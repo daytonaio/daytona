@@ -40,7 +40,7 @@ func ListGitProviders(ctx *gin.Context) {
 
 	for _, provider := range response {
 		provider.Token = ""
-		*provider.SigningKey = ""
+		provider.SigningKey = nil
 	}
 
 	ctx.JSON(200, response)
