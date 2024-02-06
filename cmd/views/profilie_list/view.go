@@ -4,11 +4,12 @@
 package profile_list
 
 import (
-	"dagent/cmd/views"
-	"dagent/config"
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/daytonaio/daytona/cmd/views"
+	"github.com/daytonaio/daytona/config"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"

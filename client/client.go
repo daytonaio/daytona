@@ -5,15 +5,16 @@ package client
 
 import (
 	"context"
-	agent_config "dagent/agent/config"
-	"dagent/config"
 	"errors"
 	"fmt"
 	"math"
 	"math/rand"
 	"os"
 
-	ssh_tunnel_util "dagent/ssh_tunnel/util"
+	agent_config "github.com/daytonaio/daytona/agent/config"
+	"github.com/daytonaio/daytona/config"
+
+	ssh_tunnel_util "github.com/daytonaio/daytona/ssh_tunnel/util"
 
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"

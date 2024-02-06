@@ -2,8 +2,9 @@ package port_manager
 
 import (
 	"context"
-	"dagent/agent/event_bus"
 	"fmt"
+
+	"github.com/daytonaio/daytona/agent/event_bus"
 )
 
 type HostPort uint16

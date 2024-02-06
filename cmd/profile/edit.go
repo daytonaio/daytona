@@ -4,12 +4,13 @@
 package cmd_profile
 
 import (
-	"dagent/cmd/views/profile_info"
-	profile_list "dagent/cmd/views/profilie_list"
-	"dagent/config"
 	"errors"
 
-	view "dagent/cmd/views/profile_create_wizard"
+	"github.com/daytonaio/daytona/cmd/views/profile_info"
+	profile_list "github.com/daytonaio/daytona/cmd/views/profilie_list"
+	"github.com/daytonaio/daytona/config"
+
+	view "github.com/daytonaio/daytona/cmd/views/profile_create_wizard"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

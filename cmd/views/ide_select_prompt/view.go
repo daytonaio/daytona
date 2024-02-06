@@ -4,12 +4,13 @@
 package ide_select_prompt
 
 import (
-	"dagent/cmd/views"
-	"dagent/config"
 	"fmt"
 	"io"
 	"os"
 	"strings"
+
+	"github.com/daytonaio/daytona/cmd/views"
+	"github.com/daytonaio/daytona/config"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"

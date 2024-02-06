@@ -5,11 +5,12 @@ package workspace
 
 import (
 	"context"
-	"dagent/agent/event_bus"
-	"dagent/credentials"
 	"errors"
 	"fmt"
 	"regexp"
+
+	"github.com/daytonaio/daytona/agent/event_bus"
+	"github.com/daytonaio/daytona/credentials"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"

@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	"dagent/agent/workspace"
-	"dagent/internal/util"
+	"github.com/daytonaio/daytona/agent/workspace"
+	"github.com/daytonaio/daytona/internal/util"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"

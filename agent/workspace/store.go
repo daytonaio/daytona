@@ -4,7 +4,7 @@
 package workspace
 
 import (
-	"dagent/agent/db"
+	"github.com/daytonaio/daytona/agent/db"
 
 	"gorm.io/gorm"
 )

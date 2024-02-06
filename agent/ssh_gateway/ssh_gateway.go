@@ -1,13 +1,14 @@
 package ssh_gateway
 
 import (
-	"dagent/agent/config"
-	"dagent/agent/workspace"
 	"errors"
 	"net"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/daytonaio/daytona/agent/config"
+	"github.com/daytonaio/daytona/agent/workspace"
 
 	gateway "github.com/daytonaio/ssh-gateway"
 	"golang.org/x/crypto/ssh"

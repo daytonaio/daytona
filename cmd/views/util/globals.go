@@ -4,8 +4,9 @@
 package views_util
 
 import (
-	"dagent/cmd/views"
 	"fmt"
+
+	"github.com/daytonaio/daytona/cmd/views"
 
 	"github.com/charmbracelet/lipgloss"
 )

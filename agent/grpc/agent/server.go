@@ -4,7 +4,7 @@
 package agent_grpc
 
 import (
-	agent_proto "dagent/grpc/proto"
+	agent_proto "github.com/daytonaio/daytona/grpc/proto"
 )
 
 type AgentServer struct {

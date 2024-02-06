@@ -3,7 +3,7 @@
 
 package config
 
-import "dagent/remote_installer"
+import "github.com/daytonaio/daytona/remote_installer"
 
 func GetBinaryUrls() map[remote_installer.RemoteOS]string {
 	return map[remote_installer.RemoteOS]string{

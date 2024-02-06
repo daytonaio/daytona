@@ -5,14 +5,15 @@ package cmd_ports
 
 import (
 	"context"
-	"dagent/client"
-	"dagent/config"
-	"dagent/grpc/proto"
-	"dagent/internal/util"
-	ssh_tunnel_util "dagent/ssh_tunnel/util"
 	"fmt"
 	"os"
 	"os/signal"
+
+	"github.com/daytonaio/daytona/client"
+	"github.com/daytonaio/daytona/config"
+	"github.com/daytonaio/daytona/grpc/proto"
+	"github.com/daytonaio/daytona/internal/util"
+	ssh_tunnel_util "github.com/daytonaio/daytona/ssh_tunnel/util"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

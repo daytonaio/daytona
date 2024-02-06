@@ -2,11 +2,12 @@ package port_manager
 
 import (
 	"context"
-	"dagent/internal/util"
 	"errors"
 	"fmt"
 	"net"
 	"os/exec"
+
+	"github.com/daytonaio/daytona/internal/util"
 
 	log "github.com/sirupsen/logrus"
 )

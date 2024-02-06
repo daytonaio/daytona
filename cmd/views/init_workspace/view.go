@@ -4,12 +4,13 @@
 package init_workspace_view
 
 import (
-	"dagent/agent/event_bus"
-	"dagent/cmd/views"
 	"os"
 	"sort"
 
-	workspace_proto "dagent/grpc/proto"
+	"github.com/daytonaio/daytona/agent/event_bus"
+	"github.com/daytonaio/daytona/cmd/views"
+
+	workspace_proto "github.com/daytonaio/daytona/grpc/proto"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"

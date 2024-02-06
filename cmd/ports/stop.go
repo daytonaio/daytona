@@ -5,10 +5,11 @@ package cmd_ports
 
 import (
 	"context"
-	"dagent/client"
-	"dagent/grpc/proto"
-	"dagent/internal/util"
 	"fmt"
+
+	"github.com/daytonaio/daytona/client"
+	"github.com/daytonaio/daytona/grpc/proto"
+	"github.com/daytonaio/daytona/internal/util"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

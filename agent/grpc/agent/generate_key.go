@@ -5,8 +5,9 @@ package agent_grpc
 
 import (
 	"context"
-	config_ssh_key "dagent/agent/config/ssh_key"
-	daytona_proto "dagent/grpc/proto"
+
+	config_ssh_key "github.com/daytonaio/daytona/agent/config/ssh_key"
+	daytona_proto "github.com/daytonaio/daytona/grpc/proto"
 )
 
 func (a *AgentServer) GenerateKey(ctx context.Context, request *daytona_proto.GenerateKeyRequest) (*daytona_proto.GetPublicKeyResponse, error) {

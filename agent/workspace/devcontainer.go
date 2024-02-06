@@ -4,8 +4,9 @@
 package workspace
 
 import (
-	"dagent/internal/util"
 	"errors"
+
+	"github.com/daytonaio/daytona/internal/util"
 
 	"path"
 

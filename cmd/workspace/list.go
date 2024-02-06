@@ -5,9 +5,10 @@ package cmd_workspace
 
 import (
 	"context"
-	"dagent/client"
-	workspace_proto "dagent/grpc/proto"
 	"fmt"
+
+	"github.com/daytonaio/daytona/client"
+	workspace_proto "github.com/daytonaio/daytona/grpc/proto"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	log "github.com/sirupsen/logrus"

@@ -1,4 +1,4 @@
-module dagent
+module github.com/daytonaio/daytona
 
 go 1.18
 

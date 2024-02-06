@@ -4,8 +4,9 @@
 package workspace
 
 import (
-	"dagent/credentials"
 	"os"
+
+	"github.com/daytonaio/daytona/credentials"
 
 	"testing"
 

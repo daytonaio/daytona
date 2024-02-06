@@ -5,9 +5,10 @@ package ports_grpc
 
 import (
 	"context"
-	"dagent/agent/port_manager"
-	"dagent/agent/workspace"
-	daytona_proto "dagent/grpc/proto"
+
+	"github.com/daytonaio/daytona/agent/port_manager"
+	"github.com/daytonaio/daytona/agent/workspace"
+	daytona_proto "github.com/daytonaio/daytona/grpc/proto"
 
 	"github.com/golang/protobuf/ptypes/empty"
 )

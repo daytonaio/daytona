@@ -4,7 +4,7 @@
 package ports_grpc
 
 import (
-	ports_proto "dagent/grpc/proto"
+	ports_proto "github.com/daytonaio/daytona/grpc/proto"
 )
 
 type PortsServer struct {

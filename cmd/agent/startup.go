@@ -4,7 +4,7 @@
 package cmd_agent
 
 import (
-	"dagent/agent"
+	"github.com/daytonaio/daytona/agent"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

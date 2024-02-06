@@ -4,15 +4,16 @@
 package cmd_agent
 
 import (
-	"dagent/config"
-	"dagent/remote_installer"
 	"fmt"
 	"strconv"
 	"time"
 
-	cmd_profile "dagent/cmd/profile"
-	profile_list "dagent/cmd/views/profilie_list"
-	views_util "dagent/cmd/views/util"
+	"github.com/daytonaio/daytona/config"
+	"github.com/daytonaio/daytona/remote_installer"
+
+	cmd_profile "github.com/daytonaio/daytona/cmd/profile"
+	profile_list "github.com/daytonaio/daytona/cmd/views/profilie_list"
+	views_util "github.com/daytonaio/daytona/cmd/views/util"
 
 	"github.com/briandowns/spinner"
 	log "github.com/sirupsen/logrus"

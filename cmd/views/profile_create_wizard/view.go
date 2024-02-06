@@ -4,15 +4,16 @@
 package profile_create_wizard
 
 import (
-	"dagent/cmd/views"
-	views_util "dagent/cmd/views/util"
-	"dagent/config"
 	"errors"
 	"fmt"
 	"log"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/daytonaio/daytona/cmd/views"
+	views_util "github.com/daytonaio/daytona/cmd/views/util"
+	"github.com/daytonaio/daytona/config"
 
 	"github.com/charmbracelet/huh"
 )
