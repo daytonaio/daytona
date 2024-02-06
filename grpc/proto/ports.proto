@@ -1,0 +1,51 @@
+syntax = "proto3";
+option go_package = "./proto";
+import "google/protobuf/empty.proto";
+
+message ForwardPortRequest {
+    string workspaceName = 1;
+    string project = 2;
+    uint32 port = 3;
+}
+
+message PortForward {
+    uint32 containerPort = 1;
+    uint32 hostPort = 2;
+}
+
+message ProjectPortForwards {
+    string project = 1;
+    map<uint32, PortForward> portForwards = 2;
+}
+
+message WorkspacePortForward {
+    string workspaceName = 1;
+    map<string, ProjectPortForwards> projectPortForwards = 2;
+}
+
+message GetPortForwardsRequest {
+    string workspaceName = 1;
+}
+
+message GetProjectPortForwardsRequest {
+    string workspaceName = 1;
+    string project = 2;
+}
+
+message StopPortForwardRequest {
+    string workspaceName = 1;
+    string project = 2;
+    uint32 port = 3;
+}
+
+message StopAllWorkspacePortForwardsRequest {
+    string workspaceName = 1;
+}
+
+service Ports {
+    rpc ForwardPort (ForwardPortRequest) returns (PortForward) {}
+    rpc GetPortForwards (GetPortForwardsRequest) returns (WorkspacePortForward) {}
+    rpc GetProjectPortForwards (GetProjectPortForwardsRequest) returns (ProjectPortForwards) {}
+    rpc StopPortForward (StopPortForwardRequest) returns (google.protobuf.Empty) {}
+    rpc StopAllWorkspacePortForwards (StopAllWorkspacePortForwardsRequest) returns (google.protobuf.Empty) {}
+}

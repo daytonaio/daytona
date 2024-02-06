@@ -1,0 +1,71 @@
+syntax = "proto3";
+option go_package = "./proto";
+import "google/protobuf/empty.proto";
+
+message CreateWorkspaceRequest {
+    string name = 1;
+    repeated string repositories = 2;
+}
+
+message CreateWorkspaceResponse {
+    string event = 1;
+    string payload = 2;
+}
+
+message WorkspaceInfoRequest {
+    string name = 1;
+}
+
+message WorkspaceProjectExtensionInfo {
+    string name = 1;
+    string info = 2;
+}
+
+message WorkspaceProjectInfo {
+    string name = 1;
+    bool available = 2;
+    bool running = 3;
+    string created = 4;
+    string started = 5;
+    string finished = 6;
+    repeated WorkspaceProjectExtensionInfo extensions = 7;
+}
+
+message WorkspaceInfoResponse {
+    string name = 1;
+    string cwd = 2;
+    repeated WorkspaceProjectInfo projects = 5;
+}
+
+message WorkspacePortForwardResponse {
+    uint32 containerPort = 1;
+    uint32 hostPort = 2;
+}
+
+message WorkspaceStartRequest {
+    string name = 1;
+    string project = 2;
+}
+
+message WorkspaceStopRequest {
+    string name = 1;
+    string project = 2;
+}
+
+message WorkspaceRemoveRequest {
+    string name = 1;
+    bool force = 2;
+}
+
+message WorkspaceListResponse {
+    repeated WorkspaceInfoResponse workspaces = 1;
+}
+
+service Workspace {
+    rpc Create (CreateWorkspaceRequest) returns (stream CreateWorkspaceResponse) {}
+    rpc Info (WorkspaceInfoRequest) returns (WorkspaceInfoResponse) {}
+    rpc List (google.protobuf.Empty) returns (WorkspaceListResponse) {}
+    rpc Start (WorkspaceStartRequest) returns (google.protobuf.Empty) {}
+    rpc Stop (WorkspaceStopRequest) returns (google.protobuf.Empty) {}
+    rpc Remove (WorkspaceRemoveRequest) returns (google.protobuf.Empty) {}
+}

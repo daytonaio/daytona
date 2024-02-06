@@ -1,0 +1,23 @@
+{
+	"name": "Daytona Agent",
+	"build": {
+		"dockerfile": "./Dockerfile"
+	},
+	"features": {
+		"ghcr.io/devcontainers/features/common-utils:1": {
+		  "installZsh": "true",
+		  "username": "daytona",
+		  "uid": "1000",
+		  "gid": "1000",
+		  "upgradePackages": "false"
+		},
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
+		"ghcr.io/devcontainers/features/go:1": {},
+		"ghcr.io/devcontainers/features/node:1": {}
+	},
+	"containerEnv": {
+		"LOG_LEVEL": "debug"
+	},
+	"postCreateCommand": "/setup/postcreate.sh",
+	"remoteUser": "daytona"
+}
