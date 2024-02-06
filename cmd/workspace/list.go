@@ -9,6 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/client"
 	workspace_proto "github.com/daytonaio/daytona/grpc/proto"
+	"github.com/daytonaio/daytona/output"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	log "github.com/sirupsen/logrus"
@@ -40,5 +41,7 @@ var ListCmd = &cobra.Command{
 		for _, workspaceInfo := range response.Workspaces {
 			fmt.Println(workspaceInfo.Name)
 		}
+
+		output.Output = response
 	},
 }
