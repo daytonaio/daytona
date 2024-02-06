@@ -140,23 +140,24 @@ func (m InitWorkspaceViewModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m InitWorkspaceViewModel) HandleWorkspaceInfo(msg *workspace_proto.WorkspaceInfoResponse) InitWorkspaceViewModel {
-	for _, projectInfo := range msg.Projects {
-		if _, ok := m.Projects[projectInfo.Name]; !ok {
-			continue
-		}
+	// TODO: handle
+	// for _, projectInfo := range msg.Projects {
+	// 	if _, ok := m.Projects[projectInfo.Name]; !ok {
+	// 		continue
+	// 	}
 
-		for _, extension := range projectInfo.Extensions {
-			if _, ok := m.Projects[projectInfo.Name].Extensions[extension.Name]; !ok {
-				continue
-			}
+	// 	for _, extension := range projectInfo.Extensions {
+	// 		if _, ok := m.Projects[projectInfo.Name].Extensions[extension.Name]; !ok {
+	// 			continue
+	// 		}
 
-			m.Projects[projectInfo.Name].Extensions[extension.Name] = InitWorkspaceViewProjectExtensionModel{
-				Name:  extension.Name,
-				State: "Started",
-				Info:  extension.Info,
-			}
-		}
-	}
+	// 		m.Projects[projectInfo.Name].Extensions[extension.Name] = InitWorkspaceViewProjectExtensionModel{
+	// 			Name:  extension.Name,
+	// 			State: "Started",
+	// 			Info:  extension.Info,
+	// 		}
+	// 	}
+	// }
 	return m
 }
 
@@ -267,11 +268,11 @@ func (m InitWorkspaceViewModel) handleWorkspaceEvent(msg EventMsg) InitWorkspace
 		m.State = "Starting"
 	case string(event_bus.WorkspaceEventStarted):
 		m.State = "Started"
-	case string(event_bus.WorkspaceEventProjectInitializing):
-		m.State = "Initializing projects"
+	case string(event_bus.WorkspaceEventCreating):
+		m.State = "Creating projects"
 		m.Projects[workspaceEventPayload.ProjectName] = InitWorkspaceViewProjectModel{
 			Name:       workspaceEventPayload.ProjectName,
-			State:      "Initializing",
+			State:      "Creating",
 			Extensions: map[string]InitWorkspaceViewProjectExtensionModel{},
 		}
 	}
@@ -289,7 +290,7 @@ func (m InitWorkspaceViewModel) handleProjectEvent(msg EventMsg) InitWorkspaceVi
 	if _, ok := m.Projects[projectEventPayload.ProjectName]; !ok {
 		m.Projects[projectEventPayload.ProjectName] = InitWorkspaceViewProjectModel{
 			Name:       projectEventPayload.ProjectName,
-			State:      "Initializing",
+			State:      "Creating",
 			Extensions: map[string]InitWorkspaceViewProjectExtensionModel{},
 		}
 	}

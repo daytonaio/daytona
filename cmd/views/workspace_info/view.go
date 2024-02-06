@@ -44,15 +44,15 @@ func projectRender(project *workspace_proto.WorkspaceProjectInfo) string {
 	extensions := [][]string{}
 	extensionsTable := ""
 
-	if !project.Available {
+	if !project.IsRunning && project.Created == "" {
 		projectState = projectStatusStyle.Foreground(lipgloss.Color(colors[0][4])).Render("Unavailable")
-	} else if !project.Running {
+	} else if !project.IsRunning {
 		projectState = projectStatusStyle.Render("Stopped")
 	} else {
 		projectState = projectStatusStyle.Foreground(lipgloss.Color(colors[4][4])).Render("Running")
-		for _, extension := range project.Extensions {
-			extensions = append(extensions, []string{extension.Name /*extension.State*/, "", extension.Info})
-		}
+		// for _, extension := range project.Extensions {
+		// 	extensions = append(extensions, []string{extension.Name /*extension.State*/, "", extension.Info})
+		// }
 
 		extensionsTable = table.New().
 			Border(lipgloss.HiddenBorder()).

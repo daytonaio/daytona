@@ -65,8 +65,7 @@ var DeleteCmd = &cobra.Command{
 		}
 
 		removeWorkspaceRequest := &workspace_proto.WorkspaceRemoveRequest{
-			Name:  workspaceName,
-			Force: force,
+			Name: workspaceName,
 		}
 		_, err = client.Remove(ctx, removeWorkspaceRequest)
 		if err != nil {
@@ -80,5 +79,5 @@ var DeleteCmd = &cobra.Command{
 }
 
 func init() {
-	DeleteCmd.PersistentFlags().BoolVarP(&force, "force", "f", false, "Force the workspace removal")
+	// DeleteCmd.PersistentFlags().BoolVarP(&force, "force", "f", false, "Force the workspace removal")
 }

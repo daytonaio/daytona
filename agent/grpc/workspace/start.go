@@ -6,10 +6,8 @@ package workspace_grpc
 import (
 	"context"
 
+	"github.com/daytonaio/daytona/agent/provisioner"
 	"github.com/daytonaio/daytona/agent/workspace"
-	"github.com/daytonaio/daytona/credentials"
-	"github.com/daytonaio/daytona/extensions/ssh"
-	"github.com/daytonaio/daytona/extensions/vsc_server"
 	daytona_proto "github.com/daytonaio/daytona/grpc/proto"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -22,29 +20,19 @@ func (m *WorkspaceServer) Start(ctx context.Context, request *daytona_proto.Work
 		return nil, err
 	}
 
-	//	todo: workspace config should be read from the container labels
-	//		  this is a temporary workaround to move fast
-	credClient := &credentials.CredentialsClient{}
-
-	extensions := []workspace.Extension{}
-
-	vsc_server := vsc_server.VscServerExtension{}
-	extensions = append(extensions, vsc_server)
-
-	ssh := ssh.SshExtension{}
-	extensions = append(extensions, ssh)
-
-	w.Credentials = credClient
-	w.Extensions = extensions
-
 	if request.Project != "" {
-		err = w.StartProject(request.Project)
+		project, err := w.GetProject(request.Project)
+		if err != nil {
+			return nil, err
+		}
+
+		err = provisioner.StartProject(*project)
 		if err != nil {
 			log.Error(err)
 			return nil, err
 		}
 	} else {
-		err = w.Start()
+		err = provisioner.StartWorkspace(*w)
 		if err != nil {
 			log.Error(err)
 			return nil, err

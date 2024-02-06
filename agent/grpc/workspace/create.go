@@ -8,12 +8,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/daytonaio/daytona/agent/config"
 	"github.com/daytonaio/daytona/agent/event_bus"
+	"github.com/daytonaio/daytona/agent/provisioner"
 	"github.com/daytonaio/daytona/agent/workspace"
-	"github.com/daytonaio/daytona/credentials"
-	"github.com/daytonaio/daytona/extensions/ssh"
-	"github.com/daytonaio/daytona/extensions/vsc_server"
 	daytona_proto "github.com/daytonaio/daytona/grpc/proto"
 
 	log "github.com/sirupsen/logrus"
@@ -25,28 +22,28 @@ func (m *WorkspaceServer) Create(request *daytona_proto.CreateWorkspaceRequest, 
 		return errors.New("workspace already exists")
 	}
 
-	c, err := config.GetConfig()
-	if err != nil {
-		return err
-	}
+	// c, err := config.GetConfig()
+	// if err != nil {
+	// 	return err
+	// }
 
-	credClient := &credentials.CredentialsClient{}
+	// credClient := &credentials.CredentialsClient{}
 
-	extensions := []workspace.Extension{}
+	// extensions := []workspace.Extension{}
 
-	vsc_server_extension := vsc_server.VscServerExtension{}
-	extensions = append(extensions, vsc_server_extension)
+	// vsc_server_extension := vsc_server.VscServerExtension{}
+	// extensions = append(extensions, vsc_server_extension)
 
-	sshPublicKey, err := config.GetWorkspacePublicKey()
-	if err != nil {
-		log.Error(err)
-		return err
-	}
+	// sshPublicKey, err := config.GetWorkspacePublicKey()
+	// if err != nil {
+	// 	log.Error(err)
+	// 	return err
+	// }
 
-	ssh := ssh.SshExtension{
-		PublicKey: sshPublicKey,
-	}
-	extensions = append(extensions, ssh)
+	// ssh := ssh.SshExtension{
+	// 	PublicKey: sshPublicKey,
+	// }
+	// extensions = append(extensions, ssh)
 
 	var repositories []workspace.Repository
 	for _, repo := range request.Repositories {
@@ -55,11 +52,8 @@ func (m *WorkspaceServer) Create(request *daytona_proto.CreateWorkspaceRequest, 
 		})
 	}
 
-	w, err := workspace.New(workspace.WorkspaceParams{
+	w, err := workspace.New(workspace.CreateWorkspaceParams{
 		Name:         request.Name,
-		Cwd:          c.DefaultWorkspaceDir,
-		Credentials:  credClient,
-		Extensions:   extensions,
 		Repositories: repositories,
 	})
 	if err != nil {
@@ -102,7 +96,7 @@ func (m *WorkspaceServer) Create(request *daytona_proto.CreateWorkspaceRequest, 
 		}
 	}()
 
-	err = w.Create()
+	err = provisioner.CreateWorkspace(*w)
 	if err != nil {
 		log.Error(err)
 		stream.Send(&daytona_proto.CreateWorkspaceResponse{
@@ -111,7 +105,7 @@ func (m *WorkspaceServer) Create(request *daytona_proto.CreateWorkspaceRequest, 
 		})
 		return err
 	}
-	err = w.Start()
+	err = provisioner.StartWorkspace(*w)
 	if err != nil {
 		log.Error(err)
 		stream.Send(&daytona_proto.CreateWorkspaceResponse{

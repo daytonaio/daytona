@@ -16,25 +16,25 @@ message WorkspaceInfoRequest {
     string name = 1;
 }
 
-message WorkspaceProjectExtensionInfo {
-    string name = 1;
-    string info = 2;
-}
-
 message WorkspaceProjectInfo {
     string name = 1;
-    bool available = 2;
-    bool running = 3;
-    string created = 4;
-    string started = 5;
-    string finished = 6;
-    repeated WorkspaceProjectExtensionInfo extensions = 7;
+    string created = 2;
+    string started = 3;
+    string finished = 4;
+    bool isRunning = 5;
+    string provisionerMetadata = 6;
+}
+
+message WorkspaceProvisioner {
+    string name = 1;
+    string profile = 2;
 }
 
 message WorkspaceInfoResponse {
     string name = 1;
-    string cwd = 2;
-    repeated WorkspaceProjectInfo projects = 5;
+    WorkspaceProvisioner provisioner = 2;
+    repeated WorkspaceProjectInfo projects = 3;
+    string provisionerMetadata = 4;
 }
 
 message WorkspacePortForwardResponse {
@@ -54,7 +54,6 @@ message WorkspaceStopRequest {
 
 message WorkspaceRemoveRequest {
     string name = 1;
-    bool force = 2;
 }
 
 message WorkspaceListResponse {

@@ -1,37 +1,47 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package ssh
+package plugin
 
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
-	"net"
 	"os"
 	"path"
 	"strings"
-	"time"
 
 	"github.com/daytonaio/daytona/agent/workspace"
 	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/plugin"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	log "github.com/sirupsen/logrus"
 )
 
-type SshExtension struct {
+type SshPlugin struct {
 	PublicKey string
+	BasePath  string
 }
 
-func (e SshExtension) Name() string {
+var Config *plugin.WorkspacePluginConfig
+
+func (e SshPlugin) SetConfig(config plugin.WorkspacePluginConfig) error {
+	Config = &config
+	return nil
+}
+
+func (e SshPlugin) GetVersion() string {
+	return "0.0.1"
+}
+
+func (e SshPlugin) GetName() string {
 	return "ssh"
 }
 
-func (e SshExtension) PreInit(project workspace.Project) error {
-	setupDir := project.GetSetupPath()
+func (e SshPlugin) ProjectPreInit(project workspace.Project) error {
+	setupDir := Config.SetupPath
 
 	err := os.MkdirAll(path.Join(setupDir, "ssh"), 0755)
 	if err != nil {
@@ -56,7 +66,7 @@ func (e SshExtension) PreInit(project workspace.Project) error {
 	defer file.Close()
 
 	wsEnv := ""
-	for _, envVar := range project.GetEnvVars() {
+	for _, envVar := range Config.EnvVars {
 		wsEnv += envVar + " "
 	}
 
@@ -81,7 +91,7 @@ func (e SshExtension) PreInit(project workspace.Project) error {
 	return nil
 }
 
-func (e SshExtension) Init(project workspace.Project) error {
+func (e SshPlugin) ProjectInit(project workspace.Project) error {
 	execConfig := types.ExecConfig{
 		Tty:          true,
 		AttachStdout: true,
@@ -93,7 +103,8 @@ func (e SshExtension) Init(project workspace.Project) error {
 		User: "root",
 	}
 
-	execResult, err := util.DockerExec(project.GetContainerName(), execConfig, nil)
+	// TODO: Implement
+	execResult, err := util.DockerExec("project.GetContainerName()", execConfig, nil)
 	if err != nil {
 		return err
 	}
@@ -107,7 +118,7 @@ func (e SshExtension) Init(project workspace.Project) error {
 	return nil
 }
 
-func (e SshExtension) Start(project workspace.Project) error {
+func (e SshPlugin) ProjectStart(project workspace.Project) error {
 	ctx := context.Background()
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -125,7 +136,9 @@ func (e SshExtension) Start(project workspace.Project) error {
 		},
 		User: "root",
 	}
-	execResp, err := cli.ContainerExecCreate(ctx, project.GetContainerName(), execConfig)
+
+	// TODO: Implement
+	execResp, err := cli.ContainerExecCreate(ctx, "project.GetContainerName()", execConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -140,30 +153,33 @@ func (e SshExtension) Start(project workspace.Project) error {
 	return nil
 }
 
-func (e SshExtension) LivenessProbe(project workspace.Project) (bool, error) {
-	containerInfo, err := project.GetContainerInfo()
-	if err != nil {
-		return false, err
-	}
+func (e SshPlugin) ProjectLivenessProbe(project workspace.Project) (bool, error) {
+	return false, errors.New("not implemented")
+	/*
+		containerInfo, err := project.GetContainerInfo()
+		if err != nil {
+			return false, err
+		}
 
-	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:22", containerInfo.IP), 3*time.Second)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"project":   project.GetName(),
-			"extension": e.Name(),
-		}).Debug(err)
-		return false, nil
-	}
-	defer conn.Close()
+		conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:22", containerInfo.IP), 3*time.Second)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"project":   project.GetName(),
+				"extension": e.Name(),
+			}).Debug(err)
+			return false, nil
+		}
+		defer conn.Close()
 
-	return true, nil
+		return true, nil
+	*/
 }
 
-func (e SshExtension) LivenessProbeTimeout() int {
+func (e SshPlugin) ProjectLivenessProbeTimeout() int {
 	return 60
 }
 
-func (e SshExtension) Info(project workspace.Project) string {
+func (e SshPlugin) ProjectInfo(project workspace.Project) string {
 	//	todo: no tailscale
 	return ""
 }

@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package vsc_server
+package plugin
 
 import (
 	"context"
@@ -14,21 +14,34 @@ import (
 
 	"github.com/daytonaio/daytona/agent/workspace"
 	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/plugin"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	log "github.com/sirupsen/logrus"
 )
 
-type VscServerExtension struct {
+type OpenVSCodeServerPlugin struct {
+	BasePath string
 }
 
-func (e VscServerExtension) Name() string {
-	return "vsc-server"
+var Config *plugin.WorkspacePluginConfig
+
+func (e OpenVSCodeServerPlugin) SetConfig(config plugin.WorkspacePluginConfig) error {
+	Config = &config
+	return nil
 }
 
-func (e VscServerExtension) PreInit(project workspace.Project) error {
-	setupDir := project.GetSetupPath()
+func (e OpenVSCodeServerPlugin) GetName() string {
+	return "openvscode-server"
+}
+
+func (e OpenVSCodeServerPlugin) GetVersion() string {
+	return "0.0.1"
+}
+
+func (e OpenVSCodeServerPlugin) ProjectPreInit(project workspace.Project) error {
+	setupDir := Config.SetupPath
 
 	err := os.MkdirAll(path.Join(setupDir, "server"), 0755)
 	if err != nil {
@@ -71,7 +84,7 @@ func (e VscServerExtension) PreInit(project workspace.Project) error {
 	return nil
 }
 
-func (e VscServerExtension) Init(project workspace.Project) error {
+func (e OpenVSCodeServerPlugin) ProjectInit(project workspace.Project) error {
 	execConfig := types.ExecConfig{
 		Tty:          true,
 		AttachStdout: true,
@@ -83,7 +96,8 @@ func (e VscServerExtension) Init(project workspace.Project) error {
 		User: "daytona",
 	}
 
-	execResult, err := util.DockerExec(project.GetContainerName(), execConfig, nil)
+	// TODO: Implement
+	execResult, err := util.DockerExec("project.GetContainerName()", execConfig, nil)
 	if err != nil {
 		return err
 	}
@@ -96,7 +110,7 @@ func (e VscServerExtension) Init(project workspace.Project) error {
 	return nil
 }
 
-func (e VscServerExtension) Start(project workspace.Project) error {
+func (e OpenVSCodeServerPlugin) ProjectStart(project workspace.Project) error {
 	ctx := context.Background()
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -114,7 +128,9 @@ func (e VscServerExtension) Start(project workspace.Project) error {
 		},
 		User: "daytona",
 	}
-	execResp, err := cli.ContainerExecCreate(ctx, project.GetContainerName(), execConfig)
+
+	// TODO: Implement
+	execResp, err := cli.ContainerExecCreate(ctx, "project.GetContainerName()", execConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -127,7 +143,7 @@ func (e VscServerExtension) Start(project workspace.Project) error {
 	return nil
 }
 
-func (e VscServerExtension) LivenessProbe(project workspace.Project) (bool, error) {
+func (e OpenVSCodeServerPlugin) ProjectLivenessProbe(project workspace.Project) (bool, error) {
 	ctx := context.Background()
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -135,7 +151,8 @@ func (e VscServerExtension) LivenessProbe(project workspace.Project) (bool, erro
 		return false, err
 	}
 
-	inspect, err := cli.ContainerInspect(ctx, project.GetContainerName())
+	// TODO: Implement
+	inspect, err := cli.ContainerInspect(ctx, "project.GetContainerName()")
 	if err != nil {
 		return false, err
 	}
@@ -145,8 +162,8 @@ func (e VscServerExtension) LivenessProbe(project workspace.Project) (bool, erro
 	resp, err := http.Get(fmt.Sprintf("http://%s:%d", ip, IDE_PORT))
 	if err != nil {
 		log.WithFields(log.Fields{
-			"project":   project.GetName(),
-			"extension": e.Name(),
+			"project":   project.Name,
+			"extension": e.GetName(),
 		}).Debug(err)
 		//	ignore err
 		return false, nil
@@ -155,8 +172,8 @@ func (e VscServerExtension) LivenessProbe(project workspace.Project) (bool, erro
 
 	if resp.StatusCode >= 300 {
 		log.WithFields(log.Fields{
-			"project":   project.GetName(),
-			"extension": e.Name(),
+			"project":   project.Name,
+			"extension": e.GetName(),
 		}).Debug(resp.StatusCode)
 		return false, nil
 	}
@@ -164,11 +181,11 @@ func (e VscServerExtension) LivenessProbe(project workspace.Project) (bool, erro
 	return true, nil
 }
 
-func (e VscServerExtension) LivenessProbeTimeout() int {
+func (e OpenVSCodeServerPlugin) ProjectLivenessProbeTimeout() int {
 	return 30
 }
 
-func (e VscServerExtension) Info(project workspace.Project) string {
+func (e OpenVSCodeServerPlugin) ProjectInfo(project workspace.Project) string {
 	//	todo: no tasilscale
 	return ""
 }

@@ -21,8 +21,8 @@ func ListFromDB() ([]Workspace, error) {
 		return nil, tx.Error
 	}
 
-	for i, _ := range workspaces {
-		for j, _ := range workspaces[i].Projects {
+	for i := range workspaces {
+		for j := range workspaces[i].Projects {
 			workspaces[i].Projects[j].Workspace = &workspaces[i]
 		}
 	}
@@ -42,7 +42,7 @@ func LoadFromDB(workspaceName string) (*Workspace, error) {
 		return nil, tx.Error
 	}
 
-	for i, _ := range workspace.Projects {
+	for i := range workspace.Projects {
 		workspace.Projects[i].Workspace = &workspace
 	}
 
