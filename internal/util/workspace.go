@@ -2,12 +2,13 @@ package util
 
 import (
 	"context"
-	"dagent/grpc/proto"
 	"errors"
 	"fmt"
 	"net/url"
 	"regexp"
 	"strings"
+
+	"github.com/daytonaio/daytona/grpc/proto"
 
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"

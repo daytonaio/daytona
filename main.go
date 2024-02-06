@@ -4,9 +4,10 @@
 package main
 
 import (
-	"dagent/cmd"
-	"dagent/internal/util"
 	"os"
+
+	"github.com/daytonaio/daytona/cmd"
+	"github.com/daytonaio/daytona/internal/util"
 
 	log "github.com/sirupsen/logrus"
 )

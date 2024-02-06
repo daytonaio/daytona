@@ -4,12 +4,13 @@
 package cmd
 
 import (
-	. "dagent/cmd/agent"
-	. "dagent/cmd/ports"
-	. "dagent/cmd/profile"
-	. "dagent/cmd/workspace"
 	"fmt"
 	"os"
+
+	. "github.com/daytonaio/daytona/cmd/agent"
+	. "github.com/daytonaio/daytona/cmd/ports"
+	. "github.com/daytonaio/daytona/cmd/profile"
+	. "github.com/daytonaio/daytona/cmd/workspace"
 
 	"github.com/spf13/cobra"
 )

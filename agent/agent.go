@@ -4,15 +4,16 @@
 package agent
 
 import (
-	"dagent/agent/config"
-	agent_grpc "dagent/agent/grpc/agent"
-	ports_grpc "dagent/agent/grpc/ports"
-	workspace_grpc "dagent/agent/grpc/workspace"
-	"dagent/agent/ssh_gateway"
-	proto "dagent/grpc/proto"
 	"net"
 	"os"
 	"os/exec"
+
+	"github.com/daytonaio/daytona/agent/config"
+	agent_grpc "github.com/daytonaio/daytona/agent/grpc/agent"
+	ports_grpc "github.com/daytonaio/daytona/agent/grpc/ports"
+	workspace_grpc "github.com/daytonaio/daytona/agent/grpc/workspace"
+	"github.com/daytonaio/daytona/agent/ssh_gateway"
+	proto "github.com/daytonaio/daytona/grpc/proto"
 
 	"google.golang.org/grpc"
 

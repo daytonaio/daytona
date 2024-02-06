@@ -4,7 +4,7 @@
 package cmd_profile
 
 import (
-	"dagent/config"
+	"github.com/daytonaio/daytona/config"
 
 	log "github.com/sirupsen/logrus"
 

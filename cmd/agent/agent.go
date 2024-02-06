@@ -4,9 +4,9 @@
 package cmd_agent
 
 import (
-	"dagent/agent"
-	"dagent/agent/config"
-	cmd_agent_key "dagent/cmd/agent/key"
+	"github.com/daytonaio/daytona/agent"
+	"github.com/daytonaio/daytona/agent/config"
+	cmd_agent_key "github.com/daytonaio/daytona/cmd/agent/key"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

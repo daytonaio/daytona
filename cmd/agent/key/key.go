@@ -5,10 +5,11 @@ package cmd_agent_key
 
 import (
 	"context"
-	"dagent/client"
-	views_util "dagent/cmd/views/util"
-	"dagent/grpc/proto"
 	"fmt"
+
+	"github.com/daytonaio/daytona/client"
+	views_util "github.com/daytonaio/daytona/cmd/views/util"
+	"github.com/daytonaio/daytona/grpc/proto"
 
 	"github.com/spf13/cobra"
 

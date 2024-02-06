@@ -6,9 +6,9 @@ package workspace_info_view
 // A simple program that counts down from 5 and then exits.
 
 import (
-	"dagent/cmd/views"
+	"github.com/daytonaio/daytona/cmd/views"
 
-	workspace_proto "dagent/grpc/proto"
+	workspace_proto "github.com/daytonaio/daytona/grpc/proto"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/table"

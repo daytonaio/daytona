@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
-	"dagent/cmd/views"
-	workspace_proto "dagent/grpc/proto"
+	"github.com/daytonaio/daytona/cmd/views"
+	workspace_proto "github.com/daytonaio/daytona/grpc/proto"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"

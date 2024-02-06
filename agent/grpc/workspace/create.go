@@ -4,16 +4,17 @@
 package workspace_grpc
 
 import (
-	"dagent/agent/config"
-	"dagent/agent/event_bus"
-	"dagent/agent/workspace"
-	"dagent/credentials"
-	"dagent/extensions/ssh"
-	"dagent/extensions/vsc_server"
-	daytona_proto "dagent/grpc/proto"
 	"encoding/json"
 	"errors"
 	"time"
+
+	"github.com/daytonaio/daytona/agent/config"
+	"github.com/daytonaio/daytona/agent/event_bus"
+	"github.com/daytonaio/daytona/agent/workspace"
+	"github.com/daytonaio/daytona/credentials"
+	"github.com/daytonaio/daytona/extensions/ssh"
+	"github.com/daytonaio/daytona/extensions/vsc_server"
+	daytona_proto "github.com/daytonaio/daytona/grpc/proto"
 
 	log "github.com/sirupsen/logrus"
 )

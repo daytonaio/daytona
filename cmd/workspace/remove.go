@@ -5,12 +5,13 @@ package cmd_workspace
 
 import (
 	"context"
-	"dagent/client"
-	"dagent/config"
-	workspace_proto "dagent/grpc/proto"
 	"os"
 
-	select_prompt "dagent/cmd/views/workspace_select_prompt"
+	"github.com/daytonaio/daytona/client"
+	"github.com/daytonaio/daytona/config"
+	workspace_proto "github.com/daytonaio/daytona/grpc/proto"
+
+	select_prompt "github.com/daytonaio/daytona/cmd/views/workspace_select_prompt"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	log "github.com/sirupsen/logrus"

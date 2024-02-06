@@ -5,16 +5,17 @@ package cmd_workspace
 
 import (
 	"context"
-	"dagent/client"
-	workspace_proto "dagent/grpc/proto"
 	"os"
+
+	"github.com/daytonaio/daytona/client"
+	workspace_proto "github.com/daytonaio/daytona/grpc/proto"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	view "dagent/cmd/views/workspace_info"
-	select_prompt "dagent/cmd/views/workspace_select_prompt"
+	view "github.com/daytonaio/daytona/cmd/views/workspace_info"
+	select_prompt "github.com/daytonaio/daytona/cmd/views/workspace_select_prompt"
 )
 
 var InfoCmd = &cobra.Command{

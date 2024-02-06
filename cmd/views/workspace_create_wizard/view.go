@@ -4,8 +4,6 @@
 package workspace_create_wizard
 
 import (
-	"dagent/cmd/views"
-	"dagent/internal/util"
 	"errors"
 	"fmt"
 	"log"
@@ -13,6 +11,9 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/daytonaio/daytona/cmd/views"
+	"github.com/daytonaio/daytona/internal/util"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"

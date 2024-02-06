@@ -5,16 +5,17 @@ package cmd_workspace
 
 import (
 	"context"
-	"dagent/client"
-	cmd_ports "dagent/cmd/ports"
-	views_util "dagent/cmd/views/util"
-	select_prompt "dagent/cmd/views/workspace_select_prompt"
-	"dagent/config"
-	workspace_proto "dagent/grpc/proto"
-	"dagent/internal/util"
 	"fmt"
 	"os"
 	"os/exec"
+
+	"github.com/daytonaio/daytona/client"
+	cmd_ports "github.com/daytonaio/daytona/cmd/ports"
+	views_util "github.com/daytonaio/daytona/cmd/views/util"
+	select_prompt "github.com/daytonaio/daytona/cmd/views/workspace_select_prompt"
+	"github.com/daytonaio/daytona/config"
+	workspace_proto "github.com/daytonaio/daytona/grpc/proto"
+	"github.com/daytonaio/daytona/internal/util"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/browser"

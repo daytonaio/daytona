@@ -5,20 +5,21 @@ package cmd_workspace
 
 import (
 	"context"
-	"dagent/client"
-	workspace_proto "dagent/grpc/proto"
-	"dagent/internal/util"
 	"io"
 	"os"
+
+	"github.com/daytonaio/daytona/client"
+	workspace_proto "github.com/daytonaio/daytona/grpc/proto"
+	"github.com/daytonaio/daytona/internal/util"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/golang/protobuf/ptypes/empty"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	init_view "dagent/cmd/views/init_workspace"
-	wizard_view "dagent/cmd/views/workspace_create_wizard"
-	info_view "dagent/cmd/views/workspace_info"
+	init_view "github.com/daytonaio/daytona/cmd/views/init_workspace"
+	wizard_view "github.com/daytonaio/daytona/cmd/views/workspace_create_wizard"
+	info_view "github.com/daytonaio/daytona/cmd/views/workspace_info"
 )
 
 var repos []string

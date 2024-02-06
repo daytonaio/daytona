@@ -4,9 +4,10 @@
 package cmd
 
 import (
-	ide_select_prompt "dagent/cmd/views/ide_select_prompt"
-	"dagent/config"
 	"fmt"
+
+	ide_select_prompt "github.com/daytonaio/daytona/cmd/views/ide_select_prompt"
+	"github.com/daytonaio/daytona/config"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

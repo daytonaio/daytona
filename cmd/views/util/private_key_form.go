@@ -4,11 +4,12 @@
 package views_util
 
 import (
-	"dagent/cmd/views"
 	"errors"
 	"os"
 	"path"
 	"regexp"
+
+	"github.com/daytonaio/daytona/cmd/views"
 
 	"github.com/charmbracelet/huh"
 )

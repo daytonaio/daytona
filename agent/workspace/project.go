@@ -7,9 +7,6 @@ import (
 	"archive/tar"
 	"bytes"
 	"context"
-	"dagent/agent/config"
-	config_ssh_key "dagent/agent/config/ssh_key"
-	"dagent/agent/event_bus"
 	"errors"
 	"fmt"
 	"io"
@@ -18,6 +15,10 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/daytonaio/daytona/agent/config"
+	config_ssh_key "github.com/daytonaio/daytona/agent/config/ssh_key"
+	"github.com/daytonaio/daytona/agent/event_bus"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"

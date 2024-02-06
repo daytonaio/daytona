@@ -2,9 +2,10 @@ package ssh_tunnel_util
 
 import (
 	"context"
-	"dagent/config"
-	"dagent/internal/util"
-	"dagent/ssh_tunnel"
+
+	"github.com/daytonaio/daytona/config"
+	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/ssh_tunnel"
 
 	log "github.com/sirupsen/logrus"
 )

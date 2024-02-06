@@ -4,9 +4,10 @@
 package agent_update_key
 
 import (
-	"dagent/cmd/views"
-	views_util "dagent/cmd/views/util"
 	"log"
+
+	"github.com/daytonaio/daytona/cmd/views"
+	views_util "github.com/daytonaio/daytona/cmd/views/util"
 
 	"github.com/charmbracelet/huh"
 )

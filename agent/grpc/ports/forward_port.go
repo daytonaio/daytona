@@ -5,9 +5,10 @@ package ports_grpc
 
 import (
 	"context"
-	"dagent/agent/port_manager"
-	"dagent/agent/workspace"
-	daytona_proto "dagent/grpc/proto"
+
+	"github.com/daytonaio/daytona/agent/port_manager"
+	"github.com/daytonaio/daytona/agent/workspace"
+	daytona_proto "github.com/daytonaio/daytona/grpc/proto"
 )
 
 func (p *PortsServer) ForwardPort(ctx context.Context, request *daytona_proto.ForwardPortRequest) (*daytona_proto.PortForward, error) {

@@ -4,8 +4,9 @@
 package profile_create_wizard
 
 import (
-	"dagent/cmd/views"
 	"log"
+
+	"github.com/daytonaio/daytona/cmd/views"
 
 	"github.com/charmbracelet/huh"
 )
