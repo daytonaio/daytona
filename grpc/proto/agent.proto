@@ -1,0 +1,27 @@
+syntax = "proto3";
+option go_package = "./proto";
+import "google/protobuf/empty.proto";
+
+message GetPublicKeyRequest {
+}
+
+message GetPublicKeyResponse {
+    string publicKey = 1;
+}
+
+message GenerateKeyRequest {
+}
+
+message SetKeyRequest {
+    string privateKey = 1;
+}
+
+message DeleteKeyRequest {
+}
+
+service Agent {
+    rpc GetPublicKey (GetPublicKeyRequest) returns (GetPublicKeyResponse) {}
+    rpc GenerateKey (GenerateKeyRequest) returns (GetPublicKeyResponse) {}
+    rpc SetKey (SetKeyRequest) returns (GetPublicKeyResponse) {}
+    rpc DeleteKey (DeleteKeyRequest) returns (google.protobuf.Empty) {}
+}
