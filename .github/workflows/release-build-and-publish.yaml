@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  BUCKET_NAME: daytona-workspace-tools/core
+  BUCKET_NAME: daytona-workspace-tools/daytona
 
 jobs:
   binary-build-and-publish:
@@ -53,14 +53,14 @@ jobs:
           go-version: '1.21'
 
       - name: Build binaries
-        run: GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 go build -o daytona-core-${{ matrix.goos }}-${{ matrix.goarch }}
+        run: GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 go build -o daytona-${{ matrix.goos }}-${{ matrix.goarch }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
-          role-to-assume: arn:aws:iam::304794187625:role/gha-daytona-core-wip
+          role-to-assume: arn:aws:iam::304794187625:role/gha-daytona
           aws-region: us-east-1
 
       - name: Copy binaries to s3
         run: |
-          aws s3 cp daytona-core-* s3://${{ env.BUCKET_NAME }}/
+          aws s3 cp daytona-${{ matrix.goos }}-${{ matrix.goarch }} s3://${{ env.BUCKET_NAME }}/
