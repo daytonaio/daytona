@@ -63,4 +63,4 @@ jobs:
 
       - name: Copy binaries to s3
         run: |
-          aws s3 cp daytona-${{ matrix.goos }}-${{ matrix.goarch }} s3://${{ env.BUCKET_NAME }}/
+          aws s3 cp daytona-${{ matrix.goos }}-${{ matrix.goarch }} s3://${{ env.BUCKET_NAME }}/latest/
