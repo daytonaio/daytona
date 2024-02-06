@@ -41,9 +41,9 @@ var stopPortForwardCmd = &cobra.Command{
 		client := proto.NewPortsClient(conn)
 
 		stopPortForwardRequest := &proto.StopPortForwardRequest{
-			WorkspaceName: args[0],
-			Project:       projectName,
-			Port:          uint32(portArg),
+			WorkspaceId: args[0],
+			Project:     projectName,
+			Port:        uint32(portArg),
 		}
 
 		_, err = client.StopPortForward(ctx, stopPortForwardRequest)

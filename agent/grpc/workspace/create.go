@@ -6,18 +6,22 @@ package workspace_grpc
 import (
 	"encoding/json"
 	"errors"
+	"path"
+	"regexp"
+	"strings"
 	"time"
 
+	"github.com/daytonaio/daytona/agent/db"
 	"github.com/daytonaio/daytona/agent/event_bus"
 	"github.com/daytonaio/daytona/agent/provisioner"
-	"github.com/daytonaio/daytona/agent/workspace"
 	daytona_proto "github.com/daytonaio/daytona/grpc/proto"
+	"github.com/daytonaio/daytona/grpc/proto/types"
 
 	log "github.com/sirupsen/logrus"
 )
 
-func (m *WorkspaceServer) Create(request *daytona_proto.CreateWorkspaceRequest, stream daytona_proto.Workspace_CreateServer) error {
-	_, err := workspace.LoadFromDB(request.Name)
+func (m *WorkspaceServer) Create(request *daytona_proto.CreateWorkspaceRequest, stream daytona_proto.WorkspaceService_CreateServer) error {
+	_, err := db.FindWorkspace(request.Name)
 	if err == nil {
 		return errors.New("workspace already exists")
 	}
@@ -45,24 +49,14 @@ func (m *WorkspaceServer) Create(request *daytona_proto.CreateWorkspaceRequest, 
 	// }
 	// extensions = append(extensions, ssh)
 
-	var repositories []workspace.Repository
-	for _, repo := range request.Repositories {
-		repositories = append(repositories, workspace.Repository{
-			Url: repo,
-		})
-	}
-
-	w, err := workspace.New(workspace.CreateWorkspaceParams{
-		Name:         request.Name,
-		Repositories: repositories,
-	})
+	w, err := newWorkspace(request)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
 	log.Debug(w)
-	workspace.SaveToDB(w)
+	db.SaveWorkspace(w)
 
 	unsubscribe := make(chan bool, 1)
 
@@ -96,7 +90,7 @@ func (m *WorkspaceServer) Create(request *daytona_proto.CreateWorkspaceRequest, 
 		}
 	}()
 
-	err = provisioner.CreateWorkspace(*w)
+	err = provisioner.CreateWorkspace(w)
 	if err != nil {
 		log.Error(err)
 		stream.Send(&daytona_proto.CreateWorkspaceResponse{
@@ -105,7 +99,7 @@ func (m *WorkspaceServer) Create(request *daytona_proto.CreateWorkspaceRequest, 
 		})
 		return err
 	}
-	err = provisioner.StartWorkspace(*w)
+	err = provisioner.StartWorkspace(w)
 	if err != nil {
 		log.Error(err)
 		stream.Send(&daytona_proto.CreateWorkspaceResponse{
@@ -118,4 +112,31 @@ func (m *WorkspaceServer) Create(request *daytona_proto.CreateWorkspaceRequest, 
 
 	unsubscribe <- true
 	return nil
+}
+
+func newWorkspace(params *daytona_proto.CreateWorkspaceRequest) (*types.Workspace, error) {
+	isAlphaNumeric := regexp.MustCompile(`^[a-zA-Z0-9-]+$`).MatchString
+	if !isAlphaNumeric(params.Name) {
+		return nil, errors.New("name is not a valid alphanumeric string")
+	}
+
+	w := &types.Workspace{
+		Id:   params.Name,
+		Name: params.Name,
+	}
+
+	w.Projects = []*types.Project{}
+
+	for _, repo := range params.Repositories {
+		project := &types.Project{
+			Name: strings.ToLower(path.Base(repo)),
+			Repository: &types.Repository{
+				Url: repo,
+			},
+			WorkspaceId: w.Id,
+		}
+		w.Projects = append(w.Projects, project)
+	}
+
+	return w, nil
 }

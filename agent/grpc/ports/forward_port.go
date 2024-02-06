@@ -11,7 +11,7 @@ import (
 
 func (p *PortsServer) ForwardPort(ctx context.Context, request *daytona_proto.ForwardPortRequest) (*daytona_proto.PortForward, error) {
 	panic("not implemented")
-	// w, err := workspace.LoadFromDB(request.WorkspaceName)
+	// w, err := workspace.FindWorkspace(request.WorkspaceName)
 	// if err != nil {
 	// 	return nil, err
 	// }

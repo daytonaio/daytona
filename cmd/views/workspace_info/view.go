@@ -8,7 +8,7 @@ package workspace_info_view
 import (
 	"github.com/daytonaio/daytona/cmd/views"
 
-	workspace_proto "github.com/daytonaio/daytona/grpc/proto"
+	"github.com/daytonaio/daytona/grpc/proto/types"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/table"
@@ -39,7 +39,7 @@ var projectStatusStyle = lipgloss.NewStyle().
 	Foreground(lipgloss.Color(colors[0][4])).
 	PaddingLeft(2)
 
-func projectRender(project *workspace_proto.WorkspaceProjectInfo) string {
+func projectRender(project *types.ProjectInfo) string {
 	projectState := ""
 	extensions := [][]string{}
 	extensionsTable := ""
@@ -64,7 +64,7 @@ func projectRender(project *workspace_proto.WorkspaceProjectInfo) string {
 	return projectViewStyle.Render(projectView)
 }
 
-func Render(wsInfo *workspace_proto.WorkspaceInfoResponse) {
+func Render(wsInfo *types.WorkspaceInfo) {
 	var output string
 	output = "\n"
 	output += workspaceInfoStyle.Render("Workspace" + workspaceNameStyle.Render(wsInfo.Name))

@@ -34,7 +34,7 @@ var InfoCmd = &cobra.Command{
 		}
 		defer conn.Close()
 
-		client := workspace_proto.NewWorkspaceClient(conn)
+		client := workspace_proto.NewWorkspaceServiceClient(conn)
 
 		if len(args) == 0 {
 			workspaceList, err := client.List(ctx, &empty.Empty{})
@@ -53,7 +53,7 @@ var InfoCmd = &cobra.Command{
 		}
 
 		workspaceInfoRequest := &workspace_proto.WorkspaceInfoRequest{
-			Name: workspaceName,
+			Id: workspaceName,
 		}
 		response, err := client.Info(ctx, workspaceInfoRequest)
 		if err != nil {

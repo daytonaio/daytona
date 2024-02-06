@@ -1,17 +1,18 @@
 package provisioner
 
 import (
+	"github.com/daytonaio/daytona/agent/db"
 	"github.com/daytonaio/daytona/agent/event_bus"
-	"github.com/daytonaio/daytona/agent/workspace"
-	"github.com/daytonaio/daytona/plugin"
+	"github.com/daytonaio/daytona/grpc/proto/types"
+	provisioner_manager "github.com/daytonaio/daytona/plugin/provisioner/manager"
 
 	log "github.com/sirupsen/logrus"
 )
 
-func CreateWorkspace(workspace workspace.Workspace) error {
+func CreateWorkspace(workspace *types.Workspace) error {
 	log.Info("Creating workspace")
 
-	provisioner, err := plugin.GetProvisionerPlugin(workspace.Provisioner.Name)
+	provisioner, err := provisioner_manager.GetProvisioner(workspace.Provisioner.Name)
 	if err != nil {
 		return err
 	}
@@ -55,10 +56,10 @@ func CreateWorkspace(workspace workspace.Workspace) error {
 
 // WorkspacePostCreate
 // WorkspacePreStart
-func StartWorkspace(workspace workspace.Workspace) error {
+func StartWorkspace(workspace *types.Workspace) error {
 	log.Info("Starting workspace")
 
-	provisioner, err := plugin.GetProvisionerPlugin(workspace.Provisioner.Name)
+	provisioner, err := provisioner_manager.GetProvisioner(workspace.Provisioner.Name)
 	if err != nil {
 		return err
 	}
@@ -89,8 +90,13 @@ func StartWorkspace(workspace workspace.Workspace) error {
 	return nil
 }
 
-func StartProject(project workspace.Project) error {
-	provisioner, err := plugin.GetProvisionerPlugin(project.Workspace.Provisioner.Name)
+func StartProject(project *types.Project) error {
+	workspace, err := db.FindWorkspace(project.WorkspaceId)
+	if err != nil {
+		return err
+	}
+
+	provisioner, err := provisioner_manager.GetProvisioner(workspace.Provisioner.Name)
 	if err != nil {
 		return err
 	}
@@ -105,10 +111,10 @@ func StartProject(project workspace.Project) error {
 
 // WorkspacePostStart
 // WorkspacePreStop
-func StopWorkspace(workspace workspace.Workspace) error {
+func StopWorkspace(workspace *types.Workspace) error {
 	log.Info("Stopping workspace")
 
-	provisioner, err := plugin.GetProvisionerPlugin(workspace.Provisioner.Name)
+	provisioner, err := provisioner_manager.GetProvisioner(workspace.Provisioner.Name)
 	if err != nil {
 		return err
 	}
@@ -140,8 +146,13 @@ func StopWorkspace(workspace workspace.Workspace) error {
 	return nil
 }
 
-func StopProject(project workspace.Project) error {
-	provisioner, err := plugin.GetProvisionerPlugin(project.Workspace.Provisioner.Name)
+func StopProject(project *types.Project) error {
+	workspace, err := db.FindWorkspace(project.WorkspaceId)
+	if err != nil {
+		return err
+	}
+
+	provisioner, err := provisioner_manager.GetProvisioner(workspace.Provisioner.Name)
 	if err != nil {
 		return err
 	}
@@ -156,10 +167,10 @@ func StopProject(project workspace.Project) error {
 
 // WorkspacePostStop
 // WorkspacePreStop
-func DestroyWorkspace(workspace workspace.Workspace) error {
+func DestroyWorkspace(workspace *types.Workspace) error {
 	log.Info("Destroying workspace")
 
-	provisioner, err := plugin.GetProvisionerPlugin(workspace.Provisioner.Name)
+	provisioner, err := provisioner_manager.GetProvisioner(workspace.Provisioner.Name)
 	if err != nil {
 		return err
 	}
@@ -191,32 +202,11 @@ func DestroyWorkspace(workspace workspace.Workspace) error {
 	return nil
 }
 
-func GetWorkspaceInfo(w workspace.Workspace) (*workspace.WorkspaceInfo, error) {
-	provisioner, err := plugin.GetProvisionerPlugin(w.Provisioner.Name)
+func GetWorkspaceInfo(w *types.Workspace) (*types.WorkspaceInfo, error) {
+	provisioner, err := provisioner_manager.GetProvisioner(w.Provisioner.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	metadata, err := (*provisioner).GetWorkspaceMetadata(w)
-	if err != nil {
-		return nil, err
-	}
-
-	projects := []workspace.ProjectInfo{}
-
-	for _, project := range w.Projects {
-		projectInfo, err := (*provisioner).GetProjectInfo(project)
-		if err != nil {
-			return nil, err
-		}
-
-		projects = append(projects, *projectInfo)
-	}
-
-	return &workspace.WorkspaceInfo{
-		Name:                w.Name,
-		Provisioner:         w.Provisioner,
-		Projects:            projects,
-		ProvisionerMetadata: metadata,
-	}, nil
+	return (*provisioner).GetWorkspaceInfo(w)
 }

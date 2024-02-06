@@ -6,8 +6,8 @@ package workspace_grpc
 import (
 	"context"
 
+	"github.com/daytonaio/daytona/agent/db"
 	"github.com/daytonaio/daytona/agent/provisioner"
-	"github.com/daytonaio/daytona/agent/workspace"
 	daytona_proto "github.com/daytonaio/daytona/grpc/proto"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -15,7 +15,7 @@ import (
 )
 
 func (m *WorkspaceServer) Stop(ctx context.Context, request *daytona_proto.WorkspaceStopRequest) (*empty.Empty, error) {
-	w, err := workspace.LoadFromDB(request.Name)
+	w, err := db.FindWorkspace(request.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -23,18 +23,18 @@ func (m *WorkspaceServer) Stop(ctx context.Context, request *daytona_proto.Works
 	log.Debug(w)
 
 	if request.Project != "" {
-		project, err := w.GetProject(request.Project)
+		project, err := getProject(w, request.Project)
 		if err != nil {
 			return nil, err
 		}
 
-		err = provisioner.StopProject(*project)
+		err = provisioner.StopProject(project)
 		if err != nil {
 			log.Error(err)
 			return nil, err
 		}
 	} else {
-		err = provisioner.StopWorkspace(*w)
+		err = provisioner.StopWorkspace(w)
 		if err != nil {
 			log.Error(err)
 			return nil, err

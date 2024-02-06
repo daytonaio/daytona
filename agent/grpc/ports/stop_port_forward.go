@@ -13,7 +13,7 @@ import (
 
 func (p *PortsServer) StopPortForward(ctx context.Context, request *daytona_proto.StopPortForwardRequest) (*empty.Empty, error) {
 	panic("not implemented")
-	// w, err := workspace.LoadFromDB(request.WorkspaceName)
+	// w, err := workspace.FindWorkspace(request.WorkspaceName)
 	// if err != nil {
 	// 	return nil, err
 	// }

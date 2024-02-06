@@ -8,5 +8,5 @@ import (
 )
 
 type WorkspaceServer struct {
-	workspace_proto.UnimplementedWorkspaceServer
+	workspace_proto.UnimplementedWorkspaceServiceServer
 }

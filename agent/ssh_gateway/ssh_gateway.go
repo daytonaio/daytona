@@ -38,7 +38,7 @@ func Start() error {
 				// workspaceName := splited[0]
 				// projectName := splited[1]
 
-				// w, err := workspace.LoadFromDB(workspaceName)
+				// w, err := workspace.FindWorkspace(workspaceName)
 				// if err != nil {
 				// 	return nil, err
 				// }

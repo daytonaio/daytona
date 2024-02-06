@@ -8,6 +8,7 @@ package proto
 
 import (
 	context "context"
+	types "github.com/daytonaio/daytona/grpc/proto/types"
 	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -20,40 +21,40 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Workspace_Create_FullMethodName = "/Workspace/Create"
-	Workspace_Info_FullMethodName   = "/Workspace/Info"
-	Workspace_List_FullMethodName   = "/Workspace/List"
-	Workspace_Start_FullMethodName  = "/Workspace/Start"
-	Workspace_Stop_FullMethodName   = "/Workspace/Stop"
-	Workspace_Remove_FullMethodName = "/Workspace/Remove"
+	WorkspaceService_Create_FullMethodName = "/WorkspaceService/Create"
+	WorkspaceService_Info_FullMethodName   = "/WorkspaceService/Info"
+	WorkspaceService_List_FullMethodName   = "/WorkspaceService/List"
+	WorkspaceService_Start_FullMethodName  = "/WorkspaceService/Start"
+	WorkspaceService_Stop_FullMethodName   = "/WorkspaceService/Stop"
+	WorkspaceService_Remove_FullMethodName = "/WorkspaceService/Remove"
 )
 
-// WorkspaceClient is the client API for Workspace service.
+// WorkspaceServiceClient is the client API for WorkspaceService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type WorkspaceClient interface {
-	Create(ctx context.Context, in *CreateWorkspaceRequest, opts ...grpc.CallOption) (Workspace_CreateClient, error)
-	Info(ctx context.Context, in *WorkspaceInfoRequest, opts ...grpc.CallOption) (*WorkspaceInfoResponse, error)
+type WorkspaceServiceClient interface {
+	Create(ctx context.Context, in *CreateWorkspaceRequest, opts ...grpc.CallOption) (WorkspaceService_CreateClient, error)
+	Info(ctx context.Context, in *WorkspaceInfoRequest, opts ...grpc.CallOption) (*types.WorkspaceInfo, error)
 	List(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*WorkspaceListResponse, error)
 	Start(ctx context.Context, in *WorkspaceStartRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	Stop(ctx context.Context, in *WorkspaceStopRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	Remove(ctx context.Context, in *WorkspaceRemoveRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
-type workspaceClient struct {
+type workspaceServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewWorkspaceClient(cc grpc.ClientConnInterface) WorkspaceClient {
-	return &workspaceClient{cc}
+func NewWorkspaceServiceClient(cc grpc.ClientConnInterface) WorkspaceServiceClient {
+	return &workspaceServiceClient{cc}
 }
 
-func (c *workspaceClient) Create(ctx context.Context, in *CreateWorkspaceRequest, opts ...grpc.CallOption) (Workspace_CreateClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Workspace_ServiceDesc.Streams[0], Workspace_Create_FullMethodName, opts...)
+func (c *workspaceServiceClient) Create(ctx context.Context, in *CreateWorkspaceRequest, opts ...grpc.CallOption) (WorkspaceService_CreateClient, error) {
+	stream, err := c.cc.NewStream(ctx, &WorkspaceService_ServiceDesc.Streams[0], WorkspaceService_Create_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &workspaceCreateClient{stream}
+	x := &workspaceServiceCreateClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -63,16 +64,16 @@ func (c *workspaceClient) Create(ctx context.Context, in *CreateWorkspaceRequest
 	return x, nil
 }
 
-type Workspace_CreateClient interface {
+type WorkspaceService_CreateClient interface {
 	Recv() (*CreateWorkspaceResponse, error)
 	grpc.ClientStream
 }
 
-type workspaceCreateClient struct {
+type workspaceServiceCreateClient struct {
 	grpc.ClientStream
 }
 
-func (x *workspaceCreateClient) Recv() (*CreateWorkspaceResponse, error) {
+func (x *workspaceServiceCreateClient) Recv() (*CreateWorkspaceResponse, error) {
 	m := new(CreateWorkspaceResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -80,242 +81,242 @@ func (x *workspaceCreateClient) Recv() (*CreateWorkspaceResponse, error) {
 	return m, nil
 }
 
-func (c *workspaceClient) Info(ctx context.Context, in *WorkspaceInfoRequest, opts ...grpc.CallOption) (*WorkspaceInfoResponse, error) {
-	out := new(WorkspaceInfoResponse)
-	err := c.cc.Invoke(ctx, Workspace_Info_FullMethodName, in, out, opts...)
+func (c *workspaceServiceClient) Info(ctx context.Context, in *WorkspaceInfoRequest, opts ...grpc.CallOption) (*types.WorkspaceInfo, error) {
+	out := new(types.WorkspaceInfo)
+	err := c.cc.Invoke(ctx, WorkspaceService_Info_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *workspaceClient) List(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*WorkspaceListResponse, error) {
+func (c *workspaceServiceClient) List(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*WorkspaceListResponse, error) {
 	out := new(WorkspaceListResponse)
-	err := c.cc.Invoke(ctx, Workspace_List_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, WorkspaceService_List_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *workspaceClient) Start(ctx context.Context, in *WorkspaceStartRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *workspaceServiceClient) Start(ctx context.Context, in *WorkspaceStartRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, Workspace_Start_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, WorkspaceService_Start_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *workspaceClient) Stop(ctx context.Context, in *WorkspaceStopRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *workspaceServiceClient) Stop(ctx context.Context, in *WorkspaceStopRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, Workspace_Stop_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, WorkspaceService_Stop_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *workspaceClient) Remove(ctx context.Context, in *WorkspaceRemoveRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *workspaceServiceClient) Remove(ctx context.Context, in *WorkspaceRemoveRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, Workspace_Remove_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, WorkspaceService_Remove_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// WorkspaceServer is the server API for Workspace service.
-// All implementations must embed UnimplementedWorkspaceServer
+// WorkspaceServiceServer is the server API for WorkspaceService service.
+// All implementations must embed UnimplementedWorkspaceServiceServer
 // for forward compatibility
-type WorkspaceServer interface {
-	Create(*CreateWorkspaceRequest, Workspace_CreateServer) error
-	Info(context.Context, *WorkspaceInfoRequest) (*WorkspaceInfoResponse, error)
+type WorkspaceServiceServer interface {
+	Create(*CreateWorkspaceRequest, WorkspaceService_CreateServer) error
+	Info(context.Context, *WorkspaceInfoRequest) (*types.WorkspaceInfo, error)
 	List(context.Context, *empty.Empty) (*WorkspaceListResponse, error)
 	Start(context.Context, *WorkspaceStartRequest) (*empty.Empty, error)
 	Stop(context.Context, *WorkspaceStopRequest) (*empty.Empty, error)
 	Remove(context.Context, *WorkspaceRemoveRequest) (*empty.Empty, error)
-	mustEmbedUnimplementedWorkspaceServer()
+	mustEmbedUnimplementedWorkspaceServiceServer()
 }
 
-// UnimplementedWorkspaceServer must be embedded to have forward compatible implementations.
-type UnimplementedWorkspaceServer struct {
+// UnimplementedWorkspaceServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedWorkspaceServiceServer struct {
 }
 
-func (UnimplementedWorkspaceServer) Create(*CreateWorkspaceRequest, Workspace_CreateServer) error {
+func (UnimplementedWorkspaceServiceServer) Create(*CreateWorkspaceRequest, WorkspaceService_CreateServer) error {
 	return status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
-func (UnimplementedWorkspaceServer) Info(context.Context, *WorkspaceInfoRequest) (*WorkspaceInfoResponse, error) {
+func (UnimplementedWorkspaceServiceServer) Info(context.Context, *WorkspaceInfoRequest) (*types.WorkspaceInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Info not implemented")
 }
-func (UnimplementedWorkspaceServer) List(context.Context, *empty.Empty) (*WorkspaceListResponse, error) {
+func (UnimplementedWorkspaceServiceServer) List(context.Context, *empty.Empty) (*WorkspaceListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
-func (UnimplementedWorkspaceServer) Start(context.Context, *WorkspaceStartRequest) (*empty.Empty, error) {
+func (UnimplementedWorkspaceServiceServer) Start(context.Context, *WorkspaceStartRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Start not implemented")
 }
-func (UnimplementedWorkspaceServer) Stop(context.Context, *WorkspaceStopRequest) (*empty.Empty, error) {
+func (UnimplementedWorkspaceServiceServer) Stop(context.Context, *WorkspaceStopRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Stop not implemented")
 }
-func (UnimplementedWorkspaceServer) Remove(context.Context, *WorkspaceRemoveRequest) (*empty.Empty, error) {
+func (UnimplementedWorkspaceServiceServer) Remove(context.Context, *WorkspaceRemoveRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Remove not implemented")
 }
-func (UnimplementedWorkspaceServer) mustEmbedUnimplementedWorkspaceServer() {}
+func (UnimplementedWorkspaceServiceServer) mustEmbedUnimplementedWorkspaceServiceServer() {}
 
-// UnsafeWorkspaceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to WorkspaceServer will
+// UnsafeWorkspaceServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to WorkspaceServiceServer will
 // result in compilation errors.
-type UnsafeWorkspaceServer interface {
-	mustEmbedUnimplementedWorkspaceServer()
+type UnsafeWorkspaceServiceServer interface {
+	mustEmbedUnimplementedWorkspaceServiceServer()
 }
 
-func RegisterWorkspaceServer(s grpc.ServiceRegistrar, srv WorkspaceServer) {
-	s.RegisterService(&Workspace_ServiceDesc, srv)
+func RegisterWorkspaceServiceServer(s grpc.ServiceRegistrar, srv WorkspaceServiceServer) {
+	s.RegisterService(&WorkspaceService_ServiceDesc, srv)
 }
 
-func _Workspace_Create_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _WorkspaceService_Create_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(CreateWorkspaceRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(WorkspaceServer).Create(m, &workspaceCreateServer{stream})
+	return srv.(WorkspaceServiceServer).Create(m, &workspaceServiceCreateServer{stream})
 }
 
-type Workspace_CreateServer interface {
+type WorkspaceService_CreateServer interface {
 	Send(*CreateWorkspaceResponse) error
 	grpc.ServerStream
 }
 
-type workspaceCreateServer struct {
+type workspaceServiceCreateServer struct {
 	grpc.ServerStream
 }
 
-func (x *workspaceCreateServer) Send(m *CreateWorkspaceResponse) error {
+func (x *workspaceServiceCreateServer) Send(m *CreateWorkspaceResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _Workspace_Info_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _WorkspaceService_Info_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(WorkspaceInfoRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WorkspaceServer).Info(ctx, in)
+		return srv.(WorkspaceServiceServer).Info(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Workspace_Info_FullMethodName,
+		FullMethod: WorkspaceService_Info_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WorkspaceServer).Info(ctx, req.(*WorkspaceInfoRequest))
+		return srv.(WorkspaceServiceServer).Info(ctx, req.(*WorkspaceInfoRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Workspace_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _WorkspaceService_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WorkspaceServer).List(ctx, in)
+		return srv.(WorkspaceServiceServer).List(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Workspace_List_FullMethodName,
+		FullMethod: WorkspaceService_List_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WorkspaceServer).List(ctx, req.(*empty.Empty))
+		return srv.(WorkspaceServiceServer).List(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Workspace_Start_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _WorkspaceService_Start_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(WorkspaceStartRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WorkspaceServer).Start(ctx, in)
+		return srv.(WorkspaceServiceServer).Start(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Workspace_Start_FullMethodName,
+		FullMethod: WorkspaceService_Start_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WorkspaceServer).Start(ctx, req.(*WorkspaceStartRequest))
+		return srv.(WorkspaceServiceServer).Start(ctx, req.(*WorkspaceStartRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Workspace_Stop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _WorkspaceService_Stop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(WorkspaceStopRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WorkspaceServer).Stop(ctx, in)
+		return srv.(WorkspaceServiceServer).Stop(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Workspace_Stop_FullMethodName,
+		FullMethod: WorkspaceService_Stop_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WorkspaceServer).Stop(ctx, req.(*WorkspaceStopRequest))
+		return srv.(WorkspaceServiceServer).Stop(ctx, req.(*WorkspaceStopRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Workspace_Remove_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _WorkspaceService_Remove_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(WorkspaceRemoveRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WorkspaceServer).Remove(ctx, in)
+		return srv.(WorkspaceServiceServer).Remove(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Workspace_Remove_FullMethodName,
+		FullMethod: WorkspaceService_Remove_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WorkspaceServer).Remove(ctx, req.(*WorkspaceRemoveRequest))
+		return srv.(WorkspaceServiceServer).Remove(ctx, req.(*WorkspaceRemoveRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Workspace_ServiceDesc is the grpc.ServiceDesc for Workspace service.
+// WorkspaceService_ServiceDesc is the grpc.ServiceDesc for WorkspaceService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Workspace_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "Workspace",
-	HandlerType: (*WorkspaceServer)(nil),
+var WorkspaceService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "WorkspaceService",
+	HandlerType: (*WorkspaceServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Info",
-			Handler:    _Workspace_Info_Handler,
+			Handler:    _WorkspaceService_Info_Handler,
 		},
 		{
 			MethodName: "List",
-			Handler:    _Workspace_List_Handler,
+			Handler:    _WorkspaceService_List_Handler,
 		},
 		{
 			MethodName: "Start",
-			Handler:    _Workspace_Start_Handler,
+			Handler:    _WorkspaceService_Start_Handler,
 		},
 		{
 			MethodName: "Stop",
-			Handler:    _Workspace_Stop_Handler,
+			Handler:    _WorkspaceService_Stop_Handler,
 		},
 		{
 			MethodName: "Remove",
-			Handler:    _Workspace_Remove_Handler,
+			Handler:    _WorkspaceService_Remove_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "Create",
-			Handler:       _Workspace_Create_Handler,
+			Handler:       _WorkspaceService_Create_Handler,
 			ServerStreams: true,
 		},
 	},

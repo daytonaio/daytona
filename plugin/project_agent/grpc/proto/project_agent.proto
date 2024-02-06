@@ -1,0 +1,36 @@
+syntax = "proto3";
+option go_package = "./proto";
+import "google/protobuf/empty.proto";
+import "grpc/proto/types/types.proto";
+
+message GetNameResponse {
+  string name = 1;
+}
+
+message GetVersionResponse {
+  string version = 1;
+}
+
+message ProjectAgentConfig {
+  string setupPath = 1;
+  map<string, string> envVars = 2;
+}
+
+message LivenessProbeTimeoutResponse {
+  uint32 timeout = 1;
+}
+
+service ProjectAgent {
+  rpc GetName (google.protobuf.Empty) returns (GetNameResponse) {}
+  rpc GetVersion (google.protobuf.Empty) returns (GetVersionResponse) {}
+  rpc SetConfig(ProjectAgentConfig) returns (google.protobuf.Empty) {}
+
+  rpc ProjectPreInit(Project) returns (google.protobuf.Empty) {}
+  rpc ProjectPostInit(Project) returns (google.protobuf.Empty) {}
+  rpc ProjectPreStart(Project) returns (google.protobuf.Empty) {}
+  rpc ProjectPostStart(Project) returns (google.protobuf.Empty) {}
+  rpc ProjectPreStop(Project) returns (google.protobuf.Empty) {}
+  rpc GetProjectInfo(Project) returns (ProjectInfo) {}
+  rpc LivenessProbe(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+  rpc LivenessProbeTimeout(google.protobuf.Empty) returns (LivenessProbeTimeoutResponse) {}
+}

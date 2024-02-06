@@ -10,7 +10,7 @@ import (
 	"github.com/daytonaio/daytona/agent/event_bus"
 	"github.com/daytonaio/daytona/cmd/views"
 
-	workspace_proto "github.com/daytonaio/daytona/grpc/proto"
+	"github.com/daytonaio/daytona/grpc/proto/types"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
@@ -139,7 +139,7 @@ func (m InitWorkspaceViewModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m InitWorkspaceViewModel) HandleWorkspaceInfo(msg *workspace_proto.WorkspaceInfoResponse) InitWorkspaceViewModel {
+func (m InitWorkspaceViewModel) HandleWorkspaceInfo(msg *types.WorkspaceInfo) InitWorkspaceViewModel {
 	// TODO: handle
 	// for _, projectInfo := range msg.Projects {
 	// 	if _, ok := m.Projects[projectInfo.Name]; !ok {

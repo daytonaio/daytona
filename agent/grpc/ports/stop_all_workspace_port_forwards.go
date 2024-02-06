@@ -6,15 +6,15 @@ package ports_grpc
 import (
 	"context"
 
+	"github.com/daytonaio/daytona/agent/db"
 	"github.com/daytonaio/daytona/agent/port_manager"
-	"github.com/daytonaio/daytona/agent/workspace"
 	daytona_proto "github.com/daytonaio/daytona/grpc/proto"
 
 	"github.com/golang/protobuf/ptypes/empty"
 )
 
 func (p *PortsServer) StopAllWorkspacePortForwards(ctx context.Context, request *daytona_proto.StopAllWorkspacePortForwardsRequest) (*empty.Empty, error) {
-	w, err := workspace.LoadFromDB(request.WorkspaceName)
+	w, err := db.FindWorkspace(request.WorkspaceId)
 	if err != nil {
 		return nil, err
 	}

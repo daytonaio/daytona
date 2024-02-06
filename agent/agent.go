@@ -47,7 +47,7 @@ func Start() error {
 
 	s := grpc.NewServer()
 	workspaceServer := &workspace_grpc.WorkspaceServer{}
-	proto.RegisterWorkspaceServer(s, workspaceServer)
+	proto.RegisterWorkspaceServiceServer(s, workspaceServer)
 	portsServer := &ports_grpc.PortsServer{}
 	proto.RegisterPortsServer(s, portsServer)
 	agentServer := &agent_grpc.AgentServer{}
