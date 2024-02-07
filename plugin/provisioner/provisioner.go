@@ -45,7 +45,7 @@ type Provisioner interface {
 }
 
 type ProvisionerPlugin struct {
-	plugin.Plugin
+	plugin.NetRPCUnsupportedPlugin
 	Impl Provisioner
 }
 
