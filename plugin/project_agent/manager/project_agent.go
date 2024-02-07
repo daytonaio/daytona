@@ -2,18 +2,17 @@ package project_agent_manager
 
 import (
 	"errors"
-	"fmt"
 	"log"
-	"os"
 	"os/exec"
 	"path"
 
 	. "github.com/daytonaio/daytona/plugin/project_agent"
+	"github.com/daytonaio/daytona/plugin/utils"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 )
 
-var ProjectAgents []ProjectAgent = []ProjectAgent{}
+var projectAgentClients map[string]*plugin.Client = make(map[string]*plugin.Client)
 
 var projectAgentHandshakeConfig = plugin.HandshakeConfig{
 	ProtocolVersion:  1,
@@ -22,12 +21,42 @@ var projectAgentHandshakeConfig = plugin.HandshakeConfig{
 }
 
 func GetProjectAgent(name string) (*ProjectAgent, error) {
-	//	todo
-	return nil, errors.New("not implemented")
+	client, ok := projectAgentClients[name]
+	if !ok {
+		return nil, errors.New("provisioner not found")
+	}
+
+	rpcClient, err := client.Client()
+	if err != nil {
+		return nil, err
+	}
+
+	raw, err := rpcClient.Dispense(name)
+	if err != nil {
+		return nil, err
+	}
+
+	projectAgent, ok := raw.(ProjectAgent)
+	if !ok {
+		return nil, errors.New("unexpected type from plugin")
+	}
+
+	return &projectAgent, nil
 }
 
-func GetProjectAgents() []ProjectAgent {
-	return ProjectAgents
+func GetProjectAgents() map[string]ProjectAgent {
+	projectAgents := make(map[string]ProjectAgent)
+	for name := range projectAgentClients {
+		provisioner, err := GetProjectAgent(name)
+		if err != nil {
+			log.Printf("Error getting provisioner %s: %s", name, err)
+			continue
+		}
+
+		projectAgents[name] = *provisioner
+	}
+
+	return projectAgents
 }
 
 func RegisterProjectAgent(pluginPath string) {
@@ -35,7 +64,7 @@ func RegisterProjectAgent(pluginPath string) {
 
 	logger := hclog.New(&hclog.LoggerOptions{
 		Name:   pluginName,
-		Output: os.Stdout,
+		Output: &utils.DebugLogWriter{},
 		Level:  hclog.Debug,
 	})
 
@@ -43,23 +72,16 @@ func RegisterProjectAgent(pluginPath string) {
 	pluginMap[pluginName] = &ProjectAgentPlugin{}
 
 	client := plugin.NewClient(&plugin.ClientConfig{
-		HandshakeConfig: projectAgentHandshakeConfig,
-		Plugins:         pluginMap,
-		Cmd:             exec.Command(pluginPath),
-		Logger:          logger,
+		HandshakeConfig:  projectAgentHandshakeConfig,
+		Plugins:          pluginMap,
+		Cmd:              exec.Command(pluginPath),
+		Logger:           logger,
+		AllowedProtocols: []plugin.Protocol{plugin.ProtocolGRPC},
 	})
-	defer client.Kill()
+	// TODO: create a cleanup or delete function that will kill the client
+	// defer client.Kill()
 
-	rpcClient, err := client.Client()
-	if err != nil {
-		log.Fatal(err)
-	}
+	projectAgentClients[pluginName] = client
 
-	raw, err := rpcClient.Dispense(pluginName)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	greeter := raw.(ProjectAgent)
-	fmt.Println(greeter.GetName())
+	log.Printf("Project Agent %s registered", pluginName)
 }

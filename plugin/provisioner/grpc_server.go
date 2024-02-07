@@ -10,7 +10,6 @@ import (
 )
 
 type ProvisionerGrpcServer struct {
-	proto.UnimplementedProvisionerServer
 	Impl Provisioner
 }
 

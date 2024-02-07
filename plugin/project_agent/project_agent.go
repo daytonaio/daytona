@@ -25,7 +25,7 @@ type ProjectAgent interface {
 }
 
 type ProjectAgentPlugin struct {
-	plugin.Plugin
+	plugin.NetRPCUnsupportedPlugin
 	Impl ProjectAgent
 }
 
@@ -34,6 +34,6 @@ func (p *ProjectAgentPlugin) GRPCServer(broker *plugin.GRPCBroker, s *grpc.Serve
 	return nil
 }
 
-func (p *ProjectAgentPlugin) GRPCClient(ctx context.Context, broker *plugin.GRPCBroker, c *grpc.ClientConn) (ProjectAgent, error) {
+func (p *ProjectAgentPlugin) GRPCClient(ctx context.Context, broker *plugin.GRPCBroker, c *grpc.ClientConn) (interface{}, error) {
 	return &ProjectAgentGrpcClient{client: proto.NewProjectAgentClient(c)}, nil
 }

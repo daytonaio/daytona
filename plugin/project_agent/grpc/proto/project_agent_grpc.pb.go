@@ -159,7 +159,7 @@ func (c *projectAgentClient) LivenessProbeTimeout(ctx context.Context, in *empty
 }
 
 // ProjectAgentServer is the server API for ProjectAgent service.
-// All implementations must embed UnimplementedProjectAgentServer
+// All implementations should embed UnimplementedProjectAgentServer
 // for forward compatibility
 type ProjectAgentServer interface {
 	GetName(context.Context, *empty.Empty) (*GetNameResponse, error)
@@ -173,10 +173,9 @@ type ProjectAgentServer interface {
 	GetProjectInfo(context.Context, *types.Project) (*types.ProjectInfo, error)
 	LivenessProbe(context.Context, *empty.Empty) (*empty.Empty, error)
 	LivenessProbeTimeout(context.Context, *empty.Empty) (*LivenessProbeTimeoutResponse, error)
-	mustEmbedUnimplementedProjectAgentServer()
 }
 
-// UnimplementedProjectAgentServer must be embedded to have forward compatible implementations.
+// UnimplementedProjectAgentServer should be embedded to have forward compatible implementations.
 type UnimplementedProjectAgentServer struct {
 }
 
@@ -213,7 +212,6 @@ func (UnimplementedProjectAgentServer) LivenessProbe(context.Context, *empty.Emp
 func (UnimplementedProjectAgentServer) LivenessProbeTimeout(context.Context, *empty.Empty) (*LivenessProbeTimeoutResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LivenessProbeTimeout not implemented")
 }
-func (UnimplementedProjectAgentServer) mustEmbedUnimplementedProjectAgentServer() {}
 
 // UnsafeProjectAgentServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to ProjectAgentServer will

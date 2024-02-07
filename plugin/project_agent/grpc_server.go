@@ -9,7 +9,6 @@ import (
 )
 
 type ProjectAgentGrpcServer struct {
-	proto.UnimplementedProjectAgentServer
 	Impl ProjectAgent
 }
 

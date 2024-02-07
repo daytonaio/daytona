@@ -2,11 +2,11 @@ package provisioner_manager
 
 import (
 	"errors"
-	"os"
 	"os/exec"
 	"path"
 
 	. "github.com/daytonaio/daytona/plugin/provisioner"
+	"github.com/daytonaio/daytona/plugin/utils"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 	log "github.com/sirupsen/logrus"
@@ -64,7 +64,7 @@ func RegisterProvisioner(pluginPath string) {
 
 	logger := hclog.New(&hclog.LoggerOptions{
 		Name:   pluginName,
-		Output: os.Stdout,
+		Output: &utils.DebugLogWriter{},
 		Level:  hclog.Debug,
 	})
 

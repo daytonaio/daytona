@@ -54,6 +54,6 @@ func (p *ProvisionerPlugin) GRPCServer(broker *plugin.GRPCBroker, s *grpc.Server
 	return nil
 }
 
-func (p *ProvisionerPlugin) GRPCClient(ctx context.Context, broker *plugin.GRPCBroker, c *grpc.ClientConn) (Provisioner, error) {
+func (p *ProvisionerPlugin) GRPCClient(ctx context.Context, broker *plugin.GRPCBroker, c *grpc.ClientConn) (interface{}, error) {
 	return &ProvisionerGrpcClient{client: proto.NewProvisionerClient(c)}, nil
 }

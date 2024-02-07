@@ -127,7 +127,7 @@ func (c *workspaceServiceClient) Remove(ctx context.Context, in *WorkspaceRemove
 }
 
 // WorkspaceServiceServer is the server API for WorkspaceService service.
-// All implementations must embed UnimplementedWorkspaceServiceServer
+// All implementations should embed UnimplementedWorkspaceServiceServer
 // for forward compatibility
 type WorkspaceServiceServer interface {
 	Create(*CreateWorkspaceRequest, WorkspaceService_CreateServer) error
@@ -136,10 +136,9 @@ type WorkspaceServiceServer interface {
 	Start(context.Context, *WorkspaceStartRequest) (*empty.Empty, error)
 	Stop(context.Context, *WorkspaceStopRequest) (*empty.Empty, error)
 	Remove(context.Context, *WorkspaceRemoveRequest) (*empty.Empty, error)
-	mustEmbedUnimplementedWorkspaceServiceServer()
 }
 
-// UnimplementedWorkspaceServiceServer must be embedded to have forward compatible implementations.
+// UnimplementedWorkspaceServiceServer should be embedded to have forward compatible implementations.
 type UnimplementedWorkspaceServiceServer struct {
 }
 
@@ -161,7 +160,6 @@ func (UnimplementedWorkspaceServiceServer) Stop(context.Context, *WorkspaceStopR
 func (UnimplementedWorkspaceServiceServer) Remove(context.Context, *WorkspaceRemoveRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Remove not implemented")
 }
-func (UnimplementedWorkspaceServiceServer) mustEmbedUnimplementedWorkspaceServiceServer() {}
 
 // UnsafeWorkspaceServiceServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to WorkspaceServiceServer will

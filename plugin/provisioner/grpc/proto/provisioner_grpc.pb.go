@@ -181,7 +181,7 @@ func (c *provisionerClient) GetProjectInfo(ctx context.Context, in *types.Projec
 }
 
 // ProvisionerServer is the server API for Provisioner service.
-// All implementations must embed UnimplementedProvisionerServer
+// All implementations should embed UnimplementedProvisionerServer
 // for forward compatibility
 type ProvisionerServer interface {
 	GetName(context.Context, *empty.Empty) (*GetNameResponse, error)
@@ -197,10 +197,9 @@ type ProvisionerServer interface {
 	StopProject(context.Context, *types.Project) (*empty.Empty, error)
 	DestroyProject(context.Context, *types.Project) (*empty.Empty, error)
 	GetProjectInfo(context.Context, *types.Project) (*types.ProjectInfo, error)
-	mustEmbedUnimplementedProvisionerServer()
 }
 
-// UnimplementedProvisionerServer must be embedded to have forward compatible implementations.
+// UnimplementedProvisionerServer should be embedded to have forward compatible implementations.
 type UnimplementedProvisionerServer struct {
 }
 
@@ -243,7 +242,6 @@ func (UnimplementedProvisionerServer) DestroyProject(context.Context, *types.Pro
 func (UnimplementedProvisionerServer) GetProjectInfo(context.Context, *types.Project) (*types.ProjectInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProjectInfo not implemented")
 }
-func (UnimplementedProvisionerServer) mustEmbedUnimplementedProvisionerServer() {}
 
 // UnsafeProvisionerServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to ProvisionerServer will

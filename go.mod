@@ -11,6 +11,8 @@ require (
 	github.com/docker/docker v24.0.7+incompatible
 	github.com/glebarez/sqlite v1.10.0
 	github.com/golang/protobuf v1.5.3
+	github.com/hashicorp/go-hclog v0.14.1
+	github.com/hashicorp/go-plugin v1.6.0
 	github.com/lucasb-eyer/go-colorful v1.2.0
 	github.com/reactivex/rxgo/v2 v2.5.0
 	github.com/sirupsen/logrus v1.9.3
@@ -30,8 +32,6 @@ require (
 	github.com/glebarez/go-sqlite v1.21.2 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/uuid v1.5.0 // indirect
-	github.com/hashicorp/go-hclog v0.14.1 // indirect
-	github.com/hashicorp/go-plugin v1.6.0 // indirect
 	github.com/hashicorp/yamux v0.1.1 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/mattn/go-colorable v0.1.4 // indirect

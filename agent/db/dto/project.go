@@ -67,8 +67,9 @@ func ToRepositoryDTO(repo *types.Repository) RepositoryDTO {
 
 func ToProject(projectDTO ProjectDTO) *types.Project {
 	return &types.Project{
-		Name:       projectDTO.Name,
-		Repository: ToRepository(projectDTO.Repository),
+		Name:        projectDTO.Name,
+		Repository:  ToRepository(projectDTO.Repository),
+		WorkspaceId: projectDTO.WorkspaceId,
 	}
 }
 

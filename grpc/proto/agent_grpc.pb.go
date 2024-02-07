@@ -81,17 +81,16 @@ func (c *agentClient) DeleteKey(ctx context.Context, in *DeleteKeyRequest, opts 
 }
 
 // AgentServer is the server API for Agent service.
-// All implementations must embed UnimplementedAgentServer
+// All implementations should embed UnimplementedAgentServer
 // for forward compatibility
 type AgentServer interface {
 	GetPublicKey(context.Context, *GetPublicKeyRequest) (*GetPublicKeyResponse, error)
 	GenerateKey(context.Context, *GenerateKeyRequest) (*GetPublicKeyResponse, error)
 	SetKey(context.Context, *SetKeyRequest) (*GetPublicKeyResponse, error)
 	DeleteKey(context.Context, *DeleteKeyRequest) (*empty.Empty, error)
-	mustEmbedUnimplementedAgentServer()
 }
 
-// UnimplementedAgentServer must be embedded to have forward compatible implementations.
+// UnimplementedAgentServer should be embedded to have forward compatible implementations.
 type UnimplementedAgentServer struct {
 }
 
@@ -107,7 +106,6 @@ func (UnimplementedAgentServer) SetKey(context.Context, *SetKeyRequest) (*GetPub
 func (UnimplementedAgentServer) DeleteKey(context.Context, *DeleteKeyRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteKey not implemented")
 }
-func (UnimplementedAgentServer) mustEmbedUnimplementedAgentServer() {}
 
 // UnsafeAgentServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to AgentServer will

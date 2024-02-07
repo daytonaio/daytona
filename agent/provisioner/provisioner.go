@@ -17,7 +17,10 @@ func CreateWorkspace(workspace *types.Workspace) error {
 		return err
 	}
 
-	(*provisioner).CreateWorkspace(workspace)
+	err = (*provisioner).CreateWorkspace(workspace)
+	if err != nil {
+		return err
+	}
 
 	log.Debug("Projects to initialize", workspace.Projects)
 
@@ -168,14 +171,12 @@ func StopProject(project *types.Project) error {
 // WorkspacePostStop
 // WorkspacePreStop
 func DestroyWorkspace(workspace *types.Workspace) error {
-	log.Info("Destroying workspace")
+	log.Infof("Destroying workspace %s", workspace.Id)
 
 	provisioner, err := provisioner_manager.GetProvisioner(workspace.Provisioner.Name)
 	if err != nil {
 		return err
 	}
-
-	(*provisioner).DestroyWorkspace(workspace)
 
 	event_bus.Publish(event_bus.Event{
 		Name: event_bus.WorkspaceEventRemoving,
@@ -192,12 +193,19 @@ func DestroyWorkspace(workspace *types.Workspace) error {
 		}
 	}
 
+	err = (*provisioner).DestroyWorkspace(workspace)
+	if err != nil {
+		return err
+	}
+
 	event_bus.Publish(event_bus.Event{
 		Name: event_bus.WorkspaceEventRemoved,
 		Payload: event_bus.WorkspaceEventPayload{
 			WorkspaceName: workspace.Name,
 		},
 	})
+
+	log.Infof("Workspace %s destroyed", workspace.Id)
 
 	return nil
 }

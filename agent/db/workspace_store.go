@@ -65,7 +65,7 @@ func DeleteWorkspace(workspace *types.Workspace) error {
 		return err
 	}
 
-	tx := db.Delete(workspace)
+	tx := db.Delete(ToWorkspaceDTO(workspace))
 	if tx.Error != nil {
 		return tx.Error
 	}

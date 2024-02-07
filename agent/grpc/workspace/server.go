@@ -3,10 +3,5 @@
 
 package workspace_grpc
 
-import (
-	workspace_proto "github.com/daytonaio/daytona/grpc/proto"
-)
-
 type WorkspaceServer struct {
-	workspace_proto.UnimplementedWorkspaceServiceServer
 }
