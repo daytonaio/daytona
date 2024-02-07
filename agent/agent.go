@@ -14,6 +14,7 @@ import (
 	workspace_grpc "github.com/daytonaio/daytona/agent/grpc/workspace"
 	"github.com/daytonaio/daytona/agent/ssh_gateway"
 	proto "github.com/daytonaio/daytona/grpc/proto"
+	provisioner_manager "github.com/daytonaio/daytona/plugin/provisioner/manager"
 
 	"google.golang.org/grpc"
 
@@ -52,6 +53,9 @@ func Start() error {
 	proto.RegisterPortsServer(s, portsServer)
 	agentServer := &agent_grpc.AgentServer{}
 	proto.RegisterAgentServer(s, agentServer)
+
+	provisioner_manager.RegisterProvisioner("/workspaces/daytona/tmp/docker-provisioner")
+
 	log.Infof("Daytona agent started %v", (*lis).Addr())
 
 	go func() {

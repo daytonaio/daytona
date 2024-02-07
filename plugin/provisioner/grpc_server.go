@@ -15,13 +15,13 @@ type ProvisionerGrpcServer struct {
 }
 
 func (m *ProvisionerGrpcServer) GetName(ctx context.Context, req *empty.Empty) (*proto.GetNameResponse, error) {
-	name := m.Impl.GetName()
-	return &proto.GetNameResponse{Name: name}, nil
+	name, err := m.Impl.GetName()
+	return &proto.GetNameResponse{Name: name}, err
 }
 
 func (m *ProvisionerGrpcServer) GetVersion(ctx context.Context, req *empty.Empty) (*proto.GetVersionResponse, error) {
-	version := m.Impl.GetVersion()
-	return &proto.GetVersionResponse{Version: version}, nil
+	version, err := m.Impl.GetVersion()
+	return &proto.GetVersionResponse{Version: version}, err
 }
 
 func (m *ProvisionerGrpcServer) Configure(ctx context.Context, req *empty.Empty) (*proto.ConfigureResponse, error) {

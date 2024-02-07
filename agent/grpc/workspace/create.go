@@ -123,6 +123,10 @@ func newWorkspace(params *daytona_proto.CreateWorkspaceRequest) (*types.Workspac
 	w := &types.Workspace{
 		Id:   params.Name,
 		Name: params.Name,
+		Provisioner: &types.WorkspaceProvisioner{
+			Name:    "docker-provisioner",
+			Profile: "default",
+		},
 	}
 
 	w.Projects = []*types.Project{}

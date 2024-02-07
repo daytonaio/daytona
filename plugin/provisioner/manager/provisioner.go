@@ -2,8 +2,6 @@ package provisioner_manager
 
 import (
 	"errors"
-	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path"
@@ -11,9 +9,10 @@ import (
 	. "github.com/daytonaio/daytona/plugin/provisioner"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
+	log "github.com/sirupsen/logrus"
 )
 
-var Provisioners []Provisioner = []Provisioner{}
+var provisionerClients map[string]*plugin.Client = make(map[string]*plugin.Client)
 
 var ProvisionerHandshakeConfig = plugin.HandshakeConfig{
 	ProtocolVersion:  1,
@@ -22,12 +21,42 @@ var ProvisionerHandshakeConfig = plugin.HandshakeConfig{
 }
 
 func GetProvisioner(name string) (*Provisioner, error) {
-	//	todo
-	return nil, errors.New("not implemented")
+	client, ok := provisionerClients[name]
+	if !ok {
+		return nil, errors.New("provisioner not found")
+	}
+
+	rpcClient, err := client.Client()
+	if err != nil {
+		return nil, err
+	}
+
+	raw, err := rpcClient.Dispense(name)
+	if err != nil {
+		return nil, err
+	}
+
+	provisioner, ok := raw.(Provisioner)
+	if !ok {
+		return nil, errors.New("unexpected type from plugin")
+	}
+
+	return &provisioner, nil
 }
 
-func GetProvisioners() []Provisioner {
-	return Provisioners
+func GetProvisioners() map[string]Provisioner {
+	provisioners := make(map[string]Provisioner)
+	for name := range provisionerClients {
+		provisioner, err := GetProvisioner(name)
+		if err != nil {
+			log.Printf("Error getting provisioner %s: %s", name, err)
+			continue
+		}
+
+		provisioners[name] = *provisioner
+	}
+
+	return provisioners
 }
 
 func RegisterProvisioner(pluginPath string) {
@@ -43,23 +72,16 @@ func RegisterProvisioner(pluginPath string) {
 	pluginMap[pluginName] = &ProvisionerPlugin{}
 
 	client := plugin.NewClient(&plugin.ClientConfig{
-		HandshakeConfig: ProvisionerHandshakeConfig,
-		Plugins:         pluginMap,
-		Cmd:             exec.Command(pluginPath),
-		Logger:          logger,
+		HandshakeConfig:  ProvisionerHandshakeConfig,
+		Plugins:          pluginMap,
+		Cmd:              exec.Command(pluginPath),
+		Logger:           logger,
+		AllowedProtocols: []plugin.Protocol{plugin.ProtocolGRPC},
 	})
-	defer client.Kill()
+	// TODO: create a cleanup or delete function that will kill the client
+	// defer client.Kill()
 
-	rpcClient, err := client.Client()
-	if err != nil {
-		log.Fatal(err)
-	}
+	provisionerClients[pluginName] = client
 
-	raw, err := rpcClient.Dispense(pluginName)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	greeter := raw.(Provisioner)
-	fmt.Println(greeter.GetName())
+	log.Printf("Provisioner %s registered", pluginName)
 }

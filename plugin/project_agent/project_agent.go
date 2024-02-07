@@ -11,8 +11,8 @@ import (
 )
 
 type ProjectAgent interface {
-	GetName() string
-	GetVersion() string
+	GetName() (string, error)
+	GetVersion() (string, error)
 	SetConfig(config *proto.ProjectAgentConfig) error
 	ProjectPreInit(project *types.Project) error
 	ProjectPostInit(project *types.Project) error
@@ -34,6 +34,6 @@ func (p *ProjectAgentPlugin) GRPCServer(broker *plugin.GRPCBroker, s *grpc.Serve
 	return nil
 }
 
-func (p *ProjectAgentPlugin) GRPCClient(ctx context.Context, broker *plugin.GRPCBroker, c *grpc.ClientConn) (interface{}, error) {
+func (p *ProjectAgentPlugin) GRPCClient(ctx context.Context, broker *plugin.GRPCBroker, c *grpc.ClientConn) (ProjectAgent, error) {
 	return &ProjectAgentGrpcClient{client: proto.NewProjectAgentClient(c)}, nil
 }

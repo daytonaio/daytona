@@ -8,7 +8,9 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 )
 
-type ProvisionerGrpcClient struct{ client proto.ProvisionerClient }
+type ProvisionerGrpcClient struct {
+	client proto.ProvisionerClient
+}
 
 func (m *ProvisionerGrpcClient) GetName() (string, error) {
 	resp, err := m.client.GetName(context.Background(), &empty.Empty{})

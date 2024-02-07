@@ -15,8 +15,8 @@ type ProvisionerProfile struct {
 }
 
 type Provisioner interface {
-	GetName() string
-	GetVersion() string
+	GetName() (string, error)
+	GetVersion() (string, error)
 
 	//	client side profile config wizard
 	Configure() (interface{}, error)
@@ -54,6 +54,6 @@ func (p *ProvisionerPlugin) GRPCServer(broker *plugin.GRPCBroker, s *grpc.Server
 	return nil
 }
 
-func (p *ProvisionerPlugin) GRPCClient(ctx context.Context, broker *plugin.GRPCBroker, c *grpc.ClientConn) (interface{}, error) {
+func (p *ProvisionerPlugin) GRPCClient(ctx context.Context, broker *plugin.GRPCBroker, c *grpc.ClientConn) (Provisioner, error) {
 	return &ProvisionerGrpcClient{client: proto.NewProvisionerClient(c)}, nil
 }

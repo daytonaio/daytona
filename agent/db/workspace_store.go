@@ -51,7 +51,7 @@ func SaveWorkspace(workspace *types.Workspace) error {
 		return err
 	}
 
-	tx := db.Save(workspace)
+	tx := db.Save(ToWorkspaceDTO(workspace))
 	if tx.Error != nil {
 		return tx.Error
 	}

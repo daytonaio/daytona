@@ -16,10 +16,9 @@ type RepositoryDTO struct {
 }
 
 type ProjectDTO struct {
-	Name       string        `json:"name"`
-	Repository RepositoryDTO `json:"repository"`
-
-	Workspace WorkspaceDTO `json:"-"`
+	Name        string        `json:"name"`
+	Repository  RepositoryDTO `json:"repository"`
+	WorkspaceId string        `json:"workspaceId"`
 }
 
 type ProjectInfoDTO struct {
@@ -33,9 +32,9 @@ type ProjectInfoDTO struct {
 
 func ToProjectDTO(project *types.Project, workspace *types.Workspace) ProjectDTO {
 	return ProjectDTO{
-		Name:       project.Name,
-		Repository: ToRepositoryDTO(project.Repository),
-		Workspace:  ToWorkspaceDTO(workspace),
+		Name:        project.Name,
+		Repository:  ToRepositoryDTO(project.Repository),
+		WorkspaceId: project.WorkspaceId,
 	}
 }
 

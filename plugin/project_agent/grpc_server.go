@@ -14,13 +14,13 @@ type ProjectAgentGrpcServer struct {
 }
 
 func (m *ProjectAgentGrpcServer) GetName(ctx context.Context, req *empty.Empty) (*proto.GetNameResponse, error) {
-	name := m.Impl.GetName()
-	return &proto.GetNameResponse{Name: name}, nil
+	name, err := m.Impl.GetName()
+	return &proto.GetNameResponse{Name: name}, err
 }
 
 func (m *ProjectAgentGrpcServer) GetVersion(ctx context.Context, req *empty.Empty) (*proto.GetVersionResponse, error) {
-	version := m.Impl.GetVersion()
-	return &proto.GetVersionResponse{Version: version}, nil
+	version, err := m.Impl.GetVersion()
+	return &proto.GetVersionResponse{Version: version}, err
 }
 
 func (m *ProjectAgentGrpcServer) SetConfig(ctx context.Context, config *proto.ProjectAgentConfig) (*empty.Empty, error) {
