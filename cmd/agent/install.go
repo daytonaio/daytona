@@ -14,7 +14,7 @@ import (
 
 	cmd_profile "github.com/daytonaio/daytona/cmd/profile"
 	view "github.com/daytonaio/daytona/cmd/views/installation_wizard"
-	profile_list "github.com/daytonaio/daytona/cmd/views/profilie_list"
+	profile_list "github.com/daytonaio/daytona/cmd/views/profile_list"
 	views_util "github.com/daytonaio/daytona/cmd/views/util"
 
 	"github.com/briandowns/spinner"

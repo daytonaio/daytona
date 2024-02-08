@@ -18,6 +18,7 @@ import (
 	"github.com/spf13/cobra"
 
 	init_view "github.com/daytonaio/daytona/cmd/views/init_workspace"
+	views_util "github.com/daytonaio/daytona/cmd/views/util"
 	wizard_view "github.com/daytonaio/daytona/cmd/views/workspace_create_wizard"
 	info_view "github.com/daytonaio/daytona/cmd/views/workspace_info"
 )
@@ -51,7 +52,14 @@ var CreateCmd = &cobra.Command{
 			}
 
 			repos = []string{} // Ignore repo flags if prompting
-			workspaceName, repos = wizard_view.GetCreationDataFromPrompt(workspaceNames)
+
+			views_util.RenderMainTitle("WORKSPACE CREATION")
+
+			workspaceName, repos, err = wizard_view.GetCreationDataFromPrompt(workspaceNames)
+			if err != nil {
+				log.Fatal(err)
+				return
+			}
 		} else {
 			validatedWorkspaceName, err := util.GetValidatedWorkspaceName(args[0])
 			if err != nil {

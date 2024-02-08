@@ -10,7 +10,10 @@
       "request": "launch",
       "mode": "debug",
       "program": "${workspaceFolder}",
-      "args": ["agent"]
-  }
+      "console": "integratedTerminal",
+      "args": [
+        "create"
+      ]
+    }
   ]
 }

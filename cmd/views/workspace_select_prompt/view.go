@@ -45,8 +45,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter":
 			i, ok := m.list.SelectedItem().(item)
 			if ok {
-				fmt.Println("i.title")
-				fmt.Println(i.title)
 				m.choice = string(i.title)
 			}
 			return m, tea.Quit

@@ -9,6 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/client"
 	workspace_proto "github.com/daytonaio/daytona/grpc/proto"
+	"github.com/daytonaio/daytona/output"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	log "github.com/sirupsen/logrus"
@@ -58,6 +59,12 @@ var InfoCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		if output.FormatFlag != "" {
+			output.Output = response
+			return
+		}
+
 		view.Render(response)
 	},
 }
