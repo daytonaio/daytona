@@ -10,6 +10,7 @@ import (
 	"os/signal"
 
 	"github.com/daytonaio/daytona/client"
+	views_util "github.com/daytonaio/daytona/cmd/views/util"
 	"github.com/daytonaio/daytona/config"
 	"github.com/daytonaio/daytona/grpc/proto"
 	"github.com/daytonaio/daytona/internal/util"
@@ -60,9 +61,9 @@ var portForwardCmd = &cobra.Command{
 			}
 		} else {
 			if *hostPort != uint32(portArg) {
-				fmt.Printf("Port %d already in use.\n", portArg)
+				views_util.RenderInfoMessage(fmt.Sprintf("Port %d already in use.", portArg))
 			}
-			fmt.Printf("Port available at http://localhost:%d\n", *hostPort)
+			views_util.RenderInfoMessage(fmt.Sprintf("Port available at http://localhost:%d\n", *hostPort))
 
 			c := make(chan os.Signal, 1)
 			signal.Notify(c, os.Interrupt)
@@ -81,7 +82,7 @@ var portForwardCmd = &cobra.Command{
 						log.Fatal(err)
 					}
 
-					fmt.Println("Port forwarding stopped.")
+					views_util.RenderInfoMessage("Port forwarding stopped")
 					os.Exit(0)
 				case err = <-errChan:
 					if err != nil {

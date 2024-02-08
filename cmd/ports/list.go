@@ -9,6 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/client"
 	"github.com/daytonaio/daytona/grpc/proto"
+	"github.com/daytonaio/daytona/output"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -68,6 +69,10 @@ func listPortForwards(conn *grpc.ClientConn, workspaceName string, projectName s
 		}
 	}
 
+	if output.FormatFlag != "" {
+		output.Output = response
+	}
+
 	return nil
 }
 
@@ -83,6 +88,10 @@ func listProjectPortForwards(conn *grpc.ClientConn, workspaceName string, projec
 		} else {
 			fmt.Printf("Port: %d\n", port.ContainerPort)
 		}
+	}
+
+	if output.FormatFlag != "" {
+		output.Output = projectPortForwards
 	}
 
 	return nil

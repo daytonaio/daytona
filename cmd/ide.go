@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	ide_select_prompt "github.com/daytonaio/daytona/cmd/views/ide_select_prompt"
+	views_util "github.com/daytonaio/daytona/cmd/views/util"
 	"github.com/daytonaio/daytona/config"
 
 	log "github.com/sirupsen/logrus"
@@ -44,6 +45,6 @@ var ideCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		fmt.Printf("\nDefault IDE set to: %s\n\n", chosenIde.Name)
+		views_util.RenderInfoMessage(fmt.Sprintf("Default IDE set to: %s", chosenIde.Name))
 	},
 }

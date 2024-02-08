@@ -4,7 +4,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	. "github.com/daytonaio/daytona/cmd/agent"
@@ -12,6 +11,7 @@ import (
 	. "github.com/daytonaio/daytona/cmd/profile"
 	. "github.com/daytonaio/daytona/cmd/workspace"
 	"github.com/daytonaio/daytona/output"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"
 )
@@ -22,7 +22,6 @@ var rootCmd = &cobra.Command{
 	Long:  `Daytona Agent is a tool for managing development environments`,
 }
 
-var outputFormat string
 var originalStdout *os.File
 
 func Execute() {
@@ -48,10 +47,10 @@ func Execute() {
 	}
 
 	rootCmd.PersistentFlags().BoolP("help", "", false, "help for daytona")
-	rootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "o", outputFormat, `Output format. Must be one of (yaml, json)`)
+	rootCmd.PersistentFlags().StringVarP(&output.FormatFlag, "output", "o", output.FormatFlag, `Output format. Must be one of (yaml, json)`)
 
 	rootCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
-		if outputFormat == "" {
+		if output.FormatFlag == "" {
 			return
 		}
 		originalStdout = os.Stdout
@@ -60,10 +59,10 @@ func Execute() {
 
 	rootCmd.PersistentPostRun = func(cmd *cobra.Command, args []string) {
 		os.Stdout = originalStdout
-		output.Print(output.Output, outputFormat)
+		output.Print(output.Output, output.FormatFlag)
 	}
 
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 }

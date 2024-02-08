@@ -5,9 +5,11 @@ package cmd_workspace
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/daytonaio/daytona/client"
+	views_util "github.com/daytonaio/daytona/cmd/views/util"
 	select_prompt "github.com/daytonaio/daytona/cmd/views/workspace_select_prompt"
 	workspace_proto "github.com/daytonaio/daytona/grpc/proto"
 
@@ -58,6 +60,8 @@ var StartCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		views_util.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully started", workspaceName))
 	},
 }
 

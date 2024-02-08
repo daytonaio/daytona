@@ -5,12 +5,14 @@ package cmd_workspace
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/daytonaio/daytona/client"
 	"github.com/daytonaio/daytona/config"
 	workspace_proto "github.com/daytonaio/daytona/grpc/proto"
 
+	views_util "github.com/daytonaio/daytona/cmd/views/util"
 	select_prompt "github.com/daytonaio/daytona/cmd/views/workspace_select_prompt"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -72,6 +74,8 @@ var DeleteCmd = &cobra.Command{
 		}
 
 		config.RemoveWorkspaceSshEntries(activeProfile.Id, workspaceName)
+
+		views_util.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully deleted", workspaceName))
 	},
 }
 
