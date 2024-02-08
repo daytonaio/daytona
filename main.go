@@ -6,7 +6,7 @@ package main
 import (
 	"os"
 
-	"github.com/daytonaio/daytona/cmd"
+	"github.com/daytonaio/daytona/cli/cmd"
 	"github.com/daytonaio/daytona/internal/util"
 
 	log "github.com/sirupsen/logrus"
