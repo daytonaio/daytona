@@ -6,7 +6,7 @@ package cmd_profile
 import (
 	"fmt"
 
-	profile_list "github.com/daytonaio/daytona/cmd/views/profilie_list"
+	profile_list "github.com/daytonaio/daytona/cmd/views/profile_list"
 	"github.com/daytonaio/daytona/config"
 
 	log "github.com/sirupsen/logrus"

@@ -12,7 +12,7 @@ import (
 	"github.com/daytonaio/daytona/remote_installer"
 
 	cmd_profile "github.com/daytonaio/daytona/cmd/profile"
-	profile_list "github.com/daytonaio/daytona/cmd/views/profilie_list"
+	profile_list "github.com/daytonaio/daytona/cmd/views/profile_list"
 	views_util "github.com/daytonaio/daytona/cmd/views/util"
 
 	"github.com/briandowns/spinner"

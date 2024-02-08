@@ -7,7 +7,7 @@ import (
 	"errors"
 
 	"github.com/daytonaio/daytona/cmd/views/profile_info"
-	profile_list "github.com/daytonaio/daytona/cmd/views/profilie_list"
+	profile_list "github.com/daytonaio/daytona/cmd/views/profile_list"
 	"github.com/daytonaio/daytona/config"
 
 	view "github.com/daytonaio/daytona/cmd/views/profile_create_wizard"
