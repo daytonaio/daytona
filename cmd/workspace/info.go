@@ -61,6 +61,7 @@ var InfoCmd = &cobra.Command{
 		}
 
 		view.Render(response)
+
 		output.Output = response
 	},
 }

@@ -51,7 +51,11 @@ var CreateCmd = &cobra.Command{
 			}
 
 			repos = []string{} // Ignore repo flags if prompting
-			workspaceName, repos = wizard_view.GetCreationDataFromPrompt(workspaceNames)
+			workspaceName, repos, err = wizard_view.GetCreationDataFromPrompt(workspaceNames)
+			if err != nil {
+				log.Fatal(err)
+				return
+			}
 		} else {
 			validatedWorkspaceName, err := util.GetValidatedWorkspaceName(args[0])
 			if err != nil {
