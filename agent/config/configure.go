@@ -18,14 +18,20 @@ func Configure() error {
 	if err != nil {
 		return err
 	}
+	defaultPluginsDir, err := getDefaultPluginsDir()
+	if err != nil {
+		return err
+	}
 
 	projectBaseImage := defaultProjectBaseImage
 	defaultWorkspaceDirInput := defaultWorkspaceDir
+	pluginsDirInput := defaultPluginsDir
 
 	existingConfig, err := GetConfig()
 	if err == nil && existingConfig != nil {
 		projectBaseImage = existingConfig.ProjectBaseImage
 		defaultWorkspaceDirInput = existingConfig.DefaultWorkspaceDir
+		pluginsDirInput = existingConfig.PluginsDir
 	}
 
 	if projectBaseImage == "" {
@@ -36,6 +42,10 @@ func Configure() error {
 		defaultWorkspaceDirInput = defaultWorkspaceDir
 	}
 
+	if pluginsDirInput == "" {
+		pluginsDirInput = defaultPluginsDir
+	}
+
 	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().
@@ -44,6 +54,17 @@ func Configure() error {
 			huh.NewInput().
 				Title("Default Workspace Directory").
 				Value(&defaultWorkspaceDirInput).
+				Validate(func(s string) error {
+					_, err := os.Stat(s)
+					if os.IsNotExist(err) {
+						return os.MkdirAll(s, 0700)
+					}
+
+					return err
+				}),
+			huh.NewInput().
+				Title("Plugins Directory").
+				Value(&pluginsDirInput).
 				Validate(func(s string) error {
 					_, err := os.Stat(s)
 					if os.IsNotExist(err) {
@@ -63,6 +84,7 @@ func Configure() error {
 	c := Config{
 		ProjectBaseImage:    projectBaseImage,
 		DefaultWorkspaceDir: defaultWorkspaceDirInput,
+		PluginsDir:          pluginsDirInput,
 	}
 
 	return c.Save()

@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"path"
 
 	"github.com/daytonaio/daytona/agent/config"
 	agent_grpc "github.com/daytonaio/daytona/agent/grpc/agent"
@@ -14,6 +15,7 @@ import (
 	workspace_grpc "github.com/daytonaio/daytona/agent/grpc/workspace"
 	"github.com/daytonaio/daytona/agent/ssh_gateway"
 	proto "github.com/daytonaio/daytona/grpc/proto"
+	project_agent_manager "github.com/daytonaio/daytona/plugin/project_agent/manager"
 	provisioner_manager "github.com/daytonaio/daytona/plugin/provisioner/manager"
 
 	"google.golang.org/grpc"
@@ -29,7 +31,12 @@ type Self struct {
 func Start() error {
 	log.Info("Starting Daytona agent")
 
-	_, err := config.GetWorkspaceKey()
+	c, err := config.GetConfig()
+	if err != nil {
+		return err
+	}
+
+	_, err = config.GetWorkspaceKey()
 	if os.IsNotExist(err) {
 		log.Info("Generating workspace key")
 		err = config.GenerateWorkspaceKey()
@@ -54,7 +61,14 @@ func Start() error {
 	agentServer := &agent_grpc.AgentServer{}
 	proto.RegisterAgentServer(s, agentServer)
 
-	provisioner_manager.RegisterProvisioner("/workspaces/daytona/tmp/docker-provisioner")
+	err = registerProvisioners(c)
+	if err != nil {
+		return err
+	}
+	err = registerProjectAgents(c)
+	if err != nil {
+		return err
+	}
 
 	log.Infof("Daytona agent started %v", (*lis).Addr())
 
@@ -108,4 +122,48 @@ func getUnixListener() (*net.Listener, error) {
 		return nil, err
 	}
 	return &lis, nil
+}
+
+func registerProvisioners(c *config.Config) error {
+	provisionerPluginsPath := path.Join(c.PluginsDir, "provisioners")
+
+	files, err := os.ReadDir(provisionerPluginsPath)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		if !file.IsDir() {
+			err := provisioner_manager.RegisterProvisioner(path.Join(provisionerPluginsPath, file.Name()))
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func registerProjectAgents(c *config.Config) error {
+	projectAgentPluginsPath := path.Join(c.PluginsDir, "project_agents")
+
+	files, err := os.ReadDir(projectAgentPluginsPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+
+		return err
+	}
+
+	for _, file := range files {
+		if !file.IsDir() {
+			err := project_agent_manager.RegisterProjectAgent(path.Join(projectAgentPluginsPath, file.Name()))
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
