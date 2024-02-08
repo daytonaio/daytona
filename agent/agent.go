@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path"
 
 	"github.com/daytonaio/daytona/agent/config"
@@ -17,6 +18,7 @@ import (
 	proto "github.com/daytonaio/daytona/grpc/proto"
 	project_agent_manager "github.com/daytonaio/daytona/plugin/project_agent/manager"
 	provisioner_manager "github.com/daytonaio/daytona/plugin/provisioner/manager"
+	"github.com/hashicorp/go-plugin"
 
 	"google.golang.org/grpc"
 
@@ -75,6 +77,17 @@ func Start() error {
 	go func() {
 		if err := ssh_gateway.Start(); err != nil {
 			log.Error(err)
+		}
+	}()
+
+	go func() {
+		interruptChannel := make(chan os.Signal, 1)
+		signal.Notify(interruptChannel, os.Interrupt)
+
+		for range interruptChannel {
+			log.Info("Shutting down")
+			plugin.CleanupClients()
+			os.Exit(0)
 		}
 	}()
 

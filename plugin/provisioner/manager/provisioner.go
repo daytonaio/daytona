@@ -78,10 +78,9 @@ func RegisterProvisioner(pluginPath string) error {
 		Plugins:          pluginMap,
 		Cmd:              exec.Command(pluginPath),
 		Logger:           logger,
+		Managed:          true,
 		AllowedProtocols: []plugin.Protocol{plugin.ProtocolGRPC},
 	})
-	// TODO: create a cleanup or delete function that will kill the client
-	// defer client.Kill()
 
 	provisionerClients[pluginName] = client
 
