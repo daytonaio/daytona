@@ -146,8 +146,13 @@ func registerProvisioners(c *config.Config) error {
 	}
 
 	for _, file := range files {
-		if !file.IsDir() {
-			err := provisioner_manager.RegisterProvisioner(path.Join(provisionerPluginsPath, file.Name()))
+		if file.IsDir() {
+			pluginPath, err := getPluginPath(path.Join(provisionerPluginsPath, file.Name()))
+			if err != nil {
+				return err
+			}
+
+			err = provisioner_manager.RegisterProvisioner(pluginPath)
 			if err != nil {
 				return err
 			}
@@ -170,8 +175,13 @@ func registerProjectAgents(c *config.Config) error {
 	}
 
 	for _, file := range files {
-		if !file.IsDir() {
-			err := project_agent_manager.RegisterProjectAgent(path.Join(projectAgentPluginsPath, file.Name()))
+		if file.IsDir() {
+			pluginPath, err := getPluginPath(path.Join(projectAgentPluginsPath, file.Name()))
+			if err != nil {
+				return err
+			}
+
+			err = project_agent_manager.RegisterProjectAgent(pluginPath)
 			if err != nil {
 				return err
 			}
@@ -179,4 +189,19 @@ func registerProjectAgents(c *config.Config) error {
 	}
 
 	return nil
+}
+
+func getPluginPath(dir string) (string, error) {
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return "", err
+	}
+
+	for _, file := range files {
+		if !file.IsDir() {
+			return path.Join(dir, file.Name()), nil
+		}
+	}
+
+	return "", nil
 }
