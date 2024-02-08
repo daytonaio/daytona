@@ -92,7 +92,7 @@ func (c *portsClient) StopAllWorkspacePortForwards(ctx context.Context, in *Stop
 }
 
 // PortsServer is the server API for Ports service.
-// All implementations must embed UnimplementedPortsServer
+// All implementations should embed UnimplementedPortsServer
 // for forward compatibility
 type PortsServer interface {
 	ForwardPort(context.Context, *ForwardPortRequest) (*PortForward, error)
@@ -100,10 +100,9 @@ type PortsServer interface {
 	GetProjectPortForwards(context.Context, *GetProjectPortForwardsRequest) (*ProjectPortForwards, error)
 	StopPortForward(context.Context, *StopPortForwardRequest) (*empty.Empty, error)
 	StopAllWorkspacePortForwards(context.Context, *StopAllWorkspacePortForwardsRequest) (*empty.Empty, error)
-	mustEmbedUnimplementedPortsServer()
 }
 
-// UnimplementedPortsServer must be embedded to have forward compatible implementations.
+// UnimplementedPortsServer should be embedded to have forward compatible implementations.
 type UnimplementedPortsServer struct {
 }
 
@@ -122,7 +121,6 @@ func (UnimplementedPortsServer) StopPortForward(context.Context, *StopPortForwar
 func (UnimplementedPortsServer) StopAllWorkspacePortForwards(context.Context, *StopAllWorkspacePortForwardsRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StopAllWorkspacePortForwards not implemented")
 }
-func (UnimplementedPortsServer) mustEmbedUnimplementedPortsServer() {}
 
 // UnsafePortsServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to PortsServer will

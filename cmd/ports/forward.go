@@ -72,9 +72,9 @@ var portForwardCmd = &cobra.Command{
 				select {
 				case <-c:
 					stopPortForwardRequest := &proto.StopPortForwardRequest{
-						WorkspaceName: args[0],
-						Project:       projectName,
-						Port:          uint32(portArg),
+						WorkspaceId: args[0],
+						Project:     projectName,
+						Port:        uint32(portArg),
 					}
 
 					_, err = proto.NewPortsClient(conn).StopPortForward(context.Background(), stopPortForwardRequest)
@@ -105,9 +105,9 @@ func ForwardPort(conn *grpc.ClientConn, activeProfile config.Profile, workspaceN
 	client := proto.NewPortsClient(conn)
 
 	forwardPortRequest := &proto.ForwardPortRequest{
-		WorkspaceName: workspaceName,
-		Project:       projectName,
-		Port:          port,
+		WorkspaceId: workspaceName,
+		Project:     projectName,
+		Port:        port,
 	}
 
 	errChan := make(chan error)

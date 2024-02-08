@@ -14,12 +14,12 @@ import (
 	"google.golang.org/grpc"
 )
 
-func GetFirstWorkspaceProjectName(conn *grpc.ClientConn, workspaceName string, projectName string) (string, error) {
+func GetFirstWorkspaceProjectName(conn *grpc.ClientConn, workspaceId string, projectName string) (string, error) {
 	ctx := context.Background()
 
-	client := proto.NewWorkspaceClient(conn)
+	client := proto.NewWorkspaceServiceClient(conn)
 	workspaceInfoRequest := &proto.WorkspaceInfoRequest{
-		Name: workspaceName,
+		Id: workspaceId,
 	}
 
 	response, err := client.Info(ctx, workspaceInfoRequest)
@@ -58,7 +58,7 @@ func GetValidatedWorkspaceName(input string) (string, error) {
 	}
 
 	if !matched {
-		return "", fmt.Errorf("Only letters, numbers, and dashes are allowed.")
+		return "", fmt.Errorf("only letters, numbers, and dashes are allowed")
 	}
 
 	return input, nil
@@ -74,13 +74,13 @@ func GetValidatedUrl(input string) (string, error) {
 	// Try to parse the input as a URL
 	parsedURL, err := url.Parse(input)
 	if err != nil {
-		return "", fmt.Errorf("Input is not a valid URL")
+		return "", fmt.Errorf("input is not a valid URL")
 	}
 
 	// Validate the URL's host (domain) has a proper extension
 	host := parsedURL.Host
 	if !isValidTLD(host) {
-		return "", fmt.Errorf("The URL does not have a valid TLD.")
+		return "", fmt.Errorf("the URL does not have a valid TLD")
 	}
 
 	// If parsing was successful, return the fixed URL

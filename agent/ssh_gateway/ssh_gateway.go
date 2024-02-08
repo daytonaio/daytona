@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/agent/config"
-	"github.com/daytonaio/daytona/agent/workspace"
 
 	gateway "github.com/daytonaio/ssh-gateway"
 	"golang.org/x/crypto/ssh"
@@ -35,32 +34,34 @@ func Start() error {
 					return nil, errors.New("invalid project container name")
 				}
 
-				workspaceName := splited[0]
-				projectName := splited[1]
+				// TODO: Implement
+				// workspaceName := splited[0]
+				// projectName := splited[1]
 
-				w, err := workspace.LoadFromDB(workspaceName)
-				if err != nil {
-					return nil, err
-				}
+				// w, err := workspace.FindWorkspace(workspaceName)
+				// if err != nil {
+				// 	return nil, err
+				// }
 
-				project, err := w.GetProject(projectName)
-				if err != nil {
-					return nil, err
-				}
+				// project, err := w.GetProject(projectName)
+				// if err != nil {
+				// 	return nil, err
+				// }
 
-				containerInfo, err := project.GetContainerInfo()
-				if err != nil {
-					return nil, err
-				}
+				// containerInfo, err := project.GetContainerInfo()
+				// if err != nil {
+				// 	return nil, err
+				// }
+				containerIp := "1.1.1.1"
 
-				_, err = net.DialTimeout("tcp", net.JoinHostPort(containerInfo.IP, "22"), time.Second)
+				_, err = net.DialTimeout("tcp", net.JoinHostPort(containerIp, "22"), time.Second)
 				if err != nil {
 					return nil, errors.New("can not connect to project container")
 				}
 
 				return &gateway.DestSshServer{
 					Network: "tcp",
-					Address: net.JoinHostPort(containerInfo.IP, "22"),
+					Address: net.JoinHostPort(containerIp, "22"),
 					Config: &ssh.ClientConfig{
 						User: "daytona",
 						Auth: []ssh.AuthMethod{
