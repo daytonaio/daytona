@@ -6,31 +6,30 @@ package ports_grpc
 import (
 	"context"
 
-	"github.com/daytonaio/daytona/agent/port_manager"
-	"github.com/daytonaio/daytona/agent/workspace"
 	daytona_proto "github.com/daytonaio/daytona/grpc/proto"
 )
 
 func (p *PortsServer) ForwardPort(ctx context.Context, request *daytona_proto.ForwardPortRequest) (*daytona_proto.PortForward, error) {
-	w, err := workspace.LoadFromDB(request.WorkspaceName)
-	if err != nil {
-		return nil, err
-	}
+	panic("not implemented")
+	// w, err := workspace.FindWorkspace(request.WorkspaceName)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	project, err := w.GetProject(request.Project)
-	if err != nil {
-		return nil, err
-	}
+	// project, err := w.GetProject(request.Project)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	containerName := project.GetContainerName()
+	// containerName := project.GetContainerName()
 
-	portForward, err := port_manager.ForwardPort(w.Name, containerName, port_manager.ContainerPort(request.Port))
-	if err != nil {
-		return nil, err
-	}
+	// portForward, err := port_manager.ForwardPort(w.Name, containerName, port_manager.ContainerPort(request.Port))
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	return &daytona_proto.PortForward{
-		ContainerPort: uint32(portForward.ContainerPort),
-		HostPort:      uint32(portForward.HostPort),
-	}, nil
+	// return &daytona_proto.PortForward{
+	// 	ContainerPort: uint32(portForward.ContainerPort),
+	// 	HostPort:      uint32(portForward.HostPort),
+	// }, nil
 }

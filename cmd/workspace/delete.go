@@ -46,7 +46,7 @@ var DeleteCmd = &cobra.Command{
 		}
 		defer conn.Close()
 
-		client := workspace_proto.NewWorkspaceClient(conn)
+		client := workspace_proto.NewWorkspaceServiceClient(conn)
 
 		if len(args) == 0 {
 			workspaceList, err := client.List(ctx, &empty.Empty{})
@@ -65,8 +65,7 @@ var DeleteCmd = &cobra.Command{
 		}
 
 		removeWorkspaceRequest := &workspace_proto.WorkspaceRemoveRequest{
-			Name:  workspaceName,
-			Force: force,
+			Id: workspaceName,
 		}
 		_, err = client.Remove(ctx, removeWorkspaceRequest)
 		if err != nil {
@@ -80,5 +79,5 @@ var DeleteCmd = &cobra.Command{
 }
 
 func init() {
-	DeleteCmd.PersistentFlags().BoolVarP(&force, "force", "f", false, "Force the workspace removal")
+	// DeleteCmd.PersistentFlags().BoolVarP(&force, "force", "f", false, "Force the workspace removal")
 }

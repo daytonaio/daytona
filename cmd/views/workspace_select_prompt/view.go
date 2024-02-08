@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/daytonaio/daytona/cmd/views"
-	workspace_proto "github.com/daytonaio/daytona/grpc/proto"
+	"github.com/daytonaio/daytona/grpc/proto/types"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -66,7 +66,7 @@ func (m model) View() string {
 	return docStyle.Render(m.list.View())
 }
 
-func SelectWorkspacePrompt(workspaces []*workspace_proto.WorkspaceInfoResponse, actionVerb string, choiceChan chan<- string) {
+func SelectWorkspacePrompt(workspaces []*types.WorkspaceInfo, actionVerb string, choiceChan chan<- string) {
 
 	// Initialize an empty list of items.
 	items := []list.Item{}
@@ -118,7 +118,7 @@ func SelectWorkspacePrompt(workspaces []*workspace_proto.WorkspaceInfoResponse, 
 	}
 }
 
-func GetWorkspaceNameFromPrompt(workspaces []*workspace_proto.WorkspaceInfoResponse, actionVerb string) string {
+func GetWorkspaceNameFromPrompt(workspaces []*types.WorkspaceInfo, actionVerb string) string {
 	choseWorkspaceName := ""
 	choiceChan := make(chan string)
 

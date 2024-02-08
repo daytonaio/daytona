@@ -6,84 +6,34 @@ package workspace_grpc
 import (
 	"context"
 
-	"github.com/daytonaio/daytona/agent/workspace"
-	"github.com/daytonaio/daytona/credentials"
-	"github.com/daytonaio/daytona/extensions/ssh"
-	"github.com/daytonaio/daytona/extensions/vsc_server"
+	"github.com/daytonaio/daytona/agent/db"
+	"github.com/daytonaio/daytona/agent/provisioner"
 	daytona_proto "github.com/daytonaio/daytona/grpc/proto"
+	"github.com/daytonaio/daytona/grpc/proto/types"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	log "github.com/sirupsen/logrus"
 )
 
 func (m *WorkspaceServer) List(ctx context.Context, request *empty.Empty) (*daytona_proto.WorkspaceListResponse, error) {
-	workspaces, err := workspace.ListFromDB()
+	workspaces, err := db.ListWorkspaces()
 	if err != nil {
 		return nil, err
 	}
 
-	response := []*daytona_proto.WorkspaceInfoResponse{}
+	workspaceInfos := []*types.WorkspaceInfo{}
 
-	for i, _ := range workspaces {
-		w, err := workspace.LoadFromDB(workspaces[i].Name)
-		if err != nil {
-			return nil, err
-		}
-
-		credClient := &credentials.CredentialsClient{}
-
-		extensions := []workspace.Extension{}
-
-		vsc_server := vsc_server.VscServerExtension{}
-		extensions = append(extensions, vsc_server)
-
-		ssh := ssh.SshExtension{}
-		extensions = append(extensions, ssh)
-
-		w.Credentials = credClient
-		w.Extensions = extensions
-
-		log.Debug(w)
-
-		workspaceInfo, err := w.Info()
+	for _, workspace := range workspaces {
+		workspaceInfo, err := provisioner.GetWorkspaceInfo(workspace)
 		if err != nil {
 			log.Error(err)
 			return nil, err
 		}
 
-		projectInfos := []*daytona_proto.WorkspaceProjectInfo{}
-
-		for _, projectInfo := range workspaceInfo.Projects {
-			extensionInfos := []*daytona_proto.WorkspaceProjectExtensionInfo{}
-
-			for _, extensionInfo := range projectInfo.Extensions {
-				extensionInfos = append(extensionInfos, &daytona_proto.WorkspaceProjectExtensionInfo{
-					Name: extensionInfo.Name,
-					Info: extensionInfo.Info,
-				})
-			}
-
-			running := false
-			if projectInfo.ContainerInfo != nil {
-				running = projectInfo.ContainerInfo.IsRunning
-			}
-
-			projectInfos = append(projectInfos, &daytona_proto.WorkspaceProjectInfo{
-				Name:       projectInfo.Name,
-				Available:  projectInfo.Available,
-				Running:    running,
-				Extensions: extensionInfos,
-			})
-		}
-
-		response = append(response, &daytona_proto.WorkspaceInfoResponse{
-			Name:     workspaceInfo.Name,
-			Cwd:      workspaceInfo.Cwd,
-			Projects: projectInfos,
-		})
+		workspaceInfos = append(workspaceInfos, workspaceInfo)
 	}
 
 	return &daytona_proto.WorkspaceListResponse{
-		Workspaces: response,
+		Workspaces: workspaceInfos,
 	}, nil
 }

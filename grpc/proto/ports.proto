@@ -3,7 +3,7 @@ option go_package = "./proto";
 import "google/protobuf/empty.proto";
 
 message ForwardPortRequest {
-    string workspaceName = 1;
+    string workspaceId = 1;
     string project = 2;
     uint32 port = 3;
 }
@@ -19,27 +19,27 @@ message ProjectPortForwards {
 }
 
 message WorkspacePortForward {
-    string workspaceName = 1;
+    string workspaceId = 1;
     map<string, ProjectPortForwards> projectPortForwards = 2;
 }
 
 message GetPortForwardsRequest {
-    string workspaceName = 1;
+    string workspaceId = 1;
 }
 
 message GetProjectPortForwardsRequest {
-    string workspaceName = 1;
+    string workspaceId = 1;
     string project = 2;
 }
 
 message StopPortForwardRequest {
-    string workspaceName = 1;
+    string workspaceId = 1;
     string project = 2;
     uint32 port = 3;
 }
 
 message StopAllWorkspacePortForwardsRequest {
-    string workspaceName = 1;
+    string workspaceId = 1;
 }
 
 service Ports {

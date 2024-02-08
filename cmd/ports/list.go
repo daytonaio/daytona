@@ -50,7 +50,7 @@ func listPortForwards(conn *grpc.ClientConn, workspaceName string, projectName s
 
 	client := proto.NewPortsClient(conn)
 	getPortForwardsRequest := &proto.GetPortForwardsRequest{
-		WorkspaceName: workspaceName,
+		WorkspaceId: workspaceName,
 	}
 
 	response, err := client.GetPortForwards(ctx, getPortForwardsRequest)
@@ -102,8 +102,8 @@ func GetProjectPortForwards(conn *grpc.ClientConn, workspaceName string, project
 
 	client := proto.NewPortsClient(conn)
 	getPortForwardsRequest := &proto.GetProjectPortForwardsRequest{
-		WorkspaceName: workspaceName,
-		Project:       projectName,
+		WorkspaceId: workspaceName,
+		Project:     projectName,
 	}
 
 	response, err := client.GetProjectPortForwards(ctx, getPortForwardsRequest)

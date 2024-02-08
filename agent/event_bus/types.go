@@ -11,17 +11,18 @@ type WorkspaceEventPayload struct {
 }
 
 const (
-	WorkspaceEventCreatingNetwork     EventName = "creating-network"
-	WorkspaceEventNetworkCreated      EventName = "network-created"
-	WorkspaceEventProjectInitializing EventName = "initializing-project"
-	WorkspaceEventProjectInitialized  EventName = "project-initialized"
-	WorkspaceEventCreating            EventName = "creating"
-	WorkspaceEventStarting            EventName = "starting"
-	WorkspaceEventStarted             EventName = "started"
-	WorkspaceEventStopping            EventName = "stopping"
-	WorkspaceEventStopped             EventName = "stopped"
-	WorkspaceEventRemoving            EventName = "removing"
-	WorkspaceEventRemoved             EventName = "removed"
+	WorkspaceEventCreatingNetwork EventName = "creating-network"
+	WorkspaceEventNetworkCreated  EventName = "network-created"
+	WorkspaceEventProjectCreating EventName = "project-creating"
+	WorkspaceEventProjectCreated  EventName = "project-created"
+	WorkspaceEventCreating        EventName = "creating"
+	WorkspaceEventCreated         EventName = "created"
+	WorkspaceEventStarting        EventName = "starting"
+	WorkspaceEventStarted         EventName = "started"
+	WorkspaceEventStopping        EventName = "stopping"
+	WorkspaceEventStopped         EventName = "stopped"
+	WorkspaceEventRemoving        EventName = "removing"
+	WorkspaceEventRemoved         EventName = "removed"
 )
 
 type ProjectEventPayload struct {

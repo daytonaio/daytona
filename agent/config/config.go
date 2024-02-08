@@ -12,6 +12,7 @@ import (
 type Config struct {
 	DefaultWorkspaceDir string `json:"defaultWorkspaceDir"`
 	ProjectBaseImage    string `json:"projectBaseImage"`
+	PluginsDir          string `json:"pluginsDir"`
 }
 
 func GetConfig() (*Config, error) {
@@ -26,10 +27,15 @@ func GetConfig() (*Config, error) {
 		if err != nil {
 			return nil, err
 		}
+		pluginsDir, err := getDefaultPluginsDir()
+		if err != nil {
+			return nil, err
+		}
 
 		return &Config{
 			DefaultWorkspaceDir: defaultWorkspaceDir,
 			ProjectBaseImage:    defaultProjectBaseImage,
+			PluginsDir:          pluginsDir,
 		}, nil
 	}
 
@@ -106,4 +112,13 @@ func getDefaultWorkspaceDir() (string, error) {
 	}
 
 	return defaultWorkspaceDir, nil
+}
+
+func getDefaultPluginsDir() (string, error) {
+	userConfigDir, err := os.UserConfigDir()
+	if err != nil {
+		return "", err
+	}
+
+	return path.Join(userConfigDir, "daytona", "plugins"), nil
 }
