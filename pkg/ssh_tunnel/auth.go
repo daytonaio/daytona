@@ -11,7 +11,7 @@ import (
 	"os/user"
 
 	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/server"
+	"golang.org/x/crypto/ssh/agent"
 )
 
 var defaultSSHKeys = []string{"id_rsa", "id_dsa", "id_ecdsa", "id_ecdsa_sk", "id_ed25519", "id_ed25519_sk"}
@@ -137,7 +137,7 @@ func (tun *SshTunnel) getSSHAuthMethodForSSHServer() (ssh.AuthMethod, error) {
 		return nil, fmt.Errorf("opening unix socket: %w", err)
 	}
 
-	serverClient := server.NewClient(conn)
+	serverClient := agent.NewClient(conn)
 
 	signers, err := serverClient.Signers()
 	if err != nil {
