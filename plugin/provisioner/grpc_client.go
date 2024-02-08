@@ -12,6 +12,11 @@ type ProvisionerGrpcClient struct {
 	client proto.ProvisionerClient
 }
 
+func (m *ProvisionerGrpcClient) Initialize(req *proto.InitializeProvisionerRequest) error {
+	_, err := m.client.Initialize(context.Background(), req)
+	return err
+}
+
 func (m *ProvisionerGrpcClient) GetInfo() (*proto.ProvisionerInfo, error) {
 	return m.client.GetInfo(context.Background(), &empty.Empty{})
 }

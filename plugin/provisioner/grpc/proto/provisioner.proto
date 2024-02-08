@@ -9,11 +9,16 @@ message ProvisionerInfo {
   string version = 2;
 }
 
+message InitializeProvisionerRequest {
+  string basePath = 1;
+}
+
 message ConfigureResponse {
   google.protobuf.Struct config = 1;
 }
 
 service Provisioner {
+  rpc Initialize (InitializeProvisionerRequest) returns (google.protobuf.Empty) {}
   rpc GetInfo (google.protobuf.Empty) returns (ProvisionerInfo) {}
   rpc Configure (google.protobuf.Empty) returns (ConfigureResponse) {}
   

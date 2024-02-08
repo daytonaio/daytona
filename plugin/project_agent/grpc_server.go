@@ -12,6 +12,15 @@ type ProjectAgentGrpcServer struct {
 	Impl ProjectAgent
 }
 
+func (m *ProjectAgentGrpcServer) Initialize(ctx context.Context, req *proto.InitializeProjectAgentRequest) (*empty.Empty, error) {
+	err := m.Impl.Initialize(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &empty.Empty{}, nil
+}
+
 func (m *ProjectAgentGrpcServer) GetInfo(ctx context.Context, req *empty.Empty) (*proto.ProjectAgentInfo, error) {
 	return m.Impl.GetInfo()
 }

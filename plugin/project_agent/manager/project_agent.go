@@ -2,14 +2,15 @@ package project_agent_manager
 
 import (
 	"errors"
-	"log"
 	"os/exec"
 	"path"
 
 	. "github.com/daytonaio/daytona/plugin/project_agent"
+	"github.com/daytonaio/daytona/plugin/project_agent/grpc/proto"
 	"github.com/daytonaio/daytona/plugin/utils"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
+	log "github.com/sirupsen/logrus"
 )
 
 var projectAgentClients map[string]*plugin.Client = make(map[string]*plugin.Client)
@@ -59,8 +60,9 @@ func GetProjectAgents() map[string]ProjectAgent {
 	return projectAgents
 }
 
-func RegisterProjectAgent(pluginPath string) {
+func RegisterProjectAgent(pluginPath string) error {
 	pluginName := path.Base(pluginPath)
+	pluginBasePath := path.Dir(pluginPath)
 
 	logger := hclog.New(&hclog.LoggerOptions{
 		Name:   pluginName,
@@ -84,4 +86,22 @@ func RegisterProjectAgent(pluginPath string) {
 	projectAgentClients[pluginName] = client
 
 	log.Printf("Project Agent %s registered", pluginName)
+
+	log.Infof("Provisioner %s registered", pluginName)
+
+	projectAgent, err := GetProjectAgent(pluginName)
+	if err != nil {
+		return errors.New("failed to initialize provisioner: " + err.Error())
+	}
+
+	err = (*projectAgent).Initialize(&proto.InitializeProjectAgentRequest{
+		BasePath: pluginBasePath,
+	})
+	if err != nil {
+		return errors.New("failed to initialize provisioner: " + err.Error())
+	}
+
+	log.Infof("Provisioner %s initialized", pluginName)
+
+	return nil
 }

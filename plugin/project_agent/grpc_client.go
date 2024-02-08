@@ -10,6 +10,11 @@ import (
 
 type ProjectAgentGrpcClient struct{ client proto.ProjectAgentClient }
 
+func (m *ProjectAgentGrpcClient) Initialize(req *proto.InitializeProjectAgentRequest) error {
+	_, err := m.client.Initialize(context.Background(), req)
+	return err
+}
+
 func (m *ProjectAgentGrpcClient) GetInfo() (*proto.ProjectAgentInfo, error) {
 	return m.client.GetInfo(context.Background(), &empty.Empty{})
 }

@@ -15,6 +15,7 @@ type ProvisionerProfile struct {
 }
 
 type Provisioner interface {
+	Initialize(*proto.InitializeProvisionerRequest) error
 	GetInfo() (*proto.ProvisionerInfo, error)
 
 	//	client side profile config wizard

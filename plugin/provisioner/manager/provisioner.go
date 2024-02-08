@@ -6,6 +6,7 @@ import (
 	"path"
 
 	. "github.com/daytonaio/daytona/plugin/provisioner"
+	"github.com/daytonaio/daytona/plugin/provisioner/grpc/proto"
 	"github.com/daytonaio/daytona/plugin/utils"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
@@ -59,8 +60,9 @@ func GetProvisioners() map[string]Provisioner {
 	return provisioners
 }
 
-func RegisterProvisioner(pluginPath string) {
+func RegisterProvisioner(pluginPath string) error {
 	pluginName := path.Base(pluginPath)
+	pluginBasePath := path.Dir(pluginPath)
 
 	logger := hclog.New(&hclog.LoggerOptions{
 		Name:   pluginName,
@@ -83,5 +85,21 @@ func RegisterProvisioner(pluginPath string) {
 
 	provisionerClients[pluginName] = client
 
-	log.Printf("Provisioner %s registered", pluginName)
+	log.Infof("Provisioner %s registered", pluginName)
+
+	provisioner, err := GetProvisioner(pluginName)
+	if err != nil {
+		return errors.New("failed to initialize provisioner: " + err.Error())
+	}
+
+	err = (*provisioner).Initialize(&proto.InitializeProvisionerRequest{
+		BasePath: pluginBasePath,
+	})
+	if err != nil {
+		return errors.New("failed to initialize provisioner: " + err.Error())
+	}
+
+	log.Infof("Provisioner %s initialized", pluginName)
+
+	return nil
 }

@@ -13,6 +13,15 @@ type ProvisionerGrpcServer struct {
 	Impl Provisioner
 }
 
+func (m *ProvisionerGrpcServer) Initialize(ctx context.Context, req *proto.InitializeProvisionerRequest) (*empty.Empty, error) {
+	err := m.Impl.Initialize(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &empty.Empty{}, nil
+}
+
 func (m *ProvisionerGrpcServer) GetInfo(ctx context.Context, req *empty.Empty) (*proto.ProvisionerInfo, error) {
 	return m.Impl.GetInfo()
 }

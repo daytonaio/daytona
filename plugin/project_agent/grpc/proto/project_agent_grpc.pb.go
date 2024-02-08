@@ -21,6 +21,7 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
+	ProjectAgent_Initialize_FullMethodName           = "/ProjectAgent/Initialize"
 	ProjectAgent_GetInfo_FullMethodName              = "/ProjectAgent/GetInfo"
 	ProjectAgent_SetConfig_FullMethodName            = "/ProjectAgent/SetConfig"
 	ProjectAgent_ProjectPreInit_FullMethodName       = "/ProjectAgent/ProjectPreInit"
@@ -37,6 +38,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ProjectAgentClient interface {
+	Initialize(ctx context.Context, in *InitializeProjectAgentRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	GetInfo(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ProjectAgentInfo, error)
 	SetConfig(ctx context.Context, in *ProjectAgentConfig, opts ...grpc.CallOption) (*empty.Empty, error)
 	ProjectPreInit(ctx context.Context, in *types.Project, opts ...grpc.CallOption) (*empty.Empty, error)
@@ -55,6 +57,15 @@ type projectAgentClient struct {
 
 func NewProjectAgentClient(cc grpc.ClientConnInterface) ProjectAgentClient {
 	return &projectAgentClient{cc}
+}
+
+func (c *projectAgentClient) Initialize(ctx context.Context, in *InitializeProjectAgentRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, ProjectAgent_Initialize_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *projectAgentClient) GetInfo(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ProjectAgentInfo, error) {
@@ -151,6 +162,7 @@ func (c *projectAgentClient) LivenessProbeTimeout(ctx context.Context, in *empty
 // All implementations should embed UnimplementedProjectAgentServer
 // for forward compatibility
 type ProjectAgentServer interface {
+	Initialize(context.Context, *InitializeProjectAgentRequest) (*empty.Empty, error)
 	GetInfo(context.Context, *empty.Empty) (*ProjectAgentInfo, error)
 	SetConfig(context.Context, *ProjectAgentConfig) (*empty.Empty, error)
 	ProjectPreInit(context.Context, *types.Project) (*empty.Empty, error)
@@ -167,6 +179,9 @@ type ProjectAgentServer interface {
 type UnimplementedProjectAgentServer struct {
 }
 
+func (UnimplementedProjectAgentServer) Initialize(context.Context, *InitializeProjectAgentRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Initialize not implemented")
+}
 func (UnimplementedProjectAgentServer) GetInfo(context.Context, *empty.Empty) (*ProjectAgentInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetInfo not implemented")
 }
@@ -207,6 +222,24 @@ type UnsafeProjectAgentServer interface {
 
 func RegisterProjectAgentServer(s grpc.ServiceRegistrar, srv ProjectAgentServer) {
 	s.RegisterService(&ProjectAgent_ServiceDesc, srv)
+}
+
+func _ProjectAgent_Initialize_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InitializeProjectAgentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectAgentServer).Initialize(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProjectAgent_Initialize_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectAgentServer).Initialize(ctx, req.(*InitializeProjectAgentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _ProjectAgent_GetInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -396,6 +429,10 @@ var ProjectAgent_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "ProjectAgent",
 	HandlerType: (*ProjectAgentServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Initialize",
+			Handler:    _ProjectAgent_Initialize_Handler,
+		},
 		{
 			MethodName: "GetInfo",
 			Handler:    _ProjectAgent_GetInfo_Handler,

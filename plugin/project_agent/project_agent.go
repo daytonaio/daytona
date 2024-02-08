@@ -11,6 +11,7 @@ import (
 )
 
 type ProjectAgent interface {
+	Initialize(*proto.InitializeProjectAgentRequest) error
 	GetInfo() (*proto.ProjectAgentInfo, error)
 	SetConfig(config *proto.ProjectAgentConfig) error
 	ProjectPreInit(project *types.Project) error

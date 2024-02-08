@@ -8,6 +8,10 @@ message ProjectAgentInfo {
   string version = 2;
 }
 
+message InitializeProjectAgentRequest {
+  string basePath = 1;
+}
+
 message ProjectAgentConfig {
   string setupPath = 1;
   map<string, string> envVars = 2;
@@ -18,6 +22,7 @@ message LivenessProbeTimeoutResponse {
 }
 
 service ProjectAgent {
+  rpc Initialize (InitializeProjectAgentRequest) returns (google.protobuf.Empty) {}
   rpc GetInfo (google.protobuf.Empty) returns (ProjectAgentInfo) {}
   rpc SetConfig(ProjectAgentConfig) returns (google.protobuf.Empty) {}
 

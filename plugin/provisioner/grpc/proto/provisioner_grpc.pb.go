@@ -21,6 +21,7 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
+	Provisioner_Initialize_FullMethodName       = "/Provisioner/Initialize"
 	Provisioner_GetInfo_FullMethodName          = "/Provisioner/GetInfo"
 	Provisioner_Configure_FullMethodName        = "/Provisioner/Configure"
 	Provisioner_CreateWorkspace_FullMethodName  = "/Provisioner/CreateWorkspace"
@@ -39,6 +40,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ProvisionerClient interface {
+	Initialize(ctx context.Context, in *InitializeProvisionerRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	GetInfo(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ProvisionerInfo, error)
 	Configure(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ConfigureResponse, error)
 	CreateWorkspace(ctx context.Context, in *types.Workspace, opts ...grpc.CallOption) (*empty.Empty, error)
@@ -59,6 +61,15 @@ type provisionerClient struct {
 
 func NewProvisionerClient(cc grpc.ClientConnInterface) ProvisionerClient {
 	return &provisionerClient{cc}
+}
+
+func (c *provisionerClient) Initialize(ctx context.Context, in *InitializeProvisionerRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, Provisioner_Initialize_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *provisionerClient) GetInfo(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ProvisionerInfo, error) {
@@ -173,6 +184,7 @@ func (c *provisionerClient) GetProjectInfo(ctx context.Context, in *types.Projec
 // All implementations should embed UnimplementedProvisionerServer
 // for forward compatibility
 type ProvisionerServer interface {
+	Initialize(context.Context, *InitializeProvisionerRequest) (*empty.Empty, error)
 	GetInfo(context.Context, *empty.Empty) (*ProvisionerInfo, error)
 	Configure(context.Context, *empty.Empty) (*ConfigureResponse, error)
 	CreateWorkspace(context.Context, *types.Workspace) (*empty.Empty, error)
@@ -191,6 +203,9 @@ type ProvisionerServer interface {
 type UnimplementedProvisionerServer struct {
 }
 
+func (UnimplementedProvisionerServer) Initialize(context.Context, *InitializeProvisionerRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Initialize not implemented")
+}
 func (UnimplementedProvisionerServer) GetInfo(context.Context, *empty.Empty) (*ProvisionerInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetInfo not implemented")
 }
@@ -237,6 +252,24 @@ type UnsafeProvisionerServer interface {
 
 func RegisterProvisionerServer(s grpc.ServiceRegistrar, srv ProvisionerServer) {
 	s.RegisterService(&Provisioner_ServiceDesc, srv)
+}
+
+func _Provisioner_Initialize_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InitializeProvisionerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProvisionerServer).Initialize(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Provisioner_Initialize_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProvisionerServer).Initialize(ctx, req.(*InitializeProvisionerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Provisioner_GetInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -462,6 +495,10 @@ var Provisioner_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "Provisioner",
 	HandlerType: (*ProvisionerServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Initialize",
+			Handler:    _Provisioner_Initialize_Handler,
+		},
 		{
 			MethodName: "GetInfo",
 			Handler:    _Provisioner_GetInfo_Handler,
