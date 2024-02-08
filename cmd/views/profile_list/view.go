@@ -20,7 +20,7 @@ import (
 var NewProfileId = "+"
 
 var columns = []table.Column{
-	{Title: "Id", Width: 10},
+	{Title: "ID", Width: 10},
 	{Title: "Name", Width: 20},
 	{Title: "Active", Width: 10},
 	{Title: "Hostname", Width: 15},
@@ -38,10 +38,10 @@ type model struct {
 }
 
 func (m model) Init() tea.Cmd {
+
 	if !m.selectable {
 		return tea.Quit
 	}
-
 	return nil
 }
 
@@ -81,7 +81,7 @@ func (m model) View() string {
 	return baseStyle.Render(m.table.View())
 }
 
-func render(profileList []config.Profile, activeProfileId string, selectable bool) string {
+func renderProfileList(profileList []config.Profile, activeProfileId string, selectable bool) model {
 	rows := []table.Row{}
 	activeProfileRow := 0
 	for i, profile := range profileList {
@@ -112,12 +112,27 @@ func render(profileList []config.Profile, activeProfileId string, selectable boo
 
 	adjustedRows, adjustedCols := getRowsAndCols(width, rows)
 
-	modelInstance := model{
+	return model{
 		table:             getTable(adjustedRows, adjustedCols, selectable, activeProfileRow),
 		selectedProfileId: activeProfileId,
 		selectable:        selectable,
 		initialRows:       rows,
 	}
+}
+
+func GetProfileIdFromPrompt(profileList []config.Profile, activeProfileId, title string, withCreateOption bool) string {
+	fmt.Println("\n" + lipgloss.NewStyle().Foreground(views.Green).Bold(true).Render(title))
+
+	withNewProfile := profileList
+
+	if withCreateOption {
+		withNewProfile = append(withNewProfile, config.Profile{
+			Id:   NewProfileId,
+			Name: "Add new profile",
+		})
+	}
+
+	modelInstance := renderProfileList(withNewProfile, activeProfileId, true)
 
 	selectedProfileId := make(chan string)
 
@@ -136,27 +151,6 @@ func render(profileList []config.Profile, activeProfileId string, selectable boo
 	lipgloss.DefaultRenderer().Output().ClearLines(strings.Count(modelInstance.View(), "\n") + 2)
 
 	return profileId
-}
-
-func GetProfileIdFromPrompt(profileList []config.Profile, activeProfileId, title string, withCreateOption bool) string {
-	fmt.Println("\n" + lipgloss.NewStyle().Foreground(views.Green).Bold(true).Render(title))
-
-	withNewProfile := profileList
-
-	if withCreateOption {
-		withNewProfile = append(withNewProfile, config.Profile{
-			Id:   NewProfileId,
-			Name: "Add new profile",
-		})
-	}
-
-	return render(withNewProfile, activeProfileId, true)
-}
-
-func Render(profileList []config.Profile, activeProfileId string) {
-	fmt.Println("\n" + lipgloss.NewStyle().Foreground(views.Green).Bold(true).Render("Profiles"))
-
-	render(profileList, activeProfileId, false)
 }
 
 func getTable(rows []table.Row, cols []table.Column, selectable bool, activeRow int) table.Model {

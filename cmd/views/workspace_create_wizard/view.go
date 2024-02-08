@@ -6,8 +6,6 @@ package workspace_create_wizard
 import (
 	"errors"
 	"fmt"
-	"log"
-	"os"
 	"strconv"
 	"strings"
 	"unicode"
@@ -81,7 +79,7 @@ const (
 	WorkspaceNameForm
 )
 
-func InitialModel(workspaceCreationPromptResponseChan chan<- WorkspaceCreationPromptResponse) {
+func InitialModel() (WorkspaceCreationPromptResponse, error) {
 	m := Model{width: maxWidth, formStep: InitialForm}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
@@ -137,31 +135,55 @@ func InitialModel(workspaceCreationPromptResponseChan chan<- WorkspaceCreationPr
 		WithShowHelp(false).
 		WithShowErrors(true)
 
+	// err := m.form.Run()
+	// if err != nil {
+	// 	return WorkspaceCreationPromptResponse{}, err
+	// }
+
+	// secondaryProjectsCount, err := strconv.Atoi(secondaryProjectsCountString)
+	// if err != nil {
+	// 	return WorkspaceCreationPromptResponse{}, err
+	// }
+
+	// return WorkspaceCreationPromptResponse{
+	// 	PrimaryRepository:     primaryRepo,
+	// 	SecondaryProjectCount: secondaryProjectsCount,
+	// }, nil
+
 	p, err := tea.NewProgram(m).Run()
 	if err != nil {
-		fmt.Println("Error running program:", err)
-		os.Exit(1)
+		return WorkspaceCreationPromptResponse{}, err
 	}
+
+	model, ok := p.(Model)
+
+	if !ok {
+		return WorkspaceCreationPromptResponse{}, errors.New("error getting creation form")
+	}
+
+	if model.form.State == huh.StateAborted {
+		return WorkspaceCreationPromptResponse{}, errors.New("aborted")
+	}
+
+	fmt.Println(model.form.State)
 
 	secondaryProjectsCount, err := strconv.Atoi(secondaryProjectsCountString)
 	if err != nil {
-		secondaryProjectsCount = 0
+		return WorkspaceCreationPromptResponse{}, err
 	}
 
 	if _, ok := p.(Model); ok {
-		workspaceCreationPromptResponseChan <- WorkspaceCreationPromptResponse{
+		return WorkspaceCreationPromptResponse{
 			PrimaryRepository:     primaryRepo,
 			SecondaryProjectCount: secondaryProjectsCount,
-		}
-	} else {
-		workspaceCreationPromptResponseChan <- WorkspaceCreationPromptResponse{
-			PrimaryRepository:     "",
-			SecondaryProjectCount: 0,
-		}
+		}, nil
 	}
+
+	return WorkspaceCreationPromptResponse{}, errors.New("error getting creation form")
+
 }
 
-func SecondaryProjectsModel(workspaceCreationPromptResponse WorkspaceCreationPromptResponse, workspaceCreationPromptResponseChan chan<- WorkspaceCreationPromptResponse) {
+func SecondaryProjectsModel(workspaceCreationPromptResponse WorkspaceCreationPromptResponse) (WorkspaceCreationPromptResponse, error) {
 	m := Model{width: maxWidth, workspaceCreationPromptResponse: workspaceCreationPromptResponse, formStep: SecodaryProjectsForm}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
@@ -212,14 +234,13 @@ func SecondaryProjectsModel(workspaceCreationPromptResponse WorkspaceCreationPro
 
 	p, err := tea.NewProgram(m).Run()
 	if err != nil {
-		fmt.Println("Error running program:", err)
-		os.Exit(1)
+		return WorkspaceCreationPromptResponse{}, err
 	}
 
 	for i := 0; i < count; i++ {
 		secondaryRepoList[i], err = util.GetValidatedUrl(secondaryRepoList[i])
 		if err != nil {
-			log.Fatal("Invalid repository URL.", secondaryRepoList[i])
+			return WorkspaceCreationPromptResponse{}, err
 		}
 	}
 
@@ -227,13 +248,13 @@ func SecondaryProjectsModel(workspaceCreationPromptResponse WorkspaceCreationPro
 	result.SecondaryRepositories = secondaryRepoList
 
 	if _, ok := p.(Model); ok {
-		workspaceCreationPromptResponseChan <- result
-	} else {
-		log.Fatal("Error running program:", err)
+		return result, nil
 	}
+
+	return WorkspaceCreationPromptResponse{}, errors.New("error getting secondary projects")
 }
 
-func WorkspaceNameModel(workspaceCreationPromptResponse WorkspaceCreationPromptResponse, suggestedName string, workspaceNames []string, workspaceCreationPromptResponseChan chan<- WorkspaceCreationPromptResponse) {
+func WorkspaceNameModel(workspaceCreationPromptResponse WorkspaceCreationPromptResponse, suggestedName string, workspaceNames []string) (WorkspaceCreationPromptResponse, error) {
 	m := Model{width: maxWidth, workspaceCreationPromptResponse: workspaceCreationPromptResponse, formStep: WorkspaceNameForm}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
@@ -272,57 +293,55 @@ func WorkspaceNameModel(workspaceCreationPromptResponse WorkspaceCreationPromptR
 
 	p, err := tea.NewProgram(m).Run()
 	if err != nil {
-		fmt.Println("Error running program:", err)
-		os.Exit(1)
+		return WorkspaceCreationPromptResponse{}, err
 	}
 
 	result := workspaceCreationPromptResponse
 	result.WorkspaceName = workspaceName
 
 	if _, ok := p.(Model); ok {
-		workspaceCreationPromptResponseChan <- result
-	} else {
-		log.Fatal("Error running program:", err)
+		return result, nil
 	}
+
+	return WorkspaceCreationPromptResponse{}, errors.New("error getting workspace name")
 }
 
-func GetCreationDataFromPrompt(workspaceNames []string) (workspaceName string, projectRepositoryList []string) {
+func GetCreationDataFromPrompt(workspaceNames []string) (workspaceName string, projectRepositoryList []string, err error) {
 	var projectRepoList []string
 
-	responseChan := make(chan WorkspaceCreationPromptResponse)
-
-	go InitialModel(responseChan)
-
-	workspaceCreationPromptResponse := <-responseChan
+	workspaceCreationPromptResponse, err := InitialModel()
+	if err != nil {
+		return "", nil, err
+	}
 
 	if workspaceCreationPromptResponse.PrimaryRepository == "" {
-		return "", nil
+		return "", nil, errors.New("primary repository is required")
 	}
 
 	projectRepoList = []string{workspaceCreationPromptResponse.PrimaryRepository}
 
 	if workspaceCreationPromptResponse.SecondaryProjectCount > 0 {
 
-		responseChan = make(chan WorkspaceCreationPromptResponse)
-		go SecondaryProjectsModel(workspaceCreationPromptResponse, responseChan)
-
-		workspaceCreationPromptResponse = <-responseChan
+		workspaceCreationPromptResponse, err = SecondaryProjectsModel(workspaceCreationPromptResponse)
+		if err != nil {
+			return "", nil, err
+		}
 
 		projectRepoList = append(projectRepoList, workspaceCreationPromptResponse.SecondaryRepositories...)
 	}
 
-	responseChan = make(chan WorkspaceCreationPromptResponse)
 	suggestedName := getSuggestedWorkspaceName(workspaceCreationPromptResponse.PrimaryRepository)
 
-	go WorkspaceNameModel(workspaceCreationPromptResponse, suggestedName, workspaceNames, responseChan)
-
-	workspaceCreationPromptResponse = <-responseChan
-
-	if workspaceCreationPromptResponse.WorkspaceName == "" {
-		return "", nil
+	workspaceCreationPromptResponse, err = WorkspaceNameModel(workspaceCreationPromptResponse, suggestedName, workspaceNames)
+	if err != nil {
+		return "", nil, err
 	}
 
-	return workspaceCreationPromptResponse.WorkspaceName, projectRepoList
+	if workspaceCreationPromptResponse.WorkspaceName == "" {
+		return "", nil, errors.New("workspace name is required")
+	}
+
+	return workspaceCreationPromptResponse.WorkspaceName, projectRepoList, nil
 }
 
 func getSuggestedWorkspaceName(repo string) string {
@@ -366,6 +385,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "esc", "ctrl+c", "q":
+			m.form.Update(tea.Quit)
 			return m, tea.Quit
 		}
 	}

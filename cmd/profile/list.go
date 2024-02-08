@@ -4,8 +4,11 @@
 package cmd_profile
 
 import (
-	profile_list "github.com/daytonaio/daytona/cmd/views/profilie_list"
+	"fmt"
+
+	profile_list "github.com/daytonaio/daytona/cmd/views/profile_list"
 	"github.com/daytonaio/daytona/config"
+	"github.com/daytonaio/daytona/output"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -20,6 +23,26 @@ var profileListCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		profile_list.Render(c.Profiles, c.ActiveProfileId)
+		chosenProfileId := profile_list.GetProfileIdFromPrompt(c.Profiles, c.ActiveProfileId, "Profiles", false)
+
+		if chosenProfileId == "" {
+			return
+		}
+
+		chosenProfile, err := c.GetProfile(chosenProfileId)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		c.ActiveProfileId = chosenProfile.Id
+
+		err = c.Save()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Printf("\nActive profile set to: %s\n\n", chosenProfile.Name)
+
+		output.Output = c.Profiles
 	},
 }
