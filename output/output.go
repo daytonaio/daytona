@@ -11,6 +11,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+var FormatFlag string
 var Output interface{}
 
 type Formatter interface {

@@ -13,12 +13,12 @@ import (
 	"github.com/daytonaio/daytona/cmd/views"
 	"github.com/daytonaio/daytona/internal/util"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 )
 
 const maxWidth = 80
+const maximumSecondaryProjects = 8
 
 type Styles struct {
 	Base,
@@ -67,26 +67,16 @@ type Model struct {
 	styles                          *Styles
 	form                            *huh.Form
 	width                           int
-	formStep                        FormStep
 	workspaceCreationPromptResponse WorkspaceCreationPromptResponse
 }
 
-type FormStep int
-
-const (
-	InitialForm FormStep = iota
-	SecodaryProjectsForm
-	WorkspaceNameForm
-)
-
-func InitialModel() (WorkspaceCreationPromptResponse, error) {
-	m := Model{width: maxWidth, formStep: InitialForm}
+func runInitialForm() (WorkspaceCreationPromptResponse, error) {
+	m := Model{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
 
 	primaryRepo := ""
-
-	secondaryProjectsCheck := false
+	hasSecondaryProjectsCheck := false
 	secondaryProjectsCountString := ""
 
 	primaryRepoPrompt := huh.NewInput().
@@ -105,15 +95,18 @@ func InitialModel() (WorkspaceCreationPromptResponse, error) {
 	secondaryProjectsPrompt := huh.NewConfirm().
 		Key("secondaryProjectsPrompt").
 		Title("Add secondary projects?").
-		Value(&secondaryProjectsCheck)
+		Value(&hasSecondaryProjectsCheck)
 
 	secondaryProjectCountPrompt := huh.NewInput().
 		Title("How many secondary projects?").
 		Value(&secondaryProjectsCountString).
 		Validate(func(str string) error {
-			_, err := strconv.Atoi(str) // Try to convert the input string to an integer
+			count, err := strconv.Atoi(str) // Try to convert the input string to an integer
 			if err != nil {
-				return errors.New("Enter a valid number")
+				return errors.New("enter a valid number")
+			}
+			if count > maximumSecondaryProjects {
+				return errors.New("maximum 8 secondary projects allowed")
 			}
 			return nil
 		}).Value(&secondaryProjectsCountString)
@@ -128,63 +121,31 @@ func InitialModel() (WorkspaceCreationPromptResponse, error) {
 		huh.NewGroup(
 			secondaryProjectCountPrompt,
 		).WithHideFunc(func() bool {
-			return !secondaryProjectsCheck
+			return !hasSecondaryProjectsCheck
 		}),
 	).WithTheme(dTheme).
 		WithWidth(45).
 		WithShowHelp(false).
 		WithShowErrors(true)
 
-	// err := m.form.Run()
-	// if err != nil {
-	// 	return WorkspaceCreationPromptResponse{}, err
-	// }
-
-	// secondaryProjectsCount, err := strconv.Atoi(secondaryProjectsCountString)
-	// if err != nil {
-	// 	return WorkspaceCreationPromptResponse{}, err
-	// }
-
-	// return WorkspaceCreationPromptResponse{
-	// 	PrimaryRepository:     primaryRepo,
-	// 	SecondaryProjectCount: secondaryProjectsCount,
-	// }, nil
-
-	p, err := tea.NewProgram(m).Run()
+	err := m.form.Run()
 	if err != nil {
 		return WorkspaceCreationPromptResponse{}, err
 	}
-
-	model, ok := p.(Model)
-
-	if !ok {
-		return WorkspaceCreationPromptResponse{}, errors.New("error getting creation form")
-	}
-
-	if model.form.State == huh.StateAborted {
-		return WorkspaceCreationPromptResponse{}, errors.New("aborted")
-	}
-
-	fmt.Println(model.form.State)
 
 	secondaryProjectsCount, err := strconv.Atoi(secondaryProjectsCountString)
 	if err != nil {
-		return WorkspaceCreationPromptResponse{}, err
+		secondaryProjectsCount = 0
 	}
 
-	if _, ok := p.(Model); ok {
-		return WorkspaceCreationPromptResponse{
-			PrimaryRepository:     primaryRepo,
-			SecondaryProjectCount: secondaryProjectsCount,
-		}, nil
-	}
-
-	return WorkspaceCreationPromptResponse{}, errors.New("error getting creation form")
-
+	return WorkspaceCreationPromptResponse{
+		PrimaryRepository:     primaryRepo,
+		SecondaryProjectCount: secondaryProjectsCount,
+	}, nil
 }
 
-func SecondaryProjectsModel(workspaceCreationPromptResponse WorkspaceCreationPromptResponse) (WorkspaceCreationPromptResponse, error) {
-	m := Model{width: maxWidth, workspaceCreationPromptResponse: workspaceCreationPromptResponse, formStep: SecodaryProjectsForm}
+func runSecondaryProjectsForm(workspaceCreationPromptResponse WorkspaceCreationPromptResponse) (WorkspaceCreationPromptResponse, error) {
+	m := Model{width: maxWidth, workspaceCreationPromptResponse: workspaceCreationPromptResponse}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
 
@@ -215,7 +176,7 @@ func SecondaryProjectsModel(workspaceCreationPromptResponse WorkspaceCreationPro
 		Title("Good to go?").
 		Validate(func(v bool) error {
 			if !v {
-				return fmt.Errorf("Double-check and hit 'Yes'")
+				return fmt.Errorf("double-check and hit 'Yes'")
 			}
 			return nil
 		})
@@ -232,7 +193,7 @@ func SecondaryProjectsModel(workspaceCreationPromptResponse WorkspaceCreationPro
 		WithShowErrors(true).
 		WithTheme(views.GetCustomTheme())
 
-	p, err := tea.NewProgram(m).Run()
+	err := m.form.Run()
 	if err != nil {
 		return WorkspaceCreationPromptResponse{}, err
 	}
@@ -247,15 +208,11 @@ func SecondaryProjectsModel(workspaceCreationPromptResponse WorkspaceCreationPro
 	result := workspaceCreationPromptResponse
 	result.SecondaryRepositories = secondaryRepoList
 
-	if _, ok := p.(Model); ok {
-		return result, nil
-	}
-
-	return WorkspaceCreationPromptResponse{}, errors.New("error getting secondary projects")
+	return result, nil
 }
 
-func WorkspaceNameModel(workspaceCreationPromptResponse WorkspaceCreationPromptResponse, suggestedName string, workspaceNames []string) (WorkspaceCreationPromptResponse, error) {
-	m := Model{width: maxWidth, workspaceCreationPromptResponse: workspaceCreationPromptResponse, formStep: WorkspaceNameForm}
+func runWorkspaceNameForm(workspaceCreationPromptResponse WorkspaceCreationPromptResponse, suggestedName string, workspaceNames []string) (WorkspaceCreationPromptResponse, error) {
+	m := Model{width: maxWidth, workspaceCreationPromptResponse: workspaceCreationPromptResponse}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
 
@@ -273,7 +230,7 @@ func WorkspaceNameModel(workspaceCreationPromptResponse WorkspaceCreationPromptR
 				}
 				for _, name := range workspaceNames {
 					if name == result {
-						return errors.New("Workspace name already exists")
+						return errors.New("workspace name already exists")
 					}
 				}
 				workspaceName = result
@@ -291,7 +248,7 @@ func WorkspaceNameModel(workspaceCreationPromptResponse WorkspaceCreationPromptR
 		WithShowHelp(false).
 		WithShowErrors(true)
 
-	p, err := tea.NewProgram(m).Run()
+	err := m.form.Run()
 	if err != nil {
 		return WorkspaceCreationPromptResponse{}, err
 	}
@@ -299,17 +256,13 @@ func WorkspaceNameModel(workspaceCreationPromptResponse WorkspaceCreationPromptR
 	result := workspaceCreationPromptResponse
 	result.WorkspaceName = workspaceName
 
-	if _, ok := p.(Model); ok {
-		return result, nil
-	}
-
-	return WorkspaceCreationPromptResponse{}, errors.New("error getting workspace name")
+	return result, nil
 }
 
 func GetCreationDataFromPrompt(workspaceNames []string) (workspaceName string, projectRepositoryList []string, err error) {
 	var projectRepoList []string
 
-	workspaceCreationPromptResponse, err := InitialModel()
+	workspaceCreationPromptResponse, err := runInitialForm()
 	if err != nil {
 		return "", nil, err
 	}
@@ -322,7 +275,7 @@ func GetCreationDataFromPrompt(workspaceNames []string) (workspaceName string, p
 
 	if workspaceCreationPromptResponse.SecondaryProjectCount > 0 {
 
-		workspaceCreationPromptResponse, err = SecondaryProjectsModel(workspaceCreationPromptResponse)
+		workspaceCreationPromptResponse, err = runSecondaryProjectsForm(workspaceCreationPromptResponse)
 		if err != nil {
 			return "", nil, err
 		}
@@ -332,7 +285,7 @@ func GetCreationDataFromPrompt(workspaceNames []string) (workspaceName string, p
 
 	suggestedName := getSuggestedWorkspaceName(workspaceCreationPromptResponse.PrimaryRepository)
 
-	workspaceCreationPromptResponse, err = WorkspaceNameModel(workspaceCreationPromptResponse, suggestedName, workspaceNames)
+	workspaceCreationPromptResponse, err = runWorkspaceNameForm(workspaceCreationPromptResponse, suggestedName, workspaceNames)
 	if err != nil {
 		return "", nil, err
 	}
@@ -365,158 +318,6 @@ func getSuggestedWorkspaceName(repo string) string {
 	}
 
 	return strings.ToLower(result.String())
-}
-
-func (m Model) Init() tea.Cmd {
-	return m.form.Init()
-}
-
-func min(x, y int) int {
-	if x > y {
-		return y
-	}
-	return x
-}
-
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		m.width = min(msg.Width, maxWidth) - m.styles.Base.GetHorizontalFrameSize()
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "esc", "ctrl+c", "q":
-			m.form.Update(tea.Quit)
-			return m, tea.Quit
-		}
-	}
-
-	var cmds []tea.Cmd
-
-	// Process the form
-	form, cmd := m.form.Update(msg)
-	if f, ok := form.(*huh.Form); ok {
-		m.form = f
-		cmds = append(cmds, cmd)
-	}
-
-	if m.form.State == huh.StateCompleted {
-		// Quit when the form is done.
-		cmds = append(cmds, tea.Quit)
-	}
-
-	return m, tea.Batch(cmds...)
-}
-
-func (m Model) View() string {
-	s := m.styles
-
-	// Main form
-	v := strings.TrimSuffix(m.form.View(), "\n\n")
-	form := m.lg.NewStyle().Margin(1, 0).Render(v)
-
-	var status string
-
-	if m.workspaceCreationPromptResponse.SecondaryProjectCount == 0 {
-		const statusWidth = 80
-		statusMarginLeft := m.width - statusWidth - lipgloss.Width(form) - s.Status.GetMarginRight()
-		status = s.Status.Copy().
-			Height(lipgloss.Height(form)).
-			Width(statusWidth).
-			MarginLeft(statusMarginLeft).
-			Render(s.StatusHeader.Render("WORKSPACE NAME: ") + m.form.GetString("workspaceName") + "\n\n" +
-
-				lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("fff")).Render("Primary project: ") +
-				m.workspaceCreationPromptResponse.PrimaryRepository)
-	} else {
-		var secondaryRepoList []string
-
-		if m.formStep == SecodaryProjectsForm {
-			for i := 0; i < m.workspaceCreationPromptResponse.SecondaryProjectCount; i++ {
-				key := fmt.Sprint("secondaryRepo", i)
-				if m.form.GetString(key) != "" {
-					validatedUrl, err := util.GetValidatedUrl(m.form.GetString(key))
-					if err != nil {
-						continue
-					}
-					secondaryRepoList = append(secondaryRepoList, "- "+validatedUrl)
-				}
-			}
-		} else {
-			for i := 0; i < len(m.workspaceCreationPromptResponse.SecondaryRepositories); i++ {
-				secondaryRepoList = append(secondaryRepoList, "- "+m.workspaceCreationPromptResponse.SecondaryRepositories[i])
-			}
-		}
-
-		const statusWidth = 80
-		statusMarginLeft := m.width - statusWidth - lipgloss.Width(form) - s.Status.GetMarginRight()
-		status = s.Status.Copy().
-			Height(lipgloss.Height(form)).
-			Width(statusWidth).
-			MarginLeft(statusMarginLeft).
-			Render(s.StatusHeader.Render("WORKSPACE NAME: ") + m.workspaceCreationPromptResponse.WorkspaceName + "\n\n" +
-
-				lipgloss.NewStyle().Bold(true).Foreground(views.Green).Render("Primary project: ") + "\n- " +
-				m.workspaceCreationPromptResponse.PrimaryRepository + "\n" + "\n" +
-
-				lipgloss.NewStyle().Bold(true).Foreground(views.Green).Render("Secondary projects:") + "\n" +
-				strings.Join(secondaryRepoList, "\n"))
-	}
-
-	body := lipgloss.JoinHorizontal(lipgloss.Top, form, status)
-
-	switch m.form.State {
-	case huh.StateCompleted:
-		if m.formStep == InitialForm || m.formStep == SecodaryProjectsForm {
-			return ""
-		}
-		if m.formStep == WorkspaceNameForm {
-			return s.Base.Render(body + "\n")
-		}
-		return s.Base.Render(body + "\n\n")
-	default:
-		if m.formStep == InitialForm || m.formStep == WorkspaceNameForm {
-			body = lipgloss.JoinHorizontal(lipgloss.Top, form, "")
-		}
-
-		errors := m.form.Errors()
-		header := m.appBoundaryView("WORKSPACE CREATION")
-		if len(errors) > 0 {
-			header = m.appErrorBoundaryView(m.errorView())
-		}
-
-		footer := m.appBoundaryView(m.form.Help().ShortHelpView(m.form.KeyBinds()))
-		if len(errors) > 0 {
-			footer = m.appErrorBoundaryView("")
-		}
-
-		return s.Base.Render(header + "\n" + body + "\n\n" + footer)
-	}
-}
-
-func (m Model) errorView() string {
-	var s string
-	for _, err := range m.form.Errors() {
-		s += err.Error()
-	}
-	return s
-}
-
-func (m Model) appBoundaryView(text string) string {
-	return lipgloss.PlaceHorizontal(
-		m.width,
-		lipgloss.Left,
-		m.styles.HeaderText.Render(text),
-		lipgloss.WithWhitespaceForeground(views.Green),
-	)
-}
-
-func (m Model) appErrorBoundaryView(text string) string {
-	return lipgloss.PlaceHorizontal(
-		m.width,
-		lipgloss.Left,
-		m.styles.ErrorHeaderText.Render(text),
-		lipgloss.WithWhitespaceForeground(views.Green),
-	)
 }
 
 func getOrderNumberString(number int) string {

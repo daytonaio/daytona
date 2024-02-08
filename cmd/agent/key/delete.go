@@ -5,9 +5,9 @@ package cmd_agent_key
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/daytonaio/daytona/client"
+	views_util "github.com/daytonaio/daytona/cmd/views/util"
 	"github.com/daytonaio/daytona/grpc/proto"
 
 	"github.com/spf13/cobra"
@@ -34,6 +34,6 @@ var deleteKeyCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		fmt.Println("Key deleted")
+		views_util.RenderInfoMessage("Key deleted")
 	},
 }
