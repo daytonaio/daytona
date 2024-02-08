@@ -16,7 +16,7 @@ import (
 	workspace_grpc "github.com/daytonaio/daytona/agent/grpc/workspace"
 	"github.com/daytonaio/daytona/agent/ssh_gateway"
 	proto "github.com/daytonaio/daytona/grpc/proto"
-	project_agent_manager "github.com/daytonaio/daytona/plugin/project_agent/manager"
+	agent_service_manager "github.com/daytonaio/daytona/plugin/agent_service/manager"
 	provisioner_manager "github.com/daytonaio/daytona/plugin/provisioner/manager"
 	"github.com/hashicorp/go-plugin"
 
@@ -67,7 +67,7 @@ func Start() error {
 	if err != nil {
 		return err
 	}
-	err = registerProjectAgents(c)
+	err = registerAgentServices(c)
 	if err != nil {
 		return err
 	}
@@ -162,8 +162,8 @@ func registerProvisioners(c *config.Config) error {
 	return nil
 }
 
-func registerProjectAgents(c *config.Config) error {
-	projectAgentPluginsPath := path.Join(c.PluginsDir, "project_agents")
+func registerAgentServices(c *config.Config) error {
+	projectAgentPluginsPath := path.Join(c.PluginsDir, "agent_services")
 
 	files, err := os.ReadDir(projectAgentPluginsPath)
 	if err != nil {
@@ -181,7 +181,7 @@ func registerProjectAgents(c *config.Config) error {
 				return err
 			}
 
-			err = project_agent_manager.RegisterProjectAgent(pluginPath)
+			err = agent_service_manager.RegisterAgentService(pluginPath)
 			if err != nil {
 				return err
 			}

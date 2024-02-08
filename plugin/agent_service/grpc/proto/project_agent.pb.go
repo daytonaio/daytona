@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.32.0
 // 	protoc        v3.12.4
-// source: plugin/project_agent/grpc/proto/project_agent.proto
+// source: plugin/agent_service/grpc/proto/project_agent.proto
 
 package proto
 
@@ -22,7 +22,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type ProjectAgentInfo struct {
+type AgentServiceInfo struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -31,23 +31,23 @@ type ProjectAgentInfo struct {
 	Version string `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
 }
 
-func (x *ProjectAgentInfo) Reset() {
-	*x = ProjectAgentInfo{}
+func (x *AgentServiceInfo) Reset() {
+	*x = AgentServiceInfo{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_plugin_project_agent_grpc_proto_project_agent_proto_msgTypes[0]
+		mi := &file_plugin_agent_service_grpc_proto_project_agent_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
 }
 
-func (x *ProjectAgentInfo) String() string {
+func (x *AgentServiceInfo) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ProjectAgentInfo) ProtoMessage() {}
+func (*AgentServiceInfo) ProtoMessage() {}
 
-func (x *ProjectAgentInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_project_agent_grpc_proto_project_agent_proto_msgTypes[0]
+func (x *AgentServiceInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_plugin_agent_service_grpc_proto_project_agent_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -58,26 +58,26 @@ func (x *ProjectAgentInfo) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ProjectAgentInfo.ProtoReflect.Descriptor instead.
-func (*ProjectAgentInfo) Descriptor() ([]byte, []int) {
-	return file_plugin_project_agent_grpc_proto_project_agent_proto_rawDescGZIP(), []int{0}
+// Deprecated: Use AgentServiceInfo.ProtoReflect.Descriptor instead.
+func (*AgentServiceInfo) Descriptor() ([]byte, []int) {
+	return file_plugin_agent_service_grpc_proto_project_agent_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ProjectAgentInfo) GetName() string {
+func (x *AgentServiceInfo) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *ProjectAgentInfo) GetVersion() string {
+func (x *AgentServiceInfo) GetVersion() string {
 	if x != nil {
 		return x.Version
 	}
 	return ""
 }
 
-type InitializeProjectAgentRequest struct {
+type InitializeAgentServiceRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -85,23 +85,23 @@ type InitializeProjectAgentRequest struct {
 	BasePath string `protobuf:"bytes,1,opt,name=basePath,proto3" json:"basePath,omitempty"`
 }
 
-func (x *InitializeProjectAgentRequest) Reset() {
-	*x = InitializeProjectAgentRequest{}
+func (x *InitializeAgentServiceRequest) Reset() {
+	*x = InitializeAgentServiceRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_plugin_project_agent_grpc_proto_project_agent_proto_msgTypes[1]
+		mi := &file_plugin_agent_service_grpc_proto_project_agent_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
 }
 
-func (x *InitializeProjectAgentRequest) String() string {
+func (x *InitializeAgentServiceRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*InitializeProjectAgentRequest) ProtoMessage() {}
+func (*InitializeAgentServiceRequest) ProtoMessage() {}
 
-func (x *InitializeProjectAgentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_project_agent_grpc_proto_project_agent_proto_msgTypes[1]
+func (x *InitializeAgentServiceRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_plugin_agent_service_grpc_proto_project_agent_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -112,19 +112,19 @@ func (x *InitializeProjectAgentRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use InitializeProjectAgentRequest.ProtoReflect.Descriptor instead.
-func (*InitializeProjectAgentRequest) Descriptor() ([]byte, []int) {
-	return file_plugin_project_agent_grpc_proto_project_agent_proto_rawDescGZIP(), []int{1}
+// Deprecated: Use InitializeAgentServiceRequest.ProtoReflect.Descriptor instead.
+func (*InitializeAgentServiceRequest) Descriptor() ([]byte, []int) {
+	return file_plugin_agent_service_grpc_proto_project_agent_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *InitializeProjectAgentRequest) GetBasePath() string {
+func (x *InitializeAgentServiceRequest) GetBasePath() string {
 	if x != nil {
 		return x.BasePath
 	}
 	return ""
 }
 
-type ProjectAgentConfig struct {
+type AgentServiceConfig struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -133,23 +133,23 @@ type ProjectAgentConfig struct {
 	EnvVars   map[string]string `protobuf:"bytes,2,rep,name=envVars,proto3" json:"envVars,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
 
-func (x *ProjectAgentConfig) Reset() {
-	*x = ProjectAgentConfig{}
+func (x *AgentServiceConfig) Reset() {
+	*x = AgentServiceConfig{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_plugin_project_agent_grpc_proto_project_agent_proto_msgTypes[2]
+		mi := &file_plugin_agent_service_grpc_proto_project_agent_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
 }
 
-func (x *ProjectAgentConfig) String() string {
+func (x *AgentServiceConfig) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ProjectAgentConfig) ProtoMessage() {}
+func (*AgentServiceConfig) ProtoMessage() {}
 
-func (x *ProjectAgentConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_project_agent_grpc_proto_project_agent_proto_msgTypes[2]
+func (x *AgentServiceConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_plugin_agent_service_grpc_proto_project_agent_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -160,19 +160,19 @@ func (x *ProjectAgentConfig) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ProjectAgentConfig.ProtoReflect.Descriptor instead.
-func (*ProjectAgentConfig) Descriptor() ([]byte, []int) {
-	return file_plugin_project_agent_grpc_proto_project_agent_proto_rawDescGZIP(), []int{2}
+// Deprecated: Use AgentServiceConfig.ProtoReflect.Descriptor instead.
+func (*AgentServiceConfig) Descriptor() ([]byte, []int) {
+	return file_plugin_agent_service_grpc_proto_project_agent_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ProjectAgentConfig) GetSetupPath() string {
+func (x *AgentServiceConfig) GetSetupPath() string {
 	if x != nil {
 		return x.SetupPath
 	}
 	return ""
 }
 
-func (x *ProjectAgentConfig) GetEnvVars() map[string]string {
+func (x *AgentServiceConfig) GetEnvVars() map[string]string {
 	if x != nil {
 		return x.EnvVars
 	}
@@ -190,7 +190,7 @@ type LivenessProbeTimeoutResponse struct {
 func (x *LivenessProbeTimeoutResponse) Reset() {
 	*x = LivenessProbeTimeoutResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_plugin_project_agent_grpc_proto_project_agent_proto_msgTypes[3]
+		mi := &file_plugin_agent_service_grpc_proto_project_agent_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -203,7 +203,7 @@ func (x *LivenessProbeTimeoutResponse) String() string {
 func (*LivenessProbeTimeoutResponse) ProtoMessage() {}
 
 func (x *LivenessProbeTimeoutResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_project_agent_grpc_proto_project_agent_proto_msgTypes[3]
+	mi := &file_plugin_agent_service_grpc_proto_project_agent_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -216,7 +216,7 @@ func (x *LivenessProbeTimeoutResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LivenessProbeTimeoutResponse.ProtoReflect.Descriptor instead.
 func (*LivenessProbeTimeoutResponse) Descriptor() ([]byte, []int) {
-	return file_plugin_project_agent_grpc_proto_project_agent_proto_rawDescGZIP(), []int{3}
+	return file_plugin_agent_service_grpc_proto_project_agent_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *LivenessProbeTimeoutResponse) GetTimeout() uint32 {
@@ -226,30 +226,30 @@ func (x *LivenessProbeTimeoutResponse) GetTimeout() uint32 {
 	return 0
 }
 
-var File_plugin_project_agent_grpc_proto_project_agent_proto protoreflect.FileDescriptor
+var File_plugin_agent_service_grpc_proto_project_agent_proto protoreflect.FileDescriptor
 
-var file_plugin_project_agent_grpc_proto_project_agent_proto_rawDesc = []byte{
-	0x0a, 0x33, 0x70, 0x6c, 0x75, 0x67, 0x69, 0x6e, 0x2f, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74,
-	0x5f, 0x61, 0x67, 0x65, 0x6e, 0x74, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2f, 0x70, 0x72, 0x6f, 0x74,
+var file_plugin_agent_service_grpc_proto_project_agent_proto_rawDesc = []byte{
+	0x0a, 0x33, 0x70, 0x6c, 0x75, 0x67, 0x69, 0x6e, 0x2f, 0x61, 0x67, 0x65, 0x6e, 0x74, 0x5f, 0x73,
+	0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2f, 0x70, 0x72, 0x6f, 0x74,
 	0x6f, 0x2f, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x61, 0x67, 0x65, 0x6e, 0x74, 0x2e,
 	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x1b, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72,
 	0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x65, 0x6d, 0x70, 0x74, 0x79, 0x2e, 0x70, 0x72, 0x6f,
 	0x74, 0x6f, 0x1a, 0x1c, 0x67, 0x72, 0x70, 0x63, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x74,
 	0x79, 0x70, 0x65, 0x73, 0x2f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x22, 0x40, 0x0a, 0x10, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x41, 0x67, 0x65, 0x6e, 0x74,
+	0x22, 0x40, 0x0a, 0x10, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
 	0x49, 0x6e, 0x66, 0x6f, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01,
 	0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x76, 0x65, 0x72, 0x73,
 	0x69, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69,
 	0x6f, 0x6e, 0x22, 0x3b, 0x0a, 0x1d, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65,
-	0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x71, 0x75,
+	0x41, 0x67, 0x65, 0x6e, 0x74, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x71, 0x75,
 	0x65, 0x73, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x62, 0x61, 0x73, 0x65, 0x50, 0x61, 0x74, 0x68, 0x18,
 	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x62, 0x61, 0x73, 0x65, 0x50, 0x61, 0x74, 0x68, 0x22,
-	0xaa, 0x01, 0x0a, 0x12, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x41, 0x67, 0x65, 0x6e, 0x74,
+	0xaa, 0x01, 0x0a, 0x12, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
 	0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x12, 0x1c, 0x0a, 0x09, 0x73, 0x65, 0x74, 0x75, 0x70, 0x50,
 	0x61, 0x74, 0x68, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x73, 0x65, 0x74, 0x75, 0x70,
 	0x50, 0x61, 0x74, 0x68, 0x12, 0x3a, 0x0a, 0x07, 0x65, 0x6e, 0x76, 0x56, 0x61, 0x72, 0x73, 0x18,
-	0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x20, 0x2e, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x41,
-	0x67, 0x65, 0x6e, 0x74, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x45, 0x6e, 0x76, 0x56, 0x61,
+	0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x20, 0x2e, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x53, 0x65, 0x72,
+	0x76, 0x69, 0x63, 0x65, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x45, 0x6e, 0x76, 0x56, 0x61,
 	0x72, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x52, 0x07, 0x65, 0x6e, 0x76, 0x56, 0x61, 0x72, 0x73,
 	0x1a, 0x3a, 0x0a, 0x0c, 0x45, 0x6e, 0x76, 0x56, 0x61, 0x72, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79,
 	0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b,
@@ -258,18 +258,18 @@ var file_plugin_project_agent_grpc_proto_project_agent_proto_rawDesc = []byte{
 	0x4c, 0x69, 0x76, 0x65, 0x6e, 0x65, 0x73, 0x73, 0x50, 0x72, 0x6f, 0x62, 0x65, 0x54, 0x69, 0x6d,
 	0x65, 0x6f, 0x75, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x18, 0x0a, 0x07,
 	0x74, 0x69, 0x6d, 0x65, 0x6f, 0x75, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x07, 0x74,
-	0x69, 0x6d, 0x65, 0x6f, 0x75, 0x74, 0x32, 0x9c, 0x05, 0x0a, 0x0c, 0x50, 0x72, 0x6f, 0x6a, 0x65,
-	0x63, 0x74, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x12, 0x46, 0x0a, 0x0a, 0x49, 0x6e, 0x69, 0x74, 0x69,
+	0x69, 0x6d, 0x65, 0x6f, 0x75, 0x74, 0x32, 0x9c, 0x05, 0x0a, 0x0c, 0x41, 0x67, 0x65, 0x6e, 0x74,
+	0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x46, 0x0a, 0x0a, 0x49, 0x6e, 0x69, 0x74, 0x69,
 	0x61, 0x6c, 0x69, 0x7a, 0x65, 0x12, 0x1e, 0x2e, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69,
-	0x7a, 0x65, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x52, 0x65,
+	0x7a, 0x65, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65,
 	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70,
 	0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x00, 0x12,
 	0x36, 0x0a, 0x07, 0x47, 0x65, 0x74, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x16, 0x2e, 0x67, 0x6f, 0x6f,
 	0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70,
-	0x74, 0x79, 0x1a, 0x11, 0x2e, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x41, 0x67, 0x65, 0x6e,
-	0x74, 0x49, 0x6e, 0x66, 0x6f, 0x22, 0x00, 0x12, 0x3a, 0x0a, 0x09, 0x53, 0x65, 0x74, 0x43, 0x6f,
-	0x6e, 0x66, 0x69, 0x67, 0x12, 0x13, 0x2e, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x41, 0x67,
-	0x65, 0x6e, 0x74, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67,
+	0x74, 0x79, 0x1a, 0x11, 0x2e, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63,
+	0x65, 0x49, 0x6e, 0x66, 0x6f, 0x22, 0x00, 0x12, 0x3a, 0x0a, 0x09, 0x53, 0x65, 0x74, 0x43, 0x6f,
+	0x6e, 0x66, 0x69, 0x67, 0x12, 0x13, 0x2e, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x53, 0x65, 0x72, 0x76,
+	0x69, 0x63, 0x65, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67,
 	0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74,
 	0x79, 0x22, 0x00, 0x12, 0x34, 0x0a, 0x0e, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x50, 0x72,
 	0x65, 0x49, 0x6e, 0x69, 0x74, 0x12, 0x08, 0x2e, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x1a,
@@ -305,52 +305,52 @@ var file_plugin_project_agent_grpc_proto_project_agent_proto_rawDesc = []byte{
 }
 
 var (
-	file_plugin_project_agent_grpc_proto_project_agent_proto_rawDescOnce sync.Once
-	file_plugin_project_agent_grpc_proto_project_agent_proto_rawDescData = file_plugin_project_agent_grpc_proto_project_agent_proto_rawDesc
+	file_plugin_agent_service_grpc_proto_project_agent_proto_rawDescOnce sync.Once
+	file_plugin_agent_service_grpc_proto_project_agent_proto_rawDescData = file_plugin_agent_service_grpc_proto_project_agent_proto_rawDesc
 )
 
-func file_plugin_project_agent_grpc_proto_project_agent_proto_rawDescGZIP() []byte {
-	file_plugin_project_agent_grpc_proto_project_agent_proto_rawDescOnce.Do(func() {
-		file_plugin_project_agent_grpc_proto_project_agent_proto_rawDescData = protoimpl.X.CompressGZIP(file_plugin_project_agent_grpc_proto_project_agent_proto_rawDescData)
+func file_plugin_agent_service_grpc_proto_project_agent_proto_rawDescGZIP() []byte {
+	file_plugin_agent_service_grpc_proto_project_agent_proto_rawDescOnce.Do(func() {
+		file_plugin_agent_service_grpc_proto_project_agent_proto_rawDescData = protoimpl.X.CompressGZIP(file_plugin_agent_service_grpc_proto_project_agent_proto_rawDescData)
 	})
-	return file_plugin_project_agent_grpc_proto_project_agent_proto_rawDescData
+	return file_plugin_agent_service_grpc_proto_project_agent_proto_rawDescData
 }
 
-var file_plugin_project_agent_grpc_proto_project_agent_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
-var file_plugin_project_agent_grpc_proto_project_agent_proto_goTypes = []interface{}{
-	(*ProjectAgentInfo)(nil),              // 0: ProjectAgentInfo
-	(*InitializeProjectAgentRequest)(nil), // 1: InitializeProjectAgentRequest
-	(*ProjectAgentConfig)(nil),            // 2: ProjectAgentConfig
+var file_plugin_agent_service_grpc_proto_project_agent_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_plugin_agent_service_grpc_proto_project_agent_proto_goTypes = []interface{}{
+	(*AgentServiceInfo)(nil),              // 0: AgentServiceInfo
+	(*InitializeAgentServiceRequest)(nil), // 1: InitializeAgentServiceRequest
+	(*AgentServiceConfig)(nil),            // 2: AgentServiceConfig
 	(*LivenessProbeTimeoutResponse)(nil),  // 3: LivenessProbeTimeoutResponse
-	nil,                                   // 4: ProjectAgentConfig.EnvVarsEntry
+	nil,                                   // 4: AgentServiceConfig.EnvVarsEntry
 	(*empty.Empty)(nil),                   // 5: google.protobuf.Empty
 	(*types.Project)(nil),                 // 6: Project
 	(*types.ProjectInfo)(nil),             // 7: ProjectInfo
 }
-var file_plugin_project_agent_grpc_proto_project_agent_proto_depIdxs = []int32{
-	4,  // 0: ProjectAgentConfig.envVars:type_name -> ProjectAgentConfig.EnvVarsEntry
-	1,  // 1: ProjectAgent.Initialize:input_type -> InitializeProjectAgentRequest
-	5,  // 2: ProjectAgent.GetInfo:input_type -> google.protobuf.Empty
-	2,  // 3: ProjectAgent.SetConfig:input_type -> ProjectAgentConfig
-	6,  // 4: ProjectAgent.ProjectPreInit:input_type -> Project
-	6,  // 5: ProjectAgent.ProjectPostInit:input_type -> Project
-	6,  // 6: ProjectAgent.ProjectPreStart:input_type -> Project
-	6,  // 7: ProjectAgent.ProjectPostStart:input_type -> Project
-	6,  // 8: ProjectAgent.ProjectPreStop:input_type -> Project
-	6,  // 9: ProjectAgent.GetProjectInfo:input_type -> Project
-	5,  // 10: ProjectAgent.LivenessProbe:input_type -> google.protobuf.Empty
-	5,  // 11: ProjectAgent.LivenessProbeTimeout:input_type -> google.protobuf.Empty
-	5,  // 12: ProjectAgent.Initialize:output_type -> google.protobuf.Empty
-	0,  // 13: ProjectAgent.GetInfo:output_type -> ProjectAgentInfo
-	5,  // 14: ProjectAgent.SetConfig:output_type -> google.protobuf.Empty
-	5,  // 15: ProjectAgent.ProjectPreInit:output_type -> google.protobuf.Empty
-	5,  // 16: ProjectAgent.ProjectPostInit:output_type -> google.protobuf.Empty
-	5,  // 17: ProjectAgent.ProjectPreStart:output_type -> google.protobuf.Empty
-	5,  // 18: ProjectAgent.ProjectPostStart:output_type -> google.protobuf.Empty
-	5,  // 19: ProjectAgent.ProjectPreStop:output_type -> google.protobuf.Empty
-	7,  // 20: ProjectAgent.GetProjectInfo:output_type -> ProjectInfo
-	5,  // 21: ProjectAgent.LivenessProbe:output_type -> google.protobuf.Empty
-	3,  // 22: ProjectAgent.LivenessProbeTimeout:output_type -> LivenessProbeTimeoutResponse
+var file_plugin_agent_service_grpc_proto_project_agent_proto_depIdxs = []int32{
+	4,  // 0: AgentServiceConfig.envVars:type_name -> AgentServiceConfig.EnvVarsEntry
+	1,  // 1: AgentService.Initialize:input_type -> InitializeAgentServiceRequest
+	5,  // 2: AgentService.GetInfo:input_type -> google.protobuf.Empty
+	2,  // 3: AgentService.SetConfig:input_type -> AgentServiceConfig
+	6,  // 4: AgentService.ProjectPreInit:input_type -> Project
+	6,  // 5: AgentService.ProjectPostInit:input_type -> Project
+	6,  // 6: AgentService.ProjectPreStart:input_type -> Project
+	6,  // 7: AgentService.ProjectPostStart:input_type -> Project
+	6,  // 8: AgentService.ProjectPreStop:input_type -> Project
+	6,  // 9: AgentService.GetProjectInfo:input_type -> Project
+	5,  // 10: AgentService.LivenessProbe:input_type -> google.protobuf.Empty
+	5,  // 11: AgentService.LivenessProbeTimeout:input_type -> google.protobuf.Empty
+	5,  // 12: AgentService.Initialize:output_type -> google.protobuf.Empty
+	0,  // 13: AgentService.GetInfo:output_type -> AgentServiceInfo
+	5,  // 14: AgentService.SetConfig:output_type -> google.protobuf.Empty
+	5,  // 15: AgentService.ProjectPreInit:output_type -> google.protobuf.Empty
+	5,  // 16: AgentService.ProjectPostInit:output_type -> google.protobuf.Empty
+	5,  // 17: AgentService.ProjectPreStart:output_type -> google.protobuf.Empty
+	5,  // 18: AgentService.ProjectPostStart:output_type -> google.protobuf.Empty
+	5,  // 19: AgentService.ProjectPreStop:output_type -> google.protobuf.Empty
+	7,  // 20: AgentService.GetProjectInfo:output_type -> ProjectInfo
+	5,  // 21: AgentService.LivenessProbe:output_type -> google.protobuf.Empty
+	3,  // 22: AgentService.LivenessProbeTimeout:output_type -> LivenessProbeTimeoutResponse
 	12, // [12:23] is the sub-list for method output_type
 	1,  // [1:12] is the sub-list for method input_type
 	1,  // [1:1] is the sub-list for extension type_name
@@ -358,14 +358,14 @@ var file_plugin_project_agent_grpc_proto_project_agent_proto_depIdxs = []int32{
 	0,  // [0:1] is the sub-list for field type_name
 }
 
-func init() { file_plugin_project_agent_grpc_proto_project_agent_proto_init() }
-func file_plugin_project_agent_grpc_proto_project_agent_proto_init() {
-	if File_plugin_project_agent_grpc_proto_project_agent_proto != nil {
+func init() { file_plugin_agent_service_grpc_proto_project_agent_proto_init() }
+func file_plugin_agent_service_grpc_proto_project_agent_proto_init() {
+	if File_plugin_agent_service_grpc_proto_project_agent_proto != nil {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_plugin_project_agent_grpc_proto_project_agent_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ProjectAgentInfo); i {
+		file_plugin_agent_service_grpc_proto_project_agent_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AgentServiceInfo); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -376,8 +376,8 @@ func file_plugin_project_agent_grpc_proto_project_agent_proto_init() {
 				return nil
 			}
 		}
-		file_plugin_project_agent_grpc_proto_project_agent_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*InitializeProjectAgentRequest); i {
+		file_plugin_agent_service_grpc_proto_project_agent_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*InitializeAgentServiceRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -388,8 +388,8 @@ func file_plugin_project_agent_grpc_proto_project_agent_proto_init() {
 				return nil
 			}
 		}
-		file_plugin_project_agent_grpc_proto_project_agent_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ProjectAgentConfig); i {
+		file_plugin_agent_service_grpc_proto_project_agent_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AgentServiceConfig); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -400,7 +400,7 @@ func file_plugin_project_agent_grpc_proto_project_agent_proto_init() {
 				return nil
 			}
 		}
-		file_plugin_project_agent_grpc_proto_project_agent_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+		file_plugin_agent_service_grpc_proto_project_agent_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*LivenessProbeTimeoutResponse); i {
 			case 0:
 				return &v.state
@@ -417,18 +417,18 @@ func file_plugin_project_agent_grpc_proto_project_agent_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: file_plugin_project_agent_grpc_proto_project_agent_proto_rawDesc,
+			RawDescriptor: file_plugin_agent_service_grpc_proto_project_agent_proto_rawDesc,
 			NumEnums:      0,
 			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_plugin_project_agent_grpc_proto_project_agent_proto_goTypes,
-		DependencyIndexes: file_plugin_project_agent_grpc_proto_project_agent_proto_depIdxs,
-		MessageInfos:      file_plugin_project_agent_grpc_proto_project_agent_proto_msgTypes,
+		GoTypes:           file_plugin_agent_service_grpc_proto_project_agent_proto_goTypes,
+		DependencyIndexes: file_plugin_agent_service_grpc_proto_project_agent_proto_depIdxs,
+		MessageInfos:      file_plugin_agent_service_grpc_proto_project_agent_proto_msgTypes,
 	}.Build()
-	File_plugin_project_agent_grpc_proto_project_agent_proto = out.File
-	file_plugin_project_agent_grpc_proto_project_agent_proto_rawDesc = nil
-	file_plugin_project_agent_grpc_proto_project_agent_proto_goTypes = nil
-	file_plugin_project_agent_grpc_proto_project_agent_proto_depIdxs = nil
+	File_plugin_agent_service_grpc_proto_project_agent_proto = out.File
+	file_plugin_agent_service_grpc_proto_project_agent_proto_rawDesc = nil
+	file_plugin_agent_service_grpc_proto_project_agent_proto_goTypes = nil
+	file_plugin_agent_service_grpc_proto_project_agent_proto_depIdxs = nil
 }

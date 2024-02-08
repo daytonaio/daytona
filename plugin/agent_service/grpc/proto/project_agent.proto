@@ -3,16 +3,16 @@ option go_package = "./proto";
 import "google/protobuf/empty.proto";
 import "grpc/proto/types/types.proto";
 
-message ProjectAgentInfo {
+message AgentServiceInfo {
   string name = 1;
   string version = 2;
 }
 
-message InitializeProjectAgentRequest {
+message InitializeAgentServiceRequest {
   string basePath = 1;
 }
 
-message ProjectAgentConfig {
+message AgentServiceConfig {
   string setupPath = 1;
   map<string, string> envVars = 2;
 }
@@ -21,10 +21,10 @@ message LivenessProbeTimeoutResponse {
   uint32 timeout = 1;
 }
 
-service ProjectAgent {
-  rpc Initialize (InitializeProjectAgentRequest) returns (google.protobuf.Empty) {}
-  rpc GetInfo (google.protobuf.Empty) returns (ProjectAgentInfo) {}
-  rpc SetConfig(ProjectAgentConfig) returns (google.protobuf.Empty) {}
+service AgentService {
+  rpc Initialize (InitializeAgentServiceRequest) returns (google.protobuf.Empty) {}
+  rpc GetInfo (google.protobuf.Empty) returns (AgentServiceInfo) {}
+  rpc SetConfig(AgentServiceConfig) returns (google.protobuf.Empty) {}
 
   rpc ProjectPreInit(Project) returns (google.protobuf.Empty) {}
   rpc ProjectPostInit(Project) returns (google.protobuf.Empty) {}

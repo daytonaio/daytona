@@ -1,12 +1,12 @@
-package project_agent_manager
+package agent_service_manager
 
 import (
 	"errors"
 	"os/exec"
 	"path"
 
-	. "github.com/daytonaio/daytona/plugin/project_agent"
-	"github.com/daytonaio/daytona/plugin/project_agent/grpc/proto"
+	. "github.com/daytonaio/daytona/plugin/agent_service"
+	"github.com/daytonaio/daytona/plugin/agent_service/grpc/proto"
 	"github.com/daytonaio/daytona/plugin/utils"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
@@ -18,10 +18,10 @@ var projectAgentClients map[string]*plugin.Client = make(map[string]*plugin.Clie
 var projectAgentHandshakeConfig = plugin.HandshakeConfig{
 	ProtocolVersion:  1,
 	MagicCookieKey:   "DAYTONA_PROJECT_AGENT_PLUGIN",
-	MagicCookieValue: "daytona_project_agent",
+	MagicCookieValue: "daytona_agent_service",
 }
 
-func GetProjectAgent(name string) (*ProjectAgent, error) {
+func GetAgentService(name string) (*AgentService, error) {
 	client, ok := projectAgentClients[name]
 	if !ok {
 		return nil, errors.New("provisioner not found")
@@ -37,7 +37,7 @@ func GetProjectAgent(name string) (*ProjectAgent, error) {
 		return nil, err
 	}
 
-	projectAgent, ok := raw.(ProjectAgent)
+	projectAgent, ok := raw.(AgentService)
 	if !ok {
 		return nil, errors.New("unexpected type from plugin")
 	}
@@ -45,10 +45,10 @@ func GetProjectAgent(name string) (*ProjectAgent, error) {
 	return &projectAgent, nil
 }
 
-func GetProjectAgents() map[string]ProjectAgent {
-	projectAgents := make(map[string]ProjectAgent)
+func GetAgentServices() map[string]AgentService {
+	projectAgents := make(map[string]AgentService)
 	for name := range projectAgentClients {
-		provisioner, err := GetProjectAgent(name)
+		provisioner, err := GetAgentService(name)
 		if err != nil {
 			log.Printf("Error getting provisioner %s: %s", name, err)
 			continue
@@ -60,7 +60,7 @@ func GetProjectAgents() map[string]ProjectAgent {
 	return projectAgents
 }
 
-func RegisterProjectAgent(pluginPath string) error {
+func RegisterAgentService(pluginPath string) error {
 	pluginName := path.Base(pluginPath)
 	pluginBasePath := path.Dir(pluginPath)
 
@@ -71,7 +71,7 @@ func RegisterProjectAgent(pluginPath string) error {
 	})
 
 	pluginMap := map[string]plugin.Plugin{}
-	pluginMap[pluginName] = &ProjectAgentPlugin{}
+	pluginMap[pluginName] = &AgentServicePlugin{}
 
 	client := plugin.NewClient(&plugin.ClientConfig{
 		HandshakeConfig:  projectAgentHandshakeConfig,
@@ -88,12 +88,12 @@ func RegisterProjectAgent(pluginPath string) error {
 
 	log.Infof("Provisioner %s registered", pluginName)
 
-	projectAgent, err := GetProjectAgent(pluginName)
+	projectAgent, err := GetAgentService(pluginName)
 	if err != nil {
 		return errors.New("failed to initialize provisioner: " + err.Error())
 	}
 
-	err = (*projectAgent).Initialize(&proto.InitializeProjectAgentRequest{
+	err = (*projectAgent).Initialize(&proto.InitializeAgentServiceRequest{
 		BasePath: pluginBasePath,
 	})
 	if err != nil {
