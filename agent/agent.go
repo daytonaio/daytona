@@ -7,6 +7,8 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"os/signal"
+	"path"
 
 	"github.com/daytonaio/daytona/agent/config"
 	agent_grpc "github.com/daytonaio/daytona/agent/grpc/agent"
@@ -14,6 +16,9 @@ import (
 	workspace_grpc "github.com/daytonaio/daytona/agent/grpc/workspace"
 	"github.com/daytonaio/daytona/agent/ssh_gateway"
 	proto "github.com/daytonaio/daytona/grpc/proto"
+	agent_service_manager "github.com/daytonaio/daytona/plugin/agent_service/manager"
+	provisioner_manager "github.com/daytonaio/daytona/plugin/provisioner/manager"
+	"github.com/hashicorp/go-plugin"
 
 	"google.golang.org/grpc"
 
@@ -28,7 +33,12 @@ type Self struct {
 func Start() error {
 	log.Info("Starting Daytona agent")
 
-	_, err := config.GetWorkspaceKey()
+	c, err := config.GetConfig()
+	if err != nil {
+		return err
+	}
+
+	_, err = config.GetWorkspaceKey()
 	if os.IsNotExist(err) {
 		log.Info("Generating workspace key")
 		err = config.GenerateWorkspaceKey()
@@ -47,16 +57,37 @@ func Start() error {
 
 	s := grpc.NewServer()
 	workspaceServer := &workspace_grpc.WorkspaceServer{}
-	proto.RegisterWorkspaceServer(s, workspaceServer)
+	proto.RegisterWorkspaceServiceServer(s, workspaceServer)
 	portsServer := &ports_grpc.PortsServer{}
 	proto.RegisterPortsServer(s, portsServer)
 	agentServer := &agent_grpc.AgentServer{}
 	proto.RegisterAgentServer(s, agentServer)
+
+	err = registerProvisioners(c)
+	if err != nil {
+		return err
+	}
+	err = registerAgentServices(c)
+	if err != nil {
+		return err
+	}
+
 	log.Infof("Daytona agent started %v", (*lis).Addr())
 
 	go func() {
 		if err := ssh_gateway.Start(); err != nil {
 			log.Error(err)
+		}
+	}()
+
+	go func() {
+		interruptChannel := make(chan os.Signal, 1)
+		signal.Notify(interruptChannel, os.Interrupt)
+
+		for range interruptChannel {
+			log.Info("Shutting down")
+			plugin.CleanupClients()
+			os.Exit(0)
 		}
 	}()
 
@@ -104,4 +135,73 @@ func getUnixListener() (*net.Listener, error) {
 		return nil, err
 	}
 	return &lis, nil
+}
+
+func registerProvisioners(c *config.Config) error {
+	provisionerPluginsPath := path.Join(c.PluginsDir, "provisioners")
+
+	files, err := os.ReadDir(provisionerPluginsPath)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			pluginPath, err := getPluginPath(path.Join(provisionerPluginsPath, file.Name()))
+			if err != nil {
+				return err
+			}
+
+			err = provisioner_manager.RegisterProvisioner(pluginPath)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func registerAgentServices(c *config.Config) error {
+	projectAgentPluginsPath := path.Join(c.PluginsDir, "agent_services")
+
+	files, err := os.ReadDir(projectAgentPluginsPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+
+		return err
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			pluginPath, err := getPluginPath(path.Join(projectAgentPluginsPath, file.Name()))
+			if err != nil {
+				return err
+			}
+
+			err = agent_service_manager.RegisterAgentService(pluginPath)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func getPluginPath(dir string) (string, error) {
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return "", err
+	}
+
+	for _, file := range files {
+		if !file.IsDir() {
+			return path.Join(dir, file.Name()), nil
+		}
+	}
+
+	return "", nil
 }

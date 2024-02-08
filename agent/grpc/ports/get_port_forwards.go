@@ -6,13 +6,13 @@ package ports_grpc
 import (
 	"context"
 
+	"github.com/daytonaio/daytona/agent/db"
 	"github.com/daytonaio/daytona/agent/port_manager"
-	"github.com/daytonaio/daytona/agent/workspace"
 	daytona_proto "github.com/daytonaio/daytona/grpc/proto"
 )
 
 func (p *PortsServer) GetPortForwards(ctx context.Context, request *daytona_proto.GetPortForwardsRequest) (*daytona_proto.WorkspacePortForward, error) {
-	w, err := workspace.LoadFromDB(request.WorkspaceName)
+	w, err := db.FindWorkspace(request.WorkspaceId)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (p *PortsServer) GetPortForwards(ctx context.Context, request *daytona_prot
 	}
 
 	return &daytona_proto.WorkspacePortForward{
-		WorkspaceName:       w.Name,
+		WorkspaceId:         w.Id,
 		ProjectPortForwards: projectPortForwards,
 	}, nil
 }

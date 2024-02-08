@@ -17,7 +17,7 @@ import (
 
 var _db *gorm.DB
 
-func GetConnection() *gorm.DB {
+func getConnection() *gorm.DB {
 	if _db != nil {
 		return _db
 	}

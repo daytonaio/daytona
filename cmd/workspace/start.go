@@ -34,7 +34,7 @@ var StartCmd = &cobra.Command{
 		}
 		defer conn.Close()
 
-		client := workspace_proto.NewWorkspaceClient(conn)
+		client := workspace_proto.NewWorkspaceServiceClient(conn)
 
 		if len(args) == 0 {
 			workspaceList, err := client.List(ctx, &empty.Empty{})
@@ -53,7 +53,7 @@ var StartCmd = &cobra.Command{
 		}
 
 		startWorkspaceRequest := &workspace_proto.WorkspaceStartRequest{
-			Name:    workspaceName,
+			Id:      workspaceName,
 			Project: startProjectFlag,
 		}
 		_, err = client.Start(ctx, startWorkspaceRequest)

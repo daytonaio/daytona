@@ -6,10 +6,8 @@ package workspace_grpc
 import (
 	"context"
 
-	"github.com/daytonaio/daytona/agent/workspace"
-	"github.com/daytonaio/daytona/credentials"
-	"github.com/daytonaio/daytona/extensions/ssh"
-	"github.com/daytonaio/daytona/extensions/vsc_server"
+	"github.com/daytonaio/daytona/agent/db"
+	"github.com/daytonaio/daytona/agent/provisioner"
 	daytona_proto "github.com/daytonaio/daytona/grpc/proto"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -17,36 +15,26 @@ import (
 )
 
 func (m *WorkspaceServer) Stop(ctx context.Context, request *daytona_proto.WorkspaceStopRequest) (*empty.Empty, error) {
-	w, err := workspace.LoadFromDB(request.Name)
+	w, err := db.FindWorkspace(request.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	//	todo: workspace config should be read from the container labels
-	//		  this is a temporary workaround to move fast
-	credClient := &credentials.CredentialsClient{}
-
-	extensions := []workspace.Extension{}
-
-	vsc_server := vsc_server.VscServerExtension{}
-	extensions = append(extensions, vsc_server)
-
-	ssh := ssh.SshExtension{}
-	extensions = append(extensions, ssh)
-
-	w.Credentials = credClient
-	w.Extensions = extensions
-
 	log.Debug(w)
 
 	if request.Project != "" {
-		err = w.StopProject(request.Project)
+		project, err := getProject(w, request.Project)
+		if err != nil {
+			return nil, err
+		}
+
+		err = provisioner.StopProject(project)
 		if err != nil {
 			log.Error(err)
 			return nil, err
 		}
 	} else {
-		err = w.Stop()
+		err = provisioner.StopWorkspace(w)
 		if err != nil {
 			log.Error(err)
 			return nil, err

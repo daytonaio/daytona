@@ -31,7 +31,7 @@ var ListCmd = &cobra.Command{
 
 		defer conn.Close()
 
-		client := workspace_proto.NewWorkspaceClient(conn)
+		client := workspace_proto.NewWorkspaceServiceClient(conn)
 
 		response, err := client.List(ctx, &empty.Empty{})
 		if err != nil {
