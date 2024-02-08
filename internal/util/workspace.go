@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/daytonaio/daytona/grpc/proto"
+	"github.com/daytonaio/daytona/common/grpc/proto"
 
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"

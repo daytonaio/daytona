@@ -20,7 +20,7 @@ func (f *GRPCErrorFormatter) Format(entry *log.Entry) ([]byte, error) {
 			description := matches[2]
 			switch code {
 			case "Unavailable":
-				return []byte("Daytona Agent is not running. Please run `daytona agent` first\n"), nil
+				return []byte("Daytona Server is not running. Please run `daytona server` first\n"), nil
 			case "Unknown":
 				return []byte(formatUnkownDescription(description)), nil
 			default:
