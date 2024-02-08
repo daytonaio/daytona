@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	profile_list "github.com/daytonaio/daytona/cmd/views/profile_list"
+	views_util "github.com/daytonaio/daytona/cmd/views/util"
 	"github.com/daytonaio/daytona/config"
 
 	log "github.com/sirupsen/logrus"
@@ -26,12 +27,12 @@ var ProfileCmd = &cobra.Command{
 		profilesList := c.Profiles
 
 		if len(profilesList) == 0 {
-			fmt.Println("Add a profile by running `daytona profile add`")
+			views_util.RenderInfoMessage("Add a profile by running `daytona profile add")
 			return
 		}
 
 		if len(profilesList) == 1 {
-			fmt.Println("You are using profile " + profilesList[0].Name + ". Add a new profile by running `daytona profile add`")
+			views_util.RenderInfoMessage(fmt.Sprintf("You are using profile %s. Add a new profile by running `daytona profile add`", profilesList[0].Name))
 			return
 		}
 
@@ -58,7 +59,7 @@ var ProfileCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		fmt.Printf("\nActive profile set to: %s\n\n", chosenProfile.Name)
+		views_util.RenderInfoMessage(fmt.Sprintf("Active profile set to: %s", chosenProfile.Name))
 	},
 }
 

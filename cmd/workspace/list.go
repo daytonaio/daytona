@@ -38,10 +38,13 @@ var ListCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		if output.FormatFlag != "" {
+			output.Output = response
+			return
+		}
+
 		for _, workspaceInfo := range response.Workspaces {
 			fmt.Println(workspaceInfo.Name)
 		}
-
-		output.Output = response
 	},
 }

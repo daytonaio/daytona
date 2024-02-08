@@ -60,9 +60,12 @@ var InfoCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		view.Render(response)
+		if output.FormatFlag != "" {
+			output.Output = response
+			return
+		}
 
-		output.Output = response
+		view.Render(response)
 	},
 }
 

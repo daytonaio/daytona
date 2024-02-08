@@ -5,9 +5,9 @@ package cmd_ports
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/daytonaio/daytona/client"
+	views_util "github.com/daytonaio/daytona/cmd/views/util"
 	"github.com/daytonaio/daytona/grpc/proto"
 	"github.com/daytonaio/daytona/internal/util"
 
@@ -51,7 +51,7 @@ var stopPortForwardCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		fmt.Println("Port forwarding stopped.")
+		views_util.RenderInfoMessage("Port forwarding stopped")
 	},
 }
 
