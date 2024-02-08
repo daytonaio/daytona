@@ -12,14 +12,8 @@ type ProjectAgentGrpcServer struct {
 	Impl ProjectAgent
 }
 
-func (m *ProjectAgentGrpcServer) GetName(ctx context.Context, req *empty.Empty) (*proto.GetNameResponse, error) {
-	name, err := m.Impl.GetName()
-	return &proto.GetNameResponse{Name: name}, err
-}
-
-func (m *ProjectAgentGrpcServer) GetVersion(ctx context.Context, req *empty.Empty) (*proto.GetVersionResponse, error) {
-	version, err := m.Impl.GetVersion()
-	return &proto.GetVersionResponse{Version: version}, err
+func (m *ProjectAgentGrpcServer) GetInfo(ctx context.Context, req *empty.Empty) (*proto.ProjectAgentInfo, error) {
+	return m.Impl.GetInfo()
 }
 
 func (m *ProjectAgentGrpcServer) SetConfig(ctx context.Context, config *proto.ProjectAgentConfig) (*empty.Empty, error) {

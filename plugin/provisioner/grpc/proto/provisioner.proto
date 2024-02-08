@@ -4,12 +4,9 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/struct.proto";
 import "grpc/proto/types/types.proto";
 
-message GetNameResponse {
+message ProvisionerInfo {
   string name = 1;
-}
-
-message GetVersionResponse {
-  string version = 1;
+  string version = 2;
 }
 
 message ConfigureResponse {
@@ -17,8 +14,7 @@ message ConfigureResponse {
 }
 
 service Provisioner {
-  rpc GetName (google.protobuf.Empty) returns (GetNameResponse) {}
-  rpc GetVersion (google.protobuf.Empty) returns (GetVersionResponse) {}
+  rpc GetInfo (google.protobuf.Empty) returns (ProvisionerInfo) {}
   rpc Configure (google.protobuf.Empty) returns (ConfigureResponse) {}
   
   rpc CreateWorkspace (Workspace) returns (google.protobuf.Empty) {}

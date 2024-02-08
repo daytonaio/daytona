@@ -15,8 +15,7 @@ type ProvisionerProfile struct {
 }
 
 type Provisioner interface {
-	GetName() (string, error)
-	GetVersion() (string, error)
+	GetInfo() (*proto.ProvisionerInfo, error)
 
 	//	client side profile config wizard
 	Configure() (interface{}, error)

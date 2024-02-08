@@ -13,14 +13,8 @@ type ProvisionerGrpcServer struct {
 	Impl Provisioner
 }
 
-func (m *ProvisionerGrpcServer) GetName(ctx context.Context, req *empty.Empty) (*proto.GetNameResponse, error) {
-	name, err := m.Impl.GetName()
-	return &proto.GetNameResponse{Name: name}, err
-}
-
-func (m *ProvisionerGrpcServer) GetVersion(ctx context.Context, req *empty.Empty) (*proto.GetVersionResponse, error) {
-	version, err := m.Impl.GetVersion()
-	return &proto.GetVersionResponse{Version: version}, err
+func (m *ProvisionerGrpcServer) GetInfo(ctx context.Context, req *empty.Empty) (*proto.ProvisionerInfo, error) {
+	return m.Impl.GetInfo()
 }
 
 func (m *ProvisionerGrpcServer) Configure(ctx context.Context, req *empty.Empty) (*proto.ConfigureResponse, error) {

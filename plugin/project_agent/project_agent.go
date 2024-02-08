@@ -11,8 +11,7 @@ import (
 )
 
 type ProjectAgent interface {
-	GetName() (string, error)
-	GetVersion() (string, error)
+	GetInfo() (*proto.ProjectAgentInfo, error)
 	SetConfig(config *proto.ProjectAgentConfig) error
 	ProjectPreInit(project *types.Project) error
 	ProjectPostInit(project *types.Project) error

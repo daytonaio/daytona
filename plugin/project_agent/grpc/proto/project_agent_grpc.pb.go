@@ -21,8 +21,7 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	ProjectAgent_GetName_FullMethodName              = "/ProjectAgent/GetName"
-	ProjectAgent_GetVersion_FullMethodName           = "/ProjectAgent/GetVersion"
+	ProjectAgent_GetInfo_FullMethodName              = "/ProjectAgent/GetInfo"
 	ProjectAgent_SetConfig_FullMethodName            = "/ProjectAgent/SetConfig"
 	ProjectAgent_ProjectPreInit_FullMethodName       = "/ProjectAgent/ProjectPreInit"
 	ProjectAgent_ProjectPostInit_FullMethodName      = "/ProjectAgent/ProjectPostInit"
@@ -38,8 +37,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ProjectAgentClient interface {
-	GetName(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetNameResponse, error)
-	GetVersion(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetVersionResponse, error)
+	GetInfo(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ProjectAgentInfo, error)
 	SetConfig(ctx context.Context, in *ProjectAgentConfig, opts ...grpc.CallOption) (*empty.Empty, error)
 	ProjectPreInit(ctx context.Context, in *types.Project, opts ...grpc.CallOption) (*empty.Empty, error)
 	ProjectPostInit(ctx context.Context, in *types.Project, opts ...grpc.CallOption) (*empty.Empty, error)
@@ -59,18 +57,9 @@ func NewProjectAgentClient(cc grpc.ClientConnInterface) ProjectAgentClient {
 	return &projectAgentClient{cc}
 }
 
-func (c *projectAgentClient) GetName(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetNameResponse, error) {
-	out := new(GetNameResponse)
-	err := c.cc.Invoke(ctx, ProjectAgent_GetName_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *projectAgentClient) GetVersion(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetVersionResponse, error) {
-	out := new(GetVersionResponse)
-	err := c.cc.Invoke(ctx, ProjectAgent_GetVersion_FullMethodName, in, out, opts...)
+func (c *projectAgentClient) GetInfo(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ProjectAgentInfo, error) {
+	out := new(ProjectAgentInfo)
+	err := c.cc.Invoke(ctx, ProjectAgent_GetInfo_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -162,8 +151,7 @@ func (c *projectAgentClient) LivenessProbeTimeout(ctx context.Context, in *empty
 // All implementations should embed UnimplementedProjectAgentServer
 // for forward compatibility
 type ProjectAgentServer interface {
-	GetName(context.Context, *empty.Empty) (*GetNameResponse, error)
-	GetVersion(context.Context, *empty.Empty) (*GetVersionResponse, error)
+	GetInfo(context.Context, *empty.Empty) (*ProjectAgentInfo, error)
 	SetConfig(context.Context, *ProjectAgentConfig) (*empty.Empty, error)
 	ProjectPreInit(context.Context, *types.Project) (*empty.Empty, error)
 	ProjectPostInit(context.Context, *types.Project) (*empty.Empty, error)
@@ -179,11 +167,8 @@ type ProjectAgentServer interface {
 type UnimplementedProjectAgentServer struct {
 }
 
-func (UnimplementedProjectAgentServer) GetName(context.Context, *empty.Empty) (*GetNameResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetName not implemented")
-}
-func (UnimplementedProjectAgentServer) GetVersion(context.Context, *empty.Empty) (*GetVersionResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetVersion not implemented")
+func (UnimplementedProjectAgentServer) GetInfo(context.Context, *empty.Empty) (*ProjectAgentInfo, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetInfo not implemented")
 }
 func (UnimplementedProjectAgentServer) SetConfig(context.Context, *ProjectAgentConfig) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetConfig not implemented")
@@ -224,38 +209,20 @@ func RegisterProjectAgentServer(s grpc.ServiceRegistrar, srv ProjectAgentServer)
 	s.RegisterService(&ProjectAgent_ServiceDesc, srv)
 }
 
-func _ProjectAgent_GetName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ProjectAgent_GetInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProjectAgentServer).GetName(ctx, in)
+		return srv.(ProjectAgentServer).GetInfo(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ProjectAgent_GetName_FullMethodName,
+		FullMethod: ProjectAgent_GetInfo_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProjectAgentServer).GetName(ctx, req.(*empty.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ProjectAgent_GetVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(empty.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ProjectAgentServer).GetVersion(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: ProjectAgent_GetVersion_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProjectAgentServer).GetVersion(ctx, req.(*empty.Empty))
+		return srv.(ProjectAgentServer).GetInfo(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -430,12 +397,8 @@ var ProjectAgent_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ProjectAgentServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetName",
-			Handler:    _ProjectAgent_GetName_Handler,
-		},
-		{
-			MethodName: "GetVersion",
-			Handler:    _ProjectAgent_GetVersion_Handler,
+			MethodName: "GetInfo",
+			Handler:    _ProjectAgent_GetInfo_Handler,
 		},
 		{
 			MethodName: "SetConfig",

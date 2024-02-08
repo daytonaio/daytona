@@ -10,20 +10,8 @@ import (
 
 type ProjectAgentGrpcClient struct{ client proto.ProjectAgentClient }
 
-func (m *ProjectAgentGrpcClient) GetName() (string, error) {
-	resp, err := m.client.GetName(context.Background(), &empty.Empty{})
-	if err != nil {
-		return "", err
-	}
-	return resp.Name, nil
-}
-
-func (m *ProjectAgentGrpcClient) GetVersion() (string, error) {
-	resp, err := m.client.GetVersion(context.Background(), &empty.Empty{})
-	if err != nil {
-		return "", err
-	}
-	return resp.Version, nil
+func (m *ProjectAgentGrpcClient) GetInfo() (*proto.ProjectAgentInfo, error) {
+	return m.client.GetInfo(context.Background(), &empty.Empty{})
 }
 
 func (m *ProjectAgentGrpcClient) SetConfig(config *proto.ProjectAgentConfig) error {

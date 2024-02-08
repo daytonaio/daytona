@@ -12,22 +12,8 @@ type ProvisionerGrpcClient struct {
 	client proto.ProvisionerClient
 }
 
-func (m *ProvisionerGrpcClient) GetName() (string, error) {
-	resp, err := m.client.GetName(context.Background(), &empty.Empty{})
-	if err != nil {
-		return "", err
-	}
-
-	return resp.Name, nil
-}
-
-func (m *ProvisionerGrpcClient) GetVersion() (string, error) {
-	resp, err := m.client.GetVersion(context.Background(), &empty.Empty{})
-	if err != nil {
-		return "", err
-	}
-
-	return resp.Version, nil
+func (m *ProvisionerGrpcClient) GetInfo() (*proto.ProvisionerInfo, error) {
+	return m.client.GetInfo(context.Background(), &empty.Empty{})
 }
 
 func (m *ProvisionerGrpcClient) Configure() (interface{}, error) {
