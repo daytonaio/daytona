@@ -1,5 +1,5 @@
 {
-	"name": "Daytona Agent",
+	"name": "Daytona",
 	"build": {
 		"dockerfile": "./Dockerfile"
 	},

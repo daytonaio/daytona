@@ -1,0 +1,47 @@
+syntax = "proto3";
+option go_package = "github.com/daytonaio/daytona/common/grpc/proto/types";
+import "google/protobuf/struct.proto";
+
+message Repository {
+  string url = 1;
+  string branch = 2;
+  string sha = 3;
+  string owner = 4;
+  uint32 prNumber = 5;
+  string source = 6;
+  string path = 7;
+}
+
+message Project {
+  string name = 1;
+  Repository repository = 2;
+  string workspaceId = 3;
+}
+
+message WorkspaceProvisioner {
+  string name = 1;
+  string profile = 2;
+}
+
+message Workspace {
+  string id = 1;
+  string name = 2;
+  repeated Project projects = 3;
+  WorkspaceProvisioner provisioner = 4;
+}
+
+message ProjectInfo {
+  string name = 1;
+  string created = 2;
+  string started = 3;
+  string finished = 4;
+  bool isRunning = 5;
+  google.protobuf.Struct provisionerMetadata = 6;
+  string workspaceId = 7;
+}
+
+message WorkspaceInfo {
+  string name = 1;
+  repeated ProjectInfo projects = 2;
+  google.protobuf.Struct provisionerMetadata = 3;
+}

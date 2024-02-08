@@ -6,7 +6,7 @@ The team at Daytona welcomes contributions from the community. There are many wa
 
 You might find things that can be improved while you are using Daytona. You can help by [submitting an issue](https://github.com/daytonaio/daytona-core-wip/issues/new) when:
 
-* Daytona crashes, or you encounter a bug that can only be resolved by restarting the Daytona agent.
+* Daytona crashes, or you encounter a bug that can only be resolved by restarting the Daytona server.
 * An error occurs that is unrecoverable, causes workspace integrity problems or loss, or generally prevents you from using a workspace.
 * A new feature or an enhancement to an existing feature will improve the utility or usability of Daytona.
 
@@ -134,7 +134,7 @@ fix(server): missing entity on init
 ### Packages:
 
 TODO
-- **agent**
+- **server**
 - **client**
 - **extensions**
 - **cmd**

@@ -20,7 +20,7 @@ TODO: one liner install
 
 [(Back to top)](#table-of-contents)
 
-![Daytona Core](./imgs/daytona-core.png)
+![Daytona Core](./public/images/daytona.png)
 
 Daytona Core offers individual developers advantages over other solutions for managing development environments. With Daytona Core, you have an easy and open source solution in a single binary. No Kubernetes clusters to setup and manage. No SaaS accounts or limited free hours to work with.
 
@@ -51,57 +51,53 @@ The second way is to use Daytona Core to manage remote development environments.
 
 Using Daytona Core is straightforward. You’ll need a Linux host running Docker. This can be local or remote. Here are the commands you will need to get started:
 
-To setup the Daytona Core Agent:
+To setup the Daytona:
+
+Start the server with
 
 ```
-daytona configure
+daytona server
 ```
 
-You can set defaults for the workspace container and a directory to store the projects. Once the agent is configured you can start it:
+In a separate shell or on a different machine you can add a profile for that server.
 
 ```
-daytona-core agent
+daytona profile add
 ```
 
-In a separate shell or on a different machine you can add a profile for that agent.
-
-```
-daytona-core profile add
-```
-
-![Create Profile](./imgs/create-profile.png)
+![Create Profile](./public/images/create-profile.png)
 
 To create a new remote development environment, use:
 
 ```
-daytona-core create <name> -r <https://github.com/repo/youwant>
+daytona create <name> -r <https://github.com/repo/youwant>
 ```
-![Create Workspace](./imgs/create-workspace.png)
+![Create Workspace](./public/images/create-workspace.png)
 
 You can list the running workspaces with:
 
 ```
-daytona-core list
+daytona list
 ```
-![List Workspaces](./imgs/list-workspace.png)
+![List Workspaces](./public/images/list-workspace.png)
 
 You can open the workspace in VS Code with:
 
 ```
-daytona-core open <name>
+daytona open <name>
 ```
 
 Or you can SSH to the workspace with:
 
 ```
-daytona-core ssh <name>
+daytona ssh <name>
 ```
 
-![SSH to Workspace](./imgs/ssh-workspace.png)
+![SSH to Workspace](./public/images/ssh-workspace.png)
 
 When you are done:
 ```
-daytona-core delete <name>
+daytona delete <name>
 ```
 
 You can find more detailed documentation here. <INSERT DOCS LINK>
