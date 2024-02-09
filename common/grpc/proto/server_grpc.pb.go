@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v3.12.4
-// source: common/grpc/proto/agent.proto
+// source: common/grpc/proto/server.proto
 
 package proto
 
@@ -24,16 +24,20 @@ const (
 	Server_GenerateKey_FullMethodName  = "/Server/GenerateKey"
 	Server_SetKey_FullMethodName       = "/Server/SetKey"
 	Server_DeleteKey_FullMethodName    = "/Server/DeleteKey"
+	Server_GetConfig_FullMethodName    = "/Server/GetConfig"
+	Server_SetConfig_FullMethodName    = "/Server/SetConfig"
 )
 
 // ServerClient is the client API for Server service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ServerClient interface {
-	GetPublicKey(ctx context.Context, in *GetPublicKeyRequest, opts ...grpc.CallOption) (*GetPublicKeyResponse, error)
-	GenerateKey(ctx context.Context, in *GenerateKeyRequest, opts ...grpc.CallOption) (*GetPublicKeyResponse, error)
+	GetPublicKey(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetPublicKeyResponse, error)
+	GenerateKey(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetPublicKeyResponse, error)
 	SetKey(ctx context.Context, in *SetKeyRequest, opts ...grpc.CallOption) (*GetPublicKeyResponse, error)
-	DeleteKey(ctx context.Context, in *DeleteKeyRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	DeleteKey(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*empty.Empty, error)
+	GetConfig(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetConfigResponse, error)
+	SetConfig(ctx context.Context, in *SetConfigRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type serverClient struct {
@@ -44,7 +48,7 @@ func NewServerClient(cc grpc.ClientConnInterface) ServerClient {
 	return &serverClient{cc}
 }
 
-func (c *serverClient) GetPublicKey(ctx context.Context, in *GetPublicKeyRequest, opts ...grpc.CallOption) (*GetPublicKeyResponse, error) {
+func (c *serverClient) GetPublicKey(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetPublicKeyResponse, error) {
 	out := new(GetPublicKeyResponse)
 	err := c.cc.Invoke(ctx, Server_GetPublicKey_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -53,7 +57,7 @@ func (c *serverClient) GetPublicKey(ctx context.Context, in *GetPublicKeyRequest
 	return out, nil
 }
 
-func (c *serverClient) GenerateKey(ctx context.Context, in *GenerateKeyRequest, opts ...grpc.CallOption) (*GetPublicKeyResponse, error) {
+func (c *serverClient) GenerateKey(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetPublicKeyResponse, error) {
 	out := new(GetPublicKeyResponse)
 	err := c.cc.Invoke(ctx, Server_GenerateKey_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -71,9 +75,27 @@ func (c *serverClient) SetKey(ctx context.Context, in *SetKeyRequest, opts ...gr
 	return out, nil
 }
 
-func (c *serverClient) DeleteKey(ctx context.Context, in *DeleteKeyRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *serverClient) DeleteKey(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, Server_DeleteKey_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *serverClient) GetConfig(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetConfigResponse, error) {
+	out := new(GetConfigResponse)
+	err := c.cc.Invoke(ctx, Server_GetConfig_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *serverClient) SetConfig(ctx context.Context, in *SetConfigRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, Server_SetConfig_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -84,27 +106,35 @@ func (c *serverClient) DeleteKey(ctx context.Context, in *DeleteKeyRequest, opts
 // All implementations should embed UnimplementedServerServer
 // for forward compatibility
 type ServerServer interface {
-	GetPublicKey(context.Context, *GetPublicKeyRequest) (*GetPublicKeyResponse, error)
-	GenerateKey(context.Context, *GenerateKeyRequest) (*GetPublicKeyResponse, error)
+	GetPublicKey(context.Context, *empty.Empty) (*GetPublicKeyResponse, error)
+	GenerateKey(context.Context, *empty.Empty) (*GetPublicKeyResponse, error)
 	SetKey(context.Context, *SetKeyRequest) (*GetPublicKeyResponse, error)
-	DeleteKey(context.Context, *DeleteKeyRequest) (*empty.Empty, error)
+	DeleteKey(context.Context, *empty.Empty) (*empty.Empty, error)
+	GetConfig(context.Context, *empty.Empty) (*GetConfigResponse, error)
+	SetConfig(context.Context, *SetConfigRequest) (*empty.Empty, error)
 }
 
 // UnimplementedServerServer should be embedded to have forward compatible implementations.
 type UnimplementedServerServer struct {
 }
 
-func (UnimplementedServerServer) GetPublicKey(context.Context, *GetPublicKeyRequest) (*GetPublicKeyResponse, error) {
+func (UnimplementedServerServer) GetPublicKey(context.Context, *empty.Empty) (*GetPublicKeyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPublicKey not implemented")
 }
-func (UnimplementedServerServer) GenerateKey(context.Context, *GenerateKeyRequest) (*GetPublicKeyResponse, error) {
+func (UnimplementedServerServer) GenerateKey(context.Context, *empty.Empty) (*GetPublicKeyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GenerateKey not implemented")
 }
 func (UnimplementedServerServer) SetKey(context.Context, *SetKeyRequest) (*GetPublicKeyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetKey not implemented")
 }
-func (UnimplementedServerServer) DeleteKey(context.Context, *DeleteKeyRequest) (*empty.Empty, error) {
+func (UnimplementedServerServer) DeleteKey(context.Context, *empty.Empty) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteKey not implemented")
+}
+func (UnimplementedServerServer) GetConfig(context.Context, *empty.Empty) (*GetConfigResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetConfig not implemented")
+}
+func (UnimplementedServerServer) SetConfig(context.Context, *SetConfigRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetConfig not implemented")
 }
 
 // UnsafeServerServer may be embedded to opt out of forward compatibility for this service.
@@ -119,7 +149,7 @@ func RegisterServerServer(s grpc.ServiceRegistrar, srv ServerServer) {
 }
 
 func _Server_GetPublicKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetPublicKeyRequest)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -131,13 +161,13 @@ func _Server_GetPublicKey_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: Server_GetPublicKey_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ServerServer).GetPublicKey(ctx, req.(*GetPublicKeyRequest))
+		return srv.(ServerServer).GetPublicKey(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Server_GenerateKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GenerateKeyRequest)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -149,7 +179,7 @@ func _Server_GenerateKey_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: Server_GenerateKey_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ServerServer).GenerateKey(ctx, req.(*GenerateKeyRequest))
+		return srv.(ServerServer).GenerateKey(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -173,7 +203,7 @@ func _Server_SetKey_Handler(srv interface{}, ctx context.Context, dec func(inter
 }
 
 func _Server_DeleteKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteKeyRequest)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -185,7 +215,43 @@ func _Server_DeleteKey_Handler(srv interface{}, ctx context.Context, dec func(in
 		FullMethod: Server_DeleteKey_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ServerServer).DeleteKey(ctx, req.(*DeleteKeyRequest))
+		return srv.(ServerServer).DeleteKey(ctx, req.(*empty.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Server_GetConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(empty.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServerServer).GetConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Server_GetConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServerServer).GetConfig(ctx, req.(*empty.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Server_SetConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServerServer).SetConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Server_SetConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServerServer).SetConfig(ctx, req.(*SetConfigRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -213,7 +279,15 @@ var Server_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "DeleteKey",
 			Handler:    _Server_DeleteKey_Handler,
 		},
+		{
+			MethodName: "GetConfig",
+			Handler:    _Server_GetConfig_Handler,
+		},
+		{
+			MethodName: "SetConfig",
+			Handler:    _Server_SetConfig_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "common/grpc/proto/agent.proto",
+	Metadata: "common/grpc/proto/server.proto",
 }
