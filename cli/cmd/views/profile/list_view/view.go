@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/daytonaio/daytona/cli/cmd/views"
+	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	"github.com/daytonaio/daytona/cli/config"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -121,7 +122,7 @@ func renderProfileList(profileList []config.Profile, activeProfileId string, sel
 }
 
 func GetProfileIdFromPrompt(profileList []config.Profile, activeProfileId, title string, withCreateOption bool) string {
-	fmt.Println("\n" + lipgloss.NewStyle().Foreground(views.Green).Bold(true).Render(title))
+	views_util.RenderMainTitle(title)
 
 	withNewProfile := profileList
 
