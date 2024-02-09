@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/daytonaio/daytona/cli/cmd/output"
+	. "github.com/daytonaio/daytona/cli/cmd/plugin"
 	. "github.com/daytonaio/daytona/cli/cmd/ports"
 	. "github.com/daytonaio/daytona/cli/cmd/profile"
 	. "github.com/daytonaio/daytona/cli/cmd/server"
@@ -44,6 +45,7 @@ func Execute() {
 		rootCmd.AddCommand(ServerCmd)
 		rootCmd.AddCommand(ideCmd)
 		rootCmd.AddCommand(ProfileCmd)
+		rootCmd.AddCommand(PluginCmd)
 	}
 
 	rootCmd.PersistentFlags().BoolP("help", "", false, "help for daytona")

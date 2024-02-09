@@ -11,6 +11,7 @@ import (
 
 	proto "github.com/daytonaio/daytona/common/grpc/proto"
 	"github.com/daytonaio/daytona/server/config"
+	plugin_grpc "github.com/daytonaio/daytona/server/grpc/plugins"
 	ports_grpc "github.com/daytonaio/daytona/server/grpc/ports"
 	server_grpc "github.com/daytonaio/daytona/server/grpc/server"
 	workspace_grpc "github.com/daytonaio/daytona/server/grpc/workspace"
@@ -57,8 +58,10 @@ func Start() error {
 	proto.RegisterWorkspaceServiceServer(s, workspaceServer)
 	portsServer := &ports_grpc.PortsServer{}
 	proto.RegisterPortsServer(s, portsServer)
-	serverServer := &server_grpc.ServerGRPCServer{}
-	proto.RegisterServerServer(s, serverServer)
+	serverGrpcServer := &server_grpc.ServerGRPCServer{}
+	proto.RegisterServerServer(s, serverGrpcServer)
+	pluginsServer := &plugin_grpc.PluginsServer{}
+	proto.RegisterPluginsServer(s, pluginsServer)
 
 	err = downloadDefaultPlugins()
 	if err != nil {

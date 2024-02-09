@@ -2,6 +2,7 @@ package provisioner_manager
 
 import (
 	"errors"
+	"os"
 	"os/exec"
 	"path"
 
@@ -14,7 +15,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var provisionerClients map[string]*plugin.Client = make(map[string]*plugin.Client)
+type pluginRef struct {
+	client *plugin.Client
+	path   string
+}
+
+var pluginRefs map[string]*pluginRef = make(map[string]*pluginRef)
 
 var ProvisionerHandshakeConfig = plugin.HandshakeConfig{
 	ProtocolVersion:  1,
@@ -23,12 +29,12 @@ var ProvisionerHandshakeConfig = plugin.HandshakeConfig{
 }
 
 func GetProvisioner(name string) (*Provisioner, error) {
-	client, ok := provisionerClients[name]
+	pluginRef, ok := pluginRefs[name]
 	if !ok {
 		return nil, errors.New("provisioner not found")
 	}
 
-	rpcClient, err := client.Client()
+	rpcClient, err := pluginRef.client.Client()
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +54,7 @@ func GetProvisioner(name string) (*Provisioner, error) {
 
 func GetProvisioners() map[string]Provisioner {
 	provisioners := make(map[string]Provisioner)
-	for name := range provisionerClients {
+	for name := range pluginRefs {
 		provisioner, err := GetProvisioner(name)
 		if err != nil {
 			log.Printf("Error getting provisioner %s: %s", name, err)
@@ -88,7 +94,10 @@ func RegisterProvisioner(pluginPath string) error {
 		AllowedProtocols: []plugin.Protocol{plugin.ProtocolGRPC},
 	})
 
-	provisionerClients[pluginName] = client
+	pluginRefs[pluginName] = &pluginRef{
+		client: client,
+		path:   pluginBasePath,
+	}
 
 	log.Infof("Provisioner %s registered", pluginName)
 
@@ -105,6 +114,23 @@ func RegisterProvisioner(pluginPath string) error {
 	}
 
 	log.Infof("Provisioner %s initialized", pluginName)
+
+	return nil
+}
+
+func UninstallProvisioner(name string) error {
+	pluginRef, ok := pluginRefs[name]
+	if !ok {
+		return errors.New("provisioner not found")
+	}
+	pluginRef.client.Kill()
+
+	err := os.RemoveAll(pluginRef.path)
+	if err != nil {
+		return errors.New("failed to remove provisioner: " + err.Error())
+	}
+
+	delete(pluginRefs, name)
 
 	return nil
 }
