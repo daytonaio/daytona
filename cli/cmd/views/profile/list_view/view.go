@@ -39,10 +39,10 @@ type model struct {
 }
 
 func (m model) Init() tea.Cmd {
-
 	if !m.selectable {
 		return tea.Quit
 	}
+
 	return nil
 }
 
@@ -76,7 +76,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 var baseStyle = lipgloss.NewStyle().
 	BorderStyle(lipgloss.RoundedBorder()).
-	Padding(0, 1)
+	Padding(0, 1).MarginBottom(1)
 
 func (m model) View() string {
 	return baseStyle.Render(m.table.View())
@@ -135,23 +135,28 @@ func GetProfileIdFromPrompt(profileList []config.Profile, activeProfileId, title
 
 	modelInstance := renderProfileList(withNewProfile, activeProfileId, true)
 
-	selectedProfileId := make(chan string)
-
-	go func() {
-		m, err := tea.NewProgram(modelInstance).Run()
-		if err != nil {
-			fmt.Println("Error running program:", err)
-			os.Exit(1)
-		}
-
-		selectedProfileId <- m.(model).selectedProfileId
-	}()
-
-	profileId := <-selectedProfileId
+	m, err := tea.NewProgram(modelInstance).Run()
+	if err != nil {
+		fmt.Println("Error running program:", err)
+		os.Exit(1)
+	}
+	profileId := m.(model).selectedProfileId
 
 	lipgloss.DefaultRenderer().Output().ClearLines(strings.Count(modelInstance.View(), "\n") + 2)
 
 	return profileId
+}
+
+func ListProfiles(profileList []config.Profile, activeProfileId string) {
+	views_util.RenderMainTitle("Profiles")
+
+	modelInstance := renderProfileList(profileList, activeProfileId, false)
+
+	_, err := tea.NewProgram(modelInstance).Run()
+	if err != nil {
+		fmt.Println("Error running program:", err)
+		os.Exit(1)
+	}
 }
 
 func getTable(rows []table.Row, cols []table.Column, selectable bool, activeRow int) table.Model {
