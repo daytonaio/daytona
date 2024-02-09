@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"path"
 
+	"github.com/daytonaio/daytona/internal/util"
 	. "github.com/daytonaio/daytona/plugins/provisioner"
 	"github.com/daytonaio/daytona/plugins/provisioner/grpc/proto"
 	"github.com/daytonaio/daytona/plugins/utils"
@@ -63,6 +64,11 @@ func GetProvisioners() map[string]Provisioner {
 func RegisterProvisioner(pluginPath string) error {
 	pluginName := path.Base(pluginPath)
 	pluginBasePath := path.Dir(pluginPath)
+
+	err := util.ChmodX(pluginPath)
+	if err != nil {
+		return errors.New("failed to chmod plugin: " + err.Error())
+	}
 
 	logger := hclog.New(&hclog.LoggerOptions{
 		Name:   pluginName,

@@ -2,8 +2,8 @@ package remote_installer
 
 import (
 	"fmt"
-	"strings"
 
+	"github.com/daytonaio/daytona/common/os"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -26,18 +26,9 @@ type SSHClient interface {
 type RemoteInstaller struct {
 	Client     SSHClient
 	Password   string
-	BinaryUrl  map[RemoteOS]string
+	BinaryUrl  map[os.OperatingSystem]string
 	Downloader DownloaderType
 }
-
-type RemoteOS int
-
-const (
-	OSLinux_64_86 RemoteOS = iota
-	OSLinux_arm64
-	OSDarwin_64_86
-	OSDarwin_arm64
-)
 
 type DownloaderType int
 
@@ -46,7 +37,7 @@ const (
 	DownloaderWget
 )
 
-func (s *RemoteInstaller) InstallBinary(os RemoteOS) error {
+func (s *RemoteInstaller) InstallBinary(os os.OperatingSystem) error {
 	session, err := s.Client.NewSession()
 	if err != nil {
 		return err
@@ -76,21 +67,21 @@ func (s *RemoteInstaller) InstallBinary(os RemoteOS) error {
 	return nil
 }
 
-func (s *RemoteInstaller) RegisterDaemon(os RemoteOS) error {
+func (s *RemoteInstaller) RegisterDaemon(remoteOs os.OperatingSystem) error {
 	session, err := s.Client.NewSession()
 	if err != nil {
 		return err
 	}
 	defer (*session).Close()
 
-	switch os {
-	case OSDarwin_64_86:
+	switch remoteOs {
+	case os.Darwin_64_86:
 		fallthrough
-	case OSDarwin_arm64:
+	case os.Darwin_arm64:
 		fallthrough
-	case OSLinux_64_86:
+	case os.Linux_64_86:
 		fallthrough
-	case OSLinux_arm64:
+	case os.Linux_arm64:
 		output, err := (*session).Output("echo $(daytona server startup > /dev/null 2>&1; echo $?)")
 		if err != nil {
 			return err
@@ -102,11 +93,11 @@ func (s *RemoteInstaller) RegisterDaemon(os RemoteOS) error {
 			return fmt.Errorf("unexpected exit status: %s", string(output))
 		}
 	default:
-		return fmt.Errorf("unexpected os: %d", os)
+		return fmt.Errorf("unexpected os: %d", remoteOs)
 	}
 }
 
-func (s *RemoteInstaller) InstallDocker(os RemoteOS) error {
+func (s *RemoteInstaller) InstallDocker(remoteOS os.OperatingSystem) error {
 	session, err := s.Client.NewSession()
 	if err != nil {
 		return err
@@ -115,21 +106,21 @@ func (s *RemoteInstaller) InstallDocker(os RemoteOS) error {
 
 	var cmd string
 
-	switch os {
-	case OSDarwin_64_86:
+	switch remoteOS {
+	case os.Darwin_64_86:
 		fallthrough
-	case OSDarwin_arm64:
+	case os.Darwin_arm64:
 		fallthrough
-	case OSLinux_64_86:
+	case os.Linux_64_86:
 		fallthrough
-	case OSLinux_arm64:
+	case os.Linux_arm64:
 		if s.Downloader == DownloaderCurl {
 			cmd = "curl -fsSL https://get.docker.com | sh"
 		} else {
 			cmd = "wget -qO- https://get.docker.com | sh"
 		}
 	default:
-		return fmt.Errorf("unexpected os: %d", os)
+		return fmt.Errorf("unexpected os: %d", remoteOS)
 	}
 
 	err = (*session).Run(cmd)
@@ -157,7 +148,7 @@ func (s *RemoteInstaller) AddUserToDockerGroup(user string) error {
 	}
 }
 
-func (s *RemoteInstaller) DetectOs() (*RemoteOS, error) {
+func (s *RemoteInstaller) DetectOs() (*os.OperatingSystem, error) {
 	session, err := s.Client.NewSession()
 	if err != nil {
 		return nil, err
@@ -169,26 +160,7 @@ func (s *RemoteInstaller) DetectOs() (*RemoteOS, error) {
 		return nil, err
 	}
 
-	fields := strings.Fields(string(output))
-	if len(fields) < 13 {
-		return nil, fmt.Errorf("unexpected output format")
-	}
-
-	if strings.Contains(string(output), "Darwin") && strings.Contains(string(output), "arm64") {
-		arch := OSDarwin_arm64
-		return &arch, nil
-	} else if strings.Contains(string(output), "Darwin") && strings.Contains(string(output), "x86_64") {
-		arch := OSDarwin_64_86
-		return &arch, nil
-	} else if strings.Contains(string(output), "arm64") {
-		arch := OSLinux_arm64
-		return &arch, nil
-	} else if strings.Contains(string(output), "x86_64") {
-		arch := OSLinux_64_86
-		return &arch, nil
-	} else {
-		return nil, fmt.Errorf("unsupported architecture in uname -a output")
-	}
+	return os.OSFromUnameA(string(output))
 }
 
 func (s *RemoteInstaller) ServerRegistered() (bool, error) {
@@ -271,21 +243,21 @@ func (s *RemoteInstaller) WgetInstalled() (bool, error) {
 	}
 }
 
-func (s *RemoteInstaller) RemoveBinary(os RemoteOS) error {
+func (s *RemoteInstaller) RemoveBinary(remoteOS os.OperatingSystem) error {
 	session, err := s.Client.NewSession()
 	if err != nil {
 		return err
 	}
 	defer (*session).Close()
 
-	switch os {
-	case OSDarwin_64_86:
+	switch remoteOS {
+	case os.Darwin_64_86:
 		fallthrough
-	case OSDarwin_arm64:
+	case os.Darwin_arm64:
 		fallthrough
-	case OSLinux_64_86:
+	case os.Linux_64_86:
 		fallthrough
-	case OSLinux_arm64:
+	case os.Linux_arm64:
 
 		cmd := fmt.Sprintf("echo $(echo '%s' | sudo -S rm /usr/local/bin/daytona > /dev/null 2>&1; echo $?)", s.Password)
 		output, err := (*session).CombinedOutput(cmd)
@@ -299,25 +271,25 @@ func (s *RemoteInstaller) RemoveBinary(os RemoteOS) error {
 			return fmt.Errorf("unexpected exit status: %s", string(output))
 		}
 	default:
-		return fmt.Errorf("unexpected os: %d", os)
+		return fmt.Errorf("unexpected os: %d", remoteOS)
 	}
 }
 
-func (s *RemoteInstaller) RemoveDaemon(os RemoteOS) error {
+func (s *RemoteInstaller) RemoveDaemon(remoteOS os.OperatingSystem) error {
 	session, err := s.Client.NewSession()
 	if err != nil {
 		return err
 	}
 	defer (*session).Close()
 
-	switch os {
-	case OSDarwin_64_86:
+	switch remoteOS {
+	case os.Darwin_64_86:
 		fallthrough
-	case OSDarwin_arm64:
+	case os.Darwin_arm64:
 		fallthrough
-	case OSLinux_64_86:
+	case os.Linux_64_86:
 		fallthrough
-	case OSLinux_arm64:
+	case os.Linux_arm64:
 		output, _ := (*session).CombinedOutput("echo $((systemctl --user stop daytona-server.service && systemctl --user disable daytona-server.service && rm $HOME/.config/systemd/user/daytona-server.service) > /dev/null 2>&1; echo $?)")
 		if err != nil {
 			return err
@@ -329,6 +301,6 @@ func (s *RemoteInstaller) RemoveDaemon(os RemoteOS) error {
 			return fmt.Errorf("unexpected exit status: %s", string(output))
 		}
 	default:
-		return fmt.Errorf("unexpected os: %d", os)
+		return fmt.Errorf("unexpected os: %d", remoteOS)
 	}
 }
