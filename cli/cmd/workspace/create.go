@@ -16,10 +16,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	init_view "github.com/daytonaio/daytona/cli/cmd/views/init_workspace"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
-	wizard_view "github.com/daytonaio/daytona/cli/cmd/views/workspace_create_wizard"
-	info_view "github.com/daytonaio/daytona/cli/cmd/views/workspace_info"
+	wizard_view "github.com/daytonaio/daytona/cli/cmd/views/workspace/creation_wizard"
+	info_view "github.com/daytonaio/daytona/cli/cmd/views/workspace/info_view"
+	init_view "github.com/daytonaio/daytona/cli/cmd/views/workspace/init_view"
 	"github.com/daytonaio/daytona/cli/connection"
 )
 

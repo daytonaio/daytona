@@ -6,11 +6,11 @@ package cmd_profile
 import (
 	"errors"
 
-	"github.com/daytonaio/daytona/cli/cmd/views/profile_info"
-	profile_list "github.com/daytonaio/daytona/cli/cmd/views/profile_list"
+	"github.com/daytonaio/daytona/cli/cmd/views/profile/info_view"
+	list_view "github.com/daytonaio/daytona/cli/cmd/views/profile/list_view"
 	"github.com/daytonaio/daytona/cli/config"
 
-	view "github.com/daytonaio/daytona/cli/cmd/views/profile_create_wizard"
+	view "github.com/daytonaio/daytona/cli/cmd/views/profile/creation_wizard"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -32,7 +32,7 @@ var profileEditCmd = &cobra.Command{
 		if len(args) == 0 {
 			profilesList := c.Profiles
 
-			chosenProfileId = profile_list.GetProfileIdFromPrompt(profilesList, c.ActiveProfileId, "Choose a profile to edit", false)
+			chosenProfileId = list_view.GetProfileIdFromPrompt(profilesList, c.ActiveProfileId, "Choose a profile to edit", false)
 
 			if chosenProfileId == "" {
 				return
@@ -114,7 +114,7 @@ var profileEditCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		profile_info.Render(profile_info.ProfileInfo{
+		info_view.Render(info_view.ProfileInfo{
 			ProfileName: profileEditView.ProfileName,
 			ServerUrl:   profileEditView.RemoteHostname,
 		}, "edited")

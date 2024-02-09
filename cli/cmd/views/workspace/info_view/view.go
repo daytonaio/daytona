@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package workspace_info_view
+package info_view_view
 
 // A simple program that counts down from 5 and then exits.
 

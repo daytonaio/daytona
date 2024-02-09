@@ -6,7 +6,7 @@ package cmd
 import (
 	"fmt"
 
-	ide_select_prompt "github.com/daytonaio/daytona/cli/cmd/views/ide_select_prompt"
+	ide_select_prompt "github.com/daytonaio/daytona/cli/cmd/views"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	"github.com/daytonaio/daytona/cli/config"
 

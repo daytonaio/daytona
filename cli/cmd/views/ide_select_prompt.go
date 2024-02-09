@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package ide_select_prompt
+package views
 
 import (
 	"fmt"
@@ -9,7 +9,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/daytonaio/daytona/cli/cmd/views"
 	"github.com/daytonaio/daytona/cli/config"
 
 	"github.com/charmbracelet/bubbles/list"
@@ -24,7 +23,7 @@ const listHeight = 8
 var (
 	titleStyle        = lipgloss.NewStyle().MarginLeft(2)
 	itemStyle         = lipgloss.NewStyle().PaddingLeft(4)
-	selectedItemStyle = lipgloss.NewStyle().PaddingLeft(2).Foreground(views.Blue).Bold(true)
+	selectedItemStyle = lipgloss.NewStyle().PaddingLeft(2).Foreground(Blue).Bold(true)
 	paginationStyle   = list.DefaultStyles().PaginationStyle.PaddingLeft(4)
 	helpStyle         = list.DefaultStyles().HelpStyle.PaddingLeft(4).PaddingBottom(1)
 	quitTextStyle     = lipgloss.NewStyle().Margin(1, 0, 2, 4)
@@ -117,7 +116,7 @@ func Render(ideList []config.Ide, choiceChan chan<- string) {
 	const defaultWidth = 20
 
 	l := list.New(items, itemDelegate{}, defaultWidth, listHeight)
-	l.Title = lipgloss.NewStyle().Foreground(views.Green).Bold(true).Render("Choose your default IDE")
+	l.Title = lipgloss.NewStyle().Foreground(Green).Bold(true).Render("Choose your default IDE")
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)
 	l.Styles.Title = titleStyle

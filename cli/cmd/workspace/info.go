@@ -14,8 +14,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/daytonaio/daytona/cli/cmd/output"
-	view "github.com/daytonaio/daytona/cli/cmd/views/workspace_info"
-	select_prompt "github.com/daytonaio/daytona/cli/cmd/views/workspace_select_prompt"
+	view "github.com/daytonaio/daytona/cli/cmd/views/workspace/info_view"
+	select_prompt "github.com/daytonaio/daytona/cli/cmd/views/workspace/select_prompt"
 	"github.com/daytonaio/daytona/cli/connection"
 )
 

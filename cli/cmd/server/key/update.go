@@ -7,7 +7,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/daytonaio/daytona/cli/cmd/views/server_update_key"
+	"github.com/daytonaio/daytona/cli/cmd/views/server/key_update_prompt"
 	"github.com/daytonaio/daytona/cli/connection"
 	"github.com/daytonaio/daytona/common/grpc/proto"
 
@@ -27,7 +27,7 @@ var updateKeyCmd = &cobra.Command{
 		}
 		defer conn.Close()
 
-		updateKeyView := server_update_key.ServerUpdateKeyView{
+		updateKeyView := key_update_prompt.ServerUpdateKeyView{
 			GenerateNewKey:   true,
 			PathToPrivateKey: "",
 		}
@@ -38,7 +38,7 @@ var updateKeyCmd = &cobra.Command{
 		} else if generateFlag {
 			updateKeyView.GenerateNewKey = true
 		} else {
-			server_update_key.InteractiveForm(&updateKeyView)
+			key_update_prompt.InteractiveForm(&updateKeyView)
 		}
 
 		serverClient := proto.NewServerClient(conn)
