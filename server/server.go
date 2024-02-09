@@ -12,6 +12,7 @@ import (
 	"path"
 
 	proto "github.com/daytonaio/daytona/common/grpc/proto"
+	"github.com/daytonaio/daytona/common/grpc/proto/types"
 	agent_service_manager "github.com/daytonaio/daytona/plugins/agent_service/manager"
 	provisioner_manager "github.com/daytonaio/daytona/plugins/provisioner/manager"
 	"github.com/daytonaio/daytona/server/config"
@@ -138,7 +139,7 @@ func getUnixListener() (*net.Listener, error) {
 	return &lis, nil
 }
 
-func registerProvisioners(c *config.Config) error {
+func registerProvisioners(c *types.ServerConfig) error {
 	log.Info("Registering provisioners")
 
 	provisionerPluginsPath := path.Join(c.PluginsDir, "provisioners")
@@ -173,7 +174,7 @@ func registerProvisioners(c *config.Config) error {
 	return nil
 }
 
-func registerAgentServices(c *config.Config) error {
+func registerAgentServices(c *types.ServerConfig) error {
 	log.Info("Registering agent services")
 	projectAgentPluginsPath := path.Join(c.PluginsDir, "agent_services")
 
