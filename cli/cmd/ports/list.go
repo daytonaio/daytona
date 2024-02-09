@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/cli/cmd/output"
+	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	"github.com/daytonaio/daytona/cli/connection"
 	"github.com/daytonaio/daytona/common/grpc/proto"
 
@@ -59,12 +60,12 @@ func listPortForwards(conn *grpc.ClientConn, workspaceName string, projectName s
 	}
 
 	for project, portForward := range response.ProjectPortForwards {
-		fmt.Printf("Project: %s\n", project)
+		views_util.RenderInfoMessage(fmt.Sprintf("Project: %s\n", project))
 		for _, port := range portForward.PortForwards {
 			if port.HostPort != port.ContainerPort {
-				fmt.Printf("\tPort: %d (host: %d)\n", port.ContainerPort, port.HostPort)
+				views_util.RenderInfoMessage(fmt.Sprintf("Port: %d (host: %d)", port.ContainerPort, port.HostPort))
 			} else {
-				fmt.Printf("\tPort: %d\n", port.ContainerPort)
+				views_util.RenderInfoMessage(fmt.Sprintf("Port: %d", port.ContainerPort))
 			}
 		}
 	}
@@ -84,9 +85,9 @@ func listProjectPortForwards(conn *grpc.ClientConn, workspaceName string, projec
 
 	for _, port := range projectPortForwards.PortForwards {
 		if port.HostPort != port.ContainerPort {
-			fmt.Printf("Port: %d (host: %d)\n", port.ContainerPort, port.HostPort)
+			views_util.RenderInfoMessage(fmt.Sprintf("Port: %d (host: %d)", port.ContainerPort, port.HostPort))
 		} else {
-			fmt.Printf("Port: %d\n", port.ContainerPort)
+			views_util.RenderInfoMessage(fmt.Sprintf("Port: %d", port.ContainerPort))
 		}
 	}
 

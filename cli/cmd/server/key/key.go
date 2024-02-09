@@ -47,8 +47,8 @@ func init() {
 func copyKeyAndNotify(key string) {
 	err := clipboard.WriteAll(key)
 	if err != nil {
-		fmt.Println("Server Public Key")
-		fmt.Println("Add this public key into your Git provider to enable cloning private repositories.")
+		views_util.RenderInfoMessage("Server Public Key")
+		views_util.RenderInfoMessage("Add this public key into your Git provider to enable cloning private repositories.")
 	} else {
 		views_util.RenderInfoMessageBold("Server's Public Key has been copied to your clipboard.")
 		views_util.RenderInfoMessage("Add it to your Git provider to enable cloning private repositories.")
