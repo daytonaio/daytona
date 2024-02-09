@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/cli/cmd/output"
-	profile_list "github.com/daytonaio/daytona/cli/cmd/views/profile_list"
+	list_view "github.com/daytonaio/daytona/cli/cmd/views/profile/list_view"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	"github.com/daytonaio/daytona/cli/config"
 
@@ -29,7 +29,7 @@ var profileListCmd = &cobra.Command{
 			return
 		}
 
-		chosenProfileId := profile_list.GetProfileIdFromPrompt(c.Profiles, c.ActiveProfileId, "Profiles", false)
+		chosenProfileId := list_view.GetProfileIdFromPrompt(c.Profiles, c.ActiveProfileId, "Profiles", false)
 
 		if chosenProfileId == "" {
 			return

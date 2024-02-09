@@ -6,7 +6,7 @@ package cmd_profile
 import (
 	"os"
 
-	profile_list "github.com/daytonaio/daytona/cli/cmd/views/profile_list"
+	list_view "github.com/daytonaio/daytona/cli/cmd/views/profile/list_view"
 	"github.com/daytonaio/daytona/cli/config"
 	"github.com/daytonaio/daytona/internal/util"
 
@@ -31,7 +31,7 @@ var profileDeleteCmd = &cobra.Command{
 		if len(args) == 0 {
 			profilesList := c.Profiles
 
-			chosenProfileId = profile_list.GetProfileIdFromPrompt(profilesList, c.ActiveProfileId, "Choose a profile to delete", false)
+			chosenProfileId = list_view.GetProfileIdFromPrompt(profilesList, c.ActiveProfileId, "Choose a profile to delete", false)
 
 			if chosenProfileId == "" {
 				return
