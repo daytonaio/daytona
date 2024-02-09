@@ -17,4 +17,5 @@ var PluginCmd = &cobra.Command{
 func init() {
 	PluginCmd.AddCommand(pluginListCmd)
 	PluginCmd.AddCommand(pluginUninstallCmd)
+	PluginCmd.AddCommand(pluginInstallCmd)
 }

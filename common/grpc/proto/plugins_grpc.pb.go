@@ -22,6 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 const (
 	Plugins_ListProvisionerPlugins_FullMethodName      = "/Plugins/ListProvisionerPlugins"
 	Plugins_ListAgentServicePlugins_FullMethodName     = "/Plugins/ListAgentServicePlugins"
+	Plugins_InstallProvisionerPlugin_FullMethodName    = "/Plugins/InstallProvisionerPlugin"
+	Plugins_InstallAgentServicePlugin_FullMethodName   = "/Plugins/InstallAgentServicePlugin"
 	Plugins_UninstallProvisionerPlugin_FullMethodName  = "/Plugins/UninstallProvisionerPlugin"
 	Plugins_UninstallAgentServicePlugin_FullMethodName = "/Plugins/UninstallAgentServicePlugin"
 )
@@ -32,6 +34,8 @@ const (
 type PluginsClient interface {
 	ListProvisionerPlugins(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ProvisionerPluginList, error)
 	ListAgentServicePlugins(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AgentServicePluginList, error)
+	InstallProvisionerPlugin(ctx context.Context, in *InstallPluginRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	InstallAgentServicePlugin(ctx context.Context, in *InstallPluginRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	UninstallProvisionerPlugin(ctx context.Context, in *UninstallPluginRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	UninstallAgentServicePlugin(ctx context.Context, in *UninstallPluginRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
@@ -62,6 +66,24 @@ func (c *pluginsClient) ListAgentServicePlugins(ctx context.Context, in *empty.E
 	return out, nil
 }
 
+func (c *pluginsClient) InstallProvisionerPlugin(ctx context.Context, in *InstallPluginRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, Plugins_InstallProvisionerPlugin_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *pluginsClient) InstallAgentServicePlugin(ctx context.Context, in *InstallPluginRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, Plugins_InstallAgentServicePlugin_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *pluginsClient) UninstallProvisionerPlugin(ctx context.Context, in *UninstallPluginRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, Plugins_UninstallProvisionerPlugin_FullMethodName, in, out, opts...)
@@ -86,6 +108,8 @@ func (c *pluginsClient) UninstallAgentServicePlugin(ctx context.Context, in *Uni
 type PluginsServer interface {
 	ListProvisionerPlugins(context.Context, *empty.Empty) (*ProvisionerPluginList, error)
 	ListAgentServicePlugins(context.Context, *empty.Empty) (*AgentServicePluginList, error)
+	InstallProvisionerPlugin(context.Context, *InstallPluginRequest) (*empty.Empty, error)
+	InstallAgentServicePlugin(context.Context, *InstallPluginRequest) (*empty.Empty, error)
 	UninstallProvisionerPlugin(context.Context, *UninstallPluginRequest) (*empty.Empty, error)
 	UninstallAgentServicePlugin(context.Context, *UninstallPluginRequest) (*empty.Empty, error)
 }
@@ -99,6 +123,12 @@ func (UnimplementedPluginsServer) ListProvisionerPlugins(context.Context, *empty
 }
 func (UnimplementedPluginsServer) ListAgentServicePlugins(context.Context, *empty.Empty) (*AgentServicePluginList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListAgentServicePlugins not implemented")
+}
+func (UnimplementedPluginsServer) InstallProvisionerPlugin(context.Context, *InstallPluginRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InstallProvisionerPlugin not implemented")
+}
+func (UnimplementedPluginsServer) InstallAgentServicePlugin(context.Context, *InstallPluginRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InstallAgentServicePlugin not implemented")
 }
 func (UnimplementedPluginsServer) UninstallProvisionerPlugin(context.Context, *UninstallPluginRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UninstallProvisionerPlugin not implemented")
@@ -154,6 +184,42 @@ func _Plugins_ListAgentServicePlugins_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Plugins_InstallProvisionerPlugin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InstallPluginRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PluginsServer).InstallProvisionerPlugin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Plugins_InstallProvisionerPlugin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PluginsServer).InstallProvisionerPlugin(ctx, req.(*InstallPluginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Plugins_InstallAgentServicePlugin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InstallPluginRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PluginsServer).InstallAgentServicePlugin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Plugins_InstallAgentServicePlugin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PluginsServer).InstallAgentServicePlugin(ctx, req.(*InstallPluginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Plugins_UninstallProvisionerPlugin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UninstallPluginRequest)
 	if err := dec(in); err != nil {
@@ -204,6 +270,14 @@ var Plugins_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListAgentServicePlugins",
 			Handler:    _Plugins_ListAgentServicePlugins_Handler,
+		},
+		{
+			MethodName: "InstallProvisionerPlugin",
+			Handler:    _Plugins_InstallProvisionerPlugin_Handler,
+		},
+		{
+			MethodName: "InstallAgentServicePlugin",
+			Handler:    _Plugins_InstallAgentServicePlugin_Handler,
 		},
 		{
 			MethodName: "UninstallProvisionerPlugin",

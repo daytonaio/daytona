@@ -17,7 +17,7 @@ var pluginUninstallCmd = &cobra.Command{
 	Use:     "uninstall",
 	Short:   "Uninstall plugin",
 	Args:    cobra.NoArgs,
-	Aliases: []string{"ls"},
+	Aliases: []string{"u"},
 	Run: func(cmd *cobra.Command, args []string) {
 		plugins, err := getPluginList()
 		if err != nil {
