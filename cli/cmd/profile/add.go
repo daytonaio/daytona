@@ -9,8 +9,8 @@ import (
 	"github.com/daytonaio/daytona/cli/config"
 	"github.com/daytonaio/daytona/internal/util"
 
-	view "github.com/daytonaio/daytona/cli/cmd/views/profile_create_wizard"
-	"github.com/daytonaio/daytona/cli/cmd/views/profile_info"
+	view "github.com/daytonaio/daytona/cli/cmd/views/profile/creation_wizard"
+	"github.com/daytonaio/daytona/cli/cmd/views/profile/info_view"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -91,7 +91,7 @@ func addProfile(profileAddView view.ProfileAddView, c *config.Config, notify boo
 	}
 
 	if notify {
-		profile_info.Render(profile_info.ProfileInfo{
+		info_view.Render(info_view.ProfileInfo{
 			ProfileName: profile.Name,
 			ServerUrl:   profile.Hostname,
 		}, "added and set as active")
