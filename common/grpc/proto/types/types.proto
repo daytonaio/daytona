@@ -45,3 +45,9 @@ message WorkspaceInfo {
   repeated ProjectInfo projects = 2;
   google.protobuf.Struct provisionerMetadata = 3;
 }
+
+message ServerConfig {       
+	string defaultWorkspaceDir = 1;
+	string projectBaseImage = 2;
+	string pluginsDir = 3; 
+}
