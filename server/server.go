@@ -4,6 +4,7 @@
 package server
 
 import (
+	"errors"
 	"net"
 	"os"
 	"os/exec"
@@ -67,7 +68,7 @@ func Start() error {
 	if err != nil {
 		return err
 	}
-	err = registerServerServices(c)
+	err = registerAgentServices(c)
 	if err != nil {
 		return err
 	}
@@ -138,10 +139,16 @@ func getUnixListener() (*net.Listener, error) {
 }
 
 func registerProvisioners(c *config.Config) error {
+	log.Info("Registering provisioners")
+
 	provisionerPluginsPath := path.Join(c.PluginsDir, "provisioners")
 
 	files, err := os.ReadDir(provisionerPluginsPath)
 	if err != nil {
+		if os.IsNotExist(err) {
+			log.Info("No provisioners found")
+			return nil
+		}
 		return err
 	}
 
@@ -149,25 +156,31 @@ func registerProvisioners(c *config.Config) error {
 		if file.IsDir() {
 			pluginPath, err := getPluginPath(path.Join(provisionerPluginsPath, file.Name()))
 			if err != nil {
-				return err
+				log.Error(err)
+				continue
 			}
 
 			err = provisioner_manager.RegisterProvisioner(pluginPath)
 			if err != nil {
-				return err
+				log.Error(err)
+				continue
 			}
 		}
 	}
 
+	log.Info("Provisioners registered")
+
 	return nil
 }
 
-func registerServerServices(c *config.Config) error {
-	projectServerPluginsPath := path.Join(c.PluginsDir, "server_services")
+func registerAgentServices(c *config.Config) error {
+	log.Info("Registering agent services")
+	projectAgentPluginsPath := path.Join(c.PluginsDir, "agent_services")
 
-	files, err := os.ReadDir(projectServerPluginsPath)
+	files, err := os.ReadDir(projectAgentPluginsPath)
 	if err != nil {
 		if os.IsNotExist(err) {
+			log.Info("No agent services found")
 			return nil
 		}
 
@@ -176,17 +189,21 @@ func registerServerServices(c *config.Config) error {
 
 	for _, file := range files {
 		if file.IsDir() {
-			pluginPath, err := getPluginPath(path.Join(projectServerPluginsPath, file.Name()))
+			pluginPath, err := getPluginPath(path.Join(projectAgentPluginsPath, file.Name()))
 			if err != nil {
-				return err
+				log.Error(err)
+				continue
 			}
 
 			err = agent_service_manager.RegisterAgentService(pluginPath)
 			if err != nil {
-				return err
+				log.Error(err)
+				continue
 			}
 		}
 	}
+
+	log.Info("Agent services registered")
 
 	return nil
 }
@@ -203,5 +220,5 @@ func getPluginPath(dir string) (string, error) {
 		}
 	}
 
-	return "", nil
+	return "", errors.New("no plugin found in " + dir)
 }
