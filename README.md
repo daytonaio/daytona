@@ -118,7 +118,9 @@ TODO
 
 [(Back to top)](#table-of-contents)
 
-![Contribute to Daytona](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Fsearch%2Fissues%3Fq%3Drepo%3Adaytonaio%2Fdaytona%2520is%3Aopen&query=%24.total_count&suffix=open&style=flat-square&logo=github&logoColor=white&label=good%20first%20issues&labelColor=E67E22&color=E67E22&link=https%3A%2F%2Fgithub.com%2Fdaytonaio%2Fdaytona%2Flabels%2Fgood%2520first%2520issue) ![Contribute to Docs](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Fsearch%2Fissues%3Fq%3Drepo%3Adaytonaio%2Fdocs%2520is%3Aopen%2520-linked%3Apr&query=%24.total_count&suffix=open&style=flat-square&logo=markdown&logoColor=white&label=docs%20issues&labelColor=2ECC71&color=2ECC71&link=https%3A%2F%2Fgithub.com%2Fdaytonaio%2Fdocs%2Fissues%3Fq%3Dis%253Aopen%2Bis%253Aissue)
+[![Contribute to Daytona](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Fsearch%2Fissues%3Fq%3Drepo%3Adaytonaio%2Fdaytona%2520is%3Aopen&query=%24.total_count&suffix=open&style=flat-square&logo=github&logoColor=white&label=good%20first%20issues&labelColor=E67E22&color=E67E22&link=https%3A%2F%2Fgithub.com%2Fdaytonaio%2Fdaytona%2Flabels%2Fgood%2520first%2520issue)](https://github.com/daytonaio/daytona/labels/good%20first%20issue)
+
+[![Contribute to Docs](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Fsearch%2Fissues%3Fq%3Drepo%3Adaytonaio%2Fdocs%2520is%3Aopen%2520-linked%3Apr&query=%24.total_count&suffix=open&style=flat-square&logo=markdown&logoColor=white&label=docs%20issues&labelColor=2ECC71&color=2ECC71&link=https%3A%2F%2Fgithub.com%2Fdaytonaio%2Fdocs%2Fissues%3Fq%3Dis%253Aopen%2Bis%253Aissue)](https://github.com/daytonaio/docs/issues?q=is%3Aopen+is%3Aissue)
 
 Join our [Slack](https://join.slack.com/t/daytonacommunity/shared_invite/zt-273yohksh-Q5YSB5V7tnQzX2RoTARr7Q) and read [CONTRIBUTING.md](./CONTRIBUTING.md).
 
