@@ -10,6 +10,7 @@ import (
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	"github.com/daytonaio/daytona/cli/connection"
 	"github.com/daytonaio/daytona/common/grpc/proto"
+	"github.com/golang/protobuf/ptypes/empty"
 
 	"github.com/spf13/cobra"
 
@@ -30,7 +31,7 @@ var KeyCmd = &cobra.Command{
 
 		serverClient := proto.NewServerClient(conn)
 
-		publicKey, err := serverClient.GetPublicKey(context.Background(), &proto.GetPublicKeyRequest{})
+		publicKey, err := serverClient.GetPublicKey(context.Background(), &empty.Empty{})
 		if err != nil {
 			log.Fatal(err)
 		}
