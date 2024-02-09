@@ -6,7 +6,7 @@ package cmd_profile
 import (
 	"fmt"
 
-	profile_list "github.com/daytonaio/daytona/cli/cmd/views/profile_list"
+	list_view "github.com/daytonaio/daytona/cli/cmd/views/profile/list_view"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	"github.com/daytonaio/daytona/cli/config"
 
@@ -36,9 +36,9 @@ var ProfileCmd = &cobra.Command{
 			return
 		}
 
-		chosenProfileId := profile_list.GetProfileIdFromPrompt(profilesList, c.ActiveProfileId, "Choose a profile to use or add a new one", true)
+		chosenProfileId := list_view.GetProfileIdFromPrompt(profilesList, c.ActiveProfileId, "Choose a profile to use or add a new one", true)
 
-		if chosenProfileId == profile_list.NewProfileId {
+		if chosenProfileId == list_view.NewProfileId {
 			CreateProfile(c, true)
 			return
 		}

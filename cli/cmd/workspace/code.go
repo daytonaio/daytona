@@ -11,7 +11,7 @@ import (
 
 	cmd_ports "github.com/daytonaio/daytona/cli/cmd/ports"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
-	select_prompt "github.com/daytonaio/daytona/cli/cmd/views/workspace_select_prompt"
+	select_prompt "github.com/daytonaio/daytona/cli/cmd/views/workspace/select_prompt"
 	"github.com/daytonaio/daytona/cli/config"
 	"github.com/daytonaio/daytona/cli/connection"
 	workspace_proto "github.com/daytonaio/daytona/common/grpc/proto"

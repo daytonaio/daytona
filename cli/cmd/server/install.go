@@ -13,8 +13,8 @@ import (
 	"github.com/daytonaio/daytona/cli/remote_installer"
 
 	cmd_profile "github.com/daytonaio/daytona/cli/cmd/profile"
-	view "github.com/daytonaio/daytona/cli/cmd/views/installation_wizard"
-	profile_list "github.com/daytonaio/daytona/cli/cmd/views/profile_list"
+	list_view "github.com/daytonaio/daytona/cli/cmd/views/profile/list_view"
+	view "github.com/daytonaio/daytona/cli/cmd/views/server/installation_wizard"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 
 	"github.com/briandowns/spinner"
@@ -37,9 +37,9 @@ var installCmd = &cobra.Command{
 		}
 
 		profilesList := c.Profiles
-		chosenProfileId := profile_list.GetProfileIdFromPrompt(profilesList, c.ActiveProfileId, "Choose a profile to install on", true)
+		chosenProfileId := list_view.GetProfileIdFromPrompt(profilesList, c.ActiveProfileId, "Choose a profile to install on", true)
 
-		if chosenProfileId == profile_list.NewProfileId {
+		if chosenProfileId == list_view.NewProfileId {
 			chosenProfileId = cmd_profile.CreateProfile(c, false)
 		}
 
