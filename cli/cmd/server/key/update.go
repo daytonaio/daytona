@@ -10,6 +10,7 @@ import (
 	"github.com/daytonaio/daytona/cli/cmd/views/server/key_update_prompt"
 	"github.com/daytonaio/daytona/cli/connection"
 	"github.com/daytonaio/daytona/common/grpc/proto"
+	"github.com/golang/protobuf/ptypes/empty"
 
 	"github.com/spf13/cobra"
 
@@ -46,7 +47,7 @@ var updateKeyCmd = &cobra.Command{
 		var response *proto.GetPublicKeyResponse
 
 		if updateKeyView.GenerateNewKey {
-			response, err = serverClient.GenerateKey(context.Background(), &proto.GenerateKeyRequest{})
+			response, err = serverClient.GenerateKey(context.Background(), &empty.Empty{})
 			if err != nil {
 				log.Fatal(err)
 			}
