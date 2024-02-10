@@ -140,6 +140,11 @@ Others are allowed to make their own distribution of the software, but they cann
 
 We explicitly grant permission for you to make a build that includes our trademarks while developing Daytona itself. You may not publish or share the build, and you may not use that build to run Daytona for any other purpose.
 
+## Code of Conduct
+[(Back to top)](#table-of-contents)
+
+This project has adapted the Code of Conduct from the [Contributor Covenant](https://www.contributor-covenant.org/). For more information see the [Code of Conduct](CODE_OF_CONDUCT.md) or contact [codeofconduct@daytona.io.](mailto:codeofconduct@daytona.io) with any additional questions or comments.
+
 ## Questions
 [(Back to top)](#table-of-contents)
 
