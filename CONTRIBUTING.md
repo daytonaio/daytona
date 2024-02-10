@@ -1,12 +1,12 @@
-# Contributing
+# Contributing to Daytona
 
 The team at Daytona welcomes contributions from the community. There are many ways to get involved!
 
 ## Provide Feedback
 
-You might find things that can be improved while you are using Daytona. You can help by [submitting an issue](https://github.com/daytonaio/daytona-core-wip/issues/new) when:
+You might find things that can be improved while you are using Daytona. You can help by [submitting an issue](https://github.com/daytonaio/daytona/issues/new) when:
 
-* Daytona crashes, or you encounter a bug that can only be resolved by restarting the Daytona server.
+* Daytona crashes, or you encounter a bug that can only be resolved by restarting Daytona.
 * An error occurs that is unrecoverable, causes workspace integrity problems or loss, or generally prevents you from using a workspace.
 * A new feature or an enhancement to an existing feature will improve the utility or usability of Daytona.
 
@@ -18,123 +18,114 @@ You can engage with our community by:
 * Helping other users on [Slack](https://join.slack.com/t/daytonacommunity/shared_invite/zt-273yohksh-Q5YSB5V7tnQzX2RoTARr7Q).
 * Improving documentation
 * Participating in general discussions about development and DevOps
+* Authoring new Daytona Plugins and sharing those Plugins
 * Authoring new dev containers and sharing examples
 
 ## Contributing Code
 You can contribute to Daytona by:
 
-* Adding a plugin 
 * Enhancing current functionality
 * Fixing bugs
 * Adding new features and capabilities
 
-Before starting your contribution, especially for core features, we encourage you to reach out to us on Slack. This allows us to ensure that your proposed feature aligns with the project's roadmap and goals. Developers are the key to making Daytona Core the best tool it can be, and we value input from the community.
+Before starting your contribution, especially for core features, we encourage you to reach out to us on [Slack](https://join.slack.com/t/daytonacommunity/shared_invite/zt-273yohksh-Q5YSB5V7tnQzX2RoTARr7Q). This allows us to ensure that your proposed feature aligns with the project's roadmap and goals. Developers are the key to making Daytona the best tool it can be, and we value input from the community.
 
-We look forward to working with you to improve Daytona Core and make remote development environments even more accessible and useful for developers everywhere. 
+We look forward to working with you to improve Daytona and make development environments as easy as possible for developers everywhere. 
 
-## Step 1: Make a fork
+### Steps to Contribute Code
 
-Fork the repository to your GitHub organization. This means that you'll have a copy of the repository under _your-GitHub-username/repository-name_.
+Follow the following steps to ensure your contribution goes smoothly.
 
-## Step 2: Clone the repository to your local machine
+1. ---need edit--- Read and follow the steps outlined in the [System Initiative Contributing Policy](README.md#contributing).
+1. Configure your development environment by either following the guide in the [documentation](https://www.daytona.io/docs/installation/server/).
+1. [Fork](https://help.github.com/articles/working-with-forks/) the GitHub Repository allowing you to make the changes in your own copy of the repository.
+1. Create a [GitHub issue](https://github.com/daytonaio/daytona/issues) if one doesn't exist already.
+1. ---need edit--- Make the changes you would like to include, adding new tests where possible, and make sure all relevant existing [tests are passing](docs/RUNNING_RUST_TESTS.md).
+1.---need edit---  [Prepare your changes](/docs/PREPARING_YOUR_CHANGES.md) and ensure your commits are descriptive. The document contains an optional commit template, if desired.
+1. Ensure that you are in the [CONTRIBUTORS](CONTRIBUTORS.md) file (see the [Adding Yourself to the Contributors List](#adding-yourself-to-the-contributors-list) section for instructions)
+1. Create a pull request on GitHub. If you're new to GitHub, read about [pull requests](https://help.github.com/articles/about-pull-requests/). You are welcome to submit your pull request for commentary or review before it is complete by creating a [draft pull request](https://help.github.com/en/articles/about-pull-requests#draft-pull-requests). Please include specific questions or items you'd like feedback on.
+1. A member of the Daytona team will review your PR within three business days (excluding any holidays) and either merge, comment, and/or assign someone for review.
+1. Work with the reviewer to complete a code review. For each change, create a new commit and push it to make changes to your pull request. When necessary, the reviewer can trigger CI to run tests prior to merging.
+1. Once you believe your pull request is ready to be reviewed, ensure the pull request is no longer a draft by [marking it ready for review](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-stage-of-a-pull-request).
+1. The reviewer will look over your contribution and either approve it or provide comments letting you know if there is anything left to do. We try to give you the opportunity to make the required changes yourself, but in some cases, we may perform the changes ourselves if it makes sense to (minor changes or for urgent issues). We do our best to review PRs promptly, but complex changes could require more time.
+1. After completing your review, a Daytona team member will trigger merge to run all tests. Upon passing, your change will be merged into `main`, and your pull requests will be closed. All merges to `main` create a new release, and all final changes are attributed to you.
 
-```sh
-git clone -b next https://github.com/{your-GitHub-username}/daytona-core-wip.git
+Note: In some cases, we might decide that a PR should be closed without merging. We'll make sure to provide clear reasoning when this happens.
 
-```
+### Adding Yourself to the Contributors List
 
-## Step 3: Prepare the development environment
+When making a pull request to the System Initiative software, you must add yourself to the [CONTRIBUTORS](CONTRIBUTORS.md) list.
+You will only have to do this the first time that you contribute to the software.
+For this, we recommend adding yourself with a separate commit (does not have to be a separate PR) to the file.
 
-Set up and run the development environment on your local machine following the [README](./README.md#Building)
+#### What Does this Mean for You?
 
-## Step 4: Create a branch
-Create a new branch for your changes.
-In order to keep branch names uniform and easy-to-understand, please use the following conventions for branch naming.
-Generally speaking, it is a good idea to add a group/type prefix to a branch.
-Here is a list of good examples:
-- for docs change : `docs/{ISSUE_NUMBER}-{CUSTOM_NAME}` for e.g. docs/2233-update-contributing-docs
-- for new features : `feat/{ISSUE_NUMBER}-{CUSTOM_NAME}` for e.g. feat/1144-add-plugins
-- for bug fixes : `fix/{ISSUE_NUMBER}-{CUSTOM_NAME}` for e.g. fix/9878-fix-invite-wrong-url
-- for anything else: `chore/{ISSUE_NUMBER}-{CUSTOM_NAME}` for e.g. chore/111-update-ci-url
+Here is what being a contributor means for you:
 
-```sh
-git checkout -b branch-name-here
-```
+* License all our contributions to the project under the Apache License, Version 2.0
+* Have the legal rights to license our contributions ourselves, or get permission to license them from our employers, clients, or others who may have them
 
-## Step 5: Make your changes
+For more information, see the [README](README.md) and feel free to reach out to us on [Slack](https://join.slack.com/t/daytonacommunity/shared_invite/zt-273yohksh-Q5YSB5V7tnQzX2RoTARr7Q).
 
-Update the code with your bug fix or new feature.
+Now, let's walk through how to add yourself to the list.
 
-## Step 6: Add the changes that are ready to be committed
+#### (1) Editing the File
 
-Stage the changes that are ready to be committed:
-
-```sh
-git add .
-```
-
-## Step 7: Commit the changes (Git)
-
-Commit the changes with a short message. (See below for more details on how we structure our commit messages)
-
-```sh
-git commit -m "<type>(<package>): <subject>"
-```
-
-## Step 8: Push the changes to the remote repository
-
-Push the changes to the remote repository using:
-
-```sh
-git push origin branch-name-here
-```
-
-## Step 9: Create Pull Request
-
-In GitHub, do the following to submit a pull request to the upstream repository:
-
-1. Add yourself to the [Contributors](./CONTRIBUTORS.md) list. You can add this as a separate commit but its needed before your issue can be reviewed.
-
-1. Give the pull request a title and a short description of the changes made following the template. Include also the issue or bug number associated with your change. Explain the changes that you made, any issues you think exist with the pull request you made, and any questions you have for the maintainer.  <br/> ⚠️ **Make sure your pull request target the `next` branch.**
- 
-  > Pull request title should be in the form of `<type>(<package>): <subject>` as per commit messages.
-Remember, it's okay if your pull request is not perfect (no pull request ever is). The reviewer will be able to help you fix any problems and improve it!
-
-1. Wait for the pull request to be reviewed by a maintainer.
-
-1. Make changes to the pull request if the reviewing maintainer recommends them.
-
-Celebrate your success after your pull request is merged.
-
-## Git Commit Messages
-
-We structure our commit messages like this:
+In [the file](CONTRIBUTING.md), there is a delimiter (e.g. `-----------`) followed by a list of names and associated GitHub usernames.
+The format of the contributor lines are as follows:
 
 ```
-<type>(<package>): <subject>
+* <name-you-would-like-to-be-referred-to-as> (@<github-username>)
 ```
 
-Example
+Here is an example:
 
 ```
-fix(server): missing entity on init
+* Nick Gerace (@nickgerace)
 ```
 
-### Types:
+You do not have to use your legal name. 
+You can provide a name you would like to referred to as, a nickname, etc.
+In fact, you can use your GitHub username in the "name" slot.
+Here is an example:
 
-- **feat**: A new feature
-- **fix**: A bug fix
-- **docs**: Changes to the documentation
-- **style**: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc.)
-- **refactor**: A code change that neither fixes a bug nor adds a feature
-- **perf**: A code change that improves performance
-- **test**: Adding missing or correcting existing tests
-- **chore**: Changes to the build process or auxiliary tools and libraries such as documentation generation
+```
+* nickgerace (@nickgerace)
+```
 
-### Packages:
+Your name can be of multiple words and use multiple whitespaces too.
+Here's a totally real example:
 
-TODO
-- **server**
-- **client**
-- **extensions**
-- **cmd**
+```
+* Todd Howard Skyrim McFallout-y Starfield Pants (@totallyrealusername)
+```
+
+Above all, ensure that the format described at the beginning is preserved.
+
+#### (2) Polish Your Addition and Ensure the List is Ready
+
+When making changes, ensure the following:
+
+- Your individual line was appended to the bottom of the list
+- No additional newlines were added
+- Your individual line has no trailing or leading spaces
+- Your individual line matches the aforementioned format
+- Your GitHub username appears exactly once
+- Nothing else in the contributors file changed
+
+#### (3) Commit Your Change
+
+We recommend adding yourself with a separate commit (does not have to be a separate PR) to the file with the following commit title format:
+
+```
+chore: add <github-username> to contributors
+```
+
+Here is an example:
+
+```
+chore: add nickgerace to contributors
+```
+
+After the commit is pushed, you should be good to go!
+
