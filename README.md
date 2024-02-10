@@ -118,21 +118,32 @@ TODO
 
 [(Back to top)](#table-of-contents)
 
-Join our [Slack](https://join.slack.com/t/daytonacommunity/shared_invite/zt-273yohksh-Q5YSB5V7tnQzX2RoTARr7Q) and read [CONTRIBUTING.md](./CONTRIBUTING.md).
+Daytona is Open Source under the [Apache License 2.0](LICENSE), and is the [copyright of its contributors](NOTICE). If you would like to contribute to the software, you must:
 
-## Questions?
+1. Read the [Contributors](CONTRIBUTORS.md) file.
+2. Agree to the terms by having a commit in your pull request "signing" the file by adding your name and GitHub handle on a new line at the bottom of the file.
+3. Make sure your commits Author metadata matches the name and handle you added to the file.
 
-You can ask questions, consult with more experienced Daytona users, and discuss development-related topics in our 
+This ensures that users, distributors, and other contributors can rely on all the software related to Daytona being contributed under the terms of the [License](LICENSE). No contributions will be accepted without following this process.
+
+Afterwards, navigate to the [contributing guide](CONTRIBUTING.md) to get started.
 
 # License
 
 [(Back to top)](#table-of-contents)
 
-Daytona Core is licensed under the Apache 2.0 License. See the [LICENSE](./LICENSE) file for more information.
+This repository contains Daytona, covered under the [Apache License 2.0](LICENSE), except where noted (any Daytona logos or trademarks are not covered under the Apache License, and should be explicitly noted by a LICENSE file.)
 
-Daytona Core is a product produced from the open source software, exclusively by Daytona, Inc. It is distributed under our commercial terms. Any other distribution, for example, publishing a version of the CLI binary for download, creating a Docker container, running the software as a service, etc. is not allowed. For more information see our trademark policy (https://daytona.io/legal/trademark) 
+Daytona is a product produced from this open source software, exclusively by Daytona Platforms, Inc. It is distributed under our commercial terms.
 
-## Can I build Daytona Core?
-You can make a build that includes our trademarks to develop the Daytona Core software itself. You may not publish or share the build, and you may not use that build to run Daytona Core for any other purpose.
+Others are allowed to make their own distribution of the software, but they cannot use any of the Daytona trademarks, cloud services, etc.
+
+We explicitly grant permission for you to make a build that includes our trademarks while developing Daytona itself. You may not publish or share the build, and you may not use that build to run Daytona for any other purpose.
+
+## Questions
+[(Back to top)](#table-of-contents)
+
+For more information on how to use and develop Daytona, talk to us on
+[Slack](https://join.slack.com/t/daytonacommunity/shared_invite/zt-273yohksh-Q5YSB5V7tnQzX2RoTARr7Q) and check out our [documentation](https://www.daytona.io/docs/installation/server/).
 
 
