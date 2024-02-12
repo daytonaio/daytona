@@ -2,6 +2,7 @@ package agent_service_manager
 
 import (
 	"errors"
+	"os"
 	"os/exec"
 	"path"
 
@@ -13,7 +14,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var projectAgentClients map[string]*plugin.Client = make(map[string]*plugin.Client)
+type pluginRef struct {
+	client *plugin.Client
+	path   string
+}
+
+var pluginRefs map[string]*pluginRef = make(map[string]*pluginRef)
 
 var projectAgentHandshakeConfig = plugin.HandshakeConfig{
 	ProtocolVersion:  1,
@@ -22,12 +28,12 @@ var projectAgentHandshakeConfig = plugin.HandshakeConfig{
 }
 
 func GetAgentService(name string) (*AgentService, error) {
-	client, ok := projectAgentClients[name]
+	pluginRef, ok := pluginRefs[name]
 	if !ok {
-		return nil, errors.New("provisioner not found")
+		return nil, errors.New("agent service not found")
 	}
 
-	rpcClient, err := client.Client()
+	rpcClient, err := pluginRef.client.Client()
 	if err != nil {
 		return nil, err
 	}
@@ -47,10 +53,10 @@ func GetAgentService(name string) (*AgentService, error) {
 
 func GetAgentServices() map[string]AgentService {
 	projectAgents := make(map[string]AgentService)
-	for name := range projectAgentClients {
+	for name := range pluginRefs {
 		provisioner, err := GetAgentService(name)
 		if err != nil {
-			log.Printf("Error getting provisioner %s: %s", name, err)
+			log.Printf("Error getting agent service %s: %s", name, err)
 			continue
 		}
 
@@ -82,7 +88,10 @@ func RegisterAgentService(pluginPath string) error {
 		AllowedProtocols: []plugin.Protocol{plugin.ProtocolGRPC},
 	})
 
-	projectAgentClients[pluginName] = client
+	pluginRefs[pluginName] = &pluginRef{
+		client: client,
+		path:   pluginBasePath,
+	}
 
 	log.Printf("Project Agent %s registered", pluginName)
 
@@ -101,6 +110,23 @@ func RegisterAgentService(pluginPath string) error {
 	}
 
 	log.Infof("Provisioner %s initialized", pluginName)
+
+	return nil
+}
+
+func UninstallAgentService(name string) error {
+	pluginRef, ok := pluginRefs[name]
+	if !ok {
+		return errors.New("agent service not found")
+	}
+	pluginRef.client.Kill()
+
+	err := os.RemoveAll(pluginRef.path)
+	if err != nil {
+		return errors.New("failed to remove agent service: " + err.Error())
+	}
+
+	delete(pluginRefs, name)
 
 	return nil
 }

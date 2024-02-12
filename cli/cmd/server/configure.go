@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 
 	view "github.com/daytonaio/daytona/cli/cmd/views/server/configuration_prompt"
+	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	"github.com/daytonaio/daytona/cli/connection"
 	server_proto "github.com/daytonaio/daytona/common/grpc/proto"
 	"github.com/daytonaio/daytona/common/grpc/proto/types"
@@ -30,20 +31,14 @@ var configureCmd = &cobra.Command{
 
 		client := server_proto.NewServerClient(conn)
 
-		response, err := client.GetConfig(ctx, &empty.Empty{})
+		config, err := client.GetConfig(ctx, &empty.Empty{})
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		config := types.ServerConfig{
-			ProjectBaseImage:    response.ProjectBaseImage,
-			DefaultWorkspaceDir: response.DefaultWorkspaceDir,
-			PluginsDir:          response.PluginsDir,
-		}
+		view.ConfigurationForm(config)
 
-		view.ConfigurationForm(&config)
-
-		_, err = client.SetConfig(ctx, &server_proto.SetConfigRequest{
+		_, err = client.SetConfig(ctx, &types.ServerConfig{
 			ProjectBaseImage:    config.ProjectBaseImage,
 			DefaultWorkspaceDir: config.DefaultWorkspaceDir,
 			PluginsDir:          config.PluginsDir,
@@ -51,5 +46,7 @@ var configureCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		views_util.RenderInfoMessage("Server configuration updated. You might need to restart the server for the changes to take effect.")
 	},
 }

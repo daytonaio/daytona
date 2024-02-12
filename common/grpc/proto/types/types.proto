@@ -50,4 +50,5 @@ message ServerConfig {
 	string defaultWorkspaceDir = 1;
 	string projectBaseImage = 2;
 	string pluginsDir = 3; 
+  string pluginRegistryUrl = 4;
 }

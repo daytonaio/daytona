@@ -7,34 +7,35 @@ import (
 	"encoding/json"
 	"os"
 	"path"
+
+	"github.com/daytonaio/daytona/common/grpc/proto/types"
 )
 
-type Config struct {
-	DefaultWorkspaceDir string `json:"defaultWorkspaceDir"`
-	ProjectBaseImage    string `json:"projectBaseImage"`
-	PluginsDir          string `json:"pluginsDir"`
-}
+const workspaceKeyFileName = "workspace_key"
+const defaultProjectBaseImage = "daytonaio/workspace-project:latest"
+const defaultPluginRegistryUrl = "https://download.daytona.io/daytona/plugins"
 
-func GetConfig() (*Config, error) {
+func GetConfig() (*types.ServerConfig, error) {
 	configFilePath, err := configFilePath()
+	if err != nil {
+		return nil, err
+	}
+
+	defaultWorkspaceDir, err := getDefaultWorkspaceDir()
+	if err != nil {
+		return nil, err
+	}
+	pluginsDir, err := getDefaultPluginsDir()
 	if err != nil {
 		return nil, err
 	}
 
 	_, err = os.Stat(configFilePath)
 	if os.IsNotExist(err) {
-		defaultWorkspaceDir, err := getDefaultWorkspaceDir()
-		if err != nil {
-			return nil, err
-		}
-		pluginsDir, err := getDefaultPluginsDir()
-		if err != nil {
-			return nil, err
-		}
-
-		return &Config{
+		return &types.ServerConfig{
 			DefaultWorkspaceDir: defaultWorkspaceDir,
 			ProjectBaseImage:    defaultProjectBaseImage,
+			PluginRegistryUrl:   defaultPluginRegistryUrl,
 			PluginsDir:          pluginsDir,
 		}, nil
 	}
@@ -43,7 +44,7 @@ func GetConfig() (*Config, error) {
 		return nil, err
 	}
 
-	var c Config
+	var c types.ServerConfig
 	configContent, err := os.ReadFile(configFilePath)
 	if err != nil {
 		return nil, err
@@ -52,6 +53,19 @@ func GetConfig() (*Config, error) {
 	err = json.Unmarshal(configContent, &c)
 	if err != nil {
 		return nil, err
+	}
+
+	if c.DefaultWorkspaceDir == "" {
+		c.DefaultWorkspaceDir = defaultWorkspaceDir
+	}
+	if c.ProjectBaseImage == "" {
+		c.ProjectBaseImage = defaultProjectBaseImage
+	}
+	if c.PluginRegistryUrl == "" {
+		c.PluginRegistryUrl = defaultPluginRegistryUrl
+	}
+	if c.PluginsDir == "" {
+		c.PluginsDir = pluginsDir
 	}
 
 	return &c, nil
@@ -66,7 +80,7 @@ func configFilePath() (string, error) {
 	return path.Join(configDir, "config.json"), nil
 }
 
-func (c *Config) Save() error {
+func Save(c *types.ServerConfig) error {
 	configFilePath, err := configFilePath()
 	if err != nil {
 		return err
