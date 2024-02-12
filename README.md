@@ -4,7 +4,7 @@
 
 Daytona Core is a local/remote development environments manager designed for developers. From a single binary, you can create and manage remote development environments, allowing you to focus on your code without the hassle of infrastructure or SaaS.
 
-## TL:DL;
+## TL:DR;
 
 TODO: one liner install
 
@@ -117,6 +117,9 @@ TODO
 # Contributing
 
 [(Back to top)](#table-of-contents)
+
+[![Daytona](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Fsearch%2Fissues%3Fq%3Drepo%3Adaytonaio%2Fdocs%2Bis%3Aopen%2Bis%3Aissue%2B-linked%3Apr%2Blabel%3A%2522good%2520first%2520issue%2522&query=%24.total_count&suffix=open&style=flat-square&logo=github&logoColor=white&label=good%20first%20issues&labelColor=2ECC71&color=2ECC71&link=https%3A%2F%2Fgithub.com%2Fdaytonaio%2Fdocs%2Fissues%3Fq%3Dis%253Aopen%2Bis%253Aissue%2B-linked%253Apr%2Blabel%253A%2522good%2Bfirst%2Bissue%2522%2B)](https://github.com/daytonaio/daytona/issues?q=is%3Aopen+label%3A%22good+first+issue%22+-linked%3Apr) 
+[![Daytona Docs](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Fsearch%2Fissues%3Fq%3Drepo%3Adaytonaio%2Fdocs%2520is%3Aopen%2520-linked%3Apr&query=%24.total_count&suffix=open&style=flat-square&logo=markdown&logoColor=white&label=docs%20issues&labelColor=E67E22&color=E67E22&link=https%3A%2F%2Fgithub.com%2Fdaytonaio%2Fdocs%2Fissues%3Fq%3Dis%253Aopen%2Bis%253Aissue%2B-linked%253Apr)](https://github.com/daytonaio/docs/issues?q=is%3Aopen+is%3Aissue+-linked%3Apr)
 
 Join our [Slack](https://join.slack.com/t/daytonacommunity/shared_invite/zt-273yohksh-Q5YSB5V7tnQzX2RoTARr7Q) and read [CONTRIBUTING.md](./CONTRIBUTING.md).
 
