@@ -7,9 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math"
-	"math/rand"
-	"os"
 
 	"github.com/daytonaio/daytona/cli/config"
 	server_config "github.com/daytonaio/daytona/server/config"
@@ -54,25 +51,19 @@ func Get(profile *config.Profile) (*grpc.ClientConn, error) {
 			return nil, errors.New("local server not configured. Run `daytona configure` first")
 		}
 
-		client, err := grpc.DialContext(ctx, "unix:///tmp/daytona/daytona.sock", grpc.WithTransportCredentials(insecure.NewCredentials()))
+		client, err := grpc.DialContext(ctx, "127.0.0.1:2790", grpc.WithTransportCredentials(insecure.NewCredentials()))
 		return client, err
 	} else {
 		sshTunnelContext, cancelTunnel := context.WithCancel(ctx)
-
-		profileSockFile := fmt.Sprintf("/tmp/daytona/daytona-%s-%d.sock", activeProfile.Name, rand.Intn(math.MaxInt32))
-
-		tunnelStartedChann, errChan := ssh_tunnel_util.ForwardRemoteUnixSock(sshTunnelContext, activeProfile, profileSockFile, "/tmp/daytona/daytona.sock")
+		hostPort, errChan := ssh_tunnel_util.ForwardRemoteTcpPort(sshTunnelContext, activeProfile, 2790)
 
 		go func() {
 			if err := <-errChan; err != nil {
 				log.Fatal(err)
-				os.Remove(profileSockFile)
 			}
 		}()
 
-		<-tunnelStartedChann
-
-		client, err := grpc.DialContext(ctx, "unix://"+profileSockFile, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		client, err := grpc.DialContext(sshTunnelContext, fmt.Sprintf("localhost:%d", hostPort), grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 		go func() {
 			for {

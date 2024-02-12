@@ -10,7 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func ForwardRemoteTcpPort(activeProfile config.Profile, targetPort uint16) (uint16, chan error) {
+func ForwardRemoteTcpPort(ctx context.Context, activeProfile config.Profile, targetPort uint16) (uint16, chan error) {
 	hostPort := targetPort
 
 	if !util.IsPortAvailable(targetPort) {
@@ -56,7 +56,7 @@ func ForwardRemoteTcpPort(activeProfile config.Profile, targetPort uint16) (uint
 
 	errChan := make(chan error)
 	go func() {
-		errChan <- sshTun.Start(context.Background())
+		errChan <- sshTun.Start(ctx)
 	}()
 
 	return hostPort, errChan
