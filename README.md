@@ -6,7 +6,7 @@ Daytona Core is a local/remote development environments manager designed for dev
 ## Design Principles
 * __Single Command__: Activate a fully configured development environment with a single command, eliminating the need for any further user interaction.
 * __Host agnostic__: Provision where possible; otherwise, seamlessly connect to existing hosts while abstracting all complexities.
-* __Interoperability__:Compatibility with all existing technologies development environment technologies
+* __Interoperability__: Compatibility with all existing technologies development environment technologies
 * __Accessibility__: Enable development environments to be accessible behind firewalls, ensuring utilization and collaboration regardless of network restrictions.
 * __Extensibility__: Enable extensibility with plugin development. Moreover, in any dynamic language, not just Go.
 * __Works on my Machine__: Never experince it again.
