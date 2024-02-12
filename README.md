@@ -4,14 +4,11 @@
 Daytona Core is a local/remote development environments manager designed for developers. From a single binary, you can create and manage remote development environments, allowing you to focus on your code without the hassle of infrastructure or SaaS.
 
 ## Design Principles
-* __Single Command Setup__: Activate a fully configured development environment with a single command.
-* __Runs everywhere__: Spin up your development environment on any machine—whether it's local, remote, a physical server, VM, or cloud-based.
-* __Confiuration File Support__: Initially support for [dev container](https://containers.dev/), ability to expand to DevFile, Nix & Backstage (Contributions welcome here!).
-* __Prebuilds System__: Has a prebuilds system, built in, to drasticly improve environment setup times.
-* __IDE Support__ : Seamlessly supports [VS Code](https://github.com/microsoft/vscode) & [JetBrains](https://www.jetbrains.com/remote-development/gateway/) locally, ready to use without configuration. Includes a built-in Web IDE for added convenience.
-* __Git Provider Integration__: Start with GitHub support, allowing easy repo or PR selection via dropdown. Future plans to expand to GitLab & Bitbucket (Contributions welcome here!).
-* __Reverse Proxy Integration__: Enable collaboration and streamline feedback loops by leveraging reverse proxy functionality. Access preview environments and the Web IDE seamlessly, even behind firewalls.
-* __Extensibility__: Enable Daytona to be extend with plugin development. Moreover, in any dynamic language, not just Go.
+* __Single Command__: Activate a fully configured development environment with a single command, eliminating the need for any further user interaction.
+* __Host agnostic__: Provision where possible; otherwise, seamlessly connect to existing hosts while abstracting all complexities.
+* __Interoperability__:Compatibility with all existing technologies development environment technologies
+* __Accessibility__: Enable development environments to be accessible behind firewalls, ensuring utilization and collaboration regardless of network restrictions.
+* __Extensibility__: Enable extensibility with plugin development. Moreover, in any dynamic language, not just Go.
 * __Works on my Machine__: Never experince it again.
 
 
@@ -35,6 +32,15 @@ Daytona Core offers individual developers advantages over other solutions for ma
 There are two ways to use Daytona Core. If you have got Docker installed (Docker Desktop or Docker Engine) you can use Daytona Core locally to manage your development environments. This is similar to the experience you get from using the dev container CLI. Except that with Daytona Core, you do not have to specify a dev container file. You can use plain git repositories with any container image.
 
 The second way is to use Daytona Core to manage remote development environments. The only requirement is SSH access to a host that can run Docker. If you have a home lab, Linux VM, or access to a developer friendly cloud like Digital Ocean, Civo, Scaleway, etc this is a great option.
+## Features2
+* __Runs everywhere__: Spin up your development environment on any machine—whether it's local, remote, a physical server, VM, or cloud-based.
+
+* __Confiuration File Support__: Initially support for [dev container](https://containers.dev/), ability to expand to DevFile, Nix & Backstage (Contributions welcome here!).
+* __Prebuilds System__: Has a prebuilds system, built in, to drasticly improve environment setup times.
+* __IDE Support__ : Seamlessly supports [VS Code](https://github.com/microsoft/vscode) & [JetBrains](https://www.jetbrains.com/remote-development/gateway/) locally, ready to use without configuration. Includes a built-in Web IDE for added convenience.
+* __Git Provider Integration__: Start with GitHub support, allowing easy repo or PR selection via dropdown. Future plans to expand to GitLab & Bitbucket (Contributions welcome here!).
+* __Reverse Proxy Integration__: Enable collaboration and streamline feedback loops by leveraging reverse proxy functionality. Access preview environments and the Web IDE seamlessly, even behind firewalls.
+
 
 ## Features
 
