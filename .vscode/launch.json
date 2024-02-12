@@ -12,7 +12,7 @@
       "program": "${workspaceFolder}",
       "console": "integratedTerminal",
       "args": [
-        "create"
+        "agent"
       ]
     }
   ]
