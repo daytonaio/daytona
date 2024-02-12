@@ -5,10 +5,13 @@ package config
 
 import (
 	"encoding/json"
+	"errors"
+	"log"
 	"os"
 	"path"
 
 	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	"github.com/google/uuid"
 )
 
 const workspaceKeyFileName = "workspace_key"
@@ -21,23 +24,9 @@ func GetConfig() (*types.ServerConfig, error) {
 		return nil, err
 	}
 
-	defaultWorkspaceDir, err := getDefaultWorkspaceDir()
-	if err != nil {
-		return nil, err
-	}
-	pluginsDir, err := getDefaultPluginsDir()
-	if err != nil {
-		return nil, err
-	}
-
 	_, err = os.Stat(configFilePath)
 	if os.IsNotExist(err) {
-		return &types.ServerConfig{
-			DefaultWorkspaceDir: defaultWorkspaceDir,
-			ProjectBaseImage:    defaultProjectBaseImage,
-			PluginRegistryUrl:   defaultPluginRegistryUrl,
-			PluginsDir:          pluginsDir,
-		}, nil
+		return nil, errors.New("config file does not exist")
 	}
 
 	if err != nil {
@@ -53,19 +42,6 @@ func GetConfig() (*types.ServerConfig, error) {
 	err = json.Unmarshal(configContent, &c)
 	if err != nil {
 		return nil, err
-	}
-
-	if c.DefaultWorkspaceDir == "" {
-		c.DefaultWorkspaceDir = defaultWorkspaceDir
-	}
-	if c.ProjectBaseImage == "" {
-		c.ProjectBaseImage = defaultProjectBaseImage
-	}
-	if c.PluginRegistryUrl == "" {
-		c.PluginRegistryUrl = defaultPluginRegistryUrl
-	}
-	if c.PluginsDir == "" {
-		c.PluginsDir = pluginsDir
 	}
 
 	return &c, nil
@@ -135,4 +111,38 @@ func getDefaultPluginsDir() (string, error) {
 	}
 
 	return path.Join(userConfigDir, "daytona", "plugins"), nil
+}
+
+func generateUuid() string {
+	uuid := uuid.New()
+	return uuid.String()
+}
+
+func init() {
+	_, err := GetConfig()
+	if err == nil {
+		return
+	}
+
+	defaultWorkspaceDir, err := getDefaultWorkspaceDir()
+	if err != nil {
+		log.Fatal("failed to get default workspace dir")
+	}
+	pluginsDir, err := getDefaultPluginsDir()
+	if err != nil {
+		log.Fatal("failed to get default plugins dir")
+	}
+
+	c := types.ServerConfig{
+		DefaultWorkspaceDir: defaultWorkspaceDir,
+		ProjectBaseImage:    defaultProjectBaseImage,
+		PluginRegistryUrl:   defaultPluginRegistryUrl,
+		PluginsDir:          pluginsDir,
+		Uuid:                generateUuid(),
+	}
+
+	err = Save(&c)
+	if err != nil {
+		log.Fatal("failed to save default config file")
+	}
 }
