@@ -3,6 +3,7 @@ package remote_installer
 import (
 	"testing"
 
+	"github.com/daytonaio/daytona/common/os"
 	"github.com/stretchr/testify/mock"
 	"golang.org/x/crypto/ssh"
 )
@@ -51,8 +52,8 @@ func TestDetectOs(t *testing.T) {
 		t.Errorf("Unexpected error: %v", err)
 	}
 
-	if *remoteOs != OSLinux_64_86 {
-		t.Errorf("Expected OSLinux_64_86, but got %v", remoteOs)
+	if *remoteOs != os.Linux_64_86 {
+		t.Errorf("Expected os.Linux_64_86, but got %v", remoteOs)
 	}
 }
 
@@ -65,7 +66,7 @@ func TestDetectOs(t *testing.T) {
 // 	mockClient.On("NewSession").Return(mockSession, nil)
 
 // 	installer := &RemoteInstaller{Client: mockClient}
-// 	exists, err := installer.ServerExists(OSLinux_64_86)
+// 	exists, err := installer.ServerExists(os.Linux_64_86)
 
 // 	mockSession.AssertExpectations(t)
 // 	mockClient.AssertExpectations(t)
@@ -93,12 +94,12 @@ func TestInstall(t *testing.T) {
 
 	installer := &RemoteInstaller{
 		Client: mockClient,
-		BinaryUrl: map[RemoteOS]string{
-			OSLinux_64_86: BinaryUrl_linux_64_86,
-			OSLinux_arm64: BinaryUrl_linux_arm64,
+		BinaryUrl: map[os.OperatingSystem]string{
+			os.Linux_64_86: BinaryUrl_linux_64_86,
+			os.Linux_arm64: BinaryUrl_linux_arm64,
 		},
 	}
-	err := installer.InstallBinary(OSLinux_64_86)
+	err := installer.InstallBinary(os.Linux_64_86)
 
 	mockSession.AssertExpectations(t)
 	mockClient.AssertExpectations(t)

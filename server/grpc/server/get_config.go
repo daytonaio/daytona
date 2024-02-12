@@ -6,20 +6,11 @@ package server_grpc
 import (
 	"context"
 
-	daytona_proto "github.com/daytonaio/daytona/common/grpc/proto"
+	"github.com/daytonaio/daytona/common/grpc/proto/types"
 	config "github.com/daytonaio/daytona/server/config"
 	"github.com/golang/protobuf/ptypes/empty"
 )
 
-func (a *ServerGRPCServer) GetConfig(ctx context.Context, request *empty.Empty) (*daytona_proto.GetConfigResponse, error) {
-	config, err := config.GetConfig()
-	if err != nil {
-		return nil, err
-	}
-
-	return &daytona_proto.GetConfigResponse{
-		DefaultWorkspaceDir: config.DefaultWorkspaceDir,
-		ProjectBaseImage:    config.ProjectBaseImage,
-		PluginsDir:          config.PluginsDir,
-	}, nil
+func (a *ServerGRPCServer) GetConfig(ctx context.Context, request *empty.Empty) (*types.ServerConfig, error) {
+	return config.GetConfig()
 }

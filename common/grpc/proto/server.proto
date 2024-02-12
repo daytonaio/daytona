@@ -1,6 +1,7 @@
 syntax = "proto3";
 option go_package = "./proto";
 import "google/protobuf/empty.proto";
+import "common/grpc/proto/types/types.proto";
 
 message GetPublicKeyResponse {
     string publicKey = 1;
@@ -10,23 +11,11 @@ message SetKeyRequest {
     string privateKey = 1;
 }
 
-message GetConfigResponse {       
-	string defaultWorkspaceDir = 1;
-	string projectBaseImage = 2;
-	string pluginsDir = 3; 
-}
-
-message SetConfigRequest {    
-	string defaultWorkspaceDir = 1;
-	string projectBaseImage = 2;
-	string pluginsDir = 3;
-}
-
 service Server {
     rpc GetPublicKey (google.protobuf.Empty) returns (GetPublicKeyResponse) {}
     rpc GenerateKey (google.protobuf.Empty) returns (GetPublicKeyResponse) {}
     rpc SetKey (SetKeyRequest) returns (GetPublicKeyResponse) {}
     rpc DeleteKey (google.protobuf.Empty) returns (google.protobuf.Empty) {}
-    rpc GetConfig (google.protobuf.Empty) returns (GetConfigResponse) {}
-    rpc SetConfig (SetConfigRequest) returns (google.protobuf.Empty) {}
+    rpc GetConfig (google.protobuf.Empty) returns (ServerConfig) {}
+    rpc SetConfig (ServerConfig) returns (google.protobuf.Empty) {}
 }

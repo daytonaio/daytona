@@ -10,7 +10,6 @@ import (
 
 	"github.com/daytonaio/daytona/cli/cmd/views"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
-	"github.com/daytonaio/daytona/cli/config"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -18,24 +17,30 @@ import (
 	"golang.org/x/term"
 )
 
-var NewProfileId = "+"
+type PluginType string
+
+type PluginViewDTO struct {
+	Name    string
+	Version string
+	Type    PluginType
+}
+
+const (
+	PluginTypeProvisioner  PluginType = "Provisioner"
+	PluginTypeAgentService PluginType = "Agent Service"
+)
 
 var columns = []table.Column{
-	{Title: "ID", Width: 10},
 	{Title: "Name", Width: 20},
-	{Title: "Active", Width: 10},
-	{Title: "Hostname", Width: 15},
-	{Title: "SSH port", Width: 10},
-	{Title: "SSH user", Width: 10},
-	{Title: "SSH password", Width: 15},
-	{Title: "SSH private key path", Width: 20},
+	{Title: "Version", Width: 20},
+	{Title: "Type", Width: 20},
 }
 
 type model struct {
-	table             table.Model
-	selectedProfileId string
-	selectable        bool
-	initialRows       []table.Row
+	table          table.Model
+	selectedPlugin *PluginViewDTO
+	selectable     bool
+	initialRows    []table.Row
 }
 
 func (m model) Init() tea.Cmd {
@@ -62,10 +67,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.table.Focus()
 			}
 		case "q", "ctrl+c":
-			m.selectedProfileId = ""
+			m.selectedPlugin = nil
 			return m, tea.Quit
 		case "enter":
-			m.selectedProfileId = m.table.SelectedRow()[0]
+			m.selectedPlugin = &PluginViewDTO{
+				Name:    m.table.SelectedRow()[0],
+				Version: m.table.SelectedRow()[1],
+				Type:    PluginType(m.table.SelectedRow()[2]),
+			}
 			return m, tea.Quit
 		}
 	}
@@ -82,29 +91,12 @@ func (m model) View() string {
 	return baseStyle.Render(m.table.View())
 }
 
-func renderProfileList(profileList []config.Profile, activeProfileId string, selectable bool) model {
+func renderPluginsList(plugins []PluginViewDTO, selectable bool) model {
 	rows := []table.Row{}
-	activeProfileRow := 0
-	for i, profile := range profileList {
-		row := table.Row{profile.Id, profile.Name, fmt.Sprintf("%t", profile.Id == activeProfileId), profile.Hostname, fmt.Sprintf("%d", profile.Port), profile.Auth.User}
+	selectedPlugin := &plugins[0]
 
-		if profile.Auth.PrivateKeyPath != nil {
-			row = append(row, "-", *profile.Auth.PrivateKeyPath)
-		} else if profile.Auth.Password != nil {
-			password := strings.Repeat("*", len(*profile.Auth.Password))
-			row = append(row, password, "-")
-		}
-
-		switch profile.Id {
-		case "default":
-			row = table.Row{profile.Id, profile.Name, fmt.Sprintf("%t", profile.Id == activeProfileId), "-", "-", "-", "-", "-"}
-		case NewProfileId:
-			row = table.Row{profile.Id, profile.Name, "", "", "", "", "", ""}
-		}
-
-		if profile.Id == activeProfileId {
-			activeProfileRow = i
-		}
+	for _, plugin := range plugins {
+		row := table.Row{plugin.Name, plugin.Version, string(plugin.Type)}
 
 		rows = append(rows, row)
 	}
@@ -114,43 +106,44 @@ func renderProfileList(profileList []config.Profile, activeProfileId string, sel
 	adjustedRows, adjustedCols := getRowsAndCols(width, rows)
 
 	return model{
-		table:             getTable(adjustedRows, adjustedCols, selectable, activeProfileRow),
-		selectedProfileId: activeProfileId,
-		selectable:        selectable,
-		initialRows:       rows,
+		table:          getTable(adjustedRows, adjustedCols, selectable, 0),
+		selectedPlugin: selectedPlugin,
+		selectable:     selectable,
+		initialRows:    rows,
 	}
 }
 
-func GetProfileIdFromPrompt(profileList []config.Profile, activeProfileId, title string, withCreateOption bool) string {
+func GetPluginFromPrompt(plugins []PluginViewDTO, title string) *PluginViewDTO {
 	views_util.RenderMainTitle(title)
 
-	withNewProfile := profileList
-
-	if withCreateOption {
-		withNewProfile = append(withNewProfile, config.Profile{
-			Id:   NewProfileId,
-			Name: "Add new profile",
-		})
+	if len(plugins) == 0 {
+		fmt.Println("No plugins found")
+		return nil
 	}
 
-	modelInstance := renderProfileList(withNewProfile, activeProfileId, true)
+	modelInstance := renderPluginsList(plugins, true)
 
 	m, err := tea.NewProgram(modelInstance).Run()
 	if err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}
-	profileId := m.(model).selectedProfileId
+	selectedPlugin := m.(model).selectedPlugin
 
 	lipgloss.DefaultRenderer().Output().ClearLines(strings.Count(modelInstance.View(), "\n") + 2)
 
-	return profileId
+	return selectedPlugin
 }
 
-func ListProfiles(profileList []config.Profile, activeProfileId string) {
-	views_util.RenderMainTitle("Profiles")
+func ListPlugins(plugins []PluginViewDTO) {
+	views_util.RenderMainTitle("Plugins")
 
-	modelInstance := renderProfileList(profileList, activeProfileId, false)
+	if len(plugins) == 0 {
+		fmt.Println("No plugins found")
+		return
+	}
+
+	modelInstance := renderPluginsList(plugins, false)
 
 	_, err := tea.NewProgram(modelInstance).Run()
 	if err != nil {
