@@ -1,12 +1,20 @@
-![Daytona Header](https://github.com/daytonaio/.github/blob/main/profile/readme_img.png)
 
 # Instant Local/Remote Development Environments
 
 Daytona Core is a local/remote development environments manager designed for developers. From a single binary, you can create and manage remote development environments, allowing you to focus on your code without the hassle of infrastructure or SaaS.
 
-## TL:DL;
+## Design Principles
+* __Single Command Setup__: Activate a fully configured development environment with a single command.
+* __Runs everywhere__: Spin up your development environment on any machine—whether it's local, remote, a physical server, VM, or cloud-based.
+* __Confiuration File Support__: Initially support for [dev container](https://containers.dev/), ability to expand to DevFile, Nix & Backstage (Contributions welcome here!).
+* __Prebuilds System__: Has a prebuilds system, built in, to drasticly improve environment setup times.
+* __IDE Support__ : Seamlessly supports [VS Code](https://github.com/microsoft/vscode) & [JetBrains](https://www.jetbrains.com/remote-development/gateway/) locally, ready to use without configuration. Includes a built-in Web IDE for added convenience.
+* __Git Provider Integration__: Start with GitHub support, allowing easy repo or PR selection via dropdown. Future plans to expand to GitLab & Bitbucket (Contributions welcome here!).
+* __Reverse Proxy Integration__: Enable collaboration and streamline feedback loops by leveraging reverse proxy functionality. Access preview environments and the Web IDE seamlessly, even behind firewalls.
+* __Extensibility__: Enable Daytona to be extend with plugin development. Moreover, in any dynamic language, not just Go.
+* __Works on my Machine__: Never experince it again.
 
-TODO: one liner install
+
 
 # Table of contents
 
