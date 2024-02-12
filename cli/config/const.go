@@ -3,14 +3,16 @@
 
 package config
 
-import "github.com/daytonaio/daytona/cli/remote_installer"
+import (
+	"github.com/daytonaio/daytona/common/os"
+)
 
-func GetBinaryUrls() map[remote_installer.RemoteOS]string {
-	return map[remote_installer.RemoteOS]string{
-		(remote_installer.OSDarwin_64_86): "https://download.daytona.io/core/daytona-core-darwin-amd64",
-		(remote_installer.OSDarwin_arm64): "https://download.daytona.io/core/daytona-core-darwin-arm64",
-		(remote_installer.OSLinux_64_86):  "https://download.daytona.io/core/daytona-core-linux-amd64",
-		(remote_installer.OSLinux_arm64):  "https://download.daytona.io/core/daytona-core-linux-arm64",
+func GetBinaryUrls() map[os.OperatingSystem]string {
+	return map[os.OperatingSystem]string{
+		(os.Darwin_64_86): "https://download.daytona.io/core/daytona-core-darwin-amd64",
+		(os.Darwin_arm64): "https://download.daytona.io/core/daytona-core-darwin-arm64",
+		(os.Linux_64_86):  "https://download.daytona.io/core/daytona-core-linux-amd64",
+		(os.Linux_arm64):  "https://download.daytona.io/core/daytona-core-linux-arm64",
 	}
 }
 

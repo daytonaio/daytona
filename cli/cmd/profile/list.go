@@ -4,11 +4,8 @@
 package cmd_profile
 
 import (
-	"fmt"
-
 	"github.com/daytonaio/daytona/cli/cmd/output"
 	list_view "github.com/daytonaio/daytona/cli/cmd/views/profile/list_view"
-	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	"github.com/daytonaio/daytona/cli/config"
 
 	log "github.com/sirupsen/logrus"
@@ -16,8 +13,9 @@ import (
 )
 
 var profileListCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List profiles",
+	Use:     "list",
+	Short:   "List profiles",
+	Aliases: []string{"ls"},
 	Run: func(cmd *cobra.Command, args []string) {
 		c, err := config.GetConfig()
 		if err != nil {
@@ -29,24 +27,6 @@ var profileListCmd = &cobra.Command{
 			return
 		}
 
-		chosenProfileId := list_view.GetProfileIdFromPrompt(c.Profiles, c.ActiveProfileId, "Profiles", false)
-
-		if chosenProfileId == "" {
-			return
-		}
-
-		chosenProfile, err := c.GetProfile(chosenProfileId)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		c.ActiveProfileId = chosenProfile.Id
-
-		err = c.Save()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		views_util.RenderInfoMessage(fmt.Sprintf("Active profile set to: %s", chosenProfile.Name))
+		list_view.ListProfiles(c.Profiles, c.ActiveProfileId)
 	},
 }

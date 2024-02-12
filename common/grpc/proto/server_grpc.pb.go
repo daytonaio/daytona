@@ -8,6 +8,7 @@ package proto
 
 import (
 	context "context"
+	types "github.com/daytonaio/daytona/common/grpc/proto/types"
 	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -36,8 +37,8 @@ type ServerClient interface {
 	GenerateKey(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetPublicKeyResponse, error)
 	SetKey(ctx context.Context, in *SetKeyRequest, opts ...grpc.CallOption) (*GetPublicKeyResponse, error)
 	DeleteKey(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*empty.Empty, error)
-	GetConfig(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetConfigResponse, error)
-	SetConfig(ctx context.Context, in *SetConfigRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	GetConfig(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*types.ServerConfig, error)
+	SetConfig(ctx context.Context, in *types.ServerConfig, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type serverClient struct {
@@ -84,8 +85,8 @@ func (c *serverClient) DeleteKey(ctx context.Context, in *empty.Empty, opts ...g
 	return out, nil
 }
 
-func (c *serverClient) GetConfig(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetConfigResponse, error) {
-	out := new(GetConfigResponse)
+func (c *serverClient) GetConfig(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*types.ServerConfig, error) {
+	out := new(types.ServerConfig)
 	err := c.cc.Invoke(ctx, Server_GetConfig_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -93,7 +94,7 @@ func (c *serverClient) GetConfig(ctx context.Context, in *empty.Empty, opts ...g
 	return out, nil
 }
 
-func (c *serverClient) SetConfig(ctx context.Context, in *SetConfigRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *serverClient) SetConfig(ctx context.Context, in *types.ServerConfig, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, Server_SetConfig_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -110,8 +111,8 @@ type ServerServer interface {
 	GenerateKey(context.Context, *empty.Empty) (*GetPublicKeyResponse, error)
 	SetKey(context.Context, *SetKeyRequest) (*GetPublicKeyResponse, error)
 	DeleteKey(context.Context, *empty.Empty) (*empty.Empty, error)
-	GetConfig(context.Context, *empty.Empty) (*GetConfigResponse, error)
-	SetConfig(context.Context, *SetConfigRequest) (*empty.Empty, error)
+	GetConfig(context.Context, *empty.Empty) (*types.ServerConfig, error)
+	SetConfig(context.Context, *types.ServerConfig) (*empty.Empty, error)
 }
 
 // UnimplementedServerServer should be embedded to have forward compatible implementations.
@@ -130,10 +131,10 @@ func (UnimplementedServerServer) SetKey(context.Context, *SetKeyRequest) (*GetPu
 func (UnimplementedServerServer) DeleteKey(context.Context, *empty.Empty) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteKey not implemented")
 }
-func (UnimplementedServerServer) GetConfig(context.Context, *empty.Empty) (*GetConfigResponse, error) {
+func (UnimplementedServerServer) GetConfig(context.Context, *empty.Empty) (*types.ServerConfig, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConfig not implemented")
 }
-func (UnimplementedServerServer) SetConfig(context.Context, *SetConfigRequest) (*empty.Empty, error) {
+func (UnimplementedServerServer) SetConfig(context.Context, *types.ServerConfig) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetConfig not implemented")
 }
 
@@ -239,7 +240,7 @@ func _Server_GetConfig_Handler(srv interface{}, ctx context.Context, dec func(in
 }
 
 func _Server_SetConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetConfigRequest)
+	in := new(types.ServerConfig)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -251,7 +252,7 @@ func _Server_SetConfig_Handler(srv interface{}, ctx context.Context, dec func(in
 		FullMethod: Server_SetConfig_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ServerServer).SetConfig(ctx, req.(*SetConfigRequest))
+		return srv.(ServerServer).SetConfig(ctx, req.(*types.ServerConfig))
 	}
 	return interceptor(ctx, in, info, handler)
 }

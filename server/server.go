@@ -4,17 +4,14 @@
 package server
 
 import (
-	"errors"
 	"net"
 	"os"
 	"os/exec"
 	"os/signal"
-	"path"
 
 	proto "github.com/daytonaio/daytona/common/grpc/proto"
-	agent_service_manager "github.com/daytonaio/daytona/plugins/agent_service/manager"
-	provisioner_manager "github.com/daytonaio/daytona/plugins/provisioner/manager"
 	"github.com/daytonaio/daytona/server/config"
+	plugin_grpc "github.com/daytonaio/daytona/server/grpc/plugins"
 	ports_grpc "github.com/daytonaio/daytona/server/grpc/ports"
 	server_grpc "github.com/daytonaio/daytona/server/grpc/server"
 	workspace_grpc "github.com/daytonaio/daytona/server/grpc/workspace"
@@ -61,8 +58,15 @@ func Start() error {
 	proto.RegisterWorkspaceServiceServer(s, workspaceServer)
 	portsServer := &ports_grpc.PortsServer{}
 	proto.RegisterPortsServer(s, portsServer)
-	serverServer := &server_grpc.ServerGRPCServer{}
-	proto.RegisterServerServer(s, serverServer)
+	serverGrpcServer := &server_grpc.ServerGRPCServer{}
+	proto.RegisterServerServer(s, serverGrpcServer)
+	pluginsServer := &plugin_grpc.PluginsServer{}
+	proto.RegisterPluginsServer(s, pluginsServer)
+
+	err = downloadDefaultPlugins()
+	if err != nil {
+		return err
+	}
 
 	err = registerProvisioners(c)
 	if err != nil {
@@ -136,89 +140,4 @@ func getUnixListener() (*net.Listener, error) {
 		return nil, err
 	}
 	return &lis, nil
-}
-
-func registerProvisioners(c *config.Config) error {
-	log.Info("Registering provisioners")
-
-	provisionerPluginsPath := path.Join(c.PluginsDir, "provisioners")
-
-	files, err := os.ReadDir(provisionerPluginsPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			log.Info("No provisioners found")
-			return nil
-		}
-		return err
-	}
-
-	for _, file := range files {
-		if file.IsDir() {
-			pluginPath, err := getPluginPath(path.Join(provisionerPluginsPath, file.Name()))
-			if err != nil {
-				log.Error(err)
-				continue
-			}
-
-			err = provisioner_manager.RegisterProvisioner(pluginPath)
-			if err != nil {
-				log.Error(err)
-				continue
-			}
-		}
-	}
-
-	log.Info("Provisioners registered")
-
-	return nil
-}
-
-func registerAgentServices(c *config.Config) error {
-	log.Info("Registering agent services")
-	projectAgentPluginsPath := path.Join(c.PluginsDir, "agent_services")
-
-	files, err := os.ReadDir(projectAgentPluginsPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			log.Info("No agent services found")
-			return nil
-		}
-
-		return err
-	}
-
-	for _, file := range files {
-		if file.IsDir() {
-			pluginPath, err := getPluginPath(path.Join(projectAgentPluginsPath, file.Name()))
-			if err != nil {
-				log.Error(err)
-				continue
-			}
-
-			err = agent_service_manager.RegisterAgentService(pluginPath)
-			if err != nil {
-				log.Error(err)
-				continue
-			}
-		}
-	}
-
-	log.Info("Agent services registered")
-
-	return nil
-}
-
-func getPluginPath(dir string) (string, error) {
-	files, err := os.ReadDir(dir)
-	if err != nil {
-		return "", err
-	}
-
-	for _, file := range files {
-		if !file.IsDir() {
-			return path.Join(dir, file.Name()), nil
-		}
-	}
-
-	return "", errors.New("no plugin found in " + dir)
 }
