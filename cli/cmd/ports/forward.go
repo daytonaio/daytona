@@ -127,7 +127,7 @@ func ForwardPort(conn *grpc.ClientConn, activeProfile config.Profile, workspaceN
 		return &response.HostPort, errChan
 	}
 
-	hostPort, errChan := ssh_tunnel_util.ForwardRemoteTcpPort(activeProfile, uint16(response.HostPort))
+	hostPort, errChan := ssh_tunnel_util.ForwardRemoteTcpPort(ctx, activeProfile, uint16(response.HostPort))
 	hostPort32 := uint32(hostPort)
 	return &hostPort32, errChan
 }
