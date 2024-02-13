@@ -41,14 +41,18 @@ More information on the [Daytona](https://daytona.io/) website.
 ### Install CLI
 To manage Daytona Dev environments you need to have access to the Daytona CLI, you can do this by using brew:
 
-```brew daytona install```
+```bash
+brew daytona install
+```
 
 You can also download and compile Daytona from this repository. To do so please check out our docs.
 
 Note the packaged Daytona includes a set of built-in extensions located in the extensions folder, which are added there for your convince.
 
 ### Setting up your first Daytona Dev environment
-```daytona agent install```
+```bash
+daytona agent install
+```
 
 input ssh name (can be localhost)
 
