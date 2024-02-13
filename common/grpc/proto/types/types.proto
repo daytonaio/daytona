@@ -51,5 +51,5 @@ message ServerConfig {
 	string projectBaseImage = 2;
 	string pluginsDir = 3; 
   string pluginRegistryUrl = 4;
-  string uuid = 5;
+  string id = 5;
 }

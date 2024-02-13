@@ -138,7 +138,7 @@ func init() {
 		ProjectBaseImage:    defaultProjectBaseImage,
 		PluginRegistryUrl:   defaultPluginRegistryUrl,
 		PluginsDir:          pluginsDir,
-		Uuid:                generateUuid(),
+		Id:                  generateUuid(),
 	}
 
 	err = Save(&c)
