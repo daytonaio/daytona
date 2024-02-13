@@ -4,82 +4,35 @@
 package agent
 
 import (
-	"encoding/json"
 	"os"
-	"path"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/kelseyhightower/envconfig"
+
+	log "github.com/sirupsen/logrus"
 )
 
-type ReverseProxyConfig struct {
-	Addr string `json:"addr"`
-	Port int    `json:"port"`
-	Auth string `json:"auth"`
+type IConfig struct {
+	ReverseProxy struct {
+		Hostname string `envconfig:"DAYTONA_PROXY_HOSTNAME" validate:"required"`
+		Port     int    `envconfig:"DAYTONA_PROXY_PORT" validate:"required"`
+		AuthKey  string `envconfig:"DAYTONA_PROXY_AUTH_KEY" validate:"required"`
+	}
 }
 
-type Config struct {
-	ReverseProxy ReverseProxyConfig `json:"reverse_proxy"`
+var Config IConfig
 
-	//	WorkspaceDir string `json:"workspace_dir"`
-	//	PluginsDir   string `json:"plugins_dir"`
-}
-
-func GetConfig() (*Config, error) {
-	configFilePath, err := configFilePath()
+func init() {
+	err := envconfig.Process("", &Config)
 	if err != nil {
-		return nil, err
+		log.Error(err)
+		os.Exit(2)
 	}
 
-	_, err = os.Stat(configFilePath)
-	if os.IsNotExist(err) {
-		panic("config file does not exist")
-	}
-
+	var validate = validator.New()
+	err = validate.Struct(&Config)
 	if err != nil {
-		return nil, err
+		log.Error(err)
+		os.Exit(2)
 	}
-
-	var c Config
-	configContent, err := os.ReadFile(configFilePath)
-	if err != nil {
-		return nil, err
-	}
-
-	err = json.Unmarshal(configContent, &c)
-	if err != nil {
-		return nil, err
-	}
-
-	return &c, nil
-}
-
-func configFilePath() (string, error) {
-	userConfigDir, err := os.UserConfigDir()
-	if err != nil {
-		return "", err
-	}
-
-	return path.Join(userConfigDir, "daytona", "agent", "config.json"), nil
-}
-
-func (c *Config) Save() error {
-	configFilePath, err := configFilePath()
-	if err != nil {
-		return err
-	}
-
-	configContent, err := json.MarshalIndent(c, "", "  ")
-	if err != nil {
-		return err
-	}
-
-	err = os.MkdirAll(path.Dir(configFilePath), 0700)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(configFilePath, configContent, 0600)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
