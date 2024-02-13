@@ -4,12 +4,11 @@
 <img src="https://github.com/kubernetes/kubernetes/raw/master/logo/logo.png" width="100">
 
 ----
-Daytona is a radically simple open source development environment standard. It automates the entire process; provisioning the instance (if remote), to reading the config and executing it, setting up prebuilds, attaching a local ide, to adding a fully qualified domain name to the dev environment to share and collaborate.
+Daytona is a radically simple open source development environment standard. It automates the entire process; provisioning the instance, reading the configuration and executing it, setting up prebuilds, attaching your local or a Web IDE, and adding a fully qualified domain name to the dev environment to share and collaborate.
 
-Daytona builds upon a decade and a half of experience of the team responsible for pioneering the Cloud IDE movement, the project Codeanywhere. Using the learning of building IDEs and orchestraters from scratch to be able to provision instant development environments,  incorporating that with technologies that are now available, and building oin the dream tha code works on any maching you run it one the team set out to make that instant dev environments a possibility to all 
+Daytona builds upon a decade and a half of experience of the team responsible for pioneering the Cloud IDE movement. This expertise encompasses the development of IDEs and orchestrators from scratch, facilitating the provision of instant cloud development environments. By integrating modern technologies and advancements with this historical knowledge,  Daytona is committed to eradicating the "works on my machine" syndrome once and for all.
 
-In essence Daytona removes all the complexities of setting up dev environments and lets you focus on code. 
-More information on the Daytona website.
+More information on the [Daytona](https://daytona.io/) website.
 
 ----
 
