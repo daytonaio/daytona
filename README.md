@@ -76,7 +76,8 @@ Note you can use  aws provisioner to auto proivision a vm for each Daytona dev e
 * Plugin system for extending the core feature set
 * Available plugins for SSH access, VS Code Server, Tailscale
 
-
+## Architecture 
+TODO: desc
 
 ## Plugins
 
