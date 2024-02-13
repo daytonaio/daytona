@@ -58,10 +58,7 @@ Note you can use  aws provisioner to auto proivision a vm for each Daytona dev e
 
 
 ## Features
-
-
 * __Runs everywhere__: Spin up your development environment on any machine—whether it's local, remote, a physical server, VM, or cloud-based.
-
 * __Confiuration File Support__: Initially support for [dev container](https://containers.dev/), ability to expand to DevFile, Nix & Backstage (Contributions welcome here!).
 * __Prebuilds System__: Has a prebuilds system, built in, to drasticly improve environment setup times.
 * __IDE Support__ : Seamlessly supports [VS Code](https://github.com/microsoft/vscode) & [JetBrains](https://www.jetbrains.com/remote-development/gateway/) locally, ready to use without configuration. Includes a built-in Web IDE for added convenience.
