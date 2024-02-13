@@ -6,6 +6,7 @@ package config
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path"
 )
@@ -17,11 +18,12 @@ type ProfileAuth struct {
 }
 
 type Profile struct {
-	Id       string      `json:"id"`
-	Name     string      `json:"name"`
-	Hostname string      `json:"hostname"`
-	Port     int         `json:"port"`
-	Auth     ProfileAuth `json:"auth"`
+	Id          string      `json:"id"`
+	Name        string      `json:"name"`
+	Hostname    string      `json:"hostname"`
+	Port        int         `json:"port"`
+	Auth        ProfileAuth `json:"auth"`
+	Provisioner string      `json:"provisioner"`
 }
 
 type Config struct {
@@ -106,6 +108,18 @@ func (c *Config) AddProfile(profile Profile) error {
 	return c.Save()
 }
 
+func (c *Config) EditProfile(profile Profile) error {
+	for i, p := range c.Profiles {
+		if p.Id == profile.Id {
+			c.Profiles[i] = profile
+
+			return c.Save()
+		}
+	}
+
+	return fmt.Errorf("profile with id %s not found", profile.Id)
+}
+
 func (c *Config) RemoveProfile(profileId string) error {
 	if profileId == "default" {
 		return errors.New("can not remove default profile")
@@ -150,6 +164,7 @@ func getDefaultConfig() Config {
 					Password:       nil,
 					PrivateKeyPath: nil,
 				},
+				Provisioner: "docker-provisioner",
 			},
 		},
 	}

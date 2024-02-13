@@ -39,7 +39,10 @@ var ProfileCmd = &cobra.Command{
 		chosenProfileId := list_view.GetProfileIdFromPrompt(profilesList, c.ActiveProfileId, "Choose a profile to use or add a new one", true)
 
 		if chosenProfileId == list_view.NewProfileId {
-			CreateProfile(c, true)
+			_, err = CreateProfile(c, true)
+			if err != nil {
+				log.Fatal(err)
+			}
 			return
 		}
 

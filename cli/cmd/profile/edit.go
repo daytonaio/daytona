@@ -4,11 +4,17 @@
 package cmd_profile
 
 import (
+	"context"
 	"errors"
 
 	"github.com/daytonaio/daytona/cli/cmd/views/profile/info_view"
 	list_view "github.com/daytonaio/daytona/cli/cmd/views/profile/list_view"
+	views_provisioner "github.com/daytonaio/daytona/cli/cmd/views/provisioner"
 	"github.com/daytonaio/daytona/cli/config"
+	"github.com/daytonaio/daytona/cli/connection"
+	"github.com/daytonaio/daytona/common/grpc/proto"
+	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	view "github.com/daytonaio/daytona/cli/cmd/views/profile/creation_wizard"
 
@@ -41,10 +47,6 @@ var profileEditCmd = &cobra.Command{
 			chosenProfileId = args[0]
 		}
 
-		if chosenProfileId == "default" {
-			log.Fatal("Can not edit default profile")
-		}
-
 		for _, profile := range c.Profiles {
 			if profile.Id == chosenProfileId || profile.Name == chosenProfileId {
 				chosenProfile = profile
@@ -54,71 +56,132 @@ var profileEditCmd = &cobra.Command{
 
 		if chosenProfile == (config.Profile{}) {
 			log.Fatal("Profile does not exist")
+		}
+
+		if profileNameFlag == "" || serverHostnameFlag == "" || serverUserFlag == "" || provisionerFlag == "" || (serverPrivateKeyPathFlag == "" && serverPasswordFlag == "") {
+			conn, err := connection.Get(nil)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			err = EditProfile(c, conn, true, &chosenProfile)
+			if err != nil {
+				log.Fatal(err)
+			}
 			return
 		}
 
 		profileEditView := view.ProfileAddView{
-			ProfileName:    chosenProfile.Name,
-			RemoteHostname: chosenProfile.Hostname,
-			RemoteSshPort:  chosenProfile.Port,
-			RemoteSshUser:  chosenProfile.Auth.User,
+			ProfileName:             profileNameFlag,
+			RemoteHostname:          serverHostnameFlag,
+			RemoteSshPort:           serverPortFlag,
+			RemoteSshUser:           serverUserFlag,
+			RemoteSshPassword:       serverPasswordFlag,
+			RemoteSshPrivateKeyPath: serverPrivateKeyPathFlag,
+			Provisioner:             provisionerFlag,
 		}
 
-		if chosenProfile.Auth.Password != nil {
-			profileEditView.RemoteSshPassword = *chosenProfile.Auth.Password
-			profileEditView.RemoteSshPrivateKeyPath = ""
-		} else if chosenProfile.Auth.PrivateKeyPath != nil {
-			profileEditView.RemoteSshPassword = ""
-			profileEditView.RemoteSshPrivateKeyPath = *chosenProfile.Auth.PrivateKeyPath
-		}
-
-		if profileNameFlag == "" || serverHostnameFlag == "" || serverUserFlag == "" || (serverPrivateKeyPathFlag == "" && serverPasswordFlag == "") {
-			view.ProfileCreationView(c, &profileEditView, true)
-		} else {
-			profileEditView.ProfileName = profileNameFlag
-			profileEditView.RemoteHostname = serverHostnameFlag
-			profileEditView.RemoteSshPassword = serverPasswordFlag
-			profileEditView.RemoteSshUser = serverUserFlag
-			profileEditView.RemoteSshPrivateKeyPath = serverPrivateKeyPathFlag
-		}
-
-		editedProfile := config.Profile{
-			Id:       chosenProfileId,
-			Name:     profileEditView.ProfileName,
-			Hostname: profileEditView.RemoteHostname,
-			Port:     profileEditView.RemoteSshPort,
-			Auth: config.ProfileAuth{
-				User:           profileEditView.RemoteSshUser,
-				Password:       nil,
-				PrivateKeyPath: nil,
-			},
-		}
-
-		if profileEditView.RemoteSshPassword != "" {
-			editedProfile.Auth.Password = &profileEditView.RemoteSshPassword
-		} else if profileEditView.RemoteSshPrivateKeyPath != "" {
-			editedProfile.Auth.PrivateKeyPath = &profileEditView.RemoteSshPrivateKeyPath
-		} else {
-			log.Fatal(errors.New("password or private key path must be provided"))
-		}
-
-		for i, profile := range c.Profiles {
-			if profile.Id == chosenProfileId {
-				c.Profiles[i] = editedProfile
-				break
-			}
-		}
-
-		err = c.Save()
+		err = editProfile(chosenProfileId, profileEditView, c, true)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		info_view.Render(info_view.ProfileInfo{
-			ProfileName: profileEditView.ProfileName,
-			ServerUrl:   profileEditView.RemoteHostname,
-		}, "edited")
 	},
+}
+
+func EditProfile(c *config.Config, conn *grpc.ClientConn, notify bool, profile *config.Profile) error {
+	if profile == nil {
+		return errors.New("profile must not be nil")
+	}
+
+	ctx := context.Background()
+	pluginsClient := proto.NewPluginsClient(conn)
+	provisionerPluginList, err := pluginsClient.ListProvisionerPlugins(ctx, &emptypb.Empty{})
+	if err != nil {
+		return err
+	}
+
+	if len(provisionerPluginList.Plugins) == 0 {
+		return errors.New("no provisioner plugins found")
+	}
+
+	var selectedProvisioner *proto.ProvisionerPlugin
+	for _, provisioner := range provisionerPluginList.Plugins {
+		if provisioner.Name == profile.Provisioner {
+			selectedProvisioner = provisioner
+			break
+		}
+	}
+
+	if profile.Id == "default" {
+		provisioner, err := views_provisioner.GetProvisionerFromPrompt(provisionerPluginList.Plugins, "Choose a provisioner to use", selectedProvisioner)
+		if err != nil {
+			return err
+		}
+		profile.Provisioner = provisioner.Name
+		return c.EditProfile(*profile)
+	}
+
+	profileAddView := view.ProfileAddView{
+		ProfileName:             profile.Name,
+		RemoteHostname:          profile.Hostname,
+		RemoteSshPort:           profile.Port,
+		RemoteSshUser:           profile.Auth.User,
+		Provisioner:             provisionerPluginList.Plugins[0].Name,
+		RemoteSshPassword:       "",
+		RemoteSshPrivateKeyPath: "",
+	}
+
+	if profile.Auth.Password != nil {
+		profileAddView.RemoteSshPassword = *profile.Auth.Password
+	} else if profile.Auth.PrivateKeyPath != nil {
+		profileAddView.RemoteSshPrivateKeyPath = *profile.Auth.PrivateKeyPath
+	}
+
+	view.ProfileCreationView(c, &profileAddView, true)
+
+	provisioner, err := views_provisioner.GetProvisionerFromPrompt(provisionerPluginList.Plugins, "Choose a provisioner to use", selectedProvisioner)
+	if err != nil {
+		return err
+	}
+	profileAddView.Provisioner = provisioner.Name
+
+	return editProfile(profile.Id, profileAddView, c, notify)
+}
+
+func editProfile(profileId string, profileView view.ProfileAddView, c *config.Config, notify bool) error {
+	editedProfile := config.Profile{
+		Id:       profileId,
+		Name:     profileView.ProfileName,
+		Hostname: profileView.RemoteHostname,
+		Port:     profileView.RemoteSshPort,
+		Auth: config.ProfileAuth{
+			User:           profileView.RemoteSshUser,
+			Password:       nil,
+			PrivateKeyPath: nil,
+		},
+		Provisioner: profileView.Provisioner,
+	}
+	if profileView.RemoteSshPassword != "" {
+		editedProfile.Auth.Password = &profileView.RemoteSshPassword
+	} else if profileView.RemoteSshPrivateKeyPath != "" {
+		editedProfile.Auth.PrivateKeyPath = &profileView.RemoteSshPrivateKeyPath
+	} else {
+		return errors.New("password or private key path must be provided")
+	}
+
+	err := c.EditProfile(editedProfile)
+	if err != nil {
+		return err
+	}
+
+	if notify {
+		info_view.Render(info_view.ProfileInfo{
+			ProfileName: profileView.ProfileName,
+			ServerUrl:   profileView.RemoteHostname,
+		}, "edited")
+	}
+
+	return nil
 }
 
 func init() {
@@ -128,4 +191,5 @@ func init() {
 	profileEditCmd.Flags().StringVarP(&serverUserFlag, "user", "u", "", "Remote SSH url")
 	profileEditCmd.Flags().StringVarP(&serverPasswordFlag, "password", "p", "", "Remote SSH password")
 	profileEditCmd.Flags().StringVarP(&serverPrivateKeyPathFlag, "private-key-path", "k", "", "Remote SSH private key path")
+	profileEditCmd.Flags().StringVarP(&provisionerFlag, "provisioner", "r", "default", "Provisioner")
 }
