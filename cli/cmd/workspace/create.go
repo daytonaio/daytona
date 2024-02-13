@@ -5,21 +5,26 @@ package cmd_workspace
 
 import (
 	"context"
+	"errors"
 	"io"
 	"os"
 
+	"github.com/daytonaio/daytona/common/grpc/proto"
 	workspace_proto "github.com/daytonaio/daytona/common/grpc/proto"
 	"github.com/daytonaio/daytona/internal/util"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/golang/protobuf/ptypes/empty"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
+	views_provisioner "github.com/daytonaio/daytona/cli/cmd/views/provisioner"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	wizard_view "github.com/daytonaio/daytona/cli/cmd/views/workspace/creation_wizard"
 	info_view "github.com/daytonaio/daytona/cli/cmd/views/workspace/info_view"
 	init_view "github.com/daytonaio/daytona/cli/cmd/views/workspace/init_view"
+	"github.com/daytonaio/daytona/cli/config"
 	"github.com/daytonaio/daytona/cli/connection"
 )
 
@@ -27,7 +32,7 @@ var repos []string
 
 var CreateCmd = &cobra.Command{
 	Use:   "create [WORKSPACE_NAME]",
-	Short: "Create the workspace",
+	Short: "Create a workspace",
 	Args:  cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var workspaceName string
@@ -38,6 +43,41 @@ var CreateCmd = &cobra.Command{
 		}
 		defer conn.Close()
 		client := workspace_proto.NewWorkspaceServiceClient(conn)
+
+		c, err := config.GetConfig()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		activeProfile, err := c.GetActiveProfile()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if activeProfile.Provisioner == "" {
+			ctx := context.Background()
+			pluginsClient := proto.NewPluginsClient(conn)
+			provisionerPluginList, err := pluginsClient.ListProvisionerPlugins(ctx, &emptypb.Empty{})
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			if len(provisionerPluginList.Plugins) == 0 {
+				log.Fatal(errors.New("no provisioner plugins found"))
+			}
+
+			provisioner, err := views_provisioner.GetProvisionerFromPrompt(provisionerPluginList.Plugins, "Provisioner not set. Choose a provisioner to use", nil)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			activeProfile.Provisioner = provisioner.Name
+
+			err = c.EditProfile(activeProfile)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
 
 		if len(args) == 0 {
 			var workspaceNames []string
@@ -78,6 +118,7 @@ var CreateCmd = &cobra.Command{
 		createRequest := &workspace_proto.CreateWorkspaceRequest{
 			Name:         workspaceName,
 			Repositories: repos,
+			Provisioner:  activeProfile.Provisioner,
 		}
 
 		stream, err := client.Create(ctx, createRequest)

@@ -22,35 +22,39 @@ var profileAddCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Aliases: []string{"new"},
 	Run: func(cmd *cobra.Command, args []string) {
-		profileAddView := view.ProfileAddView{
-			ProfileName:             "",
-			RemoteHostname:          "",
-			RemoteSshPort:           22,
-			RemoteSshPassword:       "",
-			RemoteSshUser:           "",
-			RemoteSshPrivateKeyPath: "",
-		}
-
 		c, err := config.GetConfig()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		if profileNameFlag == "" || serverHostnameFlag == "" || serverUserFlag == "" || (serverPrivateKeyPathFlag == "" && serverPasswordFlag == "") {
-			view.ProfileCreationView(c, &profileAddView, false)
-		} else {
-			profileAddView.ProfileName = profileNameFlag
-			profileAddView.RemoteHostname = serverHostnameFlag
+		if profileNameFlag == "" || serverHostnameFlag == "" || serverUserFlag == "" || provisionerFlag == "" || (serverPrivateKeyPathFlag == "" && serverPasswordFlag == "") {
+			_, err = CreateProfile(c, true)
+			if err != nil {
+				log.Fatal(err)
+			}
+			return
+		}
+
+		profileAddView := view.ProfileAddView{
+			ProfileName:    profileNameFlag,
+			RemoteHostname: serverHostnameFlag,
+			RemoteSshPort:  serverPortFlag,
+			RemoteSshUser:  serverUserFlag,
+			Provisioner:    provisionerFlag,
+		}
+		if serverPasswordFlag != "" {
 			profileAddView.RemoteSshPassword = serverPasswordFlag
-			profileAddView.RemoteSshUser = serverUserFlag
+		} else if serverPrivateKeyPathFlag != "" {
 			profileAddView.RemoteSshPrivateKeyPath = serverPrivateKeyPathFlag
+		} else {
+			log.Fatal(errors.New("password or private key path must be provided"))
 		}
 
 		addProfile(profileAddView, c, true)
 	},
 }
 
-func CreateProfile(c *config.Config, notify bool) string {
+func CreateProfile(c *config.Config, notify bool) (string, error) {
 	profileAddView := view.ProfileAddView{
 		ProfileName:             "",
 		RemoteHostname:          "",
@@ -58,36 +62,38 @@ func CreateProfile(c *config.Config, notify bool) string {
 		RemoteSshPassword:       "",
 		RemoteSshUser:           "",
 		RemoteSshPrivateKeyPath: "",
+		Provisioner:             "",
 	}
 
 	view.ProfileCreationView(c, &profileAddView, false)
+
 	return addProfile(profileAddView, c, notify)
 }
 
-func addProfile(profileAddView view.ProfileAddView, c *config.Config, notify bool) string {
+func addProfile(profileView view.ProfileAddView, c *config.Config, notify bool) (string, error) {
 	profile := config.Profile{
-		Id:       util.GenerateIdFromName(profileAddView.ProfileName),
-		Name:     profileAddView.ProfileName,
-		Hostname: profileAddView.RemoteHostname,
-		Port:     profileAddView.RemoteSshPort,
+		Id:       util.GenerateIdFromName(profileView.ProfileName),
+		Name:     profileView.ProfileName,
+		Hostname: profileView.RemoteHostname,
+		Port:     profileView.RemoteSshPort,
 		Auth: config.ProfileAuth{
-			User:           profileAddView.RemoteSshUser,
+			User:           profileView.RemoteSshUser,
 			Password:       nil,
 			PrivateKeyPath: nil,
 		},
 	}
 
-	if profileAddView.RemoteSshPassword != "" {
-		profile.Auth.Password = &profileAddView.RemoteSshPassword
-	} else if profileAddView.RemoteSshPrivateKeyPath != "" {
-		profile.Auth.PrivateKeyPath = &profileAddView.RemoteSshPrivateKeyPath
+	if profileView.RemoteSshPassword != "" {
+		profile.Auth.Password = &profileView.RemoteSshPassword
+	} else if profileView.RemoteSshPrivateKeyPath != "" {
+		profile.Auth.PrivateKeyPath = &profileView.RemoteSshPrivateKeyPath
 	} else {
-		log.Fatal(errors.New("password or private key path must be provided"))
+		return "", errors.New("password or private key path must be provided")
 	}
 
 	err := c.AddProfile(profile)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	if notify {
@@ -97,15 +103,16 @@ func addProfile(profileAddView view.ProfileAddView, c *config.Config, notify boo
 		}, "added and set as active")
 	}
 
-	return profile.Id
+	return profile.Id, nil
 }
 
 var profileNameFlag string
 var serverHostnameFlag string
-var serverPortFlag int
+var serverPortFlag int = 0
 var serverPasswordFlag string
 var serverUserFlag string
 var serverPrivateKeyPathFlag string
+var provisionerFlag string
 
 func init() {
 	profileAddCmd.Flags().StringVarP(&profileNameFlag, "name", "n", "", "Profile name")
@@ -114,4 +121,5 @@ func init() {
 	profileAddCmd.Flags().StringVarP(&serverUserFlag, "user", "u", "", "Remote SSH user")
 	profileAddCmd.Flags().StringVarP(&serverPasswordFlag, "password", "p", "", "Remote SSH password")
 	profileAddCmd.Flags().StringVarP(&serverPrivateKeyPathFlag, "private-key-path", "k", "", "Remote SSH private key path")
+	profileAddCmd.Flags().StringVarP(&provisionerFlag, "provisioner", "r", "default", "Provisioner")
 }
