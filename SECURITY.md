@@ -1,6 +1,4 @@
-Security Policy
-Supported Versions
-Information about supported Kubernetes versions can be found on the Kubernetes version and version skew support policy page on the Kubernetes website.
+#Security Policy
 
-Reporting a Vulnerability
-Instructions for reporting a vulnerability can be found on the Kubernetes Security and Disclosure Information page.
+##Reporting a Vulnerability
+Instructions for reporting a vulnerability can be found on the Daytona Documentation Security and Disclosure Information page.
