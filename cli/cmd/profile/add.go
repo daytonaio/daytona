@@ -5,9 +5,15 @@ package cmd_profile
 
 import (
 	"errors"
+	"fmt"
+	"strconv"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/daytonaio/daytona/cli/config"
+	"github.com/daytonaio/daytona/cli/remote_installer"
 	"github.com/daytonaio/daytona/internal/util"
+	"golang.org/x/crypto/ssh"
 
 	view "github.com/daytonaio/daytona/cli/cmd/views/profile/creation_wizard"
 	"github.com/daytonaio/daytona/cli/cmd/views/profile/info_view"
@@ -91,7 +97,49 @@ func addProfile(profileView view.ProfileAddView, c *config.Config, notify bool) 
 		return "", errors.New("password or private key path must be provided")
 	}
 
-	err := c.AddProfile(profile)
+	s := spinner.New(spinner.CharSets[14], 100*time.Millisecond)
+
+	sshConfig := util.GetSshConfigFromProfile(&profile)
+
+	fmt.Println("Connecting to remote host ...")
+	s.Start()
+	defer s.Stop()
+
+	ignoreConnectionCheckPrompt := false
+
+	client, err := ssh.Dial("tcp", profile.Hostname+":"+strconv.Itoa(profile.Port), sshConfig)
+	if err != nil {
+		s.Stop()
+		view.IgnoreConnectionFailedCheck(&ignoreConnectionCheckPrompt, "Failed to connect to remote host")
+		if !ignoreConnectionCheckPrompt {
+			return "", nil
+		}
+	}
+
+	installer := &remote_installer.RemoteInstaller{
+		Client: client,
+	}
+
+	s.Stop()
+
+	serverRegistered, err := installer.ServerRegistered()
+	if err != nil {
+		s.Stop()
+		view.IgnoreConnectionFailedCheck(&ignoreConnectionCheckPrompt, "Failed to connect to remote host")
+		if !ignoreConnectionCheckPrompt {
+			return "", nil
+		}
+	}
+
+	if !serverRegistered {
+		s.Stop()
+		view.IgnoreConnectionFailedCheck(&ignoreConnectionCheckPrompt, "Daytona was not found on the specified remote host.")
+		if !ignoreConnectionCheckPrompt {
+			return "", nil
+		}
+	}
+
+	err = c.AddProfile(profile)
 	if err != nil {
 		return "", err
 	}

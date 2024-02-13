@@ -10,6 +10,7 @@ import (
 
 	"github.com/daytonaio/daytona/cli/config"
 	"github.com/daytonaio/daytona/cli/remote_installer"
+	"github.com/daytonaio/daytona/internal/util"
 
 	cmd_profile "github.com/daytonaio/daytona/cli/cmd/profile"
 	list_view "github.com/daytonaio/daytona/cli/cmd/views/profile/list_view"
@@ -54,7 +55,7 @@ var uninstallCmd = &cobra.Command{
 
 		var client *ssh.Client
 
-		sshConfig := GetSshConfigFromProfile(&chosenProfile)
+		sshConfig := util.GetSshConfigFromProfile(&chosenProfile)
 
 		fmt.Println("Connecting to remote host ...")
 		s.Start()
