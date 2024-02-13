@@ -93,6 +93,8 @@ func renderProfileList(profileList []config.Profile, activeProfileId string, sel
 		} else if profile.Auth.Password != nil {
 			password := strings.Repeat("*", len(*profile.Auth.Password))
 			row = append(row, password, "-")
+		} else {
+			row = append(row, "-", "-")
 		}
 
 		switch profile.Id {

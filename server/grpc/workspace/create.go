@@ -13,6 +13,7 @@ import (
 
 	daytona_proto "github.com/daytonaio/daytona/common/grpc/proto"
 	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	provisioner_manager "github.com/daytonaio/daytona/plugins/provisioner/manager"
 	"github.com/daytonaio/daytona/server/db"
 	"github.com/daytonaio/daytona/server/event_bus"
 	"github.com/daytonaio/daytona/server/provisioner"
@@ -120,11 +121,17 @@ func newWorkspace(params *daytona_proto.CreateWorkspaceRequest) (*types.Workspac
 		return nil, errors.New("name is not a valid alphanumeric string")
 	}
 
+	_, err := provisioner_manager.GetProvisioner(params.Provisioner)
+	if err != nil {
+		return nil, err
+	}
+
 	w := &types.Workspace{
 		Id:   params.Name,
 		Name: params.Name,
 		Provisioner: &types.WorkspaceProvisioner{
-			Name:    "docker-provisioner",
+			Name: params.Provisioner,
+			// TODO: Add profile support
 			Profile: "default",
 		},
 	}

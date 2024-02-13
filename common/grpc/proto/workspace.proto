@@ -6,6 +6,7 @@ import "common/grpc/proto/types/types.proto";
 message CreateWorkspaceRequest {
     string name = 1;
     repeated string repositories = 2;
+    string provisioner = 3;
 }
 
 message CreateWorkspaceResponse {

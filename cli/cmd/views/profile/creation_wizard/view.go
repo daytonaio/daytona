@@ -5,7 +5,6 @@ package views_profile
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"regexp"
 	"strconv"
@@ -25,6 +24,7 @@ type ProfileAddView struct {
 	RemoteSshPassword       string
 	RemoteSshUser           string
 	RemoteSshPrivateKeyPath string
+	Provisioner             string
 }
 
 func ProfileCreationView(c *config.Config, profileAddView *ProfileAddView, editing bool) {
@@ -108,7 +108,6 @@ func ProfileCreationView(c *config.Config, profileAddView *ProfileAddView, editi
 		formGroups...,
 	).WithTheme(views.GetCustomTheme())
 
-	fmt.Println()
 	err := form.Run()
 	if err != nil {
 		log.Fatal(err)
