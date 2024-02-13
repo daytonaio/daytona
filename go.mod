@@ -10,17 +10,20 @@ require (
 	github.com/daytonaio/ssh-gateway v0.1.4
 	github.com/docker/docker v24.0.7+incompatible
 	github.com/glebarez/sqlite v1.10.0
+	github.com/go-playground/validator/v10 v10.18.0
 	github.com/golang/protobuf v1.5.3
 	github.com/hashicorp/go-hclog v0.14.1
 	github.com/hashicorp/go-plugin v1.6.0
+	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lucasb-eyer/go-colorful v1.2.0
 	github.com/reactivex/rxgo/v2 v2.5.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/crypto v0.18.0
+	golang.org/x/crypto v0.19.0
+	golang.org/x/mod v0.13.0
 	golang.org/x/sync v0.4.0
-	golang.org/x/term v0.16.0
+	golang.org/x/term v0.17.0
 	google.golang.org/grpc v1.60.1
 	google.golang.org/protobuf v1.32.0
 	gorm.io/gorm v1.25.5
@@ -29,17 +32,20 @@ require (
 require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/fatih/color v1.7.0 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/glebarez/go-sqlite v1.21.2 // indirect
+	github.com/go-playground/locales v0.14.1 // indirect
+	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/uuid v1.5.0 // indirect
 	github.com/hashicorp/yamux v0.1.1 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
+	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mitchellh/go-testing-interface v0.0.0-20171004221916-a61a99592b77 // indirect
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
-	golang.org/x/mod v0.13.0 // indirect
 	golang.org/x/tools v0.14.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	modernc.org/libc v1.37.6 // indirect
@@ -95,8 +101,8 @@ require (
 	github.com/yuin/goldmark v1.6.0 // indirect
 	github.com/yuin/goldmark-emoji v1.0.2 // indirect
 	golang.org/x/lint v0.0.0-20201208152925-83fdc39ff7b5 // indirect
-	golang.org/x/net v0.19.0 // indirect
-	golang.org/x/sys v0.16.0 // indirect
+	golang.org/x/net v0.21.0 // indirect
+	golang.org/x/sys v0.17.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231212172506-995d672761c0 // indirect

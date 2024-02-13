@@ -7,18 +7,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type Self struct {
-	HostName string `json:"host_name"`
-	DNSName  string `json:"dns_name"`
-}
-
 func Start() error {
 	log.Info("Starting Daytona Agent")
 
-	_, err := GetConfig()
-	if err != nil {
-		return err
-	}
+	log.Info(Config)
 
 	return nil
 }
