@@ -11,6 +11,8 @@ import (
 	"os"
 	"path"
 
+	"github.com/daytonaio/daytona/cli/config"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -68,4 +70,36 @@ func GetHostKey() (ssh.Signer, error) {
 	}
 
 	return signer, nil
+}
+
+func GetSshConfigFromProfile(chosenProfile *config.Profile) *ssh.ClientConfig {
+	sshConfig := &ssh.ClientConfig{
+		User:            chosenProfile.Auth.User,
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+
+	if chosenProfile.Auth.Password != nil && *chosenProfile.Auth.Password != "" {
+		sshConfig.Auth = []ssh.AuthMethod{
+			ssh.Password(*chosenProfile.Auth.Password),
+		}
+	} else if chosenProfile.Auth.PrivateKeyPath != nil && *chosenProfile.Auth.PrivateKeyPath != "" {
+
+		privateKeyContent, err := os.ReadFile(*chosenProfile.Auth.PrivateKeyPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		privateKey, err := ssh.ParsePrivateKey([]byte(privateKeyContent))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		sshConfig.Auth = []ssh.AuthMethod{
+			ssh.PublicKeys(privateKey),
+		}
+	} else {
+		log.Fatal("No authentication method provided")
+	}
+
+	return sshConfig
 }
