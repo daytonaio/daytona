@@ -5,12 +5,12 @@ package cmd_server
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"time"
 
 	"github.com/daytonaio/daytona/cli/config"
 	"github.com/daytonaio/daytona/cli/remote_installer"
+	"github.com/daytonaio/daytona/internal/util"
 
 	cmd_profile "github.com/daytonaio/daytona/cli/cmd/profile"
 	list_view "github.com/daytonaio/daytona/cli/cmd/views/profile/list_view"
@@ -40,7 +40,7 @@ var installCmd = &cobra.Command{
 		chosenProfileId := list_view.GetProfileIdFromPrompt(profilesList, c.ActiveProfileId, "Choose a profile to install on", true)
 
 		if chosenProfileId == list_view.NewProfileId {
-			chosenProfileId, err = cmd_profile.CreateProfile(c, false)
+			chosenProfileId, err = cmd_profile.CreateProfile(c, nil, false, false)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -57,7 +57,7 @@ var installCmd = &cobra.Command{
 
 		var client *ssh.Client
 
-		sshConfig := GetSshConfigFromProfile(&chosenProfile)
+		sshConfig := util.GetSshConfigFromProfile(&chosenProfile)
 
 		fmt.Println("Connecting to remote host ...")
 		s.Start()
@@ -183,36 +183,4 @@ var installCmd = &cobra.Command{
 		fmt.Println("\nDaytona Server has been successfully installed.")
 		fmt.Println("\nUse 'daytona create' to initialize your first workspace.")
 	},
-}
-
-func GetSshConfigFromProfile(chosenProfile *config.Profile) *ssh.ClientConfig {
-	sshConfig := &ssh.ClientConfig{
-		User:            chosenProfile.Auth.User,
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-	}
-
-	if chosenProfile.Auth.Password != nil && *chosenProfile.Auth.Password != "" {
-		sshConfig.Auth = []ssh.AuthMethod{
-			ssh.Password(*chosenProfile.Auth.Password),
-		}
-	} else if chosenProfile.Auth.PrivateKeyPath != nil && *chosenProfile.Auth.PrivateKeyPath != "" {
-
-		privateKeyContent, err := os.ReadFile(*chosenProfile.Auth.PrivateKeyPath)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		privateKey, err := ssh.ParsePrivateKey([]byte(privateKeyContent))
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		sshConfig.Auth = []ssh.AuthMethod{
-			ssh.PublicKeys(privateKey),
-		}
-	} else {
-		log.Fatal("No authentication method provided")
-	}
-
-	return sshConfig
 }
