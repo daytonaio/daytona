@@ -20,21 +20,6 @@ More information on the [Daytona](https://daytona.io/) website.
 * __Extensibility__: Enable extensibility with plugin development. Moreover, in any dynamic language, not just Go.
 * __Works on my Machine__: Never experince it again.
 
-
-
-## Table of contents
-
-- [Getting Started](##GettingStarted)
-  - [CLI](https://github.com/daytonaio/daytona#-CLI)
-  - [Dev Environment](https://github.com/daytonaio/daytona#-CLI)
-- [Features](##Features)
-- [Plugins](##Plugins)
-- [Contributing](##Contributing)
-- [License](##License)
-- [Code of Conduct](##CodeofConductg)
-- [Questions](##Questions)
-
-
 ## Getting Started
 
 
