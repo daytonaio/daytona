@@ -10,7 +10,7 @@ import (
 func Start() error {
 	log.Info("Starting Daytona Agent")
 
-	log.Info(Config)
+	log.Info(config)
 
 	return nil
 }

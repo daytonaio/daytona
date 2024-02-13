@@ -20,19 +20,25 @@ type IConfig struct {
 	}
 }
 
-var Config IConfig
+var config *IConfig
 
-func init() {
-	err := envconfig.Process("", &Config)
+func GetConfig() IConfig {
+	if config != nil {
+		return *config
+	}
+
+	err := envconfig.Process("", &config)
 	if err != nil {
 		log.Error(err)
 		os.Exit(2)
 	}
 
 	var validate = validator.New()
-	err = validate.Struct(&Config)
+	err = validate.Struct(&config)
 	if err != nil {
 		log.Error(err)
 		os.Exit(2)
 	}
+
+	return *config
 }
