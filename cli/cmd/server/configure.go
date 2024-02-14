@@ -42,6 +42,7 @@ var configureCmd = &cobra.Command{
 			ProjectBaseImage:    config.ProjectBaseImage,
 			DefaultWorkspaceDir: config.DefaultWorkspaceDir,
 			PluginsDir:          config.PluginsDir,
+			PluginRegistryUrl:   config.PluginRegistryUrl,
 		})
 		if err != nil {
 			log.Fatal(err)
