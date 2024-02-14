@@ -67,7 +67,7 @@ func GetProvisioners() map[string]Provisioner {
 	return provisioners
 }
 
-func RegisterProvisioner(pluginPath string) error {
+func RegisterProvisioner(pluginPath, serverDownloadUrl string) error {
 	pluginName := path.Base(pluginPath)
 	pluginBasePath := path.Dir(pluginPath)
 
@@ -107,7 +107,8 @@ func RegisterProvisioner(pluginPath string) error {
 	}
 
 	err = (*provisioner).Initialize(&proto.InitializeProvisionerRequest{
-		BasePath: pluginBasePath,
+		BasePath:          pluginBasePath,
+		ServerDownloadUrl: serverDownloadUrl,
 	})
 	if err != nil {
 		return errors.New("failed to initialize provisioner: " + err.Error())

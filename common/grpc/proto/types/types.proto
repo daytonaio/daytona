@@ -52,4 +52,5 @@ message ServerConfig {
 	string pluginsDir = 3; 
   string pluginRegistryUrl = 4;
   string id = 5;
+  string serverDownloadUrl = 6;
 }

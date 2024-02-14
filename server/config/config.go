@@ -17,6 +17,7 @@ import (
 const workspaceKeyFileName = "workspace_key"
 const defaultProjectBaseImage = "daytonaio/workspace-project:latest"
 const defaultPluginRegistryUrl = "https://download.daytona.io/daytona/plugins"
+const defaultServerDownloadUrl = "https://download.daytona.io/daytona/get-server.sh"
 
 func GetConfig() (*types.ServerConfig, error) {
 	configFilePath, err := configFilePath()
@@ -138,6 +139,7 @@ func init() {
 		ProjectBaseImage:    defaultProjectBaseImage,
 		PluginRegistryUrl:   defaultPluginRegistryUrl,
 		PluginsDir:          pluginsDir,
+		ServerDownloadUrl:   defaultServerDownloadUrl,
 		Id:                  generateUuid(),
 	}
 

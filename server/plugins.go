@@ -79,7 +79,7 @@ func registerProvisioners(c *types.ServerConfig) error {
 				continue
 			}
 
-			err = provisioner_manager.RegisterProvisioner(pluginPath)
+			err = provisioner_manager.RegisterProvisioner(pluginPath, c.ServerDownloadUrl)
 			if err != nil {
 				log.Error(err)
 				continue

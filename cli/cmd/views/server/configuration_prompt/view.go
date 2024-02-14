@@ -48,6 +48,9 @@ func ConfigurationForm(config *types.ServerConfig) *types.ServerConfig {
 			huh.NewInput().
 				Title("Plugin Registry URL").
 				Value(&config.PluginRegistryUrl),
+			huh.NewInput().
+				Title("Server Download URL").
+				Value(&config.ServerDownloadUrl),
 		),
 	)
 
