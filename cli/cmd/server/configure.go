@@ -43,6 +43,7 @@ var configureCmd = &cobra.Command{
 			DefaultWorkspaceDir: config.DefaultWorkspaceDir,
 			PluginsDir:          config.PluginsDir,
 			PluginRegistryUrl:   config.PluginRegistryUrl,
+			ServerDownloadUrl:   config.ServerDownloadUrl,
 		})
 		if err != nil {
 			log.Fatal(err)
