@@ -47,7 +47,9 @@ func Start() error {
 		return err
 	}
 
-	lis, err := getUnixListener()
+	var lis *net.Listener
+
+	lis, err = getTcpListener()
 	if err != nil {
 		return err
 	}
@@ -129,15 +131,10 @@ func StartDaemon() error {
 	return nil
 }
 
-func getUnixListener() (*net.Listener, error) {
-	err := os.RemoveAll("/tmp/daytona/daytona.sock")
+func getTcpListener() (*net.Listener, error) {
+	listener, err := net.Listen("tcp", "0.0.0.0:2790")
 	if err != nil {
 		return nil, err
 	}
-
-	lis, err := net.Listen("unix", "/tmp/daytona/daytona.sock")
-	if err != nil {
-		return nil, err
-	}
-	return &lis, nil
+	return &listener, nil
 }
