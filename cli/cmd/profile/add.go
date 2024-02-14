@@ -5,9 +5,14 @@ package cmd_profile
 
 import (
 	"errors"
+	"strconv"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/daytonaio/daytona/cli/config"
+	"github.com/daytonaio/daytona/cli/remote_installer"
 	"github.com/daytonaio/daytona/internal/util"
+	"golang.org/x/crypto/ssh"
 
 	view "github.com/daytonaio/daytona/cli/cmd/views/profile/creation_wizard"
 	"github.com/daytonaio/daytona/cli/cmd/views/profile/info_view"
@@ -28,7 +33,7 @@ var profileAddCmd = &cobra.Command{
 		}
 
 		if profileNameFlag == "" || serverHostnameFlag == "" || serverUserFlag == "" || provisionerFlag == "" || (serverPrivateKeyPathFlag == "" && serverPasswordFlag == "") {
-			_, err = CreateProfile(c, true)
+			_, err = CreateProfile(c, nil, true, true)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -50,27 +55,29 @@ var profileAddCmd = &cobra.Command{
 			log.Fatal(errors.New("password or private key path must be provided"))
 		}
 
-		addProfile(profileAddView, c, true)
+		addProfile(profileAddView, c, true, true)
 	},
 }
 
-func CreateProfile(c *config.Config, notify bool) (string, error) {
-	profileAddView := view.ProfileAddView{
-		ProfileName:             "",
-		RemoteHostname:          "",
-		RemoteSshPort:           22,
-		RemoteSshPassword:       "",
-		RemoteSshUser:           "",
-		RemoteSshPrivateKeyPath: "",
-		Provisioner:             "",
+func CreateProfile(c *config.Config, profileAddView *view.ProfileAddView, checkConnection bool, notify bool) (string, error) {
+	if profileAddView == nil {
+		profileAddView = &view.ProfileAddView{
+			ProfileName:             "",
+			RemoteHostname:          "",
+			RemoteSshPort:           22,
+			RemoteSshPassword:       "",
+			RemoteSshUser:           "",
+			RemoteSshPrivateKeyPath: "",
+			Provisioner:             "",
+		}
 	}
 
-	view.ProfileCreationView(c, &profileAddView, false)
+	view.ProfileCreationView(c, profileAddView, false)
 
-	return addProfile(profileAddView, c, notify)
+	return addProfile(*profileAddView, c, checkConnection, notify)
 }
 
-func addProfile(profileView view.ProfileAddView, c *config.Config, notify bool) (string, error) {
+func addProfile(profileView view.ProfileAddView, c *config.Config, checkConnection bool, notify bool) (string, error) {
 	profile := config.Profile{
 		Id:       util.GenerateIdFromName(profileView.ProfileName),
 		Name:     profileView.ProfileName,
@@ -91,6 +98,19 @@ func addProfile(profileView view.ProfileAddView, c *config.Config, notify bool) 
 		return "", errors.New("password or private key path must be provided")
 	}
 
+	if checkConnection {
+		ignoreConnectionCheckPrompt := false
+		err := checkDaytonaInstalled(profileView, profile)
+		if err != nil {
+			view.IgnoreConnectionFailedCheck(&ignoreConnectionCheckPrompt, err.Error())
+			if !ignoreConnectionCheckPrompt {
+				view.ProfileCreationView(c, &profileView, false)
+
+				return addProfile(profileView, c, true, notify)
+			}
+		}
+	}
+
 	err := c.AddProfile(profile)
 	if err != nil {
 		return "", err
@@ -104,6 +124,37 @@ func addProfile(profileView view.ProfileAddView, c *config.Config, notify bool) 
 	}
 
 	return profile.Id, nil
+}
+
+func checkDaytonaInstalled(profileView view.ProfileAddView, profile config.Profile) error {
+
+	s := spinner.New(spinner.CharSets[14], 100*time.Millisecond)
+
+	sshConfig := util.GetSshConfigFromProfile(&profile)
+
+	s.Start()
+	defer s.Stop()
+
+	client, err := ssh.Dial("tcp", profile.Hostname+":"+strconv.Itoa(profile.Port), sshConfig)
+	if err != nil {
+		return errors.New("Failed to connect to the remote machine")
+	}
+
+	installer := &remote_installer.RemoteInstaller{
+		Client: client,
+	}
+
+	s.Stop()
+
+	serverRegistered, err := installer.ServerRegistered()
+	if err != nil {
+		return errors.New("Failed to execute command on remote machine")
+	}
+
+	if !serverRegistered {
+		return errors.New("Daytona Server is not running on the remote machine")
+	}
+	return nil
 }
 
 var profileNameFlag string
