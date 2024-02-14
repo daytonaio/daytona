@@ -6,6 +6,7 @@ package server
 import (
 	"fmt"
 	"html"
+	"io"
 	"net"
 	"net/http"
 	"os"
@@ -146,6 +147,24 @@ func Start() error {
 				html.EscapeString(who.Node.ComputedName),
 				r.RemoteAddr)
 		})))
+	}()
+
+	go func() {
+		for {
+			time.Sleep(5 * time.Second)
+			req, err := http.Get("http://wrk1-tpuljak:3000")
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+			body, err := io.ReadAll(req.Body)
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+			log.Info(string(body))
+			req.Body.Close()
+		}
 	}()
 
 	go func() {
