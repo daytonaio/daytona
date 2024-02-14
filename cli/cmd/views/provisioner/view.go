@@ -4,6 +4,7 @@
 package views_provisioner
 
 import (
+	"github.com/daytonaio/daytona/cli/cmd/views"
 	"github.com/daytonaio/daytona/common/grpc/proto"
 
 	"github.com/charmbracelet/huh"
@@ -18,7 +19,7 @@ func GetProvisionerFromPrompt(provisionerPlugins []*proto.ProvisionerPlugin, des
 	}
 
 	provisionerSelect := huh.NewSelect[*proto.ProvisionerPlugin]().
-		Title("Provisioner").
+		Title("Default provisioner").
 		Options(provisionerOptions...).
 		Value(&provisioner)
 
@@ -29,7 +30,7 @@ func GetProvisionerFromPrompt(provisionerPlugins []*proto.ProvisionerPlugin, des
 	form := huh.NewForm(
 		huh.NewGroup(
 			provisionerSelect,
-		))
+		)).WithTheme(views.GetCustomTheme())
 
 	err := form.Run()
 	if err != nil {
