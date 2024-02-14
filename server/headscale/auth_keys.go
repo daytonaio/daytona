@@ -2,10 +2,8 @@ package headscale
 
 import (
 	"fmt"
-	"time"
 
 	v1 "github.com/juanfont/headscale/gen/go/headscale/v1"
-	"google.golang.org/protobuf/types/known/timestamppb"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -17,9 +15,6 @@ func CreateAuthKey() (string, error) {
 		Reusable: true,
 		User:     "daytona",
 	}
-
-	expiration := time.Now().UTC().Add(time.Duration(24) * time.Hour)
-	request.Expiration = timestamppb.New(expiration)
 
 	ctx, client, conn, cancel := GetClient()
 	defer cancel()
@@ -33,4 +28,25 @@ func CreateAuthKey() (string, error) {
 	log.Debug("Headscale auth key created")
 
 	return response.PreAuthKey.Key, nil
+}
+
+func RevokeAuthKey(key string) error {
+	log.Debug("Revoking headscale auth key")
+
+	request := &v1.ExpirePreAuthKeyRequest{
+		Key:  key,
+		User: "daytona",
+	}
+
+	ctx, client, conn, cancel := GetClient()
+	defer cancel()
+	defer conn.Close()
+
+	_, err := client.ExpirePreAuthKey(ctx, request)
+	if err != nil {
+		return fmt.Errorf("failed to revoke ApiKey: %w", err)
+	}
+
+	log.Debug("Headscale auth key revoked")
+	return nil
 }

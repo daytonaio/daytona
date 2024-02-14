@@ -16,6 +16,7 @@ message Project {
   string name = 1;
   Repository repository = 2;
   string workspaceId = 3;
+  string authKey = 4;
 }
 
 message WorkspaceProvisioner {
