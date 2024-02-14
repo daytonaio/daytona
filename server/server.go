@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"time"
 
 	proto "github.com/daytonaio/daytona/common/grpc/proto"
 	"github.com/daytonaio/daytona/server/config"
@@ -15,6 +16,7 @@ import (
 	ports_grpc "github.com/daytonaio/daytona/server/grpc/ports"
 	server_grpc "github.com/daytonaio/daytona/server/grpc/server"
 	workspace_grpc "github.com/daytonaio/daytona/server/grpc/workspace"
+	"github.com/daytonaio/daytona/server/headscale"
 	"github.com/daytonaio/daytona/server/ssh_gateway"
 	"github.com/hashicorp/go-plugin"
 
@@ -96,6 +98,24 @@ func Start() error {
 			plugin.CleanupClients()
 			os.Exit(0)
 		}
+	}()
+
+	go func() {
+		time.Sleep(5 * time.Second)
+		err := headscale.CreateUser()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		apiKey, err := headscale.CreateAuthKey()
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Info("HEADSCALE AUTH KEY: ", apiKey)
+	}()
+
+	go func() {
+		log.Fatal(headscale.Start())
 	}()
 
 	if err := s.Serve(*lis); err != nil {

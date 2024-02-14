@@ -14,31 +14,32 @@ import (
 
 type IConfig struct {
 	ReverseProxy struct {
-		Hostname string `envconfig:"DAYTONA_PROXY_HOSTNAME" validate:"required"`
-		Port     int    `envconfig:"DAYTONA_PROXY_PORT" validate:"required"`
-		AuthKey  string `envconfig:"DAYTONA_PROXY_AUTH_KEY" validate:"required"`
+		// Hostname string `envconfig:"DAYTONA_PROXY_HOSTNAME" validate:"required"`
+		// Port     int    `envconfig:"DAYTONA_PROXY_PORT" validate:"required"`
+		AuthKey string `envconfig:"AUTH_KEY" validate:"required"`
 	}
 }
 
 var config *IConfig
 
-func GetConfig() IConfig {
+func GetConfig() (*IConfig, error) {
 	if config != nil {
-		return *config
+		return config, nil
 	}
 
-	err := envconfig.Process("", &config)
+	config = &IConfig{}
+
+	err := envconfig.Process("", config)
 	if err != nil {
 		log.Error(err)
 		os.Exit(2)
 	}
 
 	var validate = validator.New()
-	err = validate.Struct(&config)
+	err = validate.Struct(config)
 	if err != nil {
-		log.Error(err)
-		os.Exit(2)
+		return nil, err
 	}
 
-	return *config
+	return config, nil
 }
