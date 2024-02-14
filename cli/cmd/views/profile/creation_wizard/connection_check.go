@@ -12,14 +12,17 @@ import (
 )
 
 func IgnoreConnectionFailedCheck(ignoreCheck *bool, description string) {
+	errTheme := views.GetCustomTheme()
+	errTheme.Focused.Title.Foreground(views.Red).Bold(true)
+
 	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewConfirm().
-				Title("Server hasn't been set up. Add profile anyway?").
+				Title("Connection to Daytona failed. Continue anyway?").
 				Description(description).
 				Value(ignoreCheck),
 		),
-	).WithTheme(views.GetCustomTheme())
+	).WithTheme(errTheme)
 
 	err := form.Run()
 	if err != nil {

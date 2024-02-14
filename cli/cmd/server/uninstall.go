@@ -40,7 +40,7 @@ var uninstallCmd = &cobra.Command{
 		chosenProfileId := list_view.GetProfileIdFromPrompt(profilesList, c.ActiveProfileId, "Choose a profile to uninstall from", true)
 
 		if chosenProfileId == list_view.NewProfileId {
-			chosenProfileId, err = cmd_profile.CreateProfile(c, false)
+			chosenProfileId, err = cmd_profile.CreateProfile(c, nil, false, false)
 			if err != nil {
 				log.Fatal(err)
 			}
