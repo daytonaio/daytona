@@ -109,6 +109,8 @@ func RegisterProvisioner(pluginPath, serverDownloadUrl string) error {
 	err = (*provisioner).Initialize(&proto.InitializeProvisionerRequest{
 		BasePath:          pluginBasePath,
 		ServerDownloadUrl: serverDownloadUrl,
+		// TODO: get version from somewhere
+		ServerVersion: "tailscale-poc",
 	})
 	if err != nil {
 		return errors.New("failed to initialize provisioner: " + err.Error())

@@ -12,6 +12,7 @@ message ProvisionerInfo {
 message InitializeProvisionerRequest {
   string basePath = 1;
   string serverDownloadUrl = 2;
+  string serverVersion = 3;
 }
 
 message ConfigureResponse {
