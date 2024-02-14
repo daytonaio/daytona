@@ -54,7 +54,7 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		if activeProfile.Provisioner == "" {
+		if activeProfile.DefaultProvisioner == "" {
 			ctx := context.Background()
 			pluginsClient := proto.NewPluginsClient(conn)
 			provisionerPluginList, err := pluginsClient.ListProvisionerPlugins(ctx, &emptypb.Empty{})
@@ -71,7 +71,7 @@ var CreateCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 
-			activeProfile.Provisioner = provisioner.Name
+			activeProfile.DefaultProvisioner = provisioner.Name
 
 			err = c.EditProfile(activeProfile)
 			if err != nil {
@@ -118,7 +118,7 @@ var CreateCmd = &cobra.Command{
 		createRequest := &workspace_proto.CreateWorkspaceRequest{
 			Name:         workspaceName,
 			Repositories: repos,
-			Provisioner:  activeProfile.Provisioner,
+			Provisioner:  activeProfile.DefaultProvisioner,
 		}
 
 		stream, err := client.Create(ctx, createRequest)

@@ -24,7 +24,7 @@ type ProfileAddView struct {
 	RemoteSshPassword       string
 	RemoteSshUser           string
 	RemoteSshPrivateKeyPath string
-	Provisioner             string
+	DefaultProvisioner      string
 }
 
 func ProfileCreationView(c *config.Config, profileAddView *ProfileAddView, editing bool) {

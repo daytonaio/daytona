@@ -78,7 +78,7 @@ var profileEditCmd = &cobra.Command{
 			RemoteSshUser:           serverUserFlag,
 			RemoteSshPassword:       serverPasswordFlag,
 			RemoteSshPrivateKeyPath: serverPrivateKeyPathFlag,
-			Provisioner:             provisionerFlag,
+			DefaultProvisioner:      provisionerFlag,
 		}
 
 		err = editProfile(chosenProfileId, profileEditView, c, true)
@@ -106,18 +106,18 @@ func EditProfile(c *config.Config, conn *grpc.ClientConn, notify bool, profile *
 
 	var selectedProvisioner *proto.ProvisionerPlugin
 	for _, provisioner := range provisionerPluginList.Plugins {
-		if provisioner.Name == profile.Provisioner {
+		if provisioner.Name == profile.DefaultProvisioner {
 			selectedProvisioner = provisioner
 			break
 		}
 	}
 
 	if profile.Id == "default" {
-		provisioner, err := views_provisioner.GetProvisionerFromPrompt(provisionerPluginList.Plugins, "Choose a provisioner to use", selectedProvisioner)
+		provisioner, err := views_provisioner.GetProvisionerFromPrompt(provisionerPluginList.Plugins, "Choose a default provisioner to use", selectedProvisioner)
 		if err != nil {
 			return err
 		}
-		profile.Provisioner = provisioner.Name
+		profile.DefaultProvisioner = provisioner.Name
 		return c.EditProfile(*profile)
 	}
 
@@ -126,7 +126,7 @@ func EditProfile(c *config.Config, conn *grpc.ClientConn, notify bool, profile *
 		RemoteHostname:          profile.Hostname,
 		RemoteSshPort:           profile.Port,
 		RemoteSshUser:           profile.Auth.User,
-		Provisioner:             provisionerPluginList.Plugins[0].Name,
+		DefaultProvisioner:      provisionerPluginList.Plugins[0].Name,
 		RemoteSshPassword:       "",
 		RemoteSshPrivateKeyPath: "",
 	}
@@ -143,7 +143,7 @@ func EditProfile(c *config.Config, conn *grpc.ClientConn, notify bool, profile *
 	if err != nil {
 		return err
 	}
-	profileAddView.Provisioner = provisioner.Name
+	profileAddView.DefaultProvisioner = provisioner.Name
 
 	return editProfile(profile.Id, profileAddView, c, notify)
 }
@@ -159,7 +159,7 @@ func editProfile(profileId string, profileView view.ProfileAddView, c *config.Co
 			Password:       nil,
 			PrivateKeyPath: nil,
 		},
-		Provisioner: profileView.Provisioner,
+		DefaultProvisioner: profileView.DefaultProvisioner,
 	}
 	if profileView.RemoteSshPassword != "" {
 		editedProfile.Auth.Password = &profileView.RemoteSshPassword
