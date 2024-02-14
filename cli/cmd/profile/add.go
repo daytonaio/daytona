@@ -41,11 +41,11 @@ var profileAddCmd = &cobra.Command{
 		}
 
 		profileAddView := view.ProfileAddView{
-			ProfileName:    profileNameFlag,
-			RemoteHostname: serverHostnameFlag,
-			RemoteSshPort:  serverPortFlag,
-			RemoteSshUser:  serverUserFlag,
-			Provisioner:    provisionerFlag,
+			ProfileName:        profileNameFlag,
+			RemoteHostname:     serverHostnameFlag,
+			RemoteSshPort:      serverPortFlag,
+			RemoteSshUser:      serverUserFlag,
+			DefaultProvisioner: provisionerFlag,
 		}
 		if serverPasswordFlag != "" {
 			profileAddView.RemoteSshPassword = serverPasswordFlag
@@ -68,7 +68,7 @@ func CreateProfile(c *config.Config, profileAddView *view.ProfileAddView, checkC
 			RemoteSshPassword:       "",
 			RemoteSshUser:           "",
 			RemoteSshPrivateKeyPath: "",
-			Provisioner:             "",
+			DefaultProvisioner:      "",
 		}
 	}
 

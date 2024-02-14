@@ -18,12 +18,12 @@ type ProfileAuth struct {
 }
 
 type Profile struct {
-	Id          string      `json:"id"`
-	Name        string      `json:"name"`
-	Hostname    string      `json:"hostname"`
-	Port        int         `json:"port"`
-	Auth        ProfileAuth `json:"auth"`
-	Provisioner string      `json:"provisioner"`
+	Id                 string      `json:"id"`
+	Name               string      `json:"name"`
+	Hostname           string      `json:"hostname"`
+	Port               int         `json:"port"`
+	Auth               ProfileAuth `json:"auth"`
+	DefaultProvisioner string      `json:"defaultProvisioner"`
 }
 
 type Config struct {
@@ -164,7 +164,7 @@ func getDefaultConfig() Config {
 					Password:       nil,
 					PrivateKeyPath: nil,
 				},
-				Provisioner: "docker-provisioner",
+				DefaultProvisioner: "docker-provisioner",
 			},
 		},
 	}
