@@ -9,25 +9,21 @@ import (
 	"net"
 	"net/http"
 	"net/netip"
+	"os"
 	"strings"
 
 	"tailscale.com/tsnet"
 )
 
-var (
-	addr     = flag.String("addr", ":80", "address to listen on")
-	hostname = flag.String("hostname", "tshello", "hostname to use on the tailnet")
-)
-
 func Start(authKey string) {
 	flag.Parse()
 	s := new(tsnet.Server)
-	s.Hostname = *hostname
+	s.Hostname = fmt.Sprintf("%s-%s", os.Getenv("DAYTONA_WS_ID"), os.Getenv("DAYTONA_WS_PROJECT_NAME"))
 	s.ControlURL = "https://toma.frps.daytona.io"
 	s.AuthKey = authKey
 
 	defer s.Close()
-	ln, err := s.Listen("tcp", *addr)
+	ln, err := s.Listen("tcp", ":80")
 	if err != nil {
 		log.Fatal(err)
 	}

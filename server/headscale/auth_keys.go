@@ -2,8 +2,10 @@ package headscale
 
 import (
 	"fmt"
+	"time"
 
 	v1 "github.com/juanfont/headscale/gen/go/headscale/v1"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -15,6 +17,7 @@ func CreateAuthKey() (string, error) {
 		Reusable: true,
 		User:     "daytona",
 	}
+	request.Expiration = timestamppb.New(time.Now().Add(100000 * time.Hour))
 
 	ctx, client, conn, cancel := GetClient()
 	defer cancel()

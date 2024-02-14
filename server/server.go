@@ -4,7 +4,10 @@
 package server
 
 import (
+	"fmt"
+	"html"
 	"net"
+	"net/http"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -19,6 +22,7 @@ import (
 	"github.com/daytonaio/daytona/server/headscale"
 	"github.com/daytonaio/daytona/server/ssh_gateway"
 	"github.com/hashicorp/go-plugin"
+	"tailscale.com/tsnet"
 
 	"google.golang.org/grpc"
 
@@ -107,11 +111,41 @@ func Start() error {
 			log.Fatal(err)
 		}
 
-		apiKey, err := headscale.CreateAuthKey()
+		authKey, err := headscale.CreateAuthKey()
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Info("HEADSCALE AUTH KEY: ", apiKey)
+
+		s := new(tsnet.Server)
+		s.Hostname = "server"
+		s.ControlURL = "https://toma.frps.daytona.io"
+		s.AuthKey = authKey
+
+		defer s.Close()
+		ln, err := s.Listen("tcp", ":80")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		defer ln.Close()
+
+		lc, err := s.LocalClient()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		log.Fatal(http.Serve(ln, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			who, err := lc.WhoIs(r.Context(), r.RemoteAddr)
+			if err != nil {
+				http.Error(w, err.Error(), 500)
+				return
+			}
+			fmt.Fprintf(w, "<html><body><h1>Hello, tailnet!</h1>\n")
+			fmt.Fprintf(w, "<p>You are <b>%s</b> from <b>%s</b> (%s)</p>",
+				html.EscapeString(who.UserProfile.LoginName),
+				html.EscapeString(who.Node.ComputedName),
+				r.RemoteAddr)
+		})))
 	}()
 
 	go func() {
