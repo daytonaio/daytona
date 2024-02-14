@@ -9,7 +9,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/daytonaio/daytona/common/grpc/proto"
+	plugin_proto "github.com/daytonaio/daytona/common/grpc/proto"
 	workspace_proto "github.com/daytonaio/daytona/common/grpc/proto"
 	"github.com/daytonaio/daytona/internal/util"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -36,6 +36,7 @@ var CreateCmd = &cobra.Command{
 	Args:  cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var workspaceName string
+		var provisioner string
 
 		conn, err := connection.Get(nil)
 		if err != nil {
@@ -54,9 +55,11 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		if activeProfile.DefaultProvisioner == "" {
+		if provisionerFlag != "" {
+			provisioner = provisionerFlag
+		} else if activeProfile.DefaultProvisioner == "" {
 			ctx := context.Background()
-			pluginsClient := proto.NewPluginsClient(conn)
+			pluginsClient := plugin_proto.NewPluginsClient(conn)
 			provisionerPluginList, err := pluginsClient.ListProvisionerPlugins(ctx, &emptypb.Empty{})
 			if err != nil {
 				log.Fatal(err)
@@ -66,17 +69,20 @@ var CreateCmd = &cobra.Command{
 				log.Fatal(errors.New("no provisioner plugins found"))
 			}
 
-			provisioner, err := views_provisioner.GetProvisionerFromPrompt(provisionerPluginList.Plugins, "Provisioner not set. Choose a provisioner to use", nil)
+			defaultProvisioner, err := views_provisioner.GetProvisionerFromPrompt(provisionerPluginList.Plugins, "Provisioner not set. Choose a provisioner to use", nil)
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			activeProfile.DefaultProvisioner = provisioner.Name
+			provisioner = defaultProvisioner.Name
+			activeProfile.DefaultProvisioner = defaultProvisioner.Name
 
 			err = c.EditProfile(activeProfile)
 			if err != nil {
 				log.Fatal(err)
 			}
+		} else {
+			provisioner = activeProfile.DefaultProvisioner
 		}
 
 		if len(args) == 0 {
@@ -118,7 +124,7 @@ var CreateCmd = &cobra.Command{
 		createRequest := &workspace_proto.CreateWorkspaceRequest{
 			Name:         workspaceName,
 			Repositories: repos,
-			Provisioner:  activeProfile.DefaultProvisioner,
+			Provisioner:  provisioner,
 		}
 
 		stream, err := client.Create(ctx, createRequest)
@@ -184,6 +190,9 @@ var CreateCmd = &cobra.Command{
 	},
 }
 
+var provisionerFlag string
+
 func init() {
 	CreateCmd.Flags().StringArrayVarP(&repos, "repo", "r", nil, "Set the repository url")
+	CreateCmd.Flags().StringVar(&provisionerFlag, "provisioner", "", "Specify the provisioner (e.g. 'docker-provisioner')")
 }
