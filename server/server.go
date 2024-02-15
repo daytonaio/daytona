@@ -12,6 +12,7 @@ import (
 
 	proto "github.com/daytonaio/daytona/common/grpc/proto"
 	"github.com/daytonaio/daytona/server/config"
+	"github.com/daytonaio/daytona/server/frpc"
 	plugin_grpc "github.com/daytonaio/daytona/server/grpc/plugins"
 	ports_grpc "github.com/daytonaio/daytona/server/grpc/ports"
 	server_grpc "github.com/daytonaio/daytona/server/grpc/server"
@@ -86,6 +87,12 @@ func Start() error {
 	go func() {
 		if err := ssh_gateway.Start(); err != nil {
 			log.Error(err)
+		}
+	}()
+
+	go func() {
+		if err := frpc.Connect(); err != nil {
+			log.Fatal(err)
 		}
 	}()
 
