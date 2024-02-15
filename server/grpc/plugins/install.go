@@ -13,6 +13,7 @@ import (
 	"github.com/daytonaio/daytona/plugins/plugin_manager"
 	provisioner_manager "github.com/daytonaio/daytona/plugins/provisioner/manager"
 	"github.com/daytonaio/daytona/server/config"
+	"github.com/daytonaio/daytona/server/frpc"
 	"github.com/golang/protobuf/ptypes/empty"
 )
 
@@ -29,7 +30,7 @@ func (s *PluginsServer) InstallProvisionerPlugin(ctx context.Context, req *proto
 		return nil, err
 	}
 
-	err = provisioner_manager.RegisterProvisioner(downloadPath, c.ServerDownloadUrl)
+	err = provisioner_manager.RegisterProvisioner(downloadPath, c.ServerDownloadUrl, frpc.GetServerUrl(c))
 	if err != nil {
 		return nil, err
 	}

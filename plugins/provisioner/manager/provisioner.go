@@ -67,7 +67,7 @@ func GetProvisioners() map[string]Provisioner {
 	return provisioners
 }
 
-func RegisterProvisioner(pluginPath, serverDownloadUrl string) error {
+func RegisterProvisioner(pluginPath, serverDownloadUrl, serverUrl string) error {
 	pluginName := path.Base(pluginPath)
 	pluginBasePath := path.Dir(pluginPath)
 
@@ -111,6 +111,7 @@ func RegisterProvisioner(pluginPath, serverDownloadUrl string) error {
 		ServerDownloadUrl: serverDownloadUrl,
 		// TODO: get version from somewhere
 		ServerVersion: "tailscale-poc",
+		ServerUrl:     serverUrl,
 	})
 	if err != nil {
 		return errors.New("failed to initialize provisioner: " + err.Error())
