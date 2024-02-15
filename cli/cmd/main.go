@@ -35,9 +35,9 @@ func Execute() {
 	rootCmd.AddCommand(exposePortCmd)
 	rootCmd.AddCommand(PortsCmd)
 	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(AgentCmd)
 
 	if !wsMode {
-		rootCmd.AddCommand(AgentCmd)
 		rootCmd.AddCommand(CodeCmd)
 		rootCmd.AddCommand(SshCmd)
 		rootCmd.AddCommand(SshProxyCmd)

@@ -4,17 +4,22 @@
 package server
 
 import (
+	"fmt"
 	"net"
 	"os"
 	"os/exec"
 	"os/signal"
+	"time"
 
 	proto "github.com/daytonaio/daytona/common/grpc/proto"
+	"github.com/daytonaio/daytona/common/grpc/proto/types"
 	"github.com/daytonaio/daytona/server/config"
+	"github.com/daytonaio/daytona/server/frpc"
 	plugin_grpc "github.com/daytonaio/daytona/server/grpc/plugins"
 	ports_grpc "github.com/daytonaio/daytona/server/grpc/ports"
 	server_grpc "github.com/daytonaio/daytona/server/grpc/server"
 	workspace_grpc "github.com/daytonaio/daytona/server/grpc/workspace"
+	"github.com/daytonaio/daytona/server/headscale"
 	"github.com/daytonaio/daytona/server/ssh_gateway"
 	"github.com/hashicorp/go-plugin"
 
@@ -49,7 +54,7 @@ func Start() error {
 
 	var lis *net.Listener
 
-	lis, err = getTcpListener()
+	lis, err = getTcpListener(c)
 	if err != nil {
 		return err
 	}
@@ -88,6 +93,12 @@ func Start() error {
 	}()
 
 	go func() {
+		if err := frpc.Connect(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	go func() {
 		interruptChannel := make(chan os.Signal, 1)
 		signal.Notify(interruptChannel, os.Interrupt)
 
@@ -95,6 +106,44 @@ func Start() error {
 			log.Info("Shutting down")
 			plugin.CleanupClients()
 			os.Exit(0)
+		}
+	}()
+
+	go func() {
+		errChan := make(chan error)
+		go func() {
+			errChan <- headscale.Start(c)
+		}()
+
+		select {
+		case err := <-errChan:
+			log.Fatal(err)
+		case <-time.After(1 * time.Second):
+			go func() {
+				errChan <- headscale.Connect()
+			}()
+		}
+
+		// go func() {
+		// 	for {
+		// 		time.Sleep(5 * time.Second)
+		// 		req, err := headscale.HTTPClient().Get("http://w1-tpuljak:3000")
+		// 		if err != nil {
+		// 			log.Error(err)
+		// 			continue
+		// 		}
+		// 		body, err := io.ReadAll(req.Body)
+		// 		if err != nil {
+		// 			log.Error(err)
+		// 			continue
+		// 		}
+		// 		log.Info(string(body))
+		// 		req.Body.Close()
+		// 	}
+		// }()
+
+		if err := <-errChan; err != nil {
+			log.Fatal(err)
 		}
 	}()
 
@@ -131,8 +180,8 @@ func StartDaemon() error {
 	return nil
 }
 
-func getTcpListener() (*net.Listener, error) {
-	listener, err := net.Listen("tcp", "0.0.0.0:2790")
+func getTcpListener(c *types.ServerConfig) (*net.Listener, error) {
+	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", c.GrpcPort))
 	if err != nil {
 		return nil, err
 	}

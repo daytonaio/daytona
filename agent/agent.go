@@ -4,13 +4,20 @@
 package agent
 
 import (
+	"github.com/daytonaio/daytona/agent/config"
+	"github.com/daytonaio/daytona/agent/tailscale"
 	log "github.com/sirupsen/logrus"
 )
 
 func Start() error {
 	log.Info("Starting Daytona Agent")
 
-	log.Info(config)
+	c, err := config.GetConfig()
+	if err != nil {
+		return err
+	}
+
+	tailscale.Start(c)
 
 	return nil
 }

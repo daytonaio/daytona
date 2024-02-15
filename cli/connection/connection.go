@@ -51,11 +51,11 @@ func Get(profile *config.Profile) (*grpc.ClientConn, error) {
 			return nil, errors.New("local server not configured. Run `daytona configure` first")
 		}
 
-		client, err := grpc.DialContext(ctx, "127.0.0.1:2790", grpc.WithTransportCredentials(insecure.NewCredentials()))
+		client, err := grpc.DialContext(ctx, "127.0.0.1:3000", grpc.WithTransportCredentials(insecure.NewCredentials()))
 		return client, err
 	} else {
 		sshTunnelContext, cancelTunnel := context.WithCancel(ctx)
-		hostPort, errChan := ssh_tunnel_util.ForwardRemoteTcpPort(sshTunnelContext, activeProfile, 2790)
+		hostPort, errChan := ssh_tunnel_util.ForwardRemoteTcpPort(sshTunnelContext, activeProfile, 3000)
 
 		go func() {
 			if err := <-errChan; err != nil {

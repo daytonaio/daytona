@@ -16,6 +16,7 @@ import (
 	provisioner_manager "github.com/daytonaio/daytona/plugins/provisioner/manager"
 	"github.com/daytonaio/daytona/server/db"
 	"github.com/daytonaio/daytona/server/event_bus"
+	"github.com/daytonaio/daytona/server/headscale"
 	"github.com/daytonaio/daytona/server/provisioner"
 
 	log "github.com/sirupsen/logrus"
@@ -139,12 +140,18 @@ func newWorkspace(params *daytona_proto.CreateWorkspaceRequest) (*types.Workspac
 	w.Projects = []*types.Project{}
 
 	for _, repo := range params.Repositories {
+		authKey, err := headscale.CreateAuthKey()
+		if err != nil {
+			return nil, err
+		}
+
 		project := &types.Project{
 			Name: strings.ToLower(path.Base(repo)),
 			Repository: &types.Repository{
 				Url: repo,
 			},
 			WorkspaceId: w.Id,
+			AuthKey:     authKey,
 		}
 		w.Projects = append(w.Projects, project)
 	}
