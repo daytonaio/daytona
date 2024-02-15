@@ -30,7 +30,12 @@ else
   exit 1
 fi
 
-DOWNLOAD_URL=$(echo "https://download.daytona.io/daytona/$VERSION/daytona-$FILENAME")
+BASE_URL="https://download.daytona.io/daytona"
+if [ -n "$DAYTONA_SERVER_DOWNLOAD_URL" ]; then
+  BASE_URL=$DAYTONA_SERVER_DOWNLOAD_URL
+fi
+
+DOWNLOAD_URL=$(echo "$BASE_URL/$VERSION/daytona-$FILENAME")
 
 echo "Downloading server from $DOWNLOAD_URL"
 
