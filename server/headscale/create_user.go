@@ -9,11 +9,14 @@ import (
 func CreateUser() error {
 	log.Debug("Creating headscale user")
 
-	ctx, client, conn, cancel := GetClient()
+	ctx, client, conn, cancel, err := getClient()
+	if err != nil {
+		return err
+	}
 	defer cancel()
 	defer conn.Close()
 
-	_, err := client.GetUser(ctx, &v1.GetUserRequest{
+	_, err = client.GetUser(ctx, &v1.GetUserRequest{
 		Name: "daytona",
 	})
 	if err == nil {

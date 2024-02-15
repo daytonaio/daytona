@@ -1,10 +1,13 @@
 package provisioner
 
 import (
+	"fmt"
+
 	"github.com/daytonaio/daytona/common/grpc/proto/types"
 	provisioner_manager "github.com/daytonaio/daytona/plugins/provisioner/manager"
 	"github.com/daytonaio/daytona/server/db"
 	"github.com/daytonaio/daytona/server/event_bus"
+	"github.com/daytonaio/daytona/server/headscale"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -190,6 +193,14 @@ func DestroyWorkspace(workspace *types.Workspace) error {
 		err := (*provisioner).DestroyProject(project)
 		if err != nil {
 			return err
+		}
+		err = headscale.DeleteNode(fmt.Sprintf("%s-%s", workspace.Name, project.Name))
+		if err != nil {
+			log.Error(err)
+		}
+		err = headscale.RevokeAuthKey(project.AuthKey)
+		if err != nil {
+			log.Error(err)
 		}
 	}
 

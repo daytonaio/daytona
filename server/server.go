@@ -4,11 +4,7 @@
 package server
 
 import (
-	"fmt"
-	"html"
-	"io"
 	"net"
-	"net/http"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -23,7 +19,6 @@ import (
 	"github.com/daytonaio/daytona/server/headscale"
 	"github.com/daytonaio/daytona/server/ssh_gateway"
 	"github.com/hashicorp/go-plugin"
-	"tailscale.com/tsnet"
 
 	"google.golang.org/grpc"
 
@@ -106,69 +101,41 @@ func Start() error {
 	}()
 
 	go func() {
-		time.Sleep(5 * time.Second)
-		err := headscale.CreateUser()
-		if err != nil {
+		errChan := make(chan error)
+		go func() {
+			errChan <- headscale.Start()
+		}()
+
+		select {
+		case err := <-errChan:
+			log.Fatal(err)
+		case <-time.After(1 * time.Second):
+			go func() {
+				errChan <- headscale.Connect()
+			}()
+		}
+
+		// go func() {
+		// 	for {
+		// 		time.Sleep(5 * time.Second)
+		// 		req, err := headscale.HTTPClient().Get("http://w1-tpuljak:3000")
+		// 		if err != nil {
+		// 			log.Error(err)
+		// 			continue
+		// 		}
+		// 		body, err := io.ReadAll(req.Body)
+		// 		if err != nil {
+		// 			log.Error(err)
+		// 			continue
+		// 		}
+		// 		log.Info(string(body))
+		// 		req.Body.Close()
+		// 	}
+		// }()
+
+		if err := <-errChan; err != nil {
 			log.Fatal(err)
 		}
-
-		authKey, err := headscale.CreateAuthKey()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		s := new(tsnet.Server)
-		s.Hostname = "server"
-		s.ControlURL = "https://toma.frps.daytona.io"
-		s.AuthKey = authKey
-
-		defer s.Close()
-		ln, err := s.Listen("tcp", ":80")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		defer ln.Close()
-
-		lc, err := s.LocalClient()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		log.Fatal(http.Serve(ln, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			who, err := lc.WhoIs(r.Context(), r.RemoteAddr)
-			if err != nil {
-				http.Error(w, err.Error(), 500)
-				return
-			}
-			fmt.Fprintf(w, "<html><body><h1>Hello, tailnet!</h1>\n")
-			fmt.Fprintf(w, "<p>You are <b>%s</b> from <b>%s</b> (%s)</p>",
-				html.EscapeString(who.UserProfile.LoginName),
-				html.EscapeString(who.Node.ComputedName),
-				r.RemoteAddr)
-		})))
-	}()
-
-	go func() {
-		for {
-			time.Sleep(5 * time.Second)
-			req, err := http.Get("http://wrk1-tpuljak:3000")
-			if err != nil {
-				log.Error(err)
-				continue
-			}
-			body, err := io.ReadAll(req.Body)
-			if err != nil {
-				log.Error(err)
-				continue
-			}
-			log.Info(string(body))
-			req.Body.Close()
-		}
-	}()
-
-	go func() {
-		log.Fatal(headscale.Start())
 	}()
 
 	if err := s.Serve(*lis); err != nil {

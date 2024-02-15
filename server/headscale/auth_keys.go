@@ -19,7 +19,10 @@ func CreateAuthKey() (string, error) {
 	}
 	request.Expiration = timestamppb.New(time.Now().Add(100000 * time.Hour))
 
-	ctx, client, conn, cancel := GetClient()
+	ctx, client, conn, cancel, err := getClient()
+	if err != nil {
+		return "", fmt.Errorf("failed to get client: %w", err)
+	}
 	defer cancel()
 	defer conn.Close()
 
@@ -41,11 +44,14 @@ func RevokeAuthKey(key string) error {
 		User: "daytona",
 	}
 
-	ctx, client, conn, cancel := GetClient()
+	ctx, client, conn, cancel, err := getClient()
+	if err != nil {
+		return fmt.Errorf("failed to get client: %w", err)
+	}
 	defer cancel()
 	defer conn.Close()
 
-	_, err := client.ExpirePreAuthKey(ctx, request)
+	_, err = client.ExpirePreAuthKey(ctx, request)
 	if err != nil {
 		return fmt.Errorf("failed to revoke ApiKey: %w", err)
 	}
