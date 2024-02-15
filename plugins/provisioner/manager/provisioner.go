@@ -110,7 +110,7 @@ func RegisterProvisioner(pluginPath, serverDownloadUrl, serverUrl string) error 
 		BasePath:          pluginBasePath,
 		ServerDownloadUrl: serverDownloadUrl,
 		// TODO: get version from somewhere
-		ServerVersion: "tailscale-poc",
+		ServerVersion: "agent",
 		ServerUrl:     serverUrl,
 	})
 	if err != nil {
