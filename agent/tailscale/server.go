@@ -3,24 +3,23 @@ package tailscale
 import (
 	"flag"
 	"fmt"
-	"html"
 	"io"
 	"log"
 	"net"
 	"net/http"
 	"net/netip"
 	"os"
-	"strings"
 
+	"github.com/daytonaio/daytona/agent/config"
 	"tailscale.com/tsnet"
 )
 
-func Start(authKey string) {
+func Start(c *config.Config) {
 	flag.Parse()
 	s := new(tsnet.Server)
 	s.Hostname = fmt.Sprintf("%s-%s", os.Getenv("DAYTONA_WS_ID"), os.Getenv("DAYTONA_WS_PROJECT_NAME"))
-	s.ControlURL = "https://toma.frps.daytona.io"
-	s.AuthKey = authKey
+	s.ControlURL = c.Server.Url
+	s.AuthKey = c.Server.AuthKey
 
 	defer s.Close()
 	ln, err := s.Listen("tcp", ":80")
@@ -30,17 +29,8 @@ func Start(authKey string) {
 
 	defer ln.Close()
 
-	lc, err := s.LocalClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	s.RegisterFallbackTCPHandler(func(src, dest netip.AddrPort) (handler func(net.Conn), intercept bool) {
-		log.Printf("fallback: %v -> %v", src, dest)
-		// Get port from dst and return net conn from that port
 		destPort := dest.Port()
-
-		log.Printf("destPort: %d", destPort)
 
 		return func(src net.Conn) {
 			defer src.Close()
@@ -73,20 +63,6 @@ func Start(authKey string) {
 	})
 
 	log.Fatal(http.Serve(ln, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		who, err := lc.WhoIs(r.Context(), r.RemoteAddr)
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-			return
-		}
-		fmt.Fprintf(w, "<html><body><h1>Hello, tailnet!</h1>\n")
-		fmt.Fprintf(w, "<p>You are <b>%s</b> from <b>%s</b> (%s)</p>",
-			html.EscapeString(who.UserProfile.LoginName),
-			html.EscapeString(firstLabel(who.Node.ComputedName)),
-			r.RemoteAddr)
+		fmt.Fprintf(w, "Ok\n")
 	})))
-}
-
-func firstLabel(s string) string {
-	s, _, _ = strings.Cut(s, ".")
-	return s
 }

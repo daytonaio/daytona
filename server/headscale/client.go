@@ -3,6 +3,7 @@ package headscale
 import (
 	"context"
 
+	"github.com/daytonaio/daytona/server/config"
 	v1 "github.com/juanfont/headscale/gen/go/headscale/v1"
 	"github.com/juanfont/headscale/hscontrol/util"
 	"github.com/rs/zerolog/log"
@@ -11,7 +12,12 @@ import (
 )
 
 func getClient() (context.Context, v1.HeadscaleServiceClient, *grpc.ClientConn, context.CancelFunc, error) {
-	cfg, err := getConfig()
+	c, err := config.GetConfig()
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+
+	cfg, err := getConfig(c)
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}

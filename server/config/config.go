@@ -14,11 +14,6 @@ import (
 	"github.com/google/uuid"
 )
 
-const workspaceKeyFileName = "workspace_key"
-const defaultProjectBaseImage = "daytonaio/workspace-project:latest"
-const defaultPluginRegistryUrl = "https://download.daytona.io/daytona/plugins"
-const defaultServerDownloadUrl = "https://download.daytona.io/daytona/get-server.sh"
-
 func GetConfig() (*types.ServerConfig, error) {
 	configFilePath, err := configFilePath()
 	if err != nil {
@@ -140,7 +135,14 @@ func init() {
 		PluginRegistryUrl:   defaultPluginRegistryUrl,
 		PluginsDir:          pluginsDir,
 		ServerDownloadUrl:   defaultServerDownloadUrl,
-		Id:                  generateUuid(),
+		GrpcPort:            defaultGrpcPort,
+		HeadscalePort:       defaultHeadscalePort,
+		Frps: &types.FRPSConfig{
+			Domain:   defaultFrpsDomain,
+			Port:     defaultFrpsPort,
+			Protocol: defaultFrpsProtocol,
+		},
+		Id: generateUuid(),
 	}
 
 	err = Save(&c)

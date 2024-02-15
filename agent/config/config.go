@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package agent
+package config
 
 import (
 	"os"
@@ -12,22 +12,21 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type IConfig struct {
-	ReverseProxy struct {
-		// Hostname string `envconfig:"DAYTONA_PROXY_HOSTNAME" validate:"required"`
-		// Port     int    `envconfig:"DAYTONA_PROXY_PORT" validate:"required"`
-		AuthKey string `envconfig:"AUTH_KEY" validate:"required"`
+type Config struct {
+	Server struct {
+		Url     string `envconfig:"DAYTONA_SERVER_URL" validate:"required"`
+		AuthKey string `envconfig:"DAYTONA_SERVER_AUTH_KEY" validate:"required"`
 	}
 }
 
-var config *IConfig
+var config *Config
 
-func GetConfig() (*IConfig, error) {
+func GetConfig() (*Config, error) {
 	if config != nil {
 		return config, nil
 	}
 
-	config = &IConfig{}
+	config = &Config{}
 
 	err := envconfig.Process("", config)
 	if err != nil {

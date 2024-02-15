@@ -7,16 +7,22 @@ import (
 
 	"tailscale.com/tsnet"
 
+	"github.com/daytonaio/daytona/server/config"
+	"github.com/daytonaio/daytona/server/frpc"
 	log "github.com/sirupsen/logrus"
 )
 
 var s = &tsnet.Server{
-	Hostname:   "server",
-	ControlURL: "https://toma.frps.daytona.io",
+	Hostname: "server",
 }
 
 func Connect() error {
-	err := CreateUser()
+	c, err := config.GetConfig()
+	if err != nil {
+		return err
+	}
+
+	err = CreateUser()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -26,6 +32,7 @@ func Connect() error {
 		log.Fatal(err)
 	}
 
+	s.ControlURL = frpc.GetServerUrl(c)
 	s.AuthKey = authKey
 
 	defer s.Close()

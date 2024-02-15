@@ -4,6 +4,7 @@
 package agent
 
 import (
+	"github.com/daytonaio/daytona/agent/config"
 	"github.com/daytonaio/daytona/agent/tailscale"
 	log "github.com/sirupsen/logrus"
 )
@@ -11,12 +12,12 @@ import (
 func Start() error {
 	log.Info("Starting Daytona Agent")
 
-	config, err := GetConfig()
+	c, err := config.GetConfig()
 	if err != nil {
 		return err
 	}
 
-	tailscale.Start(config.ReverseProxy.AuthKey)
+	tailscale.Start(c)
 
 	return nil
 }

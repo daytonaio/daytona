@@ -6,16 +6,23 @@ import (
 	"path"
 	"time"
 
+	proto_types "github.com/daytonaio/daytona/common/grpc/proto/types"
 	"github.com/daytonaio/daytona/plugins/utils"
+	"github.com/daytonaio/daytona/server/config"
 	"github.com/juanfont/headscale/hscontrol/types"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
-func getConfig() (*types.Config, error) {
+func getConfig(serverConfig *proto_types.ServerConfig) (*types.Config, error) {
 	pwd, err := os.Getwd()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get current working directory: %w", err)
+	}
+
+	configDir, err := config.GetConfigDir()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get config directory: %w", err)
 	}
 
 	err = types.LoadConfig(path.Join(pwd, "config.yaml"), true)
@@ -48,5 +55,25 @@ func getConfig() (*types.Config, error) {
 
 	cfg.Log.Format = "text"
 
+	cfg.ServerURL = fmt.Sprintf("http://127.0.0.1:%d", serverConfig.HeadscalePort)
+	cfg.Addr = fmt.Sprintf("127.0.0.1:%d", serverConfig.HeadscalePort)
+
+	cfg.DBpath = path.Join(configDir, "headscale", "headscale.db")
+	cfg.UnixSocket = path.Join(configDir, "headscale", "headscale.sock")
+	cfg.NoisePrivateKeyPath = path.Join(configDir, "headscale", "noise_private.key")
+	cfg.DERP.ServerPrivateKeyPath = path.Join(configDir, "headscale", "derp_server_private.key")
+
 	return cfg, nil
+}
+
+func init() {
+	c, err := config.GetConfigDir()
+	if err != nil {
+		return
+	}
+
+	err = os.MkdirAll(path.Join(c, "headscale"), 0700)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to create headscale directory")
+	}
 }

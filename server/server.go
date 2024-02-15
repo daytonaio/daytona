@@ -4,6 +4,7 @@
 package server
 
 import (
+	"fmt"
 	"net"
 	"os"
 	"os/exec"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	proto "github.com/daytonaio/daytona/common/grpc/proto"
+	"github.com/daytonaio/daytona/common/grpc/proto/types"
 	"github.com/daytonaio/daytona/server/config"
 	"github.com/daytonaio/daytona/server/frpc"
 	plugin_grpc "github.com/daytonaio/daytona/server/grpc/plugins"
@@ -52,7 +54,7 @@ func Start() error {
 
 	var lis *net.Listener
 
-	lis, err = getTcpListener()
+	lis, err = getTcpListener(c)
 	if err != nil {
 		return err
 	}
@@ -110,7 +112,7 @@ func Start() error {
 	go func() {
 		errChan := make(chan error)
 		go func() {
-			errChan <- headscale.Start()
+			errChan <- headscale.Start(c)
 		}()
 
 		select {
@@ -178,8 +180,8 @@ func StartDaemon() error {
 	return nil
 }
 
-func getTcpListener() (*net.Listener, error) {
-	listener, err := net.Listen("tcp", "0.0.0.0:2790")
+func getTcpListener(c *types.ServerConfig) (*net.Listener, error) {
+	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", c.GrpcPort))
 	if err != nil {
 		return nil, err
 	}

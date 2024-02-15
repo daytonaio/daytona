@@ -3,11 +3,12 @@ package headscale
 import (
 	"fmt"
 
+	"github.com/daytonaio/daytona/common/grpc/proto/types"
 	"github.com/juanfont/headscale/hscontrol"
 )
 
-func Start() error {
-	cfg, err := getConfig()
+func Start(serverConfig *types.ServerConfig) error {
+	cfg, err := getConfig(serverConfig)
 	if err != nil {
 		return fmt.Errorf(
 			"failed to load configuration while creating headscale instance: %w",

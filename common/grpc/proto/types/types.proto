@@ -47,6 +47,12 @@ message WorkspaceInfo {
   google.protobuf.Struct provisionerMetadata = 3;
 }
 
+message FRPSConfig {
+  string domain = 1;
+  uint32 port = 2;
+  string protocol = 3;
+}
+
 message ServerConfig {       
 	string defaultWorkspaceDir = 1;
 	string projectBaseImage = 2;
@@ -54,4 +60,7 @@ message ServerConfig {
   string pluginRegistryUrl = 4;
   string id = 5;
   string serverDownloadUrl = 6;
+  FRPSConfig frps = 7;
+  uint32 grpcPort = 8;
+  uint32 headscalePort = 9;
 }
