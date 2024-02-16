@@ -27,8 +27,15 @@ func Start() {
 		Addr: ":2222",
 		Handler: func(s ssh.Session) {
 			ptyReq, winCh, isPty := s.Pty()
+			cmd := exec.Command(getShell())
+			cmd.SysProcAttr = &syscall.SysProcAttr{
+				Credential: &syscall.Credential{
+					Uid: uint32(os.Geteuid()),
+					Gid: uint32(os.Getgid()),
+				},
+			}
+
 			if isPty {
-				cmd := exec.Command(getShell())
 				cmd.Env = append(cmd.Env, fmt.Sprintf("TERM=%s", ptyReq.Term))
 				f, err := pty.Start(cmd)
 				if err != nil {
@@ -45,8 +52,6 @@ func Start() {
 				io.Copy(s, f) // stdout
 				cmd.Wait()
 			} else {
-				cmd := exec.Command(getShell())
-
 				cmd.Stdin = s
 				cmd.Stdout = s
 				cmd.Stderr = s
