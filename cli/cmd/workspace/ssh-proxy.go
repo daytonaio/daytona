@@ -58,7 +58,7 @@ var SshProxyCmd = &cobra.Command{
 
 		errChan := make(chan error)
 
-		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s-%s:22", workspaceName, projectName))
+		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s-%s:2222", workspaceName, projectName))
 		if err != nil {
 			log.Fatal(err)
 		}
