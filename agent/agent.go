@@ -5,6 +5,7 @@ package agent
 
 import (
 	"github.com/daytonaio/daytona/agent/config"
+	"github.com/daytonaio/daytona/agent/ssh"
 	"github.com/daytonaio/daytona/agent/tailscale"
 	log "github.com/sirupsen/logrus"
 )
@@ -16,6 +17,10 @@ func Start() error {
 	if err != nil {
 		return err
 	}
+
+	go func() {
+		ssh.Start()
+	}()
 
 	tailscale.Start(c)
 
