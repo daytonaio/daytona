@@ -20,6 +20,8 @@ func setWinsize(f *os.File, w, h int) {
 }
 
 func Start() {
+	ForwardedTCPHandler := &ssh.ForwardedTCPHandler{}
+
 	sshServer := ssh.Server{
 		Addr: ":2222",
 		Handler: func(s ssh.Session) {
@@ -48,6 +50,23 @@ func Start() {
 
 				cmd.Run()
 			}
+		},
+		ChannelHandlers: map[string]ssh.ChannelHandler{
+			"session":      ssh.DefaultSessionHandler,
+			"direct-tcpip": ssh.DirectTCPIPHandler, // ssh -L
+		},
+		RequestHandlers: map[string]ssh.RequestHandler{
+			"tcpip-forward":        ForwardedTCPHandler.HandleSSHRequest,
+			"cancel-tcpip-forward": ForwardedTCPHandler.HandleSSHRequest,
+		},
+		LocalPortForwardingCallback: ssh.LocalPortForwardingCallback(func(ctx ssh.Context, dhost string, dport uint32) bool {
+			return true
+		}),
+		ReversePortForwardingCallback: ssh.ReversePortForwardingCallback(func(ctx ssh.Context, host string, port uint32) bool {
+			return true
+		}),
+		SessionRequestCallback: func(sess ssh.Session, requestType string) bool {
+			return true
 		},
 	}
 
