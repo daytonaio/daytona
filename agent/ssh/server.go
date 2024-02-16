@@ -45,15 +45,8 @@ func Start() {
 				io.Copy(s, f) // stdout
 				cmd.Wait()
 			} else {
-				defer s.Close()
+				cmd := exec.Command(getShell())
 
-				sshCommand := s.Command()
-
-				if len(sshCommand) == 0 {
-					return
-				}
-
-				cmd := exec.Command("sh", append([]string{"-c"}, sshCommand...)...)
 				cmd.Stdin = s
 				cmd.Stdout = s
 				cmd.Stderr = s
