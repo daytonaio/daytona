@@ -21,6 +21,7 @@ require (
 	github.com/juanfont/headscale v0.23.0-alpha3
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lucasb-eyer/go-colorful v1.2.0
+	github.com/pkg/sftp v1.13.6
 	github.com/reactivex/rxgo/v2 v2.5.0
 	github.com/rs/zerolog v1.31.0
 	github.com/sirupsen/logrus v1.9.3
@@ -109,6 +110,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.3 // indirect
 	github.com/klauspost/reedsolomon v1.9.15 // indirect
 	github.com/kortschak/wol v0.0.0-20200729010619-da482cc4850a // indirect
+	github.com/kr/fs v0.1.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

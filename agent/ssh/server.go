@@ -10,6 +10,7 @@ import (
 
 	"github.com/creack/pty"
 	"github.com/gliderlabs/ssh"
+	"github.com/pkg/sftp"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -52,7 +53,7 @@ func Start() {
 					return
 				}
 
-				cmd := exec.Command(sshCommand[0], sshCommand[1:]...)
+				cmd := exec.Command("sh", append([]string{"-c"}, sshCommand...)...)
 				cmd.Stdin = s
 				cmd.Stdout = s
 				cmd.Stderr = s
@@ -67,6 +68,9 @@ func Start() {
 		RequestHandlers: map[string]ssh.RequestHandler{
 			"tcpip-forward":        ForwardedTCPHandler.HandleSSHRequest,
 			"cancel-tcpip-forward": ForwardedTCPHandler.HandleSSHRequest,
+		},
+		SubsystemHandlers: map[string]ssh.SubsystemHandler{
+			"sftp": sftpHandler,
 		},
 		LocalPortForwardingCallback: ssh.LocalPortForwardingCallback(func(ctx ssh.Context, dhost string, dport uint32) bool {
 			return true
@@ -91,4 +95,25 @@ func getShell() string {
 	}
 
 	return "sh"
+}
+
+func sftpHandler(sess ssh.Session) {
+	debugStream := io.Discard
+	serverOptions := []sftp.ServerOption{
+		sftp.WithDebug(debugStream),
+	}
+	server, err := sftp.NewServer(
+		sess,
+		serverOptions...,
+	)
+	if err != nil {
+		log.Printf("sftp server init error: %s\n", err)
+		return
+	}
+	if err := server.Serve(); err == io.EOF {
+		server.Close()
+		fmt.Println("sftp client exited session.")
+	} else if err != nil {
+		fmt.Println("sftp server completed with error:", err)
+	}
 }
