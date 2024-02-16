@@ -32,7 +32,7 @@ var pluginUninstallCmd = &cobra.Command{
 
 		ctx := context.Background()
 
-		conn, err := connection.Get(nil)
+		conn, err := connection.GetGrpcConn(nil)
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -9,8 +9,7 @@ import (
 	"io"
 	"os"
 
-	plugin_proto "github.com/daytonaio/daytona/common/grpc/proto"
-	workspace_proto "github.com/daytonaio/daytona/common/grpc/proto"
+	"github.com/daytonaio/daytona/common/grpc/proto"
 	"github.com/daytonaio/daytona/internal/util"
 	"google.golang.org/protobuf/types/known/emptypb"
 
@@ -38,12 +37,12 @@ var CreateCmd = &cobra.Command{
 		var workspaceName string
 		var provisioner string
 
-		conn, err := connection.Get(nil)
+		conn, err := connection.GetGrpcConn(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
 		defer conn.Close()
-		client := workspace_proto.NewWorkspaceServiceClient(conn)
+		client := proto.NewWorkspaceServiceClient(conn)
 
 		c, err := config.GetConfig()
 		if err != nil {
@@ -59,7 +58,7 @@ var CreateCmd = &cobra.Command{
 			provisioner = provisionerFlag
 		} else if activeProfile.DefaultProvisioner == "" {
 			ctx := context.Background()
-			pluginsClient := plugin_proto.NewPluginsClient(conn)
+			pluginsClient := proto.NewPluginsClient(conn)
 			provisionerPluginList, err := pluginsClient.ListProvisionerPlugins(ctx, &emptypb.Empty{})
 			if err != nil {
 				log.Fatal(err)
@@ -121,7 +120,7 @@ var CreateCmd = &cobra.Command{
 
 		ctx := context.Background()
 
-		createRequest := &workspace_proto.CreateWorkspaceRequest{
+		createRequest := &proto.CreateWorkspaceRequest{
 			Name:         workspaceName,
 			Repositories: repos,
 			Provisioner:  provisioner,
@@ -171,7 +170,7 @@ var CreateCmd = &cobra.Command{
 			}
 		}
 
-		infoWorkspaceRequest := &workspace_proto.WorkspaceInfoRequest{
+		infoWorkspaceRequest := &proto.WorkspaceInfoRequest{
 			Id: workspaceName,
 		}
 		response, err := client.Info(ctx, infoWorkspaceRequest)

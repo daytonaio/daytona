@@ -32,7 +32,7 @@ var pluginListCmd = &cobra.Command{
 func getPluginList() ([]list_view.PluginViewDTO, error) {
 	ctx := context.Background()
 
-	conn, err := connection.Get(nil)
+	conn, err := connection.GetGrpcConn(nil)
 	if err != nil {
 		return nil, err
 	}

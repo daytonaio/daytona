@@ -22,7 +22,7 @@ var listPortForwardsCmd = &cobra.Command{
 	Short: "List port forwards",
 	Args:  cobra.RangeArgs(1, 2),
 	Run: func(cmd *cobra.Command, args []string) {
-		conn, err := connection.Get(nil)
+		conn, err := connection.GetGrpcConn(nil)
 		if err != nil {
 			log.Fatal(err)
 		}

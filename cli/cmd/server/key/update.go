@@ -22,7 +22,7 @@ var updateKeyCmd = &cobra.Command{
 	Short: "Update the server key",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		conn, err := connection.Get(nil)
+		conn, err := connection.GetGrpcConn(nil)
 		if err != nil {
 			log.Fatal(err)
 		}

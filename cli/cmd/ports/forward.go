@@ -36,7 +36,7 @@ var portForwardCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		conn, err := connection.Get(nil)
+		conn, err := connection.GetGrpcConn(nil)
 		if err != nil {
 			log.Fatal(err)
 		}

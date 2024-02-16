@@ -11,6 +11,10 @@ message SetKeyRequest {
     string privateKey = 1;
 }
 
+message AuthKey {
+    string key = 1;
+}
+
 service Server {
     rpc GetPublicKey (google.protobuf.Empty) returns (GetPublicKeyResponse) {}
     rpc GenerateKey (google.protobuf.Empty) returns (GetPublicKeyResponse) {}
@@ -18,4 +22,5 @@ service Server {
     rpc DeleteKey (google.protobuf.Empty) returns (google.protobuf.Empty) {}
     rpc GetConfig (google.protobuf.Empty) returns (ServerConfig) {}
     rpc SetConfig (ServerConfig) returns (google.protobuf.Empty) {}
+    rpc GenerateAuthKey(google.protobuf.Empty) returns (AuthKey) {}
 }

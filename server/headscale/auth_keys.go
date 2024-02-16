@@ -18,6 +18,7 @@ func CreateAuthKey() (string, error) {
 		User:     "daytona",
 	}
 	request.Expiration = timestamppb.New(time.Now().Add(100000 * time.Hour))
+	request.Ephemeral = true
 
 	ctx, client, conn, cancel, err := getClient()
 	if err != nil {

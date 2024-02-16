@@ -59,7 +59,7 @@ var profileEditCmd = &cobra.Command{
 		}
 
 		if profileNameFlag == "" || serverHostnameFlag == "" || serverUserFlag == "" || provisionerFlag == "" || (serverPrivateKeyPathFlag == "" && serverPasswordFlag == "") {
-			conn, err := connection.Get(nil)
+			conn, err := connection.GetGrpcConn(nil)
 			if err != nil {
 				log.Fatal(err)
 			}

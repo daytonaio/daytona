@@ -21,12 +21,13 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Server_GetPublicKey_FullMethodName = "/Server/GetPublicKey"
-	Server_GenerateKey_FullMethodName  = "/Server/GenerateKey"
-	Server_SetKey_FullMethodName       = "/Server/SetKey"
-	Server_DeleteKey_FullMethodName    = "/Server/DeleteKey"
-	Server_GetConfig_FullMethodName    = "/Server/GetConfig"
-	Server_SetConfig_FullMethodName    = "/Server/SetConfig"
+	Server_GetPublicKey_FullMethodName    = "/Server/GetPublicKey"
+	Server_GenerateKey_FullMethodName     = "/Server/GenerateKey"
+	Server_SetKey_FullMethodName          = "/Server/SetKey"
+	Server_DeleteKey_FullMethodName       = "/Server/DeleteKey"
+	Server_GetConfig_FullMethodName       = "/Server/GetConfig"
+	Server_SetConfig_FullMethodName       = "/Server/SetConfig"
+	Server_GenerateAuthKey_FullMethodName = "/Server/GenerateAuthKey"
 )
 
 // ServerClient is the client API for Server service.
@@ -39,6 +40,7 @@ type ServerClient interface {
 	DeleteKey(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*empty.Empty, error)
 	GetConfig(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*types.ServerConfig, error)
 	SetConfig(ctx context.Context, in *types.ServerConfig, opts ...grpc.CallOption) (*empty.Empty, error)
+	GenerateAuthKey(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AuthKey, error)
 }
 
 type serverClient struct {
@@ -103,6 +105,15 @@ func (c *serverClient) SetConfig(ctx context.Context, in *types.ServerConfig, op
 	return out, nil
 }
 
+func (c *serverClient) GenerateAuthKey(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AuthKey, error) {
+	out := new(AuthKey)
+	err := c.cc.Invoke(ctx, Server_GenerateAuthKey_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ServerServer is the server API for Server service.
 // All implementations should embed UnimplementedServerServer
 // for forward compatibility
@@ -113,6 +124,7 @@ type ServerServer interface {
 	DeleteKey(context.Context, *empty.Empty) (*empty.Empty, error)
 	GetConfig(context.Context, *empty.Empty) (*types.ServerConfig, error)
 	SetConfig(context.Context, *types.ServerConfig) (*empty.Empty, error)
+	GenerateAuthKey(context.Context, *empty.Empty) (*AuthKey, error)
 }
 
 // UnimplementedServerServer should be embedded to have forward compatible implementations.
@@ -136,6 +148,9 @@ func (UnimplementedServerServer) GetConfig(context.Context, *empty.Empty) (*type
 }
 func (UnimplementedServerServer) SetConfig(context.Context, *types.ServerConfig) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetConfig not implemented")
+}
+func (UnimplementedServerServer) GenerateAuthKey(context.Context, *empty.Empty) (*AuthKey, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GenerateAuthKey not implemented")
 }
 
 // UnsafeServerServer may be embedded to opt out of forward compatibility for this service.
@@ -257,6 +272,24 @@ func _Server_SetConfig_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Server_GenerateAuthKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(empty.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServerServer).GenerateAuthKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Server_GenerateAuthKey_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServerServer).GenerateAuthKey(ctx, req.(*empty.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Server_ServiceDesc is the grpc.ServiceDesc for Server service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -287,6 +320,10 @@ var Server_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetConfig",
 			Handler:    _Server_SetConfig_Handler,
+		},
+		{
+			MethodName: "GenerateAuthKey",
+			Handler:    _Server_GenerateAuthKey_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

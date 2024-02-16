@@ -7,15 +7,11 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"math"
-	"math/rand"
-	"net"
 	"os"
 
 	"github.com/daytonaio/daytona/cli/config"
 	"github.com/daytonaio/daytona/cli/connection"
 	"github.com/daytonaio/daytona/internal/util"
-	ssh_tunnel_util "github.com/daytonaio/daytona/pkg/ssh_tunnel/util"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -40,7 +36,7 @@ var SshProxyCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		conn, err := connection.Get(&profile)
+		conn, err := connection.GetGrpcConn(&profile)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -55,28 +51,21 @@ var SshProxyCmd = &cobra.Command{
 			}
 		}
 
-		localSockFile := "/tmp/daytona/ssh_gateway.sock"
-		errChan := make(chan error)
-		tunnelStartedChan := make(chan bool, 1)
-
-		if profile.Id != "default" {
-			localSockFile = fmt.Sprintf("/tmp/daytona/daytona-ssh-%s-%s-%d.sock", workspaceName, projectName, rand.Intn(math.MaxInt32))
-
-			tunnelStartedChan, errChan = ssh_tunnel_util.ForwardRemoteUnixSock(context.Background(), profile, localSockFile, "/tmp/daytona/ssh_gateway.sock")
-		} else {
-			tunnelStartedChan <- true
+		tsConn, err := connection.GetTailscaleConn(&profile)
+		if err != nil {
+			log.Fatal(err)
 		}
 
-		<-tunnelStartedChan
+		errChan := make(chan error)
 
-		socketConn, err := net.Dial("unix", localSockFile)
+		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s-%s:22", workspaceName, projectName))
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		//	pipe stdio to con
 		go func() {
-			_, err := io.Copy(os.Stdout, socketConn)
+			_, err := io.Copy(os.Stdout, dialConn)
 			if err != nil {
 				errChan <- err
 			}
@@ -84,7 +73,7 @@ var SshProxyCmd = &cobra.Command{
 		}()
 
 		go func() {
-			_, err := io.Copy(socketConn, os.Stdin)
+			_, err := io.Copy(dialConn, os.Stdin)
 			if err != nil {
 				errChan <- err
 			}

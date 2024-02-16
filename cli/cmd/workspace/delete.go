@@ -20,8 +20,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var force bool
-
 var DeleteCmd = &cobra.Command{
 	Use:     "delete",
 	Short:   "Delete the workspace",
@@ -40,7 +38,7 @@ var DeleteCmd = &cobra.Command{
 		ctx := context.Background()
 		var workspaceName string
 
-		conn, err := connection.Get(nil)
+		conn, err := connection.GetGrpcConn(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -76,8 +74,4 @@ var DeleteCmd = &cobra.Command{
 
 		views_util.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully deleted", workspaceName))
 	},
-}
-
-func init() {
-	// DeleteCmd.PersistentFlags().BoolVarP(&force, "force", "f", false, "Force the workspace removal")
 }

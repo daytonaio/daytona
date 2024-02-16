@@ -48,7 +48,7 @@ var CodeCmd = &cobra.Command{
 
 		ideId = c.DefaultIdeId
 
-		conn, err := connection.Get(nil)
+		conn, err := connection.GetGrpcConn(nil)
 		if err != nil {
 			log.Fatal(err)
 		}

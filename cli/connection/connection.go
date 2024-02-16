@@ -10,7 +10,12 @@ import (
 	"os"
 
 	"github.com/daytonaio/daytona/cli/config"
+	"github.com/daytonaio/daytona/common/grpc/proto"
 	server_config "github.com/daytonaio/daytona/server/config"
+	"github.com/daytonaio/daytona/server/frpc"
+	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/google/uuid"
+	"tailscale.com/tsnet"
 
 	ssh_tunnel_util "github.com/daytonaio/daytona/pkg/ssh_tunnel/util"
 
@@ -20,10 +25,10 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-// Get returns a grpc client connection to the local server or remote server
+// GetGrpcConn returns a grpc client connection to the local server or remote server
 // based on the profile passed in. If no profile is passed in, the active profile
 // is used.
-func Get(profile *config.Profile) (*grpc.ClientConn, error) {
+func GetGrpcConn(profile *config.Profile) (*grpc.ClientConn, error) {
 	c, err := config.GetConfig()
 	if err != nil {
 		return nil, err
@@ -82,4 +87,46 @@ func Get(profile *config.Profile) (*grpc.ClientConn, error) {
 
 		return client, err
 	}
+}
+
+var s *tsnet.Server = nil
+
+func GetTailscaleConn(profile *config.Profile) (*tsnet.Server, error) {
+	if s != nil {
+		return s, nil
+	}
+	s = &tsnet.Server{}
+
+	ctx := context.Background()
+
+	conn, err := GetGrpcConn(profile)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	client := proto.NewServerClient(conn)
+
+	c, err := client.GetConfig(ctx, &empty.Empty{})
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := client.GenerateAuthKey(ctx, &empty.Empty{})
+	if err != nil {
+		return nil, err
+	}
+
+	s.Hostname = fmt.Sprintf("cli-%s", uuid.New().String())
+	s.ControlURL = frpc.GetServerUrl(c)
+	s.AuthKey = response.Key
+	s.Ephemeral = true
+	s.Logf = func(format string, args ...any) {}
+
+	_, err = s.Up(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return s, nil
 }

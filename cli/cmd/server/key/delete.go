@@ -22,7 +22,7 @@ var deleteKeyCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Aliases: []string{"remove", "rm"},
 	Run: func(cmd *cobra.Command, args []string) {
-		conn, err := connection.Get(nil)
+		conn, err := connection.GetGrpcConn(nil)
 		if err != nil {
 			log.Fatal(err)
 		}

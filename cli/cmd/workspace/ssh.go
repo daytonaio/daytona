@@ -38,7 +38,7 @@ var SshCmd = &cobra.Command{
 		var workspaceName string
 		var projectName string
 
-		conn, err := connection.Get(nil)
+		conn, err := connection.GetGrpcConn(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
