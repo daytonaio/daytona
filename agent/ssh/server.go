@@ -25,9 +25,9 @@ func Start() {
 	sshServer := ssh.Server{
 		Addr: ":2222",
 		Handler: func(s ssh.Session) {
-			cmd := exec.Command(getShell())
 			ptyReq, winCh, isPty := s.Pty()
 			if isPty {
+				cmd := exec.Command(getShell())
 				cmd.Env = append(cmd.Env, fmt.Sprintf("TERM=%s", ptyReq.Term))
 				f, err := pty.Start(cmd)
 				if err != nil {
@@ -44,6 +44,15 @@ func Start() {
 				io.Copy(s, f) // stdout
 				cmd.Wait()
 			} else {
+				defer s.Close()
+
+				sshCommand := s.Command()
+
+				if len(sshCommand) == 0 {
+					return
+				}
+
+				cmd := exec.Command(sshCommand[0], sshCommand[1:]...)
 				cmd.Stdin = s
 				cmd.Stdout = s
 				cmd.Stderr = s
