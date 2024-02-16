@@ -19,7 +19,7 @@ import (
 var docStyle = lipgloss.NewStyle().Margin(1, 2)
 
 type item struct {
-	title, desc string
+	id, title, desc, choiceProperty string
 }
 
 func (i item) Title() string       { return i.title }
@@ -45,7 +45,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter":
 			i, ok := m.list.SelectedItem().(item)
 			if ok {
-				m.choice = string(i.title)
+				m.choice = string(i.choiceProperty)
 			}
 			return m, tea.Quit
 		}
@@ -116,15 +116,4 @@ func SelectWorkspacePrompt(workspaces []api_client.Workspace, actionVerb string,
 	} else {
 		choiceChan <- ""
 	}
-}
-
-func GetWorkspaceNameFromPrompt(workspaces []api_client.Workspace, actionVerb string) string {
-	choseWorkspaceName := ""
-	choiceChan := make(chan string)
-
-	go SelectWorkspacePrompt(workspaces, actionVerb, choiceChan)
-
-	choseWorkspaceName = <-choiceChan
-
-	return choseWorkspaceName
 }

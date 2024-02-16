@@ -37,6 +37,11 @@ type Ide struct {
 	Name string
 }
 
+type GitProvider struct {
+	Id   string
+	Name string
+}
+
 func GetConfig() (*Config, error) {
 	configFilePath, err := getConfigPath()
 	if err != nil {

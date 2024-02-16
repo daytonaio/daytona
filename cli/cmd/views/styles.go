@@ -4,6 +4,7 @@
 package views
 
 import (
+	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/lucasb-eyer/go-colorful"
@@ -43,6 +44,31 @@ func ColorGrid(xSteps, ySteps int) [][]string {
 	}
 
 	return grid
+}
+
+func GetStyledSelectList(items []list.Item) list.Model {
+
+	d := list.NewDefaultDelegate()
+
+	d.Styles.SelectedTitle = lipgloss.NewStyle().
+		Border(lipgloss.NormalBorder(), false, false, false, true).
+		BorderForeground(Blue).
+		Foreground(Blue).
+		Bold(true).
+		Padding(0, 0, 0, 1)
+
+	d.Styles.SelectedDesc = d.Styles.SelectedTitle.Copy().Foreground(DimmedBlue)
+
+	l := list.New(items, d, 0, 0)
+
+	l.Styles.FilterPrompt = lipgloss.NewStyle().Foreground(Green)
+	l.Styles.FilterCursor = lipgloss.NewStyle().Foreground(Green)
+	l.Styles.Title = lipgloss.NewStyle().Foreground(Green).Bold(true)
+
+	l.FilterInput.PromptStyle = lipgloss.NewStyle().Foreground(Green)
+	l.FilterInput.TextStyle = lipgloss.NewStyle().Foreground(Green)
+
+	return l
 }
 
 func GetCustomTheme() *huh.Theme {

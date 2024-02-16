@@ -6,14 +6,21 @@ type FRPSConfig struct {
 	Protocol string `json:"protocol"`
 } // @name FRPSConfig
 
+type GitProvider struct {
+	Id       string `json:"id"`
+	Username string `json:"username"`
+	Token    string `json:"token"`
+} // @name GitProvider
+
 type ServerConfig struct {
-	PluginsDir        string      `json:"pluginsDir"`
-	PluginRegistryUrl string      `json:"pluginRegistryUrl"`
-	Id                string      `json:"id"`
-	ServerDownloadUrl string      `json:"serverDownloadUrl"`
-	Frps              *FRPSConfig `json:"frps,omitempty"`
-	ApiPort           uint32      `json:"apiPort"`
-	HeadscalePort     uint32      `json:"headscalePort"`
+	PluginsDir        string        `json:"pluginsDir"`
+	PluginRegistryUrl string        `json:"pluginRegistryUrl"`
+	GitProviders      []GitProvider `json:"gitProviders"`
+	Id                string        `json:"id"`
+	ServerDownloadUrl string        `json:"serverDownloadUrl"`
+	Frps              *FRPSConfig   `json:"frps,omitempty"`
+	ApiPort           uint32        `json:"apiPort"`
+	HeadscalePort     uint32        `json:"headscalePort"`
 } // @name ServerConfig
 
 type NetworkKey struct {
