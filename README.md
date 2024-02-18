@@ -64,7 +64,9 @@ Note you can use  aws provisioner to auto proivision a vm for each Daytona dev e
 ## Architecture 
 TODO: desc
 
-## Plugins
+## How can I extend Daytona
+### Provisioners 
+### Plugins
 
 
 TODO: desc
