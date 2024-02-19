@@ -25,8 +25,8 @@ func GetIdeList() []Ide {
 
 func GetGitProviderList() []GitProvider {
 	return []GitProvider{
-		{"github", "GitHub"},
-		{"gitlab", "GitLab"},
-		{"bitbucket", "Bitbucket"},
+		{"github", "GitHub", ""},
+		{"gitlab", "GitLab", ""},
+		{"bitbucket", "Bitbucket", ""},
 	}
 }

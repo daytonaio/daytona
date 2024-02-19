@@ -38,8 +38,9 @@ type Ide struct {
 }
 
 type GitProvider struct {
-	Id   string
-	Name string
+	Id       string
+	Name     string
+	Username string
 }
 
 func GetConfig() (*Config, error) {

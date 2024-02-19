@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	"github.com/daytonaio/daytona/cli/config"
 	"github.com/daytonaio/daytona/cli/connection"
 	server_proto "github.com/daytonaio/daytona/common/grpc/proto"
@@ -17,8 +18,9 @@ import (
 )
 
 var GitProviderCmd = &cobra.Command{
-	Use:   "git-providers",
-	Short: "Lists your registered Git providers",
+	Use:     "git-providers",
+	Aliases: []string{"git-provider"},
+	Short:   "Lists your registered Git providers",
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
@@ -41,7 +43,7 @@ var GitProviderCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Println("Registered Git providers:")
+		views_util.RenderMainTitle("Registered Git providers:")
 
 		availableGitProviderViews := config.GetGitProviderList()
 		var gitProviderViewList []config.GitProvider
@@ -49,15 +51,20 @@ var GitProviderCmd = &cobra.Command{
 		for _, gitProvider := range serverConfig.GitProviders {
 			for _, availableGitProviderView := range availableGitProviderViews {
 				if gitProvider.Id == availableGitProviderView.Id {
-					gitProviderViewList = append(gitProviderViewList, availableGitProviderView)
+					gitProviderViewList = append(gitProviderViewList,
+						config.GitProvider{
+							Id:       gitProvider.Id,
+							Name:     availableGitProviderView.Name,
+							Username: gitProvider.Username,
+						},
+					)
 				}
 			}
 		}
 
 		for _, gitProviderView := range gitProviderViewList {
-			fmt.Println(gitProviderView.Name)
+			views_util.RenderListLine(fmt.Sprintf("%s (%s)", gitProviderView.Name, gitProviderView.Username))
 		}
-
 	},
 }
 

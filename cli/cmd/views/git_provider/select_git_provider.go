@@ -1,13 +1,15 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package views
+package views_git_provider
 
 import (
 	"errors"
 	"log"
 
 	"github.com/charmbracelet/huh"
+	"github.com/daytonaio/daytona/cli/cmd/views"
+	"github.com/daytonaio/daytona/cli/config"
 )
 
 type GitProviderSelectView struct {
@@ -17,15 +19,19 @@ type GitProviderSelectView struct {
 }
 
 func GitProviderSelectionView(gitProviderAddView *GitProviderSelectView, isDeleting bool) {
+	providers := config.GetGitProviderList()
+
+	var options []huh.Option[string]
+	for _, provider := range providers {
+		options = append(options, huh.Option[string]{Key: provider.Id, Value: provider.Name})
+	}
 
 	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewSelect[string]().
 				Title("Choose a Git provider").
 				Options(
-					huh.NewOption("GitHub", "github"),
-					huh.NewOption("GitLab", "gitlab"),
-					huh.NewOption("BitBucket", "bitbucket"),
+					options...,
 				).
 				Value(&gitProviderAddView.Id)),
 		huh.NewGroup(
@@ -39,7 +45,7 @@ func GitProviderSelectionView(gitProviderAddView *GitProviderSelectView, isDelet
 					return nil
 				}),
 		).WithHideFunc(func() bool {
-			return gitProviderAddView.Id != "bitbucket"
+			return isDeleting || gitProviderAddView.Id != "bitbucket"
 		}),
 		huh.NewGroup(
 			huh.NewInput().
@@ -52,7 +58,7 @@ func GitProviderSelectionView(gitProviderAddView *GitProviderSelectView, isDelet
 					return nil
 				}),
 		).WithHide(isDeleting),
-	).WithTheme(GetCustomTheme())
+	).WithTheme(views.GetCustomTheme())
 
 	err := form.Run()
 	if err != nil {

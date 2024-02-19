@@ -6,7 +6,7 @@ package cmd_git_provider
 import (
 	"context"
 
-	add_git_provider "github.com/daytonaio/daytona/cli/cmd/views"
+	views_git_provider "github.com/daytonaio/daytona/cli/cmd/views/git_provider"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	"github.com/daytonaio/daytona/cli/config"
 	"github.com/daytonaio/daytona/cli/connection"
@@ -21,10 +21,11 @@ import (
 
 var gitProviderAddCmd = &cobra.Command{
 	Use:     "add",
-	Aliases: []string{"register, update"},
+	Aliases: []string{"new", "register, update"},
 	Short:   "Register a Git providers",
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
+		var providerExists bool
 
 		conn, err := connection.Get(nil)
 		if err != nil {
@@ -45,30 +46,27 @@ var gitProviderAddCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		gitProviderSelectView := add_git_provider.GitProviderSelectView{
+		gitProviderSelectView := views_git_provider.GitProviderSelectView{
 			Id:       "",
 			Username: "",
 			Token:    "",
 		}
 
-		add_git_provider.GitProviderSelectionView(&gitProviderSelectView, false)
+		views_git_provider.GitProviderSelectionView(&gitProviderSelectView, false)
 
 		if gitProviderSelectView.Id == "" {
 			return
 		}
 
 		if gitProviderSelectView.Username == "" {
-			gitProvider := git_provider.CreateGitProvider(gitProviderSelectView.Id, serverConfig.GitProviders)
-			gitUser, err := gitProvider.GetUserData()
+			gitUsername, err := git_provider.GetUsernameFromToken(gitProviderSelectView.Id, config.GetGitProviderList(), gitProviderSelectView.Token)
 			if err != nil {
 				log.Fatal(err)
 			}
-			gitProviderSelectView.Username = gitUser.Username
+			gitProviderSelectView.Username = gitUsername
 		}
 
 		gitProviderList := serverConfig.GitProviders
-
-		var providerExists bool
 
 		for _, gitProvider := range gitProviderList {
 			if gitProvider.Id == gitProviderSelectView.Id {

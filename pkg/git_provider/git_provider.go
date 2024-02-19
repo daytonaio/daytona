@@ -1,6 +1,11 @@
 package git_provider
 
-import "github.com/daytonaio/daytona/common/grpc/proto/types"
+import (
+	"errors"
+
+	"github.com/daytonaio/daytona/cli/config"
+	"github.com/daytonaio/daytona/common/grpc/proto/types"
+)
 
 const personalNamespaceId = "<PERSONAL>"
 
@@ -26,7 +31,7 @@ type GitRepository struct {
 	Url      string
 }
 
-func CreateGitProvider(providerId string, gitProviders []*types.GitProvider) GitProvider {
+func GetGitProvider(providerId string, gitProviders []*types.GitProvider) (GitProvider, error) {
 	var chosenProvider *types.GitProvider
 	for _, gitProvider := range gitProviders {
 		if gitProvider.Id == providerId {
@@ -34,21 +39,53 @@ func CreateGitProvider(providerId string, gitProviders []*types.GitProvider) Git
 		}
 	}
 
+	if chosenProvider == nil {
+		return nil, errors.New("provider not found")
+	}
+
 	switch providerId {
 	case "github":
 		return &GitHubGitProvider{
 			token: chosenProvider.Token,
-		}
+		}, nil
 	case "gitlab":
 		return &GitLabGitProvider{
 			token: chosenProvider.Token,
-		}
+		}, nil
 	case "bitbucket":
 		return &BitbucketGitProvider{
 			username: chosenProvider.Username,
 			token:    chosenProvider.Token,
+		}, nil
+	default:
+		return nil, errors.New("provider not found")
+	}
+}
+
+func GetUsernameFromToken(providerId string, gitProviders []config.GitProvider, token string) (string, error) {
+	var gitProvider GitProvider
+
+	switch providerId {
+	case "github":
+		gitProvider = &GitHubGitProvider{
+			token: token,
+		}
+	case "gitlab":
+		gitProvider = &GitLabGitProvider{
+			token: token,
+		}
+	case "bitbucket":
+		gitProvider = &BitbucketGitProvider{
+			token: token,
 		}
 	default:
-		return nil
+		return "", errors.New("provider not found")
 	}
+
+	gitUser, err := gitProvider.GetUserData()
+	if err != nil {
+		return "", errors.New("user not found")
+	}
+
+	return gitUser.Username, nil
 }

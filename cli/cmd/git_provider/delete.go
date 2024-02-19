@@ -6,7 +6,7 @@ package cmd_git_provider
 import (
 	"context"
 
-	add_git_provider "github.com/daytonaio/daytona/cli/cmd/views"
+	views_git_provider "github.com/daytonaio/daytona/cli/cmd/views/git_provider"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	"github.com/daytonaio/daytona/cli/config"
 	"github.com/daytonaio/daytona/cli/connection"
@@ -44,13 +44,13 @@ var gitProviderDeleteCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		gitProviderSelectView := add_git_provider.GitProviderSelectView{
+		gitProviderSelectView := views_git_provider.GitProviderSelectView{
 			Id:       "",
 			Username: "",
 			Token:    "",
 		}
 
-		add_git_provider.GitProviderSelectionView(&gitProviderSelectView, true)
+		views_git_provider.GitProviderSelectionView(&gitProviderSelectView, true)
 
 		if gitProviderSelectView.Id == "" {
 			log.Fatal("Git provider id can not be blank")

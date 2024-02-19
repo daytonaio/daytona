@@ -352,7 +352,10 @@ func GetRepositoryUrlFromWizard(userGitProviders []*types.GitProvider, secondary
 		}
 	}
 
-	gitProvider = git_provider.CreateGitProvider(providerId, userGitProviders)
+	gitProvider, err := git_provider.GetGitProvider(providerId, userGitProviders)
+	if err != nil {
+		return "", err
+	}
 
 	namespaceList, err := gitProvider.GetNamespaces()
 	if err != nil {
