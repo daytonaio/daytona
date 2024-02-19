@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/cli/connection"
 	server_proto "github.com/daytonaio/daytona/common/grpc/proto"
 	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	"github.com/daytonaio/daytona/pkg/git_provider"
 	"github.com/golang/protobuf/ptypes/empty"
 
 	log "github.com/sirupsen/logrus"
@@ -56,6 +57,15 @@ var gitProviderAddCmd = &cobra.Command{
 			return
 		}
 
+		if gitProviderSelectView.Username == "" {
+			gitProvider := git_provider.CreateGitProvider(gitProviderSelectView.Id, serverConfig.GitProviders)
+			gitUser, err := gitProvider.GetUserData()
+			if err != nil {
+				log.Fatal(err)
+			}
+			gitProviderSelectView.Username = gitUser.Username
+		}
+
 		gitProviderList := serverConfig.GitProviders
 
 		var providerExists bool
@@ -63,6 +73,7 @@ var gitProviderAddCmd = &cobra.Command{
 		for _, gitProvider := range gitProviderList {
 			if gitProvider.Id == gitProviderSelectView.Id {
 				gitProvider.Token = gitProviderSelectView.Token
+				gitProvider.Username = gitProviderSelectView.Username
 				providerExists = true
 			}
 		}

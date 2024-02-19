@@ -2,18 +2,20 @@ package cmd
 
 import (
 	"bufio"
-	"encoding/json"
+	"context"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 
+	"github.com/daytonaio/daytona/cli/connection"
+	server_proto "github.com/daytonaio/daytona/common/grpc/proto"
+	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/spf13/cobra"
 )
 
-type GitCredResponse struct {
+type GitCredentials struct {
 	Username string `json:"username"`
 	Token    string `json:"token"`
 }
@@ -24,47 +26,77 @@ var gitCredCmd = &cobra.Command{
 	Args:    cobra.ExactArgs(1),
 	Hidden:  true,
 	Run: func(cmd *cobra.Command, args []string) {
-		switch args[0] {
-		case "get":
-			result, err := parseFromStdin()
-			host := result["host"]
-			if err != nil || host == "" {
-				fmt.Println("error parsing 'host' from stdin")
-				return
-			}
-
-			supervisorUrl := getSupervisorHostUrl()
-
-			// grpc server..., get git url from env
-			resp, err := http.Get(supervisorUrl + "/user/git-auth-token/" + host)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			//We Read the response body on the line below.
-			body, err := io.ReadAll(resp.Body)
-			if err != nil {
-				log.Fatalln(err)
-			}
-
-			var response GitCredResponse
-			if err := json.Unmarshal(body, &response); err != nil { // Parse []byte to go struct pointer
-				fmt.Println("Can not unmarshal JSON")
-			}
-
-			fmt.Println("username=" + response.Username)
-			fmt.Println("password=" + response.Token)
-		default:
+		if args[0] != "get" {
 			return
 		}
+
+		ctx := context.Background()
+		result, err := parseFromStdin()
+		host := result["host"]
+
+		if err != nil || host == "" {
+			fmt.Println("error parsing 'host' from stdin")
+			return
+		}
+
+		conn, err := connection.Get(nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer conn.Close()
+
+		serverClient := server_proto.NewServerClient(conn)
+
+		var gitCredentials GitCredentials
+		serverConfig, err := serverClient.GetConfig(ctx, &empty.Empty{})
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		projectRepositoryUrl := getProjectRepositoryUrl()
+		gitProviderId := getGitProviderFromRepositoryUrl(projectRepositoryUrl)
+
+		if gitProviderId == "" {
+			fmt.Println("error: unable to determine git provider")
+			return
+		}
+
+		var gitProvider *types.GitProvider
+		for _, provider := range serverConfig.GitProviders {
+			if provider.Id == gitProviderId {
+				gitProvider = provider
+				break
+			}
+		}
+
+		gitCredentials = GitCredentials{
+			Username: gitProvider.Username,
+			Token:    gitProvider.Token,
+		}
+
+		fmt.Println("username=" + gitCredentials.Username)
+		fmt.Println("password=" + gitCredentials.Token)
 	},
 }
 
-func getSupervisorHostUrl() string {
-	val, ok := os.LookupEnv("WS_SUPERVISOR_HOST_URL")
-	if !ok {
-		return "http://172.17.0.1:63899"
-	} else {
+func getProjectRepositoryUrl() string {
+	val, ok := os.LookupEnv("DAYTONA_WS_PROJECT_REPOSITORY_URL")
+	if ok {
 		return val
+	} else {
+		return ""
+	}
+}
+
+func getGitProviderFromRepositoryUrl(url string) string {
+	if strings.Contains(url, "github.com/") {
+		return "github"
+	} else if strings.Contains(url, "gitlab.com/") {
+		return "gitlab"
+	} else if strings.Contains(url, "bitbucket.org/") {
+		return "bitbucket"
+	} else {
+		return ""
 	}
 }
 
