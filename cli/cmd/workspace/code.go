@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 
 	cmd_ports "github.com/daytonaio/daytona/cli/cmd/ports"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
@@ -106,7 +107,7 @@ var CodeCmd = &cobra.Command{
 
 		log.Info("Opening " + workspaceName + "'s project " + projectName + " in Visual Studio Code.")
 
-		commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", projectHostname, projectName)
+		commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", projectHostname, path.Join("/workspaces", projectName))
 
 		var vscCommand *exec.Cmd = exec.Command("code", "--folder-uri", commandArgument)
 
