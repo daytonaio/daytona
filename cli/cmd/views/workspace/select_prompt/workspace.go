@@ -24,7 +24,7 @@ func selectWorkspacePrompt(workspaces []*types.WorkspaceInfo, actionVerb string,
 		for _, project := range workspace.Projects {
 			projectNames = append(projectNames, project.Name)
 		}
-		newItem := item{title: workspace.Name, choiceProperty: workspace.Name, desc: "Projects: " + strings.Join(projectNames, ", ")}
+		newItem := item{id: workspace.Name, title: workspace.Name, choiceProperty: workspace.Name, desc: "Projects: " + strings.Join(projectNames, ", ")}
 		items = append(items, newItem)
 	}
 

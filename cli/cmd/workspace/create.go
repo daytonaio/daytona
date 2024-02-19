@@ -31,10 +31,17 @@ var CreateCmd = &cobra.Command{
 	Short: "Create a workspace",
 	Args:  cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
+		ctx := context.Background()
 		var workspaceName string
 		var provisioner string
 
+		manual, _ := cmd.Flags().GetBool("manual")
 		apiClient := api.GetServerApiClient("http://localhost:3000", "")
+
+		serverConfig, _, err := apiClient.ServerAPI.GetConfig(ctx).Execute()
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		c, err := config.GetConfig()
 		if err != nil {
@@ -77,7 +84,7 @@ var CreateCmd = &cobra.Command{
 
 		if len(args) == 0 {
 			var workspaceNames []string
-			ctx := context.Background()
+			repos = []string{} // Ignore repo flags if prompting
 
 			workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
@@ -87,11 +94,9 @@ var CreateCmd = &cobra.Command{
 				workspaceNames = append(workspaceNames, *workspaceInfo.Name)
 			}
 
-			repos = []string{} // Ignore repo flags if prompting
-
 			views_util.RenderMainTitle("WORKSPACE CREATION")
 
-			workspaceName, repos, err = wizard_view.GetCreationDataFromPrompt(workspaceNames)
+			workspaceName, repos, err = wizard_view.GetCreationDataFromPrompt(workspaceNames, serverConfig.GitProviders, manual)
 			if err != nil {
 				log.Fatal(err)
 				return
@@ -108,8 +113,6 @@ var CreateCmd = &cobra.Command{
 		if workspaceName == "" || len(repos) == 0 {
 			return
 		}
-
-		ctx := context.Background()
 
 		_, _, err = apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(api_client.CreateWorkspace{
 			Name:         &workspaceName,
@@ -180,4 +183,5 @@ var provisionerFlag string
 func init() {
 	CreateCmd.Flags().StringArrayVarP(&repos, "repo", "r", nil, "Set the repository url")
 	CreateCmd.Flags().StringVar(&provisionerFlag, "provisioner", "", "Specify the provisioner (e.g. 'docker-provisioner')")
+	CreateCmd.Flags().Bool("manual", false, "Manually enter the git repositories")
 }

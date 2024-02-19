@@ -2,7 +2,6 @@ package git_provider
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
@@ -19,32 +18,45 @@ func (g *GitHubGitProvider) GetNamespaces() ([]GitNamespace, error) {
 		return nil, err
 	}
 
-	orgList, _, err := client.Organizations.List(context.Background(), user.Username, nil)
+	orgList, _, err := client.Organizations.List(context.Background(), user.Username, &github.ListOptions{
+		PerPage: 100,
+		Page:    1,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	namespaces := make([]GitNamespace, len(orgList))
+	namespaces := make([]GitNamespace, len(orgList)+1) // +1 for the user namespace
+	namespaces[0] = GitNamespace{Id: personalNamespaceId, Name: user.Username}
+
 	for i, org := range orgList {
 		if org.Login != nil {
-			namespaces[i].Id = *org.Login
-		}
-		if org.Name != nil {
-			namespaces[i].Name = *org.Name
+			namespaces[i+1].Id = *org.Login
+			namespaces[i+1].Name = *org.Login
+		} else if org.Name != nil {
+			namespaces[i+1].Name = *org.Name
 		}
 	}
 
-	fmt.Println("test")
-
-	namespaces = append(namespaces, GitNamespace{Id: user.Username, Name: user.Username})
 	return namespaces, nil
 }
 
 func (g *GitHubGitProvider) GetRepositories(namespace string) ([]GitRepository, error) {
 	client := g.getApiClient()
 	var response []GitRepository
+	var query string
 
-	repoList, _, err := client.Search.Repositories(context.Background(), "user:idagelic", &github.SearchOptions{
+	if namespace == personalNamespaceId {
+		user, err := g.GetUserData()
+		if err != nil {
+			return nil, err
+		}
+		query = "user:" + user.Username
+	} else {
+		query = "org:" + namespace
+	}
+
+	repoList, _, err := client.Search.Repositories(context.Background(), query, &github.SearchOptions{
 		ListOptions: github.ListOptions{
 			PerPage: 100,
 			Page:    1,
@@ -52,7 +64,7 @@ func (g *GitHubGitProvider) GetRepositories(namespace string) ([]GitRepository, 
 	})
 
 	if err != nil {
-		panic("error getting repositories from GitHub")
+		return nil, err
 	}
 
 	for _, repo := range repoList.Repositories {

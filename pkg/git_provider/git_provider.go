@@ -2,6 +2,8 @@ package git_provider
 
 import "github.com/daytonaio/daytona/common/grpc/proto/types"
 
+const personalNamespaceId = "<PERSONAL>"
+
 type GitProvider interface {
 	GetNamespaces() ([]GitNamespace, error)
 	GetRepositories(namespace string) ([]GitRepository, error)
@@ -9,6 +11,7 @@ type GitProvider interface {
 }
 
 type GitUser struct {
+	Id       string
 	Username string
 }
 

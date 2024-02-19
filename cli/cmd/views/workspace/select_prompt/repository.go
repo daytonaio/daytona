@@ -14,24 +14,18 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectNamespacePrompt(namespaces []git_provider.GitNamespace, secondaryProjectOrder int, choiceChan chan<- string) {
+func selectRepositoryPrompt(repositories []git_provider.GitRepository, secondaryProjectOrder int, choiceChan chan<- string) {
 	items := []list.Item{}
-	var desc string
 
 	// Populate items with titles and descriptions from workspaces.
-	for _, namespace := range namespaces {
-		if namespace.Id == "<PERSONAL>" {
-			desc = "personal"
-		} else {
-			desc = "organization"
-		}
-		newItem := item{id: namespace.Id, title: namespace.Name, desc: desc, choiceProperty: namespace.Id}
+	for _, repository := range repositories {
+		newItem := item{id: repository.Url, title: repository.Name, choiceProperty: repository.Url, desc: repository.Url}
 		items = append(items, newItem)
 	}
 
 	l := views.GetStyledSelectList(items)
 	m := model{list: l}
-	m.list.Title = "CHOOSE A NAMESPACE"
+	m.list.Title = "CHOOSE A REPOSITORY"
 	if secondaryProjectOrder > 0 {
 		m.list.Title += fmt.Sprintf(" (Secondary Project #%d)", secondaryProjectOrder)
 	}
@@ -49,10 +43,10 @@ func selectNamespacePrompt(namespaces []git_provider.GitNamespace, secondaryProj
 	}
 }
 
-func GetNamespaceIdFromPrompt(namespaces []git_provider.GitNamespace, secondaryProjectOrder int) string {
+func GetRepositoryUrlFromPrompt(repositories []git_provider.GitRepository, secondaryProjectOrder int) string {
 	choiceChan := make(chan string)
 
-	go selectNamespacePrompt(namespaces, secondaryProjectOrder, choiceChan)
+	go selectRepositoryPrompt(repositories, secondaryProjectOrder, choiceChan)
 
 	return <-choiceChan
 }

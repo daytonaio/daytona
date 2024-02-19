@@ -14,7 +14,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectProviderPrompt(gitProviders []config.GitProvider, choiceChan chan<- string) {
+func selectProviderPrompt(gitProviders []config.GitProvider, secondaryProjectOrder int, choiceChan chan<- string) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
@@ -26,6 +26,9 @@ func selectProviderPrompt(gitProviders []config.GitProvider, choiceChan chan<- s
 	l := views.GetStyledSelectList(items)
 	m := model{list: l}
 	m.list.Title = "CHOOSE A PROVIDER"
+	if secondaryProjectOrder > 0 {
+		m.list.Title += fmt.Sprintf(" (Secondary Project #%d)", secondaryProjectOrder)
+	}
 
 	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
 	if err != nil {
@@ -40,10 +43,10 @@ func selectProviderPrompt(gitProviders []config.GitProvider, choiceChan chan<- s
 	}
 }
 
-func GetProviderIdFromPrompt(gitProviders []config.GitProvider) string {
+func GetProviderIdFromPrompt(gitProviders []config.GitProvider, secondaryProjectOrder int) string {
 	choiceChan := make(chan string)
 
-	go selectProviderPrompt(gitProviders, choiceChan)
+	go selectProviderPrompt(gitProviders, secondaryProjectOrder, choiceChan)
 
 	return <-choiceChan
 }

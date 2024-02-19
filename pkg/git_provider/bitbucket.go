@@ -1,6 +1,8 @@
 package git_provider
 
 import (
+	"log"
+
 	"github.com/ktrysmt/go-bitbucket"
 )
 
@@ -13,21 +15,21 @@ func (g *BitbucketGitProvider) GetNamespaces() ([]GitNamespace, error) {
 	client := g.getApiClient()
 	user, err := g.GetUserData()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	wsList, err := client.Workspaces.List()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	namespaces := make([]GitNamespace, wsList.Size)
+	namespaces := make([]GitNamespace, wsList.Size+1) // +1 for the user namespace
+	namespaces[0] = GitNamespace{Id: personalNamespaceId, Name: user.Username}
+
 	for i, org := range wsList.Workspaces {
-		namespaces[i].Id = org.Slug
-		namespaces[i].Name = org.Name
+		namespaces[i+1].Id = org.Slug
+		namespaces[i+1].Name = org.Name
 	}
-
-	namespaces = append(namespaces, GitNamespace{Id: user.Username, Name: user.Username})
 
 	return namespaces, nil
 }
@@ -36,19 +38,27 @@ func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]GitRepositor
 	client := g.getApiClient()
 	var response []GitRepository
 
+	if namespace == personalNamespaceId {
+		user, err := g.GetUserData()
+		if err != nil {
+			return nil, err
+		}
+		namespace = user.Username
+	}
+
 	repoList, err := client.Repositories.ListForAccount(&bitbucket.RepositoriesOptions{
 		Owner:   namespace,
 		Page:    &[]int{1}[0],
 		Keyword: nil,
 	})
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	for _, repo := range repoList.Items {
 		htmlLink, ok := repo.Links["html"].(map[string]interface{})
 		if !ok {
-			panic("Invalid HTML link")
+			log.Fatal("Invalid HTML link")
 		}
 
 		response = append(response, GitRepository{
