@@ -65,6 +65,12 @@ var gitCredCmd = &cobra.Command{
 			}
 		}
 
+		if gitProvider == nil {
+			fmt.Println("error: git provider not found")
+			os.Exit(1)
+			return
+		}
+
 		gitCredentials = GitCredentials{
 			Username: gitProvider.Username,
 			Token:    gitProvider.Token,
