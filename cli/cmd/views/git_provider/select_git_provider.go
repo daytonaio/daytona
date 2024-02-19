@@ -23,7 +23,7 @@ func GitProviderSelectionView(gitProviderAddView *GitProviderSelectView, isDelet
 
 	var options []huh.Option[string]
 	for _, provider := range providers {
-		options = append(options, huh.Option[string]{Key: provider.Id, Value: provider.Name})
+		options = append(options, huh.Option[string]{Key: provider.Name, Value: provider.Id})
 	}
 
 	form := huh.NewForm(

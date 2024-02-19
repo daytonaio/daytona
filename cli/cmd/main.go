@@ -37,10 +37,12 @@ func Execute() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(AgentCmd)
 	rootCmd.AddCommand(ListCmd)
-	rootCmd.AddCommand(gitCredCmd)
 	rootCmd.AddCommand(GitProviderCmd)
 
-	if !wsMode {
+	if wsMode {
+		rootCmd.AddCommand(gitCredCmd)
+		rootCmd.AddCommand(AgentCmd)
+	} else {
 		rootCmd.AddCommand(CodeCmd)
 		rootCmd.AddCommand(SshCmd)
 		rootCmd.AddCommand(SshProxyCmd)
