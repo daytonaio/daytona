@@ -52,7 +52,7 @@ var gitProviderAddCmd = &cobra.Command{
 			Token:    "",
 		}
 
-		views_git_provider.GitProviderSelectionView(&gitProviderSelectView, false)
+		views_git_provider.GitProviderSelectionView(&gitProviderSelectView, serverConfig.GitProviders, false)
 
 		if gitProviderSelectView.Id == "" {
 			return
