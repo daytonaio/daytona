@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/daytonaio/daytona/cli/config"
 	server_config "github.com/daytonaio/daytona/server/config"
@@ -51,7 +52,12 @@ func Get(profile *config.Profile) (*grpc.ClientConn, error) {
 			return nil, errors.New("local server not configured. Run `daytona configure` first")
 		}
 
-		client, err := grpc.DialContext(ctx, "127.0.0.1:3000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+		apiUrl := "127.0.0.1:3000"
+		if serverApiUrl, ok := os.LookupEnv("DAYTONA_SERVER_API_URL"); ok {
+			apiUrl = serverApiUrl
+		}
+
+		client, err := grpc.DialContext(ctx, apiUrl, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		return client, err
 	} else {
 		sshTunnelContext, cancelTunnel := context.WithCancel(ctx)

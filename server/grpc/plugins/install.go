@@ -30,7 +30,7 @@ func (s *PluginsServer) InstallProvisionerPlugin(ctx context.Context, req *proto
 		return nil, err
 	}
 
-	err = provisioner_manager.RegisterProvisioner(downloadPath, c.ServerDownloadUrl, frpc.GetServerUrl(c))
+	err = provisioner_manager.RegisterProvisioner(downloadPath, c.ServerDownloadUrl, frpc.GetServerUrl(c), frpc.GetApiUrl(c))
 	if err != nil {
 		return nil, err
 	}

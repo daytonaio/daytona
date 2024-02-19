@@ -93,7 +93,13 @@ func Start() error {
 	}()
 
 	go func() {
-		if err := frpc.Connect(); err != nil {
+		if err := frpc.ConnectServer(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	go func() {
+		if err := frpc.ConnectApi(); err != nil {
 			log.Fatal(err)
 		}
 	}()
