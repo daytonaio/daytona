@@ -74,12 +74,9 @@ var gitProviderDeleteCmd = &cobra.Command{
 			return
 		}
 
-		_, err = client.SetConfig(ctx, &types.ServerConfig{
-			ProjectBaseImage:    serverConfig.ProjectBaseImage,
-			DefaultWorkspaceDir: serverConfig.DefaultWorkspaceDir,
-			PluginsDir:          serverConfig.PluginsDir,
-			GitProviders:        gitProviderList,
-		})
+		serverConfig.GitProviders = gitProviderList
+
+		_, err = client.SetConfig(ctx, serverConfig)
 		if err != nil {
 			log.Fatal(err)
 		}
