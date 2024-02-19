@@ -29,17 +29,15 @@ var gitCredCmd = &cobra.Command{
 		if args[0] != "get" {
 			return
 		}
-
 		ctx := context.Background()
 		result, err := parseFromStdin()
 		host := result["host"]
-
 		if err != nil || host == "" {
 			fmt.Println("error parsing 'host' from stdin")
 			return
 		}
 
-		conn, err := connection.Get(nil)
+		conn, err := connection.GetGrpcConn(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -53,9 +51,7 @@ var gitCredCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		projectRepositoryUrl := getProjectRepositoryUrl()
-		gitProviderId := getGitProviderFromRepositoryUrl(projectRepositoryUrl)
-
+		gitProviderId := getGitProviderIdFromHost(host)
 		if gitProviderId == "" {
 			fmt.Println("error: unable to determine git provider")
 			return
@@ -79,21 +75,12 @@ var gitCredCmd = &cobra.Command{
 	},
 }
 
-func getProjectRepositoryUrl() string {
-	val, ok := os.LookupEnv("DAYTONA_WS_PROJECT_REPOSITORY_URL")
-	if ok {
-		return val
-	} else {
-		return ""
-	}
-}
-
-func getGitProviderFromRepositoryUrl(url string) string {
-	if strings.Contains(url, "github.com/") {
+func getGitProviderIdFromHost(url string) string {
+	if strings.Contains(url, "github.com") {
 		return "github"
-	} else if strings.Contains(url, "gitlab.com/") {
+	} else if strings.Contains(url, "gitlab.com") {
 		return "gitlab"
-	} else if strings.Contains(url, "bitbucket.org/") {
+	} else if strings.Contains(url, "bitbucket.org") {
 		return "bitbucket"
 	} else {
 		return ""

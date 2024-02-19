@@ -47,7 +47,6 @@ func Execute() {
 		rootCmd.AddCommand(SshCmd)
 		rootCmd.AddCommand(SshProxyCmd)
 		rootCmd.AddCommand(CreateCmd)
-		rootCmd.AddCommand(CreateTempCmd)
 		rootCmd.AddCommand(DeleteCmd)
 		rootCmd.AddCommand(ServerCmd)
 		rootCmd.AddCommand(ideCmd)

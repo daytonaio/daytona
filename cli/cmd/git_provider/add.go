@@ -27,7 +27,7 @@ var gitProviderAddCmd = &cobra.Command{
 		ctx := context.Background()
 		var providerExists bool
 
-		conn, err := connection.Get(nil)
+		conn, err := connection.GetGrpcConn(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
