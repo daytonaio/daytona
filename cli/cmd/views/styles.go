@@ -11,11 +11,12 @@ import (
 )
 
 var (
-	Green      = lipgloss.AdaptiveColor{Light: "#23cc71", Dark: "#23cc71"}
-	Blue       = lipgloss.AdaptiveColor{Light: "#017ffe", Dark: "#017ffe"}
-	Red        = lipgloss.AdaptiveColor{Light: "#ff4567", Dark: "#ff4567"}
-	DimmedBlue = lipgloss.AdaptiveColor{Light: "#3398fe", Dark: "#3398fe"}
-	White      = lipgloss.AdaptiveColor{Light: "000", Dark: "fff"}
+	Green       = lipgloss.AdaptiveColor{Light: "#23cc71", Dark: "#23cc71"}
+	DimmedGreen = lipgloss.AdaptiveColor{Light: "#7be0a9", Dark: "#7be0a9"}
+	Blue        = lipgloss.AdaptiveColor{Light: "#017ffe", Dark: "#017ffe"}
+	Red         = lipgloss.AdaptiveColor{Light: "#ff4567", Dark: "#ff4567"}
+	DimmedBlue  = lipgloss.AdaptiveColor{Light: "#3398fe", Dark: "#3398fe"}
+	White       = lipgloss.AdaptiveColor{Light: "000", Dark: "fff"}
 )
 
 func ColorGrid(xSteps, ySteps int) [][]string {

@@ -21,7 +21,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-const maxWidth = 80
+const maxWidth = 160
 const maximumSecondaryProjects = 8
 
 type Styles struct {
@@ -128,7 +128,7 @@ func runInitialForm(providerRepoUrl string) (WorkspaceCreationPromptResponse, er
 			return !hasSecondaryProjectsCheck
 		}),
 	).WithTheme(dTheme).
-		WithWidth(45).
+		WithWidth(maxWidth).
 		WithShowHelp(false).
 		WithShowErrors(true)
 
@@ -194,7 +194,7 @@ func runSecondaryProjectsForm(workspaceCreationPromptResponse WorkspaceCreationP
 	m.form = huh.NewForm(
 		secondaryRepoGroup,
 	).
-		WithWidth(45).
+		WithWidth(maxWidth).
 		WithShowHelp(false).
 		WithShowErrors(true).
 		WithTheme(views.GetCustomTheme())
@@ -250,7 +250,7 @@ func runWorkspaceNameForm(workspaceCreationPromptResponse WorkspaceCreationPromp
 			workspaceNamePrompt,
 		),
 	).WithTheme(dTheme).
-		WithWidth(45).
+		WithWidth(maxWidth).
 		WithShowHelp(false).
 		WithShowErrors(true)
 
