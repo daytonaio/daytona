@@ -84,6 +84,5 @@ func (g *BitbucketGitProvider) GetUserData() (GitUser, error) {
 
 func (g *BitbucketGitProvider) getApiClient() *bitbucket.Client {
 	client := bitbucket.NewBasicAuth(g.username, g.token)
-
 	return client
 }

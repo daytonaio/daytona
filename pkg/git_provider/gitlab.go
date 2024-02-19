@@ -1,6 +1,7 @@
 package git_provider
 
 import (
+	"log"
 	"strconv"
 
 	"github.com/xanzy/go-gitlab"
@@ -93,7 +94,7 @@ func (g *GitLabGitProvider) GetUserData() (GitUser, error) {
 func (g *GitLabGitProvider) getApiClient() *gitlab.Client {
 	client, err := gitlab.NewClient(g.token)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	return client
