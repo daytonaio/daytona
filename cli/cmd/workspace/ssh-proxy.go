@@ -51,7 +51,7 @@ var SshProxyCmd = &cobra.Command{
 			}
 		}
 
-		tsConn, err := connection.GetTailscaleConn(&profile)
+		tsConn, err := connection.GetTailscaleConn(&profile, conn)
 		if err != nil {
 			log.Fatal(err)
 		}

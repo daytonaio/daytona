@@ -91,7 +91,7 @@ func GetGrpcConn(profile *config.Profile) (*grpc.ClientConn, error) {
 
 var s *tsnet.Server = nil
 
-func GetTailscaleConn(profile *config.Profile) (*tsnet.Server, error) {
+func GetTailscaleConn(profile *config.Profile, grpcConn *grpc.ClientConn) (*tsnet.Server, error) {
 	if s != nil {
 		return s, nil
 	}
@@ -99,13 +99,7 @@ func GetTailscaleConn(profile *config.Profile) (*tsnet.Server, error) {
 
 	ctx := context.Background()
 
-	conn, err := GetGrpcConn(profile)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Close()
-
-	client := proto.NewServerClient(conn)
+	client := proto.NewServerClient(grpcConn)
 
 	c, err := client.GetConfig(ctx, &empty.Empty{})
 	if err != nil {
