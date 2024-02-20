@@ -334,7 +334,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Workspace"
+                            "$ref": "#/definitions/WorkspaceInfo"
                         }
                     }
                 }
@@ -581,6 +581,41 @@ const docTemplate = `{
                 }
             }
         },
+        "WorkspaceInfo": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.ProjectInfo"
+                    }
+                },
+                "provisionerMetadata": {}
+            }
+        },
+        "github_com_golang_protobuf_ptypes_struct.Struct": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "description": "Unordered map of dynamically typed values.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Value"
+                    }
+                }
+            }
+        },
+        "google_golang_org_protobuf_types_known_structpb.Value": {
+            "type": "object",
+            "properties": {
+                "kind": {
+                    "description": "The kind of value.\n\nTypes that are assignable to Kind:\n\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
+                }
+            }
+        },
         "types.FRPSConfig": {
             "type": "object",
             "properties": {
@@ -606,6 +641,32 @@ const docTemplate = `{
                 },
                 "repository": {
                     "$ref": "#/definitions/types.Repository"
+                },
+                "workspaceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.ProjectInfo": {
+            "type": "object",
+            "properties": {
+                "created": {
+                    "type": "string"
+                },
+                "finished": {
+                    "type": "string"
+                },
+                "isRunning": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "provisionerMetadata": {
+                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
+                },
+                "started": {
+                    "type": "string"
                 },
                 "workspaceId": {
                     "type": "string"

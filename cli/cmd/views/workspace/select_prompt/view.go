@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/daytonaio/daytona/cli/cmd/views"
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	"github.com/daytonaio/daytona/common/api_client"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -66,7 +66,7 @@ func (m model) View() string {
 	return docStyle.Render(m.list.View())
 }
 
-func SelectWorkspacePrompt(workspaces []*types.WorkspaceInfo, actionVerb string, choiceChan chan<- string) {
+func SelectWorkspacePrompt(workspaces []api_client.Workspace, actionVerb string, choiceChan chan<- string) {
 
 	// Initialize an empty list of items.
 	items := []list.Item{}
@@ -75,9 +75,9 @@ func SelectWorkspacePrompt(workspaces []*types.WorkspaceInfo, actionVerb string,
 	for _, workspace := range workspaces {
 		var projectNames []string
 		for _, project := range workspace.Projects {
-			projectNames = append(projectNames, project.Name)
+			projectNames = append(projectNames, *project.Name)
 		}
-		newItem := item{title: workspace.Name, desc: strings.Join(projectNames, ", ")}
+		newItem := item{title: *workspace.Name, desc: strings.Join(projectNames, ", ")}
 		items = append(items, newItem)
 	}
 
@@ -118,7 +118,7 @@ func SelectWorkspacePrompt(workspaces []*types.WorkspaceInfo, actionVerb string,
 	}
 }
 
-func GetWorkspaceNameFromPrompt(workspaces []*types.WorkspaceInfo, actionVerb string) string {
+func GetWorkspaceNameFromPrompt(workspaces []api_client.Workspace, actionVerb string) string {
 	choseWorkspaceName := ""
 	choiceChan := make(chan string)
 

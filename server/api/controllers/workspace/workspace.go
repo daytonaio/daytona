@@ -17,7 +17,7 @@ import (
 //	@Description	Get workspace info
 //	@Produce		json
 //	@Param			workspaceId	path		string	true	"Workspace ID"
-//	@Success		200			{object}	Workspace
+//	@Success		200			{object}	WorkspaceInfo
 //	@Router			/workspace/{workspaceId} [get]
 //
 //	@id				GetWorkspaceInfo

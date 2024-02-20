@@ -8,7 +8,7 @@ package info_view_view
 import (
 	"github.com/daytonaio/daytona/cli/cmd/views"
 
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	"github.com/daytonaio/daytona/common/api_client"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/table"
@@ -39,14 +39,14 @@ var projectStatusStyle = lipgloss.NewStyle().
 	Foreground(lipgloss.Color(colors[0][4])).
 	PaddingLeft(2)
 
-func projectRender(project *types.ProjectInfo) string {
+func projectRender(project *api_client.TypesProjectInfo) string {
 	projectState := ""
 	extensions := [][]string{}
 	extensionsTable := ""
 
-	if !project.IsRunning && project.Created == "" {
+	if !*project.IsRunning && *project.Created == "" {
 		projectState = projectStatusStyle.Foreground(lipgloss.Color(colors[0][4])).Render("Unavailable")
-	} else if !project.IsRunning {
+	} else if !*project.IsRunning {
 		projectState = projectStatusStyle.Render("Stopped")
 	} else {
 		projectState = projectStatusStyle.Foreground(lipgloss.Color(colors[4][4])).Render("Running")
@@ -59,20 +59,20 @@ func projectRender(project *types.ProjectInfo) string {
 			Rows(extensions...).Render()
 	}
 
-	projectView := "Project" + projectNameStyle.Render(project.Name) + "\n" + "State  " + projectState + "\n" + extensionsTable
+	projectView := "Project" + projectNameStyle.Render(*project.Name) + "\n" + "State  " + projectState + "\n" + extensionsTable
 
 	return projectViewStyle.Render(projectView)
 }
 
-func Render(wsInfo *types.WorkspaceInfo) {
+func Render(wsInfo *api_client.WorkspaceInfo) {
 	var output string
 	output = "\n"
-	output += workspaceInfoStyle.Render("Workspace" + workspaceNameStyle.Render(wsInfo.Name))
+	output += workspaceInfoStyle.Render("Workspace" + workspaceNameStyle.Render(*wsInfo.Name))
 	if len(wsInfo.Projects) > 1 {
 		output += "\n" + "Projects"
 	}
 	for _, project := range wsInfo.Projects {
-		output += projectRender(project)
+		output += projectRender(&project)
 	}
 
 	output = lipgloss.NewStyle().PaddingLeft(3).Render(output)

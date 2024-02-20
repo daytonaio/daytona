@@ -232,7 +232,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Workspace'
+                $ref: '#/components/schemas/WorkspaceInfo'
           description: OK
       summary: Get workspace info
       tags:
@@ -450,6 +450,63 @@ components:
         provisioner:
           $ref: '#/components/schemas/types.WorkspaceProvisioner'
       type: object
+    WorkspaceInfo:
+      example:
+        projects:
+        - isRunning: true
+          created: created
+          name: name
+          provisionerMetadata:
+            fields:
+              key:
+                kind: "{}"
+          finished: finished
+          started: started
+          workspaceId: workspaceId
+        - isRunning: true
+          created: created
+          name: name
+          provisionerMetadata:
+            fields:
+              key:
+                kind: "{}"
+          finished: finished
+          started: started
+          workspaceId: workspaceId
+        name: name
+        provisionerMetadata: "{}"
+      properties:
+        name:
+          type: string
+        projects:
+          items:
+            $ref: '#/components/schemas/types.ProjectInfo'
+          type: array
+        provisionerMetadata:
+          type: object
+      type: object
+    github_com_golang_protobuf_ptypes_struct.Struct:
+      example:
+        fields:
+          key:
+            kind: "{}"
+      properties:
+        fields:
+          additionalProperties:
+            $ref: '#/components/schemas/google_golang_org_protobuf_types_known_structpb.Value'
+          description: Unordered map of dynamically typed values.
+          type: object
+      type: object
+    google_golang_org_protobuf_types_known_structpb.Value:
+      example:
+        kind: "{}"
+      properties:
+        kind:
+          description: "The kind of value.\n\nTypes that are assignable to Kind:\n\
+            \n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\
+            \t*Value_StructValue\n\t*Value_ListValue"
+          type: object
+      type: object
     types.FRPSConfig:
       example:
         protocol: protocol
@@ -483,6 +540,34 @@ components:
           type: string
         repository:
           $ref: '#/components/schemas/types.Repository'
+        workspaceId:
+          type: string
+      type: object
+    types.ProjectInfo:
+      example:
+        isRunning: true
+        created: created
+        name: name
+        provisionerMetadata:
+          fields:
+            key:
+              kind: "{}"
+        finished: finished
+        started: started
+        workspaceId: workspaceId
+      properties:
+        created:
+          type: string
+        finished:
+          type: string
+        isRunning:
+          type: boolean
+        name:
+          type: string
+        provisionerMetadata:
+          $ref: '#/components/schemas/github_com_golang_protobuf_ptypes_struct.Struct'
+        started:
+          type: string
         workspaceId:
           type: string
       type: object

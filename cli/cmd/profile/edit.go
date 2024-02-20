@@ -12,9 +12,7 @@ import (
 	list_view "github.com/daytonaio/daytona/cli/cmd/views/profile/list_view"
 	views_provisioner "github.com/daytonaio/daytona/cli/cmd/views/provisioner"
 	"github.com/daytonaio/daytona/cli/config"
-	"github.com/daytonaio/daytona/cli/connection"
 	"github.com/daytonaio/daytona/common/api_client"
-	"google.golang.org/grpc"
 
 	view "github.com/daytonaio/daytona/cli/cmd/views/profile/creation_wizard"
 
@@ -59,12 +57,7 @@ var profileEditCmd = &cobra.Command{
 		}
 
 		if profileNameFlag == "" || serverHostnameFlag == "" || serverUserFlag == "" || provisionerFlag == "" || (serverPrivateKeyPathFlag == "" && serverPasswordFlag == "") {
-			conn, err := connection.GetGrpcConn(nil)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			err = EditProfile(c, conn, true, &chosenProfile)
+			err = EditProfile(c, true, &chosenProfile)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -88,7 +81,7 @@ var profileEditCmd = &cobra.Command{
 	},
 }
 
-func EditProfile(c *config.Config, conn *grpc.ClientConn, notify bool, profile *config.Profile) error {
+func EditProfile(c *config.Config, notify bool, profile *config.Profile) error {
 	if profile == nil {
 		return errors.New("profile must not be nil")
 	}

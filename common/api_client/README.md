@@ -100,15 +100,19 @@ Class | Method | HTTP request | Description
 
  - [AgentServicePlugin](docs/AgentServicePlugin.md)
  - [CreateWorkspace](docs/CreateWorkspace.md)
+ - [GithubComGolangProtobufPtypesStructStruct](docs/GithubComGolangProtobufPtypesStructStruct.md)
+ - [GoogleGolangOrgProtobufTypesKnownStructpbValue](docs/GoogleGolangOrgProtobufTypesKnownStructpbValue.md)
  - [InstallPluginRequest](docs/InstallPluginRequest.md)
  - [NetworkKey](docs/NetworkKey.md)
  - [ProvisionerPlugin](docs/ProvisionerPlugin.md)
  - [ServerConfig](docs/ServerConfig.md)
  - [TypesFRPSConfig](docs/TypesFRPSConfig.md)
  - [TypesProject](docs/TypesProject.md)
+ - [TypesProjectInfo](docs/TypesProjectInfo.md)
  - [TypesRepository](docs/TypesRepository.md)
  - [TypesWorkspaceProvisioner](docs/TypesWorkspaceProvisioner.md)
  - [Workspace](docs/Workspace.md)
+ - [WorkspaceInfo](docs/WorkspaceInfo.md)
 
 
 ## Documentation For Authorization

@@ -140,7 +140,7 @@ type ApiGetWorkspaceInfoRequest struct {
 	workspaceId string
 }
 
-func (r ApiGetWorkspaceInfoRequest) Execute() (*Workspace, *http.Response, error) {
+func (r ApiGetWorkspaceInfoRequest) Execute() (*WorkspaceInfo, *http.Response, error) {
 	return r.ApiService.GetWorkspaceInfoExecute(r)
 }
 
@@ -162,13 +162,13 @@ func (a *WorkspaceAPIService) GetWorkspaceInfo(ctx context.Context, workspaceId 
 }
 
 // Execute executes the request
-//  @return Workspace
-func (a *WorkspaceAPIService) GetWorkspaceInfoExecute(r ApiGetWorkspaceInfoRequest) (*Workspace, *http.Response, error) {
+//  @return WorkspaceInfo
+func (a *WorkspaceAPIService) GetWorkspaceInfoExecute(r ApiGetWorkspaceInfoRequest) (*WorkspaceInfo, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  *Workspace
+		localVarReturnValue  *WorkspaceInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.GetWorkspaceInfo")

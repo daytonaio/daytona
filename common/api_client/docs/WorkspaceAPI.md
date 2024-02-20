@@ -83,7 +83,7 @@ No authorization required
 
 ## GetWorkspaceInfo
 
-> Workspace GetWorkspaceInfo(ctx, workspaceId).Execute()
+> WorkspaceInfo GetWorkspaceInfo(ctx, workspaceId).Execute()
 
 Get workspace info
 
@@ -111,7 +111,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.GetWorkspaceInfo``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `GetWorkspaceInfo`: Workspace
+	// response from `GetWorkspaceInfo`: WorkspaceInfo
 	fmt.Fprintf(os.Stdout, "Response from `WorkspaceAPI.GetWorkspaceInfo`: %v\n", resp)
 }
 ```
@@ -135,7 +135,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**Workspace**](Workspace.md)
+[**WorkspaceInfo**](WorkspaceInfo.md)
 
 ### Authorization
 

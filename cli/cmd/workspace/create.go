@@ -6,14 +6,12 @@ package cmd_workspace
 import (
 	"context"
 	"errors"
-	"io"
 	"os"
 
-	"github.com/daytonaio/daytona/common/grpc/proto"
+	"github.com/daytonaio/daytona/common/api_client"
 	"github.com/daytonaio/daytona/internal/util"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/golang/protobuf/ptypes/empty"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -24,7 +22,6 @@ import (
 	info_view "github.com/daytonaio/daytona/cli/cmd/views/workspace/info_view"
 	init_view "github.com/daytonaio/daytona/cli/cmd/views/workspace/init_view"
 	"github.com/daytonaio/daytona/cli/config"
-	"github.com/daytonaio/daytona/cli/connection"
 )
 
 var repos []string
@@ -37,12 +34,7 @@ var CreateCmd = &cobra.Command{
 		var workspaceName string
 		var provisioner string
 
-		conn, err := connection.GetGrpcConn(nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer conn.Close()
-		client := proto.NewWorkspaceServiceClient(conn)
+		apiClient := api.GetServerApiClient("http://localhost:3000", "")
 
 		c, err := config.GetConfig()
 		if err != nil {
@@ -57,7 +49,6 @@ var CreateCmd = &cobra.Command{
 		if provisionerFlag != "" {
 			provisioner = provisionerFlag
 		} else if activeProfile.DefaultProvisioner == "" {
-			apiClient := api.GetServerApiClient("http://localhost:3000", "")
 
 			provisionerPluginList, _, err := apiClient.PluginAPI.ListProvisionerPlugins(context.Background()).Execute()
 			if err != nil {
@@ -88,12 +79,12 @@ var CreateCmd = &cobra.Command{
 			var workspaceNames []string
 			ctx := context.Background()
 
-			workspaceListResponse, err := client.List(ctx, &empty.Empty{})
+			workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
 				log.Fatal(err)
 			}
-			for _, workspaceInfo := range workspaceListResponse.Workspaces {
-				workspaceNames = append(workspaceNames, workspaceInfo.Name)
+			for _, workspaceInfo := range workspaceList {
+				workspaceNames = append(workspaceNames, *workspaceInfo.Name)
 			}
 
 			repos = []string{} // Ignore repo flags if prompting
@@ -120,13 +111,11 @@ var CreateCmd = &cobra.Command{
 
 		ctx := context.Background()
 
-		createRequest := &proto.CreateWorkspaceRequest{
-			Name:         workspaceName,
+		_, _, err = apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(api_client.CreateWorkspace{
+			Name:         &workspaceName,
 			Repositories: repos,
-			Provisioner:  provisioner,
-		}
-
-		stream, err := client.Create(ctx, createRequest)
+			Provisioner:  &provisioner,
+		}).Execute()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -144,36 +133,33 @@ var CreateCmd = &cobra.Command{
 			os.Exit(0)
 		}()
 
-		started := false
-		for {
-			if started {
-				break
-			}
-			select {
-			case <-stream.Context().Done():
-				started = true
-			default:
-				// Recieve on the stream
-				res, err := stream.Recv()
-				if err != nil {
-					if err == io.EOF {
-						started = true
-						break
-					} else {
-						initViewProgram.Send(tea.Quit())
-						initViewProgram.ReleaseTerminal()
-						log.Fatal(err)
-						return
-					}
-				}
-				initViewProgram.Send(init_view.EventMsg{Event: res.Event, Payload: res.Payload})
-			}
-		}
+		// started := false
+		// for {
+		// 	if started {
+		// 		break
+		// 	}
+		// 	select {
+		// 	case <-stream.Context().Done():
+		// 		started = true
+		// 	default:
+		// 		// Recieve on the stream
+		// 		res, err := stream.Recv()
+		// 		if err != nil {
+		// 			if err == io.EOF {
+		// 				started = true
+		// 				break
+		// 			} else {
+		// 				initViewProgram.Send(tea.Quit())
+		// 				initViewProgram.ReleaseTerminal()
+		// 				log.Fatal(err)
+		// 				return
+		// 			}
+		// 		}
+		// 		initViewProgram.Send(init_view.EventMsg{Event: res.Event, Payload: res.Payload})
+		// 	}
+		// }
 
-		infoWorkspaceRequest := &proto.WorkspaceInfoRequest{
-			Id: workspaceName,
-		}
-		response, err := client.Info(ctx, infoWorkspaceRequest)
+		wsInfo, _, err := apiClient.WorkspaceAPI.GetWorkspaceInfo(ctx, workspaceName).Execute()
 		if err != nil {
 			initViewProgram.Send(tea.Quit())
 			initViewProgram.ReleaseTerminal()
@@ -185,7 +171,7 @@ var CreateCmd = &cobra.Command{
 		initViewProgram.ReleaseTerminal()
 
 		//	Show the info
-		info_view.Render(response)
+		info_view.Render(wsInfo)
 	},
 }
 

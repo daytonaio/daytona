@@ -8,36 +8,30 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/daytonaio/daytona/common/grpc/proto"
-
-	log "github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
+	"github.com/daytonaio/daytona/cli/api"
 )
 
-func GetFirstWorkspaceProjectName(conn *grpc.ClientConn, workspaceId string, projectName string) (string, error) {
+func GetFirstWorkspaceProjectName(workspaceId string, projectName string) (string, error) {
 	ctx := context.Background()
 
-	client := proto.NewWorkspaceServiceClient(conn)
-	workspaceInfoRequest := &proto.WorkspaceInfoRequest{
-		Id: workspaceId,
-	}
+	apiClient := api.GetServerApiClient("http://localhost:3000", "")
 
-	response, err := client.Info(ctx, workspaceInfoRequest)
+	wsInfo, _, err := apiClient.WorkspaceAPI.GetWorkspaceInfo(ctx, workspaceId).Execute()
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	if projectName == "" {
-		if len(response.Projects) == 0 {
+		if len(wsInfo.Projects) == 0 {
 			return "", errors.New("no projects found in workspace")
 		}
 
-		return response.Projects[0].Name, nil
+		return *wsInfo.Projects[0].Name, nil
 	}
 
-	for _, project := range response.Projects {
-		if project.Name == projectName {
-			return project.Name, nil
+	for _, project := range wsInfo.Projects {
+		if *project.Name == projectName {
+			return *project.Name, nil
 		}
 	}
 

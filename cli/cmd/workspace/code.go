@@ -10,18 +10,15 @@ import (
 	"os/exec"
 	"path"
 
+	"github.com/daytonaio/daytona/cli/api"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	select_prompt "github.com/daytonaio/daytona/cli/cmd/views/workspace/select_prompt"
 	"github.com/daytonaio/daytona/cli/config"
-	"github.com/daytonaio/daytona/cli/connection"
-	workspace_proto "github.com/daytonaio/daytona/common/grpc/proto"
 	"github.com/daytonaio/daytona/internal/util"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/browser"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"google.golang.org/grpc"
 )
 
 var CodeCmd = &cobra.Command{
@@ -47,21 +44,15 @@ var CodeCmd = &cobra.Command{
 
 		ideId = c.DefaultIdeId
 
-		conn, err := connection.GetGrpcConn(nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer conn.Close()
-
-		client := workspace_proto.NewWorkspaceServiceClient(conn)
+		apiClient := api.GetServerApiClient("http://localhost:3000", "")
 
 		if len(args) == 0 {
-			workspaceList, err := client.List(ctx, &empty.Empty{})
+			workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			workspaceName = select_prompt.GetWorkspaceNameFromPrompt(workspaceList.Workspaces, "open")
+			workspaceName = select_prompt.GetWorkspaceNameFromPrompt(workspaceList, "open")
 		} else {
 			workspaceName = args[0]
 		}
@@ -73,7 +64,7 @@ var CodeCmd = &cobra.Command{
 
 		// Todo: make project_select_prompt view for 0 args
 		if len(args) == 0 || len(args) == 1 {
-			projectName, err = util.GetFirstWorkspaceProjectName(conn, workspaceName, projectName)
+			projectName, err = util.GetFirstWorkspaceProjectName(workspaceName, projectName)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -88,7 +79,7 @@ var CodeCmd = &cobra.Command{
 		}
 
 		if ideId == "browser" {
-			err = openBrowserIDE(conn, activeProfile, workspaceName, projectName)
+			err = openBrowserIDE(activeProfile, workspaceName, projectName)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -143,7 +134,7 @@ func init() {
 	CodeCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", "Specify the IDE ('vscode' or 'browser')")
 }
 
-func openBrowserIDE(conn *grpc.ClientConn, activeProfile config.Profile, workspaceName string, projectName string) error {
+func openBrowserIDE(activeProfile config.Profile, workspaceName string, projectName string) error {
 	log.Fatal("Not implemented - no more need to go through server, use tailscale instead")
 	// projectPortForwards, err := cmd_ports.GetProjectPortForwards(conn, workspaceName, projectName)
 	// if err != nil {
