@@ -12,6 +12,38 @@
     "host": "localhost:3000",
     "basePath": "/",
     "paths": {
+        "/plugin/install/provisioner": {
+            "post": {
+                "description": "Install a provisioner plugin",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plugin"
+                ],
+                "summary": "Install a provisioner plugin",
+                "operationId": "InstallProvisionerPlugin",
+                "parameters": [
+                    {
+                        "description": "Plugin to install",
+                        "name": "plugin",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/InstallPluginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/server/config": {
             "get": {
                 "description": "Get the server configuration",
@@ -27,7 +59,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/types.ServerConfig"
+                            "$ref": "#/definitions/ServerConfig"
                         }
                     }
                 }
@@ -52,7 +84,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/types.ServerConfig"
+                            "$ref": "#/definitions/ServerConfig"
                         }
                     }
                 ],
@@ -60,7 +92,28 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/types.ServerConfig"
+                            "$ref": "#/definitions/ServerConfig"
+                        }
+                    }
+                }
+            }
+        },
+        "/server/network-key": {
+            "post": {
+                "description": "Generate a new authentication key",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "server"
+                ],
+                "summary": "Generate a new authentication key",
+                "operationId": "GenerateNetworkKey",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/NetworkKey"
                         }
                     }
                 }
@@ -68,21 +121,29 @@
         }
     },
     "definitions": {
-        "types.FRPSConfig": {
+        "InstallPluginRequest": {
             "type": "object",
             "properties": {
-                "domain": {
-                    "type": "string"
+                "downloadUrls": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
-                "port": {
-                    "type": "integer"
-                },
-                "protocol": {
+                "name": {
                     "type": "string"
                 }
             }
         },
-        "types.ServerConfig": {
+        "NetworkKey": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                }
+            }
+        },
+        "ServerConfig": {
             "type": "object",
             "properties": {
                 "apiPort": {
@@ -104,6 +165,20 @@
                     "type": "string"
                 },
                 "serverDownloadUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.FRPSConfig": {
+            "type": "object",
+            "properties": {
+                "domain": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "protocol": {
                     "type": "string"
                 }
             }

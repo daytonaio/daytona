@@ -4,7 +4,7 @@ type FRPSConfig struct {
 	Domain   string `json:"domain"`
 	Port     uint32 `json:"port"`
 	Protocol string `json:"protocol"`
-}
+} // @name FRPSConfig
 
 type ServerConfig struct {
 	PluginsDir        string      `json:"pluginsDir"`
@@ -14,4 +14,8 @@ type ServerConfig struct {
 	Frps              *FRPSConfig `json:"frps,omitempty"`
 	ApiPort           uint32      `json:"apiPort"`
 	HeadscalePort     uint32      `json:"headscalePort"`
-}
+} // @name ServerConfig
+
+type NetworkKey struct {
+	Key string `json:"key"`
+} // @name NetworkKey

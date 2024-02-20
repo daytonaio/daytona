@@ -9,10 +9,11 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/daytonaio/daytona/cli/api"
 	"github.com/daytonaio/daytona/cli/config"
-	"github.com/daytonaio/daytona/common/grpc/proto"
+	"github.com/daytonaio/daytona/common/api_client"
 	server_config "github.com/daytonaio/daytona/server/config"
-	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/daytonaio/daytona/server/frpc"
 	"github.com/google/uuid"
 	"tailscale.com/tsnet"
 
@@ -91,34 +92,30 @@ func GetGrpcConn(profile *config.Profile) (*grpc.ClientConn, error) {
 var s *tsnet.Server = nil
 
 func GetTailscaleConn(profile *config.Profile, grpcConn *grpc.ClientConn) (*tsnet.Server, error) {
-	return nil, errors.New("not implemented - REST API")
-
 	if s != nil {
 		return s, nil
 	}
 	s = &tsnet.Server{}
 
-	ctx := context.Background()
+	apiClient := api.GetServerApiClient("http://localhost:3000", "")
 
-	client := proto.NewServerClient(grpcConn)
+	serverConfig, _, err := apiClient.ServerAPI.GetConfigExecute(api_client.ApiGetConfigRequest{})
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// c, err := client.GetConfig(ctx, &empty.Empty{})
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	response, err := client.GenerateAuthKey(ctx, &empty.Empty{})
+	networkKey, _, err := apiClient.ServerAPI.GenerateNetworkKeyExecute(api_client.ApiGenerateNetworkKeyRequest{})
 	if err != nil {
 		return nil, err
 	}
 
 	s.Hostname = fmt.Sprintf("cli-%s", uuid.New().String())
-	// s.ControlURL = frpc.GetServerUrl(c)
-	s.AuthKey = response.Key
+	s.ControlURL = frpc.GetServerUrl(api.ToServerConfig(serverConfig))
+	s.AuthKey = *networkKey.Key
 	s.Ephemeral = true
 	s.Logf = func(format string, args ...any) {}
 
-	_, err = s.Up(ctx)
+	_, err = s.Up(context.Background())
 	if err != nil {
 		return nil, err
 	}

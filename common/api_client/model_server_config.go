@@ -14,11 +14,11 @@ import (
 	"encoding/json"
 )
 
-// checks if the TypesServerConfig type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &TypesServerConfig{}
+// checks if the ServerConfig type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &ServerConfig{}
 
-// TypesServerConfig struct for TypesServerConfig
-type TypesServerConfig struct {
+// ServerConfig struct for ServerConfig
+type ServerConfig struct {
 	ApiPort *int32 `json:"apiPort,omitempty"`
 	Frps *TypesFRPSConfig `json:"frps,omitempty"`
 	HeadscalePort *int32 `json:"headscalePort,omitempty"`
@@ -28,25 +28,25 @@ type TypesServerConfig struct {
 	ServerDownloadUrl *string `json:"serverDownloadUrl,omitempty"`
 }
 
-// NewTypesServerConfig instantiates a new TypesServerConfig object
+// NewServerConfig instantiates a new ServerConfig object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTypesServerConfig() *TypesServerConfig {
-	this := TypesServerConfig{}
+func NewServerConfig() *ServerConfig {
+	this := ServerConfig{}
 	return &this
 }
 
-// NewTypesServerConfigWithDefaults instantiates a new TypesServerConfig object
+// NewServerConfigWithDefaults instantiates a new ServerConfig object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewTypesServerConfigWithDefaults() *TypesServerConfig {
-	this := TypesServerConfig{}
+func NewServerConfigWithDefaults() *ServerConfig {
+	this := ServerConfig{}
 	return &this
 }
 
 // GetApiPort returns the ApiPort field value if set, zero value otherwise.
-func (o *TypesServerConfig) GetApiPort() int32 {
+func (o *ServerConfig) GetApiPort() int32 {
 	if o == nil || IsNil(o.ApiPort) {
 		var ret int32
 		return ret
@@ -56,7 +56,7 @@ func (o *TypesServerConfig) GetApiPort() int32 {
 
 // GetApiPortOk returns a tuple with the ApiPort field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesServerConfig) GetApiPortOk() (*int32, bool) {
+func (o *ServerConfig) GetApiPortOk() (*int32, bool) {
 	if o == nil || IsNil(o.ApiPort) {
 		return nil, false
 	}
@@ -64,7 +64,7 @@ func (o *TypesServerConfig) GetApiPortOk() (*int32, bool) {
 }
 
 // HasApiPort returns a boolean if a field has been set.
-func (o *TypesServerConfig) HasApiPort() bool {
+func (o *ServerConfig) HasApiPort() bool {
 	if o != nil && !IsNil(o.ApiPort) {
 		return true
 	}
@@ -73,12 +73,12 @@ func (o *TypesServerConfig) HasApiPort() bool {
 }
 
 // SetApiPort gets a reference to the given int32 and assigns it to the ApiPort field.
-func (o *TypesServerConfig) SetApiPort(v int32) {
+func (o *ServerConfig) SetApiPort(v int32) {
 	o.ApiPort = &v
 }
 
 // GetFrps returns the Frps field value if set, zero value otherwise.
-func (o *TypesServerConfig) GetFrps() TypesFRPSConfig {
+func (o *ServerConfig) GetFrps() TypesFRPSConfig {
 	if o == nil || IsNil(o.Frps) {
 		var ret TypesFRPSConfig
 		return ret
@@ -88,7 +88,7 @@ func (o *TypesServerConfig) GetFrps() TypesFRPSConfig {
 
 // GetFrpsOk returns a tuple with the Frps field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesServerConfig) GetFrpsOk() (*TypesFRPSConfig, bool) {
+func (o *ServerConfig) GetFrpsOk() (*TypesFRPSConfig, bool) {
 	if o == nil || IsNil(o.Frps) {
 		return nil, false
 	}
@@ -96,7 +96,7 @@ func (o *TypesServerConfig) GetFrpsOk() (*TypesFRPSConfig, bool) {
 }
 
 // HasFrps returns a boolean if a field has been set.
-func (o *TypesServerConfig) HasFrps() bool {
+func (o *ServerConfig) HasFrps() bool {
 	if o != nil && !IsNil(o.Frps) {
 		return true
 	}
@@ -105,12 +105,12 @@ func (o *TypesServerConfig) HasFrps() bool {
 }
 
 // SetFrps gets a reference to the given TypesFRPSConfig and assigns it to the Frps field.
-func (o *TypesServerConfig) SetFrps(v TypesFRPSConfig) {
+func (o *ServerConfig) SetFrps(v TypesFRPSConfig) {
 	o.Frps = &v
 }
 
 // GetHeadscalePort returns the HeadscalePort field value if set, zero value otherwise.
-func (o *TypesServerConfig) GetHeadscalePort() int32 {
+func (o *ServerConfig) GetHeadscalePort() int32 {
 	if o == nil || IsNil(o.HeadscalePort) {
 		var ret int32
 		return ret
@@ -120,7 +120,7 @@ func (o *TypesServerConfig) GetHeadscalePort() int32 {
 
 // GetHeadscalePortOk returns a tuple with the HeadscalePort field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesServerConfig) GetHeadscalePortOk() (*int32, bool) {
+func (o *ServerConfig) GetHeadscalePortOk() (*int32, bool) {
 	if o == nil || IsNil(o.HeadscalePort) {
 		return nil, false
 	}
@@ -128,7 +128,7 @@ func (o *TypesServerConfig) GetHeadscalePortOk() (*int32, bool) {
 }
 
 // HasHeadscalePort returns a boolean if a field has been set.
-func (o *TypesServerConfig) HasHeadscalePort() bool {
+func (o *ServerConfig) HasHeadscalePort() bool {
 	if o != nil && !IsNil(o.HeadscalePort) {
 		return true
 	}
@@ -137,12 +137,12 @@ func (o *TypesServerConfig) HasHeadscalePort() bool {
 }
 
 // SetHeadscalePort gets a reference to the given int32 and assigns it to the HeadscalePort field.
-func (o *TypesServerConfig) SetHeadscalePort(v int32) {
+func (o *ServerConfig) SetHeadscalePort(v int32) {
 	o.HeadscalePort = &v
 }
 
 // GetId returns the Id field value if set, zero value otherwise.
-func (o *TypesServerConfig) GetId() string {
+func (o *ServerConfig) GetId() string {
 	if o == nil || IsNil(o.Id) {
 		var ret string
 		return ret
@@ -152,7 +152,7 @@ func (o *TypesServerConfig) GetId() string {
 
 // GetIdOk returns a tuple with the Id field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesServerConfig) GetIdOk() (*string, bool) {
+func (o *ServerConfig) GetIdOk() (*string, bool) {
 	if o == nil || IsNil(o.Id) {
 		return nil, false
 	}
@@ -160,7 +160,7 @@ func (o *TypesServerConfig) GetIdOk() (*string, bool) {
 }
 
 // HasId returns a boolean if a field has been set.
-func (o *TypesServerConfig) HasId() bool {
+func (o *ServerConfig) HasId() bool {
 	if o != nil && !IsNil(o.Id) {
 		return true
 	}
@@ -169,12 +169,12 @@ func (o *TypesServerConfig) HasId() bool {
 }
 
 // SetId gets a reference to the given string and assigns it to the Id field.
-func (o *TypesServerConfig) SetId(v string) {
+func (o *ServerConfig) SetId(v string) {
 	o.Id = &v
 }
 
 // GetPluginRegistryUrl returns the PluginRegistryUrl field value if set, zero value otherwise.
-func (o *TypesServerConfig) GetPluginRegistryUrl() string {
+func (o *ServerConfig) GetPluginRegistryUrl() string {
 	if o == nil || IsNil(o.PluginRegistryUrl) {
 		var ret string
 		return ret
@@ -184,7 +184,7 @@ func (o *TypesServerConfig) GetPluginRegistryUrl() string {
 
 // GetPluginRegistryUrlOk returns a tuple with the PluginRegistryUrl field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesServerConfig) GetPluginRegistryUrlOk() (*string, bool) {
+func (o *ServerConfig) GetPluginRegistryUrlOk() (*string, bool) {
 	if o == nil || IsNil(o.PluginRegistryUrl) {
 		return nil, false
 	}
@@ -192,7 +192,7 @@ func (o *TypesServerConfig) GetPluginRegistryUrlOk() (*string, bool) {
 }
 
 // HasPluginRegistryUrl returns a boolean if a field has been set.
-func (o *TypesServerConfig) HasPluginRegistryUrl() bool {
+func (o *ServerConfig) HasPluginRegistryUrl() bool {
 	if o != nil && !IsNil(o.PluginRegistryUrl) {
 		return true
 	}
@@ -201,12 +201,12 @@ func (o *TypesServerConfig) HasPluginRegistryUrl() bool {
 }
 
 // SetPluginRegistryUrl gets a reference to the given string and assigns it to the PluginRegistryUrl field.
-func (o *TypesServerConfig) SetPluginRegistryUrl(v string) {
+func (o *ServerConfig) SetPluginRegistryUrl(v string) {
 	o.PluginRegistryUrl = &v
 }
 
 // GetPluginsDir returns the PluginsDir field value if set, zero value otherwise.
-func (o *TypesServerConfig) GetPluginsDir() string {
+func (o *ServerConfig) GetPluginsDir() string {
 	if o == nil || IsNil(o.PluginsDir) {
 		var ret string
 		return ret
@@ -216,7 +216,7 @@ func (o *TypesServerConfig) GetPluginsDir() string {
 
 // GetPluginsDirOk returns a tuple with the PluginsDir field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesServerConfig) GetPluginsDirOk() (*string, bool) {
+func (o *ServerConfig) GetPluginsDirOk() (*string, bool) {
 	if o == nil || IsNil(o.PluginsDir) {
 		return nil, false
 	}
@@ -224,7 +224,7 @@ func (o *TypesServerConfig) GetPluginsDirOk() (*string, bool) {
 }
 
 // HasPluginsDir returns a boolean if a field has been set.
-func (o *TypesServerConfig) HasPluginsDir() bool {
+func (o *ServerConfig) HasPluginsDir() bool {
 	if o != nil && !IsNil(o.PluginsDir) {
 		return true
 	}
@@ -233,12 +233,12 @@ func (o *TypesServerConfig) HasPluginsDir() bool {
 }
 
 // SetPluginsDir gets a reference to the given string and assigns it to the PluginsDir field.
-func (o *TypesServerConfig) SetPluginsDir(v string) {
+func (o *ServerConfig) SetPluginsDir(v string) {
 	o.PluginsDir = &v
 }
 
 // GetServerDownloadUrl returns the ServerDownloadUrl field value if set, zero value otherwise.
-func (o *TypesServerConfig) GetServerDownloadUrl() string {
+func (o *ServerConfig) GetServerDownloadUrl() string {
 	if o == nil || IsNil(o.ServerDownloadUrl) {
 		var ret string
 		return ret
@@ -248,7 +248,7 @@ func (o *TypesServerConfig) GetServerDownloadUrl() string {
 
 // GetServerDownloadUrlOk returns a tuple with the ServerDownloadUrl field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesServerConfig) GetServerDownloadUrlOk() (*string, bool) {
+func (o *ServerConfig) GetServerDownloadUrlOk() (*string, bool) {
 	if o == nil || IsNil(o.ServerDownloadUrl) {
 		return nil, false
 	}
@@ -256,7 +256,7 @@ func (o *TypesServerConfig) GetServerDownloadUrlOk() (*string, bool) {
 }
 
 // HasServerDownloadUrl returns a boolean if a field has been set.
-func (o *TypesServerConfig) HasServerDownloadUrl() bool {
+func (o *ServerConfig) HasServerDownloadUrl() bool {
 	if o != nil && !IsNil(o.ServerDownloadUrl) {
 		return true
 	}
@@ -265,11 +265,11 @@ func (o *TypesServerConfig) HasServerDownloadUrl() bool {
 }
 
 // SetServerDownloadUrl gets a reference to the given string and assigns it to the ServerDownloadUrl field.
-func (o *TypesServerConfig) SetServerDownloadUrl(v string) {
+func (o *ServerConfig) SetServerDownloadUrl(v string) {
 	o.ServerDownloadUrl = &v
 }
 
-func (o TypesServerConfig) MarshalJSON() ([]byte, error) {
+func (o ServerConfig) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -277,7 +277,7 @@ func (o TypesServerConfig) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o TypesServerConfig) ToMap() (map[string]interface{}, error) {
+func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.ApiPort) {
 		toSerialize["apiPort"] = o.ApiPort
@@ -303,38 +303,38 @@ func (o TypesServerConfig) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-type NullableTypesServerConfig struct {
-	value *TypesServerConfig
+type NullableServerConfig struct {
+	value *ServerConfig
 	isSet bool
 }
 
-func (v NullableTypesServerConfig) Get() *TypesServerConfig {
+func (v NullableServerConfig) Get() *ServerConfig {
 	return v.value
 }
 
-func (v *NullableTypesServerConfig) Set(val *TypesServerConfig) {
+func (v *NullableServerConfig) Set(val *ServerConfig) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableTypesServerConfig) IsSet() bool {
+func (v NullableServerConfig) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableTypesServerConfig) Unset() {
+func (v *NullableServerConfig) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableTypesServerConfig(val *TypesServerConfig) *NullableTypesServerConfig {
-	return &NullableTypesServerConfig{value: val, isSet: true}
+func NewNullableServerConfig(val *ServerConfig) *NullableServerConfig {
+	return &NullableServerConfig{value: val, isSet: true}
 }
 
-func (v NullableTypesServerConfig) MarshalJSON() ([]byte, error) {
+func (v NullableServerConfig) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableTypesServerConfig) UnmarshalJSON(src []byte) error {
+func (v *NullableServerConfig) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

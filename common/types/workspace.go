@@ -8,26 +8,26 @@ type Repository struct {
 	PrNumber uint32 `json:"prNumber,omitempty"`
 	Source   string `json:"source"`
 	Path     string `json:"path,omitempty"`
-}
+} // @name Repository
 
 type Project struct {
 	Name        string      `json:"name"`
 	Repository  *Repository `json:"repository"`
 	WorkspaceId string      `json:"workspaceId"`
 	AuthKey     string      `json:"authKey"`
-}
+} // @name Project
 
 type WorkspaceProvisioner struct {
 	Name    string `json:"name"`
 	Profile string `json:"profile"`
-}
+} // @name WorkspaceProvisioner
 
 type Workspace struct {
 	Id          string                `json:"id"`
 	Name        string                `json:"name"`
 	Projects    []*Project            `json:"projects"`
 	Provisioner *WorkspaceProvisioner `json:"provisioner"`
-}
+} // @name Workspace
 
 type ProjectInfo struct {
 	Name                string       `json:"name"`
@@ -37,10 +37,10 @@ type ProjectInfo struct {
 	IsRunning           bool         `json:"isRunning"`
 	ProvisionerMetadata *interface{} `json:"provisionerMetadata,omitempty"`
 	WorkspaceId         string       `json:"workspaceId"`
-}
+} // @name ProjectInfo
 
 type WorkspaceInfo struct {
 	Name                string         `json:"name"`
 	Projects            []*ProjectInfo `json:"projects"`
 	ProvisionerMetadata *interface{}   `json:"provisionerMetadata,omitempty"`
-}
+} // @name WorkspaceInfo

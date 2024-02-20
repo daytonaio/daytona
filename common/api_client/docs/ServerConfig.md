@@ -1,4 +1,4 @@
-# TypesServerConfig
+# ServerConfig
 
 ## Properties
 
@@ -14,195 +14,195 @@ Name | Type | Description | Notes
 
 ## Methods
 
-### NewTypesServerConfig
+### NewServerConfig
 
-`func NewTypesServerConfig() *TypesServerConfig`
+`func NewServerConfig() *ServerConfig`
 
-NewTypesServerConfig instantiates a new TypesServerConfig object
+NewServerConfig instantiates a new ServerConfig object
 This constructor will assign default values to properties that have it defined,
 and makes sure properties required by API are set, but the set of arguments
 will change when the set of required properties is changed
 
-### NewTypesServerConfigWithDefaults
+### NewServerConfigWithDefaults
 
-`func NewTypesServerConfigWithDefaults() *TypesServerConfig`
+`func NewServerConfigWithDefaults() *ServerConfig`
 
-NewTypesServerConfigWithDefaults instantiates a new TypesServerConfig object
+NewServerConfigWithDefaults instantiates a new ServerConfig object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
 ### GetApiPort
 
-`func (o *TypesServerConfig) GetApiPort() int32`
+`func (o *ServerConfig) GetApiPort() int32`
 
 GetApiPort returns the ApiPort field if non-nil, zero value otherwise.
 
 ### GetApiPortOk
 
-`func (o *TypesServerConfig) GetApiPortOk() (*int32, bool)`
+`func (o *ServerConfig) GetApiPortOk() (*int32, bool)`
 
 GetApiPortOk returns a tuple with the ApiPort field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetApiPort
 
-`func (o *TypesServerConfig) SetApiPort(v int32)`
+`func (o *ServerConfig) SetApiPort(v int32)`
 
 SetApiPort sets ApiPort field to given value.
 
 ### HasApiPort
 
-`func (o *TypesServerConfig) HasApiPort() bool`
+`func (o *ServerConfig) HasApiPort() bool`
 
 HasApiPort returns a boolean if a field has been set.
 
 ### GetFrps
 
-`func (o *TypesServerConfig) GetFrps() TypesFRPSConfig`
+`func (o *ServerConfig) GetFrps() TypesFRPSConfig`
 
 GetFrps returns the Frps field if non-nil, zero value otherwise.
 
 ### GetFrpsOk
 
-`func (o *TypesServerConfig) GetFrpsOk() (*TypesFRPSConfig, bool)`
+`func (o *ServerConfig) GetFrpsOk() (*TypesFRPSConfig, bool)`
 
 GetFrpsOk returns a tuple with the Frps field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetFrps
 
-`func (o *TypesServerConfig) SetFrps(v TypesFRPSConfig)`
+`func (o *ServerConfig) SetFrps(v TypesFRPSConfig)`
 
 SetFrps sets Frps field to given value.
 
 ### HasFrps
 
-`func (o *TypesServerConfig) HasFrps() bool`
+`func (o *ServerConfig) HasFrps() bool`
 
 HasFrps returns a boolean if a field has been set.
 
 ### GetHeadscalePort
 
-`func (o *TypesServerConfig) GetHeadscalePort() int32`
+`func (o *ServerConfig) GetHeadscalePort() int32`
 
 GetHeadscalePort returns the HeadscalePort field if non-nil, zero value otherwise.
 
 ### GetHeadscalePortOk
 
-`func (o *TypesServerConfig) GetHeadscalePortOk() (*int32, bool)`
+`func (o *ServerConfig) GetHeadscalePortOk() (*int32, bool)`
 
 GetHeadscalePortOk returns a tuple with the HeadscalePort field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetHeadscalePort
 
-`func (o *TypesServerConfig) SetHeadscalePort(v int32)`
+`func (o *ServerConfig) SetHeadscalePort(v int32)`
 
 SetHeadscalePort sets HeadscalePort field to given value.
 
 ### HasHeadscalePort
 
-`func (o *TypesServerConfig) HasHeadscalePort() bool`
+`func (o *ServerConfig) HasHeadscalePort() bool`
 
 HasHeadscalePort returns a boolean if a field has been set.
 
 ### GetId
 
-`func (o *TypesServerConfig) GetId() string`
+`func (o *ServerConfig) GetId() string`
 
 GetId returns the Id field if non-nil, zero value otherwise.
 
 ### GetIdOk
 
-`func (o *TypesServerConfig) GetIdOk() (*string, bool)`
+`func (o *ServerConfig) GetIdOk() (*string, bool)`
 
 GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetId
 
-`func (o *TypesServerConfig) SetId(v string)`
+`func (o *ServerConfig) SetId(v string)`
 
 SetId sets Id field to given value.
 
 ### HasId
 
-`func (o *TypesServerConfig) HasId() bool`
+`func (o *ServerConfig) HasId() bool`
 
 HasId returns a boolean if a field has been set.
 
 ### GetPluginRegistryUrl
 
-`func (o *TypesServerConfig) GetPluginRegistryUrl() string`
+`func (o *ServerConfig) GetPluginRegistryUrl() string`
 
 GetPluginRegistryUrl returns the PluginRegistryUrl field if non-nil, zero value otherwise.
 
 ### GetPluginRegistryUrlOk
 
-`func (o *TypesServerConfig) GetPluginRegistryUrlOk() (*string, bool)`
+`func (o *ServerConfig) GetPluginRegistryUrlOk() (*string, bool)`
 
 GetPluginRegistryUrlOk returns a tuple with the PluginRegistryUrl field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetPluginRegistryUrl
 
-`func (o *TypesServerConfig) SetPluginRegistryUrl(v string)`
+`func (o *ServerConfig) SetPluginRegistryUrl(v string)`
 
 SetPluginRegistryUrl sets PluginRegistryUrl field to given value.
 
 ### HasPluginRegistryUrl
 
-`func (o *TypesServerConfig) HasPluginRegistryUrl() bool`
+`func (o *ServerConfig) HasPluginRegistryUrl() bool`
 
 HasPluginRegistryUrl returns a boolean if a field has been set.
 
 ### GetPluginsDir
 
-`func (o *TypesServerConfig) GetPluginsDir() string`
+`func (o *ServerConfig) GetPluginsDir() string`
 
 GetPluginsDir returns the PluginsDir field if non-nil, zero value otherwise.
 
 ### GetPluginsDirOk
 
-`func (o *TypesServerConfig) GetPluginsDirOk() (*string, bool)`
+`func (o *ServerConfig) GetPluginsDirOk() (*string, bool)`
 
 GetPluginsDirOk returns a tuple with the PluginsDir field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetPluginsDir
 
-`func (o *TypesServerConfig) SetPluginsDir(v string)`
+`func (o *ServerConfig) SetPluginsDir(v string)`
 
 SetPluginsDir sets PluginsDir field to given value.
 
 ### HasPluginsDir
 
-`func (o *TypesServerConfig) HasPluginsDir() bool`
+`func (o *ServerConfig) HasPluginsDir() bool`
 
 HasPluginsDir returns a boolean if a field has been set.
 
 ### GetServerDownloadUrl
 
-`func (o *TypesServerConfig) GetServerDownloadUrl() string`
+`func (o *ServerConfig) GetServerDownloadUrl() string`
 
 GetServerDownloadUrl returns the ServerDownloadUrl field if non-nil, zero value otherwise.
 
 ### GetServerDownloadUrlOk
 
-`func (o *TypesServerConfig) GetServerDownloadUrlOk() (*string, bool)`
+`func (o *ServerConfig) GetServerDownloadUrlOk() (*string, bool)`
 
 GetServerDownloadUrlOk returns a tuple with the ServerDownloadUrl field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetServerDownloadUrl
 
-`func (o *TypesServerConfig) SetServerDownloadUrl(v string)`
+`func (o *ServerConfig) SetServerDownloadUrl(v string)`
 
 SetServerDownloadUrl sets ServerDownloadUrl field to given value.
 
 ### HasServerDownloadUrl
 
-`func (o *TypesServerConfig) HasServerDownloadUrl() bool`
+`func (o *ServerConfig) HasServerDownloadUrl() bool`
 
 HasServerDownloadUrl returns a boolean if a field has been set.
 

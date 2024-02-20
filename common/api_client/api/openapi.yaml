@@ -7,6 +7,25 @@ info:
 servers:
 - url: http://localhost:3000/
 paths:
+  /plugin/install/provisioner:
+    post:
+      description: Install a provisioner plugin
+      operationId: InstallProvisionerPlugin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstallPluginRequest'
+        description: Plugin to install
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Install a provisioner plugin
+      tags:
+      - plugin
+      x-codegen-request-body-name: plugin
   /server/config:
     get:
       description: Get the server configuration
@@ -16,7 +35,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/types.ServerConfig'
+                $ref: '#/components/schemas/ServerConfig'
           description: OK
       summary: Get the server configuration
       tags:
@@ -28,7 +47,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/types.ServerConfig'
+              $ref: '#/components/schemas/ServerConfig'
         description: Server configuration
         required: true
       responses:
@@ -36,28 +55,49 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/types.ServerConfig'
+                $ref: '#/components/schemas/ServerConfig'
           description: OK
       summary: Set the server configuration
       tags:
       - server
       x-codegen-request-body-name: config
+  /server/network-key:
+    post:
+      description: Generate a new authentication key
+      operationId: GenerateNetworkKey
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NetworkKey'
+          description: OK
+      summary: Generate a new authentication key
+      tags:
+      - server
 components:
   schemas:
-    types.FRPSConfig:
+    InstallPluginRequest:
       example:
-        protocol: protocol
-        port: 6
-        domain: domain
+        downloadUrls:
+          key: downloadUrls
+        name: name
       properties:
-        domain:
-          type: string
-        port:
-          type: integer
-        protocol:
+        downloadUrls:
+          additionalProperties:
+            type: string
+          type: object
+        name:
           type: string
       type: object
-    types.ServerConfig:
+    NetworkKey:
+      example:
+        key: key
+      properties:
+        key:
+          type: string
+      type: object
+    ServerConfig:
       example:
         pluginRegistryUrl: pluginRegistryUrl
         apiPort: 0
@@ -83,6 +123,19 @@ components:
         pluginsDir:
           type: string
         serverDownloadUrl:
+          type: string
+      type: object
+    types.FRPSConfig:
+      example:
+        protocol: protocol
+        port: 6
+        domain: domain
+      properties:
+        domain:
+          type: string
+        port:
+          type: integer
+        protocol:
           type: string
       type: object
 x-original-swagger-version: "2.0"

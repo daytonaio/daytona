@@ -16,6 +16,7 @@ import (
 
 	"github.com/daytonaio/daytona/server/api/docs"
 
+	"github.com/daytonaio/daytona/server/api/controllers/plugin"
 	"github.com/daytonaio/daytona/server/api/controllers/server"
 	"github.com/daytonaio/daytona/server/config"
 
@@ -57,6 +58,12 @@ func Start() error {
 	{
 		serverController.GET("/config", server.GetConfig)
 		serverController.POST("/config", server.SetConfig)
+		serverController.POST("/network-key", server.GenerateNetworkKey)
+	}
+
+	pluginController := router.Group("/plugin")
+	{
+		pluginController.POST("/install/provisioner", plugin.InstallProvisionerPlugin)
 	}
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))

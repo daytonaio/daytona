@@ -4,59 +4,31 @@
 package cmd_server
 
 import (
-	"context"
-
-	"github.com/golang/protobuf/ptypes/empty"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/daytonaio/daytona/cli/api"
 	view "github.com/daytonaio/daytona/cli/cmd/views/server/configuration_prompt"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
-	"github.com/daytonaio/daytona/cli/connection"
 	"github.com/daytonaio/daytona/common/api_client"
-	server_proto "github.com/daytonaio/daytona/common/grpc/proto"
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
 )
 
 var configureCmd = &cobra.Command{
 	Use:   "configure",
 	Short: "Configure Daytona Server",
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := context.Background()
-
 		apiClient := api.GetServerApiClient("http://localhost:3000", "")
 
-		serverConfig, _, err := apiClient.ServerAPI.GetConfigExecute(api_client.ApiGetConfigRequest{})
+		apiServerConfig, _, err := apiClient.ServerAPI.GetConfigExecute(api_client.ApiGetConfigRequest{})
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		log.Info(*serverConfig.Id)
-		return
+		serverConfig := api.ToServerConfig(apiServerConfig)
 
-		conn, err := connection.GetGrpcConn(nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer conn.Close()
+		view.ConfigurationForm(serverConfig)
 
-		client := server_proto.NewServerClient(conn)
-
-		config, err := client.GetConfig(ctx, &empty.Empty{})
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		view.ConfigurationForm(config)
-
-		_, err = client.SetConfig(ctx, &types.ServerConfig{
-			ProjectBaseImage:    config.ProjectBaseImage,
-			DefaultWorkspaceDir: config.DefaultWorkspaceDir,
-			PluginsDir:          config.PluginsDir,
-			PluginRegistryUrl:   config.PluginRegistryUrl,
-			ServerDownloadUrl:   config.ServerDownloadUrl,
-		})
+		_, _, err = apiClient.ServerAPI.SetConfigExecute(api_client.ApiSetConfigRequest{}.Config(*api.FromServerConfig(serverConfig)))
 		if err != nil {
 			log.Fatal(err)
 		}

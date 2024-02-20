@@ -1,15 +1,20 @@
 basePath: /
 definitions:
-  types.FRPSConfig:
+  InstallPluginRequest:
     properties:
-      domain:
-        type: string
-      port:
-        type: integer
-      protocol:
+      downloadUrls:
+        additionalProperties:
+          type: string
+        type: object
+      name:
         type: string
     type: object
-  types.ServerConfig:
+  NetworkKey:
+    properties:
+      key:
+        type: string
+    type: object
+  ServerConfig:
     properties:
       apiPort:
         type: integer
@@ -26,6 +31,15 @@ definitions:
       serverDownloadUrl:
         type: string
     type: object
+  types.FRPSConfig:
+    properties:
+      domain:
+        type: string
+      port:
+        type: integer
+      protocol:
+        type: string
+    type: object
 host: localhost:3000
 info:
   contact: {}
@@ -33,6 +47,27 @@ info:
   title: Daytona Server API
   version: 0.1.0
 paths:
+  /plugin/install/provisioner:
+    post:
+      consumes:
+      - application/json
+      description: Install a provisioner plugin
+      operationId: InstallProvisionerPlugin
+      parameters:
+      - description: Plugin to install
+        in: body
+        name: plugin
+        required: true
+        schema:
+          $ref: '#/definitions/InstallPluginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Install a provisioner plugin
+      tags:
+      - plugin
   /server/config:
     get:
       description: Get the server configuration
@@ -43,7 +78,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/types.ServerConfig'
+            $ref: '#/definitions/ServerConfig'
       summary: Get the server configuration
       tags:
       - server
@@ -58,15 +93,29 @@ paths:
         name: config
         required: true
         schema:
-          $ref: '#/definitions/types.ServerConfig'
+          $ref: '#/definitions/ServerConfig'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/types.ServerConfig'
+            $ref: '#/definitions/ServerConfig'
       summary: Set the server configuration
+      tags:
+      - server
+  /server/network-key:
+    post:
+      description: Generate a new authentication key
+      operationId: GenerateNetworkKey
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/NetworkKey'
+      summary: Generate a new authentication key
       tags:
       - server
 schemes:

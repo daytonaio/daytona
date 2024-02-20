@@ -4,15 +4,13 @@
 package cmd_plugin
 
 import (
-	"context"
 	"log"
 
+	"github.com/daytonaio/daytona/cli/api"
 	"github.com/daytonaio/daytona/cli/cmd/views/plugins/list_view"
-	"github.com/daytonaio/daytona/cli/connection"
-	"github.com/daytonaio/daytona/common/grpc/proto"
+	"github.com/daytonaio/daytona/common/api_client"
 	"github.com/daytonaio/daytona/common/os"
 	"github.com/daytonaio/daytona/plugins/plugin_manager"
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/spf13/cobra"
 )
 
@@ -22,22 +20,14 @@ var pluginInstallCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Aliases: []string{"i"},
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := context.Background()
+		apiClient := api.GetServerApiClient("http://localhost:3000", "")
 
-		conn, err := connection.GetGrpcConn(nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer conn.Close()
-
-		serverClient := proto.NewServerClient(conn)
-
-		config, err := serverClient.GetConfig(ctx, &empty.Empty{})
+		serverConfig, _, err := apiClient.ServerAPI.GetConfigExecute(api_client.ApiGetConfigRequest{})
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		pluginsManifest, err := plugin_manager.GetPluginsManifest(config.PluginRegistryUrl)
+		pluginsManifest, err := plugin_manager.GetPluginsManifest(*serverConfig.PluginRegistryUrl)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -51,21 +41,22 @@ var pluginInstallCmd = &cobra.Command{
 			return
 		}
 
-		pluginsClient := proto.NewPluginsClient(conn)
-
 		if pluginToInstall.Type == list_view.PluginTypeProvisioner {
-			_, err = pluginsClient.InstallProvisionerPlugin(ctx, &proto.InstallPluginRequest{
-				Name:         pluginToInstall.Name,
-				DownloadUrls: convertToStringMap(pluginsManifest.ProvisionerPlugins[pluginToInstall.Name].Versions[pluginToInstall.Version].DownloadUrls),
-			})
-		} else if pluginToInstall.Type == list_view.PluginTypeAgentService {
-			_, err = pluginsClient.InstallAgentServicePlugin(ctx, &proto.InstallPluginRequest{
-				Name:         pluginToInstall.Name,
-				DownloadUrls: convertToStringMap(pluginsManifest.AgentServicePlugins[pluginToInstall.Name].Versions[pluginToInstall.Version].DownloadUrls),
-			})
-		} else {
-			log.Fatal("Unknown plugin type")
+			downloadUrls := convertToStringMap(pluginsManifest.ProvisionerPlugins[pluginToInstall.Name].Versions[pluginToInstall.Version].DownloadUrls)
+			_, err = apiClient.PluginAPI.InstallProvisionerPluginExecute(api_client.ApiInstallProvisionerPluginRequest{}.Plugin(api_client.InstallPluginRequest{
+				Name:         &pluginToInstall.Name,
+				DownloadUrls: &downloadUrls,
+			}))
 		}
+		// else if pluginToInstall.Type == list_view.PluginTypeAgentService {
+		// 	_, err = pluginsClient.InstallAgentServicePlugin(ctx, &proto.InstallPluginRequest{
+		// 		Name:         pluginToInstall.Name,
+		// 		DownloadUrls: convertToStringMap(pluginsManifest.AgentServicePlugins[pluginToInstall.Name].Versions[pluginToInstall.Version].DownloadUrls),
+		// 	})
+		// }
+		// else {
+		// 	log.Fatal("Unknown plugin type")
+		// }
 
 		if err != nil {
 			log.Fatal(err)

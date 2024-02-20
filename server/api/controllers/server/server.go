@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/daytonaio/daytona/common/types"
 	"github.com/daytonaio/daytona/server/config"
+	"github.com/daytonaio/daytona/server/headscale"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,7 +13,7 @@ import (
 //	@Summary		Get the server configuration
 //	@Description	Get the server configuration
 //	@Produce		json
-//	@Success		200	{object}	types.ServerConfig
+//	@Success		200	{object}	ServerConfig
 //	@Router			/server/config [get]
 //
 //	@id				GetConfig
@@ -33,8 +34,8 @@ func GetConfig(ctx *gin.Context) {
 //	@Description	Set the server configuration
 //	@Accept			json
 //	@Produce		json
-//	@Param			config	body		types.ServerConfig	true	"Server configuration"
-//	@Success		200		{object}	types.ServerConfig
+//	@Param			config	body		ServerConfig	true	"Server configuration"
+//	@Success		200		{object}	ServerConfig
 //	@Router			/server/config [post]
 //
 //	@id				SetConfig
@@ -53,4 +54,24 @@ func SetConfig(ctx *gin.Context) {
 	}
 
 	ctx.JSON(200, c)
+}
+
+// GenerateNetworkKey 		godoc
+//
+//	@Tags			server
+//	@Summary		Generate a new authentication key
+//	@Description	Generate a new authentication key
+//	@Produce		json
+//	@Success		200	{object}	NetworkKey
+//	@Router			/server/network-key [post]
+//
+//	@id				GenerateNetworkKey
+func GenerateNetworkKey(ctx *gin.Context) {
+	authKey, err := headscale.CreateAuthKey()
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(200, &types.NetworkKey{Key: authKey})
 }

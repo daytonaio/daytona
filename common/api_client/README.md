@@ -77,14 +77,18 @@ All URIs are relative to *http://localhost:3000*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+*PluginAPI* | [**InstallProvisionerPlugin**](docs/PluginAPI.md#installprovisionerplugin) | **Post** /plugin/install/provisioner | Install a provisioner plugin
+*ServerAPI* | [**GenerateNetworkKey**](docs/ServerAPI.md#generatenetworkkey) | **Post** /server/network-key | Generate a new authentication key
 *ServerAPI* | [**GetConfig**](docs/ServerAPI.md#getconfig) | **Get** /server/config | Get the server configuration
 *ServerAPI* | [**SetConfig**](docs/ServerAPI.md#setconfig) | **Post** /server/config | Set the server configuration
 
 
 ## Documentation For Models
 
+ - [InstallPluginRequest](docs/InstallPluginRequest.md)
+ - [NetworkKey](docs/NetworkKey.md)
+ - [ServerConfig](docs/ServerConfig.md)
  - [TypesFRPSConfig](docs/TypesFRPSConfig.md)
- - [TypesServerConfig](docs/TypesServerConfig.md)
 
 
 ## Documentation For Authorization

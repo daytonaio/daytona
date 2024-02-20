@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	"github.com/daytonaio/daytona/common/types"
 
 	"github.com/charmbracelet/huh"
 )
@@ -20,20 +20,6 @@ type ServerUpdateKeyView struct {
 func ConfigurationForm(config *types.ServerConfig) *types.ServerConfig {
 	form := huh.NewForm(
 		huh.NewGroup(
-			huh.NewInput().
-				Title("Project Base Image").
-				Value(&config.ProjectBaseImage),
-			huh.NewInput().
-				Title("Default Workspace Directory").
-				Value(&config.DefaultWorkspaceDir).
-				Validate(func(s string) error {
-					_, err := os.Stat(s)
-					if os.IsNotExist(err) {
-						return os.MkdirAll(s, 0700)
-					}
-
-					return err
-				}),
 			huh.NewInput().
 				Title("Plugins Directory").
 				Value(&config.PluginsDir).
