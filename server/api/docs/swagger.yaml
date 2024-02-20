@@ -1,5 +1,12 @@
 basePath: /
 definitions:
+  AgentServicePlugin:
+    properties:
+      name:
+        type: string
+      version:
+        type: string
+    type: object
   InstallPluginRequest:
     properties:
       downloadUrls:
@@ -12,6 +19,13 @@ definitions:
   NetworkKey:
     properties:
       key:
+        type: string
+    type: object
+  ProvisionerPlugin:
+    properties:
+      name:
+        type: string
+      version:
         type: string
     type: object
   ServerConfig:
@@ -47,7 +61,98 @@ info:
   title: Daytona Server API
   version: 0.1.0
 paths:
-  /plugin/install/provisioner:
+  /plugin/agent-service:
+    get:
+      consumes:
+      - application/json
+      description: List agent service plugins
+      operationId: ListAgentServicePlugins
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/AgentServicePlugin'
+            type: array
+      summary: List agent service plugins
+      tags:
+      - plugin
+  /plugin/agent-service/install:
+    post:
+      consumes:
+      - application/json
+      description: Install an agent service plugin
+      operationId: InstallAgentServicePlugin
+      parameters:
+      - description: Plugin to install
+        in: body
+        name: plugin
+        required: true
+        schema:
+          $ref: '#/definitions/InstallPluginRequest'
+      responses:
+        "200":
+          description: OK
+      summary: Install an agent service plugin
+      tags:
+      - plugin
+  /plugin/agent-service/uninstall:
+    post:
+      consumes:
+      - application/json
+      description: Uninstall an agent service plugin
+      operationId: UninstallAgentServicePlugin
+      parameters:
+      - description: Agent Service to uninstall
+        in: path
+        name: agent-service
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Uninstall an agent service plugin
+      tags:
+      - plugin
+  /plugin/provisioner:
+    get:
+      consumes:
+      - application/json
+      description: List provisioner plugins
+      operationId: ListProvisionerPlugins
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ProvisionerPlugin'
+            type: array
+      summary: List provisioner plugins
+      tags:
+      - plugin
+  /plugin/provisioner/{provisioner}/uninstall:
+    post:
+      consumes:
+      - application/json
+      description: Uninstall a provisioner plugin
+      operationId: UninstallProvisionerPlugin
+      parameters:
+      - description: Provisioner to uninstall
+        in: path
+        name: provisioner
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Uninstall a provisioner plugin
+      tags:
+      - plugin
+  /plugin/provisioner/install:
     post:
       consumes:
       - application/json
@@ -60,8 +165,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/InstallPluginRequest'
-      produces:
-      - application/json
       responses:
         "200":
           description: OK

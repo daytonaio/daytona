@@ -15,13 +15,120 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/plugin/install/provisioner": {
-            "post": {
-                "description": "Install a provisioner plugin",
+        "/plugin/agent-service": {
+            "get": {
+                "description": "List agent service plugins",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plugin"
+                ],
+                "summary": "List agent service plugins",
+                "operationId": "ListAgentServicePlugins",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/AgentServicePlugin"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/plugin/agent-service/install": {
+            "post": {
+                "description": "Install an agent service plugin",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plugin"
+                ],
+                "summary": "Install an agent service plugin",
+                "operationId": "InstallAgentServicePlugin",
+                "parameters": [
+                    {
+                        "description": "Plugin to install",
+                        "name": "plugin",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/InstallPluginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/plugin/agent-service/uninstall": {
+            "post": {
+                "description": "Uninstall an agent service plugin",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plugin"
+                ],
+                "summary": "Uninstall an agent service plugin",
+                "operationId": "UninstallAgentServicePlugin",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Agent Service to uninstall",
+                        "name": "agent-service",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/plugin/provisioner": {
+            "get": {
+                "description": "List provisioner plugins",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plugin"
+                ],
+                "summary": "List provisioner plugins",
+                "operationId": "ListProvisionerPlugins",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ProvisionerPlugin"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/plugin/provisioner/install": {
+            "post": {
+                "description": "Install a provisioner plugin",
+                "consumes": [
                     "application/json"
                 ],
                 "tags": [
@@ -38,6 +145,33 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/InstallPluginRequest"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/plugin/provisioner/{provisioner}/uninstall": {
+            "post": {
+                "description": "Uninstall a provisioner plugin",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plugin"
+                ],
+                "summary": "Uninstall a provisioner plugin",
+                "operationId": "UninstallProvisionerPlugin",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Provisioner to uninstall",
+                        "name": "provisioner",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -124,6 +258,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "AgentServicePlugin": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
         "InstallPluginRequest": {
             "type": "object",
             "properties": {
@@ -142,6 +287,17 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "key": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProvisionerPlugin": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "version": {
                     "type": "string"
                 }
             }

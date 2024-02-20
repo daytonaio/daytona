@@ -11,13 +11,13 @@ import (
 
 	"github.com/daytonaio/daytona/common/grpc/proto"
 	"github.com/daytonaio/daytona/internal/util"
-	"google.golang.org/protobuf/types/known/emptypb"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/golang/protobuf/ptypes/empty"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
+	"github.com/daytonaio/daytona/cli/api"
 	views_provisioner "github.com/daytonaio/daytona/cli/cmd/views/provisioner"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	wizard_view "github.com/daytonaio/daytona/cli/cmd/views/workspace/creation_wizard"
@@ -57,24 +57,24 @@ var CreateCmd = &cobra.Command{
 		if provisionerFlag != "" {
 			provisioner = provisionerFlag
 		} else if activeProfile.DefaultProvisioner == "" {
-			ctx := context.Background()
-			pluginsClient := proto.NewPluginsClient(conn)
-			provisionerPluginList, err := pluginsClient.ListProvisionerPlugins(ctx, &emptypb.Empty{})
+			apiClient := api.GetServerApiClient("http://localhost:3000", "")
+
+			provisionerPluginList, _, err := apiClient.PluginAPI.ListProvisionerPlugins(context.Background()).Execute()
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			if len(provisionerPluginList.Plugins) == 0 {
+			if len(provisionerPluginList) == 0 {
 				log.Fatal(errors.New("no provisioner plugins found"))
 			}
 
-			defaultProvisioner, err := views_provisioner.GetProvisionerFromPrompt(provisionerPluginList.Plugins, "Provisioner not set. Choose a provisioner to use", nil)
+			defaultProvisioner, err := views_provisioner.GetProvisionerFromPrompt(provisionerPluginList, "Provisioner not set. Choose a provisioner to use", nil)
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			provisioner = defaultProvisioner.Name
-			activeProfile.DefaultProvisioner = defaultProvisioner.Name
+			provisioner = *defaultProvisioner.Name
+			activeProfile.DefaultProvisioner = *defaultProvisioner.Name
 
 			err = c.EditProfile(activeProfile)
 			if err != nil {

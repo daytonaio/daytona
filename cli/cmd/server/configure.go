@@ -4,13 +4,14 @@
 package cmd_server
 
 import (
+	"context"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/daytonaio/daytona/cli/api"
 	view "github.com/daytonaio/daytona/cli/cmd/views/server/configuration_prompt"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
-	"github.com/daytonaio/daytona/common/api_client"
 )
 
 var configureCmd = &cobra.Command{
@@ -19,7 +20,7 @@ var configureCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		apiClient := api.GetServerApiClient("http://localhost:3000", "")
 
-		apiServerConfig, _, err := apiClient.ServerAPI.GetConfigExecute(api_client.ApiGetConfigRequest{})
+		apiServerConfig, _, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -28,7 +29,7 @@ var configureCmd = &cobra.Command{
 
 		view.ConfigurationForm(serverConfig)
 
-		_, _, err = apiClient.ServerAPI.SetConfigExecute(api_client.ApiSetConfigRequest{}.Config(*api.FromServerConfig(serverConfig)))
+		_, _, err = apiClient.ServerAPI.SetConfig(context.Background()).Config(*api.FromServerConfig(serverConfig)).Execute()
 		if err != nil {
 			log.Fatal(err)
 		}

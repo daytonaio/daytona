@@ -63,7 +63,12 @@ func Start() error {
 
 	pluginController := router.Group("/plugin")
 	{
-		pluginController.POST("/install/provisioner", plugin.InstallProvisionerPlugin)
+		pluginController.POST("/provisioner/install", plugin.InstallProvisionerPlugin)
+		pluginController.POST("/agent-service/install", plugin.InstallAgentServicePlugin)
+		pluginController.GET("/provisioner", plugin.ListProvisionerPlugins)
+		pluginController.GET("/agent-service", plugin.ListAgentServicePlugins)
+		pluginController.POST("/provisioner/:provisioner/uninstall", plugin.UninstallProvisionerPlugin)
+		pluginController.POST("/agent-service/:agent-service/uninstall", plugin.UninstallAgentServicePlugin)
 	}
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))

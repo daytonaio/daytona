@@ -77,7 +77,12 @@ All URIs are relative to *http://localhost:3000*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*PluginAPI* | [**InstallProvisionerPlugin**](docs/PluginAPI.md#installprovisionerplugin) | **Post** /plugin/install/provisioner | Install a provisioner plugin
+*PluginAPI* | [**InstallAgentServicePlugin**](docs/PluginAPI.md#installagentserviceplugin) | **Post** /plugin/agent-service/install | Install an agent service plugin
+*PluginAPI* | [**InstallProvisionerPlugin**](docs/PluginAPI.md#installprovisionerplugin) | **Post** /plugin/provisioner/install | Install a provisioner plugin
+*PluginAPI* | [**ListAgentServicePlugins**](docs/PluginAPI.md#listagentserviceplugins) | **Get** /plugin/agent-service | List agent service plugins
+*PluginAPI* | [**ListProvisionerPlugins**](docs/PluginAPI.md#listprovisionerplugins) | **Get** /plugin/provisioner | List provisioner plugins
+*PluginAPI* | [**UninstallAgentServicePlugin**](docs/PluginAPI.md#uninstallagentserviceplugin) | **Post** /plugin/agent-service/uninstall | Uninstall an agent service plugin
+*PluginAPI* | [**UninstallProvisionerPlugin**](docs/PluginAPI.md#uninstallprovisionerplugin) | **Post** /plugin/provisioner/{provisioner}/uninstall | Uninstall a provisioner plugin
 *ServerAPI* | [**GenerateNetworkKey**](docs/ServerAPI.md#generatenetworkkey) | **Post** /server/network-key | Generate a new authentication key
 *ServerAPI* | [**GetConfig**](docs/ServerAPI.md#getconfig) | **Get** /server/config | Get the server configuration
 *ServerAPI* | [**SetConfig**](docs/ServerAPI.md#setconfig) | **Post** /server/config | Set the server configuration
@@ -85,8 +90,10 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [AgentServicePlugin](docs/AgentServicePlugin.md)
  - [InstallPluginRequest](docs/InstallPluginRequest.md)
  - [NetworkKey](docs/NetworkKey.md)
+ - [ProvisionerPlugin](docs/ProvisionerPlugin.md)
  - [ServerConfig](docs/ServerConfig.md)
  - [TypesFRPSConfig](docs/TypesFRPSConfig.md)
 

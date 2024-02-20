@@ -7,11 +7,9 @@ import (
 	"context"
 	"log"
 
+	"github.com/daytonaio/daytona/cli/api"
 	"github.com/daytonaio/daytona/cli/cmd/views/plugins/list_view"
-	"github.com/daytonaio/daytona/cli/connection"
-	"github.com/daytonaio/daytona/common/grpc/proto"
 	"github.com/spf13/cobra"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 var pluginListCmd = &cobra.Command{
@@ -30,40 +28,33 @@ var pluginListCmd = &cobra.Command{
 }
 
 func getPluginList() ([]list_view.PluginViewDTO, error) {
-	ctx := context.Background()
-
-	conn, err := connection.GetGrpcConn(nil)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Close()
-
-	client := proto.NewPluginsClient(conn)
+	apiClient := api.GetServerApiClient("http://localhost:3000", "")
 
 	plugins := []list_view.PluginViewDTO{}
+	ctx := context.Background()
 
-	listProvisionerPluginsResponse, err := client.ListProvisionerPlugins(ctx, &emptypb.Empty{})
+	provisionerPluginList, _, err := apiClient.PluginAPI.ListProvisionerPlugins(ctx).Execute()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, plugin := range listProvisionerPluginsResponse.Plugins {
+	for _, plugin := range provisionerPluginList {
 		plugins = append(plugins, list_view.PluginViewDTO{
-			Name:    plugin.Name,
-			Version: plugin.Version,
+			Name:    *plugin.Name,
+			Version: *plugin.Version,
 			Type:    list_view.PluginTypeProvisioner,
 		})
 	}
 
-	listAgentServicePluginsResponse, err := client.ListAgentServicePlugins(ctx, &emptypb.Empty{})
+	agentServicePluginList, _, err := apiClient.PluginAPI.ListAgentServicePlugins(ctx).Execute()
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
 
-	for _, plugin := range listAgentServicePluginsResponse.Plugins {
+	for _, plugin := range agentServicePluginList {
 		plugins = append(plugins, list_view.PluginViewDTO{
-			Name:    plugin.Name,
-			Version: plugin.Version,
+			Name:    *plugin.Name,
+			Version: *plugin.Version,
 			Type:    list_view.PluginTypeAgentService,
 		})
 	}

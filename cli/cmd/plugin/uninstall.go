@@ -7,9 +7,8 @@ import (
 	"context"
 	"log"
 
+	"github.com/daytonaio/daytona/cli/api"
 	"github.com/daytonaio/daytona/cli/cmd/views/plugins/list_view"
-	"github.com/daytonaio/daytona/cli/connection"
-	"github.com/daytonaio/daytona/common/grpc/proto"
 	"github.com/spf13/cobra"
 )
 
@@ -30,24 +29,13 @@ var pluginUninstallCmd = &cobra.Command{
 			return
 		}
 
+		apiClient := api.GetServerApiClient("http://localhost:3000", "")
 		ctx := context.Background()
 
-		conn, err := connection.GetGrpcConn(nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer conn.Close()
-
-		client := proto.NewPluginsClient(conn)
-
 		if pluginToUninstall.Type == list_view.PluginTypeProvisioner {
-			_, err = client.UninstallProvisionerPlugin(ctx, &proto.UninstallPluginRequest{
-				Name: pluginToUninstall.Name,
-			})
+			_, err = apiClient.PluginAPI.UninstallProvisionerPlugin(ctx, pluginToUninstall.Name).Execute()
 		} else if pluginToUninstall.Type == list_view.PluginTypeAgentService {
-			_, err = client.UninstallAgentServicePlugin(ctx, &proto.UninstallPluginRequest{
-				Name: pluginToUninstall.Name,
-			})
+			_, err = apiClient.PluginAPI.UninstallAgentServicePlugin(ctx, pluginToUninstall.Name).Execute()
 		} else {
 			log.Fatal("Unknown plugin type")
 		}
