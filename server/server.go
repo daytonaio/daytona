@@ -11,19 +11,13 @@ import (
 	"os/signal"
 	"time"
 
-	proto "github.com/daytonaio/daytona/common/grpc/proto"
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	"github.com/daytonaio/daytona/common/types"
+	"github.com/daytonaio/daytona/server/api"
 	"github.com/daytonaio/daytona/server/config"
 	"github.com/daytonaio/daytona/server/frpc"
-	plugin_grpc "github.com/daytonaio/daytona/server/grpc/plugins"
-	ports_grpc "github.com/daytonaio/daytona/server/grpc/ports"
-	server_grpc "github.com/daytonaio/daytona/server/grpc/server"
-	workspace_grpc "github.com/daytonaio/daytona/server/grpc/workspace"
 	"github.com/daytonaio/daytona/server/headscale"
 	"github.com/daytonaio/daytona/server/ssh_gateway"
 	"github.com/hashicorp/go-plugin"
-
-	"google.golang.org/grpc"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -52,24 +46,6 @@ func Start() error {
 		return err
 	}
 
-	var lis *net.Listener
-
-	lis, err = getTcpListener(c)
-	if err != nil {
-		return err
-	}
-	defer (*lis).Close()
-
-	s := grpc.NewServer()
-	workspaceServer := &workspace_grpc.WorkspaceServer{}
-	proto.RegisterWorkspaceServiceServer(s, workspaceServer)
-	portsServer := &ports_grpc.PortsServer{}
-	proto.RegisterPortsServer(s, portsServer)
-	serverGrpcServer := &server_grpc.ServerGRPCServer{}
-	proto.RegisterServerServer(s, serverGrpcServer)
-	pluginsServer := &plugin_grpc.PluginsServer{}
-	proto.RegisterPluginsServer(s, pluginsServer)
-
 	err = downloadDefaultPlugins()
 	if err != nil {
 		return err
@@ -83,8 +59,6 @@ func Start() error {
 	if err != nil {
 		return err
 	}
-
-	log.Infof("Daytona server started %v", (*lis).Addr())
 
 	go func() {
 		if err := ssh_gateway.Start(); err != nil {
@@ -130,34 +104,12 @@ func Start() error {
 			}()
 		}
 
-		// go func() {
-		// 	for {
-		// 		time.Sleep(5 * time.Second)
-		// 		req, err := headscale.HTTPClient().Get("http://w1-tpuljak:3000")
-		// 		if err != nil {
-		// 			log.Error(err)
-		// 			continue
-		// 		}
-		// 		body, err := io.ReadAll(req.Body)
-		// 		if err != nil {
-		// 			log.Error(err)
-		// 			continue
-		// 		}
-		// 		log.Info(string(body))
-		// 		req.Body.Close()
-		// 	}
-		// }()
-
 		if err := <-errChan; err != nil {
 			log.Fatal(err)
 		}
 	}()
 
-	if err := s.Serve(*lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
-
-	return nil
+	return api.Start()
 }
 
 func StartDaemon() error {
@@ -187,7 +139,7 @@ func StartDaemon() error {
 }
 
 func getTcpListener(c *types.ServerConfig) (*net.Listener, error) {
-	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", c.GrpcPort))
+	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", c.ApiPort))
 	if err != nil {
 		return nil, err
 	}

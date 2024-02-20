@@ -1,0 +1,74 @@
+basePath: /
+definitions:
+  types.FRPSConfig:
+    properties:
+      domain:
+        type: string
+      port:
+        type: integer
+      protocol:
+        type: string
+    type: object
+  types.ServerConfig:
+    properties:
+      apiPort:
+        type: integer
+      frps:
+        $ref: '#/definitions/types.FRPSConfig'
+      headscalePort:
+        type: integer
+      id:
+        type: string
+      pluginRegistryUrl:
+        type: string
+      pluginsDir:
+        type: string
+      serverDownloadUrl:
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: Daytona Server API
+  title: Daytona Server API
+  version: 0.1.0
+paths:
+  /server/config:
+    get:
+      description: Get the server configuration
+      operationId: GetConfig
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ServerConfig'
+      summary: Get the server configuration
+      tags:
+      - server
+    post:
+      consumes:
+      - application/json
+      description: Set the server configuration
+      operationId: SetConfig
+      parameters:
+      - description: Server configuration
+        in: body
+        name: config
+        required: true
+        schema:
+          $ref: '#/definitions/types.ServerConfig'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ServerConfig'
+      summary: Set the server configuration
+      tags:
+      - server
+schemes:
+- http
+swagger: "2.0"

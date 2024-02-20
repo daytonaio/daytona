@@ -61,6 +61,6 @@ message ServerConfig {
   string id = 5;
   string serverDownloadUrl = 6;
   FRPSConfig frps = 7;
-  uint32 grpcPort = 8;
+  uint32 apiPort = 8;
   uint32 headscalePort = 9;
 }

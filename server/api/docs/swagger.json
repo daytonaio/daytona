@@ -1,0 +1,112 @@
+{
+    "schemes": [
+        "http"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "Daytona Server API",
+        "title": "Daytona Server API",
+        "contact": {},
+        "version": "0.1.0"
+    },
+    "host": "localhost:3000",
+    "basePath": "/",
+    "paths": {
+        "/server/config": {
+            "get": {
+                "description": "Get the server configuration",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "server"
+                ],
+                "summary": "Get the server configuration",
+                "operationId": "GetConfig",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.ServerConfig"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Set the server configuration",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "server"
+                ],
+                "summary": "Set the server configuration",
+                "operationId": "SetConfig",
+                "parameters": [
+                    {
+                        "description": "Server configuration",
+                        "name": "config",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.ServerConfig"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.ServerConfig"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "types.FRPSConfig": {
+            "type": "object",
+            "properties": {
+                "domain": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "protocol": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.ServerConfig": {
+            "type": "object",
+            "properties": {
+                "apiPort": {
+                    "type": "integer"
+                },
+                "frps": {
+                    "$ref": "#/definitions/types.FRPSConfig"
+                },
+                "headscalePort": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "pluginRegistryUrl": {
+                    "type": "string"
+                },
+                "pluginsDir": {
+                    "type": "string"
+                },
+                "serverDownloadUrl": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

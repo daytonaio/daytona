@@ -18,6 +18,9 @@
 	"containerEnv": {
 		"LOG_LEVEL": "debug"
 	},
-	"postCreateCommand": "/setup/postcreate.sh",
+	"postCreateCommand": {
+		"setup": "/setup/postcreate.sh",
+		"swag": "go install github.com/swaggo/swag/cmd/swag@v1.8.10"
+	},
 	"remoteUser": "daytona"
 }

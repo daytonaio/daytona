@@ -12,7 +12,6 @@ import (
 	"github.com/daytonaio/daytona/cli/config"
 	"github.com/daytonaio/daytona/common/grpc/proto"
 	server_config "github.com/daytonaio/daytona/server/config"
-	"github.com/daytonaio/daytona/server/frpc"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/google/uuid"
 	"tailscale.com/tsnet"
@@ -92,6 +91,8 @@ func GetGrpcConn(profile *config.Profile) (*grpc.ClientConn, error) {
 var s *tsnet.Server = nil
 
 func GetTailscaleConn(profile *config.Profile, grpcConn *grpc.ClientConn) (*tsnet.Server, error) {
+	return nil, errors.New("not implemented - REST API")
+
 	if s != nil {
 		return s, nil
 	}
@@ -101,10 +102,10 @@ func GetTailscaleConn(profile *config.Profile, grpcConn *grpc.ClientConn) (*tsne
 
 	client := proto.NewServerClient(grpcConn)
 
-	c, err := client.GetConfig(ctx, &empty.Empty{})
-	if err != nil {
-		return nil, err
-	}
+	// c, err := client.GetConfig(ctx, &empty.Empty{})
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	response, err := client.GenerateAuthKey(ctx, &empty.Empty{})
 	if err != nil {
@@ -112,7 +113,7 @@ func GetTailscaleConn(profile *config.Profile, grpcConn *grpc.ClientConn) (*tsne
 	}
 
 	s.Hostname = fmt.Sprintf("cli-%s", uuid.New().String())
-	s.ControlURL = frpc.GetServerUrl(c)
+	// s.ControlURL = frpc.GetServerUrl(c)
 	s.AuthKey = response.Key
 	s.Ephemeral = true
 	s.Logf = func(format string, args ...any) {}

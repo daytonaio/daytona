@@ -1,0 +1,88 @@
+openapi: 3.0.1
+info:
+  contact: {}
+  description: Daytona Server API
+  title: Daytona Server API
+  version: 0.1.0
+servers:
+- url: http://localhost:3000/
+paths:
+  /server/config:
+    get:
+      description: Get the server configuration
+      operationId: GetConfig
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/types.ServerConfig'
+          description: OK
+      summary: Get the server configuration
+      tags:
+      - server
+    post:
+      description: Set the server configuration
+      operationId: SetConfig
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/types.ServerConfig'
+        description: Server configuration
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/types.ServerConfig'
+          description: OK
+      summary: Set the server configuration
+      tags:
+      - server
+      x-codegen-request-body-name: config
+components:
+  schemas:
+    types.FRPSConfig:
+      example:
+        protocol: protocol
+        port: 6
+        domain: domain
+      properties:
+        domain:
+          type: string
+        port:
+          type: integer
+        protocol:
+          type: string
+      type: object
+    types.ServerConfig:
+      example:
+        pluginRegistryUrl: pluginRegistryUrl
+        apiPort: 0
+        headscalePort: 1
+        serverDownloadUrl: serverDownloadUrl
+        pluginsDir: pluginsDir
+        id: id
+        frps:
+          protocol: protocol
+          port: 6
+          domain: domain
+      properties:
+        apiPort:
+          type: integer
+        frps:
+          $ref: '#/components/schemas/types.FRPSConfig'
+        headscalePort:
+          type: integer
+        id:
+          type: string
+        pluginRegistryUrl:
+          type: string
+        pluginsDir:
+          type: string
+        serverDownloadUrl:
+          type: string
+      type: object
+x-original-swagger-version: "2.0"
