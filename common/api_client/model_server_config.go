@@ -21,6 +21,7 @@ var _ MappedNullable = &ServerConfig{}
 type ServerConfig struct {
 	ApiPort *int32 `json:"apiPort,omitempty"`
 	Frps *FRPSConfig `json:"frps,omitempty"`
+	GitProviders []GitProvider `json:"gitProviders,omitempty"`
 	HeadscalePort *int32 `json:"headscalePort,omitempty"`
 	Id *string `json:"id,omitempty"`
 	PluginRegistryUrl *string `json:"pluginRegistryUrl,omitempty"`
@@ -107,6 +108,38 @@ func (o *ServerConfig) HasFrps() bool {
 // SetFrps gets a reference to the given FRPSConfig and assigns it to the Frps field.
 func (o *ServerConfig) SetFrps(v FRPSConfig) {
 	o.Frps = &v
+}
+
+// GetGitProviders returns the GitProviders field value if set, zero value otherwise.
+func (o *ServerConfig) GetGitProviders() []GitProvider {
+	if o == nil || IsNil(o.GitProviders) {
+		var ret []GitProvider
+		return ret
+	}
+	return o.GitProviders
+}
+
+// GetGitProvidersOk returns a tuple with the GitProviders field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ServerConfig) GetGitProvidersOk() ([]GitProvider, bool) {
+	if o == nil || IsNil(o.GitProviders) {
+		return nil, false
+	}
+	return o.GitProviders, true
+}
+
+// HasGitProviders returns a boolean if a field has been set.
+func (o *ServerConfig) HasGitProviders() bool {
+	if o != nil && !IsNil(o.GitProviders) {
+		return true
+	}
+
+	return false
+}
+
+// SetGitProviders gets a reference to the given []GitProvider and assigns it to the GitProviders field.
+func (o *ServerConfig) SetGitProviders(v []GitProvider) {
+	o.GitProviders = v
 }
 
 // GetHeadscalePort returns the HeadscalePort field value if set, zero value otherwise.
@@ -284,6 +317,9 @@ func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Frps) {
 		toSerialize["frps"] = o.Frps
+	}
+	if !IsNil(o.GitProviders) {
+		toSerialize["gitProviders"] = o.GitProviders
 	}
 	if !IsNil(o.HeadscalePort) {
 		toSerialize["headscalePort"] = o.HeadscalePort

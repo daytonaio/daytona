@@ -101,6 +101,7 @@ Class | Method | HTTP request | Description
  - [AgentServicePlugin](docs/AgentServicePlugin.md)
  - [CreateWorkspace](docs/CreateWorkspace.md)
  - [FRPSConfig](docs/FRPSConfig.md)
+ - [GitProvider](docs/GitProvider.md)
  - [InstallPluginRequest](docs/InstallPluginRequest.md)
  - [NetworkKey](docs/NetworkKey.md)
  - [Project](docs/Project.md)

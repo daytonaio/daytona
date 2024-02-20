@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/daytonaio/daytona/cli/config"
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	"github.com/daytonaio/daytona/common/api_client"
 )
 
 const personalNamespaceId = "<PERSONAL>"
@@ -31,11 +31,11 @@ type GitRepository struct {
 	Url      string
 }
 
-func GetGitProvider(providerId string, gitProviders []*types.GitProvider) (GitProvider, error) {
-	var chosenProvider *types.GitProvider
+func GetGitProvider(providerId string, gitProviders []api_client.GitProvider) (GitProvider, error) {
+	var chosenProvider *api_client.GitProvider
 	for _, gitProvider := range gitProviders {
-		if gitProvider.Id == providerId {
-			chosenProvider = gitProvider
+		if *gitProvider.Id == providerId {
+			chosenProvider = &gitProvider
 		}
 	}
 
@@ -46,16 +46,16 @@ func GetGitProvider(providerId string, gitProviders []*types.GitProvider) (GitPr
 	switch providerId {
 	case "github":
 		return &GitHubGitProvider{
-			token: chosenProvider.Token,
+			token: *chosenProvider.Token,
 		}, nil
 	case "gitlab":
 		return &GitLabGitProvider{
-			token: chosenProvider.Token,
+			token: *chosenProvider.Token,
 		}, nil
 	case "bitbucket":
 		return &BitbucketGitProvider{
-			username: chosenProvider.Username,
-			token:    chosenProvider.Token,
+			username: *chosenProvider.Username,
+			token:    *chosenProvider.Token,
 		}, nil
 	default:
 		return nil, errors.New("provider not found")

@@ -8,10 +8,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/daytonaio/daytona/cli/connection"
-	server_proto "github.com/daytonaio/daytona/common/grpc/proto"
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
-	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/daytonaio/daytona/cli/api"
+	"github.com/daytonaio/daytona/common/api_client"
 	"github.com/spf13/cobra"
 )
 
@@ -37,16 +35,10 @@ var gitCredCmd = &cobra.Command{
 			return
 		}
 
-		conn, err := connection.GetGrpcConn(nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer conn.Close()
-
-		serverClient := server_proto.NewServerClient(conn)
+		apiClient := api.GetServerApiClient("http://localhost:3000", "")
 
 		var gitCredentials GitCredentials
-		serverConfig, err := serverClient.GetConfig(ctx, &empty.Empty{})
+		serverConfig, _, err := apiClient.ServerAPI.GetConfig(ctx).Execute()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -57,10 +49,10 @@ var gitCredCmd = &cobra.Command{
 			return
 		}
 
-		var gitProvider *types.GitProvider
+		var gitProvider *api_client.GitProvider
 		for _, provider := range serverConfig.GitProviders {
-			if provider.Id == gitProviderId {
-				gitProvider = provider
+			if *provider.Id == gitProviderId {
+				gitProvider = &provider
 				break
 			}
 		}
@@ -72,8 +64,8 @@ var gitCredCmd = &cobra.Command{
 		}
 
 		gitCredentials = GitCredentials{
-			Username: gitProvider.Username,
-			Token:    gitProvider.Token,
+			Username: *gitProvider.Username,
+			Token:    *gitProvider.Token,
 		}
 
 		fmt.Println("username=" + gitCredentials.Username)

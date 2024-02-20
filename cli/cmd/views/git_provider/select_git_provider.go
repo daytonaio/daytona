@@ -10,7 +10,7 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/cli/cmd/views"
 	"github.com/daytonaio/daytona/cli/config"
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	"github.com/daytonaio/daytona/common/api_client"
 )
 
 type GitProviderSelectView struct {
@@ -19,14 +19,14 @@ type GitProviderSelectView struct {
 	Token    string
 }
 
-func GitProviderSelectionView(gitProviderAddView *GitProviderSelectView, userGitProviders []*types.GitProvider, isDeleting bool) {
+func GitProviderSelectionView(gitProviderAddView *GitProviderSelectView, userGitProviders []api_client.GitProvider, isDeleting bool) {
 	availableGitProviders := config.GetGitProviderList()
 
 	var options []huh.Option[string]
 	for _, availableProvider := range availableGitProviders {
 		if isDeleting {
 			for _, userProvider := range userGitProviders {
-				if userProvider.Id == availableProvider.Id {
+				if *userProvider.Id == availableProvider.Id {
 					options = append(options, huh.Option[string]{Key: availableProvider.Name, Value: availableProvider.Id})
 				}
 			}

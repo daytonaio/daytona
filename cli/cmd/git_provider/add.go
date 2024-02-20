@@ -6,14 +6,12 @@ package cmd_git_provider
 import (
 	"context"
 
+	"github.com/daytonaio/daytona/cli/api"
 	views_git_provider "github.com/daytonaio/daytona/cli/cmd/views/git_provider"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	"github.com/daytonaio/daytona/cli/config"
-	"github.com/daytonaio/daytona/cli/connection"
-	server_proto "github.com/daytonaio/daytona/common/grpc/proto"
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	"github.com/daytonaio/daytona/common/api_client"
 	"github.com/daytonaio/daytona/pkg/git_provider"
-	"github.com/golang/protobuf/ptypes/empty"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -24,19 +22,11 @@ var gitProviderAddCmd = &cobra.Command{
 	Aliases: []string{"new", "register, update"},
 	Short:   "Register a Git providers",
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := context.Background()
 		var providerExists bool
 
-		conn, err := connection.GetGrpcConn(nil)
-		if err != nil {
-			log.Fatal(err)
-		}
+		apiClient := api.GetServerApiClient("http://localhost:3000", "")
 
-		defer conn.Close()
-
-		client := server_proto.NewServerClient(conn)
-
-		serverConfig, err := client.GetConfig(ctx, &empty.Empty{})
+		serverConfig, _, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -69,24 +59,24 @@ var gitProviderAddCmd = &cobra.Command{
 		gitProviderList := serverConfig.GitProviders
 
 		for _, gitProvider := range gitProviderList {
-			if gitProvider.Id == gitProviderSelectView.Id {
-				gitProvider.Token = gitProviderSelectView.Token
-				gitProvider.Username = gitProviderSelectView.Username
+			if *gitProvider.Id == gitProviderSelectView.Id {
+				gitProvider.Token = &gitProviderSelectView.Token
+				gitProvider.Username = &gitProviderSelectView.Username
 				providerExists = true
 			}
 		}
 
 		if !providerExists {
-			gitProviderList = append(serverConfig.GitProviders, &types.GitProvider{
-				Id:       gitProviderSelectView.Id,
-				Username: gitProviderSelectView.Username,
-				Token:    gitProviderSelectView.Token,
+			gitProviderList = append(serverConfig.GitProviders, api_client.GitProvider{
+				Id:       &gitProviderSelectView.Id,
+				Username: &gitProviderSelectView.Username,
+				Token:    &gitProviderSelectView.Token,
 			})
 		}
 
 		serverConfig.GitProviders = gitProviderList
 
-		_, err = client.SetConfig(ctx, serverConfig)
+		_, _, err = apiClient.ServerAPI.SetConfig(context.Background()).Config(*serverConfig).Execute()
 		if err != nil {
 			log.Fatal(err)
 		}

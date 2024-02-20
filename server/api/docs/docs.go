@@ -516,6 +516,20 @@ const docTemplate = `{
                 }
             }
         },
+        "GitProvider": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "InstallPluginRequest": {
             "type": "object",
             "properties": {
@@ -626,6 +640,12 @@ const docTemplate = `{
                 },
                 "frps": {
                     "$ref": "#/definitions/FRPSConfig"
+                },
+                "gitProviders": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/GitProvider"
+                    }
                 },
                 "headscalePort": {
                     "type": "integer"

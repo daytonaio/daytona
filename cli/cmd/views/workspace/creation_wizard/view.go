@@ -13,7 +13,7 @@ import (
 	"github.com/daytonaio/daytona/cli/cmd/views"
 	repo_select "github.com/daytonaio/daytona/cli/cmd/views/workspace/select_prompt"
 	"github.com/daytonaio/daytona/cli/config"
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	"github.com/daytonaio/daytona/common/api_client"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/git_provider"
 
@@ -265,7 +265,7 @@ func runWorkspaceNameForm(workspaceCreationPromptResponse WorkspaceCreationPromp
 	return result, nil
 }
 
-func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []*types.GitProvider, manual bool) (workspaceName string, projectRepositoryList []string, err error) {
+func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []api_client.GitProvider, manual bool) (workspaceName string, projectRepositoryList []string, err error) {
 	var projectRepoList []string
 	var providerRepoUrl string
 
@@ -327,13 +327,13 @@ func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []*type
 	return workspaceCreationPromptResponse.WorkspaceName, projectRepoList, nil
 }
 
-func GetRepositoryUrlFromWizard(userGitProviders []*types.GitProvider, secondaryProjectOrder int) (string, error) {
+func GetRepositoryUrlFromWizard(userGitProviders []api_client.GitProvider, secondaryProjectOrder int) (string, error) {
 	var providerId string
 	var namespaceId string
 	var gitProvider git_provider.GitProvider
 
 	if len(userGitProviders) == 1 {
-		providerId = userGitProviders[0].Id
+		providerId = *userGitProviders[0].Id
 	} else {
 
 		availableGitProviderViews := config.GetGitProviderList()
@@ -341,7 +341,7 @@ func GetRepositoryUrlFromWizard(userGitProviders []*types.GitProvider, secondary
 
 		for _, gitProvider := range userGitProviders {
 			for _, availableGitProviderView := range availableGitProviderViews {
-				if gitProvider.Id == availableGitProviderView.Id {
+				if *gitProvider.Id == availableGitProviderView.Id {
 					gitProviderViewList = append(gitProviderViewList, availableGitProviderView)
 				}
 			}

@@ -7,11 +7,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/daytonaio/daytona/cli/api"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	"github.com/daytonaio/daytona/cli/config"
-	"github.com/daytonaio/daytona/cli/connection"
-	server_proto "github.com/daytonaio/daytona/common/grpc/proto"
-	"github.com/golang/protobuf/ptypes/empty"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -22,18 +20,9 @@ var GitProviderCmd = &cobra.Command{
 	Aliases: []string{"git-provider"},
 	Short:   "Lists your registered Git providers",
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := context.Background()
+		apiClient := api.GetServerApiClient("http://localhost:3000", "")
 
-		conn, err := connection.GetGrpcConn(nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		defer conn.Close()
-
-		client := server_proto.NewServerClient(conn)
-
-		serverConfig, err := client.GetConfig(ctx, &empty.Empty{})
+		serverConfig, _, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -50,12 +39,12 @@ var GitProviderCmd = &cobra.Command{
 
 		for _, gitProvider := range serverConfig.GitProviders {
 			for _, availableGitProviderView := range availableGitProviderViews {
-				if gitProvider.Id == availableGitProviderView.Id {
+				if *gitProvider.Id == availableGitProviderView.Id {
 					gitProviderViewList = append(gitProviderViewList,
 						config.GitProvider{
-							Id:       gitProvider.Id,
+							Id:       *gitProvider.Id,
 							Name:     availableGitProviderView.Name,
-							Username: gitProvider.Username,
+							Username: *gitProvider.Username,
 						},
 					)
 				}

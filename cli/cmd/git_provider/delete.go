@@ -6,13 +6,11 @@ package cmd_git_provider
 import (
 	"context"
 
+	"github.com/daytonaio/daytona/cli/api"
 	views_git_provider "github.com/daytonaio/daytona/cli/cmd/views/git_provider"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	"github.com/daytonaio/daytona/cli/config"
-	"github.com/daytonaio/daytona/cli/connection"
-	server_proto "github.com/daytonaio/daytona/common/grpc/proto"
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
-	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/daytonaio/daytona/common/api_client"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -23,18 +21,9 @@ var gitProviderDeleteCmd = &cobra.Command{
 	Aliases: []string{"remove"},
 	Short:   "Unregister a Git providers",
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := context.Background()
+		apiClient := api.GetServerApiClient("http://localhost:3000", "")
 
-		conn, err := connection.GetGrpcConn(nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		defer conn.Close()
-
-		client := server_proto.NewServerClient(conn)
-
-		serverConfig, err := client.GetConfig(ctx, &empty.Empty{})
+		serverConfig, _, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -62,7 +51,7 @@ var gitProviderDeleteCmd = &cobra.Command{
 		var providerExists bool
 
 		for _, gitProvider := range gitProviderList {
-			if gitProvider.Id == gitProviderSelectView.Id {
+			if *gitProvider.Id == gitProviderSelectView.Id {
 				providerExists = true
 			}
 		}
@@ -76,7 +65,7 @@ var gitProviderDeleteCmd = &cobra.Command{
 
 		serverConfig.GitProviders = gitProviderList
 
-		_, err = client.SetConfig(ctx, serverConfig)
+		_, _, err = apiClient.ServerAPI.SetConfig(context.Background()).Config(*serverConfig).Execute()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -90,10 +79,10 @@ var gitProviderDeleteCmd = &cobra.Command{
 	},
 }
 
-func removeGitProviderById(idToRemove string, gitProviderList []*types.GitProvider) []*types.GitProvider {
-	var newList []*types.GitProvider
+func removeGitProviderById(idToRemove string, gitProviderList []api_client.GitProvider) []api_client.GitProvider {
+	var newList []api_client.GitProvider
 	for _, provider := range gitProviderList {
-		if provider.Id != idToRemove {
+		if *provider.Id != idToRemove {
 			newList = append(newList, provider)
 		}
 	}

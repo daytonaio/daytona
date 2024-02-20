@@ -6,6 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **ApiPort** | Pointer to **int32** |  | [optional] 
 **Frps** | Pointer to [**FRPSConfig**](FRPSConfig.md) |  | [optional] 
+**GitProviders** | Pointer to [**[]GitProvider**](GitProvider.md) |  | [optional] 
 **HeadscalePort** | Pointer to **int32** |  | [optional] 
 **Id** | Pointer to **string** |  | [optional] 
 **PluginRegistryUrl** | Pointer to **string** |  | [optional] 
@@ -80,6 +81,31 @@ SetFrps sets Frps field to given value.
 `func (o *ServerConfig) HasFrps() bool`
 
 HasFrps returns a boolean if a field has been set.
+
+### GetGitProviders
+
+`func (o *ServerConfig) GetGitProviders() []GitProvider`
+
+GetGitProviders returns the GitProviders field if non-nil, zero value otherwise.
+
+### GetGitProvidersOk
+
+`func (o *ServerConfig) GetGitProvidersOk() (*[]GitProvider, bool)`
+
+GetGitProvidersOk returns a tuple with the GitProviders field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGitProviders
+
+`func (o *ServerConfig) SetGitProviders(v []GitProvider)`
+
+SetGitProviders sets GitProviders field to given value.
+
+### HasGitProviders
+
+`func (o *ServerConfig) HasGitProviders() bool`
+
+HasGitProviders returns a boolean if a field has been set.
 
 ### GetHeadscalePort
 

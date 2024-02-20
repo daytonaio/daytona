@@ -363,6 +363,19 @@ components:
         protocol:
           type: string
       type: object
+    GitProvider:
+      example:
+        id: id
+        token: token
+        username: username
+      properties:
+        id:
+          type: string
+        token:
+          type: string
+        username:
+          type: string
+      type: object
     InstallPluginRequest:
       example:
         downloadUrls:
@@ -474,6 +487,13 @@ components:
         serverDownloadUrl: serverDownloadUrl
         pluginsDir: pluginsDir
         id: id
+        gitProviders:
+        - id: id
+          token: token
+          username: username
+        - id: id
+          token: token
+          username: username
         frps:
           protocol: protocol
           port: 6
@@ -483,6 +503,10 @@ components:
           type: integer
         frps:
           $ref: '#/components/schemas/FRPSConfig'
+        gitProviders:
+          items:
+            $ref: '#/components/schemas/GitProvider'
+          type: array
         headscalePort:
           type: integer
         id:
