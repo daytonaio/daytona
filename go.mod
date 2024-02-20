@@ -15,7 +15,6 @@ require (
 	github.com/glebarez/sqlite v1.10.0
 	github.com/gliderlabs/ssh v0.3.6
 	github.com/go-playground/validator/v10 v10.18.0
-	github.com/golang/protobuf v1.5.3
 	github.com/google/uuid v1.5.0
 	github.com/hashicorp/go-hclog v1.5.0
 	github.com/hashicorp/go-plugin v1.6.0
@@ -97,6 +96,7 @@ require (
 	github.com/gofrs/uuid/v5 v5.0.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/mock v1.6.0 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/btree v1.1.2 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
@@ -217,7 +217,7 @@ require (
 require (
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/alecthomas/chroma v0.10.0 // indirect
-	github.com/atotto/clipboard v0.1.4
+	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/briandowns/spinner v1.23.0

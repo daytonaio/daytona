@@ -11,7 +11,7 @@ type ProvisionerRPCClient struct {
 }
 
 func (m *ProvisionerRPCClient) Initialize(req InitializeProvisionerRequest) error {
-	return m.client.Call("Plugin.Initialize", req, nil)
+	return m.client.Call("Plugin.Initialize", req, new(interface{}))
 }
 
 func (m *ProvisionerRPCClient) GetInfo() (ProvisionerInfo, error) {
@@ -28,19 +28,19 @@ func (m *ProvisionerRPCClient) Configure() (interface{}, error) {
 }
 
 func (m *ProvisionerRPCClient) CreateWorkspace(workspace *types.Workspace) error {
-	return m.client.Call("Plugin.CreateWorkspace", workspace, nil)
+	return m.client.Call("Plugin.CreateWorkspace", workspace, new(interface{}))
 }
 
 func (m *ProvisionerRPCClient) StartWorkspace(workspace *types.Workspace) error {
-	return m.client.Call("Plugin.StartWorkspace", workspace, nil)
+	return m.client.Call("Plugin.StartWorkspace", workspace, new(interface{}))
 }
 
 func (m *ProvisionerRPCClient) StopWorkspace(workspace *types.Workspace) error {
-	return m.client.Call("Plugin.StopWorkspace", workspace, nil)
+	return m.client.Call("Plugin.StopWorkspace", workspace, new(interface{}))
 }
 
 func (m *ProvisionerRPCClient) DestroyWorkspace(workspace *types.Workspace) error {
-	return m.client.Call("Plugin.DestroyWorkspace", workspace, nil)
+	return m.client.Call("Plugin.DestroyWorkspace", workspace, new(interface{}))
 }
 
 func (m *ProvisionerRPCClient) GetWorkspaceInfo(workspace *types.Workspace) (*types.WorkspaceInfo, error) {
@@ -50,19 +50,19 @@ func (m *ProvisionerRPCClient) GetWorkspaceInfo(workspace *types.Workspace) (*ty
 }
 
 func (m *ProvisionerRPCClient) CreateProject(project *types.Project) error {
-	return m.client.Call("Plugin.CreateProject", project, nil)
+	return m.client.Call("Plugin.CreateProject", project, new(interface{}))
 }
 
 func (m *ProvisionerRPCClient) StartProject(project *types.Project) error {
-	return m.client.Call("Plugin.StartProject", project, nil)
+	return m.client.Call("Plugin.StartProject", project, new(interface{}))
 }
 
 func (m *ProvisionerRPCClient) StopProject(project *types.Project) error {
-	return m.client.Call("Plugin.StopProject", project, nil)
+	return m.client.Call("Plugin.StopProject", project, new(interface{}))
 }
 
 func (m *ProvisionerRPCClient) DestroyProject(project *types.Project) error {
-	return m.client.Call("Plugin.DestroyProject", project, nil)
+	return m.client.Call("Plugin.DestroyProject", project, new(interface{}))
 }
 
 func (m *ProvisionerRPCClient) GetProjectInfo(project *types.Project) (*types.ProjectInfo, error) {
