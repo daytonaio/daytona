@@ -10,7 +10,6 @@ import (
 	"os/exec"
 	"path"
 
-	cmd_ports "github.com/daytonaio/daytona/cli/cmd/ports"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	select_prompt "github.com/daytonaio/daytona/cli/cmd/views/workspace/select_prompt"
 	"github.com/daytonaio/daytona/cli/config"
@@ -145,36 +144,37 @@ func init() {
 }
 
 func openBrowserIDE(conn *grpc.ClientConn, activeProfile config.Profile, workspaceName string, projectName string) error {
-	projectPortForwards, err := cmd_ports.GetProjectPortForwards(conn, workspaceName, projectName)
-	if err != nil {
-		return err
-	}
+	log.Fatal("Not implemented - no more need to go through server, use tailscale instead")
+	// projectPortForwards, err := cmd_ports.GetProjectPortForwards(conn, workspaceName, projectName)
+	// if err != nil {
+	// 	return err
+	// }
 
-	browserPort := new(uint32)
-	*browserPort = 63000
+	// browserPort := new(uint32)
+	// *browserPort = 63000
 
-	errChan := make(chan error)
-	if _, ok := projectPortForwards.PortForwards[63000]; !ok {
-		browserPort, errChan = cmd_ports.ForwardPort(conn, activeProfile, workspaceName, projectName, uint32(63000))
-		if browserPort == nil {
-			if err = <-errChan; err != nil {
-				return err
-			}
-		}
-	} else {
-		go func() {
-			errChan <- nil
-		}()
-	}
+	// errChan := make(chan error)
+	// if _, ok := projectPortForwards.PortForwards[63000]; !ok {
+	// 	browserPort, errChan = cmd_ports.ForwardPort(conn, activeProfile, workspaceName, projectName, uint32(63000))
+	// 	if browserPort == nil {
+	// 		if err = <-errChan; err != nil {
+	// 			return err
+	// 		}
+	// 	}
+	// } else {
+	// 	go func() {
+	// 		errChan <- nil
+	// 	}()
+	// }
 
-	views_util.RenderInfoMessageBold(fmt.Sprintf("Port %d is being used to access the codebase.\nOpening %s using the browser IDE.", *browserPort, projectName))
+	views_util.RenderInfoMessageBold(fmt.Sprintf("Port %d is being used to access the codebase.\nOpening %s using the browser IDE.", 1234, projectName))
 
-	url := fmt.Sprintf("http://localhost:%d", *browserPort)
+	url := fmt.Sprintf("http://localhost:%d", 1234)
 
-	err = browser.OpenURL(url)
+	err := browser.OpenURL(url)
 	if err != nil {
 		log.Fatal("Error opening URL: " + err.Error())
 	}
 
-	return <-errChan
+	return nil
 }

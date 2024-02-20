@@ -32,7 +32,6 @@ func Execute() {
 	rootCmd.AddCommand(InfoCmd)
 	rootCmd.AddCommand(StartCmd)
 	rootCmd.AddCommand(StopCmd)
-	rootCmd.AddCommand(exposePortCmd)
 	rootCmd.AddCommand(PortsCmd)
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(AgentCmd)
