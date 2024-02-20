@@ -32,7 +32,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.AgentServicePlugin"
+                                "$ref": "#/definitions/AgentServicePlugin"
                             }
                         }
                     }
@@ -57,7 +57,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.InstallPluginRequest"
+                            "$ref": "#/definitions/InstallPluginRequest"
                         }
                     }
                 ],
@@ -115,7 +115,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.ProvisionerPlugin"
+                                "$ref": "#/definitions/ProvisionerPlugin"
                             }
                         }
                     }
@@ -140,7 +140,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.InstallPluginRequest"
+                            "$ref": "#/definitions/InstallPluginRequest"
                         }
                     }
                 ],
@@ -275,9 +275,7 @@
                         }
                     }
                 }
-            }
-        },
-        "/workspace/create": {
+            },
             "post": {
                 "description": "Create a workspace",
                 "produces": [
@@ -288,6 +286,17 @@
                 ],
                 "summary": "Create a workspace",
                 "operationId": "CreateWorkspace",
+                "parameters": [
+                    {
+                        "description": "Create workspace",
+                        "name": "workspace",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateWorkspace"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -462,10 +471,63 @@
         }
     },
     "definitions": {
+        "AgentServicePlugin": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "CreateWorkspace": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "provisioner": {
+                    "type": "string"
+                },
+                "repositories": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "InstallPluginRequest": {
+            "type": "object",
+            "properties": {
+                "downloadUrls": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "NetworkKey": {
             "type": "object",
             "properties": {
                 "key": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProvisionerPlugin": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "version": {
                     "type": "string"
                 }
             }
@@ -513,42 +575,6 @@
                 },
                 "provisioner": {
                     "$ref": "#/definitions/types.WorkspaceProvisioner"
-                }
-            }
-        },
-        "dto.AgentServicePlugin": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.InstallPluginRequest": {
-            "type": "object",
-            "properties": {
-                "downloadUrls": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.ProvisionerPlugin": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "string"
                 }
             }
         },

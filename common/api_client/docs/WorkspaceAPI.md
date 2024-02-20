@@ -4,7 +4,7 @@ All URIs are relative to *http://localhost:3000*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**CreateWorkspace**](WorkspaceAPI.md#CreateWorkspace) | **Post** /workspace/create | Create a workspace
+[**CreateWorkspace**](WorkspaceAPI.md#CreateWorkspace) | **Post** /workspace | Create a workspace
 [**GetWorkspaceInfo**](WorkspaceAPI.md#GetWorkspaceInfo) | **Get** /workspace/{workspaceId} | Get workspace info
 [**ListWorkspaces**](WorkspaceAPI.md#ListWorkspaces) | **Get** /workspace | List workspaces info
 [**RemoveWorkspace**](WorkspaceAPI.md#RemoveWorkspace) | **Delete** /workspace/{workspaceId} | Remove workspace
@@ -17,7 +17,7 @@ Method | HTTP request | Description
 
 ## CreateWorkspace
 
-> Workspace CreateWorkspace(ctx).Execute()
+> Workspace CreateWorkspace(ctx).Workspace(workspace).Execute()
 
 Create a workspace
 
@@ -36,10 +36,11 @@ import (
 )
 
 func main() {
+	workspace := *openapiclient.NewCreateWorkspace() // CreateWorkspace | Create workspace
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceAPI.CreateWorkspace(context.Background()).Execute()
+	resp, r, err := apiClient.WorkspaceAPI.CreateWorkspace(context.Background()).Workspace(workspace).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.CreateWorkspace``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -51,12 +52,16 @@ func main() {
 
 ### Path Parameters
 
-This endpoint does not need any parameter.
+
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiCreateWorkspaceRequest struct via the builder pattern
 
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **workspace** | [**CreateWorkspace**](CreateWorkspace.md) | Create workspace | 
 
 ### Return type
 

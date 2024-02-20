@@ -34,7 +34,7 @@ import (
 )
 
 func main() {
-	plugin := *openapiclient.NewDtoInstallPluginRequest() // DtoInstallPluginRequest | Plugin to install
+	plugin := *openapiclient.NewInstallPluginRequest() // InstallPluginRequest | Plugin to install
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -57,7 +57,7 @@ Other parameters are passed through a pointer to a apiInstallAgentServicePluginR
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **plugin** | [**DtoInstallPluginRequest**](DtoInstallPluginRequest.md) | Plugin to install | 
+ **plugin** | [**InstallPluginRequest**](InstallPluginRequest.md) | Plugin to install | 
 
 ### Return type
 
@@ -98,7 +98,7 @@ import (
 )
 
 func main() {
-	plugin := *openapiclient.NewDtoInstallPluginRequest() // DtoInstallPluginRequest | Plugin to install
+	plugin := *openapiclient.NewInstallPluginRequest() // InstallPluginRequest | Plugin to install
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -121,7 +121,7 @@ Other parameters are passed through a pointer to a apiInstallProvisionerPluginRe
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **plugin** | [**DtoInstallPluginRequest**](DtoInstallPluginRequest.md) | Plugin to install | 
+ **plugin** | [**InstallPluginRequest**](InstallPluginRequest.md) | Plugin to install | 
 
 ### Return type
 
@@ -143,7 +143,7 @@ No authorization required
 
 ## ListAgentServicePlugins
 
-> []DtoAgentServicePlugin ListAgentServicePlugins(ctx).Execute()
+> []AgentServicePlugin ListAgentServicePlugins(ctx).Execute()
 
 List agent service plugins
 
@@ -170,7 +170,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error when calling `PluginAPI.ListAgentServicePlugins``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `ListAgentServicePlugins`: []DtoAgentServicePlugin
+	// response from `ListAgentServicePlugins`: []AgentServicePlugin
 	fmt.Fprintf(os.Stdout, "Response from `PluginAPI.ListAgentServicePlugins`: %v\n", resp)
 }
 ```
@@ -186,7 +186,7 @@ Other parameters are passed through a pointer to a apiListAgentServicePluginsReq
 
 ### Return type
 
-[**[]DtoAgentServicePlugin**](DtoAgentServicePlugin.md)
+[**[]AgentServicePlugin**](AgentServicePlugin.md)
 
 ### Authorization
 
@@ -204,7 +204,7 @@ No authorization required
 
 ## ListProvisionerPlugins
 
-> []DtoProvisionerPlugin ListProvisionerPlugins(ctx).Execute()
+> []ProvisionerPlugin ListProvisionerPlugins(ctx).Execute()
 
 List provisioner plugins
 
@@ -231,7 +231,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error when calling `PluginAPI.ListProvisionerPlugins``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `ListProvisionerPlugins`: []DtoProvisionerPlugin
+	// response from `ListProvisionerPlugins`: []ProvisionerPlugin
 	fmt.Fprintf(os.Stdout, "Response from `PluginAPI.ListProvisionerPlugins`: %v\n", resp)
 }
 ```
@@ -247,7 +247,7 @@ Other parameters are passed through a pointer to a apiListProvisionerPluginsRequ
 
 ### Return type
 
-[**[]DtoProvisionerPlugin**](DtoProvisionerPlugin.md)
+[**[]ProvisionerPlugin**](ProvisionerPlugin.md)
 
 ### Authorization
 

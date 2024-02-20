@@ -1,8 +1,42 @@
 basePath: /
 definitions:
+  AgentServicePlugin:
+    properties:
+      name:
+        type: string
+      version:
+        type: string
+    type: object
+  CreateWorkspace:
+    properties:
+      name:
+        type: string
+      provisioner:
+        type: string
+      repositories:
+        items:
+          type: string
+        type: array
+    type: object
+  InstallPluginRequest:
+    properties:
+      downloadUrls:
+        additionalProperties:
+          type: string
+        type: object
+      name:
+        type: string
+    type: object
   NetworkKey:
     properties:
       key:
+        type: string
+    type: object
+  ProvisionerPlugin:
+    properties:
+      name:
+        type: string
+      version:
         type: string
     type: object
   ServerConfig:
@@ -34,29 +68,6 @@ definitions:
         type: array
       provisioner:
         $ref: '#/definitions/types.WorkspaceProvisioner'
-    type: object
-  dto.AgentServicePlugin:
-    properties:
-      name:
-        type: string
-      version:
-        type: string
-    type: object
-  dto.InstallPluginRequest:
-    properties:
-      downloadUrls:
-        additionalProperties:
-          type: string
-        type: object
-      name:
-        type: string
-    type: object
-  dto.ProvisionerPlugin:
-    properties:
-      name:
-        type: string
-      version:
-        type: string
     type: object
   types.FRPSConfig:
     properties:
@@ -122,7 +133,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/dto.AgentServicePlugin'
+              $ref: '#/definitions/AgentServicePlugin'
             type: array
       summary: List agent service plugins
       tags:
@@ -139,7 +150,7 @@ paths:
         name: plugin
         required: true
         schema:
-          $ref: '#/definitions/dto.InstallPluginRequest'
+          $ref: '#/definitions/InstallPluginRequest'
       responses:
         "200":
           description: OK
@@ -177,7 +188,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/dto.ProvisionerPlugin'
+              $ref: '#/definitions/ProvisionerPlugin'
             type: array
       summary: List provisioner plugins
       tags:
@@ -212,7 +223,7 @@ paths:
         name: plugin
         required: true
         schema:
-          $ref: '#/definitions/dto.InstallPluginRequest'
+          $ref: '#/definitions/InstallPluginRequest'
       responses:
         "200":
           description: OK
@@ -283,6 +294,26 @@ paths:
               $ref: '#/definitions/Workspace'
             type: array
       summary: List workspaces info
+      tags:
+      - workspace
+    post:
+      description: Create a workspace
+      operationId: CreateWorkspace
+      parameters:
+      - description: Create workspace
+        in: body
+        name: workspace
+        required: true
+        schema:
+          $ref: '#/definitions/CreateWorkspace'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Workspace'
+      summary: Create a workspace
       tags:
       - workspace
   /workspace/{workspaceId}:
@@ -392,20 +423,6 @@ paths:
         "200":
           description: OK
       summary: Stop workspace
-      tags:
-      - workspace
-  /workspace/create:
-    post:
-      description: Create a workspace
-      operationId: CreateWorkspace
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/Workspace'
-      summary: Create a workspace
       tags:
       - workspace
 schemes:

@@ -17,7 +17,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/dto.AgentServicePlugin'
+                  $ref: '#/components/schemas/AgentServicePlugin'
                 type: array
           description: OK
       summary: List agent service plugins
@@ -31,7 +31,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/dto.InstallPluginRequest'
+              $ref: '#/components/schemas/InstallPluginRequest'
         description: Plugin to install
         required: true
       responses:
@@ -70,7 +70,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/dto.ProvisionerPlugin'
+                  $ref: '#/components/schemas/ProvisionerPlugin'
                 type: array
           description: OK
       summary: List provisioner plugins
@@ -84,7 +84,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/dto.InstallPluginRequest'
+              $ref: '#/components/schemas/InstallPluginRequest'
         description: Plugin to install
         required: true
       responses:
@@ -178,10 +178,16 @@ paths:
       summary: List workspaces info
       tags:
       - workspace
-  /workspace/create:
     post:
       description: Create a workspace
       operationId: CreateWorkspace
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/CreateWorkspace'
+        description: Create workspace
+        required: true
       responses:
         "200":
           content:
@@ -192,6 +198,7 @@ paths:
       summary: Create a workspace
       tags:
       - workspace
+      x-codegen-request-body-name: workspace
   /workspace/{workspaceId}:
     delete:
       description: Remove workspace
@@ -316,11 +323,61 @@ paths:
       - workspace
 components:
   schemas:
+    AgentServicePlugin:
+      example:
+        name: name
+        version: version
+      properties:
+        name:
+          type: string
+        version:
+          type: string
+      type: object
+    CreateWorkspace:
+      example:
+        provisioner: provisioner
+        repositories:
+        - repositories
+        - repositories
+        name: name
+      properties:
+        name:
+          type: string
+        provisioner:
+          type: string
+        repositories:
+          items:
+            type: string
+          type: array
+      type: object
+    InstallPluginRequest:
+      example:
+        downloadUrls:
+          key: downloadUrls
+        name: name
+      properties:
+        downloadUrls:
+          additionalProperties:
+            type: string
+          type: object
+        name:
+          type: string
+      type: object
     NetworkKey:
       example:
         key: key
       properties:
         key:
+          type: string
+      type: object
+    ProvisionerPlugin:
+      example:
+        name: name
+        version: version
+      properties:
+        name:
+          type: string
+        version:
           type: string
       type: object
     ServerConfig:
@@ -392,35 +449,6 @@ components:
           type: array
         provisioner:
           $ref: '#/components/schemas/types.WorkspaceProvisioner'
-      type: object
-    dto.AgentServicePlugin:
-      example:
-        name: name
-        version: version
-      properties:
-        name:
-          type: string
-        version:
-          type: string
-      type: object
-    dto.InstallPluginRequest:
-      properties:
-        downloadUrls:
-          additionalProperties:
-            type: string
-          type: object
-        name:
-          type: string
-      type: object
-    dto.ProvisionerPlugin:
-      example:
-        name: name
-        version: version
-      properties:
-        name:
-          type: string
-        version:
-          type: string
       type: object
     types.FRPSConfig:
       example:

@@ -86,7 +86,7 @@ Class | Method | HTTP request | Description
 *ServerAPI* | [**GenerateNetworkKey**](docs/ServerAPI.md#generatenetworkkey) | **Post** /server/network-key | Generate a new authentication key
 *ServerAPI* | [**GetConfig**](docs/ServerAPI.md#getconfig) | **Get** /server/config | Get the server configuration
 *ServerAPI* | [**SetConfig**](docs/ServerAPI.md#setconfig) | **Post** /server/config | Set the server configuration
-*WorkspaceAPI* | [**CreateWorkspace**](docs/WorkspaceAPI.md#createworkspace) | **Post** /workspace/create | Create a workspace
+*WorkspaceAPI* | [**CreateWorkspace**](docs/WorkspaceAPI.md#createworkspace) | **Post** /workspace | Create a workspace
 *WorkspaceAPI* | [**GetWorkspaceInfo**](docs/WorkspaceAPI.md#getworkspaceinfo) | **Get** /workspace/{workspaceId} | Get workspace info
 *WorkspaceAPI* | [**ListWorkspaces**](docs/WorkspaceAPI.md#listworkspaces) | **Get** /workspace | List workspaces info
 *WorkspaceAPI* | [**RemoveWorkspace**](docs/WorkspaceAPI.md#removeworkspace) | **Delete** /workspace/{workspaceId} | Remove workspace
@@ -98,10 +98,11 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
- - [DtoAgentServicePlugin](docs/DtoAgentServicePlugin.md)
- - [DtoInstallPluginRequest](docs/DtoInstallPluginRequest.md)
- - [DtoProvisionerPlugin](docs/DtoProvisionerPlugin.md)
+ - [AgentServicePlugin](docs/AgentServicePlugin.md)
+ - [CreateWorkspace](docs/CreateWorkspace.md)
+ - [InstallPluginRequest](docs/InstallPluginRequest.md)
  - [NetworkKey](docs/NetworkKey.md)
+ - [ProvisionerPlugin](docs/ProvisionerPlugin.md)
  - [ServerConfig](docs/ServerConfig.md)
  - [TypesFRPSConfig](docs/TypesFRPSConfig.md)
  - [TypesProject](docs/TypesProject.md)

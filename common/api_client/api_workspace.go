@@ -26,6 +26,13 @@ type WorkspaceAPIService service
 type ApiCreateWorkspaceRequest struct {
 	ctx context.Context
 	ApiService *WorkspaceAPIService
+	workspace *CreateWorkspace
+}
+
+// Create workspace
+func (r ApiCreateWorkspaceRequest) Workspace(workspace CreateWorkspace) ApiCreateWorkspaceRequest {
+	r.workspace = &workspace
+	return r
 }
 
 func (r ApiCreateWorkspaceRequest) Execute() (*Workspace, *http.Response, error) {
@@ -62,11 +69,14 @@ func (a *WorkspaceAPIService) CreateWorkspaceExecute(r ApiCreateWorkspaceRequest
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/create"
+	localVarPath := localBasePath + "/workspace"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+	if r.workspace == nil {
+		return localVarReturnValue, nil, reportError("workspace is required and must be specified")
+	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -85,6 +95,8 @@ func (a *WorkspaceAPIService) CreateWorkspaceExecute(r ApiCreateWorkspaceRequest
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
+	// body params
+	localVarPostBody = r.workspace
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err

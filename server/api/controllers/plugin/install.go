@@ -20,7 +20,7 @@ import (
 //	@Summary		Install a provisioner plugin
 //	@Description	Install a provisioner plugin
 //	@Accept			json
-//	@Param			plugin	body	dto.InstallPluginRequest	true	"Plugin to install"
+//	@Param			plugin	body	InstallPluginRequest	true	"Plugin to install"
 //	@Success		200
 //	@Router			/plugin/provisioner/install [post]
 //
@@ -66,7 +66,7 @@ func InstallProvisionerPlugin(ctx *gin.Context) {
 //	@Summary		Install an agent service plugin
 //	@Description	Install an agent service plugin
 //	@Accept			json
-//	@Param			plugin	body	dto.InstallPluginRequest	true	"Plugin to install"
+//	@Param			plugin	body	InstallPluginRequest	true	"Plugin to install"
 //	@Success		200
 //	@Router			/plugin/agent-service/install [post]
 //

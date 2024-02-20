@@ -22,23 +22,31 @@ import (
 //	@Tags			workspace
 //	@Summary		Create a workspace
 //	@Description	Create a workspace
+//	@Param			workspace	body	CreateWorkspace	true	"Create workspace"
 //	@Produce		json
 //	@Success		200	{object}	Workspace
-//	@Router			/workspace/create [post]
+//	@Router			/workspace [post]
 //
 //	@id				CreateWorkspace
 func CreateWorkspace(ctx *gin.Context) {
 	var createWorkspaceDto dto.CreateWorkspace
 	err := ctx.BindJSON(&createWorkspaceDto)
+	if err != nil {
+		log.Error(err)
+		ctx.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
 
 	_, err = db.FindWorkspace(createWorkspaceDto.Name)
-	if err != nil {
-		ctx.JSON(500, gin.H{"workspace already exists": err.Error()})
+	if err == nil {
+		log.Error(err)
+		ctx.JSON(500, gin.H{"error": "workspace already exists"})
 		return
 	}
 
 	w, err := newWorkspace(createWorkspaceDto)
 	if err != nil {
+		log.Error(err)
 		ctx.JSON(500, gin.H{"err": err.Error()})
 		return
 	}
