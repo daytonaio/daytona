@@ -1,180 +1,263 @@
 package workspace
 
 import (
-	"encoding/json"
 	"errors"
-	"path"
-	"regexp"
-	"strings"
-	"time"
 
 	"github.com/daytonaio/daytona/common/types"
-	provisioner_manager "github.com/daytonaio/daytona/plugins/provisioner/manager"
-	workspace_dto "github.com/daytonaio/daytona/server/api/controllers/workspace/dto"
-	"github.com/daytonaio/daytona/server/config"
 	"github.com/daytonaio/daytona/server/db"
-	"github.com/daytonaio/daytona/server/event_bus"
-	"github.com/daytonaio/daytona/server/headscale"
 	"github.com/daytonaio/daytona/server/provisioner"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
 
-// CreateWorkspace 			godoc
+// GetWorkspaceInfo 			godoc
 //
 //	@Tags			workspace
-//	@Summary		Create a workspace
-//	@Description	Create a workspace
+//	@Summary		Get workspace info
+//	@Description	Get workspace info
 //	@Produce		json
-//	@Success		200	{object}	types.ServerConfig
-//	@Router			/workspace/create [post]
+//	@Param			workspaceId	path		string	true	"Workspace ID"
+//	@Success		200			{object}	Workspace
+//	@Router			/workspace/{workspaceId} [get]
 //
-//	@id				CreateWorkspace
-func CreateWorkspace(ctx *gin.Context) {
-	var createWorkspaceDto workspace_dto.CreateWorkspaceDTO
-	err := ctx.BindJSON(&createWorkspaceDto)
+//	@id				GetWorkspaceInfo
+func GetWorkspaceInfo(ctx *gin.Context) {
+	workspaceId := ctx.Param("workspaceId")
 
-	_, err = db.FindWorkspace(createWorkspaceDto.Name)
-	if err != nil {
-		ctx.JSON(500, gin.H{"workspace already exists": err.Error()})
-		return
-	}
-
-	w, err := newWorkspace(createWorkspaceDto)
-	if err != nil {
-		ctx.JSON(500, gin.H{"err": err.Error()})
-		return
-	}
-
-	log.Debug(w)
-	db.SaveWorkspace(w)
-
-	unsubscribe := make(chan bool, 1)
-
-	go func() {
-		for event := range event_bus.SubscribeWithFilter(unsubscribe, func(i event_bus.Event) bool {
-			if _, ok := i.Payload.(event_bus.WorkspaceEventPayload); ok {
-				return i.Payload.(event_bus.WorkspaceEventPayload).WorkspaceName == w.Name
-			}
-
-			if _, ok := i.Payload.(event_bus.ProjectEventPayload); ok {
-				return i.Payload.(event_bus.ProjectEventPayload).WorkspaceName == w.Name
-			}
-
-			return false
-		}) {
-			log.Debug(event)
-			jsonPayload, err := json.Marshal(event.Payload)
-			if err != nil {
-				ctx.JSON(500, gin.H{"err": err.Error()})
-				return
-			}
-
-			err = stream.Send(&workspace_dto.WorkspaceCreationDTO{
-				Event:   string(event.Name),
-				Payload: string(jsonPayload),
-			})
-			if err != nil {
-				ctx.JSON(500, gin.H{"Event send error": err.Error()})
-			}
-		}
-	}()
-
-	err = provisioner.CreateWorkspace(w)
+	w, err := db.FindWorkspace(workspaceId)
 	if err != nil {
 		log.Error(err)
-		stream.Send(&workspace_dto.WorkspaceCreationDTO{
-			Event:   "error",
-			Payload: err.Error(),
-		})
-		ctx.JSON(500, gin.H{"err": err.Error()})
-	}
-	err = provisioner.StartWorkspace(w)
-	if err != nil {
-		log.Error(err)
-		stream.Send(&workspace_dto.WorkspaceCreationDTO{
-			Event:   "error",
-			Payload: err.Error(),
-		})
-		ctx.JSON(500, gin.H{"err": err.Error()})
-	}
-	time.Sleep(100 * time.Millisecond)
-
-	unsubscribe <- true
-
-	// ctx.JSON(200, )
-	// return nil
-	ctx.JSON(200, nil)
-}
-
-func newWorkspace(createWorkspaceDto workspace_dto.CreateWorkspaceDTO) (*types.Workspace, error) {
-	isAlphaNumeric := regexp.MustCompile(`^[a-zA-Z0-9-]+$`).MatchString
-	if !isAlphaNumeric(createWorkspaceDto.Name) {
-		return nil, errors.New("name is not a valid alphanumeric string")
-	}
-
-	_, err := provisioner_manager.GetProvisioner(createWorkspaceDto.Provisioner)
-	if err != nil {
-		return nil, err
-	}
-
-	w := &types.Workspace{
-		Id:   createWorkspaceDto.Name,
-		Name: createWorkspaceDto.Name,
-		Provisioner: &types.WorkspaceProvisioner{
-			Name: createWorkspaceDto.Provisioner,
-			// TODO: Add profile support
-			Profile: "default",
-		},
-	}
-
-	w.Projects = []*types.Project{}
-
-	for _, repo := range createWorkspaceDto.Repositories {
-		authKey, err := headscale.CreateAuthKey()
-		if err != nil {
-			return nil, err
-		}
-
-		project := &types.Project{
-			Name: strings.ToLower(path.Base(repo)),
-			Repository: &types.Repository{
-				Url: repo,
-			},
-			WorkspaceId: w.Id,
-			AuthKey:     authKey,
-		}
-		w.Projects = append(w.Projects, project)
-	}
-
-	return w, nil
-}
-
-// SetConfig 			godoc
-//
-//	@Tags			server
-//	@Summary		Set the server configuration
-//	@Description	Set the server configuration
-//	@Accept			json
-//	@Produce		json
-//	@Param			config	body		types.ServerConfig	true	"Server configuration"
-//	@Success		200		{object}	types.ServerConfig
-//	@Router			/server/config [post]
-//
-//	@id				SetConfig
-func SetConfig(ctx *gin.Context) {
-	var c types.ServerConfig
-	err := ctx.BindJSON(&c)
-	if err != nil {
-		ctx.JSON(400, gin.H{"error": err.Error()})
-		return
-	}
-
-	err = config.Save(&c)
-	if err != nil {
 		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(200, c)
+	log.Debug(w)
+
+	workspaceInfo, err := provisioner.GetWorkspaceInfo(w)
+	if err != nil {
+		log.Error(err)
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(200, workspaceInfo)
+}
+
+// ListWorkspaces 			godoc
+//
+//	@Tags			workspace
+//	@Summary		List workspaces info
+//	@Description	List workspaces info
+//	@Produce		json
+//	@Success		200	{array}	Workspace
+//	@Router			/workspace [get]
+//
+//	@id				ListWorkspaces
+func ListWorkspaces(ctx *gin.Context) {
+
+	workspaces, err := db.ListWorkspaces()
+	if err != nil {
+		log.Error(err)
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	workspaceInfos := []*types.WorkspaceInfo{}
+
+	for _, workspace := range workspaces {
+		workspaceInfo, err := provisioner.GetWorkspaceInfo(workspace)
+		if err != nil {
+			log.Error(err)
+			ctx.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+
+		workspaceInfos = append(workspaceInfos, workspaceInfo)
+	}
+
+	ctx.JSON(200, workspaceInfos)
+}
+
+// StartWorkspace 			godoc
+//
+//	@Tags			workspace
+//	@Summary		Start workspace
+//	@Description	Start workspace
+//	@Param			workspaceId	path	string	true	"Workspace ID"
+//	@Success		200
+//	@Router			/workspace/{workspaceId}/start [post]
+//
+//	@id				StartWorkspace
+func StartWorkspace(ctx *gin.Context) {
+	workspaceId := ctx.Param("workspaceId")
+
+	w, err := db.FindWorkspace(workspaceId)
+	if err != nil {
+		log.Error(err)
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	err = provisioner.StartWorkspace(w)
+	if err != nil {
+		log.Error(err)
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.Status(200)
+}
+
+// StartProject 			godoc
+//
+//	@Tags			workspace
+//	@Summary		Start project
+//	@Description	Start project
+//	@Param			workspaceId	path	string	true	"Workspace ID"
+//	@Param			projectId	path	string	true	"Project ID"
+//	@Success		200
+//	@Router			/workspace/{workspaceId}/{projectId}/start [post]
+//
+//	@id				StartProject
+func StartProject(ctx *gin.Context) {
+	workspaceId := ctx.Param("workspaceId")
+	projectId := ctx.Param("projectId")
+
+	w, err := db.FindWorkspace(workspaceId)
+	if err != nil {
+		log.Error(err)
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	project, err := getProject(w, projectId)
+	if err != nil {
+		log.Error(err)
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = provisioner.StartProject(project)
+	if err != nil {
+		log.Error(err)
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.Status(200)
+}
+
+// StopWorkspace 			godoc
+//
+//	@Tags			workspace
+//	@Summary		Stop workspace
+//	@Description	Stop workspace
+//	@Param			workspaceId	path	string	true	"Workspace ID"
+//	@Success		200
+//	@Router			/workspace/{workspaceId}/stop [post]
+//
+//	@id				StopWorkspace
+func StopWorkspace(ctx *gin.Context) {
+	workspaceId := ctx.Param("workspaceId")
+
+	w, err := db.FindWorkspace(workspaceId)
+	if err != nil {
+		log.Error(err)
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	err = provisioner.StopWorkspace(w)
+	if err != nil {
+		log.Error(err)
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.Status(200)
+}
+
+// StopProject 			godoc
+//
+//	@Tags			workspace
+//	@Summary		Stop project
+//	@Description	Stop project
+//	@Param			workspaceId	path	string	true	"Workspace ID"
+//	@Param			projectId	path	string	true	"Project ID"
+//	@Success		200
+//	@Router			/workspace/{workspaceId}/{projectId}/stop [post]
+//
+//	@id				StopProject
+func StopProject(ctx *gin.Context) {
+	workspaceId := ctx.Param("workspaceId")
+	projectId := ctx.Param("projectId")
+
+	w, err := db.FindWorkspace(workspaceId)
+	if err != nil {
+		log.Error(err)
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	project, err := getProject(w, projectId)
+	if err != nil {
+		log.Error(err)
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = provisioner.StopProject(project)
+	if err != nil {
+		log.Error(err)
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.Status(200)
+}
+
+// RemoveWorkspace 			godoc
+//
+//	@Tags			workspace
+//	@Summary		Remove workspace
+//	@Description	Remove workspace
+//	@Param			workspaceId	path	string	true	"Workspace ID"
+//	@Success		200
+//	@Router			/workspace/{workspaceId} [delete]
+//
+//	@id				RemoveWorkspace
+func RemoveWorkspace(ctx *gin.Context) {
+	workspaceId := ctx.Param("workspaceId")
+
+	w, err := db.FindWorkspace(workspaceId)
+	if err != nil {
+		log.Error(err)
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	log.Debug(w)
+
+	err = provisioner.DestroyWorkspace(w)
+	if err != nil {
+		log.Error(err)
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = db.DeleteWorkspace(w)
+	if err != nil {
+		log.Error(err)
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.Status(200)
+}
+
+func getProject(workspace *types.Workspace, projectName string) (*types.Project, error) {
+	for _, project := range workspace.Projects {
+		if project.Name == projectName {
+			return project, nil
+		}
+	}
+	return nil, errors.New("project not found")
 }

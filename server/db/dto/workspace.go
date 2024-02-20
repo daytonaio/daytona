@@ -3,7 +3,7 @@ package dto
 import (
 	"errors"
 
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	"github.com/daytonaio/daytona/common/types"
 )
 
 type WorkspaceProvisionerDTO struct {

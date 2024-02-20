@@ -1,35 +1,35 @@
-package workspace_dto
+package dto
 
-type CreateWorkspaceDTO struct {
+type CreateWorkspace struct {
 	Name         string
 	Repositories []string
 	Provisioner  string
 }
 
-type WorkspaceCreationDTO struct {
+type WorkspaceCreation struct {
 	Event   string
 	Payload string
 }
 
-type WorkspaceDTO struct {
+type Workspace struct {
 	Id string
 }
 
-type WorkspacePortForwardDTO struct {
+type WorkspacePortForward struct {
 	ContainerPort uint32
 	HostPort      uint32
 }
 
-type StartWorkspaceDTO struct {
+type StartWorkspace struct {
 	Id          string
 	ProjectName string
 }
 
-type StopWorkspaceDTO struct {
+type StopWorkspace struct {
 	Id          string
 	ProjectName string
 }
 
-type RemoveWorkspaceDTO struct {
+type RemoveWorkspace struct {
 	Id string
 }

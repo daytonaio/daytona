@@ -15,7 +15,7 @@ import (
 //	@Description	List provisioner plugins
 //	@Accept			json
 //	@Produce		json
-//	@Success		200 {array} dto.ProvisionerPlugin
+//	@Success		200	{array}	dto.ProvisionerPlugin
 //	@Router			/plugin/provisioner [get]
 //
 //	@id				ListProvisionerPlugins
@@ -47,7 +47,7 @@ func ListProvisionerPlugins(ctx *gin.Context) {
 //	@Description	List agent service plugins
 //	@Accept			json
 //	@Produce		json
-//	@Success		200 {array} dto.AgentServicePlugin
+//	@Success		200	{array}	dto.AgentServicePlugin
 //	@Router			/plugin/agent-service [get]
 //
 //	@id				ListAgentServicePlugins

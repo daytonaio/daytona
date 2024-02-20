@@ -86,16 +86,28 @@ Class | Method | HTTP request | Description
 *ServerAPI* | [**GenerateNetworkKey**](docs/ServerAPI.md#generatenetworkkey) | **Post** /server/network-key | Generate a new authentication key
 *ServerAPI* | [**GetConfig**](docs/ServerAPI.md#getconfig) | **Get** /server/config | Get the server configuration
 *ServerAPI* | [**SetConfig**](docs/ServerAPI.md#setconfig) | **Post** /server/config | Set the server configuration
+*WorkspaceAPI* | [**CreateWorkspace**](docs/WorkspaceAPI.md#createworkspace) | **Post** /workspace/create | Create a workspace
+*WorkspaceAPI* | [**GetWorkspaceInfo**](docs/WorkspaceAPI.md#getworkspaceinfo) | **Get** /workspace/{workspaceId} | Get workspace info
+*WorkspaceAPI* | [**ListWorkspaces**](docs/WorkspaceAPI.md#listworkspaces) | **Get** /workspace | List workspaces info
+*WorkspaceAPI* | [**RemoveWorkspace**](docs/WorkspaceAPI.md#removeworkspace) | **Delete** /workspace/{workspaceId} | Remove workspace
+*WorkspaceAPI* | [**StartProject**](docs/WorkspaceAPI.md#startproject) | **Post** /workspace/{workspaceId}/{projectId}/start | Start project
+*WorkspaceAPI* | [**StartWorkspace**](docs/WorkspaceAPI.md#startworkspace) | **Post** /workspace/{workspaceId}/start | Start workspace
+*WorkspaceAPI* | [**StopProject**](docs/WorkspaceAPI.md#stopproject) | **Post** /workspace/{workspaceId}/{projectId}/stop | Stop project
+*WorkspaceAPI* | [**StopWorkspace**](docs/WorkspaceAPI.md#stopworkspace) | **Post** /workspace/{workspaceId}/stop | Stop workspace
 
 
 ## Documentation For Models
 
- - [AgentServicePlugin](docs/AgentServicePlugin.md)
- - [InstallPluginRequest](docs/InstallPluginRequest.md)
+ - [DtoAgentServicePlugin](docs/DtoAgentServicePlugin.md)
+ - [DtoInstallPluginRequest](docs/DtoInstallPluginRequest.md)
+ - [DtoProvisionerPlugin](docs/DtoProvisionerPlugin.md)
  - [NetworkKey](docs/NetworkKey.md)
- - [ProvisionerPlugin](docs/ProvisionerPlugin.md)
  - [ServerConfig](docs/ServerConfig.md)
  - [TypesFRPSConfig](docs/TypesFRPSConfig.md)
+ - [TypesProject](docs/TypesProject.md)
+ - [TypesRepository](docs/TypesRepository.md)
+ - [TypesWorkspaceProvisioner](docs/TypesWorkspaceProvisioner.md)
+ - [Workspace](docs/Workspace.md)
 
 
 ## Documentation For Authorization

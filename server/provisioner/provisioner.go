@@ -3,7 +3,7 @@ package provisioner
 import (
 	"fmt"
 
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	"github.com/daytonaio/daytona/common/types"
 	provisioner_manager "github.com/daytonaio/daytona/plugins/provisioner/manager"
 	"github.com/daytonaio/daytona/server/db"
 	"github.com/daytonaio/daytona/server/event_bus"

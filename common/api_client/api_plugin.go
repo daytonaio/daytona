@@ -26,11 +26,11 @@ type PluginAPIService service
 type ApiInstallAgentServicePluginRequest struct {
 	ctx context.Context
 	ApiService *PluginAPIService
-	plugin *InstallPluginRequest
+	plugin *DtoInstallPluginRequest
 }
 
 // Plugin to install
-func (r ApiInstallAgentServicePluginRequest) Plugin(plugin InstallPluginRequest) ApiInstallAgentServicePluginRequest {
+func (r ApiInstallAgentServicePluginRequest) Plugin(plugin DtoInstallPluginRequest) ApiInstallAgentServicePluginRequest {
 	r.plugin = &plugin
 	return r
 }
@@ -126,11 +126,11 @@ func (a *PluginAPIService) InstallAgentServicePluginExecute(r ApiInstallAgentSer
 type ApiInstallProvisionerPluginRequest struct {
 	ctx context.Context
 	ApiService *PluginAPIService
-	plugin *InstallPluginRequest
+	plugin *DtoInstallPluginRequest
 }
 
 // Plugin to install
-func (r ApiInstallProvisionerPluginRequest) Plugin(plugin InstallPluginRequest) ApiInstallProvisionerPluginRequest {
+func (r ApiInstallProvisionerPluginRequest) Plugin(plugin DtoInstallPluginRequest) ApiInstallProvisionerPluginRequest {
 	r.plugin = &plugin
 	return r
 }
@@ -228,7 +228,7 @@ type ApiListAgentServicePluginsRequest struct {
 	ApiService *PluginAPIService
 }
 
-func (r ApiListAgentServicePluginsRequest) Execute() ([]AgentServicePlugin, *http.Response, error) {
+func (r ApiListAgentServicePluginsRequest) Execute() ([]DtoAgentServicePlugin, *http.Response, error) {
 	return r.ApiService.ListAgentServicePluginsExecute(r)
 }
 
@@ -248,13 +248,13 @@ func (a *PluginAPIService) ListAgentServicePlugins(ctx context.Context) ApiListA
 }
 
 // Execute executes the request
-//  @return []AgentServicePlugin
-func (a *PluginAPIService) ListAgentServicePluginsExecute(r ApiListAgentServicePluginsRequest) ([]AgentServicePlugin, *http.Response, error) {
+//  @return []DtoAgentServicePlugin
+func (a *PluginAPIService) ListAgentServicePluginsExecute(r ApiListAgentServicePluginsRequest) ([]DtoAgentServicePlugin, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  []AgentServicePlugin
+		localVarReturnValue  []DtoAgentServicePlugin
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PluginAPIService.ListAgentServicePlugins")
@@ -327,7 +327,7 @@ type ApiListProvisionerPluginsRequest struct {
 	ApiService *PluginAPIService
 }
 
-func (r ApiListProvisionerPluginsRequest) Execute() ([]ProvisionerPlugin, *http.Response, error) {
+func (r ApiListProvisionerPluginsRequest) Execute() ([]DtoProvisionerPlugin, *http.Response, error) {
 	return r.ApiService.ListProvisionerPluginsExecute(r)
 }
 
@@ -347,13 +347,13 @@ func (a *PluginAPIService) ListProvisionerPlugins(ctx context.Context) ApiListPr
 }
 
 // Execute executes the request
-//  @return []ProvisionerPlugin
-func (a *PluginAPIService) ListProvisionerPluginsExecute(r ApiListProvisionerPluginsRequest) ([]ProvisionerPlugin, *http.Response, error) {
+//  @return []DtoProvisionerPlugin
+func (a *PluginAPIService) ListProvisionerPluginsExecute(r ApiListProvisionerPluginsRequest) ([]DtoProvisionerPlugin, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  []ProvisionerPlugin
+		localVarReturnValue  []DtoProvisionerPlugin
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PluginAPIService.ListProvisionerPlugins")
