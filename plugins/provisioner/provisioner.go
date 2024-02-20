@@ -1,12 +1,10 @@
 package provisioner
 
 import (
-	"context"
+	"net/rpc"
 
 	"github.com/daytonaio/daytona/common/types"
-	"github.com/daytonaio/daytona/plugins/provisioner/grpc/proto"
 	"github.com/hashicorp/go-plugin"
-	"google.golang.org/grpc"
 )
 
 type ProvisionerProfile struct {
@@ -14,9 +12,22 @@ type ProvisionerProfile struct {
 	Config interface{}
 }
 
+type ProvisionerInfo struct {
+	Name    string
+	Version string
+}
+
+type InitializeProvisionerRequest struct {
+	BasePath          string
+	ServerDownloadUrl string
+	ServerVersion     string
+	ServerUrl         string
+	ServerApiUrl      string
+}
+
 type Provisioner interface {
-	Initialize(*proto.InitializeProvisionerRequest) error
-	GetInfo() (*proto.ProvisionerInfo, error)
+	Initialize(InitializeProvisionerRequest) error
+	GetInfo() (ProvisionerInfo, error)
 
 	//	client side profile config wizard
 	Configure() (interface{}, error)
@@ -45,15 +56,13 @@ type Provisioner interface {
 }
 
 type ProvisionerPlugin struct {
-	plugin.NetRPCUnsupportedPlugin
 	Impl Provisioner
 }
 
-func (p *ProvisionerPlugin) GRPCServer(broker *plugin.GRPCBroker, s *grpc.Server) error {
-	proto.RegisterProvisionerServer(s, &ProvisionerGrpcServer{Impl: p.Impl})
-	return nil
+func (p *ProvisionerPlugin) Server(*plugin.MuxBroker) (interface{}, error) {
+	return &ProvisionerRPCServer{Impl: p.Impl}, nil
 }
 
-func (p *ProvisionerPlugin) GRPCClient(ctx context.Context, broker *plugin.GRPCBroker, c *grpc.ClientConn) (interface{}, error) {
-	return &ProvisionerGrpcClient{client: proto.NewProvisionerClient(c)}, nil
+func (p *ProvisionerPlugin) Client(b *plugin.MuxBroker, c *rpc.Client) (interface{}, error) {
+	return &ProvisionerRPCClient{client: c}, nil
 }

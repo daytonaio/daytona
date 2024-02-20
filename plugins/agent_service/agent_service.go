@@ -1,19 +1,30 @@
 package agent_service
 
 import (
-	"context"
+	"net/rpc"
 
+	"github.com/daytonaio/daytona/common/types"
 	"github.com/hashicorp/go-plugin"
-	"google.golang.org/grpc"
-
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
-	"github.com/daytonaio/daytona/plugins/agent_service/grpc/proto"
 )
 
+type AgentServiceInfo struct {
+	Name    string
+	Version string
+}
+
+type InitializeAgentServiceRequest struct {
+	BasePath string
+}
+
+type AgentServiceConfig struct {
+	SetupPath string
+	EnvVars   map[string]string
+}
+
 type AgentService interface {
-	Initialize(*proto.InitializeAgentServiceRequest) error
-	GetInfo() (*proto.AgentServiceInfo, error)
-	SetConfig(config *proto.AgentServiceConfig) error
+	Initialize(InitializeAgentServiceRequest) error
+	GetInfo() (AgentServiceInfo, error)
+	SetConfig(config *AgentServiceConfig) error
 	ProjectPreInit(project *types.Project) error
 	ProjectPostInit(project *types.Project) error
 	ProjectPreStart(project *types.Project) error
@@ -25,15 +36,13 @@ type AgentService interface {
 }
 
 type AgentServicePlugin struct {
-	plugin.NetRPCUnsupportedPlugin
 	Impl AgentService
 }
 
-func (p *AgentServicePlugin) GRPCServer(broker *plugin.GRPCBroker, s *grpc.Server) error {
-	proto.RegisterAgentServiceServer(s, &AgentServiceGrpcServer{Impl: p.Impl})
-	return nil
+func (p *AgentServicePlugin) Server(*plugin.MuxBroker) (interface{}, error) {
+	return &AgentServiceRPCServer{Impl: p.Impl}, nil
 }
 
-func (p *AgentServicePlugin) GRPCClient(ctx context.Context, broker *plugin.GRPCBroker, c *grpc.ClientConn) (interface{}, error) {
-	return &AgentServiceGrpcClient{client: proto.NewAgentServiceClient(c)}, nil
+func (p *AgentServicePlugin) Client(b *plugin.MuxBroker, c *rpc.Client) (interface{}, error) {
+	return &AgentServiceRPCClient{client: c}, nil
 }

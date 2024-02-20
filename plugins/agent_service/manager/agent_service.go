@@ -6,8 +6,8 @@ import (
 	"os/exec"
 	"path"
 
+	"github.com/daytonaio/daytona/plugins/agent_service"
 	. "github.com/daytonaio/daytona/plugins/agent_service"
-	"github.com/daytonaio/daytona/plugins/agent_service/grpc/proto"
 	"github.com/daytonaio/daytona/plugins/utils"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
@@ -80,12 +80,11 @@ func RegisterAgentService(pluginPath string) error {
 	pluginMap[pluginName] = &AgentServicePlugin{}
 
 	client := plugin.NewClient(&plugin.ClientConfig{
-		HandshakeConfig:  projectAgentHandshakeConfig,
-		Plugins:          pluginMap,
-		Cmd:              exec.Command(pluginPath),
-		Logger:           logger,
-		Managed:          true,
-		AllowedProtocols: []plugin.Protocol{plugin.ProtocolGRPC},
+		HandshakeConfig: projectAgentHandshakeConfig,
+		Plugins:         pluginMap,
+		Cmd:             exec.Command(pluginPath),
+		Logger:          logger,
+		Managed:         true,
 	})
 
 	pluginRefs[pluginName] = &pluginRef{
@@ -102,7 +101,7 @@ func RegisterAgentService(pluginPath string) error {
 		return errors.New("failed to initialize provisioner: " + err.Error())
 	}
 
-	err = (*projectAgent).Initialize(&proto.InitializeAgentServiceRequest{
+	err = (*projectAgent).Initialize(agent_service.InitializeAgentServiceRequest{
 		BasePath: pluginBasePath,
 	})
 	if err != nil {
