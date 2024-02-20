@@ -20,7 +20,7 @@
 	},
 	"postCreateCommand": {
 		"setup": "/setup/postcreate.sh",
-		"swag": "go install github.com/swaggo/swag/cmd/swag@v1.8.10"
+		"swag": "go install github.com/swaggo/swag/cmd/swag@v1.16.3"
 	},
 	"remoteUser": "daytona"
 }
