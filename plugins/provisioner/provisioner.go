@@ -3,7 +3,7 @@ package provisioner
 import (
 	"context"
 
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	"github.com/daytonaio/daytona/common/types"
 	"github.com/daytonaio/daytona/plugins/provisioner/grpc/proto"
 	"github.com/hashicorp/go-plugin"
 	"google.golang.org/grpc"

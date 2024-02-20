@@ -255,6 +255,222 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/workspace": {
+            "get": {
+                "description": "List workspaces info",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "List workspaces info",
+                "operationId": "ListWorkspaces",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Workspace"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a workspace",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Create a workspace",
+                "operationId": "CreateWorkspace",
+                "parameters": [
+                    {
+                        "description": "Create workspace",
+                        "name": "workspace",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateWorkspace"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Workspace"
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}": {
+            "get": {
+                "description": "Get workspace info",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Get workspace info",
+                "operationId": "GetWorkspaceInfo",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Workspace"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove workspace",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Remove workspace",
+                "operationId": "RemoveWorkspace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/start": {
+            "post": {
+                "description": "Start workspace",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Start workspace",
+                "operationId": "StartWorkspace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/stop": {
+            "post": {
+                "description": "Stop workspace",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Stop workspace",
+                "operationId": "StopWorkspace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/start": {
+            "post": {
+                "description": "Start project",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Start project",
+                "operationId": "StartProject",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project ID",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/stop": {
+            "post": {
+                "description": "Stop project",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Stop project",
+                "operationId": "StopProject",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project ID",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -266,6 +482,23 @@ const docTemplate = `{
                 },
                 "version": {
                     "type": "string"
+                }
+            }
+        },
+        "CreateWorkspace": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "provisioner": {
+                    "type": "string"
+                },
+                "repositories": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -328,6 +561,26 @@ const docTemplate = `{
                 }
             }
         },
+        "Workspace": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.Project"
+                    }
+                },
+                "provisioner": {
+                    "$ref": "#/definitions/types.WorkspaceProvisioner"
+                }
+            }
+        },
         "types.FRPSConfig": {
             "type": "object",
             "properties": {
@@ -338,6 +591,60 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "protocol": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.Project": {
+            "type": "object",
+            "properties": {
+                "authKey": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "repository": {
+                    "$ref": "#/definitions/types.Repository"
+                },
+                "workspaceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.Repository": {
+            "type": "object",
+            "properties": {
+                "branch": {
+                    "type": "string"
+                },
+                "owner": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "prNumber": {
+                    "type": "integer"
+                },
+                "sha": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.WorkspaceProvisioner": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "profile": {
                     "type": "string"
                 }
             }

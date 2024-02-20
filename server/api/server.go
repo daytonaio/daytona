@@ -18,6 +18,7 @@ import (
 
 	"github.com/daytonaio/daytona/server/api/controllers/plugin"
 	"github.com/daytonaio/daytona/server/api/controllers/server"
+	"github.com/daytonaio/daytona/server/api/controllers/workspace"
 	"github.com/daytonaio/daytona/server/config"
 
 	"github.com/gin-gonic/gin"
@@ -59,6 +60,18 @@ func Start() error {
 		serverController.GET("/config", server.GetConfig)
 		serverController.POST("/config", server.SetConfig)
 		serverController.POST("/network-key", server.GenerateNetworkKey)
+	}
+
+	workspaceController := router.Group("/workspace")
+	{
+		workspaceController.GET("/:workspaceId", workspace.GetWorkspaceInfo)
+		workspaceController.GET("/", workspace.ListWorkspaces)
+		workspaceController.POST("/", workspace.CreateWorkspace)
+		workspaceController.POST("/:workspaceId/start", workspace.StartWorkspace)
+		workspaceController.POST("/:workspaceId/stop", workspace.StopWorkspace)
+		workspaceController.DELETE("/:workspaceId", workspace.RemoveWorkspace)
+		workspaceController.POST("/:workspaceId/:projectId/start", workspace.StartProject)
+		workspaceController.POST("/:workspaceId/:projectId/stop", workspace.StopProject)
 	}
 
 	pluginController := router.Group("/plugin")

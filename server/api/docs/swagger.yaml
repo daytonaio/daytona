@@ -7,6 +7,17 @@ definitions:
       version:
         type: string
     type: object
+  CreateWorkspace:
+    properties:
+      name:
+        type: string
+      provisioner:
+        type: string
+      repositories:
+        items:
+          type: string
+        type: array
+    type: object
   InstallPluginRequest:
     properties:
       downloadUrls:
@@ -45,6 +56,19 @@ definitions:
       serverDownloadUrl:
         type: string
     type: object
+  Workspace:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      projects:
+        items:
+          $ref: '#/definitions/types.Project'
+        type: array
+      provisioner:
+        $ref: '#/definitions/types.WorkspaceProvisioner'
+    type: object
   types.FRPSConfig:
     properties:
       domain:
@@ -52,6 +76,41 @@ definitions:
       port:
         type: integer
       protocol:
+        type: string
+    type: object
+  types.Project:
+    properties:
+      authKey:
+        type: string
+      name:
+        type: string
+      repository:
+        $ref: '#/definitions/types.Repository'
+      workspaceId:
+        type: string
+    type: object
+  types.Repository:
+    properties:
+      branch:
+        type: string
+      owner:
+        type: string
+      path:
+        type: string
+      prNumber:
+        type: integer
+      sha:
+        type: string
+      source:
+        type: string
+      url:
+        type: string
+    type: object
+  types.WorkspaceProvisioner:
+    properties:
+      name:
+        type: string
+      profile:
         type: string
     type: object
 host: localhost:3000
@@ -221,6 +280,151 @@ paths:
       summary: Generate a new authentication key
       tags:
       - server
+  /workspace:
+    get:
+      description: List workspaces info
+      operationId: ListWorkspaces
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/Workspace'
+            type: array
+      summary: List workspaces info
+      tags:
+      - workspace
+    post:
+      description: Create a workspace
+      operationId: CreateWorkspace
+      parameters:
+      - description: Create workspace
+        in: body
+        name: workspace
+        required: true
+        schema:
+          $ref: '#/definitions/CreateWorkspace'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Workspace'
+      summary: Create a workspace
+      tags:
+      - workspace
+  /workspace/{workspaceId}:
+    delete:
+      description: Remove workspace
+      operationId: RemoveWorkspace
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Remove workspace
+      tags:
+      - workspace
+    get:
+      description: Get workspace info
+      operationId: GetWorkspaceInfo
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Workspace'
+      summary: Get workspace info
+      tags:
+      - workspace
+  /workspace/{workspaceId}/{projectId}/start:
+    post:
+      description: Start project
+      operationId: StartProject
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Start project
+      tags:
+      - workspace
+  /workspace/{workspaceId}/{projectId}/stop:
+    post:
+      description: Stop project
+      operationId: StopProject
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Stop project
+      tags:
+      - workspace
+  /workspace/{workspaceId}/start:
+    post:
+      description: Start workspace
+      operationId: StartWorkspace
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Start workspace
+      tags:
+      - workspace
+  /workspace/{workspaceId}/stop:
+    post:
+      description: Stop workspace
+      operationId: StopWorkspace
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Stop workspace
+      tags:
+      - workspace
 schemes:
 - http
 swagger: "2.0"

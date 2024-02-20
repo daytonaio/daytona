@@ -52,6 +52,8 @@ type APIClient struct {
 	PluginAPI *PluginAPIService
 
 	ServerAPI *ServerAPIService
+
+	WorkspaceAPI *WorkspaceAPIService
 }
 
 type service struct {
@@ -72,6 +74,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	// API Services
 	c.PluginAPI = (*PluginAPIService)(&c.common)
 	c.ServerAPI = (*ServerAPIService)(&c.common)
+	c.WorkspaceAPI = (*WorkspaceAPIService)(&c.common)
 
 	return c
 }
