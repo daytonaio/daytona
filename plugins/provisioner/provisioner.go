@@ -33,7 +33,7 @@ type Provisioner interface {
 	Configure() (interface{}, error)
 
 	//	WorkspacePreCreate
-	CreateWorkspace(workspace types.Workspace) (types.Empty, error)
+	CreateWorkspace(workspace *types.Workspace) (*types.Empty, error)
 	//	WorkspacePostCreate
 	//	WorkspacePreStart
 	StartWorkspace(workspace *types.Workspace) (types.Empty, error)

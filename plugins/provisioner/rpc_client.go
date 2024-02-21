@@ -28,9 +28,9 @@ func (m *ProvisionerRPCClient) Configure() (interface{}, error) {
 	return config, err
 }
 
-func (m *ProvisionerRPCClient) CreateWorkspace(workspace types.Workspace) (types.Empty, error) {
-	err := m.client.Call("Plugin.CreateWorkspace", &workspace, new(types.Empty))
-	return types.Empty{}, err
+func (m *ProvisionerRPCClient) CreateWorkspace(workspace *types.Workspace) (*types.Empty, error) {
+	err := m.client.Call("Plugin.CreateWorkspace", workspace, new(types.Empty))
+	return new(types.Empty), err
 }
 
 func (m *ProvisionerRPCClient) StartWorkspace(workspace *types.Workspace) (types.Empty, error) {

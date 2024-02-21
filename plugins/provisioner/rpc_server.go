@@ -33,12 +33,12 @@ func (m *ProvisionerRPCServer) Configure(arg interface{}, configResponse *interf
 	return nil
 }
 
-func (m *ProvisionerRPCServer) CreateWorkspace(arg types.Workspace, resp interface{}) error {
+func (m *ProvisionerRPCServer) CreateWorkspace(arg *types.Workspace, resp *types.Empty) error {
 	_, err := m.Impl.CreateWorkspace(arg)
 	return err
 }
 
-func (m *ProvisionerRPCServer) StartWorkspace(arg *types.Workspace, resp interface{}) error {
+func (m *ProvisionerRPCServer) StartWorkspace(arg *types.Workspace, resp *types.Empty) error {
 	_, err := m.Impl.StartWorkspace(arg)
 	return err
 }

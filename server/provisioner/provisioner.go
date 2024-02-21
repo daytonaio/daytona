@@ -20,7 +20,7 @@ func CreateWorkspace(workspace *types.Workspace) error {
 		return err
 	}
 
-	_, err = (*provisioner).CreateWorkspace(*workspace)
+	_, err = (*provisioner).CreateWorkspace(workspace)
 	if err != nil {
 		return err
 	}
