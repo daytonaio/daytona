@@ -32,7 +32,7 @@ var profileAddCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		if profileNameFlag == "" || serverHostnameFlag == "" || serverUserFlag == "" || provisionerFlag == "" || (serverPrivateKeyPathFlag == "" && serverPasswordFlag == "") {
+		if profileNameFlag == "" || serverHostnameFlag == "" || serverUserFlag == "" || provisionerFlag == "" || apiUrlFlag == "" || (serverPrivateKeyPathFlag == "" && serverPasswordFlag == "") {
 			_, err = CreateProfile(c, nil, true, true)
 			if err != nil {
 				log.Fatal(err)
@@ -46,6 +46,7 @@ var profileAddCmd = &cobra.Command{
 			RemoteSshPort:      serverPortFlag,
 			RemoteSshUser:      serverUserFlag,
 			DefaultProvisioner: provisionerFlag,
+			ApiUrl:             apiUrlFlag,
 		}
 		if serverPasswordFlag != "" {
 			profileAddView.RemoteSshPassword = serverPasswordFlag
@@ -69,6 +70,7 @@ func CreateProfile(c *config.Config, profileAddView *view.ProfileAddView, checkC
 			RemoteSshUser:           "",
 			RemoteSshPrivateKeyPath: "",
 			DefaultProvisioner:      "",
+			ApiUrl:                  "",
 		}
 	}
 
@@ -88,6 +90,9 @@ func addProfile(profileView view.ProfileAddView, c *config.Config, checkConnecti
 			Password:       nil,
 			PrivateKeyPath: nil,
 		},
+		Api: config.ServerApi{
+			Url: profileView.ApiUrl,
+		},
 	}
 
 	if profileView.RemoteSshPassword != "" {
@@ -100,7 +105,7 @@ func addProfile(profileView view.ProfileAddView, c *config.Config, checkConnecti
 
 	if checkConnection {
 		ignoreConnectionCheckPrompt := false
-		err := checkDaytonaInstalled(profileView, profile)
+		err := setDaytonaApiUrl(profileView, profile)
 		if err != nil {
 			view.IgnoreConnectionFailedCheck(&ignoreConnectionCheckPrompt, err.Error())
 			if !ignoreConnectionCheckPrompt {
@@ -126,7 +131,7 @@ func addProfile(profileView view.ProfileAddView, c *config.Config, checkConnecti
 	return profile.Id, nil
 }
 
-func checkDaytonaInstalled(profileView view.ProfileAddView, profile config.Profile) error {
+func setDaytonaApiUrl(profileView view.ProfileAddView, profile config.Profile) error {
 
 	s := spinner.New(spinner.CharSets[14], 100*time.Millisecond)
 
@@ -146,14 +151,16 @@ func checkDaytonaInstalled(profileView view.ProfileAddView, profile config.Profi
 
 	s.Stop()
 
-	serverRegistered, err := installer.ServerRegistered()
+	apiUrl, err := installer.GetApiUrl()
 	if err != nil {
 		return errors.New("Failed to execute command on remote machine")
 	}
 
-	if !serverRegistered {
+	if apiUrl == "" {
 		return errors.New("Daytona Server is not running on the remote machine")
 	}
+
+	profileView.ApiUrl = apiUrl
 	return nil
 }
 
@@ -164,6 +171,7 @@ var serverPasswordFlag string
 var serverUserFlag string
 var serverPrivateKeyPathFlag string
 var provisionerFlag string
+var apiUrlFlag string
 
 func init() {
 	profileAddCmd.Flags().StringVarP(&profileNameFlag, "name", "n", "", "Profile name")
@@ -173,4 +181,5 @@ func init() {
 	profileAddCmd.Flags().StringVarP(&serverPasswordFlag, "password", "p", "", "Remote SSH password")
 	profileAddCmd.Flags().StringVarP(&serverPrivateKeyPathFlag, "private-key-path", "k", "", "Remote SSH private key path")
 	profileAddCmd.Flags().StringVarP(&provisionerFlag, "provisioner", "r", "default", "Provisioner")
+	profileAddCmd.Flags().StringVarP(&apiUrlFlag, "api-url", "a", "", "API URL")
 }
