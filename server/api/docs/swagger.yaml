@@ -27,6 +27,15 @@ definitions:
       protocol:
         type: string
     type: object
+  GitProvider:
+    properties:
+      id:
+        type: string
+      token:
+        type: string
+      username:
+        type: string
+    type: object
   InstallPluginRequest:
     properties:
       downloadUrls:
@@ -99,6 +108,10 @@ definitions:
         type: integer
       frps:
         $ref: '#/definitions/FRPSConfig'
+      gitProviders:
+        items:
+          $ref: '#/definitions/GitProvider'
+        type: array
       headscalePort:
         type: integer
       id:

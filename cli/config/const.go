@@ -22,3 +22,11 @@ func GetIdeList() []Ide {
 		{"browser", "VS Code - Browser"},
 	}
 }
+
+func GetGitProviderList() []GitProvider {
+	return []GitProvider{
+		{"github", "GitHub", ""},
+		{"gitlab", "GitLab", ""},
+		{"bitbucket", "Bitbucket", ""},
+	}
+}

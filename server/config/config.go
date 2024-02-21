@@ -113,6 +113,7 @@ func init() {
 	c := types.ServerConfig{
 		PluginRegistryUrl: defaultPluginRegistryUrl,
 		PluginsDir:        pluginsDir,
+		GitProviders:      []types.GitProvider{},
 		ServerDownloadUrl: defaultServerDownloadUrl,
 		ApiPort:           defaultApiPort,
 		HeadscalePort:     defaultHeadscalePort,
