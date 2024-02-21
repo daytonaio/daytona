@@ -2,6 +2,8 @@ package remote_installer
 
 import (
 	"fmt"
+	"strings"
+	"time"
 
 	"github.com/daytonaio/daytona/common/os"
 	"golang.org/x/crypto/ssh"
@@ -191,7 +193,9 @@ func (s *RemoteInstaller) GetApiUrl() (string, error) {
 		return "", err
 	}
 
-	return string(output), nil
+	result := strings.TrimSuffix(string(output), "\n")
+
+	return result, nil
 }
 
 func (s *RemoteInstaller) SudoPasswordRequired() (bool, error) {
@@ -317,5 +321,44 @@ func (s *RemoteInstaller) RemoveDaemon(remoteOS os.OperatingSystem) error {
 		}
 	default:
 		return fmt.Errorf("unexpected os: %d", remoteOS)
+	}
+}
+
+func (s *RemoteInstaller) WaitForServerToStart() (bool, error) {
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+
+	timeoutTimer := time.NewTimer(3 * time.Minute)
+	defer timeoutTimer.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			running, err := s.checkServerRunning()
+			if err != nil {
+				return false, err
+			}
+			if running {
+				return true, nil
+			}
+		case <-timeoutTimer.C:
+			return false, nil
+		}
+	}
+}
+
+func (s *RemoteInstaller) checkServerRunning() (bool, error) {
+	session, err := s.Client.NewSession()
+	if err != nil {
+		return false, err
+	}
+	defer session.Close()
+
+	output, _ := (*session).CombinedOutput("echo $(daytona list > /dev/null 2>&1; echo $?)")
+
+	if string(output) == "0\n" {
+		return true, nil
+	} else {
+		return false, nil
 	}
 }
