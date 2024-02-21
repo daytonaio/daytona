@@ -35,6 +35,7 @@ func Execute() {
 	rootCmd.AddCommand(PortsCmd)
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(AgentCmd)
+	rootCmd.AddCommand(ListCmd)
 
 	if !wsMode {
 		rootCmd.AddCommand(CodeCmd)
@@ -42,7 +43,6 @@ func Execute() {
 		rootCmd.AddCommand(SshProxyCmd)
 		rootCmd.AddCommand(CreateCmd)
 		rootCmd.AddCommand(DeleteCmd)
-		rootCmd.AddCommand(ListCmd)
 		rootCmd.AddCommand(ServerCmd)
 		rootCmd.AddCommand(ideCmd)
 		rootCmd.AddCommand(ProfileCmd)
