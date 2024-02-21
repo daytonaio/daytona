@@ -8,13 +8,11 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/daytonaio/daytona/cli/api"
 	select_prompt "github.com/daytonaio/daytona/cli/cmd/views/workspace/select_prompt"
 	"github.com/daytonaio/daytona/cli/config"
-	"github.com/daytonaio/daytona/cli/connection"
-	workspace_proto "github.com/daytonaio/daytona/common/grpc/proto"
 	"github.com/daytonaio/daytona/internal/util"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -38,21 +36,18 @@ var SshCmd = &cobra.Command{
 		var workspaceName string
 		var projectName string
 
-		conn, err := connection.Get(nil)
+		apiClient, err := api.GetServerApiClient(&activeProfile)
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer conn.Close()
-
-		client := workspace_proto.NewWorkspaceServiceClient(conn)
 
 		if len(args) == 0 {
-			workspaceList, err := client.List(ctx, &empty.Empty{})
+			workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			workspaceName = select_prompt.GetWorkspaceNameFromPrompt(workspaceList.Workspaces, "ssh into")
+			workspaceName = select_prompt.GetWorkspaceNameFromPrompt(workspaceList, "ssh into")
 		} else {
 			workspaceName = args[0]
 		}
@@ -64,7 +59,7 @@ var SshCmd = &cobra.Command{
 
 		// Todo: make project_select_prompt view for 0 args
 		if len(args) == 0 || len(args) == 1 {
-			projectName, err = util.GetFirstWorkspaceProjectName(conn, workspaceName, projectName)
+			projectName, err = util.GetFirstWorkspaceProjectName(workspaceName, projectName, &activeProfile)
 			if err != nil {
 				log.Fatal(err)
 			}

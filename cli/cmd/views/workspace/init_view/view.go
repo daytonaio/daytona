@@ -8,9 +8,8 @@ import (
 	"sort"
 
 	"github.com/daytonaio/daytona/cli/cmd/views"
+	"github.com/daytonaio/daytona/common/types"
 	"github.com/daytonaio/daytona/server/event_bus"
-
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"

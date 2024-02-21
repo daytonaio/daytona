@@ -10,19 +10,15 @@ import (
 	"os/exec"
 	"path"
 
-	cmd_ports "github.com/daytonaio/daytona/cli/cmd/ports"
+	"github.com/daytonaio/daytona/cli/api"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	select_prompt "github.com/daytonaio/daytona/cli/cmd/views/workspace/select_prompt"
 	"github.com/daytonaio/daytona/cli/config"
-	"github.com/daytonaio/daytona/cli/connection"
-	workspace_proto "github.com/daytonaio/daytona/common/grpc/proto"
 	"github.com/daytonaio/daytona/internal/util"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/browser"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"google.golang.org/grpc"
 )
 
 var CodeCmd = &cobra.Command{
@@ -48,21 +44,18 @@ var CodeCmd = &cobra.Command{
 
 		ideId = c.DefaultIdeId
 
-		conn, err := connection.Get(nil)
+		apiClient, err := api.GetServerApiClient(&activeProfile)
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer conn.Close()
-
-		client := workspace_proto.NewWorkspaceServiceClient(conn)
 
 		if len(args) == 0 {
-			workspaceList, err := client.List(ctx, &empty.Empty{})
+			workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			workspaceName = select_prompt.GetWorkspaceNameFromPrompt(workspaceList.Workspaces, "open")
+			workspaceName = select_prompt.GetWorkspaceNameFromPrompt(workspaceList, "open")
 		} else {
 			workspaceName = args[0]
 		}
@@ -74,7 +67,7 @@ var CodeCmd = &cobra.Command{
 
 		// Todo: make project_select_prompt view for 0 args
 		if len(args) == 0 || len(args) == 1 {
-			projectName, err = util.GetFirstWorkspaceProjectName(conn, workspaceName, projectName)
+			projectName, err = util.GetFirstWorkspaceProjectName(workspaceName, projectName, &activeProfile)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -89,7 +82,7 @@ var CodeCmd = &cobra.Command{
 		}
 
 		if ideId == "browser" {
-			err = openBrowserIDE(conn, activeProfile, workspaceName, projectName)
+			err = openBrowserIDE(activeProfile, workspaceName, projectName)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -144,37 +137,38 @@ func init() {
 	CodeCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", "Specify the IDE ('vscode' or 'browser')")
 }
 
-func openBrowserIDE(conn *grpc.ClientConn, activeProfile config.Profile, workspaceName string, projectName string) error {
-	projectPortForwards, err := cmd_ports.GetProjectPortForwards(conn, workspaceName, projectName)
-	if err != nil {
-		return err
-	}
+func openBrowserIDE(activeProfile config.Profile, workspaceName string, projectName string) error {
+	log.Fatal("Not implemented - no more need to go through server, use tailscale instead")
+	// projectPortForwards, err := cmd_ports.GetProjectPortForwards(conn, workspaceName, projectName)
+	// if err != nil {
+	// 	return err
+	// }
 
-	browserPort := new(uint32)
-	*browserPort = 63000
+	// browserPort := new(uint32)
+	// *browserPort = 63000
 
-	errChan := make(chan error)
-	if _, ok := projectPortForwards.PortForwards[63000]; !ok {
-		browserPort, errChan = cmd_ports.ForwardPort(conn, activeProfile, workspaceName, projectName, uint32(63000))
-		if browserPort == nil {
-			if err = <-errChan; err != nil {
-				return err
-			}
-		}
-	} else {
-		go func() {
-			errChan <- nil
-		}()
-	}
+	// errChan := make(chan error)
+	// if _, ok := projectPortForwards.PortForwards[63000]; !ok {
+	// 	browserPort, errChan = cmd_ports.ForwardPort(conn, activeProfile, workspaceName, projectName, uint32(63000))
+	// 	if browserPort == nil {
+	// 		if err = <-errChan; err != nil {
+	// 			return err
+	// 		}
+	// 	}
+	// } else {
+	// 	go func() {
+	// 		errChan <- nil
+	// 	}()
+	// }
 
-	views_util.RenderInfoMessageBold(fmt.Sprintf("Port %d is being used to access the codebase.\nOpening %s using the browser IDE.", *browserPort, projectName))
+	views_util.RenderInfoMessageBold(fmt.Sprintf("Port %d is being used to access the codebase.\nOpening %s using the browser IDE.", 1234, projectName))
 
-	url := fmt.Sprintf("http://localhost:%d", *browserPort)
+	url := fmt.Sprintf("http://localhost:%d", 1234)
 
-	err = browser.OpenURL(url)
+	err := browser.OpenURL(url)
 	if err != nil {
 		log.Fatal("Error opening URL: " + err.Error())
 	}
 
-	return <-errChan
+	return nil
 }
