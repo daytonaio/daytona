@@ -174,7 +174,13 @@ var installCmd = &cobra.Command{
 
 		err = installer.RegisterDaemon(*remoteOs)
 		if err != nil {
-			log.Error("Failed to RegisterDaemon")
+			log.Error("Failed to register daemon")
+			log.Fatal(err)
+		}
+
+		err = installer.EnableServiceLinger(chosenProfile.Auth.User)
+		if err != nil {
+			log.Error("Failed to enable service linger")
 			log.Fatal(err)
 		}
 
