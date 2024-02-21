@@ -5,6 +5,7 @@ package cmd_profile
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -105,8 +106,9 @@ func addProfile(profileView view.ProfileAddView, c *config.Config, checkConnecti
 
 	if checkConnection {
 		ignoreConnectionCheckPrompt := false
-		err := setDaytonaApiUrl(profileView, profile)
+		err := setDaytonaApiUrl(&profileView, profile)
 		if err != nil {
+			fmt.Println(err.Error())
 			view.IgnoreConnectionFailedCheck(&ignoreConnectionCheckPrompt, err.Error())
 			if !ignoreConnectionCheckPrompt {
 				view.ProfileCreationView(c, &profileView, false)
@@ -116,6 +118,7 @@ func addProfile(profileView view.ProfileAddView, c *config.Config, checkConnecti
 		}
 	}
 
+	profile.Api.Url = profileView.ApiUrl
 	err := c.AddProfile(profile)
 	if err != nil {
 		return "", err
@@ -131,7 +134,7 @@ func addProfile(profileView view.ProfileAddView, c *config.Config, checkConnecti
 	return profile.Id, nil
 }
 
-func setDaytonaApiUrl(profileView view.ProfileAddView, profile config.Profile) error {
+func setDaytonaApiUrl(profileView *view.ProfileAddView, profile config.Profile) error {
 
 	s := spinner.New(spinner.CharSets[14], 100*time.Millisecond)
 

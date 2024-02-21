@@ -264,6 +264,23 @@ func (s *RemoteInstaller) WgetInstalled() (bool, error) {
 	}
 }
 
+func (s *RemoteInstaller) EnableServiceLinger(user string) error {
+	session, err := s.Client.NewSession()
+	if err != nil {
+		return err
+	}
+	defer session.Close()
+
+	cmd := fmt.Sprintf("echo $(echo '%s' | sudo -S loginctl enable-linger %s  > /dev/null 2>&1; echo $?)", s.Password, user)
+	output, _ := (*session).CombinedOutput(cmd)
+
+	if string(output) == "0\n" {
+		return nil
+	} else {
+		return nil
+	}
+}
+
 func (s *RemoteInstaller) RemoveBinary(remoteOS os.OperatingSystem) error {
 	session, err := s.Client.NewSession()
 	if err != nil {
