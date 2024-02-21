@@ -25,11 +25,9 @@ var configureCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		serverConfig := api.ToServerConfig(apiServerConfig)
+		apiServerConfig = view.ConfigurationForm(apiServerConfig)
 
-		view.ConfigurationForm(serverConfig)
-
-		_, _, err = apiClient.ServerAPI.SetConfig(context.Background()).Config(*api.FromServerConfig(serverConfig)).Execute()
+		_, _, err = apiClient.ServerAPI.SetConfig(context.Background()).Config(*apiServerConfig).Execute()
 		if err != nil {
 			log.Fatal(err)
 		}
