@@ -9,13 +9,8 @@ type ProvisionerRPCServer struct {
 }
 
 func (m *ProvisionerRPCServer) Initialize(arg InitializeProvisionerRequest, resp *types.Empty) error {
-	res, err := m.Impl.Initialize(arg)
-	if err != nil {
-		return err
-	}
-
-	*resp = res
-	return nil
+	_, err := m.Impl.Initialize(arg)
+	return err
 }
 
 func (m *ProvisionerRPCServer) GetInfo(arg interface{}, resp *ProvisionerInfo) error {
@@ -39,19 +34,23 @@ func (m *ProvisionerRPCServer) Configure(arg interface{}, configResponse *interf
 }
 
 func (m *ProvisionerRPCServer) CreateWorkspace(arg *types.Workspace, resp interface{}) error {
-	return m.Impl.CreateWorkspace(arg)
+	_, err := m.Impl.CreateWorkspace(arg)
+	return err
 }
 
 func (m *ProvisionerRPCServer) StartWorkspace(arg *types.Workspace, resp interface{}) error {
-	return m.Impl.StartWorkspace(arg)
+	_, err := m.Impl.StartWorkspace(arg)
+	return err
 }
 
 func (m *ProvisionerRPCServer) StopWorkspace(arg *types.Workspace, resp interface{}) error {
-	return m.Impl.StopWorkspace(arg)
+	_, err := m.Impl.StopWorkspace(arg)
+	return err
 }
 
 func (m *ProvisionerRPCServer) DestroyWorkspace(arg *types.Workspace, resp interface{}) error {
-	return m.Impl.DestroyWorkspace(arg)
+	_, err := m.Impl.DestroyWorkspace(arg)
+	return err
 }
 
 func (m *ProvisionerRPCServer) GetWorkspaceInfo(arg *types.Workspace, resp *types.WorkspaceInfo) error {
@@ -65,19 +64,23 @@ func (m *ProvisionerRPCServer) GetWorkspaceInfo(arg *types.Workspace, resp *type
 }
 
 func (m *ProvisionerRPCServer) CreateProject(arg *types.Project, resp interface{}) error {
-	return m.Impl.CreateProject(arg)
+	_, err := m.Impl.CreateProject(arg)
+	return err
 }
 
 func (m *ProvisionerRPCServer) StartProject(arg *types.Project, resp interface{}) error {
-	return m.Impl.StartProject(arg)
+	_, err := m.Impl.StartProject(arg)
+	return err
 }
 
 func (m *ProvisionerRPCServer) StopProject(arg *types.Project, resp interface{}) error {
-	return m.Impl.StopProject(arg)
+	_, err := m.Impl.StopProject(arg)
+	return err
 }
 
 func (m *ProvisionerRPCServer) DestroyProject(arg *types.Project, resp interface{}) error {
-	return m.Impl.DestroyProject(arg)
+	_, err := m.Impl.DestroyProject(arg)
+	return err
 }
 
 func (m *ProvisionerRPCServer) GetProjectInfo(arg *types.Project, resp *types.ProjectInfo) error {

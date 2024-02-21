@@ -33,23 +33,23 @@ type Provisioner interface {
 	Configure() (interface{}, error)
 
 	//	WorkspacePreCreate
-	CreateWorkspace(workspace *types.Workspace) error
+	CreateWorkspace(workspace *types.Workspace) (types.Empty, error)
 	//	WorkspacePostCreate
 	//	WorkspacePreStart
-	StartWorkspace(workspace *types.Workspace) error
+	StartWorkspace(workspace *types.Workspace) (types.Empty, error)
 	//	WorkspacePostStart
 	//	WorkspacePreStop
-	StopWorkspace(workspace *types.Workspace) error
+	StopWorkspace(workspace *types.Workspace) (types.Empty, error)
 	//	WorkspacePostStop
 	//	WorkspacePreStop
-	DestroyWorkspace(workspace *types.Workspace) error
+	DestroyWorkspace(workspace *types.Workspace) (types.Empty, error)
 	//	WorkspacePostStop
 	GetWorkspaceInfo(workspace *types.Workspace) (*types.WorkspaceInfo, error)
 
-	CreateProject(project *types.Project) error
-	StartProject(project *types.Project) error
-	StopProject(project *types.Project) error
-	DestroyProject(project *types.Project) error
+	CreateProject(project *types.Project) (types.Empty, error)
+	StartProject(project *types.Project) (types.Empty, error)
+	StopProject(project *types.Project) (types.Empty, error)
+	DestroyProject(project *types.Project) (types.Empty, error)
 
 	// TODO: rethink name
 	GetProjectInfo(project *types.Project) (*types.ProjectInfo, error)

@@ -11,23 +11,6 @@ type ProvisionerRPCClient struct {
 }
 
 func (m *ProvisionerRPCClient) Initialize(req InitializeProvisionerRequest) (types.Empty, error) {
-	// ws := types.Workspace{
-	// 	Id:       "test",
-	// 	Name:     "test",
-	// 	Projects: []*types.Project{},
-	// 	Provisioner: &types.WorkspaceProvisioner{
-	// 		Name:    "test",
-	// 		Profile: "default",
-	// 	},
-	// }
-
-	// project := types.Project{
-	// 	Name:        "test",
-	// 	Repository:  &types.Repository{},
-	// 	WorkspaceId: "test",
-	// 	AuthKey:     "test",
-	// }
-
 	err := m.client.Call("Plugin.Initialize", &req, new(types.Empty))
 	return types.Empty{}, err
 }
@@ -45,20 +28,24 @@ func (m *ProvisionerRPCClient) Configure() (interface{}, error) {
 	return config, err
 }
 
-func (m *ProvisionerRPCClient) CreateWorkspace(workspace *types.Workspace) error {
-	return m.client.Call("Plugin.CreateWorkspace", workspace, new(interface{}))
+func (m *ProvisionerRPCClient) CreateWorkspace(workspace *types.Workspace) (types.Empty, error) {
+	err := m.client.Call("Plugin.CreateWorkspace", workspace, new(types.Empty))
+	return types.Empty{}, err
 }
 
-func (m *ProvisionerRPCClient) StartWorkspace(workspace *types.Workspace) error {
-	return m.client.Call("Plugin.StartWorkspace", workspace, new(interface{}))
+func (m *ProvisionerRPCClient) StartWorkspace(workspace *types.Workspace) (types.Empty, error) {
+	err := m.client.Call("Plugin.StartWorkspace", workspace, new(types.Empty))
+	return types.Empty{}, err
 }
 
-func (m *ProvisionerRPCClient) StopWorkspace(workspace *types.Workspace) error {
-	return m.client.Call("Plugin.StopWorkspace", workspace, new(interface{}))
+func (m *ProvisionerRPCClient) StopWorkspace(workspace *types.Workspace) (types.Empty, error) {
+	err := m.client.Call("Plugin.StopWorkspace", workspace, new(types.Empty))
+	return types.Empty{}, err
 }
 
-func (m *ProvisionerRPCClient) DestroyWorkspace(workspace *types.Workspace) error {
-	return m.client.Call("Plugin.DestroyWorkspace", workspace, new(interface{}))
+func (m *ProvisionerRPCClient) DestroyWorkspace(workspace *types.Workspace) (types.Empty, error) {
+	err := m.client.Call("Plugin.DestroyWorkspace", workspace, new(types.Empty))
+	return types.Empty{}, err
 }
 
 func (m *ProvisionerRPCClient) GetWorkspaceInfo(workspace *types.Workspace) (*types.WorkspaceInfo, error) {
@@ -67,20 +54,24 @@ func (m *ProvisionerRPCClient) GetWorkspaceInfo(workspace *types.Workspace) (*ty
 	return &response, err
 }
 
-func (m *ProvisionerRPCClient) CreateProject(project *types.Project) error {
-	return m.client.Call("Plugin.CreateProject", project, new(interface{}))
+func (m *ProvisionerRPCClient) CreateProject(project *types.Project) (types.Empty, error) {
+	err := m.client.Call("Plugin.CreateProject", project, new(types.Empty))
+	return types.Empty{}, err
 }
 
-func (m *ProvisionerRPCClient) StartProject(project *types.Project) error {
-	return m.client.Call("Plugin.StartProject", project, new(interface{}))
+func (m *ProvisionerRPCClient) StartProject(project *types.Project) (types.Empty, error) {
+	err := m.client.Call("Plugin.StartProject", project, new(types.Empty))
+	return types.Empty{}, err
 }
 
-func (m *ProvisionerRPCClient) StopProject(project *types.Project) error {
-	return m.client.Call("Plugin.StopProject", project, new(interface{}))
+func (m *ProvisionerRPCClient) StopProject(project *types.Project) (types.Empty, error) {
+	err := m.client.Call("Plugin.StopProject", project, new(types.Empty))
+	return types.Empty{}, err
 }
 
-func (m *ProvisionerRPCClient) DestroyProject(project *types.Project) error {
-	return m.client.Call("Plugin.DestroyProject", project, new(interface{}))
+func (m *ProvisionerRPCClient) DestroyProject(project *types.Project) (types.Empty, error) {
+	err := m.client.Call("Plugin.DestroyProject", project, new(types.Empty))
+	return types.Empty{}, err
 }
 
 func (m *ProvisionerRPCClient) GetProjectInfo(project *types.Project) (*types.ProjectInfo, error) {
