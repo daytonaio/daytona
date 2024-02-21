@@ -22,16 +22,16 @@ type AgentServiceConfig struct {
 }
 
 type AgentService interface {
-	Initialize(InitializeAgentServiceRequest) error
+	Initialize(InitializeAgentServiceRequest) (*types.Empty, error)
 	GetInfo() (AgentServiceInfo, error)
-	SetConfig(config *AgentServiceConfig) error
-	ProjectPreInit(project *types.Project) error
-	ProjectPostInit(project *types.Project) error
-	ProjectPreStart(project *types.Project) error
-	ProjectPostStart(project *types.Project) error
-	ProjectPreStop(project *types.Project) error
+	SetConfig(config *AgentServiceConfig) (*types.Empty, error)
+	ProjectPreInit(project *types.Project) (*types.Empty, error)
+	ProjectPostInit(project *types.Project) (*types.Empty, error)
+	ProjectPreStart(project *types.Project) (*types.Empty, error)
+	ProjectPostStart(project *types.Project) (*types.Empty, error)
+	ProjectPreStop(project *types.Project) (*types.Empty, error)
 	GetProjectInfo(project *types.Project) (*types.ProjectInfo, error)
-	LivenessProbe() error
+	LivenessProbe() (*types.Empty, error)
 	LivenessProbeTimeout() uint32
 }
 

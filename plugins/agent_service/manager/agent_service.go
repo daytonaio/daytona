@@ -101,7 +101,7 @@ func RegisterAgentService(pluginPath string) error {
 		return errors.New("failed to initialize provisioner: " + err.Error())
 	}
 
-	err = (*projectAgent).Initialize(agent_service.InitializeAgentServiceRequest{
+	_, err = (*projectAgent).Initialize(agent_service.InitializeAgentServiceRequest{
 		BasePath: pluginBasePath,
 	})
 	if err != nil {
