@@ -26,7 +26,7 @@ type InitializeProvisionerRequest struct {
 }
 
 type Provisioner interface {
-	Initialize(InitializeProvisionerRequest) (types.Empty, error)
+	Initialize(InitializeProvisionerRequest) (*types.Empty, error)
 	GetInfo() (ProvisionerInfo, error)
 
 	//	client side profile config wizard
@@ -36,20 +36,20 @@ type Provisioner interface {
 	CreateWorkspace(workspace *types.Workspace) (*types.Empty, error)
 	//	WorkspacePostCreate
 	//	WorkspacePreStart
-	StartWorkspace(workspace *types.Workspace) (types.Empty, error)
+	StartWorkspace(workspace *types.Workspace) (*types.Empty, error)
 	//	WorkspacePostStart
 	//	WorkspacePreStop
-	StopWorkspace(workspace *types.Workspace) (types.Empty, error)
+	StopWorkspace(workspace *types.Workspace) (*types.Empty, error)
 	//	WorkspacePostStop
 	//	WorkspacePreStop
-	DestroyWorkspace(workspace *types.Workspace) (types.Empty, error)
+	DestroyWorkspace(workspace *types.Workspace) (*types.Empty, error)
 	//	WorkspacePostStop
 	GetWorkspaceInfo(workspace *types.Workspace) (*types.WorkspaceInfo, error)
 
-	CreateProject(project *types.Project) (types.Empty, error)
-	StartProject(project *types.Project) (types.Empty, error)
-	StopProject(project *types.Project) (types.Empty, error)
-	DestroyProject(project *types.Project) (types.Empty, error)
+	CreateProject(project *types.Project) (*types.Empty, error)
+	StartProject(project *types.Project) (*types.Empty, error)
+	StopProject(project *types.Project) (*types.Empty, error)
+	DestroyProject(project *types.Project) (*types.Empty, error)
 
 	// TODO: rethink name
 	GetProjectInfo(project *types.Project) (*types.ProjectInfo, error)
