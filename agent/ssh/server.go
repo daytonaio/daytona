@@ -3,6 +3,7 @@ package ssh
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"os/exec"
 	"syscall"
@@ -13,14 +14,7 @@ import (
 	"github.com/pkg/sftp"
 	crypto_ssh "golang.org/x/crypto/ssh"
 	"golang.org/x/sys/unix"
-
-	log "github.com/sirupsen/logrus"
 )
-
-func setWinsize(f *os.File, w, h int) {
-	syscall.Syscall(syscall.SYS_IOCTL, f.Fd(), uintptr(syscall.TIOCSWINSZ),
-		uintptr(unsafe.Pointer(&struct{ h, w, x, y uint16 }{uint16(h), uint16(w), 0, 0})))
-}
 
 func Start() {
 	forwardedTCPHandler := &ssh.ForwardedTCPHandler{}
@@ -28,8 +22,19 @@ func Start() {
 	sshServer := ssh.Server{
 		Addr: ":2222",
 		Handler: func(s ssh.Session) {
+			switch ss := s.Subsystem(); ss {
+			case "":
+			case "sftp":
+				sftpHandler(s)
+				return
+			default:
+				fmt.Fprintf(s, "Subsystem %s not supported\n", ss)
+				s.Exit(1)
+				return
+			}
+
 			ptyReq, winCh, isPty := s.Pty()
-			if isPty {
+			if s.RawCommand() == "" && isPty {
 				handlePty(s, ptyReq, winCh)
 			} else {
 				handleNonPty(s)
@@ -69,7 +74,7 @@ func handlePty(s ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh.Window) {
 	if ssh.AgentRequested(s) {
 		l, err := ssh.NewAgentListener()
 		if err != nil {
-			fmt.Printf(err.Error())
+			fmt.Println("#5", err.Error())
 		}
 		defer l.Close()
 		go ssh.ForwardAgentConnections(l, s)
@@ -82,67 +87,34 @@ func handlePty(s ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh.Window) {
 		panic(err)
 	}
 
-	sigs := make(chan ssh.Signal, 1)
-	s.Signals(sigs)
-	defer func() {
-		s.Signals(nil)
-		close(sigs)
-	}()
-	go func() {
-		for {
-			if sigs == nil && winCh == nil {
-				return
-			}
-
-			select {
-			case sig, ok := <-sigs:
-				if !ok {
-					sigs = nil
-					continue
-				}
-				signal := osSignalFrom(sig)
-				fmt.Println(signal.String())
-			case win, ok := <-winCh:
-				if !ok {
-					winCh = nil
-					continue
-				}
-				err = pty.Setsize(f, &pty.Winsize{
-					Rows: uint16(win.Height),
-					Cols: uint16(win.Width),
-				})
-				if err != nil {
-					panic(err)
-				}
-			}
-		}
-	}()
-
 	go func() {
 		for win := range winCh {
-			setWinsize(f, win.Width, win.Height)
+			syscall.Syscall(syscall.SYS_IOCTL, f.Fd(), uintptr(syscall.TIOCSWINSZ),
+				uintptr(unsafe.Pointer(&struct{ h, w, x, y uint16 }{uint16(win.Height), uint16(win.Width), 0, 0})))
 		}
 	}()
 	go func() {
 		io.Copy(f, s) // stdin
 	}()
 	io.Copy(s, f) // stdout
-
-	log.Println("done")
 }
 
 func handleNonPty(s ssh.Session) {
 	args := []string{}
 	if len(s.Command()) > 0 {
-		args = append([]string{"-c"}, s.Command()...)
+		args = append([]string{"-c"}, s.RawCommand())
 	}
 
-	cmd := exec.Command(getShell(), args...)
+	fmt.Println("args: ", args)
+
+	cmd := exec.Command("/bin/sh", args...)
+
+	cmd.Env = append(cmd.Env, os.Environ()...)
 
 	if ssh.AgentRequested(s) {
 		l, err := ssh.NewAgentListener()
 		if err != nil {
-			fmt.Printf(err.Error())
+			fmt.Println("#4", err.Error())
 		}
 		defer l.Close()
 		go ssh.ForwardAgentConnections(l, s)
@@ -151,23 +123,25 @@ func handleNonPty(s ssh.Session) {
 
 	cmd.Stdout = s
 	cmd.Stderr = s.Stderr()
-	// This blocks forever until stdin is received if we don't
-	// use StdinPipe. It's unknown what causes this.
 	stdinPipe, err := cmd.StdinPipe()
 	if err != nil {
-		log.Println(err)
+		//	TODO: handle error
+		log.Println("#1", err)
 		return
 	}
 	go func() {
 		_, err := io.Copy(stdinPipe, s)
 		if err != nil {
-			log.Println(err)
+			//	TODO: handle error
+			log.Println("#2", err)
 		}
 		_ = stdinPipe.Close()
 	}()
+
 	err = cmd.Start()
 	if err != nil {
-		log.Println(err)
+		//	TODO: handle error
+		log.Println("#3", err)
 		return
 	}
 	sigs := make(chan ssh.Signal, 1)
@@ -182,7 +156,20 @@ func handleNonPty(s ssh.Session) {
 			cmd.Process.Signal(signal)
 		}
 	}()
-	cmd.Wait()
+	err = cmd.Wait()
+
+	if err != nil {
+		log.Println(s.RawCommand(), " ", err)
+		s.Exit(127)
+		return
+	}
+
+	err = s.Exit(0)
+	if err != nil {
+		//	TODO: handle error
+		log.Println("exit error: ", err)
+	}
+	log.Println(s.RawCommand(), " command exited successfully")
 }
 
 func osSignalFrom(sig ssh.Signal) os.Signal {

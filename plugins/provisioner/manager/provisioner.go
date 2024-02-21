@@ -109,7 +109,7 @@ func RegisterProvisioner(pluginPath, serverDownloadUrl, serverUrl, serverApiUrl 
 		BasePath:          pluginBasePath,
 		ServerDownloadUrl: serverDownloadUrl,
 		// TODO: get version from somewhere
-		ServerVersion: "rest-refactor",
+		ServerVersion: "DC-127-SSH-command",
 		ServerUrl:     serverUrl,
 		ServerApiUrl:  serverApiUrl,
 	})
