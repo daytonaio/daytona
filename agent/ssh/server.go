@@ -82,6 +82,7 @@ func handlePty(s ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh.Window) {
 	}
 
 	cmd.Env = append(cmd.Env, fmt.Sprintf("TERM=%s", ptyReq.Term))
+	cmd.Env = append(cmd.Env, os.Environ()...)
 	f, err := pty.Start(cmd)
 	if err != nil {
 		panic(err)
