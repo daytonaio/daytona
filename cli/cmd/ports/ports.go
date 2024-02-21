@@ -16,6 +16,4 @@ var PortsCmd = &cobra.Command{
 
 func init() {
 	PortsCmd.AddCommand(portForwardCmd)
-	PortsCmd.AddCommand(stopPortForwardCmd)
-	PortsCmd.AddCommand(listPortForwardsCmd)
 }

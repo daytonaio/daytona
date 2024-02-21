@@ -5,20 +5,20 @@ package views_provisioner
 
 import (
 	"github.com/daytonaio/daytona/cli/cmd/views"
-	"github.com/daytonaio/daytona/common/grpc/proto"
+	"github.com/daytonaio/daytona/common/api_client"
 
 	"github.com/charmbracelet/huh"
 )
 
-func GetProvisionerFromPrompt(provisionerPlugins []*proto.ProvisionerPlugin, description string, selectedProvisioner *proto.ProvisionerPlugin) (*proto.ProvisionerPlugin, error) {
+func GetProvisionerFromPrompt(provisionerPlugins []api_client.ProvisionerPlugin, description string, selectedProvisioner *api_client.ProvisionerPlugin) (*api_client.ProvisionerPlugin, error) {
 	var provisioner = selectedProvisioner
 
-	provisionerOptions := []huh.Option[*proto.ProvisionerPlugin]{}
+	provisionerOptions := []huh.Option[*api_client.ProvisionerPlugin]{}
 	for _, provisioner := range provisionerPlugins {
-		provisionerOptions = append(provisionerOptions, huh.NewOption(provisioner.Name, provisioner))
+		provisionerOptions = append(provisionerOptions, huh.NewOption(*provisioner.Name, &provisioner))
 	}
 
-	provisionerSelect := huh.NewSelect[*proto.ProvisionerPlugin]().
+	provisionerSelect := huh.NewSelect[*api_client.ProvisionerPlugin]().
 		Title("Default provisioner").
 		Options(provisionerOptions...).
 		Value(&provisioner)

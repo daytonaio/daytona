@@ -1,10 +1,13 @@
 package provisioner
 
 import (
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	"fmt"
+
+	"github.com/daytonaio/daytona/common/types"
 	provisioner_manager "github.com/daytonaio/daytona/plugins/provisioner/manager"
 	"github.com/daytonaio/daytona/server/db"
 	"github.com/daytonaio/daytona/server/event_bus"
+	"github.com/daytonaio/daytona/server/headscale"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -17,7 +20,7 @@ func CreateWorkspace(workspace *types.Workspace) error {
 		return err
 	}
 
-	err = (*provisioner).CreateWorkspace(workspace)
+	_, err = (*provisioner).CreateWorkspace(workspace)
 	if err != nil {
 		return err
 	}
@@ -33,7 +36,7 @@ func CreateWorkspace(workspace *types.Workspace) error {
 				ProjectName:   project.Name,
 			},
 		})
-		err := (*provisioner).CreateProject(project)
+		_, err := (*provisioner).CreateProject(project)
 		if err != nil {
 			return err
 		}
@@ -78,7 +81,7 @@ func StartWorkspace(workspace *types.Workspace) error {
 
 	for _, project := range workspace.Projects {
 		//	todo: go routines
-		err := (*provisioner).StartProject(project)
+		_, err := (*provisioner).StartProject(project)
 		if err != nil {
 			return err
 		}
@@ -104,7 +107,7 @@ func StartProject(project *types.Project) error {
 		return err
 	}
 
-	err = (*provisioner).StartProject(project)
+	_, err = (*provisioner).StartProject(project)
 	if err != nil {
 		return err
 	}
@@ -133,7 +136,7 @@ func StopWorkspace(workspace *types.Workspace) error {
 
 	for _, project := range workspace.Projects {
 		//	todo: go routines
-		err := (*provisioner).StopProject(project)
+		_, err := (*provisioner).StopProject(project)
 		if err != nil {
 			return err
 		}
@@ -160,7 +163,7 @@ func StopProject(project *types.Project) error {
 		return err
 	}
 
-	err = (*provisioner).StopProject(project)
+	_, err = (*provisioner).StopProject(project)
 	if err != nil {
 		return err
 	}
@@ -187,13 +190,21 @@ func DestroyWorkspace(workspace *types.Workspace) error {
 
 	for _, project := range workspace.Projects {
 		//	todo: go routines
-		err := (*provisioner).DestroyProject(project)
+		_, err := (*provisioner).DestroyProject(project)
 		if err != nil {
 			return err
 		}
+		err = headscale.DeleteNode(fmt.Sprintf("%s-%s", workspace.Name, project.Name))
+		if err != nil {
+			log.Error(err)
+		}
+		err = headscale.RevokeAuthKey(project.AuthKey)
+		if err != nil {
+			log.Error(err)
+		}
 	}
 
-	err = (*provisioner).DestroyWorkspace(workspace)
+	_, err = (*provisioner).DestroyWorkspace(workspace)
 	if err != nil {
 		return err
 	}

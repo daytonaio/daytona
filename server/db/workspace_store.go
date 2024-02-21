@@ -6,7 +6,7 @@ package db
 import (
 	"gorm.io/gorm"
 
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	"github.com/daytonaio/daytona/common/types"
 	. "github.com/daytonaio/daytona/server/db/dto"
 )
 
