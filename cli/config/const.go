@@ -9,10 +9,10 @@ import (
 
 func GetBinaryUrls() map[os.OperatingSystem]string {
 	return map[os.OperatingSystem]string{
-		(os.Darwin_64_86): "https://download.daytona.io/daytona/server-url-autoconfigure/daytona-darwin-amd64",
-		(os.Darwin_arm64): "https://download.daytona.io/daytona/server-url-autoconfigure/daytona-darwin-arm64",
-		(os.Linux_64_86):  "https://download.daytona.io/daytona/server-url-autoconfigure/daytona-linux-amd64",
-		(os.Linux_arm64):  "https://download.daytona.io/daytona/server-url-autoconfigure/daytona-linux-arm64",
+		(os.Darwin_64_86): "https://download.daytona.io/daytona/latest/daytona-darwin-amd64",
+		(os.Darwin_arm64): "https://download.daytona.io/daytona/latest/daytona-darwin-arm64",
+		(os.Linux_64_86):  "https://download.daytona.io/daytona/latest/daytona-linux-amd64",
+		(os.Linux_arm64):  "https://download.daytona.io/daytona/latest/daytona-linux-arm64",
 	}
 }
 
