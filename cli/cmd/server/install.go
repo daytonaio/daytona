@@ -178,6 +178,10 @@ var installCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		s.Stop()
+		fmt.Println("Waiting for Daytona Server to start")
+		s.Start()
+
 		apiUrl, err := installer.GetApiUrl()
 		if err != nil {
 			log.Error("Failed to get API URL from the remote machine")
@@ -193,6 +197,17 @@ var installCmd = &cobra.Command{
 		err = c.EditProfile(activeProfile)
 		if err != nil {
 			log.Error("Failed to set API URL from the remote machine")
+			log.Fatal(err)
+		}
+
+		success, err := installer.WaitForServerToStart()
+		if err != nil {
+			log.Error("Failed to wait for Daytona server to start")
+			log.Fatal(err)
+		}
+
+		if !success {
+			log.Error("Waiting for Daytona server to start timed out")
 			log.Fatal(err)
 		}
 
