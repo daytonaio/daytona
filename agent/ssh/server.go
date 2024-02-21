@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"syscall"
 	"unsafe"
 
@@ -69,7 +70,8 @@ func Start() {
 }
 
 func handlePty(s ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh.Window) {
-	cmd := exec.Command(getShell())
+	shell := getShell()
+	cmd := exec.Command(shell)
 
 	if ssh.AgentRequested(s) {
 		l, err := ssh.NewAgentListener()
@@ -83,6 +85,7 @@ func handlePty(s ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh.Window) {
 
 	cmd.Env = append(cmd.Env, fmt.Sprintf("TERM=%s", ptyReq.Term))
 	cmd.Env = append(cmd.Env, os.Environ()...)
+	cmd.Env = append(cmd.Env, fmt.Sprintf("SHELL=%s", shell))
 	f, err := pty.Start(cmd)
 	if err != nil {
 		panic(err)
@@ -209,6 +212,27 @@ func osSignalFrom(sig ssh.Signal) os.Signal {
 }
 
 func getShell() string {
+	out, err := exec.Command("sh", "-c", "grep '^[^#]' /etc/shells").Output()
+	if err != nil {
+		return "sh"
+	}
+
+	if strings.Contains(string(out), "/bin/bash") {
+		return "/bin/bash"
+	}
+
+	if strings.Contains(string(out), "/usr/bin/bash") {
+		return "/usr/bin/bash"
+	}
+
+	if strings.Contains(string(out), "/bin/zsh") {
+		return "/bin/zsh"
+	}
+
+	if strings.Contains(string(out), "/usr/bin/zsh") {
+		return "/usr/bin/zsh"
+	}
+
 	shellEnv, shellSet := os.LookupEnv("SHELL")
 
 	if shellSet {
