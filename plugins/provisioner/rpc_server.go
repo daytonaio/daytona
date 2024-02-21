@@ -8,7 +8,7 @@ type ProvisionerRPCServer struct {
 	Impl Provisioner
 }
 
-func (m *ProvisionerRPCServer) Initialize(arg InitializeProvisionerRequest, resp *interface{}) error {
+func (m *ProvisionerRPCServer) Initialize(arg InitializeProvisionerRequest, resp *types.Empty) error {
 	res, err := m.Impl.Initialize(arg)
 	if err != nil {
 		return err

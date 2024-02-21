@@ -10,9 +10,26 @@ type ProvisionerRPCClient struct {
 	client *rpc.Client
 }
 
-func (m *ProvisionerRPCClient) Initialize(req InitializeProvisionerRequest) (Empty, error) {
-	err := m.client.Call("Plugin.Initialize", req, new(interface{}))
-	return Empty{}, err
+func (m *ProvisionerRPCClient) Initialize(req InitializeProvisionerRequest) (types.Empty, error) {
+	// ws := types.Workspace{
+	// 	Id:       "test",
+	// 	Name:     "test",
+	// 	Projects: []*types.Project{},
+	// 	Provisioner: &types.WorkspaceProvisioner{
+	// 		Name:    "test",
+	// 		Profile: "default",
+	// 	},
+	// }
+
+	// project := types.Project{
+	// 	Name:        "test",
+	// 	Repository:  &types.Repository{},
+	// 	WorkspaceId: "test",
+	// 	AuthKey:     "test",
+	// }
+
+	err := m.client.Call("Plugin.Initialize", &req, new(types.Empty))
+	return types.Empty{}, err
 }
 
 func (m *ProvisionerRPCClient) GetInfo() (ProvisionerInfo, error) {
