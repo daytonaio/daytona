@@ -6,25 +6,22 @@ package cmd_workspace
 import (
 	"context"
 	"errors"
-	"io"
 	"os"
 
-	"github.com/daytonaio/daytona/common/grpc/proto"
+	"github.com/daytonaio/daytona/common/api_client"
 	"github.com/daytonaio/daytona/internal/util"
-	"google.golang.org/protobuf/types/known/emptypb"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/golang/protobuf/ptypes/empty"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
+	"github.com/daytonaio/daytona/cli/api"
 	views_provisioner "github.com/daytonaio/daytona/cli/cmd/views/provisioner"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	wizard_view "github.com/daytonaio/daytona/cli/cmd/views/workspace/creation_wizard"
 	info_view "github.com/daytonaio/daytona/cli/cmd/views/workspace/info_view"
 	init_view "github.com/daytonaio/daytona/cli/cmd/views/workspace/init_view"
 	"github.com/daytonaio/daytona/cli/config"
-	"github.com/daytonaio/daytona/cli/connection"
 )
 
 var repos []string
@@ -34,15 +31,17 @@ var CreateCmd = &cobra.Command{
 	Short: "Create a workspace",
 	Args:  cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
+		ctx := context.Background()
 		var workspaceName string
 		var provisioner string
 
-		conn, err := connection.GetGrpcConn(nil)
+		manual, _ := cmd.Flags().GetBool("manual")
+		apiClient := api.GetServerApiClient("http://localhost:3000", "")
+
+		serverConfig, _, err := apiClient.ServerAPI.GetConfig(ctx).Execute()
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer conn.Close()
-		client := proto.NewWorkspaceServiceClient(conn)
 
 		c, err := config.GetConfig()
 		if err != nil {
@@ -57,24 +56,23 @@ var CreateCmd = &cobra.Command{
 		if provisionerFlag != "" {
 			provisioner = provisionerFlag
 		} else if activeProfile.DefaultProvisioner == "" {
-			ctx := context.Background()
-			pluginsClient := proto.NewPluginsClient(conn)
-			provisionerPluginList, err := pluginsClient.ListProvisionerPlugins(ctx, &emptypb.Empty{})
+
+			provisionerPluginList, _, err := apiClient.PluginAPI.ListProvisionerPlugins(context.Background()).Execute()
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			if len(provisionerPluginList.Plugins) == 0 {
+			if len(provisionerPluginList) == 0 {
 				log.Fatal(errors.New("no provisioner plugins found"))
 			}
 
-			defaultProvisioner, err := views_provisioner.GetProvisionerFromPrompt(provisionerPluginList.Plugins, "Provisioner not set. Choose a provisioner to use", nil)
+			defaultProvisioner, err := views_provisioner.GetProvisionerFromPrompt(provisionerPluginList, "Provisioner not set. Choose a provisioner to use", nil)
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			provisioner = defaultProvisioner.Name
-			activeProfile.DefaultProvisioner = defaultProvisioner.Name
+			provisioner = *defaultProvisioner.Name
+			activeProfile.DefaultProvisioner = *defaultProvisioner.Name
 
 			err = c.EditProfile(activeProfile)
 			if err != nil {
@@ -86,21 +84,19 @@ var CreateCmd = &cobra.Command{
 
 		if len(args) == 0 {
 			var workspaceNames []string
-			ctx := context.Background()
+			repos = []string{} // Ignore repo flags if prompting
 
-			workspaceListResponse, err := client.List(ctx, &empty.Empty{})
+			workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
 				log.Fatal(err)
 			}
-			for _, workspaceInfo := range workspaceListResponse.Workspaces {
-				workspaceNames = append(workspaceNames, workspaceInfo.Name)
+			for _, workspaceInfo := range workspaceList {
+				workspaceNames = append(workspaceNames, *workspaceInfo.Name)
 			}
-
-			repos = []string{} // Ignore repo flags if prompting
 
 			views_util.RenderMainTitle("WORKSPACE CREATION")
 
-			workspaceName, repos, err = wizard_view.GetCreationDataFromPrompt(workspaceNames)
+			workspaceName, repos, err = wizard_view.GetCreationDataFromPrompt(workspaceNames, serverConfig.GitProviders, manual)
 			if err != nil {
 				log.Fatal(err)
 				return
@@ -118,15 +114,11 @@ var CreateCmd = &cobra.Command{
 			return
 		}
 
-		ctx := context.Background()
-
-		createRequest := &proto.CreateWorkspaceRequest{
-			Name:         workspaceName,
+		_, _, err = apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(api_client.CreateWorkspace{
+			Name:         &workspaceName,
 			Repositories: repos,
-			Provisioner:  provisioner,
-		}
-
-		stream, err := client.Create(ctx, createRequest)
+			Provisioner:  &provisioner,
+		}).Execute()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -144,36 +136,33 @@ var CreateCmd = &cobra.Command{
 			os.Exit(0)
 		}()
 
-		started := false
-		for {
-			if started {
-				break
-			}
-			select {
-			case <-stream.Context().Done():
-				started = true
-			default:
-				// Recieve on the stream
-				res, err := stream.Recv()
-				if err != nil {
-					if err == io.EOF {
-						started = true
-						break
-					} else {
-						initViewProgram.Send(tea.Quit())
-						initViewProgram.ReleaseTerminal()
-						log.Fatal(err)
-						return
-					}
-				}
-				initViewProgram.Send(init_view.EventMsg{Event: res.Event, Payload: res.Payload})
-			}
-		}
+		// started := false
+		// for {
+		// 	if started {
+		// 		break
+		// 	}
+		// 	select {
+		// 	case <-stream.Context().Done():
+		// 		started = true
+		// 	default:
+		// 		// Recieve on the stream
+		// 		res, err := stream.Recv()
+		// 		if err != nil {
+		// 			if err == io.EOF {
+		// 				started = true
+		// 				break
+		// 			} else {
+		// 				initViewProgram.Send(tea.Quit())
+		// 				initViewProgram.ReleaseTerminal()
+		// 				log.Fatal(err)
+		// 				return
+		// 			}
+		// 		}
+		// 		initViewProgram.Send(init_view.EventMsg{Event: res.Event, Payload: res.Payload})
+		// 	}
+		// }
 
-		infoWorkspaceRequest := &proto.WorkspaceInfoRequest{
-			Id: workspaceName,
-		}
-		response, err := client.Info(ctx, infoWorkspaceRequest)
+		wsInfo, _, err := apiClient.WorkspaceAPI.GetWorkspaceInfo(ctx, workspaceName).Execute()
 		if err != nil {
 			initViewProgram.Send(tea.Quit())
 			initViewProgram.ReleaseTerminal()
@@ -185,7 +174,7 @@ var CreateCmd = &cobra.Command{
 		initViewProgram.ReleaseTerminal()
 
 		//	Show the info
-		info_view.Render(response)
+		info_view.Render(wsInfo)
 	},
 }
 
@@ -194,4 +183,5 @@ var provisionerFlag string
 func init() {
 	CreateCmd.Flags().StringArrayVarP(&repos, "repo", "r", nil, "Set the repository url")
 	CreateCmd.Flags().StringVar(&provisionerFlag, "provisioner", "", "Specify the provisioner (e.g. 'docker-provisioner')")
+	CreateCmd.Flags().Bool("manual", false, "Manually enter the git repositories")
 }

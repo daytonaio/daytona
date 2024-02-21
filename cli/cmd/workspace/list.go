@@ -7,11 +7,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/daytonaio/daytona/cli/api"
 	"github.com/daytonaio/daytona/cli/cmd/output"
-	"github.com/daytonaio/daytona/cli/connection"
-	workspace_proto "github.com/daytonaio/daytona/common/grpc/proto"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -24,27 +22,20 @@ var ListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
-		conn, err := connection.GetGrpcConn(nil)
-		if err != nil {
-			log.Fatal(err)
-		}
+		apiClient := api.GetServerApiClient("http://localhost:3000", "")
 
-		defer conn.Close()
-
-		client := workspace_proto.NewWorkspaceServiceClient(conn)
-
-		response, err := client.List(ctx, &empty.Empty{})
+		workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		if output.FormatFlag != "" {
-			output.Output = response
+			output.Output = workspaceList
 			return
 		}
 
-		for _, workspaceInfo := range response.Workspaces {
-			fmt.Println(workspaceInfo.Name)
+		for _, workspaceInfo := range workspaceList {
+			fmt.Println(*workspaceInfo.Name)
 		}
 	},
 }

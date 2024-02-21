@@ -8,12 +8,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/daytonaio/daytona/cli/api"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	select_prompt "github.com/daytonaio/daytona/cli/cmd/views/workspace/select_prompt"
-	"github.com/daytonaio/daytona/cli/connection"
-	workspace_proto "github.com/daytonaio/daytona/common/grpc/proto"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -28,21 +26,15 @@ var StartCmd = &cobra.Command{
 		ctx := context.Background()
 		var workspaceName string
 
-		conn, err := connection.GetGrpcConn(nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer conn.Close()
-
-		client := workspace_proto.NewWorkspaceServiceClient(conn)
+		apiClient := api.GetServerApiClient("http://localhost:3000", "")
 
 		if len(args) == 0 {
-			workspaceList, err := client.List(ctx, &empty.Empty{})
+			workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			workspaceName = select_prompt.GetWorkspaceNameFromPrompt(workspaceList.Workspaces, "start")
+			workspaceName = select_prompt.GetWorkspaceNameFromPrompt(workspaceList, "start")
 		} else {
 			workspaceName = args[0]
 		}
@@ -52,13 +44,16 @@ var StartCmd = &cobra.Command{
 			workspaceName = wsName
 		}
 
-		startWorkspaceRequest := &workspace_proto.WorkspaceStartRequest{
-			Id:      workspaceName,
-			Project: startProjectFlag,
-		}
-		_, err = client.Start(ctx, startWorkspaceRequest)
-		if err != nil {
-			log.Fatal(err)
+		if startProjectFlag == "" {
+			_, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspaceName).Execute()
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			_, err := apiClient.WorkspaceAPI.StartProject(ctx, workspaceName, startProjectFlag).Execute()
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 
 		views_util.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully started", workspaceName))

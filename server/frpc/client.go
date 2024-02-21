@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	"github.com/daytonaio/daytona/common/types"
 	"github.com/daytonaio/daytona/server/config"
 	"github.com/fatedier/frp/client"
 	v1 "github.com/fatedier/frp/pkg/config/v1"
@@ -55,7 +55,7 @@ func ConnectApi() error {
 
 	httpConfig := &v1.HTTPProxyConfig{}
 	httpConfig.GetBaseConfig().Name = fmt.Sprintf("daytona-server-api-%s", c.Id)
-	httpConfig.GetBaseConfig().LocalPort = int(c.GrpcPort)
+	httpConfig.GetBaseConfig().LocalPort = int(c.ApiPort)
 	httpConfig.GetBaseConfig().Type = string(v1.ProxyTypeHTTP)
 	httpConfig.CustomDomains = []string{apiDomain}
 

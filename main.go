@@ -36,7 +36,7 @@ func main() {
 
 	err := os.MkdirAll("/tmp/daytona", 0755)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	cmd.Execute()

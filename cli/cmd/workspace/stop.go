@@ -8,12 +8,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/daytonaio/daytona/cli/api"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	select_prompt "github.com/daytonaio/daytona/cli/cmd/views/workspace/select_prompt"
-	"github.com/daytonaio/daytona/cli/connection"
-	workspace_proto "github.com/daytonaio/daytona/common/grpc/proto"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -28,21 +26,15 @@ var StopCmd = &cobra.Command{
 		ctx := context.Background()
 		var workspaceName string
 
-		conn, err := connection.GetGrpcConn(nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer conn.Close()
-
-		client := workspace_proto.NewWorkspaceServiceClient(conn)
+		apiClient := api.GetServerApiClient("http://localhost:3000", "")
 
 		if len(args) == 0 {
-			workspaceList, err := client.List(ctx, &empty.Empty{})
+			workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			workspaceName = select_prompt.GetWorkspaceNameFromPrompt(workspaceList.Workspaces, "stop")
+			workspaceName = select_prompt.GetWorkspaceNameFromPrompt(workspaceList, "stop")
 		} else {
 			workspaceName = args[0]
 		}
@@ -52,13 +44,16 @@ var StopCmd = &cobra.Command{
 			workspaceName = wsName
 		}
 
-		stopWorkspaceRequest := &workspace_proto.WorkspaceStopRequest{
-			Id:      workspaceName,
-			Project: stopProjectFlag,
-		}
-		_, err = client.Stop(ctx, stopWorkspaceRequest)
-		if err != nil {
-			log.Fatal(err)
+		if stopProjectFlag == "" {
+			_, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, workspaceName).Execute()
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			_, err := apiClient.WorkspaceAPI.StopProject(ctx, workspaceName, stopProjectFlag).Execute()
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 
 		views_util.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully stopped", workspaceName))

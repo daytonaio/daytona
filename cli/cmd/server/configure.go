@@ -6,45 +6,28 @@ package cmd_server
 import (
 	"context"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
+	"github.com/daytonaio/daytona/cli/api"
 	view "github.com/daytonaio/daytona/cli/cmd/views/server/configuration_prompt"
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
-	"github.com/daytonaio/daytona/cli/connection"
-	server_proto "github.com/daytonaio/daytona/common/grpc/proto"
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
 )
 
 var configureCmd = &cobra.Command{
 	Use:   "configure",
 	Short: "Configure Daytona Server",
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := context.Background()
+		apiClient := api.GetServerApiClient("http://localhost:3000", "")
 
-		conn, err := connection.GetGrpcConn(nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer conn.Close()
-
-		client := server_proto.NewServerClient(conn)
-
-		config, err := client.GetConfig(ctx, &empty.Empty{})
+		apiServerConfig, _, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		view.ConfigurationForm(config)
+		apiServerConfig = view.ConfigurationForm(apiServerConfig)
 
-		_, err = client.SetConfig(ctx, &types.ServerConfig{
-			ProjectBaseImage:    config.ProjectBaseImage,
-			DefaultWorkspaceDir: config.DefaultWorkspaceDir,
-			PluginsDir:          config.PluginsDir,
-			PluginRegistryUrl:   config.PluginRegistryUrl,
-			ServerDownloadUrl:   config.ServerDownloadUrl,
-		})
+		_, _, err = apiClient.ServerAPI.SetConfig(context.Background()).Config(*apiServerConfig).Execute()
 		if err != nil {
 			log.Fatal(err)
 		}

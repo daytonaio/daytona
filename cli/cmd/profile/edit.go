@@ -7,14 +7,12 @@ import (
 	"context"
 	"errors"
 
+	"github.com/daytonaio/daytona/cli/api"
 	"github.com/daytonaio/daytona/cli/cmd/views/profile/info_view"
 	list_view "github.com/daytonaio/daytona/cli/cmd/views/profile/list_view"
 	views_provisioner "github.com/daytonaio/daytona/cli/cmd/views/provisioner"
 	"github.com/daytonaio/daytona/cli/config"
-	"github.com/daytonaio/daytona/cli/connection"
-	"github.com/daytonaio/daytona/common/grpc/proto"
-	"google.golang.org/grpc"
-	"google.golang.org/protobuf/types/known/emptypb"
+	"github.com/daytonaio/daytona/common/api_client"
 
 	view "github.com/daytonaio/daytona/cli/cmd/views/profile/creation_wizard"
 
@@ -59,12 +57,7 @@ var profileEditCmd = &cobra.Command{
 		}
 
 		if profileNameFlag == "" || serverHostnameFlag == "" || serverUserFlag == "" || provisionerFlag == "" || (serverPrivateKeyPathFlag == "" && serverPasswordFlag == "") {
-			conn, err := connection.GetGrpcConn(nil)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			err = EditProfile(c, conn, true, &chosenProfile)
+			err = EditProfile(c, true, &chosenProfile)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -88,36 +81,36 @@ var profileEditCmd = &cobra.Command{
 	},
 }
 
-func EditProfile(c *config.Config, conn *grpc.ClientConn, notify bool, profile *config.Profile) error {
+func EditProfile(c *config.Config, notify bool, profile *config.Profile) error {
 	if profile == nil {
 		return errors.New("profile must not be nil")
 	}
 
-	ctx := context.Background()
-	pluginsClient := proto.NewPluginsClient(conn)
-	provisionerPluginList, err := pluginsClient.ListProvisionerPlugins(ctx, &emptypb.Empty{})
+	apiClient := api.GetServerApiClient("http://localhost:3000", "")
+
+	provisionerPluginList, _, err := apiClient.PluginAPI.ListProvisionerPlugins(context.Background()).Execute()
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 
-	if len(provisionerPluginList.Plugins) == 0 {
+	if len(provisionerPluginList) == 0 {
 		return errors.New("no provisioner plugins found")
 	}
 
-	var selectedProvisioner *proto.ProvisionerPlugin
-	for _, provisioner := range provisionerPluginList.Plugins {
-		if provisioner.Name == profile.DefaultProvisioner {
-			selectedProvisioner = provisioner
+	var selectedProvisioner *api_client.ProvisionerPlugin = nil
+	for _, provisioner := range provisionerPluginList {
+		if *provisioner.Name == profile.DefaultProvisioner {
+			selectedProvisioner = &provisioner
 			break
 		}
 	}
 
 	if profile.Id == "default" {
-		provisioner, err := views_provisioner.GetProvisionerFromPrompt(provisionerPluginList.Plugins, "Choose a default provisioner to use", selectedProvisioner)
+		provisioner, err := views_provisioner.GetProvisionerFromPrompt(provisionerPluginList, "Choose a default provisioner to use", selectedProvisioner)
 		if err != nil {
 			return err
 		}
-		profile.DefaultProvisioner = provisioner.Name
+		profile.DefaultProvisioner = *provisioner.Name
 		return c.EditProfile(*profile)
 	}
 
@@ -126,7 +119,7 @@ func EditProfile(c *config.Config, conn *grpc.ClientConn, notify bool, profile *
 		RemoteHostname:          profile.Hostname,
 		RemoteSshPort:           profile.Port,
 		RemoteSshUser:           profile.Auth.User,
-		DefaultProvisioner:      provisionerPluginList.Plugins[0].Name,
+		DefaultProvisioner:      *provisionerPluginList[0].Name,
 		RemoteSshPassword:       "",
 		RemoteSshPrivateKeyPath: "",
 	}
@@ -139,11 +132,11 @@ func EditProfile(c *config.Config, conn *grpc.ClientConn, notify bool, profile *
 
 	view.ProfileCreationView(c, &profileAddView, true)
 
-	provisioner, err := views_provisioner.GetProvisionerFromPrompt(provisionerPluginList.Plugins, "Choose a provisioner to use", selectedProvisioner)
+	provisioner, err := views_provisioner.GetProvisionerFromPrompt(provisionerPluginList, "Choose a provisioner to use", selectedProvisioner)
 	if err != nil {
 		return err
 	}
-	profileAddView.DefaultProvisioner = provisioner.Name
+	profileAddView.DefaultProvisioner = *provisioner.Name
 
 	return editProfile(profile.Id, profileAddView, c, notify)
 }

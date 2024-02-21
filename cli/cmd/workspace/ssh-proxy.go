@@ -36,22 +36,16 @@ var SshProxyCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		conn, err := connection.GetGrpcConn(&profile)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer conn.Close()
-
 		if len(args) == 3 {
 			projectName = args[2]
 		} else {
-			projectName, err = util.GetFirstWorkspaceProjectName(conn, workspaceName, projectName)
+			projectName, err = util.GetFirstWorkspaceProjectName(workspaceName, projectName)
 			if err != nil {
 				log.Fatal(err)
 			}
 		}
 
-		tsConn, err := connection.GetTailscaleConn(&profile, conn)
+		tsConn, err := connection.GetTailscaleConn(&profile)
 		if err != nil {
 			log.Fatal(err)
 		}
