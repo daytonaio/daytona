@@ -59,7 +59,7 @@ var installCmd = &cobra.Command{
 
 		sshConfig := util.GetSshConfigFromProfile(&chosenProfile)
 
-		fmt.Println("Connecting to remote host ...")
+		fmt.Println("Connecting to the remote host ...")
 		s.Start()
 		defer s.Stop()
 
@@ -175,6 +175,24 @@ var installCmd = &cobra.Command{
 		err = installer.RegisterDaemon(*remoteOs)
 		if err != nil {
 			log.Error("Failed to RegisterDaemon")
+			log.Fatal(err)
+		}
+
+		apiUrl, err := installer.GetApiUrl()
+		if err != nil {
+			log.Error("Failed to get API URL from the remote machine")
+			log.Fatal(err)
+		}
+
+		activeProfile, err := c.GetActiveProfile()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		activeProfile.Api.Url = apiUrl
+		err = c.EditProfile(activeProfile)
+		if err != nil {
+			log.Error("Failed to set API URL from the remote machine")
 			log.Fatal(err)
 		}
 
