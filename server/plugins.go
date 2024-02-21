@@ -5,7 +5,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	"github.com/daytonaio/daytona/common/types"
 	agent_service_manager "github.com/daytonaio/daytona/plugins/agent_service/manager"
 	"github.com/daytonaio/daytona/plugins/plugin_manager"
 	provisioner_manager "github.com/daytonaio/daytona/plugins/provisioner/manager"

@@ -3,7 +3,7 @@ package headscale
 import (
 	"fmt"
 
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	"github.com/daytonaio/daytona/common/types"
 	"github.com/juanfont/headscale/hscontrol"
 )
 

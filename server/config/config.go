@@ -10,7 +10,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	"github.com/daytonaio/daytona/common/types"
 	"github.com/google/uuid"
 )
 
@@ -85,21 +85,6 @@ func GetConfigDir() (string, error) {
 	return path.Join(userConfigDir, "daytona", "server"), nil
 }
 
-func getDefaultWorkspaceDir() (string, error) {
-	userHomeDir, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
-	}
-
-	defaultWorkspaceDir := path.Join(userHomeDir, ".daytona_workspaces")
-	err = os.MkdirAll(defaultWorkspaceDir, 0700)
-	if err != nil {
-		return "", err
-	}
-
-	return defaultWorkspaceDir, nil
-}
-
 func getDefaultPluginsDir() (string, error) {
 	userConfigDir, err := os.UserConfigDir()
 	if err != nil {
@@ -120,23 +105,18 @@ func init() {
 		return
 	}
 
-	defaultWorkspaceDir, err := getDefaultWorkspaceDir()
-	if err != nil {
-		log.Fatal("failed to get default workspace dir")
-	}
 	pluginsDir, err := getDefaultPluginsDir()
 	if err != nil {
 		log.Fatal("failed to get default plugins dir")
 	}
 
 	c := types.ServerConfig{
-		DefaultWorkspaceDir: defaultWorkspaceDir,
-		ProjectBaseImage:    defaultProjectBaseImage,
-		PluginRegistryUrl:   defaultPluginRegistryUrl,
-		PluginsDir:          pluginsDir,
-		ServerDownloadUrl:   defaultServerDownloadUrl,
-		GrpcPort:            defaultGrpcPort,
-		HeadscalePort:       defaultHeadscalePort,
+		PluginRegistryUrl: defaultPluginRegistryUrl,
+		PluginsDir:        pluginsDir,
+		GitProviders:      []types.GitProvider{},
+		ServerDownloadUrl: defaultServerDownloadUrl,
+		ApiPort:           defaultApiPort,
+		HeadscalePort:     defaultHeadscalePort,
 		Frps: &types.FRPSConfig{
 			Domain:   defaultFrpsDomain,
 			Port:     defaultFrpsPort,

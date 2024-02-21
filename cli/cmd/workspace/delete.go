@@ -8,19 +8,15 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/daytonaio/daytona/cli/api"
 	"github.com/daytonaio/daytona/cli/config"
-	"github.com/daytonaio/daytona/cli/connection"
-	workspace_proto "github.com/daytonaio/daytona/common/grpc/proto"
 
 	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	select_prompt "github.com/daytonaio/daytona/cli/cmd/views/workspace/select_prompt"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
-
-var force bool
 
 var DeleteCmd = &cobra.Command{
 	Use:     "delete",
@@ -40,21 +36,18 @@ var DeleteCmd = &cobra.Command{
 		ctx := context.Background()
 		var workspaceName string
 
-		conn, err := connection.Get(nil)
+		apiClient, err := api.GetServerApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer conn.Close()
-
-		client := workspace_proto.NewWorkspaceServiceClient(conn)
 
 		if len(args) == 0 {
-			workspaceList, err := client.List(ctx, &empty.Empty{})
+			workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			workspaceName = select_prompt.GetWorkspaceNameFromPrompt(workspaceList.Workspaces, "start")
+			workspaceName = select_prompt.GetWorkspaceNameFromPrompt(workspaceList, "start")
 		} else {
 			workspaceName = args[0]
 		}
@@ -64,10 +57,7 @@ var DeleteCmd = &cobra.Command{
 			workspaceName = wsName
 		}
 
-		removeWorkspaceRequest := &workspace_proto.WorkspaceRemoveRequest{
-			Id: workspaceName,
-		}
-		_, err = client.Remove(ctx, removeWorkspaceRequest)
+		_, err = apiClient.WorkspaceAPI.RemoveWorkspace(ctx, workspaceName).Execute()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -76,8 +66,4 @@ var DeleteCmd = &cobra.Command{
 
 		views_util.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully deleted", workspaceName))
 	},
-}
-
-func init() {
-	// DeleteCmd.PersistentFlags().BoolVarP(&force, "force", "f", false, "Force the workspace removal")
 }

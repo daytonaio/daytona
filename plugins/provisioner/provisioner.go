@@ -1,12 +1,10 @@
 package provisioner
 
 import (
-	"context"
+	"net/rpc"
 
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
-	"github.com/daytonaio/daytona/plugins/provisioner/grpc/proto"
+	"github.com/daytonaio/daytona/common/types"
 	"github.com/hashicorp/go-plugin"
-	"google.golang.org/grpc"
 )
 
 type ProvisionerProfile struct {
@@ -14,46 +12,57 @@ type ProvisionerProfile struct {
 	Config interface{}
 }
 
+type ProvisionerInfo struct {
+	Name    string
+	Version string
+}
+
+type InitializeProvisionerRequest struct {
+	BasePath          string
+	ServerDownloadUrl string
+	ServerVersion     string
+	ServerUrl         string
+	ServerApiUrl      string
+}
+
 type Provisioner interface {
-	Initialize(*proto.InitializeProvisionerRequest) error
-	GetInfo() (*proto.ProvisionerInfo, error)
+	Initialize(InitializeProvisionerRequest) (*types.Empty, error)
+	GetInfo() (ProvisionerInfo, error)
 
 	//	client side profile config wizard
 	Configure() (interface{}, error)
 
 	//	WorkspacePreCreate
-	CreateWorkspace(workspace *types.Workspace) error
+	CreateWorkspace(workspace *types.Workspace) (*types.Empty, error)
 	//	WorkspacePostCreate
 	//	WorkspacePreStart
-	StartWorkspace(workspace *types.Workspace) error
+	StartWorkspace(workspace *types.Workspace) (*types.Empty, error)
 	//	WorkspacePostStart
 	//	WorkspacePreStop
-	StopWorkspace(workspace *types.Workspace) error
+	StopWorkspace(workspace *types.Workspace) (*types.Empty, error)
 	//	WorkspacePostStop
 	//	WorkspacePreStop
-	DestroyWorkspace(workspace *types.Workspace) error
+	DestroyWorkspace(workspace *types.Workspace) (*types.Empty, error)
 	//	WorkspacePostStop
 	GetWorkspaceInfo(workspace *types.Workspace) (*types.WorkspaceInfo, error)
 
-	CreateProject(project *types.Project) error
-	StartProject(project *types.Project) error
-	StopProject(project *types.Project) error
-	DestroyProject(project *types.Project) error
+	CreateProject(project *types.Project) (*types.Empty, error)
+	StartProject(project *types.Project) (*types.Empty, error)
+	StopProject(project *types.Project) (*types.Empty, error)
+	DestroyProject(project *types.Project) (*types.Empty, error)
 
 	// TODO: rethink name
 	GetProjectInfo(project *types.Project) (*types.ProjectInfo, error)
 }
 
 type ProvisionerPlugin struct {
-	plugin.NetRPCUnsupportedPlugin
 	Impl Provisioner
 }
 
-func (p *ProvisionerPlugin) GRPCServer(broker *plugin.GRPCBroker, s *grpc.Server) error {
-	proto.RegisterProvisionerServer(s, &ProvisionerGrpcServer{Impl: p.Impl})
-	return nil
+func (p *ProvisionerPlugin) Server(*plugin.MuxBroker) (interface{}, error) {
+	return &ProvisionerRPCServer{Impl: p.Impl}, nil
 }
 
-func (p *ProvisionerPlugin) GRPCClient(ctx context.Context, broker *plugin.GRPCBroker, c *grpc.ClientConn) (interface{}, error) {
-	return &ProvisionerGrpcClient{client: proto.NewProvisionerClient(c)}, nil
+func (p *ProvisionerPlugin) Client(b *plugin.MuxBroker, c *rpc.Client) (interface{}, error) {
+	return &ProvisionerRPCClient{client: c}, nil
 }

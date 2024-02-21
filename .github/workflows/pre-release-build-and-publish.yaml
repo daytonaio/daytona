@@ -5,6 +5,7 @@ on:
   pull_request:
     branches:
       - 'main'
+      - 'agent'
     paths-ignore:
       - 'README.md'
       - '**/README.md'

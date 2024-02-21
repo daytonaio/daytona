@@ -4,7 +4,6 @@
 package cmd_server
 
 import (
-	cmd_server_key "github.com/daytonaio/daytona/cli/cmd/server/key"
 	"github.com/daytonaio/daytona/server"
 	"github.com/daytonaio/daytona/server/config"
 
@@ -39,9 +38,9 @@ var ServerCmd = &cobra.Command{
 }
 
 func init() {
-	ServerCmd.AddCommand(cmd_server_key.KeyCmd)
 	ServerCmd.AddCommand(configureCmd)
 	ServerCmd.AddCommand(startupCmd)
 	ServerCmd.AddCommand(installCmd)
 	ServerCmd.AddCommand(uninstallCmd)
+	ServerCmd.AddCommand(configCmd)
 }

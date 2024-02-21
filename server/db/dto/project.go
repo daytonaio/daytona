@@ -3,7 +3,7 @@
 
 package dto
 
-import "github.com/daytonaio/daytona/common/grpc/proto/types"
+import "github.com/daytonaio/daytona/common/types"
 
 type RepositoryDTO struct {
 	Url      string  `json:"url"`

@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	"github.com/daytonaio/daytona/common/api_client"
 
 	"github.com/charmbracelet/huh"
 )
@@ -17,26 +17,12 @@ type ServerUpdateKeyView struct {
 	PathToPrivateKey string
 }
 
-func ConfigurationForm(config *types.ServerConfig) *types.ServerConfig {
+func ConfigurationForm(config *api_client.ServerConfig) *api_client.ServerConfig {
 	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().
-				Title("Project Base Image").
-				Value(&config.ProjectBaseImage),
-			huh.NewInput().
-				Title("Default Workspace Directory").
-				Value(&config.DefaultWorkspaceDir).
-				Validate(func(s string) error {
-					_, err := os.Stat(s)
-					if os.IsNotExist(err) {
-						return os.MkdirAll(s, 0700)
-					}
-
-					return err
-				}),
-			huh.NewInput().
 				Title("Plugins Directory").
-				Value(&config.PluginsDir).
+				Value(config.PluginsDir).
 				Validate(func(s string) error {
 					_, err := os.Stat(s)
 					if os.IsNotExist(err) {
@@ -47,10 +33,10 @@ func ConfigurationForm(config *types.ServerConfig) *types.ServerConfig {
 				}),
 			huh.NewInput().
 				Title("Plugin Registry URL").
-				Value(&config.PluginRegistryUrl),
+				Value(config.PluginRegistryUrl),
 			huh.NewInput().
 				Title("Server Download URL").
-				Value(&config.ServerDownloadUrl),
+				Value(config.ServerDownloadUrl),
 		),
 	)
 

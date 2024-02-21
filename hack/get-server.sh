@@ -39,6 +39,6 @@ DOWNLOAD_URL=$(echo "$BASE_URL/$VERSION/daytona-$FILENAME")
 
 echo "Downloading server from $DOWNLOAD_URL"
 
-curl $DOWNLOAD_URL -Lo daytona
+sudo curl $DOWNLOAD_URL -Lo daytona
 sudo mv daytona /usr/local/bin/daytona
 sudo chmod +x /usr/local/bin/daytona

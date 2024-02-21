@@ -6,7 +6,7 @@ import (
 	"path"
 	"time"
 
-	proto_types "github.com/daytonaio/daytona/common/grpc/proto/types"
+	server_types "github.com/daytonaio/daytona/common/types"
 	"github.com/daytonaio/daytona/plugins/utils"
 	"github.com/daytonaio/daytona/server/config"
 	"github.com/juanfont/headscale/hscontrol/types"
@@ -14,7 +14,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func getConfig(serverConfig *proto_types.ServerConfig) (*types.Config, error) {
+func getConfig(serverConfig *server_types.ServerConfig) (*types.Config, error) {
 	pwd, err := os.Getwd()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get current working directory: %w", err)

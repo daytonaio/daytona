@@ -19,6 +19,10 @@ func RenderInfoMessage(message string) {
 	fmt.Println(lipgloss.NewStyle().Padding(1, 0, 1, 1).Render(message))
 }
 
+func RenderListLine(message string) {
+	fmt.Println(lipgloss.NewStyle().Padding(0, 0, 1, 1).Render(message))
+}
+
 func RenderInfoMessageBold(message string) {
 	fmt.Println(lipgloss.NewStyle().Bold(true).Padding(1, 0, 1, 1).Render(message))
 }

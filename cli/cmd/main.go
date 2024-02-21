@@ -7,6 +7,7 @@ import (
 	"os"
 
 	. "github.com/daytonaio/daytona/cli/cmd/agent"
+	. "github.com/daytonaio/daytona/cli/cmd/git_provider"
 	"github.com/daytonaio/daytona/cli/cmd/output"
 	. "github.com/daytonaio/daytona/cli/cmd/plugin"
 	. "github.com/daytonaio/daytona/cli/cmd/ports"
@@ -32,18 +33,21 @@ func Execute() {
 	rootCmd.AddCommand(InfoCmd)
 	rootCmd.AddCommand(StartCmd)
 	rootCmd.AddCommand(StopCmd)
-	rootCmd.AddCommand(exposePortCmd)
 	rootCmd.AddCommand(PortsCmd)
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(AgentCmd)
+	rootCmd.AddCommand(ListCmd)
+	rootCmd.AddCommand(GitProviderCmd)
 
-	if !wsMode {
+	if wsMode {
+		rootCmd.AddCommand(gitCredCmd)
+		rootCmd.AddCommand(AgentCmd)
+	} else {
 		rootCmd.AddCommand(CodeCmd)
 		rootCmd.AddCommand(SshCmd)
 		rootCmd.AddCommand(SshProxyCmd)
 		rootCmd.AddCommand(CreateCmd)
 		rootCmd.AddCommand(DeleteCmd)
-		rootCmd.AddCommand(ListCmd)
 		rootCmd.AddCommand(ServerCmd)
 		rootCmd.AddCommand(ideCmd)
 		rootCmd.AddCommand(ProfileCmd)
