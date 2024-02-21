@@ -200,14 +200,9 @@ var installCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		success, err := installer.WaitForServerToStart()
+		err = installer.WaitForServerToStart(apiUrl)
 		if err != nil {
 			log.Error("Failed to wait for Daytona server to start")
-			log.Fatal(err)
-		}
-
-		if !success {
-			log.Error("Waiting for Daytona server to start timed out")
 			log.Fatal(err)
 		}
 

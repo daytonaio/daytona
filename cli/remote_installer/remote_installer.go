@@ -1,7 +1,9 @@
 package remote_installer
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -324,7 +326,7 @@ func (s *RemoteInstaller) RemoveDaemon(remoteOS os.OperatingSystem) error {
 	}
 }
 
-func (s *RemoteInstaller) WaitForServerToStart() (bool, error) {
+func (s *RemoteInstaller) WaitForServerToStart(apiUrl string) error {
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 
@@ -334,31 +336,21 @@ func (s *RemoteInstaller) WaitForServerToStart() (bool, error) {
 	for {
 		select {
 		case <-ticker.C:
-			running, err := s.checkServerRunning()
-			if err != nil {
-				return false, err
-			}
-			if running {
-				return true, nil
+			isRunning := s.checkServerRunning(apiUrl)
+			if isRunning {
+				return nil
 			}
 		case <-timeoutTimer.C:
-			return false, nil
+			return errors.New("timeout waiting for server to start")
 		}
 	}
 }
 
-func (s *RemoteInstaller) checkServerRunning() (bool, error) {
-	session, err := s.Client.NewSession()
-	if err != nil {
-		return false, err
+func (s *RemoteInstaller) checkServerRunning(apiUrl string) bool {
+	response, err := http.Get(apiUrl + "/workspace/")
+	if err != nil || response.StatusCode != 200 {
+		return false
 	}
-	defer session.Close()
 
-	output, _ := (*session).CombinedOutput("echo $(daytona list > /dev/null 2>&1; echo $?)")
-
-	if string(output) == "0\n" {
-		return true, nil
-	} else {
-		return false, nil
-	}
+	return true
 }
