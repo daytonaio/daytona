@@ -54,7 +54,7 @@ func FromServerConfig(config *types.ServerConfig) *api_client.ServerConfig {
 		PluginRegistryUrl: &config.PluginRegistryUrl,
 		Id:                &config.Id,
 		ServerDownloadUrl: &config.ServerDownloadUrl,
-		Frps: &api_client.TypesFRPSConfig{
+		Frps: &api_client.FRPSConfig{
 			Domain:   &config.Frps.Domain,
 			Port:     &[]int32{int32(config.Frps.Port)}[0],
 			Protocol: &config.Frps.Protocol,

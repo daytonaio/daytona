@@ -20,7 +20,7 @@ var _ MappedNullable = &ServerConfig{}
 // ServerConfig struct for ServerConfig
 type ServerConfig struct {
 	ApiPort *int32 `json:"apiPort,omitempty"`
-	Frps *TypesFRPSConfig `json:"frps,omitempty"`
+	Frps *FRPSConfig `json:"frps,omitempty"`
 	HeadscalePort *int32 `json:"headscalePort,omitempty"`
 	Id *string `json:"id,omitempty"`
 	PluginRegistryUrl *string `json:"pluginRegistryUrl,omitempty"`
@@ -78,9 +78,9 @@ func (o *ServerConfig) SetApiPort(v int32) {
 }
 
 // GetFrps returns the Frps field value if set, zero value otherwise.
-func (o *ServerConfig) GetFrps() TypesFRPSConfig {
+func (o *ServerConfig) GetFrps() FRPSConfig {
 	if o == nil || IsNil(o.Frps) {
-		var ret TypesFRPSConfig
+		var ret FRPSConfig
 		return ret
 	}
 	return *o.Frps
@@ -88,7 +88,7 @@ func (o *ServerConfig) GetFrps() TypesFRPSConfig {
 
 // GetFrpsOk returns a tuple with the Frps field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ServerConfig) GetFrpsOk() (*TypesFRPSConfig, bool) {
+func (o *ServerConfig) GetFrpsOk() (*FRPSConfig, bool) {
 	if o == nil || IsNil(o.Frps) {
 		return nil, false
 	}
@@ -104,8 +104,8 @@ func (o *ServerConfig) HasFrps() bool {
 	return false
 }
 
-// SetFrps gets a reference to the given TypesFRPSConfig and assigns it to the Frps field.
-func (o *ServerConfig) SetFrps(v TypesFRPSConfig) {
+// SetFrps gets a reference to the given FRPSConfig and assigns it to the Frps field.
+func (o *ServerConfig) SetFrps(v FRPSConfig) {
 	o.Frps = &v
 }
 

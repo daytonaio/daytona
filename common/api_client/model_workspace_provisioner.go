@@ -14,34 +14,34 @@ import (
 	"encoding/json"
 )
 
-// checks if the TypesWorkspaceProvisioner type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &TypesWorkspaceProvisioner{}
+// checks if the WorkspaceProvisioner type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &WorkspaceProvisioner{}
 
-// TypesWorkspaceProvisioner struct for TypesWorkspaceProvisioner
-type TypesWorkspaceProvisioner struct {
+// WorkspaceProvisioner struct for WorkspaceProvisioner
+type WorkspaceProvisioner struct {
 	Name *string `json:"name,omitempty"`
 	Profile *string `json:"profile,omitempty"`
 }
 
-// NewTypesWorkspaceProvisioner instantiates a new TypesWorkspaceProvisioner object
+// NewWorkspaceProvisioner instantiates a new WorkspaceProvisioner object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTypesWorkspaceProvisioner() *TypesWorkspaceProvisioner {
-	this := TypesWorkspaceProvisioner{}
+func NewWorkspaceProvisioner() *WorkspaceProvisioner {
+	this := WorkspaceProvisioner{}
 	return &this
 }
 
-// NewTypesWorkspaceProvisionerWithDefaults instantiates a new TypesWorkspaceProvisioner object
+// NewWorkspaceProvisionerWithDefaults instantiates a new WorkspaceProvisioner object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewTypesWorkspaceProvisionerWithDefaults() *TypesWorkspaceProvisioner {
-	this := TypesWorkspaceProvisioner{}
+func NewWorkspaceProvisionerWithDefaults() *WorkspaceProvisioner {
+	this := WorkspaceProvisioner{}
 	return &this
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
-func (o *TypesWorkspaceProvisioner) GetName() string {
+func (o *WorkspaceProvisioner) GetName() string {
 	if o == nil || IsNil(o.Name) {
 		var ret string
 		return ret
@@ -51,7 +51,7 @@ func (o *TypesWorkspaceProvisioner) GetName() string {
 
 // GetNameOk returns a tuple with the Name field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesWorkspaceProvisioner) GetNameOk() (*string, bool) {
+func (o *WorkspaceProvisioner) GetNameOk() (*string, bool) {
 	if o == nil || IsNil(o.Name) {
 		return nil, false
 	}
@@ -59,7 +59,7 @@ func (o *TypesWorkspaceProvisioner) GetNameOk() (*string, bool) {
 }
 
 // HasName returns a boolean if a field has been set.
-func (o *TypesWorkspaceProvisioner) HasName() bool {
+func (o *WorkspaceProvisioner) HasName() bool {
 	if o != nil && !IsNil(o.Name) {
 		return true
 	}
@@ -68,12 +68,12 @@ func (o *TypesWorkspaceProvisioner) HasName() bool {
 }
 
 // SetName gets a reference to the given string and assigns it to the Name field.
-func (o *TypesWorkspaceProvisioner) SetName(v string) {
+func (o *WorkspaceProvisioner) SetName(v string) {
 	o.Name = &v
 }
 
 // GetProfile returns the Profile field value if set, zero value otherwise.
-func (o *TypesWorkspaceProvisioner) GetProfile() string {
+func (o *WorkspaceProvisioner) GetProfile() string {
 	if o == nil || IsNil(o.Profile) {
 		var ret string
 		return ret
@@ -83,7 +83,7 @@ func (o *TypesWorkspaceProvisioner) GetProfile() string {
 
 // GetProfileOk returns a tuple with the Profile field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesWorkspaceProvisioner) GetProfileOk() (*string, bool) {
+func (o *WorkspaceProvisioner) GetProfileOk() (*string, bool) {
 	if o == nil || IsNil(o.Profile) {
 		return nil, false
 	}
@@ -91,7 +91,7 @@ func (o *TypesWorkspaceProvisioner) GetProfileOk() (*string, bool) {
 }
 
 // HasProfile returns a boolean if a field has been set.
-func (o *TypesWorkspaceProvisioner) HasProfile() bool {
+func (o *WorkspaceProvisioner) HasProfile() bool {
 	if o != nil && !IsNil(o.Profile) {
 		return true
 	}
@@ -100,11 +100,11 @@ func (o *TypesWorkspaceProvisioner) HasProfile() bool {
 }
 
 // SetProfile gets a reference to the given string and assigns it to the Profile field.
-func (o *TypesWorkspaceProvisioner) SetProfile(v string) {
+func (o *WorkspaceProvisioner) SetProfile(v string) {
 	o.Profile = &v
 }
 
-func (o TypesWorkspaceProvisioner) MarshalJSON() ([]byte, error) {
+func (o WorkspaceProvisioner) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -112,7 +112,7 @@ func (o TypesWorkspaceProvisioner) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o TypesWorkspaceProvisioner) ToMap() (map[string]interface{}, error) {
+func (o WorkspaceProvisioner) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
@@ -123,38 +123,38 @@ func (o TypesWorkspaceProvisioner) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-type NullableTypesWorkspaceProvisioner struct {
-	value *TypesWorkspaceProvisioner
+type NullableWorkspaceProvisioner struct {
+	value *WorkspaceProvisioner
 	isSet bool
 }
 
-func (v NullableTypesWorkspaceProvisioner) Get() *TypesWorkspaceProvisioner {
+func (v NullableWorkspaceProvisioner) Get() *WorkspaceProvisioner {
 	return v.value
 }
 
-func (v *NullableTypesWorkspaceProvisioner) Set(val *TypesWorkspaceProvisioner) {
+func (v *NullableWorkspaceProvisioner) Set(val *WorkspaceProvisioner) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableTypesWorkspaceProvisioner) IsSet() bool {
+func (v NullableWorkspaceProvisioner) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableTypesWorkspaceProvisioner) Unset() {
+func (v *NullableWorkspaceProvisioner) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableTypesWorkspaceProvisioner(val *TypesWorkspaceProvisioner) *NullableTypesWorkspaceProvisioner {
-	return &NullableTypesWorkspaceProvisioner{value: val, isSet: true}
+func NewNullableWorkspaceProvisioner(val *WorkspaceProvisioner) *NullableWorkspaceProvisioner {
+	return &NullableWorkspaceProvisioner{value: val, isSet: true}
 }
 
-func (v NullableTypesWorkspaceProvisioner) MarshalJSON() ([]byte, error) {
+func (v NullableWorkspaceProvisioner) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableTypesWorkspaceProvisioner) UnmarshalJSON(src []byte) error {
+func (v *NullableWorkspaceProvisioner) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

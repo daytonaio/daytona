@@ -6,8 +6,8 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | Pointer to **string** |  | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
-**Projects** | Pointer to [**[]TypesProject**](TypesProject.md) |  | [optional] 
-**Provisioner** | Pointer to [**TypesWorkspaceProvisioner**](TypesWorkspaceProvisioner.md) |  | [optional] 
+**Projects** | Pointer to [**[]Project**](Project.md) |  | [optional] 
+**Provisioner** | Pointer to [**WorkspaceProvisioner**](WorkspaceProvisioner.md) |  | [optional] 
 
 ## Methods
 
@@ -80,20 +80,20 @@ HasName returns a boolean if a field has been set.
 
 ### GetProjects
 
-`func (o *Workspace) GetProjects() []TypesProject`
+`func (o *Workspace) GetProjects() []Project`
 
 GetProjects returns the Projects field if non-nil, zero value otherwise.
 
 ### GetProjectsOk
 
-`func (o *Workspace) GetProjectsOk() (*[]TypesProject, bool)`
+`func (o *Workspace) GetProjectsOk() (*[]Project, bool)`
 
 GetProjectsOk returns a tuple with the Projects field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetProjects
 
-`func (o *Workspace) SetProjects(v []TypesProject)`
+`func (o *Workspace) SetProjects(v []Project)`
 
 SetProjects sets Projects field to given value.
 
@@ -105,20 +105,20 @@ HasProjects returns a boolean if a field has been set.
 
 ### GetProvisioner
 
-`func (o *Workspace) GetProvisioner() TypesWorkspaceProvisioner`
+`func (o *Workspace) GetProvisioner() WorkspaceProvisioner`
 
 GetProvisioner returns the Provisioner field if non-nil, zero value otherwise.
 
 ### GetProvisionerOk
 
-`func (o *Workspace) GetProvisionerOk() (*TypesWorkspaceProvisioner, bool)`
+`func (o *Workspace) GetProvisionerOk() (*WorkspaceProvisioner, bool)`
 
 GetProvisionerOk returns a tuple with the Provisioner field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetProvisioner
 
-`func (o *Workspace) SetProvisioner(v TypesWorkspaceProvisioner)`
+`func (o *Workspace) SetProvisioner(v WorkspaceProvisioner)`
 
 SetProvisioner sets Provisioner field to given value.
 

@@ -18,6 +18,15 @@ definitions:
           type: string
         type: array
     type: object
+  FRPSConfig:
+    properties:
+      domain:
+        type: string
+      port:
+        type: integer
+      protocol:
+        type: string
+    type: object
   InstallPluginRequest:
     properties:
       downloadUrls:
@@ -32,6 +41,34 @@ definitions:
       key:
         type: string
     type: object
+  Project:
+    properties:
+      authKey:
+        type: string
+      name:
+        type: string
+      repository:
+        $ref: '#/definitions/Repository'
+      workspaceId:
+        type: string
+    type: object
+  ProjectInfo:
+    properties:
+      created:
+        type: string
+      finished:
+        type: string
+      isRunning:
+        type: boolean
+      name:
+        type: string
+      provisionerMetadata:
+        type: string
+      started:
+        type: string
+      workspaceId:
+        type: string
+    type: object
   ProvisionerPlugin:
     properties:
       name:
@@ -39,12 +76,29 @@ definitions:
       version:
         type: string
     type: object
+  Repository:
+    properties:
+      branch:
+        type: string
+      owner:
+        type: string
+      path:
+        type: string
+      prNumber:
+        type: integer
+      sha:
+        type: string
+      source:
+        type: string
+      url:
+        type: string
+    type: object
   ServerConfig:
     properties:
       apiPort:
         type: integer
       frps:
-        $ref: '#/definitions/types.FRPSConfig'
+        $ref: '#/definitions/FRPSConfig'
       headscalePort:
         type: integer
       id:
@@ -64,10 +118,10 @@ definitions:
         type: string
       projects:
         items:
-          $ref: '#/definitions/types.Project'
+          $ref: '#/definitions/Project'
         type: array
       provisioner:
-        $ref: '#/definitions/types.WorkspaceProvisioner'
+        $ref: '#/definitions/WorkspaceProvisioner'
     type: object
   WorkspaceInfo:
     properties:
@@ -75,78 +129,12 @@ definitions:
         type: string
       projects:
         items:
-          $ref: '#/definitions/types.ProjectInfo'
+          $ref: '#/definitions/ProjectInfo'
         type: array
-      provisionerMetadata: {}
-    type: object
-  github_com_golang_protobuf_ptypes_struct.Struct:
-    properties:
-      fields:
-        additionalProperties:
-          $ref: '#/definitions/google_golang_org_protobuf_types_known_structpb.Value'
-        description: Unordered map of dynamically typed values.
-        type: object
-    type: object
-  google_golang_org_protobuf_types_known_structpb.Value:
-    properties:
-      kind:
-        description: "The kind of value.\n\nTypes that are assignable to Kind:\n\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
-    type: object
-  types.FRPSConfig:
-    properties:
-      domain:
-        type: string
-      port:
-        type: integer
-      protocol:
-        type: string
-    type: object
-  types.Project:
-    properties:
-      authKey:
-        type: string
-      name:
-        type: string
-      repository:
-        $ref: '#/definitions/types.Repository'
-      workspaceId:
-        type: string
-    type: object
-  types.ProjectInfo:
-    properties:
-      created:
-        type: string
-      finished:
-        type: string
-      isRunning:
-        type: boolean
-      name:
-        type: string
       provisionerMetadata:
-        $ref: '#/definitions/github_com_golang_protobuf_ptypes_struct.Struct'
-      started:
-        type: string
-      workspaceId:
         type: string
     type: object
-  types.Repository:
-    properties:
-      branch:
-        type: string
-      owner:
-        type: string
-      path:
-        type: string
-      prNumber:
-        type: integer
-      sha:
-        type: string
-      source:
-        type: string
-      url:
-        type: string
-    type: object
-  types.WorkspaceProvisioner:
+  WorkspaceProvisioner:
     properties:
       name:
         type: string

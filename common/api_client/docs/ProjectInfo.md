@@ -1,4 +1,4 @@
-# TypesProjectInfo
+# ProjectInfo
 
 ## Properties
 
@@ -8,201 +8,201 @@ Name | Type | Description | Notes
 **Finished** | Pointer to **string** |  | [optional] 
 **IsRunning** | Pointer to **bool** |  | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
-**ProvisionerMetadata** | Pointer to [**GithubComGolangProtobufPtypesStructStruct**](GithubComGolangProtobufPtypesStructStruct.md) |  | [optional] 
+**ProvisionerMetadata** | Pointer to **string** |  | [optional] 
 **Started** | Pointer to **string** |  | [optional] 
 **WorkspaceId** | Pointer to **string** |  | [optional] 
 
 ## Methods
 
-### NewTypesProjectInfo
+### NewProjectInfo
 
-`func NewTypesProjectInfo() *TypesProjectInfo`
+`func NewProjectInfo() *ProjectInfo`
 
-NewTypesProjectInfo instantiates a new TypesProjectInfo object
+NewProjectInfo instantiates a new ProjectInfo object
 This constructor will assign default values to properties that have it defined,
 and makes sure properties required by API are set, but the set of arguments
 will change when the set of required properties is changed
 
-### NewTypesProjectInfoWithDefaults
+### NewProjectInfoWithDefaults
 
-`func NewTypesProjectInfoWithDefaults() *TypesProjectInfo`
+`func NewProjectInfoWithDefaults() *ProjectInfo`
 
-NewTypesProjectInfoWithDefaults instantiates a new TypesProjectInfo object
+NewProjectInfoWithDefaults instantiates a new ProjectInfo object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
 ### GetCreated
 
-`func (o *TypesProjectInfo) GetCreated() string`
+`func (o *ProjectInfo) GetCreated() string`
 
 GetCreated returns the Created field if non-nil, zero value otherwise.
 
 ### GetCreatedOk
 
-`func (o *TypesProjectInfo) GetCreatedOk() (*string, bool)`
+`func (o *ProjectInfo) GetCreatedOk() (*string, bool)`
 
 GetCreatedOk returns a tuple with the Created field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetCreated
 
-`func (o *TypesProjectInfo) SetCreated(v string)`
+`func (o *ProjectInfo) SetCreated(v string)`
 
 SetCreated sets Created field to given value.
 
 ### HasCreated
 
-`func (o *TypesProjectInfo) HasCreated() bool`
+`func (o *ProjectInfo) HasCreated() bool`
 
 HasCreated returns a boolean if a field has been set.
 
 ### GetFinished
 
-`func (o *TypesProjectInfo) GetFinished() string`
+`func (o *ProjectInfo) GetFinished() string`
 
 GetFinished returns the Finished field if non-nil, zero value otherwise.
 
 ### GetFinishedOk
 
-`func (o *TypesProjectInfo) GetFinishedOk() (*string, bool)`
+`func (o *ProjectInfo) GetFinishedOk() (*string, bool)`
 
 GetFinishedOk returns a tuple with the Finished field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetFinished
 
-`func (o *TypesProjectInfo) SetFinished(v string)`
+`func (o *ProjectInfo) SetFinished(v string)`
 
 SetFinished sets Finished field to given value.
 
 ### HasFinished
 
-`func (o *TypesProjectInfo) HasFinished() bool`
+`func (o *ProjectInfo) HasFinished() bool`
 
 HasFinished returns a boolean if a field has been set.
 
 ### GetIsRunning
 
-`func (o *TypesProjectInfo) GetIsRunning() bool`
+`func (o *ProjectInfo) GetIsRunning() bool`
 
 GetIsRunning returns the IsRunning field if non-nil, zero value otherwise.
 
 ### GetIsRunningOk
 
-`func (o *TypesProjectInfo) GetIsRunningOk() (*bool, bool)`
+`func (o *ProjectInfo) GetIsRunningOk() (*bool, bool)`
 
 GetIsRunningOk returns a tuple with the IsRunning field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetIsRunning
 
-`func (o *TypesProjectInfo) SetIsRunning(v bool)`
+`func (o *ProjectInfo) SetIsRunning(v bool)`
 
 SetIsRunning sets IsRunning field to given value.
 
 ### HasIsRunning
 
-`func (o *TypesProjectInfo) HasIsRunning() bool`
+`func (o *ProjectInfo) HasIsRunning() bool`
 
 HasIsRunning returns a boolean if a field has been set.
 
 ### GetName
 
-`func (o *TypesProjectInfo) GetName() string`
+`func (o *ProjectInfo) GetName() string`
 
 GetName returns the Name field if non-nil, zero value otherwise.
 
 ### GetNameOk
 
-`func (o *TypesProjectInfo) GetNameOk() (*string, bool)`
+`func (o *ProjectInfo) GetNameOk() (*string, bool)`
 
 GetNameOk returns a tuple with the Name field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetName
 
-`func (o *TypesProjectInfo) SetName(v string)`
+`func (o *ProjectInfo) SetName(v string)`
 
 SetName sets Name field to given value.
 
 ### HasName
 
-`func (o *TypesProjectInfo) HasName() bool`
+`func (o *ProjectInfo) HasName() bool`
 
 HasName returns a boolean if a field has been set.
 
 ### GetProvisionerMetadata
 
-`func (o *TypesProjectInfo) GetProvisionerMetadata() GithubComGolangProtobufPtypesStructStruct`
+`func (o *ProjectInfo) GetProvisionerMetadata() string`
 
 GetProvisionerMetadata returns the ProvisionerMetadata field if non-nil, zero value otherwise.
 
 ### GetProvisionerMetadataOk
 
-`func (o *TypesProjectInfo) GetProvisionerMetadataOk() (*GithubComGolangProtobufPtypesStructStruct, bool)`
+`func (o *ProjectInfo) GetProvisionerMetadataOk() (*string, bool)`
 
 GetProvisionerMetadataOk returns a tuple with the ProvisionerMetadata field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetProvisionerMetadata
 
-`func (o *TypesProjectInfo) SetProvisionerMetadata(v GithubComGolangProtobufPtypesStructStruct)`
+`func (o *ProjectInfo) SetProvisionerMetadata(v string)`
 
 SetProvisionerMetadata sets ProvisionerMetadata field to given value.
 
 ### HasProvisionerMetadata
 
-`func (o *TypesProjectInfo) HasProvisionerMetadata() bool`
+`func (o *ProjectInfo) HasProvisionerMetadata() bool`
 
 HasProvisionerMetadata returns a boolean if a field has been set.
 
 ### GetStarted
 
-`func (o *TypesProjectInfo) GetStarted() string`
+`func (o *ProjectInfo) GetStarted() string`
 
 GetStarted returns the Started field if non-nil, zero value otherwise.
 
 ### GetStartedOk
 
-`func (o *TypesProjectInfo) GetStartedOk() (*string, bool)`
+`func (o *ProjectInfo) GetStartedOk() (*string, bool)`
 
 GetStartedOk returns a tuple with the Started field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetStarted
 
-`func (o *TypesProjectInfo) SetStarted(v string)`
+`func (o *ProjectInfo) SetStarted(v string)`
 
 SetStarted sets Started field to given value.
 
 ### HasStarted
 
-`func (o *TypesProjectInfo) HasStarted() bool`
+`func (o *ProjectInfo) HasStarted() bool`
 
 HasStarted returns a boolean if a field has been set.
 
 ### GetWorkspaceId
 
-`func (o *TypesProjectInfo) GetWorkspaceId() string`
+`func (o *ProjectInfo) GetWorkspaceId() string`
 
 GetWorkspaceId returns the WorkspaceId field if non-nil, zero value otherwise.
 
 ### GetWorkspaceIdOk
 
-`func (o *TypesProjectInfo) GetWorkspaceIdOk() (*string, bool)`
+`func (o *ProjectInfo) GetWorkspaceIdOk() (*string, bool)`
 
 GetWorkspaceIdOk returns a tuple with the WorkspaceId field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetWorkspaceId
 
-`func (o *TypesProjectInfo) SetWorkspaceId(v string)`
+`func (o *ProjectInfo) SetWorkspaceId(v string)`
 
 SetWorkspaceId sets WorkspaceId field to given value.
 
 ### HasWorkspaceId
 
-`func (o *TypesProjectInfo) HasWorkspaceId() bool`
+`func (o *ProjectInfo) HasWorkspaceId() bool`
 
 HasWorkspaceId returns a boolean if a field has been set.
 

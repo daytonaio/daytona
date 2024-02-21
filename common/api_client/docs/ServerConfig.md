@@ -5,7 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **ApiPort** | Pointer to **int32** |  | [optional] 
-**Frps** | Pointer to [**TypesFRPSConfig**](TypesFRPSConfig.md) |  | [optional] 
+**Frps** | Pointer to [**FRPSConfig**](FRPSConfig.md) |  | [optional] 
 **HeadscalePort** | Pointer to **int32** |  | [optional] 
 **Id** | Pointer to **string** |  | [optional] 
 **PluginRegistryUrl** | Pointer to **string** |  | [optional] 
@@ -58,20 +58,20 @@ HasApiPort returns a boolean if a field has been set.
 
 ### GetFrps
 
-`func (o *ServerConfig) GetFrps() TypesFRPSConfig`
+`func (o *ServerConfig) GetFrps() FRPSConfig`
 
 GetFrps returns the Frps field if non-nil, zero value otherwise.
 
 ### GetFrpsOk
 
-`func (o *ServerConfig) GetFrpsOk() (*TypesFRPSConfig, bool)`
+`func (o *ServerConfig) GetFrpsOk() (*FRPSConfig, bool)`
 
 GetFrpsOk returns a tuple with the Frps field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetFrps
 
-`func (o *ServerConfig) SetFrps(v TypesFRPSConfig)`
+`func (o *ServerConfig) SetFrps(v FRPSConfig)`
 
 SetFrps sets Frps field to given value.
 

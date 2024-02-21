@@ -14,11 +14,11 @@ import (
 	"encoding/json"
 )
 
-// checks if the TypesRepository type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &TypesRepository{}
+// checks if the Repository type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &Repository{}
 
-// TypesRepository struct for TypesRepository
-type TypesRepository struct {
+// Repository struct for Repository
+type Repository struct {
 	Branch *string `json:"branch,omitempty"`
 	Owner *string `json:"owner,omitempty"`
 	Path *string `json:"path,omitempty"`
@@ -28,25 +28,25 @@ type TypesRepository struct {
 	Url *string `json:"url,omitempty"`
 }
 
-// NewTypesRepository instantiates a new TypesRepository object
+// NewRepository instantiates a new Repository object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTypesRepository() *TypesRepository {
-	this := TypesRepository{}
+func NewRepository() *Repository {
+	this := Repository{}
 	return &this
 }
 
-// NewTypesRepositoryWithDefaults instantiates a new TypesRepository object
+// NewRepositoryWithDefaults instantiates a new Repository object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewTypesRepositoryWithDefaults() *TypesRepository {
-	this := TypesRepository{}
+func NewRepositoryWithDefaults() *Repository {
+	this := Repository{}
 	return &this
 }
 
 // GetBranch returns the Branch field value if set, zero value otherwise.
-func (o *TypesRepository) GetBranch() string {
+func (o *Repository) GetBranch() string {
 	if o == nil || IsNil(o.Branch) {
 		var ret string
 		return ret
@@ -56,7 +56,7 @@ func (o *TypesRepository) GetBranch() string {
 
 // GetBranchOk returns a tuple with the Branch field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesRepository) GetBranchOk() (*string, bool) {
+func (o *Repository) GetBranchOk() (*string, bool) {
 	if o == nil || IsNil(o.Branch) {
 		return nil, false
 	}
@@ -64,7 +64,7 @@ func (o *TypesRepository) GetBranchOk() (*string, bool) {
 }
 
 // HasBranch returns a boolean if a field has been set.
-func (o *TypesRepository) HasBranch() bool {
+func (o *Repository) HasBranch() bool {
 	if o != nil && !IsNil(o.Branch) {
 		return true
 	}
@@ -73,12 +73,12 @@ func (o *TypesRepository) HasBranch() bool {
 }
 
 // SetBranch gets a reference to the given string and assigns it to the Branch field.
-func (o *TypesRepository) SetBranch(v string) {
+func (o *Repository) SetBranch(v string) {
 	o.Branch = &v
 }
 
 // GetOwner returns the Owner field value if set, zero value otherwise.
-func (o *TypesRepository) GetOwner() string {
+func (o *Repository) GetOwner() string {
 	if o == nil || IsNil(o.Owner) {
 		var ret string
 		return ret
@@ -88,7 +88,7 @@ func (o *TypesRepository) GetOwner() string {
 
 // GetOwnerOk returns a tuple with the Owner field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesRepository) GetOwnerOk() (*string, bool) {
+func (o *Repository) GetOwnerOk() (*string, bool) {
 	if o == nil || IsNil(o.Owner) {
 		return nil, false
 	}
@@ -96,7 +96,7 @@ func (o *TypesRepository) GetOwnerOk() (*string, bool) {
 }
 
 // HasOwner returns a boolean if a field has been set.
-func (o *TypesRepository) HasOwner() bool {
+func (o *Repository) HasOwner() bool {
 	if o != nil && !IsNil(o.Owner) {
 		return true
 	}
@@ -105,12 +105,12 @@ func (o *TypesRepository) HasOwner() bool {
 }
 
 // SetOwner gets a reference to the given string and assigns it to the Owner field.
-func (o *TypesRepository) SetOwner(v string) {
+func (o *Repository) SetOwner(v string) {
 	o.Owner = &v
 }
 
 // GetPath returns the Path field value if set, zero value otherwise.
-func (o *TypesRepository) GetPath() string {
+func (o *Repository) GetPath() string {
 	if o == nil || IsNil(o.Path) {
 		var ret string
 		return ret
@@ -120,7 +120,7 @@ func (o *TypesRepository) GetPath() string {
 
 // GetPathOk returns a tuple with the Path field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesRepository) GetPathOk() (*string, bool) {
+func (o *Repository) GetPathOk() (*string, bool) {
 	if o == nil || IsNil(o.Path) {
 		return nil, false
 	}
@@ -128,7 +128,7 @@ func (o *TypesRepository) GetPathOk() (*string, bool) {
 }
 
 // HasPath returns a boolean if a field has been set.
-func (o *TypesRepository) HasPath() bool {
+func (o *Repository) HasPath() bool {
 	if o != nil && !IsNil(o.Path) {
 		return true
 	}
@@ -137,12 +137,12 @@ func (o *TypesRepository) HasPath() bool {
 }
 
 // SetPath gets a reference to the given string and assigns it to the Path field.
-func (o *TypesRepository) SetPath(v string) {
+func (o *Repository) SetPath(v string) {
 	o.Path = &v
 }
 
 // GetPrNumber returns the PrNumber field value if set, zero value otherwise.
-func (o *TypesRepository) GetPrNumber() int32 {
+func (o *Repository) GetPrNumber() int32 {
 	if o == nil || IsNil(o.PrNumber) {
 		var ret int32
 		return ret
@@ -152,7 +152,7 @@ func (o *TypesRepository) GetPrNumber() int32 {
 
 // GetPrNumberOk returns a tuple with the PrNumber field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesRepository) GetPrNumberOk() (*int32, bool) {
+func (o *Repository) GetPrNumberOk() (*int32, bool) {
 	if o == nil || IsNil(o.PrNumber) {
 		return nil, false
 	}
@@ -160,7 +160,7 @@ func (o *TypesRepository) GetPrNumberOk() (*int32, bool) {
 }
 
 // HasPrNumber returns a boolean if a field has been set.
-func (o *TypesRepository) HasPrNumber() bool {
+func (o *Repository) HasPrNumber() bool {
 	if o != nil && !IsNil(o.PrNumber) {
 		return true
 	}
@@ -169,12 +169,12 @@ func (o *TypesRepository) HasPrNumber() bool {
 }
 
 // SetPrNumber gets a reference to the given int32 and assigns it to the PrNumber field.
-func (o *TypesRepository) SetPrNumber(v int32) {
+func (o *Repository) SetPrNumber(v int32) {
 	o.PrNumber = &v
 }
 
 // GetSha returns the Sha field value if set, zero value otherwise.
-func (o *TypesRepository) GetSha() string {
+func (o *Repository) GetSha() string {
 	if o == nil || IsNil(o.Sha) {
 		var ret string
 		return ret
@@ -184,7 +184,7 @@ func (o *TypesRepository) GetSha() string {
 
 // GetShaOk returns a tuple with the Sha field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesRepository) GetShaOk() (*string, bool) {
+func (o *Repository) GetShaOk() (*string, bool) {
 	if o == nil || IsNil(o.Sha) {
 		return nil, false
 	}
@@ -192,7 +192,7 @@ func (o *TypesRepository) GetShaOk() (*string, bool) {
 }
 
 // HasSha returns a boolean if a field has been set.
-func (o *TypesRepository) HasSha() bool {
+func (o *Repository) HasSha() bool {
 	if o != nil && !IsNil(o.Sha) {
 		return true
 	}
@@ -201,12 +201,12 @@ func (o *TypesRepository) HasSha() bool {
 }
 
 // SetSha gets a reference to the given string and assigns it to the Sha field.
-func (o *TypesRepository) SetSha(v string) {
+func (o *Repository) SetSha(v string) {
 	o.Sha = &v
 }
 
 // GetSource returns the Source field value if set, zero value otherwise.
-func (o *TypesRepository) GetSource() string {
+func (o *Repository) GetSource() string {
 	if o == nil || IsNil(o.Source) {
 		var ret string
 		return ret
@@ -216,7 +216,7 @@ func (o *TypesRepository) GetSource() string {
 
 // GetSourceOk returns a tuple with the Source field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesRepository) GetSourceOk() (*string, bool) {
+func (o *Repository) GetSourceOk() (*string, bool) {
 	if o == nil || IsNil(o.Source) {
 		return nil, false
 	}
@@ -224,7 +224,7 @@ func (o *TypesRepository) GetSourceOk() (*string, bool) {
 }
 
 // HasSource returns a boolean if a field has been set.
-func (o *TypesRepository) HasSource() bool {
+func (o *Repository) HasSource() bool {
 	if o != nil && !IsNil(o.Source) {
 		return true
 	}
@@ -233,12 +233,12 @@ func (o *TypesRepository) HasSource() bool {
 }
 
 // SetSource gets a reference to the given string and assigns it to the Source field.
-func (o *TypesRepository) SetSource(v string) {
+func (o *Repository) SetSource(v string) {
 	o.Source = &v
 }
 
 // GetUrl returns the Url field value if set, zero value otherwise.
-func (o *TypesRepository) GetUrl() string {
+func (o *Repository) GetUrl() string {
 	if o == nil || IsNil(o.Url) {
 		var ret string
 		return ret
@@ -248,7 +248,7 @@ func (o *TypesRepository) GetUrl() string {
 
 // GetUrlOk returns a tuple with the Url field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesRepository) GetUrlOk() (*string, bool) {
+func (o *Repository) GetUrlOk() (*string, bool) {
 	if o == nil || IsNil(o.Url) {
 		return nil, false
 	}
@@ -256,7 +256,7 @@ func (o *TypesRepository) GetUrlOk() (*string, bool) {
 }
 
 // HasUrl returns a boolean if a field has been set.
-func (o *TypesRepository) HasUrl() bool {
+func (o *Repository) HasUrl() bool {
 	if o != nil && !IsNil(o.Url) {
 		return true
 	}
@@ -265,11 +265,11 @@ func (o *TypesRepository) HasUrl() bool {
 }
 
 // SetUrl gets a reference to the given string and assigns it to the Url field.
-func (o *TypesRepository) SetUrl(v string) {
+func (o *Repository) SetUrl(v string) {
 	o.Url = &v
 }
 
-func (o TypesRepository) MarshalJSON() ([]byte, error) {
+func (o Repository) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -277,7 +277,7 @@ func (o TypesRepository) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o TypesRepository) ToMap() (map[string]interface{}, error) {
+func (o Repository) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Branch) {
 		toSerialize["branch"] = o.Branch
@@ -303,38 +303,38 @@ func (o TypesRepository) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-type NullableTypesRepository struct {
-	value *TypesRepository
+type NullableRepository struct {
+	value *Repository
 	isSet bool
 }
 
-func (v NullableTypesRepository) Get() *TypesRepository {
+func (v NullableRepository) Get() *Repository {
 	return v.value
 }
 
-func (v *NullableTypesRepository) Set(val *TypesRepository) {
+func (v *NullableRepository) Set(val *Repository) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableTypesRepository) IsSet() bool {
+func (v NullableRepository) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableTypesRepository) Unset() {
+func (v *NullableRepository) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableTypesRepository(val *TypesRepository) *NullableTypesRepository {
-	return &NullableTypesRepository{value: val, isSet: true}
+func NewNullableRepository(val *Repository) *NullableRepository {
+	return &NullableRepository{value: val, isSet: true}
 }
 
-func (v NullableTypesRepository) MarshalJSON() ([]byte, error) {
+func (v NullableRepository) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableTypesRepository) UnmarshalJSON(src []byte) error {
+func (v *NullableRepository) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

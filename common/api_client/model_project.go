@@ -14,36 +14,36 @@ import (
 	"encoding/json"
 )
 
-// checks if the TypesProject type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &TypesProject{}
+// checks if the Project type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &Project{}
 
-// TypesProject struct for TypesProject
-type TypesProject struct {
+// Project struct for Project
+type Project struct {
 	AuthKey *string `json:"authKey,omitempty"`
 	Name *string `json:"name,omitempty"`
-	Repository *TypesRepository `json:"repository,omitempty"`
+	Repository *Repository `json:"repository,omitempty"`
 	WorkspaceId *string `json:"workspaceId,omitempty"`
 }
 
-// NewTypesProject instantiates a new TypesProject object
+// NewProject instantiates a new Project object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTypesProject() *TypesProject {
-	this := TypesProject{}
+func NewProject() *Project {
+	this := Project{}
 	return &this
 }
 
-// NewTypesProjectWithDefaults instantiates a new TypesProject object
+// NewProjectWithDefaults instantiates a new Project object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewTypesProjectWithDefaults() *TypesProject {
-	this := TypesProject{}
+func NewProjectWithDefaults() *Project {
+	this := Project{}
 	return &this
 }
 
 // GetAuthKey returns the AuthKey field value if set, zero value otherwise.
-func (o *TypesProject) GetAuthKey() string {
+func (o *Project) GetAuthKey() string {
 	if o == nil || IsNil(o.AuthKey) {
 		var ret string
 		return ret
@@ -53,7 +53,7 @@ func (o *TypesProject) GetAuthKey() string {
 
 // GetAuthKeyOk returns a tuple with the AuthKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesProject) GetAuthKeyOk() (*string, bool) {
+func (o *Project) GetAuthKeyOk() (*string, bool) {
 	if o == nil || IsNil(o.AuthKey) {
 		return nil, false
 	}
@@ -61,7 +61,7 @@ func (o *TypesProject) GetAuthKeyOk() (*string, bool) {
 }
 
 // HasAuthKey returns a boolean if a field has been set.
-func (o *TypesProject) HasAuthKey() bool {
+func (o *Project) HasAuthKey() bool {
 	if o != nil && !IsNil(o.AuthKey) {
 		return true
 	}
@@ -70,12 +70,12 @@ func (o *TypesProject) HasAuthKey() bool {
 }
 
 // SetAuthKey gets a reference to the given string and assigns it to the AuthKey field.
-func (o *TypesProject) SetAuthKey(v string) {
+func (o *Project) SetAuthKey(v string) {
 	o.AuthKey = &v
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
-func (o *TypesProject) GetName() string {
+func (o *Project) GetName() string {
 	if o == nil || IsNil(o.Name) {
 		var ret string
 		return ret
@@ -85,7 +85,7 @@ func (o *TypesProject) GetName() string {
 
 // GetNameOk returns a tuple with the Name field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesProject) GetNameOk() (*string, bool) {
+func (o *Project) GetNameOk() (*string, bool) {
 	if o == nil || IsNil(o.Name) {
 		return nil, false
 	}
@@ -93,7 +93,7 @@ func (o *TypesProject) GetNameOk() (*string, bool) {
 }
 
 // HasName returns a boolean if a field has been set.
-func (o *TypesProject) HasName() bool {
+func (o *Project) HasName() bool {
 	if o != nil && !IsNil(o.Name) {
 		return true
 	}
@@ -102,14 +102,14 @@ func (o *TypesProject) HasName() bool {
 }
 
 // SetName gets a reference to the given string and assigns it to the Name field.
-func (o *TypesProject) SetName(v string) {
+func (o *Project) SetName(v string) {
 	o.Name = &v
 }
 
 // GetRepository returns the Repository field value if set, zero value otherwise.
-func (o *TypesProject) GetRepository() TypesRepository {
+func (o *Project) GetRepository() Repository {
 	if o == nil || IsNil(o.Repository) {
-		var ret TypesRepository
+		var ret Repository
 		return ret
 	}
 	return *o.Repository
@@ -117,7 +117,7 @@ func (o *TypesProject) GetRepository() TypesRepository {
 
 // GetRepositoryOk returns a tuple with the Repository field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesProject) GetRepositoryOk() (*TypesRepository, bool) {
+func (o *Project) GetRepositoryOk() (*Repository, bool) {
 	if o == nil || IsNil(o.Repository) {
 		return nil, false
 	}
@@ -125,7 +125,7 @@ func (o *TypesProject) GetRepositoryOk() (*TypesRepository, bool) {
 }
 
 // HasRepository returns a boolean if a field has been set.
-func (o *TypesProject) HasRepository() bool {
+func (o *Project) HasRepository() bool {
 	if o != nil && !IsNil(o.Repository) {
 		return true
 	}
@@ -133,13 +133,13 @@ func (o *TypesProject) HasRepository() bool {
 	return false
 }
 
-// SetRepository gets a reference to the given TypesRepository and assigns it to the Repository field.
-func (o *TypesProject) SetRepository(v TypesRepository) {
+// SetRepository gets a reference to the given Repository and assigns it to the Repository field.
+func (o *Project) SetRepository(v Repository) {
 	o.Repository = &v
 }
 
 // GetWorkspaceId returns the WorkspaceId field value if set, zero value otherwise.
-func (o *TypesProject) GetWorkspaceId() string {
+func (o *Project) GetWorkspaceId() string {
 	if o == nil || IsNil(o.WorkspaceId) {
 		var ret string
 		return ret
@@ -149,7 +149,7 @@ func (o *TypesProject) GetWorkspaceId() string {
 
 // GetWorkspaceIdOk returns a tuple with the WorkspaceId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesProject) GetWorkspaceIdOk() (*string, bool) {
+func (o *Project) GetWorkspaceIdOk() (*string, bool) {
 	if o == nil || IsNil(o.WorkspaceId) {
 		return nil, false
 	}
@@ -157,7 +157,7 @@ func (o *TypesProject) GetWorkspaceIdOk() (*string, bool) {
 }
 
 // HasWorkspaceId returns a boolean if a field has been set.
-func (o *TypesProject) HasWorkspaceId() bool {
+func (o *Project) HasWorkspaceId() bool {
 	if o != nil && !IsNil(o.WorkspaceId) {
 		return true
 	}
@@ -166,11 +166,11 @@ func (o *TypesProject) HasWorkspaceId() bool {
 }
 
 // SetWorkspaceId gets a reference to the given string and assigns it to the WorkspaceId field.
-func (o *TypesProject) SetWorkspaceId(v string) {
+func (o *Project) SetWorkspaceId(v string) {
 	o.WorkspaceId = &v
 }
 
-func (o TypesProject) MarshalJSON() ([]byte, error) {
+func (o Project) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -178,7 +178,7 @@ func (o TypesProject) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o TypesProject) ToMap() (map[string]interface{}, error) {
+func (o Project) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.AuthKey) {
 		toSerialize["authKey"] = o.AuthKey
@@ -195,38 +195,38 @@ func (o TypesProject) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-type NullableTypesProject struct {
-	value *TypesProject
+type NullableProject struct {
+	value *Project
 	isSet bool
 }
 
-func (v NullableTypesProject) Get() *TypesProject {
+func (v NullableProject) Get() *Project {
 	return v.value
 }
 
-func (v *NullableTypesProject) Set(val *TypesProject) {
+func (v *NullableProject) Set(val *Project) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableTypesProject) IsSet() bool {
+func (v NullableProject) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableTypesProject) Unset() {
+func (v *NullableProject) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableTypesProject(val *TypesProject) *NullableTypesProject {
-	return &NullableTypesProject{value: val, isSet: true}
+func NewNullableProject(val *Project) *NullableProject {
+	return &NullableProject{value: val, isSet: true}
 }
 
-func (v NullableTypesProject) MarshalJSON() ([]byte, error) {
+func (v NullableProject) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableTypesProject) UnmarshalJSON(src []byte) error {
+func (v *NullableProject) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

@@ -1,4 +1,4 @@
-# TypesFRPSConfig
+# FRPSConfig
 
 ## Properties
 
@@ -10,95 +10,95 @@ Name | Type | Description | Notes
 
 ## Methods
 
-### NewTypesFRPSConfig
+### NewFRPSConfig
 
-`func NewTypesFRPSConfig() *TypesFRPSConfig`
+`func NewFRPSConfig() *FRPSConfig`
 
-NewTypesFRPSConfig instantiates a new TypesFRPSConfig object
+NewFRPSConfig instantiates a new FRPSConfig object
 This constructor will assign default values to properties that have it defined,
 and makes sure properties required by API are set, but the set of arguments
 will change when the set of required properties is changed
 
-### NewTypesFRPSConfigWithDefaults
+### NewFRPSConfigWithDefaults
 
-`func NewTypesFRPSConfigWithDefaults() *TypesFRPSConfig`
+`func NewFRPSConfigWithDefaults() *FRPSConfig`
 
-NewTypesFRPSConfigWithDefaults instantiates a new TypesFRPSConfig object
+NewFRPSConfigWithDefaults instantiates a new FRPSConfig object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
 ### GetDomain
 
-`func (o *TypesFRPSConfig) GetDomain() string`
+`func (o *FRPSConfig) GetDomain() string`
 
 GetDomain returns the Domain field if non-nil, zero value otherwise.
 
 ### GetDomainOk
 
-`func (o *TypesFRPSConfig) GetDomainOk() (*string, bool)`
+`func (o *FRPSConfig) GetDomainOk() (*string, bool)`
 
 GetDomainOk returns a tuple with the Domain field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetDomain
 
-`func (o *TypesFRPSConfig) SetDomain(v string)`
+`func (o *FRPSConfig) SetDomain(v string)`
 
 SetDomain sets Domain field to given value.
 
 ### HasDomain
 
-`func (o *TypesFRPSConfig) HasDomain() bool`
+`func (o *FRPSConfig) HasDomain() bool`
 
 HasDomain returns a boolean if a field has been set.
 
 ### GetPort
 
-`func (o *TypesFRPSConfig) GetPort() int32`
+`func (o *FRPSConfig) GetPort() int32`
 
 GetPort returns the Port field if non-nil, zero value otherwise.
 
 ### GetPortOk
 
-`func (o *TypesFRPSConfig) GetPortOk() (*int32, bool)`
+`func (o *FRPSConfig) GetPortOk() (*int32, bool)`
 
 GetPortOk returns a tuple with the Port field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetPort
 
-`func (o *TypesFRPSConfig) SetPort(v int32)`
+`func (o *FRPSConfig) SetPort(v int32)`
 
 SetPort sets Port field to given value.
 
 ### HasPort
 
-`func (o *TypesFRPSConfig) HasPort() bool`
+`func (o *FRPSConfig) HasPort() bool`
 
 HasPort returns a boolean if a field has been set.
 
 ### GetProtocol
 
-`func (o *TypesFRPSConfig) GetProtocol() string`
+`func (o *FRPSConfig) GetProtocol() string`
 
 GetProtocol returns the Protocol field if non-nil, zero value otherwise.
 
 ### GetProtocolOk
 
-`func (o *TypesFRPSConfig) GetProtocolOk() (*string, bool)`
+`func (o *FRPSConfig) GetProtocolOk() (*string, bool)`
 
 GetProtocolOk returns a tuple with the Protocol field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetProtocol
 
-`func (o *TypesFRPSConfig) SetProtocol(v string)`
+`func (o *FRPSConfig) SetProtocol(v string)`
 
 SetProtocol sets Protocol field to given value.
 
 ### HasProtocol
 
-`func (o *TypesFRPSConfig) HasProtocol() bool`
+`func (o *FRPSConfig) HasProtocol() bool`
 
 HasProtocol returns a boolean if a field has been set.
 

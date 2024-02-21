@@ -14,35 +14,35 @@ import (
 	"encoding/json"
 )
 
-// checks if the TypesFRPSConfig type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &TypesFRPSConfig{}
+// checks if the FRPSConfig type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &FRPSConfig{}
 
-// TypesFRPSConfig struct for TypesFRPSConfig
-type TypesFRPSConfig struct {
+// FRPSConfig struct for FRPSConfig
+type FRPSConfig struct {
 	Domain *string `json:"domain,omitempty"`
 	Port *int32 `json:"port,omitempty"`
 	Protocol *string `json:"protocol,omitempty"`
 }
 
-// NewTypesFRPSConfig instantiates a new TypesFRPSConfig object
+// NewFRPSConfig instantiates a new FRPSConfig object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTypesFRPSConfig() *TypesFRPSConfig {
-	this := TypesFRPSConfig{}
+func NewFRPSConfig() *FRPSConfig {
+	this := FRPSConfig{}
 	return &this
 }
 
-// NewTypesFRPSConfigWithDefaults instantiates a new TypesFRPSConfig object
+// NewFRPSConfigWithDefaults instantiates a new FRPSConfig object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewTypesFRPSConfigWithDefaults() *TypesFRPSConfig {
-	this := TypesFRPSConfig{}
+func NewFRPSConfigWithDefaults() *FRPSConfig {
+	this := FRPSConfig{}
 	return &this
 }
 
 // GetDomain returns the Domain field value if set, zero value otherwise.
-func (o *TypesFRPSConfig) GetDomain() string {
+func (o *FRPSConfig) GetDomain() string {
 	if o == nil || IsNil(o.Domain) {
 		var ret string
 		return ret
@@ -52,7 +52,7 @@ func (o *TypesFRPSConfig) GetDomain() string {
 
 // GetDomainOk returns a tuple with the Domain field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesFRPSConfig) GetDomainOk() (*string, bool) {
+func (o *FRPSConfig) GetDomainOk() (*string, bool) {
 	if o == nil || IsNil(o.Domain) {
 		return nil, false
 	}
@@ -60,7 +60,7 @@ func (o *TypesFRPSConfig) GetDomainOk() (*string, bool) {
 }
 
 // HasDomain returns a boolean if a field has been set.
-func (o *TypesFRPSConfig) HasDomain() bool {
+func (o *FRPSConfig) HasDomain() bool {
 	if o != nil && !IsNil(o.Domain) {
 		return true
 	}
@@ -69,12 +69,12 @@ func (o *TypesFRPSConfig) HasDomain() bool {
 }
 
 // SetDomain gets a reference to the given string and assigns it to the Domain field.
-func (o *TypesFRPSConfig) SetDomain(v string) {
+func (o *FRPSConfig) SetDomain(v string) {
 	o.Domain = &v
 }
 
 // GetPort returns the Port field value if set, zero value otherwise.
-func (o *TypesFRPSConfig) GetPort() int32 {
+func (o *FRPSConfig) GetPort() int32 {
 	if o == nil || IsNil(o.Port) {
 		var ret int32
 		return ret
@@ -84,7 +84,7 @@ func (o *TypesFRPSConfig) GetPort() int32 {
 
 // GetPortOk returns a tuple with the Port field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesFRPSConfig) GetPortOk() (*int32, bool) {
+func (o *FRPSConfig) GetPortOk() (*int32, bool) {
 	if o == nil || IsNil(o.Port) {
 		return nil, false
 	}
@@ -92,7 +92,7 @@ func (o *TypesFRPSConfig) GetPortOk() (*int32, bool) {
 }
 
 // HasPort returns a boolean if a field has been set.
-func (o *TypesFRPSConfig) HasPort() bool {
+func (o *FRPSConfig) HasPort() bool {
 	if o != nil && !IsNil(o.Port) {
 		return true
 	}
@@ -101,12 +101,12 @@ func (o *TypesFRPSConfig) HasPort() bool {
 }
 
 // SetPort gets a reference to the given int32 and assigns it to the Port field.
-func (o *TypesFRPSConfig) SetPort(v int32) {
+func (o *FRPSConfig) SetPort(v int32) {
 	o.Port = &v
 }
 
 // GetProtocol returns the Protocol field value if set, zero value otherwise.
-func (o *TypesFRPSConfig) GetProtocol() string {
+func (o *FRPSConfig) GetProtocol() string {
 	if o == nil || IsNil(o.Protocol) {
 		var ret string
 		return ret
@@ -116,7 +116,7 @@ func (o *TypesFRPSConfig) GetProtocol() string {
 
 // GetProtocolOk returns a tuple with the Protocol field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesFRPSConfig) GetProtocolOk() (*string, bool) {
+func (o *FRPSConfig) GetProtocolOk() (*string, bool) {
 	if o == nil || IsNil(o.Protocol) {
 		return nil, false
 	}
@@ -124,7 +124,7 @@ func (o *TypesFRPSConfig) GetProtocolOk() (*string, bool) {
 }
 
 // HasProtocol returns a boolean if a field has been set.
-func (o *TypesFRPSConfig) HasProtocol() bool {
+func (o *FRPSConfig) HasProtocol() bool {
 	if o != nil && !IsNil(o.Protocol) {
 		return true
 	}
@@ -133,11 +133,11 @@ func (o *TypesFRPSConfig) HasProtocol() bool {
 }
 
 // SetProtocol gets a reference to the given string and assigns it to the Protocol field.
-func (o *TypesFRPSConfig) SetProtocol(v string) {
+func (o *FRPSConfig) SetProtocol(v string) {
 	o.Protocol = &v
 }
 
-func (o TypesFRPSConfig) MarshalJSON() ([]byte, error) {
+func (o FRPSConfig) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -145,7 +145,7 @@ func (o TypesFRPSConfig) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o TypesFRPSConfig) ToMap() (map[string]interface{}, error) {
+func (o FRPSConfig) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Domain) {
 		toSerialize["domain"] = o.Domain
@@ -159,38 +159,38 @@ func (o TypesFRPSConfig) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-type NullableTypesFRPSConfig struct {
-	value *TypesFRPSConfig
+type NullableFRPSConfig struct {
+	value *FRPSConfig
 	isSet bool
 }
 
-func (v NullableTypesFRPSConfig) Get() *TypesFRPSConfig {
+func (v NullableFRPSConfig) Get() *FRPSConfig {
 	return v.value
 }
 
-func (v *NullableTypesFRPSConfig) Set(val *TypesFRPSConfig) {
+func (v *NullableFRPSConfig) Set(val *FRPSConfig) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableTypesFRPSConfig) IsSet() bool {
+func (v NullableFRPSConfig) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableTypesFRPSConfig) Unset() {
+func (v *NullableFRPSConfig) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableTypesFRPSConfig(val *TypesFRPSConfig) *NullableTypesFRPSConfig {
-	return &NullableTypesFRPSConfig{value: val, isSet: true}
+func NewNullableFRPSConfig(val *FRPSConfig) *NullableFRPSConfig {
+	return &NullableFRPSConfig{value: val, isSet: true}
 }
 
-func (v NullableTypesFRPSConfig) MarshalJSON() ([]byte, error) {
+func (v NullableFRPSConfig) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableTypesFRPSConfig) UnmarshalJSON(src []byte) error {
+func (v *NullableFRPSConfig) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

@@ -20,8 +20,8 @@ var _ MappedNullable = &WorkspaceInfo{}
 // WorkspaceInfo struct for WorkspaceInfo
 type WorkspaceInfo struct {
 	Name *string `json:"name,omitempty"`
-	Projects []TypesProjectInfo `json:"projects,omitempty"`
-	ProvisionerMetadata map[string]interface{} `json:"provisionerMetadata,omitempty"`
+	Projects []ProjectInfo `json:"projects,omitempty"`
+	ProvisionerMetadata *string `json:"provisionerMetadata,omitempty"`
 }
 
 // NewWorkspaceInfo instantiates a new WorkspaceInfo object
@@ -74,9 +74,9 @@ func (o *WorkspaceInfo) SetName(v string) {
 }
 
 // GetProjects returns the Projects field value if set, zero value otherwise.
-func (o *WorkspaceInfo) GetProjects() []TypesProjectInfo {
+func (o *WorkspaceInfo) GetProjects() []ProjectInfo {
 	if o == nil || IsNil(o.Projects) {
-		var ret []TypesProjectInfo
+		var ret []ProjectInfo
 		return ret
 	}
 	return o.Projects
@@ -84,7 +84,7 @@ func (o *WorkspaceInfo) GetProjects() []TypesProjectInfo {
 
 // GetProjectsOk returns a tuple with the Projects field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *WorkspaceInfo) GetProjectsOk() ([]TypesProjectInfo, bool) {
+func (o *WorkspaceInfo) GetProjectsOk() ([]ProjectInfo, bool) {
 	if o == nil || IsNil(o.Projects) {
 		return nil, false
 	}
@@ -100,25 +100,25 @@ func (o *WorkspaceInfo) HasProjects() bool {
 	return false
 }
 
-// SetProjects gets a reference to the given []TypesProjectInfo and assigns it to the Projects field.
-func (o *WorkspaceInfo) SetProjects(v []TypesProjectInfo) {
+// SetProjects gets a reference to the given []ProjectInfo and assigns it to the Projects field.
+func (o *WorkspaceInfo) SetProjects(v []ProjectInfo) {
 	o.Projects = v
 }
 
 // GetProvisionerMetadata returns the ProvisionerMetadata field value if set, zero value otherwise.
-func (o *WorkspaceInfo) GetProvisionerMetadata() map[string]interface{} {
+func (o *WorkspaceInfo) GetProvisionerMetadata() string {
 	if o == nil || IsNil(o.ProvisionerMetadata) {
-		var ret map[string]interface{}
+		var ret string
 		return ret
 	}
-	return o.ProvisionerMetadata
+	return *o.ProvisionerMetadata
 }
 
 // GetProvisionerMetadataOk returns a tuple with the ProvisionerMetadata field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *WorkspaceInfo) GetProvisionerMetadataOk() (map[string]interface{}, bool) {
+func (o *WorkspaceInfo) GetProvisionerMetadataOk() (*string, bool) {
 	if o == nil || IsNil(o.ProvisionerMetadata) {
-		return map[string]interface{}{}, false
+		return nil, false
 	}
 	return o.ProvisionerMetadata, true
 }
@@ -132,9 +132,9 @@ func (o *WorkspaceInfo) HasProvisionerMetadata() bool {
 	return false
 }
 
-// SetProvisionerMetadata gets a reference to the given map[string]interface{} and assigns it to the ProvisionerMetadata field.
-func (o *WorkspaceInfo) SetProvisionerMetadata(v map[string]interface{}) {
-	o.ProvisionerMetadata = v
+// SetProvisionerMetadata gets a reference to the given string and assigns it to the ProvisionerMetadata field.
+func (o *WorkspaceInfo) SetProvisionerMetadata(v string) {
+	o.ProvisionerMetadata = &v
 }
 
 func (o WorkspaceInfo) MarshalJSON() ([]byte, error) {

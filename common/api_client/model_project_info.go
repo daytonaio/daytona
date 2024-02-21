@@ -14,39 +14,39 @@ import (
 	"encoding/json"
 )
 
-// checks if the TypesProjectInfo type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &TypesProjectInfo{}
+// checks if the ProjectInfo type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &ProjectInfo{}
 
-// TypesProjectInfo struct for TypesProjectInfo
-type TypesProjectInfo struct {
+// ProjectInfo struct for ProjectInfo
+type ProjectInfo struct {
 	Created *string `json:"created,omitempty"`
 	Finished *string `json:"finished,omitempty"`
 	IsRunning *bool `json:"isRunning,omitempty"`
 	Name *string `json:"name,omitempty"`
-	ProvisionerMetadata *GithubComGolangProtobufPtypesStructStruct `json:"provisionerMetadata,omitempty"`
+	ProvisionerMetadata *string `json:"provisionerMetadata,omitempty"`
 	Started *string `json:"started,omitempty"`
 	WorkspaceId *string `json:"workspaceId,omitempty"`
 }
 
-// NewTypesProjectInfo instantiates a new TypesProjectInfo object
+// NewProjectInfo instantiates a new ProjectInfo object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTypesProjectInfo() *TypesProjectInfo {
-	this := TypesProjectInfo{}
+func NewProjectInfo() *ProjectInfo {
+	this := ProjectInfo{}
 	return &this
 }
 
-// NewTypesProjectInfoWithDefaults instantiates a new TypesProjectInfo object
+// NewProjectInfoWithDefaults instantiates a new ProjectInfo object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewTypesProjectInfoWithDefaults() *TypesProjectInfo {
-	this := TypesProjectInfo{}
+func NewProjectInfoWithDefaults() *ProjectInfo {
+	this := ProjectInfo{}
 	return &this
 }
 
 // GetCreated returns the Created field value if set, zero value otherwise.
-func (o *TypesProjectInfo) GetCreated() string {
+func (o *ProjectInfo) GetCreated() string {
 	if o == nil || IsNil(o.Created) {
 		var ret string
 		return ret
@@ -56,7 +56,7 @@ func (o *TypesProjectInfo) GetCreated() string {
 
 // GetCreatedOk returns a tuple with the Created field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesProjectInfo) GetCreatedOk() (*string, bool) {
+func (o *ProjectInfo) GetCreatedOk() (*string, bool) {
 	if o == nil || IsNil(o.Created) {
 		return nil, false
 	}
@@ -64,7 +64,7 @@ func (o *TypesProjectInfo) GetCreatedOk() (*string, bool) {
 }
 
 // HasCreated returns a boolean if a field has been set.
-func (o *TypesProjectInfo) HasCreated() bool {
+func (o *ProjectInfo) HasCreated() bool {
 	if o != nil && !IsNil(o.Created) {
 		return true
 	}
@@ -73,12 +73,12 @@ func (o *TypesProjectInfo) HasCreated() bool {
 }
 
 // SetCreated gets a reference to the given string and assigns it to the Created field.
-func (o *TypesProjectInfo) SetCreated(v string) {
+func (o *ProjectInfo) SetCreated(v string) {
 	o.Created = &v
 }
 
 // GetFinished returns the Finished field value if set, zero value otherwise.
-func (o *TypesProjectInfo) GetFinished() string {
+func (o *ProjectInfo) GetFinished() string {
 	if o == nil || IsNil(o.Finished) {
 		var ret string
 		return ret
@@ -88,7 +88,7 @@ func (o *TypesProjectInfo) GetFinished() string {
 
 // GetFinishedOk returns a tuple with the Finished field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesProjectInfo) GetFinishedOk() (*string, bool) {
+func (o *ProjectInfo) GetFinishedOk() (*string, bool) {
 	if o == nil || IsNil(o.Finished) {
 		return nil, false
 	}
@@ -96,7 +96,7 @@ func (o *TypesProjectInfo) GetFinishedOk() (*string, bool) {
 }
 
 // HasFinished returns a boolean if a field has been set.
-func (o *TypesProjectInfo) HasFinished() bool {
+func (o *ProjectInfo) HasFinished() bool {
 	if o != nil && !IsNil(o.Finished) {
 		return true
 	}
@@ -105,12 +105,12 @@ func (o *TypesProjectInfo) HasFinished() bool {
 }
 
 // SetFinished gets a reference to the given string and assigns it to the Finished field.
-func (o *TypesProjectInfo) SetFinished(v string) {
+func (o *ProjectInfo) SetFinished(v string) {
 	o.Finished = &v
 }
 
 // GetIsRunning returns the IsRunning field value if set, zero value otherwise.
-func (o *TypesProjectInfo) GetIsRunning() bool {
+func (o *ProjectInfo) GetIsRunning() bool {
 	if o == nil || IsNil(o.IsRunning) {
 		var ret bool
 		return ret
@@ -120,7 +120,7 @@ func (o *TypesProjectInfo) GetIsRunning() bool {
 
 // GetIsRunningOk returns a tuple with the IsRunning field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesProjectInfo) GetIsRunningOk() (*bool, bool) {
+func (o *ProjectInfo) GetIsRunningOk() (*bool, bool) {
 	if o == nil || IsNil(o.IsRunning) {
 		return nil, false
 	}
@@ -128,7 +128,7 @@ func (o *TypesProjectInfo) GetIsRunningOk() (*bool, bool) {
 }
 
 // HasIsRunning returns a boolean if a field has been set.
-func (o *TypesProjectInfo) HasIsRunning() bool {
+func (o *ProjectInfo) HasIsRunning() bool {
 	if o != nil && !IsNil(o.IsRunning) {
 		return true
 	}
@@ -137,12 +137,12 @@ func (o *TypesProjectInfo) HasIsRunning() bool {
 }
 
 // SetIsRunning gets a reference to the given bool and assigns it to the IsRunning field.
-func (o *TypesProjectInfo) SetIsRunning(v bool) {
+func (o *ProjectInfo) SetIsRunning(v bool) {
 	o.IsRunning = &v
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
-func (o *TypesProjectInfo) GetName() string {
+func (o *ProjectInfo) GetName() string {
 	if o == nil || IsNil(o.Name) {
 		var ret string
 		return ret
@@ -152,7 +152,7 @@ func (o *TypesProjectInfo) GetName() string {
 
 // GetNameOk returns a tuple with the Name field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesProjectInfo) GetNameOk() (*string, bool) {
+func (o *ProjectInfo) GetNameOk() (*string, bool) {
 	if o == nil || IsNil(o.Name) {
 		return nil, false
 	}
@@ -160,7 +160,7 @@ func (o *TypesProjectInfo) GetNameOk() (*string, bool) {
 }
 
 // HasName returns a boolean if a field has been set.
-func (o *TypesProjectInfo) HasName() bool {
+func (o *ProjectInfo) HasName() bool {
 	if o != nil && !IsNil(o.Name) {
 		return true
 	}
@@ -169,14 +169,14 @@ func (o *TypesProjectInfo) HasName() bool {
 }
 
 // SetName gets a reference to the given string and assigns it to the Name field.
-func (o *TypesProjectInfo) SetName(v string) {
+func (o *ProjectInfo) SetName(v string) {
 	o.Name = &v
 }
 
 // GetProvisionerMetadata returns the ProvisionerMetadata field value if set, zero value otherwise.
-func (o *TypesProjectInfo) GetProvisionerMetadata() GithubComGolangProtobufPtypesStructStruct {
+func (o *ProjectInfo) GetProvisionerMetadata() string {
 	if o == nil || IsNil(o.ProvisionerMetadata) {
-		var ret GithubComGolangProtobufPtypesStructStruct
+		var ret string
 		return ret
 	}
 	return *o.ProvisionerMetadata
@@ -184,7 +184,7 @@ func (o *TypesProjectInfo) GetProvisionerMetadata() GithubComGolangProtobufPtype
 
 // GetProvisionerMetadataOk returns a tuple with the ProvisionerMetadata field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesProjectInfo) GetProvisionerMetadataOk() (*GithubComGolangProtobufPtypesStructStruct, bool) {
+func (o *ProjectInfo) GetProvisionerMetadataOk() (*string, bool) {
 	if o == nil || IsNil(o.ProvisionerMetadata) {
 		return nil, false
 	}
@@ -192,7 +192,7 @@ func (o *TypesProjectInfo) GetProvisionerMetadataOk() (*GithubComGolangProtobufP
 }
 
 // HasProvisionerMetadata returns a boolean if a field has been set.
-func (o *TypesProjectInfo) HasProvisionerMetadata() bool {
+func (o *ProjectInfo) HasProvisionerMetadata() bool {
 	if o != nil && !IsNil(o.ProvisionerMetadata) {
 		return true
 	}
@@ -200,13 +200,13 @@ func (o *TypesProjectInfo) HasProvisionerMetadata() bool {
 	return false
 }
 
-// SetProvisionerMetadata gets a reference to the given GithubComGolangProtobufPtypesStructStruct and assigns it to the ProvisionerMetadata field.
-func (o *TypesProjectInfo) SetProvisionerMetadata(v GithubComGolangProtobufPtypesStructStruct) {
+// SetProvisionerMetadata gets a reference to the given string and assigns it to the ProvisionerMetadata field.
+func (o *ProjectInfo) SetProvisionerMetadata(v string) {
 	o.ProvisionerMetadata = &v
 }
 
 // GetStarted returns the Started field value if set, zero value otherwise.
-func (o *TypesProjectInfo) GetStarted() string {
+func (o *ProjectInfo) GetStarted() string {
 	if o == nil || IsNil(o.Started) {
 		var ret string
 		return ret
@@ -216,7 +216,7 @@ func (o *TypesProjectInfo) GetStarted() string {
 
 // GetStartedOk returns a tuple with the Started field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesProjectInfo) GetStartedOk() (*string, bool) {
+func (o *ProjectInfo) GetStartedOk() (*string, bool) {
 	if o == nil || IsNil(o.Started) {
 		return nil, false
 	}
@@ -224,7 +224,7 @@ func (o *TypesProjectInfo) GetStartedOk() (*string, bool) {
 }
 
 // HasStarted returns a boolean if a field has been set.
-func (o *TypesProjectInfo) HasStarted() bool {
+func (o *ProjectInfo) HasStarted() bool {
 	if o != nil && !IsNil(o.Started) {
 		return true
 	}
@@ -233,12 +233,12 @@ func (o *TypesProjectInfo) HasStarted() bool {
 }
 
 // SetStarted gets a reference to the given string and assigns it to the Started field.
-func (o *TypesProjectInfo) SetStarted(v string) {
+func (o *ProjectInfo) SetStarted(v string) {
 	o.Started = &v
 }
 
 // GetWorkspaceId returns the WorkspaceId field value if set, zero value otherwise.
-func (o *TypesProjectInfo) GetWorkspaceId() string {
+func (o *ProjectInfo) GetWorkspaceId() string {
 	if o == nil || IsNil(o.WorkspaceId) {
 		var ret string
 		return ret
@@ -248,7 +248,7 @@ func (o *TypesProjectInfo) GetWorkspaceId() string {
 
 // GetWorkspaceIdOk returns a tuple with the WorkspaceId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TypesProjectInfo) GetWorkspaceIdOk() (*string, bool) {
+func (o *ProjectInfo) GetWorkspaceIdOk() (*string, bool) {
 	if o == nil || IsNil(o.WorkspaceId) {
 		return nil, false
 	}
@@ -256,7 +256,7 @@ func (o *TypesProjectInfo) GetWorkspaceIdOk() (*string, bool) {
 }
 
 // HasWorkspaceId returns a boolean if a field has been set.
-func (o *TypesProjectInfo) HasWorkspaceId() bool {
+func (o *ProjectInfo) HasWorkspaceId() bool {
 	if o != nil && !IsNil(o.WorkspaceId) {
 		return true
 	}
@@ -265,11 +265,11 @@ func (o *TypesProjectInfo) HasWorkspaceId() bool {
 }
 
 // SetWorkspaceId gets a reference to the given string and assigns it to the WorkspaceId field.
-func (o *TypesProjectInfo) SetWorkspaceId(v string) {
+func (o *ProjectInfo) SetWorkspaceId(v string) {
 	o.WorkspaceId = &v
 }
 
-func (o TypesProjectInfo) MarshalJSON() ([]byte, error) {
+func (o ProjectInfo) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -277,7 +277,7 @@ func (o TypesProjectInfo) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o TypesProjectInfo) ToMap() (map[string]interface{}, error) {
+func (o ProjectInfo) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Created) {
 		toSerialize["created"] = o.Created
@@ -303,38 +303,38 @@ func (o TypesProjectInfo) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-type NullableTypesProjectInfo struct {
-	value *TypesProjectInfo
+type NullableProjectInfo struct {
+	value *ProjectInfo
 	isSet bool
 }
 
-func (v NullableTypesProjectInfo) Get() *TypesProjectInfo {
+func (v NullableProjectInfo) Get() *ProjectInfo {
 	return v.value
 }
 
-func (v *NullableTypesProjectInfo) Set(val *TypesProjectInfo) {
+func (v *NullableProjectInfo) Set(val *ProjectInfo) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableTypesProjectInfo) IsSet() bool {
+func (v NullableProjectInfo) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableTypesProjectInfo) Unset() {
+func (v *NullableProjectInfo) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableTypesProjectInfo(val *TypesProjectInfo) *NullableTypesProjectInfo {
-	return &NullableTypesProjectInfo{value: val, isSet: true}
+func NewNullableProjectInfo(val *ProjectInfo) *NullableProjectInfo {
+	return &NullableProjectInfo{value: val, isSet: true}
 }
 
-func (v NullableTypesProjectInfo) MarshalJSON() ([]byte, error) {
+func (v NullableProjectInfo) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableTypesProjectInfo) UnmarshalJSON(src []byte) error {
+func (v *NullableProjectInfo) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

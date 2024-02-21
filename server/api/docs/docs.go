@@ -502,6 +502,20 @@ const docTemplate = `{
                 }
             }
         },
+        "FRPSConfig": {
+            "type": "object",
+            "properties": {
+                "domain": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "protocol": {
+                    "type": "string"
+                }
+            }
+        },
         "InstallPluginRequest": {
             "type": "object",
             "properties": {
@@ -524,6 +538,49 @@ const docTemplate = `{
                 }
             }
         },
+        "Project": {
+            "type": "object",
+            "properties": {
+                "authKey": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "repository": {
+                    "$ref": "#/definitions/Repository"
+                },
+                "workspaceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProjectInfo": {
+            "type": "object",
+            "properties": {
+                "created": {
+                    "type": "string"
+                },
+                "finished": {
+                    "type": "string"
+                },
+                "isRunning": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "provisionerMetadata": {
+                    "type": "string"
+                },
+                "started": {
+                    "type": "string"
+                },
+                "workspaceId": {
+                    "type": "string"
+                }
+            }
+        },
         "ProvisionerPlugin": {
             "type": "object",
             "properties": {
@@ -535,6 +592,32 @@ const docTemplate = `{
                 }
             }
         },
+        "Repository": {
+            "type": "object",
+            "properties": {
+                "branch": {
+                    "type": "string"
+                },
+                "owner": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "prNumber": {
+                    "type": "integer"
+                },
+                "sha": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "ServerConfig": {
             "type": "object",
             "properties": {
@@ -542,7 +625,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "frps": {
-                    "$ref": "#/definitions/types.FRPSConfig"
+                    "$ref": "#/definitions/FRPSConfig"
                 },
                 "headscalePort": {
                     "type": "integer"
@@ -573,11 +656,11 @@ const docTemplate = `{
                 "projects": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/types.Project"
+                        "$ref": "#/definitions/Project"
                     }
                 },
                 "provisioner": {
-                    "$ref": "#/definitions/types.WorkspaceProvisioner"
+                    "$ref": "#/definitions/WorkspaceProvisioner"
                 }
             }
         },
@@ -590,116 +673,15 @@ const docTemplate = `{
                 "projects": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/types.ProjectInfo"
+                        "$ref": "#/definitions/ProjectInfo"
                     }
-                },
-                "provisionerMetadata": {}
-            }
-        },
-        "github_com_golang_protobuf_ptypes_struct.Struct": {
-            "type": "object",
-            "properties": {
-                "fields": {
-                    "description": "Unordered map of dynamically typed values.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/google_golang_org_protobuf_types_known_structpb.Value"
-                    }
-                }
-            }
-        },
-        "google_golang_org_protobuf_types_known_structpb.Value": {
-            "type": "object",
-            "properties": {
-                "kind": {
-                    "description": "The kind of value.\n\nTypes that are assignable to Kind:\n\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
-                }
-            }
-        },
-        "types.FRPSConfig": {
-            "type": "object",
-            "properties": {
-                "domain": {
-                    "type": "string"
-                },
-                "port": {
-                    "type": "integer"
-                },
-                "protocol": {
-                    "type": "string"
-                }
-            }
-        },
-        "types.Project": {
-            "type": "object",
-            "properties": {
-                "authKey": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "repository": {
-                    "$ref": "#/definitions/types.Repository"
-                },
-                "workspaceId": {
-                    "type": "string"
-                }
-            }
-        },
-        "types.ProjectInfo": {
-            "type": "object",
-            "properties": {
-                "created": {
-                    "type": "string"
-                },
-                "finished": {
-                    "type": "string"
-                },
-                "isRunning": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
                 },
                 "provisionerMetadata": {
-                    "$ref": "#/definitions/github_com_golang_protobuf_ptypes_struct.Struct"
-                },
-                "started": {
-                    "type": "string"
-                },
-                "workspaceId": {
                     "type": "string"
                 }
             }
         },
-        "types.Repository": {
-            "type": "object",
-            "properties": {
-                "branch": {
-                    "type": "string"
-                },
-                "owner": {
-                    "type": "string"
-                },
-                "path": {
-                    "type": "string"
-                },
-                "prNumber": {
-                    "type": "integer"
-                },
-                "sha": {
-                    "type": "string"
-                },
-                "source": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
-                }
-            }
-        },
-        "types.WorkspaceProvisioner": {
+        "WorkspaceProvisioner": {
             "type": "object",
             "properties": {
                 "name": {

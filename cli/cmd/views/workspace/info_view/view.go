@@ -39,7 +39,7 @@ var projectStatusStyle = lipgloss.NewStyle().
 	Foreground(lipgloss.Color(colors[0][4])).
 	PaddingLeft(2)
 
-func projectRender(project *api_client.TypesProjectInfo) string {
+func projectRender(project *api_client.ProjectInfo) string {
 	projectState := ""
 	extensions := [][]string{}
 	extensionsTable := ""

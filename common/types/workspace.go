@@ -30,17 +30,17 @@ type Workspace struct {
 } // @name Workspace
 
 type ProjectInfo struct {
-	Name                string       `json:"name"`
-	Created             string       `json:"created"`
-	Started             string       `json:"started"`
-	Finished            string       `json:"finished"`
-	IsRunning           bool         `json:"isRunning"`
-	ProvisionerMetadata *interface{} `json:"provisionerMetadata,omitempty"`
-	WorkspaceId         string       `json:"workspaceId"`
+	Name                string `json:"name"`
+	Created             string `json:"created"`
+	Started             string `json:"started"`
+	Finished            string `json:"finished"`
+	IsRunning           bool   `json:"isRunning"`
+	ProvisionerMetadata string `json:"provisionerMetadata,omitempty"`
+	WorkspaceId         string `json:"workspaceId"`
 } // @name ProjectInfo
 
 type WorkspaceInfo struct {
 	Name                string         `json:"name"`
 	Projects            []*ProjectInfo `json:"projects"`
-	ProvisionerMetadata *interface{}   `json:"provisionerMetadata,omitempty"`
+	ProvisionerMetadata string         `json:"provisionerMetadata,omitempty"`
 } // @name WorkspaceInfo

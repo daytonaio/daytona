@@ -5,8 +5,8 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Name** | Pointer to **string** |  | [optional] 
-**Projects** | Pointer to [**[]TypesProjectInfo**](TypesProjectInfo.md) |  | [optional] 
-**ProvisionerMetadata** | Pointer to **map[string]interface{}** |  | [optional] 
+**Projects** | Pointer to [**[]ProjectInfo**](ProjectInfo.md) |  | [optional] 
+**ProvisionerMetadata** | Pointer to **string** |  | [optional] 
 
 ## Methods
 
@@ -54,20 +54,20 @@ HasName returns a boolean if a field has been set.
 
 ### GetProjects
 
-`func (o *WorkspaceInfo) GetProjects() []TypesProjectInfo`
+`func (o *WorkspaceInfo) GetProjects() []ProjectInfo`
 
 GetProjects returns the Projects field if non-nil, zero value otherwise.
 
 ### GetProjectsOk
 
-`func (o *WorkspaceInfo) GetProjectsOk() (*[]TypesProjectInfo, bool)`
+`func (o *WorkspaceInfo) GetProjectsOk() (*[]ProjectInfo, bool)`
 
 GetProjectsOk returns a tuple with the Projects field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetProjects
 
-`func (o *WorkspaceInfo) SetProjects(v []TypesProjectInfo)`
+`func (o *WorkspaceInfo) SetProjects(v []ProjectInfo)`
 
 SetProjects sets Projects field to given value.
 
@@ -79,20 +79,20 @@ HasProjects returns a boolean if a field has been set.
 
 ### GetProvisionerMetadata
 
-`func (o *WorkspaceInfo) GetProvisionerMetadata() map[string]interface{}`
+`func (o *WorkspaceInfo) GetProvisionerMetadata() string`
 
 GetProvisionerMetadata returns the ProvisionerMetadata field if non-nil, zero value otherwise.
 
 ### GetProvisionerMetadataOk
 
-`func (o *WorkspaceInfo) GetProvisionerMetadataOk() (*map[string]interface{}, bool)`
+`func (o *WorkspaceInfo) GetProvisionerMetadataOk() (*string, bool)`
 
 GetProvisionerMetadataOk returns a tuple with the ProvisionerMetadata field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetProvisionerMetadata
 
-`func (o *WorkspaceInfo) SetProvisionerMetadata(v map[string]interface{})`
+`func (o *WorkspaceInfo) SetProvisionerMetadata(v string)`
 
 SetProvisionerMetadata sets ProvisionerMetadata field to given value.
 

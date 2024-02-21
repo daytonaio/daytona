@@ -350,6 +350,19 @@ components:
             type: string
           type: array
       type: object
+    FRPSConfig:
+      example:
+        protocol: protocol
+        port: 6
+        domain: domain
+      properties:
+        domain:
+          type: string
+        port:
+          type: integer
+        protocol:
+          type: string
+      type: object
     InstallPluginRequest:
       example:
         downloadUrls:
@@ -370,6 +383,54 @@ components:
         key:
           type: string
       type: object
+    Project:
+      example:
+        authKey: authKey
+        name: name
+        repository:
+          owner: owner
+          path: path
+          source: source
+          prNumber: 0
+          branch: branch
+          sha: sha
+          url: url
+        workspaceId: workspaceId
+      properties:
+        authKey:
+          type: string
+        name:
+          type: string
+        repository:
+          $ref: '#/components/schemas/Repository'
+        workspaceId:
+          type: string
+      type: object
+    ProjectInfo:
+      example:
+        isRunning: true
+        created: created
+        name: name
+        provisionerMetadata: provisionerMetadata
+        finished: finished
+        started: started
+        workspaceId: workspaceId
+      properties:
+        created:
+          type: string
+        finished:
+          type: string
+        isRunning:
+          type: boolean
+        name:
+          type: string
+        provisionerMetadata:
+          type: string
+        started:
+          type: string
+        workspaceId:
+          type: string
+      type: object
     ProvisionerPlugin:
       example:
         name: name
@@ -378,6 +439,31 @@ components:
         name:
           type: string
         version:
+          type: string
+      type: object
+    Repository:
+      example:
+        owner: owner
+        path: path
+        source: source
+        prNumber: 0
+        branch: branch
+        sha: sha
+        url: url
+      properties:
+        branch:
+          type: string
+        owner:
+          type: string
+        path:
+          type: string
+        prNumber:
+          type: integer
+        sha:
+          type: string
+        source:
+          type: string
+        url:
           type: string
       type: object
     ServerConfig:
@@ -396,7 +482,7 @@ components:
         apiPort:
           type: integer
         frps:
-          $ref: '#/components/schemas/types.FRPSConfig'
+          $ref: '#/components/schemas/FRPSConfig'
         headscalePort:
           type: integer
         id:
@@ -445,10 +531,10 @@ components:
           type: string
         projects:
           items:
-            $ref: '#/components/schemas/types.Project'
+            $ref: '#/components/schemas/Project'
           type: array
         provisioner:
-          $ref: '#/components/schemas/types.WorkspaceProvisioner'
+          $ref: '#/components/schemas/WorkspaceProvisioner'
       type: object
     WorkspaceInfo:
       example:
@@ -456,147 +542,30 @@ components:
         - isRunning: true
           created: created
           name: name
-          provisionerMetadata:
-            fields:
-              key:
-                kind: "{}"
+          provisionerMetadata: provisionerMetadata
           finished: finished
           started: started
           workspaceId: workspaceId
         - isRunning: true
           created: created
           name: name
-          provisionerMetadata:
-            fields:
-              key:
-                kind: "{}"
+          provisionerMetadata: provisionerMetadata
           finished: finished
           started: started
           workspaceId: workspaceId
         name: name
-        provisionerMetadata: "{}"
+        provisionerMetadata: provisionerMetadata
       properties:
         name:
           type: string
         projects:
           items:
-            $ref: '#/components/schemas/types.ProjectInfo'
+            $ref: '#/components/schemas/ProjectInfo'
           type: array
         provisionerMetadata:
-          type: object
-      type: object
-    github_com_golang_protobuf_ptypes_struct.Struct:
-      example:
-        fields:
-          key:
-            kind: "{}"
-      properties:
-        fields:
-          additionalProperties:
-            $ref: '#/components/schemas/google_golang_org_protobuf_types_known_structpb.Value'
-          description: Unordered map of dynamically typed values.
-          type: object
-      type: object
-    google_golang_org_protobuf_types_known_structpb.Value:
-      example:
-        kind: "{}"
-      properties:
-        kind:
-          description: "The kind of value.\n\nTypes that are assignable to Kind:\n\
-            \n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\
-            \t*Value_StructValue\n\t*Value_ListValue"
-          type: object
-      type: object
-    types.FRPSConfig:
-      example:
-        protocol: protocol
-        port: 6
-        domain: domain
-      properties:
-        domain:
-          type: string
-        port:
-          type: integer
-        protocol:
           type: string
       type: object
-    types.Project:
-      example:
-        authKey: authKey
-        name: name
-        repository:
-          owner: owner
-          path: path
-          source: source
-          prNumber: 0
-          branch: branch
-          sha: sha
-          url: url
-        workspaceId: workspaceId
-      properties:
-        authKey:
-          type: string
-        name:
-          type: string
-        repository:
-          $ref: '#/components/schemas/types.Repository'
-        workspaceId:
-          type: string
-      type: object
-    types.ProjectInfo:
-      example:
-        isRunning: true
-        created: created
-        name: name
-        provisionerMetadata:
-          fields:
-            key:
-              kind: "{}"
-        finished: finished
-        started: started
-        workspaceId: workspaceId
-      properties:
-        created:
-          type: string
-        finished:
-          type: string
-        isRunning:
-          type: boolean
-        name:
-          type: string
-        provisionerMetadata:
-          $ref: '#/components/schemas/github_com_golang_protobuf_ptypes_struct.Struct'
-        started:
-          type: string
-        workspaceId:
-          type: string
-      type: object
-    types.Repository:
-      example:
-        owner: owner
-        path: path
-        source: source
-        prNumber: 0
-        branch: branch
-        sha: sha
-        url: url
-      properties:
-        branch:
-          type: string
-        owner:
-          type: string
-        path:
-          type: string
-        prNumber:
-          type: integer
-        sha:
-          type: string
-        source:
-          type: string
-        url:
-          type: string
-      type: object
-    types.WorkspaceProvisioner:
+    WorkspaceProvisioner:
       example:
         profile: profile
         name: name

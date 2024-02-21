@@ -21,8 +21,8 @@ var _ MappedNullable = &Workspace{}
 type Workspace struct {
 	Id *string `json:"id,omitempty"`
 	Name *string `json:"name,omitempty"`
-	Projects []TypesProject `json:"projects,omitempty"`
-	Provisioner *TypesWorkspaceProvisioner `json:"provisioner,omitempty"`
+	Projects []Project `json:"projects,omitempty"`
+	Provisioner *WorkspaceProvisioner `json:"provisioner,omitempty"`
 }
 
 // NewWorkspace instantiates a new Workspace object
@@ -107,9 +107,9 @@ func (o *Workspace) SetName(v string) {
 }
 
 // GetProjects returns the Projects field value if set, zero value otherwise.
-func (o *Workspace) GetProjects() []TypesProject {
+func (o *Workspace) GetProjects() []Project {
 	if o == nil || IsNil(o.Projects) {
-		var ret []TypesProject
+		var ret []Project
 		return ret
 	}
 	return o.Projects
@@ -117,7 +117,7 @@ func (o *Workspace) GetProjects() []TypesProject {
 
 // GetProjectsOk returns a tuple with the Projects field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetProjectsOk() ([]TypesProject, bool) {
+func (o *Workspace) GetProjectsOk() ([]Project, bool) {
 	if o == nil || IsNil(o.Projects) {
 		return nil, false
 	}
@@ -133,15 +133,15 @@ func (o *Workspace) HasProjects() bool {
 	return false
 }
 
-// SetProjects gets a reference to the given []TypesProject and assigns it to the Projects field.
-func (o *Workspace) SetProjects(v []TypesProject) {
+// SetProjects gets a reference to the given []Project and assigns it to the Projects field.
+func (o *Workspace) SetProjects(v []Project) {
 	o.Projects = v
 }
 
 // GetProvisioner returns the Provisioner field value if set, zero value otherwise.
-func (o *Workspace) GetProvisioner() TypesWorkspaceProvisioner {
+func (o *Workspace) GetProvisioner() WorkspaceProvisioner {
 	if o == nil || IsNil(o.Provisioner) {
-		var ret TypesWorkspaceProvisioner
+		var ret WorkspaceProvisioner
 		return ret
 	}
 	return *o.Provisioner
@@ -149,7 +149,7 @@ func (o *Workspace) GetProvisioner() TypesWorkspaceProvisioner {
 
 // GetProvisionerOk returns a tuple with the Provisioner field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetProvisionerOk() (*TypesWorkspaceProvisioner, bool) {
+func (o *Workspace) GetProvisionerOk() (*WorkspaceProvisioner, bool) {
 	if o == nil || IsNil(o.Provisioner) {
 		return nil, false
 	}
@@ -165,8 +165,8 @@ func (o *Workspace) HasProvisioner() bool {
 	return false
 }
 
-// SetProvisioner gets a reference to the given TypesWorkspaceProvisioner and assigns it to the Provisioner field.
-func (o *Workspace) SetProvisioner(v TypesWorkspaceProvisioner) {
+// SetProvisioner gets a reference to the given WorkspaceProvisioner and assigns it to the Provisioner field.
+func (o *Workspace) SetProvisioner(v WorkspaceProvisioner) {
 	o.Provisioner = &v
 }
 
