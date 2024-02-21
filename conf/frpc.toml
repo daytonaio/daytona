@@ -1,8 +1,0 @@
-serverAddr = "frps.daytona.io"
-serverPort = 7000
-
-[[proxies]]
-name = "toma"
-type = "http"
-localPort = 8000
-customDomains = ["toma.frps.daytona.io"]
