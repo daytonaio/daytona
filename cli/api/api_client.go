@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/daytonaio/daytona/common/api_client"
 	"github.com/daytonaio/daytona/common/types"
@@ -12,6 +13,10 @@ var apiClient *api_client.APIClient
 func GetServerApiClient(serverUrl, token string) *api_client.APIClient {
 	if apiClient != nil {
 		return apiClient
+	}
+
+	if envApiUrl, ok := os.LookupEnv("DAYTONA_SERVER_API_URL"); ok {
+		serverUrl = envApiUrl
 	}
 
 	clientConfig := api_client.NewConfiguration()
@@ -45,21 +50,5 @@ func ToServerConfig(config *api_client.ServerConfig) *types.ServerConfig {
 		},
 		ApiPort:       uint32(*config.ApiPort),
 		HeadscalePort: uint32(*config.HeadscalePort),
-	}
-}
-
-func FromServerConfig(config *types.ServerConfig) *api_client.ServerConfig {
-	return &api_client.ServerConfig{
-		PluginsDir:        &config.PluginsDir,
-		PluginRegistryUrl: &config.PluginRegistryUrl,
-		Id:                &config.Id,
-		ServerDownloadUrl: &config.ServerDownloadUrl,
-		Frps: &api_client.FRPSConfig{
-			Domain:   &config.Frps.Domain,
-			Port:     &[]int32{int32(config.Frps.Port)}[0],
-			Protocol: &config.Frps.Protocol,
-		},
-		ApiPort:       &[]int32{int32(config.ApiPort)}[0],
-		HeadscalePort: &[]int32{int32(config.HeadscalePort)}[0],
 	}
 }
