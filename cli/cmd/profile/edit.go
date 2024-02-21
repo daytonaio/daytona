@@ -56,7 +56,7 @@ var profileEditCmd = &cobra.Command{
 			log.Fatal("Profile does not exist")
 		}
 
-		if profileNameFlag == "" || serverHostnameFlag == "" || serverUserFlag == "" || provisionerFlag == "" || (serverPrivateKeyPathFlag == "" && serverPasswordFlag == "") {
+		if profileNameFlag == "" || serverHostnameFlag == "" || serverUserFlag == "" || provisionerFlag == "" || apiUrlFlag == "" || (serverPrivateKeyPathFlag == "" && serverPasswordFlag == "") {
 			err = EditProfile(c, true, &chosenProfile)
 			if err != nil {
 				log.Fatal(err)
@@ -72,6 +72,7 @@ var profileEditCmd = &cobra.Command{
 			RemoteSshPassword:       serverPasswordFlag,
 			RemoteSshPrivateKeyPath: serverPrivateKeyPathFlag,
 			DefaultProvisioner:      provisionerFlag,
+			ApiUrl:                  apiUrlFlag,
 		}
 
 		err = editProfile(chosenProfileId, profileEditView, c, true)
@@ -86,45 +87,19 @@ func EditProfile(c *config.Config, notify bool, profile *config.Profile) error {
 		return errors.New("profile must not be nil")
 	}
 
-	apiClient, err := api.GetServerApiClient(profile)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	provisionerPluginList, _, err := apiClient.PluginAPI.ListProvisionerPlugins(context.Background()).Execute()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if len(provisionerPluginList) == 0 {
-		return errors.New("no provisioner plugins found")
-	}
-
+	var provisionerPluginList []api_client.ProvisionerPlugin
 	var selectedProvisioner *api_client.ProvisionerPlugin = nil
-	for _, provisioner := range provisionerPluginList {
-		if *provisioner.Name == profile.DefaultProvisioner {
-			selectedProvisioner = &provisioner
-			break
-		}
-	}
-
-	if profile.Id == "default" {
-		provisioner, err := views_provisioner.GetProvisionerFromPrompt(provisionerPluginList, "Choose a default provisioner to use", selectedProvisioner)
-		if err != nil {
-			return err
-		}
-		profile.DefaultProvisioner = *provisioner.Name
-		return c.EditProfile(*profile)
-	}
+	defaultProvisioner := "default"
 
 	profileAddView := view.ProfileAddView{
 		ProfileName:             profile.Name,
 		RemoteHostname:          profile.Hostname,
 		RemoteSshPort:           profile.Port,
 		RemoteSshUser:           profile.Auth.User,
-		DefaultProvisioner:      *provisionerPluginList[0].Name,
+		DefaultProvisioner:      defaultProvisioner,
 		RemoteSshPassword:       "",
 		RemoteSshPrivateKeyPath: "",
+		ApiUrl:                  profile.Api.Url,
 	}
 
 	if profile.Auth.Password != nil {
@@ -133,13 +108,37 @@ func EditProfile(c *config.Config, notify bool, profile *config.Profile) error {
 		profileAddView.RemoteSshPrivateKeyPath = *profile.Auth.PrivateKeyPath
 	}
 
-	view.ProfileCreationView(c, &profileAddView, true)
-
-	provisioner, err := views_provisioner.GetProvisionerFromPrompt(provisionerPluginList, "Choose a provisioner to use", selectedProvisioner)
+	apiClient, err := api.GetServerApiClient(profile)
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	profileAddView.DefaultProvisioner = *provisioner.Name
+
+	provisionerPluginList, _, _ = apiClient.PluginAPI.ListProvisionerPlugins(context.Background()).Execute()
+
+	if profile.Id != "default" {
+		view.ProfileCreationView(c, &profileAddView, true)
+	}
+
+	if len(provisionerPluginList) > 0 {
+		for _, provisioner := range provisionerPluginList {
+			if *provisioner.Name == profile.DefaultProvisioner {
+				selectedProvisioner = &provisioner
+				break
+			}
+		}
+
+		provisioner, err := views_provisioner.GetProvisionerFromPrompt(provisionerPluginList, "Choose a default provisioner to use", selectedProvisioner)
+		if err != nil {
+			return err
+		}
+
+		if profile.Id == "default" {
+			profile.DefaultProvisioner = *provisioner.Name
+			return c.EditProfile(*profile)
+		} else {
+			profileAddView.DefaultProvisioner = *provisionerPluginList[0].Name
+		}
+	}
 
 	return editProfile(profile.Id, profileAddView, c, notify)
 }
@@ -156,6 +155,9 @@ func editProfile(profileId string, profileView view.ProfileAddView, c *config.Co
 			PrivateKeyPath: nil,
 		},
 		DefaultProvisioner: profileView.DefaultProvisioner,
+		Api: config.ServerApi{
+			Url: profileView.ApiUrl,
+		},
 	}
 	if profileView.RemoteSshPassword != "" {
 		editedProfile.Auth.Password = &profileView.RemoteSshPassword
@@ -188,4 +190,5 @@ func init() {
 	profileEditCmd.Flags().StringVarP(&serverPasswordFlag, "password", "p", "", "Remote SSH password")
 	profileEditCmd.Flags().StringVarP(&serverPrivateKeyPathFlag, "private-key-path", "k", "", "Remote SSH private key path")
 	profileEditCmd.Flags().StringVarP(&provisionerFlag, "provisioner", "r", "default", "Provisioner")
+	profileEditCmd.Flags().StringVarP(&apiUrlFlag, "api-url", "a", "", "API URL")
 }

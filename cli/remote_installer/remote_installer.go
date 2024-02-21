@@ -1,7 +1,11 @@
 package remote_installer
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
+	"strings"
+	"time"
 
 	"github.com/daytonaio/daytona/common/os"
 	"golang.org/x/crypto/ssh"
@@ -179,6 +183,23 @@ func (s *RemoteInstaller) ServerRegistered() (bool, error) {
 	}
 }
 
+func (s *RemoteInstaller) GetApiUrl() (string, error) {
+	session, err := s.Client.NewSession()
+	if err != nil {
+		return "", err
+	}
+	defer session.Close()
+
+	output, err := (*session).CombinedOutput("daytona server config")
+	if err != nil {
+		return "", err
+	}
+
+	result := strings.TrimSuffix(string(output), "\n")
+
+	return result, nil
+}
+
 func (s *RemoteInstaller) SudoPasswordRequired() (bool, error) {
 	session, err := s.Client.NewSession()
 	if err != nil {
@@ -303,4 +324,33 @@ func (s *RemoteInstaller) RemoveDaemon(remoteOS os.OperatingSystem) error {
 	default:
 		return fmt.Errorf("unexpected os: %d", remoteOS)
 	}
+}
+
+func (s *RemoteInstaller) WaitForServerToStart(apiUrl string) error {
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+
+	timeoutTimer := time.NewTimer(3 * time.Minute)
+	defer timeoutTimer.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			isRunning := s.checkServerRunning(apiUrl)
+			if isRunning {
+				return nil
+			}
+		case <-timeoutTimer.C:
+			return errors.New("timeout waiting for server to start")
+		}
+	}
+}
+
+func (s *RemoteInstaller) checkServerRunning(apiUrl string) bool {
+	response, err := http.Get(apiUrl + "/workspace/")
+	if err != nil || response.StatusCode != 200 {
+		return false
+	}
+
+	return true
 }
