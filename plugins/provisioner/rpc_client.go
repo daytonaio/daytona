@@ -10,8 +10,9 @@ type ProvisionerRPCClient struct {
 	client *rpc.Client
 }
 
-func (m *ProvisionerRPCClient) Initialize(req InitializeProvisionerRequest) error {
-	return m.client.Call("Plugin.Initialize", req, new(interface{}))
+func (m *ProvisionerRPCClient) Initialize(req InitializeProvisionerRequest) (Empty, error) {
+	err := m.client.Call("Plugin.Initialize", req, new(interface{}))
+	return Empty{}, err
 }
 
 func (m *ProvisionerRPCClient) GetInfo() (ProvisionerInfo, error) {

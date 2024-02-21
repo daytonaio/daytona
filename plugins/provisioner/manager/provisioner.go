@@ -105,11 +105,11 @@ func RegisterProvisioner(pluginPath, serverDownloadUrl, serverUrl, serverApiUrl 
 		return errors.New("failed to initialize provisioner: " + err.Error())
 	}
 
-	err = (*p).Initialize(provisioner.InitializeProvisionerRequest{
+	_, err = (*p).Initialize(provisioner.InitializeProvisionerRequest{
 		BasePath:          pluginBasePath,
 		ServerDownloadUrl: serverDownloadUrl,
 		// TODO: get version from somewhere
-		ServerVersion: "DC-127-SSH-command",
+		ServerVersion: "rest-refactor",
 		ServerUrl:     serverUrl,
 		ServerApiUrl:  serverApiUrl,
 	})

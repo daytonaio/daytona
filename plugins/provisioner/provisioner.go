@@ -25,8 +25,11 @@ type InitializeProvisionerRequest struct {
 	ServerApiUrl      string
 }
 
+type Empty struct {
+}
+
 type Provisioner interface {
-	Initialize(InitializeProvisionerRequest) error
+	Initialize(InitializeProvisionerRequest) (Empty, error)
 	GetInfo() (ProvisionerInfo, error)
 
 	//	client side profile config wizard

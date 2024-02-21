@@ -9,7 +9,13 @@ type ProvisionerRPCServer struct {
 }
 
 func (m *ProvisionerRPCServer) Initialize(arg InitializeProvisionerRequest, resp *interface{}) error {
-	return m.Impl.Initialize(arg)
+	res, err := m.Impl.Initialize(arg)
+	if err != nil {
+		return err
+	}
+
+	*resp = res
+	return nil
 }
 
 func (m *ProvisionerRPCServer) GetInfo(arg interface{}, resp *ProvisionerInfo) error {
