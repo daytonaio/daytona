@@ -117,12 +117,8 @@ func init() {
 		ServerDownloadUrl: defaultServerDownloadUrl,
 		ApiPort:           defaultApiPort,
 		HeadscalePort:     defaultHeadscalePort,
-		Frps: &types.FRPSConfig{
-			Domain:   defaultFrpsDomain,
-			Port:     defaultFrpsPort,
-			Protocol: defaultFrpsProtocol,
-		},
-		Id: generateUuid(),
+		Frps:              getDefaultFRPSConfig(),
+		Id:                generateUuid(),
 	}
 
 	err = Save(&c)
