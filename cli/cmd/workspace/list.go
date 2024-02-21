@@ -35,7 +35,7 @@ var ListCmd = &cobra.Command{
 		}
 
 		for _, workspaceInfo := range workspaceList {
-			fmt.Println(workspaceInfo.Name)
+			fmt.Println(*workspaceInfo.Name)
 		}
 	},
 }

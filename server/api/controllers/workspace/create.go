@@ -33,14 +33,13 @@ func CreateWorkspace(ctx *gin.Context) {
 	err := ctx.BindJSON(&createWorkspaceDto)
 	if err != nil {
 		log.Error(err)
-		ctx.JSON(400, gin.H{"error": err.Error()})
+		ctx.JSON(400, gin.H{"err": err.Error()})
 		return
 	}
 
 	_, err = db.FindWorkspace(createWorkspaceDto.Name)
 	if err == nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"error": "workspace already exists"})
+		ctx.JSON(400, gin.H{"err": "workspace already exists"})
 		return
 	}
 
@@ -58,11 +57,13 @@ func CreateWorkspace(ctx *gin.Context) {
 	if err != nil {
 		log.Error(err)
 		ctx.JSON(500, gin.H{"err": err.Error()})
+		return
 	}
 	err = provisioner.StartWorkspace(w)
 	if err != nil {
 		log.Error(err)
 		ctx.JSON(500, gin.H{"err": err.Error()})
+		return
 	}
 	time.Sleep(100 * time.Millisecond)
 
