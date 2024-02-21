@@ -27,8 +27,8 @@ var columns = []table.Column{
 	{Title: "Hostname", Width: 15},
 	{Title: "SSH port", Width: 10},
 	{Title: "SSH user", Width: 10},
-	{Title: "SSH password", Width: 15},
-	{Title: "SSH private key path", Width: 20},
+	// {Title: "SSH password", Width: 15},
+	// {Title: "SSH private key path", Width: 20},
 }
 
 type model struct {
@@ -188,8 +188,8 @@ func getTable(rows []table.Row, cols []table.Column, selectable bool, activeRow 
 	if selectable {
 		style.Selected = style.Selected.
 			Foreground(lipgloss.Color(views.White.Dark)).
-			Background(lipgloss.Color(views.Green.Dark)).
-			Bold(false)
+			Background(lipgloss.Color(views.DimmedGreen.Dark)).
+			Bold(true)
 	} else {
 		style.Selected = style.Selected.
 			Foreground(style.Cell.GetForeground()).

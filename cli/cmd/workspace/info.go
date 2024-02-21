@@ -7,16 +7,13 @@ import (
 	"context"
 	"os"
 
-	workspace_proto "github.com/daytonaio/daytona/common/grpc/proto"
-
-	"github.com/golang/protobuf/ptypes/empty"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
+	"github.com/daytonaio/daytona/cli/api"
 	"github.com/daytonaio/daytona/cli/cmd/output"
 	view "github.com/daytonaio/daytona/cli/cmd/views/workspace/info_view"
 	select_prompt "github.com/daytonaio/daytona/cli/cmd/views/workspace/select_prompt"
-	"github.com/daytonaio/daytona/cli/connection"
 )
 
 var InfoCmd = &cobra.Command{
@@ -28,21 +25,18 @@ var InfoCmd = &cobra.Command{
 		ctx := context.Background()
 		var workspaceName string
 
-		conn, err := connection.Get(nil)
+		apiClient, err := api.GetServerApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer conn.Close()
-
-		client := workspace_proto.NewWorkspaceServiceClient(conn)
 
 		if len(args) == 0 {
-			workspaceList, err := client.List(ctx, &empty.Empty{})
+			workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			workspaceName = select_prompt.GetWorkspaceNameFromPrompt(workspaceList.Workspaces, "view")
+			workspaceName = select_prompt.GetWorkspaceNameFromPrompt(workspaceList, "view")
 		} else {
 			workspaceName = args[0]
 		}
@@ -52,20 +46,17 @@ var InfoCmd = &cobra.Command{
 			workspaceName = wsName
 		}
 
-		workspaceInfoRequest := &workspace_proto.WorkspaceInfoRequest{
-			Id: workspaceName,
-		}
-		response, err := client.Info(ctx, workspaceInfoRequest)
+		workspaceInfo, _, err := apiClient.WorkspaceAPI.GetWorkspaceInfo(ctx, workspaceName).Execute()
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		if output.FormatFlag != "" {
-			output.Output = response
+			output.Output = workspaceInfo
 			return
 		}
 
-		view.Render(response)
+		view.Render(workspaceInfo)
 	},
 }
 

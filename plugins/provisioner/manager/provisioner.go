@@ -7,8 +7,8 @@ import (
 	"path"
 
 	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/plugins/provisioner"
 	. "github.com/daytonaio/daytona/plugins/provisioner"
-	"github.com/daytonaio/daytona/plugins/provisioner/grpc/proto"
 	"github.com/daytonaio/daytona/plugins/utils"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
@@ -67,7 +67,7 @@ func GetProvisioners() map[string]Provisioner {
 	return provisioners
 }
 
-func RegisterProvisioner(pluginPath string) error {
+func RegisterProvisioner(pluginPath, serverDownloadUrl, serverUrl, serverApiUrl string) error {
 	pluginName := path.Base(pluginPath)
 	pluginBasePath := path.Dir(pluginPath)
 
@@ -86,12 +86,11 @@ func RegisterProvisioner(pluginPath string) error {
 	pluginMap[pluginName] = &ProvisionerPlugin{}
 
 	client := plugin.NewClient(&plugin.ClientConfig{
-		HandshakeConfig:  ProvisionerHandshakeConfig,
-		Plugins:          pluginMap,
-		Cmd:              exec.Command(pluginPath),
-		Logger:           logger,
-		Managed:          true,
-		AllowedProtocols: []plugin.Protocol{plugin.ProtocolGRPC},
+		HandshakeConfig: ProvisionerHandshakeConfig,
+		Plugins:         pluginMap,
+		Cmd:             exec.Command(pluginPath),
+		Logger:          logger,
+		Managed:         true,
 	})
 
 	pluginRefs[pluginName] = &pluginRef{
@@ -101,13 +100,18 @@ func RegisterProvisioner(pluginPath string) error {
 
 	log.Infof("Provisioner %s registered", pluginName)
 
-	provisioner, err := GetProvisioner(pluginName)
+	p, err := GetProvisioner(pluginName)
 	if err != nil {
 		return errors.New("failed to initialize provisioner: " + err.Error())
 	}
 
-	err = (*provisioner).Initialize(&proto.InitializeProvisionerRequest{
-		BasePath: pluginBasePath,
+	_, err = (*p).Initialize(provisioner.InitializeProvisionerRequest{
+		BasePath:          pluginBasePath,
+		ServerDownloadUrl: serverDownloadUrl,
+		// TODO: get version from somewhere
+		ServerVersion: "agent",
+		ServerUrl:     serverUrl,
+		ServerApiUrl:  serverApiUrl,
 	})
 	if err != nil {
 		return errors.New("failed to initialize provisioner: " + err.Error())

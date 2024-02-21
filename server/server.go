@@ -4,21 +4,20 @@
 package server
 
 import (
+	"fmt"
 	"net"
 	"os"
 	"os/exec"
 	"os/signal"
+	"time"
 
-	proto "github.com/daytonaio/daytona/common/grpc/proto"
+	"github.com/daytonaio/daytona/common/types"
+	"github.com/daytonaio/daytona/server/api"
 	"github.com/daytonaio/daytona/server/config"
-	plugin_grpc "github.com/daytonaio/daytona/server/grpc/plugins"
-	ports_grpc "github.com/daytonaio/daytona/server/grpc/ports"
-	server_grpc "github.com/daytonaio/daytona/server/grpc/server"
-	workspace_grpc "github.com/daytonaio/daytona/server/grpc/workspace"
+	"github.com/daytonaio/daytona/server/frpc"
+	"github.com/daytonaio/daytona/server/headscale"
 	"github.com/daytonaio/daytona/server/ssh_gateway"
 	"github.com/hashicorp/go-plugin"
-
-	"google.golang.org/grpc"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -47,22 +46,6 @@ func Start() error {
 		return err
 	}
 
-	lis, err := getUnixListener()
-	if err != nil {
-		return err
-	}
-	defer (*lis).Close()
-
-	s := grpc.NewServer()
-	workspaceServer := &workspace_grpc.WorkspaceServer{}
-	proto.RegisterWorkspaceServiceServer(s, workspaceServer)
-	portsServer := &ports_grpc.PortsServer{}
-	proto.RegisterPortsServer(s, portsServer)
-	serverGrpcServer := &server_grpc.ServerGRPCServer{}
-	proto.RegisterServerServer(s, serverGrpcServer)
-	pluginsServer := &plugin_grpc.PluginsServer{}
-	proto.RegisterPluginsServer(s, pluginsServer)
-
 	err = downloadDefaultPlugins()
 	if err != nil {
 		return err
@@ -77,11 +60,21 @@ func Start() error {
 		return err
 	}
 
-	log.Infof("Daytona server started %v", (*lis).Addr())
-
 	go func() {
 		if err := ssh_gateway.Start(); err != nil {
 			log.Error(err)
+		}
+	}()
+
+	go func() {
+		if err := frpc.ConnectServer(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	go func() {
+		if err := frpc.ConnectApi(); err != nil {
+			log.Fatal(err)
 		}
 	}()
 
@@ -96,11 +89,27 @@ func Start() error {
 		}
 	}()
 
-	if err := s.Serve(*lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
+	go func() {
+		errChan := make(chan error)
+		go func() {
+			errChan <- headscale.Start(c)
+		}()
 
-	return nil
+		select {
+		case err := <-errChan:
+			log.Fatal(err)
+		case <-time.After(1 * time.Second):
+			go func() {
+				errChan <- headscale.Connect()
+			}()
+		}
+
+		if err := <-errChan; err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	return api.Start()
 }
 
 func StartDaemon() error {
@@ -129,15 +138,10 @@ func StartDaemon() error {
 	return nil
 }
 
-func getUnixListener() (*net.Listener, error) {
-	err := os.RemoveAll("/tmp/daytona/daytona.sock")
+func getTcpListener(c *types.ServerConfig) (*net.Listener, error) {
+	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", c.ApiPort))
 	if err != nil {
 		return nil, err
 	}
-
-	lis, err := net.Listen("unix", "/tmp/daytona/daytona.sock")
-	if err != nil {
-		return nil, err
-	}
-	return &lis, nil
+	return &listener, nil
 }

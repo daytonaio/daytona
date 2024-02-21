@@ -5,11 +5,12 @@ import (
 	"os"
 	"path"
 
-	"github.com/daytonaio/daytona/common/grpc/proto/types"
+	"github.com/daytonaio/daytona/common/types"
 	agent_service_manager "github.com/daytonaio/daytona/plugins/agent_service/manager"
 	"github.com/daytonaio/daytona/plugins/plugin_manager"
 	provisioner_manager "github.com/daytonaio/daytona/plugins/provisioner/manager"
 	"github.com/daytonaio/daytona/server/config"
+	"github.com/daytonaio/daytona/server/frpc"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -79,7 +80,7 @@ func registerProvisioners(c *types.ServerConfig) error {
 				continue
 			}
 
-			err = provisioner_manager.RegisterProvisioner(pluginPath)
+			err = provisioner_manager.RegisterProvisioner(pluginPath, c.ServerDownloadUrl, frpc.GetServerUrl(c), frpc.GetApiUrl(c))
 			if err != nil {
 				log.Error(err)
 				continue

@@ -11,13 +11,17 @@ import (
 	"unicode"
 
 	"github.com/daytonaio/daytona/cli/cmd/views"
+	repo_select "github.com/daytonaio/daytona/cli/cmd/views/workspace/select_prompt"
+	"github.com/daytonaio/daytona/cli/config"
+	"github.com/daytonaio/daytona/common/api_client"
 	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/git_provider"
 
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 )
 
-const maxWidth = 80
+const maxWidth = 160
 const maximumSecondaryProjects = 8
 
 type Styles struct {
@@ -70,12 +74,12 @@ type Model struct {
 	workspaceCreationPromptResponse WorkspaceCreationPromptResponse
 }
 
-func runInitialForm() (WorkspaceCreationPromptResponse, error) {
+func runInitialForm(providerRepoUrl string) (WorkspaceCreationPromptResponse, error) {
 	m := Model{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
 
-	primaryRepo := ""
+	primaryRepo := providerRepoUrl
 	hasSecondaryProjectsCheck := false
 	secondaryProjectsCountString := ""
 
@@ -124,7 +128,7 @@ func runInitialForm() (WorkspaceCreationPromptResponse, error) {
 			return !hasSecondaryProjectsCheck
 		}),
 	).WithTheme(dTheme).
-		WithWidth(45).
+		WithWidth(maxWidth).
 		WithShowHelp(false).
 		WithShowErrors(true)
 
@@ -152,8 +156,10 @@ func runSecondaryProjectsForm(workspaceCreationPromptResponse WorkspaceCreationP
 	var secondaryRepoList []string
 	count := workspaceCreationPromptResponse.SecondaryProjectCount
 
+	secondaryRepoList = workspaceCreationPromptResponse.SecondaryRepositories
+
 	// Add empty strings to the slice
-	for i := 0; i < count; i++ {
+	for i := 0; i < (count - len(workspaceCreationPromptResponse.SecondaryRepositories)); i++ {
 		secondaryRepoList = append(secondaryRepoList, "")
 	}
 
@@ -188,7 +194,7 @@ func runSecondaryProjectsForm(workspaceCreationPromptResponse WorkspaceCreationP
 	m.form = huh.NewForm(
 		secondaryRepoGroup,
 	).
-		WithWidth(45).
+		WithWidth(maxWidth).
 		WithShowHelp(false).
 		WithShowErrors(true).
 		WithTheme(views.GetCustomTheme())
@@ -244,7 +250,7 @@ func runWorkspaceNameForm(workspaceCreationPromptResponse WorkspaceCreationPromp
 			workspaceNamePrompt,
 		),
 	).WithTheme(dTheme).
-		WithWidth(45).
+		WithWidth(maxWidth).
 		WithShowHelp(false).
 		WithShowErrors(true)
 
@@ -259,10 +265,21 @@ func runWorkspaceNameForm(workspaceCreationPromptResponse WorkspaceCreationPromp
 	return result, nil
 }
 
-func GetCreationDataFromPrompt(workspaceNames []string) (workspaceName string, projectRepositoryList []string, err error) {
+func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []api_client.GitProvider, manual bool) (workspaceName string, projectRepositoryList []string, err error) {
 	var projectRepoList []string
+	var providerRepoUrl string
 
-	workspaceCreationPromptResponse, err := runInitialForm()
+	if !manual && userGitProviders != nil && len(userGitProviders) > 0 {
+		providerRepoUrl, err = GetRepositoryUrlFromWizard(userGitProviders, 0)
+		if err != nil {
+			return "", nil, err
+		}
+		if providerRepoUrl == "" {
+			return "", nil, nil
+		}
+	}
+
+	workspaceCreationPromptResponse, err := runInitialForm(providerRepoUrl)
 	if err != nil {
 		return "", nil, err
 	}
@@ -274,6 +291,19 @@ func GetCreationDataFromPrompt(workspaceNames []string) (workspaceName string, p
 	projectRepoList = []string{workspaceCreationPromptResponse.PrimaryRepository}
 
 	if workspaceCreationPromptResponse.SecondaryProjectCount > 0 {
+
+		if !manual && userGitProviders != nil && len(userGitProviders) > 0 {
+			for i := 0; i < workspaceCreationPromptResponse.SecondaryProjectCount; i++ {
+				providerRepoUrl, err = GetRepositoryUrlFromWizard(userGitProviders, i+1)
+				if err != nil {
+					return "", nil, err
+				}
+				if providerRepoUrl == "" {
+					return "", nil, nil
+				}
+				workspaceCreationPromptResponse.SecondaryRepositories = append(workspaceCreationPromptResponse.SecondaryRepositories, providerRepoUrl)
+			}
+		}
 
 		workspaceCreationPromptResponse, err = runSecondaryProjectsForm(workspaceCreationPromptResponse)
 		if err != nil {
@@ -295,6 +325,65 @@ func GetCreationDataFromPrompt(workspaceNames []string) (workspaceName string, p
 	}
 
 	return workspaceCreationPromptResponse.WorkspaceName, projectRepoList, nil
+}
+
+func GetRepositoryUrlFromWizard(userGitProviders []api_client.GitProvider, secondaryProjectOrder int) (string, error) {
+	var providerId string
+	var namespaceId string
+	var gitProvider git_provider.GitProvider
+
+	if len(userGitProviders) == 1 {
+		providerId = *userGitProviders[0].Id
+	} else {
+
+		availableGitProviderViews := config.GetGitProviderList()
+		var gitProviderViewList []config.GitProvider
+
+		for _, gitProvider := range userGitProviders {
+			for _, availableGitProviderView := range availableGitProviderViews {
+				if *gitProvider.Id == availableGitProviderView.Id {
+					gitProviderViewList = append(gitProviderViewList, availableGitProviderView)
+				}
+			}
+		}
+		providerId = repo_select.GetProviderIdFromPrompt(gitProviderViewList, secondaryProjectOrder)
+		if providerId == "" {
+			return "", nil
+		}
+	}
+
+	gitProvider, err := git_provider.GetGitProvider(providerId, userGitProviders)
+	if err != nil {
+		return "", err
+	}
+
+	namespaceList, err := gitProvider.GetNamespaces()
+	if err != nil {
+		return "", err
+	}
+
+	if len(namespaceList) == 1 {
+		namespaceId = namespaceList[0].Id
+	} else {
+		var namespaceViewList []git_provider.GitNamespace
+		namespaceViewList = append(namespaceViewList, namespaceList...)
+		namespaceId = repo_select.GetNamespaceIdFromPrompt(namespaceViewList, secondaryProjectOrder)
+		if namespaceId == "" {
+			return "", nil
+		}
+	}
+
+	repos, err := gitProvider.GetRepositories(namespaceId)
+	if err != nil {
+		return "", err
+	}
+
+	repoUrl := repo_select.GetRepositoryUrlFromPrompt(repos, secondaryProjectOrder)
+	if repoUrl == "" {
+		return "", nil
+	}
+
+	return repoUrl, nil
 }
 
 func getSuggestedWorkspaceName(repo string) string {

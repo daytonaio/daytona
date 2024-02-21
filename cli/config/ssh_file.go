@@ -75,10 +75,10 @@ func generateSshConfigEntry(profileId, workspaceName, projectName, knownHostsPat
 	projectHostname := GetProjectHostname(profileId, workspaceName, projectName)
 
 	config := fmt.Sprintf("Host %s\n"+
-		tab+"User %s~%s\n"+
+		tab+"User daytona\n"+
 		tab+"StrictHostKeyChecking no\n"+
 		tab+"UserKnownHostsFile %s\n"+
-		tab+"ProxyCommand %s ssh-proxy %s %s %s\n\n", projectHostname, workspaceName, projectName, knownHostsPath, daytonaPath, profileId, workspaceName, projectName)
+		tab+"ProxyCommand %s ssh-proxy %s %s %s\n\n", projectHostname, knownHostsPath, daytonaPath, profileId, workspaceName, projectName)
 
 	return config, nil
 }
@@ -162,5 +162,5 @@ func RemoveWorkspaceSshEntries(profileId, workspaceName string) error {
 }
 
 func GetProjectHostname(profileId, workspaceName, projectName string) string {
-	return fmt.Sprintf("%s~%s~%s", profileId, workspaceName, projectName)
+	return fmt.Sprintf("%s-%s-%s", profileId, workspaceName, projectName)
 }

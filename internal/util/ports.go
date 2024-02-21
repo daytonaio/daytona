@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -24,10 +25,13 @@ func GetAvailableEphemeralPort() (uint16, error) {
 }
 
 func IsPortAvailable(port uint16) bool {
-	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
-	if err == nil {
-		_ = ln.Close()
+	timeout := time.Millisecond * 50
+	conn, err := net.DialTimeout("tcp", fmt.Sprintf(":%d", port), timeout)
+	if err != nil {
 		return true
+	}
+	if conn != nil {
+		defer conn.Close()
 	}
 	return false
 }
