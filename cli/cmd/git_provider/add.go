@@ -19,7 +19,7 @@ import (
 
 var gitProviderAddCmd = &cobra.Command{
 	Use:     "add",
-	Aliases: []string{"new", "register, update"},
+	Aliases: []string{"new", "register", "update"},
 	Short:   "Register a Git providers",
 	Run: func(cmd *cobra.Command, args []string) {
 		var providerExists bool
@@ -60,8 +60,8 @@ var gitProviderAddCmd = &cobra.Command{
 
 		for _, gitProvider := range gitProviderList {
 			if *gitProvider.Id == gitProviderSelectView.Id {
-				gitProvider.Token = &gitProviderSelectView.Token
-				gitProvider.Username = &gitProviderSelectView.Username
+				*gitProvider.Username = gitProviderSelectView.Username
+				*gitProvider.Token = gitProviderSelectView.Token
 				providerExists = true
 			}
 		}
