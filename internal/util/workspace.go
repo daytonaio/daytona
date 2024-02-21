@@ -9,12 +9,16 @@ import (
 	"strings"
 
 	"github.com/daytonaio/daytona/cli/api"
+	"github.com/daytonaio/daytona/cli/config"
 )
 
-func GetFirstWorkspaceProjectName(workspaceId string, projectName string) (string, error) {
+func GetFirstWorkspaceProjectName(workspaceId string, projectName string, profile *config.Profile) (string, error) {
 	ctx := context.Background()
 
-	apiClient := api.GetServerApiClient("http://localhost:3000", "")
+	apiClient, err := api.GetServerApiClient(profile)
+	if err != nil {
+		return "", err
+	}
 
 	wsInfo, _, err := apiClient.WorkspaceAPI.GetWorkspaceInfo(ctx, workspaceId).Execute()
 	if err != nil {

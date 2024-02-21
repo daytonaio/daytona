@@ -39,7 +39,7 @@ var SshProxyCmd = &cobra.Command{
 		if len(args) == 3 {
 			projectName = args[2]
 		} else {
-			projectName, err = util.GetFirstWorkspaceProjectName(workspaceName, projectName)
+			projectName, err = util.GetFirstWorkspaceProjectName(workspaceName, projectName, &profile)
 			if err != nil {
 				log.Fatal(err)
 			}

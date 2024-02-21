@@ -4,19 +4,40 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/daytonaio/daytona/cli/config"
 	"github.com/daytonaio/daytona/common/api_client"
 	"github.com/daytonaio/daytona/common/types"
 )
 
 var apiClient *api_client.APIClient
 
-func GetServerApiClient(serverUrl, token string) *api_client.APIClient {
+func GetServerApiClient(profile *config.Profile) (*api_client.APIClient, error) {
 	if apiClient != nil {
-		return apiClient
+		return apiClient, nil
 	}
+
+	c, err := config.GetConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	serverUrl := "http://localhost:3000"
 
 	if envApiUrl, ok := os.LookupEnv("DAYTONA_SERVER_API_URL"); ok {
 		serverUrl = envApiUrl
+	} else {
+		var activeProfile config.Profile
+		if profile == nil {
+			var err error
+			activeProfile, err = c.GetActiveProfile()
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			activeProfile = *profile
+		}
+
+		serverUrl = activeProfile.Api.Url
 	}
 
 	clientConfig := api_client.NewConfiguration()
@@ -26,7 +47,7 @@ func GetServerApiClient(serverUrl, token string) *api_client.APIClient {
 		},
 	}
 
-	clientConfig.AddDefaultHeader("Authorization", "Bearer "+token)
+	// clientConfig.AddDefaultHeader("Authorization", "Bearer "+token)
 
 	apiClient = api_client.NewAPIClient(clientConfig)
 
@@ -34,7 +55,7 @@ func GetServerApiClient(serverUrl, token string) *api_client.APIClient {
 		Transport: http.DefaultTransport,
 	}
 
-	return apiClient
+	return apiClient, nil
 }
 
 func ToServerConfig(config *api_client.ServerConfig) *types.ServerConfig {

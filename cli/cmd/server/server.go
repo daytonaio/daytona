@@ -42,4 +42,5 @@ func init() {
 	ServerCmd.AddCommand(startupCmd)
 	ServerCmd.AddCommand(installCmd)
 	ServerCmd.AddCommand(uninstallCmd)
+	ServerCmd.AddCommand(configCmd)
 }

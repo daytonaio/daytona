@@ -17,6 +17,10 @@ type ProfileAuth struct {
 	PrivateKeyPath *string `json:"privateKeyPath"`
 }
 
+type ServerApi struct {
+	Url string `json:"url"`
+}
+
 type Profile struct {
 	Id                 string      `json:"id"`
 	Name               string      `json:"name"`
@@ -24,6 +28,7 @@ type Profile struct {
 	Port               int         `json:"port"`
 	Auth               ProfileAuth `json:"auth"`
 	DefaultProvisioner string      `json:"defaultProvisioner"`
+	Api                ServerApi   `json:"api"`
 }
 
 type Config struct {
@@ -171,6 +176,9 @@ func getDefaultConfig() Config {
 					PrivateKeyPath: nil,
 				},
 				DefaultProvisioner: "docker-provisioner",
+				Api: ServerApi{
+					Url: "http://localhost:3000",
+				},
 			},
 		},
 	}

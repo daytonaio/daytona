@@ -25,7 +25,10 @@ func GetTailscaleConn(profile *config.Profile) (*tsnet.Server, error) {
 	}
 	s = &tsnet.Server{}
 
-	apiClient := api.GetServerApiClient("http://localhost:3000", "")
+	apiClient, err := api.GetServerApiClient(profile)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	serverConfig, _, err := apiClient.ServerAPI.GetConfigExecute(api_client.ApiGetConfigRequest{})
 	if err != nil {

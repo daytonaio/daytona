@@ -44,7 +44,10 @@ var CodeCmd = &cobra.Command{
 
 		ideId = c.DefaultIdeId
 
-		apiClient := api.GetServerApiClient("http://localhost:3000", "")
+		apiClient, err := api.GetServerApiClient(&activeProfile)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		if len(args) == 0 {
 			workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
@@ -64,7 +67,7 @@ var CodeCmd = &cobra.Command{
 
 		// Todo: make project_select_prompt view for 0 args
 		if len(args) == 0 || len(args) == 1 {
-			projectName, err = util.GetFirstWorkspaceProjectName(workspaceName, projectName)
+			projectName, err = util.GetFirstWorkspaceProjectName(workspaceName, projectName, &activeProfile)
 			if err != nil {
 				log.Fatal(err)
 			}

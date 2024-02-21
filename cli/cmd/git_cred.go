@@ -35,7 +35,10 @@ var gitCredCmd = &cobra.Command{
 			return
 		}
 
-		apiClient := api.GetServerApiClient("http://localhost:3000", "")
+		apiClient, err := api.GetServerApiClient(nil)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		var gitCredentials GitCredentials
 		serverConfig, _, err := apiClient.ServerAPI.GetConfig(ctx).Execute()

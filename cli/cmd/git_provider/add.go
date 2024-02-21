@@ -24,7 +24,10 @@ var gitProviderAddCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var providerExists bool
 
-		apiClient := api.GetServerApiClient("http://localhost:3000", "")
+		apiClient, err := api.GetServerApiClient(nil)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		serverConfig, _, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
 		if err != nil {

@@ -36,7 +36,10 @@ var CreateCmd = &cobra.Command{
 		var provisioner string
 
 		manual, _ := cmd.Flags().GetBool("manual")
-		apiClient := api.GetServerApiClient("http://localhost:3000", "")
+		apiClient, err := api.GetServerApiClient(nil)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		serverConfig, _, err := apiClient.ServerAPI.GetConfig(ctx).Execute()
 		if err != nil {

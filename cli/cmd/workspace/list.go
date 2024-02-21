@@ -22,7 +22,10 @@ var ListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
-		apiClient := api.GetServerApiClient("http://localhost:3000", "")
+		apiClient, err := api.GetServerApiClient(nil)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 		if err != nil {

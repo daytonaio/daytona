@@ -25,7 +25,10 @@ var InfoCmd = &cobra.Command{
 		ctx := context.Background()
 		var workspaceName string
 
-		apiClient := api.GetServerApiClient("http://localhost:3000", "")
+		apiClient, err := api.GetServerApiClient(nil)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		if len(args) == 0 {
 			workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()

@@ -28,7 +28,10 @@ var pluginListCmd = &cobra.Command{
 }
 
 func getPluginList() ([]list_view.PluginViewDTO, error) {
-	apiClient := api.GetServerApiClient("http://localhost:3000", "")
+	apiClient, err := api.GetServerApiClient(nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	plugins := []list_view.PluginViewDTO{}
 	ctx := context.Background()

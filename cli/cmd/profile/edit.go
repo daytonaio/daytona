@@ -86,7 +86,10 @@ func EditProfile(c *config.Config, notify bool, profile *config.Profile) error {
 		return errors.New("profile must not be nil")
 	}
 
-	apiClient := api.GetServerApiClient("http://localhost:3000", "")
+	apiClient, err := api.GetServerApiClient(profile)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	provisionerPluginList, _, err := apiClient.PluginAPI.ListProvisionerPlugins(context.Background()).Execute()
 	if err != nil {

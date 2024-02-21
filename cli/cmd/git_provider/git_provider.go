@@ -20,7 +20,10 @@ var GitProviderCmd = &cobra.Command{
 	Aliases: []string{"git-provider"},
 	Short:   "Lists your registered Git providers",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient := api.GetServerApiClient("http://localhost:3000", "")
+		apiClient, err := api.GetServerApiClient(nil)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		serverConfig, _, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
 		if err != nil {
