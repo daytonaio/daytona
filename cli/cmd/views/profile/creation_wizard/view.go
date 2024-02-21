@@ -25,6 +25,7 @@ type ProfileAddView struct {
 	RemoteSshUser           string
 	RemoteSshPrivateKeyPath string
 	DefaultProvisioner      string
+	ApiUrl                  string
 }
 
 func ProfileCreationView(c *config.Config, profileAddView *ProfileAddView, editing bool) {
@@ -77,6 +78,11 @@ func ProfileCreationView(c *config.Config, profileAddView *ProfileAddView, editi
 				).
 				Value(&authType),
 		),
+		huh.NewGroup(
+			huh.NewInput().
+				Title("Server API URL").
+				Value(&profileAddView.ApiUrl),
+		).WithHide(!editing),
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Remote SSH user").

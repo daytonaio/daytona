@@ -179,6 +179,21 @@ func (s *RemoteInstaller) ServerRegistered() (bool, error) {
 	}
 }
 
+func (s *RemoteInstaller) GetApiUrl() (string, error) {
+	session, err := s.Client.NewSession()
+	if err != nil {
+		return "", err
+	}
+	defer session.Close()
+
+	output, err := (*session).CombinedOutput("daytona server config")
+	if err != nil {
+		return "", err
+	}
+
+	return string(output), nil
+}
+
 func (s *RemoteInstaller) SudoPasswordRequired() (bool, error) {
 	session, err := s.Client.NewSession()
 	if err != nil {
