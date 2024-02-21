@@ -162,5 +162,5 @@ func RemoveWorkspaceSshEntries(profileId, workspaceName string) error {
 }
 
 func GetProjectHostname(profileId, workspaceName, projectName string) string {
-	return fmt.Sprintf("%s~%s~%s", profileId, workspaceName, projectName)
+	return fmt.Sprintf("%s-%s-%s", profileId, workspaceName, projectName)
 }
