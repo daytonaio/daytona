@@ -27,7 +27,7 @@ func selectWorkspacePrompt(workspaces []api_client.Workspace, actionVerb string,
 		for _, project := range workspace.Projects {
 			projectNames = append(projectNames, *project.Name)
 		}
-		newItem := item{title: *workspace.Name, desc: strings.Join(projectNames, ", ")}
+		newItem := item{title: *workspace.Name, desc: strings.Join(projectNames, ", "), choiceProperty: *workspace.Name}
 		items = append(items, newItem)
 	}
 
