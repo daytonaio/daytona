@@ -63,7 +63,7 @@ var installCmd = &cobra.Command{
 		s.Start()
 		defer s.Stop()
 
-		client, err = ssh.Dial("tcp", chosenProfile.Hostname+":"+strconv.Itoa(chosenProfile.Port), sshConfig)
+		client, err = ssh.Dial("tcp", chosenProfile.RemoteAuth.Hostname+":"+strconv.Itoa(chosenProfile.RemoteAuth.Port), sshConfig)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -99,9 +99,9 @@ var installCmd = &cobra.Command{
 
 		var sessionPassword string
 
-		if sudoPasswordRequired && (chosenProfile.Auth.Password == nil || *chosenProfile.Auth.Password == "") {
-			if chosenProfile.Auth.Password == nil || *chosenProfile.Auth.Password == "" {
-				fmt.Printf("Enter password for user %s:", chosenProfile.Auth.User)
+		if sudoPasswordRequired && (chosenProfile.RemoteAuth.Password == nil || *chosenProfile.RemoteAuth.Password == "") {
+			if chosenProfile.RemoteAuth.Password == nil || *chosenProfile.RemoteAuth.Password == "" {
+				fmt.Printf("Enter password for user %s:", chosenProfile.RemoteAuth.User)
 				password, err := term.ReadPassword(0)
 				fmt.Println()
 				if err != nil {
@@ -109,7 +109,7 @@ var installCmd = &cobra.Command{
 				}
 				sessionPassword = string(password)
 			} else {
-				sessionPassword = *chosenProfile.Auth.Password
+				sessionPassword = *chosenProfile.RemoteAuth.Password
 			}
 		}
 		installer.Password = sessionPassword
@@ -157,7 +157,7 @@ var installCmd = &cobra.Command{
 			}
 		}
 
-		err = installer.AddUserToDockerGroup(chosenProfile.Auth.User)
+		err = installer.AddUserToDockerGroup(chosenProfile.RemoteAuth.User)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -178,7 +178,7 @@ var installCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = installer.EnableServiceLinger(chosenProfile.Auth.User)
+		err = installer.EnableServiceLinger(chosenProfile.RemoteAuth.User)
 		if err != nil {
 			log.Error("Failed to enable service linger")
 			log.Fatal(err)

@@ -93,19 +93,22 @@ func EditProfile(c *config.Config, notify bool, profile *config.Profile) error {
 
 	profileAddView := view.ProfileAddView{
 		ProfileName:             profile.Name,
-		RemoteHostname:          profile.Hostname,
-		RemoteSshPort:           profile.Port,
-		RemoteSshUser:           profile.Auth.User,
 		DefaultProvisioner:      defaultProvisioner,
 		RemoteSshPassword:       "",
 		RemoteSshPrivateKeyPath: "",
 		ApiUrl:                  profile.Api.Url,
 	}
 
-	if profile.Auth.Password != nil {
-		profileAddView.RemoteSshPassword = *profile.Auth.Password
-	} else if profile.Auth.PrivateKeyPath != nil {
-		profileAddView.RemoteSshPrivateKeyPath = *profile.Auth.PrivateKeyPath
+	if profile.RemoteAuth != nil {
+		profileAddView.RemoteSshPort = profile.RemoteAuth.Port
+		profileAddView.RemoteHostname = profile.RemoteAuth.Hostname
+		profileAddView.RemoteSshUser = profile.RemoteAuth.User
+
+		if profile.RemoteAuth.Password != nil {
+			profileAddView.RemoteSshPassword = *profile.RemoteAuth.Password
+		} else if profile.RemoteAuth.PrivateKeyPath != nil {
+			profileAddView.RemoteSshPrivateKeyPath = *profile.RemoteAuth.PrivateKeyPath
+		}
 	}
 
 	apiClient, err := api.GetServerApiClient(profile)
@@ -145,11 +148,11 @@ func EditProfile(c *config.Config, notify bool, profile *config.Profile) error {
 
 func editProfile(profileId string, profileView view.ProfileAddView, c *config.Config, notify bool) error {
 	editedProfile := config.Profile{
-		Id:       profileId,
-		Name:     profileView.ProfileName,
-		Hostname: profileView.RemoteHostname,
-		Port:     profileView.RemoteSshPort,
-		Auth: config.ProfileAuth{
+		Id:   profileId,
+		Name: profileView.ProfileName,
+		RemoteAuth: &config.RemoteAuth{
+			Port:           profileView.RemoteSshPort,
+			Hostname:       profileView.RemoteHostname,
 			User:           profileView.RemoteSshUser,
 			Password:       nil,
 			PrivateKeyPath: nil,
@@ -160,9 +163,9 @@ func editProfile(profileId string, profileView view.ProfileAddView, c *config.Co
 		},
 	}
 	if profileView.RemoteSshPassword != "" {
-		editedProfile.Auth.Password = &profileView.RemoteSshPassword
+		editedProfile.RemoteAuth.Password = &profileView.RemoteSshPassword
 	} else if profileView.RemoteSshPrivateKeyPath != "" {
-		editedProfile.Auth.PrivateKeyPath = &profileView.RemoteSshPrivateKeyPath
+		editedProfile.RemoteAuth.PrivateKeyPath = &profileView.RemoteSshPrivateKeyPath
 	} else {
 		return errors.New("password or private key path must be provided")
 	}
@@ -175,7 +178,7 @@ func editProfile(profileId string, profileView view.ProfileAddView, c *config.Co
 	if notify {
 		info_view.Render(info_view.ProfileInfo{
 			ProfileName: profileView.ProfileName,
-			ServerUrl:   profileView.RemoteHostname,
+			ApiUrl:      profileView.RemoteHostname,
 		}, "edited")
 	}
 

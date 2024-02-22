@@ -33,14 +33,6 @@ var profileAddCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		if profileNameFlag == "" || serverHostnameFlag == "" || serverUserFlag == "" || provisionerFlag == "" || apiUrlFlag == "" || (serverPrivateKeyPathFlag == "" && serverPasswordFlag == "") {
-			_, err = CreateProfile(c, nil, true, true)
-			if err != nil {
-				log.Fatal(err)
-			}
-			return
-		}
-
 		profileAddView := view.ProfileAddView{
 			ProfileName:        profileNameFlag,
 			RemoteHostname:     serverHostnameFlag,
@@ -49,6 +41,15 @@ var profileAddCmd = &cobra.Command{
 			DefaultProvisioner: provisionerFlag,
 			ApiUrl:             apiUrlFlag,
 		}
+
+		if profileNameFlag == "" || serverHostnameFlag == "" || serverUserFlag == "" || provisionerFlag == "" || apiUrlFlag == "" || (serverPrivateKeyPathFlag == "" && serverPasswordFlag == "") {
+			_, err = CreateProfile(c, nil, true, true)
+			if err != nil {
+				log.Fatal(err)
+			}
+			return
+		}
+
 		if serverPasswordFlag != "" {
 			profileAddView.RemoteSshPassword = serverPasswordFlag
 		} else if serverPrivateKeyPathFlag != "" {
@@ -82,11 +83,11 @@ func CreateProfile(c *config.Config, profileAddView *view.ProfileAddView, checkC
 
 func addProfile(profileView view.ProfileAddView, c *config.Config, checkConnection bool, notify bool) (string, error) {
 	profile := config.Profile{
-		Id:       util.GenerateIdFromName(profileView.ProfileName),
-		Name:     profileView.ProfileName,
-		Hostname: profileView.RemoteHostname,
-		Port:     profileView.RemoteSshPort,
-		Auth: config.ProfileAuth{
+		Id:   util.GenerateIdFromName(profileView.ProfileName),
+		Name: profileView.ProfileName,
+		RemoteAuth: &config.RemoteAuth{
+			Port:           profileView.RemoteSshPort,
+			Hostname:       profileView.RemoteHostname,
 			User:           profileView.RemoteSshUser,
 			Password:       nil,
 			PrivateKeyPath: nil,
@@ -97,9 +98,9 @@ func addProfile(profileView view.ProfileAddView, c *config.Config, checkConnecti
 	}
 
 	if profileView.RemoteSshPassword != "" {
-		profile.Auth.Password = &profileView.RemoteSshPassword
+		profile.RemoteAuth.Password = &profileView.RemoteSshPassword
 	} else if profileView.RemoteSshPrivateKeyPath != "" {
-		profile.Auth.PrivateKeyPath = &profileView.RemoteSshPrivateKeyPath
+		profile.RemoteAuth.PrivateKeyPath = &profileView.RemoteSshPrivateKeyPath
 	} else {
 		return "", errors.New("password or private key path must be provided")
 	}
@@ -127,7 +128,7 @@ func addProfile(profileView view.ProfileAddView, c *config.Config, checkConnecti
 	if notify {
 		info_view.Render(info_view.ProfileInfo{
 			ProfileName: profile.Name,
-			ServerUrl:   profile.Hostname,
+			ApiUrl:      profile.Api.Url,
 		}, "added and set as active")
 	}
 
@@ -135,6 +136,9 @@ func addProfile(profileView view.ProfileAddView, c *config.Config, checkConnecti
 }
 
 func setDaytonaApiUrl(profileView *view.ProfileAddView, profile config.Profile) error {
+	if profile.RemoteAuth == nil {
+		return errors.New("RemoteAuth is not set")
+	}
 
 	s := spinner.New(spinner.CharSets[14], 100*time.Millisecond)
 
@@ -143,7 +147,7 @@ func setDaytonaApiUrl(profileView *view.ProfileAddView, profile config.Profile) 
 	s.Start()
 	defer s.Stop()
 
-	client, err := ssh.Dial("tcp", profile.Hostname+":"+strconv.Itoa(profile.Port), sshConfig)
+	client, err := ssh.Dial("tcp", profile.RemoteAuth.Hostname+":"+strconv.Itoa(profile.RemoteAuth.Port), sshConfig)
 	if err != nil {
 		return errors.New("Failed to connect to the remote machine")
 	}

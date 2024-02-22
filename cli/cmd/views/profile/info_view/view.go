@@ -11,7 +11,7 @@ import (
 
 type ProfileInfo struct {
 	ProfileName string
-	ServerUrl   string
+	ApiUrl      string
 	ProfilePath string
 }
 
@@ -24,7 +24,7 @@ var grayText = lipgloss.NewStyle().
 func Render(info ProfileInfo, verb string) {
 	output := ""
 	output = grayText.Render("Profile ") + whiteText.Render(info.ProfileName) + grayText.Render(fmt.Sprintf(" %s", verb)) + "\n"
-	output += grayText.Render("Server URL: ") + whiteText.Render(info.ServerUrl)
+	output += grayText.Render("Server URL: ") + whiteText.Render(info.ApiUrl)
 
 	println(output)
 }
