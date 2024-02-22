@@ -11,7 +11,6 @@ import (
 	provisioner_manager "github.com/daytonaio/daytona/plugins/provisioner/manager"
 	"github.com/daytonaio/daytona/server/api/controllers/workspace/dto"
 	"github.com/daytonaio/daytona/server/db"
-	"github.com/daytonaio/daytona/server/headscale"
 	"github.com/daytonaio/daytona/server/provisioner"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -94,18 +93,14 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 	w.Projects = []*types.Project{}
 
 	for _, repo := range createWorkspaceDto.Repositories {
-		authKey, err := headscale.CreateAuthKey()
-		if err != nil {
-			return nil, err
-		}
-
+		// TODO: generate API key for project
 		project := &types.Project{
 			Name: strings.ToLower(path.Base(repo)),
 			Repository: &types.Repository{
 				Url: repo,
 			},
 			WorkspaceId: w.Id,
-			AuthKey:     authKey,
+			ApiKey:      "TODO",
 		}
 		w.Projects = append(w.Projects, project)
 	}

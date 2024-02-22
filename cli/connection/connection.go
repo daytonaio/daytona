@@ -6,6 +6,7 @@ package connection
 import (
 	"context"
 	"fmt"
+	"path"
 
 	"github.com/daytonaio/daytona/cli/api"
 	"github.com/daytonaio/daytona/cli/config"
@@ -13,8 +14,6 @@ import (
 	"github.com/daytonaio/daytona/server/frpc"
 	"github.com/google/uuid"
 	"tailscale.com/tsnet"
-
-	log "github.com/sirupsen/logrus"
 )
 
 var s *tsnet.Server = nil
@@ -27,12 +26,17 @@ func GetTailscaleConn(profile *config.Profile) (*tsnet.Server, error) {
 
 	apiClient, err := api.GetServerApiClient(profile)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
+	}
+
+	configDir, err := config.GetConfigDir()
+	if err != nil {
+		return nil, err
 	}
 
 	serverConfig, _, err := apiClient.ServerAPI.GetConfigExecute(api_client.ApiGetConfigRequest{})
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	networkKey, _, err := apiClient.ServerAPI.GenerateNetworkKeyExecute(api_client.ApiGenerateNetworkKeyRequest{})
@@ -40,10 +44,12 @@ func GetTailscaleConn(profile *config.Profile) (*tsnet.Server, error) {
 		return nil, err
 	}
 
-	s.Hostname = fmt.Sprintf("cli-%s", uuid.New().String())
+	cliId := uuid.New().String()
+	s.Hostname = fmt.Sprintf("cli-%s", cliId)
 	s.ControlURL = frpc.GetServerUrl(api.ToServerConfig(serverConfig))
 	s.AuthKey = *networkKey.Key
 	s.Ephemeral = true
+	s.Dir = path.Join(configDir, "tailscale", cliId)
 	s.Logf = func(format string, args ...any) {}
 
 	_, err = s.Up(context.Background())
