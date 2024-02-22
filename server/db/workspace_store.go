@@ -7,7 +7,6 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/daytonaio/daytona/common/types"
-	. "github.com/daytonaio/daytona/server/db/dto"
 )
 
 func ListWorkspaces() ([]*types.Workspace, error) {
@@ -16,15 +15,10 @@ func ListWorkspaces() ([]*types.Workspace, error) {
 		return nil, err
 	}
 
-	workspaceDTOs := []WorkspaceDTO{}
-	tx := db.Find(&workspaceDTOs)
+	workspaces := []*types.Workspace{}
+	tx := db.Find(&workspaces)
 	if tx.Error != nil {
 		return nil, tx.Error
-	}
-
-	workspaces := []*types.Workspace{}
-	for _, workspace := range workspaceDTOs {
-		workspaces = append(workspaces, ToWorkspace(workspace))
 	}
 
 	return workspaces, nil
@@ -36,13 +30,13 @@ func FindWorkspace(workspaceId string) (*types.Workspace, error) {
 		return nil, err
 	}
 
-	workspaceDTO := WorkspaceDTO{}
-	tx := db.Where("id = ?", workspaceId).First(&workspaceDTO)
+	workspace := new(types.Workspace)
+	tx := db.Where("id = ?", workspaceId).First(&workspace)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 
-	return ToWorkspace(workspaceDTO), nil
+	return workspace, nil
 }
 
 func SaveWorkspace(workspace *types.Workspace) error {
@@ -51,7 +45,7 @@ func SaveWorkspace(workspace *types.Workspace) error {
 		return err
 	}
 
-	tx := db.Save(ToWorkspaceDTO(workspace))
+	tx := db.Save(workspace)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -65,7 +59,7 @@ func DeleteWorkspace(workspace *types.Workspace) error {
 		return err
 	}
 
-	tx := db.Delete(ToWorkspaceDTO(workspace))
+	tx := db.Delete(workspace)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -75,7 +69,7 @@ func DeleteWorkspace(workspace *types.Workspace) error {
 
 func getWorkspaceDB() (*gorm.DB, error) {
 	db := getConnection()
-	err := db.AutoMigrate(&WorkspaceDTO{})
+	err := db.AutoMigrate(&types.Workspace{})
 	if err != nil {
 		return nil, err
 	}
