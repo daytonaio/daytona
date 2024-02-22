@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -142,7 +143,7 @@ func (s *RemoteInstaller) AddUserToDockerGroup(user string) error {
 	}
 	defer session.Close()
 
-	cmd := fmt.Sprintf("echo $(echo '%s' | sudo -S usermod -aG docker %s  > /dev/null 2>&1; echo $?)", s.Password, user)
+	cmd := fmt.Sprintf("echo $(echo '%s' | sudo -S usermod -aG docker %s > /dev/null 2>&1; echo $?) && logout", s.Password, user)
 	output, _ := (*session).CombinedOutput(cmd)
 
 	if string(output) == "0\n" {
@@ -343,7 +344,38 @@ func (s *RemoteInstaller) RemoveDaemon(remoteOS os.OperatingSystem) error {
 	}
 }
 
-func (s *RemoteInstaller) WaitForServerToStart(apiUrl string) error {
+func (s *RemoteInstaller) WaitForRemoteServerToStart(hostname string, port int, sshConfig *ssh.ClientConfig) (*ssh.Client, error) {
+	var client *ssh.Client
+	var err error
+	startTime := time.Now()
+
+	for {
+		client, err = ssh.Dial("tcp", hostname+":"+strconv.Itoa(port), sshConfig)
+		if err == nil {
+			break
+		}
+		if time.Since(startTime) > 2*time.Minute {
+			return nil, fmt.Errorf("Connection timed out after 2 minutes")
+		}
+		time.Sleep(5 * time.Second) // Retry every 5 seconds
+	}
+	return client, nil
+}
+
+func (s *RemoteInstaller) RestartServer() error {
+	session, err := s.Client.NewSession()
+	if err != nil {
+		return err
+	}
+	defer session.Close()
+
+	cmd := fmt.Sprintf("echo $(echo '%s' | sudo -S reboot > /dev/null 2>&1; echo $?)", s.Password)
+	_, err = (*session).CombinedOutput(cmd)
+
+	return nil
+}
+
+func (s *RemoteInstaller) WaitForDaytonaServerToStart(apiUrl string) error {
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 
