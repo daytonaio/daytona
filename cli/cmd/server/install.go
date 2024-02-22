@@ -178,8 +178,6 @@ var installCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		// time.Sleep(1 * time.Minute)
-
 		err = installer.EnableServiceLinger(chosenProfile.Auth.User)
 		if err != nil {
 			log.Error("Failed to enable service linger")
@@ -216,10 +214,6 @@ var installCmd = &cobra.Command{
 			defer s.Stop()
 
 			installer.RestartServer()
-			// if err != nil {
-			// 	log.Error("Failed to restart the remote machine.")
-			// 	log.Fatal(err)
-			// }
 		} else {
 			log.Info("Please restart the remote machine manually")
 			return
@@ -233,26 +227,6 @@ var installCmd = &cobra.Command{
 		}
 
 		installer.Client = client
-
-		// sudoPasswordRequired, err = installer.SudoPasswordRequired()
-		// if err != nil {
-		// 	log.Fatal(err)
-		// }
-
-		// if sudoPasswordRequired && (chosenProfile.Auth.Password == nil || *chosenProfile.Auth.Password == "") {
-		// 	if chosenProfile.Auth.Password == nil || *chosenProfile.Auth.Password == "" {
-		// 		fmt.Printf("Enter password for user %s:", chosenProfile.Auth.User)
-		// 		password, err := term.ReadPassword(0)
-		// 		fmt.Println()
-		// 		if err != nil {
-		// 			log.Fatal(err)
-		// 		}
-		// 		sessionPassword = string(password)
-		// 	} else {
-		// 		sessionPassword = *chosenProfile.Auth.Password
-		// 	}
-		// }
-		// installer.Password = sessionPassword
 
 		s.Stop()
 		fmt.Println("Waiting for Daytona Server to start")
