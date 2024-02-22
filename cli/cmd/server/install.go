@@ -184,10 +184,6 @@ var installCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		s.Stop()
-		fmt.Println("Waiting for Daytona Server to start")
-		s.Start()
-
 		apiUrl, err := installer.GetApiUrl()
 		if err != nil {
 			log.Error("Failed to get API URL from the remote machine")
@@ -206,7 +202,37 @@ var installCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = installer.WaitForServerToStart(apiUrl)
+		restartServerPrompt := true
+
+		s.Stop()
+		view.RestartPrompt(&restartServerPrompt)
+		s.Start()
+		if restartServerPrompt {
+
+			fmt.Println("Restarting the remote machine")
+			s.Start()
+			defer s.Stop()
+
+			installer.RestartServer()
+		} else {
+			log.Info("Please restart the remote machine manually")
+			return
+		}
+
+		// Recreate the ssh client
+
+		client, err = installer.WaitForRemoteServerToStart(chosenProfile.Hostname, chosenProfile.Port, sshConfig)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		installer.Client = client
+
+		s.Stop()
+		fmt.Println("Waiting for Daytona Server to start")
+		s.Start()
+
+		err = installer.WaitForDaytonaServerToStart(apiUrl)
 		if err != nil {
 			log.Error("Failed to wait for Daytona server to start")
 			log.Fatal(err)
@@ -215,6 +241,6 @@ var installCmd = &cobra.Command{
 		s.Stop()
 
 		fmt.Println("\nDaytona Server has been successfully installed.")
-		fmt.Println("\nUse 'daytona create' to initialize your first workspace.")
+		views_util.RenderInfoMessageBold("Use 'daytona create' to initialize your first workspace.")
 	},
 }
