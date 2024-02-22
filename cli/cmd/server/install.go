@@ -178,15 +178,13 @@ var installCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		// time.Sleep(1 * time.Minute)
+
 		err = installer.EnableServiceLinger(chosenProfile.Auth.User)
 		if err != nil {
 			log.Error("Failed to enable service linger")
 			log.Fatal(err)
 		}
-
-		s.Stop()
-		fmt.Println("Waiting for Daytona Server to start")
-		s.Start()
 
 		apiUrl, err := installer.GetApiUrl()
 		if err != nil {
@@ -206,7 +204,61 @@ var installCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = installer.WaitForServerToStart(apiUrl)
+		restartServerPrompt := true
+
+		s.Stop()
+		view.RestartPrompt(&restartServerPrompt)
+		s.Start()
+		if restartServerPrompt {
+
+			fmt.Println("Restarting the remote machine")
+			s.Start()
+			defer s.Stop()
+
+			installer.RestartServer()
+			// if err != nil {
+			// 	log.Error("Failed to restart the remote machine.")
+			// 	log.Fatal(err)
+			// }
+		} else {
+			log.Info("Please restart the remote machine manually")
+			return
+		}
+
+		// Recreate the ssh client
+
+		client, err = installer.WaitForRemoteServerToStart(chosenProfile.Hostname, chosenProfile.Port, sshConfig)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		installer.Client = client
+
+		// sudoPasswordRequired, err = installer.SudoPasswordRequired()
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
+
+		// if sudoPasswordRequired && (chosenProfile.Auth.Password == nil || *chosenProfile.Auth.Password == "") {
+		// 	if chosenProfile.Auth.Password == nil || *chosenProfile.Auth.Password == "" {
+		// 		fmt.Printf("Enter password for user %s:", chosenProfile.Auth.User)
+		// 		password, err := term.ReadPassword(0)
+		// 		fmt.Println()
+		// 		if err != nil {
+		// 			log.Fatal(err)
+		// 		}
+		// 		sessionPassword = string(password)
+		// 	} else {
+		// 		sessionPassword = *chosenProfile.Auth.Password
+		// 	}
+		// }
+		// installer.Password = sessionPassword
+
+		s.Stop()
+		fmt.Println("Waiting for Daytona Server to start")
+		s.Start()
+
+		err = installer.WaitForDaytonaServerToStart(apiUrl)
 		if err != nil {
 			log.Error("Failed to wait for Daytona server to start")
 			log.Fatal(err)
@@ -215,6 +267,6 @@ var installCmd = &cobra.Command{
 		s.Stop()
 
 		fmt.Println("\nDaytona Server has been successfully installed.")
-		fmt.Println("\nUse 'daytona create' to initialize your first workspace.")
+		views_util.RenderInfoMessageBold("Use 'daytona create' to initialize your first workspace.")
 	},
 }
