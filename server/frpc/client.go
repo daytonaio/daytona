@@ -16,8 +16,6 @@ func ConnectServer() error {
 		return err
 	}
 
-	serverDomain := GetServerDomain(c)
-
 	cfg := client.ServiceOptions{}
 	cfg.Common = &v1.ClientCommonConfig{}
 	cfg.Common.ServerAddr = c.Frps.Domain
@@ -28,9 +26,7 @@ func ConnectServer() error {
 	httpConfig.GetBaseConfig().Name = fmt.Sprintf("daytona-server-%s", c.Id)
 	httpConfig.GetBaseConfig().LocalPort = int(c.HeadscalePort)
 	httpConfig.GetBaseConfig().Type = string(v1.ProxyTypeHTTP)
-	// TODO: Swap with subDomain
-	httpConfig.CustomDomains = []string{serverDomain}
-	// httpConfig.SubDomain = c.Id
+	httpConfig.SubDomain = c.Id
 
 	cfg.ProxyCfgs = append(cfg.ProxyCfgs, httpConfig)
 
@@ -47,8 +43,6 @@ func ConnectApi() error {
 		return err
 	}
 
-	apiDomain := GetApiDomain(c)
-
 	cfg := client.ServiceOptions{}
 	cfg.Common = &v1.ClientCommonConfig{}
 	cfg.Common.ServerAddr = c.Frps.Domain
@@ -59,9 +53,7 @@ func ConnectApi() error {
 	httpConfig.GetBaseConfig().Name = fmt.Sprintf("daytona-server-api-%s", c.Id)
 	httpConfig.GetBaseConfig().LocalPort = int(c.ApiPort)
 	httpConfig.GetBaseConfig().Type = string(v1.ProxyTypeHTTP)
-	// TODO: Swap with subDomain
-	httpConfig.CustomDomains = []string{apiDomain}
-	// httpConfig.SubDomain = fmt.Sprintf("api-%s", c.Id)
+	httpConfig.SubDomain = fmt.Sprintf("api-%s", c.Id)
 
 	cfg.ProxyCfgs = append(cfg.ProxyCfgs, httpConfig)
 
