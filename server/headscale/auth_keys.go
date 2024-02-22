@@ -14,7 +14,7 @@ func CreateAuthKey() (string, error) {
 	log.Debug("Creating headscale auth key")
 
 	request := &v1.CreatePreAuthKeyRequest{
-		Reusable: true,
+		Reusable: false,
 		User:     "daytona",
 	}
 	request.Expiration = timestamppb.New(time.Now().Add(100000 * time.Hour))
@@ -35,28 +35,4 @@ func CreateAuthKey() (string, error) {
 	log.Debug("Headscale auth key created")
 
 	return response.PreAuthKey.Key, nil
-}
-
-func RevokeAuthKey(key string) error {
-	log.Debug("Revoking headscale auth key")
-
-	request := &v1.ExpirePreAuthKeyRequest{
-		Key:  key,
-		User: "daytona",
-	}
-
-	ctx, client, conn, cancel, err := getClient()
-	if err != nil {
-		return fmt.Errorf("failed to get client: %w", err)
-	}
-	defer cancel()
-	defer conn.Close()
-
-	_, err = client.ExpirePreAuthKey(ctx, request)
-	if err != nil {
-		return fmt.Errorf("failed to revoke ApiKey: %w", err)
-	}
-
-	log.Debug("Headscale auth key revoked")
-	return nil
 }

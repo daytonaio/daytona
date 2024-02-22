@@ -22,7 +22,5 @@ func Start() error {
 		ssh.Start()
 	}()
 
-	tailscale.Start(c)
-
-	return nil
+	return tailscale.Start(c)
 }

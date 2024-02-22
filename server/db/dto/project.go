@@ -19,7 +19,7 @@ type ProjectDTO struct {
 	Name        string        `json:"name"`
 	Repository  RepositoryDTO `json:"repository"`
 	WorkspaceId string        `json:"workspaceId"`
-	AuthKey     string        `json:"authKey"`
+	ApiKey      string        `json:"apiKey"`
 }
 
 type ProjectInfoDTO struct {
@@ -36,7 +36,7 @@ func ToProjectDTO(project *types.Project, workspace *types.Workspace) ProjectDTO
 		Name:        project.Name,
 		Repository:  ToRepositoryDTO(project.Repository),
 		WorkspaceId: project.WorkspaceId,
-		AuthKey:     project.AuthKey,
+		ApiKey:      project.ApiKey,
 	}
 }
 
@@ -72,7 +72,7 @@ func ToProject(projectDTO ProjectDTO) *types.Project {
 		Name:        projectDTO.Name,
 		Repository:  ToRepository(projectDTO.Repository),
 		WorkspaceId: projectDTO.WorkspaceId,
-		AuthKey:     projectDTO.AuthKey,
+		ApiKey:      projectDTO.ApiKey,
 	}
 }
 

@@ -14,7 +14,7 @@ type Project struct {
 	Name        string      `json:"name"`
 	Repository  *Repository `json:"repository"`
 	WorkspaceId string      `json:"workspaceId"`
-	AuthKey     string      `json:"authKey"`
+	ApiKey      string      `json:"apiKey"`
 } // @name Project
 
 type WorkspaceProvisioner struct {

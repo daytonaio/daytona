@@ -118,7 +118,7 @@ var defaultConfig map[string]interface{} = map[string]interface{}{
 		"nameservers":        []interface{}{"1.1.1.1"},
 		"override_local_dns": true,
 	},
-	"ephemeral_node_inactivity_timeout": "30m",
+	"ephemeral_node_inactivity_timeout": "5m",
 	"grpc_allow_insecure":               false,
 	"grpc_listen_addr":                  "127.0.0.1:50443",
 	"ip_prefixes": []interface{}{

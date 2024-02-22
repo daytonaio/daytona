@@ -11,15 +11,29 @@ import (
 	"os"
 
 	"github.com/daytonaio/daytona/agent/config"
+	"github.com/daytonaio/daytona/cli/api"
+	"github.com/daytonaio/daytona/common/api_client"
 	"tailscale.com/tsnet"
 )
 
-func Start(c *config.Config) {
+func Start(c *config.Config) error {
 	flag.Parse()
 	s := new(tsnet.Server)
 	s.Hostname = fmt.Sprintf("%s-%s", os.Getenv("DAYTONA_WS_ID"), os.Getenv("DAYTONA_WS_PROJECT_NAME"))
 	s.ControlURL = c.Server.Url
-	s.AuthKey = c.Server.AuthKey
+	s.Ephemeral = true
+
+	apiClient, err := api.GetServerApiClient(nil)
+	if err != nil {
+		return err
+	}
+
+	networkKey, _, err := apiClient.ServerAPI.GenerateNetworkKeyExecute(api_client.ApiGenerateNetworkKeyRequest{})
+	if err != nil {
+		return err
+	}
+
+	s.AuthKey = *networkKey.Key
 
 	defer s.Close()
 	ln, err := s.Listen("tcp", ":80")
@@ -62,7 +76,7 @@ func Start(c *config.Config) {
 		}, true
 	})
 
-	log.Fatal(http.Serve(ln, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return http.Serve(ln, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Ok\n")
-	})))
+	}))
 }

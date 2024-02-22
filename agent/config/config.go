@@ -14,8 +14,8 @@ import (
 
 type Config struct {
 	Server struct {
-		Url     string `envconfig:"DAYTONA_SERVER_URL" validate:"required"`
-		AuthKey string `envconfig:"DAYTONA_SERVER_AUTH_KEY" validate:"required"`
+		Url    string `envconfig:"DAYTONA_SERVER_URL" validate:"required"`
+		ApiKey string `envconfig:"DAYTONA_SERVER_API_KEY" validate:"required"`
 	}
 }
 
