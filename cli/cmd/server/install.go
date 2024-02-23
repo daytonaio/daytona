@@ -40,7 +40,7 @@ var installCmd = &cobra.Command{
 		chosenProfileId := list_view.GetProfileIdFromPrompt(profilesList, c.ActiveProfileId, "Choose a profile to install on", true)
 
 		if chosenProfileId == list_view.NewProfileId {
-			chosenProfileId, err = cmd_profile.CreateProfile(c, nil, false, false)
+			chosenProfileId, err = cmd_profile.CreateProfile(c, nil, false, false, true)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -49,6 +49,13 @@ var installCmd = &cobra.Command{
 		chosenProfile, err := c.GetProfile(chosenProfileId)
 		if err != nil {
 			log.Fatal(err)
+		}
+
+		if chosenProfile.RemoteAuth == nil {
+			err = cmd_profile.EditProfile(c, false, &chosenProfile, true, true)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 
 		installDockerPrompt := true

@@ -22,6 +22,10 @@ var grayText = lipgloss.NewStyle().
 	Foreground(lipgloss.Color("#eeeeee"))
 
 func Render(info ProfileInfo, verb string) {
+	if info.ApiUrl == "" {
+		info.ApiUrl = "N/A - set by editing the profile later"
+	}
+
 	output := ""
 	output = grayText.Render("Profile ") + whiteText.Render(info.ProfileName) + grayText.Render(fmt.Sprintf(" %s", verb)) + "\n"
 	output += grayText.Render("Server URL: ") + whiteText.Render(info.ApiUrl)

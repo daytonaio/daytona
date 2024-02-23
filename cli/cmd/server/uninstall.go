@@ -40,7 +40,7 @@ var uninstallCmd = &cobra.Command{
 		chosenProfileId := list_view.GetProfileIdFromPrompt(profilesList, c.ActiveProfileId, "Choose a profile to uninstall from", true)
 
 		if chosenProfileId == list_view.NewProfileId {
-			chosenProfileId, err = cmd_profile.CreateProfile(c, nil, false, false)
+			chosenProfileId, err = cmd_profile.CreateProfile(c, nil, false, false, true)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -49,6 +49,13 @@ var uninstallCmd = &cobra.Command{
 		chosenProfile, err := c.GetProfile(chosenProfileId)
 		if err != nil {
 			log.Fatal(err)
+		}
+
+		if chosenProfile.RemoteAuth == nil {
+			err = cmd_profile.EditProfile(c, false, &chosenProfile, true, true)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 
 		views_util.RenderMainTitle("REMOTE UNINSTALLER")

@@ -42,27 +42,21 @@ var profileAddCmd = &cobra.Command{
 			ApiUrl:             apiUrlFlag,
 		}
 
-		if profileNameFlag == "" || serverHostnameFlag == "" || serverUserFlag == "" || provisionerFlag == "" || apiUrlFlag == "" || (serverPrivateKeyPathFlag == "" && serverPasswordFlag == "") {
-			_, err = CreateProfile(c, nil, true, true)
-			if err != nil {
-				log.Fatal(err)
-			}
-			return
+		if profileAddView.ProfileName != "" && profileAddView.ApiUrl != "" {
+			_, err = addProfile(profileAddView, c, true, true)
 		}
 
-		if serverPasswordFlag != "" {
-			profileAddView.RemoteSshPassword = serverPasswordFlag
-		} else if serverPrivateKeyPathFlag != "" {
-			profileAddView.RemoteSshPrivateKeyPath = serverPrivateKeyPathFlag
-		} else {
-			log.Fatal(errors.New("password or private key path must be provided"))
+		if profileNameFlag == "" || serverHostnameFlag == "" || serverUserFlag == "" || provisionerFlag == "" || (serverPrivateKeyPathFlag == "" && serverPasswordFlag == "") {
+			_, err = CreateProfile(c, nil, true, true, false)
 		}
 
-		addProfile(profileAddView, c, true, true)
+		if err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 
-func CreateProfile(c *config.Config, profileAddView *view.ProfileAddView, checkConnection bool, notify bool) (string, error) {
+func CreateProfile(c *config.Config, profileAddView *view.ProfileAddView, checkConnection, notify, forceRemoteAccess bool) (string, error) {
 	if profileAddView == nil {
 		profileAddView = &view.ProfileAddView{
 			ProfileName:             "",
@@ -76,7 +70,7 @@ func CreateProfile(c *config.Config, profileAddView *view.ProfileAddView, checkC
 		}
 	}
 
-	view.ProfileCreationView(c, profileAddView, false)
+	view.ProfileCreationView(c, profileAddView, false, forceRemoteAccess, false)
 
 	return addProfile(*profileAddView, c, checkConnection, notify)
 }
@@ -85,34 +79,37 @@ func addProfile(profileView view.ProfileAddView, c *config.Config, checkConnecti
 	profile := config.Profile{
 		Id:   util.GenerateIdFromName(profileView.ProfileName),
 		Name: profileView.ProfileName,
-		RemoteAuth: &config.RemoteAuth{
-			Port:           profileView.RemoteSshPort,
-			Hostname:       profileView.RemoteHostname,
-			User:           profileView.RemoteSshUser,
-			Password:       nil,
-			PrivateKeyPath: nil,
-		},
 		Api: config.ServerApi{
 			Url: profileView.ApiUrl,
 		},
 	}
 
-	if profileView.RemoteSshPassword != "" {
-		profile.RemoteAuth.Password = &profileView.RemoteSshPassword
-	} else if profileView.RemoteSshPrivateKeyPath != "" {
-		profile.RemoteAuth.PrivateKeyPath = &profileView.RemoteSshPrivateKeyPath
-	} else {
-		return "", errors.New("password or private key path must be provided")
+	if profile.Api.Url == "" {
+		profile.RemoteAuth = &config.RemoteAuth{
+			Port:           profileView.RemoteSshPort,
+			Hostname:       profileView.RemoteHostname,
+			User:           profileView.RemoteSshUser,
+			Password:       nil,
+			PrivateKeyPath: nil,
+		}
+
+		if profileView.RemoteSshPassword != "" {
+			profile.RemoteAuth.Password = &profileView.RemoteSshPassword
+		} else if profileView.RemoteSshPrivateKeyPath != "" {
+			profile.RemoteAuth.PrivateKeyPath = &profileView.RemoteSshPrivateKeyPath
+		} else {
+			return "", errors.New("password or private key path must be provided")
+		}
 	}
 
-	if checkConnection {
+	if checkConnection && profile.Api.Url == "" {
 		ignoreConnectionCheckPrompt := false
 		err := setDaytonaApiUrl(&profileView, profile)
 		if err != nil {
 			fmt.Println(err.Error())
 			view.IgnoreConnectionFailedCheck(&ignoreConnectionCheckPrompt, err.Error())
 			if !ignoreConnectionCheckPrompt {
-				view.ProfileCreationView(c, &profileView, false)
+				view.ProfileCreationView(c, &profileView, false, false, false)
 
 				return addProfile(profileView, c, true, notify)
 			}
@@ -149,7 +146,7 @@ func setDaytonaApiUrl(profileView *view.ProfileAddView, profile config.Profile) 
 
 	client, err := ssh.Dial("tcp", profile.RemoteAuth.Hostname+":"+strconv.Itoa(profile.RemoteAuth.Port), sshConfig)
 	if err != nil {
-		return errors.New("Failed to connect to the remote machine")
+		return errors.New("failed to connect to the remote machine")
 	}
 
 	installer := &remote_installer.RemoteInstaller{
@@ -160,7 +157,7 @@ func setDaytonaApiUrl(profileView *view.ProfileAddView, profile config.Profile) 
 
 	apiUrl, err := installer.GetApiUrl()
 	if err != nil {
-		return errors.New("Failed to execute command on remote machine")
+		return errors.New("failed to execute command on remote machine")
 	}
 
 	if apiUrl == "" {
