@@ -8,7 +8,6 @@ require (
 	github.com/charmbracelet/huh v0.2.3
 	github.com/charmbracelet/lipgloss v0.9.1
 	github.com/creack/pty v1.1.21
-	github.com/daytonaio/ssh-gateway v0.1.4
 	github.com/docker/docker v24.0.7+incompatible
 	github.com/fatedier/frp v0.54.0
 	github.com/gin-gonic/gin v1.9.1

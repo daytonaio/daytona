@@ -753,8 +753,6 @@ github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/daytonaio/ssh-gateway v0.1.4 h1:Eaq9JLWpuKqHh6OS3Fu+FVRwKFagF+CNaNzXt4UPww4=
-github.com/daytonaio/ssh-gateway v0.1.4/go.mod h1:52x6ZVWFaXWiYoTVV3wSSdOiHseQsJ0/DZ+U6gdknQ8=
 github.com/dblohm7/wingoes v0.0.0-20231025182615-65d8b4b5428f h1:c5mkOIXbHZVKGQaSEZZyLW9ORD+h4PT2TPF8IQPwyOs=
 github.com/dblohm7/wingoes v0.0.0-20231025182615-65d8b4b5428f/go.mod h1:6NCrWM5jRefaG7iN0iMShPalLsljHWBh9v1zxM2f8Xs=
 github.com/deckarep/golang-set/v2 v2.4.0 h1:DnfgWKdhvHM8Kihdw9fKWXd08EdsPiyoHsk5bfsmkNI=
