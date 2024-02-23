@@ -88,7 +88,14 @@ func (g *GitLabGitProvider) GetUserData() (GitUser, error) {
 
 	userId := strconv.Itoa(user.ID)
 
-	return GitUser{Id: userId, Username: user.Username}, nil
+	response := GitUser{
+		Id:       userId,
+		Username: user.Username,
+		Name:     user.Name,
+		Email:    user.Email,
+	}
+
+	return response, nil
 }
 
 func (g *GitLabGitProvider) getApiClient() *gitlab.Client {

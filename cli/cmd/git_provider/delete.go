@@ -42,14 +42,19 @@ var gitProviderDeleteCmd = &cobra.Command{
 			Token:    "",
 		}
 
+		gitProviderList := serverConfig.GitProviders
+
+		if len(gitProviderList) == 0 {
+			views_util.RenderInfoMessage("No git providers registered")
+			return
+		}
+
 		views_git_provider.GitProviderSelectionView(&gitProviderSelectView, serverConfig.GitProviders, true)
 
 		if gitProviderSelectView.Id == "" {
 			log.Fatal("Git provider id can not be blank")
 			return
 		}
-
-		gitProviderList := serverConfig.GitProviders
 
 		var providerExists bool
 
