@@ -74,17 +74,17 @@ func GetHostKey() (ssh.Signer, error) {
 
 func GetSshConfigFromProfile(chosenProfile *config.Profile) *ssh.ClientConfig {
 	sshConfig := &ssh.ClientConfig{
-		User:            chosenProfile.Auth.User,
+		User:            chosenProfile.RemoteAuth.User,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
-	if chosenProfile.Auth.Password != nil && *chosenProfile.Auth.Password != "" {
+	if chosenProfile.RemoteAuth.Password != nil && *chosenProfile.RemoteAuth.Password != "" {
 		sshConfig.Auth = []ssh.AuthMethod{
-			ssh.Password(*chosenProfile.Auth.Password),
+			ssh.Password(*chosenProfile.RemoteAuth.Password),
 		}
-	} else if chosenProfile.Auth.PrivateKeyPath != nil && *chosenProfile.Auth.PrivateKeyPath != "" {
+	} else if chosenProfile.RemoteAuth.PrivateKeyPath != nil && *chosenProfile.RemoteAuth.PrivateKeyPath != "" {
 
-		privateKeyContent, err := os.ReadFile(*chosenProfile.Auth.PrivateKeyPath)
+		privateKeyContent, err := os.ReadFile(*chosenProfile.RemoteAuth.PrivateKeyPath)
 		if err != nil {
 			log.Fatal(err)
 		}
