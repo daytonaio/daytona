@@ -19,7 +19,6 @@ var _ MappedNullable = &Project{}
 
 // Project struct for Project
 type Project struct {
-	AuthKey *string `json:"authKey,omitempty"`
 	Name *string `json:"name,omitempty"`
 	Repository *Repository `json:"repository,omitempty"`
 	WorkspaceId *string `json:"workspaceId,omitempty"`
@@ -40,38 +39,6 @@ func NewProject() *Project {
 func NewProjectWithDefaults() *Project {
 	this := Project{}
 	return &this
-}
-
-// GetAuthKey returns the AuthKey field value if set, zero value otherwise.
-func (o *Project) GetAuthKey() string {
-	if o == nil || IsNil(o.AuthKey) {
-		var ret string
-		return ret
-	}
-	return *o.AuthKey
-}
-
-// GetAuthKeyOk returns a tuple with the AuthKey field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *Project) GetAuthKeyOk() (*string, bool) {
-	if o == nil || IsNil(o.AuthKey) {
-		return nil, false
-	}
-	return o.AuthKey, true
-}
-
-// HasAuthKey returns a boolean if a field has been set.
-func (o *Project) HasAuthKey() bool {
-	if o != nil && !IsNil(o.AuthKey) {
-		return true
-	}
-
-	return false
-}
-
-// SetAuthKey gets a reference to the given string and assigns it to the AuthKey field.
-func (o *Project) SetAuthKey(v string) {
-	o.AuthKey = &v
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
@@ -180,9 +147,6 @@ func (o Project) MarshalJSON() ([]byte, error) {
 
 func (o Project) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.AuthKey) {
-		toSerialize["authKey"] = o.AuthKey
-	}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
 	}

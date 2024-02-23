@@ -398,7 +398,6 @@ components:
       type: object
     Project:
       example:
-        authKey: authKey
         name: name
         repository:
           owner: owner
@@ -410,8 +409,6 @@ components:
           url: url
         workspaceId: workspaceId
       properties:
-        authKey:
-          type: string
         name:
           type: string
         repository:
@@ -524,8 +521,7 @@ components:
           profile: profile
           name: name
         projects:
-        - authKey: authKey
-          name: name
+        - name: name
           repository:
             owner: owner
             path: path
@@ -535,8 +531,7 @@ components:
             sha: sha
             url: url
           workspaceId: workspaceId
-        - authKey: authKey
-          name: name
+        - name: name
           repository:
             owner: owner
             path: path
