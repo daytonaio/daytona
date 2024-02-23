@@ -1,13 +1,19 @@
 package types
 
+type GitUserData struct {
+	Name  string
+	Email string
+} // @name GitUserData
+
 type Repository struct {
-	Url      string `json:"url"`
-	Branch   string `json:"branch,omitempty"`
-	Sha      string `json:"sha"`
-	Owner    string `json:"owner"`
-	PrNumber uint32 `json:"prNumber,omitempty"`
-	Source   string `json:"source"`
-	Path     string `json:"path,omitempty"`
+	Url         string       `json:"url"`
+	Branch      string       `json:"branch,omitempty"`
+	Sha         string       `json:"sha"`
+	Owner       string       `json:"owner"`
+	PrNumber    uint32       `json:"prNumber,omitempty"`
+	Source      string       `json:"source"`
+	Path        string       `json:"path,omitempty"`
+	GitUserData *GitUserData `json:"-"`
 } // @name Repository
 
 type Project struct {

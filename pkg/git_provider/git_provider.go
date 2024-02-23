@@ -18,6 +18,8 @@ type GitProvider interface {
 type GitUser struct {
 	Id       string
 	Username string
+	Name     string
+	Email    string
 }
 
 type GitNamespace struct {
