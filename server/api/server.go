@@ -16,6 +16,7 @@ import (
 
 	"github.com/daytonaio/daytona/server/api/docs"
 
+	log_controller "github.com/daytonaio/daytona/server/api/controllers/log"
 	"github.com/daytonaio/daytona/server/api/controllers/plugin"
 	"github.com/daytonaio/daytona/server/api/controllers/server"
 	"github.com/daytonaio/daytona/server/api/controllers/workspace"
@@ -82,6 +83,11 @@ func Start() error {
 		pluginController.GET("/agent-service", plugin.ListAgentServicePlugins)
 		pluginController.POST("/provisioner/:provisioner/uninstall", plugin.UninstallProvisionerPlugin)
 		pluginController.POST("/agent-service/:agent-service/uninstall", plugin.UninstallAgentServicePlugin)
+	}
+
+	logController := router.Group("/log")
+	{
+		logController.GET("/ws", log_controller.ReadServerLog)
 	}
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))

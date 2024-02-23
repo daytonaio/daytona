@@ -8,20 +8,21 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type LogFormatter struct {
+var LogFilePath *string
+
+type logFormatter struct {
 	textFormater *log.TextFormatter
-	LogFilePath  *string
 }
 
-func (f *LogFormatter) Format(entry *log.Entry) ([]byte, error) {
+func (f *logFormatter) Format(entry *log.Entry) ([]byte, error) {
 	formatted, err := f.textFormater.Format(entry)
 	if err != nil {
 		return nil, err
 	}
 
-	if f.LogFilePath != nil {
+	if LogFilePath != nil {
 		// Write to file
-		file, err := os.OpenFile(*f.LogFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		file, err := os.OpenFile(*LogFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			return nil, err
 		}
@@ -43,14 +44,14 @@ func Init() error {
 	}
 
 	filePath := path.Join(configDir, "daytona.log")
+	LogFilePath = &filePath
 
-	if _, err := os.Stat(filePath); err == nil {
-		os.Remove(filePath)
+	if _, err := os.Stat(*LogFilePath); err == nil {
+		os.Remove(*LogFilePath)
 	}
 
-	logFormatter := &LogFormatter{
+	logFormatter := &logFormatter{
 		textFormater: new(log.TextFormatter),
-		LogFilePath:  &filePath,
 	}
 
 	log.SetFormatter(logFormatter)
