@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/daytonaio/daytona/cli/cmd"
-	"github.com/daytonaio/daytona/internal/util"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -32,7 +31,6 @@ func main() {
 	}
 
 	log.SetLevel(logLevel)
-	log.SetFormatter(new(util.GRPCErrorFormatter))
 
 	err := os.MkdirAll("/tmp/daytona", 0755)
 	if err != nil {
