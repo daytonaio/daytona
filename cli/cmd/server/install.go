@@ -228,7 +228,7 @@ var installCmd = &cobra.Command{
 
 		// Recreate the ssh client
 
-		client, err = installer.WaitForRemoteServerToStart(chosenProfile.Hostname, chosenProfile.Port, sshConfig)
+		client, err = installer.WaitForRemoteServerToStart(chosenProfile.RemoteAuth.Hostname, chosenProfile.RemoteAuth.Port, sshConfig)
 		if err != nil {
 			log.Fatal(err)
 		}
