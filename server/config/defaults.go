@@ -7,7 +7,6 @@ import (
 	"github.com/daytonaio/daytona/common/types"
 )
 
-const workspaceKeyFileName = "workspace_key"
 const defaultPluginRegistryUrl = "https://download.daytona.io/daytona/plugins"
 const defaultServerDownloadUrl = "https://download.daytona.io/daytona/get-server.sh"
 const defaultHeadscalePort = 3001

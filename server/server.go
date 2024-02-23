@@ -16,7 +16,6 @@ import (
 	"github.com/daytonaio/daytona/server/config"
 	"github.com/daytonaio/daytona/server/frpc"
 	"github.com/daytonaio/daytona/server/headscale"
-	"github.com/daytonaio/daytona/server/ssh_gateway"
 	"github.com/hashicorp/go-plugin"
 
 	log "github.com/sirupsen/logrus"
@@ -35,17 +34,6 @@ func Start() error {
 		return err
 	}
 
-	_, err = config.GetWorkspaceKey()
-	if os.IsNotExist(err) {
-		log.Info("Generating workspace key")
-		err = config.GenerateWorkspaceKey()
-		if err != nil {
-			return err
-		}
-	} else if err != nil {
-		return err
-	}
-
 	err = downloadDefaultPlugins()
 	if err != nil {
 		return err
@@ -59,12 +47,6 @@ func Start() error {
 	if err != nil {
 		return err
 	}
-
-	go func() {
-		if err := ssh_gateway.Start(); err != nil {
-			log.Error(err)
-		}
-	}()
 
 	go func() {
 		if err := frpc.ConnectServer(); err != nil {
