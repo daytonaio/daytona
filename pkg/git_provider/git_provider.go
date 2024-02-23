@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/daytonaio/daytona/cli/config"
-	"github.com/daytonaio/daytona/common/api_client"
+	"github.com/daytonaio/daytona/common/types"
 )
 
 const personalNamespaceId = "<PERSONAL>"
@@ -18,6 +18,8 @@ type GitProvider interface {
 type GitUser struct {
 	Id       string
 	Username string
+	Name     string
+	Email    string
 }
 
 type GitNamespace struct {
@@ -31,34 +33,34 @@ type GitRepository struct {
 	Url      string
 }
 
-func GetGitProvider(providerId string, gitProviders []api_client.GitProvider) (GitProvider, error) {
-	var chosenProvider *api_client.GitProvider
+func GetGitProvider(providerId string, gitProviders []types.GitProvider) GitProvider {
+	var chosenProvider *types.GitProvider
 	for _, gitProvider := range gitProviders {
-		if *gitProvider.Id == providerId {
+		if gitProvider.Id == providerId {
 			chosenProvider = &gitProvider
 		}
 	}
 
 	if chosenProvider == nil {
-		return nil, errors.New("provider not found")
+		return nil
 	}
 
 	switch providerId {
 	case "github":
 		return &GitHubGitProvider{
-			token: *chosenProvider.Token,
-		}, nil
+			token: chosenProvider.Token,
+		}
 	case "gitlab":
 		return &GitLabGitProvider{
-			token: *chosenProvider.Token,
-		}, nil
+			token: chosenProvider.Token,
+		}
 	case "bitbucket":
 		return &BitbucketGitProvider{
-			username: *chosenProvider.Username,
-			token:    *chosenProvider.Token,
-		}, nil
+			username: chosenProvider.Username,
+			token:    chosenProvider.Token,
+		}
 	default:
-		return nil, errors.New("provider not found")
+		return nil
 	}
 }
 

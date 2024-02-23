@@ -79,7 +79,24 @@ func (g *BitbucketGitProvider) GetUserData() (GitUser, error) {
 		return GitUser{}, err
 	}
 
-	return GitUser{Username: user.Username}, nil
+	response := GitUser{}
+	response.Id = user.AccountId
+	response.Username = user.Username
+	response.Name = user.DisplayName
+
+	emails, err := client.User.Emails()
+	if err != nil {
+		return response, err
+	}
+
+	if emails != nil {
+		userEmail, ok := emails.(map[string]interface{})
+		if ok {
+			response.Email = userEmail["values"].([]interface{})[0].(map[string]interface{})["email"].(string)
+		}
+	}
+
+	return response, nil
 }
 
 func (g *BitbucketGitProvider) getApiClient() *bitbucket.Client {
