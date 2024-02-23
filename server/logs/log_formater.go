@@ -12,6 +12,7 @@ var LogFilePath *string
 
 type logFormatter struct {
 	textFormater *log.TextFormatter
+	file         *os.File
 }
 
 func (f *logFormatter) Format(entry *log.Entry) ([]byte, error) {
@@ -22,13 +23,7 @@ func (f *logFormatter) Format(entry *log.Entry) ([]byte, error) {
 
 	if LogFilePath != nil {
 		// Write to file
-		file, err := os.OpenFile(*LogFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			return nil, err
-		}
-		defer file.Close()
-
-		_, err = file.Write(formatted)
+		_, err = f.file.Write(formatted)
 		if err != nil {
 			return nil, err
 		}
@@ -46,12 +41,14 @@ func Init() error {
 	filePath := path.Join(configDir, "daytona.log")
 	LogFilePath = &filePath
 
-	if _, err := os.Stat(*LogFilePath); err == nil {
-		os.Remove(*LogFilePath)
+	file, err := os.OpenFile(*LogFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
 	}
 
 	logFormatter := &logFormatter{
 		textFormater: new(log.TextFormatter),
+		file:         file,
 	}
 
 	log.SetFormatter(logFormatter)

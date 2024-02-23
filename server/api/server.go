@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/server/api/docs"
+	"github.com/daytonaio/daytona/server/api/middlewares"
 
 	log_controller "github.com/daytonaio/daytona/server/api/controllers/log"
 	"github.com/daytonaio/daytona/server/api/controllers/plugin"
@@ -39,6 +40,8 @@ func Start() error {
 	docs.SwaggerInfo.Title = "Daytona Server API"
 
 	router = gin.Default()
+
+	router.Use(middlewares.LoggingMiddleware())
 
 	// if BaseConfig.Production {
 	// 	gin.SetMode(gin.ReleaseMode)
