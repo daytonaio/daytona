@@ -555,9 +555,6 @@ const docTemplate = `{
         "Project": {
             "type": "object",
             "properties": {
-                "authKey": {
-                    "type": "string"
-                },
                 "name": {
                     "type": "string"
                 },
