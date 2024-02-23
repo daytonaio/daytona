@@ -87,11 +87,22 @@ func (g *GitHubGitProvider) GetUserData() (GitUser, error) {
 		return GitUser{}, err
 	}
 
-	response := GitUser{
-		Id:       strconv.FormatInt(*user.ID, 10),
-		Username: *user.Login,
-		Name:     *user.Name,
-		Email:    *user.Email,
+	response := GitUser{}
+
+	if user.ID != nil {
+		response.Id = strconv.FormatInt(*user.ID, 10)
+	}
+
+	if user.Name != nil {
+		response.Name = *user.Name
+	}
+
+	if user.Login != nil {
+		response.Username = *user.Login
+	}
+
+	if user.Email != nil {
+		response.Email = *user.Email
 	}
 
 	return response, nil

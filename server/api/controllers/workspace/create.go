@@ -8,8 +8,10 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/common/types"
+	"github.com/daytonaio/daytona/pkg/git_provider"
 	provisioner_manager "github.com/daytonaio/daytona/plugins/provisioner/manager"
 	"github.com/daytonaio/daytona/server/api/controllers/workspace/dto"
+	"github.com/daytonaio/daytona/server/config"
 	"github.com/daytonaio/daytona/server/db"
 	"github.com/daytonaio/daytona/server/provisioner"
 	"github.com/gin-gonic/gin"
@@ -91,13 +93,37 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 	}
 
 	w.Projects = []*types.Project{}
+	serverConfig, err := config.GetConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	for _, repo := range createWorkspaceDto.Repositories {
+		gitUserData := &types.GitUserData{}
+		userGitProviders := serverConfig.GitProviders
+
+		if len(userGitProviders) > 0 {
+			providerId := getGitProviderIdFromUrl(repo)
+			gitProvider, err := git_provider.GetGitProviderServer(providerId, userGitProviders)
+			if err != nil {
+				return nil, err
+			}
+			if gitProvider != nil {
+				gitUser, err := gitProvider.GetUserData()
+				if err != nil {
+					return nil, err
+				}
+				gitUserData.Name = gitUser.Name
+				gitUserData.Email = gitUser.Email
+			}
+		}
+
 		// TODO: generate API key for project
 		project := &types.Project{
 			Name: strings.ToLower(path.Base(repo)),
 			Repository: &types.Repository{
-				Url: repo,
+				Url:         repo,
+				GitUserData: gitUserData,
 			},
 			WorkspaceId: w.Id,
 			ApiKey:      "TODO",
@@ -106,4 +132,16 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 	}
 
 	return w, nil
+}
+
+func getGitProviderIdFromUrl(url string) string {
+	if strings.Contains(url, "github.com") {
+		return "github"
+	} else if strings.Contains(url, "gitlab.com") {
+		return "gitlab"
+	} else if strings.Contains(url, "bitbucket.org") {
+		return "bitbucket"
+	} else {
+		return ""
+	}
 }
