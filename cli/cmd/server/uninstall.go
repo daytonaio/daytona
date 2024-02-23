@@ -40,7 +40,7 @@ var uninstallCmd = &cobra.Command{
 		chosenProfileId := list_view.GetProfileIdFromPrompt(profilesList, c.ActiveProfileId, "Choose a profile to uninstall from", true)
 
 		if chosenProfileId == list_view.NewProfileId {
-			chosenProfileId, err = cmd_profile.CreateProfile(c, nil, false, false)
+			chosenProfileId, err = cmd_profile.CreateProfile(c, nil, false, false, true)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -49,6 +49,13 @@ var uninstallCmd = &cobra.Command{
 		chosenProfile, err := c.GetProfile(chosenProfileId)
 		if err != nil {
 			log.Fatal(err)
+		}
+
+		if chosenProfile.RemoteAuth == nil {
+			err = cmd_profile.EditProfile(c, false, &chosenProfile, true, true)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 
 		views_util.RenderMainTitle("REMOTE UNINSTALLER")
@@ -61,7 +68,7 @@ var uninstallCmd = &cobra.Command{
 		s.Start()
 		defer s.Stop()
 
-		client, err = ssh.Dial("tcp", chosenProfile.Hostname+":"+strconv.Itoa(chosenProfile.Port), sshConfig)
+		client, err = ssh.Dial("tcp", chosenProfile.RemoteAuth.Hostname+":"+strconv.Itoa(chosenProfile.RemoteAuth.Port), sshConfig)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -97,9 +104,9 @@ var uninstallCmd = &cobra.Command{
 
 		var sessionPassword string
 
-		if sudoPasswordRequired && (chosenProfile.Auth.Password == nil || *chosenProfile.Auth.Password == "") {
-			if chosenProfile.Auth.Password == nil || *chosenProfile.Auth.Password == "" {
-				fmt.Printf("Enter password for user %s:", chosenProfile.Auth.User)
+		if sudoPasswordRequired && (chosenProfile.RemoteAuth.Password == nil || *chosenProfile.RemoteAuth.Password == "") {
+			if chosenProfile.RemoteAuth.Password == nil || *chosenProfile.RemoteAuth.Password == "" {
+				fmt.Printf("Enter password for user %s:", chosenProfile.RemoteAuth.User)
 				password, err := term.ReadPassword(0)
 				fmt.Println()
 				if err != nil {
@@ -107,7 +114,7 @@ var uninstallCmd = &cobra.Command{
 				}
 				sessionPassword = string(password)
 			} else {
-				sessionPassword = *chosenProfile.Auth.Password
+				sessionPassword = *chosenProfile.RemoteAuth.Password
 			}
 		}
 		installer.Password = sessionPassword
