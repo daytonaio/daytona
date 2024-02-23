@@ -34,7 +34,7 @@ type GitRepository struct {
 	Url      string
 }
 
-func GetGitProvider(providerId string, gitProviders []api_client.GitProvider) (GitProvider, error) {
+func GetGitProviderFront(providerId string, gitProviders []api_client.GitProvider) (GitProvider, error) {
 	var chosenProvider *api_client.GitProvider
 	for _, gitProvider := range gitProviders {
 		if *gitProvider.Id == providerId {
@@ -65,7 +65,7 @@ func GetGitProvider(providerId string, gitProviders []api_client.GitProvider) (G
 	}
 }
 
-func GetGitProviderServer(providerId string, gitProviders []types.GitProvider) (GitProvider, error) {
+func GetGitProvider(providerId string, gitProviders []types.GitProvider) GitProvider {
 	var chosenProvider *types.GitProvider
 	for _, gitProvider := range gitProviders {
 		if gitProvider.Id == providerId {
@@ -74,25 +74,25 @@ func GetGitProviderServer(providerId string, gitProviders []types.GitProvider) (
 	}
 
 	if chosenProvider == nil {
-		return nil, errors.New("provider not found")
+		return nil
 	}
 
 	switch providerId {
 	case "github":
 		return &GitHubGitProvider{
 			token: chosenProvider.Token,
-		}, nil
+		}
 	case "gitlab":
 		return &GitLabGitProvider{
 			token: chosenProvider.Token,
-		}, nil
+		}
 	case "bitbucket":
 		return &BitbucketGitProvider{
 			username: chosenProvider.Username,
 			token:    chosenProvider.Token,
-		}, nil
+		}
 	default:
-		return nil, errors.New("provider not found")
+		return nil
 	}
 }
 

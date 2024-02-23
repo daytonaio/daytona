@@ -102,28 +102,16 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 	for _, repo := range createWorkspaceDto.Repositories {
 		var gitUserData *types.GitUserData
 		providerId := getGitProviderIdFromUrl(repo)
+		gitProvider := git_provider.GetGitProvider(providerId, userGitProviders)
 
-		var providerCredentialsExist bool
-		for _, gitProvider := range userGitProviders {
-			if gitProvider.Id == providerId {
-				providerCredentialsExist = true
-			}
-		}
-
-		if providerCredentialsExist {
-			gitProvider, err := git_provider.GetGitProviderServer(providerId, userGitProviders)
+		if gitProvider != nil {
+			gitUser, err := gitProvider.GetUserData()
 			if err != nil {
 				return nil, err
 			}
-			if gitProvider != nil {
-				gitUser, err := gitProvider.GetUserData()
-				if err != nil {
-					return nil, err
-				}
-				gitUserData = &types.GitUserData{
-					Name:  gitUser.Name,
-					Email: gitUser.Email,
-				}
+			gitUserData = &types.GitUserData{
+				Name:  gitUser.Name,
+				Email: gitUser.Email,
 			}
 		}
 
