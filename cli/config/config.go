@@ -11,7 +11,9 @@ import (
 	"path"
 )
 
-type ProfileAuth struct {
+type RemoteAuth struct {
+	Hostname       string  `json:"hostname"`
+	Port           int     `json:"port"`
 	User           string  `json:"user"`
 	Password       *string `json:"password"`
 	PrivateKeyPath *string `json:"privateKeyPath"`
@@ -24,9 +26,7 @@ type ServerApi struct {
 type Profile struct {
 	Id                 string      `json:"id"`
 	Name               string      `json:"name"`
-	Hostname           string      `json:"hostname"`
-	Port               int         `json:"port"`
-	Auth               ProfileAuth `json:"auth"`
+	RemoteAuth         *RemoteAuth `json:"remoteAuth"`
 	DefaultProvisioner string      `json:"defaultProvisioner"`
 	Api                ServerApi   `json:"api"`
 }
@@ -167,14 +167,8 @@ func getDefaultConfig() Config {
 		ActiveProfileId: "default",
 		Profiles: []Profile{
 			{
-				Id:       "default",
-				Name:     "default",
-				Hostname: "",
-				Auth: ProfileAuth{
-					User:           "",
-					Password:       nil,
-					PrivateKeyPath: nil,
-				},
+				Id:                 "default",
+				Name:               "default",
 				DefaultProvisioner: "docker-provisioner",
 				Api: ServerApi{
 					Url: "http://localhost:3000",
