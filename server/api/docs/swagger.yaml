@@ -52,8 +52,6 @@ definitions:
     type: object
   Project:
     properties:
-      authKey:
-        type: string
       name:
         type: string
       repository:

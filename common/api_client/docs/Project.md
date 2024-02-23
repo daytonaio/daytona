@@ -4,7 +4,6 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**AuthKey** | Pointer to **string** |  | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
 **Repository** | Pointer to [**Repository**](Repository.md) |  | [optional] 
 **WorkspaceId** | Pointer to **string** |  | [optional] 
@@ -27,31 +26,6 @@ will change when the set of required properties is changed
 NewProjectWithDefaults instantiates a new Project object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
-
-### GetAuthKey
-
-`func (o *Project) GetAuthKey() string`
-
-GetAuthKey returns the AuthKey field if non-nil, zero value otherwise.
-
-### GetAuthKeyOk
-
-`func (o *Project) GetAuthKeyOk() (*string, bool)`
-
-GetAuthKeyOk returns a tuple with the AuthKey field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetAuthKey
-
-`func (o *Project) SetAuthKey(v string)`
-
-SetAuthKey sets AuthKey field to given value.
-
-### HasAuthKey
-
-`func (o *Project) HasAuthKey() bool`
-
-HasAuthKey returns a boolean if a field has been set.
 
 ### GetName
 
