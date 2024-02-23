@@ -15,7 +15,9 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/server/api/docs"
+	"github.com/daytonaio/daytona/server/api/middlewares"
 
+	log_controller "github.com/daytonaio/daytona/server/api/controllers/log"
 	"github.com/daytonaio/daytona/server/api/controllers/plugin"
 	"github.com/daytonaio/daytona/server/api/controllers/server"
 	"github.com/daytonaio/daytona/server/api/controllers/workspace"
@@ -38,6 +40,8 @@ func Start() error {
 	docs.SwaggerInfo.Title = "Daytona Server API"
 
 	router = gin.Default()
+
+	router.Use(middlewares.LoggingMiddleware())
 
 	// if BaseConfig.Production {
 	// 	gin.SetMode(gin.ReleaseMode)
@@ -82,6 +86,11 @@ func Start() error {
 		pluginController.GET("/agent-service", plugin.ListAgentServicePlugins)
 		pluginController.POST("/provisioner/:provisioner/uninstall", plugin.UninstallProvisionerPlugin)
 		pluginController.POST("/agent-service/:agent-service/uninstall", plugin.UninstallAgentServicePlugin)
+	}
+
+	logController := router.Group("/log")
+	{
+		logController.GET("/ws", log_controller.ReadServerLog)
 	}
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))

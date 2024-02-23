@@ -16,6 +16,7 @@ import (
 	"github.com/daytonaio/daytona/server/config"
 	"github.com/daytonaio/daytona/server/frpc"
 	"github.com/daytonaio/daytona/server/headscale"
+	"github.com/daytonaio/daytona/server/logs"
 	"github.com/hashicorp/go-plugin"
 
 	log "github.com/sirupsen/logrus"
@@ -27,6 +28,11 @@ type Self struct {
 }
 
 func Start() error {
+	err := logs.Init()
+	if err != nil {
+		return err
+	}
+
 	log.Info("Starting Daytona server")
 
 	c, err := config.GetConfig()
