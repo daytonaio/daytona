@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/daytonaio/daytona/common/api_client"
+	"github.com/daytonaio/daytona/common/types"
 	"github.com/daytonaio/daytona/internal/util"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -99,7 +100,22 @@ var CreateCmd = &cobra.Command{
 
 			views_util.RenderMainTitle("WORKSPACE CREATION")
 
-			workspaceName, repos, err = wizard_view.GetCreationDataFromPrompt(workspaceNames, serverConfig.GitProviders, manual)
+			var gitProviderList []types.GitProvider
+			for _, serverGitProvider := range serverConfig.GitProviders {
+				var gitProvider types.GitProvider
+				if serverGitProvider.Id != nil {
+					gitProvider.Id = *serverGitProvider.Id
+				}
+				if serverGitProvider.Username != nil {
+					gitProvider.Username = *serverGitProvider.Username
+				}
+				if serverGitProvider.Token != nil {
+					gitProvider.Token = *serverGitProvider.Token
+				}
+				gitProviderList = append(gitProviderList, gitProvider)
+			}
+
+			workspaceName, repos, err = wizard_view.GetCreationDataFromPrompt(workspaceNames, gitProviderList, manual)
 			if err != nil {
 				log.Fatal(err)
 				return

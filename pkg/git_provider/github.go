@@ -2,6 +2,7 @@ package git_provider
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
@@ -86,7 +87,25 @@ func (g *GitHubGitProvider) GetUserData() (GitUser, error) {
 		return GitUser{}, err
 	}
 
-	return GitUser{Username: *user.Login}, nil
+	response := GitUser{}
+
+	if user.ID != nil {
+		response.Id = strconv.FormatInt(*user.ID, 10)
+	}
+
+	if user.Name != nil {
+		response.Name = *user.Name
+	}
+
+	if user.Login != nil {
+		response.Username = *user.Login
+	}
+
+	if user.Email != nil {
+		response.Email = *user.Email
+	}
+
+	return response, nil
 }
 
 func (g *GitHubGitProvider) getApiClient() *github.Client {
