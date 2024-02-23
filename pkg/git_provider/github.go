@@ -44,16 +44,16 @@ func (g *GitHubGitProvider) GetNamespaces() ([]GitNamespace, error) {
 func (g *GitHubGitProvider) GetRepositories(namespace string) ([]GitRepository, error) {
 	client := g.getApiClient()
 	var response []GitRepository
-	var query string
+	query := "fork:true "
 
 	if namespace == personalNamespaceId {
 		user, err := g.GetUserData()
 		if err != nil {
 			return nil, err
 		}
-		query = "user:" + user.Username
+		query += "user:" + user.Username
 	} else {
-		query = "org:" + namespace
+		query += "org:" + namespace
 	}
 
 	repoList, _, err := client.Search.Repositories(context.Background(), query, &github.SearchOptions{
