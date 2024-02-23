@@ -60,6 +60,7 @@ func GitProviderSelectionView(gitProviderAddView *GitProviderSelectView, userGit
 			huh.NewInput().
 				Title("Personal access token").
 				Value(&gitProviderAddView.Token).
+				Password(true).
 				Validate(func(str string) error {
 					if str == "" {
 						return errors.New("token can not be blank")
