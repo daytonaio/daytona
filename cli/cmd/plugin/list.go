@@ -36,9 +36,9 @@ func getPluginList() ([]list_view.PluginViewDTO, error) {
 	plugins := []list_view.PluginViewDTO{}
 	ctx := context.Background()
 
-	provisionerPluginList, _, err := apiClient.PluginAPI.ListProvisionerPlugins(ctx).Execute()
+	provisionerPluginList, res, err := apiClient.PluginAPI.ListProvisionerPlugins(ctx).Execute()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(api.HandleErrorResponse(res, err))
 	}
 
 	for _, plugin := range provisionerPluginList {
@@ -49,9 +49,9 @@ func getPluginList() ([]list_view.PluginViewDTO, error) {
 		})
 	}
 
-	agentServicePluginList, _, err := apiClient.PluginAPI.ListAgentServicePlugins(ctx).Execute()
+	agentServicePluginList, res, err := apiClient.PluginAPI.ListAgentServicePlugins(ctx).Execute()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(api.HandleErrorResponse(res, err))
 	}
 
 	for _, plugin := range agentServicePluginList {

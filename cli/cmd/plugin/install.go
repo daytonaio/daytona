@@ -25,9 +25,9 @@ var pluginInstallCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		serverConfig, _, err := apiClient.ServerAPI.GetConfigExecute(api_client.ApiGetConfigRequest{})
+		serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(api_client.ApiGetConfigRequest{})
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(api.HandleErrorResponse(res, err))
 		}
 
 		pluginsManifest, err := plugin_manager.GetPluginsManifest(*serverConfig.PluginRegistryUrl)
@@ -46,10 +46,13 @@ var pluginInstallCmd = &cobra.Command{
 
 		if pluginToInstall.Type == list_view.PluginTypeProvisioner {
 			downloadUrls := convertToStringMap(pluginsManifest.ProvisionerPlugins[pluginToInstall.Name].Versions[pluginToInstall.Version].DownloadUrls)
-			_, err = apiClient.PluginAPI.InstallProvisionerPluginExecute(api_client.ApiInstallProvisionerPluginRequest{}.Plugin(api_client.InstallPluginRequest{
+			res, err = apiClient.PluginAPI.InstallProvisionerPluginExecute(api_client.ApiInstallProvisionerPluginRequest{}.Plugin(api_client.InstallPluginRequest{
 				Name:         &pluginToInstall.Name,
 				DownloadUrls: &downloadUrls,
 			}))
+			if err != nil {
+				log.Fatal(api.HandleErrorResponse(res, err))
+			}
 		}
 		// else if pluginToInstall.Type == list_view.PluginTypeAgentService {
 		// 	_, err = pluginsClient.InstallAgentServicePlugin(ctx, &proto.InstallPluginRequest{

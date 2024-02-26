@@ -1,10 +1,12 @@
 package plugin
 
 import (
+	"fmt"
+	"net/http"
+
 	agent_service_manager "github.com/daytonaio/daytona/plugins/agent_service/manager"
 	provisioner_manager "github.com/daytonaio/daytona/plugins/provisioner/manager"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 )
 
 // UninstallProvisionerPlugin godoc
@@ -23,8 +25,7 @@ func UninstallProvisionerPlugin(ctx *gin.Context) {
 
 	err := provisioner_manager.UninstallProvisioner(provisioner)
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to uninstall provisioner: %s", err.Error()))
 		return
 	}
 
@@ -47,8 +48,7 @@ func UninstallAgentServicePlugin(ctx *gin.Context) {
 
 	err := agent_service_manager.UninstallAgentService(agentService)
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to uninstall agent service: %s", err.Error()))
 		return
 	}
 

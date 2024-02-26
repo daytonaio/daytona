@@ -34,14 +34,14 @@ func GetTailscaleConn(profile *config.Profile) (*tsnet.Server, error) {
 		return nil, err
 	}
 
-	serverConfig, _, err := apiClient.ServerAPI.GetConfigExecute(api_client.ApiGetConfigRequest{})
+	serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(api_client.ApiGetConfigRequest{})
 	if err != nil {
-		return nil, err
+		return nil, api.HandleErrorResponse(res, err)
 	}
 
-	networkKey, _, err := apiClient.ServerAPI.GenerateNetworkKeyExecute(api_client.ApiGenerateNetworkKeyRequest{})
+	networkKey, res, err := apiClient.ServerAPI.GenerateNetworkKeyExecute(api_client.ApiGenerateNetworkKeyRequest{})
 	if err != nil {
-		return nil, err
+		return nil, api.HandleErrorResponse(res, err)
 	}
 
 	cliId := uuid.New().String()

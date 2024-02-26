@@ -2,6 +2,8 @@ package workspace
 
 import (
 	"errors"
+	"fmt"
+	"net/http"
 
 	"github.com/daytonaio/daytona/common/types"
 	"github.com/daytonaio/daytona/server/db"
@@ -26,8 +28,7 @@ func GetWorkspaceInfo(ctx *gin.Context) {
 
 	w, err := db.FindWorkspace(workspaceId)
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		ctx.AbortWithError(http.StatusNotFound, errors.New("workspace not found"))
 		return
 	}
 
@@ -35,8 +36,7 @@ func GetWorkspaceInfo(ctx *gin.Context) {
 
 	workspaceInfo, err := provisioner.GetWorkspaceInfo(w)
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get workspace info: %s", err.Error()))
 		return
 	}
 
@@ -54,11 +54,9 @@ func GetWorkspaceInfo(ctx *gin.Context) {
 //
 //	@id				ListWorkspaces
 func ListWorkspaces(ctx *gin.Context) {
-
 	workspaces, err := db.ListWorkspaces()
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		ctx.AbortWithError(http.StatusInternalServerError, errors.New("failed to list workspaces"))
 		return
 	}
 
@@ -67,8 +65,7 @@ func ListWorkspaces(ctx *gin.Context) {
 	for _, workspace := range workspaces {
 		workspaceInfo, err := provisioner.GetWorkspaceInfo(workspace)
 		if err != nil {
-			log.Error(err)
-			ctx.JSON(500, gin.H{"error": err.Error()})
+			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get workspace info for %s", workspace.Name))
 			return
 		}
 
@@ -93,8 +90,7 @@ func RemoveWorkspace(ctx *gin.Context) {
 
 	w, err := db.FindWorkspace(workspaceId)
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		ctx.AbortWithError(http.StatusNotFound, errors.New("workspace not found"))
 		return
 	}
 
@@ -102,15 +98,13 @@ func RemoveWorkspace(ctx *gin.Context) {
 
 	err = provisioner.DestroyWorkspace(w)
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to destroy workspace: %s", err.Error()))
 		return
 	}
 
 	err = db.DeleteWorkspace(w)
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to delete workspace: %s", err.Error()))
 		return
 	}
 
