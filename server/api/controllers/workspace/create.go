@@ -2,6 +2,8 @@ package workspace
 
 import (
 	"errors"
+	"fmt"
+	"net/http"
 	"path"
 	"regexp"
 	"strings"
@@ -33,21 +35,19 @@ func CreateWorkspace(ctx *gin.Context) {
 	var createWorkspaceDto dto.CreateWorkspace
 	err := ctx.BindJSON(&createWorkspaceDto)
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(400, gin.H{"err": err.Error()})
+		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %s", err.Error()))
 		return
 	}
 
 	_, err = db.FindWorkspace(createWorkspaceDto.Name)
 	if err == nil {
-		ctx.JSON(400, gin.H{"err": "workspace already exists"})
+		ctx.AbortWithError(http.StatusConflict, errors.New("workspace already exists"))
 		return
 	}
 
 	w, err := newWorkspace(createWorkspaceDto)
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"err": err.Error()})
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to initialize workspace: %s", err.Error()))
 		return
 	}
 
@@ -56,14 +56,12 @@ func CreateWorkspace(ctx *gin.Context) {
 
 	err = provisioner.CreateWorkspace(w)
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"err": err.Error()})
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to create workspace: %s", err.Error()))
 		return
 	}
 	err = provisioner.StartWorkspace(w)
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"err": err.Error()})
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to start workspace: %s", err.Error()))
 		return
 	}
 	time.Sleep(100 * time.Millisecond)

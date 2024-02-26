@@ -23,16 +23,16 @@ var configureCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		apiServerConfig, _, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
+		apiServerConfig, res, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(api.HandleErrorResponse(res, err))
 		}
 
 		apiServerConfig = view.ConfigurationForm(apiServerConfig)
 
-		_, _, err = apiClient.ServerAPI.SetConfig(context.Background()).Config(*apiServerConfig).Execute()
+		_, res, err = apiClient.ServerAPI.SetConfig(context.Background()).Config(*apiServerConfig).Execute()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(api.HandleErrorResponse(res, err))
 		}
 
 		views_util.RenderInfoMessage("Server configuration updated. You might need to restart the server for the changes to take effect.")

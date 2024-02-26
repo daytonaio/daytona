@@ -29,9 +29,9 @@ var gitProviderAddCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		serverConfig, _, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
+		serverConfig, res, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(api.HandleErrorResponse(res, err))
 		}
 
 		c, err := config.GetConfig()
@@ -79,9 +79,9 @@ var gitProviderAddCmd = &cobra.Command{
 
 		serverConfig.GitProviders = gitProviderList
 
-		_, _, err = apiClient.ServerAPI.SetConfig(context.Background()).Config(*serverConfig).Execute()
+		_, res, err = apiClient.ServerAPI.SetConfig(context.Background()).Config(*serverConfig).Execute()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(api.HandleErrorResponse(res, err))
 		}
 
 		err = c.Save()

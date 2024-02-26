@@ -32,9 +32,9 @@ var StopCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 {
-			workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal(api.HandleErrorResponse(res, err))
 			}
 
 			workspaceName = select_prompt.GetWorkspaceNameFromPrompt(workspaceList, "stop")
@@ -48,14 +48,14 @@ var StopCmd = &cobra.Command{
 		}
 
 		if stopProjectFlag == "" {
-			_, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, workspaceName).Execute()
+			res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, workspaceName).Execute()
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal(api.HandleErrorResponse(res, err))
 			}
 		} else {
-			_, err := apiClient.WorkspaceAPI.StopProject(ctx, workspaceName, stopProjectFlag).Execute()
+			res, err := apiClient.WorkspaceAPI.StopProject(ctx, workspaceName, stopProjectFlag).Execute()
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal(api.HandleErrorResponse(res, err))
 			}
 		}
 
