@@ -172,7 +172,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Workspace'
+                  $ref: '#/components/schemas/WorkspaceInfo'
                 type: array
           description: OK
       summary: List workspaces info

@@ -49,7 +49,7 @@ func GetWorkspaceInfo(ctx *gin.Context) {
 //	@Summary		List workspaces info
 //	@Description	List workspaces info
 //	@Produce		json
-//	@Success		200	{array}	Workspace
+//	@Success		200	{array}	WorkspaceInfo
 //	@Router			/workspace [get]
 //
 //	@id				ListWorkspaces

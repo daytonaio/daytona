@@ -273,7 +273,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/Workspace"
+                                "$ref": "#/definitions/WorkspaceInfo"
                             }
                         }
                     }

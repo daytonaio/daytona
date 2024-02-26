@@ -16,7 +16,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func selectWorkspacePrompt(workspaces []api_client.Workspace, actionVerb string, choiceChan chan<- string) {
+func selectWorkspacePrompt(workspaces []api_client.WorkspaceInfo, actionVerb string, choiceChan chan<- string) {
 
 	// Initialize an empty list of items.
 	items := []list.Item{}
@@ -68,7 +68,7 @@ func selectWorkspacePrompt(workspaces []api_client.Workspace, actionVerb string,
 	}
 }
 
-func GetWorkspaceNameFromPrompt(workspaces []api_client.Workspace, actionVerb string) string {
+func GetWorkspaceNameFromPrompt(workspaces []api_client.WorkspaceInfo, actionVerb string) string {
 	choiceChan := make(chan string)
 
 	go selectWorkspacePrompt(workspaces, actionVerb, choiceChan)

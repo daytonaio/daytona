@@ -330,7 +330,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Workspace'
+              $ref: '#/definitions/WorkspaceInfo'
             type: array
       summary: List workspaces info
       tags:

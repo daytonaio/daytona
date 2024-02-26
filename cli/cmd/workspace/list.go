@@ -9,6 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/cli/api"
 	"github.com/daytonaio/daytona/cli/cmd/output"
+	list_view "github.com/daytonaio/daytona/cli/cmd/views/workspace/list_view"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -37,8 +38,14 @@ var ListCmd = &cobra.Command{
 			return
 		}
 
-		for _, workspaceInfo := range workspaceList {
-			fmt.Println(*workspaceInfo.Name)
-		}
+		list_view.ListWorkspaces(workspaceList, "test")
+		fmt.Println()
+
+		// for _, workspaceInfo := range workspaceList {
+		// 	fmt.Println(*workspaceInfo.Name)
+		// 	fmt.Println(*workspaceInfo.Projects[0].Created)
+		// 	fmt.Println(*workspaceInfo.Projects[0].Started)
+		// 	fmt.Println(*workspaceInfo.Projects[0].IsRunning)
+		// }
 	},
 }

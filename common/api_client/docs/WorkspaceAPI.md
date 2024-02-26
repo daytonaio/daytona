@@ -153,7 +153,7 @@ No authorization required
 
 ## ListWorkspaces
 
-> []Workspace ListWorkspaces(ctx).Execute()
+> []WorkspaceInfo ListWorkspaces(ctx).Execute()
 
 List workspaces info
 
@@ -180,7 +180,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.ListWorkspaces``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `ListWorkspaces`: []Workspace
+	// response from `ListWorkspaces`: []WorkspaceInfo
 	fmt.Fprintf(os.Stdout, "Response from `WorkspaceAPI.ListWorkspaces`: %v\n", resp)
 }
 ```
@@ -196,7 +196,7 @@ Other parameters are passed through a pointer to a apiListWorkspacesRequest stru
 
 ### Return type
 
-[**[]Workspace**](Workspace.md)
+[**[]WorkspaceInfo**](WorkspaceInfo.md)
 
 ### Authorization
 

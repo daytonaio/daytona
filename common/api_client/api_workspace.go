@@ -242,7 +242,7 @@ type ApiListWorkspacesRequest struct {
 	ApiService *WorkspaceAPIService
 }
 
-func (r ApiListWorkspacesRequest) Execute() ([]Workspace, *http.Response, error) {
+func (r ApiListWorkspacesRequest) Execute() ([]WorkspaceInfo, *http.Response, error) {
 	return r.ApiService.ListWorkspacesExecute(r)
 }
 
@@ -262,13 +262,13 @@ func (a *WorkspaceAPIService) ListWorkspaces(ctx context.Context) ApiListWorkspa
 }
 
 // Execute executes the request
-//  @return []Workspace
-func (a *WorkspaceAPIService) ListWorkspacesExecute(r ApiListWorkspacesRequest) ([]Workspace, *http.Response, error) {
+//  @return []WorkspaceInfo
+func (a *WorkspaceAPIService) ListWorkspacesExecute(r ApiListWorkspacesRequest) ([]WorkspaceInfo, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  []Workspace
+		localVarReturnValue  []WorkspaceInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.ListWorkspaces")
