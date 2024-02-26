@@ -43,7 +43,7 @@ func OSFromEchoProcessor(output string) (*OperatingSystem, error) {
 	if strings.Contains(output, "ARM64") {
 		arch := Windows_arm64
 		return &arch, nil
-	} else if strings.Contains(output, "AMD64") {
+	} else if strings.Contains(output, "AMD64") || strings.Contains(output, "Intel") {
 		arch := Windows_64_86
 		return &arch, nil
 	} else {

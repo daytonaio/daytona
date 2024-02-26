@@ -22,7 +22,7 @@ func GetOperatingSystem() (*os.OperatingSystem, error) {
 }
 
 func GetOperatingSystemWindows() (*os.OperatingSystem, error) {
-	cmd := exec.Command("echo", "%PROCESSOR_ARCHITECTURE%")
+	cmd := exec.Command("systeminfo")
 	output, err := cmd.Output()
 	if err != nil {
 		return nil, err
