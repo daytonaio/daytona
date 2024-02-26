@@ -54,7 +54,7 @@ jobs:
 
       - name: Build binaries
         run: |
-        GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }}${{ matrix.goos == 'windows' ? '.exe' : '' }} CGO_ENABLED=0 go build -o daytona-${{ matrix.goos }}-${{ matrix.goarch }}
+        GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 go build -o daytona-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goos == 'windows' ? '.exe' : '' }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
