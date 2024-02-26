@@ -25,7 +25,7 @@ jobs:
   binary-build-and-publish:
     strategy:
       matrix:
-        goos: [linux, darwin]
+        goos: [linux, darwin, windows]
         goarch: [amd64, arm64]
     runs-on: ubuntu-latest
     permissions:
