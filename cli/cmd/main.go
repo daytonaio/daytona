@@ -35,7 +35,6 @@ func Execute() {
 	rootCmd.AddCommand(StopCmd)
 	rootCmd.AddCommand(PortsCmd)
 	rootCmd.AddCommand(versionCmd)
-	rootCmd.AddCommand(AgentCmd)
 	rootCmd.AddCommand(ListCmd)
 	rootCmd.AddCommand(GitProviderCmd)
 
