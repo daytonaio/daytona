@@ -1,10 +1,13 @@
 package workspace
 
 import (
+	"errors"
+	"fmt"
+	"net/http"
+
 	"github.com/daytonaio/daytona/server/db"
 	"github.com/daytonaio/daytona/server/provisioner"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 )
 
 // StartWorkspace 			godoc
@@ -22,14 +25,12 @@ func StartWorkspace(ctx *gin.Context) {
 
 	w, err := db.FindWorkspace(workspaceId)
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		ctx.AbortWithError(http.StatusNotFound, errors.New("workspace not found"))
 		return
 	}
 	err = provisioner.StartWorkspace(w)
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to start workspace %s: %s", w.Name, err.Error()))
 		return
 	}
 
@@ -53,22 +54,19 @@ func StartProject(ctx *gin.Context) {
 
 	w, err := db.FindWorkspace(workspaceId)
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		ctx.AbortWithError(http.StatusNotFound, errors.New("workspace not found"))
 		return
 	}
 
 	project, err := getProject(w, projectId)
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		ctx.AbortWithError(http.StatusNotFound, errors.New("project not found"))
 		return
 	}
 
 	err = provisioner.StartProject(project)
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to start project %s: %s", project.Name, err.Error()))
 		return
 	}
 

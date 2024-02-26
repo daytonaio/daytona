@@ -16,7 +16,8 @@
 		"ghcr.io/devcontainers/features/node:1": {}
 	},
 	"containerEnv": {
-		"LOG_LEVEL": "debug"
+		"LOG_LEVEL": "debug",
+		"DAYTONA_SERVER_MODE": "development"
 	},
 	"postCreateCommand": {
 		"setup": "/setup/postcreate.sh",

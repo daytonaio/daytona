@@ -42,9 +42,9 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		serverConfig, _, err := apiClient.ServerAPI.GetConfig(ctx).Execute()
+		serverConfig, res, err := apiClient.ServerAPI.GetConfig(ctx).Execute()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(api.HandleErrorResponse(res, err))
 		}
 
 		c, err := config.GetConfig()
@@ -61,9 +61,9 @@ var CreateCmd = &cobra.Command{
 			provisioner = provisionerFlag
 		} else if activeProfile.DefaultProvisioner == "" {
 
-			provisionerPluginList, _, err := apiClient.PluginAPI.ListProvisionerPlugins(context.Background()).Execute()
+			provisionerPluginList, res, err := apiClient.PluginAPI.ListProvisionerPlugins(context.Background()).Execute()
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal(api.HandleErrorResponse(res, err))
 			}
 
 			if len(provisionerPluginList) == 0 {
@@ -90,9 +90,9 @@ var CreateCmd = &cobra.Command{
 			var workspaceNames []string
 			repos = []string{} // Ignore repo flags if prompting
 
-			workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal(api.HandleErrorResponse(res, err))
 			}
 			for _, workspaceInfo := range workspaceList {
 				workspaceNames = append(workspaceNames, *workspaceInfo.Name)
@@ -133,13 +133,13 @@ var CreateCmd = &cobra.Command{
 			return
 		}
 
-		_, _, err = apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(api_client.CreateWorkspace{
+		_, res, err = apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(api_client.CreateWorkspace{
 			Name:         &workspaceName,
 			Repositories: repos,
 			Provisioner:  &provisioner,
 		}).Execute()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(api.HandleErrorResponse(res, err))
 		}
 
 		initViewModel := init_view.GetInitialModel()
@@ -181,11 +181,11 @@ var CreateCmd = &cobra.Command{
 		// 	}
 		// }
 
-		wsInfo, _, err := apiClient.WorkspaceAPI.GetWorkspaceInfo(ctx, workspaceName).Execute()
+		wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspaceInfo(ctx, workspaceName).Execute()
 		if err != nil {
 			initViewProgram.Send(tea.Quit())
 			initViewProgram.ReleaseTerminal()
-			log.Fatal(err)
+			log.Fatal(api.HandleErrorResponse(res, err))
 			return
 		}
 		initViewProgram.Send(init_view.ClearScreenMsg{})

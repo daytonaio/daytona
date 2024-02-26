@@ -25,9 +25,9 @@ var GitProviderCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		serverConfig, _, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
+		serverConfig, res, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(api.HandleErrorResponse(res, err))
 		}
 
 		if len(serverConfig.GitProviders) == 0 {
