@@ -57,4 +57,8 @@ jobs:
 
       - name: Copy binaries to s3
         run: |
-          aws s3 cp daytona-${{ matrix.goos }}-${{ matrix.goarch }} s3://${{ env.BUCKET_NAME }}/$GITHUB_HEAD_REF/
+          SUFFIX=""   
+          if [[ "${{ matrix.goos }}" == "windows" ]]; then
+            SUFFIX=".exe"
+          fi
+          aws s3 cp daytona-${{ matrix.goos }}-${{ matrix.goarch }}$SUFFIX s3://${{ env.BUCKET_NAME }}/$GITHUB_HEAD_REF/
