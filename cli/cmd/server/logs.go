@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"regexp"
 
+	"github.com/daytonaio/daytona/cli/api"
 	"github.com/daytonaio/daytona/cli/config"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
@@ -39,9 +40,9 @@ var logsCmd = &cobra.Command{
 
 		wsURL := fmt.Sprintf("ws://%s/log/ws%s", host, query)
 
-		ws, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
+		ws, res, err := websocket.DefaultDialer.Dial(wsURL, nil)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(api.HandleErrorResponse(res, err))
 		}
 
 		for {

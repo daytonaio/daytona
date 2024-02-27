@@ -41,9 +41,9 @@ var gitCredCmd = &cobra.Command{
 		}
 
 		var gitCredentials GitCredentials
-		serverConfig, _, err := apiClient.ServerAPI.GetConfig(ctx).Execute()
+		serverConfig, res, err := apiClient.ServerAPI.GetConfig(ctx).Execute()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(api.HandleErrorResponse(res, err))
 		}
 
 		gitProviderId := getGitProviderIdFromHost(host)

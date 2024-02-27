@@ -1,6 +1,8 @@
 package plugin
 
 import (
+	"fmt"
+	"net/http"
 	"path"
 
 	agent_service_manager "github.com/daytonaio/daytona/plugins/agent_service/manager"
@@ -10,8 +12,6 @@ import (
 	"github.com/daytonaio/daytona/server/config"
 	"github.com/daytonaio/daytona/server/frpc"
 	"github.com/gin-gonic/gin"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // InstallProvisionerPlugin godoc
@@ -29,15 +29,13 @@ func InstallProvisionerPlugin(ctx *gin.Context) {
 	var req dto.InstallPluginRequest
 	err := ctx.BindJSON(&req)
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(400, gin.H{"error": err.Error()})
+		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %s", err.Error()))
 		return
 	}
 
 	c, err := config.GetConfig()
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get config: %s", err.Error()))
 		return
 	}
 
@@ -45,15 +43,13 @@ func InstallProvisionerPlugin(ctx *gin.Context) {
 
 	err = plugin_manager.DownloadPlugin(req.DownloadUrls, downloadPath)
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to download plugin: %s", err.Error()))
 		return
 	}
 
 	err = provisioner_manager.RegisterProvisioner(downloadPath, c.ServerDownloadUrl, frpc.GetServerUrl(c), frpc.GetApiUrl(c))
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to register provisioner: %s", err.Error()))
 		return
 	}
 
@@ -75,15 +71,13 @@ func InstallAgentServicePlugin(ctx *gin.Context) {
 	var req dto.InstallPluginRequest
 	err := ctx.BindJSON(&req)
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(400, gin.H{"error": err.Error()})
+		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %s", err.Error()))
 		return
 	}
 
 	c, err := config.GetConfig()
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get config: %s", err.Error()))
 		return
 	}
 
@@ -91,15 +85,13 @@ func InstallAgentServicePlugin(ctx *gin.Context) {
 
 	err = plugin_manager.DownloadPlugin(req.DownloadUrls, downloadPath)
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to download plugin: %s", err.Error()))
 		return
 	}
 
 	err = agent_service_manager.RegisterAgentService(downloadPath)
 	if err != nil {
-		log.Error(err)
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to register agent service: %s", err.Error()))
 		return
 	}
 

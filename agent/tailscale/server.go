@@ -28,9 +28,9 @@ func Start(c *config.Config) error {
 		return err
 	}
 
-	networkKey, _, err := apiClient.ServerAPI.GenerateNetworkKeyExecute(api_client.ApiGenerateNetworkKeyRequest{})
+	networkKey, res, err := apiClient.ServerAPI.GenerateNetworkKeyExecute(api_client.ApiGenerateNetworkKeyRequest{})
 	if err != nil {
-		return err
+		log.Fatal(api.HandleErrorResponse(res, err))
 	}
 
 	s.AuthKey = *networkKey.Key

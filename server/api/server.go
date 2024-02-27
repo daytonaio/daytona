@@ -12,10 +12,12 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/daytonaio/daytona/server/api/docs"
 	"github.com/daytonaio/daytona/server/api/middlewares"
+	"github.com/gin-contrib/cors"
 
 	log_controller "github.com/daytonaio/daytona/server/api/controllers/log"
 	"github.com/daytonaio/daytona/server/api/controllers/plugin"
@@ -39,20 +41,17 @@ func Start() error {
 	docs.SwaggerInfo.Description = "Daytona Server API"
 	docs.SwaggerInfo.Title = "Daytona Server API"
 
-	router = gin.Default()
-
+	if mode, ok := os.LookupEnv("DAYTONA_SERVER_MODE"); ok && mode == "development" {
+		router = gin.Default()
+		router.Use(cors.New(cors.Config{
+			AllowAllOrigins: true,
+		}))
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+		router = gin.New()
+		router.Use(gin.Recovery())
+	}
 	router.Use(middlewares.LoggingMiddleware())
-
-	// if BaseConfig.Production {
-	// 	gin.SetMode(gin.ReleaseMode)
-	// 	router = gin.New()
-	// 	router.Use(gin.Recovery())
-	// } else {
-	// 	router = gin.Default()
-	// 	router.Use(cors.New(cors.Config{
-	// 		AllowAllOrigins: true,
-	// 	}))
-	// }
 
 	config, err := config.GetConfig()
 	if err != nil {

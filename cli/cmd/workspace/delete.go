@@ -42,9 +42,9 @@ var DeleteCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 {
-			workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal(api.HandleErrorResponse(res, err))
 			}
 
 			workspaceName = select_prompt.GetWorkspaceNameFromPrompt(workspaceList, "start")
@@ -57,9 +57,9 @@ var DeleteCmd = &cobra.Command{
 			workspaceName = wsName
 		}
 
-		_, err = apiClient.WorkspaceAPI.RemoveWorkspace(ctx, workspaceName).Execute()
+		res, err := apiClient.WorkspaceAPI.RemoveWorkspace(ctx, workspaceName).Execute()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(api.HandleErrorResponse(res, err))
 		}
 
 		config.RemoveWorkspaceSshEntries(activeProfile.Id, workspaceName)

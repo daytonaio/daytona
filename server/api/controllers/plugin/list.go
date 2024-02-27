@@ -1,11 +1,13 @@
 package plugin
 
 import (
+	"fmt"
+	"net/http"
+
 	agent_service_manager "github.com/daytonaio/daytona/plugins/agent_service/manager"
 	provisioner_manager "github.com/daytonaio/daytona/plugins/provisioner/manager"
 	"github.com/daytonaio/daytona/server/api/controllers/plugin/dto"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 )
 
 // ListProvisionerPlugins godoc
@@ -26,8 +28,7 @@ func ListProvisionerPlugins(ctx *gin.Context) {
 	for _, provisioner := range provisioners {
 		info, err := provisioner.GetInfo()
 		if err != nil {
-			log.Error(err)
-			ctx.JSON(500, gin.H{"error": err.Error()})
+			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get provisioner: %s", err.Error()))
 			return
 		}
 
@@ -58,8 +59,7 @@ func ListAgentServicePlugins(ctx *gin.Context) {
 	for _, agentService := range agentServices {
 		info, err := agentService.GetInfo()
 		if err != nil {
-			log.Error(err)
-			ctx.JSON(500, gin.H{"error": err.Error()})
+			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get agent service: %s", err.Error()))
 			return
 		}
 

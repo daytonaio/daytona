@@ -18,12 +18,23 @@ func LoggingMiddleware() gin.HandlerFunc {
 		reqUri := ctx.Request.RequestURI
 		statusCode := ctx.Writer.Status()
 
-		log.WithFields(log.Fields{
-			"method":  reqMethod,
-			"URI":     reqUri,
-			"status":  statusCode,
-			"latency": latencyTime,
-		}).Info("API REQUEST")
+		if len(ctx.Errors) > 0 {
+			log.WithFields(log.Fields{
+				"method":  reqMethod,
+				"URI":     reqUri,
+				"status":  statusCode,
+				"latency": latencyTime,
+				"error":   ctx.Errors.String(),
+			}).Error("API ERROR")
+			ctx.JSON(statusCode, gin.H{"error": ctx.Errors[0].Err.Error()})
+		} else {
+			log.WithFields(log.Fields{
+				"method":  reqMethod,
+				"URI":     reqUri,
+				"status":  statusCode,
+				"latency": latencyTime,
+			}).Info("API REQUEST")
+		}
 
 		ctx.Next()
 	}
