@@ -164,7 +164,7 @@ paths:
       - server
   /workspace:
     get:
-      description: List workspaces info
+      description: List workspaces
       operationId: ListWorkspaces
       responses:
         "200":
@@ -172,10 +172,10 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/WorkspaceInfo'
+                  $ref: '#/components/schemas/Workspace'
                 type: array
           description: OK
-      summary: List workspaces info
+      summary: List workspaces
       tags:
       - workspace
     post:
@@ -219,7 +219,7 @@ paths:
       - workspace
     get:
       description: Get workspace info
-      operationId: GetWorkspaceInfo
+      operationId: GetWorkspace
       parameters:
       - description: Workspace ID
         in: path
@@ -232,7 +232,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WorkspaceInfo'
+                $ref: '#/components/schemas/Workspace'
           description: OK
       summary: Get workspace info
       tags:
@@ -407,8 +407,18 @@ components:
           branch: branch
           sha: sha
           url: url
+        info:
+          isRunning: true
+          created: created
+          name: name
+          provisionerMetadata: provisionerMetadata
+          finished: finished
+          started: started
+          workspaceId: workspaceId
         workspaceId: workspaceId
       properties:
+        info:
+          $ref: '#/components/schemas/ProjectInfo'
         name:
           type: string
         repository:
@@ -530,6 +540,14 @@ components:
             branch: branch
             sha: sha
             url: url
+          info:
+            isRunning: true
+            created: created
+            name: name
+            provisionerMetadata: provisionerMetadata
+            finished: finished
+            started: started
+            workspaceId: workspaceId
           workspaceId: workspaceId
         - name: name
           repository:
@@ -540,12 +558,40 @@ components:
             branch: branch
             sha: sha
             url: url
+          info:
+            isRunning: true
+            created: created
+            name: name
+            provisionerMetadata: provisionerMetadata
+            finished: finished
+            started: started
+            workspaceId: workspaceId
           workspaceId: workspaceId
         name: name
         id: id
+        info:
+          projects:
+          - isRunning: true
+            created: created
+            name: name
+            provisionerMetadata: provisionerMetadata
+            finished: finished
+            started: started
+            workspaceId: workspaceId
+          - isRunning: true
+            created: created
+            name: name
+            provisionerMetadata: provisionerMetadata
+            finished: finished
+            started: started
+            workspaceId: workspaceId
+          name: name
+          provisionerMetadata: provisionerMetadata
       properties:
         id:
           type: string
+        info:
+          $ref: '#/components/schemas/WorkspaceInfo'
         name:
           type: string
         projects:

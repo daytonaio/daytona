@@ -68,7 +68,7 @@ func Start() error {
 
 	workspaceController := router.Group("/workspace")
 	{
-		workspaceController.GET("/:workspaceId", workspace.GetWorkspaceInfo)
+		workspaceController.GET("/:workspaceId", workspace.GetWorkspace)
 		workspaceController.GET("/", workspace.ListWorkspaces)
 		workspaceController.POST("/", workspace.CreateWorkspace)
 		workspaceController.POST("/:workspaceId/start", workspace.StartWorkspace)

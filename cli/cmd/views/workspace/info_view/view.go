@@ -64,14 +64,14 @@ func projectRender(project *api_client.ProjectInfo) string {
 	return projectViewStyle.Render(projectView)
 }
 
-func Render(wsInfo *api_client.WorkspaceInfo) {
+func Render(workspace *api_client.Workspace) {
 	var output string
 	output = "\n"
-	output += workspaceInfoStyle.Render("Workspace" + workspaceNameStyle.Render(*wsInfo.Name))
-	if len(wsInfo.Projects) > 1 {
+	output += workspaceInfoStyle.Render("Workspace" + workspaceNameStyle.Render(*workspace.Info.Name))
+	if len(workspace.Projects) > 1 {
 		output += "\n" + "Projects"
 	}
-	for _, project := range wsInfo.Projects {
+	for _, project := range workspace.Info.Projects {
 		output += projectRender(&project)
 	}
 

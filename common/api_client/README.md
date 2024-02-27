@@ -87,8 +87,8 @@ Class | Method | HTTP request | Description
 *ServerAPI* | [**GetConfig**](docs/ServerAPI.md#getconfig) | **Get** /server/config | Get the server configuration
 *ServerAPI* | [**SetConfig**](docs/ServerAPI.md#setconfig) | **Post** /server/config | Set the server configuration
 *WorkspaceAPI* | [**CreateWorkspace**](docs/WorkspaceAPI.md#createworkspace) | **Post** /workspace | Create a workspace
-*WorkspaceAPI* | [**GetWorkspaceInfo**](docs/WorkspaceAPI.md#getworkspaceinfo) | **Get** /workspace/{workspaceId} | Get workspace info
-*WorkspaceAPI* | [**ListWorkspaces**](docs/WorkspaceAPI.md#listworkspaces) | **Get** /workspace | List workspaces info
+*WorkspaceAPI* | [**GetWorkspace**](docs/WorkspaceAPI.md#getworkspace) | **Get** /workspace/{workspaceId} | Get workspace info
+*WorkspaceAPI* | [**ListWorkspaces**](docs/WorkspaceAPI.md#listworkspaces) | **Get** /workspace | List workspaces
 *WorkspaceAPI* | [**RemoveWorkspace**](docs/WorkspaceAPI.md#removeworkspace) | **Delete** /workspace/{workspaceId} | Remove workspace
 *WorkspaceAPI* | [**StartProject**](docs/WorkspaceAPI.md#startproject) | **Post** /workspace/{workspaceId}/{projectId}/start | Start project
 *WorkspaceAPI* | [**StartWorkspace**](docs/WorkspaceAPI.md#startworkspace) | **Post** /workspace/{workspaceId}/start | Start workspace

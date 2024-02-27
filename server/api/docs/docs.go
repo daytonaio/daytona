@@ -258,14 +258,14 @@ const docTemplate = `{
         },
         "/workspace": {
             "get": {
-                "description": "List workspaces info",
+                "description": "List workspaces",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "workspace"
                 ],
-                "summary": "List workspaces info",
+                "summary": "List workspaces",
                 "operationId": "ListWorkspaces",
                 "responses": {
                     "200": {
@@ -273,7 +273,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/WorkspaceInfo"
+                                "$ref": "#/definitions/Workspace"
                             }
                         }
                     }
@@ -320,7 +320,7 @@ const docTemplate = `{
                     "workspace"
                 ],
                 "summary": "Get workspace info",
-                "operationId": "GetWorkspaceInfo",
+                "operationId": "GetWorkspace",
                 "parameters": [
                     {
                         "type": "string",
@@ -334,7 +334,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/WorkspaceInfo"
+                            "$ref": "#/definitions/Workspace"
                         }
                     }
                 }
@@ -555,6 +555,9 @@ const docTemplate = `{
         "Project": {
             "type": "object",
             "properties": {
+                "info": {
+                    "$ref": "#/definitions/ProjectInfo"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -666,6 +669,9 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "type": "string"
+                },
+                "info": {
+                    "$ref": "#/definitions/WorkspaceInfo"
                 },
                 "name": {
                     "type": "string"

@@ -19,6 +19,7 @@ var _ MappedNullable = &Project{}
 
 // Project struct for Project
 type Project struct {
+	Info *ProjectInfo `json:"info,omitempty"`
 	Name *string `json:"name,omitempty"`
 	Repository *Repository `json:"repository,omitempty"`
 	WorkspaceId *string `json:"workspaceId,omitempty"`
@@ -39,6 +40,38 @@ func NewProject() *Project {
 func NewProjectWithDefaults() *Project {
 	this := Project{}
 	return &this
+}
+
+// GetInfo returns the Info field value if set, zero value otherwise.
+func (o *Project) GetInfo() ProjectInfo {
+	if o == nil || IsNil(o.Info) {
+		var ret ProjectInfo
+		return ret
+	}
+	return *o.Info
+}
+
+// GetInfoOk returns a tuple with the Info field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Project) GetInfoOk() (*ProjectInfo, bool) {
+	if o == nil || IsNil(o.Info) {
+		return nil, false
+	}
+	return o.Info, true
+}
+
+// HasInfo returns a boolean if a field has been set.
+func (o *Project) HasInfo() bool {
+	if o != nil && !IsNil(o.Info) {
+		return true
+	}
+
+	return false
+}
+
+// SetInfo gets a reference to the given ProjectInfo and assigns it to the Info field.
+func (o *Project) SetInfo(v ProjectInfo) {
+	o.Info = &v
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
@@ -147,6 +180,9 @@ func (o Project) MarshalJSON() ([]byte, error) {
 
 func (o Project) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.Info) {
+		toSerialize["info"] = o.Info
+	}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
 	}

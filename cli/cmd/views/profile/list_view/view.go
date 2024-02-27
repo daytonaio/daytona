@@ -149,7 +149,7 @@ func GetProfileIdFromPrompt(profileList []config.Profile, activeProfileId, title
 }
 
 func ListProfiles(profileList []config.Profile, activeProfileId string) {
-	views_util.RenderMainTitle("Profiles")
+	views_util.RenderMainTitle("PROFILES")
 
 	modelInstance := renderProfileList(profileList, activeProfileId, false)
 

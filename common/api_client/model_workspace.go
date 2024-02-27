@@ -20,6 +20,7 @@ var _ MappedNullable = &Workspace{}
 // Workspace struct for Workspace
 type Workspace struct {
 	Id *string `json:"id,omitempty"`
+	Info *WorkspaceInfo `json:"info,omitempty"`
 	Name *string `json:"name,omitempty"`
 	Projects []Project `json:"projects,omitempty"`
 	Provisioner *WorkspaceProvisioner `json:"provisioner,omitempty"`
@@ -72,6 +73,38 @@ func (o *Workspace) HasId() bool {
 // SetId gets a reference to the given string and assigns it to the Id field.
 func (o *Workspace) SetId(v string) {
 	o.Id = &v
+}
+
+// GetInfo returns the Info field value if set, zero value otherwise.
+func (o *Workspace) GetInfo() WorkspaceInfo {
+	if o == nil || IsNil(o.Info) {
+		var ret WorkspaceInfo
+		return ret
+	}
+	return *o.Info
+}
+
+// GetInfoOk returns a tuple with the Info field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetInfoOk() (*WorkspaceInfo, bool) {
+	if o == nil || IsNil(o.Info) {
+		return nil, false
+	}
+	return o.Info, true
+}
+
+// HasInfo returns a boolean if a field has been set.
+func (o *Workspace) HasInfo() bool {
+	if o != nil && !IsNil(o.Info) {
+		return true
+	}
+
+	return false
+}
+
+// SetInfo gets a reference to the given WorkspaceInfo and assigns it to the Info field.
+func (o *Workspace) SetInfo(v WorkspaceInfo) {
+	o.Info = &v
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
@@ -182,6 +215,9 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Id) {
 		toSerialize["id"] = o.Id
+	}
+	if !IsNil(o.Info) {
+		toSerialize["info"] = o.Info
 	}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name

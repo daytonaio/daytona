@@ -134,27 +134,27 @@ func (a *WorkspaceAPIService) CreateWorkspaceExecute(r ApiCreateWorkspaceRequest
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiGetWorkspaceInfoRequest struct {
+type ApiGetWorkspaceRequest struct {
 	ctx context.Context
 	ApiService *WorkspaceAPIService
 	workspaceId string
 }
 
-func (r ApiGetWorkspaceInfoRequest) Execute() (*WorkspaceInfo, *http.Response, error) {
-	return r.ApiService.GetWorkspaceInfoExecute(r)
+func (r ApiGetWorkspaceRequest) Execute() (*Workspace, *http.Response, error) {
+	return r.ApiService.GetWorkspaceExecute(r)
 }
 
 /*
-GetWorkspaceInfo Get workspace info
+GetWorkspace Get workspace info
 
 Get workspace info
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param workspaceId Workspace ID
- @return ApiGetWorkspaceInfoRequest
+ @return ApiGetWorkspaceRequest
 */
-func (a *WorkspaceAPIService) GetWorkspaceInfo(ctx context.Context, workspaceId string) ApiGetWorkspaceInfoRequest {
-	return ApiGetWorkspaceInfoRequest{
+func (a *WorkspaceAPIService) GetWorkspace(ctx context.Context, workspaceId string) ApiGetWorkspaceRequest {
+	return ApiGetWorkspaceRequest{
 		ApiService: a,
 		ctx: ctx,
 		workspaceId: workspaceId,
@@ -162,16 +162,16 @@ func (a *WorkspaceAPIService) GetWorkspaceInfo(ctx context.Context, workspaceId 
 }
 
 // Execute executes the request
-//  @return WorkspaceInfo
-func (a *WorkspaceAPIService) GetWorkspaceInfoExecute(r ApiGetWorkspaceInfoRequest) (*WorkspaceInfo, *http.Response, error) {
+//  @return Workspace
+func (a *WorkspaceAPIService) GetWorkspaceExecute(r ApiGetWorkspaceRequest) (*Workspace, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  *WorkspaceInfo
+		localVarReturnValue  *Workspace
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.GetWorkspaceInfo")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.GetWorkspace")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
@@ -242,14 +242,14 @@ type ApiListWorkspacesRequest struct {
 	ApiService *WorkspaceAPIService
 }
 
-func (r ApiListWorkspacesRequest) Execute() ([]WorkspaceInfo, *http.Response, error) {
+func (r ApiListWorkspacesRequest) Execute() ([]Workspace, *http.Response, error) {
 	return r.ApiService.ListWorkspacesExecute(r)
 }
 
 /*
-ListWorkspaces List workspaces info
+ListWorkspaces List workspaces
 
-List workspaces info
+List workspaces
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiListWorkspacesRequest
@@ -262,13 +262,13 @@ func (a *WorkspaceAPIService) ListWorkspaces(ctx context.Context) ApiListWorkspa
 }
 
 // Execute executes the request
-//  @return []WorkspaceInfo
-func (a *WorkspaceAPIService) ListWorkspacesExecute(r ApiListWorkspacesRequest) ([]WorkspaceInfo, *http.Response, error) {
+//  @return []Workspace
+func (a *WorkspaceAPIService) ListWorkspacesExecute(r ApiListWorkspacesRequest) ([]Workspace, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  []WorkspaceInfo
+		localVarReturnValue  []Workspace
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.ListWorkspaces")

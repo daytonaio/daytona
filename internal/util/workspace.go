@@ -20,7 +20,7 @@ func GetFirstWorkspaceProjectName(workspaceId string, projectName string, profil
 		return "", err
 	}
 
-	wsInfo, _, err := apiClient.WorkspaceAPI.GetWorkspaceInfo(ctx, workspaceId).Execute()
+	wsInfo, _, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceId).Execute()
 	if err != nil {
 		return "", err
 	}

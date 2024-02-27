@@ -46,7 +46,7 @@ var InfoCmd = &cobra.Command{
 			workspaceName = wsName
 		}
 
-		workspaceInfo, _, err := apiClient.WorkspaceAPI.GetWorkspaceInfo(ctx, workspaceName).Execute()
+		workspaceInfo, _, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceName).Execute()
 		if err != nil {
 			log.Fatal(err)
 		}

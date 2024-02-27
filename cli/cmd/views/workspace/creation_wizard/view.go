@@ -390,8 +390,10 @@ func getSuggestedWorkspaceName(repo string) string {
 	var result strings.Builder
 	input := repo
 
+	input = strings.TrimSuffix(input, "/")
+
 	// Find the last index of '/' in the repo string
-	lastIndex := strings.LastIndex(repo, "/")
+	lastIndex := strings.LastIndex(input, "/")
 
 	// If '/' is found, extract the content after it
 	if lastIndex != -1 && lastIndex < len(repo)-1 {

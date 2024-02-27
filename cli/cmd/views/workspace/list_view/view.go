@@ -6,11 +6,12 @@ package list_view
 import (
 	"fmt"
 	"os"
+	"sort"
 	"strings"
+	"time"
 
-	"github.com/daytonaio/daytona/cli/cmd/views"
-	views_util "github.com/daytonaio/daytona/cli/cmd/views/util"
 	"github.com/daytonaio/daytona/common/api_client"
+	"github.com/daytonaio/daytona/common/types"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -18,30 +19,31 @@ import (
 	"golang.org/x/term"
 )
 
-var NewWorkspaceId = "+"
+var defaultColumnWidth = 12
+var columnPadding = 3
 
-var columns = []table.Column{
-	{Title: "ID", Width: 10},
-	{Title: "Name", Width: 20},
-	{Title: "Active", Width: 10},
-	{Title: "Hostname", Width: 15},
-	{Title: "SSH port", Width: 10},
-	{Title: "SSH user", Width: 10},
+type RowData struct {
+	WorkspaceName string
+	Repository    string
+	Created       string
+	Status        string
 }
 
 type model struct {
-	table               table.Model
-	selectedWorkspaceId string
-	selectable          bool
-	initialRows         []table.Row
+	table       table.Model
+	selectable  bool
+	initialRows []table.Row
+}
+
+var columns = []table.Column{
+	{Title: "WORKSPACE NAME", Width: defaultColumnWidth},
+	{Title: "REPOSITORY", Width: defaultColumnWidth},
+	{Title: "CREATED", Width: defaultColumnWidth},
+	{Title: "STATUS", Width: defaultColumnWidth},
 }
 
 func (m model) Init() tea.Cmd {
-	if !m.selectable {
-		return tea.Quit
-	}
-
-	return nil
+	return tea.Quit
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -49,23 +51,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		rows, cols := getRowsAndCols(msg.Width, m.initialRows)
-		m.table = getTable(rows, cols, m.selectable, m.table.Cursor())
+		m.table = getTable(rows, cols, m.table.Cursor())
 		return m, nil
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "esc":
-			if m.table.Focused() {
-				m.table.Blur()
-			} else {
-				m.table.Focus()
-			}
-		case "q", "ctrl+c":
-			m.selectedWorkspaceId = ""
-			return m, tea.Quit
-		case "enter":
-			m.selectedWorkspaceId = m.table.SelectedRow()[0]
-			return m, tea.Quit
-		}
 	}
 
 	m.table, cmd = m.table.Update(msg)
@@ -73,119 +60,252 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 var baseStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.RoundedBorder()).
-	Padding(0, 1).MarginBottom(1)
+	BorderStyle(lipgloss.HiddenBorder())
 
 func (m model) View() string {
 	return baseStyle.Render(m.table.View())
 }
 
-func renderWorkspaceList(workspaceList []api_client.WorkspaceInfo, activeWorkspaceId string, selectable bool) model {
+func renderWorkspaceList(workspaceList []api_client.Workspace, selectable bool) model {
 	rows := []table.Row{}
-	activeWorkspaceRow := 0
-	for i, workspace := range workspaceList {
-		hostname := "-"
-		port := "-"
-		user := "-"
+	var row table.Row
+	var rowData RowData
 
-		row := table.Row{*workspace.Name, *workspace.Name, fmt.Sprintf("%t", *workspace.Name == activeWorkspaceId), hostname, port, user}
+	sortWorkspaces(&workspaceList)
 
-		switch *workspace.Name {
-		case "default":
-			row = table.Row{*workspace.Name, *workspace.Name, fmt.Sprintf("%t", *workspace.Name == activeWorkspaceId), "-", "-", "-"}
-		case NewWorkspaceId:
-			row = table.Row{*workspace.Name, *workspace.Name, "", "", "", ""}
+	for _, workspace := range workspaceList {
+		if len(workspace.Projects) == 1 {
+			rowData = getWorkspaceTableRowData(workspace)
+			adjustColumsFormatting(rowData)
+			row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Created, rowData.Status}
+			rows = append(rows, row)
+		} else {
+			row = table.Row{*workspace.Name, "", "", "", ""}
+			rows = append(rows, row)
+			for _, project := range workspace.Projects {
+				rowData = getProjectTableRowData(workspace, project)
+				adjustColumsFormatting(rowData)
+				row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Created, rowData.Status}
+				rows = append(rows, row)
+			}
 		}
-
-		if *workspace.Name == activeWorkspaceId {
-			activeWorkspaceRow = i
-		}
-
-		rows = append(rows, row)
 	}
 
 	width, _, _ := term.GetSize(int(os.Stdout.Fd()))
-
 	adjustedRows, adjustedCols := getRowsAndCols(width, rows)
 
 	return model{
-		table:               getTable(adjustedRows, adjustedCols, selectable, activeWorkspaceRow),
-		selectedWorkspaceId: activeWorkspaceId,
-		selectable:          selectable,
-		initialRows:         rows,
+		table:       getTable(adjustedRows, adjustedCols, 0),
+		selectable:  selectable,
+		initialRows: rows,
 	}
 }
 
-func GetWorkspaceIdFromPrompt(workspaceList []api_client.WorkspaceInfo, activeWorkspaceId, title string, withCreateOption bool) string {
-	views_util.RenderMainTitle(title)
+func sortWorkspaces(workspaceList *[]api_client.Workspace) {
+	sort.Slice(*workspaceList, func(i, j int) bool {
+		ws1 := (*workspaceList)[i]
+		ws2 := (*workspaceList)[j]
+		if ws1.Info == nil || ws2.Info == nil || ws1.Info.Projects == nil || ws2.Info.Projects == nil {
+			return false
+		}
+		if len(ws1.Info.Projects) == 0 {
+			return false
+		}
+		if len(ws2.Info.Projects) == 0 {
+			return true
+		}
+		return *ws1.Info.Projects[0].Created > *ws2.Info.Projects[0].Created
+	})
+}
 
-	withNewWorkspace := workspaceList
+func adjustColumsFormatting(rowData RowData) {
+	adjustColumnWidth("WORKSPACE NAME", rowData)
+	adjustColumnWidth("REPOSITORY", rowData)
+	adjustColumnWidth("CREATED", rowData)
+	adjustColumnWidth("STATUS", rowData)
+}
 
-	if withCreateOption {
-		withNewWorkspace = append(withNewWorkspace, api_client.WorkspaceInfo{})
+func adjustColumnWidth(title string, rowData RowData) {
+	var column *table.Column
+	for i, col := range columns {
+		if col.Title == title {
+			column = &columns[i]
+			break
+		}
+	}
+	currentField := ""
+	switch title {
+	case "WORKSPACE NAME":
+		currentField = rowData.WorkspaceName
+	case "REPOSITORY":
+		currentField = rowData.Repository
+	case "CREATED":
+		currentField = rowData.Created
+	case "STATUS":
+		currentField = rowData.Status
 	}
 
-	modelInstance := renderWorkspaceList(withNewWorkspace, activeWorkspaceId, true)
+	if len(rowData.WorkspaceName) > column.Width {
+		column.Width = len(currentField) + columnPadding
+	}
+}
 
-	m, err := tea.NewProgram(modelInstance).Run()
+func getWorkspaceTableRowData(workspace api_client.Workspace) RowData {
+	rowData := RowData{}
+	if workspace.Name != nil {
+		rowData.WorkspaceName = *workspace.Name
+	}
+	if workspace.Projects != nil && len(workspace.Projects) > 0 && workspace.Projects[0].Repository != nil {
+		rowData.Repository = getRepositorySlugFromUrl(*workspace.Projects[0].Repository.Url)
+	}
+	if workspace.Info != nil && workspace.Info.Projects != nil && len(workspace.Info.Projects) > 0 && workspace.Info.Projects[0].Created != nil {
+		rowData.Created = formatCreatedTime(*workspace.Info.Projects[0].Created)
+	}
+	if workspace.Info != nil && workspace.Info.Projects != nil && len(workspace.Info.Projects) > 0 && workspace.Info.Projects[0].Started != nil {
+		rowData.Status = formatStatusTime(*workspace.Info.Projects[0].Started)
+	}
+	return rowData
+}
+
+func getProjectTableRowData(workspace api_client.Workspace, project api_client.Project) RowData {
+	var currentProjectInfo *types.ProjectInfo
+
+	for _, projectInfo := range workspace.Info.Projects {
+		if *projectInfo.Name == *project.Name {
+			currentProjectInfo = &types.ProjectInfo{
+				Name:    *projectInfo.Name,
+				Created: *projectInfo.Created,
+				Started: *projectInfo.Started,
+			}
+			break
+		}
+	}
+
+	if currentProjectInfo == nil {
+		currentProjectInfo = &types.ProjectInfo{
+			Name:    *project.Name,
+			Created: "/",
+			Started: "/",
+		}
+	}
+
+	rowData := RowData{}
+	if project.Name != nil {
+		rowData.WorkspaceName = " └ " + *project.Name
+	}
+	if project.Repository != nil && project.Repository.Url != nil {
+		rowData.Repository = getRepositorySlugFromUrl(*project.Repository.Url)
+	}
+	rowData.Created = formatCreatedTime(currentProjectInfo.Created)
+	rowData.Status = formatStatusTime(currentProjectInfo.Started)
+	return rowData
+}
+
+func getRepositorySlugFromUrl(url string) string {
+	if url == "" {
+		return "/"
+	}
+	url = strings.TrimSuffix(url, "/")
+
+	parts := strings.Split(url, "/")
+	if len(parts) < 2 {
+		return ""
+	}
+	return parts[len(parts)-2] + "/" + parts[len(parts)-1]
+}
+
+func formatCreatedTime(input string) string {
+	layout := "2006-01-02T15:04:05.999999999Z"
+	t, err := time.Parse(layout, input)
 	if err != nil {
-		fmt.Println("Error running program:", err)
-		os.Exit(1)
+		return "/"
 	}
-	workspaceId := m.(model).selectedWorkspaceId
 
-	lipgloss.DefaultRenderer().Output().ClearLines(strings.Count(modelInstance.View(), "\n") + 2)
+	duration := time.Since(t)
 
-	return workspaceId
+	if duration < time.Minute {
+		return "<1 minute ago"
+	} else if duration < time.Hour {
+		minutes := int(duration.Minutes())
+		if minutes == 1 {
+			return "1 minute ago"
+		}
+		return fmt.Sprintf("%d minutes ago", minutes)
+	} else if duration < 24*time.Hour {
+		hours := int(duration.Hours())
+		if hours == 1 {
+			return "1 hour ago"
+		}
+		return fmt.Sprintf("%d hours ago", hours)
+	} else {
+		days := int(duration.Hours() / 24)
+		if days == 1 {
+			return "1 day ago"
+		}
+		return fmt.Sprintf("%d days ago", days)
+	}
 }
 
-func ListWorkspaces(workspaceList []api_client.WorkspaceInfo, activeWorkspaceId string) {
-	views_util.RenderMainTitle("Workspaces")
+func formatStatusTime(input string) string {
+	layout := "2006-01-02T15:04:05.999999999Z"
+	t, err := time.Parse(layout, input)
+	if err != nil {
+		return "stopped"
+	}
 
-	modelInstance := renderWorkspaceList(workspaceList, activeWorkspaceId, false)
+	duration := time.Since(t)
+
+	if duration < time.Minute {
+		return "up <1 minute"
+	} else if duration < time.Hour {
+		minutes := int(duration.Minutes())
+		if minutes == 1 {
+			return "up 1 minute"
+		}
+		return fmt.Sprintf("up %d minutes", minutes)
+	} else if duration < 24*time.Hour {
+		hours := int(duration.Hours())
+		if hours == 1 {
+			return "up 1 hour"
+		}
+		return fmt.Sprintf("up %d hours", hours)
+	} else {
+		days := int(duration.Hours() / 24)
+		if days == 1 {
+			return "up 1 day"
+		}
+		return fmt.Sprintf("up %d days", days)
+	}
+}
+
+func ListWorkspaces(workspaceList []api_client.Workspace) {
+	modelInstance := renderWorkspaceList(workspaceList, false)
 
 	_, err := tea.NewProgram(modelInstance).Run()
 	if err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}
+	fmt.Println()
 }
 
-func getTable(rows []table.Row, cols []table.Column, selectable bool, activeRow int) table.Model {
-	var t table.Model
-
-	if selectable {
-		t = table.New(
-			table.WithColumns(cols),
-			table.WithRows(rows),
-			table.WithFocused(true),
-			table.WithHeight(len(rows)),
-		)
-	} else {
-		t = table.New(
-			table.WithColumns(cols),
-			table.WithRows(rows),
-			table.WithHeight(len(rows)),
-		)
-	}
+func getTable(rows []table.Row, cols []table.Column, activeRow int) table.Model {
+	t := table.New(
+		table.WithColumns(cols),
+		table.WithRows(rows),
+		table.WithHeight(len(rows)),
+	)
 
 	style := table.DefaultStyles()
 	style.Header = style.Header.
-		BorderStyle(lipgloss.NormalBorder()).
+		BorderStyle(lipgloss.HiddenBorder()).
 		BorderBottom(true).
 		AlignHorizontal(lipgloss.Left)
 
-	if selectable {
-		style.Selected = style.Selected.
-			Foreground(lipgloss.Color(views.White.Dark)).
-			Background(lipgloss.Color(views.DimmedGreen.Dark)).
-			Bold(true)
-	} else {
-		style.Selected = style.Selected.
-			Foreground(style.Cell.GetForeground()).
-			Background(style.Cell.GetBackground()).
-			Bold(false)
-	}
+	style.Selected = style.Selected.
+		Foreground(style.Cell.GetForeground()).
+		Background(style.Cell.GetBackground()).
+		Bold(false)
 
 	t.SetStyles(style)
 	t.SetCursor(activeRow)

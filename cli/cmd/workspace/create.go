@@ -181,7 +181,7 @@ var CreateCmd = &cobra.Command{
 		// 	}
 		// }
 
-		wsInfo, _, err := apiClient.WorkspaceAPI.GetWorkspaceInfo(ctx, workspaceName).Execute()
+		wsInfo, _, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceName).Execute()
 		if err != nil {
 			initViewProgram.Send(tea.Quit())
 			initViewProgram.ReleaseTerminal()
