@@ -7,7 +7,7 @@ import (
 	"os"
 
 	. "github.com/daytonaio/daytona/pkg/cmd/agent"
-	. "github.com/daytonaio/daytona/pkg/cmd/git_provider"
+	. "github.com/daytonaio/daytona/pkg/cmd/gitprovider"
 	"github.com/daytonaio/daytona/pkg/cmd/output"
 	. "github.com/daytonaio/daytona/pkg/cmd/ports"
 	. "github.com/daytonaio/daytona/pkg/cmd/profile"
