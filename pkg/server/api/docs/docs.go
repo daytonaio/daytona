@@ -15,52 +15,49 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/plugin/agent-service": {
+        "/provider": {
             "get": {
-                "description": "List agent service plugins",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "List providers",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "plugin"
+                    "provider"
                 ],
-                "summary": "List agent service plugins",
-                "operationId": "ListAgentServicePlugins",
+                "summary": "List providers",
+                "operationId": "ListProviders",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/AgentServicePlugin"
+                                "$ref": "#/definitions/Provider"
                             }
                         }
                     }
                 }
             }
         },
-        "/plugin/agent-service/install": {
+        "/provider/install": {
             "post": {
-                "description": "Install an agent service plugin",
+                "description": "Install a provider",
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
-                    "plugin"
+                    "provider"
                 ],
-                "summary": "Install an agent service plugin",
-                "operationId": "InstallAgentServicePlugin",
+                "summary": "Install a provider",
+                "operationId": "InstallProvider",
                 "parameters": [
                     {
-                        "description": "Plugin to install",
-                        "name": "plugin",
+                        "description": "Provider to install",
+                        "name": "provider",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/InstallPluginRequest"
+                            "$ref": "#/definitions/InstallProviderRequest"
                         }
                     }
                 ],
@@ -71,100 +68,17 @@ const docTemplate = `{
                 }
             }
         },
-        "/plugin/agent-service/uninstall": {
+        "/provider/{provider}/uninstall": {
             "post": {
-                "description": "Uninstall an agent service plugin",
+                "description": "Uninstall a provider",
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
-                    "plugin"
+                    "provider"
                 ],
-                "summary": "Uninstall an agent service plugin",
-                "operationId": "UninstallAgentServicePlugin",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Agent Service to uninstall",
-                        "name": "agent-service",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/plugin/provider": {
-            "get": {
-                "description": "List provider plugins",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "plugin"
-                ],
-                "summary": "List provider plugins",
-                "operationId": "ListProviderPlugins",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/ProviderPlugin"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/plugin/provider/install": {
-            "post": {
-                "description": "Install a provider plugin",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "plugin"
-                ],
-                "summary": "Install a provider plugin",
-                "operationId": "InstallProviderPlugin",
-                "parameters": [
-                    {
-                        "description": "Plugin to install",
-                        "name": "plugin",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/InstallPluginRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/plugin/provider/{provider}/uninstall": {
-            "post": {
-                "description": "Uninstall a provider plugin",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "plugin"
-                ],
-                "summary": "Uninstall a provider plugin",
-                "operationId": "UninstallProviderPlugin",
+                "summary": "Uninstall a provider",
+                "operationId": "UninstallProvider",
                 "parameters": [
                     {
                         "type": "string",
@@ -474,17 +388,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "AgentServicePlugin": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "string"
-                }
-            }
-        },
         "CreateWorkspace": {
             "type": "object",
             "properties": {
@@ -530,7 +433,7 @@ const docTemplate = `{
                 }
             }
         },
-        "InstallPluginRequest": {
+        "InstallProviderRequest": {
             "type": "object",
             "properties": {
                 "downloadUrls": {
@@ -592,7 +495,7 @@ const docTemplate = `{
                 }
             }
         },
-        "ProviderPlugin": {
+        "Provider": {
             "type": "object",
             "properties": {
                 "name": {
@@ -650,10 +553,10 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "pluginRegistryUrl": {
+                "providersDir": {
                     "type": "string"
                 },
-                "pluginsDir": {
+                "registryUrl": {
                     "type": "string"
                 },
                 "serverDownloadUrl": {

@@ -62,19 +62,16 @@ var CreateCmd = &cobra.Command{
 			provider = providerFlag
 		} else if activeProfile.DefaultProvider == "" {
 
-			providerPluginList, res, err := apiClient.PluginAPI.ListProviderPlugins(context.Background()).Execute()
+			providersList, res, err := apiClient.ProviderAPI.ListProviders(context.Background()).Execute()
 			if err != nil {
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 
-			if len(providerPluginList) == 0 {
+			if len(providersList) == 0 {
 				log.Fatal(errors.New("no provider plugins found"))
 			}
 
-			defaultProvider, err := provider_view.GetProviderFromPrompt(providerPluginList, "Provider not set. Choose a provider to use", nil)
-			if err != nil {
-				log.Fatal(err)
-			}
+			defaultProvider := provider_view.GetProviderFromPrompt(providersList, "Provider not set. Choose a provider to use")
 
 			provider = *defaultProvider.Name
 			activeProfile.DefaultProvider = *defaultProvider.Name

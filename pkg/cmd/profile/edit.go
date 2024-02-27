@@ -84,8 +84,7 @@ func EditProfile(c *config.Config, notify bool, profileToEdit *config.Profile, f
 		return errors.New("profile must not be nil")
 	}
 
-	var providerPluginList []serverapiclient.ProviderPlugin
-	var selectedProvider *serverapiclient.ProviderPlugin = nil
+	var providersList []serverapiclient.Provider
 	defaultProvider := "default"
 
 	profileAddView := profile.ProfileAddView{
@@ -114,30 +113,20 @@ func EditProfile(c *config.Config, notify bool, profileToEdit *config.Profile, f
 		log.Fatal(err)
 	}
 
-	providerPluginList, _, _ = apiClient.PluginAPI.ListProviderPlugins(context.Background()).Execute()
+	providersList, _, _ = apiClient.ProviderAPI.ListProviders(context.Background()).Execute()
 
 	if profileToEdit.Id != "default" {
 		profile.ProfileCreationView(c, &profileAddView, true, forceRemoteAccess, skipName)
 	}
 
-	if len(providerPluginList) > 0 {
-		for _, provider := range providerPluginList {
-			if *provider.Name == profileToEdit.DefaultProvider {
-				selectedProvider = &provider
-				break
-			}
-		}
-
-		provider, err := provider.GetProviderFromPrompt(providerPluginList, "Choose a default provider to use", selectedProvider)
-		if err != nil {
-			return err
-		}
+	if len(providersList) > 0 {
+		provider := provider.GetProviderFromPrompt(providersList, "Choose a default provider to use")
 
 		if profileToEdit.Id == "default" {
 			profileToEdit.DefaultProvider = *provider.Name
 			return c.EditProfile(*profileToEdit)
 		} else {
-			profileAddView.DefaultProvider = *providerPluginList[0].Name
+			profileAddView.DefaultProvider = *providersList[0].Name
 		}
 	}
 

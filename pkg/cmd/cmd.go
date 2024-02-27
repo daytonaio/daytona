@@ -9,9 +9,9 @@ import (
 	. "github.com/daytonaio/daytona/pkg/cmd/agent"
 	. "github.com/daytonaio/daytona/pkg/cmd/git_provider"
 	"github.com/daytonaio/daytona/pkg/cmd/output"
-	. "github.com/daytonaio/daytona/pkg/cmd/plugin"
 	. "github.com/daytonaio/daytona/pkg/cmd/ports"
 	. "github.com/daytonaio/daytona/pkg/cmd/profile"
+	. "github.com/daytonaio/daytona/pkg/cmd/provider"
 	. "github.com/daytonaio/daytona/pkg/cmd/server"
 	. "github.com/daytonaio/daytona/pkg/cmd/workspace"
 	log "github.com/sirupsen/logrus"
@@ -50,7 +50,7 @@ func Execute() {
 		rootCmd.AddCommand(ServerCmd)
 		rootCmd.AddCommand(ideCmd)
 		rootCmd.AddCommand(ProfileCmd)
-		rootCmd.AddCommand(PluginCmd)
+		rootCmd.AddCommand(ProviderCmd)
 	}
 
 	rootCmd.PersistentFlags().BoolP("help", "", false, "help for daytona")

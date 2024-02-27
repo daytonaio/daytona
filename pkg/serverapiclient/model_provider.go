@@ -14,34 +14,34 @@ import (
 	"encoding/json"
 )
 
-// checks if the AgentServicePlugin type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &AgentServicePlugin{}
+// checks if the Provider type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &Provider{}
 
-// AgentServicePlugin struct for AgentServicePlugin
-type AgentServicePlugin struct {
+// Provider struct for Provider
+type Provider struct {
 	Name *string `json:"name,omitempty"`
 	Version *string `json:"version,omitempty"`
 }
 
-// NewAgentServicePlugin instantiates a new AgentServicePlugin object
+// NewProvider instantiates a new Provider object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentServicePlugin() *AgentServicePlugin {
-	this := AgentServicePlugin{}
+func NewProvider() *Provider {
+	this := Provider{}
 	return &this
 }
 
-// NewAgentServicePluginWithDefaults instantiates a new AgentServicePlugin object
+// NewProviderWithDefaults instantiates a new Provider object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewAgentServicePluginWithDefaults() *AgentServicePlugin {
-	this := AgentServicePlugin{}
+func NewProviderWithDefaults() *Provider {
+	this := Provider{}
 	return &this
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
-func (o *AgentServicePlugin) GetName() string {
+func (o *Provider) GetName() string {
 	if o == nil || IsNil(o.Name) {
 		var ret string
 		return ret
@@ -51,7 +51,7 @@ func (o *AgentServicePlugin) GetName() string {
 
 // GetNameOk returns a tuple with the Name field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AgentServicePlugin) GetNameOk() (*string, bool) {
+func (o *Provider) GetNameOk() (*string, bool) {
 	if o == nil || IsNil(o.Name) {
 		return nil, false
 	}
@@ -59,7 +59,7 @@ func (o *AgentServicePlugin) GetNameOk() (*string, bool) {
 }
 
 // HasName returns a boolean if a field has been set.
-func (o *AgentServicePlugin) HasName() bool {
+func (o *Provider) HasName() bool {
 	if o != nil && !IsNil(o.Name) {
 		return true
 	}
@@ -68,12 +68,12 @@ func (o *AgentServicePlugin) HasName() bool {
 }
 
 // SetName gets a reference to the given string and assigns it to the Name field.
-func (o *AgentServicePlugin) SetName(v string) {
+func (o *Provider) SetName(v string) {
 	o.Name = &v
 }
 
 // GetVersion returns the Version field value if set, zero value otherwise.
-func (o *AgentServicePlugin) GetVersion() string {
+func (o *Provider) GetVersion() string {
 	if o == nil || IsNil(o.Version) {
 		var ret string
 		return ret
@@ -83,7 +83,7 @@ func (o *AgentServicePlugin) GetVersion() string {
 
 // GetVersionOk returns a tuple with the Version field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AgentServicePlugin) GetVersionOk() (*string, bool) {
+func (o *Provider) GetVersionOk() (*string, bool) {
 	if o == nil || IsNil(o.Version) {
 		return nil, false
 	}
@@ -91,7 +91,7 @@ func (o *AgentServicePlugin) GetVersionOk() (*string, bool) {
 }
 
 // HasVersion returns a boolean if a field has been set.
-func (o *AgentServicePlugin) HasVersion() bool {
+func (o *Provider) HasVersion() bool {
 	if o != nil && !IsNil(o.Version) {
 		return true
 	}
@@ -100,11 +100,11 @@ func (o *AgentServicePlugin) HasVersion() bool {
 }
 
 // SetVersion gets a reference to the given string and assigns it to the Version field.
-func (o *AgentServicePlugin) SetVersion(v string) {
+func (o *Provider) SetVersion(v string) {
 	o.Version = &v
 }
 
-func (o AgentServicePlugin) MarshalJSON() ([]byte, error) {
+func (o Provider) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -112,7 +112,7 @@ func (o AgentServicePlugin) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o AgentServicePlugin) ToMap() (map[string]interface{}, error) {
+func (o Provider) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
@@ -123,38 +123,38 @@ func (o AgentServicePlugin) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-type NullableAgentServicePlugin struct {
-	value *AgentServicePlugin
+type NullableProvider struct {
+	value *Provider
 	isSet bool
 }
 
-func (v NullableAgentServicePlugin) Get() *AgentServicePlugin {
+func (v NullableProvider) Get() *Provider {
 	return v.value
 }
 
-func (v *NullableAgentServicePlugin) Set(val *AgentServicePlugin) {
+func (v *NullableProvider) Set(val *Provider) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableAgentServicePlugin) IsSet() bool {
+func (v NullableProvider) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableAgentServicePlugin) Unset() {
+func (v *NullableProvider) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableAgentServicePlugin(val *AgentServicePlugin) *NullableAgentServicePlugin {
-	return &NullableAgentServicePlugin{value: val, isSet: true}
+func NewNullableProvider(val *Provider) *NullableProvider {
+	return &NullableProvider{value: val, isSet: true}
 }
 
-func (v NullableAgentServicePlugin) MarshalJSON() ([]byte, error) {
+func (v NullableProvider) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableAgentServicePlugin) UnmarshalJSON(src []byte) error {
+func (v *NullableProvider) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

@@ -20,7 +20,7 @@ import (
 	"github.com/gin-contrib/cors"
 
 	log_controller "github.com/daytonaio/daytona/pkg/server/api/controllers/log"
-	"github.com/daytonaio/daytona/pkg/server/api/controllers/plugin"
+	"github.com/daytonaio/daytona/pkg/server/api/controllers/provider"
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/server"
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/workspace"
 	"github.com/daytonaio/daytona/pkg/server/config"
@@ -77,14 +77,11 @@ func Start() error {
 		workspaceController.POST("/:workspaceId/:projectId/stop", workspace.StopProject)
 	}
 
-	pluginController := router.Group("/plugin")
+	providerController := router.Group("/provider")
 	{
-		pluginController.POST("/provider/install", plugin.InstallProviderPlugin)
-		pluginController.POST("/agent-service/install", plugin.InstallAgentServicePlugin)
-		pluginController.GET("/provider", plugin.ListProviderPlugins)
-		pluginController.GET("/agent-service", plugin.ListAgentServicePlugins)
-		pluginController.POST("/provider/:provider/uninstall", plugin.UninstallProviderPlugin)
-		pluginController.POST("/agent-service/:agent-service/uninstall", plugin.UninstallAgentServicePlugin)
+		providerController.POST("/install", provider.InstallProvider)
+		providerController.GET("/", provider.ListProviders)
+		providerController.POST("/:provider/uninstall", provider.UninstallProvider)
 	}
 
 	logController := router.Group("/log")

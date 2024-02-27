@@ -20,8 +20,8 @@ func ConfigurationForm(config *serverapiclient.ServerConfig) *serverapiclient.Se
 	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().
-				Title("Plugins Directory").
-				Value(config.PluginsDir).
+				Title("Providers Directory").
+				Value(config.ProvidersDir).
 				Validate(func(s string) error {
 					_, err := os.Stat(s)
 					if os.IsNotExist(err) {
@@ -31,8 +31,8 @@ func ConfigurationForm(config *serverapiclient.ServerConfig) *serverapiclient.Se
 					return err
 				}),
 			huh.NewInput().
-				Title("Plugin Registry URL").
-				Value(config.PluginRegistryUrl),
+				Title("Registry URL").
+				Value(config.RegistryUrl),
 			huh.NewInput().
 				Title("Server Download URL").
 				Value(config.ServerDownloadUrl),
