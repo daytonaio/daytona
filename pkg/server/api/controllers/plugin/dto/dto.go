@@ -2,10 +2,10 @@ package dto
 
 import "github.com/daytonaio/daytona/pkg/os"
 
-type ProvisionerPlugin struct {
+type ProviderPlugin struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
-} //	@name	ProvisionerPlugin
+} //	@name	ProviderPlugin
 
 type AgentServicePlugin struct {
 	Name    string `json:"name"`

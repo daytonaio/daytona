@@ -6,7 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Name** | Pointer to **string** |  | [optional] 
 **Projects** | Pointer to [**[]ProjectInfo**](ProjectInfo.md) |  | [optional] 
-**ProvisionerMetadata** | Pointer to **string** |  | [optional] 
+**ProviderMetadata** | Pointer to **string** |  | [optional] 
 
 ## Methods
 
@@ -77,30 +77,30 @@ SetProjects sets Projects field to given value.
 
 HasProjects returns a boolean if a field has been set.
 
-### GetProvisionerMetadata
+### GetProviderMetadata
 
-`func (o *WorkspaceInfo) GetProvisionerMetadata() string`
+`func (o *WorkspaceInfo) GetProviderMetadata() string`
 
-GetProvisionerMetadata returns the ProvisionerMetadata field if non-nil, zero value otherwise.
+GetProviderMetadata returns the ProviderMetadata field if non-nil, zero value otherwise.
 
-### GetProvisionerMetadataOk
+### GetProviderMetadataOk
 
-`func (o *WorkspaceInfo) GetProvisionerMetadataOk() (*string, bool)`
+`func (o *WorkspaceInfo) GetProviderMetadataOk() (*string, bool)`
 
-GetProvisionerMetadataOk returns a tuple with the ProvisionerMetadata field if it's non-nil, zero value otherwise
+GetProviderMetadataOk returns a tuple with the ProviderMetadata field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetProvisionerMetadata
+### SetProviderMetadata
 
-`func (o *WorkspaceInfo) SetProvisionerMetadata(v string)`
+`func (o *WorkspaceInfo) SetProviderMetadata(v string)`
 
-SetProvisionerMetadata sets ProvisionerMetadata field to given value.
+SetProviderMetadata sets ProviderMetadata field to given value.
 
-### HasProvisionerMetadata
+### HasProviderMetadata
 
-`func (o *WorkspaceInfo) HasProvisionerMetadata() bool`
+`func (o *WorkspaceInfo) HasProviderMetadata() bool`
 
-HasProvisionerMetadata returns a boolean if a field has been set.
+HasProviderMetadata returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

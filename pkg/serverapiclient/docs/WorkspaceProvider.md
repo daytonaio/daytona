@@ -1,4 +1,4 @@
-# WorkspaceProvisioner
+# WorkspaceProvider
 
 ## Properties
 
@@ -9,70 +9,70 @@ Name | Type | Description | Notes
 
 ## Methods
 
-### NewWorkspaceProvisioner
+### NewWorkspaceProvider
 
-`func NewWorkspaceProvisioner() *WorkspaceProvisioner`
+`func NewWorkspaceProvider() *WorkspaceProvider`
 
-NewWorkspaceProvisioner instantiates a new WorkspaceProvisioner object
+NewWorkspaceProvider instantiates a new WorkspaceProvider object
 This constructor will assign default values to properties that have it defined,
 and makes sure properties required by API are set, but the set of arguments
 will change when the set of required properties is changed
 
-### NewWorkspaceProvisionerWithDefaults
+### NewWorkspaceProviderWithDefaults
 
-`func NewWorkspaceProvisionerWithDefaults() *WorkspaceProvisioner`
+`func NewWorkspaceProviderWithDefaults() *WorkspaceProvider`
 
-NewWorkspaceProvisionerWithDefaults instantiates a new WorkspaceProvisioner object
+NewWorkspaceProviderWithDefaults instantiates a new WorkspaceProvider object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
 ### GetName
 
-`func (o *WorkspaceProvisioner) GetName() string`
+`func (o *WorkspaceProvider) GetName() string`
 
 GetName returns the Name field if non-nil, zero value otherwise.
 
 ### GetNameOk
 
-`func (o *WorkspaceProvisioner) GetNameOk() (*string, bool)`
+`func (o *WorkspaceProvider) GetNameOk() (*string, bool)`
 
 GetNameOk returns a tuple with the Name field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetName
 
-`func (o *WorkspaceProvisioner) SetName(v string)`
+`func (o *WorkspaceProvider) SetName(v string)`
 
 SetName sets Name field to given value.
 
 ### HasName
 
-`func (o *WorkspaceProvisioner) HasName() bool`
+`func (o *WorkspaceProvider) HasName() bool`
 
 HasName returns a boolean if a field has been set.
 
 ### GetProfile
 
-`func (o *WorkspaceProvisioner) GetProfile() string`
+`func (o *WorkspaceProvider) GetProfile() string`
 
 GetProfile returns the Profile field if non-nil, zero value otherwise.
 
 ### GetProfileOk
 
-`func (o *WorkspaceProvisioner) GetProfileOk() (*string, bool)`
+`func (o *WorkspaceProvider) GetProfileOk() (*string, bool)`
 
 GetProfileOk returns a tuple with the Profile field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetProfile
 
-`func (o *WorkspaceProvisioner) SetProfile(v string)`
+`func (o *WorkspaceProvider) SetProfile(v string)`
 
 SetProfile sets Profile field to given value.
 
 ### HasProfile
 
-`func (o *WorkspaceProvisioner) HasProfile() bool`
+`func (o *WorkspaceProvider) HasProfile() bool`
 
 HasProfile returns a boolean if a field has been set.
 

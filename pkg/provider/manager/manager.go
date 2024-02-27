@@ -1,4 +1,4 @@
-package provisioner_manager
+package manager
 
 import (
 	"errors"
@@ -8,8 +8,7 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util"
 	os_util "github.com/daytonaio/daytona/pkg/os"
-	"github.com/daytonaio/daytona/pkg/provisioner"
-	. "github.com/daytonaio/daytona/pkg/provisioner"
+	. "github.com/daytonaio/daytona/pkg/provider"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 	log "github.com/sirupsen/logrus"
@@ -22,16 +21,16 @@ type pluginRef struct {
 
 var pluginRefs map[string]*pluginRef = make(map[string]*pluginRef)
 
-var ProvisionerHandshakeConfig = plugin.HandshakeConfig{
+var ProviderHandshakeConfig = plugin.HandshakeConfig{
 	ProtocolVersion:  1,
-	MagicCookieKey:   "DAYTONA_PROVISIONER_PLUGIN",
-	MagicCookieValue: "daytona_provisioner",
+	MagicCookieKey:   "DAYTONA_PROVIDER_PLUGIN",
+	MagicCookieValue: "daytona_provider",
 }
 
-func GetProvisioner(name string) (*Provisioner, error) {
+func GetProvider(name string) (*Provider, error) {
 	pluginRef, ok := pluginRefs[name]
 	if !ok {
-		return nil, errors.New("provisioner not found")
+		return nil, errors.New("provider not found")
 	}
 
 	rpcClient, err := pluginRef.client.Client()
@@ -44,30 +43,30 @@ func GetProvisioner(name string) (*Provisioner, error) {
 		return nil, err
 	}
 
-	provisioner, ok := raw.(Provisioner)
+	provider, ok := raw.(Provider)
 	if !ok {
 		return nil, errors.New("unexpected type from plugin")
 	}
 
-	return &provisioner, nil
+	return &provider, nil
 }
 
-func GetProvisioners() map[string]Provisioner {
-	provisioners := make(map[string]Provisioner)
+func GetProviders() map[string]Provider {
+	providers := make(map[string]Provider)
 	for name := range pluginRefs {
-		provisioner, err := GetProvisioner(name)
+		provider, err := GetProvider(name)
 		if err != nil {
-			log.Printf("Error getting provisioner %s: %s", name, err)
+			log.Printf("Error getting provider %s: %s", name, err)
 			continue
 		}
 
-		provisioners[name] = *provisioner
+		providers[name] = *provider
 	}
 
-	return provisioners
+	return providers
 }
 
-func RegisterProvisioner(pluginPath, serverDownloadUrl, serverUrl, serverApiUrl string) error {
+func RegisterProvider(pluginPath, serverDownloadUrl, serverUrl, serverApiUrl string) error {
 	pluginName := path.Base(pluginPath)
 	pluginBasePath := path.Dir(pluginPath)
 
@@ -83,10 +82,10 @@ func RegisterProvisioner(pluginPath, serverDownloadUrl, serverUrl, serverApiUrl 
 	})
 
 	pluginMap := map[string]plugin.Plugin{}
-	pluginMap[pluginName] = &ProvisionerPlugin{}
+	pluginMap[pluginName] = &ProviderPlugin{}
 
 	client := plugin.NewClient(&plugin.ClientConfig{
-		HandshakeConfig: ProvisionerHandshakeConfig,
+		HandshakeConfig: ProviderHandshakeConfig,
 		Plugins:         pluginMap,
 		Cmd:             exec.Command(pluginPath),
 		Logger:          logger,
@@ -98,14 +97,14 @@ func RegisterProvisioner(pluginPath, serverDownloadUrl, serverUrl, serverApiUrl 
 		path:   pluginBasePath,
 	}
 
-	log.Infof("Provisioner %s registered", pluginName)
+	log.Infof("Provider %s registered", pluginName)
 
-	p, err := GetProvisioner(pluginName)
+	p, err := GetProvider(pluginName)
 	if err != nil {
-		return errors.New("failed to initialize provisioner: " + err.Error())
+		return errors.New("failed to initialize provider: " + err.Error())
 	}
 
-	_, err = (*p).Initialize(provisioner.InitializeProvisionerRequest{
+	_, err = (*p).Initialize(InitializeProviderRequest{
 		BasePath:          pluginBasePath,
 		ServerDownloadUrl: serverDownloadUrl,
 		// TODO: get version from somewhere
@@ -114,24 +113,24 @@ func RegisterProvisioner(pluginPath, serverDownloadUrl, serverUrl, serverApiUrl 
 		ServerApiUrl:  serverApiUrl,
 	})
 	if err != nil {
-		return errors.New("failed to initialize provisioner: " + err.Error())
+		return errors.New("failed to initialize provider: " + err.Error())
 	}
 
-	log.Infof("Provisioner %s initialized", pluginName)
+	log.Infof("Provider %s initialized", pluginName)
 
 	return nil
 }
 
-func UninstallProvisioner(name string) error {
+func UninstallProvider(name string) error {
 	pluginRef, ok := pluginRefs[name]
 	if !ok {
-		return errors.New("provisioner not found")
+		return errors.New("provider not found")
 	}
 	pluginRef.client.Kill()
 
 	err := os.RemoveAll(pluginRef.path)
 	if err != nil {
-		return errors.New("failed to remove provisioner: " + err.Error())
+		return errors.New("failed to remove provider: " + err.Error())
 	}
 
 	delete(pluginRefs, name)

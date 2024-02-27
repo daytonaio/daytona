@@ -14,34 +14,34 @@ import (
 	"encoding/json"
 )
 
-// checks if the ProvisionerPlugin type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &ProvisionerPlugin{}
+// checks if the ProviderPlugin type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &ProviderPlugin{}
 
-// ProvisionerPlugin struct for ProvisionerPlugin
-type ProvisionerPlugin struct {
+// ProviderPlugin struct for ProviderPlugin
+type ProviderPlugin struct {
 	Name *string `json:"name,omitempty"`
 	Version *string `json:"version,omitempty"`
 }
 
-// NewProvisionerPlugin instantiates a new ProvisionerPlugin object
+// NewProviderPlugin instantiates a new ProviderPlugin object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProvisionerPlugin() *ProvisionerPlugin {
-	this := ProvisionerPlugin{}
+func NewProviderPlugin() *ProviderPlugin {
+	this := ProviderPlugin{}
 	return &this
 }
 
-// NewProvisionerPluginWithDefaults instantiates a new ProvisionerPlugin object
+// NewProviderPluginWithDefaults instantiates a new ProviderPlugin object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewProvisionerPluginWithDefaults() *ProvisionerPlugin {
-	this := ProvisionerPlugin{}
+func NewProviderPluginWithDefaults() *ProviderPlugin {
+	this := ProviderPlugin{}
 	return &this
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
-func (o *ProvisionerPlugin) GetName() string {
+func (o *ProviderPlugin) GetName() string {
 	if o == nil || IsNil(o.Name) {
 		var ret string
 		return ret
@@ -51,7 +51,7 @@ func (o *ProvisionerPlugin) GetName() string {
 
 // GetNameOk returns a tuple with the Name field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ProvisionerPlugin) GetNameOk() (*string, bool) {
+func (o *ProviderPlugin) GetNameOk() (*string, bool) {
 	if o == nil || IsNil(o.Name) {
 		return nil, false
 	}
@@ -59,7 +59,7 @@ func (o *ProvisionerPlugin) GetNameOk() (*string, bool) {
 }
 
 // HasName returns a boolean if a field has been set.
-func (o *ProvisionerPlugin) HasName() bool {
+func (o *ProviderPlugin) HasName() bool {
 	if o != nil && !IsNil(o.Name) {
 		return true
 	}
@@ -68,12 +68,12 @@ func (o *ProvisionerPlugin) HasName() bool {
 }
 
 // SetName gets a reference to the given string and assigns it to the Name field.
-func (o *ProvisionerPlugin) SetName(v string) {
+func (o *ProviderPlugin) SetName(v string) {
 	o.Name = &v
 }
 
 // GetVersion returns the Version field value if set, zero value otherwise.
-func (o *ProvisionerPlugin) GetVersion() string {
+func (o *ProviderPlugin) GetVersion() string {
 	if o == nil || IsNil(o.Version) {
 		var ret string
 		return ret
@@ -83,7 +83,7 @@ func (o *ProvisionerPlugin) GetVersion() string {
 
 // GetVersionOk returns a tuple with the Version field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ProvisionerPlugin) GetVersionOk() (*string, bool) {
+func (o *ProviderPlugin) GetVersionOk() (*string, bool) {
 	if o == nil || IsNil(o.Version) {
 		return nil, false
 	}
@@ -91,7 +91,7 @@ func (o *ProvisionerPlugin) GetVersionOk() (*string, bool) {
 }
 
 // HasVersion returns a boolean if a field has been set.
-func (o *ProvisionerPlugin) HasVersion() bool {
+func (o *ProviderPlugin) HasVersion() bool {
 	if o != nil && !IsNil(o.Version) {
 		return true
 	}
@@ -100,11 +100,11 @@ func (o *ProvisionerPlugin) HasVersion() bool {
 }
 
 // SetVersion gets a reference to the given string and assigns it to the Version field.
-func (o *ProvisionerPlugin) SetVersion(v string) {
+func (o *ProviderPlugin) SetVersion(v string) {
 	o.Version = &v
 }
 
-func (o ProvisionerPlugin) MarshalJSON() ([]byte, error) {
+func (o ProviderPlugin) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -112,7 +112,7 @@ func (o ProvisionerPlugin) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o ProvisionerPlugin) ToMap() (map[string]interface{}, error) {
+func (o ProviderPlugin) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
@@ -123,38 +123,38 @@ func (o ProvisionerPlugin) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-type NullableProvisionerPlugin struct {
-	value *ProvisionerPlugin
+type NullableProviderPlugin struct {
+	value *ProviderPlugin
 	isSet bool
 }
 
-func (v NullableProvisionerPlugin) Get() *ProvisionerPlugin {
+func (v NullableProviderPlugin) Get() *ProviderPlugin {
 	return v.value
 }
 
-func (v *NullableProvisionerPlugin) Set(val *ProvisionerPlugin) {
+func (v *NullableProviderPlugin) Set(val *ProviderPlugin) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableProvisionerPlugin) IsSet() bool {
+func (v NullableProviderPlugin) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableProvisionerPlugin) Unset() {
+func (v *NullableProviderPlugin) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableProvisionerPlugin(val *ProvisionerPlugin) *NullableProvisionerPlugin {
-	return &NullableProvisionerPlugin{value: val, isSet: true}
+func NewNullableProviderPlugin(val *ProviderPlugin) *NullableProviderPlugin {
+	return &NullableProviderPlugin{value: val, isSet: true}
 }
 
-func (v NullableProvisionerPlugin) MarshalJSON() ([]byte, error) {
+func (v NullableProviderPlugin) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableProvisionerPlugin) UnmarshalJSON(src []byte) error {
+func (v *NullableProviderPlugin) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

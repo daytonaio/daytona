@@ -5,11 +5,11 @@ All URIs are relative to *http://localhost:3000*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**InstallAgentServicePlugin**](PluginAPI.md#InstallAgentServicePlugin) | **Post** /plugin/agent-service/install | Install an agent service plugin
-[**InstallProvisionerPlugin**](PluginAPI.md#InstallProvisionerPlugin) | **Post** /plugin/provisioner/install | Install a provisioner plugin
+[**InstallProviderPlugin**](PluginAPI.md#InstallProviderPlugin) | **Post** /plugin/provider/install | Install a provider plugin
 [**ListAgentServicePlugins**](PluginAPI.md#ListAgentServicePlugins) | **Get** /plugin/agent-service | List agent service plugins
-[**ListProvisionerPlugins**](PluginAPI.md#ListProvisionerPlugins) | **Get** /plugin/provisioner | List provisioner plugins
+[**ListProviderPlugins**](PluginAPI.md#ListProviderPlugins) | **Get** /plugin/provider | List provider plugins
 [**UninstallAgentServicePlugin**](PluginAPI.md#UninstallAgentServicePlugin) | **Post** /plugin/agent-service/uninstall | Uninstall an agent service plugin
-[**UninstallProvisionerPlugin**](PluginAPI.md#UninstallProvisionerPlugin) | **Post** /plugin/provisioner/{provisioner}/uninstall | Uninstall a provisioner plugin
+[**UninstallProviderPlugin**](PluginAPI.md#UninstallProviderPlugin) | **Post** /plugin/provider/{provider}/uninstall | Uninstall a provider plugin
 
 
 
@@ -77,11 +77,11 @@ No authorization required
 [[Back to README]](../README.md)
 
 
-## InstallProvisionerPlugin
+## InstallProviderPlugin
 
-> InstallProvisionerPlugin(ctx).Plugin(plugin).Execute()
+> InstallProviderPlugin(ctx).Plugin(plugin).Execute()
 
-Install a provisioner plugin
+Install a provider plugin
 
 
 
@@ -102,9 +102,9 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.PluginAPI.InstallProvisionerPlugin(context.Background()).Plugin(plugin).Execute()
+	r, err := apiClient.PluginAPI.InstallProviderPlugin(context.Background()).Plugin(plugin).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `PluginAPI.InstallProvisionerPlugin``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `PluginAPI.InstallProviderPlugin``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
 }
@@ -116,7 +116,7 @@ func main() {
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiInstallProvisionerPluginRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiInstallProviderPluginRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
@@ -202,11 +202,11 @@ No authorization required
 [[Back to README]](../README.md)
 
 
-## ListProvisionerPlugins
+## ListProviderPlugins
 
-> []ProvisionerPlugin ListProvisionerPlugins(ctx).Execute()
+> []ProviderPlugin ListProviderPlugins(ctx).Execute()
 
-List provisioner plugins
+List provider plugins
 
 
 
@@ -226,13 +226,13 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.PluginAPI.ListProvisionerPlugins(context.Background()).Execute()
+	resp, r, err := apiClient.PluginAPI.ListProviderPlugins(context.Background()).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `PluginAPI.ListProvisionerPlugins``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `PluginAPI.ListProviderPlugins``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `ListProvisionerPlugins`: []ProvisionerPlugin
-	fmt.Fprintf(os.Stdout, "Response from `PluginAPI.ListProvisionerPlugins`: %v\n", resp)
+	// response from `ListProviderPlugins`: []ProviderPlugin
+	fmt.Fprintf(os.Stdout, "Response from `PluginAPI.ListProviderPlugins`: %v\n", resp)
 }
 ```
 
@@ -242,12 +242,12 @@ This endpoint does not need any parameter.
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiListProvisionerPluginsRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiListProviderPluginsRequest struct via the builder pattern
 
 
 ### Return type
 
-[**[]ProvisionerPlugin**](ProvisionerPlugin.md)
+[**[]ProviderPlugin**](ProviderPlugin.md)
 
 ### Authorization
 
@@ -331,11 +331,11 @@ No authorization required
 [[Back to README]](../README.md)
 
 
-## UninstallProvisionerPlugin
+## UninstallProviderPlugin
 
-> UninstallProvisionerPlugin(ctx, provisioner).Execute()
+> UninstallProviderPlugin(ctx, provider).Execute()
 
-Uninstall a provisioner plugin
+Uninstall a provider plugin
 
 
 
@@ -352,13 +352,13 @@ import (
 )
 
 func main() {
-	provisioner := "provisioner_example" // string | Provisioner to uninstall
+	provider := "provider_example" // string | Provider to uninstall
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.PluginAPI.UninstallProvisionerPlugin(context.Background(), provisioner).Execute()
+	r, err := apiClient.PluginAPI.UninstallProviderPlugin(context.Background(), provider).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `PluginAPI.UninstallProvisionerPlugin``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `PluginAPI.UninstallProviderPlugin``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
 }
@@ -370,11 +370,11 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**provisioner** | **string** | Provisioner to uninstall | 
+**provider** | **string** | Provider to uninstall | 
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiUninstallProvisionerPluginRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiUninstallProviderPluginRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes

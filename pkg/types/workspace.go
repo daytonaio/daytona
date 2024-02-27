@@ -23,30 +23,30 @@ type Project struct {
 	ApiKey      string      `json:"-"`
 } // @name Project
 
-type WorkspaceProvisioner struct {
+type WorkspaceProvider struct {
 	Name    string `json:"name"`
 	Profile string `json:"profile"`
-} // @name WorkspaceProvisioner
+} // @name WorkspaceProvider
 
 type Workspace struct {
-	Id          string                `json:"id"`
-	Name        string                `json:"name"`
-	Projects    []*Project            `json:"projects"`
-	Provisioner *WorkspaceProvisioner `json:"provisioner"`
+	Id       string             `json:"id"`
+	Name     string             `json:"name"`
+	Projects []*Project         `json:"projects"`
+	Provider *WorkspaceProvider `json:"provider"`
 } // @name Workspace
 
 type ProjectInfo struct {
-	Name                string `json:"name"`
-	Created             string `json:"created"`
-	Started             string `json:"started"`
-	Finished            string `json:"finished"`
-	IsRunning           bool   `json:"isRunning"`
-	ProvisionerMetadata string `json:"provisionerMetadata,omitempty"`
-	WorkspaceId         string `json:"workspaceId"`
+	Name             string `json:"name"`
+	Created          string `json:"created"`
+	Started          string `json:"started"`
+	Finished         string `json:"finished"`
+	IsRunning        bool   `json:"isRunning"`
+	ProviderMetadata string `json:"providerMetadata,omitempty"`
+	WorkspaceId      string `json:"workspaceId"`
 } // @name ProjectInfo
 
 type WorkspaceInfo struct {
-	Name                string         `json:"name"`
-	Projects            []*ProjectInfo `json:"projects"`
-	ProvisionerMetadata string         `json:"provisionerMetadata,omitempty"`
+	Name             string         `json:"name"`
+	Projects         []*ProjectInfo `json:"projects"`
+	ProviderMetadata string         `json:"providerMetadata,omitempty"`
 } // @name WorkspaceInfo

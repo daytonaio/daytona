@@ -1,4 +1,4 @@
-package provisioner
+package provider
 
 import (
 	"net/rpc"
@@ -7,17 +7,17 @@ import (
 	"github.com/hashicorp/go-plugin"
 )
 
-type ProvisionerProfile struct {
+type ProviderProfile struct {
 	Name   string
 	Config interface{}
 }
 
-type ProvisionerInfo struct {
+type ProviderInfo struct {
 	Name    string
 	Version string
 }
 
-type InitializeProvisionerRequest struct {
+type InitializeProviderRequest struct {
 	BasePath          string
 	ServerDownloadUrl string
 	ServerVersion     string
@@ -25,9 +25,9 @@ type InitializeProvisionerRequest struct {
 	ServerApiUrl      string
 }
 
-type Provisioner interface {
-	Initialize(InitializeProvisionerRequest) (*types.Empty, error)
-	GetInfo() (ProvisionerInfo, error)
+type Provider interface {
+	Initialize(InitializeProviderRequest) (*types.Empty, error)
+	GetInfo() (ProviderInfo, error)
 
 	//	client side profile config wizard
 	Configure() (interface{}, error)
@@ -55,14 +55,14 @@ type Provisioner interface {
 	GetProjectInfo(project *types.Project) (*types.ProjectInfo, error)
 }
 
-type ProvisionerPlugin struct {
-	Impl Provisioner
+type ProviderPlugin struct {
+	Impl Provider
 }
 
-func (p *ProvisionerPlugin) Server(*plugin.MuxBroker) (interface{}, error) {
-	return &ProvisionerRPCServer{Impl: p.Impl}, nil
+func (p *ProviderPlugin) Server(*plugin.MuxBroker) (interface{}, error) {
+	return &ProviderRPCServer{Impl: p.Impl}, nil
 }
 
-func (p *ProvisionerPlugin) Client(b *plugin.MuxBroker, c *rpc.Client) (interface{}, error) {
-	return &ProvisionerRPCClient{client: c}, nil
+func (p *ProviderPlugin) Client(b *plugin.MuxBroker, c *rpc.Client) (interface{}, error) {
+	return &ProviderRPCClient{client: c}, nil
 }

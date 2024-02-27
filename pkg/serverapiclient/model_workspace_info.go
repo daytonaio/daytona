@@ -21,7 +21,7 @@ var _ MappedNullable = &WorkspaceInfo{}
 type WorkspaceInfo struct {
 	Name *string `json:"name,omitempty"`
 	Projects []ProjectInfo `json:"projects,omitempty"`
-	ProvisionerMetadata *string `json:"provisionerMetadata,omitempty"`
+	ProviderMetadata *string `json:"providerMetadata,omitempty"`
 }
 
 // NewWorkspaceInfo instantiates a new WorkspaceInfo object
@@ -105,36 +105,36 @@ func (o *WorkspaceInfo) SetProjects(v []ProjectInfo) {
 	o.Projects = v
 }
 
-// GetProvisionerMetadata returns the ProvisionerMetadata field value if set, zero value otherwise.
-func (o *WorkspaceInfo) GetProvisionerMetadata() string {
-	if o == nil || IsNil(o.ProvisionerMetadata) {
+// GetProviderMetadata returns the ProviderMetadata field value if set, zero value otherwise.
+func (o *WorkspaceInfo) GetProviderMetadata() string {
+	if o == nil || IsNil(o.ProviderMetadata) {
 		var ret string
 		return ret
 	}
-	return *o.ProvisionerMetadata
+	return *o.ProviderMetadata
 }
 
-// GetProvisionerMetadataOk returns a tuple with the ProvisionerMetadata field value if set, nil otherwise
+// GetProviderMetadataOk returns a tuple with the ProviderMetadata field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *WorkspaceInfo) GetProvisionerMetadataOk() (*string, bool) {
-	if o == nil || IsNil(o.ProvisionerMetadata) {
+func (o *WorkspaceInfo) GetProviderMetadataOk() (*string, bool) {
+	if o == nil || IsNil(o.ProviderMetadata) {
 		return nil, false
 	}
-	return o.ProvisionerMetadata, true
+	return o.ProviderMetadata, true
 }
 
-// HasProvisionerMetadata returns a boolean if a field has been set.
-func (o *WorkspaceInfo) HasProvisionerMetadata() bool {
-	if o != nil && !IsNil(o.ProvisionerMetadata) {
+// HasProviderMetadata returns a boolean if a field has been set.
+func (o *WorkspaceInfo) HasProviderMetadata() bool {
+	if o != nil && !IsNil(o.ProviderMetadata) {
 		return true
 	}
 
 	return false
 }
 
-// SetProvisionerMetadata gets a reference to the given string and assigns it to the ProvisionerMetadata field.
-func (o *WorkspaceInfo) SetProvisionerMetadata(v string) {
-	o.ProvisionerMetadata = &v
+// SetProviderMetadata gets a reference to the given string and assigns it to the ProviderMetadata field.
+func (o *WorkspaceInfo) SetProviderMetadata(v string) {
+	o.ProviderMetadata = &v
 }
 
 func (o WorkspaceInfo) MarshalJSON() ([]byte, error) {
@@ -153,8 +153,8 @@ func (o WorkspaceInfo) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Projects) {
 		toSerialize["projects"] = o.Projects
 	}
-	if !IsNil(o.ProvisionerMetadata) {
-		toSerialize["provisionerMetadata"] = o.ProvisionerMetadata
+	if !IsNil(o.ProviderMetadata) {
+		toSerialize["providerMetadata"] = o.ProviderMetadata
 	}
 	return toSerialize, nil
 }

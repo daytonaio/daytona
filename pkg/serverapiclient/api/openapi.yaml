@@ -60,26 +60,26 @@ paths:
       summary: Uninstall an agent service plugin
       tags:
       - plugin
-  /plugin/provisioner:
+  /plugin/provider:
     get:
-      description: List provisioner plugins
-      operationId: ListProvisionerPlugins
+      description: List provider plugins
+      operationId: ListProviderPlugins
       responses:
         "200":
           content:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/ProvisionerPlugin'
+                  $ref: '#/components/schemas/ProviderPlugin'
                 type: array
           description: OK
-      summary: List provisioner plugins
+      summary: List provider plugins
       tags:
       - plugin
-  /plugin/provisioner/install:
+  /plugin/provider/install:
     post:
-      description: Install a provisioner plugin
-      operationId: InstallProvisionerPlugin
+      description: Install a provider plugin
+      operationId: InstallProviderPlugin
       requestBody:
         content:
           application/json:
@@ -91,18 +91,18 @@ paths:
         "200":
           content: {}
           description: OK
-      summary: Install a provisioner plugin
+      summary: Install a provider plugin
       tags:
       - plugin
       x-codegen-request-body-name: plugin
-  /plugin/provisioner/{provisioner}/uninstall:
+  /plugin/provider/{provider}/uninstall:
     post:
-      description: Uninstall a provisioner plugin
-      operationId: UninstallProvisionerPlugin
+      description: Uninstall a provider plugin
+      operationId: UninstallProviderPlugin
       parameters:
-      - description: Provisioner to uninstall
+      - description: Provider to uninstall
         in: path
-        name: provisioner
+        name: provider
         required: true
         schema:
           type: string
@@ -110,7 +110,7 @@ paths:
         "200":
           content: {}
           description: OK
-      summary: Uninstall a provisioner plugin
+      summary: Uninstall a provider plugin
       tags:
       - plugin
   /server/config:
@@ -335,7 +335,7 @@ components:
       type: object
     CreateWorkspace:
       example:
-        provisioner: provisioner
+        provider: provider
         repositories:
         - repositories
         - repositories
@@ -343,7 +343,7 @@ components:
       properties:
         name:
           type: string
-        provisioner:
+        provider:
           type: string
         repositories:
           items:
@@ -418,10 +418,10 @@ components:
       type: object
     ProjectInfo:
       example:
+        providerMetadata: providerMetadata
         isRunning: true
         created: created
         name: name
-        provisionerMetadata: provisionerMetadata
         finished: finished
         started: started
         workspaceId: workspaceId
@@ -434,14 +434,14 @@ components:
           type: boolean
         name:
           type: string
-        provisionerMetadata:
+        providerMetadata:
           type: string
         started:
           type: string
         workspaceId:
           type: string
       type: object
-    ProvisionerPlugin:
+    ProviderPlugin:
       example:
         name: name
         version: version
@@ -517,9 +517,6 @@ components:
       type: object
     Workspace:
       example:
-        provisioner:
-          profile: profile
-          name: name
         projects:
         - name: name
           repository:
@@ -541,6 +538,9 @@ components:
             sha: sha
             url: url
           workspaceId: workspaceId
+        provider:
+          profile: profile
+          name: name
         name: name
         id: id
       properties:
@@ -552,28 +552,28 @@ components:
           items:
             $ref: '#/components/schemas/Project'
           type: array
-        provisioner:
-          $ref: '#/components/schemas/WorkspaceProvisioner'
+        provider:
+          $ref: '#/components/schemas/WorkspaceProvider'
       type: object
     WorkspaceInfo:
       example:
         projects:
-        - isRunning: true
+        - providerMetadata: providerMetadata
+          isRunning: true
           created: created
           name: name
-          provisionerMetadata: provisionerMetadata
           finished: finished
           started: started
           workspaceId: workspaceId
-        - isRunning: true
+        - providerMetadata: providerMetadata
+          isRunning: true
           created: created
           name: name
-          provisionerMetadata: provisionerMetadata
           finished: finished
           started: started
           workspaceId: workspaceId
+        providerMetadata: providerMetadata
         name: name
-        provisionerMetadata: provisionerMetadata
       properties:
         name:
           type: string
@@ -581,10 +581,10 @@ components:
           items:
             $ref: '#/components/schemas/ProjectInfo'
           type: array
-        provisionerMetadata:
+        providerMetadata:
           type: string
       type: object
-    WorkspaceProvisioner:
+    WorkspaceProvider:
       example:
         profile: profile
         name: name

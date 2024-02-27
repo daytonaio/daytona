@@ -26,7 +26,7 @@ type PluginViewDTO struct {
 }
 
 const (
-	PluginTypeProvisioner  PluginType = "Provisioner"
+	PluginTypeProvider     PluginType = "Provider"
 	PluginTypeAgentService PluginType = "Agent Service"
 )
 

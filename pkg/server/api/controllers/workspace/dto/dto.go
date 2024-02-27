@@ -3,5 +3,5 @@ package dto
 type CreateWorkspace struct {
 	Name         string
 	Repositories []string
-	Provisioner  string
+	Provider     string
 } //	@name	CreateWorkspace

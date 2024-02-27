@@ -54,13 +54,13 @@ func GetAgentService(name string) (*AgentService, error) {
 func GetAgentServices() map[string]AgentService {
 	projectAgents := make(map[string]AgentService)
 	for name := range pluginRefs {
-		provisioner, err := GetAgentService(name)
+		provider, err := GetAgentService(name)
 		if err != nil {
 			log.Printf("Error getting agent service %s: %s", name, err)
 			continue
 		}
 
-		projectAgents[name] = *provisioner
+		projectAgents[name] = *provider
 	}
 
 	return projectAgents
@@ -94,21 +94,21 @@ func RegisterAgentService(pluginPath string) error {
 
 	log.Printf("Project Agent %s registered", pluginName)
 
-	log.Infof("Provisioner %s registered", pluginName)
+	log.Infof("Provider %s registered", pluginName)
 
 	projectAgent, err := GetAgentService(pluginName)
 	if err != nil {
-		return errors.New("failed to initialize provisioner: " + err.Error())
+		return errors.New("failed to initialize provider: " + err.Error())
 	}
 
 	_, err = (*projectAgent).Initialize(agent_service.InitializeAgentServiceRequest{
 		BasePath: pluginBasePath,
 	})
 	if err != nil {
-		return errors.New("failed to initialize provisioner: " + err.Error())
+		return errors.New("failed to initialize provider: " + err.Error())
 	}
 
-	log.Infof("Provisioner %s initialized", pluginName)
+	log.Infof("Provider %s initialized", pluginName)
 
 	return nil
 }
