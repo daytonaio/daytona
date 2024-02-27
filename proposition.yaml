@@ -1,0 +1,43 @@
+/assets:
+  - ... slike iz /public
+
+/cmd:
+  /daytona:
+    /main.go: iz /cli/cmd/main.go
+    /config:
+      - ...
+    /connection:
+      - ...
+
+/pkg:
+  /types:
+    - ... ostaje isto
+  /os:
+    /os.og: -
+  /apiclient: SERVER OPEN API CLIENT
+  /providers:
+    - to je /plugins/provisioners
+  /plugins:
+    - ... CLI PLUGINS
+  # /plugins:
+  #   - ... ostaje isto
+  #   /utils/log_writer.go: negdi drugo
+  /cmd: cobra komande
+  /views: iz /cli/cmd/views
+  /agent:
+    - ... ostaje isto
+  /server:
+    - ... ostaje isto
+  /remoteinstaller: iz /cli/remote_installer
+
+/hack:
+  /project-image: null
+    - kickaj code-server
+  /swagger.sh: null
+  /get-server.sh: null
+
+/internal:
+  /scripts/server: obrisat
+  /util:
+    - ... podilit di triba ic, previse utila za jedan util package
+    /api_client.go: iz /cli/api - ovo je cisti internal util

@@ -1,6 +1,6 @@
 build
 DEV_WORKSPACES
-daytona
+./daytona
 .DS_Store
 
 tmp

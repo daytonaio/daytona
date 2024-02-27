@@ -8,21 +8,22 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/daytonaio/daytona/cli/api"
-	"github.com/daytonaio/daytona/cli/config"
+	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 )
 
 func GetFirstWorkspaceProjectName(workspaceId string, projectName string, profile *config.Profile) (string, error) {
 	ctx := context.Background()
 
-	apiClient, err := api.GetServerApiClient(profile)
+	apiClient, err := server.GetApiClient(profile)
 	if err != nil {
 		return "", err
 	}
 
 	wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspaceInfo(ctx, workspaceId).Execute()
 	if err != nil {
-		return "", api.HandleErrorResponse(res, err)
+		return "", apiclient.HandleErrorResponse(res, err)
 	}
 
 	if projectName == "" {
