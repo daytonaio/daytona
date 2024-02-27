@@ -1,0 +1,22 @@
+{
+  "provisionerPlugins": {
+    "docker-provisioner": {
+      "default": true,
+      "versions": {
+        "latest": {
+          "downloadUrls": {
+            "linux-amd64": "https://download.daytona.io/daytona/plugins/docker-provisioner/latest/docker-provisioner-linux-amd64",
+            "darwin-amd64": "https://download.daytona.io/daytona/plugins/docker-provisioner/latest/docker-provisioner-darwin-amd64",
+            "windows-amd64": "https://download.daytona.io/daytona/plugins/docker-provisioner/latest/docker-provisioner-windows-amd64",
+            "linux-arm64": "https://download.daytona.io/daytona/plugins/docker-provisioner/latest/docker-provisioner-linux-arm64",
+            "darwin-arm64": "https://download.daytona.io/daytona/plugins/docker-provisioner/latest/docker-provisioner-darwin-arm64",
+            "windows-arm64": "https://download.daytona.io/daytona/plugins/docker-provisioner/latest/docker-provisioner-windows-arm64"
+          }
+        }
+      }
+    }
+  },
+  "agentServicePlugins": {
+
+  }
+}
