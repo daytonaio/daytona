@@ -8,12 +8,15 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"runtime"
 	"strings"
 )
 
+var sshHomeDir string
+
 func ensureSshFilesLinked() error {
 	// Make sure ~/.ssh/config file exists
-	sshDir := path.Join(os.Getenv("HOME"), ".ssh")
+	sshDir := path.Join(sshHomeDir, ".ssh")
 	configPath := path.Join(sshDir, "config")
 
 	_, err := os.Stat(configPath)
@@ -100,7 +103,7 @@ func EnsureSshConfigEntryAdded(profileId, workspaceName, projectName string) err
 	}
 
 	// Make sure ~/.ssh/config file exists
-	sshDir := path.Join(os.Getenv("HOME"), ".ssh")
+	sshDir := path.Join(sshHomeDir, ".ssh")
 	configPath := path.Join(sshDir, "daytona_config")
 
 	// Read existing content from the file
@@ -132,7 +135,7 @@ func EnsureSshConfigEntryAdded(profileId, workspaceName, projectName string) err
 }
 
 func RemoveWorkspaceSshEntries(profileId, workspaceName string) error {
-	sshDir := path.Join(os.Getenv("HOME"), ".ssh")
+	sshDir := path.Join(sshHomeDir, ".ssh")
 	configPath := path.Join(sshDir, "daytona_config")
 
 	// Read existing content from the file
@@ -163,4 +166,12 @@ func RemoveWorkspaceSshEntries(profileId, workspaceName string) error {
 
 func GetProjectHostname(profileId, workspaceName, projectName string) string {
 	return fmt.Sprintf("%s-%s-%s", profileId, workspaceName, projectName)
+}
+
+func init() {
+	if runtime.GOOS == "windows" {
+		sshHomeDir = os.Getenv("USERPROFILE")
+	} else {
+		sshHomeDir = os.Getenv("HOME")
+	}
 }

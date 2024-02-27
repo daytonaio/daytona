@@ -10,10 +10,17 @@ ARCH=$(uname -m)
 # Check operating system
 OS=$(uname -s)
 
+if [ "$OS" == "" ]; then
+  OS=$(ver)
+  ARCH=$(echo %PROCESSOR_ARCHITECTURE%)
+fi
+
 if [ "$OS" == "Darwin" ]; then
   FILENAME="darwin"
 elif [ "$OS" == "Linux" ]; then
   FILENAME="linux"
+elif [[ $OS == *"Windows"* ]]; then
+  FILENAME="windows"
 else
   echo "Unsupported operating system: $OS"
   exit 1
@@ -21,7 +28,11 @@ fi
 
 if [ "$ARCH" == "arm64" ]; then
   FILENAME=$(echo "$FILENAME-arm64")
+elif [ "$ARCH" == "ARM64" ]; then
+  FILENAME=$(echo "$FILENAME-arm64")
 elif [ "$ARCH" == "x86_64" ]; then
+  FILENAME=$(echo "$FILENAME-amd64")
+elif [ "$ARCH" == "AMD64" ]; then
   FILENAME=$(echo "$FILENAME-amd64")
 elif [ "$ARCH" == "aarch64" ]; then
   FILENAME=$(echo "$FILENAME-arm64")

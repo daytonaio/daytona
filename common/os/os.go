@@ -8,10 +8,12 @@ import (
 type OperatingSystem string
 
 const (
-	Linux_64_86  OperatingSystem = "linux-amd64"
-	Linux_arm64  OperatingSystem = "linux-arm64"
-	Darwin_64_86 OperatingSystem = "darwin-amd64"
-	Darwin_arm64 OperatingSystem = "darwin-arm64"
+	Linux_64_86   OperatingSystem = "linux-amd64"
+	Linux_arm64   OperatingSystem = "linux-arm64"
+	Darwin_64_86  OperatingSystem = "darwin-amd64"
+	Darwin_arm64  OperatingSystem = "darwin-arm64"
+	Windows_64_86 OperatingSystem = "windows-amd64"
+	Windows_arm64 OperatingSystem = "windows-arm64"
 )
 
 func OSFromUnameA(unameA string) (*OperatingSystem, error) {
@@ -34,5 +36,17 @@ func OSFromUnameA(unameA string) (*OperatingSystem, error) {
 		return &arch, nil
 	} else {
 		return nil, fmt.Errorf("unsupported architecture in uname -a output")
+	}
+}
+
+func OSFromEchoProcessor(output string) (*OperatingSystem, error) {
+	if strings.Contains(output, "ARM64") {
+		arch := Windows_arm64
+		return &arch, nil
+	} else if strings.Contains(output, "AMD64") || strings.Contains(output, "Intel") {
+		arch := Windows_64_86
+		return &arch, nil
+	} else {
+		return nil, fmt.Errorf("unsupported architecture in echo PROCESSOR_ARCHITECTURE output")
 	}
 }
