@@ -9,8 +9,8 @@ Name | Type | Description | Notes
 **GitProviders** | Pointer to [**[]GitProvider**](GitProvider.md) |  | [optional] 
 **HeadscalePort** | Pointer to **int32** |  | [optional] 
 **Id** | Pointer to **string** |  | [optional] 
-**PluginRegistryUrl** | Pointer to **string** |  | [optional] 
-**PluginsDir** | Pointer to **string** |  | [optional] 
+**ProvidersDir** | Pointer to **string** |  | [optional] 
+**RegistryUrl** | Pointer to **string** |  | [optional] 
 **ServerDownloadUrl** | Pointer to **string** |  | [optional] 
 
 ## Methods
@@ -157,55 +157,55 @@ SetId sets Id field to given value.
 
 HasId returns a boolean if a field has been set.
 
-### GetPluginRegistryUrl
+### GetProvidersDir
 
-`func (o *ServerConfig) GetPluginRegistryUrl() string`
+`func (o *ServerConfig) GetProvidersDir() string`
 
-GetPluginRegistryUrl returns the PluginRegistryUrl field if non-nil, zero value otherwise.
+GetProvidersDir returns the ProvidersDir field if non-nil, zero value otherwise.
 
-### GetPluginRegistryUrlOk
+### GetProvidersDirOk
 
-`func (o *ServerConfig) GetPluginRegistryUrlOk() (*string, bool)`
+`func (o *ServerConfig) GetProvidersDirOk() (*string, bool)`
 
-GetPluginRegistryUrlOk returns a tuple with the PluginRegistryUrl field if it's non-nil, zero value otherwise
+GetProvidersDirOk returns a tuple with the ProvidersDir field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetPluginRegistryUrl
+### SetProvidersDir
 
-`func (o *ServerConfig) SetPluginRegistryUrl(v string)`
+`func (o *ServerConfig) SetProvidersDir(v string)`
 
-SetPluginRegistryUrl sets PluginRegistryUrl field to given value.
+SetProvidersDir sets ProvidersDir field to given value.
 
-### HasPluginRegistryUrl
+### HasProvidersDir
 
-`func (o *ServerConfig) HasPluginRegistryUrl() bool`
+`func (o *ServerConfig) HasProvidersDir() bool`
 
-HasPluginRegistryUrl returns a boolean if a field has been set.
+HasProvidersDir returns a boolean if a field has been set.
 
-### GetPluginsDir
+### GetRegistryUrl
 
-`func (o *ServerConfig) GetPluginsDir() string`
+`func (o *ServerConfig) GetRegistryUrl() string`
 
-GetPluginsDir returns the PluginsDir field if non-nil, zero value otherwise.
+GetRegistryUrl returns the RegistryUrl field if non-nil, zero value otherwise.
 
-### GetPluginsDirOk
+### GetRegistryUrlOk
 
-`func (o *ServerConfig) GetPluginsDirOk() (*string, bool)`
+`func (o *ServerConfig) GetRegistryUrlOk() (*string, bool)`
 
-GetPluginsDirOk returns a tuple with the PluginsDir field if it's non-nil, zero value otherwise
+GetRegistryUrlOk returns a tuple with the RegistryUrl field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetPluginsDir
+### SetRegistryUrl
 
-`func (o *ServerConfig) SetPluginsDir(v string)`
+`func (o *ServerConfig) SetRegistryUrl(v string)`
 
-SetPluginsDir sets PluginsDir field to given value.
+SetRegistryUrl sets RegistryUrl field to given value.
 
-### HasPluginsDir
+### HasRegistryUrl
 
-`func (o *ServerConfig) HasPluginsDir() bool`
+`func (o *ServerConfig) HasRegistryUrl() bool`
 
-HasPluginsDir returns a boolean if a field has been set.
+HasRegistryUrl returns a boolean if a field has been set.
 
 ### GetServerDownloadUrl
 

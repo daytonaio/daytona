@@ -14,34 +14,34 @@ import (
 	"encoding/json"
 )
 
-// checks if the InstallPluginRequest type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &InstallPluginRequest{}
+// checks if the InstallProviderRequest type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &InstallProviderRequest{}
 
-// InstallPluginRequest struct for InstallPluginRequest
-type InstallPluginRequest struct {
+// InstallProviderRequest struct for InstallProviderRequest
+type InstallProviderRequest struct {
 	DownloadUrls *map[string]string `json:"downloadUrls,omitempty"`
 	Name *string `json:"name,omitempty"`
 }
 
-// NewInstallPluginRequest instantiates a new InstallPluginRequest object
+// NewInstallProviderRequest instantiates a new InstallProviderRequest object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewInstallPluginRequest() *InstallPluginRequest {
-	this := InstallPluginRequest{}
+func NewInstallProviderRequest() *InstallProviderRequest {
+	this := InstallProviderRequest{}
 	return &this
 }
 
-// NewInstallPluginRequestWithDefaults instantiates a new InstallPluginRequest object
+// NewInstallProviderRequestWithDefaults instantiates a new InstallProviderRequest object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewInstallPluginRequestWithDefaults() *InstallPluginRequest {
-	this := InstallPluginRequest{}
+func NewInstallProviderRequestWithDefaults() *InstallProviderRequest {
+	this := InstallProviderRequest{}
 	return &this
 }
 
 // GetDownloadUrls returns the DownloadUrls field value if set, zero value otherwise.
-func (o *InstallPluginRequest) GetDownloadUrls() map[string]string {
+func (o *InstallProviderRequest) GetDownloadUrls() map[string]string {
 	if o == nil || IsNil(o.DownloadUrls) {
 		var ret map[string]string
 		return ret
@@ -51,7 +51,7 @@ func (o *InstallPluginRequest) GetDownloadUrls() map[string]string {
 
 // GetDownloadUrlsOk returns a tuple with the DownloadUrls field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *InstallPluginRequest) GetDownloadUrlsOk() (*map[string]string, bool) {
+func (o *InstallProviderRequest) GetDownloadUrlsOk() (*map[string]string, bool) {
 	if o == nil || IsNil(o.DownloadUrls) {
 		return nil, false
 	}
@@ -59,7 +59,7 @@ func (o *InstallPluginRequest) GetDownloadUrlsOk() (*map[string]string, bool) {
 }
 
 // HasDownloadUrls returns a boolean if a field has been set.
-func (o *InstallPluginRequest) HasDownloadUrls() bool {
+func (o *InstallProviderRequest) HasDownloadUrls() bool {
 	if o != nil && !IsNil(o.DownloadUrls) {
 		return true
 	}
@@ -68,12 +68,12 @@ func (o *InstallPluginRequest) HasDownloadUrls() bool {
 }
 
 // SetDownloadUrls gets a reference to the given map[string]string and assigns it to the DownloadUrls field.
-func (o *InstallPluginRequest) SetDownloadUrls(v map[string]string) {
+func (o *InstallProviderRequest) SetDownloadUrls(v map[string]string) {
 	o.DownloadUrls = &v
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
-func (o *InstallPluginRequest) GetName() string {
+func (o *InstallProviderRequest) GetName() string {
 	if o == nil || IsNil(o.Name) {
 		var ret string
 		return ret
@@ -83,7 +83,7 @@ func (o *InstallPluginRequest) GetName() string {
 
 // GetNameOk returns a tuple with the Name field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *InstallPluginRequest) GetNameOk() (*string, bool) {
+func (o *InstallProviderRequest) GetNameOk() (*string, bool) {
 	if o == nil || IsNil(o.Name) {
 		return nil, false
 	}
@@ -91,7 +91,7 @@ func (o *InstallPluginRequest) GetNameOk() (*string, bool) {
 }
 
 // HasName returns a boolean if a field has been set.
-func (o *InstallPluginRequest) HasName() bool {
+func (o *InstallProviderRequest) HasName() bool {
 	if o != nil && !IsNil(o.Name) {
 		return true
 	}
@@ -100,11 +100,11 @@ func (o *InstallPluginRequest) HasName() bool {
 }
 
 // SetName gets a reference to the given string and assigns it to the Name field.
-func (o *InstallPluginRequest) SetName(v string) {
+func (o *InstallProviderRequest) SetName(v string) {
 	o.Name = &v
 }
 
-func (o InstallPluginRequest) MarshalJSON() ([]byte, error) {
+func (o InstallProviderRequest) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -112,7 +112,7 @@ func (o InstallPluginRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o InstallPluginRequest) ToMap() (map[string]interface{}, error) {
+func (o InstallProviderRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.DownloadUrls) {
 		toSerialize["downloadUrls"] = o.DownloadUrls
@@ -123,38 +123,38 @@ func (o InstallPluginRequest) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-type NullableInstallPluginRequest struct {
-	value *InstallPluginRequest
+type NullableInstallProviderRequest struct {
+	value *InstallProviderRequest
 	isSet bool
 }
 
-func (v NullableInstallPluginRequest) Get() *InstallPluginRequest {
+func (v NullableInstallProviderRequest) Get() *InstallProviderRequest {
 	return v.value
 }
 
-func (v *NullableInstallPluginRequest) Set(val *InstallPluginRequest) {
+func (v *NullableInstallProviderRequest) Set(val *InstallProviderRequest) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableInstallPluginRequest) IsSet() bool {
+func (v NullableInstallProviderRequest) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableInstallPluginRequest) Unset() {
+func (v *NullableInstallProviderRequest) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableInstallPluginRequest(val *InstallPluginRequest) *NullableInstallPluginRequest {
-	return &NullableInstallPluginRequest{value: val, isSet: true}
+func NewNullableInstallProviderRequest(val *InstallProviderRequest) *NullableInstallProviderRequest {
+	return &NullableInstallProviderRequest{value: val, isSet: true}
 }
 
-func (v NullableInstallPluginRequest) MarshalJSON() ([]byte, error) {
+func (v NullableInstallProviderRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableInstallPluginRequest) UnmarshalJSON(src []byte) error {
+func (v *NullableInstallProviderRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

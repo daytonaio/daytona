@@ -1,13 +1,13 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package plugins
+package provider
 
 import (
 	"fmt"
 	"os"
-	"strings"
 
+	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/util"
 
@@ -17,30 +17,16 @@ import (
 	"golang.org/x/term"
 )
 
-type PluginType string
-
-type PluginViewDTO struct {
-	Name    string
-	Version string
-	Type    PluginType
-}
-
-const (
-	PluginTypeProvider     PluginType = "Provider"
-	PluginTypeAgentService PluginType = "Agent Service"
-)
-
 var columns = []table.Column{
 	{Title: "Name", Width: 20},
 	{Title: "Version", Width: 20},
-	{Title: "Type", Width: 20},
 }
 
 type model struct {
-	table          table.Model
-	selectedPlugin *PluginViewDTO
-	selectable     bool
-	initialRows    []table.Row
+	table            table.Model
+	selectedProvider *serverapiclient.Provider
+	selectable       bool
+	initialRows      []table.Row
 }
 
 func (m model) Init() tea.Cmd {
@@ -67,13 +53,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.table.Focus()
 			}
 		case "q", "ctrl+c":
-			m.selectedPlugin = nil
+			m.selectedProvider = nil
 			return m, tea.Quit
 		case "enter":
-			m.selectedPlugin = &PluginViewDTO{
-				Name:    m.table.SelectedRow()[0],
-				Version: m.table.SelectedRow()[1],
-				Type:    PluginType(m.table.SelectedRow()[2]),
+			m.selectedProvider = &serverapiclient.Provider{
+				Name:    &m.table.SelectedRow()[0],
+				Version: &m.table.SelectedRow()[1],
 			}
 			return m, tea.Quit
 		}
@@ -91,13 +76,12 @@ func (m model) View() string {
 	return baseStyle.Render(m.table.View())
 }
 
-func renderPluginsList(plugins []PluginViewDTO, selectable bool) model {
+func renderProvidersList(providers []serverapiclient.Provider, selectable bool) model {
 	rows := []table.Row{}
-	selectedPlugin := &plugins[0]
+	selectedProvider := &providers[0]
 
-	for _, plugin := range plugins {
-		row := table.Row{plugin.Name, plugin.Version, string(plugin.Type)}
-
+	for _, provider := range providers {
+		row := table.Row{*provider.Name, *provider.Version}
 		rows = append(rows, row)
 	}
 
@@ -106,44 +90,22 @@ func renderPluginsList(plugins []PluginViewDTO, selectable bool) model {
 	adjustedRows, adjustedCols := getRowsAndCols(width, rows)
 
 	return model{
-		table:          getTable(adjustedRows, adjustedCols, selectable, 0),
-		selectedPlugin: selectedPlugin,
-		selectable:     selectable,
-		initialRows:    rows,
+		table:            getTable(adjustedRows, adjustedCols, selectable, 0),
+		selectedProvider: selectedProvider,
+		selectable:       selectable,
+		initialRows:      rows,
 	}
 }
 
-func GetPluginFromPrompt(plugins []PluginViewDTO, title string) *PluginViewDTO {
-	util.RenderMainTitle(title)
+func List(providers []serverapiclient.Provider) {
+	util.RenderMainTitle("Providers")
 
-	if len(plugins) == 0 {
-		fmt.Println("No plugins found")
-		return nil
-	}
-
-	modelInstance := renderPluginsList(plugins, true)
-
-	m, err := tea.NewProgram(modelInstance).Run()
-	if err != nil {
-		fmt.Println("Error running program:", err)
-		os.Exit(1)
-	}
-	selectedPlugin := m.(model).selectedPlugin
-
-	lipgloss.DefaultRenderer().Output().ClearLines(strings.Count(modelInstance.View(), "\n") + 2)
-
-	return selectedPlugin
-}
-
-func ListPlugins(plugins []PluginViewDTO) {
-	util.RenderMainTitle("Plugins")
-
-	if len(plugins) == 0 {
-		fmt.Println("No plugins found")
+	if len(providers) == 0 {
+		fmt.Println("No providers found")
 		return
 	}
 
-	modelInstance := renderPluginsList(plugins, false)
+	modelInstance := renderProvidersList(providers, false)
 
 	_, err := tea.NewProgram(modelInstance).Run()
 	if err != nil {

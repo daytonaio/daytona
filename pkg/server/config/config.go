@@ -85,13 +85,13 @@ func GetConfigDir() (string, error) {
 	return path.Join(userConfigDir, "daytona", "server"), nil
 }
 
-func getDefaultPluginsDir() (string, error) {
+func getDefaultProvidersDir() (string, error) {
 	userConfigDir, err := os.UserConfigDir()
 	if err != nil {
 		return "", err
 	}
 
-	return path.Join(userConfigDir, "daytona", "plugins"), nil
+	return path.Join(userConfigDir, "daytona", "providers"), nil
 }
 
 func generateUuid() string {
@@ -105,14 +105,14 @@ func init() {
 		return
 	}
 
-	pluginsDir, err := getDefaultPluginsDir()
+	providersDir, err := getDefaultProvidersDir()
 	if err != nil {
-		log.Fatal("failed to get default plugins dir")
+		log.Fatal("failed to get default providers dir")
 	}
 
 	c := types.ServerConfig{
-		PluginRegistryUrl: defaultPluginRegistryUrl,
-		PluginsDir:        pluginsDir,
+		RegistryUrl:       defaultRegistryUrl,
+		ProvidersDir:      providersDir,
 		GitProviders:      []types.GitProvider{},
 		ServerDownloadUrl: defaultServerDownloadUrl,
 		ApiPort:           defaultApiPort,

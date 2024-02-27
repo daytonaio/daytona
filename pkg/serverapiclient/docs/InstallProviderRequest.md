@@ -1,4 +1,4 @@
-# InstallPluginRequest
+# InstallProviderRequest
 
 ## Properties
 
@@ -9,70 +9,70 @@ Name | Type | Description | Notes
 
 ## Methods
 
-### NewInstallPluginRequest
+### NewInstallProviderRequest
 
-`func NewInstallPluginRequest() *InstallPluginRequest`
+`func NewInstallProviderRequest() *InstallProviderRequest`
 
-NewInstallPluginRequest instantiates a new InstallPluginRequest object
+NewInstallProviderRequest instantiates a new InstallProviderRequest object
 This constructor will assign default values to properties that have it defined,
 and makes sure properties required by API are set, but the set of arguments
 will change when the set of required properties is changed
 
-### NewInstallPluginRequestWithDefaults
+### NewInstallProviderRequestWithDefaults
 
-`func NewInstallPluginRequestWithDefaults() *InstallPluginRequest`
+`func NewInstallProviderRequestWithDefaults() *InstallProviderRequest`
 
-NewInstallPluginRequestWithDefaults instantiates a new InstallPluginRequest object
+NewInstallProviderRequestWithDefaults instantiates a new InstallProviderRequest object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
 ### GetDownloadUrls
 
-`func (o *InstallPluginRequest) GetDownloadUrls() map[string]string`
+`func (o *InstallProviderRequest) GetDownloadUrls() map[string]string`
 
 GetDownloadUrls returns the DownloadUrls field if non-nil, zero value otherwise.
 
 ### GetDownloadUrlsOk
 
-`func (o *InstallPluginRequest) GetDownloadUrlsOk() (*map[string]string, bool)`
+`func (o *InstallProviderRequest) GetDownloadUrlsOk() (*map[string]string, bool)`
 
 GetDownloadUrlsOk returns a tuple with the DownloadUrls field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetDownloadUrls
 
-`func (o *InstallPluginRequest) SetDownloadUrls(v map[string]string)`
+`func (o *InstallProviderRequest) SetDownloadUrls(v map[string]string)`
 
 SetDownloadUrls sets DownloadUrls field to given value.
 
 ### HasDownloadUrls
 
-`func (o *InstallPluginRequest) HasDownloadUrls() bool`
+`func (o *InstallProviderRequest) HasDownloadUrls() bool`
 
 HasDownloadUrls returns a boolean if a field has been set.
 
 ### GetName
 
-`func (o *InstallPluginRequest) GetName() string`
+`func (o *InstallProviderRequest) GetName() string`
 
 GetName returns the Name field if non-nil, zero value otherwise.
 
 ### GetNameOk
 
-`func (o *InstallPluginRequest) GetNameOk() (*string, bool)`
+`func (o *InstallProviderRequest) GetNameOk() (*string, bool)`
 
 GetNameOk returns a tuple with the Name field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetName
 
-`func (o *InstallPluginRequest) SetName(v string)`
+`func (o *InstallProviderRequest) SetName(v string)`
 
 SetName sets Name field to given value.
 
 ### HasName
 
-`func (o *InstallPluginRequest) HasName() bool`
+`func (o *InstallProviderRequest) HasName() bool`
 
 HasName returns a boolean if a field has been set.
 

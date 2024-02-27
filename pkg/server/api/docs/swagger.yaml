@@ -1,12 +1,5 @@
 basePath: /
 definitions:
-  AgentServicePlugin:
-    properties:
-      name:
-        type: string
-      version:
-        type: string
-    type: object
   CreateWorkspace:
     properties:
       name:
@@ -36,7 +29,7 @@ definitions:
       username:
         type: string
     type: object
-  InstallPluginRequest:
+  InstallProviderRequest:
     properties:
       downloadUrls:
         additionalProperties:
@@ -76,7 +69,7 @@ definitions:
       workspaceId:
         type: string
     type: object
-  ProviderPlugin:
+  Provider:
     properties:
       name:
         type: string
@@ -114,9 +107,9 @@ definitions:
         type: integer
       id:
         type: string
-      pluginRegistryUrl:
+      providersDir:
         type: string
-      pluginsDir:
+      registryUrl:
         type: string
       serverDownloadUrl:
         type: string
@@ -159,12 +152,10 @@ info:
   title: Daytona Server API
   version: 0.1.0
 paths:
-  /plugin/agent-service:
+  /provider:
     get:
-      consumes:
-      - application/json
-      description: List agent service plugins
-      operationId: ListAgentServicePlugins
+      description: List providers
+      operationId: ListProviders
       produces:
       - application/json
       responses:
@@ -172,72 +163,17 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/AgentServicePlugin'
+              $ref: '#/definitions/Provider'
             type: array
-      summary: List agent service plugins
+      summary: List providers
       tags:
-      - plugin
-  /plugin/agent-service/install:
+      - provider
+  /provider/{provider}/uninstall:
     post:
       consumes:
       - application/json
-      description: Install an agent service plugin
-      operationId: InstallAgentServicePlugin
-      parameters:
-      - description: Plugin to install
-        in: body
-        name: plugin
-        required: true
-        schema:
-          $ref: '#/definitions/InstallPluginRequest'
-      responses:
-        "200":
-          description: OK
-      summary: Install an agent service plugin
-      tags:
-      - plugin
-  /plugin/agent-service/uninstall:
-    post:
-      consumes:
-      - application/json
-      description: Uninstall an agent service plugin
-      operationId: UninstallAgentServicePlugin
-      parameters:
-      - description: Agent Service to uninstall
-        in: path
-        name: agent-service
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-      summary: Uninstall an agent service plugin
-      tags:
-      - plugin
-  /plugin/provider:
-    get:
-      consumes:
-      - application/json
-      description: List provider plugins
-      operationId: ListProviderPlugins
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/ProviderPlugin'
-            type: array
-      summary: List provider plugins
-      tags:
-      - plugin
-  /plugin/provider/{provider}/uninstall:
-    post:
-      consumes:
-      - application/json
-      description: Uninstall a provider plugin
-      operationId: UninstallProviderPlugin
+      description: Uninstall a provider
+      operationId: UninstallProvider
       parameters:
       - description: Provider to uninstall
         in: path
@@ -247,28 +183,28 @@ paths:
       responses:
         "200":
           description: OK
-      summary: Uninstall a provider plugin
+      summary: Uninstall a provider
       tags:
-      - plugin
-  /plugin/provider/install:
+      - provider
+  /provider/install:
     post:
       consumes:
       - application/json
-      description: Install a provider plugin
-      operationId: InstallProviderPlugin
+      description: Install a provider
+      operationId: InstallProvider
       parameters:
-      - description: Plugin to install
+      - description: Provider to install
         in: body
-        name: plugin
+        name: provider
         required: true
         schema:
-          $ref: '#/definitions/InstallPluginRequest'
+          $ref: '#/definitions/InstallProviderRequest'
       responses:
         "200":
           description: OK
-      summary: Install a provider plugin
+      summary: Install a provider
       tags:
-      - plugin
+      - provider
   /server/config:
     get:
       description: Get the server configuration

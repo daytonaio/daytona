@@ -7,98 +7,45 @@ info:
 servers:
 - url: http://localhost:3000/
 paths:
-  /plugin/agent-service:
+  /provider:
     get:
-      description: List agent service plugins
-      operationId: ListAgentServicePlugins
+      description: List providers
+      operationId: ListProviders
       responses:
         "200":
           content:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/AgentServicePlugin'
+                  $ref: '#/components/schemas/Provider'
                 type: array
           description: OK
-      summary: List agent service plugins
+      summary: List providers
       tags:
-      - plugin
-  /plugin/agent-service/install:
+      - provider
+  /provider/install:
     post:
-      description: Install an agent service plugin
-      operationId: InstallAgentServicePlugin
+      description: Install a provider
+      operationId: InstallProvider
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/InstallPluginRequest'
-        description: Plugin to install
+              $ref: '#/components/schemas/InstallProviderRequest'
+        description: Provider to install
         required: true
       responses:
         "200":
           content: {}
           description: OK
-      summary: Install an agent service plugin
+      summary: Install a provider
       tags:
-      - plugin
-      x-codegen-request-body-name: plugin
-  /plugin/agent-service/uninstall:
+      - provider
+      x-codegen-request-body-name: provider
+  /provider/{provider}/uninstall:
     post:
-      description: Uninstall an agent service plugin
-      operationId: UninstallAgentServicePlugin
-      parameters:
-      - description: Agent Service to uninstall
-        in: path
-        name: agent-service
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content: {}
-          description: OK
-      summary: Uninstall an agent service plugin
-      tags:
-      - plugin
-  /plugin/provider:
-    get:
-      description: List provider plugins
-      operationId: ListProviderPlugins
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/ProviderPlugin'
-                type: array
-          description: OK
-      summary: List provider plugins
-      tags:
-      - plugin
-  /plugin/provider/install:
-    post:
-      description: Install a provider plugin
-      operationId: InstallProviderPlugin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InstallPluginRequest'
-        description: Plugin to install
-        required: true
-      responses:
-        "200":
-          content: {}
-          description: OK
-      summary: Install a provider plugin
-      tags:
-      - plugin
-      x-codegen-request-body-name: plugin
-  /plugin/provider/{provider}/uninstall:
-    post:
-      description: Uninstall a provider plugin
-      operationId: UninstallProviderPlugin
+      description: Uninstall a provider
+      operationId: UninstallProvider
       parameters:
       - description: Provider to uninstall
         in: path
@@ -110,9 +57,9 @@ paths:
         "200":
           content: {}
           description: OK
-      summary: Uninstall a provider plugin
+      summary: Uninstall a provider
       tags:
-      - plugin
+      - provider
   /server/config:
     get:
       description: Get the server configuration
@@ -323,16 +270,6 @@ paths:
       - workspace
 components:
   schemas:
-    AgentServicePlugin:
-      example:
-        name: name
-        version: version
-      properties:
-        name:
-          type: string
-        version:
-          type: string
-      type: object
     CreateWorkspace:
       example:
         provider: provider
@@ -376,7 +313,7 @@ components:
         username:
           type: string
       type: object
-    InstallPluginRequest:
+    InstallProviderRequest:
       example:
         downloadUrls:
           key: downloadUrls
@@ -441,7 +378,7 @@ components:
         workspaceId:
           type: string
       type: object
-    ProviderPlugin:
+    Provider:
       example:
         name: name
         version: version
@@ -478,11 +415,11 @@ components:
       type: object
     ServerConfig:
       example:
-        pluginRegistryUrl: pluginRegistryUrl
+        registryUrl: registryUrl
         apiPort: 0
         headscalePort: 1
         serverDownloadUrl: serverDownloadUrl
-        pluginsDir: pluginsDir
+        providersDir: providersDir
         id: id
         gitProviders:
         - id: id
@@ -508,9 +445,9 @@ components:
           type: integer
         id:
           type: string
-        pluginRegistryUrl:
+        providersDir:
           type: string
-        pluginsDir:
+        registryUrl:
           type: string
         serverDownloadUrl:
           type: string

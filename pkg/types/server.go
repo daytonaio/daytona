@@ -13,8 +13,8 @@ type GitProvider struct {
 } // @name GitProvider
 
 type ServerConfig struct {
-	PluginsDir        string        `json:"pluginsDir"`
-	PluginRegistryUrl string        `json:"pluginRegistryUrl"`
+	ProvidersDir      string        `json:"providersDir"`
+	RegistryUrl       string        `json:"registryUrl"`
 	GitProviders      []GitProvider `json:"gitProviders"`
 	Id                string        `json:"id"`
 	ServerDownloadUrl string        `json:"serverDownloadUrl"`

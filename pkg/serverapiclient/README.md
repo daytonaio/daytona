@@ -77,12 +77,9 @@ All URIs are relative to *http://localhost:3000*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*PluginAPI* | [**InstallAgentServicePlugin**](docs/PluginAPI.md#installagentserviceplugin) | **Post** /plugin/agent-service/install | Install an agent service plugin
-*PluginAPI* | [**InstallProviderPlugin**](docs/PluginAPI.md#installproviderplugin) | **Post** /plugin/provider/install | Install a provider plugin
-*PluginAPI* | [**ListAgentServicePlugins**](docs/PluginAPI.md#listagentserviceplugins) | **Get** /plugin/agent-service | List agent service plugins
-*PluginAPI* | [**ListProviderPlugins**](docs/PluginAPI.md#listproviderplugins) | **Get** /plugin/provider | List provider plugins
-*PluginAPI* | [**UninstallAgentServicePlugin**](docs/PluginAPI.md#uninstallagentserviceplugin) | **Post** /plugin/agent-service/uninstall | Uninstall an agent service plugin
-*PluginAPI* | [**UninstallProviderPlugin**](docs/PluginAPI.md#uninstallproviderplugin) | **Post** /plugin/provider/{provider}/uninstall | Uninstall a provider plugin
+*ProviderAPI* | [**InstallProvider**](docs/ProviderAPI.md#installprovider) | **Post** /provider/install | Install a provider
+*ProviderAPI* | [**ListProviders**](docs/ProviderAPI.md#listproviders) | **Get** /provider | List providers
+*ProviderAPI* | [**UninstallProvider**](docs/ProviderAPI.md#uninstallprovider) | **Post** /provider/{provider}/uninstall | Uninstall a provider
 *ServerAPI* | [**GenerateNetworkKey**](docs/ServerAPI.md#generatenetworkkey) | **Post** /server/network-key | Generate a new authentication key
 *ServerAPI* | [**GetConfig**](docs/ServerAPI.md#getconfig) | **Get** /server/config | Get the server configuration
 *ServerAPI* | [**SetConfig**](docs/ServerAPI.md#setconfig) | **Post** /server/config | Set the server configuration
@@ -98,15 +95,14 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
- - [AgentServicePlugin](docs/AgentServicePlugin.md)
  - [CreateWorkspace](docs/CreateWorkspace.md)
  - [FRPSConfig](docs/FRPSConfig.md)
  - [GitProvider](docs/GitProvider.md)
- - [InstallPluginRequest](docs/InstallPluginRequest.md)
+ - [InstallProviderRequest](docs/InstallProviderRequest.md)
  - [NetworkKey](docs/NetworkKey.md)
  - [Project](docs/Project.md)
  - [ProjectInfo](docs/ProjectInfo.md)
- - [ProviderPlugin](docs/ProviderPlugin.md)
+ - [Provider](docs/Provider.md)
  - [Repository](docs/Repository.md)
  - [ServerConfig](docs/ServerConfig.md)
  - [Workspace](docs/Workspace.md)
