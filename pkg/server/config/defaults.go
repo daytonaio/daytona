@@ -7,7 +7,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/types"
 )
 
-const defaultPluginRegistryUrl = "https://download.daytona.io/daytona/plugins"
+const defaultRegistryUrl = "https://download.daytona.io/daytona"
 const defaultServerDownloadUrl = "https://download.daytona.io/daytona/get-server.sh"
 const defaultHeadscalePort = 3001
 const defaultApiPort = 3000

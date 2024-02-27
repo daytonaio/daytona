@@ -60,8 +60,8 @@ func GetApiClient(profile *config.Profile) (*serverapiclient.APIClient, error) {
 
 func ToServerConfig(config *serverapiclient.ServerConfig) *types.ServerConfig {
 	return &types.ServerConfig{
-		PluginsDir:        *config.PluginsDir,
-		PluginRegistryUrl: *config.PluginRegistryUrl,
+		ProvidersDir:      *config.ProvidersDir,
+		RegistryUrl:       *config.RegistryUrl,
 		Id:                *config.Id,
 		ServerDownloadUrl: *config.ServerDownloadUrl,
 		Frps: &types.FRPSConfig{

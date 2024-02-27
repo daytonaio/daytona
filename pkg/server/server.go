@@ -40,16 +40,12 @@ func Start() error {
 		return err
 	}
 
-	err = downloadDefaultPlugins()
+	err = downloadDefaultProviders()
 	if err != nil {
 		return err
 	}
 
 	err = registerProviders(c)
-	if err != nil {
-		return err
-	}
-	err = registerAgentServices(c)
 	if err != nil {
 		return err
 	}

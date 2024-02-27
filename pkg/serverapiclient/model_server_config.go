@@ -24,8 +24,8 @@ type ServerConfig struct {
 	GitProviders []GitProvider `json:"gitProviders,omitempty"`
 	HeadscalePort *int32 `json:"headscalePort,omitempty"`
 	Id *string `json:"id,omitempty"`
-	PluginRegistryUrl *string `json:"pluginRegistryUrl,omitempty"`
-	PluginsDir *string `json:"pluginsDir,omitempty"`
+	ProvidersDir *string `json:"providersDir,omitempty"`
+	RegistryUrl *string `json:"registryUrl,omitempty"`
 	ServerDownloadUrl *string `json:"serverDownloadUrl,omitempty"`
 }
 
@@ -206,68 +206,68 @@ func (o *ServerConfig) SetId(v string) {
 	o.Id = &v
 }
 
-// GetPluginRegistryUrl returns the PluginRegistryUrl field value if set, zero value otherwise.
-func (o *ServerConfig) GetPluginRegistryUrl() string {
-	if o == nil || IsNil(o.PluginRegistryUrl) {
+// GetProvidersDir returns the ProvidersDir field value if set, zero value otherwise.
+func (o *ServerConfig) GetProvidersDir() string {
+	if o == nil || IsNil(o.ProvidersDir) {
 		var ret string
 		return ret
 	}
-	return *o.PluginRegistryUrl
+	return *o.ProvidersDir
 }
 
-// GetPluginRegistryUrlOk returns a tuple with the PluginRegistryUrl field value if set, nil otherwise
+// GetProvidersDirOk returns a tuple with the ProvidersDir field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ServerConfig) GetPluginRegistryUrlOk() (*string, bool) {
-	if o == nil || IsNil(o.PluginRegistryUrl) {
+func (o *ServerConfig) GetProvidersDirOk() (*string, bool) {
+	if o == nil || IsNil(o.ProvidersDir) {
 		return nil, false
 	}
-	return o.PluginRegistryUrl, true
+	return o.ProvidersDir, true
 }
 
-// HasPluginRegistryUrl returns a boolean if a field has been set.
-func (o *ServerConfig) HasPluginRegistryUrl() bool {
-	if o != nil && !IsNil(o.PluginRegistryUrl) {
+// HasProvidersDir returns a boolean if a field has been set.
+func (o *ServerConfig) HasProvidersDir() bool {
+	if o != nil && !IsNil(o.ProvidersDir) {
 		return true
 	}
 
 	return false
 }
 
-// SetPluginRegistryUrl gets a reference to the given string and assigns it to the PluginRegistryUrl field.
-func (o *ServerConfig) SetPluginRegistryUrl(v string) {
-	o.PluginRegistryUrl = &v
+// SetProvidersDir gets a reference to the given string and assigns it to the ProvidersDir field.
+func (o *ServerConfig) SetProvidersDir(v string) {
+	o.ProvidersDir = &v
 }
 
-// GetPluginsDir returns the PluginsDir field value if set, zero value otherwise.
-func (o *ServerConfig) GetPluginsDir() string {
-	if o == nil || IsNil(o.PluginsDir) {
+// GetRegistryUrl returns the RegistryUrl field value if set, zero value otherwise.
+func (o *ServerConfig) GetRegistryUrl() string {
+	if o == nil || IsNil(o.RegistryUrl) {
 		var ret string
 		return ret
 	}
-	return *o.PluginsDir
+	return *o.RegistryUrl
 }
 
-// GetPluginsDirOk returns a tuple with the PluginsDir field value if set, nil otherwise
+// GetRegistryUrlOk returns a tuple with the RegistryUrl field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ServerConfig) GetPluginsDirOk() (*string, bool) {
-	if o == nil || IsNil(o.PluginsDir) {
+func (o *ServerConfig) GetRegistryUrlOk() (*string, bool) {
+	if o == nil || IsNil(o.RegistryUrl) {
 		return nil, false
 	}
-	return o.PluginsDir, true
+	return o.RegistryUrl, true
 }
 
-// HasPluginsDir returns a boolean if a field has been set.
-func (o *ServerConfig) HasPluginsDir() bool {
-	if o != nil && !IsNil(o.PluginsDir) {
+// HasRegistryUrl returns a boolean if a field has been set.
+func (o *ServerConfig) HasRegistryUrl() bool {
+	if o != nil && !IsNil(o.RegistryUrl) {
 		return true
 	}
 
 	return false
 }
 
-// SetPluginsDir gets a reference to the given string and assigns it to the PluginsDir field.
-func (o *ServerConfig) SetPluginsDir(v string) {
-	o.PluginsDir = &v
+// SetRegistryUrl gets a reference to the given string and assigns it to the RegistryUrl field.
+func (o *ServerConfig) SetRegistryUrl(v string) {
+	o.RegistryUrl = &v
 }
 
 // GetServerDownloadUrl returns the ServerDownloadUrl field value if set, zero value otherwise.
@@ -327,11 +327,11 @@ func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Id) {
 		toSerialize["id"] = o.Id
 	}
-	if !IsNil(o.PluginRegistryUrl) {
-		toSerialize["pluginRegistryUrl"] = o.PluginRegistryUrl
+	if !IsNil(o.ProvidersDir) {
+		toSerialize["providersDir"] = o.ProvidersDir
 	}
-	if !IsNil(o.PluginsDir) {
-		toSerialize["pluginsDir"] = o.PluginsDir
+	if !IsNil(o.RegistryUrl) {
+		toSerialize["registryUrl"] = o.RegistryUrl
 	}
 	if !IsNil(o.ServerDownloadUrl) {
 		toSerialize["serverDownloadUrl"] = o.ServerDownloadUrl
