@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package cmd_git_provider
+package gitprovider
 
 import (
 	"context"
@@ -9,7 +9,6 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
 	"github.com/daytonaio/daytona/pkg/views/util"
@@ -17,13 +16,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var gitProviderAddCmd = &cobra.Command{
-	Use:     "add",
-	Aliases: []string{"new", "register", "update"},
-	Short:   "Register a Git providers",
+var gitProviderDeleteCmd = &cobra.Command{
+	Use:     "delete",
+	Aliases: []string{"remove"},
+	Short:   "Unregister a Git providers",
 	Run: func(cmd *cobra.Command, args []string) {
-		var providerExists bool
-
 		apiClient, err := server.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
@@ -45,36 +42,33 @@ var gitProviderAddCmd = &cobra.Command{
 			Token:    "",
 		}
 
-		gitprovider_view.GitProviderSelectionView(&gitProviderSelectView, serverConfig.GitProviders, false)
+		gitProviderList := serverConfig.GitProviders
 
-		if gitProviderSelectView.Id == "" {
+		if len(gitProviderList) == 0 {
+			util.RenderInfoMessage("No git providers registered")
 			return
 		}
 
-		if gitProviderSelectView.Username == "" {
-			gitUsername, err := gitprovider.GetUsernameFromToken(gitProviderSelectView.Id, config.GetGitProviderList(), gitProviderSelectView.Token)
-			if err != nil {
-				log.Fatal(err)
-			}
-			gitProviderSelectView.Username = gitUsername
+		gitprovider_view.GitProviderSelectionView(&gitProviderSelectView, serverConfig.GitProviders, true)
+
+		if gitProviderSelectView.Id == "" {
+			log.Fatal("Git provider id can not be blank")
+			return
 		}
 
-		gitProviderList := serverConfig.GitProviders
+		var providerExists bool
 
 		for _, gitProvider := range gitProviderList {
 			if *gitProvider.Id == gitProviderSelectView.Id {
-				*gitProvider.Username = gitProviderSelectView.Username
-				*gitProvider.Token = gitProviderSelectView.Token
 				providerExists = true
 			}
 		}
 
-		if !providerExists {
-			gitProviderList = append(serverConfig.GitProviders, serverapiclient.GitProvider{
-				Id:       &gitProviderSelectView.Id,
-				Username: &gitProviderSelectView.Username,
-				Token:    &gitProviderSelectView.Token,
-			})
+		if providerExists {
+			gitProviderList = removeGitProviderById(gitProviderSelectView.Id, gitProviderList)
+		} else {
+			util.RenderInfoMessage("Git provider is not registered")
+			return
 		}
 
 		serverConfig.GitProviders = gitProviderList
@@ -89,6 +83,16 @@ var gitProviderAddCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		util.RenderInfoMessage("Git provider has been registered")
+		util.RenderInfoMessage("Git provider has been removed")
 	},
+}
+
+func removeGitProviderById(idToRemove string, gitProviderList []serverapiclient.GitProvider) []serverapiclient.GitProvider {
+	var newList []serverapiclient.GitProvider
+	for _, provider := range gitProviderList {
+		if *provider.Id != idToRemove {
+			newList = append(newList, provider)
+		}
+	}
+	return newList
 }
