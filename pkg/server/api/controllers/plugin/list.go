@@ -5,34 +5,34 @@ import (
 	"net/http"
 
 	agent_service_manager "github.com/daytonaio/daytona/pkg/agent_service/manager"
-	provisioner_manager "github.com/daytonaio/daytona/pkg/provisioner/manager"
+	provider_manager "github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/plugin/dto"
 	"github.com/gin-gonic/gin"
 )
 
-// ListProvisionerPlugins godoc
+// ListProviderPlugins godoc
 //
 //	@Tags			plugin
-//	@Summary		List provisioner plugins
-//	@Description	List provisioner plugins
+//	@Summary		List provider plugins
+//	@Description	List provider plugins
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{array}	ProvisionerPlugin
-//	@Router			/plugin/provisioner [get]
+//	@Success		200	{array}	ProviderPlugin
+//	@Router			/plugin/provider [get]
 //
-//	@id				ListProvisionerPlugins
-func ListProvisionerPlugins(ctx *gin.Context) {
-	provisioners := provisioner_manager.GetProvisioners()
+//	@id				ListProviderPlugins
+func ListProviderPlugins(ctx *gin.Context) {
+	providers := provider_manager.GetProviders()
 
-	result := []dto.ProvisionerPlugin{}
-	for _, provisioner := range provisioners {
-		info, err := provisioner.GetInfo()
+	result := []dto.ProviderPlugin{}
+	for _, provider := range providers {
+		info, err := provider.GetInfo()
 		if err != nil {
-			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get provisioner: %s", err.Error()))
+			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get provider: %s", err.Error()))
 			return
 		}
 
-		result = append(result, dto.ProvisionerPlugin{
+		result = append(result, dto.ProviderPlugin{
 			Name:    info.Name,
 			Version: info.Version,
 		})

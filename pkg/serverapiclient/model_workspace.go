@@ -22,7 +22,7 @@ type Workspace struct {
 	Id *string `json:"id,omitempty"`
 	Name *string `json:"name,omitempty"`
 	Projects []Project `json:"projects,omitempty"`
-	Provisioner *WorkspaceProvisioner `json:"provisioner,omitempty"`
+	Provider *WorkspaceProvider `json:"provider,omitempty"`
 }
 
 // NewWorkspace instantiates a new Workspace object
@@ -138,36 +138,36 @@ func (o *Workspace) SetProjects(v []Project) {
 	o.Projects = v
 }
 
-// GetProvisioner returns the Provisioner field value if set, zero value otherwise.
-func (o *Workspace) GetProvisioner() WorkspaceProvisioner {
-	if o == nil || IsNil(o.Provisioner) {
-		var ret WorkspaceProvisioner
+// GetProvider returns the Provider field value if set, zero value otherwise.
+func (o *Workspace) GetProvider() WorkspaceProvider {
+	if o == nil || IsNil(o.Provider) {
+		var ret WorkspaceProvider
 		return ret
 	}
-	return *o.Provisioner
+	return *o.Provider
 }
 
-// GetProvisionerOk returns a tuple with the Provisioner field value if set, nil otherwise
+// GetProviderOk returns a tuple with the Provider field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetProvisionerOk() (*WorkspaceProvisioner, bool) {
-	if o == nil || IsNil(o.Provisioner) {
+func (o *Workspace) GetProviderOk() (*WorkspaceProvider, bool) {
+	if o == nil || IsNil(o.Provider) {
 		return nil, false
 	}
-	return o.Provisioner, true
+	return o.Provider, true
 }
 
-// HasProvisioner returns a boolean if a field has been set.
-func (o *Workspace) HasProvisioner() bool {
-	if o != nil && !IsNil(o.Provisioner) {
+// HasProvider returns a boolean if a field has been set.
+func (o *Workspace) HasProvider() bool {
+	if o != nil && !IsNil(o.Provider) {
 		return true
 	}
 
 	return false
 }
 
-// SetProvisioner gets a reference to the given WorkspaceProvisioner and assigns it to the Provisioner field.
-func (o *Workspace) SetProvisioner(v WorkspaceProvisioner) {
-	o.Provisioner = &v
+// SetProvider gets a reference to the given WorkspaceProvider and assigns it to the Provider field.
+func (o *Workspace) SetProvider(v WorkspaceProvider) {
+	o.Provider = &v
 }
 
 func (o Workspace) MarshalJSON() ([]byte, error) {
@@ -189,8 +189,8 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Projects) {
 		toSerialize["projects"] = o.Projects
 	}
-	if !IsNil(o.Provisioner) {
-		toSerialize["provisioner"] = o.Provisioner
+	if !IsNil(o.Provider) {
+		toSerialize["provider"] = o.Provider
 	}
 	return toSerialize, nil
 }

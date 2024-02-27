@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	provisioner_manager "github.com/daytonaio/daytona/pkg/provisioner/manager"
+	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/workspace/dto"
 	"github.com/daytonaio/daytona/pkg/server/config"
 	"github.com/daytonaio/daytona/pkg/server/db"
@@ -75,7 +75,7 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 		return nil, errors.New("name is not a valid alphanumeric string")
 	}
 
-	_, err := provisioner_manager.GetProvisioner(createWorkspaceDto.Provisioner)
+	_, err := manager.GetProvider(createWorkspaceDto.Provider)
 	if err != nil {
 		return nil, err
 	}
@@ -83,8 +83,8 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 	w := &types.Workspace{
 		Id:   createWorkspaceDto.Name,
 		Name: createWorkspaceDto.Name,
-		Provisioner: &types.WorkspaceProvisioner{
-			Name: createWorkspaceDto.Provisioner,
+		Provider: &types.WorkspaceProvider{
+			Name: createWorkspaceDto.Provider,
 			// TODO: Add profile support
 			Profile: "default",
 		},

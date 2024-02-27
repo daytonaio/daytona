@@ -36,7 +36,7 @@ var pluginInstallCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		pluginList := convertToDTO(pluginsManifest.ProvisionerPlugins, plugins.PluginTypeProvisioner)
+		pluginList := convertToDTO(pluginsManifest.ProviderPlugins, plugins.PluginTypeProvider)
 		pluginList = append(pluginList, convertToDTO(pluginsManifest.AgentServicePlugins, plugins.PluginTypeAgentService)...)
 
 		pluginToInstall := plugins.GetPluginFromPrompt(pluginList, "Choose a Plugin to install")
@@ -45,9 +45,9 @@ var pluginInstallCmd = &cobra.Command{
 			return
 		}
 
-		if pluginToInstall.Type == plugins.PluginTypeProvisioner {
-			downloadUrls := convertToStringMap(pluginsManifest.ProvisionerPlugins[pluginToInstall.Name].Versions[pluginToInstall.Version].DownloadUrls)
-			res, err = apiClient.PluginAPI.InstallProvisionerPluginExecute(serverapiclient.ApiInstallProvisionerPluginRequest{}.Plugin(serverapiclient.InstallPluginRequest{
+		if pluginToInstall.Type == plugins.PluginTypeProvider {
+			downloadUrls := convertToStringMap(pluginsManifest.ProviderPlugins[pluginToInstall.Name].Versions[pluginToInstall.Version].DownloadUrls)
+			res, err = apiClient.PluginAPI.InstallProviderPluginExecute(serverapiclient.ApiInstallProviderPluginRequest{}.Plugin(serverapiclient.InstallPluginRequest{
 				Name:         &pluginToInstall.Name,
 				DownloadUrls: &downloadUrls,
 			}))

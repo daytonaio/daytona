@@ -1,7 +1,7 @@
 package provisioner
 
 import (
-	provisioner_manager "github.com/daytonaio/daytona/pkg/provisioner/manager"
+	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/server/db"
 	"github.com/daytonaio/daytona/pkg/server/event_bus"
 	"github.com/daytonaio/daytona/pkg/types"
@@ -12,12 +12,12 @@ import (
 func CreateWorkspace(workspace *types.Workspace) error {
 	log.Info("Creating workspace")
 
-	provisioner, err := provisioner_manager.GetProvisioner(workspace.Provisioner.Name)
+	provider, err := manager.GetProvider(workspace.Provider.Name)
 	if err != nil {
 		return err
 	}
 
-	_, err = (*provisioner).CreateWorkspace(workspace)
+	_, err = (*provider).CreateWorkspace(workspace)
 	if err != nil {
 		return err
 	}
@@ -33,7 +33,7 @@ func CreateWorkspace(workspace *types.Workspace) error {
 				ProjectName:   project.Name,
 			},
 		})
-		_, err := (*provisioner).CreateProject(project)
+		_, err := (*provider).CreateProject(project)
 		if err != nil {
 			return err
 		}
@@ -62,12 +62,12 @@ func CreateWorkspace(workspace *types.Workspace) error {
 func StartWorkspace(workspace *types.Workspace) error {
 	log.Info("Starting workspace")
 
-	provisioner, err := provisioner_manager.GetProvisioner(workspace.Provisioner.Name)
+	provider, err := manager.GetProvider(workspace.Provider.Name)
 	if err != nil {
 		return err
 	}
 
-	(*provisioner).StartWorkspace(workspace)
+	(*provider).StartWorkspace(workspace)
 
 	event_bus.Publish(event_bus.Event{
 		Name: event_bus.WorkspaceEventStarting,
@@ -78,7 +78,7 @@ func StartWorkspace(workspace *types.Workspace) error {
 
 	for _, project := range workspace.Projects {
 		//	todo: go routines
-		_, err := (*provisioner).StartProject(project)
+		_, err := (*provider).StartProject(project)
 		if err != nil {
 			return err
 		}
@@ -99,12 +99,12 @@ func StartProject(project *types.Project) error {
 		return err
 	}
 
-	provisioner, err := provisioner_manager.GetProvisioner(workspace.Provisioner.Name)
+	provider, err := manager.GetProvider(workspace.Provider.Name)
 	if err != nil {
 		return err
 	}
 
-	_, err = (*provisioner).StartProject(project)
+	_, err = (*provider).StartProject(project)
 	if err != nil {
 		return err
 	}
@@ -117,12 +117,12 @@ func StartProject(project *types.Project) error {
 func StopWorkspace(workspace *types.Workspace) error {
 	log.Info("Stopping workspace")
 
-	provisioner, err := provisioner_manager.GetProvisioner(workspace.Provisioner.Name)
+	provider, err := manager.GetProvider(workspace.Provider.Name)
 	if err != nil {
 		return err
 	}
 
-	(*provisioner).StopWorkspace(workspace)
+	(*provider).StopWorkspace(workspace)
 
 	event_bus.Publish(event_bus.Event{
 		Name: event_bus.WorkspaceEventStopping,
@@ -133,7 +133,7 @@ func StopWorkspace(workspace *types.Workspace) error {
 
 	for _, project := range workspace.Projects {
 		//	todo: go routines
-		_, err := (*provisioner).StopProject(project)
+		_, err := (*provider).StopProject(project)
 		if err != nil {
 			return err
 		}
@@ -155,12 +155,12 @@ func StopProject(project *types.Project) error {
 		return err
 	}
 
-	provisioner, err := provisioner_manager.GetProvisioner(workspace.Provisioner.Name)
+	provider, err := manager.GetProvider(workspace.Provider.Name)
 	if err != nil {
 		return err
 	}
 
-	_, err = (*provisioner).StopProject(project)
+	_, err = (*provider).StopProject(project)
 	if err != nil {
 		return err
 	}
@@ -173,7 +173,7 @@ func StopProject(project *types.Project) error {
 func DestroyWorkspace(workspace *types.Workspace) error {
 	log.Infof("Destroying workspace %s", workspace.Id)
 
-	provisioner, err := provisioner_manager.GetProvisioner(workspace.Provisioner.Name)
+	provider, err := manager.GetProvider(workspace.Provider.Name)
 	if err != nil {
 		return err
 	}
@@ -187,13 +187,13 @@ func DestroyWorkspace(workspace *types.Workspace) error {
 
 	for _, project := range workspace.Projects {
 		//	todo: go routines
-		_, err := (*provisioner).DestroyProject(project)
+		_, err := (*provider).DestroyProject(project)
 		if err != nil {
 			return err
 		}
 	}
 
-	_, err = (*provisioner).DestroyWorkspace(workspace)
+	_, err = (*provider).DestroyWorkspace(workspace)
 	if err != nil {
 		return err
 	}
@@ -211,10 +211,10 @@ func DestroyWorkspace(workspace *types.Workspace) error {
 }
 
 func GetWorkspaceInfo(w *types.Workspace) (*types.WorkspaceInfo, error) {
-	provisioner, err := provisioner_manager.GetProvisioner(w.Provisioner.Name)
+	provider, err := manager.GetProvider(w.Provider.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	return (*provisioner).GetWorkspaceInfo(w)
+	return (*provider).GetWorkspaceInfo(w)
 }

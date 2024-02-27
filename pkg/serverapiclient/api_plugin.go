@@ -123,51 +123,51 @@ func (a *PluginAPIService) InstallAgentServicePluginExecute(r ApiInstallAgentSer
 	return localVarHTTPResponse, nil
 }
 
-type ApiInstallProvisionerPluginRequest struct {
+type ApiInstallProviderPluginRequest struct {
 	ctx context.Context
 	ApiService *PluginAPIService
 	plugin *InstallPluginRequest
 }
 
 // Plugin to install
-func (r ApiInstallProvisionerPluginRequest) Plugin(plugin InstallPluginRequest) ApiInstallProvisionerPluginRequest {
+func (r ApiInstallProviderPluginRequest) Plugin(plugin InstallPluginRequest) ApiInstallProviderPluginRequest {
 	r.plugin = &plugin
 	return r
 }
 
-func (r ApiInstallProvisionerPluginRequest) Execute() (*http.Response, error) {
-	return r.ApiService.InstallProvisionerPluginExecute(r)
+func (r ApiInstallProviderPluginRequest) Execute() (*http.Response, error) {
+	return r.ApiService.InstallProviderPluginExecute(r)
 }
 
 /*
-InstallProvisionerPlugin Install a provisioner plugin
+InstallProviderPlugin Install a provider plugin
 
-Install a provisioner plugin
+Install a provider plugin
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiInstallProvisionerPluginRequest
+ @return ApiInstallProviderPluginRequest
 */
-func (a *PluginAPIService) InstallProvisionerPlugin(ctx context.Context) ApiInstallProvisionerPluginRequest {
-	return ApiInstallProvisionerPluginRequest{
+func (a *PluginAPIService) InstallProviderPlugin(ctx context.Context) ApiInstallProviderPluginRequest {
+	return ApiInstallProviderPluginRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-func (a *PluginAPIService) InstallProvisionerPluginExecute(r ApiInstallProvisionerPluginRequest) (*http.Response, error) {
+func (a *PluginAPIService) InstallProviderPluginExecute(r ApiInstallProviderPluginRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
 		formFiles            []formFile
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PluginAPIService.InstallProvisionerPlugin")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PluginAPIService.InstallProviderPlugin")
 	if err != nil {
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/plugin/provisioner/install"
+	localVarPath := localBasePath + "/plugin/provider/install"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -322,46 +322,46 @@ func (a *PluginAPIService) ListAgentServicePluginsExecute(r ApiListAgentServiceP
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiListProvisionerPluginsRequest struct {
+type ApiListProviderPluginsRequest struct {
 	ctx context.Context
 	ApiService *PluginAPIService
 }
 
-func (r ApiListProvisionerPluginsRequest) Execute() ([]ProvisionerPlugin, *http.Response, error) {
-	return r.ApiService.ListProvisionerPluginsExecute(r)
+func (r ApiListProviderPluginsRequest) Execute() ([]ProviderPlugin, *http.Response, error) {
+	return r.ApiService.ListProviderPluginsExecute(r)
 }
 
 /*
-ListProvisionerPlugins List provisioner plugins
+ListProviderPlugins List provider plugins
 
-List provisioner plugins
+List provider plugins
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiListProvisionerPluginsRequest
+ @return ApiListProviderPluginsRequest
 */
-func (a *PluginAPIService) ListProvisionerPlugins(ctx context.Context) ApiListProvisionerPluginsRequest {
-	return ApiListProvisionerPluginsRequest{
+func (a *PluginAPIService) ListProviderPlugins(ctx context.Context) ApiListProviderPluginsRequest {
+	return ApiListProviderPluginsRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []ProvisionerPlugin
-func (a *PluginAPIService) ListProvisionerPluginsExecute(r ApiListProvisionerPluginsRequest) ([]ProvisionerPlugin, *http.Response, error) {
+//  @return []ProviderPlugin
+func (a *PluginAPIService) ListProviderPluginsExecute(r ApiListProviderPluginsRequest) ([]ProviderPlugin, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  []ProvisionerPlugin
+		localVarReturnValue  []ProviderPlugin
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PluginAPIService.ListProvisionerPlugins")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PluginAPIService.ListProviderPlugins")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/plugin/provisioner"
+	localVarPath := localBasePath + "/plugin/provider"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -513,48 +513,48 @@ func (a *PluginAPIService) UninstallAgentServicePluginExecute(r ApiUninstallAgen
 	return localVarHTTPResponse, nil
 }
 
-type ApiUninstallProvisionerPluginRequest struct {
+type ApiUninstallProviderPluginRequest struct {
 	ctx context.Context
 	ApiService *PluginAPIService
-	provisioner string
+	provider string
 }
 
-func (r ApiUninstallProvisionerPluginRequest) Execute() (*http.Response, error) {
-	return r.ApiService.UninstallProvisionerPluginExecute(r)
+func (r ApiUninstallProviderPluginRequest) Execute() (*http.Response, error) {
+	return r.ApiService.UninstallProviderPluginExecute(r)
 }
 
 /*
-UninstallProvisionerPlugin Uninstall a provisioner plugin
+UninstallProviderPlugin Uninstall a provider plugin
 
-Uninstall a provisioner plugin
+Uninstall a provider plugin
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param provisioner Provisioner to uninstall
- @return ApiUninstallProvisionerPluginRequest
+ @param provider Provider to uninstall
+ @return ApiUninstallProviderPluginRequest
 */
-func (a *PluginAPIService) UninstallProvisionerPlugin(ctx context.Context, provisioner string) ApiUninstallProvisionerPluginRequest {
-	return ApiUninstallProvisionerPluginRequest{
+func (a *PluginAPIService) UninstallProviderPlugin(ctx context.Context, provider string) ApiUninstallProviderPluginRequest {
+	return ApiUninstallProviderPluginRequest{
 		ApiService: a,
 		ctx: ctx,
-		provisioner: provisioner,
+		provider: provider,
 	}
 }
 
 // Execute executes the request
-func (a *PluginAPIService) UninstallProvisionerPluginExecute(r ApiUninstallProvisionerPluginRequest) (*http.Response, error) {
+func (a *PluginAPIService) UninstallProviderPluginExecute(r ApiUninstallProviderPluginRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
 		formFiles            []formFile
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PluginAPIService.UninstallProvisionerPlugin")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PluginAPIService.UninstallProviderPlugin")
 	if err != nil {
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/plugin/provisioner/{provisioner}/uninstall"
-	localVarPath = strings.Replace(localVarPath, "{"+"provisioner"+"}", url.PathEscape(parameterValueToString(r.provisioner, "provisioner")), -1)
+	localVarPath := localBasePath + "/plugin/provider/{provider}/uninstall"
+	localVarPath = strings.Replace(localVarPath, "{"+"provider"+"}", url.PathEscape(parameterValueToString(r.provider, "provider")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}

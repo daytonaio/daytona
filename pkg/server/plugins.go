@@ -7,7 +7,7 @@ import (
 
 	agent_service_manager "github.com/daytonaio/daytona/pkg/agent_service/manager"
 	"github.com/daytonaio/daytona/pkg/plugin_manager"
-	provisioner_manager "github.com/daytonaio/daytona/pkg/provisioner/manager"
+	provider_manager "github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/server/config"
 	"github.com/daytonaio/daytona/pkg/server/frpc"
 	"github.com/daytonaio/daytona/pkg/types"
@@ -25,13 +25,13 @@ func downloadDefaultPlugins() error {
 		return err
 	}
 
-	defaultProvisionerPlugins := plugin_manager.GetDefaultPlugins(manifest.ProvisionerPlugins)
+	defaultProviderPlugins := plugin_manager.GetDefaultPlugins(manifest.ProviderPlugins)
 	defaultAgentServicePlugins := plugin_manager.GetDefaultPlugins(manifest.AgentServicePlugins)
 
-	log.Info("Downloading default provisioner plugins")
-	for pluginName, plugin := range defaultProvisionerPlugins {
+	log.Info("Downloading default provider plugins")
+	for pluginName, plugin := range defaultProviderPlugins {
 		log.Info("Downloading " + pluginName)
-		downloadPath := path.Join(c.PluginsDir, "provisioners", pluginName, pluginName)
+		downloadPath := path.Join(c.PluginsDir, "providers", pluginName, pluginName)
 		err = plugin_manager.DownloadPlugin(plugin.DownloadUrls, downloadPath)
 		if err != nil {
 			log.Error(err)
@@ -58,15 +58,15 @@ func downloadDefaultPlugins() error {
 
 }
 
-func registerProvisioners(c *types.ServerConfig) error {
-	log.Info("Registering provisioners")
+func registerProviders(c *types.ServerConfig) error {
+	log.Info("Registering providers")
 
-	provisionerPluginsPath := path.Join(c.PluginsDir, "provisioners")
+	providerPluginsPath := path.Join(c.PluginsDir, "providers")
 
-	files, err := os.ReadDir(provisionerPluginsPath)
+	files, err := os.ReadDir(providerPluginsPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			log.Info("No provisioners found")
+			log.Info("No providers found")
 			return nil
 		}
 		return err
@@ -74,13 +74,13 @@ func registerProvisioners(c *types.ServerConfig) error {
 
 	for _, file := range files {
 		if file.IsDir() {
-			pluginPath, err := getPluginPath(path.Join(provisionerPluginsPath, file.Name()))
+			pluginPath, err := getPluginPath(path.Join(providerPluginsPath, file.Name()))
 			if err != nil {
 				log.Error(err)
 				continue
 			}
 
-			err = provisioner_manager.RegisterProvisioner(pluginPath, c.ServerDownloadUrl, frpc.GetServerUrl(c), frpc.GetApiUrl(c))
+			err = provider_manager.RegisterProvider(pluginPath, c.ServerDownloadUrl, frpc.GetServerUrl(c), frpc.GetApiUrl(c))
 			if err != nil {
 				log.Error(err)
 				continue
@@ -88,7 +88,7 @@ func registerProvisioners(c *types.ServerConfig) error {
 		}
 	}
 
-	log.Info("Provisioners registered")
+	log.Info("Providers registered")
 
 	return nil
 }

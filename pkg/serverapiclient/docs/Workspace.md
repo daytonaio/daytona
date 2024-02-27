@@ -7,7 +7,7 @@ Name | Type | Description | Notes
 **Id** | Pointer to **string** |  | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
 **Projects** | Pointer to [**[]Project**](Project.md) |  | [optional] 
-**Provisioner** | Pointer to [**WorkspaceProvisioner**](WorkspaceProvisioner.md) |  | [optional] 
+**Provider** | Pointer to [**WorkspaceProvider**](WorkspaceProvider.md) |  | [optional] 
 
 ## Methods
 
@@ -103,30 +103,30 @@ SetProjects sets Projects field to given value.
 
 HasProjects returns a boolean if a field has been set.
 
-### GetProvisioner
+### GetProvider
 
-`func (o *Workspace) GetProvisioner() WorkspaceProvisioner`
+`func (o *Workspace) GetProvider() WorkspaceProvider`
 
-GetProvisioner returns the Provisioner field if non-nil, zero value otherwise.
+GetProvider returns the Provider field if non-nil, zero value otherwise.
 
-### GetProvisionerOk
+### GetProviderOk
 
-`func (o *Workspace) GetProvisionerOk() (*WorkspaceProvisioner, bool)`
+`func (o *Workspace) GetProviderOk() (*WorkspaceProvider, bool)`
 
-GetProvisionerOk returns a tuple with the Provisioner field if it's non-nil, zero value otherwise
+GetProviderOk returns a tuple with the Provider field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetProvisioner
+### SetProvider
 
-`func (o *Workspace) SetProvisioner(v WorkspaceProvisioner)`
+`func (o *Workspace) SetProvider(v WorkspaceProvider)`
 
-SetProvisioner sets Provisioner field to given value.
+SetProvider sets Provider field to given value.
 
-### HasProvisioner
+### HasProvider
 
-`func (o *Workspace) HasProvisioner() bool`
+`func (o *Workspace) HasProvider() bool`
 
-HasProvisioner returns a boolean if a field has been set.
+HasProvider returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

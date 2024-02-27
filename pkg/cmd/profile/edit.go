@@ -11,7 +11,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views/profile"
-	"github.com/daytonaio/daytona/pkg/views/provisioner"
+	"github.com/daytonaio/daytona/pkg/views/provider"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -53,7 +53,7 @@ var profileEditCmd = &cobra.Command{
 			log.Fatal("Profile does not exist")
 		}
 
-		if profileNameFlag == "" || serverHostnameFlag == "" || serverUserFlag == "" || provisionerFlag == "" || apiUrlFlag == "" || (serverPrivateKeyPathFlag == "" && serverPasswordFlag == "") {
+		if profileNameFlag == "" || serverHostnameFlag == "" || serverUserFlag == "" || providerFlag == "" || apiUrlFlag == "" || (serverPrivateKeyPathFlag == "" && serverPasswordFlag == "") {
 			err = EditProfile(c, true, &chosenProfile, false, false)
 			if err != nil {
 				log.Fatal(err)
@@ -68,7 +68,7 @@ var profileEditCmd = &cobra.Command{
 			RemoteSshUser:           serverUserFlag,
 			RemoteSshPassword:       serverPasswordFlag,
 			RemoteSshPrivateKeyPath: serverPrivateKeyPathFlag,
-			DefaultProvisioner:      provisionerFlag,
+			DefaultProvider:         providerFlag,
 			ApiUrl:                  apiUrlFlag,
 		}
 
@@ -84,13 +84,13 @@ func EditProfile(c *config.Config, notify bool, profileToEdit *config.Profile, f
 		return errors.New("profile must not be nil")
 	}
 
-	var provisionerPluginList []serverapiclient.ProvisionerPlugin
-	var selectedProvisioner *serverapiclient.ProvisionerPlugin = nil
-	defaultProvisioner := "default"
+	var providerPluginList []serverapiclient.ProviderPlugin
+	var selectedProvider *serverapiclient.ProviderPlugin = nil
+	defaultProvider := "default"
 
 	profileAddView := profile.ProfileAddView{
 		ProfileName:             profileToEdit.Name,
-		DefaultProvisioner:      defaultProvisioner,
+		DefaultProvider:         defaultProvider,
 		RemoteSshPort:           22,
 		RemoteSshPassword:       "",
 		RemoteSshPrivateKeyPath: "",
@@ -114,30 +114,30 @@ func EditProfile(c *config.Config, notify bool, profileToEdit *config.Profile, f
 		log.Fatal(err)
 	}
 
-	provisionerPluginList, _, _ = apiClient.PluginAPI.ListProvisionerPlugins(context.Background()).Execute()
+	providerPluginList, _, _ = apiClient.PluginAPI.ListProviderPlugins(context.Background()).Execute()
 
 	if profileToEdit.Id != "default" {
 		profile.ProfileCreationView(c, &profileAddView, true, forceRemoteAccess, skipName)
 	}
 
-	if len(provisionerPluginList) > 0 {
-		for _, provisioner := range provisionerPluginList {
-			if *provisioner.Name == profileToEdit.DefaultProvisioner {
-				selectedProvisioner = &provisioner
+	if len(providerPluginList) > 0 {
+		for _, provider := range providerPluginList {
+			if *provider.Name == profileToEdit.DefaultProvider {
+				selectedProvider = &provider
 				break
 			}
 		}
 
-		provisioner, err := provisioner.GetProvisionerFromPrompt(provisionerPluginList, "Choose a default provisioner to use", selectedProvisioner)
+		provider, err := provider.GetProviderFromPrompt(providerPluginList, "Choose a default provider to use", selectedProvider)
 		if err != nil {
 			return err
 		}
 
 		if profileToEdit.Id == "default" {
-			profileToEdit.DefaultProvisioner = *provisioner.Name
+			profileToEdit.DefaultProvider = *provider.Name
 			return c.EditProfile(*profileToEdit)
 		} else {
-			profileAddView.DefaultProvisioner = *provisionerPluginList[0].Name
+			profileAddView.DefaultProvider = *providerPluginList[0].Name
 		}
 	}
 
@@ -147,7 +147,7 @@ func EditProfile(c *config.Config, notify bool, profileToEdit *config.Profile, f
 func editProfile(profileToEdit *config.Profile, profileView profile.ProfileAddView, c *config.Config, notify bool) error {
 	profileToEdit.Name = profileView.ProfileName
 	profileToEdit.Api.Url = profileView.ApiUrl
-	profileToEdit.DefaultProvisioner = profileView.DefaultProvisioner
+	profileToEdit.DefaultProvider = profileView.DefaultProvider
 	profileToEdit.RemoteAuth = &config.RemoteAuth{
 		Port:     profileView.RemoteSshPort,
 		Hostname: profileView.RemoteHostname,
@@ -187,6 +187,6 @@ func init() {
 	profileEditCmd.Flags().StringVarP(&serverUserFlag, "user", "u", "", "Remote SSH url")
 	profileEditCmd.Flags().StringVarP(&serverPasswordFlag, "password", "p", "", "Remote SSH password")
 	profileEditCmd.Flags().StringVarP(&serverPrivateKeyPathFlag, "private-key-path", "k", "", "Remote SSH private key path")
-	profileEditCmd.Flags().StringVarP(&provisionerFlag, "provisioner", "r", "default", "Provisioner")
+	profileEditCmd.Flags().StringVarP(&providerFlag, "provider", "r", "default", "Provider")
 	profileEditCmd.Flags().StringVarP(&apiUrlFlag, "api-url", "a", "", "API URL")
 }

@@ -23,12 +23,12 @@ type ProjectDTO struct {
 }
 
 type ProjectInfoDTO struct {
-	Name                string      `json:"name"`
-	Created             string      `json:"created"`
-	Started             string      `json:"started"`
-	Finished            string      `json:"finished"`
-	IsRunning           bool        `json:"isRunning"`
-	ProvisionerMetadata interface{} `json:"provisionerMetadata"`
+	Name             string      `json:"name"`
+	Created          string      `json:"created"`
+	Started          string      `json:"started"`
+	Finished         string      `json:"finished"`
+	IsRunning        bool        `json:"isRunning"`
+	ProviderMetadata interface{} `json:"providerMetadata"`
 }
 
 func ToProjectDTO(project *types.Project, workspace *types.Workspace) ProjectDTO {

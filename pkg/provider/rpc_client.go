@@ -1,4 +1,4 @@
-package provisioner
+package provider
 
 import (
 	"net/rpc"
@@ -6,75 +6,75 @@ import (
 	"github.com/daytonaio/daytona/pkg/types"
 )
 
-type ProvisionerRPCClient struct {
+type ProviderRPCClient struct {
 	client *rpc.Client
 }
 
-func (m *ProvisionerRPCClient) Initialize(req InitializeProvisionerRequest) (*types.Empty, error) {
+func (m *ProviderRPCClient) Initialize(req InitializeProviderRequest) (*types.Empty, error) {
 	err := m.client.Call("Plugin.Initialize", &req, new(types.Empty))
 	return new(types.Empty), err
 }
 
-func (m *ProvisionerRPCClient) GetInfo() (ProvisionerInfo, error) {
-	var resp ProvisionerInfo
+func (m *ProviderRPCClient) GetInfo() (ProviderInfo, error) {
+	var resp ProviderInfo
 	err := m.client.Call("Plugin.GetInfo", new(interface{}), &resp)
 	return resp, err
 }
 
-func (m *ProvisionerRPCClient) Configure() (interface{}, error) {
+func (m *ProviderRPCClient) Configure() (interface{}, error) {
 	var config interface{}
 	err := m.client.Call("Plugin.Configure", new(interface{}), &config)
 
 	return config, err
 }
 
-func (m *ProvisionerRPCClient) CreateWorkspace(workspace *types.Workspace) (*types.Empty, error) {
+func (m *ProviderRPCClient) CreateWorkspace(workspace *types.Workspace) (*types.Empty, error) {
 	err := m.client.Call("Plugin.CreateWorkspace", workspace, new(types.Empty))
 	return new(types.Empty), err
 }
 
-func (m *ProvisionerRPCClient) StartWorkspace(workspace *types.Workspace) (*types.Empty, error) {
+func (m *ProviderRPCClient) StartWorkspace(workspace *types.Workspace) (*types.Empty, error) {
 	err := m.client.Call("Plugin.StartWorkspace", workspace, new(types.Empty))
 	return new(types.Empty), err
 }
 
-func (m *ProvisionerRPCClient) StopWorkspace(workspace *types.Workspace) (*types.Empty, error) {
+func (m *ProviderRPCClient) StopWorkspace(workspace *types.Workspace) (*types.Empty, error) {
 	err := m.client.Call("Plugin.StopWorkspace", workspace, new(types.Empty))
 	return new(types.Empty), err
 }
 
-func (m *ProvisionerRPCClient) DestroyWorkspace(workspace *types.Workspace) (*types.Empty, error) {
+func (m *ProviderRPCClient) DestroyWorkspace(workspace *types.Workspace) (*types.Empty, error) {
 	err := m.client.Call("Plugin.DestroyWorkspace", workspace, new(types.Empty))
 	return new(types.Empty), err
 }
 
-func (m *ProvisionerRPCClient) GetWorkspaceInfo(workspace *types.Workspace) (*types.WorkspaceInfo, error) {
+func (m *ProviderRPCClient) GetWorkspaceInfo(workspace *types.Workspace) (*types.WorkspaceInfo, error) {
 	var response types.WorkspaceInfo
 	err := m.client.Call("Plugin.GetWorkspaceInfo", workspace, &response)
 	return &response, err
 }
 
-func (m *ProvisionerRPCClient) CreateProject(project *types.Project) (*types.Empty, error) {
+func (m *ProviderRPCClient) CreateProject(project *types.Project) (*types.Empty, error) {
 	err := m.client.Call("Plugin.CreateProject", project, new(types.Empty))
 	return new(types.Empty), err
 }
 
-func (m *ProvisionerRPCClient) StartProject(project *types.Project) (*types.Empty, error) {
+func (m *ProviderRPCClient) StartProject(project *types.Project) (*types.Empty, error) {
 	err := m.client.Call("Plugin.StartProject", project, new(types.Empty))
 	return new(types.Empty), err
 }
 
-func (m *ProvisionerRPCClient) StopProject(project *types.Project) (*types.Empty, error) {
+func (m *ProviderRPCClient) StopProject(project *types.Project) (*types.Empty, error) {
 	err := m.client.Call("Plugin.StopProject", project, new(types.Empty))
 	return new(types.Empty), err
 }
 
-func (m *ProvisionerRPCClient) DestroyProject(project *types.Project) (*types.Empty, error) {
+func (m *ProviderRPCClient) DestroyProject(project *types.Project) (*types.Empty, error) {
 	err := m.client.Call("Plugin.DestroyProject", project, new(types.Empty))
 	return new(types.Empty), err
 }
 
-func (m *ProvisionerRPCClient) GetProjectInfo(project *types.Project) (*types.ProjectInfo, error) {
+func (m *ProviderRPCClient) GetProjectInfo(project *types.Project) (*types.ProjectInfo, error) {
 	var resp types.ProjectInfo
 	err := m.client.Call("Plugin.GetProjectInfo", project, &resp)
 	return &resp, err

@@ -38,16 +38,16 @@ func getPluginList() ([]plugins.PluginViewDTO, error) {
 	pluginList := []plugins.PluginViewDTO{}
 	ctx := context.Background()
 
-	provisionerPluginList, res, err := apiClient.PluginAPI.ListProvisionerPlugins(ctx).Execute()
+	providerPluginList, res, err := apiClient.PluginAPI.ListProviderPlugins(ctx).Execute()
 	if err != nil {
 		log.Fatal(apiclient.HandleErrorResponse(res, err))
 	}
 
-	for _, plugin := range provisionerPluginList {
+	for _, plugin := range providerPluginList {
 		pluginList = append(pluginList, plugins.PluginViewDTO{
 			Name:    *plugin.Name,
 			Version: *plugin.Version,
-			Type:    plugins.PluginTypeProvisioner,
+			Type:    plugins.PluginTypeProvider,
 		})
 	}
 
