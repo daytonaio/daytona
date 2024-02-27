@@ -1,0 +1,405 @@
+basePath: /
+definitions:
+  CreateWorkspace:
+    properties:
+      name:
+        type: string
+      provider:
+        type: string
+      repositories:
+        items:
+          type: string
+        type: array
+    type: object
+  FRPSConfig:
+    properties:
+      domain:
+        type: string
+      port:
+        type: integer
+      protocol:
+        type: string
+    type: object
+  GitProvider:
+    properties:
+      id:
+        type: string
+      token:
+        type: string
+      username:
+        type: string
+    type: object
+  InstallProviderRequest:
+    properties:
+      downloadUrls:
+        additionalProperties:
+          type: string
+        type: object
+      name:
+        type: string
+    type: object
+  NetworkKey:
+    properties:
+      key:
+        type: string
+    type: object
+  Project:
+    properties:
+      name:
+        type: string
+      repository:
+        $ref: '#/definitions/Repository'
+      workspaceId:
+        type: string
+    type: object
+  ProjectInfo:
+    properties:
+      created:
+        type: string
+      finished:
+        type: string
+      isRunning:
+        type: boolean
+      name:
+        type: string
+      providerMetadata:
+        type: string
+      started:
+        type: string
+      workspaceId:
+        type: string
+    type: object
+  Provider:
+    properties:
+      name:
+        type: string
+      version:
+        type: string
+    type: object
+  Repository:
+    properties:
+      branch:
+        type: string
+      owner:
+        type: string
+      path:
+        type: string
+      prNumber:
+        type: integer
+      sha:
+        type: string
+      source:
+        type: string
+      url:
+        type: string
+    type: object
+  ServerConfig:
+    properties:
+      apiPort:
+        type: integer
+      frps:
+        $ref: '#/definitions/FRPSConfig'
+      gitProviders:
+        items:
+          $ref: '#/definitions/GitProvider'
+        type: array
+      headscalePort:
+        type: integer
+      id:
+        type: string
+      providersDir:
+        type: string
+      registryUrl:
+        type: string
+      serverDownloadUrl:
+        type: string
+    type: object
+  Workspace:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      projects:
+        items:
+          $ref: '#/definitions/Project'
+        type: array
+      provider:
+        $ref: '#/definitions/WorkspaceProvider'
+    type: object
+  WorkspaceInfo:
+    properties:
+      name:
+        type: string
+      projects:
+        items:
+          $ref: '#/definitions/ProjectInfo'
+        type: array
+      providerMetadata:
+        type: string
+    type: object
+  WorkspaceProvider:
+    properties:
+      name:
+        type: string
+      profile:
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: Daytona Server API
+  title: Daytona Server API
+  version: 0.1.0
+paths:
+  /provider:
+    get:
+      description: List providers
+      operationId: ListProviders
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/Provider'
+            type: array
+      summary: List providers
+      tags:
+      - provider
+  /provider/{provider}/uninstall:
+    post:
+      consumes:
+      - application/json
+      description: Uninstall a provider
+      operationId: UninstallProvider
+      parameters:
+      - description: Provider to uninstall
+        in: path
+        name: provider
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Uninstall a provider
+      tags:
+      - provider
+  /provider/install:
+    post:
+      consumes:
+      - application/json
+      description: Install a provider
+      operationId: InstallProvider
+      parameters:
+      - description: Provider to install
+        in: body
+        name: provider
+        required: true
+        schema:
+          $ref: '#/definitions/InstallProviderRequest'
+      responses:
+        "200":
+          description: OK
+      summary: Install a provider
+      tags:
+      - provider
+  /server/config:
+    get:
+      description: Get the server configuration
+      operationId: GetConfig
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ServerConfig'
+      summary: Get the server configuration
+      tags:
+      - server
+    post:
+      consumes:
+      - application/json
+      description: Set the server configuration
+      operationId: SetConfig
+      parameters:
+      - description: Server configuration
+        in: body
+        name: config
+        required: true
+        schema:
+          $ref: '#/definitions/ServerConfig'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ServerConfig'
+      summary: Set the server configuration
+      tags:
+      - server
+  /server/network-key:
+    post:
+      description: Generate a new authentication key
+      operationId: GenerateNetworkKey
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/NetworkKey'
+      summary: Generate a new authentication key
+      tags:
+      - server
+  /workspace:
+    get:
+      description: List workspaces info
+      operationId: ListWorkspaces
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/Workspace'
+            type: array
+      summary: List workspaces info
+      tags:
+      - workspace
+    post:
+      description: Create a workspace
+      operationId: CreateWorkspace
+      parameters:
+      - description: Create workspace
+        in: body
+        name: workspace
+        required: true
+        schema:
+          $ref: '#/definitions/CreateWorkspace'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Workspace'
+      summary: Create a workspace
+      tags:
+      - workspace
+  /workspace/{workspaceId}:
+    delete:
+      description: Remove workspace
+      operationId: RemoveWorkspace
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Remove workspace
+      tags:
+      - workspace
+    get:
+      description: Get workspace info
+      operationId: GetWorkspaceInfo
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/WorkspaceInfo'
+      summary: Get workspace info
+      tags:
+      - workspace
+  /workspace/{workspaceId}/{projectId}/start:
+    post:
+      description: Start project
+      operationId: StartProject
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Start project
+      tags:
+      - workspace
+  /workspace/{workspaceId}/{projectId}/stop:
+    post:
+      description: Stop project
+      operationId: StopProject
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Stop project
+      tags:
+      - workspace
+  /workspace/{workspaceId}/start:
+    post:
+      description: Start workspace
+      operationId: StartWorkspace
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Start workspace
+      tags:
+      - workspace
+  /workspace/{workspaceId}/stop:
+    post:
+      description: Stop workspace
+      operationId: StopWorkspace
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Stop workspace
+      tags:
+      - workspace
+schemes:
+- http
+swagger: "2.0"

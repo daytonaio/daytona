@@ -1,0 +1,17 @@
+{
+  "docker-provider": {
+    "default": true,
+    "versions": {
+      "latest": {
+        "downloadUrls": {
+          "linux-amd64": "https://download.daytona.io/daytona/providers/docker-provider/latest/docker-provider-linux-amd64",
+          "darwin-amd64": "https://download.daytona.io/daytona/providers/docker-provider/latest/docker-provider-darwin-amd64",
+          "windows-amd64": "https://download.daytona.io/daytona/providers/docker-provider/latest/docker-provider-windows-amd64",
+          "linux-arm64": "https://download.daytona.io/daytona/providers/docker-provider/latest/docker-provider-linux-arm64",
+          "darwin-arm64": "https://download.daytona.io/daytona/providers/docker-provider/latest/docker-provider-darwin-arm64",
+          "windows-arm64": "https://download.daytona.io/daytona/providers/docker-provider/latest/docker-provider-windows-arm64"
+        }
+      }
+    }
+  }
+}

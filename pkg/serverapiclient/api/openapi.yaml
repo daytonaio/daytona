@@ -1,0 +1,534 @@
+openapi: 3.0.1
+info:
+  contact: {}
+  description: Daytona Server API
+  title: Daytona Server API
+  version: 0.1.0
+servers:
+- url: http://localhost:3000/
+paths:
+  /provider:
+    get:
+      description: List providers
+      operationId: ListProviders
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Provider'
+                type: array
+          description: OK
+      summary: List providers
+      tags:
+      - provider
+  /provider/install:
+    post:
+      description: Install a provider
+      operationId: InstallProvider
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstallProviderRequest'
+        description: Provider to install
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Install a provider
+      tags:
+      - provider
+      x-codegen-request-body-name: provider
+  /provider/{provider}/uninstall:
+    post:
+      description: Uninstall a provider
+      operationId: UninstallProvider
+      parameters:
+      - description: Provider to uninstall
+        in: path
+        name: provider
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Uninstall a provider
+      tags:
+      - provider
+  /server/config:
+    get:
+      description: Get the server configuration
+      operationId: GetConfig
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerConfig'
+          description: OK
+      summary: Get the server configuration
+      tags:
+      - server
+    post:
+      description: Set the server configuration
+      operationId: SetConfig
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServerConfig'
+        description: Server configuration
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerConfig'
+          description: OK
+      summary: Set the server configuration
+      tags:
+      - server
+      x-codegen-request-body-name: config
+  /server/network-key:
+    post:
+      description: Generate a new authentication key
+      operationId: GenerateNetworkKey
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NetworkKey'
+          description: OK
+      summary: Generate a new authentication key
+      tags:
+      - server
+  /workspace:
+    get:
+      description: List workspaces info
+      operationId: ListWorkspaces
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Workspace'
+                type: array
+          description: OK
+      summary: List workspaces info
+      tags:
+      - workspace
+    post:
+      description: Create a workspace
+      operationId: CreateWorkspace
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/CreateWorkspace'
+        description: Create workspace
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+          description: OK
+      summary: Create a workspace
+      tags:
+      - workspace
+      x-codegen-request-body-name: workspace
+  /workspace/{workspaceId}:
+    delete:
+      description: Remove workspace
+      operationId: RemoveWorkspace
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Remove workspace
+      tags:
+      - workspace
+    get:
+      description: Get workspace info
+      operationId: GetWorkspaceInfo
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceInfo'
+          description: OK
+      summary: Get workspace info
+      tags:
+      - workspace
+  /workspace/{workspaceId}/start:
+    post:
+      description: Start workspace
+      operationId: StartWorkspace
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Start workspace
+      tags:
+      - workspace
+  /workspace/{workspaceId}/stop:
+    post:
+      description: Stop workspace
+      operationId: StopWorkspace
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Stop workspace
+      tags:
+      - workspace
+  /workspace/{workspaceId}/{projectId}/start:
+    post:
+      description: Start project
+      operationId: StartProject
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Start project
+      tags:
+      - workspace
+  /workspace/{workspaceId}/{projectId}/stop:
+    post:
+      description: Stop project
+      operationId: StopProject
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Stop project
+      tags:
+      - workspace
+components:
+  schemas:
+    CreateWorkspace:
+      example:
+        provider: provider
+        repositories:
+        - repositories
+        - repositories
+        name: name
+      properties:
+        name:
+          type: string
+        provider:
+          type: string
+        repositories:
+          items:
+            type: string
+          type: array
+      type: object
+    FRPSConfig:
+      example:
+        protocol: protocol
+        port: 6
+        domain: domain
+      properties:
+        domain:
+          type: string
+        port:
+          type: integer
+        protocol:
+          type: string
+      type: object
+    GitProvider:
+      example:
+        id: id
+        token: token
+        username: username
+      properties:
+        id:
+          type: string
+        token:
+          type: string
+        username:
+          type: string
+      type: object
+    InstallProviderRequest:
+      example:
+        downloadUrls:
+          key: downloadUrls
+        name: name
+      properties:
+        downloadUrls:
+          additionalProperties:
+            type: string
+          type: object
+        name:
+          type: string
+      type: object
+    NetworkKey:
+      example:
+        key: key
+      properties:
+        key:
+          type: string
+      type: object
+    Project:
+      example:
+        name: name
+        repository:
+          owner: owner
+          path: path
+          source: source
+          prNumber: 0
+          branch: branch
+          sha: sha
+          url: url
+        workspaceId: workspaceId
+      properties:
+        name:
+          type: string
+        repository:
+          $ref: '#/components/schemas/Repository'
+        workspaceId:
+          type: string
+      type: object
+    ProjectInfo:
+      example:
+        providerMetadata: providerMetadata
+        isRunning: true
+        created: created
+        name: name
+        finished: finished
+        started: started
+        workspaceId: workspaceId
+      properties:
+        created:
+          type: string
+        finished:
+          type: string
+        isRunning:
+          type: boolean
+        name:
+          type: string
+        providerMetadata:
+          type: string
+        started:
+          type: string
+        workspaceId:
+          type: string
+      type: object
+    Provider:
+      example:
+        name: name
+        version: version
+      properties:
+        name:
+          type: string
+        version:
+          type: string
+      type: object
+    Repository:
+      example:
+        owner: owner
+        path: path
+        source: source
+        prNumber: 0
+        branch: branch
+        sha: sha
+        url: url
+      properties:
+        branch:
+          type: string
+        owner:
+          type: string
+        path:
+          type: string
+        prNumber:
+          type: integer
+        sha:
+          type: string
+        source:
+          type: string
+        url:
+          type: string
+      type: object
+    ServerConfig:
+      example:
+        registryUrl: registryUrl
+        apiPort: 0
+        headscalePort: 1
+        serverDownloadUrl: serverDownloadUrl
+        providersDir: providersDir
+        id: id
+        gitProviders:
+        - id: id
+          token: token
+          username: username
+        - id: id
+          token: token
+          username: username
+        frps:
+          protocol: protocol
+          port: 6
+          domain: domain
+      properties:
+        apiPort:
+          type: integer
+        frps:
+          $ref: '#/components/schemas/FRPSConfig'
+        gitProviders:
+          items:
+            $ref: '#/components/schemas/GitProvider'
+          type: array
+        headscalePort:
+          type: integer
+        id:
+          type: string
+        providersDir:
+          type: string
+        registryUrl:
+          type: string
+        serverDownloadUrl:
+          type: string
+      type: object
+    Workspace:
+      example:
+        projects:
+        - name: name
+          repository:
+            owner: owner
+            path: path
+            source: source
+            prNumber: 0
+            branch: branch
+            sha: sha
+            url: url
+          workspaceId: workspaceId
+        - name: name
+          repository:
+            owner: owner
+            path: path
+            source: source
+            prNumber: 0
+            branch: branch
+            sha: sha
+            url: url
+          workspaceId: workspaceId
+        provider:
+          profile: profile
+          name: name
+        name: name
+        id: id
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        projects:
+          items:
+            $ref: '#/components/schemas/Project'
+          type: array
+        provider:
+          $ref: '#/components/schemas/WorkspaceProvider'
+      type: object
+    WorkspaceInfo:
+      example:
+        projects:
+        - providerMetadata: providerMetadata
+          isRunning: true
+          created: created
+          name: name
+          finished: finished
+          started: started
+          workspaceId: workspaceId
+        - providerMetadata: providerMetadata
+          isRunning: true
+          created: created
+          name: name
+          finished: finished
+          started: started
+          workspaceId: workspaceId
+        providerMetadata: providerMetadata
+        name: name
+      properties:
+        name:
+          type: string
+        projects:
+          items:
+            $ref: '#/components/schemas/ProjectInfo'
+          type: array
+        providerMetadata:
+          type: string
+      type: object
+    WorkspaceProvider:
+      example:
+        profile: profile
+        name: name
+      properties:
+        name:
+          type: string
+        profile:
+          type: string
+      type: object
+x-original-swagger-version: "2.0"

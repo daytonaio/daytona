@@ -47,7 +47,7 @@ jobs:
           if [[ "${{ matrix.goos }}" == "windows" ]]; then
             SUFFIX=".exe"
           fi
-          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 go build -o daytona-${{ matrix.goos }}-${{ matrix.goarch }}$SUFFIX
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 go build -o daytona-${{ matrix.goos }}-${{ matrix.goarch }}$SUFFIX cmd/daytona/main.go
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
