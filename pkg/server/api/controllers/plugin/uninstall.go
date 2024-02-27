@@ -5,27 +5,27 @@ import (
 	"net/http"
 
 	agent_service_manager "github.com/daytonaio/daytona/pkg/agent_service/manager"
-	provisioner_manager "github.com/daytonaio/daytona/pkg/provisioner/manager"
+	provider_manager "github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/gin-gonic/gin"
 )
 
-// UninstallProvisionerPlugin godoc
+// UninstallProviderPlugin godoc
 //
 //	@Tags			plugin
-//	@Summary		Uninstall a provisioner plugin
-//	@Description	Uninstall a provisioner plugin
+//	@Summary		Uninstall a provider plugin
+//	@Description	Uninstall a provider plugin
 //	@Accept			json
-//	@Param			provisioner	path	string	true	"Provisioner to uninstall"
+//	@Param			provider	path	string	true	"Provider to uninstall"
 //	@Success		200
-//	@Router			/plugin/provisioner/{provisioner}/uninstall [post]
+//	@Router			/plugin/provider/{provider}/uninstall [post]
 //
-//	@id				UninstallProvisionerPlugin
-func UninstallProvisionerPlugin(ctx *gin.Context) {
-	provisioner := ctx.Param("provisioner")
+//	@id				UninstallProviderPlugin
+func UninstallProviderPlugin(ctx *gin.Context) {
+	provider := ctx.Param("provider")
 
-	err := provisioner_manager.UninstallProvisioner(provisioner)
+	err := provider_manager.UninstallProvider(provider)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to uninstall provisioner: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to uninstall provider: %s", err.Error()))
 		return
 	}
 

@@ -23,7 +23,7 @@ type ProjectInfo struct {
 	Finished *string `json:"finished,omitempty"`
 	IsRunning *bool `json:"isRunning,omitempty"`
 	Name *string `json:"name,omitempty"`
-	ProvisionerMetadata *string `json:"provisionerMetadata,omitempty"`
+	ProviderMetadata *string `json:"providerMetadata,omitempty"`
 	Started *string `json:"started,omitempty"`
 	WorkspaceId *string `json:"workspaceId,omitempty"`
 }
@@ -173,36 +173,36 @@ func (o *ProjectInfo) SetName(v string) {
 	o.Name = &v
 }
 
-// GetProvisionerMetadata returns the ProvisionerMetadata field value if set, zero value otherwise.
-func (o *ProjectInfo) GetProvisionerMetadata() string {
-	if o == nil || IsNil(o.ProvisionerMetadata) {
+// GetProviderMetadata returns the ProviderMetadata field value if set, zero value otherwise.
+func (o *ProjectInfo) GetProviderMetadata() string {
+	if o == nil || IsNil(o.ProviderMetadata) {
 		var ret string
 		return ret
 	}
-	return *o.ProvisionerMetadata
+	return *o.ProviderMetadata
 }
 
-// GetProvisionerMetadataOk returns a tuple with the ProvisionerMetadata field value if set, nil otherwise
+// GetProviderMetadataOk returns a tuple with the ProviderMetadata field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ProjectInfo) GetProvisionerMetadataOk() (*string, bool) {
-	if o == nil || IsNil(o.ProvisionerMetadata) {
+func (o *ProjectInfo) GetProviderMetadataOk() (*string, bool) {
+	if o == nil || IsNil(o.ProviderMetadata) {
 		return nil, false
 	}
-	return o.ProvisionerMetadata, true
+	return o.ProviderMetadata, true
 }
 
-// HasProvisionerMetadata returns a boolean if a field has been set.
-func (o *ProjectInfo) HasProvisionerMetadata() bool {
-	if o != nil && !IsNil(o.ProvisionerMetadata) {
+// HasProviderMetadata returns a boolean if a field has been set.
+func (o *ProjectInfo) HasProviderMetadata() bool {
+	if o != nil && !IsNil(o.ProviderMetadata) {
 		return true
 	}
 
 	return false
 }
 
-// SetProvisionerMetadata gets a reference to the given string and assigns it to the ProvisionerMetadata field.
-func (o *ProjectInfo) SetProvisionerMetadata(v string) {
-	o.ProvisionerMetadata = &v
+// SetProviderMetadata gets a reference to the given string and assigns it to the ProviderMetadata field.
+func (o *ProjectInfo) SetProviderMetadata(v string) {
+	o.ProviderMetadata = &v
 }
 
 // GetStarted returns the Started field value if set, zero value otherwise.
@@ -291,8 +291,8 @@ func (o ProjectInfo) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
 	}
-	if !IsNil(o.ProvisionerMetadata) {
-		toSerialize["provisionerMetadata"] = o.ProvisionerMetadata
+	if !IsNil(o.ProviderMetadata) {
+		toSerialize["providerMetadata"] = o.ProviderMetadata
 	}
 	if !IsNil(o.Started) {
 		toSerialize["started"] = o.Started

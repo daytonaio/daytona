@@ -1,4 +1,4 @@
-# ProvisionerPlugin
+# ProviderPlugin
 
 ## Properties
 
@@ -9,70 +9,70 @@ Name | Type | Description | Notes
 
 ## Methods
 
-### NewProvisionerPlugin
+### NewProviderPlugin
 
-`func NewProvisionerPlugin() *ProvisionerPlugin`
+`func NewProviderPlugin() *ProviderPlugin`
 
-NewProvisionerPlugin instantiates a new ProvisionerPlugin object
+NewProviderPlugin instantiates a new ProviderPlugin object
 This constructor will assign default values to properties that have it defined,
 and makes sure properties required by API are set, but the set of arguments
 will change when the set of required properties is changed
 
-### NewProvisionerPluginWithDefaults
+### NewProviderPluginWithDefaults
 
-`func NewProvisionerPluginWithDefaults() *ProvisionerPlugin`
+`func NewProviderPluginWithDefaults() *ProviderPlugin`
 
-NewProvisionerPluginWithDefaults instantiates a new ProvisionerPlugin object
+NewProviderPluginWithDefaults instantiates a new ProviderPlugin object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
 ### GetName
 
-`func (o *ProvisionerPlugin) GetName() string`
+`func (o *ProviderPlugin) GetName() string`
 
 GetName returns the Name field if non-nil, zero value otherwise.
 
 ### GetNameOk
 
-`func (o *ProvisionerPlugin) GetNameOk() (*string, bool)`
+`func (o *ProviderPlugin) GetNameOk() (*string, bool)`
 
 GetNameOk returns a tuple with the Name field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetName
 
-`func (o *ProvisionerPlugin) SetName(v string)`
+`func (o *ProviderPlugin) SetName(v string)`
 
 SetName sets Name field to given value.
 
 ### HasName
 
-`func (o *ProvisionerPlugin) HasName() bool`
+`func (o *ProviderPlugin) HasName() bool`
 
 HasName returns a boolean if a field has been set.
 
 ### GetVersion
 
-`func (o *ProvisionerPlugin) GetVersion() string`
+`func (o *ProviderPlugin) GetVersion() string`
 
 GetVersion returns the Version field if non-nil, zero value otherwise.
 
 ### GetVersionOk
 
-`func (o *ProvisionerPlugin) GetVersionOk() (*string, bool)`
+`func (o *ProviderPlugin) GetVersionOk() (*string, bool)`
 
 GetVersionOk returns a tuple with the Version field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetVersion
 
-`func (o *ProvisionerPlugin) SetVersion(v string)`
+`func (o *ProviderPlugin) SetVersion(v string)`
 
 SetVersion sets Version field to given value.
 
 ### HasVersion
 
-`func (o *ProvisionerPlugin) HasVersion() bool`
+`func (o *ProviderPlugin) HasVersion() bool`
 
 HasVersion returns a boolean if a field has been set.
 

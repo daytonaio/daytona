@@ -7,25 +7,25 @@ import (
 
 	agent_service_manager "github.com/daytonaio/daytona/pkg/agent_service/manager"
 	"github.com/daytonaio/daytona/pkg/plugin_manager"
-	provisioner_manager "github.com/daytonaio/daytona/pkg/provisioner/manager"
+	provider_manager "github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/plugin/dto"
 	"github.com/daytonaio/daytona/pkg/server/config"
 	"github.com/daytonaio/daytona/pkg/server/frpc"
 	"github.com/gin-gonic/gin"
 )
 
-// InstallProvisionerPlugin godoc
+// InstallProviderPlugin godoc
 //
 //	@Tags			plugin
-//	@Summary		Install a provisioner plugin
-//	@Description	Install a provisioner plugin
+//	@Summary		Install a provider plugin
+//	@Description	Install a provider plugin
 //	@Accept			json
 //	@Param			plugin	body	InstallPluginRequest	true	"Plugin to install"
 //	@Success		200
-//	@Router			/plugin/provisioner/install [post]
+//	@Router			/plugin/provider/install [post]
 //
-//	@id				InstallProvisionerPlugin
-func InstallProvisionerPlugin(ctx *gin.Context) {
+//	@id				InstallProviderPlugin
+func InstallProviderPlugin(ctx *gin.Context) {
 	var req dto.InstallPluginRequest
 	err := ctx.BindJSON(&req)
 	if err != nil {
@@ -39,7 +39,7 @@ func InstallProvisionerPlugin(ctx *gin.Context) {
 		return
 	}
 
-	downloadPath := path.Join(c.PluginsDir, "provisioners", req.Name, req.Name)
+	downloadPath := path.Join(c.PluginsDir, "providers", req.Name, req.Name)
 
 	err = plugin_manager.DownloadPlugin(req.DownloadUrls, downloadPath)
 	if err != nil {
@@ -47,9 +47,9 @@ func InstallProvisionerPlugin(ctx *gin.Context) {
 		return
 	}
 
-	err = provisioner_manager.RegisterProvisioner(downloadPath, c.ServerDownloadUrl, frpc.GetServerUrl(c), frpc.GetApiUrl(c))
+	err = provider_manager.RegisterProvider(downloadPath, c.ServerDownloadUrl, frpc.GetServerUrl(c), frpc.GetApiUrl(c))
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to register provisioner: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to register provider: %s", err.Error()))
 		return
 	}
 

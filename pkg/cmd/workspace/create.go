@@ -13,7 +13,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/types"
-	provisioner_view "github.com/daytonaio/daytona/pkg/views/provisioner"
+	provider_view "github.com/daytonaio/daytona/pkg/views/provider"
 	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
@@ -35,7 +35,7 @@ var CreateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 		var workspaceName string
-		var provisioner string
+		var provider string
 
 		manual, _ := cmd.Flags().GetBool("manual")
 		apiClient, err := server.GetApiClient(nil)
@@ -58,33 +58,33 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		if provisionerFlag != "" {
-			provisioner = provisionerFlag
-		} else if activeProfile.DefaultProvisioner == "" {
+		if providerFlag != "" {
+			provider = providerFlag
+		} else if activeProfile.DefaultProvider == "" {
 
-			provisionerPluginList, res, err := apiClient.PluginAPI.ListProvisionerPlugins(context.Background()).Execute()
+			providerPluginList, res, err := apiClient.PluginAPI.ListProviderPlugins(context.Background()).Execute()
 			if err != nil {
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 
-			if len(provisionerPluginList) == 0 {
-				log.Fatal(errors.New("no provisioner plugins found"))
+			if len(providerPluginList) == 0 {
+				log.Fatal(errors.New("no provider plugins found"))
 			}
 
-			defaultProvisioner, err := provisioner_view.GetProvisionerFromPrompt(provisionerPluginList, "Provisioner not set. Choose a provisioner to use", nil)
+			defaultProvider, err := provider_view.GetProviderFromPrompt(providerPluginList, "Provider not set. Choose a provider to use", nil)
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			provisioner = *defaultProvisioner.Name
-			activeProfile.DefaultProvisioner = *defaultProvisioner.Name
+			provider = *defaultProvider.Name
+			activeProfile.DefaultProvider = *defaultProvider.Name
 
 			err = c.EditProfile(activeProfile)
 			if err != nil {
 				log.Fatal(err)
 			}
 		} else {
-			provisioner = activeProfile.DefaultProvisioner
+			provider = activeProfile.DefaultProvider
 		}
 
 		if len(args) == 0 {
@@ -137,7 +137,7 @@ var CreateCmd = &cobra.Command{
 		_, res, err = apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(serverapiclient.CreateWorkspace{
 			Name:         &workspaceName,
 			Repositories: repos,
-			Provisioner:  &provisioner,
+			Provider:     &provider,
 		}).Execute()
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
@@ -198,10 +198,10 @@ var CreateCmd = &cobra.Command{
 	},
 }
 
-var provisionerFlag string
+var providerFlag string
 
 func init() {
 	CreateCmd.Flags().StringArrayVarP(&repos, "repo", "r", nil, "Set the repository url")
-	CreateCmd.Flags().StringVar(&provisionerFlag, "provisioner", "", "Specify the provisioner (e.g. 'docker-provisioner')")
+	CreateCmd.Flags().StringVar(&providerFlag, "provider", "", "Specify the provider (e.g. 'docker-provider')")
 	CreateCmd.Flags().Bool("manual", false, "Manually enter the git repositories")
 }

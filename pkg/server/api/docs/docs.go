@@ -98,9 +98,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/plugin/provisioner": {
+        "/plugin/provider": {
             "get": {
-                "description": "List provisioner plugins",
+                "description": "List provider plugins",
                 "consumes": [
                     "application/json"
                 ],
@@ -110,32 +110,32 @@ const docTemplate = `{
                 "tags": [
                     "plugin"
                 ],
-                "summary": "List provisioner plugins",
-                "operationId": "ListProvisionerPlugins",
+                "summary": "List provider plugins",
+                "operationId": "ListProviderPlugins",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/ProvisionerPlugin"
+                                "$ref": "#/definitions/ProviderPlugin"
                             }
                         }
                     }
                 }
             }
         },
-        "/plugin/provisioner/install": {
+        "/plugin/provider/install": {
             "post": {
-                "description": "Install a provisioner plugin",
+                "description": "Install a provider plugin",
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
                     "plugin"
                 ],
-                "summary": "Install a provisioner plugin",
-                "operationId": "InstallProvisionerPlugin",
+                "summary": "Install a provider plugin",
+                "operationId": "InstallProviderPlugin",
                 "parameters": [
                     {
                         "description": "Plugin to install",
@@ -154,22 +154,22 @@ const docTemplate = `{
                 }
             }
         },
-        "/plugin/provisioner/{provisioner}/uninstall": {
+        "/plugin/provider/{provider}/uninstall": {
             "post": {
-                "description": "Uninstall a provisioner plugin",
+                "description": "Uninstall a provider plugin",
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
                     "plugin"
                 ],
-                "summary": "Uninstall a provisioner plugin",
-                "operationId": "UninstallProvisionerPlugin",
+                "summary": "Uninstall a provider plugin",
+                "operationId": "UninstallProviderPlugin",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Provisioner to uninstall",
-                        "name": "provisioner",
+                        "description": "Provider to uninstall",
+                        "name": "provider",
                         "in": "path",
                         "required": true
                     }
@@ -491,7 +491,7 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "provisioner": {
+                "provider": {
                     "type": "string"
                 },
                 "repositories": {
@@ -581,7 +581,7 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "provisionerMetadata": {
+                "providerMetadata": {
                     "type": "string"
                 },
                 "started": {
@@ -592,7 +592,7 @@ const docTemplate = `{
                 }
             }
         },
-        "ProvisionerPlugin": {
+        "ProviderPlugin": {
             "type": "object",
             "properties": {
                 "name": {
@@ -676,8 +676,8 @@ const docTemplate = `{
                         "$ref": "#/definitions/Project"
                     }
                 },
-                "provisioner": {
-                    "$ref": "#/definitions/WorkspaceProvisioner"
+                "provider": {
+                    "$ref": "#/definitions/WorkspaceProvider"
                 }
             }
         },
@@ -693,12 +693,12 @@ const docTemplate = `{
                         "$ref": "#/definitions/ProjectInfo"
                     }
                 },
-                "provisionerMetadata": {
+                "providerMetadata": {
                     "type": "string"
                 }
             }
         },
-        "WorkspaceProvisioner": {
+        "WorkspaceProvider": {
             "type": "object",
             "properties": {
                 "name": {

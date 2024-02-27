@@ -17,7 +17,7 @@ type PluginVersion struct {
 }
 
 type PluginsManifest struct {
-	ProvisionerPlugins  map[string]PluginManifest `json:"provisionerPlugins"`
+	ProviderPlugins     map[string]PluginManifest `json:"providerPlugins"`
 	AgentServicePlugins map[string]PluginManifest `json:"agentServicePlugins"`
 }
 

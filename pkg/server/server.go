@@ -45,7 +45,7 @@ func Start() error {
 		return err
 	}
 
-	err = registerProvisioners(c)
+	err = registerProviders(c)
 	if err != nil {
 		return err
 	}

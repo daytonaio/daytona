@@ -6,25 +6,25 @@ import (
 	"github.com/daytonaio/daytona/pkg/types"
 )
 
-type WorkspaceProvisionerDTO struct {
+type WorkspaceProviderDTO struct {
 	Name    string `json:"name"`
 	Profile string `json:"profile"`
 }
 
 type WorkspaceDTO struct {
-	Id          string                  `gorm:"primaryKey"`
-	Name        string                  `json:"name"`
-	Provisioner WorkspaceProvisionerDTO `gorm:"serializer:json"`
-	Projects    []ProjectDTO            `gorm:"serializer:json"`
+	Id       string               `gorm:"primaryKey"`
+	Name     string               `json:"name"`
+	Provider WorkspaceProviderDTO `gorm:"serializer:json"`
+	Projects []ProjectDTO         `gorm:"serializer:json"`
 }
 
 type WorkspaceInfoDTO struct {
-	Id          string                  `json:"id"`
-	Name        string                  `json:"name"`
-	Provisioner WorkspaceProvisionerDTO `json:"provisioner"`
-	Projects    []ProjectInfoDTO        `json:"projects"`
+	Id       string               `json:"id"`
+	Name     string               `json:"name"`
+	Provider WorkspaceProviderDTO `json:"provider"`
+	Projects []ProjectInfoDTO     `json:"projects"`
 	// TODO: rethink name
-	ProvisionerMetadata interface{} `json:"provisionerMetadata"`
+	ProviderMetadata interface{} `json:"providerMetadata"`
 }
 
 func (w WorkspaceDTO) GetProject(name string) (*ProjectDTO, error) {
@@ -41,9 +41,9 @@ func ToWorkspaceDTO(workspace *types.Workspace) WorkspaceDTO {
 	workspaceDTO := WorkspaceDTO{
 		Id:   workspace.Id,
 		Name: workspace.Name,
-		Provisioner: WorkspaceProvisionerDTO{
-			Name:    workspace.Provisioner.Name,
-			Profile: workspace.Provisioner.Profile,
+		Provider: WorkspaceProviderDTO{
+			Name:    workspace.Provider.Name,
+			Profile: workspace.Provider.Profile,
 		},
 	}
 
@@ -58,9 +58,9 @@ func ToWorkspace(workspaceDTO WorkspaceDTO) *types.Workspace {
 	workspace := types.Workspace{
 		Id:   workspaceDTO.Id,
 		Name: workspaceDTO.Name,
-		Provisioner: &types.WorkspaceProvisioner{
-			Name:    workspaceDTO.Provisioner.Name,
-			Profile: workspaceDTO.Provisioner.Profile,
+		Provider: &types.WorkspaceProvider{
+			Name:    workspaceDTO.Provider.Name,
+			Profile: workspaceDTO.Provider.Profile,
 		},
 	}
 

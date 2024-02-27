@@ -39,8 +39,8 @@ var pluginUninstallCmd = &cobra.Command{
 		ctx := context.Background()
 
 		var res *http.Response
-		if pluginToUninstall.Type == plugins.PluginTypeProvisioner {
-			res, err = apiClient.PluginAPI.UninstallProvisionerPlugin(ctx, pluginToUninstall.Name).Execute()
+		if pluginToUninstall.Type == plugins.PluginTypeProvider {
+			res, err = apiClient.PluginAPI.UninstallProviderPlugin(ctx, pluginToUninstall.Name).Execute()
 		} else if pluginToUninstall.Type == plugins.PluginTypeAgentService {
 			res, err = apiClient.PluginAPI.UninstallAgentServicePlugin(ctx, pluginToUninstall.Name).Execute()
 		} else {

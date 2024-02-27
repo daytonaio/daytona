@@ -5,7 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Name** | Pointer to **string** |  | [optional] 
-**Provisioner** | Pointer to **string** |  | [optional] 
+**Provider** | Pointer to **string** |  | [optional] 
 **Repositories** | Pointer to **[]string** |  | [optional] 
 
 ## Methods
@@ -52,30 +52,30 @@ SetName sets Name field to given value.
 
 HasName returns a boolean if a field has been set.
 
-### GetProvisioner
+### GetProvider
 
-`func (o *CreateWorkspace) GetProvisioner() string`
+`func (o *CreateWorkspace) GetProvider() string`
 
-GetProvisioner returns the Provisioner field if non-nil, zero value otherwise.
+GetProvider returns the Provider field if non-nil, zero value otherwise.
 
-### GetProvisionerOk
+### GetProviderOk
 
-`func (o *CreateWorkspace) GetProvisionerOk() (*string, bool)`
+`func (o *CreateWorkspace) GetProviderOk() (*string, bool)`
 
-GetProvisionerOk returns a tuple with the Provisioner field if it's non-nil, zero value otherwise
+GetProviderOk returns a tuple with the Provider field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetProvisioner
+### SetProvider
 
-`func (o *CreateWorkspace) SetProvisioner(v string)`
+`func (o *CreateWorkspace) SetProvider(v string)`
 
-SetProvisioner sets Provisioner field to given value.
+SetProvider sets Provider field to given value.
 
-### HasProvisioner
+### HasProvider
 
-`func (o *CreateWorkspace) HasProvisioner() bool`
+`func (o *CreateWorkspace) HasProvider() bool`
 
-HasProvisioner returns a boolean if a field has been set.
+HasProvider returns a boolean if a field has been set.
 
 ### GetRepositories
 

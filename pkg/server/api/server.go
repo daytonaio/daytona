@@ -79,11 +79,11 @@ func Start() error {
 
 	pluginController := router.Group("/plugin")
 	{
-		pluginController.POST("/provisioner/install", plugin.InstallProvisionerPlugin)
+		pluginController.POST("/provider/install", plugin.InstallProviderPlugin)
 		pluginController.POST("/agent-service/install", plugin.InstallAgentServicePlugin)
-		pluginController.GET("/provisioner", plugin.ListProvisionerPlugins)
+		pluginController.GET("/provider", plugin.ListProviderPlugins)
 		pluginController.GET("/agent-service", plugin.ListAgentServicePlugins)
-		pluginController.POST("/provisioner/:provisioner/uninstall", plugin.UninstallProvisionerPlugin)
+		pluginController.POST("/provider/:provider/uninstall", plugin.UninstallProviderPlugin)
 		pluginController.POST("/agent-service/:agent-service/uninstall", plugin.UninstallAgentServicePlugin)
 	}
 

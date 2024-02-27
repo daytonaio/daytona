@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 **Finished** | Pointer to **string** |  | [optional] 
 **IsRunning** | Pointer to **bool** |  | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
-**ProvisionerMetadata** | Pointer to **string** |  | [optional] 
+**ProviderMetadata** | Pointer to **string** |  | [optional] 
 **Started** | Pointer to **string** |  | [optional] 
 **WorkspaceId** | Pointer to **string** |  | [optional] 
 
@@ -131,30 +131,30 @@ SetName sets Name field to given value.
 
 HasName returns a boolean if a field has been set.
 
-### GetProvisionerMetadata
+### GetProviderMetadata
 
-`func (o *ProjectInfo) GetProvisionerMetadata() string`
+`func (o *ProjectInfo) GetProviderMetadata() string`
 
-GetProvisionerMetadata returns the ProvisionerMetadata field if non-nil, zero value otherwise.
+GetProviderMetadata returns the ProviderMetadata field if non-nil, zero value otherwise.
 
-### GetProvisionerMetadataOk
+### GetProviderMetadataOk
 
-`func (o *ProjectInfo) GetProvisionerMetadataOk() (*string, bool)`
+`func (o *ProjectInfo) GetProviderMetadataOk() (*string, bool)`
 
-GetProvisionerMetadataOk returns a tuple with the ProvisionerMetadata field if it's non-nil, zero value otherwise
+GetProviderMetadataOk returns a tuple with the ProviderMetadata field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetProvisionerMetadata
+### SetProviderMetadata
 
-`func (o *ProjectInfo) SetProvisionerMetadata(v string)`
+`func (o *ProjectInfo) SetProviderMetadata(v string)`
 
-SetProvisionerMetadata sets ProvisionerMetadata field to given value.
+SetProviderMetadata sets ProviderMetadata field to given value.
 
-### HasProvisionerMetadata
+### HasProviderMetadata
 
-`func (o *ProjectInfo) HasProvisionerMetadata() bool`
+`func (o *ProjectInfo) HasProviderMetadata() bool`
 
-HasProvisionerMetadata returns a boolean if a field has been set.
+HasProviderMetadata returns a boolean if a field has been set.
 
 ### GetStarted
 
