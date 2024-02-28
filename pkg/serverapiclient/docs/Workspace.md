@@ -5,6 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | Pointer to **string** |  | [optional] 
+**Info** | Pointer to [**WorkspaceInfo**](WorkspaceInfo.md) |  | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
 **Projects** | Pointer to [**[]Project**](Project.md) |  | [optional] 
 **Provider** | Pointer to [**WorkspaceProvider**](WorkspaceProvider.md) |  | [optional] 
@@ -52,6 +53,31 @@ SetId sets Id field to given value.
 `func (o *Workspace) HasId() bool`
 
 HasId returns a boolean if a field has been set.
+
+### GetInfo
+
+`func (o *Workspace) GetInfo() WorkspaceInfo`
+
+GetInfo returns the Info field if non-nil, zero value otherwise.
+
+### GetInfoOk
+
+`func (o *Workspace) GetInfoOk() (*WorkspaceInfo, bool)`
+
+GetInfoOk returns a tuple with the Info field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetInfo
+
+`func (o *Workspace) SetInfo(v WorkspaceInfo)`
+
+SetInfo sets Info field to given value.
+
+### HasInfo
+
+`func (o *Workspace) HasInfo() bool`
+
+HasInfo returns a boolean if a field has been set.
 
 ### GetName
 

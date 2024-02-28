@@ -31,7 +31,7 @@ var GitProviderCmd = &cobra.Command{
 		}
 
 		if len(serverConfig.GitProviders) == 0 {
-			fmt.Println("No Git providers registered")
+			util.RenderInfoMessage("No git providers registered. Add a new git provider by preparing a Personal Access Token and running 'daytona git-providers add'")
 			return
 		}
 

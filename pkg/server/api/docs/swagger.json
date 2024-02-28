@@ -169,14 +169,14 @@
         },
         "/workspace": {
             "get": {
-                "description": "List workspaces info",
+                "description": "List workspaces",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "workspace"
                 ],
-                "summary": "List workspaces info",
+                "summary": "List workspaces",
                 "operationId": "ListWorkspaces",
                 "responses": {
                     "200": {
@@ -231,7 +231,7 @@
                     "workspace"
                 ],
                 "summary": "Get workspace info",
-                "operationId": "GetWorkspaceInfo",
+                "operationId": "GetWorkspace",
                 "parameters": [
                     {
                         "type": "string",
@@ -245,7 +245,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/WorkspaceInfo"
+                            "$ref": "#/definitions/Workspace"
                         }
                     }
                 }
@@ -455,6 +455,9 @@
         "Project": {
             "type": "object",
             "properties": {
+                "info": {
+                    "$ref": "#/definitions/ProjectInfo"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -566,6 +569,9 @@
             "properties": {
                 "id": {
                     "type": "string"
+                },
+                "info": {
+                    "$ref": "#/definitions/WorkspaceInfo"
                 },
                 "name": {
                     "type": "string"
