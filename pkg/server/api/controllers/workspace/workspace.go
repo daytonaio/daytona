@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/daytonaio/daytona/pkg/server/api/controllers/workspace/dto"
 	"github.com/daytonaio/daytona/pkg/server/db"
 	"github.com/daytonaio/daytona/pkg/server/provisioner"
 	"github.com/daytonaio/daytona/pkg/types"
@@ -12,18 +13,18 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// GetWorkspaceInfo 			godoc
+// GetWorkspace 			godoc
 //
 //	@Tags			workspace
 //	@Summary		Get workspace info
 //	@Description	Get workspace info
 //	@Produce		json
 //	@Param			workspaceId	path		string	true	"Workspace ID"
-//	@Success		200			{object}	WorkspaceInfo
+//	@Success		200			{object}	dto.Workspace
 //	@Router			/workspace/{workspaceId} [get]
 //
-//	@id				GetWorkspaceInfo
-func GetWorkspaceInfo(ctx *gin.Context) {
+//	@id				GetWorkspace
+func GetWorkspace(ctx *gin.Context) {
 	workspaceId := ctx.Param("workspaceId")
 
 	w, err := db.FindWorkspace(workspaceId)
@@ -40,16 +41,21 @@ func GetWorkspaceInfo(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(200, workspaceInfo)
+	response := dto.Workspace{
+		Workspace: *w,
+		Info:      workspaceInfo,
+	}
+
+	ctx.JSON(200, response)
 }
 
 // ListWorkspaces 			godoc
 //
 //	@Tags			workspace
-//	@Summary		List workspaces info
-//	@Description	List workspaces info
+//	@Summary		List workspaces
+//	@Description	List workspaces
 //	@Produce		json
-//	@Success		200	{array}	Workspace
+//	@Success		200	{array}	dto.Workspace
 //	@Router			/workspace [get]
 //
 //	@id				ListWorkspaces
@@ -60,7 +66,7 @@ func ListWorkspaces(ctx *gin.Context) {
 		return
 	}
 
-	workspaceInfos := []*types.WorkspaceInfo{}
+	response := []dto.Workspace{}
 
 	for _, workspace := range workspaces {
 		workspaceInfo, err := provisioner.GetWorkspaceInfo(workspace)
@@ -69,10 +75,13 @@ func ListWorkspaces(ctx *gin.Context) {
 			return
 		}
 
-		workspaceInfos = append(workspaceInfos, workspaceInfo)
+		response = append(response, dto.Workspace{
+			Workspace: *workspace,
+			Info:      workspaceInfo,
+		})
 	}
 
-	ctx.JSON(200, workspaceInfos)
+	ctx.JSON(200, response)
 }
 
 // RemoveWorkspace 			godoc

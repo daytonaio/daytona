@@ -45,6 +45,8 @@ definitions:
     type: object
   Project:
     properties:
+      info:
+        $ref: '#/definitions/ProjectInfo'
       name:
         type: string
       repository:
@@ -118,6 +120,8 @@ definitions:
     properties:
       id:
         type: string
+      info:
+        $ref: '#/definitions/WorkspaceInfo'
       name:
         type: string
       projects:
@@ -257,7 +261,7 @@ paths:
       - server
   /workspace:
     get:
-      description: List workspaces info
+      description: List workspaces
       operationId: ListWorkspaces
       produces:
       - application/json
@@ -268,7 +272,7 @@ paths:
             items:
               $ref: '#/definitions/Workspace'
             type: array
-      summary: List workspaces info
+      summary: List workspaces
       tags:
       - workspace
     post:
@@ -309,7 +313,7 @@ paths:
       - workspace
     get:
       description: Get workspace info
-      operationId: GetWorkspaceInfo
+      operationId: GetWorkspace
       parameters:
       - description: Workspace ID
         in: path
@@ -322,7 +326,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/WorkspaceInfo'
+            $ref: '#/definitions/Workspace'
       summary: Get workspace info
       tags:
       - workspace

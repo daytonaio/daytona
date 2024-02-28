@@ -5,11 +5,12 @@ package workspace
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/cmd/output"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
+	list_view "github.com/daytonaio/daytona/pkg/views/workspace/list"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -37,8 +38,11 @@ var ListCmd = &cobra.Command{
 			return
 		}
 
-		for _, workspaceInfo := range workspaceList {
-			fmt.Println(*workspaceInfo.Name)
+		if len(workspaceList) == 0 {
+			views_util.RenderInfoMessage("The workspace list is empty. Start off by running 'daytona create'.")
+			return
 		}
+
+		list_view.ListWorkspaces(workspaceList)
 	},
 }
