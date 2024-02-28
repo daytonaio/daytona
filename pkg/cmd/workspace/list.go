@@ -33,13 +33,13 @@ var ListCmd = &cobra.Command{
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		if len(workspaceList) == 0 {
-			views_util.RenderInfoMessage("The workspace list is empty. Start off by running 'daytona create'.")
+		if output.FormatFlag != "" {
+			output.Output = workspaceList
 			return
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = workspaceList
+		if len(workspaceList) == 0 {
+			views_util.RenderInfoMessage("The workspace list is empty. Start off by running 'daytona create'.")
 			return
 		}
 
