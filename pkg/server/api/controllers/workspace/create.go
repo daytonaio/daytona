@@ -70,6 +70,17 @@ func CreateWorkspace(ctx *gin.Context) {
 }
 
 func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, error) {
+	fmt.Println(createWorkspaceDto.Name)
+	fmt.Println(createWorkspaceDto.Name)
+	fmt.Println(createWorkspaceDto.Name)
+	fmt.Println(createWorkspaceDto.Name)
+	fmt.Println(createWorkspaceDto.Name)
+	fmt.Println(createWorkspaceDto.Name)
+	fmt.Println(createWorkspaceDto.Name)
+	fmt.Println(createWorkspaceDto.Name)
+	fmt.Println(createWorkspaceDto.Name)
+	fmt.Println(createWorkspaceDto.Name)
+	fmt.Println(createWorkspaceDto.Name)
 	isAlphaNumeric := regexp.MustCompile(`^[a-zA-Z0-9-]+$`).MatchString
 	if !isAlphaNumeric(createWorkspaceDto.Name) {
 		return nil, errors.New("name is not a valid alphanumeric string")

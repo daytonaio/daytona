@@ -21,7 +21,7 @@ func GetFirstWorkspaceProjectName(workspaceId string, projectName string, profil
 		return "", err
 	}
 
-	wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspaceInfo(ctx, workspaceId).Execute()
+	wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceId).Execute()
 	if err != nil {
 		return "", apiclient.HandleErrorResponse(res, err)
 	}
@@ -44,7 +44,7 @@ func GetFirstWorkspaceProjectName(workspaceId string, projectName string, profil
 }
 
 func GetValidatedWorkspaceName(input string) (string, error) {
-	input = strings.ToLower(input)
+	// input = strings.ToLower(input)
 
 	input = strings.ReplaceAll(input, " ", "-")
 
