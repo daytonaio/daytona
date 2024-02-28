@@ -5,8 +5,8 @@ All URIs are relative to *http://localhost:3000*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**CreateWorkspace**](WorkspaceAPI.md#CreateWorkspace) | **Post** /workspace | Create a workspace
-[**GetWorkspaceInfo**](WorkspaceAPI.md#GetWorkspaceInfo) | **Get** /workspace/{workspaceId} | Get workspace info
-[**ListWorkspaces**](WorkspaceAPI.md#ListWorkspaces) | **Get** /workspace | List workspaces info
+[**GetWorkspace**](WorkspaceAPI.md#GetWorkspace) | **Get** /workspace/{workspaceId} | Get workspace info
+[**ListWorkspaces**](WorkspaceAPI.md#ListWorkspaces) | **Get** /workspace | List workspaces
 [**RemoveWorkspace**](WorkspaceAPI.md#RemoveWorkspace) | **Delete** /workspace/{workspaceId} | Remove workspace
 [**StartProject**](WorkspaceAPI.md#StartProject) | **Post** /workspace/{workspaceId}/{projectId}/start | Start project
 [**StartWorkspace**](WorkspaceAPI.md#StartWorkspace) | **Post** /workspace/{workspaceId}/start | Start workspace
@@ -81,9 +81,9 @@ No authorization required
 [[Back to README]](../README.md)
 
 
-## GetWorkspaceInfo
+## GetWorkspace
 
-> WorkspaceInfo GetWorkspaceInfo(ctx, workspaceId).Execute()
+> Workspace GetWorkspace(ctx, workspaceId).Execute()
 
 Get workspace info
 
@@ -106,13 +106,13 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceAPI.GetWorkspaceInfo(context.Background(), workspaceId).Execute()
+	resp, r, err := apiClient.WorkspaceAPI.GetWorkspace(context.Background(), workspaceId).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.GetWorkspaceInfo``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.GetWorkspace``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `GetWorkspaceInfo`: WorkspaceInfo
-	fmt.Fprintf(os.Stdout, "Response from `WorkspaceAPI.GetWorkspaceInfo`: %v\n", resp)
+	// response from `GetWorkspace`: Workspace
+	fmt.Fprintf(os.Stdout, "Response from `WorkspaceAPI.GetWorkspace`: %v\n", resp)
 }
 ```
 
@@ -126,7 +126,7 @@ Name | Type | Description  | Notes
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiGetWorkspaceInfoRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiGetWorkspaceRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
@@ -135,7 +135,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**WorkspaceInfo**](WorkspaceInfo.md)
+[**Workspace**](Workspace.md)
 
 ### Authorization
 
@@ -155,7 +155,7 @@ No authorization required
 
 > []Workspace ListWorkspaces(ctx).Execute()
 
-List workspaces info
+List workspaces
 
 
 

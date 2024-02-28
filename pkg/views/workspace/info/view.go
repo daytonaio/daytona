@@ -6,6 +6,8 @@ package info
 // A simple program that counts down from 5 and then exits.
 
 import (
+	"fmt"
+
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 
@@ -63,18 +65,19 @@ func projectRender(project *serverapiclient.ProjectInfo) string {
 	return projectViewStyle.Render(projectView)
 }
 
-func Render(wsInfo *serverapiclient.WorkspaceInfo) {
+func Render(workspace *serverapiclient.Workspace) {
 	var output string
 	output = "\n"
-	output += workspaceInfoStyle.Render("Workspace" + workspaceNameStyle.Render(*wsInfo.Name))
-	if len(wsInfo.Projects) > 1 {
+	output += workspaceInfoStyle.Render("Workspace" + workspaceNameStyle.Render(*workspace.Info.Name))
+	if len(workspace.Projects) > 1 {
 		output += "\n" + "Projects"
 	}
-	for _, project := range wsInfo.Projects {
+	for _, project := range workspace.Info.Projects {
 		output += projectRender(&project)
 	}
 
 	output = lipgloss.NewStyle().PaddingLeft(3).Render(output)
 
 	println(output)
+	fmt.Println()
 }
