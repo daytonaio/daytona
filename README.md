@@ -1,15 +1,17 @@
-# The Open Source Development Environment Standard
-
+<div align="center"><img src="https://github.com/ivan-burazin/daytona/blob/main/public/images/Daytona-logotype-black.svg" >
+<br><br>
 
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue)](#license)
 [![Go Report Card](https://goreportcard.com/badge/github.com/daytonaio/daytona)](https://goreportcard.com/report/github.com/daytonaio/daytona)
 [![issues - daytona](https://img.shields.io/github/issues/daytonaio/daytona)](https://github.com/daytonaio/daytona/issues)
 ![GitHub Release](https://img.shields.io/github/v/release/daytonaio/daytona)
 
+</div>
 
-<img src="https://github.com/kubernetes/kubernetes/raw/master/logo/logo.png" width="100">
 
-----
+<h1 align="center">The Open Source Development Environment Standard</h1>
+
+
 Daytona is a radically simple open source development environment standard. It automates the entire process; provisioning the instance, reading the configuration and executing it, setting up prebuilds, attaching your local or a Web IDE, and adding a fully qualified domain name to the dev environment to share and collaborate.
 
 Daytona builds upon a decade and a half of experience of the team responsible for pioneering the Cloud IDE movement. This expertise encompasses the development of IDEs and orchestrators from scratch, facilitating the provision of instant cloud development environments. By integrating modern technologies and advancements with this historical knowledge,  Daytona is committed to eradicating the "works on my machine" syndrome once and for all.
