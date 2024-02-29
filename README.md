@@ -37,15 +37,6 @@ Now, 15 years since its inception, we have noticed quite a few things. First, th
 So, we took everything we learned and decided to solve these issues once and for all as a fully open-source project. Our goal was to create a single binary that allows you to set up a development environment anywhere you wish, completely free, and finally fulfill the promise that many have attempted to make.
 
 
-## Why Daytona?
-
-
-Daytona is a radically simple open source development environment standard. It automates the entire process; provisioning the instance, reading the configuration and executing it, setting up prebuilds, attaching your local or a Web IDE, and adding a fully qualified domain name to the dev environment to share and collaborate.
-
-Daytona builds upon a decade and a half of experience of the team responsible for pioneering the Cloud IDE movement. This expertise encompasses the development of IDEs and orchestrators from scratch, facilitating the provision of instant cloud development environments. By integrating modern technologies and advancements with this historical knowledge,  Daytona is committed to eradicating the "works on my machine" syndrome once and for all.
-
-More information on the [Daytona](https://daytona.io/) website.
-
 ----
 
 ## Features
