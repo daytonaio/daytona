@@ -6,6 +6,12 @@
 [![issues - daytona](https://img.shields.io/github/issues/daytonaio/daytona)](https://github.com/daytonaio/daytona/issues)
 ![GitHub Release](https://img.shields.io/github/v/release/daytonaio/daytona)
 
+[!["GitHub Discussions"](https://img.shields.io/badge/%20GitHub-%20Discussions-gray.svg?longCache=true&logo=github&colorB=purple)](https://github.com/daytonaio/daytona/discussions) 
+[!["Join us on Slack"](https://img.shields.io/badge/join-us%20on%20slack-gray.svg?longCache=true&logo=slack&colorB=brightgreen)]([https://coder.com/community](https://join.slack.com/t/daytonacommunity/shared_invite/zt-273yohksh-Q5YSB5V7tnQzX2RoTARr7Q)) 
+[![Twitter Follow](https://img.shields.io/twitter/follow/daytonaio?label=%40Daytona&style=social)](https://twitter.com/daytonaio) 
+[![See latest](https://img.shields.io/static/v1?label=Docs&message=see%20latest&color=blue)](https://daytona.io/docs)
+
+
 </div>
 
 
