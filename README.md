@@ -67,25 +67,90 @@ The default setting for Daytona is VS Code locally. If you prefer, you can switc
 ```bash
 daytona ide
 ```
+Now that you have installed and initialized Daytona, you can proceed to setting up your development environments and start coding instantly.  
 
 
+## Using Daytona
 
 
-
-### Setting up your first Daytona Dev environment
+### Creating Dev Environments 
+Creating development environments with Daytona is a straightforward process, accomplished with just one command:
 ```bash
-daytona agent install
+daytona create
+```
+Upon executing this command, you will be prompted with two questions:
+1. Where would you like to create this environment? Here, you choose by selecting the provider.
+2. Which repository will you use to create this environment? Here , you can selcet your Git repo or type it in.
+
+After making your selections, press enter, and Daytona will handle the rest. All that remains for you to do is to execute the following command to open your default IDE:
+```bash
+daytona code
 ```
 
-input ssh name (can be localhost)
+This command opens your development environment in your preferred IDE, allowing you to start coding instantly.
 
-input username/ password
+### Manipulating Dev Environments  
+To manage your development environments, Daytona provides several commands that facilitate various operations:  
 
-Note you can use  aws provisioner to auto proivision a vm for each Daytona dev en
+__- Listing Dev Environments:__ To view a list of all your dev environments, use:
+```bash
+daytona list
+```
+
+__- Deleting a Dev Environment:__ To remove a specific development environment, execute:
+```bash
+daytona delete
+```
+This command deletes the specified development environment.
+
+__- Displaying Dev Environment Information:__ or details about a specific workspace, including its status and configuration, use:
+```bash
+daytona info
+```
+
+__- Starting and Stopping Dev Environments:__   
+- To start a workspace, making it active and accessible, use:
+```bash
+daytona start
+```
+- To stop a workspace, thereby deactivating it, use:
+```bash
+daytona start
+```
+
+__- Managing Port Forwarding:__ If you need to manage the ports forwarded to your project, facilitating access to services running in your development environment, use:
+```bash
+daytona ports
+```
+
+__- SSH Access:__ For direct SSH access to a development environment using the terminal, execute:
+```bash
+daytona ssh
+```
+This allows for a secure command-line interface with your development environment.
+
+### Other Commands
+In addition to the creation and management of development environments, Daytona provides several commands for customization and accessing information:
+
+__- Managing Profiles:__ Daytona allows for the management of multiple profiles, enabling users to switch between personal use and connecting to a company's installation of the Daytona platform. To manage profiles, use the following command:
+```bash
+daytona profile
+```
+
+__- View Version:__ To find out the version of Daytona you are using, the following command can be used to print the version number:
+```bash
+daytona version
+```
+
+For more detailed information about each command, please refer to Daytona's documentation.
 
 
 
 
+
+
+
+  
 
 ## Architecture 
 TODO: desc
