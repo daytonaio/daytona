@@ -1,4 +1,4 @@
-<div align="center"><img src="https://github.com/ivan-burazin/daytona/blob/main/public/images/Daytona-logotype-black.svg" >
+<div align="center"><img src="https://github.com/ivan-burazin/daytona/blob/main/public/images/Daytona-logotype-black.svg" width="40%" >
 <br><br>
 
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue)](#license)
