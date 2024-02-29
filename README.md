@@ -28,16 +28,49 @@ More information on the [Daytona](https://daytona.io/) website.
 ## Getting Started
 
 
-### Install CLI
-To manage Daytona Dev environments you need to have access to the Daytona CLI, you can do this by using brew:
+### Installing Daytona
+Daytona allows you to manage your Development Environments using the Daytona CLI. To install it, please execute the following command:
 
 ```bash
-brew daytona install
+curl https://download.daytona.io/daytona/get-server.sh | bash
 ```
 
 You can also download and compile Daytona from this repository. To do so please check out our docs.
 
 Note the packaged Daytona includes a set of built-in extensions located in the extensions folder, which are added there for your convince.
+
+### Initializing Daytona
+To initialize Daytona, follow these steps:
+
+__1. Start the Daytona Service:__  
+This initiates the Daytona service, which must always be running for Daytona to function. Use the command:
+```bash
+daytona server
+```
+__2. Add Your Git Provider of Choice:__  
+Daytona supports GitHub, GitLab, and Bitbucket. To add them to your profile, use the command:  
+```bash
+daytona git-providers add
+
+```
+Follow the steps provided. Here's a link to the [documentation](https://daytona.io/docs) for more details.
+
+__3. Add Your Provider:__  
+This step is for choosing where to deploy Development Environments. By default, Daytona includes a Docker provider to spin up environments on your local machine. For remote development environments, use the command:
+```bash
+daytona providers add
+```
+This command allows adding connections to an SSH machine or one of the cloud providers (Contributions welcome here!).
+
+__4. Choose Your Default IDE:__  
+The default setting for Daytona is VS Code locally. If you prefer, you can switch to VS Code - Browser or any IDE from the JetBrains portfolio (Contributions welcome here!) using the command:
+```bash
+daytona ide
+```
+
+
+
+
 
 ### Setting up your first Daytona Dev environment
 ```bash
@@ -53,14 +86,6 @@ Note you can use  aws provisioner to auto proivision a vm for each Daytona dev e
 
 
 
-
-
-* Spin-up ready to code development environments (Workspaces) for all popular programming languages
-* First class devcontainer.json support
-* Easy install on remote machines over SSH
-* Prebuild hooks for always ready to code environments
-* Plugin system for extending the core feature set
-* Available plugins for SSH access, VS Code Server, Tailscale
 
 ## Architecture 
 TODO: desc
