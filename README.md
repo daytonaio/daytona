@@ -155,16 +155,26 @@ For more detailed information about each command, please refer to Daytona's docu
 ## Architecture 
 TODO: desc
 
-## How can I extend Daytona
-### Provisioners 
+## How to Extend Daytona
+
+Daytona offers flexibility for extension through the creation of plugins and providers.
+
+
+### Providers 
+Daytona is designed to be infrastructure-agnostic, capable of creating and managing development environments across various platforms. Providers are the components that encapsulate the logic for provisioning compute resources on a specific target platform. They allow for the configuration of different profiles within a single provider, enabling, for instance, multiple AWS profiles within an AWS provider.
+
+How does it work? When executing the `daytona create` command, Daytona communicates the environment details to the selected provider, which then provisions the necessary compute resources. Once provisioned, Daytona sets up the environment on these resources, allowing the user to interact with the environment seamlessly.
+
+PProviders are independent projects that adhere to the Daytona Provider interface. They can be developed in nearly any major programming language. For more details, see [Providers](providers/readme.md)
+
+
 ### Plugins
+Plugins enhance Daytona's core functionalities by adding new CLI commands, API methods, or services within the development environments. They offer configurable settings to tailor the plugin's behavior to the user's needs.
+
+Similar to providers, plugins are independent projects that conform to the Daytona Plugin interface and can be developed in a wide range of programming languages. For more information, visit  [Plugins](plugins/readme.md)
 
 
-TODO: desc
 
-* SSH Access
-* VS Code Server
-* Tailscale
 
 ## Contributing
 
