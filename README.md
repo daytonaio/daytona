@@ -29,6 +29,13 @@ Empowering you to effortlessly create a functional development environment on an
     <a href="https://twitter.com/Daytona">Twitter</a>
   </p>
 
+## Backstory
+We spent most of our careers building cloud development environments. In 2009, we launched what was likely the first commercial Cloud IDE project. At that time, technology was lacking, forcing us to develop everything from scratch—the IDE, the environment orchestrator, and almost everything else. A lot of people were interested, and over 2.5 million developers signed up! But we were too early, and we asked too much from our users to change how they worked.
+
+Now, 15 years since its inception, we have noticed quite a few things. First, the technology we wished for back then exists now. Second, approximately 50% of developers work in remote dev environments, and third, and most importantly, setting up development environments has become more complex than ever, both locally and to a greater magnitude for remote.
+
+So, we took everything we learned and decided to solve these issues once and for all as a fully open-source project. Our goal was to create a single binary that allows you to set up a development environment anywhere you wish, completely free, and finally fulfill the promise that many have attempted to make.
+
 
 ## Why Daytona?
 
