@@ -5,15 +5,32 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/daytonaio/daytona)](https://goreportcard.com/report/github.com/daytonaio/daytona)
 [![issues - daytona](https://img.shields.io/github/issues/daytonaio/daytona)](https://github.com/daytonaio/daytona/issues)
 ![GitHub Release](https://img.shields.io/github/v/release/daytonaio/daytona)
-[![Twitter Follow](https://img.shields.io/twitter/follow/daytonaio?label=%40Daytona&style=social)](https://twitter.com/daytonaio) 
 [![See latest](https://img.shields.io/static/v1?label=Docs&message=see%20latest&color=blue)](https://daytona.io/docs)
-[!["Join us on Slack"](https://img.shields.io/badge/join-us%20on%20slack-gray.svg?longCache=true&logo=slack&colorB=brightgreen)](https://join.slack.com/t/daytonacommunity/shared_invite/zt-273yohksh-Q5YSB5V7tnQzX2RoTARr7Q)
+
 
 
 </div>
 
 
-<h1 align="center">The Open Source Development Environment Standard</h1>
+<h1 align="center">The Open Source Development Environment Manager</h1>
+<div align="center">
+Empowering you to effortlessly create a functional development environment on any infrastructure with a single command.
+</div>
+</br>
+
+
+<p align="center">
+    <a href="https://github.com/daytonaio/daytona/issues/new?assignees=&labels=type%3A+bug&template=bug_report.yml&title=%F0%9F%90%9B+Bug+Report%3A+">Report Bug</a>
+    ·
+    <a href="https://github.com/daytonaio/daytona/issues/new?assignees=&labels=feature&template=feature_request.yml&title=%F0%9F%9A%80+Feature%3A+">Request Feature</a>
+    ·
+  <a href="https://join.slack.com/t/daytonacommunity/shared_invite/zt-273yohksh-Q5YSB5V7tnQzX2RoTARr7Q">Join Our Slack</a>
+    ·
+    <a href="https://twitter.com/Daytona">Twitter</a>
+  </p>
+
+
+## Why Daytona?
 
 
 Daytona is a radically simple open source development environment standard. It automates the entire process; provisioning the instance, reading the configuration and executing it, setting up prebuilds, attaching your local or a Web IDE, and adding a fully qualified domain name to the dev environment to share and collaborate.
