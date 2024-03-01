@@ -3,7 +3,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue)](#license)
 [![Go Report Card](https://goreportcard.com/badge/github.com/daytonaio/daytona)](https://goreportcard.com/report/github.com/daytonaio/daytona)
-[![issues - daytona](https://img.shields.io/github/issues/daytonaio/daytona)](https://github.com/daytonaio/daytona/issues)
+[![Issues - daytona](https://img.shields.io/github/issues/daytonaio/daytona)](https://github.com/daytonaio/daytona/issues)
 ![GitHub Release](https://img.shields.io/github/v/release/daytonaio/daytona)
 [![See latest](https://img.shields.io/static/v1?label=Docs&message=see%20latest&color=blue)](https://daytona.io/docs)
 
@@ -14,7 +14,7 @@
 
 <h1 align="center">The Open Source Development Environment Manager</h1>
 <div align="center">
-Empowering you to effortlessly create a functional development environment on any infrastructure with a single command.
+Set up a development environment on any infrastructure, with a single command.
 </div>
 </br>
 
@@ -56,12 +56,12 @@ So, we took everything we learned and decided to solve these issues once and for
 
 ## Features
 * __Single Command__: Activate a fully configured development environment with a single command.
-* __Runs everywhere__: Spin up your development environment on any machine—whether it's local, remote, a physical server, VM, or cloud-based, & any architecture x86 or Arm.
+* __Runs everywhere__: pin up your development environment on any machine—whether it's local, remote, or a cloud-based, a physical server, or a VM & any architecture x86 or ARM.
 * __Confiuration File Support__: Initially support for [dev container](https://containers.dev/), ability to expand to DevFile, Nix & Flox (Contributions welcome here!).
-* __Prebuilds System__: Has a prebuilds system, built in, to drasticly improve environment setup times(Contributions welcome here!).
+* __Prebuilds System__: Has a prebuilds system, built-in, to drastically improve environment setup times(Contributions welcome here!).
 * __IDE Support__ : Seamlessly supports [VS Code](https://github.com/microsoft/vscode) & [JetBrains](https://www.jetbrains.com/remote-development/gateway/) locally, ready to use without configuration. Includes a built-in Web IDE for added convenience.
-* __Git Provider Integration__: Start with GitHub support, allowing easy repo or PR selection. Future plans to expand to GitLab & Bitbucket (Contributions welcome here!).
-* __Multiple Project Workspace__: Support for multiple project repositories in a dev environment, making it easy to develop using micro-service architecture.
+* __Git Provider Integration__: GitHub, GitLab & Bitbucket support, allowing easy repo or PR selection. 
+* __Multiple Project Workspace__: Support for multiple project repositories in a dev environment, making it easy to develop using a micro-service architecture.
 * __Reverse Proxy Integration__: Enable collaboration and streamline feedback loops by leveraging reverse proxy functionality. Access preview environments and the Web IDE seamlessly, even behind firewalls.
 * __Extensibility__: Enable extensibility with plugin or provider development. Moreover, in any dynamic language, not just Go(Contributions welcome here!).
 * __Security__: Automatically creates a VPN tunnel between the client and the devt environment, ensuring a fully secure connection.
@@ -86,9 +86,9 @@ Daytona allows you to manage your Development Environments using the Daytona CLI
 curl https://download.daytona.io/daytona/get-server.sh | bash
 ```
 
-You can also download and compile Daytona from this repository. To do so please check out our docs.
+Alternatively, download and compile Daytona directly from this repository by consulting our [documentation](https://daytona.io/docs).
 
-Note the packaged Daytona includes a set of built-in extensions located in the extensions folder, which are added there for your convince.
+*Note. The packaged Daytona includes a set of built-in extensions located in the extensions folder, which are added there for your convince.
 
 ### Initializing Daytona
 To initialize Daytona, follow these steps:
@@ -109,7 +109,7 @@ Follow the steps provided. Here's a link to the [documentation](https://daytona.
 __3. Add Your Provider:__  
 This step is for choosing where to deploy Development Environments. By default, Daytona includes a Docker provider to spin up environments on your local machine. For remote development environments, use the command:
 ```bash
-daytona providers add
+daytona provider add
 ```
 This command allows adding connections to an SSH machine or one of the cloud providers (Contributions welcome here!).
 
@@ -130,8 +130,8 @@ Creating development environments with Daytona is a straightforward process, acc
 daytona create
 ```
 Upon executing this command, you will be prompted with two questions:
-1. Where would you like to create this environment? Here, you choose by selecting the provider.
-2. Which repository will you use to create this environment? Here , you can selcet your Git repo or type it in.
+1. Choose the provider to decide where to create a dev environment.
+2. Select or type the Git repository you wish to use to create a dev environment.
 
 After making your selections, press enter, and Daytona will handle the rest. All that remains for you to do is to execute the following command to open your default IDE:
 ```bash
@@ -143,57 +143,64 @@ This command opens your development environment in your preferred IDE, allowing 
 ### Manipulating Dev Environments  
 To manage your development environments, Daytona provides several commands that facilitate various operations:  
 
-__- Listing Dev Environments:__ To view a list of all your dev environments, use:
+__- Listing Dev Environments:__ 
+To view a list of all your dev environments, use:
 ```bash
 daytona list
 ```
 
-__- Deleting a Dev Environment:__ To remove a specific development environment, execute:
+__- Deleting a Dev Environment:__ 
+To remove a specific development environment, execute:
 ```bash
 daytona delete
 ```
 This command deletes the specified development environment.
 
-__- Displaying Dev Environment Information:__ or details about a specific workspace, including its status and configuration, use:
+__- Displaying Dev Environment Information:__ 
+or details about a specific workspace, including its status and configuration, use:
 ```bash
 daytona info
 ```
 
 __- Starting and Stopping Dev Environments:__   
-- To start a workspace, making it active and accessible, use:
+- To start a Dev Environment, making it active and accessible, use:
 ```bash
 daytona start
 ```
-- To stop a workspace, thereby deactivating it, use:
+- To stop a Dev Environment, thereby deactivating it, use:
 ```bash
-daytona start
+daytona stop
 ```
 
-__- Managing Port Forwarding:__ If you need to manage the ports forwarded to your project, facilitating access to services running in your development environment, use:
+__- Managing Port Forwarding:__ 
+If you need to manage the ports forwarded to your project, facilitating access to services running in your development environment, use:
 ```bash
 daytona ports
 ```
 
-__- SSH Access:__ For direct SSH access to a development environment using the terminal, execute:
+__- SSH Access:__ 
+For direct SSH access to a development environment using the terminal, execute:
 ```bash
 daytona ssh
 ```
-This allows for a secure command-line interface with your development environment.
+This allows for a secure command-line interface with your dev environment.
 
 ### Other Commands
-In addition to the creation and management of development environments, Daytona provides several commands for customization and accessing information:
+In addition to the creation and management of dev environments, Daytona provides several commands for customization and accessing information:
 
-__- Managing Profiles:__ Daytona allows for the management of multiple profiles, enabling users to switch between personal use and connecting to a company's installation of the Daytona platform. To manage profiles, use the following command:
+__- Managing Profiles:__ 
+Daytona allows for the management of multiple profiles, enabling users to switch between personal use and connecting to a company's installation of the Daytona platform. To manage profiles, use the following command:
 ```bash
 daytona profile
 ```
 
-__- View Version:__ To find out the version of Daytona you are using, the following command can be used to print the version number:
+__- View Version:__ 
+To find out the version of Daytona you are using, the following command can be used to print the version number:
 ```bash
 daytona version
 ```
 
-For more detailed information about each command, please refer to Daytona's documentation.
+For more detailed information about each command, please refer to Daytona's [documentation](https://daytona.io/docs).
 
 
 
@@ -216,7 +223,7 @@ Daytona is designed to be infrastructure-agnostic, capable of creating and manag
 
 How does it work? When executing the `daytona create` command, Daytona communicates the environment details to the selected provider, which then provisions the necessary compute resources. Once provisioned, Daytona sets up the environment on these resources, allowing the user to interact with the environment seamlessly.
 
-PProviders are independent projects that adhere to the Daytona Provider interface. They can be developed in nearly any major programming language. For more details, see [Providers](providers/readme.md)
+Prroviders are independent projects that adhere to the Daytona Provider interface. They can be developed in nearly any major programming language. For more details, see [Providers](providers/readme.md)
 
 
 ### Plugins
@@ -228,7 +235,6 @@ Similar to providers, plugins are independent projects that conform to the Dayto
 
 
 ## Contributing
-
 
 
 Daytona is Open Source under the [Apache License 2.0](LICENSE), and is the [copyright of its contributors](NOTICE). If you would like to contribute to the software, you must:
