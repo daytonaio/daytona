@@ -81,6 +81,28 @@ func (g *GitLabGitProvider) GetRepositories(namespace string) ([]GitRepository, 
 	return response, err
 }
 
+func (g *GitLabGitProvider) GetRepoBranches(repo GitRepository, namespaceId string) ([]GitBranch, error) {
+	client := g.getApiClient()
+	var response []GitBranch
+
+	branches, _, err := client.Branches.ListBranches(repo.FullName, &gitlab.ListBranchesOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, branch := range branches {
+		responseBranch := GitBranch{
+			Name: branch.Name,
+		}
+		if branch.Commit != nil {
+			responseBranch.SHA = branch.Commit.ID
+		}
+		response = append(response, responseBranch)
+	}
+
+	return response, nil
+}
+
 func (g *GitLabGitProvider) GetUserData() (GitUser, error) {
 	client := g.getApiClient()
 

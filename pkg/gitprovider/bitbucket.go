@@ -4,10 +4,27 @@
 package gitprovider
 
 import (
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"io"
 	"log"
+	"net/http"
+	"strings"
 
 	"github.com/ktrysmt/go-bitbucket"
 )
+
+type BranchesResponse struct {
+	Values []BranchResponse `json:"values"`
+}
+
+type BranchResponse struct {
+	Name   string `json:"name"`
+	Target struct {
+		Hash string `json:"hash"`
+	} `json:"target"`
+}
 
 type BitbucketGitProvider struct {
 	username string
@@ -72,6 +89,67 @@ func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]GitRepositor
 	}
 
 	return response, err
+}
+
+func (g *BitbucketGitProvider) GetRepoBranches(repo GitRepository, namespaceId string) ([]GitBranch, error) {
+	client := g.getApiClient()
+	var response []GitBranch
+
+	if namespaceId == personalNamespaceId {
+		user, err := g.GetUserData()
+		if err != nil {
+			return nil, err
+		}
+		namespaceId = user.Username
+	}
+
+	// Custom API call implementation
+
+	repoSlug := repo.Url[strings.LastIndex(repo.Url, "/")+1:]
+	authString := fmt.Sprintf("%s:%s", g.username, g.token)
+	encodedAuth := base64.StdEncoding.EncodeToString([]byte(authString))
+
+	url := fmt.Sprintf("https://api.bitbucket.org/2.0/repositories/%s/%s/refs/branches", namespaceId, repoSlug)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		fmt.Println("Error creating request:", err)
+		return nil, err
+	}
+
+	req.Header.Set("Authorization", "Basic "+encodedAuth)
+
+	resp, err := client.HttpClient.Do(req)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return nil, err
+	}
+
+	var branchesResponse BranchesResponse
+
+	// Unmarshal JSON into the Branches slice
+	err = json.Unmarshal(body, &branchesResponse)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return nil, err
+	}
+
+	// Now you can work with the branches
+	for _, branch := range branchesResponse.Values {
+		response = append(response, GitBranch{
+			Name: branch.Name,
+			SHA:  branch.Target.Hash,
+		})
+	}
+
+	return response, nil
 }
 
 func (g *BitbucketGitProvider) GetUserData() (GitUser, error) {

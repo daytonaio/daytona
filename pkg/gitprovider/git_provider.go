@@ -16,6 +16,7 @@ type GitProvider interface {
 	GetNamespaces() ([]GitNamespace, error)
 	GetRepositories(namespace string) ([]GitRepository, error)
 	GetUserData() (GitUser, error)
+	GetRepoBranches(GitRepository, string) ([]GitBranch, error)
 }
 
 type GitUser struct {
@@ -34,6 +35,11 @@ type GitRepository struct {
 	FullName string
 	Name     string
 	Url      string
+}
+
+type GitBranch struct {
+	Name string
+	SHA  string
 }
 
 func GetGitProvider(providerId string, gitProviders []types.GitProvider) GitProvider {

@@ -321,6 +321,7 @@ func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []types
 func GetRepositoryUrlFromWizard(userGitProviders []types.GitProvider, secondaryProjectOrder int) (string, error) {
 	var providerId string
 	var namespaceId string
+	var branchName string
 	var gitProvider gitprovider.GitProvider
 
 	if len(userGitProviders) == 1 {
@@ -369,12 +370,30 @@ func GetRepositoryUrlFromWizard(userGitProviders []types.GitProvider, secondaryP
 		return "", err
 	}
 
-	repoUrl := selection.GetRepositoryUrlFromPrompt(repos, secondaryProjectOrder)
-	if repoUrl == "" {
+	chosenRepo := selection.GetRepositoryFromPrompt(repos, secondaryProjectOrder)
+	if chosenRepo == (gitprovider.GitRepository{}) {
 		return "", nil
 	}
 
-	return repoUrl, nil
+	branchList, err := gitProvider.GetRepoBranches(chosenRepo, namespaceId)
+	if err != nil {
+		return "", err
+	}
+
+	if len(branchList) == 0 {
+		return "", errors.New("no branches found")
+	}
+
+	if len(branchList) == 1 {
+		branchName = branchList[0].Name
+	} else {
+		branchName = selection.GetBranchNameFromPrompt(branchList, secondaryProjectOrder)
+		if branchName == "" {
+			return "", nil
+		}
+	}
+
+	return chosenRepo.Url, nil
 }
 
 func getSuggestedWorkspaceName(repo string) string {

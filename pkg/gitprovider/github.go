@@ -82,6 +82,32 @@ func (g *GitHubGitProvider) GetRepositories(namespace string) ([]GitRepository, 
 	return response, err
 }
 
+func (g *GitHubGitProvider) GetRepoBranches(repo GitRepository, namespaceId string) ([]GitBranch, error) {
+	client := g.getApiClient()
+	user, err := g.GetUserData()
+	if err != nil {
+		return nil, err
+	}
+	var response []GitBranch
+
+	repoBranches, _, err := client.Repositories.ListBranches(context.Background(), user.Username, repo.Name, &github.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, branch := range repoBranches {
+		responseBranch := GitBranch{
+			Name: *branch.Name,
+		}
+		if branch.Commit != nil && branch.Commit.SHA != nil {
+			responseBranch.SHA = *branch.Commit.SHA
+		}
+		response = append(response, responseBranch)
+	}
+
+	return response, nil
+}
+
 func (g *GitHubGitProvider) GetUserData() (GitUser, error) {
 	client := g.getApiClient()
 
