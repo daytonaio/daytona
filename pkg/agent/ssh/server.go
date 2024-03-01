@@ -11,6 +11,7 @@ import (
 	"unsafe"
 
 	"github.com/creack/pty"
+	"github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/gliderlabs/ssh"
 	"github.com/pkg/sftp"
 	crypto_ssh "golang.org/x/crypto/ssh"
@@ -70,8 +71,16 @@ func Start() {
 }
 
 func handlePty(s ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh.Window) {
+	c, err := config.GetConfig()
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
 	shell := getShell()
 	cmd := exec.Command(shell)
+
+	cmd.Dir = c.ProjectDir
 
 	if ssh.AgentRequested(s) {
 		l, err := ssh.NewAgentListener()
@@ -111,6 +120,12 @@ func handleNonPty(s ssh.Session) {
 
 	fmt.Println("args: ", args)
 
+	c, err := config.GetConfig()
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
 	cmd := exec.Command("/bin/sh", args...)
 
 	cmd.Env = append(cmd.Env, os.Environ()...)
@@ -125,6 +140,7 @@ func handleNonPty(s ssh.Session) {
 		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", "SSH_AUTH_SOCK", l.Addr().String()))
 	}
 
+	cmd.Dir = c.ProjectDir
 	cmd.Stdout = s
 	cmd.Stderr = s.Stderr()
 	stdinPipe, err := cmd.StdinPipe()
