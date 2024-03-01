@@ -74,28 +74,32 @@ So, we took everything we learned and decided to solve these issues once and for
 
 ## Features
 * __Single Command__: Activate a fully configured development environment with a single command.
-* __Runs everywhere__: pin up your development environment on any machine—whether it's local, remote, or a cloud-based, a physical server, or a VM & any architecture x86 or ARM.
-* __Confiuration File Support__: Initially support for [dev container](https://containers.dev/), ability to expand to DevFile, Nix & Flox (Contributions welcome here!).
-* __Prebuilds System__: Has a prebuilds system, built-in, to drastically improve environment setup times(Contributions welcome here!).
+* __Runs everywhere__: spin up your development environment on any machine — whether it's local, remote, cloud-based, physical server, or a VM & any architecture x86 or ARM.
+* __Configuration File Support__: Initially support for [dev container](https://containers.dev/), ability to expand to DevFile, Nix & Flox (Contributions welcome here!).
+* __Prebuilds System__: Has a prebuilds system, built-in, to drastically improve environment setup times (Contributions welcome here!).
 * __IDE Support__ : Seamlessly supports [VS Code](https://github.com/microsoft/vscode) & [JetBrains](https://www.jetbrains.com/remote-development/gateway/) locally, ready to use without configuration. Includes a built-in Web IDE for added convenience.
-* __Git Provider Integration__: GitHub, GitLab & Bitbucket support, allowing easy repo or PR selection. 
-* __Multiple Project Workspace__: Support for multiple project repositories in a dev environment, making it easy to develop using a micro-service architecture.
-* __Reverse Proxy Integration__: Enable collaboration and streamline feedback loops by leveraging reverse proxy functionality. Access preview environments and the Web IDE seamlessly, even behind firewalls.
+* __Git Provider Integration__: GitHub, GitLab & Bitbucket can be connected, allowing easy repo branch or PR pull and commit back from the workspaces.
+* __Multiple Project Workspace__: Support for multiple project repositories in the same workspace, making it easy to develop using a micro-service architecture.
+* __Reverse Proxy Integration__: Enable collaboration and streamline feedback loops by leveraging reverse proxy functionality. Access preview ports and the Web IDE seamlessly, even behind firewalls.
 * __Extensibility__: Enable extensibility with plugin or provider development. Moreover, in any dynamic language, not just Go(Contributions welcome here!).
-* __Security__: Automatically creates a VPN tunnel between the client and the devt environment, ensuring a fully secure connection.
-* __All Ports__: The VPN connection enables access to all ports on the development environments, offering greater functionality compared to using only the SSH port for remote environment connections.
+* __Security__: Automatically creates a VPN connection between the client machine and the development environment, ensuring a fully secure connection.
+* __All Ports__: The VPN connection enables access to all ports on the development environments, removing the need to setup port forwards over SSH connection.
 * __Works on my Machine__: Never experince it again.
 
 ## Getting Started
 ### Requirements
 
-Before you begin the installation of Daytona, ensure you meet the following requirements:
+Daytona itself has a tiny memory and cpu requirements and will run on any machine. It can create development environments (Workspaces) both locally or on remote targets.
 
-- __Docker__: Ensure Docker is installed and running on your machine. Daytona relies on Docker to create and manage development environments.
-- __Hardware Resources__: If you plan to create development environments locally, ensure your machine has sufficient resources. We recommend a minimum hardware specification of at least 2GB of RAM for optimal performance.
+Before you create a development environment using Daytona, ensure you meet the following requirements:
+
+- __Hardware Resources__: Depending on the project requirements, ensure your machine has sufficient resources. Usually a minimum hardware specification is at least 1cpu, 2GB of RAM and 10GB of disk space. For optimal performance we advise to allocate more resources depending on the project complexity.
+
+*Note. If using `docker-provider`
+
+- __Docker__: Ensure Docker is installed and running on the target machine. Daytona `docker-provider` relies on Docker to create and manage development environments.
 
 Please verify these requirements to ensure a smooth installation and operation of Daytona on your system.
-
 
 ### Installing Daytona
 Daytona allows you to manage your Development Environments using the Daytona CLI. To install it, please execute the following command:
