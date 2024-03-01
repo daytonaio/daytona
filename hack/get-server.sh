@@ -10,28 +10,36 @@ ARCH=$(uname -m)
 # Check operating system
 OS=$(uname -s)
 
-if [ "$OS" == "Darwin" ]; then
-  FILENAME="darwin"
-elif [ "$OS" == "Linux" ]; then
-  FILENAME="linux"
-  echo "Unsupported operating system: $OS"
-  exit 1
-fi
+case $OS in
+  "Darwin")
+    FILENAME="darwin"
+    ;;
+  "Linux")
+    FILENAME="linux"
+    echo "Unsupported operating system: $OS"
+    exit 1
+    ;;
+  *)
+    echo "Unsupported operating system: $OS"
+    exit 1
+    ;;
+esac
 
-if [ "$ARCH" == "arm64" ]; then
-  FILENAME="$FILENAME-arm64"
-elif [ "$ARCH" == "ARM64" ]; then
-  FILENAME="$FILENAME-arm64"
-elif [ "$ARCH" == "x86_64" ]; then
-  FILENAME="$FILENAME-amd64"
-elif [ "$ARCH" == "AMD64" ]; then
-  FILENAME="$FILENAME-amd64"
-elif [ "$ARCH" == "aarch64" ]; then
-  FILENAME="$FILENAME-arm64"
-else
-  echo "Unsupported architecture: $ARCH"
-  exit 1
-fi
+case $ARCH in
+  "arm64" | "ARM64")
+    FILENAME="$FILENAME-arm64"
+    ;;
+  "x86_64" | "AMD64")
+    FILENAME="$FILENAME-amd64"
+    ;;
+  "aarch64")
+    FILENAME="$FILENAME-arm64"
+    ;;
+  *)
+    echo "Unsupported architecture: $ARCH"
+    exit 1
+    ;;
+esac
 
 BASE_URL="https://download.daytona.io/daytona"
 if [ -n "$DAYTONA_SERVER_DOWNLOAD_URL" ]; then
