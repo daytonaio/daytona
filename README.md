@@ -106,7 +106,8 @@ curl https://download.daytona.io/daytona/get-server.sh | bash
 
 Alternatively, download and compile Daytona directly from this repository by consulting our [documentation](https://daytona.io/docs).
 
-*Note. The packaged Daytona includes a set of built-in extensions located in the extensions folder, which are added there for your convince.
+> [!NOTE]
+> The packaged Daytona includes a set of built-in extensions located in the extensions folder, which are added there for your convince.
 
 ### Initializing Daytona
 To initialize Daytona, follow these steps:
