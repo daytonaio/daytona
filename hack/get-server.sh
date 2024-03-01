@@ -3,25 +3,17 @@
 VERSION="latest"
 if [ -n "$DAYTONA_SERVER_VERSION" ]; then
   VERSION=$DAYTONA_SERVER_VERSION
-fi 
-  
+fi
+
 # Check machine architecture
 ARCH=$(uname -m)
 # Check operating system
 OS=$(uname -s)
 
-if [ "$OS" == "" ]; then
-  OS=$(ver)
-  ARCH=$(echo %PROCESSOR_ARCHITECTURE%)
-fi
-
 if [ "$OS" == "Darwin" ]; then
   FILENAME="darwin"
 elif [ "$OS" == "Linux" ]; then
   FILENAME="linux"
-elif [[ $OS == *"Windows"* ]]; then
-  FILENAME="windows"
-else
   echo "Unsupported operating system: $OS"
   exit 1
 fi
