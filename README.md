@@ -29,6 +29,21 @@ Empowering you to effortlessly create a functional development environment on an
     <a href="https://twitter.com/Daytona">Twitter</a>
   </p>
 
+## Why Daytona?
+Daytona is a radically simple open source development environment manager.
+
+Setting up development environments has become increasingly challenging over time, especially when aiming to set up remotely, where the complexity increases by a order of magnitude. The process is so complex that we've compiled a [comprehensive guide](https://www.daytona.io/dotfiles/diy-guide-to-transform-any-machine-into-a-codespace) detailing all the necessary steps to set one up—spanning __5,000 words__, __7 steps__, and requiring anywhere from 15 to __45 minutes__. 
+
+This complexity is unnecessary.
+
+With Daytona, you need only to execute a single command: `daytona create`.
+
+Daytona automates the entire process; provisioning the instance, interpreting and applying the configuration, setting up prebuilds, establishing a secure VPN connection, securly connecting your local or a Web IDE, and assigning a fully qualified domain name to the development environment for easy sharing and collaboration. 
+
+As a developer, you can immediately start focusing on what matters most—your code.
+
+
+
 ## Backstory
 We spent most of our careers building cloud development environments. In 2009, we launched what was likely the first commercial [Cloud IDE](https://codeanywhere.com) project. At that time, technology was lacking, forcing us to develop everything from scratch—the IDE, the environment orchestrator, and almost everything else. A lot of people were interested, and over 2.5 million developers signed up! But we were too early, and we asked too much from our users to change how they worked.
 
