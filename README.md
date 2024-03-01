@@ -42,17 +42,26 @@ So, we took everything we learned and decided to solve these issues once and for
 ## Features
 * __Single Command__: Activate a fully configured development environment with a single command.
 * __Runs everywhere__: Spin up your development environment on any machine—whether it's local, remote, a physical server, VM, or cloud-based, & any architecture x86 or Arm.
-* __Confiuration File Support__: Initially support for [dev container](https://containers.dev/), ability to expand to DevFile, Nix & Backstage (Contributions welcome here!).
+* __Confiuration File Support__: Initially support for [dev container](https://containers.dev/), ability to expand to DevFile, Nix & Flox (Contributions welcome here!).
 * __Prebuilds System__: Has a prebuilds system, built in, to drasticly improve environment setup times(Contributions welcome here!).
 * __IDE Support__ : Seamlessly supports [VS Code](https://github.com/microsoft/vscode) & [JetBrains](https://www.jetbrains.com/remote-development/gateway/) locally, ready to use without configuration. Includes a built-in Web IDE for added convenience.
 * __Git Provider Integration__: Start with GitHub support, allowing easy repo or PR selection. Future plans to expand to GitLab & Bitbucket (Contributions welcome here!).
 * __Multiple Project Workspace__: Support for multiple project repositories in a dev environment, making it easy to develop using micro-service architecture.
 * __Reverse Proxy Integration__: Enable collaboration and streamline feedback loops by leveraging reverse proxy functionality. Access preview environments and the Web IDE seamlessly, even behind firewalls.
 * __Extensibility__: Enable extensibility with plugin or provider development. Moreover, in any dynamic language, not just Go(Contributions welcome here!).
-* __Security__: Compatibility with all existing technologies development environment technologies
+* __Security__: Automatically creates a VPN tunnel between the client and the devt environment, ensuring a fully secure connection.
+* __All Ports__: The VPN connection enables access to all ports on the development environments, offering greater functionality compared to using only the SSH port for remote environment connections.
 * __Works on my Machine__: Never experince it again.
 
 ## Getting Started
+### Requirements
+
+Before you begin the installation of Daytona, ensure you meet the following requirements:
+
+- __Docker__: Ensure Docker is installed and running on your machine. Daytona relies on Docker to create and manage development environments.
+- __Hardware Resources__: If you plan to create development environments locally, ensure your machine has sufficient resources. We recommend a minimum hardware specification of at least 2GB of RAM for optimal performance.
+
+Please verify these requirements to ensure a smooth installation and operation of Daytona on your system.
 
 
 ### Installing Daytona
@@ -188,7 +197,7 @@ Daytona offers flexibility for extension through the creation of plugins and pro
 
 
 ### Providers 
-Daytona is designed to be infrastructure-agnostic, capable of creating and managing development environments across various platforms. Providers are the components that encapsulate the logic for provisioning compute resources on a specific target platform. They allow for the configuration of different profiles within a single provider, enabling, for instance, multiple AWS profiles within an AWS provider.
+Daytona is designed to be infrastructure-agnostic, capable of creating and managing development environments across various platforms. Providers are the components that encapsulate the logic for provisioning compute resources on a specific target platform. They allow for the configuration of different targets within a single provider, enabling, for instance, multiple AWS profiles within an AWS provider.
 
 How does it work? When executing the `daytona create` command, Daytona communicates the environment details to the selected provider, which then provisions the necessary compute resources. Once provisioned, Daytona sets up the environment on these resources, allowing the user to interact with the environment seamlessly.
 
