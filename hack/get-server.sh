@@ -1,9 +1,18 @@
 #!/bin/bash
 
-VERSION="latest"
-if [ -n "$DAYTONA_SERVER_VERSION" ]; then
-  VERSION=$DAYTONA_SERVER_VERSION
-fi
+# This script downloads the Daytona server binary and installs it to /usr/local/bin
+# You can set the environment variable DAYTONA_SERVER_VERSION to specify the version to download
+# You can set the environment variable DAYTONA_SERVER_DOWNLOAD_URL to specify the base URL to download from
+
+VERSION=${DAYTONA_SERVER_VERSION:-"latest"}
+BASE_URL=${DAYTONA_SERVER_DOWNLOAD_URL:-"https://download.daytona.io/daytona"}
+DESTINATION="/usr/local/bin/daytona"
+
+# Print error message to stderr and exit
+err() {
+  echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&2
+  exit 1
+}
 
 # Check machine architecture
 ARCH=$(uname -m)
@@ -16,12 +25,9 @@ case $OS in
     ;;
   "Linux")
     FILENAME="linux"
-    echo "Unsupported operating system: $OS"
-    exit 1
     ;;
   *)
-    echo "Unsupported operating system: $OS"
-    exit 1
+    err "Unsupported operating system: $OS"
     ;;
 esac
 
@@ -36,20 +42,21 @@ case $ARCH in
     FILENAME="$FILENAME-arm64"
     ;;
   *)
-    echo "Unsupported architecture: $ARCH"
-    exit 1
+    err "Unsupported architecture: $ARCH"
     ;;
 esac
-
-BASE_URL="https://download.daytona.io/daytona"
-if [ -n "$DAYTONA_SERVER_DOWNLOAD_URL" ]; then
-  BASE_URL=$DAYTONA_SERVER_DOWNLOAD_URL
-fi
 
 DOWNLOAD_URL="$BASE_URL/$VERSION/daytona-$FILENAME"
 
 echo "Downloading server from $DOWNLOAD_URL"
 
-sudo curl $DOWNLOAD_URL -Lo daytona
-sudo mv daytona /usr/local/bin/daytona
-sudo chmod +x /usr/local/bin/daytona
+# curl does not fail with a non-zero status code when the HTTP status
+# code is not successful (like 404 or 500). You can add -f flag to curl
+# command to fail silently on server errors.
+curl -fsSL "$DOWNLOAD_URL" -o daytona
+if [ $? -ne 0 ]; then
+  err "Error occurred while downloading the server"
+fi
+
+sudo mv daytona "$DESTINATION"
+sudo chmod +x "$DESTINATION"
