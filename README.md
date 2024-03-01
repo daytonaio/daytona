@@ -29,6 +29,24 @@ Set up a development environment on any infrastructure, with a single command.
     <a href="https://twitter.com/Daytona">Twitter</a>
   </p>
 
+----
+
+## Quick Start
+To install the Daytona CLI, please execute the following command:
+
+```bash
+curl https://download.daytona.io/daytona/get-server.sh | bash
+```
+
+Start creating dev environments with just this one command:
+```bash
+daytona create
+```
+
+Start coding.
+
+----
+
 ## Why Daytona?
 Daytona is a radically simple open source development environment manager.
 
@@ -52,7 +70,7 @@ Now, 15 years since its inception, we have noticed quite a few things. First, th
 So, we took everything we learned and decided to solve these issues once and for all as a fully open-source project. Our goal was to create a single binary that allows you to set up a development environment anywhere you wish, completely free, and finally fulfill the promise that many have attempted to make.
 
 
-----
+
 
 ## Features
 * __Single Command__: Activate a fully configured development environment with a single command.
