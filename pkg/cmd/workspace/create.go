@@ -6,7 +6,10 @@ package workspace
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
+	"regexp"
+	"strings"
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
@@ -18,6 +21,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	"github.com/daytonaio/daytona/pkg/views/workspace/initialize"
+	"github.com/gorilla/websocket"
 
 	tea "github.com/charmbracelet/bubbletea"
 	log "github.com/sirupsen/logrus"
@@ -153,31 +157,48 @@ var CreateCmd = &cobra.Command{
 			os.Exit(0)
 		}()
 
-		// started := false
-		// for {
-		// 	if started {
-		// 		break
-		// 	}
-		// 	select {
-		// 	case <-stream.Context().Done():
-		// 		started = true
-		// 	default:
-		// 		// Recieve on the stream
-		// 		res, err := stream.Recv()
-		// 		if err != nil {
-		// 			if err == io.EOF {
-		// 				started = true
-		// 				break
-		// 			} else {
-		// 				initViewProgram.Send(tea.Quit())
-		// 				initViewProgram.ReleaseTerminal()
-		// 				log.Fatal(err)
-		// 				return
-		// 			}
-		// 		}
-		// 		initViewProgram.Send(init_view.EventMsg{Event: res.Event, Payload: res.Payload})
-		// 	}
-		// }
+		hostRegex := regexp.MustCompile(`https*://(.*)`)
+		host := hostRegex.FindStringSubmatch(activeProfile.Api.Url)[1]
+		wsURL := fmt.Sprintf("ws://%s/log/ws%s", host, "?follow=true")
+
+		ws, res, err := websocket.DefaultDialer.Dial(wsURL, nil)
+		if err != nil {
+			log.Fatal(apiclient.HandleErrorResponse(res, err))
+		}
+
+		started := false
+
+		for {
+			if started {
+				break
+			}
+			_, msgRaw, err := ws.ReadMessage()
+			if err != nil {
+				initViewProgram.Send(tea.Quit())
+				initViewProgram.ReleaseTerminal()
+				log.Fatal(err)
+				return
+			}
+
+			msg := string(msgRaw)
+
+			words := []string{"Workspace", workspaceName, "foo", "bar"}
+
+			// Loop through the list of words
+			for _, word := range words {
+				if strings.Contains(msg, word) {
+					initViewProgram.Send(initialize.EventMsg{Event: "test", Payload: msg})
+					fmt.Println(msg)
+					break
+				}
+			}
+
+			if strings.Contains(msg, "failed") {
+				initViewProgram.Send(initialize.EventMsg{Event: "test", Payload: msg})
+				fmt.Println(msg)
+				break
+			}
+		}
 
 		wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceName).Execute()
 		if err != nil {
