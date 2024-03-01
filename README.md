@@ -26,7 +26,7 @@ Set up a development environment on any infrastructure, with a single command.
     ·
   <a href="https://join.slack.com/t/daytonacommunity/shared_invite/zt-273yohksh-Q5YSB5V7tnQzX2RoTARr7Q">Join Our Slack</a>
     ·
-    <a href="https://twitter.com/Daytona">Twitter</a>
+    <a href="https://twitter.com/Daytonaio">Twitter</a>
   </p>
 
 ----
