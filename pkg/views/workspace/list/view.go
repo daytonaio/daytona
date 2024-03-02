@@ -27,6 +27,7 @@ type RowData struct {
 	Repository    string
 	Created       string
 	Status        string
+	Branch        string
 }
 
 type model struct {
@@ -40,6 +41,7 @@ var columns = []table.Column{
 	{Title: "REPOSITORY", Width: defaultColumnWidth},
 	{Title: "CREATED", Width: defaultColumnWidth},
 	{Title: "STATUS", Width: defaultColumnWidth},
+	{Title: "BRANCH", Width: defaultColumnWidth},
 }
 
 func (m model) Init() tea.Cmd {
@@ -77,15 +79,15 @@ func renderWorkspaceList(workspaceList []serverapiclient.Workspace, specifyGitPr
 		if len(workspace.Projects) == 1 {
 			rowData = getWorkspaceTableRowData(workspace, specifyGitProviders)
 			adjustColumsFormatting(rowData)
-			row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Created, rowData.Status}
+			row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Created, rowData.Status, rowData.Branch}
 			rows = append(rows, row)
 		} else {
-			row = table.Row{*workspace.Name, "", "", "", ""}
+			row = table.Row{*workspace.Name, "", "", "", "", ""}
 			rows = append(rows, row)
 			for _, project := range workspace.Projects {
 				rowData = getProjectTableRowData(workspace, project, specifyGitProviders)
 				adjustColumsFormatting(rowData)
-				row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Created, rowData.Status}
+				row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Created, rowData.Status, rowData.Branch}
 				rows = append(rows, row)
 			}
 		}
@@ -123,6 +125,7 @@ func adjustColumsFormatting(rowData RowData) {
 	adjustColumnWidth("REPOSITORY", rowData)
 	adjustColumnWidth("CREATED", rowData)
 	adjustColumnWidth("STATUS", rowData)
+	adjustColumnWidth("BRANCH", rowData)
 }
 
 func adjustColumnWidth(title string, rowData RowData) {
