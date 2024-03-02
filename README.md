@@ -76,7 +76,7 @@ So, we took everything we learned and decided to solve these issues once and for
 * __Single Command__: Activate a fully configured development environment with a single command.
 * __Runs everywhere__: spin up your development environment on any machine — whether it's local, remote, cloud-based, physical server, or a VM & any architecture x86 or ARM.
 * __Configuration File Support__: Initially support for [dev container](https://containers.dev/), ability to expand to DevFile, Nix & Flox (Contributions welcome here!).
-* __Prebuilds System__: Has a prebuilds system, built-in, to drastically improve environment setup times (Contributions welcome here!).
+* __Prebuilds System__: Drastically improve environment setup times (Contributions welcome here!).
 * __IDE Support__ : Seamlessly supports [VS Code](https://github.com/microsoft/vscode) & [JetBrains](https://www.jetbrains.com/remote-development/gateway/) locally, ready to use without configuration. Includes a built-in Web IDE for added convenience.
 * __Git Provider Integration__: GitHub, GitLab & Bitbucket can be connected, allowing easy repo branch or PR pull and commit back from the workspaces.
 * __Multiple Project Workspace__: Support for multiple project repositories in the same workspace, making it easy to develop using a micro-service architecture.
