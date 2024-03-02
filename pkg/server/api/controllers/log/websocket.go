@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os/exec"
 
+	"github.com/daytonaio/daytona/pkg/server/config"
 	"github.com/daytonaio/daytona/pkg/server/logs"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -18,8 +19,8 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func readLog(ctx context.Context, follow bool, c chan []byte, errChan chan error) {
-	if logs.LogFilePath == nil {
+func readLog(ctx context.Context, filePath *string, follow bool, c chan []byte, errChan chan error) {
+	if filePath == nil {
 		return
 	}
 
@@ -30,7 +31,7 @@ func readLog(ctx context.Context, follow bool, c chan []byte, errChan chan error
 	if follow {
 		tailCmd.Args = append(tailCmd.Args, "-f")
 	}
-	tailCmd.Args = append(tailCmd.Args, *logs.LogFilePath)
+	tailCmd.Args = append(tailCmd.Args, *filePath)
 
 	reader, err := tailCmd.StdoutPipe()
 	if err != nil {
@@ -78,7 +79,50 @@ func ReadServerLog(ginCtx *gin.Context) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	defer cancel()
-	go readLog(ctx, follow, msgChannel, errChannel)
+	go readLog(ctx, logs.LogFilePath, follow, msgChannel, errChannel)
+	go writeToWs(ws, msgChannel, errChannel)
+
+	go func() {
+		err := <-errChannel
+		if err != nil {
+			log.Error(err)
+		}
+		ws.Close()
+		cancel()
+	}()
+
+	for {
+		_, _, err := ws.ReadMessage()
+		if err != nil {
+			log.Error(err)
+			cancel()
+			break
+		}
+	}
+}
+
+func ReadProjectLog(ginCtx *gin.Context) {
+	workspaceId := ginCtx.Param("workspaceId")
+	projectId := ginCtx.Param("projectId")
+
+	projectLogFilePath, err := config.GetProjectLogFilePath(workspaceId, projectId)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	ws, err := upgrader.Upgrade(ginCtx.Writer, ginCtx.Request, nil)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	msgChannel := make(chan []byte)
+	errChannel := make(chan error)
+	ctx, cancel := context.WithCancel(context.Background())
+
+	defer cancel()
+	go readLog(ctx, &projectLogFilePath, true, msgChannel, errChannel)
 	go writeToWs(ws, msgChannel, errChannel)
 
 	go func() {

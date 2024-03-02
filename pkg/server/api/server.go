@@ -87,6 +87,7 @@ func Start() error {
 	logController := router.Group("/log")
 	{
 		logController.GET("/ws", log_controller.ReadServerLog)
+		logController.GET("/:workspaceId/:projectId", log_controller.ReadProjectLog)
 	}
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))

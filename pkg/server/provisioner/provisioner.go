@@ -4,16 +4,35 @@
 package provisioner
 
 import (
+	"fmt"
+	"io"
+	"os"
+
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
+	"github.com/daytonaio/daytona/pkg/server/config"
 	"github.com/daytonaio/daytona/pkg/server/db"
 	"github.com/daytonaio/daytona/pkg/server/event_bus"
 	"github.com/daytonaio/daytona/pkg/types"
-
 	log "github.com/sirupsen/logrus"
 )
 
 func CreateWorkspace(workspace *types.Workspace) error {
-	log.Info("Creating workspace")
+	workspaceLogFilePath, err := config.GetWorkspaceLogFilePath(workspace.Id)
+	if err != nil {
+		return err
+	}
+
+	workspaceLogFile, err := os.OpenFile(workspaceLogFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		return err
+	}
+	defer workspaceLogFile.Close()
+
+	wsMultiWriter := io.MultiWriter(&util.InfoLogWriter{}, io.Writer(workspaceLogFile))
+
+	wsMultiWriter.Write([]byte("Creating workspace\n"))
+	// log.Info("Creating workspace")
 
 	provider, err := manager.GetProvider(workspace.Provider.Name)
 	if err != nil {
@@ -28,6 +47,21 @@ func CreateWorkspace(workspace *types.Workspace) error {
 	log.Debug("Projects to initialize", workspace.Projects)
 
 	for _, project := range workspace.Projects {
+
+		projectLogFilePath, err := config.GetProjectLogFilePath(workspace.Id, project.Name)
+		if err != nil {
+			return err
+		}
+
+		projectLogFile, err := os.OpenFile(projectLogFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		if err != nil {
+			return err
+		}
+		defer projectLogFile.Close()
+
+		projectMultiWriter := io.MultiWriter(&util.InfoLogWriter{}, io.Writer(workspaceLogFile), io.Writer(projectLogFile))
+		projectMultiWriter.Write([]byte(fmt.Sprintf("Creating project %s\n", project.Name)))
+
 		//	todo: go routines
 		event_bus.Publish(event_bus.Event{
 			Name: event_bus.WorkspaceEventProjectCreating,
@@ -36,7 +70,7 @@ func CreateWorkspace(workspace *types.Workspace) error {
 				ProjectName:   project.Name,
 			},
 		})
-		_, err := (*provider).CreateProject(project)
+		_, err = (*provider).CreateProject(project)
 		if err != nil {
 			return err
 		}

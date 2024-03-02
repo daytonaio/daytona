@@ -85,6 +85,47 @@ func GetConfigDir() (string, error) {
 	return path.Join(userConfigDir, "daytona", "server"), nil
 }
 
+func GetWorkspaceLogsDir() (string, error) {
+	configDir, err := GetConfigDir()
+	if err != nil {
+		return "", err
+	}
+
+	return path.Join(configDir, "logs"), nil
+}
+
+func GetWorkspaceLogFilePath(workspaceId string) (string, error) {
+	projectLogsDir, err := GetWorkspaceLogsDir()
+	if err != nil {
+		return "", err
+	}
+
+	filePath := path.Join(projectLogsDir, workspaceId, "log")
+
+	err = os.MkdirAll(path.Dir(filePath), 0755)
+	if err != nil {
+		return "", err
+	}
+
+	return filePath, nil
+}
+
+func GetProjectLogFilePath(workspaceId string, projectId string) (string, error) {
+	projectLogsDir, err := GetWorkspaceLogsDir()
+	if err != nil {
+		return "", err
+	}
+
+	filePath := path.Join(projectLogsDir, workspaceId, projectId, "log")
+
+	err = os.MkdirAll(path.Dir(filePath), 0755)
+	if err != nil {
+		return "", err
+	}
+
+	return filePath, nil
+}
+
 func getDefaultProvidersDir() (string, error) {
 	userConfigDir, err := os.UserConfigDir()
 	if err != nil {
