@@ -31,7 +31,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 )
 
-var repos []string
+var argRepos []string
 
 var CreateCmd = &cobra.Command{
 	Use:   "create [WORKSPACE_NAME]",
@@ -39,6 +39,8 @@ var CreateCmd = &cobra.Command{
 	Args:  cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
+		var repoUrls []string
+		var repos []serverapiclient.Repository
 		var workspaceName string
 
 		manual, err := cmd.Flags().GetBool("manual")
@@ -74,7 +76,11 @@ var CreateCmd = &cobra.Command{
 
 		if len(args) == 0 {
 			var workspaceNames []string
-			repos = []string{} // Ignore repo flags if prompting
+
+			if argRepos != nil {
+				view_util.RenderInfoMessage("Error: workspace name argument is required for this command")
+				cmd.Help()
+			}
 
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
@@ -111,9 +117,24 @@ var CreateCmd = &cobra.Command{
 				return
 			}
 			workspaceName = validatedWorkspaceName
+			if argRepos != nil {
+				repoUrls = argRepos
+			} else {
+				view_util.RenderInfoMessage("Error: --repo flag is required for this command")
+				cmd.Help()
+			}
+
+			for _, repoUrl := range repoUrls {
+				repo, res, err := apiClient.ServerAPI.GetGitContext(ctx, repoUrl).Execute()
+				if err != nil {
+					log.Fatal(apiclient.HandleErrorResponse(res, err))
+				}
+				repos = append(repos, *repo)
+			}
 		}
 
 		if workspaceName == "" || len(repos) == 0 {
+			log.Fatal("workspace name and repository urls are required")
 			return
 		}
 
@@ -237,7 +258,7 @@ var providerFlag string
 var targetNameFlag string
 
 func init() {
-	CreateCmd.Flags().StringArrayVarP(&repos, "repo", "r", nil, "Set the repository url")
+	CreateCmd.Flags().StringArrayVarP(&argRepos, "repo", "r", nil, "Set the repository url")
 	CreateCmd.Flags().StringVar(&providerFlag, "provider", "", "Specify the provider (e.g. 'docker-provider')")
 	CreateCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", "Specify the IDE ('vscode' or 'browser')")
 	CreateCmd.Flags().StringVarP(&targetNameFlag, "target", "t", "", "Specify the target (e.g. 'local')")

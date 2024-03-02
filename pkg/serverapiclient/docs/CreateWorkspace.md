@@ -5,7 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Name** | Pointer to **string** |  | [optional] 
-**Repositories** | Pointer to **[]string** |  | [optional] 
+**Repositories** | Pointer to [**[]Repository**](Repository.md) |  | [optional] 
 **Target** | Pointer to **string** |  | [optional] 
 
 ## Methods
@@ -54,20 +54,20 @@ HasName returns a boolean if a field has been set.
 
 ### GetRepositories
 
-`func (o *CreateWorkspace) GetRepositories() []string`
+`func (o *CreateWorkspace) GetRepositories() []Repository`
 
 GetRepositories returns the Repositories field if non-nil, zero value otherwise.
 
 ### GetRepositoriesOk
 
-`func (o *CreateWorkspace) GetRepositoriesOk() (*[]string, bool)`
+`func (o *CreateWorkspace) GetRepositoriesOk() (*[]Repository, bool)`
 
 GetRepositoriesOk returns a tuple with the Repositories field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetRepositories
 
-`func (o *CreateWorkspace) SetRepositories(v []string)`
+`func (o *CreateWorkspace) SetRepositories(v []Repository)`
 
 SetRepositories sets Repositories field to given value.
 

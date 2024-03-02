@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/server/config"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/daytonaio/daytona/pkg/types"
@@ -77,4 +78,27 @@ func GenerateNetworkKey(ctx *gin.Context) {
 	}
 
 	ctx.JSON(200, &types.NetworkKey{Key: authKey})
+}
+
+// GetGitContext 			godoc
+//
+//	@Tags			server
+//	@Summary		Get Git context
+//	@Description	Get Git context
+//	@Produce		json
+//	@Param			gitUrl	path		string	true	"Git URL"
+//	@Success		200		{object}	Repository
+//	@Router			/server/get-git-context/{gitUrl} [get]
+//
+//	@id				GetGitContext
+func GetGitContext(ctx *gin.Context) {
+	gitUrl := ctx.Param("gitUrl")
+
+	repo, err := util.GetGitContextFromUrl(gitUrl)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git context: %s", err.Error()))
+		return
+	}
+
+	ctx.JSON(200, repo)
 }
