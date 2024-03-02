@@ -38,7 +38,7 @@ var logsCmd = &cobra.Command{
 			query = "?follow=true"
 		}
 
-		wsURL := fmt.Sprintf("ws://%s/log/ws%s", host, query)
+		wsURL := fmt.Sprintf("ws://%s/log/server%s", host, query)
 
 		ws, res, err := websocket.DefaultDialer.Dial(wsURL, nil)
 		if err != nil {

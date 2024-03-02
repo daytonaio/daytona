@@ -20,6 +20,7 @@ import (
 
 var defaultColumnWidth = 12
 var columnPadding = 3
+var timeLayout = "2006-01-02T15:04:05.999999999Z"
 
 type RowData struct {
 	WorkspaceName string
@@ -214,8 +215,7 @@ func getRepositorySlugFromUrl(url string) string {
 }
 
 func formatCreatedTime(input string) string {
-	layout := "2006-01-02T15:04:05.999999999Z"
-	t, err := time.Parse(layout, input)
+	t, err := time.Parse(timeLayout, input)
 	if err != nil {
 		return "/"
 	}
@@ -246,8 +246,7 @@ func formatCreatedTime(input string) string {
 }
 
 func formatStatusTime(input string) string {
-	layout := "2006-01-02T15:04:05.999999999Z"
-	t, err := time.Parse(layout, input)
+	t, err := time.Parse(timeLayout, input)
 	if err != nil {
 		return "stopped"
 	}

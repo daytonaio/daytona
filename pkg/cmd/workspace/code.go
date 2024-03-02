@@ -84,60 +84,45 @@ var CodeCmd = &cobra.Command{
 			ideId = ideFlag
 		}
 
-		if ideId == "browser" {
-			err = openBrowserIDE(activeProfile, workspaceName, projectName)
-			if err != nil {
-				log.Fatal(err)
-			}
-			return
-		}
+		view_util.RenderInfoMessage("Opening the workspace in your preferred IDE")
 
-		err = config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceName, projectName)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		checkAndAlertVSCodeInstalled()
-
-		projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceName, projectName)
-
-		log.Info("Opening " + workspaceName + "'s project " + projectName + " in Visual Studio Code.")
-
-		commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", projectHostname, path.Join("/workspaces", projectName))
-
-		var vscCommand *exec.Cmd = exec.Command("code", "--folder-uri", commandArgument)
-
-		err = vscCommand.Run()
-
-		if err != nil {
-			log.Fatal(err.Error())
-		}
+		openIDE(ideId, activeProfile, workspaceName, projectName)
 	},
 }
 
-func checkAndAlertVSCodeInstalled() {
-	if err := isVSCodeInstalled(); err != nil {
-		redBold := "\033[1;31m" // ANSI escape code for red and bold
-		reset := "\033[0m"      // ANSI escape code to reset text formatting
+func openIDE(ideId string, activeProfile config.Profile, workspaceName string, projectName string) {
 
-		errorMessage := "Please install Visual Studio Code and ensure it's in your PATH."
-
-		log.Error(redBold + errorMessage + reset)
-
-		log.Info("More information on: 'https://code.visualstudio.com/docs/editor/command-line#_launching-from-command-line'")
+	if ideId == "browser" {
+		err := openBrowserIDE(activeProfile, workspaceName, projectName)
+		if err != nil {
+			log.Fatal(err)
+		}
 		return
 	}
+
+	openVSCode(activeProfile, workspaceName, projectName)
 }
 
-func isVSCodeInstalled() error {
-	_, err := exec.LookPath("code")
-	return err
-}
+func openVSCode(activeProfile config.Profile, workspaceName string, projectName string) {
 
-var ideFlag string
+	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceName, projectName)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-func init() {
-	CodeCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", "Specify the IDE ('vscode' or 'browser')")
+	checkAndAlertVSCodeInstalled()
+
+	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceName, projectName)
+
+	commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", projectHostname, path.Join("/workspaces", projectName))
+
+	var vscCommand *exec.Cmd = exec.Command("code", "--folder-uri", commandArgument)
+
+	err = vscCommand.Run()
+
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 }
 
 func openBrowserIDE(activeProfile config.Profile, workspaceName string, projectName string) error {
@@ -198,3 +183,28 @@ func openBrowserIDE(activeProfile config.Profile, workspaceName string, projectN
 }
 
 const startVSCodeServerCommand = "$HOME/vscode-server/bin/openvscode-server --start-server --port=63000 --host=0.0.0.0 --without-connection-token --disable-workspace-trust --default-folder=$DAYTONA_WS_DIR"
+
+func checkAndAlertVSCodeInstalled() {
+	if err := isVSCodeInstalled(); err != nil {
+		redBold := "\033[1;31m" // ANSI escape code for red and bold
+		reset := "\033[0m"      // ANSI escape code to reset text formatting
+
+		errorMessage := "Please install Visual Studio Code and ensure it's in your PATH. "
+		infoMessage := "More information on: 'https://code.visualstudio.com/docs/editor/command-line#_launching-from-command-line'"
+
+		log.Error(redBold + errorMessage + reset + infoMessage)
+
+		return
+	}
+}
+
+func isVSCodeInstalled() error {
+	_, err := exec.LookPath("code")
+	return err
+}
+
+var ideFlag string
+
+func init() {
+	CodeCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", "Specify the IDE ('vscode' or 'browser')")
+}

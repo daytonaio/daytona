@@ -6,8 +6,14 @@ package workspace
 import (
 	"context"
 	"errors"
+	"fmt"
+	"net/http"
 	"os"
+	"regexp"
+	"time"
 
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/daytonaio/daytona/internal/tailscale"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
@@ -17,9 +23,9 @@ import (
 	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
-	"github.com/daytonaio/daytona/pkg/views/workspace/initialize"
+	status "github.com/daytonaio/daytona/pkg/views/workspace/status"
+	"github.com/gorilla/websocket"
 
-	tea "github.com/charmbracelet/bubbletea"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -37,7 +43,15 @@ var CreateCmd = &cobra.Command{
 		var workspaceName string
 		var provider string
 
-		manual, _ := cmd.Flags().GetBool("manual")
+		manual, err := cmd.Flags().GetBool("manual")
+		if err != nil {
+			log.Fatal(err)
+		}
+		multiProjectFlag, err := cmd.Flags().GetBool("multi-project")
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		apiClient, err := server.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
@@ -84,6 +98,8 @@ var CreateCmd = &cobra.Command{
 			provider = activeProfile.DefaultProvider
 		}
 
+		view_util.RenderMainTitle("WORKSPACE CREATION")
+
 		if len(args) == 0 {
 			var workspaceNames []string
 			repos = []string{} // Ignore repo flags if prompting
@@ -95,8 +111,6 @@ var CreateCmd = &cobra.Command{
 			for _, workspaceInfo := range workspaceList {
 				workspaceNames = append(workspaceNames, *workspaceInfo.Name)
 			}
-
-			view_util.RenderMainTitle("WORKSPACE CREATION")
 
 			var gitProviderList []types.GitProvider
 			for _, serverGitProvider := range serverConfig.GitProviders {
@@ -113,7 +127,7 @@ var CreateCmd = &cobra.Command{
 				gitProviderList = append(gitProviderList, gitProvider)
 			}
 
-			workspaceName, repos, err = create.GetCreationDataFromPrompt(workspaceNames, gitProviderList, manual)
+			workspaceName, repos, err = create.GetCreationDataFromPrompt(workspaceNames, gitProviderList, manual, multiProjectFlag)
 			if err != nil {
 				log.Fatal(err)
 				return
@@ -131,7 +145,63 @@ var CreateCmd = &cobra.Command{
 			return
 		}
 
-		_, res, err = apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(serverapiclient.CreateWorkspace{
+		statusProgram := tea.NewProgram(status.NewModel())
+
+		started := false
+
+		go func() {
+			hostRegex := regexp.MustCompile(`https*://(.*)`)
+			host := hostRegex.FindStringSubmatch(activeProfile.Api.Url)[1]
+			wsURL := fmt.Sprintf("ws://%s/log/workspace/%s?follow=true", host, workspaceName)
+			var ws *websocket.Conn
+			var res *http.Response
+			var err error
+
+			ws, res, err = websocket.DefaultDialer.Dial(wsURL, nil)
+			if err != nil {
+				log.Fatal(apiclient.HandleErrorResponse(res, err))
+			}
+
+			defer ws.Close()
+
+			for {
+				_, msg, err := ws.ReadMessage()
+				if err != nil {
+					// TODO: needs refactor
+					ws.Close()
+					ws, _, _ = websocket.DefaultDialer.Dial(wsURL, nil)
+					continue
+				}
+
+				statusProgram.Send(status.ResultMsg{Line: string(msg)})
+				if started {
+					statusProgram.Send(status.ResultMsg{Line: "END_SIGNAL"})
+					break
+				}
+			}
+		}()
+
+		go func() {
+			if _, err := statusProgram.Run(); err != nil {
+				fmt.Println("Error running status program:", err)
+				statusProgram.Send(status.ClearScreenMsg{})
+				statusProgram.Send(tea.Quit())
+				statusProgram.ReleaseTerminal()
+				os.Exit(1)
+			}
+		}()
+
+		activeProfile, err = c.GetActiveProfile()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		tsConn, err := tailscale.GetConnection(&activeProfile)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(serverapiclient.CreateWorkspace{
 			Name:         &workspaceName,
 			Repositories: repos,
 			Provider:     &provider,
@@ -139,59 +209,50 @@ var CreateCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
+		started = true
 
-		initViewModel := initialize.GetInitialModel()
-		initViewProgram := tea.NewProgram(initViewModel)
-
-		go func() {
-			_, err := initViewProgram.Run()
-			initViewProgram.ReleaseTerminal()
-			if err != nil {
-				log.Fatal(err)
-				os.Exit(1)
+		dialStartTime := time.Now()
+		dialTimeout := 3 * time.Minute
+		statusProgram.Send(status.ResultMsg{Line: "Establishing connection with the workspace"})
+		for {
+			if time.Since(dialStartTime) > dialTimeout {
+				log.Fatal("Timeout: dialing timed out after 3 minutes")
 			}
-			os.Exit(0)
-		}()
 
-		// started := false
-		// for {
-		// 	if started {
-		// 		break
-		// 	}
-		// 	select {
-		// 	case <-stream.Context().Done():
-		// 		started = true
-		// 	default:
-		// 		// Recieve on the stream
-		// 		res, err := stream.Recv()
-		// 		if err != nil {
-		// 			if err == io.EOF {
-		// 				started = true
-		// 				break
-		// 			} else {
-		// 				initViewProgram.Send(tea.Quit())
-		// 				initViewProgram.ReleaseTerminal()
-		// 				log.Fatal(err)
-		// 				return
-		// 			}
-		// 		}
-		// 		initViewProgram.Send(init_view.EventMsg{Event: res.Event, Payload: res.Payload})
-		// 	}
-		// }
+			dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s-%s:2222", workspaceName, *createdWorkspace.Projects[0].Name))
+			if err == nil {
+				defer dialConn.Close()
+				break
+			}
+
+			time.Sleep(time.Second)
+		}
 
 		wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceName).Execute()
 		if err != nil {
-			initViewProgram.Send(tea.Quit())
-			initViewProgram.ReleaseTerminal()
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 			return
 		}
-		initViewProgram.Send(initialize.ClearScreenMsg{})
-		initViewProgram.Send(tea.Quit())
-		initViewProgram.ReleaseTerminal()
 
-		//	Show the info
+		statusProgram.Send(status.ClearScreenMsg{})
+		statusProgram.Send(tea.Quit())
+		statusProgram.ReleaseTerminal()
+
+		fmt.Println()
 		info.Render(wsInfo)
+
+		skipIdeFlag, _ := cmd.Flags().GetBool("skip-ide")
+		if skipIdeFlag {
+			return
+		}
+
+		ide := c.DefaultIdeId
+		if ideFlag != "" {
+			ide = ideFlag
+		}
+
+		view_util.RenderInfoMessageBold("Opening the workspace in your preferred IDE")
+		openIDE(ide, activeProfile, workspaceName, *wsInfo.Projects[0].Name)
 	},
 }
 
@@ -200,5 +261,8 @@ var providerFlag string
 func init() {
 	CreateCmd.Flags().StringArrayVarP(&repos, "repo", "r", nil, "Set the repository url")
 	CreateCmd.Flags().StringVar(&providerFlag, "provider", "", "Specify the provider (e.g. 'docker-provider')")
+	CreateCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", "Specify the IDE ('vscode' or 'browser')")
 	CreateCmd.Flags().Bool("manual", false, "Manually enter the git repositories")
+	CreateCmd.Flags().Bool("multi-project", false, "Workspace with multiple projects/repos")
+	CreateCmd.Flags().Bool("skip-ide", false, "Don't open the IDE after workspace creation")
 }

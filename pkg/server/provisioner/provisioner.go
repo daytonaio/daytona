@@ -4,16 +4,34 @@
 package provisioner
 
 import (
+	"fmt"
+	"io"
+	"os"
+
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
+	"github.com/daytonaio/daytona/pkg/server/config"
 	"github.com/daytonaio/daytona/pkg/server/db"
 	"github.com/daytonaio/daytona/pkg/server/event_bus"
 	"github.com/daytonaio/daytona/pkg/types"
-
 	log "github.com/sirupsen/logrus"
 )
 
 func CreateWorkspace(workspace *types.Workspace) error {
-	log.Info("Creating workspace")
+	workspaceLogFilePath, err := config.GetWorkspaceLogFilePath(workspace.Id)
+	if err != nil {
+		return err
+	}
+
+	workspaceLogFile, err := os.OpenFile(workspaceLogFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		return err
+	}
+	defer workspaceLogFile.Close()
+
+	wsLogWriter := io.MultiWriter(&util.InfoLogWriter{}, io.Writer(workspaceLogFile))
+
+	wsLogWriter.Write([]byte("Creating workspace\n"))
 
 	provider, err := manager.GetProvider(workspace.Provider.Name)
 	if err != nil {
@@ -28,6 +46,21 @@ func CreateWorkspace(workspace *types.Workspace) error {
 	log.Debug("Projects to initialize", workspace.Projects)
 
 	for _, project := range workspace.Projects {
+
+		projectLogFilePath, err := config.GetProjectLogFilePath(workspace.Id, project.Name)
+		if err != nil {
+			return err
+		}
+
+		projectLogFile, err := os.OpenFile(projectLogFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		if err != nil {
+			return err
+		}
+		defer projectLogFile.Close()
+
+		projectLogWriter := io.MultiWriter(wsLogWriter, io.Writer(projectLogFile))
+		projectLogWriter.Write([]byte(fmt.Sprintf("Creating project %s\n", project.Name)))
+
 		//	todo: go routines
 		event_bus.Publish(event_bus.Event{
 			Name: event_bus.WorkspaceEventProjectCreating,
@@ -36,7 +69,7 @@ func CreateWorkspace(workspace *types.Workspace) error {
 				ProjectName:   project.Name,
 			},
 		})
-		_, err := (*provider).CreateProject(project)
+		_, err = (*provider).CreateProject(project)
 		if err != nil {
 			return err
 		}
@@ -47,6 +80,8 @@ func CreateWorkspace(workspace *types.Workspace) error {
 				ProjectName:   project.Name,
 			},
 		})
+
+		projectLogWriter.Write([]byte(fmt.Sprintf("Project %s created\n", project.Name)))
 	}
 
 	event_bus.Publish(event_bus.Event{
@@ -56,14 +91,28 @@ func CreateWorkspace(workspace *types.Workspace) error {
 		},
 	})
 
-	return nil
+	wsLogWriter.Write([]byte("Workspace creation completed\n"))
 
+	return nil
 }
 
 // WorkspacePostCreate
 // WorkspacePreStart
 func StartWorkspace(workspace *types.Workspace) error {
-	log.Info("Starting workspace")
+	workspaceLogFilePath, err := config.GetWorkspaceLogFilePath(workspace.Id)
+	if err != nil {
+		return err
+	}
+
+	workspaceLogFile, err := os.OpenFile(workspaceLogFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		return err
+	}
+	defer workspaceLogFile.Close()
+
+	wsLogWriter := io.MultiWriter(&util.InfoLogWriter{}, io.Writer(workspaceLogFile))
+
+	wsLogWriter.Write([]byte("Starting workspace\n"))
 
 	provider, err := manager.GetProvider(workspace.Provider.Name)
 	if err != nil {
@@ -80,8 +129,23 @@ func StartWorkspace(workspace *types.Workspace) error {
 	})
 
 	for _, project := range workspace.Projects {
+
+		projectLogFilePath, err := config.GetProjectLogFilePath(workspace.Id, project.Name)
+		if err != nil {
+			return err
+		}
+
+		projectLogFile, err := os.OpenFile(projectLogFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		if err != nil {
+			return err
+		}
+		defer projectLogFile.Close()
+
+		projectLogWriter := io.MultiWriter(wsLogWriter, io.Writer(projectLogFile))
+		projectLogWriter.Write([]byte(fmt.Sprintf("Starting project %s\n", project.Name)))
+
 		//	todo: go routines
-		_, err := (*provider).StartProject(project)
+		_, err = (*provider).StartProject(project)
 		if err != nil {
 			return err
 		}

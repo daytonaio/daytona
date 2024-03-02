@@ -74,13 +74,12 @@ type Model struct {
 	workspaceCreationPromptResponse WorkspaceCreationPromptResponse
 }
 
-func runInitialForm(providerRepoUrl string) (WorkspaceCreationPromptResponse, error) {
+func runInitialForm(providerRepoUrl string, multiProject bool) (WorkspaceCreationPromptResponse, error) {
 	m := Model{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
 
 	primaryRepo := providerRepoUrl
-	hasSecondaryProjectsCheck := false
 	secondaryProjectsCountString := ""
 
 	primaryRepoPrompt := huh.NewInput().
@@ -96,11 +95,6 @@ func runInitialForm(providerRepoUrl string) (WorkspaceCreationPromptResponse, er
 			return nil
 		})
 
-	secondaryProjectsPrompt := huh.NewConfirm().
-		Key("secondaryProjectsPrompt").
-		Title("Add secondary projects?").
-		Value(&hasSecondaryProjectsCheck)
-
 	secondaryProjectCountPrompt := huh.NewInput().
 		Title("How many secondary projects?").
 		Value(&secondaryProjectsCountString).
@@ -113,20 +107,17 @@ func runInitialForm(providerRepoUrl string) (WorkspaceCreationPromptResponse, er
 				return errors.New("maximum 8 secondary projects allowed")
 			}
 			return nil
-		}).Value(&secondaryProjectsCountString)
+		})
 
 	dTheme := views.GetCustomTheme()
 
 	m.form = huh.NewForm(
 		huh.NewGroup(
 			primaryRepoPrompt,
-			secondaryProjectsPrompt,
 		),
 		huh.NewGroup(
 			secondaryProjectCountPrompt,
-		).WithHideFunc(func() bool {
-			return !hasSecondaryProjectsCheck
-		}),
+		).WithHide(!multiProject),
 	).WithTheme(dTheme).
 		WithWidth(maxWidth).
 		WithShowHelp(false).
@@ -265,7 +256,7 @@ func runWorkspaceNameForm(workspaceCreationPromptResponse WorkspaceCreationPromp
 	return result, nil
 }
 
-func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []types.GitProvider, manual bool) (workspaceName string, projectRepositoryList []string, err error) {
+func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []types.GitProvider, manual bool, multiProject bool) (workspaceName string, projectRepositoryList []string, err error) {
 	var projectRepoList []string
 	var providerRepoUrl string
 
@@ -279,7 +270,7 @@ func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []types
 		}
 	}
 
-	workspaceCreationPromptResponse, err := runInitialForm(providerRepoUrl)
+	workspaceCreationPromptResponse, err := runInitialForm(providerRepoUrl, multiProject)
 	if err != nil {
 		return "", nil, err
 	}

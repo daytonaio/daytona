@@ -1,11 +1,11 @@
 package log
 
 import (
-	"bufio"
 	"context"
 	"net/http"
-	"os/exec"
 
+	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/server/config"
 	"github.com/daytonaio/daytona/pkg/server/logs"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -18,41 +18,6 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func readLog(ctx context.Context, follow bool, c chan []byte, errChan chan error) {
-	if logs.LogFilePath == nil {
-		return
-	}
-
-	ctxCancel, cancel := context.WithCancel(ctx)
-	defer cancel()
-
-	tailCmd := exec.CommandContext(ctxCancel, "tail", "-n", "+1")
-	if follow {
-		tailCmd.Args = append(tailCmd.Args, "-f")
-	}
-	tailCmd.Args = append(tailCmd.Args, *logs.LogFilePath)
-
-	reader, err := tailCmd.StdoutPipe()
-	if err != nil {
-		errChan <- err
-		return
-	}
-	scanner := bufio.NewScanner(reader)
-	go func() {
-		for scanner.Scan() {
-			c <- scanner.Bytes()
-		}
-	}()
-
-	err = tailCmd.Start()
-	if err != nil {
-		errChan <- err
-		return
-	}
-
-	errChan <- tailCmd.Wait()
-}
-
 func writeToWs(ws *websocket.Conn, c chan []byte, errChan chan error) {
 	for {
 		err := ws.WriteMessage(websocket.TextMessage, <-c)
@@ -63,7 +28,7 @@ func writeToWs(ws *websocket.Conn, c chan []byte, errChan chan error) {
 	}
 }
 
-func ReadServerLog(ginCtx *gin.Context) {
+func readLog(ginCtx *gin.Context, logFilePath *string) {
 	followQuery := ginCtx.Query("follow")
 	follow := followQuery == "true"
 
@@ -78,7 +43,7 @@ func ReadServerLog(ginCtx *gin.Context) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	defer cancel()
-	go readLog(ctx, follow, msgChannel, errChannel)
+	go util.ReadLog(ctx, logFilePath, follow, msgChannel, errChannel)
 	go writeToWs(ws, msgChannel, errChannel)
 
 	go func() {
@@ -98,4 +63,20 @@ func ReadServerLog(ginCtx *gin.Context) {
 			break
 		}
 	}
+}
+
+func ReadServerLog(ginCtx *gin.Context) {
+	readLog(ginCtx, logs.LogFilePath)
+}
+
+func ReadWorkspaceLog(ginCtx *gin.Context) {
+	workspaceId := ginCtx.Param("workspaceId")
+
+	workspaceLogFilePath, err := config.GetWorkspaceLogFilePath(workspaceId)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	readLog(ginCtx, &workspaceLogFilePath)
 }
