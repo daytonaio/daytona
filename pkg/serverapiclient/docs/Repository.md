@@ -5,6 +5,8 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Branch** | Pointer to **string** |  | [optional] 
+**Id** | Pointer to **string** |  | [optional] 
+**Name** | Pointer to **string** |  | [optional] 
 **Owner** | Pointer to **string** |  | [optional] 
 **Path** | Pointer to **string** |  | [optional] 
 **PrNumber** | Pointer to **int32** |  | [optional] 
@@ -55,6 +57,56 @@ SetBranch sets Branch field to given value.
 `func (o *Repository) HasBranch() bool`
 
 HasBranch returns a boolean if a field has been set.
+
+### GetId
+
+`func (o *Repository) GetId() string`
+
+GetId returns the Id field if non-nil, zero value otherwise.
+
+### GetIdOk
+
+`func (o *Repository) GetIdOk() (*string, bool)`
+
+GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetId
+
+`func (o *Repository) SetId(v string)`
+
+SetId sets Id field to given value.
+
+### HasId
+
+`func (o *Repository) HasId() bool`
+
+HasId returns a boolean if a field has been set.
+
+### GetName
+
+`func (o *Repository) GetName() string`
+
+GetName returns the Name field if non-nil, zero value otherwise.
+
+### GetNameOk
+
+`func (o *Repository) GetNameOk() (*string, bool)`
+
+GetNameOk returns a tuple with the Name field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetName
+
+`func (o *Repository) SetName(v string)`
+
+SetName sets Name field to given value.
+
+### HasName
+
+`func (o *Repository) HasName() bool`
+
+HasName returns a boolean if a field has been set.
 
 ### GetOwner
 

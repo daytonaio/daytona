@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/daytonaio/daytona/pkg/types"
 	"github.com/ktrysmt/go-bitbucket"
 )
 
@@ -54,9 +55,9 @@ func (g *BitbucketGitProvider) GetNamespaces() ([]GitNamespace, error) {
 	return namespaces, nil
 }
 
-func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]GitRepository, error) {
+func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]types.Repository, error) {
 	client := g.getApiClient()
-	var response []GitRepository
+	var response []types.Repository
 
 	if namespace == personalNamespaceId {
 		user, err := g.GetUserData()
@@ -81,17 +82,16 @@ func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]GitRepositor
 			log.Fatal("Invalid HTML link")
 		}
 
-		response = append(response, GitRepository{
-			FullName: repo.Full_name,
-			Name:     repo.Name,
-			Url:      htmlLink["href"].(string),
+		response = append(response, types.Repository{
+			Name: repo.Name,
+			Url:  htmlLink["href"].(string),
 		})
 	}
 
 	return response, err
 }
 
-func (g *BitbucketGitProvider) GetRepoBranches(repo GitRepository, namespaceId string) ([]GitBranch, error) {
+func (g *BitbucketGitProvider) GetRepoBranches(repo types.Repository, namespaceId string) ([]GitBranch, error) {
 	client := g.getApiClient()
 	var response []GitBranch
 

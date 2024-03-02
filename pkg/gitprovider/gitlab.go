@@ -7,6 +7,7 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/daytonaio/daytona/pkg/types"
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -37,9 +38,9 @@ func (g *GitLabGitProvider) GetNamespaces() ([]GitNamespace, error) {
 	return namespaces, nil
 }
 
-func (g *GitLabGitProvider) GetRepositories(namespace string) ([]GitRepository, error) {
+func (g *GitLabGitProvider) GetRepositories(namespace string) ([]types.Repository, error) {
 	client := g.getApiClient()
-	var response []GitRepository
+	var response []types.Repository
 	var repoList []*gitlab.Project
 	var err error
 
@@ -71,21 +72,21 @@ func (g *GitLabGitProvider) GetRepositories(namespace string) ([]GitRepository, 
 	}
 
 	for _, repo := range repoList {
-		response = append(response, GitRepository{
-			FullName: repo.PathWithNamespace,
-			Name:     repo.Name,
-			Url:      repo.WebURL,
+		response = append(response, types.Repository{
+			Id:   strconv.Itoa(repo.ID),
+			Name: repo.Name,
+			Url:  repo.WebURL,
 		})
 	}
 
 	return response, err
 }
 
-func (g *GitLabGitProvider) GetRepoBranches(repo GitRepository, namespaceId string) ([]GitBranch, error) {
+func (g *GitLabGitProvider) GetRepoBranches(repo types.Repository, namespaceId string) ([]GitBranch, error) {
 	client := g.getApiClient()
 	var response []GitBranch
 
-	branches, _, err := client.Branches.ListBranches(repo.FullName, &gitlab.ListBranchesOptions{})
+	branches, _, err := client.Branches.ListBranches(repo.Id, &gitlab.ListBranchesOptions{})
 	if err != nil {
 		return nil, err
 	}

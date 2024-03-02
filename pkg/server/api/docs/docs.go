@@ -668,6 +668,12 @@ const docTemplate = `{
                 "branch": {
                     "type": "string"
                 },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
                 "owner": {
                     "type": "string"
                 },

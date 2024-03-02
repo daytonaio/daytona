@@ -6,15 +6,16 @@ package selection
 import (
 	"fmt"
 	"os"
+	"strings"
 
-	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/types"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectRepositoryPrompt(repositories []gitprovider.GitRepository, secondaryProjectOrder int, choiceChan chan<- string) {
+func selectRepositoryPrompt(repositories []types.Repository, secondaryProjectOrder int, choiceChan chan<- string) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
@@ -43,7 +44,7 @@ func selectRepositoryPrompt(repositories []gitprovider.GitRepository, secondaryP
 	}
 }
 
-func GetRepositoryFromPrompt(repositories []gitprovider.GitRepository, secondaryProjectOrder int) gitprovider.GitRepository {
+func GetRepositoryFromPrompt(repositories []types.Repository, secondaryProjectOrder int) types.Repository {
 	choiceChan := make(chan string)
 
 	go selectRepositoryPrompt(repositories, secondaryProjectOrder, choiceChan)
@@ -56,5 +57,19 @@ func GetRepositoryFromPrompt(repositories []gitprovider.GitRepository, secondary
 		}
 	}
 
-	return gitprovider.GitRepository{}
+	return types.Repository{}
+}
+
+func getRepositoryNameFromUrl(url string) string {
+	if url == "" {
+		return "/"
+	}
+	url = strings.TrimSuffix(url, "/")
+
+	parts := strings.Split(url, "/")
+	if len(parts) < 2 {
+		return ""
+	}
+
+	return parts[len(parts)-1]
 }

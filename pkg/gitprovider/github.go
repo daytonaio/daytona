@@ -7,6 +7,7 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/daytonaio/daytona/pkg/types"
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
 )
@@ -45,9 +46,9 @@ func (g *GitHubGitProvider) GetNamespaces() ([]GitNamespace, error) {
 	return namespaces, nil
 }
 
-func (g *GitHubGitProvider) GetRepositories(namespace string) ([]GitRepository, error) {
+func (g *GitHubGitProvider) GetRepositories(namespace string) ([]types.Repository, error) {
 	client := g.getApiClient()
-	var response []GitRepository
+	var response []types.Repository
 	query := "fork:true "
 
 	if namespace == personalNamespaceId {
@@ -72,17 +73,16 @@ func (g *GitHubGitProvider) GetRepositories(namespace string) ([]GitRepository, 
 	}
 
 	for _, repo := range repoList.Repositories {
-		response = append(response, GitRepository{
-			FullName: *repo.FullName,
-			Name:     *repo.Name,
-			Url:      *repo.HTMLURL,
+		response = append(response, types.Repository{
+			Name: *repo.Name,
+			Url:  *repo.HTMLURL,
 		})
 	}
 
 	return response, err
 }
 
-func (g *GitHubGitProvider) GetRepoBranches(repo GitRepository, namespaceId string) ([]GitBranch, error) {
+func (g *GitHubGitProvider) GetRepoBranches(repo types.Repository, namespaceId string) ([]GitBranch, error) {
 	client := g.getApiClient()
 	user, err := g.GetUserData()
 	if err != nil {

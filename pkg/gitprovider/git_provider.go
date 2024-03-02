@@ -14,9 +14,9 @@ const personalNamespaceId = "<PERSONAL>"
 
 type GitProvider interface {
 	GetNamespaces() ([]GitNamespace, error)
-	GetRepositories(namespace string) ([]GitRepository, error)
+	GetRepositories(namespace string) ([]types.Repository, error)
 	GetUserData() (GitUser, error)
-	GetRepoBranches(GitRepository, string) ([]GitBranch, error)
+	GetRepoBranches(types.Repository, string) ([]GitBranch, error)
 }
 
 type GitUser struct {
@@ -31,12 +31,6 @@ type GitNamespace struct {
 	Name string
 }
 
-type GitRepository struct {
-	FullName string
-	Name     string
-	Url      string
-}
-
 type GitBranch struct {
 	Name string
 	SHA  string
@@ -47,6 +41,7 @@ func GetGitProvider(providerId string, gitProviders []types.GitProvider) GitProv
 	for _, gitProvider := range gitProviders {
 		if gitProvider.Id == providerId {
 			chosenProvider = &gitProvider
+			break
 		}
 	}
 

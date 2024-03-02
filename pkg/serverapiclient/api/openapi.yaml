@@ -369,6 +369,8 @@ components:
         repositories:
         - owner: owner
           path: path
+          name: name
+          id: id
           source: source
           prNumber: 0
           branch: branch
@@ -376,6 +378,8 @@ components:
           url: url
         - owner: owner
           path: path
+          name: name
+          id: id
           source: source
           prNumber: 0
           branch: branch
@@ -445,6 +449,8 @@ components:
         repository:
           owner: owner
           path: path
+          name: name
+          id: id
           source: source
           prNumber: 0
           branch: branch
@@ -531,6 +537,8 @@ components:
       example:
         owner: owner
         path: path
+        name: name
+        id: id
         source: source
         prNumber: 0
         branch: branch
@@ -538,6 +546,10 @@ components:
         url: url
       properties:
         branch:
+          type: string
+        id:
+          type: string
+        name:
           type: string
         owner:
           type: string
@@ -601,6 +613,8 @@ components:
           repository:
             owner: owner
             path: path
+            name: name
+            id: id
             source: source
             prNumber: 0
             branch: branch
@@ -620,6 +634,8 @@ components:
           repository:
             owner: owner
             path: path
+            name: name
+            id: id
             source: source
             prNumber: 0
             branch: branch

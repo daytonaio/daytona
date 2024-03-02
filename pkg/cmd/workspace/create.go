@@ -40,7 +40,7 @@ var CreateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 		var repoUrls []string
-		var repos []serverapiclient.Repository
+		var repos []types.Repository
 		var workspaceName string
 
 		manual, err := cmd.Flags().GetBool("manual")
@@ -125,10 +125,16 @@ var CreateCmd = &cobra.Command{
 			}
 
 			for _, repoUrl := range repoUrls {
-				repo, res, err := apiClient.ServerAPI.GetGitContext(ctx, repoUrl).Execute()
+				repoResponse, res, err := apiClient.ServerAPI.GetGitContext(ctx, repoUrl).Execute()
 				if err != nil {
 					log.Fatal(apiclient.HandleErrorResponse(res, err))
 				}
+
+				repo := &types.Repository{
+					Name: *repoResponse.Name,
+					Url:  *repoResponse.Url,
+				}
+
 				repos = append(repos, *repo)
 			}
 		}
@@ -199,14 +205,23 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		var requestRepos []serverapiclient.Repository
+		for _, repo := range repos {
+			requestRepos = append(requestRepos, serverapiclient.Repository{
+				Name: &repo.Name,
+				Url:  &repo.Url,
+			})
+		}
+
 		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(serverapiclient.CreateWorkspace{
 			Name:         &workspaceName,
-			Repositories: repos,
 			Target:       target.Name,
+			Repositories: requestRepos,
 		}).Execute()
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
+
 		started = true
 
 		dialStartTime := time.Now()
