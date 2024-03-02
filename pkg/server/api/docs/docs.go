@@ -458,9 +458,6 @@ const docTemplate = `{
         "Project": {
             "type": "object",
             "properties": {
-                "info": {
-                    "$ref": "#/definitions/ProjectInfo"
-                },
                 "name": {
                     "type": "string"
                 },

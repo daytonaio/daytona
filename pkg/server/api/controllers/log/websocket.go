@@ -101,11 +101,10 @@ func ReadServerLog(ginCtx *gin.Context) {
 	}
 }
 
-func ReadProjectLog(ginCtx *gin.Context) {
+func ReadWorkspaceLog(ginCtx *gin.Context) {
 	workspaceId := ginCtx.Param("workspaceId")
-	projectId := ginCtx.Param("projectId")
 
-	projectLogFilePath, err := config.GetProjectLogFilePath(workspaceId, projectId)
+	projectLogFilePath, err := config.GetWorkspaceLogFilePath(workspaceId)
 	if err != nil {
 		log.Error(err)
 		return

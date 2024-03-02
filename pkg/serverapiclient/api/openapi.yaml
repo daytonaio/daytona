@@ -344,18 +344,8 @@ components:
           branch: branch
           sha: sha
           url: url
-        info:
-          providerMetadata: providerMetadata
-          isRunning: true
-          created: created
-          name: name
-          finished: finished
-          started: started
-          workspaceId: workspaceId
         workspaceId: workspaceId
       properties:
-        info:
-          $ref: '#/components/schemas/ProjectInfo'
         name:
           type: string
         repository:
@@ -474,14 +464,6 @@ components:
             branch: branch
             sha: sha
             url: url
-          info:
-            providerMetadata: providerMetadata
-            isRunning: true
-            created: created
-            name: name
-            finished: finished
-            started: started
-            workspaceId: workspaceId
           workspaceId: workspaceId
         - name: name
           repository:
@@ -492,14 +474,6 @@ components:
             branch: branch
             sha: sha
             url: url
-          info:
-            providerMetadata: providerMetadata
-            isRunning: true
-            created: created
-            name: name
-            finished: finished
-            started: started
-            workspaceId: workspaceId
           workspaceId: workspaceId
         provider:
           profile: profile

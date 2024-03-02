@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
 
@@ -20,10 +19,8 @@ import (
 	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
-	"github.com/daytonaio/daytona/pkg/views/workspace/initialize"
 	"github.com/gorilla/websocket"
 
-	tea "github.com/charmbracelet/bubbletea"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -144,72 +141,34 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		initViewModel := initialize.GetInitialModel()
-		initViewProgram := tea.NewProgram(initViewModel)
-
-		go func() {
-			_, err := initViewProgram.Run()
-			initViewProgram.ReleaseTerminal()
-			if err != nil {
-				log.Fatal(err)
-				os.Exit(1)
-			}
-			os.Exit(0)
-		}()
-
 		hostRegex := regexp.MustCompile(`https*://(.*)`)
 		host := hostRegex.FindStringSubmatch(activeProfile.Api.Url)[1]
-		wsURL := fmt.Sprintf("ws://%s/log/ws%s", host, "?follow=true")
+		wsURL := fmt.Sprintf("ws://%s/log/%s", host, workspaceName)
 
 		ws, res, err := websocket.DefaultDialer.Dial(wsURL, nil)
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		started := false
-
 		for {
-			if started {
-				break
-			}
-			_, msgRaw, err := ws.ReadMessage()
+			_, msg, err := ws.ReadMessage()
 			if err != nil {
-				initViewProgram.Send(tea.Quit())
-				initViewProgram.ReleaseTerminal()
-				log.Fatal(err)
 				return
 			}
 
-			msg := string(msgRaw)
+			fmt.Println(string(msg))
 
-			words := []string{"Workspace", workspaceName, "foo", "bar"}
-
-			// Loop through the list of words
-			for _, word := range words {
-				if strings.Contains(msg, word) {
-					initViewProgram.Send(initialize.EventMsg{Event: "test", Payload: msg})
-					fmt.Println(msg)
-					break
-				}
-			}
-
-			if strings.Contains(msg, "failed") {
-				initViewProgram.Send(initialize.EventMsg{Event: "test", Payload: msg})
-				fmt.Println(msg)
+			if strings.Contains(string(msg), "completed") {
 				break
 			}
+
 		}
 
 		wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceName).Execute()
 		if err != nil {
-			initViewProgram.Send(tea.Quit())
-			initViewProgram.ReleaseTerminal()
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 			return
 		}
-		initViewProgram.Send(initialize.ClearScreenMsg{})
-		initViewProgram.Send(tea.Quit())
-		initViewProgram.ReleaseTerminal()
 
 		//	Show the info
 		info.Render(wsInfo)

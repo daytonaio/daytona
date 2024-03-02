@@ -4,7 +4,6 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Info** | Pointer to [**ProjectInfo**](ProjectInfo.md) |  | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
 **Repository** | Pointer to [**Repository**](Repository.md) |  | [optional] 
 **WorkspaceId** | Pointer to **string** |  | [optional] 
@@ -27,31 +26,6 @@ will change when the set of required properties is changed
 NewProjectWithDefaults instantiates a new Project object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
-
-### GetInfo
-
-`func (o *Project) GetInfo() ProjectInfo`
-
-GetInfo returns the Info field if non-nil, zero value otherwise.
-
-### GetInfoOk
-
-`func (o *Project) GetInfoOk() (*ProjectInfo, bool)`
-
-GetInfoOk returns a tuple with the Info field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetInfo
-
-`func (o *Project) SetInfo(v ProjectInfo)`
-
-SetInfo sets Info field to given value.
-
-### HasInfo
-
-`func (o *Project) HasInfo() bool`
-
-HasInfo returns a boolean if a field has been set.
 
 ### GetName
 
