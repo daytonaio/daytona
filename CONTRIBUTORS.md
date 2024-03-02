@@ -9,3 +9,5 @@ We contributors to Daytona:
 -----------
 * Ivan Burazin (@ivan-burazin)
 * Chad Metcalf (@metcalfc)
+* Toma Puljak (@tpuljak)
+* Nikola Balic (@nkkko)

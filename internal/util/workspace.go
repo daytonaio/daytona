@@ -8,36 +8,35 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/daytonaio/daytona/common/grpc/proto"
-
-	log "github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
+	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 )
 
-func GetFirstWorkspaceProjectName(conn *grpc.ClientConn, workspaceId string, projectName string) (string, error) {
+func GetFirstWorkspaceProjectName(workspaceId string, projectName string, profile *config.Profile) (string, error) {
 	ctx := context.Background()
 
-	client := proto.NewWorkspaceServiceClient(conn)
-	workspaceInfoRequest := &proto.WorkspaceInfoRequest{
-		Id: workspaceId,
+	apiClient, err := server.GetApiClient(profile)
+	if err != nil {
+		return "", err
 	}
 
-	response, err := client.Info(ctx, workspaceInfoRequest)
+	wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceId).Execute()
 	if err != nil {
-		log.Fatal(err)
+		return "", apiclient.HandleErrorResponse(res, err)
 	}
 
 	if projectName == "" {
-		if len(response.Projects) == 0 {
+		if len(wsInfo.Projects) == 0 {
 			return "", errors.New("no projects found in workspace")
 		}
 
-		return response.Projects[0].Name, nil
+		return *wsInfo.Projects[0].Name, nil
 	}
 
-	for _, project := range response.Projects {
-		if project.Name == projectName {
-			return project.Name, nil
+	for _, project := range wsInfo.Projects {
+		if *project.Name == projectName {
+			return *project.Name, nil
 		}
 	}
 
@@ -45,7 +44,7 @@ func GetFirstWorkspaceProjectName(conn *grpc.ClientConn, workspaceId string, pro
 }
 
 func GetValidatedWorkspaceName(input string) (string, error) {
-	input = strings.ToLower(input)
+	// input = strings.ToLower(input)
 
 	input = strings.ReplaceAll(input, " ", "-")
 

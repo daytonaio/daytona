@@ -8,7 +8,7 @@
 [![See latest](https://img.shields.io/static/v1?label=Docs&message=see%20latest&color=blue)](https://daytona.io/docs)
 
 
-
+  
 </div>
 
 

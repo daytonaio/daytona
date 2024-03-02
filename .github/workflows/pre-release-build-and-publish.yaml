@@ -1,0 +1,64 @@
+name: "[pre-release] Daytona core binary build and publish"
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - 'main'
+      - 'agent'
+    paths-ignore:
+      - 'README.md'
+      - '**/README.md'
+      - 'LICENSE'
+      - 'CHANGELOG.md'
+    #  - '.github/*'
+
+concurrency:
+  # New commit on branch cancels running workflows of the same branch
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BUCKET_NAME: daytona-workspace-tools/daytona
+
+jobs:
+  binary-build-and-publish:
+    strategy:
+      matrix:
+        goos: [linux, darwin, windows]
+        goarch: [amd64, arm64]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Build binaries
+        run: |
+          SUFFIX=""   
+          if [[ "${{ matrix.goos }}" == "windows" ]]; then
+            SUFFIX=".exe"
+          fi
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 go build -o daytona-${{ matrix.goos }}-${{ matrix.goarch }}$SUFFIX cmd/daytona/main.go
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::304794187625:role/gha-daytona
+          aws-region: us-east-1
+
+      - name: Copy binaries to s3
+        run: |
+          SUFFIX=""   
+          if [[ "${{ matrix.goos }}" == "windows" ]]; then
+            SUFFIX=".exe"
+          fi
+          aws s3 cp daytona-${{ matrix.goos }}-${{ matrix.goarch }}$SUFFIX s3://${{ env.BUCKET_NAME }}/$GITHUB_HEAD_REF/

@@ -21,7 +21,7 @@ jobs:
   binary-build-and-publish:
     strategy:
       matrix:
-        goos: [linux, darwin]
+        goos: [linux, darwin, windows]
         goarch: [amd64, arm64]
     runs-on: ubuntu-latest
     permissions:
@@ -53,7 +53,12 @@ jobs:
           go-version: '1.21'
 
       - name: Build binaries
-        run: GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 go build -o daytona-${{ matrix.goos }}-${{ matrix.goarch }}
+        run: |
+          SUFFIX=""   
+          if [[ "${{ matrix.goos }}" == "windows" ]]; then
+            SUFFIX=".exe"
+          fi
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 go build -o daytona-${{ matrix.goos }}-${{ matrix.goarch }}$SUFFIX cmd/daytona/main.go
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -63,4 +68,8 @@ jobs:
 
       - name: Copy binaries to s3
         run: |
-          aws s3 cp daytona-${{ matrix.goos }}-${{ matrix.goarch }} s3://${{ env.BUCKET_NAME }}/latest/
+          SUFFIX=""   
+          if [[ "${{ matrix.goos }}" == "windows" ]]; then
+            SUFFIX=".exe"
+          fi
+          aws s3 cp daytona-${{ matrix.goos }}-${{ matrix.goarch }}$SUFFIX s3://${{ env.BUCKET_NAME }}/latest/
