@@ -90,8 +90,9 @@ func CreateWorkspace(workspace *types.Workspace) error {
 		},
 	})
 
-	return nil
+	wsMultiWriter.Write([]byte("Workspace creation completed\n"))
 
+	return nil
 }
 
 // WorkspacePostCreate

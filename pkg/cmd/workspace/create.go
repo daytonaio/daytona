@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
@@ -38,7 +39,15 @@ var CreateCmd = &cobra.Command{
 		var workspaceName string
 		var provider string
 
-		manual, _ := cmd.Flags().GetBool("manual")
+		manual, err := cmd.Flags().GetBool("manual")
+		if err != nil {
+			log.Fatal(err)
+		}
+		multiProjectFlag, err := cmd.Flags().GetBool("multi-project")
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		apiClient, err := server.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
@@ -114,7 +123,7 @@ var CreateCmd = &cobra.Command{
 				gitProviderList = append(gitProviderList, gitProvider)
 			}
 
-			workspaceName, repos, err = create.GetCreationDataFromPrompt(workspaceNames, gitProviderList, manual)
+			workspaceName, repos, err = create.GetCreationDataFromPrompt(workspaceNames, gitProviderList, manual, multiProjectFlag)
 			if err != nil {
 				log.Fatal(err)
 				return
@@ -161,7 +170,6 @@ var CreateCmd = &cobra.Command{
 			if strings.Contains(string(msg), "completed") {
 				break
 			}
-
 		}
 
 		wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceName).Execute()
@@ -170,8 +178,26 @@ var CreateCmd = &cobra.Command{
 			return
 		}
 
-		//	Show the info
 		info.Render(wsInfo)
+
+		skipIdeFlag, _ := cmd.Flags().GetBool("skip-ide")
+		if skipIdeFlag {
+			return
+		}
+
+		activeProfile, err = c.GetActiveProfile()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		ide := c.DefaultIdeId
+		if ideFlag != "" {
+			ide = ideFlag
+		}
+
+		view_util.RenderInfoMessageBold("Opening the workspace in your preferred IDE")
+		time.Sleep(5 * time.Second)
+		openIDE(ide, activeProfile, workspaceName, *wsInfo.Projects[0].Name)
 	},
 }
 
@@ -180,5 +206,8 @@ var providerFlag string
 func init() {
 	CreateCmd.Flags().StringArrayVarP(&repos, "repo", "r", nil, "Set the repository url")
 	CreateCmd.Flags().StringVar(&providerFlag, "provider", "", "Specify the provider (e.g. 'docker-provider')")
+	CreateCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", "Specify the IDE ('vscode' or 'browser')")
 	CreateCmd.Flags().Bool("manual", false, "Manually enter the git repositories")
+	CreateCmd.Flags().Bool("multi-project", false, "Workspace with multiple projects/repos")
+	CreateCmd.Flags().Bool("skip-ide", false, "Don't open the IDE after workspace creation")
 }
