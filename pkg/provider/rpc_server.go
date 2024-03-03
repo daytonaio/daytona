@@ -26,13 +26,33 @@ func (m *ProviderRPCServer) GetInfo(arg interface{}, resp *ProviderInfo) error {
 	return nil
 }
 
-func (m *ProviderRPCServer) Configure(arg interface{}, configResponse *interface{}) error {
-	config, err := m.Impl.Configure()
+func (m *ProviderRPCServer) GetTargetManifest(arg interface{}, resp *ProviderTargetManifest) error {
+	targetManifest, err := m.Impl.GetTargetManifest()
 	if err != nil {
 		return err
 	}
 
-	*configResponse = config
+	*resp = *targetManifest
+	return nil
+}
+
+func (m *ProviderRPCServer) SetTarget(arg ProviderTarget, resp *types.Empty) error {
+	_, err := m.Impl.SetTarget(arg)
+	return err
+}
+
+func (m *ProviderRPCServer) RemoveTarget(arg string, resp *types.Empty) error {
+	_, err := m.Impl.RemoveTarget(arg)
+	return err
+}
+
+func (m *ProviderRPCServer) GetTargets(arg interface{}, resp *[]ProviderTarget) error {
+	targets, err := m.Impl.GetTargets()
+	if err != nil {
+		return err
+	}
+
+	*resp = *targets
 	return nil
 }
 
