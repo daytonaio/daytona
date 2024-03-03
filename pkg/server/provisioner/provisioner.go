@@ -29,10 +29,9 @@ func CreateWorkspace(workspace *types.Workspace) error {
 	}
 	defer workspaceLogFile.Close()
 
-	wsMultiWriter := io.MultiWriter(&util.InfoLogWriter{}, io.Writer(workspaceLogFile))
+	wsLogWriter := io.MultiWriter(&util.InfoLogWriter{}, io.Writer(workspaceLogFile))
 
-	wsMultiWriter.Write([]byte("Creating workspace\n"))
-	// log.Info("Creating workspace")
+	wsLogWriter.Write([]byte("Creating workspace\n"))
 
 	provider, err := manager.GetProvider(workspace.Provider.Name)
 	if err != nil {
@@ -59,8 +58,8 @@ func CreateWorkspace(workspace *types.Workspace) error {
 		}
 		defer projectLogFile.Close()
 
-		projectMultiWriter := io.MultiWriter(&util.InfoLogWriter{}, io.Writer(workspaceLogFile), io.Writer(projectLogFile))
-		projectMultiWriter.Write([]byte(fmt.Sprintf("Creating project %s\n", project.Name)))
+		projectLogWriter := io.MultiWriter(wsLogWriter, io.Writer(projectLogFile))
+		projectLogWriter.Write([]byte(fmt.Sprintf("Creating project %s\n", project.Name)))
 
 		//	todo: go routines
 		event_bus.Publish(event_bus.Event{
@@ -81,6 +80,8 @@ func CreateWorkspace(workspace *types.Workspace) error {
 				ProjectName:   project.Name,
 			},
 		})
+
+		projectLogWriter.Write([]byte(fmt.Sprintf("Project %s created\n", project.Name)))
 	}
 
 	event_bus.Publish(event_bus.Event{
@@ -89,8 +90,6 @@ func CreateWorkspace(workspace *types.Workspace) error {
 			WorkspaceName: workspace.Name,
 		},
 	})
-
-	wsMultiWriter.Write([]byte("Workspace creation completed\n"))
 
 	return nil
 }

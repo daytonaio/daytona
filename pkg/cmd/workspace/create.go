@@ -152,7 +152,7 @@ var CreateCmd = &cobra.Command{
 
 		hostRegex := regexp.MustCompile(`https*://(.*)`)
 		host := hostRegex.FindStringSubmatch(activeProfile.Api.Url)[1]
-		wsURL := fmt.Sprintf("ws://%s/log/%s", host, workspaceName)
+		wsURL := fmt.Sprintf("ws://%s/log/workspace/%s?follow=true", host, workspaceName)
 
 		ws, res, err := websocket.DefaultDialer.Dial(wsURL, nil)
 		if err != nil {
