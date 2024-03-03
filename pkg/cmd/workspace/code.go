@@ -6,6 +6,7 @@ package workspace
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path"
@@ -141,7 +142,35 @@ func init() {
 
 func openBrowserIDE(activeProfile config.Profile, workspaceName string, projectName string) error {
 	// Download and start IDE
-	// TODO
+	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceName, projectName)
+	if err != nil {
+		return err
+	}
+
+	view_util.RenderInfoMessageBold("Downloading OpenVSCode Server...")
+	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceName, projectName)
+
+	installServerCommand := exec.Command("ssh", projectHostname, "curl -fsSL https://download.daytona.io/daytona/get-openvscode-server.sh | sh")
+	installServerCommand.Stdout = io.Writer(&util.DebugLogWriter{})
+	installServerCommand.Stderr = io.Writer(&util.DebugLogWriter{})
+
+	err = installServerCommand.Run()
+	if err != nil {
+		return err
+	}
+
+	view_util.RenderInfoMessageBold("Starting OpenVSCode Server...")
+
+	go func() {
+		startServerCommand := exec.CommandContext(context.Background(), "ssh", projectHostname, startVSCodeServerCommand)
+		startServerCommand.Stdout = io.Writer(&util.DebugLogWriter{})
+		startServerCommand.Stderr = io.Writer(&util.DebugLogWriter{})
+
+		err = startServerCommand.Run()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	// Forward IDE port
 	browserPort, errChan := ports.ForwardPort(workspaceName, projectName, 63000)
@@ -153,10 +182,19 @@ func openBrowserIDE(activeProfile config.Profile, workspaceName string, projectN
 
 	view_util.RenderInfoMessageBold(fmt.Sprintf("Forwarded %s IDE port to %d.\nOpening browser...", projectName, *browserPort))
 
-	err := browser.OpenURL(fmt.Sprintf("http://localhost:%d", *browserPort))
+	err = browser.OpenURL(fmt.Sprintf("http://localhost:%d", *browserPort))
 	if err != nil {
-		log.Fatal("Error opening URL: " + err.Error())
+		log.Error("Error opening URL: " + err.Error())
 	}
 
-	return <-errChan
+	for {
+		err := <-errChan
+		if err != nil {
+			// Log only in debug mode
+			// Connection errors to the forwarded port should not exit the process
+			log.Debug(err)
+		}
+	}
 }
+
+const startVSCodeServerCommand = "$HOME/vscode-server/bin/openvscode-server --start-server --port=63000 --host=0.0.0.0 --without-connection-token --disable-workspace-trust --default-folder=$DAYTONA_WS_DIR"
