@@ -6,6 +6,7 @@ package workspace
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path"
@@ -14,6 +15,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	"github.com/daytonaio/daytona/pkg/ports"
 	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
@@ -139,37 +141,60 @@ func init() {
 }
 
 func openBrowserIDE(activeProfile config.Profile, workspaceName string, projectName string) error {
-	log.Fatal("Not implemented - no more need to go through server, use tailscale instead")
-	// projectPortForwards, err := cmd_ports.GetProjectPortForwards(conn, workspaceName, projectName)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// browserPort := new(uint32)
-	// *browserPort = 63000
-
-	// errChan := make(chan error)
-	// if _, ok := projectPortForwards.PortForwards[63000]; !ok {
-	// 	browserPort, errChan = cmd_ports.ForwardPort(conn, activeProfile, workspaceName, projectName, uint32(63000))
-	// 	if browserPort == nil {
-	// 		if err = <-errChan; err != nil {
-	// 			return err
-	// 		}
-	// 	}
-	// } else {
-	// 	go func() {
-	// 		errChan <- nil
-	// 	}()
-	// }
-
-	view_util.RenderInfoMessageBold(fmt.Sprintf("Port %d is being used to access the codebase.\nOpening %s using the browser IDE.", 1234, projectName))
-
-	url := fmt.Sprintf("http://localhost:%d", 1234)
-
-	err := browser.OpenURL(url)
+	// Download and start IDE
+	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceName, projectName)
 	if err != nil {
-		log.Fatal("Error opening URL: " + err.Error())
+		return err
 	}
 
-	return nil
+	view_util.RenderInfoMessageBold("Downloading OpenVSCode Server...")
+	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceName, projectName)
+
+	installServerCommand := exec.Command("ssh", projectHostname, "curl -fsSL https://download.daytona.io/daytona/get-openvscode-server.sh | sh")
+	installServerCommand.Stdout = io.Writer(&util.DebugLogWriter{})
+	installServerCommand.Stderr = io.Writer(&util.DebugLogWriter{})
+
+	err = installServerCommand.Run()
+	if err != nil {
+		return err
+	}
+
+	view_util.RenderInfoMessageBold("Starting OpenVSCode Server...")
+
+	go func() {
+		startServerCommand := exec.CommandContext(context.Background(), "ssh", projectHostname, startVSCodeServerCommand)
+		startServerCommand.Stdout = io.Writer(&util.DebugLogWriter{})
+		startServerCommand.Stderr = io.Writer(&util.DebugLogWriter{})
+
+		err = startServerCommand.Run()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	// Forward IDE port
+	browserPort, errChan := ports.ForwardPort(workspaceName, projectName, 63000)
+	if browserPort == nil {
+		if err := <-errChan; err != nil {
+			return err
+		}
+	}
+
+	view_util.RenderInfoMessageBold(fmt.Sprintf("Forwarded %s IDE port to %d.\nOpening browser...", projectName, *browserPort))
+
+	err = browser.OpenURL(fmt.Sprintf("http://localhost:%d", *browserPort))
+	if err != nil {
+		log.Error("Error opening URL: " + err.Error())
+	}
+
+	for {
+		err := <-errChan
+		if err != nil {
+			// Log only in debug mode
+			// Connection errors to the forwarded port should not exit the process
+			log.Debug(err)
+		}
+	}
 }
+
+const startVSCodeServerCommand = "$HOME/vscode-server/bin/openvscode-server --start-server --port=63000 --host=0.0.0.0 --without-connection-token --disable-workspace-trust --default-folder=$DAYTONA_WS_DIR"
