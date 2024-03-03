@@ -17,7 +17,7 @@ import (
 
 var ProfileUseCmd = &cobra.Command{
 	Use:   "use",
-	Short: "Use profile [PROFILE_NAME]",
+	Short: "Set the active profile",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		c, err := config.GetConfig()

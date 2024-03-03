@@ -19,7 +19,7 @@ const listLabelWidth = 20
 
 var whoamiCmd = &cobra.Command{
 	Use:     "whoami",
-	Short:   "Displays information about the currently logged in user",
+	Short:   "Display information about the active user",
 	Args:    cobra.NoArgs,
 	Aliases: []string{"who", "profile active"},
 	Run: func(cmd *cobra.Command, args []string) {
