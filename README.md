@@ -29,8 +29,20 @@ Set up a development environment on any infrastructure, with a single command.
     <a href="https://twitter.com/Daytonaio">Twitter</a>
   </p>
 
-----
 
+## Features
+* __Single Command__: Activate a fully configured development environment with a single command.
+* __Runs everywhere__: spin up your development environment on any machine — whether it's local, remote, cloud-based, physical server, or a VM & any architecture x86 or ARM.
+* __Configuration File Support__: Initially support for [dev container](https://containers.dev/), ability to expand to DevFile, Nix & Flox (Contributions welcome here!).
+* __Prebuilds System__: Drastically improve environment setup times (Contributions welcome here!).
+* __IDE Support__ : Seamlessly supports [VS Code](https://github.com/microsoft/vscode) & [JetBrains](https://www.jetbrains.com/remote-development/gateway/) locally, ready to use without configuration. Includes a built-in Web IDE for added convenience.
+* __Git Provider Integration__: GitHub, GitLab & Bitbucket can be connected, allowing easy repo branch or PR pull and commit back from the workspaces.
+* __Multiple Project Workspace__: Support for multiple project repositories in the same workspace, making it easy to develop using a micro-service architecture.
+* __Reverse Proxy Integration__: Enable collaboration and streamline feedback loops by leveraging reverse proxy functionality. Access preview ports and the Web IDE seamlessly, even behind firewalls.
+* __Extensibility__: Enable extensibility with plugin or provider development. Moreover, in any dynamic language, not just Go(Contributions welcome here!).
+* __Security__: Automatically creates a VPN connection between the client machine and the development environment, ensuring a fully secure connection.
+* __All Ports__: The VPN connection enables access to all ports on the development environments, removing the need to setup port forwards over SSH connection.
+* __Works on my Machine__: Never experince it again.
 ## Quick Start
 To install Daytona all you need to do is execute this script:
 
@@ -79,19 +91,7 @@ So, we took everything we learned and decided to solve these issues once and for
 
 
 
-## Features
-* __Single Command__: Activate a fully configured development environment with a single command.
-* __Runs everywhere__: spin up your development environment on any machine — whether it's local, remote, cloud-based, physical server, or a VM & any architecture x86 or ARM.
-* __Configuration File Support__: Initially support for [dev container](https://containers.dev/), ability to expand to DevFile, Nix & Flox (Contributions welcome here!).
-* __Prebuilds System__: Drastically improve environment setup times (Contributions welcome here!).
-* __IDE Support__ : Seamlessly supports [VS Code](https://github.com/microsoft/vscode) & [JetBrains](https://www.jetbrains.com/remote-development/gateway/) locally, ready to use without configuration. Includes a built-in Web IDE for added convenience.
-* __Git Provider Integration__: GitHub, GitLab & Bitbucket can be connected, allowing easy repo branch or PR pull and commit back from the workspaces.
-* __Multiple Project Workspace__: Support for multiple project repositories in the same workspace, making it easy to develop using a micro-service architecture.
-* __Reverse Proxy Integration__: Enable collaboration and streamline feedback loops by leveraging reverse proxy functionality. Access preview ports and the Web IDE seamlessly, even behind firewalls.
-* __Extensibility__: Enable extensibility with plugin or provider development. Moreover, in any dynamic language, not just Go(Contributions welcome here!).
-* __Security__: Automatically creates a VPN connection between the client machine and the development environment, ensuring a fully secure connection.
-* __All Ports__: The VPN connection enables access to all ports on the development environments, removing the need to setup port forwards over SSH connection.
-* __Works on my Machine__: Never experince it again.
+
 
 ## Getting Started
 ### Requirements
