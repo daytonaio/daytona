@@ -24,11 +24,27 @@ func (m *ProviderRPCClient) GetInfo() (ProviderInfo, error) {
 	return resp, err
 }
 
-func (m *ProviderRPCClient) Configure() (interface{}, error) {
-	var config interface{}
-	err := m.client.Call("Plugin.Configure", new(interface{}), &config)
+func (m *ProviderRPCClient) GetTargetManifest() (*ProviderTargetManifest, error) {
+	var resp ProviderTargetManifest
+	err := m.client.Call("Plugin.GetTargetManifest", new(interface{}), &resp)
 
-	return config, err
+	return &resp, err
+}
+
+func (m *ProviderRPCClient) SetTarget(target ProviderTarget) (*types.Empty, error) {
+	err := m.client.Call("Plugin.SetTarget", target, new(types.Empty))
+	return new(types.Empty), err
+}
+
+func (m *ProviderRPCClient) RemoveTarget(name string) (*types.Empty, error) {
+	err := m.client.Call("Plugin.RemoveTarget", name, new(types.Empty))
+	return new(types.Empty), err
+}
+
+func (m *ProviderRPCClient) GetTargets() (*[]ProviderTarget, error) {
+	var resp []ProviderTarget
+	err := m.client.Call("Plugin.GetTargets", new(interface{}), &resp)
+	return &resp, err
 }
 
 func (m *ProviderRPCClient) CreateWorkspace(workspace *types.Workspace) (*types.Empty, error) {
