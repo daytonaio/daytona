@@ -93,6 +93,8 @@ func handlePortConnection(conn net.Conn, tsConn *tsnet.Server, targetUrl string,
 		if err != nil {
 			errChan <- err
 		}
+		conn.Close()
+		dialConn.Close()
 	}()
 
 	go func() {
@@ -100,5 +102,7 @@ func handlePortConnection(conn net.Conn, tsConn *tsnet.Server, targetUrl string,
 		if err != nil {
 			errChan <- err
 		}
+		conn.Close()
+		dialConn.Close()
 	}()
 }
