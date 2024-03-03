@@ -14,6 +14,7 @@ import (
 	. "github.com/daytonaio/daytona/pkg/cmd/provider"
 	. "github.com/daytonaio/daytona/pkg/cmd/server"
 	. "github.com/daytonaio/daytona/pkg/cmd/workspace"
+	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"
@@ -22,18 +23,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "daytona",
 	Short: "Daytona is a Dev Environment Manager",
-	Long: `
-====================================
-Daytona; Your Dev Environment Manager
-====================================
-Use the following commands to get started:
-1. daytona server - Start the Daytona Server process in a terminal window
-2. daytona git-providers add - Register a Git provider of your choice
-3. daytona providers add - Choose the hosting provider to spin up your Dev Environments on
-4. daytona ide - Choose the default IDE
-5. daytona whoami - Show information about the currently logged in user
-		
-	`,
+	Long:  view_util.GetLongDescription(),
 }
 
 var originalStdout *os.File
