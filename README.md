@@ -32,18 +32,25 @@ Set up a development environment on any infrastructure, with a single command.
 ----
 
 ## Quick Start
-To install the Daytona CLI, please execute the following command:
+To install Daytona all you need to do is execute this script:
+
 
 ```bash
+# Install Daytona
 curl https://download.daytona.io/daytona/get-server.sh | bash
-```
 
-Start creating dev environments with just this one command:
+# Start Daytona server 
+daytona server
+```
+Then in a new terminal type:
+
 ```bash
+Create your first dev environment with just this command:
 daytona create
 ```
 
 Start coding.
+
 
 ----
 
@@ -88,18 +95,11 @@ So, we took everything we learned and decided to solve these issues once and for
 
 ## Getting Started
 ### Requirements
+Before starting the installation script, please go over all the necessary requirements:
+- __Hardware Resources__: Depending on the project requirements, ensure your machine has sufficient resources. Minimum hardware specification is 1cpu, 2GB of RAM and 10GB of disk space. 
+- __Docker__: Ensure Docker is installed and running. 
 
-Daytona itself has a tiny memory and cpu requirements and will run on any machine. It can create development environments (Workspaces) both locally or on remote targets.
 
-Before you create a development environment using Daytona, ensure you meet the following requirements:
-
-- __Hardware Resources__: Depending on the project requirements, ensure your machine has sufficient resources. Usually a minimum hardware specification is at least 1cpu, 2GB of RAM and 10GB of disk space. For optimal performance we advise to allocate more resources depending on the project complexity.
-
-*Note. If using `docker-provider`
-
-- __Docker__: Ensure Docker is installed and running on the target machine. Daytona `docker-provider` relies on Docker to create and manage development environments.
-
-Please verify these requirements to ensure a smooth installation and operation of Daytona on your system.
 
 ### Installing Daytona
 Daytona allows you to manage your Development Environments using the Daytona CLI. To install it, please execute the following command:
@@ -112,6 +112,7 @@ Alternatively, download and compile Daytona directly from this repository by con
 
 > [!NOTE]
 > The packaged Daytona includes a set of built-in extensions located in the extensions folder, which are added there for your convince.
+
 
 ### Initializing Daytona
 To initialize Daytona, follow these steps:
