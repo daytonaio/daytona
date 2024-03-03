@@ -7,10 +7,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 	"time"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
@@ -20,6 +22,7 @@ import (
 	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
+	status "github.com/daytonaio/daytona/pkg/views/workspace/status"
 	"github.com/gorilla/websocket"
 
 	log "github.com/sirupsen/logrus"
@@ -94,6 +97,8 @@ var CreateCmd = &cobra.Command{
 			provider = activeProfile.DefaultProvider
 		}
 
+		view_util.RenderMainTitle("WORKSPACE CREATION")
+
 		if len(args) == 0 {
 			var workspaceNames []string
 			repos = []string{} // Ignore repo flags if prompting
@@ -105,8 +110,6 @@ var CreateCmd = &cobra.Command{
 			for _, workspaceInfo := range workspaceList {
 				workspaceNames = append(workspaceNames, *workspaceInfo.Name)
 			}
-
-			view_util.RenderMainTitle("WORKSPACE CREATION")
 
 			var gitProviderList []types.GitProvider
 			for _, serverGitProvider := range serverConfig.GitProviders {
@@ -159,18 +162,30 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		for {
-			_, msg, err := ws.ReadMessage()
-			if err != nil {
-				return
-			}
+		statusProgram := tea.NewProgram(status.NewModel())
 
-			fmt.Println(string(msg))
+		go func() {
+			for {
+				_, msg, err := ws.ReadMessage()
+				if err != nil {
+					return
+				}
 
-			if strings.Contains(string(msg), "completed") {
-				break
+				statusProgram.Send(status.ResultMsg{Line: string(msg), Duration: 100})
+
+				if strings.Contains(string(msg), "completed") {
+					statusProgram.Send(status.ResultMsg{Line: "END_SIGNAL", Duration: 100})
+					break
+				}
 			}
+		}()
+
+		if _, err := statusProgram.Run(); err != nil {
+			fmt.Println("Error running status program:", err)
+			os.Exit(1)
 		}
+
+		fmt.Println()
 
 		wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceName).Execute()
 		if err != nil {

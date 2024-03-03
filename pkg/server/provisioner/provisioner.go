@@ -91,13 +91,28 @@ func CreateWorkspace(workspace *types.Workspace) error {
 		},
 	})
 
+	wsLogWriter.Write([]byte("Workspace creation completed\n"))
+
 	return nil
 }
 
 // WorkspacePostCreate
 // WorkspacePreStart
 func StartWorkspace(workspace *types.Workspace) error {
-	log.Info("Starting workspace")
+	workspaceLogFilePath, err := config.GetWorkspaceLogFilePath(workspace.Id)
+	if err != nil {
+		return err
+	}
+
+	workspaceLogFile, err := os.OpenFile(workspaceLogFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		return err
+	}
+	defer workspaceLogFile.Close()
+
+	wsLogWriter := io.MultiWriter(&util.InfoLogWriter{}, io.Writer(workspaceLogFile))
+
+	wsLogWriter.Write([]byte("Starting workspace\n"))
 
 	provider, err := manager.GetProvider(workspace.Provider.Name)
 	if err != nil {
@@ -114,8 +129,23 @@ func StartWorkspace(workspace *types.Workspace) error {
 	})
 
 	for _, project := range workspace.Projects {
+
+		projectLogFilePath, err := config.GetProjectLogFilePath(workspace.Id, project.Name)
+		if err != nil {
+			return err
+		}
+
+		projectLogFile, err := os.OpenFile(projectLogFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		if err != nil {
+			return err
+		}
+		defer projectLogFile.Close()
+
+		projectLogWriter := io.MultiWriter(wsLogWriter, io.Writer(projectLogFile))
+		projectLogWriter.Write([]byte(fmt.Sprintf("Starting project %s\n", project.Name)))
+
 		//	todo: go routines
-		_, err := (*provider).StartProject(project)
+		_, err = (*provider).StartProject(project)
 		if err != nil {
 			return err
 		}
