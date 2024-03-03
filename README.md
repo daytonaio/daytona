@@ -98,7 +98,7 @@ So, we took everything we learned and decided to solve these issues once and for
 ### Requirements
 Before starting the installation script, please go over all the necessary requirements:
 - __Hardware Resources__: Depending on the project requirements, ensure your machine has sufficient resources. Minimum hardware specification is 1cpu, 2GB of RAM and 10GB of disk space. 
-- __Docker__: Ensure Docker is installed and running. 
+- __Docker__: Ensure [Docker](https://www.docker.com/products/docker-desktop/) is installed and running.   
 
 
 
