@@ -6,6 +6,7 @@ package gitprovider
 import (
 	"context"
 	"strconv"
+	"strings"
 
 	"github.com/daytonaio/daytona/pkg/types"
 	"github.com/google/go-github/github"
@@ -148,3 +149,82 @@ func (g *GitHubGitProvider) getApiClient() *github.Client {
 
 	return client
 }
+
+func (g *GitHubGitProvider) ParseGitUrl(url string) (*types.Repository, error) {
+	repo := parseGitUrl(url)
+
+	if strings.Contains(url, "pull/") {
+		parts := strings.Split(repo.Path, "pull/")
+		prNumber, err := strconv.Atoi(strings.Split(parts[1], "/")[0])
+		if err != nil {
+			return nil, err
+		}
+		repo.Path = ""
+		repo.PRNumber = prNumber
+	}
+	return nil, nil
+}
+
+// public override parseGitUrl(gitUrl: string): StaticGitContext {
+// 	const staticContext = super.parseGitUrl(gitUrl)
+
+// 	if (staticContext.path?.includes('pull/')) {
+// 		const parts = staticContext.path.split('pull/')
+// 		const prNumber = Number(parts[1].split('/')[0])
+
+// 		return {
+// 			...staticContext,
+// 			path: undefined,
+// 			prNumber,
+// 		}
+// 	}
+
+// 	if (staticContext.path?.includes('tree/')) {
+// 		const parts = staticContext.path.split('tree/')
+// 		const branch = parts[1].split('/')[0]
+
+// 		return {
+// 			...staticContext,
+// 			path: undefined,
+// 			branch,
+// 		}
+// 	}
+
+// 	if (staticContext.path?.includes('blob/')) {
+// 		const parts = staticContext.path.split('blob/')
+// 		const branch = parts[1].split('/')[0]
+// 		const path = parts[1].split('/').slice(1).join('/')
+
+// 		return {
+// 			...staticContext,
+// 			path,
+// 			branch,
+// 		}
+// 	}
+
+// 	if (staticContext.path?.includes('commit/')) {
+// 		const parts = staticContext.path.split('commit/')
+// 		const sha = parts[1].split('/')[0]
+
+// 		return {
+// 			...staticContext,
+// 			path: undefined,
+// 			sha,
+// 			branch: sha,
+// 		}
+// 	}
+
+// 	if (staticContext.path?.includes('commits/')) {
+// 		const parts = staticContext.path.split('commits/')
+// 		const sha = parts[1].split('/')[0]
+
+// 		return {
+// 			...staticContext,
+// 			path: undefined,
+// 			sha,
+// 			branch: sha,
+// 		}
+// 	}
+
+// 	return staticContext
+// }
