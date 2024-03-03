@@ -42,10 +42,10 @@ curl https://download.daytona.io/daytona/get-server.sh | bash
 # Start Daytona server 
 daytona server
 ```
-Then in a new terminal type:
+Create your first dev environment by opening a new terminal, and executing just this command:
 
 ```bash
-Create your first dev environment with just this command:
+
 daytona create
 ```
 
