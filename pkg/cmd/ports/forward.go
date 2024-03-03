@@ -13,9 +13,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/frpc"
 	"github.com/daytonaio/daytona/pkg/ports"
-	serverfrpc "github.com/daytonaio/daytona/pkg/server/frpc"
 	view_util "github.com/daytonaio/daytona/pkg/views/util"
-	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -23,7 +21,7 @@ import (
 var publicPreview bool
 
 var portForwardCmd = &cobra.Command{
-	Use:   "forward [WORKSPACE_NAME] [PROJECT_NAME] -p [PORT]",
+	Use:   "forward [WORKSPACE_NAME] [PROJECT_NAME]",
 	Short: "Forward port",
 	Args:  cobra.RangeArgs(1, 2),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -55,7 +53,7 @@ var portForwardCmd = &cobra.Command{
 
 		if publicPreview {
 			go func() {
-				errChan <- forwardPublicPort(workspaceId, projectName)
+				errChan <- forwardPublicPort(workspaceId, projectName, *hostPort)
 			}()
 		}
 
@@ -74,8 +72,8 @@ func init() {
 	portForwardCmd.MarkFlagRequired("port")
 }
 
-func forwardPublicPort(workspaceId, projectName string) error {
-	log.Info("Forwarding port to a public URL...")
+func forwardPublicPort(workspaceId, projectName string, hostPort uint16) error {
+	view_util.RenderInfoMessage("Forwarding port to a public URL...")
 
 	apiClient, err := server.GetApiClient(nil)
 	if err != nil {
@@ -87,12 +85,11 @@ func forwardPublicPort(workspaceId, projectName string) error {
 		return apiclient.HandleErrorResponse(res, err)
 	}
 
-	// TODO: Remove uuid from the end when workspaceId becomes an uuid (currently, wsId is the same as its name)
-	subDomain := fmt.Sprintf("%s-%s-%d-%s", workspaceId, projectName, portArg, uuid.New().String())
+	subDomain := fmt.Sprintf("%s-%s-%d-%s", workspaceId, projectName, portArg, *serverConfig.Id)
 
 	go func() {
 		time.Sleep(1 * time.Second)
-		log.Infof("Port available at %s", fmt.Sprintf("%s://%s.%s", subDomain, serverfrpc.GetServerDomain(server.ToServerConfig(serverConfig)), *serverConfig.Frps.Protocol))
+		view_util.RenderInfoMessage(fmt.Sprintf("Port available at %s", fmt.Sprintf("%s://%s.%s", *serverConfig.Frps.Protocol, subDomain, *serverConfig.Frps.Domain)))
 	}()
 
 	return frpc.Connect(frpc.FrpcConnectParams{
@@ -100,5 +97,6 @@ func forwardPublicPort(workspaceId, projectName string) error {
 		ServerPort:   int(*serverConfig.Frps.Port),
 		Name:         subDomain,
 		SubDomain:    subDomain,
+		Port:         int(hostPort),
 	})
 }
