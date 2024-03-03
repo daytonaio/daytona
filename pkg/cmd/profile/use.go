@@ -4,14 +4,18 @@
 package profile
 
 import (
+	"fmt"
+
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 
 	log "github.com/sirupsen/logrus"
 
+	"github.com/daytonaio/daytona/pkg/cmd/output"
+	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 )
 
-var profileUseCmd = &cobra.Command{
+var ProfileUseCmd = &cobra.Command{
 	Use:   "use",
 	Short: "Use profile [PROFILE_NAME]",
 	Args:  cobra.ExactArgs(1),
@@ -22,7 +26,7 @@ var profileUseCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 {
-			log.Fatal("Please provide profile name")
+			log.Fatal("Please provide the profile name")
 		}
 
 		profileArg := args[0]
@@ -47,6 +51,11 @@ var profileUseCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		log.Info("Active profile set to ", chosenProfile.Name)
+		if output.FormatFlag != "" {
+			output.Output = chosenProfile.Id
+			return
+		}
+
+		view_util.RenderInfoMessage(fmt.Sprintf("Active profile set to %s", chosenProfile.Name))
 	},
 }
