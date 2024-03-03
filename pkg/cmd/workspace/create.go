@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"os"
 	"regexp"
-	"strings"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/daytonaio/daytona/internal/tailscale"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
@@ -161,6 +161,8 @@ var CreateCmd = &cobra.Command{
 			}
 		}()
 
+		started := false
+
 		go func() {
 			for {
 				_, msg, err := ws.ReadMessage()
@@ -171,14 +173,14 @@ var CreateCmd = &cobra.Command{
 
 				statusProgram.Send(status.ResultMsg{Line: string(msg)})
 
-				if strings.Contains(string(msg), "completed") {
+				if started {
 					statusProgram.Send(status.ResultMsg{Line: "END_SIGNAL"})
 					break
 				}
 			}
 		}()
 
-		_, res, err = apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(serverapiclient.CreateWorkspace{
+		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(serverapiclient.CreateWorkspace{
 			Name:         &workspaceName,
 			Repositories: repos,
 			Provider:     &provider,
@@ -188,6 +190,34 @@ var CreateCmd = &cobra.Command{
 		}
 
 		fmt.Println()
+
+		activeProfile, err = c.GetActiveProfile()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		tsConn, err := tailscale.GetConnection(&activeProfile)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		startTime := time.Now()
+		timeout := 3 * time.Minute
+		for {
+			if time.Since(startTime) > timeout {
+				log.Fatal("Timeout: dialing timed out after 3 minutes")
+			}
+
+			// Dial with exponential backoff
+			dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s-%s:2222", workspaceName, *createdWorkspace.Projects[0].Name))
+			if err == nil {
+				// Dial succeeded
+				defer dialConn.Close()
+				break
+			}
+
+			time.Sleep(time.Second) // Adjust sleep time as needed
+		}
 
 		wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceName).Execute()
 		if err != nil {
@@ -200,11 +230,6 @@ var CreateCmd = &cobra.Command{
 		skipIdeFlag, _ := cmd.Flags().GetBool("skip-ide")
 		if skipIdeFlag {
 			return
-		}
-
-		activeProfile, err = c.GetActiveProfile()
-		if err != nil {
-			log.Fatal(err)
 		}
 
 		ide := c.DefaultIdeId
