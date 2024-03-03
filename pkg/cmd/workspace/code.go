@@ -84,6 +84,8 @@ var CodeCmd = &cobra.Command{
 			ideId = ideFlag
 		}
 
+		view_util.RenderInfoMessage("Opening the workspace in your preferred IDE")
+
 		openIDE(ideId, activeProfile, workspaceName, projectName)
 	},
 }
@@ -111,8 +113,6 @@ func openVSCode(activeProfile config.Profile, workspaceName string, projectName 
 	checkAndAlertVSCodeInstalled()
 
 	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceName, projectName)
-
-	log.Info(fmt.Sprintf("Opening %s's project %s in Visual Studio Code.", workspaceName, projectName))
 
 	commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", projectHostname, path.Join("/workspaces", projectName))
 

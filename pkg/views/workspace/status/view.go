@@ -18,7 +18,7 @@ var (
 	spinnerStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("63"))
 	helpStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Margin(1, 0)
 	dotStyle     = helpStyle.Copy().UnsetMargins()
-	appStyle     = lipgloss.NewStyle().Margin(1, 2, 0, 2).BorderStyle(lipgloss.NormalBorder()).BorderForeground(views.Green).Width(50).Padding(1, 1, 0, 2)
+	appStyle     = lipgloss.NewStyle().Margin(1, 2, 1, 2).BorderStyle(lipgloss.NormalBorder()).BorderForeground(views.Green).Width(50).Padding(1, 1, 0, 2)
 )
 
 type ResultMsg struct {
@@ -40,12 +40,14 @@ type model struct {
 }
 
 func NewModel() model {
-	const numLastResults = 3
+	const numLastResults = 4
 	s := spinner.New()
 	s.Style = spinnerStyle
+	results := make([]ResultMsg, numLastResults)
+	results[0] = ResultMsg{Line: "Workspace creation is pending..."}
 	return model{
 		spinner: s,
-		results: make([]ResultMsg, numLastResults),
+		results: results,
 	}
 }
 
@@ -77,8 +79,6 @@ func (m model) View() string {
 	for _, res := range m.results {
 		s += res.String() + "\n"
 	}
-
-	s += "\n"
 
 	return appStyle.Render(s)
 }

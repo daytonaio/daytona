@@ -144,15 +144,6 @@ var CreateCmd = &cobra.Command{
 			return
 		}
 
-		_, res, err = apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(serverapiclient.CreateWorkspace{
-			Name:         &workspaceName,
-			Repositories: repos,
-			Provider:     &provider,
-		}).Execute()
-		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
-		}
-
 		hostRegex := regexp.MustCompile(`https*://(.*)`)
 		host := hostRegex.FindStringSubmatch(activeProfile.Api.Url)[1]
 		wsURL := fmt.Sprintf("ws://%s/log/workspace/%s?follow=true", host, workspaceName)
@@ -161,28 +152,39 @@ var CreateCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
-
 		statusProgram := tea.NewProgram(status.NewModel())
+
+		go func() {
+			if _, err := statusProgram.Run(); err != nil {
+				fmt.Println("Error running status program:", err)
+				os.Exit(1)
+			}
+		}()
 
 		go func() {
 			for {
 				_, msg, err := ws.ReadMessage()
 				if err != nil {
-					return
+					time.Sleep(500 * time.Millisecond)
+					continue
 				}
 
-				statusProgram.Send(status.ResultMsg{Line: string(msg), Duration: 100})
+				statusProgram.Send(status.ResultMsg{Line: string(msg)})
 
 				if strings.Contains(string(msg), "completed") {
-					statusProgram.Send(status.ResultMsg{Line: "END_SIGNAL", Duration: 100})
+					statusProgram.Send(status.ResultMsg{Line: "END_SIGNAL"})
 					break
 				}
 			}
 		}()
 
-		if _, err := statusProgram.Run(); err != nil {
-			fmt.Println("Error running status program:", err)
-			os.Exit(1)
+		_, res, err = apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(serverapiclient.CreateWorkspace{
+			Name:         &workspaceName,
+			Repositories: repos,
+			Provider:     &provider,
+		}).Execute()
+		if err != nil {
+			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
 		fmt.Println()
@@ -211,7 +213,7 @@ var CreateCmd = &cobra.Command{
 		}
 
 		view_util.RenderInfoMessageBold("Opening the workspace in your preferred IDE")
-		time.Sleep(5 * time.Second)
+		time.Sleep(20 * time.Second)
 		openIDE(ide, activeProfile, workspaceName, *wsInfo.Projects[0].Name)
 	},
 }
