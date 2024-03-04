@@ -32,19 +32,20 @@ var profileAddCmd = &cobra.Command{
 		}
 
 		profileAddView := profile.ProfileAddView{
-			ProfileName:     profileNameFlag,
-			RemoteHostname:  serverHostnameFlag,
-			RemoteSshPort:   serverPortFlag,
-			RemoteSshUser:   serverUserFlag,
-			DefaultProvider: providerFlag,
-			ApiUrl:          apiUrlFlag,
+			ProfileName:           profileNameFlag,
+			RemoteHostname:        serverHostnameFlag,
+			RemoteSshPort:         serverPortFlag,
+			RemoteSshUser:         serverUserFlag,
+			DefaultProviderName:   providerFlag,
+			DefaultProviderTarget: providerTargetFlag,
+			ApiUrl:                apiUrlFlag,
 		}
 
 		if profileAddView.ProfileName != "" && profileAddView.ApiUrl != "" {
 			_, err = addProfile(profileAddView, c, true, true)
 		}
 
-		if profileNameFlag == "" || serverHostnameFlag == "" || serverUserFlag == "" || providerFlag == "" || (serverPrivateKeyPathFlag == "" && serverPasswordFlag == "") {
+		if profileNameFlag == "" || serverHostnameFlag == "" || serverUserFlag == "" || providerFlag == "" || providerTargetFlag == "" || (serverPrivateKeyPathFlag == "" && serverPasswordFlag == "") {
 			_, err = CreateProfile(c, nil, true, true, false)
 		}
 
@@ -63,7 +64,8 @@ func CreateProfile(c *config.Config, profileAddView *profile.ProfileAddView, che
 			RemoteSshPassword:       "",
 			RemoteSshUser:           "",
 			RemoteSshPrivateKeyPath: "",
-			DefaultProvider:         "",
+			DefaultProviderName:     "",
+			DefaultProviderTarget:   "",
 			ApiUrl:                  "",
 		}
 	}
@@ -173,6 +175,7 @@ var serverPasswordFlag string
 var serverUserFlag string
 var serverPrivateKeyPathFlag string
 var providerFlag string
+var providerTargetFlag string
 var apiUrlFlag string
 
 func init() {
@@ -183,5 +186,6 @@ func init() {
 	profileAddCmd.Flags().StringVarP(&serverPasswordFlag, "password", "p", "", "Remote SSH password")
 	profileAddCmd.Flags().StringVarP(&serverPrivateKeyPathFlag, "private-key-path", "k", "", "Remote SSH private key path")
 	profileAddCmd.Flags().StringVarP(&providerFlag, "provider", "r", "default", "Provider")
+	profileAddCmd.Flags().StringVarP(&providerTargetFlag, "provider-target", "t", "", "Provider target")
 	profileAddCmd.Flags().StringVarP(&apiUrlFlag, "api-url", "a", "", "API URL")
 }
