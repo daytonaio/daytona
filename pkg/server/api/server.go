@@ -82,6 +82,9 @@ func Start() error {
 		providerController.POST("/install", provider.InstallProvider)
 		providerController.GET("/", provider.ListProviders)
 		providerController.POST("/:provider/uninstall", provider.UninstallProvider)
+		providerController.PUT("/:provider/target", provider.SetTarget)
+		providerController.DELETE("/:provider/:target", provider.RemoveTarget)
+		providerController.GET("/:provider/target-manifest", provider.GetTargetManifest)
 	}
 
 	logController := router.Group("/log")

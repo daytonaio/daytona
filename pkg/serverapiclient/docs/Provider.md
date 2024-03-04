@@ -5,6 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Name** | Pointer to **string** |  | [optional] 
+**Targets** | Pointer to [**[]TargetDTO**](TargetDTO.md) |  | [optional] 
 **Version** | Pointer to **string** |  | [optional] 
 
 ## Methods
@@ -50,6 +51,31 @@ SetName sets Name field to given value.
 `func (o *Provider) HasName() bool`
 
 HasName returns a boolean if a field has been set.
+
+### GetTargets
+
+`func (o *Provider) GetTargets() []TargetDTO`
+
+GetTargets returns the Targets field if non-nil, zero value otherwise.
+
+### GetTargetsOk
+
+`func (o *Provider) GetTargetsOk() (*[]TargetDTO, bool)`
+
+GetTargetsOk returns a tuple with the Targets field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTargets
+
+`func (o *Provider) SetTargets(v []TargetDTO)`
+
+SetTargets sets Targets field to given value.
+
+### HasTargets
+
+`func (o *Provider) HasTargets() bool`
+
+HasTargets returns a boolean if a field has been set.
 
 ### GetVersion
 

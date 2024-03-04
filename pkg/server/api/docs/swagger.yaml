@@ -75,6 +75,10 @@ definitions:
     properties:
       name:
         type: string
+      targets:
+        items:
+          $ref: '#/definitions/TargetDTO'
+        type: array
       version:
         type: string
     type: object
@@ -84,6 +88,10 @@ definitions:
         type: string
       target:
         type: string
+    type: object
+  ProviderTargetManifest:
+    additionalProperties:
+      $ref: '#/definitions/provider.ProviderTargetProperty'
     type: object
   Repository:
     properties:
@@ -123,6 +131,14 @@ definitions:
       serverDownloadUrl:
         type: string
     type: object
+  TargetDTO:
+    properties:
+      name:
+        type: string
+      options:
+        description: JSON encoded map of options
+        type: string
+    type: object
   Workspace:
     properties:
       id:
@@ -149,6 +165,34 @@ definitions:
       providerMetadata:
         type: string
     type: object
+  provider.ProviderTargetProperty:
+    properties:
+      defaultValue:
+        description: DefaultValue is converted into the appropriate type based on
+          the Type
+        type: string
+      options:
+        description: Options is only used if the Type is ProviderTargetPropertyTypeOption
+        items:
+          type: string
+        type: array
+      type:
+        $ref: '#/definitions/provider.ProviderTargetPropertyType'
+    type: object
+  provider.ProviderTargetPropertyType:
+    enum:
+    - string
+    - option
+    - boolean
+    - int
+    - float
+    type: string
+    x-enum-varnames:
+    - ProviderTargetPropertyTypeString
+    - ProviderTargetPropertyTypeOption
+    - ProviderTargetPropertyTypeBoolean
+    - ProviderTargetPropertyTypeInt
+    - ProviderTargetPropertyTypeFloat
 host: localhost:3000
 info:
   contact: {}
@@ -170,6 +214,67 @@ paths:
               $ref: '#/definitions/Provider'
             type: array
       summary: List providers
+      tags:
+      - provider
+  /provider/{provider}/{target}:
+    delete:
+      description: Set a provider target
+      operationId: RemoveTarget
+      parameters:
+      - description: Provider name
+        in: path
+        name: provider
+        required: true
+        type: string
+      - description: Target name
+        in: path
+        name: target
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      summary: Set a provider target
+      tags:
+      - provider
+  /provider/{provider}/target:
+    put:
+      description: Set a provider target
+      operationId: SetTarget
+      parameters:
+      - description: Provider target to set
+        in: body
+        name: target
+        required: true
+        schema:
+          $ref: '#/definitions/TargetDTO'
+      - description: Provider name
+        in: path
+        name: provider
+        required: true
+        type: string
+      responses:
+        "201":
+          description: Created
+      summary: Set a provider target
+      tags:
+      - provider
+  /provider/{provider}/target-manifest:
+    get:
+      description: Get provider target manifest
+      operationId: GetTargetManifest
+      parameters:
+      - description: Provider name
+        in: path
+        name: provider
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ProviderTargetManifest'
+      summary: Get provider target manifest
       tags:
       - provider
   /provider/{provider}/uninstall:

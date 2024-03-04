@@ -6,7 +6,9 @@ package provider
 import (
 	"fmt"
 	"os"
+	"strings"
 
+	internal "github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/util"
@@ -20,11 +22,13 @@ import (
 var columns = []table.Column{
 	{Title: "Name", Width: 20},
 	{Title: "Version", Width: 20},
+	{Title: "Targets", Width: 40},
 }
 
 type model struct {
 	table            table.Model
 	selectedProvider *serverapiclient.Provider
+	providers        map[string]serverapiclient.Provider
 	selectable       bool
 	initialRows      []table.Row
 }
@@ -56,10 +60,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.selectedProvider = nil
 			return m, tea.Quit
 		case "enter":
-			m.selectedProvider = &serverapiclient.Provider{
-				Name:    &m.table.SelectedRow()[0],
-				Version: &m.table.SelectedRow()[1],
-			}
+			selectedProvider := m.providers[m.table.SelectedRow()[0]]
+			m.selectedProvider = &selectedProvider
 			return m, tea.Quit
 		}
 	}
@@ -81,7 +83,11 @@ func renderProvidersList(providers []serverapiclient.Provider, selectable bool) 
 	selectedProvider := &providers[0]
 
 	for _, provider := range providers {
-		row := table.Row{*provider.Name, *provider.Version}
+		targets := strings.Join(internal.ArrayMap(provider.Targets, func(t serverapiclient.TargetDTO) string {
+			return *t.Name
+		}), ", ")
+		targets = strings.TrimSuffix(targets, ", ")
+		row := table.Row{*provider.Name, *provider.Version, targets}
 		rows = append(rows, row)
 	}
 
@@ -89,10 +95,16 @@ func renderProvidersList(providers []serverapiclient.Provider, selectable bool) 
 
 	adjustedRows, adjustedCols := getRowsAndCols(width, rows)
 
+	providerMap := map[string]serverapiclient.Provider{}
+	for _, provider := range providers {
+		providerMap[*provider.Name] = provider
+	}
+
 	return model{
 		table:            getTable(adjustedRows, adjustedCols, selectable, 0),
 		selectedProvider: selectedProvider,
 		selectable:       selectable,
+		providers:        providerMap,
 		initialRows:      rows,
 	}
 }

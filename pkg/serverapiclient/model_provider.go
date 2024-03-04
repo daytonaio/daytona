@@ -20,6 +20,7 @@ var _ MappedNullable = &Provider{}
 // Provider struct for Provider
 type Provider struct {
 	Name *string `json:"name,omitempty"`
+	Targets []TargetDTO `json:"targets,omitempty"`
 	Version *string `json:"version,omitempty"`
 }
 
@@ -72,6 +73,38 @@ func (o *Provider) SetName(v string) {
 	o.Name = &v
 }
 
+// GetTargets returns the Targets field value if set, zero value otherwise.
+func (o *Provider) GetTargets() []TargetDTO {
+	if o == nil || IsNil(o.Targets) {
+		var ret []TargetDTO
+		return ret
+	}
+	return o.Targets
+}
+
+// GetTargetsOk returns a tuple with the Targets field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Provider) GetTargetsOk() ([]TargetDTO, bool) {
+	if o == nil || IsNil(o.Targets) {
+		return nil, false
+	}
+	return o.Targets, true
+}
+
+// HasTargets returns a boolean if a field has been set.
+func (o *Provider) HasTargets() bool {
+	if o != nil && !IsNil(o.Targets) {
+		return true
+	}
+
+	return false
+}
+
+// SetTargets gets a reference to the given []TargetDTO and assigns it to the Targets field.
+func (o *Provider) SetTargets(v []TargetDTO) {
+	o.Targets = v
+}
+
 // GetVersion returns the Version field value if set, zero value otherwise.
 func (o *Provider) GetVersion() string {
 	if o == nil || IsNil(o.Version) {
@@ -116,6 +149,9 @@ func (o Provider) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
+	}
+	if !IsNil(o.Targets) {
+		toSerialize["targets"] = o.Targets
 	}
 	if !IsNil(o.Version) {
 		toSerialize["version"] = o.Version
