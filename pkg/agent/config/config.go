@@ -13,7 +13,8 @@ import (
 )
 
 type Config struct {
-	Server struct {
+	ProjectDir string `envconfig:"DAYTONA_WS_DIR" validate:"required"`
+	Server     struct {
 		Url    string `envconfig:"DAYTONA_SERVER_URL" validate:"required"`
 		ApiKey string `envconfig:"DAYTONA_SERVER_API_KEY" validate:"required"`
 	}
