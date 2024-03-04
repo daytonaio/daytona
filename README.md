@@ -42,7 +42,7 @@ Set up a development environment on any infrastructure, with a single command.
 * __Extensibility__: Enable extensibility with plugin or provider development. Moreover, in any dynamic language, not just Go(Contributions welcome here!).
 * __Security__: Automatically creates a VPN connection between the client machine and the development environment, ensuring a fully secure connection.
 * __All Ports__: The VPN connection enables access to all ports on the development environments, removing the need to setup port forwards over SSH connection.
-* __Works on my Machine__: Never experince it again.
+* __Works on my Machine__: Never experience it again.
 ## Quick Start
 To install Daytona all you need to do is execute this script:
 
@@ -76,7 +76,7 @@ This complexity is unnecessary.
 
 With Daytona, you need only to execute a single command: `daytona create`.
 
-Daytona automates the entire process; provisioning the instance, interpreting and applying the configuration, setting up prebuilds, establishing a secure VPN connection, securly connecting your local or a Web IDE, and assigning a fully qualified domain name to the development environment for easy sharing and collaboration. 
+Daytona automates the entire process; provisioning the instance, interpreting and applying the configuration, setting up prebuilds, establishing a secure VPN connection, securely connecting your local or a Web IDE, and assigning a fully qualified domain name to the development environment for easy sharing and collaboration. 
 
 As a developer, you can immediately start focusing on what matters most—your code.
 
@@ -112,7 +112,7 @@ curl https://download.daytona.io/daytona/get-server.sh | bash
 Alternatively, download and compile Daytona directly from this repository by consulting our [documentation](https://daytona.io/docs).
 
 > [!NOTE]
-> The packaged Daytona includes a set of built-in extensions located in the extensions folder, which are added there for your convince.
+> The packaged Daytona includes a set of built-in extensions located in the extensions folder, which are added there for your convenience.
 
 
 ### Initializing Daytona
@@ -183,7 +183,7 @@ Daytona is designed to be infrastructure-agnostic, capable of creating and manag
 
 How does it work? When executing the `daytona create` command, Daytona communicates the environment details to the selected provider, which then provisions the necessary compute resources. Once provisioned, Daytona sets up the environment on these resources, allowing the user to interact with the environment seamlessly.
 
-Prroviders are independent projects that adhere to the Daytona Provider interface. They can be developed in nearly any major programming language. For more details, see [Providers](providers/readme.md)
+Providers are independent projects that adhere to the Daytona Provider interface. They can be developed in nearly any major programming language. For more details, see [Providers](providers/readme.md)
 
 
 ### Plugins
