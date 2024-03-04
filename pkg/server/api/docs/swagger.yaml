@@ -4,8 +4,8 @@ definitions:
     properties:
       name:
         type: string
-      provider:
-        type: string
+      providerTarget:
+        $ref: '#/definitions/ProviderTarget'
       repositories:
         items:
           type: string
@@ -45,10 +45,10 @@ definitions:
     type: object
   Project:
     properties:
-      info:
-        $ref: '#/definitions/ProjectInfo'
       name:
         type: string
+      provider:
+        $ref: '#/definitions/ProviderTarget'
       repository:
         $ref: '#/definitions/Repository'
       workspaceId:
@@ -76,6 +76,13 @@ definitions:
       name:
         type: string
       version:
+        type: string
+    type: object
+  ProviderTarget:
+    properties:
+      provider:
+        type: string
+      target:
         type: string
     type: object
   Repository:
@@ -129,7 +136,7 @@ definitions:
           $ref: '#/definitions/Project'
         type: array
       provider:
-        $ref: '#/definitions/WorkspaceProvider'
+        $ref: '#/definitions/ProviderTarget'
     type: object
   WorkspaceInfo:
     properties:
@@ -140,13 +147,6 @@ definitions:
           $ref: '#/definitions/ProjectInfo'
         type: array
       providerMetadata:
-        type: string
-    type: object
-  WorkspaceProvider:
-    properties:
-      name:
-        type: string
-      profile:
         type: string
     type: object
 host: localhost:3000

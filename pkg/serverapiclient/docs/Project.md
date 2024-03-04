@@ -4,8 +4,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Info** | Pointer to [**ProjectInfo**](ProjectInfo.md) |  | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
+**Provider** | Pointer to [**ProviderTarget**](ProviderTarget.md) |  | [optional] 
 **Repository** | Pointer to [**Repository**](Repository.md) |  | [optional] 
 **WorkspaceId** | Pointer to **string** |  | [optional] 
 
@@ -27,31 +27,6 @@ will change when the set of required properties is changed
 NewProjectWithDefaults instantiates a new Project object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
-
-### GetInfo
-
-`func (o *Project) GetInfo() ProjectInfo`
-
-GetInfo returns the Info field if non-nil, zero value otherwise.
-
-### GetInfoOk
-
-`func (o *Project) GetInfoOk() (*ProjectInfo, bool)`
-
-GetInfoOk returns a tuple with the Info field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetInfo
-
-`func (o *Project) SetInfo(v ProjectInfo)`
-
-SetInfo sets Info field to given value.
-
-### HasInfo
-
-`func (o *Project) HasInfo() bool`
-
-HasInfo returns a boolean if a field has been set.
 
 ### GetName
 
@@ -77,6 +52,31 @@ SetName sets Name field to given value.
 `func (o *Project) HasName() bool`
 
 HasName returns a boolean if a field has been set.
+
+### GetProvider
+
+`func (o *Project) GetProvider() ProviderTarget`
+
+GetProvider returns the Provider field if non-nil, zero value otherwise.
+
+### GetProviderOk
+
+`func (o *Project) GetProviderOk() (*ProviderTarget, bool)`
+
+GetProviderOk returns a tuple with the Provider field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetProvider
+
+`func (o *Project) SetProvider(v ProviderTarget)`
+
+SetProvider sets Provider field to given value.
+
+### HasProvider
+
+`func (o *Project) HasProvider() bool`
+
+HasProvider returns a boolean if a field has been set.
 
 ### GetRepository
 

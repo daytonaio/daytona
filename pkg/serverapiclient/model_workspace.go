@@ -23,7 +23,7 @@ type Workspace struct {
 	Info *WorkspaceInfo `json:"info,omitempty"`
 	Name *string `json:"name,omitempty"`
 	Projects []Project `json:"projects,omitempty"`
-	Provider *WorkspaceProvider `json:"provider,omitempty"`
+	Provider *ProviderTarget `json:"provider,omitempty"`
 }
 
 // NewWorkspace instantiates a new Workspace object
@@ -172,9 +172,9 @@ func (o *Workspace) SetProjects(v []Project) {
 }
 
 // GetProvider returns the Provider field value if set, zero value otherwise.
-func (o *Workspace) GetProvider() WorkspaceProvider {
+func (o *Workspace) GetProvider() ProviderTarget {
 	if o == nil || IsNil(o.Provider) {
-		var ret WorkspaceProvider
+		var ret ProviderTarget
 		return ret
 	}
 	return *o.Provider
@@ -182,7 +182,7 @@ func (o *Workspace) GetProvider() WorkspaceProvider {
 
 // GetProviderOk returns a tuple with the Provider field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetProviderOk() (*WorkspaceProvider, bool) {
+func (o *Workspace) GetProviderOk() (*ProviderTarget, bool) {
 	if o == nil || IsNil(o.Provider) {
 		return nil, false
 	}
@@ -198,8 +198,8 @@ func (o *Workspace) HasProvider() bool {
 	return false
 }
 
-// SetProvider gets a reference to the given WorkspaceProvider and assigns it to the Provider field.
-func (o *Workspace) SetProvider(v WorkspaceProvider) {
+// SetProvider gets a reference to the given ProviderTarget and assigns it to the Provider field.
+func (o *Workspace) SetProvider(v ProviderTarget) {
 	o.Provider = &v
 }
 

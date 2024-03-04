@@ -394,8 +394,8 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "provider": {
-                    "type": "string"
+                "providerTarget": {
+                    "$ref": "#/definitions/ProviderTarget"
                 },
                 "repositories": {
                     "type": "array",
@@ -458,11 +458,11 @@ const docTemplate = `{
         "Project": {
             "type": "object",
             "properties": {
-                "info": {
-                    "$ref": "#/definitions/ProjectInfo"
-                },
                 "name": {
                     "type": "string"
+                },
+                "provider": {
+                    "$ref": "#/definitions/ProviderTarget"
                 },
                 "repository": {
                     "$ref": "#/definitions/Repository"
@@ -505,6 +505,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProviderTarget": {
+            "type": "object",
+            "properties": {
+                "provider": {
+                    "type": "string"
+                },
+                "target": {
                     "type": "string"
                 }
             }
@@ -586,7 +597,7 @@ const docTemplate = `{
                     }
                 },
                 "provider": {
-                    "$ref": "#/definitions/WorkspaceProvider"
+                    "$ref": "#/definitions/ProviderTarget"
                 }
             }
         },
@@ -603,17 +614,6 @@ const docTemplate = `{
                     }
                 },
                 "providerMetadata": {
-                    "type": "string"
-                }
-            }
-        },
-        "WorkspaceProvider": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "profile": {
                     "type": "string"
                 }
             }

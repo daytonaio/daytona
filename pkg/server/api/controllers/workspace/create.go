@@ -75,7 +75,7 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 		return nil, errors.New("name is not a valid alphanumeric string")
 	}
 
-	_, err := manager.GetProvider(createWorkspaceDto.Provider)
+	_, err := manager.GetProvider(createWorkspaceDto.ProviderTarget.Provider)
 	if err != nil {
 		return nil, err
 	}
@@ -83,10 +83,9 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 	w := &types.Workspace{
 		Id:   createWorkspaceDto.Name,
 		Name: createWorkspaceDto.Name,
-		Provider: &types.WorkspaceProvider{
-			Name: createWorkspaceDto.Provider,
-			// TODO: Add profile support
-			Profile: "default",
+		ProviderTarget: types.ProviderTarget{
+			Provider: createWorkspaceDto.ProviderTarget.Provider,
+			Target:   createWorkspaceDto.ProviderTarget.Target,
 		},
 	}
 
@@ -122,6 +121,10 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 			},
 			WorkspaceId: w.Id,
 			ApiKey:      "TODO",
+			ProviderTarget: types.ProviderTarget{
+				Provider: createWorkspaceDto.ProviderTarget.Provider,
+				Target:   createWorkspaceDto.ProviderTarget.Target,
+			},
 		}
 		w.Projects = append(w.Projects, project)
 	}
