@@ -5,7 +5,23 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch Package",
+      "name": "agent",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/cmd/daytona",
+      "console": "integratedTerminal",
+      "env": {
+        "DAYTONA_SERVER_URL": "http://localhost:3000",
+        "DAYTONA_SERVER_API_KEY": "1234567890",
+        "DAYTONA_WS_DIR": "/workspaces/daytona"
+      },
+      "args": [
+        "agent"
+      ]
+    },
+    {
+      "name": "Server",
       "type": "go",
       "request": "launch",
       "mode": "debug",
