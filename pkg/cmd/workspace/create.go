@@ -167,8 +167,10 @@ var CreateCmd = &cobra.Command{
 			for {
 				_, msg, err := ws.ReadMessage()
 				if err != nil {
+					// TODO: needs refactor
 					ws.Close()
 					ws, _, _ = websocket.DefaultDialer.Dial(wsURL, nil)
+					continue
 				}
 
 				statusProgram.Send(status.ResultMsg{Line: string(msg)})

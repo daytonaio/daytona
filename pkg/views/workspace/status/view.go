@@ -50,7 +50,7 @@ func NewModel() model {
 		results[i] = ResultMsg{Dots: true}
 	}
 
-	results[len(results)-1] = ResultMsg{Line: "Workspace creation is pending...", Dots: false}
+	results[len(results)-1] = ResultMsg{Line: "Workspace creation request submitted", Dots: false}
 
 	return model{
 		spinner: s,
