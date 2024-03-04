@@ -6,6 +6,7 @@ package target
 import (
 	"encoding/json"
 	"errors"
+	"regexp"
 	"sort"
 	"strconv"
 
@@ -50,6 +51,12 @@ func SetTargetForm(target *serverapiclient.TargetDTO, targetManifest map[string]
 
 	for _, name := range sortedKeys {
 		property := targetManifest[name]
+		if property.DisabledPredicate != nil && *property.DisabledPredicate != "" {
+			if matched, err := regexp.Match(*property.DisabledPredicate, []byte(*target.Name)); err == nil && matched {
+				continue
+			}
+		}
+
 		switch *property.Type {
 		case serverapiclient.ProviderTargetPropertyTypeFloat, serverapiclient.ProviderTargetPropertyTypeInt:
 			var initialValue *string
@@ -102,6 +109,11 @@ func SetTargetForm(target *serverapiclient.TargetDTO, targetManifest map[string]
 	}
 
 	for name, property := range targetManifest {
+		if property.DisabledPredicate != nil && *property.DisabledPredicate != "" {
+			if matched, err := regexp.Match(*property.DisabledPredicate, []byte(*target.Name)); err == nil && matched {
+				continue
+			}
+		}
 		switch *property.Type {
 		case serverapiclient.ProviderTargetPropertyTypeInt:
 			options[name], err = strconv.Atoi(*options[name].(*string))
@@ -135,6 +147,7 @@ func getInput(name string, property serverapiclient.ProviderProviderTargetProper
 	return huh.NewInput().
 		Title(name).
 		Value(value).
+		Password(property.InputMasked != nil && *property.InputMasked).
 		Validate(func(s string) error {
 			switch *property.Type {
 			case serverapiclient.ProviderTargetPropertyTypeInt:

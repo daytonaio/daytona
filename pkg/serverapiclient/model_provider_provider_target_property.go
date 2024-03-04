@@ -21,6 +21,9 @@ var _ MappedNullable = &ProviderProviderTargetProperty{}
 type ProviderProviderTargetProperty struct {
 	// DefaultValue is converted into the appropriate type based on the Type
 	DefaultValue *string `json:"defaultValue,omitempty"`
+	// A regex string matched with the name of the target to determine if the property should be disabled If the regex matches the target name, the property will be disabled E.g. \"^local$\" will disable the property for the local target
+	DisabledPredicate *string `json:"disabledPredicate,omitempty"`
+	InputMasked *bool `json:"inputMasked,omitempty"`
 	// Options is only used if the Type is ProviderTargetPropertyTypeOption
 	Options []string `json:"options,omitempty"`
 	Type *ProviderProviderTargetPropertyType `json:"type,omitempty"`
@@ -73,6 +76,70 @@ func (o *ProviderProviderTargetProperty) HasDefaultValue() bool {
 // SetDefaultValue gets a reference to the given string and assigns it to the DefaultValue field.
 func (o *ProviderProviderTargetProperty) SetDefaultValue(v string) {
 	o.DefaultValue = &v
+}
+
+// GetDisabledPredicate returns the DisabledPredicate field value if set, zero value otherwise.
+func (o *ProviderProviderTargetProperty) GetDisabledPredicate() string {
+	if o == nil || IsNil(o.DisabledPredicate) {
+		var ret string
+		return ret
+	}
+	return *o.DisabledPredicate
+}
+
+// GetDisabledPredicateOk returns a tuple with the DisabledPredicate field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ProviderProviderTargetProperty) GetDisabledPredicateOk() (*string, bool) {
+	if o == nil || IsNil(o.DisabledPredicate) {
+		return nil, false
+	}
+	return o.DisabledPredicate, true
+}
+
+// HasDisabledPredicate returns a boolean if a field has been set.
+func (o *ProviderProviderTargetProperty) HasDisabledPredicate() bool {
+	if o != nil && !IsNil(o.DisabledPredicate) {
+		return true
+	}
+
+	return false
+}
+
+// SetDisabledPredicate gets a reference to the given string and assigns it to the DisabledPredicate field.
+func (o *ProviderProviderTargetProperty) SetDisabledPredicate(v string) {
+	o.DisabledPredicate = &v
+}
+
+// GetInputMasked returns the InputMasked field value if set, zero value otherwise.
+func (o *ProviderProviderTargetProperty) GetInputMasked() bool {
+	if o == nil || IsNil(o.InputMasked) {
+		var ret bool
+		return ret
+	}
+	return *o.InputMasked
+}
+
+// GetInputMaskedOk returns a tuple with the InputMasked field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ProviderProviderTargetProperty) GetInputMaskedOk() (*bool, bool) {
+	if o == nil || IsNil(o.InputMasked) {
+		return nil, false
+	}
+	return o.InputMasked, true
+}
+
+// HasInputMasked returns a boolean if a field has been set.
+func (o *ProviderProviderTargetProperty) HasInputMasked() bool {
+	if o != nil && !IsNil(o.InputMasked) {
+		return true
+	}
+
+	return false
+}
+
+// SetInputMasked gets a reference to the given bool and assigns it to the InputMasked field.
+func (o *ProviderProviderTargetProperty) SetInputMasked(v bool) {
+	o.InputMasked = &v
 }
 
 // GetOptions returns the Options field value if set, zero value otherwise.
@@ -151,6 +218,12 @@ func (o ProviderProviderTargetProperty) ToMap() (map[string]interface{}, error) 
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.DefaultValue) {
 		toSerialize["defaultValue"] = o.DefaultValue
+	}
+	if !IsNil(o.DisabledPredicate) {
+		toSerialize["disabledPredicate"] = o.DisabledPredicate
+	}
+	if !IsNil(o.InputMasked) {
+		toSerialize["inputMasked"] = o.InputMasked
 	}
 	if !IsNil(o.Options) {
 		toSerialize["options"] = o.Options
