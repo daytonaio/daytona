@@ -45,6 +45,8 @@ definitions:
     type: object
   Project:
     properties:
+      info:
+        $ref: '#/definitions/ProjectInfo'
       name:
         type: string
       repository:

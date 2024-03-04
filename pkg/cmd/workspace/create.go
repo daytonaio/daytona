@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"regexp"
 	"time"
@@ -144,35 +145,33 @@ var CreateCmd = &cobra.Command{
 			return
 		}
 
-		hostRegex := regexp.MustCompile(`https*://(.*)`)
-		host := hostRegex.FindStringSubmatch(activeProfile.Api.Url)[1]
-		wsURL := fmt.Sprintf("ws://%s/log/workspace/%s?follow=true", host, workspaceName)
-
-		ws, res, err := websocket.DefaultDialer.Dial(wsURL, nil)
-		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
-		}
 		statusProgram := tea.NewProgram(status.NewModel())
-
-		go func() {
-			if _, err := statusProgram.Run(); err != nil {
-				fmt.Println("Error running status program:", err)
-				os.Exit(1)
-			}
-		}()
 
 		started := false
 
 		go func() {
+			hostRegex := regexp.MustCompile(`https*://(.*)`)
+			host := hostRegex.FindStringSubmatch(activeProfile.Api.Url)[1]
+			wsURL := fmt.Sprintf("ws://%s/log/workspace/%s?follow=true", host, workspaceName)
+			var ws *websocket.Conn
+			var res *http.Response
+			var err error
+
+			ws, res, err = websocket.DefaultDialer.Dial(wsURL, nil)
+			if err != nil {
+				log.Fatal(apiclient.HandleErrorResponse(res, err))
+			}
+
+			defer ws.Close()
+
 			for {
 				_, msg, err := ws.ReadMessage()
 				if err != nil {
-					time.Sleep(500 * time.Millisecond)
-					continue
+					ws.Close()
+					ws, _, _ = websocket.DefaultDialer.Dial(wsURL, nil)
 				}
 
 				statusProgram.Send(status.ResultMsg{Line: string(msg)})
-
 				if started {
 					statusProgram.Send(status.ResultMsg{Line: "END_SIGNAL"})
 					break
@@ -180,16 +179,15 @@ var CreateCmd = &cobra.Command{
 			}
 		}()
 
-		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(serverapiclient.CreateWorkspace{
-			Name:         &workspaceName,
-			Repositories: repos,
-			Provider:     &provider,
-		}).Execute()
-		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
-		}
-
-		fmt.Println()
+		go func() {
+			if _, err := statusProgram.Run(); err != nil {
+				fmt.Println("Error running status program:", err)
+				statusProgram.Send(status.ClearScreenMsg{})
+				statusProgram.Send(tea.Quit())
+				statusProgram.ReleaseTerminal()
+				os.Exit(1)
+			}
+		}()
 
 		activeProfile, err = c.GetActiveProfile()
 		if err != nil {
@@ -201,22 +199,31 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		startTime := time.Now()
-		timeout := 3 * time.Minute
+		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(serverapiclient.CreateWorkspace{
+			Name:         &workspaceName,
+			Repositories: repos,
+			Provider:     &provider,
+		}).Execute()
+		if err != nil {
+			log.Fatal(apiclient.HandleErrorResponse(res, err))
+		}
+		started = true
+
+		dialStartTime := time.Now()
+		dialTimeout := 3 * time.Minute
+		statusProgram.Send(status.ResultMsg{Line: "Establishing connection with the workspace"})
 		for {
-			if time.Since(startTime) > timeout {
+			if time.Since(dialStartTime) > dialTimeout {
 				log.Fatal("Timeout: dialing timed out after 3 minutes")
 			}
 
-			// Dial with exponential backoff
 			dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s-%s:2222", workspaceName, *createdWorkspace.Projects[0].Name))
 			if err == nil {
-				// Dial succeeded
 				defer dialConn.Close()
 				break
 			}
 
-			time.Sleep(time.Second) // Adjust sleep time as needed
+			time.Sleep(time.Second)
 		}
 
 		wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceName).Execute()
@@ -225,6 +232,11 @@ var CreateCmd = &cobra.Command{
 			return
 		}
 
+		statusProgram.Send(status.ClearScreenMsg{})
+		statusProgram.Send(tea.Quit())
+		statusProgram.ReleaseTerminal()
+
+		fmt.Println()
 		info.Render(wsInfo)
 
 		skipIdeFlag, _ := cmd.Flags().GetBool("skip-ide")
@@ -238,7 +250,6 @@ var CreateCmd = &cobra.Command{
 		}
 
 		view_util.RenderInfoMessageBold("Opening the workspace in your preferred IDE")
-		time.Sleep(20 * time.Second)
 		openIDE(ide, activeProfile, workspaceName, *wsInfo.Projects[0].Name)
 	},
 }

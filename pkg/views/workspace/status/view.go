@@ -6,7 +6,6 @@ package status
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
@@ -18,17 +17,19 @@ var (
 	spinnerStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("63"))
 	helpStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Margin(1, 0)
 	dotStyle     = helpStyle.Copy().UnsetMargins()
-	appStyle     = lipgloss.NewStyle().Margin(1, 2, 1, 2).BorderStyle(lipgloss.NormalBorder()).BorderForeground(views.Green).Width(50).Padding(1, 1, 0, 2)
+	appStyle     = lipgloss.NewStyle().Margin(0, 2, 1, 2).BorderStyle(lipgloss.NormalBorder()).BorderForeground(views.Green).Width(50).Padding(1, 1, 0, 2)
 )
 
 type ResultMsg struct {
-	Duration time.Duration
-	Line     string
+	Line string
+	Dots bool
 }
 
+type ClearScreenMsg struct{}
+
 func (r ResultMsg) String() string {
-	if r.Duration == 0 {
-		return dotStyle.Render(strings.Repeat(".", 36))
+	if r.Dots {
+		return dotStyle.Render(strings.Repeat(".", 30))
 	}
 	return fmt.Sprintf(r.Line)
 }
@@ -40,11 +41,17 @@ type model struct {
 }
 
 func NewModel() model {
-	const numLastResults = 4
+	const numLastResults = 6
 	s := spinner.New()
 	s.Style = spinnerStyle
 	results := make([]ResultMsg, numLastResults)
-	results[0] = ResultMsg{Line: "Workspace creation is pending..."}
+
+	for i := range results {
+		results[i] = ResultMsg{Dots: true}
+	}
+
+	results[len(results)-1] = ResultMsg{Line: "Workspace creation is pending...", Dots: false}
+
 	return model{
 		spinner: s,
 		results: results,
@@ -68,6 +75,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		var cmd tea.Cmd
 		m.spinner, cmd = m.spinner.Update(msg)
 		return m, cmd
+	case ClearScreenMsg:
+		m.quitting = true
+		return m, nil
 	default:
 		return m, nil
 	}
