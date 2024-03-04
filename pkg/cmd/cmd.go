@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	. "github.com/daytonaio/daytona/pkg/cmd/agent"
@@ -23,7 +24,11 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "daytona",
 	Short: "Daytona is a Dev Environment Manager",
-	Long:  view_util.GetLongDescription(),
+	Long:  "Daytona is a Dev Environment Manager",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Print(view_util.GetLongDescription())
+		cmd.Help()
+	},
 }
 
 var originalStdout *os.File
