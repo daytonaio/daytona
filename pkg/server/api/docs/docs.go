@@ -740,6 +740,13 @@ const docTemplate = `{
                     "description": "DefaultValue is converted into the appropriate type based on the Type",
                     "type": "string"
                 },
+                "disabledPredicate": {
+                    "description": "A regex string matched with the name of the target to determine if the property should be disabled\nIf the regex matches the target name, the property will be disabled\nE.g. \"^local$\" will disable the property for the local target",
+                    "type": "string"
+                },
+                "inputMasked": {
+                    "type": "boolean"
+                },
                 "options": {
                     "description": "Options is only used if the Type is ProviderTargetPropertyTypeOption",
                     "type": "array",
