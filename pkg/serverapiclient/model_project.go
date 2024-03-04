@@ -19,8 +19,8 @@ var _ MappedNullable = &Project{}
 
 // Project struct for Project
 type Project struct {
-	Info *ProjectInfo `json:"info,omitempty"`
 	Name *string `json:"name,omitempty"`
+	Provider *ProviderTarget `json:"provider,omitempty"`
 	Repository *Repository `json:"repository,omitempty"`
 	WorkspaceId *string `json:"workspaceId,omitempty"`
 }
@@ -40,38 +40,6 @@ func NewProject() *Project {
 func NewProjectWithDefaults() *Project {
 	this := Project{}
 	return &this
-}
-
-// GetInfo returns the Info field value if set, zero value otherwise.
-func (o *Project) GetInfo() ProjectInfo {
-	if o == nil || IsNil(o.Info) {
-		var ret ProjectInfo
-		return ret
-	}
-	return *o.Info
-}
-
-// GetInfoOk returns a tuple with the Info field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *Project) GetInfoOk() (*ProjectInfo, bool) {
-	if o == nil || IsNil(o.Info) {
-		return nil, false
-	}
-	return o.Info, true
-}
-
-// HasInfo returns a boolean if a field has been set.
-func (o *Project) HasInfo() bool {
-	if o != nil && !IsNil(o.Info) {
-		return true
-	}
-
-	return false
-}
-
-// SetInfo gets a reference to the given ProjectInfo and assigns it to the Info field.
-func (o *Project) SetInfo(v ProjectInfo) {
-	o.Info = &v
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
@@ -104,6 +72,38 @@ func (o *Project) HasName() bool {
 // SetName gets a reference to the given string and assigns it to the Name field.
 func (o *Project) SetName(v string) {
 	o.Name = &v
+}
+
+// GetProvider returns the Provider field value if set, zero value otherwise.
+func (o *Project) GetProvider() ProviderTarget {
+	if o == nil || IsNil(o.Provider) {
+		var ret ProviderTarget
+		return ret
+	}
+	return *o.Provider
+}
+
+// GetProviderOk returns a tuple with the Provider field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Project) GetProviderOk() (*ProviderTarget, bool) {
+	if o == nil || IsNil(o.Provider) {
+		return nil, false
+	}
+	return o.Provider, true
+}
+
+// HasProvider returns a boolean if a field has been set.
+func (o *Project) HasProvider() bool {
+	if o != nil && !IsNil(o.Provider) {
+		return true
+	}
+
+	return false
+}
+
+// SetProvider gets a reference to the given ProviderTarget and assigns it to the Provider field.
+func (o *Project) SetProvider(v ProviderTarget) {
+	o.Provider = &v
 }
 
 // GetRepository returns the Repository field value if set, zero value otherwise.
@@ -180,11 +180,11 @@ func (o Project) MarshalJSON() ([]byte, error) {
 
 func (o Project) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Info) {
-		toSerialize["info"] = o.Info
-	}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
+	}
+	if !IsNil(o.Provider) {
+		toSerialize["provider"] = o.Provider
 	}
 	if !IsNil(o.Repository) {
 		toSerialize["repository"] = o.Repository

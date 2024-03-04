@@ -272,16 +272,18 @@ components:
   schemas:
     CreateWorkspace:
       example:
-        provider: provider
         repositories:
         - repositories
         - repositories
         name: name
+        providerTarget:
+          provider: provider
+          target: target
       properties:
         name:
           type: string
-        provider:
-          type: string
+        providerTarget:
+          $ref: '#/components/schemas/ProviderTarget'
         repositories:
           items:
             type: string
@@ -335,6 +337,9 @@ components:
       type: object
     Project:
       example:
+        provider:
+          provider: provider
+          target: target
         name: name
         repository:
           owner: owner
@@ -344,20 +349,12 @@ components:
           branch: branch
           sha: sha
           url: url
-        info:
-          providerMetadata: providerMetadata
-          isRunning: true
-          created: created
-          name: name
-          finished: finished
-          started: started
-          workspaceId: workspaceId
         workspaceId: workspaceId
       properties:
-        info:
-          $ref: '#/components/schemas/ProjectInfo'
         name:
           type: string
+        provider:
+          $ref: '#/components/schemas/ProviderTarget'
         repository:
           $ref: '#/components/schemas/Repository'
         workspaceId:
@@ -396,6 +393,16 @@ components:
         name:
           type: string
         version:
+          type: string
+      type: object
+    ProviderTarget:
+      example:
+        provider: provider
+        target: target
+      properties:
+        provider:
+          type: string
+        target:
           type: string
       type: object
     Repository:
@@ -465,7 +472,10 @@ components:
     Workspace:
       example:
         projects:
-        - name: name
+        - provider:
+            provider: provider
+            target: target
+          name: name
           repository:
             owner: owner
             path: path
@@ -474,16 +484,11 @@ components:
             branch: branch
             sha: sha
             url: url
-          info:
-            providerMetadata: providerMetadata
-            isRunning: true
-            created: created
-            name: name
-            finished: finished
-            started: started
-            workspaceId: workspaceId
           workspaceId: workspaceId
-        - name: name
+        - provider:
+            provider: provider
+            target: target
+          name: name
           repository:
             owner: owner
             path: path
@@ -492,18 +497,10 @@ components:
             branch: branch
             sha: sha
             url: url
-          info:
-            providerMetadata: providerMetadata
-            isRunning: true
-            created: created
-            name: name
-            finished: finished
-            started: started
-            workspaceId: workspaceId
           workspaceId: workspaceId
         provider:
-          profile: profile
-          name: name
+          provider: provider
+          target: target
         name: name
         id: id
         info:
@@ -536,7 +533,7 @@ components:
             $ref: '#/components/schemas/Project'
           type: array
         provider:
-          $ref: '#/components/schemas/WorkspaceProvider'
+          $ref: '#/components/schemas/ProviderTarget'
       type: object
     WorkspaceInfo:
       example:
@@ -565,16 +562,6 @@ components:
             $ref: '#/components/schemas/ProjectInfo'
           type: array
         providerMetadata:
-          type: string
-      type: object
-    WorkspaceProvider:
-      example:
-        profile: profile
-        name: name
-      properties:
-        name:
-          type: string
-        profile:
           type: string
       type: object
 x-original-swagger-version: "2.0"

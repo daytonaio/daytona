@@ -97,6 +97,7 @@ var CreateCmd = &cobra.Command{
 		} else {
 			provider = activeProfile.DefaultProvider
 		}
+		providerTarget := "local"
 
 		view_util.RenderMainTitle("WORKSPACE CREATION")
 
@@ -204,7 +205,10 @@ var CreateCmd = &cobra.Command{
 		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(serverapiclient.CreateWorkspace{
 			Name:         &workspaceName,
 			Repositories: repos,
-			Provider:     &provider,
+			ProviderTarget: &serverapiclient.ProviderTarget{
+				Provider: &provider,
+				Target:   &providerTarget,
+			},
 		}).Execute()
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))

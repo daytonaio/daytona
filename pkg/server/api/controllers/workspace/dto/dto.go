@@ -3,9 +3,9 @@ package dto
 import "github.com/daytonaio/daytona/pkg/types"
 
 type CreateWorkspace struct {
-	Name         string
-	Repositories []string
-	Provider     string
+	Name           string
+	Repositories   []string
+	ProviderTarget types.ProviderTarget
 } //	@name	CreateWorkspace
 
 type Workspace struct {

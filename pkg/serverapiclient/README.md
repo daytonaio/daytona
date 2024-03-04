@@ -103,11 +103,11 @@ Class | Method | HTTP request | Description
  - [Project](docs/Project.md)
  - [ProjectInfo](docs/ProjectInfo.md)
  - [Provider](docs/Provider.md)
+ - [ProviderTarget](docs/ProviderTarget.md)
  - [Repository](docs/Repository.md)
  - [ServerConfig](docs/ServerConfig.md)
  - [Workspace](docs/Workspace.md)
  - [WorkspaceInfo](docs/WorkspaceInfo.md)
- - [WorkspaceProvider](docs/WorkspaceProvider.md)
 
 
 ## Documentation For Authorization
