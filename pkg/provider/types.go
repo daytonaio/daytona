@@ -24,7 +24,7 @@ type ProviderTarget struct {
 	Options string
 }
 
-type ProviderTargetManifest map[string]ProviderTargetProperty
+type ProviderTargetManifest map[string]ProviderTargetProperty // @name ProviderTargetManifest
 
 type ProviderTargetPropertyType string
 

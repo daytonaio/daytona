@@ -4,10 +4,12 @@
 package server
 
 import (
+	"context"
 	"net/http"
 	"os"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/types"
 )
@@ -75,4 +77,20 @@ func ToServerConfig(config *serverapiclient.ServerConfig) *types.ServerConfig {
 		ApiPort:       uint32(*config.ApiPort),
 		HeadscalePort: uint32(*config.HeadscalePort),
 	}
+}
+
+func GetProviderList() ([]serverapiclient.Provider, error) {
+	apiClient, err := GetApiClient(nil)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx := context.Background()
+
+	providersList, res, err := apiClient.ProviderAPI.ListProviders(ctx).Execute()
+	if err != nil {
+		return nil, apiclient.HandleErrorResponse(res, err)
+	}
+
+	return providersList, nil
 }

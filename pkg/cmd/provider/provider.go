@@ -4,10 +4,11 @@
 package provider
 
 import (
+	"github.com/daytonaio/daytona/pkg/cmd/provider/target"
 	"github.com/spf13/cobra"
 )
 
-var pluginNameArg string
+var providerNameArg string
 
 var ProviderCmd = &cobra.Command{
 	Use:   "provider",
@@ -18,4 +19,5 @@ func init() {
 	ProviderCmd.AddCommand(providerListCmd)
 	ProviderCmd.AddCommand(providerUninstallCmd)
 	ProviderCmd.AddCommand(providerInstallCmd)
+	ProviderCmd.AddCommand(target.TargetCmd)
 }

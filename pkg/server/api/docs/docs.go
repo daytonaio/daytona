@@ -68,6 +68,66 @@ const docTemplate = `{
                 }
             }
         },
+        "/provider/{provider}/target": {
+            "put": {
+                "description": "Set a provider target",
+                "tags": [
+                    "provider"
+                ],
+                "summary": "Set a provider target",
+                "operationId": "SetTarget",
+                "parameters": [
+                    {
+                        "description": "Provider target to set",
+                        "name": "target",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/TargetDTO"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider name",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            }
+        },
+        "/provider/{provider}/target-manifest": {
+            "get": {
+                "description": "Get provider target manifest",
+                "tags": [
+                    "provider"
+                ],
+                "summary": "Get provider target manifest",
+                "operationId": "GetTargetManifest",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Provider name",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ProviderTargetManifest"
+                        }
+                    }
+                }
+            }
+        },
         "/provider/{provider}/uninstall": {
             "post": {
                 "description": "Uninstall a provider",
@@ -91,6 +151,37 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK"
+                    }
+                }
+            }
+        },
+        "/provider/{provider}/{target}": {
+            "delete": {
+                "description": "Set a provider target",
+                "tags": [
+                    "provider"
+                ],
+                "summary": "Set a provider target",
+                "operationId": "RemoveTarget",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Provider name",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Target name",
+                        "name": "target",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -504,6 +595,12 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "targets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/TargetDTO"
+                    }
+                },
                 "version": {
                     "type": "string"
                 }
@@ -518,6 +615,12 @@ const docTemplate = `{
                 "target": {
                     "type": "string"
                 }
+            }
+        },
+        "ProviderTargetManifest": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/provider.ProviderTargetProperty"
             }
         },
         "Repository": {
@@ -578,6 +681,18 @@ const docTemplate = `{
                 }
             }
         },
+        "TargetDTO": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "options": {
+                    "description": "JSON encoded map of options",
+                    "type": "string"
+                }
+            }
+        },
         "Workspace": {
             "type": "object",
             "properties": {
@@ -617,6 +732,42 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "provider.ProviderTargetProperty": {
+            "type": "object",
+            "properties": {
+                "defaultValue": {
+                    "description": "DefaultValue is converted into the appropriate type based on the Type",
+                    "type": "string"
+                },
+                "options": {
+                    "description": "Options is only used if the Type is ProviderTargetPropertyTypeOption",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "type": {
+                    "$ref": "#/definitions/provider.ProviderTargetPropertyType"
+                }
+            }
+        },
+        "provider.ProviderTargetPropertyType": {
+            "type": "string",
+            "enum": [
+                "string",
+                "option",
+                "boolean",
+                "int",
+                "float"
+            ],
+            "x-enum-varnames": [
+                "ProviderTargetPropertyTypeString",
+                "ProviderTargetPropertyTypeOption",
+                "ProviderTargetPropertyTypeBoolean",
+                "ProviderTargetPropertyTypeInt",
+                "ProviderTargetPropertyTypeFloat"
+            ]
         }
     }
 }`
