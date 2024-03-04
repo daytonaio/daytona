@@ -391,8 +391,8 @@
                 "name": {
                     "type": "string"
                 },
-                "provider": {
-                    "type": "string"
+                "providerTarget": {
+                    "$ref": "#/definitions/ProviderTarget"
                 },
                 "repositories": {
                     "type": "array",
@@ -455,11 +455,11 @@
         "Project": {
             "type": "object",
             "properties": {
-                "info": {
-                    "$ref": "#/definitions/ProjectInfo"
-                },
                 "name": {
                     "type": "string"
+                },
+                "provider": {
+                    "$ref": "#/definitions/ProviderTarget"
                 },
                 "repository": {
                     "$ref": "#/definitions/Repository"
@@ -502,6 +502,17 @@
                     "type": "string"
                 },
                 "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProviderTarget": {
+            "type": "object",
+            "properties": {
+                "provider": {
+                    "type": "string"
+                },
+                "target": {
                     "type": "string"
                 }
             }
@@ -583,7 +594,7 @@
                     }
                 },
                 "provider": {
-                    "$ref": "#/definitions/WorkspaceProvider"
+                    "$ref": "#/definitions/ProviderTarget"
                 }
             }
         },
@@ -600,17 +611,6 @@
                     }
                 },
                 "providerMetadata": {
-                    "type": "string"
-                }
-            }
-        },
-        "WorkspaceProvider": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "profile": {
                     "type": "string"
                 }
             }

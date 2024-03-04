@@ -9,25 +9,16 @@ import (
 	"github.com/daytonaio/daytona/pkg/types"
 )
 
-type WorkspaceProviderDTO struct {
-	Name    string `json:"name"`
-	Profile string `json:"profile"`
+type ProviderTargetDTO struct {
+	Provider string `json:"provider"`
+	Target   string `json:"target"`
 }
 
 type WorkspaceDTO struct {
-	Id       string               `gorm:"primaryKey"`
-	Name     string               `json:"name"`
-	Provider WorkspaceProviderDTO `gorm:"serializer:json"`
-	Projects []ProjectDTO         `gorm:"serializer:json"`
-}
-
-type WorkspaceInfoDTO struct {
-	Id       string               `json:"id"`
-	Name     string               `json:"name"`
-	Provider WorkspaceProviderDTO `json:"provider"`
-	Projects []ProjectInfoDTO     `json:"projects"`
-	// TODO: rethink name
-	ProviderMetadata interface{} `json:"providerMetadata"`
+	Id             string            `gorm:"primaryKey"`
+	Name           string            `json:"name"`
+	ProviderTarget ProviderTargetDTO `gorm:"serializer:json"`
+	Projects       []ProjectDTO      `gorm:"serializer:json"`
 }
 
 func (w WorkspaceDTO) GetProject(name string) (*ProjectDTO, error) {
@@ -44,9 +35,9 @@ func ToWorkspaceDTO(workspace *types.Workspace) WorkspaceDTO {
 	workspaceDTO := WorkspaceDTO{
 		Id:   workspace.Id,
 		Name: workspace.Name,
-		Provider: WorkspaceProviderDTO{
-			Name:    workspace.Provider.Name,
-			Profile: workspace.Provider.Profile,
+		ProviderTarget: ProviderTargetDTO{
+			Provider: workspace.ProviderTarget.Provider,
+			Target:   workspace.ProviderTarget.Target,
 		},
 	}
 
@@ -61,9 +52,9 @@ func ToWorkspace(workspaceDTO WorkspaceDTO) *types.Workspace {
 	workspace := types.Workspace{
 		Id:   workspaceDTO.Id,
 		Name: workspaceDTO.Name,
-		Provider: &types.WorkspaceProvider{
-			Name:    workspaceDTO.Provider.Name,
-			Profile: workspaceDTO.Provider.Profile,
+		ProviderTarget: types.ProviderTarget{
+			Provider: workspaceDTO.ProviderTarget.Provider,
+			Target:   workspaceDTO.ProviderTarget.Target,
 		},
 	}
 

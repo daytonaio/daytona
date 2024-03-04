@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 **Info** | Pointer to [**WorkspaceInfo**](WorkspaceInfo.md) |  | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
 **Projects** | Pointer to [**[]Project**](Project.md) |  | [optional] 
-**Provider** | Pointer to [**WorkspaceProvider**](WorkspaceProvider.md) |  | [optional] 
+**Provider** | Pointer to [**ProviderTarget**](ProviderTarget.md) |  | [optional] 
 
 ## Methods
 
@@ -131,20 +131,20 @@ HasProjects returns a boolean if a field has been set.
 
 ### GetProvider
 
-`func (o *Workspace) GetProvider() WorkspaceProvider`
+`func (o *Workspace) GetProvider() ProviderTarget`
 
 GetProvider returns the Provider field if non-nil, zero value otherwise.
 
 ### GetProviderOk
 
-`func (o *Workspace) GetProviderOk() (*WorkspaceProvider, bool)`
+`func (o *Workspace) GetProviderOk() (*ProviderTarget, bool)`
 
 GetProviderOk returns a tuple with the Provider field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetProvider
 
-`func (o *Workspace) SetProvider(v WorkspaceProvider)`
+`func (o *Workspace) SetProvider(v ProviderTarget)`
 
 SetProvider sets Provider field to given value.
 
