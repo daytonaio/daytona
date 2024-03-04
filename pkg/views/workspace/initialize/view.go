@@ -4,7 +4,6 @@
 package initialize
 
 import (
-	"fmt"
 	"os"
 	"sort"
 
@@ -169,8 +168,6 @@ func (m InitWorkspaceViewModel) View() string {
 	if m.done {
 		return ""
 	}
-
-	fmt.Println("TEST")
 
 	sortedProjects := []string{}
 	for project := range m.Projects {
