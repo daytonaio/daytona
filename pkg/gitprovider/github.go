@@ -6,7 +6,6 @@ package gitprovider
 import (
 	"context"
 	"strconv"
-	"strings"
 
 	"github.com/daytonaio/daytona/pkg/types"
 	"github.com/google/go-github/github"
@@ -150,20 +149,20 @@ func (g *GitHubGitProvider) getApiClient() *github.Client {
 	return client
 }
 
-func (g *GitHubGitProvider) ParseGitUrl(url string) (*types.Repository, error) {
-	repo := parseGitUrl(url)
+// func (g *GitHubGitProvider) ParseGitUrl(url string) (*types.Repository, error) {
+// 	repo := parseGitUrl(url)
 
-	if strings.Contains(url, "pull/") {
-		parts := strings.Split(repo.Path, "pull/")
-		prNumber, err := strconv.Atoi(strings.Split(parts[1], "/")[0])
-		if err != nil {
-			return nil, err
-		}
-		repo.Path = ""
-		repo.PRNumber = prNumber
-	}
-	return nil, nil
-}
+// 	if strings.Contains(url, "pull/") {
+// 		parts := strings.Split(repo.Path, "pull/")
+// 		prNumber, err := strconv.Atoi(strings.Split(parts[1], "/")[0])
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 		repo.Path = ""
+// 		repo.PRNumber = prNumber
+// 	}
+// 	return nil, nil
+// }
 
 // public override parseGitUrl(gitUrl: string): StaticGitContext {
 // 	const staticContext = super.parseGitUrl(gitUrl)

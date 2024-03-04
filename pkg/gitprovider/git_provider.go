@@ -5,8 +5,6 @@ package gitprovider
 
 import (
 	"errors"
-	"net/url"
-	"strings"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/types"
@@ -19,7 +17,7 @@ type GitProvider interface {
 	GetRepositories(namespace string) ([]types.Repository, error)
 	GetUserData() (GitUser, error)
 	GetRepoBranches(types.Repository, string) ([]GitBranch, error)
-	ParseGitUrl(string) (*types.Repository, error)
+	// ParseGitUrl(string) (*types.Repository, error)
 }
 
 type GitUser struct {
@@ -99,42 +97,42 @@ func GetUsernameFromToken(providerId string, gitProviders []config.GitProvider, 
 	return gitUser.Username, nil
 }
 
-func GetRepository(url string) {
-	// GetProvider
-	provider := GitProvider{}
+// func GetRepository(url string) {
+// 	// GetProvider
+// 	provider := GitProvider{}
 
-	repo := provider.ParseGitUrl(url)
+// 	repo := provider.ParseGitUrl(url)
 
-	if repo.Prnumber {
-		repo = provider.GetPullRequestContext(repo)
-	}
+// 	if repo.Prnumber {
+// 		repo = provider.GetPullRequestContext(repo)
+// 	}
 
-	sha := provider.GetLastCommitSha(repo)
-	repo.Sha = sha
+// 	sha := provider.GetLastCommitSha(repo)
+// 	repo.Sha = sha
 
-	return repo
-}
+// 	return repo
+// }
 
-func parseGitUrl(url string) (*types.Repository, error) {
-	if strings.HasPrefix(url, "git@") {
-		return parseGitUrlWithSsh(url)
-	}
+// func parseGitUrl(url string) (*types.Repository, error) {
+// 	if strings.HasPrefix(url, "git@") {
+// 		return parseGitUrlWithSsh(url)
+// 	}
 
-	if !strings.HasPrefix(url, "http") {
-		return nil, errors.New("Can not parse git url")
-	}
+// 	if !strings.HasPrefix(url, "http") {
+// 		return nil, errors.New("Can not parse git url")
+// 	}
 
-	removedProtocol := strings.Replace(url, "(^\w+:|^)://", "", -1)
-	splitted := strings.Split(removedProtocol, "/")
-	source := splitted[0]
-	owner := splitted[1]
-	repo := strings.Replace(splitted[2], ".git", "", -1)
+// 	removedProtocol := strings.Replace(url, "(^\w+:|^)://", "", -1)
+// 	splitted := strings.Split(removedProtocol, "/")
+// 	source := splitted[0]
+// 	owner := splitted[1]
+// 	repo := strings.Replace(splitted[2], ".git", "", -1)
 
-	path := strings.Join(splitted[3:], "/")
+// 	path := strings.Join(splitted[3:], "/")
 
-	...
-	
-}
+// 	...
+
+// }
 
 // public parseGitUrl(gitUrl: string): StaticGitContext {
 // 	if (gitUrl.startsWith('git@')) {
