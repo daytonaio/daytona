@@ -5,7 +5,9 @@ package ports
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
+	"hash/fnv"
 	"time"
 
 	"github.com/daytonaio/daytona/internal/util"
@@ -85,7 +87,10 @@ func forwardPublicPort(workspaceId, projectName string, hostPort uint16) error {
 		return apiclient.HandleErrorResponse(res, err)
 	}
 
-	subDomain := fmt.Sprintf("%s-%s-%d-%s", workspaceId, projectName, portArg, *serverConfig.Id)
+	h := fnv.New64()
+	h.Write([]byte(fmt.Sprintf("%s-%s-%s", workspaceId, projectName, *serverConfig.Id)))
+
+	subDomain := fmt.Sprintf("%d-%s", portArg, base64.RawURLEncoding.EncodeToString([]byte(fmt.Sprint(h.Sum64()))))
 
 	go func() {
 		time.Sleep(1 * time.Second)
