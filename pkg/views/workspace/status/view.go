@@ -35,9 +35,10 @@ func (r ResultMsg) String() string {
 }
 
 type model struct {
-	spinner  spinner.Model
-	results  []ResultMsg
-	quitting bool
+	spinner       spinner.Model
+	results       []ResultMsg
+	quitting      bool
+	width, height int
 }
 
 func NewModel() model {
@@ -78,6 +79,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case ClearScreenMsg:
 		m.quitting = true
 		return m, nil
+	case tea.WindowSizeMsg:
+		m.width, m.height = msg.Width, msg.Height
+		return m, nil
 	default:
 		return m, nil
 	}
@@ -90,5 +94,5 @@ func (m model) View() string {
 		s += res.String() + "\n"
 	}
 
-	return appStyle.Render(s)
+	return appStyle.Width(m.width - 10).Render(s)
 }
