@@ -11,3 +11,4 @@ We contributors to Daytona:
 * Chad Metcalf (@metcalfc)
 * Toma Puljak (@tpuljak)
 * Nikola Balic (@nkkko)
+* Goran Draganic (@gdraganic)
