@@ -17,6 +17,7 @@ type GitProvider interface {
 	GetRepositories(namespace string) ([]types.Repository, error)
 	GetUserData() (GitUser, error)
 	GetRepoBranches(types.Repository, string) ([]GitBranch, error)
+	GetRepoPRs(types.Repository, string) ([]GitPullRequest, error)
 	// ParseGitUrl(string) (*types.Repository, error)
 }
 
@@ -36,6 +37,22 @@ type GitBranch struct {
 	Name string
 	SHA  string
 }
+
+type GitPullRequest struct {
+	Name   string
+	Branch string
+}
+
+type CheckoutOption struct {
+	Title string
+	Id    string
+}
+
+var (
+	CheckoutDefault = CheckoutOption{Title: "Default", Id: "default"}
+	CheckoutBranch  = CheckoutOption{Title: "Branch", Id: "branch"}
+	CheckoutPR      = CheckoutOption{Title: "Pull/Merge request", Id: "pullrequest"}
+)
 
 func GetGitProvider(providerId string, gitProviders []types.GitProvider) GitProvider {
 	var chosenProvider *types.GitProvider

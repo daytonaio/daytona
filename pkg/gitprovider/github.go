@@ -88,9 +88,13 @@ func (g *GitHubGitProvider) GetRepoBranches(repo types.Repository, namespaceId s
 	if err != nil {
 		return nil, err
 	}
+	if user.Id == personalNamespaceId {
+		namespaceId = user.Username
+	}
+
 	var response []GitBranch
 
-	repoBranches, _, err := client.Repositories.ListBranches(context.Background(), user.Username, repo.Name, &github.ListOptions{})
+	repoBranches, _, err := client.Repositories.ListBranches(context.Background(), namespaceId, repo.Name, &github.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -103,6 +107,35 @@ func (g *GitHubGitProvider) GetRepoBranches(repo types.Repository, namespaceId s
 			responseBranch.SHA = *branch.Commit.SHA
 		}
 		response = append(response, responseBranch)
+	}
+
+	return response, nil
+}
+
+func (g *GitHubGitProvider) GetRepoPRs(repo types.Repository, namespaceId string) ([]GitPullRequest, error) {
+	client := g.getApiClient()
+	user, err := g.GetUserData()
+	if err != nil {
+		return nil, err
+	}
+	if user.Id == personalNamespaceId {
+		namespaceId = user.Username
+	}
+
+	var response []GitPullRequest
+
+	prList, _, err := client.PullRequests.List(context.Background(), namespaceId, repo.Name, &github.PullRequestListOptions{
+		State: "open",
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, pr := range prList {
+		response = append(response, GitPullRequest{
+			Name:   *pr.Title,
+			Branch: *pr.Head.Ref,
+		})
 	}
 
 	return response, nil

@@ -5,6 +5,7 @@ package gitprovider
 
 import (
 	"errors"
+	"fmt"
 	"log"
 
 	"github.com/charmbracelet/huh"
@@ -35,7 +36,7 @@ func GitProviderSelectionView(gitProviderAddView *GitProviderSelectView, userGit
 		}
 	}
 
-	form := huh.NewForm(
+	gitProviderForm := huh.NewForm(
 		huh.NewGroup(
 			huh.NewSelect[string]().
 				Title("Choose a Git provider").
@@ -43,6 +44,14 @@ func GitProviderSelectionView(gitProviderAddView *GitProviderSelectView, userGit
 					options...,
 				).
 				Value(&gitProviderAddView.Id)),
+	).WithTheme(views.GetCustomTheme())
+
+	err := gitProviderForm.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	userDataForm := huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Username").
@@ -70,7 +79,10 @@ func GitProviderSelectionView(gitProviderAddView *GitProviderSelectView, userGit
 		).WithHide(isDeleting),
 	).WithTheme(views.GetCustomTheme())
 
-	err := form.Run()
+	fmt.Println("More information on:")
+	fmt.Println(config.GetDocsLinkFromGitProvider(gitProviderAddView.Id))
+
+	err = userDataForm.Run()
 	if err != nil {
 		log.Fatal(err)
 	}

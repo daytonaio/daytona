@@ -104,6 +104,25 @@ func (g *GitLabGitProvider) GetRepoBranches(repo types.Repository, namespaceId s
 	return response, nil
 }
 
+func (g *GitLabGitProvider) GetRepoPRs(repo types.Repository, namespaceId string) ([]GitPullRequest, error) {
+	client := g.getApiClient()
+	var response []GitPullRequest
+
+	mergeRequests, _, err := client.MergeRequests.ListProjectMergeRequests(repo.Id, &gitlab.ListProjectMergeRequestsOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, mergeRequest := range mergeRequests {
+		response = append(response, GitPullRequest{
+			Name:   mergeRequest.Title,
+			Branch: mergeRequest.SourceBranch,
+		})
+	}
+
+	return response, nil
+}
+
 func (g *GitLabGitProvider) GetUserData() (GitUser, error) {
 	client := g.getApiClient()
 

@@ -131,8 +131,7 @@ var CreateCmd = &cobra.Command{
 				}
 
 				repo := &types.Repository{
-					Name: *repoResponse.Name,
-					Url:  *repoResponse.Url,
+					Url: *repoResponse.Url,
 				}
 
 				repos = append(repos, *repo)

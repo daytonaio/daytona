@@ -152,6 +152,31 @@ func (g *BitbucketGitProvider) GetRepoBranches(repo types.Repository, namespaceI
 	return response, nil
 }
 
+func (g *BitbucketGitProvider) GetRepoPRs(repo types.Repository, namespaceId string) ([]GitPullRequest, error) {
+	client := g.getApiClient()
+	var response []GitPullRequest
+
+	if namespaceId == personalNamespaceId {
+		user, err := g.GetUserData()
+		if err != nil {
+			return nil, err
+		}
+		namespaceId = user.Username
+	}
+
+	prList, err := client.Repositories.PullRequests.Get(&bitbucket.PullRequestsOptions{
+		Owner:    namespaceId,
+		RepoSlug: repo.Name,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(prList)
+
+	return response, err
+}
+
 func (g *BitbucketGitProvider) GetUserData() (GitUser, error) {
 	client := g.getApiClient()
 

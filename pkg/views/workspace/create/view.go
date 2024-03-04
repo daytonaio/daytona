@@ -331,6 +331,7 @@ func GetRepositoryFromWizard(userGitProviders []types.GitProvider, secondaryProj
 	var namespaceId string
 	var branchName string
 	var gitProvider gitprovider.GitProvider
+	var checkoutOptions []gitprovider.CheckoutOption
 
 	if len(userGitProviders) == 1 {
 		providerId = userGitProviders[0].Id
@@ -404,14 +405,47 @@ func GetRepositoryFromWizard(userGitProviders []types.GitProvider, secondaryProj
 
 	if len(branchList) == 1 {
 		branchName = branchList[0].Name
-	} else {
+		chosenRepo.Branch = branchName
+		return chosenRepo, nil
+	}
+
+	prList, err := gitProvider.GetRepoPRs(chosenRepo, namespaceId)
+	if err != nil {
+		return types.Repository{}, err
+	}
+	if len(prList) == 0 {
 		branchName = selection.GetBranchNameFromPrompt(branchList, secondaryProjectOrder)
 		if branchName == "" {
 			return types.Repository{}, nil
 		}
+		chosenRepo.Branch = branchName
+
+		return chosenRepo, nil
 	}
 
-	chosenRepo.Branch = branchName
+	checkoutOptions = append(checkoutOptions, gitprovider.CheckoutBranch)
+	checkoutOptions = append(checkoutOptions, gitprovider.CheckoutPR)
+	checkoutOptions = append(checkoutOptions, gitprovider.CheckoutDefault)
+
+	chosenCheckoutOption := selection.GetCheckoutOptionFromPrompt(secondaryProjectOrder, checkoutOptions)
+	if chosenCheckoutOption == gitprovider.CheckoutDefault {
+		return chosenRepo, nil
+	}
+
+	if chosenCheckoutOption == gitprovider.CheckoutBranch {
+		branchName = selection.GetBranchNameFromPrompt(branchList, secondaryProjectOrder)
+		if branchName == "" {
+			return types.Repository{}, nil
+		}
+		chosenRepo.Branch = branchName
+	} else if chosenCheckoutOption == gitprovider.CheckoutPR {
+		chosenPullRequest := selection.GetPullRequestFromPrompt(prList, secondaryProjectOrder)
+		if chosenPullRequest.Branch == "" {
+			return types.Repository{}, nil
+		}
+
+		chosenRepo.Branch = chosenPullRequest.Branch
+	}
 
 	return chosenRepo, nil
 }
