@@ -37,7 +37,12 @@ const (
 )
 
 type ProviderTargetProperty struct {
-	Type ProviderTargetPropertyType
+	Type        ProviderTargetPropertyType
+	InputMasked bool
+	// A regex string matched with the name of the target to determine if the property should be disabled
+	// If the regex matches the target name, the property will be disabled
+	// E.g. "^local$" will disable the property for the local target
+	DisabledPredicate string
 	// DefaultValue is converted into the appropriate type based on the Type
 	DefaultValue string
 	// Options is only used if the Type is ProviderTargetPropertyTypeOption

@@ -5,6 +5,8 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **DefaultValue** | Pointer to **string** | DefaultValue is converted into the appropriate type based on the Type | [optional] 
+**DisabledPredicate** | Pointer to **string** | A regex string matched with the name of the target to determine if the property should be disabled If the regex matches the target name, the property will be disabled E.g. \&quot;^local$\&quot; will disable the property for the local target | [optional] 
+**InputMasked** | Pointer to **bool** |  | [optional] 
 **Options** | Pointer to **[]string** | Options is only used if the Type is ProviderTargetPropertyTypeOption | [optional] 
 **Type** | Pointer to [**ProviderProviderTargetPropertyType**](ProviderProviderTargetPropertyType.md) |  | [optional] 
 
@@ -51,6 +53,56 @@ SetDefaultValue sets DefaultValue field to given value.
 `func (o *ProviderProviderTargetProperty) HasDefaultValue() bool`
 
 HasDefaultValue returns a boolean if a field has been set.
+
+### GetDisabledPredicate
+
+`func (o *ProviderProviderTargetProperty) GetDisabledPredicate() string`
+
+GetDisabledPredicate returns the DisabledPredicate field if non-nil, zero value otherwise.
+
+### GetDisabledPredicateOk
+
+`func (o *ProviderProviderTargetProperty) GetDisabledPredicateOk() (*string, bool)`
+
+GetDisabledPredicateOk returns a tuple with the DisabledPredicate field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetDisabledPredicate
+
+`func (o *ProviderProviderTargetProperty) SetDisabledPredicate(v string)`
+
+SetDisabledPredicate sets DisabledPredicate field to given value.
+
+### HasDisabledPredicate
+
+`func (o *ProviderProviderTargetProperty) HasDisabledPredicate() bool`
+
+HasDisabledPredicate returns a boolean if a field has been set.
+
+### GetInputMasked
+
+`func (o *ProviderProviderTargetProperty) GetInputMasked() bool`
+
+GetInputMasked returns the InputMasked field if non-nil, zero value otherwise.
+
+### GetInputMaskedOk
+
+`func (o *ProviderProviderTargetProperty) GetInputMaskedOk() (*bool, bool)`
+
+GetInputMaskedOk returns a tuple with the InputMasked field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetInputMasked
+
+`func (o *ProviderProviderTargetProperty) SetInputMasked(v bool)`
+
+SetInputMasked sets InputMasked field to given value.
+
+### HasInputMasked
+
+`func (o *ProviderProviderTargetProperty) HasInputMasked() bool`
+
+HasInputMasked returns a boolean if a field has been set.
 
 ### GetOptions
 
