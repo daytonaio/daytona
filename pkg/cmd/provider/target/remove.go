@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package provider
+package target
 
 import (
 	"context"
@@ -9,36 +9,40 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/views/provider"
+	"github.com/daytonaio/daytona/pkg/views/provider/target"
 	"github.com/spf13/cobra"
 
 	log "github.com/sirupsen/logrus"
 )
 
-var providerUninstallCmd = &cobra.Command{
-	Use:     "uninstall",
-	Short:   "Uninstall provider",
+var targetRemoveCmd = &cobra.Command{
+	Use:     "remove",
+	Short:   "Remove provider target",
 	Args:    cobra.NoArgs,
-	Aliases: []string{"u"},
+	Aliases: []string{"rm"},
 	Run: func(cmd *cobra.Command, args []string) {
 		pluginList, err := server.GetProviderList()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		providerToUninstall := provider.GetProviderFromPrompt(pluginList, "Choose a Provider to uninstall")
+		selectedProvider := provider.GetProviderFromPrompt(pluginList, "Choose a Provider")
 
-		if providerToUninstall == nil {
+		if selectedProvider == nil {
 			return
 		}
 
-		apiClient, err := server.GetApiClient(nil)
+		selectedTarget, err := target.GetTargetFromPrompt(selectedProvider.Targets, false)
 		if err != nil {
 			log.Fatal(err)
 		}
-		ctx := context.Background()
 
-		res, err := apiClient.ProviderAPI.UninstallProvider(ctx, *providerToUninstall.Name).Execute()
+		client, err := server.GetApiClient(nil)
+		if err != nil {
+			log.Fatal(err)
+		}
 
+		res, err := client.ProviderAPI.RemoveTarget(context.Background(), *selectedProvider.Name, *selectedTarget.Name).Execute()
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}

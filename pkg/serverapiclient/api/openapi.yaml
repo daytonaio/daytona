@@ -42,6 +42,53 @@ paths:
       tags:
       - provider
       x-codegen-request-body-name: provider
+  /provider/{provider}/target:
+    put:
+      description: Set a provider target
+      operationId: SetTarget
+      parameters:
+      - description: Provider name
+        in: path
+        name: provider
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/TargetDTO'
+        description: Provider target to set
+        required: true
+      responses:
+        "201":
+          content: {}
+          description: Created
+      summary: Set a provider target
+      tags:
+      - provider
+      x-codegen-request-body-name: target
+  /provider/{provider}/target-manifest:
+    get:
+      description: Get provider target manifest
+      operationId: GetTargetManifest
+      parameters:
+      - description: Provider name
+        in: path
+        name: provider
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProviderTargetManifest'
+          description: OK
+      summary: Get provider target manifest
+      tags:
+      - provider
   /provider/{provider}/uninstall:
     post:
       description: Uninstall a provider
@@ -58,6 +105,30 @@ paths:
           content: {}
           description: OK
       summary: Uninstall a provider
+      tags:
+      - provider
+  /provider/{provider}/{target}:
+    delete:
+      description: Set a provider target
+      operationId: RemoveTarget
+      parameters:
+      - description: Provider name
+        in: path
+        name: provider
+        required: true
+        schema:
+          type: string
+      - description: Target name
+        in: path
+        name: target
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          content: {}
+          description: No Content
+      summary: Set a provider target
       tags:
       - provider
   /server/config:
@@ -272,16 +343,18 @@ components:
   schemas:
     CreateWorkspace:
       example:
-        provider: provider
         repositories:
         - repositories
         - repositories
         name: name
+        providerTarget:
+          provider: provider
+          target: target
       properties:
         name:
           type: string
-        provider:
-          type: string
+        providerTarget:
+          $ref: '#/components/schemas/ProviderTarget'
         repositories:
           items:
             type: string
@@ -335,6 +408,9 @@ components:
       type: object
     Project:
       example:
+        provider:
+          provider: provider
+          target: target
         name: name
         repository:
           owner: owner
@@ -344,20 +420,12 @@ components:
           branch: branch
           sha: sha
           url: url
-        info:
-          providerMetadata: providerMetadata
-          isRunning: true
-          created: created
-          name: name
-          finished: finished
-          started: started
-          workspaceId: workspaceId
         workspaceId: workspaceId
       properties:
-        info:
-          $ref: '#/components/schemas/ProjectInfo'
         name:
           type: string
+        provider:
+          $ref: '#/components/schemas/ProviderTarget'
         repository:
           $ref: '#/components/schemas/Repository'
         workspaceId:
@@ -391,12 +459,35 @@ components:
     Provider:
       example:
         name: name
+        targets:
+        - name: name
+          options: options
+        - name: name
+          options: options
         version: version
       properties:
         name:
           type: string
+        targets:
+          items:
+            $ref: '#/components/schemas/TargetDTO'
+          type: array
         version:
           type: string
+      type: object
+    ProviderTarget:
+      example:
+        provider: provider
+        target: target
+      properties:
+        provider:
+          type: string
+        target:
+          type: string
+      type: object
+    ProviderTargetManifest:
+      additionalProperties:
+        $ref: '#/components/schemas/provider.ProviderTargetProperty'
       type: object
     Repository:
       example:
@@ -462,10 +553,24 @@ components:
         serverDownloadUrl:
           type: string
       type: object
+    TargetDTO:
+      example:
+        name: name
+        options: options
+      properties:
+        name:
+          type: string
+        options:
+          description: JSON encoded map of options
+          type: string
+      type: object
     Workspace:
       example:
         projects:
-        - name: name
+        - provider:
+            provider: provider
+            target: target
+          name: name
           repository:
             owner: owner
             path: path
@@ -474,16 +579,11 @@ components:
             branch: branch
             sha: sha
             url: url
-          info:
-            providerMetadata: providerMetadata
-            isRunning: true
-            created: created
-            name: name
-            finished: finished
-            started: started
-            workspaceId: workspaceId
           workspaceId: workspaceId
-        - name: name
+        - provider:
+            provider: provider
+            target: target
+          name: name
           repository:
             owner: owner
             path: path
@@ -492,18 +592,10 @@ components:
             branch: branch
             sha: sha
             url: url
-          info:
-            providerMetadata: providerMetadata
-            isRunning: true
-            created: created
-            name: name
-            finished: finished
-            started: started
-            workspaceId: workspaceId
           workspaceId: workspaceId
         provider:
-          profile: profile
-          name: name
+          provider: provider
+          target: target
         name: name
         id: id
         info:
@@ -536,7 +628,7 @@ components:
             $ref: '#/components/schemas/Project'
           type: array
         provider:
-          $ref: '#/components/schemas/WorkspaceProvider'
+          $ref: '#/components/schemas/ProviderTarget'
       type: object
     WorkspaceInfo:
       example:
@@ -567,14 +659,40 @@ components:
         providerMetadata:
           type: string
       type: object
-    WorkspaceProvider:
-      example:
-        profile: profile
-        name: name
+    provider.ProviderTargetProperty:
       properties:
-        name:
+        defaultValue:
+          description: DefaultValue is converted into the appropriate type based on
+            the Type
           type: string
-        profile:
+        disabledPredicate:
+          description: |-
+            A regex string matched with the name of the target to determine if the property should be disabled
+            If the regex matches the target name, the property will be disabled
+            E.g. "^local$" will disable the property for the local target
           type: string
+        inputMasked:
+          type: boolean
+        options:
+          description: Options is only used if the Type is ProviderTargetPropertyTypeOption
+          items:
+            type: string
+          type: array
+        type:
+          $ref: '#/components/schemas/provider.ProviderTargetPropertyType'
       type: object
+    provider.ProviderTargetPropertyType:
+      enum:
+      - string
+      - option
+      - boolean
+      - int
+      - float
+      type: string
+      x-enum-varnames:
+      - ProviderTargetPropertyTypeString
+      - ProviderTargetPropertyTypeOption
+      - ProviderTargetPropertyTypeBoolean
+      - ProviderTargetPropertyTypeInt
+      - ProviderTargetPropertyTypeFloat
 x-original-swagger-version: "2.0"

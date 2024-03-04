@@ -20,7 +20,7 @@ var _ MappedNullable = &CreateWorkspace{}
 // CreateWorkspace struct for CreateWorkspace
 type CreateWorkspace struct {
 	Name *string `json:"name,omitempty"`
-	Provider *string `json:"provider,omitempty"`
+	ProviderTarget *ProviderTarget `json:"providerTarget,omitempty"`
 	Repositories []string `json:"repositories,omitempty"`
 }
 
@@ -73,36 +73,36 @@ func (o *CreateWorkspace) SetName(v string) {
 	o.Name = &v
 }
 
-// GetProvider returns the Provider field value if set, zero value otherwise.
-func (o *CreateWorkspace) GetProvider() string {
-	if o == nil || IsNil(o.Provider) {
-		var ret string
+// GetProviderTarget returns the ProviderTarget field value if set, zero value otherwise.
+func (o *CreateWorkspace) GetProviderTarget() ProviderTarget {
+	if o == nil || IsNil(o.ProviderTarget) {
+		var ret ProviderTarget
 		return ret
 	}
-	return *o.Provider
+	return *o.ProviderTarget
 }
 
-// GetProviderOk returns a tuple with the Provider field value if set, nil otherwise
+// GetProviderTargetOk returns a tuple with the ProviderTarget field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CreateWorkspace) GetProviderOk() (*string, bool) {
-	if o == nil || IsNil(o.Provider) {
+func (o *CreateWorkspace) GetProviderTargetOk() (*ProviderTarget, bool) {
+	if o == nil || IsNil(o.ProviderTarget) {
 		return nil, false
 	}
-	return o.Provider, true
+	return o.ProviderTarget, true
 }
 
-// HasProvider returns a boolean if a field has been set.
-func (o *CreateWorkspace) HasProvider() bool {
-	if o != nil && !IsNil(o.Provider) {
+// HasProviderTarget returns a boolean if a field has been set.
+func (o *CreateWorkspace) HasProviderTarget() bool {
+	if o != nil && !IsNil(o.ProviderTarget) {
 		return true
 	}
 
 	return false
 }
 
-// SetProvider gets a reference to the given string and assigns it to the Provider field.
-func (o *CreateWorkspace) SetProvider(v string) {
-	o.Provider = &v
+// SetProviderTarget gets a reference to the given ProviderTarget and assigns it to the ProviderTarget field.
+func (o *CreateWorkspace) SetProviderTarget(v ProviderTarget) {
+	o.ProviderTarget = &v
 }
 
 // GetRepositories returns the Repositories field value if set, zero value otherwise.
@@ -150,8 +150,8 @@ func (o CreateWorkspace) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
 	}
-	if !IsNil(o.Provider) {
-		toSerialize["provider"] = o.Provider
+	if !IsNil(o.ProviderTarget) {
+		toSerialize["providerTarget"] = o.ProviderTarget
 	}
 	if !IsNil(o.Repositories) {
 		toSerialize["repositories"] = o.Repositories

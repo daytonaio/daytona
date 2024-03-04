@@ -24,7 +24,8 @@ type ProfileAddView struct {
 	RemoteSshPassword       string
 	RemoteSshUser           string
 	RemoteSshPrivateKeyPath string
-	DefaultProvider         string
+	DefaultProviderName     string
+	DefaultProviderTarget   string
 	ApiUrl                  string
 }
 
