@@ -22,9 +22,9 @@ var us_defaultFrpsConfig = types.FRPSConfig{
 }
 
 var eu_defaultFrpsConfig = types.FRPSConfig{
-	Domain:   "try-eu.daytona.io",
+	Domain:   "try-eu.daytona.app",
 	Port:     7000,
-	Protocol: "http",
+	Protocol: "https",
 }
 
 func getDefaultFRPSConfig() *types.FRPSConfig {
