@@ -71,8 +71,9 @@ func ListWorkspaces(ctx *gin.Context) {
 	for _, workspace := range workspaces {
 		workspaceInfo, err := provisioner.GetWorkspaceInfo(workspace)
 		if err != nil {
-			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get workspace info for %s", workspace.Name))
-			return
+			log.Error(fmt.Errorf("failed to get workspace info for %s", workspace.Name))
+			// ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get workspace info for %s", workspace.Name))
+			// return
 		}
 
 		response = append(response, dto.Workspace{
