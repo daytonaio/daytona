@@ -74,24 +74,24 @@ type Model struct {
 	workspaceCreationPromptResponse WorkspaceCreationPromptResponse
 }
 
-func runInitialForm(providerRepoUrl string, multiProject bool) (WorkspaceCreationPromptResponse, error) {
+func runInitialForm(providerRepo types.Repository, multiProject bool) (WorkspaceCreationPromptResponse, error) {
 	m := Model{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
 
-	primaryRepo := providerRepoUrl
+	primaryRepoUrl := providerRepo.Url
 	secondaryProjectsCountString := ""
 
 	primaryRepoPrompt := huh.NewInput().
 		Title("Primary project repository").
-		Value(&primaryRepo).
+		Value(&primaryRepoUrl).
 		Key("primaryProjectRepo").
 		Validate(func(str string) error {
 			result, err := util.GetValidatedUrl(str)
 			if err != nil {
 				return err
 			}
-			primaryRepo = result
+			primaryRepoUrl = result
 			return nil
 		})
 
@@ -133,12 +133,10 @@ func runInitialForm(providerRepoUrl string, multiProject bool) (WorkspaceCreatio
 		secondaryProjectsCount = 0
 	}
 
-	primaryRepository := types.Repository{
-		Url: primaryRepo,
-	}
+	providerRepo.Url = primaryRepoUrl
 
 	return WorkspaceCreationPromptResponse{
-		PrimaryRepository:     primaryRepository,
+		PrimaryRepository:     providerRepo,
 		SecondaryProjectCount: secondaryProjectsCount,
 	}, nil
 }
@@ -278,7 +276,7 @@ func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []types
 		}
 	}
 
-	workspaceCreationPromptResponse, err := runInitialForm(providerRepo.Url, multiProject)
+	workspaceCreationPromptResponse, err := runInitialForm(providerRepo, multiProject)
 	if err != nil {
 		return "", nil, err
 	}

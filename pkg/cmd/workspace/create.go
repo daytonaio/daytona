@@ -62,9 +62,9 @@ var CreateCmd = &cobra.Command{
 		view_util.RenderMainTitle("WORKSPACE CREATION")
 
 		if len(args) == 0 {
-			processNoArgs(cmd, apiClient, &workspaceName, &repos, ctx)
+			processPrompting(cmd, apiClient, &workspaceName, &repos, ctx)
 		} else {
-			processWithArgs(cmd, args, apiClient, &workspaceName, &repos, ctx)
+			processCmdArguments(cmd, args, apiClient, &workspaceName, &repos, ctx)
 		}
 
 		if workspaceName == "" || len(repos) == 0 {
@@ -106,8 +106,9 @@ var CreateCmd = &cobra.Command{
 		var requestRepos []serverapiclient.Repository
 		for _, repo := range repos {
 			requestRepos = append(requestRepos, serverapiclient.Repository{
-				Name: &repo.Name,
-				Url:  &repo.Url,
+				Name:   &repo.Name,
+				Url:    &repo.Url,
+				Branch: &repo.Branch,
 			})
 		}
 
@@ -196,8 +197,7 @@ func getTarget() (*serverapiclient.ProviderTarget, error) {
 	return selectedTarget, nil
 }
 
-func processNoArgs(cmd *cobra.Command, apiClient *serverapiclient.APIClient, workspaceName *string, repos *[]types.Repository, ctx context.Context) {
-
+func processPrompting(cmd *cobra.Command, apiClient *serverapiclient.APIClient, workspaceName *string, repos *[]types.Repository, ctx context.Context) {
 	manual, err := cmd.Flags().GetBool("manual")
 	if err != nil {
 		log.Fatal(err)
@@ -249,7 +249,7 @@ func processNoArgs(cmd *cobra.Command, apiClient *serverapiclient.APIClient, wor
 	}
 }
 
-func processWithArgs(cmd *cobra.Command, args []string, apiClient *serverapiclient.APIClient, workspaceName *string, repos *[]types.Repository, ctx context.Context) {
+func processCmdArguments(cmd *cobra.Command, args []string, apiClient *serverapiclient.APIClient, workspaceName *string, repos *[]types.Repository, ctx context.Context) {
 	var repoUrls []string
 
 	validatedWorkspaceName, err := util.GetValidatedWorkspaceName(args[0])
