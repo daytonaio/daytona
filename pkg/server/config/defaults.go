@@ -16,7 +16,7 @@ const defaultHeadscalePort = 3001
 const defaultApiPort = 3000
 
 var us_defaultFrpsConfig = types.FRPSConfig{
-	Domain:   "frps.daytona.io",
+	Domain:   "try-us.daytona.app",
 	Port:     7000,
 	Protocol: "https",
 }
