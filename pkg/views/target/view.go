@@ -16,8 +16,13 @@ type item struct {
 	target serverapiclient.ProviderTarget
 }
 
-func (i item) Title() string       { return *i.target.Name }
-func (i item) Description() string { return "" }
+func (i item) Title() string { return *i.target.Name }
+func (i item) Description() string {
+	if i.target.ProviderInfo != nil {
+		return *i.target.ProviderInfo.Name
+	}
+	return ""
+}
 func (i item) FilterValue() string { return *i.target.Name }
 
 type model struct {

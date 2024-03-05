@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 
@@ -15,13 +16,16 @@ import (
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 )
 
-func NewTargetNameInput(targetName *string) error {
+func NewTargetNameInput(targetName *string, existingTargetNames []string) error {
 	input := huh.NewInput().
 		Title("Name").
 		Value(targetName).
 		Validate(func(s string) error {
 			if s == "" {
 				return errors.New("Name cannot be empty")
+			}
+			if slices.Contains(existingTargetNames, s) {
+				return errors.New("Target with the same name already exists")
 			}
 			return nil
 		})

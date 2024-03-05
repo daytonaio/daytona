@@ -6,6 +6,7 @@ package target
 import (
 	"context"
 
+	internal_util "github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
@@ -63,7 +64,9 @@ var targetSetCmd = &cobra.Command{
 
 		if *selectedTarget.Name == target.NewTargetName {
 			*selectedTarget.Name = ""
-			err = target.NewTargetNameInput(selectedTarget.Name)
+			err = target.NewTargetNameInput(selectedTarget.Name, internal_util.ArrayMap(targets, func(t serverapiclient.ProviderTarget) string {
+				return *t.Name
+			}))
 			if err != nil {
 				log.Fatal(err)
 			}
