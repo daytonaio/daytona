@@ -333,23 +333,25 @@ func GetRepositoryFromWizard(userGitProviders []types.GitProvider, secondaryProj
 	var gitProvider gitprovider.GitProvider
 	var checkoutOptions []gitprovider.CheckoutOption
 
-	if len(userGitProviders) == 1 {
-		providerId = userGitProviders[0].Id
-	} else {
-		availableGitProviderViews := config.GetGitProviderList()
-		var gitProviderViewList []config.GitProvider
+	availableGitProviderViews := config.GetGitProviderList()
+	var gitProviderViewList []config.GitProvider
 
-		for _, gitProvider := range userGitProviders {
-			for _, availableGitProviderView := range availableGitProviderViews {
-				if gitProvider.Id == availableGitProviderView.Id {
-					gitProviderViewList = append(gitProviderViewList, availableGitProviderView)
-				}
+	for _, gitProvider := range userGitProviders {
+		for _, availableGitProviderView := range availableGitProviderViews {
+			if gitProvider.Id == availableGitProviderView.Id {
+				gitProviderViewList = append(gitProviderViewList, availableGitProviderView)
 			}
 		}
-		providerId = selection.GetProviderIdFromPrompt(gitProviderViewList, secondaryProjectOrder)
-		if providerId == "" {
-			return types.Repository{}, nil
-		}
+	}
+	providerId = selection.GetProviderIdFromPrompt(gitProviderViewList, secondaryProjectOrder)
+	if providerId == "" {
+		return types.Repository{}, nil
+	}
+
+	if providerId == selection.CustomRepoIdentifier {
+		return types.Repository{
+			Id: selection.CustomRepoIdentifier,
+		}, nil
 	}
 
 	gitProvider = gitprovider.GetGitProvider(providerId, userGitProviders)

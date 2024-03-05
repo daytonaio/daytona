@@ -21,7 +21,7 @@ var stopProjectFlag string
 var StopCmd = &cobra.Command{
 	Use:   "stop [WORKSPACE_NAME]",
 	Short: "Stop the workspace",
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 		var workspaceName string

@@ -23,9 +23,12 @@ func selectProviderPrompt(gitProviders []config.GitProvider, secondaryProjectOrd
 		items = append(items, newItem)
 	}
 
+	newItem := item{id: CustomRepoIdentifier, title: "Enter a custom repository URL", choiceProperty: CustomRepoIdentifier}
+	items = append(items, newItem)
+
 	l := views.GetStyledSelectList(items)
 	m := model{list: l}
-	m.list.Title = "CHOOSE A PROVIDER"
+	m.list.Title = "CHOOSE YOUR PROVIDER"
 	if secondaryProjectOrder > 0 {
 		m.list.Title += fmt.Sprintf(" (Secondary Project #%d)", secondaryProjectOrder)
 	}

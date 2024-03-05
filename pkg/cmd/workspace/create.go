@@ -245,15 +245,15 @@ var CreateCmd = &cobra.Command{
 			time.Sleep(time.Second)
 		}
 
+		statusProgram.Send(status.ClearScreenMsg{})
+		statusProgram.Send(tea.Quit())
+		statusProgram.ReleaseTerminal()
+
 		wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceName).Execute()
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 			return
 		}
-
-		statusProgram.Send(status.ClearScreenMsg{})
-		statusProgram.Send(tea.Quit())
-		statusProgram.ReleaseTerminal()
 
 		fmt.Println()
 		info.Render(wsInfo)
