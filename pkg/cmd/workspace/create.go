@@ -5,7 +5,6 @@ package workspace
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -19,8 +18,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/types"
-	provider_view "github.com/daytonaio/daytona/pkg/views/provider"
-	"github.com/daytonaio/daytona/pkg/views/provider/target"
+	"github.com/daytonaio/daytona/pkg/views/target"
 	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
@@ -166,7 +164,11 @@ var CreateCmd = &cobra.Command{
 		}()
 
 		activeProfile, err = c.GetActiveProfile()
-		providerTarget, err := getProviderTarget(apiClient)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		target, err := getTarget(apiClient)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -177,9 +179,9 @@ var CreateCmd = &cobra.Command{
 		}
 
 		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(serverapiclient.CreateWorkspace{
-			Name:           &workspaceName,
-			Repositories:   repos,
-			ProviderTarget: providerTarget,
+			Name:         &workspaceName,
+			Repositories: repos,
+			Target:       target.Name,
 		}).Execute()
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
@@ -232,91 +234,41 @@ var CreateCmd = &cobra.Command{
 }
 
 var providerFlag string
-var providerTargetFlag string
+var targetNameFlag string
 
 func init() {
 	CreateCmd.Flags().StringArrayVarP(&repos, "repo", "r", nil, "Set the repository url")
 	CreateCmd.Flags().StringVar(&providerFlag, "provider", "", "Specify the provider (e.g. 'docker-provider')")
 	CreateCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", "Specify the IDE ('vscode' or 'browser')")
-	CreateCmd.Flags().StringVar(&providerTargetFlag, "target", "", "Specify the provider target (e.g. 'local')")
+	CreateCmd.Flags().StringVarP(&targetNameFlag, "target", "t", "", "Specify the target (e.g. 'local')")
 	CreateCmd.Flags().Bool("manual", false, "Manually enter the git repositories")
 	CreateCmd.Flags().Bool("multi-project", false, "Workspace with multiple projects/repos")
 	CreateCmd.Flags().Bool("skip-ide", false, "Don't open the IDE after workspace creation")
 }
 
-func getProviderTarget(apiClient *serverapiclient.APIClient) (*serverapiclient.ProviderTarget, error) {
-	c, err := config.GetConfig()
+func getTarget(apiClient *serverapiclient.APIClient) (*serverapiclient.ProviderTarget, error) {
+	targets, err := server.GetTargetList()
 	if err != nil {
 		return nil, err
 	}
 
-	activeProfile, err := c.GetActiveProfile()
-	if err != nil {
-		return nil, err
-	}
+	var selectedTarget *serverapiclient.ProviderTarget = nil
 
-	providerName := ""
-	providerTarget := ""
-
-	providersList, res, err := apiClient.ProviderAPI.ListProviders(context.Background()).Execute()
-	if err != nil {
-		return nil, apiclient.HandleErrorResponse(res, err)
-	}
-
-	if providerFlag != "" {
-		providerName = providerFlag
-	} else if activeProfile.DefaultProvider == nil {
-		if len(providersList) == 0 {
-			return nil, errors.New("No providers found")
-		}
-
-		defaultProvider := provider_view.GetProviderFromPrompt(providersList, "Provider not set. Choose a provider to use")
-
-		activeProfile.DefaultProvider = &config.DefaultProvider{
-			Provider: *defaultProvider.Name,
-		}
-
-		err = c.EditProfile(activeProfile)
-		if err != nil {
-			return nil, err
-		}
-		providerName = *defaultProvider.Name
-	} else {
-		providerName = activeProfile.DefaultProvider.Provider
-	}
-
-	if providerTargetFlag != "" {
-		providerTarget = providerTargetFlag
-	} else if activeProfile.DefaultProvider.Target == "" {
-		var provider *serverapiclient.Provider
-		for _, p := range providersList {
-			if *p.Name == activeProfile.DefaultProvider.Provider {
-				provider = &p
+	if targetNameFlag != "" {
+		for _, t := range targets {
+			if *t.Name == targetNameFlag {
+				selectedTarget = &t
 				break
 			}
 		}
-		if provider == nil {
-			return nil, errors.New("provider not found")
-		}
-
-		defaultTarget, err := target.GetTargetFromPrompt(provider.Targets, false)
-		if err != nil {
-			return nil, err
-		}
-
-		activeProfile.DefaultProvider.Target = *defaultTarget.Name
-
-		err = c.EditProfile(activeProfile)
-		if err != nil {
-			return nil, err
-		}
-		providerTarget = *defaultTarget.Name
-	} else {
-		providerTarget = activeProfile.DefaultProvider.Target
 	}
 
-	return &serverapiclient.ProviderTarget{
-		Provider: &providerName,
-		Target:   &providerTarget,
-	}, nil
+	if selectedTarget == nil {
+		selectedTarget, err = target.GetTargetFromPrompt(targets, false)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return selectedTarget, nil
 }

@@ -4,39 +4,38 @@
 package target
 
 import (
+	"fmt"
+	"log"
 	"strings"
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
-	"github.com/daytonaio/daytona/pkg/views/provider"
 	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
-
-	log "github.com/sirupsen/logrus"
 )
 
 var targetListCmd = &cobra.Command{
 	Use:     "list",
-	Short:   "List provider targets",
+	Short:   "List targets",
 	Args:    cobra.NoArgs,
 	Aliases: []string{"ls"},
 	Run: func(cmd *cobra.Command, args []string) {
-		pluginList, err := server.GetProviderList()
+		targets, err := server.GetTargetList()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		selectedProvider := provider.GetProviderFromPrompt(pluginList, "Choose a Provider")
-
-		if selectedProvider == nil {
+		if len(targets) == 0 {
+			view_util.RenderInfoMessageBold("No targets found")
+			view_util.RenderInfoMessage("Use 'daytona target set' to add a target")
 			return
 		}
 
-		targets := strings.Join(util.ArrayMap(selectedProvider.Targets, func(t serverapiclient.TargetDTO) string {
-			return *t.Name + ": " + *t.Options
+		output := strings.Join(util.ArrayMap(targets, func(t serverapiclient.ProviderTarget) string {
+			return fmt.Sprintf("%s/%s: %s", *t.ProviderInfo.Name, *t.Name, *t.Options)
 		}), "\n")
 
-		view_util.RenderInfoMessage(targets)
+		view_util.RenderInfoMessage(output)
 	},
 }

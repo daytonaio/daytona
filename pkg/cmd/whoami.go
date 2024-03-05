@@ -56,14 +56,7 @@ var whoamiCmd = &cobra.Command{
 			view_util.RenderListLine(fmt.Sprintf("\x1b[1m%-*s\x1b[0m%s", listLabelWidth, "API URL:", profile.Api.Url))
 		}
 
-		defaultProvider := ""
-		if profile.DefaultProvider == nil {
-			defaultProvider = "/"
-		} else {
-			defaultProvider = profile.DefaultProvider.Provider + ":" + profile.DefaultProvider.Target
-		}
-
-		view_util.RenderListLine(fmt.Sprintf("\x1b[1m%-*s\x1b[0m%s", listLabelWidth, "Default provider:", defaultProvider))
+		view_util.RenderListLine(fmt.Sprintf("\x1b[1m%-*s\x1b[0m", listLabelWidth))
 
 		if profile.Id == "default" {
 			view_util.RenderInfoMessage("Set up a remote Daytona Server using “daytona server install“ or get to coding locally by running “daytona create“")

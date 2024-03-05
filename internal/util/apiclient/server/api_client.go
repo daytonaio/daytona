@@ -94,3 +94,17 @@ func GetProviderList() ([]serverapiclient.Provider, error) {
 
 	return providersList, nil
 }
+
+func GetTargetList() ([]serverapiclient.ProviderTarget, error) {
+	apiClient, err := GetApiClient(nil)
+	if err != nil {
+		return nil, err
+	}
+
+	targets, resp, err := apiClient.TargetAPI.ListTargets(context.Background()).Execute()
+	if err != nil {
+		return nil, apiclient.HandleErrorResponse(resp, err)
+	}
+
+	return targets, nil
+}

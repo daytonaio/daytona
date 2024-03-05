@@ -27,6 +27,7 @@ type ServerConfig struct {
 	ProvidersDir *string `json:"providersDir,omitempty"`
 	RegistryUrl *string `json:"registryUrl,omitempty"`
 	ServerDownloadUrl *string `json:"serverDownloadUrl,omitempty"`
+	TargetsFilePath *string `json:"targetsFilePath,omitempty"`
 }
 
 // NewServerConfig instantiates a new ServerConfig object
@@ -302,6 +303,38 @@ func (o *ServerConfig) SetServerDownloadUrl(v string) {
 	o.ServerDownloadUrl = &v
 }
 
+// GetTargetsFilePath returns the TargetsFilePath field value if set, zero value otherwise.
+func (o *ServerConfig) GetTargetsFilePath() string {
+	if o == nil || IsNil(o.TargetsFilePath) {
+		var ret string
+		return ret
+	}
+	return *o.TargetsFilePath
+}
+
+// GetTargetsFilePathOk returns a tuple with the TargetsFilePath field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ServerConfig) GetTargetsFilePathOk() (*string, bool) {
+	if o == nil || IsNil(o.TargetsFilePath) {
+		return nil, false
+	}
+	return o.TargetsFilePath, true
+}
+
+// HasTargetsFilePath returns a boolean if a field has been set.
+func (o *ServerConfig) HasTargetsFilePath() bool {
+	if o != nil && !IsNil(o.TargetsFilePath) {
+		return true
+	}
+
+	return false
+}
+
+// SetTargetsFilePath gets a reference to the given string and assigns it to the TargetsFilePath field.
+func (o *ServerConfig) SetTargetsFilePath(v string) {
+	o.TargetsFilePath = &v
+}
+
 func (o ServerConfig) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -335,6 +368,9 @@ func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.ServerDownloadUrl) {
 		toSerialize["serverDownloadUrl"] = o.ServerDownloadUrl
+	}
+	if !IsNil(o.TargetsFilePath) {
+		toSerialize["targetsFilePath"] = o.TargetsFilePath
 	}
 	return toSerialize, nil
 }

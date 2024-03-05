@@ -9,16 +9,11 @@ import (
 	"github.com/daytonaio/daytona/pkg/types"
 )
 
-type ProviderTargetDTO struct {
-	Provider string `json:"provider"`
-	Target   string `json:"target"`
-}
-
 type WorkspaceDTO struct {
-	Id             string            `gorm:"primaryKey"`
-	Name           string            `json:"name"`
-	ProviderTarget ProviderTargetDTO `gorm:"serializer:json"`
-	Projects       []ProjectDTO      `gorm:"serializer:json"`
+	Id       string       `gorm:"primaryKey"`
+	Name     string       `json:"name"`
+	Target   string       `json:"target"`
+	Projects []ProjectDTO `gorm:"serializer:json"`
 }
 
 func (w WorkspaceDTO) GetProject(name string) (*ProjectDTO, error) {
@@ -33,12 +28,9 @@ func (w WorkspaceDTO) GetProject(name string) (*ProjectDTO, error) {
 
 func ToWorkspaceDTO(workspace *types.Workspace) WorkspaceDTO {
 	workspaceDTO := WorkspaceDTO{
-		Id:   workspace.Id,
-		Name: workspace.Name,
-		ProviderTarget: ProviderTargetDTO{
-			Provider: workspace.ProviderTarget.Provider,
-			Target:   workspace.ProviderTarget.Target,
-		},
+		Id:     workspace.Id,
+		Name:   workspace.Name,
+		Target: workspace.Target,
 	}
 
 	for _, project := range workspace.Projects {
@@ -50,12 +42,9 @@ func ToWorkspaceDTO(workspace *types.Workspace) WorkspaceDTO {
 
 func ToWorkspace(workspaceDTO WorkspaceDTO) *types.Workspace {
 	workspace := types.Workspace{
-		Id:   workspaceDTO.Id,
-		Name: workspaceDTO.Name,
-		ProviderTarget: types.ProviderTarget{
-			Provider: workspaceDTO.ProviderTarget.Provider,
-			Target:   workspaceDTO.ProviderTarget.Target,
-		},
+		Id:     workspaceDTO.Id,
+		Name:   workspaceDTO.Name,
+		Target: workspaceDTO.Target,
 	}
 
 	for _, projectDTO := range workspaceDTO.Projects {

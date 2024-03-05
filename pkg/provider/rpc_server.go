@@ -36,18 +36,8 @@ func (m *ProviderRPCServer) GetTargetManifest(arg interface{}, resp *ProviderTar
 	return nil
 }
 
-func (m *ProviderRPCServer) SetTarget(arg ProviderTarget, resp *types.Empty) error {
-	_, err := m.Impl.SetTarget(arg)
-	return err
-}
-
-func (m *ProviderRPCServer) RemoveTarget(arg string, resp *types.Empty) error {
-	_, err := m.Impl.RemoveTarget(arg)
-	return err
-}
-
-func (m *ProviderRPCServer) GetTargets(arg interface{}, resp *[]ProviderTarget) error {
-	targets, err := m.Impl.GetTargets()
+func (m *ProviderRPCServer) GetDefaultTargets(arg interface{}, resp *[]ProviderTarget) error {
+	targets, err := m.Impl.GetDefaultTargets()
 	if err != nil {
 		return err
 	}
@@ -56,27 +46,27 @@ func (m *ProviderRPCServer) GetTargets(arg interface{}, resp *[]ProviderTarget) 
 	return nil
 }
 
-func (m *ProviderRPCServer) CreateWorkspace(arg *types.Workspace, resp *types.Empty) error {
+func (m *ProviderRPCServer) CreateWorkspace(arg *WorkspaceRequest, resp *types.Empty) error {
 	_, err := m.Impl.CreateWorkspace(arg)
 	return err
 }
 
-func (m *ProviderRPCServer) StartWorkspace(arg *types.Workspace, resp *types.Empty) error {
+func (m *ProviderRPCServer) StartWorkspace(arg *WorkspaceRequest, resp *types.Empty) error {
 	_, err := m.Impl.StartWorkspace(arg)
 	return err
 }
 
-func (m *ProviderRPCServer) StopWorkspace(arg *types.Workspace, resp *types.Empty) error {
+func (m *ProviderRPCServer) StopWorkspace(arg *WorkspaceRequest, resp *types.Empty) error {
 	_, err := m.Impl.StopWorkspace(arg)
 	return err
 }
 
-func (m *ProviderRPCServer) DestroyWorkspace(arg *types.Workspace, resp *types.Empty) error {
+func (m *ProviderRPCServer) DestroyWorkspace(arg *WorkspaceRequest, resp *types.Empty) error {
 	_, err := m.Impl.DestroyWorkspace(arg)
 	return err
 }
 
-func (m *ProviderRPCServer) GetWorkspaceInfo(arg *types.Workspace, resp *types.WorkspaceInfo) error {
+func (m *ProviderRPCServer) GetWorkspaceInfo(arg *WorkspaceRequest, resp *types.WorkspaceInfo) error {
 	info, err := m.Impl.GetWorkspaceInfo(arg)
 	if err != nil {
 		return err
@@ -86,27 +76,27 @@ func (m *ProviderRPCServer) GetWorkspaceInfo(arg *types.Workspace, resp *types.W
 	return nil
 }
 
-func (m *ProviderRPCServer) CreateProject(arg *types.Project, resp *types.Empty) error {
+func (m *ProviderRPCServer) CreateProject(arg *ProjectRequest, resp *types.Empty) error {
 	_, err := m.Impl.CreateProject(arg)
 	return err
 }
 
-func (m *ProviderRPCServer) StartProject(arg *types.Project, resp *types.Empty) error {
+func (m *ProviderRPCServer) StartProject(arg *ProjectRequest, resp *types.Empty) error {
 	_, err := m.Impl.StartProject(arg)
 	return err
 }
 
-func (m *ProviderRPCServer) StopProject(arg *types.Project, resp *types.Empty) error {
+func (m *ProviderRPCServer) StopProject(arg *ProjectRequest, resp *types.Empty) error {
 	_, err := m.Impl.StopProject(arg)
 	return err
 }
 
-func (m *ProviderRPCServer) DestroyProject(arg *types.Project, resp *types.Empty) error {
+func (m *ProviderRPCServer) DestroyProject(arg *ProjectRequest, resp *types.Empty) error {
 	_, err := m.Impl.DestroyProject(arg)
 	return err
 }
 
-func (m *ProviderRPCServer) GetProjectInfo(arg *types.Project, resp *types.ProjectInfo) error {
+func (m *ProviderRPCServer) GetProjectInfo(arg *ProjectRequest, resp *types.ProjectInfo) error {
 	info, err := m.Impl.GetProjectInfo(arg)
 	if err != nil {
 		return err

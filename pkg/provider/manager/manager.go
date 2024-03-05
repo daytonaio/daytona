@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	os_util "github.com/daytonaio/daytona/pkg/os"
 	. "github.com/daytonaio/daytona/pkg/provider"
+	"github.com/daytonaio/daytona/pkg/server/targets"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 	log "github.com/sirupsen/logrus"
@@ -118,6 +119,32 @@ func RegisterProvider(pluginPath, serverDownloadUrl, serverUrl, serverApiUrl str
 	if err != nil {
 		return errors.New("failed to initialize provider: " + err.Error())
 	}
+
+	existingTargets, err := targets.GetTargets()
+	if err != nil {
+		return errors.New("failed to get targets: " + err.Error())
+	}
+
+	defaultTargets, err := (*p).GetDefaultTargets()
+	if err != nil {
+		return errors.New("failed to get default targets: " + err.Error())
+	}
+
+	log.Info("Setting default targets")
+	for _, target := range *defaultTargets {
+		if _, ok := existingTargets[target.Name]; ok {
+			log.Infof("Target %s already exists. Skipping...", target.Name)
+			continue
+		}
+
+		err := targets.SetTarget(target)
+		if err != nil {
+			log.Errorf("Failed to set target %s: %s", target.Name, err)
+		} else {
+			log.Infof("Target %s set", target.Name)
+		}
+	}
+	log.Info("Default targets set")
 
 	log.Infof("Provider %s initialized", pluginName)
 

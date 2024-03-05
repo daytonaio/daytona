@@ -23,7 +23,7 @@ type Workspace struct {
 	Info *WorkspaceInfo `json:"info,omitempty"`
 	Name *string `json:"name,omitempty"`
 	Projects []Project `json:"projects,omitempty"`
-	Provider *ProviderTarget `json:"provider,omitempty"`
+	Target *string `json:"target,omitempty"`
 }
 
 // NewWorkspace instantiates a new Workspace object
@@ -171,36 +171,36 @@ func (o *Workspace) SetProjects(v []Project) {
 	o.Projects = v
 }
 
-// GetProvider returns the Provider field value if set, zero value otherwise.
-func (o *Workspace) GetProvider() ProviderTarget {
-	if o == nil || IsNil(o.Provider) {
-		var ret ProviderTarget
+// GetTarget returns the Target field value if set, zero value otherwise.
+func (o *Workspace) GetTarget() string {
+	if o == nil || IsNil(o.Target) {
+		var ret string
 		return ret
 	}
-	return *o.Provider
+	return *o.Target
 }
 
-// GetProviderOk returns a tuple with the Provider field value if set, nil otherwise
+// GetTargetOk returns a tuple with the Target field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetProviderOk() (*ProviderTarget, bool) {
-	if o == nil || IsNil(o.Provider) {
+func (o *Workspace) GetTargetOk() (*string, bool) {
+	if o == nil || IsNil(o.Target) {
 		return nil, false
 	}
-	return o.Provider, true
+	return o.Target, true
 }
 
-// HasProvider returns a boolean if a field has been set.
-func (o *Workspace) HasProvider() bool {
-	if o != nil && !IsNil(o.Provider) {
+// HasTarget returns a boolean if a field has been set.
+func (o *Workspace) HasTarget() bool {
+	if o != nil && !IsNil(o.Target) {
 		return true
 	}
 
 	return false
 }
 
-// SetProvider gets a reference to the given ProviderTarget and assigns it to the Provider field.
-func (o *Workspace) SetProvider(v ProviderTarget) {
-	o.Provider = &v
+// SetTarget gets a reference to the given string and assigns it to the Target field.
+func (o *Workspace) SetTarget(v string) {
+	o.Target = &v
 }
 
 func (o Workspace) MarshalJSON() ([]byte, error) {
@@ -225,8 +225,8 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Projects) {
 		toSerialize["projects"] = o.Projects
 	}
-	if !IsNil(o.Provider) {
-		toSerialize["provider"] = o.Provider
+	if !IsNil(o.Target) {
+		toSerialize["target"] = o.Target
 	}
 	return toSerialize, nil
 }
