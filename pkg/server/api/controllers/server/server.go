@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/daytonaio/daytona/pkg/server/config"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
@@ -77,4 +78,31 @@ func GenerateNetworkKey(ctx *gin.Context) {
 	}
 
 	ctx.JSON(200, &types.NetworkKey{Key: authKey})
+}
+
+// GetGitContext 			godoc
+//
+//	@Tags			server
+//	@Summary		Get Git context
+//	@Description	Get Git context
+//	@Produce		json
+//	@Param			gitUrl	path		string	true	"Git URL"
+//	@Success		200		{object}	Repository
+//	@Router			/server/get-git-context/{gitUrl} [get]
+//
+//	@id				GetGitContext
+func GetGitContext(ctx *gin.Context) {
+	// TODO: needs real implementing
+	gitUrl := ctx.Param("gitUrl")
+
+	decodedURLParam, err := url.QueryUnescape(gitUrl)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode query param: %s", err.Error()))
+		return
+	}
+
+	repo := &types.Repository{}
+	repo.Url = decodedURLParam
+
+	ctx.JSON(200, repo)
 }

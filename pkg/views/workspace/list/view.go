@@ -36,7 +36,7 @@ type model struct {
 }
 
 var columns = []table.Column{
-	{Title: "WORKSPACE NAME", Width: defaultColumnWidth},
+	{Title: "WORKSPACE", Width: defaultColumnWidth},
 	{Title: "REPOSITORY", Width: defaultColumnWidth},
 	{Title: "CREATED", Width: defaultColumnWidth},
 	{Title: "STATUS", Width: defaultColumnWidth},
@@ -66,7 +66,7 @@ func (m model) View() string {
 	return baseStyle.Render(m.table.View())
 }
 
-func renderWorkspaceList(workspaceList []serverapiclient.Workspace, selectable bool) model {
+func renderWorkspaceList(workspaceList []serverapiclient.Workspace, specifyGitProviders bool) model {
 	rows := []table.Row{}
 	var row table.Row
 	var rowData RowData
@@ -75,15 +75,15 @@ func renderWorkspaceList(workspaceList []serverapiclient.Workspace, selectable b
 
 	for _, workspace := range workspaceList {
 		if len(workspace.Projects) == 1 {
-			rowData = getWorkspaceTableRowData(workspace)
+			rowData = getWorkspaceTableRowData(workspace, specifyGitProviders)
 			adjustColumsFormatting(rowData)
 			row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Created, rowData.Status}
 			rows = append(rows, row)
 		} else {
-			row = table.Row{*workspace.Name, "", "", "", ""}
+			row = table.Row{*workspace.Name, "", "", "", "", ""}
 			rows = append(rows, row)
 			for _, project := range workspace.Projects {
-				rowData = getProjectTableRowData(workspace, project)
+				rowData = getProjectTableRowData(workspace, project, specifyGitProviders)
 				adjustColumsFormatting(rowData)
 				row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Created, rowData.Status}
 				rows = append(rows, row)
@@ -96,7 +96,7 @@ func renderWorkspaceList(workspaceList []serverapiclient.Workspace, selectable b
 
 	return model{
 		table:       getTable(adjustedRows, adjustedCols, 0),
-		selectable:  selectable,
+		selectable:  false,
 		initialRows: rows,
 	}
 }
@@ -119,7 +119,7 @@ func sortWorkspaces(workspaceList *[]serverapiclient.Workspace) {
 }
 
 func adjustColumsFormatting(rowData RowData) {
-	adjustColumnWidth("WORKSPACE NAME", rowData)
+	adjustColumnWidth("WORKSPACE", rowData)
 	adjustColumnWidth("REPOSITORY", rowData)
 	adjustColumnWidth("CREATED", rowData)
 	adjustColumnWidth("STATUS", rowData)
@@ -135,7 +135,7 @@ func adjustColumnWidth(title string, rowData RowData) {
 	}
 	currentField := ""
 	switch title {
-	case "WORKSPACE NAME":
+	case "WORKSPACE":
 		currentField = rowData.WorkspaceName
 	case "REPOSITORY":
 		currentField = rowData.Repository
@@ -145,18 +145,18 @@ func adjustColumnWidth(title string, rowData RowData) {
 		currentField = rowData.Status
 	}
 
-	if len(rowData.WorkspaceName) > column.Width {
+	if len(currentField) > column.Width {
 		column.Width = len(currentField) + columnPadding
 	}
 }
 
-func getWorkspaceTableRowData(workspace serverapiclient.Workspace) RowData {
+func getWorkspaceTableRowData(workspace serverapiclient.Workspace, specifyGitProviders bool) RowData {
 	rowData := RowData{}
 	if workspace.Name != nil {
 		rowData.WorkspaceName = *workspace.Name
 	}
 	if workspace.Projects != nil && len(workspace.Projects) > 0 && workspace.Projects[0].Repository != nil {
-		rowData.Repository = getRepositorySlugFromUrl(*workspace.Projects[0].Repository.Url)
+		rowData.Repository = getRepositorySlugFromUrl(*workspace.Projects[0].Repository.Url, specifyGitProviders)
 	}
 	if workspace.Info != nil && workspace.Info.Projects != nil && len(workspace.Info.Projects) > 0 && workspace.Info.Projects[0].Created != nil {
 		rowData.Created = formatCreatedTime(*workspace.Info.Projects[0].Created)
@@ -167,7 +167,7 @@ func getWorkspaceTableRowData(workspace serverapiclient.Workspace) RowData {
 	return rowData
 }
 
-func getProjectTableRowData(workspace serverapiclient.Workspace, project serverapiclient.Project) RowData {
+func getProjectTableRowData(workspace serverapiclient.Workspace, project serverapiclient.Project, specifyGitProviders bool) RowData {
 	var currentProjectInfo *types.ProjectInfo
 
 	for _, projectInfo := range workspace.Info.Projects {
@@ -194,14 +194,14 @@ func getProjectTableRowData(workspace serverapiclient.Workspace, project servera
 		rowData.WorkspaceName = " └ " + *project.Name
 	}
 	if project.Repository != nil && project.Repository.Url != nil {
-		rowData.Repository = getRepositorySlugFromUrl(*project.Repository.Url)
+		rowData.Repository = getRepositorySlugFromUrl(*project.Repository.Url, specifyGitProviders)
 	}
 	rowData.Created = formatCreatedTime(currentProjectInfo.Created)
 	rowData.Status = formatStatusTime(currentProjectInfo.Started)
 	return rowData
 }
 
-func getRepositorySlugFromUrl(url string) string {
+func getRepositorySlugFromUrl(url string, specifyGitProviders bool) string {
 	if url == "" {
 		return "/"
 	}
@@ -211,6 +211,11 @@ func getRepositorySlugFromUrl(url string) string {
 	if len(parts) < 2 {
 		return ""
 	}
+
+	if specifyGitProviders {
+		return parts[len(parts)-3] + "/" + parts[len(parts)-2] + "/" + parts[len(parts)-1]
+	}
+
 	return parts[len(parts)-2] + "/" + parts[len(parts)-1]
 }
 
@@ -276,8 +281,8 @@ func formatStatusTime(input string) string {
 	}
 }
 
-func ListWorkspaces(workspaceList []serverapiclient.Workspace) {
-	modelInstance := renderWorkspaceList(workspaceList, false)
+func ListWorkspaces(workspaceList []serverapiclient.Workspace, specifyGitProviders bool) {
+	modelInstance := renderWorkspaceList(workspaceList, specifyGitProviders)
 
 	_, err := tea.NewProgram(modelInstance).Run()
 	if err != nil {

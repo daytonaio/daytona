@@ -22,6 +22,7 @@ var ListCmd = &cobra.Command{
 	Aliases: []string{"ls"},
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
+		var specifyGitProviders bool
 
 		apiClient, err := server.GetApiClient(nil)
 		if err != nil {
@@ -31,6 +32,15 @@ var ListCmd = &cobra.Command{
 		workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
+		}
+
+		serverConfig, res, err := apiClient.ServerAPI.GetConfig(ctx).Execute()
+		if err != nil {
+			log.Fatal(apiclient.HandleErrorResponse(res, err))
+		}
+
+		if len(serverConfig.GitProviders) > 1 {
+			specifyGitProviders = true
 		}
 
 		if output.FormatFlag != "" {
@@ -43,6 +53,6 @@ var ListCmd = &cobra.Command{
 			return
 		}
 
-		list_view.ListWorkspaces(workspaceList)
+		list_view.ListWorkspaces(workspaceList, specifyGitProviders)
 	},
 }

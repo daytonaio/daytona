@@ -94,8 +94,7 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 	userGitProviders := serverConfig.GitProviders
 
 	for _, repo := range createWorkspaceDto.Repositories {
-		var gitUserData *types.GitUserData
-		providerId := getGitProviderIdFromUrl(repo)
+		providerId := getGitProviderIdFromUrl(repo.Url)
 		gitProvider := gitprovider.GetGitProvider(providerId, userGitProviders)
 
 		if gitProvider != nil {
@@ -103,7 +102,7 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 			if err != nil {
 				return nil, err
 			}
-			gitUserData = &types.GitUserData{
+			repo.GitUserData = &types.GitUserData{
 				Name:  gitUser.Name,
 				Email: gitUser.Email,
 			}
@@ -111,13 +110,10 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 
 		// TODO: generate API key for project
 		projectNameSlugRegex := regexp.MustCompile(`[^a-zA-Z0-9-]`)
-		projectName := projectNameSlugRegex.ReplaceAllString(strings.ToLower(path.Base(repo)), "-")
+		projectName := projectNameSlugRegex.ReplaceAllString(strings.ToLower(path.Base(repo.Url)), "-")
 		project := &types.Project{
-			Name: projectName,
-			Repository: &types.Repository{
-				Url:         repo,
-				GitUserData: gitUserData,
-			},
+			Name:        projectName,
+			Repository:  &repo,
 			WorkspaceId: w.Id,
 			ApiKey:      "TODO",
 			Target:      createWorkspaceDto.Target,
