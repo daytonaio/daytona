@@ -217,6 +217,7 @@ func processPrompting(cmd *cobra.Command, apiClient *serverapiclient.APIClient, 
 	if argRepos != nil {
 		view_util.RenderInfoMessage("Error: workspace name argument is required for this command")
 		cmd.Help()
+		os.Exit(1)
 	}
 
 	workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
@@ -263,6 +264,7 @@ func processCmdArguments(cmd *cobra.Command, args []string, apiClient *serverapi
 	} else {
 		view_util.RenderInfoMessage("Error: --repo flag is required for this command")
 		cmd.Help()
+		os.Exit(1)
 	}
 
 	for _, repoUrl := range repoUrls {
