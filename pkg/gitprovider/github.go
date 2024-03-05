@@ -84,11 +84,12 @@ func (g *GitHubGitProvider) GetRepositories(namespace string) ([]types.Repositor
 
 func (g *GitHubGitProvider) GetRepoBranches(repo types.Repository, namespaceId string) ([]GitBranch, error) {
 	client := g.getApiClient()
-	user, err := g.GetUserData()
-	if err != nil {
-		return nil, err
-	}
-	if user.Id == personalNamespaceId {
+
+	if namespaceId == personalNamespaceId {
+		user, err := g.GetUserData()
+		if err != nil {
+			return nil, err
+		}
 		namespaceId = user.Username
 	}
 
@@ -114,11 +115,12 @@ func (g *GitHubGitProvider) GetRepoBranches(repo types.Repository, namespaceId s
 
 func (g *GitHubGitProvider) GetRepoPRs(repo types.Repository, namespaceId string) ([]GitPullRequest, error) {
 	client := g.getApiClient()
-	user, err := g.GetUserData()
-	if err != nil {
-		return nil, err
-	}
-	if user.Id == personalNamespaceId {
+
+	if namespaceId == personalNamespaceId {
+		user, err := g.GetUserData()
+		if err != nil {
+			return nil, err
+		}
 		namespaceId = user.Username
 	}
 

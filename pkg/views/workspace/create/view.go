@@ -336,7 +336,6 @@ func GetRepositoryFromWizard(userGitProviders []types.GitProvider, secondaryProj
 	if len(userGitProviders) == 1 {
 		providerId = userGitProviders[0].Id
 	} else {
-
 		availableGitProviderViews := config.GetGitProviderList()
 		var gitProviderViewList []config.GitProvider
 

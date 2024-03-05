@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/daytonaio/daytona/pkg/server/config"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
@@ -94,8 +95,14 @@ func GetGitContext(ctx *gin.Context) {
 	// TODO: needs real implementing
 	gitUrl := ctx.Param("gitUrl")
 
+	decodedURLParam, err := url.QueryUnescape(gitUrl)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode query param: %s", err.Error()))
+		return
+	}
+
 	repo := &types.Repository{}
-	repo.Url = gitUrl
+	repo.Url = decodedURLParam
 
 	ctx.JSON(200, repo)
 }

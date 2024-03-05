@@ -81,6 +81,7 @@ func GitProviderSelectionView(gitProviderAddView *GitProviderSelectView, userGit
 
 	fmt.Println("More information on:")
 	fmt.Println(config.GetDocsLinkFromGitProvider(gitProviderAddView.Id))
+	fmt.Println()
 
 	err = userDataForm.Run()
 	if err != nil {

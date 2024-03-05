@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"regexp"
 	"time"
@@ -125,7 +126,8 @@ var CreateCmd = &cobra.Command{
 			}
 
 			for _, repoUrl := range repoUrls {
-				repoResponse, res, err := apiClient.ServerAPI.GetGitContext(ctx, repoUrl).Execute()
+				encodedURLParam := url.QueryEscape(repoUrl)
+				repoResponse, res, err := apiClient.ServerAPI.GetGitContext(ctx, encodedURLParam).Execute()
 				if err != nil {
 					log.Fatal(apiclient.HandleErrorResponse(res, err))
 				}
