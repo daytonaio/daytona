@@ -75,8 +75,7 @@ func GetValidatedWorkspaceName(input string) (string, error) {
 func GetValidatedUrl(input string) (string, error) {
 	// Check if the input starts with a scheme (e.g., http:// or https://)
 	if !strings.HasPrefix(input, "http://") && !strings.HasPrefix(input, "https://") {
-		// If it doesn't, add "http://" as the default scheme
-		input = "https://" + input
+		return "", fmt.Errorf("input is missing http:// or https://")
 	}
 
 	// Try to parse the input as a URL

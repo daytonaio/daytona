@@ -101,5 +101,5 @@ func (m model) View() string {
 		s += res.String() + "\n"
 	}
 
-	return appStyle.Width(m.width - 10).Render(s)
+	return appStyle.Width(m.width - 20).Render(s)
 }

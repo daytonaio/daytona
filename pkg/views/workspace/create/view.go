@@ -410,6 +410,11 @@ func GetRepositoryFromWizard(userGitProviders []types.GitProvider, secondaryProj
 		return chosenRepo, nil
 	}
 
+	// TODO: Add support for Bitbucket
+	if providerId == "bitbucket" {
+		return chosenRepo, nil
+	}
+
 	prList, err := gitProvider.GetRepoPRs(chosenRepo, namespaceId)
 	if err != nil {
 		return types.Repository{}, err
