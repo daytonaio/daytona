@@ -29,23 +29,43 @@ Set up a development environment on any infrastructure, with a single command.
     <a href="https://twitter.com/Daytonaio">Twitter</a>
   </p>
 
-----
 
+## Features
+* __Single Command__: Activate a fully configured development environment with a single command.
+* __Runs everywhere__: spin up your development environment on any machine — whether it's local, remote, cloud-based, physical server, or a VM & any architecture x86 or ARM.
+* __Configuration File Support__: Initially support for [dev container](https://containers.dev/), ability to expand to DevFile, Nix & Flox (Contributions welcome here!).
+* __Prebuilds System__: Drastically improve environment setup times (Contributions welcome here!).
+* __IDE Support__ : Seamlessly supports [VS Code](https://github.com/microsoft/vscode) & [JetBrains](https://www.jetbrains.com/remote-development/gateway/) locally, ready to use without configuration. Includes a built-in Web IDE for added convenience.
+* __Git Provider Integration__: GitHub, GitLab & Bitbucket can be connected, allowing easy repo branch or PR pull and commit back from the workspaces.
+* __Multiple Project Workspace__: Support for multiple project repositories in the same workspace, making it easy to develop using a micro-service architecture.
+* __Reverse Proxy Integration__: Enable collaboration and streamline feedback loops by leveraging reverse proxy functionality. Access preview ports and the Web IDE seamlessly, even behind firewalls.
+* __Extensibility__: Enable extensibility with plugin or provider development. Moreover, in any dynamic language, not just Go(Contributions welcome here!).
+* __Security__: Automatically creates a VPN connection between the client machine and the development environment, ensuring a fully secure connection.
+* __All Ports__: The VPN connection enables access to all ports on the development environments, removing the need to setup port forwards over SSH connection.
+* __Works on my Machine__: Never experience it again.
 ## Quick Start
-To install the Daytona CLI, please execute the following command:
+To install Daytona all you need to do is execute this script:
+
 
 ```bash
+# Install Daytona
 curl https://download.daytona.io/daytona/get-server.sh | bash
-```
 
-Start creating dev environments with just this one command:
+# Start Daytona server 
+daytona server
+```
+Create your first dev environment by opening a new terminal, and executing just this command:
+
 ```bash
+
 daytona create
 ```
 
 Start coding.
 
+
 ----
+</br>
 
 ## Why Daytona?
 Daytona is a radically simple open source development environment manager.
@@ -56,7 +76,7 @@ This complexity is unnecessary.
 
 With Daytona, you need only to execute a single command: `daytona create`.
 
-Daytona automates the entire process; provisioning the instance, interpreting and applying the configuration, setting up prebuilds, establishing a secure VPN connection, securly connecting your local or a Web IDE, and assigning a fully qualified domain name to the development environment for easy sharing and collaboration. 
+Daytona automates the entire process; provisioning the instance, interpreting and applying the configuration, setting up prebuilds, establishing a secure VPN connection, securely connecting your local or a Web IDE, and assigning a fully qualified domain name to the development environment for easy sharing and collaboration. 
 
 As a developer, you can immediately start focusing on what matters most—your code.
 
@@ -72,34 +92,15 @@ So, we took everything we learned and decided to solve these issues once and for
 
 
 
-## Features
-* __Single Command__: Activate a fully configured development environment with a single command.
-* __Runs everywhere__: spin up your development environment on any machine — whether it's local, remote, cloud-based, physical server, or a VM & any architecture x86 or ARM.
-* __Configuration File Support__: Initially support for [dev container](https://containers.dev/), ability to expand to DevFile, Nix & Flox (Contributions welcome here!).
-* __Prebuilds System__: Drastically improve environment setup times (Contributions welcome here!).
-* __IDE Support__ : Seamlessly supports [VS Code](https://github.com/microsoft/vscode) & [JetBrains](https://www.jetbrains.com/remote-development/gateway/) locally, ready to use without configuration. Includes a built-in Web IDE for added convenience.
-* __Git Provider Integration__: GitHub, GitLab & Bitbucket can be connected, allowing easy repo branch or PR pull and commit back from the workspaces.
-* __Multiple Project Workspace__: Support for multiple project repositories in the same workspace, making it easy to develop using a micro-service architecture.
-* __Reverse Proxy Integration__: Enable collaboration and streamline feedback loops by leveraging reverse proxy functionality. Access preview ports and the Web IDE seamlessly, even behind firewalls.
-* __Extensibility__: Enable extensibility with plugin or provider development. Moreover, in any dynamic language, not just Go(Contributions welcome here!).
-* __Security__: Automatically creates a VPN connection between the client machine and the development environment, ensuring a fully secure connection.
-* __All Ports__: The VPN connection enables access to all ports on the development environments, removing the need to setup port forwards over SSH connection.
-* __Works on my Machine__: Never experince it again.
+
 
 ## Getting Started
 ### Requirements
+Before starting the installation script, please go over all the necessary requirements:
+- __Hardware Resources__: Depending on the project requirements, ensure your machine has sufficient resources. Minimum hardware specification is 1cpu, 2GB of RAM and 10GB of disk space. 
+- __Docker__: Ensure [Docker](https://www.docker.com/products/docker-desktop/) is installed and running.   
 
-Daytona itself has a tiny memory and cpu requirements and will run on any machine. It can create development environments (Workspaces) both locally or on remote targets.
 
-Before you create a development environment using Daytona, ensure you meet the following requirements:
-
-- __Hardware Resources__: Depending on the project requirements, ensure your machine has sufficient resources. Usually a minimum hardware specification is at least 1cpu, 2GB of RAM and 10GB of disk space. For optimal performance we advise to allocate more resources depending on the project complexity.
-
-*Note. If using `docker-provider`
-
-- __Docker__: Ensure Docker is installed and running on the target machine. Daytona `docker-provider` relies on Docker to create and manage development environments.
-
-Please verify these requirements to ensure a smooth installation and operation of Daytona on your system.
 
 ### Installing Daytona
 Daytona allows you to manage your Development Environments using the Daytona CLI. To install it, please execute the following command:
@@ -111,7 +112,8 @@ curl https://download.daytona.io/daytona/get-server.sh | bash
 Alternatively, download and compile Daytona directly from this repository by consulting our [documentation](https://daytona.io/docs).
 
 > [!NOTE]
-> The packaged Daytona includes a set of built-in extensions located in the extensions folder, which are added there for your convince.
+> The packaged Daytona includes a set of built-in extensions located in the extensions folder, which are added there for your convenience.
+
 
 ### Initializing Daytona
 To initialize Daytona, follow these steps:
@@ -144,7 +146,7 @@ daytona ide
 Now that you have installed and initialized Daytona, you can proceed to setting up your development environments and start coding instantly.  
 
 
-## Using Daytona
+
 
 
 ### Creating Dev Environments 
@@ -163,73 +165,8 @@ daytona code
 
 This command opens your development environment in your preferred IDE, allowing you to start coding instantly.
 
-### Manipulating Dev Environments  
-To manage your development environments, Daytona provides several commands that facilitate various operations:  
-
-__- Listing Dev Environments:__ 
-To view a list of all your dev environments, use:
-```bash
-daytona list
-```
-
-__- Deleting a Dev Environment:__ 
-To remove a specific development environment, execute:
-```bash
-daytona delete
-```
-This command deletes the specified development environment.
-
-__- Displaying Dev Environment Information:__ 
-or details about a specific workspace, including its status and configuration, use:
-```bash
-daytona info
-```
-
-__- Starting and Stopping Dev Environments:__   
-- To start a Dev Environment, making it active and accessible, use:
-```bash
-daytona start
-```
-- To stop a Dev Environment, thereby deactivating it, use:
-```bash
-daytona stop
-```
-
-__- Managing Port Forwarding:__ 
-If you need to manage the ports forwarded to your project, facilitating access to services running in your development environment, use:
-```bash
-daytona ports
-```
-
-__- SSH Access:__ 
-For direct SSH access to a development environment using the terminal, execute:
-```bash
-daytona ssh
-```
-This allows for a secure command-line interface with your dev environment.
-
 ### Other Commands
-In addition to the creation and management of dev environments, Daytona provides several commands for customization and accessing information:
-
-__- Managing Profiles:__ 
-Daytona allows for the management of multiple profiles, enabling users to switch between personal use and connecting to a company's installation of the Daytona platform. To manage profiles, use the following command:
-```bash
-daytona profile
-```
-
-__- View Version:__ 
-To find out the version of Daytona you are using, the following command can be used to print the version number:
-```bash
-daytona version
-```
-
 For more detailed information about each command, please refer to Daytona's [documentation](https://daytona.io/docs).
-
-
-
-
-
-
 
   
 
@@ -246,13 +183,13 @@ Daytona is designed to be infrastructure-agnostic, capable of creating and manag
 
 How does it work? When executing the `daytona create` command, Daytona communicates the environment details to the selected provider, which then provisions the necessary compute resources. Once provisioned, Daytona sets up the environment on these resources, allowing the user to interact with the environment seamlessly.
 
-Prroviders are independent projects that adhere to the Daytona Provider interface. They can be developed in nearly any major programming language. For more details, see [Providers](providers/readme.md)
+Providers are independent projects that adhere to the Daytona Provider interface. They can be developed in nearly any major programming language. More details coming soon.
 
 
 ### Plugins
 Plugins enhance Daytona's core functionalities by adding new CLI commands, API methods, or services within the development environments. They offer configurable settings to tailor the plugin's behavior to the user's needs.
 
-Similar to providers, plugins are independent projects that conform to the Daytona Plugin interface and can be developed in a wide range of programming languages. For more information, visit  [Plugins](plugins/readme.md)
+Similar to providers, plugins are independent projects that conform to the Daytona Plugin interface and can be developed in a wide range of programming languages. More details coming soon.
 
 
 
