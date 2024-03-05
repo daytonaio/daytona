@@ -6,7 +6,7 @@ definitions:
         type: string
       repositories:
         items:
-          type: string
+          $ref: '#/definitions/Repository'
         type: array
       target:
         type: string
@@ -96,6 +96,10 @@ definitions:
     properties:
       branch:
         type: string
+      id:
+        type: string
+      name:
+        type: string
       owner:
         type: string
       path:
@@ -168,8 +172,9 @@ definitions:
   provider.ProviderTargetProperty:
     properties:
       defaultValue:
-        description: DefaultValue is converted into the appropriate type based on
-          the Type
+        description: |-
+          DefaultValue is converted into the appropriate type based on the Type
+          If the property is a FilePath, the DefaultValue is a path to a directory
         type: string
       disabledPredicate:
         description: |-
@@ -315,6 +320,26 @@ paths:
           schema:
             $ref: '#/definitions/ServerConfig'
       summary: Set the server configuration
+      tags:
+      - server
+  /server/get-git-context/{gitUrl}:
+    get:
+      description: Get Git context
+      operationId: GetGitContext
+      parameters:
+      - description: Git URL
+        in: path
+        name: gitUrl
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Repository'
+      summary: Get Git context
       tags:
       - server
   /server/network-key:

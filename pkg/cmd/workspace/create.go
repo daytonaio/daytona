@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"regexp"
 	"time"
@@ -24,6 +25,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	status "github.com/daytonaio/daytona/pkg/views/workspace/status"
 	"github.com/gorilla/websocket"
+	"tailscale.com/tsnet"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -31,7 +33,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 )
 
-var repos []string
+var argRepos []string
 
 var CreateCmd = &cobra.Command{
 	Use:   "create [WORKSPACE_NAME]",
@@ -39,25 +41,12 @@ var CreateCmd = &cobra.Command{
 	Args:  cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
+		var repos []types.Repository
 		var workspaceName string
-
-		manual, err := cmd.Flags().GetBool("manual")
-		if err != nil {
-			log.Fatal(err)
-		}
-		multiProjectFlag, err := cmd.Flags().GetBool("multi-project")
-		if err != nil {
-			log.Fatal(err)
-		}
 
 		apiClient, err := server.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
-		}
-
-		serverConfig, res, err := apiClient.ServerAPI.GetConfig(ctx).Execute()
-		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
 		c, err := config.GetConfig()
@@ -73,85 +62,26 @@ var CreateCmd = &cobra.Command{
 		view_util.RenderMainTitle("WORKSPACE CREATION")
 
 		if len(args) == 0 {
-			var workspaceNames []string
-			repos = []string{} // Ignore repo flags if prompting
-
-			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
-			if err != nil {
-				log.Fatal(apiclient.HandleErrorResponse(res, err))
-			}
-			for _, workspaceInfo := range workspaceList {
-				workspaceNames = append(workspaceNames, *workspaceInfo.Name)
-			}
-
-			var gitProviderList []types.GitProvider
-			for _, serverGitProvider := range serverConfig.GitProviders {
-				var gitProvider types.GitProvider
-				if serverGitProvider.Id != nil {
-					gitProvider.Id = *serverGitProvider.Id
-				}
-				if serverGitProvider.Username != nil {
-					gitProvider.Username = *serverGitProvider.Username
-				}
-				if serverGitProvider.Token != nil {
-					gitProvider.Token = *serverGitProvider.Token
-				}
-				gitProviderList = append(gitProviderList, gitProvider)
-			}
-
-			workspaceName, repos, err = create.GetCreationDataFromPrompt(workspaceNames, gitProviderList, manual, multiProjectFlag)
-			if err != nil {
-				log.Fatal(err)
-				return
-			}
+			processPrompting(cmd, apiClient, &workspaceName, &repos, ctx)
 		} else {
-			validatedWorkspaceName, err := util.GetValidatedWorkspaceName(args[0])
-			if err != nil {
-				log.Fatal(err)
-				return
-			}
-			workspaceName = validatedWorkspaceName
+			processCmdArguments(cmd, args, apiClient, &workspaceName, &repos, ctx)
 		}
 
 		if workspaceName == "" || len(repos) == 0 {
+			log.Fatal("workspace name and repository urls are required")
 			return
+		}
+
+		target, err := getTarget()
+		if err != nil {
+			log.Fatal(err)
 		}
 
 		statusProgram := tea.NewProgram(status.NewModel())
 
 		started := false
 
-		go func() {
-			hostRegex := regexp.MustCompile(`https*://(.*)`)
-			host := hostRegex.FindStringSubmatch(activeProfile.Api.Url)[1]
-			wsURL := fmt.Sprintf("ws://%s/log/workspace/%s?follow=true", host, workspaceName)
-			var ws *websocket.Conn
-			var res *http.Response
-			var err error
-
-			ws, res, err = websocket.DefaultDialer.Dial(wsURL, nil)
-			if err != nil {
-				log.Fatal(apiclient.HandleErrorResponse(res, err))
-			}
-
-			defer ws.Close()
-
-			for {
-				_, msg, err := ws.ReadMessage()
-				if err != nil {
-					// TODO: needs refactor
-					ws.Close()
-					ws, _, _ = websocket.DefaultDialer.Dial(wsURL, nil)
-					continue
-				}
-
-				statusProgram.Send(status.ResultMsg{Line: string(msg)})
-				if started {
-					statusProgram.Send(status.ResultMsg{Line: "END_SIGNAL"})
-					break
-				}
-			}
-		}()
+		go scanWorkspaceLogs(activeProfile, workspaceName, statusProgram, &started)
 
 		go func() {
 			if _, err := statusProgram.Run(); err != nil {
@@ -168,52 +98,46 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		target, err := getTarget(apiClient)
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		tsConn, err := tailscale.GetConnection(&activeProfile)
 		if err != nil {
 			log.Fatal(err)
 		}
 
+		var requestRepos []serverapiclient.Repository
+		for _, repo := range repos {
+			requestRepos = append(requestRepos, serverapiclient.Repository{
+				Name:   &repo.Name,
+				Url:    &repo.Url,
+				Branch: &repo.Branch,
+			})
+		}
+
 		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(serverapiclient.CreateWorkspace{
 			Name:         &workspaceName,
-			Repositories: repos,
 			Target:       target.Name,
+			Repositories: requestRepos,
 		}).Execute()
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
+
 		started = true
 
 		dialStartTime := time.Now()
 		dialTimeout := 3 * time.Minute
 		statusProgram.Send(status.ResultMsg{Line: "Establishing connection with the workspace"})
-		for {
-			if time.Since(dialStartTime) > dialTimeout {
-				log.Fatal("Timeout: dialing timed out after 3 minutes")
-			}
 
-			dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s-%s:2222", workspaceName, *createdWorkspace.Projects[0].Name))
-			if err == nil {
-				defer dialConn.Close()
-				break
-			}
+		waitForDial(tsConn, workspaceName, *createdWorkspace.Projects[0].Name, dialStartTime, dialTimeout, statusProgram)
 
-			time.Sleep(time.Second)
-		}
+		statusProgram.Send(status.ClearScreenMsg{})
+		statusProgram.Send(tea.Quit())
+		statusProgram.ReleaseTerminal()
 
 		wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceName).Execute()
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 			return
 		}
-
-		statusProgram.Send(status.ClearScreenMsg{})
-		statusProgram.Send(tea.Quit())
-		statusProgram.ReleaseTerminal()
 
 		fmt.Println()
 		info.Render(wsInfo)
@@ -237,7 +161,7 @@ var providerFlag string
 var targetNameFlag string
 
 func init() {
-	CreateCmd.Flags().StringArrayVarP(&repos, "repo", "r", nil, "Set the repository url")
+	CreateCmd.Flags().StringArrayVarP(&argRepos, "repo", "r", nil, "Set the repository url")
 	CreateCmd.Flags().StringVar(&providerFlag, "provider", "", "Specify the provider (e.g. 'docker-provider')")
 	CreateCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", "Specify the IDE ('vscode' or 'browser')")
 	CreateCmd.Flags().StringVarP(&targetNameFlag, "target", "t", "", "Specify the target (e.g. 'local')")
@@ -246,7 +170,7 @@ func init() {
 	CreateCmd.Flags().Bool("skip-ide", false, "Don't open the IDE after workspace creation")
 }
 
-func getTarget(apiClient *serverapiclient.APIClient) (*serverapiclient.ProviderTarget, error) {
+func getTarget() (*serverapiclient.ProviderTarget, error) {
 	targets, err := server.GetTargetList()
 	if err != nil {
 		return nil, err
@@ -271,4 +195,142 @@ func getTarget(apiClient *serverapiclient.APIClient) (*serverapiclient.ProviderT
 	}
 
 	return selectedTarget, nil
+}
+
+func processPrompting(cmd *cobra.Command, apiClient *serverapiclient.APIClient, workspaceName *string, repos *[]types.Repository, ctx context.Context) {
+	manual, err := cmd.Flags().GetBool("manual")
+	if err != nil {
+		log.Fatal(err)
+	}
+	multiProjectFlag, err := cmd.Flags().GetBool("multi-project")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	serverConfig, res, err := apiClient.ServerAPI.GetConfig(ctx).Execute()
+	if err != nil {
+		log.Fatal(apiclient.HandleErrorResponse(res, err))
+	}
+
+	var workspaceNames []string
+
+	if argRepos != nil {
+		view_util.RenderInfoMessage("Error: workspace name argument is required for this command")
+		cmd.Help()
+		os.Exit(1)
+	}
+
+	workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+	if err != nil {
+		log.Fatal(apiclient.HandleErrorResponse(res, err))
+	}
+	for _, workspaceInfo := range workspaceList {
+		workspaceNames = append(workspaceNames, *workspaceInfo.Name)
+	}
+
+	var gitProviderList []types.GitProvider
+	for _, serverGitProvider := range serverConfig.GitProviders {
+		var gitProvider types.GitProvider
+		if serverGitProvider.Id != nil {
+			gitProvider.Id = *serverGitProvider.Id
+		}
+		if serverGitProvider.Username != nil {
+			gitProvider.Username = *serverGitProvider.Username
+		}
+		if serverGitProvider.Token != nil {
+			gitProvider.Token = *serverGitProvider.Token
+		}
+		gitProviderList = append(gitProviderList, gitProvider)
+	}
+
+	*workspaceName, *repos, err = create.GetCreationDataFromPrompt(workspaceNames, gitProviderList, manual, multiProjectFlag)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+}
+
+func processCmdArguments(cmd *cobra.Command, args []string, apiClient *serverapiclient.APIClient, workspaceName *string, repos *[]types.Repository, ctx context.Context) {
+	var repoUrls []string
+
+	validatedWorkspaceName, err := util.GetValidatedWorkspaceName(args[0])
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	*workspaceName = validatedWorkspaceName
+	if argRepos != nil {
+		repoUrls = argRepos
+	} else {
+		view_util.RenderInfoMessage("Error: --repo flag is required for this command")
+		cmd.Help()
+		os.Exit(1)
+	}
+
+	for _, repoUrl := range repoUrls {
+		encodedURLParam := url.QueryEscape(repoUrl)
+		repoResponse, res, err := apiClient.ServerAPI.GetGitContext(ctx, encodedURLParam).Execute()
+		if err != nil {
+			log.Fatal(apiclient.HandleErrorResponse(res, err))
+		}
+
+		repo := &types.Repository{
+			Url: *repoResponse.Url,
+		}
+
+		*repos = append(*repos, *repo)
+	}
+}
+
+func scanWorkspaceLogs(activeProfile config.Profile, workspaceName string, statusProgram *tea.Program, started *bool) {
+	hostRegex := regexp.MustCompile(`https*://(.*)`)
+	host := hostRegex.FindStringSubmatch(activeProfile.Api.Url)[1]
+	wsURL := fmt.Sprintf("ws://%s/log/workspace/%s?follow=true", host, workspaceName)
+	var ws *websocket.Conn
+	var res *http.Response
+	var err error
+
+	time.Sleep(1 * time.Second)
+
+	ws, res, err = websocket.DefaultDialer.Dial(wsURL, nil)
+	if err != nil {
+		log.Fatal(apiclient.HandleErrorResponse(res, err))
+	}
+
+	defer ws.Close()
+
+	for {
+		_, msg, err := ws.ReadMessage()
+		if err != nil {
+			return
+		}
+
+		statusProgram.Send(status.ResultMsg{Line: string(msg)})
+		if *started {
+			statusProgram.Send(status.ResultMsg{Line: "END_SIGNAL"})
+			break
+		}
+	}
+}
+
+func waitForDial(tsConn *tsnet.Server, workspaceName string, projectName string, dialStartTime time.Time, dialTimeout time.Duration, statusProgram *tea.Program) {
+	for {
+		if time.Since(dialStartTime) > dialTimeout {
+			statusProgram.Send(status.ClearScreenMsg{})
+			statusProgram.Send(tea.Quit())
+			statusProgram.ReleaseTerminal()
+			log.Fatal("Timeout: dialing timed out after 3 minutes")
+		}
+
+		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s-%s:2222", workspaceName, projectName))
+		if err == nil {
+			defer dialConn.Close()
+			break
+		}
+
+		time.Sleep(time.Second)
+	}
+	statusProgram.Send(status.ClearScreenMsg{})
+	statusProgram.Send(tea.Quit())
+	statusProgram.ReleaseTerminal()
 }

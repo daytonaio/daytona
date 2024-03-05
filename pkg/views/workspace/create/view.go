@@ -36,8 +36,8 @@ type Styles struct {
 
 type WorkspaceCreationPromptResponse struct {
 	WorkspaceName         string
-	PrimaryRepository     string
-	SecondaryRepositories []string
+	PrimaryRepository     types.Repository
+	SecondaryRepositories []types.Repository
 	SecondaryProjectCount int
 }
 
@@ -74,24 +74,24 @@ type Model struct {
 	workspaceCreationPromptResponse WorkspaceCreationPromptResponse
 }
 
-func runInitialForm(providerRepoUrl string, multiProject bool) (WorkspaceCreationPromptResponse, error) {
+func runInitialForm(providerRepo types.Repository, multiProject bool) (WorkspaceCreationPromptResponse, error) {
 	m := Model{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
 
-	primaryRepo := providerRepoUrl
+	primaryRepoUrl := providerRepo.Url
 	secondaryProjectsCountString := ""
 
 	primaryRepoPrompt := huh.NewInput().
 		Title("Primary project repository").
-		Value(&primaryRepo).
+		Value(&primaryRepoUrl).
 		Key("primaryProjectRepo").
 		Validate(func(str string) error {
 			result, err := util.GetValidatedUrl(str)
 			if err != nil {
 				return err
 			}
-			primaryRepo = result
+			primaryRepoUrl = result
 			return nil
 		})
 
@@ -133,8 +133,10 @@ func runInitialForm(providerRepoUrl string, multiProject bool) (WorkspaceCreatio
 		secondaryProjectsCount = 0
 	}
 
+	providerRepo.Url = primaryRepoUrl
+
 	return WorkspaceCreationPromptResponse{
-		PrimaryRepository:     primaryRepo,
+		PrimaryRepository:     providerRepo,
 		SecondaryProjectCount: secondaryProjectsCount,
 	}, nil
 }
@@ -144,21 +146,24 @@ func runSecondaryProjectsForm(workspaceCreationPromptResponse WorkspaceCreationP
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
 
-	var secondaryRepoList []string
+	var secondaryRepoList []types.Repository
 	count := workspaceCreationPromptResponse.SecondaryProjectCount
 
 	secondaryRepoList = workspaceCreationPromptResponse.SecondaryRepositories
 
 	// Add empty strings to the slice
 	for i := 0; i < (count - len(workspaceCreationPromptResponse.SecondaryRepositories)); i++ {
-		secondaryRepoList = append(secondaryRepoList, "")
+		emptyString := ""
+		secondaryRepoList = append(secondaryRepoList, types.Repository{
+			Url: emptyString,
+		})
 	}
 
 	formFields := make([]huh.Field, count+1)
 	for i := 0; i < count; i++ {
 		formFields[i] = huh.NewInput().
 			Title(getOrderNumberString(i+1) + " secondary project repository").
-			Value(&secondaryRepoList[i]).
+			Value(&secondaryRepoList[i].Url).
 			Key(fmt.Sprintf("secondaryRepo%d", i)).
 			Validate(func(str string) error {
 				_, err := util.GetValidatedUrl(str)
@@ -196,10 +201,11 @@ func runSecondaryProjectsForm(workspaceCreationPromptResponse WorkspaceCreationP
 	}
 
 	for i := 0; i < count; i++ {
-		secondaryRepoList[i], err = util.GetValidatedUrl(secondaryRepoList[i])
+		validatedURL, err := util.GetValidatedUrl(secondaryRepoList[i].Url)
 		if err != nil {
 			return WorkspaceCreationPromptResponse{}, err
 		}
+		secondaryRepoList[i].Url = validatedURL
 	}
 
 	result := workspaceCreationPromptResponse
@@ -256,43 +262,43 @@ func runWorkspaceNameForm(workspaceCreationPromptResponse WorkspaceCreationPromp
 	return result, nil
 }
 
-func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []types.GitProvider, manual bool, multiProject bool) (workspaceName string, projectRepositoryList []string, err error) {
-	var projectRepoList []string
-	var providerRepoUrl string
+func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []types.GitProvider, manual bool, multiProject bool) (workspaceName string, projectRepositoryList []types.Repository, err error) {
+	var projectRepoList []types.Repository
+	var providerRepo types.Repository
 
 	if !manual && userGitProviders != nil && len(userGitProviders) > 0 {
-		providerRepoUrl, err = GetRepositoryUrlFromWizard(userGitProviders, 0)
+		providerRepo, err = GetRepositoryFromWizard(userGitProviders, 0)
 		if err != nil {
 			return "", nil, err
 		}
-		if providerRepoUrl == "" {
+		if providerRepo == (types.Repository{}) {
 			return "", nil, nil
 		}
 	}
 
-	workspaceCreationPromptResponse, err := runInitialForm(providerRepoUrl, multiProject)
+	workspaceCreationPromptResponse, err := runInitialForm(providerRepo, multiProject)
 	if err != nil {
 		return "", nil, err
 	}
 
-	if workspaceCreationPromptResponse.PrimaryRepository == "" {
+	if workspaceCreationPromptResponse.PrimaryRepository == (types.Repository{}) {
 		return "", nil, errors.New("primary repository is required")
 	}
 
-	projectRepoList = []string{workspaceCreationPromptResponse.PrimaryRepository}
+	projectRepoList = []types.Repository{workspaceCreationPromptResponse.PrimaryRepository}
 
 	if workspaceCreationPromptResponse.SecondaryProjectCount > 0 {
 
 		if !manual && userGitProviders != nil && len(userGitProviders) > 0 {
 			for i := 0; i < workspaceCreationPromptResponse.SecondaryProjectCount; i++ {
-				providerRepoUrl, err = GetRepositoryUrlFromWizard(userGitProviders, i+1)
+				providerRepo, err = GetRepositoryFromWizard(userGitProviders, i+1)
 				if err != nil {
 					return "", nil, err
 				}
-				if providerRepoUrl == "" {
+				if providerRepo == (types.Repository{}) {
 					return "", nil, nil
 				}
-				workspaceCreationPromptResponse.SecondaryRepositories = append(workspaceCreationPromptResponse.SecondaryRepositories, providerRepoUrl)
+				workspaceCreationPromptResponse.SecondaryRepositories = append(workspaceCreationPromptResponse.SecondaryRepositories, providerRepo)
 			}
 		}
 
@@ -304,7 +310,7 @@ func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []types
 		projectRepoList = append(projectRepoList, workspaceCreationPromptResponse.SecondaryRepositories...)
 	}
 
-	suggestedName := getSuggestedWorkspaceName(workspaceCreationPromptResponse.PrimaryRepository)
+	suggestedName := getSuggestedWorkspaceName(workspaceCreationPromptResponse.PrimaryRepository.Url)
 
 	workspaceCreationPromptResponse, err = runWorkspaceNameForm(workspaceCreationPromptResponse, suggestedName, workspaceNames)
 	if err != nil {
@@ -318,39 +324,42 @@ func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []types
 	return workspaceCreationPromptResponse.WorkspaceName, projectRepoList, nil
 }
 
-func GetRepositoryUrlFromWizard(userGitProviders []types.GitProvider, secondaryProjectOrder int) (string, error) {
+func GetRepositoryFromWizard(userGitProviders []types.GitProvider, secondaryProjectOrder int) (types.Repository, error) {
 	var providerId string
 	var namespaceId string
+	var branchName string
 	var gitProvider gitprovider.GitProvider
+	var checkoutOptions []gitprovider.CheckoutOption
 
-	if len(userGitProviders) == 1 {
-		providerId = userGitProviders[0].Id
-	} else {
+	availableGitProviderViews := config.GetGitProviderList()
+	var gitProviderViewList []config.GitProvider
 
-		availableGitProviderViews := config.GetGitProviderList()
-		var gitProviderViewList []config.GitProvider
-
-		for _, gitProvider := range userGitProviders {
-			for _, availableGitProviderView := range availableGitProviderViews {
-				if gitProvider.Id == availableGitProviderView.Id {
-					gitProviderViewList = append(gitProviderViewList, availableGitProviderView)
-				}
+	for _, gitProvider := range userGitProviders {
+		for _, availableGitProviderView := range availableGitProviderViews {
+			if gitProvider.Id == availableGitProviderView.Id {
+				gitProviderViewList = append(gitProviderViewList, availableGitProviderView)
 			}
 		}
-		providerId = selection.GetProviderIdFromPrompt(gitProviderViewList, secondaryProjectOrder)
-		if providerId == "" {
-			return "", nil
-		}
+	}
+	providerId = selection.GetProviderIdFromPrompt(gitProviderViewList, secondaryProjectOrder)
+	if providerId == "" {
+		return types.Repository{}, nil
+	}
+
+	if providerId == selection.CustomRepoIdentifier {
+		return types.Repository{
+			Id: selection.CustomRepoIdentifier,
+		}, nil
 	}
 
 	gitProvider = gitprovider.GetGitProvider(providerId, userGitProviders)
 	if gitProvider == nil {
-		return "", errors.New("provider not found")
+		return types.Repository{}, errors.New("provider not found")
 	}
 
 	namespaceList, err := gitProvider.GetNamespaces()
 	if err != nil {
-		return "", err
+		return types.Repository{}, err
 	}
 
 	if len(namespaceList) == 1 {
@@ -360,21 +369,89 @@ func GetRepositoryUrlFromWizard(userGitProviders []types.GitProvider, secondaryP
 		namespaceViewList = append(namespaceViewList, namespaceList...)
 		namespaceId = selection.GetNamespaceIdFromPrompt(namespaceViewList, secondaryProjectOrder)
 		if namespaceId == "" {
-			return "", nil
+			return types.Repository{}, errors.New("namespace not found")
 		}
 	}
 
-	repos, err := gitProvider.GetRepositories(namespaceId)
+	providerRepos, err := gitProvider.GetRepositories(namespaceId)
 	if err != nil {
-		return "", err
+		return types.Repository{}, err
 	}
 
-	repoUrl := selection.GetRepositoryUrlFromPrompt(repos, secondaryProjectOrder)
-	if repoUrl == "" {
-		return "", nil
+	repos := []types.Repository{}
+	for _, providerRepo := range providerRepos {
+		repo := types.Repository{
+			Id:   providerRepo.Id,
+			Name: providerRepo.Name,
+			Url:  providerRepo.Url,
+		}
+		repos = append(repos, repo)
 	}
 
-	return repoUrl, nil
+	chosenRepo := selection.GetRepositoryFromPrompt(repos, secondaryProjectOrder)
+	if chosenRepo == (types.Repository{}) {
+		return types.Repository{}, nil
+	}
+
+	branchList, err := gitProvider.GetRepoBranches(chosenRepo, namespaceId)
+	if err != nil {
+		return types.Repository{}, err
+	}
+
+	if len(branchList) == 0 {
+		return types.Repository{}, errors.New("no branches found")
+	}
+
+	if len(branchList) == 1 {
+		branchName = branchList[0].Name
+		chosenRepo.Branch = branchName
+		return chosenRepo, nil
+	}
+
+	// TODO: Add support for Bitbucket
+	if providerId == "bitbucket" {
+		return chosenRepo, nil
+	}
+
+	prList, err := gitProvider.GetRepoPRs(chosenRepo, namespaceId)
+	if err != nil {
+		return types.Repository{}, err
+	}
+	if len(prList) == 0 {
+		branchName = selection.GetBranchNameFromPrompt(branchList, secondaryProjectOrder)
+		if branchName == "" {
+			return types.Repository{}, nil
+		}
+		chosenRepo.Branch = branchName
+
+		return chosenRepo, nil
+	}
+
+	checkoutOptions = append(checkoutOptions, gitprovider.CheckoutDefault)
+	checkoutOptions = append(checkoutOptions, gitprovider.CheckoutBranch)
+	checkoutOptions = append(checkoutOptions, gitprovider.CheckoutPR)
+
+	chosenCheckoutOption := selection.GetCheckoutOptionFromPrompt(secondaryProjectOrder, checkoutOptions)
+	if chosenCheckoutOption == gitprovider.CheckoutDefault {
+		return chosenRepo, nil
+	}
+
+	if chosenCheckoutOption == gitprovider.CheckoutBranch {
+		branchName = selection.GetBranchNameFromPrompt(branchList, secondaryProjectOrder)
+		if branchName == "" {
+			return types.Repository{}, nil
+		}
+		chosenRepo.Branch = branchName
+	} else if chosenCheckoutOption == gitprovider.CheckoutPR {
+		chosenPullRequest := selection.GetPullRequestFromPrompt(prList, secondaryProjectOrder)
+		if chosenPullRequest.Branch == "" {
+			return types.Repository{}, nil
+		}
+
+		chosenRepo.Branch = chosenPullRequest.Branch
+	}
+
+	return chosenRepo, nil
 }
 
 func getSuggestedWorkspaceName(repo string) string {

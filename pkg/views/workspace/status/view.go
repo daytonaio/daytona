@@ -82,6 +82,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width, m.height = msg.Width, msg.Height
 		return m, nil
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "q", "ctrl+c":
+			m.quitting = true
+			return m, tea.Quit
+		}
+		return m, nil
 	default:
 		return m, nil
 	}
@@ -94,5 +101,5 @@ func (m model) View() string {
 		s += res.String() + "\n"
 	}
 
-	return appStyle.Width(m.width - 10).Render(s)
+	return appStyle.Width(m.width - 20).Render(s)
 }

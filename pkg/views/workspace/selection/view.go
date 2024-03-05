@@ -9,6 +9,8 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+var CustomRepoIdentifier = "<CUSTOM_REPO>"
+
 var docStyle = lipgloss.NewStyle().Margin(1, 2)
 
 type item struct {

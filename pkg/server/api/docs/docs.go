@@ -176,6 +176,36 @@ const docTemplate = `{
                 }
             }
         },
+        "/server/get-git-context/{gitUrl}": {
+            "get": {
+                "description": "Get Git context",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "server"
+                ],
+                "summary": "Get Git context",
+                "operationId": "GetGitContext",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Git URL",
+                        "name": "gitUrl",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Repository"
+                        }
+                    }
+                }
+            }
+        },
         "/server/network-key": {
             "post": {
                 "description": "Generate a new authentication key",
@@ -496,7 +526,7 @@ const docTemplate = `{
                 "repositories": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/Repository"
                     }
                 },
                 "target": {
@@ -635,6 +665,12 @@ const docTemplate = `{
                 "branch": {
                     "type": "string"
                 },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
                 "owner": {
                     "type": "string"
                 },
@@ -745,7 +781,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "defaultValue": {
-                    "description": "DefaultValue is converted into the appropriate type based on the Type",
+                    "description": "DefaultValue is converted into the appropriate type based on the Type\nIf the property is a FilePath, the DefaultValue is a path to a directory",
                     "type": "string"
                 },
                 "disabledPredicate": {

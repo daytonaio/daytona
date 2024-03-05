@@ -64,6 +64,7 @@ func Start() error {
 		serverController.GET("/config", server.GetConfig)
 		serverController.POST("/config", server.SetConfig)
 		serverController.POST("/network-key", server.GenerateNetworkKey)
+		serverController.GET("/get-git-context/:gitUrl", server.GetGitContext)
 	}
 
 	workspaceController := router.Group("/workspace")

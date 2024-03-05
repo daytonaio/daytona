@@ -9,7 +9,9 @@ type GitUserData struct {
 } // @name GitUserData
 
 type Repository struct {
+	Id          string       `json:"id,omitempty"`
 	Url         string       `json:"url"`
+	Name        string       `json:"name"`
 	Branch      string       `json:"branch,omitempty"`
 	Sha         string       `json:"sha"`
 	Owner       string       `json:"owner"`

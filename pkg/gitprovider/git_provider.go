@@ -14,8 +14,11 @@ const personalNamespaceId = "<PERSONAL>"
 
 type GitProvider interface {
 	GetNamespaces() ([]GitNamespace, error)
-	GetRepositories(namespace string) ([]GitRepository, error)
+	GetRepositories(namespace string) ([]types.Repository, error)
 	GetUserData() (GitUser, error)
+	GetRepoBranches(types.Repository, string) ([]GitBranch, error)
+	GetRepoPRs(types.Repository, string) ([]GitPullRequest, error)
+	// ParseGitUrl(string) (*types.Repository, error)
 }
 
 type GitUser struct {
@@ -30,17 +33,33 @@ type GitNamespace struct {
 	Name string
 }
 
-type GitRepository struct {
-	FullName string
-	Name     string
-	Url      string
+type GitBranch struct {
+	Name string
+	SHA  string
 }
+
+type GitPullRequest struct {
+	Name   string
+	Branch string
+}
+
+type CheckoutOption struct {
+	Title string
+	Id    string
+}
+
+var (
+	CheckoutDefault = CheckoutOption{Title: "Clone the default branch", Id: "default"}
+	CheckoutBranch  = CheckoutOption{Title: "Branches", Id: "branch"}
+	CheckoutPR      = CheckoutOption{Title: "Pull/Merge requests", Id: "pullrequest"}
+)
 
 func GetGitProvider(providerId string, gitProviders []types.GitProvider) GitProvider {
 	var chosenProvider *types.GitProvider
 	for _, gitProvider := range gitProviders {
 		if gitProvider.Id == providerId {
 			chosenProvider = &gitProvider
+			break
 		}
 	}
 
