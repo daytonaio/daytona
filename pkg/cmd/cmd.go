@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/daytonaio/daytona/internal/util"
 	. "github.com/daytonaio/daytona/pkg/cmd/agent"
 	. "github.com/daytonaio/daytona/pkg/cmd/gitprovider"
 	"github.com/daytonaio/daytona/pkg/cmd/output"
@@ -35,18 +36,16 @@ var rootCmd = &cobra.Command{
 var originalStdout *os.File
 
 func Execute() {
-	_, wsMode := os.LookupEnv("DAYTONA_WS_DIR")
-
 	rootCmd.AddCommand(InfoCmd)
 	rootCmd.AddCommand(StartCmd)
 	rootCmd.AddCommand(StopCmd)
-	rootCmd.AddCommand(PortsCmd)
+	rootCmd.AddCommand(PortForwardCmd)
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(ListCmd)
 	rootCmd.AddCommand(GitProviderCmd)
 	rootCmd.AddCommand(TargetCmd)
 
-	if wsMode {
+	if util.WorkspaceMode() {
 		rootCmd.AddCommand(gitCredCmd)
 		rootCmd.AddCommand(AgentCmd)
 	} else {
