@@ -36,12 +36,11 @@ We look forward to working with you to improve Daytona and make development envi
 
 Follow the following steps to ensure your contribution goes smoothly.
 
-1. ---need edit--- Read and follow the steps outlined in the [System Initiative Contributing Policy](README.md#contributing).
-1. Configure your development environment by either following the guide in the [documentation](https://www.daytona.io/docs/installation/server/).
+1. Read and follow the steps outlined in the [Daytona Contributing Policy](README.md#contributing).
+1. Configure your development environment by either following the guide below.
 1. [Fork](https://help.github.com/articles/working-with-forks/) the GitHub Repository allowing you to make the changes in your own copy of the repository.
-1. Create a [GitHub issue](https://github.com/daytonaio/daytona/issues) if one doesn't exist already.
-1. ---need edit--- Make the changes you would like to include, adding new tests where possible, and make sure all relevant existing [tests are passing](docs/RUNNING_RUST_TESTS.md).
-1.---need edit---  [Prepare your changes](/docs/PREPARING_YOUR_CHANGES.md) and ensure your commits are descriptive. The document contains an optional commit template, if desired.
+1. Create a [GitHub issue](https://github.com/daytonaio/daytona/issues) if one doesn't exist already.  
+1. [Prepare your changes](/PREPARING_YOUR_CHANGES.md) and ensure your commits are descriptive. The document contains an optional commit template, if desired.
 1. Ensure that you are in the [CONTRIBUTORS](CONTRIBUTORS.md) file (see the [Adding Yourself to the Contributors List](#adding-yourself-to-the-contributors-list) section for instructions)
 1. Create a pull request on GitHub. If you're new to GitHub, read about [pull requests](https://help.github.com/articles/about-pull-requests/). You are welcome to submit your pull request for commentary or review before it is complete by creating a [draft pull request](https://help.github.com/en/articles/about-pull-requests#draft-pull-requests). Please include specific questions or items you'd like feedback on.
 1. A member of the Daytona team will review your PR within three business days (excluding any holidays) and either merge, comment, and/or assign someone for review.
