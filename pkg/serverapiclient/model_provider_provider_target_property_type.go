@@ -25,6 +25,7 @@ const (
 	ProviderTargetPropertyTypeBoolean ProviderProviderTargetPropertyType = "boolean"
 	ProviderTargetPropertyTypeInt ProviderProviderTargetPropertyType = "int"
 	ProviderTargetPropertyTypeFloat ProviderProviderTargetPropertyType = "float"
+	ProviderTargetPropertyTypeFilePath ProviderProviderTargetPropertyType = "file-path"
 )
 
 // All allowed values of ProviderProviderTargetPropertyType enum
@@ -34,6 +35,7 @@ var AllowedProviderProviderTargetPropertyTypeEnumValues = []ProviderProviderTarg
 	"boolean",
 	"int",
 	"float",
+	"file-path",
 }
 
 func (v *ProviderProviderTargetPropertyType) UnmarshalJSON(src []byte) error {

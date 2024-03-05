@@ -774,14 +774,16 @@ const docTemplate = `{
                 "option",
                 "boolean",
                 "int",
-                "float"
+                "float",
+                "file-path"
             ],
             "x-enum-varnames": [
                 "ProviderTargetPropertyTypeString",
                 "ProviderTargetPropertyTypeOption",
                 "ProviderTargetPropertyTypeBoolean",
                 "ProviderTargetPropertyTypeInt",
-                "ProviderTargetPropertyTypeFloat"
+                "ProviderTargetPropertyTypeFloat",
+                "ProviderTargetPropertyTypeFilePath"
             ]
         }
     }

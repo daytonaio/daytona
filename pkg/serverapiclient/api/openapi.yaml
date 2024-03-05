@@ -679,6 +679,7 @@ components:
       - boolean
       - int
       - float
+      - file-path
       type: string
       x-enum-varnames:
       - ProviderTargetPropertyTypeString
@@ -686,4 +687,5 @@ components:
       - ProviderTargetPropertyTypeBoolean
       - ProviderTargetPropertyTypeInt
       - ProviderTargetPropertyTypeFloat
+      - ProviderTargetPropertyTypeFilePath
 x-original-swagger-version: "2.0"

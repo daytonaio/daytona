@@ -194,6 +194,7 @@ definitions:
     - boolean
     - int
     - float
+    - file-path
     type: string
     x-enum-varnames:
     - ProviderTargetPropertyTypeString
@@ -201,6 +202,7 @@ definitions:
     - ProviderTargetPropertyTypeBoolean
     - ProviderTargetPropertyTypeInt
     - ProviderTargetPropertyTypeFloat
+    - ProviderTargetPropertyTypeFilePath
 host: localhost:3000
 info:
   contact: {}

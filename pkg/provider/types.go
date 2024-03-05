@@ -53,6 +53,7 @@ type ProviderTargetProperty struct {
 	// E.g. "^local$" will disable the property for the local target
 	DisabledPredicate string
 	// DefaultValue is converted into the appropriate type based on the Type
+	// If the property is a FilePath, the DefaultValue is a path to a directory
 	DefaultValue string
 	// Options is only used if the Type is ProviderTargetPropertyTypeOption
 	Options []string

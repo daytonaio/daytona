@@ -6,10 +6,13 @@ package target
 import (
 	"encoding/json"
 	"errors"
+	"os"
+	"path"
 	"regexp"
 	"slices"
 	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/internal/util"
@@ -40,6 +43,7 @@ func NewTargetNameInput(targetName *string, existingTargetNames []string) error 
 
 func SetTargetForm(target *serverapiclient.ProviderTarget, targetManifest map[string]serverapiclient.ProviderProviderTargetProperty) error {
 	fields := make([]huh.Field, 0, len(targetManifest))
+	groups := []*huh.Group{}
 	options := make(map[string]interface{})
 
 	err := json.Unmarshal([]byte(*target.Options), &options)
@@ -103,10 +107,14 @@ func SetTargetForm(target *serverapiclient.ProviderTarget, targetManifest map[st
 			selectField, value := getSelect(name, property, initialValue)
 			fields = append(fields, selectField)
 			options[name] = value
+		case serverapiclient.ProviderTargetPropertyTypeFilePath:
+			group, value := getFilePicker(name, property)
+			groups = append(groups, group...)
+			options[name] = value
 		}
 	}
 
-	form := huh.NewForm(huh.NewGroup(fields...))
+	form := huh.NewForm(append([]*huh.Group{huh.NewGroup(fields...)}, groups...)...)
 	err = form.Run()
 	if err != nil {
 		return err
@@ -128,6 +136,10 @@ func SetTargetForm(target *serverapiclient.ProviderTarget, targetManifest map[st
 			options[name], err = strconv.ParseFloat(*options[name].(*string), 64)
 			if err != nil {
 				return err
+			}
+		case serverapiclient.ProviderTargetPropertyTypeFilePath:
+			if *options[name].(*string) == "none" {
+				delete(options, name)
 			}
 		}
 	}
@@ -191,4 +203,68 @@ func getConfirm(name string, property serverapiclient.ProviderProviderTargetProp
 	return huh.NewConfirm().
 		Title(name).
 		Value(&value), &value
+}
+
+func getFilePicker(name string, property serverapiclient.ProviderProviderTargetProperty) ([]*huh.Group, *string) {
+	dirPath := "~"
+
+	if property.DefaultValue != nil {
+		dirPath = *property.DefaultValue
+	}
+
+	home := os.Getenv("HOME")
+	if home != "" {
+		dirPath = strings.Replace(dirPath, "~", home, 1)
+	}
+
+	options := []huh.Option[string]{}
+
+	files, err := os.ReadDir(dirPath)
+	if err == nil {
+		for _, file := range files {
+			if file.IsDir() {
+				continue
+			}
+
+			options = append(options, huh.NewOption(file.Name(), path.Join(dirPath, file.Name())))
+		}
+	}
+
+	customPathInput := huh.NewInput().
+		Title(name).
+		Validate(func(filePath string) error {
+			fileInfo, err := os.Stat(filePath)
+			if os.IsNotExist(err) {
+				return errors.New("file does not exist")
+			} else if err != nil {
+				return err
+			}
+
+			if fileInfo.IsDir() {
+				return errors.New("file is a directory")
+			}
+
+			return nil
+		})
+
+	if len(options) == 0 {
+		return []*huh.Group{}, nil
+	}
+
+	options = append(options, huh.NewOption("Custom path", "custom-path"))
+	options = append(options, huh.NewOption("None", "none"))
+
+	var value *string = new(string)
+
+	return []*huh.Group{
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title(name).
+				Options(options...).
+				Value(value),
+		),
+		huh.NewGroup(customPathInput).WithHideFunc(func() bool {
+			return *value != "custom-path"
+		}),
+	}, value
 }
