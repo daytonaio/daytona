@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
 	"regexp"
 	"strings"
 
@@ -15,6 +16,11 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 )
+
+func WorkspaceMode() bool {
+	_, wsMode := os.LookupEnv("DAYTONA_WS_DIR")
+	return wsMode
+}
 
 func GetFirstWorkspaceProjectName(workspaceId string, projectName string, profile *config.Profile) (string, error) {
 	ctx := context.Background()
