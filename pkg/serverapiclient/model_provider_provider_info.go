@@ -14,34 +14,34 @@ import (
 	"encoding/json"
 )
 
-// checks if the Provider type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &Provider{}
+// checks if the ProviderProviderInfo type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &ProviderProviderInfo{}
 
-// Provider struct for Provider
-type Provider struct {
+// ProviderProviderInfo struct for ProviderProviderInfo
+type ProviderProviderInfo struct {
 	Name *string `json:"name,omitempty"`
 	Version *string `json:"version,omitempty"`
 }
 
-// NewProvider instantiates a new Provider object
+// NewProviderProviderInfo instantiates a new ProviderProviderInfo object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProvider() *Provider {
-	this := Provider{}
+func NewProviderProviderInfo() *ProviderProviderInfo {
+	this := ProviderProviderInfo{}
 	return &this
 }
 
-// NewProviderWithDefaults instantiates a new Provider object
+// NewProviderProviderInfoWithDefaults instantiates a new ProviderProviderInfo object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewProviderWithDefaults() *Provider {
-	this := Provider{}
+func NewProviderProviderInfoWithDefaults() *ProviderProviderInfo {
+	this := ProviderProviderInfo{}
 	return &this
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
-func (o *Provider) GetName() string {
+func (o *ProviderProviderInfo) GetName() string {
 	if o == nil || IsNil(o.Name) {
 		var ret string
 		return ret
@@ -51,7 +51,7 @@ func (o *Provider) GetName() string {
 
 // GetNameOk returns a tuple with the Name field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Provider) GetNameOk() (*string, bool) {
+func (o *ProviderProviderInfo) GetNameOk() (*string, bool) {
 	if o == nil || IsNil(o.Name) {
 		return nil, false
 	}
@@ -59,7 +59,7 @@ func (o *Provider) GetNameOk() (*string, bool) {
 }
 
 // HasName returns a boolean if a field has been set.
-func (o *Provider) HasName() bool {
+func (o *ProviderProviderInfo) HasName() bool {
 	if o != nil && !IsNil(o.Name) {
 		return true
 	}
@@ -68,12 +68,12 @@ func (o *Provider) HasName() bool {
 }
 
 // SetName gets a reference to the given string and assigns it to the Name field.
-func (o *Provider) SetName(v string) {
+func (o *ProviderProviderInfo) SetName(v string) {
 	o.Name = &v
 }
 
 // GetVersion returns the Version field value if set, zero value otherwise.
-func (o *Provider) GetVersion() string {
+func (o *ProviderProviderInfo) GetVersion() string {
 	if o == nil || IsNil(o.Version) {
 		var ret string
 		return ret
@@ -83,7 +83,7 @@ func (o *Provider) GetVersion() string {
 
 // GetVersionOk returns a tuple with the Version field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Provider) GetVersionOk() (*string, bool) {
+func (o *ProviderProviderInfo) GetVersionOk() (*string, bool) {
 	if o == nil || IsNil(o.Version) {
 		return nil, false
 	}
@@ -91,7 +91,7 @@ func (o *Provider) GetVersionOk() (*string, bool) {
 }
 
 // HasVersion returns a boolean if a field has been set.
-func (o *Provider) HasVersion() bool {
+func (o *ProviderProviderInfo) HasVersion() bool {
 	if o != nil && !IsNil(o.Version) {
 		return true
 	}
@@ -100,11 +100,11 @@ func (o *Provider) HasVersion() bool {
 }
 
 // SetVersion gets a reference to the given string and assigns it to the Version field.
-func (o *Provider) SetVersion(v string) {
+func (o *ProviderProviderInfo) SetVersion(v string) {
 	o.Version = &v
 }
 
-func (o Provider) MarshalJSON() ([]byte, error) {
+func (o ProviderProviderInfo) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -112,7 +112,7 @@ func (o Provider) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o Provider) ToMap() (map[string]interface{}, error) {
+func (o ProviderProviderInfo) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
@@ -123,38 +123,38 @@ func (o Provider) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-type NullableProvider struct {
-	value *Provider
+type NullableProviderProviderInfo struct {
+	value *ProviderProviderInfo
 	isSet bool
 }
 
-func (v NullableProvider) Get() *Provider {
+func (v NullableProviderProviderInfo) Get() *ProviderProviderInfo {
 	return v.value
 }
 
-func (v *NullableProvider) Set(val *Provider) {
+func (v *NullableProviderProviderInfo) Set(val *ProviderProviderInfo) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableProvider) IsSet() bool {
+func (v NullableProviderProviderInfo) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableProvider) Unset() {
+func (v *NullableProviderProviderInfo) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableProvider(val *Provider) *NullableProvider {
-	return &NullableProvider{value: val, isSet: true}
+func NewNullableProviderProviderInfo(val *ProviderProviderInfo) *NullableProviderProviderInfo {
+	return &NullableProviderProviderInfo{value: val, isSet: true}
 }
 
-func (v NullableProvider) MarshalJSON() ([]byte, error) {
+func (v NullableProviderProviderInfo) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableProvider) UnmarshalJSON(src []byte) error {
+func (v *NullableProviderProviderInfo) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

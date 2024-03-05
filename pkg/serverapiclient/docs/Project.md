@@ -5,8 +5,8 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Name** | Pointer to **string** |  | [optional] 
-**Provider** | Pointer to [**ProviderTarget**](ProviderTarget.md) |  | [optional] 
 **Repository** | Pointer to [**Repository**](Repository.md) |  | [optional] 
+**Target** | Pointer to **string** |  | [optional] 
 **WorkspaceId** | Pointer to **string** |  | [optional] 
 
 ## Methods
@@ -53,31 +53,6 @@ SetName sets Name field to given value.
 
 HasName returns a boolean if a field has been set.
 
-### GetProvider
-
-`func (o *Project) GetProvider() ProviderTarget`
-
-GetProvider returns the Provider field if non-nil, zero value otherwise.
-
-### GetProviderOk
-
-`func (o *Project) GetProviderOk() (*ProviderTarget, bool)`
-
-GetProviderOk returns a tuple with the Provider field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetProvider
-
-`func (o *Project) SetProvider(v ProviderTarget)`
-
-SetProvider sets Provider field to given value.
-
-### HasProvider
-
-`func (o *Project) HasProvider() bool`
-
-HasProvider returns a boolean if a field has been set.
-
 ### GetRepository
 
 `func (o *Project) GetRepository() Repository`
@@ -102,6 +77,31 @@ SetRepository sets Repository field to given value.
 `func (o *Project) HasRepository() bool`
 
 HasRepository returns a boolean if a field has been set.
+
+### GetTarget
+
+`func (o *Project) GetTarget() string`
+
+GetTarget returns the Target field if non-nil, zero value otherwise.
+
+### GetTargetOk
+
+`func (o *Project) GetTargetOk() (*string, bool)`
+
+GetTargetOk returns a tuple with the Target field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTarget
+
+`func (o *Project) SetTarget(v string)`
+
+SetTarget sets Target field to given value.
+
+### HasTarget
+
+`func (o *Project) HasTarget() bool`
+
+HasTarget returns a boolean if a field has been set.
 
 ### GetWorkspaceId
 

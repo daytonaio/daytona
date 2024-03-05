@@ -13,7 +13,7 @@ import (
 var docStyle = lipgloss.NewStyle().Margin(1, 2)
 
 type item struct {
-	target serverapiclient.TargetDTO
+	target serverapiclient.ProviderTarget
 }
 
 func (i item) Title() string       { return *i.target.Name }
@@ -22,7 +22,7 @@ func (i item) FilterValue() string { return *i.target.Name }
 
 type model struct {
 	list   list.Model
-	choice *serverapiclient.TargetDTO
+	choice *serverapiclient.ProviderTarget
 }
 
 func (m model) Init() tea.Cmd {

@@ -10,11 +10,11 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/workspace/dto"
 	"github.com/daytonaio/daytona/pkg/server/config"
 	"github.com/daytonaio/daytona/pkg/server/db"
 	"github.com/daytonaio/daytona/pkg/server/provisioner"
+	"github.com/daytonaio/daytona/pkg/server/targets"
 	"github.com/daytonaio/daytona/pkg/types"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -75,18 +75,15 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 		return nil, errors.New("name is not a valid alphanumeric string")
 	}
 
-	_, err := manager.GetProvider(createWorkspaceDto.ProviderTarget.Provider)
+	_, err := targets.GetTarget(createWorkspaceDto.Target)
 	if err != nil {
 		return nil, err
 	}
 
 	w := &types.Workspace{
-		Id:   createWorkspaceDto.Name,
-		Name: createWorkspaceDto.Name,
-		ProviderTarget: types.ProviderTarget{
-			Provider: createWorkspaceDto.ProviderTarget.Provider,
-			Target:   createWorkspaceDto.ProviderTarget.Target,
-		},
+		Id:     createWorkspaceDto.Name,
+		Name:   createWorkspaceDto.Name,
+		Target: createWorkspaceDto.Target,
 	}
 
 	w.Projects = []*types.Project{}
@@ -121,10 +118,7 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 			},
 			WorkspaceId: w.Id,
 			ApiKey:      "TODO",
-			ProviderTarget: types.ProviderTarget{
-				Provider: createWorkspaceDto.ProviderTarget.Provider,
-				Target:   createWorkspaceDto.ProviderTarget.Target,
-			},
+			Target:      createWorkspaceDto.Target,
 		}
 		w.Projects = append(w.Projects, project)
 	}

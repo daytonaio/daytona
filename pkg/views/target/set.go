@@ -34,7 +34,7 @@ func NewTargetNameInput(targetName *string) error {
 	return nil
 }
 
-func SetTargetForm(target *serverapiclient.TargetDTO, targetManifest map[string]serverapiclient.ProviderProviderTargetProperty) error {
+func SetTargetForm(target *serverapiclient.ProviderTarget, targetManifest map[string]serverapiclient.ProviderProviderTargetProperty) error {
 	fields := make([]huh.Field, 0, len(targetManifest))
 	options := make(map[string]interface{})
 

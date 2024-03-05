@@ -22,6 +22,7 @@ import (
 	log_controller "github.com/daytonaio/daytona/pkg/server/api/controllers/log"
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/provider"
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/server"
+	"github.com/daytonaio/daytona/pkg/server/api/controllers/target"
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/workspace"
 	"github.com/daytonaio/daytona/pkg/server/config"
 
@@ -82,9 +83,14 @@ func Start() error {
 		providerController.POST("/install", provider.InstallProvider)
 		providerController.GET("/", provider.ListProviders)
 		providerController.POST("/:provider/uninstall", provider.UninstallProvider)
-		providerController.PUT("/:provider/target", provider.SetTarget)
-		providerController.DELETE("/:provider/:target", provider.RemoveTarget)
 		providerController.GET("/:provider/target-manifest", provider.GetTargetManifest)
+	}
+
+	targetController := router.Group("/target")
+	{
+		targetController.GET("/", target.ListTargets)
+		targetController.PUT("/", target.SetTarget)
+		targetController.DELETE("/:target", target.RemoveTarget)
 	}
 
 	logController := router.Group("/log")

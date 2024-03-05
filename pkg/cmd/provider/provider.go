@@ -4,7 +4,6 @@
 package provider
 
 import (
-	"github.com/daytonaio/daytona/pkg/cmd/provider/target"
 	"github.com/spf13/cobra"
 )
 
@@ -19,5 +18,4 @@ func init() {
 	ProviderCmd.AddCommand(providerListCmd)
 	ProviderCmd.AddCommand(providerUninstallCmd)
 	ProviderCmd.AddCommand(providerInstallCmd)
-	ProviderCmd.AddCommand(target.TargetCmd)
 }

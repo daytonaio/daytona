@@ -19,8 +19,10 @@ var _ MappedNullable = &ProviderTarget{}
 
 // ProviderTarget struct for ProviderTarget
 type ProviderTarget struct {
-	Provider *string `json:"provider,omitempty"`
-	Target *string `json:"target,omitempty"`
+	Name *string `json:"name,omitempty"`
+	// JSON encoded map of options
+	Options *string `json:"options,omitempty"`
+	ProviderInfo *ProviderProviderInfo `json:"providerInfo,omitempty"`
 }
 
 // NewProviderTarget instantiates a new ProviderTarget object
@@ -40,68 +42,100 @@ func NewProviderTargetWithDefaults() *ProviderTarget {
 	return &this
 }
 
-// GetProvider returns the Provider field value if set, zero value otherwise.
-func (o *ProviderTarget) GetProvider() string {
-	if o == nil || IsNil(o.Provider) {
+// GetName returns the Name field value if set, zero value otherwise.
+func (o *ProviderTarget) GetName() string {
+	if o == nil || IsNil(o.Name) {
 		var ret string
 		return ret
 	}
-	return *o.Provider
+	return *o.Name
 }
 
-// GetProviderOk returns a tuple with the Provider field value if set, nil otherwise
+// GetNameOk returns a tuple with the Name field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ProviderTarget) GetProviderOk() (*string, bool) {
-	if o == nil || IsNil(o.Provider) {
+func (o *ProviderTarget) GetNameOk() (*string, bool) {
+	if o == nil || IsNil(o.Name) {
 		return nil, false
 	}
-	return o.Provider, true
+	return o.Name, true
 }
 
-// HasProvider returns a boolean if a field has been set.
-func (o *ProviderTarget) HasProvider() bool {
-	if o != nil && !IsNil(o.Provider) {
+// HasName returns a boolean if a field has been set.
+func (o *ProviderTarget) HasName() bool {
+	if o != nil && !IsNil(o.Name) {
 		return true
 	}
 
 	return false
 }
 
-// SetProvider gets a reference to the given string and assigns it to the Provider field.
-func (o *ProviderTarget) SetProvider(v string) {
-	o.Provider = &v
+// SetName gets a reference to the given string and assigns it to the Name field.
+func (o *ProviderTarget) SetName(v string) {
+	o.Name = &v
 }
 
-// GetTarget returns the Target field value if set, zero value otherwise.
-func (o *ProviderTarget) GetTarget() string {
-	if o == nil || IsNil(o.Target) {
+// GetOptions returns the Options field value if set, zero value otherwise.
+func (o *ProviderTarget) GetOptions() string {
+	if o == nil || IsNil(o.Options) {
 		var ret string
 		return ret
 	}
-	return *o.Target
+	return *o.Options
 }
 
-// GetTargetOk returns a tuple with the Target field value if set, nil otherwise
+// GetOptionsOk returns a tuple with the Options field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ProviderTarget) GetTargetOk() (*string, bool) {
-	if o == nil || IsNil(o.Target) {
+func (o *ProviderTarget) GetOptionsOk() (*string, bool) {
+	if o == nil || IsNil(o.Options) {
 		return nil, false
 	}
-	return o.Target, true
+	return o.Options, true
 }
 
-// HasTarget returns a boolean if a field has been set.
-func (o *ProviderTarget) HasTarget() bool {
-	if o != nil && !IsNil(o.Target) {
+// HasOptions returns a boolean if a field has been set.
+func (o *ProviderTarget) HasOptions() bool {
+	if o != nil && !IsNil(o.Options) {
 		return true
 	}
 
 	return false
 }
 
-// SetTarget gets a reference to the given string and assigns it to the Target field.
-func (o *ProviderTarget) SetTarget(v string) {
-	o.Target = &v
+// SetOptions gets a reference to the given string and assigns it to the Options field.
+func (o *ProviderTarget) SetOptions(v string) {
+	o.Options = &v
+}
+
+// GetProviderInfo returns the ProviderInfo field value if set, zero value otherwise.
+func (o *ProviderTarget) GetProviderInfo() ProviderProviderInfo {
+	if o == nil || IsNil(o.ProviderInfo) {
+		var ret ProviderProviderInfo
+		return ret
+	}
+	return *o.ProviderInfo
+}
+
+// GetProviderInfoOk returns a tuple with the ProviderInfo field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ProviderTarget) GetProviderInfoOk() (*ProviderProviderInfo, bool) {
+	if o == nil || IsNil(o.ProviderInfo) {
+		return nil, false
+	}
+	return o.ProviderInfo, true
+}
+
+// HasProviderInfo returns a boolean if a field has been set.
+func (o *ProviderTarget) HasProviderInfo() bool {
+	if o != nil && !IsNil(o.ProviderInfo) {
+		return true
+	}
+
+	return false
+}
+
+// SetProviderInfo gets a reference to the given ProviderProviderInfo and assigns it to the ProviderInfo field.
+func (o *ProviderTarget) SetProviderInfo(v ProviderProviderInfo) {
+	o.ProviderInfo = &v
 }
 
 func (o ProviderTarget) MarshalJSON() ([]byte, error) {
@@ -114,11 +148,14 @@ func (o ProviderTarget) MarshalJSON() ([]byte, error) {
 
 func (o ProviderTarget) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Provider) {
-		toSerialize["provider"] = o.Provider
+	if !IsNil(o.Name) {
+		toSerialize["name"] = o.Name
 	}
-	if !IsNil(o.Target) {
-		toSerialize["target"] = o.Target
+	if !IsNil(o.Options) {
+		toSerialize["options"] = o.Options
+	}
+	if !IsNil(o.ProviderInfo) {
+		toSerialize["providerInfo"] = o.ProviderInfo
 	}
 	return toSerialize, nil
 }

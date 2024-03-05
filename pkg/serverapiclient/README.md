@@ -80,12 +80,13 @@ Class | Method | HTTP request | Description
 *ProviderAPI* | [**GetTargetManifest**](docs/ProviderAPI.md#gettargetmanifest) | **Get** /provider/{provider}/target-manifest | Get provider target manifest
 *ProviderAPI* | [**InstallProvider**](docs/ProviderAPI.md#installprovider) | **Post** /provider/install | Install a provider
 *ProviderAPI* | [**ListProviders**](docs/ProviderAPI.md#listproviders) | **Get** /provider | List providers
-*ProviderAPI* | [**RemoveTarget**](docs/ProviderAPI.md#removetarget) | **Delete** /provider/{provider}/{target} | Set a provider target
-*ProviderAPI* | [**SetTarget**](docs/ProviderAPI.md#settarget) | **Put** /provider/{provider}/target | Set a provider target
 *ProviderAPI* | [**UninstallProvider**](docs/ProviderAPI.md#uninstallprovider) | **Post** /provider/{provider}/uninstall | Uninstall a provider
 *ServerAPI* | [**GenerateNetworkKey**](docs/ServerAPI.md#generatenetworkkey) | **Post** /server/network-key | Generate a new authentication key
 *ServerAPI* | [**GetConfig**](docs/ServerAPI.md#getconfig) | **Get** /server/config | Get the server configuration
 *ServerAPI* | [**SetConfig**](docs/ServerAPI.md#setconfig) | **Post** /server/config | Set the server configuration
+*TargetAPI* | [**ListTargets**](docs/TargetAPI.md#listtargets) | **Get** /target | List targets
+*TargetAPI* | [**RemoveTarget**](docs/TargetAPI.md#removetarget) | **Delete** /target/{target} | Remove a target
+*TargetAPI* | [**SetTarget**](docs/TargetAPI.md#settarget) | **Put** /target | Set a target
 *WorkspaceAPI* | [**CreateWorkspace**](docs/WorkspaceAPI.md#createworkspace) | **Post** /workspace | Create a workspace
 *WorkspaceAPI* | [**GetWorkspace**](docs/WorkspaceAPI.md#getworkspace) | **Get** /workspace/{workspaceId} | Get workspace info
 *WorkspaceAPI* | [**ListWorkspaces**](docs/WorkspaceAPI.md#listworkspaces) | **Get** /workspace | List workspaces
@@ -106,12 +107,12 @@ Class | Method | HTTP request | Description
  - [Project](docs/Project.md)
  - [ProjectInfo](docs/ProjectInfo.md)
  - [Provider](docs/Provider.md)
+ - [ProviderProviderInfo](docs/ProviderProviderInfo.md)
  - [ProviderProviderTargetProperty](docs/ProviderProviderTargetProperty.md)
  - [ProviderProviderTargetPropertyType](docs/ProviderProviderTargetPropertyType.md)
  - [ProviderTarget](docs/ProviderTarget.md)
  - [Repository](docs/Repository.md)
  - [ServerConfig](docs/ServerConfig.md)
- - [TargetDTO](docs/TargetDTO.md)
  - [Workspace](docs/Workspace.md)
  - [WorkspaceInfo](docs/WorkspaceInfo.md)
 

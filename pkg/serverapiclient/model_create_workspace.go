@@ -20,8 +20,8 @@ var _ MappedNullable = &CreateWorkspace{}
 // CreateWorkspace struct for CreateWorkspace
 type CreateWorkspace struct {
 	Name *string `json:"name,omitempty"`
-	ProviderTarget *ProviderTarget `json:"providerTarget,omitempty"`
 	Repositories []string `json:"repositories,omitempty"`
+	Target *string `json:"target,omitempty"`
 }
 
 // NewCreateWorkspace instantiates a new CreateWorkspace object
@@ -73,38 +73,6 @@ func (o *CreateWorkspace) SetName(v string) {
 	o.Name = &v
 }
 
-// GetProviderTarget returns the ProviderTarget field value if set, zero value otherwise.
-func (o *CreateWorkspace) GetProviderTarget() ProviderTarget {
-	if o == nil || IsNil(o.ProviderTarget) {
-		var ret ProviderTarget
-		return ret
-	}
-	return *o.ProviderTarget
-}
-
-// GetProviderTargetOk returns a tuple with the ProviderTarget field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *CreateWorkspace) GetProviderTargetOk() (*ProviderTarget, bool) {
-	if o == nil || IsNil(o.ProviderTarget) {
-		return nil, false
-	}
-	return o.ProviderTarget, true
-}
-
-// HasProviderTarget returns a boolean if a field has been set.
-func (o *CreateWorkspace) HasProviderTarget() bool {
-	if o != nil && !IsNil(o.ProviderTarget) {
-		return true
-	}
-
-	return false
-}
-
-// SetProviderTarget gets a reference to the given ProviderTarget and assigns it to the ProviderTarget field.
-func (o *CreateWorkspace) SetProviderTarget(v ProviderTarget) {
-	o.ProviderTarget = &v
-}
-
 // GetRepositories returns the Repositories field value if set, zero value otherwise.
 func (o *CreateWorkspace) GetRepositories() []string {
 	if o == nil || IsNil(o.Repositories) {
@@ -137,6 +105,38 @@ func (o *CreateWorkspace) SetRepositories(v []string) {
 	o.Repositories = v
 }
 
+// GetTarget returns the Target field value if set, zero value otherwise.
+func (o *CreateWorkspace) GetTarget() string {
+	if o == nil || IsNil(o.Target) {
+		var ret string
+		return ret
+	}
+	return *o.Target
+}
+
+// GetTargetOk returns a tuple with the Target field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateWorkspace) GetTargetOk() (*string, bool) {
+	if o == nil || IsNil(o.Target) {
+		return nil, false
+	}
+	return o.Target, true
+}
+
+// HasTarget returns a boolean if a field has been set.
+func (o *CreateWorkspace) HasTarget() bool {
+	if o != nil && !IsNil(o.Target) {
+		return true
+	}
+
+	return false
+}
+
+// SetTarget gets a reference to the given string and assigns it to the Target field.
+func (o *CreateWorkspace) SetTarget(v string) {
+	o.Target = &v
+}
+
 func (o CreateWorkspace) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -150,11 +150,11 @@ func (o CreateWorkspace) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
 	}
-	if !IsNil(o.ProviderTarget) {
-		toSerialize["providerTarget"] = o.ProviderTarget
-	}
 	if !IsNil(o.Repositories) {
 		toSerialize["repositories"] = o.Repositories
+	}
+	if !IsNil(o.Target) {
+		toSerialize["target"] = o.Target
 	}
 	return toSerialize, nil
 }

@@ -15,21 +15,19 @@ type Provider interface {
 	GetInfo() (ProviderInfo, error)
 
 	GetTargetManifest() (*ProviderTargetManifest, error)
-	SetTarget(ProviderTarget) (*types.Empty, error)
-	RemoveTarget(string) (*types.Empty, error)
-	GetTargets() (*[]ProviderTarget, error)
+	GetDefaultTargets() (*[]ProviderTarget, error)
 
-	CreateWorkspace(workspace *types.Workspace) (*types.Empty, error)
-	StartWorkspace(workspace *types.Workspace) (*types.Empty, error)
-	StopWorkspace(workspace *types.Workspace) (*types.Empty, error)
-	DestroyWorkspace(workspace *types.Workspace) (*types.Empty, error)
-	GetWorkspaceInfo(workspace *types.Workspace) (*types.WorkspaceInfo, error)
+	CreateWorkspace(*WorkspaceRequest) (*types.Empty, error)
+	StartWorkspace(*WorkspaceRequest) (*types.Empty, error)
+	StopWorkspace(*WorkspaceRequest) (*types.Empty, error)
+	DestroyWorkspace(*WorkspaceRequest) (*types.Empty, error)
+	GetWorkspaceInfo(*WorkspaceRequest) (*types.WorkspaceInfo, error)
 
-	CreateProject(project *types.Project) (*types.Empty, error)
-	StartProject(project *types.Project) (*types.Empty, error)
-	StopProject(project *types.Project) (*types.Empty, error)
-	DestroyProject(project *types.Project) (*types.Empty, error)
-	GetProjectInfo(project *types.Project) (*types.ProjectInfo, error)
+	CreateProject(*ProjectRequest) (*types.Empty, error)
+	StartProject(*ProjectRequest) (*types.Empty, error)
+	StopProject(*ProjectRequest) (*types.Empty, error)
+	DestroyProject(*ProjectRequest) (*types.Empty, error)
+	GetProjectInfo(*ProjectRequest) (*types.ProjectInfo, error)
 }
 
 type ProviderPlugin struct {

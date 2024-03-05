@@ -68,39 +68,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/provider/{provider}/target": {
-            "put": {
-                "description": "Set a provider target",
-                "tags": [
-                    "provider"
-                ],
-                "summary": "Set a provider target",
-                "operationId": "SetTarget",
-                "parameters": [
-                    {
-                        "description": "Provider target to set",
-                        "name": "target",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/TargetDTO"
-                        }
-                    },
-                    {
-                        "type": "string",
-                        "description": "Provider name",
-                        "name": "provider",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created"
-                    }
-                }
-            }
-        },
         "/provider/{provider}/target-manifest": {
             "get": {
                 "description": "Get provider target manifest",
@@ -151,37 +118,6 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK"
-                    }
-                }
-            }
-        },
-        "/provider/{provider}/{target}": {
-            "delete": {
-                "description": "Set a provider target",
-                "tags": [
-                    "provider"
-                ],
-                "summary": "Set a provider target",
-                "operationId": "RemoveTarget",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Provider name",
-                        "name": "provider",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Target name",
-                        "name": "target",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
                     }
                 }
             }
@@ -257,6 +193,78 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/NetworkKey"
                         }
+                    }
+                }
+            }
+        },
+        "/target": {
+            "get": {
+                "description": "List targets",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "target"
+                ],
+                "summary": "List targets",
+                "operationId": "ListTargets",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ProviderTarget"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Set a target",
+                "tags": [
+                    "target"
+                ],
+                "summary": "Set a target",
+                "operationId": "SetTarget",
+                "parameters": [
+                    {
+                        "description": "Target to set",
+                        "name": "target",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ProviderTarget"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            }
+        },
+        "/target/{target}": {
+            "delete": {
+                "description": "Remove a target",
+                "tags": [
+                    "target"
+                ],
+                "summary": "Remove a target",
+                "operationId": "RemoveTarget",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target name",
+                        "name": "target",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -485,14 +493,14 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "providerTarget": {
-                    "$ref": "#/definitions/ProviderTarget"
-                },
                 "repositories": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
+                },
+                "target": {
+                    "type": "string"
                 }
             }
         },
@@ -552,11 +560,11 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "provider": {
-                    "$ref": "#/definitions/ProviderTarget"
-                },
                 "repository": {
                     "$ref": "#/definitions/Repository"
+                },
+                "target": {
+                    "type": "string"
                 },
                 "workspaceId": {
                     "type": "string"
@@ -595,12 +603,6 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "targets": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/TargetDTO"
-                    }
-                },
                 "version": {
                     "type": "string"
                 }
@@ -609,11 +611,15 @@ const docTemplate = `{
         "ProviderTarget": {
             "type": "object",
             "properties": {
-                "provider": {
+                "name": {
                     "type": "string"
                 },
-                "target": {
+                "options": {
+                    "description": "JSON encoded map of options",
                     "type": "string"
+                },
+                "providerInfo": {
+                    "$ref": "#/definitions/provider.ProviderInfo"
                 }
             }
         },
@@ -678,17 +684,8 @@ const docTemplate = `{
                 },
                 "serverDownloadUrl": {
                     "type": "string"
-                }
-            }
-        },
-        "TargetDTO": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
                 },
-                "options": {
-                    "description": "JSON encoded map of options",
+                "targetsFilePath": {
                     "type": "string"
                 }
             }
@@ -711,8 +708,8 @@ const docTemplate = `{
                         "$ref": "#/definitions/Project"
                     }
                 },
-                "provider": {
-                    "$ref": "#/definitions/ProviderTarget"
+                "target": {
+                    "type": "string"
                 }
             }
         },
@@ -729,6 +726,17 @@ const docTemplate = `{
                     }
                 },
                 "providerMetadata": {
+                    "type": "string"
+                }
+            }
+        },
+        "provider.ProviderInfo": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "version": {
                     "type": "string"
                 }
             }
