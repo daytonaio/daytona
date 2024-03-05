@@ -8,6 +8,8 @@ import (
 	"encoding/base64"
 	"fmt"
 	"hash/fnv"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/daytonaio/daytona/internal/util"
@@ -21,18 +23,25 @@ import (
 )
 
 var publicPreview bool
+var workspaceId string
+var projectName string
 
-var portForwardCmd = &cobra.Command{
-	Use:   "forward [WORKSPACE_NAME] [PROJECT_NAME]",
-	Short: "Forward port",
-	Args:  cobra.RangeArgs(1, 2),
+var PortForwardCmd = &cobra.Command{
+	Use:   "forward [PORT]",
+	Short: "Forward a port from a project to your local machine",
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		workspaceId := args[0]
-		projectName := ""
-		var err error
+		port, err := strconv.Atoi(args[0])
+		if err != nil {
+			log.Fatal(err)
+		}
 
-		if len(args) == 2 {
-			projectName = args[1]
+		if len(args) > 1 {
+			workspaceId = args[1]
+		}
+
+		if len(args) == 3 {
+			projectName = args[2]
 		} else {
 			projectName, err = util.GetFirstWorkspaceProjectName(workspaceId, projectName, nil)
 			if err != nil {
@@ -40,22 +49,22 @@ var portForwardCmd = &cobra.Command{
 			}
 		}
 
-		hostPort, errChan := ports.ForwardPort(workspaceId, projectName, uint16(portArg))
+		hostPort, errChan := ports.ForwardPort(workspaceId, projectName, uint16(port))
 
 		if hostPort == nil {
 			if err = <-errChan; err != nil {
 				log.Fatal(err)
 			}
 		} else {
-			if *hostPort != uint16(portArg) {
-				view_util.RenderInfoMessage(fmt.Sprintf("Port %d already in use.", portArg))
+			if *hostPort != uint16(port) {
+				view_util.RenderInfoMessage(fmt.Sprintf("Port %d already in use.", port))
 			}
 			view_util.RenderInfoMessage(fmt.Sprintf("Port available at http://localhost:%d\n", *hostPort))
 		}
 
 		if publicPreview {
 			go func() {
-				errChan <- forwardPublicPort(workspaceId, projectName, *hostPort)
+				errChan <- forwardPublicPort(workspaceId, projectName, *hostPort, uint16(port))
 			}()
 		}
 
@@ -69,12 +78,22 @@ var portForwardCmd = &cobra.Command{
 }
 
 func init() {
-	portForwardCmd.Flags().BoolVar(&publicPreview, "public", false, "Should be port be available publicly via an URL")
-	portForwardCmd.Flags().IntVarP(&portArg, "port", "p", 0, "Port to forward")
-	portForwardCmd.MarkFlagRequired("port")
+	if wsId := os.Getenv("DAYTONA_WS_ID"); wsId != "" {
+		workspaceId = wsId
+	}
+	if pName := os.Getenv("DAYTONA_PROJECT_NAME"); pName != "" {
+		projectName = pName
+	}
+
+	if !util.WorkspaceMode() {
+		PortForwardCmd.Use = PortForwardCmd.Use + " [WORKSPACE] [PROJECT]"
+		PortForwardCmd.Args = cobra.RangeArgs(2, 3)
+	}
+
+	PortForwardCmd.Flags().BoolVar(&publicPreview, "public", false, "Should be port be available publicly via an URL")
 }
 
-func forwardPublicPort(workspaceId, projectName string, hostPort uint16) error {
+func forwardPublicPort(workspaceId, projectName string, hostPort, targetPort uint16) error {
 	view_util.RenderInfoMessage("Forwarding port to a public URL...")
 
 	apiClient, err := server.GetApiClient(nil)
@@ -90,7 +109,7 @@ func forwardPublicPort(workspaceId, projectName string, hostPort uint16) error {
 	h := fnv.New64()
 	h.Write([]byte(fmt.Sprintf("%s-%s-%s", workspaceId, projectName, *serverConfig.Id)))
 
-	subDomain := fmt.Sprintf("%d-%s", portArg, base64.RawURLEncoding.EncodeToString([]byte(fmt.Sprint(h.Sum64()))))
+	subDomain := fmt.Sprintf("%d-%s", targetPort, base64.RawURLEncoding.EncodeToString([]byte(fmt.Sprint(h.Sum64()))))
 
 	go func() {
 		time.Sleep(1 * time.Second)
