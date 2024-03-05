@@ -37,11 +37,12 @@ type ProviderTargetManifest map[string]ProviderTargetProperty // @name ProviderT
 type ProviderTargetPropertyType string
 
 const (
-	ProviderTargetPropertyTypeString  ProviderTargetPropertyType = "string"
-	ProviderTargetPropertyTypeOption  ProviderTargetPropertyType = "option"
-	ProviderTargetPropertyTypeBoolean ProviderTargetPropertyType = "boolean"
-	ProviderTargetPropertyTypeInt     ProviderTargetPropertyType = "int"
-	ProviderTargetPropertyTypeFloat   ProviderTargetPropertyType = "float"
+	ProviderTargetPropertyTypeString   ProviderTargetPropertyType = "string"
+	ProviderTargetPropertyTypeOption   ProviderTargetPropertyType = "option"
+	ProviderTargetPropertyTypeBoolean  ProviderTargetPropertyType = "boolean"
+	ProviderTargetPropertyTypeInt      ProviderTargetPropertyType = "int"
+	ProviderTargetPropertyTypeFloat    ProviderTargetPropertyType = "float"
+	ProviderTargetPropertyTypeFilePath ProviderTargetPropertyType = "file-path"
 )
 
 type ProviderTargetProperty struct {
