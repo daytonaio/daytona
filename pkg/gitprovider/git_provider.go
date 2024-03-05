@@ -49,9 +49,9 @@ type CheckoutOption struct {
 }
 
 var (
-	CheckoutDefault = CheckoutOption{Title: "Default", Id: "default"}
-	CheckoutBranch  = CheckoutOption{Title: "Branch", Id: "branch"}
-	CheckoutPR      = CheckoutOption{Title: "Pull/Merge request", Id: "pullrequest"}
+	CheckoutDefault = CheckoutOption{Title: "Clone the default branch", Id: "default"}
+	CheckoutBranch  = CheckoutOption{Title: "Branches", Id: "branch"}
+	CheckoutPR      = CheckoutOption{Title: "Pull/Merge requests", Id: "pullrequest"}
 )
 
 func GetGitProvider(providerId string, gitProviders []types.GitProvider) GitProvider {

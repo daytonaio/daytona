@@ -422,9 +422,9 @@ func GetRepositoryFromWizard(userGitProviders []types.GitProvider, secondaryProj
 		return chosenRepo, nil
 	}
 
+	checkoutOptions = append(checkoutOptions, gitprovider.CheckoutDefault)
 	checkoutOptions = append(checkoutOptions, gitprovider.CheckoutBranch)
 	checkoutOptions = append(checkoutOptions, gitprovider.CheckoutPR)
-	checkoutOptions = append(checkoutOptions, gitprovider.CheckoutDefault)
 
 	chosenCheckoutOption := selection.GetCheckoutOptionFromPrompt(secondaryProjectOrder, checkoutOptions)
 	if chosenCheckoutOption == gitprovider.CheckoutDefault {

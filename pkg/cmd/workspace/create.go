@@ -230,6 +230,9 @@ var CreateCmd = &cobra.Command{
 		statusProgram.Send(status.ResultMsg{Line: "Establishing connection with the workspace"})
 		for {
 			if time.Since(dialStartTime) > dialTimeout {
+				statusProgram.Send(status.ClearScreenMsg{})
+				statusProgram.Send(tea.Quit())
+				statusProgram.ReleaseTerminal()
 				log.Fatal("Timeout: dialing timed out after 3 minutes")
 			}
 
