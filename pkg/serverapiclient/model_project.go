@@ -20,8 +20,8 @@ var _ MappedNullable = &Project{}
 // Project struct for Project
 type Project struct {
 	Name *string `json:"name,omitempty"`
-	Provider *ProviderTarget `json:"provider,omitempty"`
 	Repository *Repository `json:"repository,omitempty"`
+	Target *string `json:"target,omitempty"`
 	WorkspaceId *string `json:"workspaceId,omitempty"`
 }
 
@@ -74,38 +74,6 @@ func (o *Project) SetName(v string) {
 	o.Name = &v
 }
 
-// GetProvider returns the Provider field value if set, zero value otherwise.
-func (o *Project) GetProvider() ProviderTarget {
-	if o == nil || IsNil(o.Provider) {
-		var ret ProviderTarget
-		return ret
-	}
-	return *o.Provider
-}
-
-// GetProviderOk returns a tuple with the Provider field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *Project) GetProviderOk() (*ProviderTarget, bool) {
-	if o == nil || IsNil(o.Provider) {
-		return nil, false
-	}
-	return o.Provider, true
-}
-
-// HasProvider returns a boolean if a field has been set.
-func (o *Project) HasProvider() bool {
-	if o != nil && !IsNil(o.Provider) {
-		return true
-	}
-
-	return false
-}
-
-// SetProvider gets a reference to the given ProviderTarget and assigns it to the Provider field.
-func (o *Project) SetProvider(v ProviderTarget) {
-	o.Provider = &v
-}
-
 // GetRepository returns the Repository field value if set, zero value otherwise.
 func (o *Project) GetRepository() Repository {
 	if o == nil || IsNil(o.Repository) {
@@ -136,6 +104,38 @@ func (o *Project) HasRepository() bool {
 // SetRepository gets a reference to the given Repository and assigns it to the Repository field.
 func (o *Project) SetRepository(v Repository) {
 	o.Repository = &v
+}
+
+// GetTarget returns the Target field value if set, zero value otherwise.
+func (o *Project) GetTarget() string {
+	if o == nil || IsNil(o.Target) {
+		var ret string
+		return ret
+	}
+	return *o.Target
+}
+
+// GetTargetOk returns a tuple with the Target field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Project) GetTargetOk() (*string, bool) {
+	if o == nil || IsNil(o.Target) {
+		return nil, false
+	}
+	return o.Target, true
+}
+
+// HasTarget returns a boolean if a field has been set.
+func (o *Project) HasTarget() bool {
+	if o != nil && !IsNil(o.Target) {
+		return true
+	}
+
+	return false
+}
+
+// SetTarget gets a reference to the given string and assigns it to the Target field.
+func (o *Project) SetTarget(v string) {
+	o.Target = &v
 }
 
 // GetWorkspaceId returns the WorkspaceId field value if set, zero value otherwise.
@@ -183,11 +183,11 @@ func (o Project) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
 	}
-	if !IsNil(o.Provider) {
-		toSerialize["provider"] = o.Provider
-	}
 	if !IsNil(o.Repository) {
 		toSerialize["repository"] = o.Repository
+	}
+	if !IsNil(o.Target) {
+		toSerialize["target"] = o.Target
 	}
 	if !IsNil(o.WorkspaceId) {
 		toSerialize["workspaceId"] = o.WorkspaceId

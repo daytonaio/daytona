@@ -17,8 +17,8 @@ import (
 
 const NewTargetName = "+ New Target"
 
-func GetTargetFromPrompt(targets []serverapiclient.TargetDTO, withNewTarget bool) (*serverapiclient.TargetDTO, error) {
-	items := util.ArrayMap(targets, func(t serverapiclient.TargetDTO) list.Item {
+func GetTargetFromPrompt(targets []serverapiclient.ProviderTarget, withNewTarget bool) (*serverapiclient.ProviderTarget, error) {
+	items := util.ArrayMap(targets, func(t serverapiclient.ProviderTarget) list.Item {
 		return item{
 			target: t,
 		}
@@ -28,7 +28,7 @@ func GetTargetFromPrompt(targets []serverapiclient.TargetDTO, withNewTarget bool
 		name := NewTargetName
 		options := "{}"
 		items = append(items, item{
-			target: serverapiclient.TargetDTO{
+			target: serverapiclient.ProviderTarget{
 				Name:    &name,
 				Options: &options,
 			},

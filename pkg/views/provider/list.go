@@ -6,9 +6,7 @@ package provider
 import (
 	"fmt"
 	"os"
-	"strings"
 
-	internal "github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/util"
@@ -22,7 +20,6 @@ import (
 var columns = []table.Column{
 	{Title: "Name", Width: 20},
 	{Title: "Version", Width: 20},
-	{Title: "Targets", Width: 40},
 }
 
 type model struct {
@@ -83,11 +80,7 @@ func renderProvidersList(providers []serverapiclient.Provider, selectable bool) 
 	selectedProvider := &providers[0]
 
 	for _, provider := range providers {
-		targets := strings.Join(internal.ArrayMap(provider.Targets, func(t serverapiclient.TargetDTO) string {
-			return *t.Name
-		}), ", ")
-		targets = strings.TrimSuffix(targets, ", ")
-		row := table.Row{*provider.Name, *provider.Version, targets}
+		row := table.Row{*provider.Name, *provider.Version}
 		rows = append(rows, row)
 	}
 

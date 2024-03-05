@@ -4,8 +4,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Provider** | Pointer to **string** |  | [optional] 
-**Target** | Pointer to **string** |  | [optional] 
+**Name** | Pointer to **string** |  | [optional] 
+**Options** | Pointer to **string** | JSON encoded map of options | [optional] 
+**ProviderInfo** | Pointer to [**ProviderProviderInfo**](ProviderProviderInfo.md) |  | [optional] 
 
 ## Methods
 
@@ -26,55 +27,80 @@ NewProviderTargetWithDefaults instantiates a new ProviderTarget object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
-### GetProvider
+### GetName
 
-`func (o *ProviderTarget) GetProvider() string`
+`func (o *ProviderTarget) GetName() string`
 
-GetProvider returns the Provider field if non-nil, zero value otherwise.
+GetName returns the Name field if non-nil, zero value otherwise.
 
-### GetProviderOk
+### GetNameOk
 
-`func (o *ProviderTarget) GetProviderOk() (*string, bool)`
+`func (o *ProviderTarget) GetNameOk() (*string, bool)`
 
-GetProviderOk returns a tuple with the Provider field if it's non-nil, zero value otherwise
+GetNameOk returns a tuple with the Name field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetProvider
+### SetName
 
-`func (o *ProviderTarget) SetProvider(v string)`
+`func (o *ProviderTarget) SetName(v string)`
 
-SetProvider sets Provider field to given value.
+SetName sets Name field to given value.
 
-### HasProvider
+### HasName
 
-`func (o *ProviderTarget) HasProvider() bool`
+`func (o *ProviderTarget) HasName() bool`
 
-HasProvider returns a boolean if a field has been set.
+HasName returns a boolean if a field has been set.
 
-### GetTarget
+### GetOptions
 
-`func (o *ProviderTarget) GetTarget() string`
+`func (o *ProviderTarget) GetOptions() string`
 
-GetTarget returns the Target field if non-nil, zero value otherwise.
+GetOptions returns the Options field if non-nil, zero value otherwise.
 
-### GetTargetOk
+### GetOptionsOk
 
-`func (o *ProviderTarget) GetTargetOk() (*string, bool)`
+`func (o *ProviderTarget) GetOptionsOk() (*string, bool)`
 
-GetTargetOk returns a tuple with the Target field if it's non-nil, zero value otherwise
+GetOptionsOk returns a tuple with the Options field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetTarget
+### SetOptions
 
-`func (o *ProviderTarget) SetTarget(v string)`
+`func (o *ProviderTarget) SetOptions(v string)`
 
-SetTarget sets Target field to given value.
+SetOptions sets Options field to given value.
 
-### HasTarget
+### HasOptions
 
-`func (o *ProviderTarget) HasTarget() bool`
+`func (o *ProviderTarget) HasOptions() bool`
 
-HasTarget returns a boolean if a field has been set.
+HasOptions returns a boolean if a field has been set.
+
+### GetProviderInfo
+
+`func (o *ProviderTarget) GetProviderInfo() ProviderProviderInfo`
+
+GetProviderInfo returns the ProviderInfo field if non-nil, zero value otherwise.
+
+### GetProviderInfoOk
+
+`func (o *ProviderTarget) GetProviderInfoOk() (*ProviderProviderInfo, bool)`
+
+GetProviderInfoOk returns a tuple with the ProviderInfo field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetProviderInfo
+
+`func (o *ProviderTarget) SetProviderInfo(v ProviderProviderInfo)`
+
+SetProviderInfo sets ProviderInfo field to given value.
+
+### HasProviderInfo
+
+`func (o *ProviderTarget) HasProviderInfo() bool`
+
+HasProviderInfo returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

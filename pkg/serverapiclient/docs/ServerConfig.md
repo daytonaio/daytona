@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **ProvidersDir** | Pointer to **string** |  | [optional] 
 **RegistryUrl** | Pointer to **string** |  | [optional] 
 **ServerDownloadUrl** | Pointer to **string** |  | [optional] 
+**TargetsFilePath** | Pointer to **string** |  | [optional] 
 
 ## Methods
 
@@ -231,6 +232,31 @@ SetServerDownloadUrl sets ServerDownloadUrl field to given value.
 `func (o *ServerConfig) HasServerDownloadUrl() bool`
 
 HasServerDownloadUrl returns a boolean if a field has been set.
+
+### GetTargetsFilePath
+
+`func (o *ServerConfig) GetTargetsFilePath() string`
+
+GetTargetsFilePath returns the TargetsFilePath field if non-nil, zero value otherwise.
+
+### GetTargetsFilePathOk
+
+`func (o *ServerConfig) GetTargetsFilePathOk() (*string, bool)`
+
+GetTargetsFilePathOk returns a tuple with the TargetsFilePath field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTargetsFilePath
+
+`func (o *ServerConfig) SetTargetsFilePath(v string)`
+
+SetTargetsFilePath sets TargetsFilePath field to given value.
+
+### HasTargetsFilePath
+
+`func (o *ServerConfig) HasTargetsFilePath() bool`
+
+HasTargetsFilePath returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

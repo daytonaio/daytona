@@ -4,12 +4,12 @@ definitions:
     properties:
       name:
         type: string
-      providerTarget:
-        $ref: '#/definitions/ProviderTarget'
       repositories:
         items:
           type: string
         type: array
+      target:
+        type: string
     type: object
   FRPSConfig:
     properties:
@@ -47,10 +47,10 @@ definitions:
     properties:
       name:
         type: string
-      provider:
-        $ref: '#/definitions/ProviderTarget'
       repository:
         $ref: '#/definitions/Repository'
+      target:
+        type: string
       workspaceId:
         type: string
     type: object
@@ -75,19 +75,18 @@ definitions:
     properties:
       name:
         type: string
-      targets:
-        items:
-          $ref: '#/definitions/TargetDTO'
-        type: array
       version:
         type: string
     type: object
   ProviderTarget:
     properties:
-      provider:
+      name:
         type: string
-      target:
+      options:
+        description: JSON encoded map of options
         type: string
+      providerInfo:
+        $ref: '#/definitions/provider.ProviderInfo'
     type: object
   ProviderTargetManifest:
     additionalProperties:
@@ -130,13 +129,7 @@ definitions:
         type: string
       serverDownloadUrl:
         type: string
-    type: object
-  TargetDTO:
-    properties:
-      name:
-        type: string
-      options:
-        description: JSON encoded map of options
+      targetsFilePath:
         type: string
     type: object
   Workspace:
@@ -151,8 +144,8 @@ definitions:
         items:
           $ref: '#/definitions/Project'
         type: array
-      provider:
-        $ref: '#/definitions/ProviderTarget'
+      target:
+        type: string
     type: object
   WorkspaceInfo:
     properties:
@@ -163,6 +156,13 @@ definitions:
           $ref: '#/definitions/ProjectInfo'
         type: array
       providerMetadata:
+        type: string
+    type: object
+  provider.ProviderInfo:
+    properties:
+      name:
+        type: string
+      version:
         type: string
     type: object
   provider.ProviderTargetProperty:
@@ -194,6 +194,7 @@ definitions:
     - boolean
     - int
     - float
+    - file-path
     type: string
     x-enum-varnames:
     - ProviderTargetPropertyTypeString
@@ -201,6 +202,7 @@ definitions:
     - ProviderTargetPropertyTypeBoolean
     - ProviderTargetPropertyTypeInt
     - ProviderTargetPropertyTypeFloat
+    - ProviderTargetPropertyTypeFilePath
 host: localhost:3000
 info:
   contact: {}
@@ -222,49 +224,6 @@ paths:
               $ref: '#/definitions/Provider'
             type: array
       summary: List providers
-      tags:
-      - provider
-  /provider/{provider}/{target}:
-    delete:
-      description: Set a provider target
-      operationId: RemoveTarget
-      parameters:
-      - description: Provider name
-        in: path
-        name: provider
-        required: true
-        type: string
-      - description: Target name
-        in: path
-        name: target
-        required: true
-        type: string
-      responses:
-        "204":
-          description: No Content
-      summary: Set a provider target
-      tags:
-      - provider
-  /provider/{provider}/target:
-    put:
-      description: Set a provider target
-      operationId: SetTarget
-      parameters:
-      - description: Provider target to set
-        in: body
-        name: target
-        required: true
-        schema:
-          $ref: '#/definitions/TargetDTO'
-      - description: Provider name
-        in: path
-        name: provider
-        required: true
-        type: string
-      responses:
-        "201":
-          description: Created
-      summary: Set a provider target
       tags:
       - provider
   /provider/{provider}/target-manifest:
@@ -372,6 +331,54 @@ paths:
       summary: Generate a new authentication key
       tags:
       - server
+  /target:
+    get:
+      description: List targets
+      operationId: ListTargets
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ProviderTarget'
+            type: array
+      summary: List targets
+      tags:
+      - target
+    put:
+      description: Set a target
+      operationId: SetTarget
+      parameters:
+      - description: Target to set
+        in: body
+        name: target
+        required: true
+        schema:
+          $ref: '#/definitions/ProviderTarget'
+      responses:
+        "201":
+          description: Created
+      summary: Set a target
+      tags:
+      - target
+  /target/{target}:
+    delete:
+      description: Remove a target
+      operationId: RemoveTarget
+      parameters:
+      - description: Target name
+        in: path
+        name: target
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      summary: Remove a target
+      tags:
+      - target
   /workspace:
     get:
       description: List workspaces

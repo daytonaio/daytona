@@ -24,6 +24,7 @@ type ServerConfig struct {
 	Frps              *FRPSConfig   `json:"frps,omitempty"`
 	ApiPort           uint32        `json:"apiPort"`
 	HeadscalePort     uint32        `json:"headscalePort"`
+	TargetsFilePath   string        `json:"targetsFilePath"`
 } // @name ServerConfig
 
 type NetworkKey struct {

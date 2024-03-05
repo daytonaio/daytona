@@ -42,32 +42,6 @@ paths:
       tags:
       - provider
       x-codegen-request-body-name: provider
-  /provider/{provider}/target:
-    put:
-      description: Set a provider target
-      operationId: SetTarget
-      parameters:
-      - description: Provider name
-        in: path
-        name: provider
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/TargetDTO'
-        description: Provider target to set
-        required: true
-      responses:
-        "201":
-          content: {}
-          description: Created
-      summary: Set a provider target
-      tags:
-      - provider
-      x-codegen-request-body-name: target
   /provider/{provider}/target-manifest:
     get:
       description: Get provider target manifest
@@ -105,30 +79,6 @@ paths:
           content: {}
           description: OK
       summary: Uninstall a provider
-      tags:
-      - provider
-  /provider/{provider}/{target}:
-    delete:
-      description: Set a provider target
-      operationId: RemoveTarget
-      parameters:
-      - description: Provider name
-        in: path
-        name: provider
-        required: true
-        schema:
-          type: string
-      - description: Target name
-        in: path
-        name: target
-        required: true
-        schema:
-          type: string
-      responses:
-        "204":
-          content: {}
-          description: No Content
-      summary: Set a provider target
       tags:
       - provider
   /server/config:
@@ -180,6 +130,58 @@ paths:
       summary: Generate a new authentication key
       tags:
       - server
+  /target:
+    get:
+      description: List targets
+      operationId: ListTargets
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ProviderTarget'
+                type: array
+          description: OK
+      summary: List targets
+      tags:
+      - target
+    put:
+      description: Set a target
+      operationId: SetTarget
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/ProviderTarget'
+        description: Target to set
+        required: true
+      responses:
+        "201":
+          content: {}
+          description: Created
+      summary: Set a target
+      tags:
+      - target
+      x-codegen-request-body-name: target
+  /target/{target}:
+    delete:
+      description: Remove a target
+      operationId: RemoveTarget
+      parameters:
+      - description: Target name
+        in: path
+        name: target
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          content: {}
+          description: No Content
+      summary: Remove a target
+      tags:
+      - target
   /workspace:
     get:
       description: List workspaces
@@ -347,18 +349,16 @@ components:
         - repositories
         - repositories
         name: name
-        providerTarget:
-          provider: provider
-          target: target
+        target: target
       properties:
         name:
           type: string
-        providerTarget:
-          $ref: '#/components/schemas/ProviderTarget'
         repositories:
           items:
             type: string
           type: array
+        target:
+          type: string
       type: object
     FRPSConfig:
       example:
@@ -408,9 +408,6 @@ components:
       type: object
     Project:
       example:
-        provider:
-          provider: provider
-          target: target
         name: name
         repository:
           owner: owner
@@ -420,14 +417,15 @@ components:
           branch: branch
           sha: sha
           url: url
+        target: target
         workspaceId: workspaceId
       properties:
         name:
           type: string
-        provider:
-          $ref: '#/components/schemas/ProviderTarget'
         repository:
           $ref: '#/components/schemas/Repository'
+        target:
+          type: string
         workspaceId:
           type: string
       type: object
@@ -459,31 +457,28 @@ components:
     Provider:
       example:
         name: name
-        targets:
-        - name: name
-          options: options
-        - name: name
-          options: options
         version: version
       properties:
         name:
           type: string
-        targets:
-          items:
-            $ref: '#/components/schemas/TargetDTO'
-          type: array
         version:
           type: string
       type: object
     ProviderTarget:
       example:
-        provider: provider
-        target: target
+        name: name
+        options: options
+        providerInfo:
+          name: name
+          version: version
       properties:
-        provider:
+        name:
           type: string
-        target:
+        options:
+          description: JSON encoded map of options
           type: string
+        providerInfo:
+          $ref: '#/components/schemas/provider.ProviderInfo'
       type: object
     ProviderTargetManifest:
       additionalProperties:
@@ -522,6 +517,7 @@ components:
         serverDownloadUrl: serverDownloadUrl
         providersDir: providersDir
         id: id
+        targetsFilePath: targetsFilePath
         gitProviders:
         - id: id
           token: token
@@ -552,25 +548,13 @@ components:
           type: string
         serverDownloadUrl:
           type: string
-      type: object
-    TargetDTO:
-      example:
-        name: name
-        options: options
-      properties:
-        name:
-          type: string
-        options:
-          description: JSON encoded map of options
+        targetsFilePath:
           type: string
       type: object
     Workspace:
       example:
         projects:
-        - provider:
-            provider: provider
-            target: target
-          name: name
+        - name: name
           repository:
             owner: owner
             path: path
@@ -579,23 +563,19 @@ components:
             branch: branch
             sha: sha
             url: url
-          workspaceId: workspaceId
-        - provider:
-            provider: provider
-            target: target
-          name: name
-          repository:
-            owner: owner
-            path: path
-            source: source
-            prNumber: 0
-            branch: branch
-            sha: sha
-            url: url
-          workspaceId: workspaceId
-        provider:
-          provider: provider
           target: target
+          workspaceId: workspaceId
+        - name: name
+          repository:
+            owner: owner
+            path: path
+            source: source
+            prNumber: 0
+            branch: branch
+            sha: sha
+            url: url
+          target: target
+          workspaceId: workspaceId
         name: name
         id: id
         info:
@@ -616,6 +596,7 @@ components:
             workspaceId: workspaceId
           providerMetadata: providerMetadata
           name: name
+        target: target
       properties:
         id:
           type: string
@@ -627,8 +608,8 @@ components:
           items:
             $ref: '#/components/schemas/Project'
           type: array
-        provider:
-          $ref: '#/components/schemas/ProviderTarget'
+        target:
+          type: string
       type: object
     WorkspaceInfo:
       example:
@@ -657,6 +638,16 @@ components:
             $ref: '#/components/schemas/ProjectInfo'
           type: array
         providerMetadata:
+          type: string
+      type: object
+    provider.ProviderInfo:
+      example:
+        name: name
+        version: version
+      properties:
+        name:
+          type: string
+        version:
           type: string
       type: object
     provider.ProviderTargetProperty:
@@ -688,6 +679,7 @@ components:
       - boolean
       - int
       - float
+      - file-path
       type: string
       x-enum-varnames:
       - ProviderTargetPropertyTypeString
@@ -695,4 +687,5 @@ components:
       - ProviderTargetPropertyTypeBoolean
       - ProviderTargetPropertyTypeInt
       - ProviderTargetPropertyTypeFloat
+      - ProviderTargetPropertyTypeFilePath
 x-original-swagger-version: "2.0"
