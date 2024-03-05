@@ -19,23 +19,18 @@ type Repository struct {
 	GitUserData *GitUserData `json:"-"`
 } // @name Repository
 
-type ProviderTarget struct {
-	Provider string `json:"provider"`
-	Target   string `json:"target"`
-} // @name ProviderTarget
-
 type Project struct {
-	Name           string         `json:"name"`
-	Repository     *Repository    `json:"repository"`
-	WorkspaceId    string         `json:"workspaceId"`
-	ApiKey         string         `json:"-"`
-	ProviderTarget ProviderTarget `json:"provider"`
+	Name        string      `json:"name"`
+	Repository  *Repository `json:"repository"`
+	WorkspaceId string      `json:"workspaceId"`
+	ApiKey      string      `json:"-"`
+	Target      string      `json:"target"`
 } // @name Project
 type Workspace struct {
-	Id             string         `json:"id"`
-	Name           string         `json:"name"`
-	Projects       []*Project     `json:"projects"`
-	ProviderTarget ProviderTarget `json:"provider"`
+	Id       string     `json:"id"`
+	Name     string     `json:"name"`
+	Projects []*Project `json:"projects"`
+	Target   string     `json:"target"`
 } // @name Workspace
 
 type ProjectInfo struct {

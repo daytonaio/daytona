@@ -1,4 +1,4 @@
-# Provider
+# ProviderProviderInfo
 
 ## Properties
 
@@ -9,70 +9,70 @@ Name | Type | Description | Notes
 
 ## Methods
 
-### NewProvider
+### NewProviderProviderInfo
 
-`func NewProvider() *Provider`
+`func NewProviderProviderInfo() *ProviderProviderInfo`
 
-NewProvider instantiates a new Provider object
+NewProviderProviderInfo instantiates a new ProviderProviderInfo object
 This constructor will assign default values to properties that have it defined,
 and makes sure properties required by API are set, but the set of arguments
 will change when the set of required properties is changed
 
-### NewProviderWithDefaults
+### NewProviderProviderInfoWithDefaults
 
-`func NewProviderWithDefaults() *Provider`
+`func NewProviderProviderInfoWithDefaults() *ProviderProviderInfo`
 
-NewProviderWithDefaults instantiates a new Provider object
+NewProviderProviderInfoWithDefaults instantiates a new ProviderProviderInfo object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
 ### GetName
 
-`func (o *Provider) GetName() string`
+`func (o *ProviderProviderInfo) GetName() string`
 
 GetName returns the Name field if non-nil, zero value otherwise.
 
 ### GetNameOk
 
-`func (o *Provider) GetNameOk() (*string, bool)`
+`func (o *ProviderProviderInfo) GetNameOk() (*string, bool)`
 
 GetNameOk returns a tuple with the Name field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetName
 
-`func (o *Provider) SetName(v string)`
+`func (o *ProviderProviderInfo) SetName(v string)`
 
 SetName sets Name field to given value.
 
 ### HasName
 
-`func (o *Provider) HasName() bool`
+`func (o *ProviderProviderInfo) HasName() bool`
 
 HasName returns a boolean if a field has been set.
 
 ### GetVersion
 
-`func (o *Provider) GetVersion() string`
+`func (o *ProviderProviderInfo) GetVersion() string`
 
 GetVersion returns the Version field if non-nil, zero value otherwise.
 
 ### GetVersionOk
 
-`func (o *Provider) GetVersionOk() (*string, bool)`
+`func (o *ProviderProviderInfo) GetVersionOk() (*string, bool)`
 
 GetVersionOk returns a tuple with the Version field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetVersion
 
-`func (o *Provider) SetVersion(v string)`
+`func (o *ProviderProviderInfo) SetVersion(v string)`
 
 SetVersion sets Version field to given value.
 
 ### HasVersion
 
-`func (o *Provider) HasVersion() bool`
+`func (o *ProviderProviderInfo) HasVersion() bool`
 
 HasVersion returns a boolean if a field has been set.
 

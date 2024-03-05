@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 **Info** | Pointer to [**WorkspaceInfo**](WorkspaceInfo.md) |  | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
 **Projects** | Pointer to [**[]Project**](Project.md) |  | [optional] 
-**Provider** | Pointer to [**ProviderTarget**](ProviderTarget.md) |  | [optional] 
+**Target** | Pointer to **string** |  | [optional] 
 
 ## Methods
 
@@ -129,30 +129,30 @@ SetProjects sets Projects field to given value.
 
 HasProjects returns a boolean if a field has been set.
 
-### GetProvider
+### GetTarget
 
-`func (o *Workspace) GetProvider() ProviderTarget`
+`func (o *Workspace) GetTarget() string`
 
-GetProvider returns the Provider field if non-nil, zero value otherwise.
+GetTarget returns the Target field if non-nil, zero value otherwise.
 
-### GetProviderOk
+### GetTargetOk
 
-`func (o *Workspace) GetProviderOk() (*ProviderTarget, bool)`
+`func (o *Workspace) GetTargetOk() (*string, bool)`
 
-GetProviderOk returns a tuple with the Provider field if it's non-nil, zero value otherwise
+GetTargetOk returns a tuple with the Target field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetProvider
+### SetTarget
 
-`func (o *Workspace) SetProvider(v ProviderTarget)`
+`func (o *Workspace) SetTarget(v string)`
 
-SetProvider sets Provider field to given value.
+SetTarget sets Target field to given value.
 
-### HasProvider
+### HasTarget
 
-`func (o *Workspace) HasProvider() bool`
+`func (o *Workspace) HasTarget() bool`
 
-HasProvider returns a boolean if a field has been set.
+HasTarget returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

@@ -135,6 +135,16 @@ func getDefaultProvidersDir() (string, error) {
 	return path.Join(userConfigDir, "daytona", "providers"), nil
 }
 
+func getDefaultTargetsPath() (string, error) {
+	configDir, err := GetConfigDir()
+	if err != nil {
+		return "", err
+	}
+
+	return path.Join(configDir, "targets.json"), nil
+
+}
+
 func generateUuid() string {
 	uuid := uuid.New()
 	return uuid.String()
@@ -151,6 +161,11 @@ func init() {
 		log.Fatal("failed to get default providers dir")
 	}
 
+	targetsPath, err := getDefaultTargetsPath()
+	if err != nil {
+		log.Fatal("failed to get default targets path")
+	}
+
 	c := types.ServerConfig{
 		RegistryUrl:       defaultRegistryUrl,
 		ProvidersDir:      providersDir,
@@ -158,6 +173,7 @@ func init() {
 		ServerDownloadUrl: defaultServerDownloadUrl,
 		ApiPort:           defaultApiPort,
 		HeadscalePort:     defaultHeadscalePort,
+		TargetsFilePath:   targetsPath,
 		Frps:              getDefaultFRPSConfig(),
 		Id:                generateUuid(),
 	}

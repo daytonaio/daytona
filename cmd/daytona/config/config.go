@@ -29,11 +29,10 @@ type DefaultProvider struct {
 }
 
 type Profile struct {
-	Id              string           `json:"id"`
-	Name            string           `json:"name"`
-	RemoteAuth      *RemoteAuth      `json:"remoteAuth"`
-	DefaultProvider *DefaultProvider `json:"defaultProvider"`
-	Api             ServerApi        `json:"api"`
+	Id         string      `json:"id"`
+	Name       string      `json:"name"`
+	RemoteAuth *RemoteAuth `json:"remoteAuth"`
+	Api        ServerApi   `json:"api"`
 }
 
 type Config struct {
@@ -174,10 +173,6 @@ func getDefaultConfig() Config {
 			{
 				Id:   "default",
 				Name: "default",
-				DefaultProvider: &DefaultProvider{
-					Provider: "docker-provider",
-					Target:   "local",
-				},
 				Api: ServerApi{
 					Url: "http://localhost:3000",
 				},

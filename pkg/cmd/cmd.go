@@ -14,6 +14,7 @@ import (
 	. "github.com/daytonaio/daytona/pkg/cmd/profile"
 	. "github.com/daytonaio/daytona/pkg/cmd/provider"
 	. "github.com/daytonaio/daytona/pkg/cmd/server"
+	. "github.com/daytonaio/daytona/pkg/cmd/target"
 	. "github.com/daytonaio/daytona/pkg/cmd/workspace"
 	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	log "github.com/sirupsen/logrus"
@@ -43,6 +44,7 @@ func Execute() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(ListCmd)
 	rootCmd.AddCommand(GitProviderCmd)
+	rootCmd.AddCommand(TargetCmd)
 
 	if wsMode {
 		rootCmd.AddCommand(gitCredCmd)

@@ -5,8 +5,8 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Name** | Pointer to **string** |  | [optional] 
-**ProviderTarget** | Pointer to [**ProviderTarget**](ProviderTarget.md) |  | [optional] 
 **Repositories** | Pointer to **[]string** |  | [optional] 
+**Target** | Pointer to **string** |  | [optional] 
 
 ## Methods
 
@@ -52,31 +52,6 @@ SetName sets Name field to given value.
 
 HasName returns a boolean if a field has been set.
 
-### GetProviderTarget
-
-`func (o *CreateWorkspace) GetProviderTarget() ProviderTarget`
-
-GetProviderTarget returns the ProviderTarget field if non-nil, zero value otherwise.
-
-### GetProviderTargetOk
-
-`func (o *CreateWorkspace) GetProviderTargetOk() (*ProviderTarget, bool)`
-
-GetProviderTargetOk returns a tuple with the ProviderTarget field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetProviderTarget
-
-`func (o *CreateWorkspace) SetProviderTarget(v ProviderTarget)`
-
-SetProviderTarget sets ProviderTarget field to given value.
-
-### HasProviderTarget
-
-`func (o *CreateWorkspace) HasProviderTarget() bool`
-
-HasProviderTarget returns a boolean if a field has been set.
-
 ### GetRepositories
 
 `func (o *CreateWorkspace) GetRepositories() []string`
@@ -101,6 +76,31 @@ SetRepositories sets Repositories field to given value.
 `func (o *CreateWorkspace) HasRepositories() bool`
 
 HasRepositories returns a boolean if a field has been set.
+
+### GetTarget
+
+`func (o *CreateWorkspace) GetTarget() string`
+
+GetTarget returns the Target field if non-nil, zero value otherwise.
+
+### GetTargetOk
+
+`func (o *CreateWorkspace) GetTargetOk() (*string, bool)`
+
+GetTargetOk returns a tuple with the Target field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTarget
+
+`func (o *CreateWorkspace) SetTarget(v string)`
+
+SetTarget sets Target field to given value.
+
+### HasTarget
+
+`func (o *CreateWorkspace) HasTarget() bool`
+
+HasTarget returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

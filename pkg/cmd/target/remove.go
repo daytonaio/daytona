@@ -8,8 +8,8 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
-	"github.com/daytonaio/daytona/pkg/views/provider"
-	"github.com/daytonaio/daytona/pkg/views/provider/target"
+	"github.com/daytonaio/daytona/pkg/views/target"
+	"github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 
 	log "github.com/sirupsen/logrus"
@@ -17,22 +17,16 @@ import (
 
 var targetRemoveCmd = &cobra.Command{
 	Use:     "remove",
-	Short:   "Remove provider target",
+	Short:   "Remove target",
 	Args:    cobra.NoArgs,
 	Aliases: []string{"rm"},
 	Run: func(cmd *cobra.Command, args []string) {
-		pluginList, err := server.GetProviderList()
+		targets, err := server.GetTargetList()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		selectedProvider := provider.GetProviderFromPrompt(pluginList, "Choose a Provider")
-
-		if selectedProvider == nil {
-			return
-		}
-
-		selectedTarget, err := target.GetTargetFromPrompt(selectedProvider.Targets, false)
+		selectedTarget, err := target.GetTargetFromPrompt(targets, false)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -42,9 +36,11 @@ var targetRemoveCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		res, err := client.ProviderAPI.RemoveTarget(context.Background(), *selectedProvider.Name, *selectedTarget.Name).Execute()
+		res, err := client.TargetAPI.RemoveTarget(context.Background(), *selectedTarget.Name).Execute()
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
+
+		util.RenderInfoMessageBold("Target removed successfully")
 	},
 }
