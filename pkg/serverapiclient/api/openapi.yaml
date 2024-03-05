@@ -116,6 +116,27 @@ paths:
       tags:
       - server
       x-codegen-request-body-name: config
+  /server/get-git-context/{gitUrl}:
+    get:
+      description: Get Git context
+      operationId: GetGitContext
+      parameters:
+      - description: Git URL
+        in: path
+        name: gitUrl
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Repository'
+          description: OK
+      summary: Get Git context
+      tags:
+      - server
   /server/network-key:
     post:
       description: Generate a new authentication key
@@ -346,8 +367,24 @@ components:
     CreateWorkspace:
       example:
         repositories:
-        - repositories
-        - repositories
+        - owner: owner
+          path: path
+          name: name
+          id: id
+          source: source
+          prNumber: 0
+          branch: branch
+          sha: sha
+          url: url
+        - owner: owner
+          path: path
+          name: name
+          id: id
+          source: source
+          prNumber: 0
+          branch: branch
+          sha: sha
+          url: url
         name: name
         target: target
       properties:
@@ -355,7 +392,7 @@ components:
           type: string
         repositories:
           items:
-            type: string
+            $ref: '#/components/schemas/Repository'
           type: array
         target:
           type: string
@@ -412,6 +449,8 @@ components:
         repository:
           owner: owner
           path: path
+          name: name
+          id: id
           source: source
           prNumber: 0
           branch: branch
@@ -488,6 +527,8 @@ components:
       example:
         owner: owner
         path: path
+        name: name
+        id: id
         source: source
         prNumber: 0
         branch: branch
@@ -495,6 +536,10 @@ components:
         url: url
       properties:
         branch:
+          type: string
+        id:
+          type: string
+        name:
           type: string
         owner:
           type: string
@@ -558,6 +603,8 @@ components:
           repository:
             owner: owner
             path: path
+            name: name
+            id: id
             source: source
             prNumber: 0
             branch: branch
@@ -569,6 +616,8 @@ components:
           repository:
             owner: owner
             path: path
+            name: name
+            id: id
             source: source
             prNumber: 0
             branch: branch
@@ -653,8 +702,9 @@ components:
     provider.ProviderTargetProperty:
       properties:
         defaultValue:
-          description: DefaultValue is converted into the appropriate type based on
-            the Type
+          description: |-
+            DefaultValue is converted into the appropriate type based on the Type
+            If the property is a FilePath, the DefaultValue is a path to a directory
           type: string
         disabledPredicate:
           description: |-

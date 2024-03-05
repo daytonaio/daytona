@@ -7,28 +7,28 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectProviderPrompt(gitProviders []config.GitProvider, secondaryProjectOrder int, choiceChan chan<- string) {
+func selectBranchPrompt(branches []gitprovider.GitBranch, secondaryProjectOrder int, choiceChan chan<- string) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
-	for _, provider := range gitProviders {
-		newItem := item{id: provider.Id, title: provider.Name, choiceProperty: provider.Id}
+	for _, branch := range branches {
+		newItem := item{id: branch.Name, title: branch.Name, choiceProperty: branch.Name}
+		if branch.SHA != "" {
+			newItem.desc = fmt.Sprintf("SHA: %s", branch.SHA)
+		}
 		items = append(items, newItem)
 	}
 
-	newItem := item{id: CustomRepoIdentifier, title: "Enter a custom repository URL", choiceProperty: CustomRepoIdentifier}
-	items = append(items, newItem)
-
 	l := views.GetStyledSelectList(items)
 	m := model{list: l}
-	m.list.Title = "CHOOSE YOUR PROVIDER"
+	m.list.Title = "CHOOSE A BRANCH"
 	if secondaryProjectOrder > 0 {
 		m.list.Title += fmt.Sprintf(" (Secondary Project #%d)", secondaryProjectOrder)
 	}
@@ -46,10 +46,10 @@ func selectProviderPrompt(gitProviders []config.GitProvider, secondaryProjectOrd
 	}
 }
 
-func GetProviderIdFromPrompt(gitProviders []config.GitProvider, secondaryProjectOrder int) string {
+func GetBranchNameFromPrompt(branches []gitprovider.GitBranch, secondaryProjectOrder int) string {
 	choiceChan := make(chan string)
 
-	go selectProviderPrompt(gitProviders, secondaryProjectOrder, choiceChan)
+	go selectBranchPrompt(branches, secondaryProjectOrder, choiceChan)
 
 	return <-choiceChan
 }

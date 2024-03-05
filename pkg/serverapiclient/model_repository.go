@@ -20,6 +20,8 @@ var _ MappedNullable = &Repository{}
 // Repository struct for Repository
 type Repository struct {
 	Branch *string `json:"branch,omitempty"`
+	Id *string `json:"id,omitempty"`
+	Name *string `json:"name,omitempty"`
 	Owner *string `json:"owner,omitempty"`
 	Path *string `json:"path,omitempty"`
 	PrNumber *int32 `json:"prNumber,omitempty"`
@@ -75,6 +77,70 @@ func (o *Repository) HasBranch() bool {
 // SetBranch gets a reference to the given string and assigns it to the Branch field.
 func (o *Repository) SetBranch(v string) {
 	o.Branch = &v
+}
+
+// GetId returns the Id field value if set, zero value otherwise.
+func (o *Repository) GetId() string {
+	if o == nil || IsNil(o.Id) {
+		var ret string
+		return ret
+	}
+	return *o.Id
+}
+
+// GetIdOk returns a tuple with the Id field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Repository) GetIdOk() (*string, bool) {
+	if o == nil || IsNil(o.Id) {
+		return nil, false
+	}
+	return o.Id, true
+}
+
+// HasId returns a boolean if a field has been set.
+func (o *Repository) HasId() bool {
+	if o != nil && !IsNil(o.Id) {
+		return true
+	}
+
+	return false
+}
+
+// SetId gets a reference to the given string and assigns it to the Id field.
+func (o *Repository) SetId(v string) {
+	o.Id = &v
+}
+
+// GetName returns the Name field value if set, zero value otherwise.
+func (o *Repository) GetName() string {
+	if o == nil || IsNil(o.Name) {
+		var ret string
+		return ret
+	}
+	return *o.Name
+}
+
+// GetNameOk returns a tuple with the Name field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Repository) GetNameOk() (*string, bool) {
+	if o == nil || IsNil(o.Name) {
+		return nil, false
+	}
+	return o.Name, true
+}
+
+// HasName returns a boolean if a field has been set.
+func (o *Repository) HasName() bool {
+	if o != nil && !IsNil(o.Name) {
+		return true
+	}
+
+	return false
+}
+
+// SetName gets a reference to the given string and assigns it to the Name field.
+func (o *Repository) SetName(v string) {
+	o.Name = &v
 }
 
 // GetOwner returns the Owner field value if set, zero value otherwise.
@@ -281,6 +347,12 @@ func (o Repository) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Branch) {
 		toSerialize["branch"] = o.Branch
+	}
+	if !IsNil(o.Id) {
+		toSerialize["id"] = o.Id
+	}
+	if !IsNil(o.Name) {
+		toSerialize["name"] = o.Name
 	}
 	if !IsNil(o.Owner) {
 		toSerialize["owner"] = o.Owner

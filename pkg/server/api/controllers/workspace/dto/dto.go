@@ -4,8 +4,8 @@ import "github.com/daytonaio/daytona/pkg/types"
 
 type CreateWorkspace struct {
 	Name         string
-	Repositories []string
 	Target       string
+	Repositories []types.Repository
 } //	@name	CreateWorkspace
 
 type Workspace struct {
