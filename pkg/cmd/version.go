@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/daytonaio/daytona/internal"
 	"github.com/spf13/cobra"
 )
 
@@ -13,6 +14,6 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print the version number",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Version 0.3.0")
+		fmt.Println("Daytona version", internal.Version)
 	},
 }
