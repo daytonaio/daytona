@@ -45,6 +45,6 @@ var providerUninstallCmd = &cobra.Command{
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		view_util.RenderInfoMessage(fmt.Sprintf("Provider %s has been successfully uninstalled", *providerToUninstall.Name))
+		view_util.RenderInfoMessageBold(fmt.Sprintf("Provider %s has been successfully uninstalled", *providerToUninstall.Name))
 	},
 }

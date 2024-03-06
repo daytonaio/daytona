@@ -64,7 +64,7 @@ var providerInstallCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		view_util.RenderInfoMessage(fmt.Sprintf("Provider %s has been successfully installed", *providerToInstall.Name))
+		view_util.RenderInfoMessageBold(fmt.Sprintf("Provider %s has been successfully installed", *providerToInstall.Name))
 	},
 }
 
