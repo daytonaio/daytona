@@ -89,12 +89,14 @@ var CreateCmd = &cobra.Command{
 		}
 
 		var requestRepos []serverapiclient.Repository
-		for _, repo := range repos {
-			requestRepos = append(requestRepos, serverapiclient.Repository{
+		for i := range repos {
+			repo := repos[i]
+			requestRepo := serverapiclient.Repository{
 				Name:   &repo.Name,
 				Url:    &repo.Url,
 				Branch: &repo.Branch,
-			})
+			}
+			requestRepos = append(requestRepos, requestRepo)
 		}
 
 		statusProgram := tea.NewProgram(status.NewModel())
