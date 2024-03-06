@@ -5,40 +5,77 @@ package headscale
 
 import (
 	"fmt"
+	"io/fs"
+	"net/netip"
 	"os"
 	"path"
 	"time"
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/server/config"
-	server_types "github.com/daytonaio/daytona/pkg/types"
-	"github.com/juanfont/headscale/hscontrol/types"
+	"github.com/daytonaio/daytona/pkg/types"
+	hstypes "github.com/juanfont/headscale/hscontrol/types"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"gopkg.in/yaml.v2"
+	"tailscale.com/tailcfg"
+	"tailscale.com/types/dnstype"
 )
 
-func getConfig(serverConfig *server_types.ServerConfig) (*types.Config, error) {
+func getConfig(serverConfig *types.ServerConfig) (*hstypes.Config, error) {
 	configDir, err := config.GetConfigDir()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get config directory: %w", err)
 	}
 
-	err = types.LoadConfig(path.Join(configDir, "headscale", "config.yaml"), true)
-	if err != nil {
-		return nil, fmt.Errorf("failed to load headscale configuration: %w", err)
+	cfg := &hstypes.Config{
+		DBtype:                         "sqlite3",
+		ServerURL:                      fmt.Sprintf("https://%s.%s", serverConfig.Id, serverConfig.Frps.Domain),
+		Addr:                           fmt.Sprintf("127.0.0.1:%d", serverConfig.HeadscalePort),
+		EphemeralNodeInactivityTimeout: 5 * time.Minute,
+		NodeUpdateCheckInterval:        10 * time.Second,
+		BaseDomain:                     "daytona.local",
+		DERP: hstypes.DERPConfig{
+			ServerEnabled:                      true,
+			AutomaticallyAddEmbeddedDerpRegion: true,
+			ServerRegionID:                     999,
+			ServerRegionCode:                   "local",
+			ServerRegionName:                   "Daytona embedded DERP",
+			Paths:                              []string{},
+			ServerPrivateKeyPath:               path.Join(configDir, "headscale", "derp_server_private.key"),
+			UpdateFrequency:                    24 * time.Hour,
+			AutoUpdate:                         true,
+			STUNAddr:                           "0.0.0.0:3478",
+		},
+		Log: hstypes.LogConfig{
+			Format: "text",
+		},
+		IPPrefixes: []netip.Prefix{
+			netip.MustParsePrefix("fd7a:115c:a1e0::/48"),
+			netip.MustParsePrefix("100.64.0.0/10"),
+		},
+		DNSConfig: &tailcfg.DNSConfig{
+			Proxied: true,
+			Nameservers: []netip.Addr{
+				netip.MustParseAddr("127.0.0.11"),
+				netip.MustParseAddr("1.1.1.1"),
+			},
+			Resolvers: []*dnstype.Resolver{
+				{
+					Addr: "127.0.0.11",
+				},
+				{
+					Addr: "1.1.1.1",
+				},
+			},
+		},
+		DBpath:               path.Join(configDir, "headscale", "headscale.db"),
+		UnixSocket:           path.Join(configDir, "headscale", "headscale.sock"),
+		UnixSocketPermission: fs.FileMode.Perm(0700),
+		NoisePrivateKeyPath:  path.Join(configDir, "headscale", "noise_private.key"),
+		CLI: hstypes.CLIConfig{
+			Timeout: 10 * time.Second,
+		},
 	}
-
-	cfg, err := types.GetHeadscaleConfig()
-	if err != nil {
-		return nil, err
-	}
-
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
-	log.Logger = log.Output(zerolog.ConsoleWriter{
-		Out:        &util.DebugLogWriter{},
-		TimeFormat: time.RFC3339,
-	})
 
 	logLevelEnv, logLevelSet := os.LookupEnv("LOG_LEVEL")
 	if logLevelSet {
@@ -51,16 +88,11 @@ func getConfig(serverConfig *server_types.ServerConfig) (*types.Config, error) {
 	}
 
 	zerolog.SetGlobalLevel(cfg.Log.Level)
-
-	cfg.Log.Format = "text"
-
-	cfg.ServerURL = fmt.Sprintf("http://127.0.0.1:%d", serverConfig.HeadscalePort)
-	cfg.Addr = fmt.Sprintf("127.0.0.1:%d", serverConfig.HeadscalePort)
-
-	cfg.DBpath = path.Join(configDir, "headscale", "headscale.db")
-	cfg.UnixSocket = path.Join(configDir, "headscale", "headscale.sock")
-	cfg.NoisePrivateKeyPath = path.Join(configDir, "headscale", "noise_private.key")
-	cfg.DERP.ServerPrivateKeyPath = path.Join(configDir, "headscale", "derp_server_private.key")
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	log.Logger = log.Output(zerolog.ConsoleWriter{
+		Out:        &util.DebugLogWriter{},
+		TimeFormat: time.RFC3339,
+	})
 
 	return cfg, nil
 }
@@ -76,76 +108,4 @@ func init() {
 		log.Error().Err(err).Msg("failed to create headscale directory")
 		return
 	}
-
-	if _, err := os.Stat(path.Join(c, "headscale", "config.yaml")); os.IsNotExist(err) {
-		yamlString, err := yaml.Marshal(defaultConfig)
-		if err != nil {
-			log.Error().Err(err).Msg("failed to marshal default headscale configuration")
-			return
-		}
-
-		err = os.WriteFile(path.Join(c, "headscale", "config.yaml"), yamlString, 0600)
-		if err != nil {
-			log.Error().Err(err).Msg("failed to write default headscale configuration")
-			return
-		}
-	}
-}
-
-var defaultConfig map[string]interface{} = map[string]interface{}{
-	"acl_policy_path": " ",
-	"acme_email":      " ",
-	"acme_url":        "https://acme-v02.api.letsencrypt.org/directory",
-	"db_type":         "sqlite3",
-	"derp": map[string]interface{}{
-		"auto_update_enabled": true,
-		"paths":               []interface{}{},
-		"server": map[string]interface{}{
-			"automatically_add_embedded_derp_region": true,
-			"enabled":                                true,
-			"ipv4":                                   "1.2.3.4",
-			"ipv6":                                   "2001:db8::1",
-			"region_code":                            "headscale",
-			"region_id":                              999,
-			"region_name":                            "Headscale Embedded DERP",
-			"stun_listen_addr":                       "0.0.0.0:3478",
-		},
-		"update_frequency": "24h",
-		"urls":             []interface{}{"https://controlplane.tailscale.com/derpmap/default"},
-	},
-	"disable_check_updates": false,
-	"dns_config": map[string]interface{}{
-		"base_domain":        "example.com",
-		"domains":            []interface{}{},
-		"magic_dns":          true,
-		"nameservers":        []interface{}{"1.1.1.1"},
-		"override_local_dns": true,
-	},
-	"ephemeral_node_inactivity_timeout": "5m",
-	"grpc_allow_insecure":               false,
-	"grpc_listen_addr":                  "127.0.0.1:50443",
-	"ip_prefixes": []interface{}{
-		"fd7a:115c:a1e0::/48",
-		"100.64.0.0/10",
-	},
-	"log": map[string]interface{}{
-		"format": "text",
-		"level":  "info",
-	},
-	"logtail": map[string]interface{}{
-		"enabled": false,
-	},
-	"metrics_listen_addr":        "127.0.0.1:9090",
-	"node_update_check_interval": "10s",
-	"noise": map[string]interface{}{
-		"private_key_path": "/",
-	},
-	"randomize_client_port":          false,
-	"server_url":                     "http://127.0.0.1:8000",
-	"tls_cert_path":                  "",
-	"tls_key_path":                   "",
-	"tls_letsencrypt_cache_dir":      "/var/lib/headscale/cache",
-	"tls_letsencrypt_challenge_type": "HTTP-01",
-	"tls_letsencrypt_hostname":       "",
-	"tls_letsencrypt_listen":         ":http",
 }
