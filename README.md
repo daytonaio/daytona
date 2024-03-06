@@ -1,4 +1,10 @@
-<div align="center"><img src="https://github.com/ivan-burazin/daytona/blob/main/public/images/Daytona-logotype-black.svg" width="40%" >
+<div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/daytonaio/daytona/raw/main/assets/images/Daytona-logotype-white.png">
+    <img alt="Daytona logo" src="https://github.com/daytonaio/daytona/raw/main/assets/images/Daytona-logotype-black.png" width="40%">
+  </picture>
+</div>
+
 <br><br>
 
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue)](#license)
@@ -29,6 +35,7 @@ Set up a development environment on any infrastructure, with a single command.
     <a href="https://twitter.com/Daytonaio">Twitter</a>
   </p>
 
+<div align="center"><img src="https://github.com/daytonaio/daytona/raw/main/assets/images/daytona_demo.gif" width="40%" ></div>
 
 ## Features
 * __Single Command__: Activate a fully configured development environment with a single command.
@@ -65,6 +72,7 @@ Start coding.
 
 
 ----
+
 </br>
 
 ## Why Daytona?
@@ -131,12 +139,12 @@ daytona git-providers add
 ```
 Follow the steps provided. Here's a link to the [documentation](https://daytona.io/docs) for more details.
 
-__3. Add Your Provider:__  
+__3. Add Your Provider Target:__  
 This step is for choosing where to deploy Development Environments. By default, Daytona includes a Docker provider to spin up environments on your local machine. For remote development environments, use the command:
 ```bash
-daytona provider add
+daytona target set
 ```
-This command allows adding connections to an SSH machine or one of the cloud providers (Contributions welcome here!).
+Following the steps this command adds SSH machines to your targets.
 
 __4. Choose Your Default IDE:__  
 The default setting for Daytona is VS Code locally. If you prefer, you can switch to VS Code - Browser or any IDE from the JetBrains portfolio (Contributions welcome here!) using the command:
@@ -168,10 +176,6 @@ This command opens your development environment in your preferred IDE, allowing 
 ### Other Commands
 For more detailed information about each command, please refer to Daytona's [documentation](https://daytona.io/docs).
 
-  
-
-## Architecture 
-TODO: desc
 
 ## How to Extend Daytona
 
