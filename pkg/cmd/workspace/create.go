@@ -77,22 +77,6 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		statusProgram := tea.NewProgram(status.NewModel())
-
-		started := false
-
-		go scanWorkspaceLogs(activeProfile, workspaceName, statusProgram, &started)
-
-		go func() {
-			if _, err := statusProgram.Run(); err != nil {
-				fmt.Println("Error running status program:", err)
-				statusProgram.Send(status.ClearScreenMsg{})
-				statusProgram.Send(tea.Quit())
-				statusProgram.ReleaseTerminal()
-				os.Exit(1)
-			}
-		}()
-
 		activeProfile, err = c.GetActiveProfile()
 		if err != nil {
 			log.Fatal(err)
@@ -111,6 +95,22 @@ var CreateCmd = &cobra.Command{
 				Branch: &repo.Branch,
 			})
 		}
+
+		statusProgram := tea.NewProgram(status.NewModel())
+
+		started := false
+
+		go scanWorkspaceLogs(activeProfile, workspaceName, statusProgram, &started)
+
+		go func() {
+			if _, err := statusProgram.Run(); err != nil {
+				fmt.Println("Error running status program:", err)
+				statusProgram.Send(status.ClearScreenMsg{})
+				statusProgram.Send(tea.Quit())
+				statusProgram.ReleaseTerminal()
+				os.Exit(1)
+			}
+		}()
 
 		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(serverapiclient.CreateWorkspace{
 			Name:         &workspaceName,
@@ -290,7 +290,7 @@ func scanWorkspaceLogs(activeProfile config.Profile, workspaceName string, statu
 	var res *http.Response
 	var err error
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(2 * time.Second)
 
 	ws, res, err = websocket.DefaultDialer.Dial(wsURL, nil)
 	if err != nil {
