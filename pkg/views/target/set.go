@@ -17,6 +17,7 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/views"
 )
 
 func NewTargetNameInput(targetName *string, existingTargetNames []string) error {
@@ -31,7 +32,7 @@ func NewTargetNameInput(targetName *string, existingTargetNames []string) error 
 				return errors.New("Target with the same name already exists")
 			}
 			return nil
-		})
+		}).WithTheme(views.GetCustomTheme())
 
 	form := huh.NewForm(huh.NewGroup(input))
 	err := form.Run()
@@ -114,7 +115,7 @@ func SetTargetForm(target *serverapiclient.ProviderTarget, targetManifest map[st
 		}
 	}
 
-	form := huh.NewForm(append([]*huh.Group{huh.NewGroup(fields...)}, groups...)...)
+	form := huh.NewForm(append([]*huh.Group{huh.NewGroup(fields...)}, groups...)...).WithTheme(views.GetCustomTheme())
 	err = form.Run()
 	if err != nil {
 		return err

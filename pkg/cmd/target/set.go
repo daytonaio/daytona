@@ -29,7 +29,7 @@ var targetSetCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		selectedProvider := provider.GetProviderFromPrompt(pluginList, "Choose a Provider")
+		selectedProvider := provider.GetProviderFromPrompt(pluginList, "CHOOSE A PROVIDER")
 
 		if selectedProvider == nil {
 			return

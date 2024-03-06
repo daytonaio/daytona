@@ -103,7 +103,7 @@ func renderProvidersList(providers []serverapiclient.Provider, selectable bool) 
 }
 
 func List(providers []serverapiclient.Provider) {
-	util.RenderMainTitle("Providers")
+	util.RenderMainTitle("PROVIDERS")
 
 	if len(providers) == 0 {
 		fmt.Println("No providers found")
