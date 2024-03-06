@@ -93,7 +93,8 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 	}
 	userGitProviders := serverConfig.GitProviders
 
-	for _, repo := range createWorkspaceDto.Repositories {
+	for i := range createWorkspaceDto.Repositories {
+		repo := createWorkspaceDto.Repositories[i]
 		providerId := getGitProviderIdFromUrl(repo.Url)
 		gitProvider := gitprovider.GetGitProvider(providerId, userGitProviders)
 
