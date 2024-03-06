@@ -37,7 +37,7 @@ func GetTargetFromPrompt(targets []serverapiclient.ProviderTarget, withNewTarget
 
 	l := views.GetStyledSelectList(items)
 	m := model{list: l}
-	m.list.Title = "Choose a target"
+	m.list.Title = "CHOOSE A TARGET"
 
 	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
 	if err != nil {

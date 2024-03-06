@@ -17,11 +17,11 @@ var providerListCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Aliases: []string{"ls"},
 	Run: func(cmd *cobra.Command, args []string) {
-		pluginList, err := server.GetProviderList()
+		providerList, err := server.GetProviderList()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		provider.List(pluginList)
+		provider.List(providerList)
 	},
 }
