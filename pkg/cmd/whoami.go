@@ -5,7 +5,6 @@ package cmd
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 
@@ -44,13 +43,6 @@ var whoamiCmd = &cobra.Command{
 			view_util.RenderInfoMessageBold("You are currently on profile " + profile.Name)
 		}
 		view_util.RenderListLine(fmt.Sprintf("\x1b[1m%-*s\x1b[0m%s", listLabelWidth, "Profile ID:", profile.Id))
-
-		if profile.RemoteAuth != nil {
-			view_util.RenderListLine(fmt.Sprintf("\x1b[1m%-*s\x1b[0m%s:%s", listLabelWidth, "Remote host:", profile.RemoteAuth.Hostname, strconv.Itoa(profile.RemoteAuth.Port)))
-			if profile.RemoteAuth.PrivateKeyPath != nil {
-				view_util.RenderListLine(fmt.Sprintf("\x1b[1m%-*s\x1b[0m%s", listLabelWidth, "SSH key path:", *profile.RemoteAuth.PrivateKeyPath))
-			}
-		}
 
 		if profile.Api.Url != "" {
 			view_util.RenderListLine(fmt.Sprintf("\x1b[1m%-*s\x1b[0m%s", listLabelWidth, "API URL:", profile.Api.Url))

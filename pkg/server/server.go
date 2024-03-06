@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"os/exec"
 	"os/signal"
 	"time"
 
@@ -94,32 +93,6 @@ func Start() error {
 	}()
 
 	return api.Start()
-}
-
-func StartDaemon() error {
-
-	scriptFile, err := createTemporaryScriptFile()
-	if err != nil {
-		log.Error(err)
-		return nil
-	}
-	defer func() {
-		scriptFile.Close()
-		os.Remove(scriptFile.Name())
-	}()
-
-	scriptPath := scriptFile.Name()
-
-	// Run the bash script and capture its output
-	cmd := exec.Command("bash", scriptPath)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		log.Error(string(output))
-		return err
-	}
-	log.Info(string(output))
-
-	return nil
 }
 
 func getTcpListener(c *types.ServerConfig) (*net.Listener, error) {

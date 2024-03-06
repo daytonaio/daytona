@@ -11,14 +11,6 @@ import (
 	"path"
 )
 
-type RemoteAuth struct {
-	Hostname       string  `json:"hostname"`
-	Port           int     `json:"port"`
-	User           string  `json:"user"`
-	Password       *string `json:"password"`
-	PrivateKeyPath *string `json:"privateKeyPath"`
-}
-
 type ServerApi struct {
 	Url string `json:"url"`
 }
@@ -29,10 +21,9 @@ type DefaultProvider struct {
 }
 
 type Profile struct {
-	Id         string      `json:"id"`
-	Name       string      `json:"name"`
-	RemoteAuth *RemoteAuth `json:"remoteAuth"`
-	Api        ServerApi   `json:"api"`
+	Id   string    `json:"id"`
+	Name string    `json:"name"`
+	Api  ServerApi `json:"api"`
 }
 
 type Config struct {

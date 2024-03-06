@@ -39,7 +39,7 @@ var ProfileCmd = &cobra.Command{
 		chosenProfileId := profile.GetProfileIdFromPrompt(profilesList, c.ActiveProfileId, "Choose a profile to use or add a new one", true)
 
 		if chosenProfileId == profile.NewProfileId {
-			_, err = CreateProfile(c, nil, true, true, false)
+			_, err = CreateProfile(c, nil, true)
 			if err != nil {
 				log.Fatal(err)
 			}
