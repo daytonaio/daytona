@@ -6,7 +6,6 @@ package profile
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -25,9 +24,7 @@ var columns = []table.Column{
 	{Title: "ID", Width: 10},
 	{Title: "Name", Width: 20},
 	{Title: "Active", Width: 10},
-	{Title: "Hostname", Width: 15},
-	{Title: "SSH port", Width: 10},
-	{Title: "SSH user", Width: 10},
+	{Title: "API URL", Width: 30},
 }
 
 type model struct {
@@ -85,22 +82,11 @@ func renderProfileList(profileList []config.Profile, activeProfileId string, sel
 	rows := []table.Row{}
 	activeProfileRow := 0
 	for i, profile := range profileList {
-		hostname := "-"
-		port := "-"
-		user := "-"
-		if profile.RemoteAuth != nil {
-			hostname = profile.RemoteAuth.Hostname
-			port = strconv.Itoa(profile.RemoteAuth.Port)
-			user = profile.RemoteAuth.User
-		}
-
-		row := table.Row{profile.Id, profile.Name, fmt.Sprintf("%t", profile.Id == activeProfileId), hostname, port, user}
+		row := table.Row{profile.Id, profile.Name, fmt.Sprintf("%t", profile.Id == activeProfileId), profile.Api.Url}
 
 		switch profile.Id {
-		case "default":
-			row = table.Row{profile.Id, profile.Name, fmt.Sprintf("%t", profile.Id == activeProfileId), "-", "-", "-"}
 		case NewProfileId:
-			row = table.Row{profile.Id, profile.Name, "", "", "", ""}
+			row = table.Row{profile.Id, profile.Name, "", ""}
 		}
 
 		if profile.Id == activeProfileId {

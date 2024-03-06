@@ -49,8 +49,8 @@ var profileEditCmd = &cobra.Command{
 			log.Fatal("Profile does not exist")
 		}
 
-		if profileNameFlag == "" || serverHostnameFlag == "" || serverUserFlag == "" || apiUrlFlag == "" || (serverPrivateKeyPathFlag == "" && serverPasswordFlag == "") {
-			err = EditProfile(c, true, &chosenProfile, false, false)
+		if profileNameFlag == "" || apiUrlFlag == "" {
+			err = EditProfile(c, true, &chosenProfile)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -58,13 +58,8 @@ var profileEditCmd = &cobra.Command{
 		}
 
 		profileEditView := profile.ProfileAddView{
-			ProfileName:             profileNameFlag,
-			RemoteHostname:          serverHostnameFlag,
-			RemoteSshPort:           serverPortFlag,
-			RemoteSshUser:           serverUserFlag,
-			RemoteSshPassword:       serverPasswordFlag,
-			RemoteSshPrivateKeyPath: serverPrivateKeyPathFlag,
-			ApiUrl:                  apiUrlFlag,
+			ProfileName: profileNameFlag,
+			ApiUrl:      apiUrlFlag,
 		}
 
 		err = editProfile(&chosenProfile, profileEditView, c, true)
@@ -74,33 +69,18 @@ var profileEditCmd = &cobra.Command{
 	},
 }
 
-func EditProfile(c *config.Config, notify bool, profileToEdit *config.Profile, forceRemoteAccess, skipName bool) error {
+func EditProfile(c *config.Config, notify bool, profileToEdit *config.Profile) error {
 	if profileToEdit == nil {
 		return errors.New("profile must not be nil")
 	}
 
 	profileAddView := profile.ProfileAddView{
-		ProfileName:             profileToEdit.Name,
-		RemoteSshPort:           22,
-		RemoteSshPassword:       "",
-		RemoteSshPrivateKeyPath: "",
-		ApiUrl:                  profileToEdit.Api.Url,
-	}
-
-	if profileToEdit.RemoteAuth != nil {
-		profileAddView.RemoteSshPort = profileToEdit.RemoteAuth.Port
-		profileAddView.RemoteHostname = profileToEdit.RemoteAuth.Hostname
-		profileAddView.RemoteSshUser = profileToEdit.RemoteAuth.User
-
-		if profileToEdit.RemoteAuth.Password != nil {
-			profileAddView.RemoteSshPassword = *profileToEdit.RemoteAuth.Password
-		} else if profileToEdit.RemoteAuth.PrivateKeyPath != nil {
-			profileAddView.RemoteSshPrivateKeyPath = *profileToEdit.RemoteAuth.PrivateKeyPath
-		}
+		ProfileName: profileToEdit.Name,
+		ApiUrl:      profileToEdit.Api.Url,
 	}
 
 	if profileToEdit.Id != "default" {
-		profile.ProfileCreationView(c, &profileAddView, true, forceRemoteAccess, skipName)
+		profile.ProfileCreationView(c, &profileAddView, true)
 	}
 
 	return editProfile(profileToEdit, profileAddView, c, notify)
@@ -108,22 +88,8 @@ func EditProfile(c *config.Config, notify bool, profileToEdit *config.Profile, f
 
 func editProfile(profileToEdit *config.Profile, profileView profile.ProfileAddView, c *config.Config, notify bool) error {
 	profileToEdit.Name = profileView.ProfileName
-	profileToEdit.Api.Url = profileView.ApiUrl
-	profileToEdit.RemoteAuth = &config.RemoteAuth{
-		Port:     profileView.RemoteSshPort,
-		Hostname: profileView.RemoteHostname,
-		User:     profileView.RemoteSshUser,
-	}
 	profileToEdit.Api = config.ServerApi{
 		Url: profileView.ApiUrl,
-	}
-
-	if profileView.RemoteSshPassword != "" {
-		profileToEdit.RemoteAuth.Password = &profileView.RemoteSshPassword
-	} else if profileView.RemoteSshPrivateKeyPath != "" {
-		profileToEdit.RemoteAuth.PrivateKeyPath = &profileView.RemoteSshPrivateKeyPath
-	} else {
-		return errors.New("password or private key path must be provided")
 	}
 
 	err := c.EditProfile(*profileToEdit)
@@ -134,7 +100,7 @@ func editProfile(profileToEdit *config.Profile, profileView profile.ProfileAddVi
 	if notify {
 		profile.Render(profile.ProfileInfo{
 			ProfileName: profileView.ProfileName,
-			ApiUrl:      profileView.RemoteHostname,
+			ApiUrl:      profileView.ApiUrl,
 		}, "edited")
 	}
 
@@ -143,10 +109,5 @@ func editProfile(profileToEdit *config.Profile, profileView profile.ProfileAddVi
 
 func init() {
 	profileEditCmd.Flags().StringVarP(&profileNameFlag, "name", "n", "", "Profile name")
-	profileEditCmd.Flags().StringVarP(&serverHostnameFlag, "hostname", "h", "", "Remote SSH hostname")
-	profileEditCmd.Flags().IntVarP(&serverPortFlag, "port", "P", 22, "Remote SSH port")
-	profileEditCmd.Flags().StringVarP(&serverUserFlag, "user", "u", "", "Remote SSH url")
-	profileEditCmd.Flags().StringVarP(&serverPasswordFlag, "password", "p", "", "Remote SSH password")
-	profileEditCmd.Flags().StringVarP(&serverPrivateKeyPathFlag, "private-key-path", "k", "", "Remote SSH private key path")
 	profileEditCmd.Flags().StringVarP(&apiUrlFlag, "api-url", "a", "", "API URL")
 }

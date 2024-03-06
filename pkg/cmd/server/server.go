@@ -39,9 +39,6 @@ var ServerCmd = &cobra.Command{
 
 func init() {
 	ServerCmd.AddCommand(configureCmd)
-	ServerCmd.AddCommand(startupCmd)
-	ServerCmd.AddCommand(installCmd)
-	ServerCmd.AddCommand(uninstallCmd)
 	ServerCmd.AddCommand(configCmd)
 	ServerCmd.AddCommand(logsCmd)
 }
