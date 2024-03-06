@@ -5,6 +5,7 @@ package workspace
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -118,7 +119,7 @@ var CreateCmd = &cobra.Command{
 			Repositories: requestRepos,
 		}).Execute()
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+			cleanUpTerminal(statusProgram, apiclient.HandleErrorResponse(res, err))
 		}
 
 		started = true
@@ -129,13 +130,11 @@ var CreateCmd = &cobra.Command{
 
 		waitForDial(tsConn, workspaceName, *createdWorkspace.Projects[0].Name, dialStartTime, dialTimeout, statusProgram)
 
-		statusProgram.Send(status.ClearScreenMsg{})
-		statusProgram.Send(tea.Quit())
-		statusProgram.ReleaseTerminal()
+		cleanUpTerminal(statusProgram, nil)
 
 		wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceName).Execute()
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+			cleanUpTerminal(statusProgram, apiclient.HandleErrorResponse(res, err))
 			return
 		}
 
@@ -294,7 +293,7 @@ func scanWorkspaceLogs(activeProfile config.Profile, workspaceName string, statu
 
 	ws, res, err = websocket.DefaultDialer.Dial(wsURL, nil)
 	if err != nil {
-		log.Fatal(apiclient.HandleErrorResponse(res, err))
+		cleanUpTerminal(statusProgram, apiclient.HandleErrorResponse(res, apiclient.HandleErrorResponse(res, err)))
 	}
 
 	defer ws.Close()
@@ -316,10 +315,7 @@ func scanWorkspaceLogs(activeProfile config.Profile, workspaceName string, statu
 func waitForDial(tsConn *tsnet.Server, workspaceName string, projectName string, dialStartTime time.Time, dialTimeout time.Duration, statusProgram *tea.Program) {
 	for {
 		if time.Since(dialStartTime) > dialTimeout {
-			statusProgram.Send(status.ClearScreenMsg{})
-			statusProgram.Send(tea.Quit())
-			statusProgram.ReleaseTerminal()
-			log.Fatal("Timeout: dialing timed out after 3 minutes")
+			cleanUpTerminal(statusProgram, errors.New("timeout: dialing timed out after 3 minutes"))
 		}
 
 		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s-%s:2222", workspaceName, projectName))
@@ -330,7 +326,14 @@ func waitForDial(tsConn *tsnet.Server, workspaceName string, projectName string,
 
 		time.Sleep(time.Second)
 	}
+	cleanUpTerminal(statusProgram, nil)
+}
+
+func cleanUpTerminal(statusProgram *tea.Program, err error) {
 	statusProgram.Send(status.ClearScreenMsg{})
 	statusProgram.Send(tea.Quit())
 	statusProgram.ReleaseTerminal()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
