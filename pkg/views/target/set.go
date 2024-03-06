@@ -32,9 +32,9 @@ func NewTargetNameInput(targetName *string, existingTargetNames []string) error 
 				return errors.New("Target with the same name already exists")
 			}
 			return nil
-		}).WithTheme(views.GetCustomTheme())
+		})
 
-	form := huh.NewForm(huh.NewGroup(input))
+	form := huh.NewForm(huh.NewGroup(input)).WithTheme(views.GetCustomTheme())
 	err := form.Run()
 	if err != nil {
 		return err
