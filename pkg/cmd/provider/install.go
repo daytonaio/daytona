@@ -4,12 +4,15 @@
 package provider
 
 import (
+	"fmt"
+
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/os"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views/provider"
+	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 
 	log "github.com/sirupsen/logrus"
@@ -42,7 +45,7 @@ var providerInstallCmd = &cobra.Command{
 
 		pluginList := convertToDTO(providersManifest)
 
-		providerToInstall := provider.GetProviderFromPrompt(pluginList, "Choose a Provider to install")
+		providerToInstall := provider.GetProviderFromPrompt(pluginList, "CHOOSE A PROVIDER TO INSTALL")
 
 		if providerToInstall == nil {
 			return
@@ -60,6 +63,8 @@ var providerInstallCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		view_util.RenderInfoMessage(fmt.Sprintf("Provider %s has been successfully installed", *providerToInstall.Name))
 	},
 }
 

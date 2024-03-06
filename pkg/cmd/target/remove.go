@@ -19,7 +19,7 @@ var targetRemoveCmd = &cobra.Command{
 	Use:     "remove",
 	Short:   "Remove target",
 	Args:    cobra.NoArgs,
-	Aliases: []string{"rm"},
+	Aliases: []string{"rm", "delete"},
 	Run: func(cmd *cobra.Command, args []string) {
 		targets, err := server.GetTargetList()
 		if err != nil {

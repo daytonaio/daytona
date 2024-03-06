@@ -14,6 +14,7 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	"golang.org/x/term"
 )
 
@@ -106,7 +107,7 @@ func List(providers []serverapiclient.Provider) {
 	util.RenderMainTitle("PROVIDERS")
 
 	if len(providers) == 0 {
-		fmt.Println("No providers found")
+		view_util.RenderInfoMessage("No providers found")
 		return
 	}
 
