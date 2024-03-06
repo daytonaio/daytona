@@ -87,22 +87,21 @@ func generateSshConfigEntry(profileId, workspaceName, projectName, knownHostsPat
 }
 
 func EnsureSshConfigEntryAdded(profileId, workspaceName, projectName string) error {
-	configDir, err := GetConfigDir()
+	err := ensureSshFilesLinked()
 	if err != nil {
 		return err
 	}
 
-	err = ensureSshFilesLinked()
+	knownHostsFile := "/dev/null"
+	if runtime.GOOS == "windows" {
+		knownHostsFile = "NUL"
+	}
+
+	data, err := generateSshConfigEntry(profileId, workspaceName, projectName, knownHostsFile)
 	if err != nil {
 		return err
 	}
 
-	data, err := generateSshConfigEntry(profileId, workspaceName, projectName, path.Join(configDir, ".known_hosts"))
-	if err != nil {
-		return err
-	}
-
-	// Make sure ~/.ssh/config file exists
 	sshDir := path.Join(sshHomeDir, ".ssh")
 	configPath := path.Join(sshDir, "daytona_config")
 
