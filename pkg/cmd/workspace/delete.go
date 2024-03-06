@@ -47,7 +47,7 @@ var DeleteCmd = &cobra.Command{
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 
-			workspaceName = selection.GetWorkspaceNameFromPrompt(workspaceList, "start")
+			workspaceName = selection.GetWorkspaceNameFromPrompt(workspaceList, "delete")
 		} else {
 			workspaceName = args[0]
 		}
