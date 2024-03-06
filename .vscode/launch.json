@@ -25,7 +25,7 @@
       "type": "go",
       "request": "launch",
       "mode": "debug",
-      "program": "${workspaceFolder}",
+      "program": "${workspaceFolder}/cmd/daytona",
       "console": "integratedTerminal",
       "args": [
         "server"
