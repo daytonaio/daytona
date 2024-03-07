@@ -18,12 +18,12 @@ func selectCheckoutPrompt(checkoutOptions []gitprovider.CheckoutOption, secondar
 	items := []list.Item{}
 
 	for _, checkoutOption := range checkoutOptions {
-		newItem := item{id: checkoutOption.Id, title: checkoutOption.Title, choiceProperty: checkoutOption.Id}
+		newItem := item[string]{id: checkoutOption.Id, title: checkoutOption.Title, choiceProperty: checkoutOption.Id}
 		items = append(items, newItem)
 	}
 
 	l := views.GetStyledSelectList(items)
-	m := model{list: l}
+	m := model[string]{list: l}
 	m.list.Title = "CLONING OPTIONS"
 	if secondaryProjectOrder > 0 {
 		m.list.Title += fmt.Sprintf(" (Secondary Project #%d)", secondaryProjectOrder)
@@ -35,8 +35,8 @@ func selectCheckoutPrompt(checkoutOptions []gitprovider.CheckoutOption, secondar
 		os.Exit(1)
 	}
 
-	if m, ok := p.(model); ok && m.choice != "" {
-		choiceChan <- m.choice
+	if m, ok := p.(model[string]); ok && m.choice != nil {
+		choiceChan <- *m.choice
 	} else {
 		choiceChan <- ""
 	}

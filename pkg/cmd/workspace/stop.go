@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 
+	internal_util "github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/views/util"
@@ -19,56 +20,56 @@ import (
 var stopProjectFlag string
 
 var StopCmd = &cobra.Command{
-	Use:   "stop [WORKSPACE_NAME]",
-	Short: "Stop the workspace",
-	Args:  cobra.MaximumNArgs(1),
+	Use:   "stop",
+	Short: "Stop a workspace",
+	Args:  cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
-		var workspaceName string
+		var workspaceId string
 
 		apiClient, err := server.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		if len(args) == 0 {
+		if internal_util.WorkspaceMode() {
+			workspaceId = os.Getenv("DAYTONA_WS_ID")
+		} else if len(args) == 0 {
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 
-			workspaceName = selection.GetWorkspaceNameFromPrompt(workspaceList, "stop")
+			workspace := selection.GetWorkspaceFromPrompt(workspaceList, "stop")
+			if workspace == nil {
+				return
+			}
+			workspaceId = *workspace.Id
 		} else {
-			workspaceName = args[0]
-		}
-
-		wsName, wsMode := os.LookupEnv("DAYTONA_WS_NAME")
-		if wsMode {
-			workspaceName = wsName
+			workspaceId = args[0]
 		}
 
 		if stopProjectFlag == "" {
-			res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, workspaceName).Execute()
+			res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, workspaceId).Execute()
 			if err != nil {
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 		} else {
-			res, err := apiClient.WorkspaceAPI.StopProject(ctx, workspaceName, stopProjectFlag).Execute()
+			res, err := apiClient.WorkspaceAPI.StopProject(ctx, workspaceId, stopProjectFlag).Execute()
 			if err != nil {
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 		}
 
-		util.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully stopped", workspaceName))
+		util.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully stopped", workspaceId))
 	},
 }
 
 func init() {
-	_, exists := os.LookupEnv("DAYTONA_WS_DIR")
-	if exists {
-		StopCmd.Use = "stop"
-		StopCmd.Args = cobra.ExactArgs(0)
+	if !internal_util.WorkspaceMode() {
+		StopCmd.Use += " [WORKSPACE]"
+		StopCmd.Args = cobra.MaximumNArgs(0)
 	}
 
-	StopCmd.Flags().StringVarP(&stopProjectFlag, "project", "p", "", "Stop the single project in the workspace (project name)")
+	StopCmd.Flags().StringVarP(&stopProjectFlag, "project", "p", "", "Stop a single project in the workspace (project name)")
 }

@@ -16,8 +16,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func selectWorkspacePrompt(workspaces []serverapiclient.Workspace, actionVerb string, choiceChan chan<- string) {
-
+func selectWorkspacePrompt(workspaces []serverapiclient.Workspace, actionVerb string, choiceChan chan<- *serverapiclient.Workspace) {
 	// Initialize an empty list of items.
 	items := []list.Item{}
 
@@ -27,7 +26,7 @@ func selectWorkspacePrompt(workspaces []serverapiclient.Workspace, actionVerb st
 		for _, project := range workspace.Projects {
 			projectNames = append(projectNames, *project.Name)
 		}
-		newItem := item{title: *workspace.Name, desc: strings.Join(projectNames, ", "), choiceProperty: *workspace.Name}
+		newItem := item[serverapiclient.Workspace]{title: *workspace.Name, desc: strings.Join(projectNames, ", "), choiceProperty: workspace}
 		items = append(items, newItem)
 	}
 
@@ -50,7 +49,7 @@ func selectWorkspacePrompt(workspaces []serverapiclient.Workspace, actionVerb st
 	l.FilterInput.PromptStyle = lipgloss.NewStyle().Foreground(views.Green)
 	l.FilterInput.TextStyle = lipgloss.NewStyle().Foreground(views.Green)
 
-	m := model{list: l}
+	m := model[serverapiclient.Workspace]{list: l}
 
 	m.list.Title = "SELECT A WORKSPACE TO " + strings.ToUpper(actionVerb)
 	m.list.Styles.Title = lipgloss.NewStyle().Foreground(views.Green).Bold(true)
@@ -61,15 +60,15 @@ func selectWorkspacePrompt(workspaces []serverapiclient.Workspace, actionVerb st
 		os.Exit(1)
 	}
 
-	if m, ok := p.(model); ok && m.choice != "" {
+	if m, ok := p.(model[serverapiclient.Workspace]); ok && m.choice != nil {
 		choiceChan <- m.choice
 	} else {
-		choiceChan <- ""
+		choiceChan <- nil
 	}
 }
 
-func GetWorkspaceNameFromPrompt(workspaces []serverapiclient.Workspace, actionVerb string) string {
-	choiceChan := make(chan string)
+func GetWorkspaceFromPrompt(workspaces []serverapiclient.Workspace, actionVerb string) *serverapiclient.Workspace {
+	choiceChan := make(chan *serverapiclient.Workspace)
 
 	go selectWorkspacePrompt(workspaces, actionVerb, choiceChan)
 

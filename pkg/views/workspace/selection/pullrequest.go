@@ -19,7 +19,7 @@ func selectPullRequestPrompt(pullRequests []gitprovider.GitPullRequest, secondar
 
 	// Populate items with titles and descriptions from workspaces.
 	for _, pr := range pullRequests {
-		newItem := item{id: pr.Name, title: pr.Name, choiceProperty: pr.Name}
+		newItem := item[string]{id: pr.Name, title: pr.Name, choiceProperty: pr.Name}
 		if pr.Branch != "" {
 			newItem.desc = fmt.Sprintf("Branch: %s", pr.Branch)
 		}
@@ -27,7 +27,7 @@ func selectPullRequestPrompt(pullRequests []gitprovider.GitPullRequest, secondar
 	}
 
 	l := views.GetStyledSelectList(items)
-	m := model{list: l}
+	m := model[string]{list: l}
 	m.list.Title = "CHOOSE A PULL/MERGE REQUEST"
 	if secondaryProjectOrder > 0 {
 		m.list.Title += fmt.Sprintf(" (Secondary Project #%d)", secondaryProjectOrder)
@@ -39,8 +39,8 @@ func selectPullRequestPrompt(pullRequests []gitprovider.GitPullRequest, secondar
 		os.Exit(1)
 	}
 
-	if m, ok := p.(model); ok && m.choice != "" {
-		choiceChan <- m.choice
+	if m, ok := p.(model[string]); ok && m.choice != nil {
+		choiceChan <- *m.choice
 	} else {
 		choiceChan <- ""
 	}

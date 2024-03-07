@@ -24,12 +24,12 @@ func selectNamespacePrompt(namespaces []gitprovider.GitNamespace, secondaryProje
 		} else {
 			desc = "organization"
 		}
-		newItem := item{id: namespace.Id, title: namespace.Name, desc: desc, choiceProperty: namespace.Id}
+		newItem := item[string]{id: namespace.Id, title: namespace.Name, desc: desc, choiceProperty: namespace.Id}
 		items = append(items, newItem)
 	}
 
 	l := views.GetStyledSelectList(items)
-	m := model{list: l}
+	m := model[string]{list: l}
 	m.list.Title = "CHOOSE A NAMESPACE"
 	if secondaryProjectOrder > 0 {
 		m.list.Title += fmt.Sprintf(" (Secondary Project #%d)", secondaryProjectOrder)
@@ -41,8 +41,8 @@ func selectNamespacePrompt(namespaces []gitprovider.GitNamespace, secondaryProje
 		os.Exit(1)
 	}
 
-	if m, ok := p.(model); ok && m.choice != "" {
-		choiceChan <- m.choice
+	if m, ok := p.(model[string]); ok && m.choice != nil {
+		choiceChan <- *m.choice
 	} else {
 		choiceChan <- ""
 	}
