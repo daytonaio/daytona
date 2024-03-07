@@ -71,12 +71,16 @@ var CodeCmd = &cobra.Command{
 			workspaceId = *workspace.Id
 		}
 
-		// Todo: make project_select_prompt view for 0 args
 		if len(args) == 0 || len(args) == 1 {
-			projectName, err = SelectWorkspaceProject(workspaceId, projectName, &activeProfile)
+			var selectedProject *string
+			selectedProject, err = SelectWorkspaceProject(workspaceId, &activeProfile)
 			if err != nil {
 				log.Fatal(err)
 			}
+			if selectedProject == nil {
+				return
+			}
+			projectName = *selectedProject
 		}
 
 		if len(args) == 2 {
@@ -93,27 +97,30 @@ var CodeCmd = &cobra.Command{
 	},
 }
 
-func SelectWorkspaceProject(workspaceId string, projectName string, profile *config.Profile) (string, error) {
+func SelectWorkspaceProject(workspaceId string, profile *config.Profile) (*string, error) {
 	ctx := context.Background()
 
 	apiClient, err := server.GetApiClient(profile)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceId).Execute()
 	if err != nil {
-		return "", apiclient.HandleErrorResponse(res, err)
+		return nil, apiclient.HandleErrorResponse(res, err)
 	}
 
 	if len(wsInfo.Projects) > 1 {
 		selectedProject := selection.GetProjectFromPrompt(wsInfo.Projects, "open")
-		return *selectedProject.Name, nil
+		if selectedProject == nil {
+			return nil, nil
+		}
+		return selectedProject.Name, nil
 	} else if len(wsInfo.Projects) == 1 {
-		return *wsInfo.Projects[0].Name, nil
+		return wsInfo.Projects[0].Name, nil
 	}
 
-	return "", errors.New("no projects found in workspace")
+	return nil, errors.New("no projects found in workspace")
 }
 
 func openIDE(ideId string, activeProfile config.Profile, workspaceId string, projectName string) {
