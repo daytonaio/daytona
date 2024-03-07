@@ -7,13 +7,14 @@
 
 <br><br>
 
+<div align="center">
+
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue)](#license)
 [![Go Report Card](https://goreportcard.com/badge/github.com/daytonaio/daytona)](https://goreportcard.com/report/github.com/daytonaio/daytona)
 [![Issues - daytona](https://img.shields.io/github/issues/daytonaio/daytona)](https://github.com/daytonaio/daytona/issues)
 ![GitHub Release](https://img.shields.io/github/v/release/daytonaio/daytona)
-[![See latest](https://img.shields.io/static/v1?label=Docs&message=see%20latest&color=blue)](https://daytona.io/docs)
-
-
+[![Open Bounties](https://img.shields.io/endpoint?url=https%3A%2F%2Fconsole.algora.io%2Fapi%2Fshields%2Fdaytonaio%2Fbounties%3Fstatus%3Dopen)](https://console.algora.io/org/daytonaio/bounties?status=open)
+[![Rewarded Bounties](https://img.shields.io/endpoint?url=https%3A%2F%2Fconsole.algora.io%2Fapi%2Fshields%2Fdaytonaio%2Fbounties%3Fstatus%3Dcompleted)](https://console.algora.io/org/daytonaio/bounties?status=completed)
 
 </div>
 
@@ -117,11 +118,6 @@ Daytona allows you to manage your Development Environments using the Daytona CLI
 curl https://download.daytona.io/daytona/get-server.sh | bash
 ```
 
-Alternatively, download and compile Daytona directly from this repository by consulting our [documentation](https://daytona.io/docs).
-
-> [!NOTE]
-> The packaged Daytona includes a set of built-in extensions located in the extensions folder, which are added there for your convenience.
-
 
 ### Initializing Daytona
 To initialize Daytona, follow these steps:
@@ -137,7 +133,7 @@ Daytona supports GitHub, GitLab, and Bitbucket. To add them to your profile, use
 daytona git-providers add
 
 ```
-Follow the steps provided. Here's a link to the [documentation](https://daytona.io/docs) for more details.
+Follow the steps provided.
 
 __3. Add Your Provider Target:__  
 This step is for choosing where to deploy Development Environments. By default, Daytona includes a Docker provider to spin up environments on your local machine. For remote development environments, use the command:
@@ -172,10 +168,6 @@ daytona code
 ```
 
 This command opens your development environment in your preferred IDE, allowing you to start coding instantly.
-
-### Other Commands
-For more detailed information about each command, please refer to Daytona's [documentation](https://daytona.io/docs).
-
 
 ## How to Extend Daytona
 
@@ -232,6 +224,6 @@ This project has adapted the Code of Conduct from the [Contributor Covenant](htt
 
 
 For more information on how to use and develop Daytona, talk to us on
-[Slack](https://join.slack.com/t/daytonacommunity/shared_invite/zt-273yohksh-Q5YSB5V7tnQzX2RoTARr7Q) and check out our [documentation](https://www.daytona.io/docs/installation/server/).
+[Slack](https://join.slack.com/t/daytonacommunity/shared_invite/zt-273yohksh-Q5YSB5V7tnQzX2RoTARr7Q).
 
 
