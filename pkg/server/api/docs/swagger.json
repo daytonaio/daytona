@@ -364,7 +364,7 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workspace ID",
+                        "description": "Workspace ID or Name",
                         "name": "workspaceId",
                         "in": "path",
                         "required": true
@@ -413,7 +413,7 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workspace ID",
+                        "description": "Workspace ID or Name",
                         "name": "workspaceId",
                         "in": "path",
                         "required": true
@@ -437,7 +437,7 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workspace ID",
+                        "description": "Workspace ID or Name",
                         "name": "workspaceId",
                         "in": "path",
                         "required": true
@@ -461,7 +461,7 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workspace ID",
+                        "description": "Workspace ID or Name",
                         "name": "workspaceId",
                         "in": "path",
                         "required": true
@@ -492,7 +492,7 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workspace ID",
+                        "description": "Workspace ID or Name",
                         "name": "workspaceId",
                         "in": "path",
                         "required": true
@@ -584,6 +584,9 @@
         "Project": {
             "type": "object",
             "properties": {
+                "info": {
+                    "$ref": "#/definitions/ProjectInfo"
+                },
                 "name": {
                     "type": "string"
                 },

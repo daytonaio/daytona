@@ -367,7 +367,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workspace ID",
+                        "description": "Workspace ID or Name",
                         "name": "workspaceId",
                         "in": "path",
                         "required": true
@@ -416,7 +416,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workspace ID",
+                        "description": "Workspace ID or Name",
                         "name": "workspaceId",
                         "in": "path",
                         "required": true
@@ -440,7 +440,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workspace ID",
+                        "description": "Workspace ID or Name",
                         "name": "workspaceId",
                         "in": "path",
                         "required": true
@@ -464,7 +464,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workspace ID",
+                        "description": "Workspace ID or Name",
                         "name": "workspaceId",
                         "in": "path",
                         "required": true
@@ -495,7 +495,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workspace ID",
+                        "description": "Workspace ID or Name",
                         "name": "workspaceId",
                         "in": "path",
                         "required": true
@@ -587,6 +587,9 @@ const docTemplate = `{
         "Project": {
             "type": "object",
             "properties": {
+                "info": {
+                    "$ref": "#/definitions/ProjectInfo"
+                },
                 "name": {
                     "type": "string"
                 },

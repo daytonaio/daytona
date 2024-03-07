@@ -150,7 +150,7 @@ GetWorkspace Get workspace info
 Get workspace info
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workspaceId Workspace ID
+ @param workspaceId Workspace ID or Name
  @return ApiGetWorkspaceRequest
 */
 func (a *WorkspaceAPIService) GetWorkspace(ctx context.Context, workspaceId string) ApiGetWorkspaceRequest {
@@ -445,7 +445,7 @@ StartProject Start project
 Start project
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workspaceId Workspace ID
+ @param workspaceId Workspace ID or Name
  @param projectId Project ID
  @return ApiStartProjectRequest
 */
@@ -540,7 +540,7 @@ StartWorkspace Start workspace
 Start workspace
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workspaceId Workspace ID
+ @param workspaceId Workspace ID or Name
  @return ApiStartWorkspaceRequest
 */
 func (a *WorkspaceAPIService) StartWorkspace(ctx context.Context, workspaceId string) ApiStartWorkspaceRequest {
@@ -633,7 +633,7 @@ StopProject Stop project
 Stop project
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workspaceId Workspace ID
+ @param workspaceId Workspace ID or Name
  @param projectId Project ID
  @return ApiStopProjectRequest
 */
@@ -728,7 +728,7 @@ StopWorkspace Stop workspace
 Stop workspace
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workspaceId Workspace ID
+ @param workspaceId Workspace ID or Name
  @return ApiStopWorkspaceRequest
 */
 func (a *WorkspaceAPIService) StopWorkspace(ctx context.Context, workspaceId string) ApiStopWorkspaceRequest {

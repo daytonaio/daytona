@@ -19,7 +19,7 @@ import (
 //	@Summary		Get workspace info
 //	@Description	Get workspace info
 //	@Produce		json
-//	@Param			workspaceId	path		string	true	"Workspace ID"
+//	@Param			workspaceId	path		string	true	"Workspace ID or Name"
 //	@Success		200			{object}	dto.Workspace
 //	@Router			/workspace/{workspaceId} [get]
 //
@@ -27,7 +27,7 @@ import (
 func GetWorkspace(ctx *gin.Context) {
 	workspaceId := ctx.Param("workspaceId")
 
-	w, err := db.FindWorkspace(workspaceId)
+	w, err := db.FindWorkspaceByIdOrName(workspaceId)
 	if err != nil {
 		ctx.AbortWithError(http.StatusNotFound, errors.New("workspace not found"))
 		return
@@ -98,7 +98,7 @@ func ListWorkspaces(ctx *gin.Context) {
 func RemoveWorkspace(ctx *gin.Context) {
 	workspaceId := ctx.Param("workspaceId")
 
-	w, err := db.FindWorkspace(workspaceId)
+	w, err := db.FindWorkspaceByIdOrName(workspaceId)
 	if err != nil {
 		ctx.AbortWithError(http.StatusNotFound, errors.New("workspace not found"))
 		return

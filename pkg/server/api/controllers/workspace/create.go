@@ -17,6 +17,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/targets"
 	"github.com/daytonaio/daytona/pkg/types"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -39,7 +40,7 @@ func CreateWorkspace(ctx *gin.Context) {
 		return
 	}
 
-	_, err = db.FindWorkspace(createWorkspaceDto.Name)
+	_, err = db.FindWorkspaceByName(createWorkspaceDto.Name)
 	if err == nil {
 		ctx.AbortWithError(http.StatusConflict, errors.New("workspace already exists"))
 		return
@@ -81,7 +82,7 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 	}
 
 	w := &types.Workspace{
-		Id:     createWorkspaceDto.Name,
+		Id:     uuid.NewString(),
 		Name:   createWorkspaceDto.Name,
 		Target: createWorkspaceDto.Target,
 	}

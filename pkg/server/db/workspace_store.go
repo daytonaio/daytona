@@ -30,7 +30,7 @@ func ListWorkspaces() ([]*types.Workspace, error) {
 	return workspaces, nil
 }
 
-func FindWorkspace(workspaceId string) (*types.Workspace, error) {
+func FindWorkspaceById(workspaceId string) (*types.Workspace, error) {
 	db, err := getWorkspaceDB()
 	if err != nil {
 		return nil, err
@@ -38,6 +38,36 @@ func FindWorkspace(workspaceId string) (*types.Workspace, error) {
 
 	workspaceDTO := WorkspaceDTO{}
 	tx := db.Where("id = ?", workspaceId).First(&workspaceDTO)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return ToWorkspace(workspaceDTO), nil
+}
+
+func FindWorkspaceByName(workspaceName string) (*types.Workspace, error) {
+	db, err := getWorkspaceDB()
+	if err != nil {
+		return nil, err
+	}
+
+	workspaceDTO := WorkspaceDTO{}
+	tx := db.Where("name = ?", workspaceName).First(&workspaceDTO)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return ToWorkspace(workspaceDTO), nil
+}
+
+func FindWorkspaceByIdOrName(workspaceIdOrName string) (*types.Workspace, error) {
+	db, err := getWorkspaceDB()
+	if err != nil {
+		return nil, err
+	}
+
+	workspaceDTO := WorkspaceDTO{}
+	tx := db.Where("id = ? OR name = ?", workspaceIdOrName, workspaceIdOrName).First(&workspaceDTO)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
