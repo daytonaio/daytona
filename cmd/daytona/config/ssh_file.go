@@ -143,7 +143,7 @@ func RemoveWorkspaceSshEntries(profileId, workspaceId string) error {
 		return nil
 	}
 
-	regex := regexp.MustCompile(fmt.Sprintf(`Host %s~%s~\w+\n(?:\t.*\n?)*`, profileId, workspaceId))
+	regex := regexp.MustCompile(fmt.Sprintf(`Host %s-%s-\w+\n(?:\t.*\n?)*`, profileId, workspaceId))
 	newContent := regex.ReplaceAllString(string(existingContent), "")
 
 	newContent = strings.Trim(newContent, "\n")
