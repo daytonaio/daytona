@@ -74,3 +74,42 @@ func GetWorkspaceFromPrompt(workspaces []serverapiclient.Workspace, actionVerb s
 
 	return <-choiceChan
 }
+
+func GetProjectFromPrompt(projects []serverapiclient.Project, actionVerb string) *serverapiclient.Project {
+	choiceChan := make(chan *serverapiclient.Project)
+	go selectProjectPrompt(projects, actionVerb, choiceChan)
+	return <-choiceChan
+}
+
+func selectProjectPrompt(projects []serverapiclient.Project, actionVerb string, choiceChan chan<- *serverapiclient.Project) {
+	items := []list.Item{}
+
+	for _, project := range projects {
+		var projectName string
+		if project.Name != nil {
+			projectName = *project.Name
+		} else {
+			projectName = "Unnamed Project"
+		}
+		newItem := item[serverapiclient.Project]{title: projectName, desc: "", choiceProperty: project}
+		items = append(items, newItem)
+	}
+
+	d := list.NewDefaultDelegate()
+	l := list.New(items, d, 0, 0)
+
+	l.Title = "SELECT A PROJECT TO " + strings.ToUpper(actionVerb)
+	l.Styles.Title = lipgloss.NewStyle().Foreground(views.Green).Bold(true)
+
+	p, err := tea.NewProgram(model[serverapiclient.Project]{list: l}, tea.WithAltScreen()).Run()
+	if err != nil {
+		fmt.Println("Error running program:", err)
+		os.Exit(1)
+	}
+
+	if m, ok := p.(model[serverapiclient.Project]); ok && m.choice != nil {
+		choiceChan <- m.choice
+	} else {
+		choiceChan <- nil
+	}
+}
