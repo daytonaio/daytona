@@ -6,7 +6,6 @@ package selection
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/daytonaio/daytona/pkg/types"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -20,12 +19,12 @@ func selectRepositoryPrompt(repositories []types.Repository, secondaryProjectOrd
 
 	// Populate items with titles and descriptions from workspaces.
 	for _, repository := range repositories {
-		newItem := item{id: repository.Url, title: repository.Name, choiceProperty: repository.Url, desc: repository.Url}
+		newItem := item[string]{id: repository.Url, title: repository.Name, choiceProperty: repository.Url, desc: repository.Url}
 		items = append(items, newItem)
 	}
 
 	l := views.GetStyledSelectList(items)
-	m := model{list: l}
+	m := model[string]{list: l}
 	m.list.Title = "CHOOSE A REPOSITORY"
 	if secondaryProjectOrder > 0 {
 		m.list.Title += fmt.Sprintf(" (Secondary Project #%d)", secondaryProjectOrder)
@@ -37,8 +36,8 @@ func selectRepositoryPrompt(repositories []types.Repository, secondaryProjectOrd
 		os.Exit(1)
 	}
 
-	if m, ok := p.(model); ok && m.choice != "" {
-		choiceChan <- m.choice
+	if m, ok := p.(model[string]); ok && m.choice != nil {
+		choiceChan <- *m.choice
 	} else {
 		choiceChan <- ""
 	}
@@ -58,18 +57,4 @@ func GetRepositoryFromPrompt(repositories []types.Repository, secondaryProjectOr
 	}
 
 	return types.Repository{}
-}
-
-func getRepositoryNameFromUrl(url string) string {
-	if url == "" {
-		return "/"
-	}
-	url = strings.TrimSuffix(url, "/")
-
-	parts := strings.Split(url, "/")
-	if len(parts) < 2 {
-		return ""
-	}
-
-	return parts[len(parts)-1]
 }

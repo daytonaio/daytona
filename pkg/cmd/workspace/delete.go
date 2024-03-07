@@ -6,11 +6,11 @@ package workspace
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
@@ -19,8 +19,8 @@ import (
 )
 
 var DeleteCmd = &cobra.Command{
-	Use:     "delete",
-	Short:   "Delete the workspace",
+	Use:     "delete [WORKSPACE]",
+	Short:   "Delete a workspace",
 	Aliases: []string{"remove", "rm"},
 	Run: func(cmd *cobra.Command, args []string) {
 		c, err := config.GetConfig()
@@ -34,7 +34,7 @@ var DeleteCmd = &cobra.Command{
 		}
 
 		ctx := context.Background()
-		var workspaceName string
+		var workspace *serverapiclient.Workspace
 
 		apiClient, err := server.GetApiClient(nil)
 		if err != nil {
@@ -47,23 +47,24 @@ var DeleteCmd = &cobra.Command{
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 
-			workspaceName = selection.GetWorkspaceNameFromPrompt(workspaceList, "delete")
+			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "delete")
 		} else {
-			workspaceName = args[0]
+			workspace, err = server.GetWorkspace(args[0])
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+		if workspace == nil {
+			return
 		}
 
-		wsName, wsMode := os.LookupEnv("DAYTONA_WS_NAME")
-		if wsMode {
-			workspaceName = wsName
-		}
-
-		res, err := apiClient.WorkspaceAPI.RemoveWorkspace(ctx, workspaceName).Execute()
+		res, err := apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		config.RemoveWorkspaceSshEntries(activeProfile.Id, workspaceName)
+		config.RemoveWorkspaceSshEntries(activeProfile.Id, *workspace.Id)
 
-		util.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully deleted", workspaceName))
+		util.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully deleted", *workspace.Name))
 	},
 }

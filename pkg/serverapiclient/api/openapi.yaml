@@ -262,7 +262,7 @@ paths:
       description: Get workspace info
       operationId: GetWorkspace
       parameters:
-      - description: Workspace ID
+      - description: Workspace ID or Name
         in: path
         name: workspaceId
         required: true
@@ -283,7 +283,7 @@ paths:
       description: Start workspace
       operationId: StartWorkspace
       parameters:
-      - description: Workspace ID
+      - description: Workspace ID or Name
         in: path
         name: workspaceId
         required: true
@@ -301,7 +301,7 @@ paths:
       description: Stop workspace
       operationId: StopWorkspace
       parameters:
-      - description: Workspace ID
+      - description: Workspace ID or Name
         in: path
         name: workspaceId
         required: true
@@ -319,7 +319,7 @@ paths:
       description: Start project
       operationId: StartProject
       parameters:
-      - description: Workspace ID
+      - description: Workspace ID or Name
         in: path
         name: workspaceId
         required: true
@@ -343,7 +343,7 @@ paths:
       description: Stop project
       operationId: StopProject
       parameters:
-      - description: Workspace ID
+      - description: Workspace ID or Name
         in: path
         name: workspaceId
         required: true
@@ -456,9 +456,19 @@ components:
           branch: branch
           sha: sha
           url: url
+        info:
+          providerMetadata: providerMetadata
+          isRunning: true
+          created: created
+          name: name
+          finished: finished
+          started: started
+          workspaceId: workspaceId
         target: target
         workspaceId: workspaceId
       properties:
+        info:
+          $ref: '#/components/schemas/ProjectInfo'
         name:
           type: string
         repository:
@@ -610,6 +620,14 @@ components:
             branch: branch
             sha: sha
             url: url
+          info:
+            providerMetadata: providerMetadata
+            isRunning: true
+            created: created
+            name: name
+            finished: finished
+            started: started
+            workspaceId: workspaceId
           target: target
           workspaceId: workspaceId
         - name: name
@@ -623,6 +641,14 @@ components:
             branch: branch
             sha: sha
             url: url
+          info:
+            providerMetadata: providerMetadata
+            isRunning: true
+            created: created
+            name: name
+            finished: finished
+            started: started
+            workspaceId: workspaceId
           target: target
           workspaceId: workspaceId
         name: name

@@ -11,7 +11,7 @@ import (
 
 type WorkspaceDTO struct {
 	Id       string       `gorm:"primaryKey"`
-	Name     string       `json:"name"`
+	Name     string       `json:"name" gorm:"unique"`
 	Target   string       `json:"target"`
 	Projects []ProjectDTO `gorm:"serializer:json"`
 }

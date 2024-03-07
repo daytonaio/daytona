@@ -68,20 +68,20 @@ func ensureSshFilesLinked() error {
 
 // Add ssh entry
 
-func generateSshConfigEntry(profileId, workspaceName, projectName, knownHostsPath string) (string, error) {
+func generateSshConfigEntry(profileId, workspaceId, projectName, knownHostsPath string) (string, error) {
 	daytonaPath, err := os.Executable()
 	if err != nil {
 		return "", err
 	}
 
 	tab := "\t"
-	projectHostname := GetProjectHostname(profileId, workspaceName, projectName)
+	projectHostname := GetProjectHostname(profileId, workspaceId, projectName)
 
 	config := fmt.Sprintf("Host %s\n"+
 		tab+"User daytona\n"+
 		tab+"StrictHostKeyChecking no\n"+
 		tab+"UserKnownHostsFile %s\n"+
-		tab+"ProxyCommand %s ssh-proxy %s %s %s\n\n", projectHostname, knownHostsPath, daytonaPath, profileId, workspaceName, projectName)
+		tab+"ProxyCommand %s ssh-proxy %s %s %s\n\n", projectHostname, knownHostsPath, daytonaPath, profileId, workspaceId, projectName)
 
 	return config, nil
 }
@@ -133,7 +133,7 @@ func EnsureSshConfigEntryAdded(profileId, workspaceName, projectName string) err
 	return nil
 }
 
-func RemoveWorkspaceSshEntries(profileId, workspaceName string) error {
+func RemoveWorkspaceSshEntries(profileId, workspaceId string) error {
 	sshDir := path.Join(sshHomeDir, ".ssh")
 	configPath := path.Join(sshDir, "daytona_config")
 
@@ -143,7 +143,7 @@ func RemoveWorkspaceSshEntries(profileId, workspaceName string) error {
 		return nil
 	}
 
-	regex := regexp.MustCompile(fmt.Sprintf(`Host %s~%s~\w+\n(?:\t.*\n?)*`, profileId, workspaceName))
+	regex := regexp.MustCompile(fmt.Sprintf(`Host %s-%s-\w+\n(?:\t.*\n?)*`, profileId, workspaceId))
 	newContent := regex.ReplaceAllString(string(existingContent), "")
 
 	newContent = strings.Trim(newContent, "\n")
@@ -163,8 +163,8 @@ func RemoveWorkspaceSshEntries(profileId, workspaceName string) error {
 	return nil
 }
 
-func GetProjectHostname(profileId, workspaceName, projectName string) string {
-	return fmt.Sprintf("%s-%s-%s", profileId, workspaceName, projectName)
+func GetProjectHostname(profileId, workspaceId, projectName string) string {
+	return fmt.Sprintf("%s-%s-%s", profileId, workspaceId, projectName)
 }
 
 func init() {

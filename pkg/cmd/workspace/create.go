@@ -139,7 +139,7 @@ var CreateCmd = &cobra.Command{
 		dialTimeout := 3 * time.Minute
 		statusProgram.Send(status.ResultMsg{Line: "Establishing connection with the workspace"})
 
-		waitForDial(tsConn, workspaceName, *createdWorkspace.Projects[0].Name, dialStartTime, dialTimeout, statusProgram)
+		waitForDial(tsConn, *createdWorkspace.Id, *createdWorkspace.Projects[0].Name, dialStartTime, dialTimeout, statusProgram)
 
 		cleanUpTerminal(statusProgram, nil)
 
@@ -163,7 +163,7 @@ var CreateCmd = &cobra.Command{
 		}
 
 		view_util.RenderInfoMessageBold("Opening the workspace in your preferred IDE")
-		openIDE(ide, activeProfile, workspaceName, *wsInfo.Projects[0].Name)
+		openIDE(ide, activeProfile, *createdWorkspace.Id, *wsInfo.Projects[0].Name)
 	},
 }
 
@@ -323,13 +323,13 @@ func scanWorkspaceLogs(activeProfile config.Profile, workspaceName string, statu
 	}
 }
 
-func waitForDial(tsConn *tsnet.Server, workspaceName string, projectName string, dialStartTime time.Time, dialTimeout time.Duration, statusProgram *tea.Program) {
+func waitForDial(tsConn *tsnet.Server, workspaceId string, projectName string, dialStartTime time.Time, dialTimeout time.Duration, statusProgram *tea.Program) {
 	for {
 		if time.Since(dialStartTime) > dialTimeout {
 			cleanUpTerminal(statusProgram, errors.New("timeout: dialing timed out after 3 minutes"))
 		}
 
-		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s-%s:2222", workspaceName, projectName))
+		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s-%s:2222", workspaceId, projectName))
 		if err == nil {
 			defer dialConn.Close()
 			break

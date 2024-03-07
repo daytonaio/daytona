@@ -102,7 +102,7 @@ import (
 )
 
 func main() {
-	workspaceId := "workspaceId_example" // string | Workspace ID
+	workspaceId := "workspaceId_example" // string | Workspace ID or Name
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -122,7 +122,7 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**workspaceId** | **string** | Workspace ID | 
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
@@ -301,7 +301,7 @@ import (
 )
 
 func main() {
-	workspaceId := "workspaceId_example" // string | Workspace ID
+	workspaceId := "workspaceId_example" // string | Workspace ID or Name
 	projectId := "projectId_example" // string | Project ID
 
 	configuration := openapiclient.NewConfiguration()
@@ -320,7 +320,7 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**workspaceId** | **string** | Workspace ID | 
+**workspaceId** | **string** | Workspace ID or Name | 
 **projectId** | **string** | Project ID | 
 
 ### Other Parameters
@@ -372,7 +372,7 @@ import (
 )
 
 func main() {
-	workspaceId := "workspaceId_example" // string | Workspace ID
+	workspaceId := "workspaceId_example" // string | Workspace ID or Name
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -390,7 +390,7 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**workspaceId** | **string** | Workspace ID | 
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
@@ -440,7 +440,7 @@ import (
 )
 
 func main() {
-	workspaceId := "workspaceId_example" // string | Workspace ID
+	workspaceId := "workspaceId_example" // string | Workspace ID or Name
 	projectId := "projectId_example" // string | Project ID
 
 	configuration := openapiclient.NewConfiguration()
@@ -459,7 +459,7 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**workspaceId** | **string** | Workspace ID | 
+**workspaceId** | **string** | Workspace ID or Name | 
 **projectId** | **string** | Project ID | 
 
 ### Other Parameters
@@ -511,7 +511,7 @@ import (
 )
 
 func main() {
-	workspaceId := "workspaceId_example" // string | Workspace ID
+	workspaceId := "workspaceId_example" // string | Workspace ID or Name
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -529,7 +529,7 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**workspaceId** | **string** | Workspace ID | 
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 

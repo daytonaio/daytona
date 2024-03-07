@@ -45,6 +45,8 @@ definitions:
     type: object
   Project:
     properties:
+      info:
+        $ref: '#/definitions/ProjectInfo'
       name:
         type: string
       repository:
@@ -460,7 +462,7 @@ paths:
       description: Get workspace info
       operationId: GetWorkspace
       parameters:
-      - description: Workspace ID
+      - description: Workspace ID or Name
         in: path
         name: workspaceId
         required: true
@@ -480,7 +482,7 @@ paths:
       description: Start project
       operationId: StartProject
       parameters:
-      - description: Workspace ID
+      - description: Workspace ID or Name
         in: path
         name: workspaceId
         required: true
@@ -501,7 +503,7 @@ paths:
       description: Stop project
       operationId: StopProject
       parameters:
-      - description: Workspace ID
+      - description: Workspace ID or Name
         in: path
         name: workspaceId
         required: true
@@ -522,7 +524,7 @@ paths:
       description: Start workspace
       operationId: StartWorkspace
       parameters:
-      - description: Workspace ID
+      - description: Workspace ID or Name
         in: path
         name: workspaceId
         required: true
@@ -538,7 +540,7 @@ paths:
       description: Stop workspace
       operationId: StopWorkspace
       parameters:
-      - description: Workspace ID
+      - description: Workspace ID or Name
         in: path
         name: workspaceId
         required: true
