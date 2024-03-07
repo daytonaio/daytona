@@ -16,12 +16,18 @@ import (
 )
 
 var startProjectFlag string
+var allFlag bool
 
 var StartCmd = &cobra.Command{
 	Use:   "start [WORKSPACE]",
 	Short: "Start a workspace",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		if allFlag {
+			startAllWorkspaces()
+			return
+		}
+
 		ctx := context.Background()
 		var workspaceId string
 
@@ -63,4 +69,26 @@ var StartCmd = &cobra.Command{
 
 func init() {
 	StartCmd.PersistentFlags().StringVarP(&startProjectFlag, "project", "p", "", "Start a single project in the workspace (project name)")
+	StartCmd.PersistentFlags().BoolVarP(&allFlag, "all", "a", false, "Start all workspaces")
+}
+
+func startAllWorkspaces() {
+	ctx := context.Background()
+	apiClient, err := server.GetApiClient(nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+	if err != nil {
+		log.Fatal(apiclient.HandleErrorResponse(res, err))
+	}
+
+	for _, workspace := range workspaceList {
+		res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, *workspace.Id).Execute()
+		if err != nil {
+			log.Fatal(apiclient.HandleErrorResponse(res, err))
+		}
+		fmt.Printf("Workspace %s successfully started\n", *workspace.Id)
+	}
 }

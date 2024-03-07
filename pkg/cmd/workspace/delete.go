@@ -6,6 +6,7 @@ package workspace
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
@@ -18,11 +19,31 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	allFlag bool
+	yesFlag bool
+)
+
+
 var DeleteCmd = &cobra.Command{
 	Use:     "delete [WORKSPACE]",
 	Short:   "Delete a workspace",
 	Aliases: []string{"remove", "rm"},
 	Run: func(cmd *cobra.Command, args []string) {
+		if allFlag {
+			if yesFlag {
+				deleteAllWorkspaces()
+			} else {
+				confirmation := util.ConfirmationPrompt("Are you sure you want to delete all workspaces?")
+				if !confirmation {
+					fmt.Println("Operation canceled.")
+					return
+				}
+				deleteAllWorkspaces()
+			}
+			return
+		}
+
 		c, err := config.GetConfig()
 		if err != nil {
 			log.Fatal(err)
@@ -67,4 +88,31 @@ var DeleteCmd = &cobra.Command{
 
 		util.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully deleted", *workspace.Name))
 	},
+}
+
+func init() {
+	DeleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Delete all workspaces")
+	DeleteCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Confirm deletion without prompt")
+}
+
+func deleteAllWorkspaces() {
+	ctx := context.Background()
+	apiClient, err := server.GetApiClient(nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+	if err != nil {
+		log.Fatal(apiclient.HandleErrorResponse(res, err))
+	}
+
+	for _, workspace := range workspaceList {
+		res, err := apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
+		if err != nil {
+			log.Errorf("Failed to delete workspace %s: %v", *workspace.Id, apiclient.HandleErrorResponse(res, err))
+			continue
+		}
+		fmt.Printf("Workspace %s successfully deleted\n", *workspace.Name)
+	}
 }
