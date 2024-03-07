@@ -12,3 +12,4 @@ We contributors to Daytona:
 * Toma Puljak (@tpuljak)
 * Nikola Balic (@nkkko)
 * Goran Draganic (@gdraganic)
+* Ivan Dagelić (@idagelic)
