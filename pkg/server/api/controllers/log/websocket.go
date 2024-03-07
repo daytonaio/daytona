@@ -6,6 +6,7 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/server/config"
+	"github.com/daytonaio/daytona/pkg/server/db"
 	"github.com/daytonaio/daytona/pkg/server/logs"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -72,7 +73,13 @@ func ReadServerLog(ginCtx *gin.Context) {
 func ReadWorkspaceLog(ginCtx *gin.Context) {
 	workspaceId := ginCtx.Param("workspaceId")
 
-	workspaceLogFilePath, err := config.GetWorkspaceLogFilePath(workspaceId)
+	workspace, err := db.FindWorkspaceByIdOrName(workspaceId)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	workspaceLogFilePath, err := config.GetWorkspaceLogFilePath(workspace.Id)
 	if err != nil {
 		log.Error(err)
 		return

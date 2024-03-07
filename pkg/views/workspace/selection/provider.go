@@ -19,15 +19,15 @@ func selectProviderPrompt(gitProviders []config.GitProvider, secondaryProjectOrd
 
 	// Populate items with titles and descriptions from workspaces.
 	for _, provider := range gitProviders {
-		newItem := item{id: provider.Id, title: provider.Name, choiceProperty: provider.Id}
+		newItem := item[string]{id: provider.Id, title: provider.Name, choiceProperty: provider.Id}
 		items = append(items, newItem)
 	}
 
-	newItem := item{id: CustomRepoIdentifier, title: "Enter a custom repository URL", choiceProperty: CustomRepoIdentifier}
+	newItem := item[string]{id: CustomRepoIdentifier, title: "Enter a custom repository URL", choiceProperty: CustomRepoIdentifier}
 	items = append(items, newItem)
 
 	l := views.GetStyledSelectList(items)
-	m := model{list: l}
+	m := model[string]{list: l}
 	m.list.Title = "CHOOSE YOUR PROVIDER"
 	if secondaryProjectOrder > 0 {
 		m.list.Title += fmt.Sprintf(" (Secondary Project #%d)", secondaryProjectOrder)
@@ -39,8 +39,8 @@ func selectProviderPrompt(gitProviders []config.GitProvider, secondaryProjectOrd
 		os.Exit(1)
 	}
 
-	if m, ok := p.(model); ok && m.choice != "" {
-		choiceChan <- m.choice
+	if m, ok := p.(model[string]); ok && m.choice != nil {
+		choiceChan <- *m.choice
 	} else {
 		choiceChan <- ""
 	}

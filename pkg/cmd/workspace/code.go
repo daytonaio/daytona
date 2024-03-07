@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
 	"os/exec"
 	"path"
 
@@ -25,7 +24,7 @@ import (
 )
 
 var CodeCmd = &cobra.Command{
-	Use:     "code [WORKSPACE_NAME] [PROJECT_NAME]",
+	Use:     "code [WORKSPACE] [PROJECT]",
 	Short:   "Open a workspace in your preferred IDE",
 	Args:    cobra.RangeArgs(0, 2),
 	Aliases: []string{"open"},
@@ -36,7 +35,7 @@ var CodeCmd = &cobra.Command{
 		}
 
 		ctx := context.Background()
-		var workspaceName string
+		var workspaceId string
 		var projectName string
 		var ideId string
 
@@ -58,19 +57,22 @@ var CodeCmd = &cobra.Command{
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 
-			workspaceName = selection.GetWorkspaceNameFromPrompt(workspaceList, "open")
+			workspace := selection.GetWorkspaceFromPrompt(workspaceList, "open")
+			if workspace == nil {
+				return
+			}
+			workspaceId = *workspace.Id
 		} else {
-			workspaceName = args[0]
-		}
-
-		wsName, wsMode := os.LookupEnv("DAYTONA_WS_NAME")
-		if wsMode {
-			workspaceName = wsName
+			workspace, err := server.GetWorkspace(args[0])
+			if err != nil {
+				log.Fatal(err)
+			}
+			workspaceId = *workspace.Id
 		}
 
 		// Todo: make project_select_prompt view for 0 args
 		if len(args) == 0 || len(args) == 1 {
-			projectName, err = util.GetFirstWorkspaceProjectName(workspaceName, projectName, &activeProfile)
+			projectName, err = util.GetFirstWorkspaceProjectName(workspaceId, projectName, &activeProfile)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -86,33 +88,31 @@ var CodeCmd = &cobra.Command{
 
 		view_util.RenderInfoMessage("Opening the workspace in your preferred IDE")
 
-		openIDE(ideId, activeProfile, workspaceName, projectName)
+		openIDE(ideId, activeProfile, workspaceId, projectName)
 	},
 }
 
-func openIDE(ideId string, activeProfile config.Profile, workspaceName string, projectName string) {
-
+func openIDE(ideId string, activeProfile config.Profile, workspaceId string, projectName string) {
 	if ideId == "browser" {
-		err := openBrowserIDE(activeProfile, workspaceName, projectName)
+		err := openBrowserIDE(activeProfile, workspaceId, projectName)
 		if err != nil {
 			log.Fatal(err)
 		}
 		return
 	}
 
-	openVSCode(activeProfile, workspaceName, projectName)
+	openVSCode(activeProfile, workspaceId, projectName)
 }
 
-func openVSCode(activeProfile config.Profile, workspaceName string, projectName string) {
-
-	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceName, projectName)
+func openVSCode(activeProfile config.Profile, workspaceId string, projectName string) {
+	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	checkAndAlertVSCodeInstalled()
 
-	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceName, projectName)
+	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
 
 	commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", projectHostname, path.Join("/workspaces", projectName))
 
@@ -125,15 +125,15 @@ func openVSCode(activeProfile config.Profile, workspaceName string, projectName 
 	}
 }
 
-func openBrowserIDE(activeProfile config.Profile, workspaceName string, projectName string) error {
+func openBrowserIDE(activeProfile config.Profile, workspaceId string, projectName string) error {
 	// Download and start IDE
-	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceName, projectName)
+	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName)
 	if err != nil {
 		return err
 	}
 
 	view_util.RenderInfoMessageBold("Downloading OpenVSCode Server...")
-	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceName, projectName)
+	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
 
 	installServerCommand := exec.Command("ssh", projectHostname, "curl -fsSL https://download.daytona.io/daytona/get-openvscode-server.sh | sh")
 	installServerCommand.Stdout = io.Writer(&util.DebugLogWriter{})
@@ -158,7 +158,7 @@ func openBrowserIDE(activeProfile config.Profile, workspaceName string, projectN
 	}()
 
 	// Forward IDE port
-	browserPort, errChan := ports.ForwardPort(workspaceName, projectName, 63000)
+	browserPort, errChan := ports.ForwardPort(workspaceId, projectName, 63000)
 	if browserPort == nil {
 		if err := <-errChan; err != nil {
 			return err

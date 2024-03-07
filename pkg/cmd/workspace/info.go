@@ -7,9 +7,11 @@ import (
 	"context"
 	"os"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	log "github.com/sirupsen/logrus"
@@ -17,53 +19,51 @@ import (
 )
 
 var InfoCmd = &cobra.Command{
-	Use:     "info [WORKSPACE_NAME]",
+	Use:     "info",
 	Short:   "Show workspace info",
 	Aliases: []string{"view"},
-	Args:    cobra.RangeArgs(0, 1),
+	Args:    cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
-		var workspaceName string
 
 		apiClient, err := server.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		if len(args) == 0 {
+		var workspace *serverapiclient.Workspace
+
+		if util.WorkspaceMode() {
+			workspace, err = server.GetWorkspace(os.Getenv("DAYTONA_WS_ID"))
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else if len(args) == 0 {
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 
-			workspaceName = selection.GetWorkspaceNameFromPrompt(workspaceList, "view")
+			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "view")
 		} else {
-			workspaceName = args[0]
-		}
-
-		wsName, wsMode := os.LookupEnv("DAYTONA_WS_NAME")
-		if wsMode {
-			workspaceName = wsName
-		}
-
-		workspaceInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceName).Execute()
-		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+			workspace, err = server.GetWorkspace(args[0])
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 
 		if output.FormatFlag != "" {
-			output.Output = workspaceInfo
+			output.Output = workspace
 			return
 		}
 
-		info.Render(workspaceInfo)
+		info.Render(workspace)
 	},
 }
 
 func init() {
-	_, exists := os.LookupEnv("DAYTONA_WS_DIR")
-	if exists {
-		InfoCmd.Use = "info"
-		InfoCmd.Args = cobra.ExactArgs(0)
+	if !util.WorkspaceMode() {
+		InfoCmd.Use += " [WORKSPACE]"
+		InfoCmd.Args = cobra.RangeArgs(0, 1)
 	}
 }

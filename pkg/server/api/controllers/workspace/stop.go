@@ -15,7 +15,7 @@ import (
 //	@Tags			workspace
 //	@Summary		Stop workspace
 //	@Description	Stop workspace
-//	@Param			workspaceId	path	string	true	"Workspace ID"
+//	@Param			workspaceId	path	string	true	"Workspace ID or Name"
 //	@Success		200
 //	@Router			/workspace/{workspaceId}/stop [post]
 //
@@ -23,7 +23,7 @@ import (
 func StopWorkspace(ctx *gin.Context) {
 	workspaceId := ctx.Param("workspaceId")
 
-	w, err := db.FindWorkspace(workspaceId)
+	w, err := db.FindWorkspaceByIdOrName(workspaceId)
 	if err != nil {
 		ctx.AbortWithError(http.StatusNotFound, errors.New("workspace not found"))
 		return
@@ -42,7 +42,7 @@ func StopWorkspace(ctx *gin.Context) {
 //	@Tags			workspace
 //	@Summary		Stop project
 //	@Description	Stop project
-//	@Param			workspaceId	path	string	true	"Workspace ID"
+//	@Param			workspaceId	path	string	true	"Workspace ID or Name"
 //	@Param			projectId	path	string	true	"Project ID"
 //	@Success		200
 //	@Router			/workspace/{workspaceId}/{projectId}/stop [post]
@@ -52,7 +52,7 @@ func StopProject(ctx *gin.Context) {
 	workspaceId := ctx.Param("workspaceId")
 	projectId := ctx.Param("projectId")
 
-	w, err := db.FindWorkspace(workspaceId)
+	w, err := db.FindWorkspaceByIdOrName(workspaceId)
 	if err != nil {
 		ctx.AbortWithError(http.StatusNotFound, errors.New("workspace not found"))
 		return

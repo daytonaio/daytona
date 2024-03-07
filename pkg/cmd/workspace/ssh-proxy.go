@@ -18,7 +18,7 @@ import (
 )
 
 var SshProxyCmd = &cobra.Command{
-	Use:    "ssh-proxy [PROFILE_ID] [WORKSPACE_NAME] [PROJECT_NAME]",
+	Use:    "ssh-proxy [PROFILE_ID] [WORKSPACE_ID] [PROJECT]",
 	Args:   cobra.RangeArgs(2, 3),
 	Hidden: true,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -28,7 +28,7 @@ var SshProxyCmd = &cobra.Command{
 		}
 
 		profileId := args[0]
-		workspaceName := args[1]
+		workspaceId := args[1]
 		projectName := ""
 
 		profile, err := c.GetProfile(profileId)
@@ -39,7 +39,7 @@ var SshProxyCmd = &cobra.Command{
 		if len(args) == 3 {
 			projectName = args[2]
 		} else {
-			projectName, err = util.GetFirstWorkspaceProjectName(workspaceName, projectName, &profile)
+			projectName, err = util.GetFirstWorkspaceProjectName(workspaceId, projectName, &profile)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -52,7 +52,7 @@ var SshProxyCmd = &cobra.Command{
 
 		errChan := make(chan error)
 
-		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s-%s:2222", workspaceName, projectName))
+		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s-%s:2222", workspaceId, projectName))
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -5,7 +5,6 @@ package workspace
 
 import (
 	"context"
-	"os"
 	"os/exec"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -19,7 +18,7 @@ import (
 )
 
 var SshCmd = &cobra.Command{
-	Use:   "ssh [WORKSPACE_NAME] [PROJECT_NAME]",
+	Use:   "ssh [WORKSPACE] [PROJECT]",
 	Short: "SSH into a project using the terminal",
 	Args:  cobra.RangeArgs(0, 2),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -34,7 +33,7 @@ var SshCmd = &cobra.Command{
 		}
 
 		ctx := context.Background()
-		var workspaceName string
+		var workspaceId string
 		var projectName string
 
 		apiClient, err := server.GetApiClient(&activeProfile)
@@ -48,19 +47,22 @@ var SshCmd = &cobra.Command{
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 
-			workspaceName = selection.GetWorkspaceNameFromPrompt(workspaceList, "ssh into")
+			workspace := selection.GetWorkspaceFromPrompt(workspaceList, "ssh into")
+			if workspace == nil {
+				return
+			}
+			workspaceId = *workspace.Id
 		} else {
-			workspaceName = args[0]
-		}
-
-		wsName, wsMode := os.LookupEnv("DAYTONA_WS_NAME")
-		if wsMode {
-			workspaceName = wsName
+			workspace, err := server.GetWorkspace(args[0])
+			if err != nil {
+				log.Fatal(err)
+			}
+			workspaceId = *workspace.Id
 		}
 
 		// Todo: make project_select_prompt view for 0 args
 		if len(args) == 0 || len(args) == 1 {
-			projectName, err = util.GetFirstWorkspaceProjectName(workspaceName, projectName, &activeProfile)
+			projectName, err = util.GetFirstWorkspaceProjectName(workspaceId, projectName, &activeProfile)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -70,12 +72,12 @@ var SshCmd = &cobra.Command{
 			projectName = args[1]
 		}
 
-		err = config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceName, projectName)
+		err = config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceName, projectName)
+		projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
 
 		sshCommand := exec.Command("ssh", projectHostname)
 		sshCommand.Stdin = cmd.InOrStdin()
