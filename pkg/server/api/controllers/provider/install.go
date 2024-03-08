@@ -31,6 +31,14 @@ func InstallProvider(ctx *gin.Context) {
 		return
 	}
 
+	if _, err := manager.GetProvider(req.Name); err == nil {
+		err := manager.UninstallProvider(req.Name)
+		if err != nil {
+			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to uninstall current provider: %s", err.Error()))
+			return
+		}
+	}
+
 	c, err := config.GetConfig()
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get config: %s", err.Error()))
