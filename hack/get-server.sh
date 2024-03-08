@@ -72,6 +72,20 @@ esac
 
 DOWNLOAD_URL="$BASE_URL/$VERSION/daytona-$FILENAME"
 
+# We want to fail fast so check everything before we download
+
+# Check if the $DESTINATION exists. We are making a decision to not mkdir
+# for the user here. /opt/bin and /usr/local/bin are system directories and
+# the user should decide and explicitly create those.
+if [ ! -d "$DESTINATION" ]; then
+  err "Destination directory $DESTINATION does not exist. Run mkdir -p $DESTINATION and re-run."
+fi
+
+# Check if sudo is required
+if [ "$SUDO_REQUIRED" -eq 1 ] && [ "$EUID" -ne 0 ]; then
+  err "Cannot write to /opt/bin or /usr/local/bin as non root. Please re-run with sudo."
+fi
+
 echo "Downloading server from $DOWNLOAD_URL"
 
 # Create a temporary file to download the server binary. Just in case the author... user
@@ -98,9 +112,4 @@ fi
 chmod +x "$temp_file"
 
 echo "Installing server to $DESTINATION"
-# Check if sudo is required
-if [ "$SUDO_REQUIRED" -eq 1 ] && [ "$EUID" -ne 0 ]; then
-  err "Cannot write to /opt/bin or /usr/local/bin as non root. Please re-run with sudo."
-fi
-
 mv "$temp_file" "$DESTINATION/daytona"
