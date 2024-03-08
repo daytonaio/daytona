@@ -72,8 +72,7 @@ var CodeCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 || len(args) == 1 {
-			var selectedProject *string
-			selectedProject, err = SelectWorkspaceProject(workspaceId, &activeProfile)
+			selectedProject, err := selectWorkspaceProject(workspaceId, &activeProfile)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -91,13 +90,13 @@ var CodeCmd = &cobra.Command{
 			ideId = ideFlag
 		}
 
-		view_util.RenderInfoMessage("Opening the workspace project '" + projectName + "' in your preferred IDE.")
+		view_util.RenderInfoMessage(fmt.Sprintf("Opening the workspace project '%s' in your preferred IDE.", projectName))
 
 		openIDE(ideId, activeProfile, workspaceId, projectName)
 	},
 }
 
-func SelectWorkspaceProject(workspaceId string, profile *config.Profile) (*string, error) {
+func selectWorkspaceProject(workspaceId string, profile *config.Profile) (*string, error) {
 	ctx := context.Background()
 
 	apiClient, err := server.GetApiClient(profile)
