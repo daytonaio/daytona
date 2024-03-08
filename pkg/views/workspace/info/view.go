@@ -17,8 +17,6 @@ import (
 
 var colors = views.ColorGrid(5, 5)
 
-var workspaceInfoStyle = lipgloss.NewStyle()
-
 var workspaceNameStyle = lipgloss.NewStyle().
 	Foreground(views.Green).
 	Bold(true).
@@ -29,7 +27,11 @@ var repositoryURLStyle = lipgloss.NewStyle().
 	Foreground(lipgloss.Color("227")).
 	MarginLeft(2)
 
-var projectViewStyle = lipgloss.NewStyle().
+var repositoryBranchStyle = lipgloss.NewStyle().
+	Foreground(lipgloss.Color("227")).
+	MarginLeft(2)
+
+var viewStyle = lipgloss.NewStyle().
 	MarginTop(1).
 	MarginBottom(0).
 	PaddingLeft(2).
@@ -48,6 +50,7 @@ func projectRender(projectInfo *serverapiclient.ProjectInfo, project *serverapic
 	projectState := ""
 	extensions := [][]string{}
 	extensionsTable := ""
+	repoBranch := ""
 
 	if !*projectInfo.IsRunning && *projectInfo.Created == "" {
 		projectState = projectStatusStyle.Foreground(lipgloss.Color(colors[0][4])).Render("Unavailable")
@@ -63,9 +66,19 @@ func projectRender(projectInfo *serverapiclient.ProjectInfo, project *serverapic
 			Border(lipgloss.HiddenBorder()).
 			Rows(extensions...).Render()
 	}
+
+	if (project.Repository.Branch == nil){
+		repoBranch = ""
+	} else {
+		repoBranch = "Branch" + repositoryBranchStyle.Render(*project.Repository.Branch)
+	}
+
+	repoView := "Url" + (repositoryURLStyle.Render(*project.Repository.Url)) + "\n" + repoBranch
+	repoView = "Repository" + viewStyle.Render(repoView)
 	
-	projectView := "Project" + projectNameStyle.Render(*projectInfo.Name) + "\n" + "RepositoryUrl" + repositoryURLStyle.Render(*project.Repository.Url) + "\n" + "State  " + projectState + "\n" + extensionsTable
-	return projectViewStyle.Render(projectView)
+	projectView := "Project" + projectNameStyle.Render(*projectInfo.Name) + "\n" + "State  " + projectState + extensionsTable
+
+	return viewStyle.Render(projectView) + viewStyle.Render(repoView)
 }
 
 func Render(workspace *serverapiclient.Workspace) {
