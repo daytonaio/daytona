@@ -38,7 +38,7 @@ var whoamiCmd = &cobra.Command{
 		}
 
 		if profile.Id == "default" {
-			view_util.RenderInfoMessageBold("You are currently the default profile")
+			view_util.RenderInfoMessageBold("You are currently on the default profile")
 		} else {
 			view_util.RenderInfoMessageBold("You are currently on profile " + profile.Name)
 		}
@@ -46,12 +46,6 @@ var whoamiCmd = &cobra.Command{
 
 		if profile.Api.Url != "" {
 			view_util.RenderListLine(fmt.Sprintf("\x1b[1m%-*s\x1b[0m%s", listLabelWidth, "API URL:", profile.Api.Url))
-		}
-
-		view_util.RenderListLine(fmt.Sprintf("\x1b[1m%-*s\x1b[0m", listLabelWidth))
-
-		if profile.Id == "default" {
-			view_util.RenderInfoMessage("Set up a remote Daytona Server using “daytona server install“ or get to coding locally by running “daytona create“")
 		}
 	},
 }
