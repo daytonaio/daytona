@@ -22,8 +22,12 @@ var workspaceInfoStyle = lipgloss.NewStyle()
 var workspaceNameStyle = lipgloss.NewStyle().
 	Foreground(views.Green).
 	Bold(true).
-	MarginLeft(2).
-	MarginBottom(1)
+	MarginLeft(2)
+
+var repositoryURLStyle = lipgloss.NewStyle().
+	Bold(true).
+	Foreground(lipgloss.Color("227")).
+	MarginLeft(2)
 
 var projectViewStyle = lipgloss.NewStyle().
 	MarginTop(1).
@@ -40,14 +44,14 @@ var projectStatusStyle = lipgloss.NewStyle().
 	Foreground(lipgloss.Color(colors[0][4])).
 	PaddingLeft(2)
 
-func projectRender(project *serverapiclient.ProjectInfo) string {
+func projectRender(projectInfo *serverapiclient.ProjectInfo, project *serverapiclient.Project) string {
 	projectState := ""
 	extensions := [][]string{}
 	extensionsTable := ""
 
-	if !*project.IsRunning && *project.Created == "" {
+	if !*projectInfo.IsRunning && *projectInfo.Created == "" {
 		projectState = projectStatusStyle.Foreground(lipgloss.Color(colors[0][4])).Render("Unavailable")
-	} else if !*project.IsRunning {
+	} else if !*projectInfo.IsRunning {
 		projectState = projectStatusStyle.Render("Stopped")
 	} else {
 		projectState = projectStatusStyle.Foreground(lipgloss.Color(colors[4][4])).Render("Running")
@@ -59,21 +63,26 @@ func projectRender(project *serverapiclient.ProjectInfo) string {
 			Border(lipgloss.HiddenBorder()).
 			Rows(extensions...).Render()
 	}
-
-	projectView := "Project" + projectNameStyle.Render(*project.Name) + "\n" + "State  " + projectState + "\n" + extensionsTable
-
+	
+	projectView := "Project" + projectNameStyle.Render(*projectInfo.Name) + "\n" + "RepositoryUrl" + repositoryURLStyle.Render(*project.Repository.Url) + "\n" + "State  " + projectState + "\n" + extensionsTable
 	return projectViewStyle.Render(projectView)
 }
 
 func Render(workspace *serverapiclient.Workspace) {
 	var output string
 	output = "\n"
-	output += workspaceInfoStyle.Render("Workspace" + workspaceNameStyle.Render(*workspace.Info.Name))
+	output += "Workspace" + workspaceNameStyle.Render(*workspace.Info.Name) + "\n"
+	output += "ID" + workspaceNameStyle.Render(*workspace.Id) + "\n"
+	output += "Target" + workspaceNameStyle.Render(*workspace.Target) + "\n"
+
 	if len(workspace.Projects) > 1 {
 		output += "\n" + "Projects"
 	}
-	for _, project := range workspace.Info.Projects {
-		output += projectRender(&project)
+
+	for _, project := range workspace.Projects { 
+		for _, projectInfo := range workspace.Info.Projects {
+			output += projectRender(&projectInfo, &project)
+		}
 	}
 
 	output = lipgloss.NewStyle().PaddingLeft(3).Render(output)
