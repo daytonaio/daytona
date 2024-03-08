@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"strings"
 
 	"github.com/daytonaio/daytona/internal/util"
 	os_util "github.com/daytonaio/daytona/pkg/os"
@@ -15,6 +16,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/targets"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
+	"github.com/shirou/gopsutil/process"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -164,6 +166,25 @@ func UninstallProvider(name string) error {
 	}
 
 	delete(pluginRefs, name)
+
+	return nil
+}
+
+func TerminateProviderProcesses(providersBasePath string) error {
+	process, err := process.Processes()
+
+	if err != nil {
+		return err
+	}
+
+	for _, p := range process {
+		if e, err := p.Exe(); err == nil && strings.HasPrefix(e, providersBasePath) {
+			err := p.Kill()
+			if err != nil {
+				log.Errorf("Failed to kill process %d: %s", p.Pid, err)
+			}
+		}
+	}
 
 	return nil
 }

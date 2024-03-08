@@ -4,18 +4,17 @@
 package server
 
 import (
-	"fmt"
 	"net"
 	"os"
 	"os/signal"
 	"time"
 
+	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/server/api"
 	"github.com/daytonaio/daytona/pkg/server/config"
 	"github.com/daytonaio/daytona/pkg/server/frpc"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/daytonaio/daytona/pkg/server/logs"
-	"github.com/daytonaio/daytona/pkg/types"
 	"github.com/hashicorp/go-plugin"
 
 	log "github.com/sirupsen/logrus"
@@ -37,6 +36,22 @@ func Start() error {
 	c, err := config.GetConfig()
 	if err != nil {
 		return err
+	}
+
+	apiServer, err := api.GetServer()
+	if err != nil {
+		return err
+	}
+
+	apiListener, err := net.Listen("tcp", apiServer.Addr)
+	if err != nil {
+		return err
+	}
+
+	// Terminate orphaned provider processes
+	err = manager.TerminateProviderProcesses(c.ProvidersDir)
+	if err != nil {
+		log.Errorf("Failed to terminate orphaned provider processes: %s", err)
 	}
 
 	err = downloadDefaultProviders()
@@ -92,13 +107,6 @@ func Start() error {
 		}
 	}()
 
-	return api.Start()
-}
-
-func getTcpListener(c *types.ServerConfig) (*net.Listener, error) {
-	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", c.ApiPort))
-	if err != nil {
-		return nil, err
-	}
-	return &listener, nil
+	log.Infof("Starting api server on port %d", c.ApiPort)
+	return apiServer.Serve(apiListener)
 }
