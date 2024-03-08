@@ -56,7 +56,7 @@ To install Daytona all you need to do is execute this script:
 
 
 ```bash
-# Install Daytona into ~/bin or ~/.local/bin
+# Install Daytona into ~/bin or ~/.local/bin (you may need to add one of these to your PATH first)
 curl -sf -L https://download.daytona.io/daytona/get-server.sh | bash
 
 # OR if you want to install Daytona to /usr/loca/bin or /opt/bin
