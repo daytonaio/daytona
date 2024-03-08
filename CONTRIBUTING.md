@@ -53,7 +53,7 @@ Note: In some cases, we might decide that a PR should be closed without merging.
 
 ### Adding Yourself to the Contributors List
 
-When making a pull request to the System Initiative software, you must add yourself to the [CONTRIBUTORS](CONTRIBUTORS.md) list.
+When making a pull request to the Daytona software, you must add yourself to the [CONTRIBUTORS](CONTRIBUTORS.md) list.
 You will only have to do this the first time that you contribute to the software.
 For this, we recommend adding yourself with a separate commit (does not have to be a separate PR) to the file.
 
