@@ -19,10 +19,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	allFlag bool
-	yesFlag bool
-)
+var allFlag bool
+var yesFlag bool
 
 
 var DeleteCmd = &cobra.Command{
@@ -32,14 +30,21 @@ var DeleteCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if allFlag {
 			if yesFlag {
-				deleteAllWorkspaces()
+				fmt.Println("Deleting all workspaces.")
+				err := deleteAllWorkspaces()
+				if err != nil {
+					log.Fatal(err)
+				}
 			} else {
 				confirmation := util.ConfirmationPrompt("Are you sure you want to delete all workspaces?")
 				if !confirmation {
 					fmt.Println("Operation canceled.")
 					return
 				}
-				deleteAllWorkspaces()
+				err := deleteAllWorkspaces()
+				if err != nil {
+					log.Fatal(err)
+				}
 			}
 			return
 		}
@@ -95,23 +100,22 @@ func init() {
 	DeleteCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Confirm deletion without prompt")
 }
 
-func deleteAllWorkspaces() {
+func deleteAllWorkspaces() error{
 	ctx := context.Background()
 	apiClient, err := server.GetApiClient(nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 	if err != nil {
-		log.Fatal(apiclient.HandleErrorResponse(res, err))
+		return apiclient.HandleErrorResponse(res, err)
 	}
 
 	for _, workspace := range workspaceList {
 		res, err := apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
 		if err != nil {
-			log.Errorf("Failed to delete workspace %s: %v", *workspace.Id, apiclient.HandleErrorResponse(res, err))
-			continue
+		  return fmt.Errorf("failed to delete workspace %s: %v", *workspace.Id, apiclient.HandleErrorResponse(res, err))
 		}
 		fmt.Printf("Workspace %s successfully deleted\n", *workspace.Name)
 	}

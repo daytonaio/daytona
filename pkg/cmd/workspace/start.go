@@ -24,8 +24,10 @@ var StartCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if allFlag {
-			startAllWorkspaces()
-			return
+			err := startAllWorkspaces()
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 
 		ctx := context.Background()
@@ -72,23 +74,24 @@ func init() {
 	StartCmd.PersistentFlags().BoolVarP(&allFlag, "all", "a", false, "Start all workspaces")
 }
 
-func startAllWorkspaces() {
+func startAllWorkspaces() error{
 	ctx := context.Background()
 	apiClient, err := server.GetApiClient(nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 	if err != nil {
-		log.Fatal(apiclient.HandleErrorResponse(res, err))
+		return apiclient.HandleErrorResponse(res, err)
 	}
 
 	for _, workspace := range workspaceList {
 		res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, *workspace.Id).Execute()
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+			return fmt.Errorf("failed to start workspace %s: %v", *workspace.Id, apiclient.HandleErrorResponse(res, err))
 		}
 		fmt.Printf("Workspace %s successfully started\n", *workspace.Id)
 	}
+	return nil
 }
