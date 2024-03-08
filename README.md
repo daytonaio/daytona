@@ -59,7 +59,7 @@ To install Daytona all you need to do is execute this script:
 # Install Daytona into ~/bin or ~/.local/bin (you may need to add one of these to your PATH first)
 curl -sf -L https://download.daytona.io/daytona/get-server.sh | bash
 
-# OR if you want to install Daytona to /usr/loca/bin or /opt/bin
+# OR if you want to install Daytona to /usr/local/bin or /opt/bin
 curl -sf -L https://download.daytona.io/daytona/get-server.sh | sudo bash
 
 # Start Daytona server
@@ -118,7 +118,13 @@ Before starting the installation script, please go over all the necessary requir
 Daytona allows you to manage your Development Environments using the Daytona CLI. To install it, please execute the following command:
 
 ```bash
-curl https://download.daytona.io/daytona/get-server.sh | bash
+curl -sf -L https://download.daytona.io/daytona/get-server.sh | sudo bash
+```
+
+If you are allergic to sudo, make sure you have either `~/.local/bin` or `~/bin` folders in your path and use:
+
+```bash
+curl -sf -L https://download.daytona.io/daytona/get-server.sh | bash
 ```
 
 
