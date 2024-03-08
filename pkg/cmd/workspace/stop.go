@@ -18,7 +18,6 @@ import (
 )
 
 var stopProjectFlag string
-var allFlag bool
 
 var StopCmd = &cobra.Command{
 	Use:   "stop",
@@ -99,7 +98,7 @@ func stopAllWorkspaces() error{
 	for _, workspace := range workspaceList {
 		res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, *workspace.Id).Execute()
 		if err != nil {
-		  log.Errorf("Failed to stop workspace %s: %v", *workspace.Id, apiclient.HandleErrorResponse(res, err))
+			return fmt.Errorf("failed to stop workspace %s: %v", *workspace.Id, apiclient.HandleErrorResponse(res, err))
 		}
 		fmt.Printf("Workspace %s successfully stopped\n", *workspace.Id)
 	}

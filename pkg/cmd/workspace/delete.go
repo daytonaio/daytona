@@ -6,12 +6,13 @@ package workspace
 import (
 	"context"
 	"fmt"
-	"os"
 
+	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
@@ -19,9 +20,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var allFlag bool
 var yesFlag bool
-
 
 var DeleteCmd = &cobra.Command{
 	Use:     "delete [WORKSPACE]",
@@ -36,14 +35,27 @@ var DeleteCmd = &cobra.Command{
 					log.Fatal(err)
 				}
 			} else {
-				confirmation := util.ConfirmationPrompt("Are you sure you want to delete all workspaces?")
-				if !confirmation {
-					fmt.Println("Operation canceled.")
-					return
-				}
-				err := deleteAllWorkspaces()
+				form := huh.NewForm(
+					huh.NewGroup(
+						huh.NewConfirm().
+							Title("Delete all workspaces?").
+							Description("Are you sure you want to delete all workspaces?").
+							Value(&yesFlag),
+					),
+				).WithTheme(views.GetCustomTheme())
+
+				err := form.Run()
 				if err != nil {
 					log.Fatal(err)
+				}
+
+				if yesFlag {
+					err := deleteAllWorkspaces()
+					if err != nil {
+						log.Fatal(err)
+					}
+				} else {
+					fmt.Println("Operation canceled.")
 				}
 			}
 			return
@@ -115,8 +127,9 @@ func deleteAllWorkspaces() error{
 	for _, workspace := range workspaceList {
 		res, err := apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
 		if err != nil {
-		  return fmt.Errorf("failed to delete workspace %s: %v", *workspace.Id, apiclient.HandleErrorResponse(res, err))
+			return fmt.Errorf("failed to delete workspace %s: %v", *workspace.Id, apiclient.HandleErrorResponse(res, err))
 		}
 		fmt.Printf("Workspace %s successfully deleted\n", *workspace.Name)
 	}
+	return nil
 }
