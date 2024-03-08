@@ -36,6 +36,7 @@ var rootCmd = &cobra.Command{
 var originalStdout *os.File
 
 func Execute() {
+	rootCmd.AddCommand(CompletionCmd)
 	rootCmd.AddCommand(InfoCmd)
 	rootCmd.AddCommand(StartCmd)
 	rootCmd.AddCommand(StopCmd)
