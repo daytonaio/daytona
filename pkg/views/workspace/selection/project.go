@@ -1,6 +1,3 @@
-// Copyright 2024 Daytona Platforms Inc.
-// SPDX-License-Identifier: Apache-2.0
-
 package selection
 
 import (
@@ -16,17 +13,23 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func selectWorkspacePrompt(workspaces []serverapiclient.Workspace, actionVerb string, choiceChan chan<- *serverapiclient.Workspace) {
-	// Initialize an empty list of items.
+func GetProjectFromPrompt(projects []serverapiclient.Project, actionVerb string) *serverapiclient.Project {
+	choiceChan := make(chan *serverapiclient.Project)
+	go selectProjectPrompt(projects, actionVerb, choiceChan)
+	return <-choiceChan
+}
+
+func selectProjectPrompt(projects []serverapiclient.Project, actionVerb string, choiceChan chan<- *serverapiclient.Project) {
 	items := []list.Item{}
 
-	// Populate items with titles and descriptions from workspaces.
-	for _, workspace := range workspaces {
-		var projectNames []string
-		for _, project := range workspace.Projects {
-			projectNames = append(projectNames, *project.Name)
+	for _, project := range projects {
+		var projectName string
+		if project.Name != nil {
+			projectName = *project.Name
+		} else {
+			projectName = "Unnamed Project"
 		}
-		newItem := item[serverapiclient.Workspace]{title: *workspace.Name, desc: strings.Join(projectNames, ", "), choiceProperty: workspace}
+		newItem := item[serverapiclient.Project]{title: projectName, desc: "", choiceProperty: project}
 		items = append(items, newItem)
 	}
 
@@ -49,9 +52,9 @@ func selectWorkspacePrompt(workspaces []serverapiclient.Workspace, actionVerb st
 	l.FilterInput.PromptStyle = lipgloss.NewStyle().Foreground(views.Green)
 	l.FilterInput.TextStyle = lipgloss.NewStyle().Foreground(views.Green)
 
-	m := model[serverapiclient.Workspace]{list: l}
+	m := model[serverapiclient.Project]{list: l}
 
-	m.list.Title = "SELECT A WORKSPACE TO " + strings.ToUpper(actionVerb)
+	m.list.Title = "SELECT A PROJECT TO " + strings.ToUpper(actionVerb)
 	m.list.Styles.Title = lipgloss.NewStyle().Foreground(views.Green).Bold(true)
 
 	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
@@ -60,17 +63,9 @@ func selectWorkspacePrompt(workspaces []serverapiclient.Workspace, actionVerb st
 		os.Exit(1)
 	}
 
-	if m, ok := p.(model[serverapiclient.Workspace]); ok && m.choice != nil {
+	if m, ok := p.(model[serverapiclient.Project]); ok && m.choice != nil {
 		choiceChan <- m.choice
 	} else {
 		choiceChan <- nil
 	}
-}
-
-func GetWorkspaceFromPrompt(workspaces []serverapiclient.Workspace, actionVerb string) *serverapiclient.Workspace {
-	choiceChan := make(chan *serverapiclient.Workspace)
-
-	go selectWorkspacePrompt(workspaces, actionVerb, choiceChan)
-
-	return <-choiceChan
 }
