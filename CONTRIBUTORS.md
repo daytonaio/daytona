@@ -7,6 +7,7 @@ We contributors to Daytona:
 * Add our names and GitHub handles to this CONTRIBUTORS.md file to create a permanent record that users, distributors, and other contributors can all rely on:
 
 -----------
+* Vedran Jukic (@vedranjukic)
 * Ivan Burazin (@ivan-burazin)
 * Chad Metcalf (@metcalfc)
 * Toma Puljak (@tpuljak)
