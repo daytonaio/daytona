@@ -16,3 +16,4 @@ We contributors to Daytona:
 * Ivan Dagelić (@idagelic)
 * Neo (@neo773)
 * Ezhil Shanmugham (@ezhil56x)
+* Deepak gupta (@guptadeepak8)
