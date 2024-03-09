@@ -4,7 +4,6 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -66,23 +65,21 @@ var CompletionCmd = &cobra.Command{
 			return
 		}
 
-		sourceCommand := fmt.Sprintf("source %s\n", filePath)
+		sourceCommand := fmt.Sprintf("\nsource %s\n", filePath)
 		if shell == "powershell" {
 			sourceCommand = fmt.Sprintf(". %s\n", filePath)
 		}
 
 		alreadyPresent := false
-		profile, err := os.Open(profilePath)
-		if err == nil {
-			scanner := bufio.NewScanner(profile)
-			for scanner.Scan() {
-				line := strings.TrimSpace(scanner.Text())			
-				if strings.Contains(line, strings.TrimSpace(sourceCommand)) {
-					alreadyPresent = true
-					break
-				}
-			}
-			profile.Close()
+		// Read existing content from the file
+		profile, err := os.ReadFile(profilePath)
+
+		if err != nil && !os.IsNotExist(err) {
+			fmt.Printf("Error while reading profile (%s): %s\n", profilePath, err)
+		}
+	
+		if strings.Contains(string(profile), strings.TrimSpace(sourceCommand)) {
+			alreadyPresent = true
 		}
 
 		if !alreadyPresent {
