@@ -15,24 +15,25 @@ import (
 )
 
 type GitProviderSelectView struct {
-	Id       string
-	Username string
-	Token    string
+	Id         string
+	Username   string
+	BaseApiUrl string
+	Token      string
 }
 
 func GitProviderSelectionView(gitProviderAddView *GitProviderSelectView, userGitProviders []serverapiclient.GitProvider, isDeleting bool) {
 	availableGitProviders := config.GetGitProviderList()
 
-	var options []huh.Option[string]
+	var gitProviderOptions []huh.Option[string]
 	for _, availableProvider := range availableGitProviders {
 		if isDeleting {
 			for _, userProvider := range userGitProviders {
 				if *userProvider.Id == availableProvider.Id {
-					options = append(options, huh.Option[string]{Key: availableProvider.Name, Value: availableProvider.Id})
+					gitProviderOptions = append(gitProviderOptions, huh.Option[string]{Key: availableProvider.Name, Value: availableProvider.Id})
 				}
 			}
 		} else {
-			options = append(options, huh.Option[string]{Key: availableProvider.Name, Value: availableProvider.Id})
+			gitProviderOptions = append(gitProviderOptions, huh.Option[string]{Key: availableProvider.Name, Value: availableProvider.Id})
 		}
 	}
 
@@ -41,7 +42,7 @@ func GitProviderSelectionView(gitProviderAddView *GitProviderSelectView, userGit
 			huh.NewSelect[string]().
 				Title("Choose a Git provider").
 				Options(
-					options...,
+					gitProviderOptions...,
 				).
 				Value(&gitProviderAddView.Id)),
 	).WithTheme(views.GetCustomTheme())
@@ -64,6 +65,19 @@ func GitProviderSelectionView(gitProviderAddView *GitProviderSelectView, userGit
 				}),
 		).WithHideFunc(func() bool {
 			return isDeleting || gitProviderAddView.Id != "bitbucket"
+		}),
+		huh.NewGroup(
+			huh.NewInput().
+				Title("Self-hosted URL").
+				Value(&gitProviderAddView.BaseApiUrl).
+				Validate(func(str string) error {
+					if str == "" {
+						return errors.New("URL can not be blank")
+					}
+					return nil
+				}),
+		).WithHideFunc(func() bool {
+			return isDeleting || gitProviderAddView.Id != "gitlab-self-hosted"
 		}),
 		huh.NewGroup(
 			huh.NewInput().

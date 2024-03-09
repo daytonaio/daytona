@@ -10,9 +10,10 @@ type FRPSConfig struct {
 } // @name FRPSConfig
 
 type GitProvider struct {
-	Id       string `json:"id"`
-	Username string `json:"username"`
-	Token    string `json:"token"`
+	Id         string `json:"id"`
+	Username   string `json:"username"`
+	Token      string `json:"token"`
+	BaseApiUrl string `json:"baseApiUrl"`
 } // @name GitProvider
 
 type ServerConfig struct {

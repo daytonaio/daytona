@@ -22,6 +22,8 @@ definitions:
     type: object
   GitProvider:
     properties:
+      baseApiUrl:
+        type: string
       id:
         type: string
       token:
@@ -45,8 +47,6 @@ definitions:
     type: object
   Project:
     properties:
-      info:
-        $ref: '#/definitions/ProjectInfo'
       name:
         type: string
       repository:

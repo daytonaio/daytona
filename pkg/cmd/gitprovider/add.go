@@ -64,6 +64,7 @@ var gitProviderAddCmd = &cobra.Command{
 		for _, gitProvider := range gitProviderList {
 			if *gitProvider.Id == gitProviderSelectView.Id {
 				*gitProvider.Username = gitProviderSelectView.Username
+				*gitProvider.BaseApiUrl = gitProviderSelectView.BaseApiUrl
 				*gitProvider.Token = gitProviderSelectView.Token
 				providerExists = true
 			}
@@ -71,9 +72,10 @@ var gitProviderAddCmd = &cobra.Command{
 
 		if !providerExists {
 			gitProviderList = append(serverConfig.GitProviders, serverapiclient.GitProvider{
-				Id:       &gitProviderSelectView.Id,
-				Username: &gitProviderSelectView.Username,
-				Token:    &gitProviderSelectView.Token,
+				Id:         &gitProviderSelectView.Id,
+				Username:   &gitProviderSelectView.Username,
+				BaseApiUrl: &gitProviderSelectView.BaseApiUrl,
+				Token:      &gitProviderSelectView.Token,
 			})
 		}
 

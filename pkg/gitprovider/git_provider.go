@@ -81,6 +81,11 @@ func GetGitProvider(providerId string, gitProviders []types.GitProvider) GitProv
 			username: chosenProvider.Username,
 			token:    chosenProvider.Token,
 		}
+	case "gitlab-self-hosted":
+		return &GitLabGitProvider{
+			token:      chosenProvider.Token,
+			baseApiUrl: chosenProvider.BaseApiUrl,
+		}
 	default:
 		return nil
 	}
@@ -95,6 +100,8 @@ func GetUsernameFromToken(providerId string, gitProviders []config.GitProvider, 
 			token: token,
 		}
 	case "gitlab":
+		fallthrough
+	case "gitlab-self-hosted":
 		gitProvider = &GitLabGitProvider{
 			token: token,
 		}

@@ -249,6 +249,9 @@ func processPrompting(cmd *cobra.Command, apiClient *serverapiclient.APIClient, 
 		if serverGitProvider.Token != nil {
 			gitProvider.Token = *serverGitProvider.Token
 		}
+		if serverGitProvider.BaseApiUrl != nil {
+			gitProvider.BaseApiUrl = *serverGitProvider.BaseApiUrl
+		}
 		gitProviderList = append(gitProviderList, gitProvider)
 	}
 

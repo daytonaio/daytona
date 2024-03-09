@@ -412,10 +412,13 @@ components:
       type: object
     GitProvider:
       example:
+        baseApiUrl: baseApiUrl
         id: id
         token: token
         username: username
       properties:
+        baseApiUrl:
+          type: string
         id:
           type: string
         token:
@@ -456,19 +459,9 @@ components:
           branch: branch
           sha: sha
           url: url
-        info:
-          providerMetadata: providerMetadata
-          isRunning: true
-          created: created
-          name: name
-          finished: finished
-          started: started
-          workspaceId: workspaceId
         target: target
         workspaceId: workspaceId
       properties:
-        info:
-          $ref: '#/components/schemas/ProjectInfo'
         name:
           type: string
         repository:
@@ -574,10 +567,12 @@ components:
         id: id
         targetsFilePath: targetsFilePath
         gitProviders:
-        - id: id
+        - baseApiUrl: baseApiUrl
+          id: id
           token: token
           username: username
-        - id: id
+        - baseApiUrl: baseApiUrl
+          id: id
           token: token
           username: username
         frps:
@@ -620,14 +615,6 @@ components:
             branch: branch
             sha: sha
             url: url
-          info:
-            providerMetadata: providerMetadata
-            isRunning: true
-            created: created
-            name: name
-            finished: finished
-            started: started
-            workspaceId: workspaceId
           target: target
           workspaceId: workspaceId
         - name: name
@@ -641,14 +628,6 @@ components:
             branch: branch
             sha: sha
             url: url
-          info:
-            providerMetadata: providerMetadata
-            isRunning: true
-            created: created
-            name: name
-            finished: finished
-            started: started
-            workspaceId: workspaceId
           target: target
           workspaceId: workspaceId
         name: name

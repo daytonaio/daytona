@@ -27,6 +27,7 @@ func GetGitProviderList() []GitProvider {
 	return []GitProvider{
 		{"github", "GitHub", ""},
 		{"gitlab", "GitLab", ""},
+		{"gitlab-self-hosted", "GitLab (Self-hosted)", ""},
 		{"bitbucket", "Bitbucket", ""},
 	}
 }
