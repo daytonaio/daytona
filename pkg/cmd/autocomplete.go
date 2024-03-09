@@ -4,9 +4,11 @@
 package cmd
 
 import (
-	"os"
+	"bufio"
 	"fmt"
+	"os"
 	"path/filepath"
+	"strings"
 	"github.com/spf13/cobra"
 )
 
@@ -69,17 +71,33 @@ var CompletionCmd = &cobra.Command{
 			sourceCommand = fmt.Sprintf(". %s\n", filePath)
 		}
 
-		// Append the source command to the shell's profile file
-		profile, err := os.OpenFile(profilePath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-		if err != nil {
-			fmt.Printf("Error opening profile file (%s): %s\n", profilePath, err)
-			return
+		alreadyPresent := false
+		profile, err := os.Open(profilePath)
+		if err == nil {
+			scanner := bufio.NewScanner(profile)
+			for scanner.Scan() {
+				line := strings.TrimSpace(scanner.Text())			
+				if strings.Contains(line, strings.TrimSpace(sourceCommand)) {
+					alreadyPresent = true
+					break
+				}
+			}
+			profile.Close()
 		}
-		defer profile.Close()
 
-		if _, err := profile.WriteString(sourceCommand); err != nil {
-			fmt.Printf("Error writing to profile file (%s): %s\n", profilePath, err)
-			return
+		if !alreadyPresent {
+			// Append the source command to the shell's profile file if not present
+			profile, err := os.OpenFile(profilePath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+			if err != nil {
+				fmt.Printf("Error opening profile file (%s): %s\n", profilePath, err)
+				return
+			}
+			defer profile.Close()
+
+			if _, err := profile.WriteString(sourceCommand); err != nil {
+				fmt.Printf("Error writing to profile file (%s): %s\n", profilePath, err)
+				return
+			}
 		}
 
 		fmt.Println("Autocomplete script generated and injected successfully.")
