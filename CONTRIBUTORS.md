@@ -20,3 +20,4 @@ We contributors to Daytona:
 * Tarun Chauhan (@tarunrajput)
 * Deepak gupta (@guptadeepak8)
 * Vineeth Kumar (@vineeth-vk11)
+* Jay Kumar (@35C4n0r)
