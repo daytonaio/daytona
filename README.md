@@ -56,11 +56,11 @@ To install Daytona all you need to do is execute this script:
 
 
 ```bash
-# Install Daytona into ~/bin or ~/.local/bin
-curl -sf -L https://download.daytona.io/daytona/get-server.sh | bash
+# Install Daytona into /usr/local/bin
+curl -sf -L https://download.daytona.io/daytona/get-server.sh | sudo bash
 
-# OR if you want to install Daytona to /usr/loca/bin or /opt/bin
-# curl -sf -L https://download.daytona.io/daytona/get-server.sh | sudo bash
+# OR if you want to install Daytona to some other path where you don`t need sudo
+# curl -sf -L https://download.daytona.io/daytona/get-server.sh | DAYTONA_PATH=/home/user/bin bash
 
 # Start Daytona server
 daytona server
@@ -228,4 +228,3 @@ This project has adapted the Code of Conduct from the [Contributor Covenant](htt
 
 For more information on how to use and develop Daytona, talk to us on
 [Slack](https://join.slack.com/t/daytonacommunity/shared_invite/zt-273yohksh-Q5YSB5V7tnQzX2RoTARr7Q).
-
