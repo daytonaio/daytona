@@ -17,4 +17,6 @@ We contributors to Daytona:
 * Fabjan Vučina (@fabjanvucina)
 * Neo (@neo773)
 * Ezhil Shanmugham (@ezhil56x)
+* Tarun Chauhan (@tarunrajput)
+* Deepak gupta (@guptadeepak8)
 * Vineeth Kumar (@vineeth-vk11)
