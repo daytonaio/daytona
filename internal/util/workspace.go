@@ -84,21 +84,6 @@ func GetValidatedUrl(input string) (string, error) {
 		return "", fmt.Errorf("input is not a valid URL")
 	}
 
-	// Validate the URL's host (domain) has a proper extension
-	host := parsedURL.Host
-	if !isValidTLD(host) {
-		return "", fmt.Errorf("the URL does not have a valid TLD")
-	}
-
 	// If parsing was successful, return the fixed URL
 	return parsedURL.String(), nil
-}
-
-func isValidTLD(host string) bool {
-	// Regular expression to match common domain extensions like .com, .org, etc.
-	extensionPattern := `\.([a-zA-Z]{2,6})$`
-	regex := regexp.MustCompile(extensionPattern)
-
-	// Check if the host (domain) matches the extension pattern
-	return regex.MatchString(host)
 }

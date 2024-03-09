@@ -50,21 +50,9 @@ var gitCredCmd = &cobra.Command{
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		gitProviderId := getGitProviderIdFromHost(host)
-		if gitProviderId == "" {
-			fmt.Println("error: unable to determine git provider")
-			return
-		}
+		gitProvider := getGitProviderFromHost(host, serverConfig.GitProviders)
 
-		var gitProvider *serverapiclient.GitProvider
-		for _, provider := range serverConfig.GitProviders {
-			if *provider.Id == gitProviderId {
-				gitProvider = &provider
-				break
-			}
-		}
-
-		if gitProvider == nil {
+		if gitProvider == (serverapiclient.GitProvider{}) {
 			fmt.Println("error: git provider not found")
 			os.Exit(1)
 			return
@@ -80,16 +68,31 @@ var gitCredCmd = &cobra.Command{
 	},
 }
 
-func getGitProviderIdFromHost(url string) string {
-	if strings.Contains(url, "github.com") {
-		return "github"
-	} else if strings.Contains(url, "gitlab.com") {
-		return "gitlab"
-	} else if strings.Contains(url, "bitbucket.org") {
-		return "bitbucket"
-	} else {
-		return ""
+func getGitProviderFromHost(url string, gitProviders []serverapiclient.GitProvider) serverapiclient.GitProvider {
+	for _, gitProvider := range gitProviders {
+		if strings.Contains(url, fmt.Sprintf("%s.", *gitProvider.Id)) {
+			return gitProvider
+		}
+
+		if *gitProvider.BaseApiUrl != "" && strings.Contains(url, getHostnameFromUrl(*gitProvider.BaseApiUrl)) {
+			return gitProvider
+		}
 	}
+	return serverapiclient.GitProvider{}
+}
+
+func getHostnameFromUrl(url string) string {
+	input := url
+	input = strings.TrimPrefix(input, "https://")
+	input = strings.TrimPrefix(input, "http://")
+	input = strings.TrimPrefix(input, "www.")
+
+	// Remove everything after the first '/'
+	if slashIndex := strings.Index(input, "/"); slashIndex != -1 {
+		input = input[:slashIndex]
+	}
+
+	return input
 }
 
 func parseFromStdin() (map[string]string, error) {
