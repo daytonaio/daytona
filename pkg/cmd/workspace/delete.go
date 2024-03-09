@@ -112,7 +112,7 @@ func init() {
 	DeleteCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Confirm deletion without prompt")
 }
 
-func deleteAllWorkspaces() error{
+func deleteAllWorkspaces() error {
 	ctx := context.Background()
 	apiClient, err := server.GetApiClient(nil)
 	if err != nil {
@@ -127,7 +127,8 @@ func deleteAllWorkspaces() error{
 	for _, workspace := range workspaceList {
 		res, err := apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
 		if err != nil {
-			return fmt.Errorf("failed to delete workspace %s: %v", *workspace.Id, apiclient.HandleErrorResponse(res, err))
+			log.Errorf("Failed to delete workspace %s: %v", *workspace.Id, apiclient.HandleErrorResponse(res, err))
+			continue
 		}
 		fmt.Printf("Workspace %s successfully deleted\n", *workspace.Name)
 	}

@@ -83,7 +83,7 @@ func init() {
 	StopCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Stop all workspaces")
 }
 
-func stopAllWorkspaces() error{
+func stopAllWorkspaces() error {
 	ctx := context.Background()
 	apiClient, err := server.GetApiClient(nil)
 	if err != nil {
@@ -98,7 +98,8 @@ func stopAllWorkspaces() error{
 	for _, workspace := range workspaceList {
 		res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, *workspace.Id).Execute()
 		if err != nil {
-			return fmt.Errorf("failed to stop workspace %s: %v", *workspace.Id, apiclient.HandleErrorResponse(res, err))
+			log.Errorf("Failed to stop workspace %s: %v", *workspace.Id, apiclient.HandleErrorResponse(res, err))
+			continue
 		}
 		fmt.Printf("Workspace %s successfully stopped\n", *workspace.Id)
 	}

@@ -74,7 +74,7 @@ func init() {
 	StartCmd.PersistentFlags().BoolVarP(&allFlag, "all", "a", false, "Start all workspaces")
 }
 
-func startAllWorkspaces() error{
+func startAllWorkspaces() error {
 	ctx := context.Background()
 	apiClient, err := server.GetApiClient(nil)
 	if err != nil {
@@ -89,7 +89,8 @@ func startAllWorkspaces() error{
 	for _, workspace := range workspaceList {
 		res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, *workspace.Id).Execute()
 		if err != nil {
-			return fmt.Errorf("failed to start workspace %s: %v", *workspace.Id, apiclient.HandleErrorResponse(res, err))
+			log.Errorf("Failed to start workspace %s: %v", *workspace.Id, apiclient.HandleErrorResponse(res, err))
+			continue
 		}
 		fmt.Printf("Workspace %s successfully started\n", *workspace.Id)
 	}
