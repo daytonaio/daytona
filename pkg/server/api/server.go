@@ -36,7 +36,7 @@ import (
 var httpServer *http.Server
 var router *gin.Engine
 
-func Start() error {
+func GetServer() (*http.Server, error) {
 	docs.SwaggerInfo.Version = "0.1"
 	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Description = "Daytona Server API"
@@ -56,7 +56,7 @@ func Start() error {
 
 	config, err := config.GetConfig()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	serverController := router.Group("/server")
@@ -107,9 +107,7 @@ func Start() error {
 		Handler: router,
 	}
 
-	log.Infof("Starting api server on port %d", config.ApiPort)
-
-	return httpServer.ListenAndServe()
+	return httpServer, nil
 }
 
 func Stop() {

@@ -60,7 +60,7 @@ To install Daytona all you need to do is execute this script:
 curl -sf -L https://download.daytona.io/daytona/get-server.sh | bash
 
 # OR if you want to install Daytona to /usr/local/bin or /opt/bin
-curl -sf -L https://download.daytona.io/daytona/get-server.sh | sudo bash
+# curl -sf -L https://download.daytona.io/daytona/get-server.sh | sudo bash
 
 # Start Daytona server
 daytona server
