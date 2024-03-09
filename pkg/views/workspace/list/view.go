@@ -25,6 +25,7 @@ var timeLayout = "2006-01-02T15:04:05.999999999Z"
 type RowData struct {
 	WorkspaceName string
 	Repository    string
+	Target        string
 	Created       string
 	Status        string
 }
@@ -38,6 +39,7 @@ type model struct {
 var columns = []table.Column{
 	{Title: "WORKSPACE", Width: defaultColumnWidth},
 	{Title: "REPOSITORY", Width: defaultColumnWidth},
+	{Title: "TARGET", Width: defaultColumnWidth},
 	{Title: "CREATED", Width: defaultColumnWidth},
 	{Title: "STATUS", Width: defaultColumnWidth},
 }
@@ -77,7 +79,7 @@ func renderWorkspaceList(workspaceList []serverapiclient.Workspace, specifyGitPr
 		if len(workspace.Projects) == 1 {
 			rowData = getWorkspaceTableRowData(workspace, specifyGitProviders)
 			adjustColumsFormatting(rowData)
-			row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Created, rowData.Status}
+			row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Target, rowData.Created, rowData.Status}
 			rows = append(rows, row)
 		} else {
 			row = table.Row{*workspace.Name, "", "", "", "", ""}
@@ -85,7 +87,7 @@ func renderWorkspaceList(workspaceList []serverapiclient.Workspace, specifyGitPr
 			for _, project := range workspace.Projects {
 				rowData = getProjectTableRowData(workspace, project, specifyGitProviders)
 				adjustColumsFormatting(rowData)
-				row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Created, rowData.Status}
+				row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Target, rowData.Created, rowData.Status}
 				rows = append(rows, row)
 			}
 		}
@@ -121,6 +123,7 @@ func sortWorkspaces(workspaceList *[]serverapiclient.Workspace) {
 func adjustColumsFormatting(rowData RowData) {
 	adjustColumnWidth("WORKSPACE", rowData)
 	adjustColumnWidth("REPOSITORY", rowData)
+	adjustColumnWidth("TARGET", rowData)
 	adjustColumnWidth("CREATED", rowData)
 	adjustColumnWidth("STATUS", rowData)
 }
@@ -139,6 +142,8 @@ func adjustColumnWidth(title string, rowData RowData) {
 		currentField = rowData.WorkspaceName
 	case "REPOSITORY":
 		currentField = rowData.Repository
+	case "TARGET":
+		currentField = rowData.Target
 	case "CREATED":
 		currentField = rowData.Created
 	case "STATUS":
@@ -157,6 +162,9 @@ func getWorkspaceTableRowData(workspace serverapiclient.Workspace, specifyGitPro
 	}
 	if workspace.Projects != nil && len(workspace.Projects) > 0 && workspace.Projects[0].Repository != nil {
 		rowData.Repository = getRepositorySlugFromUrl(*workspace.Projects[0].Repository.Url, specifyGitProviders)
+	}
+	if workspace.Target != nil {
+		rowData.Target = *workspace.Target
 	}
 	if workspace.Info != nil && workspace.Info.Projects != nil && len(workspace.Info.Projects) > 0 && workspace.Info.Projects[0].Created != nil {
 		rowData.Created = formatCreatedTime(*workspace.Info.Projects[0].Created)
@@ -195,6 +203,9 @@ func getProjectTableRowData(workspace serverapiclient.Workspace, project servera
 	}
 	if project.Repository != nil && project.Repository.Url != nil {
 		rowData.Repository = getRepositorySlugFromUrl(*project.Repository.Url, specifyGitProviders)
+	}
+	if project.Target != nil {
+		rowData.Target = *project.Target
 	}
 	rowData.Created = formatCreatedTime(currentProjectInfo.Created)
 	rowData.Status = formatStatusTime(currentProjectInfo.Started)
