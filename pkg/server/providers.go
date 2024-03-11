@@ -30,8 +30,12 @@ func downloadDefaultProviders() error {
 
 	log.Info("Downloading default providers")
 	for pluginName, plugin := range defaultProviderPlugins {
-		log.Info("Downloading " + pluginName)
 		downloadPath := path.Join(c.ProvidersDir, pluginName, pluginName)
+		if _, err := os.Stat(downloadPath); err == nil {
+			log.Info(pluginName + " already downloaded")
+			continue
+		}
+		log.Info("Downloading " + pluginName)
 		err = manager.DownloadProvider(plugin.DownloadUrls, downloadPath)
 		if err != nil {
 			log.Error(err)
