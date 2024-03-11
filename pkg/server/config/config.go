@@ -111,26 +111,21 @@ func GetWorkspaceLogFilePath(workspaceId string) (string, error) {
 }
 
 func DeleteWorkspaceLogs(workspaceId string) error {
-	projectLogsDir, err := GetWorkspaceLogsDir()
+	logsDir, err := GetWorkspaceLogsDir()
 	if err != nil {
 		return err
 	}
 
-	workspaceDir := path.Join(projectLogsDir, workspaceId)
+	workspaceLogsDir := path.Join(logsDir, workspaceId)
 
-	_, err = os.Stat(workspaceDir)
+	_, err = os.Stat(workspaceLogsDir)
 	if os.IsNotExist(err) {
 		return nil
 	} else if err != nil {
 		return err
 	}
 
-	err = os.RemoveAll(workspaceDir)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return os.RemoveAll(workspaceLogsDir)
 }
 
 func GetProjectLogFilePath(workspaceId string, projectId string) (string, error) {
