@@ -43,9 +43,9 @@ var providerInstallCmd = &cobra.Command{
 			log.Fatal("Could not get providers manifest")
 		}
 
-		pluginList := convertToDTO(providersManifest)
+		providerList := convertToDTO(providersManifest)
 
-		providerToInstall := provider.GetProviderFromPrompt(pluginList, "CHOOSE A PROVIDER TO INSTALL")
+		providerToInstall := provider.GetProviderFromPrompt(providerList, "CHOOSE A PROVIDER TO INSTALL")
 
 		if providerToInstall == nil {
 			return
