@@ -5,6 +5,7 @@ package provider
 
 import (
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	"github.com/daytonaio/daytona/pkg/cmd/output"
 	"github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/spf13/cobra"
 
@@ -20,6 +21,11 @@ var providerListCmd = &cobra.Command{
 		providerList, err := server.GetProviderList()
 		if err != nil {
 			log.Fatal(err)
+		}
+
+		if output.FormatFlag != "" {
+			output.Output = providerList
+			return
 		}
 
 		provider.List(providerList)

@@ -10,6 +10,7 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	"github.com/daytonaio/daytona/pkg/cmd/output"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
@@ -29,6 +30,11 @@ var targetListCmd = &cobra.Command{
 		if len(targets) == 0 {
 			view_util.RenderInfoMessageBold("No targets found")
 			view_util.RenderInfoMessage("Use 'daytona target set' to add a target")
+			return
+		}
+
+		if output.FormatFlag != "" {
+			output.Output = targets
 			return
 		}
 

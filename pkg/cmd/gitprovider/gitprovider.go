@@ -10,6 +10,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	"github.com/daytonaio/daytona/pkg/cmd/output"
 	"github.com/daytonaio/daytona/pkg/views/util"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -52,6 +53,11 @@ var GitProviderCmd = &cobra.Command{
 					)
 				}
 			}
+		}
+
+		if output.FormatFlag != "" {
+			output.Output = gitProviderViewList
+			return
 		}
 
 		for _, gitProviderView := range gitProviderViewList {
