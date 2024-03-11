@@ -25,6 +25,7 @@ var timeLayout = "2006-01-02T15:04:05.999999999Z"
 type RowData struct {
 	WorkspaceName string
 	Repository    string
+	Branch        string
 	Target        string
 	Created       string
 	Status        string
@@ -39,6 +40,7 @@ type model struct {
 var columns = []table.Column{
 	{Title: "WORKSPACE", Width: defaultColumnWidth},
 	{Title: "REPOSITORY", Width: defaultColumnWidth},
+	{Title: "BRANCH", Width: defaultColumnWidth},
 	{Title: "TARGET", Width: defaultColumnWidth},
 	{Title: "CREATED", Width: defaultColumnWidth},
 	{Title: "STATUS", Width: defaultColumnWidth},
@@ -79,7 +81,7 @@ func renderWorkspaceList(workspaceList []serverapiclient.Workspace, specifyGitPr
 		if len(workspace.Projects) == 1 {
 			rowData = getWorkspaceTableRowData(workspace, specifyGitProviders)
 			adjustColumsFormatting(rowData)
-			row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Target, rowData.Created, rowData.Status}
+			row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Branch, rowData.Target, rowData.Created, rowData.Status}
 			rows = append(rows, row)
 		} else {
 			row = table.Row{*workspace.Name, "", "", "", "", ""}
@@ -87,7 +89,7 @@ func renderWorkspaceList(workspaceList []serverapiclient.Workspace, specifyGitPr
 			for _, project := range workspace.Projects {
 				rowData = getProjectTableRowData(workspace, project, specifyGitProviders)
 				adjustColumsFormatting(rowData)
-				row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Target, rowData.Created, rowData.Status}
+				row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Branch, rowData.Target, rowData.Created, rowData.Status}
 				rows = append(rows, row)
 			}
 		}
@@ -123,6 +125,7 @@ func sortWorkspaces(workspaceList *[]serverapiclient.Workspace) {
 func adjustColumsFormatting(rowData RowData) {
 	adjustColumnWidth("WORKSPACE", rowData)
 	adjustColumnWidth("REPOSITORY", rowData)
+	adjustColumnWidth("BRANCH", rowData)
 	adjustColumnWidth("TARGET", rowData)
 	adjustColumnWidth("CREATED", rowData)
 	adjustColumnWidth("STATUS", rowData)
@@ -142,6 +145,8 @@ func adjustColumnWidth(title string, rowData RowData) {
 		currentField = rowData.WorkspaceName
 	case "REPOSITORY":
 		currentField = rowData.Repository
+	case "BRANCH":
+		currentField = rowData.Branch
 	case "TARGET":
 		currentField = rowData.Target
 	case "CREATED":
@@ -162,6 +167,9 @@ func getWorkspaceTableRowData(workspace serverapiclient.Workspace, specifyGitPro
 	}
 	if workspace.Projects != nil && len(workspace.Projects) > 0 && workspace.Projects[0].Repository != nil {
 		rowData.Repository = getRepositorySlugFromUrl(*workspace.Projects[0].Repository.Url, specifyGitProviders)
+		if workspace.Projects[0].Repository.Branch != nil {
+			rowData.Branch = *workspace.Projects[0].Repository.Branch
+		}
 	}
 	if workspace.Target != nil {
 		rowData.Target = *workspace.Target
@@ -203,6 +211,9 @@ func getProjectTableRowData(workspace serverapiclient.Workspace, project servera
 	}
 	if project.Repository != nil && project.Repository.Url != nil {
 		rowData.Repository = getRepositorySlugFromUrl(*project.Repository.Url, specifyGitProviders)
+		if project.Repository.Branch != nil {
+			rowData.Branch = *project.Repository.Branch
+		}
 	}
 	if project.Target != nil {
 		rowData.Target = *project.Target
