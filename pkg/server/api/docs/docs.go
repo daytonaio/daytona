@@ -551,6 +551,9 @@ const docTemplate = `{
         "GitProvider": {
             "type": "object",
             "properties": {
+                "baseApiUrl": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -587,9 +590,6 @@ const docTemplate = `{
         "Project": {
             "type": "object",
             "properties": {
-                "info": {
-                    "$ref": "#/definitions/ProjectInfo"
-                },
                 "name": {
                     "type": "string"
                 },

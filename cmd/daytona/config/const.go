@@ -27,6 +27,7 @@ func GetGitProviderList() []GitProvider {
 	return []GitProvider{
 		{"github", "GitHub", ""},
 		{"gitlab", "GitLab", ""},
+		{"gitlab-self-managed", "GitLab Self-managed", ""},
 		{"bitbucket", "Bitbucket", ""},
 	}
 }
@@ -36,6 +37,8 @@ func GetDocsLinkFromGitProvider(providerId string) string {
 	case "github":
 		return "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic"
 	case "gitlab":
+		fallthrough
+	case "gitlab-self-managed":
 		return "https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token"
 	case "bitbucket":
 		return "https://support.atlassian.com/bitbucket-cloud/docs/create-an-app-password"

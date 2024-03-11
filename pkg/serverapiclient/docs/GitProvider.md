@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**BaseApiUrl** | Pointer to **string** |  | [optional] 
 **Id** | Pointer to **string** |  | [optional] 
 **Token** | Pointer to **string** |  | [optional] 
 **Username** | Pointer to **string** |  | [optional] 
@@ -26,6 +27,31 @@ will change when the set of required properties is changed
 NewGitProviderWithDefaults instantiates a new GitProvider object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetBaseApiUrl
+
+`func (o *GitProvider) GetBaseApiUrl() string`
+
+GetBaseApiUrl returns the BaseApiUrl field if non-nil, zero value otherwise.
+
+### GetBaseApiUrlOk
+
+`func (o *GitProvider) GetBaseApiUrlOk() (*string, bool)`
+
+GetBaseApiUrlOk returns a tuple with the BaseApiUrl field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetBaseApiUrl
+
+`func (o *GitProvider) SetBaseApiUrl(v string)`
+
+SetBaseApiUrl sets BaseApiUrl field to given value.
+
+### HasBaseApiUrl
+
+`func (o *GitProvider) HasBaseApiUrl() bool`
+
+HasBaseApiUrl returns a boolean if a field has been set.
 
 ### GetId
 

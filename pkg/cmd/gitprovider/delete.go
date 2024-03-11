@@ -18,7 +18,7 @@ import (
 
 var gitProviderDeleteCmd = &cobra.Command{
 	Use:     "delete",
-	Aliases: []string{"remove"},
+	Aliases: []string{"remove", "rm"},
 	Short:   "Unregister a Git providers",
 	Run: func(cmd *cobra.Command, args []string) {
 		apiClient, err := server.GetApiClient(nil)

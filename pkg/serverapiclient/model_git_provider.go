@@ -19,6 +19,7 @@ var _ MappedNullable = &GitProvider{}
 
 // GitProvider struct for GitProvider
 type GitProvider struct {
+	BaseApiUrl *string `json:"baseApiUrl,omitempty"`
 	Id *string `json:"id,omitempty"`
 	Token *string `json:"token,omitempty"`
 	Username *string `json:"username,omitempty"`
@@ -39,6 +40,38 @@ func NewGitProvider() *GitProvider {
 func NewGitProviderWithDefaults() *GitProvider {
 	this := GitProvider{}
 	return &this
+}
+
+// GetBaseApiUrl returns the BaseApiUrl field value if set, zero value otherwise.
+func (o *GitProvider) GetBaseApiUrl() string {
+	if o == nil || IsNil(o.BaseApiUrl) {
+		var ret string
+		return ret
+	}
+	return *o.BaseApiUrl
+}
+
+// GetBaseApiUrlOk returns a tuple with the BaseApiUrl field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitProvider) GetBaseApiUrlOk() (*string, bool) {
+	if o == nil || IsNil(o.BaseApiUrl) {
+		return nil, false
+	}
+	return o.BaseApiUrl, true
+}
+
+// HasBaseApiUrl returns a boolean if a field has been set.
+func (o *GitProvider) HasBaseApiUrl() bool {
+	if o != nil && !IsNil(o.BaseApiUrl) {
+		return true
+	}
+
+	return false
+}
+
+// SetBaseApiUrl gets a reference to the given string and assigns it to the BaseApiUrl field.
+func (o *GitProvider) SetBaseApiUrl(v string) {
+	o.BaseApiUrl = &v
 }
 
 // GetId returns the Id field value if set, zero value otherwise.
@@ -147,6 +180,9 @@ func (o GitProvider) MarshalJSON() ([]byte, error) {
 
 func (o GitProvider) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.BaseApiUrl) {
+		toSerialize["baseApiUrl"] = o.BaseApiUrl
+	}
 	if !IsNil(o.Id) {
 		toSerialize["id"] = o.Id
 	}
