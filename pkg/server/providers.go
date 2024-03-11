@@ -46,6 +46,11 @@ func downloadDefaultProviders() error {
 func registerProviders(c *types.ServerConfig) error {
 	log.Info("Registering providers")
 
+	manifest, err := manager.GetProvidersManifest(c.RegistryUrl)
+	if err != nil {
+		return err
+	}
+
 	files, err := os.ReadDir(c.ProvidersDir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -67,6 +72,23 @@ func registerProviders(c *types.ServerConfig) error {
 			if err != nil {
 				log.Error(err)
 				continue
+			}
+
+			// Check for updates
+			provider, err := manager.GetProvider(file.Name())
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+
+			info, err := (*provider).GetInfo()
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+
+			if manager.HasUpdateAvailable(info.Name, info.Version, *manifest) {
+				log.Infof("Update available for %s. Update with `daytona provider update`.", info.Name)
 			}
 		}
 	}
