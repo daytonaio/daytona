@@ -92,3 +92,24 @@ func GetDefaultProviders(manifest ProvidersManifest) map[string]*Version {
 
 	return defaultProviders
 }
+
+func HasUpdateAvailable(providerName string, currentVersion string, manifest ProvidersManifest) bool {
+	provider, ok := manifest[providerName]
+	if !ok {
+		return false
+	}
+
+	var latestVersion string = "v0.0.0"
+
+	for version := range provider.Versions {
+		if version == "latest" {
+			continue
+		}
+
+		if semver.Compare(version, latestVersion) > 0 {
+			latestVersion = version
+		}
+	}
+
+	return semver.Compare(latestVersion, currentVersion) > 0
+}
