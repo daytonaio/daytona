@@ -4,12 +4,10 @@
 package os
 
 import (
-	"bytes"
 	"fmt"
 	"os/exec"
 	"runtime"
 	"strings"
-	"syscall"
 )
 
 type OperatingSystem string
@@ -58,35 +56,9 @@ func OSFromEchoProcessor(output string) (*OperatingSystem, error) {
 	}
 }
 
-func OSFromSysCallUtsName(uname *syscall.Utsname) (*OperatingSystem, error) {
-	var arch OperatingSystem
-	sysname := unameToString(uname.Sysname)
-	machine := unameToString(uname.Machine)
-	if sysname == "Darwin" && machine == "arm64" {
-		arch = Darwin_arm64
-		return &arch, nil
-	} else if sysname == "Darwin" && machine == "x86_64" {
-		arch = Darwin_64_86
-		return &arch, nil
-	} else if sysname == "arm64" || sysname == "aarch64" {
-		arch = Linux_arm64
-		return &arch, nil
-	} else if machine == "x86_64" {
-		arch = Linux_64_86
-		return &arch, nil
-	} else {
-		return nil, fmt.Errorf("unsupported architecture in `syscall.Uname` output")
-	}
-}
-
 func GetOperatingSystem() (*OperatingSystem, error) {
 	if runtime.GOOS == "windows" {
 		return GetOperatingSystemWindows()
-	}
-
-	var uname *syscall.Utsname
-	if err := syscall.Uname(uname); err == nil {
-		return OSFromSysCallUtsName(uname)
 	}
 
 	cmd := exec.Command("uname", "-a")
@@ -105,15 +77,4 @@ func GetOperatingSystemWindows() (*OperatingSystem, error) {
 		return nil, err
 	}
 	return OSFromEchoProcessor(string(output))
-}
-
-func unameToString(input [65]int8) string {
-	var buffer bytes.Buffer
-	for _, value := range input {
-		if value == 0 {
-			break
-		}
-		buffer.WriteByte(uint8(value))
-	}
-	return buffer.String()
 }
