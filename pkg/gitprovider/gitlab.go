@@ -4,7 +4,6 @@
 package gitprovider
 
 import (
-	"fmt"
 	"log"
 	"strconv"
 
@@ -157,8 +156,6 @@ func (g *GitLabGitProvider) getApiClient() *gitlab.Client {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	fmt.Println(client.BaseURL())
 
 	return client
 }

@@ -52,7 +52,7 @@ var gitProviderAddCmd = &cobra.Command{
 		}
 
 		if gitProviderSelectView.Username == "" {
-			gitUsername, err := gitprovider.GetUsernameFromToken(gitProviderSelectView.Id, config.GetGitProviderList(), gitProviderSelectView.Token)
+			gitUsername, err := gitprovider.GetUsernameFromToken(gitProviderSelectView.Id, config.GetGitProviderList(), gitProviderSelectView.Token, gitProviderSelectView.BaseApiUrl)
 			if err != nil {
 				log.Fatal(err)
 			}

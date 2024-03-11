@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	view_util "github.com/daytonaio/daytona/pkg/views/util"
 )
 
 type GitProviderSelectView struct {
@@ -93,9 +94,7 @@ func GitProviderSelectionView(gitProviderAddView *GitProviderSelectView, userGit
 		).WithHide(isDeleting),
 	).WithTheme(views.GetCustomTheme())
 
-	fmt.Println("More information on:")
-	fmt.Println(config.GetDocsLinkFromGitProvider(gitProviderAddView.Id))
-	fmt.Println()
+	view_util.RenderInfoMessage(fmt.Sprintf("More information on:\n%s", config.GetDocsLinkFromGitProvider(gitProviderAddView.Id)))
 
 	err = userDataForm.Run()
 	if err != nil {
