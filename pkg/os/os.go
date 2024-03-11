@@ -23,7 +23,7 @@ const (
 
 func OSFromUnameA(unameA string) (*OperatingSystem, error) {
 	fields := strings.Fields(unameA)
-	if len(fields) < 13 {
+	if len(fields) < 3 {
 		return nil, fmt.Errorf("unexpected output format")
 	}
 

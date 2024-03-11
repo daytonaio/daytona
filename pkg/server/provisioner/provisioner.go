@@ -317,6 +317,11 @@ func DestroyWorkspace(workspace *types.Workspace) error {
 		},
 	})
 
+	err = config.DeleteWorkspaceLogs(workspace.Id)
+	if err != nil {
+		return err
+	}
+
 	log.Infof("Workspace %s destroyed", workspace.Id)
 
 	return nil

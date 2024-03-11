@@ -114,7 +114,7 @@ func runInitialForm(providerRepo types.Repository, multiProject bool) (Workspace
 	m.form = huh.NewForm(
 		huh.NewGroup(
 			primaryRepoPrompt,
-		),
+		).WithHide(!multiProject),
 		huh.NewGroup(
 			secondaryProjectCountPrompt,
 		).WithHide(!multiProject),
