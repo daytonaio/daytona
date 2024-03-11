@@ -24,6 +24,14 @@ var StopCmd = &cobra.Command{
 	Short: "Stop a workspace",
 	Args:  cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
+		if allFlag {
+			err := stopAllWorkspaces()
+			if err != nil {
+				log.Fatal(err)
+			}
+			return
+		}
+
 		ctx := context.Background()
 		var workspaceId string
 
@@ -72,4 +80,28 @@ func init() {
 	}
 
 	StopCmd.Flags().StringVarP(&stopProjectFlag, "project", "p", "", "Stop a single project in the workspace (project name)")
+	StopCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Stop all workspaces")
+}
+
+func stopAllWorkspaces() error {
+	ctx := context.Background()
+	apiClient, err := server.GetApiClient(nil)
+	if err != nil {
+		return err
+	}
+
+	workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+	if err != nil {
+		return apiclient.HandleErrorResponse(res, err)
+	}
+
+	for _, workspace := range workspaceList {
+		res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, *workspace.Id).Execute()
+		if err != nil {
+			log.Errorf("Failed to stop workspace %s: %v", *workspace.Id, apiclient.HandleErrorResponse(res, err))
+			continue
+		}
+		fmt.Printf("Workspace %s successfully stopped\n", *workspace.Id)
+	}
+	return nil
 }
