@@ -22,12 +22,12 @@ var providerUninstallCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Aliases: []string{"u"},
 	Run: func(cmd *cobra.Command, args []string) {
-		pluginList, err := server.GetProviderList()
+		providerList, err := server.GetProviderList()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		providerToUninstall := provider.GetProviderFromPrompt(pluginList, "CHOOSE A PROVIDER TO UNINSTALL")
+		providerToUninstall := provider.GetProviderFromPrompt(providerList, "CHOOSE A PROVIDER TO UNINSTALL")
 
 		if providerToUninstall == nil {
 			return

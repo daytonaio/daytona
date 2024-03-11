@@ -18,4 +18,5 @@ func init() {
 	ProviderCmd.AddCommand(providerListCmd)
 	ProviderCmd.AddCommand(providerUninstallCmd)
 	ProviderCmd.AddCommand(providerInstallCmd)
+	ProviderCmd.AddCommand(providerUpdateCmd)
 }
