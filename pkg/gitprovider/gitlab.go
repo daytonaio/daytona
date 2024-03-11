@@ -12,7 +12,8 @@ import (
 )
 
 type GitLabGitProvider struct {
-	token string
+	token      string
+	baseApiUrl string
 }
 
 func (g *GitLabGitProvider) GetNamespaces() ([]GitNamespace, error) {
@@ -144,7 +145,14 @@ func (g *GitLabGitProvider) GetUserData() (GitUser, error) {
 }
 
 func (g *GitLabGitProvider) getApiClient() *gitlab.Client {
-	client, err := gitlab.NewClient(g.token)
+	var client *gitlab.Client
+	var err error
+
+	if g.baseApiUrl == "" {
+		client, err = gitlab.NewClient(g.token)
+	} else {
+		client, err = gitlab.NewClient(g.token, gitlab.WithBaseURL(g.baseApiUrl))
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
