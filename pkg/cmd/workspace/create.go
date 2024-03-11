@@ -98,8 +98,7 @@ var CreateCmd = &cobra.Command{
 		}
 
 		var requestRepos []serverapiclient.Repository
-		for i := range repos {
-			repo := repos[i]
+		for _, repo := range repos {
 			requestRepo := serverapiclient.Repository{
 				Name:   &repo.Name,
 				Url:    &repo.Url,
