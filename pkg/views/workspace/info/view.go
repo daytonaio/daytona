@@ -58,16 +58,13 @@ func projectRender(projectInfo *serverapiclient.ProjectInfo, project *serverapic
 		projectState = projectStatusStyle.Render("Stopped")
 	} else {
 		projectState = projectStatusStyle.Foreground(lipgloss.Color(colors[4][4])).Render("Running")
-		// for _, extension := range project.Extensions {
-		// 	extensions = append(extensions, []string{extension.Name /*extension.State*/, "", extension.Info})
-		// }
 
 		extensionsTable = table.New().
 			Border(lipgloss.HiddenBorder()).
 			Rows(extensions...).Render()
 	}
 
-	if (project.Repository.Branch == nil){
+	if project.Repository.Branch == nil {
 		repoBranch = ""
 	} else {
 		repoBranch = "Branch" + repositoryBranchStyle.Render(*project.Repository.Branch)
@@ -75,7 +72,7 @@ func projectRender(projectInfo *serverapiclient.ProjectInfo, project *serverapic
 
 	repoView := "Url" + (repositoryURLStyle.Render(*project.Repository.Url)) + "\n" + repoBranch
 	repoView = "Repository" + viewStyle.Render(repoView)
-	
+
 	projectView := "Project" + projectNameStyle.Render(*projectInfo.Name) + "\n" + "State  " + projectState + extensionsTable
 
 	return viewStyle.Render(projectView) + viewStyle.Render(repoView)
@@ -92,9 +89,12 @@ func Render(workspace *serverapiclient.Workspace) {
 		output += "\n" + "Projects"
 	}
 
-	for _, project := range workspace.Projects { 
+	for _, project := range workspace.Projects {
 		for _, projectInfo := range workspace.Info.Projects {
-			output += projectRender(&projectInfo, &project)
+			if *projectInfo.Name == *project.Name {
+				output += projectRender(&projectInfo, &project)
+				break
+			}
 		}
 	}
 
