@@ -11,8 +11,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var CompletionCmd = &cobra.Command{
-	Use:     "completion [bash|zsh|fish|powershell]",
+var AutoCompleteCmd = &cobra.Command{
+	Use:     "autocomplete [bash|zsh|fish|powershell]",
 	Short:   "Adds completion script for your shell enviornment",
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {

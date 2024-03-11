@@ -36,7 +36,7 @@ var rootCmd = &cobra.Command{
 var originalStdout *os.File
 
 func Execute() {
-	rootCmd.AddCommand(CompletionCmd)
+	rootCmd.AddCommand(AutoCompleteCmd)
 	rootCmd.AddCommand(InfoCmd)
 	rootCmd.AddCommand(StartCmd)
 	rootCmd.AddCommand(StopCmd)
@@ -63,6 +63,7 @@ func Execute() {
 		rootCmd.AddCommand(ProviderCmd)
 	}
 
+	rootCmd.CompletionOptions.HiddenDefaultCmd = true
 	rootCmd.PersistentFlags().BoolP("help", "", false, "help for daytona")
 	rootCmd.PersistentFlags().StringVarP(&output.FormatFlag, "output", "o", output.FormatFlag, `Output format. Must be one of (yaml, json)`)
 
