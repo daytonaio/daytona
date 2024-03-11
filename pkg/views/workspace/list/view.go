@@ -167,9 +167,9 @@ func getWorkspaceTableRowData(workspace serverapiclient.Workspace, specifyGitPro
 	}
 	if workspace.Projects != nil && len(workspace.Projects) > 0 && workspace.Projects[0].Repository != nil {
 		rowData.Repository = getRepositorySlugFromUrl(*workspace.Projects[0].Repository.Url, specifyGitProviders)
-	}
-	if workspace.Projects[0].Repository.Branch != nil {
-		rowData.Branch = *workspace.Projects[0].Repository.Branch
+		if workspace.Projects[0].Repository.Branch != nil {
+			rowData.Branch = *workspace.Projects[0].Repository.Branch
+		}
 	}
 	if workspace.Target != nil {
 		rowData.Target = *workspace.Target
@@ -211,9 +211,9 @@ func getProjectTableRowData(workspace serverapiclient.Workspace, project servera
 	}
 	if project.Repository != nil && project.Repository.Url != nil {
 		rowData.Repository = getRepositorySlugFromUrl(*project.Repository.Url, specifyGitProviders)
-	}
-	if project.Repository.Branch != nil {
-		rowData.Branch = *project.Repository.Branch
+		if project.Repository.Branch != nil {
+			rowData.Branch = *project.Repository.Branch
+		}
 	}
 	if project.Target != nil {
 		rowData.Target = *project.Target
