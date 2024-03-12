@@ -146,7 +146,7 @@ daytona target set
 Following the steps this command adds SSH machines to your targets.
 
 __4. Choose Your Default IDE:__
-The default setting for Daytona is VS Code locally. If you prefer, you can switch to VS Code - Browser or any IDE from the JetBrains portfolio (Contributions welcome here!) using the command:
+The default setting for Daytona is VS Code locally. If you prefer, you can switch to VS Code - Browser or any IDE from the JetBrains portfolio using the command:
 ```bash
 daytona ide
 ```
