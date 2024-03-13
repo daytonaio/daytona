@@ -3,7 +3,10 @@
 
 package config
 
-import "github.com/daytonaio/daytona/pkg/os"
+import (
+	"github.com/daytonaio/daytona/internal/jetbrains"
+	"github.com/daytonaio/daytona/pkg/os"
+)
 
 func GetBinaryUrls() map[os.OperatingSystem]string {
 	return map[os.OperatingSystem]string{
@@ -17,10 +20,16 @@ func GetBinaryUrls() map[os.OperatingSystem]string {
 }
 
 func GetIdeList() []Ide {
-	return []Ide{
+	ides := []Ide{
 		{"vscode", "VS Code"},
 		{"browser", "VS Code - Browser"},
 	}
+
+	for id, ide := range jetbrains.GetIdes() {
+		ides = append(ides, Ide{string(id), ide.Name})
+	}
+
+	return ides
 }
 
 func GetGitProviderList() []GitProvider {
