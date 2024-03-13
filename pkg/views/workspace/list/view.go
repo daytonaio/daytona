@@ -8,11 +8,11 @@ import (
 	"os"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/types"
 	"golang.org/x/term"
@@ -20,7 +20,6 @@ import (
 
 var defaultColumnWidth = 12
 var columnPadding = 3
-var timeLayout = "2006-01-02T15:04:05.999999999Z"
 
 type RowData struct {
 	WorkspaceName string
@@ -175,10 +174,10 @@ func getWorkspaceTableRowData(workspace serverapiclient.Workspace, specifyGitPro
 		rowData.Target = *workspace.Target
 	}
 	if workspace.Info != nil && workspace.Info.Projects != nil && len(workspace.Info.Projects) > 0 && workspace.Info.Projects[0].Created != nil {
-		rowData.Created = formatCreatedTime(*workspace.Info.Projects[0].Created)
+		rowData.Created = util.FormatCreatedTime(*workspace.Info.Projects[0].Created)
 	}
 	if workspace.Info != nil && workspace.Info.Projects != nil && len(workspace.Info.Projects) > 0 && workspace.Info.Projects[0].Started != nil {
-		rowData.Status = formatStatusTime(*workspace.Info.Projects[0].Started)
+		rowData.Status = util.FormatStatusTime(*workspace.Info.Projects[0].Started)
 	}
 	return rowData
 }
@@ -218,8 +217,8 @@ func getProjectTableRowData(workspace serverapiclient.Workspace, project servera
 	if project.Target != nil {
 		rowData.Target = *project.Target
 	}
-	rowData.Created = formatCreatedTime(currentProjectInfo.Created)
-	rowData.Status = formatStatusTime(currentProjectInfo.Started)
+	rowData.Created = util.FormatCreatedTime(currentProjectInfo.Created)
+	rowData.Status = util.FormatStatusTime(currentProjectInfo.Started)
 	return rowData
 }
 
@@ -239,68 +238,6 @@ func getRepositorySlugFromUrl(url string, specifyGitProviders bool) string {
 	}
 
 	return parts[len(parts)-2] + "/" + parts[len(parts)-1]
-}
-
-func formatCreatedTime(input string) string {
-	t, err := time.Parse(timeLayout, input)
-	if err != nil {
-		return "/"
-	}
-
-	duration := time.Since(t)
-
-	if duration < time.Minute {
-		return "< 1 minute ago"
-	} else if duration < time.Hour {
-		minutes := int(duration.Minutes())
-		if minutes == 1 {
-			return "1 minute ago"
-		}
-		return fmt.Sprintf("%d minutes ago", minutes)
-	} else if duration < 24*time.Hour {
-		hours := int(duration.Hours())
-		if hours == 1 {
-			return "1 hour ago"
-		}
-		return fmt.Sprintf("%d hours ago", hours)
-	} else {
-		days := int(duration.Hours() / 24)
-		if days == 1 {
-			return "1 day ago"
-		}
-		return fmt.Sprintf("%d days ago", days)
-	}
-}
-
-func formatStatusTime(input string) string {
-	t, err := time.Parse(timeLayout, input)
-	if err != nil {
-		return "stopped"
-	}
-
-	duration := time.Since(t)
-
-	if duration < time.Minute {
-		return "up < 1 minute"
-	} else if duration < time.Hour {
-		minutes := int(duration.Minutes())
-		if minutes == 1 {
-			return "up 1 minute"
-		}
-		return fmt.Sprintf("up %d minutes", minutes)
-	} else if duration < 24*time.Hour {
-		hours := int(duration.Hours())
-		if hours == 1 {
-			return "up 1 hour"
-		}
-		return fmt.Sprintf("up %d hours", hours)
-	} else {
-		days := int(duration.Hours() / 24)
-		if days == 1 {
-			return "up 1 day"
-		}
-		return fmt.Sprintf("up %d days", days)
-	}
 }
 
 func ListWorkspaces(workspaceList []serverapiclient.Workspace, specifyGitProviders bool) {

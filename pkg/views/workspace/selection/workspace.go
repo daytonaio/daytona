@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 
@@ -26,20 +27,31 @@ func selectWorkspacePrompt(workspaces []serverapiclient.Workspace, actionVerb st
 		for _, project := range workspace.Projects {
 			projectNames = append(projectNames, *project.Name)
 		}
-		newItem := item[serverapiclient.Workspace]{title: *workspace.Name, desc: strings.Join(projectNames, ", "), choiceProperty: workspace}
+
+		// Get the time if available
+		statusTime := ""
+		createdTime := ""
+		if workspace.Info != nil && workspace.Info.Projects != nil && len(workspace.Info.Projects) > 0 && workspace.Info.Projects[0].Created != nil {
+			createdTime = util.FormatCreatedTime(*workspace.Info.Projects[0].Created)
+		}
+		if workspace.Info != nil && workspace.Info.Projects != nil && len(workspace.Info.Projects) > 0 && workspace.Info.Projects[0].Started != nil {
+			statusTime = util.FormatStatusTime(*workspace.Info.Projects[0].Started)
+		}
+
+		newItem := item[serverapiclient.Workspace]{
+			title:          *workspace.Name,
+			id:             *workspace.Id,
+			desc:           strings.Join(projectNames, ", "),
+			createdTime:    createdTime,
+			statusTime:     statusTime,
+			target:         *workspace.Target,
+			choiceProperty: workspace,
+		}
+
 		items = append(items, newItem)
 	}
 
-	d := list.NewDefaultDelegate()
-
-	d.Styles.SelectedTitle = lipgloss.NewStyle().
-		Border(lipgloss.NormalBorder(), false, false, false, true).
-		BorderForeground(views.Blue).
-		Foreground(views.Blue).
-		Bold(true).
-		Padding(0, 0, 0, 1)
-
-	d.Styles.SelectedDesc = d.Styles.SelectedTitle.Copy().Foreground(views.DimmedBlue)
+	d := ItemDelegate[serverapiclient.Workspace]{}
 
 	l := list.New(items, d, 0, 0)
 

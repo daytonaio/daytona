@@ -17,6 +17,7 @@ var (
 	Red         = lipgloss.AdaptiveColor{Light: "#ff4567", Dark: "#ff4567"}
 	DimmedBlue  = lipgloss.AdaptiveColor{Light: "#3398fe", Dark: "#3398fe"}
 	White       = lipgloss.AdaptiveColor{Light: "000", Dark: "fff"}
+	Gray        = lipgloss.AdaptiveColor{Light: "243", Dark: "243"}
 )
 
 func ColorGrid(xSteps, ySteps int) [][]string {
