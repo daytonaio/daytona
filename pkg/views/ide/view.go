@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/bubbles/list"
@@ -106,13 +107,9 @@ func (m model) View() string {
 }
 
 func Render(ideList []config.Ide, choiceChan chan<- string) {
-	items := make([]list.Item, 0)
-
-	for _, ide := range ideList {
-		if len(ide.Name) > 0 {
-			items = append(items, item{id: ide.Id, name: ide.Name})
-		}
-	}
+	items := util.ArrayMap(ideList, func(ide config.Ide) list.Item {
+		return item{id: ide.Id, name: ide.Name}
+	})
 
 	const defaultWidth = 20
 
