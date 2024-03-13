@@ -88,7 +88,10 @@ var CodeCmd = &cobra.Command{
 
 		view_util.RenderInfoMessage(fmt.Sprintf("Opening the workspace project '%s' in your preferred IDE.", projectName))
 
-		log.Fatal(openIDE(ideId, activeProfile, workspaceId, projectName))
+		err = openIDE(ideId, activeProfile, workspaceId, projectName)
+		if err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 
