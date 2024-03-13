@@ -29,6 +29,8 @@ func GetGitProviderList() []GitProvider {
 		{"gitlab", "GitLab", ""},
 		{"gitlab-self-managed", "GitLab Self-managed", ""},
 		{"bitbucket", "Bitbucket", ""},
+		{"codeberg", "Codeberg", ""},
+		{"gitea", "Gitea", ""},
 	}
 }
 
@@ -42,6 +44,10 @@ func GetDocsLinkFromGitProvider(providerId string) string {
 		return "https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token"
 	case "bitbucket":
 		return "https://support.atlassian.com/bitbucket-cloud/docs/create-an-app-password"
+	case "codeberg":
+		return "https://docs.codeberg.org/advanced/access-token/"
+	case "gitea":
+		return "https://docs.gitea.com/1.21/development/api-usage#generating-and-listing-api-tokens"
 	default:
 		return ""
 	}
