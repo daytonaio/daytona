@@ -198,9 +198,8 @@ Similar to providers, plugins are independent projects that conform to the Dayto
 
 Daytona is Open Source under the [Apache License 2.0](LICENSE), and is the [copyright of its contributors](NOTICE). If you would like to contribute to the software, you must:
 
-1. Read the [Contributors](CONTRIBUTORS.md) file.
-2. Agree to the terms by having a commit in your pull request "signing" the file by adding your name and GitHub handle on a new line at the bottom of the file.
-3. Make sure your commits Author metadata matches the name and handle you added to the file.
+1. Read the Developer Certificate of Origin Version 1.1 (https://developercertificate.org/)
+2. Signing all commits to the Daytona project.
 
 This ensures that users, distributors, and other contributors can rely on all the software related to Daytona being contributed under the terms of the [License](LICENSE). No contributions will be accepted without following this process.
 
