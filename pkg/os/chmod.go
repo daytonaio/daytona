@@ -3,10 +3,17 @@
 
 package os
 
-import "os/exec"
+import (
+	"os"
+)
 
 func ChmodX(filePath string) error {
-	err := exec.Command("chmod", "+x", filePath).Run()
+	f, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
+
+	err = f.Chmod(0755)
 	if err != nil {
 		return err
 	}

@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"runtime"
 	"strings"
 
 	"github.com/daytonaio/daytona/internal/util"
@@ -75,6 +76,10 @@ func GetProviders() map[string]Provider {
 func RegisterProvider(pluginPath, serverDownloadUrl, serverUrl, serverApiUrl string) error {
 	pluginName := path.Base(pluginPath)
 	pluginBasePath := path.Dir(pluginPath)
+
+	if runtime.GOOS == "windows" && strings.HasSuffix(pluginPath, ".exe") {
+		pluginName = strings.TrimSuffix(pluginName, ".exe")
+	}
 
 	err := os_util.ChmodX(pluginPath)
 	if err != nil {
