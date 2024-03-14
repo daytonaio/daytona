@@ -52,6 +52,10 @@ var InfoCmd = &cobra.Command{
 			}
 		}
 
+		if workspace == nil {
+			return
+		}
+
 		if output.FormatFlag != "" {
 			output.Output = workspace
 			return

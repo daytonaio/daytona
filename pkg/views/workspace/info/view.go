@@ -79,6 +79,10 @@ func projectRender(projectInfo *serverapiclient.ProjectInfo, project *serverapic
 }
 
 func Render(workspace *serverapiclient.Workspace) {
+	if workspace == nil {
+		return
+	}
+
 	var output string
 	output = "\n"
 	output += "Workspace" + workspaceNameStyle.Render(*workspace.Info.Name) + "\n"
