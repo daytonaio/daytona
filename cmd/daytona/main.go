@@ -5,12 +5,22 @@ package main
 
 import (
 	"os"
+	"time"
 
+	golog "log"
+
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/cmd"
+	"github.com/rs/zerolog"
+	zlog "github.com/rs/zerolog/log"
 	log "github.com/sirupsen/logrus"
 )
 
 func main() {
+	cmd.Execute()
+}
+
+func init() {
 	logLevel := log.ErrorLevel
 
 	logLevelEnv, logLevelSet := os.LookupEnv("LOG_LEVEL")
@@ -31,5 +41,17 @@ func main() {
 
 	log.SetLevel(logLevel)
 
-	cmd.Execute()
+	zerologLevel, err := zerolog.ParseLevel(logLevel.String())
+	if err != nil {
+		zerologLevel = zerolog.ErrorLevel
+	}
+
+	zerolog.SetGlobalLevel(zerologLevel)
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	zlog.Logger = zlog.Output(zerolog.ConsoleWriter{
+		Out:        &util.DebugLogWriter{},
+		TimeFormat: time.RFC3339,
+	})
+
+	golog.SetOutput(&util.DebugLogWriter{})
 }
