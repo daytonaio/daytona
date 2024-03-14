@@ -1,29 +1,10 @@
 {
 	"name": "Daytona",
-	"build": {
-		"dockerfile": "./Dockerfile"
-	},
-	"features": {
-		"ghcr.io/devcontainers/features/common-utils:1": {
-			"installZsh": "true",
-			"username": "daytona",
-			"uid": "1000",
-			"gid": "1000",
-			"upgradePackages": "false"
-		},
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
-		"ghcr.io/devcontainers/features/go:1": {
-			"version": "1.22.1"
-		},
-		"ghcr.io/devcontainers/features/node:1": {}
-	},
+	"image": "ghcr.io/daytonaio/go-devcontainer:main",
 	"containerEnv": {
 		"LOG_LEVEL": "debug",
 		"DAYTONA_SERVER_MODE": "development"
 	},
-	"postCreateCommand": {
-		"setup": "/setup/postcreate.sh",
-		"swag": "go install github.com/swaggo/swag/cmd/swag@v1.16.3"
-	},
+	"postCreateCommand":  ".devcontainer/postcreate.sh",
 	"remoteUser": "daytona"
 }
