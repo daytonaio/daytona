@@ -25,7 +25,7 @@ type Self struct {
 	DNSName  string `json:"DNSName"`
 }
 
-func Start() error {
+func Start(errCh chan error) error {
 	err := logs.Init()
 	if err != nil {
 		return err
@@ -66,13 +66,13 @@ func Start() error {
 
 	go func() {
 		if err := frpc.ConnectServer(); err != nil {
-			log.Fatal(err)
+			errCh <- err
 		}
 	}()
 
 	go func() {
 		if err := frpc.ConnectApi(); err != nil {
-			log.Fatal(err)
+			errCh <- err
 		}
 	}()
 
@@ -95,7 +95,7 @@ func Start() error {
 
 		select {
 		case err := <-errChan:
-			log.Fatal(err)
+			errCh <- err
 		case <-time.After(1 * time.Second):
 			go func() {
 				errChan <- headscale.Connect()
@@ -103,10 +103,17 @@ func Start() error {
 		}
 
 		if err := <-errChan; err != nil {
-			log.Fatal(err)
+			errCh <- err
 		}
 	}()
 
-	log.Infof("Starting api server on port %d", c.ApiPort)
-	return apiServer.Serve(apiListener)
+	go func() {
+		log.Infof("Starting api server on port %d", c.ApiPort)
+		err := apiServer.Serve(apiListener)
+		if err != nil {
+			errCh <- err
+		}
+	}()
+
+	return nil
 }

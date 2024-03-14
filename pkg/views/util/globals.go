@@ -25,3 +25,14 @@ func RenderListLine(message string) {
 func RenderInfoMessageBold(message string) {
 	fmt.Println(lipgloss.NewStyle().Bold(true).Padding(1, 0, 1, 1).Render(message))
 }
+
+func RenderBorderedMessage(message string) {
+	fmt.Println(lipgloss.
+		NewStyle().
+		Margin(1, 0).
+		Padding(1, 1, 1, 1).
+		BorderForeground(views.Green).
+		Border(lipgloss.RoundedBorder()).
+		Render(message),
+	)
+}
