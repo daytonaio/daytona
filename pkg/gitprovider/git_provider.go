@@ -86,6 +86,16 @@ func GetGitProvider(providerId string, gitProviders []types.GitProvider) GitProv
 			token:      chosenProvider.Token,
 			baseApiUrl: chosenProvider.BaseApiUrl,
 		}
+	case "codeberg":
+		return &GiteaGitProvider{
+			token:      chosenProvider.Token,
+			baseApiUrl: "https://codeberg.org",
+		}
+	case "gitea":
+		return &GiteaGitProvider{
+			token:      chosenProvider.Token,
+			baseApiUrl: chosenProvider.BaseApiUrl,
+		}
 	default:
 		return nil
 	}
@@ -109,6 +119,16 @@ func GetUsernameFromToken(providerId string, gitProviders []config.GitProvider, 
 	case "bitbucket":
 		gitProvider = &BitbucketGitProvider{
 			token: token,
+		}
+	case "codeberg":
+		gitProvider = &GiteaGitProvider{
+			token:      token,
+			baseApiUrl: "https://codeberg.org",
+		}
+	case "gitea":
+		gitProvider = &GiteaGitProvider{
+			token:      token,
+			baseApiUrl: baseApiUrl,
 		}
 	default:
 		return "", errors.New("provider not found")

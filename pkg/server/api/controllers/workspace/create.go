@@ -132,6 +132,8 @@ func getGitProviderIdFromUrl(url string) string {
 		return "gitlab"
 	} else if strings.Contains(url, "bitbucket.org") {
 		return "bitbucket"
+	} else if strings.Contains(url, "codeberg.org") {
+		return "codeberg"
 	} else {
 		return ""
 	}
