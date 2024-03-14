@@ -5,7 +5,6 @@ package server
 
 import (
 	"fmt"
-	"regexp"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
@@ -30,15 +29,17 @@ var logsCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		hostRegex := regexp.MustCompile(`https*://(.*)`)
-		host := hostRegex.FindStringSubmatch(activeProfile.Api.Url)[1]
-
 		query := ""
 		if followFlag {
 			query = "?follow=true"
 		}
 
-		wsURL := fmt.Sprintf("ws://%s/log/server%s", host, query)
+		wsURL, err := apiclient.GetWebSocketUrl(activeProfile.Api.Url)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		wsURL = fmt.Sprintf("%s/log/server%s", wsURL, query)
 
 		ws, res, err := websocket.DefaultDialer.Dial(wsURL, nil)
 		if err != nil {

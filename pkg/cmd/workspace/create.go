@@ -7,10 +7,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/http"
 	"net/url"
 	"os"
-	"regexp"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -299,16 +297,16 @@ func processCmdArguments(cmd *cobra.Command, args []string, apiClient *serverapi
 }
 
 func scanWorkspaceLogs(activeProfile config.Profile, workspaceName string, statusProgram *tea.Program, started *bool) {
-	hostRegex := regexp.MustCompile(`https*://(.*)`)
-	host := hostRegex.FindStringSubmatch(activeProfile.Api.Url)[1]
-	wsURL := fmt.Sprintf("ws://%s/log/workspace/%s?follow=true", host, workspaceName)
-	var ws *websocket.Conn
-	var res *http.Response
-	var err error
+	wsURL, err := apiclient.GetWebSocketUrl(activeProfile.Api.Url)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	wsURL = fmt.Sprintf("%s/log/workspace/%s?follow=true", wsURL, workspaceName)
 
 	time.Sleep(2 * time.Second)
 
-	ws, res, err = websocket.DefaultDialer.Dial(wsURL, nil)
+	ws, res, err := websocket.DefaultDialer.Dial(wsURL, nil)
 	if err != nil {
 		cleanUpTerminal(statusProgram, apiclient.HandleErrorResponse(res, apiclient.HandleErrorResponse(res, err)))
 	}
