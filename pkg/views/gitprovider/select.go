@@ -71,7 +71,7 @@ func GitProviderSelectionView(gitProviderAddView *GitProviderSelectView, userGit
 			huh.NewInput().
 				Title("Self-managed API URL").
 				Value(&gitProviderAddView.BaseApiUrl).
-				Description("For example: http://IP_ADDRESS/api/v4/").
+				Description("For example: http://gitlab-host/api/v4/ or https://gitea-host").
 				Validate(func(str string) error {
 					if str == "" {
 						return errors.New("URL can not be blank")
@@ -79,7 +79,7 @@ func GitProviderSelectionView(gitProviderAddView *GitProviderSelectView, userGit
 					return nil
 				}),
 		).WithHideFunc(func() bool {
-			return isDeleting || gitProviderAddView.Id != "gitlab-self-managed"
+			return isDeleting || (gitProviderAddView.Id != "gitlab-self-managed" && gitProviderAddView.Id != "gitea")
 		}),
 		huh.NewGroup(
 			huh.NewInput().
