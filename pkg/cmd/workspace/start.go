@@ -15,6 +15,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type WorkspaceState string
+
+const (
+	WORKSPACE_STATUS_RUNNING WorkspaceState = "Running"
+	WORKSPACE_STATUS_STOPPED WorkspaceState = "Unavailable"
+)
+
 var startProjectFlag string
 var allFlag bool
 
@@ -67,11 +74,20 @@ var StartCmd = &cobra.Command{
 
 		util.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully started", workspaceId))
 	},
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		if len(args) != 0 {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+
+		return getAllWorkspacesByState(WORKSPACE_STATUS_STOPPED)
+	},
 }
 
 func init() {
 	StartCmd.PersistentFlags().StringVarP(&startProjectFlag, "project", "p", "", "Start a single project in the workspace (project name)")
 	StartCmd.PersistentFlags().BoolVarP(&allFlag, "all", "a", false, "Start all workspaces")
+
+	StartCmd.RegisterFlagCompletionFunc("project", getProjectNameCompletions)
 }
 
 func startAllWorkspaces() error {
@@ -95,4 +111,73 @@ func startAllWorkspaces() error {
 		fmt.Printf("Workspace %s successfully started\n", *workspace.Id)
 	}
 	return nil
+}
+
+func getProjectNameCompletions(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	ctx := context.Background()
+	apiClient, err := server.GetApiClient(nil)
+	if err != nil {
+		return nil, cobra.ShellCompDirectiveDefault
+	}
+
+	workspaceId := args[0]
+	workspace, _, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceId).Execute()
+	if err != nil {
+		return nil, cobra.ShellCompDirectiveDefault
+	}
+
+	var choices []string
+	for _, project := range workspace.Projects {
+		choices = append(choices, *project.Name)
+	}
+	return choices, cobra.ShellCompDirectiveDefault
+}
+
+func getWorkspaceNameCompletions() ([]string, cobra.ShellCompDirective) {
+	ctx := context.Background()
+	apiClient, err := server.GetApiClient(nil)
+	if err != nil {
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	}
+
+	workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+	if err != nil {
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	}
+
+	var choices []string
+	for _, v := range workspaceList {
+		choices = append(choices, *v.Name)
+	}
+
+	return choices, cobra.ShellCompDirectiveNoFileComp
+}
+
+func getAllWorkspacesByState(state WorkspaceState) ([]string, cobra.ShellCompDirective) {
+	ctx := context.Background()
+	apiClient, err := server.GetApiClient(nil)
+	if err != nil {
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	}
+
+	workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+	if err != nil {
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	}
+
+	var choices []string
+	for _, workspace := range workspaceList {
+		for _, project := range workspace.Info.Projects {
+			if state == WORKSPACE_STATUS_RUNNING && *project.IsRunning {
+				choices = append(choices, *workspace.Name)
+				break
+			}
+			if state == WORKSPACE_STATUS_STOPPED && !*project.IsRunning {
+				choices = append(choices, *workspace.Name)
+				break
+			}
+		}
+	}
+
+	return choices, cobra.ShellCompDirectiveNoFileComp
 }
