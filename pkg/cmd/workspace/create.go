@@ -161,8 +161,12 @@ var CreateCmd = &cobra.Command{
 			ide = ideFlag
 		}
 
-		view_util.RenderInfoMessageBold("Opening the workspace in your preferred IDE")
-		openIDE(ide, activeProfile, *createdWorkspace.Id, *wsInfo.Projects[0].Name)
+		view_util.RenderInfoMessage(fmt.Sprintf("Opening the workspace project '%s' in your preferred IDE.", *wsInfo.Projects[0].Name))
+
+		err = openIDE(ide, activeProfile, *createdWorkspace.Id, *wsInfo.Projects[0].Name)
+		if err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 
