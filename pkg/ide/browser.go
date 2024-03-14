@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
@@ -60,9 +61,18 @@ func OpenBrowserIDE(activeProfile config.Profile, workspaceId string, projectNam
 		}
 	}
 
-	view_util.RenderInfoMessageBold(fmt.Sprintf("Forwarded %s IDE port to %d.\nOpening browser...", projectName, *browserPort))
+	ideURL := fmt.Sprintf("http://localhost:%d", *browserPort)
+	// Wait for the port to be ready
+	for {
+		if ports.IsPortReady(*browserPort) {
+			break
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
 
-	err = browser.OpenURL(fmt.Sprintf("http://localhost:%d", *browserPort))
+	view_util.RenderInfoMessageBold(fmt.Sprintf("Forwarded %s IDE port to %s.\nOpening browser...\n", projectName, ideURL))
+
+	err = browser.OpenURL(ideURL)
 	if err != nil {
 		log.Error("Error opening URL: " + err.Error())
 	}

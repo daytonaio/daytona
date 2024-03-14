@@ -11,6 +11,7 @@ import (
 	"net"
 	"strconv"
 	"time"
+	"net/http"
 
 	"github.com/daytonaio/daytona/internal/tailscale"
 	log "github.com/sirupsen/logrus"
@@ -38,6 +39,21 @@ func IsPortAvailable(port uint16) bool {
 		defer conn.Close()
 	}
 	return false
+}
+
+// This function checks if a service is ready on the specified port
+
+func IsPortReady(port uint16) bool {
+	client := &http.Client{Timeout: time.Second * 10}
+	// Close the idle connections after the function returns
+	defer client.CloseIdleConnections()
+
+	response, err := client.Get(fmt.Sprintf("http://localhost:%d", port))
+	if err != nil {
+		return false
+	}
+	defer response.Body.Close()
+	return response.StatusCode == http.StatusOK
 }
 
 func ForwardPort(workspaceId, projectName string, targetPort uint16) (*uint16, chan error) {
