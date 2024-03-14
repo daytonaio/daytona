@@ -7,6 +7,7 @@ import (
 	"errors"
 	"os"
 	"path"
+	"runtime"
 
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/server/config"
@@ -31,6 +32,10 @@ func downloadDefaultProviders() error {
 	log.Info("Downloading default providers")
 	for pluginName, plugin := range defaultProviderPlugins {
 		downloadPath := path.Join(c.ProvidersDir, pluginName, pluginName)
+		if runtime.GOOS == "windows" {
+			downloadPath += ".exe"
+		}
+
 		if _, err := os.Stat(downloadPath); err == nil {
 			log.Info(pluginName + " already downloaded")
 			continue
