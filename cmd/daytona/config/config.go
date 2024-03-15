@@ -160,6 +160,7 @@ func (c *Config) GetProfile(profileId string) (Profile, error) {
 func getDefaultConfig() Config {
 	return Config{
 		ActiveProfileId: "default",
+		DefaultIdeId:    "vscode",
 		Profiles: []Profile{
 			{
 				Id:   "default",
