@@ -8,6 +8,7 @@ import (
 	"path"
 
 	"github.com/daytonaio/daytona/pkg/server/config"
+	frp_log "github.com/fatedier/frp/pkg/util/log"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -55,6 +56,18 @@ func Init() error {
 	}
 
 	log.SetFormatter(logFormatter)
+
+	frpLogLevel := "error"
+	if os.Getenv("FRP_LOG_LEVEL") != "" {
+		frpLogLevel = os.Getenv("FRP_LOG_LEVEL")
+	}
+
+	frpOutput := filePath
+	if os.Getenv("FRP_LOG_OUTPUT") != "" {
+		frpOutput = os.Getenv("FRP_LOG_OUTPUT")
+	}
+
+	frp_log.InitLog(frpOutput, frpLogLevel, 0, false)
 
 	return nil
 }
