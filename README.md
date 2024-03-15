@@ -118,8 +118,27 @@ Before starting the installation script, please go over all the necessary requir
 Daytona allows you to manage your Development Environments using the Daytona CLI. To install it, please execute the following command:
 
 ```bash
-curl https://download.daytona.io/daytona/get-server.sh | bash
+# Install Daytona into /usr/local/bin
+curl -sf -L https://download.daytona.io/daytona/get-server.sh | sudo bash
+
+# OR if you want to install Daytona to some other path where you don`t need sudo
+# curl -sf -L https://download.daytona.io/daytona/get-server.sh | DAYTONA_PATH=/home/user/bin bash
 ```
+<details open>
+  <summary>For manual install...</summary>
+  If you don't wanna use script provided, for manual binary download you can choose direct URL of the binaries according to your OS:
+
+  ```bash
+  curl -sf -L https://download.daytona.io/daytona/latest/daytona-darwin-amd64 -o daytona
+  curl -sf -L https://download.daytona.io/daytona/latest/daytona-darwin-arm64 -o daytona
+  curl -sf -L https://download.daytona.io/daytona/latest/daytona-linux-amd64 -o daytona
+  curl -sf -L https://download.daytona.io/daytona/latest/daytona-linux-arm64 -o daytona
+  curl -sf -L https://download.daytona.io/daytona/latest/daytona-windows-amd64.exe -o daytona
+  curl -sf -L https://download.daytona.io/daytona/latest/daytona-windows-arm64.exe -o daytona
+  ```
+  Make sure that path where `daytona` binary is downloaded is in your system PATH.
+</details>
+
 
 
 ### Initializing Daytona
