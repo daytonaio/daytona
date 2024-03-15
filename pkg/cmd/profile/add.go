@@ -30,10 +30,8 @@ var profileAddCmd = &cobra.Command{
 
 		if profileAddView.ProfileName != "" && profileAddView.ApiUrl != "" {
 			_, err = addProfile(profileAddView, c, true)
-		}
-
-		if profileNameFlag == "" || apiUrlFlag == "" {
-			_, err = CreateProfile(c, nil, true)
+		} else {
+			_, err = CreateProfile(c, &profileAddView, true)
 		}
 
 		if err != nil {
