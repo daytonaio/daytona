@@ -144,7 +144,7 @@ func openIDE(ideId string, activeProfile config.Profile, workspaceId string, pro
 		}
 	}
 
-	return errors.New("invalid IDE")
+	return errors.New("invalid IDE. Please choose one by running `daytona ide`")
 }
 
 var ideFlag string
