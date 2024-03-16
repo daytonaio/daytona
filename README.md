@@ -52,20 +52,50 @@ Set up a development environment on any infrastructure, with a single command.
 * __All Ports__: The VPN connection enables access to all ports on the development environments, removing the need to setup port forwards over SSH connection.
 * __Works on my Machine__: Never experience it again.
 ## Quick Start
-To install Daytona all you need to do is execute this script:
+### Mac / Linux
+Install Daytona into /usr/local/bin
+```bash
+curl -sf -L https://download.daytona.io/daytona/get-server.sh | sudo bash
+```
+Or if you want to install Daytona to some other path where you don't need sudo
+```bash
+curl -sf -L https://download.daytona.io/daytona/get-server.sh | DAYTONA_PATH=/home/user/bin bash
+```
+### Windows
+<details>
+  <summary>AMD</summary>
+Run the following command in Windows PowerShell:
 
+```pwsh
+md -Force "$Env:APPDATA\daytona"; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]'Tls,Tls11,Tls12';
+    Invoke-WebRequest -URI "https://download.daytona.io/daytona/latest/daytona-windows-amd64.exe" -o $Env:APPDATA\daytona\daytona.exe;
+    $env:Path += ";" + $Env:APPDATA + "\daytona";
+    [Environment]::SetEnvironmentVariable("Path", $env:Path, [System.EnvironmentVariableTarget]::User);
+    daytona;
+```
+</details>
+
+<details>
+  <summary>ARM</summary>
+Run the following command in Windows PowerShell:
+
+```pwsh
+md -Force "$Env:APPDATA\daytona"; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]'Tls,Tls11,Tls12';
+    Invoke-WebRequest -URI "https://download.daytona.io/daytona/latest/daytona-windows-arm64.exe" -o $Env:APPDATA\daytona\daytona.exe;
+    $env:Path += ";" + $Env:APPDATA + "\daytona";
+    [Environment]::SetEnvironmentVariable("Path", $env:Path, [System.EnvironmentVariableTarget]::User);
+    daytona;
+```
+</details>
+
+### Start the Daytona server:
 
 ```bash
-# Install Daytona into /usr/local/bin
-curl -sf -L https://download.daytona.io/daytona/get-server.sh | sudo bash
 
-# OR if you want to install Daytona to some other path where you don`t need sudo
-# curl -sf -L https://download.daytona.io/daytona/get-server.sh | DAYTONA_PATH=/home/user/bin bash
-
-# Start Daytona server
 daytona server
 ```
-Create your first dev environment by opening a new terminal, and executing just this command:
+
+### Create your first dev environment by opening a new terminal, and executing just this command:
 
 ```bash
 
