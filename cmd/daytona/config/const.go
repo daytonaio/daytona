@@ -4,6 +4,9 @@
 package config
 
 import (
+	"slices"
+	"strings"
+
 	"github.com/daytonaio/daytona/internal/jetbrains"
 	"github.com/daytonaio/daytona/pkg/os"
 )
@@ -25,9 +28,14 @@ func GetIdeList() []Ide {
 		{"browser", "VS Code - Browser"},
 	}
 
+	sortedJbIdes := []Ide{}
 	for id, ide := range jetbrains.GetIdes() {
-		ides = append(ides, Ide{string(id), ide.Name})
+		sortedJbIdes = append(sortedJbIdes, Ide{string(id), ide.Name})
 	}
+	slices.SortFunc(sortedJbIdes, func(i, j Ide) int {
+		return strings.Compare(i.Name, j.Name)
+	})
+	ides = append(ides, sortedJbIdes...)
 
 	return ides
 }
