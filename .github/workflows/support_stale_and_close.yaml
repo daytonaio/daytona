@@ -8,6 +8,7 @@ permissions: {}
 
 jobs:
   stale:
+    if: github.repository == 'daytonaio/daytona'
     runs-on: ubuntu-latest
     steps:
       # This step will add the stale comment and label for the first 15 days without activity. It won't close any task
