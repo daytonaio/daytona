@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script downloads the Daytona server binary and installs it to /usr/local/bin
+# This script downloads the Daytona server binary, installs it to /usr/local/bin and runs the Daytona Server
 # You can set the environment variable DAYTONA_SERVER_VERSION to specify the version to download
 # You can set the environment variable DAYTONA_SERVER_DOWNLOAD_URL to specify the base URL to download from
 # You can set the environment variable DAYTONA_PATH to specify the path where to install the binary
@@ -108,5 +108,17 @@ if [[ ! :"$PATH:" == *":$DESTINATION:"* ]]; then
   echo "         Edit your shell configuration file (e.g., ~/.bashrc or ~/.zshrc)"
   echo "         Add the following line:"
   echo "             export PATH=\$PATH:$DESTINATION"
-  echo "         Source the configuration file to apply the changes (e.g., source ~/.bashrc)"
+  echo "         Source the configuration file to apply the changes (e.g., source ~/.bashrc) and run the Daytona Server:"
+  echo "             daytona server"
+  else 
+    # Prompt the user for running the Daytona Server
+    echo -e "\nDo you want to run 'daytona server'? (Y/n) "
+    read choice
+
+    # Check if the input is 'Y' or 'y' or 'yes'
+    if [[ $choice == "Y" || $choice == "y" || $choice == "yes" ]]; then
+        daytona server
+    else
+        echo "No action taken. Run 'daytona server' when you're ready."
+    fi
 fi
