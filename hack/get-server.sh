@@ -112,8 +112,7 @@ if [[ ! :"$PATH:" == *":$DESTINATION:"* ]]; then
   echo "             daytona server"
   else 
     # Prompt the user for running the Daytona Server
-    echo -e "\nDo you want to run 'daytona server'? (Y/n) "
-    read choice
+    read -p "Do you want to proceed with the installation? (Y/n) " choice
 
     # Check if the input is 'Y' or 'y' or 'yes'
     if [[ $choice == "Y" || $choice == "y" || $choice == "yes" ]]; then
