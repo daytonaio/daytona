@@ -10,7 +10,6 @@ import (
 	"path"
 
 	"github.com/daytonaio/daytona/pkg/types"
-	"github.com/google/uuid"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -145,59 +144,18 @@ func GetProjectLogFilePath(workspaceId string, projectId string) (string, error)
 	return filePath, nil
 }
 
-func getDefaultProvidersDir() (string, error) {
-	userConfigDir, err := os.UserConfigDir()
-	if err != nil {
-		return "", err
-	}
-
-	return path.Join(userConfigDir, "daytona", "providers"), nil
-}
-
-func getDefaultTargetsPath() (string, error) {
-	configDir, err := GetConfigDir()
-	if err != nil {
-		return "", err
-	}
-
-	return path.Join(configDir, "targets.json"), nil
-
-}
-
-func generateUuid() string {
-	uuid := uuid.New()
-	return uuid.String()
-}
-
 func init() {
 	_, err := GetConfig()
 	if err == nil {
 		return
 	}
 
-	providersDir, err := getDefaultProvidersDir()
+	c, err := getDefaultConfig()
 	if err != nil {
-		log.Fatal("failed to get default providers dir")
+		log.Fatal("failed to get default config")
 	}
 
-	targetsPath, err := getDefaultTargetsPath()
-	if err != nil {
-		log.Fatal("failed to get default targets path")
-	}
-
-	c := types.ServerConfig{
-		RegistryUrl:       defaultRegistryUrl,
-		ProvidersDir:      providersDir,
-		GitProviders:      []types.GitProvider{},
-		ServerDownloadUrl: defaultServerDownloadUrl,
-		ApiPort:           defaultApiPort,
-		HeadscalePort:     defaultHeadscalePort,
-		TargetsFilePath:   targetsPath,
-		Frps:              getDefaultFRPSConfig(),
-		Id:                generateUuid(),
-	}
-
-	err = Save(&c)
+	err = Save(c)
 	if err != nil {
 		log.Fatal("failed to save default config file")
 	}
