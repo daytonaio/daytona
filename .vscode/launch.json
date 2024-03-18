@@ -12,9 +12,11 @@
       "program": "${workspaceFolder}/cmd/daytona",
       "console": "integratedTerminal",
       "env": {
+        "DAYTONA_WS_ID": "WS_ID",
+        "DAYTONA_WS_PROJECT_NAME": "PROJECT_NAME",
         "DAYTONA_SERVER_URL": "http://localhost:3000",
         "DAYTONA_SERVER_API_KEY": "1234567890",
-        "DAYTONA_WS_DIR": "/workspaces/daytona"
+        "DAYTONA_WS_DIR": "/tmp/project-1"
       },
       "args": [
         "agent"

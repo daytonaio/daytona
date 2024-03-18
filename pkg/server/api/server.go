@@ -20,6 +20,7 @@ import (
 	"github.com/gin-contrib/cors"
 
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/binary"
+	"github.com/daytonaio/daytona/pkg/server/api/controllers/gitprovider"
 	log_controller "github.com/daytonaio/daytona/pkg/server/api/controllers/log"
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/provider"
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/server"
@@ -105,6 +106,11 @@ func GetServer() (*http.Server, error) {
 	{
 		logController.GET("/server", log_controller.ReadServerLog)
 		logController.GET("/workspace/:workspaceId", log_controller.ReadWorkspaceLog)
+	}
+
+	gitProivderController := router.Group("/gitprovider")
+	{
+		gitProivderController.GET("/:gitProviderId/user-data", gitprovider.GetGitUserData)
 	}
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
