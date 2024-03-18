@@ -310,6 +310,14 @@ const docTemplate = `{
                 ],
                 "summary": "List workspaces",
                 "operationId": "ListWorkspaces",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Verbose",
+                        "name": "verbose",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

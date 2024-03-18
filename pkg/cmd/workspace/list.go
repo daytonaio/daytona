@@ -15,6 +15,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var verbose bool
+
 var ListCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List workspaces",
@@ -29,7 +31,8 @@ var ListCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+		workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Verbose(verbose).Execute()
+
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
@@ -52,7 +55,12 @@ var ListCmd = &cobra.Command{
 			views_util.RenderInfoMessage("The workspace list is empty. Start off by running 'daytona create'.")
 			return
 		}
-
+		
 		list_view.ListWorkspaces(workspaceList, specifyGitProviders)
 	},
 }
+
+func init() {
+	ListCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose output")
+}
+

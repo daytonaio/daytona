@@ -410,6 +410,11 @@ paths:
     get:
       description: List workspaces
       operationId: ListWorkspaces
+      parameters:
+      - description: Verbose
+        in: query
+        name: verbose
+        type: boolean
       produces:
       - application/json
       responses:

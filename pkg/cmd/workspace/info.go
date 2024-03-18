@@ -5,6 +5,7 @@ package workspace
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/daytonaio/daytona/internal/util"
@@ -39,7 +40,7 @@ var InfoCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 		} else if len(args) == 0 {
-			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Verbose(true).Execute()
 			if err != nil {
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
