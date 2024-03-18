@@ -26,7 +26,7 @@ Since the descriptiveness of a commit is subjective, please feel free to talk to
 If you would like an optional commit template, see the following:
 
 ```text
-<present-tense-verb-with-capitalized-first-letter> <everything-else-without-puncutation-at-the-end>
+<present-tense-verb-with-capitalized-first-letter> <everything-else-without-punctuation-at-the-end>
 
 <sentences-in-paragraph-format-or-bullet-points>
 ```
