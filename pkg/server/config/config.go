@@ -6,12 +6,13 @@ package config
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"os"
 	"path"
 
 	"github.com/daytonaio/daytona/pkg/types"
 	"github.com/google/uuid"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func GetConfig() (*types.ServerConfig, error) {

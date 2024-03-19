@@ -91,14 +91,13 @@ md -Force "$Env:APPDATA\daytona"; [System.Net.ServicePointManager]::SecurityProt
 ### Start the Daytona server:
 
 ```bash
-
-daytona server
+# Start the Daytona Server (omit -d if you want to run it in the foreground)
+daytona server -d
 ```
 
 ### Create your first dev environment by opening a new terminal, and executing just this command:
 
 ```bash
-
 daytona create
 ```
 
@@ -174,10 +173,10 @@ curl -sf -L https://download.daytona.io/daytona/get-server.sh | sudo bash
 ### Initializing Daytona
 To initialize Daytona, follow these steps:
 
-__1. Start the Daytona Service:__
-This initiates the Daytona service, which must always be running for Daytona to function. Use the command:
+__1. Start the Daytona Server:__
+This initiates the Daytona Server in daemon mode. Use the command:
 ```bash
-daytona server
+daytona server -d
 ```
 __2. Add Your Git Provider of Choice:__
 Daytona supports GitHub, GitLab, Bitbucket and Gitea. To add them to your profile, use the command:
@@ -220,6 +219,16 @@ daytona code
 ```
 
 This command opens your development environment in your preferred IDE, allowing you to start coding instantly.
+
+### Stopping the Daytona Server:
+```bash
+daytona server stop
+```
+
+### Restarting the Daytona Server:
+```bash
+daytona server restart
+```
 
 ## How to Extend Daytona
 

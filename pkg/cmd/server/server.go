@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/daytonaio/daytona/pkg/cmd/server/daemon"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/config"
 	"github.com/daytonaio/daytona/pkg/server/frpc"
@@ -15,6 +16,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
+
+var runAsDaemon bool
 
 var ServerCmd = &cobra.Command{
 	Use:   "server",
@@ -25,6 +28,16 @@ var ServerCmd = &cobra.Command{
 			//	for now, force the log level to info when running the server
 			log.SetLevel(log.InfoLevel)
 		}
+
+		if runAsDaemon {
+			fmt.Println("Starting the Daytona Server daemon...")
+			err := daemon.Start()
+			if err != nil {
+				log.Fatal(err)
+			}
+			return
+		}
+
 		errCh := make(chan error)
 
 		err := server.Start(errCh)
@@ -53,7 +66,10 @@ var ServerCmd = &cobra.Command{
 }
 
 func init() {
+	ServerCmd.PersistentFlags().BoolVarP(&runAsDaemon, "daemon", "d", false, "Run the server as a daemon")
 	ServerCmd.AddCommand(configureCmd)
 	ServerCmd.AddCommand(configCmd)
 	ServerCmd.AddCommand(logsCmd)
+	ServerCmd.AddCommand(stopCmd)
+	ServerCmd.AddCommand(restartCmd)
 }
