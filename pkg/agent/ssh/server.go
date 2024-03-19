@@ -85,6 +85,10 @@ func handlePty(s ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh.Window) {
 
 	cmd.Dir = c.ProjectDir
 
+	if _, err := os.Stat(c.ProjectDir); os.IsNotExist(err) {
+		cmd.Dir = os.Getenv("HOME")
+	}
+
 	if ssh.AgentRequested(s) {
 		l, err := ssh.NewAgentListener()
 		if err != nil {
@@ -144,6 +148,10 @@ func handleNonPty(s ssh.Session) {
 	}
 
 	cmd.Dir = c.ProjectDir
+	if _, err := os.Stat(c.ProjectDir); os.IsNotExist(err) {
+		cmd.Dir = os.Getenv("HOME")
+	}
+
 	cmd.Stdout = s
 	cmd.Stderr = s.Stderr()
 	stdinPipe, err := cmd.StdinPipe()
