@@ -4,10 +4,17 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"path"
+	"strconv"
 
 	"github.com/daytonaio/daytona/pkg/types"
+	"github.com/google/uuid"
+
+	log "github.com/sirupsen/logrus"
 )
 
 const defaultRegistryUrl = "https://download.daytona.io/daytona"
@@ -28,6 +35,24 @@ var eu_defaultFrpsConfig = types.FRPSConfig{
 }
 
 func getDefaultFRPSConfig() *types.FRPSConfig {
+	frpsDomain := os.Getenv("DEFAULT_FRPS_DOMAIN")
+	fprsProtocol := os.Getenv("DEFAULT_FRPS_PROTOCOL")
+	frpsPort := os.Getenv("DEFAULT_FRPS_PORT")
+	if frpsDomain != "" && fprsProtocol != "" && frpsPort != "" {
+		port, err := parsePort(frpsPort)
+		if err != nil {
+			log.Error(fmt.Printf("%s. Using default", err))
+		} else {
+			return &types.FRPSConfig{
+				Domain:   frpsDomain,
+				Port:     port,
+				Protocol: fprsProtocol,
+			}
+		}
+	} else {
+		log.Info("Using default FRPS config")
+	}
+
 	// Return config which responds fastest to a ping
 	usReturnChan := make(chan bool)
 	euReturnChan := make(chan bool)
@@ -50,4 +75,94 @@ func getDefaultFRPSConfig() *types.FRPSConfig {
 	case <-euReturnChan:
 		return &eu_defaultFrpsConfig
 	}
+}
+
+func getDefaultConfig() (*types.ServerConfig, error) {
+	providersDir, err := getDefaultProvidersDir()
+	if err != nil {
+		return nil, errors.New("failed to get default providers dir")
+	}
+
+	targetsPath, err := getDefaultTargetsPath()
+	if err != nil {
+		return nil, errors.New("failed to get default targets path")
+	}
+
+	c := types.ServerConfig{
+		Id:                generateUuid(),
+		GitProviders:      []types.GitProvider{},
+		RegistryUrl:       defaultRegistryUrl,
+		ProvidersDir:      providersDir,
+		ServerDownloadUrl: defaultServerDownloadUrl,
+		ApiPort:           defaultApiPort,
+		HeadscalePort:     defaultHeadscalePort,
+		TargetsFilePath:   targetsPath,
+		Frps:              getDefaultFRPSConfig(),
+	}
+
+	if os.Getenv("DEFAULT_REGISTRY_URL") != "" {
+		c.RegistryUrl = os.Getenv("DEFAULT_REGISTRY_URL")
+	}
+	if os.Getenv("DEFAULT_SERVER_DOWNLOAD_URL") != "" {
+		c.ServerDownloadUrl = os.Getenv("DEFAULT_SERVER_DOWNLOAD_URL")
+	}
+	if os.Getenv("DEFAULT_PROVIDERS_DIR") != "" {
+		c.ProvidersDir = os.Getenv("DEFAULT_PROVIDERS_DIR")
+	}
+	if os.Getenv("DEFAULT_TARGETS_FILE_PATH") != "" {
+		c.TargetsFilePath = os.Getenv("DEFAULT_TARGETS_FILE_PATH")
+	}
+	if os.Getenv("DEFAULT_API_PORT") != "" {
+		apiPort, err := parsePort(os.Getenv("DEFAULT_API_PORT"))
+		if err != nil {
+			log.Error(fmt.Printf("%s. Using %d", err, defaultApiPort))
+		} else {
+			c.ApiPort = apiPort
+		}
+	}
+	if os.Getenv("DEFAULT_HEADSCALE_PORT") != "" {
+		headscalePort, err := parsePort(os.Getenv("DEFAULT_HEADSCALE_PORT"))
+		if err != nil {
+			log.Error(fmt.Printf("%s. Using %d", err, defaultHeadscalePort))
+		} else {
+			c.HeadscalePort = headscalePort
+		}
+	}
+
+	return &c, nil
+}
+
+func parsePort(port string) (uint32, error) {
+	p, err := strconv.Atoi(port)
+	if err != nil {
+		return 0, errors.New("failed to parse port")
+	}
+	if p < 0 || p > 65535 {
+		return 0, errors.New("port out of range")
+	}
+
+	return uint32(p), nil
+}
+
+func getDefaultProvidersDir() (string, error) {
+	userConfigDir, err := os.UserConfigDir()
+	if err != nil {
+		return "", err
+	}
+
+	return path.Join(userConfigDir, "daytona", "providers"), nil
+}
+
+func getDefaultTargetsPath() (string, error) {
+	configDir, err := GetConfigDir()
+	if err != nil {
+		return "", err
+	}
+
+	return path.Join(configDir, "targets.json"), nil
+}
+
+func generateUuid() string {
+	uuid := uuid.New()
+	return uuid.String()
 }
