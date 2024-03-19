@@ -51,8 +51,10 @@ func Init() error {
 	}
 
 	logFormatter := &logFormatter{
-		textFormater: new(log.TextFormatter),
-		file:         file,
+		textFormater: &log.TextFormatter{
+			ForceColors: true,
+		},
+		file: file,
 	}
 
 	log.SetFormatter(logFormatter)
