@@ -153,7 +153,7 @@ No authorization required
 
 ## ListWorkspaces
 
-> []Workspace ListWorkspaces(ctx).Execute()
+> []Workspace ListWorkspaces(ctx).Verbose(verbose).Execute()
 
 List workspaces
 
@@ -172,10 +172,11 @@ import (
 )
 
 func main() {
+	verbose := true // bool | Verbose (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceAPI.ListWorkspaces(context.Background()).Execute()
+	resp, r, err := apiClient.WorkspaceAPI.ListWorkspaces(context.Background()).Verbose(verbose).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.ListWorkspaces``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -187,12 +188,16 @@ func main() {
 
 ### Path Parameters
 
-This endpoint does not need any parameter.
+
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiListWorkspacesRequest struct via the builder pattern
 
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **verbose** | **bool** | Verbose | 
 
 ### Return type
 

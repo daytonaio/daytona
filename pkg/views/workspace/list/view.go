@@ -80,7 +80,10 @@ func renderWorkspaceList(workspaceList []serverapiclient.Workspace, specifyGitPr
 		if len(workspace.Projects) == 1 {
 			rowData = getWorkspaceTableRowData(workspace, specifyGitProviders)
 			adjustColumsFormatting(rowData)
-			row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Branch, rowData.Target, rowData.Created, rowData.Status}
+			row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Branch, rowData.Target}
+			if workspace.Info != nil && len(workspace.Info.Projects) > 0 {
+                row = append(row, rowData.Created, rowData.Status)
+            }
 			rows = append(rows, row)
 		} else {
 			row = table.Row{*workspace.Name, "", "", "", "", ""}
@@ -88,7 +91,10 @@ func renderWorkspaceList(workspaceList []serverapiclient.Workspace, specifyGitPr
 			for _, project := range workspace.Projects {
 				rowData = getProjectTableRowData(workspace, project, specifyGitProviders)
 				adjustColumsFormatting(rowData)
-				row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Branch, rowData.Target, rowData.Created, rowData.Status}
+				row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Branch, rowData.Target}
+				if workspace.Info != nil && len(workspace.Info.Projects) > 0 {
+					row = append(row, rowData.Created, rowData.Status)
+				}
 				rows = append(rows, row)
 			}
 		}
@@ -275,11 +281,16 @@ func getTable(rows []table.Row, cols []table.Column, activeRow int) table.Model 
 	return t
 }
 
-func getRowsAndCols(width int, initialRows []table.Row) ([]table.Row, []table.Column) {
+func getRowsAndCols(width int, initialRows []table.Row)([]table.Row, []table.Column) {
 	colWidth := 0
 	cols := []table.Column{}
 
-	for _, col := range columns {
+	for i, col := range columns {
+		// keep columns length in sync with initialRows
+		if i >= len(initialRows[0]) {
+			break
+		}
+		
 		if colWidth+col.Width > width {
 			break
 		}
@@ -288,10 +299,14 @@ func getRowsAndCols(width int, initialRows []table.Row) ([]table.Row, []table.Co
 		cols = append(cols, col)
 	}
 
-	rows := []table.Row{}
-	for _, row := range initialRows {
-		rows = append(rows, row[:len(cols)])
-	}
+	rows := make([]table.Row, len(initialRows))
 
+    for i, row := range initialRows {
+        if len(row) >= len(cols) {
+            rows[i] = row[:len(cols)]
+        } else {
+            rows[i] = row 
+        }
+    }
 	return rows, cols
 }
