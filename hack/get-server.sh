@@ -76,8 +76,8 @@ DOWNLOAD_URL="$BASE_URL/$VERSION/daytona-$FILENAME"
 
 echo -e "\nDownloading server from $DOWNLOAD_URL"
 
-# Create a temporary file to download the server binary. Just in case the author... user
-# has say a directory named "daytona" in $HOME... the current directory.
+# Create a temporary file to download the server binary. Just in case the user
+# has file named "daytona" in the current directory.
 temp_file="daytona-$RANDOM"
 
 # Ensure the temporary file is deleted on exit

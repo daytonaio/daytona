@@ -19,6 +19,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/api/middlewares"
 	"github.com/gin-contrib/cors"
 
+	"github.com/daytonaio/daytona/pkg/server/api/controllers/binary"
 	log_controller "github.com/daytonaio/daytona/pkg/server/api/controllers/log"
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/provider"
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/server"
@@ -65,6 +66,12 @@ func GetServer() (*http.Server, error) {
 		serverController.POST("/config", server.SetConfig)
 		serverController.POST("/network-key", server.GenerateNetworkKey)
 		serverController.GET("/get-git-context/:gitUrl", server.GetGitContext)
+	}
+
+	binaryController := router.Group("/binary")
+	{
+		binaryController.GET("/script", binary.GetDaytonaScript)
+		binaryController.GET("/:version/:binaryName", binary.GetBinary)
 	}
 
 	workspaceController := router.Group("/workspace")

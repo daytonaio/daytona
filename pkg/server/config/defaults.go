@@ -88,6 +88,11 @@ func getDefaultConfig() (*types.ServerConfig, error) {
 		return nil, errors.New("failed to get default targets path")
 	}
 
+	binariesPath, err := getDefaultBinariesPath()
+	if err != nil {
+		return nil, errors.New("failed to get default binaries path")
+	}
+
 	c := types.ServerConfig{
 		Id:                generateUuid(),
 		GitProviders:      []types.GitProvider{},
@@ -97,6 +102,7 @@ func getDefaultConfig() (*types.ServerConfig, error) {
 		ApiPort:           defaultApiPort,
 		HeadscalePort:     defaultHeadscalePort,
 		TargetsFilePath:   targetsPath,
+		BinariesPath:      binariesPath,
 		Frps:              getDefaultFRPSConfig(),
 	}
 
@@ -111,6 +117,9 @@ func getDefaultConfig() (*types.ServerConfig, error) {
 	}
 	if os.Getenv("DEFAULT_TARGETS_FILE_PATH") != "" {
 		c.TargetsFilePath = os.Getenv("DEFAULT_TARGETS_FILE_PATH")
+	}
+	if os.Getenv("DEFAULT_BINARIES_PATH") != "" {
+		c.BinariesPath = os.Getenv("DEFAULT_BINARIES_PATH")
 	}
 	if os.Getenv("DEFAULT_API_PORT") != "" {
 		apiPort, err := parsePort(os.Getenv("DEFAULT_API_PORT"))
@@ -160,6 +169,15 @@ func getDefaultTargetsPath() (string, error) {
 	}
 
 	return filepath.Join(configDir, "targets.json"), nil
+}
+
+func getDefaultBinariesPath() (string, error) {
+	configDir, err := GetConfigDir()
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(configDir, "binaries"), nil
 }
 
 func generateUuid() string {
