@@ -53,56 +53,31 @@ Set up a development environment on any infrastructure, with a single command.
 * __Works on my Machine__: Never experience it again.
 ## Quick Start
 ### Mac / Linux
-Install Daytona into /usr/local/bin
 ```bash
 curl -sf -L https://download.daytona.io/daytona/get-server.sh | sudo bash
 ```
-Or if you want to install Daytona to some other path where you don't need sudo
-```bash
-curl -sf -L https://download.daytona.io/daytona/get-server.sh | DAYTONA_PATH=/home/user/bin bash
-```
 ### Windows
 <details>
-  <summary>AMD</summary>
-Run the following command in Windows PowerShell:
+<summary>Windows PowerShell</summary>
+This command downloads and installs Daytona and runs the Daytona Server:
 
 ```pwsh
+$architecture = if ($env:PROCESSOR_ARCHITECTURE -eq "AMD64") { "amd64" } else { "arm64" }
 md -Force "$Env:APPDATA\daytona"; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]'Tls,Tls11,Tls12';
-    Invoke-WebRequest -URI "https://download.daytona.io/daytona/latest/daytona-windows-amd64.exe" -o $Env:APPDATA\daytona\daytona.exe;
-    $env:Path += ";" + $Env:APPDATA + "\daytona";
-    [Environment]::SetEnvironmentVariable("Path", $env:Path, [System.EnvironmentVariableTarget]::User);
-    daytona;
+Invoke-WebRequest -URI "https://download.daytona.io/daytona/latest/daytona-windows-$architecture.exe" -o "$Env:APPDATA\daytona\daytona.exe";
+$env:Path += ";" + $Env:APPDATA + "\daytona"; [Environment]::SetEnvironmentVariable("Path", $env:Path, [System.EnvironmentVariableTarget]::User);
+daytona server;
 ```
+
 </details>
 
-<details>
-  <summary>ARM</summary>
-Run the following command in Windows PowerShell:
-
-```pwsh
-md -Force "$Env:APPDATA\daytona"; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]'Tls,Tls11,Tls12';
-    Invoke-WebRequest -URI "https://download.daytona.io/daytona/latest/daytona-windows-arm64.exe" -o $Env:APPDATA\daytona\daytona.exe;
-    $env:Path += ";" + $Env:APPDATA + "\daytona";
-    [Environment]::SetEnvironmentVariable("Path", $env:Path, [System.EnvironmentVariableTarget]::User);
-    daytona;
-```
-</details>
-
-### Start the Daytona server:
-
-```bash
-# Start the Daytona Server (omit -d if you want to run it in the foreground)
-daytona server -d
-```
-
-### Create your first dev environment by opening a new terminal, and executing just this command:
+### Create your first dev environment by opening a new terminal, and running:
 
 ```bash
 daytona create
 ```
 
-Start coding.
-
+**Start coding.**
 
 ----
 
@@ -154,8 +129,8 @@ curl -sf -L https://download.daytona.io/daytona/get-server.sh | sudo bash
 # curl -sf -L https://download.daytona.io/daytona/get-server.sh | DAYTONA_PATH=/home/user/bin bash
 ```
 <details open>
-  <summary>For manual install...</summary>
-  If you don't wanna use script provided, for manual binary download you can choose direct URL of the binaries according to your OS:
+  <summary> Manual installation </summary>
+  If you don't want to use the provided script, download the binary directly from the URL for your specific OS:
 
   ```bash
   curl -sf -L https://download.daytona.io/daytona/latest/daytona-darwin-amd64 -o daytona
