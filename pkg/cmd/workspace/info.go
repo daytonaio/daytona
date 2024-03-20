@@ -5,7 +5,6 @@ package workspace
 
 import (
 	"context"
-	"fmt"
 	"os"
 
 	"github.com/daytonaio/daytona/internal/util"
