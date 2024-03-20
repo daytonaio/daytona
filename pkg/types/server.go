@@ -26,6 +26,7 @@ type ServerConfig struct {
 	ApiPort           uint32        `json:"apiPort"`
 	HeadscalePort     uint32        `json:"headscalePort"`
 	TargetsFilePath   string        `json:"targetsFilePath"`
+	BinariesPath      string        `json:"binariesPath"`
 } // @name ServerConfig
 
 type NetworkKey struct {
