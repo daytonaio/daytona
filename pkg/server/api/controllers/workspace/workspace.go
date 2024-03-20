@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/workspace/dto"
 	"github.com/daytonaio/daytona/pkg/server/db"
@@ -57,10 +58,13 @@ func GetWorkspace(ctx *gin.Context) {
 //	@Produce		json
 //	@Success		200	{array}	dto.Workspace
 //	@Router			/workspace [get]
+//	@Param			verbose	query	bool	false	"Verbose"
 //
 //	@id				ListWorkspaces
 func ListWorkspaces(ctx *gin.Context) {
 	workspaces, err := db.ListWorkspaces()
+	verbose := ctx.Query("verbose")
+
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, errors.New("failed to list workspaces"))
 		return
@@ -69,12 +73,23 @@ func ListWorkspaces(ctx *gin.Context) {
 	response := []dto.Workspace{}
 
 	for _, workspace := range workspaces {
-		workspaceInfo, err := provisioner.GetWorkspaceInfo(workspace)
-		if err != nil {
-			log.Error(fmt.Errorf("failed to get workspace info for %s", workspace.Name))
-			// ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get workspace info for %s", workspace.Name))
-			// return
+		var workspaceInfo *types.WorkspaceInfo
+		if verbose != "" {
+			isVerbose, err := strconv.ParseBool(verbose)
+			if err != nil {
+				ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for verbose flag"))
+				return
+			}
+	
+			if isVerbose {
+				workspaceInfo, err = provisioner.GetWorkspaceInfo(workspace)
+				if err != nil {
+					log.Error(fmt.Errorf("failed to get workspace info for %s", workspace.Name))
+					// return
+				}
+			}
 		}
+			
 
 		response = append(response, dto.Workspace{
 			Workspace: *workspace,
