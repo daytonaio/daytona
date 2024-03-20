@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 	"strconv"
 
 	"github.com/daytonaio/daytona/pkg/types"
@@ -150,7 +150,7 @@ func getDefaultProvidersDir() (string, error) {
 		return "", err
 	}
 
-	return path.Join(userConfigDir, "daytona", "providers"), nil
+	return filepath.Join(userConfigDir, "daytona", "providers"), nil
 }
 
 func getDefaultTargetsPath() (string, error) {
@@ -159,7 +159,7 @@ func getDefaultTargetsPath() (string, error) {
 		return "", err
 	}
 
-	return path.Join(configDir, "targets.json"), nil
+	return filepath.Join(configDir, "targets.json"), nil
 }
 
 func generateUuid() string {

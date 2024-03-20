@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
-	"path"
+	"path/filepath"
 	"regexp"
 	"slices"
 	"sort"
@@ -227,7 +227,7 @@ func getFilePicker(name string, property serverapiclient.ProviderProviderTargetP
 				continue
 			}
 
-			options = append(options, huh.NewOption(file.Name(), path.Join(dirPath, file.Name())))
+			options = append(options, huh.NewOption(file.Name(), filepath.Join(dirPath, file.Name())))
 		}
 	}
 

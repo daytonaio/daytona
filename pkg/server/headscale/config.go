@@ -8,7 +8,7 @@ import (
 	"io/fs"
 	"net/netip"
 	"os"
-	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/daytonaio/daytona/internal/util"
@@ -41,7 +41,7 @@ func getConfig(serverConfig *types.ServerConfig) (*hstypes.Config, error) {
 			ServerRegionCode:                   "local",
 			ServerRegionName:                   "Daytona embedded DERP",
 			Paths:                              []string{},
-			ServerPrivateKeyPath:               path.Join(configDir, "headscale", "derp_server_private.key"),
+			ServerPrivateKeyPath:               filepath.Join(configDir, "headscale", "derp_server_private.key"),
 			UpdateFrequency:                    24 * time.Hour,
 			AutoUpdate:                         true,
 			STUNAddr:                           "0.0.0.0:3478",
@@ -68,10 +68,10 @@ func getConfig(serverConfig *types.ServerConfig) (*hstypes.Config, error) {
 				},
 			},
 		},
-		DBpath:               path.Join(configDir, "headscale", "headscale.db"),
-		UnixSocket:           path.Join(configDir, "headscale", "headscale.sock"),
+		DBpath:               filepath.Join(configDir, "headscale", "headscale.db"),
+		UnixSocket:           filepath.Join(configDir, "headscale", "headscale.sock"),
 		UnixSocketPermission: fs.FileMode.Perm(0700),
-		NoisePrivateKeyPath:  path.Join(configDir, "headscale", "noise_private.key"),
+		NoisePrivateKeyPath:  filepath.Join(configDir, "headscale", "noise_private.key"),
 		CLI: hstypes.CLIConfig{
 			Timeout: 10 * time.Second,
 		},
@@ -103,7 +103,7 @@ func init() {
 		return
 	}
 
-	err = os.MkdirAll(path.Join(c, "headscale"), 0700)
+	err = os.MkdirAll(filepath.Join(c, "headscale"), 0700)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to create headscale directory")
 		return

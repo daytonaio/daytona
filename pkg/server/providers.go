@@ -6,7 +6,7 @@ package server
 import (
 	"errors"
 	"os"
-	"path"
+	"path/filepath"
 	"runtime"
 
 	"github.com/daytonaio/daytona/pkg/provider/manager"
@@ -31,7 +31,7 @@ func downloadDefaultProviders() error {
 
 	log.Info("Downloading default providers")
 	for pluginName, plugin := range defaultProviderPlugins {
-		downloadPath := path.Join(c.ProvidersDir, pluginName, pluginName)
+		downloadPath := filepath.Join(c.ProvidersDir, pluginName, pluginName)
 		if runtime.GOOS == "windows" {
 			downloadPath += ".exe"
 		}
@@ -71,7 +71,7 @@ func registerProviders(c *types.ServerConfig) error {
 
 	for _, file := range files {
 		if file.IsDir() {
-			pluginPath, err := getPluginPath(path.Join(c.ProvidersDir, file.Name()))
+			pluginPath, err := getPluginPath(filepath.Join(c.ProvidersDir, file.Name()))
 			if err != nil {
 				log.Error(err)
 				continue
@@ -115,7 +115,7 @@ func getPluginPath(dir string) (string, error) {
 
 	for _, file := range files {
 		if !file.IsDir() {
-			return path.Join(dir, file.Name()), nil
+			return filepath.Join(dir, file.Name()), nil
 		}
 	}
 

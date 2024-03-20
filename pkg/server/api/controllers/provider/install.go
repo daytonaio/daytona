@@ -3,7 +3,7 @@ package provider
 import (
 	"fmt"
 	"net/http"
-	"path"
+	"path/filepath"
 
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/provider/dto"
@@ -45,7 +45,7 @@ func InstallProvider(ctx *gin.Context) {
 		return
 	}
 
-	downloadPath := path.Join(c.ProvidersDir, req.Name, req.Name)
+	downloadPath := filepath.Join(c.ProvidersDir, req.Name, req.Name)
 
 	err = manager.DownloadProvider(req.DownloadUrls, downloadPath)
 	if err != nil {
