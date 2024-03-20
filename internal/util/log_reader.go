@@ -2,41 +2,49 @@ package util
 
 import (
 	"bufio"
+	"bytes"
 	"context"
-	"os/exec"
+	"io"
+	"os"
+	"time"
 )
 
 func ReadLog(ctx context.Context, filePath *string, follow bool, c chan []byte, errChan chan error) {
 	if filePath == nil {
+		errChan <- os.ErrInvalid
 		return
 	}
 
-	ctxCancel, cancel := context.WithCancel(ctx)
-	defer cancel()
-
-	tailCmd := exec.CommandContext(ctxCancel, "tail", "-n", "+1")
-	if follow {
-		tailCmd.Args = append(tailCmd.Args, "-f")
-	}
-	tailCmd.Args = append(tailCmd.Args, *filePath)
-
-	reader, err := tailCmd.StdoutPipe()
+	file, err := os.Open(*filePath)
 	if err != nil {
 		errChan <- err
 		return
 	}
-	scanner := bufio.NewScanner(reader)
-	go func() {
-		for scanner.Scan() {
-			c <- scanner.Bytes()
+	defer file.Close()
+
+	reader := bufio.NewReader(file)
+
+	for {
+		select {
+		case <-ctx.Done():
+			errChan <- ctx.Err()
+			return
+		default:
+			line, err := reader.ReadBytes('\n')
+			if err != nil {
+				if err != io.EOF {
+					errChan <- err
+				}
+				if !follow {
+					errChan <- io.EOF
+					return
+				}
+				time.Sleep(500 * time.Millisecond) // Sleep to avoid busy loop
+				continue
+			}
+			// Trim the newline character
+			line = bytes.TrimRight(line, "\n")
+			c <- line
 		}
-	}()
-
-	err = tailCmd.Start()
-	if err != nil {
-		errChan <- err
-		return
 	}
-
-	errChan <- tailCmd.Wait()
 }
