@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/daytonaio/daytona/pkg/types"
 
@@ -49,7 +49,7 @@ func configFilePath() (string, error) {
 		return "", err
 	}
 
-	return path.Join(configDir, "config.json"), nil
+	return filepath.Join(configDir, "config.json"), nil
 }
 
 func Save(c *types.ServerConfig) error {
@@ -63,7 +63,7 @@ func Save(c *types.ServerConfig) error {
 		return err
 	}
 
-	err = os.MkdirAll(path.Dir(configFilePath), 0700)
+	err = os.MkdirAll(filepath.Dir(configFilePath), 0700)
 	if err != nil {
 		return err
 	}
@@ -82,7 +82,7 @@ func GetConfigDir() (string, error) {
 		return "", err
 	}
 
-	return path.Join(userConfigDir, "daytona", "server"), nil
+	return filepath.Join(userConfigDir, "daytona", "server"), nil
 }
 
 func GetWorkspaceLogsDir() (string, error) {
@@ -91,7 +91,7 @@ func GetWorkspaceLogsDir() (string, error) {
 		return "", err
 	}
 
-	return path.Join(configDir, "logs"), nil
+	return filepath.Join(configDir, "logs"), nil
 }
 
 func GetWorkspaceLogFilePath(workspaceId string) (string, error) {
@@ -100,9 +100,9 @@ func GetWorkspaceLogFilePath(workspaceId string) (string, error) {
 		return "", err
 	}
 
-	filePath := path.Join(projectLogsDir, workspaceId, "log")
+	filePath := filepath.Join(projectLogsDir, workspaceId, "log")
 
-	err = os.MkdirAll(path.Dir(filePath), 0755)
+	err = os.MkdirAll(filepath.Dir(filePath), 0755)
 	if err != nil {
 		return "", err
 	}
@@ -116,7 +116,7 @@ func DeleteWorkspaceLogs(workspaceId string) error {
 		return err
 	}
 
-	workspaceLogsDir := path.Join(logsDir, workspaceId)
+	workspaceLogsDir := filepath.Join(logsDir, workspaceId)
 
 	_, err = os.Stat(workspaceLogsDir)
 	if os.IsNotExist(err) {
@@ -134,9 +134,9 @@ func GetProjectLogFilePath(workspaceId string, projectId string) (string, error)
 		return "", err
 	}
 
-	filePath := path.Join(projectLogsDir, workspaceId, projectId, "log")
+	filePath := filepath.Join(projectLogsDir, workspaceId, projectId, "log")
 
-	err = os.MkdirAll(path.Dir(filePath), 0755)
+	err = os.MkdirAll(filepath.Dir(filePath), 0755)
 	if err != nil {
 		return "", err
 	}

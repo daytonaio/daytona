@@ -5,7 +5,7 @@ package logs
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/daytonaio/daytona/pkg/server/config"
 	frp_log "github.com/fatedier/frp/pkg/util/log"
@@ -42,7 +42,7 @@ func Init() error {
 		return err
 	}
 
-	filePath := path.Join(configDir, "daytona.log")
+	filePath := filepath.Join(configDir, "daytona.log")
 	LogFilePath = &filePath
 
 	file, err := os.OpenFile(*LogFilePath, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)

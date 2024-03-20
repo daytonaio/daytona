@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 )
 
 type ServerApi struct {
@@ -94,7 +94,7 @@ func (c *Config) Save() error {
 		return err
 	}
 
-	err = os.MkdirAll(path.Dir(configFilePath), 0755)
+	err = os.MkdirAll(filepath.Dir(configFilePath), 0755)
 	if err != nil {
 		return err
 	}
@@ -179,7 +179,7 @@ func getConfigPath() (string, error) {
 		return "", err
 	}
 
-	return path.Join(configDir, "config.json"), nil
+	return filepath.Join(configDir, "config.json"), nil
 }
 
 func GetConfigDir() (string, error) {
@@ -188,5 +188,5 @@ func GetConfigDir() (string, error) {
 		return "", err
 	}
 
-	return path.Join(userConfigDir, "daytona"), nil
+	return filepath.Join(userConfigDir, "daytona"), nil
 }

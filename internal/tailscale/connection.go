@@ -6,7 +6,7 @@ package tailscale
 import (
 	"context"
 	"fmt"
-	"path"
+	"path/filepath"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
@@ -50,7 +50,7 @@ func GetConnection(profile *config.Profile) (*tsnet.Server, error) {
 	s.ControlURL = frpc.GetServerUrl(server.ToServerConfig(serverConfig))
 	s.AuthKey = *networkKey.Key
 	s.Ephemeral = true
-	s.Dir = path.Join(configDir, "tailscale", cliId)
+	s.Dir = filepath.Join(configDir, "tailscale", cliId)
 	s.Logf = func(format string, args ...any) {}
 
 	_, err = s.Up(context.Background())
