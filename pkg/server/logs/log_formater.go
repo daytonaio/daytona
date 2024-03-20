@@ -12,7 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var LogFilePath *string
+var logFilePath *string
 
 type logFormatter struct {
 	textFormater *log.TextFormatter
@@ -25,7 +25,7 @@ func (f *logFormatter) Format(entry *log.Entry) ([]byte, error) {
 		return nil, err
 	}
 
-	if LogFilePath != nil {
+	if logFilePath != nil {
 		// Write to file
 		_, err = f.file.Write(formatted)
 		if err != nil {
@@ -36,16 +36,24 @@ func (f *logFormatter) Format(entry *log.Entry) ([]byte, error) {
 	return formatted, nil
 }
 
-func Init() error {
-	configDir, err := config.GetConfigDir()
-	if err != nil {
-		return err
+func GetLogFilePath() *string {
+	if logFilePath == nil {
+		configDir, err := config.GetConfigDir()
+		if err != nil {
+			return nil
+		}
+
+		filePath := filepath.Join(configDir, "daytona.log")
+		logFilePath = &filePath
 	}
 
-	filePath := filepath.Join(configDir, "daytona.log")
-	LogFilePath = &filePath
+	return logFilePath
+}
 
-	file, err := os.OpenFile(*LogFilePath, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)
+func Init() error {
+	filePath := GetLogFilePath()
+
+	file, err := os.OpenFile(*filePath, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
@@ -64,7 +72,7 @@ func Init() error {
 		frpLogLevel = os.Getenv("FRP_LOG_LEVEL")
 	}
 
-	frpOutput := filePath
+	frpOutput := *filePath
 	if os.Getenv("FRP_LOG_OUTPUT") != "" {
 		frpOutput = os.Getenv("FRP_LOG_OUTPUT")
 	}
