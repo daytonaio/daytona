@@ -10,6 +10,7 @@ import (
 	"runtime"
 
 	"github.com/daytonaio/daytona/pkg/provider/manager"
+	"github.com/daytonaio/daytona/pkg/server/api/util"
 	"github.com/daytonaio/daytona/pkg/server/config"
 	"github.com/daytonaio/daytona/pkg/server/frpc"
 	"github.com/daytonaio/daytona/pkg/types"
@@ -77,7 +78,7 @@ func registerProviders(c *types.ServerConfig) error {
 				continue
 			}
 
-			err = manager.RegisterProvider(pluginPath, c.ServerDownloadUrl, frpc.GetServerUrl(c), frpc.GetApiUrl(c))
+			err = manager.RegisterProvider(pluginPath, util.GetDaytonaScriptUrl(c), frpc.GetServerUrl(c), frpc.GetApiUrl(c))
 			if err != nil {
 				log.Error(err)
 				continue

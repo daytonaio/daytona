@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/util"
 	os_util "github.com/daytonaio/daytona/pkg/os"
 	. "github.com/daytonaio/daytona/pkg/provider"
@@ -118,10 +119,9 @@ func RegisterProvider(pluginPath, serverDownloadUrl, serverUrl, serverApiUrl str
 	_, err = (*p).Initialize(InitializeProviderRequest{
 		BasePath:          pluginBasePath,
 		ServerDownloadUrl: serverDownloadUrl,
-		// TODO: get version from somewhere
-		ServerVersion: "latest",
-		ServerUrl:     serverUrl,
-		ServerApiUrl:  serverApiUrl,
+		ServerVersion:     internal.Version,
+		ServerUrl:         serverUrl,
+		ServerApiUrl:      serverApiUrl,
 	})
 	if err != nil {
 		return errors.New("failed to initialize provider: " + err.Error())
