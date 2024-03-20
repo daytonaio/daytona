@@ -6,7 +6,7 @@ package db
 import (
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/glebarez/sqlite"
@@ -63,12 +63,12 @@ func getDbPath() (string, error) {
 		return "", err
 	}
 
-	dir := path.Join(userConfigDir, "daytona")
+	dir := filepath.Join(userConfigDir, "daytona")
 
 	err = os.MkdirAll(dir, 0755)
 	if err != nil {
 		return "", err
 	}
 
-	return path.Join(dir, "db"), nil
+	return filepath.Join(dir, "db"), nil
 }

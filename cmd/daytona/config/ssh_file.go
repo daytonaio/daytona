@@ -6,7 +6,7 @@ package config
 import (
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"strings"
@@ -16,8 +16,8 @@ var sshHomeDir string
 
 func ensureSshFilesLinked() error {
 	// Make sure ~/.ssh/config file exists
-	sshDir := path.Join(sshHomeDir, ".ssh")
-	configPath := path.Join(sshDir, "config")
+	sshDir := filepath.Join(sshHomeDir, ".ssh")
+	configPath := filepath.Join(sshDir, "config")
 
 	_, err := os.Stat(configPath)
 	if os.IsNotExist(err) {
@@ -28,7 +28,7 @@ func ensureSshFilesLinked() error {
 	}
 
 	// Make sure daytona_config file exists
-	daytonaConfigPath := path.Join(sshDir, "daytona_config")
+	daytonaConfigPath := filepath.Join(sshDir, "daytona_config")
 
 	_, err = os.Stat(daytonaConfigPath)
 	if os.IsNotExist(err) {
@@ -39,7 +39,7 @@ func ensureSshFilesLinked() error {
 	}
 
 	// Make sure daytona_config is included
-	configFile := path.Join(sshDir, "config")
+	configFile := filepath.Join(sshDir, "config")
 	_, err = os.Stat(configFile)
 	if os.IsNotExist(err) {
 		err := os.WriteFile(configFile, []byte("Include daytona_config\n\n"), 0600)
@@ -102,8 +102,8 @@ func EnsureSshConfigEntryAdded(profileId, workspaceName, projectName string) err
 		return err
 	}
 
-	sshDir := path.Join(sshHomeDir, ".ssh")
-	configPath := path.Join(sshDir, "daytona_config")
+	sshDir := filepath.Join(sshHomeDir, ".ssh")
+	configPath := filepath.Join(sshDir, "daytona_config")
 
 	// Read existing content from the file
 	existingContent, err := os.ReadFile(configPath)
@@ -134,8 +134,8 @@ func EnsureSshConfigEntryAdded(profileId, workspaceName, projectName string) err
 }
 
 func RemoveWorkspaceSshEntries(profileId, workspaceId string) error {
-	sshDir := path.Join(sshHomeDir, ".ssh")
-	configPath := path.Join(sshDir, "daytona_config")
+	sshDir := filepath.Join(sshHomeDir, ".ssh")
+	configPath := filepath.Join(sshDir, "daytona_config")
 
 	// Read existing content from the file
 	existingContent, err := os.ReadFile(configPath)

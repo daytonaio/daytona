@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os/exec"
 	"path"
+	"path/filepath"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/jetbrains"
@@ -31,7 +32,7 @@ func OpenJetbrainsIDE(activeProfile config.Profile, ide, workspaceId, projectNam
 		return fmt.Errorf("IDE not found")
 	}
 
-	downloadPath := path.Join("/home/daytona/.cache/JetBrains", ide)
+	downloadPath := filepath.ToSlash(filepath.Join("/home/daytona/.cache/JetBrains", ide))
 
 	downloadUrl := ""
 

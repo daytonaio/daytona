@@ -7,22 +7,22 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 )
 
-func DownloadFile(url string, filepath string) error {
+func DownloadFile(url string, filename string) error {
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
-	err = os.MkdirAll(path.Dir(filepath), os.ModePerm)
+	err = os.MkdirAll(filepath.Dir(filename), os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	out, err := os.Create(filepath)
+	out, err := os.Create(filename)
 	if err != nil {
 		return err
 	}

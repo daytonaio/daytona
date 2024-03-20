@@ -7,7 +7,7 @@ import (
 	"errors"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -74,8 +74,8 @@ func GetProviders() map[string]Provider {
 }
 
 func RegisterProvider(pluginPath, serverDownloadUrl, serverUrl, serverApiUrl string) error {
-	pluginName := path.Base(pluginPath)
-	pluginBasePath := path.Dir(pluginPath)
+	pluginName := filepath.Base(pluginPath)
+	pluginBasePath := filepath.Dir(pluginPath)
 
 	if runtime.GOOS == "windows" && strings.HasSuffix(pluginPath, ".exe") {
 		pluginName = strings.TrimSuffix(pluginName, ".exe")

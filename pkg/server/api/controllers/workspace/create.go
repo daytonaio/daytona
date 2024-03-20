@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -111,7 +111,7 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 
 		// TODO: generate API key for project
 		projectNameSlugRegex := regexp.MustCompile(`[^a-zA-Z0-9-]`)
-		projectName := projectNameSlugRegex.ReplaceAllString(strings.ToLower(path.Base(repo.Url)), "-")
+		projectName := projectNameSlugRegex.ReplaceAllString(strings.ToLower(filepath.Base(repo.Url)), "-")
 		project := &types.Project{
 			Name:        projectName,
 			Repository:  &repo,
