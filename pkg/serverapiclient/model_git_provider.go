@@ -20,9 +20,9 @@ var _ MappedNullable = &GitProvider{}
 // GitProvider struct for GitProvider
 type GitProvider struct {
 	BaseApiUrl *string `json:"baseApiUrl,omitempty"`
-	Id *string `json:"id,omitempty"`
-	Token *string `json:"token,omitempty"`
-	Username *string `json:"username,omitempty"`
+	Id         *string `json:"id,omitempty"`
+	Token      *string `json:"token,omitempty"`
+	Username   *string `json:"username,omitempty"`
 }
 
 // NewGitProvider instantiates a new GitProvider object
@@ -171,7 +171,7 @@ func (o *GitProvider) SetUsername(v string) {
 }
 
 func (o GitProvider) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -230,5 +230,3 @@ func (v *NullableGitProvider) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

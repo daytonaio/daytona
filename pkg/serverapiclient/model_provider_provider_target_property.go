@@ -23,10 +23,10 @@ type ProviderProviderTargetProperty struct {
 	DefaultValue *string `json:"defaultValue,omitempty"`
 	// A regex string matched with the name of the target to determine if the property should be disabled If the regex matches the target name, the property will be disabled E.g. \"^local$\" will disable the property for the local target
 	DisabledPredicate *string `json:"disabledPredicate,omitempty"`
-	InputMasked *bool `json:"inputMasked,omitempty"`
+	InputMasked       *bool   `json:"inputMasked,omitempty"`
 	// Options is only used if the Type is ProviderTargetPropertyTypeOption
-	Options []string `json:"options,omitempty"`
-	Type *ProviderProviderTargetPropertyType `json:"type,omitempty"`
+	Options []string                            `json:"options,omitempty"`
+	Type    *ProviderProviderTargetPropertyType `json:"type,omitempty"`
 }
 
 // NewProviderProviderTargetProperty instantiates a new ProviderProviderTargetProperty object
@@ -207,7 +207,7 @@ func (o *ProviderProviderTargetProperty) SetType(v ProviderProviderTargetPropert
 }
 
 func (o ProviderProviderTargetProperty) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -269,5 +269,3 @@ func (v *NullableProviderProviderTargetProperty) UnmarshalJSON(src []byte) error
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

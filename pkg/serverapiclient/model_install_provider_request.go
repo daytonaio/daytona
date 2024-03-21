@@ -20,7 +20,7 @@ var _ MappedNullable = &InstallProviderRequest{}
 // InstallProviderRequest struct for InstallProviderRequest
 type InstallProviderRequest struct {
 	DownloadUrls *map[string]string `json:"downloadUrls,omitempty"`
-	Name *string `json:"name,omitempty"`
+	Name         *string            `json:"name,omitempty"`
 }
 
 // NewInstallProviderRequest instantiates a new InstallProviderRequest object
@@ -105,7 +105,7 @@ func (o *InstallProviderRequest) SetName(v string) {
 }
 
 func (o InstallProviderRequest) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -158,5 +158,3 @@ func (v *NullableInstallProviderRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

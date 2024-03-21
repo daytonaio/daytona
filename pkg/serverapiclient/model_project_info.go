@@ -19,13 +19,13 @@ var _ MappedNullable = &ProjectInfo{}
 
 // ProjectInfo struct for ProjectInfo
 type ProjectInfo struct {
-	Created *string `json:"created,omitempty"`
-	Finished *string `json:"finished,omitempty"`
-	IsRunning *bool `json:"isRunning,omitempty"`
-	Name *string `json:"name,omitempty"`
+	Created          *string `json:"created,omitempty"`
+	Finished         *string `json:"finished,omitempty"`
+	IsRunning        *bool   `json:"isRunning,omitempty"`
+	Name             *string `json:"name,omitempty"`
 	ProviderMetadata *string `json:"providerMetadata,omitempty"`
-	Started *string `json:"started,omitempty"`
-	WorkspaceId *string `json:"workspaceId,omitempty"`
+	Started          *string `json:"started,omitempty"`
+	WorkspaceId      *string `json:"workspaceId,omitempty"`
 }
 
 // NewProjectInfo instantiates a new ProjectInfo object
@@ -270,7 +270,7 @@ func (o *ProjectInfo) SetWorkspaceId(v string) {
 }
 
 func (o ProjectInfo) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -338,5 +338,3 @@ func (v *NullableProjectInfo) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

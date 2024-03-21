@@ -80,7 +80,7 @@ func ListWorkspaces(ctx *gin.Context) {
 				ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for verbose flag"))
 				return
 			}
-	
+
 			if isVerbose {
 				workspaceInfo, err = provisioner.GetWorkspaceInfo(workspace)
 				if err != nil {
@@ -89,7 +89,6 @@ func ListWorkspaces(ctx *gin.Context) {
 				}
 			}
 		}
-			
 
 		response = append(response, dto.Workspace{
 			Workspace: *workspace,
