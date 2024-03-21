@@ -53,7 +53,11 @@ func CreateWorkspace(ctx *gin.Context) {
 	}
 
 	log.Debug(w)
-	db.SaveWorkspace(w)
+	err = db.SaveWorkspace(w)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to save workspace: %s", err.Error()))
+		return
+	}
 
 	err = provisioner.CreateWorkspace(w)
 	if err != nil {

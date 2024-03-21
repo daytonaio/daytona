@@ -50,7 +50,7 @@ func getLongDescriptionFull() string {
 	response := ""
 
 	response +=
-		fmt.Sprintf("\n") +
+		"\n" +
 			fmt.Sprintf("%s\n", "               @@@          ") +
 			fmt.Sprintf("%s\x1b[1m%s\x1b[0m%s\n", "            @@@@@           ", "Daytona", " - your Dev Environment Manager") +
 			fmt.Sprintf("%s\n", "     @@@@  @@@@@            ") +
@@ -66,26 +66,4 @@ func getLongDescriptionFull() string {
 			fmt.Sprintf("%s\n\n", "         @@@    @@@   ")
 
 	return response
-}
-
-// Unused for the moment
-func getAsciiLogoWithSigil() string {
-	return "                       \n" +
-		"             @@.       \n" +
-		"      @@# .@@@           ____              _\n" +
-		"      @@#@@ .@@@@@@@    |  _ \\  __ _ _   _| |_ ___  _ __   __ _\n" +
-		"  .@@@@@#     ,@@.      | | | |/ _` | | | | __/ _ \\| '_ \\ / _` |\n" +
-		"     @@@         @@@    | |_| | (_| | |_| | || (_) | | | | (_| |\n" +
-		"   (@@@@@@   @@@@  @.   |____/ \\__,_|\\__, |\\__\\___/|_| |_|\\__,_|\n" +
-		"         /@@@ @@@       	      |___/\n" +
-		"         @@   @        \n\n"
-}
-
-func getAsciiLogoWithoutSigil() string {
-	return "  ____              _\n" +
-		" |  _ \\  __ _ _   _| |_ ___  _ __   __ _\n" +
-		" | | | |/ _` | | | | __/ _ \\| '_ \\ / _` |\n" +
-		" | |_| | (_| | |_| | || (_) | | | | (_| |\n" +
-		" |____/ \\__,_|\\__, |\\__\\___/|_| |_|\\__,_|\n" +
-		" 	      |___/\n"
 }

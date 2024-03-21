@@ -7,7 +7,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"net/http"
 	"net/netip"
@@ -18,6 +17,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"tailscale.com/tsnet"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func Start(c *config.Config) error {
@@ -54,7 +55,7 @@ func Start(c *config.Config) error {
 			defer src.Close()
 			dst, err := net.Dial("tcp", fmt.Sprintf("localhost:%d", destPort))
 			if err != nil {
-				log.Printf("Dial failed: %v", err)
+				log.Errorf("Dial failed: %v", err)
 				return
 			}
 			defer dst.Close()

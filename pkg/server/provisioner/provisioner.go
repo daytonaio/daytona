@@ -71,13 +71,16 @@ func CreateWorkspace(workspace *types.Workspace) error {
 		projectLogWriter.Write([]byte(fmt.Sprintf("Creating project %s\n", project.Name)))
 
 		//	todo: go routines
-		event_bus.Publish(event_bus.Event{
+		err = event_bus.Publish(event_bus.Event{
 			Name: event_bus.WorkspaceEventProjectCreating,
 			Payload: event_bus.WorkspaceEventPayload{
 				WorkspaceName: workspace.Name,
 				ProjectName:   project.Name,
 			},
 		})
+		if err != nil {
+			log.Error(err)
+		}
 		_, err = (*provider).CreateProject(&provider_types.ProjectRequest{
 			TargetOptions: target.Options,
 			Project:       project,
@@ -85,23 +88,29 @@ func CreateWorkspace(workspace *types.Workspace) error {
 		if err != nil {
 			return err
 		}
-		event_bus.Publish(event_bus.Event{
+		err = event_bus.Publish(event_bus.Event{
 			Name: event_bus.WorkspaceEventProjectCreated,
 			Payload: event_bus.WorkspaceEventPayload{
 				WorkspaceName: workspace.Name,
 				ProjectName:   project.Name,
 			},
 		})
+		if err != nil {
+			log.Error(err)
+		}
 
 		projectLogWriter.Write([]byte(fmt.Sprintf("Project %s created\n", project.Name)))
 	}
 
-	event_bus.Publish(event_bus.Event{
+	err = event_bus.Publish(event_bus.Event{
 		Name: event_bus.WorkspaceEventCreated,
 		Payload: event_bus.WorkspaceEventPayload{
 			WorkspaceName: workspace.Name,
 		},
 	})
+	if err != nil {
+		log.Error(err)
+	}
 
 	wsLogWriter.Write([]byte("Workspace creation completed\n"))
 
@@ -134,17 +143,23 @@ func StartWorkspace(workspace *types.Workspace) error {
 		return err
 	}
 
-	(*provider).StartWorkspace(&provider_types.WorkspaceRequest{
+	_, err = (*provider).StartWorkspace(&provider_types.WorkspaceRequest{
 		TargetOptions: target.Options,
 		Workspace:     workspace,
 	})
+	if err != nil {
+		return err
+	}
 
-	event_bus.Publish(event_bus.Event{
+	err = event_bus.Publish(event_bus.Event{
 		Name: event_bus.WorkspaceEventStarting,
 		Payload: event_bus.WorkspaceEventPayload{
 			WorkspaceName: workspace.Name,
 		},
 	})
+	if err != nil {
+		log.Error(err)
+	}
 
 	for _, project := range workspace.Projects {
 
@@ -172,12 +187,15 @@ func StartWorkspace(workspace *types.Workspace) error {
 		}
 	}
 
-	event_bus.Publish(event_bus.Event{
+	err = event_bus.Publish(event_bus.Event{
 		Name: event_bus.WorkspaceEventStarted,
 		Payload: event_bus.WorkspaceEventPayload{
 			WorkspaceName: workspace.Name,
 		},
 	})
+	if err != nil {
+		log.Error(err)
+	}
 	return nil
 }
 
@@ -216,17 +234,23 @@ func StopWorkspace(workspace *types.Workspace) error {
 		return err
 	}
 
-	(*provider).StopWorkspace(&provider_types.WorkspaceRequest{
+	_, err = (*provider).StopWorkspace(&provider_types.WorkspaceRequest{
 		TargetOptions: target.Options,
 		Workspace:     workspace,
 	})
+	if err != nil {
+		return err
+	}
 
-	event_bus.Publish(event_bus.Event{
+	err = event_bus.Publish(event_bus.Event{
 		Name: event_bus.WorkspaceEventStopping,
 		Payload: event_bus.WorkspaceEventPayload{
 			WorkspaceName: workspace.Name,
 		},
 	})
+	if err != nil {
+		log.Error(err)
+	}
 
 	for _, project := range workspace.Projects {
 		//	todo: go routines
@@ -239,12 +263,15 @@ func StopWorkspace(workspace *types.Workspace) error {
 		}
 	}
 
-	event_bus.Publish(event_bus.Event{
+	err = event_bus.Publish(event_bus.Event{
 		Name: event_bus.WorkspaceEventStopped,
 		Payload: event_bus.WorkspaceEventPayload{
 			WorkspaceName: workspace.Name,
 		},
 	})
+	if err != nil {
+		log.Error(err)
+	}
 
 	return nil
 }
@@ -284,12 +311,15 @@ func DestroyWorkspace(workspace *types.Workspace) error {
 		return err
 	}
 
-	event_bus.Publish(event_bus.Event{
+	err = event_bus.Publish(event_bus.Event{
 		Name: event_bus.WorkspaceEventRemoving,
 		Payload: event_bus.WorkspaceEventPayload{
 			WorkspaceName: workspace.Name,
 		},
 	})
+	if err != nil {
+		log.Error(err)
+	}
 
 	for _, project := range workspace.Projects {
 		//	todo: go routines
@@ -310,12 +340,15 @@ func DestroyWorkspace(workspace *types.Workspace) error {
 		return err
 	}
 
-	event_bus.Publish(event_bus.Event{
+	err = event_bus.Publish(event_bus.Event{
 		Name: event_bus.WorkspaceEventRemoved,
 		Payload: event_bus.WorkspaceEventPayload{
 			WorkspaceName: workspace.Name,
 		},
 	})
+	if err != nil {
+		log.Error(err)
+	}
 
 	err = config.DeleteWorkspaceLogs(workspace.Id)
 	if err != nil {

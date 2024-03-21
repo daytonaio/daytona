@@ -38,7 +38,7 @@ func getBinaryPath(binaryName, binaryVersion string) (string, error) {
 		return "", err
 	}
 
-	binaryOs := daytona_os.Linux_64_86
+	var binaryOs daytona_os.OperatingSystem
 	split := strings.Split(binaryName, "-")
 	if len(split) != 3 {
 		return "", fmt.Errorf("invalid binary name: %s", binaryName)

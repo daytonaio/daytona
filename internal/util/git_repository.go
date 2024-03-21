@@ -4,10 +4,11 @@
 package util
 
 import (
+	"errors"
+
 	"github.com/daytonaio/daytona/pkg/types"
 )
 
 func GetGitContextFromUrl(name string) (*types.Repository, error) {
-	panic("not implemented")
-	return &types.Repository{}, nil
+	return nil, errors.New("not implemented")
 }
