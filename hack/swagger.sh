@@ -1,2 +1,3 @@
+# Make sure you have Node, Java 11 and Swagger installed and available in your PATH before running as well as the npm package @openapitools/openapi-generator-cli
 (cd pkg/server && swag fmt && swag init --parseDependency --parseInternal --parseDepth 1 -o api/docs -g api/server.go)
 GO_POST_PROCESS_FILE="/usr/local/bin/gofmt -w" GIT_USER_ID=daytonaio GIT_REPO_ID=daytona npx --yes @openapitools/openapi-generator-cli generate -i pkg/server/api/docs/swagger.json -g go --package-name=serverapiclient --additional-properties=isGoSubmodule=true -o pkg/serverapiclient && rm -rf pkg/serverapiclient/.openapi-generator/FILES

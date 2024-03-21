@@ -9,3 +9,4 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc
 go mod tidy
 
 echo 'alias daytona="go run cmd/daytona/main.go"' >> ~/.zshrc
+echo 'alias daytona="go run cmd/daytona/main.go"' >> ~/.bashrc

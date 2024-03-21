@@ -229,14 +229,19 @@ Similar to providers, plugins are independent projects that conform to the Dayto
 ## Contributing
 
 
-Daytona is Open Source under the [Apache License 2.0](LICENSE), and is the [copyright of its contributors](NOTICE). If you would like to contribute to the software, you must:
-
-1. Read the Developer Certificate of Origin Version 1.1 (https://developercertificate.org/)
-2. Signing all commits to the Daytona project.
-
-This ensures that users, distributors, and other contributors can rely on all the software related to Daytona being contributed under the terms of the [License](LICENSE). No contributions will be accepted without following this process.
+Daytona is Open Source under the [Apache License 2.0](LICENSE), and is the [copyright of its contributors](NOTICE). If you would like to contribute to the software, start by reading the Developer Certificate of Origin Version 1.1 (https://developercertificate.org/). This ensures that users, distributors, and other contributors can rely on all the software related to Daytona being contributed under the terms of the [License](LICENSE). No contributions will be accepted without following this process.
 
 Afterwards, navigate to the [contributing guide](CONTRIBUTING.md) to get started.
+
+### Contribute to Daytona using Daytona
+
+The first step is to [fork](https://help.github.com/articles/working-with-forks/) the GitHub Repository allowing you to make the changes in your own copy of the repository. Then:
+ 
+1. Follow the Quick Start guide to install Daytona to your device
+1. Open a new terminal window and run ```daytona create DaytonaWorkspace -r <YOUR_FORKED_REPOSITORY_URL>```
+1. Once Visual Studio Code is ready, reopen in a [Dev Container](https://code.visualstudio.com/docs/devcontainers/containers) and start developing.
+
+If you are developing outside of a Devcontainer and use a different development setup read more in the [contributing guide](CONTRIBUTING.md).
 
 ## License
 
