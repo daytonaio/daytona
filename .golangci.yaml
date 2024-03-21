@@ -1,0 +1,8 @@
+linters-settings:
+  errcheck:
+    exclude-functions:
+      - (*github.com/gin-gonic/gin.Context).AbortWithError
+      - io.Copy
+      - syscall.Syscall
+      - (github.com/gliderlabs/ssh.Session).Exit
+      - (io.Writer).Write

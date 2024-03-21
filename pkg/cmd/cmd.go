@@ -29,7 +29,10 @@ var rootCmd = &cobra.Command{
 	Long:  "Daytona is a Dev Environment Manager",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Print(view_util.GetLongDescription())
-		cmd.Help()
+		err := cmd.Help()
+		if err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 

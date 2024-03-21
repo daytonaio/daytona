@@ -87,7 +87,10 @@ func init() {
 	StartCmd.PersistentFlags().StringVarP(&startProjectFlag, "project", "p", "", "Start a single project in the workspace (project name)")
 	StartCmd.PersistentFlags().BoolVarP(&allFlag, "all", "a", false, "Start all workspaces")
 
-	StartCmd.RegisterFlagCompletionFunc("project", getProjectNameCompletions)
+	err := StartCmd.RegisterFlagCompletionFunc("project", getProjectNameCompletions)
+	if err != nil {
+		log.Error("failed to register completion function: ", err)
+	}
 }
 
 func startAllWorkspaces() error {

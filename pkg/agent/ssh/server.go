@@ -6,7 +6,6 @@ package ssh
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -19,6 +18,8 @@ import (
 	"github.com/pkg/sftp"
 	crypto_ssh "golang.org/x/crypto/ssh"
 	"golang.org/x/sys/unix"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func Start() {
@@ -184,7 +185,10 @@ func handleNonPty(s ssh.Session) {
 	go func() {
 		for sig := range sigs {
 			signal := osSignalFrom(sig)
-			cmd.Process.Signal(signal)
+			err := cmd.Process.Signal(signal)
+			if err != nil {
+				log.Println("signal error: ", err)
+			}
 		}
 	}()
 	err = cmd.Wait()

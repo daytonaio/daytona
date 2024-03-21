@@ -101,7 +101,10 @@ var DeleteCmd = &cobra.Command{
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		config.RemoveWorkspaceSshEntries(activeProfile.Id, *workspace.Id)
+		err = config.RemoveWorkspaceSshEntries(activeProfile.Id, *workspace.Id)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		util.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully deleted", *workspace.Name))
 	},

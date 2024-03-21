@@ -7,8 +7,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var providerNameArg string
-
 var ProviderCmd = &cobra.Command{
 	Use:   "provider",
 	Short: "Manage providers",
