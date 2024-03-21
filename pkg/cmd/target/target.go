@@ -7,8 +7,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var targetNameArg string
-
 var TargetCmd = &cobra.Command{
 	Use:   "target",
 	Short: "Manage provider targets",

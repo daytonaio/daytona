@@ -116,7 +116,10 @@ var CreateCmd = &cobra.Command{
 				fmt.Println("Error running status program:", err)
 				statusProgram.Send(status.ClearScreenMsg{})
 				statusProgram.Send(tea.Quit())
-				statusProgram.ReleaseTerminal()
+				err := statusProgram.ReleaseTerminal()
+				if err != nil {
+					log.Error(err)
+				}
 				os.Exit(1)
 			}
 		}()
@@ -227,7 +230,10 @@ func processPrompting(cmd *cobra.Command, apiClient *serverapiclient.APIClient, 
 
 	if argRepos != nil {
 		view_util.RenderInfoMessage("Error: workspace name argument is required for this command")
-		cmd.Help()
+		err := cmd.Help()
+		if err != nil {
+			log.Fatal(err)
+		}
 		os.Exit(1)
 	}
 
@@ -277,7 +283,10 @@ func processCmdArguments(cmd *cobra.Command, args []string, apiClient *serverapi
 		repoUrls = argRepos
 	} else {
 		view_util.RenderInfoMessage("Error: --repo flag is required for this command")
-		cmd.Help()
+		err := cmd.Help()
+		if err != nil {
+			log.Fatal(err)
+		}
 		os.Exit(1)
 	}
 
@@ -347,7 +356,10 @@ func waitForDial(tsConn *tsnet.Server, workspaceId string, projectName string, d
 func cleanUpTerminal(statusProgram *tea.Program, err error) {
 	statusProgram.Send(status.ClearScreenMsg{})
 	statusProgram.Send(tea.Quit())
-	statusProgram.ReleaseTerminal()
+	releaseError := statusProgram.ReleaseTerminal()
+	if releaseError != nil {
+		log.Error(releaseError)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}

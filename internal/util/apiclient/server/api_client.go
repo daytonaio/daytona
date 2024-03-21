@@ -26,7 +26,7 @@ func GetApiClient(profile *config.Profile) (*serverapiclient.APIClient, error) {
 		return nil, err
 	}
 
-	serverUrl := "http://localhost:3000"
+	var serverUrl string
 
 	if envApiUrl, ok := os.LookupEnv("DAYTONA_SERVER_API_URL"); ok {
 		serverUrl = envApiUrl
