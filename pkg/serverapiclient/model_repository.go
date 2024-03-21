@@ -19,15 +19,15 @@ var _ MappedNullable = &Repository{}
 
 // Repository struct for Repository
 type Repository struct {
-	Branch *string `json:"branch,omitempty"`
-	Id *string `json:"id,omitempty"`
-	Name *string `json:"name,omitempty"`
-	Owner *string `json:"owner,omitempty"`
-	Path *string `json:"path,omitempty"`
-	PrNumber *int32 `json:"prNumber,omitempty"`
-	Sha *string `json:"sha,omitempty"`
-	Source *string `json:"source,omitempty"`
-	Url *string `json:"url,omitempty"`
+	Branch   *string `json:"branch,omitempty"`
+	Id       *string `json:"id,omitempty"`
+	Name     *string `json:"name,omitempty"`
+	Owner    *string `json:"owner,omitempty"`
+	Path     *string `json:"path,omitempty"`
+	PrNumber *int32  `json:"prNumber,omitempty"`
+	Sha      *string `json:"sha,omitempty"`
+	Source   *string `json:"source,omitempty"`
+	Url      *string `json:"url,omitempty"`
 }
 
 // NewRepository instantiates a new Repository object
@@ -336,7 +336,7 @@ func (o *Repository) SetUrl(v string) {
 }
 
 func (o Repository) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -410,5 +410,3 @@ func (v *NullableRepository) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"net/http"
 	"strconv"
 	"time"
-	"net/http"
 
 	"github.com/daytonaio/daytona/internal/tailscale"
 	log "github.com/sirupsen/logrus"

@@ -8,13 +8,14 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
 	"github.com/spf13/cobra"
 )
 
 var AutoCompleteCmd = &cobra.Command{
-	Use:     "autocomplete [bash|zsh|fish|powershell]",
-	Short:   "Adds completion script for your shell enviornment",
-	Args:    cobra.ExactArgs(1),
+	Use:   "autocomplete [bash|zsh|fish|powershell]",
+	Short: "Adds completion script for your shell enviornment",
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		shell := args[0]
 		homeDir, err := os.UserHomeDir()
@@ -77,7 +78,7 @@ var AutoCompleteCmd = &cobra.Command{
 		if err != nil && !os.IsNotExist(err) {
 			fmt.Printf("Error while reading profile (%s): %s\n", profilePath, err)
 		}
-	
+
 		if strings.Contains(string(profile), strings.TrimSpace(sourceCommand)) {
 			alreadyPresent = true
 		}

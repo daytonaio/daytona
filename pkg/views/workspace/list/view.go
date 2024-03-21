@@ -82,8 +82,8 @@ func renderWorkspaceList(workspaceList []serverapiclient.Workspace, specifyGitPr
 			adjustColumsFormatting(rowData)
 			row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Branch, rowData.Target}
 			if workspace.Info != nil && len(workspace.Info.Projects) > 0 {
-                row = append(row, rowData.Created, rowData.Status)
-            }
+				row = append(row, rowData.Created, rowData.Status)
+			}
 			rows = append(rows, row)
 		} else {
 			row = table.Row{*workspace.Name, "", "", "", "", ""}
@@ -281,7 +281,7 @@ func getTable(rows []table.Row, cols []table.Column, activeRow int) table.Model 
 	return t
 }
 
-func getRowsAndCols(width int, initialRows []table.Row)([]table.Row, []table.Column) {
+func getRowsAndCols(width int, initialRows []table.Row) ([]table.Row, []table.Column) {
 	colWidth := 0
 	cols := []table.Column{}
 
@@ -290,7 +290,7 @@ func getRowsAndCols(width int, initialRows []table.Row)([]table.Row, []table.Col
 		if i >= len(initialRows[0]) {
 			break
 		}
-		
+
 		if colWidth+col.Width > width {
 			break
 		}
@@ -301,12 +301,12 @@ func getRowsAndCols(width int, initialRows []table.Row)([]table.Row, []table.Col
 
 	rows := make([]table.Row, len(initialRows))
 
-    for i, row := range initialRows {
-        if len(row) >= len(cols) {
-            rows[i] = row[:len(cols)]
-        } else {
-            rows[i] = row 
-        }
-    }
+	for i, row := range initialRows {
+		if len(row) >= len(cols) {
+			rows[i] = row[:len(cols)]
+		} else {
+			rows[i] = row
+		}
+	}
 	return rows, cols
 }

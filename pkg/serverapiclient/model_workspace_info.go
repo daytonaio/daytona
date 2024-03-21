@@ -19,9 +19,9 @@ var _ MappedNullable = &WorkspaceInfo{}
 
 // WorkspaceInfo struct for WorkspaceInfo
 type WorkspaceInfo struct {
-	Name *string `json:"name,omitempty"`
-	Projects []ProjectInfo `json:"projects,omitempty"`
-	ProviderMetadata *string `json:"providerMetadata,omitempty"`
+	Name             *string       `json:"name,omitempty"`
+	Projects         []ProjectInfo `json:"projects,omitempty"`
+	ProviderMetadata *string       `json:"providerMetadata,omitempty"`
 }
 
 // NewWorkspaceInfo instantiates a new WorkspaceInfo object
@@ -138,7 +138,7 @@ func (o *WorkspaceInfo) SetProviderMetadata(v string) {
 }
 
 func (o WorkspaceInfo) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -194,5 +194,3 @@ func (v *NullableWorkspaceInfo) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-
