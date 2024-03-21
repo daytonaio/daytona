@@ -19,8 +19,8 @@ var _ MappedNullable = &FRPSConfig{}
 
 // FRPSConfig struct for FRPSConfig
 type FRPSConfig struct {
-	Domain *string `json:"domain,omitempty"`
-	Port *int32 `json:"port,omitempty"`
+	Domain   *string `json:"domain,omitempty"`
+	Port     *int32  `json:"port,omitempty"`
 	Protocol *string `json:"protocol,omitempty"`
 }
 
@@ -138,7 +138,7 @@ func (o *FRPSConfig) SetProtocol(v string) {
 }
 
 func (o FRPSConfig) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -194,5 +194,3 @@ func (v *NullableFRPSConfig) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

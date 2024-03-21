@@ -19,11 +19,11 @@ var _ MappedNullable = &Workspace{}
 
 // Workspace struct for Workspace
 type Workspace struct {
-	Id *string `json:"id,omitempty"`
-	Info *WorkspaceInfo `json:"info,omitempty"`
-	Name *string `json:"name,omitempty"`
-	Projects []Project `json:"projects,omitempty"`
-	Target *string `json:"target,omitempty"`
+	Id       *string        `json:"id,omitempty"`
+	Info     *WorkspaceInfo `json:"info,omitempty"`
+	Name     *string        `json:"name,omitempty"`
+	Projects []Project      `json:"projects,omitempty"`
+	Target   *string        `json:"target,omitempty"`
 }
 
 // NewWorkspace instantiates a new Workspace object
@@ -204,7 +204,7 @@ func (o *Workspace) SetTarget(v string) {
 }
 
 func (o Workspace) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -266,5 +266,3 @@ func (v *NullableWorkspace) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

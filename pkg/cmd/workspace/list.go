@@ -55,7 +55,7 @@ var ListCmd = &cobra.Command{
 			views_util.RenderInfoMessage("The workspace list is empty. Start off by running 'daytona create'.")
 			return
 		}
-		
+
 		list_view.ListWorkspaces(workspaceList, specifyGitProviders)
 	},
 }
@@ -63,4 +63,3 @@ var ListCmd = &cobra.Command{
 func init() {
 	ListCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose output")
 }
-

@@ -19,15 +19,15 @@ var _ MappedNullable = &ServerConfig{}
 
 // ServerConfig struct for ServerConfig
 type ServerConfig struct {
-	ApiPort *int32 `json:"apiPort,omitempty"`
-	Frps *FRPSConfig `json:"frps,omitempty"`
-	GitProviders []GitProvider `json:"gitProviders,omitempty"`
-	HeadscalePort *int32 `json:"headscalePort,omitempty"`
-	Id *string `json:"id,omitempty"`
-	ProvidersDir *string `json:"providersDir,omitempty"`
-	RegistryUrl *string `json:"registryUrl,omitempty"`
-	ServerDownloadUrl *string `json:"serverDownloadUrl,omitempty"`
-	TargetsFilePath *string `json:"targetsFilePath,omitempty"`
+	ApiPort           *int32        `json:"apiPort,omitempty"`
+	Frps              *FRPSConfig   `json:"frps,omitempty"`
+	GitProviders      []GitProvider `json:"gitProviders,omitempty"`
+	HeadscalePort     *int32        `json:"headscalePort,omitempty"`
+	Id                *string       `json:"id,omitempty"`
+	ProvidersDir      *string       `json:"providersDir,omitempty"`
+	RegistryUrl       *string       `json:"registryUrl,omitempty"`
+	ServerDownloadUrl *string       `json:"serverDownloadUrl,omitempty"`
+	TargetsFilePath   *string       `json:"targetsFilePath,omitempty"`
 }
 
 // NewServerConfig instantiates a new ServerConfig object
@@ -336,7 +336,7 @@ func (o *ServerConfig) SetTargetsFilePath(v string) {
 }
 
 func (o ServerConfig) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -410,5 +410,3 @@ func (v *NullableServerConfig) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-
