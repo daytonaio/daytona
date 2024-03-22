@@ -47,8 +47,6 @@ definitions:
     type: object
   Project:
     properties:
-      info:
-        $ref: '#/definitions/ProjectInfo'
       name:
         type: string
       repository:
@@ -143,6 +141,19 @@ definitions:
         type: string
     type: object
   Workspace:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      projects:
+        items:
+          $ref: '#/definitions/Project'
+        type: array
+      target:
+        type: string
+    type: object
+  WorkspaceDTO:
     properties:
       id:
         type: string
@@ -426,7 +437,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Workspace'
+              $ref: '#/definitions/WorkspaceDTO'
             type: array
       summary: List workspaces
       tags:
@@ -482,7 +493,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Workspace'
+            $ref: '#/definitions/WorkspaceDTO'
       summary: Get workspace info
       tags:
       - workspace

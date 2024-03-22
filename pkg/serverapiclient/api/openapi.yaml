@@ -219,7 +219,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Workspace'
+                  $ref: '#/components/schemas/WorkspaceDTO'
                 type: array
           description: OK
       summary: List workspaces
@@ -279,7 +279,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Workspace'
+                $ref: '#/components/schemas/WorkspaceDTO'
           description: OK
       summary: Get workspace info
       tags:
@@ -465,19 +465,9 @@ components:
           branch: branch
           sha: sha
           url: url
-        info:
-          providerMetadata: providerMetadata
-          isRunning: true
-          created: created
-          name: name
-          finished: finished
-          started: started
-          workspaceId: workspaceId
         target: target
         workspaceId: workspaceId
       properties:
-        info:
-          $ref: '#/components/schemas/ProjectInfo'
         name:
           type: string
         repository:
@@ -634,14 +624,6 @@ components:
             branch: branch
             sha: sha
             url: url
-          info:
-            providerMetadata: providerMetadata
-            isRunning: true
-            created: created
-            name: name
-            finished: finished
-            started: started
-            workspaceId: workspaceId
           target: target
           workspaceId: workspaceId
         - name: name
@@ -655,14 +637,50 @@ components:
             branch: branch
             sha: sha
             url: url
-          info:
-            providerMetadata: providerMetadata
-            isRunning: true
-            created: created
+          target: target
+          workspaceId: workspaceId
+        name: name
+        id: id
+        target: target
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        projects:
+          items:
+            $ref: '#/components/schemas/Project'
+          type: array
+        target:
+          type: string
+      type: object
+    WorkspaceDTO:
+      example:
+        projects:
+        - name: name
+          repository:
+            owner: owner
+            path: path
             name: name
-            finished: finished
-            started: started
-            workspaceId: workspaceId
+            id: id
+            source: source
+            prNumber: 0
+            branch: branch
+            sha: sha
+            url: url
+          target: target
+          workspaceId: workspaceId
+        - name: name
+          repository:
+            owner: owner
+            path: path
+            name: name
+            id: id
+            source: source
+            prNumber: 0
+            branch: branch
+            sha: sha
+            url: url
           target: target
           workspaceId: workspaceId
         name: name

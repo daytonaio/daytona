@@ -324,7 +324,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/Workspace"
+                                "$ref": "#/definitions/WorkspaceDTO"
                             }
                         }
                     }
@@ -385,7 +385,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Workspace"
+                            "$ref": "#/definitions/WorkspaceDTO"
                         }
                     }
                 }
@@ -598,9 +598,6 @@ const docTemplate = `{
         "Project": {
             "type": "object",
             "properties": {
-                "info": {
-                    "$ref": "#/definitions/ProjectInfo"
-                },
                 "name": {
                     "type": "string"
                 },
@@ -744,6 +741,26 @@ const docTemplate = `{
             }
         },
         "Workspace": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Project"
+                    }
+                },
+                "target": {
+                    "type": "string"
+                }
+            }
+        },
+        "WorkspaceDTO": {
             "type": "object",
             "properties": {
                 "id": {
