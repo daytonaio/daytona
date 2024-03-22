@@ -465,9 +465,19 @@ components:
           branch: branch
           sha: sha
           url: url
+        info:
+          providerMetadata: providerMetadata
+          isRunning: true
+          created: created
+          name: name
+          finished: finished
+          started: started
+          workspaceId: workspaceId
         target: target
         workspaceId: workspaceId
       properties:
+        info:
+          $ref: '#/components/schemas/ProjectInfo'
         name:
           type: string
         repository:
@@ -569,6 +579,7 @@ components:
         apiPort: 0
         headscalePort: 1
         serverDownloadUrl: serverDownloadUrl
+        binariesPath: binariesPath
         providersDir: providersDir
         id: id
         targetsFilePath: targetsFilePath
@@ -588,6 +599,8 @@ components:
       properties:
         apiPort:
           type: integer
+        binariesPath:
+          type: string
         frps:
           $ref: '#/components/schemas/FRPSConfig'
         gitProviders:
@@ -621,6 +634,14 @@ components:
             branch: branch
             sha: sha
             url: url
+          info:
+            providerMetadata: providerMetadata
+            isRunning: true
+            created: created
+            name: name
+            finished: finished
+            started: started
+            workspaceId: workspaceId
           target: target
           workspaceId: workspaceId
         - name: name
@@ -634,6 +655,14 @@ components:
             branch: branch
             sha: sha
             url: url
+          info:
+            providerMetadata: providerMetadata
+            isRunning: true
+            created: created
+            name: name
+            finished: finished
+            started: started
+            workspaceId: workspaceId
           target: target
           workspaceId: workspaceId
         name: name
