@@ -598,6 +598,9 @@ const docTemplate = `{
         "Project": {
             "type": "object",
             "properties": {
+                "info": {
+                    "$ref": "#/definitions/ProjectInfo"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -707,6 +710,9 @@ const docTemplate = `{
             "properties": {
                 "apiPort": {
                     "type": "integer"
+                },
+                "binariesPath": {
+                    "type": "string"
                 },
                 "frps": {
                     "$ref": "#/definitions/FRPSConfig"
