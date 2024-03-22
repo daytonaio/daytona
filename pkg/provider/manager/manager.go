@@ -74,7 +74,7 @@ func GetProviders() map[string]Provider {
 	return providers
 }
 
-func RegisterProvider(pluginPath, serverDownloadUrl, serverUrl, serverApiUrl string) error {
+func RegisterProvider(pluginPath, serverDownloadUrl, serverUrl, serverApiUrl, logsDir string) error {
 	pluginName := filepath.Base(pluginPath)
 	pluginBasePath := filepath.Dir(pluginPath)
 
@@ -122,6 +122,7 @@ func RegisterProvider(pluginPath, serverDownloadUrl, serverUrl, serverApiUrl str
 		ServerVersion:     internal.Version,
 		ServerUrl:         serverUrl,
 		ServerApiUrl:      serverApiUrl,
+		LogsDir:           logsDir,
 	})
 	if err != nil {
 		return errors.New("failed to initialize provider: " + err.Error())

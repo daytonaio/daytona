@@ -6,9 +6,9 @@ package provisioner
 import (
 	"fmt"
 	"io"
-	"os"
 
 	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/logger"
 	provider_types "github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/server/config"
@@ -24,18 +24,15 @@ func CreateWorkspace(workspace *types.Workspace) error {
 		return err
 	}
 
-	workspaceLogFilePath, err := config.GetWorkspaceLogFilePath(workspace.Id)
+	logsDir, err := config.GetWorkspaceLogsDir()
 	if err != nil {
 		return err
 	}
 
-	workspaceLogFile, err := os.OpenFile(workspaceLogFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		return err
-	}
-	defer workspaceLogFile.Close()
+	workspaceLogger := logger.GetWorkspaceLogger(logsDir, workspace.Id)
+	defer workspaceLogger.Close()
 
-	wsLogWriter := io.MultiWriter(&util.InfoLogWriter{}, io.Writer(workspaceLogFile))
+	wsLogWriter := io.MultiWriter(&util.InfoLogWriter{}, workspaceLogger)
 
 	wsLogWriter.Write([]byte("Creating workspace\n"))
 
@@ -55,19 +52,10 @@ func CreateWorkspace(workspace *types.Workspace) error {
 	log.Debug("Projects to initialize", workspace.Projects)
 
 	for _, project := range workspace.Projects {
+		projectLogger := logger.GetProjectLogger(logsDir, workspace.Id, project.Name)
+		defer projectLogger.Close()
 
-		projectLogFilePath, err := config.GetProjectLogFilePath(workspace.Id, project.Name)
-		if err != nil {
-			return err
-		}
-
-		projectLogFile, err := os.OpenFile(projectLogFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-		if err != nil {
-			return err
-		}
-		defer projectLogFile.Close()
-
-		projectLogWriter := io.MultiWriter(wsLogWriter, io.Writer(projectLogFile))
+		projectLogWriter := io.MultiWriter(wsLogWriter, projectLogger)
 		projectLogWriter.Write([]byte(fmt.Sprintf("Creating project %s\n", project.Name)))
 
 		//	todo: go routines
@@ -118,23 +106,20 @@ func CreateWorkspace(workspace *types.Workspace) error {
 }
 
 func StartWorkspace(workspace *types.Workspace) error {
+	logsDir, err := config.GetWorkspaceLogsDir()
+	if err != nil {
+		return err
+	}
+
 	target, err := targets.GetTarget(workspace.Target)
 	if err != nil {
 		return err
 	}
 
-	workspaceLogFilePath, err := config.GetWorkspaceLogFilePath(workspace.Id)
-	if err != nil {
-		return err
-	}
+	workspaceLogger := logger.GetWorkspaceLogger(logsDir, workspace.Id)
+	defer workspaceLogger.Close()
 
-	workspaceLogFile, err := os.OpenFile(workspaceLogFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		return err
-	}
-	defer workspaceLogFile.Close()
-
-	wsLogWriter := io.MultiWriter(&util.InfoLogWriter{}, io.Writer(workspaceLogFile))
+	wsLogWriter := io.MultiWriter(&util.InfoLogWriter{}, workspaceLogger)
 
 	wsLogWriter.Write([]byte("Starting workspace\n"))
 
@@ -162,19 +147,10 @@ func StartWorkspace(workspace *types.Workspace) error {
 	}
 
 	for _, project := range workspace.Projects {
+		projectLogger := logger.GetProjectLogger(logsDir, workspace.Id, project.Name)
+		defer projectLogger.Close()
 
-		projectLogFilePath, err := config.GetProjectLogFilePath(workspace.Id, project.Name)
-		if err != nil {
-			return err
-		}
-
-		projectLogFile, err := os.OpenFile(projectLogFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-		if err != nil {
-			return err
-		}
-		defer projectLogFile.Close()
-
-		projectLogWriter := io.MultiWriter(wsLogWriter, io.Writer(projectLogFile))
+		projectLogWriter := io.MultiWriter(wsLogWriter, projectLogger)
 		projectLogWriter.Write([]byte(fmt.Sprintf("Starting project %s\n", project.Name)))
 
 		//	todo: go routines

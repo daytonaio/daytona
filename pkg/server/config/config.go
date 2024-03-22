@@ -137,22 +137,6 @@ func DeleteWorkspaceLogs(workspaceId string) error {
 	return os.RemoveAll(workspaceLogsDir)
 }
 
-func GetProjectLogFilePath(workspaceId string, projectId string) (string, error) {
-	projectLogsDir, err := GetWorkspaceLogsDir()
-	if err != nil {
-		return "", err
-	}
-
-	filePath := filepath.Join(projectLogsDir, workspaceId, projectId, "log")
-
-	err = os.MkdirAll(filepath.Dir(filePath), 0755)
-	if err != nil {
-		return "", err
-	}
-
-	return filePath, nil
-}
-
 func init() {
 	_, err := GetConfig()
 	if err == nil {

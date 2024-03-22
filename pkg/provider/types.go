@@ -13,6 +13,7 @@ type InitializeProviderRequest struct {
 	ServerVersion     string
 	ServerUrl         string
 	ServerApiUrl      string
+	LogsDir           string
 }
 
 type WorkspaceRequest struct {
