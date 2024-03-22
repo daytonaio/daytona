@@ -66,6 +66,39 @@ func ensureSshFilesLinked() error {
 	return nil
 }
 
+func UnlinkSshFiles() error {
+	sshDirPath := filepath.Join(sshHomeDir, ".ssh")
+	sshConfigPath := filepath.Join(sshDirPath, "config")
+	daytonaConfigPath := filepath.Join(sshDirPath, "daytona_config")
+
+	// Remove the include line from the config file
+	_, err := os.Stat(sshConfigPath)
+	if os.IsExist(err) {
+		content, err := os.ReadFile(sshConfigPath)
+		if err != nil {
+			return err
+		}
+
+		newContent := strings.ReplaceAll(string(content), "Include daytona_config\n\n", "")
+		newContent = strings.ReplaceAll(string(newContent), "Include daytona_config", "")
+		err = os.WriteFile(sshConfigPath, []byte(newContent), 0600)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Remove the daytona_config file
+	_, err = os.Stat(daytonaConfigPath)
+	if os.IsExist(err) {
+		err = os.Remove(daytonaConfigPath)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // Add ssh entry
 
 func generateSshConfigEntry(profileId, workspaceId, projectName, knownHostsPath string) (string, error) {

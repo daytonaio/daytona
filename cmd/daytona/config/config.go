@@ -190,3 +190,17 @@ func GetConfigDir() (string, error) {
 
 	return filepath.Join(userConfigDir, "daytona"), nil
 }
+
+func DeleteConfigDir() error {
+	configDir, err := GetConfigDir()
+	if err != nil {
+		return err
+	}
+
+	err = os.RemoveAll(configDir)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
