@@ -109,7 +109,7 @@ func GetTargetList() ([]serverapiclient.ProviderTarget, error) {
 	return targets, nil
 }
 
-func GetWorkspace(workspaceNameOrId string) (*serverapiclient.Workspace, error) {
+func GetWorkspace(workspaceNameOrId string) (*serverapiclient.WorkspaceDTO, error) {
 	ctx := context.Background()
 
 	apiClient, err := GetApiClient(nil)

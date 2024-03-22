@@ -17,7 +17,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func selectWorkspacePrompt(workspaces []serverapiclient.Workspace, actionVerb string, choiceChan chan<- *serverapiclient.Workspace) {
+func selectWorkspacePrompt(workspaces []serverapiclient.WorkspaceDTO, actionVerb string, choiceChan chan<- *serverapiclient.WorkspaceDTO) {
 	// Initialize an empty list of items.
 	items := []list.Item{}
 
@@ -38,7 +38,7 @@ func selectWorkspacePrompt(workspaces []serverapiclient.Workspace, actionVerb st
 			statusTime = util.FormatStatusTime(*workspace.Info.Projects[0].Started)
 		}
 
-		newItem := item[serverapiclient.Workspace]{
+		newItem := item[serverapiclient.WorkspaceDTO]{
 			title:          *workspace.Name,
 			id:             *workspace.Id,
 			desc:           strings.Join(projectNames, ", "),
@@ -51,7 +51,7 @@ func selectWorkspacePrompt(workspaces []serverapiclient.Workspace, actionVerb st
 		items = append(items, newItem)
 	}
 
-	d := ItemDelegate[serverapiclient.Workspace]{}
+	d := ItemDelegate[serverapiclient.WorkspaceDTO]{}
 
 	l := list.New(items, d, 0, 0)
 
@@ -72,15 +72,15 @@ func selectWorkspacePrompt(workspaces []serverapiclient.Workspace, actionVerb st
 		os.Exit(1)
 	}
 
-	if m, ok := p.(model[serverapiclient.Workspace]); ok && m.choice != nil {
+	if m, ok := p.(model[serverapiclient.WorkspaceDTO]); ok && m.choice != nil {
 		choiceChan <- m.choice
 	} else {
 		choiceChan <- nil
 	}
 }
 
-func GetWorkspaceFromPrompt(workspaces []serverapiclient.Workspace, actionVerb string) *serverapiclient.Workspace {
-	choiceChan := make(chan *serverapiclient.Workspace)
+func GetWorkspaceFromPrompt(workspaces []serverapiclient.WorkspaceDTO, actionVerb string) *serverapiclient.WorkspaceDTO {
+	choiceChan := make(chan *serverapiclient.WorkspaceDTO)
 
 	go selectWorkspacePrompt(workspaces, actionVerb, choiceChan)
 

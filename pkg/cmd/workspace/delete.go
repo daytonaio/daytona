@@ -72,7 +72,7 @@ var DeleteCmd = &cobra.Command{
 		}
 
 		ctx := context.Background()
-		var workspace *serverapiclient.Workspace
+		var workspace *serverapiclient.WorkspaceDTO
 
 		apiClient, err := server.GetApiClient(nil)
 		if err != nil {

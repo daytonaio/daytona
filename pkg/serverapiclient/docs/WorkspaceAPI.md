@@ -83,7 +83,7 @@ No authorization required
 
 ## GetWorkspace
 
-> Workspace GetWorkspace(ctx, workspaceId).Execute()
+> WorkspaceDTO GetWorkspace(ctx, workspaceId).Execute()
 
 Get workspace info
 
@@ -111,7 +111,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.GetWorkspace``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `GetWorkspace`: Workspace
+	// response from `GetWorkspace`: WorkspaceDTO
 	fmt.Fprintf(os.Stdout, "Response from `WorkspaceAPI.GetWorkspace`: %v\n", resp)
 }
 ```
@@ -135,7 +135,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**Workspace**](Workspace.md)
+[**WorkspaceDTO**](WorkspaceDTO.md)
 
 ### Authorization
 
@@ -153,7 +153,7 @@ No authorization required
 
 ## ListWorkspaces
 
-> []Workspace ListWorkspaces(ctx).Verbose(verbose).Execute()
+> []WorkspaceDTO ListWorkspaces(ctx).Verbose(verbose).Execute()
 
 List workspaces
 
@@ -181,7 +181,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.ListWorkspaces``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `ListWorkspaces`: []Workspace
+	// response from `ListWorkspaces`: []WorkspaceDTO
 	fmt.Fprintf(os.Stdout, "Response from `WorkspaceAPI.ListWorkspaces`: %v\n", resp)
 }
 ```
@@ -201,7 +201,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**[]Workspace**](Workspace.md)
+[**[]WorkspaceDTO**](WorkspaceDTO.md)
 
 ### Authorization
 

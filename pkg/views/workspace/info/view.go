@@ -78,7 +78,7 @@ func projectRender(projectInfo *serverapiclient.ProjectInfo, project *serverapic
 	return viewStyle.Render(projectView) + viewStyle.Render(repoView)
 }
 
-func Render(workspace *serverapiclient.Workspace) {
+func Render(workspace *serverapiclient.WorkspaceDTO) {
 	if workspace == nil {
 		return
 	}

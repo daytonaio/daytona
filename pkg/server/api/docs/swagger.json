@@ -321,7 +321,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/Workspace"
+                                "$ref": "#/definitions/WorkspaceDTO"
                             }
                         }
                     }
@@ -382,7 +382,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Workspace"
+                            "$ref": "#/definitions/WorkspaceDTO"
                         }
                     }
                 }
@@ -595,9 +595,6 @@
         "Project": {
             "type": "object",
             "properties": {
-                "info": {
-                    "$ref": "#/definitions/ProjectInfo"
-                },
                 "name": {
                     "type": "string"
                 },
@@ -741,6 +738,26 @@
             }
         },
         "Workspace": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Project"
+                    }
+                },
+                "target": {
+                    "type": "string"
+                }
+            }
+        },
+        "WorkspaceDTO": {
             "type": "object",
             "properties": {
                 "id": {
