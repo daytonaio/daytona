@@ -56,13 +56,11 @@ var ServerCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		select {
-		case err := <-errCh:
-			log.Fatal(err)
-		// TODO: This is an optimistic check. We should check if the server is actually running
-		case <-time.After(5 * time.Second):
-			printServerStartedMessage(c)
+		for !server.HealthCheck() {
+			time.Sleep(1 * time.Second)
 		}
+
+		printServerStartedMessage(c)
 
 		err = <-errCh
 		if err != nil {

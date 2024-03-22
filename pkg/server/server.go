@@ -117,3 +117,11 @@ func Start(errCh chan error) error {
 
 	return nil
 }
+
+func HealthCheck() bool {
+	_, err := net.DialTimeout("tcp", "localhost:3000", time.Second)
+	if err != nil {
+		return false
+	}
+	return true
+}
