@@ -1,10 +1,9 @@
-// Copyright 2024 Daytona Platforms Inc.
-// SPDX-License-Identifier: Apache-2.0
-
 package server
 
 import (
 	"fmt"
+	"net"
+	"net/http"
 	"time"
 
 	"github.com/daytonaio/daytona/pkg/cmd/server/daemon"
@@ -13,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/frpc"
 	"github.com/daytonaio/daytona/pkg/views/util"
 
+	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -25,21 +25,27 @@ var ServerCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		if log.GetLevel() < log.InfoLevel {
-			//	for now, force the log level to info when running the server
 			log.SetLevel(log.InfoLevel)
 		}
 
 		if runAsDaemon {
 			fmt.Println("Starting the Daytona Server daemon...")
-			err := daemon.Start()
-			if err != nil {
-				log.Fatal(err)
-			}
+			daemon.Start()
 			return
 		}
 
-		errCh := make(chan error)
+		router := mux.NewRouter()
+		router.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+			if err := performHealthCheck(); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Fprintf(w, "Server unhealthy: %v", err)
+				return
+			}
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintf(w, "Server healthy")
+		})
 
+		errCh := make(chan error)
 		err := server.Start(errCh)
 		if err != nil {
 			log.Fatal(err)
@@ -50,10 +56,16 @@ var ServerCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		go func() {
+			if err := performHealthCheck(); err != nil {
+				log.Error(err)
+				errCh <- err
+			}
+		}()
+
 		select {
 		case err := <-errCh:
 			log.Fatal(err)
-		// TODO: This is an optimistic check. We should check if the server is actually running
 		case <-time.After(5 * time.Second):
 			util.RenderBorderedMessage(fmt.Sprintf("Daytona Server running on port: %d.\nTo connect to the server remotely, use the following command on the client machine:\n\ndaytona profile add -a %s", c.ApiPort, frpc.GetApiUrl(c)))
 		}
@@ -63,6 +75,20 @@ var ServerCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 	},
+}
+
+func performHealthCheck() error {
+	c, err := config.GetConfig()
+	if err != nil {
+		return err
+	}
+	addr := fmt.Sprintf(":%d", c.ApiPort)
+	conn, err := net.Dial("tcp", addr)
+	if err != nil {
+		return fmt.Errorf("server not listening on port %d: %v", c.ApiPort, err)
+	}
+	conn.Close()
+	return nil
 }
 
 func init() {
