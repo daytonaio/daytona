@@ -3,8 +3,8 @@ package binary
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -61,7 +61,10 @@ func getBinaryPath(binaryName, binaryVersion string) (string, error) {
 		return binaryPath, nil
 	}
 
-	downloadUrl := path.Join(c.RegistryUrl, binaryVersion, binaryName)
+	downloadUrl, err := url.JoinPath(c.RegistryUrl, binaryVersion, binaryName)
+	if err != nil {
+		return "", err
+	}
 
 	err = daytona_os.DownloadFile(downloadUrl, binaryPath)
 	if err != nil {
