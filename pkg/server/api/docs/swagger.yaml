@@ -47,6 +47,8 @@ definitions:
     type: object
   Project:
     properties:
+      info:
+        $ref: '#/definitions/ProjectInfo'
       name:
         type: string
       repository:
@@ -119,6 +121,8 @@ definitions:
     properties:
       apiPort:
         type: integer
+      binariesPath:
+        type: string
       frps:
         $ref: '#/definitions/FRPSConfig'
       gitProviders:

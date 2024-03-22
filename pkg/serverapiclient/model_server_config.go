@@ -20,6 +20,7 @@ var _ MappedNullable = &ServerConfig{}
 // ServerConfig struct for ServerConfig
 type ServerConfig struct {
 	ApiPort           *int32        `json:"apiPort,omitempty"`
+	BinariesPath      *string       `json:"binariesPath,omitempty"`
 	Frps              *FRPSConfig   `json:"frps,omitempty"`
 	GitProviders      []GitProvider `json:"gitProviders,omitempty"`
 	HeadscalePort     *int32        `json:"headscalePort,omitempty"`
@@ -77,6 +78,38 @@ func (o *ServerConfig) HasApiPort() bool {
 // SetApiPort gets a reference to the given int32 and assigns it to the ApiPort field.
 func (o *ServerConfig) SetApiPort(v int32) {
 	o.ApiPort = &v
+}
+
+// GetBinariesPath returns the BinariesPath field value if set, zero value otherwise.
+func (o *ServerConfig) GetBinariesPath() string {
+	if o == nil || IsNil(o.BinariesPath) {
+		var ret string
+		return ret
+	}
+	return *o.BinariesPath
+}
+
+// GetBinariesPathOk returns a tuple with the BinariesPath field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ServerConfig) GetBinariesPathOk() (*string, bool) {
+	if o == nil || IsNil(o.BinariesPath) {
+		return nil, false
+	}
+	return o.BinariesPath, true
+}
+
+// HasBinariesPath returns a boolean if a field has been set.
+func (o *ServerConfig) HasBinariesPath() bool {
+	if o != nil && !IsNil(o.BinariesPath) {
+		return true
+	}
+
+	return false
+}
+
+// SetBinariesPath gets a reference to the given string and assigns it to the BinariesPath field.
+func (o *ServerConfig) SetBinariesPath(v string) {
+	o.BinariesPath = &v
 }
 
 // GetFrps returns the Frps field value if set, zero value otherwise.
@@ -347,6 +380,9 @@ func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.ApiPort) {
 		toSerialize["apiPort"] = o.ApiPort
+	}
+	if !IsNil(o.BinariesPath) {
+		toSerialize["binariesPath"] = o.BinariesPath
 	}
 	if !IsNil(o.Frps) {
 		toSerialize["frps"] = o.Frps

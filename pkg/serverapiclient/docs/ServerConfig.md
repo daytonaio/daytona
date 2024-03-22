@@ -5,6 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **ApiPort** | Pointer to **int32** |  | [optional] 
+**BinariesPath** | Pointer to **string** |  | [optional] 
 **Frps** | Pointer to [**FRPSConfig**](FRPSConfig.md) |  | [optional] 
 **GitProviders** | Pointer to [**[]GitProvider**](GitProvider.md) |  | [optional] 
 **HeadscalePort** | Pointer to **int32** |  | [optional] 
@@ -57,6 +58,31 @@ SetApiPort sets ApiPort field to given value.
 `func (o *ServerConfig) HasApiPort() bool`
 
 HasApiPort returns a boolean if a field has been set.
+
+### GetBinariesPath
+
+`func (o *ServerConfig) GetBinariesPath() string`
+
+GetBinariesPath returns the BinariesPath field if non-nil, zero value otherwise.
+
+### GetBinariesPathOk
+
+`func (o *ServerConfig) GetBinariesPathOk() (*string, bool)`
+
+GetBinariesPathOk returns a tuple with the BinariesPath field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetBinariesPath
+
+`func (o *ServerConfig) SetBinariesPath(v string)`
+
+SetBinariesPath sets BinariesPath field to given value.
+
+### HasBinariesPath
+
+`func (o *ServerConfig) HasBinariesPath() bool`
+
+HasBinariesPath returns a boolean if a field has been set.
 
 ### GetFrps
 
