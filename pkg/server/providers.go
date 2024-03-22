@@ -70,6 +70,11 @@ func registerProviders(c *types.ServerConfig) error {
 		return err
 	}
 
+	logsDir, err := config.GetWorkspaceLogsDir()
+	if err != nil {
+		return err
+	}
+
 	for _, file := range files {
 		if file.IsDir() {
 			pluginPath, err := getPluginPath(filepath.Join(c.ProvidersDir, file.Name()))
@@ -78,7 +83,7 @@ func registerProviders(c *types.ServerConfig) error {
 				continue
 			}
 
-			err = manager.RegisterProvider(pluginPath, util.GetDaytonaScriptUrl(c), frpc.GetServerUrl(c), frpc.GetApiUrl(c))
+			err = manager.RegisterProvider(pluginPath, util.GetDaytonaScriptUrl(c), frpc.GetServerUrl(c), frpc.GetApiUrl(c), logsDir)
 			if err != nil {
 				log.Error(err)
 				continue

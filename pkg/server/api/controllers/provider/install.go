@@ -54,7 +54,13 @@ func InstallProvider(ctx *gin.Context) {
 		return
 	}
 
-	err = manager.RegisterProvider(downloadPath, util.GetDaytonaScriptUrl(c), frpc.GetServerUrl(c), frpc.GetApiUrl(c))
+	logsDir, err := config.GetWorkspaceLogsDir()
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get workspace logs dir: %s", err.Error()))
+		return
+	}
+
+	err = manager.RegisterProvider(downloadPath, util.GetDaytonaScriptUrl(c), frpc.GetServerUrl(c), frpc.GetApiUrl(c), logsDir)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to register provider: %s", err.Error()))
 		return
