@@ -5,7 +5,9 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"time"
 
+	"github.com/daytonaio/daytona/pkg/server/logs"
 	"github.com/kardianos/service"
 )
 
@@ -26,7 +28,38 @@ func Start() error {
 	if err != nil {
 		return err
 	}
-	return s.Start()
+
+	err = s.Start()
+	if err != nil {
+		return err
+	}
+
+	logFilePath := logs.GetLogFilePath()
+
+	time.Sleep(5 * time.Second)
+	status, err := s.Status()
+	if err != nil {
+		return err
+	}
+
+	if status == service.StatusRunning {
+		return nil
+	}
+
+	err = Stop()
+	if err != nil {
+		return err
+	}
+	logContent, err := os.ReadFile(*logFilePath)
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(logContent))
+	if status == service.StatusStopped {
+		return fmt.Errorf("daemon stopped unexpectedly")
+	} else {
+		return fmt.Errorf("daemon status unknown")
+	}
 }
 
 func Stop() error {
@@ -53,9 +86,6 @@ func getServiceConfig() (*service.Config, error) {
 		DisplayName: "Daytona Server",
 		Description: "This is the Daytona Server daemon.",
 		Arguments:   []string{"server"},
-		EnvVars: map[string]string{
-			"LOG_LEVEL": "debug",
-		},
 	}
 
 	user := os.Getenv("USER")

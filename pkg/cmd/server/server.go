@@ -11,6 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/config"
 	"github.com/daytonaio/daytona/pkg/server/frpc"
+	"github.com/daytonaio/daytona/pkg/types"
 	"github.com/daytonaio/daytona/pkg/views/util"
 
 	log "github.com/sirupsen/logrus"
@@ -35,6 +36,11 @@ var ServerCmd = &cobra.Command{
 			if err != nil {
 				log.Fatal(err)
 			}
+			c, err := config.GetConfig()
+			if err != nil {
+				log.Fatal(err)
+			}
+			printServerStartedMessage(c)
 			return
 		}
 
@@ -55,7 +61,7 @@ var ServerCmd = &cobra.Command{
 			log.Fatal(err)
 		// TODO: This is an optimistic check. We should check if the server is actually running
 		case <-time.After(5 * time.Second):
-			util.RenderBorderedMessage(fmt.Sprintf("Daytona Server running on port: %d.\nTo connect to the server remotely, use the following command on the client machine:\n\ndaytona profile add -a %s", c.ApiPort, frpc.GetApiUrl(c)))
+			printServerStartedMessage(c)
 		}
 
 		err = <-errCh
@@ -63,6 +69,10 @@ var ServerCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 	},
+}
+
+func printServerStartedMessage(c *types.ServerConfig) {
+	util.RenderBorderedMessage(fmt.Sprintf("Daytona Server running on port: %d.\nTo connect to the server remotely, use the following command on the client machine:\n\ndaytona profile add -a %s", c.ApiPort, frpc.GetApiUrl(c)))
 }
 
 func init() {

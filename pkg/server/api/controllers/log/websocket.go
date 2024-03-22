@@ -67,7 +67,8 @@ func readLog(ginCtx *gin.Context, logFilePath *string) {
 }
 
 func ReadServerLog(ginCtx *gin.Context) {
-	readLog(ginCtx, logs.LogFilePath)
+	logFilePath := logs.GetLogFilePath()
+	readLog(ginCtx, logFilePath)
 }
 
 func ReadWorkspaceLog(ginCtx *gin.Context) {
