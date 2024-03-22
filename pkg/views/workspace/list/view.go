@@ -69,7 +69,7 @@ func (m model) View() string {
 	return baseStyle.Render(m.table.View())
 }
 
-func renderWorkspaceList(workspaceList []serverapiclient.Workspace, specifyGitProviders bool) model {
+func renderWorkspaceList(workspaceList []serverapiclient.WorkspaceDTO, specifyGitProviders bool) model {
 	rows := []table.Row{}
 	var row table.Row
 	var rowData RowData
@@ -110,7 +110,7 @@ func renderWorkspaceList(workspaceList []serverapiclient.Workspace, specifyGitPr
 	}
 }
 
-func sortWorkspaces(workspaceList *[]serverapiclient.Workspace) {
+func sortWorkspaces(workspaceList *[]serverapiclient.WorkspaceDTO) {
 	sort.Slice(*workspaceList, func(i, j int) bool {
 		ws1 := (*workspaceList)[i]
 		ws2 := (*workspaceList)[j]
@@ -165,7 +165,7 @@ func adjustColumnWidth(title string, rowData RowData) {
 	}
 }
 
-func getWorkspaceTableRowData(workspace serverapiclient.Workspace, specifyGitProviders bool) RowData {
+func getWorkspaceTableRowData(workspace serverapiclient.WorkspaceDTO, specifyGitProviders bool) RowData {
 	rowData := RowData{}
 	if workspace.Name != nil {
 		rowData.WorkspaceName = *workspace.Name
@@ -188,7 +188,7 @@ func getWorkspaceTableRowData(workspace serverapiclient.Workspace, specifyGitPro
 	return rowData
 }
 
-func getProjectTableRowData(workspace serverapiclient.Workspace, project serverapiclient.Project, specifyGitProviders bool) RowData {
+func getProjectTableRowData(workspace serverapiclient.WorkspaceDTO, project serverapiclient.Project, specifyGitProviders bool) RowData {
 	var currentProjectInfo *types.ProjectInfo
 
 	for _, projectInfo := range workspace.Info.Projects {
@@ -246,7 +246,7 @@ func getRepositorySlugFromUrl(url string, specifyGitProviders bool) string {
 	return parts[len(parts)-2] + "/" + parts[len(parts)-1]
 }
 
-func ListWorkspaces(workspaceList []serverapiclient.Workspace, specifyGitProviders bool) {
+func ListWorkspaces(workspaceList []serverapiclient.WorkspaceDTO, specifyGitProviders bool) {
 	modelInstance := renderWorkspaceList(workspaceList, specifyGitProviders)
 
 	_, err := tea.NewProgram(modelInstance).Run()

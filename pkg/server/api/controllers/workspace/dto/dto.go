@@ -8,12 +8,12 @@ type CreateWorkspace struct {
 	Repositories []types.Repository
 } //	@name	CreateWorkspace
 
-type Workspace struct {
+type WorkspaceDTO struct {
 	types.Workspace
 	Info *types.WorkspaceInfo
-} //	@name	Workspace
+} //	@name	WorkspaceDTO
 
-type Project struct {
+type ProjectDTO struct {
 	types.Project
 	Info *types.ProjectInfo
-} //	@name	Project
+} //	@name	ProjectDTO

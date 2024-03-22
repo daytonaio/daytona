@@ -115,6 +115,7 @@ Class | Method | HTTP request | Description
  - [Repository](docs/Repository.md)
  - [ServerConfig](docs/ServerConfig.md)
  - [Workspace](docs/Workspace.md)
+ - [WorkspaceDTO](docs/WorkspaceDTO.md)
  - [WorkspaceInfo](docs/WorkspaceInfo.md)
 
 

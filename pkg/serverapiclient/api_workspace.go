@@ -140,7 +140,7 @@ type ApiGetWorkspaceRequest struct {
 	workspaceId string
 }
 
-func (r ApiGetWorkspaceRequest) Execute() (*Workspace, *http.Response, error) {
+func (r ApiGetWorkspaceRequest) Execute() (*WorkspaceDTO, *http.Response, error) {
 	return r.ApiService.GetWorkspaceExecute(r)
 }
 
@@ -163,13 +163,13 @@ func (a *WorkspaceAPIService) GetWorkspace(ctx context.Context, workspaceId stri
 
 // Execute executes the request
 //
-//	@return Workspace
-func (a *WorkspaceAPIService) GetWorkspaceExecute(r ApiGetWorkspaceRequest) (*Workspace, *http.Response, error) {
+//	@return WorkspaceDTO
+func (a *WorkspaceAPIService) GetWorkspaceExecute(r ApiGetWorkspaceRequest) (*WorkspaceDTO, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *Workspace
+		localVarReturnValue *WorkspaceDTO
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.GetWorkspace")
@@ -250,7 +250,7 @@ func (r ApiListWorkspacesRequest) Verbose(verbose bool) ApiListWorkspacesRequest
 	return r
 }
 
-func (r ApiListWorkspacesRequest) Execute() ([]Workspace, *http.Response, error) {
+func (r ApiListWorkspacesRequest) Execute() ([]WorkspaceDTO, *http.Response, error) {
 	return r.ApiService.ListWorkspacesExecute(r)
 }
 
@@ -271,13 +271,13 @@ func (a *WorkspaceAPIService) ListWorkspaces(ctx context.Context) ApiListWorkspa
 
 // Execute executes the request
 //
-//	@return []Workspace
-func (a *WorkspaceAPIService) ListWorkspacesExecute(r ApiListWorkspacesRequest) ([]Workspace, *http.Response, error) {
+//	@return []WorkspaceDTO
+func (a *WorkspaceAPIService) ListWorkspacesExecute(r ApiListWorkspacesRequest) ([]WorkspaceDTO, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue []Workspace
+		localVarReturnValue []WorkspaceDTO
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.ListWorkspaces")

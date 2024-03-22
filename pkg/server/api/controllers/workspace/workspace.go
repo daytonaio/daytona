@@ -21,7 +21,7 @@ import (
 //	@Description	Get workspace info
 //	@Produce		json
 //	@Param			workspaceId	path		string	true	"Workspace ID or Name"
-//	@Success		200			{object}	dto.Workspace
+//	@Success		200			{object}	WorkspaceDTO
 //	@Router			/workspace/{workspaceId} [get]
 //
 //	@id				GetWorkspace
@@ -42,7 +42,7 @@ func GetWorkspace(ctx *gin.Context) {
 		return
 	}
 
-	response := dto.Workspace{
+	response := dto.WorkspaceDTO{
 		Workspace: *w,
 		Info:      workspaceInfo,
 	}
@@ -56,7 +56,7 @@ func GetWorkspace(ctx *gin.Context) {
 //	@Summary		List workspaces
 //	@Description	List workspaces
 //	@Produce		json
-//	@Success		200	{array}	dto.Workspace
+//	@Success		200	{array}	WorkspaceDTO
 //	@Router			/workspace [get]
 //	@Param			verbose	query	bool	false	"Verbose"
 //
@@ -70,7 +70,7 @@ func ListWorkspaces(ctx *gin.Context) {
 		return
 	}
 
-	response := []dto.Workspace{}
+	response := []dto.WorkspaceDTO{}
 
 	for _, workspace := range workspaces {
 		var workspaceInfo *types.WorkspaceInfo
@@ -90,7 +90,7 @@ func ListWorkspaces(ctx *gin.Context) {
 			}
 		}
 
-		response = append(response, dto.Workspace{
+		response = append(response, dto.WorkspaceDTO{
 			Workspace: *workspace,
 			Info:      workspaceInfo,
 		})

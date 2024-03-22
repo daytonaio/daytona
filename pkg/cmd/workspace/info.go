@@ -31,7 +31,7 @@ var InfoCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		var workspace *serverapiclient.Workspace
+		var workspace *serverapiclient.WorkspaceDTO
 
 		if util.WorkspaceMode() {
 			workspace, err = server.GetWorkspace(os.Getenv("DAYTONA_WS_ID"))
