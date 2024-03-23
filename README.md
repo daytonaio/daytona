@@ -54,7 +54,7 @@ Set up a development environment on any infrastructure, with a single command.
 ## Quick Start
 ### Mac / Linux
 ```bash
-curl -sf -L https://download.daytona.io/daytona/get-server.sh | sudo bash
+(curl -sf -L https://download.daytona.io/daytona/get-server.sh | sudo bash) && daytona server -d
 ```
 ### Windows
 <details>
