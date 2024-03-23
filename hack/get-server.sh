@@ -109,7 +109,4 @@ if [[ ! :"$PATH:" == *":$DESTINATION:"* ]]; then
   echo "         Add the following line:"
   echo "             export PATH=\$PATH:$DESTINATION"
   echo "         Source the configuration file to apply the changes (e.g., source ~/.bashrc)"
-  else
-  echo -e "\nRunning the Daytona server in daemon mode"
-  daytona server -d
 fi
