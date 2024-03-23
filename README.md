@@ -53,20 +53,29 @@ Set up a development environment on any infrastructure, with a single command.
 * __Works on my Machine__: Never experience it again.
 ## Quick Start
 ### Mac / Linux
+Install Daytona to your machine:
 ```bash
 curl -sf -L https://download.daytona.io/daytona/get-server.sh | sudo bash
 ```
+Run the Daytona Server:
+```bash
+daytona server -d
+```
 ### Windows
 <details>
-<summary>Windows PowerShell</summary> 
-This command downloads and installs Daytona and runs the Daytona Server:
+<summary>Windows PowerShell</summary>
+Install Daytona to your machine:
 
 ```pwsh
 $architecture = if ($env:PROCESSOR_ARCHITECTURE -eq "AMD64") { "amd64" } else { "arm64" }
 md -Force "$Env:APPDATA\bin\daytona"; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]'Tls,Tls11,Tls12';
 Invoke-WebRequest -URI "https://download.daytona.io/daytona/latest/daytona-windows-$architecture.exe" -OutFile "$Env:APPDATA\bin\daytona\daytona.exe";
 $env:Path += ";" + $Env:APPDATA + "\bin\daytona"; [Environment]::SetEnvironmentVariable("Path", $env:Path, [System.EnvironmentVariableTarget]::User);
-daytona server;
+daytona;
+```
+Run the Daytona Server:
+```bash
+daytona server
 ```
 
 </details>
