@@ -61,7 +61,7 @@ func selectWorkspacePrompt(workspaces []serverapiclient.WorkspaceDTO, actionVerb
 	l.FilterInput.PromptStyle = lipgloss.NewStyle().Foreground(views.Green)
 	l.FilterInput.TextStyle = lipgloss.NewStyle().Foreground(views.Green)
 
-	m := model[serverapiclient.Workspace]{list: l}
+	m := model[serverapiclient.WorkspaceDTO]{list: l}
 
 	m.list.Title = "SELECT A WORKSPACE TO " + strings.ToUpper(actionVerb)
 	m.list.Styles.Title = lipgloss.NewStyle().Foreground(views.Green).Bold(true)
