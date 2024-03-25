@@ -72,6 +72,16 @@ func GetValidatedWorkspaceName(input string) (string, error) {
 	return input, nil
 }
 
+func GetBranchFromRepoURL(repoURL string) string {
+	pattern := `/tree/([^/]+)`
+	match := regexp.MustCompile(pattern).FindStringSubmatch(repoURL)
+	if len(match) > 1 {
+		return match[1]
+	}
+
+	return ""
+}
+
 func GetValidatedUrl(input string) (string, error) {
 	// Check if the input starts with a scheme (e.g., http:// or https://)
 	if !strings.HasPrefix(input, "http://") && !strings.HasPrefix(input, "https://") {

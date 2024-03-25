@@ -133,7 +133,12 @@ func runInitialForm(providerRepo types.Repository, multiProject bool) (Workspace
 		secondaryProjectsCount = 0
 	}
 
-	providerRepo.Url = primaryRepoUrl
+	branch := util.GetBranchFromRepoURL(primaryRepoUrl)
+	if branch != "" {
+		providerRepo.Branch = branch
+	}
+
+	providerRepo.Url = strings.Split(primaryRepoUrl, "/tree/")[0]
 
 	return WorkspaceCreationPromptResponse{
 		PrimaryRepository:     providerRepo,
