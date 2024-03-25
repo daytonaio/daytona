@@ -7,7 +7,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	workspace "github.com/daytonaio/daytona/pkg/cmd/workspace"
 	profile_view "github.com/daytonaio/daytona/pkg/views/profile"
-	view "github.com/daytonaio/daytona/pkg/views/prune"
+	view "github.com/daytonaio/daytona/pkg/views/purge"
 	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -15,10 +15,10 @@ import (
 
 var yesFlag bool
 
-var pruneCmd = &cobra.Command{
-	Use:   "prune",
-	Short: "Prunes all Daytona data from the current device",
-	Long:  "Prunes all Daytona data from the current device - including all workspaces, configuration files, and SSH files. This command is irreversible.",
+var purgeCmd = &cobra.Command{
+	Use:   "purge",
+	Short: "Purges all Daytona data from the current device",
+	Long:  "Purges all Daytona data from the current device - including all workspaces, configuration files, and SSH files. This command is irreversible.",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		var confirmCheck bool
@@ -86,5 +86,5 @@ var pruneCmd = &cobra.Command{
 }
 
 func init() {
-	pruneCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Execute prune without prompt")
+	purgeCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Execute purge without prompt")
 }
