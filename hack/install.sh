@@ -65,9 +65,9 @@ if [[ ! -w $DESTINATION ]]; then
   echo -e "\nWarning: Destination directory $DESTINATION is not writeable."
   echo "         Rerun the script with SUDO privileges:"
   if [ "$DAYTONA_PATH" ]; then
-    echo "           curl -sf -L https://download.daytona.io/daytona/get-server.sh | DAYTONA_PATH=$DESTINATION sudo bash"
+    echo "           curl -sf -L https://download.daytona.io/daytona/install.sh | DAYTONA_PATH=$DESTINATION sudo bash"
   else
-    echo "           curl -sf -L https://download.daytona.io/daytona/get-server.sh | sudo bash"
+    echo "           curl -sf -L https://download.daytona.io/daytona/install.sh | sudo bash"
   fi
   exit 1
 fi

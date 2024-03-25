@@ -18,7 +18,7 @@ import (
 )
 
 const defaultRegistryUrl = "https://download.daytona.io/daytona"
-const defaultServerDownloadUrl = "https://download.daytona.io/daytona/get-server.sh"
+const defaultServerDownloadUrl = "https://download.daytona.io/daytona/install.sh"
 const defaultHeadscalePort = 3001
 const defaultApiPort = 3000
 
