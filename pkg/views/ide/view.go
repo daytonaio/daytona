@@ -124,7 +124,7 @@ func Render(ideList []config.Ide, choiceChan chan<- string) {
 
 	ModelInstance = model{list: l}
 
-	m, err := tea.NewProgram(ModelInstance).Run()
+	m, err := tea.NewProgram(ModelInstance, tea.WithAltScreen()).Run()
 	if err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
