@@ -32,13 +32,35 @@ Before starting your contribution, especially for core features, we encourage yo
 
 We look forward to working with you to improve Daytona and make development environments as easy as possible for developers everywhere.
 
+### Making changes
+
+The first step is to [fork](https://help.github.com/articles/working-with-forks/) the GitHub Repository allowing you to make the changes in your own copy of the repository.
+
+#### Using Daytona
+
+The development approach we encourage for working on this project is to run it in Daytona in order to get familiar with the product and contribute at the same time. Follow these steps to get started:
+1. If you haven't already, follow the Quick Start guide to install Daytona to your device
+1. Open a new terminal window and run ```daytona create DaytonaWorkspace -r <YOUR_FORKED_REPOSITORY_URL>```
+1. Once Visual Studio Code is ready, reopen in a [Dev Container](https://code.visualstudio.com/docs/devcontainers/containers) and start developing.
+
+#### Notes
+
+The ```hack``` folder includes the following scripts:
+- ```swagger``` - used for generating the API documentation and the client library from the OpenAPI specification; run this when making changes to the API
+- ```inject-binary``` - used for building and placing the binary into the Daytona configuration folder which is then included on the following ```daytona create``` call; run this when making changes that are relevant to commands run from inside the project container
+
+If you are developing outside of our Dev Container configuration, before running the ```swagger.sh``` script make sure you have Node, Java and Swagger installed and available in your PATH as well as the npm package ```@openapitools/openapi-generator-cli```.
+
+If you are developing on a Windows system, make sure to use the batch scripts that are available in the ```hack/windows``` subdirectory.
+
+
+ 
+
 ### Steps to Contribute Code
 
 Follow the following steps to ensure your contribution goes smoothly.
 
 1. Read and follow the steps outlined in the [Daytona Contributing Policy](README.md#contributing).
-1. Configure your development environment by either following the guide below.
-1. [Fork](https://help.github.com/articles/working-with-forks/) the GitHub Repository allowing you to make the changes in your own copy of the repository.
 1. Create a [GitHub issue](https://github.com/daytonaio/daytona/issues) if one doesn't exist already.
 1. [Prepare your changes](/PREPARING_YOUR_CHANGES.md) and ensure your commits are descriptive. The document contains an optional commit template, if desired.
 1. Ensure that you sign off on all your commits to comply with the DCO v1.1. We have more details in [Prepare your changes](/PREPARING_YOUR_CHANGES.md).
