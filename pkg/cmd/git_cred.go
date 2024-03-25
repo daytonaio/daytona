@@ -13,7 +13,7 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/spf13/cobra"
 )
 
@@ -50,9 +50,9 @@ var gitCredCmd = &cobra.Command{
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		gitProvider := getGitProviderFromHost(host, serverConfig.GitProviders)
+		gitProvider := gitprovider.GetGitProviderFromHost(host, serverConfig.GitProviders)
 
-		if gitProvider == (serverapiclient.GitProvider{}) {
+		if gitProvider == nil {
 			fmt.Println("error: git provider not found")
 			os.Exit(1)
 			return
@@ -66,33 +66,6 @@ var gitCredCmd = &cobra.Command{
 		fmt.Println("username=" + gitCredentials.Username)
 		fmt.Println("password=" + gitCredentials.Token)
 	},
-}
-
-func getGitProviderFromHost(url string, gitProviders []serverapiclient.GitProvider) serverapiclient.GitProvider {
-	for _, gitProvider := range gitProviders {
-		if strings.Contains(url, fmt.Sprintf("%s.", *gitProvider.Id)) {
-			return gitProvider
-		}
-
-		if *gitProvider.BaseApiUrl != "" && strings.Contains(url, getHostnameFromUrl(*gitProvider.BaseApiUrl)) {
-			return gitProvider
-		}
-	}
-	return serverapiclient.GitProvider{}
-}
-
-func getHostnameFromUrl(url string) string {
-	input := url
-	input = strings.TrimPrefix(input, "https://")
-	input = strings.TrimPrefix(input, "http://")
-	input = strings.TrimPrefix(input, "www.")
-
-	// Remove everything after the first '/'
-	if slashIndex := strings.Index(input, "/"); slashIndex != -1 {
-		input = input[:slashIndex]
-	}
-
-	return input
 }
 
 func parseFromStdin() (map[string]string, error) {

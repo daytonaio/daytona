@@ -31,6 +31,13 @@ definitions:
       username:
         type: string
     type: object
+  GitUserData:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+    type: object
   InstallProviderRequest:
     properties:
       downloadUrls:
@@ -232,6 +239,26 @@ info:
   title: Daytona Server API
   version: 0.1.0
 paths:
+  /gitprovider/{gitProviderId}/user-data:
+    get:
+      description: Get Git context
+      operationId: GetGitUserData
+      parameters:
+      - description: Git Provider Id
+        in: path
+        name: gitProviderId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/GitUserData'
+      summary: Get Git context
+      tags:
+      - gitProvider
   /provider:
     get:
       description: List providers

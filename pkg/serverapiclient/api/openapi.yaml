@@ -7,6 +7,27 @@ info:
 servers:
 - url: http://localhost:3000/
 paths:
+  /gitprovider/{gitProviderId}/user-data:
+    get:
+      description: Get Git context
+      operationId: GetGitUserData
+      parameters:
+      - description: Git Provider Id
+        in: path
+        name: gitProviderId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GitUserData'
+          description: OK
+      summary: Get Git context
+      tags:
+      - gitProvider
   /provider:
     get:
       description: List providers
@@ -430,6 +451,16 @@ components:
         token:
           type: string
         username:
+          type: string
+      type: object
+    GitUserData:
+      example:
+        name: name
+        email: email
+      properties:
+        email:
+          type: string
+        name:
           type: string
       type: object
     InstallProviderRequest:
