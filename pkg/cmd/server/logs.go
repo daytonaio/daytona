@@ -8,7 +8,7 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/gorilla/websocket"
+	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -31,17 +31,10 @@ var logsCmd = &cobra.Command{
 
 		query := ""
 		if followFlag {
-			query = "?follow=true"
+			query = "follow=true"
 		}
 
-		wsURL, err := apiclient.GetWebSocketUrl(activeProfile.Api.Url)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		wsURL = fmt.Sprintf("%s/log/server%s", wsURL, query)
-
-		ws, res, err := websocket.DefaultDialer.Dial(wsURL, nil)
+		ws, res, err := server.GetWebsocketConn("/log/server", &activeProfile, &query)
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}

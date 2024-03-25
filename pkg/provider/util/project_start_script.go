@@ -2,6 +2,6 @@ package util
 
 import "fmt"
 
-func GetProjectStartScript(serverDownloadUrl string) string {
-	return fmt.Sprintf("curl -sfL %s | sudo -E bash && daytona agent", serverDownloadUrl)
+func GetProjectStartScript(serverDownloadUrl string, apiKey string) string {
+	return fmt.Sprintf(`curl -sfL -H "Authorization: Bearer %s" %s | sudo -E bash && daytona agent`, apiKey, serverDownloadUrl)
 }

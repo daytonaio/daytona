@@ -9,6 +9,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/workspace/dto"
 	"github.com/daytonaio/daytona/pkg/server/db"
 	"github.com/daytonaio/daytona/pkg/server/provisioner"
+	"github.com/daytonaio/daytona/pkg/server/workspaceservice"
 	"github.com/daytonaio/daytona/pkg/types"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -28,26 +29,13 @@ import (
 func GetWorkspace(ctx *gin.Context) {
 	workspaceId := ctx.Param("workspaceId")
 
-	w, err := db.FindWorkspaceByIdOrName(workspaceId)
+	w, err := workspaceservice.GetWorkspace(workspaceId)
 	if err != nil {
-		ctx.AbortWithError(http.StatusNotFound, errors.New("workspace not found"))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get workspace: %s", err.Error()))
 		return
 	}
 
-	log.Debug(w)
-
-	workspaceInfo, err := provisioner.GetWorkspaceInfo(w)
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get workspace info: %s", err.Error()))
-		return
-	}
-
-	response := dto.WorkspaceDTO{
-		Workspace: *w,
-		Info:      workspaceInfo,
-	}
-
-	ctx.JSON(200, response)
+	ctx.JSON(200, w)
 }
 
 // ListWorkspaces 			godoc
@@ -112,34 +100,11 @@ func ListWorkspaces(ctx *gin.Context) {
 func RemoveWorkspace(ctx *gin.Context) {
 	workspaceId := ctx.Param("workspaceId")
 
-	w, err := db.FindWorkspaceByIdOrName(workspaceId)
+	err := workspaceservice.RemoveWorkspace(workspaceId)
 	if err != nil {
-		ctx.AbortWithError(http.StatusNotFound, errors.New("workspace not found"))
-		return
-	}
-
-	log.Debug(w)
-
-	err = provisioner.DestroyWorkspace(w)
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to destroy workspace: %s", err.Error()))
-		return
-	}
-
-	err = db.DeleteWorkspace(w)
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to delete workspace: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to remove workspace: %s", err.Error()))
 		return
 	}
 
 	ctx.Status(200)
-}
-
-func getProject(workspace *types.Workspace, projectName string) (*types.Project, error) {
-	for _, project := range workspace.Projects {
-		if project.Name == projectName {
-			return project, nil
-		}
-	}
-	return nil, errors.New("project not found")
 }
