@@ -15,6 +15,36 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/gitprovider/{gitProviderId}/user-data": {
+            "get": {
+                "description": "Get Git context",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gitProvider"
+                ],
+                "summary": "Get Git context",
+                "operationId": "GetGitUserData",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Git Provider Id",
+                        "name": "gitProviderId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GitUserData"
+                        }
+                    }
+                }
+            }
+        },
         "/provider": {
             "get": {
                 "description": "List providers",
@@ -569,6 +599,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitUserData": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }

@@ -77,6 +77,7 @@ All URIs are relative to *http://localhost:3000*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+*GitProviderAPI* | [**GetGitUserData**](docs/GitProviderAPI.md#getgituserdata) | **Get** /gitprovider/{gitProviderId}/user-data | Get Git context
 *ProviderAPI* | [**GetTargetManifest**](docs/ProviderAPI.md#gettargetmanifest) | **Get** /provider/{provider}/target-manifest | Get provider target manifest
 *ProviderAPI* | [**InstallProvider**](docs/ProviderAPI.md#installprovider) | **Post** /provider/install | Install a provider
 *ProviderAPI* | [**ListProviders**](docs/ProviderAPI.md#listproviders) | **Get** /provider | List providers
@@ -103,6 +104,7 @@ Class | Method | HTTP request | Description
  - [CreateWorkspace](docs/CreateWorkspace.md)
  - [FRPSConfig](docs/FRPSConfig.md)
  - [GitProvider](docs/GitProvider.md)
+ - [GitUserData](docs/GitUserData.md)
  - [InstallProviderRequest](docs/InstallProviderRequest.md)
  - [NetworkKey](docs/NetworkKey.md)
  - [Project](docs/Project.md)
