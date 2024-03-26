@@ -32,3 +32,17 @@ type ServerConfig struct {
 type NetworkKey struct {
 	Key string `json:"key"`
 } // @name NetworkKey
+
+type ApiKeyType string
+
+const (
+	ApiKeyTypeClient  ApiKeyType = "client"
+	ApiKeyTypeProject ApiKeyType = "project"
+)
+
+type ApiKey struct {
+	KeyHash string     `json:"keyHash"`
+	Type    ApiKeyType `json:"type"`
+	// Project or client name
+	Name string `json:"name"`
+} // @name ApiKey

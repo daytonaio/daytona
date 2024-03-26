@@ -54,7 +54,9 @@ func GetServer() (*http.Server, error) {
 		router = gin.New()
 		router.Use(gin.Recovery())
 	}
+
 	router.Use(middlewares.LoggingMiddleware())
+	router.Use(middlewares.AuthMiddleware())
 
 	config, err := config.GetConfig()
 	if err != nil {

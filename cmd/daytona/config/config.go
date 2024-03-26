@@ -9,10 +9,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/daytonaio/daytona/pkg/server/auth"
+	"github.com/daytonaio/daytona/pkg/types"
 )
 
 type ServerApi struct {
 	Url string `json:"url"`
+	Key string `json:"key"`
 }
 
 type DefaultProvider struct {
@@ -51,13 +55,16 @@ func GetConfig() (*Config, error) {
 
 	_, err = os.Stat(configFilePath)
 	if os.IsNotExist(err) {
-		defaultConfig := getDefaultConfig()
+		defaultConfig, err := getDefaultConfig()
+		if err != nil {
+			return nil, err
+		}
 		err = defaultConfig.Save()
 		if err != nil {
 			return nil, err
 		}
 
-		return &defaultConfig, nil
+		return defaultConfig, nil
 	}
 
 	if err != nil {
@@ -157,8 +164,13 @@ func (c *Config) GetProfile(profileId string) (Profile, error) {
 	return Profile{}, errors.New("profile not found")
 }
 
-func getDefaultConfig() Config {
-	return Config{
+func getDefaultConfig() (*Config, error) {
+	apiKey, err := auth.GenerateApiKey(types.ApiKeyTypeClient, "default")
+	if err != nil {
+		return nil, err
+	}
+
+	return &Config{
 		ActiveProfileId: "default",
 		DefaultIdeId:    "vscode",
 		Profiles: []Profile{
@@ -167,10 +179,11 @@ func getDefaultConfig() Config {
 				Name: "default",
 				Api: ServerApi{
 					Url: "http://localhost:3000",
+					Key: apiKey,
 				},
 			},
 		},
-	}
+	}, nil
 }
 
 func getConfigPath() (string, error) {

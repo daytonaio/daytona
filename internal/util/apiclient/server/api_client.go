@@ -5,6 +5,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -27,9 +28,11 @@ func GetApiClient(profile *config.Profile) (*serverapiclient.APIClient, error) {
 	}
 
 	var serverUrl string
+	var apiKey string
 
 	if envApiUrl, ok := os.LookupEnv("DAYTONA_SERVER_API_URL"); ok {
 		serverUrl = envApiUrl
+		apiKey = os.Getenv("DAYTONA_SERVER_API_KEY")
 	} else {
 		var activeProfile config.Profile
 		if profile == nil {
@@ -43,6 +46,7 @@ func GetApiClient(profile *config.Profile) (*serverapiclient.APIClient, error) {
 		}
 
 		serverUrl = activeProfile.Api.Url
+		apiKey = activeProfile.Api.Key
 	}
 
 	clientConfig := serverapiclient.NewConfiguration()
@@ -52,7 +56,7 @@ func GetApiClient(profile *config.Profile) (*serverapiclient.APIClient, error) {
 		},
 	}
 
-	// clientConfig.AddDefaultHeader("Authorization", "Bearer "+token)
+	clientConfig.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", apiKey))
 
 	apiClient = serverapiclient.NewAPIClient(clientConfig)
 
