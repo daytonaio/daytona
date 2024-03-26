@@ -23,7 +23,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	status "github.com/daytonaio/daytona/pkg/views/workspace/status"
-	"github.com/gorilla/websocket"
 	"tailscale.com/tsnet"
 
 	log "github.com/sirupsen/logrus"
@@ -306,16 +305,10 @@ func processCmdArguments(cmd *cobra.Command, args []string, apiClient *serverapi
 }
 
 func scanWorkspaceLogs(activeProfile config.Profile, workspaceName string, statusProgram *tea.Program, started *bool) {
-	wsURL, err := apiclient.GetWebSocketUrl(activeProfile.Api.Url)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	wsURL = fmt.Sprintf("%s/log/workspace/%s?follow=true", wsURL, workspaceName)
-
 	time.Sleep(2 * time.Second)
 
-	ws, res, err := websocket.DefaultDialer.Dial(wsURL, nil)
+	query := "follow=true"
+	ws, res, err := server.GetWebsocketConn(fmt.Sprintf("/log/workspace/%s", workspaceName), &activeProfile, &query)
 	if err != nil {
 		cleanUpTerminal(statusProgram, apiclient.HandleErrorResponse(res, apiclient.HandleErrorResponse(res, err)))
 	}

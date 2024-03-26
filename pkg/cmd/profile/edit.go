@@ -49,7 +49,17 @@ var profileEditCmd = &cobra.Command{
 			log.Fatal("Profile does not exist")
 		}
 
-		if profileNameFlag == "" || apiUrlFlag == "" {
+		if profileNameFlag != "" {
+			chosenProfile.Name = profileNameFlag
+		}
+		if apiUrlFlag != "" {
+			chosenProfile.Api.Url = apiUrlFlag
+		}
+		if apiKeyFlag != "" {
+			chosenProfile.Api.Key = apiKeyFlag
+		}
+
+		if profileNameFlag == "" || apiUrlFlag == "" || apiKeyFlag == "" {
 			err = EditProfile(c, true, &chosenProfile)
 			if err != nil {
 				log.Fatal(err)
@@ -60,6 +70,7 @@ var profileEditCmd = &cobra.Command{
 		profileEditView := profile.ProfileAddView{
 			ProfileName: profileNameFlag,
 			ApiUrl:      apiUrlFlag,
+			ApiKey:      apiKeyFlag,
 		}
 
 		err = editProfile(&chosenProfile, profileEditView, c, true)
@@ -77,11 +88,10 @@ func EditProfile(c *config.Config, notify bool, profileToEdit *config.Profile) e
 	profileAddView := profile.ProfileAddView{
 		ProfileName: profileToEdit.Name,
 		ApiUrl:      profileToEdit.Api.Url,
+		ApiKey:      profileToEdit.Api.Key,
 	}
 
-	if profileToEdit.Id != "default" {
-		profile.ProfileCreationView(c, &profileAddView, true)
-	}
+	profile.ProfileCreationView(c, &profileAddView, true)
 
 	return editProfile(profileToEdit, profileAddView, c, notify)
 }
@@ -90,6 +100,7 @@ func editProfile(profileToEdit *config.Profile, profileView profile.ProfileAddVi
 	profileToEdit.Name = profileView.ProfileName
 	profileToEdit.Api = config.ServerApi{
 		Url: profileView.ApiUrl,
+		Key: profileView.ApiKey,
 	}
 
 	err := c.EditProfile(*profileToEdit)
@@ -110,4 +121,5 @@ func editProfile(profileToEdit *config.Profile, profileView profile.ProfileAddVi
 func init() {
 	profileEditCmd.Flags().StringVarP(&profileNameFlag, "name", "n", "", "Profile name")
 	profileEditCmd.Flags().StringVarP(&apiUrlFlag, "api-url", "a", "", "API URL")
+	profileEditCmd.Flags().StringVarP(&apiKeyFlag, "api-key", "k", "", "API Key")
 }

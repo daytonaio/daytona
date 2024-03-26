@@ -6,6 +6,7 @@ package server
 import (
 	"fmt"
 
+	apikey "github.com/daytonaio/daytona/pkg/cmd/server/apikey"
 	"github.com/daytonaio/daytona/pkg/cmd/server/daemon"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/config"
@@ -76,7 +77,7 @@ var ServerCmd = &cobra.Command{
 }
 
 func printServerStartedMessage(c *types.ServerConfig) {
-	util.RenderBorderedMessage(fmt.Sprintf("Daytona Server running on port: %d.\nTo connect to the server remotely, use the following command on the client machine:\n\ndaytona profile add -a %s", c.ApiPort, frpc.GetApiUrl(c)))
+	util.RenderBorderedMessage(fmt.Sprintf("Daytona Server running on port: %d.\nTo connect to the server remotely:\n\n1. Create an API key on this machine:\ndaytona server api-key new\n\n2. On the client machine run:\ndaytona profile add -a %s -k API_KEY", c.ApiPort, frpc.GetApiUrl(c)))
 }
 
 func init() {
@@ -86,4 +87,5 @@ func init() {
 	ServerCmd.AddCommand(logsCmd)
 	ServerCmd.AddCommand(stopCmd)
 	ServerCmd.AddCommand(restartCmd)
+	ServerCmd.AddCommand(apikey.ApiKeyCmd)
 }

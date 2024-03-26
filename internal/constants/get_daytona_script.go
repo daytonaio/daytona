@@ -63,7 +63,7 @@ temp_file="daytona-$RANDOM"
 # Ensure the temporary file is deleted on exit
 trap 'rm -f "$temp_file"' EXIT
 
-if ! curl -fsSL "$DOWNLOAD_URL" -o "$temp_file"; then
+if ! curl -fsSL "$DOWNLOAD_URL" -H "Authorization: Bearer $DAYTONA_SERVER_API_KEY" -o "$temp_file"; then
   err "Daytona server download failed"
 fi
 chmod +x "$temp_file"

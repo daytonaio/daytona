@@ -18,6 +18,7 @@ import (
 type ProfileAddView struct {
 	ProfileName string
 	ApiUrl      string
+	ApiKey      string
 }
 
 func ProfileCreationView(c *config.Config, profileAddView *ProfileAddView, editing bool) {
@@ -52,6 +53,16 @@ func ProfileCreationView(c *config.Config, profileAddView *ProfileAddView, editi
 				Validate(func(str string) error {
 					if str == "" {
 						return errors.New("server API URL can not be blank")
+					}
+					return nil
+				}),
+			huh.NewInput().
+				Title("Server API Key").
+				Password(true).
+				Value(&profileAddView.ApiKey).
+				Validate(func(str string) error {
+					if str == "" {
+						return errors.New("server API Key can not be blank")
 					}
 					return nil
 				}),
