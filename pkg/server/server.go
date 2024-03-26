@@ -4,6 +4,7 @@
 package server
 
 import (
+	"fmt"
 	"net"
 	"os"
 	"os/signal"
@@ -114,6 +115,21 @@ func Start(errCh chan error) error {
 			errCh <- err
 		}
 	}()
+
+	return nil
+}
+
+func HealthCheck() error {
+	c, err := config.GetConfig()
+	if err != nil {
+		return err
+	}
+
+	conn, err := net.DialTimeout("tcp", fmt.Sprintf(":%d", c.ApiPort), 3*time.Second)
+	if err != nil {
+		return fmt.Errorf("API health check timed out")
+	}
+	defer conn.Close()
 
 	return nil
 }

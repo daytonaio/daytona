@@ -5,7 +5,6 @@ package server
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/daytonaio/daytona/pkg/cmd/server/daemon"
 	"github.com/daytonaio/daytona/pkg/server"
@@ -56,11 +55,16 @@ var ServerCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		select {
-		case err := <-errCh:
+		go func() {
+			err := <-errCh
+			if err != nil {
+				log.Fatal(err)
+			}
+		}()
+
+		if err := server.HealthCheck(); err != nil {
 			log.Fatal(err)
-		// TODO: This is an optimistic check. We should check if the server is actually running
-		case <-time.After(5 * time.Second):
+		} else {
 			printServerStartedMessage(c)
 		}
 
