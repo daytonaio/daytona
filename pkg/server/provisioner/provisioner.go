@@ -7,12 +7,14 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/logger"
 	provider_types "github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/server/config"
 	"github.com/daytonaio/daytona/pkg/server/event_bus"
+	"github.com/daytonaio/daytona/pkg/server/frpc"
 	"github.com/daytonaio/daytona/pkg/server/targets"
 	"github.com/daytonaio/daytona/pkg/types"
 	log "github.com/sirupsen/logrus"
@@ -25,6 +27,11 @@ func CreateWorkspace(workspace *types.Workspace) error {
 	}
 
 	logsDir, err := config.GetWorkspaceLogsDir()
+	if err != nil {
+		return err
+	}
+
+	c, err := config.GetConfig()
 	if err != nil {
 		return err
 	}
@@ -69,9 +76,13 @@ func CreateWorkspace(workspace *types.Workspace) error {
 		if err != nil {
 			log.Error(err)
 		}
+
+		projectToCreate := *project
+		projectToCreate.EnvVars = getProjectEnvVars(project, c)
+
 		_, err = (*provider).CreateProject(&provider_types.ProjectRequest{
 			TargetOptions: target.Options,
-			Project:       project,
+			Project:       &projectToCreate,
 		})
 		if err != nil {
 			return err
@@ -107,6 +118,11 @@ func CreateWorkspace(workspace *types.Workspace) error {
 
 func StartWorkspace(workspace *types.Workspace) error {
 	logsDir, err := config.GetWorkspaceLogsDir()
+	if err != nil {
+		return err
+	}
+
+	c, err := config.GetConfig()
 	if err != nil {
 		return err
 	}
@@ -153,10 +169,13 @@ func StartWorkspace(workspace *types.Workspace) error {
 		projectLogWriter := io.MultiWriter(wsLogWriter, projectLogger)
 		projectLogWriter.Write([]byte(fmt.Sprintf("Starting project %s\n", project.Name)))
 
+		projectToStart := *project
+		projectToStart.EnvVars = getProjectEnvVars(project, c)
+
 		//	todo: go routines
 		_, err = (*provider).StartProject(&provider_types.ProjectRequest{
 			TargetOptions: target.Options,
-			Project:       project,
+			Project:       &projectToStart,
 		})
 		if err != nil {
 			return err
@@ -181,14 +200,22 @@ func StartProject(project *types.Project) error {
 		return err
 	}
 
+	c, err := config.GetConfig()
+	if err != nil {
+		return err
+	}
+
 	provider, err := manager.GetProvider(target.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
+	projectToStart := *project
+	projectToStart.EnvVars = getProjectEnvVars(project, c)
+
 	_, err = (*provider).StartProject(&provider_types.ProjectRequest{
 		TargetOptions: target.Options,
-		Project:       project,
+		Project:       &projectToStart,
 	})
 	if err != nil {
 		return err
@@ -351,4 +378,18 @@ func GetWorkspaceInfo(workspace *types.Workspace) (*types.WorkspaceInfo, error) 
 		TargetOptions: target.Options,
 		Workspace:     workspace,
 	})
+}
+
+func getProjectEnvVars(project *types.Project, config *types.ServerConfig) map[string]string {
+	envVars := map[string]string{
+		"DAYTONA_WS_ID":                     project.WorkspaceId,
+		"DAYTONA_WS_PROJECT_NAME":           project.Name,
+		"DAYTONA_WS_PROJECT_REPOSITORY_URL": project.Repository.Url,
+		"DAYTONA_SERVER_API_KEY":            project.ApiKey,
+		"DAYTONA_SERVER_VERSION":            internal.Version,
+		"DAYTONA_SERVER_URL":                frpc.GetServerUrl(config),
+		"DAYTONA_SERVER_API_URL":            frpc.GetApiUrl(config),
+	}
+
+	return envVars
 }
