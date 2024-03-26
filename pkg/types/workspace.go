@@ -22,11 +22,12 @@ type Repository struct {
 } // @name Repository
 
 type Project struct {
-	Name        string      `json:"name"`
-	Repository  *Repository `json:"repository"`
-	WorkspaceId string      `json:"workspaceId"`
-	ApiKey      string      `json:"-"`
-	Target      string      `json:"target"`
+	Name        string            `json:"name"`
+	Repository  *Repository       `json:"repository"`
+	WorkspaceId string            `json:"workspaceId"`
+	ApiKey      string            `json:"-"`
+	Target      string            `json:"target"`
+	EnvVars     map[string]string `json:"-"`
 } // @name Project
 type Workspace struct {
 	Id       string     `json:"id"`
