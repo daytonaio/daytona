@@ -3,7 +3,10 @@
 
 FROM alpine:3.19.1
 
+ARG TARGETOS TARGETARCH
 ARG DAYTONA_VERSION
+ARG DAYTONA_DIST=daytona-${TARGETOS}-${TARGETARCH}
+
 LABEL \
 	org.opencontainers.image.description="The Open Source Development Environment Manager" \
 	org.opencontainers.image.title="Daytona" \
@@ -27,7 +30,7 @@ RUN apk add --no-cache \
 		curl \
         gcompat
 
-COPY --chown=daytona:daytona --chmod=755 daytona /usr/local/bin
+COPY --chown=daytona:daytona --chmod=755 $DAYTONA_DIST /usr/local/bin/daytona
 
 USER daytona
 ENV HOME=/home/daytona
