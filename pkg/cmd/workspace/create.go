@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -132,13 +133,13 @@ var CreateCmd = &cobra.Command{
 			cleanUpTerminal(statusProgram, apiclient.HandleErrorResponse(res, err))
 		}
 
-		started = true
-
 		dialStartTime := time.Now()
 		dialTimeout := 3 * time.Minute
 		statusProgram.Send(status.ResultMsg{Line: "Establishing connection with the workspace"})
 
 		waitForDial(tsConn, *createdWorkspace.Id, *createdWorkspace.Projects[0].Name, dialStartTime, dialTimeout, statusProgram)
+
+		started = true
 
 		cleanUpTerminal(statusProgram, nil)
 
@@ -321,7 +322,10 @@ func scanWorkspaceLogs(activeProfile config.Profile, workspaceName string, statu
 			return
 		}
 
-		statusProgram.Send(status.ResultMsg{Line: string(msg)})
+		messages := strings.Split(string(msg), "\r")
+		for _, msg := range messages {
+			statusProgram.Send(status.ResultMsg{Line: msg})
+		}
 		if *started {
 			statusProgram.Send(status.ResultMsg{Line: "END_SIGNAL"})
 			break

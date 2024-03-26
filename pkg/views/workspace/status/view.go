@@ -4,7 +4,6 @@
 package status
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/spinner"
@@ -31,7 +30,7 @@ func (r ResultMsg) String() string {
 	if r.Dots {
 		return dotStyle.Render(strings.Repeat(".", 30))
 	}
-	return fmt.Sprintf(r.Line)
+	return r.Line
 }
 
 type model struct {
