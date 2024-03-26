@@ -80,7 +80,7 @@ var CreateCmd = &cobra.Command{
 			visited[repo.Url] = true
 		}
 
-		target, err := getTarget()
+		target, err := getTarget(activeProfile.Name)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -184,7 +184,7 @@ func init() {
 	CreateCmd.Flags().Bool("skip-ide", false, "Don't open the IDE after workspace creation")
 }
 
-func getTarget() (*serverapiclient.ProviderTarget, error) {
+func getTarget(activeProfileName string) (*serverapiclient.ProviderTarget, error) {
 	targets, err := server.GetTargetList()
 	if err != nil {
 		return nil, err
@@ -202,7 +202,7 @@ func getTarget() (*serverapiclient.ProviderTarget, error) {
 	}
 
 	if selectedTarget == nil {
-		selectedTarget, err = target.GetTargetFromPrompt(targets, false)
+		selectedTarget, err = target.GetTargetFromPrompt(targets, activeProfileName, false)
 		if err != nil {
 			return nil, err
 		}

@@ -6,6 +6,7 @@ package target
 import (
 	"context"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/views/target"
@@ -21,12 +22,22 @@ var targetRemoveCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Aliases: []string{"rm", "delete"},
 	Run: func(cmd *cobra.Command, args []string) {
+		c, err := config.GetConfig()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		activeProfile, err := c.GetActiveProfile()
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		targets, err := server.GetTargetList()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		selectedTarget, err := target.GetTargetFromPrompt(targets, false)
+		selectedTarget, err := target.GetTargetFromPrompt(targets, activeProfile.Name, false)
 		if err != nil {
 			log.Fatal(err)
 		}

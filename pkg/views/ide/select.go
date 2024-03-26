@@ -7,11 +7,11 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 )
 
-func GetIdeIdFromPrompt(ideList []config.Ide) string {
+func GetIdeIdFromPrompt(ideList []config.Ide, activeProfileName string) string {
 	chosenIdeId := ""
 	choiceChan := make(chan string)
 
-	go Render(ideList, choiceChan)
+	go Render(ideList, activeProfileName, choiceChan)
 
 	chosenIdeId = <-choiceChan
 
