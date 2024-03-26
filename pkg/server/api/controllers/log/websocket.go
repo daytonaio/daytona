@@ -38,6 +38,7 @@ func readLog(ginCtx *gin.Context, logFilePath *string) {
 		log.Error(err)
 		return
 	}
+	defer ws.Close()
 
 	msgChannel := make(chan []byte)
 	errChannel := make(chan error)
@@ -48,20 +49,34 @@ func readLog(ginCtx *gin.Context, logFilePath *string) {
 	go writeToWs(ws, msgChannel, errChannel)
 
 	go func() {
-		err := <-errChannel
-		if err != nil {
-			log.Error(err)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				err := <-errChannel
+				if err != nil {
+					if err.Error() != "EOF" {
+						log.Error(err)
+					}
+					ws.Close()
+					cancel()
+				}
+			}
 		}
-		ws.Close()
-		cancel()
 	}()
 
 	for {
-		_, _, err := ws.ReadMessage()
-		if err != nil {
-			log.Error(err)
-			cancel()
-			break
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			_, _, err := ws.ReadMessage()
+			if err != nil {
+				ws.Close()
+				cancel()
+				return
+			}
 		}
 	}
 }

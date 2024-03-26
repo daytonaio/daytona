@@ -27,15 +27,13 @@ func ReadLog(ctx context.Context, filePath *string, follow bool, c chan []byte, 
 	for {
 		select {
 		case <-ctx.Done():
-			errChan <- ctx.Err()
 			return
 		default:
 			line, err := reader.ReadBytes('\n')
 			if err != nil {
 				if err != io.EOF {
 					errChan <- err
-				}
-				if !follow {
+				} else if !follow {
 					errChan <- io.EOF
 					return
 				}
