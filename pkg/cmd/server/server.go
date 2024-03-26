@@ -77,7 +77,7 @@ var ServerCmd = &cobra.Command{
 }
 
 func printServerStartedMessage(c *types.ServerConfig) {
-	util.RenderBorderedMessage(fmt.Sprintf("Daytona Server running on port: %d.\nTo connect to the server remotely:\n\n1. Create an API key on this machine:\ndaytona server api-key new\n\n2. On the client machine run:\ndaytona profile add -a %s -k API_KEY", c.ApiPort, frpc.GetApiUrl(c)))
+	util.RenderBorderedMessage(fmt.Sprintf("Daytona Server running on port: %d.\nYou can now begin developing locally.\n\nIf you want to connect to the server remotely:\n\n1. Create an API key on this machine:\ndaytona server api-key new\n\n2. On the client machine run:\ndaytona profile add -a %s -k API_KEY", c.ApiPort, frpc.GetApiUrl(c)))
 }
 
 func init() {
