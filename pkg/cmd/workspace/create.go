@@ -199,6 +199,10 @@ func getTarget() (*serverapiclient.ProviderTarget, error) {
 				break
 			}
 		}
+
+		if selectedTarget == nil {
+			return nil, fmt.Errorf("target '%s' not found", targetNameFlag)
+		}
 	}
 
 	if selectedTarget == nil {
