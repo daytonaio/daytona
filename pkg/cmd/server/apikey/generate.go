@@ -11,6 +11,7 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/server/auth"
+	"github.com/daytonaio/daytona/pkg/server/db"
 	"github.com/daytonaio/daytona/pkg/types"
 	"github.com/daytonaio/daytona/pkg/views/server/apikey"
 	"github.com/daytonaio/daytona/pkg/views/util"
@@ -26,10 +27,28 @@ var generateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var keyName string
 
+		apiKeys, err := db.ListApiKeys()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		clientKeys := []*types.ApiKey{}
+		for _, key := range apiKeys {
+			if key.Type == types.ApiKeyTypeClient {
+				clientKeys = append(clientKeys, key)
+			}
+		}
+
 		if len(args) == 1 {
 			keyName = args[0]
 		} else {
-			apikey.ApiKeyCreationView(&keyName, &saveFlag)
+			apikey.ApiKeyCreationView(&keyName, &saveFlag, clientKeys)
+		}
+
+		for _, key := range clientKeys {
+			if key.Name == keyName {
+				log.Fatal("key name already exists, please choose a different one")
+			}
 		}
 
 		key, err := auth.GenerateApiKey(types.ApiKeyTypeClient, keyName)

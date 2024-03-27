@@ -7,12 +7,13 @@ import (
 	"errors"
 	"log"
 
+	"github.com/daytonaio/daytona/pkg/types"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/huh"
 )
 
-func ApiKeyCreationView(name *string, saveToDefaultProfile *bool) {
+func ApiKeyCreationView(name *string, saveToDefaultProfile *bool, clientKeys []*types.ApiKey) {
 	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().
@@ -21,6 +22,11 @@ func ApiKeyCreationView(name *string, saveToDefaultProfile *bool) {
 				Validate(func(str string) error {
 					if str == "" {
 						return errors.New("name can not be blank")
+					}
+					for _, key := range clientKeys {
+						if key.Name == str {
+							return errors.New("key name already exists")
+						}
 					}
 					return nil
 				}),
