@@ -1,3 +1,7 @@
+<div align="center"><a href="https://go.daytona.io/ph"><img src="https://github.com/daytonaio/daytona/raw/main/assets/images/ph-readme.png"></a></div>
+
+<br/>
+
 <div align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://github.com/daytonaio/daytona/raw/main/assets/images/Daytona-logotype-white.png">
