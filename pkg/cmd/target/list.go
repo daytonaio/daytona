@@ -4,14 +4,11 @@
 package target
 
 import (
-	"fmt"
 	"log"
-	"strings"
 
-	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/cmd/output"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	list_view "github.com/daytonaio/daytona/pkg/views/target/list"
 	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 )
@@ -38,10 +35,6 @@ var targetListCmd = &cobra.Command{
 			return
 		}
 
-		output := strings.Join(util.ArrayMap(targets, func(t serverapiclient.ProviderTarget) string {
-			return fmt.Sprintf("%s/%s: %s", *t.ProviderInfo.Name, *t.Name, *t.Options)
-		}), "\n")
-
-		view_util.RenderInfoMessage(output)
+		list_view.ListTargets(targets)
 	},
 }
