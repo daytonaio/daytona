@@ -190,29 +190,20 @@ func getTarget() (*serverapiclient.ProviderTarget, error) {
 		return nil, err
 	}
 
-	var selectedTarget *serverapiclient.ProviderTarget = nil
-
 	if targetNameFlag != "" {
 		for _, t := range targets {
 			if *t.Name == targetNameFlag {
-				selectedTarget = &t
-				break
+				return &t, nil
 			}
 		}
-
-		if selectedTarget == nil {
-			return nil, fmt.Errorf("target '%s' not found", targetNameFlag)
-		}
+		return nil, fmt.Errorf("target '%s' not found", targetNameFlag)
 	}
 
-	if selectedTarget == nil {
-		selectedTarget, err = target.GetTargetFromPrompt(targets, false)
-		if err != nil {
-			return nil, err
-		}
+	if len(targets) == 1 {
+		return &targets[0], nil
 	}
 
-	return selectedTarget, nil
+	return target.GetTargetFromPrompt(targets, false)
 }
 
 func processPrompting(cmd *cobra.Command, apiClient *serverapiclient.APIClient, workspaceName *string, repos *[]types.Repository, ctx context.Context) {
