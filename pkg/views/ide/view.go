@@ -16,6 +16,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	view_util "github.com/daytonaio/daytona/pkg/views/util"
 )
 
 var ModelInstance model
@@ -25,7 +26,6 @@ var (
 	paginationStyle = list.DefaultStyles().PaginationStyle.PaddingLeft(4)
 	helpStyle       = list.DefaultStyles().HelpStyle.PaddingLeft(4).PaddingBottom(1)
 	quitTextStyle   = lipgloss.NewStyle().Margin(1, 0, 2, 4)
-	docStyle        = lipgloss.NewStyle().Margin(1, 2)
 )
 
 type item struct {
@@ -67,6 +67,7 @@ type model struct {
 	list     list.Model
 	choice   item
 	quitting bool
+	footer   string
 }
 
 func (m model) Init() tea.Cmd {
@@ -76,7 +77,7 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		h, v := docStyle.GetFrameSize()
+		h, v := view_util.DocStyle.GetFrameSize()
 		m.list.SetSize(msg.Width-h, msg.Height-v)
 
 	case tea.KeyMsg:
@@ -106,10 +107,10 @@ func (m model) View() string {
 	if m.quitting {
 		return quitTextStyle.Render("Canceled")
 	}
-	return docStyle.Render(m.list.View())
+	return view_util.DocStyle.Render(m.list.View() + m.footer)
 }
 
-func Render(ideList []config.Ide, choiceChan chan<- string) {
+func Render(ideList []config.Ide, activeProfileName string, choiceChan chan<- string) {
 	items := util.ArrayMap(ideList, func(ide config.Ide) list.Item {
 		return item{id: ide.Id, name: ide.Name}
 	})
@@ -123,6 +124,7 @@ func Render(ideList []config.Ide, choiceChan chan<- string) {
 	l.Styles.HelpStyle = helpStyle
 
 	ModelInstance = model{list: l}
+	ModelInstance.footer = view_util.GetListProfileFooter(activeProfileName)
 
 	m, err := tea.NewProgram(ModelInstance, tea.WithAltScreen()).Run()
 	if err != nil {

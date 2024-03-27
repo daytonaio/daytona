@@ -26,7 +26,12 @@ var ideCmd = &cobra.Command{
 		ideList := config.GetIdeList()
 		var chosenIde config.Ide
 
-		chosenIdeId := ide.GetIdeIdFromPrompt(ideList)
+		activeProfile, err := c.GetActiveProfile()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		chosenIdeId := ide.GetIdeIdFromPrompt(ideList, activeProfile.Name)
 
 		if chosenIdeId == "" {
 			return
