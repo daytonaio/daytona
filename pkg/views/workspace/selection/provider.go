@@ -7,14 +7,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
 )
 
-func selectProviderPrompt(gitProviders []config.GitProvider, secondaryProjectOrder int, choiceChan chan<- string) {
+func selectProviderPrompt(gitProviders []gitprovider_view.GitProviderView, secondaryProjectOrder int, choiceChan chan<- string) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
@@ -46,7 +46,7 @@ func selectProviderPrompt(gitProviders []config.GitProvider, secondaryProjectOrd
 	}
 }
 
-func GetProviderIdFromPrompt(gitProviders []config.GitProvider, secondaryProjectOrder int) string {
+func GetProviderIdFromPrompt(gitProviders []gitprovider_view.GitProviderView, secondaryProjectOrder int) string {
 	choiceChan := make(chan string)
 
 	go selectProviderPrompt(gitProviders, secondaryProjectOrder, choiceChan)

@@ -31,29 +31,23 @@ func ToProjectDTO(project *types.Project, workspace *types.Workspace) ProjectDTO
 	}
 }
 
-func ToRepositoryDTO(repo *types.Repository) RepositoryDTO {
+func ToRepositoryDTO(repo *types.GitRepository) RepositoryDTO {
 	repoDTO := RepositoryDTO{
 		Url: repo.Url,
 	}
 
-	if repo.Branch != "" {
-		repoDTO.Branch = &repo.Branch
-	}
+	repoDTO.Branch = repo.Branch
 	if repo.Sha != "" {
 		repoDTO.SHA = &repo.Sha
 	}
 	if repo.Owner != "" {
 		repoDTO.Owner = &repo.Owner
 	}
-	if repo.PrNumber != 0 {
-		repoDTO.PrNumber = &repo.PrNumber
-	}
+	repoDTO.PrNumber = repo.PrNumber
 	if repo.Source != "" {
 		repoDTO.Source = &repo.Source
 	}
-	if repo.Path != "" {
-		repoDTO.Path = &repo.Path
-	}
+	repoDTO.Path = repo.Path
 
 	return repoDTO
 }
@@ -67,23 +61,19 @@ func ToProject(projectDTO ProjectDTO) *types.Project {
 	}
 }
 
-func ToRepository(repoDTO RepositoryDTO) *types.Repository {
-	repo := types.Repository{
+func ToRepository(repoDTO RepositoryDTO) *types.GitRepository {
+	repo := types.GitRepository{
 		Url: repoDTO.Url,
 	}
 
-	if repoDTO.Branch != nil {
-		repo.Branch = *repoDTO.Branch
-	}
+	repo.Branch = repoDTO.Branch
 	if repoDTO.SHA != nil {
 		repo.Sha = *repoDTO.SHA
 	}
 	if repoDTO.Owner != nil {
 		repo.Owner = *repoDTO.Owner
 	}
-	if repoDTO.PrNumber != nil {
-		repo.PrNumber = *repoDTO.PrNumber
-	}
+	repo.PrNumber = repoDTO.PrNumber
 	if repoDTO.Source != nil {
 		repo.Source = *repoDTO.Source
 	}

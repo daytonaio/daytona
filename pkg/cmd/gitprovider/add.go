@@ -6,10 +6,7 @@ package gitprovider
 import (
 	"context"
 
-	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
 	"github.com/daytonaio/daytona/pkg/views/util"
@@ -22,71 +19,34 @@ var gitProviderAddCmd = &cobra.Command{
 	Aliases: []string{"new", "register", "update"},
 	Short:   "Register a Git providers",
 	Run: func(cmd *cobra.Command, args []string) {
-		var providerExists bool
+		ctx := context.Background()
 
 		apiClient, err := server.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		serverConfig, res, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
-		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
-		}
+		gitProviderData := serverapiclient.GitProvider{}
+		gitProviderData.Id = new(string)
+		gitProviderData.Username = new(string)
+		gitProviderData.Token = new(string)
+		gitProviderData.BaseApiUrl = new(string)
 
-		c, err := config.GetConfig()
-		if err != nil {
-			log.Fatal(err)
-		}
+		gitprovider_view.GitProviderSelectionView(&gitProviderData, nil, false)
 
-		gitProviderSelectView := gitprovider_view.GitProviderSelectView{
-			Id:       "",
-			Username: "",
-			Token:    "",
-		}
-
-		gitprovider_view.GitProviderSelectionView(&gitProviderSelectView, serverConfig.GitProviders, false)
-
-		if gitProviderSelectView.Id == "" {
+		if *gitProviderData.Id == "" {
 			return
 		}
 
-		if gitProviderSelectView.Username == "" {
-			gitUsername, err := gitprovider.GetUsernameFromToken(gitProviderSelectView.Id, config.GetGitProviderList(), gitProviderSelectView.Token, gitProviderSelectView.BaseApiUrl)
+		if *gitProviderData.Username == "" {
+			gitUsername, _, err := apiClient.GitProviderAPI.GetGitUsernameFromToken(ctx).GitProviderData(gitProviderData).Execute()
 			if err != nil {
 				log.Fatal(err)
 			}
-			gitProviderSelectView.Username = gitUsername
+			*gitProviderData.Username = gitUsername
 		}
 
-		gitProviderList := serverConfig.GitProviders
-
-		for _, gitProvider := range gitProviderList {
-			if *gitProvider.Id == gitProviderSelectView.Id {
-				*gitProvider.Username = gitProviderSelectView.Username
-				*gitProvider.BaseApiUrl = gitProviderSelectView.BaseApiUrl
-				*gitProvider.Token = gitProviderSelectView.Token
-				providerExists = true
-			}
-		}
-
-		if !providerExists {
-			gitProviderList = append(serverConfig.GitProviders, serverapiclient.GitProvider{
-				Id:         &gitProviderSelectView.Id,
-				Username:   &gitProviderSelectView.Username,
-				BaseApiUrl: &gitProviderSelectView.BaseApiUrl,
-				Token:      &gitProviderSelectView.Token,
-			})
-		}
-
-		serverConfig.GitProviders = gitProviderList
-
-		_, res, err = apiClient.ServerAPI.SetConfig(context.Background()).Config(*serverConfig).Execute()
-		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
-		}
-
-		err = c.Save()
+		_, err = apiClient.GitProviderAPI.SetGitProvider(ctx).GitProviderData(gitProviderData).Execute()
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -6,7 +6,6 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**GenerateNetworkKey**](ServerAPI.md#GenerateNetworkKey) | **Post** /server/network-key | Generate a new authentication key
 [**GetConfig**](ServerAPI.md#GetConfig) | **Get** /server/config | Get the server configuration
-[**GetGitContext**](ServerAPI.md#GetGitContext) | **Get** /server/get-git-context/{gitUrl} | Get Git context
 [**SetConfig**](ServerAPI.md#SetConfig) | **Post** /server/config | Set the server configuration
 
 
@@ -118,76 +117,6 @@ Other parameters are passed through a pointer to a apiGetConfigRequest struct vi
 ### Return type
 
 [**ServerConfig**](ServerConfig.md)
-
-### Authorization
-
-No authorization required
-
-### HTTP request headers
-
-- **Content-Type**: Not defined
-- **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
-## GetGitContext
-
-> Repository GetGitContext(ctx, gitUrl).Execute()
-
-Get Git context
-
-
-
-### Example
-
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"os"
-	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/serverapiclient"
-)
-
-func main() {
-	gitUrl := "gitUrl_example" // string | Git URL
-
-	configuration := openapiclient.NewConfiguration()
-	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.ServerAPI.GetGitContext(context.Background(), gitUrl).Execute()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `ServerAPI.GetGitContext``: %v\n", err)
-		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
-	}
-	// response from `GetGitContext`: Repository
-	fmt.Fprintf(os.Stdout, "Response from `ServerAPI.GetGitContext`: %v\n", resp)
-}
-```
-
-### Path Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**gitUrl** | **string** | Git URL | 
-
-### Other Parameters
-
-Other parameters are passed through a pointer to a apiGetGitContextRequest struct via the builder pattern
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-
-
-### Return type
-
-[**Repository**](Repository.md)
 
 ### Authorization
 

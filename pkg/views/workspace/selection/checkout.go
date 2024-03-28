@@ -7,14 +7,24 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectCheckoutPrompt(checkoutOptions []gitprovider.CheckoutOption, secondaryProjectOrder int, choiceChan chan<- string) {
+type CheckoutOption struct {
+	Title string
+	Id    string
+}
+
+var (
+	CheckoutDefault = CheckoutOption{Title: "Clone the default branch", Id: "default"}
+	CheckoutBranch  = CheckoutOption{Title: "Branches", Id: "branch"}
+	CheckoutPR      = CheckoutOption{Title: "Pull/Merge requests", Id: "pullrequest"}
+)
+
+func selectCheckoutPrompt(checkoutOptions []CheckoutOption, secondaryProjectOrder int, choiceChan chan<- string) {
 	items := []list.Item{}
 
 	for _, checkoutOption := range checkoutOptions {
@@ -42,7 +52,7 @@ func selectCheckoutPrompt(checkoutOptions []gitprovider.CheckoutOption, secondar
 	}
 }
 
-func GetCheckoutOptionFromPrompt(secondaryProjectOrder int, checkoutOptions []gitprovider.CheckoutOption) gitprovider.CheckoutOption {
+func GetCheckoutOptionFromPrompt(secondaryProjectOrder int, checkoutOptions []CheckoutOption) CheckoutOption {
 	choiceChan := make(chan string)
 
 	go selectCheckoutPrompt(checkoutOptions, secondaryProjectOrder, choiceChan)
@@ -54,5 +64,5 @@ func GetCheckoutOptionFromPrompt(secondaryProjectOrder int, checkoutOptions []gi
 			return checkoutOption
 		}
 	}
-	return gitprovider.CheckoutDefault
+	return CheckoutDefault
 }
