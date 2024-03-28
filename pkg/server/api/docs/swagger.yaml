@@ -6,7 +6,7 @@ definitions:
         type: string
       repositories:
         items:
-          $ref: '#/definitions/Repository'
+          $ref: '#/definitions/GitRepository'
         type: array
       target:
         type: string
@@ -20,6 +20,20 @@ definitions:
       protocol:
         type: string
     type: object
+  GitBranch:
+    properties:
+      name:
+        type: string
+      sha:
+        type: string
+    type: object
+  GitNamespace:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
   GitProvider:
     properties:
       baseApiUrl:
@@ -31,11 +45,43 @@ definitions:
       username:
         type: string
     type: object
-  GitUserData:
+  GitPullRequest:
+    properties:
+      branch:
+        type: string
+      name:
+        type: string
+    type: object
+  GitRepository:
+    properties:
+      branch:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      owner:
+        type: string
+      path:
+        type: string
+      prNumber:
+        type: integer
+      sha:
+        type: string
+      source:
+        type: string
+      url:
+        type: string
+    type: object
+  GitUser:
     properties:
       email:
         type: string
+      id:
+        type: string
       name:
+        type: string
+      username:
         type: string
     type: object
   InstallProviderRequest:
@@ -57,7 +103,7 @@ definitions:
       name:
         type: string
       repository:
-        $ref: '#/definitions/Repository'
+        $ref: '#/definitions/GitRepository'
       target:
         type: string
       workspaceId:
@@ -100,27 +146,6 @@ definitions:
   ProviderTargetManifest:
     additionalProperties:
       $ref: '#/definitions/provider.ProviderTargetProperty'
-    type: object
-  Repository:
-    properties:
-      branch:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      owner:
-        type: string
-      path:
-        type: string
-      prNumber:
-        type: integer
-      sha:
-        type: string
-      source:
-        type: string
-      url:
-        type: string
     type: object
   ServerConfig:
     properties:
@@ -242,10 +267,160 @@ info:
   title: Daytona Server API
   version: 0.1.0
 paths:
-  /gitprovider/{gitProviderId}/user-data:
+  /gitprovider:
+    put:
+      description: Set Git provider
+      operationId: SetGitProvider
+      parameters:
+      - description: Git provider
+        in: body
+        name: gitProviderData
+        required: true
+        schema:
+          $ref: '#/definitions/GitProvider'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Set Git provider
+      tags:
+      - gitProvider
+  /gitprovider/{gitProviderId}:
+    delete:
+      description: Remove Git provider
+      operationId: RemoveGitProvider
+      parameters:
+      - description: Git provider
+        in: path
+        name: gitProviderId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Remove Git provider
+      tags:
+      - gitProvider
+  /gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/branches:
+    get:
+      description: Get Git repository branches
+      operationId: GetRepoBranches
+      parameters:
+      - description: Git provider
+        in: path
+        name: gitProviderId
+        required: true
+        type: string
+      - description: Namespace
+        in: path
+        name: namespaceId
+        required: true
+        type: string
+      - description: Repository
+        in: path
+        name: repositoryId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/GitBranch'
+            type: array
+      summary: Get Git repository branches
+      tags:
+      - gitProvider
+  /gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/pull-requests:
+    get:
+      description: Get Git repository PRs
+      operationId: GetRepoPRs
+      parameters:
+      - description: Git provider
+        in: path
+        name: gitProviderId
+        required: true
+        type: string
+      - description: Namespace
+        in: path
+        name: namespaceId
+        required: true
+        type: string
+      - description: Repository
+        in: path
+        name: repositoryId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/GitPullRequest'
+            type: array
+      summary: Get Git repository PRs
+      tags:
+      - gitProvider
+  /gitprovider/{gitProviderId}/{namespaceId}/repositories:
+    get:
+      description: Get Git repositories
+      operationId: GetRepositories
+      parameters:
+      - description: Git provider
+        in: path
+        name: gitProviderId
+        required: true
+        type: string
+      - description: Namespace
+        in: path
+        name: namespaceId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/GitRepository'
+            type: array
+      summary: Get Git repositories
+      tags:
+      - gitProvider
+  /gitprovider/{gitProviderId}/namespaces:
+    get:
+      description: Get Git namespaces
+      operationId: GetNamespaces
+      parameters:
+      - description: Git provider
+        in: path
+        name: gitProviderId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/GitNamespace'
+            type: array
+      summary: Get Git namespaces
+      tags:
+      - gitProvider
+  /gitprovider/{gitProviderId}/user:
     get:
       description: Get Git context
-      operationId: GetGitUserData
+      operationId: GetGitUser
       parameters:
       - description: Git Provider Id
         in: path
@@ -258,8 +433,69 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/GitUserData'
+            $ref: '#/definitions/GitUser'
       summary: Get Git context
+      tags:
+      - gitProvider
+  /gitprovider/context/{gitUrl}:
+    get:
+      description: Get Git context
+      operationId: GetGitContext
+      parameters:
+      - description: Git URL
+        in: path
+        name: gitUrl
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/GitRepository'
+      summary: Get Git context
+      tags:
+      - gitProvider
+  /gitprovider/for-url/{url}:
+    get:
+      description: Get Git provider
+      operationId: GetGitProviderForUrl
+      parameters:
+      - description: Url
+        in: path
+        name: url
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/GitProvider'
+      summary: Get Git provider
+      tags:
+      - gitProvider
+  /gitprovider/username-from-token:
+    get:
+      description: Get username from token
+      operationId: GetGitUsernameFromToken
+      parameters:
+      - description: Git provider
+        in: body
+        name: gitProviderData
+        required: true
+        schema:
+          $ref: '#/definitions/GitProvider'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Get username from token
       tags:
       - gitProvider
   /provider:
@@ -367,26 +603,6 @@ paths:
           schema:
             $ref: '#/definitions/ServerConfig'
       summary: Set the server configuration
-      tags:
-      - server
-  /server/get-git-context/{gitUrl}:
-    get:
-      description: Get Git context
-      operationId: GetGitContext
-      parameters:
-      - description: Git URL
-        in: path
-        name: gitUrl
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/Repository'
-      summary: Get Git context
       tags:
       - server
   /server/network-key:

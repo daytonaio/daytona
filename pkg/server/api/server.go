@@ -66,6 +66,9 @@ func GetServer() (*http.Server, error) {
 	protected := router.Group("/")
 	protected.Use(middlewares.AuthMiddleware())
 
+	project := protected.Group("/")
+	project.Use(middlewares.ProjectAuthMiddleware())
+
 	config, err := config.GetConfig()
 	if err != nil {
 		return nil, err
@@ -76,7 +79,6 @@ func GetServer() (*http.Server, error) {
 		serverController.GET("/config", server.GetConfig)
 		serverController.POST("/config", server.SetConfig)
 		serverController.POST("/network-key", server.GenerateNetworkKey)
-		serverController.GET("/get-git-context/:gitUrl", server.GetGitContext)
 	}
 
 	binaryController := protected.Group("/binary")
@@ -118,10 +120,20 @@ func GetServer() (*http.Server, error) {
 		logController.GET("/workspace/:workspaceId", log_controller.ReadWorkspaceLog)
 	}
 
-	gitProivderController := protected.Group("/gitprovider")
+	gitProviderController := protected.Group("/gitprovider")
 	{
-		gitProivderController.GET("/:gitProviderId/user-data", gitprovider.GetGitUserData)
+		gitProviderController.PUT("/", gitprovider.SetGitProvider)
+		gitProviderController.DELETE("/:gitProviderId", gitprovider.RemoveGitProvider)
+		gitProviderController.GET("/:gitProviderId/user", gitprovider.GetGitUser)
+		gitProviderController.GET("/:gitProviderId/namespaces", gitprovider.GetNamespaces)
+		gitProviderController.GET("/:gitProviderId/:namespaceId/repositories", gitprovider.GetRepositories)
+		gitProviderController.GET("/:gitProviderId/:namespaceId/:repositoryId/branches", gitprovider.GetRepoBranches)
+		gitProviderController.GET("/:gitProviderId/:namespaceId/:repositoryId/pull-requests", gitprovider.GetRepoPRs)
+		gitProviderController.GET("/context/:gitUrl", gitprovider.GetGitContext)
+		gitProviderController.GET("/username-from-token", gitprovider.GetGitUsernameFromToken)
 	}
+
+	project.GET(gitProviderController.BasePath()+"/for-url/:url", middlewares.ProjectAuthMiddleware(), gitprovider.GetGitProviderForUrl)
 
 	httpServer = &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.ApiPort),

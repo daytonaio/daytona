@@ -11,6 +11,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/cmd/output"
+	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
 	"github.com/daytonaio/daytona/pkg/views/util"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -38,16 +39,16 @@ var GitProviderCmd = &cobra.Command{
 
 		util.RenderMainTitle("Registered Git providers:")
 
-		availableGitProviderViews := config.GetGitProviderList()
-		var gitProviderViewList []config.GitProvider
+		supportedProviders := config.GetSupportedGitProviders()
+		var gitProviderViewList []gitprovider_view.GitProviderView
 
 		for _, gitProvider := range serverConfig.GitProviders {
-			for _, availableGitProviderView := range availableGitProviderViews {
-				if *gitProvider.Id == availableGitProviderView.Id {
+			for _, supportedProvider := range supportedProviders {
+				if *gitProvider.Id == supportedProvider.Id {
 					gitProviderViewList = append(gitProviderViewList,
-						config.GitProvider{
+						gitprovider_view.GitProviderView{
 							Id:       *gitProvider.Id,
-							Name:     availableGitProviderView.Name,
+							Name:     supportedProvider.Name,
 							Username: *gitProvider.Username,
 						},
 					)

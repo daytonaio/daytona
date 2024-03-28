@@ -7,10 +7,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	log "github.com/sirupsen/logrus"
 )
@@ -54,15 +54,15 @@ func (a *Agent) Start() error {
 		}
 	}
 
-	var gitUserData *serverapiclient.GitUserData
+	var gitUser *serverapiclient.GitUser
 	if gitProvider != nil {
-		gitUserData, err = a.getGitUserData(*gitProvider.Id)
+		gitUser, err = a.getGitUser(*gitProvider.Id)
 		if err != nil {
 			log.Error(fmt.Sprintf("failed to get git user data: %s", err))
 		}
 	}
 
-	err = a.Git.SetGitConfig(gitUserData)
+	err = a.Git.SetGitConfig(gitUser)
 	if err != nil {
 		log.Error(fmt.Sprintf("failed to set git config: %s", err))
 	}
@@ -93,17 +93,19 @@ func (a *Agent) getProject() (*serverapiclient.Project, error) {
 }
 
 func (a *Agent) getGitProvider(repoUrl string) (*serverapiclient.GitProvider, error) {
+	ctx := context.Background()
+
 	apiClient, err := server.GetApiClient(nil)
 	if err != nil {
 		return nil, err
 	}
 
-	serverConfig, res, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
+	encodedUrl := url.QueryEscape(repoUrl)
+	gitProvider, res, err := apiClient.GitProviderAPI.GetGitProviderForUrl(ctx, encodedUrl).Execute()
 	if err != nil {
 		return nil, apiclient.HandleErrorResponse(res, err)
 	}
 
-	gitProvider := gitprovider.GetGitProviderFromHost(repoUrl, serverConfig.GitProviders)
 	if gitProvider != nil {
 		return gitProvider, nil
 	}
@@ -111,13 +113,13 @@ func (a *Agent) getGitProvider(repoUrl string) (*serverapiclient.GitProvider, er
 	return nil, nil
 }
 
-func (a *Agent) getGitUserData(gitProviderId string) (*serverapiclient.GitUserData, error) {
+func (a *Agent) getGitUser(gitProviderId string) (*serverapiclient.GitUser, error) {
 	apiClient, err := server.GetApiClient(nil)
 	if err != nil {
 		return nil, err
 	}
 
-	userData, res, err := apiClient.GitProviderAPI.GetGitUserData(context.Background(), gitProviderId).Execute()
+	userData, res, err := apiClient.GitProviderAPI.GetGitUser(context.Background(), gitProviderId).Execute()
 	if err != nil {
 		return nil, apiclient.HandleErrorResponse(res, err)
 	}

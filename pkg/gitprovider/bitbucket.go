@@ -32,9 +32,9 @@ type BitbucketGitProvider struct {
 	token    string
 }
 
-func (g *BitbucketGitProvider) GetNamespaces() ([]GitNamespace, error) {
+func (g *BitbucketGitProvider) GetNamespaces() ([]types.GitNamespace, error) {
 	client := g.getApiClient()
-	user, err := g.GetUserData()
+	user, err := g.GetUser()
 	if err != nil {
 		return nil, err
 	}
@@ -44,8 +44,8 @@ func (g *BitbucketGitProvider) GetNamespaces() ([]GitNamespace, error) {
 		return nil, err
 	}
 
-	namespaces := make([]GitNamespace, wsList.Size+1) // +1 for the user namespace
-	namespaces[0] = GitNamespace{Id: personalNamespaceId, Name: user.Username}
+	namespaces := make([]types.GitNamespace, wsList.Size+1) // +1 for the user namespace
+	namespaces[0] = types.GitNamespace{Id: personalNamespaceId, Name: user.Username}
 
 	for i, org := range wsList.Workspaces {
 		namespaces[i+1].Id = org.Slug
@@ -55,12 +55,12 @@ func (g *BitbucketGitProvider) GetNamespaces() ([]GitNamespace, error) {
 	return namespaces, nil
 }
 
-func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]types.Repository, error) {
+func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]types.GitRepository, error) {
 	client := g.getApiClient()
-	var response []types.Repository
+	var response []types.GitRepository
 
 	if namespace == personalNamespaceId {
-		user, err := g.GetUserData()
+		user, err := g.GetUser()
 		if err != nil {
 			return nil, err
 		}
@@ -82,21 +82,25 @@ func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]types.Reposi
 			log.Fatal("Invalid HTML link")
 		}
 
-		response = append(response, types.Repository{
+		url := htmlLink["href"].(string)
+		repoSlug := url[strings.LastIndex(url, "/")+1:]
+
+		response = append(response, types.GitRepository{
+			Id:   repoSlug,
 			Name: repo.Name,
-			Url:  htmlLink["href"].(string),
+			Url:  url,
 		})
 	}
 
 	return response, err
 }
 
-func (g *BitbucketGitProvider) GetRepoBranches(repo types.Repository, namespaceId string) ([]GitBranch, error) {
+func (g *BitbucketGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]types.GitBranch, error) {
 	client := g.getApiClient()
-	var response []GitBranch
+	var response []types.GitBranch
 
 	if namespaceId == personalNamespaceId {
-		user, err := g.GetUserData()
+		user, err := g.GetUser()
 		if err != nil {
 			return nil, err
 		}
@@ -105,11 +109,10 @@ func (g *BitbucketGitProvider) GetRepoBranches(repo types.Repository, namespaceI
 
 	// Custom API call implementation
 
-	repoSlug := repo.Url[strings.LastIndex(repo.Url, "/")+1:]
 	authString := fmt.Sprintf("%s:%s", g.username, g.token)
 	encodedAuth := base64.StdEncoding.EncodeToString([]byte(authString))
 
-	url := fmt.Sprintf("https://api.bitbucket.org/2.0/repositories/%s/%s/refs/branches", namespaceId, repoSlug)
+	url := fmt.Sprintf("https://api.bitbucket.org/2.0/repositories/%s/%s/refs/branches", namespaceId, repositoryId)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -143,7 +146,7 @@ func (g *BitbucketGitProvider) GetRepoBranches(repo types.Repository, namespaceI
 
 	// Now you can work with the branches
 	for _, branch := range branchesResponse.Values {
-		response = append(response, GitBranch{
+		response = append(response, types.GitBranch{
 			Name: branch.Name,
 			SHA:  branch.Target.Hash,
 		})
@@ -152,12 +155,12 @@ func (g *BitbucketGitProvider) GetRepoBranches(repo types.Repository, namespaceI
 	return response, nil
 }
 
-func (g *BitbucketGitProvider) GetRepoPRs(repo types.Repository, namespaceId string) ([]GitPullRequest, error) {
+func (g *BitbucketGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]types.GitPullRequest, error) {
 	client := g.getApiClient()
-	var response []GitPullRequest
+	var response []types.GitPullRequest
 
 	if namespaceId == personalNamespaceId {
-		user, err := g.GetUserData()
+		user, err := g.GetUser()
 		if err != nil {
 			return nil, err
 		}
@@ -166,7 +169,7 @@ func (g *BitbucketGitProvider) GetRepoPRs(repo types.Repository, namespaceId str
 
 	prList, err := client.Repositories.PullRequests.Get(&bitbucket.PullRequestsOptions{
 		Owner:    namespaceId,
-		RepoSlug: repo.Name,
+		RepoSlug: repositoryId,
 	})
 
 	if err != nil {
@@ -177,15 +180,15 @@ func (g *BitbucketGitProvider) GetRepoPRs(repo types.Repository, namespaceId str
 	return response, err
 }
 
-func (g *BitbucketGitProvider) GetUserData() (GitUser, error) {
+func (g *BitbucketGitProvider) GetUser() (types.GitUser, error) {
 	client := g.getApiClient()
 
 	user, err := client.User.Profile()
 	if err != nil {
-		return GitUser{}, err
+		return types.GitUser{}, err
 	}
 
-	response := GitUser{}
+	response := types.GitUser{}
 	response.Id = user.AccountId
 	response.Username = user.Username
 	response.Name = user.DisplayName

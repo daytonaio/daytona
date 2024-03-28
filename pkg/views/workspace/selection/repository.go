@@ -7,19 +7,19 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/daytonaio/daytona/pkg/types"
+	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectRepositoryPrompt(repositories []types.Repository, secondaryProjectOrder int, choiceChan chan<- string) {
+func selectRepositoryPrompt(repositories []serverapiclient.GitRepository, secondaryProjectOrder int, choiceChan chan<- string) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
 	for _, repository := range repositories {
-		newItem := item[string]{id: repository.Url, title: repository.Name, choiceProperty: repository.Url, desc: repository.Url}
+		newItem := item[string]{id: *repository.Url, title: *repository.Name, choiceProperty: *repository.Url, desc: *repository.Url}
 		items = append(items, newItem)
 	}
 
@@ -43,7 +43,7 @@ func selectRepositoryPrompt(repositories []types.Repository, secondaryProjectOrd
 	}
 }
 
-func GetRepositoryFromPrompt(repositories []types.Repository, secondaryProjectOrder int) types.Repository {
+func GetRepositoryFromPrompt(repositories []serverapiclient.GitRepository, secondaryProjectOrder int) serverapiclient.GitRepository {
 	choiceChan := make(chan string)
 
 	go selectRepositoryPrompt(repositories, secondaryProjectOrder, choiceChan)
@@ -51,10 +51,10 @@ func GetRepositoryFromPrompt(repositories []types.Repository, secondaryProjectOr
 	choice := <-choiceChan
 
 	for _, repository := range repositories {
-		if repository.Url == choice {
+		if *repository.Url == choice {
 			return repository
 		}
 	}
 
-	return types.Repository{}
+	return serverapiclient.GitRepository{}
 }

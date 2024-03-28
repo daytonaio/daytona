@@ -17,11 +17,10 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
-	"github.com/daytonaio/daytona/pkg/types"
 	"github.com/daytonaio/daytona/pkg/views/target"
 	view_util "github.com/daytonaio/daytona/pkg/views/util"
-	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	status "github.com/daytonaio/daytona/pkg/views/workspace/status"
 	"tailscale.com/tsnet"
@@ -40,7 +39,7 @@ var CreateCmd = &cobra.Command{
 	Args:  cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
-		var repos []types.Repository
+		var repos []serverapiclient.GitRepository
 		var workspaceName string
 
 		apiClient, err := server.GetApiClient(nil)
@@ -74,10 +73,10 @@ var CreateCmd = &cobra.Command{
 		visited := make(map[string]bool)
 
 		for _, repo := range repos {
-			if visited[repo.Url] {
-				log.Fatalf("Error: duplicate repository url: %s", repo.Url)
+			if visited[*repo.Url] {
+				log.Fatalf("Error: duplicate repository url: %s", *repo.Url)
 			}
-			visited[repo.Url] = true
+			visited[*repo.Url] = true
 		}
 
 		target, err := getTarget(activeProfile.Name)
@@ -93,16 +92,6 @@ var CreateCmd = &cobra.Command{
 		tsConn, err := tailscale.GetConnection(&activeProfile)
 		if err != nil {
 			log.Fatal(err)
-		}
-
-		var requestRepos []serverapiclient.Repository
-		for _, repo := range repos {
-			requestRepo := serverapiclient.Repository{
-				Name:   &repo.Name,
-				Url:    &repo.Url,
-				Branch: &repo.Branch,
-			}
-			requestRepos = append(requestRepos, requestRepo)
 		}
 
 		statusProgram := tea.NewProgram(status.NewModel())
@@ -127,7 +116,7 @@ var CreateCmd = &cobra.Command{
 		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(serverapiclient.CreateWorkspace{
 			Name:         &workspaceName,
 			Target:       target.Name,
-			Repositories: requestRepos,
+			Repositories: repos,
 		}).Execute()
 		if err != nil {
 			cleanUpTerminal(statusProgram, apiclient.HandleErrorResponse(res, err))
@@ -206,7 +195,7 @@ func getTarget(activeProfileName string) (*serverapiclient.ProviderTarget, error
 	return target.GetTargetFromPrompt(targets, activeProfileName, false)
 }
 
-func processPrompting(cmd *cobra.Command, apiClient *serverapiclient.APIClient, workspaceName *string, repos *[]types.Repository, ctx context.Context) {
+func processPrompting(cmd *cobra.Command, apiClient *serverapiclient.APIClient, workspaceName *string, repos *[]serverapiclient.GitRepository, ctx context.Context) {
 	manual, err := cmd.Flags().GetBool("manual")
 	if err != nil {
 		log.Fatal(err)
@@ -240,32 +229,14 @@ func processPrompting(cmd *cobra.Command, apiClient *serverapiclient.APIClient, 
 		workspaceNames = append(workspaceNames, *workspaceInfo.Name)
 	}
 
-	var gitProviderList []types.GitProvider
-	for _, serverGitProvider := range serverConfig.GitProviders {
-		var gitProvider types.GitProvider
-		if serverGitProvider.Id != nil {
-			gitProvider.Id = *serverGitProvider.Id
-		}
-		if serverGitProvider.Username != nil {
-			gitProvider.Username = *serverGitProvider.Username
-		}
-		if serverGitProvider.Token != nil {
-			gitProvider.Token = *serverGitProvider.Token
-		}
-		if serverGitProvider.BaseApiUrl != nil {
-			gitProvider.BaseApiUrl = *serverGitProvider.BaseApiUrl
-		}
-		gitProviderList = append(gitProviderList, gitProvider)
-	}
-
-	*workspaceName, *repos, err = create.GetCreationDataFromPrompt(workspaceNames, gitProviderList, manual, multiProjectFlag)
+	*workspaceName, *repos, err = workspace_util.GetCreationDataFromPrompt(workspaceNames, serverConfig.GitProviders, manual, multiProjectFlag)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 }
 
-func processCmdArguments(cmd *cobra.Command, args []string, apiClient *serverapiclient.APIClient, workspaceName *string, repos *[]types.Repository, ctx context.Context) {
+func processCmdArguments(cmd *cobra.Command, args []string, apiClient *serverapiclient.APIClient, workspaceName *string, repos *[]serverapiclient.GitRepository, ctx context.Context) {
 	var repoUrls []string
 
 	validatedWorkspaceName, err := util.GetValidatedWorkspaceName(args[0])
@@ -287,13 +258,13 @@ func processCmdArguments(cmd *cobra.Command, args []string, apiClient *serverapi
 
 	for _, repoUrl := range repoUrls {
 		encodedURLParam := url.QueryEscape(repoUrl)
-		repoResponse, res, err := apiClient.ServerAPI.GetGitContext(ctx, encodedURLParam).Execute()
+		repoResponse, res, err := apiClient.GitProviderAPI.GetGitContext(ctx, encodedURLParam).Execute()
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		repo := &types.Repository{
-			Url: *repoResponse.Url,
+		repo := &serverapiclient.GitRepository{
+			Url: repoResponse.Url,
 		}
 
 		*repos = append(*repos, *repo)

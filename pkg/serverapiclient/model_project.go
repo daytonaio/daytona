@@ -19,10 +19,10 @@ var _ MappedNullable = &Project{}
 
 // Project struct for Project
 type Project struct {
-	Name        *string     `json:"name,omitempty"`
-	Repository  *Repository `json:"repository,omitempty"`
-	Target      *string     `json:"target,omitempty"`
-	WorkspaceId *string     `json:"workspaceId,omitempty"`
+	Name        *string        `json:"name,omitempty"`
+	Repository  *GitRepository `json:"repository,omitempty"`
+	Target      *string        `json:"target,omitempty"`
+	WorkspaceId *string        `json:"workspaceId,omitempty"`
 }
 
 // NewProject instantiates a new Project object
@@ -75,9 +75,9 @@ func (o *Project) SetName(v string) {
 }
 
 // GetRepository returns the Repository field value if set, zero value otherwise.
-func (o *Project) GetRepository() Repository {
+func (o *Project) GetRepository() GitRepository {
 	if o == nil || IsNil(o.Repository) {
-		var ret Repository
+		var ret GitRepository
 		return ret
 	}
 	return *o.Repository
@@ -85,7 +85,7 @@ func (o *Project) GetRepository() Repository {
 
 // GetRepositoryOk returns a tuple with the Repository field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Project) GetRepositoryOk() (*Repository, bool) {
+func (o *Project) GetRepositoryOk() (*GitRepository, bool) {
 	if o == nil || IsNil(o.Repository) {
 		return nil, false
 	}
@@ -101,8 +101,8 @@ func (o *Project) HasRepository() bool {
 	return false
 }
 
-// SetRepository gets a reference to the given Repository and assigns it to the Repository field.
-func (o *Project) SetRepository(v Repository) {
+// SetRepository gets a reference to the given GitRepository and assigns it to the Repository field.
+func (o *Project) SetRepository(v GitRepository) {
 	o.Repository = &v
 }
 

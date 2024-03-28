@@ -8,19 +8,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"strings"
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/spf13/cobra"
 )
-
-type GitCredentials struct {
-	Username string `json:"username"`
-	Token    string `json:"token"`
-}
 
 var gitCredCmd = &cobra.Command{
 	Use:     "git-cred get",
@@ -44,13 +39,11 @@ var gitCredCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		var gitCredentials GitCredentials
-		serverConfig, res, err := apiClient.ServerAPI.GetConfig(ctx).Execute()
+		encodedUrl := url.QueryEscape(host)
+		gitProvider, res, err := apiClient.GitProviderAPI.GetGitProviderForUrl(ctx, encodedUrl).Execute()
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
-
-		gitProvider := gitprovider.GetGitProviderFromHost(host, serverConfig.GitProviders)
 
 		if gitProvider == nil {
 			fmt.Println("error: git provider not found")
@@ -58,13 +51,8 @@ var gitCredCmd = &cobra.Command{
 			return
 		}
 
-		gitCredentials = GitCredentials{
-			Username: *gitProvider.Username,
-			Token:    *gitProvider.Token,
-		}
-
-		fmt.Println("username=" + gitCredentials.Username)
-		fmt.Println("password=" + gitCredentials.Token)
+		fmt.Println("username=" + *gitProvider.Username)
+		fmt.Println("password=" + *gitProvider.Token)
 	},
 }
 

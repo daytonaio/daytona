@@ -11,7 +11,7 @@ import (
 type GitService interface {
 	CloneRepository(project *serverapiclient.Project, authToken *string) error
 	RepositoryExists(project *serverapiclient.Project) (bool, error)
-	SetGitConfig(userData *serverapiclient.GitUserData) error
+	SetGitConfig(userData *serverapiclient.GitUser) error
 }
 
 type SshServer interface {
