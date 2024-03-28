@@ -177,6 +177,10 @@ func (g *BitbucketGitProvider) GetRepoPRs(repo types.Repository, namespaceId str
 	return response, err
 }
 
+func (g *BitbucketGitProvider) ParseGitUrl(url string) (*types.Repository, error) {
+	return nil, nil
+}
+
 func (g *BitbucketGitProvider) GetUserData() (GitUser, error) {
 	client := g.getApiClient()
 

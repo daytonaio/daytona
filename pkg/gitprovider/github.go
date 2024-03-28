@@ -5,6 +5,9 @@ package gitprovider
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"regexp"
 	"strconv"
 
 	"github.com/daytonaio/daytona/pkg/types"
@@ -141,6 +144,30 @@ func (g *GitHubGitProvider) GetRepoPRs(repo types.Repository, namespaceId string
 	}
 
 	return response, nil
+}
+
+func (g *GitHubGitProvider) ParseGitUrl(url string) (*types.Repository, error) {
+	pattern := `^https?://github.com/([^/]+)/([^/]+)(/tree/([^/]+))?/?$`
+	re := regexp.MustCompile(pattern)
+	match := re.FindStringSubmatch(url)
+
+	if len(match) < 3 {
+		return nil, errors.New("invalid GitHub URL: " + url)
+	}
+	var branch string
+	if len(match) > 4 && match[4] != "" {
+		branch = match[4]
+	}
+
+	repoURL := fmt.Sprintf("https://github.com/%s/%s", match[1], match[2])
+
+	repo := &types.Repository{
+		Url:    repoURL,
+		Branch: branch,
+		// we can add more fields here if needed
+	}
+
+	return repo, nil
 }
 
 func (g *GitHubGitProvider) GetUserData() (GitUser, error) {

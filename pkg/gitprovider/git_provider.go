@@ -21,7 +21,7 @@ type GitProvider interface {
 	GetUserData() (GitUser, error)
 	GetRepoBranches(types.Repository, string) ([]GitBranch, error)
 	GetRepoPRs(types.Repository, string) ([]GitPullRequest, error)
-	// ParseGitUrl(string) (*types.Repository, error)
+	ParseGitUrl(string) (*types.Repository, error)
 }
 
 type GitUser struct {
