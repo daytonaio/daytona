@@ -76,7 +76,7 @@ func (s *Service) RepositoryExists(project *serverapiclient.Project) (bool, erro
 	return true, nil
 }
 
-func (s *Service) SetGitConfig(userData *serverapiclient.GitUserData) error {
+func (s *Service) SetGitConfig(userData *serverapiclient.GitUser) error {
 	gitConfigFileName := s.GitConfigFileName
 
 	var gitConfigContent []byte

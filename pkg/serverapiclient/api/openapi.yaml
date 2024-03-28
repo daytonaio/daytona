@@ -7,10 +7,134 @@ info:
 servers:
 - url: http://localhost:3000/
 paths:
-  /gitprovider/{gitProviderId}/user-data:
+  /gitprovider:
+    put:
+      description: Set Git provider
+      operationId: SetGitProvider
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/GitProvider'
+        description: Git provider
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Set Git provider
+      tags:
+      - gitProvider
+      x-codegen-request-body-name: gitProviderData
+  /gitprovider/context/{gitUrl}:
     get:
       description: Get Git context
-      operationId: GetGitUserData
+      operationId: GetGitContext
+      parameters:
+      - description: Git URL
+        in: path
+        name: gitUrl
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GitRepository'
+          description: OK
+      summary: Get Git context
+      tags:
+      - gitProvider
+  /gitprovider/for-url/{url}:
+    get:
+      description: Get Git provider
+      operationId: GetGitProviderForUrl
+      parameters:
+      - description: Url
+        in: path
+        name: url
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GitProvider'
+          description: OK
+      summary: Get Git provider
+      tags:
+      - gitProvider
+  /gitprovider/username-from-token:
+    get:
+      description: Get username from token
+      operationId: GetGitUsernameFromToken
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/GitProvider'
+        description: Git provider
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: OK
+      summary: Get username from token
+      tags:
+      - gitProvider
+      x-codegen-request-body-name: gitProviderData
+  /gitprovider/{gitProviderId}:
+    delete:
+      description: Remove Git provider
+      operationId: RemoveGitProvider
+      parameters:
+      - description: Git provider
+        in: path
+        name: gitProviderId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Remove Git provider
+      tags:
+      - gitProvider
+  /gitprovider/{gitProviderId}/namespaces:
+    get:
+      description: Get Git namespaces
+      operationId: GetNamespaces
+      parameters:
+      - description: Git provider
+        in: path
+        name: gitProviderId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/GitNamespace'
+                type: array
+          description: OK
+      summary: Get Git namespaces
+      tags:
+      - gitProvider
+  /gitprovider/{gitProviderId}/user:
+    get:
+      description: Get Git context
+      operationId: GetGitUser
       parameters:
       - description: Git Provider Id
         in: path
@@ -23,9 +147,108 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GitUserData'
+                $ref: '#/components/schemas/GitUser'
           description: OK
       summary: Get Git context
+      tags:
+      - gitProvider
+  /gitprovider/{gitProviderId}/{namespaceId}/repositories:
+    get:
+      description: Get Git repositories
+      operationId: GetRepositories
+      parameters:
+      - description: Git provider
+        in: path
+        name: gitProviderId
+        required: true
+        schema:
+          type: string
+      - description: Namespace
+        in: path
+        name: namespaceId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/GitRepository'
+                type: array
+          description: OK
+      summary: Get Git repositories
+      tags:
+      - gitProvider
+  /gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/branches:
+    get:
+      description: Get Git repository branches
+      operationId: GetRepoBranches
+      parameters:
+      - description: Git provider
+        in: path
+        name: gitProviderId
+        required: true
+        schema:
+          type: string
+      - description: Namespace
+        in: path
+        name: namespaceId
+        required: true
+        schema:
+          type: string
+      - description: Repository
+        in: path
+        name: repositoryId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/GitBranch'
+                type: array
+          description: OK
+      summary: Get Git repository branches
+      tags:
+      - gitProvider
+  /gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/pull-requests:
+    get:
+      description: Get Git repository PRs
+      operationId: GetRepoPRs
+      parameters:
+      - description: Git provider
+        in: path
+        name: gitProviderId
+        required: true
+        schema:
+          type: string
+      - description: Namespace
+        in: path
+        name: namespaceId
+        required: true
+        schema:
+          type: string
+      - description: Repository
+        in: path
+        name: repositoryId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/GitPullRequest'
+                type: array
+          description: OK
+      summary: Get Git repository PRs
       tags:
       - gitProvider
   /provider:
@@ -137,27 +360,6 @@ paths:
       tags:
       - server
       x-codegen-request-body-name: config
-  /server/get-git-context/{gitUrl}:
-    get:
-      description: Get Git context
-      operationId: GetGitContext
-      parameters:
-      - description: Git URL
-        in: path
-        name: gitUrl
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Repository'
-          description: OK
-      summary: Get Git context
-      tags:
-      - server
   /server/network-key:
     post:
       description: Generate a new authentication key
@@ -419,7 +621,7 @@ components:
           type: string
         repositories:
           items:
-            $ref: '#/components/schemas/Repository'
+            $ref: '#/components/schemas/GitRepository'
           type: array
         target:
           type: string
@@ -435,6 +637,26 @@ components:
         port:
           type: integer
         protocol:
+          type: string
+      type: object
+    GitBranch:
+      example:
+        name: name
+        sha: sha
+      properties:
+        name:
+          type: string
+        sha:
+          type: string
+      type: object
+    GitNamespace:
+      example:
+        name: name
+        id: id
+      properties:
+        id:
+          type: string
+        name:
           type: string
       type: object
     GitProvider:
@@ -453,14 +675,61 @@ components:
         username:
           type: string
       type: object
-    GitUserData:
+    GitPullRequest:
       example:
         name: name
+        branch: branch
+      properties:
+        branch:
+          type: string
+        name:
+          type: string
+      type: object
+    GitRepository:
+      example:
+        owner: owner
+        path: path
+        name: name
+        id: id
+        source: source
+        prNumber: 0
+        branch: branch
+        sha: sha
+        url: url
+      properties:
+        branch:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+        owner:
+          type: string
+        path:
+          type: string
+        prNumber:
+          type: integer
+        sha:
+          type: string
+        source:
+          type: string
+        url:
+          type: string
+      type: object
+    GitUser:
+      example:
+        name: name
+        id: id
         email: email
+        username: username
       properties:
         email:
           type: string
+        id:
+          type: string
         name:
+          type: string
+        username:
           type: string
       type: object
     InstallProviderRequest:
@@ -502,7 +771,7 @@ components:
         name:
           type: string
         repository:
-          $ref: '#/components/schemas/Repository'
+          $ref: '#/components/schemas/GitRepository'
         target:
           type: string
         workspaceId:
@@ -562,37 +831,6 @@ components:
     ProviderTargetManifest:
       additionalProperties:
         $ref: '#/components/schemas/provider.ProviderTargetProperty'
-      type: object
-    Repository:
-      example:
-        owner: owner
-        path: path
-        name: name
-        id: id
-        source: source
-        prNumber: 0
-        branch: branch
-        sha: sha
-        url: url
-      properties:
-        branch:
-          type: string
-        id:
-          type: string
-        name:
-          type: string
-        owner:
-          type: string
-        path:
-          type: string
-        prNumber:
-          type: integer
-        sha:
-          type: string
-        source:
-          type: string
-        url:
-          type: string
       type: object
     ServerConfig:
       example:
