@@ -19,9 +19,9 @@ var _ MappedNullable = &CreateWorkspace{}
 
 // CreateWorkspace struct for CreateWorkspace
 type CreateWorkspace struct {
-	Name         *string      `json:"name,omitempty"`
-	Repositories []Repository `json:"repositories,omitempty"`
-	Target       *string      `json:"target,omitempty"`
+	Name         *string         `json:"name,omitempty"`
+	Repositories []GitRepository `json:"repositories,omitempty"`
+	Target       *string         `json:"target,omitempty"`
 }
 
 // NewCreateWorkspace instantiates a new CreateWorkspace object
@@ -74,9 +74,9 @@ func (o *CreateWorkspace) SetName(v string) {
 }
 
 // GetRepositories returns the Repositories field value if set, zero value otherwise.
-func (o *CreateWorkspace) GetRepositories() []Repository {
+func (o *CreateWorkspace) GetRepositories() []GitRepository {
 	if o == nil || IsNil(o.Repositories) {
-		var ret []Repository
+		var ret []GitRepository
 		return ret
 	}
 	return o.Repositories
@@ -84,7 +84,7 @@ func (o *CreateWorkspace) GetRepositories() []Repository {
 
 // GetRepositoriesOk returns a tuple with the Repositories field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CreateWorkspace) GetRepositoriesOk() ([]Repository, bool) {
+func (o *CreateWorkspace) GetRepositoriesOk() ([]GitRepository, bool) {
 	if o == nil || IsNil(o.Repositories) {
 		return nil, false
 	}
@@ -100,8 +100,8 @@ func (o *CreateWorkspace) HasRepositories() bool {
 	return false
 }
 
-// SetRepositories gets a reference to the given []Repository and assigns it to the Repositories field.
-func (o *CreateWorkspace) SetRepositories(v []Repository) {
+// SetRepositories gets a reference to the given []GitRepository and assigns it to the Repositories field.
+func (o *CreateWorkspace) SetRepositories(v []GitRepository) {
 	o.Repositories = v
 }
 

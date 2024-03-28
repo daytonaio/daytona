@@ -12,18 +12,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetGitUserData 			godoc
+// GetNamespaces 			godoc
 //
 //	@Tags			gitProvider
-//	@Summary		Get Git context
-//	@Description	Get Git context
+//	@Summary		Get Git namespaces
+//	@Description	Get Git namespaces
+//	@Param			gitProviderId	path	string	true	"Git provider"
 //	@Produce		json
-//	@Param			gitProviderId	path		string	true	"Git Provider Id"
-//	@Success		200				{object}	GitUserData
-//	@Router			/gitprovider/{gitProviderId}/user-data [get]
+//	@Success		200	{array}	GitNamespace
+//	@Router			/gitprovider/{gitProviderId}/namespaces [get]
 //
-//	@id				GetGitUserData
-func GetGitUserData(ctx *gin.Context) {
+//	@id				GetNamespaces
+func GetNamespaces(ctx *gin.Context) {
 	gitProviderId := ctx.Param("gitProviderId")
 
 	c, err := config.GetConfig()
@@ -38,11 +38,11 @@ func GetGitUserData(ctx *gin.Context) {
 		return
 	}
 
-	userData, err := gitProvider.GetUserData()
+	response, err := gitProvider.GetNamespaces()
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get user data: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get namespaces: %s", err.Error()))
 		return
 	}
 
-	ctx.JSON(200, userData)
+	ctx.JSON(200, response)
 }

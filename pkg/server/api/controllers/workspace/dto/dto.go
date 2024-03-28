@@ -8,7 +8,7 @@ import "github.com/daytonaio/daytona/pkg/types"
 type CreateWorkspace struct {
 	Name         string
 	Target       string
-	Repositories []types.Repository
+	Repositories []types.GitRepository
 } //	@name	CreateWorkspace
 
 type WorkspaceDTO struct {

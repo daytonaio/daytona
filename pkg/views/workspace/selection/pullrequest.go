@@ -7,21 +7,21 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectPullRequestPrompt(pullRequests []gitprovider.GitPullRequest, secondaryProjectOrder int, choiceChan chan<- string) {
+func selectPullRequestPrompt(pullRequests []serverapiclient.GitPullRequest, secondaryProjectOrder int, choiceChan chan<- string) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
 	for _, pr := range pullRequests {
-		newItem := item[string]{id: pr.Name, title: pr.Name, choiceProperty: pr.Name}
-		if pr.Branch != "" {
-			newItem.desc = fmt.Sprintf("Branch: %s", pr.Branch)
+		newItem := item[string]{id: *pr.Name, title: *pr.Name, choiceProperty: *pr.Name}
+		if *pr.Branch != "" {
+			newItem.desc = fmt.Sprintf("Branch: %s", *pr.Branch)
 		}
 		items = append(items, newItem)
 	}
@@ -46,7 +46,7 @@ func selectPullRequestPrompt(pullRequests []gitprovider.GitPullRequest, secondar
 	}
 }
 
-func GetPullRequestFromPrompt(pullRequests []gitprovider.GitPullRequest, secondaryProjectOrder int) gitprovider.GitPullRequest {
+func GetPullRequestFromPrompt(pullRequests []serverapiclient.GitPullRequest, secondaryProjectOrder int) serverapiclient.GitPullRequest {
 	choiceChan := make(chan string)
 
 	go selectPullRequestPrompt(pullRequests, secondaryProjectOrder, choiceChan)
@@ -54,9 +54,9 @@ func GetPullRequestFromPrompt(pullRequests []gitprovider.GitPullRequest, seconda
 	pullRequestName := <-choiceChan
 
 	for _, pr := range pullRequests {
-		if pr.Name == pullRequestName {
+		if *pr.Name == pullRequestName {
 			return pr
 		}
 	}
-	return gitprovider.GitPullRequest{}
+	return serverapiclient.GitPullRequest{}
 }

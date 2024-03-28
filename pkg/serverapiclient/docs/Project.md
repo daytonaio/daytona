@@ -5,7 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Name** | Pointer to **string** |  | [optional] 
-**Repository** | Pointer to [**Repository**](Repository.md) |  | [optional] 
+**Repository** | Pointer to [**GitRepository**](GitRepository.md) |  | [optional] 
 **Target** | Pointer to **string** |  | [optional] 
 **WorkspaceId** | Pointer to **string** |  | [optional] 
 
@@ -55,20 +55,20 @@ HasName returns a boolean if a field has been set.
 
 ### GetRepository
 
-`func (o *Project) GetRepository() Repository`
+`func (o *Project) GetRepository() GitRepository`
 
 GetRepository returns the Repository field if non-nil, zero value otherwise.
 
 ### GetRepositoryOk
 
-`func (o *Project) GetRepositoryOk() (*Repository, bool)`
+`func (o *Project) GetRepositoryOk() (*GitRepository, bool)`
 
 GetRepositoryOk returns a tuple with the Repository field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetRepository
 
-`func (o *Project) SetRepository(v Repository)`
+`func (o *Project) SetRepository(v GitRepository)`
 
 SetRepository sets Repository field to given value.
 

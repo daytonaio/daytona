@@ -81,11 +81,11 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 		gitProvider := gitprovider.GetGitProvider(providerId, userGitProviders)
 
 		if gitProvider != nil {
-			gitUser, err := gitProvider.GetUserData()
+			gitUser, err := gitProvider.GetUser()
 			if err != nil {
 				return nil, err
 			}
-			repo.GitUserData = &types.GitUserData{
+			repo.GitUser = &types.GitUser{
 				Name:  gitUser.Name,
 				Email: gitUser.Email,
 			}
