@@ -57,11 +57,11 @@ func CloneRepository(config *config.Config, project *serverapiclient.Project, au
 }
 
 func shouldCloneBranch(project *serverapiclient.Project) bool {
-	if project.Repository.Branch == nil {
+	if project.Repository.Branch == nil || *project.Repository.Branch == "" {
 		return false
 	}
 
-	if project.Repository.Sha == nil {
+	if project.Repository.Sha == nil || *project.Repository.Sha == "" {
 		return true
 	}
 

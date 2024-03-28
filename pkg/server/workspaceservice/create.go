@@ -89,6 +89,15 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 				Name:  gitUser.Name,
 				Email: gitUser.Email,
 			}
+
+			parsedRepo, err := gitProvider.ParseGitUrl(repo.Url)
+
+			if err != nil {
+				return nil, err
+			}
+
+			repo.Url = parsedRepo.Url
+			repo.Branch = parsedRepo.Branch
 		}
 
 		projectNameSlugRegex := regexp.MustCompile(`[^a-zA-Z0-9-]`)

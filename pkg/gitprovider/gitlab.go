@@ -4,7 +4,10 @@
 package gitprovider
 
 import (
+	"errors"
+	"fmt"
 	"log"
+	"regexp"
 	"strconv"
 
 	"github.com/daytonaio/daytona/pkg/types"
@@ -122,6 +125,32 @@ func (g *GitLabGitProvider) GetRepoPRs(repo types.Repository, namespaceId string
 	}
 
 	return response, nil
+}
+
+func (g *GitLabGitProvider) ParseGitUrl(url string) (*types.Repository, error) {
+	pattern := `^https?://gitlab.com/([^/]+)/([^/]+)(?:/-/tree/([^/]+))?/?$`
+
+	re := regexp.MustCompile(pattern)
+	match := re.FindStringSubmatch(url)
+
+	if len(match) < 3 {
+		return nil, errors.New("invalid GitLab URL: " + url)
+	}
+
+	var branch string
+
+	if len(match) > 3 {
+		branch = match[3]
+	}
+
+	repoURL := fmt.Sprintf("https://gitlab.com/%s/%s", match[1], match[2])
+
+	repo := &types.Repository{
+		Url:    repoURL,
+		Branch: branch,
+	}
+
+	return repo, nil
 }
 
 func (g *GitLabGitProvider) GetUserData() (GitUser, error) {

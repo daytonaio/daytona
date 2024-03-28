@@ -173,6 +173,10 @@ func (g *GiteaGitProvider) GetRepoPRs(repo types.Repository, namespaceId string)
 	return response, nil
 }
 
+func (g *GiteaGitProvider) ParseGitUrl(url string) (*types.Repository, error) {
+	return nil, nil
+}
+
 func (g *GiteaGitProvider) GetUserData() (GitUser, error) {
 	client, err := g.getApiClient()
 	if err != nil {
