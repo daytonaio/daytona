@@ -71,7 +71,7 @@ var baseStyle = lipgloss.NewStyle().
 	Padding(0, 1).MarginBottom(1)
 
 func (m model) View() string {
-	return baseStyle.Render(m.table.View())
+	return baseStyle.Render(m.table.View()) + "\n"
 }
 
 func renderApiKeyList(apiKeyList []*types.ApiKey, selectable bool) model {
