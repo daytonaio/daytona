@@ -5,12 +5,12 @@ package workspace
 
 import (
 	"context"
-	"os/exec"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	"github.com/daytonaio/daytona/pkg/ide"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
 	log "github.com/sirupsen/logrus"
@@ -72,19 +72,7 @@ var SshCmd = &cobra.Command{
 			projectName = args[1]
 		}
 
-		err = config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
-
-		sshCommand := exec.Command("ssh", projectHostname)
-		sshCommand.Stdin = cmd.InOrStdin()
-		sshCommand.Stdout = cmd.OutOrStdout()
-		sshCommand.Stderr = cmd.ErrOrStderr()
-
-		err = sshCommand.Run()
+		err = ide.OpenTerminalSsh(activeProfile, workspaceId, projectName)
 		if err != nil {
 			log.Fatal(err)
 		}
