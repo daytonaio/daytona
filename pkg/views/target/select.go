@@ -13,11 +13,12 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	view_util "github.com/daytonaio/daytona/pkg/views/util"
 )
 
 const NewTargetName = "+ New Target"
 
-func GetTargetFromPrompt(targets []serverapiclient.ProviderTarget, withNewTarget bool) (*serverapiclient.ProviderTarget, error) {
+func GetTargetFromPrompt(targets []serverapiclient.ProviderTarget, activeProfileName string, withNewTarget bool) (*serverapiclient.ProviderTarget, error) {
 	items := util.ArrayMap(targets, func(t serverapiclient.ProviderTarget) list.Item {
 		return item{
 			target: t,
@@ -38,6 +39,7 @@ func GetTargetFromPrompt(targets []serverapiclient.ProviderTarget, withNewTarget
 	l := views.GetStyledSelectList(items)
 	m := model{list: l}
 	m.list.Title = "CHOOSE A TARGET"
+	m.footer = view_util.GetListFooter(activeProfileName)
 
 	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
 	if err != nil {

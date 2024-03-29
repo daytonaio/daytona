@@ -6,17 +6,18 @@ package selection
 import (
 	"fmt"
 	"io"
+	"log"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/views"
+	view_util "github.com/daytonaio/daytona/pkg/views/util"
 )
 
 var CustomRepoIdentifier = "<CUSTOM_REPO>"
-
-var docStyle = lipgloss.NewStyle().Margin(1, 2)
 
 type item[T any] struct {
 	id, title, desc, createdTime, statusTime, target string
@@ -34,6 +35,7 @@ func (i item[T]) Target() string      { return i.target }
 type model[T any] struct {
 	list   list.Model
 	choice *T
+	footer string
 }
 
 func (m model[T]) Init() tea.Cmd {
@@ -55,7 +57,7 @@ func (m model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	case tea.WindowSizeMsg:
-		h, v := docStyle.GetFrameSize()
+		h, v := view_util.DocStyle.GetFrameSize()
 		m.list.SetSize(msg.Width-h, msg.Height-v)
 	}
 
@@ -65,7 +67,20 @@ func (m model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model[T]) View() string {
-	return docStyle.Render(m.list.View())
+	if m.footer == "" {
+		c, err := config.GetConfig()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		activeProfile, err := c.GetActiveProfile()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		m.footer = view_util.GetListFooter(activeProfile.Name)
+	}
+	return view_util.DocStyle.Render(m.list.View() + m.footer)
 }
 
 type ItemDelegate[T any] struct {

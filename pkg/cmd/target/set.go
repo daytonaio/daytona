@@ -6,6 +6,7 @@ package target
 import (
 	"context"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	internal_util "github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
@@ -24,6 +25,16 @@ var targetSetCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Aliases: []string{"s"},
 	Run: func(cmd *cobra.Command, args []string) {
+		c, err := config.GetConfig()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		activeProfile, err := c.GetActiveProfile()
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		pluginList, err := server.GetProviderList()
 		if err != nil {
 			log.Fatal(err)
@@ -47,7 +58,7 @@ var targetSetCmd = &cobra.Command{
 			}
 		}
 
-		selectedTarget, err := target.GetTargetFromPrompt(filteredTargets, true)
+		selectedTarget, err := target.GetTargetFromPrompt(filteredTargets, activeProfile.Name, true)
 		if err != nil {
 			log.Fatal(err)
 		}
