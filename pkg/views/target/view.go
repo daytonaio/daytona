@@ -6,11 +6,9 @@ package target
 import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	view_util "github.com/daytonaio/daytona/pkg/views/util"
 )
-
-var docStyle = lipgloss.NewStyle().Margin(1, 2)
 
 type item struct {
 	target serverapiclient.ProviderTarget
@@ -28,6 +26,7 @@ func (i item) FilterValue() string { return *i.target.Name }
 type model struct {
 	list   list.Model
 	choice *serverapiclient.ProviderTarget
+	footer string
 }
 
 func (m model) Init() tea.Cmd {
@@ -49,7 +48,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	case tea.WindowSizeMsg:
-		h, v := docStyle.GetFrameSize()
+		h, v := view_util.DocStyle.GetFrameSize()
 		m.list.SetSize(msg.Width-h, msg.Height-v)
 	}
 
@@ -59,5 +58,5 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	return docStyle.Render(m.list.View())
+	return view_util.DocStyle.Render(m.list.View() + m.footer)
 }
