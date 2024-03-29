@@ -10,7 +10,7 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/provider/manager"
+	"github.com/daytonaio/daytona/pkg/server/provider/manager"
 	"github.com/daytonaio/daytona/pkg/server/api"
 	"github.com/daytonaio/daytona/pkg/server/config"
 	"github.com/daytonaio/daytona/pkg/server/frpc"

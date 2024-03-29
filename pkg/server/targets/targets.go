@@ -5,7 +5,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/daytonaio/daytona/pkg/provider"
+	"github.com/daytonaio/daytona/pkg/server/provider"
 	"github.com/daytonaio/daytona/pkg/server/config"
 )
 

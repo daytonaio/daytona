@@ -8,7 +8,7 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/cmd/output"
-	list_view "github.com/daytonaio/daytona/pkg/views/target/list"
+	list_view "github.com/daytonaio/daytona/pkg/views/server/target/list"
 	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 )

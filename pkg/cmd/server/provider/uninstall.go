@@ -9,7 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
-	"github.com/daytonaio/daytona/pkg/views/provider"
+	"github.com/daytonaio/daytona/pkg/views/server/provider"
 	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 

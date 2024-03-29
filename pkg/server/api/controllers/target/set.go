@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/daytonaio/daytona/pkg/provider"
+	"github.com/daytonaio/daytona/pkg/server/provider"
 	"github.com/daytonaio/daytona/pkg/server/targets"
 	"github.com/gin-gonic/gin"
 )

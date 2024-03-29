@@ -13,6 +13,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/frpc"
 	"github.com/daytonaio/daytona/pkg/types"
 	"github.com/daytonaio/daytona/pkg/views/util"
+	. "github.com/daytonaio/daytona/pkg/cmd/server/target"
+	. "github.com/daytonaio/daytona/pkg/cmd/server/provider"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -82,6 +84,8 @@ func printServerStartedMessage(c *types.ServerConfig) {
 
 func init() {
 	ServerCmd.PersistentFlags().BoolVarP(&runAsDaemon, "daemon", "d", false, "Run the server as a daemon")
+	ServerCmd.AddCommand(TargetCmd)
+	ServerCmd.AddCommand(ProviderCmd)
 	ServerCmd.AddCommand(configureCmd)
 	ServerCmd.AddCommand(configCmd)
 	ServerCmd.AddCommand(logsCmd)

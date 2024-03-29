@@ -14,7 +14,7 @@ import (
 	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/util"
 	os_util "github.com/daytonaio/daytona/pkg/os"
-	. "github.com/daytonaio/daytona/pkg/provider"
+	. "github.com/daytonaio/daytona/pkg/server/provider"
 	"github.com/daytonaio/daytona/pkg/server/targets"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"

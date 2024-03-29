@@ -168,7 +168,7 @@ Follow the steps provided.
 __3. Add Your Provider Target:__
 This step is for choosing where to deploy Development Environments. By default, Daytona includes a Docker provider to spin up environments on your local machine. For remote development environments, use the command:
 ```bash
-daytona target set
+daytona server target set
 ```
 Following the steps this command adds SSH machines to your targets.
 

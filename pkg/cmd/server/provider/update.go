@@ -8,9 +8,9 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
-	"github.com/daytonaio/daytona/pkg/provider/manager"
+	"github.com/daytonaio/daytona/pkg/server/provider/manager"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
-	"github.com/daytonaio/daytona/pkg/views/provider"
+	"github.com/daytonaio/daytona/pkg/views/server/provider"
 	"github.com/spf13/cobra"
 
 	log "github.com/sirupsen/logrus"
