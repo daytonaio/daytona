@@ -137,6 +137,15 @@ func EnsureSshConfigEntryAdded(profileId, workspaceName, projectName string) err
 
 	sshDir := filepath.Join(sshHomeDir, ".ssh")
 	configPath := filepath.Join(sshDir, "daytona_config")
+	_, err = os.Stat(configPath)
+	if os.IsNotExist(err) {
+		err = os.WriteFile(configPath, []byte{}, 0600)
+		if err != nil {
+			return err
+		}
+	}  else if err != nil {
+		return err
+	}
 
 	// Read existing content from the file
 	existingContent, err := os.ReadFile(configPath)
