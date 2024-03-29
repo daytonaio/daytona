@@ -15,13 +15,17 @@ import (
 var sshHomeDir string
 
 func ensureSshFilesLinked() error {
-	// Make sure ~/.ssh/config file exists
+	// Make sure ~/.ssh/config file exists if not create it
 	sshDir := filepath.Join(sshHomeDir, ".ssh")
 	configPath := filepath.Join(sshDir, "config")
 
 	_, err := os.Stat(configPath)
 	if os.IsNotExist(err) {
-		err := os.WriteFile(configPath, []byte{}, 0600)
+		err := os.MkdirAll(sshDir, 0700)
+		if err != nil {
+			return err
+		}
+		err = os.WriteFile(configPath, []byte{}, 0600)
 		if err != nil {
 			return err
 		}
