@@ -152,8 +152,8 @@ var CreateCmd = &cobra.Command{
 		fmt.Println()
 		info.Render(wsInfo)
 
-		connectFlag, _ := cmd.Flags().GetBool("connect")
-		if !connectFlag {
+		codeFlag, _ := cmd.Flags().GetBool("code")
+		if !codeFlag {
 			return
 		}
 
@@ -181,7 +181,7 @@ func init() {
 	CreateCmd.Flags().StringVarP(&targetNameFlag, "target", "t", "", "Specify the target (e.g. 'local')")
 	CreateCmd.Flags().Bool("manual", false, "Manually enter the git repositories")
 	CreateCmd.Flags().Bool("multi-project", false, "Workspace with multiple projects/repos")
-	CreateCmd.Flags().Bool("connect", false, "Open the workspace in the IDE after workspace creation")
+	CreateCmd.Flags().BoolP("code", "c", false, "Open the workspace in the IDE after workspace creation")
 }
 
 func getTarget() (*serverapiclient.ProviderTarget, error) {
