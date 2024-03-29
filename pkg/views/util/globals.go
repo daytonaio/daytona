@@ -10,6 +10,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
+var DocStyle = lipgloss.NewStyle().Margin(3, 2, 1, 2)
+
 func RenderMainTitle(title string) {
 	fmt.Println(lipgloss.NewStyle().Foreground(views.Green).Bold(true).Padding(1, 0, 1, 0).Render(title))
 }
@@ -28,6 +30,10 @@ func RenderListLine(message string) {
 
 func RenderInfoMessageBold(message string) {
 	fmt.Println(lipgloss.NewStyle().Bold(true).Padding(1, 0, 1, 1).Render(message))
+}
+
+func GetListFooter(profileName string) string {
+	return lipgloss.NewStyle().Bold(true).PaddingLeft(2).Render("\n\nActive profile: " + profileName)
 }
 
 func RenderBorderedMessage(message string) {
