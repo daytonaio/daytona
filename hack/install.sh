@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script downloads the Daytona server binary and installs it to /usr/local/bin
+# This script downloads the Daytona binary and installs it to /usr/local/bin
 # You can set the environment variable DAYTONA_SERVER_VERSION to specify the version to download
 # You can set the environment variable DAYTONA_SERVER_DOWNLOAD_URL to specify the base URL to download from
 # You can set the environment variable DAYTONA_PATH to specify the path where to install the binary
@@ -74,9 +74,9 @@ fi
 
 DOWNLOAD_URL="$BASE_URL/$VERSION/daytona-$FILENAME"
 
-echo -e "\nDownloading server from $DOWNLOAD_URL"
+echo -e "\nDownloading Daytona binary from $DOWNLOAD_URL"
 
-# Create a temporary file to download the server binary. Just in case the user
+# Create a temporary file to download the Daytona binary. Just in case the user
 # has file named "daytona" in the current directory.
 temp_file="daytona-$RANDOM"
 
@@ -94,7 +94,7 @@ trap 'rm -f "$temp_file"' EXIT
 # -L, --location: Follow redirects.
 # -o, --output <file>: Write output to <file> instead of stdout.
 if ! curl -fsSL "$DOWNLOAD_URL" -o "$temp_file"; then
-  err "Daytona server download failed"
+  err "Daytona binary download failed"
 fi
 chmod +x "$temp_file"
 
