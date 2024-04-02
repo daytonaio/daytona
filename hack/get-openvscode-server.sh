@@ -1,3 +1,6 @@
+# Copyright 2024 Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 RELEASE_TAG="v1.86.2"
 RELEASE_ORG="gitpod-io"
 OPENVSCODE_SERVER_ROOT="$HOME/vscode-server"

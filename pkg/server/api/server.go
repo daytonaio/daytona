@@ -1,3 +1,6 @@
+// Copyright 2024 Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
 //	@title			Daytona Server API
 //	@version		0.1.0
 //	@description	Daytona Server API

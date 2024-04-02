@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright 2024 Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 # This script downloads the Daytona binary and installs it to /usr/local/bin
 # You can set the environment variable DAYTONA_SERVER_VERSION to specify the version to download
 # You can set the environment variable DAYTONA_SERVER_DOWNLOAD_URL to specify the base URL to download from
