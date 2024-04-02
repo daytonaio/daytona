@@ -54,9 +54,9 @@ esac
 
 DOWNLOAD_URL="$BASE_URL/$VERSION/daytona-$FILENAME"
 
-echo -e "\nDownloading server from $DOWNLOAD_URL"
+echo -e "\nDownloading Daytona binary from $DOWNLOAD_URL"
 
-# Create a temporary file to download the server binary. Just in case the user
+# Create a temporary file to download the Daytona binary. Just in case the user
 # has file named "daytona" in the current directory.
 temp_file="daytona-$RANDOM"
 
@@ -64,7 +64,7 @@ temp_file="daytona-$RANDOM"
 trap 'rm -f "$temp_file"' EXIT
 
 if ! curl -fsSL "$DOWNLOAD_URL" -H "Authorization: Bearer $DAYTONA_SERVER_API_KEY" -o "$temp_file"; then
-  err "Daytona server download failed"
+  err "Daytona binary download failed"
 fi
 chmod +x "$temp_file"
 
