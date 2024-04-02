@@ -26,7 +26,7 @@ var targetListCmd = &cobra.Command{
 
 		if len(targets) == 0 {
 			view_util.RenderInfoMessageBold("No targets found")
-			view_util.RenderInfoMessage("Use 'daytona target set' to add a target")
+			view_util.RenderInfoMessage("Use 'daytona server target set' to add a target")
 			return
 		}
 
