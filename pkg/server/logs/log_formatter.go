@@ -15,12 +15,12 @@ import (
 var logFilePath *string
 
 type logFormatter struct {
-	textFormater *log.TextFormatter
-	file         *os.File
+	textFormatter *log.TextFormatter
+	file          *os.File
 }
 
 func (f *logFormatter) Format(entry *log.Entry) ([]byte, error) {
-	formatted, err := f.textFormater.Format(entry)
+	formatted, err := f.textFormatter.Format(entry)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func Init() error {
 	}
 
 	logFormatter := &logFormatter{
-		textFormater: &log.TextFormatter{
+		textFormatter: &log.TextFormatter{
 			ForceColors: true,
 		},
 		file: file,
