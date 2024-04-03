@@ -1,3 +1,6 @@
+// Copyright 2024 Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
 package util
 
 func ArrayMap[T, U any](data []T, f func(T) U) []U {
