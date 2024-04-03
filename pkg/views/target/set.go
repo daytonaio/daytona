@@ -163,6 +163,7 @@ func getInput(name string, property serverapiclient.ProviderProviderTargetProper
 
 	return huh.NewInput().
 		Title(name).
+		Description(*property.Description).
 		Value(value).
 		Password(property.InputMasked != nil && *property.InputMasked).
 		Validate(func(s string) error {
@@ -186,6 +187,7 @@ func getSelect(name string, property serverapiclient.ProviderProviderTargetPrope
 
 	return huh.NewSelect[string]().
 		Title(name).
+		Description(*property.Description).
 		Options(util.ArrayMap(property.Options, func(o string) huh.Option[string] {
 			return huh.NewOption(o, o)
 		})...).
@@ -203,6 +205,7 @@ func getConfirm(name string, property serverapiclient.ProviderProviderTargetProp
 
 	return huh.NewConfirm().
 		Title(name).
+		Description(*property.Description).
 		Value(&value), &value
 }
 
@@ -233,6 +236,7 @@ func getFilePicker(name string, property serverapiclient.ProviderProviderTargetP
 
 	customPathInput := huh.NewInput().
 		Title(name).
+		Description(*property.Description).
 		Validate(func(filePath string) error {
 			fileInfo, err := os.Stat(filePath)
 			if os.IsNotExist(err) {

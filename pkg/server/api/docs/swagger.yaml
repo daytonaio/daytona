@@ -200,6 +200,9 @@ definitions:
           DefaultValue is converted into the appropriate type based on the Type
           If the property is a FilePath, the DefaultValue is a path to a directory
         type: string
+      description:
+        description: Brief description of the property
+        type: string
       disabledPredicate:
         description: |-
           A regex string matched with the name of the target to determine if the property should be disabled

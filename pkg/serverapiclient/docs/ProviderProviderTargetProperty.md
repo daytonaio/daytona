@@ -5,6 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **DefaultValue** | Pointer to **string** | DefaultValue is converted into the appropriate type based on the Type If the property is a FilePath, the DefaultValue is a path to a directory | [optional] 
+**Description** | Pointer to **string** | Brief description of the property | [optional] 
 **DisabledPredicate** | Pointer to **string** | A regex string matched with the name of the target to determine if the property should be disabled If the regex matches the target name, the property will be disabled E.g. \&quot;^local$\&quot; will disable the property for the local target | [optional] 
 **InputMasked** | Pointer to **bool** |  | [optional] 
 **Options** | Pointer to **[]string** | Options is only used if the Type is ProviderTargetPropertyTypeOption | [optional] 
@@ -53,6 +54,31 @@ SetDefaultValue sets DefaultValue field to given value.
 `func (o *ProviderProviderTargetProperty) HasDefaultValue() bool`
 
 HasDefaultValue returns a boolean if a field has been set.
+
+### GetDescription
+
+`func (o *ProviderProviderTargetProperty) GetDescription() string`
+
+GetDescription returns the Description field if non-nil, zero value otherwise.
+
+### GetDescriptionOk
+
+`func (o *ProviderProviderTargetProperty) GetDescriptionOk() (*string, bool)`
+
+GetDescriptionOk returns a tuple with the Description field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetDescription
+
+`func (o *ProviderProviderTargetProperty) SetDescription(v string)`
+
+SetDescription sets Description field to given value.
+
+### HasDescription
+
+`func (o *ProviderProviderTargetProperty) HasDescription() bool`
+
+HasDescription returns a boolean if a field has been set.
 
 ### GetDisabledPredicate
 

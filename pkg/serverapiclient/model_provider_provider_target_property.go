@@ -21,6 +21,8 @@ var _ MappedNullable = &ProviderProviderTargetProperty{}
 type ProviderProviderTargetProperty struct {
 	// DefaultValue is converted into the appropriate type based on the Type If the property is a FilePath, the DefaultValue is a path to a directory
 	DefaultValue *string `json:"defaultValue,omitempty"`
+	// Brief description of the property
+	Description *string `json:"description,omitempty"`
 	// A regex string matched with the name of the target to determine if the property should be disabled If the regex matches the target name, the property will be disabled E.g. \"^local$\" will disable the property for the local target
 	DisabledPredicate *string `json:"disabledPredicate,omitempty"`
 	InputMasked       *bool   `json:"inputMasked,omitempty"`
@@ -76,6 +78,38 @@ func (o *ProviderProviderTargetProperty) HasDefaultValue() bool {
 // SetDefaultValue gets a reference to the given string and assigns it to the DefaultValue field.
 func (o *ProviderProviderTargetProperty) SetDefaultValue(v string) {
 	o.DefaultValue = &v
+}
+
+// GetDescription returns the Description field value if set, zero value otherwise.
+func (o *ProviderProviderTargetProperty) GetDescription() string {
+	if o == nil || IsNil(o.Description) {
+		var ret string
+		return ret
+	}
+	return *o.Description
+}
+
+// GetDescriptionOk returns a tuple with the Description field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ProviderProviderTargetProperty) GetDescriptionOk() (*string, bool) {
+	if o == nil || IsNil(o.Description) {
+		return nil, false
+	}
+	return o.Description, true
+}
+
+// HasDescription returns a boolean if a field has been set.
+func (o *ProviderProviderTargetProperty) HasDescription() bool {
+	if o != nil && !IsNil(o.Description) {
+		return true
+	}
+
+	return false
+}
+
+// SetDescription gets a reference to the given string and assigns it to the Description field.
+func (o *ProviderProviderTargetProperty) SetDescription(v string) {
+	o.Description = &v
 }
 
 // GetDisabledPredicate returns the DisabledPredicate field value if set, zero value otherwise.
@@ -218,6 +252,9 @@ func (o ProviderProviderTargetProperty) ToMap() (map[string]interface{}, error) 
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.DefaultValue) {
 		toSerialize["defaultValue"] = o.DefaultValue
+	}
+	if !IsNil(o.Description) {
+		toSerialize["description"] = o.Description
 	}
 	if !IsNil(o.DisabledPredicate) {
 		toSerialize["disabledPredicate"] = o.DisabledPredicate
