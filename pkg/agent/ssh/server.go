@@ -13,7 +13,6 @@ import (
 	"unsafe"
 
 	"github.com/creack/pty"
-	"github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/gliderlabs/ssh"
 	"github.com/pkg/sftp"
 	crypto_ssh "golang.org/x/crypto/ssh"
@@ -22,28 +21,33 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func Start() {
+type Server struct {
+	ProjectDir        string
+	DefaultProjectDir string
+}
+
+func (s *Server) Start() error {
 	forwardedTCPHandler := &ssh.ForwardedTCPHandler{}
 
 	sshServer := ssh.Server{
 		Addr: ":2222",
-		Handler: func(s ssh.Session) {
-			switch ss := s.Subsystem(); ss {
+		Handler: func(session ssh.Session) {
+			switch ss := session.Subsystem(); ss {
 			case "":
 			case "sftp":
-				sftpHandler(s)
+				s.sftpHandler(session)
 				return
 			default:
-				fmt.Fprintf(s, "Subsystem %s not supported\n", ss)
-				s.Exit(1)
+				fmt.Fprintf(session, "Subsystem %s not supported\n", ss)
+				session.Exit(1)
 				return
 			}
 
-			ptyReq, winCh, isPty := s.Pty()
-			if s.RawCommand() == "" && isPty {
-				handlePty(s, ptyReq, winCh)
+			ptyReq, winCh, isPty := session.Pty()
+			if session.RawCommand() == "" && isPty {
+				s.handlePty(session, ptyReq, winCh)
 			} else {
-				handleNonPty(s)
+				s.handleNonPty(session)
 			}
 		},
 		ChannelHandlers: map[string]ssh.ChannelHandler{
@@ -57,7 +61,7 @@ func Start() {
 			"cancel-tcpip-forward": forwardedTCPHandler.HandleSSHRequest,
 		},
 		SubsystemHandlers: map[string]ssh.SubsystemHandler{
-			"sftp": sftpHandler,
+			"sftp": s.sftpHandler,
 		},
 		LocalPortForwardingCallback: ssh.LocalPortForwardingCallback(func(ctx ssh.Context, dhost string, dport uint32) bool {
 			return true
@@ -71,32 +75,26 @@ func Start() {
 	}
 
 	log.Println("starting ssh server on port 2222...")
-	log.Fatal(sshServer.ListenAndServe())
+	return sshServer.ListenAndServe()
 }
 
-func handlePty(s ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh.Window) {
-	c, err := config.GetConfig()
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-
-	shell := getShell()
+func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh.Window) {
+	shell := s.getShell()
 	cmd := exec.Command(shell)
 
-	cmd.Dir = c.ProjectDir
+	cmd.Dir = s.ProjectDir
 
-	if _, err := os.Stat(c.ProjectDir); os.IsNotExist(err) {
-		cmd.Dir = os.Getenv("HOME")
+	if _, err := os.Stat(s.ProjectDir); os.IsNotExist(err) {
+		cmd.Dir = s.DefaultProjectDir
 	}
 
-	if ssh.AgentRequested(s) {
+	if ssh.AgentRequested(session) {
 		l, err := ssh.NewAgentListener()
 		if err != nil {
 			fmt.Println("#5", err.Error())
 		}
 		defer l.Close()
-		go ssh.ForwardAgentConnections(l, s)
+		go ssh.ForwardAgentConnections(l, session)
 		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", "SSH_AUTH_SOCK", l.Addr().String()))
 	}
 
@@ -115,46 +113,40 @@ func handlePty(s ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh.Window) {
 		}
 	}()
 	go func() {
-		io.Copy(f, s) // stdin
+		io.Copy(f, session) // stdin
 	}()
-	io.Copy(s, f) // stdout
+	io.Copy(session, f) // stdout
 }
 
-func handleNonPty(s ssh.Session) {
+func (s *Server) handleNonPty(session ssh.Session) {
 	args := []string{}
-	if len(s.Command()) > 0 {
-		args = append([]string{"-c"}, s.RawCommand())
+	if len(session.Command()) > 0 {
+		args = append([]string{"-c"}, session.RawCommand())
 	}
 
 	fmt.Println("args: ", args)
-
-	c, err := config.GetConfig()
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
 
 	cmd := exec.Command("/bin/sh", args...)
 
 	cmd.Env = append(cmd.Env, os.Environ()...)
 
-	if ssh.AgentRequested(s) {
+	if ssh.AgentRequested(session) {
 		l, err := ssh.NewAgentListener()
 		if err != nil {
 			fmt.Println("#4", err.Error())
 		}
 		defer l.Close()
-		go ssh.ForwardAgentConnections(l, s)
+		go ssh.ForwardAgentConnections(l, session)
 		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", "SSH_AUTH_SOCK", l.Addr().String()))
 	}
 
-	cmd.Dir = c.ProjectDir
-	if _, err := os.Stat(c.ProjectDir); os.IsNotExist(err) {
-		cmd.Dir = os.Getenv("HOME")
+	cmd.Dir = s.ProjectDir
+	if _, err := os.Stat(s.ProjectDir); os.IsNotExist(err) {
+		cmd.Dir = s.DefaultProjectDir
 	}
 
-	cmd.Stdout = s
-	cmd.Stderr = s.Stderr()
+	cmd.Stdout = session
+	cmd.Stderr = session.Stderr()
 	stdinPipe, err := cmd.StdinPipe()
 	if err != nil {
 		//	TODO: handle error
@@ -162,7 +154,7 @@ func handleNonPty(s ssh.Session) {
 		return
 	}
 	go func() {
-		_, err := io.Copy(stdinPipe, s)
+		_, err := io.Copy(stdinPipe, session)
 		if err != nil {
 			//	TODO: handle error
 			log.Println("#2", err)
@@ -177,14 +169,14 @@ func handleNonPty(s ssh.Session) {
 		return
 	}
 	sigs := make(chan ssh.Signal, 1)
-	s.Signals(sigs)
+	session.Signals(sigs)
 	defer func() {
-		s.Signals(nil)
+		session.Signals(nil)
 		close(sigs)
 	}()
 	go func() {
 		for sig := range sigs {
-			signal := osSignalFrom(sig)
+			signal := s.osSignalFrom(sig)
 			err := cmd.Process.Signal(signal)
 			if err != nil {
 				log.Println("signal error: ", err)
@@ -194,20 +186,20 @@ func handleNonPty(s ssh.Session) {
 	err = cmd.Wait()
 
 	if err != nil {
-		log.Println(s.RawCommand(), " ", err)
-		s.Exit(127)
+		log.Println(session.RawCommand(), " ", err)
+		session.Exit(127)
 		return
 	}
 
-	err = s.Exit(0)
+	err = session.Exit(0)
 	if err != nil {
 		//	TODO: handle error
 		log.Println("exit error: ", err)
 	}
-	log.Println(s.RawCommand(), " command exited successfully")
+	log.Println(session.RawCommand(), " command exited successfully")
 }
 
-func osSignalFrom(sig ssh.Signal) os.Signal {
+func (s *Server) osSignalFrom(sig ssh.Signal) os.Signal {
 	switch sig {
 	case ssh.SIGABRT:
 		return unix.SIGABRT
@@ -242,7 +234,7 @@ func osSignalFrom(sig ssh.Signal) os.Signal {
 	}
 }
 
-func getShell() string {
+func (s *Server) getShell() string {
 	out, err := exec.Command("sh", "-c", "grep '^[^#]' /etc/shells").Output()
 	if err != nil {
 		return "sh"
@@ -273,13 +265,13 @@ func getShell() string {
 	return "sh"
 }
 
-func sftpHandler(sess ssh.Session) {
+func (s *Server) sftpHandler(session ssh.Session) {
 	debugStream := io.Discard
 	serverOptions := []sftp.ServerOption{
 		sftp.WithDebug(debugStream),
 	}
 	server, err := sftp.NewServer(
-		sess,
+		session,
 		serverOptions...,
 	)
 	if err != nil {
