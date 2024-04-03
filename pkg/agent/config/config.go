@@ -12,14 +12,16 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type DaytonaServerConfig struct {
+	Url    string `envconfig:"DAYTONA_SERVER_URL" validate:"required"`
+	ApiKey string `envconfig:"DAYTONA_SERVER_API_KEY" validate:"required"`
+}
+
 type Config struct {
 	ProjectDir  string `envconfig:"DAYTONA_WS_DIR" validate:"required"`
 	ProjectName string `envconfig:"DAYTONA_WS_PROJECT_NAME" validate:"required"`
 	WorkspaceId string `envconfig:"DAYTONA_WS_ID" validate:"required"`
-	Server      struct {
-		Url    string `envconfig:"DAYTONA_SERVER_URL" validate:"required"`
-		ApiKey string `envconfig:"DAYTONA_SERVER_API_KEY" validate:"required"`
-	}
+	Server      DaytonaServerConfig
 }
 
 var config *Config
