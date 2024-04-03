@@ -1,7 +1,3 @@
-<div align="center"><a href="https://go.daytona.io/ph"><img src="https://github.com/daytonaio/daytona/raw/main/assets/images/ph-readme.png"></a></div>
-
-<br/>
-
 <div align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://github.com/daytonaio/daytona/raw/main/assets/images/Daytona-logotype-white.png">
@@ -20,6 +16,11 @@
 [![Open Bounties](https://img.shields.io/endpoint?url=https%3A%2F%2Fconsole.algora.io%2Fapi%2Fshields%2Fdaytonaio%2Fbounties%3Fstatus%3Dopen)](https://console.algora.io/org/daytonaio/bounties?status=open)
 [![Rewarded Bounties](https://img.shields.io/endpoint?url=https%3A%2F%2Fconsole.algora.io%2Fapi%2Fshields%2Fdaytonaio%2Fbounties%3Fstatus%3Dcompleted)](https://console.algora.io/org/daytonaio/bounties?status=completed)
 
+<br>
+
+<a href="https://www.producthunt.com/posts/daytona?utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-daytona" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=445392&theme=light&period=daily" alt="Daytona - Dev&#0032;environment&#0032;manager&#0032;that&#0032;makes&#0032;you&#0032;2x&#0032;more&#0032;productive | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+<a href="https://www.producthunt.com/posts/daytona?utm_source=badge-top-post-topic-badge&utm_medium=badge&utm_souce=badge-daytona" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-topic-badge.svg?post_id=445392&theme=light&period=weekly&topic_id=267" alt="Daytona - Dev&#0032;environment&#0032;manager&#0032;that&#0032;makes&#0032;you&#0032;2x&#0032;more&#0032;productive | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+
 </div>
 
 
@@ -37,10 +38,10 @@ Set up a development environment on any infrastructure, with a single command.
     ·
   <a href="https://join.slack.com/t/daytonacommunity/shared_invite/zt-273yohksh-Q5YSB5V7tnQzX2RoTARr7Q">Join Our Slack</a>
     ·
-    <a href="https://twitter.com/Daytonaio">Twitter</a>
+    <a href="https://twitter.com/daytonaio">Twitter</a>
   </p>
 
-<div align="center"><img src="https://github.com/daytonaio/daytona/raw/main/assets/images/daytona_demo.gif" width="40%" ></div>
+<div align="center"><img src="https://github.com/daytonaio/daytona/raw/main/assets/images/daytona_demo.gif" width="50%" ></div>
 
 ## Features
 * __Single Command__: Activate a fully configured development environment with a single command.
@@ -62,7 +63,7 @@ Set up a development environment on any infrastructure, with a single command.
 ```
 ### Windows
 <details>
-<summary>Windows PowerShell</summary> 
+<summary>Windows PowerShell</summary>
 This command downloads and installs Daytona and runs the Daytona Server:
 
 ```pwsh
