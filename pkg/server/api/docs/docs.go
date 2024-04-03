@@ -859,6 +859,10 @@ const docTemplate = `{
                     "description": "DefaultValue is converted into the appropriate type based on the Type\nIf the property is a FilePath, the DefaultValue is a path to a directory",
                     "type": "string"
                 },
+                "description": {
+                    "description": "Brief description of the property",
+                    "type": "string"
+                },
                 "disabledPredicate": {
                     "description": "A regex string matched with the name of the target to determine if the property should be disabled\nIf the regex matches the target name, the property will be disabled\nE.g. \"^local$\" will disable the property for the local target",
                     "type": "string"

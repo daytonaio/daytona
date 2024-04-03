@@ -59,6 +59,8 @@ type ProviderTargetProperty struct {
 	// DefaultValue is converted into the appropriate type based on the Type
 	// If the property is a FilePath, the DefaultValue is a path to a directory
 	DefaultValue string
+	// Brief description of the property
+	Description string
 	// Options is only used if the Type is ProviderTargetPropertyTypeOption
 	Options []string
 }
