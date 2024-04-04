@@ -91,8 +91,7 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 			}
 		}
 
-		projectNameSlugRegex := regexp.MustCompile(`[^a-zA-Z0-9-]`)
-		projectName := projectNameSlugRegex.ReplaceAllString(strings.ToLower(filepath.Base(repo.Url)), "-")
+		projectName := extractProjectNameFromUrl(repo.Url)
 
 		apiKey, err := auth.GenerateApiKey(types.ApiKeyTypeProject, fmt.Sprintf("%s/%s", w.Id, projectName))
 		if err != nil {
@@ -110,6 +109,18 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 	}
 
 	return w, nil
+}
+
+func extractProjectNameFromUrl(url string) string {
+    parts := strings.Split(url, "/")
+    repoNameWithSuffix := parts[len(parts)-1]
+    
+    repoName := strings.TrimSuffix(repoNameWithSuffix, ".git")
+
+    projectNameSlugRegex := regexp.MustCompile(`[^a-zA-Z0-9-]`)
+    projectName := projectNameSlugRegex.ReplaceAllString(strings.ToLower(repoName), "-")
+
+    return projectName
 }
 
 func getGitProviderIdFromUrl(url string) string {
