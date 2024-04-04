@@ -7,16 +7,39 @@ import (
 	"errors"
 
 	"github.com/daytonaio/daytona/pkg/server/db"
-	"github.com/daytonaio/daytona/pkg/server/provisioner"
+	"github.com/daytonaio/daytona/pkg/server/targets"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func StopWorkspace(workspaceId string) error {
-	w, err := db.FindWorkspaceByIdOrName(workspaceId)
+	workspace, err := db.FindWorkspaceByIdOrName(workspaceId)
 	if err != nil {
 		return errors.New("workspace not found")
 	}
 
-	return provisioner.StopWorkspace(w)
+	log.Info("Stopping workspace")
+
+	target, err := targets.GetTarget(workspace.Target)
+	if err != nil {
+		return err
+	}
+
+	for _, project := range workspace.Projects {
+		//	todo: go routines
+		err := provisioner.StopProject(project, target)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = provisioner.StopWorkspace(workspace, target)
+	if err != nil {
+		return err
+	}
+
+	log.Info("Workspace stopped")
+	return nil
 }
 
 func StopProject(workspaceId, projectId string) error {
@@ -30,5 +53,10 @@ func StopProject(workspaceId, projectId string) error {
 		return errors.New("project not found")
 	}
 
-	return provisioner.StopProject(project)
+	target, err := targets.GetTarget(project.Target)
+	if err != nil {
+		return err
+	}
+
+	return provisioner.StopProject(project, target)
 }
