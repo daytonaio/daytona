@@ -59,14 +59,19 @@ func GetServer() (*http.Server, error) {
 	}
 
 	router.Use(middlewares.LoggingMiddleware())
-	router.Use(middlewares.AuthMiddleware())
+
+	public := router.Group("/")
+	public.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+
+	protected := router.Group("/")
+	protected.Use(middlewares.AuthMiddleware())
 
 	config, err := config.GetConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	serverController := router.Group("/server")
+	serverController := protected.Group("/server")
 	{
 		serverController.GET("/config", server.GetConfig)
 		serverController.POST("/config", server.SetConfig)
@@ -74,13 +79,13 @@ func GetServer() (*http.Server, error) {
 		serverController.GET("/get-git-context/:gitUrl", server.GetGitContext)
 	}
 
-	binaryController := router.Group("/binary")
+	binaryController := protected.Group("/binary")
 	{
 		binaryController.GET("/script", binary.GetDaytonaScript)
 		binaryController.GET("/:version/:binaryName", binary.GetBinary)
 	}
 
-	workspaceController := router.Group("/workspace")
+	workspaceController := protected.Group("/workspace")
 	{
 		workspaceController.GET("/:workspaceId", workspace.GetWorkspace)
 		workspaceController.GET("/", workspace.ListWorkspaces)
@@ -92,7 +97,7 @@ func GetServer() (*http.Server, error) {
 		workspaceController.POST("/:workspaceId/:projectId/stop", workspace.StopProject)
 	}
 
-	providerController := router.Group("/provider")
+	providerController := protected.Group("/provider")
 	{
 		providerController.POST("/install", provider.InstallProvider)
 		providerController.GET("/", provider.ListProviders)
@@ -100,25 +105,23 @@ func GetServer() (*http.Server, error) {
 		providerController.GET("/:provider/target-manifest", provider.GetTargetManifest)
 	}
 
-	targetController := router.Group("/target")
+	targetController := protected.Group("/target")
 	{
 		targetController.GET("/", target.ListTargets)
 		targetController.PUT("/", target.SetTarget)
 		targetController.DELETE("/:target", target.RemoveTarget)
 	}
 
-	logController := router.Group("/log")
+	logController := protected.Group("/log")
 	{
 		logController.GET("/server", log_controller.ReadServerLog)
 		logController.GET("/workspace/:workspaceId", log_controller.ReadWorkspaceLog)
 	}
 
-	gitProivderController := router.Group("/gitprovider")
+	gitProivderController := protected.Group("/gitprovider")
 	{
 		gitProivderController.GET("/:gitProviderId/user-data", gitprovider.GetGitUserData)
 	}
-
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	httpServer = &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.ApiPort),
