@@ -92,7 +92,7 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 		}
 
 		projectNameSlugRegex := regexp.MustCompile(`[^a-zA-Z0-9-]`)
-		projectName := projectNameSlugRegex.ReplaceAllString(strings.ToLower(filepath.Base(repo.Url)), "-")
+		projectName := projectNameSlugRegex.ReplaceAllString(strings.TrimSuffix(strings.ToLower(filepath.Base(repo.Url)), ".git"), "-")
 
 		apiKey, err := auth.GenerateApiKey(types.ApiKeyTypeProject, fmt.Sprintf("%s/%s", w.Id, projectName))
 		if err != nil {
