@@ -91,6 +91,7 @@ func newWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, err
 			}
 		}
 
+		projectName := strings.TrimSuffix(filepath.Base(repo.Url), ".git")
 		projectNameSlugRegex := regexp.MustCompile(`[^a-zA-Z0-9-]`)
 		projectName := projectNameSlugRegex.ReplaceAllString(strings.ToLower(filepath.Base(repo.Url)), "-")
 
