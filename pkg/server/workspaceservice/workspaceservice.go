@@ -6,8 +6,11 @@ package workspaceservice
 import (
 	"errors"
 
+	p "github.com/daytonaio/daytona/pkg/server/provisioner"
 	"github.com/daytonaio/daytona/pkg/types"
 )
+
+var provisioner = p.Provisioner{}
 
 func getProject(workspace *types.Workspace, projectName string) (*types.Project, error) {
 	for _, project := range workspace.Projects {

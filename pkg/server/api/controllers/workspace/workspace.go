@@ -9,13 +9,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/daytonaio/daytona/pkg/server/api/controllers/workspace/dto"
-	"github.com/daytonaio/daytona/pkg/server/db"
-	"github.com/daytonaio/daytona/pkg/server/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/workspaceservice"
-	"github.com/daytonaio/daytona/pkg/types"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 )
 
 // GetWorkspace 			godoc
@@ -53,41 +48,25 @@ func GetWorkspace(ctx *gin.Context) {
 //
 //	@id				ListWorkspaces
 func ListWorkspaces(ctx *gin.Context) {
-	workspaces, err := db.ListWorkspaces()
-	verbose := ctx.Query("verbose")
+	verboseQuery := ctx.Query("verbose")
+	verbose := false
+	var err error
 
+	if verboseQuery != "" {
+		verbose, err = strconv.ParseBool(verboseQuery)
+		if err != nil {
+			ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for verbose flag"))
+			return
+		}
+	}
+
+	workspaceList, err := workspaceservice.ListWorkspaces(verbose)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, errors.New("failed to list workspaces"))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list workspaces: %s", err.Error()))
 		return
 	}
 
-	response := []dto.WorkspaceDTO{}
-
-	for _, workspace := range workspaces {
-		var workspaceInfo *types.WorkspaceInfo
-		if verbose != "" {
-			isVerbose, err := strconv.ParseBool(verbose)
-			if err != nil {
-				ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for verbose flag"))
-				return
-			}
-
-			if isVerbose {
-				workspaceInfo, err = provisioner.GetWorkspaceInfo(workspace)
-				if err != nil {
-					log.Error(fmt.Errorf("failed to get workspace info for %s", workspace.Name))
-					// return
-				}
-			}
-		}
-
-		response = append(response, dto.WorkspaceDTO{
-			Workspace: *workspace,
-			Info:      workspaceInfo,
-		})
-	}
-
-	ctx.JSON(200, response)
+	ctx.JSON(200, workspaceList)
 }
 
 // RemoveWorkspace 			godoc

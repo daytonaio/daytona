@@ -7,7 +7,6 @@ import (
 	"os"
 	"sort"
 
-	"github.com/daytonaio/daytona/pkg/server/event_bus"
 	"github.com/daytonaio/daytona/pkg/types"
 	"github.com/daytonaio/daytona/pkg/views"
 
@@ -18,11 +17,6 @@ import (
 	"github.com/charmbracelet/lipgloss/table"
 	"golang.org/x/term"
 )
-
-type EventMsg struct {
-	Event   string
-	Payload string
-}
 
 type ClearScreenMsg struct{}
 
@@ -125,8 +119,6 @@ func (m InitWorkspaceViewModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 		return m, nil
-	case EventMsg:
-		return m.HandleEvent(msg), m.spinner.Tick
 	case ClearScreenMsg:
 		m.done = true
 		return m, nil
@@ -158,10 +150,6 @@ func (m InitWorkspaceViewModel) HandleWorkspaceInfo(msg *types.WorkspaceInfo) In
 	// 	}
 	// }
 	return m
-}
-
-func (m InitWorkspaceViewModel) HandleEvent(msg EventMsg) InitWorkspaceViewModel {
-	return m.handleWorkspaceEvent(msg).handleProjectEvent(msg)
 }
 
 func (m InitWorkspaceViewModel) View() string {
@@ -249,96 +237,4 @@ func projectRender(project InitWorkspaceViewProjectModel) string {
 	default:
 		return projectViewStyle.Border(lipgloss.HiddenBorder()).Render(projectView)
 	}
-}
-
-func (m InitWorkspaceViewModel) handleWorkspaceEvent(msg EventMsg) InitWorkspaceViewModel {
-	workspaceEventPayload, err := event_bus.UnmarshallWorkspaceEventPayload(msg.Payload)
-	if err != nil {
-		return m
-	}
-
-	switch msg.Event {
-	//	workspace events
-	case string(event_bus.WorkspaceEventCreatingNetwork):
-		m.State = "Creating network"
-	case string(event_bus.WorkspaceEventNetworkCreated):
-		m.State = "Network created"
-	case string(event_bus.WorkspaceEventStarting):
-		m.State = "Starting"
-	case string(event_bus.WorkspaceEventStarted):
-		m.State = "Started"
-	case string(event_bus.WorkspaceEventCreating):
-		m.State = "Creating projects"
-		m.Projects[workspaceEventPayload.ProjectName] = InitWorkspaceViewProjectModel{
-			Name:       workspaceEventPayload.ProjectName,
-			State:      "Creating",
-			Extensions: map[string]InitWorkspaceViewProjectExtensionModel{},
-		}
-	}
-
-	return m
-}
-
-func (m InitWorkspaceViewModel) handleProjectEvent(msg EventMsg) InitWorkspaceViewModel {
-	projectEventPayload, err := event_bus.UnmarshallProjectEventPayload(msg.Payload)
-	if err != nil || projectEventPayload.ProjectName == "" {
-		return m
-	}
-
-	// Handle unordered project events
-	if _, ok := m.Projects[projectEventPayload.ProjectName]; !ok {
-		m.Projects[projectEventPayload.ProjectName] = InitWorkspaceViewProjectModel{
-			Name:       projectEventPayload.ProjectName,
-			State:      "Creating",
-			Extensions: map[string]InitWorkspaceViewProjectExtensionModel{},
-		}
-	}
-
-	newProjectState := ""
-	newExtensionState := ""
-
-	switch msg.Event {
-	case string(event_bus.ProjectEventCloningRepo):
-		newProjectState = "Cloning repository"
-	case string(event_bus.ProjectEventRepoCloned):
-		newProjectState = "Repository cloned"
-	case string(event_bus.ProjectEventInitializing):
-		newProjectState = "Initializing"
-	case string(event_bus.ProjectEventInitialized):
-		newProjectState = "Initialized"
-	case string(event_bus.ProjectEventStarting):
-		newProjectState = "Starting"
-	case string(event_bus.ProjectEventStarted):
-		newProjectState = "Started"
-	case string(event_bus.ProjectEventPreparingExtension):
-		newExtensionState = "Preparing"
-	case string(event_bus.ProjectEventInitializingExtension):
-		newExtensionState = "Initializing"
-	case string(event_bus.ProjectEventStartingExtension):
-		newExtensionState = "Starting"
-	}
-
-	if newProjectState != "" {
-		m.Projects[projectEventPayload.ProjectName] = InitWorkspaceViewProjectModel{
-			Name:       projectEventPayload.ProjectName,
-			State:      newProjectState,
-			Extensions: m.Projects[projectEventPayload.ProjectName].Extensions,
-		}
-	}
-
-	if newExtensionState != "" {
-		oldInfo := ""
-		oldExtension, ok := m.Projects[projectEventPayload.ProjectName].Extensions[projectEventPayload.ExtensionName]
-		if ok {
-			oldInfo = oldExtension.Info
-		}
-
-		m.Projects[projectEventPayload.ProjectName].Extensions[projectEventPayload.ExtensionName] = InitWorkspaceViewProjectExtensionModel{
-			Name:  projectEventPayload.ExtensionName,
-			State: newExtensionState,
-			Info:  oldInfo,
-		}
-	}
-
-	return m
 }
