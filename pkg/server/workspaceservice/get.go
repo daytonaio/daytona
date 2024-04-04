@@ -8,22 +8,27 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/workspace/dto"
 	"github.com/daytonaio/daytona/pkg/server/db"
-	"github.com/daytonaio/daytona/pkg/server/provisioner"
+	"github.com/daytonaio/daytona/pkg/server/targets"
 )
 
 func GetWorkspace(workspaceId string) (*dto.WorkspaceDTO, error) {
-	w, err := db.FindWorkspaceByIdOrName(workspaceId)
+	workspace, err := db.FindWorkspaceByIdOrName(workspaceId)
 	if err != nil {
 		return nil, errors.New("workspace not found")
 	}
 
-	workspaceInfo, err := provisioner.GetWorkspaceInfo(w)
+	target, err := targets.GetTarget(workspace.Target)
+	if err != nil {
+		return nil, err
+	}
+
+	workspaceInfo, err := provisioner.GetWorkspaceInfo(workspace, target)
 	if err != nil {
 		return nil, err
 	}
 
 	response := dto.WorkspaceDTO{
-		Workspace: *w,
+		Workspace: *workspace,
 		Info:      workspaceInfo,
 	}
 
