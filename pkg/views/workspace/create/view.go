@@ -467,6 +467,8 @@ func getSuggestedWorkspaceName(repo string) string {
 		input = repo[lastIndex+1:]
 	}
 
+	input = strings.TrimSuffix(input, ".git")
+
 	for _, char := range input {
 		if unicode.IsLetter(char) || unicode.IsNumber(char) || char == '-' {
 			result.WriteRune(char)
