@@ -7,18 +7,12 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/server/config"
 )
 
-func GetRepositories(gitProviderId, namespaceId string) ([]gitprovider.GitRepository, error) {
-	c, err := config.GetConfig()
+func (s *GitProviderService) GetRepositories(gitProviderId, namespaceId string) ([]*gitprovider.GitRepository, error) {
+	gitProvider, err := s.GetGitProvider(gitProviderId)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get config: %s", err.Error())
-	}
-
-	gitProvider := gitprovider.GetGitProvider(gitProviderId, c.GitProviders)
-	if gitProvider == nil {
-		return nil, fmt.Errorf("git provider not found")
+		return nil, fmt.Errorf("failed to get git provider: %s", err.Error())
 	}
 
 	response, err := gitProvider.GetRepositories(namespaceId)

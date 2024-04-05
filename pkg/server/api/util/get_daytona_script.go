@@ -7,10 +7,9 @@ import (
 	"net/url"
 
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/pkg/types"
 )
 
-func GetDaytonaScriptUrl(c *types.ServerConfig) string {
-	url, _ := url.JoinPath(util.GetFrpcApiUrl(c), "binary", "script")
+func GetDaytonaScriptUrl(protocol, serverId, serverDomain string) string {
+	url, _ := url.JoinPath(util.GetFrpcApiUrl(protocol, serverId, serverDomain), "binary", "script")
 	return url
 }

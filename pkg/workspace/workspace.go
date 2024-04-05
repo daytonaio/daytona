@@ -3,7 +3,12 @@
 
 package workspace
 
-import "github.com/daytonaio/daytona/pkg/gitprovider"
+import (
+	"errors"
+
+	"github.com/daytonaio/daytona/internal"
+	"github.com/daytonaio/daytona/pkg/gitprovider"
+)
 
 type Project struct {
 	Name        string                     `json:"name"`
@@ -21,6 +26,15 @@ type Workspace struct {
 	Target   string     `json:"target"`
 } // @name Workspace
 
+func (w *Workspace) GetProject(projectName string) (*Project, error) {
+	for _, project := range w.Projects {
+		if project.Name == projectName {
+			return project, nil
+		}
+	}
+	return nil, errors.New("project not found")
+}
+
 type ProjectInfo struct {
 	Name             string `json:"name"`
 	Created          string `json:"created"`
@@ -36,3 +50,17 @@ type WorkspaceInfo struct {
 	Projects         []*ProjectInfo `json:"projects"`
 	ProviderMetadata string         `json:"providerMetadata,omitempty"`
 } // @name WorkspaceInfo
+
+func GetProjectEnvVars(project *Project, apiUrl, serverUrl string) map[string]string {
+	envVars := map[string]string{
+		"DAYTONA_WS_ID":                     project.WorkspaceId,
+		"DAYTONA_WS_PROJECT_NAME":           project.Name,
+		"DAYTONA_WS_PROJECT_REPOSITORY_URL": project.Repository.Url,
+		"DAYTONA_SERVER_API_KEY":            project.ApiKey,
+		"DAYTONA_SERVER_VERSION":            internal.Version,
+		"DAYTONA_SERVER_URL":                serverUrl,
+		"DAYTONA_SERVER_API_URL":            apiUrl,
+	}
+
+	return envVars
+}

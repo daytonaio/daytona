@@ -13,6 +13,15 @@ type ApiKeyStore struct {
 	db *gorm.DB
 }
 
+func NewApiKeyStore(db *gorm.DB) (*ApiKeyStore, error) {
+	err := db.AutoMigrate(&ApiKeyDTO{})
+	if err != nil {
+		return nil, err
+	}
+
+	return &ApiKeyStore{db: db}, nil
+}
+
 func (a *ApiKeyStore) List() ([]*apikey.ApiKey, error) {
 	apiKeyDTOs := []ApiKeyDTO{}
 	tx := a.db.Find(&apiKeyDTOs)

@@ -3,11 +3,11 @@
 
 package gitprovider
 
-type GitProvider struct {
-	Id         string `json:"id"`
-	Username   string `json:"username"`
-	Token      string `json:"token"`
-	BaseApiUrl string `json:"baseApiUrl"`
+type GitProviderConfig struct {
+	Id         string  `json:"id"`
+	Username   string  `json:"username"`
+	Token      string  `json:"token"`
+	BaseApiUrl *string `json:"baseApiUrl,omitempty"`
 } // @name GitProvider
 
 type GitUser struct {
@@ -18,16 +18,15 @@ type GitUser struct {
 } // @name GitUser
 
 type GitRepository struct {
-	Id       string   `json:"id"`
-	Url      string   `json:"url"`
-	Name     string   `json:"name"`
-	Branch   *string  `json:"branch,omitempty"`
-	Sha      string   `json:"sha"`
-	Owner    string   `json:"owner"`
-	PrNumber *uint32  `json:"prNumber,omitempty"`
-	Source   string   `json:"source"`
-	Path     *string  `json:"path,omitempty"`
-	GitUser  *GitUser `json:"-"`
+	Id       string  `json:"id"`
+	Url      string  `json:"url"`
+	Name     string  `json:"name"`
+	Branch   *string `json:"branch,omitempty"`
+	Sha      string  `json:"sha"`
+	Owner    string  `json:"owner"`
+	PrNumber *uint32 `json:"prNumber,omitempty"`
+	Source   string  `json:"source"`
+	Path     *string `json:"path,omitempty"`
 } // @name GitRepository
 
 type GitNamespace struct {

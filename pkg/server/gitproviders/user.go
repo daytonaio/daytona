@@ -7,33 +7,18 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/server/config"
 )
 
-func GetGitUser(gitProviderId string) (gitprovider.GitUser, error) {
-	c, err := config.GetConfig()
+func (s *GitProviderService) GetGitUser(gitProviderId string) (*gitprovider.GitUser, error) {
+	gitProvider, err := s.GetGitProvider(gitProviderId)
 	if err != nil {
-		return gitprovider.GitUser{}, fmt.Errorf("failed to get config: %s", err.Error())
-	}
-
-	gitProvider := gitprovider.GetGitProvider(gitProviderId, c.GitProviders)
-	if gitProvider == nil {
-		return gitprovider.GitUser{}, fmt.Errorf("git provider not found")
+		return nil, fmt.Errorf("failed to get git provider: %s", err.Error())
 	}
 
 	user, err := gitProvider.GetUser()
 	if err != nil {
-		return gitprovider.GitUser{}, fmt.Errorf("failed to get user: %s", err.Error())
+		return nil, fmt.Errorf("failed to get user: %s", err.Error())
 	}
 
 	return user, nil
-}
-
-func GetGitUsernameFromToken(gitProviderData gitprovider.GitProvider) (string, error) {
-	username, err := gitprovider.GetUsernameFromToken(gitProviderData.Id, gitProviderData.Token, gitProviderData.BaseApiUrl)
-	if err != nil {
-		return "", fmt.Errorf("failed to get username: %s", err.Error())
-	}
-
-	return username, nil
 }

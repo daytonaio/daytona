@@ -7,11 +7,6 @@ import (
 	"net/http"
 )
 
-type Self struct {
-	HostName string `json:"HostName"`
-	DNSName  string `json:"DNSName"`
-}
-
 type TailscaleServer interface {
 	Connect() error
 	CreateAuthKey() (string, error)
@@ -30,7 +25,7 @@ type NetworkKey struct {
 	Key string `json:"key"`
 } // @name NetworkKey
 
-type ServerConfig struct {
+type Config struct {
 	ProvidersDir      string      `json:"providersDir"`
 	RegistryUrl       string      `json:"registryUrl"`
 	Id                string      `json:"id"`
@@ -38,12 +33,6 @@ type ServerConfig struct {
 	Frps              *FRPSConfig `json:"frps,omitempty"`
 	ApiPort           uint32      `json:"apiPort"`
 	HeadscalePort     uint32      `json:"headscalePort"`
-	TargetsFilePath   string      `json:"targetsFilePath"`
 	BinariesPath      string      `json:"binariesPath"`
+	LogFilePath       string      `json:"logFilePath"`
 } // @name ServerConfig
-
-type Server struct {
-	Config ServerConfig
-
-	TailscaleServer TailscaleServer
-}

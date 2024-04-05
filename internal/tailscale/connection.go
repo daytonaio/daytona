@@ -47,7 +47,7 @@ func GetConnection(profile *config.Profile) (*tsnet.Server, error) {
 
 	cliId := uuid.New().String()
 	s.Hostname = fmt.Sprintf("cli-%s", cliId)
-	s.ControlURL = util.GetFrpcServerUrl(server.ToServerConfig(*serverConfig))
+	s.ControlURL = util.GetFrpcServerUrl(*serverConfig.Frps.Protocol, *serverConfig.Id, *serverConfig.Frps.Domain)
 	s.AuthKey = *networkKey.Key
 	s.Ephemeral = true
 	s.Dir = filepath.Join(configDir, "tailscale", cliId)

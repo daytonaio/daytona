@@ -16,7 +16,7 @@ import (
 )
 
 func (s *Server) downloadDefaultProviders() error {
-	manifest, err := manager.GetProvidersManifest(s.Config.RegistryUrl)
+	manifest, err := manager.GetProvidersManifest(s.config.RegistryUrl)
 	if err != nil {
 		return err
 	}
@@ -25,7 +25,7 @@ func (s *Server) downloadDefaultProviders() error {
 
 	log.Info("Downloading default providers")
 	for pluginName, plugin := range defaultProviderPlugins {
-		downloadPath := filepath.Join(s.Config.ProvidersDir, pluginName, pluginName)
+		downloadPath := filepath.Join(s.config.ProvidersDir, pluginName, pluginName)
 		if runtime.GOOS == "windows" {
 			downloadPath += ".exe"
 		}
@@ -49,12 +49,12 @@ func (s *Server) downloadDefaultProviders() error {
 func (s *Server) registerProviders() error {
 	log.Info("Registering providers")
 
-	manifest, err := manager.GetProvidersManifest(s.Config.RegistryUrl)
+	manifest, err := manager.GetProvidersManifest(s.config.RegistryUrl)
 	if err != nil {
 		return err
 	}
 
-	files, err := os.ReadDir(s.Config.ProvidersDir)
+	files, err := os.ReadDir(s.config.ProvidersDir)
 	if err != nil {
 		if os.IsNotExist(err) {
 			log.Info("No providers found")
@@ -70,13 +70,20 @@ func (s *Server) registerProviders() error {
 
 	for _, file := range files {
 		if file.IsDir() {
-			pluginPath, err := s.getPluginPath(filepath.Join(s.Config.ProvidersDir, file.Name()))
+			pluginPath, err := s.getPluginPath(filepath.Join(s.config.ProvidersDir, file.Name()))
 			if err != nil {
 				log.Error(err)
 				continue
 			}
 
-			err = manager.RegisterProvider(pluginPath, api_util.GetDaytonaScriptUrl(s.Config), util.GetFrpcServerUrl(s.Config), util.GetFrpcApiUrl(s.Config), logsDir)
+			// TODO: Refactor params to a struct
+			err = manager.RegisterProvider(
+				pluginPath,
+				api_util.GetDaytonaScriptUrl(s.config.Frps.Protocol, s.config.Id, s.config.Frps.Domain),
+				util.GetFrpcServerUrl(s.config.Frps.Protocol, s.config.Id, s.config.Frps.Domain),
+				util.GetFrpcApiUrl(s.config.Frps.Protocol, s.config.Id, s.config.Frps.Domain),
+				logsDir,
+			)
 			if err != nil {
 				log.Error(err)
 				continue

@@ -1,27 +1,26 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package auth
+package apikeys
 
 import (
 	"crypto/sha256"
 	"encoding/base64"
 
-	"github.com/daytonaio/daytona/pkg/server/db"
-	"github.com/daytonaio/daytona/pkg/types"
+	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/google/uuid"
 )
 
-func GenerateApiKey(keyType types.ApiKeyType, name string) (string, error) {
+func (s *ApiKeyService) Generate(keyType apikey.ApiKeyType, name string) (string, error) {
 	key := generateRandomKey()
 
-	apiKey := &types.ApiKey{
+	apiKey := &apikey.ApiKey{
 		KeyHash: hashKey(key),
 		Type:    keyType,
 		Name:    name,
 	}
 
-	err := db.SaveApiKey(apiKey)
+	err := s.apiKeyStore.Save(apiKey)
 	if err != nil {
 		return "", err
 	}

@@ -4,7 +4,6 @@
 package logger
 
 import (
-	"io"
 	"os"
 	"path/filepath"
 )
@@ -41,6 +40,19 @@ func (w *workspaceLogger) Close() error {
 	return nil
 }
 
-func GetWorkspaceLogger(logsDir, workspaceId string) io.WriteCloser {
+func (w *workspaceLogger) Cleanup() error {
+	workspaceLogsDir := filepath.Join(w.logsDir, w.workspaceId)
+
+	_, err := os.Stat(workspaceLogsDir)
+	if os.IsNotExist(err) {
+		return nil
+	} else if err != nil {
+		return err
+	}
+
+	return os.RemoveAll(workspaceLogsDir)
+}
+
+func NewWorkspaceLogger(logsDir, workspaceId string) Logger {
 	return &workspaceLogger{workspaceId: workspaceId, logsDir: logsDir}
 }
