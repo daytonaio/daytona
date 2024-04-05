@@ -8,6 +8,8 @@ import (
 
 	apikey "github.com/daytonaio/daytona/pkg/cmd/server/apikey"
 	"github.com/daytonaio/daytona/pkg/cmd/server/daemon"
+	. "github.com/daytonaio/daytona/pkg/cmd/server/provider"
+	. "github.com/daytonaio/daytona/pkg/cmd/server/target"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/config"
 	"github.com/daytonaio/daytona/pkg/server/frpc"
@@ -85,6 +87,8 @@ func init() {
 	ServerCmd.AddCommand(configureCmd)
 	ServerCmd.AddCommand(configCmd)
 	ServerCmd.AddCommand(logsCmd)
+	ServerCmd.AddCommand(TargetCmd)
+	ServerCmd.AddCommand(ProviderCmd)
 	ServerCmd.AddCommand(stopCmd)
 	ServerCmd.AddCommand(restartCmd)
 	ServerCmd.AddCommand(apikey.ApiKeyCmd)

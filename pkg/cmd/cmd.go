@@ -13,9 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/cmd/output"
 	. "github.com/daytonaio/daytona/pkg/cmd/ports"
 	. "github.com/daytonaio/daytona/pkg/cmd/profile"
-	. "github.com/daytonaio/daytona/pkg/cmd/provider"
 	. "github.com/daytonaio/daytona/pkg/cmd/server"
-	. "github.com/daytonaio/daytona/pkg/cmd/target"
 	. "github.com/daytonaio/daytona/pkg/cmd/workspace"
 	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	log "github.com/sirupsen/logrus"
@@ -47,7 +45,6 @@ func Execute() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(ListCmd)
 	rootCmd.AddCommand(GitProviderCmd)
-	rootCmd.AddCommand(TargetCmd)
 
 	if util.WorkspaceMode() {
 		rootCmd.AddCommand(gitCredCmd)
@@ -63,7 +60,6 @@ func Execute() {
 		rootCmd.AddCommand(ProfileCmd)
 		rootCmd.AddCommand(ProfileUseCmd)
 		rootCmd.AddCommand(whoamiCmd)
-		rootCmd.AddCommand(ProviderCmd)
 		rootCmd.AddCommand(purgeCmd)
 	}
 

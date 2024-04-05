@@ -103,7 +103,7 @@ func registerProviders(c *types.ServerConfig) error {
 			}
 
 			if manager.HasUpdateAvailable(info.Name, info.Version, *manifest) {
-				log.Infof("Update available for %s. Update with `daytona provider update`.", info.Name)
+				log.Infof("Update available for %s. Update with `daytona server provider update`.", info.Name)
 			}
 		}
 	}
