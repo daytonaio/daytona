@@ -7,7 +7,6 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/daytonaio/daytona/pkg/types"
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
 )
@@ -16,7 +15,7 @@ type GitHubGitProvider struct {
 	token string
 }
 
-func (g *GitHubGitProvider) GetNamespaces() ([]types.GitNamespace, error) {
+func (g *GitHubGitProvider) GetNamespaces() ([]GitNamespace, error) {
 	client := g.getApiClient()
 	user, err := g.GetUser()
 	if err != nil {
@@ -31,8 +30,8 @@ func (g *GitHubGitProvider) GetNamespaces() ([]types.GitNamespace, error) {
 		return nil, err
 	}
 
-	namespaces := make([]types.GitNamespace, len(orgList)+1) // +1 for the user namespace
-	namespaces[0] = types.GitNamespace{Id: personalNamespaceId, Name: user.Username}
+	namespaces := make([]GitNamespace, len(orgList)+1) // +1 for the user namespace
+	namespaces[0] = GitNamespace{Id: personalNamespaceId, Name: user.Username}
 
 	for i, org := range orgList {
 		if org.Login != nil {
@@ -46,9 +45,9 @@ func (g *GitHubGitProvider) GetNamespaces() ([]types.GitNamespace, error) {
 	return namespaces, nil
 }
 
-func (g *GitHubGitProvider) GetRepositories(namespace string) ([]types.GitRepository, error) {
+func (g *GitHubGitProvider) GetRepositories(namespace string) ([]GitRepository, error) {
 	client := g.getApiClient()
-	var response []types.GitRepository
+	var response []GitRepository
 	query := "fork:true "
 
 	if namespace == personalNamespaceId {
@@ -73,7 +72,7 @@ func (g *GitHubGitProvider) GetRepositories(namespace string) ([]types.GitReposi
 	}
 
 	for _, repo := range repoList.Repositories {
-		response = append(response, types.GitRepository{
+		response = append(response, GitRepository{
 			Id:   *repo.Name,
 			Name: *repo.Name,
 			Url:  *repo.HTMLURL,
@@ -83,7 +82,7 @@ func (g *GitHubGitProvider) GetRepositories(namespace string) ([]types.GitReposi
 	return response, err
 }
 
-func (g *GitHubGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]types.GitBranch, error) {
+func (g *GitHubGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]GitBranch, error) {
 	client := g.getApiClient()
 
 	if namespaceId == personalNamespaceId {
@@ -94,7 +93,7 @@ func (g *GitHubGitProvider) GetRepoBranches(repositoryId string, namespaceId str
 		namespaceId = user.Username
 	}
 
-	var response []types.GitBranch
+	var response []GitBranch
 
 	repoBranches, _, err := client.Repositories.ListBranches(context.Background(), namespaceId, repositoryId, &github.ListOptions{})
 	if err != nil {
@@ -102,7 +101,7 @@ func (g *GitHubGitProvider) GetRepoBranches(repositoryId string, namespaceId str
 	}
 
 	for _, branch := range repoBranches {
-		responseBranch := types.GitBranch{
+		responseBranch := GitBranch{
 			Name: *branch.Name,
 		}
 		if branch.Commit != nil && branch.Commit.SHA != nil {
@@ -114,7 +113,7 @@ func (g *GitHubGitProvider) GetRepoBranches(repositoryId string, namespaceId str
 	return response, nil
 }
 
-func (g *GitHubGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]types.GitPullRequest, error) {
+func (g *GitHubGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]GitPullRequest, error) {
 	client := g.getApiClient()
 
 	if namespaceId == personalNamespaceId {
@@ -125,7 +124,7 @@ func (g *GitHubGitProvider) GetRepoPRs(repositoryId string, namespaceId string) 
 		namespaceId = user.Username
 	}
 
-	var response []types.GitPullRequest
+	var response []GitPullRequest
 
 	prList, _, err := client.PullRequests.List(context.Background(), namespaceId, repositoryId, &github.PullRequestListOptions{
 		State: "open",
@@ -135,7 +134,7 @@ func (g *GitHubGitProvider) GetRepoPRs(repositoryId string, namespaceId string) 
 	}
 
 	for _, pr := range prList {
-		response = append(response, types.GitPullRequest{
+		response = append(response, GitPullRequest{
 			Name:   *pr.Title,
 			Branch: *pr.Head.Ref,
 		})
@@ -144,15 +143,15 @@ func (g *GitHubGitProvider) GetRepoPRs(repositoryId string, namespaceId string) 
 	return response, nil
 }
 
-func (g *GitHubGitProvider) GetUser() (types.GitUser, error) {
+func (g *GitHubGitProvider) GetUser() (GitUser, error) {
 	client := g.getApiClient()
 
 	user, _, err := client.Users.Get(context.Background(), "")
 	if err != nil {
-		return types.GitUser{}, err
+		return GitUser{}, err
 	}
 
-	response := types.GitUser{}
+	response := GitUser{}
 
 	if user.ID != nil {
 		response.Id = strconv.FormatInt(*user.ID, 10)

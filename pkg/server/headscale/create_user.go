@@ -9,10 +9,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func CreateUser() error {
+func (s *HeadscaleServer) CreateUser() error {
 	log.Debug("Creating headscale user")
 
-	ctx, client, conn, cancel, err := getClient()
+	ctx, client, conn, cancel, err := s.getClient()
 	if err != nil {
 		return err
 	}

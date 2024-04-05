@@ -67,8 +67,8 @@ func GetApiClient(profile *config.Profile) (*serverapiclient.APIClient, error) {
 	return apiClient, nil
 }
 
-func ToServerConfig(config *serverapiclient.ServerConfig) *types.ServerConfig {
-	return &types.ServerConfig{
+func ToServerConfig(config serverapiclient.ServerConfig) types.ServerConfig {
+	return types.ServerConfig{
 		ProvidersDir:      *config.ProvidersDir,
 		RegistryUrl:       *config.RegistryUrl,
 		Id:                *config.Id,

@@ -3,7 +3,7 @@
 
 package provider
 
-import "github.com/daytonaio/daytona/pkg/types"
+import "github.com/daytonaio/daytona/pkg/workspace"
 
 type ProviderInfo struct {
 	Name    string `json:"name"`
@@ -21,12 +21,12 @@ type InitializeProviderRequest struct {
 
 type WorkspaceRequest struct {
 	TargetOptions string
-	Workspace     *types.Workspace
+	Workspace     *workspace.Workspace
 }
 
 type ProjectRequest struct {
 	TargetOptions string
-	Project       *types.Project
+	Project       *workspace.Project
 }
 
 type ProviderTarget struct {
