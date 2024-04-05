@@ -7,7 +7,7 @@ import (
 	"errors"
 
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
-	create_view "github.com/daytonaio/daytona/pkg/views/workspace/create"
+	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 )
 
 func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []serverapiclient.GitProvider, manual bool, multiProject bool) (workspaceName string, projectRepositoryList []serverapiclient.GitRepository, err error) {
@@ -24,7 +24,7 @@ func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []serve
 		}
 	}
 
-	workspaceCreationPromptResponse, err := create_view.RunInitialForm(providerRepo, multiProject)
+	workspaceCreationPromptResponse, err := create.RunInitialForm(providerRepo, multiProject)
 	if err != nil {
 		return "", nil, err
 	}
@@ -50,7 +50,7 @@ func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []serve
 			}
 		}
 
-		workspaceCreationPromptResponse, err = create_view.RunSecondaryProjectsForm(workspaceCreationPromptResponse)
+		workspaceCreationPromptResponse, err = create.RunSecondaryProjectsForm(workspaceCreationPromptResponse)
 		if err != nil {
 			return "", nil, err
 		}
@@ -58,9 +58,9 @@ func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []serve
 		projectRepoList = append(projectRepoList, workspaceCreationPromptResponse.SecondaryRepositories...)
 	}
 
-	suggestedName := create_view.GetSuggestedWorkspaceName(*workspaceCreationPromptResponse.PrimaryRepository.Url)
+	suggestedName := create.GetSuggestedWorkspaceName(*workspaceCreationPromptResponse.PrimaryRepository.Url)
 
-	workspaceCreationPromptResponse, err = create_view.RunWorkspaceNameForm(workspaceCreationPromptResponse, suggestedName, workspaceNames)
+	workspaceCreationPromptResponse, err = create.RunWorkspaceNameForm(workspaceCreationPromptResponse, suggestedName, workspaceNames)
 	if err != nil {
 		return "", nil, err
 	}

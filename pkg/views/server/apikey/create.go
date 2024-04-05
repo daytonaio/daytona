@@ -7,13 +7,13 @@ import (
 	"errors"
 	"log"
 
-	"github.com/daytonaio/daytona/pkg/types"
+	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/huh"
 )
 
-func ApiKeyCreationView(name *string, saveToDefaultProfile *bool, clientKeys []*types.ApiKey) {
+func ApiKeyCreationView(name *string, saveToDefaultProfile *bool, clientKeys []*apikey.ApiKey) {
 	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().

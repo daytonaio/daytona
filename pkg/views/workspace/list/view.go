@@ -14,7 +14,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
-	"github.com/daytonaio/daytona/pkg/types"
+	"github.com/daytonaio/daytona/pkg/workspace"
 	"golang.org/x/term"
 )
 
@@ -188,12 +188,12 @@ func getWorkspaceTableRowData(workspace serverapiclient.WorkspaceDTO, specifyGit
 	return rowData
 }
 
-func getProjectTableRowData(workspace serverapiclient.WorkspaceDTO, project serverapiclient.Project, specifyGitProviders bool) RowData {
-	var currentProjectInfo *types.ProjectInfo
+func getProjectTableRowData(workspaceDTO serverapiclient.WorkspaceDTO, project serverapiclient.Project, specifyGitProviders bool) RowData {
+	var currentProjectInfo *workspace.ProjectInfo
 
-	for _, projectInfo := range workspace.Info.Projects {
+	for _, projectInfo := range workspaceDTO.Info.Projects {
 		if *projectInfo.Name == *project.Name {
-			currentProjectInfo = &types.ProjectInfo{
+			currentProjectInfo = &workspace.ProjectInfo{
 				Name:    *projectInfo.Name,
 				Created: *projectInfo.Created,
 				Started: *projectInfo.Started,
@@ -203,7 +203,7 @@ func getProjectTableRowData(workspace serverapiclient.WorkspaceDTO, project serv
 	}
 
 	if currentProjectInfo == nil {
-		currentProjectInfo = &types.ProjectInfo{
+		currentProjectInfo = &workspace.ProjectInfo{
 			Name:    *project.Name,
 			Created: "/",
 			Started: "/",

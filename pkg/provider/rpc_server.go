@@ -4,14 +4,15 @@
 package provider
 
 import (
-	"github.com/daytonaio/daytona/pkg/types"
+	"github.com/daytonaio/daytona/pkg/provider/util"
+	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
 type ProviderRPCServer struct {
 	Impl Provider
 }
 
-func (m *ProviderRPCServer) Initialize(arg InitializeProviderRequest, resp *types.Empty) error {
+func (m *ProviderRPCServer) Initialize(arg InitializeProviderRequest, resp *util.Empty) error {
 	_, err := m.Impl.Initialize(arg)
 	return err
 }
@@ -46,27 +47,27 @@ func (m *ProviderRPCServer) GetDefaultTargets(arg interface{}, resp *[]ProviderT
 	return nil
 }
 
-func (m *ProviderRPCServer) CreateWorkspace(arg *WorkspaceRequest, resp *types.Empty) error {
+func (m *ProviderRPCServer) CreateWorkspace(arg *WorkspaceRequest, resp *util.Empty) error {
 	_, err := m.Impl.CreateWorkspace(arg)
 	return err
 }
 
-func (m *ProviderRPCServer) StartWorkspace(arg *WorkspaceRequest, resp *types.Empty) error {
+func (m *ProviderRPCServer) StartWorkspace(arg *WorkspaceRequest, resp *util.Empty) error {
 	_, err := m.Impl.StartWorkspace(arg)
 	return err
 }
 
-func (m *ProviderRPCServer) StopWorkspace(arg *WorkspaceRequest, resp *types.Empty) error {
+func (m *ProviderRPCServer) StopWorkspace(arg *WorkspaceRequest, resp *util.Empty) error {
 	_, err := m.Impl.StopWorkspace(arg)
 	return err
 }
 
-func (m *ProviderRPCServer) DestroyWorkspace(arg *WorkspaceRequest, resp *types.Empty) error {
+func (m *ProviderRPCServer) DestroyWorkspace(arg *WorkspaceRequest, resp *util.Empty) error {
 	_, err := m.Impl.DestroyWorkspace(arg)
 	return err
 }
 
-func (m *ProviderRPCServer) GetWorkspaceInfo(arg *WorkspaceRequest, resp *types.WorkspaceInfo) error {
+func (m *ProviderRPCServer) GetWorkspaceInfo(arg *WorkspaceRequest, resp *workspace.WorkspaceInfo) error {
 	info, err := m.Impl.GetWorkspaceInfo(arg)
 	if err != nil {
 		return err
@@ -76,27 +77,27 @@ func (m *ProviderRPCServer) GetWorkspaceInfo(arg *WorkspaceRequest, resp *types.
 	return nil
 }
 
-func (m *ProviderRPCServer) CreateProject(arg *ProjectRequest, resp *types.Empty) error {
+func (m *ProviderRPCServer) CreateProject(arg *ProjectRequest, resp *util.Empty) error {
 	_, err := m.Impl.CreateProject(arg)
 	return err
 }
 
-func (m *ProviderRPCServer) StartProject(arg *ProjectRequest, resp *types.Empty) error {
+func (m *ProviderRPCServer) StartProject(arg *ProjectRequest, resp *util.Empty) error {
 	_, err := m.Impl.StartProject(arg)
 	return err
 }
 
-func (m *ProviderRPCServer) StopProject(arg *ProjectRequest, resp *types.Empty) error {
+func (m *ProviderRPCServer) StopProject(arg *ProjectRequest, resp *util.Empty) error {
 	_, err := m.Impl.StopProject(arg)
 	return err
 }
 
-func (m *ProviderRPCServer) DestroyProject(arg *ProjectRequest, resp *types.Empty) error {
+func (m *ProviderRPCServer) DestroyProject(arg *ProjectRequest, resp *util.Empty) error {
 	_, err := m.Impl.DestroyProject(arg)
 	return err
 }
 
-func (m *ProviderRPCServer) GetProjectInfo(arg *ProjectRequest, resp *types.ProjectInfo) error {
+func (m *ProviderRPCServer) GetProjectInfo(arg *ProjectRequest, resp *workspace.ProjectInfo) error {
 	info, err := m.Impl.GetProjectInfo(arg)
 	if err != nil {
 		return err

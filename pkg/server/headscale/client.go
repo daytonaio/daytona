@@ -6,7 +6,6 @@ package headscale
 import (
 	"context"
 
-	"github.com/daytonaio/daytona/pkg/server/config"
 	v1 "github.com/juanfont/headscale/gen/go/headscale/v1"
 	"github.com/juanfont/headscale/hscontrol/util"
 	"github.com/rs/zerolog/log"
@@ -14,13 +13,8 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func getClient() (context.Context, v1.HeadscaleServiceClient, *grpc.ClientConn, context.CancelFunc, error) {
-	c, err := config.GetConfig()
-	if err != nil {
-		return nil, nil, nil, nil, err
-	}
-
-	cfg, err := getConfig(c)
+func (s *HeadscaleServer) getClient() (context.Context, v1.HeadscaleServiceClient, *grpc.ClientConn, context.CancelFunc, error) {
+	cfg, err := s.getHeadscaleConfig()
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}

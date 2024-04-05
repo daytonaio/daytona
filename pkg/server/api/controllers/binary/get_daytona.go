@@ -9,8 +9,8 @@ import (
 	"net/url"
 
 	"github.com/daytonaio/daytona/internal/constants"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/server/config"
-	"github.com/daytonaio/daytona/pkg/server/frpc"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,7 +22,7 @@ func GetDaytonaScript(ctx *gin.Context) {
 		return
 	}
 
-	downloadUrl, _ := url.JoinPath(frpc.GetApiUrl(c), "binary")
+	downloadUrl, _ := url.JoinPath(util.GetFrpcApiUrl(c), "binary")
 	getServerScript := constants.GetDaytonaScript(downloadUrl)
 
 	ctx.String(http.StatusOK, getServerScript)

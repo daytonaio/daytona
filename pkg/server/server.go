@@ -12,32 +12,20 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/server/api"
-	"github.com/daytonaio/daytona/pkg/server/config"
 	"github.com/daytonaio/daytona/pkg/server/frpc"
-	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/daytonaio/daytona/pkg/server/logs"
 	"github.com/hashicorp/go-plugin"
 
 	log "github.com/sirupsen/logrus"
 )
 
-type Self struct {
-	HostName string `json:"HostName"`
-	DNSName  string `json:"DNSName"`
-}
-
-func Start(errCh chan error) error {
+func (s *Server) Start(errCh chan error) error {
 	err := logs.Init()
 	if err != nil {
 		return err
 	}
 
 	log.Info("Starting Daytona server")
-
-	c, err := config.GetConfig()
-	if err != nil {
-		return err
-	}
 
 	apiServer, err := api.GetServer()
 	if err != nil {
@@ -50,17 +38,17 @@ func Start(errCh chan error) error {
 	}
 
 	// Terminate orphaned provider processes
-	err = manager.TerminateProviderProcesses(c.ProvidersDir)
+	err = manager.TerminateProviderProcesses(s.Config.ProvidersDir)
 	if err != nil {
 		log.Errorf("Failed to terminate orphaned provider processes: %s", err)
 	}
 
-	err = downloadDefaultProviders()
+	err = s.downloadDefaultProviders()
 	if err != nil {
 		return err
 	}
 
-	err = registerProviders(c)
+	err = s.registerProviders()
 	if err != nil {
 		return err
 	}
@@ -91,7 +79,7 @@ func Start(errCh chan error) error {
 	go func() {
 		errChan := make(chan error)
 		go func() {
-			errChan <- headscale.Start(c)
+			errChan <- s.TailscaleServer.Start()
 		}()
 
 		select {
@@ -99,7 +87,7 @@ func Start(errCh chan error) error {
 			errCh <- err
 		case <-time.After(1 * time.Second):
 			go func() {
-				errChan <- headscale.Connect()
+				errChan <- s.TailscaleServer.Connect()
 			}()
 		}
 
@@ -109,7 +97,7 @@ func Start(errCh chan error) error {
 	}()
 
 	go func() {
-		log.Infof("Starting api server on port %d", c.ApiPort)
+		log.Infof("Starting api server on port %d", s.Config.ApiPort)
 		err := apiServer.Serve(apiListener)
 		if err != nil {
 			errCh <- err
@@ -119,13 +107,8 @@ func Start(errCh chan error) error {
 	return nil
 }
 
-func HealthCheck() error {
-	c, err := config.GetConfig()
-	if err != nil {
-		return err
-	}
-
-	conn, err := net.DialTimeout("tcp", fmt.Sprintf(":%d", c.ApiPort), 3*time.Second)
+func (s *Server) HealthCheck() error {
+	conn, err := net.DialTimeout("tcp", fmt.Sprintf(":%d", s.Config.ApiPort), 3*time.Second)
 	if err != nil {
 		return fmt.Errorf("API health check timed out")
 	}
