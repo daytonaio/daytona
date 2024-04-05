@@ -8,8 +8,7 @@ import (
 	"net/http"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/server/config"
-	"github.com/daytonaio/daytona/pkg/types"
+	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,25 +26,13 @@ import (
 func GetGitUser(ctx *gin.Context) {
 	gitProviderId := ctx.Param("gitProviderId")
 
-	c, err := config.GetConfig()
+	response, err := gitproviders.GetGitUser(gitProviderId)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get config: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git user: %s", err.Error()))
 		return
 	}
 
-	gitProviderInstance := gitprovider.GetGitProvider(gitProviderId, c.GitProviders)
-	if gitProviderInstance == nil {
-		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("git provider not found"))
-		return
-	}
-
-	user, err := gitProviderInstance.GetUser()
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get user: %s", err.Error()))
-		return
-	}
-
-	ctx.JSON(200, user)
+	ctx.JSON(200, response)
 }
 
 // GetGitUsernameFromToken 			godoc
@@ -60,7 +47,7 @@ func GetGitUser(ctx *gin.Context) {
 //
 //	@id				GetGitUsernameFromToken
 func GetGitUsernameFromToken(ctx *gin.Context) {
-	var gitProviderData types.GitProvider
+	var gitProviderData gitprovider.GitProvider
 
 	err := ctx.BindJSON(&gitProviderData)
 	if err != nil {
@@ -68,11 +55,11 @@ func GetGitUsernameFromToken(ctx *gin.Context) {
 		return
 	}
 
-	username, err := gitprovider.GetUsernameFromToken(gitProviderData.Id, gitProviderData.Token, gitProviderData.BaseApiUrl)
+	response, err := gitproviders.GetGitUsernameFromToken(gitProviderData)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get user: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git user: %s", err.Error()))
 		return
 	}
 
-	ctx.String(200, username)
+	ctx.String(200, response)
 }

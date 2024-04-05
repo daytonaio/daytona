@@ -5,8 +5,6 @@ package server
 
 import (
 	"net/http"
-
-	"github.com/daytonaio/daytona/pkg/gitprovider"
 )
 
 type Self struct {
@@ -33,16 +31,15 @@ type NetworkKey struct {
 } // @name NetworkKey
 
 type ServerConfig struct {
-	ProvidersDir      string                    `json:"providersDir"`
-	RegistryUrl       string                    `json:"registryUrl"`
-	GitProviders      []gitprovider.GitProvider `json:"gitProviders"`
-	Id                string                    `json:"id"`
-	ServerDownloadUrl string                    `json:"serverDownloadUrl"`
-	Frps              *FRPSConfig               `json:"frps,omitempty"`
-	ApiPort           uint32                    `json:"apiPort"`
-	HeadscalePort     uint32                    `json:"headscalePort"`
-	TargetsFilePath   string                    `json:"targetsFilePath"`
-	BinariesPath      string                    `json:"binariesPath"`
+	ProvidersDir      string      `json:"providersDir"`
+	RegistryUrl       string      `json:"registryUrl"`
+	Id                string      `json:"id"`
+	ServerDownloadUrl string      `json:"serverDownloadUrl"`
+	Frps              *FRPSConfig `json:"frps,omitempty"`
+	ApiPort           uint32      `json:"apiPort"`
+	HeadscalePort     uint32      `json:"headscalePort"`
+	TargetsFilePath   string      `json:"targetsFilePath"`
+	BinariesPath      string      `json:"binariesPath"`
 } // @name ServerConfig
 
 type Server struct {
