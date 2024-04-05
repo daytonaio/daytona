@@ -8,11 +8,11 @@ import (
 	"net/http"
 	"path/filepath"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/provider/dto"
-	"github.com/daytonaio/daytona/pkg/server/api/util"
+	api_util "github.com/daytonaio/daytona/pkg/server/api/util"
 	"github.com/daytonaio/daytona/pkg/server/config"
-	"github.com/daytonaio/daytona/pkg/server/frpc"
 	"github.com/gin-gonic/gin"
 )
 
@@ -63,7 +63,7 @@ func InstallProvider(ctx *gin.Context) {
 		return
 	}
 
-	err = manager.RegisterProvider(downloadPath, util.GetDaytonaScriptUrl(c), frpc.GetServerUrl(c), frpc.GetApiUrl(c), logsDir)
+	err = manager.RegisterProvider(downloadPath, api_util.GetDaytonaScriptUrl(c), util.GetFrpcServerUrl(c), util.GetFrpcApiUrl(c), logsDir)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to register provider: %s", err.Error()))
 		return

@@ -6,16 +6,17 @@ package provider
 import (
 	"net/rpc"
 
-	"github.com/daytonaio/daytona/pkg/types"
+	"github.com/daytonaio/daytona/pkg/provider/util"
+	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
 type ProviderRPCClient struct {
 	client *rpc.Client
 }
 
-func (m *ProviderRPCClient) Initialize(req InitializeProviderRequest) (*types.Empty, error) {
-	err := m.client.Call("Plugin.Initialize", &req, new(types.Empty))
-	return new(types.Empty), err
+func (m *ProviderRPCClient) Initialize(req InitializeProviderRequest) (*util.Empty, error) {
+	err := m.client.Call("Plugin.Initialize", &req, new(util.Empty))
+	return new(util.Empty), err
 }
 
 func (m *ProviderRPCClient) GetInfo() (ProviderInfo, error) {
@@ -37,54 +38,54 @@ func (m *ProviderRPCClient) GetDefaultTargets() (*[]ProviderTarget, error) {
 	return &resp, err
 }
 
-func (m *ProviderRPCClient) CreateWorkspace(workspaceReq *WorkspaceRequest) (*types.Empty, error) {
-	err := m.client.Call("Plugin.CreateWorkspace", workspaceReq, new(types.Empty))
-	return new(types.Empty), err
+func (m *ProviderRPCClient) CreateWorkspace(workspaceReq *WorkspaceRequest) (*util.Empty, error) {
+	err := m.client.Call("Plugin.CreateWorkspace", workspaceReq, new(util.Empty))
+	return new(util.Empty), err
 }
 
-func (m *ProviderRPCClient) StartWorkspace(workspaceReq *WorkspaceRequest) (*types.Empty, error) {
-	err := m.client.Call("Plugin.StartWorkspace", workspaceReq, new(types.Empty))
-	return new(types.Empty), err
+func (m *ProviderRPCClient) StartWorkspace(workspaceReq *WorkspaceRequest) (*util.Empty, error) {
+	err := m.client.Call("Plugin.StartWorkspace", workspaceReq, new(util.Empty))
+	return new(util.Empty), err
 }
 
-func (m *ProviderRPCClient) StopWorkspace(workspaceReq *WorkspaceRequest) (*types.Empty, error) {
-	err := m.client.Call("Plugin.StopWorkspace", workspaceReq, new(types.Empty))
-	return new(types.Empty), err
+func (m *ProviderRPCClient) StopWorkspace(workspaceReq *WorkspaceRequest) (*util.Empty, error) {
+	err := m.client.Call("Plugin.StopWorkspace", workspaceReq, new(util.Empty))
+	return new(util.Empty), err
 }
 
-func (m *ProviderRPCClient) DestroyWorkspace(workspaceReq *WorkspaceRequest) (*types.Empty, error) {
-	err := m.client.Call("Plugin.DestroyWorkspace", workspaceReq, new(types.Empty))
-	return new(types.Empty), err
+func (m *ProviderRPCClient) DestroyWorkspace(workspaceReq *WorkspaceRequest) (*util.Empty, error) {
+	err := m.client.Call("Plugin.DestroyWorkspace", workspaceReq, new(util.Empty))
+	return new(util.Empty), err
 }
 
-func (m *ProviderRPCClient) GetWorkspaceInfo(workspace *WorkspaceRequest) (*types.WorkspaceInfo, error) {
-	var response types.WorkspaceInfo
-	err := m.client.Call("Plugin.GetWorkspaceInfo", workspace, &response)
+func (m *ProviderRPCClient) GetWorkspaceInfo(workspaceReq *WorkspaceRequest) (*workspace.WorkspaceInfo, error) {
+	var response workspace.WorkspaceInfo
+	err := m.client.Call("Plugin.GetWorkspaceInfo", workspaceReq, &response)
 	return &response, err
 }
 
-func (m *ProviderRPCClient) CreateProject(projectReq *ProjectRequest) (*types.Empty, error) {
-	err := m.client.Call("Plugin.CreateProject", projectReq, new(types.Empty))
-	return new(types.Empty), err
+func (m *ProviderRPCClient) CreateProject(projectReq *ProjectRequest) (*util.Empty, error) {
+	err := m.client.Call("Plugin.CreateProject", projectReq, new(util.Empty))
+	return new(util.Empty), err
 }
 
-func (m *ProviderRPCClient) StartProject(projectReq *ProjectRequest) (*types.Empty, error) {
-	err := m.client.Call("Plugin.StartProject", projectReq, new(types.Empty))
-	return new(types.Empty), err
+func (m *ProviderRPCClient) StartProject(projectReq *ProjectRequest) (*util.Empty, error) {
+	err := m.client.Call("Plugin.StartProject", projectReq, new(util.Empty))
+	return new(util.Empty), err
 }
 
-func (m *ProviderRPCClient) StopProject(projectReq *ProjectRequest) (*types.Empty, error) {
-	err := m.client.Call("Plugin.StopProject", projectReq, new(types.Empty))
-	return new(types.Empty), err
+func (m *ProviderRPCClient) StopProject(projectReq *ProjectRequest) (*util.Empty, error) {
+	err := m.client.Call("Plugin.StopProject", projectReq, new(util.Empty))
+	return new(util.Empty), err
 }
 
-func (m *ProviderRPCClient) DestroyProject(projectReq *ProjectRequest) (*types.Empty, error) {
-	err := m.client.Call("Plugin.DestroyProject", projectReq, new(types.Empty))
-	return new(types.Empty), err
+func (m *ProviderRPCClient) DestroyProject(projectReq *ProjectRequest) (*util.Empty, error) {
+	err := m.client.Call("Plugin.DestroyProject", projectReq, new(util.Empty))
+	return new(util.Empty), err
 }
 
-func (m *ProviderRPCClient) GetProjectInfo(projectReq *ProjectRequest) (*types.ProjectInfo, error) {
-	var resp types.ProjectInfo
+func (m *ProviderRPCClient) GetProjectInfo(projectReq *ProjectRequest) (*workspace.ProjectInfo, error) {
+	var resp workspace.ProjectInfo
 	err := m.client.Call("Plugin.GetProjectInfo", projectReq, &resp)
 	return &resp, err
 }

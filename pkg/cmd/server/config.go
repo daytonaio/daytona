@@ -9,9 +9,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/cmd/output"
 	"github.com/daytonaio/daytona/pkg/server/config"
-	"github.com/daytonaio/daytona/pkg/server/frpc"
 )
 
 var configCmd = &cobra.Command{
@@ -23,7 +23,7 @@ var configCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		apiUrl := frpc.GetApiUrl(config)
+		apiUrl := util.GetFrpcApiUrl(*config)
 		output.Output = apiUrl
 
 		fmt.Println(apiUrl)

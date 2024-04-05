@@ -8,7 +8,6 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/frpc"
 	"github.com/daytonaio/daytona/pkg/server/config"
-	"github.com/daytonaio/daytona/pkg/types"
 )
 
 func ConnectServer() error {
@@ -39,20 +38,4 @@ func ConnectApi() error {
 		Port:         int(c.ApiPort),
 		SubDomain:    fmt.Sprintf("api-%s", c.Id),
 	})
-}
-
-func GetApiDomain(c *types.ServerConfig) string {
-	return fmt.Sprintf("api-%s", GetServerDomain(c))
-}
-
-func GetServerDomain(c *types.ServerConfig) string {
-	return fmt.Sprintf("%s.%s", c.Id, c.Frps.Domain)
-}
-
-func GetServerUrl(c *types.ServerConfig) string {
-	return fmt.Sprintf("%s://%s", c.Frps.Protocol, GetServerDomain(c))
-}
-
-func GetApiUrl(c *types.ServerConfig) string {
-	return fmt.Sprintf("%s://%s", c.Frps.Protocol, GetApiDomain(c))
 }

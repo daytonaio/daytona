@@ -1,0 +1,14 @@
+// Copyright 2024 Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
+package workspaces
+
+type WorkspaceServiceConfig struct {
+}
+
+func NewWorkspaceService(config WorkspaceServiceConfig) *WorkspaceService {
+	return &WorkspaceService{}
+}
+
+type WorkspaceService struct {
+}

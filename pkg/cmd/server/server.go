@@ -6,15 +6,16 @@ package server
 import (
 	"fmt"
 
+	"github.com/daytonaio/daytona/internal/util"
 	apikey "github.com/daytonaio/daytona/pkg/cmd/server/apikey"
 	"github.com/daytonaio/daytona/pkg/cmd/server/daemon"
 	. "github.com/daytonaio/daytona/pkg/cmd/server/provider"
 	. "github.com/daytonaio/daytona/pkg/cmd/server/target"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/config"
-	"github.com/daytonaio/daytona/pkg/server/frpc"
+	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/daytonaio/daytona/pkg/types"
-	"github.com/daytonaio/daytona/pkg/views/util"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -46,14 +47,29 @@ var ServerCmd = &cobra.Command{
 			return
 		}
 
-		errCh := make(chan error)
-
-		err := server.Start(errCh)
+		c, err := config.GetConfig()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		c, err := config.GetConfig()
+		headscaleServer := headscale.HeadscaleServer{
+			ServerId:      c.Id,
+			FrpsDomain:    c.Frps.Domain,
+			HeadscalePort: c.HeadscalePort,
+		}
+		err = headscaleServer.Init()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		server := server.Server{
+			Config:          *c,
+			TailscaleServer: &headscaleServer,
+		}
+
+		errCh := make(chan error)
+
+		err = server.Start(errCh)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -79,7 +95,7 @@ var ServerCmd = &cobra.Command{
 }
 
 func printServerStartedMessage(c *types.ServerConfig) {
-	util.RenderBorderedMessage(fmt.Sprintf("Daytona Server running on port: %d.\nYou can now begin developing locally.\n\nIf you want to connect to the server remotely:\n\n1. Create an API key on this machine:\ndaytona server api-key new\n\n2. On the client machine run:\ndaytona profile add -a %s -k API_KEY", c.ApiPort, frpc.GetApiUrl(c)))
+	views_util.RenderBorderedMessage(fmt.Sprintf("Daytona Server running on port: %d.\nYou can now begin developing locally.\n\nIf you want to connect to the server remotely:\n\n1. Create an API key on this machine:\ndaytona server api-key new\n\n2. On the client machine run:\ndaytona profile add -a %s -k API_KEY", c.ApiPort, util.GetFrpcApiUrl(*c)))
 }
 
 func init() {

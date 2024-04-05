@@ -7,8 +7,6 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/daytonaio/daytona/pkg/types"
-
 	"code.gitea.io/sdk/gitea"
 )
 
@@ -17,7 +15,7 @@ type GiteaGitProvider struct {
 	baseApiUrl string
 }
 
-func (g *GiteaGitProvider) GetNamespaces() ([]types.GitNamespace, error) {
+func (g *GiteaGitProvider) GetNamespaces() ([]GitNamespace, error) {
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, err
@@ -38,17 +36,17 @@ func (g *GiteaGitProvider) GetNamespaces() ([]types.GitNamespace, error) {
 		return nil, err
 	}
 
-	namespaces := make([]types.GitNamespace, len(orgList)+1) // +1 for the user namespace
-	namespaces[0] = types.GitNamespace{Id: personalNamespaceId, Name: user.Username}
+	namespaces := make([]GitNamespace, len(orgList)+1) // +1 for the user namespace
+	namespaces[0] = GitNamespace{Id: personalNamespaceId, Name: user.Username}
 
 	for i, org := range orgList {
-		namespaces[i+1] = types.GitNamespace{Id: org.UserName, Name: org.UserName}
+		namespaces[i+1] = GitNamespace{Id: org.UserName, Name: org.UserName}
 	}
 
 	return namespaces, nil
 }
 
-func (g *GiteaGitProvider) GetRepositories(namespace string) ([]types.GitRepository, error) {
+func (g *GiteaGitProvider) GetRepositories(namespace string) ([]GitRepository, error) {
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, err
@@ -83,10 +81,10 @@ func (g *GiteaGitProvider) GetRepositories(namespace string) ([]types.GitReposit
 		}
 	}
 
-	response := make([]types.GitRepository, 0, len(repoList))
+	response := make([]GitRepository, 0, len(repoList))
 
 	for _, repo := range repoList {
-		response = append(response, types.GitRepository{
+		response = append(response, GitRepository{
 			Id:   repo.Name,
 			Name: repo.Name,
 			Url:  repo.HTMLURL,
@@ -96,7 +94,7 @@ func (g *GiteaGitProvider) GetRepositories(namespace string) ([]types.GitReposit
 	return response, err
 }
 
-func (g *GiteaGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]types.GitBranch, error) {
+func (g *GiteaGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]GitBranch, error) {
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, err
@@ -120,10 +118,10 @@ func (g *GiteaGitProvider) GetRepoBranches(repositoryId string, namespaceId stri
 		return nil, err
 	}
 
-	response := make([]types.GitBranch, 0, len(repoBranches))
+	response := make([]GitBranch, 0, len(repoBranches))
 
 	for _, branch := range repoBranches {
-		responseBranch := types.GitBranch{
+		responseBranch := GitBranch{
 			Name: branch.Name,
 		}
 		if branch.Commit != nil {
@@ -135,7 +133,7 @@ func (g *GiteaGitProvider) GetRepoBranches(repositoryId string, namespaceId stri
 	return response, nil
 }
 
-func (g *GiteaGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]types.GitPullRequest, error) {
+func (g *GiteaGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]GitPullRequest, error) {
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, err
@@ -161,10 +159,10 @@ func (g *GiteaGitProvider) GetRepoPRs(repositoryId string, namespaceId string) (
 		return nil, err
 	}
 
-	response := make([]types.GitPullRequest, 0, len(prList))
+	response := make([]GitPullRequest, 0, len(prList))
 
 	for _, pr := range prList {
-		response = append(response, types.GitPullRequest{
+		response = append(response, GitPullRequest{
 			Name:   pr.Title,
 			Branch: pr.Head.Ref,
 		})
@@ -173,18 +171,18 @@ func (g *GiteaGitProvider) GetRepoPRs(repositoryId string, namespaceId string) (
 	return response, nil
 }
 
-func (g *GiteaGitProvider) GetUser() (types.GitUser, error) {
+func (g *GiteaGitProvider) GetUser() (GitUser, error) {
 	client, err := g.getApiClient()
 	if err != nil {
-		return types.GitUser{}, err
+		return GitUser{}, err
 	}
 
 	user, _, err := client.GetMyUserInfo()
 	if user == nil || err != nil {
-		return types.GitUser{}, err
+		return GitUser{}, err
 	}
 
-	return types.GitUser{
+	return GitUser{
 		Id:       strconv.FormatInt(user.ID, 10),
 		Username: user.UserName,
 		Name:     user.FullName,

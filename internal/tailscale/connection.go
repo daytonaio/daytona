@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
-	"github.com/daytonaio/daytona/pkg/server/frpc"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/google/uuid"
 	"tailscale.com/tsnet"
@@ -47,7 +47,7 @@ func GetConnection(profile *config.Profile) (*tsnet.Server, error) {
 
 	cliId := uuid.New().String()
 	s.Hostname = fmt.Sprintf("cli-%s", cliId)
-	s.ControlURL = frpc.GetServerUrl(server.ToServerConfig(serverConfig))
+	s.ControlURL = util.GetFrpcServerUrl(server.ToServerConfig(*serverConfig))
 	s.AuthKey = *networkKey.Key
 	s.Ephemeral = true
 	s.Dir = filepath.Join(configDir, "tailscale", cliId)

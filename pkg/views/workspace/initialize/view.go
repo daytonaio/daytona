@@ -7,7 +7,6 @@ import (
 	"os"
 	"sort"
 
-	"github.com/daytonaio/daytona/pkg/types"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/bubbles/spinner"
@@ -128,28 +127,6 @@ func (m InitWorkspaceViewModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 	}
 	return m, nil
-}
-
-func (m InitWorkspaceViewModel) HandleWorkspaceInfo(msg *types.WorkspaceInfo) InitWorkspaceViewModel {
-	// TODO: handle
-	// for _, projectInfo := range msg.Projects {
-	// 	if _, ok := m.Projects[projectInfo.Name]; !ok {
-	// 		continue
-	// 	}
-
-	// 	for _, extension := range projectInfo.Extensions {
-	// 		if _, ok := m.Projects[projectInfo.Name].Extensions[extension.Name]; !ok {
-	// 			continue
-	// 		}
-
-	// 		m.Projects[projectInfo.Name].Extensions[extension.Name] = InitWorkspaceViewProjectExtensionModel{
-	// 			Name:  extension.Name,
-	// 			State: "Started",
-	// 			Info:  extension.Info,
-	// 		}
-	// 	}
-	// }
-	return m
 }
 
 func (m InitWorkspaceViewModel) View() string {

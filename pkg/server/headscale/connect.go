@@ -14,31 +14,31 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var s = &tsnet.Server{
+var tsNetServer = &tsnet.Server{
 	Hostname: "server",
 }
 
-func Connect() error {
+func (s *HeadscaleServer) Connect() error {
 	c, err := config.GetConfig()
 	if err != nil {
 		return err
 	}
 
-	err = CreateUser()
+	err = s.CreateUser()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	authKey, err := CreateAuthKey()
+	authKey, err := s.CreateAuthKey()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	s.ControlURL = frpc.GetServerUrl(c)
-	s.AuthKey = authKey
+	tsNetServer.ControlURL = frpc.GetServerUrl(c)
+	tsNetServer.AuthKey = authKey
 
-	defer s.Close()
-	ln, err := s.Listen("tcp", ":80")
+	defer tsNetServer.Close()
+	ln, err := tsNetServer.Listen("tcp", ":80")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -49,6 +49,6 @@ func Connect() error {
 	}))
 }
 
-func HTTPClient() *http.Client {
-	return s.HTTPClient()
+func (s *HeadscaleServer) HTTPClient() *http.Client {
+	return tsNetServer.HTTPClient()
 }

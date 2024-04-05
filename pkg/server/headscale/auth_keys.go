@@ -13,7 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func CreateAuthKey() (string, error) {
+func (s *HeadscaleServer) CreateAuthKey() (string, error) {
 	log.Debug("Creating headscale auth key")
 
 	request := &v1.CreatePreAuthKeyRequest{
@@ -23,7 +23,7 @@ func CreateAuthKey() (string, error) {
 	request.Expiration = timestamppb.New(time.Now().Add(100000 * time.Hour))
 	request.Ephemeral = true
 
-	ctx, client, conn, cancel, err := getClient()
+	ctx, client, conn, cancel, err := s.getClient()
 	if err != nil {
 		return "", fmt.Errorf("failed to get client: %w", err)
 	}

@@ -5,23 +5,21 @@ package gitprovider
 
 import (
 	"errors"
-
-	"github.com/daytonaio/daytona/pkg/types"
 )
 
 const personalNamespaceId = "<PERSONAL>"
 
-type GitProvider interface {
-	GetNamespaces() ([]types.GitNamespace, error)
-	GetRepositories(namespace string) ([]types.GitRepository, error)
-	GetUser() (types.GitUser, error)
-	GetRepoBranches(repositoryId string, namespaceId string) ([]types.GitBranch, error)
-	GetRepoPRs(repositoryId string, namespaceId string) ([]types.GitPullRequest, error)
-	// ParseGitUrl(string) (*types.GitRepository, error)
+type gitProvider interface {
+	GetNamespaces() ([]GitNamespace, error)
+	GetRepositories(namespace string) ([]GitRepository, error)
+	GetUser() (GitUser, error)
+	GetRepoBranches(repositoryId string, namespaceId string) ([]GitBranch, error)
+	GetRepoPRs(repositoryId string, namespaceId string) ([]GitPullRequest, error)
+	// ParseGitUrl(string) (*GitRepository, error)
 }
 
-func GetGitProvider(providerId string, gitProviders []types.GitProvider) GitProvider {
-	var chosenProvider *types.GitProvider
+func GetGitProvider(providerId string, gitProviders []GitProvider) gitProvider {
+	var chosenProvider *GitProvider
 	for _, gitProvider := range gitProviders {
 		if gitProvider.Id == providerId {
 			chosenProvider = &gitProvider
@@ -68,7 +66,7 @@ func GetGitProvider(providerId string, gitProviders []types.GitProvider) GitProv
 }
 
 func GetUsernameFromToken(providerId string, token string, baseApiUrl string) (string, error) {
-	var gitProvider GitProvider
+	var gitProvider gitProvider
 
 	switch providerId {
 	case "github":
