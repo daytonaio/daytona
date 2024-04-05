@@ -7,7 +7,6 @@ import (
 	"context"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/ide"
@@ -62,7 +61,7 @@ var SshCmd = &cobra.Command{
 
 		// Todo: make project_select_prompt view for 0 args
 		if len(args) == 0 || len(args) == 1 {
-			projectName, err = util.GetFirstWorkspaceProjectName(workspaceId, projectName, &activeProfile)
+			projectName, err = server.GetFirstWorkspaceProjectName(workspaceId, projectName, &activeProfile)
 			if err != nil {
 				log.Fatal(err)
 			}

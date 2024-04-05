@@ -9,8 +9,7 @@ import (
 
 	"tailscale.com/tsnet"
 
-	"github.com/daytonaio/daytona/pkg/server/config"
-	"github.com/daytonaio/daytona/pkg/server/frpc"
+	"github.com/daytonaio/daytona/internal/util"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -19,12 +18,7 @@ var tsNetServer = &tsnet.Server{
 }
 
 func (s *HeadscaleServer) Connect() error {
-	c, err := config.GetConfig()
-	if err != nil {
-		return err
-	}
-
-	err = s.CreateUser()
+	err := s.CreateUser()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -34,7 +28,7 @@ func (s *HeadscaleServer) Connect() error {
 		log.Fatal(err)
 	}
 
-	tsNetServer.ControlURL = frpc.GetServerUrl(c)
+	tsNetServer.ControlURL = util.GetFrpcServerUrl(s.frpsProtocol, s.serverId, s.frpsDomain)
 	tsNetServer.AuthKey = authKey
 
 	defer tsNetServer.Close()

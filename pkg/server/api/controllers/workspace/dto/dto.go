@@ -3,20 +3,23 @@
 
 package dto
 
-import "github.com/daytonaio/daytona/pkg/types"
+import (
+	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/workspace"
+)
 
 type CreateWorkspace struct {
 	Name         string
-	Target       string
-	Repositories []types.GitRepository
+	TargetId     string
+	Repositories []gitprovider.GitRepository
 } //	@name	CreateWorkspace
 
 type WorkspaceDTO struct {
-	types.Workspace
-	Info *types.WorkspaceInfo
+	workspace.Workspace
+	Info *workspace.WorkspaceInfo
 } //	@name	WorkspaceDTO
 
 type ProjectDTO struct {
-	types.Project
-	Info *types.ProjectInfo
+	workspace.Project
+	Info *workspace.ProjectInfo
 } //	@name	ProjectDTO

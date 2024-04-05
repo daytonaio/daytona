@@ -7,39 +7,41 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/workspace/dto"
-	"github.com/daytonaio/daytona/pkg/server/db"
-	"github.com/daytonaio/daytona/pkg/server/targets"
-	"github.com/daytonaio/daytona/pkg/types"
+	"github.com/daytonaio/daytona/pkg/workspace"
 	log "github.com/sirupsen/logrus"
 )
 
-func ListWorkspaces(verbose bool) ([]dto.WorkspaceDTO, error) {
-	workspaces, err := db.ListWorkspaces()
-
+func (s *WorkspaceService) ListWorkspaces(verbose bool) ([]dto.WorkspaceDTO, error) {
+	workspaces, err := s.workspaceStore.List()
 	if err != nil {
 		return nil, err
 	}
 
 	response := []dto.WorkspaceDTO{}
 
-	for _, workspace := range workspaces {
-		var workspaceInfo *types.WorkspaceInfo
+	for _, w := range workspaces {
+		var workspaceInfo *workspace.WorkspaceInfo
 		if verbose {
-			target, err := targets.GetTarget(workspace.Target)
+			providerName, targetName, err := s.parseTargetId(w.Target)
 			if err != nil {
-				log.Error(fmt.Errorf("failed to get target for %s", workspace.Target))
+				return nil, err
+			}
+
+			target, err := s.targetStore.Find(providerName, targetName)
+			if err != nil {
+				log.Error(fmt.Errorf("failed to get target for %s", w.Target))
 				continue
 			}
 
-			workspaceInfo, err = provisioner.GetWorkspaceInfo(workspace, target)
+			workspaceInfo, err = s.provisioner.GetWorkspaceInfo(w, target)
 			if err != nil {
-				log.Error(fmt.Errorf("failed to get workspace info for %s", workspace.Name))
+				log.Error(fmt.Errorf("failed to get workspace info for %s", w.Name))
 				// return
 			}
 		}
 
 		response = append(response, dto.WorkspaceDTO{
-			Workspace: *workspace,
+			Workspace: *w,
 			Info:      workspaceInfo,
 		})
 	}

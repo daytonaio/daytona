@@ -4,101 +4,47 @@
 package gitproviders
 
 import (
+	"errors"
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/server/config"
 )
 
-func GetGitProviderForUrl(url string) (gitprovider.GitProvider, error) {
-	var gitProvider gitprovider.GitProvider
-
-	c, err := config.GetConfig()
+func (s *GitProviderService) GetGitProviderForUrl(url string) (gitprovider.GitProvider, error) {
+	gitProviders, err := s.configStore.List()
 	if err != nil {
-		return gitprovider.GitProvider{}, err
+		return nil, err
 	}
 
-	for _, p := range c.GitProviders {
+	for _, p := range gitProviders {
 		if strings.Contains(url, fmt.Sprintf("%s.", p.Id)) {
-			gitProvider = p
+			return s.GetGitProvider(p.Id)
 		}
 
-		if p.BaseApiUrl != "" && strings.Contains(url, getHostnameFromUrl(p.BaseApiUrl)) {
-			gitProvider = p
+		hostname, err := getHostnameFromUrl(*p.BaseApiUrl)
+		if err != nil {
+			return nil, err
+		}
+
+		if p.BaseApiUrl != nil && strings.Contains(url, hostname) {
+			return s.GetGitProvider(p.Id)
 		}
 	}
 
-	return gitProvider, nil
+	return nil, errors.New("git provider not found")
 }
 
-func SetGitProvider(gitProviderData gitprovider.GitProvider) error {
-	var providerExists bool
-
-	c, err := config.GetConfig()
-	if err != nil {
-		return fmt.Errorf("failed to get config: %s", err.Error())
-	}
-
-	for i, provider := range c.GitProviders {
-		if provider.Id == gitProviderData.Id {
-			c.GitProviders[i].Token = gitProviderData.Token
-			c.GitProviders[i].Username = gitProviderData.Username
-			c.GitProviders[i].BaseApiUrl = gitProviderData.BaseApiUrl
-			providerExists = true
-			break
-		}
-	}
-
-	if !providerExists {
-		c.GitProviders = append(c.GitProviders, gitprovider.GitProvider{
-			Id:         gitProviderData.Id,
-			Token:      gitProviderData.Token,
-			Username:   gitProviderData.Username,
-			BaseApiUrl: gitProviderData.BaseApiUrl,
-		})
-	}
-
-	err = config.Save(c)
-	if err != nil {
-		return fmt.Errorf("failed to save config: %s", err.Error())
-	}
-
-	return nil
+func (s *GitProviderService) SetGitProviderConfig(providerConfig *gitprovider.GitProviderConfig) error {
+	return s.configStore.Save(providerConfig)
 }
 
-func RemoveGitProvider(gitProviderId string) error {
-	c, err := config.GetConfig()
+func getHostnameFromUrl(urlToParse string) (string, error) {
+	parsed, err := url.Parse(urlToParse)
 	if err != nil {
-		return fmt.Errorf("failed to get config: %s", err.Error())
+		return "", err
 	}
 
-	var newProviders []gitprovider.GitProvider
-	for _, provider := range c.GitProviders {
-		if provider.Id != gitProviderId {
-			newProviders = append(newProviders, provider)
-		}
-	}
-
-	c.GitProviders = newProviders
-	err = config.Save(c)
-	if err != nil {
-		return fmt.Errorf("failed to save config: %s", err.Error())
-	}
-
-	return nil
-}
-
-func getHostnameFromUrl(url string) string {
-	input := url
-	input = strings.TrimPrefix(input, "https://")
-	input = strings.TrimPrefix(input, "http://")
-	input = strings.TrimPrefix(input, "www.")
-
-	// Remove everything after the first '/'
-	if slashIndex := strings.Index(input, "/"); slashIndex != -1 {
-		input = input[:slashIndex]
-	}
-
-	return input
+	return strings.TrimPrefix("www.", parsed.Hostname()), nil
 }

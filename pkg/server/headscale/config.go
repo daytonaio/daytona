@@ -27,8 +27,8 @@ func (s *HeadscaleServer) getHeadscaleConfig() (*hstypes.Config, error) {
 
 	cfg := &hstypes.Config{
 		DBtype:                         "sqlite3",
-		ServerURL:                      fmt.Sprintf("https://%s.%s", s.ServerId, s.FrpsDomain),
-		Addr:                           fmt.Sprintf("127.0.0.1:%d", s.HeadscalePort),
+		ServerURL:                      fmt.Sprintf("https://%s.%s", s.serverId, s.frpsDomain),
+		Addr:                           fmt.Sprintf("127.0.0.1:%d", s.headscalePort),
 		EphemeralNodeInactivityTimeout: 5 * time.Minute,
 		NodeUpdateCheckInterval:        10 * time.Second,
 		BaseDomain:                     "daytona.local",

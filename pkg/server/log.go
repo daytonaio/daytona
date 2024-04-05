@@ -5,7 +5,6 @@ package server
 
 import (
 	"os"
-	"path/filepath"
 
 	frp_log "github.com/fatedier/frp/pkg/util/log"
 	log "github.com/sirupsen/logrus"
@@ -35,24 +34,10 @@ func (f *logFormatter) Format(entry *log.Entry) ([]byte, error) {
 	return formatted, nil
 }
 
-func GetLogFilePath() *string {
-	if logFilePath == nil {
-		configDir, err := GetConfigDir()
-		if err != nil {
-			return nil
-		}
+func (s *Server) initLogs() error {
+	filePath := s.config.LogFilePath
 
-		filePath := filepath.Join(configDir, "daytona.log")
-		logFilePath = &filePath
-	}
-
-	return logFilePath
-}
-
-func Init() error {
-	filePath := GetLogFilePath()
-
-	file, err := os.OpenFile(*filePath, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(filePath, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
@@ -71,7 +56,7 @@ func Init() error {
 		frpLogLevel = os.Getenv("FRP_LOG_LEVEL")
 	}
 
-	frpOutput := *filePath
+	frpOutput := filePath
 	if os.Getenv("FRP_LOG_OUTPUT") != "" {
 		frpOutput = os.Getenv("FRP_LOG_OUTPUT")
 	}

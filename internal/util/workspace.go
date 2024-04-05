@@ -4,52 +4,16 @@
 package util
 
 import (
-	"context"
-	"errors"
 	"fmt"
 	"net/url"
 	"os"
 	"regexp"
 	"strings"
-
-	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 )
 
 func WorkspaceMode() bool {
 	_, wsMode := os.LookupEnv("DAYTONA_WS_DIR")
 	return wsMode
-}
-
-func GetFirstWorkspaceProjectName(workspaceId string, projectName string, profile *config.Profile) (string, error) {
-	ctx := context.Background()
-
-	apiClient, err := server.GetApiClient(profile)
-	if err != nil {
-		return "", err
-	}
-
-	wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceId).Execute()
-	if err != nil {
-		return "", apiclient.HandleErrorResponse(res, err)
-	}
-
-	if projectName == "" {
-		if len(wsInfo.Projects) == 0 {
-			return "", errors.New("no projects found in workspace")
-		}
-
-		return *wsInfo.Projects[0].Name, nil
-	}
-
-	for _, project := range wsInfo.Projects {
-		if *project.Name == projectName {
-			return *project.Name, nil
-		}
-	}
-
-	return "", errors.New("project not found in workspace")
 }
 
 func GetValidatedWorkspaceName(input string) (string, error) {

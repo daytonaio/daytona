@@ -12,10 +12,17 @@ import (
 
 type GitLabGitProvider struct {
 	token      string
-	baseApiUrl string
+	baseApiUrl *string
 }
 
-func (g *GitLabGitProvider) GetNamespaces() ([]GitNamespace, error) {
+func NewGitLabGitProvider(token string, baseApiUrl *string) *GitLabGitProvider {
+	return &GitLabGitProvider{
+		token:      token,
+		baseApiUrl: baseApiUrl,
+	}
+}
+
+func (g *GitLabGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	client := g.getApiClient()
 	user, err := g.GetUser()
 	if err != nil {
@@ -27,20 +34,23 @@ func (g *GitLabGitProvider) GetNamespaces() ([]GitNamespace, error) {
 		return nil, err
 	}
 
-	namespaces := make([]GitNamespace, len(groupList)+1) // +1 for the personal namespace
-	namespaces[0] = GitNamespace{Id: personalNamespaceId, Name: user.Username}
+	namespaces := []*GitNamespace{}
 
-	for i, group := range groupList {
-		namespaces[i+1].Id = strconv.Itoa(group.ID)
-		namespaces[i+1].Name = group.Name
+	for _, group := range groupList {
+		namespaces = append(namespaces, &GitNamespace{
+			Id:   strconv.Itoa(group.ID),
+			Name: group.Name,
+		})
 	}
+
+	namespaces = append([]*GitNamespace{{Id: personalNamespaceId, Name: user.Username}}, namespaces...)
 
 	return namespaces, nil
 }
 
-func (g *GitLabGitProvider) GetRepositories(namespace string) ([]GitRepository, error) {
+func (g *GitLabGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
 	client := g.getApiClient()
-	var response []GitRepository
+	var response []*GitRepository
 	var repoList []*gitlab.Project
 	var err error
 
@@ -72,7 +82,7 @@ func (g *GitLabGitProvider) GetRepositories(namespace string) ([]GitRepository, 
 	}
 
 	for _, repo := range repoList {
-		response = append(response, GitRepository{
+		response = append(response, &GitRepository{
 			Id:   strconv.Itoa(repo.ID),
 			Name: repo.Name,
 			Url:  repo.WebURL,
@@ -82,9 +92,9 @@ func (g *GitLabGitProvider) GetRepositories(namespace string) ([]GitRepository, 
 	return response, err
 }
 
-func (g *GitLabGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]GitBranch, error) {
+func (g *GitLabGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {
 	client := g.getApiClient()
-	var response []GitBranch
+	var response []*GitBranch
 
 	branches, _, err := client.Branches.ListBranches(repositoryId, &gitlab.ListBranchesOptions{})
 	if err != nil {
@@ -92,7 +102,7 @@ func (g *GitLabGitProvider) GetRepoBranches(repositoryId string, namespaceId str
 	}
 
 	for _, branch := range branches {
-		responseBranch := GitBranch{
+		responseBranch := &GitBranch{
 			Name: branch.Name,
 		}
 		if branch.Commit != nil {
@@ -104,9 +114,9 @@ func (g *GitLabGitProvider) GetRepoBranches(repositoryId string, namespaceId str
 	return response, nil
 }
 
-func (g *GitLabGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]GitPullRequest, error) {
+func (g *GitLabGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error) {
 	client := g.getApiClient()
-	var response []GitPullRequest
+	var response []*GitPullRequest
 
 	mergeRequests, _, err := client.MergeRequests.ListProjectMergeRequests(repositoryId, &gitlab.ListProjectMergeRequestsOptions{})
 	if err != nil {
@@ -114,7 +124,7 @@ func (g *GitLabGitProvider) GetRepoPRs(repositoryId string, namespaceId string) 
 	}
 
 	for _, mergeRequest := range mergeRequests {
-		response = append(response, GitPullRequest{
+		response = append(response, &GitPullRequest{
 			Name:   mergeRequest.Title,
 			Branch: mergeRequest.SourceBranch,
 		})
@@ -123,17 +133,17 @@ func (g *GitLabGitProvider) GetRepoPRs(repositoryId string, namespaceId string) 
 	return response, nil
 }
 
-func (g *GitLabGitProvider) GetUser() (GitUser, error) {
+func (g *GitLabGitProvider) GetUser() (*GitUser, error) {
 	client := g.getApiClient()
 
 	user, _, err := client.Users.CurrentUser()
 	if err != nil {
-		return GitUser{}, err
+		return nil, err
 	}
 
 	userId := strconv.Itoa(user.ID)
 
-	response := GitUser{
+	response := &GitUser{
 		Id:       userId,
 		Username: user.Username,
 		Name:     user.Name,
@@ -147,10 +157,10 @@ func (g *GitLabGitProvider) getApiClient() *gitlab.Client {
 	var client *gitlab.Client
 	var err error
 
-	if g.baseApiUrl == "" {
+	if g.baseApiUrl == nil {
 		client, err = gitlab.NewClient(g.token)
 	} else {
-		client, err = gitlab.NewClient(g.token, gitlab.WithBaseURL(g.baseApiUrl))
+		client, err = gitlab.NewClient(g.token, gitlab.WithBaseURL(*g.baseApiUrl))
 	}
 	if err != nil {
 		log.Fatal(err)

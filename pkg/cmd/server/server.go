@@ -5,16 +5,22 @@ package server
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/daytonaio/daytona/internal/util"
 	apikey "github.com/daytonaio/daytona/pkg/cmd/server/apikey"
 	"github.com/daytonaio/daytona/pkg/cmd/server/daemon"
 	. "github.com/daytonaio/daytona/pkg/cmd/server/provider"
 	. "github.com/daytonaio/daytona/pkg/cmd/server/target"
+	"github.com/daytonaio/daytona/pkg/db"
+	"github.com/daytonaio/daytona/pkg/logger"
 	"github.com/daytonaio/daytona/pkg/server"
-	"github.com/daytonaio/daytona/pkg/server/config"
+	"github.com/daytonaio/daytona/pkg/server/apikeys"
+	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
-	"github.com/daytonaio/daytona/pkg/types"
+	"github.com/daytonaio/daytona/pkg/server/providertargets"
+	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 
 	log "github.com/sirupsen/logrus"
@@ -39,7 +45,7 @@ var ServerCmd = &cobra.Command{
 			if err != nil {
 				log.Fatal(err)
 			}
-			c, err := config.GetConfig()
+			c, err := server.GetConfig()
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -47,25 +53,80 @@ var ServerCmd = &cobra.Command{
 			return
 		}
 
-		c, err := config.GetConfig()
+		c, err := server.GetConfig()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		headscaleServer := headscale.HeadscaleServer{
+		logsDir, err := server.GetWorkspaceLogsDir()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		dbPath, err := getDbPath()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		dbConnection := db.GetSQLiteConnection(dbPath)
+		apiKeyStore, err := db.NewApiKeyStore(dbConnection)
+		if err != nil {
+			log.Fatal(err)
+		}
+		gitProviderConfigStore, err := db.NewGitProviderConfigStore(dbConnection)
+		if err != nil {
+			log.Fatal(err)
+		}
+		providerTargetStore, err := db.NewProviderTargetStore(dbConnection)
+		if err != nil {
+			log.Fatal(err)
+		}
+		workspaceStore, err := db.NewWorkspaceStore(dbConnection)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		headscaleServer := headscale.NewHeadscaleServer(&headscale.HeadscaleServerConfig{
 			ServerId:      c.Id,
 			FrpsDomain:    c.Frps.Domain,
 			HeadscalePort: c.HeadscalePort,
-		}
+		})
 		err = headscaleServer.Init()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		server := server.Server{
-			Config:          *c,
-			TailscaleServer: &headscaleServer,
-		}
+		providerTargetService := providertargets.NewProviderTargetService(providertargets.ProviderTargetServiceConfig{
+			TargetStore: providerTargetStore,
+		})
+		apiKeyService := apikeys.NewApiKeyService(apikeys.ApiKeyServiceConfig{
+			ApiKeyStore: apiKeyStore,
+		})
+		workspaceService := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
+			WorkspaceStore: workspaceStore,
+			TargetStore:    providerTargetStore,
+			ApiKeyService:  *apiKeyService,
+			ServerApiUrl:   util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+			ServerUrl:      util.GetFrpcServerUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+			NewWorkspaceLogger: func(workspaceId string) logger.Logger {
+				return logger.NewWorkspaceLogger(logsDir, workspaceId)
+			},
+			NewProjectLogger: func(workspaceId, projectName string) logger.Logger {
+				return logger.NewProjectLogger(logsDir, workspaceId, projectName)
+			},
+		})
+		gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
+			ConfigStore: gitProviderConfigStore,
+		})
+
+		server := server.GetInstance(&server.ServerConfig{
+			Config:                *c,
+			TailscaleServer:       headscaleServer,
+			ProviderTargetService: *providerTargetService,
+			APiKeyService:         *apiKeyService,
+			WorkspaceService:      *workspaceService,
+			GitProviderService:    *gitProviderService,
+		})
 
 		errCh := make(chan error)
 
@@ -94,8 +155,24 @@ var ServerCmd = &cobra.Command{
 	},
 }
 
-func printServerStartedMessage(c *types.ServerConfig) {
-	views_util.RenderBorderedMessage(fmt.Sprintf("Daytona Server running on port: %d.\nYou can now begin developing locally.\n\nIf you want to connect to the server remotely:\n\n1. Create an API key on this machine:\ndaytona server api-key new\n\n2. On the client machine run:\ndaytona profile add -a %s -k API_KEY", c.ApiPort, util.GetFrpcApiUrl(*c)))
+func printServerStartedMessage(c *server.Config) {
+	views_util.RenderBorderedMessage(fmt.Sprintf("Daytona Server running on port: %d.\nYou can now begin developing locally.\n\nIf you want to connect to the server remotely:\n\n1. Create an API key on this machine:\ndaytona server api-key new\n\n2. On the client machine run:\ndaytona profile add -a %s -k API_KEY", c.ApiPort, util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain)))
+}
+
+func getDbPath() (string, error) {
+	userConfigDir, err := os.UserConfigDir()
+	if err != nil {
+		return "", err
+	}
+
+	dir := filepath.Join(userConfigDir, "daytona")
+
+	err = os.MkdirAll(dir, 0755)
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(dir, "db"), nil
 }
 
 func init() {
