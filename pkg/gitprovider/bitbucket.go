@@ -31,7 +31,14 @@ type BitbucketGitProvider struct {
 	token    string
 }
 
-func (g *BitbucketGitProvider) GetNamespaces() ([]GitNamespace, error) {
+func NewBitbucketGitProvider(username string, token string) *BitbucketGitProvider {
+	return &BitbucketGitProvider{
+		username: username,
+		token:    token,
+	}
+}
+
+func (g *BitbucketGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	client := g.getApiClient()
 	user, err := g.GetUser()
 	if err != nil {
@@ -43,20 +50,23 @@ func (g *BitbucketGitProvider) GetNamespaces() ([]GitNamespace, error) {
 		return nil, err
 	}
 
-	namespaces := make([]GitNamespace, wsList.Size+1) // +1 for the user namespace
-	namespaces[0] = GitNamespace{Id: personalNamespaceId, Name: user.Username}
+	namespaces := []*GitNamespace{}
 
-	for i, org := range wsList.Workspaces {
-		namespaces[i+1].Id = org.Slug
-		namespaces[i+1].Name = org.Name
+	for _, org := range wsList.Workspaces {
+		namespace := &GitNamespace{}
+		namespace.Id = org.Slug
+		namespace.Name = org.Name
+		namespaces = append(namespaces, namespace)
 	}
+
+	namespaces = append([]*GitNamespace{{Id: personalNamespaceId, Name: user.Username}}, namespaces...)
 
 	return namespaces, nil
 }
 
-func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]GitRepository, error) {
+func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
 	client := g.getApiClient()
-	var response []GitRepository
+	var response []*GitRepository
 
 	if namespace == personalNamespaceId {
 		user, err := g.GetUser()
@@ -84,7 +94,7 @@ func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]GitRepositor
 		url := htmlLink["href"].(string)
 		repoSlug := url[strings.LastIndex(url, "/")+1:]
 
-		response = append(response, GitRepository{
+		response = append(response, &GitRepository{
 			Id:   repoSlug,
 			Name: repo.Name,
 			Url:  url,
@@ -94,9 +104,9 @@ func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]GitRepositor
 	return response, err
 }
 
-func (g *BitbucketGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]GitBranch, error) {
+func (g *BitbucketGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {
 	client := g.getApiClient()
-	var response []GitBranch
+	var response []*GitBranch
 
 	if namespaceId == personalNamespaceId {
 		user, err := g.GetUser()
@@ -145,7 +155,7 @@ func (g *BitbucketGitProvider) GetRepoBranches(repositoryId string, namespaceId 
 
 	// Now you can work with the branches
 	for _, branch := range branchesResponse.Values {
-		response = append(response, GitBranch{
+		response = append(response, &GitBranch{
 			Name: branch.Name,
 			SHA:  branch.Target.Hash,
 		})
@@ -154,9 +164,9 @@ func (g *BitbucketGitProvider) GetRepoBranches(repositoryId string, namespaceId 
 	return response, nil
 }
 
-func (g *BitbucketGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]GitPullRequest, error) {
+func (g *BitbucketGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error) {
 	client := g.getApiClient()
-	var response []GitPullRequest
+	var response []*GitPullRequest
 
 	if namespaceId == personalNamespaceId {
 		user, err := g.GetUser()
@@ -179,15 +189,15 @@ func (g *BitbucketGitProvider) GetRepoPRs(repositoryId string, namespaceId strin
 	return response, err
 }
 
-func (g *BitbucketGitProvider) GetUser() (GitUser, error) {
+func (g *BitbucketGitProvider) GetUser() (*GitUser, error) {
 	client := g.getApiClient()
 
 	user, err := client.User.Profile()
 	if err != nil {
-		return GitUser{}, err
+		return nil, err
 	}
 
-	response := GitUser{}
+	response := &GitUser{}
 	response.Id = user.AccountId
 	response.Username = user.Username
 	response.Name = user.DisplayName

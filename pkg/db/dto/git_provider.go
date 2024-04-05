@@ -7,24 +7,26 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 )
 
-type GitProviderDTO struct {
-	Id         string `gorm:"primaryKey"`
-	Username   string
-	Token      string
-	BaseApiUrl string
+type GitProviderConfigDTO struct {
+	Id         string  `gorm:"primaryKey"`
+	Username   string  `json:"username"`
+	Token      string  `json:"token"`
+	BaseApiUrl *string `json:"baseApiUrl,omitempty"`
 }
 
-func ToGitProviderDTO(gitProvider gitprovider.GitProvider) GitProviderDTO {
-	return GitProviderDTO{
+func ToGitProviderConfigDTO(gitProvider gitprovider.GitProviderConfig) GitProviderConfigDTO {
+	gitProviderDTO := GitProviderConfigDTO{
 		Id:         gitProvider.Id,
 		Username:   gitProvider.Username,
 		Token:      gitProvider.Token,
 		BaseApiUrl: gitProvider.BaseApiUrl,
 	}
+
+	return gitProviderDTO
 }
 
-func ToGitProvider(gitProviderDTO GitProviderDTO) gitprovider.GitProvider {
-	return gitprovider.GitProvider{
+func ToGitProviderConfig(gitProviderDTO GitProviderConfigDTO) gitprovider.GitProviderConfig {
+	return gitprovider.GitProviderConfig{
 		Id:         gitProviderDTO.Id,
 		Username:   gitProviderDTO.Username,
 		Token:      gitProviderDTO.Token,

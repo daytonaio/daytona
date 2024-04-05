@@ -11,95 +11,72 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/daytonaio/daytona/internal"
-	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/logger"
 	"github.com/daytonaio/daytona/pkg/provider"
-	"github.com/daytonaio/daytona/pkg/server/api/controllers/workspace/dto"
-	"github.com/daytonaio/daytona/pkg/server/auth"
-	"github.com/daytonaio/daytona/pkg/server/config"
-	"github.com/daytonaio/daytona/pkg/server/db"
-	"github.com/daytonaio/daytona/pkg/server/provisioner"
-	"github.com/daytonaio/daytona/pkg/server/targets"
+	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/google/uuid"
-
-	log "github.com/sirupsen/logrus"
 )
 
-func CreateWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, error) {
-	_, err := db.FindWorkspaceByName(createWorkspaceDto.Name)
+func (s *WorkspaceService) CreateWorkspace(name string, targetId string, repositories []gitprovider.GitRepository) (*workspace.Workspace, error) {
+	_, err := s.workspaceStore.Find(name)
 	if err == nil {
 		return nil, errors.New("workspace already exists")
 	}
 
 	isAlphaNumeric := regexp.MustCompile(`^[a-zA-Z0-9-]+$`).MatchString
-	if !isAlphaNumeric(createWorkspaceDto.Name) {
+	if !isAlphaNumeric(name) {
 		return nil, errors.New("name is not a valid alphanumeric string")
 	}
 
-	t, err := targets.GetTarget(createWorkspaceDto.Target)
+	providerName, targetName, err := s.parseTargetId(targetId)
 	if err != nil {
 		return nil, err
 	}
 
-	w := &types.Workspace{
-		Id:     uuid.NewString(),
-		Name:   createWorkspaceDto.Name,
-		Target: createWorkspaceDto.Target,
-	}
-
-	w.Projects = []*types.Project{}
-	serverConfig, err := config.GetConfig()
+	t, err := s.targetStore.Find(providerName, targetName)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	userGitProviders := serverConfig.GitProviders
 
-	for _, repo := range createWorkspaceDto.Repositories {
-		providerId := getGitProviderIdFromUrl(repo.Url)
-		gitProvider := gitprovider.GetGitProvider(providerId, userGitProviders)
+	w := &workspace.Workspace{
+		Id:     uuid.NewString(),
+		Name:   name,
+		Target: targetId,
+	}
 
-		if gitProvider != nil {
-			gitUser, err := gitProvider.GetUser()
-			if err != nil {
-				return nil, err
-			}
-			repo.GitUser = &types.GitUser{
-				Name:  gitUser.Name,
-				Email: gitUser.Email,
-			}
-		}
+	w.Projects = []*workspace.Project{}
 
+	for _, repo := range repositories {
 		projectNameSlugRegex := regexp.MustCompile(`[^a-zA-Z0-9-]`)
 		projectName := projectNameSlugRegex.ReplaceAllString(strings.TrimSuffix(strings.ToLower(filepath.Base(repo.Url)), ".git"), "-")
 
-		apiKey, err := auth.GenerateApiKey(types.ApiKeyTypeProject, fmt.Sprintf("%s/%s", w.Id, projectName))
+		apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", w.Id, projectName))
 		if err != nil {
 			return nil, err
 		}
 
-		project := &types.Project{
+		project := &workspace.Project{
 			Name:        projectName,
 			Repository:  &repo,
 			WorkspaceId: w.Id,
 			ApiKey:      apiKey,
-			Target:      createWorkspaceDto.Target,
+			Target:      targetId,
 		}
 		w.Projects = append(w.Projects, project)
 	}
 
-	err = db.SaveWorkspace(w)
+	err = s.workspaceStore.Save(w)
 	if err != nil {
 		return nil, err
 	}
 
-	err = provisioner.CreateWorkspace(w, t)
+	err = s.provisioner.CreateWorkspace(w, t)
 	if err != nil {
 		return nil, err
 	}
 
-	err = provisioner.StartWorkspace(w, t)
+	err = s.provisioner.StartWorkspace(w, t)
 	if err != nil {
 		return nil, err
 	}
@@ -107,13 +84,13 @@ func CreateWorkspace(createWorkspaceDto dto.CreateWorkspace) (*types.Workspace, 
 	return w, nil
 }
 
-func createProject(project *types.Project, c *types.ServerConfig, target *provider.ProviderTarget, logWriter io.Writer) error {
+func (s *WorkspaceService) createProject(project *workspace.Project, target *provider.ProviderTarget, logWriter io.Writer) error {
 	logWriter.Write([]byte(fmt.Sprintf("Creating project %s\n", project.Name)))
 
 	projectToCreate := *project
-	projectToCreate.EnvVars = getProjectEnvVars(project, c)
+	projectToCreate.EnvVars = workspace.GetProjectEnvVars(project, s.serverApiUrl, s.serverUrl)
 
-	err := provisioner.CreateProject(&projectToCreate, target)
+	err := s.provisioner.CreateProject(&projectToCreate, target)
 	if err != nil {
 		return err
 	}
@@ -123,67 +100,44 @@ func createProject(project *types.Project, c *types.ServerConfig, target *provid
 	return nil
 }
 
-func createWorkspace(workspace *types.Workspace) (*types.Workspace, error) {
-	target, err := targets.GetTarget(workspace.Target)
+func (s *WorkspaceService) createWorkspace(workspace *workspace.Workspace) (*workspace.Workspace, error) {
+	providerName, targetName, err := s.parseTargetId(workspace.Target)
 	if err != nil {
 		return workspace, err
 	}
 
-	logsDir, err := config.GetWorkspaceLogsDir()
+	target, err := s.targetStore.Find(providerName, targetName)
 	if err != nil {
 		return workspace, err
 	}
 
-	c, err := config.GetConfig()
-	if err != nil {
-		return workspace, err
-	}
+	wsLogger := s.newWorkspaceLogger(workspace.Id)
+	wsLogger.Write([]byte("Creating workspace\n"))
 
-	workspaceLogger := logger.GetWorkspaceLogger(logsDir, workspace.Id)
-	defer workspaceLogger.Close()
-
-	wsLogWriter := io.MultiWriter(&util.InfoLogWriter{}, workspaceLogger)
-
-	wsLogWriter.Write([]byte("Creating workspace\n"))
-
-	err = provisioner.CreateWorkspace(workspace, target)
+	err = s.provisioner.CreateWorkspace(workspace, target)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, project := range workspace.Projects {
-		projectLogger := logger.GetProjectLogger(logsDir, workspace.Id, project.Name)
+		projectLogger := s.newProjectLogger(workspace.Id, project.Name)
 		defer projectLogger.Close()
 
-		projectLogWriter := io.MultiWriter(wsLogWriter, projectLogger)
-		err := createProject(project, c, target, projectLogWriter)
+		projectLogWriter := io.MultiWriter(wsLogger, projectLogger)
+		err := s.createProject(project, target, projectLogWriter)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	wsLogWriter.Write([]byte("Workspace creation complete. Pending start...\n"))
+	wsLogger.Write([]byte("Workspace creation complete. Pending start...\n"))
 
-	err = startWorkspace(workspace, target, c, logsDir, wsLogWriter)
+	err = s.startWorkspace(workspace, target, wsLogger)
 	if err != nil {
 		return nil, err
 	}
 
 	return workspace, nil
-}
-
-func getProjectEnvVars(project *types.Project, config *types.ServerConfig) map[string]string {
-	envVars := map[string]string{
-		"DAYTONA_WS_ID":                     project.WorkspaceId,
-		"DAYTONA_WS_PROJECT_NAME":           project.Name,
-		"DAYTONA_WS_PROJECT_REPOSITORY_URL": project.Repository.Url,
-		"DAYTONA_SERVER_API_KEY":            project.ApiKey,
-		"DAYTONA_SERVER_VERSION":            internal.Version,
-		"DAYTONA_SERVER_URL":                util.GetFrpcServerUrl(config),
-		"DAYTONA_SERVER_API_URL":            util.GetFrpcApiUrl(config),
-	}
-
-	return envVars
 }
 
 func getGitProviderIdFromUrl(url string) string {

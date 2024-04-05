@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/server/logs"
 	"github.com/kardianos/service"
 )
 
@@ -37,7 +36,7 @@ func Start() error {
 		return err
 	}
 
-	logFilePath := logs.GetLogFilePath()
+	// logFilePath := server.GetLogFilePath()
 
 	time.Sleep(5 * time.Second)
 	status, err := s.Status()
@@ -53,11 +52,14 @@ func Start() error {
 	if err != nil {
 		return err
 	}
-	logContent, err := os.ReadFile(*logFilePath)
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(logContent))
+
+	// TODO: return this
+	// logContent, err := os.ReadFile(*logFilePath)
+	// if err != nil {
+	// 	return err
+	// }
+	// fmt.Println(string(logContent))
+
 	if status == service.StatusStopped {
 		return fmt.Errorf("daemon stopped unexpectedly")
 	} else {

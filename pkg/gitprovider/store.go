@@ -3,9 +3,9 @@
 
 package gitprovider
 
-type Store interface {
-	List() ([]*GitProvider, error)
-	Get(id string) (*GitProvider, error)
-	Set(gitProvider *GitProvider) error
-	Remove(gitProvider *GitProvider) error
+type ConfigStore interface {
+	List() ([]*GitProviderConfig, error)
+	Find(id string) (*GitProviderConfig, error)
+	Save(*GitProviderConfig) error
+	Delete(*GitProviderConfig) error
 }

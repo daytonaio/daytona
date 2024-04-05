@@ -14,6 +14,15 @@ type WorkspaceStore struct {
 	db *gorm.DB
 }
 
+func NewWorkspaceStore(db *gorm.DB) (*WorkspaceStore, error) {
+	err := db.AutoMigrate(&WorkspaceDTO{})
+	if err != nil {
+		return nil, err
+	}
+
+	return &WorkspaceStore{db: db}, nil
+}
+
 func (w *WorkspaceStore) List() ([]*workspace.Workspace, error) {
 	workspaceDTOs := []WorkspaceDTO{}
 	tx := w.db.Find(&workspaceDTOs)

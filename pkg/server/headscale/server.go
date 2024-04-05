@@ -10,10 +10,27 @@ import (
 	"github.com/juanfont/headscale/hscontrol"
 )
 
-type HeadscaleServer struct {
+type HeadscaleServerConfig struct {
 	ServerId      string
 	FrpsDomain    string
+	FrpsProtocol  string
 	HeadscalePort uint32
+}
+
+func NewHeadscaleServer(config *HeadscaleServerConfig) *HeadscaleServer {
+	return &HeadscaleServer{
+		serverId:      config.ServerId,
+		frpsDomain:    config.FrpsDomain,
+		frpsProtocol:  config.FrpsProtocol,
+		headscalePort: config.HeadscalePort,
+	}
+}
+
+type HeadscaleServer struct {
+	serverId      string
+	frpsDomain    string
+	frpsProtocol  string
+	headscalePort uint32
 }
 
 func (s *HeadscaleServer) Init() error {

@@ -49,19 +49,3 @@ func GetSQLiteConnection(dbPath string) *gorm.DB {
 
 	return _db
 }
-
-// func GetDbPath() (string, error) {
-// 	userConfigDir, err := os.UserConfigDir()
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	dir := filepath.Join(userConfigDir, "daytona")
-
-// 	err = os.MkdirAll(dir, 0755)
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	return filepath.Join(dir, "db"), nil
-// }

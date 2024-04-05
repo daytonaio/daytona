@@ -76,15 +76,10 @@ func getDefaultFRPSConfig() *FRPSConfig {
 	}
 }
 
-func getDefaultConfig() (*ServerConfig, error) {
+func getDefaultConfig() (*Config, error) {
 	providersDir, err := getDefaultProvidersDir()
 	if err != nil {
 		return nil, errors.New("failed to get default providers dir")
-	}
-
-	targetsPath, err := getDefaultTargetsPath()
-	if err != nil {
-		return nil, errors.New("failed to get default targets path")
 	}
 
 	binariesPath, err := getDefaultBinariesPath()
@@ -92,16 +87,21 @@ func getDefaultConfig() (*ServerConfig, error) {
 		return nil, errors.New("failed to get default binaries path")
 	}
 
-	c := ServerConfig{
+	logFilePath, err := getDefaultLogFilePath()
+	if err != nil {
+		return nil, errors.New("failed to get default log file path")
+	}
+
+	c := Config{
 		Id:                generateUuid(),
 		RegistryUrl:       defaultRegistryUrl,
 		ProvidersDir:      providersDir,
 		ServerDownloadUrl: defaultServerDownloadUrl,
 		ApiPort:           defaultApiPort,
 		HeadscalePort:     defaultHeadscalePort,
-		TargetsFilePath:   targetsPath,
 		BinariesPath:      binariesPath,
 		Frps:              getDefaultFRPSConfig(),
+		LogFilePath:       logFilePath,
 	}
 
 	if os.Getenv("DEFAULT_REGISTRY_URL") != "" {
@@ -112,9 +112,6 @@ func getDefaultConfig() (*ServerConfig, error) {
 	}
 	if os.Getenv("DEFAULT_PROVIDERS_DIR") != "" {
 		c.ProvidersDir = os.Getenv("DEFAULT_PROVIDERS_DIR")
-	}
-	if os.Getenv("DEFAULT_TARGETS_FILE_PATH") != "" {
-		c.TargetsFilePath = os.Getenv("DEFAULT_TARGETS_FILE_PATH")
 	}
 	if os.Getenv("DEFAULT_BINARIES_PATH") != "" {
 		c.BinariesPath = os.Getenv("DEFAULT_BINARIES_PATH")
@@ -160,13 +157,13 @@ func getDefaultProvidersDir() (string, error) {
 	return filepath.Join(userConfigDir, "daytona", "providers"), nil
 }
 
-func getDefaultTargetsPath() (string, error) {
+func getDefaultLogFilePath() (string, error) {
 	configDir, err := GetConfigDir()
 	if err != nil {
 		return "", err
 	}
 
-	return filepath.Join(configDir, "targets.json"), nil
+	return filepath.Join(configDir, "daytona.log"), nil
 }
 
 func getDefaultBinariesPath() (string, error) {

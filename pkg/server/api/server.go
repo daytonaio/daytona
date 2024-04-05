@@ -29,7 +29,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/server"
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/target"
 	"github.com/daytonaio/daytona/pkg/server/api/controllers/workspace"
-	"github.com/daytonaio/daytona/pkg/server/config"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -41,7 +40,7 @@ import (
 var httpServer *http.Server
 var router *gin.Engine
 
-func GetServer() (*http.Server, error) {
+func GetServer(apiPort int) (*http.Server, error) {
 	docs.SwaggerInfo.Version = "0.1"
 	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Description = "Daytona Server API"
@@ -68,11 +67,6 @@ func GetServer() (*http.Server, error) {
 
 	project := protected.Group("/")
 	project.Use(middlewares.ProjectAuthMiddleware())
-
-	config, err := config.GetConfig()
-	if err != nil {
-		return nil, err
-	}
 
 	serverController := protected.Group("/server")
 	{
@@ -136,7 +130,7 @@ func GetServer() (*http.Server, error) {
 	project.GET(gitProviderController.BasePath()+"/for-url/:url", middlewares.ProjectAuthMiddleware(), gitprovider.GetGitProviderForUrl)
 
 	httpServer = &http.Server{
-		Addr:    fmt.Sprintf(":%d", config.ApiPort),
+		Addr:    fmt.Sprintf(":%d", apiPort),
 		Handler: router,
 	}
 

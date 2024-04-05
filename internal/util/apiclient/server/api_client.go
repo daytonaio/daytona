@@ -5,14 +5,15 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
-	"github.com/daytonaio/daytona/pkg/types"
 )
 
 var apiClient *serverapiclient.APIClient
@@ -67,13 +68,13 @@ func GetApiClient(profile *config.Profile) (*serverapiclient.APIClient, error) {
 	return apiClient, nil
 }
 
-func ToServerConfig(config serverapiclient.ServerConfig) types.ServerConfig {
-	return types.ServerConfig{
+func ToServerConfig(config serverapiclient.ServerConfig) server.Config {
+	return server.Config{
 		ProvidersDir:      *config.ProvidersDir,
 		RegistryUrl:       *config.RegistryUrl,
 		Id:                *config.Id,
 		ServerDownloadUrl: *config.ServerDownloadUrl,
-		Frps: &types.FRPSConfig{
+		Frps: &server.FRPSConfig{
 			Domain:   *config.Frps.Domain,
 			Port:     uint32(*config.Frps.Port),
 			Protocol: *config.Frps.Protocol,
@@ -127,4 +128,34 @@ func GetWorkspace(workspaceNameOrId string) (*serverapiclient.WorkspaceDTO, erro
 	}
 
 	return workspace, nil
+}
+
+func GetFirstWorkspaceProjectName(workspaceId string, projectName string, profile *config.Profile) (string, error) {
+	ctx := context.Background()
+
+	apiClient, err := GetApiClient(profile)
+	if err != nil {
+		return "", err
+	}
+
+	wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceId).Execute()
+	if err != nil {
+		return "", apiclient.HandleErrorResponse(res, err)
+	}
+
+	if projectName == "" {
+		if len(wsInfo.Projects) == 0 {
+			return "", errors.New("no projects found in workspace")
+		}
+
+		return *wsInfo.Projects[0].Name, nil
+	}
+
+	for _, project := range wsInfo.Projects {
+		if *project.Name == projectName {
+			return *project.Name, nil
+		}
+	}
+
+	return "", errors.New("project not found in workspace")
 }

@@ -7,54 +7,62 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/daytonaio/daytona/pkg/server/auth"
-	"github.com/daytonaio/daytona/pkg/server/config"
-	"github.com/daytonaio/daytona/pkg/server/db"
-	"github.com/daytonaio/daytona/pkg/server/targets"
-
 	log "github.com/sirupsen/logrus"
 )
 
-func RemoveWorkspace(workspaceId string) error {
-	workspace, err := db.FindWorkspaceByIdOrName(workspaceId)
+func (s *WorkspaceService) RemoveWorkspace(workspaceId string) error {
+	workspace, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
 		return errors.New("workspace not found")
 	}
 
 	log.Infof("Destroying workspace %s", workspace.Id)
 
-	target, err := targets.GetTarget(workspace.Target)
+	providerName, targetName, err := s.parseTargetId(workspace.Target)
+	if err != nil {
+		return err
+	}
+
+	target, err := s.targetStore.Find(providerName, targetName)
 	if err != nil {
 		return err
 	}
 
 	for _, project := range workspace.Projects {
 		//	todo: go routines
-		err := provisioner.DestroyProject(project, target)
+		err := s.provisioner.DestroyProject(project, target)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = provisioner.DestroyWorkspace(workspace, target)
-	if err != nil {
-		return err
-	}
-
-	err = config.DeleteWorkspaceLogs(workspace.Id)
+	err = s.provisioner.DestroyWorkspace(workspace, target)
 	if err != nil {
 		return err
 	}
 
 	for _, project := range workspace.Projects {
-		err := auth.RevokeApiKey(fmt.Sprintf("%s/%s", workspace.Id, project.Name))
+		err := s.apiKeyService.Revoke(fmt.Sprintf("%s/%s", workspace.Id, project.Name))
 		if err != nil {
 			// Should not fail the whole operation if the API key cannot be revoked
 			log.Error(err)
 		}
+		projectLogger := s.newProjectLogger(workspace.Id, project.Name)
+		err = projectLogger.Cleanup()
+		if err != nil {
+			// Should not fail the whole operation if the project logger cannot be cleaned up
+			log.Error(err)
+		}
 	}
 
-	err = db.DeleteWorkspace(workspace)
+	logger := s.newWorkspaceLogger(workspace.Id)
+	err = logger.Cleanup()
+	if err != nil {
+		// Should not fail the whole operation if the workspace logger cannot be cleaned up
+		log.Error(err)
+	}
+
+	err = s.workspaceStore.Delete(workspace)
 	if err != nil {
 		return err
 	}

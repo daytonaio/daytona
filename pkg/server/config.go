@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 )
 
-func GetConfig() (*ServerConfig, error) {
+func GetConfig() (*Config, error) {
 	configFilePath, err := configFilePath()
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ func GetConfig() (*ServerConfig, error) {
 		return nil, err
 	}
 
-	var c ServerConfig
+	var c Config
 	configContent, err := os.ReadFile(configFilePath)
 	if err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func configFilePath() (string, error) {
 	return filepath.Join(configDir, "config.json"), nil
 }
 
-func Save(c ServerConfig) error {
+func Save(c Config) error {
 	configFilePath, err := configFilePath()
 	if err != nil {
 		return err
@@ -107,38 +107,4 @@ func GetWorkspaceLogsDir() (string, error) {
 	}
 
 	return filepath.Join(configDir, "logs"), nil
-}
-
-func GetWorkspaceLogFilePath(workspaceId string) (string, error) {
-	projectLogsDir, err := GetWorkspaceLogsDir()
-	if err != nil {
-		return "", err
-	}
-
-	filePath := filepath.Join(projectLogsDir, workspaceId, "log")
-
-	err = os.MkdirAll(filepath.Dir(filePath), 0755)
-	if err != nil {
-		return "", err
-	}
-
-	return filePath, nil
-}
-
-func DeleteWorkspaceLogs(workspaceId string) error {
-	logsDir, err := GetWorkspaceLogsDir()
-	if err != nil {
-		return err
-	}
-
-	workspaceLogsDir := filepath.Join(logsDir, workspaceId)
-
-	_, err = os.Stat(workspaceLogsDir)
-	if os.IsNotExist(err) {
-		return nil
-	} else if err != nil {
-		return err
-	}
-
-	return os.RemoveAll(workspaceLogsDir)
 }

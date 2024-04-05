@@ -6,34 +6,36 @@ package workspaces
 import (
 	"errors"
 
-	"github.com/daytonaio/daytona/pkg/server/db"
-	"github.com/daytonaio/daytona/pkg/server/targets"
-
 	log "github.com/sirupsen/logrus"
 )
 
-func StopWorkspace(workspaceId string) error {
-	workspace, err := db.FindWorkspaceByIdOrName(workspaceId)
+func (s *WorkspaceService) StopWorkspace(workspaceId string) error {
+	workspace, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
 		return errors.New("workspace not found")
 	}
 
 	log.Info("Stopping workspace")
 
-	target, err := targets.GetTarget(workspace.Target)
+	providerName, targetName, err := s.parseTargetId(workspace.Target)
+	if err != nil {
+		return err
+	}
+
+	target, err := s.targetStore.Find(providerName, targetName)
 	if err != nil {
 		return err
 	}
 
 	for _, project := range workspace.Projects {
 		//	todo: go routines
-		err := provisioner.StopProject(project, target)
+		err := s.provisioner.StopProject(project, target)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = provisioner.StopWorkspace(workspace, target)
+	err = s.provisioner.StopWorkspace(workspace, target)
 	if err != nil {
 		return err
 	}
@@ -42,21 +44,26 @@ func StopWorkspace(workspaceId string) error {
 	return nil
 }
 
-func StopProject(workspaceId, projectId string) error {
-	w, err := db.FindWorkspaceByIdOrName(workspaceId)
+func (s *WorkspaceService) StopProject(workspaceId, projectName string) error {
+	w, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
 		return errors.New("workspace not found")
 	}
 
-	project, err := getProject(w, projectId)
+	project, err := w.GetProject(projectName)
 	if err != nil {
 		return errors.New("project not found")
 	}
 
-	target, err := targets.GetTarget(project.Target)
+	providerName, targetName, err := s.parseTargetId(w.Target)
 	if err != nil {
 		return err
 	}
 
-	return provisioner.StopProject(project, target)
+	target, err := s.targetStore.Find(providerName, targetName)
+	if err != nil {
+		return err
+	}
+
+	return s.provisioner.StopProject(project, target)
 }
