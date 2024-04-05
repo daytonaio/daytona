@@ -7,8 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/server/config"
+	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,19 +25,7 @@ import (
 func GetNamespaces(ctx *gin.Context) {
 	gitProviderId := ctx.Param("gitProviderId")
 
-	c, err := config.GetConfig()
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get config: %s", err.Error()))
-		return
-	}
-
-	gitProvider := gitprovider.GetGitProvider(gitProviderId, c.GitProviders)
-	if gitProvider == nil {
-		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("git provider not found"))
-		return
-	}
-
-	response, err := gitProvider.GetNamespaces()
+	response, err := gitproviders.GetNamespaces(gitProviderId)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get namespaces: %s", err.Error()))
 		return

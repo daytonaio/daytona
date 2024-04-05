@@ -7,8 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/server/config"
+	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/gin-gonic/gin"
 )
 
@@ -28,21 +27,9 @@ func GetRepositories(ctx *gin.Context) {
 	gitProviderId := ctx.Param("gitProviderId")
 	namespaceId := ctx.Param("namespaceId")
 
-	c, err := config.GetConfig()
+	response, err := gitproviders.GetRepositories(gitProviderId, namespaceId)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get config: %s", err.Error()))
-		return
-	}
-
-	gitProvider := gitprovider.GetGitProvider(gitProviderId, c.GitProviders)
-	if gitProvider == nil {
-		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("git provider not found"))
-		return
-	}
-
-	response, err := gitProvider.GetRepositories(namespaceId)
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get repositories: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get repositories for url: %s", err.Error()))
 		return
 	}
 

@@ -94,7 +94,6 @@ func getDefaultConfig() (*ServerConfig, error) {
 
 	c := ServerConfig{
 		Id:                generateUuid(),
-		GitProviders:      []GitProvider{},
 		RegistryUrl:       defaultRegistryUrl,
 		ProvidersDir:      providersDir,
 		ServerDownloadUrl: defaultServerDownloadUrl,

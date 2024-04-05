@@ -7,8 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/server/config"
+	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,21 +29,9 @@ func GetRepoBranches(ctx *gin.Context) {
 	namespaceId := ctx.Param("namespaceId")
 	repositoryId := ctx.Param("repositoryId")
 
-	c, err := config.GetConfig()
+	response, err := gitproviders.GetRepoBranches(gitProviderId, namespaceId, repositoryId)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get config: %s", err.Error()))
-		return
-	}
-
-	gitProvider := gitprovider.GetGitProvider(gitProviderId, c.GitProviders)
-	if gitProvider == nil {
-		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("git provider not found"))
-		return
-	}
-
-	response, err := gitProvider.GetRepoBranches(repositoryId, namespaceId)
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get branches: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get repo branches: %s", err.Error()))
 		return
 	}
 

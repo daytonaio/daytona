@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/daytonaio/daytona/pkg/types"
+	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/gin-gonic/gin"
 )
 
@@ -33,7 +33,7 @@ func GetGitContext(ctx *gin.Context) {
 		return
 	}
 
-	repo := &types.GitRepository{}
+	repo := &gitprovider.GitRepository{}
 	repo.Url = decodedURLParam
 
 	ctx.JSON(200, repo)
