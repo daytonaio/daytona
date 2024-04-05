@@ -6,12 +6,11 @@ package gitprovider
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"net/url"
 
-	"github.com/daytonaio/daytona/pkg/server/config"
-	"github.com/daytonaio/daytona/pkg/types"
+	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,7 +26,7 @@ import (
 //
 //	@id				GetGitProviderForUrl
 func GetGitProviderForUrl(ctx *gin.Context) {
-	var response types.GitProvider
+	var response gitprovider.GitProvider
 
 	urlParam := ctx.Param("url")
 
@@ -37,20 +36,10 @@ func GetGitProviderForUrl(ctx *gin.Context) {
 		return
 	}
 
-	c, err := config.GetConfig()
+	response, err = gitproviders.GetGitProviderForUrl(decodedUrl)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get config: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %s", err.Error()))
 		return
-	}
-
-	for _, gitProvider := range c.GitProviders {
-		if strings.Contains(decodedUrl, fmt.Sprintf("%s.", gitProvider.Id)) {
-			response = gitProvider
-		}
-
-		if gitProvider.BaseApiUrl != "" && strings.Contains(decodedUrl, getHostnameFromUrl(gitProvider.BaseApiUrl)) {
-			response = gitProvider
-		}
 	}
 
 	ctx.JSON(200, response)
@@ -68,8 +57,7 @@ func GetGitProviderForUrl(ctx *gin.Context) {
 //
 //	@id				SetGitProvider
 func SetGitProvider(ctx *gin.Context) {
-	var gitProviderData types.GitProvider
-	var providerExists bool
+	var gitProviderData gitprovider.GitProvider
 
 	err := ctx.BindJSON(&gitProviderData)
 	if err != nil {
@@ -77,34 +65,9 @@ func SetGitProvider(ctx *gin.Context) {
 		return
 	}
 
-	c, err := config.GetConfig()
+	err = gitproviders.SetGitProvider(gitProviderData)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get config: %s", err.Error()))
-		return
-	}
-
-	for i, provider := range c.GitProviders {
-		if provider.Id == gitProviderData.Id {
-			c.GitProviders[i].Token = gitProviderData.Token
-			c.GitProviders[i].Username = gitProviderData.Username
-			c.GitProviders[i].BaseApiUrl = gitProviderData.BaseApiUrl
-			providerExists = true
-			break
-		}
-	}
-
-	if !providerExists {
-		c.GitProviders = append(c.GitProviders, types.GitProvider{
-			Id:         gitProviderData.Id,
-			Token:      gitProviderData.Token,
-			Username:   gitProviderData.Username,
-			BaseApiUrl: gitProviderData.BaseApiUrl,
-		})
-	}
-
-	err = config.Save(c)
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to save config: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to set git provider: %s", err.Error()))
 		return
 	}
 
@@ -125,39 +88,11 @@ func SetGitProvider(ctx *gin.Context) {
 func RemoveGitProvider(ctx *gin.Context) {
 	gitProviderId := ctx.Param("gitProviderId")
 
-	c, err := config.GetConfig()
+	err := gitproviders.RemoveGitProvider(gitProviderId)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get config: %s", err.Error()))
-		return
-	}
-
-	var newProviders []types.GitProvider
-	for _, provider := range c.GitProviders {
-		if provider.Id != gitProviderId {
-			newProviders = append(newProviders, provider)
-		}
-	}
-
-	c.GitProviders = newProviders
-	err = config.Save(c)
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to save config: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to remove git provider: %s", err.Error()))
 		return
 	}
 
 	ctx.JSON(200, nil)
-}
-
-func getHostnameFromUrl(url string) string {
-	input := url
-	input = strings.TrimPrefix(input, "https://")
-	input = strings.TrimPrefix(input, "http://")
-	input = strings.TrimPrefix(input, "www.")
-
-	// Remove everything after the first '/'
-	if slashIndex := strings.Index(input, "/"); slashIndex != -1 {
-		input = input[:slashIndex]
-	}
-
-	return input
 }
