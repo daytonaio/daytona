@@ -49,34 +49,10 @@ func (s *GitProviderService) GetGitProvider(id string) (gitprovider.GitProvider,
 	}
 }
 
-// TODO: ON save
-// func GetUsernameFromToken(providerId string, token string, baseApiUrl *string) (string, error) {
-// 	var gitProvider gitprovider.GitProvider
+func (s *GitProviderService) ListConfigs() ([]*gitprovider.GitProviderConfig, error) {
+	return s.configStore.List()
+}
 
-// 	switch providerId {
-// 	case "github":
-// 		gitProvider = gitprovider.NewGitHubGitProvider(token)
-// 	case "gitlab":
-// 		fallthrough
-// 	case "gitlab-self-managed":
-// 		gitProvider = gitprovider.NewGitLabGitProvider(token, baseApiUrl)
-// 	case "bitbucket":
-// 		gitProvider = gitprovider.NewBitbucketGitProvider("", token)
-// 	case "codeberg":
-// 		gitProvider = gitprovider.NewGiteaGitProvider(token, codebergUrl)
-// 	case "gitea":
-// 		gitProvider = &GiteaGitProvider{
-// 			token:      token,
-// 			baseApiUrl: baseApiUrl,
-// 		}
-// 	default:
-// 		return "", errors.New("provider not found")
-// 	}
-
-// 	gitUser, err := gitProvider.GetUser()
-// 	if err != nil {
-// 		return "", errors.New("user not found")
-// 	}
-
-// 	return gitUser.Username, nil
-// }
+func (s *GitProviderService) GetConfig(id string) (*gitprovider.GitProviderConfig, error) {
+	return s.configStore.Find(id)
+}

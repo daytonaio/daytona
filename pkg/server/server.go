@@ -10,9 +10,9 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/frpc"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
-	"github.com/daytonaio/daytona/pkg/server/api"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/providertargets"
@@ -22,18 +22,18 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type ServerConfig struct {
+type ServerInstanceConfig struct {
 	Config                Config
 	TailscaleServer       TailscaleServer
 	ProviderTargetService providertargets.ProviderTargetService
 	WorkspaceService      workspaces.WorkspaceService
-	APiKeyService         apikeys.ApiKeyService
+	ApiKeyService         apikeys.ApiKeyService
 	GitProviderService    gitproviders.GitProviderService
 }
 
 var server *Server
 
-func GetInstance(serverConfig *ServerConfig) *Server {
+func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 	if serverConfig != nil && server != nil {
 		log.Fatal("Server already initialized")
 	}
@@ -41,10 +41,10 @@ func GetInstance(serverConfig *ServerConfig) *Server {
 	if server == nil {
 		server = &Server{
 			config:                serverConfig.Config,
-			tailscaleServer:       serverConfig.TailscaleServer,
+			TailscaleServer:       serverConfig.TailscaleServer,
 			ProviderTargetService: serverConfig.ProviderTargetService,
 			WorkspaceService:      serverConfig.WorkspaceService,
-			APiKeyService:         serverConfig.APiKeyService,
+			ApiKeyService:         serverConfig.ApiKeyService,
 			GitProviderService:    serverConfig.GitProviderService,
 		}
 	}
@@ -54,10 +54,10 @@ func GetInstance(serverConfig *ServerConfig) *Server {
 
 type Server struct {
 	config                Config
-	tailscaleServer       TailscaleServer
+	TailscaleServer       TailscaleServer
 	ProviderTargetService providertargets.ProviderTargetService
 	WorkspaceService      workspaces.WorkspaceService
-	APiKeyService         apikeys.ApiKeyService
+	ApiKeyService         apikeys.ApiKeyService
 	GitProviderService    gitproviders.GitProviderService
 }
 
@@ -69,15 +69,15 @@ func (s *Server) Start(errCh chan error) error {
 
 	log.Info("Starting Daytona server")
 
-	apiServer, err := api.GetServer(int(s.config.ApiPort))
-	if err != nil {
-		return err
-	}
+	// apiServer, err := api.GetServer(int(s.config.ApiPort))
+	// if err != nil {
+	// 	return err
+	// }
 
-	apiListener, err := net.Listen("tcp", apiServer.Addr)
-	if err != nil {
-		return err
-	}
+	// apiListener, err := net.Listen("tcp", apiServer.Addr)
+	// if err != nil {
+	// 	return err
+	// }
 
 	// Terminate orphaned provider processes
 	err = manager.TerminateProviderProcesses(s.config.ProvidersDir)
@@ -135,7 +135,7 @@ func (s *Server) Start(errCh chan error) error {
 	go func() {
 		errChan := make(chan error)
 		go func() {
-			errChan <- s.tailscaleServer.Start()
+			errChan <- s.TailscaleServer.Start()
 		}()
 
 		select {
@@ -143,7 +143,7 @@ func (s *Server) Start(errCh chan error) error {
 			errCh <- err
 		case <-time.After(1 * time.Second):
 			go func() {
-				errChan <- s.tailscaleServer.Connect()
+				errChan <- s.TailscaleServer.Connect()
 			}()
 		}
 
@@ -152,13 +152,13 @@ func (s *Server) Start(errCh chan error) error {
 		}
 	}()
 
-	go func() {
-		log.Infof("Starting api server on port %d", s.config.ApiPort)
-		err := apiServer.Serve(apiListener)
-		if err != nil {
-			errCh <- err
-		}
-	}()
+	// go func() {
+	// 	log.Infof("Starting api server on port %d", s.config.ApiPort)
+	// 	err := apiServer.Serve(apiListener)
+	// 	if err != nil {
+	// 		errCh <- err
+	// 	}
+	// }()
 
 	return nil
 }
@@ -171,4 +171,8 @@ func (s *Server) HealthCheck() error {
 	defer conn.Close()
 
 	return nil
+}
+
+func (s *Server) GetApiUrl() string {
+	return util.GetFrpcApiUrl(s.config.Frps.Protocol, s.config.Id, s.config.Frps.Domain)
 }

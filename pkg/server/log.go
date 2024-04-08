@@ -4,13 +4,12 @@
 package server
 
 import (
+	"io"
 	"os"
 
 	frp_log "github.com/fatedier/frp/pkg/util/log"
 	log "github.com/sirupsen/logrus"
 )
-
-var logFilePath *string
 
 type logFormatter struct {
 	textFormatter *log.TextFormatter
@@ -23,7 +22,7 @@ func (f *logFormatter) Format(entry *log.Entry) ([]byte, error) {
 		return nil, err
 	}
 
-	if logFilePath != nil {
+	if f.file != nil {
 		// Write to file
 		_, err = f.file.Write(formatted)
 		if err != nil {
@@ -64,4 +63,13 @@ func (s *Server) initLogs() error {
 	frp_log.InitLog(frpOutput, frpLogLevel, 0, false)
 
 	return nil
+}
+
+func (s *Server) GetLogReader() (io.Reader, error) {
+	file, err := os.Open(s.config.LogFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	return file, nil
 }

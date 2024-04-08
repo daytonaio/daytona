@@ -11,7 +11,7 @@ header:
 
   paths-ignore:
     - "**/serverapiclient/**"
-    - "**/pkg/server/api/docs/docs.go"
+    - "**/pkg/api/docs/docs.go"
     - ".devcontainer/postcreate.sh"
 
   comment: on-failure

@@ -37,12 +37,12 @@ var ListCmd = &cobra.Command{
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		serverConfig, res, err := apiClient.ServerAPI.GetConfig(ctx).Execute()
+		gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		if len(serverConfig.GitProviders) > 1 {
+		if len(gitProviders) > 1 {
 			specifyGitProviders = true
 		}
 

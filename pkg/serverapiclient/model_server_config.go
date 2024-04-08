@@ -19,16 +19,15 @@ var _ MappedNullable = &ServerConfig{}
 
 // ServerConfig struct for ServerConfig
 type ServerConfig struct {
-	ApiPort           *int32        `json:"apiPort,omitempty"`
-	BinariesPath      *string       `json:"binariesPath,omitempty"`
-	Frps              *FRPSConfig   `json:"frps,omitempty"`
-	GitProviders      []GitProvider `json:"gitProviders,omitempty"`
-	HeadscalePort     *int32        `json:"headscalePort,omitempty"`
-	Id                *string       `json:"id,omitempty"`
-	ProvidersDir      *string       `json:"providersDir,omitempty"`
-	RegistryUrl       *string       `json:"registryUrl,omitempty"`
-	ServerDownloadUrl *string       `json:"serverDownloadUrl,omitempty"`
-	TargetsFilePath   *string       `json:"targetsFilePath,omitempty"`
+	ApiPort           *int32      `json:"apiPort,omitempty"`
+	BinariesPath      *string     `json:"binariesPath,omitempty"`
+	Frps              *FRPSConfig `json:"frps,omitempty"`
+	HeadscalePort     *int32      `json:"headscalePort,omitempty"`
+	Id                *string     `json:"id,omitempty"`
+	LogFilePath       *string     `json:"logFilePath,omitempty"`
+	ProvidersDir      *string     `json:"providersDir,omitempty"`
+	RegistryUrl       *string     `json:"registryUrl,omitempty"`
+	ServerDownloadUrl *string     `json:"serverDownloadUrl,omitempty"`
 }
 
 // NewServerConfig instantiates a new ServerConfig object
@@ -144,38 +143,6 @@ func (o *ServerConfig) SetFrps(v FRPSConfig) {
 	o.Frps = &v
 }
 
-// GetGitProviders returns the GitProviders field value if set, zero value otherwise.
-func (o *ServerConfig) GetGitProviders() []GitProvider {
-	if o == nil || IsNil(o.GitProviders) {
-		var ret []GitProvider
-		return ret
-	}
-	return o.GitProviders
-}
-
-// GetGitProvidersOk returns a tuple with the GitProviders field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *ServerConfig) GetGitProvidersOk() ([]GitProvider, bool) {
-	if o == nil || IsNil(o.GitProviders) {
-		return nil, false
-	}
-	return o.GitProviders, true
-}
-
-// HasGitProviders returns a boolean if a field has been set.
-func (o *ServerConfig) HasGitProviders() bool {
-	if o != nil && !IsNil(o.GitProviders) {
-		return true
-	}
-
-	return false
-}
-
-// SetGitProviders gets a reference to the given []GitProvider and assigns it to the GitProviders field.
-func (o *ServerConfig) SetGitProviders(v []GitProvider) {
-	o.GitProviders = v
-}
-
 // GetHeadscalePort returns the HeadscalePort field value if set, zero value otherwise.
 func (o *ServerConfig) GetHeadscalePort() int32 {
 	if o == nil || IsNil(o.HeadscalePort) {
@@ -238,6 +205,38 @@ func (o *ServerConfig) HasId() bool {
 // SetId gets a reference to the given string and assigns it to the Id field.
 func (o *ServerConfig) SetId(v string) {
 	o.Id = &v
+}
+
+// GetLogFilePath returns the LogFilePath field value if set, zero value otherwise.
+func (o *ServerConfig) GetLogFilePath() string {
+	if o == nil || IsNil(o.LogFilePath) {
+		var ret string
+		return ret
+	}
+	return *o.LogFilePath
+}
+
+// GetLogFilePathOk returns a tuple with the LogFilePath field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ServerConfig) GetLogFilePathOk() (*string, bool) {
+	if o == nil || IsNil(o.LogFilePath) {
+		return nil, false
+	}
+	return o.LogFilePath, true
+}
+
+// HasLogFilePath returns a boolean if a field has been set.
+func (o *ServerConfig) HasLogFilePath() bool {
+	if o != nil && !IsNil(o.LogFilePath) {
+		return true
+	}
+
+	return false
+}
+
+// SetLogFilePath gets a reference to the given string and assigns it to the LogFilePath field.
+func (o *ServerConfig) SetLogFilePath(v string) {
+	o.LogFilePath = &v
 }
 
 // GetProvidersDir returns the ProvidersDir field value if set, zero value otherwise.
@@ -336,38 +335,6 @@ func (o *ServerConfig) SetServerDownloadUrl(v string) {
 	o.ServerDownloadUrl = &v
 }
 
-// GetTargetsFilePath returns the TargetsFilePath field value if set, zero value otherwise.
-func (o *ServerConfig) GetTargetsFilePath() string {
-	if o == nil || IsNil(o.TargetsFilePath) {
-		var ret string
-		return ret
-	}
-	return *o.TargetsFilePath
-}
-
-// GetTargetsFilePathOk returns a tuple with the TargetsFilePath field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *ServerConfig) GetTargetsFilePathOk() (*string, bool) {
-	if o == nil || IsNil(o.TargetsFilePath) {
-		return nil, false
-	}
-	return o.TargetsFilePath, true
-}
-
-// HasTargetsFilePath returns a boolean if a field has been set.
-func (o *ServerConfig) HasTargetsFilePath() bool {
-	if o != nil && !IsNil(o.TargetsFilePath) {
-		return true
-	}
-
-	return false
-}
-
-// SetTargetsFilePath gets a reference to the given string and assigns it to the TargetsFilePath field.
-func (o *ServerConfig) SetTargetsFilePath(v string) {
-	o.TargetsFilePath = &v
-}
-
 func (o ServerConfig) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -387,14 +354,14 @@ func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Frps) {
 		toSerialize["frps"] = o.Frps
 	}
-	if !IsNil(o.GitProviders) {
-		toSerialize["gitProviders"] = o.GitProviders
-	}
 	if !IsNil(o.HeadscalePort) {
 		toSerialize["headscalePort"] = o.HeadscalePort
 	}
 	if !IsNil(o.Id) {
 		toSerialize["id"] = o.Id
+	}
+	if !IsNil(o.LogFilePath) {
+		toSerialize["logFilePath"] = o.LogFilePath
 	}
 	if !IsNil(o.ProvidersDir) {
 		toSerialize["providersDir"] = o.ProvidersDir
@@ -404,9 +371,6 @@ func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.ServerDownloadUrl) {
 		toSerialize["serverDownloadUrl"] = o.ServerDownloadUrl
-	}
-	if !IsNil(o.TargetsFilePath) {
-		toSerialize["targetsFilePath"] = o.TargetsFilePath
 	}
 	return toSerialize, nil
 }

@@ -18,7 +18,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s *WorkspaceService) CreateWorkspace(name string, targetId string, repositories []gitprovider.GitRepository) (*workspace.Workspace, error) {
+func (s *WorkspaceService) CreateWorkspace(name string, targetName string, repositories []gitprovider.GitRepository) (*workspace.Workspace, error) {
 	_, err := s.workspaceStore.Find(name)
 	if err == nil {
 		return nil, errors.New("workspace already exists")
@@ -29,12 +29,7 @@ func (s *WorkspaceService) CreateWorkspace(name string, targetId string, reposit
 		return nil, errors.New("name is not a valid alphanumeric string")
 	}
 
-	providerName, targetName, err := s.parseTargetId(targetId)
-	if err != nil {
-		return nil, err
-	}
-
-	t, err := s.targetStore.Find(providerName, targetName)
+	t, err := s.targetStore.Find(targetName)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +37,7 @@ func (s *WorkspaceService) CreateWorkspace(name string, targetId string, reposit
 	w := &workspace.Workspace{
 		Id:     uuid.NewString(),
 		Name:   name,
-		Target: targetId,
+		Target: targetName,
 	}
 
 	w.Projects = []*workspace.Project{}
@@ -61,7 +56,7 @@ func (s *WorkspaceService) CreateWorkspace(name string, targetId string, reposit
 			Repository:  &repo,
 			WorkspaceId: w.Id,
 			ApiKey:      apiKey,
-			Target:      targetId,
+			Target:      targetName,
 		}
 		w.Projects = append(w.Projects, project)
 	}
@@ -101,12 +96,7 @@ func (s *WorkspaceService) createProject(project *workspace.Project, target *pro
 }
 
 func (s *WorkspaceService) createWorkspace(workspace *workspace.Workspace) (*workspace.Workspace, error) {
-	providerName, targetName, err := s.parseTargetId(workspace.Target)
-	if err != nil {
-		return workspace, err
-	}
-
-	target, err := s.targetStore.Find(providerName, targetName)
+	target, err := s.targetStore.Find(workspace.Target)
 	if err != nil {
 		return workspace, err
 	}

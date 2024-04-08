@@ -17,12 +17,7 @@ func (s *WorkspaceService) StopWorkspace(workspaceId string) error {
 
 	log.Info("Stopping workspace")
 
-	providerName, targetName, err := s.parseTargetId(workspace.Target)
-	if err != nil {
-		return err
-	}
-
-	target, err := s.targetStore.Find(providerName, targetName)
+	target, err := s.targetStore.Find(workspace.Target)
 	if err != nil {
 		return err
 	}
@@ -55,12 +50,7 @@ func (s *WorkspaceService) StopProject(workspaceId, projectName string) error {
 		return errors.New("project not found")
 	}
 
-	providerName, targetName, err := s.parseTargetId(w.Target)
-	if err != nil {
-		return err
-	}
-
-	target, err := s.targetStore.Find(providerName, targetName)
+	target, err := s.targetStore.Find(w.Target)
 	if err != nil {
 		return err
 	}

@@ -334,118 +334,6 @@ func (a *GitProviderAPIService) GetGitUserExecute(r ApiGetGitUserRequest) (*GitU
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiGetGitUsernameFromTokenRequest struct {
-	ctx             context.Context
-	ApiService      *GitProviderAPIService
-	gitProviderData *GitProvider
-}
-
-// Git provider
-func (r ApiGetGitUsernameFromTokenRequest) GitProviderData(gitProviderData GitProvider) ApiGetGitUsernameFromTokenRequest {
-	r.gitProviderData = &gitProviderData
-	return r
-}
-
-func (r ApiGetGitUsernameFromTokenRequest) Execute() (string, *http.Response, error) {
-	return r.ApiService.GetGitUsernameFromTokenExecute(r)
-}
-
-/*
-GetGitUsernameFromToken Get username from token
-
-Get username from token
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiGetGitUsernameFromTokenRequest
-*/
-func (a *GitProviderAPIService) GetGitUsernameFromToken(ctx context.Context) ApiGetGitUsernameFromTokenRequest {
-	return ApiGetGitUsernameFromTokenRequest{
-		ApiService: a,
-		ctx:        ctx,
-	}
-}
-
-// Execute executes the request
-//
-//	@return string
-func (a *GitProviderAPIService) GetGitUsernameFromTokenExecute(r ApiGetGitUsernameFromTokenRequest) (string, *http.Response, error) {
-	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue string
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitProviderAPIService.GetGitUsernameFromToken")
-	if err != nil {
-		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/gitprovider/username-from-token"
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-	if r.gitProviderData == nil {
-		return localVarReturnValue, nil, reportError("gitProviderData is required and must be specified")
-	}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	// body params
-	localVarPostBody = r.gitProviderData
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
-}
-
 type ApiGetNamespacesRequest struct {
 	ctx           context.Context
 	ApiService    *GitProviderAPIService
@@ -882,6 +770,106 @@ func (a *GitProviderAPIService) GetRepositoriesExecute(r ApiGetRepositoriesReque
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiListGitProvidersRequest struct {
+	ctx        context.Context
+	ApiService *GitProviderAPIService
+}
+
+func (r ApiListGitProvidersRequest) Execute() ([]GitProvider, *http.Response, error) {
+	return r.ApiService.ListGitProvidersExecute(r)
+}
+
+/*
+ListGitProviders List Git providers
+
+List Git providers
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiListGitProvidersRequest
+*/
+func (a *GitProviderAPIService) ListGitProviders(ctx context.Context) ApiListGitProvidersRequest {
+	return ApiListGitProvidersRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//
+//	@return []GitProvider
+func (a *GitProviderAPIService) ListGitProvidersExecute(r ApiListGitProvidersRequest) ([]GitProvider, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []GitProvider
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitProviderAPIService.ListGitProviders")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/gitprovider"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiRemoveGitProviderRequest struct {
 	ctx           context.Context
 	ApiService    *GitProviderAPIService
@@ -975,14 +963,14 @@ func (a *GitProviderAPIService) RemoveGitProviderExecute(r ApiRemoveGitProviderR
 }
 
 type ApiSetGitProviderRequest struct {
-	ctx             context.Context
-	ApiService      *GitProviderAPIService
-	gitProviderData *GitProvider
+	ctx               context.Context
+	ApiService        *GitProviderAPIService
+	gitProviderConfig *GitProvider
 }
 
 // Git provider
-func (r ApiSetGitProviderRequest) GitProviderData(gitProviderData GitProvider) ApiSetGitProviderRequest {
-	r.gitProviderData = &gitProviderData
+func (r ApiSetGitProviderRequest) GitProviderConfig(gitProviderConfig GitProvider) ApiSetGitProviderRequest {
+	r.gitProviderConfig = &gitProviderConfig
 	return r
 }
 
@@ -1023,8 +1011,8 @@ func (a *GitProviderAPIService) SetGitProviderExecute(r ApiSetGitProviderRequest
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.gitProviderData == nil {
-		return nil, reportError("gitProviderData is required and must be specified")
+	if r.gitProviderConfig == nil {
+		return nil, reportError("gitProviderConfig is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -1045,7 +1033,7 @@ func (a *GitProviderAPIService) SetGitProviderExecute(r ApiSetGitProviderRequest
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = r.gitProviderData
+	localVarPostBody = r.gitProviderConfig
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err

@@ -21,12 +21,7 @@ func (s *WorkspaceService) StartWorkspace(workspaceId string) error {
 		return errors.New("workspace not found")
 	}
 
-	providerName, targetName, err := s.parseTargetId(w.Target)
-	if err != nil {
-		return err
-	}
-
-	target, err := s.targetStore.Find(providerName, targetName)
+	target, err := s.targetStore.Find(w.Target)
 	if err != nil {
 		return err
 	}
@@ -50,12 +45,7 @@ func (s *WorkspaceService) StartProject(workspaceId, projectName string) error {
 		return errors.New("project not found")
 	}
 
-	providerName, targetName, err := s.parseTargetId(w.Target)
-	if err != nil {
-		return err
-	}
-
-	target, err := s.targetStore.Find(providerName, targetName)
+	target, err := s.targetStore.Find(project.Target)
 	if err != nil {
 		return err
 	}
