@@ -9,9 +9,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
-	api_util "github.com/daytonaio/daytona/pkg/server/api/util"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -63,27 +61,28 @@ func (s *Server) registerProviders() error {
 		return err
 	}
 
-	logsDir, err := GetWorkspaceLogsDir()
-	if err != nil {
-		return err
-	}
+	// logsDir, err := GetWorkspaceLogsDir()
+	// if err != nil {
+	// 	return err
+	// }
 
 	for _, file := range files {
 		if file.IsDir() {
-			pluginPath, err := s.getPluginPath(filepath.Join(s.config.ProvidersDir, file.Name()))
-			if err != nil {
-				log.Error(err)
-				continue
-			}
+			// pluginPath, err := s.getPluginPath(filepath.Join(s.config.ProvidersDir, file.Name()))
+			// if err != nil {
+			// 	log.Error(err)
+			// 	continue
+			// }
 
 			// TODO: Refactor params to a struct
-			err = manager.RegisterProvider(
-				pluginPath,
-				api_util.GetDaytonaScriptUrl(s.config.Frps.Protocol, s.config.Id, s.config.Frps.Domain),
-				util.GetFrpcServerUrl(s.config.Frps.Protocol, s.config.Id, s.config.Frps.Domain),
-				util.GetFrpcApiUrl(s.config.Frps.Protocol, s.config.Id, s.config.Frps.Domain),
-				logsDir,
-			)
+			err = errors.New("Not implemented")
+			// err = manager.RegisterProvider(
+			// 	pluginPath,
+			// 	"TODO", // api_util.GetDaytonaScriptUrl(s.config.Frps.Protocol, s.config.Id, s.config.Frps.Domain),
+			// 	util.GetFrpcServerUrl(s.config.Frps.Protocol, s.config.Id, s.config.Frps.Domain),
+			// 	util.GetFrpcApiUrl(s.config.Frps.Protocol, s.config.Id, s.config.Frps.Domain),
+			// 	logsDir,
+			// )
 			if err != nil {
 				log.Error(err)
 				continue

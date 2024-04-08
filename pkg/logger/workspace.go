@@ -4,6 +4,7 @@
 package logger
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 )
@@ -55,4 +56,9 @@ func (w *workspaceLogger) Cleanup() error {
 
 func NewWorkspaceLogger(logsDir, workspaceId string) Logger {
 	return &workspaceLogger{workspaceId: workspaceId, logsDir: logsDir}
+}
+
+func GetWorkspaceLogReader(logsDir, workspaceId string) (io.Reader, error) {
+	filePath := filepath.Join(logsDir, workspaceId, "log")
+	return os.Open(filePath)
 }

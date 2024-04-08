@@ -7,7 +7,7 @@ import "github.com/daytonaio/daytona/pkg/provider"
 
 type ProviderTargetDTO struct {
 	Name            string `json:"name" gorm:"primaryKey"`
-	ProviderName    string `json:"providerName" gorm:"primaryKey"`
+	ProviderName    string `json:"providerName"`
 	ProviderVersion string `json:"providerVersion"`
 	Options         string `json:"options"`
 }

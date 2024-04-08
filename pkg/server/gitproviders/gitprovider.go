@@ -36,7 +36,44 @@ func (s *GitProviderService) GetGitProviderForUrl(url string) (gitprovider.GitPr
 	return nil, errors.New("git provider not found")
 }
 
+func (s *GitProviderService) GetConfigForUrl(url string) (*gitprovider.GitProviderConfig, error) {
+	gitProviders, err := s.configStore.List()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, p := range gitProviders {
+		if strings.Contains(url, fmt.Sprintf("%s.", p.Id)) {
+			return p, nil
+		}
+
+		hostname, err := getHostnameFromUrl(*p.BaseApiUrl)
+		if err != nil {
+			return nil, err
+		}
+
+		if p.BaseApiUrl != nil && strings.Contains(url, hostname) {
+			return p, nil
+		}
+	}
+
+	return nil, errors.New("git provider not found")
+}
+
 func (s *GitProviderService) SetGitProviderConfig(providerConfig *gitprovider.GitProviderConfig) error {
+	gitProvider, err := s.GetGitProvider(providerConfig.Id)
+	if err != nil {
+		return err
+	}
+
+	if providerConfig.Username == "" {
+		userData, err := gitProvider.GetUser()
+		if err != nil {
+			return err
+		}
+		providerConfig.Username = userData.Username
+	}
+
 	return s.configStore.Save(providerConfig)
 }
 

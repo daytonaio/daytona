@@ -23,8 +23,8 @@ func (s *ProviderTargetService) List() ([]*provider.ProviderTarget, error) {
 	return s.targetStore.List()
 }
 
-func (s *ProviderTargetService) Find(providerName, targetName string) (*provider.ProviderTarget, error) {
-	return s.targetStore.Find(providerName, targetName)
+func (s *ProviderTargetService) Find(targetName string) (*provider.ProviderTarget, error) {
+	return s.targetStore.Find(targetName)
 }
 
 func (s *ProviderTargetService) Save(target *provider.ProviderTarget) error {

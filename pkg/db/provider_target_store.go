@@ -38,9 +38,9 @@ func (s *ProviderTargetStore) List() ([]*provider.ProviderTarget, error) {
 	return providerTargets, nil
 }
 
-func (s *ProviderTargetStore) Find(providerName, targetName string) (*provider.ProviderTarget, error) {
+func (s *ProviderTargetStore) Find(targetName string) (*provider.ProviderTarget, error) {
 	providerTargetDTO := ProviderTargetDTO{}
-	tx := s.db.Where("providerName = ? AND name = ?", providerName, targetName).First(&providerTargetDTO)
+	tx := s.db.Where("name = ?", targetName).First(&providerTargetDTO)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}

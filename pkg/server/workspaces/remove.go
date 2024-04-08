@@ -18,12 +18,7 @@ func (s *WorkspaceService) RemoveWorkspace(workspaceId string) error {
 
 	log.Infof("Destroying workspace %s", workspace.Id)
 
-	providerName, targetName, err := s.parseTargetId(workspace.Target)
-	if err != nil {
-		return err
-	}
-
-	target, err := s.targetStore.Find(providerName, targetName)
+	target, err := s.targetStore.Find(workspace.Target)
 	if err != nil {
 		return err
 	}

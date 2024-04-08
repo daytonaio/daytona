@@ -27,12 +27,10 @@ var gitProviderDeleteCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		serverConfig, res, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
+		gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
-
-		gitProviderList := serverConfig.GitProviders
 
 		var gitProviderData serverapiclient.GitProvider
 		gitProviderData.Id = new(string)
@@ -40,12 +38,12 @@ var gitProviderDeleteCmd = &cobra.Command{
 		gitProviderData.Token = new(string)
 		gitProviderData.BaseApiUrl = new(string)
 
-		if len(gitProviderList) == 0 {
+		if len(gitProviders) == 0 {
 			util.RenderInfoMessage("No git providers registered")
 			return
 		}
 
-		gitprovider_view.GitProviderSelectionView(&gitProviderData, gitProviderList, true)
+		gitprovider_view.GitProviderSelectionView(&gitProviderData, gitProviders, true)
 
 		if *gitProviderData.Id == "" {
 			log.Fatal("Git provider id can not be blank")
