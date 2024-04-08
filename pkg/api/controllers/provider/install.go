@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/daytonaio/daytona/pkg/api/controllers/provider/dto"
-	"github.com/daytonaio/daytona/pkg/provider/manager"
+	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,40 +31,26 @@ func InstallProvider(ctx *gin.Context) {
 		return
 	}
 
-	if _, err := manager.GetProvider(req.Name); err == nil {
-		err := manager.UninstallProvider(req.Name)
+	server := server.GetInstance(nil)
+	if _, err := server.ProviderManager.GetProvider(req.Name); err == nil {
+		err := server.ProviderManager.UninstallProvider(req.Name)
 		if err != nil {
 			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to uninstall current provider: %s", err.Error()))
 			return
 		}
 	}
 
-	// TODO
-	// c, err := config.GetConfig()
-	// if err != nil {
-	// 	ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get config: %s", err.Error()))
-	// 	return
-	// }
+	downloadPath, err := server.ProviderManager.DownloadProvider(req.DownloadUrls, req.Name, true)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to download provider: %s", err.Error()))
+		return
+	}
 
-	// downloadPath := filepath.Join(c.ProvidersDir, req.Name, req.Name)
-
-	// err = manager.DownloadProvider(req.DownloadUrls, downloadPath)
-	// if err != nil {
-	// 	ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to download provider: %s", err.Error()))
-	// 	return
-	// }
-
-	// logsDir, err := config.GetWorkspaceLogsDir()
-	// if err != nil {
-	// 	ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get workspace logs dir: %s", err.Error()))
-	// 	return
-	// }
-
-	// err = manager.RegisterProvider(downloadPath, api_util.GetDaytonaScriptUrl(c), util.GetFrpcServerUrl(c), util.GetFrpcApiUrl(c), logsDir)
-	// if err != nil {
-	// 	ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to register provider: %s", err.Error()))
-	// 	return
-	// }
+	err = server.ProviderManager.RegisterProvider(downloadPath)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to register provider: %s", err.Error()))
+		return
+	}
 
 	ctx.Status(200)
 }

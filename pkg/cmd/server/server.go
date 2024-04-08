@@ -5,6 +5,8 @@ package server
 
 import (
 	"fmt"
+	"io"
+	"net/url"
 	"os"
 	"path/filepath"
 
@@ -15,6 +17,8 @@ import (
 	. "github.com/daytonaio/daytona/pkg/cmd/server/target"
 	"github.com/daytonaio/daytona/pkg/db"
 	"github.com/daytonaio/daytona/pkg/logger"
+	"github.com/daytonaio/daytona/pkg/provider/manager"
+	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
@@ -102,12 +106,26 @@ var ServerCmd = &cobra.Command{
 		apiKeyService := apikeys.NewApiKeyService(apikeys.ApiKeyServiceConfig{
 			ApiKeyStore: apiKeyStore,
 		})
+		providerManager := manager.NewProviderManager(manager.ProviderManagerConfig{
+			LogsDir:               logsDir,
+			ProviderTargetService: *providerTargetService,
+			ServerApiUrl:          util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+			ServerDownloadUrl:     getDaytonaScriptUrl(c),
+			ServerUrl:             util.GetFrpcServerUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+			RegistryUrl:           c.RegistryUrl,
+			BaseDir:               c.ProvidersDir,
+		})
+		provisioner := provisioner.NewProvisioner(provisioner.ProvisionerConfig{
+			ProviderManager: *providerManager,
+		})
+
 		workspaceService := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
 			WorkspaceStore: workspaceStore,
 			TargetStore:    providerTargetStore,
 			ApiKeyService:  *apiKeyService,
 			ServerApiUrl:   util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 			ServerUrl:      util.GetFrpcServerUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+			Provisioner:    *provisioner,
 			NewWorkspaceLogger: func(workspaceId string) logger.Logger {
 				return logger.NewWorkspaceLogger(logsDir, workspaceId)
 			},
@@ -129,6 +147,7 @@ var ServerCmd = &cobra.Command{
 			ApiKeyService:         *apiKeyService,
 			WorkspaceService:      *workspaceService,
 			GitProviderService:    *gitProviderService,
+			ProviderManager:       *providerManager,
 		})
 
 		errCh := make(chan error)
@@ -156,6 +175,11 @@ var ServerCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 	},
+}
+
+func getDaytonaScriptUrl(config *server.Config) string {
+	url, _ := url.JoinPath(util.GetFrpcApiUrl(config.Frps.Protocol, config.Id, config.Frps.Domain), "binary", "script")
+	return url
 }
 
 func printServerStartedMessage(c *server.Config) {

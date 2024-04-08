@@ -29,6 +29,7 @@ type ServerInstanceConfig struct {
 	WorkspaceService      workspaces.WorkspaceService
 	ApiKeyService         apikeys.ApiKeyService
 	GitProviderService    gitproviders.GitProviderService
+	ProviderManager       manager.ProviderManager
 }
 
 var server *Server
@@ -46,6 +47,7 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 			WorkspaceService:      serverConfig.WorkspaceService,
 			ApiKeyService:         serverConfig.ApiKeyService,
 			GitProviderService:    serverConfig.GitProviderService,
+			ProviderManager:       serverConfig.ProviderManager,
 		}
 	}
 
@@ -59,6 +61,7 @@ type Server struct {
 	WorkspaceService      workspaces.WorkspaceService
 	ApiKeyService         apikeys.ApiKeyService
 	GitProviderService    gitproviders.GitProviderService
+	ProviderManager       manager.ProviderManager
 }
 
 func (s *Server) Start(errCh chan error) error {
@@ -80,7 +83,7 @@ func (s *Server) Start(errCh chan error) error {
 	// }
 
 	// Terminate orphaned provider processes
-	err = manager.TerminateProviderProcesses(s.config.ProvidersDir)
+	err = s.ProviderManager.TerminateProviderProcesses(s.config.ProvidersDir)
 	if err != nil {
 		log.Errorf("Failed to terminate orphaned provider processes: %s", err)
 	}

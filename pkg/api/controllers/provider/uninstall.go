@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/daytonaio/daytona/pkg/provider/manager"
+	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,7 +25,9 @@ import (
 func UninstallProvider(ctx *gin.Context) {
 	provider := ctx.Param("provider")
 
-	err := manager.UninstallProvider(provider)
+	server := server.GetInstance(nil)
+
+	err := server.ProviderManager.UninstallProvider(provider)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to uninstall provider: %s", err.Error()))
 		return

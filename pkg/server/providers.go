@@ -7,33 +7,22 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"runtime"
 
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	log "github.com/sirupsen/logrus"
 )
 
 func (s *Server) downloadDefaultProviders() error {
-	manifest, err := manager.GetProvidersManifest(s.config.RegistryUrl)
+	manifest, err := s.ProviderManager.GetProvidersManifest()
 	if err != nil {
 		return err
 	}
 
-	defaultProviderPlugins := manager.GetDefaultProviders(*manifest)
+	defaultProviders := manager.GetDefaultProviders(*manifest)
 
 	log.Info("Downloading default providers")
-	for pluginName, plugin := range defaultProviderPlugins {
-		downloadPath := filepath.Join(s.config.ProvidersDir, pluginName, pluginName)
-		if runtime.GOOS == "windows" {
-			downloadPath += ".exe"
-		}
-
-		if _, err := os.Stat(downloadPath); err == nil {
-			log.Info(pluginName + " already downloaded")
-			continue
-		}
-		log.Info("Downloading " + pluginName)
-		err = manager.DownloadProvider(plugin.DownloadUrls, downloadPath)
+	for providerName, provider := range defaultProviders {
+		_, err = s.ProviderManager.DownloadProvider(provider.DownloadUrls, providerName, false)
 		if err != nil {
 			log.Error(err)
 		}
@@ -47,7 +36,7 @@ func (s *Server) downloadDefaultProviders() error {
 func (s *Server) registerProviders() error {
 	log.Info("Registering providers")
 
-	manifest, err := manager.GetProvidersManifest(s.config.RegistryUrl)
+	manifest, err := s.ProviderManager.GetProvidersManifest()
 	if err != nil {
 		return err
 	}
@@ -61,35 +50,22 @@ func (s *Server) registerProviders() error {
 		return err
 	}
 
-	// logsDir, err := GetWorkspaceLogsDir()
-	// if err != nil {
-	// 	return err
-	// }
-
 	for _, file := range files {
 		if file.IsDir() {
-			// pluginPath, err := s.getPluginPath(filepath.Join(s.config.ProvidersDir, file.Name()))
-			// if err != nil {
-			// 	log.Error(err)
-			// 	continue
-			// }
+			pluginPath, err := s.getPluginPath(filepath.Join(s.config.ProvidersDir, file.Name()))
+			if err != nil {
+				log.Error(err)
+				continue
+			}
 
-			// TODO: Refactor params to a struct
-			err = errors.New("Not implemented")
-			// err = manager.RegisterProvider(
-			// 	pluginPath,
-			// 	"TODO", // api_util.GetDaytonaScriptUrl(s.config.Frps.Protocol, s.config.Id, s.config.Frps.Domain),
-			// 	util.GetFrpcServerUrl(s.config.Frps.Protocol, s.config.Id, s.config.Frps.Domain),
-			// 	util.GetFrpcApiUrl(s.config.Frps.Protocol, s.config.Id, s.config.Frps.Domain),
-			// 	logsDir,
-			// )
+			err = s.ProviderManager.RegisterProvider(pluginPath)
 			if err != nil {
 				log.Error(err)
 				continue
 			}
 
 			// Check for updates
-			provider, err := manager.GetProvider(file.Name())
+			provider, err := s.ProviderManager.GetProvider(file.Name())
 			if err != nil {
 				log.Error(err)
 				continue
