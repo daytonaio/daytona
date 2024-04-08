@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/daytonaio/daytona/pkg/api/controllers/provider/dto"
-	"github.com/daytonaio/daytona/pkg/provider/manager"
+	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,7 +23,8 @@ import (
 //
 //	@id				ListProviders
 func ListProviders(ctx *gin.Context) {
-	providers := manager.GetProviders()
+	server := server.GetInstance(nil)
+	providers := server.ProviderManager.GetProviders()
 
 	result := []dto.Provider{}
 	for _, provider := range providers {

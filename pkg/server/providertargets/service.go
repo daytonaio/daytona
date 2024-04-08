@@ -23,6 +23,20 @@ func (s *ProviderTargetService) List() ([]*provider.ProviderTarget, error) {
 	return s.targetStore.List()
 }
 
+func (s *ProviderTargetService) Map() (map[string]*provider.ProviderTarget, error) {
+	list, err := s.targetStore.List()
+	if err != nil {
+		return nil, err
+	}
+
+	targets := make(map[string]*provider.ProviderTarget)
+	for _, target := range list {
+		targets[target.Name] = target
+	}
+
+	return targets, nil
+}
+
 func (s *ProviderTargetService) Find(targetName string) (*provider.ProviderTarget, error) {
 	return s.targetStore.Find(targetName)
 }
