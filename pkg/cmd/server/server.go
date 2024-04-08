@@ -114,16 +114,19 @@ var ServerCmd = &cobra.Command{
 			NewProjectLogger: func(workspaceId, projectName string) logger.Logger {
 				return logger.NewProjectLogger(logsDir, workspaceId, projectName)
 			},
+			NewWorkspaceLogReader: func(workspaceId string) (io.Reader, error) {
+				return logger.GetWorkspaceLogReader(logsDir, workspaceId)
+			},
 		})
 		gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
 			ConfigStore: gitProviderConfigStore,
 		})
 
-		server := server.GetInstance(&server.ServerConfig{
+		server := server.GetInstance(&server.ServerInstanceConfig{
 			Config:                *c,
 			TailscaleServer:       headscaleServer,
 			ProviderTargetService: *providerTargetService,
-			APiKeyService:         *apiKeyService,
+			ApiKeyService:         *apiKeyService,
 			WorkspaceService:      *workspaceService,
 			GitProviderService:    *gitProviderService,
 		})

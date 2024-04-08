@@ -38,15 +38,7 @@ var gitProviderAddCmd = &cobra.Command{
 			return
 		}
 
-		if *gitProviderData.Username == "" {
-			gitUsername, _, err := apiClient.GitProviderAPI.GetGitUsernameFromToken(ctx).GitProviderData(gitProviderData).Execute()
-			if err != nil {
-				log.Fatal(err)
-			}
-			*gitProviderData.Username = gitUsername
-		}
-
-		_, err = apiClient.GitProviderAPI.SetGitProvider(ctx).GitProviderData(gitProviderData).Execute()
+		_, err = apiClient.GitProviderAPI.SetGitProvider(ctx).GitProviderConfig(gitProviderData).Execute()
 		if err != nil {
 			log.Fatal(err)
 		}

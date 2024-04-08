@@ -6,7 +6,7 @@ package workspaces
 import (
 	"errors"
 
-	"github.com/daytonaio/daytona/pkg/server/api/controllers/workspace/dto"
+	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 )
 
 func (s *WorkspaceService) GetWorkspace(workspaceId string) (*dto.WorkspaceDTO, error) {
@@ -15,12 +15,7 @@ func (s *WorkspaceService) GetWorkspace(workspaceId string) (*dto.WorkspaceDTO, 
 		return nil, errors.New("workspace not found")
 	}
 
-	providerName, targetName, err := s.parseTargetId(workspace.Target)
-	if err != nil {
-		return nil, err
-	}
-
-	target, err := s.targetStore.Find(providerName, targetName)
+	target, err := s.targetStore.Find(workspace.Target)
 	if err != nil {
 		return nil, err
 	}

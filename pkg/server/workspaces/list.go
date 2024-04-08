@@ -6,7 +6,7 @@ package workspaces
 import (
 	"fmt"
 
-	"github.com/daytonaio/daytona/pkg/server/api/controllers/workspace/dto"
+	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	log "github.com/sirupsen/logrus"
 )
@@ -22,12 +22,7 @@ func (s *WorkspaceService) ListWorkspaces(verbose bool) ([]dto.WorkspaceDTO, err
 	for _, w := range workspaces {
 		var workspaceInfo *workspace.WorkspaceInfo
 		if verbose {
-			providerName, targetName, err := s.parseTargetId(w.Target)
-			if err != nil {
-				return nil, err
-			}
-
-			target, err := s.targetStore.Find(providerName, targetName)
+			target, err := s.targetStore.Find(w.Target)
 			if err != nil {
 				log.Error(fmt.Errorf("failed to get target for %s", w.Target))
 				continue

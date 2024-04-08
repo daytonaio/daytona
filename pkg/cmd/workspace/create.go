@@ -205,7 +205,7 @@ func processPrompting(cmd *cobra.Command, apiClient *serverapiclient.APIClient, 
 		log.Fatal(err)
 	}
 
-	serverConfig, res, err := apiClient.ServerAPI.GetConfig(ctx).Execute()
+	gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
 	if err != nil {
 		log.Fatal(apiclient.HandleErrorResponse(res, err))
 	}
@@ -229,7 +229,7 @@ func processPrompting(cmd *cobra.Command, apiClient *serverapiclient.APIClient, 
 		workspaceNames = append(workspaceNames, *workspaceInfo.Name)
 	}
 
-	*workspaceName, *repos, err = workspace_util.GetCreationDataFromPrompt(workspaceNames, serverConfig.GitProviders, manual, multiProjectFlag)
+	*workspaceName, *repos, err = workspace_util.GetCreationDataFromPrompt(workspaceNames, gitProviders, manual, multiProjectFlag)
 	if err != nil {
 		log.Fatal(err)
 		return

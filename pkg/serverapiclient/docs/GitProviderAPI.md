@@ -7,11 +7,11 @@ Method | HTTP request | Description
 [**GetGitContext**](GitProviderAPI.md#GetGitContext) | **Get** /gitprovider/context/{gitUrl} | Get Git context
 [**GetGitProviderForUrl**](GitProviderAPI.md#GetGitProviderForUrl) | **Get** /gitprovider/for-url/{url} | Get Git provider
 [**GetGitUser**](GitProviderAPI.md#GetGitUser) | **Get** /gitprovider/{gitProviderId}/user | Get Git context
-[**GetGitUsernameFromToken**](GitProviderAPI.md#GetGitUsernameFromToken) | **Get** /gitprovider/username-from-token | Get username from token
 [**GetNamespaces**](GitProviderAPI.md#GetNamespaces) | **Get** /gitprovider/{gitProviderId}/namespaces | Get Git namespaces
 [**GetRepoBranches**](GitProviderAPI.md#GetRepoBranches) | **Get** /gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/branches | Get Git repository branches
 [**GetRepoPRs**](GitProviderAPI.md#GetRepoPRs) | **Get** /gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/pull-requests | Get Git repository PRs
 [**GetRepositories**](GitProviderAPI.md#GetRepositories) | **Get** /gitprovider/{gitProviderId}/{namespaceId}/repositories | Get Git repositories
+[**ListGitProviders**](GitProviderAPI.md#ListGitProviders) | **Get** /gitprovider | List Git providers
 [**RemoveGitProvider**](GitProviderAPI.md#RemoveGitProvider) | **Delete** /gitprovider/{gitProviderId} | Remove Git provider
 [**SetGitProvider**](GitProviderAPI.md#SetGitProvider) | **Put** /gitprovider | Set Git provider
 
@@ -212,72 +212,6 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**GitUser**](GitUser.md)
-
-### Authorization
-
-No authorization required
-
-### HTTP request headers
-
-- **Content-Type**: Not defined
-- **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
-## GetGitUsernameFromToken
-
-> string GetGitUsernameFromToken(ctx).GitProviderData(gitProviderData).Execute()
-
-Get username from token
-
-
-
-### Example
-
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"os"
-	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/serverapiclient"
-)
-
-func main() {
-	gitProviderData := *openapiclient.NewGitProvider() // GitProvider | Git provider
-
-	configuration := openapiclient.NewConfiguration()
-	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.GitProviderAPI.GetGitUsernameFromToken(context.Background()).GitProviderData(gitProviderData).Execute()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `GitProviderAPI.GetGitUsernameFromToken``: %v\n", err)
-		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
-	}
-	// response from `GetGitUsernameFromToken`: string
-	fmt.Fprintf(os.Stdout, "Response from `GitProviderAPI.GetGitUsernameFromToken`: %v\n", resp)
-}
-```
-
-### Path Parameters
-
-
-
-### Other Parameters
-
-Other parameters are passed through a pointer to a apiGetGitUsernameFromTokenRequest struct via the builder pattern
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **gitProviderData** | [**GitProvider**](GitProvider.md) | Git provider | 
-
-### Return type
-
-**string**
 
 ### Authorization
 
@@ -588,6 +522,67 @@ No authorization required
 [[Back to README]](../README.md)
 
 
+## ListGitProviders
+
+> []GitProvider ListGitProviders(ctx).Execute()
+
+List Git providers
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/serverapiclient"
+)
+
+func main() {
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.GitProviderAPI.ListGitProviders(context.Background()).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `GitProviderAPI.ListGitProviders``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `ListGitProviders`: []GitProvider
+	fmt.Fprintf(os.Stdout, "Response from `GitProviderAPI.ListGitProviders`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+This endpoint does not need any parameter.
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiListGitProvidersRequest struct via the builder pattern
+
+
+### Return type
+
+[**[]GitProvider**](GitProvider.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## RemoveGitProvider
 
 > RemoveGitProvider(ctx, gitProviderId).Execute()
@@ -658,7 +653,7 @@ No authorization required
 
 ## SetGitProvider
 
-> SetGitProvider(ctx).GitProviderData(gitProviderData).Execute()
+> SetGitProvider(ctx).GitProviderConfig(gitProviderConfig).Execute()
 
 Set Git provider
 
@@ -677,11 +672,11 @@ import (
 )
 
 func main() {
-	gitProviderData := *openapiclient.NewGitProvider() // GitProvider | Git provider
+	gitProviderConfig := *openapiclient.NewGitProvider() // GitProvider | Git provider
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.GitProviderAPI.SetGitProvider(context.Background()).GitProviderData(gitProviderData).Execute()
+	r, err := apiClient.GitProviderAPI.SetGitProvider(context.Background()).GitProviderConfig(gitProviderConfig).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `GitProviderAPI.SetGitProvider``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -700,7 +695,7 @@ Other parameters are passed through a pointer to a apiSetGitProviderRequest stru
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **gitProviderData** | [**GitProvider**](GitProvider.md) | Git provider | 
+ **gitProviderConfig** | [**GitProvider**](GitProvider.md) | Git provider | 
 
 ### Return type
 

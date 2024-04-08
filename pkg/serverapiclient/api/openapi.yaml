@@ -8,6 +8,21 @@ servers:
 - url: http://localhost:3000/
 paths:
   /gitprovider:
+    get:
+      description: List Git providers
+      operationId: ListGitProviders
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/GitProvider'
+                type: array
+          description: OK
+      summary: List Git providers
+      tags:
+      - gitProvider
     put:
       description: Set Git provider
       operationId: SetGitProvider
@@ -25,7 +40,7 @@ paths:
       summary: Set Git provider
       tags:
       - gitProvider
-      x-codegen-request-body-name: gitProviderData
+      x-codegen-request-body-name: gitProviderConfig
   /gitprovider/context/{gitUrl}:
     get:
       description: Get Git context
@@ -68,28 +83,6 @@ paths:
       summary: Get Git provider
       tags:
       - gitProvider
-  /gitprovider/username-from-token:
-    get:
-      description: Get username from token
-      operationId: GetGitUsernameFromToken
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/GitProvider'
-        description: Git provider
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                type: string
-          description: OK
-      summary: Get username from token
-      tags:
-      - gitProvider
-      x-codegen-request-body-name: gitProviderData
   /gitprovider/{gitProviderId}:
     delete:
       description: Remove Git provider
@@ -839,18 +832,9 @@ components:
         headscalePort: 1
         serverDownloadUrl: serverDownloadUrl
         binariesPath: binariesPath
+        logFilePath: logFilePath
         providersDir: providersDir
         id: id
-        targetsFilePath: targetsFilePath
-        gitProviders:
-        - baseApiUrl: baseApiUrl
-          id: id
-          token: token
-          username: username
-        - baseApiUrl: baseApiUrl
-          id: id
-          token: token
-          username: username
         frps:
           protocol: protocol
           port: 6
@@ -862,21 +846,17 @@ components:
           type: string
         frps:
           $ref: '#/components/schemas/FRPSConfig'
-        gitProviders:
-          items:
-            $ref: '#/components/schemas/GitProvider'
-          type: array
         headscalePort:
           type: integer
         id:
+          type: string
+        logFilePath:
           type: string
         providersDir:
           type: string
         registryUrl:
           type: string
         serverDownloadUrl:
-          type: string
-        targetsFilePath:
           type: string
       type: object
     Workspace:

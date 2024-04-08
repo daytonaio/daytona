@@ -27,12 +27,12 @@ var GitProviderCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		serverConfig, res, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
+		gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(context.Background()).Execute()
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		if len(serverConfig.GitProviders) == 0 {
+		if len(gitProviders) == 0 {
 			util.RenderInfoMessage("No git providers registered. Add a new git provider by preparing a Personal Access Token and running 'daytona git-providers add'")
 			return
 		}
@@ -42,7 +42,7 @@ var GitProviderCmd = &cobra.Command{
 		supportedProviders := config.GetSupportedGitProviders()
 		var gitProviderViewList []gitprovider_view.GitProviderView
 
-		for _, gitProvider := range serverConfig.GitProviders {
+		for _, gitProvider := range gitProviders {
 			for _, supportedProvider := range supportedProviders {
 				if *gitProvider.Id == supportedProvider.Id {
 					gitProviderViewList = append(gitProviderViewList,

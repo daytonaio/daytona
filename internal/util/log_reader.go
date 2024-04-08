@@ -8,24 +8,11 @@ import (
 	"bytes"
 	"context"
 	"io"
-	"os"
 	"time"
 )
 
-func ReadLog(ctx context.Context, filePath *string, follow bool, c chan []byte, errChan chan error) {
-	if filePath == nil {
-		errChan <- os.ErrInvalid
-		return
-	}
-
-	file, err := os.Open(*filePath)
-	if err != nil {
-		errChan <- err
-		return
-	}
-	defer file.Close()
-
-	reader := bufio.NewReader(file)
+func ReadLog(ctx context.Context, logReader *io.Reader, follow bool, c chan []byte, errChan chan error) {
+	reader := bufio.NewReader(*logReader)
 
 	for {
 		select {
