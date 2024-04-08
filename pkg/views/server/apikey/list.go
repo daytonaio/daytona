@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/daytonaio/daytona/pkg/apikey"
+	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/util"
 
@@ -74,11 +74,11 @@ func (m model) View() string {
 	return baseStyle.Render(m.table.View()) + "\n"
 }
 
-func renderApiKeyList(apiKeyList []*apikey.ApiKey, selectable bool) model {
+func renderApiKeyList(apiKeyList []serverapiclient.ApiKey, selectable bool) model {
 	rows := []table.Row{}
 	activeProfileRow := 0
 	for _, apiKey := range apiKeyList {
-		row := table.Row{apiKey.Name, string(apiKey.Type)}
+		row := table.Row{*apiKey.Name, string(*apiKey.Type)}
 
 		rows = append(rows, row)
 	}
@@ -94,7 +94,7 @@ func renderApiKeyList(apiKeyList []*apikey.ApiKey, selectable bool) model {
 	}
 }
 
-func GetApiKeyNameFromPrompt(apiKeyList []*apikey.ApiKey, title string) string {
+func GetApiKeyNameFromPrompt(apiKeyList []serverapiclient.ApiKey, title string) string {
 	util.RenderMainTitle(title)
 
 	withNewProfile := apiKeyList
@@ -113,7 +113,7 @@ func GetApiKeyNameFromPrompt(apiKeyList []*apikey.ApiKey, title string) string {
 	return name
 }
 
-func ListApiKeys(apiKeyList []*apikey.ApiKey) {
+func ListApiKeys(apiKeyList []serverapiclient.ApiKey) {
 	util.RenderMainTitle("API KEYS")
 
 	modelInstance := renderApiKeyList(apiKeyList, false)

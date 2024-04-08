@@ -10,8 +10,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/daytonaio/daytona/pkg/server/auth"
-	"github.com/daytonaio/daytona/pkg/types"
+	"github.com/daytonaio/daytona/pkg/apikey"
+	"github.com/daytonaio/daytona/pkg/server"
 )
 
 type ServerApi struct {
@@ -164,7 +164,9 @@ func (c *Config) GetProfile(profileId string) (Profile, error) {
 }
 
 func getDefaultConfig() (*Config, error) {
-	apiKey, err := auth.GenerateApiKey(types.ApiKeyTypeClient, "default")
+	server := server.GetInstance(nil)
+
+	apiKey, err := server.ApiKeyService.Generate(apikey.ApiKeyTypeClient, "default")
 	if err != nil {
 		return nil, err
 	}

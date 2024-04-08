@@ -4,11 +4,13 @@
 package apikey
 
 import (
+	"context"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/daytonaio/daytona/pkg/server/db"
-	"github.com/daytonaio/daytona/pkg/types"
+	"github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/views/server/apikey"
 )
 
@@ -17,18 +19,18 @@ var listCmd = &cobra.Command{
 	Short:   "List API keys",
 	Aliases: []string{"ls"},
 	Run: func(cmd *cobra.Command, args []string) {
-		apiKeys, err := db.ListApiKeys()
+		ctx := context.Background()
+
+		apiClient, err := server.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		clientKeys := []*types.ApiKey{}
-		for _, key := range apiKeys {
-			if key.Type == types.ApiKeyTypeClient {
-				clientKeys = append(clientKeys, key)
-			}
+		apiKeyList, _, err := apiClient.ApiKeyAPI.ListClientApiKeys(ctx).Execute()
+		if err != nil {
+			log.Fatal(apiclient.HandleErrorResponse(nil, err))
 		}
 
-		apikey.ListApiKeys(clientKeys)
+		apikey.ListApiKeys(apiKeyList)
 	},
 }

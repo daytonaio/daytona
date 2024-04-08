@@ -7,6 +7,60 @@ info:
 servers:
 - url: http://localhost:3000/
 paths:
+  /apikey:
+    get:
+      description: List API keys
+      operationId: ListClientApiKeys
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ApiKey'
+                type: array
+          description: OK
+      summary: List API keys
+      tags:
+      - apiKey
+  /apikey/{apiKeyName}:
+    delete:
+      description: Revoke API key
+      operationId: RevokeApiKey
+      parameters:
+      - description: API key name
+        in: path
+        name: apiKeyName
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Revoke API key
+      tags:
+      - apiKey
+    post:
+      description: Generate an API key
+      operationId: GenerateApiKey
+      parameters:
+      - description: API key name
+        in: path
+        name: apiKeyName
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema:
+                type: string
+          description: OK
+      summary: Generate an API key
+      tags:
+      - apiKey
   /gitprovider:
     get:
       description: List Git providers
@@ -586,6 +640,20 @@ paths:
       - workspace
 components:
   schemas:
+    ApiKey:
+      example:
+        keyHash: keyHash
+        name: name
+        type: null
+      properties:
+        keyHash:
+          type: string
+        name:
+          description: Project or client name
+          type: string
+        type:
+          $ref: '#/components/schemas/apikey.ApiKeyType'
+      type: object
     CreateWorkspace:
       example:
         repositories:
@@ -996,6 +1064,14 @@ components:
         providerMetadata:
           type: string
       type: object
+    apikey.ApiKeyType:
+      enum:
+      - client
+      - project
+      type: string
+      x-enum-varnames:
+      - ApiKeyTypeClient
+      - ApiKeyTypeProject
     provider.ProviderInfo:
       example:
         name: name
