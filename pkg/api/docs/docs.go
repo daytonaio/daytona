@@ -15,6 +15,82 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/apikey": {
+            "get": {
+                "description": "List API keys",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "apiKey"
+                ],
+                "summary": "List API keys",
+                "operationId": "ListClientApiKeys",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ApiKey"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/apikey/{apiKeyName}": {
+            "post": {
+                "description": "Generate an API key",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "apiKey"
+                ],
+                "summary": "Generate an API key",
+                "operationId": "GenerateApiKey",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API key name",
+                        "name": "apiKeyName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Revoke API key",
+                "tags": [
+                    "apiKey"
+                ],
+                "summary": "Revoke API key",
+                "operationId": "RevokeApiKey",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API key name",
+                        "name": "apiKeyName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/gitprovider": {
             "get": {
                 "description": "List Git providers",
@@ -830,6 +906,21 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "ApiKey": {
+            "type": "object",
+            "properties": {
+                "keyHash": {
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Project or client name",
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/apikey.ApiKeyType"
+                }
+            }
+        },
         "CreateWorkspace": {
             "type": "object",
             "properties": {
@@ -1148,6 +1239,17 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "apikey.ApiKeyType": {
+            "type": "string",
+            "enum": [
+                "client",
+                "project"
+            ],
+            "x-enum-varnames": [
+                "ApiKeyTypeClient",
+                "ApiKeyTypeProject"
+            ]
         },
         "provider.ProviderInfo": {
             "type": "object",

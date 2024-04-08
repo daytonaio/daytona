@@ -1,5 +1,15 @@
 basePath: /
 definitions:
+  ApiKey:
+    properties:
+      keyHash:
+        type: string
+      name:
+        description: Project or client name
+        type: string
+      type:
+        $ref: '#/definitions/apikey.ApiKeyType'
+    type: object
   CreateWorkspace:
     properties:
       name:
@@ -207,6 +217,14 @@ definitions:
       providerMetadata:
         type: string
     type: object
+  apikey.ApiKeyType:
+    enum:
+    - client
+    - project
+    type: string
+    x-enum-varnames:
+    - ApiKeyTypeClient
+    - ApiKeyTypeProject
   provider.ProviderInfo:
     properties:
       name:
@@ -263,6 +281,57 @@ info:
   title: Daytona Server API
   version: 0.1.0
 paths:
+  /apikey:
+    get:
+      description: List API keys
+      operationId: ListClientApiKeys
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ApiKey'
+            type: array
+      summary: List API keys
+      tags:
+      - apiKey
+  /apikey/{apiKeyName}:
+    delete:
+      description: Revoke API key
+      operationId: RevokeApiKey
+      parameters:
+      - description: API key name
+        in: path
+        name: apiKeyName
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Revoke API key
+      tags:
+      - apiKey
+    post:
+      description: Generate an API key
+      operationId: GenerateApiKey
+      parameters:
+      - description: API key name
+        in: path
+        name: apiKeyName
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Generate an API key
+      tags:
+      - apiKey
   /gitprovider:
     get:
       description: List Git providers

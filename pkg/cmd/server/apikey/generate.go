@@ -4,15 +4,15 @@
 package apikey
 
 import (
+	"context"
 	"fmt"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/pkg/server/auth"
-	"github.com/daytonaio/daytona/pkg/server/db"
-	"github.com/daytonaio/daytona/pkg/types"
+	"github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/views/server/apikey"
 	"github.com/daytonaio/daytona/pkg/views/util"
 )
@@ -25,35 +25,34 @@ var generateCmd = &cobra.Command{
 	Aliases: []string{"g", "new"},
 	Args:    cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
+		ctx := context.Background()
 		var keyName string
 
-		apiKeys, err := db.ListApiKeys()
+		apiClient, err := server.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		clientKeys := []*types.ApiKey{}
-		for _, key := range apiKeys {
-			if key.Type == types.ApiKeyTypeClient {
-				clientKeys = append(clientKeys, key)
-			}
+		apiKeyList, _, err := apiClient.ApiKeyAPI.ListClientApiKeys(ctx).Execute()
+		if err != nil {
+			log.Fatal(apiclient.HandleErrorResponse(nil, err))
 		}
 
 		if len(args) == 1 {
 			keyName = args[0]
 		} else {
-			apikey.ApiKeyCreationView(&keyName, &saveFlag, clientKeys)
+			apikey.ApiKeyCreationView(&keyName, &saveFlag, apiKeyList)
 		}
 
-		for _, key := range clientKeys {
-			if key.Name == keyName {
+		for _, key := range apiKeyList {
+			if *key.Name == keyName {
 				log.Fatal("key name already exists, please choose a different one")
 			}
 		}
 
-		key, err := auth.GenerateApiKey(types.ApiKeyTypeClient, keyName)
+		key, _, err := apiClient.ApiKeyAPI.GenerateApiKey(ctx, keyName).Execute()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(apiclient.HandleErrorResponse(nil, err))
 		}
 
 		if saveFlag {
