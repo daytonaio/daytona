@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/daytonaio/daytona/pkg/provider/manager"
+	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,7 +25,9 @@ import (
 func GetTargetManifest(ctx *gin.Context) {
 	providerName := ctx.Param("provider")
 
-	p, err := manager.GetProvider(providerName)
+	server := server.GetInstance(nil)
+
+	p, err := server.ProviderManager.GetProvider(providerName)
 	if err != nil {
 		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("provider not found: %s", err.Error()))
 		return

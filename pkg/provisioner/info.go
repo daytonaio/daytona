@@ -5,12 +5,11 @@ package provisioner
 
 import (
 	"github.com/daytonaio/daytona/pkg/provider"
-	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
 func (p *Provisioner) GetWorkspaceInfo(workspace *workspace.Workspace, target *provider.ProviderTarget) (*workspace.WorkspaceInfo, error) {
-	targetProvider, err := manager.GetProvider(target.ProviderInfo.Name)
+	targetProvider, err := p.providerManager.GetProvider(target.ProviderInfo.Name)
 	if err != nil {
 		return nil, err
 	}
