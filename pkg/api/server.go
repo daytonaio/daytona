@@ -22,6 +22,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/middlewares"
 	"github.com/gin-contrib/cors"
 
+	"github.com/daytonaio/daytona/pkg/api/controllers/apikey"
 	"github.com/daytonaio/daytona/pkg/api/controllers/binary"
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider"
 	log_controller "github.com/daytonaio/daytona/pkg/api/controllers/log"
@@ -124,6 +125,13 @@ func GetServer(apiPort int) (*http.Server, error) {
 		gitProviderController.GET("/:gitProviderId/:namespaceId/:repositoryId/branches", gitprovider.GetRepoBranches)
 		gitProviderController.GET("/:gitProviderId/:namespaceId/:repositoryId/pull-requests", gitprovider.GetRepoPRs)
 		gitProviderController.GET("/context/:gitUrl", gitprovider.GetGitContext)
+	}
+
+	apiKeyController := protected.Group("/apikey")
+	{
+		apiKeyController.GET("/", apikey.ListClientApiKeys)
+		apiKeyController.POST("/:apiKeyName", apikey.GenerateApiKey)
+		apiKeyController.DELETE("/:apiKeyName", apikey.RevokeApiKey)
 	}
 
 	project.GET(gitProviderController.BasePath()+"/for-url/:url", middlewares.ProjectAuthMiddleware(), gitprovider.GetGitProviderForUrl)
