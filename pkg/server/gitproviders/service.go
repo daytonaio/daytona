@@ -31,22 +31,7 @@ func (s *GitProviderService) GetGitProvider(id string) (gitprovider.GitProvider,
 		return nil, err
 	}
 
-	switch id {
-	case "github":
-		return gitprovider.NewGitHubGitProvider(providerConfig.Token), nil
-	case "gitlab":
-		return gitprovider.NewGitLabGitProvider(providerConfig.Token, nil), nil
-	case "bitbucket":
-		return gitprovider.NewBitbucketGitProvider(providerConfig.Username, providerConfig.Token), nil
-	case "gitlab-self-managed":
-		return gitprovider.NewGitLabGitProvider(providerConfig.Token, providerConfig.BaseApiUrl), nil
-	case "codeberg":
-		return gitprovider.NewGiteaGitProvider(providerConfig.Token, codebergUrl), nil
-	case "gitea":
-		return gitprovider.NewGiteaGitProvider(providerConfig.Token, *providerConfig.BaseApiUrl), nil
-	default:
-		return nil, errors.New("git provider not found")
-	}
+	return s.newGitProvider(providerConfig)
 }
 
 func (s *GitProviderService) ListConfigs() ([]*gitprovider.GitProviderConfig, error) {
@@ -55,4 +40,23 @@ func (s *GitProviderService) ListConfigs() ([]*gitprovider.GitProviderConfig, er
 
 func (s *GitProviderService) GetConfig(id string) (*gitprovider.GitProviderConfig, error) {
 	return s.configStore.Find(id)
+}
+
+func (s *GitProviderService) newGitProvider(config *gitprovider.GitProviderConfig) (gitprovider.GitProvider, error) {
+	switch config.Id {
+	case "github":
+		return gitprovider.NewGitHubGitProvider(config.Token), nil
+	case "gitlab":
+		return gitprovider.NewGitLabGitProvider(config.Token, nil), nil
+	case "bitbucket":
+		return gitprovider.NewBitbucketGitProvider(config.Username, config.Token), nil
+	case "gitlab-self-managed":
+		return gitprovider.NewGitLabGitProvider(config.Token, config.BaseApiUrl), nil
+	case "codeberg":
+		return gitprovider.NewGiteaGitProvider(config.Token, codebergUrl), nil
+	case "gitea":
+		return gitprovider.NewGiteaGitProvider(config.Token, *config.BaseApiUrl), nil
+	default:
+		return nil, errors.New("git provider not found")
+	}
 }

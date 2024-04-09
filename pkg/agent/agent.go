@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
@@ -17,6 +18,11 @@ import (
 
 func (a *Agent) Start() error {
 	log.Info("Starting Daytona Agent")
+
+	err := a.setDefaultConfig()
+	if err != nil {
+		return err
+	}
 
 	project, err := a.getProject()
 	if err != nil {
@@ -123,4 +129,36 @@ func (a *Agent) getGitUser(gitProviderId string) (*serverapiclient.GitUser, erro
 	}
 
 	return userData, nil
+}
+
+func (a *Agent) setDefaultConfig() error {
+	existingConfig, err := config.GetConfig()
+	if err != nil && !config.IsNotExist(err) {
+		return err
+	}
+
+	if existingConfig != nil {
+		for _, profile := range existingConfig.Profiles {
+			if profile.Id == "default" {
+				return nil
+			}
+		}
+	}
+
+	config := &config.Config{
+		ActiveProfileId: "default",
+		DefaultIdeId:    "vscode",
+		Profiles: []config.Profile{
+			{
+				Id:   "default",
+				Name: "default",
+				Api: config.ServerApi{
+					Url: a.Config.Server.ApiUrl,
+					Key: a.Config.Server.ApiKey,
+				},
+			},
+		},
+	}
+
+	return config.Save()
 }

@@ -676,8 +676,11 @@ components:
           sha: sha
           url: url
         name: name
+        id: id
         target: target
       properties:
+        id:
+          type: string
         name:
           type: string
         repositories:

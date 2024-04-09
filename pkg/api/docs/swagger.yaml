@@ -12,6 +12,8 @@ definitions:
     type: object
   CreateWorkspace:
     properties:
+      id:
+        type: string
       name:
         type: string
       repositories:

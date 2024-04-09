@@ -8,6 +8,7 @@ import (
 )
 
 type CreateWorkspace struct {
+	Id           string
 	Name         string
 	Target       string
 	Repositories []gitprovider.GitRepository

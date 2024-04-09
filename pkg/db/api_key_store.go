@@ -72,7 +72,7 @@ func (a *ApiKeyStore) Save(apiKey *apikey.ApiKey) error {
 }
 
 func (a *ApiKeyStore) Delete(apiKey *apikey.ApiKey) error {
-	tx := a.db.Where("key_hash = ?", apiKey).Delete(&ApiKeyDTO{})
+	tx := a.db.Where("key_hash = ?", apiKey.KeyHash).Delete(&ApiKeyDTO{})
 	if tx.Error != nil {
 		return tx.Error
 	}
