@@ -58,13 +58,13 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		view_util.RenderMainTitle("WORKSPACE CREATION")
-
 		if len(args) == 0 {
 			processPrompting(cmd, apiClient, &workspaceName, &repos, ctx)
 		} else {
 			processCmdArguments(cmd, args, apiClient, &workspaceName, &repos, ctx)
 		}
+
+		view_util.RenderMainTitle("WORKSPACE CREATION")
 
 		if workspaceName == "" || len(repos) == 0 {
 			log.Fatal("workspace name and repository urls are required")
