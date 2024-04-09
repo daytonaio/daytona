@@ -23,6 +23,7 @@ import (
 	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	status "github.com/daytonaio/daytona/pkg/views/workspace/status"
+	"github.com/google/uuid"
 	"tailscale.com/tsnet"
 
 	log "github.com/sirupsen/logrus"
@@ -97,8 +98,9 @@ var CreateCmd = &cobra.Command{
 		statusProgram := tea.NewProgram(status.NewModel())
 
 		started := false
+		id := uuid.NewString()
 
-		go scanWorkspaceLogs(activeProfile, workspaceName, statusProgram, &started)
+		go scanWorkspaceLogs(activeProfile, id, statusProgram, &started)
 
 		go func() {
 			if _, err := statusProgram.Run(); err != nil {
@@ -114,6 +116,7 @@ var CreateCmd = &cobra.Command{
 		}()
 
 		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(serverapiclient.CreateWorkspace{
+			Id:           &id,
 			Name:         &workspaceName,
 			Target:       target.Name,
 			Repositories: repos,
@@ -271,13 +274,13 @@ func processCmdArguments(cmd *cobra.Command, args []string, apiClient *serverapi
 	}
 }
 
-func scanWorkspaceLogs(activeProfile config.Profile, workspaceName string, statusProgram *tea.Program, started *bool) {
+func scanWorkspaceLogs(activeProfile config.Profile, workspaceId string, statusProgram *tea.Program, started *bool) {
 	time.Sleep(2 * time.Second)
 
 	query := "follow=true"
-	ws, res, err := server.GetWebsocketConn(fmt.Sprintf("/log/workspace/%s", workspaceName), &activeProfile, &query)
+	ws, res, err := server.GetWebsocketConn(fmt.Sprintf("/log/workspace/%s", workspaceId), &activeProfile, &query)
 	if err != nil {
-		cleanUpTerminal(statusProgram, apiclient.HandleErrorResponse(res, apiclient.HandleErrorResponse(res, err)))
+		cleanUpTerminal(statusProgram, apiclient.HandleErrorResponse(res, err))
 	}
 
 	defer ws.Close()

@@ -30,7 +30,7 @@ func HandleErrorResponse(res *http.Response, requestErr error) error {
 
 	err = json.Unmarshal(body, &errResponse)
 	if err != nil {
-		return err
+		return errors.New(string(body))
 	}
 
 	return errors.New(errResponse.Error)

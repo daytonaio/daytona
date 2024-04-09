@@ -15,10 +15,9 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/google/uuid"
 )
 
-func (s *WorkspaceService) CreateWorkspace(name string, targetName string, repositories []gitprovider.GitRepository) (*workspace.Workspace, error) {
+func (s *WorkspaceService) CreateWorkspace(id, name, targetName string, repositories []gitprovider.GitRepository) (*workspace.Workspace, error) {
 	_, err := s.workspaceStore.Find(name)
 	if err == nil {
 		return nil, errors.New("workspace already exists")
@@ -29,13 +28,8 @@ func (s *WorkspaceService) CreateWorkspace(name string, targetName string, repos
 		return nil, errors.New("name is not a valid alphanumeric string")
 	}
 
-	t, err := s.targetStore.Find(targetName)
-	if err != nil {
-		return nil, err
-	}
-
 	w := &workspace.Workspace{
-		Id:     uuid.NewString(),
+		Id:     id,
 		Name:   name,
 		Target: targetName,
 	}
@@ -66,17 +60,7 @@ func (s *WorkspaceService) CreateWorkspace(name string, targetName string, repos
 		return nil, err
 	}
 
-	err = s.provisioner.CreateWorkspace(w, t)
-	if err != nil {
-		return nil, err
-	}
-
-	err = s.provisioner.StartWorkspace(w, t)
-	if err != nil {
-		return nil, err
-	}
-
-	return w, nil
+	return s.createWorkspace(w)
 }
 
 func (s *WorkspaceService) createProject(project *workspace.Project, target *provider.ProviderTarget, logWriter io.Writer) error {
@@ -128,18 +112,4 @@ func (s *WorkspaceService) createWorkspace(workspace *workspace.Workspace) (*wor
 	}
 
 	return workspace, nil
-}
-
-func getGitProviderIdFromUrl(url string) string {
-	if strings.Contains(url, "github.com") {
-		return "github"
-	} else if strings.Contains(url, "gitlab.com") {
-		return "gitlab"
-	} else if strings.Contains(url, "bitbucket.org") {
-		return "bitbucket"
-	} else if strings.Contains(url, "codeberg.org") {
-		return "codeberg"
-	} else {
-		return ""
-	}
 }

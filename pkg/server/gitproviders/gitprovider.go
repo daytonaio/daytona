@@ -61,7 +61,7 @@ func (s *GitProviderService) GetConfigForUrl(url string) (*gitprovider.GitProvid
 }
 
 func (s *GitProviderService) SetGitProviderConfig(providerConfig *gitprovider.GitProviderConfig) error {
-	gitProvider, err := s.GetGitProvider(providerConfig.Id)
+	gitProvider, err := s.newGitProvider(providerConfig)
 	if err != nil {
 		return err
 	}

@@ -39,9 +39,9 @@ func (p *GitProviderConfigStore) List() ([]*gitprovider.GitProviderConfig, error
 	return gitProviders, nil
 }
 
-func (p *GitProviderConfigStore) Find(idOrName string) (*gitprovider.GitProviderConfig, error) {
+func (p *GitProviderConfigStore) Find(id string) (*gitprovider.GitProviderConfig, error) {
 	gitProviderDTO := GitProviderConfigDTO{}
-	tx := p.db.Where("id = ? OR name = ?", idOrName, idOrName).First(&gitProviderDTO)
+	tx := p.db.Where("id = ?", id).First(&gitProviderDTO)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
