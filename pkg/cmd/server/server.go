@@ -9,9 +9,13 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"time"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
-	apikey "github.com/daytonaio/daytona/pkg/cmd/server/apikey"
+	"github.com/daytonaio/daytona/pkg/api"
+	"github.com/daytonaio/daytona/pkg/apikey"
+	apikeyCmd "github.com/daytonaio/daytona/pkg/cmd/server/apikey"
 	"github.com/daytonaio/daytona/pkg/cmd/server/daemon"
 	. "github.com/daytonaio/daytona/pkg/cmd/server/provider"
 	. "github.com/daytonaio/daytona/pkg/cmd/server/target"
@@ -93,6 +97,7 @@ var ServerCmd = &cobra.Command{
 		headscaleServer := headscale.NewHeadscaleServer(&headscale.HeadscaleServerConfig{
 			ServerId:      c.Id,
 			FrpsDomain:    c.Frps.Domain,
+			FrpsProtocol:  c.Frps.Protocol,
 			HeadscalePort: c.HeadscalePort,
 		})
 		err = headscaleServer.Init()
@@ -157,6 +162,17 @@ var ServerCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		apiServer := api.NewApiServer(api.ApiServerConfig{
+			ApiPort: int(c.ApiPort),
+		})
+
+		go func() {
+			err := apiServer.Start()
+			if err != nil {
+				log.Fatal(err)
+			}
+		}()
+
 		go func() {
 			err := <-errCh
 			if err != nil {
@@ -164,10 +180,24 @@ var ServerCmd = &cobra.Command{
 			}
 		}()
 
-		if err := server.HealthCheck(); err != nil {
-			log.Fatal(err)
-		} else {
+		for i := 0; i < 3; i++ {
+			err = apiServer.HealthCheck()
+			if err != nil {
+				time.Sleep(3 * time.Second)
+				continue
+			}
+
 			printServerStartedMessage(c)
+			break
+		}
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = setDefaultConfig(server)
+		if err != nil {
+			log.Fatal(err)
 		}
 
 		err = <-errCh
@@ -202,6 +232,43 @@ func getDbPath() (string, error) {
 	return filepath.Join(dir, "db"), nil
 }
 
+func setDefaultConfig(server *server.Server) error {
+	existingConfig, err := config.GetConfig()
+	if err != nil && !config.IsNotExist(err) {
+		return err
+	}
+
+	if existingConfig != nil {
+		for _, profile := range existingConfig.Profiles {
+			if profile.Id == "default" {
+				return nil
+			}
+		}
+	}
+
+	apiKey, err := server.ApiKeyService.Generate(apikey.ApiKeyTypeClient, "default")
+	if err != nil {
+		return err
+	}
+
+	config := &config.Config{
+		ActiveProfileId: "default",
+		DefaultIdeId:    "vscode",
+		Profiles: []config.Profile{
+			{
+				Id:   "default",
+				Name: "default",
+				Api: config.ServerApi{
+					Url: "http://localhost:3000",
+					Key: apiKey,
+				},
+			},
+		},
+	}
+
+	return config.Save()
+}
+
 func init() {
 	ServerCmd.PersistentFlags().BoolVarP(&runAsDaemon, "daemon", "d", false, "Run the server as a daemon")
 	ServerCmd.AddCommand(configureCmd)
@@ -211,5 +278,5 @@ func init() {
 	ServerCmd.AddCommand(ProviderCmd)
 	ServerCmd.AddCommand(stopCmd)
 	ServerCmd.AddCommand(restartCmd)
-	ServerCmd.AddCommand(apikey.ApiKeyCmd)
+	ServerCmd.AddCommand(apikeyCmd.ApiKeyCmd)
 }

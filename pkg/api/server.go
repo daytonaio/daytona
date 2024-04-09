@@ -14,6 +14,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"time"
@@ -38,32 +39,45 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-var httpServer *http.Server
-var router *gin.Engine
+type ApiServerConfig struct {
+	ApiPort int
+}
 
-func GetServer(apiPort int) (*http.Server, error) {
+func NewApiServer(config ApiServerConfig) *ApiServer {
+	return &ApiServer{
+		apiPort: config.ApiPort,
+	}
+}
+
+type ApiServer struct {
+	apiPort    int
+	httpServer *http.Server
+	router     *gin.Engine
+}
+
+func (a *ApiServer) Start() error {
 	docs.SwaggerInfo.Version = "0.1"
 	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Description = "Daytona Server API"
 	docs.SwaggerInfo.Title = "Daytona Server API"
 
 	if mode, ok := os.LookupEnv("DAYTONA_SERVER_MODE"); ok && mode == "development" {
-		router = gin.Default()
-		router.Use(cors.New(cors.Config{
+		a.router = gin.Default()
+		a.router.Use(cors.New(cors.Config{
 			AllowAllOrigins: true,
 		}))
 	} else {
 		gin.SetMode(gin.ReleaseMode)
-		router = gin.New()
-		router.Use(gin.Recovery())
+		a.router = gin.New()
+		a.router.Use(gin.Recovery())
 	}
 
-	router.Use(middlewares.LoggingMiddleware())
+	a.router.Use(middlewares.LoggingMiddleware())
 
-	public := router.Group("/")
+	public := a.router.Group("/")
 	public.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-	protected := router.Group("/")
+	protected := a.router.Group("/")
 	protected.Use(middlewares.AuthMiddleware())
 
 	project := protected.Group("/")
@@ -117,6 +131,7 @@ func GetServer(apiPort int) (*http.Server, error) {
 
 	gitProviderController := protected.Group("/gitprovider")
 	{
+		gitProviderController.GET("/", gitprovider.ListGitProviders)
 		gitProviderController.PUT("/", gitprovider.SetGitProvider)
 		gitProviderController.DELETE("/:gitProviderId", gitprovider.RemoveGitProvider)
 		gitProviderController.GET("/:gitProviderId/user", gitprovider.GetGitUser)
@@ -136,18 +151,34 @@ func GetServer(apiPort int) (*http.Server, error) {
 
 	project.GET(gitProviderController.BasePath()+"/for-url/:url", middlewares.ProjectAuthMiddleware(), gitprovider.GetGitProviderForUrl)
 
-	httpServer = &http.Server{
-		Addr:    fmt.Sprintf(":%d", apiPort),
-		Handler: router,
+	a.httpServer = &http.Server{
+		Addr:    fmt.Sprintf(":%d", a.apiPort),
+		Handler: a.router,
 	}
 
-	return httpServer, nil
+	listener, err := net.Listen("tcp", a.httpServer.Addr)
+	if err != nil {
+		return err
+	}
+
+	log.Infof("Starting api server on port %d", a.apiPort)
+	return a.httpServer.Serve(listener)
 }
 
-func Stop() {
+func (a *ApiServer) HealthCheck() error {
+	conn, err := net.Dial("tcp", fmt.Sprintf(":%d", a.apiPort))
+	if err != nil {
+		return fmt.Errorf("API health check timed out")
+	}
+	defer conn.Close()
+
+	return nil
+}
+
+func (a *ApiServer) Stop() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if err := httpServer.Shutdown(ctx); err != nil {
+	if err := a.httpServer.Shutdown(ctx); err != nil {
 		log.Error(err)
 	}
 }

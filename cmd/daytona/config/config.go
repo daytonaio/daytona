@@ -9,9 +9,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-
-	"github.com/daytonaio/daytona/pkg/apikey"
-	"github.com/daytonaio/daytona/pkg/server"
 )
 
 type ServerApi struct {
@@ -46,6 +43,12 @@ type GitProvider struct {
 	Name string
 }
 
+const configDoesntExistError = "config does not exist. Run `daytona server` to create a default profile"
+
+func IsNotExist(err error) bool {
+	return err.Error() == configDoesntExistError
+}
+
 func GetConfig() (*Config, error) {
 	configFilePath, err := getConfigPath()
 	if err != nil {
@@ -54,16 +57,7 @@ func GetConfig() (*Config, error) {
 
 	_, err = os.Stat(configFilePath)
 	if os.IsNotExist(err) {
-		defaultConfig, err := getDefaultConfig()
-		if err != nil {
-			return nil, err
-		}
-		err = defaultConfig.Save()
-		if err != nil {
-			return nil, err
-		}
-
-		return defaultConfig, nil
+		return nil, errors.New(configDoesntExistError)
 	}
 
 	if err != nil {
@@ -161,30 +155,6 @@ func (c *Config) GetProfile(profileId string) (Profile, error) {
 	}
 
 	return Profile{}, errors.New("profile not found")
-}
-
-func getDefaultConfig() (*Config, error) {
-	server := server.GetInstance(nil)
-
-	apiKey, err := server.ApiKeyService.Generate(apikey.ApiKeyTypeClient, "default")
-	if err != nil {
-		return nil, err
-	}
-
-	return &Config{
-		ActiveProfileId: "default",
-		DefaultIdeId:    "vscode",
-		Profiles: []Profile{
-			{
-				Id:   "default",
-				Name: "default",
-				Api: ServerApi{
-					Url: "http://localhost:3000",
-					Key: apiKey,
-				},
-			},
-		},
-	}, nil
 }
 
 func getConfigPath() (string, error) {

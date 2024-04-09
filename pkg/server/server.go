@@ -5,7 +5,6 @@ package server
 
 import (
 	"fmt"
-	"net"
 	"os"
 	"os/signal"
 	"time"
@@ -40,6 +39,9 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 	}
 
 	if server == nil {
+		if serverConfig == nil {
+			log.Fatal("Server not initialized")
+		}
 		server = &Server{
 			config:                serverConfig.Config,
 			TailscaleServer:       serverConfig.TailscaleServer,
@@ -71,16 +73,6 @@ func (s *Server) Start(errCh chan error) error {
 	}
 
 	log.Info("Starting Daytona server")
-
-	// apiServer, err := api.GetServer(int(s.config.ApiPort))
-	// if err != nil {
-	// 	return err
-	// }
-
-	// apiListener, err := net.Listen("tcp", apiServer.Addr)
-	// if err != nil {
-	// 	return err
-	// }
 
 	// Terminate orphaned provider processes
 	err = s.ProviderManager.TerminateProviderProcesses(s.config.ProvidersDir)
@@ -154,24 +146,6 @@ func (s *Server) Start(errCh chan error) error {
 			errCh <- err
 		}
 	}()
-
-	// go func() {
-	// 	log.Infof("Starting api server on port %d", s.config.ApiPort)
-	// 	err := apiServer.Serve(apiListener)
-	// 	if err != nil {
-	// 		errCh <- err
-	// 	}
-	// }()
-
-	return nil
-}
-
-func (s *Server) HealthCheck() error {
-	conn, err := net.DialTimeout("tcp", fmt.Sprintf(":%d", s.config.ApiPort), 3*time.Second)
-	if err != nil {
-		return fmt.Errorf("API health check timed out")
-	}
-	defer conn.Close()
 
 	return nil
 }
