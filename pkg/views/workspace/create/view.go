@@ -15,6 +15,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/types"
 	"github.com/daytonaio/daytona/pkg/views"
+	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
 	"github.com/charmbracelet/huh"
@@ -357,7 +358,13 @@ func GetRepositoryFromWizard(userGitProviders []types.GitProvider, secondaryProj
 		return types.Repository{}, errors.New("provider not found")
 	}
 
-	namespaceList, err := gitProvider.GetNamespaces()
+	var namespaceList []gitprovider.GitNamespace
+	var err error
+
+	err = view_util.With(func() error {
+		namespaceList, err = gitProvider.GetNamespaces()
+		return err
+	})
 	if err != nil {
 		return types.Repository{}, err
 	}
@@ -373,7 +380,12 @@ func GetRepositoryFromWizard(userGitProviders []types.GitProvider, secondaryProj
 		}
 	}
 
-	providerRepos, err := gitProvider.GetRepositories(namespaceId)
+	var providerRepos []types.Repository
+	err = view_util.With(func() error {
+		providerRepos, err = gitProvider.GetRepositories(namespaceId)
+		return err
+	})
+
 	if err != nil {
 		return types.Repository{}, err
 	}
@@ -393,7 +405,11 @@ func GetRepositoryFromWizard(userGitProviders []types.GitProvider, secondaryProj
 		return types.Repository{}, nil
 	}
 
-	branchList, err := gitProvider.GetRepoBranches(chosenRepo, namespaceId)
+	var branchList []gitprovider.GitBranch
+	err = view_util.With(func() error {
+		branchList, err = gitProvider.GetRepoBranches(chosenRepo, namespaceId)
+		return err
+	})
 	if err != nil {
 		return types.Repository{}, err
 	}
@@ -413,7 +429,12 @@ func GetRepositoryFromWizard(userGitProviders []types.GitProvider, secondaryProj
 		return chosenRepo, nil
 	}
 
-	prList, err := gitProvider.GetRepoPRs(chosenRepo, namespaceId)
+	var prList []gitprovider.GitPullRequest
+	err = view_util.With(func() error {
+		prList, err = gitProvider.GetRepoPRs(chosenRepo, namespaceId)
+		return err
+	})
+
 	if err != nil {
 		return types.Repository{}, err
 	}
