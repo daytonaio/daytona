@@ -4,6 +4,7 @@
 package workspaces
 
 import (
+	"errors"
 	"io"
 
 	"github.com/daytonaio/daytona/pkg/logger"
@@ -53,4 +54,20 @@ type WorkspaceService struct {
 	newWorkspaceLogger    func(workspaceId string) logger.Logger
 	newProjectLogger      func(workspaceId, projectName string) logger.Logger
 	NewWorkspaceLogReader func(workspaceId string) (io.Reader, error)
+}
+
+func (s *WorkspaceService) SetProjectState(workspaceId, projectName string, state *workspace.ProjectState) (*workspace.Workspace, error) {
+	ws, err := s.workspaceStore.Find(workspaceId)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, project := range ws.Projects {
+		if project.Name == projectName {
+			project.State = state
+			return ws, s.workspaceStore.Save(ws)
+		}
+	}
+
+	return nil, errors.New("project not found")
 }

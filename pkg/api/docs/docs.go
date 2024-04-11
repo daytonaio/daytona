@@ -873,6 +873,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/workspace/{workspaceId}/{projectId}/state": {
+            "post": {
+                "description": "Set project state",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Set project state",
+                "operationId": "SetProjectState",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project ID",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Set State",
+                        "name": "setState",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SetProjectState"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/workspace/{workspaceId}/{projectId}/stop": {
             "post": {
                 "description": "Stop project",
@@ -1085,6 +1125,9 @@ const docTemplate = `{
                 "repository": {
                     "$ref": "#/definitions/GitRepository"
                 },
+                "state": {
+                    "$ref": "#/definitions/ProjectState"
+                },
                 "target": {
                     "type": "string"
                 },
@@ -1099,9 +1142,6 @@ const docTemplate = `{
                 "created": {
                     "type": "string"
                 },
-                "finished": {
-                    "type": "string"
-                },
                 "isRunning": {
                     "type": "boolean"
                 },
@@ -1111,11 +1151,19 @@ const docTemplate = `{
                 "providerMetadata": {
                     "type": "string"
                 },
-                "started": {
-                    "type": "string"
-                },
                 "workspaceId": {
                     "type": "string"
+                }
+            }
+        },
+        "ProjectState": {
+            "type": "object",
+            "properties": {
+                "updatedAt": {
+                    "type": "string"
+                },
+                "uptime": {
+                    "type": "integer"
                 }
             }
         },
@@ -1180,6 +1228,14 @@ const docTemplate = `{
                 },
                 "serverDownloadUrl": {
                     "type": "string"
+                }
+            }
+        },
+        "SetProjectState": {
+            "type": "object",
+            "properties": {
+                "uptime": {
+                    "type": "integer"
                 }
             }
         },

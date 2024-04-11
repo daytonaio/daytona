@@ -614,6 +614,38 @@ paths:
       summary: Start project
       tags:
       - workspace
+  /workspace/{workspaceId}/{projectId}/state:
+    post:
+      description: Set project state
+      operationId: SetProjectState
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/SetProjectState'
+        description: Set State
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Set project state
+      tags:
+      - workspace
+      x-codegen-request-body-name: setState
   /workspace/{workspaceId}/{projectId}/stop:
     post:
       description: Stop project
@@ -819,6 +851,9 @@ components:
     Project:
       example:
         name: name
+        state:
+          updatedAt: updatedAt
+          uptime: 0
         repository:
           owner: owner
           path: path
@@ -836,6 +871,8 @@ components:
           type: string
         repository:
           $ref: '#/components/schemas/GitRepository'
+        state:
+          $ref: '#/components/schemas/ProjectState'
         target:
           type: string
         workspaceId:
@@ -847,13 +884,9 @@ components:
         isRunning: true
         created: created
         name: name
-        finished: finished
-        started: started
         workspaceId: workspaceId
       properties:
         created:
-          type: string
-        finished:
           type: string
         isRunning:
           type: boolean
@@ -861,10 +894,18 @@ components:
           type: string
         providerMetadata:
           type: string
-        started:
-          type: string
         workspaceId:
           type: string
+      type: object
+    ProjectState:
+      example:
+        updatedAt: updatedAt
+        uptime: 0
+      properties:
+        updatedAt:
+          type: string
+        uptime:
+          type: integer
       type: object
     Provider:
       example:
@@ -930,10 +971,20 @@ components:
         serverDownloadUrl:
           type: string
       type: object
+    SetProjectState:
+      example:
+        uptime: 0
+      properties:
+        uptime:
+          type: integer
+      type: object
     Workspace:
       example:
         projects:
         - name: name
+          state:
+            updatedAt: updatedAt
+            uptime: 0
           repository:
             owner: owner
             path: path
@@ -947,6 +998,9 @@ components:
           target: target
           workspaceId: workspaceId
         - name: name
+          state:
+            updatedAt: updatedAt
+            uptime: 0
           repository:
             owner: owner
             path: path
@@ -978,6 +1032,9 @@ components:
       example:
         projects:
         - name: name
+          state:
+            updatedAt: updatedAt
+            uptime: 0
           repository:
             owner: owner
             path: path
@@ -991,6 +1048,9 @@ components:
           target: target
           workspaceId: workspaceId
         - name: name
+          state:
+            updatedAt: updatedAt
+            uptime: 0
           repository:
             owner: owner
             path: path
@@ -1011,15 +1071,11 @@ components:
             isRunning: true
             created: created
             name: name
-            finished: finished
-            started: started
             workspaceId: workspaceId
           - providerMetadata: providerMetadata
             isRunning: true
             created: created
             name: name
-            finished: finished
-            started: started
             workspaceId: workspaceId
           providerMetadata: providerMetadata
           name: name
@@ -1045,15 +1101,11 @@ components:
           isRunning: true
           created: created
           name: name
-          finished: finished
-          started: started
           workspaceId: workspaceId
         - providerMetadata: providerMetadata
           isRunning: true
           created: created
           name: name
-          finished: finished
-          started: started
           workspaceId: workspaceId
         providerMetadata: providerMetadata
         name: name

@@ -17,6 +17,7 @@ type Project struct {
 	ApiKey      string                     `json:"-"`
 	Target      string                     `json:"target"`
 	EnvVars     map[string]string          `json:"-"`
+	State       *ProjectState              `json:"state,omitempty"`
 } // @name Project
 
 type Workspace struct {
@@ -35,11 +36,14 @@ func (w *Workspace) GetProject(projectName string) (*Project, error) {
 	return nil, errors.New("project not found")
 }
 
+type ProjectState struct {
+	UpdatedAt string `json:"updatedAt"`
+	Uptime    uint64 `json:"uptime"`
+} // @name ProjectState
+
 type ProjectInfo struct {
 	Name             string `json:"name"`
 	Created          string `json:"created"`
-	Started          string `json:"started"`
-	Finished         string `json:"finished"`
 	IsRunning        bool   `json:"isRunning"`
 	ProviderMetadata string `json:"providerMetadata,omitempty"`
 	WorkspaceId      string `json:"workspaceId"`

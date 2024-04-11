@@ -20,11 +20,9 @@ var _ MappedNullable = &ProjectInfo{}
 // ProjectInfo struct for ProjectInfo
 type ProjectInfo struct {
 	Created          *string `json:"created,omitempty"`
-	Finished         *string `json:"finished,omitempty"`
 	IsRunning        *bool   `json:"isRunning,omitempty"`
 	Name             *string `json:"name,omitempty"`
 	ProviderMetadata *string `json:"providerMetadata,omitempty"`
-	Started          *string `json:"started,omitempty"`
 	WorkspaceId      *string `json:"workspaceId,omitempty"`
 }
 
@@ -75,38 +73,6 @@ func (o *ProjectInfo) HasCreated() bool {
 // SetCreated gets a reference to the given string and assigns it to the Created field.
 func (o *ProjectInfo) SetCreated(v string) {
 	o.Created = &v
-}
-
-// GetFinished returns the Finished field value if set, zero value otherwise.
-func (o *ProjectInfo) GetFinished() string {
-	if o == nil || IsNil(o.Finished) {
-		var ret string
-		return ret
-	}
-	return *o.Finished
-}
-
-// GetFinishedOk returns a tuple with the Finished field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *ProjectInfo) GetFinishedOk() (*string, bool) {
-	if o == nil || IsNil(o.Finished) {
-		return nil, false
-	}
-	return o.Finished, true
-}
-
-// HasFinished returns a boolean if a field has been set.
-func (o *ProjectInfo) HasFinished() bool {
-	if o != nil && !IsNil(o.Finished) {
-		return true
-	}
-
-	return false
-}
-
-// SetFinished gets a reference to the given string and assigns it to the Finished field.
-func (o *ProjectInfo) SetFinished(v string) {
-	o.Finished = &v
 }
 
 // GetIsRunning returns the IsRunning field value if set, zero value otherwise.
@@ -205,38 +171,6 @@ func (o *ProjectInfo) SetProviderMetadata(v string) {
 	o.ProviderMetadata = &v
 }
 
-// GetStarted returns the Started field value if set, zero value otherwise.
-func (o *ProjectInfo) GetStarted() string {
-	if o == nil || IsNil(o.Started) {
-		var ret string
-		return ret
-	}
-	return *o.Started
-}
-
-// GetStartedOk returns a tuple with the Started field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *ProjectInfo) GetStartedOk() (*string, bool) {
-	if o == nil || IsNil(o.Started) {
-		return nil, false
-	}
-	return o.Started, true
-}
-
-// HasStarted returns a boolean if a field has been set.
-func (o *ProjectInfo) HasStarted() bool {
-	if o != nil && !IsNil(o.Started) {
-		return true
-	}
-
-	return false
-}
-
-// SetStarted gets a reference to the given string and assigns it to the Started field.
-func (o *ProjectInfo) SetStarted(v string) {
-	o.Started = &v
-}
-
 // GetWorkspaceId returns the WorkspaceId field value if set, zero value otherwise.
 func (o *ProjectInfo) GetWorkspaceId() string {
 	if o == nil || IsNil(o.WorkspaceId) {
@@ -282,9 +216,6 @@ func (o ProjectInfo) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Created) {
 		toSerialize["created"] = o.Created
 	}
-	if !IsNil(o.Finished) {
-		toSerialize["finished"] = o.Finished
-	}
 	if !IsNil(o.IsRunning) {
 		toSerialize["isRunning"] = o.IsRunning
 	}
@@ -293,9 +224,6 @@ func (o ProjectInfo) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.ProviderMetadata) {
 		toSerialize["providerMetadata"] = o.ProviderMetadata
-	}
-	if !IsNil(o.Started) {
-		toSerialize["started"] = o.Started
 	}
 	if !IsNil(o.WorkspaceId) {
 		toSerialize["workspaceId"] = o.WorkspaceId

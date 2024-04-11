@@ -18,11 +18,17 @@ type RepositoryDTO struct {
 	Path     *string `json:"path,omitempty"`
 }
 
+type ProjectStateDTO struct {
+	UpdatedAt string `json:"updatedAt"`
+	Uptime    uint64 `json:"uptime"`
+}
+
 type ProjectDTO struct {
-	Name        string        `json:"name"`
-	Repository  RepositoryDTO `json:"repository"`
-	WorkspaceId string        `json:"workspaceId"`
-	Target      string        `json:"target"`
+	Name        string           `json:"name"`
+	Repository  RepositoryDTO    `json:"repository"`
+	WorkspaceId string           `json:"workspaceId"`
+	Target      string           `json:"target"`
+	State       *ProjectStateDTO `json:"state,omitempty" gorm:"serializer:json"`
 }
 
 func ToProjectDTO(project *workspace.Project, workspace *workspace.Workspace) ProjectDTO {
@@ -31,6 +37,7 @@ func ToProjectDTO(project *workspace.Project, workspace *workspace.Workspace) Pr
 		Repository:  ToRepositoryDTO(project.Repository),
 		WorkspaceId: project.WorkspaceId,
 		Target:      project.Target,
+		State:       ToProjectStateDTO(project.State),
 	}
 }
 
@@ -55,12 +62,35 @@ func ToRepositoryDTO(repo *gitprovider.GitRepository) RepositoryDTO {
 	return repoDTO
 }
 
+func ToProjectStateDTO(state *workspace.ProjectState) *ProjectStateDTO {
+	if state == nil {
+		return nil
+	}
+
+	return &ProjectStateDTO{
+		UpdatedAt: state.UpdatedAt,
+		Uptime:    state.Uptime,
+	}
+}
+
 func ToProject(projectDTO ProjectDTO) *workspace.Project {
 	return &workspace.Project{
 		Name:        projectDTO.Name,
 		Repository:  ToRepository(projectDTO.Repository),
 		WorkspaceId: projectDTO.WorkspaceId,
 		Target:      projectDTO.Target,
+		State:       ToProjectState(projectDTO.State),
+	}
+}
+
+func ToProjectState(stateDTO *ProjectStateDTO) *workspace.ProjectState {
+	if stateDTO == nil {
+		return nil
+	}
+
+	return &workspace.ProjectState{
+		UpdatedAt: stateDTO.UpdatedAt,
+		Uptime:    stateDTO.Uptime,
 	}
 }
 

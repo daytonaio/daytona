@@ -27,7 +27,7 @@ type RowData struct {
 	Branch        string
 	Target        string
 	Created       string
-	Status        string
+	Uptime        string
 }
 
 type model struct {
@@ -42,7 +42,7 @@ var columns = []table.Column{
 	{Title: "BRANCH", Width: defaultColumnWidth},
 	{Title: "TARGET", Width: defaultColumnWidth},
 	{Title: "CREATED", Width: defaultColumnWidth},
-	{Title: "STATUS", Width: defaultColumnWidth},
+	{Title: "UPTIME", Width: defaultColumnWidth},
 }
 
 func (m model) Init() tea.Cmd {
@@ -82,7 +82,7 @@ func renderWorkspaceList(workspaceList []serverapiclient.WorkspaceDTO, specifyGi
 			adjustColumsFormatting(rowData)
 			row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Branch, rowData.Target}
 			if workspace.Info != nil && len(workspace.Info.Projects) > 0 {
-				row = append(row, rowData.Created, rowData.Status)
+				row = append(row, rowData.Created, rowData.Uptime)
 			}
 			rows = append(rows, row)
 		} else {
@@ -93,7 +93,7 @@ func renderWorkspaceList(workspaceList []serverapiclient.WorkspaceDTO, specifyGi
 				adjustColumsFormatting(rowData)
 				row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Branch, rowData.Target}
 				if workspace.Info != nil && len(workspace.Info.Projects) > 0 {
-					row = append(row, rowData.Created, rowData.Status)
+					row = append(row, rowData.Created, rowData.Uptime)
 				}
 				rows = append(rows, row)
 			}
@@ -133,7 +133,7 @@ func adjustColumsFormatting(rowData RowData) {
 	adjustColumnWidth("BRANCH", rowData)
 	adjustColumnWidth("TARGET", rowData)
 	adjustColumnWidth("CREATED", rowData)
-	adjustColumnWidth("STATUS", rowData)
+	adjustColumnWidth("UPTIME", rowData)
 }
 
 func adjustColumnWidth(title string, rowData RowData) {
@@ -156,8 +156,8 @@ func adjustColumnWidth(title string, rowData RowData) {
 		currentField = rowData.Target
 	case "CREATED":
 		currentField = rowData.Created
-	case "STATUS":
-		currentField = rowData.Status
+	case "UPTIME":
+		currentField = rowData.Uptime
 	}
 
 	if len(currentField) > column.Width {
@@ -182,8 +182,8 @@ func getWorkspaceTableRowData(workspace serverapiclient.WorkspaceDTO, specifyGit
 	if workspace.Info != nil && workspace.Info.Projects != nil && len(workspace.Info.Projects) > 0 && workspace.Info.Projects[0].Created != nil {
 		rowData.Created = util.FormatCreatedTime(*workspace.Info.Projects[0].Created)
 	}
-	if workspace.Info != nil && workspace.Info.Projects != nil && len(workspace.Info.Projects) > 0 && workspace.Info.Projects[0].Started != nil {
-		rowData.Status = util.FormatStatusTime(*workspace.Info.Projects[0].Started)
+	if len(workspace.Projects) > 0 && workspace.Projects[0].State != nil && workspace.Projects[0].State.Uptime != nil {
+		rowData.Uptime = util.FormatUptime(*workspace.Projects[0].State.Uptime)
 	}
 	return rowData
 }
@@ -196,7 +196,6 @@ func getProjectTableRowData(workspaceDTO serverapiclient.WorkspaceDTO, project s
 			currentProjectInfo = &workspace.ProjectInfo{
 				Name:    *projectInfo.Name,
 				Created: *projectInfo.Created,
-				Started: *projectInfo.Started,
 			}
 			break
 		}
@@ -206,7 +205,6 @@ func getProjectTableRowData(workspaceDTO serverapiclient.WorkspaceDTO, project s
 		currentProjectInfo = &workspace.ProjectInfo{
 			Name:    *project.Name,
 			Created: "/",
-			Started: "/",
 		}
 	}
 
@@ -224,7 +222,9 @@ func getProjectTableRowData(workspaceDTO serverapiclient.WorkspaceDTO, project s
 		rowData.Target = *project.Target
 	}
 	rowData.Created = util.FormatCreatedTime(currentProjectInfo.Created)
-	rowData.Status = util.FormatStatusTime(currentProjectInfo.Started)
+	if project.State.Uptime != nil {
+		rowData.Uptime = util.FormatUptime(*project.State.Uptime)
+	}
 	return rowData
 }
 
