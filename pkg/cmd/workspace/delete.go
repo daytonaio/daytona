@@ -62,16 +62,6 @@ var DeleteCmd = &cobra.Command{
 			return
 		}
 
-		c, err := config.GetConfig()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		activeProfile, err := c.GetActiveProfile()
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		ctx := context.Background()
 		var workspace *serverapiclient.WorkspaceDTO
 
@@ -97,17 +87,30 @@ var DeleteCmd = &cobra.Command{
 			return
 		}
 
-		res, err := apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
-		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+		if !yesFlag {
+			form := huh.NewForm(
+				huh.NewGroup(
+					huh.NewConfirm().
+						Title(fmt.Sprintf("Delete workspace %s?", *workspace.Name)).
+						Description(fmt.Sprintf("Are you sure you want to delete workspace %s?", *workspace.Name)).
+						Value(&yesFlag),
+				),
+			).WithTheme(views.GetCustomTheme())
+
+			err := form.Run()
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 
-		err = config.RemoveWorkspaceSshEntries(activeProfile.Id, *workspace.Id)
-		if err != nil {
-			log.Fatal(err)
+		if yesFlag {
+			err := removeWorkspace(ctx, apiClient, workspace)
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			fmt.Println("Operation canceled.")
 		}
-
-		util.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully deleted", *workspace.Name))
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) > 0 {
@@ -143,5 +146,30 @@ func DeleteAllWorkspaces() error {
 		}
 		view_util.RenderLine(fmt.Sprintf("- Workspace %s successfully deleted\n", *workspace.Name))
 	}
+	return nil
+}
+
+func removeWorkspace(ctx context.Context, apiClient *serverapiclient.APIClient, workspace *serverapiclient.WorkspaceDTO) error {
+	res, err := apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
+	if err != nil {
+		log.Fatal(apiclient.HandleErrorResponse(res, err))
+	}
+
+	c, err := config.GetConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	activeProfile, err := c.GetActiveProfile()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = config.RemoveWorkspaceSshEntries(activeProfile.Id, *workspace.Id)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	util.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully deleted", *workspace.Name))
 	return nil
 }
