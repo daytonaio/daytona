@@ -6,3 +6,6 @@ linters-settings:
       - syscall.Syscall
       - (github.com/gliderlabs/ssh.Session).Exit
       - (io.Writer).Write
+run:
+  build-tags:
+    - testing
