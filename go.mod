@@ -1,6 +1,6 @@
 module github.com/daytonaio/daytona
 
-go 1.22.1
+go 1.22.2
 
 require (
 	code.gitea.io/sdk/gitea v0.17.1
@@ -276,7 +276,7 @@ require (
 	github.com/xanzy/go-gitlab v0.97.0
 	github.com/yuin/goldmark v1.6.0 // indirect
 	github.com/yuin/goldmark-emoji v1.0.2 // indirect
-	golang.org/x/net v0.21.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/sys v0.18.0
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
