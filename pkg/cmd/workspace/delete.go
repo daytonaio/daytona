@@ -97,17 +97,36 @@ var DeleteCmd = &cobra.Command{
 			return
 		}
 
-		res, err := apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
-		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
-		}
+		var confirmDeletionFlag bool
 
-		err = config.RemoveWorkspaceSshEntries(activeProfile.Id, *workspace.Id)
-		if err != nil {
+		form := huh.NewForm(
+			huh.NewGroup(
+				huh.NewConfirm().
+					Title("Delete workspace?").
+					Description("Are you sure you want to delete this workspace?").
+					Value(&confirmDeletionFlag),
+			),
+		).WithTheme(views.GetCustomTheme())
+
+		if err := form.Run(); err != nil {
 			log.Fatal(err)
 		}
 
-		util.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully deleted", *workspace.Name))
+		if confirmDeletionFlag {
+			res, err := apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
+			if err != nil {
+				log.Fatal(apiclient.HandleErrorResponse(res, err))
+			}
+
+			err = config.RemoveWorkspaceSshEntries(activeProfile.Id, *workspace.Id)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			util.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully deleted", *workspace.Name))
+		} else {
+			fmt.Println("Operation canceled.")
+		}
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) > 0 {
