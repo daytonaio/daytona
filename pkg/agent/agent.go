@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
@@ -18,6 +19,8 @@ import (
 
 func (a *Agent) Start() error {
 	log.Info("Starting Daytona Agent")
+
+	a.startTime = time.Now()
 
 	err := a.setDefaultConfig()
 	if err != nil {
@@ -75,6 +78,17 @@ func (a *Agent) Start() error {
 		err := a.Ssh.Start()
 		if err != nil {
 			log.Error(fmt.Sprintf("failed to start ssh server: %s", err))
+		}
+	}()
+
+	go func() {
+		for {
+			err := a.updateProjectState()
+			if err != nil {
+				log.Error(fmt.Sprintf("failed to update project state: %s", err))
+			}
+
+			time.Sleep(2 * time.Second)
 		}
 	}()
 
@@ -161,4 +175,26 @@ func (a *Agent) setDefaultConfig() error {
 	}
 
 	return config.Save()
+}
+
+// Agent uptime in seconds
+func (a *Agent) uptime() int32 {
+	return int32(time.Since(a.startTime).Seconds())
+}
+
+func (a *Agent) updateProjectState() error {
+	apiClient, err := server.GetApiClient(nil)
+	if err != nil {
+		return err
+	}
+
+	uptime := a.uptime()
+	res, err := apiClient.WorkspaceAPI.SetProjectState(context.Background(), a.Config.WorkspaceId, a.Config.ProjectName).SetState(serverapiclient.SetProjectState{
+		Uptime: &uptime,
+	}).Execute()
+	if err != nil {
+		return apiclient.HandleErrorResponse(res, err)
+	}
+
+	return nil
 }

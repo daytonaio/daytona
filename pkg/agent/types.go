@@ -4,6 +4,8 @@
 package agent
 
 import (
+	"time"
+
 	"github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 )
@@ -27,4 +29,5 @@ type Agent struct {
 	Git       GitService
 	Ssh       SshServer
 	Tailscale TailscaleServer
+	startTime time.Time
 }

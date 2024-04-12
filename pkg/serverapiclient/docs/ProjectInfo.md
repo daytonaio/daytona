@@ -5,11 +5,9 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Created** | Pointer to **string** |  | [optional] 
-**Finished** | Pointer to **string** |  | [optional] 
 **IsRunning** | Pointer to **bool** |  | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
 **ProviderMetadata** | Pointer to **string** |  | [optional] 
-**Started** | Pointer to **string** |  | [optional] 
 **WorkspaceId** | Pointer to **string** |  | [optional] 
 
 ## Methods
@@ -55,31 +53,6 @@ SetCreated sets Created field to given value.
 `func (o *ProjectInfo) HasCreated() bool`
 
 HasCreated returns a boolean if a field has been set.
-
-### GetFinished
-
-`func (o *ProjectInfo) GetFinished() string`
-
-GetFinished returns the Finished field if non-nil, zero value otherwise.
-
-### GetFinishedOk
-
-`func (o *ProjectInfo) GetFinishedOk() (*string, bool)`
-
-GetFinishedOk returns a tuple with the Finished field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetFinished
-
-`func (o *ProjectInfo) SetFinished(v string)`
-
-SetFinished sets Finished field to given value.
-
-### HasFinished
-
-`func (o *ProjectInfo) HasFinished() bool`
-
-HasFinished returns a boolean if a field has been set.
 
 ### GetIsRunning
 
@@ -155,31 +128,6 @@ SetProviderMetadata sets ProviderMetadata field to given value.
 `func (o *ProjectInfo) HasProviderMetadata() bool`
 
 HasProviderMetadata returns a boolean if a field has been set.
-
-### GetStarted
-
-`func (o *ProjectInfo) GetStarted() string`
-
-GetStarted returns the Started field if non-nil, zero value otherwise.
-
-### GetStartedOk
-
-`func (o *ProjectInfo) GetStartedOk() (*string, bool)`
-
-GetStartedOk returns a tuple with the Started field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetStarted
-
-`func (o *ProjectInfo) SetStarted(v string)`
-
-SetStarted sets Started field to given value.
-
-### HasStarted
-
-`func (o *ProjectInfo) HasStarted() bool`
-
-HasStarted returns a boolean if a field has been set.
 
 ### GetWorkspaceId
 

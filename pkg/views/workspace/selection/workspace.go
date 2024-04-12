@@ -29,13 +29,13 @@ func selectWorkspacePrompt(workspaces []serverapiclient.WorkspaceDTO, actionVerb
 		}
 
 		// Get the time if available
-		statusTime := ""
+		uptime := ""
 		createdTime := ""
 		if workspace.Info != nil && workspace.Info.Projects != nil && len(workspace.Info.Projects) > 0 && workspace.Info.Projects[0].Created != nil {
 			createdTime = util.FormatCreatedTime(*workspace.Info.Projects[0].Created)
 		}
-		if workspace.Info != nil && workspace.Info.Projects != nil && len(workspace.Info.Projects) > 0 && workspace.Info.Projects[0].Started != nil {
-			statusTime = util.FormatStatusTime(*workspace.Info.Projects[0].Started)
+		if len(workspace.Projects) > 0 && workspace.Projects[0].State != nil && workspace.Projects[0].State.Uptime != nil {
+			uptime = fmt.Sprintf("up %s", util.FormatUptime(*workspace.Projects[0].State.Uptime))
 		}
 
 		newItem := item[serverapiclient.WorkspaceDTO]{
@@ -43,7 +43,7 @@ func selectWorkspacePrompt(workspaces []serverapiclient.WorkspaceDTO, actionVerb
 			id:             *workspace.Id,
 			desc:           strings.Join(projectNames, ", "),
 			createdTime:    createdTime,
-			statusTime:     statusTime,
+			uptime:         uptime,
 			target:         *workspace.Target,
 			choiceProperty: workspace,
 		}
