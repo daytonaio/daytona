@@ -104,6 +104,7 @@ Class | Method | HTTP request | Description
 *WorkspaceAPI* | [**GetWorkspace**](docs/WorkspaceAPI.md#getworkspace) | **Get** /workspace/{workspaceId} | Get workspace info
 *WorkspaceAPI* | [**ListWorkspaces**](docs/WorkspaceAPI.md#listworkspaces) | **Get** /workspace | List workspaces
 *WorkspaceAPI* | [**RemoveWorkspace**](docs/WorkspaceAPI.md#removeworkspace) | **Delete** /workspace/{workspaceId} | Remove workspace
+*WorkspaceAPI* | [**SetProjectState**](docs/WorkspaceAPI.md#setprojectstate) | **Post** /workspace/{workspaceId}/{projectId}/state | Set project state
 *WorkspaceAPI* | [**StartProject**](docs/WorkspaceAPI.md#startproject) | **Post** /workspace/{workspaceId}/{projectId}/start | Start project
 *WorkspaceAPI* | [**StartWorkspace**](docs/WorkspaceAPI.md#startworkspace) | **Post** /workspace/{workspaceId}/start | Start workspace
 *WorkspaceAPI* | [**StopProject**](docs/WorkspaceAPI.md#stopproject) | **Post** /workspace/{workspaceId}/{projectId}/stop | Stop project
@@ -126,12 +127,14 @@ Class | Method | HTTP request | Description
  - [NetworkKey](docs/NetworkKey.md)
  - [Project](docs/Project.md)
  - [ProjectInfo](docs/ProjectInfo.md)
+ - [ProjectState](docs/ProjectState.md)
  - [Provider](docs/Provider.md)
  - [ProviderProviderInfo](docs/ProviderProviderInfo.md)
  - [ProviderProviderTargetProperty](docs/ProviderProviderTargetProperty.md)
  - [ProviderProviderTargetPropertyType](docs/ProviderProviderTargetPropertyType.md)
  - [ProviderTarget](docs/ProviderTarget.md)
  - [ServerConfig](docs/ServerConfig.md)
+ - [SetProjectState](docs/SetProjectState.md)
  - [Workspace](docs/Workspace.md)
  - [WorkspaceDTO](docs/WorkspaceDTO.md)
  - [WorkspaceInfo](docs/WorkspaceInfo.md)

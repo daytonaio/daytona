@@ -116,6 +116,8 @@ definitions:
         type: string
       repository:
         $ref: '#/definitions/GitRepository'
+      state:
+        $ref: '#/definitions/ProjectState'
       target:
         type: string
       workspaceId:
@@ -125,18 +127,21 @@ definitions:
     properties:
       created:
         type: string
-      finished:
-        type: string
       isRunning:
         type: boolean
       name:
         type: string
       providerMetadata:
         type: string
-      started:
-        type: string
       workspaceId:
         type: string
+    type: object
+  ProjectState:
+    properties:
+      updatedAt:
+        type: string
+      uptime:
+        type: integer
     type: object
   Provider:
     properties:
@@ -179,6 +184,11 @@ definitions:
         type: string
       serverDownloadUrl:
         type: string
+    type: object
+  SetProjectState:
+    properties:
+      uptime:
+        type: integer
     type: object
   Workspace:
     properties:
@@ -823,6 +833,33 @@ paths:
         "200":
           description: OK
       summary: Start project
+      tags:
+      - workspace
+  /workspace/{workspaceId}/{projectId}/state:
+    post:
+      description: Set project state
+      operationId: SetProjectState
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Set State
+        in: body
+        name: setState
+        required: true
+        schema:
+          $ref: '#/definitions/SetProjectState'
+      responses:
+        "200":
+          description: OK
+      summary: Set project state
       tags:
       - workspace
   /workspace/{workspaceId}/{projectId}/stop:

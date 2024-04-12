@@ -6,6 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Name** | Pointer to **string** |  | [optional] 
 **Repository** | Pointer to [**GitRepository**](GitRepository.md) |  | [optional] 
+**State** | Pointer to [**ProjectState**](ProjectState.md) |  | [optional] 
 **Target** | Pointer to **string** |  | [optional] 
 **WorkspaceId** | Pointer to **string** |  | [optional] 
 
@@ -77,6 +78,31 @@ SetRepository sets Repository field to given value.
 `func (o *Project) HasRepository() bool`
 
 HasRepository returns a boolean if a field has been set.
+
+### GetState
+
+`func (o *Project) GetState() ProjectState`
+
+GetState returns the State field if non-nil, zero value otherwise.
+
+### GetStateOk
+
+`func (o *Project) GetStateOk() (*ProjectState, bool)`
+
+GetStateOk returns a tuple with the State field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetState
+
+`func (o *Project) SetState(v ProjectState)`
+
+SetState sets State field to given value.
+
+### HasState
+
+`func (o *Project) HasState() bool`
+
+HasState returns a boolean if a field has been set.
 
 ### GetTarget
 

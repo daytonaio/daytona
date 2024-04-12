@@ -80,9 +80,6 @@ func (a *ApiServer) Start() error {
 	protected := a.router.Group("/")
 	protected.Use(middlewares.AuthMiddleware())
 
-	project := protected.Group("/")
-	project.Use(middlewares.ProjectAuthMiddleware())
-
 	serverController := protected.Group("/server")
 	{
 		serverController.GET("/config", server.GetConfig)
@@ -149,7 +146,12 @@ func (a *ApiServer) Start() error {
 		apiKeyController.DELETE("/:apiKeyName", apikey.RevokeApiKey)
 	}
 
-	project.GET(gitProviderController.BasePath()+"/for-url/:url", middlewares.ProjectAuthMiddleware(), gitprovider.GetGitProviderForUrl)
+	projectGroup := protected.Group("/")
+	projectGroup.Use(middlewares.ProjectAuthMiddleware())
+	{
+		projectGroup.POST(workspaceController.BasePath()+"/:workspaceId/:projectId/state", workspace.SetProjectState)
+		projectGroup.GET(gitProviderController.BasePath()+"/for-url/:url", gitprovider.GetGitProviderForUrl)
+	}
 
 	a.httpServer = &http.Server{
 		Addr:    fmt.Sprintf(":%d", a.apiPort),

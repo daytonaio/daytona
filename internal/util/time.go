@@ -41,33 +41,28 @@ func FormatCreatedTime(input string) string {
 	}
 }
 
-func FormatStatusTime(input string) string {
-	t, err := time.Parse(timeLayout, input)
-	if err != nil {
-		return "stopped"
-	}
-
-	duration := time.Since(t)
+func FormatUptime(uptime int32) string {
+	duration := time.Duration(uptime) * time.Second
 
 	if duration < time.Minute {
-		return "up < 1 minute"
+		return "< 1 minute"
 	} else if duration < time.Hour {
 		minutes := int(duration.Minutes())
 		if minutes == 1 {
-			return "up 1 minute"
+			return "1 minute"
 		}
-		return fmt.Sprintf("up %d minutes", minutes)
+		return fmt.Sprintf("%d minutes", minutes)
 	} else if duration < 24*time.Hour {
 		hours := int(duration.Hours())
 		if hours == 1 {
-			return "up 1 hour"
+			return "1 hour"
 		}
-		return fmt.Sprintf("up %d hours", hours)
+		return fmt.Sprintf("%d hours", hours)
 	} else {
 		days := int(duration.Hours() / 24)
 		if days == 1 {
-			return "up 1 day"
+			return "1 day"
 		}
-		return fmt.Sprintf("up %d days", days)
+		return fmt.Sprintf("%d days", days)
 	}
 }

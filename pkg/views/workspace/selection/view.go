@@ -20,8 +20,8 @@ import (
 var CustomRepoIdentifier = "<CUSTOM_REPO>"
 
 type item[T any] struct {
-	id, title, desc, createdTime, statusTime, target string
-	choiceProperty                                   T
+	id, title, desc, createdTime, uptime, target string
+	choiceProperty                               T
 }
 
 func (i item[T]) Title() string       { return i.title }
@@ -29,7 +29,7 @@ func (i item[T]) Id() string          { return i.id }
 func (i item[T]) Description() string { return i.desc }
 func (i item[T]) FilterValue() string { return i.title }
 func (i item[T]) CreatedTime() string { return i.createdTime }
-func (i item[T]) StatusTime() string  { return i.statusTime }
+func (i item[T]) Uptime() string      { return i.uptime }
 func (i item[T]) Target() string      { return i.target }
 
 type model[T any] struct {
@@ -105,8 +105,8 @@ func (d ItemDelegate[T]) Render(w io.Writer, m list.Model, index int, listItem l
 		Align(lipgloss.Right).
 		Width(timeWidth)
 	timeString := timeStyles.Render("")
-	if i.StatusTime() != "" {
-		timeString = timeStyles.Render(i.StatusTime())
+	if i.Uptime() != "" {
+		timeString = timeStyles.Render(i.Uptime())
 	} else if i.CreatedTime() != "" {
 		timeString = timeStyles.Render(fmt.Sprintf("created %s", i.CreatedTime()))
 	}

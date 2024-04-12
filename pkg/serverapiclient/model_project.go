@@ -21,6 +21,7 @@ var _ MappedNullable = &Project{}
 type Project struct {
 	Name        *string        `json:"name,omitempty"`
 	Repository  *GitRepository `json:"repository,omitempty"`
+	State       *ProjectState  `json:"state,omitempty"`
 	Target      *string        `json:"target,omitempty"`
 	WorkspaceId *string        `json:"workspaceId,omitempty"`
 }
@@ -106,6 +107,38 @@ func (o *Project) SetRepository(v GitRepository) {
 	o.Repository = &v
 }
 
+// GetState returns the State field value if set, zero value otherwise.
+func (o *Project) GetState() ProjectState {
+	if o == nil || IsNil(o.State) {
+		var ret ProjectState
+		return ret
+	}
+	return *o.State
+}
+
+// GetStateOk returns a tuple with the State field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Project) GetStateOk() (*ProjectState, bool) {
+	if o == nil || IsNil(o.State) {
+		return nil, false
+	}
+	return o.State, true
+}
+
+// HasState returns a boolean if a field has been set.
+func (o *Project) HasState() bool {
+	if o != nil && !IsNil(o.State) {
+		return true
+	}
+
+	return false
+}
+
+// SetState gets a reference to the given ProjectState and assigns it to the State field.
+func (o *Project) SetState(v ProjectState) {
+	o.State = &v
+}
+
 // GetTarget returns the Target field value if set, zero value otherwise.
 func (o *Project) GetTarget() string {
 	if o == nil || IsNil(o.Target) {
@@ -185,6 +218,9 @@ func (o Project) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Repository) {
 		toSerialize["repository"] = o.Repository
+	}
+	if !IsNil(o.State) {
+		toSerialize["state"] = o.State
 	}
 	if !IsNil(o.Target) {
 		toSerialize["target"] = o.Target
