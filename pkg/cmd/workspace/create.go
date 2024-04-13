@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -115,11 +117,24 @@ var CreateCmd = &cobra.Command{
 			}
 		}()
 
-		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(serverapiclient.CreateWorkspace{
-			Id:           &id,
-			Name:         &workspaceName,
-			Target:       target.Name,
-			Repositories: repos,
+		projects := []serverapiclient.CreateWorkspaceRequestProject{}
+		for _, repo := range repos {
+			projectNameSlugRegex := regexp.MustCompile(`[^a-zA-Z0-9-]`)
+			projectName := projectNameSlugRegex.ReplaceAllString(strings.TrimSuffix(strings.ToLower(filepath.Base(*repo.Url)), ".git"), "-")
+			projects = append(projects, serverapiclient.CreateWorkspaceRequestProject{
+				Id:   &projectName,
+				Name: &projectName,
+				Source: &serverapiclient.CreateWorkspaceRequestProjectSource{
+					Repository: &repo,
+				},
+			})
+		}
+
+		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(serverapiclient.CreateWorkspaceRequest{
+			Id:       &id,
+			Name:     &workspaceName,
+			Target:   target.Name,
+			Projects: projects,
 		}).Execute()
 		if err != nil {
 			cleanUpTerminal(statusProgram, apiclient.HandleErrorResponse(res, err))

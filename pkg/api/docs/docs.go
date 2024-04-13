@@ -728,7 +728,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/CreateWorkspace"
+                            "$ref": "#/definitions/CreateWorkspaceRequest"
                         }
                     }
                 ],
@@ -961,7 +961,7 @@ const docTemplate = `{
                 }
             }
         },
-        "CreateWorkspace": {
+        "CreateWorkspaceRequest": {
             "type": "object",
             "properties": {
                 "id": {
@@ -970,14 +970,45 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "repositories": {
+                "projects": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/GitRepository"
+                        "$ref": "#/definitions/CreateWorkspaceRequestProject"
                     }
                 },
                 "target": {
                     "type": "string"
+                }
+            }
+        },
+        "CreateWorkspaceRequestProject": {
+            "type": "object",
+            "properties": {
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "source": {
+                    "$ref": "#/definitions/CreateWorkspaceRequestProjectSource"
+                }
+            }
+        },
+        "CreateWorkspaceRequestProjectSource": {
+            "type": "object",
+            "properties": {
+                "repository": {
+                    "$ref": "#/definitions/GitRepository"
                 }
             }
         },
@@ -1119,6 +1150,9 @@ const docTemplate = `{
         "Project": {
             "type": "object",
             "properties": {
+                "image": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },

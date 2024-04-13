@@ -25,11 +25,11 @@ type WorkspaceAPIService service
 type ApiCreateWorkspaceRequest struct {
 	ctx        context.Context
 	ApiService *WorkspaceAPIService
-	workspace  *CreateWorkspace
+	workspace  *CreateWorkspaceRequest
 }
 
 // Create workspace
-func (r ApiCreateWorkspaceRequest) Workspace(workspace CreateWorkspace) ApiCreateWorkspaceRequest {
+func (r ApiCreateWorkspaceRequest) Workspace(workspace CreateWorkspaceRequest) ApiCreateWorkspaceRequest {
 	r.workspace = &workspace
 	return r
 }

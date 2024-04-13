@@ -1,4 +1,4 @@
-# CreateWorkspace
+# CreateWorkspaceRequest
 
 ## Properties
 
@@ -6,125 +6,125 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | Pointer to **string** |  | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
-**Repositories** | Pointer to [**[]GitRepository**](GitRepository.md) |  | [optional] 
+**Projects** | Pointer to [**[]CreateWorkspaceRequestProject**](CreateWorkspaceRequestProject.md) |  | [optional] 
 **Target** | Pointer to **string** |  | [optional] 
 
 ## Methods
 
-### NewCreateWorkspace
+### NewCreateWorkspaceRequest
 
-`func NewCreateWorkspace() *CreateWorkspace`
+`func NewCreateWorkspaceRequest() *CreateWorkspaceRequest`
 
-NewCreateWorkspace instantiates a new CreateWorkspace object
+NewCreateWorkspaceRequest instantiates a new CreateWorkspaceRequest object
 This constructor will assign default values to properties that have it defined,
 and makes sure properties required by API are set, but the set of arguments
 will change when the set of required properties is changed
 
-### NewCreateWorkspaceWithDefaults
+### NewCreateWorkspaceRequestWithDefaults
 
-`func NewCreateWorkspaceWithDefaults() *CreateWorkspace`
+`func NewCreateWorkspaceRequestWithDefaults() *CreateWorkspaceRequest`
 
-NewCreateWorkspaceWithDefaults instantiates a new CreateWorkspace object
+NewCreateWorkspaceRequestWithDefaults instantiates a new CreateWorkspaceRequest object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
 ### GetId
 
-`func (o *CreateWorkspace) GetId() string`
+`func (o *CreateWorkspaceRequest) GetId() string`
 
 GetId returns the Id field if non-nil, zero value otherwise.
 
 ### GetIdOk
 
-`func (o *CreateWorkspace) GetIdOk() (*string, bool)`
+`func (o *CreateWorkspaceRequest) GetIdOk() (*string, bool)`
 
 GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetId
 
-`func (o *CreateWorkspace) SetId(v string)`
+`func (o *CreateWorkspaceRequest) SetId(v string)`
 
 SetId sets Id field to given value.
 
 ### HasId
 
-`func (o *CreateWorkspace) HasId() bool`
+`func (o *CreateWorkspaceRequest) HasId() bool`
 
 HasId returns a boolean if a field has been set.
 
 ### GetName
 
-`func (o *CreateWorkspace) GetName() string`
+`func (o *CreateWorkspaceRequest) GetName() string`
 
 GetName returns the Name field if non-nil, zero value otherwise.
 
 ### GetNameOk
 
-`func (o *CreateWorkspace) GetNameOk() (*string, bool)`
+`func (o *CreateWorkspaceRequest) GetNameOk() (*string, bool)`
 
 GetNameOk returns a tuple with the Name field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetName
 
-`func (o *CreateWorkspace) SetName(v string)`
+`func (o *CreateWorkspaceRequest) SetName(v string)`
 
 SetName sets Name field to given value.
 
 ### HasName
 
-`func (o *CreateWorkspace) HasName() bool`
+`func (o *CreateWorkspaceRequest) HasName() bool`
 
 HasName returns a boolean if a field has been set.
 
-### GetRepositories
+### GetProjects
 
-`func (o *CreateWorkspace) GetRepositories() []GitRepository`
+`func (o *CreateWorkspaceRequest) GetProjects() []CreateWorkspaceRequestProject`
 
-GetRepositories returns the Repositories field if non-nil, zero value otherwise.
+GetProjects returns the Projects field if non-nil, zero value otherwise.
 
-### GetRepositoriesOk
+### GetProjectsOk
 
-`func (o *CreateWorkspace) GetRepositoriesOk() (*[]GitRepository, bool)`
+`func (o *CreateWorkspaceRequest) GetProjectsOk() (*[]CreateWorkspaceRequestProject, bool)`
 
-GetRepositoriesOk returns a tuple with the Repositories field if it's non-nil, zero value otherwise
+GetProjectsOk returns a tuple with the Projects field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetRepositories
+### SetProjects
 
-`func (o *CreateWorkspace) SetRepositories(v []GitRepository)`
+`func (o *CreateWorkspaceRequest) SetProjects(v []CreateWorkspaceRequestProject)`
 
-SetRepositories sets Repositories field to given value.
+SetProjects sets Projects field to given value.
 
-### HasRepositories
+### HasProjects
 
-`func (o *CreateWorkspace) HasRepositories() bool`
+`func (o *CreateWorkspaceRequest) HasProjects() bool`
 
-HasRepositories returns a boolean if a field has been set.
+HasProjects returns a boolean if a field has been set.
 
 ### GetTarget
 
-`func (o *CreateWorkspace) GetTarget() string`
+`func (o *CreateWorkspaceRequest) GetTarget() string`
 
 GetTarget returns the Target field if non-nil, zero value otherwise.
 
 ### GetTargetOk
 
-`func (o *CreateWorkspace) GetTargetOk() (*string, bool)`
+`func (o *CreateWorkspaceRequest) GetTargetOk() (*string, bool)`
 
 GetTargetOk returns a tuple with the Target field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetTarget
 
-`func (o *CreateWorkspace) SetTarget(v string)`
+`func (o *CreateWorkspaceRequest) SetTarget(v string)`
 
 SetTarget sets Target field to given value.
 
 ### HasTarget
 
-`func (o *CreateWorkspace) HasTarget() bool`
+`func (o *CreateWorkspaceRequest) HasTarget() bool`
 
 HasTarget returns a boolean if a field has been set.
 

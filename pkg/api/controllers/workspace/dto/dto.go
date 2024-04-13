@@ -3,17 +3,6 @@
 
 package dto
 
-import (
-	"github.com/daytonaio/daytona/pkg/gitprovider"
-)
-
-type CreateWorkspace struct {
-	Id           string
-	Name         string
-	Target       string
-	Repositories []gitprovider.GitRepository
-} //	@name	CreateWorkspace
-
 type SetProjectState struct {
 	Uptime uint64 `json:"uptime"`
 } // @name SetProjectState

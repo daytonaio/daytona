@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**Image** | Pointer to **string** |  | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
 **Repository** | Pointer to [**GitRepository**](GitRepository.md) |  | [optional] 
 **State** | Pointer to [**ProjectState**](ProjectState.md) |  | [optional] 
@@ -28,6 +29,31 @@ will change when the set of required properties is changed
 NewProjectWithDefaults instantiates a new Project object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetImage
+
+`func (o *Project) GetImage() string`
+
+GetImage returns the Image field if non-nil, zero value otherwise.
+
+### GetImageOk
+
+`func (o *Project) GetImageOk() (*string, bool)`
+
+GetImageOk returns a tuple with the Image field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetImage
+
+`func (o *Project) SetImage(v string)`
+
+SetImage sets Image field to given value.
+
+### HasImage
+
+`func (o *Project) HasImage() bool`
+
+HasImage returns a boolean if a field has been set.
 
 ### GetName
 

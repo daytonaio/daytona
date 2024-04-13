@@ -7,50 +7,52 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"path/filepath"
 	"regexp"
-	"strings"
 
 	"github.com/daytonaio/daytona/pkg/apikey"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/provider"
+	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
-func (s *WorkspaceService) CreateWorkspace(id, name, targetName string, repositories []gitprovider.GitRepository) (*workspace.Workspace, error) {
-	_, err := s.workspaceStore.Find(name)
+func (s *WorkspaceService) CreateWorkspace(req dto.CreateWorkspaceRequest) (*workspace.Workspace, error) {
+	_, err := s.workspaceStore.Find(req.Name)
 	if err == nil {
 		return nil, errors.New("workspace already exists")
 	}
 
 	isAlphaNumeric := regexp.MustCompile(`^[a-zA-Z0-9-]+$`).MatchString
-	if !isAlphaNumeric(name) {
+	if !isAlphaNumeric(req.Name) {
 		return nil, errors.New("name is not a valid alphanumeric string")
 	}
 
 	w := &workspace.Workspace{
-		Id:     id,
-		Name:   name,
-		Target: targetName,
+		Id:     req.Id,
+		Name:   req.Name,
+		Target: req.Target,
 	}
 
 	w.Projects = []*workspace.Project{}
 
-	for _, repo := range repositories {
-		projectNameSlugRegex := regexp.MustCompile(`[^a-zA-Z0-9-]`)
-		projectName := projectNameSlugRegex.ReplaceAllString(strings.TrimSuffix(strings.ToLower(filepath.Base(repo.Url)), ".git"), "-")
-
-		apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", w.Id, projectName))
+	for _, project := range req.Projects {
+		apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", w.Id, project.Name))
 		if err != nil {
 			return nil, err
 		}
 
+		projectImage := s.defaultProjectImage
+		if project.Image != nil {
+			projectImage = *project.Image
+		}
+
 		project := &workspace.Project{
-			Name:        projectName,
-			Repository:  &repo,
+			Name:        project.Name,
+			Image:       projectImage,
+			Repository:  project.Source.Repository,
 			WorkspaceId: w.Id,
 			ApiKey:      apiKey,
-			Target:      targetName,
+			Target:      w.Target,
+			EnvVars:     project.EnvVars,
 		}
 		w.Projects = append(w.Projects, project)
 	}
@@ -68,6 +70,10 @@ func (s *WorkspaceService) createProject(project *workspace.Project, target *pro
 
 	projectToCreate := *project
 	projectToCreate.EnvVars = workspace.GetProjectEnvVars(project, s.serverApiUrl, s.serverUrl)
+
+	for k, v := range project.EnvVars {
+		projectToCreate.EnvVars[k] = v
+	}
 
 	err := s.provisioner.CreateProject(&projectToCreate, target)
 	if err != nil {

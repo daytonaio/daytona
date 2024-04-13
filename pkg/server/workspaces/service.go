@@ -7,7 +7,6 @@ import (
 	"errors"
 	"io"
 
-	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logger"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provisioner"
@@ -17,7 +16,7 @@ import (
 )
 
 type IWorkspaceService interface {
-	CreateWorkspace(id string, name string, targetName string, repositories []gitprovider.GitRepository) (*workspace.Workspace, error)
+	CreateWorkspace(req dto.CreateWorkspaceRequest) (*workspace.Workspace, error)
 	GetWorkspace(workspaceId string) (*dto.WorkspaceDTO, error)
 	GetWorkspaceLogReader(workspaceId string) (io.Reader, error)
 	ListWorkspaces(verbose bool) ([]dto.WorkspaceDTO, error)
@@ -39,6 +38,7 @@ type WorkspaceServiceConfig struct {
 	ServerApiUrl          string
 	ServerUrl             string
 	Provisioner           provisioner.IProvisioner
+	DefaultProjectImage   string
 	ApiKeyService         apikeys.IApiKeyService
 	NewWorkspaceLogger    func(workspaceId string) logger.Logger
 	NewProjectLogger      func(workspaceId, projectName string) logger.Logger
@@ -51,6 +51,7 @@ func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 		targetStore:           config.TargetStore,
 		serverApiUrl:          config.ServerApiUrl,
 		serverUrl:             config.ServerUrl,
+		defaultProjectImage:   config.DefaultProjectImage,
 		provisioner:           config.Provisioner,
 		newWorkspaceLogger:    config.NewWorkspaceLogger,
 		newProjectLogger:      config.NewProjectLogger,
@@ -66,6 +67,7 @@ type WorkspaceService struct {
 	apiKeyService         apikeys.IApiKeyService
 	serverApiUrl          string
 	serverUrl             string
+	defaultProjectImage   string
 	newWorkspaceLogger    func(workspaceId string) logger.Logger
 	newProjectLogger      func(workspaceId, projectName string) logger.Logger
 	newWorkspaceLogReader func(workspaceId string) (io.Reader, error)
