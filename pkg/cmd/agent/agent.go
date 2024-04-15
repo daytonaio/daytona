@@ -6,6 +6,7 @@
 package agent
 
 import (
+	"fmt"
 	"os"
 	"path"
 
@@ -18,12 +19,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var hostModeFlag bool
+
 var AgentCmd = &cobra.Command{
 	Use:   "agent",
 	Short: "Start the agent process",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		config, err := config.GetConfig()
+		agentMode := config.ModeProject
+
+		if hostModeFlag {
+			agentMode = config.ModeHost
+		}
+
+		config, err := config.GetConfig(agentMode)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -38,10 +47,14 @@ var AgentCmd = &cobra.Command{
 			DefaultProjectDir: os.Getenv("HOME"),
 		}
 
+		tailscaleHostname := fmt.Sprintf("%s-%s", config.WorkspaceId, config.ProjectName)
+		if hostModeFlag {
+			tailscaleHostname = config.WorkspaceId
+		}
+
 		tailscaleServer := &tailscale.Server{
-			WorkspaceId: config.WorkspaceId,
-			ProjectName: config.ProjectName,
-			ServerUrl:   config.Server.Url,
+			Hostname:  tailscaleHostname,
+			ServerUrl: config.Server.Url,
 		}
 
 		agent := agent.Agent{
@@ -59,5 +72,5 @@ var AgentCmd = &cobra.Command{
 }
 
 func init() {
-
+	AgentCmd.Flags().BoolVar(&hostModeFlag, "host", false, "Run the agent in host mode")
 }

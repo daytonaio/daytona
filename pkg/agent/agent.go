@@ -13,6 +13,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	agent_config "github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	log "github.com/sirupsen/logrus"
 )
@@ -22,6 +23,24 @@ func (a *Agent) Start() error {
 
 	a.startTime = time.Now()
 
+	if a.Config.Mode == agent_config.ModeProject {
+		err := a.startProjectMode()
+		if err != nil {
+			return err
+		}
+	}
+
+	go func() {
+		err := a.Ssh.Start()
+		if err != nil {
+			log.Error(fmt.Sprintf("failed to start ssh server: %s", err))
+		}
+	}()
+
+	return a.Tailscale.Start()
+}
+
+func (a *Agent) startProjectMode() error {
 	err := a.setDefaultConfig()
 	if err != nil {
 		return err
@@ -75,13 +94,6 @@ func (a *Agent) Start() error {
 	}
 
 	go func() {
-		err := a.Ssh.Start()
-		if err != nil {
-			log.Error(fmt.Sprintf("failed to start ssh server: %s", err))
-		}
-	}()
-
-	go func() {
 		for {
 			err := a.updateProjectState()
 			if err != nil {
@@ -92,7 +104,7 @@ func (a *Agent) Start() error {
 		}
 	}()
 
-	return a.Tailscale.Start()
+	return nil
 }
 
 func (a *Agent) getProject() (*serverapiclient.Project, error) {

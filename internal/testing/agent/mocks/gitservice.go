@@ -41,3 +41,8 @@ func NewMockGitService(repositoryShouldExist bool, project *workspace.Project) *
 
 	return gitService
 }
+
+func NewHostModeMockGitService() *mockGitService {
+	gitService := new(mockGitService)
+	return gitService
+}
