@@ -36,6 +36,9 @@ func ConfigurationForm(config *serverapiclient.ServerConfig) *serverapiclient.Se
 			huh.NewInput().
 				Title("Server Download URL").
 				Value(config.ServerDownloadUrl),
+			huh.NewInput().
+				Title("Default Project Image").
+				Value(config.DefaultProjectImage),
 		),
 	)
 
