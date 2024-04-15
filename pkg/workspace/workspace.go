@@ -12,6 +12,7 @@ import (
 
 type Project struct {
 	Name        string                     `json:"name"`
+	Image       string                     `json:"image"`
 	Repository  *gitprovider.GitRepository `json:"repository"`
 	WorkspaceId string                     `json:"workspaceId"`
 	ApiKey      string                     `json:"-"`

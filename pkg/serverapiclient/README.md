@@ -115,7 +115,9 @@ Class | Method | HTTP request | Description
 
  - [ApiKey](docs/ApiKey.md)
  - [ApikeyApiKeyType](docs/ApikeyApiKeyType.md)
- - [CreateWorkspace](docs/CreateWorkspace.md)
+ - [CreateWorkspaceRequest](docs/CreateWorkspaceRequest.md)
+ - [CreateWorkspaceRequestProject](docs/CreateWorkspaceRequestProject.md)
+ - [CreateWorkspaceRequestProjectSource](docs/CreateWorkspaceRequestProjectSource.md)
  - [FRPSConfig](docs/FRPSConfig.md)
  - [GitBranch](docs/GitBranch.md)
  - [GitNamespace](docs/GitNamespace.md)

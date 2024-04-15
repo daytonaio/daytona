@@ -125,12 +125,13 @@ var ServerCmd = &cobra.Command{
 		})
 
 		workspaceService := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
-			WorkspaceStore: workspaceStore,
-			TargetStore:    providerTargetStore,
-			ApiKeyService:  apiKeyService,
-			ServerApiUrl:   util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
-			ServerUrl:      util.GetFrpcServerUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
-			Provisioner:    provisioner,
+			WorkspaceStore:      workspaceStore,
+			TargetStore:         providerTargetStore,
+			ApiKeyService:       apiKeyService,
+			ServerApiUrl:        util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+			ServerUrl:           util.GetFrpcServerUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+			DefaultProjectImage: c.DefaultProjectImage,
+			Provisioner:         provisioner,
 			NewWorkspaceLogger: func(workspaceId string) logger.Logger {
 				return logger.NewWorkspaceLogger(logsDir, workspaceId)
 			},
