@@ -9,6 +9,21 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 )
 
+type IGitProviderService interface {
+	GetConfig(id string) (*gitprovider.GitProviderConfig, error)
+	GetConfigForUrl(url string) (*gitprovider.GitProviderConfig, error)
+	GetGitProvider(id string) (gitprovider.GitProvider, error)
+	GetGitProviderForUrl(url string) (gitprovider.GitProvider, error)
+	GetGitUser(gitProviderId string) (*gitprovider.GitUser, error)
+	GetNamespaces(gitProviderId string) ([]*gitprovider.GitNamespace, error)
+	GetRepoBranches(gitProviderId string, namespaceId string, repositoryId string) ([]*gitprovider.GitBranch, error)
+	GetRepoPRs(gitProviderId string, namespaceId string, repositoryId string) ([]*gitprovider.GitPullRequest, error)
+	GetRepositories(gitProviderId string, namespaceId string) ([]*gitprovider.GitRepository, error)
+	ListConfigs() ([]*gitprovider.GitProviderConfig, error)
+	RemoveGitProvider(gitProviderId string) error
+	SetGitProviderConfig(providerConfig *gitprovider.GitProviderConfig) error
+}
+
 type GitProviderServiceConfig struct {
 	ConfigStore gitprovider.ConfigStore
 }
@@ -17,7 +32,7 @@ type GitProviderService struct {
 	configStore gitprovider.ConfigStore
 }
 
-func NewGitProviderService(config GitProviderServiceConfig) *GitProviderService {
+func NewGitProviderService(config GitProviderServiceConfig) IGitProviderService {
 	return &GitProviderService{
 		configStore: config.ConfigStore,
 	}
