@@ -55,7 +55,7 @@ var StartCmd = &cobra.Command{
 			if workspace == nil {
 				return
 			}
-			workspaceId = *workspace.Id
+			workspaceId = *workspace.Name
 		} else {
 			workspaceId = args[0]
 		}
