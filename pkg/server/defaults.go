@@ -20,6 +20,7 @@ const defaultRegistryUrl = "https://download.daytona.io/daytona"
 const defaultServerDownloadUrl = "https://download.daytona.io/daytona/install.sh"
 const defaultHeadscalePort = 3001
 const defaultApiPort = 3000
+const defaultProjectImage = "daytonaio/workspace-project:latest"
 
 var us_defaultFrpsConfig = FRPSConfig{
 	Domain:   "try-us.daytona.app",
@@ -93,15 +94,16 @@ func getDefaultConfig() (*Config, error) {
 	}
 
 	c := Config{
-		Id:                generateUuid(),
-		RegistryUrl:       defaultRegistryUrl,
-		ProvidersDir:      providersDir,
-		ServerDownloadUrl: defaultServerDownloadUrl,
-		ApiPort:           defaultApiPort,
-		HeadscalePort:     defaultHeadscalePort,
-		BinariesPath:      binariesPath,
-		Frps:              getDefaultFRPSConfig(),
-		LogFilePath:       logFilePath,
+		Id:                  generateUuid(),
+		RegistryUrl:         defaultRegistryUrl,
+		ProvidersDir:        providersDir,
+		ServerDownloadUrl:   defaultServerDownloadUrl,
+		ApiPort:             defaultApiPort,
+		HeadscalePort:       defaultHeadscalePort,
+		BinariesPath:        binariesPath,
+		Frps:                getDefaultFRPSConfig(),
+		LogFilePath:         logFilePath,
+		DefaultProjectImage: defaultProjectImage,
 	}
 
 	if os.Getenv("DEFAULT_REGISTRY_URL") != "" {

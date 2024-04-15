@@ -26,13 +26,14 @@ type NetworkKey struct {
 } // @name NetworkKey
 
 type Config struct {
-	ProvidersDir      string      `json:"providersDir"`
-	RegistryUrl       string      `json:"registryUrl"`
-	Id                string      `json:"id"`
-	ServerDownloadUrl string      `json:"serverDownloadUrl"`
-	Frps              *FRPSConfig `json:"frps,omitempty"`
-	ApiPort           uint32      `json:"apiPort"`
-	HeadscalePort     uint32      `json:"headscalePort"`
-	BinariesPath      string      `json:"binariesPath"`
-	LogFilePath       string      `json:"logFilePath"`
+	ProvidersDir        string      `json:"providersDir"`
+	RegistryUrl         string      `json:"registryUrl"`
+	Id                  string      `json:"id"`
+	ServerDownloadUrl   string      `json:"serverDownloadUrl"`
+	Frps                *FRPSConfig `json:"frps,omitempty"`
+	ApiPort             uint32      `json:"apiPort"`
+	HeadscalePort       uint32      `json:"headscalePort"`
+	BinariesPath        string      `json:"binariesPath"`
+	LogFilePath         string      `json:"logFilePath"`
+	DefaultProjectImage string      `json:"defaultProjectImage"`
 } // @name ServerConfig

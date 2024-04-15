@@ -1208,6 +1208,9 @@ const docTemplate = `{
                 "binariesPath": {
                     "type": "string"
                 },
+                "defaultProjectImage": {
+                    "type": "string"
+                },
                 "frps": {
                     "$ref": "#/definitions/FRPSConfig"
                 },

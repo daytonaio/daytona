@@ -6,6 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **ApiPort** | Pointer to **int32** |  | [optional] 
 **BinariesPath** | Pointer to **string** |  | [optional] 
+**DefaultProjectImage** | Pointer to **string** |  | [optional] 
 **Frps** | Pointer to [**FRPSConfig**](FRPSConfig.md) |  | [optional] 
 **HeadscalePort** | Pointer to **int32** |  | [optional] 
 **Id** | Pointer to **string** |  | [optional] 
@@ -82,6 +83,31 @@ SetBinariesPath sets BinariesPath field to given value.
 `func (o *ServerConfig) HasBinariesPath() bool`
 
 HasBinariesPath returns a boolean if a field has been set.
+
+### GetDefaultProjectImage
+
+`func (o *ServerConfig) GetDefaultProjectImage() string`
+
+GetDefaultProjectImage returns the DefaultProjectImage field if non-nil, zero value otherwise.
+
+### GetDefaultProjectImageOk
+
+`func (o *ServerConfig) GetDefaultProjectImageOk() (*string, bool)`
+
+GetDefaultProjectImageOk returns a tuple with the DefaultProjectImage field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetDefaultProjectImage
+
+`func (o *ServerConfig) SetDefaultProjectImage(v string)`
+
+SetDefaultProjectImage sets DefaultProjectImage field to given value.
+
+### HasDefaultProjectImage
+
+`func (o *ServerConfig) HasDefaultProjectImage() bool`
+
+HasDefaultProjectImage returns a boolean if a field has been set.
 
 ### GetFrps
 

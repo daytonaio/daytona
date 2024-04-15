@@ -945,6 +945,7 @@ components:
         serverDownloadUrl: serverDownloadUrl
         binariesPath: binariesPath
         logFilePath: logFilePath
+        defaultProjectImage: defaultProjectImage
         providersDir: providersDir
         id: id
         frps:
@@ -955,6 +956,8 @@ components:
         apiPort:
           type: integer
         binariesPath:
+          type: string
+        defaultProjectImage:
           type: string
         frps:
           $ref: '#/components/schemas/FRPSConfig'
