@@ -7,12 +7,27 @@ import (
 	"errors"
 	"io"
 
+	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logger"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
+	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
+
+type IWorkspaceService interface {
+	CreateWorkspace(id string, name string, targetName string, repositories []gitprovider.GitRepository) (*workspace.Workspace, error)
+	GetWorkspace(workspaceId string) (*dto.WorkspaceDTO, error)
+	GetWorkspaceLogReader(workspaceId string) (io.Reader, error)
+	ListWorkspaces(verbose bool) ([]dto.WorkspaceDTO, error)
+	RemoveWorkspace(workspaceId string) error
+	SetProjectState(workspaceId string, projectName string, state *workspace.ProjectState) (*workspace.Workspace, error)
+	StartProject(workspaceId string, projectName string) error
+	StartWorkspace(workspaceId string) error
+	StopProject(workspaceId string, projectName string) error
+	StopWorkspace(workspaceId string) error
+}
 
 type targetStore interface {
 	Find(targetName string) (*provider.ProviderTarget, error)
@@ -23,14 +38,14 @@ type WorkspaceServiceConfig struct {
 	TargetStore           targetStore
 	ServerApiUrl          string
 	ServerUrl             string
-	Provisioner           provisioner.Provisioner
-	ApiKeyService         apikeys.ApiKeyService
+	Provisioner           provisioner.IProvisioner
+	ApiKeyService         apikeys.IApiKeyService
 	NewWorkspaceLogger    func(workspaceId string) logger.Logger
 	NewProjectLogger      func(workspaceId, projectName string) logger.Logger
 	NewWorkspaceLogReader func(workspaceId string) (io.Reader, error)
 }
 
-func NewWorkspaceService(config WorkspaceServiceConfig) *WorkspaceService {
+func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 	return &WorkspaceService{
 		workspaceStore:        config.WorkspaceStore,
 		targetStore:           config.TargetStore,
@@ -40,20 +55,20 @@ func NewWorkspaceService(config WorkspaceServiceConfig) *WorkspaceService {
 		newWorkspaceLogger:    config.NewWorkspaceLogger,
 		newProjectLogger:      config.NewProjectLogger,
 		apiKeyService:         config.ApiKeyService,
-		NewWorkspaceLogReader: config.NewWorkspaceLogReader,
+		newWorkspaceLogReader: config.NewWorkspaceLogReader,
 	}
 }
 
 type WorkspaceService struct {
 	workspaceStore        workspace.Store
 	targetStore           targetStore
-	provisioner           provisioner.Provisioner
-	apiKeyService         apikeys.ApiKeyService
+	provisioner           provisioner.IProvisioner
+	apiKeyService         apikeys.IApiKeyService
 	serverApiUrl          string
 	serverUrl             string
 	newWorkspaceLogger    func(workspaceId string) logger.Logger
 	newProjectLogger      func(workspaceId, projectName string) logger.Logger
-	NewWorkspaceLogReader func(workspaceId string) (io.Reader, error)
+	newWorkspaceLogReader func(workspaceId string) (io.Reader, error)
 }
 
 func (s *WorkspaceService) SetProjectState(workspaceId, projectName string, state *workspace.ProjectState) (*workspace.Workspace, error) {
@@ -70,4 +85,8 @@ func (s *WorkspaceService) SetProjectState(workspaceId, projectName string, stat
 	}
 
 	return nil, errors.New("project not found")
+}
+
+func (s *WorkspaceService) GetWorkspaceLogReader(workspaceId string) (io.Reader, error) {
+	return s.newWorkspaceLogReader(workspaceId)
 }

@@ -24,11 +24,11 @@ import (
 type ServerInstanceConfig struct {
 	Config                Config
 	TailscaleServer       TailscaleServer
-	ProviderTargetService providertargets.ProviderTargetService
-	WorkspaceService      workspaces.WorkspaceService
-	ApiKeyService         apikeys.ApiKeyService
-	GitProviderService    gitproviders.GitProviderService
-	ProviderManager       manager.ProviderManager
+	ProviderTargetService providertargets.IProviderTargetService
+	WorkspaceService      workspaces.IWorkspaceService
+	ApiKeyService         apikeys.IApiKeyService
+	GitProviderService    gitproviders.IGitProviderService
+	ProviderManager       manager.IProviderManager
 }
 
 var server *Server
@@ -59,11 +59,11 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 type Server struct {
 	config                Config
 	TailscaleServer       TailscaleServer
-	ProviderTargetService providertargets.ProviderTargetService
-	WorkspaceService      workspaces.WorkspaceService
-	ApiKeyService         apikeys.ApiKeyService
-	GitProviderService    gitproviders.GitProviderService
-	ProviderManager       manager.ProviderManager
+	ProviderTargetService providertargets.IProviderTargetService
+	WorkspaceService      workspaces.IWorkspaceService
+	ApiKeyService         apikeys.IApiKeyService
+	GitProviderService    gitproviders.IGitProviderService
+	ProviderManager       manager.IProviderManager
 }
 
 func (s *Server) Start(errCh chan error) error {

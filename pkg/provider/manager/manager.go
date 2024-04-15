@@ -33,12 +33,22 @@ var ProviderHandshakeConfig = plugin.HandshakeConfig{
 	MagicCookieValue: "daytona_provider",
 }
 
+type IProviderManager interface {
+	DownloadProvider(downloadUrls map[os_util.OperatingSystem]string, providerName string, throwIfPresent bool) (string, error)
+	GetProvider(name string) (*Provider, error)
+	GetProviders() map[string]Provider
+	GetProvidersManifest() (*ProvidersManifest, error)
+	RegisterProvider(pluginPath string) error
+	TerminateProviderProcesses(providersBasePath string) error
+	UninstallProvider(name string) error
+}
+
 type ProviderManagerConfig struct {
 	ServerDownloadUrl     string
 	ServerUrl             string
 	ServerApiUrl          string
 	LogsDir               string
-	ProviderTargetService providertargets.ProviderTargetService
+	ProviderTargetService providertargets.IProviderTargetService
 	RegistryUrl           string
 	BaseDir               string
 }
@@ -62,7 +72,7 @@ type ProviderManager struct {
 	serverUrl             string
 	serverApiUrl          string
 	logsDir               string
-	providerTargetService providertargets.ProviderTargetService
+	providerTargetService providertargets.IProviderTargetService
 	registryUrl           string
 	baseDir               string
 }

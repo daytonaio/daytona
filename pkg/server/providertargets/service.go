@@ -5,6 +5,14 @@ package providertargets
 
 import "github.com/daytonaio/daytona/pkg/provider"
 
+type IProviderTargetService interface {
+	Delete(target *provider.ProviderTarget) error
+	Find(targetName string) (*provider.ProviderTarget, error)
+	List() ([]*provider.ProviderTarget, error)
+	Map() (map[string]*provider.ProviderTarget, error)
+	Save(target *provider.ProviderTarget) error
+}
+
 type ProviderTargetServiceConfig struct {
 	TargetStore provider.TargetStore
 }
@@ -13,7 +21,7 @@ type ProviderTargetService struct {
 	targetStore provider.TargetStore
 }
 
-func NewProviderTargetService(config ProviderTargetServiceConfig) *ProviderTargetService {
+func NewProviderTargetService(config ProviderTargetServiceConfig) IProviderTargetService {
 	return &ProviderTargetService{
 		targetStore: config.TargetStore,
 	}
