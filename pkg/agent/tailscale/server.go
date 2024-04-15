@@ -20,15 +20,14 @@ import (
 )
 
 type Server struct {
-	WorkspaceId string
-	ProjectName string
-	ServerUrl   string
+	Hostname  string
+	ServerUrl string
 }
 
 func (s *Server) Start() error {
 	flag.Parse()
 	tsnetServer := new(tsnet.Server)
-	tsnetServer.Hostname = fmt.Sprintf("%s-%s", s.WorkspaceId, s.ProjectName)
+	tsnetServer.Hostname = s.Hostname
 	tsnetServer.ControlURL = s.ServerUrl
 	tsnetServer.Ephemeral = true
 
