@@ -19,15 +19,16 @@ var _ MappedNullable = &ServerConfig{}
 
 // ServerConfig struct for ServerConfig
 type ServerConfig struct {
-	ApiPort           *int32      `json:"apiPort,omitempty"`
-	BinariesPath      *string     `json:"binariesPath,omitempty"`
-	Frps              *FRPSConfig `json:"frps,omitempty"`
-	HeadscalePort     *int32      `json:"headscalePort,omitempty"`
-	Id                *string     `json:"id,omitempty"`
-	LogFilePath       *string     `json:"logFilePath,omitempty"`
-	ProvidersDir      *string     `json:"providersDir,omitempty"`
-	RegistryUrl       *string     `json:"registryUrl,omitempty"`
-	ServerDownloadUrl *string     `json:"serverDownloadUrl,omitempty"`
+	ApiPort             *int32      `json:"apiPort,omitempty"`
+	BinariesPath        *string     `json:"binariesPath,omitempty"`
+	DefaultProjectImage *string     `json:"defaultProjectImage,omitempty"`
+	Frps                *FRPSConfig `json:"frps,omitempty"`
+	HeadscalePort       *int32      `json:"headscalePort,omitempty"`
+	Id                  *string     `json:"id,omitempty"`
+	LogFilePath         *string     `json:"logFilePath,omitempty"`
+	ProvidersDir        *string     `json:"providersDir,omitempty"`
+	RegistryUrl         *string     `json:"registryUrl,omitempty"`
+	ServerDownloadUrl   *string     `json:"serverDownloadUrl,omitempty"`
 }
 
 // NewServerConfig instantiates a new ServerConfig object
@@ -109,6 +110,38 @@ func (o *ServerConfig) HasBinariesPath() bool {
 // SetBinariesPath gets a reference to the given string and assigns it to the BinariesPath field.
 func (o *ServerConfig) SetBinariesPath(v string) {
 	o.BinariesPath = &v
+}
+
+// GetDefaultProjectImage returns the DefaultProjectImage field value if set, zero value otherwise.
+func (o *ServerConfig) GetDefaultProjectImage() string {
+	if o == nil || IsNil(o.DefaultProjectImage) {
+		var ret string
+		return ret
+	}
+	return *o.DefaultProjectImage
+}
+
+// GetDefaultProjectImageOk returns a tuple with the DefaultProjectImage field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ServerConfig) GetDefaultProjectImageOk() (*string, bool) {
+	if o == nil || IsNil(o.DefaultProjectImage) {
+		return nil, false
+	}
+	return o.DefaultProjectImage, true
+}
+
+// HasDefaultProjectImage returns a boolean if a field has been set.
+func (o *ServerConfig) HasDefaultProjectImage() bool {
+	if o != nil && !IsNil(o.DefaultProjectImage) {
+		return true
+	}
+
+	return false
+}
+
+// SetDefaultProjectImage gets a reference to the given string and assigns it to the DefaultProjectImage field.
+func (o *ServerConfig) SetDefaultProjectImage(v string) {
+	o.DefaultProjectImage = &v
 }
 
 // GetFrps returns the Frps field value if set, zero value otherwise.
@@ -350,6 +383,9 @@ func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.BinariesPath) {
 		toSerialize["binariesPath"] = o.BinariesPath
+	}
+	if !IsNil(o.DefaultProjectImage) {
+		toSerialize["defaultProjectImage"] = o.DefaultProjectImage
 	}
 	if !IsNil(o.Frps) {
 		toSerialize["frps"] = o.Frps
