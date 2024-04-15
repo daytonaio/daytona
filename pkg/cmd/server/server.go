@@ -113,7 +113,7 @@ var ServerCmd = &cobra.Command{
 		})
 		providerManager := manager.NewProviderManager(manager.ProviderManagerConfig{
 			LogsDir:               logsDir,
-			ProviderTargetService: *providerTargetService,
+			ProviderTargetService: providerTargetService,
 			ServerApiUrl:          util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 			ServerDownloadUrl:     getDaytonaScriptUrl(c),
 			ServerUrl:             util.GetFrpcServerUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
@@ -121,16 +121,16 @@ var ServerCmd = &cobra.Command{
 			BaseDir:               c.ProvidersDir,
 		})
 		provisioner := provisioner.NewProvisioner(provisioner.ProvisionerConfig{
-			ProviderManager: *providerManager,
+			ProviderManager: providerManager,
 		})
 
 		workspaceService := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
 			WorkspaceStore: workspaceStore,
 			TargetStore:    providerTargetStore,
-			ApiKeyService:  *apiKeyService,
+			ApiKeyService:  apiKeyService,
 			ServerApiUrl:   util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 			ServerUrl:      util.GetFrpcServerUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
-			Provisioner:    *provisioner,
+			Provisioner:    provisioner,
 			NewWorkspaceLogger: func(workspaceId string) logger.Logger {
 				return logger.NewWorkspaceLogger(logsDir, workspaceId)
 			},
@@ -148,11 +148,11 @@ var ServerCmd = &cobra.Command{
 		server := server.GetInstance(&server.ServerInstanceConfig{
 			Config:                *c,
 			TailscaleServer:       headscaleServer,
-			ProviderTargetService: *providerTargetService,
-			ApiKeyService:         *apiKeyService,
-			WorkspaceService:      *workspaceService,
-			GitProviderService:    *gitProviderService,
-			ProviderManager:       *providerManager,
+			ProviderTargetService: providerTargetService,
+			ApiKeyService:         apiKeyService,
+			WorkspaceService:      workspaceService,
+			GitProviderService:    gitProviderService,
+			ProviderManager:       providerManager,
 		})
 
 		errCh := make(chan error)

@@ -100,7 +100,7 @@ func ReadWorkspaceLog(ginCtx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	wsLogReader, err := server.WorkspaceService.NewWorkspaceLogReader(workspaceId)
+	wsLogReader, err := server.WorkspaceService.GetWorkspaceLogReader(workspaceId)
 	if err != nil {
 		ginCtx.AbortWithError(http.StatusInternalServerError, err)
 		return
