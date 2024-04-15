@@ -502,7 +502,7 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/CreateWorkspace'
+              $ref: '#/components/schemas/CreateWorkspaceRequest'
         description: Create workspace
         required: true
       responses:
@@ -686,27 +686,41 @@ components:
         type:
           $ref: '#/components/schemas/apikey.ApiKeyType'
       type: object
-    CreateWorkspace:
+    CreateWorkspaceRequest:
       example:
-        repositories:
-        - owner: owner
-          path: path
+        projects:
+        - image: image
+          envVars:
+            key: envVars
           name: name
           id: id
-          source: source
-          prNumber: 0
-          branch: branch
-          sha: sha
-          url: url
-        - owner: owner
-          path: path
+          source:
+            repository:
+              owner: owner
+              path: path
+              name: name
+              id: id
+              source: source
+              prNumber: 0
+              branch: branch
+              sha: sha
+              url: url
+        - image: image
+          envVars:
+            key: envVars
           name: name
           id: id
-          source: source
-          prNumber: 0
-          branch: branch
-          sha: sha
-          url: url
+          source:
+            repository:
+              owner: owner
+              path: path
+              name: name
+              id: id
+              source: source
+              prNumber: 0
+              branch: branch
+              sha: sha
+              url: url
         name: name
         id: id
         target: target
@@ -715,12 +729,60 @@ components:
           type: string
         name:
           type: string
-        repositories:
+        projects:
           items:
-            $ref: '#/components/schemas/GitRepository'
+            $ref: '#/components/schemas/CreateWorkspaceRequestProject'
           type: array
         target:
           type: string
+      type: object
+    CreateWorkspaceRequestProject:
+      example:
+        image: image
+        envVars:
+          key: envVars
+        name: name
+        id: id
+        source:
+          repository:
+            owner: owner
+            path: path
+            name: name
+            id: id
+            source: source
+            prNumber: 0
+            branch: branch
+            sha: sha
+            url: url
+      properties:
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
+        id:
+          type: string
+        image:
+          type: string
+        name:
+          type: string
+        source:
+          $ref: '#/components/schemas/CreateWorkspaceRequestProjectSource'
+      type: object
+    CreateWorkspaceRequestProjectSource:
+      example:
+        repository:
+          owner: owner
+          path: path
+          name: name
+          id: id
+          source: source
+          prNumber: 0
+          branch: branch
+          sha: sha
+          url: url
+      properties:
+        repository:
+          $ref: '#/components/schemas/GitRepository'
       type: object
     FRPSConfig:
       example:
@@ -850,6 +912,7 @@ components:
       type: object
     Project:
       example:
+        image: image
         name: name
         state:
           updatedAt: updatedAt
@@ -867,6 +930,8 @@ components:
         target: target
         workspaceId: workspaceId
       properties:
+        image:
+          type: string
         name:
           type: string
         repository:
@@ -984,7 +1049,8 @@ components:
     Workspace:
       example:
         projects:
-        - name: name
+        - image: image
+          name: name
           state:
             updatedAt: updatedAt
             uptime: 0
@@ -1000,7 +1066,8 @@ components:
             url: url
           target: target
           workspaceId: workspaceId
-        - name: name
+        - image: image
+          name: name
           state:
             updatedAt: updatedAt
             uptime: 0
@@ -1034,7 +1101,8 @@ components:
     WorkspaceDTO:
       example:
         projects:
-        - name: name
+        - image: image
+          name: name
           state:
             updatedAt: updatedAt
             uptime: 0
@@ -1050,7 +1118,8 @@ components:
             url: url
           target: target
           workspaceId: workspaceId
-        - name: name
+        - image: image
+          name: name
           state:
             updatedAt: updatedAt
             uptime: 0

@@ -19,6 +19,7 @@ var _ MappedNullable = &Project{}
 
 // Project struct for Project
 type Project struct {
+	Image       *string        `json:"image,omitempty"`
 	Name        *string        `json:"name,omitempty"`
 	Repository  *GitRepository `json:"repository,omitempty"`
 	State       *ProjectState  `json:"state,omitempty"`
@@ -41,6 +42,38 @@ func NewProject() *Project {
 func NewProjectWithDefaults() *Project {
 	this := Project{}
 	return &this
+}
+
+// GetImage returns the Image field value if set, zero value otherwise.
+func (o *Project) GetImage() string {
+	if o == nil || IsNil(o.Image) {
+		var ret string
+		return ret
+	}
+	return *o.Image
+}
+
+// GetImageOk returns a tuple with the Image field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Project) GetImageOk() (*string, bool) {
+	if o == nil || IsNil(o.Image) {
+		return nil, false
+	}
+	return o.Image, true
+}
+
+// HasImage returns a boolean if a field has been set.
+func (o *Project) HasImage() bool {
+	if o != nil && !IsNil(o.Image) {
+		return true
+	}
+
+	return false
+}
+
+// SetImage gets a reference to the given string and assigns it to the Image field.
+func (o *Project) SetImage(v string) {
+	o.Image = &v
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
@@ -213,6 +246,9 @@ func (o Project) MarshalJSON() ([]byte, error) {
 
 func (o Project) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.Image) {
+		toSerialize["image"] = o.Image
+	}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
 	}

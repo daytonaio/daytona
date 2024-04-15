@@ -10,18 +10,38 @@ definitions:
       type:
         $ref: '#/definitions/apikey.ApiKeyType'
     type: object
-  CreateWorkspace:
+  CreateWorkspaceRequest:
     properties:
       id:
         type: string
       name:
         type: string
-      repositories:
+      projects:
         items:
-          $ref: '#/definitions/GitRepository'
+          $ref: '#/definitions/CreateWorkspaceRequestProject'
         type: array
       target:
         type: string
+    type: object
+  CreateWorkspaceRequestProject:
+    properties:
+      envVars:
+        additionalProperties:
+          type: string
+        type: object
+      id:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      source:
+        $ref: '#/definitions/CreateWorkspaceRequestProjectSource'
+    type: object
+  CreateWorkspaceRequestProjectSource:
+    properties:
+      repository:
+        $ref: '#/definitions/GitRepository'
     type: object
   FRPSConfig:
     properties:
@@ -112,6 +132,8 @@ definitions:
     type: object
   Project:
     properties:
+      image:
+        type: string
       name:
         type: string
       repository:
@@ -770,7 +792,7 @@ paths:
         name: workspace
         required: true
         schema:
-          $ref: '#/definitions/CreateWorkspace'
+          $ref: '#/definitions/CreateWorkspaceRequest'
       produces:
       - application/json
       responses:
