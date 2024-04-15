@@ -45,6 +45,7 @@ var mockConfig = &config.Config{
 		Url:    "http://localhost:3000",
 		ApiKey: "test-api-key",
 	},
+	Mode: config.ModeProject,
 }
 
 func TestAgent(t *testing.T) {
@@ -74,6 +75,36 @@ func TestAgent(t *testing.T) {
 	}
 
 	t.Run("Start agent", func(t *testing.T) {
+		err := a.Start()
+
+		require.Nil(t, err)
+	})
+
+	t.Cleanup(func() {
+		mockGitService.AssertExpectations(t)
+		mockSshServer.AssertExpectations(t)
+		mockTailscaleServer.AssertExpectations(t)
+	})
+}
+
+func TestAgentHostMode(t *testing.T) {
+	mockGitService := mocks.NewHostModeMockGitService()
+	mockSshServer := mocks.NewMockSshServer()
+	mockTailscaleServer := mocks.NewMockTailscaleServer()
+
+	mockConfig := *mockConfig
+	mockConfig.Mode = config.ModeHost
+
+	// Create a new Agent instance
+	a := &agent.Agent{
+		Config:    &mockConfig,
+		Git:       mockGitService,
+		Ssh:       mockSshServer,
+		Tailscale: mockTailscaleServer,
+	}
+
+	t.Run("Start agent in host mode", func(t *testing.T) {
+		mockConfig.Mode = config.ModeHost
 		err := a.Start()
 
 		require.Nil(t, err)
