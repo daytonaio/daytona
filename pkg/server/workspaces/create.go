@@ -4,7 +4,6 @@
 package workspaces
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"regexp"
@@ -18,12 +17,12 @@ import (
 func (s *WorkspaceService) CreateWorkspace(req dto.CreateWorkspaceRequest) (*workspace.Workspace, error) {
 	_, err := s.workspaceStore.Find(req.Name)
 	if err == nil {
-		return nil, errors.New("workspace already exists")
+		return nil, ErrWorkspaceAlreadyExists
 	}
 
 	isAlphaNumeric := regexp.MustCompile(`^[a-zA-Z0-9-]+$`).MatchString
 	if !isAlphaNumeric(req.Name) {
-		return nil, errors.New("name is not a valid alphanumeric string")
+		return nil, ErrInvalidWorkspaceName
 	}
 
 	w := &workspace.Workspace{

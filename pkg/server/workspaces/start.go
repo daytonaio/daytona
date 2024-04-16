@@ -4,8 +4,6 @@
 package workspaces
 
 import (
-	"errors"
-
 	"fmt"
 	"io"
 
@@ -18,7 +16,7 @@ import (
 func (s *WorkspaceService) StartWorkspace(workspaceId string) error {
 	w, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
-		return errors.New("workspace not found")
+		return ErrWorkspaceNotFound
 	}
 
 	target, err := s.targetStore.Find(w.Target)
@@ -37,12 +35,12 @@ func (s *WorkspaceService) StartWorkspace(workspaceId string) error {
 func (s *WorkspaceService) StartProject(workspaceId, projectName string) error {
 	w, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
-		return errors.New("workspace not found")
+		return ErrWorkspaceNotFound
 	}
 
 	project, err := w.GetProject(projectName)
 	if err != nil {
-		return errors.New("project not found")
+		return ErrProjectNotFound
 	}
 
 	target, err := s.targetStore.Find(project.Target)
