@@ -25,6 +25,7 @@ import (
 	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	status "github.com/daytonaio/daytona/pkg/views/workspace/status"
+	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/google/uuid"
 	"tailscale.com/tsnet"
 
@@ -323,7 +324,7 @@ func waitForDial(tsConn *tsnet.Server, workspaceId string, projectName string, d
 			cleanUpTerminal(statusProgram, errors.New("timeout: dialing timed out after 3 minutes"))
 		}
 
-		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s-%s:2222", workspaceId, projectName))
+		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:2222", workspace.GetProjectHostname(workspaceId, projectName)))
 		if err == nil {
 			defer dialConn.Close()
 			break

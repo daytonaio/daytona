@@ -4,7 +4,10 @@
 package workspace
 
 import (
+	"encoding/base64"
 	"errors"
+	"fmt"
+	"hash/fnv"
 
 	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
@@ -68,4 +71,11 @@ func GetProjectEnvVars(project *Project, apiUrl, serverUrl string) map[string]st
 	}
 
 	return envVars
+}
+
+func GetProjectHostname(workspaceId string, projectName string) string {
+	h := fnv.New64()
+	h.Write([]byte(fmt.Sprintf("%s-%s", workspaceId, projectName)))
+
+	return base64.RawURLEncoding.EncodeToString([]byte(fmt.Sprint(h.Sum64())))
 }
