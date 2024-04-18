@@ -4,7 +4,6 @@
 package workspaces
 
 import (
-	"errors"
 	"fmt"
 
 	log "github.com/sirupsen/logrus"
@@ -13,7 +12,7 @@ import (
 func (s *WorkspaceService) RemoveWorkspace(workspaceId string) error {
 	workspace, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
-		return errors.New("workspace not found")
+		return ErrWorkspaceNotFound
 	}
 
 	log.Infof("Destroying workspace %s", workspace.Id)

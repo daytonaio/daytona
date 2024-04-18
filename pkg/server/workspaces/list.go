@@ -31,7 +31,6 @@ func (s *WorkspaceService) ListWorkspaces(verbose bool) ([]dto.WorkspaceDTO, err
 			workspaceInfo, err = s.provisioner.GetWorkspaceInfo(w, target)
 			if err != nil {
 				log.Error(fmt.Errorf("failed to get workspace info for %s", w.Name))
-				// return
 			}
 		}
 

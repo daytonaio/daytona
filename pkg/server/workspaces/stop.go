@@ -4,15 +4,13 @@
 package workspaces
 
 import (
-	"errors"
-
 	log "github.com/sirupsen/logrus"
 )
 
 func (s *WorkspaceService) StopWorkspace(workspaceId string) error {
 	workspace, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
-		return errors.New("workspace not found")
+		return ErrWorkspaceNotFound
 	}
 
 	log.Info("Stopping workspace")
@@ -42,12 +40,12 @@ func (s *WorkspaceService) StopWorkspace(workspaceId string) error {
 func (s *WorkspaceService) StopProject(workspaceId, projectName string) error {
 	w, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
-		return errors.New("workspace not found")
+		return ErrWorkspaceNotFound
 	}
 
 	project, err := w.GetProject(projectName)
 	if err != nil {
-		return errors.New("project not found")
+		return ErrProjectNotFound
 	}
 
 	target, err := s.targetStore.Find(w.Target)
