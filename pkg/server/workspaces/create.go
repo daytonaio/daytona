@@ -9,6 +9,7 @@ import (
 	"regexp"
 
 	"github.com/daytonaio/daytona/pkg/apikey"
+	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	"github.com/daytonaio/daytona/pkg/workspace"
@@ -74,7 +75,21 @@ func (s *WorkspaceService) createProject(project *workspace.Project, target *pro
 		projectToCreate.EnvVars[k] = v
 	}
 
-	err := s.provisioner.CreateProject(&projectToCreate, target)
+	imageUriParts, err := project.ParseImage()
+	if err != nil {
+		return err
+	}
+
+	var cr *containerregistry.ContainerRegistry
+
+	if imageUriParts.Username != nil {
+		cr, err = s.containerRegistryStore.Find(imageUriParts.Server, *imageUriParts.Username)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = s.provisioner.CreateProject(&projectToCreate, target, cr)
 	if err != nil {
 		return err
 	}

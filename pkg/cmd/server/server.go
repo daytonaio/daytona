@@ -25,6 +25,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
+	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/daytonaio/daytona/pkg/server/providertargets"
@@ -81,6 +82,10 @@ var ServerCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+		containerRegistryStore, err := db.NewContainerRegistryStore(dbConnection)
+		if err != nil {
+			log.Fatal(err)
+		}
 		gitProviderConfigStore, err := db.NewGitProviderConfigStore(dbConnection)
 		if err != nil {
 			log.Fatal(err)
@@ -104,6 +109,10 @@ var ServerCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		containerRegistryService := containerregistries.NewContainerRegistryService(containerregistries.ContainerRegistryServiceConfig{
+			Store: containerRegistryStore,
+		})
 
 		providerTargetService := providertargets.NewProviderTargetService(providertargets.ProviderTargetServiceConfig{
 			TargetStore: providerTargetStore,
@@ -147,13 +156,14 @@ var ServerCmd = &cobra.Command{
 		})
 
 		server := server.GetInstance(&server.ServerInstanceConfig{
-			Config:                *c,
-			TailscaleServer:       headscaleServer,
-			ProviderTargetService: providerTargetService,
-			ApiKeyService:         apiKeyService,
-			WorkspaceService:      workspaceService,
-			GitProviderService:    gitProviderService,
-			ProviderManager:       providerManager,
+			Config:                   *c,
+			TailscaleServer:          headscaleServer,
+			ProviderTargetService:    providerTargetService,
+			ContainerRegistryService: containerRegistryService,
+			ApiKeyService:            apiKeyService,
+			WorkspaceService:         workspaceService,
+			GitProviderService:       gitProviderService,
+			ProviderManager:          providerManager,
 		})
 
 		errCh := make(chan error)

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"io"
 
+	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/logger"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provisioner"
@@ -33,44 +34,47 @@ type targetStore interface {
 }
 
 type WorkspaceServiceConfig struct {
-	WorkspaceStore        workspace.Store
-	TargetStore           targetStore
-	ServerApiUrl          string
-	ServerUrl             string
-	Provisioner           provisioner.IProvisioner
-	DefaultProjectImage   string
-	ApiKeyService         apikeys.IApiKeyService
-	NewWorkspaceLogger    func(workspaceId string) logger.Logger
-	NewProjectLogger      func(workspaceId, projectName string) logger.Logger
-	NewWorkspaceLogReader func(workspaceId string) (io.Reader, error)
+	WorkspaceStore         workspace.Store
+	TargetStore            targetStore
+	ContainerRegistryStore containerregistry.Store
+	ServerApiUrl           string
+	ServerUrl              string
+	Provisioner            provisioner.IProvisioner
+	DefaultProjectImage    string
+	ApiKeyService          apikeys.IApiKeyService
+	NewWorkspaceLogger     func(workspaceId string) logger.Logger
+	NewProjectLogger       func(workspaceId, projectName string) logger.Logger
+	NewWorkspaceLogReader  func(workspaceId string) (io.Reader, error)
 }
 
 func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 	return &WorkspaceService{
-		workspaceStore:        config.WorkspaceStore,
-		targetStore:           config.TargetStore,
-		serverApiUrl:          config.ServerApiUrl,
-		serverUrl:             config.ServerUrl,
-		defaultProjectImage:   config.DefaultProjectImage,
-		provisioner:           config.Provisioner,
-		newWorkspaceLogger:    config.NewWorkspaceLogger,
-		newProjectLogger:      config.NewProjectLogger,
-		apiKeyService:         config.ApiKeyService,
-		newWorkspaceLogReader: config.NewWorkspaceLogReader,
+		workspaceStore:         config.WorkspaceStore,
+		targetStore:            config.TargetStore,
+		containerRegistryStore: config.ContainerRegistryStore,
+		serverApiUrl:           config.ServerApiUrl,
+		serverUrl:              config.ServerUrl,
+		defaultProjectImage:    config.DefaultProjectImage,
+		provisioner:            config.Provisioner,
+		newWorkspaceLogger:     config.NewWorkspaceLogger,
+		newProjectLogger:       config.NewProjectLogger,
+		apiKeyService:          config.ApiKeyService,
+		newWorkspaceLogReader:  config.NewWorkspaceLogReader,
 	}
 }
 
 type WorkspaceService struct {
-	workspaceStore        workspace.Store
-	targetStore           targetStore
-	provisioner           provisioner.IProvisioner
-	apiKeyService         apikeys.IApiKeyService
-	serverApiUrl          string
-	serverUrl             string
-	defaultProjectImage   string
-	newWorkspaceLogger    func(workspaceId string) logger.Logger
-	newProjectLogger      func(workspaceId, projectName string) logger.Logger
-	newWorkspaceLogReader func(workspaceId string) (io.Reader, error)
+	workspaceStore         workspace.Store
+	targetStore            targetStore
+	containerRegistryStore containerregistry.Store
+	provisioner            provisioner.IProvisioner
+	apiKeyService          apikeys.IApiKeyService
+	serverApiUrl           string
+	serverUrl              string
+	defaultProjectImage    string
+	newWorkspaceLogger     func(workspaceId string) logger.Logger
+	newProjectLogger       func(workspaceId, projectName string) logger.Logger
+	newWorkspaceLogReader  func(workspaceId string) (io.Reader, error)
 }
 
 func (s *WorkspaceService) SetProjectState(workspaceId, projectName string, state *workspace.ProjectState) (*workspace.Workspace, error) {
