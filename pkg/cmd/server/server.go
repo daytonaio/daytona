@@ -252,9 +252,25 @@ func setDefaultConfig(server *server.Server) error {
 		return err
 	}
 
+	if existingConfig != nil {
+		err := existingConfig.AddProfile(config.Profile{
+			Id:   "default",
+			Name: "default",
+			Api: config.ServerApi{
+				Url: "http://localhost:3000",
+				Key: apiKey,
+			},
+		})
+		if err != nil {
+			return err
+		}
+
+		return existingConfig.Save()
+	}
+
 	config := &config.Config{
 		ActiveProfileId: "default",
-		DefaultIdeId:    "vscode",
+		DefaultIdeId:    config.DefaultIdeId,
 		Profiles: []config.Profile{
 			{
 				Id:   "default",

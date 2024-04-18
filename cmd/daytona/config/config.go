@@ -38,12 +38,14 @@ type Ide struct {
 	Name string
 }
 
+const DefaultIdeId = "vscode"
+
 type GitProvider struct {
 	Id   string
 	Name string
 }
 
-const configDoesntExistError = "config does not exist. Run `daytona server` to create a default profile"
+const configDoesntExistError = "config does not exist. Run `daytona server` to create a default profile or `daytona profile add` to connect to a remote server."
 
 func IsNotExist(err error) bool {
 	return err.Error() == configDoesntExistError
