@@ -1407,7 +1407,20 @@ const docTemplate = `{
                 "ProviderTargetPropertyTypeFilePath"
             ]
         }
-    }
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "description": "\"Type 'Bearer TOKEN' to correctly set the API Key\"",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    },
+    "security": [
+        {
+            "Bearer": []
+        }
+    ]
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
