@@ -20,7 +20,18 @@ var profileAddCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			if !config.IsNotExist(err) {
+				log.Fatal(err)
+			}
+
+			c = &config.Config{
+				DefaultIdeId: config.DefaultIdeId,
+				Profiles:     []config.Profile{},
+			}
+
+			if err := c.Save(); err != nil {
+				log.Fatal(err)
+			}
 		}
 
 		profileAddView := profile.ProfileAddView{
