@@ -8,10 +8,17 @@ import (
 	"errors"
 	"fmt"
 	"hash/fnv"
+	"strings"
 
 	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 )
+
+type ProjectImageUriParts struct {
+	Server    string
+	Username  *string
+	ImageName string
+}
 
 type Project struct {
 	Name        string                     `json:"name"`
@@ -23,6 +30,33 @@ type Project struct {
 	EnvVars     map[string]string          `json:"-"`
 	State       *ProjectState              `json:"state,omitempty"`
 } // @name Project
+
+func (p *Project) ParseImage() (*ProjectImageUriParts, error) {
+	server := "docker.io"
+	var user string
+	image := ""
+
+	parts := strings.Split(p.Image, "/")
+	switch len(parts) {
+	case 1:
+		image = parts[0]
+	case 2:
+		user = parts[0]
+		image = parts[1]
+	case 3:
+		server = parts[0]
+		user = parts[1]
+		image = parts[2]
+	default:
+		return nil, errors.New("invalid image uri")
+	}
+
+	return &ProjectImageUriParts{
+		Server:    server,
+		Username:  &user,
+		ImageName: image,
+	}, nil
+}
 
 type Workspace struct {
 	Id       string     `json:"id"`

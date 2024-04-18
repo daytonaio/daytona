@@ -32,6 +32,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/api/controllers/apikey"
 	"github.com/daytonaio/daytona/pkg/api/controllers/binary"
+	"github.com/daytonaio/daytona/pkg/api/controllers/containerregistry"
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider"
 	log_controller "github.com/daytonaio/daytona/pkg/api/controllers/log"
 	"github.com/daytonaio/daytona/pkg/api/controllers/provider"
@@ -118,6 +119,14 @@ func (a *ApiServer) Start() error {
 		providerController.GET("/", provider.ListProviders)
 		providerController.POST("/:provider/uninstall", provider.UninstallProvider)
 		providerController.GET("/:provider/target-manifest", provider.GetTargetManifest)
+	}
+
+	containerRegistryController := protected.Group("/container-registry")
+	{
+		containerRegistryController.GET("/", containerregistry.ListContainerRegistries)
+		containerRegistryController.GET("/:id", containerregistry.GetContainerRegistry)
+		containerRegistryController.PUT("/", containerregistry.SetContainerRegistry)
+		containerRegistryController.DELETE("/:id", containerregistry.RemoveContainerRegistry)
 	}
 
 	targetController := protected.Group("/target")

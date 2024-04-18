@@ -91,6 +91,106 @@ const docTemplate = `{
                 }
             }
         },
+        "/container-registry": {
+            "get": {
+                "description": "List container registries",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container-registry"
+                ],
+                "summary": "List container registries",
+                "operationId": "ListContainerRegistries",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ContainerRegistry"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Set container registry credentials",
+                "tags": [
+                    "container-registry"
+                ],
+                "summary": "Set container registry credentials",
+                "operationId": "SetContainerRegistry",
+                "parameters": [
+                    {
+                        "description": "Container Registry credentials to set",
+                        "name": "containerRegistry",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ContainerRegistry"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            }
+        },
+        "/container-registry/{id}": {
+            "get": {
+                "description": "Get container registry credentials",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container-registry"
+                ],
+                "summary": "Get container registry credentials",
+                "operationId": "GetContainerRegistry",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Container Registry Id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ContainerRegistry"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove a container registry credentials",
+                "tags": [
+                    "container-registry"
+                ],
+                "summary": "Remove a container registry credentials",
+                "operationId": "RemoveContainerRegistry",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Container Registry Id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/gitprovider": {
             "get": {
                 "description": "List Git providers",
@@ -958,6 +1058,23 @@ const docTemplate = `{
                 },
                 "type": {
                     "$ref": "#/definitions/apikey.ApiKeyType"
+                }
+            }
+        },
+        "ContainerRegistry": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "server": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },
