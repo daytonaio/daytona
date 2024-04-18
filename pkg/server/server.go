@@ -13,6 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/frpc"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
+	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/providertargets"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
@@ -22,13 +23,14 @@ import (
 )
 
 type ServerInstanceConfig struct {
-	Config                Config
-	TailscaleServer       TailscaleServer
-	ProviderTargetService providertargets.IProviderTargetService
-	WorkspaceService      workspaces.IWorkspaceService
-	ApiKeyService         apikeys.IApiKeyService
-	GitProviderService    gitproviders.IGitProviderService
-	ProviderManager       manager.IProviderManager
+	Config                   Config
+	TailscaleServer          TailscaleServer
+	ProviderTargetService    providertargets.IProviderTargetService
+	ContainerRegistryService containerregistries.IContainerRegistryService
+	WorkspaceService         workspaces.IWorkspaceService
+	ApiKeyService            apikeys.IApiKeyService
+	GitProviderService       gitproviders.IGitProviderService
+	ProviderManager          manager.IProviderManager
 }
 
 var server *Server
@@ -43,13 +45,14 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 			log.Fatal("Server not initialized")
 		}
 		server = &Server{
-			config:                serverConfig.Config,
-			TailscaleServer:       serverConfig.TailscaleServer,
-			ProviderTargetService: serverConfig.ProviderTargetService,
-			WorkspaceService:      serverConfig.WorkspaceService,
-			ApiKeyService:         serverConfig.ApiKeyService,
-			GitProviderService:    serverConfig.GitProviderService,
-			ProviderManager:       serverConfig.ProviderManager,
+			config:                   serverConfig.Config,
+			TailscaleServer:          serverConfig.TailscaleServer,
+			ProviderTargetService:    serverConfig.ProviderTargetService,
+			ContainerRegistryService: serverConfig.ContainerRegistryService,
+			WorkspaceService:         serverConfig.WorkspaceService,
+			ApiKeyService:            serverConfig.ApiKeyService,
+			GitProviderService:       serverConfig.GitProviderService,
+			ProviderManager:          serverConfig.ProviderManager,
 		}
 	}
 
@@ -57,13 +60,14 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 }
 
 type Server struct {
-	config                Config
-	TailscaleServer       TailscaleServer
-	ProviderTargetService providertargets.IProviderTargetService
-	WorkspaceService      workspaces.IWorkspaceService
-	ApiKeyService         apikeys.IApiKeyService
-	GitProviderService    gitproviders.IGitProviderService
-	ProviderManager       manager.IProviderManager
+	config                   Config
+	TailscaleServer          TailscaleServer
+	ContainerRegistryService containerregistries.IContainerRegistryService
+	ProviderTargetService    providertargets.IProviderTargetService
+	WorkspaceService         workspaces.IWorkspaceService
+	ApiKeyService            apikeys.IApiKeyService
+	GitProviderService       gitproviders.IGitProviderService
+	ProviderManager          manager.IProviderManager
 }
 
 func (s *Server) Start(errCh chan error) error {

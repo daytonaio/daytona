@@ -4,6 +4,7 @@
 package provisioner
 
 import (
+	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
@@ -22,15 +23,16 @@ func (p *Provisioner) CreateWorkspace(workspace *workspace.Workspace, target *pr
 	return err
 }
 
-func (p *Provisioner) CreateProject(project *workspace.Project, target *provider.ProviderTarget) error {
+func (p *Provisioner) CreateProject(project *workspace.Project, target *provider.ProviderTarget, cr *containerregistry.ContainerRegistry) error {
 	targetProvider, err := p.providerManager.GetProvider(target.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
 	_, err = (*targetProvider).CreateProject(&provider.ProjectRequest{
-		TargetOptions: target.Options,
-		Project:       project,
+		TargetOptions:     target.Options,
+		Project:           project,
+		ContainerRegistry: cr,
 	})
 
 	return err

@@ -6,6 +6,7 @@
 package mocks
 
 import (
+	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/stretchr/testify/mock"
@@ -19,8 +20,8 @@ func NewMockProvisioner() *mockProvisioner {
 	return &mockProvisioner{}
 }
 
-func (p *mockProvisioner) CreateProject(project *workspace.Project, target *provider.ProviderTarget) error {
-	args := p.Called(project, target)
+func (p *mockProvisioner) CreateProject(project *workspace.Project, target *provider.ProviderTarget, cr *containerregistry.ContainerRegistry) error {
+	args := p.Called(project, target, cr)
 	return args.Error(0)
 }
 
