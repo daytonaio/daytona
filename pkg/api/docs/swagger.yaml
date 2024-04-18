@@ -941,4 +941,12 @@ paths:
       - workspace
 schemes:
 - http
+security:
+- Bearer: []
+securityDefinitions:
+  Bearer:
+    description: '"Type ''Bearer TOKEN'' to correctly set the API Key"'
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

@@ -6,6 +6,8 @@ info:
   version: 0.1.0
 servers:
 - url: http://localhost:3000/
+security:
+- Bearer: []
 paths:
   /apikey:
     get:
@@ -1251,4 +1253,10 @@ components:
       - ProviderTargetPropertyTypeInt
       - ProviderTargetPropertyTypeFloat
       - ProviderTargetPropertyTypeFilePath
+  securitySchemes:
+    Bearer:
+      description: '"Type ''Bearer TOKEN'' to correctly set the API Key"'
+      in: header
+      name: Authorization
+      type: apiKey
 x-original-swagger-version: "2.0"
