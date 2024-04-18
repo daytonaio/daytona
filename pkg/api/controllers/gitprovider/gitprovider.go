@@ -35,6 +35,10 @@ func ListGitProviders(ctx *gin.Context) {
 		return
 	}
 
+	for _, provider := range response {
+		provider.Token = ""
+	}
+
 	ctx.JSON(200, response)
 }
 
