@@ -4,11 +4,8 @@
 package apikeys
 
 import (
-	"crypto/sha256"
-	"encoding/base64"
-
+	"github.com/daytonaio/daytona/internal/apikeys"
 	"github.com/daytonaio/daytona/pkg/apikey"
-	"github.com/google/uuid"
 )
 
 func (s *ApiKeyService) ListClientKeys() ([]*apikey.ApiKey, error) {
@@ -38,10 +35,10 @@ func (s *ApiKeyService) Revoke(name string) error {
 }
 
 func (s *ApiKeyService) Generate(keyType apikey.ApiKeyType, name string) (string, error) {
-	key := generateRandomKey()
+	key := apikeys.GenerateRandomKey()
 
 	apiKey := &apikey.ApiKey{
-		KeyHash: hashKey(key),
+		KeyHash: apikeys.HashKey(key),
 		Type:    keyType,
 		Name:    name,
 	}
@@ -52,14 +49,4 @@ func (s *ApiKeyService) Generate(keyType apikey.ApiKeyType, name string) (string
 	}
 
 	return key, nil
-}
-
-func hashKey(key string) string {
-	keyHash := sha256.Sum256([]byte(key))
-	return string(keyHash[:])
-}
-
-func generateRandomKey() string {
-	uuid := uuid.NewString()
-	return base64.RawStdEncoding.EncodeToString([]byte(uuid))
 }
