@@ -10,6 +10,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	view_util "github.com/daytonaio/daytona/pkg/views/util"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -40,12 +41,12 @@ func selectProjectPrompt(projects []serverapiclient.Project, actionVerb string, 
 
 	d.Styles.SelectedTitle = lipgloss.NewStyle().
 		Border(lipgloss.NormalBorder(), false, false, false, true).
-		BorderForeground(views.Blue).
-		Foreground(views.Blue).
+		BorderForeground(views.TempGreen).
+		Foreground(views.TempGreen).
 		Bold(true).
 		Padding(0, 0, 0, 1)
 
-	d.Styles.SelectedDesc = d.Styles.SelectedTitle.Copy().Foreground(views.DimmedBlue)
+	d.Styles.SelectedDesc = d.Styles.SelectedTitle.Copy().Foreground(views.TempDimmedGreen)
 
 	l := list.New(items, d, 0, 0)
 
@@ -57,7 +58,7 @@ func selectProjectPrompt(projects []serverapiclient.Project, actionVerb string, 
 
 	m := model[serverapiclient.Project]{list: l}
 
-	m.list.Title = "SELECT A PROJECT TO " + strings.ToUpper(actionVerb)
+	m.list.Title = view_util.GetStyledMainTitle("Select a project to " + strings.ToUpper(actionVerb))
 	m.list.Styles.Title = lipgloss.NewStyle().Foreground(views.Green).Bold(true)
 
 	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()

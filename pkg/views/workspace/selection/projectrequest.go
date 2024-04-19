@@ -158,8 +158,8 @@ func (d projectRequestItemDelegate) Render(w io.Writer, m list.Model, index int,
 
 	// Adjust styles as the user moves through the menu
 	if isSelected {
-		name = selectedStyles.Copy().Foreground(views.Blue).Render(i.Name())
-		imageLine = selectedStyles.Copy().Foreground(views.DimmedBlue).Render(i.Image())
+		name = selectedStyles.Copy().Foreground(views.TempGreen).Render(i.Name())
+		imageLine = selectedStyles.Copy().Foreground(views.TempDimmedGreen).Render(i.Image())
 		userLine = selectedStyles.Copy().Foreground(views.Gray).Render(i.User())
 		postStartCommandsLine = selectedStyles.Copy().Foreground(views.Gray).Render(i.PostStartCommands())
 	}

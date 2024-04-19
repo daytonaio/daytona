@@ -9,6 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	view_util "github.com/daytonaio/daytona/pkg/views/util"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -25,7 +26,8 @@ func selectRepositoryPrompt(repositories []serverapiclient.GitRepository, second
 
 	l := views.GetStyledSelectList(items)
 	m := model[string]{list: l}
-	m.list.Title = "CHOOSE A REPOSITORY"
+	m.list.Title = view_util.GetStyledMainTitle("Choose a repository")
+
 	if secondaryProjectOrder > 0 {
 		m.list.Title += fmt.Sprintf(" (Secondary Project #%d)", secondaryProjectOrder)
 	}

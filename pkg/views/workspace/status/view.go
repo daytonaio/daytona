@@ -4,57 +4,45 @@
 package status
 
 import (
-	"strings"
+	"fmt"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/daytonaio/daytona/pkg/views"
 )
 
 var (
 	spinnerStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("63"))
-	helpStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Margin(1, 0)
-	dotStyle     = helpStyle.Copy().UnsetMargins()
-	appStyle     = lipgloss.NewStyle().Margin(0, 2, 1, 2).BorderStyle(lipgloss.NormalBorder()).BorderForeground(views.Green).Width(50).Padding(1, 1, 0, 2)
+	checkMark    = lipgloss.NewStyle().Foreground(lipgloss.Color("42")).SetString("✓")
 )
 
-type ResultMsg struct {
+type Message struct {
 	Line string
-	Dots bool
 }
 
 type ClearScreenMsg struct{}
 
-func (r ResultMsg) String() string {
-	if r.Dots {
-		return dotStyle.Render(strings.Repeat(".", 30))
-	}
+func (r Message) String() string {
 	return r.Line
 }
 
 type model struct {
 	spinner       spinner.Model
-	results       []ResultMsg
+	messages      []Message
 	quitting      bool
 	width, height int
 }
 
 func NewModel() model {
-	const numLastResults = 6
 	s := spinner.New()
 	s.Style = spinnerStyle
-	results := make([]ResultMsg, numLastResults)
+	messages := make([]Message, 0)
 
-	for i := range results {
-		results[i] = ResultMsg{Dots: true}
-	}
-
-	results[len(results)-1] = ResultMsg{Line: "Workspace creation request submitted", Dots: false}
+	// messages = append(messages, Message{Line: "Workspace creation request submitted"})
 
 	return model{
-		spinner: s,
-		results: results,
+		spinner:  s,
+		messages: messages,
 	}
 }
 
@@ -64,12 +52,12 @@ func (m model) Init() tea.Cmd {
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case ResultMsg:
+	case Message:
 		if msg.Line == "END_SIGNAL" {
 			m.quitting = true
 			return m, tea.Quit
 		}
-		m.results = append(m.results[1:], msg)
+		m.messages = append(m.messages, msg)
 		return m, nil
 	case spinner.TickMsg:
 		var cmd tea.Cmd
@@ -96,9 +84,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
 	var s string
 
-	for _, res := range m.results {
-		s += res.String() + "\n"
+	for _, message := range m.messages {
+		if message.Line != "" {
+			// fmt.Printf("\r%s", msg)
+			s += fmt.Sprintf("%s %s\n", checkMark, message.String())
+		}
 	}
 
-	return appStyle.Width(m.width - 20).Render(s)
+	return s + m.spinner.View()
 }

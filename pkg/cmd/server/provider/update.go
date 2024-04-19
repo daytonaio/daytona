@@ -58,7 +58,7 @@ var providerUpdateCmd = &cobra.Command{
 			return
 		}
 
-		providerToUpdate := provider.GetProviderFromPrompt(providerList, "CHOOSE A PROVIDER TO UPDATE")
+		providerToUpdate := provider.GetProviderFromPrompt(providerList, "Choose a provider to update")
 		if providerToUpdate == nil {
 			return
 		}

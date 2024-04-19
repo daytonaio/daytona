@@ -27,7 +27,7 @@ var providerUninstallCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		providerToUninstall := provider.GetProviderFromPrompt(providerList, "CHOOSE A PROVIDER TO UNINSTALL")
+		providerToUninstall := provider.GetProviderFromPrompt(providerList, "Choose a provider to uninstall")
 
 		if providerToUninstall == nil {
 			return

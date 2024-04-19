@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/daytonaio/daytona/pkg/views"
+	view_util "github.com/daytonaio/daytona/pkg/views/util"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -34,7 +35,7 @@ func selectCheckoutPrompt(checkoutOptions []CheckoutOption, secondaryProjectOrde
 
 	l := views.GetStyledSelectList(items)
 	m := model[string]{list: l}
-	m.list.Title = "CLONING OPTIONS"
+	m.list.Title = view_util.GetStyledMainTitle("Cloning options")
 	if secondaryProjectOrder > 0 {
 		m.list.Title += fmt.Sprintf(" (Secondary Project #%d)", secondaryProjectOrder)
 	}

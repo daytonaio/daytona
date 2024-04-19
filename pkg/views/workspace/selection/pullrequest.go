@@ -9,6 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	view_util "github.com/daytonaio/daytona/pkg/views/util"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -28,7 +29,7 @@ func selectPullRequestPrompt(pullRequests []serverapiclient.GitPullRequest, seco
 
 	l := views.GetStyledSelectList(items)
 	m := model[string]{list: l}
-	m.list.Title = "CHOOSE A PULL/MERGE REQUEST"
+	m.list.Title = view_util.GetStyledMainTitle("Choose a pull/merge request")
 	if secondaryProjectOrder > 0 {
 		m.list.Title += fmt.Sprintf(" (Secondary Project #%d)", secondaryProjectOrder)
 	}

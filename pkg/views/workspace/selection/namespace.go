@@ -11,6 +11,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	view_util "github.com/daytonaio/daytona/pkg/views/util"
 )
 
 func selectNamespacePrompt(namespaces []serverapiclient.GitNamespace, secondaryProjectOrder int, choiceChan chan<- string) {
@@ -30,7 +31,7 @@ func selectNamespacePrompt(namespaces []serverapiclient.GitNamespace, secondaryP
 
 	l := views.GetStyledSelectList(items)
 	m := model[string]{list: l}
-	m.list.Title = "CHOOSE A NAMESPACE"
+	m.list.Title = view_util.GetStyledMainTitle("Choose a namespace")
 	if secondaryProjectOrder > 0 {
 		m.list.Title += fmt.Sprintf(" (Secondary Project #%d)", secondaryProjectOrder)
 	}

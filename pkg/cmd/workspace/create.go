@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"strings"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -131,7 +130,7 @@ var CreateCmd = &cobra.Command{
 
 		dialStartTime := time.Now()
 		dialTimeout := 3 * time.Minute
-		statusProgram.Send(status.ResultMsg{Line: "Establishing connection with the workspace"})
+		// statusProgram.Send(status.Message{Line: "Establishing connection with the workspace"})
 
 		waitForDial(tsConn, *createdWorkspace.Id, *createdWorkspace.Projects[0].Name, dialStartTime, dialTimeout, statusProgram)
 
@@ -145,22 +144,32 @@ var CreateCmd = &cobra.Command{
 			return
 		}
 
+		chosenIdeId := c.DefaultIdeId
+		if ideFlag != "" {
+			chosenIdeId = ideFlag
+		}
+
+		ideList := config.GetIdeList()
+		var chosenIde config.Ide
+
+		for _, ide := range ideList {
+			if ide.Id == chosenIdeId {
+				chosenIde = ide
+			}
+		}
+
 		fmt.Println()
-		info.Render(wsInfo)
+		info.Render(wsInfo, chosenIde.Name)
 
 		codeFlag, _ := cmd.Flags().GetBool("code")
 		if !codeFlag {
+			view_util.RenderCreationInfoMessage("Run 'daytona code' when you're ready to start developing")
 			return
 		}
 
-		ide := c.DefaultIdeId
-		if ideFlag != "" {
-			ide = ideFlag
-		}
+		view_util.RenderCreationInfoMessage("Opening the workspace in your preferred editor ...")
 
-		view_util.RenderInfoMessage(fmt.Sprintf("Opening the workspace project '%s' in your preferred IDE.", *wsInfo.Projects[0].Name))
-
-		err = openIDE(ide, activeProfile, *createdWorkspace.Id, *wsInfo.Projects[0].Name)
+		err = openIDE(chosenIdeId, activeProfile, *createdWorkspace.Id, *wsInfo.Projects[0].Name)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -305,15 +314,44 @@ func scanWorkspaceLogs(activeProfile config.Profile, workspaceId string, statusP
 			return
 		}
 
-		messages := strings.Split(string(msg), "\r")
-		for _, msg := range messages {
-			statusProgram.Send(status.ResultMsg{Line: msg})
+		delimiter := byte('\r')
+		messages := splitWithDelimiter(string(msg), delimiter)
+
+		for _, message := range messages {
+			line := fmt.Sprintf("%s %s", view_util.CheckmarkSymbol, message)
+			fmt.Print(line)
 		}
 		if *started {
-			statusProgram.Send(status.ResultMsg{Line: "END_SIGNAL"})
+			fmt.Print("\nWorkspace creation complete.")
+			statusProgram.Send(status.Message{Line: "END_SIGNAL"})
 			break
 		}
+		if len(messages) != 0 {
+			fmt.Print("\n")
+		}
 	}
+}
+
+func splitWithDelimiter(s string, delimiter byte) []string {
+	var parts []string
+	var buffer []byte
+
+	for i := 0; i < len(s); i++ {
+		if s[i] == delimiter {
+			parts = append(parts, string(buffer))
+			buffer = nil
+			parts = append(parts, string(delimiter))
+		} else {
+			buffer = append(buffer, s[i])
+		}
+	}
+
+	// Add the remaining characters in the buffer
+	if len(buffer) > 0 {
+		parts = append(parts, string(buffer))
+	}
+
+	return parts
 }
 
 func waitForDial(tsConn *tsnet.Server, workspaceId string, projectName string, dialStartTime time.Time, dialTimeout time.Duration, statusProgram *tea.Program) {

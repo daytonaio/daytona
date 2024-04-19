@@ -45,7 +45,7 @@ var providerInstallCmd = &cobra.Command{
 
 		providerList := convertToDTO(providersManifest)
 
-		providerToInstall := provider.GetProviderFromPrompt(providerList, "CHOOSE A PROVIDER TO INSTALL")
+		providerToInstall := provider.GetProviderFromPrompt(providerList, "Choose a provider to install")
 
 		if providerToInstall == nil {
 			return

@@ -19,7 +19,7 @@ import (
 
 var saveFlag bool
 
-var generateCmd = &cobra.Command{
+var GenerateCmd = &cobra.Command{
 	Use:     "generate [NAME]",
 	Short:   "Generate a new API key",
 	Aliases: []string{"g", "new"},
@@ -85,5 +85,5 @@ func saveKeyToDefaultProfile(key string) error {
 }
 
 func init() {
-	generateCmd.Flags().BoolVarP(&saveFlag, "save", "s", false, "Save the API key to your default profile on this machine")
+	GenerateCmd.Flags().BoolVarP(&saveFlag, "save", "s", false, "Save the API key to your default profile on this machine")
 }

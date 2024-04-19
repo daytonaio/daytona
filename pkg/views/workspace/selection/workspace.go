@@ -11,6 +11,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	view_util "github.com/daytonaio/daytona/pkg/views/util"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -63,7 +64,7 @@ func selectWorkspacePrompt(workspaces []serverapiclient.WorkspaceDTO, actionVerb
 
 	m := model[serverapiclient.WorkspaceDTO]{list: l}
 
-	m.list.Title = "SELECT A WORKSPACE TO " + strings.ToUpper(actionVerb)
+	m.list.Title = view_util.GetStyledMainTitle("Select a workspace to " + strings.ToUpper(actionVerb))
 	m.list.Styles.Title = lipgloss.NewStyle().Foreground(views.Green).Bold(true)
 
 	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()

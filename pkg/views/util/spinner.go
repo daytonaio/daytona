@@ -24,7 +24,7 @@ type Msg string
 func initialModel() model {
 	s := spinner.New()
 	s.Spinner = spinner.Dot
-	s.Style = lipgloss.NewStyle().Foreground(views.Blue)
+	s.Style = lipgloss.NewStyle().Foreground(views.TempGreen)
 	return model{spinner: s}
 }
 
@@ -76,7 +76,7 @@ func (m model) View() string {
 		return ""
 	}
 
-	str := fmt.Sprintf("\n\n   %s Loading...\n\n", m.spinner.View())
+	str := DocStyle.Render(fmt.Sprintf("\n\n   %s Loading...\n\n", m.spinner.View()))
 
 	return str
 }

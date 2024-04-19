@@ -4,8 +4,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/views/ide"
 	"github.com/daytonaio/daytona/pkg/views/util"
@@ -45,6 +43,6 @@ var ideCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		util.RenderInfoMessage(fmt.Sprintf("Default IDE set to: %s", chosenIde.Name))
+		util.RenderDefaultIdeUpdated(chosenIde.Name)
 	},
 }

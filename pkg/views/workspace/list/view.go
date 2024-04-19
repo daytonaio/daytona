@@ -14,6 +14,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"golang.org/x/term"
 )
@@ -22,12 +23,12 @@ var defaultColumnWidth = 12
 var columnPadding = 3
 
 type RowData struct {
-	WorkspaceName string
-	Repository    string
-	Branch        string
-	Target        string
-	Created       string
-	Uptime        string
+	Name       string
+	Repository string
+	Branch     string
+	Target     string
+	Created    string
+	Uptime     string
 }
 
 type model struct {
@@ -37,12 +38,12 @@ type model struct {
 }
 
 var columns = []table.Column{
-	{Title: "WORKSPACE", Width: defaultColumnWidth},
-	{Title: "REPOSITORY", Width: defaultColumnWidth},
-	{Title: "BRANCH", Width: defaultColumnWidth},
-	{Title: "TARGET", Width: defaultColumnWidth},
-	{Title: "CREATED", Width: defaultColumnWidth},
-	{Title: "UPTIME", Width: defaultColumnWidth},
+	{Title: "Workspace", Width: defaultColumnWidth},
+	{Title: "Repository", Width: defaultColumnWidth},
+	{Title: "Branch", Width: defaultColumnWidth},
+	{Title: "Target", Width: defaultColumnWidth},
+	{Title: "Created", Width: defaultColumnWidth},
+	{Title: "Uptime", Width: defaultColumnWidth},
 }
 
 func (m model) Init() tea.Cmd {
@@ -63,10 +64,40 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 var baseStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.HiddenBorder())
+	BorderForeground(views.LightGray).
+	Border(lipgloss.RoundedBorder()).Padding(1, 2).Margin(1, 0)
+
+var nameStyle = lipgloss.NewStyle().Foreground(views.White)
+var runningStyle = lipgloss.NewStyle().Foreground(views.Green)
+var stoppedStyle = lipgloss.NewStyle().Foreground(views.Red)
+var defaultCellStyle = lipgloss.NewStyle().Foreground(views.Gray)
 
 func (m model) View() string {
-	return baseStyle.Render(m.table.View())
+	return baseStyle.Render(m.table.View()) + "\n"
+}
+
+func getRowFromRowData(rowData RowData) table.Row {
+	var stateStyle lipgloss.Style
+	if rowData.Uptime == "Stopped" {
+		stateStyle = stoppedStyle
+	} else {
+		stateStyle = runningStyle
+	}
+
+	row := table.Row{
+		nameStyle.Render(rowData.Name),
+		defaultCellStyle.Render(rowData.Repository),
+		rowData.Branch,
+		rowData.Target,
+		rowData.Created,
+		stateStyle.Render(rowData.Uptime),
+	}
+
+	if rowData.Created != "" && rowData.Uptime != "" {
+		row = append(row, rowData.Created, stateStyle.Render("RUNNING")+defaultCellStyle.Render(rowData.Uptime))
+	}
+
+	return row
 }
 
 func renderWorkspaceList(workspaceList []serverapiclient.WorkspaceDTO, specifyGitProviders bool) model {
@@ -80,22 +111,28 @@ func renderWorkspaceList(workspaceList []serverapiclient.WorkspaceDTO, specifyGi
 		if len(workspace.Projects) == 1 {
 			rowData = getWorkspaceTableRowData(workspace, specifyGitProviders)
 			adjustColumsFormatting(rowData)
-			row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Branch, rowData.Target}
+			row = getRowFromRowData(rowData)
 			if workspace.Info != nil && len(workspace.Info.Projects) > 0 {
 				row = append(row, rowData.Created, rowData.Uptime)
 			}
 			rows = append(rows, row)
+			rows = append(rows, []string{"", "", "", ""})
 		} else {
-			row = table.Row{*workspace.Name, "", "", "", "", ""}
+			row = getRowFromRowData(RowData{Name: *workspace.Name})
 			rows = append(rows, row)
+			rows = append(rows, []string{"", "", "", ""})
 			for _, project := range workspace.Projects {
 				rowData = getProjectTableRowData(workspace, project, specifyGitProviders)
+				if rowData == (RowData{}) {
+					continue
+				}
 				adjustColumsFormatting(rowData)
-				row = table.Row{rowData.WorkspaceName, rowData.Repository, rowData.Branch, rowData.Target}
+				row = getRowFromRowData(rowData)
 				if workspace.Info != nil && len(workspace.Info.Projects) > 0 {
 					row = append(row, rowData.Created, rowData.Uptime)
 				}
 				rows = append(rows, row)
+				rows = append(rows, []string{"", "", "", ""})
 			}
 		}
 	}
@@ -128,12 +165,12 @@ func sortWorkspaces(workspaceList *[]serverapiclient.WorkspaceDTO) {
 }
 
 func adjustColumsFormatting(rowData RowData) {
-	adjustColumnWidth("WORKSPACE", rowData)
-	adjustColumnWidth("REPOSITORY", rowData)
-	adjustColumnWidth("BRANCH", rowData)
-	adjustColumnWidth("TARGET", rowData)
-	adjustColumnWidth("CREATED", rowData)
-	adjustColumnWidth("UPTIME", rowData)
+	adjustColumnWidth("Workspace", rowData)
+	adjustColumnWidth("Repository", rowData)
+	adjustColumnWidth("Branch", rowData)
+	adjustColumnWidth("Target", rowData)
+	adjustColumnWidth("Created", rowData)
+	adjustColumnWidth("Uptime", rowData)
 }
 
 func adjustColumnWidth(title string, rowData RowData) {
@@ -146,17 +183,17 @@ func adjustColumnWidth(title string, rowData RowData) {
 	}
 	currentField := ""
 	switch title {
-	case "WORKSPACE":
-		currentField = rowData.WorkspaceName
-	case "REPOSITORY":
+	case "Workspace":
+		currentField = rowData.Name
+	case "Repository":
 		currentField = rowData.Repository
-	case "BRANCH":
+	case "Branch":
 		currentField = rowData.Branch
-	case "TARGET":
+	case "Target":
 		currentField = rowData.Target
-	case "CREATED":
+	case "Created":
 		currentField = rowData.Created
-	case "UPTIME":
+	case "Uptime":
 		currentField = rowData.Uptime
 	}
 
@@ -168,7 +205,7 @@ func adjustColumnWidth(title string, rowData RowData) {
 func getWorkspaceTableRowData(workspace serverapiclient.WorkspaceDTO, specifyGitProviders bool) RowData {
 	rowData := RowData{}
 	if workspace.Name != nil {
-		rowData.WorkspaceName = *workspace.Name
+		rowData.Name = *workspace.Name + "    "
 	}
 	if workspace.Projects != nil && len(workspace.Projects) > 0 && workspace.Projects[0].Repository != nil {
 		rowData.Repository = getRepositorySlugFromUrl(*workspace.Projects[0].Repository.Url, specifyGitProviders)
@@ -214,7 +251,7 @@ func getProjectTableRowData(workspaceDTO serverapiclient.WorkspaceDTO, project s
 
 	rowData := RowData{}
 	if project.Name != nil {
-		rowData.WorkspaceName = " └ " + *project.Name
+		rowData.Name = " └ " + *project.Name
 	}
 	if project.Repository != nil && project.Repository.Url != nil {
 		rowData.Repository = getRepositorySlugFromUrl(*project.Repository.Url, specifyGitProviders)
@@ -258,7 +295,6 @@ func ListWorkspaces(workspaceList []serverapiclient.WorkspaceDTO, specifyGitProv
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}
-	fmt.Println()
 }
 
 func getTable(rows []table.Row, cols []table.Column, activeRow int) table.Model {
@@ -270,9 +306,12 @@ func getTable(rows []table.Row, cols []table.Column, activeRow int) table.Model 
 
 	style := table.DefaultStyles()
 	style.Header = style.Header.
-		BorderStyle(lipgloss.HiddenBorder()).
+		BorderStyle(lipgloss.RoundedBorder()).
+		BorderForeground(views.LightGray).
+		Foreground(views.LightGray).
 		BorderBottom(true).
-		AlignHorizontal(lipgloss.Left)
+		PaddingBottom(1).
+		AlignHorizontal(lipgloss.Left).MarginBottom(1)
 
 	style.Selected = style.Selected.
 		Foreground(style.Cell.GetForeground()).

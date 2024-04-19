@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
@@ -15,13 +16,14 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/views"
 	view_util "github.com/daytonaio/daytona/pkg/views/util"
+	"golang.org/x/term"
 )
 
 var CustomRepoIdentifier = "<CUSTOM_REPO>"
 
 var selectedStyles = lipgloss.NewStyle().
 	Border(lipgloss.NormalBorder(), false, false, false, true).
-	BorderForeground(views.Blue).
+	BorderForeground(views.TempGreen).
 	Bold(true).
 	Padding(0, 0, 0, 1)
 
@@ -39,9 +41,10 @@ func (i item[T]) Uptime() string      { return i.uptime }
 func (i item[T]) Target() string      { return i.target }
 
 type model[T any] struct {
-	list   list.Model
-	choice *T
-	footer string
+	list            list.Model
+	choice          *T
+	footer          string
+	initialWidthSet bool
 }
 
 func (m model[T]) Init() tea.Cmd {
@@ -49,6 +52,13 @@ func (m model[T]) Init() tea.Cmd {
 }
 
 func (m model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	if !m.initialWidthSet {
+		_, _, err := term.GetSize(int(os.Stdout.Fd()))
+		if err != nil {
+			m.list.SetWidth(150)
+		}
+	}
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch keypress := msg.String(); keypress {
@@ -86,7 +96,13 @@ func (m model[T]) View() string {
 
 		m.footer = view_util.GetListFooter(activeProfile.Name)
 	}
-	return view_util.DocStyle.Render(m.list.View() + m.footer)
+
+	terminalWidth, terminalHeight, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		return ""
+	}
+
+	return view_util.DocStyle.Width(terminalWidth - 4).Height(terminalHeight - 4).Render(m.list.View() + m.footer)
 }
 
 type ItemDelegate[T any] struct {
@@ -100,7 +116,8 @@ func (d ItemDelegate[T]) Render(w io.Writer, m list.Model, index int, listItem l
 
 	baseStyles := lipgloss.NewStyle().Padding(0, 0, 0, 2)
 
-	title := baseStyles.Copy().Render(i.Title())
+	// title := baseStyles.Copy().Render(i.Title())
+	title := view_util.GetStyledMainTitle(i.Title())
 	idWithTargetString := fmt.Sprintf("%s (%s)", i.Id(), i.Target())
 	idWithTarget := baseStyles.Copy().Foreground(views.Gray).Render(idWithTargetString)
 	description := baseStyles.Copy().Render(i.Description())
@@ -119,10 +136,10 @@ func (d ItemDelegate[T]) Render(w io.Writer, m list.Model, index int, listItem l
 
 	// Adjust styles as the user moves through the menu
 	if isSelected {
-		title = selectedStyles.Copy().Foreground(views.Blue).Render(i.Title())
+		title = selectedStyles.Copy().Foreground(views.TempGreen).Render(i.Title())
 		idWithTarget = selectedStyles.Copy().Foreground(views.Gray).Render(idWithTargetString)
-		description = selectedStyles.Copy().Foreground(views.DimmedBlue).Render(i.Description())
-		timeString = timeStyles.Copy().Foreground(views.DimmedBlue).Render(timeString)
+		description = selectedStyles.Copy().Foreground(views.TempDimmedGreen).Render(i.Description())
+		timeString = timeStyles.Copy().Foreground(views.TempDimmedGreen).Render(timeString)
 	}
 
 	// Render to the terminal

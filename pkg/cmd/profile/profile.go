@@ -69,7 +69,7 @@ var ProfileCmd = &cobra.Command{
 func init() {
 	ProfileCmd.AddCommand(profileListCmd)
 	ProfileCmd.AddCommand(ProfileUseCmd)
-	ProfileCmd.AddCommand(profileAddCmd)
+	ProfileCmd.AddCommand(ProfileAddCmd)
 	ProfileCmd.AddCommand(profileEditCmd)
 	ProfileCmd.AddCommand(profileDeleteCmd)
 }
