@@ -9,12 +9,10 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
-	"github.com/daytonaio/daytona/pkg/views/util"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	"golang.org/x/term"
 )
 
@@ -104,10 +102,10 @@ func renderProvidersList(providers []serverapiclient.Provider, selectable bool) 
 }
 
 func List(providers []serverapiclient.Provider) {
-	util.RenderMainTitle("PROVIDERS")
+	views.RenderMainTitle("PROVIDERS")
 
 	if len(providers) == 0 {
-		view_util.RenderInfoMessage("No providers found")
+		views.RenderInfoMessage("No providers found")
 		return
 	}
 

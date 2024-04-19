@@ -11,8 +11,8 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/views"
 	containerregistry_view "github.com/daytonaio/daytona/pkg/views/containerregistry"
-	"github.com/daytonaio/daytona/pkg/views/util"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -48,7 +48,7 @@ var containerRegistryDeleteCmd = &cobra.Command{
 			}
 
 			if len(containerRegistries) == 0 {
-				util.RenderInfoMessage("No container registries found")
+				views.RenderInfoMessage("No container registries found")
 				return
 			}
 
@@ -67,6 +67,6 @@ var containerRegistryDeleteCmd = &cobra.Command{
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		util.RenderInfoMessage("Container registry deleted successfully")
+		views.RenderInfoMessage("Container registry deleted successfully")
 	},
 }

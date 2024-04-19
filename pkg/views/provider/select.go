@@ -11,15 +11,14 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
-	"github.com/daytonaio/daytona/pkg/views/util"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
+	"github.com/daytonaio/daytona/pkg/views"
 )
 
 func GetProviderFromPrompt(providers []serverapiclient.Provider, title string) *serverapiclient.Provider {
-	util.RenderMainTitle(title)
+	views.RenderMainTitle(title)
 
 	if len(providers) == 0 {
-		view_util.RenderInfoMessage("No providers found")
+		views.RenderInfoMessage("No providers found")
 		return nil
 	}
 

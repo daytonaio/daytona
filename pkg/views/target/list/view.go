@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
-	"github.com/daytonaio/daytona/pkg/views/util"
+	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -100,7 +100,7 @@ func getRowsAndCols(width int, initialRows []table.Row) ([]table.Row, []table.Co
 }
 
 func ListTargets(targets []serverapiclient.ProviderTarget) {
-	util.RenderMainTitle("TARGETS")
+	views.RenderMainTitle("TARGETS")
 
 	m := renderTargetList(targets)
 

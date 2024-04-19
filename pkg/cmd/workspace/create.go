@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"strings"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -19,8 +18,8 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/target"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	status "github.com/daytonaio/daytona/pkg/views/workspace/status"
 	"github.com/daytonaio/daytona/pkg/workspace"
@@ -64,8 +63,6 @@ var CreateCmd = &cobra.Command{
 		} else {
 			processCmdArguments(cmd, args, apiClient, &workspaceName, &projects, ctx)
 		}
-
-		view_util.RenderMainTitle("WORKSPACE CREATION")
 
 		if workspaceName == "" || len(projects) == 0 {
 			log.Fatal("workspace name and repository urls are required")
@@ -131,7 +128,7 @@ var CreateCmd = &cobra.Command{
 
 		dialStartTime := time.Now()
 		dialTimeout := 3 * time.Minute
-		statusProgram.Send(status.ResultMsg{Line: "Establishing connection with the workspace"})
+		// statusProgram.Send(status.Message{Line: "Establishing connection with the workspace"})
 
 		waitForDial(tsConn, *createdWorkspace.Id, *createdWorkspace.Projects[0].Name, dialStartTime, dialTimeout, statusProgram)
 
@@ -145,22 +142,31 @@ var CreateCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Println()
-		info.Render(wsInfo)
+		chosenIdeId := c.DefaultIdeId
+		if ideFlag != "" {
+			chosenIdeId = ideFlag
+		}
 
-		codeFlag, _ := cmd.Flags().GetBool("code")
+		ideList := config.GetIdeList()
+		var chosenIde config.Ide
+
+		for _, ide := range ideList {
+			if ide.Id == chosenIdeId {
+				chosenIde = ide
+			}
+		}
+
+		fmt.Println()
+		info.Render(wsInfo, chosenIde.Name)
+
 		if !codeFlag {
+			views.RenderCreationInfoMessage("Run 'daytona code' when you're ready to start developing")
 			return
 		}
 
-		ide := c.DefaultIdeId
-		if ideFlag != "" {
-			ide = ideFlag
-		}
+		views.RenderCreationInfoMessage("Opening the workspace in your preferred editor ...")
 
-		view_util.RenderInfoMessage(fmt.Sprintf("Opening the workspace project '%s' in your preferred IDE.", *wsInfo.Projects[0].Name))
-
-		err = openIDE(ide, activeProfile, *createdWorkspace.Id, *wsInfo.Projects[0].Name)
+		err = openIDE(chosenIdeId, activeProfile, *createdWorkspace.Id, *wsInfo.Projects[0].Name)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -169,15 +175,18 @@ var CreateCmd = &cobra.Command{
 
 var providerFlag string
 var targetNameFlag string
+var manualFlag bool
+var multiProjectFlag bool
+var codeFlag bool
 
 func init() {
 	CreateCmd.Flags().StringArrayVarP(&argRepos, "repo", "r", nil, "Set the repository url")
 	CreateCmd.Flags().StringVar(&providerFlag, "provider", "", "Specify the provider (e.g. 'docker-provider')")
 	CreateCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", "Specify the IDE ('vscode' or 'browser')")
 	CreateCmd.Flags().StringVarP(&targetNameFlag, "target", "t", "", "Specify the target (e.g. 'local')")
-	CreateCmd.Flags().Bool("manual", false, "Manually enter the git repositories")
-	CreateCmd.Flags().Bool("multi-project", false, "Workspace with multiple projects/repos")
-	CreateCmd.Flags().BoolP("code", "c", false, "Open the workspace in the IDE after workspace creation")
+	CreateCmd.Flags().BoolVar(&manualFlag, "manual", false, "Manually enter the git repositories")
+	CreateCmd.Flags().BoolVar(&multiProjectFlag, "multi-project", false, "Workspace with multiple projects/repos")
+	CreateCmd.Flags().BoolVarP(&multiProjectFlag, "code", "c", false, "Open the workspace in the IDE after workspace creation")
 }
 
 func getTarget(activeProfileName string) (*serverapiclient.ProviderTarget, error) {
@@ -203,15 +212,6 @@ func getTarget(activeProfileName string) (*serverapiclient.ProviderTarget, error
 }
 
 func processPrompting(cmd *cobra.Command, apiClient *serverapiclient.APIClient, workspaceName *string, projects *[]serverapiclient.CreateWorkspaceRequestProject, ctx context.Context) {
-	manualFlag, err := cmd.Flags().GetBool("manual")
-	if err != nil {
-		log.Fatal(err)
-	}
-	multiProjectFlag, err := cmd.Flags().GetBool("multi-project")
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
 	if err != nil {
 		log.Fatal(apiclient.HandleErrorResponse(res, err))
@@ -220,7 +220,7 @@ func processPrompting(cmd *cobra.Command, apiClient *serverapiclient.APIClient, 
 	var workspaceNames []string
 
 	if argRepos != nil {
-		view_util.RenderInfoMessage("Error: workspace name argument is required for this command")
+		views.RenderInfoMessage("Error: workspace name argument is required for this command")
 		err := cmd.Help()
 		if err != nil {
 			log.Fatal(err)
@@ -260,7 +260,7 @@ func processCmdArguments(cmd *cobra.Command, args []string, apiClient *serverapi
 	if argRepos != nil {
 		repoUrls = argRepos
 	} else {
-		view_util.RenderInfoMessage("Error: --repo flag is required for this command")
+		views.RenderInfoMessage("Error: --repo flag is required for this command")
 		err := cmd.Help()
 		if err != nil {
 			log.Fatal(err)
@@ -305,15 +305,44 @@ func scanWorkspaceLogs(activeProfile config.Profile, workspaceId string, statusP
 			return
 		}
 
-		messages := strings.Split(string(msg), "\r")
-		for _, msg := range messages {
-			statusProgram.Send(status.ResultMsg{Line: msg})
+		delimiter := byte('\r')
+		messages := splitWithDelimiter(string(msg), delimiter)
+
+		for _, message := range messages {
+			line := fmt.Sprintf("%s %s", views.CheckmarkSymbol, message)
+			fmt.Print(line)
 		}
 		if *started {
-			statusProgram.Send(status.ResultMsg{Line: "END_SIGNAL"})
+			fmt.Print("\nWorkspace creation complete.")
+			statusProgram.Send(status.Message{Line: "END_SIGNAL"})
 			break
 		}
+		if len(messages) != 0 {
+			fmt.Print("\n")
+		}
 	}
+}
+
+func splitWithDelimiter(s string, delimiter byte) []string {
+	var parts []string
+	var buffer []byte
+
+	for i := 0; i < len(s); i++ {
+		if s[i] == delimiter {
+			parts = append(parts, string(buffer))
+			buffer = nil
+			parts = append(parts, string(delimiter))
+		} else {
+			buffer = append(buffer, s[i])
+		}
+	}
+
+	// Add the remaining characters in the buffer
+	if len(buffer) > 0 {
+		parts = append(parts, string(buffer))
+	}
+
+	return parts
 }
 
 func waitForDial(tsConn *tsnet.Server, workspaceId string, projectName string, dialStartTime time.Time, dialTimeout time.Duration, statusProgram *tea.Program) {

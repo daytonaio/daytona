@@ -3,107 +3,150 @@
 
 package info
 
-// A simple program that counts down from 5 and then exits.
-
 import (
 	"fmt"
-
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
-	"github.com/daytonaio/daytona/pkg/views"
+	"os"
+	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/lipgloss/table"
+	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/views"
+	"golang.org/x/term"
 )
 
-var colors = views.ColorGrid(5, 5)
+const propertyNameWidth = 16
+const minTUIWidth = 80
+const maxTUIWidth = 140
 
-var workspaceNameStyle = lipgloss.NewStyle().
-	Foreground(views.Green).
-	Bold(true).
-	MarginLeft(2)
+var propertyNameStyle = lipgloss.NewStyle().
+	Foreground(views.LightGray)
 
-var repositoryURLStyle = lipgloss.NewStyle().
-	Bold(true).
-	Foreground(lipgloss.Color("227")).
-	MarginLeft(2)
+var propertyValueStyle = lipgloss.NewStyle().
+	Foreground(views.White).
+	Bold(true)
 
-var repositoryBranchStyle = lipgloss.NewStyle().
-	Foreground(lipgloss.Color("227")).
-	MarginLeft(2)
+func Render(workspace *serverapiclient.WorkspaceDTO, ide string) {
+	var isCreationView bool
+	nameLabel := "Name"
 
-var viewStyle = lipgloss.NewStyle().
-	MarginTop(1).
-	MarginBottom(0).
-	PaddingLeft(2).
-	PaddingRight(2)
-
-var projectNameStyle = lipgloss.NewStyle().
-	Bold(true).
-	Foreground(views.Blue).
-	PaddingLeft(2)
-
-var projectStatusStyle = lipgloss.NewStyle().
-	Foreground(lipgloss.Color(colors[0][4])).
-	PaddingLeft(2)
-
-func projectRender(projectInfo *serverapiclient.ProjectInfo, project *serverapiclient.Project) string {
-	projectState := ""
-	extensions := [][]string{}
-	extensionsTable := ""
-	repoBranch := ""
-
-	if !*projectInfo.IsRunning && *projectInfo.Created == "" {
-		projectState = projectStatusStyle.Foreground(lipgloss.Color(colors[0][4])).Render("Unavailable")
-	} else if !*projectInfo.IsRunning {
-		projectState = projectStatusStyle.Render("Stopped")
-	} else {
-		projectState = projectStatusStyle.Foreground(lipgloss.Color(colors[4][4])).Render("Running")
-
-		extensionsTable = table.New().
-			Border(lipgloss.HiddenBorder()).
-			Rows(extensions...).Render()
+	if ide != "" {
+		isCreationView = true
 	}
 
-	if project.Repository.Branch == nil {
-		repoBranch = ""
+	output := ""
+
+	if !isCreationView {
+		output += views.GetStyledMainTitle("Workspace info") + "\n"
 	} else {
-		repoBranch = "Branch" + repositoryBranchStyle.Render(*project.Repository.Branch)
+		nameLabel = "Workspace"
 	}
 
-	repoView := "Url" + (repositoryURLStyle.Render(*project.Repository.Url)) + "\n" + repoBranch
-	repoView = "Repository" + viewStyle.Render(repoView)
+	output += "\n"
 
-	projectView := "Project" + projectNameStyle.Render(*projectInfo.Name) + "\n" + "State  " + projectState + extensionsTable
+	output += getInfoLine(nameLabel, *workspace.Info.Name) + "\n"
 
-	return viewStyle.Render(projectView) + viewStyle.Render(repoView)
-}
+	if isCreationView {
+		output += getInfoLine("Editor", ide) + "\n"
+	} else {
+		output += getInfoLine("ID", *workspace.Id) + "\n"
+	}
 
-func Render(workspace *serverapiclient.WorkspaceDTO) {
-	if workspace == nil {
+	if len(workspace.Projects) == 1 {
+		output += renderSingleProject(&workspace.Projects[0], isCreationView)
+	} else {
+		output += renderProjects(workspace.Projects, workspace.Info.Projects, isCreationView)
+	}
+
+	var width int
+	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil || terminalWidth < minTUIWidth {
+		fmt.Println(output)
 		return
 	}
+	width = terminalWidth - 20
+	if width > maxTUIWidth {
+		width = maxTUIWidth
+	}
+	renderTUIView(output, width, isCreationView)
+}
 
-	var output string
-	output = "\n"
-	output += "Workspace" + workspaceNameStyle.Render(*workspace.Info.Name) + "\n"
-	output += "ID" + workspaceNameStyle.Render(*workspace.Id) + "\n"
-	output += "Target" + workspaceNameStyle.Render(*workspace.Target) + "\n"
+func renderTUIView(output string, terminalWidth int, isCreationView bool) {
+	output = lipgloss.NewStyle().PaddingLeft(3).Render(output)
 
-	if len(workspace.Projects) > 1 {
-		output += "\n" + "Projects"
+	content := lipgloss.
+		NewStyle().
+		BorderForeground(views.LightGray).
+		Border(lipgloss.RoundedBorder()).Width(terminalWidth).
+		Render(output)
+
+	if !isCreationView {
+		content = lipgloss.NewStyle().Margin(1, 0).Render(content)
 	}
 
-	for _, project := range workspace.Projects {
-		for _, projectInfo := range workspace.Info.Projects {
+	fmt.Println(content)
+}
+
+func renderSingleProject(project *serverapiclient.Project, isCreationView bool) string {
+	var output string
+
+	repositoryUrl := *project.Repository.Url
+	repositoryUrl = strings.TrimPrefix(repositoryUrl, "https://")
+	repositoryUrl = strings.TrimPrefix(repositoryUrl, "http://")
+
+	output += getInfoLineState("State", project.State) + "\n"
+	if project.Target != nil && !isCreationView {
+		output += getInfoLine("Target", *project.Target) + "\n"
+	}
+	output += getInfoLine("Repository", repositoryUrl) + "\n"
+
+	if project.Name != nil && !isCreationView {
+		output += getInfoLine("Project", *project.Name)
+	}
+
+	return output
+}
+
+func renderProjects(projects []serverapiclient.Project, projectInfos []serverapiclient.ProjectInfo, isCreationView bool) string {
+	var output string
+	for i, project := range projects {
+		for _, projectInfo := range projectInfos {
 			if *projectInfo.Name == *project.Name {
-				output += projectRender(&projectInfo, &project)
+				output += getInfoLine(fmt.Sprintf("Project #%d", i+1), *project.Name)
+				output += getInfoLineState("State", project.State)
+				if project.Target != nil && !isCreationView {
+					output += getInfoLine("Target", *project.Target)
+				}
+				if project.Repository != nil {
+					output += getInfoLine("Repository", *project.Repository.Url)
+				}
 				break
 			}
 		}
+		if project.Name != projects[len(projects)-1].Name {
+			output += "\n"
+		}
+	}
+	return output
+}
+
+func getInfoLine(key, value string) string {
+	return propertyNameStyle.Render(fmt.Sprintf("%-*s", propertyNameWidth, key)) + propertyValueStyle.Render(value) + "\n"
+}
+
+func getInfoLineState(key string, state *serverapiclient.ProjectState) string {
+	var uptime int
+	var stateProperty string
+
+	if state == nil || state.Uptime == nil {
+		uptime = 0
+	} else {
+		uptime = int(*state.Uptime)
 	}
 
-	output = lipgloss.NewStyle().PaddingLeft(3).Render(output)
-
-	println(output)
-	fmt.Println()
+	if uptime == 0 {
+		stateProperty = propertyValueStyle.Foreground(views.Gray).Render("STOPPED")
+	} else {
+		stateProperty = propertyValueStyle.Foreground(views.Green).Render("RUNNING")
+	}
+	return propertyNameStyle.Render(fmt.Sprintf("%-*s", propertyNameWidth, key)) + stateProperty + propertyValueStyle.Foreground(views.White).Render("\n")
 }

@@ -63,7 +63,7 @@ func selectWorkspacePrompt(workspaces []serverapiclient.WorkspaceDTO, actionVerb
 
 	m := model[serverapiclient.WorkspaceDTO]{list: l}
 
-	m.list.Title = "SELECT A WORKSPACE TO " + strings.ToUpper(actionVerb)
+	m.list.Title = views.GetStyledMainTitle("Select a workspace to " + actionVerb)
 	m.list.Styles.Title = lipgloss.NewStyle().Foreground(views.Green).Bold(true)
 
 	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()

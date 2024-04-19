@@ -11,13 +11,16 @@ import (
 )
 
 var (
-	Green       = lipgloss.AdaptiveColor{Light: "#23cc71", Dark: "#23cc71"}
-	DimmedGreen = lipgloss.AdaptiveColor{Light: "#7be0a9", Dark: "#7be0a9"}
-	Blue        = lipgloss.AdaptiveColor{Light: "#017ffe", Dark: "#017ffe"}
-	Red         = lipgloss.AdaptiveColor{Light: "#ff4567", Dark: "#ff4567"}
-	DimmedBlue  = lipgloss.AdaptiveColor{Light: "#3398fe", Dark: "#3398fe"}
-	White       = lipgloss.AdaptiveColor{Light: "000", Dark: "fff"}
-	Gray        = lipgloss.AdaptiveColor{Light: "243", Dark: "243"}
+	Green           = lipgloss.AdaptiveColor{Light: "#23cc71", Dark: "#23cc71"}
+	TempGreen       = lipgloss.AdaptiveColor{Light: "#23cc71", Dark: "#23cc71"}
+	DimmedGreen     = lipgloss.AdaptiveColor{Light: "#50d98f", Dark: "#50d98f"}
+	TempDimmedGreen = lipgloss.AdaptiveColor{Light: "#7be0a9", Dark: "#7be0a9"}
+	Red             = lipgloss.AdaptiveColor{Light: "#ff4567", Dark: "#ff4567"}
+	Orange          = lipgloss.AdaptiveColor{Light: "#eb9834", Dark: "#eb9834"}
+	White           = lipgloss.AdaptiveColor{Light: "fff", Dark: "fff"}
+	Black           = lipgloss.AdaptiveColor{Light: "000", Dark: "000"}
+	Gray            = lipgloss.AdaptiveColor{Light: "243", Dark: "243"}
+	LightGray       = lipgloss.AdaptiveColor{Light: "#828282", Dark: "#828282"}
 )
 
 func ColorGrid(xSteps, ySteps int) [][]string {
@@ -54,31 +57,63 @@ func GetStyledSelectList(items []list.Item) list.Model {
 
 	d.Styles.SelectedTitle = lipgloss.NewStyle().
 		Border(lipgloss.NormalBorder(), false, false, false, true).
-		BorderForeground(Blue).
-		Foreground(Blue).
+		BorderForeground(Green).
+		Foreground(Green).
 		Bold(true).
 		Padding(0, 0, 0, 1)
 
-	d.Styles.SelectedDesc = d.Styles.SelectedTitle.Copy().Foreground(DimmedBlue)
+	d.Styles.SelectedDesc = d.Styles.SelectedTitle.Copy().Foreground(DimmedGreen).Bold(false)
 
 	l := list.New(items, d, 0, 0)
 
 	l.Styles.FilterPrompt = lipgloss.NewStyle().Foreground(Green)
-	l.Styles.FilterCursor = lipgloss.NewStyle().Foreground(Green)
-	l.Styles.Title = lipgloss.NewStyle().Foreground(Green).Bold(true)
+	l.Styles.FilterCursor = lipgloss.NewStyle().Foreground(Green).Background(Green)
+	l.Styles.Title = lipgloss.NewStyle().Foreground(Black).Bold(true).
+		Background(lipgloss.Color("#fff")).Padding(0)
 
 	l.FilterInput.PromptStyle = lipgloss.NewStyle().Foreground(Green)
 	l.FilterInput.TextStyle = lipgloss.NewStyle().Foreground(Green)
+
+	l.SetStatusBarItemName("item\n\n"+lipgloss.NewStyle().Foreground(LightGray).Render("==="), "items\n\n"+lipgloss.NewStyle().Foreground(LightGray).Render("==="))
 
 	return l
 }
 
 func GetCustomTheme() *huh.Theme {
+	newTheme := huh.ThemeCharm()
+
+	newTheme.Blurred.Title = newTheme.Focused.Title
+
+	b := &newTheme.Blurred
+	b.FocusedButton.Background(Green)
+	b.FocusedButton.Bold(true)
+	b.TextInput.Prompt.Foreground(White)
+	b.TextInput.Cursor.Foreground(White)
+	b.SelectSelector.Foreground(Green)
+
+	f := &newTheme.Focused
+	f.Base = f.Base.BorderForeground(lipgloss.Color("fff"))
+	f.Title.Foreground(Green).Bold(true)
+	f.FocusedButton.Bold(true)
+	f.FocusedButton.Background(Green)
+	f.TextInput.Prompt.Foreground(White)
+	f.TextInput.Cursor.Foreground(White)
+	f.SelectSelector.Foreground(Green)
+	f.SelectedOption.Foreground(Green)
+
+	f.Base.MarginTop(DefaultLayoutMarginTop)
+	b.Base.MarginTop(DefaultLayoutMarginTop)
+
+	return newTheme
+}
+
+func GetInitialCommandTheme() *huh.Theme {
 
 	newTheme := huh.ThemeCharm()
 
 	newTheme.Blurred.Title = newTheme.Focused.Title
 
+	// newTheme.Focused.SelectSelector = lipgloss.NewStyle().Foreground(Green)
 	b := &newTheme.Blurred
 	b.FocusedButton.Background(Green)
 	b.FocusedButton.Bold(true)
@@ -88,12 +123,18 @@ func GetCustomTheme() *huh.Theme {
 
 	f := &newTheme.Focused
 	f.Base = f.Base.BorderForeground(lipgloss.Color("fff"))
-	f.Title.Foreground(Blue).Bold(true)
+	f.Title.Foreground(Green).Bold(true)
 	f.FocusedButton.Bold(true)
 	f.FocusedButton.Background(Green)
 	f.TextInput.Prompt.Foreground(Green)
 	f.TextInput.Cursor.Foreground(White)
 	f.SelectSelector.Foreground(Green)
+
+	f.Base.UnsetMarginLeft()
+	f.Base.UnsetPaddingLeft()
+	f.Base.BorderLeft(false)
+
+	f.SelectedOption = lipgloss.NewStyle().Foreground(Green)
 
 	return newTheme
 }
