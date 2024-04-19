@@ -6,6 +6,7 @@ package containerregistry
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
@@ -26,9 +27,15 @@ func RemoveContainerRegistry(ctx *gin.Context) {
 	crServer := ctx.Param("server")
 	crUsername := ctx.Param("username")
 
+	decodedServerURL, err := url.QueryUnescape(crServer)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode server URL: %s", err.Error()))
+		return
+	}
+
 	server := server.GetInstance(nil)
 
-	err := server.ContainerRegistryService.Delete(crServer, crUsername)
+	err = server.ContainerRegistryService.Delete(decodedServerURL, crUsername)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to remove container registry: %s", err.Error()))
 		return

@@ -124,9 +124,9 @@ func (a *ApiServer) Start() error {
 	containerRegistryController := protected.Group("/container-registry")
 	{
 		containerRegistryController.GET("/", containerregistry.ListContainerRegistries)
-		containerRegistryController.GET("/:id", containerregistry.GetContainerRegistry)
-		containerRegistryController.PUT("/", containerregistry.SetContainerRegistry)
-		containerRegistryController.DELETE("/:id", containerregistry.RemoveContainerRegistry)
+		containerRegistryController.GET("/:server/:username", containerregistry.GetContainerRegistry)
+		containerRegistryController.PUT("/:server/:username", containerregistry.SetContainerRegistry)
+		containerRegistryController.DELETE("/:server/:username", containerregistry.RemoveContainerRegistry)
 	}
 
 	targetController := protected.Group("/target")

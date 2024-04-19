@@ -19,7 +19,6 @@ var _ MappedNullable = &ContainerRegistry{}
 
 // ContainerRegistry struct for ContainerRegistry
 type ContainerRegistry struct {
-	Id       *string `json:"id,omitempty"`
 	Password *string `json:"password,omitempty"`
 	Server   *string `json:"server,omitempty"`
 	Username *string `json:"username,omitempty"`
@@ -40,38 +39,6 @@ func NewContainerRegistry() *ContainerRegistry {
 func NewContainerRegistryWithDefaults() *ContainerRegistry {
 	this := ContainerRegistry{}
 	return &this
-}
-
-// GetId returns the Id field value if set, zero value otherwise.
-func (o *ContainerRegistry) GetId() string {
-	if o == nil || IsNil(o.Id) {
-		var ret string
-		return ret
-	}
-	return *o.Id
-}
-
-// GetIdOk returns a tuple with the Id field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *ContainerRegistry) GetIdOk() (*string, bool) {
-	if o == nil || IsNil(o.Id) {
-		return nil, false
-	}
-	return o.Id, true
-}
-
-// HasId returns a boolean if a field has been set.
-func (o *ContainerRegistry) HasId() bool {
-	if o != nil && !IsNil(o.Id) {
-		return true
-	}
-
-	return false
-}
-
-// SetId gets a reference to the given string and assigns it to the Id field.
-func (o *ContainerRegistry) SetId(v string) {
-	o.Id = &v
 }
 
 // GetPassword returns the Password field value if set, zero value otherwise.
@@ -180,9 +147,6 @@ func (o ContainerRegistry) MarshalJSON() ([]byte, error) {
 
 func (o ContainerRegistry) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Id) {
-		toSerialize["id"] = o.Id
-	}
 	if !IsNil(o.Password) {
 		toSerialize["password"] = o.Password
 	}

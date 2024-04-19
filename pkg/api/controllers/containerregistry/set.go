@@ -6,6 +6,7 @@ package containerregistry
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/server"
@@ -17,14 +18,25 @@ import (
 //	@Tags			container-registry
 //	@Summary		Set container registry credentials
 //	@Description	Set container registry credentials
+//	@Param			server				path	string				true	"Container Registry server name"
+//	@Param			username			path	string				true	"Container Registry username"
 //	@Param			containerRegistry	body	ContainerRegistry	true	"Container Registry credentials to set"
 //	@Success		201
-//	@Router			/container-registry [put]
+//	@Router			/container-registry/{server}/{username} [put]
 //
 //	@id				SetContainerRegistry
 func SetContainerRegistry(ctx *gin.Context) {
+	crServer := ctx.Param("server")
+	crUsername := ctx.Param("username")
+
+	decodedServerURL, err := url.QueryUnescape(crServer)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode server URL: %s", err.Error()))
+		return
+	}
+
 	var req containerregistry.ContainerRegistry
-	err := ctx.BindJSON(&req)
+	err = ctx.BindJSON(&req)
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %s", err.Error()))
 		return
@@ -32,8 +44,14 @@ func SetContainerRegistry(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	cr, err := server.ContainerRegistryService.Find(req.Server, req.Username)
+	cr, err := server.ContainerRegistryService.Find(decodedServerURL, crUsername)
 	if err == nil {
+		err = server.ContainerRegistryService.Delete(decodedServerURL, crUsername)
+		if err != nil {
+			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to remove container registry: %s", err.Error()))
+			return
+		}
+
 		cr.Server = req.Server
 		cr.Username = req.Username
 		cr.Password = req.Password

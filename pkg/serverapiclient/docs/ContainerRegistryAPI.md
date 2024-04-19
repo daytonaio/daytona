@@ -4,16 +4,16 @@ All URIs are relative to *http://localhost:3000*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**GetContainerRegistry**](ContainerRegistryAPI.md#GetContainerRegistry) | **Get** /container-registry/{id} | Get container registry credentials
+[**GetContainerRegistry**](ContainerRegistryAPI.md#GetContainerRegistry) | **Get** /container-registry/{server}/{username} | Get container registry credentials
 [**ListContainerRegistries**](ContainerRegistryAPI.md#ListContainerRegistries) | **Get** /container-registry | List container registries
-[**RemoveContainerRegistry**](ContainerRegistryAPI.md#RemoveContainerRegistry) | **Delete** /container-registry/{id} | Remove a container registry credentials
-[**SetContainerRegistry**](ContainerRegistryAPI.md#SetContainerRegistry) | **Put** /container-registry | Set container registry credentials
+[**RemoveContainerRegistry**](ContainerRegistryAPI.md#RemoveContainerRegistry) | **Delete** /container-registry/{server}/{username} | Remove a container registry credentials
+[**SetContainerRegistry**](ContainerRegistryAPI.md#SetContainerRegistry) | **Put** /container-registry/{server}/{username} | Set container registry credentials
 
 
 
 ## GetContainerRegistry
 
-> ContainerRegistry GetContainerRegistry(ctx, id).Execute()
+> ContainerRegistry GetContainerRegistry(ctx, server, username).Execute()
 
 Get container registry credentials
 
@@ -32,11 +32,12 @@ import (
 )
 
 func main() {
-	id := "id_example" // string | Container Registry Id
+	server := "server_example" // string | Container Registry server name
+	username := "username_example" // string | Container Registry username
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.ContainerRegistryAPI.GetContainerRegistry(context.Background(), id).Execute()
+	resp, r, err := apiClient.ContainerRegistryAPI.GetContainerRegistry(context.Background(), server, username).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `ContainerRegistryAPI.GetContainerRegistry``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -52,7 +53,8 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**id** | **string** | Container Registry Id | 
+**server** | **string** | Container Registry server name | 
+**username** | **string** | Container Registry username | 
 
 ### Other Parameters
 
@@ -61,6 +63,7 @@ Other parameters are passed through a pointer to a apiGetContainerRegistryReques
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+
 
 
 ### Return type
@@ -144,7 +147,7 @@ Other parameters are passed through a pointer to a apiListContainerRegistriesReq
 
 ## RemoveContainerRegistry
 
-> RemoveContainerRegistry(ctx, id).Execute()
+> RemoveContainerRegistry(ctx, server, username).Execute()
 
 Remove a container registry credentials
 
@@ -163,11 +166,12 @@ import (
 )
 
 func main() {
-	id := "id_example" // string | Container Registry Id
+	server := "server_example" // string | Container Registry server name
+	username := "username_example" // string | Container Registry username
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.ContainerRegistryAPI.RemoveContainerRegistry(context.Background(), id).Execute()
+	r, err := apiClient.ContainerRegistryAPI.RemoveContainerRegistry(context.Background(), server, username).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `ContainerRegistryAPI.RemoveContainerRegistry``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -181,7 +185,8 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**id** | **string** | Container Registry Id | 
+**server** | **string** | Container Registry server name | 
+**username** | **string** | Container Registry username | 
 
 ### Other Parameters
 
@@ -190,6 +195,7 @@ Other parameters are passed through a pointer to a apiRemoveContainerRegistryReq
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+
 
 
 ### Return type
@@ -212,7 +218,7 @@ Name | Type | Description  | Notes
 
 ## SetContainerRegistry
 
-> SetContainerRegistry(ctx).ContainerRegistry(containerRegistry).Execute()
+> SetContainerRegistry(ctx, server, username).ContainerRegistry(containerRegistry).Execute()
 
 Set container registry credentials
 
@@ -231,11 +237,13 @@ import (
 )
 
 func main() {
+	server := "server_example" // string | Container Registry server name
+	username := "username_example" // string | Container Registry username
 	containerRegistry := *openapiclient.NewContainerRegistry() // ContainerRegistry | Container Registry credentials to set
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.ContainerRegistryAPI.SetContainerRegistry(context.Background()).ContainerRegistry(containerRegistry).Execute()
+	r, err := apiClient.ContainerRegistryAPI.SetContainerRegistry(context.Background(), server, username).ContainerRegistry(containerRegistry).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `ContainerRegistryAPI.SetContainerRegistry``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -246,6 +254,11 @@ func main() {
 ### Path Parameters
 
 
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**server** | **string** | Container Registry server name | 
+**username** | **string** | Container Registry username | 
 
 ### Other Parameters
 
@@ -254,6 +267,8 @@ Other parameters are passed through a pointer to a apiSetContainerRegistryReques
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+
+
  **containerRegistry** | [**ContainerRegistry**](ContainerRegistry.md) | Container Registry credentials to set | 
 
 ### Return type

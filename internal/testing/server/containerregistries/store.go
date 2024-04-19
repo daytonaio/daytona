@@ -23,9 +23,9 @@ func NewInMemoryContainerRegistryStore() containerregistry.Store {
 
 func (s *InMemoryContainerRegistryStore) List() ([]*containerregistry.ContainerRegistry, error) {
 	crs := []*containerregistry.ContainerRegistry{}
-	//	itterate server key
+	// iterate server key
 	for _, s := range s.crs {
-		//	itterate username key
+		// iterate username key
 		for _, u := range s {
 			crs = append(crs, u)
 		}

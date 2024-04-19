@@ -79,9 +79,72 @@ paths:
       summary: List container registries
       tags:
       - container-registry
+  /container-registry/{server}/{username}:
+    delete:
+      description: Remove a container registry credentials
+      operationId: RemoveContainerRegistry
+      parameters:
+      - description: Container Registry server name
+        in: path
+        name: server
+        required: true
+        schema:
+          type: string
+      - description: Container Registry username
+        in: path
+        name: username
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          content: {}
+          description: No Content
+      summary: Remove a container registry credentials
+      tags:
+      - container-registry
+    get:
+      description: Get container registry credentials
+      operationId: GetContainerRegistry
+      parameters:
+      - description: Container Registry server name
+        in: path
+        name: server
+        required: true
+        schema:
+          type: string
+      - description: Container Registry username
+        in: path
+        name: username
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContainerRegistry'
+          description: OK
+      summary: Get container registry credentials
+      tags:
+      - container-registry
     put:
       description: Set container registry credentials
       operationId: SetContainerRegistry
+      parameters:
+      - description: Container Registry server name
+        in: path
+        name: server
+        required: true
+        schema:
+          type: string
+      - description: Container Registry username
+        in: path
+        name: username
+        required: true
+        schema:
+          type: string
       requestBody:
         content:
           '*/*':
@@ -97,44 +160,6 @@ paths:
       tags:
       - container-registry
       x-codegen-request-body-name: containerRegistry
-  /container-registry/{id}:
-    delete:
-      description: Remove a container registry credentials
-      operationId: RemoveContainerRegistry
-      parameters:
-      - description: Container Registry Id
-        in: path
-        name: id
-        required: true
-        schema:
-          type: string
-      responses:
-        "204":
-          content: {}
-          description: No Content
-      summary: Remove a container registry credentials
-      tags:
-      - container-registry
-    get:
-      description: Get container registry credentials
-      operationId: GetContainerRegistry
-      parameters:
-      - description: Container Registry Id
-        in: path
-        name: id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ContainerRegistry'
-          description: OK
-      summary: Get container registry credentials
-      tags:
-      - container-registry
   /gitprovider:
     get:
       description: List Git providers
@@ -764,11 +789,8 @@ components:
       example:
         server: server
         password: password
-        id: id
         username: username
       properties:
-        id:
-          type: string
         password:
           type: string
         server:
