@@ -4,8 +4,7 @@
 package server
 
 import (
-	"fmt"
-
+	view "github.com/daytonaio/daytona/pkg/views/server"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -26,6 +25,6 @@ var configCmd = &cobra.Command{
 		apiUrl := util.GetFrpcApiUrl(config.Frps.Protocol, config.Id, config.Frps.Domain)
 		output.Output = apiUrl
 
-		fmt.Println(apiUrl)
+		view.RenderConfig(config)
 	},
 }

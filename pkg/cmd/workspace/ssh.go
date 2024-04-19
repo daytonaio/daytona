@@ -46,7 +46,7 @@ var SshCmd = &cobra.Command{
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 
-			workspace := selection.GetWorkspaceFromPrompt(workspaceList, "ssh into")
+			workspace := selection.GetWorkspaceFromPrompt(workspaceList, "SSH Into")
 			if workspace == nil {
 				return
 			}

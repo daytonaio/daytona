@@ -13,7 +13,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/ide"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
+	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
 	log "github.com/sirupsen/logrus"
@@ -54,7 +54,7 @@ var CodeCmd = &cobra.Command{
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 
-			workspace := selection.GetWorkspaceFromPrompt(workspaceList, "open")
+			workspace := selection.GetWorkspaceFromPrompt(workspaceList, "Open")
 			if workspace == nil {
 				return
 			}
@@ -86,7 +86,7 @@ var CodeCmd = &cobra.Command{
 			ideId = ideFlag
 		}
 
-		view_util.RenderInfoMessage(fmt.Sprintf("Opening the workspace project '%s' in your preferred IDE.", projectName))
+		views.RenderInfoMessage(fmt.Sprintf("Opening the workspace project '%s' in your preferred IDE.", projectName))
 
 		err = openIDE(ideId, activeProfile, workspaceId, projectName)
 		if err != nil {

@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var profileAddCmd = &cobra.Command{
+var ProfileAddCmd = &cobra.Command{
 	Use:     "add",
 	Short:   "Add profile",
 	Args:    cobra.NoArgs,
@@ -97,7 +97,7 @@ var apiUrlFlag string
 var apiKeyFlag string
 
 func init() {
-	profileAddCmd.Flags().StringVarP(&profileNameFlag, "name", "n", "", "Profile name")
-	profileAddCmd.Flags().StringVarP(&apiUrlFlag, "api-url", "a", "", "API URL")
-	profileAddCmd.Flags().StringVarP(&apiKeyFlag, "api-key", "k", "", "API Key")
+	ProfileAddCmd.Flags().StringVarP(&profileNameFlag, "name", "n", "", "Profile name")
+	ProfileAddCmd.Flags().StringVarP(&apiUrlFlag, "api-url", "a", "", "API URL")
+	ProfileAddCmd.Flags().StringVarP(&apiKeyFlag, "api-key", "k", "", "API Key")
 }

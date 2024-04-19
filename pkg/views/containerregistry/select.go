@@ -5,15 +5,12 @@ package containerregistry
 
 import (
 	"errors"
-	"fmt"
-	"os"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
 )
 
 const NewRegistryServerIdentifier = "+ New Container Registry"
@@ -39,13 +36,12 @@ func GetRegistryFromPrompt(registries []serverapiclient.ContainerRegistry, activ
 
 	l := views.GetStyledSelectList(items)
 	m := model{list: l}
-	m.list.Title = "CHOOSE A REGISTRY"
-	m.footer = view_util.GetListFooter(activeProfileName)
+	m.list.Title = "Choose a container registry"
+	m.footer = views.GetListFooter(activeProfileName)
 
 	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
 	if err != nil {
-		fmt.Println("Error running program:", err)
-		os.Exit(1)
+		return nil, err
 	}
 
 	if m, ok := p.(model); ok && m.choice != nil {

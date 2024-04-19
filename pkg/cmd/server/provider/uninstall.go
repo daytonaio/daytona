@@ -9,8 +9,8 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/provider"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 
 	log "github.com/sirupsen/logrus"
@@ -27,7 +27,10 @@ var providerUninstallCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		providerToUninstall := provider.GetProviderFromPrompt(providerList, "CHOOSE A PROVIDER TO UNINSTALL")
+		providerToUninstall, err := provider.GetProviderFromPrompt(providerList, "Choose a provider to uninstall", false)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		if providerToUninstall == nil {
 			return
@@ -45,6 +48,6 @@ var providerUninstallCmd = &cobra.Command{
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		view_util.RenderInfoMessageBold(fmt.Sprintf("Provider %s has been successfully uninstalled", *providerToUninstall.Name))
+		views.RenderInfoMessageBold(fmt.Sprintf("Provider %s has been successfully uninstalled", *providerToUninstall.Name))
 	},
 }

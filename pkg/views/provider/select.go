@@ -4,35 +4,46 @@
 package provider
 
 import (
-	"fmt"
-	"os"
-	"strings"
+	"errors"
 
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
-	"github.com/daytonaio/daytona/pkg/views/util"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
+	"github.com/daytonaio/daytona/pkg/views"
 )
 
-func GetProviderFromPrompt(providers []serverapiclient.Provider, title string) *serverapiclient.Provider {
-	util.RenderMainTitle(title)
+var NewProviderId = "+ New Provider"
 
-	if len(providers) == 0 {
-		view_util.RenderInfoMessage("No providers found")
-		return nil
+func GetProviderFromPrompt(providers []serverapiclient.Provider, title string, withNewProvider bool) (*serverapiclient.Provider, error) {
+	var items []list.Item
+
+	for _, p := range providers {
+		items = append(items, item{
+			provider: p,
+		})
 	}
 
-	modelInstance := renderProvidersList(providers, true)
+	if withNewProvider {
+		name := NewProviderId
+		items = append(items, item{
+			provider: serverapiclient.Provider{
+				Name: &name,
+			},
+		})
+	}
 
-	m, err := tea.NewProgram(modelInstance).Run()
+	l := views.GetStyledSelectList(items)
+	m := model{list: l}
+	m.list.Title = views.GetStyledMainTitle(title)
+
+	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
 	if err != nil {
-		fmt.Println("Error running program:", err)
-		os.Exit(1)
+		return nil, err
 	}
-	selectedProvider := m.(model).selectedProvider
 
-	lipgloss.DefaultRenderer().Output().ClearLines(strings.Count(modelInstance.View(), "\n") + 2)
+	if m, ok := p.(model); ok && m.choice != nil {
+		return m.choice, nil
+	}
 
-	return selectedProvider
+	return nil, errors.New("no provider selected")
 }

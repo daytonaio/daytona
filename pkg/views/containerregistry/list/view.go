@@ -111,15 +111,15 @@ func adjustColumnWidth(title string, rowData rowData) {
 	}
 }
 
-func ListRegistries(registryList []serverapiclient.ContainerRegistry) {
+func ListRegistries(registryList []serverapiclient.ContainerRegistry) error {
 	modelInstance := renderRegistryList(registryList)
 
 	_, err := tea.NewProgram(modelInstance).Run()
 	if err != nil {
-		fmt.Println("Error running program:", err)
-		os.Exit(1)
+		return err
 	}
 	fmt.Println()
+	return nil
 }
 
 func getTable(rows []table.Row, cols []table.Column, activeRow int) table.Model {

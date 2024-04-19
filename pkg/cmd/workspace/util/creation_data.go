@@ -104,7 +104,10 @@ func GetCreationDataFromPrompt(apiServerConfig *serverapiclient.ServerConfig, wo
 	}
 
 	if multiProject {
-		create.DisplayMultiSubmitForm(workspaceName, &projectList, apiServerConfig, &doneCheck)
+		err = create.DisplayMultiSubmitForm(workspaceName, &projectList, apiServerConfig, &doneCheck)
+		if err != nil {
+			return "", nil, err
+		}
 		if !doneCheck {
 			return "", nil, errors.New("operation cancelled")
 		}

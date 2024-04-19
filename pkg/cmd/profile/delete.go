@@ -23,12 +23,15 @@ var profileDeleteCmd = &cobra.Command{
 		}
 
 		var chosenProfileId string
-		var chosenProfile config.Profile
+		var chosenProfile *config.Profile
 
 		if len(args) == 0 {
 			profilesList := c.Profiles
 
-			chosenProfileId = profile.GetProfileIdFromPrompt(profilesList, c.ActiveProfileId, "Choose a profile to delete", false)
+			chosenProfile, err = profile.GetProfileFromPrompt(profilesList, c.ActiveProfileId, false)
+			if err != nil {
+				log.Fatal(err)
+			}
 
 			if chosenProfileId == "" {
 				return
@@ -43,12 +46,12 @@ var profileDeleteCmd = &cobra.Command{
 
 		for _, profile := range c.Profiles {
 			if profile.Id == chosenProfileId || profile.Name == chosenProfileId {
-				chosenProfile = profile
+				chosenProfile = &profile
 				break
 			}
 		}
 
-		if chosenProfile == (config.Profile{}) {
+		if chosenProfile == nil {
 			log.Fatal("Profile does not exist")
 			return
 		}

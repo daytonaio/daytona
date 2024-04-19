@@ -8,8 +8,8 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/views"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
-	"github.com/daytonaio/daytona/pkg/views/util"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -43,6 +43,6 @@ var gitProviderAddCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		util.RenderInfoMessage("Git provider has been registered")
+		views.RenderInfoMessage("Git provider has been registered")
 	},
 }
