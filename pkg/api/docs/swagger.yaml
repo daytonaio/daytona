@@ -12,8 +12,6 @@ definitions:
     type: object
   ContainerRegistry:
     properties:
-      id:
-        type: string
       password:
         type: string
       server:
@@ -395,30 +393,19 @@ paths:
       summary: List container registries
       tags:
       - container-registry
-    put:
-      description: Set container registry credentials
-      operationId: SetContainerRegistry
-      parameters:
-      - description: Container Registry credentials to set
-        in: body
-        name: containerRegistry
-        required: true
-        schema:
-          $ref: '#/definitions/ContainerRegistry'
-      responses:
-        "201":
-          description: Created
-      summary: Set container registry credentials
-      tags:
-      - container-registry
-  /container-registry/{id}:
+  /container-registry/{server}/{username}:
     delete:
       description: Remove a container registry credentials
       operationId: RemoveContainerRegistry
       parameters:
-      - description: Container Registry Id
+      - description: Container Registry server name
         in: path
-        name: id
+        name: server
+        required: true
+        type: string
+      - description: Container Registry username
+        in: path
+        name: username
         required: true
         type: string
       responses:
@@ -431,9 +418,14 @@ paths:
       description: Get container registry credentials
       operationId: GetContainerRegistry
       parameters:
-      - description: Container Registry Id
+      - description: Container Registry server name
         in: path
-        name: id
+        name: server
+        required: true
+        type: string
+      - description: Container Registry username
+        in: path
+        name: username
         required: true
         type: string
       produces:
@@ -444,6 +436,32 @@ paths:
           schema:
             $ref: '#/definitions/ContainerRegistry'
       summary: Get container registry credentials
+      tags:
+      - container-registry
+    put:
+      description: Set container registry credentials
+      operationId: SetContainerRegistry
+      parameters:
+      - description: Container Registry server name
+        in: path
+        name: server
+        required: true
+        type: string
+      - description: Container Registry username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: Container Registry credentials to set
+        in: body
+        name: containerRegistry
+        required: true
+        schema:
+          $ref: '#/definitions/ContainerRegistry'
+      responses:
+        "201":
+          description: Created
+      summary: Set container registry credentials
       tags:
       - container-registry
   /gitprovider:

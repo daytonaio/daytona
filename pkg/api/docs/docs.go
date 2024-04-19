@@ -113,6 +113,43 @@ const docTemplate = `{
                         }
                     }
                 }
+            }
+        },
+        "/container-registry/{server}/{username}": {
+            "get": {
+                "description": "Get container registry credentials",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container-registry"
+                ],
+                "summary": "Get container registry credentials",
+                "operationId": "GetContainerRegistry",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Container Registry server name",
+                        "name": "server",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Container Registry username",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ContainerRegistry"
+                        }
+                    }
+                }
             },
             "put": {
                 "description": "Set container registry credentials",
@@ -122,6 +159,20 @@ const docTemplate = `{
                 "summary": "Set container registry credentials",
                 "operationId": "SetContainerRegistry",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Container Registry server name",
+                        "name": "server",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Container Registry username",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "Container Registry credentials to set",
                         "name": "containerRegistry",
@@ -137,36 +188,6 @@ const docTemplate = `{
                         "description": "Created"
                     }
                 }
-            }
-        },
-        "/container-registry/{id}": {
-            "get": {
-                "description": "Get container registry credentials",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "container-registry"
-                ],
-                "summary": "Get container registry credentials",
-                "operationId": "GetContainerRegistry",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Container Registry Id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/ContainerRegistry"
-                        }
-                    }
-                }
             },
             "delete": {
                 "description": "Remove a container registry credentials",
@@ -178,8 +199,15 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Container Registry Id",
-                        "name": "id",
+                        "description": "Container Registry server name",
+                        "name": "server",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Container Registry username",
+                        "name": "username",
                         "in": "path",
                         "required": true
                     }
@@ -1064,9 +1092,6 @@ const docTemplate = `{
         "ContainerRegistry": {
             "type": "object",
             "properties": {
-                "id": {
-                    "type": "string"
-                },
                 "password": {
                     "type": "string"
                 },

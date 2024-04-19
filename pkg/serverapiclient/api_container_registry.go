@@ -25,7 +25,8 @@ type ContainerRegistryAPIService service
 type ApiGetContainerRegistryRequest struct {
 	ctx        context.Context
 	ApiService *ContainerRegistryAPIService
-	id         string
+	server     string
+	username   string
 }
 
 func (r ApiGetContainerRegistryRequest) Execute() (*ContainerRegistry, *http.Response, error) {
@@ -38,14 +39,16 @@ GetContainerRegistry Get container registry credentials
 Get container registry credentials
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id Container Registry Id
+	@param server Container Registry server name
+	@param username Container Registry username
 	@return ApiGetContainerRegistryRequest
 */
-func (a *ContainerRegistryAPIService) GetContainerRegistry(ctx context.Context, id string) ApiGetContainerRegistryRequest {
+func (a *ContainerRegistryAPIService) GetContainerRegistry(ctx context.Context, server string, username string) ApiGetContainerRegistryRequest {
 	return ApiGetContainerRegistryRequest{
 		ApiService: a,
 		ctx:        ctx,
-		id:         id,
+		server:     server,
+		username:   username,
 	}
 }
 
@@ -65,8 +68,9 @@ func (a *ContainerRegistryAPIService) GetContainerRegistryExecute(r ApiGetContai
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/container-registry/{id}"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath := localBasePath + "/container-registry/{server}/{username}"
+	localVarPath = strings.Replace(localVarPath, "{"+"server"+"}", url.PathEscape(parameterValueToString(r.server, "server")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"username"+"}", url.PathEscape(parameterValueToString(r.username, "username")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -257,7 +261,8 @@ func (a *ContainerRegistryAPIService) ListContainerRegistriesExecute(r ApiListCo
 type ApiRemoveContainerRegistryRequest struct {
 	ctx        context.Context
 	ApiService *ContainerRegistryAPIService
-	id         string
+	server     string
+	username   string
 }
 
 func (r ApiRemoveContainerRegistryRequest) Execute() (*http.Response, error) {
@@ -270,14 +275,16 @@ RemoveContainerRegistry Remove a container registry credentials
 Remove a container registry credentials
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id Container Registry Id
+	@param server Container Registry server name
+	@param username Container Registry username
 	@return ApiRemoveContainerRegistryRequest
 */
-func (a *ContainerRegistryAPIService) RemoveContainerRegistry(ctx context.Context, id string) ApiRemoveContainerRegistryRequest {
+func (a *ContainerRegistryAPIService) RemoveContainerRegistry(ctx context.Context, server string, username string) ApiRemoveContainerRegistryRequest {
 	return ApiRemoveContainerRegistryRequest{
 		ApiService: a,
 		ctx:        ctx,
-		id:         id,
+		server:     server,
+		username:   username,
 	}
 }
 
@@ -294,8 +301,9 @@ func (a *ContainerRegistryAPIService) RemoveContainerRegistryExecute(r ApiRemove
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/container-registry/{id}"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath := localBasePath + "/container-registry/{server}/{username}"
+	localVarPath = strings.Replace(localVarPath, "{"+"server"+"}", url.PathEscape(parameterValueToString(r.server, "server")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"username"+"}", url.PathEscape(parameterValueToString(r.username, "username")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -363,6 +371,8 @@ func (a *ContainerRegistryAPIService) RemoveContainerRegistryExecute(r ApiRemove
 type ApiSetContainerRegistryRequest struct {
 	ctx               context.Context
 	ApiService        *ContainerRegistryAPIService
+	server            string
+	username          string
 	containerRegistry *ContainerRegistry
 }
 
@@ -382,12 +392,16 @@ SetContainerRegistry Set container registry credentials
 Set container registry credentials
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param server Container Registry server name
+	@param username Container Registry username
 	@return ApiSetContainerRegistryRequest
 */
-func (a *ContainerRegistryAPIService) SetContainerRegistry(ctx context.Context) ApiSetContainerRegistryRequest {
+func (a *ContainerRegistryAPIService) SetContainerRegistry(ctx context.Context, server string, username string) ApiSetContainerRegistryRequest {
 	return ApiSetContainerRegistryRequest{
 		ApiService: a,
 		ctx:        ctx,
+		server:     server,
+		username:   username,
 	}
 }
 
@@ -404,7 +418,9 @@ func (a *ContainerRegistryAPIService) SetContainerRegistryExecute(r ApiSetContai
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/container-registry"
+	localVarPath := localBasePath + "/container-registry/{server}/{username}"
+	localVarPath = strings.Replace(localVarPath, "{"+"server"+"}", url.PathEscape(parameterValueToString(r.server, "server")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"username"+"}", url.PathEscape(parameterValueToString(r.username, "username")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}

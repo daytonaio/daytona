@@ -6,6 +6,7 @@ package containerregistry
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/server"
@@ -18,18 +19,25 @@ import (
 //	@Summary		Get container registry credentials
 //	@Description	Get container registry credentials
 //	@Produce		json
-//	@Param			server	path		string	true	"Container Registry server name"
+//	@Param			server		path		string	true	"Container Registry server name"
 //	@Param			username	path		string	true	"Container Registry username"
-//	@Success		200	{object}	ContainerRegistry
+//	@Success		200			{object}	ContainerRegistry
 //	@Router			/container-registry/{server}/{username} [get]
 //
 //	@id				GetContainerRegistry
 func GetContainerRegistry(ctx *gin.Context) {
 	crServer := ctx.Param("server")
 	crUsername := ctx.Param("username")
+
+	decodedServerURL, err := url.QueryUnescape(crServer)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode server URL: %s", err.Error()))
+		return
+	}
+
 	server := server.GetInstance(nil)
 
-	cr, err := server.ContainerRegistryService.Find(crServer, crUsername)
+	cr, err := server.ContainerRegistryService.Find(decodedServerURL, crUsername)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get container registry: %s", err.Error()))
 		return
