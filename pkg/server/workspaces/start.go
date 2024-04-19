@@ -4,17 +4,20 @@
 package workspaces
 
 import (
+	"context"
 	"fmt"
 	"io"
 
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/provider"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/workspace"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/daytonaio/daytona/internal/util"
 )
 
-func (s *WorkspaceService) StartWorkspace(workspaceId string) error {
+func (s *WorkspaceService) StartWorkspace(ctx context.Context, workspaceId string) error {
 	w, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
 		return ErrWorkspaceNotFound
@@ -30,10 +33,29 @@ func (s *WorkspaceService) StartWorkspace(workspaceId string) error {
 
 	wsLogWriter := io.MultiWriter(&util.InfoLogWriter{}, workspaceLogger)
 
-	return s.startWorkspace(w, target, wsLogWriter)
+	err = s.startWorkspace(ctx, w, target, wsLogWriter)
+
+	if !telemetry.TelemetryEnabled(ctx) {
+		return err
+	}
+
+	cliId := telemetry.CliId(ctx)
+
+	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, w, target)
+	event := telemetry.ServerEventWorkspaceStarted
+	if err != nil {
+		telemetryProps["error"] = err.Error()
+		event = telemetry.ServerEventWorkspaceStartError
+	}
+	telemetryError := s.telemetryService.TrackServerEvent(event, cliId, telemetryProps)
+	if telemetryError != nil {
+		log.Trace(telemetryError)
+	}
+
+	return err
 }
 
-func (s *WorkspaceService) StartProject(workspaceId, projectName string) error {
+func (s *WorkspaceService) StartProject(ctx context.Context, workspaceId, projectName string) error {
 	w, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
 		return ErrWorkspaceNotFound
@@ -52,37 +74,47 @@ func (s *WorkspaceService) StartProject(workspaceId, projectName string) error {
 	projectLogger := s.loggerFactory.CreateProjectLogger(w.Id, project.Name, logs.LogSourceServer)
 	defer projectLogger.Close()
 
-	return s.startProject(project, target, projectLogger)
+	return s.startProject(ctx, project, target, projectLogger)
 }
 
-func (s *WorkspaceService) startWorkspace(workspace *workspace.Workspace, target *provider.ProviderTarget, wsLogWriter io.Writer) error {
+func (s *WorkspaceService) startWorkspace(ctx context.Context, ws *workspace.Workspace, target *provider.ProviderTarget, wsLogWriter io.Writer) error {
 	wsLogWriter.Write([]byte("Starting workspace\n"))
 
-	err := s.provisioner.StartWorkspace(workspace, target)
+	ws.EnvVars = workspace.GetWorkspaceEnvVars(ws, workspace.WorkspaceEnvVarParams{
+		ApiUrl:    s.serverApiUrl,
+		ServerUrl: s.serverUrl,
+		CliId:     telemetry.CliId(ctx),
+	}, telemetry.TelemetryEnabled(ctx))
+
+	err := s.provisioner.StartWorkspace(ws, target)
 	if err != nil {
 		return err
 	}
 
-	for _, project := range workspace.Projects {
-		projectLogger := s.loggerFactory.CreateProjectLogger(workspace.Id, project.Name, logs.LogSourceServer)
+	for _, project := range ws.Projects {
+		projectLogger := s.loggerFactory.CreateProjectLogger(ws.Id, project.Name, logs.LogSourceServer)
 		defer projectLogger.Close()
 
-		err = s.startProject(project, target, projectLogger)
+		err = s.startProject(ctx, project, target, projectLogger)
 		if err != nil {
 			return err
 		}
 	}
 
-	wsLogWriter.Write([]byte(fmt.Sprintf("Workspace %s started\n", workspace.Name)))
+	wsLogWriter.Write([]byte(fmt.Sprintf("Workspace %s started\n", ws.Name)))
 
 	return nil
 }
 
-func (s *WorkspaceService) startProject(project *workspace.Project, target *provider.ProviderTarget, logWriter io.Writer) error {
+func (s *WorkspaceService) startProject(ctx context.Context, project *workspace.Project, target *provider.ProviderTarget, logWriter io.Writer) error {
 	logWriter.Write([]byte(fmt.Sprintf("Starting project %s\n", project.Name)))
 
 	projectToStart := *project
-	projectToStart.EnvVars = workspace.GetProjectEnvVars(project, s.serverApiUrl, s.serverUrl)
+	projectToStart.EnvVars = workspace.GetProjectEnvVars(project, workspace.ProjectEnvVarParams{
+		ApiUrl:    s.serverApiUrl,
+		ServerUrl: s.serverUrl,
+		CliId:     telemetry.CliId(ctx),
+	}, telemetry.TelemetryEnabled(ctx))
 
 	err := s.provisioner.StartProject(project, target)
 	if err != nil {

@@ -19,6 +19,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/providertargets"
 	"github.com/daytonaio/daytona/pkg/server/registry"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/hashicorp/go-plugin"
 
 	log "github.com/sirupsen/logrus"
@@ -35,6 +36,7 @@ type ServerInstanceConfig struct {
 	GitProviderService       gitproviders.IGitProviderService
 	ProviderManager          manager.IProviderManager
 	ProfileDataService       profiledata.IProfileDataService
+	TelemetryService         telemetry.TelemetryService
 }
 
 var server *Server
@@ -49,6 +51,7 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 			log.Fatal("Server not initialized")
 		}
 		server = &Server{
+			Id:                       serverConfig.Config.Id,
 			config:                   serverConfig.Config,
 			TailscaleServer:          serverConfig.TailscaleServer,
 			ProviderTargetService:    serverConfig.ProviderTargetService,
@@ -59,6 +62,7 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 			GitProviderService:       serverConfig.GitProviderService,
 			ProviderManager:          serverConfig.ProviderManager,
 			ProfileDataService:       serverConfig.ProfileDataService,
+			TelemetryService:         serverConfig.TelemetryService,
 		}
 	}
 
@@ -66,6 +70,7 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 }
 
 type Server struct {
+	Id                       string
 	config                   Config
 	TailscaleServer          TailscaleServer
 	ProviderTargetService    providertargets.IProviderTargetService
@@ -76,6 +81,7 @@ type Server struct {
 	GitProviderService       gitproviders.IGitProviderService
 	ProviderManager          manager.IProviderManager
 	ProfileDataService       profiledata.IProfileDataService
+	TelemetryService         telemetry.TelemetryService
 }
 
 func (s *Server) Start(errCh chan error) error {

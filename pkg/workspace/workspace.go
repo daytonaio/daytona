@@ -5,14 +5,17 @@ package workspace
 
 import (
 	"errors"
+
+	"github.com/daytonaio/daytona/internal"
 )
 
 type Workspace struct {
-	Id       string     `json:"id"`
-	Name     string     `json:"name"`
-	Projects []*Project `json:"projects"`
-	Target   string     `json:"target"`
-	ApiKey   string     `json:"-"`
+	Id       string            `json:"id"`
+	Name     string            `json:"name"`
+	Projects []*Project        `json:"projects"`
+	Target   string            `json:"target"`
+	ApiKey   string            `json:"-"`
+	EnvVars  map[string]string `json:"-"`
 } // @name Workspace
 
 type WorkspaceInfo struct {
@@ -31,21 +34,25 @@ func (w *Workspace) GetProject(projectName string) (*Project, error) {
 }
 
 type WorkspaceEnvVarParams struct {
-	ApiUrl        string
-	ApiKey        string
-	ServerUrl     string
-	ServerVersion string
+	ApiUrl    string
+	ServerUrl string
+	CliId     string
 }
 
-func GetWorkspaceEnvVars(workspace *Workspace, params WorkspaceEnvVarParams) map[string]string {
+func GetWorkspaceEnvVars(workspace *Workspace, params WorkspaceEnvVarParams, telemetryEnabled bool) map[string]string {
 	envVars := map[string]string{
 		"DAYTONA_WS_ID":          workspace.Id,
-		"DAYTONA_SERVER_API_KEY": params.ApiKey,
-		"DAYTONA_SERVER_VERSION": params.ServerVersion,
+		"DAYTONA_SERVER_API_KEY": workspace.ApiKey,
+		"DAYTONA_SERVER_VERSION": internal.Version,
 		"DAYTONA_SERVER_URL":     params.ServerUrl,
 		"DAYTONA_SERVER_API_URL": params.ApiUrl,
+		"DAYTONA_CLI_ID":         params.CliId,
 		// (HOME) will be replaced at runtime
 		"DAYTONA_AGENT_LOG_FILE_PATH": "(HOME)/.daytona-agent.log",
+	}
+
+	if telemetryEnabled {
+		envVars["DAYTONA_TELEMETRY_ENABLED"] = "true"
 	}
 
 	return envVars

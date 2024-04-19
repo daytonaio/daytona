@@ -75,17 +75,22 @@ var AgentCmd = &cobra.Command{
 			tailscaleHostname = c.WorkspaceId
 		}
 
+		telemetryEnabled := os.Getenv("DAYTONA_TELEMETRY_ENABLED") == "true"
+
 		tailscaleServer := &tailscale.Server{
-			Hostname: tailscaleHostname,
-			Server:   c.Server,
+			Hostname:         tailscaleHostname,
+			Server:           c.Server,
+			TelemetryEnabled: telemetryEnabled,
+			CliId:            c.CliId,
 		}
 
 		agent := agent.Agent{
-			Config:    c,
-			Git:       git,
-			Ssh:       sshServer,
-			Tailscale: tailscaleServer,
-			LogWriter: agentLogWriter,
+			Config:           c,
+			Git:              git,
+			Ssh:              sshServer,
+			Tailscale:        tailscaleServer,
+			LogWriter:        agentLogWriter,
+			TelemetryEnabled: telemetryEnabled,
 		}
 
 		err = agent.Start()

@@ -14,7 +14,7 @@ import (
 	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	"github.com/daytonaio/daytona/pkg/server"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 )
 
 const CLIENT_VERSION_HEADER = "X-Client-Version"
@@ -65,6 +65,17 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 	clientConfig.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", apiKey))
 	clientConfig.AddDefaultHeader(CLIENT_VERSION_HEADER, internal.Version)
 
+	if c.TelemetryEnabled {
+		clientConfig.AddDefaultHeader(telemetry.ENABLED_HEADER, "true")
+		clientConfig.AddDefaultHeader(telemetry.SESSION_ID_HEADER, internal.SESSION_ID)
+		clientConfig.AddDefaultHeader(telemetry.CLI_ID_HEADER, c.Id)
+		if internal.WorkspaceMode() {
+			clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, "cli-project")
+		} else {
+			clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, "cli")
+		}
+	}
+
 	apiClient = apiclient.NewAPIClient(clientConfig)
 
 	apiClient.GetConfig().HTTPClient = &http.Client{
@@ -74,7 +85,7 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 	return apiClient, nil
 }
 
-func GetAgentApiClient(apiUrl, apiKey string) (*apiclient.APIClient, error) {
+func GetAgentApiClient(apiUrl, apiKey, cliId string, telemetryEnabled bool) (*apiclient.APIClient, error) {
 	clientConfig := apiclient.NewConfiguration()
 	clientConfig.Servers = apiclient.ServerConfigurations{
 		{
@@ -85,6 +96,13 @@ func GetAgentApiClient(apiUrl, apiKey string) (*apiclient.APIClient, error) {
 	clientConfig.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", apiKey))
 	clientConfig.AddDefaultHeader(CLIENT_VERSION_HEADER, internal.Version)
 
+	if telemetryEnabled {
+		clientConfig.AddDefaultHeader(telemetry.ENABLED_HEADER, "true")
+		clientConfig.AddDefaultHeader(telemetry.SESSION_ID_HEADER, internal.SESSION_ID)
+		clientConfig.AddDefaultHeader(telemetry.CLI_ID_HEADER, cliId)
+		clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, "agent")
+	}
+
 	apiClient = apiclient.NewAPIClient(clientConfig)
 
 	apiClient.GetConfig().HTTPClient = &http.Client{
@@ -92,22 +110,6 @@ func GetAgentApiClient(apiUrl, apiKey string) (*apiclient.APIClient, error) {
 	}
 
 	return apiClient, nil
-}
-
-func ToServerConfig(config apiclient.ServerConfig) server.Config {
-	return server.Config{
-		ProvidersDir:      *config.ProvidersDir,
-		RegistryUrl:       *config.RegistryUrl,
-		Id:                *config.Id,
-		ServerDownloadUrl: *config.ServerDownloadUrl,
-		Frps: &server.FRPSConfig{
-			Domain:   *config.Frps.Domain,
-			Port:     uint32(*config.Frps.Port),
-			Protocol: *config.Frps.Protocol,
-		},
-		ApiPort:       uint32(*config.ApiPort),
-		HeadscalePort: uint32(*config.HeadscalePort),
-	}
 }
 
 func GetProviderList() ([]apiclient.Provider, error) {

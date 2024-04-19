@@ -29,7 +29,7 @@
       "program": "${workspaceFolder}/cmd/daytona",
       "console": "integratedTerminal",
       "args": [
-        "serve"
+        "serve",
       ]
     },
     {

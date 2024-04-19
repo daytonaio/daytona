@@ -22,6 +22,7 @@ type DaytonaServerConfig struct {
 
 type Config struct {
 	ProjectDir  string
+	CliId       string  `envconfig:"DAYTONA_CLI_ID" validate:"required"`
 	ProjectName string  `envconfig:"DAYTONA_WS_PROJECT_NAME"`
 	WorkspaceId string  `envconfig:"DAYTONA_WS_ID" validate:"required"`
 	LogFilePath *string `envconfig:"DAYTONA_AGENT_LOG_FILE_PATH"`
