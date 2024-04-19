@@ -13,13 +13,13 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/server/apikey"
-	"github.com/daytonaio/daytona/pkg/views/util"
 )
 
 var saveFlag bool
 
-var generateCmd = &cobra.Command{
+var GenerateCmd = &cobra.Command{
 	Use:     "generate [NAME]",
 	Short:   "Generate a new API key",
 	Aliases: []string{"g", "new"},
@@ -60,11 +60,11 @@ var generateCmd = &cobra.Command{
 			if err != nil {
 				log.Fatal(err)
 			}
-			util.RenderBorderedMessage("API key saved to your default profile")
+			views.RenderBorderedMessage("API key saved to your default profile")
 			return
 		}
 
-		util.RenderBorderedMessage(fmt.Sprintf("Generated API key: %s\n\nYou can add it to a profile by running:\n\ndaytona profile edit -k %s\n\nMake sure to copy it as you will not be able to see it again.", key, key))
+		views.RenderBorderedMessage(fmt.Sprintf("Generated API key: %s\n\nYou can add it to a profile by running:\n\ndaytona profile edit -k %s\n\nMake sure to copy it as you will not be able to see it again.", key, key))
 	},
 }
 
@@ -85,5 +85,5 @@ func saveKeyToDefaultProfile(key string) error {
 }
 
 func init() {
-	generateCmd.Flags().BoolVarP(&saveFlag, "save", "s", false, "Save the API key to your default profile on this machine")
+	GenerateCmd.Flags().BoolVarP(&saveFlag, "save", "s", false, "Save the API key to your default profile on this machine")
 }

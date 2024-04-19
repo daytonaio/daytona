@@ -7,7 +7,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
+	"github.com/daytonaio/daytona/pkg/views"
 )
 
 type item struct {
@@ -48,7 +48,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	case tea.WindowSizeMsg:
-		h, v := view_util.DocStyle.GetFrameSize()
+		h, v := views.DocStyle.GetFrameSize()
 		m.list.SetSize(msg.Width-h, msg.Height-v)
 	}
 
@@ -58,5 +58,5 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	return view_util.DocStyle.Render(m.list.View() + m.footer)
+	return views.DocStyle.Render(m.list.View() + m.footer)
 }

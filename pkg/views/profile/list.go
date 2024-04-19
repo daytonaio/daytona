@@ -10,7 +10,6 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/views"
-	"github.com/daytonaio/daytona/pkg/views/util"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -109,7 +108,7 @@ func renderProfileList(profileList []config.Profile, activeProfileId string, sel
 }
 
 func GetProfileIdFromPrompt(profileList []config.Profile, activeProfileId, title string, withCreateOption bool) string {
-	util.RenderMainTitle(title)
+	views.RenderMainTitle(title)
 
 	withNewProfile := profileList
 
@@ -135,7 +134,7 @@ func GetProfileIdFromPrompt(profileList []config.Profile, activeProfileId, title
 }
 
 func ListProfiles(profileList []config.Profile, activeProfileId string) {
-	util.RenderMainTitle("PROFILES")
+	views.RenderMainTitle("PROFILES")
 
 	modelInstance := renderProfileList(profileList, activeProfileId, false)
 

@@ -10,7 +10,6 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
-	"github.com/daytonaio/daytona/pkg/views/util"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -103,7 +102,7 @@ func renderApiKeyList(apiKeyList []serverapiclient.ApiKey, selectable bool) mode
 }
 
 func GetApiKeyFromPrompt(apiKeyList []serverapiclient.ApiKey, title string) *serverapiclient.ApiKey {
-	util.RenderMainTitle(title)
+	views.RenderMainTitle(title)
 
 	modelInstance := renderApiKeyList(apiKeyList, true)
 
@@ -120,7 +119,7 @@ func GetApiKeyFromPrompt(apiKeyList []serverapiclient.ApiKey, title string) *ser
 }
 
 func ListApiKeys(apiKeyList []serverapiclient.ApiKey) {
-	util.RenderMainTitle("API KEYS")
+	views.RenderMainTitle("API KEYS")
 
 	modelInstance := renderApiKeyList(apiKeyList, false)
 

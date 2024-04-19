@@ -40,7 +40,7 @@ var projectViewStyle = lipgloss.NewStyle().
 
 var projectNameStyle = lipgloss.NewStyle().
 	Bold(true).
-	Foreground(views.Blue).
+	Foreground(views.TempGreen).
 	PaddingLeft(2)
 
 var projectStatusStyle = lipgloss.NewStyle().

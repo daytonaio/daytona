@@ -11,7 +11,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
+	"github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
 
@@ -36,7 +36,7 @@ func ConfigureProjects(projectList []serverapiclient.CreateWorkspaceRequestProje
 		containerUser = *project.User
 	}
 	if project.PostStartCommands != nil {
-		postStartCommands = view_util.GetJoinedCommands(project.PostStartCommands)
+		postStartCommands = util.GetJoinedCommands(project.PostStartCommands)
 	}
 
 	GetProjectConfigurationGroup(&containerImage, &containerUser, &postStartCommands)
@@ -54,7 +54,7 @@ func ConfigureProjects(projectList []serverapiclient.CreateWorkspaceRequestProje
 		if projectList[i].Name == project.Name {
 			projectList[i].Image = &containerImage
 			projectList[i].User = &containerUser
-			projectList[i].PostStartCommands = view_util.GetSplitCommands(postStartCommands)
+			projectList[i].PostStartCommands = util.GetSplitCommands(postStartCommands)
 		}
 	}
 

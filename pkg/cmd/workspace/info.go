@@ -61,7 +61,7 @@ var InfoCmd = &cobra.Command{
 			return
 		}
 
-		info.Render(workspace)
+		info.Render(workspace, "")
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) > 0 {

@@ -8,8 +8,8 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	"github.com/daytonaio/daytona/pkg/views"
 	server_view "github.com/daytonaio/daytona/pkg/views/server"
-	"github.com/daytonaio/daytona/pkg/views/util"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -35,6 +35,6 @@ var configureCmd = &cobra.Command{
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		util.RenderInfoMessage("Server configuration updated. You might need to restart the server for the changes to take effect.")
+		views.RenderInfoMessage("Server configuration updated. You might need to restart the server for the changes to take effect.")
 	},
 }

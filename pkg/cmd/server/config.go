@@ -6,12 +6,14 @@ package server
 import (
 	"fmt"
 
+	"github.com/charmbracelet/lipgloss"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/cmd/output"
 	"github.com/daytonaio/daytona/pkg/server"
+	"github.com/daytonaio/daytona/pkg/views"
 )
 
 var configCmd = &cobra.Command{
@@ -26,6 +28,13 @@ var configCmd = &cobra.Command{
 		apiUrl := util.GetFrpcApiUrl(config.Frps.Protocol, config.Id, config.Frps.Domain)
 		output.Output = apiUrl
 
-		fmt.Println(apiUrl)
+		output := ""
+		output += "If you want to connect to the server remotely:\n\n"
+
+		output += "1. Create an API key on this machine: "
+		output += lipgloss.NewStyle().Foreground(views.Green).Render("daytona server api-key new") + "\n"
+		output += "2. Add a profile on the client machine: \n\t"
+		output += lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("daytona profile add -a %s -k API_KEY", apiUrl))
+		views.RenderInfoMessage(output)
 	},
 }

@@ -33,11 +33,14 @@ func selectCheckoutPrompt(checkoutOptions []CheckoutOption, secondaryProjectOrde
 	}
 
 	l := views.GetStyledSelectList(items)
-	m := model[string]{list: l}
-	m.list.Title = "CLONING OPTIONS"
+
+	title := "Cloning options"
 	if secondaryProjectOrder > 0 {
-		m.list.Title += fmt.Sprintf(" (Secondary Project #%d)", secondaryProjectOrder)
+		title += fmt.Sprintf(" (Secondary Project #%d)", secondaryProjectOrder)
 	}
+	l.Title = views.GetStyledMainTitle(title)
+	l.Styles.Title = titleStyle
+	m := model[string]{list: l}
 
 	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
 	if err != nil {

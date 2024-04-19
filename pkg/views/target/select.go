@@ -13,7 +13,6 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
 )
 
 const NewTargetName = "+ New Target"
@@ -38,8 +37,8 @@ func GetTargetFromPrompt(targets []serverapiclient.ProviderTarget, activeProfile
 
 	l := views.GetStyledSelectList(items)
 	m := model{list: l}
-	m.list.Title = "CHOOSE A TARGET"
-	m.footer = view_util.GetListFooter(activeProfileName)
+	m.list.Title = views.GetStyledMainTitle("Choose a target")
+	m.footer = views.GetListFooter(activeProfileName)
 
 	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
 	if err != nil {

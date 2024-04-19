@@ -18,7 +18,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/server/apikey"
-	"github.com/daytonaio/daytona/pkg/views/util"
 )
 
 var yesFlag bool
@@ -97,7 +96,7 @@ var revokeCmd = &cobra.Command{
 				log.Fatal(apiclient.HandleErrorResponse(nil, err))
 			}
 
-			util.RenderInfoMessage("API key revoked")
+			views.RenderInfoMessage("API key revoked")
 		} else {
 			fmt.Println("Operation canceled.")
 		}
