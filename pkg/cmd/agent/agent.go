@@ -6,7 +6,6 @@
 package agent
 
 import (
-	"fmt"
 	"os"
 	"path"
 
@@ -15,6 +14,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/agent/git"
 	"github.com/daytonaio/daytona/pkg/agent/ssh"
 	"github.com/daytonaio/daytona/pkg/agent/tailscale"
+	"github.com/daytonaio/daytona/pkg/workspace"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -47,7 +47,7 @@ var AgentCmd = &cobra.Command{
 			DefaultProjectDir: os.Getenv("HOME"),
 		}
 
-		tailscaleHostname := fmt.Sprintf("%s-%s", config.WorkspaceId, config.ProjectName)
+		tailscaleHostname := workspace.GetProjectHostname(config.WorkspaceId, config.ProjectName)
 		if hostModeFlag {
 			tailscaleHostname = config.WorkspaceId
 		}

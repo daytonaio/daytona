@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/tailscale"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	"github.com/daytonaio/daytona/pkg/workspace"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -52,7 +53,7 @@ var SshProxyCmd = &cobra.Command{
 
 		errChan := make(chan error)
 
-		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s-%s:2222", workspaceId, projectName))
+		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:2222", workspace.GetProjectHostname(workspaceId, projectName)))
 		if err != nil {
 			log.Fatal(err)
 		}
