@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"hash/fnv"
+	"strings"
 
 	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
@@ -23,6 +24,16 @@ type Project struct {
 	EnvVars     map[string]string          `json:"-"`
 	State       *ProjectState              `json:"state,omitempty"`
 } // @name Project
+
+func (p *Project) GetImageServer() string {
+	parts := strings.Split(p.Image, "/")
+
+	if len(parts) < 3 {
+		return "docker.io"
+	}
+
+	return parts[0]
+}
 
 type Workspace struct {
 	Id       string     `json:"id"`

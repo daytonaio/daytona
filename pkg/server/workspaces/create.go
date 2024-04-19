@@ -74,7 +74,9 @@ func (s *WorkspaceService) createProject(project *workspace.Project, target *pro
 		projectToCreate.EnvVars[k] = v
 	}
 
-	err := s.provisioner.CreateProject(&projectToCreate, target)
+	cr, _ := s.containerRegistryStore.Find(project.GetImageServer())
+
+	err := s.provisioner.CreateProject(&projectToCreate, target, cr)
 	if err != nil {
 		return err
 	}
