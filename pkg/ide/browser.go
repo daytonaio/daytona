@@ -13,7 +13,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/ports"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
+	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/pkg/browser"
 	log "github.com/sirupsen/logrus"
@@ -28,7 +28,7 @@ func OpenBrowserIDE(activeProfile config.Profile, workspaceId string, projectNam
 		return err
 	}
 
-	view_util.RenderInfoMessageBold("Downloading OpenVSCode Server...")
+	views.RenderInfoMessageBold("Downloading OpenVSCode Server...")
 	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
 
 	installServerCommand := exec.Command("ssh", projectHostname, "curl -fsSL https://download.daytona.io/daytona/get-openvscode-server.sh | sh")
@@ -40,7 +40,7 @@ func OpenBrowserIDE(activeProfile config.Profile, workspaceId string, projectNam
 		return err
 	}
 
-	view_util.RenderInfoMessageBold("Starting OpenVSCode Server...")
+	views.RenderInfoMessageBold("Starting OpenVSCode Server...")
 
 	go func() {
 		startServerCommand := exec.CommandContext(context.Background(), "ssh", projectHostname, startVSCodeServerCommand)
@@ -70,7 +70,7 @@ func OpenBrowserIDE(activeProfile config.Profile, workspaceId string, projectNam
 		time.Sleep(500 * time.Millisecond)
 	}
 
-	view_util.RenderInfoMessageBold(fmt.Sprintf("Forwarded %s IDE port to %s.\nOpening browser...\n", projectName, ideURL))
+	views.RenderInfoMessageBold(fmt.Sprintf("Forwarded %s IDE port to %s.\nOpening browser...\n", projectName, ideURL))
 
 	err = browser.OpenURL(ideURL)
 	if err != nil {

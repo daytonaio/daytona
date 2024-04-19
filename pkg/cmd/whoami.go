@@ -9,7 +9,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 
 	"github.com/daytonaio/daytona/pkg/cmd/output"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
+	"github.com/daytonaio/daytona/pkg/views"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -38,14 +38,14 @@ var whoamiCmd = &cobra.Command{
 		}
 
 		if profile.Id == "default" {
-			view_util.RenderInfoMessageBold("You are currently on the default profile")
+			views.RenderInfoMessageBold("You are currently on the default profile")
 		} else {
-			view_util.RenderInfoMessageBold("You are currently on profile " + profile.Name)
+			views.RenderInfoMessageBold("You are currently on profile " + profile.Name)
 		}
-		view_util.RenderListLine(fmt.Sprintf("\x1b[1m%-*s\x1b[0m%s", listLabelWidth, "Profile ID:", profile.Id))
+		views.RenderListLine(fmt.Sprintf("\x1b[1m%-*s\x1b[0m%s", listLabelWidth, "Profile ID:", profile.Id))
 
 		if profile.Api.Url != "" {
-			view_util.RenderListLine(fmt.Sprintf("\x1b[1m%-*s\x1b[0m%s", listLabelWidth, "API URL:", profile.Api.Url))
+			views.RenderListLine(fmt.Sprintf("\x1b[1m%-*s\x1b[0m%s", listLabelWidth, "API URL:", profile.Api.Url))
 		}
 	},
 }

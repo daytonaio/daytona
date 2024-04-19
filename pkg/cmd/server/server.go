@@ -31,7 +31,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/daytonaio/daytona/pkg/server/providertargets"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
-	views_util "github.com/daytonaio/daytona/pkg/views/util"
+	started_view "github.com/daytonaio/daytona/pkg/views/server/started"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -59,7 +59,7 @@ var ServerCmd = &cobra.Command{
 			if err != nil {
 				log.Fatal(err)
 			}
-			printServerStartedMessage(c)
+			printServerStartedMessage(c, runAsDaemon)
 			return
 		}
 
@@ -202,7 +202,7 @@ var ServerCmd = &cobra.Command{
 				continue
 			}
 
-			printServerStartedMessage(c)
+			printServerStartedMessage(c, runAsDaemon)
 			break
 		}
 
@@ -227,8 +227,9 @@ func getDaytonaScriptUrl(config *server.Config) string {
 	return url
 }
 
-func printServerStartedMessage(c *server.Config) {
-	views_util.RenderBorderedMessage(fmt.Sprintf("Daytona Server running on port: %d.\nYou can now begin developing locally.\n\nIf you want to connect to the server remotely:\n\n1. Create an API key on this machine:\ndaytona server api-key new\n\n2. On the client machine run:\ndaytona profile add -a %s -k API_KEY", c.ApiPort, util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain)))
+func printServerStartedMessage(c *server.Config, runAsDaemon bool) {
+	started_view.Render(c.ApiPort, util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain), runAsDaemon)
+	// views_util.RenderBorderedMessage(fmt.Sprintf("Daytona Server running on port: %d.\nYou can now begin developing locally.\n\nIf you want to connect to the server remotely:\n\n1. Create an API key on this machine:\ndaytona server api-key new\n\n2. On the client machine run:\ndaytona profile add -a %s -k API_KEY", c.ApiPort, util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain)))
 }
 
 func getDbPath() (string, error) {

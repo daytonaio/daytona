@@ -9,8 +9,8 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/views"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
-	"github.com/daytonaio/daytona/pkg/views/util"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -39,7 +39,7 @@ var gitProviderDeleteCmd = &cobra.Command{
 		gitProviderData.BaseApiUrl = new(string)
 
 		if len(gitProviders) == 0 {
-			util.RenderInfoMessage("No git providers registered")
+			views.RenderInfoMessage("No git providers registered")
 			return
 		}
 
@@ -55,6 +55,6 @@ var gitProviderDeleteCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		util.RenderInfoMessage("Git provider has been removed")
+		views.RenderInfoMessage("Git provider has been removed")
 	},
 }

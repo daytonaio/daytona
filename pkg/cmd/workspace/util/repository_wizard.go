@@ -12,7 +12,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
 
@@ -58,7 +58,7 @@ func getRepositoryFromWizard(userGitProviders []serverapiclient.GitProvider, sec
 
 	var namespaceList []serverapiclient.GitNamespace
 
-	err = view_util.With(func() error {
+	err = views_util.With(func() error {
 		namespaceList, _, err = apiClient.GitProviderAPI.GetNamespaces(ctx, providerId).Execute()
 		return err
 	})
@@ -76,7 +76,7 @@ func getRepositoryFromWizard(userGitProviders []serverapiclient.GitProvider, sec
 	}
 
 	var providerRepos []serverapiclient.GitRepository
-	err = view_util.With(func() error {
+	err = views_util.With(func() error {
 		providerRepos, _, err = apiClient.GitProviderAPI.GetRepositories(ctx, providerId, namespaceId).Execute()
 		return err
 	})
@@ -91,7 +91,7 @@ func getRepositoryFromWizard(userGitProviders []serverapiclient.GitProvider, sec
 	}
 
 	var branchList []serverapiclient.GitBranch
-	err = view_util.With(func() error {
+	err = views_util.With(func() error {
 		branchList, _, err = apiClient.GitProviderAPI.GetRepoBranches(ctx, providerId, namespaceId, *chosenRepo.Id).Execute()
 		return err
 	})
@@ -116,7 +116,7 @@ func getRepositoryFromWizard(userGitProviders []serverapiclient.GitProvider, sec
 	}
 
 	var prList []serverapiclient.GitPullRequest
-	err = view_util.With(func() error {
+	err = views_util.With(func() error {
 		prList, _, err = apiClient.GitProviderAPI.GetRepoPRs(ctx, providerId, namespaceId, *chosenRepo.Id).Execute()
 		return err
 	})

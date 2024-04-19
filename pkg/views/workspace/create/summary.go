@@ -13,7 +13,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
+	"github.com/daytonaio/daytona/pkg/views/util"
 )
 
 type SummaryModel struct {
@@ -55,7 +55,7 @@ func DisplayMultiSubmitForm(workspaceName string, projectList *[]serverapiclient
 		(*projectList)[i].PostStartCommands = apiServerConfig.DefaultProjectPostStartCommands
 	}
 
-	defaultPostStartCommandString := view_util.GetJoinedCommands(apiServerConfig.DefaultProjectPostStartCommands)
+	defaultPostStartCommandString := util.GetJoinedCommands(apiServerConfig.DefaultProjectPostStartCommands)
 
 	configuredProjects, err := ConfigureProjects(*projectList, *apiServerConfig.DefaultProjectImage, *apiServerConfig.DefaultProjectUser, defaultPostStartCommandString)
 	if err != nil {
@@ -69,7 +69,7 @@ func DisplayMultiSubmitForm(workspaceName string, projectList *[]serverapiclient
 
 func RenderSummary(workspaceName string, projectList []serverapiclient.CreateWorkspaceRequestProject) string {
 
-	output := view_util.GetStyledMainTitle(fmt.Sprintf("SUMMARY - Workspace %s", workspaceName))
+	output := views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - Workspace %s", workspaceName))
 
 	for _, project := range projectList {
 		if project.Source == nil || project.Source.Repository == nil || project.Source.Repository.Url == nil {
@@ -77,7 +77,7 @@ func RenderSummary(workspaceName string, projectList []serverapiclient.CreateWor
 		}
 	}
 
-	output += fmt.Sprintf("\n\n%s - %s\n", lipgloss.NewStyle().Foreground(views.Blue).Render("Primary Project"), *projectList[0].Source.Repository.Url)
+	output += fmt.Sprintf("\n\n%s - %s\n", lipgloss.NewStyle().Foreground(views.TempGreen).Render("Primary Project"), *projectList[0].Source.Repository.Url)
 
 	// Remove the primary project from the list
 	projectList = projectList[1:]
@@ -87,7 +87,7 @@ func RenderSummary(workspaceName string, projectList []serverapiclient.CreateWor
 	}
 
 	for i := range projectList {
-		output += fmt.Sprintf("%s - %s", lipgloss.NewStyle().Foreground(views.Blue).Render(fmt.Sprintf("#%d %s", i+1, "Secondary Project")), (*projectList[i].Source.Repository.Url))
+		output += fmt.Sprintf("%s - %s", lipgloss.NewStyle().Foreground(views.TempGreen).Render(fmt.Sprintf("#%d %s", i+1, "Secondary Project")), (*projectList[i].Source.Repository.Url))
 		if i < len(projectList)-1 {
 			output += "\n"
 		}
@@ -158,5 +158,5 @@ func (m SummaryModel) View() string {
 		return ""
 	}
 
-	return view_util.GetBorderedMessage(RenderSummary(m.workspaceName, m.projectList)) + "\n" + m.form.View() + configurationHelpLine
+	return views.GetBorderedMessage(RenderSummary(m.workspaceName, m.projectList)) + "\n" + m.form.View() + configurationHelpLine
 }

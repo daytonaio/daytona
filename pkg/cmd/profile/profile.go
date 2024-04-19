@@ -7,8 +7,8 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/profile"
-	"github.com/daytonaio/daytona/pkg/views/util"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -27,12 +27,12 @@ var ProfileCmd = &cobra.Command{
 		profilesList := c.Profiles
 
 		if len(profilesList) == 0 {
-			util.RenderInfoMessage("Add a profile by running `daytona profile add")
+			views.RenderInfoMessage("Add a profile by running `daytona profile add`")
 			return
 		}
 
 		if len(profilesList) == 1 {
-			util.RenderInfoMessage(fmt.Sprintf("You are using profile %s. Add a new profile by running `daytona profile add`", profilesList[0].Name))
+			views.RenderInfoMessage(fmt.Sprintf("You are using profile %s. Add a new profile by running `daytona profile add`", profilesList[0].Name))
 			return
 		}
 
@@ -62,14 +62,14 @@ var ProfileCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		util.RenderInfoMessage(fmt.Sprintf("Active profile set to: %s", chosenProfile.Name))
+		views.RenderInfoMessage(fmt.Sprintf("Active profile set to: %s", chosenProfile.Name))
 	},
 }
 
 func init() {
 	ProfileCmd.AddCommand(profileListCmd)
 	ProfileCmd.AddCommand(ProfileUseCmd)
-	ProfileCmd.AddCommand(profileAddCmd)
+	ProfileCmd.AddCommand(ProfileAddCmd)
 	ProfileCmd.AddCommand(profileEditCmd)
 	ProfileCmd.AddCommand(profileDeleteCmd)
 }

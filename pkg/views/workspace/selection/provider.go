@@ -11,8 +11,11 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
 )
+
+var titleStyle = lipgloss.NewStyle()
 
 func selectProviderPrompt(gitProviders []gitprovider_view.GitProviderView, secondaryProjectOrder int, choiceChan chan<- string) {
 	items := []list.Item{}
@@ -27,11 +30,14 @@ func selectProviderPrompt(gitProviders []gitprovider_view.GitProviderView, secon
 	items = append(items, newItem)
 
 	l := views.GetStyledSelectList(items)
-	m := model[string]{list: l}
-	m.list.Title = "CHOOSE YOUR PROVIDER"
+
+	title := "Choose a provider"
 	if secondaryProjectOrder > 0 {
-		m.list.Title += fmt.Sprintf(" (Secondary Project #%d)", secondaryProjectOrder)
+		title += fmt.Sprintf(" (Secondary Project #%d)", secondaryProjectOrder)
 	}
+	l.Title = views.GetStyledMainTitle(title)
+	l.Styles.Title = titleStyle
+	m := model[string]{list: l}
 
 	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
 	if err != nil {

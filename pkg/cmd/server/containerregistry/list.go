@@ -9,8 +9,8 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/views"
 	containerregistry_view "github.com/daytonaio/daytona/pkg/views/containerregistry/list"
-	"github.com/daytonaio/daytona/pkg/views/util"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -32,7 +32,7 @@ var containerRegistryListCmd = &cobra.Command{
 		}
 
 		if len(containerRegistries) == 0 {
-			util.RenderInfoMessage("No container registries found. Set a new container registry by running 'daytona server container-registry set'")
+			views.RenderInfoMessage("No container registries found. Set a new container registry by running 'daytona server container-registry set'")
 			return
 		}
 

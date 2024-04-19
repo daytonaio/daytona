@@ -11,7 +11,6 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
@@ -84,7 +83,7 @@ func selectProjectRequestPrompt(projects []serverapiclient.CreateWorkspaceReques
 
 	m := projectRequestModel{}
 	m.list = l
-	m.list.Title = "CHOOSE A PROJECT TO CONFIGURE"
+	m.list.Title = "Choose a project to configure"
 
 	m.list.AdditionalShortHelpKeys = func() []key.Binding {
 		return []key.Binding{
@@ -134,7 +133,7 @@ func (m projectRequestModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	case tea.WindowSizeMsg:
-		h, v := view_util.DocStyle.GetFrameSize()
+		h, v := views.DocStyle.GetFrameSize()
 		m.list.SetSize(msg.Width-h, msg.Height-v)
 	}
 
@@ -158,8 +157,8 @@ func (d projectRequestItemDelegate) Render(w io.Writer, m list.Model, index int,
 
 	// Adjust styles as the user moves through the menu
 	if isSelected {
-		name = selectedStyles.Copy().Foreground(views.Blue).Render(i.Name())
-		imageLine = selectedStyles.Copy().Foreground(views.DimmedBlue).Render(i.Image())
+		name = selectedStyles.Copy().Foreground(views.TempGreen).Render(i.Name())
+		imageLine = selectedStyles.Copy().Foreground(views.TempDimmedGreen).Render(i.Image())
 		userLine = selectedStyles.Copy().Foreground(views.Gray).Render(i.User())
 		postStartCommandsLine = selectedStyles.Copy().Foreground(views.Gray).Render(i.PostStartCommands())
 	}

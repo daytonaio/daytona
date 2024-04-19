@@ -9,7 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
-	"github.com/daytonaio/daytona/pkg/views/util"
+	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -72,7 +72,7 @@ var StartCmd = &cobra.Command{
 			}
 		}
 
-		util.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully started", workspaceId))
+		views.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully started", workspaceId))
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) != 0 {
