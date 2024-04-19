@@ -5,6 +5,8 @@ package workspaces
 
 import (
 	"time"
+
+	"github.com/daytonaio/daytona/pkg/telemetry"
 )
 
 func (s *WorkspaceService) StopWorkspace(workspaceId string) error {
@@ -31,6 +33,15 @@ func (s *WorkspaceService) StopWorkspace(workspaceId string) error {
 	}
 
 	err = s.provisioner.StopWorkspace(workspace, target)
+
+	telemetryProps := telemetry.NewWorkspaceEventProps(workspace, target)
+	event := telemetry.ServerEventWorkspaceStopped
+	if err != nil {
+		telemetryProps["error"] = err.Error()
+		event = telemetry.ServerEventWorkspaceStopError
+	}
+	s.telemetryService.TrackServerEvent(event, workspaceId, telemetryProps)
+
 	if err != nil {
 		return err
 	}

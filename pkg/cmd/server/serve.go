@@ -12,12 +12,14 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/builder"
 	"github.com/daytonaio/daytona/pkg/db"
 	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/pkg/posthogservice"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server"
@@ -55,8 +57,15 @@ var ServeCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		telemetryService := posthogservice.NewTelemetryService(posthogservice.PosthogServiceConfig{
+			ApiKey:   internal.PosthogApiKey,
+			Endpoint: internal.PosthogEndpoint,
+		})
+		defer telemetryService.Close()
+
 		apiServer := api.NewApiServer(api.ApiServerConfig{
-			ApiPort: int(c.ApiPort),
+			ApiPort:          int(c.ApiPort),
+			TelemetryService: telemetryService,
 		})
 
 		logsDir, err := server.GetWorkspaceLogsDir()
@@ -193,6 +202,7 @@ var ServeCmd = &cobra.Command{
 			Provisioner:                     provisioner,
 			LoggerFactory:                   loggerFactory,
 			BuilderFactory:                  builderFactory,
+			TelemetryService:                telemetryService,
 		})
 		profileDataService := profiledata.NewProfileDataService(profiledata.ProfileDataServiceConfig{
 			ProfileDataStore: profileDataStore,
@@ -209,6 +219,7 @@ var ServeCmd = &cobra.Command{
 			GitProviderService:       gitProviderService,
 			ProviderManager:          providerManager,
 			ProfileDataService:       profileDataService,
+			TelemetryService:         telemetryService,
 		})
 
 		errCh := make(chan error)

@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -64,12 +65,16 @@ func (s *WorkspaceService) RemoveWorkspace(workspaceId string) error {
 	}
 
 	err = s.workspaceStore.Delete(workspace)
-	if err != nil {
-		return err
-	}
 
-	log.Infof("Workspace %s destroyed", workspace.Id)
-	return nil
+	telemetryProps := telemetry.NewWorkspaceEventProps(workspace, target)
+	event := telemetry.ServerEventWorkspaceStarted
+	if err != nil {
+		telemetryProps["error"] = err.Error()
+		event = telemetry.ServerEventWorkspaceStartError
+	}
+	s.telemetryService.TrackServerEvent(event, workspaceId, telemetryProps)
+
+	return err
 }
 
 // ForceRemoveWorkspace ignores provider errors and makes sure the workspace is removed from storage.

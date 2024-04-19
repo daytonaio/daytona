@@ -29,7 +29,8 @@
       "program": "${workspaceFolder}/cmd/daytona",
       "console": "integratedTerminal",
       "args": [
-        "serve"
+        "create",
+        "https://github.com/tpuljak/tpuljak"
       ]
     },
     {

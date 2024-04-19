@@ -15,6 +15,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
@@ -51,6 +52,7 @@ type WorkspaceServiceConfig struct {
 	LoggerFactory                   logs.LoggerFactory
 	GitProviderService              gitproviders.IGitProviderService
 	BuilderFactory                  builder.IBuilderFactory
+	TelemetryService                telemetry.TelemetryService
 }
 
 func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
@@ -68,6 +70,7 @@ func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 		apiKeyService:                   config.ApiKeyService,
 		gitProviderService:              config.GitProviderService,
 		builderFactory:                  config.BuilderFactory,
+		telemetryService:                config.TelemetryService,
 	}
 }
 
@@ -85,6 +88,7 @@ type WorkspaceService struct {
 	loggerFactory                   logs.LoggerFactory
 	gitProviderService              gitproviders.IGitProviderService
 	builderFactory                  builder.IBuilderFactory
+	telemetryService                telemetry.TelemetryService
 }
 
 func (s *WorkspaceService) SetProjectState(workspaceId, projectName string, state *workspace.ProjectState) (*workspace.Workspace, error) {

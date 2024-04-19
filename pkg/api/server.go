@@ -28,6 +28,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/api/docs"
 	"github.com/daytonaio/daytona/pkg/api/middlewares"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/gin-contrib/cors"
 
 	"github.com/daytonaio/daytona/pkg/api/controllers/apikey"
@@ -50,21 +51,24 @@ import (
 )
 
 type ApiServerConfig struct {
-	ApiPort int
+	ApiPort          int
+	TelemetryService telemetry.TelemetryService
 }
 
 const HEALTH_CHECK_ROUTE = "/health"
 
 func NewApiServer(config ApiServerConfig) *ApiServer {
 	return &ApiServer{
-		apiPort: config.ApiPort,
+		apiPort:          config.ApiPort,
+		TelemetryService: config.TelemetryService,
 	}
 }
 
 type ApiServer struct {
-	apiPort    int
-	httpServer *http.Server
-	router     *gin.Engine
+	apiPort          int
+	TelemetryService telemetry.TelemetryService
+	httpServer       *http.Server
+	router           *gin.Engine
 }
 
 func (a *ApiServer) Start() error {
@@ -86,6 +90,7 @@ func (a *ApiServer) Start() error {
 		a.router.Use(gin.Recovery())
 	}
 
+	a.router.Use(middlewares.TelemetryMiddleware(&a.TelemetryService))
 	a.router.Use(middlewares.LoggingMiddleware())
 	a.router.Use(middlewares.SetVersionMiddleware())
 

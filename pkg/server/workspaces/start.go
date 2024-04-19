@@ -9,6 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/provider"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/workspace"
 
 	"github.com/daytonaio/daytona/internal/util"
@@ -30,7 +31,17 @@ func (s *WorkspaceService) StartWorkspace(workspaceId string) error {
 
 	wsLogWriter := io.MultiWriter(&util.InfoLogWriter{}, workspaceLogger)
 
-	return s.startWorkspace(w, target, wsLogWriter)
+	err = s.startWorkspace(w, target, wsLogWriter)
+
+	telemetryProps := telemetry.NewWorkspaceEventProps(w, target)
+	event := telemetry.ServerEventWorkspaceStarted
+	if err != nil {
+		telemetryProps["error"] = err.Error()
+		event = telemetry.ServerEventWorkspaceStartError
+	}
+	s.telemetryService.TrackServerEvent(event, workspaceId, telemetryProps)
+
+	return err
 }
 
 func (s *WorkspaceService) StartProject(workspaceId, projectName string) error {

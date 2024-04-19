@@ -15,6 +15,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/server"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 )
 
 const CLIENT_VERSION_HEADER = "X-Client-Version"
@@ -64,6 +65,11 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 
 	clientConfig.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", apiKey))
 	clientConfig.AddDefaultHeader(CLIENT_VERSION_HEADER, internal.Version)
+
+	if c.TelemetryEnabled {
+		clientConfig.AddDefaultHeader(telemetry.ENABLED_HEADER, "true")
+		clientConfig.AddDefaultHeader(telemetry.SESSION_ID_HEADER, internal.SESSION_ID)
+	}
 
 	apiClient = apiclient.NewAPIClient(clientConfig)
 

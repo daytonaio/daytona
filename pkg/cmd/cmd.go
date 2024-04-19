@@ -5,7 +5,9 @@ package cmd
 
 import (
 	"os"
+	"strings"
 
+	"github.com/daytonaio/daytona/internal"
 	. "github.com/daytonaio/daytona/pkg/cmd/apikey"
 	. "github.com/daytonaio/daytona/pkg/cmd/containerregistry"
 	. "github.com/daytonaio/daytona/pkg/cmd/gitprovider"
@@ -16,7 +18,10 @@ import (
 	. "github.com/daytonaio/daytona/pkg/cmd/provider"
 	. "github.com/daytonaio/daytona/pkg/cmd/server"
 	. "github.com/daytonaio/daytona/pkg/cmd/target"
+	. "github.com/daytonaio/daytona/pkg/cmd/telemetry"
 	. "github.com/daytonaio/daytona/pkg/cmd/workspace"
+	"github.com/daytonaio/daytona/pkg/posthogservice"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 	view "github.com/daytonaio/daytona/pkg/views/initial"
 	log "github.com/sirupsen/logrus"
 
@@ -56,6 +61,7 @@ func Execute() {
 	rootCmd.AddCommand(InfoCmd)
 	rootCmd.AddCommand(PortForwardCmd)
 	rootCmd.AddCommand(EnvCmd)
+	rootCmd.AddCommand(TelemetryCmd)
 
 	SetupRootCommand(rootCmd)
 
@@ -76,7 +82,18 @@ func SetupRootCommand(cmd *cobra.Command) {
 	cmd.PersistentFlags().BoolP("help", "", false, "help for daytona")
 	cmd.PersistentFlags().StringVarP(&output.FormatFlag, "output", "o", output.FormatFlag, `Output format. Must be one of (yaml, json)`)
 
+	telemetryService := posthogservice.NewTelemetryService(posthogservice.PosthogServiceConfig{
+		ApiKey:   internal.PosthogApiKey,
+		Endpoint: internal.PosthogEndpoint,
+	})
+	defer telemetryService.Close()
+
 	cmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		err := telemetryService.TrackCliEvent(telemetry.CliEventCmdStart, internal.SESSION_ID, getCmdTelemetryData(cmd))
+		if err != nil {
+			log.Error(err)
+		}
+
 		if output.FormatFlag == "" {
 			return
 		}
@@ -85,6 +102,11 @@ func SetupRootCommand(cmd *cobra.Command) {
 	}
 
 	cmd.PersistentPostRun = func(cmd *cobra.Command, args []string) {
+		err := telemetryService.TrackCliEvent(telemetry.CliEventCmdEnd, internal.SESSION_ID, getCmdTelemetryData(cmd))
+		if err != nil {
+			log.Error(err)
+		}
+
 		os.Stdout = originalStdout
 		output.Print(output.Output, output.FormatFlag)
 	}
@@ -112,5 +134,21 @@ func RunInitialScreenFlow(cmd *cobra.Command, args []string) {
 		if err != nil {
 			log.Fatal(err)
 		}
+	}
+}
+
+func getCmdTelemetryData(cmd *cobra.Command) map[string]interface{} {
+	path := cmd.CommandPath()
+
+	// Trim daytona from the path if a non-root command was invoked
+	// This prevents a `daytona` pileup in the telemetry data
+	if path != "daytona" {
+		path = strings.TrimPrefix("daytona ", path)
+	}
+
+	calledAs := cmd.CalledAs()
+	return map[string]interface{}{
+		"command":   path,
+		"called_as": calledAs,
 	}
 }
