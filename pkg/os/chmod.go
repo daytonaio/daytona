@@ -12,6 +12,7 @@ func ChmodX(filePath string) error {
 	if err != nil {
 		return err
 	}
+	defer f.Close()
 
 	err = f.Chmod(0755)
 	if err != nil {
