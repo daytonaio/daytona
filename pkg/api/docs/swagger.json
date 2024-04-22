@@ -1119,6 +1119,9 @@
                 },
                 "source": {
                     "$ref": "#/definitions/CreateWorkspaceRequestProjectSource"
+                },
+                "user": {
+                    "type": "string"
                 }
             }
         },
@@ -1283,6 +1286,9 @@
                 "target": {
                     "type": "string"
                 },
+                "user": {
+                    "type": "string"
+                },
                 "workspaceId": {
                     "type": "string"
                 }
@@ -1361,6 +1367,9 @@
                     "type": "string"
                 },
                 "defaultProjectImage": {
+                    "type": "string"
+                },
+                "defaultProjectUser": {
                     "type": "string"
                 },
                 "frps": {

@@ -46,6 +46,8 @@ definitions:
         type: string
       source:
         $ref: '#/definitions/CreateWorkspaceRequestProjectSource'
+      user:
+        type: string
     type: object
   CreateWorkspaceRequestProjectSource:
     properties:
@@ -151,6 +153,8 @@ definitions:
         $ref: '#/definitions/ProjectState'
       target:
         type: string
+      user:
+        type: string
       workspaceId:
         type: string
     type: object
@@ -202,6 +206,8 @@ definitions:
       binariesPath:
         type: string
       defaultProjectImage:
+        type: string
+      defaultProjectUser:
         type: string
       frps:
         $ref: '#/definitions/FRPSConfig'

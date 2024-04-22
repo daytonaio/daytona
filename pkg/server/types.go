@@ -36,4 +36,5 @@ type Config struct {
 	BinariesPath        string      `json:"binariesPath"`
 	LogFilePath         string      `json:"logFilePath"`
 	DefaultProjectImage string      `json:"defaultProjectImage"`
+	DefaultProjectUser  string      `json:"defaultProjectUser"`
 } // @name ServerConfig

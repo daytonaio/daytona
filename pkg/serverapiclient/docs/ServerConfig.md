@@ -7,6 +7,7 @@ Name | Type | Description | Notes
 **ApiPort** | Pointer to **int32** |  | [optional] 
 **BinariesPath** | Pointer to **string** |  | [optional] 
 **DefaultProjectImage** | Pointer to **string** |  | [optional] 
+**DefaultProjectUser** | Pointer to **string** |  | [optional] 
 **Frps** | Pointer to [**FRPSConfig**](FRPSConfig.md) |  | [optional] 
 **HeadscalePort** | Pointer to **int32** |  | [optional] 
 **Id** | Pointer to **string** |  | [optional] 
@@ -108,6 +109,31 @@ SetDefaultProjectImage sets DefaultProjectImage field to given value.
 `func (o *ServerConfig) HasDefaultProjectImage() bool`
 
 HasDefaultProjectImage returns a boolean if a field has been set.
+
+### GetDefaultProjectUser
+
+`func (o *ServerConfig) GetDefaultProjectUser() string`
+
+GetDefaultProjectUser returns the DefaultProjectUser field if non-nil, zero value otherwise.
+
+### GetDefaultProjectUserOk
+
+`func (o *ServerConfig) GetDefaultProjectUserOk() (*string, bool)`
+
+GetDefaultProjectUserOk returns a tuple with the DefaultProjectUser field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetDefaultProjectUser
+
+`func (o *ServerConfig) SetDefaultProjectUser(v string)`
+
+SetDefaultProjectUser sets DefaultProjectUser field to given value.
+
+### HasDefaultProjectUser
+
+`func (o *ServerConfig) HasDefaultProjectUser() bool`
+
+HasDefaultProjectUser returns a boolean if a field has been set.
 
 ### GetFrps
 
