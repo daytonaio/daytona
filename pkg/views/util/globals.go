@@ -37,12 +37,19 @@ func GetListFooter(profileName string) string {
 }
 
 func RenderBorderedMessage(message string) {
-	fmt.Println(lipgloss.
+	fmt.Println(GetBorderedMessage(message))
+}
+
+func GetBorderedMessage(message string) string {
+	return lipgloss.
 		NewStyle().
 		Margin(1, 0).
 		Padding(1, 1, 1, 1).
 		BorderForeground(views.Green).
 		Border(lipgloss.RoundedBorder()).
-		Render(message),
-	)
+		Render(message)
+}
+
+func GetStyledMainTitle(content string) string {
+	return lipgloss.NewStyle().Foreground(views.Green).Bold(true).Render(content)
 }
