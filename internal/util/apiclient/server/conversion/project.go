@@ -13,6 +13,7 @@ func ToProjectDTO(project *workspace.Project) *serverapiclient.Project {
 		Name:        &project.Name,
 		Target:      &project.Target,
 		WorkspaceId: &project.WorkspaceId,
+		Image:       &project.Image,
 		Repository: &serverapiclient.GitRepository{
 			Id:     &project.Repository.Id,
 			Name:   &project.Repository.Name,
