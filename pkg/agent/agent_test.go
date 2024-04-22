@@ -5,7 +5,6 @@ package agent_test
 
 import (
 	"bytes"
-	"net/http"
 	"testing"
 
 	log "github.com/sirupsen/logrus"
@@ -42,7 +41,6 @@ var mockConfig = &config.Config{
 	WorkspaceId: workspace1.Id,
 	ProjectName: project1.Name,
 	Server: config.DaytonaServerConfig{
-		Url:    "http://localhost:3000",
 		ApiKey: "test-api-key",
 	},
 	Mode: config.ModeProject,
@@ -54,11 +52,8 @@ func TestAgent(t *testing.T) {
 
 	apiServer := mocks.NewMockRestServer(t, workspace1)
 	defer apiServer.Close()
-	go func() {
-		if err := apiServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("ListenAndServe(): %s", err)
-		}
-	}()
+
+	mockConfig.Server.ApiUrl = apiServer.URL
 
 	mockGitService := mocks.NewMockGitService(true, project1)
 	mockSshServer := mocks.NewMockSshServer()

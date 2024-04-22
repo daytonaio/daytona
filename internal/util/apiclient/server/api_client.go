@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
@@ -28,32 +27,43 @@ func GetApiClient(profile *config.Profile) (*serverapiclient.APIClient, error) {
 		return nil, err
 	}
 
-	var serverUrl string
-	var apiKey string
-
-	if envApiUrl, ok := os.LookupEnv("DAYTONA_SERVER_API_URL"); ok {
-		serverUrl = envApiUrl
-		apiKey = os.Getenv("DAYTONA_SERVER_API_KEY")
-	} else {
-		var activeProfile config.Profile
-		if profile == nil {
-			var err error
-			activeProfile, err = c.GetActiveProfile()
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			activeProfile = *profile
+	var activeProfile config.Profile
+	if profile == nil {
+		var err error
+		activeProfile, err = c.GetActiveProfile()
+		if err != nil {
+			return nil, err
 		}
-
-		serverUrl = activeProfile.Api.Url
-		apiKey = activeProfile.Api.Key
+	} else {
+		activeProfile = *profile
 	}
+
+	serverUrl := activeProfile.Api.Url
+	apiKey := activeProfile.Api.Key
 
 	clientConfig := serverapiclient.NewConfiguration()
 	clientConfig.Servers = serverapiclient.ServerConfigurations{
 		{
 			URL: serverUrl,
+		},
+	}
+
+	clientConfig.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", apiKey))
+
+	apiClient = serverapiclient.NewAPIClient(clientConfig)
+
+	apiClient.GetConfig().HTTPClient = &http.Client{
+		Transport: http.DefaultTransport,
+	}
+
+	return apiClient, nil
+}
+
+func GetAgentApiClient(apiUrl, apiKey string) (*serverapiclient.APIClient, error) {
+	clientConfig := serverapiclient.NewConfiguration()
+	clientConfig.Servers = serverapiclient.ServerConfigurations{
+		{
+			URL: apiUrl,
 		},
 	}
 
