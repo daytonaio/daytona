@@ -24,10 +24,11 @@ var columns = []table.Column{
 }
 
 type model struct {
-	table              table.Model
-	selectedApiKeyName string
-	selectable         bool
-	initialRows        []table.Row
+	table          table.Model
+	selectedApiKey *serverapiclient.ApiKey
+	selectable     bool
+	initialRows    []table.Row
+	apiKeys        []serverapiclient.ApiKey
 }
 
 func (m model) Init() tea.Cmd {
@@ -54,10 +55,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.table.Focus()
 			}
 		case "q", "ctrl+c":
-			m.selectedApiKeyName = ""
+			m.selectedApiKey = nil
 			return m, tea.Quit
 		case "enter":
-			m.selectedApiKeyName = m.table.SelectedRow()[0]
+			apiKeyName := m.table.SelectedRow()[0]
+			for _, apiKey := range m.apiKeys {
+				if *apiKey.Name == apiKeyName {
+					m.selectedApiKey = &apiKey
+					break
+				}
+			}
 			return m, tea.Quit
 		}
 	}
@@ -91,26 +98,25 @@ func renderApiKeyList(apiKeyList []serverapiclient.ApiKey, selectable bool) mode
 		table:       getTable(adjustedRows, adjustedCols, selectable, activeProfileRow),
 		selectable:  selectable,
 		initialRows: rows,
+		apiKeys:     apiKeyList,
 	}
 }
 
-func GetApiKeyNameFromPrompt(apiKeyList []serverapiclient.ApiKey, title string) string {
+func GetApiKeyFromPrompt(apiKeyList []serverapiclient.ApiKey, title string) *serverapiclient.ApiKey {
 	util.RenderMainTitle(title)
 
-	withNewProfile := apiKeyList
-
-	modelInstance := renderApiKeyList(withNewProfile, true)
+	modelInstance := renderApiKeyList(apiKeyList, true)
 
 	m, err := tea.NewProgram(modelInstance).Run()
 	if err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}
-	name := m.(model).selectedApiKeyName
+	selectedApiKey := m.(model).selectedApiKey
 
 	lipgloss.DefaultRenderer().Output().ClearLines(strings.Count(modelInstance.View(), "\n") + 2)
 
-	return name
+	return selectedApiKey
 }
 
 func ListApiKeys(apiKeyList []serverapiclient.ApiKey) {
