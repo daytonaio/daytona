@@ -12,9 +12,11 @@ import (
 
 	t_logger "github.com/daytonaio/daytona/internal/testing/logger"
 	t_targets "github.com/daytonaio/daytona/internal/testing/provider/targets"
+	t_containerregistries "github.com/daytonaio/daytona/internal/testing/server/containerregistries"
 	t_workspaces "github.com/daytonaio/daytona/internal/testing/server/workspaces"
 	"github.com/daytonaio/daytona/internal/testing/server/workspaces/mocks"
 	"github.com/daytonaio/daytona/pkg/apikey"
+	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logger"
 	"github.com/daytonaio/daytona/pkg/provider"
@@ -36,6 +38,12 @@ var target = provider.ProviderTarget{
 		Version: "test",
 	},
 	Options: "test-options",
+}
+
+var cr = containerregistry.ContainerRegistry{
+	Server:   "test-server",
+	Username: "test-username",
+	Password: "test-password",
 }
 
 var createWorkspaceRequest = dto.CreateWorkspaceRequest{
@@ -74,8 +82,12 @@ var workspaceInfo = workspace.WorkspaceInfo{
 func TestWorkspaceService(t *testing.T) {
 	workspaceStore := t_workspaces.NewInMemoryWorkspaceStore()
 
+	crStore := t_containerregistries.NewInMemoryContainerRegistryStore()
+	err := crStore.Save(&cr)
+	require.Nil(t, err)
+
 	targetStore := t_targets.NewInMemoryTargetStore()
-	err := targetStore.Save(&target)
+	err = targetStore.Save(&target)
 	require.Nil(t, err)
 
 	apiKeyService := mocks.NewMockApiKeyService()
@@ -84,13 +96,14 @@ func TestWorkspaceService(t *testing.T) {
 	logsDir := t.TempDir()
 
 	service := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
-		WorkspaceStore:      workspaceStore,
-		TargetStore:         targetStore,
-		ServerApiUrl:        serverApiUrl,
-		ServerUrl:           serverUrl,
-		DefaultProjectImage: defaultProjectImage,
-		ApiKeyService:       apiKeyService,
-		Provisioner:         provisioner,
+		WorkspaceStore:         workspaceStore,
+		TargetStore:            targetStore,
+		ServerApiUrl:           serverApiUrl,
+		ServerUrl:              serverUrl,
+		ContainerRegistryStore: crStore,
+		DefaultProjectImage:    defaultProjectImage,
+		ApiKeyService:          apiKeyService,
+		Provisioner:            provisioner,
 		NewWorkspaceLogger: func(workspaceId string) logger.Logger {
 			workspaceLogFilePath := filepath.Join(logsDir, workspaceId+".log")
 			workspaceLogFile, err := os.Create(workspaceLogFilePath)
@@ -118,13 +131,15 @@ func TestWorkspaceService(t *testing.T) {
 	})
 
 	t.Run("CreateWorkspace", func(t *testing.T) {
+		var containerRegistry *containerregistry.ContainerRegistry
+
 		provisioner.On("CreateWorkspace", mock.Anything, &target).Return(nil)
 		provisioner.On("StartWorkspace", mock.Anything, &target).Return(nil)
 
 		for _, project := range createWorkspaceRequest.Projects {
 			apiKeyService.On("Generate", apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", createWorkspaceRequest.Id, project.Name)).Return(project.Name, nil)
 		}
-		provisioner.On("CreateProject", mock.Anything, &target).Return(nil)
+		provisioner.On("CreateProject", mock.Anything, &target, containerRegistry).Return(nil)
 		provisioner.On("StartProject", mock.Anything, &target).Return(nil)
 
 		workspace, err := service.CreateWorkspace(createWorkspaceRequest)
