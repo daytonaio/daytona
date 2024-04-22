@@ -44,9 +44,15 @@ func (s *WorkspaceService) CreateWorkspace(req dto.CreateWorkspaceRequest) (*wor
 			projectImage = *project.Image
 		}
 
+		projectUser := s.defaultProjectUser
+		if project.User != nil {
+			projectUser = *project.User
+		}
+
 		project := &workspace.Project{
 			Name:        project.Name,
 			Image:       projectImage,
+			User:        projectUser,
 			Repository:  project.Source.Repository,
 			WorkspaceId: w.Id,
 			ApiKey:      apiKey,

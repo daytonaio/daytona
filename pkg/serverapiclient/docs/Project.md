@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **Repository** | Pointer to [**GitRepository**](GitRepository.md) |  | [optional] 
 **State** | Pointer to [**ProjectState**](ProjectState.md) |  | [optional] 
 **Target** | Pointer to **string** |  | [optional] 
+**User** | Pointer to **string** |  | [optional] 
 **WorkspaceId** | Pointer to **string** |  | [optional] 
 
 ## Methods
@@ -154,6 +155,31 @@ SetTarget sets Target field to given value.
 `func (o *Project) HasTarget() bool`
 
 HasTarget returns a boolean if a field has been set.
+
+### GetUser
+
+`func (o *Project) GetUser() string`
+
+GetUser returns the User field if non-nil, zero value otherwise.
+
+### GetUserOk
+
+`func (o *Project) GetUserOk() (*string, bool)`
+
+GetUserOk returns a tuple with the User field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetUser
+
+`func (o *Project) SetUser(v string)`
+
+SetUser sets User field to given value.
+
+### HasUser
+
+`func (o *Project) HasUser() bool`
+
+HasUser returns a boolean if a field has been set.
 
 ### GetWorkspaceId
 

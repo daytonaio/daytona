@@ -24,6 +24,7 @@ type CreateWorkspaceRequestProject struct {
 	Image   *string                              `json:"image,omitempty"`
 	Name    *string                              `json:"name,omitempty"`
 	Source  *CreateWorkspaceRequestProjectSource `json:"source,omitempty"`
+	User    *string                              `json:"user,omitempty"`
 }
 
 // NewCreateWorkspaceRequestProject instantiates a new CreateWorkspaceRequestProject object
@@ -203,6 +204,38 @@ func (o *CreateWorkspaceRequestProject) SetSource(v CreateWorkspaceRequestProjec
 	o.Source = &v
 }
 
+// GetUser returns the User field value if set, zero value otherwise.
+func (o *CreateWorkspaceRequestProject) GetUser() string {
+	if o == nil || IsNil(o.User) {
+		var ret string
+		return ret
+	}
+	return *o.User
+}
+
+// GetUserOk returns a tuple with the User field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateWorkspaceRequestProject) GetUserOk() (*string, bool) {
+	if o == nil || IsNil(o.User) {
+		return nil, false
+	}
+	return o.User, true
+}
+
+// HasUser returns a boolean if a field has been set.
+func (o *CreateWorkspaceRequestProject) HasUser() bool {
+	if o != nil && !IsNil(o.User) {
+		return true
+	}
+
+	return false
+}
+
+// SetUser gets a reference to the given string and assigns it to the User field.
+func (o *CreateWorkspaceRequestProject) SetUser(v string) {
+	o.User = &v
+}
+
 func (o CreateWorkspaceRequestProject) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -227,6 +260,9 @@ func (o CreateWorkspaceRequestProject) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Source) {
 		toSerialize["source"] = o.Source
+	}
+	if !IsNil(o.User) {
+		toSerialize["user"] = o.User
 	}
 	return toSerialize, nil
 }

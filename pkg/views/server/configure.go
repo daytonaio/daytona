@@ -39,6 +39,9 @@ func ConfigurationForm(config *serverapiclient.ServerConfig) *serverapiclient.Se
 			huh.NewInput().
 				Title("Default Project Image").
 				Value(config.DefaultProjectImage),
+			huh.NewInput().
+				Title("Default Project User").
+				Value(config.DefaultProjectUser),
 		),
 	)
 

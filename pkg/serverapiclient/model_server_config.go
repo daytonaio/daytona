@@ -22,6 +22,7 @@ type ServerConfig struct {
 	ApiPort             *int32      `json:"apiPort,omitempty"`
 	BinariesPath        *string     `json:"binariesPath,omitempty"`
 	DefaultProjectImage *string     `json:"defaultProjectImage,omitempty"`
+	DefaultProjectUser  *string     `json:"defaultProjectUser,omitempty"`
 	Frps                *FRPSConfig `json:"frps,omitempty"`
 	HeadscalePort       *int32      `json:"headscalePort,omitempty"`
 	Id                  *string     `json:"id,omitempty"`
@@ -142,6 +143,38 @@ func (o *ServerConfig) HasDefaultProjectImage() bool {
 // SetDefaultProjectImage gets a reference to the given string and assigns it to the DefaultProjectImage field.
 func (o *ServerConfig) SetDefaultProjectImage(v string) {
 	o.DefaultProjectImage = &v
+}
+
+// GetDefaultProjectUser returns the DefaultProjectUser field value if set, zero value otherwise.
+func (o *ServerConfig) GetDefaultProjectUser() string {
+	if o == nil || IsNil(o.DefaultProjectUser) {
+		var ret string
+		return ret
+	}
+	return *o.DefaultProjectUser
+}
+
+// GetDefaultProjectUserOk returns a tuple with the DefaultProjectUser field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ServerConfig) GetDefaultProjectUserOk() (*string, bool) {
+	if o == nil || IsNil(o.DefaultProjectUser) {
+		return nil, false
+	}
+	return o.DefaultProjectUser, true
+}
+
+// HasDefaultProjectUser returns a boolean if a field has been set.
+func (o *ServerConfig) HasDefaultProjectUser() bool {
+	if o != nil && !IsNil(o.DefaultProjectUser) {
+		return true
+	}
+
+	return false
+}
+
+// SetDefaultProjectUser gets a reference to the given string and assigns it to the DefaultProjectUser field.
+func (o *ServerConfig) SetDefaultProjectUser(v string) {
+	o.DefaultProjectUser = &v
 }
 
 // GetFrps returns the Frps field value if set, zero value otherwise.
@@ -386,6 +419,9 @@ func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.DefaultProjectImage) {
 		toSerialize["defaultProjectImage"] = o.DefaultProjectImage
+	}
+	if !IsNil(o.DefaultProjectUser) {
+		toSerialize["defaultProjectUser"] = o.DefaultProjectUser
 	}
 	if !IsNil(o.Frps) {
 		toSerialize["frps"] = o.Frps

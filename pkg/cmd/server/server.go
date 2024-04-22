@@ -142,6 +142,7 @@ var ServerCmd = &cobra.Command{
 			ServerApiUrl:           util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 			ServerUrl:              util.GetFrpcServerUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 			DefaultProjectImage:    c.DefaultProjectImage,
+			DefaultProjectUser:     c.DefaultProjectUser,
 			Provisioner:            provisioner,
 			NewWorkspaceLogger: func(workspaceId string) logger.Logger {
 				return logger.NewWorkspaceLogger(logsDir, workspaceId)

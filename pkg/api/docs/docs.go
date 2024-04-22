@@ -1122,6 +1122,9 @@ const docTemplate = `{
                 },
                 "source": {
                     "$ref": "#/definitions/CreateWorkspaceRequestProjectSource"
+                },
+                "user": {
+                    "type": "string"
                 }
             }
         },
@@ -1286,6 +1289,9 @@ const docTemplate = `{
                 "target": {
                     "type": "string"
                 },
+                "user": {
+                    "type": "string"
+                },
                 "workspaceId": {
                     "type": "string"
                 }
@@ -1364,6 +1370,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "defaultProjectImage": {
+                    "type": "string"
+                },
+                "defaultProjectUser": {
                     "type": "string"
                 },
                 "frps": {
