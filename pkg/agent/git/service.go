@@ -139,11 +139,11 @@ func (s *Service) SetGitConfig(userData *serverapiclient.GitUser) error {
 }
 
 func (s *Service) shouldCloneBranch(project *serverapiclient.Project) bool {
-	if project.Repository.Branch == nil {
+	if project.Repository.Branch == nil || *project.Repository.Branch == "" {
 		return false
 	}
 
-	if project.Repository.Sha == nil {
+	if project.Repository.Sha == nil || *project.Repository.Sha == "" {
 		return true
 	}
 
@@ -151,11 +151,11 @@ func (s *Service) shouldCloneBranch(project *serverapiclient.Project) bool {
 }
 
 func (s *Service) shouldCheckoutSha(project *serverapiclient.Project) bool {
-	if project.Repository.Sha == nil {
+	if project.Repository.Sha == nil || *project.Repository.Sha == "" {
 		return false
 	}
 
-	if project.Repository.Branch == nil {
+	if project.Repository.Branch == nil || *project.Repository.Branch == "" {
 		return true
 	}
 
