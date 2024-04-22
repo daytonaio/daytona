@@ -108,9 +108,16 @@ func (a *Agent) startProjectMode() error {
 }
 
 func (a *Agent) getProject() (*serverapiclient.Project, error) {
-	workspace, err := server.GetWorkspace(a.Config.WorkspaceId)
+	ctx := context.Background()
+
+	apiClient, err := server.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
 	if err != nil {
 		return nil, err
+	}
+
+	workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, a.Config.WorkspaceId).Execute()
+	if err != nil {
+		return nil, apiclient.HandleErrorResponse(res, err)
 	}
 
 	for _, project := range workspace.Projects {
@@ -125,7 +132,7 @@ func (a *Agent) getProject() (*serverapiclient.Project, error) {
 func (a *Agent) getGitProvider(repoUrl string) (*serverapiclient.GitProvider, error) {
 	ctx := context.Background()
 
-	apiClient, err := server.GetApiClient(nil)
+	apiClient, err := server.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +151,7 @@ func (a *Agent) getGitProvider(repoUrl string) (*serverapiclient.GitProvider, er
 }
 
 func (a *Agent) getGitUser(gitProviderId string) (*serverapiclient.GitUser, error) {
-	apiClient, err := server.GetApiClient(nil)
+	apiClient, err := server.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
 	if err != nil {
 		return nil, err
 	}
@@ -195,7 +202,7 @@ func (a *Agent) uptime() int32 {
 }
 
 func (a *Agent) updateProjectState() error {
-	apiClient, err := server.GetApiClient(nil)
+	apiClient, err := server.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
 	if err != nil {
 		return err
 	}

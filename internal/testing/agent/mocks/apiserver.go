@@ -8,6 +8,7 @@ package mocks
 import (
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/daytonaio/daytona/pkg/server"
@@ -15,7 +16,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewMockRestServer(t *testing.T, workspace *workspace.Workspace) *http.Server {
+func NewMockRestServer(t *testing.T, workspace *workspace.Workspace) *httptest.Server {
 	router := gin.Default()
 	serverController := router.Group("/server")
 	{
@@ -51,10 +52,7 @@ func NewMockRestServer(t *testing.T, workspace *workspace.Workspace) *http.Serve
 		})
 	}
 
-	server := &http.Server{
-		Addr:    ":3000",
-		Handler: router,
-	}
+	server := httptest.NewServer(router)
 
 	return server
 }
