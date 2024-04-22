@@ -41,6 +41,7 @@ type WorkspaceServiceConfig struct {
 	ServerUrl              string
 	Provisioner            provisioner.IProvisioner
 	DefaultProjectImage    string
+	DefaultProjectUser     string
 	ApiKeyService          apikeys.IApiKeyService
 	NewWorkspaceLogger     func(workspaceId string) logger.Logger
 	NewProjectLogger       func(workspaceId, projectName string) logger.Logger
@@ -55,6 +56,7 @@ func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 		serverApiUrl:           config.ServerApiUrl,
 		serverUrl:              config.ServerUrl,
 		defaultProjectImage:    config.DefaultProjectImage,
+		defaultProjectUser:     config.DefaultProjectUser,
 		provisioner:            config.Provisioner,
 		newWorkspaceLogger:     config.NewWorkspaceLogger,
 		newProjectLogger:       config.NewProjectLogger,
@@ -72,6 +74,7 @@ type WorkspaceService struct {
 	serverApiUrl           string
 	serverUrl              string
 	defaultProjectImage    string
+	defaultProjectUser     string
 	newWorkspaceLogger     func(workspaceId string) logger.Logger
 	newProjectLogger       func(workspaceId, projectName string) logger.Logger
 	newWorkspaceLogReader  func(workspaceId string) (io.Reader, error)

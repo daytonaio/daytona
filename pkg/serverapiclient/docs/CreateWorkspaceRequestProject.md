@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **Image** | Pointer to **string** |  | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
 **Source** | Pointer to [**CreateWorkspaceRequestProjectSource**](CreateWorkspaceRequestProjectSource.md) |  | [optional] 
+**User** | Pointer to **string** |  | [optional] 
 
 ## Methods
 
@@ -153,6 +154,31 @@ SetSource sets Source field to given value.
 `func (o *CreateWorkspaceRequestProject) HasSource() bool`
 
 HasSource returns a boolean if a field has been set.
+
+### GetUser
+
+`func (o *CreateWorkspaceRequestProject) GetUser() string`
+
+GetUser returns the User field if non-nil, zero value otherwise.
+
+### GetUserOk
+
+`func (o *CreateWorkspaceRequestProject) GetUserOk() (*string, bool)`
+
+GetUserOk returns a tuple with the User field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetUser
+
+`func (o *CreateWorkspaceRequestProject) SetUser(v string)`
+
+SetUser sets User field to given value.
+
+### HasUser
+
+`func (o *CreateWorkspaceRequestProject) HasUser() bool`
+
+HasUser returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

@@ -24,6 +24,7 @@ type Project struct {
 	Repository  *GitRepository `json:"repository,omitempty"`
 	State       *ProjectState  `json:"state,omitempty"`
 	Target      *string        `json:"target,omitempty"`
+	User        *string        `json:"user,omitempty"`
 	WorkspaceId *string        `json:"workspaceId,omitempty"`
 }
 
@@ -204,6 +205,38 @@ func (o *Project) SetTarget(v string) {
 	o.Target = &v
 }
 
+// GetUser returns the User field value if set, zero value otherwise.
+func (o *Project) GetUser() string {
+	if o == nil || IsNil(o.User) {
+		var ret string
+		return ret
+	}
+	return *o.User
+}
+
+// GetUserOk returns a tuple with the User field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Project) GetUserOk() (*string, bool) {
+	if o == nil || IsNil(o.User) {
+		return nil, false
+	}
+	return o.User, true
+}
+
+// HasUser returns a boolean if a field has been set.
+func (o *Project) HasUser() bool {
+	if o != nil && !IsNil(o.User) {
+		return true
+	}
+
+	return false
+}
+
+// SetUser gets a reference to the given string and assigns it to the User field.
+func (o *Project) SetUser(v string) {
+	o.User = &v
+}
+
 // GetWorkspaceId returns the WorkspaceId field value if set, zero value otherwise.
 func (o *Project) GetWorkspaceId() string {
 	if o == nil || IsNil(o.WorkspaceId) {
@@ -260,6 +293,9 @@ func (o Project) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Target) {
 		toSerialize["target"] = o.Target
+	}
+	if !IsNil(o.User) {
+		toSerialize["user"] = o.User
 	}
 	if !IsNil(o.WorkspaceId) {
 		toSerialize["workspaceId"] = o.WorkspaceId

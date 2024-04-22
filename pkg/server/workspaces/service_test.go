@@ -30,6 +30,7 @@ import (
 const serverApiUrl = "http://localhost:3000"
 const serverUrl = "http://localhost:3001"
 const defaultProjectImage = "daytonaio/workspace-project:latest"
+const defaultProjectUser = "daytona"
 
 var target = provider.ProviderTarget{
 	Name: "test-target",
@@ -102,6 +103,7 @@ func TestWorkspaceService(t *testing.T) {
 		ServerUrl:              serverUrl,
 		ContainerRegistryStore: crStore,
 		DefaultProjectImage:    defaultProjectImage,
+		DefaultProjectUser:     defaultProjectUser,
 		ApiKeyService:          apiKeyService,
 		Provisioner:            provisioner,
 		NewWorkspaceLogger: func(workspaceId string) logger.Logger {

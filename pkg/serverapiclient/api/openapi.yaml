@@ -799,6 +799,7 @@ components:
               branch: branch
               sha: sha
               url: url
+          user: user
         - image: image
           envVars:
             key: envVars
@@ -815,6 +816,7 @@ components:
               branch: branch
               sha: sha
               url: url
+          user: user
         name: name
         id: id
         target: target
@@ -848,6 +850,7 @@ components:
             branch: branch
             sha: sha
             url: url
+        user: user
       properties:
         envVars:
           additionalProperties:
@@ -861,6 +864,8 @@ components:
           type: string
         source:
           $ref: '#/components/schemas/CreateWorkspaceRequestProjectSource'
+        user:
+          type: string
       type: object
     CreateWorkspaceRequestProjectSource:
       example:
@@ -1021,6 +1026,7 @@ components:
           branch: branch
           sha: sha
           url: url
+        user: user
         target: target
         workspaceId: workspaceId
       properties:
@@ -1033,6 +1039,8 @@ components:
         state:
           $ref: '#/components/schemas/ProjectState'
         target:
+          type: string
+        user:
           type: string
         workspaceId:
           type: string
@@ -1105,6 +1113,7 @@ components:
         binariesPath: binariesPath
         logFilePath: logFilePath
         defaultProjectImage: defaultProjectImage
+        defaultProjectUser: defaultProjectUser
         providersDir: providersDir
         id: id
         frps:
@@ -1117,6 +1126,8 @@ components:
         binariesPath:
           type: string
         defaultProjectImage:
+          type: string
+        defaultProjectUser:
           type: string
         frps:
           $ref: '#/components/schemas/FRPSConfig'
@@ -1158,6 +1169,7 @@ components:
             branch: branch
             sha: sha
             url: url
+          user: user
           target: target
           workspaceId: workspaceId
         - image: image
@@ -1175,6 +1187,7 @@ components:
             branch: branch
             sha: sha
             url: url
+          user: user
           target: target
           workspaceId: workspaceId
         name: name
@@ -1210,6 +1223,7 @@ components:
             branch: branch
             sha: sha
             url: url
+          user: user
           target: target
           workspaceId: workspaceId
         - image: image
@@ -1227,6 +1241,7 @@ components:
             branch: branch
             sha: sha
             url: url
+          user: user
           target: target
           workspaceId: workspaceId
         name: name
