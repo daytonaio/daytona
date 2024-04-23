@@ -11,7 +11,9 @@ API version: 0.1.0
 package serverapiclient
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the CreateWorkspaceRequestProject type satisfies the MappedNullable interface at compile time
@@ -20,19 +22,21 @@ var _ MappedNullable = &CreateWorkspaceRequestProject{}
 // CreateWorkspaceRequestProject struct for CreateWorkspaceRequestProject
 type CreateWorkspaceRequestProject struct {
 	EnvVars *map[string]string                   `json:"envVars,omitempty"`
-	Id      *string                              `json:"id,omitempty"`
 	Image   *string                              `json:"image,omitempty"`
-	Name    *string                              `json:"name,omitempty"`
+	Name    string                               `json:"name"`
 	Source  *CreateWorkspaceRequestProjectSource `json:"source,omitempty"`
 	User    *string                              `json:"user,omitempty"`
 }
+
+type _CreateWorkspaceRequestProject CreateWorkspaceRequestProject
 
 // NewCreateWorkspaceRequestProject instantiates a new CreateWorkspaceRequestProject object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateWorkspaceRequestProject() *CreateWorkspaceRequestProject {
+func NewCreateWorkspaceRequestProject(name string) *CreateWorkspaceRequestProject {
 	this := CreateWorkspaceRequestProject{}
+	this.Name = name
 	return &this
 }
 
@@ -76,38 +80,6 @@ func (o *CreateWorkspaceRequestProject) SetEnvVars(v map[string]string) {
 	o.EnvVars = &v
 }
 
-// GetId returns the Id field value if set, zero value otherwise.
-func (o *CreateWorkspaceRequestProject) GetId() string {
-	if o == nil || IsNil(o.Id) {
-		var ret string
-		return ret
-	}
-	return *o.Id
-}
-
-// GetIdOk returns a tuple with the Id field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *CreateWorkspaceRequestProject) GetIdOk() (*string, bool) {
-	if o == nil || IsNil(o.Id) {
-		return nil, false
-	}
-	return o.Id, true
-}
-
-// HasId returns a boolean if a field has been set.
-func (o *CreateWorkspaceRequestProject) HasId() bool {
-	if o != nil && !IsNil(o.Id) {
-		return true
-	}
-
-	return false
-}
-
-// SetId gets a reference to the given string and assigns it to the Id field.
-func (o *CreateWorkspaceRequestProject) SetId(v string) {
-	o.Id = &v
-}
-
 // GetImage returns the Image field value if set, zero value otherwise.
 func (o *CreateWorkspaceRequestProject) GetImage() string {
 	if o == nil || IsNil(o.Image) {
@@ -140,36 +112,28 @@ func (o *CreateWorkspaceRequestProject) SetImage(v string) {
 	o.Image = &v
 }
 
-// GetName returns the Name field value if set, zero value otherwise.
+// GetName returns the Name field value
 func (o *CreateWorkspaceRequestProject) GetName() string {
-	if o == nil || IsNil(o.Name) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Name
+
+	return o.Name
 }
 
-// GetNameOk returns a tuple with the Name field value if set, nil otherwise
+// GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
 func (o *CreateWorkspaceRequestProject) GetNameOk() (*string, bool) {
-	if o == nil || IsNil(o.Name) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Name, true
+	return &o.Name, true
 }
 
-// HasName returns a boolean if a field has been set.
-func (o *CreateWorkspaceRequestProject) HasName() bool {
-	if o != nil && !IsNil(o.Name) {
-		return true
-	}
-
-	return false
-}
-
-// SetName gets a reference to the given string and assigns it to the Name field.
+// SetName sets field value
 func (o *CreateWorkspaceRequestProject) SetName(v string) {
-	o.Name = &v
+	o.Name = v
 }
 
 // GetSource returns the Source field value if set, zero value otherwise.
@@ -249,15 +213,10 @@ func (o CreateWorkspaceRequestProject) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.EnvVars) {
 		toSerialize["envVars"] = o.EnvVars
 	}
-	if !IsNil(o.Id) {
-		toSerialize["id"] = o.Id
-	}
 	if !IsNil(o.Image) {
 		toSerialize["image"] = o.Image
 	}
-	if !IsNil(o.Name) {
-		toSerialize["name"] = o.Name
-	}
+	toSerialize["name"] = o.Name
 	if !IsNil(o.Source) {
 		toSerialize["source"] = o.Source
 	}
@@ -265,6 +224,43 @@ func (o CreateWorkspaceRequestProject) ToMap() (map[string]interface{}, error) {
 		toSerialize["user"] = o.User
 	}
 	return toSerialize, nil
+}
+
+func (o *CreateWorkspaceRequestProject) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	requiredProperties := []string{
+		"name",
+	}
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	for _, requiredProperty := range requiredProperties {
+		if _, exists := allProperties[requiredProperty]; !exists {
+			return fmt.Errorf("no value given for required property %v", requiredProperty)
+		}
+	}
+
+	varCreateWorkspaceRequestProject := _CreateWorkspaceRequestProject{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&varCreateWorkspaceRequestProject)
+
+	if err != nil {
+		return err
+	}
+
+	*o = CreateWorkspaceRequestProject(varCreateWorkspaceRequestProject)
+
+	return err
 }
 
 type NullableCreateWorkspaceRequestProject struct {

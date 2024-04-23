@@ -31,6 +31,8 @@ definitions:
         type: array
       target:
         type: string
+    required:
+    - projects
     type: object
   CreateWorkspaceRequestProject:
     properties:
@@ -38,8 +40,6 @@ definitions:
         additionalProperties:
           type: string
         type: object
-      id:
-        type: string
       image:
         type: string
       name:
@@ -48,6 +48,8 @@ definitions:
         $ref: '#/definitions/CreateWorkspaceRequestProjectSource'
       user:
         type: string
+    required:
+    - name
     type: object
   CreateWorkspaceRequestProjectSource:
     properties:

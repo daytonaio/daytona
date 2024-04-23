@@ -23,8 +23,7 @@ type CreateWorkspaceRequestProjectSource struct {
 } // @name CreateWorkspaceRequestProjectSource
 
 type CreateWorkspaceRequestProject struct {
-	Id      string                              `json:"id"`
-	Name    string                              `json:"name"`
+	Name    string                              `json:"name" validate:"required,gt=0"`
 	Image   *string                             `json:"image,omitempty"`
 	User    *string                             `json:"user,omitempty"`
 	Source  CreateWorkspaceRequestProjectSource `json:"source"`
@@ -35,5 +34,5 @@ type CreateWorkspaceRequest struct {
 	Id       string                          `json:"id"`
 	Name     string                          `json:"name"`
 	Target   string                          `json:"target"`
-	Projects []CreateWorkspaceRequestProject `json:"projects"`
+	Projects []CreateWorkspaceRequestProject `json:"projects" validate:"required,gt=0,dive"`
 } //	@name	CreateWorkspaceRequest
