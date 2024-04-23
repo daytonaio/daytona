@@ -4,7 +4,6 @@
 package create
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"unicode"
@@ -183,54 +182,6 @@ func RunProjectForm(workspaceCreationPromptResponse WorkspaceCreationPromptRespo
 	result := workspaceCreationPromptResponse
 	result.SecondaryProjects = append(result.SecondaryProjects, project)
 	result.AddingMoreProjects = moreCheck
-
-	return result, nil
-}
-
-func RunWorkspaceNameForm(workspaceCreationPromptResponse WorkspaceCreationPromptResponse, suggestedName string, workspaceNames []string) (WorkspaceCreationPromptResponse, error) {
-	m := Model{width: maxWidth, workspaceCreationPromptResponse: workspaceCreationPromptResponse}
-	m.lg = lipgloss.DefaultRenderer()
-	m.styles = NewStyles(m.lg)
-
-	workspaceName := suggestedName
-
-	workspaceNamePrompt :=
-		huh.NewInput().
-			Title("Workspace name").
-			Value(&workspaceName).
-			Key("workspaceName").
-			Validate(func(str string) error {
-				result, err := util.GetValidatedWorkspaceName(str)
-				if err != nil {
-					return err
-				}
-				for _, name := range workspaceNames {
-					if name == result {
-						return errors.New("workspace name already exists")
-					}
-				}
-				workspaceName = result
-				return nil
-			})
-
-	dTheme := views.GetCustomTheme()
-
-	m.form = huh.NewForm(
-		huh.NewGroup(
-			workspaceNamePrompt,
-		),
-	).WithTheme(dTheme).
-		WithWidth(maxWidth).
-		WithShowHelp(false).
-		WithShowErrors(true)
-
-	err := m.form.Run()
-	if err != nil {
-		return WorkspaceCreationPromptResponse{}, err
-	}
-
-	result := workspaceCreationPromptResponse
-	result.WorkspaceName = workspaceName
 
 	return result, nil
 }

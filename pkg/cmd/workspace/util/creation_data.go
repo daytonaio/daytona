@@ -18,7 +18,10 @@ func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []serve
 	var providerRepo serverapiclient.GitRepository
 	var providerRepoUrl string
 	var err error
-	var confirmCheck bool
+	var workspaceName string
+	var primaryContainerImage string
+	var primaryContainerUser string
+	doneCheck := true
 
 	if !manual && userGitProviders != nil && len(userGitProviders) > 0 {
 		providerRepo, err = getRepositoryFromWizard(userGitProviders, 0)
@@ -69,17 +72,6 @@ func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []serve
 		projectList = append(projectList, workspaceCreationPromptResponse.SecondaryProjects...)
 	}
 
-	suggestedName := create.GetSuggestedWorkspaceName(*workspaceCreationPromptResponse.PrimaryProject.Source.Repository.Url)
-
-	workspaceCreationPromptResponse, err = create.RunWorkspaceNameForm(workspaceCreationPromptResponse, suggestedName, workspaceNames)
-	if err != nil {
-		return "", nil, err
-	}
-
-	if workspaceCreationPromptResponse.WorkspaceName == "" {
-		return "", nil, errors.New("workspace name is required")
-	}
-
 	for i, project := range projectList {
 		if project.Source == nil || project.Source.Repository == nil || project.Source.Repository.Url == nil {
 			return "", nil, errors.New("repository is required")
@@ -88,14 +80,30 @@ func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []serve
 		projectList[i].Name = projectName
 	}
 
-	if len(projectList) > 1 {
-		create.DisplaySummaryView(workspaceCreationPromptResponse.WorkspaceName, projectList, &confirmCheck)
-		if !confirmCheck {
+	suggestedName := create.GetSuggestedWorkspaceName(*workspaceCreationPromptResponse.PrimaryProject.Source.Repository.Url)
+
+	workspaceName, primaryContainerImage, primaryContainerUser = create.GetWorkspaceDataFromPrompt(suggestedName, workspaceNames, !multiProject)
+
+	if workspaceName == "" {
+		return "", nil, errors.New("workspace name is required")
+	}
+
+	if primaryContainerImage != "" {
+		projectList[0].Image = &primaryContainerImage
+	}
+
+	if primaryContainerUser != "" {
+		projectList[0].User = &primaryContainerUser
+	}
+
+	if multiProject {
+		create.DisplayMultiSubmitForm(workspaceName, &projectList, &doneCheck)
+		if !doneCheck {
 			return "", nil, errors.New("operation cancelled")
 		}
 	}
 
-	return workspaceCreationPromptResponse.WorkspaceName, projectList, nil
+	return workspaceName, projectList, nil
 }
 
 func GetProjectNameFromRepo(repoUrl string) string {

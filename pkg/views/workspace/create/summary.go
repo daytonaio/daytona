@@ -26,13 +26,26 @@ type SummaryModel struct {
 	projectList   []serverapiclient.CreateWorkspaceRequestProject
 }
 
-func DisplaySummaryView(workspaceName string, projectList []serverapiclient.CreateWorkspaceRequestProject, confirmCheck *bool) {
-	m := NewSummaryModel(workspaceName, projectList, confirmCheck)
+var configureCheck bool
+
+func DisplayMultiSubmitForm(workspaceName string, projectList *[]serverapiclient.CreateWorkspaceRequestProject, doneCheck *bool) {
+	m := NewSummaryModel(workspaceName, *projectList, doneCheck)
 
 	if _, err := tea.NewProgram(m).Run(); err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}
+
+	if !configureCheck {
+		return
+	}
+
+	configuredProjects, err := ConfigureProjects(*projectList)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	*projectList = configuredProjects
 }
 
 func RenderSummary(workspaceName string, projectList []serverapiclient.CreateWorkspaceRequestProject) string {
@@ -64,7 +77,7 @@ func RenderSummary(workspaceName string, projectList []serverapiclient.CreateWor
 	return output
 }
 
-func NewSummaryModel(workspaceName string, projectList []serverapiclient.CreateWorkspaceRequestProject, confirmCheck *bool) SummaryModel {
+func NewSummaryModel(workspaceName string, projectList []serverapiclient.CreateWorkspaceRequestProject, doneCheck *bool) SummaryModel {
 	m := SummaryModel{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
@@ -76,9 +89,9 @@ func NewSummaryModel(workspaceName string, projectList []serverapiclient.CreateW
 			huh.NewConfirm().
 				Title("Good to go?").
 				Negative("Abort").
-				Value(confirmCheck),
+				Value(doneCheck),
 		),
-	).WithTheme(views.GetCustomTheme())
+	).WithShowHelp(false).WithTheme(views.GetCustomTheme())
 
 	return m
 }
@@ -94,14 +107,19 @@ func (m SummaryModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "q", "ctrl+c":
 			m.quitting = true
 			return m, tea.Quit
+		case "f10":
+			m.quitting = true
+			m.form.State = huh.StateCompleted
+			configureCheck = true
+			return m, tea.Quit
 		}
 	}
 
 	var cmds []tea.Cmd
 
 	// Process the form
-	activeForm, cmd := m.form.Update(msg)
-	if f, ok := activeForm.(*huh.Form); ok {
+	form, cmd := m.form.Update(msg)
+	if f, ok := form.(*huh.Form); ok {
 		m.form = f
 		cmds = append(cmds, cmd)
 	}
@@ -120,5 +138,5 @@ func (m SummaryModel) View() string {
 		return ""
 	}
 
-	return view_util.GetBorderedMessage(RenderSummary(m.workspaceName, m.projectList)) + "\n" + m.form.View()
+	return view_util.GetBorderedMessage(RenderSummary(m.workspaceName, m.projectList)) + "\n" + m.form.View() + configurationHelpLine
 }
