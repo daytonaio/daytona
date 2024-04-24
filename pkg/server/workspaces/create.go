@@ -49,15 +49,21 @@ func (s *WorkspaceService) CreateWorkspace(req dto.CreateWorkspaceRequest) (*wor
 			projectUser = *project.User
 		}
 
+		postStartCommands := s.defaultProjectPostStartCommands
+		if project.PostStartCommands != nil {
+			postStartCommands = *project.PostStartCommands
+		}
+
 		project := &workspace.Project{
-			Name:        project.Name,
-			Image:       projectImage,
-			User:        projectUser,
-			Repository:  project.Source.Repository,
-			WorkspaceId: w.Id,
-			ApiKey:      apiKey,
-			Target:      w.Target,
-			EnvVars:     project.EnvVars,
+			Name:              project.Name,
+			Image:             projectImage,
+			User:              projectUser,
+			PostStartCommands: postStartCommands,
+			Repository:        project.Source.Repository,
+			WorkspaceId:       w.Id,
+			ApiKey:            apiKey,
+			Target:            w.Target,
+			EnvVars:           project.EnvVars,
 		}
 		w.Projects = append(w.Projects, project)
 	}

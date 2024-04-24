@@ -24,8 +24,9 @@ var project1 = &workspace.Project{
 		Url:  "https://github.com/daytonaio/daytona",
 		Name: "daytona",
 	},
-	WorkspaceId: "123",
-	Target:      "local",
+	WorkspaceId:       "123",
+	Target:            "local",
+	PostStartCommands: []string{"echo 'test' > test.txt"},
 }
 
 var workspace1 = &workspace.Workspace{
@@ -73,6 +74,9 @@ func TestAgent(t *testing.T) {
 		err := a.Start()
 
 		require.Nil(t, err)
+
+		// Check post start command result
+		require.FileExists(t, mockConfig.ProjectDir+"/test.txt")
 	})
 
 	t.Cleanup(func() {

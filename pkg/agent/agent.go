@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os/exec"
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -106,6 +107,8 @@ func (a *Agent) startProjectMode() error {
 		}
 	}()
 
+	a.runPostStartCommands(project)
+
 	return nil
 }
 
@@ -196,6 +199,25 @@ func (a *Agent) setDefaultConfig() error {
 	}
 
 	return config.Save()
+}
+
+func (a *Agent) runPostStartCommands(project *serverapiclient.Project) {
+	log.Info("Running post start commands...")
+
+	for _, command := range project.PostStartCommands {
+		go func() {
+			log.Info("Running command: " + command)
+			cmd := exec.Command("sh", "-c", command)
+			cmd.Dir = a.Config.ProjectDir
+			cmd.Stdout = a.LogWriter
+			cmd.Stderr = a.LogWriter
+
+			err := cmd.Run()
+			if err != nil {
+				log.Error(fmt.Sprintf("command '%s' failed: %v", command, err))
+			}
+		}()
+	}
 }
 
 // Agent uptime in seconds

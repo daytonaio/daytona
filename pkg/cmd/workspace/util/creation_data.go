@@ -39,7 +39,7 @@ func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []serve
 		return "", nil, err
 	}
 
-	if workspaceCreationPromptResponse.PrimaryProject == (serverapiclient.CreateWorkspaceRequestProject{}) {
+	if workspaceCreationPromptResponse.PrimaryProject.Source == nil {
 		return "", nil, errors.New("primary project is required")
 	}
 

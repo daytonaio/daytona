@@ -19,13 +19,14 @@ var _ MappedNullable = &Project{}
 
 // Project struct for Project
 type Project struct {
-	Image       *string        `json:"image,omitempty"`
-	Name        *string        `json:"name,omitempty"`
-	Repository  *GitRepository `json:"repository,omitempty"`
-	State       *ProjectState  `json:"state,omitempty"`
-	Target      *string        `json:"target,omitempty"`
-	User        *string        `json:"user,omitempty"`
-	WorkspaceId *string        `json:"workspaceId,omitempty"`
+	Image             *string        `json:"image,omitempty"`
+	Name              *string        `json:"name,omitempty"`
+	PostStartCommands []string       `json:"postStartCommands,omitempty"`
+	Repository        *GitRepository `json:"repository,omitempty"`
+	State             *ProjectState  `json:"state,omitempty"`
+	Target            *string        `json:"target,omitempty"`
+	User              *string        `json:"user,omitempty"`
+	WorkspaceId       *string        `json:"workspaceId,omitempty"`
 }
 
 // NewProject instantiates a new Project object
@@ -107,6 +108,38 @@ func (o *Project) HasName() bool {
 // SetName gets a reference to the given string and assigns it to the Name field.
 func (o *Project) SetName(v string) {
 	o.Name = &v
+}
+
+// GetPostStartCommands returns the PostStartCommands field value if set, zero value otherwise.
+func (o *Project) GetPostStartCommands() []string {
+	if o == nil || IsNil(o.PostStartCommands) {
+		var ret []string
+		return ret
+	}
+	return o.PostStartCommands
+}
+
+// GetPostStartCommandsOk returns a tuple with the PostStartCommands field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Project) GetPostStartCommandsOk() ([]string, bool) {
+	if o == nil || IsNil(o.PostStartCommands) {
+		return nil, false
+	}
+	return o.PostStartCommands, true
+}
+
+// HasPostStartCommands returns a boolean if a field has been set.
+func (o *Project) HasPostStartCommands() bool {
+	if o != nil && !IsNil(o.PostStartCommands) {
+		return true
+	}
+
+	return false
+}
+
+// SetPostStartCommands gets a reference to the given []string and assigns it to the PostStartCommands field.
+func (o *Project) SetPostStartCommands(v []string) {
+	o.PostStartCommands = v
 }
 
 // GetRepository returns the Repository field value if set, zero value otherwise.
@@ -284,6 +317,9 @@ func (o Project) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
+	}
+	if !IsNil(o.PostStartCommands) {
+		toSerialize["postStartCommands"] = o.PostStartCommands
 	}
 	if !IsNil(o.Repository) {
 		toSerialize["repository"] = o.Repository

@@ -7,6 +7,7 @@ Name | Type | Description | Notes
 **EnvVars** | Pointer to **map[string]string** |  | [optional] 
 **Image** | Pointer to **string** |  | [optional] 
 **Name** | **string** |  | 
+**PostStartCommands** | Pointer to **[]string** |  | [optional] 
 **Source** | Pointer to [**CreateWorkspaceRequestProjectSource**](CreateWorkspaceRequestProjectSource.md) |  | [optional] 
 **User** | Pointer to **string** |  | [optional] 
 
@@ -98,6 +99,31 @@ and a boolean to check if the value has been set.
 
 SetName sets Name field to given value.
 
+
+### GetPostStartCommands
+
+`func (o *CreateWorkspaceRequestProject) GetPostStartCommands() []string`
+
+GetPostStartCommands returns the PostStartCommands field if non-nil, zero value otherwise.
+
+### GetPostStartCommandsOk
+
+`func (o *CreateWorkspaceRequestProject) GetPostStartCommandsOk() (*[]string, bool)`
+
+GetPostStartCommandsOk returns a tuple with the PostStartCommands field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetPostStartCommands
+
+`func (o *CreateWorkspaceRequestProject) SetPostStartCommands(v []string)`
+
+SetPostStartCommands sets PostStartCommands field to given value.
+
+### HasPostStartCommands
+
+`func (o *CreateWorkspaceRequestProject) HasPostStartCommands() bool`
+
+HasPostStartCommands returns a boolean if a field has been set.
 
 ### GetSource
 

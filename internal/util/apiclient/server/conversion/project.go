@@ -10,11 +10,12 @@ import (
 
 func ToProjectDTO(project *workspace.Project) *serverapiclient.Project {
 	projectDto := &serverapiclient.Project{
-		Name:        &project.Name,
-		Target:      &project.Target,
-		WorkspaceId: &project.WorkspaceId,
-		Image:       &project.Image,
-		User:        &project.User,
+		Name:              &project.Name,
+		Target:            &project.Target,
+		WorkspaceId:       &project.WorkspaceId,
+		Image:             &project.Image,
+		User:              &project.User,
+		PostStartCommands: project.PostStartCommands,
 		Repository: &serverapiclient.GitRepository{
 			Id:     &project.Repository.Id,
 			Name:   &project.Repository.Name,
