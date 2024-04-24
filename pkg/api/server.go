@@ -41,6 +41,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/workspace"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	log "github.com/sirupsen/logrus"
 
 	swaggerfiles "github.com/swaggo/files"
@@ -68,6 +69,8 @@ func (a *ApiServer) Start() error {
 	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Description = "Daytona Server API"
 	docs.SwaggerInfo.Title = "Daytona Server API"
+
+	binding.Validator = new(defaultValidator)
 
 	if mode, ok := os.LookupEnv("DAYTONA_SERVER_MODE"); ok && mode == "development" {
 		a.router = gin.Default()

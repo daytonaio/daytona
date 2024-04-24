@@ -53,7 +53,6 @@ var createWorkspaceRequest = dto.CreateWorkspaceRequest{
 	Target: target.Name,
 	Projects: []dto.CreateWorkspaceRequestProject{
 		{
-			Id:   "project1",
 			Name: "project1",
 			Source: dto.CreateWorkspaceRequestProjectSource{
 				Repository: &gitprovider.GitRepository{

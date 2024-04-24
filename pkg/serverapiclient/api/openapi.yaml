@@ -787,7 +787,6 @@ components:
           envVars:
             key: envVars
           name: name
-          id: id
           source:
             repository:
               owner: owner
@@ -804,7 +803,6 @@ components:
           envVars:
             key: envVars
           name: name
-          id: id
           source:
             repository:
               owner: owner
@@ -831,6 +829,8 @@ components:
           type: array
         target:
           type: string
+      required:
+      - projects
       type: object
     CreateWorkspaceRequestProject:
       example:
@@ -838,7 +838,6 @@ components:
         envVars:
           key: envVars
         name: name
-        id: id
         source:
           repository:
             owner: owner
@@ -856,8 +855,6 @@ components:
           additionalProperties:
             type: string
           type: object
-        id:
-          type: string
         image:
           type: string
         name:
@@ -866,6 +863,8 @@ components:
           $ref: '#/components/schemas/CreateWorkspaceRequestProjectSource'
         user:
           type: string
+      required:
+      - name
       type: object
     CreateWorkspaceRequestProjectSource:
       example:

@@ -5,9 +5,8 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **EnvVars** | Pointer to **map[string]string** |  | [optional] 
-**Id** | Pointer to **string** |  | [optional] 
 **Image** | Pointer to **string** |  | [optional] 
-**Name** | Pointer to **string** |  | [optional] 
+**Name** | **string** |  | 
 **Source** | Pointer to [**CreateWorkspaceRequestProjectSource**](CreateWorkspaceRequestProjectSource.md) |  | [optional] 
 **User** | Pointer to **string** |  | [optional] 
 
@@ -15,7 +14,7 @@ Name | Type | Description | Notes
 
 ### NewCreateWorkspaceRequestProject
 
-`func NewCreateWorkspaceRequestProject() *CreateWorkspaceRequestProject`
+`func NewCreateWorkspaceRequestProject(name string, ) *CreateWorkspaceRequestProject`
 
 NewCreateWorkspaceRequestProject instantiates a new CreateWorkspaceRequestProject object
 This constructor will assign default values to properties that have it defined,
@@ -54,31 +53,6 @@ SetEnvVars sets EnvVars field to given value.
 `func (o *CreateWorkspaceRequestProject) HasEnvVars() bool`
 
 HasEnvVars returns a boolean if a field has been set.
-
-### GetId
-
-`func (o *CreateWorkspaceRequestProject) GetId() string`
-
-GetId returns the Id field if non-nil, zero value otherwise.
-
-### GetIdOk
-
-`func (o *CreateWorkspaceRequestProject) GetIdOk() (*string, bool)`
-
-GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetId
-
-`func (o *CreateWorkspaceRequestProject) SetId(v string)`
-
-SetId sets Id field to given value.
-
-### HasId
-
-`func (o *CreateWorkspaceRequestProject) HasId() bool`
-
-HasId returns a boolean if a field has been set.
 
 ### GetImage
 
@@ -124,11 +98,6 @@ and a boolean to check if the value has been set.
 
 SetName sets Name field to given value.
 
-### HasName
-
-`func (o *CreateWorkspaceRequestProject) HasName() bool`
-
-HasName returns a boolean if a field has been set.
 
 ### GetSource
 

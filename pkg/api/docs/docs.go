@@ -1084,6 +1084,9 @@ const docTemplate = `{
         },
         "CreateWorkspaceRequest": {
             "type": "object",
+            "required": [
+                "projects"
+            ],
             "properties": {
                 "id": {
                     "type": "string"
@@ -1104,15 +1107,15 @@ const docTemplate = `{
         },
         "CreateWorkspaceRequestProject": {
             "type": "object",
+            "required": [
+                "name"
+            ],
             "properties": {
                 "envVars": {
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
                     }
-                },
-                "id": {
-                    "type": "string"
                 },
                 "image": {
                     "type": "string"
