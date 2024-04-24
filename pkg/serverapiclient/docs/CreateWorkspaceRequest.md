@@ -6,14 +6,14 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | Pointer to **string** |  | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
-**Projects** | Pointer to [**[]CreateWorkspaceRequestProject**](CreateWorkspaceRequestProject.md) |  | [optional] 
+**Projects** | [**[]CreateWorkspaceRequestProject**](CreateWorkspaceRequestProject.md) |  | 
 **Target** | Pointer to **string** |  | [optional] 
 
 ## Methods
 
 ### NewCreateWorkspaceRequest
 
-`func NewCreateWorkspaceRequest() *CreateWorkspaceRequest`
+`func NewCreateWorkspaceRequest(projects []CreateWorkspaceRequestProject, ) *CreateWorkspaceRequest`
 
 NewCreateWorkspaceRequest instantiates a new CreateWorkspaceRequest object
 This constructor will assign default values to properties that have it defined,
@@ -97,11 +97,6 @@ and a boolean to check if the value has been set.
 
 SetProjects sets Projects field to given value.
 
-### HasProjects
-
-`func (o *CreateWorkspaceRequest) HasProjects() bool`
-
-HasProjects returns a boolean if a field has been set.
 
 ### GetTarget
 

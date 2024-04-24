@@ -123,8 +123,7 @@ var CreateCmd = &cobra.Command{
 			projectNameSlugRegex := regexp.MustCompile(`[^a-zA-Z0-9-]`)
 			projectName := projectNameSlugRegex.ReplaceAllString(strings.TrimSuffix(strings.ToLower(filepath.Base(*repo.Url)), ".git"), "-")
 			projects = append(projects, serverapiclient.CreateWorkspaceRequestProject{
-				Id:   &projectName,
-				Name: &projectName,
+				Name: projectName,
 				Source: &serverapiclient.CreateWorkspaceRequestProjectSource{
 					Repository: &repo,
 				},
