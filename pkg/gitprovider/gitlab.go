@@ -4,8 +4,10 @@
 package gitprovider
 
 import (
+	"fmt"
 	"log"
 	"strconv"
+	"strings"
 
 	"github.com/xanzy/go-gitlab"
 )
@@ -131,6 +133,69 @@ func (g *GitLabGitProvider) GetRepoPRs(repositoryId string, namespaceId string) 
 	}
 
 	return response, nil
+}
+
+func (g *GitLabGitProvider) ParseGitUrl(gitURL string) (*GitRepository, error) {
+	client := g.getApiClient()
+	repo , err := parseGitComponents(gitURL)
+	if err != nil {
+		return nil, err
+	}
+
+	repo, err = g.parseSpecificPath(repo, client)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return repo, nil
+}
+
+func (g *GitLabGitProvider) parseSpecificPath(repo *GitRepository, client *gitlab.Client) (*GitRepository, error) {
+	parts := strings.Split(*repo.Path, "/")
+	repo.Path = nil
+
+	switch {
+	case len(parts) >= 2 && parts[0] == "-":
+		switch parts[1] {
+		case "tree":
+			repo.Branch = &parts[2]
+		case "merge_requests":
+			prNumber, _ := strconv.Atoi(parts[2])
+			pull, _, err := client.MergeRequests.GetMergeRequest(fmt.Sprintf("%s/%s",repo.Owner,repo.Name), prNumber, nil)
+			if err != nil {
+				return nil, err
+			}
+			repo.Branch = &pull.SourceBranch
+			repo.Url = getCloneURL(repo.Source, pull.Author.Username, repo.Name)
+			repo.Owner = pull.Author.Username
+		case "commits":
+			repo.Sha = parts[2]
+			repo.Branch = &repo.Sha
+		}
+
+	case len(parts) >= 2 && parts[0] == "merge_requests":
+		prNumber, _ := strconv.Atoi(parts[1])
+		pull, _, err := client.MergeRequests.GetMergeRequest(fmt.Sprintf("%s/%s",repo.Owner,repo.Name), prNumber, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		repo.Branch = &pull.SourceBranch
+		repo.Url = getCloneURL(repo.Source, pull.Author.Username, repo.Name)
+		repo.Owner = pull.Author.Username
+	case len(parts) >= 1 && parts[0] == "tree":
+		repo.Branch = &parts[1]
+	case len(parts) >= 2 && parts[0] == "blob":
+		repo.Branch = &parts[1]
+		branchPath := strings.Join(parts[2:], "/")
+		repo.Path = &branchPath
+	case len(parts) >= 2 && (parts[0] == "commit" || parts[0] == "commits"):
+		repo.Sha = parts[1]
+		repo.Branch = &repo.Sha
+	}
+
+	return repo, nil
 }
 
 func (g *GitLabGitProvider) GetUser() (*GitUser, error) {

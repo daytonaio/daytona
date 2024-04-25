@@ -6,6 +6,7 @@ package gitprovider
 import (
 	"context"
 	"strconv"
+	"strings"
 
 	"code.gitea.io/sdk/gitea"
 )
@@ -176,6 +177,42 @@ func (g *GiteaGitProvider) GetRepoPRs(repositoryId string, namespaceId string) (
 	}
 
 	return response, nil
+}
+func (g *GiteaGitProvider) ParseGitUrl(gitURL string) (*GitRepository, error) {
+	client, _ := g.getApiClient()
+	repo , err := parseGitComponents(gitURL)
+	if err != nil {
+		return nil, err
+	}
+
+	repo, err = g.parseSpecificPath(repo, client)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return repo, nil
+}
+
+func (g *GiteaGitProvider) parseSpecificPath(repo *GitRepository, client *gitea.Client) (*GitRepository, error) {
+	parts := strings.Split(*repo.Path, "/")
+	repo.Path=nil
+	switch {
+	case len(parts) >= 2 && parts[0] == "pulls":
+		prNumber, _ := strconv.Atoi(parts[1])
+		pull, _, err := client.GetPullRequest(repo.Owner, repo.Name, int64(prNumber))
+		if err != nil {
+			return nil, err
+		}
+		repo.Branch = &pull.Head.Ref
+		repo.Url = pull.Head.Repository.CloneURL
+		repo.Owner = pull.Head.Repository.Owner.UserName
+	case len(parts) >= 2 && parts[1] == "branch":
+		branchPath := strings.Join(parts[2:], "/")
+		repo.Branch = &branchPath
+	}
+
+	return repo, nil
 }
 
 func (g *GiteaGitProvider) GetUser() (*GitUser, error) {

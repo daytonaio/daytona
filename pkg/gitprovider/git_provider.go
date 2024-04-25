@@ -11,5 +11,5 @@ type GitProvider interface {
 	GetUser() (*GitUser, error)
 	GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error)
 	GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error)
-	// ParseGitUrl(string) (*GitRepository, error)
+	ParseGitUrl(string) (*GitRepository, error)
 }

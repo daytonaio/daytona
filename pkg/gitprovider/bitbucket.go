@@ -189,6 +189,48 @@ func (g *BitbucketGitProvider) GetRepoPRs(repositoryId string, namespaceId strin
 	return response, err
 }
 
+func (g *BitbucketGitProvider) ParseGitUrl(gitURL string) (*GitRepository, error) {
+	client := g.getApiClient()
+	repo , err := parseGitComponents(gitURL)
+	if err != nil {
+		return nil, err
+	}
+
+	repo, err = g.parseSpecificPath(repo, client)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+func (g *BitbucketGitProvider) parseSpecificPath(repo *GitRepository, client *bitbucket.Client) (*GitRepository, error) {
+	parts := strings.Split(*repo.Path, "/")
+	repo.Path=nil
+
+	switch {
+	case len(parts) >= 1 && parts[0] == "pull-requests":
+		pull, err := client.Repositories.PullRequests.Get(&bitbucket.PullRequestsOptions{
+			Owner:    repo.Owner,
+			RepoSlug: repo.Name,
+			ID:     parts[1],
+		})
+
+		pullMap := pull.(map[string]interface{})
+		branchMap := pullMap["source"].(map[string]interface{})["branch"].(map[string]interface{})["name"].(string)
+		repo.Branch = &branchMap
+
+		if err != nil {
+			return nil, err
+		}
+	case len(parts) >= 1 && parts[0] == "src":
+		repo.Branch = &parts[1]
+	}
+
+	return repo, nil
+}
+
 func (g *BitbucketGitProvider) GetUser() (*GitUser, error) {
 	client := g.getApiClient()
 
