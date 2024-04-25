@@ -9,7 +9,9 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	view_util "github.com/daytonaio/daytona/pkg/views/util"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -55,12 +57,22 @@ func selectProjectRequestPrompt(projects []serverapiclient.CreateWorkspaceReques
 		items = append(items, newItem)
 	}
 
-	newItem := item[serverapiclient.CreateWorkspaceRequestProject]{id: "Done configuring", title: "Done configuring", desc: "Submit the creation request", choiceProperty: DoneConfiguring}
+	newItem := item[serverapiclient.CreateWorkspaceRequestProject]{id: "Done configuring", title: "Finish configuration", desc: "Return to summary view", choiceProperty: DoneConfiguring}
 	items = append(items, newItem)
 
 	l := views.GetStyledSelectList(items)
-	m := model[serverapiclient.CreateWorkspaceRequestProject]{list: l}
+	m := projectRequestModel{}
+	m.list = l
 	m.list.Title = "CHOOSE A PROJECT TO CONFIGURE"
+
+	m.list.AdditionalShortHelpKeys = func() []key.Binding {
+		return []key.Binding{
+			key.NewBinding(
+				key.WithKeys("f10"),
+				key.WithHelp("f10", "return to summary"),
+			),
+		}
+	}
 
 	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
 	if err != nil {
@@ -68,7 +80,7 @@ func selectProjectRequestPrompt(projects []serverapiclient.CreateWorkspaceReques
 		os.Exit(1)
 	}
 
-	if m, ok := p.(model[serverapiclient.CreateWorkspaceRequestProject]); ok && m.choice != nil {
+	if m, ok := p.(projectRequestModel); ok && m.choice != nil {
 		choiceChan <- m.choice
 	} else {
 		choiceChan <- nil
@@ -81,4 +93,35 @@ func GetProjectRequestFromPrompt(projects []serverapiclient.CreateWorkspaceReque
 	go selectProjectRequestPrompt(projects, defaultContainerUser, choiceChan)
 
 	return <-choiceChan
+}
+
+func (m projectRequestModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch keypress := msg.String(); keypress {
+		case "q", "ctrl+c":
+			return m, tea.Quit
+
+		case "enter":
+			i, ok := m.list.SelectedItem().(item[serverapiclient.CreateWorkspaceRequestProject])
+			if ok {
+				m.choice = &i.choiceProperty
+			}
+			return m, tea.Quit
+		case "f10":
+			m.choice = &DoneConfiguring
+			return m, tea.Quit
+		}
+	case tea.WindowSizeMsg:
+		h, v := view_util.DocStyle.GetFrameSize()
+		m.list.SetSize(msg.Width-h, msg.Height-v)
+	}
+
+	var cmd tea.Cmd
+	m.list, cmd = m.list.Update(msg)
+	return m, cmd
+}
+
+type projectRequestModel struct {
+	model[serverapiclient.CreateWorkspaceRequestProject]
 }
