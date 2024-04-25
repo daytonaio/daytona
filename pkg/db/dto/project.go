@@ -24,20 +24,22 @@ type ProjectStateDTO struct {
 }
 
 type ProjectDTO struct {
-	Name        string           `json:"name"`
-	Repository  RepositoryDTO    `json:"repository"`
-	WorkspaceId string           `json:"workspaceId"`
-	Target      string           `json:"target"`
-	State       *ProjectStateDTO `json:"state,omitempty" gorm:"serializer:json"`
+	Name              string           `json:"name"`
+	Repository        RepositoryDTO    `json:"repository"`
+	WorkspaceId       string           `json:"workspaceId"`
+	Target            string           `json:"target"`
+	State             *ProjectStateDTO `json:"state,omitempty" gorm:"serializer:json"`
+	PostStartCommands []string         `json:"postStartCommands,omitempty"`
 }
 
 func ToProjectDTO(project *workspace.Project, workspace *workspace.Workspace) ProjectDTO {
 	return ProjectDTO{
-		Name:        project.Name,
-		Repository:  ToRepositoryDTO(project.Repository),
-		WorkspaceId: project.WorkspaceId,
-		Target:      project.Target,
-		State:       ToProjectStateDTO(project.State),
+		Name:              project.Name,
+		Repository:        ToRepositoryDTO(project.Repository),
+		WorkspaceId:       project.WorkspaceId,
+		Target:            project.Target,
+		State:             ToProjectStateDTO(project.State),
+		PostStartCommands: project.PostStartCommands,
 	}
 }
 
@@ -75,11 +77,12 @@ func ToProjectStateDTO(state *workspace.ProjectState) *ProjectStateDTO {
 
 func ToProject(projectDTO ProjectDTO) *workspace.Project {
 	return &workspace.Project{
-		Name:        projectDTO.Name,
-		Repository:  ToRepository(projectDTO.Repository),
-		WorkspaceId: projectDTO.WorkspaceId,
-		Target:      projectDTO.Target,
-		State:       ToProjectState(projectDTO.State),
+		Name:              projectDTO.Name,
+		Repository:        ToRepository(projectDTO.Repository),
+		WorkspaceId:       projectDTO.WorkspaceId,
+		Target:            projectDTO.Target,
+		State:             ToProjectState(projectDTO.State),
+		PostStartCommands: projectDTO.PostStartCommands,
 	}
 }
 
