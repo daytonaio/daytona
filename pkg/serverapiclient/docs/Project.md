@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**Build** | Pointer to [**ProjectBuild**](ProjectBuild.md) |  | [optional] 
 **Image** | Pointer to **string** |  | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
 **PostStartCommands** | Pointer to **[]string** |  | [optional] 
@@ -31,6 +32,31 @@ will change when the set of required properties is changed
 NewProjectWithDefaults instantiates a new Project object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetBuild
+
+`func (o *Project) GetBuild() ProjectBuild`
+
+GetBuild returns the Build field if non-nil, zero value otherwise.
+
+### GetBuildOk
+
+`func (o *Project) GetBuildOk() (*ProjectBuild, bool)`
+
+GetBuildOk returns a tuple with the Build field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetBuild
+
+`func (o *Project) SetBuild(v ProjectBuild)`
+
+SetBuild sets Build field to given value.
+
+### HasBuild
+
+`func (o *Project) HasBuild() bool`
+
+HasBuild returns a boolean if a field has been set.
 
 ### GetImage
 

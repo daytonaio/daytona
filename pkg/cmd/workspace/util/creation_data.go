@@ -77,6 +77,7 @@ func GetCreationDataFromPrompt(apiServerConfig *serverapiclient.ServerConfig, ex
 		}
 		projectName := GetProjectNameFromRepo(*project.Source.Repository.Url)
 		projectList[i].Name = projectName
+		projectList[i].Build = &serverapiclient.ProjectBuild{}
 	}
 
 	suggestedName := GetSuggestedWorkspaceName(*workspaceCreationPromptResponse.PrimaryProject.Source.Repository.Url, existingWorkspaceNames)
@@ -84,6 +85,22 @@ func GetCreationDataFromPrompt(apiServerConfig *serverapiclient.ServerConfig, ex
 	err = create.RunSubmissionForm(&workspaceName, suggestedName, existingWorkspaceNames, &projectList, apiServerConfig)
 	if err != nil {
 		return "", nil, err
+	}
+
+	for _, project := range projectList {
+		if project.Build != nil {
+			if project.Image != nil {
+				*project.Image = ""
+			}
+			if project.User != nil {
+				*project.User = ""
+			}
+			if project.Build.Devcontainer != nil || *project.Build == (serverapiclient.ProjectBuild{}) {
+				if project.PostStartCommands != nil {
+					project.PostStartCommands = []string{}
+				}
+			}
+		}
 	}
 
 	return workspaceName, projectList, nil

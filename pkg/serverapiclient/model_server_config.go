@@ -29,6 +29,7 @@ type ServerConfig struct {
 	Id                              *string     `json:"id,omitempty"`
 	LogFilePath                     *string     `json:"logFilePath,omitempty"`
 	ProvidersDir                    *string     `json:"providersDir,omitempty"`
+	RegistryPort                    *int32      `json:"registryPort,omitempty"`
 	RegistryUrl                     *string     `json:"registryUrl,omitempty"`
 	ServerDownloadUrl               *string     `json:"serverDownloadUrl,omitempty"`
 }
@@ -370,6 +371,38 @@ func (o *ServerConfig) SetProvidersDir(v string) {
 	o.ProvidersDir = &v
 }
 
+// GetRegistryPort returns the RegistryPort field value if set, zero value otherwise.
+func (o *ServerConfig) GetRegistryPort() int32 {
+	if o == nil || IsNil(o.RegistryPort) {
+		var ret int32
+		return ret
+	}
+	return *o.RegistryPort
+}
+
+// GetRegistryPortOk returns a tuple with the RegistryPort field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ServerConfig) GetRegistryPortOk() (*int32, bool) {
+	if o == nil || IsNil(o.RegistryPort) {
+		return nil, false
+	}
+	return o.RegistryPort, true
+}
+
+// HasRegistryPort returns a boolean if a field has been set.
+func (o *ServerConfig) HasRegistryPort() bool {
+	if o != nil && !IsNil(o.RegistryPort) {
+		return true
+	}
+
+	return false
+}
+
+// SetRegistryPort gets a reference to the given int32 and assigns it to the RegistryPort field.
+func (o *ServerConfig) SetRegistryPort(v int32) {
+	o.RegistryPort = &v
+}
+
 // GetRegistryUrl returns the RegistryUrl field value if set, zero value otherwise.
 func (o *ServerConfig) GetRegistryUrl() string {
 	if o == nil || IsNil(o.RegistryUrl) {
@@ -473,6 +506,9 @@ func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.ProvidersDir) {
 		toSerialize["providersDir"] = o.ProvidersDir
+	}
+	if !IsNil(o.RegistryPort) {
+		toSerialize["registryPort"] = o.RegistryPort
 	}
 	if !IsNil(o.RegistryUrl) {
 		toSerialize["registryUrl"] = o.RegistryUrl

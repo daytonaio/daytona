@@ -36,6 +36,8 @@ definitions:
     type: object
   CreateWorkspaceRequestProject:
     properties:
+      build:
+        $ref: '#/definitions/ProjectBuild'
       envVars:
         additionalProperties:
           type: string
@@ -169,6 +171,8 @@ definitions:
     type: object
   Project:
     properties:
+      build:
+        $ref: '#/definitions/ProjectBuild'
       image:
         type: string
       name:
@@ -186,6 +190,29 @@ definitions:
       user:
         type: string
       workspaceId:
+        type: string
+    type: object
+  ProjectBuild:
+    properties:
+      devcontainer:
+        $ref: '#/definitions/ProjectBuildDevcontainer'
+      dockerfile:
+        $ref: '#/definitions/ProjectBuildDockerfile'
+    type: object
+  ProjectBuildDevcontainer:
+    properties:
+      devContainerFilePath:
+        type: string
+    type: object
+  ProjectBuildDockerfile:
+    properties:
+      args:
+        additionalProperties:
+          type: string
+        type: object
+      context:
+        type: string
+      dockerfile:
         type: string
     type: object
   ProjectInfo:
@@ -255,6 +282,8 @@ definitions:
         type: string
       providersDir:
         type: string
+      registryPort:
+        type: integer
       registryUrl:
         type: string
       serverDownloadUrl:

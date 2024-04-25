@@ -1108,6 +1108,9 @@
                 "name"
             ],
             "properties": {
+                "build": {
+                    "$ref": "#/definitions/ProjectBuild"
+                },
                 "envVars": {
                     "type": "object",
                     "additionalProperties": {
@@ -1311,6 +1314,9 @@
         "Project": {
             "type": "object",
             "properties": {
+                "build": {
+                    "$ref": "#/definitions/ProjectBuild"
+                },
                 "image": {
                     "type": "string"
                 },
@@ -1336,6 +1342,42 @@
                     "type": "string"
                 },
                 "workspaceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProjectBuild": {
+            "type": "object",
+            "properties": {
+                "devcontainer": {
+                    "$ref": "#/definitions/ProjectBuildDevcontainer"
+                },
+                "dockerfile": {
+                    "$ref": "#/definitions/ProjectBuildDockerfile"
+                }
+            }
+        },
+        "ProjectBuildDevcontainer": {
+            "type": "object",
+            "properties": {
+                "devContainerFilePath": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProjectBuildDockerfile": {
+            "type": "object",
+            "properties": {
+                "args": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "context": {
+                    "type": "string"
+                },
+                "dockerfile": {
                     "type": "string"
                 }
             }
@@ -1441,6 +1483,9 @@
                 },
                 "providersDir": {
                     "type": "string"
+                },
+                "registryPort": {
+                    "type": "integer"
                 },
                 "registryUrl": {
                     "type": "string"

@@ -9,7 +9,8 @@ require (
 	github.com/charmbracelet/huh v0.2.3
 	github.com/charmbracelet/lipgloss v0.9.1
 	github.com/creack/pty v1.1.21
-	github.com/docker/docker v26.1.0+incompatible
+	github.com/docker/docker v26.0.2+incompatible
+	github.com/docker/go-connections v0.4.0
 	github.com/fatedier/frp v0.54.0
 	github.com/gin-contrib/cors v1.5.0
 	github.com/gin-gonic/gin v1.9.1
@@ -86,7 +87,6 @@ require (
 	github.com/deckarep/golang-set/v2 v2.4.0 // indirect
 	github.com/digitalocean/go-smbios v0.0.0-20180907143718-390a4f403a8e // indirect
 	github.com/distribution/reference v0.6.0 // indirect
-	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/fatedier/beego v0.0.0-20171024143340-6c6a4f5bd5eb // indirect

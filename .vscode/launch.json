@@ -31,6 +31,17 @@
       "args": [
         "serve"
       ]
+    },
+    {
+      "name": "CLI Create",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/cmd/daytona",
+      "console": "integratedTerminal",
+      "args": [
+        "create"
+      ]
     }
   ]
 }

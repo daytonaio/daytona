@@ -13,6 +13,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/apikey"
+	"github.com/daytonaio/daytona/pkg/builder"
 	"github.com/daytonaio/daytona/pkg/db"
 	"github.com/daytonaio/daytona/pkg/logger"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
@@ -23,6 +24,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/daytonaio/daytona/pkg/server/providertargets"
+	"github.com/daytonaio/daytona/pkg/server/registry"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	started_view "github.com/daytonaio/daytona/pkg/views/server/started"
 
@@ -38,6 +40,11 @@ var ServeCmd = &cobra.Command{
 		if log.GetLevel() < log.InfoLevel {
 			//	for now, force the log level to info when running the server
 			log.SetLevel(log.InfoLevel)
+		}
+
+		configDir, err := server.GetConfigDir()
+		if err != nil {
+			log.Fatal(err)
 		}
 
 		c, err := server.GetConfig()
@@ -93,6 +100,12 @@ var ServeCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		//	todo: skip container registry option from config
+		localContainerRegistry := registry.NewLocalContainerRegistry(&registry.LocalContainerRegistryConfig{
+			DataPath: filepath.Join(configDir, "registry"),
+			Port:     c.RegistryPort,
+		})
+
 		containerRegistryService := containerregistries.NewContainerRegistryService(containerregistries.ContainerRegistryServiceConfig{
 			Store: containerRegistryStore,
 		})
@@ -112,14 +125,34 @@ var ServeCmd = &cobra.Command{
 			RegistryUrl:           c.RegistryUrl,
 			BaseDir:               c.ProvidersDir,
 		})
+		builderFactory := &builder.BuilderFactory{
+			BuilderConfig: builder.BuilderConfig{
+				DaytonaServerConfigFolder:       configDir,
+				LocalContainerRegistryServer:    "localhost:5000",
+				BasePath:                        filepath.Join(configDir, "builds"),
+				LoggerFactory:                   loggerFactory,
+				DefaultProjectImage:             c.DefaultProjectImage,
+				DefaultProjectUser:              c.DefaultProjectUser,
+				DefaultProjectPostStartCommands: c.DefaultProjectPostStartCommands,
+			},
+		}
 		provisioner := provisioner.NewProvisioner(provisioner.ProvisionerConfig{
+			//	LocalContainerRegistryServer: fmt.Sprintf("registry-%s.%s", c.Id, c.Frps.Domain),
+			//	for the local provisioner, we use the local container registry
+			//	there is no need to use the frps domain
+			//	todo: get the port from the local container registry
 			ProviderManager: providerManager,
+			LoggerFactory:   loggerFactory,
+		})
+		gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
+			ConfigStore: gitProviderConfigStore,
 		})
 
 		workspaceService := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
 			WorkspaceStore:                  workspaceStore,
 			TargetStore:                     providerTargetStore,
 			ApiKeyService:                   apiKeyService,
+			GitProviderService:              gitProviderService,
 			ContainerRegistryStore:          containerRegistryStore,
 			ServerApiUrl:                    util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 			ServerUrl:                       util.GetFrpcServerUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
@@ -128,9 +161,7 @@ var ServeCmd = &cobra.Command{
 			DefaultProjectPostStartCommands: c.DefaultProjectPostStartCommands,
 			Provisioner:                     provisioner,
 			LoggerFactory:                   loggerFactory,
-		})
-		gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
-			ConfigStore: gitProviderConfigStore,
+			BuilderFactory:                  builderFactory,
 		})
 
 		server := server.GetInstance(&server.ServerInstanceConfig{
@@ -138,6 +169,7 @@ var ServeCmd = &cobra.Command{
 			TailscaleServer:          headscaleServer,
 			ProviderTargetService:    providerTargetService,
 			ContainerRegistryService: containerRegistryService,
+			LocalContainerRegistry:   localContainerRegistry,
 			ApiKeyService:            apiKeyService,
 			WorkspaceService:         workspaceService,
 			GitProviderService:       gitProviderService,
