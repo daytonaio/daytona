@@ -12,6 +12,7 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
@@ -27,10 +28,14 @@ type WorkspaceDataModel struct {
 	showConfigurationOption bool
 }
 
-func GetWorkspaceDataFromPrompt(suggestedName string, workspaceNames []string, showConfigurationOption bool) (string, string, string) {
-	workspaceName, containerImage, osUser := suggestedName, "", ""
+func GetWorkspaceDataFromPrompt(apiServerConfig *serverapiclient.ServerConfig, suggestedName string, workspaceNames []string, showConfigurationOption bool) (string, string, string, error) {
+	if apiServerConfig.DefaultProjectImage == nil || apiServerConfig.DefaultProjectUser == nil {
+		return "", "", "", errors.New("default project image and user are not set")
+	}
 
-	m := NewWorkspaceDataModel(workspaceNames, &workspaceName, &containerImage, &osUser, showConfigurationOption)
+	workspaceName, containerImage, containerUser := suggestedName, *apiServerConfig.DefaultProjectImage, *apiServerConfig.DefaultProjectUser
+
+	m := NewWorkspaceDataModel(workspaceNames, &workspaceName, &containerImage, &containerUser, showConfigurationOption)
 
 	if _, err := tea.NewProgram(m).Run(); err != nil {
 		fmt.Println("Error running program:", err)
@@ -38,13 +43,13 @@ func GetWorkspaceDataFromPrompt(suggestedName string, workspaceNames []string, s
 	}
 
 	if !doneCheck {
-		return "", "", ""
+		return "", "", "", errors.New("workspace creation cancelled")
 	}
 
-	return workspaceName, containerImage, osUser
+	return workspaceName, containerImage, containerUser, nil
 }
 
-func NewWorkspaceDataModel(workspaceNames []string, workspaceName *string, containerImage *string, osUser *string, showConfigurationOption bool) WorkspaceDataModel {
+func NewWorkspaceDataModel(workspaceNames []string, workspaceName *string, containerImage *string, containerUser *string, showConfigurationOption bool) WorkspaceDataModel {
 	m := WorkspaceDataModel{width: maxWidth, basicViewActive: true, showConfigurationOption: showConfigurationOption}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
@@ -74,7 +79,7 @@ func NewWorkspaceDataModel(workspaceNames []string, workspaceName *string, conta
 		huh.NewGroup(
 			workspaceNamePrompt,
 		),
-		GetProjectConfigurationGroup(containerImage, osUser),
+		GetProjectConfigurationGroup(containerImage, containerUser),
 	).WithTheme(dTheme).
 		WithWidth(maxWidth).
 		WithShowErrors(true).WithShowHelp(false)

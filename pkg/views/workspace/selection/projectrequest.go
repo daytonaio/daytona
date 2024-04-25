@@ -14,7 +14,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectProjectRequestPrompt(projects []serverapiclient.CreateWorkspaceRequestProject, choiceChan chan<- string) {
+func selectProjectRequestPrompt(projects []serverapiclient.CreateWorkspaceRequestProject, choiceChan chan<- *serverapiclient.CreateWorkspaceRequestProject) {
 	items := []list.Item{}
 
 	for _, project := range projects {
@@ -30,23 +30,17 @@ func selectProjectRequestPrompt(projects []serverapiclient.CreateWorkspaceReques
 		if project.User != nil {
 			user = *project.User
 		}
-		newItem := item[string]{id: name, title: name, choiceProperty: name}
-		if image != "" {
-			if user != "" {
-				newItem.desc = fmt.Sprintf("%s (%s)", image, user)
-			} else {
-				newItem.desc = fmt.Sprintf("Image: %s", image)
-			}
-		} else if user != "" {
-			newItem.desc = fmt.Sprintf("User: %s", user)
-		} else {
-			newItem.desc = "Default configuration"
+		if user == "" {
+			user = "user not defined"
 		}
+		newItem := item[serverapiclient.CreateWorkspaceRequestProject]{id: name, title: name, choiceProperty: project}
+		newItem.desc = fmt.Sprintf("%s (%s)", image, user)
+
 		items = append(items, newItem)
 	}
 
 	l := views.GetStyledSelectList(items)
-	m := model[string]{list: l}
+	m := model[serverapiclient.CreateWorkspaceRequestProject]{list: l}
 	m.list.Title = "CHOOSE A PROJECT TO CONFIGURE"
 
 	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
@@ -55,15 +49,15 @@ func selectProjectRequestPrompt(projects []serverapiclient.CreateWorkspaceReques
 		os.Exit(1)
 	}
 
-	if m, ok := p.(model[string]); ok && m.choice != nil {
-		choiceChan <- *m.choice
+	if m, ok := p.(model[serverapiclient.CreateWorkspaceRequestProject]); ok && m.choice != nil {
+		choiceChan <- m.choice
 	} else {
-		choiceChan <- ""
+		choiceChan <- nil
 	}
 }
 
-func GetProjectRequestFromPrompt(projects []serverapiclient.CreateWorkspaceRequestProject) string {
-	choiceChan := make(chan string)
+func GetProjectRequestFromPrompt(projects []serverapiclient.CreateWorkspaceRequestProject) *serverapiclient.CreateWorkspaceRequestProject {
+	choiceChan := make(chan *serverapiclient.CreateWorkspaceRequestProject)
 
 	go selectProjectRequestPrompt(projects, choiceChan)
 

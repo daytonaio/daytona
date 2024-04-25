@@ -16,20 +16,26 @@ import (
 
 var configurationHelpLine = lipgloss.NewStyle().Foreground(views.Gray).Render("enter: next  f10: advanced configuration")
 
-func ConfigureProjects(projectList []serverapiclient.CreateWorkspaceRequestProject) ([]serverapiclient.CreateWorkspaceRequestProject, error) {
-	var containerImage string
-	var osUser string
+func ConfigureProjects(projectList []serverapiclient.CreateWorkspaceRequestProject, defaultContainerImage string, defaultContainerUser string) ([]serverapiclient.CreateWorkspaceRequestProject, error) {
+	containerImage := defaultContainerImage
+	containerUser := defaultContainerUser
 	var doneCheck bool
 
-	projectName := selection.GetProjectRequestFromPrompt(projectList)
-	if projectName == "" {
-		return projectList, errors.New("project ID is required")
+	project := selection.GetProjectRequestFromPrompt(projectList)
+	if project == nil {
+		return projectList, errors.New("project is required")
+	}
+	if project.Image != nil {
+		containerImage = *project.Image
+	}
+	if project.User != nil {
+		containerUser = *project.User
 	}
 
-	GetProjectConfigurationGroup(&containerImage, &osUser)
+	GetProjectConfigurationGroup(&containerImage, &containerUser)
 
 	form := huh.NewForm(
-		GetProjectConfigurationGroup(&containerImage, &osUser),
+		GetProjectConfigurationGroup(&containerImage, &containerUser),
 		GetDoneCheckGroup(&doneCheck),
 	).WithTheme(views.GetCustomTheme())
 
@@ -39,14 +45,14 @@ func ConfigureProjects(projectList []serverapiclient.CreateWorkspaceRequestProje
 	}
 
 	for i := range projectList {
-		if projectList[i].Name == projectName {
+		if projectList[i].Name == project.Name {
 			projectList[i].Image = &containerImage
-			projectList[i].User = &osUser
+			projectList[i].User = &containerUser
 		}
 	}
 
 	if !doneCheck {
-		projectList, err = ConfigureProjects(projectList)
+		projectList, err = ConfigureProjects(projectList, defaultContainerImage, defaultContainerUser)
 		if err != nil {
 			return projectList, err
 		}

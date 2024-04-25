@@ -28,7 +28,7 @@ type SummaryModel struct {
 
 var configureCheck bool
 
-func DisplayMultiSubmitForm(workspaceName string, projectList *[]serverapiclient.CreateWorkspaceRequestProject, doneCheck *bool) {
+func DisplayMultiSubmitForm(workspaceName string, projectList *[]serverapiclient.CreateWorkspaceRequestProject, apiServerConfig *serverapiclient.ServerConfig, doneCheck *bool) {
 	m := NewSummaryModel(workspaceName, *projectList, doneCheck)
 
 	if _, err := tea.NewProgram(m).Run(); err != nil {
@@ -40,7 +40,16 @@ func DisplayMultiSubmitForm(workspaceName string, projectList *[]serverapiclient
 		return
 	}
 
-	configuredProjects, err := ConfigureProjects(*projectList)
+	if apiServerConfig.DefaultProjectImage == nil || apiServerConfig.DefaultProjectUser == nil {
+		log.Fatal("Default project image and user are not set")
+	}
+
+	for i := range *projectList {
+		(*projectList)[i].Image = apiServerConfig.DefaultProjectImage
+		(*projectList)[i].User = apiServerConfig.DefaultProjectUser
+	}
+
+	configuredProjects, err := ConfigureProjects(*projectList, *apiServerConfig.DefaultProjectImage, *apiServerConfig.DefaultProjectUser)
 	if err != nil {
 		log.Fatal(err)
 	}

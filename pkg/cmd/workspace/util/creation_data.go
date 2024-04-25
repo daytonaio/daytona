@@ -13,7 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 )
 
-func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []serverapiclient.GitProvider, manual bool, multiProject bool) (string, []serverapiclient.CreateWorkspaceRequestProject, error) {
+func GetCreationDataFromPrompt(apiServerConfig *serverapiclient.ServerConfig, workspaceNames []string, userGitProviders []serverapiclient.GitProvider, manual bool, multiProject bool) (string, []serverapiclient.CreateWorkspaceRequestProject, error) {
 	var projectList []serverapiclient.CreateWorkspaceRequestProject
 	var providerRepo serverapiclient.GitRepository
 	var providerRepoUrl string
@@ -82,7 +82,10 @@ func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []serve
 
 	suggestedName := create.GetSuggestedWorkspaceName(*workspaceCreationPromptResponse.PrimaryProject.Source.Repository.Url)
 
-	workspaceName, primaryContainerImage, primaryContainerUser = create.GetWorkspaceDataFromPrompt(suggestedName, workspaceNames, !multiProject)
+	workspaceName, primaryContainerImage, primaryContainerUser, err = create.GetWorkspaceDataFromPrompt(apiServerConfig, suggestedName, workspaceNames, !multiProject)
+	if err != nil {
+		return "", nil, err
+	}
 
 	if workspaceName == "" {
 		return "", nil, errors.New("workspace name is required")
@@ -97,7 +100,7 @@ func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []serve
 	}
 
 	if multiProject {
-		create.DisplayMultiSubmitForm(workspaceName, &projectList, &doneCheck)
+		create.DisplayMultiSubmitForm(workspaceName, &projectList, apiServerConfig, &doneCheck)
 		if !doneCheck {
 			return "", nil, errors.New("operation cancelled")
 		}
