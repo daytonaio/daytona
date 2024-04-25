@@ -32,6 +32,8 @@ const serverUrl = "http://localhost:3001"
 const defaultProjectImage = "daytonaio/workspace-project:latest"
 const defaultProjectUser = "daytona"
 
+var defaultProjectPostStartCommands = []string{"sudo dockerd"}
+
 var target = provider.ProviderTarget{
 	Name: "test-target",
 	ProviderInfo: provider.ProviderInfo{
@@ -96,15 +98,16 @@ func TestWorkspaceService(t *testing.T) {
 	logsDir := t.TempDir()
 
 	service := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
-		WorkspaceStore:         workspaceStore,
-		TargetStore:            targetStore,
-		ServerApiUrl:           serverApiUrl,
-		ServerUrl:              serverUrl,
-		ContainerRegistryStore: crStore,
-		DefaultProjectImage:    defaultProjectImage,
-		DefaultProjectUser:     defaultProjectUser,
-		ApiKeyService:          apiKeyService,
-		Provisioner:            provisioner,
+		WorkspaceStore:                  workspaceStore,
+		TargetStore:                     targetStore,
+		ServerApiUrl:                    serverApiUrl,
+		ServerUrl:                       serverUrl,
+		ContainerRegistryStore:          crStore,
+		DefaultProjectImage:             defaultProjectImage,
+		DefaultProjectUser:              defaultProjectUser,
+		DefaultProjectPostStartCommands: defaultProjectPostStartCommands,
+		ApiKeyService:                   apiKeyService,
+		Provisioner:                     provisioner,
 		NewWorkspaceLogger: func(workspaceId string) logger.Logger {
 			workspaceLogFilePath := filepath.Join(logsDir, workspaceId+".log")
 			workspaceLogFile, err := os.Create(workspaceLogFilePath)
