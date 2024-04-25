@@ -6,6 +6,7 @@ package config
 import (
 	"errors"
 	"os"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/kelseyhightower/envconfig"
@@ -20,9 +21,10 @@ type DaytonaServerConfig struct {
 }
 
 type Config struct {
-	ProjectDir  string `envconfig:"DAYTONA_WS_DIR"`
-	ProjectName string `envconfig:"DAYTONA_WS_PROJECT_NAME"`
-	WorkspaceId string `envconfig:"DAYTONA_WS_ID" validate:"required"`
+	ProjectDir  string  `envconfig:"DAYTONA_WS_DIR"`
+	ProjectName string  `envconfig:"DAYTONA_WS_PROJECT_NAME"`
+	WorkspaceId string  `envconfig:"DAYTONA_WS_ID" validate:"required"`
+	LogFilePath *string `envconfig:"DAYTONA_AGENT_LOG_FILE_PATH"`
 	Server      DaytonaServerConfig
 	Mode        Mode
 }
@@ -69,5 +71,18 @@ func GetConfig(mode Mode) (*Config, error) {
 		}
 	}
 
+	config.LogFilePath = GetLogFilePath()
+
 	return config, nil
+}
+
+func GetLogFilePath() *string {
+	logFilePath, ok := os.LookupEnv("DAYTONA_AGENT_LOG_FILE_PATH")
+	if !ok {
+		return nil
+	}
+
+	logFilePath = strings.Replace(logFilePath, "$HOME", os.Getenv("HOME"), 1)
+
+	return &logFilePath
 }

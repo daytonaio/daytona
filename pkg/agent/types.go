@@ -4,6 +4,7 @@
 package agent
 
 import (
+	"io"
 	"time"
 
 	"github.com/daytonaio/daytona/pkg/agent/config"
@@ -29,5 +30,6 @@ type Agent struct {
 	Git       GitService
 	Ssh       SshServer
 	Tailscale TailscaleServer
+	LogWriter io.Writer
 	startTime time.Time
 }

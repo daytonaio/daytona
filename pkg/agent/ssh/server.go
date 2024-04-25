@@ -74,7 +74,7 @@ func (s *Server) Start() error {
 		},
 	}
 
-	log.Println("starting ssh server on port 2222...")
+	log.Println("Starting ssh server on port 2222...")
 	return sshServer.ListenAndServe()
 }
 

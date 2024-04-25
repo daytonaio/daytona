@@ -19,6 +19,8 @@ import (
 )
 
 func (a *Agent) Start() error {
+	a.initLogs()
+
 	log.Info("Starting Daytona Agent")
 
 	a.startTime = time.Now()

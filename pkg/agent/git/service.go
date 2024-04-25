@@ -5,6 +5,7 @@ package git
 
 import (
 	"bytes"
+	"io"
 	"os"
 
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
@@ -17,14 +18,18 @@ import (
 type Service struct {
 	ProjectDir        string
 	GitConfigFileName string
+	LogWriter         io.Writer
 }
 
 func (s *Service) CloneRepository(project *serverapiclient.Project, authToken *string) error {
 	cloneOptions := &git.CloneOptions{
 		URL:             *project.Repository.Url,
-		Progress:        os.Stdout,
 		SingleBranch:    true,
 		InsecureSkipTLS: true,
+	}
+
+	if s.LogWriter != nil {
+		cloneOptions.Progress = s.LogWriter
 	}
 
 	if authToken != nil {
