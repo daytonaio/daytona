@@ -21,6 +21,7 @@ func GetCreationDataFromPrompt(apiServerConfig *serverapiclient.ServerConfig, wo
 	var workspaceName string
 	var primaryContainerImage string
 	var primaryContainerUser string
+	var primaryContainerPostStartCommands []string
 	doneCheck := true
 
 	if !manual && userGitProviders != nil && len(userGitProviders) > 0 {
@@ -82,7 +83,7 @@ func GetCreationDataFromPrompt(apiServerConfig *serverapiclient.ServerConfig, wo
 
 	suggestedName := create.GetSuggestedWorkspaceName(*workspaceCreationPromptResponse.PrimaryProject.Source.Repository.Url)
 
-	workspaceName, primaryContainerImage, primaryContainerUser, err = create.GetWorkspaceDataFromPrompt(apiServerConfig, suggestedName, workspaceNames, !multiProject)
+	workspaceName, primaryContainerImage, primaryContainerUser, primaryContainerPostStartCommands, err = create.GetWorkspaceDataFromPrompt(apiServerConfig, suggestedName, workspaceNames, !multiProject)
 	if err != nil {
 		return "", nil, err
 	}
@@ -97,6 +98,9 @@ func GetCreationDataFromPrompt(apiServerConfig *serverapiclient.ServerConfig, wo
 
 	if primaryContainerUser != "" {
 		projectList[0].User = &primaryContainerUser
+	}
+	if primaryContainerPostStartCommands != nil {
+		projectList[0].PostStartCommands = primaryContainerPostStartCommands
 	}
 
 	if multiProject {

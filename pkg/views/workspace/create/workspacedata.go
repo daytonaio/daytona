@@ -14,6 +14,8 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	configure "github.com/daytonaio/daytona/pkg/views/server"
+	view_util "github.com/daytonaio/daytona/pkg/views/util"
 )
 
 var doneCheck bool
@@ -28,14 +30,18 @@ type WorkspaceDataModel struct {
 	showConfigurationOption bool
 }
 
-func GetWorkspaceDataFromPrompt(apiServerConfig *serverapiclient.ServerConfig, suggestedName string, workspaceNames []string, showConfigurationOption bool) (string, string, string, error) {
-	if apiServerConfig.DefaultProjectImage == nil || apiServerConfig.DefaultProjectUser == nil {
-		return "", "", "", errors.New("default project image and user are not set")
+func GetWorkspaceDataFromPrompt(apiServerConfig *serverapiclient.ServerConfig, suggestedName string, workspaceNames []string, showConfigurationOption bool) (string, string, string, []string, error) {
+	if apiServerConfig.DefaultProjectImage == nil || apiServerConfig.DefaultProjectUser == nil || apiServerConfig.DefaultProjectPostStartCommands == nil {
+		return "", "", "", nil, errors.New("default project entries are not set")
 	}
+
+	var postStartCommands []string
+
+	postStartCommandString := view_util.GetJoinedCommands(apiServerConfig.DefaultProjectPostStartCommands)
 
 	workspaceName, containerImage, containerUser := suggestedName, *apiServerConfig.DefaultProjectImage, *apiServerConfig.DefaultProjectUser
 
-	m := NewWorkspaceDataModel(workspaceNames, &workspaceName, &containerImage, &containerUser, showConfigurationOption)
+	m := NewWorkspaceDataModel(workspaceNames, &workspaceName, &containerImage, &containerUser, &postStartCommandString, showConfigurationOption)
 
 	if _, err := tea.NewProgram(m).Run(); err != nil {
 		fmt.Println("Error running program:", err)
@@ -43,13 +49,17 @@ func GetWorkspaceDataFromPrompt(apiServerConfig *serverapiclient.ServerConfig, s
 	}
 
 	if !doneCheck {
-		return "", "", "", errors.New("workspace creation cancelled")
+		return "", "", "", nil, errors.New("workspace creation cancelled")
 	}
 
-	return workspaceName, containerImage, containerUser, nil
+	if postStartCommandString != "" {
+		postStartCommands = view_util.GetSplitCommands(postStartCommandString)
+	}
+
+	return workspaceName, containerImage, containerUser, postStartCommands, nil
 }
 
-func NewWorkspaceDataModel(workspaceNames []string, workspaceName *string, containerImage *string, containerUser *string, showConfigurationOption bool) WorkspaceDataModel {
+func NewWorkspaceDataModel(workspaceNames []string, workspaceName *string, containerImage *string, containerUser *string, postStartCommands *string, showConfigurationOption bool) WorkspaceDataModel {
 	m := WorkspaceDataModel{width: maxWidth, basicViewActive: true, showConfigurationOption: showConfigurationOption}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
@@ -79,7 +89,7 @@ func NewWorkspaceDataModel(workspaceNames []string, workspaceName *string, conta
 		huh.NewGroup(
 			workspaceNamePrompt,
 		),
-		GetProjectConfigurationGroup(containerImage, containerUser),
+		GetProjectConfigurationGroup(containerImage, containerUser, postStartCommands),
 	).WithTheme(dTheme).
 		WithWidth(maxWidth).
 		WithShowErrors(true).WithShowHelp(false)
@@ -87,14 +97,18 @@ func NewWorkspaceDataModel(workspaceNames []string, workspaceName *string, conta
 	return m
 }
 
-func GetProjectConfigurationGroup(image *string, containerUser *string) *huh.Group {
+func GetProjectConfigurationGroup(image *string, user *string, postStartCommands *string) *huh.Group {
 	group := huh.NewGroup(
 		huh.NewInput().
 			Title("Custom container image").
 			Value(image),
 		huh.NewInput().
 			Title("Container user").
-			Value(containerUser),
+			Value(user),
+		huh.NewInput().
+			Title("Post start commands").
+			Description(configure.CommandsInputHelp).
+			Value(postStartCommands),
 	)
 
 	return group

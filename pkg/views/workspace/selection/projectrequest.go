@@ -14,27 +14,41 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectProjectRequestPrompt(projects []serverapiclient.CreateWorkspaceRequestProject, choiceChan chan<- *serverapiclient.CreateWorkspaceRequestProject) {
+func selectProjectRequestPrompt(projects []serverapiclient.CreateWorkspaceRequestProject, defaultContainerUser string, choiceChan chan<- *serverapiclient.CreateWorkspaceRequestProject) {
 	items := []list.Item{}
 
 	for _, project := range projects {
 		var name string
+		var image string
+		var user string
+
 		if project.Name != "" {
 			name = project.Name
 		}
-		var image string
 		if project.Image != nil {
 			image = *project.Image
 		}
-		var user string
 		if project.User != nil {
 			user = *project.User
 		}
 		if user == "" {
 			user = "user not defined"
 		}
-		newItem := item[serverapiclient.CreateWorkspaceRequestProject]{id: name, title: name, choiceProperty: project}
-		newItem.desc = fmt.Sprintf("%s (%s)", image, user)
+
+		newItem := item[serverapiclient.CreateWorkspaceRequestProject]{id: name, desc: image, title: name, choiceProperty: project}
+		if len(project.PostStartCommands) > 0 {
+			newItem.desc = fmt.Sprintf("%s + %d post start command%s", newItem.desc, len(project.PostStartCommands), func() string {
+				if len(project.PostStartCommands) == 1 {
+					return ""
+				} else {
+					return "s"
+				}
+			}())
+		}
+
+		if user != defaultContainerUser {
+			newItem.title += fmt.Sprintf(" (%s)", user)
+		}
 
 		items = append(items, newItem)
 	}
@@ -56,10 +70,10 @@ func selectProjectRequestPrompt(projects []serverapiclient.CreateWorkspaceReques
 	}
 }
 
-func GetProjectRequestFromPrompt(projects []serverapiclient.CreateWorkspaceRequestProject) *serverapiclient.CreateWorkspaceRequestProject {
+func GetProjectRequestFromPrompt(projects []serverapiclient.CreateWorkspaceRequestProject, defaultContainerUser string) *serverapiclient.CreateWorkspaceRequestProject {
 	choiceChan := make(chan *serverapiclient.CreateWorkspaceRequestProject)
 
-	go selectProjectRequestPrompt(projects, choiceChan)
+	go selectProjectRequestPrompt(projects, defaultContainerUser, choiceChan)
 
 	return <-choiceChan
 }

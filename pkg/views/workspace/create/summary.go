@@ -40,16 +40,19 @@ func DisplayMultiSubmitForm(workspaceName string, projectList *[]serverapiclient
 		return
 	}
 
-	if apiServerConfig.DefaultProjectImage == nil || apiServerConfig.DefaultProjectUser == nil {
-		log.Fatal("Default project image and user are not set")
+	if apiServerConfig.DefaultProjectImage == nil || apiServerConfig.DefaultProjectUser == nil || apiServerConfig.DefaultProjectPostStartCommands == nil {
+		log.Fatal("Default project entries are not set")
 	}
 
 	for i := range *projectList {
 		(*projectList)[i].Image = apiServerConfig.DefaultProjectImage
 		(*projectList)[i].User = apiServerConfig.DefaultProjectUser
+		(*projectList)[i].PostStartCommands = apiServerConfig.DefaultProjectPostStartCommands
 	}
 
-	configuredProjects, err := ConfigureProjects(*projectList, *apiServerConfig.DefaultProjectImage, *apiServerConfig.DefaultProjectUser)
+	defaultPostStartCommandString := view_util.GetJoinedCommands(apiServerConfig.DefaultProjectPostStartCommands)
+
+	configuredProjects, err := ConfigureProjects(*projectList, *apiServerConfig.DefaultProjectImage, *apiServerConfig.DefaultProjectUser, defaultPostStartCommandString)
 	if err != nil {
 		log.Fatal(err)
 	}
