@@ -14,6 +14,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+var DoneConfiguring = serverapiclient.CreateWorkspaceRequestProject{Name: "DoneConfiguringName"}
+
 func selectProjectRequestPrompt(projects []serverapiclient.CreateWorkspaceRequestProject, defaultContainerUser string, choiceChan chan<- *serverapiclient.CreateWorkspaceRequestProject) {
 	items := []list.Item{}
 
@@ -52,6 +54,9 @@ func selectProjectRequestPrompt(projects []serverapiclient.CreateWorkspaceReques
 
 		items = append(items, newItem)
 	}
+
+	newItem := item[serverapiclient.CreateWorkspaceRequestProject]{id: "Done configuring", title: "Done configuring", desc: "Submit the creation request", choiceProperty: DoneConfiguring}
+	items = append(items, newItem)
 
 	l := views.GetStyledSelectList(items)
 	m := model[serverapiclient.CreateWorkspaceRequestProject]{list: l}

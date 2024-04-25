@@ -21,11 +21,13 @@ func ConfigureProjects(projectList []serverapiclient.CreateWorkspaceRequestProje
 	containerImage := defaultContainerImage
 	containerUser := defaultContainerUser
 	postStartCommands := defaultPostStartCommands
-	var doneCheck bool
 
 	project := selection.GetProjectRequestFromPrompt(projectList, defaultContainerUser)
 	if project == nil {
 		return projectList, errors.New("project is required")
+	}
+	if project.Name == selection.DoneConfiguring.Name {
+		return projectList, nil
 	}
 	if project.Image != nil {
 		containerImage = *project.Image
@@ -41,7 +43,6 @@ func ConfigureProjects(projectList []serverapiclient.CreateWorkspaceRequestProje
 
 	form := huh.NewForm(
 		GetProjectConfigurationGroup(&containerImage, &containerUser, &postStartCommands),
-		GetDoneCheckGroup(&doneCheck),
 	).WithTheme(views.GetCustomTheme())
 
 	err := form.Run()
@@ -57,22 +58,5 @@ func ConfigureProjects(projectList []serverapiclient.CreateWorkspaceRequestProje
 		}
 	}
 
-	if !doneCheck {
-		projectList, err = ConfigureProjects(projectList, defaultContainerImage, defaultContainerUser, defaultPostStartCommands)
-		if err != nil {
-			return projectList, err
-		}
-	}
-
-	return projectList, nil
-}
-
-func GetDoneCheckGroup(doneCheck *bool) *huh.Group {
-	group := huh.NewGroup(
-		huh.NewConfirm().
-			Title("Done configuring projects?").
-			Value(doneCheck),
-	)
-
-	return group
+	return ConfigureProjects(projectList, defaultContainerImage, defaultContainerUser, defaultPostStartCommands)
 }

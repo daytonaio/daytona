@@ -27,14 +27,19 @@ type SummaryModel struct {
 }
 
 var configureCheck bool
+var confirmationResult bool
 
 func DisplayMultiSubmitForm(workspaceName string, projectList *[]serverapiclient.CreateWorkspaceRequestProject, apiServerConfig *serverapiclient.ServerConfig, doneCheck *bool) {
-	m := NewSummaryModel(workspaceName, *projectList, doneCheck)
+	configureCheck = false
+
+	m := NewSummaryModel(workspaceName, *projectList)
 
 	if _, err := tea.NewProgram(m).Run(); err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}
+
+	*doneCheck = confirmationResult
 
 	if !configureCheck {
 		return
@@ -58,6 +63,8 @@ func DisplayMultiSubmitForm(workspaceName string, projectList *[]serverapiclient
 	}
 
 	*projectList = configuredProjects
+
+	DisplayMultiSubmitForm(workspaceName, projectList, apiServerConfig, doneCheck)
 }
 
 func RenderSummary(workspaceName string, projectList []serverapiclient.CreateWorkspaceRequestProject) string {
@@ -89,7 +96,7 @@ func RenderSummary(workspaceName string, projectList []serverapiclient.CreateWor
 	return output
 }
 
-func NewSummaryModel(workspaceName string, projectList []serverapiclient.CreateWorkspaceRequestProject, doneCheck *bool) SummaryModel {
+func NewSummaryModel(workspaceName string, projectList []serverapiclient.CreateWorkspaceRequestProject) SummaryModel {
 	m := SummaryModel{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
@@ -101,7 +108,7 @@ func NewSummaryModel(workspaceName string, projectList []serverapiclient.CreateW
 			huh.NewConfirm().
 				Title("Good to go?").
 				Negative("Abort").
-				Value(doneCheck),
+				Value(&confirmationResult),
 		),
 	).WithShowHelp(false).WithTheme(views.GetCustomTheme())
 
@@ -123,6 +130,7 @@ func (m SummaryModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.quitting = true
 			m.form.State = huh.StateCompleted
 			configureCheck = true
+			confirmationResult = true
 			return m, tea.Quit
 		}
 	}
