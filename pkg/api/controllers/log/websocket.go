@@ -31,7 +31,7 @@ func writeToWs(ws *websocket.Conn, c chan []byte, errChan chan error) {
 	}
 }
 
-func readLog(ginCtx *gin.Context, logReader *io.Reader) {
+func readLog(ginCtx *gin.Context, logReader io.Reader) {
 	followQuery := ginCtx.Query("follow")
 	follow := followQuery == "true"
 
@@ -92,7 +92,7 @@ func ReadServerLog(ginCtx *gin.Context) {
 		return
 	}
 
-	readLog(ginCtx, &reader)
+	readLog(ginCtx, reader)
 }
 
 func ReadWorkspaceLog(ginCtx *gin.Context) {
@@ -106,5 +106,5 @@ func ReadWorkspaceLog(ginCtx *gin.Context) {
 		return
 	}
 
-	readLog(ginCtx, &wsLogReader)
+	readLog(ginCtx, wsLogReader)
 }

@@ -6,6 +6,7 @@
 package agent
 
 import (
+	"io"
 	"os"
 	"path"
 
@@ -26,6 +27,10 @@ var AgentCmd = &cobra.Command{
 	Short: "Start the agent process",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
+		if log.GetLevel() < log.InfoLevel {
+			log.SetLevel(log.InfoLevel)
+		}
+
 		agentMode := config.ModeProject
 
 		if hostModeFlag {
@@ -37,9 +42,22 @@ var AgentCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		gitLogWriter := io.MultiWriter(os.Stdout)
+		var agentLogWriter io.Writer
+		if config.LogFilePath != nil {
+			logFile, err := os.OpenFile(*config.LogFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer logFile.Close()
+			gitLogWriter = io.MultiWriter(os.Stdout, logFile)
+			agentLogWriter = logFile
+		}
+
 		git := &git.Service{
 			ProjectDir:        config.ProjectDir,
 			GitConfigFileName: path.Join(os.Getenv("HOME"), ".gitconfig"),
+			LogWriter:         gitLogWriter,
 		}
 
 		sshServer := &ssh.Server{
@@ -62,6 +80,7 @@ var AgentCmd = &cobra.Command{
 			Git:       git,
 			Ssh:       sshServer,
 			Tailscale: tailscaleServer,
+			LogWriter: agentLogWriter,
 		}
 
 		err = agent.Start()
@@ -73,4 +92,5 @@ var AgentCmd = &cobra.Command{
 
 func init() {
 	AgentCmd.Flags().BoolVar(&hostModeFlag, "host", false, "Run the agent in host mode")
+	AgentCmd.AddCommand(logsCmd)
 }
