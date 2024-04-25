@@ -4,6 +4,9 @@
 package workspace
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -11,10 +14,26 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 )
 
+type ProjectBuildDevcontainer struct {
+	DevContainerFilePath string `json:"devContainerFilePath"`
+} // @name ProjectBuildDevcontainer
+
+type ProjectBuildDockerfile struct {
+	Context    string            `json:"context"`
+	Dockerfile string            `json:"dockerfile"`
+	Args       map[string]string `json:"args"`
+} // @name ProjectBuildDockerfile
+
+type ProjectBuild struct {
+	Devcontainer *ProjectBuildDevcontainer `json:"devcontainer"`
+	Dockerfile   *ProjectBuildDockerfile   `json:"dockerfile"`
+} // @name ProjectBuild
+
 type Project struct {
 	Name              string                     `json:"name"`
 	Image             string                     `json:"image"`
 	User              string                     `json:"user"`
+	Build             *ProjectBuild              `json:"build"`
 	Repository        *gitprovider.GitRepository `json:"repository"`
 	WorkspaceId       string                     `json:"workspaceId"`
 	ApiKey            string                     `json:"-"`
@@ -98,4 +117,33 @@ func GetProjectHostname(workspaceId string, projectName string) string {
 	}
 
 	return hostname
+}
+
+// GetImageHash returns a SHA-256 hash of the project's build configuration, repository URL, and environment variables.
+func (p *Project) GetConfigHash() (string, error) {
+
+	buildJson, err := json.Marshal(p.Build)
+	if err != nil {
+		return "", err
+	}
+
+	/*
+		//	todo: atm env vars contain workspace env provided by the server
+		//		  this causes each workspace to have a different hash
+		envVarsJson, err := json.Marshal(p.EnvVars)
+		if err != nil {
+			return "", err
+		}
+	*/
+
+	// Concatenate the JSON strings and the repository URL
+	data := string(buildJson) + p.Repository.Url /* + string(envVarsJson)*/
+
+	// Compute the SHA-256 hash of the data
+	hash := sha256.Sum256([]byte(data))
+
+	// Convert the hash to a hexadecimal string
+	hashStr := hex.EncodeToString(hash[:])
+
+	return hashStr, nil
 }

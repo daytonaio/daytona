@@ -9,13 +9,15 @@ import (
 	"regexp"
 
 	"github.com/daytonaio/daytona/pkg/apikey"
+	"github.com/daytonaio/daytona/pkg/containerregistry"
+	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
 func (s *WorkspaceService) CreateWorkspace(req dto.CreateWorkspaceRequest) (*workspace.Workspace, error) {
-	_, err := s.workspaceStore.Find(req.Name)
+	_, err := s.WorkspaceStore.Find(req.Name)
 	if err == nil {
 		return nil, ErrWorkspaceAlreadyExists
 	}
@@ -31,7 +33,7 @@ func (s *WorkspaceService) CreateWorkspace(req dto.CreateWorkspaceRequest) (*wor
 		Target: req.Target,
 	}
 
-	apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeWorkspace, w.Id)
+	apiKey, err := s.ApiKeyService.Generate(apikey.ApiKeyTypeWorkspace, w.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -41,37 +43,38 @@ func (s *WorkspaceService) CreateWorkspace(req dto.CreateWorkspaceRequest) (*wor
 
 	for _, project := range req.Projects {
 		if project.Source.Repository != nil && project.Source.Repository.Sha == "" {
-			sha, err := s.gitProviderService.GetLastCommitSha(project.Source.Repository)
+			sha, err := s.GitProviderService.GetLastCommitSha(project.Source.Repository)
 			if err != nil {
 				return nil, err
 			}
 			project.Source.Repository.Sha = sha
 		}
 
-		apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", w.Id, project.Name))
+		apiKey, err := s.ApiKeyService.Generate(apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", w.Id, project.Name))
 		if err != nil {
 			return nil, err
 		}
 
-		projectImage := s.defaultProjectImage
+		projectImage := s.DefaultProjectImage
 		if project.Image != nil {
 			projectImage = *project.Image
 		}
 
-		projectUser := s.defaultProjectUser
+		projectUser := s.DefaultProjectUser
 		if project.User != nil {
 			projectUser = *project.User
 		}
 
-		postStartCommands := s.defaultProjectPostStartCommands
+		postStartCommands := s.DefaultProjectPostStartCommands
 		if project.PostStartCommands != nil {
 			postStartCommands = *project.PostStartCommands
 		}
 
-		project := &workspace.Project{
+		p := &workspace.Project{
 			Name:              project.Name,
 			Image:             projectImage,
 			User:              projectUser,
+			Build:             project.Build,
 			PostStartCommands: postStartCommands,
 			Repository:        project.Source.Repository,
 			WorkspaceId:       w.Id,
@@ -79,10 +82,10 @@ func (s *WorkspaceService) CreateWorkspace(req dto.CreateWorkspaceRequest) (*wor
 			Target:            w.Target,
 			EnvVars:           project.EnvVars,
 		}
-		w.Projects = append(w.Projects, project)
+		w.Projects = append(w.Projects, p)
 	}
 
-	err = s.workspaceStore.Save(w)
+	err = s.WorkspaceStore.Save(w)
 	if err != nil {
 		return nil, err
 	}
@@ -90,19 +93,81 @@ func (s *WorkspaceService) CreateWorkspace(req dto.CreateWorkspaceRequest) (*wor
 	return s.createWorkspace(w)
 }
 
+func (s *WorkspaceService) createBuild(project *workspace.Project, cr *containerregistry.ContainerRegistry, gc *gitprovider.GitProviderConfig, logWriter io.Writer) (*workspace.Project, error) {
+	if project.Build != nil {
+		builder := s.BuilderFactory.Create(*project, cr, gc)
+
+		lastBuildResult, err := builder.LoadBuildResults()
+		if err != nil {
+			return nil, err
+		}
+		if lastBuildResult == nil {
+			err := builder.Prepare()
+			if err != nil {
+				return nil, err
+			}
+
+			builderPlugin := builder.GetBuilderPlugin()
+			if builderPlugin != nil {
+				buildResult, err := builderPlugin.Build()
+				if err != nil {
+					return nil, err
+				}
+
+				err = builderPlugin.Publish()
+				if err != nil {
+					return nil, err
+				}
+
+				err = builder.SaveBuildResults(*buildResult)
+				if err != nil {
+					return nil, err
+				}
+
+				/*
+					err = (*targetProvider).PublishBuildArtifacts(project, ba)
+					if err != nil {
+						return err
+					}
+				*/
+
+				//	todo: just for test
+				lastBuildResult = buildResult
+			}
+		} else {
+			logWriter.Write([]byte("Project build image found. Skipping build\n"))
+		}
+
+		if lastBuildResult != nil {
+			project.Image = lastBuildResult.ImageName
+			project.User = lastBuildResult.User
+			project.Build = nil
+		}
+	}
+
+	return project, nil
+}
+
 func (s *WorkspaceService) createProject(project *workspace.Project, target *provider.ProviderTarget, logWriter io.Writer) error {
 	logWriter.Write([]byte(fmt.Sprintf("Creating project %s\n", project.Name)))
 
-	projectToCreate := *project
-	projectToCreate.EnvVars = workspace.GetProjectEnvVars(project, s.serverApiUrl, s.serverUrl)
+	projectWithEnv := *project
+	projectWithEnv.EnvVars = workspace.GetProjectEnvVars(project, s.ServerApiUrl, s.ServerUrl)
 
 	for k, v := range project.EnvVars {
-		projectToCreate.EnvVars[k] = v
+		projectWithEnv.EnvVars[k] = v
 	}
 
-	cr, _ := s.containerRegistryStore.Find(project.GetImageServer())
+	cr, _ := s.ContainerRegistryStore.Find(project.GetImageServer())
 
-	err := s.provisioner.CreateProject(&projectToCreate, target, cr)
+	gc, _ := s.GitProviderService.GetConfigForUrl(project.Repository.Url)
+
+	projectToCreate, err := s.createBuild(&projectWithEnv, cr, gc, logWriter)
+	if err != nil {
+		return err
+	}
+
+	err = s.Provisioner.CreateProject(projectToCreate, target, cr, gc)
 	if err != nil {
 		return err
 	}
@@ -113,21 +178,21 @@ func (s *WorkspaceService) createProject(project *workspace.Project, target *pro
 }
 
 func (s *WorkspaceService) createWorkspace(workspace *workspace.Workspace) (*workspace.Workspace, error) {
-	target, err := s.targetStore.Find(workspace.Target)
+	target, err := s.TargetStore.Find(workspace.Target)
 	if err != nil {
 		return workspace, err
 	}
 
-	wsLogger := s.loggerFactory.CreateWorkspaceLogger(workspace.Id)
+	wsLogger := s.LoggerFactory.CreateWorkspaceLogger(workspace.Id)
 	wsLogger.Write([]byte("Creating workspace\n"))
 
-	err = s.provisioner.CreateWorkspace(workspace, target)
+	err = s.Provisioner.CreateWorkspace(workspace, target)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, project := range workspace.Projects {
-		projectLogger := s.loggerFactory.CreateProjectLogger(workspace.Id, project.Name)
+		projectLogger := s.LoggerFactory.CreateProjectLogger(workspace.Id, project.Name)
 		defer projectLogger.Close()
 
 		err := s.createProject(project, target, projectLogger)

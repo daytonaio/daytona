@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/cmd/tailscale"
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
@@ -359,6 +360,12 @@ func waitForDial(tsConn *tsnet.Server, workspaceId string, projectName string, d
 }
 
 func readLog(ws *websocket.Conn, stopLogs *bool) {
+	if internal.Version == "v0.0.0-dev" {
+		err := ws.SetReadDeadline(time.Time{})
+		if err != nil {
+			panic(err)
+		}
+	}
 	for {
 		_, msg, err := ws.ReadMessage()
 		if err != nil {

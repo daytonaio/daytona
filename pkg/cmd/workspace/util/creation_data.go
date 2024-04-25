@@ -48,6 +48,7 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 		Source: &apiclient.CreateWorkspaceRequestProjectSource{
 			Repository: providerRepo,
 		},
+		Build: &serverapiclient.ProjectBuild{},
 	}}
 
 	if config.MultiProject {
@@ -79,6 +80,7 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 				Source: &apiclient.CreateWorkspaceRequestProjectSource{
 					Repository: providerRepo,
 				},
+				Build: &apiclient.ProjectBuild{},
 			})
 		}
 	}
@@ -88,6 +90,22 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 	err = create.RunSubmissionForm(&workspaceName, suggestedName, config.ExistingWorkspaceNames, &projectList, config.ApiServerConfig)
 	if err != nil {
 		return "", nil, err
+	}
+
+	for _, project := range projectList {
+		if project.Build != nil {
+			if project.Image != nil {
+				*project.Image = ""
+			}
+			if project.User != nil {
+				*project.User = ""
+			}
+			if project.Build.Devcontainer != nil || *project.Build == (serverapiclient.ProjectBuild{}) {
+				if project.PostStartCommands != nil {
+					project.PostStartCommands = []string{}
+				}
+			}
+		}
 	}
 
 	return workspaceName, projectList, nil

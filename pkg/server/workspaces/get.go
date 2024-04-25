@@ -8,17 +8,17 @@ import (
 )
 
 func (s *WorkspaceService) GetWorkspace(workspaceId string) (*dto.WorkspaceDTO, error) {
-	workspace, err := s.workspaceStore.Find(workspaceId)
+	workspace, err := s.WorkspaceStore.Find(workspaceId)
 	if err != nil {
 		return nil, ErrWorkspaceNotFound
 	}
 
-	target, err := s.targetStore.Find(workspace.Target)
+	target, err := s.TargetStore.Find(workspace.Target)
 	if err != nil {
 		return nil, err
 	}
 
-	workspaceInfo, err := s.provisioner.GetWorkspaceInfo(workspace, target)
+	workspaceInfo, err := s.Provisioner.GetWorkspaceInfo(workspace, target)
 	if err != nil {
 		return nil, err
 	}

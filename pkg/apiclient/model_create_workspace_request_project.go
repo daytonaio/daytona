@@ -21,6 +21,7 @@ var _ MappedNullable = &CreateWorkspaceRequestProject{}
 
 // CreateWorkspaceRequestProject struct for CreateWorkspaceRequestProject
 type CreateWorkspaceRequestProject struct {
+	Build             *ProjectBuild                        `json:"build,omitempty"`
 	EnvVars           *map[string]string                   `json:"envVars,omitempty"`
 	Image             *string                              `json:"image,omitempty"`
 	Name              string                               `json:"name"`
@@ -47,6 +48,38 @@ func NewCreateWorkspaceRequestProject(name string) *CreateWorkspaceRequestProjec
 func NewCreateWorkspaceRequestProjectWithDefaults() *CreateWorkspaceRequestProject {
 	this := CreateWorkspaceRequestProject{}
 	return &this
+}
+
+// GetBuild returns the Build field value if set, zero value otherwise.
+func (o *CreateWorkspaceRequestProject) GetBuild() ProjectBuild {
+	if o == nil || IsNil(o.Build) {
+		var ret ProjectBuild
+		return ret
+	}
+	return *o.Build
+}
+
+// GetBuildOk returns a tuple with the Build field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateWorkspaceRequestProject) GetBuildOk() (*ProjectBuild, bool) {
+	if o == nil || IsNil(o.Build) {
+		return nil, false
+	}
+	return o.Build, true
+}
+
+// HasBuild returns a boolean if a field has been set.
+func (o *CreateWorkspaceRequestProject) HasBuild() bool {
+	if o != nil && !IsNil(o.Build) {
+		return true
+	}
+
+	return false
+}
+
+// SetBuild gets a reference to the given ProjectBuild and assigns it to the Build field.
+func (o *CreateWorkspaceRequestProject) SetBuild(v ProjectBuild) {
+	o.Build = &v
 }
 
 // GetEnvVars returns the EnvVars field value if set, zero value otherwise.
@@ -243,6 +276,9 @@ func (o CreateWorkspaceRequestProject) MarshalJSON() ([]byte, error) {
 
 func (o CreateWorkspaceRequestProject) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.Build) {
+		toSerialize["build"] = o.Build
+	}
 	if !IsNil(o.EnvVars) {
 		toSerialize["envVars"] = o.EnvVars
 	}
