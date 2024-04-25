@@ -5,13 +5,15 @@ package provisioner
 
 import (
 	"github.com/daytonaio/daytona/pkg/containerregistry"
+	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/logger"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
 type IProvisioner interface {
-	CreateProject(project *workspace.Project, target *provider.ProviderTarget, cr *containerregistry.ContainerRegistry) error
+	CreateProject(project *workspace.Project, target *provider.ProviderTarget, cr *containerregistry.ContainerRegistry, gc *gitprovider.GitProviderConfig) error
 	CreateWorkspace(workspace *workspace.Workspace, target *provider.ProviderTarget) error
 	DestroyProject(project *workspace.Project, target *provider.ProviderTarget) error
 	DestroyWorkspace(workspace *workspace.Workspace, target *provider.ProviderTarget) error
@@ -24,14 +26,15 @@ type IProvisioner interface {
 
 type ProvisionerConfig struct {
 	ProviderManager manager.IProviderManager
+	LoggerFactory   logger.LoggerFactory
 }
 
 func NewProvisioner(config ProvisionerConfig) IProvisioner {
 	return &Provisioner{
-		providerManager: config.ProviderManager,
+		ProvisionerConfig: config,
 	}
 }
 
 type Provisioner struct {
-	providerManager manager.IProviderManager
+	ProvisionerConfig
 }

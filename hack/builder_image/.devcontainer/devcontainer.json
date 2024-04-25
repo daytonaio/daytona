@@ -1,0 +1,28 @@
+{
+	"name": "Daytona Project Image Builder",
+	"build": {
+		"context": "..",
+		"dockerfile": "../Dockerfile"
+	},
+	"features": {
+		"ghcr.io/devcontainers/features/common-utils:1": {
+			"installZsh": "true",
+			"username": "daytona",
+			"uid": "1000",
+			"gid": "1000",
+			"upgradePackages": "false"
+		},
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
+		"ghcr.io/devcontainers/features/node:1": {},
+		"ghcr.io/wxw-matt/devcontainer-features/command_runner:latest": {
+			"devcontainers": "npm install -g @devcontainers/cli"
+		}
+	},
+	"overrideFeatureInstallOrder": [
+		"ghcr.io/devcontainers/features/docker-in-docker:2",
+		"ghcr.io/devcontainers/features/node:1",
+		"ghcr.io/devcontainers/features/common-utils:1",
+		"ghcr.io/wxw-matt/devcontainer-features/command_runner:latest"
+	],
+	"remoteUser": "daytona"
+}

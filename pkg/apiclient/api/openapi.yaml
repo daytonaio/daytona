@@ -829,6 +829,14 @@ components:
           postStartCommands:
           - postStartCommands
           - postStartCommands
+          build:
+            devcontainer:
+              devContainerFilePath: devContainerFilePath
+            dockerfile:
+              args:
+                key: args
+              dockerfile: dockerfile
+              context: context
           envVars:
             key: envVars
           name: name
@@ -848,6 +856,14 @@ components:
           postStartCommands:
           - postStartCommands
           - postStartCommands
+          build:
+            devcontainer:
+              devContainerFilePath: devContainerFilePath
+            dockerfile:
+              args:
+                key: args
+              dockerfile: dockerfile
+              context: context
           envVars:
             key: envVars
           name: name
@@ -886,6 +902,14 @@ components:
         postStartCommands:
         - postStartCommands
         - postStartCommands
+        build:
+          devcontainer:
+            devContainerFilePath: devContainerFilePath
+          dockerfile:
+            args:
+              key: args
+            dockerfile: dockerfile
+            context: context
         envVars:
           key: envVars
         name: name
@@ -902,6 +926,8 @@ components:
             url: url
         user: user
       properties:
+        build:
+          $ref: '#/components/schemas/ProjectBuild'
         envVars:
           additionalProperties:
             type: string
@@ -1130,6 +1156,14 @@ components:
         postStartCommands:
         - postStartCommands
         - postStartCommands
+        build:
+          devcontainer:
+            devContainerFilePath: devContainerFilePath
+          dockerfile:
+            args:
+              key: args
+            dockerfile: dockerfile
+            context: context
         name: name
         state:
           gitStatus:
@@ -1159,6 +1193,8 @@ components:
         target: target
         workspaceId: workspaceId
       properties:
+        build:
+          $ref: '#/components/schemas/ProjectBuild'
         image:
           type: string
         name:
@@ -1176,6 +1212,44 @@ components:
         user:
           type: string
         workspaceId:
+          type: string
+      type: object
+    ProjectBuild:
+      example:
+        devcontainer:
+          devContainerFilePath: devContainerFilePath
+        dockerfile:
+          args:
+            key: args
+          dockerfile: dockerfile
+          context: context
+      properties:
+        devcontainer:
+          $ref: '#/components/schemas/ProjectBuildDevcontainer'
+        dockerfile:
+          $ref: '#/components/schemas/ProjectBuildDockerfile'
+      type: object
+    ProjectBuildDevcontainer:
+      example:
+        devContainerFilePath: devContainerFilePath
+      properties:
+        devContainerFilePath:
+          type: string
+      type: object
+    ProjectBuildDockerfile:
+      example:
+        args:
+          key: args
+        dockerfile: dockerfile
+        context: context
+      properties:
+        args:
+          additionalProperties:
+            type: string
+          type: object
+        context:
+          type: string
+        dockerfile:
           type: string
       type: object
     ProjectInfo:
@@ -1253,18 +1327,19 @@ components:
     ServerConfig:
       example:
         registryUrl: registryUrl
+        defaultProjectUser: defaultProjectUser
+        defaultProjectPostStartCommands:
+        - defaultProjectPostStartCommands
+        - defaultProjectPostStartCommands
         apiPort: 0
         headscalePort: 1
         serverDownloadUrl: serverDownloadUrl
         binariesPath: binariesPath
         logFilePath: logFilePath
         defaultProjectImage: defaultProjectImage
-        defaultProjectUser: defaultProjectUser
         providersDir: providersDir
         id: id
-        defaultProjectPostStartCommands:
-        - defaultProjectPostStartCommands
-        - defaultProjectPostStartCommands
+        registryPort: 5
         frps:
           protocol: protocol
           port: 6
@@ -1292,6 +1367,8 @@ components:
           type: string
         providersDir:
           type: string
+        registryPort:
+          type: integer
         registryUrl:
           type: string
         serverDownloadUrl:
@@ -1344,6 +1421,14 @@ components:
           postStartCommands:
           - postStartCommands
           - postStartCommands
+          build:
+            devcontainer:
+              devContainerFilePath: devContainerFilePath
+            dockerfile:
+              args:
+                key: args
+              dockerfile: dockerfile
+              context: context
           name: name
           state:
             gitStatus:
@@ -1376,6 +1461,14 @@ components:
           postStartCommands:
           - postStartCommands
           - postStartCommands
+          build:
+            devcontainer:
+              devContainerFilePath: devContainerFilePath
+            dockerfile:
+              args:
+                key: args
+              dockerfile: dockerfile
+              context: context
           name: name
           state:
             gitStatus:
@@ -1426,6 +1519,14 @@ components:
           postStartCommands:
           - postStartCommands
           - postStartCommands
+          build:
+            devcontainer:
+              devContainerFilePath: devContainerFilePath
+            dockerfile:
+              args:
+                key: args
+              dockerfile: dockerfile
+              context: context
           name: name
           state:
             gitStatus:
@@ -1458,6 +1559,14 @@ components:
           postStartCommands:
           - postStartCommands
           - postStartCommands
+          build:
+            devcontainer:
+              devContainerFilePath: devContainerFilePath
+            dockerfile:
+              args:
+                key: args
+              dockerfile: dockerfile
+              context: context
           name: name
           state:
             gitStatus:

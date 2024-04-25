@@ -1172,6 +1172,9 @@ const docTemplate = `{
                 "name"
             ],
             "properties": {
+                "build": {
+                    "$ref": "#/definitions/ProjectBuild"
+                },
                 "envVars": {
                     "type": "object",
                     "additionalProperties": {
@@ -1401,6 +1404,9 @@ const docTemplate = `{
         "Project": {
             "type": "object",
             "properties": {
+                "build": {
+                    "$ref": "#/definitions/ProjectBuild"
+                },
                 "image": {
                     "type": "string"
                 },
@@ -1426,6 +1432,42 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "workspaceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProjectBuild": {
+            "type": "object",
+            "properties": {
+                "devcontainer": {
+                    "$ref": "#/definitions/ProjectBuildDevcontainer"
+                },
+                "dockerfile": {
+                    "$ref": "#/definitions/ProjectBuildDockerfile"
+                }
+            }
+        },
+        "ProjectBuildDevcontainer": {
+            "type": "object",
+            "properties": {
+                "devContainerFilePath": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProjectBuildDockerfile": {
+            "type": "object",
+            "properties": {
+                "args": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "context": {
+                    "type": "string"
+                },
+                "dockerfile": {
                     "type": "string"
                 }
             }
@@ -1531,6 +1573,9 @@ const docTemplate = `{
                 },
                 "providersDir": {
                     "type": "string"
+                },
+                "registryPort": {
+                    "type": "integer"
                 },
                 "registryUrl": {
                     "type": "string"

@@ -29,6 +29,7 @@ type ServerInstanceConfig struct {
 	TailscaleServer          TailscaleServer
 	ProviderTargetService    providertargets.IProviderTargetService
 	ContainerRegistryService containerregistries.IContainerRegistryService
+	LocalContainerRegistry   ILocalContainerRegistry
 	WorkspaceService         workspaces.IWorkspaceService
 	ApiKeyService            apikeys.IApiKeyService
 	GitProviderService       gitproviders.IGitProviderService
@@ -48,15 +49,7 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 			log.Fatal("Server not initialized")
 		}
 		server = &Server{
-			config:                   serverConfig.Config,
-			TailscaleServer:          serverConfig.TailscaleServer,
-			ProviderTargetService:    serverConfig.ProviderTargetService,
-			ContainerRegistryService: serverConfig.ContainerRegistryService,
-			WorkspaceService:         serverConfig.WorkspaceService,
-			ApiKeyService:            serverConfig.ApiKeyService,
-			GitProviderService:       serverConfig.GitProviderService,
-			ProviderManager:          serverConfig.ProviderManager,
-			ProfileDataService:       serverConfig.ProfileDataService,
+			ServerInstanceConfig: *serverConfig,
 		}
 	}
 
@@ -64,15 +57,7 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 }
 
 type Server struct {
-	config                   Config
-	TailscaleServer          TailscaleServer
-	ContainerRegistryService containerregistries.IContainerRegistryService
-	ProviderTargetService    providertargets.IProviderTargetService
-	WorkspaceService         workspaces.IWorkspaceService
-	ApiKeyService            apikeys.IApiKeyService
-	GitProviderService       gitproviders.IGitProviderService
-	ProviderManager          manager.IProviderManager
-	ProfileDataService       profiledata.IProfileDataService
+	ServerInstanceConfig
 }
 
 func (s *Server) Start(errCh chan error) error {
@@ -83,15 +68,38 @@ func (s *Server) Start(errCh chan error) error {
 
 	log.Info("Starting Daytona server")
 
+	// Terminate orphaned provider processes
+	err = s.ProviderManager.TerminateProviderProcesses(s.Config.ProvidersDir)
+	if err != nil {
+		log.Errorf("Failed to terminate orphaned provider processes: %s", err)
+	}
+
+	err = s.downloadDefaultProviders()
+	if err != nil {
+		return err
+	}
+
+	err = s.registerProviders()
+	if err != nil {
+		return err
+	}
+
 	headscaleFrpcHealthCheck, headscaleFrpcService, err := frpc.GetService(frpc.FrpcConnectParams{
-		ServerDomain: s.config.Frps.Domain,
-		ServerPort:   int(s.config.Frps.Port),
-		Name:         fmt.Sprintf("daytona-server-%s", s.config.Id),
-		Port:         int(s.config.HeadscalePort),
-		SubDomain:    s.config.Id,
+		ServerDomain: s.Config.Frps.Domain,
+		ServerPort:   int(s.Config.Frps.Port),
+		Name:         fmt.Sprintf("daytona-server-%s", s.Config.Id),
+		Port:         int(s.Config.HeadscalePort),
+		SubDomain:    s.Config.Id,
 	})
 	if err != nil {
 		return err
+	}
+
+	//	todo: from config - allow to skip
+	log.Info("Starting local container registry")
+	err = s.LocalContainerRegistry.Start()
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	go func() {
@@ -102,11 +110,11 @@ func (s *Server) Start(errCh chan error) error {
 	}()
 
 	apiFrpcHealthCheck, apiFrpcService, err := frpc.GetService(frpc.FrpcConnectParams{
-		ServerDomain: s.config.Frps.Domain,
-		ServerPort:   int(s.config.Frps.Port),
-		Name:         fmt.Sprintf("daytona-server-api-%s", s.config.Id),
-		Port:         int(s.config.ApiPort),
-		SubDomain:    fmt.Sprintf("api-%s", s.config.Id),
+		ServerDomain: s.Config.Frps.Domain,
+		ServerPort:   int(s.Config.Frps.Port),
+		Name:         fmt.Sprintf("daytona-server-api-%s", s.Config.Id),
+		Port:         int(s.Config.ApiPort),
+		SubDomain:    fmt.Sprintf("api-%s", s.Config.Id),
 	})
 	if err != nil {
 		return err
@@ -114,6 +122,23 @@ func (s *Server) Start(errCh chan error) error {
 
 	go func() {
 		err := apiFrpcService.Run(context.Background())
+		if err != nil {
+			errCh <- err
+		}
+	}()
+
+	_, registryFrpcService, err := frpc.GetService(frpc.FrpcConnectParams{
+		ServerDomain: s.Config.Frps.Domain,
+		ServerPort:   int(s.Config.Frps.Port),
+		Name:         fmt.Sprintf("daytona-server-registry-%s", s.Config.Id),
+		Port:         int(s.Config.RegistryPort),
+		SubDomain:    fmt.Sprintf("registry-%s", s.Config.Id),
+	})
+	if err != nil {
+		return err
+	}
+	go func() {
+		err := registryFrpcService.Run(context.Background())
 		if err != nil {
 			errCh <- err
 		}
@@ -175,7 +200,7 @@ func (s *Server) Start(errCh chan error) error {
 	}
 
 	// Terminate orphaned provider processes
-	err = s.ProviderManager.TerminateProviderProcesses(s.config.ProvidersDir)
+	err = s.ProviderManager.TerminateProviderProcesses(s.Config.ProvidersDir)
 	if err != nil {
 		log.Errorf("Failed to terminate orphaned provider processes: %s", err)
 	}
@@ -194,5 +219,5 @@ func (s *Server) Start(errCh chan error) error {
 }
 
 func (s *Server) GetApiUrl() string {
-	return util.GetFrpcApiUrl(s.config.Frps.Protocol, s.config.Id, s.config.Frps.Domain)
+	return util.GetFrpcApiUrl(s.Config.Frps.Protocol, s.Config.Id, s.Config.Frps.Domain)
 }

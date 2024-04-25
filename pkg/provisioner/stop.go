@@ -9,7 +9,7 @@ import (
 )
 
 func (p *Provisioner) StopWorkspace(workspace *workspace.Workspace, target *provider.ProviderTarget) error {
-	targetProvider, err := p.providerManager.GetProvider(target.ProviderInfo.Name)
+	targetProvider, err := p.ProviderManager.GetProvider(target.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
@@ -23,7 +23,7 @@ func (p *Provisioner) StopWorkspace(workspace *workspace.Workspace, target *prov
 }
 
 func (p *Provisioner) StopProject(project *workspace.Project, target *provider.ProviderTarget) error {
-	targetProvider, err := p.providerManager.GetProvider(target.ProviderInfo.Name)
+	targetProvider, err := p.ProviderManager.GetProvider(target.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}

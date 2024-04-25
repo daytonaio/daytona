@@ -10,6 +10,7 @@ import (
 
 	t_targets "github.com/daytonaio/daytona/internal/testing/provider/targets"
 	t_containerregistries "github.com/daytonaio/daytona/internal/testing/server/containerregistries"
+	t_gitservice "github.com/daytonaio/daytona/internal/testing/server/gitproviders/mocks"
 	t_workspaces "github.com/daytonaio/daytona/internal/testing/server/workspaces"
 	"github.com/daytonaio/daytona/internal/testing/server/workspaces/mocks"
 	"github.com/daytonaio/daytona/pkg/apikey"
@@ -95,6 +96,10 @@ func TestWorkspaceService(t *testing.T) {
 
 	logsDir := t.TempDir()
 
+	mockBuilderFactory := &mocks.MockBuilderFactory{}
+
+	mockGitProviderService := t_gitservice.NewGitProviderService()
+
 	service := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
 		WorkspaceStore:                  workspaceStore,
 		TargetStore:                     targetStore,
@@ -107,7 +112,8 @@ func TestWorkspaceService(t *testing.T) {
 		ApiKeyService:                   apiKeyService,
 		Provisioner:                     provisioner,
 		LoggerFactory:                   logger.NewLoggerFactory(logsDir),
-		GitProviderService:              gitProviderService,
+		GitProviderService:              mockGitProviderService,
+		BuilderFactory:                  mockBuilderFactory,
 	})
 
 	t.Run("CreateWorkspace", func(t *testing.T) {
@@ -124,6 +130,16 @@ func TestWorkspaceService(t *testing.T) {
 		}
 		provisioner.On("CreateProject", mock.Anything, &target, containerRegistry).Return(nil)
 		provisioner.On("StartProject", mock.Anything, &target).Return(nil)
+
+		baseApiUrl := "https://api.github.com"
+		gitProviderConfig := gitprovider.GitProviderConfig{
+			Id:         "github",
+			Username:   "test-username",
+			Token:      "test-token",
+			BaseApiUrl: &baseApiUrl,
+		}
+
+		mockGitProviderService.On("GetConfigForUrl", "https://github.com/daytonaio/daytona").Return(&gitProviderConfig, nil)
 
 		workspace, err := service.CreateWorkspace(createWorkspaceRequest)
 
