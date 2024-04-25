@@ -191,6 +191,10 @@ func getWorkspaceTableRowData(workspace serverapiclient.WorkspaceDTO, specifyGit
 func getProjectTableRowData(workspaceDTO serverapiclient.WorkspaceDTO, project serverapiclient.Project, specifyGitProviders bool) RowData {
 	var currentProjectInfo *workspace.ProjectInfo
 
+	if workspaceDTO.Info == nil || workspaceDTO.Info.Projects == nil {
+		return RowData{}
+	}
+
 	for _, projectInfo := range workspaceDTO.Info.Projects {
 		if *projectInfo.Name == *project.Name {
 			currentProjectInfo = &workspace.ProjectInfo{
