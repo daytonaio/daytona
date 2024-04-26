@@ -22,7 +22,7 @@ func ConfigureProjects(projectList []serverapiclient.CreateWorkspaceRequestProje
 	containerUser := defaultContainerUser
 	postStartCommands := defaultPostStartCommands
 
-	project := selection.GetProjectRequestFromPrompt(projectList, defaultContainerUser)
+	project := selection.GetProjectRequestFromPrompt(projectList)
 	if project == nil {
 		return projectList, errors.New("project is required")
 	}

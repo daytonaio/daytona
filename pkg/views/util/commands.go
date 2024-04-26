@@ -9,7 +9,9 @@ func GetSplitCommands(commands string) []string {
 	splitCommands := []string{}
 
 	for _, command := range splitEscaped(commands, ',') {
-		splitCommands = append(splitCommands, strings.ReplaceAll(command, "\\,", ","))
+		splitCommand := strings.ReplaceAll(command, "\\,", ",")
+		splitCommand = strings.TrimLeft(splitCommand, " ")
+		splitCommands = append(splitCommands, splitCommand)
 	}
 
 	return splitCommands
