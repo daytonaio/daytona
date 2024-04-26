@@ -13,12 +13,16 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 )
 
-func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []serverapiclient.GitProvider, manual bool, multiProject bool) (string, []serverapiclient.CreateWorkspaceRequestProject, error) {
+func GetCreationDataFromPrompt(apiServerConfig *serverapiclient.ServerConfig, workspaceNames []string, userGitProviders []serverapiclient.GitProvider, manual bool, multiProject bool) (string, []serverapiclient.CreateWorkspaceRequestProject, error) {
 	var projectList []serverapiclient.CreateWorkspaceRequestProject
 	var providerRepo serverapiclient.GitRepository
 	var providerRepoUrl string
 	var err error
-	var confirmCheck bool
+	var workspaceName string
+	var primaryContainerImage string
+	var primaryContainerUser string
+	var primaryContainerPostStartCommands []string
+	doneCheck := true
 
 	if !manual && userGitProviders != nil && len(userGitProviders) > 0 {
 		providerRepo, err = getRepositoryFromWizard(userGitProviders, 0)
@@ -69,17 +73,6 @@ func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []serve
 		projectList = append(projectList, workspaceCreationPromptResponse.SecondaryProjects...)
 	}
 
-	suggestedName := create.GetSuggestedWorkspaceName(*workspaceCreationPromptResponse.PrimaryProject.Source.Repository.Url)
-
-	workspaceCreationPromptResponse, err = create.RunWorkspaceNameForm(workspaceCreationPromptResponse, suggestedName, workspaceNames)
-	if err != nil {
-		return "", nil, err
-	}
-
-	if workspaceCreationPromptResponse.WorkspaceName == "" {
-		return "", nil, errors.New("workspace name is required")
-	}
-
 	for i, project := range projectList {
 		if project.Source == nil || project.Source.Repository == nil || project.Source.Repository.Url == nil {
 			return "", nil, errors.New("repository is required")
@@ -88,14 +81,36 @@ func GetCreationDataFromPrompt(workspaceNames []string, userGitProviders []serve
 		projectList[i].Name = projectName
 	}
 
-	if len(projectList) > 1 {
-		create.DisplaySummaryView(workspaceCreationPromptResponse.WorkspaceName, projectList, &confirmCheck)
-		if !confirmCheck {
+	suggestedName := create.GetSuggestedWorkspaceName(*workspaceCreationPromptResponse.PrimaryProject.Source.Repository.Url)
+
+	workspaceName, primaryContainerImage, primaryContainerUser, primaryContainerPostStartCommands, err = create.GetWorkspaceDataFromPrompt(apiServerConfig, suggestedName, workspaceNames, !multiProject)
+	if err != nil {
+		return "", nil, err
+	}
+
+	if workspaceName == "" {
+		return "", nil, errors.New("workspace name is required")
+	}
+
+	if primaryContainerImage != "" {
+		projectList[0].Image = &primaryContainerImage
+	}
+
+	if primaryContainerUser != "" {
+		projectList[0].User = &primaryContainerUser
+	}
+	if primaryContainerPostStartCommands != nil {
+		projectList[0].PostStartCommands = primaryContainerPostStartCommands
+	}
+
+	if multiProject {
+		create.DisplayMultiSubmitForm(workspaceName, &projectList, apiServerConfig, &doneCheck)
+		if !doneCheck {
 			return "", nil, errors.New("operation cancelled")
 		}
 	}
 
-	return workspaceCreationPromptResponse.WorkspaceName, projectList, nil
+	return workspaceName, projectList, nil
 }
 
 func GetProjectNameFromRepo(repoUrl string) string {

@@ -11,8 +11,6 @@ var ContainerRegistryCmd = &cobra.Command{
 	Use:     "container-registry",
 	Aliases: []string{"container-registries", "cr"},
 	Short:   "Manage container registries",
-	// Hidden until project configuration is implemented
-	Hidden: true,
 }
 
 func init() {
