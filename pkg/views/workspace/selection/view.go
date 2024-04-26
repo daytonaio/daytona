@@ -19,6 +19,12 @@ import (
 
 var CustomRepoIdentifier = "<CUSTOM_REPO>"
 
+var selectedStyles = lipgloss.NewStyle().
+	Border(lipgloss.NormalBorder(), false, false, false, true).
+	BorderForeground(views.Blue).
+	Bold(true).
+	Padding(0, 0, 0, 1)
+
 type item[T any] struct {
 	id, title, desc, createdTime, uptime, target string
 	choiceProperty                               T
@@ -113,12 +119,6 @@ func (d ItemDelegate[T]) Render(w io.Writer, m list.Model, index int, listItem l
 
 	// Adjust styles as the user moves through the menu
 	if isSelected {
-		selectedStyles := lipgloss.NewStyle().
-			Border(lipgloss.NormalBorder(), false, false, false, true).
-			BorderForeground(views.Blue).
-			Bold(true).
-			Padding(0, 0, 0, 1)
-
 		title = selectedStyles.Copy().Foreground(views.Blue).Render(i.Title())
 		idWithTarget = selectedStyles.Copy().Foreground(views.Gray).Render(idWithTargetString)
 		description = selectedStyles.Copy().Foreground(views.DimmedBlue).Render(i.Description())

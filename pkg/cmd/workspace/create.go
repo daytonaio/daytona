@@ -235,7 +235,13 @@ func processPrompting(cmd *cobra.Command, apiClient *serverapiclient.APIClient, 
 	for _, workspaceInfo := range workspaceList {
 		workspaceNames = append(workspaceNames, *workspaceInfo.Name)
 	}
-	*workspaceName, *projects, err = workspace_util.GetCreationDataFromPrompt(workspaceNames, gitProviders, manualFlag, multiProjectFlag)
+
+	apiServerConfig, res, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
+	if err != nil {
+		log.Fatal(apiclient.HandleErrorResponse(res, err))
+	}
+
+	*workspaceName, *projects, err = workspace_util.GetCreationDataFromPrompt(apiServerConfig, workspaceNames, gitProviders, manualFlag, multiProjectFlag)
 	if err != nil {
 		log.Fatal(err)
 		return

@@ -25,6 +25,8 @@ type ProjectStateDTO struct {
 
 type ProjectDTO struct {
 	Name              string           `json:"name"`
+	Image             string           `json:"image"`
+	User              string           `json:"user"`
 	Repository        RepositoryDTO    `json:"repository"`
 	WorkspaceId       string           `json:"workspaceId"`
 	Target            string           `json:"target"`
@@ -35,6 +37,8 @@ type ProjectDTO struct {
 func ToProjectDTO(project *workspace.Project, workspace *workspace.Workspace) ProjectDTO {
 	return ProjectDTO{
 		Name:              project.Name,
+		Image:             project.Image,
+		User:              project.User,
 		Repository:        ToRepositoryDTO(project.Repository),
 		WorkspaceId:       project.WorkspaceId,
 		Target:            project.Target,
@@ -78,6 +82,8 @@ func ToProjectStateDTO(state *workspace.ProjectState) *ProjectStateDTO {
 func ToProject(projectDTO ProjectDTO) *workspace.Project {
 	return &workspace.Project{
 		Name:              projectDTO.Name,
+		Image:             projectDTO.Image,
+		User:              projectDTO.User,
 		Repository:        ToRepository(projectDTO.Repository),
 		WorkspaceId:       projectDTO.WorkspaceId,
 		Target:            projectDTO.Target,
