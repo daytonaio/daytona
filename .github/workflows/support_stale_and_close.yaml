@@ -20,13 +20,7 @@ jobs:
           close-pr-message: 'Due to the lack of activity in the last 7 days since it was marked as "stale", we are closing this Pull Request. Do not hesitate to reopen it later if necessary.'
           days-before-stale: 14
           days-before-close: 7
-          exempt-issue-labels: 
-            - 'on-hold'
-            - 'never stale'
-            - 'enhancement'
-          exempt-pr-labels:
-            - 'on-hold'
-            - 'never stale'
-            - 'enhancement'
+          exempt-issue-labels: on-hold,never stale,enhancement
+          exempt-pr-labels: on-hold,never stale,enhancement
           operations-per-run: 100
           repo-token: ${{ secrets.GITHUBBOT_TOKEN }}
