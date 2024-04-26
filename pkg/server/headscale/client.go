@@ -34,7 +34,7 @@ func (s *HeadscaleServer) getClient() (context.Context, v1.HeadscaleServiceClien
 	)
 
 	log.Trace().Caller().Str("address", address).Msg("Connecting via gRPC")
-	conn, err := grpc.DialContext(ctx, address, grpcOptions...)
+	conn, err := grpc.NewClient(address, grpcOptions...)
 	if err != nil {
 		cancel()
 		return nil, nil, nil, nil, err
