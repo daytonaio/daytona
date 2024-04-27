@@ -32,7 +32,7 @@ const serverUrl = "http://localhost:3001"
 const defaultProjectImage = "daytonaio/workspace-project:latest"
 const defaultProjectUser = "daytona"
 
-var defaultProjectPostStartCommands = []string{"sudo dockerd"}
+var defaultProjectPostStartCommands = []string{"/usr/bin/dockerd"}
 
 var target = provider.ProviderTarget{
 	Name: "test-target",

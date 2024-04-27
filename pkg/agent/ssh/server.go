@@ -8,6 +8,8 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"os/user"
+	"strconv"
 	"strings"
 	"syscall"
 	"unsafe"
@@ -80,9 +82,12 @@ func (s *Server) Start() error {
 
 func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh.Window) {
 	shell := s.getShell()
-	cmd := exec.Command(shell)
-
-	cmd.Dir = s.ProjectDir
+	cmd, err := s.getExecCmd(session.User(), shell, []string{})
+	if err != nil {
+		log.Println("error getting exec cmd: ", err)
+		session.Exit(127)
+		return
+	}
 
 	if _, err := os.Stat(s.ProjectDir); os.IsNotExist(err) {
 		cmd.Dir = s.DefaultProjectDir
@@ -101,6 +106,22 @@ func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh
 	cmd.Env = append(cmd.Env, fmt.Sprintf("TERM=%s", ptyReq.Term))
 	cmd.Env = append(cmd.Env, os.Environ()...)
 	cmd.Env = append(cmd.Env, fmt.Sprintf("SHELL=%s", shell))
+
+	if session.User() != "root" {
+		newHome := "/home/" + session.User()
+
+		// Remove existing HOME variable if it exists
+		for i, v := range cmd.Env {
+			if strings.HasPrefix(v, "HOME=") {
+				cmd.Env = append(cmd.Env[:i], cmd.Env[i+1:]...)
+				break
+			}
+		}
+
+		// Add new HOME variable
+		cmd.Env = append(cmd.Env, fmt.Sprintf("HOME=%s", newHome))
+	}
+
 	f, err := pty.Start(cmd)
 	if err != nil {
 		panic(err)
@@ -126,9 +147,27 @@ func (s *Server) handleNonPty(session ssh.Session) {
 
 	fmt.Println("args: ", args)
 
-	cmd := exec.Command("/bin/sh", args...)
+	cmd, err := s.getExecCmd(session.User(), "/bin/sh", args)
+	if err != nil {
+		log.Println("error getting exec cmd: ", err)
+		session.Exit(127)
+		return
+	}
 
-	cmd.Env = append(cmd.Env, os.Environ()...)
+	if session.User() != "root" {
+		newHome := "/home/" + session.User()
+
+		// Remove existing HOME variable if it exists
+		for i, v := range cmd.Env {
+			if strings.HasPrefix(v, "HOME=") {
+				cmd.Env = append(cmd.Env[:i], cmd.Env[i+1:]...)
+				break
+			}
+		}
+
+		// Add new HOME variable
+		cmd.Env = append(cmd.Env, fmt.Sprintf("HOME=%s", newHome))
+	}
 
 	if ssh.AgentRequested(session) {
 		l, err := ssh.NewAgentListener()
@@ -284,4 +323,63 @@ func (s *Server) sftpHandler(session ssh.Session) {
 	} else if err != nil {
 		fmt.Println("sftp server completed with error:", err)
 	}
+}
+
+func (s *Server) getUserUidGid(username string) (int, int, []int, error) {
+	cmd := exec.Command("id", "-u", username)
+	uidBytes, err := cmd.Output()
+	if err != nil {
+		return 0, 0, nil, err
+	}
+
+	cmd = exec.Command("id", "-g", username)
+	gidBytes, err := cmd.Output()
+	if err != nil {
+		return 0, 0, nil, err
+	}
+
+	uid, err := strconv.Atoi(strings.TrimSpace(string(uidBytes)))
+	if err != nil {
+		return 0, 0, nil, err
+	}
+	gid, err := strconv.Atoi(strings.TrimSpace(string(gidBytes)))
+	if err != nil {
+		return 0, 0, nil, err
+	}
+
+	//	todo: get all user groups
+
+	dockerGroup, err := user.LookupGroup("docker")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dockerGid, err := strconv.Atoi(dockerGroup.Gid)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	groups := []int{dockerGid}
+
+	return uid, gid, groups, nil
+}
+
+func (s *Server) getExecCmd(user string, command string, args []string) (*exec.Cmd, error) {
+	uid, gid, groups, err := s.getUserUidGid(user)
+	groupsUint32 := make([]uint32, len(groups))
+	for i, group := range groups {
+		groupsUint32[i] = uint32(group)
+	}
+
+	if err != nil {
+		log.Println("error getting user uid and gid: ", err)
+		return nil, err
+	}
+
+	cmd := exec.Command(command, args...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{}
+	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uint32(uid), Gid: uint32(gid), Groups: groupsUint32}
+	cmd.Dir = s.ProjectDir
+
+	return cmd, nil
 }

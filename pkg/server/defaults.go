@@ -23,7 +23,7 @@ const defaultApiPort = 3000
 const defaultProjectImage = "daytonaio/workspace-project:latest"
 const defaultProjectUser = "daytona"
 
-var defaultProjectPostStartCommands = []string{"sudo dockerd"}
+var defaultProjectPostStartCommands = []string{"/usr/bin/dockerd"}
 
 var us_defaultFrpsConfig = FRPSConfig{
 	Domain:   "try-us.daytona.app",
