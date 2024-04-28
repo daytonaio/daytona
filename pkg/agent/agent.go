@@ -8,7 +8,9 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
 	"os/exec"
+	"os/user"
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -198,7 +200,32 @@ func (a *Agent) setDefaultConfig() error {
 		},
 	}
 
-	return config.Save()
+	err = config.Save()
+	if err != nil {
+		return err
+	}
+
+	//	as the agent is running as root, we need to move the config to the user's home directory
+	user, err := user.Lookup(a.Config.User)
+	if err != nil {
+		return err
+	}
+
+	rootConfigPath := "/root/.config/daytona"
+	userConfigPath := user.HomeDir + "/.config/daytona"
+
+	err = os.MkdirAll(user.HomeDir+"/.config", 0755)
+	if err != nil {
+		return err
+	}
+
+	err = os.Rename(rootConfigPath, userConfigPath)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }
 
 func (a *Agent) runPostStartCommands(project *serverapiclient.Project) {

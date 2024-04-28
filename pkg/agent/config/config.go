@@ -6,6 +6,7 @@ package config
 import (
 	"errors"
 	"os"
+	"os/user"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
@@ -27,6 +28,8 @@ type Config struct {
 	LogFilePath *string `envconfig:"DAYTONA_AGENT_LOG_FILE_PATH"`
 	Server      DaytonaServerConfig
 	Mode        Mode
+	Image       string `envconfig:"DAYTONA_PROJECT_IMAGE"`
+	User        string `envconfig:"DAYTONA_PROJECT_USER"`
 }
 
 type Mode string
@@ -82,7 +85,18 @@ func GetLogFilePath() *string {
 		return nil
 	}
 
-	logFilePath = strings.Replace(logFilePath, "$HOME", os.Getenv("HOME"), 1)
+	username, ok := os.LookupEnv("DAYTONA_PROJECT_USER")
+	if !ok {
+		//	todo: revisit if invalid username should provoke fatal error
+		username = "root"
+	}
+
+	user, err := user.Lookup(username)
+	if err != nil {
+		log.Fatalf("failed to get user: %s", err)
+	}
+
+	logFilePath = strings.Replace(logFilePath, "$HOME", user.HomeDir, 1)
 
 	return &logFilePath
 }
