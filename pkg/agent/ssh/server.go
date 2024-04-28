@@ -134,7 +134,7 @@ func (s *Server) handleNonPty(session ssh.Session) {
 
 	cmd, err := s.getExecCmd(session.User(), "/bin/sh", args)
 	if err != nil {
-		log.Println("error getting exec cmd: ", err)
+		log.Errorf("error getting exec cmd: %s", err)
 		session.Exit(127)
 		return
 	}
@@ -160,14 +160,14 @@ func (s *Server) handleNonPty(session ssh.Session) {
 	stdinPipe, err := cmd.StdinPipe()
 	if err != nil {
 		//	TODO: handle error
-		log.Println("#1", err)
+		log.Errorf("%s", err)
 		return
 	}
 	go func() {
 		_, err := io.Copy(stdinPipe, session)
 		if err != nil {
 			//	TODO: handle error
-			log.Println("#2", err)
+			log.Errorf("%s", err)
 		}
 		_ = stdinPipe.Close()
 	}()
@@ -175,7 +175,7 @@ func (s *Server) handleNonPty(session ssh.Session) {
 	err = cmd.Start()
 	if err != nil {
 		//	TODO: handle error
-		log.Println("#3", err)
+		log.Errorf("%s", err)
 		return
 	}
 	sigs := make(chan ssh.Signal, 1)
@@ -189,14 +189,14 @@ func (s *Server) handleNonPty(session ssh.Session) {
 			signal := s.osSignalFrom(sig)
 			err := cmd.Process.Signal(signal)
 			if err != nil {
-				log.Println("signal error: ", err)
+				log.Errorf("signal error: %s", err)
 			}
 		}
 	}()
 	err = cmd.Wait()
 
 	if err != nil {
-		log.Println(session.RawCommand(), " ", err)
+		log.Errorf(session.RawCommand(), " ", err)
 		session.Exit(127)
 		return
 	}
@@ -204,7 +204,7 @@ func (s *Server) handleNonPty(session ssh.Session) {
 	err = session.Exit(0)
 	if err != nil {
 		//	TODO: handle error
-		log.Println("exit error: ", err)
+		log.Errorf("exit error: %s", err)
 	}
 	log.Println(session.RawCommand(), " command exited successfully")
 }
