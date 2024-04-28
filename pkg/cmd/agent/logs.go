@@ -10,10 +10,11 @@ import (
 	"os"
 
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/pkg/agent/config"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
+
+const AgentLogFilePath = "/var/log/daytona/agent.log"
 
 var followFlag bool
 
@@ -21,13 +22,7 @@ var logsCmd = &cobra.Command{
 	Use:   "logs",
 	Short: "Output Daytona Agent logs",
 	Run: func(cmd *cobra.Command, args []string) {
-		logFilePath := config.GetLogFilePath()
-
-		if logFilePath == nil {
-			log.Fatal("Log file path not set")
-		}
-
-		file, err := os.Open(*logFilePath)
+		file, err := os.Open(AgentLogFilePath)
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -32,4 +32,6 @@ type Agent struct {
 	Tailscale TailscaleServer
 	LogWriter io.Writer
 	startTime time.Time
+
+	project *serverapiclient.Project
 }

@@ -42,17 +42,23 @@ var AgentCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		gitLogWriter := io.MultiWriter(os.Stdout)
-		var agentLogWriter io.Writer
-		if config.LogFilePath != nil {
-			logFile, err := os.OpenFile(*config.LogFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-			if err != nil {
-				log.Fatal(err)
-			}
-			defer logFile.Close()
-			gitLogWriter = io.MultiWriter(os.Stdout, logFile)
-			agentLogWriter = logFile
+		// if flag.Lookup("test.v") == nil {
+		// 	gitLogWriter := io.MultiWriter(os.Stdout)
+		// }
+
+		err = os.MkdirAll(path.Dir(AgentLogFilePath), 0755)
+		if err != nil {
+			log.Fatal(err)
 		}
+
+		var agentLogWriter io.Writer
+		logFile, err := os.OpenFile(AgentLogFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer logFile.Close()
+		gitLogWriter := io.MultiWriter(os.Stdout, logFile)
+		agentLogWriter = logFile
 
 		git := &git.Service{
 			ProjectDir:        config.ProjectDir,

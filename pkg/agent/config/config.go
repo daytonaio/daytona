@@ -6,8 +6,6 @@ package config
 import (
 	"errors"
 	"os"
-	"os/user"
-	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/kelseyhightower/envconfig"
@@ -22,14 +20,11 @@ type DaytonaServerConfig struct {
 }
 
 type Config struct {
-	ProjectDir  string  `envconfig:"DAYTONA_WS_DIR"`
-	ProjectName string  `envconfig:"DAYTONA_WS_PROJECT_NAME"`
-	WorkspaceId string  `envconfig:"DAYTONA_WS_ID" validate:"required"`
-	LogFilePath *string `envconfig:"DAYTONA_AGENT_LOG_FILE_PATH"`
+	ProjectDir  string `envconfig:"DAYTONA_WS_DIR"`
+	ProjectName string `envconfig:"DAYTONA_WS_PROJECT_NAME"`
+	WorkspaceId string `envconfig:"DAYTONA_WS_ID" validate:"required"`
 	Server      DaytonaServerConfig
 	Mode        Mode
-	Image       string `envconfig:"DAYTONA_PROJECT_IMAGE"`
-	User        string `envconfig:"DAYTONA_PROJECT_USER"`
 }
 
 type Mode string
@@ -74,29 +69,5 @@ func GetConfig(mode Mode) (*Config, error) {
 		}
 	}
 
-	config.LogFilePath = GetLogFilePath()
-
 	return config, nil
-}
-
-func GetLogFilePath() *string {
-	logFilePath, ok := os.LookupEnv("DAYTONA_AGENT_LOG_FILE_PATH")
-	if !ok {
-		return nil
-	}
-
-	username, ok := os.LookupEnv("DAYTONA_PROJECT_USER")
-	if !ok {
-		//	todo: revisit if invalid username should provoke fatal error
-		username = "root"
-	}
-
-	user, err := user.Lookup(username)
-	if err != nil {
-		log.Fatalf("failed to get user: %s", err)
-	}
-
-	logFilePath = strings.Replace(logFilePath, "$HOME", user.HomeDir, 1)
-
-	return &logFilePath
 }

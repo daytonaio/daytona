@@ -46,29 +46,30 @@ func (a *Agent) Start() error {
 }
 
 func (a *Agent) startProjectMode() error {
-	err := a.setDefaultConfig()
-	if err != nil {
-		return err
-	}
-
 	project, err := a.getProject()
 	if err != nil {
 		return err
 	}
+	a.project = project
 
-	if project.Repository.Url == nil {
+	err = a.setDefaultConfig()
+	if err != nil {
+		return err
+	}
+
+	if a.project.Repository.Url == nil {
 		return errors.New("repository url not found")
 	}
 
 	// Ignoring error because we don't want to fail if the git provider is not found
-	gitProvider, _ := a.getGitProvider(*project.Repository.Url)
+	gitProvider, _ := a.getGitProvider()
 
 	var authToken *string = nil
 	if gitProvider != nil {
 		authToken = gitProvider.Token
 	}
 
-	exists, err := a.Git.RepositoryExists(project)
+	exists, err := a.Git.RepositoryExists(a.project)
 	if err != nil {
 		log.Error(fmt.Sprintf("failed to clone repository: %s", err))
 	} else {
@@ -76,7 +77,7 @@ func (a *Agent) startProjectMode() error {
 			log.Info("Repository already exists. Skipping clone...")
 		} else {
 			log.Info("Cloning repository...")
-			err = a.Git.CloneRepository(project, authToken)
+			err = a.Git.CloneRepository(a.project, authToken)
 			if err != nil {
 				log.Error(fmt.Sprintf("failed to clone repository: %s", err))
 			} else {
@@ -109,13 +110,21 @@ func (a *Agent) startProjectMode() error {
 		}
 	}()
 
-	a.runPostStartCommands(project)
+	a.runPostStartCommands()
 
 	return nil
 }
 
 func (a *Agent) getProject() (*serverapiclient.Project, error) {
 	ctx := context.Background()
+
+	if a.Config == nil {
+		config, err := agent_config.GetConfig(agent_config.ModeProject)
+		if err != nil {
+			return nil, err
+		}
+		a.Config = config
+	}
 
 	apiClient, err := server.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
 	if err != nil {
@@ -136,7 +145,7 @@ func (a *Agent) getProject() (*serverapiclient.Project, error) {
 	return nil, errors.New("project not found")
 }
 
-func (a *Agent) getGitProvider(repoUrl string) (*serverapiclient.GitProvider, error) {
+func (a *Agent) getGitProvider() (*serverapiclient.GitProvider, error) {
 	ctx := context.Background()
 
 	apiClient, err := server.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
@@ -144,7 +153,7 @@ func (a *Agent) getGitProvider(repoUrl string) (*serverapiclient.GitProvider, er
 		return nil, err
 	}
 
-	encodedUrl := url.QueryEscape(repoUrl)
+	encodedUrl := url.QueryEscape(*a.project.Repository.Url)
 	gitProvider, res, err := apiClient.GitProviderAPI.GetGitProviderForUrl(ctx, encodedUrl).Execute()
 	if err != nil {
 		return nil, apiclient.HandleErrorResponse(res, err)
@@ -206,7 +215,7 @@ func (a *Agent) setDefaultConfig() error {
 	}
 
 	//	as the agent is running as root, we need to move the config to the user's home directory
-	user, err := user.Lookup(a.Config.User)
+	user, err := user.Lookup(*a.project.User)
 	if err != nil {
 		return err
 	}
@@ -228,10 +237,10 @@ func (a *Agent) setDefaultConfig() error {
 
 }
 
-func (a *Agent) runPostStartCommands(project *serverapiclient.Project) {
+func (a *Agent) runPostStartCommands() {
 	log.Info("Running post start commands...")
 
-	for _, command := range project.PostStartCommands {
+	for _, command := range a.project.PostStartCommands {
 		go func() {
 			log.Info("Running command: " + command)
 			cmd := exec.Command("sh", "-c", command)
