@@ -41,6 +41,7 @@ var AgentCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+		config.ProjectDir = path.Join(os.Getenv("HOME"), config.ProjectName)
 
 		gitLogWriter := io.MultiWriter(os.Stdout)
 		var agentLogWriter io.Writer

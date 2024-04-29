@@ -21,7 +21,7 @@ type DaytonaServerConfig struct {
 }
 
 type Config struct {
-	ProjectDir  string  `envconfig:"DAYTONA_WS_DIR"`
+	ProjectDir  string
 	ProjectName string  `envconfig:"DAYTONA_WS_PROJECT_NAME"`
 	WorkspaceId string  `envconfig:"DAYTONA_WS_ID" validate:"required"`
 	LogFilePath *string `envconfig:"DAYTONA_AGENT_LOG_FILE_PATH"`
@@ -63,9 +63,6 @@ func GetConfig(mode Mode) (*Config, error) {
 	}
 
 	if config.Mode == ModeProject {
-		if config.ProjectDir == "" {
-			return nil, errors.New("DAYTONA_WS_DIR is required in project mode")
-		}
 		if config.ProjectName == "" {
 			return nil, errors.New("DAYTONA_WS_PROJECT_NAME is required in project mode")
 		}
