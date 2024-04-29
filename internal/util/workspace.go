@@ -12,7 +12,7 @@ import (
 )
 
 func WorkspaceMode() bool {
-	_, wsMode := os.LookupEnv("DAYTONA_WS_DIR")
+	_, wsMode := os.LookupEnv("DAYTONA_WS_ID")
 	return wsMode
 }
 
