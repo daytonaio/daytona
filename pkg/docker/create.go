@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"path"
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/containerregistry"
@@ -227,9 +226,7 @@ func readPullProgress(pullResponse io.ReadCloser, logWriter io.Writer) error {
 }
 
 func GetContainerCreateConfig(project *workspace.Project, daytonaDownloadUrl string) *container.Config {
-	envVars := []string{
-		"DAYTONA_WS_DIR=" + path.Join("/workspaces", project.Name),
-	}
+	envVars := []string{}
 
 	for key, value := range project.EnvVars {
 		envVars = append(envVars, fmt.Sprintf("%s=%s", key, value))
