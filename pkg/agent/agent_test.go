@@ -25,6 +25,8 @@ var project1 = &workspace.Project{
 		Name: "daytona",
 	},
 	WorkspaceId:       "123",
+	User:              "root",
+	Image:             "daytonaio/workspace-project:latest",
 	Target:            "local",
 	PostStartCommands: []string{"echo 'test' > test.txt"},
 }

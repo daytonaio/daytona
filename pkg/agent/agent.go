@@ -13,7 +13,7 @@ import (
 	"os/user"
 	"time"
 
-	"github.com/daytonaio/daytona/cmd/daytona/config"
+	cli_config "github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	agent_config "github.com/daytonaio/daytona/pkg/agent/config"
@@ -118,14 +118,6 @@ func (a *Agent) startProjectMode() error {
 func (a *Agent) getProject() (*serverapiclient.Project, error) {
 	ctx := context.Background()
 
-	if a.Config == nil {
-		config, err := agent_config.GetConfig(agent_config.ModeProject)
-		if err != nil {
-			return nil, err
-		}
-		a.Config = config
-	}
-
 	apiClient, err := server.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
 	if err != nil {
 		return nil, err
@@ -181,8 +173,8 @@ func (a *Agent) getGitUser(gitProviderId string) (*serverapiclient.GitUser, erro
 }
 
 func (a *Agent) setDefaultConfig() error {
-	existingConfig, err := config.GetConfig()
-	if err != nil && !config.IsNotExist(err) {
+	existingConfig, err := cli_config.GetConfig()
+	if err != nil && !cli_config.IsNotExist(err) {
 		return err
 	}
 
@@ -194,14 +186,14 @@ func (a *Agent) setDefaultConfig() error {
 		}
 	}
 
-	config := &config.Config{
+	cliConfig := &cli_config.Config{
 		ActiveProfileId: "default",
 		DefaultIdeId:    "vscode",
-		Profiles: []config.Profile{
+		Profiles: []cli_config.Profile{
 			{
 				Id:   "default",
 				Name: "default",
-				Api: config.ServerApi{
+				Api: cli_config.ServerApi{
 					Url: a.Config.Server.ApiUrl,
 					Key: a.Config.Server.ApiKey,
 				},
@@ -209,9 +201,13 @@ func (a *Agent) setDefaultConfig() error {
 		},
 	}
 
-	err = config.Save()
+	err = cliConfig.Save()
 	if err != nil {
 		return err
+	}
+
+	if *a.project.User == "root" {
+		return nil
 	}
 
 	//	as the agent is running as root, we need to move the config to the user's home directory
@@ -220,21 +216,19 @@ func (a *Agent) setDefaultConfig() error {
 		return err
 	}
 
-	rootConfigPath := "/root/.config/daytona"
-	userConfigPath := user.HomeDir + "/.config/daytona"
+	rootConfigDir, err := cli_config.GetConfigDir()
+	if err != nil {
+		return err
+	}
+
+	userConfigDir := user.HomeDir + "/.config/daytona"
 
 	err = os.MkdirAll(user.HomeDir+"/.config", 0755)
 	if err != nil {
 		return err
 	}
 
-	err = os.Rename(rootConfigPath, userConfigPath)
-	if err != nil {
-		return err
-	}
-
-	return nil
-
+	return os.Rename(rootConfigDir, userConfigDir)
 }
 
 func (a *Agent) runPostStartCommands() {
