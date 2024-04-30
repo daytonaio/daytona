@@ -48,23 +48,27 @@ var ServerCmd = &cobra.Command{
 			log.SetLevel(log.InfoLevel)
 		}
 
+		c, err := server.GetConfig()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		apiServer := api.NewApiServer(api.ApiServerConfig{
+			ApiPort: int(c.ApiPort),
+		})
+
 		if runAsDaemon {
 			views.RenderInfoMessageBold("Starting the Daytona Server daemon...")
 			err := daemon.Start()
 			if err != nil {
 				log.Fatal(err)
 			}
-			c, err := server.GetConfig()
+			err = waitForServerToStart(apiServer)
 			if err != nil {
 				log.Fatal(err)
 			}
 			printServerStartedMessage(c, runAsDaemon)
 			return
-		}
-
-		c, err := server.GetConfig()
-		if err != nil {
-			log.Fatal(err)
 		}
 
 		logsDir, err := server.GetWorkspaceLogsDir()
@@ -169,10 +173,6 @@ var ServerCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		apiServer := api.NewApiServer(api.ApiServerConfig{
-			ApiPort: int(c.ApiPort),
-		})
-
 		go func() {
 			err := apiServer.Start()
 			if err != nil {
@@ -187,20 +187,13 @@ var ServerCmd = &cobra.Command{
 			}
 		}()
 
-		for i := 0; i < 3; i++ {
-			err = apiServer.HealthCheck()
-			if err != nil {
-				time.Sleep(3 * time.Second)
-				continue
-			}
-
-			printServerStartedMessage(c, runAsDaemon)
-			break
-		}
+		err = waitForServerToStart(apiServer)
 
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		printServerStartedMessage(c, runAsDaemon)
 
 		err = setDefaultConfig(server)
 		if err != nil {
@@ -212,6 +205,21 @@ var ServerCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 	},
+}
+
+func waitForServerToStart(apiServer *api.ApiServer) error {
+	var err error
+	for i := 0; i < 3; i++ {
+		err = apiServer.HealthCheck()
+		if err != nil {
+			time.Sleep(3 * time.Second)
+			continue
+		}
+
+		return nil
+	}
+
+	return err
 }
 
 func getDaytonaScriptUrl(config *server.Config) string {
