@@ -186,7 +186,7 @@ func init() {
 	CreateCmd.Flags().StringVarP(&targetNameFlag, "target", "t", "", "Specify the target (e.g. 'local')")
 	CreateCmd.Flags().BoolVar(&manualFlag, "manual", false, "Manually enter the git repositories")
 	CreateCmd.Flags().BoolVar(&multiProjectFlag, "multi-project", false, "Workspace with multiple projects/repos")
-	CreateCmd.Flags().BoolVarP(&multiProjectFlag, "code", "c", false, "Open the workspace in the IDE after workspace creation")
+	CreateCmd.Flags().BoolVarP(&codeFlag, "code", "c", false, "Open the workspace in the IDE after workspace creation")
 }
 
 func getTarget(activeProfileName string) (*serverapiclient.ProviderTarget, error) {
