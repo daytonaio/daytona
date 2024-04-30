@@ -35,6 +35,6 @@ var configureCmd = &cobra.Command{
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		util.RenderInfoMessage("Server configuration updated. You might need to restart the server for the changes to take effect.")
+		util.RenderInfoMessage("Server configuration updated. You need to restart the server for the changes to take effect.")
 	},
 }
