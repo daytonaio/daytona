@@ -4,6 +4,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/signal"
@@ -94,27 +95,37 @@ func (s *Server) Start(errCh chan error) error {
 		return err
 	}
 
+	headscaleFrpcHealthCheck, headscaleFrpcService, err := frpc.GetService(frpc.FrpcConnectParams{
+		ServerDomain: s.config.Frps.Domain,
+		ServerPort:   int(s.config.Frps.Port),
+		Name:         fmt.Sprintf("daytona-server-%s", s.config.Id),
+		Port:         int(s.config.HeadscalePort),
+		SubDomain:    s.config.Id,
+	})
+	if err != nil {
+		return err
+	}
+
 	go func() {
-		err := frpc.Connect(frpc.FrpcConnectParams{
-			ServerDomain: s.config.Frps.Domain,
-			ServerPort:   int(s.config.Frps.Port),
-			Name:         fmt.Sprintf("daytona-server-%s", s.config.Id),
-			Port:         int(s.config.HeadscalePort),
-			SubDomain:    s.config.Id,
-		})
+		err := headscaleFrpcService.Run(context.Background())
 		if err != nil {
 			errCh <- err
 		}
 	}()
 
+	apiFrpcHealthCheck, apiFrpcService, err := frpc.GetService(frpc.FrpcConnectParams{
+		ServerDomain: s.config.Frps.Domain,
+		ServerPort:   int(s.config.Frps.Port),
+		Name:         fmt.Sprintf("daytona-server-api-%s", s.config.Id),
+		Port:         int(s.config.ApiPort),
+		SubDomain:    fmt.Sprintf("api-%s", s.config.Id),
+	})
+	if err != nil {
+		return err
+	}
+
 	go func() {
-		err := frpc.Connect(frpc.FrpcConnectParams{
-			ServerDomain: s.config.Frps.Domain,
-			ServerPort:   int(s.config.Frps.Port),
-			Name:         fmt.Sprintf("daytona-server-api-%s", s.config.Id),
-			Port:         int(s.config.ApiPort),
-			SubDomain:    fmt.Sprintf("api-%s", s.config.Id),
-		})
+		err := apiFrpcService.Run(context.Background())
 		if err != nil {
 			errCh <- err
 		}
@@ -150,6 +161,30 @@ func (s *Server) Start(errCh chan error) error {
 			errCh <- err
 		}
 	}()
+
+	for i := 0; i < 5; i++ {
+		if err = headscaleFrpcHealthCheck(); err != nil {
+			log.Debugf("Failed to connect to headscale frpc: %s", err)
+			time.Sleep(2 * time.Second)
+		} else {
+			break
+		}
+	}
+	if err != nil {
+		return err
+	}
+
+	for i := 0; i < 5; i++ {
+		if err = apiFrpcHealthCheck(); err != nil {
+			log.Debugf("Failed to connect to api frpc: %s", err)
+			time.Sleep(2 * time.Second)
+		} else {
+			break
+		}
+	}
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

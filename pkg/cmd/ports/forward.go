@@ -120,11 +120,16 @@ func forwardPublicPort(workspaceId, projectName string, hostPort, targetPort uin
 		view_util.RenderInfoMessage(fmt.Sprintf("Port available at %s", fmt.Sprintf("%s://%s.%s", *serverConfig.Frps.Protocol, subDomain, *serverConfig.Frps.Domain)))
 	}()
 
-	return frpc.Connect(frpc.FrpcConnectParams{
+	_, service, err := frpc.GetService(frpc.FrpcConnectParams{
 		ServerDomain: *serverConfig.Frps.Domain,
 		ServerPort:   int(*serverConfig.Frps.Port),
 		Name:         subDomain,
 		SubDomain:    subDomain,
 		Port:         int(hostPort),
 	})
+	if err != nil {
+		return err
+	}
+
+	return service.Run(context.Background())
 }
