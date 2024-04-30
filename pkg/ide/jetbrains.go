@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -20,7 +19,7 @@ import (
 )
 
 func OpenJetbrainsIDE(activeProfile config.Profile, ide, workspaceId, projectName string) error {
-	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName)
+	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName)
 	if err != nil {
 		return err
 	}
@@ -55,7 +54,7 @@ func OpenJetbrainsIDE(activeProfile config.Profile, ide, workspaceId, projectNam
 		return err
 	}
 
-	gatewayUrl := fmt.Sprintf("jetbrains-gateway://connect#host=%s&type=ssh&deploy=false&projectPath=%s&user=daytona&port=2222&idePath=%s", projectHostname, path.Join("/workspaces", projectName), url.QueryEscape(downloadPath))
+	gatewayUrl := fmt.Sprintf("jetbrains-gateway://connect#host=%s&type=ssh&deploy=false&projectPath=%s&user=daytona&port=2222&idePath=%s", projectHostname, projectDir, url.QueryEscape(downloadPath))
 
 	return browser.OpenURL(gatewayUrl)
 }

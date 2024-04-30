@@ -6,24 +6,24 @@ package ide
 import (
 	"fmt"
 	"os/exec"
-	"path"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util"
 
 	log "github.com/sirupsen/logrus"
 )
 
 func OpenVSCode(activeProfile config.Profile, workspaceId string, projectName string) error {
-	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName)
-	if err != nil {
-		return err
-	}
-
 	checkAndAlertVSCodeInstalled()
 
 	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
 
-	commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", projectHostname, path.Join("/workspaces", projectName))
+	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName)
+	if err != nil {
+		return err
+	}
+
+	commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", projectHostname, projectDir)
 
 	var vscCommand *exec.Cmd = exec.Command("code", "--folder-uri", commandArgument)
 
