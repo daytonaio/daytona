@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
@@ -53,7 +54,10 @@ func GetConnection(profile *config.Profile) (*tsnet.Server, error) {
 	s.Dir = filepath.Join(configDir, "tailscale", cliId)
 	s.Logf = func(format string, args ...any) {}
 
-	_, err = s.Up(context.Background())
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	_, err = s.Up(timeoutCtx)
 	if err != nil {
 		return nil, err
 	}
