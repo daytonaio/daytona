@@ -10,6 +10,24 @@ import (
 )
 
 func ToProjectDTO(project *workspace.Project) *serverapiclient.Project {
+	repositoryDTO := &serverapiclient.GitRepository{
+		Id:     &project.Repository.Id,
+		Name:   &project.Repository.Name,
+		Branch: project.Repository.Branch,
+		Owner:  &project.Repository.Owner,
+		Path:   project.Repository.Path,
+		Sha:    &project.Repository.Sha,
+		Source: &project.Repository.Source,
+		Url:    &project.Repository.Url,
+	}
+
+	uptime := int32(project.State.Uptime)
+	projectStateDTO := &serverapiclient.ProjectState{
+		UpdatedAt: &project.State.UpdatedAt,
+		Uptime:    &uptime,
+		GitStatus: ToGitStatusDTO(project.State.GitStatus),
+	}
+
 	projectDto := &serverapiclient.Project{
 		Name:              &project.Name,
 		Target:            &project.Target,
@@ -17,16 +35,8 @@ func ToProjectDTO(project *workspace.Project) *serverapiclient.Project {
 		Image:             &project.Image,
 		User:              &project.User,
 		PostStartCommands: project.PostStartCommands,
-		Repository: &serverapiclient.GitRepository{
-			Id:     &project.Repository.Id,
-			Name:   &project.Repository.Name,
-			Branch: project.Repository.Branch,
-			Owner:  &project.Repository.Owner,
-			Path:   project.Repository.Path,
-			Sha:    &project.Repository.Sha,
-			Source: &project.Repository.Source,
-			Url:    &project.Repository.Url,
-		},
+		Repository:        repositoryDTO,
+		State:             projectStateDTO,
 	}
 
 	if project.Repository.PrNumber != nil {
@@ -38,6 +48,24 @@ func ToProjectDTO(project *workspace.Project) *serverapiclient.Project {
 }
 
 func ToProject(project *serverapiclient.Project) *workspace.Project {
+	repositoryDTO := &gitprovider.GitRepository{
+		Id:     *project.Repository.Id,
+		Name:   *project.Repository.Name,
+		Branch: project.Repository.Branch,
+		Owner:  *project.Repository.Owner,
+		Path:   project.Repository.Path,
+		Sha:    *project.Repository.Sha,
+		Source: *project.Repository.Source,
+		Url:    *project.Repository.Url,
+	}
+
+	uptime := *project.State.Uptime
+	projectStateDTO := &workspace.ProjectState{
+		UpdatedAt: *project.State.UpdatedAt,
+		Uptime:    uint64(uptime),
+		GitStatus: ToGitStatus(project.State.GitStatus),
+	}
+
 	projectDto := &workspace.Project{
 		Name:              *project.Name,
 		Target:            *project.Target,
@@ -45,16 +73,8 @@ func ToProject(project *serverapiclient.Project) *workspace.Project {
 		Image:             *project.Image,
 		User:              *project.User,
 		PostStartCommands: project.PostStartCommands,
-		Repository: &gitprovider.GitRepository{
-			Id:     *project.Repository.Id,
-			Name:   *project.Repository.Name,
-			Branch: project.Repository.Branch,
-			Owner:  *project.Repository.Owner,
-			Path:   project.Repository.Path,
-			Sha:    *project.Repository.Sha,
-			Source: *project.Repository.Source,
-			Url:    *project.Repository.Url,
-		},
+		Repository:        repositoryDTO,
+		State:             projectStateDTO,
 	}
 
 	if project.Repository.PrNumber != nil {
@@ -63,4 +83,44 @@ func ToProject(project *serverapiclient.Project) *workspace.Project {
 	}
 
 	return projectDto
+}
+
+func ToGitStatusDTO(gitStatus *workspace.GitStatus) *serverapiclient.GitStatus {
+	fileStatusDTO := []serverapiclient.FileStatus{}
+	for _, file := range gitStatus.Files {
+		staging := serverapiclient.Status(string(file.Staging))
+		worktree := serverapiclient.Status(string(file.Worktree))
+		fileDTO := serverapiclient.FileStatus{
+			Name:     &file.Name,
+			Extra:    &file.Extra,
+			Staging:  &staging,
+			Worktree: &worktree,
+		}
+		fileStatusDTO = append(fileStatusDTO, fileDTO)
+	}
+
+	return &serverapiclient.GitStatus{
+		CurrentBranch: &gitStatus.CurrentBranch,
+		FileStatus:    fileStatusDTO,
+	}
+}
+
+func ToGitStatus(gitStatus *serverapiclient.GitStatus) *workspace.GitStatus {
+	fileStatusDTO := []*workspace.FileStatus{}
+	for _, file := range gitStatus.FileStatus {
+		staging := workspace.Status(string(*file.Staging))
+		worktree := workspace.Status(string(*file.Worktree))
+		fileDTO := &workspace.FileStatus{
+			Name:     *file.Name,
+			Extra:    *file.Extra,
+			Staging:  staging,
+			Worktree: worktree,
+		}
+		fileStatusDTO = append(fileStatusDTO, fileDTO)
+	}
+
+	return &workspace.GitStatus{
+		CurrentBranch: *gitStatus.CurrentBranch,
+		Files:         fileStatusDTO,
+	}
 }

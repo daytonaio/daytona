@@ -144,5 +144,9 @@ func getInfoLineState(key string, state *serverapiclient.ProjectState) string {
 	} else {
 		stateProperty = propertyValueStyle.Foreground(views.Green).Render("RUNNING")
 	}
-	return propertyNameStyle.Render(fmt.Sprintf("%-*s", propertyNameWidth, key)) + stateProperty + propertyValueStyle.Foreground(views.Light).Render("\n")
+
+	output := propertyNameStyle.Render(fmt.Sprintf("%-*s", propertyNameWidth, key)) + stateProperty + propertyValueStyle.Foreground(views.Light).Render("\n")
+	output += "On branch " + propertyNameStyle.Foreground(views.Gray).Render(fmt.Sprintf("%-*s", propertyNameWidth, *state.GitStatus.CurrentBranch)) + fmt.Sprint(len(state.GitStatus.FileStatus)) + " uncommited changes." + propertyValueStyle.Foreground(views.Light).Render("\n")
+
+	return output
 }

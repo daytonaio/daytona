@@ -31,6 +31,11 @@ func (m *MockGitService) SetGitConfig(userData *gitprovider.GitUser) error {
 	return args.Error(0)
 }
 
+func (m *MockGitService) GetGitStatus() (*workspace.GitStatus, error) {
+	args := m.Called()
+	return args.Get(0).(*workspace.GitStatus), args.Error(1)
+}
+
 func NewMockGitService() *MockGitService {
 	gitService := new(MockGitService)
 	return gitService

@@ -243,9 +243,15 @@ func (a *Agent) updateProjectState() error {
 		return err
 	}
 
+	gitStatus, err := a.Git.GetGitStatus()
+	if err != nil {
+		return err
+	}
+
 	uptime := a.uptime()
 	res, err := apiClient.WorkspaceAPI.SetProjectState(context.Background(), a.Config.WorkspaceId, a.Config.ProjectName).SetState(serverapiclient.SetProjectState{
-		Uptime: &uptime,
+		Uptime:    &uptime,
+		GitStatus: conversion.ToGitStatusDTO(gitStatus),
 	}).Execute()
 	if err != nil {
 		return apiclient.HandleErrorResponse(res, err)
