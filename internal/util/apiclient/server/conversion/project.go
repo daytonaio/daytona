@@ -4,6 +4,7 @@
 package conversion
 
 import (
+	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
@@ -30,6 +31,34 @@ func ToProjectDTO(project *workspace.Project) *serverapiclient.Project {
 
 	if project.Repository.PrNumber != nil {
 		prNumber := int32(*project.Repository.PrNumber)
+		projectDto.Repository.PrNumber = &prNumber
+	}
+
+	return projectDto
+}
+
+func ToProject(project *serverapiclient.Project) *workspace.Project {
+	projectDto := &workspace.Project{
+		Name:              *project.Name,
+		Target:            *project.Target,
+		WorkspaceId:       *project.WorkspaceId,
+		Image:             *project.Image,
+		User:              *project.User,
+		PostStartCommands: project.PostStartCommands,
+		Repository: &gitprovider.GitRepository{
+			Id:     *project.Repository.Id,
+			Name:   *project.Repository.Name,
+			Branch: project.Repository.Branch,
+			Owner:  *project.Repository.Owner,
+			Path:   project.Repository.Path,
+			Sha:    *project.Repository.Sha,
+			Source: *project.Repository.Source,
+			Url:    *project.Repository.Url,
+		},
+	}
+
+	if project.Repository.PrNumber != nil {
+		prNumber := uint32(*project.Repository.PrNumber)
 		projectDto.Repository.PrNumber = &prNumber
 	}
 
