@@ -9,6 +9,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient/server/conversion"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -16,8 +17,8 @@ type mockGitService struct {
 	mock.Mock
 }
 
-func (m *mockGitService) CloneRepository(project *serverapiclient.Project, authToken *string) error {
-	args := m.Called(project, authToken)
+func (m *mockGitService) CloneRepository(project *serverapiclient.Project, auth *http.BasicAuth) error {
+	args := m.Called(project, auth)
 	return args.Error(0)
 }
 

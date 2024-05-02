@@ -16,6 +16,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	agent_config "github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -61,9 +62,15 @@ func (a *Agent) startProjectMode() error {
 	// Ignoring error because we don't want to fail if the git provider is not found
 	gitProvider, _ := a.getGitProvider(*project.Repository.Url)
 
-	var authToken *string = nil
+	var auth *http.BasicAuth
 	if gitProvider != nil {
-		authToken = gitProvider.Token
+		auth = &http.BasicAuth{}
+		if gitProvider.Username != nil {
+			auth.Username = *gitProvider.Username
+		}
+		if gitProvider.Token != nil {
+			auth.Password = *gitProvider.Token
+		}
 	}
 
 	exists, err := a.Git.RepositoryExists(project)
@@ -74,7 +81,7 @@ func (a *Agent) startProjectMode() error {
 			log.Info("Repository already exists. Skipping clone...")
 		} else {
 			log.Info("Cloning repository...")
-			err = a.Git.CloneRepository(project, authToken)
+			err = a.Git.CloneRepository(project, auth)
 			if err != nil {
 				log.Error(fmt.Sprintf("failed to clone repository: %s", err))
 			} else {
