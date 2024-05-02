@@ -8,15 +8,8 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/pkg/agent/config"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
-	"github.com/go-git/go-git/v5/plumbing/transport/http"
+	"github.com/daytonaio/daytona/pkg/git"
 )
-
-type GitService interface {
-	CloneRepository(project *serverapiclient.Project, auth *http.BasicAuth) error
-	RepositoryExists(project *serverapiclient.Project) (bool, error)
-	SetGitConfig(userData *serverapiclient.GitUser) error
-}
 
 type SshServer interface {
 	Start() error
@@ -28,7 +21,7 @@ type TailscaleServer interface {
 
 type Agent struct {
 	Config    *config.Config
-	Git       GitService
+	Git       git.IGitService
 	Ssh       SshServer
 	Tailscale TailscaleServer
 	LogWriter io.Writer

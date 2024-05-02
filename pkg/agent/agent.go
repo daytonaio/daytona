@@ -14,8 +14,11 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	"github.com/daytonaio/daytona/internal/util/apiclient/server/conversion"
 	agent_config "github.com/daytonaio/daytona/pkg/agent/config"
+	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	log "github.com/sirupsen/logrus"
 )
@@ -55,12 +58,8 @@ func (a *Agent) startProjectMode() error {
 		return err
 	}
 
-	if project.Repository.Url == nil {
-		return errors.New("repository url not found")
-	}
-
 	// Ignoring error because we don't want to fail if the git provider is not found
-	gitProvider, _ := a.getGitProvider(*project.Repository.Url)
+	gitProvider, _ := a.getGitProvider(project.Repository.Url)
 
 	var auth *http.BasicAuth
 	if gitProvider != nil {
@@ -90,11 +89,17 @@ func (a *Agent) startProjectMode() error {
 		}
 	}
 
-	var gitUser *serverapiclient.GitUser
+	var gitUser *gitprovider.GitUser
 	if gitProvider != nil {
-		gitUser, err = a.getGitUser(*gitProvider.Id)
+		user, err := a.getGitUser(*gitProvider.Id)
 		if err != nil {
 			log.Error(fmt.Sprintf("failed to get git user data: %s", err))
+		}
+		gitUser = &gitprovider.GitUser{
+			Email:    *user.Email,
+			Name:     *user.Name,
+			Id:       *user.Id,
+			Username: *user.Username,
 		}
 	}
 
@@ -119,7 +124,7 @@ func (a *Agent) startProjectMode() error {
 	return nil
 }
 
-func (a *Agent) getProject() (*serverapiclient.Project, error) {
+func (a *Agent) getProject() (*workspace.Project, error) {
 	ctx := context.Background()
 
 	apiClient, err := server.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
@@ -134,7 +139,7 @@ func (a *Agent) getProject() (*serverapiclient.Project, error) {
 
 	for _, project := range workspace.Projects {
 		if *project.Name == a.Config.ProjectName {
-			return &project, nil
+			return conversion.ToProject(&project), nil
 		}
 	}
 
@@ -208,7 +213,7 @@ func (a *Agent) setDefaultConfig() error {
 	return config.Save()
 }
 
-func (a *Agent) runPostStartCommands(project *serverapiclient.Project) {
+func (a *Agent) runPostStartCommands(project *workspace.Project) {
 	log.Info("Running post start commands...")
 
 	for _, command := range project.PostStartCommands {
