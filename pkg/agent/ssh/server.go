@@ -38,7 +38,7 @@ func (s *Server) Start() error {
 				s.sftpHandler(session)
 				return
 			default:
-				fmt.Fprintf(session, "Subsystem %s not supported\n", ss)
+				log.Errorf("Subsystem %s not supported\n", ss)
 				session.Exit(1)
 				return
 			}
@@ -91,7 +91,8 @@ func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh
 	if ssh.AgentRequested(session) {
 		l, err := ssh.NewAgentListener()
 		if err != nil {
-			fmt.Println("#5", err.Error())
+			log.Errorf("Failed to start agent listener: %v", err)
+			return
 		}
 		defer l.Close()
 		go ssh.ForwardAgentConnections(l, session)
@@ -103,7 +104,8 @@ func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh
 	cmd.Env = append(cmd.Env, fmt.Sprintf("SHELL=%s", shell))
 	f, err := pty.Start(cmd)
 	if err != nil {
-		panic(err)
+		log.Errorf("Unable to start command: %v", err)
+		return
 	}
 
 	go func() {
@@ -124,8 +126,6 @@ func (s *Server) handleNonPty(session ssh.Session) {
 		args = append([]string{"-c"}, session.RawCommand())
 	}
 
-	fmt.Println("args: ", args)
-
 	cmd := exec.Command("/bin/sh", args...)
 
 	cmd.Env = append(cmd.Env, os.Environ()...)
@@ -133,7 +133,8 @@ func (s *Server) handleNonPty(session ssh.Session) {
 	if ssh.AgentRequested(session) {
 		l, err := ssh.NewAgentListener()
 		if err != nil {
-			fmt.Println("#4", err.Error())
+			log.Errorf("Failed to start agent listener: %v", err)
+			return
 		}
 		defer l.Close()
 		go ssh.ForwardAgentConnections(l, session)
@@ -149,23 +150,21 @@ func (s *Server) handleNonPty(session ssh.Session) {
 	cmd.Stderr = session.Stderr()
 	stdinPipe, err := cmd.StdinPipe()
 	if err != nil {
-		//	TODO: handle error
-		log.Println("#1", err)
+		log.Errorf("Unable to setup stdin for session: %v", err)
 		return
 	}
 	go func() {
 		_, err := io.Copy(stdinPipe, session)
 		if err != nil {
-			//	TODO: handle error
-			log.Println("#2", err)
+			log.Errorf("Unable to read from session: %v", err)
+			return
 		}
 		_ = stdinPipe.Close()
 	}()
 
 	err = cmd.Start()
 	if err != nil {
-		//	TODO: handle error
-		log.Println("#3", err)
+		log.Errorf("Unable to start command: %v", err)
 		return
 	}
 	sigs := make(chan ssh.Signal, 1)
@@ -179,7 +178,7 @@ func (s *Server) handleNonPty(session ssh.Session) {
 			signal := s.osSignalFrom(sig)
 			err := cmd.Process.Signal(signal)
 			if err != nil {
-				log.Println("signal error: ", err)
+				log.Warnf("Unable to send signal to process: %v", err)
 			}
 		}
 	}()
@@ -193,10 +192,8 @@ func (s *Server) handleNonPty(session ssh.Session) {
 
 	err = session.Exit(0)
 	if err != nil {
-		//	TODO: handle error
-		log.Println("exit error: ", err)
+		log.Warnf("Unable to exit session: %v", err)
 	}
-	log.Println(session.RawCommand(), " command exited successfully")
 }
 
 func (s *Server) osSignalFrom(sig ssh.Signal) os.Signal {
@@ -275,13 +272,12 @@ func (s *Server) sftpHandler(session ssh.Session) {
 		serverOptions...,
 	)
 	if err != nil {
-		log.Printf("sftp server init error: %s\n", err)
+		log.Errorf("sftp server init error: %s\n", err)
 		return
 	}
 	if err := server.Serve(); err == io.EOF {
 		server.Close()
-		fmt.Println("sftp client exited session.")
 	} else if err != nil {
-		fmt.Println("sftp server completed with error:", err)
+		log.Errorf("sftp server completed with error: %s\n", err)
 	}
 }
