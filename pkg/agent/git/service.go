@@ -21,22 +21,16 @@ type Service struct {
 	LogWriter         io.Writer
 }
 
-func (s *Service) CloneRepository(project *serverapiclient.Project, authToken *string) error {
+func (s *Service) CloneRepository(project *serverapiclient.Project, auth *http.BasicAuth) error {
 	cloneOptions := &git.CloneOptions{
 		URL:             *project.Repository.Url,
 		SingleBranch:    true,
 		InsecureSkipTLS: true,
+		Auth:            auth,
 	}
 
 	if s.LogWriter != nil {
 		cloneOptions.Progress = s.LogWriter
-	}
-
-	if authToken != nil {
-		cloneOptions.Auth = &http.BasicAuth{
-			Username: "daytona",
-			Password: *authToken,
-		}
 	}
 
 	if s.shouldCloneBranch(project) {
