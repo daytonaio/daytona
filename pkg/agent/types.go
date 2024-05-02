@@ -9,10 +9,11 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
 type GitService interface {
-	CloneRepository(project *serverapiclient.Project, authToken *string) error
+	CloneRepository(project *serverapiclient.Project, auth *http.BasicAuth) error
 	RepositoryExists(project *serverapiclient.Project) (bool, error)
 	SetGitConfig(userData *serverapiclient.GitUser) error
 }
