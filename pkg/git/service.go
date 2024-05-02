@@ -8,12 +8,19 @@ import (
 	"io"
 	"os"
 
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"gopkg.in/ini.v1"
 )
+
+type IGitService interface {
+	CloneRepository(project *workspace.Project, auth *http.BasicAuth) error
+	RepositoryExists(project *workspace.Project) (bool, error)
+	SetGitConfig(userData *gitprovider.GitUser) error
+}
 
 type Service struct {
 	ProjectDir        string
@@ -21,9 +28,9 @@ type Service struct {
 	LogWriter         io.Writer
 }
 
-func (s *Service) CloneRepository(project *serverapiclient.Project, auth *http.BasicAuth) error {
+func (s *Service) CloneRepository(project *workspace.Project, auth *http.BasicAuth) error {
 	cloneOptions := &git.CloneOptions{
-		URL:             *project.Repository.Url,
+		URL:             project.Repository.Url,
 		SingleBranch:    true,
 		InsecureSkipTLS: true,
 		Auth:            auth,
@@ -54,7 +61,7 @@ func (s *Service) CloneRepository(project *serverapiclient.Project, auth *http.B
 		}
 
 		err = w.Checkout(&git.CheckoutOptions{
-			Hash: plumbing.NewHash(*project.Repository.Sha),
+			Hash: plumbing.NewHash(project.Repository.Sha),
 		})
 		if err != nil {
 			return err
@@ -64,7 +71,7 @@ func (s *Service) CloneRepository(project *serverapiclient.Project, auth *http.B
 	return err
 }
 
-func (s *Service) RepositoryExists(project *serverapiclient.Project) (bool, error) {
+func (s *Service) RepositoryExists(project *workspace.Project) (bool, error) {
 	_, err := os.Stat(s.ProjectDir)
 	if os.IsNotExist(err) {
 		return false, nil
@@ -75,7 +82,7 @@ func (s *Service) RepositoryExists(project *serverapiclient.Project) (bool, erro
 	return true, nil
 }
 
-func (s *Service) SetGitConfig(userData *serverapiclient.GitUser) error {
+func (s *Service) SetGitConfig(userData *gitprovider.GitUser) error {
 	gitConfigFileName := s.GitConfigFileName
 
 	var gitConfigContent []byte
@@ -109,17 +116,14 @@ func (s *Service) SetGitConfig(userData *serverapiclient.GitUser) error {
 			}
 		}
 
-		if userData.Name != nil {
-			_, err := cfg.Section("user").NewKey("name", *userData.Name)
-			if err != nil {
-				return err
-			}
+		_, err := cfg.Section("user").NewKey("name", userData.Name)
+		if err != nil {
+			return err
 		}
-		if userData.Email != nil {
-			_, err := cfg.Section("user").NewKey("email", *userData.Email)
-			if err != nil {
-				return err
-			}
+
+		_, err = cfg.Section("user").NewKey("email", userData.Email)
+		if err != nil {
+			return err
 		}
 	}
 
@@ -137,20 +141,20 @@ func (s *Service) SetGitConfig(userData *serverapiclient.GitUser) error {
 	return nil
 }
 
-func (s *Service) shouldCloneBranch(project *serverapiclient.Project) bool {
+func (s *Service) shouldCloneBranch(project *workspace.Project) bool {
 	if project.Repository.Branch == nil || *project.Repository.Branch == "" {
 		return false
 	}
 
-	if project.Repository.Sha == nil || *project.Repository.Sha == "" {
+	if project.Repository.Sha == "" {
 		return true
 	}
 
-	return *project.Repository.Branch == *project.Repository.Sha
+	return *project.Repository.Branch == project.Repository.Sha
 }
 
-func (s *Service) shouldCheckoutSha(project *serverapiclient.Project) bool {
-	if project.Repository.Sha == nil || *project.Repository.Sha == "" {
+func (s *Service) shouldCheckoutSha(project *workspace.Project) bool {
+	if project.Repository.Sha == "" {
 		return false
 	}
 
@@ -158,5 +162,5 @@ func (s *Service) shouldCheckoutSha(project *serverapiclient.Project) bool {
 		return true
 	}
 
-	return *project.Repository.Branch == *project.Repository.Sha
+	return *project.Repository.Branch == project.Repository.Sha
 }

@@ -8,9 +8,11 @@ import (
 	"testing"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
 	"github.com/daytonaio/daytona/internal/testing/agent/mocks"
+	mock_git "github.com/daytonaio/daytona/internal/testing/git/mocks"
 	"github.com/daytonaio/daytona/pkg/agent"
 	"github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
@@ -56,7 +58,10 @@ func TestAgent(t *testing.T) {
 
 	mockConfig.Server.ApiUrl = apiServer.URL
 
-	mockGitService := mocks.NewMockGitService(true, project1)
+	mockGitService := mock_git.NewMockGitService()
+	mockGitService.On("RepositoryExists", project1).Return(true, nil)
+	mockGitService.On("SetGitConfig", mock.Anything).Return(nil)
+
 	mockSshServer := mocks.NewMockSshServer()
 	mockTailscaleServer := mocks.NewMockTailscaleServer()
 
@@ -87,7 +92,7 @@ func TestAgent(t *testing.T) {
 }
 
 func TestAgentHostMode(t *testing.T) {
-	mockGitService := mocks.NewHostModeMockGitService()
+	mockGitService := mock_git.NewMockGitService()
 	mockSshServer := mocks.NewMockSshServer()
 	mockTailscaleServer := mocks.NewMockTailscaleServer()
 

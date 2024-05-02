@@ -12,9 +12,9 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/agent"
 	"github.com/daytonaio/daytona/pkg/agent/config"
-	"github.com/daytonaio/daytona/pkg/agent/git"
 	"github.com/daytonaio/daytona/pkg/agent/ssh"
 	"github.com/daytonaio/daytona/pkg/agent/tailscale"
+	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
