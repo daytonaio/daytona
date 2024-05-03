@@ -116,8 +116,7 @@ func (s *WorkspaceService) createWorkspace(workspace *workspace.Workspace) (*wor
 		projectLogger := s.loggerFactory.CreateProjectLogger(workspace.Id, project.Name)
 		defer projectLogger.Close()
 
-		projectLogWriter := io.MultiWriter(wsLogger, projectLogger)
-		err := s.createProject(project, target, projectLogWriter)
+		err := s.createProject(project, target, projectLogger)
 		if err != nil {
 			return nil, err
 		}

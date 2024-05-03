@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -25,6 +26,7 @@ import (
 	status "github.com/daytonaio/daytona/pkg/views/workspace/status"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/google/uuid"
+	"github.com/gorilla/websocket"
 	"tailscale.com/tsnet"
 
 	log "github.com/sirupsen/logrus"
@@ -104,7 +106,7 @@ var CreateCmd = &cobra.Command{
 		started := false
 		id := uuid.NewString()
 
-		go scanWorkspaceLogs(activeProfile, id, statusProgram, &started)
+		go readWorkspaceLogs(activeProfile, id, projects, statusProgram, &started)
 
 		go func() {
 			if _, err := statusProgram.Run(); err != nil {
@@ -288,7 +290,7 @@ func processCmdArguments(cmd *cobra.Command, args []string, apiClient *serverapi
 	}
 }
 
-func scanWorkspaceLogs(activeProfile config.Profile, workspaceId string, statusProgram *tea.Program, started *bool) {
+func readWorkspaceLogs(activeProfile config.Profile, workspaceId string, projects []serverapiclient.CreateWorkspaceRequestProject, statusProgram *tea.Program, started *bool) {
 	time.Sleep(2 * time.Second)
 
 	query := "follow=true"
@@ -299,21 +301,27 @@ func scanWorkspaceLogs(activeProfile config.Profile, workspaceId string, statusP
 
 	defer ws.Close()
 
-	for {
-		_, msg, err := ws.ReadMessage()
-		if err != nil {
-			return
-		}
+	var wg sync.WaitGroup
+	for _, project := range projects {
+		wg.Add(1)
+		go func(project serverapiclient.CreateWorkspaceRequestProject) {
+			defer wg.Done()
+			query := "follow=true"
+			ws, res, err := server.GetWebsocketConn(fmt.Sprintf("/log/workspace/%s/%s", workspaceId, project.Name), &activeProfile, &query)
+			if err != nil {
+				cleanUpTerminal(statusProgram, apiclient.HandleErrorResponse(res, err))
+			}
 
-		messages := strings.Split(string(msg), "\r")
-		for _, msg := range messages {
-			statusProgram.Send(status.ResultMsg{Line: msg})
-		}
-		if *started {
-			statusProgram.Send(status.ResultMsg{Line: "END_SIGNAL"})
-			break
-		}
+			defer ws.Close()
+
+			readLog(ws, statusProgram, started)
+		}(project)
 	}
+
+	readLog(ws, statusProgram, started)
+	wg.Wait()
+
+	statusProgram.Send(status.ResultMsg{Line: "END_SIGNAL"})
 }
 
 func waitForDial(tsConn *tsnet.Server, workspaceId string, projectName string, dialStartTime time.Time, dialTimeout time.Duration, statusProgram *tea.Program) {
@@ -342,5 +350,22 @@ func cleanUpTerminal(statusProgram *tea.Program, err error) {
 	}
 	if err != nil {
 		log.Fatal(err)
+	}
+}
+
+func readLog(ws *websocket.Conn, statusProgram *tea.Program, started *bool) {
+	for {
+		_, msg, err := ws.ReadMessage()
+		if err != nil {
+			return
+		}
+
+		messages := strings.Split(string(msg), "\r")
+		for _, msg := range messages {
+			statusProgram.Send(status.ResultMsg{Line: msg})
+		}
+		if *started {
+			break
+		}
 	}
 }

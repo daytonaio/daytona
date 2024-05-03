@@ -20,6 +20,7 @@ type IWorkspaceService interface {
 	CreateWorkspace(req dto.CreateWorkspaceRequest) (*workspace.Workspace, error)
 	GetWorkspace(workspaceId string) (*dto.WorkspaceDTO, error)
 	GetWorkspaceLogReader(workspaceId string) (io.Reader, error)
+	GetProjectLogReader(workspaceId, projectName string) (io.Reader, error)
 	ListWorkspaces(verbose bool) ([]dto.WorkspaceDTO, error)
 	RemoveWorkspace(workspaceId string) error
 	SetProjectState(workspaceId string, projectName string, state *workspace.ProjectState) (*workspace.Workspace, error)
@@ -95,4 +96,8 @@ func (s *WorkspaceService) SetProjectState(workspaceId, projectName string, stat
 
 func (s *WorkspaceService) GetWorkspaceLogReader(workspaceId string) (io.Reader, error) {
 	return s.loggerFactory.CreateWorkspaceLogReader(workspaceId)
+}
+
+func (s *WorkspaceService) GetProjectLogReader(workspaceId, projectName string) (io.Reader, error) {
+	return s.loggerFactory.CreateProjectLogReader(workspaceId, projectName)
 }
