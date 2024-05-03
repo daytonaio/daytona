@@ -108,3 +108,18 @@ func ReadWorkspaceLog(ginCtx *gin.Context) {
 
 	readLog(ginCtx, wsLogReader)
 }
+
+func ReadProjectLog(ginCtx *gin.Context) {
+	workspaceId := ginCtx.Param("workspaceId")
+	projectName := ginCtx.Param("projectName")
+
+	server := server.GetInstance(nil)
+
+	projectLogReader, err := server.WorkspaceService.GetProjectLogReader(workspaceId, projectName)
+	if err != nil {
+		ginCtx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	readLog(ginCtx, projectLogReader)
+}

@@ -16,6 +16,7 @@ type LoggerFactory interface {
 	CreateWorkspaceLogger(workspaceId string) Logger
 	CreateProjectLogger(workspaceId, projectName string) Logger
 	CreateWorkspaceLogReader(workspaceId string) (io.Reader, error)
+	CreateProjectLogReader(workspaceId, projectName string) (io.Reader, error)
 }
 
 type loggerFactoryImpl struct {
