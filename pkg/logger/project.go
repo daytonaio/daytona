@@ -55,6 +55,6 @@ func (pl *projectLogger) Cleanup() error {
 	return os.RemoveAll(projectLogsDir)
 }
 
-func NewProjectLogger(logsDir, workspaceId, projectName string) Logger {
-	return &projectLogger{workspaceId: workspaceId, logsDir: logsDir, projectName: projectName}
+func (l *loggerFactoryImpl) CreateProjectLogger(workspaceId, projectName string) Logger {
+	return &projectLogger{workspaceId: workspaceId, logsDir: l.logsDir, projectName: projectName}
 }

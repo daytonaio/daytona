@@ -44,9 +44,7 @@ type WorkspaceServiceConfig struct {
 	DefaultProjectUser              string
 	DefaultProjectPostStartCommands []string
 	ApiKeyService                   apikeys.IApiKeyService
-	NewWorkspaceLogger              func(workspaceId string) logger.Logger
-	NewProjectLogger                func(workspaceId, projectName string) logger.Logger
-	NewWorkspaceLogReader           func(workspaceId string) (io.Reader, error)
+	LoggerFactory                   logger.LoggerFactory
 }
 
 func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
@@ -60,10 +58,8 @@ func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 		defaultProjectUser:              config.DefaultProjectUser,
 		defaultProjectPostStartCommands: config.DefaultProjectPostStartCommands,
 		provisioner:                     config.Provisioner,
-		newWorkspaceLogger:              config.NewWorkspaceLogger,
-		newProjectLogger:                config.NewProjectLogger,
+		loggerFactory:                   config.LoggerFactory,
 		apiKeyService:                   config.ApiKeyService,
-		newWorkspaceLogReader:           config.NewWorkspaceLogReader,
 	}
 }
 
@@ -78,9 +74,7 @@ type WorkspaceService struct {
 	defaultProjectImage             string
 	defaultProjectUser              string
 	defaultProjectPostStartCommands []string
-	newWorkspaceLogger              func(workspaceId string) logger.Logger
-	newProjectLogger                func(workspaceId, projectName string) logger.Logger
-	newWorkspaceLogReader           func(workspaceId string) (io.Reader, error)
+	loggerFactory                   logger.LoggerFactory
 }
 
 func (s *WorkspaceService) SetProjectState(workspaceId, projectName string, state *workspace.ProjectState) (*workspace.Workspace, error) {
@@ -100,5 +94,5 @@ func (s *WorkspaceService) SetProjectState(workspaceId, projectName string, stat
 }
 
 func (s *WorkspaceService) GetWorkspaceLogReader(workspaceId string) (io.Reader, error) {
-	return s.newWorkspaceLogReader(workspaceId)
+	return s.loggerFactory.CreateWorkspaceLogReader(workspaceId)
 }

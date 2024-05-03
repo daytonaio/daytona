@@ -24,7 +24,7 @@ func (s *WorkspaceService) StartWorkspace(workspaceId string) error {
 		return err
 	}
 
-	workspaceLogger := s.newWorkspaceLogger(w.Id)
+	workspaceLogger := s.loggerFactory.CreateWorkspaceLogger(w.Id)
 	defer workspaceLogger.Close()
 
 	wsLogWriter := io.MultiWriter(&util.InfoLogWriter{}, workspaceLogger)
@@ -48,10 +48,10 @@ func (s *WorkspaceService) StartProject(workspaceId, projectName string) error {
 		return err
 	}
 
-	workspaceLogger := s.newWorkspaceLogger(w.Id)
+	workspaceLogger := s.loggerFactory.CreateWorkspaceLogger(w.Id)
 	defer workspaceLogger.Close()
 
-	projectLogger := s.newProjectLogger(w.Id, project.Name)
+	projectLogger := s.loggerFactory.CreateProjectLogger(w.Id, project.Name)
 	defer projectLogger.Close()
 
 	projectLogWriter := io.MultiWriter(workspaceLogger, projectLogger)
@@ -68,7 +68,7 @@ func (s *WorkspaceService) startWorkspace(workspace *workspace.Workspace, target
 	}
 
 	for _, project := range workspace.Projects {
-		projectLogger := s.newProjectLogger(workspace.Id, project.Name)
+		projectLogger := s.loggerFactory.CreateProjectLogger(workspace.Id, project.Name)
 		defer projectLogger.Close()
 
 		projectLogWriter := io.MultiWriter(wsLogWriter, projectLogger)
