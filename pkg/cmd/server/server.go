@@ -5,7 +5,6 @@ package server
 
 import (
 	"fmt"
-	"io"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -72,6 +71,7 @@ var ServerCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+		loggerFactory := logger.NewLoggerFactory(logsDir)
 
 		dbPath, err := getDbPath()
 		if err != nil {
@@ -145,15 +145,7 @@ var ServerCmd = &cobra.Command{
 			DefaultProjectUser:              c.DefaultProjectUser,
 			DefaultProjectPostStartCommands: c.DefaultProjectPostStartCommands,
 			Provisioner:                     provisioner,
-			NewWorkspaceLogger: func(workspaceId string) logger.Logger {
-				return logger.NewWorkspaceLogger(logsDir, workspaceId)
-			},
-			NewProjectLogger: func(workspaceId, projectName string) logger.Logger {
-				return logger.NewProjectLogger(logsDir, workspaceId, projectName)
-			},
-			NewWorkspaceLogReader: func(workspaceId string) (io.Reader, error) {
-				return logger.GetWorkspaceLogReader(logsDir, workspaceId)
-			},
+			LoggerFactory:                   loggerFactory,
 		})
 		gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
 			ConfigStore: gitProviderConfigStore,
