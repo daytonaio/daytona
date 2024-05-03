@@ -48,15 +48,10 @@ func (s *WorkspaceService) StartProject(workspaceId, projectName string) error {
 		return err
 	}
 
-	workspaceLogger := s.loggerFactory.CreateWorkspaceLogger(w.Id)
-	defer workspaceLogger.Close()
-
 	projectLogger := s.loggerFactory.CreateProjectLogger(w.Id, project.Name)
 	defer projectLogger.Close()
 
-	projectLogWriter := io.MultiWriter(workspaceLogger, projectLogger)
-
-	return s.startProject(project, target, projectLogWriter)
+	return s.startProject(project, target, projectLogger)
 }
 
 func (s *WorkspaceService) startWorkspace(workspace *workspace.Workspace, target *provider.ProviderTarget, wsLogWriter io.Writer) error {
@@ -71,9 +66,7 @@ func (s *WorkspaceService) startWorkspace(workspace *workspace.Workspace, target
 		projectLogger := s.loggerFactory.CreateProjectLogger(workspace.Id, project.Name)
 		defer projectLogger.Close()
 
-		projectLogWriter := io.MultiWriter(wsLogWriter, projectLogger)
-
-		err = s.startProject(project, target, projectLogWriter)
+		err = s.startProject(project, target, projectLogger)
 		if err != nil {
 			return err
 		}

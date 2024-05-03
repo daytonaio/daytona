@@ -4,6 +4,7 @@
 package logger
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 )
@@ -57,4 +58,9 @@ func (pl *projectLogger) Cleanup() error {
 
 func (l *loggerFactoryImpl) CreateProjectLogger(workspaceId, projectName string) Logger {
 	return &projectLogger{workspaceId: workspaceId, logsDir: l.logsDir, projectName: projectName}
+}
+
+func (l *loggerFactoryImpl) CreateProjectLogReader(workspaceId, projectName string) (io.Reader, error) {
+	filePath := filepath.Join(l.logsDir, workspaceId, projectName, "log")
+	return os.Open(filePath)
 }
