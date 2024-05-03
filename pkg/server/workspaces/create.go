@@ -104,7 +104,7 @@ func (s *WorkspaceService) createWorkspace(workspace *workspace.Workspace) (*wor
 		return workspace, err
 	}
 
-	wsLogger := s.newWorkspaceLogger(workspace.Id)
+	wsLogger := s.loggerFactory.CreateWorkspaceLogger(workspace.Id)
 	wsLogger.Write([]byte("Creating workspace\n"))
 
 	err = s.provisioner.CreateWorkspace(workspace, target)
@@ -113,7 +113,7 @@ func (s *WorkspaceService) createWorkspace(workspace *workspace.Workspace) (*wor
 	}
 
 	for _, project := range workspace.Projects {
-		projectLogger := s.newProjectLogger(workspace.Id, project.Name)
+		projectLogger := s.loggerFactory.CreateProjectLogger(workspace.Id, project.Name)
 		defer projectLogger.Close()
 
 		projectLogWriter := io.MultiWriter(wsLogger, projectLogger)

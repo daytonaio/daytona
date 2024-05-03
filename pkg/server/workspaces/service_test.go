@@ -5,12 +5,8 @@ package workspaces_test
 
 import (
 	"fmt"
-	"io"
-	"os"
-	"path/filepath"
 	"testing"
 
-	t_logger "github.com/daytonaio/daytona/internal/testing/logger"
 	t_targets "github.com/daytonaio/daytona/internal/testing/provider/targets"
 	t_containerregistries "github.com/daytonaio/daytona/internal/testing/server/containerregistries"
 	t_workspaces "github.com/daytonaio/daytona/internal/testing/server/workspaces"
@@ -108,30 +104,7 @@ func TestWorkspaceService(t *testing.T) {
 		DefaultProjectPostStartCommands: defaultProjectPostStartCommands,
 		ApiKeyService:                   apiKeyService,
 		Provisioner:                     provisioner,
-		NewWorkspaceLogger: func(workspaceId string) logger.Logger {
-			workspaceLogFilePath := filepath.Join(logsDir, workspaceId+".log")
-			workspaceLogFile, err := os.Create(workspaceLogFilePath)
-			if err != nil {
-				t.Fatalf("failed to create workspace log file: %v", err)
-			}
-			return t_logger.NewPipeLogger(workspaceLogFile)
-		},
-		NewProjectLogger: func(workspaceId, projectName string) logger.Logger {
-			projectLogFilePath := filepath.Join(logsDir, fmt.Sprintf("%s-%s.log", projectName, workspaceId))
-			projectLogFile, err := os.Create(projectLogFilePath)
-			if err != nil {
-				t.Fatalf("failed to create project log file: %v", err)
-			}
-			return t_logger.NewPipeLogger(projectLogFile)
-		},
-		NewWorkspaceLogReader: func(workspaceId string) (io.Reader, error) {
-			workspaceLogFilePath := filepath.Join(logsDir, workspaceId+".log")
-			workspaceLogFile, err := os.Open(workspaceLogFilePath)
-			if err != nil {
-				return nil, err
-			}
-			return t_logger.NewPipeLogReader(workspaceLogFile)
-		},
+		LoggerFactory:                   logger.NewLoggerFactory(logsDir),
 	})
 
 	t.Run("CreateWorkspace", func(t *testing.T) {

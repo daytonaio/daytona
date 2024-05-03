@@ -54,11 +54,11 @@ func (w *workspaceLogger) Cleanup() error {
 	return os.RemoveAll(workspaceLogsDir)
 }
 
-func NewWorkspaceLogger(logsDir, workspaceId string) Logger {
-	return &workspaceLogger{workspaceId: workspaceId, logsDir: logsDir}
+func (l *loggerFactoryImpl) CreateWorkspaceLogger(workspaceId string) Logger {
+	return &workspaceLogger{workspaceId: workspaceId, logsDir: l.logsDir}
 }
 
-func GetWorkspaceLogReader(logsDir, workspaceId string) (io.Reader, error) {
-	filePath := filepath.Join(logsDir, workspaceId, "log")
+func (l *loggerFactoryImpl) CreateWorkspaceLogReader(workspaceId string) (io.Reader, error) {
+	filePath := filepath.Join(l.logsDir, workspaceId, "log")
 	return os.Open(filePath)
 }
