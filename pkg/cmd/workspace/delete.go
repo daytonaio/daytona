@@ -6,6 +6,7 @@ package workspace
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -60,8 +61,9 @@ var DeleteCmd = &cobra.Command{
 		}
 
 		ctx := context.Background()
-		var workspace *apiclient.WorkspaceDTO
 
+		var workspaceDeleteList = []*apiclient.WorkspaceDTO{}
+		var workspaceDeleteListNames = []string{}
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
@@ -72,15 +74,23 @@ var DeleteCmd = &cobra.Command{
 			if err != nil {
 				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
-
-			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "Delete")
+			workspaceDeleteList = selection.GetWorkspacesFromPrompt(workspaceList, "Delete")
+			for _, workspace := range workspaceDeleteList {
+				workspaceDeleteListNames = append(workspaceDeleteListNames, *workspace.Name)
+			}
 		} else {
-			workspace, err = apiclient_util.GetWorkspace(args[0])
-			if err != nil {
-				log.Fatal(err)
+			for _, arg := range args {
+				workspace, err := apiclient_util.GetWorkspace(arg)
+				if err != nil {
+					log.Error(fmt.Sprintf("[ %s ] : %v", arg, err))
+					continue
+				}
+				workspaceDeleteList = append(workspaceDeleteList, workspace)
+				workspaceDeleteListNames = append(workspaceDeleteListNames, *workspace.Name)
 			}
 		}
-		if workspace == nil {
+
+		if len(workspaceDeleteList) == 0 {
 			return
 		}
 
@@ -88,8 +98,8 @@ var DeleteCmd = &cobra.Command{
 			form := huh.NewForm(
 				huh.NewGroup(
 					huh.NewConfirm().
-						Title(fmt.Sprintf("Delete workspace %s?", *workspace.Name)).
-						Description(fmt.Sprintf("Are you sure you want to delete workspace %s?", *workspace.Name)).
+						Title(fmt.Sprintf("Delete workspace(s): [%s]?", strings.Join(workspaceDeleteListNames, ", "))).
+						Description(fmt.Sprintf("Are you sure you want to delete the workspace(s): [%s]?", strings.Join(workspaceDeleteListNames, ", "))).
 						Value(&yesFlag),
 				),
 			).WithTheme(views.GetCustomTheme())
@@ -100,13 +110,15 @@ var DeleteCmd = &cobra.Command{
 			}
 		}
 
-		if yesFlag {
-			err := removeWorkspace(ctx, apiClient, workspace)
-			if err != nil {
-				log.Fatal(err)
-			}
-		} else {
+		if !yesFlag {
 			fmt.Println("Operation canceled.")
+		} else {
+			for _, workspace := range workspaceDeleteList {
+				err := removeWorkspace(ctx, apiClient, workspace)
+				if err != nil {
+					log.Error(fmt.Sprintf("[ %s ] : %v", *workspace.Name, err))
+				}
+			}
 		}
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -149,22 +161,22 @@ func DeleteAllWorkspaces() error {
 func removeWorkspace(ctx context.Context, apiClient *apiclient.APIClient, workspace *apiclient.WorkspaceDTO) error {
 	res, err := apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
 	if err != nil {
-		log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	c, err := config.GetConfig()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	activeProfile, err := c.GetActiveProfile()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	err = config.RemoveWorkspaceSshEntries(activeProfile.Id, *workspace.Id)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	views.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully deleted", *workspace.Name))
