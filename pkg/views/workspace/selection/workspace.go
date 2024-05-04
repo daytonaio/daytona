@@ -86,3 +86,13 @@ func GetWorkspaceFromPrompt(workspaces []serverapiclient.WorkspaceDTO, actionVer
 
 	return <-choiceChan
 }
+
+func RemoveWorkSpaceFromList(workspaces []serverapiclient.WorkspaceDTO, workspaceToRemove *serverapiclient.WorkspaceDTO) []serverapiclient.WorkspaceDTO {
+	var updatedWorkspaces []serverapiclient.WorkspaceDTO
+	for _, workspace := range workspaces {
+		if workspace.Id != workspaceToRemove.Id {
+			updatedWorkspaces = append(updatedWorkspaces, workspace)
+		}
+	}
+	return updatedWorkspaces
+}
