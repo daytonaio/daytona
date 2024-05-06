@@ -90,7 +90,7 @@ func getServiceConfig() (*service.Config, error) {
 		Name:        "DaytonaServerDaemon",
 		DisplayName: "Daytona Server",
 		Description: "This is the Daytona Server daemon.",
-		Arguments:   []string{"server"},
+		Arguments:   []string{"serve"},
 	}
 
 	user := os.Getenv("USER")
