@@ -4,10 +4,8 @@
 package workspace
 
 import (
-	"encoding/base64"
 	"errors"
 	"fmt"
-	"hash/fnv"
 	"strings"
 
 	"github.com/daytonaio/daytona/internal"
@@ -89,8 +87,11 @@ func GetProjectEnvVars(project *Project, apiUrl, serverUrl string) map[string]st
 }
 
 func GetProjectHostname(workspaceId string, projectName string) string {
-	h := fnv.New64()
-	h.Write([]byte(fmt.Sprintf("%s-%s", workspaceId, projectName)))
+	hostname := fmt.Sprintf("%s-%s", workspaceId, projectName)
 
-	return base64.RawURLEncoding.EncodeToString([]byte(fmt.Sprint(h.Sum64())))
+	if len(hostname) > 63 {
+		return hostname[:63]
+	}
+
+	return hostname
 }

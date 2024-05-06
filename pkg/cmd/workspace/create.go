@@ -22,7 +22,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/target"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/google/uuid"
+	"github.com/docker/docker/pkg/stringid"
 	"github.com/gorilla/websocket"
 	"tailscale.com/tsnet"
 
@@ -103,7 +103,8 @@ var CreateCmd = &cobra.Command{
 		}
 
 		stopLogs := false
-		id := uuid.NewString()
+		id := stringid.GenerateRandomID()
+		id = stringid.TruncateID(id)
 
 		go readWorkspaceLogs(activeProfile, id, projects, &stopLogs)
 

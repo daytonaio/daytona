@@ -24,7 +24,6 @@ require (
 	github.com/juanfont/headscale v0.23.0-alpha3
 	github.com/kardianos/service v1.2.2
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/lucasb-eyer/go-colorful v1.2.0
 	github.com/opencontainers/image-spec v1.1.0-rc5
 	github.com/pkg/sftp v1.13.6
 	github.com/rs/zerolog v1.31.0
@@ -157,6 +156,7 @@ require (
 	github.com/kortschak/wol v0.0.0-20200729010619-da482cc4850a // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
+	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
