@@ -280,34 +280,45 @@ func processCmdArguments(cmd *cobra.Command, args []string, apiClient *serverapi
 }
 
 func readWorkspaceLogs(activeProfile config.Profile, workspaceId string, projects []serverapiclient.CreateWorkspaceRequestProject, stopLogs *bool) {
-	time.Sleep(2 * time.Second)
-
-	query := "follow=true"
-	ws, res, err := server.GetWebsocketConn(fmt.Sprintf("/log/workspace/%s", workspaceId), &activeProfile, &query)
-	if err != nil {
-		log.Fatal(apiclient.HandleErrorResponse(res, err))
-	}
-
-	defer ws.Close()
-
 	var wg sync.WaitGroup
 	for _, project := range projects {
 		wg.Add(1)
 		go func(project serverapiclient.CreateWorkspaceRequestProject) {
 			defer wg.Done()
 			query := "follow=true"
-			ws, res, err := server.GetWebsocketConn(fmt.Sprintf("/log/workspace/%s/%s", workspaceId, project.Name), &activeProfile, &query)
-			if err != nil {
-				log.Fatal(apiclient.HandleErrorResponse(res, err))
+
+			for {
+				ws, res, err := server.GetWebsocketConn(fmt.Sprintf("/log/workspace/%s/%s", workspaceId, project.Name), &activeProfile, &query)
+				// We want to retry getting the logs if it fails
+				if err != nil {
+					log.Trace(apiclient.HandleErrorResponse(res, err))
+					time.Sleep(500 * time.Millisecond)
+					continue
+				}
+
+				readLog(ws, stopLogs)
+
+				ws.Close()
 			}
-
-			defer ws.Close()
-
-			readLog(ws, stopLogs)
 		}(project)
 	}
 
-	readLog(ws, stopLogs)
+	query := "follow=true"
+
+	for {
+		ws, res, err := server.GetWebsocketConn(fmt.Sprintf("/log/workspace/%s", workspaceId), &activeProfile, &query)
+		// We want to retry getting the logs if it fails
+		if err != nil {
+			log.Trace(apiclient.HandleErrorResponse(res, err))
+			time.Sleep(500 * time.Millisecond)
+			continue
+		}
+
+		readLog(ws, stopLogs)
+		ws.Close()
+		break
+	}
+
 	wg.Wait()
 }
 
