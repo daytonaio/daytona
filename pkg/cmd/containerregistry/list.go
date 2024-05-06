@@ -32,7 +32,7 @@ var containerRegistryListCmd = &cobra.Command{
 		}
 
 		if len(containerRegistries) == 0 {
-			views.RenderInfoMessage("No container registries found. Set a new container registry by running 'daytona server container-registry set'")
+			views.RenderInfoMessage("No container registries found. Set a new container registry by running 'daytona container-registry set'")
 			return
 		}
 

@@ -67,7 +67,7 @@ type CommandView struct {
 var commandViews []CommandView = []CommandView{
 	{Command: "list", Name: "daytona list", Desc: "(list all workspaces)"},
 	{Command: "profile add", Name: "daytona profile add", Desc: "(run on client machine)"},
-	{Command: "server api-key new", Name: "daytona server api-key new", Desc: "(create API key on this machine)"},
+	{Command: "api-key new", Name: "daytona api-key new", Desc: "(create API key on this machine)"},
 	{Command: "create", Name: "daytona create", Desc: "(create new workspace)\n"},
 	{Command: "help", Name: "view all commands", Desc: ""},
 }
@@ -141,7 +141,7 @@ func (m Model) View() string {
 		formHeader := "\n"
 		formHeader += lipgloss.NewStyle().Foreground(views.Green).Render("Daytona")
 		formHeader += "\n"
-		formHeader += "The future of dev environemnets\n\n"
+		formHeader += "The future of dev environments\n\n"
 		formHeader += internal.Version + "\n\n"
 		formHeader += "-------------------------------------------------------------\n\n"
 		formHeader += "Get started\n"
