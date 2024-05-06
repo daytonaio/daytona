@@ -8,12 +8,11 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"os"
 	"sync"
 	"time"
 
 	"github.com/daytonaio/daytona/internal/tailscale"
-	"github.com/daytonaio/daytona/internal/util"
+	util "github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
@@ -32,8 +31,6 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 )
 
-var argRepos []string
-
 var CreateCmd = &cobra.Command{
 	Use:   "create [WORKSPACE_NAME]",
 	Short: "Create a workspace",
@@ -42,6 +39,7 @@ var CreateCmd = &cobra.Command{
 		ctx := context.Background()
 		var projects []serverapiclient.CreateWorkspaceRequestProject
 		var workspaceName string
+		var existingWorkspaceNames []string
 
 		apiClient, err := server.GetApiClient(nil)
 		if err != nil {
@@ -58,15 +56,31 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		if nameFlag != "" {
+			workspaceName = nameFlag
+		}
+
+		workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+		if err != nil {
+			log.Fatal(apiclient.HandleErrorResponse(res, err))
+		}
+		for _, workspaceInfo := range workspaceList {
+			existingWorkspaceNames = append(existingWorkspaceNames, *workspaceInfo.Name)
+		}
+
 		if len(args) == 0 {
-			err = processPrompting(cmd, apiClient, &workspaceName, &projects, ctx)
+			err = processPrompting(apiClient, &workspaceName, &projects, existingWorkspaceNames, ctx)
 			if err != nil {
 				log.Fatal(err)
 			}
 		} else {
-			err = processCmdArguments(cmd, args, apiClient, &workspaceName, &projects, ctx)
+			err = processCmdArguments(args, apiClient, &projects, ctx)
 			if err != nil {
 				log.Fatal(err)
+			}
+
+			if workspaceName == "" {
+				workspaceName = workspace_util.GetSuggestedWorkspaceName(*projects[0].Source.Repository.Url, existingWorkspaceNames)
 			}
 		}
 
@@ -165,13 +179,14 @@ var CreateCmd = &cobra.Command{
 }
 
 var providerFlag string
+var nameFlag string
 var targetNameFlag string
 var manualFlag bool
 var multiProjectFlag bool
 var codeFlag bool
 
 func init() {
-	CreateCmd.Flags().StringArrayVarP(&argRepos, "repo", "r", nil, "Set the repository url")
+	CreateCmd.Flags().StringVar(&nameFlag, "name", "", "Specify the workspace name")
 	CreateCmd.Flags().StringVar(&providerFlag, "provider", "", "Specify the provider (e.g. 'docker-provider')")
 	CreateCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", "Specify the IDE ('vscode' or 'browser')")
 	CreateCmd.Flags().StringVarP(&targetNameFlag, "target", "t", "", "Specify the target (e.g. 'local')")
@@ -202,29 +217,10 @@ func getTarget(activeProfileName string) (*serverapiclient.ProviderTarget, error
 	return target.GetTargetFromPrompt(targets, activeProfileName, false)
 }
 
-func processPrompting(cmd *cobra.Command, apiClient *serverapiclient.APIClient, workspaceName *string, projects *[]serverapiclient.CreateWorkspaceRequestProject, ctx context.Context) error {
+func processPrompting(apiClient *serverapiclient.APIClient, workspaceName *string, projects *[]serverapiclient.CreateWorkspaceRequestProject, workspaceNames []string, ctx context.Context) error {
 	gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
 	if err != nil {
 		return apiclient.HandleErrorResponse(res, err)
-	}
-
-	var workspaceNames []string
-
-	if argRepos != nil {
-		views.RenderInfoMessage("Error: workspace name argument is required for this command")
-		err := cmd.Help()
-		if err != nil {
-			log.Fatal(err)
-		}
-		os.Exit(1)
-	}
-
-	workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
-	if err != nil {
-		return apiclient.HandleErrorResponse(res, err)
-	}
-	for _, workspaceInfo := range workspaceList {
-		workspaceNames = append(workspaceNames, *workspaceInfo.Name)
 	}
 
 	apiServerConfig, res, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
@@ -239,43 +235,31 @@ func processPrompting(cmd *cobra.Command, apiClient *serverapiclient.APIClient, 
 	return nil
 }
 
-func processCmdArguments(cmd *cobra.Command, args []string, apiClient *serverapiclient.APIClient, workspaceName *string, projects *[]serverapiclient.CreateWorkspaceRequestProject, ctx context.Context) error {
-	var repoUrls []string
+func processCmdArguments(args []string, apiClient *serverapiclient.APIClient, projects *[]serverapiclient.CreateWorkspaceRequestProject, ctx context.Context) error {
+	repoUrl := args[0]
 
-	validatedWorkspaceName, err := util.GetValidatedWorkspaceName(args[0])
+	repoUrl, err := util.GetValidatedUrl(repoUrl)
 	if err != nil {
 		return err
 	}
-	*workspaceName = validatedWorkspaceName
-	if argRepos != nil {
-		repoUrls = argRepos
-	} else {
-		views.RenderInfoMessage("Error: --repo flag is required for this command")
-		err := cmd.Help()
-		if err != nil {
-			log.Fatal(err)
-		}
-		os.Exit(1)
+
+	encodedURLParam := url.QueryEscape(repoUrl)
+	repoResponse, res, err := apiClient.GitProviderAPI.GetGitContext(ctx, encodedURLParam).Execute()
+	if err != nil {
+		return apiclient.HandleErrorResponse(res, err)
 	}
 
-	for _, repoUrl := range repoUrls {
-		encodedURLParam := url.QueryEscape(repoUrl)
-		repoResponse, res, err := apiClient.GitProviderAPI.GetGitContext(ctx, encodedURLParam).Execute()
-		if err != nil {
-			return apiclient.HandleErrorResponse(res, err)
-		}
+	projectName := workspace_util.GetProjectNameFromRepo(repoUrl)
 
-		projectName := workspace_util.GetProjectNameFromRepo(repoUrl)
-
-		project := &serverapiclient.CreateWorkspaceRequestProject{
-			Name: projectName,
-			Source: &serverapiclient.CreateWorkspaceRequestProjectSource{
-				Repository: &serverapiclient.GitRepository{Url: repoResponse.Url},
-			},
-		}
-
-		*projects = append(*projects, *project)
+	project := &serverapiclient.CreateWorkspaceRequestProject{
+		Name: projectName,
+		Source: &serverapiclient.CreateWorkspaceRequestProjectSource{
+			Repository: &serverapiclient.GitRepository{Url: repoResponse.Url},
+		},
 	}
+
+	*projects = append(*projects, *project)
+
 	return nil
 }
 
