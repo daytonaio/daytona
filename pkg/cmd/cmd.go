@@ -73,6 +73,7 @@ func Execute() {
 		rootCmd.AddCommand(SshProxyCmd)
 		rootCmd.AddCommand(CreateCmd)
 		rootCmd.AddCommand(DeleteCmd)
+		rootCmd.AddCommand(ServeCmd)
 		rootCmd.AddCommand(ServerCmd)
 		rootCmd.AddCommand(ApiKeyCmd)
 		rootCmd.AddCommand(ContainerRegistryCmd)
