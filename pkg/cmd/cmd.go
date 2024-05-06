@@ -8,12 +8,15 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util"
 	. "github.com/daytonaio/daytona/pkg/cmd/agent"
+	. "github.com/daytonaio/daytona/pkg/cmd/apikey"
+	. "github.com/daytonaio/daytona/pkg/cmd/containerregistry"
 	. "github.com/daytonaio/daytona/pkg/cmd/gitprovider"
 	"github.com/daytonaio/daytona/pkg/cmd/output"
 	. "github.com/daytonaio/daytona/pkg/cmd/ports"
 	. "github.com/daytonaio/daytona/pkg/cmd/profile"
+	. "github.com/daytonaio/daytona/pkg/cmd/provider"
 	. "github.com/daytonaio/daytona/pkg/cmd/server"
-	apikeyCmd "github.com/daytonaio/daytona/pkg/cmd/server/apikey"
+	. "github.com/daytonaio/daytona/pkg/cmd/target"
 	. "github.com/daytonaio/daytona/pkg/cmd/workspace"
 	view "github.com/daytonaio/daytona/pkg/views/initial"
 	log "github.com/sirupsen/logrus"
@@ -36,8 +39,8 @@ var rootCmd = &cobra.Command{
 			ListCmd.Run(cmd, args)
 		case "profile add":
 			ProfileAddCmd.Run(cmd, []string{})
-		case "server api-key new":
-			apikeyCmd.GenerateCmd.Run(cmd, []string{})
+		case "api-key new":
+			GenerateCmd.Run(cmd, []string{})
 		case "create":
 			CreateCmd.Run(cmd, []string{})
 		case "help":
@@ -71,6 +74,10 @@ func Execute() {
 		rootCmd.AddCommand(CreateCmd)
 		rootCmd.AddCommand(DeleteCmd)
 		rootCmd.AddCommand(ServerCmd)
+		rootCmd.AddCommand(ApiKeyCmd)
+		rootCmd.AddCommand(ContainerRegistryCmd)
+		rootCmd.AddCommand(ProviderCmd)
+		rootCmd.AddCommand(TargetCmd)
 		rootCmd.AddCommand(ideCmd)
 		rootCmd.AddCommand(ProfileCmd)
 		rootCmd.AddCommand(ProfileUseCmd)
