@@ -13,11 +13,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/apikey"
-	apikeyCmd "github.com/daytonaio/daytona/pkg/cmd/server/apikey"
-	. "github.com/daytonaio/daytona/pkg/cmd/server/containerregistry"
 	"github.com/daytonaio/daytona/pkg/cmd/server/daemon"
-	. "github.com/daytonaio/daytona/pkg/cmd/server/provider"
-	. "github.com/daytonaio/daytona/pkg/cmd/server/target"
 	"github.com/daytonaio/daytona/pkg/db"
 	"github.com/daytonaio/daytona/pkg/logger"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
@@ -305,10 +301,6 @@ func init() {
 	ServerCmd.AddCommand(configureCmd)
 	ServerCmd.AddCommand(configCmd)
 	ServerCmd.AddCommand(logsCmd)
-	ServerCmd.AddCommand(TargetCmd)
-	ServerCmd.AddCommand(ProviderCmd)
-	ServerCmd.AddCommand(ContainerRegistryCmd)
 	ServerCmd.AddCommand(stopCmd)
 	ServerCmd.AddCommand(restartCmd)
-	ServerCmd.AddCommand(apikeyCmd.ApiKeyCmd)
 }
