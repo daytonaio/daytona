@@ -59,7 +59,7 @@ Set up a development environment on any infrastructure, with a single command.
 ## Quick Start
 ### Mac / Linux
 ```bash
-(curl -sf -L https://download.daytona.io/daytona/install.sh | sudo bash) && daytona server -d && daytona
+(curl -sf -L https://download.daytona.io/daytona/install.sh | sudo bash) && daytona server -y && daytona
 ```
 ### Windows
 <details>
@@ -71,7 +71,7 @@ $architecture = if ($env:PROCESSOR_ARCHITECTURE -eq "AMD64") { "amd64" } else { 
 md -Force "$Env:APPDATA\bin\daytona"; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]'Tls,Tls11,Tls12';
 Invoke-WebRequest -URI "https://download.daytona.io/daytona/latest/daytona-windows-$architecture.exe" -OutFile "$Env:APPDATA\bin\daytona\daytona.exe";
 $env:Path += ";" + $Env:APPDATA + "\bin\daytona"; [Environment]::SetEnvironmentVariable("Path", $env:Path, [System.EnvironmentVariableTarget]::User);
-daytona server;
+daytona serve;
 ```
 
 </details>
@@ -156,7 +156,7 @@ To initialize Daytona, follow these steps:
 __1. Start the Daytona Server:__
 This initiates the Daytona Server in daemon mode. Use the command:
 ```bash
-daytona server -d
+daytona server
 ```
 __2. Add Your Git Provider of Choice:__
 Daytona supports GitHub, GitLab, Bitbucket and Gitea. To add them to your profile, use the command:
