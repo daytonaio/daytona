@@ -44,7 +44,7 @@ var InfoCmd = &cobra.Command{
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 
-			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "view")
+			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "View")
 		} else {
 			workspace, err = server.GetWorkspace(args[0])
 			if err != nil {
@@ -61,7 +61,7 @@ var InfoCmd = &cobra.Command{
 			return
 		}
 
-		info.Render(workspace)
+		info.Render(workspace, "", false)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) > 0 {

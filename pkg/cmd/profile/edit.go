@@ -24,28 +24,28 @@ var profileEditCmd = &cobra.Command{
 		}
 
 		var chosenProfileId string
-		var chosenProfile config.Profile
+		var chosenProfile *config.Profile
 
 		if len(args) == 0 {
-			profilesList := c.Profiles
+			chosenProfile, err = profile.GetProfileFromPrompt(c.Profiles, c.ActiveProfileId, false)
+			if err != nil {
+				log.Fatal(err)
+			}
 
-			chosenProfileId = profile.GetProfileIdFromPrompt(profilesList, c.ActiveProfileId, "Choose a profile to edit", false)
-
-			if chosenProfileId == "" {
+			if chosenProfile.Id == "" {
 				return
 			}
 		} else {
 			chosenProfileId = args[0]
-		}
-
-		for _, profile := range c.Profiles {
-			if profile.Id == chosenProfileId || profile.Name == chosenProfileId {
-				chosenProfile = profile
-				break
+			for _, profile := range c.Profiles {
+				if profile.Id == chosenProfileId || profile.Name == chosenProfileId {
+					chosenProfile = &profile
+					break
+				}
 			}
 		}
 
-		if chosenProfile == (config.Profile{}) {
+		if chosenProfile == nil {
 			log.Fatal("Profile does not exist")
 		}
 
@@ -60,7 +60,7 @@ var profileEditCmd = &cobra.Command{
 		}
 
 		if profileNameFlag == "" || apiUrlFlag == "" || apiKeyFlag == "" {
-			err = EditProfile(c, true, &chosenProfile)
+			err = EditProfile(c, true, chosenProfile)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -73,7 +73,7 @@ var profileEditCmd = &cobra.Command{
 			ApiKey:      apiKeyFlag,
 		}
 
-		err = editProfile(&chosenProfile, profileEditView, c, true)
+		err = editProfile(chosenProfile, profileEditView, c, true)
 		if err != nil {
 			log.Fatal(err)
 		}

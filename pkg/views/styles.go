@@ -4,49 +4,38 @@
 package views
 
 import (
+	"os"
+
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/lucasb-eyer/go-colorful"
 )
 
 var (
 	Green       = lipgloss.AdaptiveColor{Light: "#23cc71", Dark: "#23cc71"}
 	DimmedGreen = lipgloss.AdaptiveColor{Light: "#7be0a9", Dark: "#7be0a9"}
-	Blue        = lipgloss.AdaptiveColor{Light: "#017ffe", Dark: "#017ffe"}
-	Red         = lipgloss.AdaptiveColor{Light: "#ff4567", Dark: "#ff4567"}
-	DimmedBlue  = lipgloss.AdaptiveColor{Light: "#3398fe", Dark: "#3398fe"}
-	White       = lipgloss.AdaptiveColor{Light: "000", Dark: "fff"}
+	Orange      = lipgloss.AdaptiveColor{Light: "#eb9834", Dark: "#eb9834"}
+	Light       = lipgloss.AdaptiveColor{Light: "#000", Dark: "#fff"}
+	Dark        = lipgloss.AdaptiveColor{Light: "#fff", Dark: "#000"}
 	Gray        = lipgloss.AdaptiveColor{Light: "243", Dark: "243"}
+	LightGray   = lipgloss.AdaptiveColor{Light: "#828282", Dark: "#828282"}
 )
 
-func ColorGrid(xSteps, ySteps int) [][]string {
-	x0y0, _ := colorful.Hex("#F25D94")
-	x1y0, _ := colorful.Hex("#EDFF82")
-	x0y1, _ := colorful.Hex("#643AFF")
-	x1y1, _ := colorful.Hex("#14F9D5")
+var (
+	BaseTableStyleHorizontalPadding = 4
+	BaseTableStyle                  = lipgloss.NewStyle().
+					PaddingLeft(BaseTableStyleHorizontalPadding).
+					PaddingRight(BaseTableStyleHorizontalPadding).
+					PaddingTop(1).
+					Margin(1, 0)
 
-	x0 := make([]colorful.Color, ySteps)
-	for i := range x0 {
-		x0[i] = x0y0.BlendLuv(x0y1, float64(i)/float64(ySteps))
-	}
-
-	x1 := make([]colorful.Color, ySteps)
-	for i := range x1 {
-		x1[i] = x1y0.BlendLuv(x1y1, float64(i)/float64(ySteps))
-	}
-
-	grid := make([][]string, ySteps)
-	for x := 0; x < ySteps; x++ {
-		y0 := x0[x]
-		grid[x] = make([]string, xSteps)
-		for y := 0; y < xSteps; y++ {
-			grid[x][y] = y0.BlendLuv(x1[x], float64(y)/float64(xSteps)).Hex()
-		}
-	}
-
-	return grid
-}
+	NameStyle           = lipgloss.NewStyle().Foreground(Light)
+	ActiveStyle         = lipgloss.NewStyle().Foreground(Green)
+	InactiveStyle       = lipgloss.NewStyle().Foreground(Orange)
+	DefaultRowDataStyle = lipgloss.NewStyle().Foreground(Gray)
+	BaseCellStyle       = lipgloss.NewRenderer(os.Stdout).NewStyle().Padding(0, 4, 1, 0)
+	TableHeaderStyle    = BaseCellStyle.Copy().Foreground(LightGray).Bold(false).Padding(0).MarginRight(4)
+)
 
 func GetStyledSelectList(items []list.Item) list.Model {
 
@@ -54,26 +43,59 @@ func GetStyledSelectList(items []list.Item) list.Model {
 
 	d.Styles.SelectedTitle = lipgloss.NewStyle().
 		Border(lipgloss.NormalBorder(), false, false, false, true).
-		BorderForeground(Blue).
-		Foreground(Blue).
+		BorderForeground(Green).
+		Foreground(Green).
 		Bold(true).
 		Padding(0, 0, 0, 1)
 
-	d.Styles.SelectedDesc = d.Styles.SelectedTitle.Copy().Foreground(DimmedBlue)
+	d.Styles.SelectedDesc = d.Styles.SelectedTitle.Copy().Foreground(DimmedGreen).Bold(false)
 
 	l := list.New(items, d, 0, 0)
 
 	l.Styles.FilterPrompt = lipgloss.NewStyle().Foreground(Green)
-	l.Styles.FilterCursor = lipgloss.NewStyle().Foreground(Green)
-	l.Styles.Title = lipgloss.NewStyle().Foreground(Green).Bold(true)
+	l.Styles.FilterCursor = lipgloss.NewStyle().Foreground(Green).Background(Green)
+	l.Styles.Title = lipgloss.NewStyle().Foreground(Dark).Bold(true).
+		Background(lipgloss.Color("#fff")).Padding(0)
 
 	l.FilterInput.PromptStyle = lipgloss.NewStyle().Foreground(Green)
 	l.FilterInput.TextStyle = lipgloss.NewStyle().Foreground(Green)
+
+	l.SetStatusBarItemName("item\n\n"+lipgloss.NewStyle().Foreground(LightGray).Render("==="), "items\n\n"+lipgloss.NewStyle().Foreground(LightGray).Render("==="))
 
 	return l
 }
 
 func GetCustomTheme() *huh.Theme {
+	newTheme := huh.ThemeCharm()
+
+	b := &newTheme.Blurred
+	b.FocusedButton.Background(Green)
+	b.FocusedButton.Bold(true)
+	b.TextInput.Prompt.Foreground(Light)
+	b.TextInput.Cursor.Foreground(Light)
+	b.SelectSelector.Foreground(Green)
+	b.Title.Foreground(Gray).Bold(true)
+	b.Description.Foreground(LightGray)
+
+	f := &newTheme.Focused
+	f.Title.Foreground(Green).Bold(true)
+	f.Description.Foreground(LightGray).Bold(true)
+	f.FocusedButton.Bold(true)
+	f.FocusedButton.Background(Green)
+	f.TextInput.Prompt.Foreground(Green)
+	f.TextInput.Cursor.Foreground(Light)
+	f.SelectSelector.Foreground(Green)
+	f.SelectedOption.Foreground(Green)
+
+	f.Base.BorderForeground(Green)
+
+	f.Base.MarginTop(DefaultLayoutMarginTop)
+	b.Base.MarginTop(DefaultLayoutMarginTop)
+
+	return newTheme
+}
+
+func GetInitialCommandTheme() *huh.Theme {
 
 	newTheme := huh.ThemeCharm()
 
@@ -88,12 +110,18 @@ func GetCustomTheme() *huh.Theme {
 
 	f := &newTheme.Focused
 	f.Base = f.Base.BorderForeground(lipgloss.Color("fff"))
-	f.Title.Foreground(Blue).Bold(true)
+	f.Title.Foreground(Green).Bold(true)
 	f.FocusedButton.Bold(true)
 	f.FocusedButton.Background(Green)
 	f.TextInput.Prompt.Foreground(Green)
-	f.TextInput.Cursor.Foreground(White)
+	f.TextInput.Cursor.Foreground(Light)
 	f.SelectSelector.Foreground(Green)
+
+	f.Base.UnsetMarginLeft()
+	f.Base.UnsetPaddingLeft()
+	f.Base.BorderLeft(false)
+
+	f.SelectedOption = lipgloss.NewStyle().Foreground(Green)
 
 	return newTheme
 }

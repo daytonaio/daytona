@@ -17,7 +17,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/frpc"
 	"github.com/daytonaio/daytona/pkg/ports"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
+	"github.com/daytonaio/daytona/pkg/views"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -61,9 +61,9 @@ var PortForwardCmd = &cobra.Command{
 			}
 		} else {
 			if *hostPort != uint16(port) {
-				view_util.RenderInfoMessage(fmt.Sprintf("Port %d already in use.", port))
+				views.RenderInfoMessage(fmt.Sprintf("Port %d already in use.", port))
 			}
-			view_util.RenderInfoMessage(fmt.Sprintf("Port available at http://localhost:%d\n", *hostPort))
+			views.RenderInfoMessage(fmt.Sprintf("Port available at http://localhost:%d\n", *hostPort))
 		}
 
 		if publicPreview {
@@ -98,7 +98,7 @@ func init() {
 }
 
 func forwardPublicPort(workspaceId, projectName string, hostPort, targetPort uint16) error {
-	view_util.RenderInfoMessage("Forwarding port to a public URL...")
+	views.RenderInfoMessage("Forwarding port to a public URL...")
 
 	apiClient, err := server.GetApiClient(nil)
 	if err != nil {
@@ -117,7 +117,7 @@ func forwardPublicPort(workspaceId, projectName string, hostPort, targetPort uin
 
 	go func() {
 		time.Sleep(1 * time.Second)
-		view_util.RenderInfoMessage(fmt.Sprintf("Port available at %s", fmt.Sprintf("%s://%s.%s", *serverConfig.Frps.Protocol, subDomain, *serverConfig.Frps.Domain)))
+		views.RenderInfoMessage(fmt.Sprintf("Port available at %s", fmt.Sprintf("%s://%s.%s", *serverConfig.Frps.Protocol, subDomain, *serverConfig.Frps.Domain)))
 	}()
 
 	return frpc.Connect(frpc.FrpcConnectParams{

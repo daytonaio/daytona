@@ -24,11 +24,14 @@ func selectRepositoryPrompt(repositories []serverapiclient.GitRepository, second
 	}
 
 	l := views.GetStyledSelectList(items)
-	m := model[string]{list: l}
-	m.list.Title = "CHOOSE A REPOSITORY"
+
+	title := "Choose a Repository"
 	if secondaryProjectOrder > 0 {
-		m.list.Title += fmt.Sprintf(" (Secondary Project #%d)", secondaryProjectOrder)
+		title += fmt.Sprintf(" (Secondary Project #%d)", secondaryProjectOrder)
 	}
+	l.Title = views.GetStyledMainTitle(title)
+	l.Styles.Title = titleStyle
+	m := model[string]{list: l}
 
 	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
 	if err != nil {

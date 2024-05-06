@@ -13,8 +13,6 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
-	"github.com/daytonaio/daytona/pkg/views/util"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
 	log "github.com/sirupsen/logrus"
@@ -76,7 +74,7 @@ var DeleteCmd = &cobra.Command{
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 
-			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "delete")
+			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "Delete")
 		} else {
 			workspace, err = server.GetWorkspace(args[0])
 			if err != nil {
@@ -144,7 +142,7 @@ func DeleteAllWorkspaces() error {
 			log.Errorf("Failed to delete workspace %s: %v", *workspace.Id, apiclient.HandleErrorResponse(res, err))
 			continue
 		}
-		view_util.RenderLine(fmt.Sprintf("- Workspace %s successfully deleted\n", *workspace.Name))
+		views.RenderLine(fmt.Sprintf("- Workspace %s successfully deleted\n", *workspace.Name))
 	}
 	return nil
 }
@@ -170,6 +168,6 @@ func removeWorkspace(ctx context.Context, apiClient *serverapiclient.APIClient, 
 		log.Fatal(err)
 	}
 
-	util.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully deleted", *workspace.Name))
+	views.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully deleted", *workspace.Name))
 	return nil
 }

@@ -7,143 +7,89 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"strings"
 
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
-	"github.com/daytonaio/daytona/pkg/views/util"
+	"github.com/daytonaio/daytona/pkg/views"
 
-	"github.com/charmbracelet/bubbles/table"
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss/table"
 	"golang.org/x/term"
 )
 
-var columns = []table.Column{
-	{Title: "Provider", Width: 24},
-	{Title: "Target", Width: 24},
-	{Title: "Options", Width: 70},
+type RowData struct {
+	Target   string
+	Provider string
+	Options  string
 }
 
-type model struct {
-	table       table.Model
-	initialRows []table.Row
-}
-
-func (m model) Init() tea.Cmd {
-	return tea.Quit
-}
-
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		rows, cols := getRowsAndCols(msg.Width, m.initialRows)
-		m.table = getTable(rows, cols, m.table.Cursor())
-		return m, nil
+func getRowFromRowData(rowData RowData) []string {
+	row := []string{
+		views.NameStyle.Render(rowData.Target),
+		views.DefaultRowDataStyle.Render(rowData.Provider),
+		views.DefaultRowDataStyle.Render(rowData.Options),
 	}
-	m.table, cmd = m.table.Update(msg)
-	return m, cmd
+
+	return row
 }
 
-var baseStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.RoundedBorder()).
-	Padding(0, 1).MarginBottom(1)
+func getRowData(target *serverapiclient.ProviderTarget) *RowData {
+	rowData := RowData{"", "", ""}
 
-func (m model) View() string {
-	return baseStyle.Render(m.table.View()) + "\n"
+	rowData.Target = *target.Name
+	rowData.Provider = *target.ProviderInfo.Name
+	rowData.Options = *target.Options
+
+	return &rowData
 }
 
-func getTable(rows []table.Row, cols []table.Column, activeRow int) table.Model {
-	t := table.New(
-		table.WithColumns(cols),
-		table.WithRows(rows),
-		table.WithFocused(true),
-		table.WithHeight(len(rows)),
-	)
+func ListTargets(targetList []serverapiclient.ProviderTarget) {
 
-	style := table.DefaultStyles()
-	style.Header = style.Header.
-		BorderStyle(lipgloss.NormalBorder()).
-		BorderBottom(true).
-		AlignHorizontal(lipgloss.Left)
+	sortTargets(&targetList)
 
-	style.Selected = style.Selected.
-		Foreground(style.Cell.GetForeground()).
-		Background(style.Cell.GetBackground()).
-		Bold(false)
+	re := lipgloss.NewRenderer(os.Stdout)
 
-	t.SetStyles(style)
-	t.SetCursor(activeRow)
+	headers := []string{"Target", "Provider", "Options"}
 
-	return t
-}
+	data := [][]string{}
 
-func getRowsAndCols(width int, initialRows []table.Row) ([]table.Row, []table.Column) {
-	colWidth := 0
-	cols := []table.Column{}
+	for _, target := range targetList {
+		var rowData *RowData
+		var row []string
 
-	for _, col := range columns {
-		if colWidth+col.Width > width {
-			break
+		rowData = getRowData(&target)
+		if rowData == nil {
+			continue
 		}
-
-		colWidth += col.Width
-		cols = append(cols, col)
+		row = getRowFromRowData(*rowData)
+		data = append(data, row)
 	}
 
-	rows := []table.Row{}
-	for _, row := range initialRows {
-		rows = append(rows, row[:len(cols)])
-	}
-
-	return rows, cols
-}
-
-func ListTargets(targets []serverapiclient.ProviderTarget) {
-	util.RenderMainTitle("TARGETS")
-
-	m := renderTargetList(targets)
-
-	_, err := tea.NewProgram(m).Run()
+	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
-		fmt.Println("Error running program:", err)
-		os.Exit(1)
+		fmt.Println(data)
+		return
 	}
-}
 
-func renderTargetList(targets []serverapiclient.ProviderTarget) model {
-	rows := []table.Row{}
+	breakpointWidth := views.GetContainerBreakpointWidth(terminalWidth)
 
-	sortTargets(&targets)
+	if breakpointWidth == 0 || terminalWidth < views.TUITableMinimumWidth {
+		renderUnstyledList(targetList)
+		return
+	}
 
-	for _, target := range targets {
-		optionsString := *target.Options
-		optionsRows := []table.Row{}
-
-		parts := strings.Split(optionsString, "\n")
-		for i, part := range parts {
-			if i == 0 {
-				optionsRows = append(optionsRows, table.Row{
-					*target.ProviderInfo.Name,
-					*target.Name,
-					part,
-				})
-			} else {
-				optionsRows = append(optionsRows, table.Row{"", "", part})
+	t := table.New().
+		Headers(headers...).
+		Rows(data...).
+		BorderStyle(re.NewStyle().Foreground(views.LightGray)).
+		BorderRow(false).BorderColumn(false).BorderLeft(false).BorderRight(false).BorderTop(false).BorderBottom(false).
+		StyleFunc(func(row, col int) lipgloss.Style {
+			if row == 0 {
+				return views.TableHeaderStyle
 			}
-		}
+			return views.BaseCellStyle
+		}).Width(breakpointWidth - 2*views.BaseTableStyleHorizontalPadding)
 
-		rows = append(rows, optionsRows...)
-	}
-
-	width, _, _ := term.GetSize(int(os.Stdout.Fd()))
-	adjustedRows, adjustedCols := getRowsAndCols(width, rows)
-
-	return model{
-		table:       getTable(adjustedRows, adjustedCols, 0),
-		initialRows: rows,
-	}
-
+	fmt.Println(views.BaseTableStyle.Render(t.String()))
 }
 
 func sortTargets(targets *[]serverapiclient.ProviderTarget) {
@@ -152,4 +98,22 @@ func sortTargets(targets *[]serverapiclient.ProviderTarget) {
 		t2 := (*targets)[j]
 		return *t1.ProviderInfo.Name < *t2.ProviderInfo.Name
 	})
+}
+
+func renderUnstyledList(targetList []serverapiclient.ProviderTarget) {
+	output := "\n"
+
+	for _, target := range targetList {
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Target Name: "), *target.Name) + "\n\n"
+
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Target Provider: "), *target.ProviderInfo.Name) + "\n\n"
+
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Target Options: "), *target.Options) + "\n"
+
+		if target.Name != targetList[len(targetList)-1].Name {
+			output += views.SeparatorString + "\n\n"
+		}
+	}
+
+	fmt.Println(output)
 }
