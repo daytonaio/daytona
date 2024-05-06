@@ -119,30 +119,6 @@ func (m WorkspaceDataModel) Init() tea.Cmd {
 }
 
 func (m WorkspaceDataModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c":
-			m.quitting = true
-			return m, tea.Quit
-		case "enter":
-			if m.basicViewActive {
-				m.form.State = huh.StateCompleted
-			}
-			doneCheck = true
-		case "f10":
-			if !m.showConfigurationOption {
-				return m, nil
-			}
-			if m.basicViewActive {
-				m.form.NextGroup()
-			} else {
-				m.form.PrevGroup()
-			}
-			m.basicViewActive = !m.basicViewActive
-		}
-	}
-
 	var cmds []tea.Cmd
 
 	// Process the form
@@ -156,6 +132,35 @@ func (m WorkspaceDataModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Quit when the form is done.
 		m.quitting = true
 		cmds = append(cmds, tea.Quit)
+	}
+
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "ctrl+c":
+			m.quitting = true
+			return m, tea.Quit
+		case "enter":
+			errs := m.form.Errors()
+			if len(errs) > 0 {
+				return m, nil
+			}
+			if m.basicViewActive {
+				m.form.State = huh.StateCompleted
+			}
+			doneCheck = true
+		case "f10":
+			m.form.Update(tea.KeyMsg{Type: tea.KeyEnter})
+			if !m.showConfigurationOption {
+				return m, nil
+			}
+			if m.basicViewActive {
+				m.form.NextGroup()
+			} else {
+				m.form.PrevGroup()
+			}
+			m.basicViewActive = !m.basicViewActive
+		}
 	}
 
 	return m, tea.Batch(cmds...)
