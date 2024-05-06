@@ -3,7 +3,8 @@
 	"image": "ghcr.io/daytonaio/go-devcontainer:latest",
 	"containerEnv": {
 		"LOG_LEVEL": "debug",
-		"DAYTONA_SERVER_MODE": "development"
+		"DAYTONA_SERVER_MODE": "development",
+		"CGO_ENABLED": "0"
 	},
 	"postCreateCommand": ".devcontainer/postcreate.sh",
 	"remoteUser": "daytona"
