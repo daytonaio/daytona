@@ -4,7 +4,7 @@
 package frpc
 
 import (
-	"context"
+	"fmt"
 
 	"github.com/fatedier/frp/client"
 	v1 "github.com/fatedier/frp/pkg/config/v1"
@@ -18,7 +18,9 @@ type FrpcConnectParams struct {
 	Port         int
 }
 
-func Connect(params FrpcConnectParams) error {
+type HealthCheckFunc func() error
+
+func GetService(params FrpcConnectParams) (HealthCheckFunc, *client.Service, error) {
 	cfg := client.ServiceOptions{}
 	cfg.Common = &v1.ClientCommonConfig{}
 	cfg.Common.ServerAddr = params.ServerDomain
@@ -35,8 +37,23 @@ func Connect(params FrpcConnectParams) error {
 
 	service, err := client.NewService(cfg)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
-	return service.Run(context.Background())
+	return func() error {
+		proxyStatus, err := service.GetProxyStatus(params.Name)
+		if err != nil {
+			return err
+		}
+
+		if proxyStatus.Err != "" {
+			return fmt.Errorf("proxy error: %s", proxyStatus.Err)
+		}
+
+		if proxyStatus.Phase != "running" {
+			return fmt.Errorf("proxy state is not running. State is %s", proxyStatus.Phase)
+		}
+
+		return nil
+	}, service, nil
 }
