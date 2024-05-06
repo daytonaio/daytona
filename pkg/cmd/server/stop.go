@@ -15,7 +15,7 @@ var stopCmd = &cobra.Command{
 	Use:   "stop",
 	Short: "Stops the Daytona Server daemon",
 	Run: func(cmd *cobra.Command, args []string) {
-		views.RenderContainerLayout(views.GetBoldedInfoMessage("Stopping the Daytona Server daemon..."))
+		views.RenderInfoMessageBold("Stopping the Daytona Server daemon...")
 		err := daemon.Stop()
 		if err != nil {
 			log.Fatal(err)
