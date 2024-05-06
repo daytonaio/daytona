@@ -5,8 +5,6 @@ package create
 
 import (
 	"fmt"
-	"strings"
-	"unicode"
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
@@ -184,32 +182,6 @@ func RunProjectForm(workspaceCreationPromptResponse WorkspaceCreationPromptRespo
 	result.AddingMoreProjects = moreCheck
 
 	return result, nil
-}
-
-func GetSuggestedWorkspaceName(repo string) string {
-	var result strings.Builder
-	input := repo
-	input = strings.TrimSuffix(input, "/")
-
-	// Find the last index of '/' in the repo string
-	lastIndex := strings.LastIndex(input, "/")
-
-	// If '/' is found, extract the content after it
-	if lastIndex != -1 && lastIndex < len(repo)-1 {
-		input = repo[lastIndex+1:]
-	}
-
-	input = strings.TrimSuffix(input, ".git")
-
-	for _, char := range input {
-		if unicode.IsLetter(char) || unicode.IsNumber(char) || char == '-' {
-			result.WriteRune(char)
-		} else if char == ' ' {
-			result.WriteRune('-')
-		}
-	}
-
-	return strings.ToLower(result.String())
 }
 
 func getOrderNumberString(number int) string {
