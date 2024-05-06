@@ -32,7 +32,7 @@ import (
 )
 
 var CreateCmd = &cobra.Command{
-	Use:   "create [WORKSPACE_NAME]",
+	Use:   "create [REPOSITORY_URL]",
 	Short: "Create a workspace",
 	Args:  cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
