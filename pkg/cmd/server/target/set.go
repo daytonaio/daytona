@@ -11,9 +11,9 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/daytonaio/daytona/pkg/views/target"
-	"github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 
 	log "github.com/sirupsen/logrus"
@@ -40,7 +40,10 @@ var targetSetCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		selectedProvider := provider.GetProviderFromPrompt(pluginList, "CHOOSE A PROVIDER")
+		selectedProvider, err := provider.GetProviderFromPrompt(pluginList, "Choose a provider", false)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		if selectedProvider == nil {
 			return
@@ -98,6 +101,6 @@ var targetSetCmd = &cobra.Command{
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		util.RenderInfoMessage("Target set successfully")
+		views.RenderInfoMessage("Target set successfully")
 	},
 }

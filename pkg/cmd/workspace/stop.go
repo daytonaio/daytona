@@ -11,7 +11,7 @@ import (
 	internal_util "github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
-	"github.com/daytonaio/daytona/pkg/views/util"
+	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -48,7 +48,7 @@ var StopCmd = &cobra.Command{
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 
-			workspace := selection.GetWorkspaceFromPrompt(workspaceList, "stop")
+			workspace := selection.GetWorkspaceFromPrompt(workspaceList, "Stop")
 			if workspace == nil {
 				return
 			}
@@ -69,7 +69,7 @@ var StopCmd = &cobra.Command{
 			}
 		}
 
-		util.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully stopped", workspaceId))
+		views.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully stopped", workspaceId))
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) >= 1 {

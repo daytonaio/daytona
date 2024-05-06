@@ -6,9 +6,9 @@ package cmd
 import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	workspace "github.com/daytonaio/daytona/pkg/cmd/workspace"
+	"github.com/daytonaio/daytona/pkg/views"
 	profile_view "github.com/daytonaio/daytona/pkg/views/profile"
 	view "github.com/daytonaio/daytona/pkg/views/purge"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -33,7 +33,7 @@ var purgeCmd = &cobra.Command{
 		if c.ActiveProfileId != "default" {
 			profile_view.SwitchToDefaultPrompt(&switchProfileCheck)
 			if !switchProfileCheck {
-				view_util.RenderInfoMessage("Operation cancelled.")
+				views.RenderInfoMessage("Operation cancelled.")
 				return
 			}
 			c.ActiveProfileId = "default"
@@ -46,24 +46,24 @@ var purgeCmd = &cobra.Command{
 		if !yesFlag {
 			view.ConfirmPrompt(&confirmCheck)
 			if !confirmCheck {
-				view_util.RenderInfoMessage("Operation cancelled.")
+				views.RenderInfoMessage("Operation cancelled.")
 				return
 			}
 		}
 
-		view_util.RenderLine("\nDeleting all workspaces")
+		views.RenderLine("\nDeleting all workspaces")
 		err = workspace.DeleteAllWorkspaces()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		view_util.RenderLine("Deleting the SSH configuration file")
+		views.RenderLine("Deleting the SSH configuration file")
 		err = config.UnlinkSshFiles()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		view_util.RenderLine("Deleting autocompletion data")
+		views.RenderLine("Deleting autocompletion data")
 		err = config.DeleteAutocompletionData()
 		if err != nil {
 			log.Fatal(err)
@@ -71,17 +71,17 @@ var purgeCmd = &cobra.Command{
 
 		view.ServerStoppedPrompt(&serverStoppedCheck)
 		if !serverStoppedCheck {
-			view_util.RenderInfoMessage("Operation cancelled.")
+			views.RenderInfoMessage("Operation cancelled.")
 			return
 		}
 
-		view_util.RenderLine("Deleting the Daytona config directory")
+		views.RenderLine("Deleting the Daytona config directory")
 		err = config.DeleteConfigDir()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		view_util.RenderInfoMessage("All Daytona data has been successfully cleared from the device.\nYou may now delete the binary.")
+		views.RenderInfoMessage("All Daytona data has been successfully cleared from the device.\nYou may now delete the binary.")
 	},
 }
 

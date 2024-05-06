@@ -15,7 +15,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	configure "github.com/daytonaio/daytona/pkg/views/server"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 )
 
 var doneCheck bool
@@ -37,7 +37,7 @@ func GetWorkspaceDataFromPrompt(apiServerConfig *serverapiclient.ServerConfig, s
 
 	var postStartCommands []string
 
-	postStartCommandString := view_util.GetJoinedCommands(apiServerConfig.DefaultProjectPostStartCommands)
+	postStartCommandString := views_util.GetJoinedCommands(apiServerConfig.DefaultProjectPostStartCommands)
 
 	workspaceName, containerImage, containerUser := suggestedName, *apiServerConfig.DefaultProjectImage, *apiServerConfig.DefaultProjectUser
 
@@ -53,7 +53,7 @@ func GetWorkspaceDataFromPrompt(apiServerConfig *serverapiclient.ServerConfig, s
 	}
 
 	if postStartCommandString != "" {
-		postStartCommands = view_util.GetSplitCommands(postStartCommandString)
+		postStartCommands = views_util.GetSplitCommands(postStartCommandString)
 	}
 
 	return workspaceName, containerImage, containerUser, postStartCommands, nil
@@ -122,7 +122,7 @@ func (m WorkspaceDataModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "q", "ctrl+c":
+		case "ctrl+c":
 			m.quitting = true
 			return m, tea.Quit
 		case "enter":

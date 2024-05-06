@@ -14,7 +14,7 @@ import (
 	"github.com/daytonaio/daytona/internal/jetbrains"
 	"github.com/daytonaio/daytona/internal/util"
 	ospkg "github.com/daytonaio/daytona/pkg/os"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
+	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/pkg/browser"
 )
 
@@ -61,11 +61,11 @@ func OpenJetbrainsIDE(activeProfile config.Profile, ide, workspaceId, projectNam
 
 func downloadJetbrainsIDE(projectHostname, downloadUrl, downloadPath string) error {
 	if isAlreadyDownloaded(projectHostname, downloadPath) {
-		view_util.RenderInfoMessage("JetBrains IDE already downloaded. Opening...")
+		views.RenderInfoMessage("JetBrains IDE already downloaded. Opening...")
 		return nil
 	}
 
-	view_util.RenderInfoMessage(fmt.Sprintf("Downloading the IDE into the project from %s...", downloadUrl))
+	views.RenderInfoMessage(fmt.Sprintf("Downloading the IDE into the project from %s...", downloadUrl))
 
 	downloadIdeCmd := exec.Command("ssh", projectHostname, fmt.Sprintf("mkdir -p %s && wget -q --show-progress --progress=bar:force -pO- %s | tar -xzC %s --strip-components=1", downloadPath, downloadUrl, downloadPath))
 	downloadIdeCmd.Stdout = os.Stdout
@@ -76,7 +76,7 @@ func downloadJetbrainsIDE(projectHostname, downloadUrl, downloadPath string) err
 		return err
 	}
 
-	view_util.RenderInfoMessage("IDE downloaded. Opening...")
+	views.RenderInfoMessage("IDE downloaded. Opening...")
 
 	return nil
 }

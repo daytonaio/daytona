@@ -4,7 +4,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/daytonaio/daytona/internal/util"
@@ -14,8 +13,9 @@ import (
 	. "github.com/daytonaio/daytona/pkg/cmd/ports"
 	. "github.com/daytonaio/daytona/pkg/cmd/profile"
 	. "github.com/daytonaio/daytona/pkg/cmd/server"
+	apikeyCmd "github.com/daytonaio/daytona/pkg/cmd/server/apikey"
 	. "github.com/daytonaio/daytona/pkg/cmd/workspace"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
+	view "github.com/daytonaio/daytona/pkg/views/initial"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"
@@ -26,10 +26,25 @@ var rootCmd = &cobra.Command{
 	Short: "Daytona is a Dev Environment Manager",
 	Long:  "Daytona is a Dev Environment Manager",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Print(view_util.GetLongDescription())
-		err := cmd.Help()
+		command, err := view.GetCommand()
 		if err != nil {
 			log.Fatal(err)
+		}
+
+		switch command {
+		case "list":
+			ListCmd.Run(cmd, args)
+		case "profile add":
+			ProfileAddCmd.Run(cmd, []string{})
+		case "server api-key new":
+			apikeyCmd.GenerateCmd.Run(cmd, []string{})
+		case "create":
+			CreateCmd.Run(cmd, []string{})
+		case "help":
+			err := cmd.Help()
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	},
 }

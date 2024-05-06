@@ -11,7 +11,8 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
+	"github.com/daytonaio/daytona/pkg/views"
+	"github.com/daytonaio/daytona/pkg/views/util"
 )
 
 var CommandsInputHelp = "Comma separated list of commands. To use ',' in commands, escape them like this '\\,'"
@@ -22,7 +23,7 @@ type ServerUpdateKeyView struct {
 }
 
 func ConfigurationForm(config *serverapiclient.ServerConfig) *serverapiclient.ServerConfig {
-	projectStartCommands := view_util.GetJoinedCommands(config.DefaultProjectPostStartCommands)
+	projectStartCommands := util.GetJoinedCommands(config.DefaultProjectPostStartCommands)
 	apiPortView := strconv.Itoa(int(config.GetApiPort()))
 	headscalePortView := strconv.Itoa(int(config.GetHeadscalePort()))
 	frpsPortView := strconv.Itoa(int(config.Frps.GetPort()))
@@ -92,14 +93,14 @@ func ConfigurationForm(config *serverapiclient.ServerConfig) *serverapiclient.Se
 				Title("Frps Protocol").
 				Value(config.Frps.Protocol),
 		),
-	)
+	).WithTheme(views.GetCustomTheme())
 
 	err := form.Run()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	config.DefaultProjectPostStartCommands = view_util.GetSplitCommands(projectStartCommands)
+	config.DefaultProjectPostStartCommands = util.GetSplitCommands(projectStartCommands)
 
 	return config
 }

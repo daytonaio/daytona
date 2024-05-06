@@ -4,10 +4,13 @@
 package target
 
 import (
+	"os"
+
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
+	"github.com/daytonaio/daytona/pkg/views"
+	"golang.org/x/term"
 )
 
 type item struct {
@@ -37,7 +40,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch keypress := msg.String(); keypress {
-		case "q", "ctrl+c":
+		case "ctrl+c":
 			return m, tea.Quit
 
 		case "enter":
@@ -48,7 +51,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	case tea.WindowSizeMsg:
-		h, v := view_util.DocStyle.GetFrameSize()
+		h, v := views.DocStyle.GetFrameSize()
 		m.list.SetSize(msg.Width-h, msg.Height-v)
 	}
 
@@ -58,5 +61,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	return view_util.DocStyle.Render(m.list.View() + m.footer)
+	terminalWidth, terminalHeight, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		return ""
+	}
+
+	return views.DocStyle.Width(terminalWidth - 4).Height(terminalHeight - 4).Render(m.list.View() + m.footer)
 }

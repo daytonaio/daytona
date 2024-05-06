@@ -9,176 +9,95 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
-	"github.com/daytonaio/daytona/pkg/views/util"
 
-	"github.com/charmbracelet/bubbles/table"
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	view_util "github.com/daytonaio/daytona/pkg/views/util"
+	"github.com/charmbracelet/lipgloss/table"
 	"golang.org/x/term"
 )
 
-var columns = []table.Column{
-	{Title: "Name", Width: 20},
-	{Title: "Version", Width: 20},
+type RowData struct {
+	Name    string
+	Version string
 }
 
-type model struct {
-	table            table.Model
-	selectedProvider *serverapiclient.Provider
-	providers        map[string]serverapiclient.Provider
-	selectable       bool
-	initialRows      []table.Row
-}
-
-func (m model) Init() tea.Cmd {
-	if !m.selectable {
-		return tea.Quit
+func getRowFromRowData(rowData RowData) []string {
+	row := []string{
+		views.NameStyle.Render(rowData.Name),
+		views.DefaultRowDataStyle.Render(rowData.Version),
 	}
 
-	return nil
+	return row
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		rows, cols := getRowsAndCols(msg.Width, m.initialRows)
-		m.table = getTable(rows, cols, m.selectable, m.table.Cursor())
-		return m, nil
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "esc":
-			if m.table.Focused() {
-				m.table.Blur()
-			} else {
-				m.table.Focus()
-			}
-		case "q", "ctrl+c":
-			m.selectedProvider = nil
-			return m, tea.Quit
-		case "enter":
-			selectedProvider := m.providers[m.table.SelectedRow()[0]]
-			m.selectedProvider = &selectedProvider
-			return m, tea.Quit
+func getRowData(provider *serverapiclient.Provider) *RowData {
+	rowData := RowData{"", ""}
+
+	rowData.Name = *provider.Name
+	rowData.Version = *provider.Version
+
+	return &rowData
+}
+
+func List(providerList []serverapiclient.Provider) {
+
+	re := lipgloss.NewRenderer(os.Stdout)
+
+	headers := []string{"Name", "Version"}
+
+	data := [][]string{}
+
+	for _, provider := range providerList {
+		var rowData *RowData
+		var row []string
+
+		rowData = getRowData(&provider)
+		if rowData == nil {
+			continue
 		}
+		row = getRowFromRowData(*rowData)
+		data = append(data, row)
 	}
 
-	m.table, cmd = m.table.Update(msg)
-	return m, cmd
-}
-
-var baseStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.RoundedBorder()).
-	Padding(0, 1).MarginBottom(1)
-
-func (m model) View() string {
-	return baseStyle.Render(m.table.View()) + "\n"
-}
-
-func renderProvidersList(providers []serverapiclient.Provider, selectable bool) model {
-	rows := []table.Row{}
-	selectedProvider := &providers[0]
-
-	for _, provider := range providers {
-		row := table.Row{*provider.Name, *provider.Version}
-		rows = append(rows, row)
-	}
-
-	width, _, _ := term.GetSize(int(os.Stdout.Fd()))
-
-	adjustedRows, adjustedCols := getRowsAndCols(width, rows)
-
-	providerMap := map[string]serverapiclient.Provider{}
-	for _, provider := range providers {
-		providerMap[*provider.Name] = provider
-	}
-
-	return model{
-		table:            getTable(adjustedRows, adjustedCols, selectable, 0),
-		selectedProvider: selectedProvider,
-		selectable:       selectable,
-		providers:        providerMap,
-		initialRows:      rows,
-	}
-}
-
-func List(providers []serverapiclient.Provider) {
-	util.RenderMainTitle("PROVIDERS")
-
-	if len(providers) == 0 {
-		view_util.RenderInfoMessage("No providers found")
+	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		fmt.Println(data)
 		return
 	}
 
-	modelInstance := renderProvidersList(providers, false)
+	breakpointWidth := views.GetContainerBreakpointWidth(terminalWidth)
 
-	_, err := tea.NewProgram(modelInstance).Run()
-	if err != nil {
-		fmt.Println("Error running program:", err)
-		os.Exit(1)
+	if breakpointWidth == 0 || terminalWidth < views.TUITableMinimumWidth {
+		renderUnstyledList(providerList)
+		return
 	}
+
+	t := table.New().
+		Headers(headers...).
+		Rows(data...).
+		BorderStyle(re.NewStyle().Foreground(views.LightGray)).
+		BorderRow(false).BorderColumn(false).BorderLeft(false).BorderRight(false).BorderTop(false).BorderBottom(false).
+		StyleFunc(func(row, col int) lipgloss.Style {
+			if row == 0 {
+				return views.TableHeaderStyle
+			}
+			return views.BaseCellStyle
+		}).Width(breakpointWidth - 2*views.BaseTableStyleHorizontalPadding)
+
+	fmt.Println(views.BaseTableStyle.Render(t.String()))
 }
 
-func getTable(rows []table.Row, cols []table.Column, selectable bool, activeRow int) table.Model {
-	var t table.Model
+func renderUnstyledList(providerList []serverapiclient.Provider) {
+	output := "\n"
 
-	if selectable {
-		t = table.New(
-			table.WithColumns(cols),
-			table.WithRows(rows),
-			table.WithFocused(true),
-			table.WithHeight(len(rows)),
-		)
-	} else {
-		t = table.New(
-			table.WithColumns(cols),
-			table.WithRows(rows),
-			table.WithHeight(len(rows)),
-		)
-	}
+	for _, provider := range providerList {
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Provider Name: "), *provider.Name) + "\n\n"
 
-	style := table.DefaultStyles()
-	style.Header = style.Header.
-		BorderStyle(lipgloss.NormalBorder()).
-		BorderBottom(true).
-		AlignHorizontal(lipgloss.Left)
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Provider Version: "), *provider.Version) + "\n"
 
-	if selectable {
-		style.Selected = style.Selected.
-			Foreground(lipgloss.Color(views.White.Dark)).
-			Background(lipgloss.Color(views.Green.Dark)).
-			Bold(false)
-	} else {
-		style.Selected = style.Selected.
-			Foreground(style.Cell.GetForeground()).
-			Background(style.Cell.GetBackground()).
-			Bold(false)
-	}
-
-	t.SetStyles(style)
-	t.SetCursor(activeRow)
-
-	return t
-}
-
-func getRowsAndCols(width int, initialRows []table.Row) ([]table.Row, []table.Column) {
-	colWidth := 0
-	cols := []table.Column{}
-
-	for _, col := range columns {
-		if colWidth+col.Width > width {
-			break
+		if provider.Name != providerList[len(providerList)-1].Name {
+			output += views.SeparatorString + "\n\n"
 		}
-
-		colWidth += col.Width
-		cols = append(cols, col)
 	}
 
-	rows := []table.Row{}
-	for _, row := range initialRows {
-		rows = append(rows, row[:len(cols)])
-	}
-
-	return rows, cols
+	fmt.Println(output)
 }
