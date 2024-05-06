@@ -5,9 +5,11 @@ package util
 
 import (
 	"errors"
+	"fmt"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"unicode"
 
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
@@ -81,7 +83,7 @@ func GetCreationDataFromPrompt(apiServerConfig *serverapiclient.ServerConfig, wo
 		projectList[i].Name = projectName
 	}
 
-	suggestedName := create.GetSuggestedWorkspaceName(*workspaceCreationPromptResponse.PrimaryProject.Source.Repository.Url)
+	suggestedName := GetSuggestedWorkspaceName(*workspaceCreationPromptResponse.PrimaryProject.Source.Repository.Url, workspaceNames)
 
 	workspaceName, primaryContainerImage, primaryContainerUser, primaryContainerPostStartCommands, err = create.GetWorkspaceDataFromPrompt(apiServerConfig, suggestedName, workspaceNames, !multiProject)
 	if err != nil {
@@ -119,4 +121,52 @@ func GetCreationDataFromPrompt(apiServerConfig *serverapiclient.ServerConfig, wo
 func GetProjectNameFromRepo(repoUrl string) string {
 	projectNameSlugRegex := regexp.MustCompile(`[^a-zA-Z0-9-]`)
 	return projectNameSlugRegex.ReplaceAllString(strings.TrimSuffix(strings.ToLower(filepath.Base(repoUrl)), ".git"), "-")
+}
+
+func GetSuggestedWorkspaceName(repo string, existingWorkspaceNames []string) string {
+	var result strings.Builder
+	input := repo
+	input = strings.TrimSuffix(input, "/")
+
+	// Find the last index of '/' in the repo string
+	lastIndex := strings.LastIndex(input, "/")
+
+	// If '/' is found, extract the content after it
+	if lastIndex != -1 && lastIndex < len(repo)-1 {
+		input = repo[lastIndex+1:]
+	}
+
+	input = strings.TrimSuffix(input, ".git")
+
+	for _, char := range input {
+		if unicode.IsLetter(char) || unicode.IsNumber(char) || char == '-' {
+			result.WriteRune(char)
+		} else if char == ' ' {
+			result.WriteRune('-')
+		}
+	}
+
+	suggestion := strings.ToLower(result.String())
+
+	if !checkContains(existingWorkspaceNames, suggestion) {
+		return suggestion
+	} else {
+		i := 2
+		for {
+			newSuggestion := fmt.Sprintf("%s%d", suggestion, i)
+			if !checkContains(existingWorkspaceNames, newSuggestion) {
+				return newSuggestion
+			}
+			i++
+		}
+	}
+}
+
+func checkContains(arr []string, target string) bool {
+	for _, s := range arr {
+		if s == target {
+			return true
+		}
+	}
+	return false
 }
