@@ -28,7 +28,7 @@ var allFlag bool
 var StartCmd = &cobra.Command{
 	Use:   "start [WORKSPACE]",
 	Short: "Start a workspace",
-	Args:  cobra.MaximumNArgs(1),
+	Args:  cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if allFlag {
 			err := startAllWorkspaces()

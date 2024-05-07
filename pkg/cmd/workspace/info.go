@@ -5,9 +5,7 @@ package workspace
 
 import (
 	"context"
-	"os"
 
-	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/cmd/output"
@@ -19,10 +17,10 @@ import (
 )
 
 var InfoCmd = &cobra.Command{
-	Use:     "info",
+	Use:     "info [WORKSPACE]",
 	Short:   "Show workspace info",
 	Aliases: []string{"view"},
-	Args:    cobra.ExactArgs(0),
+	Args:    cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
@@ -33,12 +31,7 @@ var InfoCmd = &cobra.Command{
 
 		var workspace *serverapiclient.WorkspaceDTO
 
-		if util.WorkspaceMode() {
-			workspace, err = server.GetWorkspace(os.Getenv("DAYTONA_WS_ID"))
-			if err != nil {
-				log.Fatal(err)
-			}
-		} else if len(args) == 0 {
+		if len(args) == 0 {
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Verbose(true).Execute()
 			if err != nil {
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
@@ -70,11 +63,4 @@ var InfoCmd = &cobra.Command{
 
 		return getWorkspaceNameCompletions()
 	},
-}
-
-func init() {
-	if !util.WorkspaceMode() {
-		InfoCmd.Use += " [WORKSPACE]"
-		InfoCmd.Args = cobra.RangeArgs(0, 1)
-	}
 }

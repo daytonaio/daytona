@@ -6,9 +6,7 @@ package workspace
 import (
 	"context"
 	"fmt"
-	"os"
 
-	internal_util "github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -20,9 +18,9 @@ import (
 var stopProjectFlag string
 
 var StopCmd = &cobra.Command{
-	Use:   "stop",
+	Use:   "stop [WORKSPACE]",
 	Short: "Stop a workspace",
-	Args:  cobra.ExactArgs(0),
+	Args:  cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if allFlag {
 			err := stopAllWorkspaces()
@@ -40,9 +38,7 @@ var StopCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		if internal_util.WorkspaceMode() {
-			workspaceId = os.Getenv("DAYTONA_WS_ID")
-		} else if len(args) == 0 {
+		if len(args) == 0 {
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
@@ -81,11 +77,6 @@ var StopCmd = &cobra.Command{
 }
 
 func init() {
-	if !internal_util.WorkspaceMode() {
-		StopCmd.Use += " [WORKSPACE]"
-		StopCmd.Args = cobra.MaximumNArgs(0)
-	}
-
 	StopCmd.Flags().StringVarP(&stopProjectFlag, "project", "p", "", "Stop a single project in the workspace (project name)")
 	StopCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Stop all workspaces")
 }
