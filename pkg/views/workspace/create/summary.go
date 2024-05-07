@@ -101,6 +101,8 @@ func NewSummaryModel(workspaceName string, projectList []serverapiclient.CreateW
 	m.workspaceName = workspaceName
 	m.projectList = projectList
 
+	confirmationResult = true
+
 	m.form = huh.NewForm(
 		huh.NewGroup(
 			huh.NewConfirm().
