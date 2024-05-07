@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var gitProviderAddCmd = &cobra.Command{
+var GitProviderAddCmd = &cobra.Command{
 	Use:     "add",
 	Aliases: []string{"new", "register", "update"},
 	Short:   "Register a Git providers",

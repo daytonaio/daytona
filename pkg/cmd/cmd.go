@@ -35,14 +35,14 @@ var rootCmd = &cobra.Command{
 		}
 
 		switch command {
-		case "list":
-			ListCmd.Run(cmd, args)
-		case "profile add":
-			ProfileAddCmd.Run(cmd, []string{})
-		case "api-key new":
-			GenerateCmd.Run(cmd, []string{})
 		case "create":
 			CreateCmd.Run(cmd, []string{})
+		case "code":
+			CodeCmd.Run(cmd, []string{})
+		case "git-provider add":
+			GitProviderAddCmd.Run(cmd, []string{})
+		case "target set":
+			TargetSetCmd.Run(cmd, []string{})
 		case "help":
 			err := cmd.Help()
 			if err != nil {

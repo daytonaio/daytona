@@ -65,10 +65,10 @@ type CommandView struct {
 }
 
 var commandViews []CommandView = []CommandView{
-	{Command: "list", Name: "daytona list", Desc: "(list all workspaces)"},
-	{Command: "profile add", Name: "daytona profile add", Desc: "(run on client machine)"},
-	{Command: "api-key new", Name: "daytona api-key new", Desc: "(create API key on this machine)"},
-	{Command: "create", Name: "daytona create", Desc: "(create new workspace)\n"},
+	{Command: "create", Name: "daytona create", Desc: "(create a new workspace)"},
+	{Command: "code", Name: "daytona code", Desc: "(open a workspace in your preferred IDE)"},
+	{Command: "git-provider add", Name: "daytona git-provider add", Desc: "(register a Git provider account)"},
+	{Command: "target set", Name: "daytona target set", Desc: "(run workspaces on a remote machine)\n"},
 	{Command: "help", Name: "view all commands", Desc: ""},
 }
 

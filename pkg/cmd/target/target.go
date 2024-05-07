@@ -14,6 +14,6 @@ var TargetCmd = &cobra.Command{
 
 func init() {
 	TargetCmd.AddCommand(targetListCmd)
-	TargetCmd.AddCommand(targetSetCmd)
+	TargetCmd.AddCommand(TargetSetCmd)
 	TargetCmd.AddCommand(targetRemoveCmd)
 }
