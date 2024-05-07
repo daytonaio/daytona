@@ -52,6 +52,8 @@ type ApiServerConfig struct {
 	ApiPort int
 }
 
+const HEALTH_CHECK_ROUTE = "/health"
+
 func NewApiServer(config ApiServerConfig) *ApiServer {
 	return &ApiServer{
 		apiPort: config.ApiPort,
@@ -87,6 +89,9 @@ func (a *ApiServer) Start() error {
 
 	public := a.router.Group("/")
 	public.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	public.GET(HEALTH_CHECK_ROUTE, func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
 
 	protected := a.router.Group("/")
 	protected.Use(middlewares.AuthMiddleware())
@@ -188,11 +193,14 @@ func (a *ApiServer) Start() error {
 }
 
 func (a *ApiServer) HealthCheck() error {
-	conn, err := net.Dial("tcp", fmt.Sprintf(":%d", a.apiPort))
+	resp, err := http.Get(fmt.Sprintf("http://localhost:%d%s", a.apiPort, HEALTH_CHECK_ROUTE))
 	if err != nil {
-		return fmt.Errorf("API health check timed out")
+		return err
 	}
-	defer conn.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("health check failed with status code %d", resp.StatusCode)
+	}
 
 	return nil
 }
