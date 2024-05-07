@@ -94,6 +94,7 @@ func getSingleProjectOutput(project *serverapiclient.Project, isCreationView boo
 	repositoryUrl = strings.TrimPrefix(repositoryUrl, "http://")
 
 	output += getInfoLineState("State", project.State) + "\n"
+	output += getInfoLineGitStatus("Git Status", project.State.GitStatus) + "\n"
 	if project.Target != nil && !isCreationView {
 		output += getInfoLine("Target", *project.Target) + "\n"
 	}
@@ -112,6 +113,7 @@ func getProjectsOutputs(projects []serverapiclient.Project, isCreationView bool)
 	for i, project := range projects {
 		output += getInfoLine(fmt.Sprintf("Project #%d", i+1), *project.Name)
 		output += getInfoLineState("State", project.State)
+		output += getInfoLineGitStatus("Git Status", project.State.GitStatus)
 		if project.Target != nil && !isCreationView {
 			output += getInfoLine("Target", *project.Target)
 		}
@@ -145,8 +147,19 @@ func getInfoLineState(key string, state *serverapiclient.ProjectState) string {
 		stateProperty = propertyValueStyle.Foreground(views.Green).Render("RUNNING")
 	}
 
-	output := propertyNameStyle.Render(fmt.Sprintf("%-*s", propertyNameWidth, key)) + stateProperty + propertyValueStyle.Foreground(views.Light).Render("\n")
-	output += "On branch " + propertyNameStyle.Foreground(views.Gray).Render(fmt.Sprintf("%-*s", propertyNameWidth, *state.GitStatus.CurrentBranch)) + fmt.Sprint(len(state.GitStatus.FileStatus)) + " uncommited changes." + propertyValueStyle.Foreground(views.Light).Render("\n")
+	return propertyNameStyle.Render(fmt.Sprintf("%-*s", propertyNameWidth, key)) + stateProperty + propertyValueStyle.Foreground(views.Light).Render("\n")
+}
+
+func getInfoLineGitStatus(key string, status *serverapiclient.GitStatus) string {
+	output := propertyNameStyle.Render(fmt.Sprintf("%-*s", propertyNameWidth, key))
+	output += "On branch " + propertyNameStyle.Foreground(views.Gray).Render(fmt.Sprintf("%-*s", propertyNameWidth, *status.CurrentBranch))
+
+	changesOutput := " uncommited changes."
+	filesNum := len(status.FileStatus)
+	if filesNum == 1 {
+		changesOutput = " uncommited change."
+	}
+	output += fmt.Sprint(filesNum) + changesOutput + propertyValueStyle.Foreground(views.Light).Render("\n")
 
 	return output
 }

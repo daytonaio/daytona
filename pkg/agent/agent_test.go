@@ -50,8 +50,8 @@ var gitStatus1 = &workspace.GitStatus{
 	Files: []*workspace.FileStatus{{
 		Name:     "File1",
 		Extra:    "",
-		Staging:  "H",
-		Worktree: "H",
+		Staging:  workspace.Modified,
+		Worktree: workspace.Modified,
 	}},
 }
 
