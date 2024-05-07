@@ -15,7 +15,7 @@ func Render(apiPort uint32, frpcUrl string, isDaemonMode bool) {
 	output += views.GetStyledMainTitle("Daytona") + "\n\n"
 	output += fmt.Sprintf("## Daytona Server is running on port: %d\n\n", apiPort)
 	output += views.SeparatorString + "\n\n"
-	output += "You may now begin developing locally"
+	output += "You may now begin developing"
 	output += "\n"
 
 	output = lipgloss.NewStyle().PaddingLeft(3).Render(output) + "\n"
