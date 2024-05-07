@@ -19,7 +19,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var targetSetCmd = &cobra.Command{
+var TargetSetCmd = &cobra.Command{
 	Use:     "set",
 	Short:   "Set provider target",
 	Args:    cobra.NoArgs,
