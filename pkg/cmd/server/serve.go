@@ -187,10 +187,10 @@ var ServeCmd = &cobra.Command{
 
 func waitForServerToStart(apiServer *api.ApiServer) error {
 	var err error
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 30; i++ {
+		time.Sleep(1 * time.Second)
 		err = apiServer.HealthCheck()
 		if err != nil {
-			time.Sleep(3 * time.Second)
 			continue
 		}
 
