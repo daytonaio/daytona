@@ -13,6 +13,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/ide"
+	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
@@ -35,6 +36,7 @@ var CodeCmd = &cobra.Command{
 		var workspaceId string
 		var projectName string
 		var ideId string
+		var workspace *serverapiclient.WorkspaceDTO
 
 		activeProfile, err := c.GetActiveProfile()
 		if err != nil {
@@ -54,13 +56,13 @@ var CodeCmd = &cobra.Command{
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 
-			workspace := selection.GetWorkspaceFromPrompt(workspaceList, "Open")
+			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "Open")
 			if workspace == nil {
 				return
 			}
 			workspaceId = *workspace.Id
 		} else {
-			workspace, err := server.GetWorkspace(args[0])
+			workspace, err = server.GetWorkspace(args[0])
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -86,7 +88,7 @@ var CodeCmd = &cobra.Command{
 			ideId = ideFlag
 		}
 
-		views.RenderInfoMessage(fmt.Sprintf("Opening the workspace project '%s' in your preferred IDE.", projectName))
+		views.RenderInfoMessage(fmt.Sprintf("Opening the project '%s' from workspace '%s' in your preferred IDE.", projectName, *workspace.Name))
 
 		err = openIDE(ideId, activeProfile, workspaceId, projectName)
 		if err != nil {
