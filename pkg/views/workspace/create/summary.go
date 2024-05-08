@@ -4,15 +4,17 @@
 package create
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
+	util "github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
-	"github.com/daytonaio/daytona/pkg/views/util"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 )
 
 type SummaryModel struct {
@@ -26,25 +28,27 @@ type SummaryModel struct {
 }
 
 var configureCheck bool
-var confirmationResult bool
+var userCancelled bool
 
-func DisplayMultiSubmitForm(workspaceName string, projectList *[]serverapiclient.CreateWorkspaceRequestProject, apiServerConfig *serverapiclient.ServerConfig, doneCheck *bool) error {
+func RunSubmissionForm(workspaceName *string, suggestedName string, workspaceNames []string, projectList *[]serverapiclient.CreateWorkspaceRequestProject, apiServerConfig *serverapiclient.ServerConfig) error {
 	configureCheck = false
 
-	m := NewSummaryModel(workspaceName, *projectList)
+	m := NewSummaryModel(workspaceName, suggestedName, workspaceNames, *projectList)
 
 	if _, err := tea.NewProgram(m).Run(); err != nil {
 		return err
 	}
 
-	*doneCheck = confirmationResult
+	if userCancelled {
+		return errors.New("user cancelled")
+	}
 
 	if !configureCheck {
 		return nil
 	}
 
 	if apiServerConfig.DefaultProjectImage == nil || apiServerConfig.DefaultProjectUser == nil || apiServerConfig.DefaultProjectPostStartCommands == nil {
-		log.Fatal("Default project entries are not set")
+		return fmt.Errorf("default project entries are not set")
 	}
 
 	for i := range *projectList {
@@ -53,16 +57,16 @@ func DisplayMultiSubmitForm(workspaceName string, projectList *[]serverapiclient
 		(*projectList)[i].PostStartCommands = apiServerConfig.DefaultProjectPostStartCommands
 	}
 
-	defaultPostStartCommandString := util.GetJoinedCommands(apiServerConfig.DefaultProjectPostStartCommands)
+	defaultPostStartCommandString := views_util.GetJoinedCommands(apiServerConfig.DefaultProjectPostStartCommands)
 
 	configuredProjects, err := ConfigureProjects(*projectList, *apiServerConfig.DefaultProjectImage, *apiServerConfig.DefaultProjectUser, defaultPostStartCommandString)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	*projectList = configuredProjects
 
-	return DisplayMultiSubmitForm(workspaceName, projectList, apiServerConfig, doneCheck)
+	return RunSubmissionForm(workspaceName, suggestedName, workspaceNames, projectList, apiServerConfig)
 }
 
 func RenderSummary(workspaceName string, projectList []serverapiclient.CreateWorkspaceRequestProject) (string, error) {
@@ -71,7 +75,7 @@ func RenderSummary(workspaceName string, projectList []serverapiclient.CreateWor
 
 	for _, project := range projectList {
 		if project.Source == nil || project.Source.Repository == nil || project.Source.Repository.Url == nil {
-			return "", fmt.Errorf("Repository is required")
+			return "", fmt.Errorf("repository is required")
 		}
 	}
 
@@ -94,21 +98,36 @@ func RenderSummary(workspaceName string, projectList []serverapiclient.CreateWor
 	return output, nil
 }
 
-func NewSummaryModel(workspaceName string, projectList []serverapiclient.CreateWorkspaceRequestProject) SummaryModel {
+func NewSummaryModel(workspaceName *string, suggestedName string, workspaceNames []string, projectList []serverapiclient.CreateWorkspaceRequestProject) SummaryModel {
 	m := SummaryModel{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
-	m.workspaceName = workspaceName
+	m.workspaceName = *workspaceName
 	m.projectList = projectList
 
-	confirmationResult = true
+	if *workspaceName == "" {
+		*workspaceName = suggestedName
+	}
 
 	m.form = huh.NewForm(
 		huh.NewGroup(
-			huh.NewConfirm().
-				Title("Good to go?").
-				Negative("Abort").
-				Value(&confirmationResult),
+			huh.NewInput().
+				Title("Workspace name").
+				Value(workspaceName).
+				Key("workspaceName").
+				Validate(func(str string) error {
+					result, err := util.GetValidatedWorkspaceName(str)
+					if err != nil {
+						return err
+					}
+					for _, name := range workspaceNames {
+						if name == result {
+							return errors.New("workspace name already exists")
+						}
+					}
+					*workspaceName = result
+					return nil
+				}),
 		),
 	).WithShowHelp(false).WithTheme(views.GetCustomTheme())
 
@@ -124,13 +143,13 @@ func (m SummaryModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c":
+			userCancelled = true
 			m.quitting = true
 			return m, tea.Quit
 		case "f10":
 			m.quitting = true
 			m.form.State = huh.StateCompleted
 			configureCheck = true
-			confirmationResult = true
 			return m, tea.Quit
 		}
 	}
@@ -158,10 +177,15 @@ func (m SummaryModel) View() string {
 		return ""
 	}
 
-	summary, err := RenderSummary(m.workspaceName, m.projectList)
-	if err != nil {
-		log.Fatal(err)
+	view := m.form.View() + configurationHelpLine
+
+	if len(m.projectList) > 1 {
+		summary, err := RenderSummary(m.workspaceName, m.projectList)
+		if err != nil {
+			log.Fatal(err)
+		}
+		view = views.GetBorderedMessage(summary) + "\n" + view
 	}
 
-	return views.GetBorderedMessage(summary) + "\n" + m.form.View() + configurationHelpLine
+	return view
 }
