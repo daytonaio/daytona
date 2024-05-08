@@ -35,7 +35,11 @@ func selectWorkspacePrompt(workspaces []serverapiclient.WorkspaceDTO, actionVerb
 			createdTime = util.FormatCreatedTime(*workspace.Info.Projects[0].Created)
 		}
 		if len(workspace.Projects) > 0 && workspace.Projects[0].State != nil && workspace.Projects[0].State.Uptime != nil {
-			uptime = fmt.Sprintf("up %s", util.FormatUptime(*workspace.Projects[0].State.Uptime))
+			if *workspace.Projects[0].State.Uptime == 0 {
+				uptime = "STOPPED"
+			} else {
+				uptime = fmt.Sprintf("up %s", util.FormatUptime(*workspace.Projects[0].State.Uptime))
+			}
 		}
 
 		newItem := item[serverapiclient.WorkspaceDTO]{

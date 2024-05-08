@@ -4,7 +4,7 @@
 package workspaces
 
 import (
-	log "github.com/sirupsen/logrus"
+	"time"
 )
 
 func (s *WorkspaceService) StopWorkspace(workspaceId string) error {
@@ -12,8 +12,6 @@ func (s *WorkspaceService) StopWorkspace(workspaceId string) error {
 	if err != nil {
 		return ErrWorkspaceNotFound
 	}
-
-	log.Info("Stopping workspace")
 
 	target, err := s.targetStore.Find(workspace.Target)
 	if err != nil {
@@ -26,6 +24,10 @@ func (s *WorkspaceService) StopWorkspace(workspaceId string) error {
 		if err != nil {
 			return err
 		}
+		if project.State != nil {
+			project.State.Uptime = 0
+			project.State.UpdatedAt = time.Now().Format(time.RFC1123)
+		}
 	}
 
 	err = s.provisioner.StopWorkspace(workspace, target)
@@ -33,8 +35,7 @@ func (s *WorkspaceService) StopWorkspace(workspaceId string) error {
 		return err
 	}
 
-	log.Info("Workspace stopped")
-	return nil
+	return s.workspaceStore.Save(workspace)
 }
 
 func (s *WorkspaceService) StopProject(workspaceId, projectName string) error {
@@ -53,5 +54,15 @@ func (s *WorkspaceService) StopProject(workspaceId, projectName string) error {
 		return err
 	}
 
-	return s.provisioner.StopProject(project, target)
+	err = s.provisioner.StopProject(project, target)
+	if err != nil {
+		return err
+	}
+
+	if project.State != nil {
+		project.State.Uptime = 0
+		project.State.UpdatedAt = time.Now().Format(time.RFC1123)
+	}
+
+	return s.workspaceStore.Save(w)
 }
