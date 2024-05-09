@@ -15,16 +15,12 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 )
 
-func GetCreationDataFromPrompt(apiServerConfig *serverapiclient.ServerConfig, workspaceNames []string, userGitProviders []serverapiclient.GitProvider, manual bool, multiProject bool) (string, []serverapiclient.CreateWorkspaceRequestProject, error) {
+func GetCreationDataFromPrompt(apiServerConfig *serverapiclient.ServerConfig, existingWorkspaceNames []string, userGitProviders []serverapiclient.GitProvider, manual bool, multiProject bool) (string, []serverapiclient.CreateWorkspaceRequestProject, error) {
 	var projectList []serverapiclient.CreateWorkspaceRequestProject
 	var providerRepo serverapiclient.GitRepository
 	var providerRepoUrl string
 	var err error
 	var workspaceName string
-	var primaryContainerImage string
-	var primaryContainerUser string
-	var primaryContainerPostStartCommands []string
-	doneCheck := true
 
 	if !manual && userGitProviders != nil && len(userGitProviders) > 0 {
 		providerRepo, err = getRepositoryFromWizard(userGitProviders, 0)
@@ -83,36 +79,11 @@ func GetCreationDataFromPrompt(apiServerConfig *serverapiclient.ServerConfig, wo
 		projectList[i].Name = projectName
 	}
 
-	suggestedName := GetSuggestedWorkspaceName(*workspaceCreationPromptResponse.PrimaryProject.Source.Repository.Url, workspaceNames)
+	suggestedName := GetSuggestedWorkspaceName(*workspaceCreationPromptResponse.PrimaryProject.Source.Repository.Url, existingWorkspaceNames)
 
-	workspaceName, primaryContainerImage, primaryContainerUser, primaryContainerPostStartCommands, err = create.GetWorkspaceDataFromPrompt(apiServerConfig, suggestedName, workspaceNames, !multiProject)
+	err = create.RunSubmissionForm(&workspaceName, suggestedName, existingWorkspaceNames, &projectList, apiServerConfig)
 	if err != nil {
 		return "", nil, err
-	}
-
-	if workspaceName == "" {
-		return "", nil, errors.New("workspace name is required")
-	}
-
-	if primaryContainerImage != "" {
-		projectList[0].Image = &primaryContainerImage
-	}
-
-	if primaryContainerUser != "" {
-		projectList[0].User = &primaryContainerUser
-	}
-	if primaryContainerPostStartCommands != nil {
-		projectList[0].PostStartCommands = primaryContainerPostStartCommands
-	}
-
-	if multiProject {
-		err = create.DisplayMultiSubmitForm(workspaceName, &projectList, apiServerConfig, &doneCheck)
-		if err != nil {
-			return "", nil, err
-		}
-		if !doneCheck {
-			return "", nil, errors.New("operation cancelled")
-		}
 	}
 
 	return workspaceName, projectList, nil
