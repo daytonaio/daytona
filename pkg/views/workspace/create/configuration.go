@@ -13,7 +13,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	configure "github.com/daytonaio/daytona/pkg/views/server"
-	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
 
@@ -84,8 +83,6 @@ func ConfigureProjects(projectList []serverapiclient.CreateWorkspaceRequestProje
 }
 
 func GetProjectConfigurationGroup(projectConfiguration *ProjectConfigurationData) *huh.Group {
-	postStartCommandsString := views_util.GetJoinedCommands(projectConfiguration.PostStartCommands)
-
 	group := huh.NewGroup(
 		huh.NewInput().
 			Title("Custom container image").
@@ -93,14 +90,7 @@ func GetProjectConfigurationGroup(projectConfiguration *ProjectConfigurationData
 		huh.NewInput().
 			Title("Container user").
 			Value(&projectConfiguration.User),
-		huh.NewInput().
-			Title("Post start commands").
-			Description(configure.CommandsInputHelp).
-			Value(&postStartCommandsString).
-			Validate(func(s string) error {
-				projectConfiguration.PostStartCommands = views_util.GetSplitCommands(s)
-				return nil
-			}),
+		configure.GetPostStartCommandsInput(&projectConfiguration.PostStartCommands, "Post start commands"),
 		views.GetEnvVarsInput(&projectConfiguration.EnvVars),
 	)
 

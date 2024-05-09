@@ -8,14 +8,12 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
-	"github.com/daytonaio/daytona/pkg/views/util"
 )
-
-var CommandsInputHelp = "Comma separated list of commands. To use ',' in commands, escape them like this '\\,'"
 
 type ServerUpdateKeyView struct {
 	GenerateNewKey   bool
@@ -23,7 +21,6 @@ type ServerUpdateKeyView struct {
 }
 
 func ConfigurationForm(config *serverapiclient.ServerConfig) *serverapiclient.ServerConfig {
-	projectStartCommands := util.GetJoinedCommands(config.DefaultProjectPostStartCommands)
 	apiPortView := strconv.Itoa(int(config.GetApiPort()))
 	headscalePortView := strconv.Itoa(int(config.GetHeadscalePort()))
 	frpsPortView := strconv.Itoa(int(config.Frps.GetPort()))
@@ -49,10 +46,7 @@ func ConfigurationForm(config *serverapiclient.ServerConfig) *serverapiclient.Se
 			huh.NewInput().
 				Title("Default Project User").
 				Value(config.DefaultProjectUser),
-			huh.NewInput().
-				Title("Default Project Post Start Commands").
-				Description(CommandsInputHelp).
-				Value(&projectStartCommands),
+			GetPostStartCommandsInput(&config.DefaultProjectPostStartCommands, "Default Project Post Start Commands"),
 		),
 		huh.NewGroup(
 			huh.NewInput().
@@ -100,8 +94,6 @@ func ConfigurationForm(config *serverapiclient.ServerConfig) *serverapiclient.Se
 		log.Fatal(err)
 	}
 
-	config.DefaultProjectPostStartCommands = util.GetSplitCommands(projectStartCommands)
-
 	return config
 }
 
@@ -133,4 +125,28 @@ func directoryValidator(path *string) func(string) error {
 
 		return err
 	}
+}
+
+func GetPostStartCommandsInput(postStartCommands *[]string, title string) *huh.Text {
+	postStartCommandsString := ""
+	for _, command := range *postStartCommands {
+		postStartCommandsString += command + "\n"
+	}
+	postStartCommandsString = strings.TrimSuffix(postStartCommandsString, "\n")
+
+	return huh.NewText().
+		Title(title).
+		Description("Enter one command per line.").
+		Value(&postStartCommandsString).
+		Validate(func(s string) error {
+			*postStartCommands = []string{}
+			for _, line := range strings.Split(s, "\n") {
+				if line == "" {
+					continue
+				}
+				*postStartCommands = append(*postStartCommands, line)
+			}
+
+			return nil
+		})
 }
