@@ -6,7 +6,9 @@ package views
 import (
 	"fmt"
 	"os"
+	"strings"
 
+	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	"golang.org/x/term"
 )
@@ -119,4 +121,36 @@ func RenderContainerLayout(output string) {
 	}
 
 	fmt.Println(BasicLayout.Width(GetContainerBreakpointWidth(terminalWidth)).Render(output))
+}
+
+func GetEnvVarsInput(envVars *map[string]string) *huh.Text {
+	if envVars == nil {
+		return nil
+	}
+
+	var inputText string
+	for key, value := range *envVars {
+		inputText += fmt.Sprintf("%s=%s\n", key, value)
+	}
+	inputText = strings.TrimSuffix(inputText, "\n")
+
+	return huh.NewText().
+		Title("Environment Variables").
+		Description("Enter environment variables in the format KEY=VALUE").
+		Value(&inputText).
+		Validate(func(str string) error {
+			if str == "" {
+				return nil
+			}
+
+			for i, line := range strings.Split(str, "\n") {
+				parts := strings.SplitN(line, "=", 2)
+				if len(parts) != 2 {
+					return fmt.Errorf("invalid format: %s on line %d", line, i+1)
+				}
+				(*envVars)[parts[0]] = parts[1]
+			}
+
+			return nil
+		})
 }

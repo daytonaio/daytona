@@ -7,22 +7,27 @@ import (
 	"errors"
 	"log"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	configure "github.com/daytonaio/daytona/pkg/views/server"
-	"github.com/daytonaio/daytona/pkg/views/util"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
 
 var configurationHelpLine = lipgloss.NewStyle().Foreground(views.Gray).Render("enter: next  f10: advanced configuration")
 
-func ConfigureProjects(projectList []serverapiclient.CreateWorkspaceRequestProject, defaultContainerImage string, defaultContainerUser string, defaultPostStartCommands string) ([]serverapiclient.CreateWorkspaceRequestProject, error) {
+type ProjectConfigurationData struct {
+	Image             string
+	User              string
+	PostStartCommands []string
+	EnvVars           map[string]string
+}
+
+func ConfigureProjects(projectList []serverapiclient.CreateWorkspaceRequestProject) ([]serverapiclient.CreateWorkspaceRequestProject, error) {
 	var currentProject *serverapiclient.CreateWorkspaceRequestProject
-	containerImage := defaultContainerImage
-	containerUser := defaultContainerUser
-	postStartCommands := defaultPostStartCommands
 
 	if len(projectList) > 1 {
 		currentProject = selection.GetProjectRequestFromPrompt(projectList)
@@ -36,21 +41,26 @@ func ConfigureProjects(projectList []serverapiclient.CreateWorkspaceRequestProje
 	if currentProject.Name == selection.DoneConfiguring.Name {
 		return projectList, nil
 	}
-	if currentProject.Image != nil {
-		containerImage = *currentProject.Image
-	}
-	if currentProject.User != nil {
-		containerUser = *currentProject.User
-	}
-	if currentProject.PostStartCommands != nil {
-		postStartCommands = util.GetJoinedCommands(currentProject.PostStartCommands)
-	}
 
-	GetProjectConfigurationGroup(&containerImage, &containerUser, &postStartCommands)
+	projectConfigurationData := &ProjectConfigurationData{
+		Image:             *currentProject.Image,
+		User:              *currentProject.User,
+		PostStartCommands: currentProject.PostStartCommands,
+		EnvVars:           *currentProject.EnvVars,
+	}
 
 	form := huh.NewForm(
-		GetProjectConfigurationGroup(&containerImage, &containerUser, &postStartCommands),
+		GetProjectConfigurationGroup(projectConfigurationData),
 	).WithTheme(views.GetCustomTheme())
+
+	keyMap := huh.NewDefaultKeyMap()
+	keyMap.Text = huh.TextKeyMap{
+		NewLine: key.NewBinding(key.WithKeys("alt+enter"), key.WithHelp("alt+enter", "new line")),
+		Next:    key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "next")),
+		Prev:    key.NewBinding(key.WithKeys("shift+tab"), key.WithHelp("shift+tab", "prev")),
+	}
+
+	form = form.WithKeyMap(keyMap)
 
 	err := form.Run()
 	if err != nil {
@@ -59,9 +69,10 @@ func ConfigureProjects(projectList []serverapiclient.CreateWorkspaceRequestProje
 
 	for i := range projectList {
 		if projectList[i].Name == currentProject.Name {
-			projectList[i].Image = &containerImage
-			projectList[i].User = &containerUser
-			projectList[i].PostStartCommands = util.GetSplitCommands(postStartCommands)
+			projectList[i].Image = &projectConfigurationData.Image
+			projectList[i].User = &projectConfigurationData.User
+			projectList[i].PostStartCommands = projectConfigurationData.PostStartCommands
+			projectList[i].EnvVars = &projectConfigurationData.EnvVars
 		}
 	}
 
@@ -69,21 +80,28 @@ func ConfigureProjects(projectList []serverapiclient.CreateWorkspaceRequestProje
 		return projectList, nil
 	}
 
-	return ConfigureProjects(projectList, defaultContainerImage, defaultContainerUser, defaultPostStartCommands)
+	return ConfigureProjects(projectList)
 }
 
-func GetProjectConfigurationGroup(image *string, user *string, postStartCommands *string) *huh.Group {
+func GetProjectConfigurationGroup(projectConfiguration *ProjectConfigurationData) *huh.Group {
+	postStartCommandsString := views_util.GetJoinedCommands(projectConfiguration.PostStartCommands)
+
 	group := huh.NewGroup(
 		huh.NewInput().
 			Title("Custom container image").
-			Value(image),
+			Value(&projectConfiguration.Image),
 		huh.NewInput().
 			Title("Container user").
-			Value(user),
+			Value(&projectConfiguration.User),
 		huh.NewInput().
 			Title("Post start commands").
 			Description(configure.CommandsInputHelp).
-			Value(postStartCommands),
+			Value(&postStartCommandsString).
+			Validate(func(s string) error {
+				projectConfiguration.PostStartCommands = views_util.GetSplitCommands(s)
+				return nil
+			}),
+		views.GetEnvVarsInput(&projectConfiguration.EnvVars),
 	)
 
 	return group
