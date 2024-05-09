@@ -14,7 +14,6 @@ import (
 	util "github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
-	views_util "github.com/daytonaio/daytona/pkg/views/util"
 )
 
 type SummaryModel struct {
@@ -52,14 +51,21 @@ func RunSubmissionForm(workspaceName *string, suggestedName string, workspaceNam
 	}
 
 	for i := range *projectList {
-		(*projectList)[i].Image = apiServerConfig.DefaultProjectImage
-		(*projectList)[i].User = apiServerConfig.DefaultProjectUser
-		(*projectList)[i].PostStartCommands = apiServerConfig.DefaultProjectPostStartCommands
+		if (*projectList)[i].Image == nil {
+			(*projectList)[i].Image = apiServerConfig.DefaultProjectImage
+		}
+		if (*projectList)[i].User == nil {
+			(*projectList)[i].User = apiServerConfig.DefaultProjectUser
+		}
+		if (*projectList)[i].PostStartCommands == nil {
+			(*projectList)[i].PostStartCommands = apiServerConfig.DefaultProjectPostStartCommands
+		}
+		if (*projectList)[i].EnvVars == nil {
+			(*projectList)[i].EnvVars = &map[string]string{}
+		}
 	}
 
-	defaultPostStartCommandString := views_util.GetJoinedCommands(apiServerConfig.DefaultProjectPostStartCommands)
-
-	configuredProjects, err := ConfigureProjects(*projectList, *apiServerConfig.DefaultProjectImage, *apiServerConfig.DefaultProjectUser, defaultPostStartCommandString)
+	configuredProjects, err := ConfigureProjects(*projectList)
 	if err != nil {
 		return err
 	}
