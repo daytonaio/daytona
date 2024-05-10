@@ -25,6 +25,7 @@ import (
 type pluginRef struct {
 	client *plugin.Client
 	path   string
+	name   string
 }
 
 var ProviderHandshakeConfig = plugin.HandshakeConfig{
@@ -86,22 +87,21 @@ func (m *ProviderManager) GetProvider(name string) (*Provider, error) {
 		return nil, errors.New("provider not found")
 	}
 
-	rpcClient, err := pluginRef.client.Client()
+	p, err := m.dispenseProvider(pluginRef.client, name)
 	if err != nil {
-		return nil, err
+		// Attempt to reinitialize the provider
+		pluginRef.client.Kill()
+		pluginRef, err := m.initializeProvider(filepath.Join(pluginRef.path, name))
+		if err != nil {
+			return nil, err
+		}
+
+		m.pluginRefs[name] = pluginRef
+
+		return m.dispenseProvider(pluginRef.client, name)
 	}
 
-	raw, err := rpcClient.Dispense(name)
-	if err != nil {
-		return nil, err
-	}
-
-	provider, ok := raw.(Provider)
-	if !ok {
-		return nil, errors.New("unexpected type from plugin")
-	}
-
-	return &provider, nil
+	return p, nil
 }
 
 func (m *ProviderManager) GetProviders() map[string]Provider {
@@ -120,63 +120,16 @@ func (m *ProviderManager) GetProviders() map[string]Provider {
 }
 
 func (m *ProviderManager) RegisterProvider(pluginPath string) error {
-	pluginName := filepath.Base(pluginPath)
-	pluginBasePath := filepath.Dir(pluginPath)
-
-	if runtime.GOOS == "windows" && strings.HasSuffix(pluginPath, ".exe") {
-		pluginName = strings.TrimSuffix(pluginName, ".exe")
-	}
-
-	err := os_util.ChmodX(pluginPath)
+	pluginRef, err := m.initializeProvider(pluginPath)
 	if err != nil {
-		return errors.New("failed to chmod plugin: " + err.Error())
+		return err
 	}
 
-	logger := hclog.New(&hclog.LoggerOptions{
-		Name:   pluginName,
-		Output: &util.DebugLogWriter{},
-		Level:  hclog.Debug,
-	})
+	m.pluginRefs[pluginRef.name] = pluginRef
 
-	pluginMap := map[string]plugin.Plugin{}
-	pluginMap[pluginName] = &ProviderPlugin{}
-
-	client := plugin.NewClient(&plugin.ClientConfig{
-		HandshakeConfig: ProviderHandshakeConfig,
-		Plugins:         pluginMap,
-		Cmd:             exec.Command(pluginPath),
-		Logger:          logger,
-		Managed:         true,
-	})
-
-	m.pluginRefs[pluginName] = &pluginRef{
-		client: client,
-		path:   pluginBasePath,
-	}
-
-	log.Infof("Provider %s registered", pluginName)
-
-	p, err := m.GetProvider(pluginName)
+	p, err := m.dispenseProvider(pluginRef.client, pluginRef.name)
 	if err != nil {
-		return errors.New("failed to initialize provider: " + err.Error())
-	}
-
-	networkKey, err := m.createProviderNetworkKey(pluginName)
-	if err != nil {
-		return errors.New("failed to create network key: " + err.Error())
-	}
-
-	_, err = (*p).Initialize(InitializeProviderRequest{
-		BasePath:          pluginBasePath,
-		ServerDownloadUrl: m.serverDownloadUrl,
-		ServerVersion:     internal.Version,
-		ServerUrl:         m.serverUrl,
-		ServerApiUrl:      m.serverApiUrl,
-		LogsDir:           m.logsDir,
-		NetworkKey:        networkKey,
-	})
-	if err != nil {
-		return errors.New("failed to initialize provider: " + err.Error())
+		return err
 	}
 
 	existingTargets, err := m.providerTargetService.Map()
@@ -205,7 +158,7 @@ func (m *ProviderManager) RegisterProvider(pluginPath string) error {
 	}
 	log.Info("Default targets set")
 
-	log.Infof("Provider %s initialized", pluginName)
+	log.Infof("Provider %s initialized", pluginRef.name)
 
 	return nil
 }
@@ -244,4 +197,85 @@ func (m *ProviderManager) TerminateProviderProcesses(providersBasePath string) e
 	}
 
 	return nil
+}
+
+func (m *ProviderManager) initializeProvider(pluginPath string) (*pluginRef, error) {
+	pluginName := filepath.Base(pluginPath)
+	pluginBasePath := filepath.Dir(pluginPath)
+
+	if runtime.GOOS == "windows" && strings.HasSuffix(pluginPath, ".exe") {
+		pluginName = strings.TrimSuffix(pluginName, ".exe")
+	}
+
+	err := os_util.ChmodX(pluginPath)
+	if err != nil {
+		return nil, errors.New("failed to chmod plugin: " + err.Error())
+	}
+
+	logger := hclog.New(&hclog.LoggerOptions{
+		Name:   pluginName,
+		Output: &util.DebugLogWriter{},
+		Level:  hclog.Debug,
+	})
+
+	pluginMap := map[string]plugin.Plugin{}
+	pluginMap[pluginName] = &ProviderPlugin{}
+
+	client := plugin.NewClient(&plugin.ClientConfig{
+		HandshakeConfig: ProviderHandshakeConfig,
+		Plugins:         pluginMap,
+		Cmd:             exec.Command(pluginPath),
+		Logger:          logger,
+		Managed:         true,
+	})
+
+	log.Infof("Provider %s registered", pluginName)
+
+	p, err := m.dispenseProvider(client, pluginName)
+	if err != nil {
+		return nil, errors.New("failed to initialize provider: " + err.Error())
+	}
+
+	networkKey, err := m.createProviderNetworkKey(pluginName)
+	if err != nil {
+		return nil, errors.New("failed to create network key: " + err.Error())
+	}
+
+	_, err = (*p).Initialize(InitializeProviderRequest{
+		BasePath:          pluginBasePath,
+		ServerDownloadUrl: m.serverDownloadUrl,
+		ServerVersion:     internal.Version,
+		ServerUrl:         m.serverUrl,
+		ServerApiUrl:      m.serverApiUrl,
+		LogsDir:           m.logsDir,
+		NetworkKey:        networkKey,
+	})
+	if err != nil {
+		return nil, errors.New("failed to initialize provider: " + err.Error())
+	}
+
+	return &pluginRef{
+		client: client,
+		path:   pluginBasePath,
+		name:   pluginName,
+	}, nil
+}
+
+func (m *ProviderManager) dispenseProvider(client *plugin.Client, name string) (*Provider, error) {
+	rpcClient, err := client.Client()
+	if err != nil {
+		return nil, err
+	}
+
+	raw, err := rpcClient.Dispense(name)
+	if err != nil {
+		return nil, err
+	}
+
+	provider, ok := raw.(Provider)
+	if !ok {
+		return nil, errors.New("unexpected type from plugin")
+	}
+
+	return &provider, nil
 }
