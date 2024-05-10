@@ -96,10 +96,10 @@ func stopAllWorkspaces() error {
 	for _, workspace := range workspaceList {
 		res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, *workspace.Id).Execute()
 		if err != nil {
-			log.Errorf("Failed to stop workspace %s: %v", *workspace.Id, apiclient.HandleErrorResponse(res, err))
+			log.Errorf("Failed to stop workspace %s: %v", *workspace.Name, apiclient.HandleErrorResponse(res, err))
 			continue
 		}
-		fmt.Printf("Workspace %s successfully stopped\n", *workspace.Id)
+		fmt.Printf("Workspace %s successfully stopped\n", *workspace.Name)
 	}
 	return nil
 }
