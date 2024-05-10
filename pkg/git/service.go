@@ -16,16 +16,29 @@ import (
 	"gopkg.in/ini.v1"
 )
 
+var MapStatus map[git.StatusCode]workspace.Status = map[git.StatusCode]workspace.Status{
+	git.Unmodified:         workspace.Unmodified,
+	git.Untracked:          workspace.Untracked,
+	git.Modified:           workspace.Modified,
+	git.Added:              workspace.Added,
+	git.Deleted:            workspace.Deleted,
+	git.Renamed:            workspace.Renamed,
+	git.Copied:             workspace.Copied,
+	git.UpdatedButUnmerged: workspace.UpdatedButUnmerged,
+}
+
 type IGitService interface {
 	CloneRepository(project *workspace.Project, auth *http.BasicAuth) error
 	RepositoryExists(project *workspace.Project) (bool, error)
 	SetGitConfig(userData *gitprovider.GitUser) error
+	GetGitStatus() (*workspace.GitStatus, error)
 }
 
 type Service struct {
 	ProjectDir        string
 	GitConfigFileName string
 	LogWriter         io.Writer
+	OpenRepository    *git.Repository
 }
 
 func (s *Service) CloneRepository(project *workspace.Project, auth *http.BasicAuth) error {
@@ -139,6 +152,43 @@ func (s *Service) SetGitConfig(userData *gitprovider.GitUser) error {
 	}
 
 	return nil
+}
+
+func (s *Service) GetGitStatus() (*workspace.GitStatus, error) {
+	repo, err := git.PlainOpen(s.ProjectDir)
+	if err != nil {
+		return nil, err
+	}
+
+	ref, err := repo.Head()
+	if err != nil {
+		return nil, err
+	}
+
+	worktree, err := repo.Worktree()
+	if err != nil {
+		return nil, err
+	}
+
+	status, err := worktree.Status()
+	if err != nil {
+		return nil, err
+	}
+
+	files := []*workspace.FileStatus{}
+	for path, file := range status {
+		files = append(files, &workspace.FileStatus{
+			Name:     path,
+			Extra:    file.Extra,
+			Staging:  MapStatus[file.Staging],
+			Worktree: MapStatus[file.Worktree],
+		})
+	}
+
+	return &workspace.GitStatus{
+		CurrentBranch: ref.Name().Short(),
+		Files:         files,
+	}, nil
 }
 
 func (s *Service) shouldCloneBranch(project *workspace.Project) bool {

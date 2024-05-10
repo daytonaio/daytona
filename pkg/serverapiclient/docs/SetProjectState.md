@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**GitStatus** | Pointer to [**GitStatus**](GitStatus.md) |  | [optional] 
 **Uptime** | Pointer to **int32** |  | [optional] 
 
 ## Methods
@@ -24,6 +25,31 @@ will change when the set of required properties is changed
 NewSetProjectStateWithDefaults instantiates a new SetProjectState object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetGitStatus
+
+`func (o *SetProjectState) GetGitStatus() GitStatus`
+
+GetGitStatus returns the GitStatus field if non-nil, zero value otherwise.
+
+### GetGitStatusOk
+
+`func (o *SetProjectState) GetGitStatusOk() (*GitStatus, bool)`
+
+GetGitStatusOk returns a tuple with the GitStatus field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGitStatus
+
+`func (o *SetProjectState) SetGitStatus(v GitStatus)`
+
+SetGitStatus sets GitStatus field to given value.
+
+### HasGitStatus
+
+`func (o *SetProjectState) HasGitStatus() bool`
+
+HasGitStatus returns a boolean if a field has been set.
 
 ### GetUptime
 

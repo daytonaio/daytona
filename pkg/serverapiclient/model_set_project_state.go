@@ -19,7 +19,8 @@ var _ MappedNullable = &SetProjectState{}
 
 // SetProjectState struct for SetProjectState
 type SetProjectState struct {
-	Uptime *int32 `json:"uptime,omitempty"`
+	GitStatus *GitStatus `json:"gitStatus,omitempty"`
+	Uptime    *int32     `json:"uptime,omitempty"`
 }
 
 // NewSetProjectState instantiates a new SetProjectState object
@@ -37,6 +38,38 @@ func NewSetProjectState() *SetProjectState {
 func NewSetProjectStateWithDefaults() *SetProjectState {
 	this := SetProjectState{}
 	return &this
+}
+
+// GetGitStatus returns the GitStatus field value if set, zero value otherwise.
+func (o *SetProjectState) GetGitStatus() GitStatus {
+	if o == nil || IsNil(o.GitStatus) {
+		var ret GitStatus
+		return ret
+	}
+	return *o.GitStatus
+}
+
+// GetGitStatusOk returns a tuple with the GitStatus field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SetProjectState) GetGitStatusOk() (*GitStatus, bool) {
+	if o == nil || IsNil(o.GitStatus) {
+		return nil, false
+	}
+	return o.GitStatus, true
+}
+
+// HasGitStatus returns a boolean if a field has been set.
+func (o *SetProjectState) HasGitStatus() bool {
+	if o != nil && !IsNil(o.GitStatus) {
+		return true
+	}
+
+	return false
+}
+
+// SetGitStatus gets a reference to the given GitStatus and assigns it to the GitStatus field.
+func (o *SetProjectState) SetGitStatus(v GitStatus) {
+	o.GitStatus = &v
 }
 
 // GetUptime returns the Uptime field value if set, zero value otherwise.
@@ -81,6 +114,9 @@ func (o SetProjectState) MarshalJSON() ([]byte, error) {
 
 func (o SetProjectState) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.GitStatus) {
+		toSerialize["gitStatus"] = o.GitStatus
+	}
 	if !IsNil(o.Uptime) {
 		toSerialize["uptime"] = o.Uptime
 	}

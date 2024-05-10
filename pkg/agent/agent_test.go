@@ -29,6 +29,11 @@ var project1 = &workspace.Project{
 	WorkspaceId:       "123",
 	Target:            "local",
 	PostStartCommands: []string{"echo 'test' > test.txt"},
+	State: &workspace.ProjectState{
+		UpdatedAt: "123",
+		Uptime:    148,
+		GitStatus: gitStatus1,
+	},
 }
 
 var workspace1 = &workspace.Workspace{
@@ -38,6 +43,16 @@ var workspace1 = &workspace.Workspace{
 	Projects: []*workspace.Project{
 		project1,
 	},
+}
+
+var gitStatus1 = &workspace.GitStatus{
+	CurrentBranch: "main",
+	Files: []*workspace.FileStatus{{
+		Name:     "File1",
+		Extra:    "",
+		Staging:  workspace.Modified,
+		Worktree: workspace.Modified,
+	}},
 }
 
 var mockConfig = &config.Config{
@@ -61,6 +76,7 @@ func TestAgent(t *testing.T) {
 	mockGitService := mock_git.NewMockGitService()
 	mockGitService.On("RepositoryExists", project1).Return(true, nil)
 	mockGitService.On("SetGitConfig", mock.Anything).Return(nil)
+	mockGitService.On("GetGitStatus").Return(gitStatus1, nil)
 
 	mockSshServer := mocks.NewMockSshServer()
 	mockTailscaleServer := mocks.NewMockTailscaleServer()

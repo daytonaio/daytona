@@ -1159,6 +1159,23 @@ const docTemplate = `{
                 }
             }
         },
+        "FileStatus": {
+            "type": "object",
+            "properties": {
+                "extra": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "staging": {
+                    "$ref": "#/definitions/Status"
+                },
+                "worktree": {
+                    "$ref": "#/definitions/Status"
+                }
+            }
+        },
         "GitBranch": {
             "type": "object",
             "properties": {
@@ -1238,6 +1255,20 @@ const docTemplate = `{
                 },
                 "url": {
                     "type": "string"
+                }
+            }
+        },
+        "GitStatus": {
+            "type": "object",
+            "properties": {
+                "currentBranch": {
+                    "type": "string"
+                },
+                "fileStatus": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/FileStatus"
+                    }
                 }
             }
         },
@@ -1335,6 +1366,9 @@ const docTemplate = `{
         "ProjectState": {
             "type": "object",
             "properties": {
+                "gitStatus": {
+                    "$ref": "#/definitions/GitStatus"
+                },
                 "updatedAt": {
                     "type": "string"
                 },
@@ -1422,10 +1456,36 @@ const docTemplate = `{
         "SetProjectState": {
             "type": "object",
             "properties": {
+                "gitStatus": {
+                    "$ref": "#/definitions/GitStatus"
+                },
                 "uptime": {
                     "type": "integer"
                 }
             }
+        },
+        "Status": {
+            "type": "string",
+            "enum": [
+                "Unmodified",
+                "Untracked",
+                "Modified",
+                "Added",
+                "Deleted",
+                "Renamed",
+                "Copied",
+                "Updated but unmerged"
+            ],
+            "x-enum-varnames": [
+                "Unmodified",
+                "Untracked",
+                "Modified",
+                "Added",
+                "Deleted",
+                "Renamed",
+                "Copied",
+                "UpdatedButUnmerged"
+            ]
         },
         "Workspace": {
             "type": "object",
