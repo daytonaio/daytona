@@ -23,7 +23,7 @@ var TargetSetCmd = &cobra.Command{
 	Use:     "set",
 	Short:   "Set provider target",
 	Args:    cobra.NoArgs,
-	Aliases: []string{"s"},
+	Aliases: []string{"s", "add", "update", "register", "edit"},
 	Run: func(cmd *cobra.Command, args []string) {
 		c, err := config.GetConfig()
 		if err != nil {
