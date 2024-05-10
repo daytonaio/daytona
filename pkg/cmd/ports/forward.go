@@ -8,11 +8,9 @@ import (
 	"encoding/base64"
 	"fmt"
 	"hash/fnv"
-	"os"
 	"strconv"
 	"time"
 
-	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/frpc"
@@ -27,22 +25,19 @@ var workspaceId string
 var projectName string
 
 var PortForwardCmd = &cobra.Command{
-	Use:   "forward [PORT]",
+	Use:   "forward [PORT] [WORKSPACE] [PROJECT]",
 	Short: "Forward a port from a project to your local machine",
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.RangeArgs(2, 3),
 	Run: func(cmd *cobra.Command, args []string) {
 		port, err := strconv.Atoi(args[0])
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		if len(args) > 1 {
-			workspace, err := server.GetWorkspace(args[1])
-			if err != nil {
-				log.Fatal(err)
-			}
-			workspaceId = *workspace.Id
+		workspace, err := server.GetWorkspace(args[1])
+		if err != nil {
+			log.Fatal(err)
 		}
+		workspaceId = *workspace.Id
 
 		if len(args) == 3 {
 			projectName = args[2]
@@ -68,7 +63,7 @@ var PortForwardCmd = &cobra.Command{
 
 		if publicPreview {
 			go func() {
-				errChan <- forwardPublicPort(workspaceId, projectName, *hostPort, uint16(port))
+				errChan <- ForwardPublicPort(workspaceId, projectName, *hostPort, uint16(port))
 			}()
 		}
 
@@ -82,22 +77,10 @@ var PortForwardCmd = &cobra.Command{
 }
 
 func init() {
-	if wsId := os.Getenv("DAYTONA_WS_ID"); wsId != "" {
-		workspaceId = wsId
-	}
-	if pName := os.Getenv("DAYTONA_PROJECT_NAME"); pName != "" {
-		projectName = pName
-	}
-
-	if !util.WorkspaceMode() {
-		PortForwardCmd.Use = PortForwardCmd.Use + " [WORKSPACE] [PROJECT]"
-		PortForwardCmd.Args = cobra.RangeArgs(2, 3)
-	}
-
 	PortForwardCmd.Flags().BoolVar(&publicPreview, "public", false, "Should be port be available publicly via an URL")
 }
 
-func forwardPublicPort(workspaceId, projectName string, hostPort, targetPort uint16) error {
+func ForwardPublicPort(workspaceId, projectName string, hostPort, targetPort uint16) error {
 	views.RenderInfoMessage("Forwarding port to a public URL...")
 
 	apiClient, err := server.GetApiClient(nil)
