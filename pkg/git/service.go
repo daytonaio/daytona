@@ -63,7 +63,7 @@ func (s *Service) CloneRepository(project *workspace.Project, auth *http.BasicAu
 	}
 
 	if s.shouldCheckoutSha(project) {
-		repo, err := s.getOpenRepository()
+		repo, err := git.PlainOpen(s.ProjectDir)
 		if err != nil {
 			return err
 		}
@@ -155,7 +155,7 @@ func (s *Service) SetGitConfig(userData *gitprovider.GitUser) error {
 }
 
 func (s *Service) GetGitStatus() (*workspace.GitStatus, error) {
-	repo, err := s.getOpenRepository()
+	repo, err := git.PlainOpen(s.ProjectDir)
 	if err != nil {
 		return nil, err
 	}
@@ -213,16 +213,4 @@ func (s *Service) shouldCheckoutSha(project *workspace.Project) bool {
 	}
 
 	return *project.Repository.Branch == project.Repository.Sha
-}
-
-func (s *Service) getOpenRepository() (*git.Repository, error) {
-	var err error
-	if s.OpenRepository == nil {
-		s.OpenRepository, err = git.PlainOpen(s.ProjectDir)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return s.OpenRepository, nil
 }
