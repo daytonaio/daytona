@@ -108,10 +108,10 @@ func startAllWorkspaces() error {
 	for _, workspace := range workspaceList {
 		res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, *workspace.Id).Execute()
 		if err != nil {
-			log.Errorf("Failed to start workspace %s: %v", *workspace.Id, apiclient.HandleErrorResponse(res, err))
+			log.Errorf("Failed to start workspace %s: %v", *workspace.Name, apiclient.HandleErrorResponse(res, err))
 			continue
 		}
-		fmt.Printf("Workspace %s successfully started\n", *workspace.Id)
+		fmt.Printf("Workspace %s successfully started\n", *workspace.Name)
 	}
 	return nil
 }

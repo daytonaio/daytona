@@ -139,7 +139,7 @@ func DeleteAllWorkspaces() error {
 	for _, workspace := range workspaceList {
 		res, err := apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
 		if err != nil {
-			log.Errorf("Failed to delete workspace %s: %v", *workspace.Id, apiclient.HandleErrorResponse(res, err))
+			log.Errorf("Failed to delete workspace %s: %v", *workspace.Name, apiclient.HandleErrorResponse(res, err))
 			continue
 		}
 		views.RenderLine(fmt.Sprintf("- Workspace %s successfully deleted\n", *workspace.Name))
