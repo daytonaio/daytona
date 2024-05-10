@@ -185,7 +185,7 @@ func getWorkspaceTableRowData(workspace serverapiclient.WorkspaceDTO, specifyGit
 	if workspace.Info != nil && workspace.Info.Projects != nil && len(workspace.Info.Projects) > 0 && workspace.Info.Projects[0].Created != nil {
 		rowData.Created = util.FormatCreatedTime(*workspace.Info.Projects[0].Created)
 	}
-	if len(workspace.Projects) > 0 && workspace.Projects[0].State != nil && workspace.Projects[0].State.Uptime != nil {
+	if len(workspace.Projects) > 0 && workspace.Projects[0].State != nil && workspace.Projects[0].State.Uptime != nil && *workspace.Projects[0].State.Uptime > 0 {
 		rowData.Status = util.FormatUptime(*workspace.Projects[0].State.Uptime)
 	}
 	return &rowData
@@ -205,7 +205,7 @@ func getProjectTableRowData(workspaceDTO serverapiclient.WorkspaceDTO, project s
 	if project.Target != nil {
 		rowData.Target = *project.Target + views_util.AdditionalPropertyPadding
 	}
-	if project.State != nil && project.State.Uptime != nil {
+	if project.State != nil && project.State.Uptime != nil && *project.State.Uptime > 0 {
 		rowData.Status = util.FormatUptime(*project.State.Uptime)
 	}
 
