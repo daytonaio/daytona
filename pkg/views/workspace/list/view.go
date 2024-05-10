@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"strings"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/table"
@@ -174,7 +173,7 @@ func getWorkspaceTableRowData(workspace serverapiclient.WorkspaceDTO, specifyGit
 		rowData.Name = *workspace.Name + views_util.AdditionalPropertyPadding
 	}
 	if workspace.Projects != nil && len(workspace.Projects) > 0 && workspace.Projects[0].Repository != nil {
-		rowData.Repository = getRepositorySlugFromUrl(*workspace.Projects[0].Repository.Url, specifyGitProviders)
+		rowData.Repository = util.GetRepositorySlugFromUrl(*workspace.Projects[0].Repository.Url, specifyGitProviders)
 		if workspace.Projects[0].Repository.Branch != nil {
 			rowData.Branch = *workspace.Projects[0].Repository.Branch
 		}
@@ -197,7 +196,7 @@ func getProjectTableRowData(workspaceDTO serverapiclient.WorkspaceDTO, project s
 		rowData.Name = " └ " + *project.Name
 	}
 	if project.Repository != nil && project.Repository.Url != nil {
-		rowData.Repository = getRepositorySlugFromUrl(*project.Repository.Url, specifyGitProviders)
+		rowData.Repository = util.GetRepositorySlugFromUrl(*project.Repository.Url, specifyGitProviders)
 		if project.Repository.Branch != nil {
 			rowData.Branch = *project.Repository.Branch
 		}
@@ -221,22 +220,4 @@ func getProjectTableRowData(workspaceDTO serverapiclient.WorkspaceDTO, project s
 	}
 
 	return &rowData
-}
-
-func getRepositorySlugFromUrl(url string, specifyGitProviders bool) string {
-	if url == "" {
-		return "/"
-	}
-	url = strings.TrimSuffix(url, "/")
-
-	parts := strings.Split(url, "/")
-	if len(parts) < 2 {
-		return ""
-	}
-
-	if specifyGitProviders {
-		return parts[len(parts)-3] + "/" + parts[len(parts)-2] + "/" + parts[len(parts)-1]
-	}
-
-	return parts[len(parts)-2] + "/" + parts[len(parts)-1]
 }

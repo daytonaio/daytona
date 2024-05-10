@@ -51,3 +51,21 @@ func GetValidatedUrl(input string) (string, error) {
 	// If parsing was successful, return the fixed URL
 	return parsedURL.String(), nil
 }
+
+func GetRepositorySlugFromUrl(url string, specifyGitProviders bool) string {
+	if url == "" {
+		return "/"
+	}
+	url = strings.TrimSuffix(url, "/")
+
+	parts := strings.Split(url, "/")
+	if len(parts) < 2 {
+		return ""
+	}
+
+	if specifyGitProviders {
+		return parts[len(parts)-3] + "/" + parts[len(parts)-2] + "/" + parts[len(parts)-1]
+	}
+
+	return parts[len(parts)-2] + "/" + parts[len(parts)-1]
+}

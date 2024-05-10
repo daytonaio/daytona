@@ -39,10 +39,10 @@ func Render(workspace *serverapiclient.WorkspaceDTO, ide string, forceUnstyled b
 	output += "\n"
 	output += getInfoLine(nameLabel, *workspace.Name) + "\n"
 
+	output += getInfoLine("ID", *workspace.Id) + "\n"
+
 	if isCreationView {
 		output += getInfoLine("Editor", ide) + "\n"
-	} else {
-		output += getInfoLine("ID", *workspace.Id) + "\n"
 	}
 
 	if len(workspace.Projects) == 1 {
