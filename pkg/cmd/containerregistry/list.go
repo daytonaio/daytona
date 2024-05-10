@@ -41,9 +41,6 @@ var containerRegistryListCmd = &cobra.Command{
 			return
 		}
 
-		err = containerregistry_view.ListRegistries(containerRegistries)
-		if err != nil {
-			log.Fatal(err)
-		}
+		containerregistry_view.ListRegistries(containerRegistries)
 	},
 }

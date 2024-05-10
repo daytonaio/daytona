@@ -7,15 +7,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/charmbracelet/bubbles/table"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/views"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
+
+	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss/table"
 	"golang.org/x/term"
 )
-
-var defaultColumnWidth = 12
-var columnPadding = 3
 
 type rowData struct {
 	Server   string
@@ -23,155 +22,84 @@ type rowData struct {
 	Password string
 }
 
-type model struct {
-	table       table.Model
-	initialRows []table.Row
+func getRowData(registry *serverapiclient.ContainerRegistry) *rowData {
+	rowData := rowData{"", "", ""}
+
+	rowData.Server = *registry.Server
+	rowData.Username = *registry.Username
+	rowData.Password = *registry.Password
+
+	return &rowData
 }
 
-var columns = []table.Column{
-	{Title: "SERVER", Width: defaultColumnWidth},
-	{Title: "USERNAME", Width: defaultColumnWidth},
-	{Title: "PASSWORD", Width: defaultColumnWidth},
-}
-
-func (m model) Init() tea.Cmd {
-	return tea.Quit
-}
-
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		rows, cols := getRowsAndCols(msg.Width, m.initialRows)
-		m.table = getTable(rows, cols, m.table.Cursor())
-		return m, nil
+func getRowFromRowData(rowData rowData) []string {
+	row := []string{
+		views.NameStyle.Render(rowData.Server),
+		views.DefaultRowDataStyle.Render(rowData.Username),
+		views.DefaultRowDataStyle.Render(rowData.Password),
 	}
 
-	m.table, cmd = m.table.Update(msg)
-	return m, cmd
+	return row
 }
 
-var baseStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.HiddenBorder())
-
-func (m model) View() string {
-	return baseStyle.Render(m.table.View())
-}
-
-func renderRegistryList(registryList []serverapiclient.ContainerRegistry) model {
-	rows := []table.Row{}
-	var row table.Row
-	var rowData rowData
+func ListRegistries(registryList []serverapiclient.ContainerRegistry) {
+	re := lipgloss.NewRenderer(os.Stdout)
+	headers := []string{"Server", "Username", "Password"}
+	data := [][]string{}
 
 	for _, registry := range registryList {
-		rowData.Server = *registry.Server
-		rowData.Username = *registry.Username
-		rowData.Password = *registry.Password
+		var rowData *rowData
+		var row []string
 
-		adjustColumsFormatting(rowData)
-		row = table.Row{rowData.Server, rowData.Username, rowData.Password}
-		rows = append(rows, row)
-	}
-
-	width, _, _ := term.GetSize(int(os.Stdout.Fd()))
-	adjustedRows, adjustedCols := getRowsAndCols(width, rows)
-
-	return model{
-		table:       getTable(adjustedRows, adjustedCols, 0),
-		initialRows: rows,
-	}
-}
-
-func adjustColumsFormatting(rowData rowData) {
-	adjustColumnWidth("SERVER", rowData)
-	adjustColumnWidth("USERNAME", rowData)
-	adjustColumnWidth("PASSWORD", rowData)
-}
-
-func adjustColumnWidth(title string, rowData rowData) {
-	var column *table.Column
-	for i, col := range columns {
-		if col.Title == title {
-			column = &columns[i]
-			break
+		rowData = getRowData(&registry)
+		if rowData == nil {
+			continue
 		}
-	}
-	currentField := ""
-	switch title {
-	case "SERVER":
-		currentField = rowData.Server
-	case "USERNAME":
-		currentField = rowData.Username
-	case "PASSWORD":
-		currentField = rowData.Password
+		row = getRowFromRowData(*rowData)
+		data = append(data, row)
 	}
 
-	if len(currentField) > column.Width {
-		column.Width = len(currentField) + columnPadding
-	}
-}
-
-func ListRegistries(registryList []serverapiclient.ContainerRegistry) error {
-	modelInstance := renderRegistryList(registryList)
-
-	_, err := tea.NewProgram(modelInstance).Run()
+	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
-		return err
+		fmt.Println(data)
+		return
 	}
-	fmt.Println()
-	return nil
+	breakpointWidth := views.GetContainerBreakpointWidth(terminalWidth)
+	minWidth := views_util.GetTableMinimumWidth(data)
+	if breakpointWidth == 0 || terminalWidth < views.TUITableMinimumWidth || minWidth > breakpointWidth {
+		renderUnstyledList(registryList)
+		return
+	}
+
+	t := table.New().
+		Headers(headers...).
+		Rows(data...).
+		BorderStyle(re.NewStyle().Foreground(views.LightGray)).
+		BorderRow(false).BorderColumn(false).BorderLeft(false).BorderRight(false).BorderTop(false).BorderBottom(false).
+		StyleFunc(func(row, col int) lipgloss.Style {
+			if row == 0 {
+				return views.TableHeaderStyle
+			}
+			return views.BaseCellStyle
+		}).Width(breakpointWidth - 2*views.BaseTableStyleHorizontalPadding)
+
+	fmt.Println(views.BaseTableStyle.Render(t.String()))
 }
 
-func getTable(rows []table.Row, cols []table.Column, activeRow int) table.Model {
-	t := table.New(
-		table.WithColumns(cols),
-		table.WithRows(rows),
-		table.WithHeight(len(rows)),
-	)
+func renderUnstyledList(registryList []serverapiclient.ContainerRegistry) {
+	output := "\n"
 
-	style := table.DefaultStyles()
-	style.Header = style.Header.
-		BorderStyle(lipgloss.HiddenBorder()).
-		BorderBottom(true).
-		AlignHorizontal(lipgloss.Left)
+	for _, registry := range registryList {
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Server: "), *registry.Server) + "\n\n"
 
-	style.Selected = style.Selected.
-		Foreground(style.Cell.GetForeground()).
-		Background(style.Cell.GetBackground()).
-		Bold(false)
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Username: "), *registry.Username) + "\n\n"
 
-	t.SetStyles(style)
-	t.SetCursor(activeRow)
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Password: "), *registry.Password) + "\n\n"
 
-	return t
-}
-
-func getRowsAndCols(width int, initialRows []table.Row) ([]table.Row, []table.Column) {
-	colWidth := 0
-	cols := []table.Column{}
-
-	for i, col := range columns {
-		// keep columns length in sync with initialRows
-		if i >= len(initialRows[0]) {
-			break
-		}
-
-		if colWidth+col.Width > width {
-			break
-		}
-
-		colWidth += col.Width
-		cols = append(cols, col)
-	}
-
-	rows := make([]table.Row, len(initialRows))
-
-	for i, row := range initialRows {
-		if len(row) >= len(cols) {
-			rows[i] = row[:len(cols)]
-		} else {
-			rows[i] = row
+		if registry.Server != registryList[len(registryList)-1].Server {
+			output += views.SeparatorString + "\n\n"
 		}
 	}
-	return rows, cols
+
+	fmt.Println(output)
 }
