@@ -6,6 +6,7 @@ package workspaces_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	t_targets "github.com/daytonaio/daytona/internal/testing/provider/targets"
 	t_containerregistries "github.com/daytonaio/daytona/internal/testing/server/containerregistries"
@@ -234,6 +235,26 @@ func TestWorkspaceService(t *testing.T) {
 
 		_, err = service.GetWorkspace(createWorkspaceRequest.Id)
 		require.Equal(t, workspaces.ErrWorkspaceNotFound, err)
+	})
+
+	t.Run("SetProjectState", func(t *testing.T) {
+		ws, err := service.CreateWorkspace(createWorkspaceRequest)
+		require.Nil(t, err)
+
+		projectName := ws.Projects[0].Name
+		updatedAt := time.Now().Format(time.RFC1123)
+		res, err := service.SetProjectState(ws.Id, projectName, &workspace.ProjectState{
+			UpdatedAt: updatedAt,
+			Uptime:    10,
+			GitStatus: &workspace.GitStatus{
+				CurrentBranch: "main",
+			},
+		})
+		require.Nil(t, err)
+
+		project, err := res.GetProject(projectName)
+		require.Nil(t, err)
+		require.Equal(t, "main", project.State.GitStatus.CurrentBranch)
 	})
 
 	t.Cleanup(func() {

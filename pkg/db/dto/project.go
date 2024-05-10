@@ -18,9 +18,22 @@ type RepositoryDTO struct {
 	Path     *string `json:"path,omitempty"`
 }
 
+type FileStatusDTO struct {
+	Name     string `json:"name"`
+	Extra    string `json:"extra"`
+	Staging  string `json:"staging"`
+	Worktree string `json:"worktree"`
+}
+
+type GitStatusDTO struct {
+	CurrentBranch string           `json:"currentBranch"`
+	Files         []*FileStatusDTO `json:"fileStatus"`
+}
+
 type ProjectStateDTO struct {
-	UpdatedAt string `json:"updatedAt"`
-	Uptime    uint64 `json:"uptime"`
+	UpdatedAt string        `json:"updatedAt"`
+	Uptime    uint64        `json:"uptime"`
+	GitStatus *GitStatusDTO `json:"gitStatus"`
 }
 
 type ProjectDTO struct {
@@ -68,6 +81,35 @@ func ToRepositoryDTO(repo *gitprovider.GitRepository) RepositoryDTO {
 	return repoDTO
 }
 
+func ToFileStatusDTO(status *workspace.FileStatus) *FileStatusDTO {
+	if status == nil {
+		return nil
+	}
+
+	return &FileStatusDTO{
+		Name:     status.Name,
+		Extra:    status.Extra,
+		Staging:  string(status.Staging),
+		Worktree: string(status.Worktree),
+	}
+}
+
+func ToGitStatusDTO(status *workspace.GitStatus) *GitStatusDTO {
+	if status == nil {
+		return nil
+	}
+
+	statusDTO := &GitStatusDTO{
+		CurrentBranch: status.CurrentBranch,
+	}
+
+	for _, file := range status.Files {
+		statusDTO.Files = append(statusDTO.Files, ToFileStatusDTO(file))
+	}
+
+	return statusDTO
+}
+
 func ToProjectStateDTO(state *workspace.ProjectState) *ProjectStateDTO {
 	if state == nil {
 		return nil
@@ -76,6 +118,7 @@ func ToProjectStateDTO(state *workspace.ProjectState) *ProjectStateDTO {
 	return &ProjectStateDTO{
 		UpdatedAt: state.UpdatedAt,
 		Uptime:    state.Uptime,
+		GitStatus: ToGitStatusDTO(state.GitStatus),
 	}
 }
 
@@ -92,6 +135,35 @@ func ToProject(projectDTO ProjectDTO) *workspace.Project {
 	}
 }
 
+func ToFileStatus(statusDTO *FileStatusDTO) *workspace.FileStatus {
+	if statusDTO == nil {
+		return nil
+	}
+
+	return &workspace.FileStatus{
+		Name:     statusDTO.Name,
+		Extra:    statusDTO.Extra,
+		Staging:  workspace.Status(statusDTO.Staging),
+		Worktree: workspace.Status(statusDTO.Worktree),
+	}
+}
+
+func ToGitStatus(statusDTO *GitStatusDTO) *workspace.GitStatus {
+	if statusDTO == nil {
+		return nil
+	}
+
+	status := &workspace.GitStatus{
+		CurrentBranch: statusDTO.CurrentBranch,
+	}
+
+	for _, file := range statusDTO.Files {
+		status.Files = append(status.Files, ToFileStatus(file))
+	}
+
+	return status
+}
+
 func ToProjectState(stateDTO *ProjectStateDTO) *workspace.ProjectState {
 	if stateDTO == nil {
 		return nil
@@ -100,6 +172,7 @@ func ToProjectState(stateDTO *ProjectStateDTO) *workspace.ProjectState {
 	return &workspace.ProjectState{
 		UpdatedAt: stateDTO.UpdatedAt,
 		Uptime:    stateDTO.Uptime,
+		GitStatus: ToGitStatus(stateDTO.GitStatus),
 	}
 }
 

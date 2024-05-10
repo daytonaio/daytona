@@ -908,6 +908,22 @@ components:
         protocol:
           type: string
       type: object
+    FileStatus:
+      example:
+        extra: extra
+        name: name
+        staging: null
+        worktree: null
+      properties:
+        extra:
+          type: string
+        name:
+          type: string
+        staging:
+          $ref: '#/components/schemas/Status'
+        worktree:
+          $ref: '#/components/schemas/Status'
+      type: object
     GitBranch:
       example:
         name: name
@@ -985,6 +1001,26 @@ components:
         url:
           type: string
       type: object
+    GitStatus:
+      example:
+        fileStatus:
+        - extra: extra
+          name: name
+          staging: null
+          worktree: null
+        - extra: extra
+          name: name
+          staging: null
+          worktree: null
+        currentBranch: currentBranch
+      properties:
+        currentBranch:
+          type: string
+        fileStatus:
+          items:
+            $ref: '#/components/schemas/FileStatus'
+          type: array
+      type: object
     GitUser:
       example:
         name: name
@@ -1029,6 +1065,17 @@ components:
         - postStartCommands
         name: name
         state:
+          gitStatus:
+            fileStatus:
+            - extra: extra
+              name: name
+              staging: null
+              worktree: null
+            - extra: extra
+              name: name
+              staging: null
+              worktree: null
+            currentBranch: currentBranch
           updatedAt: updatedAt
           uptime: 0
         repository:
@@ -1085,9 +1132,22 @@ components:
       type: object
     ProjectState:
       example:
+        gitStatus:
+          fileStatus:
+          - extra: extra
+            name: name
+            staging: null
+            worktree: null
+          - extra: extra
+            name: name
+            staging: null
+            worktree: null
+          currentBranch: currentBranch
         updatedAt: updatedAt
         uptime: 0
       properties:
+        gitStatus:
+          $ref: '#/components/schemas/GitStatus'
         updatedAt:
           type: string
         uptime:
@@ -1172,11 +1232,44 @@ components:
       type: object
     SetProjectState:
       example:
+        gitStatus:
+          fileStatus:
+          - extra: extra
+            name: name
+            staging: null
+            worktree: null
+          - extra: extra
+            name: name
+            staging: null
+            worktree: null
+          currentBranch: currentBranch
         uptime: 0
       properties:
+        gitStatus:
+          $ref: '#/components/schemas/GitStatus'
         uptime:
           type: integer
       type: object
+    Status:
+      enum:
+      - Unmodified
+      - Untracked
+      - Modified
+      - Added
+      - Deleted
+      - Renamed
+      - Copied
+      - Updated but unmerged
+      type: string
+      x-enum-varnames:
+      - Unmodified
+      - Untracked
+      - Modified
+      - Added
+      - Deleted
+      - Renamed
+      - Copied
+      - UpdatedButUnmerged
     Workspace:
       example:
         projects:
@@ -1186,6 +1279,17 @@ components:
           - postStartCommands
           name: name
           state:
+            gitStatus:
+              fileStatus:
+              - extra: extra
+                name: name
+                staging: null
+                worktree: null
+              - extra: extra
+                name: name
+                staging: null
+                worktree: null
+              currentBranch: currentBranch
             updatedAt: updatedAt
             uptime: 0
           repository:
@@ -1207,6 +1311,17 @@ components:
           - postStartCommands
           name: name
           state:
+            gitStatus:
+              fileStatus:
+              - extra: extra
+                name: name
+                staging: null
+                worktree: null
+              - extra: extra
+                name: name
+                staging: null
+                worktree: null
+              currentBranch: currentBranch
             updatedAt: updatedAt
             uptime: 0
           repository:
@@ -1246,6 +1361,17 @@ components:
           - postStartCommands
           name: name
           state:
+            gitStatus:
+              fileStatus:
+              - extra: extra
+                name: name
+                staging: null
+                worktree: null
+              - extra: extra
+                name: name
+                staging: null
+                worktree: null
+              currentBranch: currentBranch
             updatedAt: updatedAt
             uptime: 0
           repository:
@@ -1267,6 +1393,17 @@ components:
           - postStartCommands
           name: name
           state:
+            gitStatus:
+              fileStatus:
+              - extra: extra
+                name: name
+                staging: null
+                worktree: null
+              - extra: extra
+                name: name
+                staging: null
+                worktree: null
+              currentBranch: currentBranch
             updatedAt: updatedAt
             uptime: 0
           repository:
