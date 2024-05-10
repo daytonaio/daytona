@@ -11,12 +11,18 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/cmd"
+	"github.com/daytonaio/daytona/pkg/cmd/workspacemode"
 	"github.com/rs/zerolog"
 	zlog "github.com/rs/zerolog/log"
 	log "github.com/sirupsen/logrus"
 )
 
 func main() {
+	if util.WorkspaceMode() {
+		workspacemode.Execute()
+		return
+	}
+
 	cmd.Execute()
 }
 
