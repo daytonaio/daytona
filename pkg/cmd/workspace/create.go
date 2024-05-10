@@ -8,6 +8,8 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -57,6 +59,11 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		profileData, res, err := apiClient.ProfileAPI.GetProfileData(ctx).Execute()
+		if err != nil {
+			log.Fatal(apiclient.HandleErrorResponse(res, err))
+		}
+
 		if nameFlag != "" {
 			workspaceName = nameFlag
 		}
@@ -100,6 +107,7 @@ var CreateCmd = &cobra.Command{
 				log.Fatalf("Error: duplicate repository url: %s", *projects[i].Source.Repository.Url)
 			}
 			visited[*projects[i].Source.Repository.Url] = true
+			projects[i].EnvVars = getEnvVariables(&projects[i], profileData)
 		}
 
 		target, err := getTarget(activeProfile.Name)
@@ -367,4 +375,40 @@ func readLog(ws *websocket.Conn, stopLogs *bool) {
 			return
 		}
 	}
+}
+
+func getEnvVariables(project *serverapiclient.CreateWorkspaceRequestProject, profileData *serverapiclient.ProfileData) *map[string]string {
+	envVars := map[string]string{}
+
+	if profileData.EnvVars != nil {
+		for k, v := range *profileData.EnvVars {
+			if strings.HasPrefix(v, "$") {
+				env, ok := os.LookupEnv(v[1:])
+				if ok {
+					envVars[k] = env
+				} else {
+					log.Warnf("Environment variable %s not found", v[1:])
+				}
+			} else {
+				envVars[k] = v
+			}
+		}
+	}
+
+	if project.EnvVars != nil {
+		for k, v := range *project.EnvVars {
+			if strings.HasPrefix(v, "$") {
+				env, ok := os.LookupEnv(v[1:])
+				if ok {
+					envVars[k] = env
+				} else {
+					log.Warnf("Environment variable %s not found", v[1:])
+				}
+			} else {
+				envVars[k] = v
+			}
+		}
+	}
+
+	return &envVars
 }

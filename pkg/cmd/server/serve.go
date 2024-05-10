@@ -22,6 +22,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
+	"github.com/daytonaio/daytona/pkg/server/profiledata"
 	"github.com/daytonaio/daytona/pkg/server/providertargets"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	started_view "github.com/daytonaio/daytona/pkg/views/server/started"
@@ -81,6 +82,10 @@ var ServeCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+		profileDataStore, err := db.NewProfileDataStore(dbConnection)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		headscaleServer := headscale.NewHeadscaleServer(&headscale.HeadscaleServerConfig{
 			ServerId:      c.Id,
@@ -135,6 +140,9 @@ var ServeCmd = &cobra.Command{
 		gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
 			ConfigStore: gitProviderConfigStore,
 		})
+		profileDataService := profiledata.NewProfileDataService(profiledata.ProfileDataServiceConfig{
+			ProfileDataStore: profileDataStore,
+		})
 
 		server := server.GetInstance(&server.ServerInstanceConfig{
 			Config:                   *c,
@@ -145,6 +153,7 @@ var ServeCmd = &cobra.Command{
 			WorkspaceService:         workspaceService,
 			GitProviderService:       gitProviderService,
 			ProviderManager:          providerManager,
+			ProfileDataService:       profileDataService,
 		})
 
 		errCh := make(chan error)

@@ -16,6 +16,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
+	"github.com/daytonaio/daytona/pkg/server/profiledata"
 	"github.com/daytonaio/daytona/pkg/server/providertargets"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/hashicorp/go-plugin"
@@ -32,6 +33,7 @@ type ServerInstanceConfig struct {
 	ApiKeyService            apikeys.IApiKeyService
 	GitProviderService       gitproviders.IGitProviderService
 	ProviderManager          manager.IProviderManager
+	ProfileDataService       profiledata.IProfileDataService
 }
 
 var server *Server
@@ -54,6 +56,7 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 			ApiKeyService:            serverConfig.ApiKeyService,
 			GitProviderService:       serverConfig.GitProviderService,
 			ProviderManager:          serverConfig.ProviderManager,
+			ProfileDataService:       serverConfig.ProfileDataService,
 		}
 	}
 
@@ -69,6 +72,7 @@ type Server struct {
 	ApiKeyService            apikeys.IApiKeyService
 	GitProviderService       gitproviders.IGitProviderService
 	ProviderManager          manager.IProviderManager
+	ProfileDataService       profiledata.IProfileDataService
 }
 
 func (s *Server) Start(errCh chan error) error {

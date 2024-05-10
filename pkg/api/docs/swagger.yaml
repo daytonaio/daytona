@@ -167,6 +167,13 @@ definitions:
       key:
         type: string
     type: object
+  ProfileData:
+    properties:
+      envVars:
+        additionalProperties:
+          type: string
+        type: object
+    type: object
   Project:
     properties:
       image:
@@ -740,6 +747,47 @@ paths:
       summary: Get Git provider
       tags:
       - gitProvider
+  /profile:
+    delete:
+      description: Delete profile data
+      operationId: DeleteProfileData
+      responses:
+        "204":
+          description: No Content
+      summary: Delete profile data
+      tags:
+      - profile
+    get:
+      consumes:
+      - application/json
+      description: Get profile data
+      operationId: GetProfileData
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ProfileData'
+      summary: Get profile data
+      tags:
+      - profile
+    post:
+      consumes:
+      - application/json
+      description: Set profile data
+      operationId: SetProfileData
+      parameters:
+      - description: Profile data
+        in: body
+        name: profileData
+        required: true
+        schema:
+          $ref: '#/definitions/ProfileData'
+      responses:
+        "201":
+          description: Created
+      summary: Set profile data
+      tags:
+      - profile
   /provider:
     get:
       description: List providers

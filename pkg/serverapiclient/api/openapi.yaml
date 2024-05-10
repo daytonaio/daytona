@@ -379,6 +379,48 @@ paths:
       summary: Get Git repository PRs
       tags:
       - gitProvider
+  /profile:
+    delete:
+      description: Delete profile data
+      operationId: DeleteProfileData
+      responses:
+        "204":
+          content: {}
+          description: No Content
+      summary: Delete profile data
+      tags:
+      - profile
+    get:
+      description: Get profile data
+      operationId: GetProfileData
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProfileData'
+          description: OK
+      summary: Get profile data
+      tags:
+      - profile
+    post:
+      description: Set profile data
+      operationId: SetProfileData
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileData'
+        description: Profile data
+        required: true
+      responses:
+        "201":
+          content: {}
+          description: Created
+      summary: Set profile data
+      tags:
+      - profile
+      x-codegen-request-body-name: profileData
   /provider:
     get:
       description: List providers
@@ -1056,6 +1098,16 @@ components:
       properties:
         key:
           type: string
+      type: object
+    ProfileData:
+      example:
+        envVars:
+          key: envVars
+      properties:
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
       type: object
     Project:
       example:

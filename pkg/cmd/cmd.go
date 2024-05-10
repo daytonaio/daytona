@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/cmd/output"
 	. "github.com/daytonaio/daytona/pkg/cmd/ports"
 	. "github.com/daytonaio/daytona/pkg/cmd/profile"
+	. "github.com/daytonaio/daytona/pkg/cmd/profiledata/env"
 	. "github.com/daytonaio/daytona/pkg/cmd/provider"
 	. "github.com/daytonaio/daytona/pkg/cmd/server"
 	. "github.com/daytonaio/daytona/pkg/cmd/target"
@@ -53,6 +54,7 @@ func Execute() {
 	rootCmd.AddCommand(StopCmd)
 	rootCmd.AddCommand(InfoCmd)
 	rootCmd.AddCommand(PortForwardCmd)
+	rootCmd.AddCommand(EnvCmd)
 
 	SetupRootCommand(rootCmd)
 
