@@ -271,7 +271,7 @@ func (a *ProfileAPIService) SetProfileData(ctx context.Context) ApiSetProfileDat
 // Execute executes the request
 func (a *ProfileAPIService) SetProfileDataExecute(r ApiSetProfileDataRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
+		localVarHTTPMethod = http.MethodPut
 		localVarPostBody   interface{}
 		formFiles          []formFile
 	)

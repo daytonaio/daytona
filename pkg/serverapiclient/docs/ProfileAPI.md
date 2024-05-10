@@ -6,7 +6,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**DeleteProfileData**](ProfileAPI.md#DeleteProfileData) | **Delete** /profile | Delete profile data
 [**GetProfileData**](ProfileAPI.md#GetProfileData) | **Get** /profile | Get profile data
-[**SetProfileData**](ProfileAPI.md#SetProfileData) | **Post** /profile | Set profile data
+[**SetProfileData**](ProfileAPI.md#SetProfileData) | **Put** /profile | Set profile data
 
 
 

@@ -770,7 +770,7 @@ paths:
       summary: Get profile data
       tags:
       - profile
-    post:
+    put:
       consumes:
       - application/json
       description: Set profile data

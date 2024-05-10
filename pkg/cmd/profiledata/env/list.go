@@ -5,11 +5,12 @@ package env
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	"github.com/daytonaio/daytona/pkg/cmd/output"
 	"github.com/daytonaio/daytona/pkg/views"
+	"github.com/daytonaio/daytona/pkg/views/env"
 	"github.com/spf13/cobra"
 
 	log "github.com/sirupsen/logrus"
@@ -31,13 +32,19 @@ var listCmd = &cobra.Command{
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
+		if output.FormatFlag != "" {
+			if profileData.EnvVars == nil {
+				profileData.EnvVars = &map[string]string{}
+			}
+			output.Output = *profileData.EnvVars
+			return
+		}
+
 		if profileData.EnvVars == nil || len(*profileData.EnvVars) == 0 {
 			views.RenderInfoMessageBold("No environment variables set")
 			return
 		}
 
-		for key, value := range *profileData.EnvVars {
-			fmt.Printf("%s=%s\n", key, value)
-		}
+		env.List(*profileData.EnvVars)
 	},
 }

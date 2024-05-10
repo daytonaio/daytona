@@ -403,7 +403,7 @@ paths:
       summary: Get profile data
       tags:
       - profile
-    post:
+    put:
       description: Set profile data
       operationId: SetProfileData
       requestBody:

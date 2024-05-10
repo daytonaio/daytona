@@ -553,7 +553,7 @@ const docTemplate = `{
                     }
                 }
             },
-            "post": {
+            "put": {
                 "description": "Set profile data",
                 "consumes": [
                     "application/json"

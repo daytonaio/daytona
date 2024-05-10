@@ -175,7 +175,7 @@ func (a *ApiServer) Start() error {
 	profileDataController := protected.Group("/profile")
 	{
 		profileDataController.GET("/", profiledata.GetProfileData)
-		profileDataController.POST("/", profiledata.SetProfileData)
+		profileDataController.PUT("/", profiledata.SetProfileData)
 		profileDataController.DELETE("/", profiledata.DeleteProfileData)
 	}
 

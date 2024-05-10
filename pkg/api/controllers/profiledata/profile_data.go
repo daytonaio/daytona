@@ -45,7 +45,7 @@ func GetProfileData(ctx *gin.Context) {
 //	@Accept			json
 //	@Param			profileData	body	profiledata.ProfileData	true	"Profile data"
 //	@Success		201
-//	@Router			/profile [post]
+//	@Router			/profile [put]
 //
 //	@id				SetProfileData
 func SetProfileData(ctx *gin.Context) {

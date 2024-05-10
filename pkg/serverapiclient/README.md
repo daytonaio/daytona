@@ -96,7 +96,7 @@ Class | Method | HTTP request | Description
 *GitProviderAPI* | [**SetGitProvider**](docs/GitProviderAPI.md#setgitprovider) | **Put** /gitprovider | Set Git provider
 *ProfileAPI* | [**DeleteProfileData**](docs/ProfileAPI.md#deleteprofiledata) | **Delete** /profile | Delete profile data
 *ProfileAPI* | [**GetProfileData**](docs/ProfileAPI.md#getprofiledata) | **Get** /profile | Get profile data
-*ProfileAPI* | [**SetProfileData**](docs/ProfileAPI.md#setprofiledata) | **Post** /profile | Set profile data
+*ProfileAPI* | [**SetProfileData**](docs/ProfileAPI.md#setprofiledata) | **Put** /profile | Set profile data
 *ProviderAPI* | [**GetTargetManifest**](docs/ProviderAPI.md#gettargetmanifest) | **Get** /provider/{provider}/target-manifest | Get provider target manifest
 *ProviderAPI* | [**InstallProvider**](docs/ProviderAPI.md#installprovider) | **Post** /provider/install | Install a provider
 *ProviderAPI* | [**ListProviders**](docs/ProviderAPI.md#listproviders) | **Get** /provider | List providers
