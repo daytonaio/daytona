@@ -20,14 +20,16 @@ type ApikeyApiKeyType string
 
 // List of apikey.ApiKeyType
 const (
-	ApiKeyTypeClient  ApikeyApiKeyType = "client"
-	ApiKeyTypeProject ApikeyApiKeyType = "project"
+	ApiKeyTypeClient    ApikeyApiKeyType = "client"
+	ApiKeyTypeProject   ApikeyApiKeyType = "project"
+	ApiKeyTypeWorkspace ApikeyApiKeyType = "workspace"
 )
 
 // All allowed values of ApikeyApiKeyType enum
 var AllowedApikeyApiKeyTypeEnumValues = []ApikeyApiKeyType{
 	"client",
 	"project",
+	"workspace",
 }
 
 func (v *ApikeyApiKeyType) UnmarshalJSON(src []byte) error {

@@ -31,6 +31,12 @@ func (s *WorkspaceService) CreateWorkspace(req dto.CreateWorkspaceRequest) (*wor
 		Target: req.Target,
 	}
 
+	apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeWorkspace, w.Id)
+	if err != nil {
+		return nil, err
+	}
+	w.ApiKey = apiKey
+
 	w.Projects = []*workspace.Project{}
 
 	for _, project := range req.Projects {

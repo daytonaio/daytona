@@ -114,6 +114,8 @@ func TestWorkspaceService(t *testing.T) {
 		provisioner.On("CreateWorkspace", mock.Anything, &target).Return(nil)
 		provisioner.On("StartWorkspace", mock.Anything, &target).Return(nil)
 
+		apiKeyService.On("Generate", apikey.ApiKeyTypeWorkspace, createWorkspaceRequest.Id).Return(createWorkspaceRequest.Id, nil)
+
 		for _, project := range createWorkspaceRequest.Projects {
 			apiKeyService.On("Generate", apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", createWorkspaceRequest.Id, project.Name)).Return(project.Name, nil)
 		}
