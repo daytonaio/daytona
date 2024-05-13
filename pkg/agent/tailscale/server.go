@@ -13,6 +13,7 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	"github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"tailscale.com/tsnet"
 
@@ -20,18 +21,18 @@ import (
 )
 
 type Server struct {
-	Hostname  string
-	ServerUrl string
+	Hostname string
+	Server   config.DaytonaServerConfig
 }
 
 func (s *Server) Start() error {
 	flag.Parse()
 	tsnetServer := new(tsnet.Server)
 	tsnetServer.Hostname = s.Hostname
-	tsnetServer.ControlURL = s.ServerUrl
+	tsnetServer.ControlURL = s.Server.Url
 	tsnetServer.Ephemeral = true
 
-	apiClient, err := server.GetApiClient(nil)
+	apiClient, err := server.GetAgentApiClient(s.Server.ApiUrl, s.Server.ApiKey)
 	if err != nil {
 		return err
 	}
