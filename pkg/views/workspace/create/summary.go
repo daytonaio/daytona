@@ -85,17 +85,10 @@ func RenderSummary(workspaceName string, projectList []serverapiclient.CreateWor
 		}
 	}
 
-	output += fmt.Sprintf("\n\n%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render("Primary Project"), *projectList[0].Source.Repository.Url)
-
-	// Remove the primary project from the list
-	projectList = projectList[1:]
-
-	if len(projectList) > 1 {
-		output += "\n"
-	}
+	output += "\n\n"
 
 	for i := range projectList {
-		output += fmt.Sprintf("%s - %s", lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("#%d %s", i+1, "Secondary Project")), (*projectList[i].Source.Repository.Url))
+		output += fmt.Sprintf("%s - %s", lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("%s #%d", "Project", i+1)), (*projectList[i].Source.Repository.Url))
 		if i < len(projectList)-1 {
 			output += "\n"
 		}
