@@ -49,7 +49,7 @@ func selectPullRequestPrompt(pullRequests []serverapiclient.GitPullRequest, addi
 	}
 }
 
-func GetPullRequestFromPrompt(pullRequests []serverapiclient.GitPullRequest, additionalProjectOrder int) serverapiclient.GitPullRequest {
+func GetPullRequestFromPrompt(pullRequests []serverapiclient.GitPullRequest, additionalProjectOrder int) *serverapiclient.GitPullRequest {
 	choiceChan := make(chan string)
 
 	go selectPullRequestPrompt(pullRequests, additionalProjectOrder, choiceChan)
@@ -58,8 +58,8 @@ func GetPullRequestFromPrompt(pullRequests []serverapiclient.GitPullRequest, add
 
 	for _, pr := range pullRequests {
 		if *pr.Name == pullRequestName {
-			return pr
+			return &pr
 		}
 	}
-	return serverapiclient.GitPullRequest{}
+	return nil
 }

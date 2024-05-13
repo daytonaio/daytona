@@ -90,6 +90,7 @@ func TestWorkspaceService(t *testing.T) {
 	require.Nil(t, err)
 
 	apiKeyService := mocks.NewMockApiKeyService()
+	gitProviderService := mocks.NewMockGitProviderService()
 	provisioner := mocks.NewMockProvisioner()
 
 	logsDir := t.TempDir()
@@ -106,6 +107,7 @@ func TestWorkspaceService(t *testing.T) {
 		ApiKeyService:                   apiKeyService,
 		Provisioner:                     provisioner,
 		LoggerFactory:                   logger.NewLoggerFactory(logsDir),
+		GitProviderService:              gitProviderService,
 	})
 
 	t.Run("CreateWorkspace", func(t *testing.T) {
@@ -115,6 +117,7 @@ func TestWorkspaceService(t *testing.T) {
 		provisioner.On("StartWorkspace", mock.Anything, &target).Return(nil)
 
 		apiKeyService.On("Generate", apikey.ApiKeyTypeWorkspace, createWorkspaceRequest.Id).Return(createWorkspaceRequest.Id, nil)
+		gitProviderService.On("GetLastCommitSha", createWorkspaceRequest.Projects[0].Source.Repository).Return("123", nil)
 
 		for _, project := range createWorkspaceRequest.Projects {
 			apiKeyService.On("Generate", apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", createWorkspaceRequest.Id, project.Name)).Return(project.Name, nil)

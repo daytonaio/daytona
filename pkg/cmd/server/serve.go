@@ -123,6 +123,9 @@ var ServeCmd = &cobra.Command{
 		provisioner := provisioner.NewProvisioner(provisioner.ProvisionerConfig{
 			ProviderManager: providerManager,
 		})
+		gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
+			ConfigStore: gitProviderConfigStore,
+		})
 
 		workspaceService := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
 			WorkspaceStore:                  workspaceStore,
@@ -136,10 +139,9 @@ var ServeCmd = &cobra.Command{
 			DefaultProjectPostStartCommands: c.DefaultProjectPostStartCommands,
 			Provisioner:                     provisioner,
 			LoggerFactory:                   loggerFactory,
+			GitProviderService:              gitProviderService,
 		})
-		gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
-			ConfigStore: gitProviderConfigStore,
-		})
+
 		profileDataService := profiledata.NewProfileDataService(profiledata.ProfileDataServiceConfig{
 			ProfileDataStore: profileDataStore,
 		})

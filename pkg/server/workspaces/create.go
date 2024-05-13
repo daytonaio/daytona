@@ -40,6 +40,14 @@ func (s *WorkspaceService) CreateWorkspace(req dto.CreateWorkspaceRequest) (*wor
 	w.Projects = []*workspace.Project{}
 
 	for _, project := range req.Projects {
+		if project.Source.Repository != nil && project.Source.Repository.Sha == "" {
+			sha, err := s.gitProviderService.GetLastCommitSha(project.Source.Repository)
+			if err != nil {
+				return nil, err
+			}
+			project.Source.Repository.Sha = sha
+		}
+
 		apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", w.Id, project.Name))
 		if err != nil {
 			return nil, err
