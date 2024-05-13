@@ -26,7 +26,7 @@ func ProjectAuthMiddleware() gin.HandlerFunc {
 
 		server := server.GetInstance(nil)
 
-		if !server.ApiKeyService.IsProjectApiKey(token) {
+		if !server.ApiKeyService.IsProjectApiKey(token) && !server.ApiKeyService.IsWorkspaceApiKey(token) {
 			ctx.AbortWithError(401, errors.New("unauthorized"))
 		}
 

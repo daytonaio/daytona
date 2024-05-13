@@ -29,3 +29,18 @@ func (s *ApiKeyService) IsProjectApiKey(apiKey string) bool {
 
 	return true
 }
+
+func (s *ApiKeyService) IsWorkspaceApiKey(apiKey string) bool {
+	keyHash := apikeys.HashKey(apiKey)
+
+	key, err := s.apiKeyStore.Find(keyHash)
+	if err != nil {
+		return false
+	}
+
+	if key.Type != apikey.ApiKeyTypeWorkspace {
+		return false
+	}
+
+	return true
+}
