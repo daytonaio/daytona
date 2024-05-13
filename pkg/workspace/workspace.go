@@ -12,6 +12,7 @@ type Workspace struct {
 	Name     string     `json:"name"`
 	Projects []*Project `json:"projects"`
 	Target   string     `json:"target"`
+	ApiKey   string     `json:"-"`
 } // @name Workspace
 
 type WorkspaceInfo struct {
@@ -27,4 +28,25 @@ func (w *Workspace) GetProject(projectName string) (*Project, error) {
 		}
 	}
 	return nil, errors.New("project not found")
+}
+
+type WorkspaceEnvVarParams struct {
+	ApiUrl        string
+	ApiKey        string
+	ServerUrl     string
+	ServerVersion string
+}
+
+func GetWorkspaceEnvVars(workspace *Workspace, params WorkspaceEnvVarParams) map[string]string {
+	envVars := map[string]string{
+		"DAYTONA_WS_ID":          workspace.Id,
+		"DAYTONA_SERVER_API_KEY": params.ApiKey,
+		"DAYTONA_SERVER_VERSION": params.ServerVersion,
+		"DAYTONA_SERVER_URL":     params.ServerUrl,
+		"DAYTONA_SERVER_API_URL": params.ApiUrl,
+		// $HOME will be replaced at runtime
+		"DAYTONA_AGENT_LOG_FILE_PATH": "$HOME/.daytona-agent.log",
+	}
+
+	return envVars
 }

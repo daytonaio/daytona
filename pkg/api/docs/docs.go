@@ -1551,11 +1551,13 @@ const docTemplate = `{
             "type": "string",
             "enum": [
                 "client",
-                "project"
+                "project",
+                "workspace"
             ],
             "x-enum-varnames": [
                 "ApiKeyTypeClient",
-                "ApiKeyTypeProject"
+                "ApiKeyTypeProject",
+                "ApiKeyTypeWorkspace"
             ]
         },
         "provider.ProviderInfo": {

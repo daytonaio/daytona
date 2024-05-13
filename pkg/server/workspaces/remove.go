@@ -35,6 +35,12 @@ func (s *WorkspaceService) RemoveWorkspace(workspaceId string) error {
 		return err
 	}
 
+	// Should not fail the whole operation if the API key cannot be revoked
+	err = s.apiKeyService.Revoke(workspace.Id)
+	if err != nil {
+		log.Error(err)
+	}
+
 	for _, project := range workspace.Projects {
 		err := s.apiKeyService.Revoke(fmt.Sprintf("%s/%s", workspace.Id, project.Name))
 		if err != nil {

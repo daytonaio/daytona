@@ -6,8 +6,9 @@ package apikey
 type ApiKeyType string
 
 const (
-	ApiKeyTypeClient  ApiKeyType = "client"
-	ApiKeyTypeProject ApiKeyType = "project"
+	ApiKeyTypeClient    ApiKeyType = "client"
+	ApiKeyTypeProject   ApiKeyType = "project"
+	ApiKeyTypeWorkspace ApiKeyType = "workspace"
 )
 
 type ApiKey struct {

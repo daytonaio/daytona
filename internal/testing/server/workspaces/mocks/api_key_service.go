@@ -33,6 +33,11 @@ func (s *mockApiKeyService) IsValidApiKey(apiKey string) bool {
 	return args.Bool(0)
 }
 
+func (s *mockApiKeyService) IsWorkspaceApiKey(apiKey string) bool {
+	args := s.Called(apiKey)
+	return args.Bool(0)
+}
+
 func (s *mockApiKeyService) ListClientKeys() ([]*apikey.ApiKey, error) {
 	args := s.Called()
 	return args.Get(0).([]*apikey.ApiKey), args.Error(1)

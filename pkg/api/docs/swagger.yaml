@@ -330,10 +330,12 @@ definitions:
     enum:
     - client
     - project
+    - workspace
     type: string
     x-enum-varnames:
     - ApiKeyTypeClient
     - ApiKeyTypeProject
+    - ApiKeyTypeWorkspace
   provider.ProviderInfo:
     properties:
       name:
