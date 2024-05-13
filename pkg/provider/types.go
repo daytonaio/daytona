@@ -18,6 +18,7 @@ type InitializeProviderRequest struct {
 	ServerDownloadUrl string
 	ServerVersion     string
 	ServerUrl         string
+	NetworkKey        string
 	ServerApiUrl      string
 	LogsDir           string
 }
