@@ -35,6 +35,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/containerregistry"
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider"
 	log_controller "github.com/daytonaio/daytona/pkg/api/controllers/log"
+	"github.com/daytonaio/daytona/pkg/api/controllers/profiledata"
 	"github.com/daytonaio/daytona/pkg/api/controllers/provider"
 	"github.com/daytonaio/daytona/pkg/api/controllers/server"
 	"github.com/daytonaio/daytona/pkg/api/controllers/target"
@@ -169,6 +170,13 @@ func (a *ApiServer) Start() error {
 		apiKeyController.GET("/", apikey.ListClientApiKeys)
 		apiKeyController.POST("/:apiKeyName", apikey.GenerateApiKey)
 		apiKeyController.DELETE("/:apiKeyName", apikey.RevokeApiKey)
+	}
+
+	profileDataController := protected.Group("/profile")
+	{
+		profileDataController.GET("/", profiledata.GetProfileData)
+		profileDataController.PUT("/", profiledata.SetProfileData)
+		profileDataController.DELETE("/", profiledata.DeleteProfileData)
 	}
 
 	projectGroup := protected.Group("/")

@@ -533,6 +533,67 @@ const docTemplate = `{
                 }
             }
         },
+        "/profile": {
+            "get": {
+                "description": "Get profile data",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "summary": "Get profile data",
+                "operationId": "GetProfileData",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ProfileData"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Set profile data",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "summary": "Set profile data",
+                "operationId": "SetProfileData",
+                "parameters": [
+                    {
+                        "description": "Profile data",
+                        "name": "profileData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ProfileData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete profile data",
+                "tags": [
+                    "profile"
+                ],
+                "summary": "Delete profile data",
+                "operationId": "DeleteProfileData",
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/provider": {
             "get": {
                 "description": "List providers",
@@ -1308,6 +1369,17 @@ const docTemplate = `{
             "properties": {
                 "key": {
                     "type": "string"
+                }
+            }
+        },
+        "ProfileData": {
+            "type": "object",
+            "properties": {
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 }
             }
         },
