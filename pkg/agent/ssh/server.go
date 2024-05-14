@@ -15,11 +15,12 @@ import (
 	"github.com/creack/pty"
 	"github.com/gliderlabs/ssh"
 	"github.com/pkg/sftp"
-	crypto_ssh "golang.org/x/crypto/ssh"
 	"golang.org/x/sys/unix"
 
 	log "github.com/sirupsen/logrus"
 )
+
+const SSH_PORT = 2222
 
 type Server struct {
 	ProjectDir        string
@@ -28,9 +29,10 @@ type Server struct {
 
 func (s *Server) Start() error {
 	forwardedTCPHandler := &ssh.ForwardedTCPHandler{}
+	unixForwardHandler := newForwardedUnixHandler()
 
 	sshServer := ssh.Server{
-		Addr: ":2222",
+		Addr: fmt.Sprintf(":%d", SSH_PORT),
 		Handler: func(session ssh.Session) {
 			switch ss := session.Subsystem(); ss {
 			case "":
@@ -51,14 +53,15 @@ func (s *Server) Start() error {
 			}
 		},
 		ChannelHandlers: map[string]ssh.ChannelHandler{
-			"session": ssh.DefaultSessionHandler,
-			"direct-tcpip": func(srv *ssh.Server, conn *crypto_ssh.ServerConn, newChan crypto_ssh.NewChannel, ctx ssh.Context) {
-				ssh.DirectTCPIPHandler(srv, conn, newChan, ctx)
-			},
+			"session":                        ssh.DefaultSessionHandler,
+			"direct-tcpip":                   ssh.DirectTCPIPHandler,
+			"direct-streamlocal@openssh.com": directStreamLocalHandler,
 		},
 		RequestHandlers: map[string]ssh.RequestHandler{
-			"tcpip-forward":        forwardedTCPHandler.HandleSSHRequest,
-			"cancel-tcpip-forward": forwardedTCPHandler.HandleSSHRequest,
+			"tcpip-forward":                          forwardedTCPHandler.HandleSSHRequest,
+			"cancel-tcpip-forward":                   forwardedTCPHandler.HandleSSHRequest,
+			"streamlocal-forward@openssh.com":        unixForwardHandler.HandleSSHRequest,
+			"cancel-streamlocal-forward@openssh.com": unixForwardHandler.HandleSSHRequest,
 		},
 		SubsystemHandlers: map[string]ssh.SubsystemHandler{
 			"sftp": s.sftpHandler,
@@ -74,7 +77,7 @@ func (s *Server) Start() error {
 		},
 	}
 
-	log.Println("Starting ssh server on port 2222...")
+	log.Printf("Starting ssh server on port %d...\n", SSH_PORT)
 	return sshServer.ListenAndServe()
 }
 

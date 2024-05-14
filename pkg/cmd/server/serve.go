@@ -111,6 +111,9 @@ var ServeCmd = &cobra.Command{
 			ServerUrl:             util.GetFrpcServerUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 			RegistryUrl:           c.RegistryUrl,
 			BaseDir:               c.ProvidersDir,
+			CreateProviderNetworkKey: func(providerName string) (string, error) {
+				return headscaleServer.CreateAuthKey()
+			},
 		})
 		provisioner := provisioner.NewProvisioner(provisioner.ProvisionerConfig{
 			ProviderManager: providerManager,
