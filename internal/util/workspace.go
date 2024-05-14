@@ -12,8 +12,15 @@ import (
 )
 
 func WorkspaceMode() bool {
-	_, wsMode := os.LookupEnv("DAYTONA_WS_ID")
-	return wsMode
+	_, devEnv := os.LookupEnv("DAYTONA_DEV")
+	if devEnv {
+		return false
+	}
+	val, wsMode := os.LookupEnv("DAYTONA_WS_ID")
+	if wsMode && val != "" {
+		return true
+	}
+	return false
 }
 
 func GetValidatedWorkspaceName(input string) (string, error) {
