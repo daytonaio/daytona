@@ -10,18 +10,18 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
-func Render(key string) {
+func Render(key, apiUrl string) {
 	var output string
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Generated API key: "), key) + "\n\n"
 
+	output += "Make sure to copy it as you will not be able to see it again." + "\n\n"
+
 	output += views.SeparatorString + "\n\n"
 
-	output += "You can add it to a profile by running:\n\n"
+	output += "You can connect to the Daytona Server from a client machine by running:\n\n"
 
-	output += lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("daytona profile edit -k %s", key)) + "\n\n"
-
-	output += "Make sure to copy it as you will not be able to see it again."
+	output += lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("daytona profile add -a %s -k %s", apiUrl, key))
 
 	views.RenderContainerLayout(views.GetInfoMessage(output))
 }

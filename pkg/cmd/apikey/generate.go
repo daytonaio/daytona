@@ -11,8 +11,10 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/server/apikey"
 	view "github.com/daytonaio/daytona/pkg/views/server/apikey"
@@ -65,7 +67,14 @@ var GenerateCmd = &cobra.Command{
 			return
 		}
 
-		view.Render(key)
+		serverConfig, _, err := apiClient.ServerAPI.GetConfigExecute(serverapiclient.ApiGetConfigRequest{})
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		apiUrl := util.GetFrpcApiUrl(*serverConfig.Frps.Protocol, *serverConfig.Id, *serverConfig.Frps.Domain)
+
+		view.Render(key, apiUrl)
 	},
 }
 
