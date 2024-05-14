@@ -8,9 +8,11 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 )
@@ -40,6 +42,16 @@ func GetApiClient(profile *config.Profile) (*serverapiclient.APIClient, error) {
 
 	serverUrl := activeProfile.Api.Url
 	apiKey := activeProfile.Api.Key
+
+	healthUrl, err := url.JoinPath(serverUrl, api.HEALTH_CHECK_ROUTE)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = http.Head(healthUrl)
+	if err != nil {
+		return nil, fmt.Errorf("failed to check server health at: %s. Make sure Daytona is running on the appropriate port", healthUrl)
+	}
 
 	clientConfig := serverapiclient.NewConfiguration()
 	clientConfig.Servers = serverapiclient.ServerConfigurations{
