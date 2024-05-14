@@ -23,9 +23,20 @@ func selectWorkspacePrompt(workspaces []serverapiclient.WorkspaceDTO, actionVerb
 
 	// Populate items with titles and descriptions from workspaces.
 	for _, workspace := range workspaces {
-		var projectNames []string
-		for _, project := range workspace.Projects {
-			projectNames = append(projectNames, *project.Name)
+		var projectsInfo []string
+
+		if workspace.Projects == nil || len(workspace.Projects) == 0 {
+			continue
+		}
+
+		if len(workspace.Projects) == 1 {
+			if workspace.Projects[0].Repository != nil && workspace.Projects[0].Repository.Url != nil {
+				projectsInfo = append(projectsInfo, util.GetRepositorySlugFromUrl(*workspace.Projects[0].Repository.Url, true))
+			}
+		} else {
+			for _, project := range workspace.Projects {
+				projectsInfo = append(projectsInfo, *project.Name)
+			}
 		}
 
 		// Get the time if available
@@ -45,7 +56,7 @@ func selectWorkspacePrompt(workspaces []serverapiclient.WorkspaceDTO, actionVerb
 		newItem := item[serverapiclient.WorkspaceDTO]{
 			title:          *workspace.Name,
 			id:             *workspace.Id,
-			desc:           strings.Join(projectNames, ", "),
+			desc:           strings.Join(projectsInfo, ", "),
 			createdTime:    createdTime,
 			uptime:         uptime,
 			target:         *workspace.Target,
