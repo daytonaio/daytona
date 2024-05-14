@@ -86,14 +86,18 @@ func Stop() error {
 }
 
 func getServiceConfig() (*service.Config, error) {
+	user, ok := os.LookupEnv("USER")
+	if !ok {
+		return nil, fmt.Errorf("could not determine user")
+	}
+
 	svcConfig := &service.Config{
 		Name:        "DaytonaServerDaemon",
 		DisplayName: "Daytona Server",
 		Description: "This is the Daytona Server daemon.",
 		Arguments:   []string{"serve"},
+		UserName:    user,
 	}
-
-	user := os.Getenv("USER")
 
 	switch runtime.GOOS {
 	case "windows":
