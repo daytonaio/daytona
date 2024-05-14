@@ -49,6 +49,7 @@ func ProfileCreationView(c *config.Config, profileAddView *ProfileAddView, editi
 			nameInput,
 			huh.NewInput().
 				Title("Server API URL").
+				Description("If you want to connect to a remote Daytona Server, start by running 'daytona api-key new' on the remote machine").
 				Value(&profileAddView.ApiUrl).
 				Validate(func(str string) error {
 					if str == "" {
