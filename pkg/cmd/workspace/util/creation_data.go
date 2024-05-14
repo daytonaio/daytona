@@ -41,17 +41,17 @@ func GetCreationDataFromPrompt(apiServerConfig *serverapiclient.ServerConfig, ex
 		return "", nil, err
 	}
 
-	if workspaceCreationPromptResponse.PrimaryProject.Source == nil {
-		return "", nil, errors.New("primary project is required")
+	if workspaceCreationPromptResponse.InitialProject.Source == nil {
+		return "", nil, errors.New("project repository is required")
 	}
 
-	projectList = []serverapiclient.CreateWorkspaceRequestProject{workspaceCreationPromptResponse.PrimaryProject}
+	projectList = []serverapiclient.CreateWorkspaceRequestProject{workspaceCreationPromptResponse.InitialProject}
 
 	if multiProject {
 		for i := 0; workspaceCreationPromptResponse.AddingMoreProjects; i++ {
 
 			if !manual && userGitProviders != nil && len(userGitProviders) > 0 {
-				providerRepo, err = getRepositoryFromWizard(userGitProviders, i+1)
+				providerRepo, err = getRepositoryFromWizard(userGitProviders, i+2)
 				if err != nil {
 					return "", nil, err
 				}
@@ -68,7 +68,7 @@ func GetCreationDataFromPrompt(apiServerConfig *serverapiclient.ServerConfig, ex
 			}
 			providerRepoUrl = ""
 		}
-		projectList = append(projectList, workspaceCreationPromptResponse.SecondaryProjects...)
+		projectList = append(projectList, workspaceCreationPromptResponse.AdditionalProjects...)
 	}
 
 	for i, project := range projectList {
@@ -79,7 +79,7 @@ func GetCreationDataFromPrompt(apiServerConfig *serverapiclient.ServerConfig, ex
 		projectList[i].Name = projectName
 	}
 
-	suggestedName := GetSuggestedWorkspaceName(*workspaceCreationPromptResponse.PrimaryProject.Source.Repository.Url, existingWorkspaceNames)
+	suggestedName := GetSuggestedWorkspaceName(*workspaceCreationPromptResponse.InitialProject.Source.Repository.Url, existingWorkspaceNames)
 
 	err = create.RunSubmissionForm(&workspaceName, suggestedName, existingWorkspaceNames, &projectList, apiServerConfig)
 	if err != nil {

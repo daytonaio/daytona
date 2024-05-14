@@ -14,7 +14,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectRepositoryPrompt(repositories []serverapiclient.GitRepository, secondaryProjectOrder int, choiceChan chan<- string) {
+func selectRepositoryPrompt(repositories []serverapiclient.GitRepository, additionalProjectOrder int, choiceChan chan<- string) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
@@ -26,8 +26,8 @@ func selectRepositoryPrompt(repositories []serverapiclient.GitRepository, second
 	l := views.GetStyledSelectList(items)
 
 	title := "Choose a Repository"
-	if secondaryProjectOrder > 0 {
-		title += fmt.Sprintf(" (Secondary Project #%d)", secondaryProjectOrder)
+	if additionalProjectOrder > 0 {
+		title += fmt.Sprintf(" (Project #%d)", additionalProjectOrder)
 	}
 	l.Title = views.GetStyledMainTitle(title)
 	l.Styles.Title = titleStyle
@@ -46,10 +46,10 @@ func selectRepositoryPrompt(repositories []serverapiclient.GitRepository, second
 	}
 }
 
-func GetRepositoryFromPrompt(repositories []serverapiclient.GitRepository, secondaryProjectOrder int) serverapiclient.GitRepository {
+func GetRepositoryFromPrompt(repositories []serverapiclient.GitRepository, additionalProjectOrder int) serverapiclient.GitRepository {
 	choiceChan := make(chan string)
 
-	go selectRepositoryPrompt(repositories, secondaryProjectOrder, choiceChan)
+	go selectRepositoryPrompt(repositories, additionalProjectOrder, choiceChan)
 
 	choice := <-choiceChan
 
