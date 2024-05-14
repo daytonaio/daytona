@@ -16,7 +16,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
 
-func getRepositoryFromWizard(userGitProviders []serverapiclient.GitProvider, secondaryProjectOrder int) (serverapiclient.GitRepository, error) {
+func getRepositoryFromWizard(userGitProviders []serverapiclient.GitProvider, additionalProjectOrder int) (serverapiclient.GitRepository, error) {
 	var providerId string
 	var namespaceId string
 	var branchName string
@@ -38,7 +38,7 @@ func getRepositoryFromWizard(userGitProviders []serverapiclient.GitProvider, sec
 			}
 		}
 	}
-	providerId = selection.GetProviderIdFromPrompt(gitProviderViewList, secondaryProjectOrder)
+	providerId = selection.GetProviderIdFromPrompt(gitProviderViewList, additionalProjectOrder)
 	if providerId == "" {
 		return serverapiclient.GitRepository{}, nil
 	}
@@ -69,7 +69,7 @@ func getRepositoryFromWizard(userGitProviders []serverapiclient.GitProvider, sec
 	if len(namespaceList) == 1 {
 		namespaceId = *namespaceList[0].Id
 	} else {
-		namespaceId = selection.GetNamespaceIdFromPrompt(namespaceList, secondaryProjectOrder)
+		namespaceId = selection.GetNamespaceIdFromPrompt(namespaceList, additionalProjectOrder)
 		if namespaceId == "" {
 			return serverapiclient.GitRepository{}, errors.New("namespace not found")
 		}
@@ -85,7 +85,7 @@ func getRepositoryFromWizard(userGitProviders []serverapiclient.GitProvider, sec
 		return serverapiclient.GitRepository{}, err
 	}
 
-	chosenRepo := selection.GetRepositoryFromPrompt(providerRepos, secondaryProjectOrder)
+	chosenRepo := selection.GetRepositoryFromPrompt(providerRepos, additionalProjectOrder)
 	if chosenRepo == (serverapiclient.GitRepository{}) {
 		return serverapiclient.GitRepository{}, nil
 	}
@@ -125,7 +125,7 @@ func getRepositoryFromWizard(userGitProviders []serverapiclient.GitProvider, sec
 		return serverapiclient.GitRepository{}, err
 	}
 	if len(prList) == 0 {
-		branchName = selection.GetBranchNameFromPrompt(branchList, secondaryProjectOrder)
+		branchName = selection.GetBranchNameFromPrompt(branchList, additionalProjectOrder)
 		if branchName == "" {
 			return serverapiclient.GitRepository{}, nil
 		}
@@ -138,19 +138,19 @@ func getRepositoryFromWizard(userGitProviders []serverapiclient.GitProvider, sec
 	checkoutOptions = append(checkoutOptions, selection.CheckoutBranch)
 	checkoutOptions = append(checkoutOptions, selection.CheckoutPR)
 
-	chosenCheckoutOption := selection.GetCheckoutOptionFromPrompt(secondaryProjectOrder, checkoutOptions)
+	chosenCheckoutOption := selection.GetCheckoutOptionFromPrompt(additionalProjectOrder, checkoutOptions)
 	if chosenCheckoutOption == selection.CheckoutDefault {
 		return chosenRepo, nil
 	}
 
 	if chosenCheckoutOption == selection.CheckoutBranch {
-		branchName = selection.GetBranchNameFromPrompt(branchList, secondaryProjectOrder)
+		branchName = selection.GetBranchNameFromPrompt(branchList, additionalProjectOrder)
 		if branchName == "" {
 			return serverapiclient.GitRepository{}, nil
 		}
 		chosenRepo.Branch = &branchName
 	} else if chosenCheckoutOption == selection.CheckoutPR {
-		chosenPullRequest := selection.GetPullRequestFromPrompt(prList, secondaryProjectOrder)
+		chosenPullRequest := selection.GetPullRequestFromPrompt(prList, additionalProjectOrder)
 		if *chosenPullRequest.Branch == "" {
 			return serverapiclient.GitRepository{}, nil
 		}

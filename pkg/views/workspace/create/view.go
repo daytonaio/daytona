@@ -28,8 +28,8 @@ type Styles struct {
 
 type WorkspaceCreationPromptResponse struct {
 	WorkspaceName      string
-	PrimaryProject     serverapiclient.CreateWorkspaceRequestProject
-	SecondaryProjects  []serverapiclient.CreateWorkspaceRequestProject
+	InitialProject     serverapiclient.CreateWorkspaceRequestProject
+	AdditionalProjects []serverapiclient.CreateWorkspaceRequestProject
 	AddingMoreProjects bool
 }
 
@@ -66,21 +66,27 @@ type Model struct {
 	workspaceCreationPromptResponse WorkspaceCreationPromptResponse
 }
 
-func RunInitialForm(primaryRepoUrl string, multiProject bool) (WorkspaceCreationPromptResponse, error) {
+func RunInitialForm(initialRepoUrl string, multiProject bool) (WorkspaceCreationPromptResponse, error) {
 	m := Model{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
 
-	primaryRepoPrompt := huh.NewInput().
-		Title("Primary project repository").
-		Value(&primaryRepoUrl).
-		Key("primaryProjectRepo").
+	title := "Git Repository"
+
+	if multiProject {
+		title = "First project repository"
+	}
+
+	initialRepoPrompt := huh.NewInput().
+		Title(title).
+		Value(&initialRepoUrl).
+		Key("initialProjectRepo").
 		Validate(func(str string) error {
 			result, err := util.GetValidatedUrl(str)
 			if err != nil {
 				return err
 			}
-			primaryRepoUrl = result
+			initialRepoUrl = result
 			return nil
 		})
 
@@ -88,8 +94,8 @@ func RunInitialForm(primaryRepoUrl string, multiProject bool) (WorkspaceCreation
 
 	m.form = huh.NewForm(
 		huh.NewGroup(
-			primaryRepoPrompt,
-		).WithHide(primaryRepoUrl != ""),
+			initialRepoPrompt,
+		).WithHide(initialRepoUrl != ""),
 	).WithTheme(dTheme).
 		WithWidth(maxWidth).
 		WithShowHelp(false).
@@ -100,16 +106,16 @@ func RunInitialForm(primaryRepoUrl string, multiProject bool) (WorkspaceCreation
 		return WorkspaceCreationPromptResponse{}, err
 	}
 
-	primaryProject := serverapiclient.CreateWorkspaceRequestProject{
+	initialProject := serverapiclient.CreateWorkspaceRequestProject{
 		Source: &serverapiclient.CreateWorkspaceRequestProjectSource{
-			Repository: &serverapiclient.GitRepository{Url: &primaryRepoUrl},
+			Repository: &serverapiclient.GitRepository{Url: &initialRepoUrl},
 		},
 	}
 
 	return WorkspaceCreationPromptResponse{
 		WorkspaceName:      "",
-		PrimaryProject:     primaryProject,
-		SecondaryProjects:  []serverapiclient.CreateWorkspaceRequestProject{},
+		InitialProject:     initialProject,
+		AdditionalProjects: []serverapiclient.CreateWorkspaceRequestProject{},
 		AddingMoreProjects: multiProject,
 	}, nil
 }
@@ -129,9 +135,9 @@ func RunProjectForm(workspaceCreationPromptResponse WorkspaceCreationPromptRespo
 
 	repositoryUrlInput :=
 		huh.NewInput().
-			Title(getOrderNumberString(len(workspaceCreationPromptResponse.SecondaryProjects)+1) + " secondary project repository").
+			Title(getOrderNumberString(len(workspaceCreationPromptResponse.AdditionalProjects)+2) + " project repository").
 			Value(project.Source.Repository.Url).
-			Key(fmt.Sprintf("secondaryRepo%d", len(workspaceCreationPromptResponse.SecondaryProjects)+1)).
+			Key(fmt.Sprintf("additionalRepo%d", len(workspaceCreationPromptResponse.AdditionalProjects)+1)).
 			Validate(func(str string) error {
 				_, err := util.GetValidatedUrl(str)
 				if err != nil {
@@ -178,7 +184,7 @@ func RunProjectForm(workspaceCreationPromptResponse WorkspaceCreationPromptRespo
 
 	*project.Source.Repository.Url = validatedURL
 	result := workspaceCreationPromptResponse
-	result.SecondaryProjects = append(result.SecondaryProjects, project)
+	result.AdditionalProjects = append(result.AdditionalProjects, project)
 	result.AddingMoreProjects = moreCheck
 
 	return result, nil
