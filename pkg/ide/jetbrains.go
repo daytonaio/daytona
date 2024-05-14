@@ -43,7 +43,10 @@ func OpenJetbrainsIDE(activeProfile config.Profile, ide, workspaceId, projectNam
 		return err
 	}
 
-	jbIdeVersion := GetJetbrainsVersion(jbIde.ProductCode)
+	jbIdeVersion, err := getJetbrainsVersion(jbIde.ProductCode)
+	if err != nil {
+		return err
+	}
 
 	switch *remoteOs {
 	case ospkg.Linux_arm64:
@@ -92,11 +95,11 @@ func isAlreadyDownloaded(projectHostname, downloadPath string) bool {
 	return err == nil
 }
 
-func GetJetbrainsVersion(productCode string) string {
+func getJetbrainsVersion(productCode string) (string, error) {
 	jetbrainsDataServicesUrl := fmt.Sprintf("https://data.services.jetbrains.com/products/releases?code=%s&type=release&latest=true&build=", productCode)
 	res, err := http.Get(jetbrainsDataServicesUrl)
 	if err != nil {
-		panic("failed to request version for product")
+		return "", err
 	}
 
 	body, err := io.ReadAll(res.Body)
@@ -112,7 +115,7 @@ func GetJetbrainsVersion(productCode string) string {
 	for _, v := range result {
 		if len(v) > 0 {
 			if version, ok := v[0]["version"].(string); ok {
-				return version
+				return version, nil
 			}
 		}
 	}
