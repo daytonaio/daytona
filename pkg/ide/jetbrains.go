@@ -104,12 +104,12 @@ func getJetbrainsVersion(productCode string) (string, error) {
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		panic("failed to read version for product")
+		return "", err
 	}
 
 	var result map[string][]map[string]interface{}
 	if err := json.Unmarshal(body, &result); err != nil {
-		panic("failed to parse json for product")
+		return "", err
 	}
 
 	for _, v := range result {
@@ -119,5 +119,5 @@ func getJetbrainsVersion(productCode string) (string, error) {
 			}
 		}
 	}
-	panic("no version found")
+	return "", fmt.Errorf("jetbrains: no version found for %s", productCode)
 }
