@@ -13,14 +13,13 @@ import (
 	"unsafe"
 
 	"github.com/creack/pty"
+	"github.com/daytonaio/daytona/pkg/agent/ssh/config"
 	"github.com/gliderlabs/ssh"
 	"github.com/pkg/sftp"
 	"golang.org/x/sys/unix"
 
 	log "github.com/sirupsen/logrus"
 )
-
-const SSH_PORT = 2222
 
 type Server struct {
 	ProjectDir        string
@@ -32,7 +31,7 @@ func (s *Server) Start() error {
 	unixForwardHandler := newForwardedUnixHandler()
 
 	sshServer := ssh.Server{
-		Addr: fmt.Sprintf(":%d", SSH_PORT),
+		Addr: fmt.Sprintf(":%d", config.SSH_PORT),
 		Handler: func(session ssh.Session) {
 			switch ss := session.Subsystem(); ss {
 			case "":
@@ -77,7 +76,7 @@ func (s *Server) Start() error {
 		},
 	}
 
-	log.Printf("Starting ssh server on port %d...\n", SSH_PORT)
+	log.Printf("Starting ssh server on port %d...\n", config.SSH_PORT)
 	return sshServer.ListenAndServe()
 }
 
