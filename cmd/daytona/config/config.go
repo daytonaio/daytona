@@ -16,11 +16,6 @@ type ServerApi struct {
 	Key string `json:"key"`
 }
 
-type DefaultProvider struct {
-	Provider string `json:"provider"`
-	Target   string `json:"target"`
-}
-
 type Profile struct {
 	Id   string    `json:"id"`
 	Name string    `json:"name"`
