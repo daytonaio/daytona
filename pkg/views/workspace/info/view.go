@@ -88,10 +88,13 @@ func renderTUIView(output string, width int, isCreationView bool) {
 
 func getSingleProjectOutput(project *serverapiclient.Project, isCreationView bool) string {
 	var output string
+	var repositoryUrl string
 
-	repositoryUrl := *project.Repository.Url
-	repositoryUrl = strings.TrimPrefix(repositoryUrl, "https://")
-	repositoryUrl = strings.TrimPrefix(repositoryUrl, "http://")
+	if project.Repository != nil {
+		repositoryUrl = *project.Repository.Url
+		repositoryUrl = strings.TrimPrefix(repositoryUrl, "https://")
+		repositoryUrl = strings.TrimPrefix(repositoryUrl, "http://")
+	}
 
 	output += getInfoLineState("State", project.State) + "\n"
 	output += getInfoLineGitStatus("Branch", project.State.GitStatus) + "\n"
@@ -152,9 +155,16 @@ func getInfoLineState(key string, state *serverapiclient.ProjectState) string {
 
 func getInfoLineGitStatus(key string, status *serverapiclient.GitStatus) string {
 	output := propertyNameStyle.Render(fmt.Sprintf("%-*s", propertyNameWidth, key))
+	if status.CurrentBranch == nil {
+		return output + propertyValueStyle.Foreground(views.Gray).Render("No branch") + "\n"
+	}
 	output += propertyNameStyle.Foreground(views.Gray).Render(fmt.Sprintf("%-*s", propertyNameWidth, *status.CurrentBranch))
 
 	changesOutput := ""
+	if status.FileStatus == nil {
+		return output + "\n"
+	}
+
 	filesNum := len(status.FileStatus)
 	if filesNum == 1 {
 		changesOutput = " (" + fmt.Sprint(filesNum) + " uncommited change)"
