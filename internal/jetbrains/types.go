@@ -4,8 +4,8 @@
 package jetbrains
 
 type Ide struct {
+	ProductCode  string
 	Name         string
-	Version      string
 	UrlTemplates UrlTemplates
 }
 
