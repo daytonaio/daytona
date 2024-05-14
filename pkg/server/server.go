@@ -79,22 +79,6 @@ func (s *Server) Start(errCh chan error) error {
 
 	log.Info("Starting Daytona server")
 
-	// Terminate orphaned provider processes
-	err = s.ProviderManager.TerminateProviderProcesses(s.config.ProvidersDir)
-	if err != nil {
-		log.Errorf("Failed to terminate orphaned provider processes: %s", err)
-	}
-
-	err = s.downloadDefaultProviders()
-	if err != nil {
-		return err
-	}
-
-	err = s.registerProviders()
-	if err != nil {
-		return err
-	}
-
 	headscaleFrpcHealthCheck, headscaleFrpcService, err := frpc.GetService(frpc.FrpcConnectParams{
 		ServerDomain: s.config.Frps.Domain,
 		ServerPort:   int(s.config.Frps.Port),
@@ -182,6 +166,22 @@ func (s *Server) Start(errCh chan error) error {
 			break
 		}
 	}
+	if err != nil {
+		return err
+	}
+
+	// Terminate orphaned provider processes
+	err = s.ProviderManager.TerminateProviderProcesses(s.config.ProvidersDir)
+	if err != nil {
+		log.Errorf("Failed to terminate orphaned provider processes: %s", err)
+	}
+
+	err = s.downloadDefaultProviders()
+	if err != nil {
+		return err
+	}
+
+	err = s.registerProviders()
 	if err != nil {
 		return err
 	}

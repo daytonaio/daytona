@@ -44,37 +44,40 @@ type IProviderManager interface {
 }
 
 type ProviderManagerConfig struct {
-	ServerDownloadUrl     string
-	ServerUrl             string
-	ServerApiUrl          string
-	LogsDir               string
-	ProviderTargetService providertargets.IProviderTargetService
-	RegistryUrl           string
-	BaseDir               string
+	ServerDownloadUrl        string
+	ServerUrl                string
+	ServerApiUrl             string
+	LogsDir                  string
+	ProviderTargetService    providertargets.IProviderTargetService
+	RegistryUrl              string
+	BaseDir                  string
+	CreateProviderNetworkKey func(providerName string) (string, error)
 }
 
 func NewProviderManager(config ProviderManagerConfig) *ProviderManager {
 	return &ProviderManager{
-		pluginRefs:            make(map[string]*pluginRef),
-		serverDownloadUrl:     config.ServerDownloadUrl,
-		serverUrl:             config.ServerUrl,
-		serverApiUrl:          config.ServerApiUrl,
-		logsDir:               config.LogsDir,
-		providerTargetService: config.ProviderTargetService,
-		registryUrl:           config.RegistryUrl,
-		baseDir:               config.BaseDir,
+		pluginRefs:               make(map[string]*pluginRef),
+		serverDownloadUrl:        config.ServerDownloadUrl,
+		serverUrl:                config.ServerUrl,
+		serverApiUrl:             config.ServerApiUrl,
+		logsDir:                  config.LogsDir,
+		providerTargetService:    config.ProviderTargetService,
+		registryUrl:              config.RegistryUrl,
+		baseDir:                  config.BaseDir,
+		createProviderNetworkKey: config.CreateProviderNetworkKey,
 	}
 }
 
 type ProviderManager struct {
-	pluginRefs            map[string]*pluginRef
-	serverDownloadUrl     string
-	serverUrl             string
-	serverApiUrl          string
-	logsDir               string
-	providerTargetService providertargets.IProviderTargetService
-	registryUrl           string
-	baseDir               string
+	pluginRefs               map[string]*pluginRef
+	serverDownloadUrl        string
+	serverUrl                string
+	serverApiUrl             string
+	logsDir                  string
+	providerTargetService    providertargets.IProviderTargetService
+	registryUrl              string
+	baseDir                  string
+	createProviderNetworkKey func(providerName string) (string, error)
 }
 
 func (m *ProviderManager) GetProvider(name string) (*Provider, error) {
@@ -158,6 +161,11 @@ func (m *ProviderManager) RegisterProvider(pluginPath string) error {
 		return errors.New("failed to initialize provider: " + err.Error())
 	}
 
+	networkKey, err := m.createProviderNetworkKey(pluginName)
+	if err != nil {
+		return errors.New("failed to create network key: " + err.Error())
+	}
+
 	_, err = (*p).Initialize(InitializeProviderRequest{
 		BasePath:          pluginBasePath,
 		ServerDownloadUrl: m.serverDownloadUrl,
@@ -165,6 +173,7 @@ func (m *ProviderManager) RegisterProvider(pluginPath string) error {
 		ServerUrl:         m.serverUrl,
 		ServerApiUrl:      m.serverApiUrl,
 		LogsDir:           m.logsDir,
+		NetworkKey:        networkKey,
 	})
 	if err != nil {
 		return errors.New("failed to initialize provider: " + err.Error())

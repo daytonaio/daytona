@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/daytonaio/daytona/internal/tailscale"
+	"github.com/daytonaio/daytona/internal/cmd/tailscale"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	log "github.com/sirupsen/logrus"
 	"tailscale.com/tsnet"

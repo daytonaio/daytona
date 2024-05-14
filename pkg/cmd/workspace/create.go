@@ -11,10 +11,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/daytonaio/daytona/internal/tailscale"
-	util "github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/internal/cmd/tailscale"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	"github.com/daytonaio/daytona/pkg/agent/ssh"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -334,7 +335,7 @@ func waitForDial(tsConn *tsnet.Server, workspaceId string, projectName string, d
 			return errors.New("timeout: dialing timed out after 3 minutes")
 		}
 
-		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:2222", workspace.GetProjectHostname(workspaceId, projectName)))
+		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", workspace.GetProjectHostname(workspaceId, projectName), ssh.SSH_PORT))
 		if err == nil {
 			defer dialConn.Close()
 			break
