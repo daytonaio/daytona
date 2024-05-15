@@ -4,7 +4,10 @@
 package ide
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"net/url"
 	"os"
 	"os/exec"
@@ -41,11 +44,16 @@ func OpenJetbrainsIDE(activeProfile config.Profile, ide, workspaceId, projectNam
 		return err
 	}
 
+	jbIdeVersion, err := getJetbrainsVersion(jbIde.ProductCode)
+	if err != nil {
+		return err
+	}
+
 	switch *remoteOs {
 	case ospkg.Linux_arm64:
-		downloadUrl = fmt.Sprintf(jbIde.UrlTemplates.Arm64, jbIde.Version)
+		downloadUrl = fmt.Sprintf(jbIde.UrlTemplates.Arm64, jbIdeVersion)
 	case ospkg.Linux_64_86:
-		downloadUrl = fmt.Sprintf(jbIde.UrlTemplates.Amd64, jbIde.Version)
+		downloadUrl = fmt.Sprintf(jbIde.UrlTemplates.Amd64, jbIdeVersion)
 	default:
 		return fmt.Errorf("JetBrains remote IDEs are only supported on Linux.")
 	}
@@ -86,4 +94,31 @@ func isAlreadyDownloaded(projectHostname, downloadPath string) bool {
 	statCmd := exec.Command("ssh", projectHostname, fmt.Sprintf("stat %s", downloadPath))
 	err := statCmd.Run()
 	return err == nil
+}
+
+func getJetbrainsVersion(productCode string) (string, error) {
+	jetbrainsDataServicesUrl := fmt.Sprintf("https://data.services.jetbrains.com/products/releases?code=%s&type=release&latest=true&build=", productCode)
+	res, err := http.Get(jetbrainsDataServicesUrl)
+	if err != nil {
+		return "", err
+	}
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return "", err
+	}
+
+	var result map[string][]map[string]interface{}
+	if err := json.Unmarshal(body, &result); err != nil {
+		return "", err
+	}
+
+	for _, v := range result {
+		if len(v) > 0 {
+			if version, ok := v[0]["version"].(string); ok {
+				return version, nil
+			}
+		}
+	}
+	return "", fmt.Errorf("jetbrains: no version found for %s", productCode)
 }
