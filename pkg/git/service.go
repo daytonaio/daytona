@@ -200,7 +200,7 @@ func (s *Service) shouldCloneBranch(project *workspace.Project) bool {
 		return true
 	}
 
-	return *project.Repository.Branch == project.Repository.Sha
+	return *project.Repository.Branch != project.Repository.Sha
 }
 
 func (s *Service) shouldCheckoutSha(project *workspace.Project) bool {
@@ -209,7 +209,7 @@ func (s *Service) shouldCheckoutSha(project *workspace.Project) bool {
 	}
 
 	if project.Repository.Branch == nil || *project.Repository.Branch == "" {
-		return true
+		return false
 	}
 
 	return *project.Repository.Branch == project.Repository.Sha
