@@ -17,8 +17,8 @@ func GetIdes() map[Id]Ide {
 }
 
 var clion = Ide{
-	Name:    "CLion",
-	Version: "2023.2.2",
+	ProductCode: "CL",
+	Name:        "CLion",
 	UrlTemplates: UrlTemplates{
 		Amd64: "https://download.jetbrains.com/cpp/CLion-%s.tar.gz",
 		Arm64: "https://download.jetbrains.com/cpp/CLion-%s-aarch64.tar.gz",
@@ -26,8 +26,8 @@ var clion = Ide{
 }
 
 var intellij = Ide{
-	Name:    "IntelliJ IDEA Ultimate",
-	Version: "2023.2.2",
+	ProductCode: "IIU",
+	Name:        "IntelliJ IDEA Ultimate",
 	UrlTemplates: UrlTemplates{
 		Amd64: "https://download.jetbrains.com/idea/ideaIU-%s.tar.gz",
 		Arm64: "https://download.jetbrains.com/idea/ideaIU-%s-aarch64.tar.gz",
@@ -35,8 +35,8 @@ var intellij = Ide{
 }
 
 var goland = Ide{
-	Name:    "GoLand",
-	Version: "2023.2.2",
+	ProductCode: "GO",
+	Name:        "GoLand",
 	UrlTemplates: UrlTemplates{
 		Amd64: "https://download.jetbrains.com/go/goland-%s.tar.gz",
 		Arm64: "https://download.jetbrains.com/go/goland-%s-aarch64.tar.gz",
@@ -44,8 +44,8 @@ var goland = Ide{
 }
 
 var pycharm = Ide{
-	Name:    "PyCharm Professional",
-	Version: "2023.2.2",
+	ProductCode: "PCP",
+	Name:        "PyCharm Professional",
 	UrlTemplates: UrlTemplates{
 		Amd64: "https://download.jetbrains.com/python/pycharm-professional-%s.tar.gz",
 		Arm64: "https://download.jetbrains.com/python/pycharm-professional-%s-aarch64.tar.gz",
@@ -53,8 +53,8 @@ var pycharm = Ide{
 }
 
 var phpstorm = Ide{
-	Name:    "PhpStorm",
-	Version: "2023.2.2",
+	ProductCode: "PS",
+	Name:        "PhpStorm",
 	UrlTemplates: UrlTemplates{
 		Amd64: "https://download.jetbrains.com/webide/PhpStorm-%s.tar.gz",
 		Arm64: "https://download.jetbrains.com/webide/PhpStorm-%s-aarch64.tar.gz",
@@ -62,8 +62,8 @@ var phpstorm = Ide{
 }
 
 var webstorm = Ide{
-	Name:    "WebStorm",
-	Version: "2023.2.2",
+	ProductCode: "WS",
+	Name:        "WebStorm",
 	UrlTemplates: UrlTemplates{
 		Amd64: "https://download.jetbrains.com/webstorm/WebStorm-%s.tar.gz",
 		Arm64: "https://download.jetbrains.com/webstorm/WebStorm-%s-aarch64.tar.gz",
@@ -71,8 +71,8 @@ var webstorm = Ide{
 }
 
 var rider = Ide{
-	Name:    "Rider",
-	Version: "2023.2.2",
+	ProductCode: "RD",
+	Name:        "Rider",
 	UrlTemplates: UrlTemplates{
 		Amd64: "https://download.jetbrains.com/rider/JetBrains.Rider-%s.tar.gz",
 		Arm64: "https://download.jetbrains.com/rider/JetBrains.Rider-%s-aarch64.tar.gz",
@@ -80,8 +80,8 @@ var rider = Ide{
 }
 
 var rubymine = Ide{
-	Name:    "RubyMine",
-	Version: "2023.2.2",
+	ProductCode: "RM",
+	Name:        "RubyMine",
 	UrlTemplates: UrlTemplates{
 		Amd64: "https://download.jetbrains.com/ruby/RubyMine-%s.tar.gz",
 		Arm64: "https://download.jetbrains.com/ruby/RubyMine-%s-aarch64.tar.gz",
