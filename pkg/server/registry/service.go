@@ -79,7 +79,7 @@ func (s *LocalContainerRegistry) Start() error {
 	}
 
 	// Pull the image
-	out, err := cli.ImagePull(ctx, "registry:2", image.PullOptions{})
+	out, err := cli.ImagePull(ctx, "registry:2.8.3", image.PullOptions{})
 	if err != nil {
 		return err
 	}
@@ -95,20 +95,17 @@ func (s *LocalContainerRegistry) Start() error {
 
 	//	todo: enable TLS
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
-		Image: "registry:2",
+		Image: "registry:2.8.3",
 		ExposedPorts: nat.PortSet{
 			port: struct{}{},
 		},
-	}, &container.HostConfig{
-		Privileged: true,
-		PortBindings: nat.PortMap{
-			port: []nat.PortBinding{
-				{
-					HostIP:   "127.0.0.1",
-					HostPort: portStr,
-				},
-			},
+		Env: []string{
+			//	todo: from config?
+			"REGISTRY_HTTP_ADDR=127.0.0.1:5000",
 		},
+	}, &container.HostConfig{
+		NetworkMode: "host",
+		Privileged:  true,
 		Binds: []string{
 			s.dataPath + ":/var/lib/registry",
 		},
