@@ -11,7 +11,7 @@ import (
 )
 
 func (p *Provisioner) CreateWorkspace(workspace *workspace.Workspace, target *provider.ProviderTarget) error {
-	targetProvider, err := p.ProviderManager.GetProvider(target.ProviderInfo.Name)
+	targetProvider, err := p.providerManager.GetProvider(target.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
@@ -25,7 +25,7 @@ func (p *Provisioner) CreateWorkspace(workspace *workspace.Workspace, target *pr
 }
 
 func (p *Provisioner) CreateProject(project *workspace.Project, target *provider.ProviderTarget, cr *containerregistry.ContainerRegistry, gc *gitprovider.GitProviderConfig) error {
-	targetProvider, err := p.ProviderManager.GetProvider(target.ProviderInfo.Name)
+	targetProvider, err := p.providerManager.GetProvider(target.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}

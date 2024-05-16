@@ -54,16 +54,40 @@ type WorkspaceServiceConfig struct {
 
 func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 	return &WorkspaceService{
-		WorkspaceServiceConfig: config,
+		workspaceStore:                  config.WorkspaceStore,
+		targetStore:                     config.TargetStore,
+		containerRegistryStore:          config.ContainerRegistryStore,
+		serverApiUrl:                    config.ServerApiUrl,
+		serverUrl:                       config.ServerUrl,
+		defaultProjectImage:             config.DefaultProjectImage,
+		defaultProjectUser:              config.DefaultProjectUser,
+		defaultProjectPostStartCommands: config.DefaultProjectPostStartCommands,
+		provisioner:                     config.Provisioner,
+		loggerFactory:                   config.LoggerFactory,
+		apiKeyService:                   config.ApiKeyService,
+		gitProviderService:              config.GitProviderService,
+		builderFactory:                  config.BuilderFactory,
 	}
 }
 
 type WorkspaceService struct {
-	WorkspaceServiceConfig
+	workspaceStore                  workspace.Store
+	targetStore                     targetStore
+	containerRegistryStore          containerregistry.Store
+	provisioner                     provisioner.IProvisioner
+	apiKeyService                   apikeys.IApiKeyService
+	serverApiUrl                    string
+	serverUrl                       string
+	defaultProjectImage             string
+	defaultProjectUser              string
+	defaultProjectPostStartCommands []string
+	loggerFactory                   logger.LoggerFactory
+	gitProviderService              gitproviders.IGitProviderService
+	builderFactory                  builder.IBuilderFactory
 }
 
 func (s *WorkspaceService) SetProjectState(workspaceId, projectName string, state *workspace.ProjectState) (*workspace.Workspace, error) {
-	ws, err := s.WorkspaceStore.Find(workspaceId)
+	ws, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +95,7 @@ func (s *WorkspaceService) SetProjectState(workspaceId, projectName string, stat
 	for _, project := range ws.Projects {
 		if project.Name == projectName {
 			project.State = state
-			return ws, s.WorkspaceStore.Save(ws)
+			return ws, s.workspaceStore.Save(ws)
 		}
 	}
 
@@ -79,9 +103,9 @@ func (s *WorkspaceService) SetProjectState(workspaceId, projectName string, stat
 }
 
 func (s *WorkspaceService) GetWorkspaceLogReader(workspaceId string) (io.Reader, error) {
-	return s.LoggerFactory.CreateWorkspaceLogReader(workspaceId)
+	return s.loggerFactory.CreateWorkspaceLogReader(workspaceId)
 }
 
 func (s *WorkspaceService) GetProjectLogReader(workspaceId, projectName string) (io.Reader, error) {
-	return s.LoggerFactory.CreateProjectLogReader(workspaceId, projectName)
+	return s.loggerFactory.CreateProjectLogReader(workspaceId, projectName)
 }

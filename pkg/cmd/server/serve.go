@@ -134,27 +134,21 @@ var ServeCmd = &cobra.Command{
 				return headscaleServer.CreateAuthKey()
 			},
 		})
-		builderFactory := &builder.BuilderFactory{
-			BuilderConfig: builder.BuilderConfig{
-				DaytonaServerConfigFolder:       configDir,
-				LocalContainerRegistryServer:    "127.0.0.1:5000",
-				BasePath:                        filepath.Join(configDir, "builds"),
-				LoggerFactory:                   loggerFactory,
-				DefaultProjectImage:             c.DefaultProjectImage,
-				DefaultProjectUser:              c.DefaultProjectUser,
-				DefaultProjectPostStartCommands: c.DefaultProjectPostStartCommands,
-			},
-		}
+		builderFactory := builder.NewBuilderFactory(builder.BuilderConfig{
+			DaytonaServerConfigFolder:       configDir,
+			LocalContainerRegistryServer:    "127.0.0.1:5000",
+			BasePath:                        filepath.Join(configDir, "builds"),
+			LoggerFactory:                   loggerFactory,
+			DefaultProjectImage:             c.DefaultProjectImage,
+			DefaultProjectUser:              c.DefaultProjectUser,
+			DefaultProjectPostStartCommands: c.DefaultProjectPostStartCommands,
+		})
 		provisioner := provisioner.NewProvisioner(provisioner.ProvisionerConfig{
 			//	LocalContainerRegistryServer: fmt.Sprintf("registry-%s.%s", c.Id, c.Frps.Domain),
 			//	for the local provisioner, we use the local container registry
 			//	there is no need to use the frps domain
 			//	todo: get the port from the local container registry
 			ProviderManager: providerManager,
-			LoggerFactory:   loggerFactory,
-		})
-		gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
-			ConfigStore: gitProviderConfigStore,
 		})
 		gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
 			ConfigStore: gitProviderConfigStore,
@@ -173,7 +167,6 @@ var ServeCmd = &cobra.Command{
 			DefaultProjectPostStartCommands: c.DefaultProjectPostStartCommands,
 			Provisioner:                     provisioner,
 			LoggerFactory:                   loggerFactory,
-			GitProviderService:              gitProviderService,
 			BuilderFactory:                  builderFactory,
 		})
 		profileDataService := profiledata.NewProfileDataService(profiledata.ProfileDataServiceConfig{

@@ -9,7 +9,7 @@ import (
 )
 
 func (p *Provisioner) GetWorkspaceInfo(workspace *workspace.Workspace, target *provider.ProviderTarget) (*workspace.WorkspaceInfo, error) {
-	targetProvider, err := p.ProviderManager.GetProvider(target.ProviderInfo.Name)
+	targetProvider, err := p.providerManager.GetProvider(target.ProviderInfo.Name)
 	if err != nil {
 		return nil, err
 	}

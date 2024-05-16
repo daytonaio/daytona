@@ -14,66 +14,71 @@ type mockGitProviderService struct {
 	mock.Mock
 }
 
-func NewGitProviderService() *mockGitProviderService {
+func NewMockGitProviderService() *mockGitProviderService {
 	return &mockGitProviderService{}
 }
 
-func (s *mockGitProviderService) GetConfig(id string) (*gitprovider.GitProviderConfig, error) {
-	args := s.Called(id)
+func (m *mockGitProviderService) GetConfig(id string) (*gitprovider.GitProviderConfig, error) {
+	args := m.Called(id)
 	return args.Get(0).(*gitprovider.GitProviderConfig), args.Error(1)
 }
 
-func (s *mockGitProviderService) GetConfigForUrl(url string) (*gitprovider.GitProviderConfig, error) {
-	args := s.Called(url)
+func (m *mockGitProviderService) GetConfigForUrl(url string) (*gitprovider.GitProviderConfig, error) {
+	args := m.Called(url)
 	return args.Get(0).(*gitprovider.GitProviderConfig), args.Error(1)
 }
 
-func (s *mockGitProviderService) GetGitProvider(id string) (gitprovider.GitProvider, error) {
-	args := s.Called(id)
+func (m *mockGitProviderService) GetGitProvider(id string) (gitprovider.GitProvider, error) {
+	args := m.Called(id)
 	return args.Get(0).(gitprovider.GitProvider), args.Error(1)
 }
 
-func (s *mockGitProviderService) GetGitProviderForUrl(url string) (gitprovider.GitProvider, error) {
-	args := s.Called(url)
+func (m *mockGitProviderService) GetGitProviderForUrl(url string) (gitprovider.GitProvider, error) {
+	args := m.Called(url)
 	return args.Get(0).(gitprovider.GitProvider), args.Error(1)
 }
 
-func (s *mockGitProviderService) GetGitUser(gitProviderId string) (*gitprovider.GitUser, error) {
-	args := s.Called(gitProviderId)
+func (m *mockGitProviderService) GetGitUser(gitProviderId string) (*gitprovider.GitUser, error) {
+	args := m.Called(gitProviderId)
 	return args.Get(0).(*gitprovider.GitUser), args.Error(1)
 }
 
-func (s *mockGitProviderService) GetNamespaces(gitProviderId string) ([]*gitprovider.GitNamespace, error) {
-	args := s.Called(gitProviderId)
+func (m *mockGitProviderService) GetNamespaces(gitProviderId string) ([]*gitprovider.GitNamespace, error) {
+	args := m.Called(gitProviderId)
 	return args.Get(0).([]*gitprovider.GitNamespace), args.Error(1)
 }
 
-func (s *mockGitProviderService) GetRepoBranches(gitProviderId string, namespaceId string, repositoryId string) ([]*gitprovider.GitBranch, error) {
-	args := s.Called(gitProviderId, namespaceId, repositoryId)
+func (m *mockGitProviderService) GetRepoBranches(gitProviderId string, namespaceId string, repositoryId string) ([]*gitprovider.GitBranch, error) {
+	args := m.Called(gitProviderId, namespaceId, repositoryId)
 	return args.Get(0).([]*gitprovider.GitBranch), args.Error(1)
 }
 
-func (s *mockGitProviderService) GetRepoPRs(gitProviderId string, namespaceId string, repositoryId string) ([]*gitprovider.GitPullRequest, error) {
-	args := s.Called(gitProviderId, namespaceId, repositoryId)
+func (m *mockGitProviderService) GetRepoPRs(gitProviderId string, namespaceId string, repositoryId string) ([]*gitprovider.GitPullRequest, error) {
+	args := m.Called(gitProviderId, namespaceId, repositoryId)
 	return args.Get(0).([]*gitprovider.GitPullRequest), args.Error(1)
 }
 
-func (s *mockGitProviderService) GetRepositories(gitProviderId string, namespaceId string) ([]*gitprovider.GitRepository, error) {
-	args := s.Called(gitProviderId, namespaceId)
+func (m *mockGitProviderService) GetRepositories(gitProviderId string, namespaceId string) ([]*gitprovider.GitRepository, error) {
+	args := m.Called(gitProviderId, namespaceId)
 	return args.Get(0).([]*gitprovider.GitRepository), args.Error(1)
 }
 
-func (s *mockGitProviderService) ListConfigs() ([]*gitprovider.GitProviderConfig, error) {
-	args := s.Called()
+func (m *mockGitProviderService) ListConfigs() ([]*gitprovider.GitProviderConfig, error) {
+	args := m.Called()
 	return args.Get(0).([]*gitprovider.GitProviderConfig), args.Error(1)
 }
 
-func (s *mockGitProviderService) RemoveGitProvider(gitProviderId string) error {
-	args := s.Called(gitProviderId)
+func (m *mockGitProviderService) RemoveGitProvider(gitProviderId string) error {
+	args := m.Called(gitProviderId)
 	return args.Error(0)
 }
 
-func (s *mockGitProviderService) SetGitProviderConfig(providerConfig *gitprovider.GitProviderConfig) error {
-	args := s.Called(providerConfig)
+func (m *mockGitProviderService) SetGitProviderConfig(providerConfig *gitprovider.GitProviderConfig) error {
+	args := m.Called(providerConfig)
 	return args.Error(0)
+}
+
+func (m *mockGitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (string, error) {
+	args := m.Called(repo)
+	return args.String(0), args.Error(1)
 }

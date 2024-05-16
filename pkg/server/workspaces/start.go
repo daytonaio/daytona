@@ -14,17 +14,17 @@ import (
 )
 
 func (s *WorkspaceService) StartWorkspace(workspaceId string) error {
-	w, err := s.WorkspaceStore.Find(workspaceId)
+	w, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
 		return ErrWorkspaceNotFound
 	}
 
-	target, err := s.TargetStore.Find(w.Target)
+	target, err := s.targetStore.Find(w.Target)
 	if err != nil {
 		return err
 	}
 
-	workspaceLogger := s.LoggerFactory.CreateWorkspaceLogger(w.Id)
+	workspaceLogger := s.loggerFactory.CreateWorkspaceLogger(w.Id)
 	defer workspaceLogger.Close()
 
 	wsLogWriter := io.MultiWriter(&util.InfoLogWriter{}, workspaceLogger)
@@ -33,7 +33,7 @@ func (s *WorkspaceService) StartWorkspace(workspaceId string) error {
 }
 
 func (s *WorkspaceService) StartProject(workspaceId, projectName string) error {
-	w, err := s.WorkspaceStore.Find(workspaceId)
+	w, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
 		return ErrWorkspaceNotFound
 	}
@@ -43,12 +43,12 @@ func (s *WorkspaceService) StartProject(workspaceId, projectName string) error {
 		return ErrProjectNotFound
 	}
 
-	target, err := s.TargetStore.Find(project.Target)
+	target, err := s.targetStore.Find(project.Target)
 	if err != nil {
 		return err
 	}
 
-	projectLogger := s.LoggerFactory.CreateProjectLogger(w.Id, project.Name)
+	projectLogger := s.loggerFactory.CreateProjectLogger(w.Id, project.Name)
 	defer projectLogger.Close()
 
 	return s.startProject(project, target, projectLogger)
@@ -57,13 +57,13 @@ func (s *WorkspaceService) StartProject(workspaceId, projectName string) error {
 func (s *WorkspaceService) startWorkspace(workspace *workspace.Workspace, target *provider.ProviderTarget, wsLogWriter io.Writer) error {
 	wsLogWriter.Write([]byte("Starting workspace\n"))
 
-	err := s.Provisioner.StartWorkspace(workspace, target)
+	err := s.provisioner.StartWorkspace(workspace, target)
 	if err != nil {
 		return err
 	}
 
 	for _, project := range workspace.Projects {
-		projectLogger := s.LoggerFactory.CreateProjectLogger(workspace.Id, project.Name)
+		projectLogger := s.loggerFactory.CreateProjectLogger(workspace.Id, project.Name)
 		defer projectLogger.Close()
 
 		err = s.startProject(project, target, projectLogger)
@@ -81,9 +81,9 @@ func (s *WorkspaceService) startProject(project *workspace.Project, target *prov
 	logWriter.Write([]byte(fmt.Sprintf("Starting project %s\n", project.Name)))
 
 	projectToStart := *project
-	projectToStart.EnvVars = workspace.GetProjectEnvVars(project, s.ServerApiUrl, s.ServerUrl)
+	projectToStart.EnvVars = workspace.GetProjectEnvVars(project, s.serverApiUrl, s.serverUrl)
 
-	err := s.Provisioner.StartProject(project, target)
+	err := s.provisioner.StartProject(project, target)
 	if err != nil {
 		return err
 	}
