@@ -5,6 +5,7 @@ package target
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
@@ -17,29 +18,37 @@ import (
 )
 
 var targetRemoveCmd = &cobra.Command{
-	Use:     "remove",
+	Use:     "remove [TARGET_NAME]",
 	Short:   "Remove target",
-	Args:    cobra.NoArgs,
+	Args:    cobra.RangeArgs(0, 1),
 	Aliases: []string{"rm", "delete"},
 	Run: func(cmd *cobra.Command, args []string) {
+		var selectedTargetName string
+
 		c, err := config.GetConfig()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		activeProfile, err := c.GetActiveProfile()
-		if err != nil {
-			log.Fatal(err)
-		}
+		if len(args) == 0 {
+			activeProfile, err := c.GetActiveProfile()
+			if err != nil {
+				log.Fatal(err)
+			}
 
-		targets, err := server.GetTargetList()
-		if err != nil {
-			log.Fatal(err)
-		}
+			targets, err := server.GetTargetList()
+			if err != nil {
+				log.Fatal(err)
+			}
 
-		selectedTarget, err := target.GetTargetFromPrompt(targets, activeProfile.Name, false)
-		if err != nil {
-			log.Fatal(err)
+			selectedTarget, err := target.GetTargetFromPrompt(targets, activeProfile.Name, false)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			selectedTargetName = *selectedTarget.Name
+		} else {
+			selectedTargetName = args[0]
 		}
 
 		client, err := server.GetApiClient(nil)
@@ -47,11 +56,11 @@ var targetRemoveCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		res, err := client.TargetAPI.RemoveTarget(context.Background(), *selectedTarget.Name).Execute()
+		res, err := client.TargetAPI.RemoveTarget(context.Background(), selectedTargetName).Execute()
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		views.RenderInfoMessageBold("Target removed successfully")
+		views.RenderInfoMessageBold(fmt.Sprintf("Target %s removed successfully", selectedTargetName))
 	},
 }
