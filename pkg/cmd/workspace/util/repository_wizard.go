@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"net/url"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
@@ -89,7 +90,7 @@ func getRepositoryFromWizard(userGitProviders []serverapiclient.GitProvider, add
 
 	var branchList []serverapiclient.GitBranch
 	err = views_util.With(func() error {
-		branchList, _, err = apiClient.GitProviderAPI.GetRepoBranches(ctx, providerId, namespaceId, *chosenRepo.Id).Execute()
+		branchList, _, err = apiClient.GitProviderAPI.GetRepoBranches(ctx, providerId, namespaceId, url.QueryEscape(*chosenRepo.Id)).Execute()
 		return err
 	})
 
@@ -107,14 +108,9 @@ func getRepositoryFromWizard(userGitProviders []serverapiclient.GitProvider, add
 		return chosenRepo, nil
 	}
 
-	// TODO: Add support for Bitbucket
-	if providerId == "bitbucket" {
-		return chosenRepo, nil
-	}
-
 	var prList []serverapiclient.GitPullRequest
 	err = views_util.With(func() error {
-		prList, _, err = apiClient.GitProviderAPI.GetRepoPRs(ctx, providerId, namespaceId, *chosenRepo.Id).Execute()
+		prList, _, err = apiClient.GitProviderAPI.GetRepoPRs(ctx, providerId, namespaceId, url.QueryEscape(*chosenRepo.Id)).Execute()
 		return err
 	})
 

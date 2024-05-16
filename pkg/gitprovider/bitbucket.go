@@ -4,28 +4,14 @@
 package gitprovider
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 
 	"github.com/ktrysmt/go-bitbucket"
 )
-
-type BranchesResponse struct {
-	Values []BranchResponse `json:"values"`
-}
-
-type BranchResponse struct {
-	Name   string `json:"name"`
-	Target struct {
-		Hash string `json:"hash"`
-	} `json:"target"`
-}
 
 type BitbucketGitProvider struct {
 	*AbstractGitProvider
@@ -47,11 +33,6 @@ func NewBitbucketGitProvider(username string, token string) *BitbucketGitProvide
 
 func (g *BitbucketGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	client := g.getApiClient()
-	user, err := g.GetUser()
-	if err != nil {
-		return nil, err
-	}
-
 	wsList, err := client.Workspaces.List()
 	if err != nil {
 		return nil, err
@@ -65,8 +46,6 @@ func (g *BitbucketGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 		namespace.Name = org.Name
 		namespaces = append(namespaces, namespace)
 	}
-
-	namespaces = append([]*GitNamespace{{Id: personalNamespaceId, Name: user.Username}}, namespaces...)
 
 	return namespaces, nil
 }
@@ -98,25 +77,27 @@ func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]*GitReposito
 			return nil, fmt.Errorf("Invalid repo links")
 		}
 
-		repoUrl := htmlLink["href"].(string)
-		repoSlug := repoUrl[strings.LastIndex(repoUrl, "/")+1:]
+		repoUrl, ok := htmlLink["href"].(string)
+		if !ok {
+			return nil, fmt.Errorf("Invalid repo html link")
+		}
 
 		u, err := url.Parse(repoUrl)
 		if err != nil {
 			return nil, err
 		}
 
-		ownerUsername, ok := repo.Owner["username"].(string)
-		if !ok {
-			return nil, fmt.Errorf("Invalid repo owner")
+		owner, name, err := g.getOwnerAndRepoFromFullName(repo.Full_name)
+		if err != nil {
+			return nil, err
 		}
 
 		response = append(response, &GitRepository{
-			Id:     repoSlug,
-			Name:   repo.Name,
+			Id:     repo.Full_name,
+			Name:   name,
 			Url:    repoUrl,
 			Source: u.Host,
-			Owner:  ownerUsername,
+			Owner:  owner,
 		})
 	}
 
@@ -127,56 +108,28 @@ func (g *BitbucketGitProvider) GetRepoBranches(repositoryId string, namespaceId 
 	client := g.getApiClient()
 	var response []*GitBranch
 
-	if namespaceId == personalNamespaceId {
-		user, err := g.GetUser()
-		if err != nil {
-			return nil, err
+	owner, repo, err := g.getOwnerAndRepoFromFullName(repositoryId)
+	if err != nil {
+		return nil, err
+	}
+
+	branches, err := client.Repositories.Repository.ListBranches(&bitbucket.RepositoryBranchOptions{
+		RepoSlug: repo,
+		Owner:    owner,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, branch := range branches.Branches {
+		hash, ok := branch.Target["hash"].(string)
+		if !ok {
+			return nil, fmt.Errorf("Invalid branch hash")
 		}
-		namespaceId = user.Username
-	}
 
-	// Custom API call implementation
-
-	authString := fmt.Sprintf("%s:%s", g.username, g.token)
-	encodedAuth := base64.StdEncoding.EncodeToString([]byte(authString))
-
-	url := fmt.Sprintf("https://api.bitbucket.org/2.0/repositories/%s/%s/refs/branches", namespaceId, repositoryId)
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		fmt.Println("Error creating request:", err)
-		return nil, err
-	}
-
-	req.Header.Set("Authorization", "Basic "+encodedAuth)
-
-	resp, err := client.HttpClient.Do(req)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return nil, err
-	}
-
-	var branchesResponse BranchesResponse
-
-	// Unmarshal JSON into the Branches slice
-	err = json.Unmarshal(body, &branchesResponse)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return nil, err
-	}
-
-	// Now you can work with the branches
-	for _, branch := range branchesResponse.Values {
 		response = append(response, &GitBranch{
 			Name: branch.Name,
-			Sha:  branch.Target.Hash,
+			Sha:  hash,
 		})
 	}
 
@@ -187,26 +140,53 @@ func (g *BitbucketGitProvider) GetRepoPRs(repositoryId string, namespaceId strin
 	client := g.getApiClient()
 	var response []*GitPullRequest
 
-	if namespaceId == personalNamespaceId {
-		user, err := g.GetUser()
-		if err != nil {
-			return nil, err
-		}
-		namespaceId = user.Username
-	}
-
-	prList, err := client.Repositories.PullRequests.Get(&bitbucket.PullRequestsOptions{
-		Owner:    namespaceId,
-		RepoSlug: repositoryId,
-	})
-
+	owner, repo, err := g.getOwnerAndRepoFromFullName(repositoryId)
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO: Implement this
-	fmt.Println(prList)
-	return response, err
+	prList, err := client.Repositories.PullRequests.Get(&bitbucket.PullRequestsOptions{
+		Owner:    owner,
+		RepoSlug: repo,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	marshalled, err := json.Marshal(prList)
+	if err != nil {
+		return nil, err
+	}
+
+	var prResponse prResponseData
+	err = json.Unmarshal(marshalled, &prResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, pr := range prResponse.Values {
+		htmlLink, ok := pr.Source.Repository.Links["html"].(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("Invalid repo links")
+		}
+
+		repoUrl, ok := htmlLink["href"].(string)
+		if !ok {
+			return nil, fmt.Errorf("Invalid repo html link")
+		}
+
+		response = append(response, &GitPullRequest{
+			Name:            pr.Title,
+			Branch:          pr.Source.Branch.Name,
+			Sha:             pr.Source.Commit.Hash,
+			SourceRepoId:    pr.Source.Repository.Full_name,
+			SourceRepoUrl:   repoUrl,
+			SourceRepoOwner: owner,
+			SourceRepoName:  repo,
+		})
+	}
+
+	return response, nil
 }
 
 func (g *BitbucketGitProvider) GetUser() (*GitUser, error) {
@@ -329,22 +309,9 @@ func (g *BitbucketGitProvider) getPrContext(staticContext *StaticGitContext) (*S
 		return nil, fmt.Errorf("Invalid PR repository full name")
 	}
 
-	links, ok := repository["links"].(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("Invalid PR repository links")
-	}
-
-	htmlLink, ok := links["html"].(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("Invalid PR repository html link")
-	}
-
-	url := htmlLink["href"].(string)
-	repoSlug := url[strings.LastIndex(url, "/")+1:]
-
 	repo.Owner = parts[0]
 	repo.Name = parts[1]
-	repo.Id = repoSlug
+	repo.Id = fullName
 
 	branch, ok := source["branch"].(map[string]interface{})
 	if !ok {
@@ -379,7 +346,7 @@ func (g *BitbucketGitProvider) parseStaticGitContext(repoUrl string) (*StaticGit
 		prUint := uint32(prNumber)
 		staticContext.PrNumber = &prUint
 		staticContext.Path = nil
-	case len(parts) >= 1 && parts[0] == "src":
+	case len(parts) >= 1 && (parts[0] == "src" || parts[0] == "branch"):
 		staticContext.Branch = &parts[1]
 		if len(parts) > 2 {
 			path := strings.Join(parts[2:], "/")
@@ -397,4 +364,36 @@ func (g *BitbucketGitProvider) parseStaticGitContext(repoUrl string) (*StaticGit
 	}
 
 	return staticContext, nil
+}
+
+func (b *BitbucketGitProvider) getOwnerAndRepoFromFullName(fullName string) (string, string, error) {
+	parts := strings.Split(fullName, "/")
+	if len(parts) < 2 {
+		return "", "", fmt.Errorf("Invalid full name")
+	}
+
+	name := parts[len(parts)-1]
+
+	owner := strings.Join(parts[:len(parts)-1], "/")
+
+	return owner, name, nil
+}
+
+type prResponseData struct {
+	Values []struct {
+		Title  string `json:"title"`
+		Source struct {
+			Branch struct {
+				Name string `json:"name"`
+			} `json:"branch"`
+			Commit struct {
+				Hash string `json:"hash"`
+			} `json:"commit"`
+			Repository struct {
+				UUID      string                 `json:"uuid"`
+				Links     map[string]interface{} `json:"links"`
+				Full_name string                 `json:"full_name"`
+			} `json:"repository"`
+		} `json:"source"`
+	} `json:"values"`
 }
