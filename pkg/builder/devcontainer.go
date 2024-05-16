@@ -16,6 +16,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/logger"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/docker/docker/api/types"
@@ -25,8 +26,10 @@ import (
 )
 
 type BuildOutcome struct {
-	Outcome   string   `json:"outcome"`
-	ImageName []string `json:"imageName"`
+	Outcome               string `json:"outcome"`
+	ContainerId           string `json:"containerId"`
+	RemoteUser            string `json:"remoteUser"`
+	RemoteWorkspaceFolder string `json:"remoteWorkspaceFolder"`
 }
 
 type DevcontainerBuilderConfig struct {
@@ -41,6 +44,7 @@ type DevcontainerBuilder struct {
 	BuilderPlugin
 	DevcontainerBuilderConfig
 	buildImageName string
+	user           string
 }
 
 func (b *DevcontainerBuilder) Build() (*BuildResult, error) {
@@ -59,13 +63,8 @@ func (b *DevcontainerBuilder) Build() (*BuildResult, error) {
 		return nil, err
 	}
 
-	remoteUser, err := b.getRemoteUser()
-	if err != nil {
-		return nil, err
-	}
-
 	return &BuildResult{
-		User:              remoteUser,
+		User:              b.user,
 		ImageName:         b.buildImageName,
 		ProjectVolumePath: b.projectVolumePath,
 	}, nil
@@ -124,14 +123,16 @@ func (b *DevcontainerBuilder) buildDevcontainer() error {
 	projectLogger := b.loggerFactory.CreateProjectLogger(b.project.WorkspaceId, b.project.Name)
 	defer projectLogger.Close()
 
-	ctx := context.Background()
-
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return err
 	}
 
-	cmd := []string{"devcontainer", "build", "--workspace-folder", "/project"}
+	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
+		ApiClient: cli,
+	})
+
+	cmd := []string{"devcontainer", "up", "--workspace-folder", "/project"}
 	if b.project.Build.Devcontainer.DevContainerFilePath != "" {
 		cmd = append(cmd, "--config", filepath.Join("/project", b.project.Build.Devcontainer.DevContainerFilePath))
 	}
@@ -140,41 +141,41 @@ func (b *DevcontainerBuilder) buildDevcontainer() error {
 		AttachStdout: true,
 		AttachStderr: true,
 		Cmd:          cmd,
+		Tty:          true,
 	}
 
-	execIDResp, err := cli.ContainerExecCreate(ctx, b.buildId, execConfig)
-	if err != nil {
-		return err
-	}
-
-	attachResp, err := cli.ContainerExecAttach(ctx, execIDResp.ID, types.ExecStartCheck{})
-	if err != nil {
-		return err
-	}
-	defer attachResp.Close()
-
+	r, w := io.Pipe()
 	var buildOutcome BuildOutcome
-	var lastLine string
-	scanner := bufio.NewScanner(attachResp.Reader)
-	for scanner.Scan() {
-		lastLine = scanner.Text()
-		projectLogger.Write([]byte(lastLine + "\n"))
 
-		if strings.Contains(lastLine, `{"outcome"`) {
-			start := strings.Index(lastLine, "{")
-			end := strings.LastIndex(lastLine, "}")
-			if start != -1 && end != -1 && start < end {
-				lastLine = lastLine[start : end+1]
-			}
+	go func(buildOutcome *BuildOutcome) {
+		var lastLine string
+		scanner := bufio.NewScanner(r)
+		for scanner.Scan() {
+			lastLine = scanner.Text()
+			projectLogger.Write([]byte(lastLine + "\n"))
 
-			err = json.Unmarshal([]byte(lastLine), &buildOutcome)
-			if err != nil {
-				// lastLine could not be unmarshalled into the expected JSON structure
-				return err
+			if strings.Contains(lastLine, `{"outcome"`) {
+				start := strings.Index(lastLine, "{")
+				end := strings.LastIndex(lastLine, "}")
+				if start != -1 && end != -1 && start < end {
+					lastLine = lastLine[start : end+1]
+				}
+
+				err = json.Unmarshal([]byte(lastLine), &buildOutcome)
+				if err != nil {
+					//	todo: handle properly
+					log.Error(err)
+				}
 			}
 		}
-	}
-	if err := scanner.Err(); err != nil {
+		if err := scanner.Err(); err != nil {
+			//	todo: handle properly
+			log.Error(err)
+		}
+	}(&buildOutcome)
+
+	result, err := dockerClient.ExecSync(b.buildId, execConfig, w)
+	if err != nil {
 		return err
 	}
 
@@ -183,26 +184,24 @@ func (b *DevcontainerBuilder) buildDevcontainer() error {
 		return errors.New("devcontainer build failed")
 	}
 
-	execInspect, err := cli.ContainerExecInspect(ctx, execIDResp.ID)
-	if err != nil {
-		return err
-	}
-	if execInspect.ExitCode != 0 {
+	b.user = buildOutcome.RemoteUser
+
+	if result.ExitCode != 0 {
 		return errors.New("devcontainer build failed")
 	}
 
-	devcontainerImage := buildOutcome.ImageName[0]
+	builderCli, err := b.getBuilderDockerClient()
+	if err != nil {
+		return err
+	}
 
 	//	todo: commit sha from project Repository
 	tag := "latest"
 	imageName := fmt.Sprintf("%s:%s", b.localContainerRegistryServer+"/p-"+b.buildId, tag)
 
-	cliBuilder, err := b.getBuilderDockerClient()
-	if err != nil {
-		return err
-	}
-
-	err = cliBuilder.ImageTag(ctx, devcontainerImage, imageName)
+	_, err = builderCli.ContainerCommit(context.Background(), buildOutcome.ContainerId, container.CommitOptions{
+		Reference: imageName,
+	})
 	if err != nil {
 		return err
 	}
@@ -210,35 +209,6 @@ func (b *DevcontainerBuilder) buildDevcontainer() error {
 	b.buildImageName = imageName
 
 	return nil
-}
-
-func (b *DevcontainerBuilder) getRemoteUser() (string, error) {
-	ctx := context.Background()
-	cliBuilder, err := b.getBuilderDockerClient()
-	if err != nil {
-		return "", err
-	}
-
-	imageInspect, _, err := cliBuilder.ImageInspectWithRaw(ctx, b.buildImageName)
-	if err != nil {
-		return "", err
-	}
-	meta, ok := imageInspect.Config.Labels["devcontainer.metadata"]
-	if !ok {
-		return "", errors.New("devcontainer.metadata label not found")
-	}
-	var metadata []interface{}
-	err = json.Unmarshal([]byte(meta), &metadata)
-	if err != nil {
-		return "", err
-	}
-	for _, m := range metadata {
-		metadataMap := m.(map[string]interface{})
-		if metadataMap["remoteUser"] != nil {
-			return metadataMap["remoteUser"].(string), nil
-		}
-	}
-	return "", errors.New("remoteUser not found in metadata")
 }
 
 func (b *DevcontainerBuilder) startContainer() error {
@@ -263,7 +233,7 @@ func (b *DevcontainerBuilder) startContainer() error {
 		return err
 	}
 
-	dir := "/tmp/" + b.buildId + "/etc/docker"
+	dir := "/tmp/" + b.buildId + "/var/lib/docker"
 	err = os.MkdirAll(dir, 0755)
 	if err != nil {
 		return err
@@ -279,6 +249,7 @@ func (b *DevcontainerBuilder) startContainer() error {
 		Binds: []string{
 			b.projectVolumePath + ":/project",
 			filepath.Dir(b.getLocalDockerSocket()) + ":/tmp/docker",
+			dir + ":/var/lib/docker",
 		},
 	}, nil, nil, b.buildId)
 	if err != nil {
@@ -303,7 +274,7 @@ func (b *DevcontainerBuilder) startDocker() error {
 	execConfig := types.ExecConfig{
 		AttachStdout: true,
 		AttachStderr: true,
-		Cmd:          []string{"dockerd", "-H", "unix:///tmp/docker/docker.sock", "-H", "unix:///var/run/docker.sock", "--insecure-registry", "localhost:5000"},
+		Cmd:          []string{"dockerd", "-H", "unix:///tmp/docker/docker.sock", "-H", "unix:///var/run/docker.sock", "--insecure-registry", b.localContainerRegistryServer},
 	}
 
 	execResp, err := cli.ContainerExecCreate(ctx, b.buildId, execConfig)
