@@ -5,7 +5,7 @@
 //	@version		0.1.0
 //	@description	Daytona Server API
 
-//	@host		localhost:3000
+//	@host		localhost:3986
 //	@schemes	http
 //	@BasePath	/
 

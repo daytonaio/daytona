@@ -4,6 +4,7 @@
 package server
 
 import (
+	"fmt"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -187,7 +188,7 @@ var ServeCmd = &cobra.Command{
 
 		printServerStartedMessage(c, false)
 
-		err = setDefaultConfig(server)
+		err = setDefaultConfig(server, c.ApiPort)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -239,7 +240,7 @@ func getDbPath() (string, error) {
 	return filepath.Join(dir, "db"), nil
 }
 
-func setDefaultConfig(server *server.Server) error {
+func setDefaultConfig(server *server.Server, apiPort uint32) error {
 	existingConfig, err := config.GetConfig()
 	if err != nil && !config.IsNotExist(err) {
 		return err
@@ -263,7 +264,7 @@ func setDefaultConfig(server *server.Server) error {
 			Id:   "default",
 			Name: "default",
 			Api: config.ServerApi{
-				Url: "http://localhost:3000",
+				Url: fmt.Sprintf("http://localhost:%d", apiPort),
 				Key: apiKey,
 			},
 		})
@@ -282,7 +283,7 @@ func setDefaultConfig(server *server.Server) error {
 				Id:   "default",
 				Name: "default",
 				Api: config.ServerApi{
-					Url: "http://localhost:3000",
+					Url: fmt.Sprintf("http://localhost:%d", apiPort),
 					Key: apiKey,
 				},
 			},

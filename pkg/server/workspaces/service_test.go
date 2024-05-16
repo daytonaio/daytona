@@ -24,8 +24,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const serverApiUrl = "http://localhost:3000"
-const serverUrl = "http://localhost:3001"
+const serverApiUrl = "http://localhost:3986"
+const serverUrl = "http://localhost:3987"
 const defaultProjectImage = "daytonaio/workspace-project:latest"
 const defaultProjectUser = "daytona"
 

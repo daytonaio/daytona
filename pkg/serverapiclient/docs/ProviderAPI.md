@@ -1,6 +1,6 @@
 # \ProviderAPI
 
-All URIs are relative to *http://localhost:3000*
+All URIs are relative to *http://localhost:3986*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
