@@ -36,7 +36,7 @@ func (s *WorkspaceService) RemoveWorkspace(workspaceId string) error {
 	}
 
 	// Should not fail the whole operation if the API key cannot be revoked
-	err = s.apiKeyService.Revoke(workspace.Id)
+	err = s.ApiKeyService.Revoke(workspace.Id)
 	if err != nil {
 		log.Error(err)
 	}
