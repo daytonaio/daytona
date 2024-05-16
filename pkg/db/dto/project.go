@@ -9,12 +9,14 @@ import (
 )
 
 type RepositoryDTO struct {
+	Id       string  `json:"id"`
 	Url      string  `json:"url"`
+	Name     string  `json:"name"`
+	Owner    string  `json:"owner"`
+	Sha      string  `json:"sha"`
+	Source   string  `json:"source"`
 	Branch   *string `default:"main" json:"branch,omitempty"`
-	SHA      *string `json:"sha,omitempty"`
-	Owner    *string `json:"owner,omitempty"`
 	PrNumber *uint32 `json:"prNumber,omitempty"`
-	Source   *string `json:"source,omitempty"`
 	Path     *string `json:"path,omitempty"`
 }
 
@@ -62,21 +64,16 @@ func ToProjectDTO(project *workspace.Project, workspace *workspace.Workspace) Pr
 
 func ToRepositoryDTO(repo *gitprovider.GitRepository) RepositoryDTO {
 	repoDTO := RepositoryDTO{
-		Url: repo.Url,
+		Url:      repo.Url,
+		Name:     repo.Name,
+		Id:       repo.Id,
+		Owner:    repo.Owner,
+		Sha:      repo.Sha,
+		Source:   repo.Source,
+		Branch:   repo.Branch,
+		PrNumber: repo.PrNumber,
+		Path:     repo.Path,
 	}
-
-	repoDTO.Branch = repo.Branch
-	if repo.Sha != "" {
-		repoDTO.SHA = &repo.Sha
-	}
-	if repo.Owner != "" {
-		repoDTO.Owner = &repo.Owner
-	}
-	repoDTO.PrNumber = repo.PrNumber
-	if repo.Source != "" {
-		repoDTO.Source = &repo.Source
-	}
-	repoDTO.Path = repo.Path
 
 	return repoDTO
 }
@@ -178,19 +175,15 @@ func ToProjectState(stateDTO *ProjectStateDTO) *workspace.ProjectState {
 
 func ToRepository(repoDTO RepositoryDTO) *gitprovider.GitRepository {
 	repo := gitprovider.GitRepository{
-		Url: repoDTO.Url,
-	}
-
-	repo.Branch = repoDTO.Branch
-	if repoDTO.SHA != nil {
-		repo.Sha = *repoDTO.SHA
-	}
-	if repoDTO.Owner != nil {
-		repo.Owner = *repoDTO.Owner
-	}
-	repo.PrNumber = repoDTO.PrNumber
-	if repoDTO.Source != nil {
-		repo.Source = *repoDTO.Source
+		Url:      repoDTO.Url,
+		Id:       repoDTO.Id,
+		Name:     repoDTO.Name,
+		Owner:    repoDTO.Owner,
+		Branch:   repoDTO.Branch,
+		Sha:      repoDTO.Sha,
+		PrNumber: repoDTO.PrNumber,
+		Source:   repoDTO.Source,
+		Path:     repoDTO.Path,
 	}
 
 	return &repo

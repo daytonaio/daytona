@@ -12,14 +12,14 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 )
 
-func (s *GitProviderService) GetGitProviderForUrl(url string) (gitprovider.GitProvider, error) {
+func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.GitProvider, error) {
 	gitProviders, err := s.configStore.List()
 	if err != nil {
 		return nil, err
 	}
 
 	for _, p := range gitProviders {
-		if strings.Contains(url, fmt.Sprintf("%s.", p.Id)) {
+		if strings.Contains(repoUrl, fmt.Sprintf("%s.", p.Id)) {
 			return s.GetGitProvider(p.Id)
 		}
 
@@ -28,12 +28,25 @@ func (s *GitProviderService) GetGitProviderForUrl(url string) (gitprovider.GitPr
 			return nil, err
 		}
 
-		if p.BaseApiUrl != nil && strings.Contains(url, hostname) {
+		if p.BaseApiUrl != nil && strings.Contains(repoUrl, hostname) {
 			return s.GetGitProvider(p.Id)
 		}
 	}
 
-	return nil, errors.New("git provider not found")
+	u, err := url.Parse(repoUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	hostname := strings.TrimPrefix(u.Hostname(), "www.")
+	providerId := strings.Split(hostname, ".")[0]
+
+	return s.newGitProvider(&gitprovider.GitProviderConfig{
+		Id:         providerId,
+		Username:   "",
+		Token:      "",
+		BaseApiUrl: nil,
+	})
 }
 
 func (s *GitProviderService) GetConfigForUrl(url string) (*gitprovider.GitProviderConfig, error) {

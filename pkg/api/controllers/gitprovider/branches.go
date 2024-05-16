@@ -6,6 +6,7 @@ package gitprovider
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	_ "github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/server"
@@ -27,8 +28,20 @@ import (
 //	@id				GetRepoBranches
 func GetRepoBranches(ctx *gin.Context) {
 	gitProviderId := ctx.Param("gitProviderId")
-	namespaceId := ctx.Param("namespaceId")
-	repositoryId := ctx.Param("repositoryId")
+	namespaceArg := ctx.Param("namespaceId")
+	repositoryArg := ctx.Param("repositoryId")
+
+	namespaceId, err := url.QueryUnescape(namespaceArg)
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to parse namespace: %s", err.Error()))
+		return
+	}
+
+	repositoryId, err := url.QueryUnescape(repositoryArg)
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to parse repository: %s", err.Error()))
+		return
+	}
 
 	server := server.GetInstance(nil)
 
