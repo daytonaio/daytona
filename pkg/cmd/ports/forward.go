@@ -17,6 +17,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/ports"
 	"github.com/daytonaio/daytona/pkg/views"
 	log "github.com/sirupsen/logrus"
+	qrcode "github.com/skip2/go-qrcode"
 	"github.com/spf13/cobra"
 )
 
@@ -100,7 +101,9 @@ func ForwardPublicPort(workspaceId, projectName string, hostPort, targetPort uin
 
 	go func() {
 		time.Sleep(1 * time.Second)
-		views.RenderInfoMessage(fmt.Sprintf("Port available at %s", fmt.Sprintf("%s://%s.%s", *serverConfig.Frps.Protocol, subDomain, *serverConfig.Frps.Domain)))
+		var url = fmt.Sprintf("%s://%s.%s", *serverConfig.Frps.Protocol, subDomain, *serverConfig.Frps.Domain)
+		views.RenderInfoMessage(fmt.Sprintf("Port available at %s", url))
+		renderQr(url)
 	}()
 
 	_, service, err := frpc.GetService(frpc.FrpcConnectParams{
@@ -115,4 +118,12 @@ func ForwardPublicPort(workspaceId, projectName string, hostPort, targetPort uin
 	}
 
 	return service.Run(context.Background())
+}
+
+func renderQr(s string) {
+	q, err := qrcode.New(s, qrcode.Medium)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(q.ToSmallString(true))
 }
