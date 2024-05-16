@@ -96,8 +96,13 @@ func getSingleProjectOutput(project *serverapiclient.Project, isCreationView boo
 		repositoryUrl = strings.TrimPrefix(repositoryUrl, "http://")
 	}
 
-	output += getInfoLineState("State", project.State) + "\n"
-	output += getInfoLineGitStatus("Branch", project.State.GitStatus) + "\n"
+	if project.State != nil {
+		output += getInfoLineState("State", project.State) + "\n"
+		if project.State.GitStatus != nil {
+			output += getInfoLineGitStatus("Branch", project.State.GitStatus) + "\n"
+		}
+	}
+
 	if project.Target != nil && !isCreationView {
 		output += getInfoLine("Target", *project.Target) + "\n"
 	}
