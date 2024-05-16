@@ -11,15 +11,15 @@ import (
 	"net/url"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/internal/util/apiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/api"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/server"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
 )
 
-var apiClient *serverapiclient.APIClient
+var apiClient *apiclient.APIClient
 
-func GetApiClient(profile *config.Profile) (*serverapiclient.APIClient, error) {
+func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 	if apiClient != nil {
 		return apiClient, nil
 	}
@@ -53,8 +53,8 @@ func GetApiClient(profile *config.Profile) (*serverapiclient.APIClient, error) {
 		return nil, fmt.Errorf("failed to check server health at: %s. Make sure Daytona is running on the appropriate port", healthUrl)
 	}
 
-	clientConfig := serverapiclient.NewConfiguration()
-	clientConfig.Servers = serverapiclient.ServerConfigurations{
+	clientConfig := apiclient.NewConfiguration()
+	clientConfig.Servers = apiclient.ServerConfigurations{
 		{
 			URL: serverUrl,
 		},
@@ -62,7 +62,7 @@ func GetApiClient(profile *config.Profile) (*serverapiclient.APIClient, error) {
 
 	clientConfig.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", apiKey))
 
-	apiClient = serverapiclient.NewAPIClient(clientConfig)
+	apiClient = apiclient.NewAPIClient(clientConfig)
 
 	apiClient.GetConfig().HTTPClient = &http.Client{
 		Transport: http.DefaultTransport,
@@ -71,9 +71,9 @@ func GetApiClient(profile *config.Profile) (*serverapiclient.APIClient, error) {
 	return apiClient, nil
 }
 
-func GetAgentApiClient(apiUrl, apiKey string) (*serverapiclient.APIClient, error) {
-	clientConfig := serverapiclient.NewConfiguration()
-	clientConfig.Servers = serverapiclient.ServerConfigurations{
+func GetAgentApiClient(apiUrl, apiKey string) (*apiclient.APIClient, error) {
+	clientConfig := apiclient.NewConfiguration()
+	clientConfig.Servers = apiclient.ServerConfigurations{
 		{
 			URL: apiUrl,
 		},
@@ -81,7 +81,7 @@ func GetAgentApiClient(apiUrl, apiKey string) (*serverapiclient.APIClient, error
 
 	clientConfig.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", apiKey))
 
-	apiClient = serverapiclient.NewAPIClient(clientConfig)
+	apiClient = apiclient.NewAPIClient(clientConfig)
 
 	apiClient.GetConfig().HTTPClient = &http.Client{
 		Transport: http.DefaultTransport,
@@ -90,7 +90,7 @@ func GetAgentApiClient(apiUrl, apiKey string) (*serverapiclient.APIClient, error
 	return apiClient, nil
 }
 
-func ToServerConfig(config serverapiclient.ServerConfig) server.Config {
+func ToServerConfig(config apiclient.ServerConfig) server.Config {
 	return server.Config{
 		ProvidersDir:      *config.ProvidersDir,
 		RegistryUrl:       *config.RegistryUrl,
@@ -106,7 +106,7 @@ func ToServerConfig(config serverapiclient.ServerConfig) server.Config {
 	}
 }
 
-func GetProviderList() ([]serverapiclient.Provider, error) {
+func GetProviderList() ([]apiclient.Provider, error) {
 	apiClient, err := GetApiClient(nil)
 	if err != nil {
 		return nil, err
@@ -116,13 +116,13 @@ func GetProviderList() ([]serverapiclient.Provider, error) {
 
 	providersList, res, err := apiClient.ProviderAPI.ListProviders(ctx).Execute()
 	if err != nil {
-		return nil, apiclient.HandleErrorResponse(res, err)
+		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	return providersList, nil
 }
 
-func GetTargetList() ([]serverapiclient.ProviderTarget, error) {
+func GetTargetList() ([]apiclient.ProviderTarget, error) {
 	apiClient, err := GetApiClient(nil)
 	if err != nil {
 		return nil, err
@@ -130,13 +130,13 @@ func GetTargetList() ([]serverapiclient.ProviderTarget, error) {
 
 	targets, resp, err := apiClient.TargetAPI.ListTargets(context.Background()).Execute()
 	if err != nil {
-		return nil, apiclient.HandleErrorResponse(resp, err)
+		return nil, apiclient_util.HandleErrorResponse(resp, err)
 	}
 
 	return targets, nil
 }
 
-func GetWorkspace(workspaceNameOrId string) (*serverapiclient.WorkspaceDTO, error) {
+func GetWorkspace(workspaceNameOrId string) (*apiclient.WorkspaceDTO, error) {
 	ctx := context.Background()
 
 	apiClient, err := GetApiClient(nil)
@@ -146,7 +146,7 @@ func GetWorkspace(workspaceNameOrId string) (*serverapiclient.WorkspaceDTO, erro
 
 	workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceNameOrId).Execute()
 	if err != nil {
-		return nil, apiclient.HandleErrorResponse(res, err)
+		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	return workspace, nil
@@ -162,7 +162,7 @@ func GetFirstWorkspaceProjectName(workspaceId string, projectName string, profil
 
 	wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceId).Execute()
 	if err != nil {
-		return "", apiclient.HandleErrorResponse(res, err)
+		return "", apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	if projectName == "" {

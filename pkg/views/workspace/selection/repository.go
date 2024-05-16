@@ -7,14 +7,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectRepositoryPrompt(repositories []serverapiclient.GitRepository, index int, choiceChan chan<- string) {
+func selectRepositoryPrompt(repositories []apiclient.GitRepository, index int, choiceChan chan<- string) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
@@ -46,7 +46,7 @@ func selectRepositoryPrompt(repositories []serverapiclient.GitRepository, index 
 	}
 }
 
-func GetRepositoryFromPrompt(repositories []serverapiclient.GitRepository, index int) *serverapiclient.GitRepository {
+func GetRepositoryFromPrompt(repositories []apiclient.GitRepository, index int) *apiclient.GitRepository {
 	choiceChan := make(chan string)
 
 	go selectRepositoryPrompt(repositories, index, choiceChan)

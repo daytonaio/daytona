@@ -6,11 +6,11 @@ package provider
 import (
 	"fmt"
 
-	"github.com/daytonaio/daytona/internal/util/apiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/os"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/spf13/cobra"
@@ -29,9 +29,9 @@ var providerInstallCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(serverapiclient.ApiGetConfigRequest{})
+		serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(apiclient.ApiGetConfigRequest{})
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
 		providersManifest, err := manager.GetProvidersManifest(*serverConfig.RegistryUrl)
@@ -55,12 +55,12 @@ var providerInstallCmd = &cobra.Command{
 		}
 
 		downloadUrls := convertToStringMap((*providersManifest)[*providerToInstall.Name].Versions[*providerToInstall.Version].DownloadUrls)
-		res, err = apiClient.ProviderAPI.InstallProviderExecute(serverapiclient.ApiInstallProviderRequest{}.Provider(serverapiclient.InstallProviderRequest{
+		res, err = apiClient.ProviderAPI.InstallProviderExecute(apiclient.ApiInstallProviderRequest{}.Provider(apiclient.InstallProviderRequest{
 			Name:         providerToInstall.Name,
 			DownloadUrls: &downloadUrls,
 		}))
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
 		if err != nil {
@@ -71,11 +71,11 @@ var providerInstallCmd = &cobra.Command{
 	},
 }
 
-func convertToDTO(manifest *manager.ProvidersManifest) []serverapiclient.Provider {
-	pluginList := []serverapiclient.Provider{}
+func convertToDTO(manifest *manager.ProvidersManifest) []apiclient.Provider {
+	pluginList := []apiclient.Provider{}
 	for pluginName, pluginManifest := range *manifest {
 		for version := range pluginManifest.Versions {
-			pluginList = append(pluginList, serverapiclient.Provider{
+			pluginList = append(pluginList, apiclient.Provider{
 				Name:    &pluginName,
 				Version: &version,
 			})

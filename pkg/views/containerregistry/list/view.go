@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 
@@ -22,7 +22,7 @@ type rowData struct {
 	Password string
 }
 
-func getRowData(registry *serverapiclient.ContainerRegistry) *rowData {
+func getRowData(registry *apiclient.ContainerRegistry) *rowData {
 	rowData := rowData{"", "", ""}
 
 	rowData.Server = *registry.Server
@@ -42,7 +42,7 @@ func getRowFromRowData(rowData rowData) []string {
 	return row
 }
 
-func ListRegistries(registryList []serverapiclient.ContainerRegistry) {
+func ListRegistries(registryList []apiclient.ContainerRegistry) {
 	re := lipgloss.NewRenderer(os.Stdout)
 	headers := []string{"Server", "Username", "Password"}
 	data := [][]string{}
@@ -86,7 +86,7 @@ func ListRegistries(registryList []serverapiclient.ContainerRegistry) {
 	fmt.Println(views.BaseTableStyle.Render(t.String()))
 }
 
-func renderUnstyledList(registryList []serverapiclient.ContainerRegistry) {
+func renderUnstyledList(registryList []apiclient.ContainerRegistry) {
 	output := "\n"
 
 	for _, registry := range registryList {

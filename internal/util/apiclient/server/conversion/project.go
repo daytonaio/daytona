@@ -4,12 +4,12 @@
 package conversion
 
 import (
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
-func ToProject(projectDTO *serverapiclient.Project) *workspace.Project {
+func ToProject(projectDTO *apiclient.Project) *workspace.Project {
 	if projectDTO == nil {
 		return nil
 	}
@@ -54,7 +54,7 @@ func ToProject(projectDTO *serverapiclient.Project) *workspace.Project {
 	return project
 }
 
-func ToGitStatus(gitStatusDTO *serverapiclient.GitStatus) *workspace.GitStatus {
+func ToGitStatus(gitStatusDTO *apiclient.GitStatus) *workspace.GitStatus {
 	if gitStatusDTO == nil {
 		return nil
 	}
@@ -78,16 +78,16 @@ func ToGitStatus(gitStatusDTO *serverapiclient.GitStatus) *workspace.GitStatus {
 	}
 }
 
-func ToGitStatusDTO(gitStatus *workspace.GitStatus) *serverapiclient.GitStatus {
+func ToGitStatusDTO(gitStatus *workspace.GitStatus) *apiclient.GitStatus {
 	if gitStatus == nil {
 		return nil
 	}
 
-	fileStatusDTO := []serverapiclient.FileStatus{}
+	fileStatusDTO := []apiclient.FileStatus{}
 	for _, file := range gitStatus.Files {
-		staging := serverapiclient.Status(string(file.Staging))
-		worktree := serverapiclient.Status(string(file.Worktree))
-		fileDTO := serverapiclient.FileStatus{
+		staging := apiclient.Status(string(file.Staging))
+		worktree := apiclient.Status(string(file.Worktree))
+		fileDTO := apiclient.FileStatus{
 			Name:     &file.Name,
 			Extra:    &file.Extra,
 			Staging:  &staging,
@@ -96,7 +96,7 @@ func ToGitStatusDTO(gitStatus *workspace.GitStatus) *serverapiclient.GitStatus {
 		fileStatusDTO = append(fileStatusDTO, fileDTO)
 	}
 
-	return &serverapiclient.GitStatus{
+	return &apiclient.GitStatus{
 		CurrentBranch: &gitStatus.CurrentBranch,
 		FileStatus:    fileStatusDTO,
 	}

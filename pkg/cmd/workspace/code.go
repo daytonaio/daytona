@@ -10,10 +10,10 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/jetbrains"
-	"github.com/daytonaio/daytona/internal/util/apiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/ide"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
@@ -36,7 +36,7 @@ var CodeCmd = &cobra.Command{
 		var workspaceId string
 		var projectName string
 		var ideId string
-		var workspace *serverapiclient.WorkspaceDTO
+		var workspace *apiclient.WorkspaceDTO
 
 		activeProfile, err := c.GetActiveProfile()
 		if err != nil {
@@ -53,7 +53,7 @@ var CodeCmd = &cobra.Command{
 		if len(args) == 0 {
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
-				log.Fatal(apiclient.HandleErrorResponse(res, err))
+				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
 
 			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "Open")
@@ -117,7 +117,7 @@ func selectWorkspaceProject(workspaceId string, profile *config.Profile) (*strin
 
 	wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceId).Execute()
 	if err != nil {
-		return nil, apiclient.HandleErrorResponse(res, err)
+		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	if len(wsInfo.Projects) > 1 {

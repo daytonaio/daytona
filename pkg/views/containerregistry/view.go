@@ -6,12 +6,12 @@ package containerregistry
 import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
 type item struct {
-	registry serverapiclient.ContainerRegistry
+	registry apiclient.ContainerRegistry
 }
 
 func (i item) Title() string { return *i.registry.Server }
@@ -25,7 +25,7 @@ func (i item) FilterValue() string { return *i.registry.Server }
 
 type model struct {
 	list   list.Model
-	choice *serverapiclient.ContainerRegistry
+	choice *apiclient.ContainerRegistry
 	footer string
 }
 

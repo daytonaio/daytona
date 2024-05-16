@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/lipgloss"
@@ -29,7 +29,7 @@ func getRowFromRowData(rowData RowData) []string {
 	return row
 }
 
-func getRowData(apiKey *serverapiclient.ApiKey) *RowData {
+func getRowData(apiKey *apiclient.ApiKey) *RowData {
 	rowData := RowData{"", ""}
 
 	rowData.Name = *apiKey.Name
@@ -38,7 +38,7 @@ func getRowData(apiKey *serverapiclient.ApiKey) *RowData {
 	return &rowData
 }
 
-func ListApiKeys(apiKeyList []serverapiclient.ApiKey) {
+func ListApiKeys(apiKeyList []apiclient.ApiKey) {
 
 	re := lipgloss.NewRenderer(os.Stdout)
 
@@ -86,7 +86,7 @@ func ListApiKeys(apiKeyList []serverapiclient.ApiKey) {
 	fmt.Println(views.BaseTableStyle.Render(t.String()))
 }
 
-func renderUnstyledList(apiKeyList []serverapiclient.ApiKey) {
+func renderUnstyledList(apiKeyList []apiclient.ApiKey) {
 	output := "\n"
 
 	for _, apiKey := range apiKeyList {

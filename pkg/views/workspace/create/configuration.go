@@ -10,7 +10,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	configure "github.com/daytonaio/daytona/pkg/views/server"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -25,8 +25,8 @@ type ProjectConfigurationData struct {
 	EnvVars           map[string]string
 }
 
-func ConfigureProjects(projectList []serverapiclient.CreateWorkspaceRequestProject) ([]serverapiclient.CreateWorkspaceRequestProject, error) {
-	var currentProject *serverapiclient.CreateWorkspaceRequestProject
+func ConfigureProjects(projectList []apiclient.CreateWorkspaceRequestProject) ([]apiclient.CreateWorkspaceRequestProject, error) {
+	var currentProject *apiclient.CreateWorkspaceRequestProject
 
 	if len(projectList) > 1 {
 		currentProject = selection.GetProjectRequestFromPrompt(projectList)

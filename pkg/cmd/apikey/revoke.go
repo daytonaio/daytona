@@ -13,9 +13,9 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/apikeys"
-	"github.com/daytonaio/daytona/internal/util/apiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/server/apikey"
 )
@@ -45,11 +45,11 @@ var revokeCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		var selectedApiKey *serverapiclient.ApiKey
+		var selectedApiKey *apiclient.ApiKey
 
 		apiKeyList, _, err := apiClient.ApiKeyAPI.ListClientApiKeys(ctx).Execute()
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(nil, err))
+			log.Fatal(apiclient_util.HandleErrorResponse(nil, err))
 		}
 
 		if len(args) == 1 {
@@ -96,7 +96,7 @@ var revokeCmd = &cobra.Command{
 		if yesFlag {
 			_, err = apiClient.ApiKeyAPI.RevokeApiKey(ctx, *selectedApiKey.Name).Execute()
 			if err != nil {
-				log.Fatal(apiclient.HandleErrorResponse(nil, err))
+				log.Fatal(apiclient_util.HandleErrorResponse(nil, err))
 			}
 
 			views.RenderInfoMessage("API key revoked")

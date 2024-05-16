@@ -12,9 +12,9 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/internal/util/apiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/server/apikey"
 	view "github.com/daytonaio/daytona/pkg/views/server/apikey"
@@ -38,7 +38,7 @@ var GenerateCmd = &cobra.Command{
 
 		apiKeyList, _, err := apiClient.ApiKeyAPI.ListClientApiKeys(ctx).Execute()
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(nil, err))
+			log.Fatal(apiclient_util.HandleErrorResponse(nil, err))
 		}
 
 		if len(args) == 1 {
@@ -55,7 +55,7 @@ var GenerateCmd = &cobra.Command{
 
 		key, _, err := apiClient.ApiKeyAPI.GenerateApiKey(ctx, keyName).Execute()
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(nil, err))
+			log.Fatal(apiclient_util.HandleErrorResponse(nil, err))
 		}
 
 		if saveFlag {
@@ -67,7 +67,7 @@ var GenerateCmd = &cobra.Command{
 			return
 		}
 
-		serverConfig, _, err := apiClient.ServerAPI.GetConfigExecute(serverapiclient.ApiGetConfigRequest{})
+		serverConfig, _, err := apiClient.ServerAPI.GetConfigExecute(apiclient.ApiGetConfigRequest{})
 		if err != nil {
 			log.Fatal(err)
 		}

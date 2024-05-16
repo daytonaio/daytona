@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/huh"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
@@ -20,7 +20,7 @@ type ServerUpdateKeyView struct {
 	PathToPrivateKey string
 }
 
-func ConfigurationForm(config *serverapiclient.ServerConfig) *serverapiclient.ServerConfig {
+func ConfigurationForm(config *apiclient.ServerConfig) *apiclient.ServerConfig {
 	apiPortView := strconv.Itoa(int(config.GetApiPort()))
 	headscalePortView := strconv.Itoa(int(config.GetHeadscalePort()))
 	frpsPortView := strconv.Itoa(int(config.Frps.GetPort()))
@@ -97,7 +97,7 @@ func ConfigurationForm(config *serverapiclient.ServerConfig) *serverapiclient.Se
 	return config
 }
 
-func createPortValidator(config *serverapiclient.ServerConfig, portView *string, port *int32) func(string) error {
+func createPortValidator(config *apiclient.ServerConfig, portView *string, port *int32) func(string) error {
 	return func(string) error {
 		validatePort, err := strconv.Atoi(*portView)
 		if err != nil {

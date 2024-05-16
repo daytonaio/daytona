@@ -15,11 +15,11 @@ import (
 
 	"github.com/daytonaio/daytona/internal/cmd/tailscale"
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/internal/util/apiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	ssh_config "github.com/daytonaio/daytona/pkg/agent/ssh/config"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/target"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
@@ -40,7 +40,7 @@ var CreateCmd = &cobra.Command{
 	Args:  cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
-		var projects []serverapiclient.CreateWorkspaceRequestProject
+		var projects []apiclient.CreateWorkspaceRequestProject
 		var workspaceName string
 		var existingWorkspaceNames []string
 
@@ -61,7 +61,7 @@ var CreateCmd = &cobra.Command{
 
 		profileData, res, err := apiClient.ProfileAPI.GetProfileData(ctx).Execute()
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
 		if nameFlag != "" {
@@ -70,7 +70,7 @@ var CreateCmd = &cobra.Command{
 
 		workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 		for _, workspaceInfo := range workspaceList {
 			existingWorkspaceNames = append(existingWorkspaceNames, *workspaceInfo.Name)
@@ -131,14 +131,14 @@ var CreateCmd = &cobra.Command{
 
 		go readWorkspaceLogs(activeProfile, id, projects, &stopLogs)
 
-		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(serverapiclient.CreateWorkspaceRequest{
+		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(apiclient.CreateWorkspaceRequest{
 			Id:       &id,
 			Name:     &workspaceName,
 			Target:   target.Name,
 			Projects: projects,
 		}).Execute()
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
 		dialStartTime := time.Now()
@@ -153,7 +153,7 @@ var CreateCmd = &cobra.Command{
 
 		wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceName).Execute()
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
 		chosenIdeId := c.DefaultIdeId
@@ -204,7 +204,7 @@ func init() {
 	CreateCmd.Flags().BoolVarP(&codeFlag, "code", "c", false, "Open the workspace in the IDE after workspace creation")
 }
 
-func getTarget(activeProfileName string) (*serverapiclient.ProviderTarget, error) {
+func getTarget(activeProfileName string) (*apiclient.ProviderTarget, error) {
 	targets, err := server.GetTargetList()
 	if err != nil {
 		return nil, err
@@ -226,15 +226,15 @@ func getTarget(activeProfileName string) (*serverapiclient.ProviderTarget, error
 	return target.GetTargetFromPrompt(targets, activeProfileName, false)
 }
 
-func processPrompting(apiClient *serverapiclient.APIClient, workspaceName *string, projects *[]serverapiclient.CreateWorkspaceRequestProject, workspaceNames []string, ctx context.Context) error {
+func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, projects *[]apiclient.CreateWorkspaceRequestProject, workspaceNames []string, ctx context.Context) error {
 	gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
 	if err != nil {
-		return apiclient.HandleErrorResponse(res, err)
+		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	apiServerConfig, res, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
 	if err != nil {
-		return apiclient.HandleErrorResponse(res, err)
+		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	*workspaceName, *projects, err = workspace_util.GetCreationDataFromPrompt(workspace_util.CreateDataPromptConfig{
@@ -251,7 +251,7 @@ func processPrompting(apiClient *serverapiclient.APIClient, workspaceName *strin
 	return nil
 }
 
-func processCmdArguments(args []string, apiClient *serverapiclient.APIClient, projects *[]serverapiclient.CreateWorkspaceRequestProject, ctx context.Context) error {
+func processCmdArguments(args []string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateWorkspaceRequestProject, ctx context.Context) error {
 	repoUrl := args[0]
 
 	repoUrl, err := util.GetValidatedUrl(repoUrl)
@@ -262,12 +262,12 @@ func processCmdArguments(args []string, apiClient *serverapiclient.APIClient, pr
 	encodedURLParam := url.QueryEscape(repoUrl)
 	repoResponse, res, err := apiClient.GitProviderAPI.GetGitContext(ctx, encodedURLParam).Execute()
 	if err != nil {
-		return apiclient.HandleErrorResponse(res, err)
+		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	project := &serverapiclient.CreateWorkspaceRequestProject{
+	project := &apiclient.CreateWorkspaceRequestProject{
 		Name: *repoResponse.Name,
-		Source: &serverapiclient.CreateWorkspaceRequestProjectSource{
+		Source: &apiclient.CreateWorkspaceRequestProjectSource{
 			Repository: repoResponse,
 		},
 	}
@@ -277,11 +277,11 @@ func processCmdArguments(args []string, apiClient *serverapiclient.APIClient, pr
 	return nil
 }
 
-func readWorkspaceLogs(activeProfile config.Profile, workspaceId string, projects []serverapiclient.CreateWorkspaceRequestProject, stopLogs *bool) {
+func readWorkspaceLogs(activeProfile config.Profile, workspaceId string, projects []apiclient.CreateWorkspaceRequestProject, stopLogs *bool) {
 	var wg sync.WaitGroup
 	for _, project := range projects {
 		wg.Add(1)
-		go func(project serverapiclient.CreateWorkspaceRequestProject) {
+		go func(project apiclient.CreateWorkspaceRequestProject) {
 			defer wg.Done()
 			query := "follow=true"
 
@@ -289,7 +289,7 @@ func readWorkspaceLogs(activeProfile config.Profile, workspaceId string, project
 				ws, res, err := server.GetWebsocketConn(fmt.Sprintf("/log/workspace/%s/%s", workspaceId, project.Name), &activeProfile, &query)
 				// We want to retry getting the logs if it fails
 				if err != nil {
-					log.Trace(apiclient.HandleErrorResponse(res, err))
+					log.Trace(apiclient_util.HandleErrorResponse(res, err))
 					time.Sleep(500 * time.Millisecond)
 					continue
 				}
@@ -307,7 +307,7 @@ func readWorkspaceLogs(activeProfile config.Profile, workspaceId string, project
 		ws, res, err := server.GetWebsocketConn(fmt.Sprintf("/log/workspace/%s", workspaceId), &activeProfile, &query)
 		// We want to retry getting the logs if it fails
 		if err != nil {
-			log.Trace(apiclient.HandleErrorResponse(res, err))
+			log.Trace(apiclient_util.HandleErrorResponse(res, err))
 			time.Sleep(500 * time.Millisecond)
 			continue
 		}
@@ -386,7 +386,7 @@ func readLog(ws *websocket.Conn, stopLogs *bool) {
 	}
 }
 
-func getEnvVariables(project *serverapiclient.CreateWorkspaceRequestProject, profileData *serverapiclient.ProfileData) *map[string]string {
+func getEnvVariables(project *apiclient.CreateWorkspaceRequestProject, profileData *apiclient.ProfileData) *map[string]string {
 	envVars := map[string]string{}
 
 	if profileData.EnvVars != nil {

@@ -16,7 +16,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
@@ -42,7 +42,7 @@ func NewTargetNameInput(targetName *string, existingTargetNames []string) error 
 	return nil
 }
 
-func SetTargetForm(target *serverapiclient.ProviderTarget, targetManifest map[string]serverapiclient.ProviderProviderTargetProperty) error {
+func SetTargetForm(target *apiclient.ProviderTarget, targetManifest map[string]apiclient.ProviderProviderTargetProperty) error {
 	fields := make([]huh.Field, 0, len(targetManifest))
 	groups := []*huh.Group{}
 	options := make(map[string]interface{})
@@ -67,7 +67,7 @@ func SetTargetForm(target *serverapiclient.ProviderTarget, targetManifest map[st
 		}
 
 		switch *property.Type {
-		case serverapiclient.ProviderTargetPropertyTypeFloat, serverapiclient.ProviderTargetPropertyTypeInt:
+		case apiclient.ProviderTargetPropertyTypeFloat, apiclient.ProviderTargetPropertyTypeInt:
 			var initialValue *string
 			floatValue, ok := options[name].(float64)
 			if ok {
@@ -78,7 +78,7 @@ func SetTargetForm(target *serverapiclient.ProviderTarget, targetManifest map[st
 			input, value := getInput(name, property, initialValue)
 			fields = append(fields, input)
 			options[name] = value
-		case serverapiclient.ProviderTargetPropertyTypeString:
+		case apiclient.ProviderTargetPropertyTypeString:
 			var initialValue *string
 			v, ok := options[name].(string)
 			if ok {
@@ -88,7 +88,7 @@ func SetTargetForm(target *serverapiclient.ProviderTarget, targetManifest map[st
 			input, value := getInput(name, property, initialValue)
 			fields = append(fields, input)
 			options[name] = value
-		case serverapiclient.ProviderTargetPropertyTypeBoolean:
+		case apiclient.ProviderTargetPropertyTypeBoolean:
 			var initialValue *bool
 			v, ok := options[name].(bool)
 			if ok {
@@ -98,7 +98,7 @@ func SetTargetForm(target *serverapiclient.ProviderTarget, targetManifest map[st
 			confirm, value := getConfirm(name, property, initialValue)
 			fields = append(fields, confirm)
 			options[name] = value
-		case serverapiclient.ProviderTargetPropertyTypeOption:
+		case apiclient.ProviderTargetPropertyTypeOption:
 			var initialValue *string
 			v, ok := options[name].(string)
 			if ok {
@@ -108,7 +108,7 @@ func SetTargetForm(target *serverapiclient.ProviderTarget, targetManifest map[st
 			selectField, value := getSelect(name, property, initialValue)
 			fields = append(fields, selectField)
 			options[name] = value
-		case serverapiclient.ProviderTargetPropertyTypeFilePath:
+		case apiclient.ProviderTargetPropertyTypeFilePath:
 			group, value := getFilePicker(name, property)
 			groups = append(groups, group...)
 			options[name] = value
@@ -128,17 +128,17 @@ func SetTargetForm(target *serverapiclient.ProviderTarget, targetManifest map[st
 			}
 		}
 		switch *property.Type {
-		case serverapiclient.ProviderTargetPropertyTypeInt:
+		case apiclient.ProviderTargetPropertyTypeInt:
 			options[name], err = strconv.Atoi(*options[name].(*string))
 			if err != nil {
 				return err
 			}
-		case serverapiclient.ProviderTargetPropertyTypeFloat:
+		case apiclient.ProviderTargetPropertyTypeFloat:
 			options[name], err = strconv.ParseFloat(*options[name].(*string), 64)
 			if err != nil {
 				return err
 			}
-		case serverapiclient.ProviderTargetPropertyTypeFilePath:
+		case apiclient.ProviderTargetPropertyTypeFilePath:
 			if *options[name].(*string) == "none" {
 				delete(options, name)
 			}
@@ -155,7 +155,7 @@ func SetTargetForm(target *serverapiclient.ProviderTarget, targetManifest map[st
 	return nil
 }
 
-func getInput(name string, property serverapiclient.ProviderProviderTargetProperty, initialValue *string) (*huh.Input, *string) {
+func getInput(name string, property apiclient.ProviderProviderTargetProperty, initialValue *string) (*huh.Input, *string) {
 	value := property.DefaultValue
 	if initialValue != nil {
 		value = initialValue
@@ -168,10 +168,10 @@ func getInput(name string, property serverapiclient.ProviderProviderTargetProper
 		Password(property.InputMasked != nil && *property.InputMasked).
 		Validate(func(s string) error {
 			switch *property.Type {
-			case serverapiclient.ProviderTargetPropertyTypeInt:
+			case apiclient.ProviderTargetPropertyTypeInt:
 				_, err := strconv.Atoi(s)
 				return err
-			case serverapiclient.ProviderTargetPropertyTypeFloat:
+			case apiclient.ProviderTargetPropertyTypeFloat:
 				_, err := strconv.ParseFloat(s, 64)
 				return err
 			}
@@ -179,7 +179,7 @@ func getInput(name string, property serverapiclient.ProviderProviderTargetProper
 		}), value
 }
 
-func getSelect(name string, property serverapiclient.ProviderProviderTargetProperty, initialValue *string) (*huh.Select[string], *string) {
+func getSelect(name string, property apiclient.ProviderProviderTargetProperty, initialValue *string) (*huh.Select[string], *string) {
 	value := property.DefaultValue
 	if initialValue != nil {
 		value = initialValue
@@ -194,7 +194,7 @@ func getSelect(name string, property serverapiclient.ProviderProviderTargetPrope
 		Value(value), value
 }
 
-func getConfirm(name string, property serverapiclient.ProviderProviderTargetProperty, initialValue *bool) (*huh.Confirm, *bool) {
+func getConfirm(name string, property apiclient.ProviderProviderTargetProperty, initialValue *bool) (*huh.Confirm, *bool) {
 	value := false
 	if property.DefaultValue != nil && *property.DefaultValue == "true" {
 		value = true
@@ -209,7 +209,7 @@ func getConfirm(name string, property serverapiclient.ProviderProviderTargetProp
 		Value(&value), &value
 }
 
-func getFilePicker(name string, property serverapiclient.ProviderProviderTargetProperty) ([]*huh.Group, *string) {
+func getFilePicker(name string, property apiclient.ProviderProviderTargetProperty) ([]*huh.Group, *string) {
 	dirPath := "~"
 
 	if property.DefaultValue != nil {

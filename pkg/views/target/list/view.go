@@ -8,7 +8,7 @@ import (
 	"os"
 	"sort"
 
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/lipgloss"
@@ -32,7 +32,7 @@ func getRowFromRowData(rowData RowData) []string {
 	return row
 }
 
-func getRowData(target *serverapiclient.ProviderTarget) *RowData {
+func getRowData(target *apiclient.ProviderTarget) *RowData {
 	rowData := RowData{"", "", ""}
 
 	rowData.Target = *target.Name
@@ -42,7 +42,7 @@ func getRowData(target *serverapiclient.ProviderTarget) *RowData {
 	return &rowData
 }
 
-func ListTargets(targetList []serverapiclient.ProviderTarget) {
+func ListTargets(targetList []apiclient.ProviderTarget) {
 
 	sortTargets(&targetList)
 
@@ -92,7 +92,7 @@ func ListTargets(targetList []serverapiclient.ProviderTarget) {
 	fmt.Println(views.BaseTableStyle.Render(t.String()))
 }
 
-func sortTargets(targets *[]serverapiclient.ProviderTarget) {
+func sortTargets(targets *[]apiclient.ProviderTarget) {
 	sort.Slice(*targets, func(i, j int) bool {
 		t1 := (*targets)[i]
 		t2 := (*targets)[j]
@@ -100,7 +100,7 @@ func sortTargets(targets *[]serverapiclient.ProviderTarget) {
 	})
 }
 
-func renderUnstyledList(targetList []serverapiclient.ProviderTarget) {
+func renderUnstyledList(targetList []apiclient.ProviderTarget) {
 	output := "\n"
 
 	for _, target := range targetList {

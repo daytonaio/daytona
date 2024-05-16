@@ -8,7 +8,7 @@ import (
 	"log"
 
 	"github.com/charmbracelet/huh"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
@@ -18,7 +18,7 @@ type RegistryView struct {
 	Password string
 }
 
-func RegistryCreationView(registryView *RegistryView, registries []serverapiclient.ContainerRegistry, editing bool) {
+func RegistryCreationView(registryView *RegistryView, registries []apiclient.ContainerRegistry, editing bool) {
 	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().

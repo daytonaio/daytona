@@ -5,8 +5,8 @@ package workspacemode
 
 import (
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/output"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -18,7 +18,7 @@ var infoCmd = &cobra.Command{
 	Aliases: []string{"view"},
 	Args:    cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		var workspace *serverapiclient.WorkspaceDTO
+		var workspace *apiclient.WorkspaceDTO
 
 		workspace, err := server.GetWorkspace(workspaceId)
 		if err != nil {

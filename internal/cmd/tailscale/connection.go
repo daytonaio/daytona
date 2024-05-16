@@ -9,9 +9,9 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/internal/util/apiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/tailscale"
 	"github.com/google/uuid"
 	"tailscale.com/tsnet"
@@ -28,14 +28,14 @@ func GetConnection(profile *config.Profile) (*tsnet.Server, error) {
 		return nil, err
 	}
 
-	serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(serverapiclient.ApiGetConfigRequest{})
+	serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(apiclient.ApiGetConfigRequest{})
 	if err != nil {
-		return nil, apiclient.HandleErrorResponse(res, err)
+		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	networkKey, res, err := apiClient.ServerAPI.GenerateNetworkKeyExecute(serverapiclient.ApiGenerateNetworkKeyRequest{})
+	networkKey, res, err := apiClient.ServerAPI.GenerateNetworkKeyExecute(apiclient.ApiGenerateNetworkKeyRequest{})
 	if err != nil {
-		return nil, apiclient.HandleErrorResponse(res, err)
+		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	cliId := uuid.New().String()

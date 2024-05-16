@@ -8,13 +8,13 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"golang.org/x/term"
 )
 
 type item struct {
-	provider serverapiclient.Provider
+	provider apiclient.Provider
 }
 
 func (i item) Title() string { return *i.provider.Name }
@@ -25,7 +25,7 @@ func (i item) FilterValue() string { return *i.provider.Name }
 
 type model struct {
 	list   list.Model
-	choice *serverapiclient.Provider
+	choice *apiclient.Provider
 }
 
 func (m model) Init() tea.Cmd {

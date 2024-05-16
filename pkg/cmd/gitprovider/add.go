@@ -7,7 +7,7 @@ import (
 	"context"
 
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
 	log "github.com/sirupsen/logrus"
@@ -26,7 +26,7 @@ var GitProviderAddCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		gitProviderData := serverapiclient.GitProvider{}
+		gitProviderData := apiclient.GitProvider{}
 		gitProviderData.Id = new(string)
 		gitProviderData.Username = new(string)
 		gitProviderData.Token = new(string)
