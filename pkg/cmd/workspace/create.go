@@ -295,8 +295,8 @@ func readWorkspaceLogs(activeProfile config.Profile, workspaceId string, project
 				}
 
 				readLog(ws, stopLogs)
-
 				ws.Close()
+				break
 			}
 		}(project)
 	}
@@ -363,6 +363,10 @@ func readLog(ws *websocket.Conn, stopLogs *bool) {
 	for {
 		_, msg, err := ws.ReadMessage()
 		if err != nil {
+			return
+		}
+
+		if *stopLogs {
 			return
 		}
 
