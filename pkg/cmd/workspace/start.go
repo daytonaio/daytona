@@ -30,15 +30,18 @@ var StartCmd = &cobra.Command{
 	Short: "Start a workspace",
 	Args:  cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
+		var workspaceId string
+		var message string
+
 		if allFlag {
 			err := startAllWorkspaces()
 			if err != nil {
 				log.Fatal(err)
 			}
+			return
 		}
 
 		ctx := context.Background()
-		var workspaceId string
 
 		apiClient, err := server.GetApiClient(nil)
 		if err != nil {
@@ -46,6 +49,13 @@ var StartCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 {
+			if startProjectFlag != "" {
+				err := cmd.Help()
+				if err != nil {
+					log.Fatal(err)
+				}
+				return
+			}
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
@@ -61,18 +71,20 @@ var StartCmd = &cobra.Command{
 		}
 
 		if startProjectFlag == "" {
+			message = fmt.Sprintf("Workspace '%s' start request submitted", workspaceId)
 			res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspaceId).Execute()
 			if err != nil {
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 		} else {
+			message = fmt.Sprintf("Project '%s' from workspace '%s' start request submitted", startProjectFlag, workspaceId)
 			res, err := apiClient.WorkspaceAPI.StartProject(ctx, workspaceId, startProjectFlag).Execute()
 			if err != nil {
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 		}
 
-		views.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully started", workspaceId))
+		views.RenderInfoMessage(message)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) != 0 {
@@ -111,7 +123,7 @@ func startAllWorkspaces() error {
 			log.Errorf("Failed to start workspace %s: %v", *workspace.Name, apiclient.HandleErrorResponse(res, err))
 			continue
 		}
-		fmt.Printf("Workspace %s successfully started\n", *workspace.Name)
+		fmt.Printf("Workspace '%s' start request submitted\n", *workspace.Name)
 	}
 	return nil
 }

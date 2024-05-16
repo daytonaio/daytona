@@ -121,7 +121,7 @@ func selectWorkspaceProject(workspaceId string, profile *config.Profile) (*strin
 	}
 
 	if len(wsInfo.Projects) > 1 {
-		selectedProject := selection.GetProjectFromPrompt(wsInfo.Projects, "open")
+		selectedProject := selection.GetProjectFromPrompt(wsInfo.Projects, "Open")
 		if selectedProject == nil {
 			return nil, nil
 		}
