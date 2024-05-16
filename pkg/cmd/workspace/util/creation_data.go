@@ -48,7 +48,7 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 		Source: &apiclient.CreateWorkspaceRequestProjectSource{
 			Repository: providerRepo,
 		},
-		Build: &serverapiclient.ProjectBuild{},
+		Build: &apiclient.ProjectBuild{},
 	}}
 
 	if config.MultiProject {
@@ -100,7 +100,7 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 			if project.User != nil {
 				*project.User = ""
 			}
-			if project.Build.Devcontainer != nil || *project.Build == (serverapiclient.ProjectBuild{}) {
+			if project.Build.Devcontainer != nil || *project.Build == (apiclient.ProjectBuild{}) {
 				if project.PostStartCommands != nil {
 					project.PostStartCommands = []string{}
 				}

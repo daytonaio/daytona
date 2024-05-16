@@ -6,7 +6,6 @@ package provisioner
 import (
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/logger"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/workspace"
@@ -26,15 +25,14 @@ type IProvisioner interface {
 
 type ProvisionerConfig struct {
 	ProviderManager manager.IProviderManager
-	LoggerFactory   logger.LoggerFactory
 }
 
 func NewProvisioner(config ProvisionerConfig) IProvisioner {
 	return &Provisioner{
-		ProvisionerConfig: config,
+		providerManager: config.ProviderManager,
 	}
 }
 
 type Provisioner struct {
-	ProvisionerConfig
+	providerManager manager.IProviderManager
 }

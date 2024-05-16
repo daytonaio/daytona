@@ -8,19 +8,19 @@ import (
 )
 
 func (s *WorkspaceService) StopWorkspace(workspaceId string) error {
-	workspace, err := s.WorkspaceStore.Find(workspaceId)
+	workspace, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
 		return ErrWorkspaceNotFound
 	}
 
-	target, err := s.TargetStore.Find(workspace.Target)
+	target, err := s.targetStore.Find(workspace.Target)
 	if err != nil {
 		return err
 	}
 
 	for _, project := range workspace.Projects {
 		//	todo: go routines
-		err := s.Provisioner.StopProject(project, target)
+		err := s.provisioner.StopProject(project, target)
 		if err != nil {
 			return err
 		}
@@ -30,16 +30,16 @@ func (s *WorkspaceService) StopWorkspace(workspaceId string) error {
 		}
 	}
 
-	err = s.Provisioner.StopWorkspace(workspace, target)
+	err = s.provisioner.StopWorkspace(workspace, target)
 	if err != nil {
 		return err
 	}
 
-	return s.WorkspaceStore.Save(workspace)
+	return s.workspaceStore.Save(workspace)
 }
 
 func (s *WorkspaceService) StopProject(workspaceId, projectName string) error {
-	w, err := s.WorkspaceStore.Find(workspaceId)
+	w, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
 		return ErrWorkspaceNotFound
 	}
@@ -49,12 +49,12 @@ func (s *WorkspaceService) StopProject(workspaceId, projectName string) error {
 		return ErrProjectNotFound
 	}
 
-	target, err := s.TargetStore.Find(w.Target)
+	target, err := s.targetStore.Find(w.Target)
 	if err != nil {
 		return err
 	}
 
-	err = s.Provisioner.StopProject(project, target)
+	err = s.provisioner.StopProject(project, target)
 	if err != nil {
 		return err
 	}
@@ -64,5 +64,5 @@ func (s *WorkspaceService) StopProject(workspaceId, projectName string) error {
 		project.State.UpdatedAt = time.Now().Format(time.RFC1123)
 	}
 
-	return s.WorkspaceStore.Save(w)
+	return s.workspaceStore.Save(w)
 }

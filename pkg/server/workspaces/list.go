@@ -12,7 +12,7 @@ import (
 )
 
 func (s *WorkspaceService) ListWorkspaces(verbose bool) ([]dto.WorkspaceDTO, error) {
-	workspaces, err := s.WorkspaceStore.List()
+	workspaces, err := s.workspaceStore.List()
 	if err != nil {
 		return nil, err
 	}
@@ -22,13 +22,13 @@ func (s *WorkspaceService) ListWorkspaces(verbose bool) ([]dto.WorkspaceDTO, err
 	for _, w := range workspaces {
 		var workspaceInfo *workspace.WorkspaceInfo
 		if verbose {
-			target, err := s.TargetStore.Find(w.Target)
+			target, err := s.targetStore.Find(w.Target)
 			if err != nil {
 				log.Error(fmt.Errorf("failed to get target for %s", w.Target))
 				continue
 			}
 
-			workspaceInfo, err = s.Provisioner.GetWorkspaceInfo(w, target)
+			workspaceInfo, err = s.provisioner.GetWorkspaceInfo(w, target)
 			if err != nil {
 				log.Error(fmt.Errorf("failed to get workspace info for %s", w.Name))
 			}

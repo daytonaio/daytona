@@ -64,7 +64,7 @@ func RunSubmissionForm(workspaceName *string, suggestedName string, workspaceNam
 			(*projectList)[i].EnvVars = &map[string]string{}
 		}
 		if (*projectList)[i].Build == nil {
-			(*projectList)[i].Build = &serverapiclient.ProjectBuild{}
+			(*projectList)[i].Build = &apiclient.ProjectBuild{}
 		}
 	}
 

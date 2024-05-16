@@ -51,13 +51,20 @@ type IBuilder interface {
 }
 
 type Builder struct {
-	BuilderConfig
 	id                string
 	plugin            BuilderPlugin
 	project           workspace.Project
 	containerRegistry *containerregistry.ContainerRegistry
 	gitProviderConfig *gitprovider.GitProviderConfig
 	hash              string
+
+	daytonaServerConfigFolder       string
+	localContainerRegistryServer    string
+	basePath                        string
+	loggerFactory                   logger.LoggerFactory
+	defaultProjectImage             string
+	defaultProjectUser              string
+	defaultProjectPostStartCommands []string
 }
 
 type IBuilderFactory interface {
@@ -65,7 +72,25 @@ type IBuilderFactory interface {
 }
 
 type BuilderFactory struct {
-	BuilderConfig
+	daytonaServerConfigFolder       string
+	localContainerRegistryServer    string
+	basePath                        string
+	loggerFactory                   logger.LoggerFactory
+	defaultProjectImage             string
+	defaultProjectUser              string
+	defaultProjectPostStartCommands []string
+}
+
+func NewBuilderFactory(config BuilderConfig) IBuilderFactory {
+	return &BuilderFactory{
+		daytonaServerConfigFolder:       config.DaytonaServerConfigFolder,
+		localContainerRegistryServer:    config.LocalContainerRegistryServer,
+		basePath:                        config.BasePath,
+		loggerFactory:                   config.LoggerFactory,
+		defaultProjectImage:             config.DefaultProjectImage,
+		defaultProjectUser:              config.DefaultProjectUser,
+		defaultProjectPostStartCommands: config.DefaultProjectPostStartCommands,
+	}
 }
 
 func (f *BuilderFactory) Create(p workspace.Project, cr *containerregistry.ContainerRegistry, gpc *gitprovider.GitProviderConfig) IBuilder {
@@ -73,20 +98,19 @@ func (f *BuilderFactory) Create(p workspace.Project, cr *containerregistry.Conta
 	buildId := uuid.String()[:8]
 
 	builder := &Builder{
-		BuilderConfig: BuilderConfig{
-			DaytonaServerConfigFolder:       f.DaytonaServerConfigFolder,
-			LocalContainerRegistryServer:    f.LocalContainerRegistryServer,
-			BasePath:                        f.BasePath,
-			LoggerFactory:                   f.LoggerFactory,
-			DefaultProjectImage:             f.DefaultProjectImage,
-			DefaultProjectUser:              f.DefaultProjectUser,
-			DefaultProjectPostStartCommands: f.DefaultProjectPostStartCommands,
-		},
 		id:                buildId,
 		plugin:            nil,
 		project:           p,
 		containerRegistry: cr,
 		gitProviderConfig: gpc,
+
+		daytonaServerConfigFolder:       f.daytonaServerConfigFolder,
+		localContainerRegistryServer:    f.localContainerRegistryServer,
+		basePath:                        f.basePath,
+		loggerFactory:                   f.loggerFactory,
+		defaultProjectImage:             f.defaultProjectImage,
+		defaultProjectUser:              f.defaultProjectUser,
+		defaultProjectPostStartCommands: f.defaultProjectPostStartCommands,
 	}
 
 	return builder
@@ -102,7 +126,7 @@ func (b *Builder) Prepare() error {
 		return err
 	}
 	b.hash = hash
-	projectDir := filepath.Join(b.BasePath, hash, "project")
+	projectDir := filepath.Join(b.basePath, hash, "project")
 
 	err = os.RemoveAll(projectDir)
 	if err != nil {
@@ -156,9 +180,9 @@ func (b *Builder) Prepare() error {
 
 		//	no supported dev config standard found
 		//	set default project image to ensure that project will run anyway
-		b.project.Image = b.DefaultProjectImage
-		b.project.User = b.DefaultProjectUser
-		b.project.PostStartCommands = b.DefaultProjectPostStartCommands
+		b.project.Image = b.defaultProjectImage
+		b.project.User = b.defaultProjectUser
+		b.project.PostStartCommands = b.defaultProjectPostStartCommands
 	}
 
 initPlugin:
@@ -168,9 +192,9 @@ initPlugin:
 			DevcontainerBuilderConfig: DevcontainerBuilderConfig{
 				buildId:                      b.id,
 				project:                      b.project,
-				loggerFactory:                b.LoggerFactory,
-				localContainerRegistryServer: b.LocalContainerRegistryServer,
-				projectVolumePath:            filepath.Join(b.BasePath, b.hash, "project"),
+				loggerFactory:                b.loggerFactory,
+				localContainerRegistryServer: b.localContainerRegistryServer,
+				projectVolumePath:            filepath.Join(b.basePath, b.hash, "project"),
 			},
 		}
 	}
@@ -184,7 +208,7 @@ func (b *Builder) LoadBuildResults() (*BuildResult, error) {
 		return nil, err
 	}
 
-	filePath := filepath.Join(b.DaytonaServerConfigFolder, "builds", hash, "build.json")
+	filePath := filepath.Join(b.daytonaServerConfigFolder, "builds", hash, "build.json")
 
 	_, err = os.Stat(filePath)
 	if err != nil {
@@ -214,12 +238,12 @@ func (b *Builder) LoadBuildResults() (*BuildResult, error) {
 }
 
 func (b *Builder) SaveBuildResults(r BuildResult) error {
-	err := os.MkdirAll(filepath.Join(b.DaytonaServerConfigFolder, "builds", b.hash), 0755)
+	err := os.MkdirAll(filepath.Join(b.daytonaServerConfigFolder, "builds", b.hash), 0755)
 	if err != nil {
 		return err
 	}
 
-	file, err := os.Create(filepath.Join(b.DaytonaServerConfigFolder, "builds", b.hash, "build.json"))
+	file, err := os.Create(filepath.Join(b.daytonaServerConfigFolder, "builds", b.hash, "build.json"))
 	if err != nil {
 		return err
 	}
