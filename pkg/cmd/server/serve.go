@@ -137,7 +137,7 @@ var ServeCmd = &cobra.Command{
 		builderFactory := &builder.BuilderFactory{
 			BuilderConfig: builder.BuilderConfig{
 				DaytonaServerConfigFolder:       configDir,
-				LocalContainerRegistryServer:    "localhost:5000",
+				LocalContainerRegistryServer:    "127.0.0.1:5000",
 				BasePath:                        filepath.Join(configDir, "builds"),
 				LoggerFactory:                   loggerFactory,
 				DefaultProjectImage:             c.DefaultProjectImage,
