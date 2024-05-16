@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"slices"
 
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -22,10 +23,13 @@ type GitProviderView struct {
 	Token      string
 }
 
+var commonGitProviderIds = []string{"github", "gitlab", "bitbucket"}
+
 func GitProviderSelectionView(gitProviderAddView *serverapiclient.GitProvider, userGitProviders []serverapiclient.GitProvider, isDeleting bool) {
 	supportedProviders := config.GetSupportedGitProviders()
 
 	var gitProviderOptions []huh.Option[string]
+	var otherGitProviderOptions []huh.Option[string]
 	for _, supportedProvider := range supportedProviders {
 		if isDeleting {
 			for _, userProvider := range userGitProviders {
@@ -34,8 +38,16 @@ func GitProviderSelectionView(gitProviderAddView *serverapiclient.GitProvider, u
 				}
 			}
 		} else {
-			gitProviderOptions = append(gitProviderOptions, huh.Option[string]{Key: supportedProvider.Name, Value: supportedProvider.Id})
+			if slices.Contains(commonGitProviderIds, supportedProvider.Id) {
+				gitProviderOptions = append(gitProviderOptions, huh.Option[string]{Key: supportedProvider.Name, Value: supportedProvider.Id})
+			} else {
+				otherGitProviderOptions = append(otherGitProviderOptions, huh.Option[string]{Key: supportedProvider.Name, Value: supportedProvider.Id})
+			}
 		}
+	}
+
+	if len(otherGitProviderOptions) > 0 {
+		gitProviderOptions = append(gitProviderOptions, huh.Option[string]{Key: "Other", Value: "other"})
 	}
 
 	gitProviderForm := huh.NewForm(
@@ -46,6 +58,15 @@ func GitProviderSelectionView(gitProviderAddView *serverapiclient.GitProvider, u
 					gitProviderOptions...,
 				).
 				Value(gitProviderAddView.Id)),
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title("Choose a Git provider").
+				Options(
+					otherGitProviderOptions...,
+				).
+				Value(gitProviderAddView.Id)).WithHideFunc(func() bool {
+			return *gitProviderAddView.Id != "other"
+		}),
 	).WithTheme(views.GetCustomTheme())
 
 	err := gitProviderForm.Run()
