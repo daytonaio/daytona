@@ -111,6 +111,16 @@ definitions:
         type: string
       name:
         type: string
+      sha:
+        type: string
+      sourceRepoId:
+        type: string
+      sourceRepoName:
+        type: string
+      sourceRepoOwner:
+        type: string
+      sourceRepoUrl:
+        type: string
     type: object
   GitRepository:
     properties:

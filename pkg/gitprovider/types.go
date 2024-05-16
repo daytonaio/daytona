@@ -36,10 +36,15 @@ type GitNamespace struct {
 
 type GitBranch struct {
 	Name string `json:"name"`
-	SHA  string `json:"sha"`
+	Sha  string `json:"sha"`
 } // @name GitBranch
 
 type GitPullRequest struct {
-	Name   string `json:"name"`
-	Branch string `json:"branch"`
+	Name            string `json:"name"`
+	Branch          string `json:"branch"`
+	Sha             string `json:"sha"`
+	SourceRepoId    string `json:"sourceRepoId"`
+	SourceRepoUrl   string `json:"sourceRepoUrl"`
+	SourceRepoOwner string `json:"sourceRepoOwner"`
+	SourceRepoName  string `json:"sourceRepoName"`
 } // @name GitPullRequest

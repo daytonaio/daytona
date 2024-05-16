@@ -1004,12 +1004,27 @@ components:
       type: object
     GitPullRequest:
       example:
+        sourceRepoUrl: sourceRepoUrl
+        sourceRepoId: sourceRepoId
         name: name
+        sourceRepoOwner: sourceRepoOwner
         branch: branch
+        sha: sha
+        sourceRepoName: sourceRepoName
       properties:
         branch:
           type: string
         name:
+          type: string
+        sha:
+          type: string
+        sourceRepoId:
+          type: string
+        sourceRepoName:
+          type: string
+        sourceRepoOwner:
+          type: string
+        sourceRepoUrl:
           type: string
       type: object
     GitRepository:

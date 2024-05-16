@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,7 +24,6 @@ import (
 //
 //	@id				GetGitContext
 func GetGitContext(ctx *gin.Context) {
-	// TODO: needs real implementing
 	gitUrl := ctx.Param("gitUrl")
 
 	decodedURLParam, err := url.QueryUnescape(gitUrl)
@@ -33,8 +32,19 @@ func GetGitContext(ctx *gin.Context) {
 		return
 	}
 
-	repo := &gitprovider.GitRepository{}
-	repo.Url = decodedURLParam
+	server := server.GetInstance(nil)
+
+	gitProvider, err := server.GitProviderService.GetGitProviderForUrl(decodedURLParam)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %s", err.Error()))
+		return
+	}
+
+	repo, err := gitProvider.GetRepositoryFromUrl(decodedURLParam)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get repository: %s", err.Error()))
+		return
+	}
 
 	ctx.JSON(200, repo)
 }

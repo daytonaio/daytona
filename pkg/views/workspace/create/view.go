@@ -4,7 +4,10 @@
 package create
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"net/url"
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
@@ -24,13 +27,6 @@ type Styles struct {
 	Highlight,
 	ErrorHeaderText,
 	Help lipgloss.Style
-}
-
-type WorkspaceCreationPromptResponse struct {
-	WorkspaceName      string
-	InitialProject     serverapiclient.CreateWorkspaceRequestProject
-	AdditionalProjects []serverapiclient.CreateWorkspaceRequestProject
-	AddingMoreProjects bool
 }
 
 func NewStyles(lg *lipgloss.Renderer) *Styles {
@@ -59,43 +55,42 @@ func NewStyles(lg *lipgloss.Renderer) *Styles {
 }
 
 type Model struct {
-	lg                              *lipgloss.Renderer
-	styles                          *Styles
-	form                            *huh.Form
-	width                           int
-	workspaceCreationPromptResponse WorkspaceCreationPromptResponse
+	lg     *lipgloss.Renderer
+	styles *Styles
+	form   *huh.Form
+	width  int
 }
 
-func RunInitialForm(initialRepoUrl string, multiProject bool) (WorkspaceCreationPromptResponse, error) {
+func GetRepositoryFromUrlInput(multiProject bool, apiClient *serverapiclient.APIClient) (*serverapiclient.GitRepository, error) {
 	m := Model{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
 
-	title := "Git Repository"
+	title := "Git repository"
 
 	if multiProject {
 		title = "First project repository"
 	}
 
-	initialRepoPrompt := huh.NewInput().
+	var initialRepoUrl string
+	var repo *serverapiclient.GitRepository
+
+	initialRepoInput := huh.NewInput().
 		Title(title).
 		Value(&initialRepoUrl).
 		Key("initialProjectRepo").
 		Validate(func(str string) error {
-			result, err := util.GetValidatedUrl(str)
-			if err != nil {
-				return err
-			}
-			initialRepoUrl = result
-			return nil
+			var err error
+			repo, err = validateRepoUrl(str, apiClient)
+			return err
 		})
 
 	dTheme := views.GetCustomTheme()
 
 	m.form = huh.NewForm(
 		huh.NewGroup(
-			initialRepoPrompt,
-		).WithHide(initialRepoUrl != ""),
+			initialRepoInput,
+		),
 	).WithTheme(dTheme).
 		WithWidth(maxWidth).
 		WithShowHelp(false).
@@ -103,69 +98,40 @@ func RunInitialForm(initialRepoUrl string, multiProject bool) (WorkspaceCreation
 
 	err := m.form.Run()
 	if err != nil {
-		return WorkspaceCreationPromptResponse{}, err
+		return nil, err
 	}
 
-	initialProject := serverapiclient.CreateWorkspaceRequestProject{
-		Source: &serverapiclient.CreateWorkspaceRequestProjectSource{
-			Repository: &serverapiclient.GitRepository{Url: &initialRepoUrl},
-		},
-	}
-
-	return WorkspaceCreationPromptResponse{
-		WorkspaceName:      "",
-		InitialProject:     initialProject,
-		AdditionalProjects: []serverapiclient.CreateWorkspaceRequestProject{},
-		AddingMoreProjects: multiProject,
-	}, nil
+	return repo, nil
 }
 
-func RunProjectForm(workspaceCreationPromptResponse WorkspaceCreationPromptResponse, providerRepoUrl string) (WorkspaceCreationPromptResponse, error) {
-	m := Model{width: maxWidth, workspaceCreationPromptResponse: workspaceCreationPromptResponse}
+func RunAdditionalProjectRepoForm(index int, apiClient *serverapiclient.APIClient) (*serverapiclient.GitRepository, bool, error) {
+	m := Model{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
 
-	project := serverapiclient.CreateWorkspaceRequestProject{
-		Source: &serverapiclient.CreateWorkspaceRequestProjectSource{
-			Repository: &serverapiclient.GitRepository{Url: &providerRepoUrl},
-		},
-	}
+	var repoUrl string
+	var repo *serverapiclient.GitRepository
 
-	var moreCheck bool
+	var addAnother bool
 
 	repositoryUrlInput :=
 		huh.NewInput().
-			Title(getOrderNumberString(len(workspaceCreationPromptResponse.AdditionalProjects)+2) + " project repository").
-			Value(project.Source.Repository.Url).
-			Key(fmt.Sprintf("additionalRepo%d", len(workspaceCreationPromptResponse.AdditionalProjects)+1)).
+			Title(getOrderNumberString(index) + " project repository").
+			Value(&repoUrl).
+			Key(fmt.Sprintf("additionalRepo%d", index)).
 			Validate(func(str string) error {
-				_, err := util.GetValidatedUrl(str)
-				if err != nil {
-					return err
-				}
-				return nil
+				var err error
+				repo, err = validateRepoUrl(str, apiClient)
+				return err
 			})
 
 	confirmInput :=
 		huh.NewConfirm().
 			Title("Add another project?").
-			Value(&moreCheck)
-
-	var formGroup *huh.Group
-
-	if project.Source.Repository.Url == nil || *project.Source.Repository.Url == "" {
-		formGroup = huh.NewGroup(
-			repositoryUrlInput,
-			confirmInput,
-		)
-	} else {
-		formGroup = huh.NewGroup(
-			confirmInput,
-		)
-	}
+			Value(&addAnother)
 
 	m.form = huh.NewForm(
-		formGroup,
+		huh.NewGroup(repositoryUrlInput, confirmInput),
 	).
 		WithWidth(maxWidth).
 		WithShowHelp(false).
@@ -174,20 +140,38 @@ func RunProjectForm(workspaceCreationPromptResponse WorkspaceCreationPromptRespo
 
 	err := m.form.Run()
 	if err != nil {
-		return WorkspaceCreationPromptResponse{}, err
+		return nil, false, err
 	}
 
-	validatedURL, err := util.GetValidatedUrl(*project.Source.Repository.Url)
+	return repo, addAnother, nil
+}
+
+func RunAddMoreProjectsForm() (bool, error) {
+	m := Model{width: maxWidth}
+	m.lg = lipgloss.DefaultRenderer()
+	m.styles = NewStyles(m.lg)
+
+	var addMore bool
+
+	confirmInput :=
+		huh.NewConfirm().
+			Title("Add another project?").
+			Value(&addMore)
+
+	m.form = huh.NewForm(
+		huh.NewGroup(confirmInput),
+	).
+		WithWidth(maxWidth).
+		WithShowHelp(false).
+		WithShowErrors(true).
+		WithTheme(views.GetCustomTheme())
+
+	err := m.form.Run()
 	if err != nil {
-		return WorkspaceCreationPromptResponse{}, err
+		return false, err
 	}
 
-	*project.Source.Repository.Url = validatedURL
-	result := workspaceCreationPromptResponse
-	result.AdditionalProjects = append(result.AdditionalProjects, project)
-	result.AddingMoreProjects = moreCheck
-
-	return result, nil
+	return addMore, nil
 }
 
 func getOrderNumberString(number int) string {
@@ -221,4 +205,18 @@ func getOrderNumberString(number int) string {
 	}
 	// Handle invalid numbers or negative numbers
 	return "Invalid"
+}
+
+func validateRepoUrl(repoUrl string, apiClient *serverapiclient.APIClient) (*serverapiclient.GitRepository, error) {
+	result, err := util.GetValidatedUrl(repoUrl)
+	if err != nil {
+		return nil, err
+	}
+	encodedURLParam := url.QueryEscape(result)
+	repo, _, err := apiClient.GitProviderAPI.GetGitContext(context.Background(), encodedURLParam).Execute()
+	if err != nil {
+		return nil, errors.New("Failed to fetch repository information. Please check the URL and try again.")
+	}
+
+	return repo, nil
 }

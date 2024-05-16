@@ -88,7 +88,7 @@ var CreateCmd = &cobra.Command{
 			}
 
 			if workspaceName == "" {
-				workspaceName = workspace_util.GetSuggestedWorkspaceName(*projects[0].Source.Repository.Url, existingWorkspaceNames)
+				workspaceName = workspace_util.GetSuggestedWorkspaceName(projects[0].Name, existingWorkspaceNames)
 			}
 		}
 
@@ -237,7 +237,14 @@ func processPrompting(apiClient *serverapiclient.APIClient, workspaceName *strin
 		return apiclient.HandleErrorResponse(res, err)
 	}
 
-	*workspaceName, *projects, err = workspace_util.GetCreationDataFromPrompt(apiServerConfig, workspaceNames, gitProviders, manualFlag, multiProjectFlag)
+	*workspaceName, *projects, err = workspace_util.GetCreationDataFromPrompt(workspace_util.CreateDataPromptConfig{
+		ApiServerConfig:        apiServerConfig,
+		ExistingWorkspaceNames: workspaceNames,
+		UserGitProviders:       gitProviders,
+		Manual:                 manualFlag,
+		MultiProject:           multiProjectFlag,
+		ApiClient:              apiClient,
+	})
 	if err != nil {
 		return err
 	}
@@ -258,12 +265,10 @@ func processCmdArguments(args []string, apiClient *serverapiclient.APIClient, pr
 		return apiclient.HandleErrorResponse(res, err)
 	}
 
-	projectName := workspace_util.GetProjectNameFromRepo(repoUrl)
-
 	project := &serverapiclient.CreateWorkspaceRequestProject{
-		Name: projectName,
+		Name: *repoResponse.Name,
 		Source: &serverapiclient.CreateWorkspaceRequestProjectSource{
-			Repository: &serverapiclient.GitRepository{Url: repoResponse.Url},
+			Repository: repoResponse,
 		},
 	}
 

@@ -49,10 +49,18 @@ func selectBranchPrompt(branches []serverapiclient.GitBranch, additionalProjectO
 	}
 }
 
-func GetBranchNameFromPrompt(branches []serverapiclient.GitBranch, additionalProjectOrder int) string {
+func GetBranchFromPrompt(branches []serverapiclient.GitBranch, additionalProjectOrder int) *serverapiclient.GitBranch {
 	choiceChan := make(chan string)
 
 	go selectBranchPrompt(branches, additionalProjectOrder, choiceChan)
 
-	return <-choiceChan
+	branchName := <-choiceChan
+
+	for _, b := range branches {
+		if *b.Name == branchName {
+			return &b
+		}
+	}
+
+	return nil
 }

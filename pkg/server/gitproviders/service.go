@@ -5,6 +5,8 @@ package gitproviders
 
 import (
 	"errors"
+	"fmt"
+	"strings"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 )
@@ -22,6 +24,7 @@ type IGitProviderService interface {
 	ListConfigs() ([]*gitprovider.GitProviderConfig, error)
 	RemoveGitProvider(gitProviderId string) error
 	SetGitProviderConfig(providerConfig *gitprovider.GitProviderConfig) error
+	GetLastCommitSha(repo *gitprovider.GitRepository) (string, error)
 }
 
 type GitProviderServiceConfig struct {
@@ -55,6 +58,69 @@ func (s *GitProviderService) ListConfigs() ([]*gitprovider.GitProviderConfig, er
 
 func (s *GitProviderService) GetConfig(id string) (*gitprovider.GitProviderConfig, error) {
 	return s.configStore.Find(id)
+}
+
+func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (string, error) {
+	var err error
+	var provider gitprovider.GitProvider
+	providerFound := false
+
+	gitProviders, err := s.configStore.List()
+	if err != nil {
+		return "", err
+	}
+
+	for _, p := range gitProviders {
+		if strings.Contains(repo.Url, fmt.Sprintf("%s.", p.Id)) {
+			provider, err = s.GetGitProvider(p.Id)
+			if err == nil {
+				return "", err
+			}
+			providerFound = true
+			break
+		}
+
+		hostname, err := getHostnameFromUrl(*p.BaseApiUrl)
+		if err != nil {
+			return "", err
+		}
+
+		if p.BaseApiUrl != nil && strings.Contains(repo.Url, hostname) {
+			provider, err = s.GetGitProvider(p.Id)
+			if err == nil {
+				return "", err
+			}
+			providerFound = true
+			break
+		}
+	}
+
+	if !providerFound {
+		hostname := strings.TrimPrefix(repo.Source, "www.")
+		providerId := strings.Split(hostname, ".")[0]
+
+		provider, err = s.newGitProvider(&gitprovider.GitProviderConfig{
+			Id:         providerId,
+			Username:   "",
+			Token:      "",
+			BaseApiUrl: nil,
+		})
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return provider.GetLastCommitSha(&gitprovider.StaticGitContext{
+		Id:       repo.Id,
+		Url:      repo.Url,
+		Name:     repo.Name,
+		Branch:   repo.Branch,
+		Sha:      &repo.Sha,
+		Owner:    repo.Owner,
+		PrNumber: repo.PrNumber,
+		Source:   repo.Source,
+		Path:     repo.Path,
+	})
 }
 
 func (s *GitProviderService) newGitProvider(config *gitprovider.GitProviderConfig) (gitprovider.GitProvider, error) {

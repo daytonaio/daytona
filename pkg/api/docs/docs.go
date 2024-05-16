@@ -1284,6 +1284,21 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "sha": {
+                    "type": "string"
+                },
+                "sourceRepoId": {
+                    "type": "string"
+                },
+                "sourceRepoName": {
+                    "type": "string"
+                },
+                "sourceRepoOwner": {
+                    "type": "string"
+                },
+                "sourceRepoUrl": {
+                    "type": "string"
                 }
             }
         },
