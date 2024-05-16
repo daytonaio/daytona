@@ -16,12 +16,14 @@ import (
 type GitHubGitProvider struct {
 	*AbstractGitProvider
 
-	token string
+	token      string
+	baseApiUrl *string
 }
 
-func NewGitHubGitProvider(token string) *GitHubGitProvider {
+func NewGitHubGitProvider(token string, baseApiUrl *string) *GitHubGitProvider {
 	gitProvider := &GitHubGitProvider{
 		token:               token,
+		baseApiUrl:          baseApiUrl,
 		AbstractGitProvider: &AbstractGitProvider{},
 	}
 	gitProvider.AbstractGitProvider.GitProvider = gitProvider
@@ -242,6 +244,18 @@ func (g *GitHubGitProvider) getApiClient() *github.Client {
 	}
 
 	client := github.NewClient(tc)
+
+	if g.baseApiUrl != nil {
+		trimmedUrl := strings.TrimPrefix(*g.baseApiUrl, "https://")
+		trimmedUrl = strings.TrimSuffix(trimmedUrl, "api/v3/")
+		trimmedUrl = strings.TrimSuffix(trimmedUrl, "/")
+
+		client.BaseURL = &url.URL{
+			Scheme: "https",
+			Host:   trimmedUrl,
+			Path:   "api/v3/",
+		}
+	}
 
 	return client
 }

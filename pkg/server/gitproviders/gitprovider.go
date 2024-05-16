@@ -60,6 +60,10 @@ func (s *GitProviderService) GetConfigForUrl(url string) (*gitprovider.GitProvid
 			return p, nil
 		}
 
+		if p.BaseApiUrl == nil || *p.BaseApiUrl == "" {
+			continue
+		}
+
 		hostname, err := getHostnameFromUrl(*p.BaseApiUrl)
 		if err != nil {
 			return nil, err
@@ -96,5 +100,5 @@ func getHostnameFromUrl(urlToParse string) (string, error) {
 		return "", err
 	}
 
-	return strings.TrimPrefix("www.", parsed.Hostname()), nil
+	return strings.TrimPrefix(parsed.Hostname(), "www."), nil
 }
