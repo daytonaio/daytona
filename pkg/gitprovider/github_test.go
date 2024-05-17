@@ -16,7 +16,7 @@ type GitHubGitProviderTestSuite struct {
 
 func NewGitHubGitProviderTestSuite() *GitHubGitProviderTestSuite {
 	return &GitHubGitProviderTestSuite{
-		gitProvider: NewGitHubGitProvider(""),
+		gitProvider: NewGitHubGitProvider("", nil),
 	}
 }
 

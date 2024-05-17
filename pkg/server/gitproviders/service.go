@@ -126,7 +126,9 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 func (s *GitProviderService) newGitProvider(config *gitprovider.GitProviderConfig) (gitprovider.GitProvider, error) {
 	switch config.Id {
 	case "github":
-		return gitprovider.NewGitHubGitProvider(config.Token), nil
+		return gitprovider.NewGitHubGitProvider(config.Token, nil), nil
+	case "github-enterprise-server":
+		return gitprovider.NewGitHubGitProvider(config.Token, config.BaseApiUrl), nil
 	case "gitlab":
 		return gitprovider.NewGitLabGitProvider(config.Token, nil), nil
 	case "bitbucket":

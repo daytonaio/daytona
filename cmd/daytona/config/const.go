@@ -44,6 +44,7 @@ func GetIdeList() []Ide {
 func GetSupportedGitProviders() []GitProvider {
 	return []GitProvider{
 		{"github", "GitHub"},
+		{"github-enterprise-server", "GitHub Enterprise Server"},
 		{"gitlab", "GitLab"},
 		{"gitlab-self-managed", "GitLab Self-managed"},
 		{"bitbucket", "Bitbucket"},
@@ -55,6 +56,8 @@ func GetSupportedGitProviders() []GitProvider {
 func GetDocsLinkFromGitProvider(providerId string) string {
 	switch providerId {
 	case "github":
+		fallthrough
+	case "github-enterprise-server":
 		return "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic"
 	case "gitlab":
 		fallthrough
