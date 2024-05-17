@@ -402,7 +402,7 @@ definitions:
     - ProviderTargetPropertyTypeInt
     - ProviderTargetPropertyTypeFloat
     - ProviderTargetPropertyTypeFilePath
-host: localhost:3000
+host: localhost:3986
 info:
   contact: {}
   description: Daytona Server API

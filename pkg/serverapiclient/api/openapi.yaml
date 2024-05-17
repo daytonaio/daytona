@@ -5,7 +5,7 @@ info:
   title: Daytona Server API
   version: 0.1.0
 servers:
-- url: http://localhost:3000/
+- url: http://localhost:3986/
 security:
 - Bearer: []
 paths:
