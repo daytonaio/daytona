@@ -12,6 +12,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
+	log "github.com/sirupsen/logrus"
 )
 
 type CreateDataPromptConfig struct {
@@ -53,6 +54,7 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 	if config.MultiProject {
 		addMore := true
 		for i := 2; addMore; i++ {
+			var providerRepo *apiclient.GitRepository
 			if !config.Manual && config.UserGitProviders != nil && len(config.UserGitProviders) > 0 {
 				providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, i+2)
 				if err != nil {
@@ -69,6 +71,12 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 				addMore, err = create.RunAddMoreProjectsForm()
 				if err != nil {
 					return "", nil, err
+				}
+			}
+
+			for _, project := range projectList {
+				if *project.Source.Repository.Url == *providerRepo.Url {
+					log.Fatalf("Error: duplicate repository url: %s", *providerRepo.Url)
 				}
 			}
 
