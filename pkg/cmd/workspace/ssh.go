@@ -59,12 +59,15 @@ var SshCmd = &cobra.Command{
 			workspaceId = *workspace.Id
 		}
 
-		// Todo: make project_select_prompt view for 0 args
 		if len(args) == 0 || len(args) == 1 {
-			projectName, err = server.GetFirstWorkspaceProjectName(workspaceId, projectName, &activeProfile)
+			selectedProject, err := selectWorkspaceProject(workspaceId, &activeProfile)
 			if err != nil {
 				log.Fatal(err)
 			}
+			if selectedProject == nil {
+				return
+			}
+			projectName = *selectedProject
 		}
 
 		if len(args) == 2 {
