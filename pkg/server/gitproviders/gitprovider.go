@@ -23,6 +23,10 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 			return s.GetGitProvider(p.Id)
 		}
 
+		if p.BaseApiUrl == nil || *p.BaseApiUrl == "" {
+			continue
+		}
+
 		hostname, err := getHostnameFromUrl(*p.BaseApiUrl)
 		if err != nil {
 			return nil, err
