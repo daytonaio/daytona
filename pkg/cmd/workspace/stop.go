@@ -63,13 +63,13 @@ var StopCmd = &cobra.Command{
 		}
 
 		if stopProjectFlag == "" {
-			message = fmt.Sprintf("Workspace '%s' stop request submitted", workspaceId)
+			message = fmt.Sprintf("Workspace '%s' is stopping", workspaceId)
 			res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, workspaceId).Execute()
 			if err != nil {
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 		} else {
-			message = fmt.Sprintf("Project '%s' from workspace '%s' stop request submitted", stopProjectFlag, workspaceId)
+			message = fmt.Sprintf("Project '%s' from workspace '%s' is stopping", stopProjectFlag, workspaceId)
 			res, err := apiClient.WorkspaceAPI.StopProject(ctx, workspaceId, stopProjectFlag).Execute()
 			if err != nil {
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
@@ -110,7 +110,7 @@ func stopAllWorkspaces() error {
 			log.Errorf("Failed to stop workspace %s: %v", *workspace.Name, apiclient.HandleErrorResponse(res, err))
 			continue
 		}
-		fmt.Printf("Workspace '%s' stop request submitted\n", *workspace.Name)
+		fmt.Printf("Workspace '%s' is stopping\n", *workspace.Name)
 	}
 	return nil
 }

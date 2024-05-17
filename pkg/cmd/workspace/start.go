@@ -71,13 +71,13 @@ var StartCmd = &cobra.Command{
 		}
 
 		if startProjectFlag == "" {
-			message = fmt.Sprintf("Workspace '%s' start request submitted", workspaceId)
+			message = fmt.Sprintf("Workspace '%s' is starting", workspaceId)
 			res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspaceId).Execute()
 			if err != nil {
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 		} else {
-			message = fmt.Sprintf("Project '%s' from workspace '%s' start request submitted", startProjectFlag, workspaceId)
+			message = fmt.Sprintf("Project '%s' from workspace '%s' is starting", startProjectFlag, workspaceId)
 			res, err := apiClient.WorkspaceAPI.StartProject(ctx, workspaceId, startProjectFlag).Execute()
 			if err != nil {
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
@@ -123,7 +123,7 @@ func startAllWorkspaces() error {
 			log.Errorf("Failed to start workspace %s: %v", *workspace.Name, apiclient.HandleErrorResponse(res, err))
 			continue
 		}
-		fmt.Printf("Workspace '%s' start request submitted\n", *workspace.Name)
+		fmt.Printf("Workspace '%s' is starting\n", *workspace.Name)
 	}
 	return nil
 }
