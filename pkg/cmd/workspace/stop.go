@@ -22,6 +22,9 @@ var StopCmd = &cobra.Command{
 	Short: "Stop a workspace",
 	Args:  cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
+		var workspaceId string
+		var message string
+
 		if allFlag {
 			err := stopAllWorkspaces()
 			if err != nil {
@@ -31,7 +34,6 @@ var StopCmd = &cobra.Command{
 		}
 
 		ctx := context.Background()
-		var workspaceId string
 
 		apiClient, err := server.GetApiClient(nil)
 		if err != nil {
@@ -39,6 +41,13 @@ var StopCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 {
+			if stopProjectFlag != "" {
+				err := cmd.Help()
+				if err != nil {
+					log.Fatal(err)
+				}
+				return
+			}
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
@@ -54,18 +63,20 @@ var StopCmd = &cobra.Command{
 		}
 
 		if stopProjectFlag == "" {
+			message = fmt.Sprintf("Workspace '%s' is stopping", workspaceId)
 			res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, workspaceId).Execute()
 			if err != nil {
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 		} else {
+			message = fmt.Sprintf("Project '%s' from workspace '%s' is stopping", stopProjectFlag, workspaceId)
 			res, err := apiClient.WorkspaceAPI.StopProject(ctx, workspaceId, stopProjectFlag).Execute()
 			if err != nil {
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 		}
 
-		views.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully stopped", workspaceId))
+		views.RenderInfoMessage(message)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) >= 1 {
@@ -99,7 +110,7 @@ func stopAllWorkspaces() error {
 			log.Errorf("Failed to stop workspace %s: %v", *workspace.Name, apiclient.HandleErrorResponse(res, err))
 			continue
 		}
-		fmt.Printf("Workspace %s successfully stopped\n", *workspace.Name)
+		fmt.Printf("Workspace '%s' is stopping\n", *workspace.Name)
 	}
 	return nil
 }
