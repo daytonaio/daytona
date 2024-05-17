@@ -4,16 +4,16 @@
 package tailscale
 
 import (
-	"flag"
 	"fmt"
 	"io"
 	"net"
 	"net/http"
 	"net/netip"
+	"time"
 
-	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/agent/config"
+	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"tailscale.com/tsnet"
 
@@ -26,31 +26,72 @@ type Server struct {
 }
 
 func (s *Server) Start() error {
-	flag.Parse()
-	tsnetServer := new(tsnet.Server)
-	tsnetServer.Hostname = s.Hostname
-	tsnetServer.ControlURL = s.Server.Url
-	tsnetServer.Ephemeral = true
+	errChan := make(chan error)
 
+	tsnetServer, err := s.connect()
+	if err != nil {
+		return fmt.Errorf("failed to connect to server: %v", err)
+	}
+
+	go func(tsnetServer *tsnet.Server) {
+		for {
+			time.Sleep(5 * time.Second)
+			httpClient := tsnetServer.HTTPClient()
+			httpClient.Timeout = 5 * time.Second
+			_, err := httpClient.Get(fmt.Sprintf("http://server%s", api.HEALTH_CHECK_ROUTE))
+			if err != nil {
+				log.Errorf("Failed to connect to server: %v. Reconnecting...", err)
+				// Close the tsnet server and reconnect
+				err = tsnetServer.Close()
+				if err != nil {
+					log.Errorf("Failed to close tsnet server: %v", err)
+				}
+
+				tsnetServer, err = s.connect()
+				if err != nil {
+					log.Errorf("Failed to reconnect: %v", err)
+				} else {
+					log.Info("Reconnected to server")
+				}
+			} else {
+				log.Trace("Connected to server")
+			}
+		}
+	}(tsnetServer)
+
+	return <-errChan
+}
+
+func (s *Server) getNetworkKey() (string, error) {
 	apiClient, err := server.GetAgentApiClient(s.Server.ApiUrl, s.Server.ApiKey)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	networkKey, res, err := apiClient.ServerAPI.GenerateNetworkKeyExecute(serverapiclient.ApiGenerateNetworkKeyRequest{})
+	networkKey, _, err := apiClient.ServerAPI.GenerateNetworkKeyExecute(serverapiclient.ApiGenerateNetworkKeyRequest{})
+	// Retry indefinitely. Used to reconnect to the Daytona Server
 	if err != nil {
-		log.Fatal(apiclient.HandleErrorResponse(res, err))
+		log.Tracef("Failed to get network key: %v", err)
+		time.Sleep(5 * time.Second)
+		return s.getNetworkKey()
 	}
 
-	tsnetServer.AuthKey = *networkKey.Key
+	return *networkKey.Key, nil
+}
 
-	defer tsnetServer.Close()
-	ln, err := tsnetServer.Listen("tcp", ":80")
+func (s *Server) getTsnetServer() (*tsnet.Server, error) {
+	tsnetServer := &tsnet.Server{
+		Hostname:   s.Hostname,
+		ControlURL: s.Server.Url,
+		Ephemeral:  true,
+	}
+
+	networkKey, err := s.getNetworkKey()
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("failed to get network key: %v", err)
 	}
 
-	defer ln.Close()
+	tsnetServer.AuthKey = networkKey
 
 	tsnetServer.RegisterFallbackTCPHandler(func(src, dest netip.AddrPort) (handler func(net.Conn), intercept bool) {
 		destPort := dest.Port()
@@ -85,7 +126,29 @@ func (s *Server) Start() error {
 		}, true
 	})
 
-	return http.Serve(ln, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Ok\n")
-	}))
+	return tsnetServer, nil
+}
+
+func (s *Server) connect() (*tsnet.Server, error) {
+	tsnetServer, err := s.getTsnetServer()
+	if err != nil {
+		return nil, err
+	}
+
+	ln, err := tsnetServer.Listen("tcp", ":80")
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		err := http.Serve(ln, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, "Ok\n")
+		}))
+		if err != nil {
+			// Trace log because this is expected to fail when disconnected from the Daytona Server
+			log.Tracef("Failed to serve: %v", err)
+		}
+	}()
+
+	return tsnetServer, nil
 }
