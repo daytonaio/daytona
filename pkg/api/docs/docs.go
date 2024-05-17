@@ -1726,7 +1726,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "0.1.0",
-	Host:             "localhost:3000",
+	Host:             "localhost:3986",
 	BasePath:         "/",
 	Schemes:          []string{"http"},
 	Title:            "Daytona Server API",

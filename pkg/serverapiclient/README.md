@@ -73,7 +73,7 @@ ctx = context.WithValue(context.Background(), serverapiclient.ContextOperationSe
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *http://localhost:3000*
+All URIs are relative to *http://localhost:3986*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
