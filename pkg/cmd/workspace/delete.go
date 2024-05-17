@@ -9,9 +9,8 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
@@ -61,9 +60,9 @@ var DeleteCmd = &cobra.Command{
 		}
 
 		ctx := context.Background()
-		var workspace *serverapiclient.WorkspaceDTO
+		var workspace *apiclient.WorkspaceDTO
 
-		apiClient, err := server.GetApiClient(nil)
+		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -71,12 +70,12 @@ var DeleteCmd = &cobra.Command{
 		if len(args) == 0 {
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
-				log.Fatal(apiclient.HandleErrorResponse(res, err))
+				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
 
 			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "Delete")
 		} else {
-			workspace, err = server.GetWorkspace(args[0])
+			workspace, err = apiclient_util.GetWorkspace(args[0])
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -126,20 +125,20 @@ func init() {
 
 func DeleteAllWorkspaces() error {
 	ctx := context.Background()
-	apiClient, err := server.GetApiClient(nil)
+	apiClient, err := apiclient_util.GetApiClient(nil)
 	if err != nil {
 		return err
 	}
 
 	workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 	if err != nil {
-		return apiclient.HandleErrorResponse(res, err)
+		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	for _, workspace := range workspaceList {
 		res, err := apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
 		if err != nil {
-			log.Errorf("Failed to delete workspace %s: %v", *workspace.Name, apiclient.HandleErrorResponse(res, err))
+			log.Errorf("Failed to delete workspace %s: %v", *workspace.Name, apiclient_util.HandleErrorResponse(res, err))
 			continue
 		}
 		views.RenderLine(fmt.Sprintf("- Workspace %s successfully deleted\n", *workspace.Name))
@@ -147,10 +146,10 @@ func DeleteAllWorkspaces() error {
 	return nil
 }
 
-func removeWorkspace(ctx context.Context, apiClient *serverapiclient.APIClient, workspace *serverapiclient.WorkspaceDTO) error {
+func removeWorkspace(ctx context.Context, apiClient *apiclient.APIClient, workspace *apiclient.WorkspaceDTO) error {
 	res, err := apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
 	if err != nil {
-		log.Fatal(apiclient.HandleErrorResponse(res, err))
+		log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 	}
 
 	c, err := config.GetConfig()

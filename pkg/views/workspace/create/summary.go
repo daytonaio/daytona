@@ -12,7 +12,7 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	util "github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
@@ -23,13 +23,13 @@ type SummaryModel struct {
 	width         int
 	quitting      bool
 	workspaceName string
-	projectList   []serverapiclient.CreateWorkspaceRequestProject
+	projectList   []apiclient.CreateWorkspaceRequestProject
 }
 
 var configureCheck bool
 var userCancelled bool
 
-func RunSubmissionForm(workspaceName *string, suggestedName string, workspaceNames []string, projectList *[]serverapiclient.CreateWorkspaceRequestProject, apiServerConfig *serverapiclient.ServerConfig) error {
+func RunSubmissionForm(workspaceName *string, suggestedName string, workspaceNames []string, projectList *[]apiclient.CreateWorkspaceRequestProject, apiServerConfig *apiclient.ServerConfig) error {
 	configureCheck = false
 
 	m := NewSummaryModel(workspaceName, suggestedName, workspaceNames, *projectList)
@@ -75,7 +75,7 @@ func RunSubmissionForm(workspaceName *string, suggestedName string, workspaceNam
 	return RunSubmissionForm(workspaceName, suggestedName, workspaceNames, projectList, apiServerConfig)
 }
 
-func RenderSummary(workspaceName string, projectList []serverapiclient.CreateWorkspaceRequestProject) (string, error) {
+func RenderSummary(workspaceName string, projectList []apiclient.CreateWorkspaceRequestProject) (string, error) {
 
 	output := views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - Workspace %s", workspaceName))
 
@@ -97,7 +97,7 @@ func RenderSummary(workspaceName string, projectList []serverapiclient.CreateWor
 	return output, nil
 }
 
-func NewSummaryModel(workspaceName *string, suggestedName string, workspaceNames []string, projectList []serverapiclient.CreateWorkspaceRequestProject) SummaryModel {
+func NewSummaryModel(workspaceName *string, suggestedName string, workspaceNames []string, projectList []apiclient.CreateWorkspaceRequestProject) SummaryModel {
 	m := SummaryModel{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)

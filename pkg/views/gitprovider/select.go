@@ -11,7 +11,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
@@ -25,7 +25,7 @@ type GitProviderView struct {
 
 var commonGitProviderIds = []string{"github", "gitlab", "bitbucket"}
 
-func GitProviderSelectionView(gitProviderAddView *serverapiclient.GitProvider, userGitProviders []serverapiclient.GitProvider, isDeleting bool) {
+func GitProviderSelectionView(gitProviderAddView *apiclient.GitProvider, userGitProviders []apiclient.GitProvider, isDeleting bool) {
 	supportedProviders := config.GetSupportedGitProviders()
 
 	var gitProviderOptions []huh.Option[string]

@@ -35,7 +35,7 @@ jobs:
           go install github.com/swaggo/swag/cmd/swag@v1.16.3
           ./hack/swagger.sh
           go fmt ./...
-          git diff --exit-code pkg/serverapiclient/* || (echo "API clients are out of sync! Please generate with './hack/swagger.sh' and commit" && exit 1)
+          git diff --exit-code pkg/apiclient/* || (echo "API clients are out of sync! Please generate with './hack/swagger.sh' and commit" && exit 1)
           git diff --exit-code '**/*.go' || (echo "Code is not formatted! Please run 'go fmt ./...' and commit" && exit 1)
   test:
     name: Unit tests

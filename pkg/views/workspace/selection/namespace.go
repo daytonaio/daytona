@@ -9,11 +9,11 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
-func selectNamespacePrompt(namespaces []serverapiclient.GitNamespace, additionalProjectOrder int, choiceChan chan<- string) {
+func selectNamespacePrompt(namespaces []apiclient.GitNamespace, additionalProjectOrder int, choiceChan chan<- string) {
 	items := []list.Item{}
 	var desc string
 
@@ -51,7 +51,7 @@ func selectNamespacePrompt(namespaces []serverapiclient.GitNamespace, additional
 	}
 }
 
-func GetNamespaceIdFromPrompt(namespaces []serverapiclient.GitNamespace, additionalProjectOrder int) string {
+func GetNamespaceIdFromPrompt(namespaces []apiclient.GitNamespace, additionalProjectOrder int) string {
 	choiceChan := make(chan string)
 
 	go selectNamespacePrompt(namespaces, additionalProjectOrder, choiceChan)

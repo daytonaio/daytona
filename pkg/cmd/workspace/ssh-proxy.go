@@ -11,7 +11,7 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/cmd/tailscale"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	"github.com/daytonaio/daytona/internal/util/apiclient"
 	ssh_config "github.com/daytonaio/daytona/pkg/agent/ssh/config"
 	"github.com/daytonaio/daytona/pkg/workspace"
 
@@ -41,7 +41,7 @@ var SshProxyCmd = &cobra.Command{
 		if len(args) == 3 {
 			projectName = args[2]
 		} else {
-			projectName, err = server.GetFirstWorkspaceProjectName(workspaceId, projectName, &profile)
+			projectName, err = apiclient.GetFirstWorkspaceProjectName(workspaceId, projectName, &profile)
 			if err != nil {
 				log.Fatal(err)
 			}

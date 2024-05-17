@@ -10,14 +10,14 @@ import (
 	"net/url"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
 
-func getRepositoryFromWizard(userGitProviders []serverapiclient.GitProvider, additionalProjectOrder int) (*serverapiclient.GitRepository, error) {
+func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additionalProjectOrder int) (*apiclient.GitRepository, error) {
 	var providerId string
 	var namespaceId string
 	var checkoutOptions []selection.CheckoutOption
@@ -49,12 +49,12 @@ func getRepositoryFromWizard(userGitProviders []serverapiclient.GitProvider, add
 
 	ctx := context.Background()
 
-	apiClient, err := server.GetApiClient(nil)
+	apiClient, err := apiclient_util.GetApiClient(nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	var namespaceList []serverapiclient.GitNamespace
+	var namespaceList []apiclient.GitNamespace
 
 	err = views_util.With(func() error {
 		namespaceList, _, err = apiClient.GitProviderAPI.GetNamespaces(ctx, providerId).Execute()
@@ -73,7 +73,7 @@ func getRepositoryFromWizard(userGitProviders []serverapiclient.GitProvider, add
 		}
 	}
 
-	var providerRepos []serverapiclient.GitRepository
+	var providerRepos []apiclient.GitRepository
 	err = views_util.With(func() error {
 		providerRepos, _, err = apiClient.GitProviderAPI.GetRepositories(ctx, providerId, namespaceId).Execute()
 		return err
@@ -88,7 +88,7 @@ func getRepositoryFromWizard(userGitProviders []serverapiclient.GitProvider, add
 		return nil, errors.New("must select a repository")
 	}
 
-	var branchList []serverapiclient.GitBranch
+	var branchList []apiclient.GitBranch
 	err = views_util.With(func() error {
 		branchList, _, err = apiClient.GitProviderAPI.GetRepoBranches(ctx, providerId, namespaceId, url.QueryEscape(*chosenRepo.Id)).Execute()
 		return err
@@ -108,7 +108,7 @@ func getRepositoryFromWizard(userGitProviders []serverapiclient.GitProvider, add
 		return chosenRepo, nil
 	}
 
-	var prList []serverapiclient.GitPullRequest
+	var prList []apiclient.GitPullRequest
 	err = views_util.With(func() error {
 		prList, _, err = apiClient.GitProviderAPI.GetRepoPRs(ctx, providerId, namespaceId, url.QueryEscape(*chosenRepo.Id)).Execute()
 		return err
@@ -118,7 +118,7 @@ func getRepositoryFromWizard(userGitProviders []serverapiclient.GitProvider, add
 		return nil, err
 	}
 
-	var branch *serverapiclient.GitBranch
+	var branch *apiclient.GitBranch
 	if len(prList) == 0 {
 		branch = selection.GetBranchFromPrompt(branchList, additionalProjectOrder)
 		if branch == nil {

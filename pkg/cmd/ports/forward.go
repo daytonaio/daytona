@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/frpc"
 	"github.com/daytonaio/daytona/pkg/ports"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -34,7 +33,7 @@ var PortForwardCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		workspace, err := server.GetWorkspace(args[1])
+		workspace, err := apiclient.GetWorkspace(args[1])
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -43,7 +42,7 @@ var PortForwardCmd = &cobra.Command{
 		if len(args) == 3 {
 			projectName = args[2]
 		} else {
-			projectName, err = server.GetFirstWorkspaceProjectName(workspaceId, projectName, nil)
+			projectName, err = apiclient.GetFirstWorkspaceProjectName(workspaceId, projectName, nil)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -84,7 +83,7 @@ func init() {
 func ForwardPublicPort(workspaceId, projectName string, hostPort, targetPort uint16) error {
 	views.RenderInfoMessage("Forwarding port to a public URL...")
 
-	apiClient, err := server.GetApiClient(nil)
+	apiClient, err := apiclient.GetApiClient(nil)
 	if err != nil {
 		return err
 	}

@@ -8,7 +8,6 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/ide"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
@@ -35,7 +34,7 @@ var SshCmd = &cobra.Command{
 		var workspaceId string
 		var projectName string
 
-		apiClient, err := server.GetApiClient(&activeProfile)
+		apiClient, err := apiclient.GetApiClient(&activeProfile)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -52,7 +51,7 @@ var SshCmd = &cobra.Command{
 			}
 			workspaceId = *workspace.Id
 		} else {
-			workspace, err := server.GetWorkspace(args[0])
+			workspace, err := apiclient.GetWorkspace(args[0])
 			if err != nil {
 				log.Fatal(err)
 			}

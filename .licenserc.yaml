@@ -10,7 +10,7 @@ header:
     - "**/*.sh"
 
   paths-ignore:
-    - "**/serverapiclient/**"
+    - "**/apiclient/**"
     - "**/pkg/api/docs/docs.go"
     - ".devcontainer/postcreate.sh"
 

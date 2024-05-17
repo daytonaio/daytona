@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"golang.org/x/term"
 )
@@ -23,7 +23,7 @@ var propertyValueStyle = lipgloss.NewStyle().
 	Foreground(views.Light).
 	Bold(true)
 
-func Render(workspace *serverapiclient.WorkspaceDTO, ide string, forceUnstyled bool) {
+func Render(workspace *apiclient.WorkspaceDTO, ide string, forceUnstyled bool) {
 	var isCreationView bool
 	var output string
 	nameLabel := "Name"
@@ -86,7 +86,7 @@ func renderTUIView(output string, width int, isCreationView bool) {
 	fmt.Println(content)
 }
 
-func getSingleProjectOutput(project *serverapiclient.Project, isCreationView bool) string {
+func getSingleProjectOutput(project *apiclient.Project, isCreationView bool) string {
 	var output string
 	var repositoryUrl string
 
@@ -116,7 +116,7 @@ func getSingleProjectOutput(project *serverapiclient.Project, isCreationView boo
 	return output
 }
 
-func getProjectsOutputs(projects []serverapiclient.Project, isCreationView bool) string {
+func getProjectsOutputs(projects []apiclient.Project, isCreationView bool) string {
 	var output string
 	for i, project := range projects {
 		output += getInfoLine(fmt.Sprintf("Project #%d", i+1), *project.Name)
@@ -139,7 +139,7 @@ func getInfoLine(key, value string) string {
 	return propertyNameStyle.Render(fmt.Sprintf("%-*s", propertyNameWidth, key)) + propertyValueStyle.Render(value) + "\n"
 }
 
-func getInfoLineState(key string, state *serverapiclient.ProjectState) string {
+func getInfoLineState(key string, state *apiclient.ProjectState) string {
 	var uptime int
 	var stateProperty string
 
@@ -158,7 +158,7 @@ func getInfoLineState(key string, state *serverapiclient.ProjectState) string {
 	return propertyNameStyle.Render(fmt.Sprintf("%-*s", propertyNameWidth, key)) + stateProperty + propertyValueStyle.Foreground(views.Light).Render("\n")
 }
 
-func getInfoLineGitStatus(key string, status *serverapiclient.GitStatus) string {
+func getInfoLineGitStatus(key string, status *apiclient.GitStatus) string {
 	output := propertyNameStyle.Render(fmt.Sprintf("%-*s", propertyNameWidth, key))
 	if status.CurrentBranch == nil {
 		return output + propertyValueStyle.Foreground(views.Gray).Render("No branch") + "\n"

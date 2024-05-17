@@ -8,13 +8,13 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
 var NewApiKeyName = "+ New API Key"
 
-func GetApiKeyFromPrompt(apiKeys []serverapiclient.ApiKey, title string, withNewApiKey bool) (*serverapiclient.ApiKey, error) {
+func GetApiKeyFromPrompt(apiKeys []apiclient.ApiKey, title string, withNewApiKey bool) (*apiclient.ApiKey, error) {
 	var items []list.Item
 
 	for _, p := range apiKeys {
@@ -26,7 +26,7 @@ func GetApiKeyFromPrompt(apiKeys []serverapiclient.ApiKey, title string, withNew
 	if withNewApiKey {
 		name := NewApiKeyName
 		items = append(items, item{
-			apiKey: serverapiclient.ApiKey{
+			apiKey: apiclient.ApiKey{
 				Name: &name,
 			},
 		})

@@ -8,9 +8,8 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	internal_util "github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/daytonaio/daytona/pkg/views/target"
@@ -35,7 +34,7 @@ var TargetSetCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		pluginList, err := server.GetProviderList()
+		pluginList, err := apiclient_util.GetProviderList()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -49,12 +48,12 @@ var TargetSetCmd = &cobra.Command{
 			return
 		}
 
-		targets, err := server.GetTargetList()
+		targets, err := apiclient_util.GetTargetList()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		filteredTargets := []serverapiclient.ProviderTarget{}
+		filteredTargets := []apiclient.ProviderTarget{}
 		for _, t := range targets {
 			if *t.ProviderInfo.Name == *selectedProvider.Name {
 				filteredTargets = append(filteredTargets, t)
@@ -66,19 +65,19 @@ var TargetSetCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		client, err := server.GetApiClient(nil)
+		client, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		targetManifest, res, err := client.ProviderAPI.GetTargetManifest(context.Background(), *selectedProvider.Name).Execute()
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
 		if *selectedTarget.Name == target.NewTargetName {
 			*selectedTarget.Name = ""
-			err = target.NewTargetNameInput(selectedTarget.Name, internal_util.ArrayMap(targets, func(t serverapiclient.ProviderTarget) string {
+			err = target.NewTargetNameInput(selectedTarget.Name, internal_util.ArrayMap(targets, func(t apiclient.ProviderTarget) string {
 				return *t.Name
 			}))
 			if err != nil {
@@ -91,14 +90,14 @@ var TargetSetCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		selectedTarget.ProviderInfo = &serverapiclient.ProviderProviderInfo{
+		selectedTarget.ProviderInfo = &apiclient.ProviderProviderInfo{
 			Name:    selectedProvider.Name,
 			Version: selectedProvider.Version,
 		}
 
 		res, err = client.TargetAPI.SetTarget(context.Background()).Target(*selectedTarget).Execute()
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
 		views.RenderInfoMessage("Target set successfully")

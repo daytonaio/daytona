@@ -9,7 +9,6 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/target"
 	"github.com/spf13/cobra"
@@ -36,7 +35,7 @@ var targetRemoveCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 
-			targets, err := server.GetTargetList()
+			targets, err := apiclient.GetTargetList()
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -51,7 +50,7 @@ var targetRemoveCmd = &cobra.Command{
 			selectedTargetName = args[0]
 		}
 
-		client, err := server.GetApiClient(nil)
+		client, err := apiclient.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}

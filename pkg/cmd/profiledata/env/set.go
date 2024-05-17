@@ -9,7 +9,6 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/spf13/cobra"
 
@@ -21,7 +20,7 @@ var setCmd = &cobra.Command{
 	Short:   "Set profile environment variables",
 	Aliases: []string{"s", "update", "add", "delete", "rm"},
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, err := server.GetApiClient(nil)
+		apiClient, err := apiclient.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}

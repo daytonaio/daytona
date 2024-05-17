@@ -4,7 +4,7 @@
 package provider
 
 import (
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/output"
 	"github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/spf13/cobra"
@@ -18,7 +18,7 @@ var providerListCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Aliases: []string{"ls"},
 	Run: func(cmd *cobra.Command, args []string) {
-		providerList, err := server.GetProviderList()
+		providerList, err := apiclient.GetProviderList()
 		if err != nil {
 			log.Fatal(err)
 		}

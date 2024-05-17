@@ -10,22 +10,22 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 )
 
 type CreateDataPromptConfig struct {
-	ApiServerConfig        *serverapiclient.ServerConfig
+	ApiServerConfig        *apiclient.ServerConfig
 	ExistingWorkspaceNames []string
-	UserGitProviders       []serverapiclient.GitProvider
+	UserGitProviders       []apiclient.GitProvider
 	Manual                 bool
 	MultiProject           bool
-	ApiClient              *serverapiclient.APIClient
+	ApiClient              *apiclient.APIClient
 }
 
-func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []serverapiclient.CreateWorkspaceRequestProject, error) {
-	var projectList []serverapiclient.CreateWorkspaceRequestProject
-	var providerRepo *serverapiclient.GitRepository
+func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclient.CreateWorkspaceRequestProject, error) {
+	var projectList []apiclient.CreateWorkspaceRequestProject
+	var providerRepo *apiclient.GitRepository
 	var err error
 	var workspaceName string
 
@@ -43,9 +43,9 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []servera
 		}
 	}
 
-	projectList = []serverapiclient.CreateWorkspaceRequestProject{{
+	projectList = []apiclient.CreateWorkspaceRequestProject{{
 		Name: *providerRepo.Name,
-		Source: &serverapiclient.CreateWorkspaceRequestProjectSource{
+		Source: &apiclient.CreateWorkspaceRequestProjectSource{
 			Repository: providerRepo,
 		},
 	}}
@@ -72,9 +72,9 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []servera
 				}
 			}
 
-			projectList = append(projectList, serverapiclient.CreateWorkspaceRequestProject{
+			projectList = append(projectList, apiclient.CreateWorkspaceRequestProject{
 				Name: *providerRepo.Name,
-				Source: &serverapiclient.CreateWorkspaceRequestProjectSource{
+				Source: &apiclient.CreateWorkspaceRequestProjectSource{
 					Repository: providerRepo,
 				},
 			})

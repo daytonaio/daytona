@@ -8,7 +8,6 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -34,7 +33,7 @@ var logsCmd = &cobra.Command{
 			query = "follow=true"
 		}
 
-		ws, res, err := server.GetWebsocketConn("/log/server", &activeProfile, &query)
+		ws, res, err := apiclient.GetWebsocketConn("/log/server", &activeProfile, &query)
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}

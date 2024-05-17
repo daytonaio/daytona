@@ -11,10 +11,10 @@ import (
 	"net/netip"
 	"time"
 
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/api"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"tailscale.com/tsnet"
 
 	log "github.com/sirupsen/logrus"
@@ -63,12 +63,12 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) getNetworkKey() (string, error) {
-	apiClient, err := server.GetAgentApiClient(s.Server.ApiUrl, s.Server.ApiKey)
+	apiClient, err := apiclient_util.GetAgentApiClient(s.Server.ApiUrl, s.Server.ApiKey)
 	if err != nil {
 		return "", err
 	}
 
-	networkKey, _, err := apiClient.ServerAPI.GenerateNetworkKeyExecute(serverapiclient.ApiGenerateNetworkKeyRequest{})
+	networkKey, _, err := apiClient.ServerAPI.GenerateNetworkKeyExecute(apiclient.ApiGenerateNetworkKeyRequest{})
 	// Retry indefinitely. Used to reconnect to the Daytona Server
 	if err != nil {
 		log.Tracef("Failed to get network key: %v", err)

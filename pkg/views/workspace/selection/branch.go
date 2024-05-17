@@ -7,14 +7,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectBranchPrompt(branches []serverapiclient.GitBranch, additionalProjectOrder int, choiceChan chan<- string) {
+func selectBranchPrompt(branches []apiclient.GitBranch, additionalProjectOrder int, choiceChan chan<- string) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
@@ -49,7 +49,7 @@ func selectBranchPrompt(branches []serverapiclient.GitBranch, additionalProjectO
 	}
 }
 
-func GetBranchFromPrompt(branches []serverapiclient.GitBranch, additionalProjectOrder int) *serverapiclient.GitBranch {
+func GetBranchFromPrompt(branches []apiclient.GitBranch, additionalProjectOrder int) *apiclient.GitBranch {
 	choiceChan := make(chan string)
 
 	go selectBranchPrompt(branches, additionalProjectOrder, choiceChan)

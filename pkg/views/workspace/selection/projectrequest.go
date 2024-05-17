@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -18,22 +18,22 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-var DoneConfiguring = serverapiclient.CreateWorkspaceRequestProject{Name: "DoneConfiguringName"}
+var DoneConfiguring = apiclient.CreateWorkspaceRequestProject{Name: "DoneConfiguringName"}
 
 type projectRequestItem struct {
-	item[serverapiclient.CreateWorkspaceRequestProject]
+	item[apiclient.CreateWorkspaceRequestProject]
 	name, image, user, postStartCommands string
-	project                              serverapiclient.CreateWorkspaceRequestProject
+	project                              apiclient.CreateWorkspaceRequestProject
 }
 
 type projectRequestItemDelegate struct {
-	ItemDelegate[serverapiclient.CreateWorkspaceRequestProject]
+	ItemDelegate[apiclient.CreateWorkspaceRequestProject]
 }
 type projectRequestModel struct {
-	model[serverapiclient.CreateWorkspaceRequestProject]
+	model[apiclient.CreateWorkspaceRequestProject]
 }
 
-func selectProjectRequestPrompt(projects []serverapiclient.CreateWorkspaceRequestProject, choiceChan chan<- *serverapiclient.CreateWorkspaceRequestProject) {
+func selectProjectRequestPrompt(projects []apiclient.CreateWorkspaceRequestProject, choiceChan chan<- *apiclient.CreateWorkspaceRequestProject) {
 	items := []list.Item{}
 
 	for _, project := range projects {
@@ -107,8 +107,8 @@ func selectProjectRequestPrompt(projects []serverapiclient.CreateWorkspaceReques
 	}
 }
 
-func GetProjectRequestFromPrompt(projects []serverapiclient.CreateWorkspaceRequestProject) *serverapiclient.CreateWorkspaceRequestProject {
-	choiceChan := make(chan *serverapiclient.CreateWorkspaceRequestProject)
+func GetProjectRequestFromPrompt(projects []apiclient.CreateWorkspaceRequestProject) *apiclient.CreateWorkspaceRequestProject {
+	choiceChan := make(chan *apiclient.CreateWorkspaceRequestProject)
 
 	go selectProjectRequestPrompt(projects, choiceChan)
 
