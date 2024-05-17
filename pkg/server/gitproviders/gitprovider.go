@@ -23,6 +23,10 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 			return s.GetGitProvider(p.Id)
 		}
 
+		if p.BaseApiUrl == nil || *p.BaseApiUrl == "" {
+			continue
+		}
+
 		hostname, err := getHostnameFromUrl(*p.BaseApiUrl)
 		if err != nil {
 			return nil, err
@@ -58,6 +62,10 @@ func (s *GitProviderService) GetConfigForUrl(url string) (*gitprovider.GitProvid
 	for _, p := range gitProviders {
 		if strings.Contains(url, fmt.Sprintf("%s.", p.Id)) {
 			return p, nil
+		}
+
+		if p.BaseApiUrl == nil || *p.BaseApiUrl == "" {
+			continue
 		}
 
 		hostname, err := getHostnameFromUrl(*p.BaseApiUrl)
@@ -96,5 +104,5 @@ func getHostnameFromUrl(urlToParse string) (string, error) {
 		return "", err
 	}
 
-	return strings.TrimPrefix("www.", parsed.Hostname()), nil
+	return strings.TrimPrefix(parsed.Hostname(), "www."), nil
 }

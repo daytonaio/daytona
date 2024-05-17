@@ -71,7 +71,7 @@ func GitProviderSelectionView(gitProviderAddView *serverapiclient.GitProvider, u
 			huh.NewInput().
 				Title("Self-managed API URL").
 				Value(gitProviderAddView.BaseApiUrl).
-				Description("For example: http://gitlab-host/api/v4/ or https://gitea-host").
+				Description(getApiUrlDescription(*gitProviderAddView.Id)).
 				Validate(func(str string) error {
 					if str == "" {
 						return errors.New("URL can not be blank")
@@ -108,5 +108,16 @@ func providerRequiresUsername(gitProviderId string) bool {
 }
 
 func providerRequiresApiUrl(gitProviderId string) bool {
-	return gitProviderId == "gitlab-self-managed" || gitProviderId == "gitea"
+	return gitProviderId == "github-enterprise-server" || gitProviderId == "gitlab-self-managed" || gitProviderId == "gitea"
+}
+
+func getApiUrlDescription(gitProviderId string) string {
+	if gitProviderId == "gitlab-self-managed" {
+		return "For example: http://gitlab-host/api/v4/"
+	} else if gitProviderId == "github-enterprise-server" {
+		return "For example: https://github-host"
+	} else if gitProviderId == "gitea" {
+		return "For example: http://gitea-host"
+	}
+	return ""
 }
