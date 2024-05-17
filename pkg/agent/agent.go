@@ -12,12 +12,11 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server/conversion"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	agent_config "github.com/daytonaio/daytona/pkg/agent/config"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	log "github.com/sirupsen/logrus"
@@ -127,14 +126,14 @@ func (a *Agent) startProjectMode() error {
 func (a *Agent) getProject() (*workspace.Project, error) {
 	ctx := context.Background()
 
-	apiClient, err := server.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
+	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
 	if err != nil {
 		return nil, err
 	}
 
 	workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, a.Config.WorkspaceId).Execute()
 	if err != nil {
-		return nil, apiclient.HandleErrorResponse(res, err)
+		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	for _, project := range workspace.Projects {
@@ -146,10 +145,10 @@ func (a *Agent) getProject() (*workspace.Project, error) {
 	return nil, errors.New("project not found")
 }
 
-func (a *Agent) getGitProvider(repoUrl string) (*serverapiclient.GitProvider, error) {
+func (a *Agent) getGitProvider(repoUrl string) (*apiclient.GitProvider, error) {
 	ctx := context.Background()
 
-	apiClient, err := server.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
+	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +156,7 @@ func (a *Agent) getGitProvider(repoUrl string) (*serverapiclient.GitProvider, er
 	encodedUrl := url.QueryEscape(repoUrl)
 	gitProvider, res, err := apiClient.GitProviderAPI.GetGitProviderForUrl(ctx, encodedUrl).Execute()
 	if err != nil {
-		return nil, apiclient.HandleErrorResponse(res, err)
+		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	if gitProvider != nil {
@@ -167,15 +166,15 @@ func (a *Agent) getGitProvider(repoUrl string) (*serverapiclient.GitProvider, er
 	return nil, nil
 }
 
-func (a *Agent) getGitUser(gitProviderId string) (*serverapiclient.GitUser, error) {
-	apiClient, err := server.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
+func (a *Agent) getGitUser(gitProviderId string) (*apiclient.GitUser, error) {
+	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
 	if err != nil {
 		return nil, err
 	}
 
 	userData, res, err := apiClient.GitProviderAPI.GetGitUser(context.Background(), gitProviderId).Execute()
 	if err != nil {
-		return nil, apiclient.HandleErrorResponse(res, err)
+		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	return userData, nil
@@ -238,7 +237,7 @@ func (a *Agent) uptime() int32 {
 }
 
 func (a *Agent) updateProjectState() error {
-	apiClient, err := server.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
+	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
 	if err != nil {
 		return err
 	}
@@ -249,12 +248,12 @@ func (a *Agent) updateProjectState() error {
 	}
 
 	uptime := a.uptime()
-	res, err := apiClient.WorkspaceAPI.SetProjectState(context.Background(), a.Config.WorkspaceId, a.Config.ProjectName).SetState(serverapiclient.SetProjectState{
+	res, err := apiClient.WorkspaceAPI.SetProjectState(context.Background(), a.Config.WorkspaceId, a.Config.ProjectName).SetState(apiclient.SetProjectState{
 		Uptime:    &uptime,
 		GitStatus: conversion.ToGitStatusDTO(gitStatus),
 	}).Execute()
 	if err != nil {
-		return apiclient.HandleErrorResponse(res, err)
+		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	return nil

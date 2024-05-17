@@ -9,14 +9,14 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
 const NewTargetName = "+ New Target"
 
-func GetTargetFromPrompt(targets []serverapiclient.ProviderTarget, activeProfileName string, withNewTarget bool) (*serverapiclient.ProviderTarget, error) {
-	items := util.ArrayMap(targets, func(t serverapiclient.ProviderTarget) list.Item {
+func GetTargetFromPrompt(targets []apiclient.ProviderTarget, activeProfileName string, withNewTarget bool) (*apiclient.ProviderTarget, error) {
+	items := util.ArrayMap(targets, func(t apiclient.ProviderTarget) list.Item {
 		return item{
 			target: t,
 		}
@@ -26,7 +26,7 @@ func GetTargetFromPrompt(targets []serverapiclient.ProviderTarget, activeProfile
 		name := NewTargetName
 		options := "{}"
 		items = append(items, item{
-			target: serverapiclient.ProviderTarget{
+			target: apiclient.ProviderTarget{
 				Name:    &name,
 				Options: &options,
 			},

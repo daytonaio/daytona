@@ -7,14 +7,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectPullRequestPrompt(pullRequests []serverapiclient.GitPullRequest, additionalProjectOrder int, choiceChan chan<- string) {
+func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, additionalProjectOrder int, choiceChan chan<- string) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
@@ -49,7 +49,7 @@ func selectPullRequestPrompt(pullRequests []serverapiclient.GitPullRequest, addi
 	}
 }
 
-func GetPullRequestFromPrompt(pullRequests []serverapiclient.GitPullRequest, additionalProjectOrder int) *serverapiclient.GitPullRequest {
+func GetPullRequestFromPrompt(pullRequests []apiclient.GitPullRequest, additionalProjectOrder int) *apiclient.GitPullRequest {
 	choiceChan := make(chan string)
 
 	go selectPullRequestPrompt(pullRequests, additionalProjectOrder, choiceChan)

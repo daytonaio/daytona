@@ -10,7 +10,7 @@ import (
 	"net/url"
 
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/huh"
@@ -61,7 +61,7 @@ type Model struct {
 	width  int
 }
 
-func GetRepositoryFromUrlInput(multiProject bool, apiClient *serverapiclient.APIClient) (*serverapiclient.GitRepository, error) {
+func GetRepositoryFromUrlInput(multiProject bool, apiClient *apiclient.APIClient) (*apiclient.GitRepository, error) {
 	m := Model{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
@@ -73,7 +73,7 @@ func GetRepositoryFromUrlInput(multiProject bool, apiClient *serverapiclient.API
 	}
 
 	var initialRepoUrl string
-	var repo *serverapiclient.GitRepository
+	var repo *apiclient.GitRepository
 
 	initialRepoInput := huh.NewInput().
 		Title(title).
@@ -104,13 +104,13 @@ func GetRepositoryFromUrlInput(multiProject bool, apiClient *serverapiclient.API
 	return repo, nil
 }
 
-func RunAdditionalProjectRepoForm(index int, apiClient *serverapiclient.APIClient) (*serverapiclient.GitRepository, bool, error) {
+func RunAdditionalProjectRepoForm(index int, apiClient *apiclient.APIClient) (*apiclient.GitRepository, bool, error) {
 	m := Model{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
 
 	var repoUrl string
-	var repo *serverapiclient.GitRepository
+	var repo *apiclient.GitRepository
 
 	var addAnother bool
 
@@ -207,7 +207,7 @@ func getOrderNumberString(number int) string {
 	return "Invalid"
 }
 
-func validateRepoUrl(repoUrl string, apiClient *serverapiclient.APIClient) (*serverapiclient.GitRepository, error) {
+func validateRepoUrl(repoUrl string, apiClient *apiclient.APIClient) (*apiclient.GitRepository, error) {
 	result, err := util.GetValidatedUrl(repoUrl)
 	if err != nil {
 		return nil, err

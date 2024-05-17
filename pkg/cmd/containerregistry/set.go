@@ -8,9 +8,8 @@ import (
 	"net/url"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	containerregistry_view "github.com/daytonaio/daytona/pkg/views/containerregistry"
 	"github.com/spf13/cobra"
@@ -24,7 +23,7 @@ var containerRegistrySetCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Aliases: []string{"add", "update", "register"},
 	Run: func(cmd *cobra.Command, args []string) {
-		var registryDto *serverapiclient.ContainerRegistry
+		var registryDto *apiclient.ContainerRegistry
 		selectedServer := serverFlag
 
 		c, err := config.GetConfig()
@@ -43,14 +42,14 @@ var containerRegistrySetCmd = &cobra.Command{
 			Password: passwordFlag,
 		}
 
-		apiClient, err := server.GetApiClient(nil)
+		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		containerRegistries, res, err := apiClient.ContainerRegistryAPI.ListContainerRegistries(context.Background()).Execute()
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
 		if serverFlag == "" || usernameFlag == "" || passwordFlag == "" {
@@ -79,7 +78,7 @@ var containerRegistrySetCmd = &cobra.Command{
 			}
 		}
 
-		registryDto = &serverapiclient.ContainerRegistry{
+		registryDto = &apiclient.ContainerRegistry{
 			Server:   &registryView.Server,
 			Username: &registryView.Username,
 			Password: &registryView.Password,
@@ -87,7 +86,7 @@ var containerRegistrySetCmd = &cobra.Command{
 
 		res, err = apiClient.ContainerRegistryAPI.SetContainerRegistry(context.Background(), url.QueryEscape(selectedServer)).ContainerRegistry(*registryDto).Execute()
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
 		views.RenderInfoMessage("Registry set successfully")

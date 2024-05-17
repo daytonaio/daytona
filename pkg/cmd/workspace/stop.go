@@ -8,7 +8,6 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	log "github.com/sirupsen/logrus"
@@ -35,7 +34,7 @@ var StopCmd = &cobra.Command{
 
 		ctx := context.Background()
 
-		apiClient, err := server.GetApiClient(nil)
+		apiClient, err := apiclient.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -94,7 +93,7 @@ func init() {
 
 func stopAllWorkspaces() error {
 	ctx := context.Background()
-	apiClient, err := server.GetApiClient(nil)
+	apiClient, err := apiclient.GetApiClient(nil)
 	if err != nil {
 		return err
 	}

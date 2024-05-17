@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/bubbles/list"
@@ -17,7 +17,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func selectWorkspacePrompt(workspaces []serverapiclient.WorkspaceDTO, actionVerb string, choiceChan chan<- *serverapiclient.WorkspaceDTO) {
+func selectWorkspacePrompt(workspaces []apiclient.WorkspaceDTO, actionVerb string, choiceChan chan<- *apiclient.WorkspaceDTO) {
 	// Initialize an empty list of items.
 	items := []list.Item{}
 
@@ -53,7 +53,7 @@ func selectWorkspacePrompt(workspaces []serverapiclient.WorkspaceDTO, actionVerb
 			}
 		}
 
-		newItem := item[serverapiclient.WorkspaceDTO]{
+		newItem := item[apiclient.WorkspaceDTO]{
 			title:          *workspace.Name,
 			id:             *workspace.Id,
 			desc:           strings.Join(projectsInfo, ", "),
@@ -66,7 +66,7 @@ func selectWorkspacePrompt(workspaces []serverapiclient.WorkspaceDTO, actionVerb
 		items = append(items, newItem)
 	}
 
-	d := ItemDelegate[serverapiclient.WorkspaceDTO]{}
+	d := ItemDelegate[apiclient.WorkspaceDTO]{}
 
 	l := list.New(items, d, 0, 0)
 
@@ -76,7 +76,7 @@ func selectWorkspacePrompt(workspaces []serverapiclient.WorkspaceDTO, actionVerb
 	l.FilterInput.PromptStyle = lipgloss.NewStyle().Foreground(views.Green)
 	l.FilterInput.TextStyle = lipgloss.NewStyle().Foreground(views.Green)
 
-	m := model[serverapiclient.WorkspaceDTO]{list: l}
+	m := model[apiclient.WorkspaceDTO]{list: l}
 
 	m.list.Title = views.GetStyledMainTitle("Select a Workspace To " + actionVerb)
 	m.list.Styles.Title = lipgloss.NewStyle().Foreground(views.Green).Bold(true)
@@ -87,15 +87,15 @@ func selectWorkspacePrompt(workspaces []serverapiclient.WorkspaceDTO, actionVerb
 		os.Exit(1)
 	}
 
-	if m, ok := p.(model[serverapiclient.WorkspaceDTO]); ok && m.choice != nil {
+	if m, ok := p.(model[apiclient.WorkspaceDTO]); ok && m.choice != nil {
 		choiceChan <- m.choice
 	} else {
 		choiceChan <- nil
 	}
 }
 
-func GetWorkspaceFromPrompt(workspaces []serverapiclient.WorkspaceDTO, actionVerb string) *serverapiclient.WorkspaceDTO {
-	choiceChan := make(chan *serverapiclient.WorkspaceDTO)
+func GetWorkspaceFromPrompt(workspaces []apiclient.WorkspaceDTO, actionVerb string) *apiclient.WorkspaceDTO {
+	choiceChan := make(chan *apiclient.WorkspaceDTO)
 
 	go selectWorkspacePrompt(workspaces, actionVerb, choiceChan)
 

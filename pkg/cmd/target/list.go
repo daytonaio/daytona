@@ -6,7 +6,7 @@ package target
 import (
 	"log"
 
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/output"
 	"github.com/daytonaio/daytona/pkg/views"
 	list_view "github.com/daytonaio/daytona/pkg/views/target/list"
@@ -19,7 +19,7 @@ var targetListCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Aliases: []string{"ls"},
 	Run: func(cmd *cobra.Command, args []string) {
-		targets, err := server.GetTargetList()
+		targets, err := apiclient.GetTargetList()
 		if err != nil {
 			log.Fatal(err)
 		}

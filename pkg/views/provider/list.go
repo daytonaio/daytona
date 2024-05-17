@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/lipgloss"
@@ -29,7 +29,7 @@ func getRowFromRowData(rowData RowData) []string {
 	return row
 }
 
-func getRowData(provider *serverapiclient.Provider) *RowData {
+func getRowData(provider *apiclient.Provider) *RowData {
 	rowData := RowData{"", ""}
 
 	rowData.Name = *provider.Name
@@ -38,7 +38,7 @@ func getRowData(provider *serverapiclient.Provider) *RowData {
 	return &rowData
 }
 
-func List(providerList []serverapiclient.Provider) {
+func List(providerList []apiclient.Provider) {
 
 	re := lipgloss.NewRenderer(os.Stdout)
 
@@ -86,7 +86,7 @@ func List(providerList []serverapiclient.Provider) {
 	fmt.Println(views.BaseTableStyle.Render(t.String()))
 }
 
-func renderUnstyledList(providerList []serverapiclient.Provider) {
+func renderUnstyledList(providerList []apiclient.Provider) {
 	output := "\n"
 
 	for _, provider := range providerList {

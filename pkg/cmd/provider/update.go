@@ -6,10 +6,9 @@ package provider
 import (
 	"fmt"
 
-	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/spf13/cobra"
 
@@ -24,19 +23,19 @@ var providerUpdateCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Aliases: []string{"up"},
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, err := server.GetApiClient(nil)
+		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		providerList, err := server.GetProviderList()
+		providerList, err := apiclient_util.GetProviderList()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(serverapiclient.ApiGetConfigRequest{})
+		serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(apiclient.ApiGetConfigRequest{})
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
 		providersManifest, err := manager.GetProvidersManifest(*serverConfig.RegistryUrl)
@@ -75,7 +74,7 @@ var providerUpdateCmd = &cobra.Command{
 	},
 }
 
-func updateProvider(providerToUpdate *serverapiclient.Provider, providersManifest *manager.ProvidersManifest, apiClient *serverapiclient.APIClient) error {
+func updateProvider(providerToUpdate *apiclient.Provider, providersManifest *manager.ProvidersManifest, apiClient *apiclient.APIClient) error {
 	providerManifest, ok := (*providersManifest)[*providerToUpdate.Name]
 	if !ok {
 		return fmt.Errorf("Provider %s not found in manifest", *providerToUpdate.Name)
@@ -88,12 +87,12 @@ func updateProvider(providerToUpdate *serverapiclient.Provider, providersManifes
 
 	downloadUrls := convertToStringMap(version.DownloadUrls)
 
-	res, err := apiClient.ProviderAPI.InstallProviderExecute(serverapiclient.ApiInstallProviderRequest{}.Provider(serverapiclient.InstallProviderRequest{
+	res, err := apiClient.ProviderAPI.InstallProviderExecute(apiclient.ApiInstallProviderRequest{}.Provider(apiclient.InstallProviderRequest{
 		Name:         providerToUpdate.Name,
 		DownloadUrls: &downloadUrls,
 	}))
 	if err != nil {
-		return apiclient.HandleErrorResponse(res, err)
+		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	return nil

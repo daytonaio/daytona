@@ -8,9 +8,8 @@ import (
 	"net/url"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	containerregistry_view "github.com/daytonaio/daytona/pkg/views/containerregistry"
 	log "github.com/sirupsen/logrus"
@@ -23,10 +22,10 @@ var containerRegistryDeleteCmd = &cobra.Command{
 	Short:   "Delete a container registry",
 	Args:    cobra.RangeArgs(0, 2),
 	Run: func(cmd *cobra.Command, args []string) {
-		var registryDto *serverapiclient.ContainerRegistry
+		var registryDto *apiclient.ContainerRegistry
 		var selectedServer string
 
-		apiClient, err := server.GetApiClient(nil)
+		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -44,7 +43,7 @@ var containerRegistryDeleteCmd = &cobra.Command{
 
 			containerRegistries, res, err := apiClient.ContainerRegistryAPI.ListContainerRegistries(context.Background()).Execute()
 			if err != nil {
-				log.Fatal(apiclient.HandleErrorResponse(res, err))
+				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
 
 			if len(containerRegistries) == 0 {
@@ -64,7 +63,7 @@ var containerRegistryDeleteCmd = &cobra.Command{
 
 		res, err := apiClient.ContainerRegistryAPI.RemoveContainerRegistry(context.Background(), url.QueryEscape(selectedServer)).Execute()
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
 		views.RenderInfoMessage("Container registry deleted successfully")

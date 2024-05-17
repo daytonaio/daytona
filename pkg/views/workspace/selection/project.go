@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/bubbles/list"
@@ -15,13 +15,13 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func GetProjectFromPrompt(projects []serverapiclient.Project, actionVerb string) *serverapiclient.Project {
-	choiceChan := make(chan *serverapiclient.Project)
+func GetProjectFromPrompt(projects []apiclient.Project, actionVerb string) *apiclient.Project {
+	choiceChan := make(chan *apiclient.Project)
 	go selectProjectPrompt(projects, actionVerb, choiceChan)
 	return <-choiceChan
 }
 
-func selectProjectPrompt(projects []serverapiclient.Project, actionVerb string, choiceChan chan<- *serverapiclient.Project) {
+func selectProjectPrompt(projects []apiclient.Project, actionVerb string, choiceChan chan<- *apiclient.Project) {
 	items := []list.Item{}
 
 	for _, project := range projects {
@@ -31,7 +31,7 @@ func selectProjectPrompt(projects []serverapiclient.Project, actionVerb string, 
 		} else {
 			projectName = "Unnamed Project"
 		}
-		newItem := item[serverapiclient.Project]{title: projectName, desc: "", choiceProperty: project}
+		newItem := item[apiclient.Project]{title: projectName, desc: "", choiceProperty: project}
 		items = append(items, newItem)
 	}
 
@@ -54,7 +54,7 @@ func selectProjectPrompt(projects []serverapiclient.Project, actionVerb string, 
 	l.FilterInput.PromptStyle = lipgloss.NewStyle().Foreground(views.Green)
 	l.FilterInput.TextStyle = lipgloss.NewStyle().Foreground(views.Green)
 
-	m := model[serverapiclient.Project]{list: l}
+	m := model[apiclient.Project]{list: l}
 
 	m.list.Title = views.GetStyledMainTitle("Select a Project To " + actionVerb)
 	m.list.Styles.Title = lipgloss.NewStyle().Foreground(views.Green).Bold(true)
@@ -65,7 +65,7 @@ func selectProjectPrompt(projects []serverapiclient.Project, actionVerb string, 
 		os.Exit(1)
 	}
 
-	if m, ok := p.(model[serverapiclient.Project]); ok && m.choice != nil {
+	if m, ok := p.(model[apiclient.Project]); ok && m.choice != nil {
 		choiceChan <- m.choice
 	} else {
 		choiceChan <- nil

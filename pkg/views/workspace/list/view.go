@@ -11,7 +11,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/table"
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	info_view "github.com/daytonaio/daytona/pkg/views/workspace/info"
@@ -27,7 +27,7 @@ type RowData struct {
 	Branch     string
 }
 
-func ListWorkspaces(workspaceList []serverapiclient.WorkspaceDTO, specifyGitProviders bool, verbose bool) {
+func ListWorkspaces(workspaceList []apiclient.WorkspaceDTO, specifyGitProviders bool, verbose bool) {
 	sortWorkspaces(&workspaceList, verbose)
 
 	re := lipgloss.NewRenderer(os.Stdout)
@@ -101,7 +101,7 @@ func ListWorkspaces(workspaceList []serverapiclient.WorkspaceDTO, specifyGitProv
 	fmt.Println(views.BaseTableStyle.Render(t.String()))
 }
 
-func renderUnstyledList(workspaceList []serverapiclient.WorkspaceDTO) {
+func renderUnstyledList(workspaceList []apiclient.WorkspaceDTO) {
 	for _, workspace := range workspaceList {
 		info_view.Render(&workspace, "", true)
 
@@ -140,7 +140,7 @@ func getRowFromRowData(rowData RowData, isMultiProjectAccordion bool) []string {
 	return row
 }
 
-func sortWorkspaces(workspaceList *[]serverapiclient.WorkspaceDTO, verbose bool) {
+func sortWorkspaces(workspaceList *[]apiclient.WorkspaceDTO, verbose bool) {
 	if verbose {
 		sort.Slice(*workspaceList, func(i, j int) bool {
 			ws1 := (*workspaceList)[i]
@@ -167,7 +167,7 @@ func sortWorkspaces(workspaceList *[]serverapiclient.WorkspaceDTO, verbose bool)
 
 }
 
-func getWorkspaceTableRowData(workspace serverapiclient.WorkspaceDTO, specifyGitProviders bool) *RowData {
+func getWorkspaceTableRowData(workspace apiclient.WorkspaceDTO, specifyGitProviders bool) *RowData {
 	rowData := RowData{"", "", "", "", "", ""}
 	if workspace.Name != nil {
 		rowData.Name = *workspace.Name + views_util.AdditionalPropertyPadding
@@ -190,7 +190,7 @@ func getWorkspaceTableRowData(workspace serverapiclient.WorkspaceDTO, specifyGit
 	return &rowData
 }
 
-func getProjectTableRowData(workspaceDTO serverapiclient.WorkspaceDTO, project serverapiclient.Project, specifyGitProviders bool) *RowData {
+func getProjectTableRowData(workspaceDTO apiclient.WorkspaceDTO, project apiclient.Project, specifyGitProviders bool) *RowData {
 	rowData := RowData{"", "", "", "", "", ""}
 	if project.Name != nil {
 		rowData.Name = " └ " + *project.Name

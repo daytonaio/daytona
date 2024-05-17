@@ -10,10 +10,9 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/jetbrains"
-	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/ide"
-	"github.com/daytonaio/daytona/pkg/serverapiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
@@ -36,7 +35,7 @@ var CodeCmd = &cobra.Command{
 		var workspaceId string
 		var projectName string
 		var ideId string
-		var workspace *serverapiclient.WorkspaceDTO
+		var workspace *apiclient.WorkspaceDTO
 
 		activeProfile, err := c.GetActiveProfile()
 		if err != nil {
@@ -45,7 +44,7 @@ var CodeCmd = &cobra.Command{
 
 		ideId = c.DefaultIdeId
 
-		apiClient, err := server.GetApiClient(&activeProfile)
+		apiClient, err := apiclient_util.GetApiClient(&activeProfile)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -53,7 +52,7 @@ var CodeCmd = &cobra.Command{
 		if len(args) == 0 {
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
-				log.Fatal(apiclient.HandleErrorResponse(res, err))
+				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
 
 			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "Open")
@@ -62,7 +61,7 @@ var CodeCmd = &cobra.Command{
 			}
 			workspaceId = *workspace.Id
 		} else {
-			workspace, err = server.GetWorkspace(args[0])
+			workspace, err = apiclient_util.GetWorkspace(args[0])
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -110,14 +109,14 @@ var CodeCmd = &cobra.Command{
 func selectWorkspaceProject(workspaceId string, profile *config.Profile) (*string, error) {
 	ctx := context.Background()
 
-	apiClient, err := server.GetApiClient(profile)
+	apiClient, err := apiclient_util.GetApiClient(profile)
 	if err != nil {
 		return nil, err
 	}
 
 	wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceId).Execute()
 	if err != nil {
-		return nil, apiclient.HandleErrorResponse(res, err)
+		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	if len(wsInfo.Projects) > 1 {

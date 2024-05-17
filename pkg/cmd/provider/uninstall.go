@@ -8,7 +8,6 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/spf13/cobra"
@@ -22,7 +21,7 @@ var providerUninstallCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Aliases: []string{"u"},
 	Run: func(cmd *cobra.Command, args []string) {
-		providerList, err := server.GetProviderList()
+		providerList, err := apiclient.GetProviderList()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -36,7 +35,7 @@ var providerUninstallCmd = &cobra.Command{
 			return
 		}
 
-		apiClient, err := server.GetApiClient(nil)
+		apiClient, err := apiclient.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
