@@ -16,7 +16,6 @@ import (
 	"github.com/daytonaio/daytona/internal/cmd/tailscale"
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	ssh_config "github.com/daytonaio/daytona/pkg/agent/ssh/config"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
@@ -44,7 +43,7 @@ var CreateCmd = &cobra.Command{
 		var workspaceName string
 		var existingWorkspaceNames []string
 
-		apiClient, err := server.GetApiClient(nil)
+		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -205,7 +204,7 @@ func init() {
 }
 
 func getTarget(activeProfileName string) (*apiclient.ProviderTarget, error) {
-	targets, err := server.GetTargetList()
+	targets, err := apiclient_util.GetTargetList()
 	if err != nil {
 		return nil, err
 	}
@@ -286,7 +285,7 @@ func readWorkspaceLogs(activeProfile config.Profile, workspaceId string, project
 			query := "follow=true"
 
 			for {
-				ws, res, err := server.GetWebsocketConn(fmt.Sprintf("/log/workspace/%s/%s", workspaceId, project.Name), &activeProfile, &query)
+				ws, res, err := apiclient_util.GetWebsocketConn(fmt.Sprintf("/log/workspace/%s/%s", workspaceId, project.Name), &activeProfile, &query)
 				// We want to retry getting the logs if it fails
 				if err != nil {
 					log.Trace(apiclient_util.HandleErrorResponse(res, err))
@@ -304,7 +303,7 @@ func readWorkspaceLogs(activeProfile config.Profile, workspaceId string, project
 	query := "follow=true"
 
 	for {
-		ws, res, err := server.GetWebsocketConn(fmt.Sprintf("/log/workspace/%s", workspaceId), &activeProfile, &query)
+		ws, res, err := apiclient_util.GetWebsocketConn(fmt.Sprintf("/log/workspace/%s", workspaceId), &activeProfile, &query)
 		// We want to retry getting the logs if it fails
 		if err != nil {
 			log.Trace(apiclient_util.HandleErrorResponse(res, err))

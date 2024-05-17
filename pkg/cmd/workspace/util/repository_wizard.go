@@ -10,7 +10,7 @@ import (
 	"net/url"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -49,7 +49,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 
 	ctx := context.Background()
 
-	apiClient, err := server.GetApiClient(nil)
+	apiClient, err := apiclient_util.GetApiClient(nil)
 	if err != nil {
 		log.Fatal(err)
 	}

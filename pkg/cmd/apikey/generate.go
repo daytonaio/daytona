@@ -13,7 +13,6 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/server/apikey"
@@ -31,7 +30,7 @@ var GenerateCmd = &cobra.Command{
 		ctx := context.Background()
 		var keyName string
 
-		apiClient, err := server.GetApiClient(nil)
+		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}

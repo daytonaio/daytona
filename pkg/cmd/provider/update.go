@@ -7,7 +7,6 @@ import (
 	"fmt"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/views/provider"
@@ -24,12 +23,12 @@ var providerUpdateCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Aliases: []string{"up"},
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, err := server.GetApiClient(nil)
+		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		providerList, err := server.GetProviderList()
+		providerList, err := apiclient_util.GetProviderList()
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -8,7 +8,6 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	log "github.com/sirupsen/logrus"
@@ -43,7 +42,7 @@ var StartCmd = &cobra.Command{
 
 		ctx := context.Background()
 
-		apiClient, err := server.GetApiClient(nil)
+		apiClient, err := apiclient.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -107,7 +106,7 @@ func init() {
 
 func startAllWorkspaces() error {
 	ctx := context.Background()
-	apiClient, err := server.GetApiClient(nil)
+	apiClient, err := apiclient.GetApiClient(nil)
 	if err != nil {
 		return err
 	}
@@ -130,7 +129,7 @@ func startAllWorkspaces() error {
 
 func getProjectNameCompletions(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	ctx := context.Background()
-	apiClient, err := server.GetApiClient(nil)
+	apiClient, err := apiclient.GetApiClient(nil)
 	if err != nil {
 		return nil, cobra.ShellCompDirectiveDefault
 	}
@@ -150,7 +149,7 @@ func getProjectNameCompletions(cmd *cobra.Command, args []string, toComplete str
 
 func getWorkspaceNameCompletions() ([]string, cobra.ShellCompDirective) {
 	ctx := context.Background()
-	apiClient, err := server.GetApiClient(nil)
+	apiClient, err := apiclient.GetApiClient(nil)
 	if err != nil {
 		return nil, cobra.ShellCompDirectiveNoFileComp
 	}
@@ -170,7 +169,7 @@ func getWorkspaceNameCompletions() ([]string, cobra.ShellCompDirective) {
 
 func getAllWorkspacesByState(state WorkspaceState) ([]string, cobra.ShellCompDirective) {
 	ctx := context.Background()
-	apiClient, err := server.GetApiClient(nil)
+	apiClient, err := apiclient.GetApiClient(nil)
 	if err != nil {
 		return nil, cobra.ShellCompDirectiveNoFileComp
 	}

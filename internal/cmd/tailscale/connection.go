@@ -10,7 +10,6 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/tailscale"
 	"github.com/google/uuid"
@@ -18,7 +17,7 @@ import (
 )
 
 func GetConnection(profile *config.Profile) (*tsnet.Server, error) {
-	apiClient, err := server.GetApiClient(profile)
+	apiClient, err := apiclient_util.GetApiClient(profile)
 	if err != nil {
 		return nil, err
 	}

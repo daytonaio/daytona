@@ -13,8 +13,7 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server/conversion"
+	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	agent_config "github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
@@ -127,7 +126,7 @@ func (a *Agent) startProjectMode() error {
 func (a *Agent) getProject() (*workspace.Project, error) {
 	ctx := context.Background()
 
-	apiClient, err := server.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
+	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +148,7 @@ func (a *Agent) getProject() (*workspace.Project, error) {
 func (a *Agent) getGitProvider(repoUrl string) (*apiclient.GitProvider, error) {
 	ctx := context.Background()
 
-	apiClient, err := server.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
+	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +167,7 @@ func (a *Agent) getGitProvider(repoUrl string) (*apiclient.GitProvider, error) {
 }
 
 func (a *Agent) getGitUser(gitProviderId string) (*apiclient.GitUser, error) {
-	apiClient, err := server.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
+	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
 	if err != nil {
 		return nil, err
 	}
@@ -238,7 +237,7 @@ func (a *Agent) uptime() int32 {
 }
 
 func (a *Agent) updateProjectState() error {
-	apiClient, err := server.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
+	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey)
 	if err != nil {
 		return err
 	}

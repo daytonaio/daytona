@@ -7,7 +7,6 @@ import (
 	"fmt"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/os"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
@@ -24,7 +23,7 @@ var providerInstallCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Aliases: []string{"i"},
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, err := server.GetApiClient(nil)
+		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package server
+package apiclient
 
 import (
 	"context"
@@ -11,7 +11,6 @@ import (
 	"net/url"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
-	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/server"
@@ -116,7 +115,7 @@ func GetProviderList() ([]apiclient.Provider, error) {
 
 	providersList, res, err := apiClient.ProviderAPI.ListProviders(ctx).Execute()
 	if err != nil {
-		return nil, apiclient_util.HandleErrorResponse(res, err)
+		return nil, HandleErrorResponse(res, err)
 	}
 
 	return providersList, nil
@@ -130,7 +129,7 @@ func GetTargetList() ([]apiclient.ProviderTarget, error) {
 
 	targets, resp, err := apiClient.TargetAPI.ListTargets(context.Background()).Execute()
 	if err != nil {
-		return nil, apiclient_util.HandleErrorResponse(resp, err)
+		return nil, HandleErrorResponse(resp, err)
 	}
 
 	return targets, nil
@@ -146,7 +145,7 @@ func GetWorkspace(workspaceNameOrId string) (*apiclient.WorkspaceDTO, error) {
 
 	workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceNameOrId).Execute()
 	if err != nil {
-		return nil, apiclient_util.HandleErrorResponse(res, err)
+		return nil, HandleErrorResponse(res, err)
 	}
 
 	return workspace, nil
@@ -162,7 +161,7 @@ func GetFirstWorkspaceProjectName(workspaceId string, projectName string, profil
 
 	wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceId).Execute()
 	if err != nil {
-		return "", apiclient_util.HandleErrorResponse(res, err)
+		return "", HandleErrorResponse(res, err)
 	}
 
 	if projectName == "" {

@@ -10,7 +10,6 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -63,7 +62,7 @@ var DeleteCmd = &cobra.Command{
 		ctx := context.Background()
 		var workspace *apiclient.WorkspaceDTO
 
-		apiClient, err := server.GetApiClient(nil)
+		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -76,7 +75,7 @@ var DeleteCmd = &cobra.Command{
 
 			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "Delete")
 		} else {
-			workspace, err = server.GetWorkspace(args[0])
+			workspace, err = apiclient_util.GetWorkspace(args[0])
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -126,7 +125,7 @@ func init() {
 
 func DeleteAllWorkspaces() error {
 	ctx := context.Background()
-	apiClient, err := server.GetApiClient(nil)
+	apiClient, err := apiclient_util.GetApiClient(nil)
 	if err != nil {
 		return err
 	}

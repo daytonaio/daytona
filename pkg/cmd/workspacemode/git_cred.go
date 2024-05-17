@@ -12,7 +12,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
+	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/spf13/cobra"
 )
 
@@ -33,7 +33,7 @@ var gitCredCmd = &cobra.Command{
 			return
 		}
 
-		apiClient, err := server.GetApiClient(nil)
+		apiClient, err := apiclient.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}

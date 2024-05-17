@@ -7,7 +7,6 @@ import (
 	"context"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/output"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
@@ -24,7 +23,7 @@ var InfoCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
-		apiClient, err := server.GetApiClient(nil)
+		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -39,7 +38,7 @@ var InfoCmd = &cobra.Command{
 
 			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "View")
 		} else {
-			workspace, err = server.GetWorkspace(args[0])
+			workspace, err = apiclient_util.GetWorkspace(args[0])
 			if err != nil {
 				log.Fatal(err)
 			}

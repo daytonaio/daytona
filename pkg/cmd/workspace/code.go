@@ -11,7 +11,6 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/jetbrains"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/ide"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -45,7 +44,7 @@ var CodeCmd = &cobra.Command{
 
 		ideId = c.DefaultIdeId
 
-		apiClient, err := server.GetApiClient(&activeProfile)
+		apiClient, err := apiclient_util.GetApiClient(&activeProfile)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -62,7 +61,7 @@ var CodeCmd = &cobra.Command{
 			}
 			workspaceId = *workspace.Id
 		} else {
-			workspace, err = server.GetWorkspace(args[0])
+			workspace, err = apiclient_util.GetWorkspace(args[0])
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -110,7 +109,7 @@ var CodeCmd = &cobra.Command{
 func selectWorkspaceProject(workspaceId string, profile *config.Profile) (*string, error) {
 	ctx := context.Background()
 
-	apiClient, err := server.GetApiClient(profile)
+	apiClient, err := apiclient_util.GetApiClient(profile)
 	if err != nil {
 		return nil, err
 	}

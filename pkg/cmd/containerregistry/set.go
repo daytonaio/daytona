@@ -9,7 +9,6 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	containerregistry_view "github.com/daytonaio/daytona/pkg/views/containerregistry"
@@ -43,7 +42,7 @@ var containerRegistrySetCmd = &cobra.Command{
 			Password: passwordFlag,
 		}
 
-		apiClient, err := server.GetApiClient(nil)
+		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}

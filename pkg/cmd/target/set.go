@@ -9,7 +9,6 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	internal_util "github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/provider"
@@ -35,7 +34,7 @@ var TargetSetCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		pluginList, err := server.GetProviderList()
+		pluginList, err := apiclient_util.GetProviderList()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -49,7 +48,7 @@ var TargetSetCmd = &cobra.Command{
 			return
 		}
 
-		targets, err := server.GetTargetList()
+		targets, err := apiclient_util.GetTargetList()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -66,7 +65,7 @@ var TargetSetCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		client, err := server.GetApiClient(nil)
+		client, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}

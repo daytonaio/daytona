@@ -7,7 +7,6 @@ import (
 	"context"
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/server"
 	"github.com/daytonaio/daytona/pkg/cmd/output"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/env"
@@ -21,7 +20,7 @@ var listCmd = &cobra.Command{
 	Short:   "List profile environment variables",
 	Aliases: []string{"ls"},
 	Run: func(cmd *cobra.Command, args []string) {
-		apiClient, err := server.GetApiClient(nil)
+		apiClient, err := apiclient.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
