@@ -22,9 +22,11 @@ type Catalog struct {
 }
 
 type BuildResult struct {
-	User              string
-	ImageName         string
-	ProjectVolumePath string
+	User               string
+	ImageName          string
+	ProjectVolumePath  string
+	PostCreateCommands []string
+	PostStartCommands  []string
 }
 
 type BuilderPlugin interface {

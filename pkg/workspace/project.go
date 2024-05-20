@@ -30,17 +30,18 @@ type ProjectBuild struct {
 } // @name ProjectBuild
 
 type Project struct {
-	Name              string                     `json:"name"`
-	Image             string                     `json:"image"`
-	User              string                     `json:"user"`
-	Build             *ProjectBuild              `json:"build"`
-	Repository        *gitprovider.GitRepository `json:"repository"`
-	WorkspaceId       string                     `json:"workspaceId"`
-	ApiKey            string                     `json:"-"`
-	Target            string                     `json:"target"`
-	EnvVars           map[string]string          `json:"-"`
-	State             *ProjectState              `json:"state,omitempty"`
-	PostStartCommands []string                   `json:"postStartCommands,omitempty"`
+	Name               string                     `json:"name"`
+	Image              string                     `json:"image"`
+	User               string                     `json:"user"`
+	Build              *ProjectBuild              `json:"build"`
+	Repository         *gitprovider.GitRepository `json:"repository"`
+	WorkspaceId        string                     `json:"workspaceId"`
+	ApiKey             string                     `json:"-"`
+	Target             string                     `json:"target"`
+	EnvVars            map[string]string          `json:"-"`
+	State              *ProjectState              `json:"state,omitempty"`
+	PostCreateCommands []string                   `json:"postCreateCommands,omitempty"`
+	PostStartCommands  []string                   `json:"postStartCommands,omitempty"`
 } // @name Project
 
 type ProjectInfo struct {

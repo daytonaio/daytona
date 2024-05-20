@@ -142,6 +142,8 @@ func (s *WorkspaceService) createBuild(project *workspace.Project, cr *container
 			project.Image = lastBuildResult.ImageName
 			project.User = lastBuildResult.User
 			project.Build = nil
+			project.PostStartCommands = lastBuildResult.PostStartCommands
+			project.PostCreateCommands = lastBuildResult.PostCreateCommands
 		}
 	}
 
