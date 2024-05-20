@@ -117,7 +117,9 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.GitProvider, userGit
 		).WithHide(isDeleting),
 	).WithTheme(views.GetCustomTheme())
 
-	views.RenderInfoMessage(getGitProviderHelpMessage(*gitProviderAddView.Id))
+	if !isDeleting {
+		views.RenderInfoMessage(getGitProviderHelpMessage(*gitProviderAddView.Id))
+	}
 
 	err = userDataForm.Run()
 	if err != nil {
