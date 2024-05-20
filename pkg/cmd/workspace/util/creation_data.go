@@ -53,6 +53,8 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 	if config.MultiProject {
 		addMore := true
 		for i := 2; addMore; i++ {
+			var providerRepo *apiclient.GitRepository
+
 			if !config.Manual && config.UserGitProviders != nil && len(config.UserGitProviders) > 0 {
 				providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, i+2)
 				if err != nil {
