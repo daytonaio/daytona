@@ -8,7 +8,9 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
 	"os/exec"
+	"syscall"
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -78,6 +80,17 @@ func (a *Agent) startProjectMode() error {
 		if exists {
 			log.Info("Repository already exists. Skipping clone...")
 		} else {
+			if stat, err := os.Stat(a.Config.ProjectDir); err == nil {
+				ownerUid := stat.Sys().(*syscall.Stat_t).Uid
+				if ownerUid != uint32(os.Getuid()) {
+					chownCmd := exec.Command("sudo", "chown", "-R", fmt.Sprintf("%s:%s", project.User, project.User), a.Config.ProjectDir)
+					err = chownCmd.Run()
+					if err != nil {
+						log.Error(err)
+					}
+				}
+			}
+
 			log.Info("Cloning repository...")
 			err = a.Git.CloneRepository(project, auth)
 			if err != nil {

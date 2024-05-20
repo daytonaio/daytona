@@ -18,6 +18,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/image"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/registry"
 )
 
@@ -144,6 +145,13 @@ func (d *DockerClient) initProjectContainer(project *workspace.Project, daytonaD
 	_, err := d.apiClient.ContainerCreate(ctx, GetContainerCreateConfig(project, daytonaDownloadUrl), &container.HostConfig{
 		Privileged:  true,
 		NetworkMode: container.NetworkMode(project.WorkspaceId),
+		Mounts: []mount.Mount{
+			{
+				Type:   mount.TypeVolume,
+				Source: d.GetProjectVolumeName(project),
+				Target: fmt.Sprintf("/home/%s/%s", project.User, project.Name),
+			},
+		},
 	}, nil, nil, d.GetProjectContainerName(project))
 	if err != nil {
 		return err
