@@ -9,6 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/target"
 	"github.com/spf13/cobra"
@@ -58,6 +59,26 @@ var targetRemoveCmd = &cobra.Command{
 		res, err := client.TargetAPI.RemoveTarget(context.Background(), selectedTargetName).Execute()
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
+		}
+
+		workspaceClient, err := apiclient_util.GetApiClient(nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		workspaceList, res, err := workspaceClient.WorkspaceAPI.ListWorkspaces(context.Background()).Execute()
+		if err != nil {
+			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+		}
+
+		for _, workspace := range workspaceList {
+			res, err := workspaceClient.WorkspaceAPI.RemoveWorkspace(context.Background(), *workspace.Id).Execute()
+
+			if err != nil {
+				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			}
+
+			views.RenderLine(fmt.Sprintf("- Workspace %s successfully deleted\n", *workspace.Name))
 		}
 
 		views.RenderInfoMessageBold(fmt.Sprintf("Target %s removed successfully", selectedTargetName))
