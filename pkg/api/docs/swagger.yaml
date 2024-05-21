@@ -194,6 +194,10 @@ definitions:
         type: string
       name:
         type: string
+      postCreateCommands:
+        items:
+          type: string
+        type: array
       postStartCommands:
         items:
           type: string
