@@ -1413,6 +1413,12 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "postCreateCommands": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "postStartCommands": {
                     "type": "array",
                     "items": {

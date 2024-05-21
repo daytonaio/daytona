@@ -1153,6 +1153,9 @@ components:
     Project:
       example:
         image: image
+        postCreateCommands:
+        - postCreateCommands
+        - postCreateCommands
         postStartCommands:
         - postStartCommands
         - postStartCommands
@@ -1199,6 +1202,10 @@ components:
           type: string
         name:
           type: string
+        postCreateCommands:
+          items:
+            type: string
+          type: array
         postStartCommands:
           items:
             type: string
@@ -1418,6 +1425,9 @@ components:
       example:
         projects:
         - image: image
+          postCreateCommands:
+          - postCreateCommands
+          - postCreateCommands
           postStartCommands:
           - postStartCommands
           - postStartCommands
@@ -1458,6 +1468,9 @@ components:
           target: target
           workspaceId: workspaceId
         - image: image
+          postCreateCommands:
+          - postCreateCommands
+          - postCreateCommands
           postStartCommands:
           - postStartCommands
           - postStartCommands
@@ -1516,6 +1529,9 @@ components:
       example:
         projects:
         - image: image
+          postCreateCommands:
+          - postCreateCommands
+          - postCreateCommands
           postStartCommands:
           - postStartCommands
           - postStartCommands
@@ -1556,6 +1572,9 @@ components:
           target: target
           workspaceId: workspaceId
         - image: image
+          postCreateCommands:
+          - postCreateCommands
+          - postCreateCommands
           postStartCommands:
           - postStartCommands
           - postStartCommands

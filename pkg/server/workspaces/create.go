@@ -153,23 +153,11 @@ func (s *WorkspaceService) createBuild(project *workspace.Project, cr *container
 func (s *WorkspaceService) createProject(project *workspace.Project, target *provider.ProviderTarget, logWriter io.Writer) error {
 	logWriter.Write([]byte(fmt.Sprintf("Creating project %s\n", project.Name)))
 
-	projectWithEnv := *project
-	projectWithEnv.EnvVars = workspace.GetProjectEnvVars(project, s.serverApiUrl, s.serverUrl)
-
-	for k, v := range project.EnvVars {
-		projectWithEnv.EnvVars[k] = v
-	}
-
 	cr, _ := s.containerRegistryStore.Find(project.GetImageServer())
 
 	gc, _ := s.gitProviderService.GetConfigForUrl(project.Repository.Url)
 
-	projectToCreate, err := s.createBuild(&projectWithEnv, cr, gc, logWriter)
-	if err != nil {
-		return err
-	}
-
-	err = s.provisioner.CreateProject(projectToCreate, target, cr, gc)
+	err := s.provisioner.CreateProject(project, target, cr, gc)
 	if err != nil {
 		return err
 	}
@@ -179,25 +167,49 @@ func (s *WorkspaceService) createProject(project *workspace.Project, target *pro
 	return nil
 }
 
-func (s *WorkspaceService) createWorkspace(workspace *workspace.Workspace) (*workspace.Workspace, error) {
-	target, err := s.targetStore.Find(workspace.Target)
+func (s *WorkspaceService) createWorkspace(ws *workspace.Workspace) (*workspace.Workspace, error) {
+	target, err := s.targetStore.Find(ws.Target)
 	if err != nil {
-		return workspace, err
+		return ws, err
 	}
 
-	wsLogger := s.loggerFactory.CreateWorkspaceLogger(workspace.Id)
+	wsLogger := s.loggerFactory.CreateWorkspaceLogger(ws.Id)
 	wsLogger.Write([]byte("Creating workspace\n"))
 
-	err = s.provisioner.CreateWorkspace(workspace, target)
+	err = s.provisioner.CreateWorkspace(ws, target)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, project := range workspace.Projects {
-		projectLogger := s.loggerFactory.CreateProjectLogger(workspace.Id, project.Name)
+	for i, project := range ws.Projects {
+		projectLogger := s.loggerFactory.CreateProjectLogger(ws.Id, project.Name)
 		defer projectLogger.Close()
 
-		err := s.createProject(project, target, projectLogger)
+		cr, _ := s.containerRegistryStore.Find(project.GetImageServer())
+
+		gc, _ := s.gitProviderService.GetConfigForUrl(project.Repository.Url)
+
+		projectWithEnv := *project
+		projectWithEnv.EnvVars = workspace.GetProjectEnvVars(project, s.serverApiUrl, s.serverUrl)
+
+		for k, v := range project.EnvVars {
+			projectWithEnv.EnvVars[k] = v
+		}
+
+		var err error
+
+		project, err = s.createBuild(&projectWithEnv, cr, gc, projectLogger)
+		if err != nil {
+			return nil, err
+		}
+
+		ws.Projects[i] = project
+		err = s.workspaceStore.Save(ws)
+		if err != nil {
+			return nil, err
+		}
+
+		err = s.createProject(project, target, projectLogger)
 		if err != nil {
 			return nil, err
 		}
@@ -205,10 +217,10 @@ func (s *WorkspaceService) createWorkspace(workspace *workspace.Workspace) (*wor
 
 	wsLogger.Write([]byte("Workspace creation complete. Pending start...\n"))
 
-	err = s.startWorkspace(workspace, target, wsLogger)
+	err = s.startWorkspace(ws, target, wsLogger)
 	if err != nil {
 		return nil, err
 	}
 
-	return workspace, nil
+	return ws, nil
 }
