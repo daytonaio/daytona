@@ -45,6 +45,7 @@ type ProjectDTO struct {
 	Repository        RepositoryDTO    `json:"repository"`
 	WorkspaceId       string           `json:"workspaceId"`
 	Target            string           `json:"target"`
+	ApiKey            string           `json:"apiKey"`
 	State             *ProjectStateDTO `json:"state,omitempty" gorm:"serializer:json"`
 	PostStartCommands []string         `json:"postStartCommands,omitempty"`
 }
@@ -59,6 +60,7 @@ func ToProjectDTO(project *workspace.Project, workspace *workspace.Workspace) Pr
 		Target:            project.Target,
 		State:             ToProjectStateDTO(project.State),
 		PostStartCommands: project.PostStartCommands,
+		ApiKey:            workspace.ApiKey,
 	}
 }
 
@@ -129,6 +131,7 @@ func ToProject(projectDTO ProjectDTO) *workspace.Project {
 		Target:            projectDTO.Target,
 		State:             ToProjectState(projectDTO.State),
 		PostStartCommands: projectDTO.PostStartCommands,
+		ApiKey:            projectDTO.ApiKey,
 	}
 }
 

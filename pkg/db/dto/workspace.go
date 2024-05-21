@@ -13,6 +13,7 @@ type WorkspaceDTO struct {
 	Id       string       `gorm:"primaryKey"`
 	Name     string       `json:"name" gorm:"unique"`
 	Target   string       `json:"target"`
+	ApiKey   string       `json:"apiKey"`
 	Projects []ProjectDTO `gorm:"serializer:json"`
 }
 
@@ -31,6 +32,7 @@ func ToWorkspaceDTO(workspace *workspace.Workspace) WorkspaceDTO {
 		Id:     workspace.Id,
 		Name:   workspace.Name,
 		Target: workspace.Target,
+		ApiKey: workspace.ApiKey,
 	}
 
 	for _, project := range workspace.Projects {
@@ -45,6 +47,7 @@ func ToWorkspace(workspaceDTO WorkspaceDTO) *workspace.Workspace {
 		Id:     workspaceDTO.Id,
 		Name:   workspaceDTO.Name,
 		Target: workspaceDTO.Target,
+		ApiKey: workspaceDTO.ApiKey,
 	}
 
 	for _, projectDTO := range workspaceDTO.Projects {
