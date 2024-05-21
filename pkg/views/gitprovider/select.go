@@ -10,6 +10,7 @@ import (
 	"slices"
 
 	"github.com/charmbracelet/huh"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -116,7 +117,7 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.GitProvider, userGit
 		).WithHide(isDeleting),
 	).WithTheme(views.GetCustomTheme())
 
-	views.RenderInfoMessage(fmt.Sprintf("More information on:\n%s", config.GetDocsLinkFromGitProvider(*gitProviderAddView.Id)))
+	views.RenderInfoMessage(getGitProviderHelpMessage(*gitProviderAddView.Id))
 
 	err = userDataForm.Run()
 	if err != nil {
@@ -141,4 +142,12 @@ func getApiUrlDescription(gitProviderId string) string {
 		return "For example: http://gitea-host"
 	}
 	return ""
+}
+
+func getGitProviderHelpMessage(gitProviderId string) string {
+	return fmt.Sprintf("%s\n%s\n\n%s%s",
+		lipgloss.NewStyle().Foreground(views.Green).Bold(true).Render("More information on:"),
+		config.GetDocsLinkFromGitProvider(gitProviderId),
+		lipgloss.NewStyle().Foreground(views.Green).Bold(true).Render("Required scopes: "),
+		config.GetScopesFromGitProvider(gitProviderId))
 }

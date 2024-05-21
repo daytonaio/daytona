@@ -73,3 +73,24 @@ func GetDocsLinkFromGitProvider(providerId string) string {
 		return ""
 	}
 }
+
+func GetScopesFromGitProvider(providerId string) string {
+	switch providerId {
+	case "github":
+		fallthrough
+	case "github-enterprise-server":
+		return "repo,read:user,user:email"
+	case "gitlab":
+		fallthrough
+	case "gitlab-self-managed":
+		return "api,read_user,write_repository"
+	case "bitbucket":
+		return "account:read,repositories:write,pullrequests:read"
+	case "codeberg":
+		fallthrough
+	case "gitea":
+		return "read:organization,write:repository,read:user"
+	default:
+		return ""
+	}
+}
