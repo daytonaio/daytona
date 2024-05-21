@@ -25,6 +25,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/docker/docker/pkg/stringid"
 	"github.com/gorilla/websocket"
+	"golang.org/x/term"
 	"tailscale.com/tsnet"
 
 	log "github.com/sirupsen/logrus"
@@ -372,9 +373,16 @@ func readLog(ws *websocket.Conn, stopLogs *bool) {
 		delimiter := byte('\r')
 		messages := splitWithDelimiter(string(msg), delimiter)
 
-		for _, message := range messages {
-			fmt.Print(message)
+		message := strings.Join(messages, "")
+
+		terminalWidth, _, _ := term.GetSize(int(os.Stdout.Fd()))
+
+		if len(message) > (terminalWidth) {
+			message = message[:terminalWidth]
 		}
+
+		fmt.Print(message)
+
 		if len(messages) != 0 {
 			fmt.Print("\n")
 		}
