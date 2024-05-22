@@ -7,7 +7,6 @@ package mocks
 
 import (
 	"github.com/daytonaio/daytona/pkg/builder"
-	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/stretchr/testify/mock"
@@ -23,46 +22,35 @@ type MockBuilderPlugin struct {
 	mock.Mock
 }
 
-func (b *MockBuilderPlugin) Build() (*builder.BuildResult, error) {
-	return MockBuildResults, nil
-}
-
-func (b *MockBuilderPlugin) CleanUp() error {
-	return nil
-}
-
-func (b *MockBuilderPlugin) Publish() error {
-	return nil
-}
-
 type MockBuilderFactory struct {
 	mock.Mock
 }
 
-func (f *MockBuilderFactory) Create(p workspace.Project, cr *containerregistry.ContainerRegistry, gpc *gitprovider.GitProviderConfig) builder.IBuilder {
-	return &mockBuilder{}
+func (f *MockBuilderFactory) Create(p workspace.Project, gpc *gitprovider.GitProviderConfig) (builder.IBuilder, error) {
+	return &mockBuilder{}, nil
+}
+
+func (f *MockBuilderFactory) CheckExistingBuild(p workspace.Project) (*builder.BuildResult, error) {
+	return MockBuildResults, nil
 }
 
 type mockBuilder struct {
 	mock.Mock
 }
 
-func (p *mockBuilder) Prepare() error {
-	args := p.Called()
-	return args.Error(0)
+func (b *mockBuilder) Build() (*builder.BuildResult, error) {
+	return MockBuildResults, nil
 }
 
-func (p *mockBuilder) LoadBuildResults() (*builder.BuildResult, error) {
-	args := p.Called()
-	return MockBuildResults, args.Error(0)
+func (b *mockBuilder) CleanUp() error {
+	return nil
+}
+
+func (b *mockBuilder) Publish() error {
+	return nil
 }
 
 func (p *mockBuilder) SaveBuildResults(r builder.BuildResult) error {
 	args := p.Called(r)
 	return args.Error(0)
-}
-
-func (p *mockBuilder) GetBuilderPlugin() builder.BuilderPlugin {
-	plugin := &MockBuilderPlugin{}
-	return plugin
 }

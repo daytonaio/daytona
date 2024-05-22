@@ -9,7 +9,6 @@ import (
 	"regexp"
 
 	"github.com/daytonaio/daytona/pkg/apikey"
-	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
@@ -93,58 +92,48 @@ func (s *WorkspaceService) CreateWorkspace(req dto.CreateWorkspaceRequest) (*wor
 	return s.createWorkspace(w)
 }
 
-func (s *WorkspaceService) createBuild(project *workspace.Project, cr *containerregistry.ContainerRegistry, gc *gitprovider.GitProviderConfig, logWriter io.Writer) (*workspace.Project, error) {
+func (s *WorkspaceService) createBuild(project *workspace.Project, gc *gitprovider.GitProviderConfig, logWriter io.Writer) (*workspace.Project, error) {
 	if project.Build != nil {
-		builder := s.builderFactory.Create(*project, cr, gc)
-
-		lastBuildResult, err := builder.LoadBuildResults()
+		lastBuildResult, err := s.builderFactory.CheckExistingBuild(*project)
 		if err != nil {
 			return nil, err
 		}
-		if lastBuildResult == nil {
-			err := builder.Prepare()
-			if err != nil {
-				return nil, err
-			}
-
-			builderPlugin := builder.GetBuilderPlugin()
-			if builderPlugin != nil {
-				buildResult, err := builderPlugin.Build()
-				if err != nil {
-					return nil, err
-				}
-
-				err = builderPlugin.Publish()
-				if err != nil {
-					return nil, err
-				}
-
-				err = builder.SaveBuildResults(*buildResult)
-				if err != nil {
-					return nil, err
-				}
-
-				/*
-					err = (*targetProvider).PublishBuildArtifacts(project, ba)
-					if err != nil {
-						return err
-					}
-				*/
-
-				//	todo: just for test
-				lastBuildResult = buildResult
-			}
-		} else {
-			logWriter.Write([]byte("Project build image found. Skipping build\n"))
-		}
-
 		if lastBuildResult != nil {
 			project.Image = lastBuildResult.ImageName
 			project.User = lastBuildResult.User
 			project.Build = nil
 			project.PostStartCommands = lastBuildResult.PostStartCommands
 			project.PostCreateCommands = lastBuildResult.PostCreateCommands
+			return project, nil
 		}
+
+		builder, err := s.builderFactory.Create(*project, gc)
+		if err != nil {
+			return nil, err
+		}
+
+		buildResult, err := builder.Build()
+		if err != nil {
+			return nil, err
+		}
+
+		err = builder.Publish()
+		if err != nil {
+			return nil, err
+		}
+
+		err = builder.SaveBuildResults(*buildResult)
+		if err != nil {
+			return nil, err
+		}
+
+		project.Image = buildResult.ImageName
+		project.User = buildResult.User
+		project.Build = nil
+		project.PostStartCommands = buildResult.PostStartCommands
+		project.PostCreateCommands = buildResult.PostCreateCommands
+
+		return project, nil
 	}
 
 	return project, nil
@@ -185,8 +174,6 @@ func (s *WorkspaceService) createWorkspace(ws *workspace.Workspace) (*workspace.
 		projectLogger := s.loggerFactory.CreateProjectLogger(ws.Id, project.Name)
 		defer projectLogger.Close()
 
-		cr, _ := s.containerRegistryStore.Find(project.GetImageServer())
-
 		gc, _ := s.gitProviderService.GetConfigForUrl(project.Repository.Url)
 
 		projectWithEnv := *project
@@ -198,7 +185,7 @@ func (s *WorkspaceService) createWorkspace(ws *workspace.Workspace) (*workspace.
 
 		var err error
 
-		project, err = s.createBuild(&projectWithEnv, cr, gc, projectLogger)
+		project, err = s.createBuild(&projectWithEnv, gc, projectLogger)
 		if err != nil {
 			return nil, err
 		}
