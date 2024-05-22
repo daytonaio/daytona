@@ -128,9 +128,6 @@ func (f *BuilderFactory) CheckExistingBuild(p workspace.Project) (*BuildResult, 
 		if os.IsNotExist(err) {
 			return nil, nil
 		}
-		if pathErr, ok := err.(*os.PathError); ok && pathErr.Err.Error() == "not a directory" {
-			return nil, nil
-		}
 		return nil, err
 	}
 
