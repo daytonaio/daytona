@@ -217,23 +217,10 @@ definitions:
     properties:
       devcontainer:
         $ref: '#/definitions/ProjectBuildDevcontainer'
-      dockerfile:
-        $ref: '#/definitions/ProjectBuildDockerfile'
     type: object
   ProjectBuildDevcontainer:
     properties:
       devContainerFilePath:
-        type: string
-    type: object
-  ProjectBuildDockerfile:
-    properties:
-      args:
-        additionalProperties:
-          type: string
-        type: object
-      context:
-        type: string
-      dockerfile:
         type: string
     type: object
   ProjectInfo:

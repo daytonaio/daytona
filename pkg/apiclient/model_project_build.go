@@ -20,7 +20,6 @@ var _ MappedNullable = &ProjectBuild{}
 // ProjectBuild struct for ProjectBuild
 type ProjectBuild struct {
 	Devcontainer *ProjectBuildDevcontainer `json:"devcontainer,omitempty"`
-	Dockerfile   *ProjectBuildDockerfile   `json:"dockerfile,omitempty"`
 }
 
 // NewProjectBuild instantiates a new ProjectBuild object
@@ -72,38 +71,6 @@ func (o *ProjectBuild) SetDevcontainer(v ProjectBuildDevcontainer) {
 	o.Devcontainer = &v
 }
 
-// GetDockerfile returns the Dockerfile field value if set, zero value otherwise.
-func (o *ProjectBuild) GetDockerfile() ProjectBuildDockerfile {
-	if o == nil || IsNil(o.Dockerfile) {
-		var ret ProjectBuildDockerfile
-		return ret
-	}
-	return *o.Dockerfile
-}
-
-// GetDockerfileOk returns a tuple with the Dockerfile field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *ProjectBuild) GetDockerfileOk() (*ProjectBuildDockerfile, bool) {
-	if o == nil || IsNil(o.Dockerfile) {
-		return nil, false
-	}
-	return o.Dockerfile, true
-}
-
-// HasDockerfile returns a boolean if a field has been set.
-func (o *ProjectBuild) HasDockerfile() bool {
-	if o != nil && !IsNil(o.Dockerfile) {
-		return true
-	}
-
-	return false
-}
-
-// SetDockerfile gets a reference to the given ProjectBuildDockerfile and assigns it to the Dockerfile field.
-func (o *ProjectBuild) SetDockerfile(v ProjectBuildDockerfile) {
-	o.Dockerfile = &v
-}
-
 func (o ProjectBuild) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -116,9 +83,6 @@ func (o ProjectBuild) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Devcontainer) {
 		toSerialize["devcontainer"] = o.Devcontainer
-	}
-	if !IsNil(o.Dockerfile) {
-		toSerialize["dockerfile"] = o.Dockerfile
 	}
 	return toSerialize, nil
 }

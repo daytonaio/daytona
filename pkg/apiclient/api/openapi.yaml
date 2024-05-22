@@ -832,11 +832,6 @@ components:
           build:
             devcontainer:
               devContainerFilePath: devContainerFilePath
-            dockerfile:
-              args:
-                key: args
-              dockerfile: dockerfile
-              context: context
           envVars:
             key: envVars
           name: name
@@ -859,11 +854,6 @@ components:
           build:
             devcontainer:
               devContainerFilePath: devContainerFilePath
-            dockerfile:
-              args:
-                key: args
-              dockerfile: dockerfile
-              context: context
           envVars:
             key: envVars
           name: name
@@ -905,11 +895,6 @@ components:
         build:
           devcontainer:
             devContainerFilePath: devContainerFilePath
-          dockerfile:
-            args:
-              key: args
-            dockerfile: dockerfile
-            context: context
         envVars:
           key: envVars
         name: name
@@ -1162,11 +1147,6 @@ components:
         build:
           devcontainer:
             devContainerFilePath: devContainerFilePath
-          dockerfile:
-            args:
-              key: args
-            dockerfile: dockerfile
-            context: context
         name: name
         state:
           gitStatus:
@@ -1225,38 +1205,15 @@ components:
       example:
         devcontainer:
           devContainerFilePath: devContainerFilePath
-        dockerfile:
-          args:
-            key: args
-          dockerfile: dockerfile
-          context: context
       properties:
         devcontainer:
           $ref: '#/components/schemas/ProjectBuildDevcontainer'
-        dockerfile:
-          $ref: '#/components/schemas/ProjectBuildDockerfile'
       type: object
     ProjectBuildDevcontainer:
       example:
         devContainerFilePath: devContainerFilePath
       properties:
         devContainerFilePath:
-          type: string
-      type: object
-    ProjectBuildDockerfile:
-      example:
-        args:
-          key: args
-        dockerfile: dockerfile
-        context: context
-      properties:
-        args:
-          additionalProperties:
-            type: string
-          type: object
-        context:
-          type: string
-        dockerfile:
           type: string
       type: object
     ProjectInfo:
@@ -1434,11 +1391,6 @@ components:
           build:
             devcontainer:
               devContainerFilePath: devContainerFilePath
-            dockerfile:
-              args:
-                key: args
-              dockerfile: dockerfile
-              context: context
           name: name
           state:
             gitStatus:
@@ -1477,11 +1429,6 @@ components:
           build:
             devcontainer:
               devContainerFilePath: devContainerFilePath
-            dockerfile:
-              args:
-                key: args
-              dockerfile: dockerfile
-              context: context
           name: name
           state:
             gitStatus:
@@ -1538,11 +1485,6 @@ components:
           build:
             devcontainer:
               devContainerFilePath: devContainerFilePath
-            dockerfile:
-              args:
-                key: args
-              dockerfile: dockerfile
-              context: context
           name: name
           state:
             gitStatus:
@@ -1581,11 +1523,6 @@ components:
           build:
             devcontainer:
               devContainerFilePath: devContainerFilePath
-            dockerfile:
-              args:
-                key: args
-              dockerfile: dockerfile
-              context: context
           name: name
           state:
             gitStatus:

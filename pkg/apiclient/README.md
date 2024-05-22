@@ -141,7 +141,6 @@ Class | Method | HTTP request | Description
  - [Project](docs/Project.md)
  - [ProjectBuild](docs/ProjectBuild.md)
  - [ProjectBuildDevcontainer](docs/ProjectBuildDevcontainer.md)
- - [ProjectBuildDockerfile](docs/ProjectBuildDockerfile.md)
  - [ProjectInfo](docs/ProjectInfo.md)
  - [ProjectState](docs/ProjectState.md)
  - [Provider](docs/Provider.md)
