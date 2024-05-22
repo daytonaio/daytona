@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -136,7 +137,7 @@ var ServeCmd = &cobra.Command{
 		})
 		builderFactory := builder.NewBuilderFactory(builder.BuilderConfig{
 			DaytonaServerConfigFolder:       configDir,
-			LocalContainerRegistryServer:    "127.0.0.1:5000",
+			LocalContainerRegistryServer:    fmt.Sprintf("%s:%s", "127.0.0.1", strconv.Itoa(int(c.RegistryPort))),
 			BasePath:                        filepath.Join(configDir, "builds"),
 			LoggerFactory:                   loggerFactory,
 			DefaultProjectImage:             c.DefaultProjectImage,
@@ -144,10 +145,6 @@ var ServeCmd = &cobra.Command{
 			DefaultProjectPostStartCommands: c.DefaultProjectPostStartCommands,
 		})
 		provisioner := provisioner.NewProvisioner(provisioner.ProvisionerConfig{
-			//	LocalContainerRegistryServer: fmt.Sprintf("registry-%s.%s", c.Id, c.Frps.Domain),
-			//	for the local provisioner, we use the local container registry
-			//	there is no need to use the frps domain
-			//	todo: get the port from the local container registry
 			ProviderManager: providerManager,
 		})
 		gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
