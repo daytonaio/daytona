@@ -29,9 +29,6 @@ type Provider interface {
 	StopProject(*ProjectRequest) (*util.Empty, error)
 	DestroyProject(*ProjectRequest) (*util.Empty, error)
 	GetProjectInfo(*ProjectRequest) (*workspace.ProjectInfo, error)
-
-	//	todo: single param
-	//	PublishBuildArtifacts(*workspace.Project, *builder.BuildArtifacts) error
 }
 
 type ProviderPlugin struct {
