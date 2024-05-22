@@ -20,6 +20,7 @@ var MockBuildResults = &builder.BuildResult{
 }
 
 type MockBuilderPlugin struct {
+	mock.Mock
 }
 
 func (b *MockBuilderPlugin) Build() (*builder.BuildResult, error) {
