@@ -135,11 +135,13 @@ func (b *Builder) Prepare() error {
 		return err
 	}
 
+	projectLogger := b.loggerFactory.CreateProjectLogger(b.project.WorkspaceId, b.project.Name)
+	defer projectLogger.Close()
+
 	gitservice := git.Service{
 		ProjectDir:        projectDir,
 		GitConfigFileName: "",
-		//	todo: write to project log
-		LogWriter: os.Stdout,
+		LogWriter:         projectLogger,
 	}
 
 	var auth *http.BasicAuth
