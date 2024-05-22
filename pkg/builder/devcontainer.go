@@ -194,8 +194,7 @@ func (b *DevcontainerBuilder) buildDevcontainer() error {
 		return err
 	}
 
-	//	todo: commit sha from project Repository
-	tag := "latest"
+	tag := b.project.Repository.Sha
 	imageName := fmt.Sprintf("%s:%s", b.localContainerRegistryServer+"/p-"+b.id, tag)
 
 	_, err = builderCli.ContainerCommit(context.Background(), buildOutcome.ContainerId, container.CommitOptions{

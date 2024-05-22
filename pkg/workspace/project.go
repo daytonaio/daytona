@@ -138,7 +138,7 @@ func (p *Project) GetConfigHash() (string, error) {
 	*/
 
 	// Concatenate the JSON strings and the repository URL
-	data := string(buildJson) + p.Repository.Url /* + string(envVarsJson)*/
+	data := string(buildJson) + p.Repository.Sha /* + string(envVarsJson)*/
 
 	// Compute the SHA-256 hash of the data
 	hash := sha256.Sum256([]byte(data))
