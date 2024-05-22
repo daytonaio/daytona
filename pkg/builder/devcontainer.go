@@ -274,6 +274,9 @@ func (b *DevcontainerBuilder) readConfiguration() error {
 func (b *DevcontainerBuilder) startContainer() error {
 	ctx := context.Background()
 
+	projectLogger := b.loggerFactory.CreateProjectLogger(b.project.WorkspaceId, b.project.Name)
+	defer projectLogger.Close()
+
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return err
@@ -287,8 +290,7 @@ func (b *DevcontainerBuilder) startContainer() error {
 	if err != nil {
 		return err
 	}
-	//	wait for pull to complete
-	_, err = io.Copy(io.Discard, reader)
+	_, err = io.Copy(projectLogger, reader)
 	if err != nil {
 		return err
 	}
@@ -326,6 +328,9 @@ func (b *DevcontainerBuilder) startContainer() error {
 func (b *DevcontainerBuilder) startDocker() error {
 	ctx := context.Background()
 
+	projectLogger := b.loggerFactory.CreateProjectLogger(b.project.WorkspaceId, b.project.Name)
+	defer projectLogger.Close()
+
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return err
@@ -354,7 +359,7 @@ func (b *DevcontainerBuilder) startDocker() error {
 	defer attachResp.Close()
 
 	go func() {
-		_, err = io.Copy(os.Stdout, attachResp.Reader)
+		_, err = io.Copy(projectLogger, attachResp.Reader)
 		if err != nil {
 			log.Errorf("error copying output: %v", err)
 		}
