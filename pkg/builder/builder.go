@@ -13,8 +13,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logger"
 	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/docker/docker/pkg/stringid"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
-	"github.com/google/uuid"
 )
 
 type Catalog struct {
@@ -96,8 +96,8 @@ func NewBuilderFactory(config BuilderConfig) IBuilderFactory {
 }
 
 func (f *BuilderFactory) Create(p workspace.Project, cr *containerregistry.ContainerRegistry, gpc *gitprovider.GitProviderConfig) IBuilder {
-	uuid := uuid.New()
-	buildId := uuid.String()[:8]
+	buildId := stringid.GenerateRandomID()
+	buildId = stringid.TruncateID(buildId)
 
 	builder := &Builder{
 		id:                buildId,
