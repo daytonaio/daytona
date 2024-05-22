@@ -1447,9 +1447,6 @@ const docTemplate = `{
             "properties": {
                 "devcontainer": {
                     "$ref": "#/definitions/ProjectBuildDevcontainer"
-                },
-                "dockerfile": {
-                    "$ref": "#/definitions/ProjectBuildDockerfile"
                 }
             }
         },
@@ -1457,23 +1454,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "devContainerFilePath": {
-                    "type": "string"
-                }
-            }
-        },
-        "ProjectBuildDockerfile": {
-            "type": "object",
-            "properties": {
-                "args": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "context": {
-                    "type": "string"
-                },
-                "dockerfile": {
                     "type": "string"
                 }
             }
