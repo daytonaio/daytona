@@ -5,14 +5,13 @@ package provisioner
 
 import (
 	"github.com/daytonaio/daytona/pkg/containerregistry"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
 type IProvisioner interface {
-	CreateProject(project *workspace.Project, target *provider.ProviderTarget, cr *containerregistry.ContainerRegistry, gc *gitprovider.GitProviderConfig) error
+	CreateProject(project *workspace.Project, target *provider.ProviderTarget, cr *containerregistry.ContainerRegistry) error
 	CreateWorkspace(workspace *workspace.Workspace, target *provider.ProviderTarget) error
 	DestroyProject(project *workspace.Project, target *provider.ProviderTarget) error
 	DestroyWorkspace(workspace *workspace.Workspace, target *provider.ProviderTarget) error

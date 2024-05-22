@@ -144,9 +144,7 @@ func (s *WorkspaceService) createProject(project *workspace.Project, target *pro
 
 	cr, _ := s.containerRegistryStore.Find(project.GetImageServer())
 
-	gc, _ := s.gitProviderService.GetConfigForUrl(project.Repository.Url)
-
-	err := s.provisioner.CreateProject(project, target, cr, gc)
+	err := s.provisioner.CreateProject(project, target, cr)
 	if err != nil {
 		return err
 	}
