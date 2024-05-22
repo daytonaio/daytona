@@ -34,12 +34,12 @@ func (s *Server) GetBinaryPath(binaryName, binaryVersion string) (string, error)
 		return os.Executable()
 	}
 
-	binaryPath := filepath.Join(s.Config.BinariesPath, binaryVersion, binaryName)
+	binaryPath := filepath.Join(s.config.BinariesPath, binaryVersion, binaryName)
 	if _, err := os.Stat(binaryPath); err == nil {
 		return binaryPath, nil
 	}
 
-	downloadUrl, err := url.JoinPath(s.Config.RegistryUrl, binaryVersion, binaryName)
+	downloadUrl, err := url.JoinPath(s.config.RegistryUrl, binaryVersion, binaryName)
 	if err != nil {
 		return "", err
 	}

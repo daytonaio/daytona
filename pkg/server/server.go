@@ -49,7 +49,16 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 			log.Fatal("Server not initialized")
 		}
 		server = &Server{
-			ServerInstanceConfig: *serverConfig,
+			config:                   serverConfig.Config,
+			TailscaleServer:          serverConfig.TailscaleServer,
+			ProviderTargetService:    serverConfig.ProviderTargetService,
+			ContainerRegistryService: serverConfig.ContainerRegistryService,
+			LocalContainerRegistry:   serverConfig.LocalContainerRegistry,
+			WorkspaceService:         serverConfig.WorkspaceService,
+			ApiKeyService:            serverConfig.ApiKeyService,
+			GitProviderService:       serverConfig.GitProviderService,
+			ProviderManager:          serverConfig.ProviderManager,
+			ProfileDataService:       serverConfig.ProfileDataService,
 		}
 	}
 
@@ -57,7 +66,16 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 }
 
 type Server struct {
-	ServerInstanceConfig
+	config                   Config
+	TailscaleServer          TailscaleServer
+	ProviderTargetService    providertargets.IProviderTargetService
+	ContainerRegistryService containerregistries.IContainerRegistryService
+	LocalContainerRegistry   ILocalContainerRegistry
+	WorkspaceService         workspaces.IWorkspaceService
+	ApiKeyService            apikeys.IApiKeyService
+	GitProviderService       gitproviders.IGitProviderService
+	ProviderManager          manager.IProviderManager
+	ProfileDataService       profiledata.IProfileDataService
 }
 
 func (s *Server) Start(errCh chan error) error {
@@ -69,11 +87,11 @@ func (s *Server) Start(errCh chan error) error {
 	log.Info("Starting Daytona server")
 
 	headscaleFrpcHealthCheck, headscaleFrpcService, err := frpc.GetService(frpc.FrpcConnectParams{
-		ServerDomain: s.Config.Frps.Domain,
-		ServerPort:   int(s.Config.Frps.Port),
-		Name:         fmt.Sprintf("daytona-server-%s", s.Config.Id),
-		Port:         int(s.Config.HeadscalePort),
-		SubDomain:    s.Config.Id,
+		ServerDomain: s.config.Frps.Domain,
+		ServerPort:   int(s.config.Frps.Port),
+		Name:         fmt.Sprintf("daytona-server-%s", s.config.Id),
+		Port:         int(s.config.HeadscalePort),
+		SubDomain:    s.config.Id,
 	})
 	if err != nil {
 		return err
@@ -94,11 +112,11 @@ func (s *Server) Start(errCh chan error) error {
 	}()
 
 	apiFrpcHealthCheck, apiFrpcService, err := frpc.GetService(frpc.FrpcConnectParams{
-		ServerDomain: s.Config.Frps.Domain,
-		ServerPort:   int(s.Config.Frps.Port),
-		Name:         fmt.Sprintf("daytona-server-api-%s", s.Config.Id),
-		Port:         int(s.Config.ApiPort),
-		SubDomain:    fmt.Sprintf("api-%s", s.Config.Id),
+		ServerDomain: s.config.Frps.Domain,
+		ServerPort:   int(s.config.Frps.Port),
+		Name:         fmt.Sprintf("daytona-server-api-%s", s.config.Id),
+		Port:         int(s.config.ApiPort),
+		SubDomain:    fmt.Sprintf("api-%s", s.config.Id),
 	})
 	if err != nil {
 		return err
@@ -112,11 +130,11 @@ func (s *Server) Start(errCh chan error) error {
 	}()
 
 	_, registryFrpcService, err := frpc.GetService(frpc.FrpcConnectParams{
-		ServerDomain: s.Config.Frps.Domain,
-		ServerPort:   int(s.Config.Frps.Port),
-		Name:         fmt.Sprintf("daytona-server-registry-%s", s.Config.Id),
-		Port:         int(s.Config.RegistryPort),
-		SubDomain:    fmt.Sprintf("registry-%s", s.Config.Id),
+		ServerDomain: s.config.Frps.Domain,
+		ServerPort:   int(s.config.Frps.Port),
+		Name:         fmt.Sprintf("daytona-server-registry-%s", s.config.Id),
+		Port:         int(s.config.RegistryPort),
+		SubDomain:    fmt.Sprintf("registry-%s", s.config.Id),
 	})
 	if err != nil {
 		return err
@@ -184,7 +202,7 @@ func (s *Server) Start(errCh chan error) error {
 	}
 
 	// Terminate orphaned provider processes
-	err = s.ProviderManager.TerminateProviderProcesses(s.Config.ProvidersDir)
+	err = s.ProviderManager.TerminateProviderProcesses(s.config.ProvidersDir)
 	if err != nil {
 		log.Errorf("Failed to terminate orphaned provider processes: %s", err)
 	}
@@ -203,5 +221,5 @@ func (s *Server) Start(errCh chan error) error {
 }
 
 func (s *Server) GetApiUrl() string {
-	return util.GetFrpcApiUrl(s.Config.Frps.Protocol, s.Config.Id, s.Config.Frps.Domain)
+	return util.GetFrpcApiUrl(s.config.Frps.Protocol, s.config.Id, s.config.Frps.Domain)
 }
