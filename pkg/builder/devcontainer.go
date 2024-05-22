@@ -186,7 +186,7 @@ func (b *DevcontainerBuilder) buildDevcontainer() error {
 	b.user = buildOutcome.RemoteUser
 
 	if result.ExitCode != 0 {
-		return errors.New("devcontainer build failed")
+		return errors.New(result.StdErr)
 	}
 
 	builderCli, err := b.getBuilderDockerClient()
@@ -240,7 +240,7 @@ func (b *DevcontainerBuilder) readConfiguration() error {
 	}
 
 	if result.ExitCode != 0 {
-		return errors.New("devcontainer read configuration failed")
+		return errors.New(result.StdErr)
 	}
 
 	// Convert result.Stdout to string
