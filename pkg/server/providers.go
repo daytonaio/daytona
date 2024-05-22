@@ -41,7 +41,7 @@ func (s *Server) registerProviders() error {
 		return err
 	}
 
-	files, err := os.ReadDir(s.Config.ProvidersDir)
+	files, err := os.ReadDir(s.config.ProvidersDir)
 	if err != nil {
 		if os.IsNotExist(err) {
 			log.Info("No providers found")
@@ -52,7 +52,7 @@ func (s *Server) registerProviders() error {
 
 	for _, file := range files {
 		if file.IsDir() {
-			pluginPath, err := s.getPluginPath(filepath.Join(s.Config.ProvidersDir, file.Name()))
+			pluginPath, err := s.getPluginPath(filepath.Join(s.config.ProvidersDir, file.Name()))
 			if err != nil {
 				log.Error(err)
 				continue

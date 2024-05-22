@@ -34,7 +34,7 @@ func (f *logFormatter) Format(entry *log.Entry) ([]byte, error) {
 }
 
 func (s *Server) initLogs() error {
-	filePath := s.Config.LogFilePath
+	filePath := s.config.LogFilePath
 
 	file, err := os.OpenFile(filePath, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -66,7 +66,7 @@ func (s *Server) initLogs() error {
 }
 
 func (s *Server) GetLogReader() (io.Reader, error) {
-	file, err := os.Open(s.Config.LogFilePath)
+	file, err := os.Open(s.config.LogFilePath)
 	if err != nil {
 		return nil, err
 	}
