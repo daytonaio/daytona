@@ -12,6 +12,9 @@
 			"gid": "1000",
 			"upgradePackages": "false"
 		},
+		"ghcr.io/devcontainers-contrib/features/apt-get-packages:1": {
+			"packages": "curl"
+		},
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
 		"ghcr.io/devcontainers/features/node:1": {},
 		"ghcr.io/wxw-matt/devcontainer-features/command_runner:latest": {
