@@ -5,6 +5,7 @@ package registry
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"os"
 	"strconv"
@@ -100,8 +101,7 @@ func (s *LocalContainerRegistry) Start() error {
 			port: struct{}{},
 		},
 		Env: []string{
-			//	todo: from config?
-			"REGISTRY_HTTP_ADDR=127.0.0.1:5000",
+			fmt.Sprintf("%s:%s", "REGISTRY_HTTP_ADDR=127.0.0.1", strconv.Itoa(int(s.port))),
 		},
 	}, &container.HostConfig{
 		NetworkMode: "host",
