@@ -1,9 +1,6 @@
 {
 	"name": "Daytona Project Image Builder",
-	"build": {
-		"context": "..",
-		"dockerfile": "../Dockerfile"
-	},
+	"image": "ubuntu:22.04",
 	"features": {
 		"ghcr.io/devcontainers/features/common-utils:1": {
 			"installZsh": "true",
