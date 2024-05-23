@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
 	"os/exec"
 	"time"
 
@@ -118,7 +119,13 @@ func (a *Agent) startProjectMode() error {
 		}
 	}()
 
-	a.runPostStartCommands(project)
+	err = a.runPostCreateCommands(project)
+	if err != nil {
+		log.Error(fmt.Sprintf("failed to run post create commands: %s", err))
+		log.Error("skipping post start commands...")
+	} else {
+		a.runPostStartCommands(project)
+	}
 
 	return nil
 }
@@ -210,6 +217,52 @@ func (a *Agent) setDefaultConfig() error {
 	}
 
 	return config.Save()
+}
+
+func (a *Agent) runPostCreateCommands(project *workspace.Project) error {
+	if _, err := os.Stat(a.PostCreateLockFilePath); err == nil {
+		log.Info("Post create commands already ran. Skipping...")
+		return nil
+	}
+
+	if len(project.PostCreateCommands) == 0 {
+		log.Info("No post create commands to run")
+		return nil
+	}
+
+	log.Info("Running post create commands...")
+
+	var errCh = make(chan error)
+
+	for _, command := range project.PostCreateCommands {
+		go func() {
+			log.Info("Running command: " + command)
+			cmd := exec.Command("sh", "-c", command)
+			cmd.Dir = a.Config.ProjectDir
+			cmd.Stdout = a.LogWriter
+			cmd.Stderr = a.LogWriter
+
+			err := cmd.Run()
+			if err != nil {
+				log.Error(fmt.Sprintf("command '%s' failed: %v", command, err))
+			}
+			errCh <- err
+		}()
+	}
+
+	resultErr := errors.New("errors: ")
+	for range project.PostCreateCommands {
+		err := <-errCh
+		if err != nil {
+			resultErr = fmt.Errorf("%w %v", resultErr, err)
+		}
+	}
+
+	if resultErr.Error() != "errors: " {
+		return resultErr
+	}
+
+	return os.WriteFile(a.PostCreateLockFilePath, []byte{}, 0644)
 }
 
 func (a *Agent) runPostStartCommands(project *workspace.Project) {

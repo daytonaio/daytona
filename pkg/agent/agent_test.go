@@ -5,6 +5,8 @@ package agent_test
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
 	"testing"
 
 	log "github.com/sirupsen/logrus"
@@ -26,9 +28,10 @@ var project1 = &workspace.Project{
 		Url:  "https://github.com/daytonaio/daytona",
 		Name: "daytona",
 	},
-	WorkspaceId:       "123",
-	Target:            "local",
-	PostStartCommands: []string{"echo 'test' > test.txt"},
+	WorkspaceId:        "123",
+	Target:             "local",
+	PostCreateCommands: []string{"echo 'test' > test2.txt"},
+	PostStartCommands:  []string{"echo 'test' > test.txt"},
 	State: &workspace.ProjectState{
 		UpdatedAt: "123",
 		Uptime:    148,
@@ -83,12 +86,15 @@ func TestAgent(t *testing.T) {
 
 	mockConfig.ProjectDir = t.TempDir()
 
+	postCreateLockFilePath := filepath.Join(t.TempDir(), ".daytona_post_create.lock")
+
 	// Create a new Agent instance
 	a := &agent.Agent{
-		Config:    mockConfig,
-		Git:       mockGitService,
-		Ssh:       mockSshServer,
-		Tailscale: mockTailscaleServer,
+		Config:                 mockConfig,
+		Git:                    mockGitService,
+		Ssh:                    mockSshServer,
+		Tailscale:              mockTailscaleServer,
+		PostCreateLockFilePath: postCreateLockFilePath,
 	}
 
 	t.Run("Start agent", func(t *testing.T) {
@@ -96,6 +102,28 @@ func TestAgent(t *testing.T) {
 
 		require.Nil(t, err)
 
+		// Check post create command result
+		require.FileExists(t, mockConfig.ProjectDir+"/test2.txt")
+		// Check post start command result
+		require.FileExists(t, mockConfig.ProjectDir+"/test.txt")
+	})
+
+	t.Run("Post create commands not ran", func(t *testing.T) {
+		projectDir := t.TempDir()
+		postCreateLockFilePath := filepath.Join(t.TempDir(), ".daytona_post_create.lock")
+
+		err := os.WriteFile(postCreateLockFilePath, []byte{}, 0644)
+		require.Nil(t, err)
+
+		a.PostCreateLockFilePath = postCreateLockFilePath
+		a.Config.ProjectDir = projectDir
+
+		err = a.Start()
+
+		require.Nil(t, err)
+
+		// Check post create command result
+		require.NoFileExists(t, mockConfig.ProjectDir+"/test2.txt")
 		// Check post start command result
 		require.FileExists(t, mockConfig.ProjectDir+"/test.txt")
 	})
