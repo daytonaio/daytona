@@ -282,14 +282,12 @@ func (b *DevcontainerBuilder) startContainer() error {
 		return err
 	}
 
-	//	todo builder image from config
-	reader, err := cli.ImagePull(ctx, "daytonaio/workspace-project", image.PullOptions{
-		//	auth for builder image
+	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
+		ApiClient: cli,
 	})
-	if err != nil {
-		return err
-	}
-	_, err = io.Copy(projectLogger, reader)
+
+	//	todo: builder image from config
+	err = dockerClient.PullImage("daytonaio/workspace-project", nil, projectLogger)
 	if err != nil {
 		return err
 	}

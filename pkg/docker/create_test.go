@@ -40,7 +40,7 @@ func (s *DockerClientTestSuite) TestCreateProject() {
 		},
 	).Return([]image.Summary{}, nil)
 
-	s.mockClient.On("ImagePull", mock.Anything, project1.Image, image.PullOptions{}).Return(t_docker.NewPipeReader(""), nil)
+	s.mockClient.On("ImagePull", mock.Anything, project1.Image, mock.Anything).Return(t_docker.NewPipeReader(""), nil)
 
 	s.mockClient.On("ContainerCreate", mock.Anything, docker.GetContainerCreateConfig(project1, "download-url"),
 		&container.HostConfig{
