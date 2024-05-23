@@ -24,6 +24,7 @@ func ConfigurationForm(config *apiclient.ServerConfig) *apiclient.ServerConfig {
 	apiPortView := strconv.Itoa(int(config.GetApiPort()))
 	headscalePortView := strconv.Itoa(int(config.GetHeadscalePort()))
 	frpsPortView := strconv.Itoa(int(config.Frps.GetPort()))
+	registryPortView := strconv.Itoa(int(config.GetRegistryPort()))
 
 	form := huh.NewForm(
 		huh.NewGroup(
@@ -57,6 +58,10 @@ func ConfigurationForm(config *apiclient.ServerConfig) *apiclient.ServerConfig {
 				Title("Headscale Port").
 				Value(&headscalePortView).
 				Validate(createPortValidator(config, &headscalePortView, config.HeadscalePort)),
+			huh.NewInput().
+				Title("Build Registry Port").
+				Value(&registryPortView).
+				Validate(createPortValidator(config, &registryPortView, config.RegistryPort)),
 			huh.NewInput().
 				Title("Binaries Path").
 				Description("Directory will be created if it does not exist").
