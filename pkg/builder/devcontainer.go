@@ -285,7 +285,6 @@ func (b *DevcontainerBuilder) startContainer() error {
 	//	todo builder image from config
 	reader, err := cli.ImagePull(ctx, "daytonaio/workspace-project", image.PullOptions{
 		//	auth for builder image
-		//	RegistryAuth: ,
 	})
 	if err != nil {
 		return err
