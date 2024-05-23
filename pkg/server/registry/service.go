@@ -101,7 +101,7 @@ func (s *LocalContainerRegistry) Start() error {
 			port: struct{}{},
 		},
 		Env: []string{
-			fmt.Sprintf("%s:%s", "REGISTRY_HTTP_ADDR=127.0.0.1", strconv.Itoa(int(s.port))),
+			fmt.Sprintf("REGISTRY_HTTP_ADDR=127.0.0.1:%d", s.port),
 		},
 	}, &container.HostConfig{
 		NetworkMode: "host",

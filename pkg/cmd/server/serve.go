@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"strconv"
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -137,7 +136,7 @@ var ServeCmd = &cobra.Command{
 		})
 		builderFactory := builder.NewBuilderFactory(builder.BuilderConfig{
 			DaytonaServerConfigFolder:       configDir,
-			LocalContainerRegistryServer:    fmt.Sprintf("%s:%s", "127.0.0.1", strconv.Itoa(int(c.RegistryPort))),
+			LocalContainerRegistryServer:    fmt.Sprintf("127.0.0.1:%d", c.RegistryPort),
 			BasePath:                        filepath.Join(configDir, "builds"),
 			LoggerFactory:                   loggerFactory,
 			DefaultProjectImage:             c.DefaultProjectImage,
