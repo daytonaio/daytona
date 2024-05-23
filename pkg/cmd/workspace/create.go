@@ -270,6 +270,7 @@ func processCmdArguments(args []string, apiClient *apiclient.APIClient, projects
 		Source: &apiclient.CreateWorkspaceRequestProjectSource{
 			Repository: repoResponse,
 		},
+		Build: &apiclient.ProjectBuild{},
 	}
 
 	*projects = append(*projects, *project)
