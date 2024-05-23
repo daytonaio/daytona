@@ -124,7 +124,7 @@ func GetProjectHostname(workspaceId string, projectName string) string {
 	return hostname
 }
 
-// GetImageHash returns a SHA-256 hash of the project's build configuration, repository URL, and environment variables.
+// GetConfigHash returns a SHA-256 hash of the project's build configuration, repository URL, and environment variables.
 func (p *Project) GetConfigHash() (string, error) {
 
 	buildJson, err := json.Marshal(p.Build)
