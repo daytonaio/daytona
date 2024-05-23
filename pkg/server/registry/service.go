@@ -6,12 +6,11 @@ package registry
 import (
 	"context"
 	"fmt"
-	"io"
 	"os"
 	"strconv"
 
+	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 )
@@ -51,6 +50,10 @@ func (s *LocalContainerRegistry) Start() error {
 		return err
 	}
 
+	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
+		ApiClient: cli,
+	})
+
 	containers, err := cli.ContainerList(ctx, container.ListOptions{All: true})
 	if err != nil {
 		return err
@@ -80,16 +83,7 @@ func (s *LocalContainerRegistry) Start() error {
 	}
 
 	// Pull the image
-	out, err := cli.ImagePull(ctx, "registry:2.8.3", image.PullOptions{})
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	//	todo: log progress
-
-	// Wait for the image pull to complete
-	_, err = io.Copy(io.Discard, out)
+	err = dockerClient.PullImage("registry:2.8.3", nil, os.Stdout)
 	if err != nil {
 		return err
 	}
