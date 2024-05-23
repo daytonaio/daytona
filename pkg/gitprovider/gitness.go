@@ -1,0 +1,22 @@
+// Copyright 2024 Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
+package gitprovider
+
+type GitNessGitProvider struct {
+	*AbstractGitProvider
+
+	token      string
+	baseApiUrl *string
+}
+
+func NewGitNessGitProvider(token string, baseApiUrl *string) *GitNessGitProvider {
+	gitProvider := &GitNessGitProvider{
+		token:               token,
+		baseApiUrl:          baseApiUrl,
+		AbstractGitProvider: &AbstractGitProvider{},
+	}
+	gitProvider.AbstractGitProvider.GitProvider = gitProvider
+
+	return gitProvider
+}
