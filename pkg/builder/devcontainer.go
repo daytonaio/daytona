@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -20,7 +21,9 @@ import (
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
+	"github.com/docker/go-connections/nat"
 )
 
 type BuildOutcome struct {
@@ -34,17 +37,13 @@ type DevcontainerBuilder struct {
 	*Builder
 	buildImageName     string
 	user               string
+	builderDockerPort  uint16
 	postCreateCommands []string
 	postStartCommands  []string
 }
 
 func (b *DevcontainerBuilder) Build() (*BuildResult, error) {
 	err := b.startContainer()
-	if err != nil {
-		return nil, err
-	}
-
-	err = b.startDocker()
 	if err != nil {
 		return nil, err
 	}
@@ -59,9 +58,11 @@ func (b *DevcontainerBuilder) Build() (*BuildResult, error) {
 		return nil, err
 	}
 
+	buildImageName := strings.Replace(b.buildImageName, "host.docker.internal", "127.0.0.1", 1)
+
 	return &BuildResult{
 		User:               b.user,
-		ImageName:          b.buildImageName,
+		ImageName:          buildImageName,
 		ProjectVolumePath:  b.projectVolumePath,
 		PostCreateCommands: b.postCreateCommands,
 		PostStartCommands:  b.postStartCommands,
@@ -169,7 +170,6 @@ func (b *DevcontainerBuilder) buildDevcontainer() error {
 	}
 
 	if buildOutcome.Outcome != "success" {
-		//	todo: parse reason
 		return errors.New("devcontainer build failed")
 	}
 
@@ -282,7 +282,7 @@ func (b *DevcontainerBuilder) startContainer() error {
 		return err
 	}
 
-	dir := "/tmp/" + b.id + "/var/lib/docker"
+	dir := filepath.Join(os.TempDir(), b.id, "/var/lib/docker")
 	err = os.MkdirAll(dir, 0755)
 	if err != nil {
 		return err
@@ -291,74 +291,64 @@ func (b *DevcontainerBuilder) startContainer() error {
 	//	todo: mount folders
 	_, err = cli.ContainerCreate(ctx, &container.Config{
 		Image:      "daytonaio/workspace-project",
-		Entrypoint: []string{"sleep", "infinity"},
-	}, &container.HostConfig{
-		NetworkMode: "host",
-		Privileged:  true,
-		Binds: []string{
-			b.projectVolumePath + ":/project",
-			filepath.Dir(b.getLocalDockerSocket()) + ":/tmp/docker",
-			dir + ":/var/lib/docker",
+		Entrypoint: []string{"dockerd", "-H", fmt.Sprintf("tcp://0.0.0.0:%d", b.builderDockerPort), "-H", "unix:///var/run/docker.sock", "--insecure-registry", b.localContainerRegistryServer},
+		ExposedPorts: nat.PortSet{
+			nat.Port(fmt.Sprintf("%d/tcp", b.builderDockerPort)): {},
 		},
+	}, &container.HostConfig{
+		Privileged: true,
+		Mounts: []mount.Mount{
+			{
+				Type:   mount.TypeBind,
+				Source: b.projectVolumePath,
+				Target: "/project",
+			},
+			{
+				Type:   mount.TypeBind,
+				Source: dir,
+				Target: "/var/lib/docker",
+			},
+		},
+		PortBindings: nat.PortMap{
+			nat.Port(fmt.Sprintf("%d/tcp", b.builderDockerPort)): []nat.PortBinding{
+				{
+					HostIP:   "0.0.0.0",
+					HostPort: fmt.Sprint(b.builderDockerPort),
+				},
+			},
+		},
+		ExtraHosts: []string{"host.docker.internal:host-gateway"},
 	}, nil, nil, b.id)
 	if err != nil {
 		return err
 	}
 
-	if err := cli.ContainerStart(ctx, b.id, container.StartOptions{}); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (b *DevcontainerBuilder) startDocker() error {
-	ctx := context.Background()
-
-	projectLogger := b.loggerFactory.CreateProjectLogger(b.project.WorkspaceId, b.project.Name)
-	defer projectLogger.Close()
-
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	err = cli.ContainerStart(ctx, b.id, container.StartOptions{})
 	if err != nil {
 		return err
 	}
 
-	execConfig := types.ExecConfig{
-		AttachStdout: true,
-		AttachStderr: true,
-		Cmd:          []string{"dockerd", "-H", "unix:///tmp/docker/docker.sock", "-H", "unix:///var/run/docker.sock", "--insecure-registry", b.localContainerRegistryServer},
-	}
-
-	execResp, err := cli.ContainerExecCreate(ctx, b.id, execConfig)
+	// Wait for docker to start
+	builderCli, err := b.getBuilderDockerClient()
 	if err != nil {
 		return err
 	}
 
-	execStartCheck := types.ExecStartCheck{
-		Detach: false,
-		Tty:    false,
-	}
-
-	attachResp, err := cli.ContainerExecAttach(ctx, execResp.ID, execStartCheck)
-	if err != nil {
-		return err
-	}
-	defer attachResp.Close()
-
-	go func() {
-		_, err = io.Copy(projectLogger, attachResp.Reader)
-		if err != nil {
-			log.Errorf("error copying output: %v", err)
+	for i := 0; i < 30; i++ {
+		time.Sleep(1 * time.Second)
+		_, err = builderCli.Ping(ctx)
+		if err == nil {
+			break
 		}
-	}()
+	}
+
+	if err != nil {
+		return fmt.Errorf("timeout waiting for dockerd to start: %v", err)
+	}
 
 	return nil
 }
 
 func (b *DevcontainerBuilder) getBuilderDockerClient() (*client.Client, error) {
-	return client.NewClientWithOpts(client.WithHost(fmt.Sprintf("unix://%s", b.getLocalDockerSocket())), client.WithAPIVersionNegotiation())
-}
-
-func (b *DevcontainerBuilder) getLocalDockerSocket() string {
-	return filepath.Join("/tmp", b.id, "docker", "docker.sock")
+	return client.NewClientWithOpts(client.WithHost(fmt.Sprintf("tcp://127.0.0.1:%d", b.builderDockerPort)), client.WithAPIVersionNegotiation())
 }

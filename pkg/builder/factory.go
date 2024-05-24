@@ -11,6 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logger"
+	"github.com/daytonaio/daytona/pkg/ports"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/docker/docker/pkg/stringid"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
@@ -94,6 +95,12 @@ func (f *BuilderFactory) Create(p workspace.Project, gpc *gitprovider.GitProvide
 		buildConfig.Devcontainer = &workspace.ProjectBuildDevcontainer{
 			DevContainerFilePath: devcontainerConfigFilePath,
 		}
+
+		builderDockerPort, err := ports.GetAvailableEphemeralPort()
+		if err != nil {
+			return nil, err
+		}
+
 		return &DevcontainerBuilder{
 			Builder: &Builder{
 				id:                              buildId,
@@ -109,6 +116,7 @@ func (f *BuilderFactory) Create(p workspace.Project, gpc *gitprovider.GitProvide
 				defaultProjectUser:              f.defaultProjectUser,
 				defaultProjectPostStartCommands: f.defaultProjectPostStartCommands,
 			},
+			builderDockerPort: builderDockerPort,
 		}, nil
 	}
 

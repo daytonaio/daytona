@@ -11,9 +11,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/daytonaio/daytona/internal/cmd/tailscale"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/frpc"
-	"github.com/daytonaio/daytona/pkg/ports"
 	"github.com/daytonaio/daytona/pkg/views"
 	log "github.com/sirupsen/logrus"
 	qrcode "github.com/skip2/go-qrcode"
@@ -48,7 +48,7 @@ var PortForwardCmd = &cobra.Command{
 			}
 		}
 
-		hostPort, errChan := ports.ForwardPort(workspaceId, projectName, uint16(port))
+		hostPort, errChan := tailscale.ForwardPort(workspaceId, projectName, uint16(port))
 
 		if hostPort == nil {
 			if err = <-errChan; err != nil {

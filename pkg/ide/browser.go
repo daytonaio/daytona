@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/cmd/tailscale"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/ports"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -54,7 +55,7 @@ func OpenBrowserIDE(activeProfile config.Profile, workspaceId string, projectNam
 	}()
 
 	// Forward IDE port
-	browserPort, errChan := ports.ForwardPort(workspaceId, projectName, 63000)
+	browserPort, errChan := tailscale.ForwardPort(workspaceId, projectName, 63000)
 	if browserPort == nil {
 		if err := <-errChan; err != nil {
 			return err
