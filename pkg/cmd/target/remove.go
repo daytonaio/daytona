@@ -112,7 +112,7 @@ func RemoveTargetWorkspaces(ctx context.Context, client *apiclient.APIClient, ta
 	}
 
 	for _, workspace := range workspaceList {
-		if workspace.Target != target {
+		if *workspace.Target != *target {
 			continue
 		}
 
