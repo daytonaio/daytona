@@ -20,7 +20,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
 )
 
@@ -96,26 +95,17 @@ func (b *DevcontainerBuilder) Publish() error {
 	projectLogger := b.loggerFactory.CreateProjectLogger(b.project.WorkspaceId, b.project.Name)
 	defer projectLogger.Close()
 
-	ctx := context.Background()
 	cliBuilder, err := b.getBuilderDockerClient()
 	if err != nil {
 		return err
 	}
 
-	reader, err := cliBuilder.ImagePush(ctx, b.buildImageName, image.PushOptions{
-		//	todo: registry auth (from container registry store)
-		RegistryAuth: "empty", //	make sure that something is passed, as with "" will throw an X-Auth error
+	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
+		ApiClient: cliBuilder,
 	})
-	if err != nil {
-		return err
-	}
 
-	scanner := bufio.NewScanner(reader)
-	for scanner.Scan() {
-		projectLogger.Write([]byte(scanner.Text() + "\n"))
-	}
-
-	return nil
+	//	todo: registry auth (from container registry store)
+	return dockerClient.PushImage(b.buildImageName, nil, projectLogger)
 }
 
 func (b *DevcontainerBuilder) buildDevcontainer() error {
