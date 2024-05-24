@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strconv"
 
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/docker/docker/api/types/container"
@@ -76,12 +75,6 @@ func (s *LocalContainerRegistry) Start() error {
 		}
 	}
 
-	portStr := strconv.FormatUint(uint64(s.port), 10)
-	port, err := nat.NewPort("tcp", portStr)
-	if err != nil {
-		return err
-	}
-
 	// Pull the image
 	err = dockerClient.PullImage("registry:2.8.3", nil, os.Stdout)
 	if err != nil {
@@ -91,17 +84,24 @@ func (s *LocalContainerRegistry) Start() error {
 	//	todo: enable TLS
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image: "registry:2.8.3",
-		ExposedPorts: nat.PortSet{
-			port: struct{}{},
-		},
 		Env: []string{
-			fmt.Sprintf("REGISTRY_HTTP_ADDR=127.0.0.1:%d", s.port),
+			fmt.Sprintf("REGISTRY_HTTP_ADDR=0.0.0.0:%d", s.port),
+		},
+		ExposedPorts: nat.PortSet{
+			nat.Port(fmt.Sprintf("%d/tcp", s.port)): {},
 		},
 	}, &container.HostConfig{
-		NetworkMode: "host",
-		Privileged:  true,
+		Privileged: true,
 		Binds: []string{
 			s.dataPath + ":/var/lib/registry",
+		},
+		PortBindings: nat.PortMap{
+			nat.Port(fmt.Sprintf("%d/tcp", s.port)): []nat.PortBinding{
+				{
+					HostIP:   "0.0.0.0",
+					HostPort: fmt.Sprint(s.port),
+				},
+			},
 		},
 	}, nil, nil, "daytona-registry")
 	if err != nil {
