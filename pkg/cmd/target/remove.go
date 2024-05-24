@@ -62,7 +62,7 @@ var targetRemoveCmd = &cobra.Command{
 
 		if yesFlag {
 			fmt.Println("Deleting all workspaces.")
-			err := RemoveTargetWorkspaces(ctx, client, &selectedTargetName)
+			err := RemoveTargetWorkspaces(ctx, client, selectedTargetName)
 
 			if err != nil {
 				log.Fatal(err)
@@ -83,7 +83,7 @@ var targetRemoveCmd = &cobra.Command{
 			}
 
 			if yesFlag {
-				err := RemoveTargetWorkspaces(ctx, client, &selectedTargetName)
+				err := RemoveTargetWorkspaces(ctx, client, selectedTargetName)
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -105,14 +105,14 @@ func init() {
 	targetRemoveCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Confirm deletion of all workspaces without prompt")
 }
 
-func RemoveTargetWorkspaces(ctx context.Context, client *apiclient.APIClient, target *string) error {
+func RemoveTargetWorkspaces(ctx context.Context, client *apiclient.APIClient, target string) error {
 	workspaceList, res, err := client.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	for _, workspace := range workspaceList {
-		if *workspace.Target != *target {
+		if *workspace.Target != target {
 			continue
 		}
 
