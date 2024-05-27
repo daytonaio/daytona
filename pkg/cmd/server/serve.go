@@ -136,7 +136,7 @@ var ServeCmd = &cobra.Command{
 		})
 		builderFactory := builder.NewBuilderFactory(builder.BuilderConfig{
 			DaytonaServerConfigFolder:       configDir,
-			LocalContainerRegistryServer:    fmt.Sprintf("host.docker.internal:%d", c.RegistryPort),
+			LocalContainerRegistryServer:    util.GetFrpcRegistryDomain(c.Id, c.Frps.Domain),
 			BasePath:                        filepath.Join(configDir, "builds"),
 			LoggerFactory:                   loggerFactory,
 			DefaultProjectImage:             c.DefaultProjectImage,

@@ -282,12 +282,6 @@ func (b *DevcontainerBuilder) startContainer() error {
 		return err
 	}
 
-	dir := filepath.Join(os.TempDir(), b.id, "/var/lib/docker")
-	err = os.MkdirAll(dir, 0755)
-	if err != nil {
-		return err
-	}
-
 	//	todo: mount folders
 	_, err = cli.ContainerCreate(ctx, &container.Config{
 		Image:      "daytonaio/workspace-project",
@@ -302,11 +296,6 @@ func (b *DevcontainerBuilder) startContainer() error {
 				Type:   mount.TypeBind,
 				Source: b.projectVolumePath,
 				Target: "/project",
-			},
-			{
-				Type:   mount.TypeBind,
-				Source: dir,
-				Target: "/var/lib/docker",
 			},
 		},
 		PortBindings: nat.PortMap{
