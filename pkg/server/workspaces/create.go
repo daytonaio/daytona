@@ -112,6 +112,10 @@ func (s *WorkspaceService) createBuild(project *workspace.Project, gc *gitprovid
 			return nil, err
 		}
 
+		if builder == nil {
+			return project, nil
+		}
+
 		buildResult, err := builder.Build()
 		if err != nil {
 			return nil, err
