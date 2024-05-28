@@ -151,7 +151,6 @@ func (s *WorkspaceService) createBuild(project *workspace.Project, gc *gitprovid
 
 		project.Image = buildResult.ImageName
 		project.User = buildResult.User
-		project.Build = nil
 		project.PostStartCommands = buildResult.PostStartCommands
 		project.PostCreateCommands = buildResult.PostCreateCommands
 

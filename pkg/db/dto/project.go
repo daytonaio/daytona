@@ -38,10 +38,19 @@ type ProjectStateDTO struct {
 	GitStatus *GitStatusDTO `json:"gitStatus"`
 }
 
+type ProjectBuildDevcontainerDTO struct {
+	DevContainerFilePath string `json:"devContainerFilePath"`
+}
+
+type ProjectBuildDTO struct {
+	Devcontainer *ProjectBuildDevcontainerDTO `json:"devcontainer"`
+}
+
 type ProjectDTO struct {
 	Name               string           `json:"name"`
 	Image              string           `json:"image"`
 	User               string           `json:"user"`
+	Build              *ProjectBuildDTO `json:"build,omitempty" gorm:"serializer:json"`
 	Repository         RepositoryDTO    `json:"repository"`
 	WorkspaceId        string           `json:"workspaceId"`
 	Target             string           `json:"target"`
@@ -56,6 +65,7 @@ func ToProjectDTO(project *workspace.Project, workspace *workspace.Workspace) Pr
 		Name:               project.Name,
 		Image:              project.Image,
 		User:               project.User,
+		Build:              ToProjectBuildDTO(project.Build),
 		Repository:         ToRepositoryDTO(project.Repository),
 		WorkspaceId:        project.WorkspaceId,
 		Target:             project.Target,
@@ -123,11 +133,28 @@ func ToProjectStateDTO(state *workspace.ProjectState) *ProjectStateDTO {
 	}
 }
 
+func ToProjectBuildDTO(build *workspace.ProjectBuild) *ProjectBuildDTO {
+	if build == nil {
+		return nil
+	}
+
+	if build.Devcontainer == nil {
+		return &ProjectBuildDTO{}
+	}
+
+	return &ProjectBuildDTO{
+		Devcontainer: &ProjectBuildDevcontainerDTO{
+			DevContainerFilePath: build.Devcontainer.DevContainerFilePath,
+		},
+	}
+}
+
 func ToProject(projectDTO ProjectDTO) *workspace.Project {
 	return &workspace.Project{
 		Name:               projectDTO.Name,
 		Image:              projectDTO.Image,
 		User:               projectDTO.User,
+		Build:              ToProjectBuild(projectDTO.Build),
 		Repository:         ToRepository(projectDTO.Repository),
 		WorkspaceId:        projectDTO.WorkspaceId,
 		Target:             projectDTO.Target,
@@ -193,4 +220,20 @@ func ToRepository(repoDTO RepositoryDTO) *gitprovider.GitRepository {
 	}
 
 	return &repo
+}
+
+func ToProjectBuild(buildDTO *ProjectBuildDTO) *workspace.ProjectBuild {
+	if buildDTO == nil {
+		return nil
+	}
+
+	if buildDTO.Devcontainer == nil {
+		return &workspace.ProjectBuild{}
+	}
+
+	return &workspace.ProjectBuild{
+		Devcontainer: &workspace.ProjectBuildDevcontainer{
+			DevContainerFilePath: buildDTO.Devcontainer.DevContainerFilePath,
+		},
+	}
 }
