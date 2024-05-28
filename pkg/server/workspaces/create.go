@@ -118,15 +118,33 @@ func (s *WorkspaceService) createBuild(project *workspace.Project, gc *gitprovid
 
 		buildResult, err := builder.Build()
 		if err != nil {
+			cleanupErr := builder.CleanUp()
+			if cleanupErr != nil {
+				logWriter.Write([]byte(fmt.Sprintf("Error cleaning up build: %s\n", cleanupErr.Error())))
+			}
+
 			return nil, err
 		}
 
 		err = builder.Publish()
 		if err != nil {
+			cleanupErr := builder.CleanUp()
+			if cleanupErr != nil {
+				logWriter.Write([]byte(fmt.Sprintf("Error cleaning up build: %s\n", cleanupErr.Error())))
+			}
 			return nil, err
 		}
 
 		err = builder.SaveBuildResults(*buildResult)
+		if err != nil {
+			cleanupErr := builder.CleanUp()
+			if cleanupErr != nil {
+				logWriter.Write([]byte(fmt.Sprintf("Error cleaning up build: %s\n", cleanupErr.Error())))
+			}
+			return nil, err
+		}
+
+		err = builder.CleanUp()
 		if err != nil {
 			return nil, err
 		}
