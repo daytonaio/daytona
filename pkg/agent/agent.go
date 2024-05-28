@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net/url"
 	"os"
 	"os/exec"
@@ -251,8 +252,8 @@ func (a *Agent) runPostCreateCommands(project *workspace.Project) error {
 			log.Info("Running command: " + command)
 			cmd := exec.Command("sh", "-c", command)
 			cmd.Dir = a.Config.ProjectDir
-			cmd.Stdout = a.LogWriter
-			cmd.Stderr = a.LogWriter
+			cmd.Stdout = io.MultiWriter(a.LogWriter, os.Stdout)
+			cmd.Stderr = io.MultiWriter(a.LogWriter, os.Stderr)
 
 			err := cmd.Run()
 			if err != nil {
@@ -285,8 +286,8 @@ func (a *Agent) runPostStartCommands(project *workspace.Project) {
 			log.Info("Running command: " + command)
 			cmd := exec.Command("sh", "-c", command)
 			cmd.Dir = a.Config.ProjectDir
-			cmd.Stdout = a.LogWriter
-			cmd.Stderr = a.LogWriter
+			cmd.Stdout = io.MultiWriter(a.LogWriter, os.Stdout)
+			cmd.Stderr = io.MultiWriter(a.LogWriter, os.Stderr)
 
 			err := cmd.Run()
 			if err != nil {
