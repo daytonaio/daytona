@@ -82,7 +82,7 @@ var AgentCmd = &cobra.Command{
 			Ssh:                    sshServer,
 			Tailscale:              tailscaleServer,
 			LogWriter:              agentLogWriter,
-			PostCreateLockFilePath: filepath.Join(c.ProjectDir, ".daytona_post_create.lock"),
+			PostCreateLockFilePath: filepath.Join(os.Getenv("HOME"), ".daytona_post_create.lock"),
 		}
 
 		err = agent.Start()
