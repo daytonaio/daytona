@@ -126,28 +126,20 @@ func GetProjectHostname(workspaceId string, projectName string) string {
 
 // GetConfigHash returns a SHA-256 hash of the project's build configuration, repository URL, and environment variables.
 func (p *Project) GetConfigHash() (string, error) {
-
 	buildJson, err := json.Marshal(p.Build)
 	if err != nil {
 		return "", err
 	}
 
-	/*
-		//	todo: atm env vars contain workspace env provided by the server
-		//		  this causes each workspace to have a different hash
-		envVarsJson, err := json.Marshal(p.EnvVars)
-		if err != nil {
-			return "", err
-		}
-	*/
+	//	todo: atm env vars contain workspace env provided by the server
+	//		  this causes each workspace to have a different hash
+	// envVarsJson, err := json.Marshal(p.EnvVars)
+	// if err != nil {
+	// 	return "", err
+	// }
 
-	// Concatenate the JSON strings and the repository URL
 	data := string(buildJson) + p.Repository.Sha /* + string(envVarsJson)*/
-
-	// Compute the SHA-256 hash of the data
 	hash := sha256.Sum256([]byte(data))
-
-	// Convert the hash to a hexadecimal string
 	hashStr := hex.EncodeToString(hash[:])
 
 	return hashStr, nil
