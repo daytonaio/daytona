@@ -58,11 +58,9 @@ func (b *DevcontainerBuilder) Build() (*BuildResult, error) {
 		return nil, err
 	}
 
-	buildImageName := strings.Replace(b.buildImageName, "host.docker.internal", "127.0.0.1", 1)
-
 	return &BuildResult{
 		User:               b.user,
-		ImageName:          buildImageName,
+		ImageName:          b.buildImageName,
 		ProjectVolumePath:  b.projectVolumePath,
 		PostCreateCommands: b.postCreateCommands,
 		PostStartCommands:  b.postStartCommands,
@@ -185,7 +183,7 @@ func (b *DevcontainerBuilder) buildDevcontainer() error {
 	}
 
 	tag := b.project.Repository.Sha
-	imageName := fmt.Sprintf("%s:%s", b.localContainerRegistryServer+"/p-"+b.id, tag)
+	imageName := fmt.Sprintf("%s/p-%s:%s", b.localContainerRegistryServer, b.id, tag)
 
 	_, err = builderCli.ContainerCommit(context.Background(), buildOutcome.ContainerId, container.CommitOptions{
 		Reference: imageName,
@@ -316,7 +314,6 @@ func (b *DevcontainerBuilder) startContainer() error {
 				},
 			},
 		},
-		ExtraHosts: []string{"host.docker.internal:host-gateway"},
 	}, nil, nil, b.id)
 	if err != nil {
 		return err
