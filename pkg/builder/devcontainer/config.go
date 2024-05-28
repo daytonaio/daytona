@@ -3,6 +3,8 @@
 
 package devcontainer
 
+import "fmt"
+
 type Configuration struct {
 	Name              string                    `json:"name"`
 	DockerFile        string                    `json:"dockerFile"`
@@ -89,24 +91,57 @@ type Root struct {
 }
 
 type MergedConfiguration struct {
-	Name                  string                    `json:"name"`
-	DockerFile            string                    `json:"dockerFile"`
-	RunArgs               []string                  `json:"runArgs"`
-	InitializeCommand     string                    `json:"initializeCommand"`
-	RemoteUser            string                    `json:"remoteUser"`
-	Features              map[string]interface{}    `json:"features"`
-	ForwardPorts          []int                     `json:"forwardPorts"`
-	ConfigFilePath        ConfigFilePath            `json:"configFilePath"`
-	Init                  bool                      `json:"init"`
-	Privileged            bool                      `json:"privileged"`
-	Entrypoints           []string                  `json:"entrypoints"`
-	Mounts                []Mount                   `json:"mounts"`
-	OnCreateCommands      []string                  `json:"onCreateCommands"`
-	UpdateContentCommands []string                  `json:"updateContentCommands"`
-	PostCreateCommands    []string                  `json:"postCreateCommands"`
-	PostStartCommands     []string                  `json:"postStartCommands"`
-	PostAttachCommands    []string                  `json:"postAttachCommands"`
-	RemoteEnv             map[string]string         `json:"remoteEnv"`
-	ContainerEnv          map[string]string         `json:"containerEnv"`
-	PortsAttributes       map[string]PortAttributes `json:"portsAttributes"`
+	Name            string                    `json:"name"`
+	DockerFile      string                    `json:"dockerFile"`
+	RunArgs         []string                  `json:"runArgs"`
+	RemoteUser      string                    `json:"remoteUser"`
+	Features        map[string]interface{}    `json:"features"`
+	ForwardPorts    []int                     `json:"forwardPorts"`
+	ConfigFilePath  ConfigFilePath            `json:"configFilePath"`
+	Init            bool                      `json:"init"`
+	Privileged      bool                      `json:"privileged"`
+	Entrypoints     []string                  `json:"entrypoints"`
+	Mounts          []Mount                   `json:"mounts"`
+	RemoteEnv       map[string]string         `json:"remoteEnv"`
+	ContainerEnv    map[string]string         `json:"containerEnv"`
+	PortsAttributes map[string]PortAttributes `json:"portsAttributes"`
+
+	// Commands
+	InitializeCommand     []interface{} `json:"initializeCommand"`
+	OnCreateCommands      []interface{} `json:"onCreateCommands"`
+	UpdateContentCommands []interface{} `json:"updateContentCommands"`
+	PostCreateCommands    []interface{} `json:"postCreateCommands"`
+	PostStartCommands     []interface{} `json:"postStartCommands"`
+	PostAttachCommands    []interface{} `json:"postAttachCommands"`
+}
+
+func ConvertCommands(mergedCommands []interface{}) ([]string, error) {
+	// Convert the commands to a string array
+	var commandArray []string
+	for _, commands := range mergedCommands {
+		switch commands := commands.(type) {
+		case []interface{}:
+			for _, command := range commands {
+				commandString, ok := command.(string)
+				if !ok {
+					return nil, fmt.Errorf("invalid command type: %v", command)
+				}
+				commandArray = append(commandArray, commandString)
+			}
+		case map[string]interface{}:
+			for _, command := range commands {
+				commandString, ok := command.(string)
+				if !ok {
+					return nil, fmt.Errorf("invalid command type: %v", command)
+				}
+				commandArray = append(commandArray, commandString)
+			}
+		case string:
+			commandArray = append(commandArray, commands)
+		default:
+			return nil, fmt.Errorf("invalid command type")
+		}
+	}
+
+	return commandArray, nil
 }

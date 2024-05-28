@@ -254,9 +254,19 @@ func (b *DevcontainerBuilder) readConfiguration() error {
 		return err
 	}
 
-	b.postCreateCommands = append(b.postCreateCommands, root.MergedConfiguration.PostCreateCommands...)
+	postCreateCommands, err := devcontainer.ConvertCommands(root.MergedConfiguration.PostCreateCommands)
+	if err != nil {
+		projectLogger.Write([]byte(fmt.Sprintf("Error converting post create commands: %v\n", err)))
+	}
+
+	postStartCommands, err := devcontainer.ConvertCommands(root.MergedConfiguration.PostStartCommands)
+	if err != nil {
+		projectLogger.Write([]byte(fmt.Sprintf("Error converting post start commands: %v\n", err)))
+	}
+
+	b.postCreateCommands = append(b.postCreateCommands, postCreateCommands...)
 	b.postStartCommands = append(b.postStartCommands, root.MergedConfiguration.Entrypoints...)
-	b.postStartCommands = append(b.postStartCommands, root.MergedConfiguration.PostStartCommands...)
+	b.postStartCommands = append(b.postStartCommands, postStartCommands...)
 
 	return nil
 }
