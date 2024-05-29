@@ -133,6 +133,8 @@ func (s *GitProviderService) newGitProvider(config *gitprovider.GitProviderConfi
 		return gitprovider.NewGitLabGitProvider(config.Token, nil), nil
 	case "bitbucket":
 		return gitprovider.NewBitbucketGitProvider(config.Username, config.Token), nil
+	case "bitbucket-server":
+		return gitprovider.NewBitbucketServerGitProvider(config.Username, config.Token, config.BaseApiUrl), nil
 	case "gitlab-self-managed":
 		return gitprovider.NewGitLabGitProvider(config.Token, config.BaseApiUrl), nil
 	case "codeberg":
