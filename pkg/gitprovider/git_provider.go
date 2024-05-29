@@ -14,16 +14,15 @@ import (
 const personalNamespaceId = "<PERSONAL>"
 
 type StaticGitContext struct {
-	Id         string  `json:"id"`
-	Url        string  `json:"url"`
-	Name       string  `json:"name"`
-	Branch     *string `json:"branch,omitempty"`
-	Sha        *string `json:"sha,omitempty"`
-	Owner      string  `json:"owner"`
-	PrNumber   *uint32 `json:"prNumber,omitempty"`
-	Source     string  `json:"source"`
-	Path       *string `json:"path,omitempty"`
-	ProjectKey string  `json:"projectKey,omitempty"`
+	Id       string  `json:"id"`
+	Url      string  `json:"url"`
+	Name     string  `json:"name"`
+	Branch   *string `json:"branch,omitempty"`
+	Sha      *string `json:"sha,omitempty"`
+	Owner    string  `json:"owner"`
+	PrNumber *uint32 `json:"prNumber,omitempty"`
+	Source   string  `json:"source"`
+	Path     *string `json:"path,omitempty"`
 } // @name StaticGitContext
 
 type GitProvider interface {

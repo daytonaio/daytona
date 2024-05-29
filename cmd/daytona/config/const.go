@@ -69,7 +69,7 @@ func GetDocsLinkFromGitProvider(providerId string) string {
 	case "bitbucket":
 		return "https://support.atlassian.com/bitbucket-cloud/docs/create-an-app-password"
 	case "bitbucket-server":
-		return "https://confluence.atlassian.com/bitbucketserver/using-ssh-keys-to-secure-git-operations-776639772.html"
+		return "https://confluence.atlassian.com/bitbucketserver/http-access-tokens-939515499.html"
 	case "codeberg":
 		return "https://docs.codeberg.org/advanced/access-token/"
 	case "gitea":
