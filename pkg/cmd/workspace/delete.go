@@ -19,6 +19,7 @@ import (
 )
 
 var yesFlag bool
+var forceFlag bool
 
 var DeleteCmd = &cobra.Command{
 	Use:     "delete [WORKSPACE]",
@@ -101,9 +102,31 @@ var DeleteCmd = &cobra.Command{
 		}
 
 		if yesFlag {
-			err := removeWorkspace(ctx, apiClient, workspace)
-			if err != nil {
-				log.Fatal(err)
+			if !forceFlag {
+				form := huh.NewForm(
+					huh.NewGroup(
+						huh.NewConfirm().
+							Title(fmt.Sprintf("Delete workspace %s by force?", *workspace.Name)).
+							Description("Provider resources might not be removed.").
+							Value(&forceFlag),
+					),
+				).WithTheme(views.GetCustomTheme())
+
+				err := form.Run()
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				if forceFlag {
+					forceRemoveWorkspace(ctx, apiClient, workspace)
+				} else {
+					err := removeWorkspace(ctx, apiClient, workspace)
+					if err != nil {
+						log.Fatal(err)
+					}
+				}
+			} else {
+				forceRemoveWorkspace(ctx, apiClient, workspace)
 			}
 		} else {
 			fmt.Println("Operation canceled.")
@@ -121,6 +144,7 @@ var DeleteCmd = &cobra.Command{
 func init() {
 	DeleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Delete all workspaces")
 	DeleteCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Confirm deletion without prompt")
+	DeleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Delete a workspace by force")
 }
 
 func DeleteAllWorkspaces() error {
@@ -166,6 +190,17 @@ func removeWorkspace(ctx context.Context, apiClient *apiclient.APIClient, worksp
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	views.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully deleted", *workspace.Name))
+	return nil
+}
+
+func forceRemoveWorkspace(ctx context.Context, apiClient *apiclient.APIClient, workspace *apiclient.WorkspaceDTO) error {
+	apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
+
+	c, _ := config.GetConfig()
+	activeProfile, _ := c.GetActiveProfile()
+	config.RemoveWorkspaceSshEntries(activeProfile.Id, *workspace.Id)
 
 	views.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully deleted", *workspace.Name))
 	return nil
