@@ -13,6 +13,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/protocol/packp/capability"
+	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"gopkg.in/ini.v1"
 )
@@ -52,6 +54,15 @@ func (s *Service) CloneRepository(project *workspace.Project, auth *http.BasicAu
 
 	if s.LogWriter != nil {
 		cloneOptions.Progress = s.LogWriter
+	}
+
+	// Azure DevOps requires capabilities multi_ack / multi_ack_detailed,
+	// which are not fully implemented and by default are included in
+	// transport.UnsupportedCapabilities.
+	//
+	// This can be removed once go-git implements the git v2 protocol.
+	transport.UnsupportedCapabilities = []capability.Capability{
+		capability.ThinPack,
 	}
 
 	if s.shouldCloneBranch(project) {
