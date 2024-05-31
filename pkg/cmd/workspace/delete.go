@@ -107,7 +107,7 @@ var DeleteCmd = &cobra.Command{
 					huh.NewGroup(
 						huh.NewConfirm().
 							Title(fmt.Sprintf("Delete workspace %s by force?", *workspace.Name)).
-							Description("Provider resources might not be removed.").
+							Description("Provider resources might not be removed if you don't use this option").
 							Value(&forceFlag),
 					),
 				).WithTheme(views.GetCustomTheme())
