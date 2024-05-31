@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	bitbucket "github.com/ktrysmt/go-bitbucket"
+	"github.com/ktrysmt/go-bitbucket"
 )
 
 type BitbucketGitProvider struct {

@@ -6,6 +6,7 @@ package gitprovider
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -253,18 +254,18 @@ func (g *BitbucketServerGitProvider) GetUser() (*GitUser, error) {
 func (g *BitbucketServerGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (string, error) {
 	client := g.getApiClient()
 
-	branch := ""
-	if staticContext.Branch != nil {
-		branch = *staticContext.Branch
-	}
-
 	bitbucketDCClient, ok := client.(*bitbucketv1.APIClient)
 	if !ok {
 		return "", fmt.Errorf("Invalid Bitbucket Data Center/Server client")
 	}
 
-	commits, err := bitbucketDCClient.DefaultApi.GetCommits(staticContext.Id, staticContext.Id, map[string]interface{}{
-		"until": branch,
+	until := ""
+	if staticContext.Sha != nil {
+		until = *staticContext.Sha
+	}
+
+	commits, err := bitbucketDCClient.DefaultApi.GetCommits(staticContext.Id, staticContext.Name, map[string]interface{}{
+		"until": until,
 	})
 
 	if err != nil {
@@ -297,7 +298,7 @@ func (g *BitbucketServerGitProvider) getPrContext(staticContext *StaticGitContex
 		return nil, fmt.Errorf("Invalid Bitbucket Data Center/Server client")
 	}
 
-	pr, err := bitbucketDCClient.DefaultApi.GetPullRequest(staticContext.Id, staticContext.Id, int(*staticContext.PrNumber))
+	pr, err := bitbucketDCClient.DefaultApi.GetPullRequest(staticContext.Id, staticContext.Name, int(*staticContext.PrNumber))
 	if err != nil {
 		return nil, err
 	}
@@ -316,59 +317,61 @@ func (g *BitbucketServerGitProvider) getPrContext(staticContext *StaticGitContex
 }
 
 func (g *BitbucketServerGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
-	staticContext, err := g.AbstractGitProvider.parseStaticGitContext(repoUrl)
-	if err != nil {
-		return nil, err
+	var staticContext StaticGitContext
+
+	re := regexp.MustCompile(`(https?://[^/]+)/projects/([^/]+)/repos/([^/]+)(?:/([^/]+))?(?:/([^/]+))?`)
+	matches := re.FindStringSubmatch(repoUrl)
+
+	if len(matches) < 4 {
+		return nil, fmt.Errorf("Could not extract project key and repo name from URL: %s", repoUrl)
 	}
 
-	urlParts := strings.Split(repoUrl, "/")
-	if len(urlParts) < 5 {
-		return nil, fmt.Errorf("Invalid repository URL")
-	}
-
-	// Example URL: https://bitbucket.example.com/projects/<PROJECT_KEY>/repos/<REPO_NAME>
-	var projectKey string
-	for i, part := range urlParts {
-		if strings.ToLower(part) == "projects" && i+2 < len(urlParts) {
-			projectKey = urlParts[i+1]
-			break
-		}
-	}
-
-	if projectKey == "" {
-		return nil, fmt.Errorf("Could not extract project key from URL")
-	}
+	baseUrl := matches[1]
+	projectKey := matches[2]
+	repoName := matches[3]
+	// action is either 'pull-requests', 'browse', 'commits', 'branches'
+	action := matches[4]
+	// identifier is either pull request number or path or commit SHA
+	identifier := matches[5]
 
 	staticContext.Id = projectKey
+	staticContext.Name = repoName
+	// for simplicity, assigning owner as 'atlassian'
+	// else calling an api for fetching repo owner seems an overhead
+	// as there is no use of 'owner' field in any of the defined apis (as an arg) here
+	staticContext.Owner = "atlassian"
+	// For '.git' or repo clone over https format, refer https://community.atlassian.com/t5/Bitbucket-questions/Project-key-in-repositories-URL/qaq-p/578207
+	// and https://community.atlassian.com/t5/Bitbucket-questions/remote-url-in-Bitbucket-server-what-does-scm-represent-is-it/qaq-p/2060987
+	staticContext.Url = fmt.Sprintf("%s/scm/%s/%s.git", baseUrl, projectKey, repoName)
+	staticContext.Source = strings.TrimPrefix(baseUrl, "https://")
 
-	if staticContext.Path == nil {
-		return staticContext, nil
-	}
-
-	parts := strings.Split(*staticContext.Path, "/")
-
-	switch {
-	case len(parts) >= 2 && parts[0] == "pull-requests":
-		prNumber, _ := strconv.Atoi(parts[1])
-		prUint := uint32(prNumber)
-		staticContext.PrNumber = &prUint
-		staticContext.Path = nil
-	case len(parts) >= 1 && (parts[0] == "src" || parts[0] == "branch"):
-		staticContext.Branch = &parts[1]
-		if len(parts) > 2 {
-			path := strings.Join(parts[2:], "/")
-			staticContext.Path = &path
-		} else {
-			staticContext.Path = nil
+	switch action {
+	case "pull-requests":
+		if prNumber, err := strconv.Atoi(identifier); err == nil {
+			prUint := uint32(prNumber)
+			staticContext.PrNumber = &prUint
 		}
-	case len(parts) >= 3 && parts[0] == "commits" && parts[1] == "branch":
-		staticContext.Branch = &parts[2]
-		staticContext.Path = nil
-	case len(parts) >= 2 && parts[0] == "commits":
-		staticContext.Sha = &parts[1]
-		staticContext.Branch = staticContext.Sha
-		staticContext.Path = nil
+	case "browse":
+		if identifier != "" {
+			staticContext.Path = &identifier
+		}
+	case "commits":
+		if identifier != "" {
+			staticContext.Sha = &identifier
+		}
+	case "branches":
+		if identifier != "" {
+			staticContext.Branch = &identifier
+		}
+	default:
+		if strings.Contains(repoUrl, "commits?until=") {
+			parts := strings.Split(repoUrl, "commits?until=")
+			if len(parts) == 2 {
+				sha := parts[1]
+				staticContext.Sha = &sha
+			}
+		}
 	}
 
-	return staticContext, nil
+	return &staticContext, nil
 }
