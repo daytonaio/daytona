@@ -118,7 +118,7 @@ var DeleteCmd = &cobra.Command{
 				}
 
 				if forceFlag {
-					forceRemoveWorkspace(ctx, apiClient, workspace)
+					_ = forceRemoveWorkspace(ctx, apiClient, workspace)
 				} else {
 					err := removeWorkspace(ctx, apiClient, workspace)
 					if err != nil {
