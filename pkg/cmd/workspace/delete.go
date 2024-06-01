@@ -126,7 +126,7 @@ var DeleteCmd = &cobra.Command{
 					}
 				}
 			} else {
-				forceRemoveWorkspace(ctx, apiClient, workspace)
+				_ = forceRemoveWorkspace(ctx, apiClient, workspace)
 			}
 		} else {
 			fmt.Println("Operation canceled.")
