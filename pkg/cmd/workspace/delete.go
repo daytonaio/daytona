@@ -196,11 +196,11 @@ func removeWorkspace(ctx context.Context, apiClient *apiclient.APIClient, worksp
 }
 
 func forceRemoveWorkspace(ctx context.Context, apiClient *apiclient.APIClient, workspace *apiclient.WorkspaceDTO) error {
-	apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
+	_, _ = apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
 
 	c, _ := config.GetConfig()
 	activeProfile, _ := c.GetActiveProfile()
-	config.RemoveWorkspaceSshEntries(activeProfile.Id, *workspace.Id)
+	_ = config.RemoveWorkspaceSshEntries(activeProfile.Id, *workspace.Id)
 
 	views.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully deleted", *workspace.Name))
 	return nil
