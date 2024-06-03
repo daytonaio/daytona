@@ -29,6 +29,7 @@ require (
 	github.com/rs/zerolog v1.31.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/sirupsen/logrus v1.9.3
+	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0
 	github.com/swaggo/files v1.0.1
@@ -37,6 +38,7 @@ require (
 	golang.org/x/crypto v0.21.0
 	golang.org/x/mod v0.14.0
 	golang.org/x/oauth2 v0.17.0
+	golang.org/x/sync v0.6.0
 	golang.org/x/term v0.18.0
 	google.golang.org/grpc v1.63.0
 	google.golang.org/protobuf v1.33.0
@@ -199,7 +201,6 @@ require (
 	github.com/samber/lo v1.38.1 // indirect
 	github.com/sergi/go-diff v1.3.1 // indirect
 	github.com/skeema/knownhosts v1.2.1 // indirect
-	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
@@ -241,9 +242,7 @@ require (
 	go4.org/netipx v0.0.0-20230824141953-6213f710f925 // indirect
 	golang.org/x/arch v0.5.0 // indirect
 	golang.org/x/exp v0.0.0-20231127185646-65229373498e // indirect
-	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/tools v0.16.0 // indirect
-	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	golang.zx2c4.com/wintun v0.0.0-20230126152724-0fa3db229ce2 // indirect
 	golang.zx2c4.com/wireguard/windows v0.5.3 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
