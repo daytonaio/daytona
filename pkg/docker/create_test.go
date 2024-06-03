@@ -4,12 +4,15 @@
 package docker_test
 
 import (
+	"fmt"
+
 	t_docker "github.com/daytonaio/daytona/internal/testing/docker"
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/image"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/stretchr/testify/mock"
@@ -46,6 +49,13 @@ func (s *DockerClientTestSuite) TestCreateProject() {
 		&container.HostConfig{
 			Privileged:  true,
 			NetworkMode: container.NetworkMode(project1.WorkspaceId),
+			Mounts: []mount.Mount{
+				{
+					Type:   mount.TypeVolume,
+					Source: s.dockerClient.GetProjectVolumeName(project1),
+					Target: fmt.Sprintf("/home/%s/%s", project1.User, project1.Name),
+				},
+			},
 		},
 		networkingConfig,
 		platform,
