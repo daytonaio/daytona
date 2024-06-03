@@ -47,5 +47,10 @@ func (d *DockerClient) removeProjectContainer(project *workspace.Project) error 
 		return err
 	}
 
+	err = d.apiClient.VolumeRemove(ctx, d.GetProjectVolumeName(project), true)
+	if err != nil && !client.IsErrNotFound(err) {
+		return err
+	}
+
 	return nil
 }

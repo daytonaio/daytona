@@ -35,6 +35,8 @@ func (s *DockerClientTestSuite) TestDestroyProject() {
 		},
 	).Return(nil)
 
+	s.mockClient.On("VolumeRemove", mock.Anything, s.dockerClient.GetProjectVolumeName(project1), true).Return(nil)
+
 	err := s.dockerClient.DestroyProject(project1)
 	require.Nil(s.T(), err)
 }
