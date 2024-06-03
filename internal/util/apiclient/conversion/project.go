@@ -36,14 +36,15 @@ func ToProject(projectDTO *apiclient.Project) *workspace.Project {
 	}
 
 	project := &workspace.Project{
-		Name:              *projectDTO.Name,
-		Target:            *projectDTO.Target,
-		WorkspaceId:       *projectDTO.WorkspaceId,
-		Image:             *projectDTO.Image,
-		User:              *projectDTO.User,
-		PostStartCommands: projectDTO.PostStartCommands,
-		Repository:        repository,
-		State:             projectState,
+		Name:               *projectDTO.Name,
+		Target:             *projectDTO.Target,
+		WorkspaceId:        *projectDTO.WorkspaceId,
+		Image:              *projectDTO.Image,
+		User:               *projectDTO.User,
+		PostCreateCommands: projectDTO.PostCreateCommands,
+		PostStartCommands:  projectDTO.PostStartCommands,
+		Repository:         repository,
+		State:              projectState,
 	}
 
 	if projectDTO.Repository.PrNumber != nil {

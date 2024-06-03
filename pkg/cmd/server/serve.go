@@ -14,6 +14,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/apikey"
+	"github.com/daytonaio/daytona/pkg/builder"
 	"github.com/daytonaio/daytona/pkg/db"
 	"github.com/daytonaio/daytona/pkg/logger"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
@@ -25,6 +26,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/daytonaio/daytona/pkg/server/profiledata"
 	"github.com/daytonaio/daytona/pkg/server/providertargets"
+	"github.com/daytonaio/daytona/pkg/server/registry"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	started_view "github.com/daytonaio/daytona/pkg/views/server/started"
 
@@ -40,6 +42,11 @@ var ServeCmd = &cobra.Command{
 		if log.GetLevel() < log.InfoLevel {
 			//	for now, force the log level to info when running the server
 			log.SetLevel(log.InfoLevel)
+		}
+
+		configDir, err := server.GetConfigDir()
+		if err != nil {
+			log.Fatal(err)
 		}
 
 		c, err := server.GetConfig()
@@ -99,6 +106,12 @@ var ServeCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		//	todo: skip container registry option from config
+		localContainerRegistry := registry.NewLocalContainerRegistry(&registry.LocalContainerRegistryConfig{
+			DataPath: filepath.Join(configDir, "registry"),
+			Port:     c.RegistryPort,
+		})
+
 		containerRegistryService := containerregistries.NewContainerRegistryService(containerregistries.ContainerRegistryServiceConfig{
 			Store: containerRegistryStore,
 		})
@@ -121,6 +134,15 @@ var ServeCmd = &cobra.Command{
 				return headscaleServer.CreateAuthKey()
 			},
 		})
+		builderFactory := builder.NewBuilderFactory(builder.BuilderConfig{
+			ServerConfigFolder:              configDir,
+			LocalContainerRegistryServer:    util.GetFrpcRegistryDomain(c.Id, c.Frps.Domain),
+			BasePath:                        filepath.Join(configDir, "builds"),
+			LoggerFactory:                   loggerFactory,
+			DefaultProjectImage:             c.DefaultProjectImage,
+			DefaultProjectUser:              c.DefaultProjectUser,
+			DefaultProjectPostStartCommands: c.DefaultProjectPostStartCommands,
+		})
 		provisioner := provisioner.NewProvisioner(provisioner.ProvisionerConfig{
 			ProviderManager: providerManager,
 		})
@@ -132,6 +154,7 @@ var ServeCmd = &cobra.Command{
 			WorkspaceStore:                  workspaceStore,
 			TargetStore:                     providerTargetStore,
 			ApiKeyService:                   apiKeyService,
+			GitProviderService:              gitProviderService,
 			ContainerRegistryStore:          containerRegistryStore,
 			ServerApiUrl:                    util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 			ServerUrl:                       util.GetFrpcServerUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
@@ -140,9 +163,8 @@ var ServeCmd = &cobra.Command{
 			DefaultProjectPostStartCommands: c.DefaultProjectPostStartCommands,
 			Provisioner:                     provisioner,
 			LoggerFactory:                   loggerFactory,
-			GitProviderService:              gitProviderService,
+			BuilderFactory:                  builderFactory,
 		})
-
 		profileDataService := profiledata.NewProfileDataService(profiledata.ProfileDataServiceConfig{
 			ProfileDataStore: profileDataStore,
 		})
@@ -152,6 +174,7 @@ var ServeCmd = &cobra.Command{
 			TailscaleServer:          headscaleServer,
 			ProviderTargetService:    providerTargetService,
 			ContainerRegistryService: containerRegistryService,
+			LocalContainerRegistry:   localContainerRegistry,
 			ApiKeyService:            apiKeyService,
 			WorkspaceService:         workspaceService,
 			GitProviderService:       gitProviderService,

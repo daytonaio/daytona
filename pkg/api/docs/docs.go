@@ -1172,6 +1172,9 @@ const docTemplate = `{
                 "name"
             ],
             "properties": {
+                "build": {
+                    "$ref": "#/definitions/ProjectBuild"
+                },
                 "envVars": {
                     "type": "object",
                     "additionalProperties": {
@@ -1401,11 +1404,20 @@ const docTemplate = `{
         "Project": {
             "type": "object",
             "properties": {
+                "build": {
+                    "$ref": "#/definitions/ProjectBuild"
+                },
                 "image": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "postCreateCommands": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "postStartCommands": {
                     "type": "array",
@@ -1426,6 +1438,22 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "workspaceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProjectBuild": {
+            "type": "object",
+            "properties": {
+                "devcontainer": {
+                    "$ref": "#/definitions/ProjectBuildDevcontainer"
+                }
+            }
+        },
+        "ProjectBuildDevcontainer": {
+            "type": "object",
+            "properties": {
+                "devContainerFilePath": {
                     "type": "string"
                 }
             }
@@ -1531,6 +1559,9 @@ const docTemplate = `{
                 },
                 "providersDir": {
                     "type": "string"
+                },
+                "registryPort": {
+                    "type": "integer"
                 },
                 "registryUrl": {
                     "type": "string"

@@ -26,6 +26,7 @@ type CreateWorkspaceRequestProject struct {
 	Name              string                              `json:"name" validate:"required,gt=0"`
 	Image             *string                             `json:"image,omitempty"`
 	User              *string                             `json:"user,omitempty"`
+	Build             *workspace.ProjectBuild             `json:"build,omitempty"`
 	Source            CreateWorkspaceRequestProjectSource `json:"source"`
 	EnvVars           map[string]string                   `json:"envVars"`
 	PostStartCommands *[]string                           `json:"postStartCommands,omitempty"`

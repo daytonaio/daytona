@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **Id** | Pointer to **string** |  | [optional] 
 **LogFilePath** | Pointer to **string** |  | [optional] 
 **ProvidersDir** | Pointer to **string** |  | [optional] 
+**RegistryPort** | Pointer to **int32** |  | [optional] 
 **RegistryUrl** | Pointer to **string** |  | [optional] 
 **ServerDownloadUrl** | Pointer to **string** |  | [optional] 
 
@@ -285,6 +286,31 @@ SetProvidersDir sets ProvidersDir field to given value.
 `func (o *ServerConfig) HasProvidersDir() bool`
 
 HasProvidersDir returns a boolean if a field has been set.
+
+### GetRegistryPort
+
+`func (o *ServerConfig) GetRegistryPort() int32`
+
+GetRegistryPort returns the RegistryPort field if non-nil, zero value otherwise.
+
+### GetRegistryPortOk
+
+`func (o *ServerConfig) GetRegistryPortOk() (*int32, bool)`
+
+GetRegistryPortOk returns a tuple with the RegistryPort field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetRegistryPort
+
+`func (o *ServerConfig) SetRegistryPort(v int32)`
+
+SetRegistryPort sets RegistryPort field to given value.
+
+### HasRegistryPort
+
+`func (o *ServerConfig) HasRegistryPort() bool`
+
+HasRegistryPort returns a boolean if a field has been set.
 
 ### GetRegistryUrl
 

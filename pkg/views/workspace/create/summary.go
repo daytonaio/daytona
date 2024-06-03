@@ -63,9 +63,12 @@ func RunSubmissionForm(workspaceName *string, suggestedName string, workspaceNam
 		if (*projectList)[i].EnvVars == nil {
 			(*projectList)[i].EnvVars = &map[string]string{}
 		}
+		if (*projectList)[i].Build == nil {
+			(*projectList)[i].Build = &apiclient.ProjectBuild{}
+		}
 	}
 
-	configuredProjects, err := ConfigureProjects(*projectList)
+	configuredProjects, err := ConfigureProjects(*projectList, *apiServerConfig)
 	if err != nil {
 		return err
 	}

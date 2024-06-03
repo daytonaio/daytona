@@ -20,6 +20,7 @@ const defaultRegistryUrl = "https://download.daytona.io/daytona"
 const defaultServerDownloadUrl = "https://download.daytona.io/daytona/install.sh"
 const defaultHeadscalePort = 3987
 const defaultApiPort = 3986
+const defaultRegistryPort = 3988
 const defaultProjectImage = "daytonaio/workspace-project:latest"
 const defaultProjectUser = "daytona"
 
@@ -102,6 +103,7 @@ func getDefaultConfig() (*Config, error) {
 		ProvidersDir:                    providersDir,
 		ServerDownloadUrl:               defaultServerDownloadUrl,
 		ApiPort:                         defaultApiPort,
+		RegistryPort:                    defaultRegistryPort,
 		HeadscalePort:                   defaultHeadscalePort,
 		BinariesPath:                    binariesPath,
 		Frps:                            getDefaultFRPSConfig(),

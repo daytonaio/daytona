@@ -22,3 +22,11 @@ func GetFrpcServerUrl(protocol, serverId, frpsDomain string) string {
 func GetFrpcApiUrl(protocol, serverId, frpsDomain string) string {
 	return fmt.Sprintf("%s://%s", protocol, GetFrpcApiDomain(serverId, frpsDomain))
 }
+
+func GetFrpcRegistryDomain(serverId, frpsDomain string) string {
+	return fmt.Sprintf("registry-%s", GetFrpcServerDomain(serverId, frpsDomain))
+}
+
+func GetFrpcRegistryUrl(protocol, serverId, frpsDomain string) string {
+	return fmt.Sprintf("%s://%s", protocol, GetFrpcRegistryDomain(serverId, frpsDomain))
+}

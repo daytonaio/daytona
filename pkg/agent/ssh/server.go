@@ -239,20 +239,20 @@ func (s *Server) getShell() string {
 		return "sh"
 	}
 
-	if strings.Contains(string(out), "/bin/bash") {
-		return "/bin/bash"
-	}
-
-	if strings.Contains(string(out), "/usr/bin/bash") {
-		return "/usr/bin/bash"
+	if strings.Contains(string(out), "/usr/bin/zsh") {
+		return "/usr/bin/zsh"
 	}
 
 	if strings.Contains(string(out), "/bin/zsh") {
 		return "/bin/zsh"
 	}
 
-	if strings.Contains(string(out), "/usr/bin/zsh") {
-		return "/usr/bin/zsh"
+	if strings.Contains(string(out), "/usr/bin/bash") {
+		return "/usr/bin/bash"
+	}
+
+	if strings.Contains(string(out), "/bin/bash") {
+		return "/bin/bash"
 	}
 
 	shellEnv, shellSet := os.LookupEnv("SHELL")
