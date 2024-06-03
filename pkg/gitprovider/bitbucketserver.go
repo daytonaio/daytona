@@ -336,10 +336,7 @@ func (g *BitbucketServerGitProvider) parseStaticGitContext(repoUrl string) (*Sta
 
 	staticContext.Id = projectKey
 	staticContext.Name = repoName
-	// for simplicity, assigning owner as 'atlassian'
-	// else calling an api for fetching repo owner seems an overhead
-	// as there is no use of 'owner' field in any of the defined apis (as an arg) here
-	staticContext.Owner = "atlassian"
+	staticContext.Owner = projectKey
 	// For '.git' or repo clone over https format, refer https://community.atlassian.com/t5/Bitbucket-questions/Project-key-in-repositories-URL/qaq-p/578207
 	// and https://community.atlassian.com/t5/Bitbucket-questions/remote-url-in-Bitbucket-server-what-does-scm-represent-is-it/qaq-p/2060987
 	staticContext.Url = fmt.Sprintf("%s/scm/%s/%s.git", baseUrl, projectKey, repoName)

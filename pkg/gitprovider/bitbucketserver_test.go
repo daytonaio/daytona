@@ -27,7 +27,7 @@ func (b *BitbucketServerGitProviderTestSuite) TestParseStaticGitContext_PR() {
 	prContext := &StaticGitContext{
 		Id:       "PROJECT_KEY",
 		Name:     "REPO_NAME",
-		Owner:    "atlassian",
+		Owner:    "PROJECT_KEY",
 		Url:      "https://bitbucket.example.com/scm/PROJECT_KEY/REPO_NAME.git",
 		Source:   "bitbucket.example.com",
 		Branch:   nil,
@@ -49,7 +49,7 @@ func (b *BitbucketServerGitProviderTestSuite) TestParseStaticGitContext_Blob() {
 	blobContext := &StaticGitContext{
 		Id:       "PROJECT_KEY",
 		Name:     "REPO_NAME",
-		Owner:    "atlassian",
+		Owner:    "PROJECT_KEY",
 		Url:      "https://bitbucket.example.com/scm/PROJECT_KEY/REPO_NAME.git",
 		Source:   "bitbucket.example.com",
 		Branch:   nil,
@@ -71,7 +71,7 @@ func (b *BitbucketServerGitProviderTestSuite) TestParseStaticGitContext_Branch()
 	branchContext := &StaticGitContext{
 		Id:       "PROJECT_KEY",
 		Name:     "REPO_NAME",
-		Owner:    "atlassian",
+		Owner:    "PROJECT_KEY",
 		Url:      "https://bitbucket.example.com/scm/PROJECT_KEY/REPO_NAME.git",
 		Source:   "bitbucket.example.com",
 		Branch:   &[]string{"master"}[0],
@@ -93,7 +93,7 @@ func (b *BitbucketServerGitProviderTestSuite) TestParseStaticGitContext_Commits(
 	commitsContext := &StaticGitContext{
 		Id:       "PROJECT_KEY",
 		Name:     "REPO_NAME",
-		Owner:    "atlassian",
+		Owner:    "PROJECT_KEY",
 		Url:      "https://bitbucket.example.com/scm/PROJECT_KEY/REPO_NAME.git",
 		Source:   "bitbucket.example.com",
 		Branch:   nil,
@@ -115,7 +115,7 @@ func (b *BitbucketServerGitProviderTestSuite) TestParseStaticGitContext_Commit()
 	commitContext := &StaticGitContext{
 		Id:       "PROJECT_KEY",
 		Name:     "REPO_NAME",
-		Owner:    "atlassian",
+		Owner:    "PROJECT_KEY",
 		Url:      "https://bitbucket.example.com/scm/PROJECT_KEY/REPO_NAME.git",
 		Source:   "bitbucket.example.com",
 		Branch:   nil,
