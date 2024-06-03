@@ -293,7 +293,7 @@ func (b *DevcontainerBuilder) startContainer() error {
 	//	todo: mount folders
 	_, err = cli.ContainerCreate(ctx, &container.Config{
 		Image:      "daytonaio/workspace-project",
-		Entrypoint: []string{"dockerd", "-H", fmt.Sprintf("tcp://0.0.0.0:%d", b.builderDockerPort), "-H", "unix:///var/run/docker.sock", "--insecure-registry", b.localContainerRegistryServer},
+		Entrypoint: []string{"sudo", "dockerd", "-H", fmt.Sprintf("tcp://0.0.0.0:%d", b.builderDockerPort), "-H", "unix:///var/run/docker.sock", "--insecure-registry", b.localContainerRegistryServer},
 		ExposedPorts: nat.PortSet{
 			nat.Port(fmt.Sprintf("%d/tcp", b.builderDockerPort)): {},
 		},
