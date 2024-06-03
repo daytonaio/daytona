@@ -23,7 +23,7 @@ type IBuilderFactory interface {
 }
 
 type BuilderFactory struct {
-	daytonaServerConfigFolder       string
+	serverConfigFolder              string
 	localContainerRegistryServer    string
 	basePath                        string
 	loggerFactory                   logger.LoggerFactory
@@ -34,7 +34,7 @@ type BuilderFactory struct {
 
 func NewBuilderFactory(config BuilderConfig) IBuilderFactory {
 	return &BuilderFactory{
-		daytonaServerConfigFolder:       config.DaytonaServerConfigFolder,
+		serverConfigFolder:              config.ServerConfigFolder,
 		localContainerRegistryServer:    config.LocalContainerRegistryServer,
 		basePath:                        config.BasePath,
 		loggerFactory:                   config.LoggerFactory,
@@ -108,7 +108,7 @@ func (f *BuilderFactory) Create(p workspace.Project, gpc *gitprovider.GitProvide
 				gitProviderConfig:               gpc,
 				hash:                            hash,
 				projectVolumePath:               projectDir,
-				daytonaServerConfigFolder:       f.daytonaServerConfigFolder,
+				serverConfigFolder:              f.serverConfigFolder,
 				localContainerRegistryServer:    f.localContainerRegistryServer,
 				basePath:                        f.basePath,
 				loggerFactory:                   f.loggerFactory,
@@ -129,7 +129,7 @@ func (f *BuilderFactory) CheckExistingBuild(p workspace.Project) (*BuildResult, 
 		return nil, err
 	}
 
-	filePath := filepath.Join(f.daytonaServerConfigFolder, "builds", hash, "build.json")
+	filePath := filepath.Join(f.serverConfigFolder, "builds", hash, "build.json")
 
 	_, err = os.Stat(filePath)
 	if err != nil {

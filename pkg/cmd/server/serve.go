@@ -135,7 +135,7 @@ var ServeCmd = &cobra.Command{
 			},
 		})
 		builderFactory := builder.NewBuilderFactory(builder.BuilderConfig{
-			DaytonaServerConfigFolder:       configDir,
+			ServerConfigFolder:              configDir,
 			LocalContainerRegistryServer:    util.GetFrpcRegistryDomain(c.Id, c.Frps.Domain),
 			BasePath:                        filepath.Join(configDir, "builds"),
 			LoggerFactory:                   loggerFactory,

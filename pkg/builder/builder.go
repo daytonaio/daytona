@@ -22,7 +22,7 @@ type BuildResult struct {
 }
 
 type BuilderConfig struct {
-	DaytonaServerConfigFolder       string
+	ServerConfigFolder              string
 	LocalContainerRegistryServer    string
 	BasePath                        string
 	LoggerFactory                   logger.LoggerFactory
@@ -45,7 +45,7 @@ type Builder struct {
 	hash              string
 	projectVolumePath string
 
-	daytonaServerConfigFolder       string
+	serverConfigFolder              string
 	localContainerRegistryServer    string
 	basePath                        string
 	loggerFactory                   logger.LoggerFactory
@@ -55,12 +55,12 @@ type Builder struct {
 }
 
 func (b *Builder) SaveBuildResults(r BuildResult) error {
-	err := os.MkdirAll(filepath.Join(b.daytonaServerConfigFolder, "builds", b.hash), 0755)
+	err := os.MkdirAll(filepath.Join(b.serverConfigFolder, "builds", b.hash), 0755)
 	if err != nil {
 		return err
 	}
 
-	file, err := os.Create(filepath.Join(b.daytonaServerConfigFolder, "builds", b.hash, "build.json"))
+	file, err := os.Create(filepath.Join(b.serverConfigFolder, "builds", b.hash, "build.json"))
 	if err != nil {
 		return err
 	}
