@@ -4,19 +4,14 @@
 package ports
 
 import (
-	"context"
 	"errors"
 	"fmt"
-	"io"
 	"net"
 	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/daytonaio/daytona/internal/cmd/tailscale"
-	"github.com/daytonaio/daytona/pkg/workspace"
 	log "github.com/sirupsen/logrus"
-	"tailscale.com/tsnet"
 )
 
 func GetAvailableEphemeralPort() (uint16, error) {
@@ -55,71 +50,4 @@ func IsPortReady(port uint16) bool {
 	}
 	defer response.Body.Close()
 	return response.StatusCode == http.StatusOK
-}
-
-func ForwardPort(workspaceId, projectName string, targetPort uint16) (*uint16, chan error) {
-	hostPort := targetPort
-	errChan := make(chan error)
-	var err error
-	if !IsPortAvailable(targetPort) {
-		hostPort, err = GetAvailableEphemeralPort()
-		if err != nil {
-			errChan <- err
-			return nil, errChan
-		}
-	}
-
-	tsConn, err := tailscale.GetConnection(nil)
-	if err != nil {
-		errChan <- err
-		return nil, errChan
-	}
-
-	netListener, err := net.Listen("tcp", fmt.Sprintf(":%d", hostPort))
-	if err != nil {
-		errChan <- err
-		return nil, errChan
-	}
-
-	go func() {
-		for {
-			conn, err := netListener.Accept()
-			if err != nil {
-				errChan <- err
-				return
-			}
-
-			targetUrl := fmt.Sprintf("%s:%d", workspace.GetProjectHostname(workspaceId, projectName), targetPort)
-
-			go handlePortConnection(conn, tsConn, targetUrl, errChan)
-		}
-	}()
-
-	return &hostPort, errChan
-}
-
-func handlePortConnection(conn net.Conn, tsConn *tsnet.Server, targetUrl string, errChan chan error) {
-	dialConn, err := tsConn.Dial(context.Background(), "tcp", targetUrl)
-	if err != nil {
-		errChan <- err
-		return
-	}
-
-	go func() {
-		_, err := io.Copy(conn, dialConn)
-		if err != nil {
-			errChan <- err
-		}
-		conn.Close()
-		dialConn.Close()
-	}()
-
-	go func() {
-		_, err := io.Copy(dialConn, conn)
-		if err != nil {
-			errChan <- err
-		}
-		conn.Close()
-		dialConn.Close()
-	}()
 }

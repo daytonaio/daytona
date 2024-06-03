@@ -29,6 +29,8 @@ type IDockerClient interface {
 	GetProjectVolumeName(project *workspace.Project) string
 	ExecSync(containerID string, config types.ExecConfig, outputWriter io.Writer) (*ExecResult, error)
 	GetContainerLogs(containerName string, logWriter io.Writer) error
+	PullImage(imageName string, cr *containerregistry.ContainerRegistry, logWriter io.Writer) error
+	PushImage(imageName string, cr *containerregistry.ContainerRegistry, logWriter io.Writer) error
 }
 
 type DockerClientConfig struct {

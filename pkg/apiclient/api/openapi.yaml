@@ -829,6 +829,9 @@ components:
           postStartCommands:
           - postStartCommands
           - postStartCommands
+          build:
+            devcontainer:
+              devContainerFilePath: devContainerFilePath
           envVars:
             key: envVars
           name: name
@@ -848,6 +851,9 @@ components:
           postStartCommands:
           - postStartCommands
           - postStartCommands
+          build:
+            devcontainer:
+              devContainerFilePath: devContainerFilePath
           envVars:
             key: envVars
           name: name
@@ -886,6 +892,9 @@ components:
         postStartCommands:
         - postStartCommands
         - postStartCommands
+        build:
+          devcontainer:
+            devContainerFilePath: devContainerFilePath
         envVars:
           key: envVars
         name: name
@@ -902,6 +911,8 @@ components:
             url: url
         user: user
       properties:
+        build:
+          $ref: '#/components/schemas/ProjectBuild'
         envVars:
           additionalProperties:
             type: string
@@ -1127,9 +1138,15 @@ components:
     Project:
       example:
         image: image
+        postCreateCommands:
+        - postCreateCommands
+        - postCreateCommands
         postStartCommands:
         - postStartCommands
         - postStartCommands
+        build:
+          devcontainer:
+            devContainerFilePath: devContainerFilePath
         name: name
         state:
           gitStatus:
@@ -1159,10 +1176,16 @@ components:
         target: target
         workspaceId: workspaceId
       properties:
+        build:
+          $ref: '#/components/schemas/ProjectBuild'
         image:
           type: string
         name:
           type: string
+        postCreateCommands:
+          items:
+            type: string
+          type: array
         postStartCommands:
           items:
             type: string
@@ -1176,6 +1199,21 @@ components:
         user:
           type: string
         workspaceId:
+          type: string
+      type: object
+    ProjectBuild:
+      example:
+        devcontainer:
+          devContainerFilePath: devContainerFilePath
+      properties:
+        devcontainer:
+          $ref: '#/components/schemas/ProjectBuildDevcontainer'
+      type: object
+    ProjectBuildDevcontainer:
+      example:
+        devContainerFilePath: devContainerFilePath
+      properties:
+        devContainerFilePath:
           type: string
       type: object
     ProjectInfo:
@@ -1253,18 +1291,19 @@ components:
     ServerConfig:
       example:
         registryUrl: registryUrl
+        defaultProjectUser: defaultProjectUser
+        defaultProjectPostStartCommands:
+        - defaultProjectPostStartCommands
+        - defaultProjectPostStartCommands
         apiPort: 0
         headscalePort: 1
         serverDownloadUrl: serverDownloadUrl
         binariesPath: binariesPath
         logFilePath: logFilePath
         defaultProjectImage: defaultProjectImage
-        defaultProjectUser: defaultProjectUser
         providersDir: providersDir
         id: id
-        defaultProjectPostStartCommands:
-        - defaultProjectPostStartCommands
-        - defaultProjectPostStartCommands
+        registryPort: 5
         frps:
           protocol: protocol
           port: 6
@@ -1292,6 +1331,8 @@ components:
           type: string
         providersDir:
           type: string
+        registryPort:
+          type: integer
         registryUrl:
           type: string
         serverDownloadUrl:
@@ -1341,9 +1382,15 @@ components:
       example:
         projects:
         - image: image
+          postCreateCommands:
+          - postCreateCommands
+          - postCreateCommands
           postStartCommands:
           - postStartCommands
           - postStartCommands
+          build:
+            devcontainer:
+              devContainerFilePath: devContainerFilePath
           name: name
           state:
             gitStatus:
@@ -1373,9 +1420,15 @@ components:
           target: target
           workspaceId: workspaceId
         - image: image
+          postCreateCommands:
+          - postCreateCommands
+          - postCreateCommands
           postStartCommands:
           - postStartCommands
           - postStartCommands
+          build:
+            devcontainer:
+              devContainerFilePath: devContainerFilePath
           name: name
           state:
             gitStatus:
@@ -1423,9 +1476,15 @@ components:
       example:
         projects:
         - image: image
+          postCreateCommands:
+          - postCreateCommands
+          - postCreateCommands
           postStartCommands:
           - postStartCommands
           - postStartCommands
+          build:
+            devcontainer:
+              devContainerFilePath: devContainerFilePath
           name: name
           state:
             gitStatus:
@@ -1455,9 +1514,15 @@ components:
           target: target
           workspaceId: workspaceId
         - image: image
+          postCreateCommands:
+          - postCreateCommands
+          - postCreateCommands
           postStartCommands:
           - postStartCommands
           - postStartCommands
+          build:
+            devcontainer:
+              devContainerFilePath: devContainerFilePath
           name: name
           state:
             gitStatus:

@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/cmd/tailscale"
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
@@ -269,6 +270,7 @@ func processCmdArguments(args []string, apiClient *apiclient.APIClient, projects
 		Source: &apiclient.CreateWorkspaceRequestProjectSource{
 			Repository: repoResponse,
 		},
+		Build: &apiclient.ProjectBuild{},
 	}
 
 	*projects = append(*projects, *project)
@@ -319,28 +321,6 @@ func readWorkspaceLogs(activeProfile config.Profile, workspaceId string, project
 	wg.Wait()
 }
 
-func splitWithDelimiter(s string, delimiter byte) []string {
-	var parts []string
-	var buffer []byte
-
-	for i := 0; i < len(s); i++ {
-		if s[i] == delimiter {
-			parts = append(parts, string(buffer))
-			buffer = nil
-			parts = append(parts, string(delimiter))
-		} else {
-			buffer = append(buffer, s[i])
-		}
-	}
-
-	// Add the remaining characters in the buffer
-	if len(buffer) > 0 {
-		parts = append(parts, string(buffer))
-	}
-
-	return parts
-}
-
 func waitForDial(tsConn *tsnet.Server, workspaceId string, projectName string, dialStartTime time.Time, dialTimeout time.Duration) error {
 	for {
 		if time.Since(dialStartTime) > dialTimeout {
@@ -359,6 +339,12 @@ func waitForDial(tsConn *tsnet.Server, workspaceId string, projectName string, d
 }
 
 func readLog(ws *websocket.Conn, stopLogs *bool) {
+	if internal.Version == "v0.0.0-dev" {
+		err := ws.SetReadDeadline(time.Time{})
+		if err != nil {
+			panic(err)
+		}
+	}
 	for {
 		_, msg, err := ws.ReadMessage()
 		if err != nil {
@@ -369,15 +355,7 @@ func readLog(ws *websocket.Conn, stopLogs *bool) {
 			return
 		}
 
-		delimiter := byte('\r')
-		messages := splitWithDelimiter(string(msg), delimiter)
-
-		for _, message := range messages {
-			fmt.Print(message)
-		}
-		if len(messages) != 0 {
-			fmt.Print("\n")
-		}
+		fmt.Print(string(msg))
 
 		if *stopLogs {
 			return

@@ -29,6 +29,7 @@ type ServerInstanceConfig struct {
 	TailscaleServer          TailscaleServer
 	ProviderTargetService    providertargets.IProviderTargetService
 	ContainerRegistryService containerregistries.IContainerRegistryService
+	LocalContainerRegistry   ILocalContainerRegistry
 	WorkspaceService         workspaces.IWorkspaceService
 	ApiKeyService            apikeys.IApiKeyService
 	GitProviderService       gitproviders.IGitProviderService
@@ -52,6 +53,7 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 			TailscaleServer:          serverConfig.TailscaleServer,
 			ProviderTargetService:    serverConfig.ProviderTargetService,
 			ContainerRegistryService: serverConfig.ContainerRegistryService,
+			LocalContainerRegistry:   serverConfig.LocalContainerRegistry,
 			WorkspaceService:         serverConfig.WorkspaceService,
 			ApiKeyService:            serverConfig.ApiKeyService,
 			GitProviderService:       serverConfig.GitProviderService,
@@ -66,8 +68,9 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 type Server struct {
 	config                   Config
 	TailscaleServer          TailscaleServer
-	ContainerRegistryService containerregistries.IContainerRegistryService
 	ProviderTargetService    providertargets.IProviderTargetService
+	ContainerRegistryService containerregistries.IContainerRegistryService
+	LocalContainerRegistry   ILocalContainerRegistry
 	WorkspaceService         workspaces.IWorkspaceService
 	ApiKeyService            apikeys.IApiKeyService
 	GitProviderService       gitproviders.IGitProviderService
@@ -94,6 +97,13 @@ func (s *Server) Start(errCh chan error) error {
 		return err
 	}
 
+	//	todo: from config - allow to skip
+	log.Info("Starting local container registry")
+	err = s.LocalContainerRegistry.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	go func() {
 		err := headscaleFrpcService.Run(context.Background())
 		if err != nil {
@@ -114,6 +124,23 @@ func (s *Server) Start(errCh chan error) error {
 
 	go func() {
 		err := apiFrpcService.Run(context.Background())
+		if err != nil {
+			errCh <- err
+		}
+	}()
+
+	_, registryFrpcService, err := frpc.GetService(frpc.FrpcConnectParams{
+		ServerDomain: s.config.Frps.Domain,
+		ServerPort:   int(s.config.Frps.Port),
+		Name:         fmt.Sprintf("daytona-server-registry-%s", s.config.Id),
+		Port:         int(s.config.RegistryPort),
+		SubDomain:    fmt.Sprintf("registry-%s", s.config.Id),
+	})
+	if err != nil {
+		return err
+	}
+	go func() {
+		err := registryFrpcService.Run(context.Background())
 		if err != nil {
 			errCh <- err
 		}
