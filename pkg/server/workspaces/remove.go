@@ -70,3 +70,32 @@ func (s *WorkspaceService) RemoveWorkspace(workspaceId string) error {
 	log.Infof("Workspace %s destroyed", workspace.Id)
 	return nil
 }
+
+func (s *WorkspaceService) ForceRemoveWorkspace(workspaceId string) error {
+	// This version of RemoveWorkspace ignores provider errors and continues with the deletion
+
+	workspace, err := s.workspaceStore.Find(workspaceId)
+	if err != nil {
+		return ErrWorkspaceNotFound
+	}
+
+	target, _ := s.targetStore.Find(workspace.Target)
+
+	for _, project := range workspace.Projects {
+		_ = s.provisioner.DestroyProject(project, target)
+	}
+
+	_ = s.provisioner.DestroyWorkspace(workspace, target)
+	_ = s.apiKeyService.Revoke(workspace.Id)
+
+	for _, project := range workspace.Projects {
+		_ = s.apiKeyService.Revoke(fmt.Sprintf("%s/%s", workspace.Id, project.Name))
+
+		projectLogger := s.loggerFactory.CreateProjectLogger(workspace.Id, project.Name)
+		_ = projectLogger.Cleanup()
+	}
+
+	_ = s.workspaceStore.Delete(workspace)
+
+	return nil
+}

@@ -25,6 +25,7 @@ type IWorkspaceService interface {
 	GetProjectLogReader(workspaceId, projectName string) (io.Reader, error)
 	ListWorkspaces(verbose bool) ([]dto.WorkspaceDTO, error)
 	RemoveWorkspace(workspaceId string) error
+	ForceRemoveWorkspace(workspaceId string) error
 	SetProjectState(workspaceId string, projectName string, state *workspace.ProjectState) (*workspace.Workspace, error)
 	StartProject(workspaceId string, projectName string) error
 	StartWorkspace(workspaceId string) error

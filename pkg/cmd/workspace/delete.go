@@ -11,6 +11,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
@@ -118,7 +119,7 @@ var DeleteCmd = &cobra.Command{
 				}
 
 				if forceFlag {
-					_ = forceRemoveWorkspace(ctx, apiClient, workspace)
+					_ = forceRemoveWorkspace(workspace)
 				} else {
 					err := removeWorkspace(ctx, apiClient, workspace)
 					if err != nil {
@@ -126,7 +127,7 @@ var DeleteCmd = &cobra.Command{
 					}
 				}
 			} else {
-				_ = forceRemoveWorkspace(ctx, apiClient, workspace)
+				_ = forceRemoveWorkspace(workspace)
 			}
 		} else {
 			fmt.Println("Operation canceled.")
@@ -195,13 +196,9 @@ func removeWorkspace(ctx context.Context, apiClient *apiclient.APIClient, worksp
 	return nil
 }
 
-func forceRemoveWorkspace(ctx context.Context, apiClient *apiclient.APIClient, workspace *apiclient.WorkspaceDTO) error {
-	_, _ = apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
+func forceRemoveWorkspace(workspace *apiclient.WorkspaceDTO) error {
+	server := server.GetInstance(nil)
+	_ = server.WorkspaceService.ForceRemoveWorkspace(*workspace.Id)
 
-	c, _ := config.GetConfig()
-	activeProfile, _ := c.GetActiveProfile()
-	_ = config.RemoveWorkspaceSshEntries(activeProfile.Id, *workspace.Id)
-
-	views.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully deleted", *workspace.Name))
 	return nil
 }
