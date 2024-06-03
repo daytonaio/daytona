@@ -4,6 +4,9 @@
 package workspace
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -11,17 +14,38 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 )
 
+type ProjectBuildDevcontainer struct {
+	DevContainerFilePath string `json:"devContainerFilePath"`
+} // @name ProjectBuildDevcontainer
+
+/*
+type ProjectBuildDockerfile struct {
+	Context    string            `json:"context"`
+	Dockerfile string            `json:"dockerfile"`
+	Args       map[string]string `json:"args"`
+} // @name ProjectBuildDockerfile
+*/
+
+type ProjectBuild struct {
+	Devcontainer *ProjectBuildDevcontainer `json:"devcontainer"`
+	/*
+		Dockerfile   *ProjectBuildDockerfile   `json:"dockerfile"`
+	*/
+} // @name ProjectBuild
+
 type Project struct {
-	Name              string                     `json:"name"`
-	Image             string                     `json:"image"`
-	User              string                     `json:"user"`
-	Repository        *gitprovider.GitRepository `json:"repository"`
-	WorkspaceId       string                     `json:"workspaceId"`
-	ApiKey            string                     `json:"-"`
-	Target            string                     `json:"target"`
-	EnvVars           map[string]string          `json:"-"`
-	State             *ProjectState              `json:"state,omitempty"`
-	PostStartCommands []string                   `json:"postStartCommands,omitempty"`
+	Name               string                     `json:"name"`
+	Image              string                     `json:"image"`
+	User               string                     `json:"user"`
+	Build              *ProjectBuild              `json:"build"`
+	Repository         *gitprovider.GitRepository `json:"repository"`
+	WorkspaceId        string                     `json:"workspaceId"`
+	ApiKey             string                     `json:"-"`
+	Target             string                     `json:"target"`
+	EnvVars            map[string]string          `json:"-"`
+	State              *ProjectState              `json:"state,omitempty"`
+	PostCreateCommands []string                   `json:"postCreateCommands,omitempty"`
+	PostStartCommands  []string                   `json:"postStartCommands,omitempty"`
 } // @name Project
 
 type ProjectInfo struct {
@@ -98,4 +122,25 @@ func GetProjectHostname(workspaceId string, projectName string) string {
 	}
 
 	return hostname
+}
+
+// GetConfigHash returns a SHA-256 hash of the project's build configuration, repository URL, and environment variables.
+func (p *Project) GetConfigHash() (string, error) {
+	buildJson, err := json.Marshal(p.Build)
+	if err != nil {
+		return "", err
+	}
+
+	//	todo: atm env vars contain workspace env provided by the server
+	//		  this causes each workspace to have a different hash
+	// envVarsJson, err := json.Marshal(p.EnvVars)
+	// if err != nil {
+	// 	return "", err
+	// }
+
+	data := string(buildJson) + p.Repository.Sha /* + string(envVarsJson)*/
+	hash := sha256.Sum256([]byte(data))
+	hashStr := hex.EncodeToString(hash[:])
+
+	return hashStr, nil
 }

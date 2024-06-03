@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/daytonaio/daytona/internal/cmd/tailscale"
 	defaultPortForwardCmd "github.com/daytonaio/daytona/pkg/cmd/ports"
-	"github.com/daytonaio/daytona/pkg/ports"
 	"github.com/daytonaio/daytona/pkg/views"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -26,7 +26,7 @@ var portForwardCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		hostPort, errChan := ports.ForwardPort(workspaceId, projectName, uint16(port))
+		hostPort, errChan := tailscale.ForwardPort(workspaceId, projectName, uint16(port))
 
 		if hostPort == nil {
 			if err = <-errChan; err != nil {

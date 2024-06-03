@@ -95,6 +95,8 @@ func TestWorkspaceService(t *testing.T) {
 
 	logsDir := t.TempDir()
 
+	mockBuilderFactory := &mocks.MockBuilderFactory{}
+
 	service := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
 		WorkspaceStore:                  workspaceStore,
 		TargetStore:                     targetStore,
@@ -108,6 +110,7 @@ func TestWorkspaceService(t *testing.T) {
 		Provisioner:                     provisioner,
 		LoggerFactory:                   logger.NewLoggerFactory(logsDir),
 		GitProviderService:              gitProviderService,
+		BuilderFactory:                  mockBuilderFactory,
 	})
 
 	t.Run("CreateWorkspace", func(t *testing.T) {
@@ -124,6 +127,16 @@ func TestWorkspaceService(t *testing.T) {
 		}
 		provisioner.On("CreateProject", mock.Anything, &target, containerRegistry).Return(nil)
 		provisioner.On("StartProject", mock.Anything, &target).Return(nil)
+
+		baseApiUrl := "https://api.github.com"
+		gitProviderConfig := gitprovider.GitProviderConfig{
+			Id:         "github",
+			Username:   "test-username",
+			Token:      "test-token",
+			BaseApiUrl: &baseApiUrl,
+		}
+
+		gitProviderService.On("GetConfigForUrl", "https://github.com/daytonaio/daytona").Return(&gitProviderConfig, nil)
 
 		workspace, err := service.CreateWorkspace(createWorkspaceRequest)
 

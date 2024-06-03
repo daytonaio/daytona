@@ -19,14 +19,16 @@ var _ MappedNullable = &Project{}
 
 // Project struct for Project
 type Project struct {
-	Image             *string        `json:"image,omitempty"`
-	Name              *string        `json:"name,omitempty"`
-	PostStartCommands []string       `json:"postStartCommands,omitempty"`
-	Repository        *GitRepository `json:"repository,omitempty"`
-	State             *ProjectState  `json:"state,omitempty"`
-	Target            *string        `json:"target,omitempty"`
-	User              *string        `json:"user,omitempty"`
-	WorkspaceId       *string        `json:"workspaceId,omitempty"`
+	Build              *ProjectBuild  `json:"build,omitempty"`
+	Image              *string        `json:"image,omitempty"`
+	Name               *string        `json:"name,omitempty"`
+	PostCreateCommands []string       `json:"postCreateCommands,omitempty"`
+	PostStartCommands  []string       `json:"postStartCommands,omitempty"`
+	Repository         *GitRepository `json:"repository,omitempty"`
+	State              *ProjectState  `json:"state,omitempty"`
+	Target             *string        `json:"target,omitempty"`
+	User               *string        `json:"user,omitempty"`
+	WorkspaceId        *string        `json:"workspaceId,omitempty"`
 }
 
 // NewProject instantiates a new Project object
@@ -44,6 +46,38 @@ func NewProject() *Project {
 func NewProjectWithDefaults() *Project {
 	this := Project{}
 	return &this
+}
+
+// GetBuild returns the Build field value if set, zero value otherwise.
+func (o *Project) GetBuild() ProjectBuild {
+	if o == nil || IsNil(o.Build) {
+		var ret ProjectBuild
+		return ret
+	}
+	return *o.Build
+}
+
+// GetBuildOk returns a tuple with the Build field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Project) GetBuildOk() (*ProjectBuild, bool) {
+	if o == nil || IsNil(o.Build) {
+		return nil, false
+	}
+	return o.Build, true
+}
+
+// HasBuild returns a boolean if a field has been set.
+func (o *Project) HasBuild() bool {
+	if o != nil && !IsNil(o.Build) {
+		return true
+	}
+
+	return false
+}
+
+// SetBuild gets a reference to the given ProjectBuild and assigns it to the Build field.
+func (o *Project) SetBuild(v ProjectBuild) {
+	o.Build = &v
 }
 
 // GetImage returns the Image field value if set, zero value otherwise.
@@ -108,6 +142,38 @@ func (o *Project) HasName() bool {
 // SetName gets a reference to the given string and assigns it to the Name field.
 func (o *Project) SetName(v string) {
 	o.Name = &v
+}
+
+// GetPostCreateCommands returns the PostCreateCommands field value if set, zero value otherwise.
+func (o *Project) GetPostCreateCommands() []string {
+	if o == nil || IsNil(o.PostCreateCommands) {
+		var ret []string
+		return ret
+	}
+	return o.PostCreateCommands
+}
+
+// GetPostCreateCommandsOk returns a tuple with the PostCreateCommands field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Project) GetPostCreateCommandsOk() ([]string, bool) {
+	if o == nil || IsNil(o.PostCreateCommands) {
+		return nil, false
+	}
+	return o.PostCreateCommands, true
+}
+
+// HasPostCreateCommands returns a boolean if a field has been set.
+func (o *Project) HasPostCreateCommands() bool {
+	if o != nil && !IsNil(o.PostCreateCommands) {
+		return true
+	}
+
+	return false
+}
+
+// SetPostCreateCommands gets a reference to the given []string and assigns it to the PostCreateCommands field.
+func (o *Project) SetPostCreateCommands(v []string) {
+	o.PostCreateCommands = v
 }
 
 // GetPostStartCommands returns the PostStartCommands field value if set, zero value otherwise.
@@ -312,11 +378,17 @@ func (o Project) MarshalJSON() ([]byte, error) {
 
 func (o Project) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.Build) {
+		toSerialize["build"] = o.Build
+	}
 	if !IsNil(o.Image) {
 		toSerialize["image"] = o.Image
 	}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
+	}
+	if !IsNil(o.PostCreateCommands) {
+		toSerialize["postCreateCommands"] = o.PostCreateCommands
 	}
 	if !IsNil(o.PostStartCommands) {
 		toSerialize["postStartCommands"] = o.PostStartCommands

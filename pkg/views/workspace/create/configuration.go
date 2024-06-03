@@ -19,13 +19,15 @@ import (
 var configurationHelpLine = lipgloss.NewStyle().Foreground(views.Gray).Render("enter: next  f10: advanced configuration")
 
 type ProjectConfigurationData struct {
-	Image             string
-	User              string
-	PostStartCommands []string
-	EnvVars           map[string]string
+	BuilderChoice        string
+	DevcontainerFilePath string
+	Image                string
+	User                 string
+	PostStartCommands    []string
+	EnvVars              map[string]string
 }
 
-func ConfigureProjects(projectList []apiclient.CreateWorkspaceRequestProject) ([]apiclient.CreateWorkspaceRequestProject, error) {
+func ConfigureProjects(projectList []apiclient.CreateWorkspaceRequestProject, apiServerConfig apiclient.ServerConfig) ([]apiclient.CreateWorkspaceRequestProject, error) {
 	var currentProject *apiclient.CreateWorkspaceRequestProject
 
 	if len(projectList) > 1 {
@@ -41,15 +43,115 @@ func ConfigureProjects(projectList []apiclient.CreateWorkspaceRequestProject) ([
 		return projectList, nil
 	}
 
-	projectConfigurationData := &ProjectConfigurationData{
-		Image:             *currentProject.Image,
-		User:              *currentProject.User,
-		PostStartCommands: currentProject.PostStartCommands,
-		EnvVars:           *currentProject.EnvVars,
+	devContainerFilePath := ".devcontainer/devcontainer.json"
+	builderChoice := "auto"
+
+	if currentProject.Build != nil {
+		if currentProject.Build.Devcontainer != nil {
+			builderChoice = "devcontainer"
+			devContainerFilePath = *currentProject.Build.Devcontainer.DevContainerFilePath
+		}
+	} else {
+		builderChoice = "none"
 	}
 
+	projectConfigurationData := &ProjectConfigurationData{
+		BuilderChoice:        builderChoice,
+		DevcontainerFilePath: devContainerFilePath,
+		Image:                *currentProject.Image,
+		User:                 *currentProject.User,
+		PostStartCommands:    currentProject.PostStartCommands,
+		EnvVars:              *currentProject.EnvVars,
+	}
+
+	form := GetProjectConfigurationForm(projectConfigurationData)
+	err := form.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for i := range projectList {
+		if projectList[i].Name == currentProject.Name {
+			if projectConfigurationData.BuilderChoice == "none" {
+				projectList[i].Image = apiServerConfig.DefaultProjectImage
+				projectList[i].User = apiServerConfig.DefaultProjectUser
+				continue
+			}
+
+			projectList[i].Image = &projectConfigurationData.Image
+			projectList[i].User = &projectConfigurationData.User
+			projectList[i].PostStartCommands = projectConfigurationData.PostStartCommands
+			projectList[i].EnvVars = &projectConfigurationData.EnvVars
+
+			if projectConfigurationData.BuilderChoice == "auto" {
+				projectList[i].Build = &apiclient.ProjectBuild{}
+				continue
+			}
+
+			if projectConfigurationData.BuilderChoice == "devcontainer" {
+				projectList[i].Build = &apiclient.ProjectBuild{
+					Devcontainer: &apiclient.ProjectBuildDevcontainer{
+						DevContainerFilePath: &projectConfigurationData.DevcontainerFilePath,
+					},
+				}
+			}
+		}
+	}
+
+	if len(projectList) == 1 {
+		return projectList, nil
+	}
+
+	return ConfigureProjects(projectList, apiServerConfig)
+}
+
+func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData) *huh.Form {
+	var buildOptions []huh.Option[string]
+	// TODO: move to variable
+	buildOptions = append(buildOptions, huh.Option[string]{Key: "Automatic", Value: "auto"})
+	buildOptions = append(buildOptions, huh.Option[string]{Key: "Devcontainer", Value: "devcontainer"})
+	buildOptions = append(buildOptions, huh.Option[string]{Key: "Custom image", Value: "custom-image"})
+	buildOptions = append(buildOptions, huh.Option[string]{Key: "None", Value: "none"})
+
 	form := huh.NewForm(
-		GetProjectConfigurationGroup(projectConfigurationData),
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title("Choose a build configuration").
+				Options(
+					buildOptions...,
+				).
+				Value(&projectConfiguration.BuilderChoice),
+		),
+		huh.NewGroup(
+			huh.NewInput().
+				Title("Custom container image").
+				Value(&projectConfiguration.Image),
+			huh.NewInput().
+				Title("Container user").
+				Value(&projectConfiguration.User),
+		).WithHideFunc(func() bool {
+			return projectConfiguration.BuilderChoice != "custom-image"
+		}),
+		huh.NewGroup(
+			huh.NewInput().
+				Title("Devcontainer file path").
+				Value(&projectConfiguration.DevcontainerFilePath).Validate(func(s string) error {
+				if s == "" {
+					return errors.New("devcontainer file path is required")
+				}
+				return nil
+			}),
+		).WithHideFunc(func() bool {
+			return projectConfiguration.BuilderChoice != "devcontainer"
+		}),
+		huh.NewGroup(
+			configure.GetPostStartCommandsInput(&projectConfiguration.PostStartCommands, "Post start commands"),
+		).WithHideFunc(func() bool {
+			return projectConfiguration.BuilderChoice == "devcontainer"
+		}),
+		huh.NewGroup(
+			views.GetEnvVarsInput(&projectConfiguration.EnvVars),
+		),
 	).WithTheme(views.GetCustomTheme())
 
 	keyMap := huh.NewDefaultKeyMap()
@@ -61,38 +163,5 @@ func ConfigureProjects(projectList []apiclient.CreateWorkspaceRequestProject) ([
 
 	form = form.WithKeyMap(keyMap)
 
-	err := form.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for i := range projectList {
-		if projectList[i].Name == currentProject.Name {
-			projectList[i].Image = &projectConfigurationData.Image
-			projectList[i].User = &projectConfigurationData.User
-			projectList[i].PostStartCommands = projectConfigurationData.PostStartCommands
-			projectList[i].EnvVars = &projectConfigurationData.EnvVars
-		}
-	}
-
-	if len(projectList) == 1 {
-		return projectList, nil
-	}
-
-	return ConfigureProjects(projectList)
-}
-
-func GetProjectConfigurationGroup(projectConfiguration *ProjectConfigurationData) *huh.Group {
-	group := huh.NewGroup(
-		huh.NewInput().
-			Title("Custom container image").
-			Value(&projectConfiguration.Image),
-		huh.NewInput().
-			Title("Container user").
-			Value(&projectConfiguration.User),
-		configure.GetPostStartCommandsInput(&projectConfiguration.PostStartCommands, "Post start commands"),
-		views.GetEnvVarsInput(&projectConfiguration.EnvVars),
-	)
-
-	return group
+	return form
 }
