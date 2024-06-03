@@ -38,7 +38,9 @@ var providerUpdateCmd = &cobra.Command{
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
-		providersManifest, err := manager.GetProvidersManifest(*serverConfig.RegistryUrl)
+		providerManager := manager.NewProviderManager(manager.ProviderManagerConfig{RegistryUrl: *serverConfig.RegistryUrl})
+
+		providersManifest, err := providerManager.GetProvidersManifest()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -82,7 +84,8 @@ func updateProvider(providerToUpdate *apiclient.Provider, providersManifest *man
 
 	version, ok := providerManifest.Versions["latest"]
 	if !ok {
-		version = *manager.FindLatestVersion(providerManifest)
+		_, latest := providerManifest.FindLatestVersion()
+		version = *latest
 	}
 
 	downloadUrls := convertToStringMap(version.DownloadUrls)
