@@ -5,6 +5,7 @@ package util
 
 import (
 	"fmt"
+	"net/url"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -43,8 +44,15 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 		}
 	}
 
+	providerRepoName := *providerRepo.Name
+	urlDecodedName, err := url.QueryUnescape(providerRepoName)
+	if err != nil {
+		return "", nil, err
+	}
+	providerRepoName = strings.ReplaceAll(urlDecodedName, " ", "-")
+
 	projectList = []apiclient.CreateWorkspaceRequestProject{{
-		Name: *providerRepo.Name,
+		Name: providerRepoName,
 		Source: &apiclient.CreateWorkspaceRequestProjectSource{
 			Repository: providerRepo,
 		},
