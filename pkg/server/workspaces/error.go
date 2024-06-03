@@ -12,6 +12,7 @@ var (
 	ErrInvalidWorkspaceName   = errors.New("name is not a valid alphanumeric string")
 	ErrWorkspaceNotFound      = errors.New("workspace not found")
 	ErrProjectNotFound        = errors.New("project not found")
+	ErrInvalidProjectName     = errors.New("project name is not valid. Only [a-zA-Z0-9-_.] are allowed")
 )
 
 func IsWorkspaceAlreadyExists(err error) bool {
