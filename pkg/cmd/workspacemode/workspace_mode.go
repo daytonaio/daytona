@@ -17,9 +17,10 @@ var workspaceId = ""
 var projectName = ""
 
 var workspaceModeRootCmd = &cobra.Command{
-	Use:   "daytona",
-	Short: "Use the Daytona CLI to manage your project",
-	Long:  "Use the Daytona CLI to manage your project",
+	Use:               "daytona",
+	Short:             "Use the Daytona CLI to manage your project",
+	Long:              "Use the Daytona CLI to manage your project",
+	DisableAutoGenTag: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		err := cmd.Help()
 		if err != nil {

@@ -24,10 +24,11 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "daytona",
-	Short: "Daytona is a Dev Environment Manager",
-	Long:  "Daytona is a Dev Environment Manager",
-	Run:   RunInitialScreenFlow,
+	Use:               "daytona",
+	Short:             "Daytona is a Dev Environment Manager",
+	Long:              "Daytona is a Dev Environment Manager",
+	DisableAutoGenTag: true,
+	Run:               RunInitialScreenFlow,
 }
 
 var originalStdout *os.File
