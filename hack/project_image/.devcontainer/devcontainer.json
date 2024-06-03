@@ -17,7 +17,7 @@
 		"ghcr.io/devcontainers/features/node:1": {},
 		"ghcr.io/devcontainers-contrib/features/typescript:2": {},
 		"ghcr.io/wxw-matt/devcontainer-features/command_runner:latest": {
-			"devcontainers": "npm install -g @devcontainers/cli"
+			"command1": "npm install -g @devcontainers/cli"
 		}
 	},
 	"overrideFeatureInstallOrder": [

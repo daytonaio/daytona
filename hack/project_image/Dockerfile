@@ -6,4 +6,6 @@ FROM ubuntu:22.04
 RUN apt update -y && \
     apt install curl libgit2-1.1 -y
 
-CMD ["tail", "-f", "/dev/null"]
+USER daytona
+
+ENTRYPOINT ["tail", "-f", "/dev/null"]
