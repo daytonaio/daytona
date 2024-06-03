@@ -68,6 +68,7 @@ func SetupRootCommand(cmd *cobra.Command) {
 	cmd.AddCommand(AutoCompleteCmd)
 	cmd.AddCommand(versionCmd)
 	cmd.AddCommand(ListCmd)
+	cmd.AddCommand(generateDocsCmd)
 
 	cmd.CompletionOptions.HiddenDefaultCmd = true
 	cmd.PersistentFlags().BoolP("help", "", false, "help for daytona")
