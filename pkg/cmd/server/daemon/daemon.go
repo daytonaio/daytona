@@ -96,13 +96,16 @@ func getServiceConfig() (*service.Config, error) {
 		DisplayName: "Daytona Server",
 		Description: "This is the Daytona Server daemon.",
 		Arguments:   []string{"serve"},
-		UserName:    user,
 	}
 
 	switch runtime.GOOS {
 	case "windows":
 		return nil, fmt.Errorf("daemon mode not supported on Windows")
 	case "linux":
+		// Fix for running as root on Linux
+		if user == "root" {
+			svcConfig.UserName = user
+		}
 		if !strings.HasSuffix(service.Platform(), "systemd") {
 			return nil, fmt.Errorf("on Linux, `server -d` is only supported with systemd. %s detected", service.Platform())
 		}
