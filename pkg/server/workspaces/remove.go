@@ -79,6 +79,8 @@ func (s *WorkspaceService) ForceRemoveWorkspace(workspaceId string) error {
 		return ErrWorkspaceNotFound
 	}
 
+	log.Infof("Destroying workspace %s", workspace.Id)
+
 	target, _ := s.targetStore.Find(workspace.Target)
 
 	for _, project := range workspace.Projects {
@@ -97,5 +99,6 @@ func (s *WorkspaceService) ForceRemoveWorkspace(workspaceId string) error {
 
 	_ = s.workspaceStore.Delete(workspace)
 
+	log.Infof("Workspace %s destroyed", workspace.Id)
 	return nil
 }
