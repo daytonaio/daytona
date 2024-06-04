@@ -50,10 +50,10 @@ func (p *ProfileDataStore) Save(profileData *profiledata.ProfileData) error {
 func (p *ProfileDataStore) Delete() error {
 	tx := p.db.Where("id = ?", ProfileDataId).Delete(&ProfileDataDTO{})
 	if tx.Error != nil {
-		if tx.Error == gorm.ErrRecordNotFound {
-			return profiledata.ErrProfileDataNotFound
-		}
 		return tx.Error
+	}
+	if tx.RowsAffected == 0 {
+		return profiledata.ErrProfileDataNotFound
 	}
 
 	return nil

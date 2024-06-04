@@ -43,6 +43,9 @@ func (p *GitProviderConfigStore) Find(id string) (*gitprovider.GitProviderConfig
 	gitProviderDTO := GitProviderConfigDTO{}
 	tx := p.db.Where("id = ?", id).First(&gitProviderDTO)
 	if tx.Error != nil {
+		if IsRecordNotFound(tx.Error) {
+			return nil, gitprovider.ErrGitProviderNotFound
+		}
 		return nil, tx.Error
 	}
 
@@ -66,6 +69,9 @@ func (p *GitProviderConfigStore) Delete(gitProvider *gitprovider.GitProviderConf
 	tx := p.db.Delete(&gitProviderDTO)
 	if tx.Error != nil {
 		return tx.Error
+	}
+	if tx.RowsAffected == 0 {
+		return gitprovider.ErrGitProviderNotFound
 	}
 
 	return nil

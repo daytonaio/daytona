@@ -3,10 +3,20 @@
 
 package apikey
 
+import "errors"
+
 type Store interface {
 	List() ([]*ApiKey, error)
 	Find(key string) (*ApiKey, error)
 	FindByName(name string) (*ApiKey, error)
 	Save(apiKey *ApiKey) error
 	Delete(apiKey *ApiKey) error
+}
+
+var (
+	ErrApiKeyNotFound = errors.New("api key not found")
+)
+
+func IsApiKeyNotFound(err error) bool {
+	return err.Error() == ErrApiKeyNotFound.Error()
 }

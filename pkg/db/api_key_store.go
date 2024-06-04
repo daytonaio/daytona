@@ -41,6 +41,9 @@ func (a *ApiKeyStore) Find(key string) (*apikey.ApiKey, error) {
 	apiKeyDTO := ApiKeyDTO{}
 	tx := a.db.Where("key_hash = ?", key).First(&apiKeyDTO)
 	if tx.Error != nil {
+		if IsRecordNotFound(tx.Error) {
+			return nil, apikey.ErrApiKeyNotFound
+		}
 		return nil, tx.Error
 	}
 
@@ -53,6 +56,9 @@ func (a *ApiKeyStore) FindByName(name string) (*apikey.ApiKey, error) {
 	apiKeyDTO := ApiKeyDTO{}
 	tx := a.db.Where("name = ?", name).First(&apiKeyDTO)
 	if tx.Error != nil {
+		if IsRecordNotFound(tx.Error) {
+			return nil, apikey.ErrApiKeyNotFound
+		}
 		return nil, tx.Error
 	}
 
@@ -77,7 +83,7 @@ func (a *ApiKeyStore) Delete(apiKey *apikey.ApiKey) error {
 		return tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		return gorm.ErrRecordNotFound
+		return apikey.ErrApiKeyNotFound
 	}
 
 	return nil

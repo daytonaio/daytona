@@ -6,8 +6,6 @@
 package targets
 
 import (
-	"errors"
-
 	"github.com/daytonaio/daytona/pkg/provider"
 )
 
@@ -33,7 +31,7 @@ func (s *InMemoryTargetStore) List() ([]*provider.ProviderTarget, error) {
 func (s *InMemoryTargetStore) Find(targetName string) (*provider.ProviderTarget, error) {
 	target, ok := s.targets[targetName]
 	if !ok {
-		return nil, errors.New("target not found")
+		return nil, provider.ErrTargetNotFound
 	}
 
 	return target, nil
