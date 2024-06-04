@@ -96,7 +96,7 @@ func GetScopesFromGitProvider(providerId string) string {
 	case "bitbucket":
 		return "account:read,repositories:write,pullrequests:read"
 	case "bitbucket-server":
-		return "ACCOUNT_WRITE,PROJECT_VIEW,REPO_READ,REPO_WRITE"
+		return "PROJECT_READ,REPOSITORY_WRITE"
 	case "codeberg":
 		fallthrough
 	case "gitea":
