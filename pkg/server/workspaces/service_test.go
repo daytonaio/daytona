@@ -255,6 +255,35 @@ func TestWorkspaceService(t *testing.T) {
 		require.Equal(t, workspaces.ErrWorkspaceNotFound, err)
 	})
 
+	t.Run("ForceRemoveWorkspace", func(t *testing.T) {
+		var containerRegistry *containerregistry.ContainerRegistry
+
+		provisioner.On("CreateWorkspace", mock.Anything, &target).Return(nil)
+		provisioner.On("StartWorkspace", mock.Anything, &target).Return(nil)
+
+		apiKeyService.On("Generate", apikey.ApiKeyTypeWorkspace, createWorkspaceRequest.Id).Return(createWorkspaceRequest.Id, nil)
+		gitProviderService.On("GetLastCommitSha", createWorkspaceRequest.Projects[0].Source.Repository).Return("123", nil)
+
+		for _, project := range createWorkspaceRequest.Projects {
+			apiKeyService.On("Generate", apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", createWorkspaceRequest.Id, project.Name)).Return(project.Name, nil)
+		}
+		provisioner.On("CreateProject", mock.Anything, &target, containerRegistry).Return(nil)
+		provisioner.On("StartProject", mock.Anything, &target).Return(nil)
+
+		_, _ = service.CreateWorkspace(createWorkspaceRequest)
+
+		provisioner.On("DestroyWorkspace", mock.Anything, &target).Return(nil)
+		provisioner.On("DestroyProject", mock.Anything, &target).Return(nil)
+		apiKeyService.On("Revoke", mock.Anything).Return(nil)
+
+		err = service.ForceRemoveWorkspace(createWorkspaceRequest.Id)
+
+		require.Nil(t, err)
+
+		_, err = service.GetWorkspace(createWorkspaceRequest.Id)
+		require.Equal(t, workspaces.ErrWorkspaceNotFound, err)
+	})
+
 	t.Run("SetProjectState", func(t *testing.T) {
 		ws, err := service.CreateWorkspace(createWorkspaceRequest)
 		require.Nil(t, err)
