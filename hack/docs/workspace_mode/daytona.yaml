@@ -1,0 +1,21 @@
+name: daytona
+synopsis: Use the Daytona CLI to manage your project
+description: Use the Daytona CLI to manage your project
+usage: daytona [flags]
+options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+    - name: output
+      shorthand: o
+      usage: Output format. Must be one of (yaml, json)
+see_also:
+    - daytona agent - Start the agent process
+    - daytona autocomplete - Adds completion script for your shell enviornment
+    - daytona docs - Opens the Daytona documentation in your default browser.
+    - daytona forward - Forward a port from the project to your local machine
+    - daytona info - Show project info
+    - daytona list - List workspaces
+    - daytona start - Start the project
+    - daytona stop - Stop the project
+    - daytona version - Print the version number

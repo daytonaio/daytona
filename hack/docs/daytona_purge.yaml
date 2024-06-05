@@ -1,0 +1,19 @@
+name: daytona purge
+synopsis: Purges all Daytona data from the current device
+description: |
+    Purges all Daytona data from the current device - including all workspaces, configuration files, and SSH files. This command is irreversible.
+usage: daytona purge [flags]
+options:
+    - name: "yes"
+      shorthand: "y"
+      default_value: "false"
+      usage: Execute purge without prompt
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+    - name: output
+      shorthand: o
+      usage: Output format. Must be one of (yaml, json)
+see_also:
+    - daytona - Daytona is a Dev Environment Manager
