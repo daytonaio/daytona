@@ -154,8 +154,8 @@ func (s *WorkspaceService) createBuild(project *workspace.Project, gc *gitprovid
 func (s *WorkspaceService) createProject(project *workspace.Project, target *provider.ProviderTarget, logWriter io.Writer) error {
 	logWriter.Write([]byte(fmt.Sprintf("Creating project %s\n", project.Name)))
 
-	cr, err := s.containerRegistryStore.Find(project.GetImageServer())
-	if !containerregistry.IsContainerRegistryNotFound(err) {
+	cr, err := s.containerRegistryService.FindByImageName(project.Image)
+	if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
 		return err
 	}
 

@@ -10,6 +10,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logger"
+	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
@@ -22,6 +23,8 @@ type BuildResult struct {
 }
 
 type BuilderConfig struct {
+	Image                           string
+	ContainerRegistryService        containerregistries.IContainerRegistryService
 	ServerConfigFolder              string
 	LocalContainerRegistryServer    string
 	BasePath                        string
@@ -45,6 +48,8 @@ type Builder struct {
 	hash              string
 	projectVolumePath string
 
+	image                           string
+	containerRegistryService        containerregistries.IContainerRegistryService
 	serverConfigFolder              string
 	localContainerRegistryServer    string
 	basePath                        string
