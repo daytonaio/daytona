@@ -6,8 +6,6 @@
 package apikeys
 
 import (
-	"errors"
-
 	"github.com/daytonaio/daytona/pkg/apikey"
 )
 
@@ -33,7 +31,7 @@ func (s *InMemoryApiKeyStore) List() ([]*apikey.ApiKey, error) {
 func (s *InMemoryApiKeyStore) Find(key string) (*apikey.ApiKey, error) {
 	apiKey, ok := s.apiKeys[key]
 	if !ok {
-		return nil, errors.New("api key not found")
+		return nil, apikey.ErrApiKeyNotFound
 	}
 
 	return apiKey, nil
