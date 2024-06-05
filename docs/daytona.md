@@ -25,6 +25,7 @@ daytona [flags]
 * [daytona container-registry](daytona_container-registry.md)	 - Manage container registries
 * [daytona create](daytona_create.md)	 - Create a workspace
 * [daytona delete](daytona_delete.md)	 - Delete a workspace
+* [daytona docs](daytona_docs.md)	 - Opens the Daytona documentation in your default browser.
 * [daytona env](daytona_env.md)	 - Manage profile environment variables that are added to all workspaces
 * [daytona forward](daytona_forward.md)	 - Forward a port from a project to your local machine
 * [daytona git-providers](daytona_git-providers.md)	 - Manage Git providers
