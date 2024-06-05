@@ -139,6 +139,9 @@ func (s *GitProviderService) newGitProvider(config *gitprovider.GitProviderConfi
 		return gitprovider.NewGiteaGitProvider(config.Token, codebergUrl), nil
 	case "gitea":
 		return gitprovider.NewGiteaGitProvider(config.Token, *config.BaseApiUrl), nil
+	case "gitness":
+		return gitprovider.NewGitNessGitProvider(config.Token, config.BaseApiUrl), nil
+
 	default:
 		return nil, errors.New("git provider not found")
 	}
