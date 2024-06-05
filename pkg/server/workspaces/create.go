@@ -10,6 +10,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/builder"
+	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
@@ -153,9 +154,12 @@ func (s *WorkspaceService) createBuild(project *workspace.Project, gc *gitprovid
 func (s *WorkspaceService) createProject(project *workspace.Project, target *provider.ProviderTarget, logWriter io.Writer) error {
 	logWriter.Write([]byte(fmt.Sprintf("Creating project %s\n", project.Name)))
 
-	cr, _ := s.containerRegistryStore.Find(project.GetImageServer())
+	cr, err := s.containerRegistryStore.Find(project.GetImageServer())
+	if !containerregistry.IsContainerRegistryNotFound(err) {
+		return err
+	}
 
-	err := s.provisioner.CreateProject(project, target, cr)
+	err = s.provisioner.CreateProject(project, target, cr)
 	if err != nil {
 		return err
 	}

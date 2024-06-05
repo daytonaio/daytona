@@ -6,8 +6,6 @@
 package containerregistries
 
 import (
-	"errors"
-
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 )
 
@@ -33,7 +31,7 @@ func (s *InMemoryContainerRegistryStore) List() ([]*containerregistry.ContainerR
 func (s *InMemoryContainerRegistryStore) Find(server string) (*containerregistry.ContainerRegistry, error) {
 	cr, ok := s.crs[server]
 	if !ok {
-		return nil, errors.New("container registry not found")
+		return nil, containerregistry.ErrContainerRegistryNotFound
 	}
 
 	return cr, nil
@@ -47,7 +45,7 @@ func (s *InMemoryContainerRegistryStore) Save(cr *containerregistry.ContainerReg
 func (s *InMemoryContainerRegistryStore) Delete(cr *containerregistry.ContainerRegistry) error {
 	_, ok := s.crs[cr.Server]
 	if !ok {
-		return errors.New("container registry not found")
+		return containerregistry.ErrContainerRegistryNotFound
 	}
 	delete(s.crs, cr.Server)
 	return nil
