@@ -6,8 +6,6 @@
 package workspaces
 
 import (
-	"errors"
-
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
@@ -31,17 +29,17 @@ func (s *InMemoryWorkspaceStore) List() ([]*workspace.Workspace, error) {
 }
 
 func (s *InMemoryWorkspaceStore) Find(idOrName string) (*workspace.Workspace, error) {
-	workspace, ok := s.workspaces[idOrName]
+	ws, ok := s.workspaces[idOrName]
 	if !ok {
 		for _, w := range s.workspaces {
 			if w.Name == idOrName {
 				return w, nil
 			}
 		}
-		return nil, errors.New("workspace not found")
+		return nil, workspace.ErrWorkspaceNotFound
 	}
 
-	return workspace, nil
+	return ws, nil
 }
 
 func (s *InMemoryWorkspaceStore) Save(workspace *workspace.Workspace) error {

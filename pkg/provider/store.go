@@ -3,6 +3,8 @@
 
 package provider
 
+import "errors"
+
 type Store interface {
 }
 
@@ -11,4 +13,12 @@ type TargetStore interface {
 	Find(targetName string) (*ProviderTarget, error)
 	Save(target *ProviderTarget) error
 	Delete(target *ProviderTarget) error
+}
+
+var (
+	ErrTargetNotFound = errors.New("provider not found")
+)
+
+func IsTargetNotFound(err error) bool {
+	return err.Error() == ErrTargetNotFound.Error()
 }

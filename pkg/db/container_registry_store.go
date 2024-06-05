@@ -42,6 +42,9 @@ func (s *ContainerRegistryStore) Find(server string) (*containerregistry.Contain
 	containerRegistryDTO := ContainerRegistryDTO{}
 	tx := s.db.Where("server = ?", server).First(&containerRegistryDTO)
 	if tx.Error != nil {
+		if IsRecordNotFound(tx.Error) {
+			return nil, containerregistry.ErrContainerRegistryNotFound
+		}
 		return nil, tx.Error
 	}
 
@@ -61,6 +64,9 @@ func (s *ContainerRegistryStore) Delete(cr *containerregistry.ContainerRegistry)
 	tx := s.db.Delete(ToContainerRegistryDTO(cr))
 	if tx.Error != nil {
 		return tx.Error
+	}
+	if tx.RowsAffected == 0 {
+		return containerregistry.ErrContainerRegistryNotFound
 	}
 
 	return nil
