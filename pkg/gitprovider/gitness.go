@@ -34,7 +34,10 @@ func (g *GitNessGitProvider) getApiClient() *GitnessClient {
 	return NewGitnessClient(g.token, url)
 }
 
-// func (g *GitNessGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {}
+func (g *GitNessGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
+	client := g.getApiClient()
+	return client.GetRepositories(namespace)
+}
 
 func (g *GitNessGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {
 	client := g.getApiClient()

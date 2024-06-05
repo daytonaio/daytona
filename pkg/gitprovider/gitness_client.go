@@ -12,12 +12,6 @@ import (
 	"time"
 )
 
-// GitnessClient is a client for interacting with the Gitness API.
-type GitnessClient struct {
-	Token   string
-	BaseURL *url.URL
-}
-
 // Intermediate structs for the API response
 
 type apiMembershipResponse struct {
@@ -145,6 +139,36 @@ type PullRequest struct {
 	} `json:"stats"`
 }
 
+type ApiRepository struct {
+	Id             int    `json:"id"`
+	ParentId       int    `json:"parent_id"`
+	Identifier     string `json:"identifier"`
+	Path           string `json:"path"`
+	Description    string `json:"description"`
+	IsPublic       bool   `json:"is_public"`
+	CreatedBy      int    `json:"created_by"`
+	Created        int64  `json:"created"`
+	Updated        int64  `json:"updated"`
+	Size           int    `json:"size"`
+	SizeUpdated    int    `json:"size_updated"`
+	DefaultBranch  string `json:"default_branch"`
+	ForkId         int    `json:"fork_id"`
+	NumForks       int    `json:"num_forks"`
+	NumPulls       int    `json:"num_pulls"`
+	NumClosedPulls int    `json:"num_closed_pulls"`
+	NumOpenPulls   int    `json:"num_open_pulls"`
+	NumMergedPulls int    `json:"num_merged_pulls"`
+	Importing      bool   `json:"importing"`
+	GitUrl         string `json:"git_url"`
+	Uid            string `json:"uid"`
+}
+
+// GitnessClient is a client for interacting with the Gitness API.
+type GitnessClient struct {
+	Token   string
+	BaseURL *url.URL
+}
+
 func NewGitnessClient(token string, baseUrl *url.URL) *GitnessClient {
 	return &GitnessClient{
 		Token:   token,
@@ -247,7 +271,72 @@ func (g *GitnessClient) GetSpaces() ([]*GitNamespace, error) {
 	return namespaces, nil
 }
 
-//TODO: func (g *GitnessClient)GetRepositories(namespace string) ([] *GitRepository, error){}
+func (g *GitnessClient) GetRepositories(namespace string) ([]*GitRepository, error) {
+	space := ""
+	if namespace == personalNamespaceId {
+		user, err := g.GetUser()
+		if err != nil {
+			return nil, err
+		}
+		space = user.Username
+	} else {
+		space = namespace
+	}
+
+	reposURL, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/spaces/%s/+/repos?page=1&limit=100", space))
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", reposURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("accept", "application/json")
+	req.Header.Set("Authorization", "Bearer "+g.Token)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to fetch repositories, status code: %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var apiRepos []ApiRepository
+	if err := json.Unmarshal(body, &apiRepos); err != nil {
+		return nil, err
+	}
+
+	var repos []*GitRepository
+
+	for _, apiRepo := range apiRepos {
+		u, err := url.Parse(apiRepo.GitUrl)
+		if err != nil {
+			return nil, err
+		}
+		repo := &GitRepository{
+			Id:     apiRepo.Identifier,
+			Name:   apiRepo.Identifier,
+			Url:    apiRepo.GitUrl,
+			Branch: &apiRepo.DefaultBranch,
+			Source: u.Host,
+		}
+
+		repos = append(repos, repo)
+	}
+
+	return repos, nil
+}
 
 func (g *GitnessClient) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {
 	branchesURL := g.BaseURL.ResolveReference(&url.URL{
