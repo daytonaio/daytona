@@ -22,7 +22,6 @@ var profileDeleteCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		var chosenProfileId string
 		var chosenProfile *config.Profile
 
 		if len(args) == 0 {
@@ -33,19 +32,19 @@ var profileDeleteCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 
-			if chosenProfileId == "" {
+			if chosenProfile.Id == "" {
 				return
 			}
 		} else {
-			chosenProfileId = args[0]
+			chosenProfile.Id = args[0]
 		}
 
-		if chosenProfileId == "default" {
+		if chosenProfile.Id == "default" {
 			log.Fatal("Can not delete default profile")
 		}
 
 		for _, profile := range c.Profiles {
-			if profile.Id == chosenProfileId || profile.Name == chosenProfileId {
+			if profile.Id == chosenProfile.Id || profile.Name == chosenProfile.Id {
 				chosenProfile = &profile
 				break
 			}
