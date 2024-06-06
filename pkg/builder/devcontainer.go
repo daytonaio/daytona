@@ -18,6 +18,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/daytonaio/daytona/pkg/builder/devcontainer"
+	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -284,15 +285,18 @@ func (b *DevcontainerBuilder) startContainer() error {
 		ApiClient: cli,
 	})
 
-	//	todo: builder image from config
-	err = dockerClient.PullImage("daytonaio/workspace-project", nil, projectLogger)
+	cr, err := b.containerRegistryService.FindByImageName(b.image)
+	if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
+		return err
+	}
+
+	err = dockerClient.PullImage(b.image, cr, projectLogger)
 	if err != nil {
 		return err
 	}
 
-	//	todo: mount folders
 	_, err = cli.ContainerCreate(ctx, &container.Config{
-		Image:      "daytonaio/workspace-project",
+		Image:      b.image,
 		Entrypoint: []string{"sudo", "dockerd", "-H", fmt.Sprintf("tcp://0.0.0.0:%d", b.builderDockerPort), "-H", "unix:///var/run/docker.sock", "--insecure-registry", b.localContainerRegistryServer},
 		ExposedPorts: nat.PortSet{
 			nat.Port(fmt.Sprintf("%d/tcp", b.builderDockerPort)): {},

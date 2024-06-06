@@ -51,6 +51,16 @@ func ConfigurationForm(config *apiclient.ServerConfig) *apiclient.ServerConfig {
 		),
 		huh.NewGroup(
 			huh.NewInput().
+				Title("Builder Image").
+				Description("Image dependencies: docker, @devcontainers/cli (node package)").
+				Value(config.BuilderImage),
+			huh.NewInput().
+				Title("Build Registry Port").
+				Value(&registryPortView).
+				Validate(createPortValidator(config, &registryPortView, config.RegistryPort)),
+		),
+		huh.NewGroup(
+			huh.NewInput().
 				Title("API Port").
 				Value(&apiPortView).
 				Validate(createPortValidator(config, &apiPortView, config.ApiPort)),
@@ -58,10 +68,6 @@ func ConfigurationForm(config *apiclient.ServerConfig) *apiclient.ServerConfig {
 				Title("Headscale Port").
 				Value(&headscalePortView).
 				Validate(createPortValidator(config, &headscalePortView, config.HeadscalePort)),
-			huh.NewInput().
-				Title("Build Registry Port").
-				Value(&registryPortView).
-				Validate(createPortValidator(config, &registryPortView, config.RegistryPort)),
 			huh.NewInput().
 				Title("Binaries Path").
 				Description("Directory will be created if it does not exist").

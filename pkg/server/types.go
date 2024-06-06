@@ -43,4 +43,5 @@ type Config struct {
 	DefaultProjectImage             string      `json:"defaultProjectImage"`
 	DefaultProjectUser              string      `json:"defaultProjectUser"`
 	DefaultProjectPostStartCommands []string    `json:"defaultProjectPostStartCommands"`
+	BuilderImage                    string      `json:"builderImage"`
 } // @name ServerConfig

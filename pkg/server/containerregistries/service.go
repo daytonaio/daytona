@@ -3,11 +3,16 @@
 
 package containerregistries
 
-import "github.com/daytonaio/daytona/pkg/containerregistry"
+import (
+	"strings"
+
+	"github.com/daytonaio/daytona/pkg/containerregistry"
+)
 
 type IContainerRegistryService interface {
 	Delete(server string) error
 	Find(server string) (*containerregistry.ContainerRegistry, error)
+	FindByImageName(imageName string) (*containerregistry.ContainerRegistry, error)
 	List() ([]*containerregistry.ContainerRegistry, error)
 	Map() (map[string]*containerregistry.ContainerRegistry, error)
 	Save(cr *containerregistry.ContainerRegistry) error
@@ -49,6 +54,12 @@ func (s *ContainerRegistryService) Find(server string) (*containerregistry.Conta
 	return s.store.Find(server)
 }
 
+func (s *ContainerRegistryService) FindByImageName(imageName string) (*containerregistry.ContainerRegistry, error) {
+	server := getImageServer(imageName)
+
+	return s.Find(server)
+}
+
 func (s *ContainerRegistryService) Save(cr *containerregistry.ContainerRegistry) error {
 	return s.store.Save(cr)
 }
@@ -59,4 +70,14 @@ func (s *ContainerRegistryService) Delete(server string) error {
 		return err
 	}
 	return s.store.Delete(cr)
+}
+
+func getImageServer(imageName string) string {
+	parts := strings.Split(imageName, "/")
+
+	if len(parts) < 3 {
+		return "docker.io"
+	}
+
+	return parts[0]
 }
