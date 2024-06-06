@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -26,9 +27,18 @@ var selectedStyles = lipgloss.NewStyle().
 	Bold(true).
 	Padding(0, 0, 0, 1)
 
+var statusMessageGreenStyle = lipgloss.NewStyle().Bold(true).
+	Foreground(lipgloss.AdaptiveColor{Light: "#04B575", Dark: "#04B575"}).
+	Render
+
+var statusMessageDangerStyle = lipgloss.NewStyle().Bold(true).
+	Foreground(lipgloss.AdaptiveColor{Light: "#FF474C", Dark: "#FF474C"}).
+	Render
+
 type item[T any] struct {
 	id, title, desc, createdTime, uptime, target string
 	choiceProperty                               T
+	markForDeletion                              bool
 }
 
 func (i item[T]) Title() string       { return i.title }
@@ -42,6 +52,7 @@ func (i item[T]) Target() string      { return i.target }
 type model[T any] struct {
 	list            list.Model
 	choice          *T
+	choices         []*T
 	footer          string
 	initialWidthSet bool
 }
@@ -69,8 +80,22 @@ func (m model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if ok {
 				m.choice = &i.choiceProperty
 			}
+			workspaceList := m.list.Items()
+			var choices []*T
+			for _, workspace := range workspaceList {
+				if workspace.(item[T]).markForDeletion {
+					workspaceItem, ok := workspace.(item[T])
+					if !ok {
+						continue
+					}
+					choices = append(choices, &workspaceItem.choiceProperty)
+				}
+
+			}
+			m.choices = choices
 			return m, tea.Quit
 		}
+
 	case tea.WindowSizeMsg:
 		h, v := views.DocStyle.GetFrameSize()
 		m.list.SetSize(msg.Width-h, msg.Height-v)
@@ -161,5 +186,31 @@ func (d ItemDelegate[T]) Spacing() int {
 }
 
 func (d ItemDelegate[T]) Update(msg tea.Msg, m *list.Model) tea.Cmd {
+	i, ok := m.SelectedItem().(item[T])
+	if !ok {
+		return nil
+	}
+
+	m.StatusMessageLifetime = time.Millisecond * 2000
+
+	var title string
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch keypress := msg.String(); keypress {
+		case "x":
+			if i.markForDeletion {
+				i.title = strings.TrimPrefix(i.title, statusMessageDangerStyle("Delete: "))
+				i.markForDeletion = false
+				m.SetItem(m.Index(), i)
+				return m.NewStatusMessage(statusMessageGreenStyle("Removed workspace from deletion list: ") + statusMessageGreenStyle(i.title))
+			}
+
+			title = i.title
+			i.title = statusMessageDangerStyle("Delete: ") + statusMessageGreenStyle(i.title)
+			i.markForDeletion = true
+			m.SetItem(m.Index(), i)
+			return m.NewStatusMessage(statusMessageDangerStyle("Added workspace to deletion list: ") + statusMessageGreenStyle(title))
+		}
+	}
 	return nil
 }
