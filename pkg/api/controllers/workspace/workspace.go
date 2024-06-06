@@ -96,3 +96,17 @@ func RemoveWorkspace(ctx *gin.Context) {
 
 	ctx.Status(200)
 }
+
+func ForceRemoveWorkspace(ctx *gin.Context) {
+	workspaceId := ctx.Param("workspaceId")
+
+	server := server.GetInstance(nil)
+
+	err := server.WorkspaceService.ForceRemoveWorkspace(workspaceId)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to force remove workspace: %s", err.Error()))
+		return
+	}
+
+	ctx.Status(200)
+}

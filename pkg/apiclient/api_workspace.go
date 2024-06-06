@@ -397,7 +397,11 @@ type ApiRemoveWorkspaceRequest struct {
 }
 
 func (r ApiRemoveWorkspaceRequest) Execute() (*http.Response, error) {
-	return r.ApiService.RemoveWorkspaceExecute(r)
+	return r.ApiService.RemoveWorkspaceExecute(r, false)
+}
+
+func (r ApiRemoveWorkspaceRequest) ExecuteForce() (*http.Response, error) {
+	return r.ApiService.RemoveWorkspaceExecute(r, true)
 }
 
 /*
@@ -418,11 +422,12 @@ func (a *WorkspaceAPIService) RemoveWorkspace(ctx context.Context, workspaceId s
 }
 
 // Execute executes the request
-func (a *WorkspaceAPIService) RemoveWorkspaceExecute(r ApiRemoveWorkspaceRequest) (*http.Response, error) {
+func (a *WorkspaceAPIService) RemoveWorkspaceExecute(r ApiRemoveWorkspaceRequest, force bool) (*http.Response, error) {
 	var (
 		localVarHTTPMethod = http.MethodDelete
 		localVarPostBody   interface{}
 		formFiles          []formFile
+		localVarPath	   string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.RemoveWorkspace")
@@ -430,7 +435,11 @@ func (a *WorkspaceAPIService) RemoveWorkspaceExecute(r ApiRemoveWorkspaceRequest
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}"
+	if force {
+		localVarPath = localBasePath + "/workspace/{workspaceId}/force"
+	} else {
+		localVarPath = localBasePath + "/workspace/{workspaceId}"
+	}
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 
 	localVarHeaderParams := make(map[string]string)

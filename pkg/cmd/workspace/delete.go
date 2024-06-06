@@ -6,6 +6,7 @@ package workspace
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/charmbracelet/huh"
@@ -20,6 +21,7 @@ import (
 )
 
 var yesFlag bool
+var forceFlag bool
 
 var DeleteCmd = &cobra.Command{
 	Use:     "delete [WORKSPACE]",
@@ -113,8 +115,24 @@ var DeleteCmd = &cobra.Command{
 		if !yesFlag {
 			fmt.Println("Operation canceled.")
 		} else {
+			if !forceFlag {
+				form := huh.NewForm(
+					huh.NewGroup(
+						huh.NewConfirm().
+							Title(fmt.Sprintf("Delete workspace(s): [%s] by force?", strings.Join(workspaceDeleteListNames, ", "))).
+							Description("Provider resources might not be removed if you don't use this option").
+							Value(&forceFlag),
+					),
+				).WithTheme(views.GetCustomTheme())
+
+				err := form.Run()
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
+
 			for _, workspace := range workspaceDeleteList {
-				err := removeWorkspace(ctx, apiClient, workspace)
+				err := removeWorkspace(ctx, apiClient, workspace, forceFlag)
 				if err != nil {
 					log.Error(fmt.Sprintf("[ %s ] : %v", *workspace.Name, err))
 				}
@@ -133,6 +151,7 @@ var DeleteCmd = &cobra.Command{
 func init() {
 	DeleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Delete all workspaces")
 	DeleteCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Confirm deletion without prompt")
+	DeleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Delete a workspace by force")
 }
 
 func DeleteAllWorkspaces() error {
@@ -158,8 +177,16 @@ func DeleteAllWorkspaces() error {
 	return nil
 }
 
-func removeWorkspace(ctx context.Context, apiClient *apiclient.APIClient, workspace *apiclient.WorkspaceDTO) error {
-	res, err := apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
+func removeWorkspace(ctx context.Context, apiClient *apiclient.APIClient, workspace *apiclient.WorkspaceDTO, force bool) error {
+	var res *http.Response
+	var err error
+
+	if force {
+		res, err = apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
+	} else {
+		res, err = apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).ExecuteForce()
+	}
+
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)
 	}

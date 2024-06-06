@@ -118,6 +118,7 @@ func (a *ApiServer) Start() error {
 		workspaceController.POST("/:workspaceId/start", workspace.StartWorkspace)
 		workspaceController.POST("/:workspaceId/stop", workspace.StopWorkspace)
 		workspaceController.DELETE("/:workspaceId", workspace.RemoveWorkspace)
+		workspaceController.DELETE("/:workspaceId/force", workspace.ForceRemoveWorkspace)
 		workspaceController.POST("/:workspaceId/:projectId/start", workspace.StartProject)
 		workspaceController.POST("/:workspaceId/:projectId/stop", workspace.StopProject)
 	}
