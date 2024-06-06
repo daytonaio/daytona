@@ -117,12 +117,17 @@ func (g *BitbucketServerGitProvider) GetRepositories(namespace string) ([]*GitRe
 				}
 			}
 
+			var ownerName string
+			if repo.Owner != nil {
+				ownerName = repo.Owner.Name
+			}
+
 			response = append(response, &GitRepository{
 				Id:     repo.Slug,
 				Name:   repo.Name,
 				Url:    repoUrl,
 				Source: *g.baseApiUrl,
-				Owner:  repo.Owner.Name,
+				Owner:  ownerName,
 			})
 		}
 
@@ -230,6 +235,9 @@ func (g *BitbucketServerGitProvider) GetUser() (*GitUser, error) {
 		return nil, err
 	}
 
+	if user.Values == nil {
+		return nil, fmt.Errorf("User values are nil")
+	}
 	var userInfo bitbucketv1.User
 	err = mapstructure.Decode(user.Values, &userInfo)
 
