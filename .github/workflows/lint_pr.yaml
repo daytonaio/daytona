@@ -49,6 +49,7 @@ jobs:
         run: |
           ./hack/generate-cli-docs.sh
           git diff --exit-code docs/* || (echo "CLI Documentation is out of sync! Please generate it with './hack/generate-cli-docs.sh' and commit" && exit 1)
+          git diff --exit-code hack/docs/* || (echo "CLI Documentation is out of sync! Please generate it with './hack/generate-cli-docs.sh' and commit" && exit 1)
   test:
     name: Unit tests
     runs-on: ubuntu-latest

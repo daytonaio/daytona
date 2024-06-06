@@ -6,12 +6,14 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 )
 
+var yamlDirectory = "hack"
 var defaultDirectory = "docs"
 
 var generateDocsCmd = &cobra.Command{
@@ -32,7 +34,17 @@ var generateDocsCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		err = os.MkdirAll(filepath.Join(yamlDirectory, directory), os.ModePerm)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		err = doc.GenMarkdownTree(cmd.Root(), directory)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = doc.GenYamlTree(cmd.Root(), filepath.Join(yamlDirectory, directory))
 		if err != nil {
 			log.Fatal(err)
 		}

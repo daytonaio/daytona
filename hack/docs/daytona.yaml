@@ -1,0 +1,37 @@
+name: daytona
+synopsis: Daytona is a Dev Environment Manager
+description: Daytona is a Dev Environment Manager
+usage: daytona [flags]
+options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+    - name: output
+      shorthand: o
+      usage: Output format. Must be one of (yaml, json)
+see_also:
+    - daytona api-key - Api Key commands
+    - daytona autocomplete - Adds completion script for your shell enviornment
+    - daytona code - Open a workspace in your preferred IDE
+    - daytona container-registry - Manage container registries
+    - daytona create - Create a workspace
+    - daytona delete - Delete a workspace
+    - daytona docs - Opens the Daytona documentation in your default browser.
+    - daytona env - Manage profile environment variables that are added to all workspaces
+    - daytona forward - Forward a port from a project to your local machine
+    - daytona git-providers - Manage Git providers
+    - daytona ide - Choose the default IDE
+    - daytona info - Show workspace info
+    - daytona list - List workspaces
+    - daytona profile - Manage profiles
+    - daytona provider - Manage providers
+    - daytona purge - Purges all Daytona data from the current device
+    - daytona serve - Run the server process in the current terminal session
+    - daytona server - Start the server process in daemon mode
+    - daytona ssh - SSH into a project using the terminal
+    - daytona start - Start a workspace
+    - daytona stop - Stop a workspace
+    - daytona target - Manage provider targets
+    - daytona use - Set the active profile
+    - daytona version - Print the version number
+    - daytona whoami - Display information about the active user

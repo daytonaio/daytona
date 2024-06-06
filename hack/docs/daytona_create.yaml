@@ -1,0 +1,33 @@
+name: daytona create
+synopsis: Create a workspace
+usage: daytona create [REPOSITORY_URL] [flags]
+options:
+    - name: code
+      shorthand: c
+      default_value: "false"
+      usage: Open the workspace in the IDE after workspace creation
+    - name: ide
+      shorthand: i
+      usage: Specify the IDE ('vscode' or 'browser')
+    - name: manual
+      default_value: "false"
+      usage: Manually enter the git repositories
+    - name: multi-project
+      default_value: "false"
+      usage: Workspace with multiple projects/repos
+    - name: name
+      usage: Specify the workspace name
+    - name: provider
+      usage: Specify the provider (e.g. 'docker-provider')
+    - name: target
+      shorthand: t
+      usage: Specify the target (e.g. 'local')
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+    - name: output
+      shorthand: o
+      usage: Output format. Must be one of (yaml, json)
+see_also:
+    - daytona - Daytona is a Dev Environment Manager
