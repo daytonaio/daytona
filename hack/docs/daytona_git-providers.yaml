@@ -1,0 +1,14 @@
+name: daytona git-providers
+synopsis: Manage Git providers
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+    - name: output
+      shorthand: o
+      usage: Output format. Must be one of (yaml, json)
+see_also:
+    - daytona - Daytona is a Dev Environment Manager
+    - daytona git-providers add - Register a Git providers
+    - daytona git-providers delete - Unregister a Git providers
+    - daytona git-providers list - Lists your registered Git providers
