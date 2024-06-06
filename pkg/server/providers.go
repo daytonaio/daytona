@@ -8,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/daytonaio/daytona/pkg/provider/manager"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,7 +17,7 @@ func (s *Server) downloadDefaultProviders() error {
 		return err
 	}
 
-	defaultProviders := manager.GetDefaultProviders(*manifest)
+	defaultProviders := manifest.GetDefaultProviders()
 
 	log.Info("Downloading default providers")
 	for providerName, provider := range defaultProviders {
@@ -77,7 +76,7 @@ func (s *Server) registerProviders() error {
 				continue
 			}
 
-			if manager.HasUpdateAvailable(info.Name, info.Version, *manifest) {
+			if manifest.HasUpdateAvailable(info.Name, info.Version) {
 				log.Infof("Update available for %s. Update with `daytona provider update`.", info.Name)
 			}
 		}
