@@ -11,12 +11,60 @@
 VERSION=${DAYTONA_SERVER_VERSION:-"latest"}
 BASE_URL=${DAYTONA_SERVER_DOWNLOAD_URL:-"https://download.daytona.io/daytona"}
 DESTINATION=${DAYTONA_PATH:-"/usr/local/bin"}
+CONFIRM_FLAG=false
+
+# Check for the -y flag
+for arg in "$@"; do
+  case $arg in
+    -y)
+    CONFIRM_FLAG=true
+    shift
+    ;;
+  esac
+done
 
 # Print error message to stderr and exit
 err() {
   echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&2
   exit 1
 }
+
+# Stop the Daytona server if it is running
+stop_daytona_server() {
+  if pgrep -x "daytona" > /dev/null; then
+    if [ "$CONFIRM_FLAG" = false ]; then
+      read -p "Daytona server is running. Do you want to stop it? (yes/no): " user_input < /dev/tty
+      case $user_input in
+        [Yy][Ee][Ss] )
+          CONFIRM_FLAG=true
+          ;;
+        [Nn][Oo] )
+          echo "Please stop the Daytona server manually and rerun the script."
+          exit 0
+          ;;
+        * )
+          echo "Invalid input. Please enter 'yes' or 'no'."
+          exit 1
+          ;;
+      esac
+    fi
+
+    if [ "$CONFIRM_FLAG" = true ]; then
+      echo "Attempting to stop the Daytona server..."
+      if daytona server stop; then
+        continue
+      else
+        pkill -x "daytona"
+      fi
+      echo -e "Daytona server stopped.\n"
+    fi
+  fi
+}
+
+# Check if the Daytona server is running
+stop_daytona_server
+
+echo -e "Installing Daytona...\n"
 
 # Check machine architecture
 ARCH=$(uname -m)
