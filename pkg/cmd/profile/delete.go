@@ -33,9 +33,11 @@ var profileDeleteCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 
-			if chosenProfileId == "" {
+			if chosenProfile.Id == "" {
 				return
 			}
+
+			chosenProfileId = chosenProfile.Id
 		} else {
 			chosenProfileId = args[0]
 		}
