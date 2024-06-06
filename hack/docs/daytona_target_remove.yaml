@@ -1,0 +1,17 @@
+name: daytona target remove
+synopsis: Remove target
+usage: daytona target remove [TARGET_NAME] [flags]
+options:
+    - name: "yes"
+      shorthand: "y"
+      default_value: "false"
+      usage: Confirm deletion of all workspaces without prompt
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+    - name: output
+      shorthand: o
+      usage: Output format. Must be one of (yaml, json)
+see_also:
+    - daytona target - Manage provider targets

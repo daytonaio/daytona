@@ -1,0 +1,15 @@
+name: daytona provider
+synopsis: Manage providers
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+    - name: output
+      shorthand: o
+      usage: Output format. Must be one of (yaml, json)
+see_also:
+    - daytona - Daytona is a Dev Environment Manager
+    - daytona provider install - Install provider
+    - daytona provider list - List installed providers
+    - daytona provider uninstall - Uninstall provider
+    - daytona provider update - Update provider

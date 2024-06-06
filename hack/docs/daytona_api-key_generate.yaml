@@ -1,0 +1,17 @@
+name: daytona api-key generate
+synopsis: Generate a new API key
+usage: daytona api-key generate [NAME] [flags]
+options:
+    - name: save
+      shorthand: s
+      default_value: "false"
+      usage: Save the API key to your default profile on this machine
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+    - name: output
+      shorthand: o
+      usage: Output format. Must be one of (yaml, json)
+see_also:
+    - daytona api-key - Api Key commands
