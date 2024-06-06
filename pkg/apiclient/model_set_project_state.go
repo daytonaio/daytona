@@ -20,7 +20,7 @@ var _ MappedNullable = &SetProjectState{}
 // SetProjectState struct for SetProjectState
 type SetProjectState struct {
 	GitStatus *GitStatus `json:"gitStatus,omitempty"`
-	Uptime *int32 `json:"uptime,omitempty"`
+	Uptime    *int32     `json:"uptime,omitempty"`
 }
 
 // NewSetProjectState instantiates a new SetProjectState object
@@ -105,7 +105,7 @@ func (o *SetProjectState) SetUptime(v int32) {
 }
 
 func (o SetProjectState) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -158,5 +158,3 @@ func (v *NullableSetProjectState) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

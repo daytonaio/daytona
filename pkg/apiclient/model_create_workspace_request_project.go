@@ -11,8 +11,8 @@ API version: 0.1.0
 package apiclient
 
 import (
-	"encoding/json"
 	"bytes"
+	"encoding/json"
 	"fmt"
 )
 
@@ -21,13 +21,13 @@ var _ MappedNullable = &CreateWorkspaceRequestProject{}
 
 // CreateWorkspaceRequestProject struct for CreateWorkspaceRequestProject
 type CreateWorkspaceRequestProject struct {
-	Build *ProjectBuild `json:"build,omitempty"`
-	EnvVars *map[string]string `json:"envVars,omitempty"`
-	Image *string `json:"image,omitempty"`
-	Name string `json:"name"`
-	PostStartCommands []string `json:"postStartCommands,omitempty"`
-	Source *CreateWorkspaceRequestProjectSource `json:"source,omitempty"`
-	User *string `json:"user,omitempty"`
+	Build             *ProjectBuild                        `json:"build,omitempty"`
+	EnvVars           *map[string]string                   `json:"envVars,omitempty"`
+	Image             *string                              `json:"image,omitempty"`
+	Name              string                               `json:"name"`
+	PostStartCommands []string                             `json:"postStartCommands,omitempty"`
+	Source            *CreateWorkspaceRequestProjectSource `json:"source,omitempty"`
+	User              *string                              `json:"user,omitempty"`
 }
 
 type _CreateWorkspaceRequestProject CreateWorkspaceRequestProject
@@ -267,7 +267,7 @@ func (o *CreateWorkspaceRequestProject) SetUser(v string) {
 }
 
 func (o CreateWorkspaceRequestProject) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -311,10 +311,10 @@ func (o *CreateWorkspaceRequestProject) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err;
+		return err
 	}
 
-	for _, requiredProperty := range(requiredProperties) {
+	for _, requiredProperty := range requiredProperties {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -370,5 +370,3 @@ func (v *NullableCreateWorkspaceRequestProject) UnmarshalJSON(src []byte) error 
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -19,7 +19,7 @@ var _ MappedNullable = &ProviderProviderInfo{}
 
 // ProviderProviderInfo struct for ProviderProviderInfo
 type ProviderProviderInfo struct {
-	Name *string `json:"name,omitempty"`
+	Name    *string `json:"name,omitempty"`
 	Version *string `json:"version,omitempty"`
 }
 
@@ -105,7 +105,7 @@ func (o *ProviderProviderInfo) SetVersion(v string) {
 }
 
 func (o ProviderProviderInfo) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -158,5 +158,3 @@ func (v *NullableProviderProviderInfo) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

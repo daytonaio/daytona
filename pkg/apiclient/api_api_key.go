@@ -19,12 +19,11 @@ import (
 	"strings"
 )
 
-
 // ApiKeyAPIService ApiKeyAPI service
 type ApiKeyAPIService service
 
 type ApiGenerateApiKeyRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ApiKeyAPIService
 	apiKeyName string
 }
@@ -38,26 +37,27 @@ GenerateApiKey Generate an API key
 
 Generate an API key
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param apiKeyName API key name
- @return ApiGenerateApiKeyRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param apiKeyName API key name
+	@return ApiGenerateApiKeyRequest
 */
 func (a *ApiKeyAPIService) GenerateApiKey(ctx context.Context, apiKeyName string) ApiGenerateApiKeyRequest {
 	return ApiGenerateApiKeyRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		apiKeyName: apiKeyName,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *ApiKeyAPIService) GenerateApiKeyExecute(r ApiGenerateApiKeyRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApiKeyAPIService.GenerateApiKey")
@@ -141,7 +141,7 @@ func (a *ApiKeyAPIService) GenerateApiKeyExecute(r ApiGenerateApiKeyRequest) (st
 }
 
 type ApiListClientApiKeysRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ApiKeyAPIService
 }
 
@@ -154,24 +154,25 @@ ListClientApiKeys List API keys
 
 List API keys
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiListClientApiKeysRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiListClientApiKeysRequest
 */
 func (a *ApiKeyAPIService) ListClientApiKeys(ctx context.Context) ApiListClientApiKeysRequest {
 	return ApiListClientApiKeysRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []ApiKey
+//
+//	@return []ApiKey
 func (a *ApiKeyAPIService) ListClientApiKeysExecute(r ApiListClientApiKeysRequest) ([]ApiKey, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []ApiKey
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []ApiKey
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApiKeyAPIService.ListClientApiKeys")
@@ -254,7 +255,7 @@ func (a *ApiKeyAPIService) ListClientApiKeysExecute(r ApiListClientApiKeysReques
 }
 
 type ApiRevokeApiKeyRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ApiKeyAPIService
 	apiKeyName string
 }
@@ -268,14 +269,14 @@ RevokeApiKey Revoke API key
 
 Revoke API key
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param apiKeyName API key name
- @return ApiRevokeApiKeyRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param apiKeyName API key name
+	@return ApiRevokeApiKeyRequest
 */
 func (a *ApiKeyAPIService) RevokeApiKey(ctx context.Context, apiKeyName string) ApiRevokeApiKeyRequest {
 	return ApiRevokeApiKeyRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		apiKeyName: apiKeyName,
 	}
 }
@@ -283,9 +284,9 @@ func (a *ApiKeyAPIService) RevokeApiKey(ctx context.Context, apiKeyName string) 
 // Execute executes the request
 func (a *ApiKeyAPIService) RevokeApiKeyExecute(r ApiRevokeApiKeyRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApiKeyAPIService.RevokeApiKey")

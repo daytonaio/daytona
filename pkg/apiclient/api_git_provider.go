@@ -19,14 +19,13 @@ import (
 	"strings"
 )
 
-
 // GitProviderAPIService GitProviderAPI service
 type GitProviderAPIService service
 
 type ApiGetGitContextRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *GitProviderAPIService
-	gitUrl string
+	gitUrl     string
 }
 
 func (r ApiGetGitContextRequest) Execute() (*GitRepository, *http.Response, error) {
@@ -38,26 +37,27 @@ GetGitContext Get Git context
 
 Get Git context
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param gitUrl Git URL
- @return ApiGetGitContextRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param gitUrl Git URL
+	@return ApiGetGitContextRequest
 */
 func (a *GitProviderAPIService) GetGitContext(ctx context.Context, gitUrl string) ApiGetGitContextRequest {
 	return ApiGetGitContextRequest{
 		ApiService: a,
-		ctx: ctx,
-		gitUrl: gitUrl,
+		ctx:        ctx,
+		gitUrl:     gitUrl,
 	}
 }
 
 // Execute executes the request
-//  @return GitRepository
+//
+//	@return GitRepository
 func (a *GitProviderAPIService) GetGitContextExecute(r ApiGetGitContextRequest) (*GitRepository, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *GitRepository
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GitRepository
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitProviderAPIService.GetGitContext")
@@ -141,9 +141,9 @@ func (a *GitProviderAPIService) GetGitContextExecute(r ApiGetGitContextRequest) 
 }
 
 type ApiGetGitProviderForUrlRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *GitProviderAPIService
-	url string
+	url        string
 }
 
 func (r ApiGetGitProviderForUrlRequest) Execute() (*GitProvider, *http.Response, error) {
@@ -155,26 +155,27 @@ GetGitProviderForUrl Get Git provider
 
 Get Git provider
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param url Url
- @return ApiGetGitProviderForUrlRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param url Url
+	@return ApiGetGitProviderForUrlRequest
 */
 func (a *GitProviderAPIService) GetGitProviderForUrl(ctx context.Context, url string) ApiGetGitProviderForUrlRequest {
 	return ApiGetGitProviderForUrlRequest{
 		ApiService: a,
-		ctx: ctx,
-		url: url,
+		ctx:        ctx,
+		url:        url,
 	}
 }
 
 // Execute executes the request
-//  @return GitProvider
+//
+//	@return GitProvider
 func (a *GitProviderAPIService) GetGitProviderForUrlExecute(r ApiGetGitProviderForUrlRequest) (*GitProvider, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *GitProvider
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GitProvider
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitProviderAPIService.GetGitProviderForUrl")
@@ -258,8 +259,8 @@ func (a *GitProviderAPIService) GetGitProviderForUrlExecute(r ApiGetGitProviderF
 }
 
 type ApiGetGitUserRequest struct {
-	ctx context.Context
-	ApiService *GitProviderAPIService
+	ctx           context.Context
+	ApiService    *GitProviderAPIService
 	gitProviderId string
 }
 
@@ -272,26 +273,27 @@ GetGitUser Get Git context
 
 Get Git context
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param gitProviderId Git Provider Id
- @return ApiGetGitUserRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param gitProviderId Git Provider Id
+	@return ApiGetGitUserRequest
 */
 func (a *GitProviderAPIService) GetGitUser(ctx context.Context, gitProviderId string) ApiGetGitUserRequest {
 	return ApiGetGitUserRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:    a,
+		ctx:           ctx,
 		gitProviderId: gitProviderId,
 	}
 }
 
 // Execute executes the request
-//  @return GitUser
+//
+//	@return GitUser
 func (a *GitProviderAPIService) GetGitUserExecute(r ApiGetGitUserRequest) (*GitUser, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *GitUser
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GitUser
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitProviderAPIService.GetGitUser")
@@ -375,8 +377,8 @@ func (a *GitProviderAPIService) GetGitUserExecute(r ApiGetGitUserRequest) (*GitU
 }
 
 type ApiGetNamespacesRequest struct {
-	ctx context.Context
-	ApiService *GitProviderAPIService
+	ctx           context.Context
+	ApiService    *GitProviderAPIService
 	gitProviderId string
 }
 
@@ -389,26 +391,27 @@ GetNamespaces Get Git namespaces
 
 Get Git namespaces
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param gitProviderId Git provider
- @return ApiGetNamespacesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param gitProviderId Git provider
+	@return ApiGetNamespacesRequest
 */
 func (a *GitProviderAPIService) GetNamespaces(ctx context.Context, gitProviderId string) ApiGetNamespacesRequest {
 	return ApiGetNamespacesRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:    a,
+		ctx:           ctx,
 		gitProviderId: gitProviderId,
 	}
 }
 
 // Execute executes the request
-//  @return []GitNamespace
+//
+//	@return []GitNamespace
 func (a *GitProviderAPIService) GetNamespacesExecute(r ApiGetNamespacesRequest) ([]GitNamespace, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []GitNamespace
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []GitNamespace
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitProviderAPIService.GetNamespaces")
@@ -492,11 +495,11 @@ func (a *GitProviderAPIService) GetNamespacesExecute(r ApiGetNamespacesRequest) 
 }
 
 type ApiGetRepoBranchesRequest struct {
-	ctx context.Context
-	ApiService *GitProviderAPIService
+	ctx           context.Context
+	ApiService    *GitProviderAPIService
 	gitProviderId string
-	namespaceId string
-	repositoryId string
+	namespaceId   string
+	repositoryId  string
 }
 
 func (r ApiGetRepoBranchesRequest) Execute() ([]GitBranch, *http.Response, error) {
@@ -508,30 +511,31 @@ GetRepoBranches Get Git repository branches
 
 Get Git repository branches
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param gitProviderId Git provider
- @param namespaceId Namespace
- @param repositoryId Repository
- @return ApiGetRepoBranchesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param gitProviderId Git provider
+	@param namespaceId Namespace
+	@param repositoryId Repository
+	@return ApiGetRepoBranchesRequest
 */
 func (a *GitProviderAPIService) GetRepoBranches(ctx context.Context, gitProviderId string, namespaceId string, repositoryId string) ApiGetRepoBranchesRequest {
 	return ApiGetRepoBranchesRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:    a,
+		ctx:           ctx,
 		gitProviderId: gitProviderId,
-		namespaceId: namespaceId,
-		repositoryId: repositoryId,
+		namespaceId:   namespaceId,
+		repositoryId:  repositoryId,
 	}
 }
 
 // Execute executes the request
-//  @return []GitBranch
+//
+//	@return []GitBranch
 func (a *GitProviderAPIService) GetRepoBranchesExecute(r ApiGetRepoBranchesRequest) ([]GitBranch, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []GitBranch
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []GitBranch
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitProviderAPIService.GetRepoBranches")
@@ -617,11 +621,11 @@ func (a *GitProviderAPIService) GetRepoBranchesExecute(r ApiGetRepoBranchesReque
 }
 
 type ApiGetRepoPRsRequest struct {
-	ctx context.Context
-	ApiService *GitProviderAPIService
+	ctx           context.Context
+	ApiService    *GitProviderAPIService
 	gitProviderId string
-	namespaceId string
-	repositoryId string
+	namespaceId   string
+	repositoryId  string
 }
 
 func (r ApiGetRepoPRsRequest) Execute() ([]GitPullRequest, *http.Response, error) {
@@ -633,30 +637,31 @@ GetRepoPRs Get Git repository PRs
 
 Get Git repository PRs
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param gitProviderId Git provider
- @param namespaceId Namespace
- @param repositoryId Repository
- @return ApiGetRepoPRsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param gitProviderId Git provider
+	@param namespaceId Namespace
+	@param repositoryId Repository
+	@return ApiGetRepoPRsRequest
 */
 func (a *GitProviderAPIService) GetRepoPRs(ctx context.Context, gitProviderId string, namespaceId string, repositoryId string) ApiGetRepoPRsRequest {
 	return ApiGetRepoPRsRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:    a,
+		ctx:           ctx,
 		gitProviderId: gitProviderId,
-		namespaceId: namespaceId,
-		repositoryId: repositoryId,
+		namespaceId:   namespaceId,
+		repositoryId:  repositoryId,
 	}
 }
 
 // Execute executes the request
-//  @return []GitPullRequest
+//
+//	@return []GitPullRequest
 func (a *GitProviderAPIService) GetRepoPRsExecute(r ApiGetRepoPRsRequest) ([]GitPullRequest, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []GitPullRequest
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []GitPullRequest
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitProviderAPIService.GetRepoPRs")
@@ -742,10 +747,10 @@ func (a *GitProviderAPIService) GetRepoPRsExecute(r ApiGetRepoPRsRequest) ([]Git
 }
 
 type ApiGetRepositoriesRequest struct {
-	ctx context.Context
-	ApiService *GitProviderAPIService
+	ctx           context.Context
+	ApiService    *GitProviderAPIService
 	gitProviderId string
-	namespaceId string
+	namespaceId   string
 }
 
 func (r ApiGetRepositoriesRequest) Execute() ([]GitRepository, *http.Response, error) {
@@ -757,28 +762,29 @@ GetRepositories Get Git repositories
 
 Get Git repositories
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param gitProviderId Git provider
- @param namespaceId Namespace
- @return ApiGetRepositoriesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param gitProviderId Git provider
+	@param namespaceId Namespace
+	@return ApiGetRepositoriesRequest
 */
 func (a *GitProviderAPIService) GetRepositories(ctx context.Context, gitProviderId string, namespaceId string) ApiGetRepositoriesRequest {
 	return ApiGetRepositoriesRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:    a,
+		ctx:           ctx,
 		gitProviderId: gitProviderId,
-		namespaceId: namespaceId,
+		namespaceId:   namespaceId,
 	}
 }
 
 // Execute executes the request
-//  @return []GitRepository
+//
+//	@return []GitRepository
 func (a *GitProviderAPIService) GetRepositoriesExecute(r ApiGetRepositoriesRequest) ([]GitRepository, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []GitRepository
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []GitRepository
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitProviderAPIService.GetRepositories")
@@ -863,7 +869,7 @@ func (a *GitProviderAPIService) GetRepositoriesExecute(r ApiGetRepositoriesReque
 }
 
 type ApiListGitProvidersRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *GitProviderAPIService
 }
 
@@ -876,24 +882,25 @@ ListGitProviders List Git providers
 
 List Git providers
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiListGitProvidersRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiListGitProvidersRequest
 */
 func (a *GitProviderAPIService) ListGitProviders(ctx context.Context) ApiListGitProvidersRequest {
 	return ApiListGitProvidersRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []GitProvider
+//
+//	@return []GitProvider
 func (a *GitProviderAPIService) ListGitProvidersExecute(r ApiListGitProvidersRequest) ([]GitProvider, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []GitProvider
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []GitProvider
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitProviderAPIService.ListGitProviders")
@@ -976,8 +983,8 @@ func (a *GitProviderAPIService) ListGitProvidersExecute(r ApiListGitProvidersReq
 }
 
 type ApiRemoveGitProviderRequest struct {
-	ctx context.Context
-	ApiService *GitProviderAPIService
+	ctx           context.Context
+	ApiService    *GitProviderAPIService
 	gitProviderId string
 }
 
@@ -990,14 +997,14 @@ RemoveGitProvider Remove Git provider
 
 Remove Git provider
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param gitProviderId Git provider
- @return ApiRemoveGitProviderRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param gitProviderId Git provider
+	@return ApiRemoveGitProviderRequest
 */
 func (a *GitProviderAPIService) RemoveGitProvider(ctx context.Context, gitProviderId string) ApiRemoveGitProviderRequest {
 	return ApiRemoveGitProviderRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:    a,
+		ctx:           ctx,
 		gitProviderId: gitProviderId,
 	}
 }
@@ -1005,9 +1012,9 @@ func (a *GitProviderAPIService) RemoveGitProvider(ctx context.Context, gitProvid
 // Execute executes the request
 func (a *GitProviderAPIService) RemoveGitProviderExecute(r ApiRemoveGitProviderRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitProviderAPIService.RemoveGitProvider")
@@ -1082,8 +1089,8 @@ func (a *GitProviderAPIService) RemoveGitProviderExecute(r ApiRemoveGitProviderR
 }
 
 type ApiSetGitProviderRequest struct {
-	ctx context.Context
-	ApiService *GitProviderAPIService
+	ctx               context.Context
+	ApiService        *GitProviderAPIService
 	gitProviderConfig *GitProvider
 }
 
@@ -1102,22 +1109,22 @@ SetGitProvider Set Git provider
 
 Set Git provider
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiSetGitProviderRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiSetGitProviderRequest
 */
 func (a *GitProviderAPIService) SetGitProvider(ctx context.Context) ApiSetGitProviderRequest {
 	return ApiSetGitProviderRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *GitProviderAPIService) SetGitProviderExecute(r ApiSetGitProviderRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitProviderAPIService.SetGitProvider")

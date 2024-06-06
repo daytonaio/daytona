@@ -11,8 +11,8 @@ API version: 0.1.0
 package apiclient
 
 import (
-	"encoding/json"
 	"bytes"
+	"encoding/json"
 	"fmt"
 )
 
@@ -21,10 +21,10 @@ var _ MappedNullable = &CreateWorkspaceRequest{}
 
 // CreateWorkspaceRequest struct for CreateWorkspaceRequest
 type CreateWorkspaceRequest struct {
-	Id *string `json:"id,omitempty"`
-	Name *string `json:"name,omitempty"`
+	Id       *string                         `json:"id,omitempty"`
+	Name     *string                         `json:"name,omitempty"`
 	Projects []CreateWorkspaceRequestProject `json:"projects"`
-	Target *string `json:"target,omitempty"`
+	Target   *string                         `json:"target,omitempty"`
 }
 
 type _CreateWorkspaceRequest CreateWorkspaceRequest
@@ -168,7 +168,7 @@ func (o *CreateWorkspaceRequest) SetTarget(v string) {
 }
 
 func (o CreateWorkspaceRequest) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -203,10 +203,10 @@ func (o *CreateWorkspaceRequest) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err;
+		return err
 	}
 
-	for _, requiredProperty := range(requiredProperties) {
+	for _, requiredProperty := range requiredProperties {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -262,5 +262,3 @@ func (v *NullableCreateWorkspaceRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

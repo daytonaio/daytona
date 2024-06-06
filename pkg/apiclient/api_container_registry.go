@@ -19,14 +19,13 @@ import (
 	"strings"
 )
 
-
 // ContainerRegistryAPIService ContainerRegistryAPI service
 type ContainerRegistryAPIService service
 
 type ApiGetContainerRegistryRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ContainerRegistryAPIService
-	server string
+	server     string
 }
 
 func (r ApiGetContainerRegistryRequest) Execute() (*ContainerRegistry, *http.Response, error) {
@@ -38,26 +37,27 @@ GetContainerRegistry Get container registry credentials
 
 Get container registry credentials
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param server Container Registry server name
- @return ApiGetContainerRegistryRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param server Container Registry server name
+	@return ApiGetContainerRegistryRequest
 */
 func (a *ContainerRegistryAPIService) GetContainerRegistry(ctx context.Context, server string) ApiGetContainerRegistryRequest {
 	return ApiGetContainerRegistryRequest{
 		ApiService: a,
-		ctx: ctx,
-		server: server,
+		ctx:        ctx,
+		server:     server,
 	}
 }
 
 // Execute executes the request
-//  @return ContainerRegistry
+//
+//	@return ContainerRegistry
 func (a *ContainerRegistryAPIService) GetContainerRegistryExecute(r ApiGetContainerRegistryRequest) (*ContainerRegistry, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ContainerRegistry
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ContainerRegistry
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ContainerRegistryAPIService.GetContainerRegistry")
@@ -141,7 +141,7 @@ func (a *ContainerRegistryAPIService) GetContainerRegistryExecute(r ApiGetContai
 }
 
 type ApiListContainerRegistriesRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ContainerRegistryAPIService
 }
 
@@ -154,24 +154,25 @@ ListContainerRegistries List container registries
 
 List container registries
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiListContainerRegistriesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiListContainerRegistriesRequest
 */
 func (a *ContainerRegistryAPIService) ListContainerRegistries(ctx context.Context) ApiListContainerRegistriesRequest {
 	return ApiListContainerRegistriesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []ContainerRegistry
+//
+//	@return []ContainerRegistry
 func (a *ContainerRegistryAPIService) ListContainerRegistriesExecute(r ApiListContainerRegistriesRequest) ([]ContainerRegistry, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []ContainerRegistry
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []ContainerRegistry
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ContainerRegistryAPIService.ListContainerRegistries")
@@ -254,9 +255,9 @@ func (a *ContainerRegistryAPIService) ListContainerRegistriesExecute(r ApiListCo
 }
 
 type ApiRemoveContainerRegistryRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ContainerRegistryAPIService
-	server string
+	server     string
 }
 
 func (r ApiRemoveContainerRegistryRequest) Execute() (*http.Response, error) {
@@ -268,24 +269,24 @@ RemoveContainerRegistry Remove a container registry credentials
 
 Remove a container registry credentials
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param server Container Registry server name
- @return ApiRemoveContainerRegistryRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param server Container Registry server name
+	@return ApiRemoveContainerRegistryRequest
 */
 func (a *ContainerRegistryAPIService) RemoveContainerRegistry(ctx context.Context, server string) ApiRemoveContainerRegistryRequest {
 	return ApiRemoveContainerRegistryRequest{
 		ApiService: a,
-		ctx: ctx,
-		server: server,
+		ctx:        ctx,
+		server:     server,
 	}
 }
 
 // Execute executes the request
 func (a *ContainerRegistryAPIService) RemoveContainerRegistryExecute(r ApiRemoveContainerRegistryRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ContainerRegistryAPIService.RemoveContainerRegistry")
@@ -360,9 +361,9 @@ func (a *ContainerRegistryAPIService) RemoveContainerRegistryExecute(r ApiRemove
 }
 
 type ApiSetContainerRegistryRequest struct {
-	ctx context.Context
-	ApiService *ContainerRegistryAPIService
-	server string
+	ctx               context.Context
+	ApiService        *ContainerRegistryAPIService
+	server            string
 	containerRegistry *ContainerRegistry
 }
 
@@ -381,24 +382,24 @@ SetContainerRegistry Set container registry credentials
 
 Set container registry credentials
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param server Container Registry server name
- @return ApiSetContainerRegistryRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param server Container Registry server name
+	@return ApiSetContainerRegistryRequest
 */
 func (a *ContainerRegistryAPIService) SetContainerRegistry(ctx context.Context, server string) ApiSetContainerRegistryRequest {
 	return ApiSetContainerRegistryRequest{
 		ApiService: a,
-		ctx: ctx,
-		server: server,
+		ctx:        ctx,
+		server:     server,
 	}
 }
 
 // Execute executes the request
 func (a *ContainerRegistryAPIService) SetContainerRegistryExecute(r ApiSetContainerRegistryRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ContainerRegistryAPIService.SetContainerRegistry")

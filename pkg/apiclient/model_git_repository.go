@@ -19,15 +19,15 @@ var _ MappedNullable = &GitRepository{}
 
 // GitRepository struct for GitRepository
 type GitRepository struct {
-	Branch *string `json:"branch,omitempty"`
-	Id *string `json:"id,omitempty"`
-	Name *string `json:"name,omitempty"`
-	Owner *string `json:"owner,omitempty"`
-	Path *string `json:"path,omitempty"`
-	PrNumber *int32 `json:"prNumber,omitempty"`
-	Sha *string `json:"sha,omitempty"`
-	Source *string `json:"source,omitempty"`
-	Url *string `json:"url,omitempty"`
+	Branch   *string `json:"branch,omitempty"`
+	Id       *string `json:"id,omitempty"`
+	Name     *string `json:"name,omitempty"`
+	Owner    *string `json:"owner,omitempty"`
+	Path     *string `json:"path,omitempty"`
+	PrNumber *int32  `json:"prNumber,omitempty"`
+	Sha      *string `json:"sha,omitempty"`
+	Source   *string `json:"source,omitempty"`
+	Url      *string `json:"url,omitempty"`
 }
 
 // NewGitRepository instantiates a new GitRepository object
@@ -336,7 +336,7 @@ func (o *GitRepository) SetUrl(v string) {
 }
 
 func (o GitRepository) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -410,5 +410,3 @@ func (v *NullableGitRepository) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

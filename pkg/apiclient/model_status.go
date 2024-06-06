@@ -20,13 +20,13 @@ type Status string
 
 // List of Status
 const (
-	Unmodified Status = "Unmodified"
-	Untracked Status = "Untracked"
-	Modified Status = "Modified"
-	Added Status = "Added"
-	Deleted Status = "Deleted"
-	Renamed Status = "Renamed"
-	Copied Status = "Copied"
+	Unmodified         Status = "Unmodified"
+	Untracked          Status = "Untracked"
+	Modified           Status = "Modified"
+	Added              Status = "Added"
+	Deleted            Status = "Deleted"
+	Renamed            Status = "Renamed"
+	Copied             Status = "Copied"
 	UpdatedButUnmerged Status = "Updated but unmerged"
 )
 
@@ -120,4 +120,3 @@ func (v *NullableStatus) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-

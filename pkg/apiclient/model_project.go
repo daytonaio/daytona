@@ -19,16 +19,16 @@ var _ MappedNullable = &Project{}
 
 // Project struct for Project
 type Project struct {
-	Build *ProjectBuild `json:"build,omitempty"`
-	Image *string `json:"image,omitempty"`
-	Name *string `json:"name,omitempty"`
-	PostCreateCommands []string `json:"postCreateCommands,omitempty"`
-	PostStartCommands []string `json:"postStartCommands,omitempty"`
-	Repository *GitRepository `json:"repository,omitempty"`
-	State *ProjectState `json:"state,omitempty"`
-	Target *string `json:"target,omitempty"`
-	User *string `json:"user,omitempty"`
-	WorkspaceId *string `json:"workspaceId,omitempty"`
+	Build              *ProjectBuild  `json:"build,omitempty"`
+	Image              *string        `json:"image,omitempty"`
+	Name               *string        `json:"name,omitempty"`
+	PostCreateCommands []string       `json:"postCreateCommands,omitempty"`
+	PostStartCommands  []string       `json:"postStartCommands,omitempty"`
+	Repository         *GitRepository `json:"repository,omitempty"`
+	State              *ProjectState  `json:"state,omitempty"`
+	Target             *string        `json:"target,omitempty"`
+	User               *string        `json:"user,omitempty"`
+	WorkspaceId        *string        `json:"workspaceId,omitempty"`
 }
 
 // NewProject instantiates a new Project object
@@ -369,7 +369,7 @@ func (o *Project) SetWorkspaceId(v string) {
 }
 
 func (o Project) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -446,5 +446,3 @@ func (v *NullableProject) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

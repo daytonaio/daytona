@@ -21,7 +21,7 @@ var _ MappedNullable = &ApiKey{}
 type ApiKey struct {
 	KeyHash *string `json:"keyHash,omitempty"`
 	// Project or client name
-	Name *string `json:"name,omitempty"`
+	Name *string           `json:"name,omitempty"`
 	Type *ApikeyApiKeyType `json:"type,omitempty"`
 }
 
@@ -139,7 +139,7 @@ func (o *ApiKey) SetType(v ApikeyApiKeyType) {
 }
 
 func (o ApiKey) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -195,5 +195,3 @@ func (v *NullableApiKey) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

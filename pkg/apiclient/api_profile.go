@@ -18,12 +18,11 @@ import (
 	"net/url"
 )
 
-
 // ProfileAPIService ProfileAPI service
 type ProfileAPIService service
 
 type ApiDeleteProfileDataRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ProfileAPIService
 }
 
@@ -36,22 +35,22 @@ DeleteProfileData Delete profile data
 
 Delete profile data
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiDeleteProfileDataRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiDeleteProfileDataRequest
 */
 func (a *ProfileAPIService) DeleteProfileData(ctx context.Context) ApiDeleteProfileDataRequest {
 	return ApiDeleteProfileDataRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *ProfileAPIService) DeleteProfileDataExecute(r ApiDeleteProfileDataRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProfileAPIService.DeleteProfileData")
@@ -125,7 +124,7 @@ func (a *ProfileAPIService) DeleteProfileDataExecute(r ApiDeleteProfileDataReque
 }
 
 type ApiGetProfileDataRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ProfileAPIService
 }
 
@@ -138,24 +137,25 @@ GetProfileData Get profile data
 
 Get profile data
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetProfileDataRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetProfileDataRequest
 */
 func (a *ProfileAPIService) GetProfileData(ctx context.Context) ApiGetProfileDataRequest {
 	return ApiGetProfileDataRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ProfileData
+//
+//	@return ProfileData
 func (a *ProfileAPIService) GetProfileDataExecute(r ApiGetProfileDataRequest) (*ProfileData, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ProfileData
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ProfileData
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProfileAPIService.GetProfileData")
@@ -238,8 +238,8 @@ func (a *ProfileAPIService) GetProfileDataExecute(r ApiGetProfileDataRequest) (*
 }
 
 type ApiSetProfileDataRequest struct {
-	ctx context.Context
-	ApiService *ProfileAPIService
+	ctx         context.Context
+	ApiService  *ProfileAPIService
 	profileData *ProfileData
 }
 
@@ -258,22 +258,22 @@ SetProfileData Set profile data
 
 Set profile data
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiSetProfileDataRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiSetProfileDataRequest
 */
 func (a *ProfileAPIService) SetProfileData(ctx context.Context) ApiSetProfileDataRequest {
 	return ApiSetProfileDataRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *ProfileAPIService) SetProfileDataExecute(r ApiSetProfileDataRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProfileAPIService.SetProfileData")

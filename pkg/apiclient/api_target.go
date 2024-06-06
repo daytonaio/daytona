@@ -19,12 +19,11 @@ import (
 	"strings"
 )
 
-
 // TargetAPIService TargetAPI service
 type TargetAPIService service
 
 type ApiListTargetsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *TargetAPIService
 }
 
@@ -37,24 +36,25 @@ ListTargets List targets
 
 List targets
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiListTargetsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiListTargetsRequest
 */
 func (a *TargetAPIService) ListTargets(ctx context.Context) ApiListTargetsRequest {
 	return ApiListTargetsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []ProviderTarget
+//
+//	@return []ProviderTarget
 func (a *TargetAPIService) ListTargetsExecute(r ApiListTargetsRequest) ([]ProviderTarget, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []ProviderTarget
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []ProviderTarget
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TargetAPIService.ListTargets")
@@ -137,9 +137,9 @@ func (a *TargetAPIService) ListTargetsExecute(r ApiListTargetsRequest) ([]Provid
 }
 
 type ApiRemoveTargetRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *TargetAPIService
-	target string
+	target     string
 }
 
 func (r ApiRemoveTargetRequest) Execute() (*http.Response, error) {
@@ -151,24 +151,24 @@ RemoveTarget Remove a target
 
 Remove a target
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param target Target name
- @return ApiRemoveTargetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param target Target name
+	@return ApiRemoveTargetRequest
 */
 func (a *TargetAPIService) RemoveTarget(ctx context.Context, target string) ApiRemoveTargetRequest {
 	return ApiRemoveTargetRequest{
 		ApiService: a,
-		ctx: ctx,
-		target: target,
+		ctx:        ctx,
+		target:     target,
 	}
 }
 
 // Execute executes the request
 func (a *TargetAPIService) RemoveTargetExecute(r ApiRemoveTargetRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TargetAPIService.RemoveTarget")
@@ -243,9 +243,9 @@ func (a *TargetAPIService) RemoveTargetExecute(r ApiRemoveTargetRequest) (*http.
 }
 
 type ApiSetTargetRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *TargetAPIService
-	target *ProviderTarget
+	target     *ProviderTarget
 }
 
 // Target to set
@@ -263,22 +263,22 @@ SetTarget Set a target
 
 Set a target
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiSetTargetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiSetTargetRequest
 */
 func (a *TargetAPIService) SetTarget(ctx context.Context) ApiSetTargetRequest {
 	return ApiSetTargetRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *TargetAPIService) SetTargetExecute(r ApiSetTargetRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TargetAPIService.SetTarget")

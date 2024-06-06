@@ -20,11 +20,11 @@ type ProviderProviderTargetPropertyType string
 
 // List of provider.ProviderTargetPropertyType
 const (
-	ProviderTargetPropertyTypeString ProviderProviderTargetPropertyType = "string"
-	ProviderTargetPropertyTypeOption ProviderProviderTargetPropertyType = "option"
-	ProviderTargetPropertyTypeBoolean ProviderProviderTargetPropertyType = "boolean"
-	ProviderTargetPropertyTypeInt ProviderProviderTargetPropertyType = "int"
-	ProviderTargetPropertyTypeFloat ProviderProviderTargetPropertyType = "float"
+	ProviderTargetPropertyTypeString   ProviderProviderTargetPropertyType = "string"
+	ProviderTargetPropertyTypeOption   ProviderProviderTargetPropertyType = "option"
+	ProviderTargetPropertyTypeBoolean  ProviderProviderTargetPropertyType = "boolean"
+	ProviderTargetPropertyTypeInt      ProviderProviderTargetPropertyType = "int"
+	ProviderTargetPropertyTypeFloat    ProviderProviderTargetPropertyType = "float"
 	ProviderTargetPropertyTypeFilePath ProviderProviderTargetPropertyType = "file-path"
 )
 
@@ -116,4 +116,3 @@ func (v *NullableProviderProviderTargetPropertyType) UnmarshalJSON(src []byte) e
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-

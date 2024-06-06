@@ -19,11 +19,11 @@ var _ MappedNullable = &WorkspaceDTO{}
 
 // WorkspaceDTO struct for WorkspaceDTO
 type WorkspaceDTO struct {
-	Id *string `json:"id,omitempty"`
-	Info *WorkspaceInfo `json:"info,omitempty"`
-	Name *string `json:"name,omitempty"`
-	Projects []Project `json:"projects,omitempty"`
-	Target *string `json:"target,omitempty"`
+	Id       *string        `json:"id,omitempty"`
+	Info     *WorkspaceInfo `json:"info,omitempty"`
+	Name     *string        `json:"name,omitempty"`
+	Projects []Project      `json:"projects,omitempty"`
+	Target   *string        `json:"target,omitempty"`
 }
 
 // NewWorkspaceDTO instantiates a new WorkspaceDTO object
@@ -204,7 +204,7 @@ func (o *WorkspaceDTO) SetTarget(v string) {
 }
 
 func (o WorkspaceDTO) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -266,5 +266,3 @@ func (v *NullableWorkspaceDTO) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

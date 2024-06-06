@@ -19,9 +19,9 @@ var _ MappedNullable = &FileStatus{}
 
 // FileStatus struct for FileStatus
 type FileStatus struct {
-	Extra *string `json:"extra,omitempty"`
-	Name *string `json:"name,omitempty"`
-	Staging *Status `json:"staging,omitempty"`
+	Extra    *string `json:"extra,omitempty"`
+	Name     *string `json:"name,omitempty"`
+	Staging  *Status `json:"staging,omitempty"`
 	Worktree *Status `json:"worktree,omitempty"`
 }
 
@@ -171,7 +171,7 @@ func (o *FileStatus) SetWorktree(v Status) {
 }
 
 func (o FileStatus) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -230,5 +230,3 @@ func (v *NullableFileStatus) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

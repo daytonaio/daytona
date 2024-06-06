@@ -18,12 +18,11 @@ import (
 	"net/url"
 )
 
-
 // ServerAPIService ServerAPI service
 type ServerAPIService service
 
 type ApiGenerateNetworkKeyRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ServerAPIService
 }
 
@@ -36,24 +35,25 @@ GenerateNetworkKey Generate a new authentication key
 
 Generate a new authentication key
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGenerateNetworkKeyRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGenerateNetworkKeyRequest
 */
 func (a *ServerAPIService) GenerateNetworkKey(ctx context.Context) ApiGenerateNetworkKeyRequest {
 	return ApiGenerateNetworkKeyRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return NetworkKey
+//
+//	@return NetworkKey
 func (a *ServerAPIService) GenerateNetworkKeyExecute(r ApiGenerateNetworkKeyRequest) (*NetworkKey, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *NetworkKey
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *NetworkKey
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ServerAPIService.GenerateNetworkKey")
@@ -136,7 +136,7 @@ func (a *ServerAPIService) GenerateNetworkKeyExecute(r ApiGenerateNetworkKeyRequ
 }
 
 type ApiGetConfigRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ServerAPIService
 }
 
@@ -149,24 +149,25 @@ GetConfig Get the server configuration
 
 Get the server configuration
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetConfigRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetConfigRequest
 */
 func (a *ServerAPIService) GetConfig(ctx context.Context) ApiGetConfigRequest {
 	return ApiGetConfigRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ServerConfig
+//
+//	@return ServerConfig
 func (a *ServerAPIService) GetConfigExecute(r ApiGetConfigRequest) (*ServerConfig, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ServerConfig
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ServerConfig
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ServerAPIService.GetConfig")
@@ -249,9 +250,9 @@ func (a *ServerAPIService) GetConfigExecute(r ApiGetConfigRequest) (*ServerConfi
 }
 
 type ApiSetConfigRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ServerAPIService
-	config *ServerConfig
+	config     *ServerConfig
 }
 
 // Server configuration
@@ -269,24 +270,25 @@ SetConfig Set the server configuration
 
 Set the server configuration
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiSetConfigRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiSetConfigRequest
 */
 func (a *ServerAPIService) SetConfig(ctx context.Context) ApiSetConfigRequest {
 	return ApiSetConfigRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ServerConfig
+//
+//	@return ServerConfig
 func (a *ServerAPIService) SetConfigExecute(r ApiSetConfigRequest) (*ServerConfig, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ServerConfig
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ServerConfig
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ServerAPIService.SetConfig")

@@ -20,7 +20,7 @@ var _ MappedNullable = &GitBranch{}
 // GitBranch struct for GitBranch
 type GitBranch struct {
 	Name *string `json:"name,omitempty"`
-	Sha *string `json:"sha,omitempty"`
+	Sha  *string `json:"sha,omitempty"`
 }
 
 // NewGitBranch instantiates a new GitBranch object
@@ -105,7 +105,7 @@ func (o *GitBranch) SetSha(v string) {
 }
 
 func (o GitBranch) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -158,5 +158,3 @@ func (v *NullableGitBranch) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

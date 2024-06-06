@@ -19,9 +19,9 @@ var _ MappedNullable = &GitUser{}
 
 // GitUser struct for GitUser
 type GitUser struct {
-	Email *string `json:"email,omitempty"`
-	Id *string `json:"id,omitempty"`
-	Name *string `json:"name,omitempty"`
+	Email    *string `json:"email,omitempty"`
+	Id       *string `json:"id,omitempty"`
+	Name     *string `json:"name,omitempty"`
 	Username *string `json:"username,omitempty"`
 }
 
@@ -171,7 +171,7 @@ func (o *GitUser) SetUsername(v string) {
 }
 
 func (o GitUser) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -230,5 +230,3 @@ func (v *NullableGitUser) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-
