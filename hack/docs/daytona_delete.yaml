@@ -6,6 +6,10 @@ options:
       shorthand: a
       default_value: "false"
       usage: Delete all workspaces
+    - name: force
+      shorthand: f
+      default_value: "false"
+      usage: Delete a workspace by force
     - name: "yes"
       shorthand: "y"
       default_value: "false"
