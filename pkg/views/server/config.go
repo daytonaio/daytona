@@ -33,11 +33,13 @@ func RenderConfig(config *server.Config) {
 
 	output += fmt.Sprintf("%s %d", views.GetPropertyKey("Headscale Port: "), config.HeadscalePort) + "\n\n"
 
-	output += fmt.Sprintf("%s %d", views.GetPropertyKey("Build Registry Port: "), config.RegistryPort) + "\n\n"
-
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Binaries Path: "), config.BinariesPath) + "\n\n"
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Logs Path: "), config.LogFilePath) + "\n\n"
+
+	output += fmt.Sprintf("%s %d", views.GetPropertyKey("Build Registry Port: "), config.RegistryPort) + "\n\n"
+
+	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Builder Image: "), config.BuilderImage) + "\n\n"
 
 	output += views.SeparatorString + "\n\n"
 

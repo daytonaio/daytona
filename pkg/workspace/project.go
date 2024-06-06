@@ -8,7 +8,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
@@ -87,16 +86,6 @@ const (
 	Copied             Status = "Copied"
 	UpdatedButUnmerged Status = "Updated but unmerged"
 )
-
-func (p *Project) GetImageServer() string {
-	parts := strings.Split(p.Image, "/")
-
-	if len(parts) < 3 {
-		return "docker.io"
-	}
-
-	return parts[0]
-}
 
 func GetProjectEnvVars(project *Project, apiUrl, serverUrl string) map[string]string {
 	envVars := map[string]string{

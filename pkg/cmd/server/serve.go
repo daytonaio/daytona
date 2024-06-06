@@ -142,6 +142,8 @@ var ServeCmd = &cobra.Command{
 			DefaultProjectImage:             c.DefaultProjectImage,
 			DefaultProjectUser:              c.DefaultProjectUser,
 			DefaultProjectPostStartCommands: c.DefaultProjectPostStartCommands,
+			Image:                           c.BuilderImage,
+			ContainerRegistryService:        containerRegistryService,
 		})
 		provisioner := provisioner.NewProvisioner(provisioner.ProvisionerConfig{
 			ProviderManager: providerManager,
@@ -155,7 +157,7 @@ var ServeCmd = &cobra.Command{
 			TargetStore:                     providerTargetStore,
 			ApiKeyService:                   apiKeyService,
 			GitProviderService:              gitProviderService,
-			ContainerRegistryStore:          containerRegistryStore,
+			ContainerRegistryService:        containerRegistryService,
 			ServerApiUrl:                    util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 			ServerUrl:                       util.GetFrpcServerUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 			DefaultProjectImage:             c.DefaultProjectImage,

@@ -1533,6 +1533,9 @@ const docTemplate = `{
                 "binariesPath": {
                     "type": "string"
                 },
+                "builderImage": {
+                    "type": "string"
+                },
                 "defaultProjectImage": {
                     "type": "string"
                 },

@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logger"
 	"github.com/daytonaio/daytona/pkg/ports"
+	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/docker/docker/pkg/stringid"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
@@ -27,6 +28,8 @@ type BuilderFactory struct {
 	localContainerRegistryServer    string
 	basePath                        string
 	loggerFactory                   logger.LoggerFactory
+	image                           string
+	containerRegistryService        containerregistries.IContainerRegistryService
 	defaultProjectImage             string
 	defaultProjectUser              string
 	defaultProjectPostStartCommands []string
@@ -34,8 +37,10 @@ type BuilderFactory struct {
 
 func NewBuilderFactory(config BuilderConfig) IBuilderFactory {
 	return &BuilderFactory{
+		image:                           config.Image,
 		serverConfigFolder:              config.ServerConfigFolder,
 		localContainerRegistryServer:    config.LocalContainerRegistryServer,
+		containerRegistryService:        config.ContainerRegistryService,
 		basePath:                        config.BasePath,
 		loggerFactory:                   config.LoggerFactory,
 		defaultProjectImage:             config.DefaultProjectImage,
@@ -108,6 +113,8 @@ func (f *BuilderFactory) Create(p workspace.Project, gpc *gitprovider.GitProvide
 				gitProviderConfig:               gpc,
 				hash:                            hash,
 				projectVolumePath:               projectDir,
+				image:                           f.image,
+				containerRegistryService:        f.containerRegistryService,
 				serverConfigFolder:              f.serverConfigFolder,
 				localContainerRegistryServer:    f.localContainerRegistryServer,
 				basePath:                        f.basePath,

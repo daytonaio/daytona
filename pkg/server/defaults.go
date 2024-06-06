@@ -21,6 +21,7 @@ const defaultServerDownloadUrl = "https://download.daytona.io/daytona/install.sh
 const defaultHeadscalePort = 3987
 const defaultApiPort = 3986
 const defaultRegistryPort = 3988
+const defaultBuilderImage = "daytonaio/workspace-builder:latest"
 const defaultProjectImage = "daytonaio/workspace-project:latest"
 const defaultProjectUser = "daytona"
 
@@ -111,6 +112,7 @@ func getDefaultConfig() (*Config, error) {
 		DefaultProjectImage:             defaultProjectImage,
 		DefaultProjectUser:              defaultProjectUser,
 		DefaultProjectPostStartCommands: defaultProjectPostStartCommands,
+		BuilderImage:                    defaultBuilderImage,
 	}
 
 	if os.Getenv("DEFAULT_REGISTRY_URL") != "" {

@@ -8,11 +8,11 @@ import (
 	"io"
 
 	"github.com/daytonaio/daytona/pkg/builder"
-	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/logger"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
+	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	"github.com/daytonaio/daytona/pkg/workspace"
@@ -39,7 +39,7 @@ type targetStore interface {
 type WorkspaceServiceConfig struct {
 	WorkspaceStore                  workspace.Store
 	TargetStore                     targetStore
-	ContainerRegistryStore          containerregistry.Store
+	ContainerRegistryService        containerregistries.IContainerRegistryService
 	ServerApiUrl                    string
 	ServerUrl                       string
 	Provisioner                     provisioner.IProvisioner
@@ -56,7 +56,7 @@ func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 	return &WorkspaceService{
 		workspaceStore:                  config.WorkspaceStore,
 		targetStore:                     config.TargetStore,
-		containerRegistryStore:          config.ContainerRegistryStore,
+		containerRegistryService:        config.ContainerRegistryService,
 		serverApiUrl:                    config.ServerApiUrl,
 		serverUrl:                       config.ServerUrl,
 		defaultProjectImage:             config.DefaultProjectImage,
@@ -73,7 +73,7 @@ func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 type WorkspaceService struct {
 	workspaceStore                  workspace.Store
 	targetStore                     targetStore
-	containerRegistryStore          containerregistry.Store
+	containerRegistryService        containerregistries.IContainerRegistryService
 	provisioner                     provisioner.IProvisioner
 	apiKeyService                   apikeys.IApiKeyService
 	serverApiUrl                    string
