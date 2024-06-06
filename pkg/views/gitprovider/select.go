@@ -128,7 +128,7 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.GitProvider, userGit
 }
 
 func providerRequiresUsername(gitProviderId string) bool {
-	return gitProviderId == "bitbucket"
+	return gitProviderId == "bitbucket" || gitProviderId == "bitbucket-server"
 }
 
 func providerRequiresApiUrl(gitProviderId string) bool {
@@ -147,7 +147,7 @@ func getApiUrlDescription(gitProviderId string) string {
 	} else if gitProviderId == "azure-devops" {
 		return "For example: https://dev.azure.com/organization"
 	} else if gitProviderId == "bitbucket-server" {
-		return "For example: https://bitbucket.host.com"
+		return "For example: https://bitbucket.host.com/rest"
 	}
 	return ""
 }

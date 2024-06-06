@@ -36,27 +36,25 @@ func NewBitbucketServerGitProvider(username string, token string, baseApiUrl *st
 	return provider
 }
 
-func (g *BitbucketServerGitProvider) getApiClient() interface{} {
+func (g *BitbucketServerGitProvider) getApiClient() (*bitbucketv1.APIClient, error) {
 	conf := bitbucketv1.NewConfiguration(*g.baseApiUrl)
 	ctx := context.WithValue(context.Background(), bitbucketv1.ContextBasicAuth, bitbucketv1.BasicAuth{
 		UserName: g.username,
 		Password: g.token,
 	})
 	client := bitbucketv1.NewAPIClient(ctx, conf)
-	return client
+	return client, nil
 }
 
 func (g *BitbucketServerGitProvider) GetNamespaces() ([]*GitNamespace, error) {
-	client := g.getApiClient()
-	var namespaces []*GitNamespace
-
-	// Bitbucket Data Center/Server
-	bitbucketDCClient, ok := client.(*bitbucketv1.APIClient)
-	if !ok {
-		return nil, fmt.Errorf("Invalid Bitbucket Data Center/Server client")
+	client, err := g.getApiClient()
+	if err != nil {
+		return nil, err
 	}
 
-	projectsRaw, err := bitbucketDCClient.DefaultApi.GetProjects(map[string]any{
+	var namespaces []*GitNamespace
+
+	projectsRaw, err := client.DefaultApi.GetProjects(map[string]any{
 		"limit": bitbucketServerResponseLimit,
 	})
 	if err != nil {
@@ -82,22 +80,21 @@ func (g *BitbucketServerGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 }
 
 func (g *BitbucketServerGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
-	client := g.getApiClient()
-	var response []*GitRepository
-
-	bitbucketDCClient, ok := client.(*bitbucketv1.APIClient)
-	if !ok {
-		return nil, fmt.Errorf("Invalid Bitbucket Data Center/Server client")
+	client, err := g.getApiClient()
+	if err != nil {
+		return nil, err
 	}
+
+	var response []*GitRepository
 
 	start := 0
 	for {
 		var repoList *bitbucketv1.APIResponse
 		var err error
 		if namespace == personalNamespaceId {
-			repoList, err = bitbucketDCClient.DefaultApi.GetRepositories_19(nil)
+			repoList, err = client.DefaultApi.GetRepositories_19(nil)
 		} else {
-			repoList, err = bitbucketDCClient.DefaultApi.GetRepositoriesWithOptions(namespace, map[string]interface{}{
+			repoList, err = client.DefaultApi.GetRepositoriesWithOptions(namespace, map[string]interface{}{
 				"start": start,
 			})
 		}
@@ -140,14 +137,14 @@ func (g *BitbucketServerGitProvider) GetRepositories(namespace string) ([]*GitRe
 }
 
 func (g *BitbucketServerGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {
-	client := g.getApiClient()
+	client, err := g.getApiClient()
+	if err != nil {
+		return nil, err
+	}
+
 	var response []*GitBranch
 
-	bitbucketDCClient, ok := client.(*bitbucketv1.APIClient)
-	if !ok {
-		return nil, fmt.Errorf("Invalid Bitbucket Data Center/Server client")
-	}
-	branches, err := bitbucketDCClient.DefaultApi.GetBranches(namespaceId, repositoryId, nil)
+	branches, err := client.DefaultApi.GetBranches(namespaceId, repositoryId, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -168,15 +165,14 @@ func (g *BitbucketServerGitProvider) GetRepoBranches(repositoryId string, namesp
 }
 
 func (g *BitbucketServerGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error) {
-	client := g.getApiClient()
-	var response []*GitPullRequest
-
-	bitbucketDCClient, ok := client.(*bitbucketv1.APIClient)
-	if !ok {
-		return nil, fmt.Errorf("Invalid Bitbucket Data Center/Server client")
+	client, err := g.getApiClient()
+	if err != nil {
+		return nil, err
 	}
 
-	prList, err := bitbucketDCClient.DefaultApi.GetPullRequests(nil)
+	var response []*GitPullRequest
+
+	prList, err := client.DefaultApi.GetPullRequests(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -210,18 +206,16 @@ func (g *BitbucketServerGitProvider) GetRepoPRs(repositoryId string, namespaceId
 }
 
 func (g *BitbucketServerGitProvider) GetUser() (*GitUser, error) {
-	client := g.getApiClient()
-
-	bitbucketDCClient, ok := client.(*bitbucketv1.APIClient)
-	if !ok {
-		return nil, fmt.Errorf("Invalid Bitbucket Data Center/Server client")
+	client, err := g.getApiClient()
+	if err != nil {
+		return nil, err
 	}
 
 	// Since BitbucketServer or gfleury/go-bitbucket-v1 doesn't offer an endpoint to query the
 	// currently authenticated user, We instead query the '/rest/api/1.0/application-properties' endpoint
 	// which does not put load on the server and then extract the username from the response header.
 	// Refer this developer community comment: https://community.developer.atlassian.com/t/obtain-authorised-users-username-from-api/24422/2
-	res, err := bitbucketDCClient.DefaultApi.GetApplicationProperties()
+	res, err := client.DefaultApi.GetApplicationProperties()
 	if err != nil {
 		return nil, err
 	}
@@ -231,7 +225,7 @@ func (g *BitbucketServerGitProvider) GetUser() (*GitUser, error) {
 		return nil, fmt.Errorf("X-Ausername header is missing")
 	}
 
-	user, err := bitbucketDCClient.DefaultApi.GetUser(username)
+	user, err := client.DefaultApi.GetUser(username)
 	if err != nil {
 		return nil, err
 	}
@@ -252,11 +246,9 @@ func (g *BitbucketServerGitProvider) GetUser() (*GitUser, error) {
 }
 
 func (g *BitbucketServerGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (string, error) {
-	client := g.getApiClient()
-
-	bitbucketDCClient, ok := client.(*bitbucketv1.APIClient)
-	if !ok {
-		return "", fmt.Errorf("Invalid Bitbucket Data Center/Server client")
+	client, err := g.getApiClient()
+	if err != nil {
+		return "", err
 	}
 
 	until := ""
@@ -264,7 +256,7 @@ func (g *BitbucketServerGitProvider) GetLastCommitSha(staticContext *StaticGitCo
 		until = *staticContext.Sha
 	}
 
-	commits, err := bitbucketDCClient.DefaultApi.GetCommits(staticContext.Id, staticContext.Name, map[string]interface{}{
+	commits, err := client.DefaultApi.GetCommits(staticContext.Id, staticContext.Name, map[string]interface{}{
 		"until": until,
 	})
 
@@ -291,14 +283,12 @@ func (g *BitbucketServerGitProvider) getPrContext(staticContext *StaticGitContex
 
 	repo := *staticContext
 
-	client := g.getApiClient()
-
-	bitbucketDCClient, ok := client.(*bitbucketv1.APIClient)
-	if !ok {
-		return nil, fmt.Errorf("Invalid Bitbucket Data Center/Server client")
+	client, err := g.getApiClient()
+	if err != nil {
+		return nil, err
 	}
 
-	pr, err := bitbucketDCClient.DefaultApi.GetPullRequest(staticContext.Id, staticContext.Name, int(*staticContext.PrNumber))
+	pr, err := client.DefaultApi.GetPullRequest(staticContext.Id, staticContext.Name, int(*staticContext.PrNumber))
 	if err != nil {
 		return nil, err
 	}
@@ -319,7 +309,7 @@ func (g *BitbucketServerGitProvider) getPrContext(staticContext *StaticGitContex
 func (g *BitbucketServerGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
 	var staticContext StaticGitContext
 
-	re := regexp.MustCompile(`(https?://[^/]+)/projects/([^/]+)/repos/([^/]+)(?:/([^/]+))?(?:/([^/]+))?`)
+	re := regexp.MustCompile(`(https?://[^/]+)/rest/api/[^/]+/projects/([^/]+)/repos/([^/]+)(?:/([^/]+))?(?:/([^/]+))?`)
 	matches := re.FindStringSubmatch(repoUrl)
 
 	if len(matches) < 4 {

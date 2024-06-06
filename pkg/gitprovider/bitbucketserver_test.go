@@ -22,7 +22,7 @@ func NewBitbucketServerGitProviderTestSuite() *BitbucketServerGitProviderTestSui
 }
 
 func (b *BitbucketServerGitProviderTestSuite) TestParseStaticGitContext_PR() {
-	prUrl := "https://bitbucket.example.com/projects/PROJECT_KEY/repos/REPO_NAME/pull-requests/1"
+	prUrl := "https://bitbucket.example.com/rest/api/latest/projects/PROJECT_KEY/repos/REPO_NAME/pull-requests/1"
 	prNumber := uint32(1)
 	prContext := &StaticGitContext{
 		Id:       "PROJECT_KEY",
@@ -45,7 +45,7 @@ func (b *BitbucketServerGitProviderTestSuite) TestParseStaticGitContext_PR() {
 }
 
 func (b *BitbucketServerGitProviderTestSuite) TestParseStaticGitContext_Blob() {
-	blobUrl := "https://bitbucket.example.com/projects/PROJECT_KEY/repos/REPO_NAME/browse/README.md"
+	blobUrl := "https://bitbucket.example.com/rest/api/latest/projects/PROJECT_KEY/repos/REPO_NAME/browse/README.md"
 	blobContext := &StaticGitContext{
 		Id:       "PROJECT_KEY",
 		Name:     "REPO_NAME",
@@ -67,7 +67,7 @@ func (b *BitbucketServerGitProviderTestSuite) TestParseStaticGitContext_Blob() {
 }
 
 func (b *BitbucketServerGitProviderTestSuite) TestParseStaticGitContext_Branch() {
-	branchUrl := "https://bitbucket.example.com/projects/PROJECT_KEY/repos/REPO_NAME/branches/master"
+	branchUrl := "https://bitbucket.example.com/rest/api/latest/projects/PROJECT_KEY/repos/REPO_NAME/branches/master"
 	branchContext := &StaticGitContext{
 		Id:       "PROJECT_KEY",
 		Name:     "REPO_NAME",
@@ -89,7 +89,7 @@ func (b *BitbucketServerGitProviderTestSuite) TestParseStaticGitContext_Branch()
 }
 
 func (b *BitbucketServerGitProviderTestSuite) TestParseStaticGitContext_Commits() {
-	commitsUrl := "https://bitbucket.example.com/projects/PROJECT_KEY/repos/REPO_NAME/commits?until=COMMIT_SHA"
+	commitsUrl := "https://bitbucket.example.com/rest/api/latest/projects/PROJECT_KEY/repos/REPO_NAME/commits?until=COMMIT_SHA"
 	commitsContext := &StaticGitContext{
 		Id:       "PROJECT_KEY",
 		Name:     "REPO_NAME",
@@ -111,7 +111,7 @@ func (b *BitbucketServerGitProviderTestSuite) TestParseStaticGitContext_Commits(
 }
 
 func (b *BitbucketServerGitProviderTestSuite) TestParseStaticGitContext_Commit() {
-	commitUrl := "https://bitbucket.example.com/projects/PROJECT_KEY/repos/REPO_NAME/commits/COMMIT_SHA"
+	commitUrl := "https://bitbucket.example.com/rest/api/latest/projects/PROJECT_KEY/repos/REPO_NAME/commits/COMMIT_SHA"
 	commitContext := &StaticGitContext{
 		Id:       "PROJECT_KEY",
 		Name:     "REPO_NAME",
