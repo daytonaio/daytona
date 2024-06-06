@@ -33,7 +33,9 @@ var providerInstallCmd = &cobra.Command{
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
-		providersManifest, err := manager.GetProvidersManifest(*serverConfig.RegistryUrl)
+		providerManager := manager.NewProviderManager(manager.ProviderManagerConfig{RegistryUrl: *serverConfig.RegistryUrl})
+
+		providersManifest, err := providerManager.GetProvidersManifest()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -42,7 +44,15 @@ var providerInstallCmd = &cobra.Command{
 			log.Fatal("Could not get providers manifest")
 		}
 
-		providerList := convertToDTO(providersManifest)
+		providersManifestLatest := providersManifest.GetLatestVersions()
+		if providersManifestLatest == nil {
+			log.Fatal("Could not get providers manifest")
+		}
+
+		providerList := convertToDTO(providersManifestLatest)
+		specificProviderName := "Select a specific version"
+		specificProviderVersion := ""
+		providerList = append(providerList, apiclient.Provider{Name: &specificProviderName, Version: &specificProviderVersion})
 
 		providerToInstall, err := provider.GetProviderFromPrompt(providerList, "Choose a provider to install", false)
 		if err != nil {
@@ -51,6 +61,19 @@ var providerInstallCmd = &cobra.Command{
 
 		if providerToInstall == nil {
 			return
+		}
+
+		if *providerToInstall.Name == specificProviderName {
+			providerList = convertToDTO(providersManifest)
+
+			providerToInstall, err = provider.GetProviderFromPrompt(providerList, "Choose a specific provider to install", false)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			if providerToInstall == nil {
+				return
+			}
 		}
 
 		downloadUrls := convertToStringMap((*providersManifest)[*providerToInstall.Name].Versions[*providerToInstall.Version].DownloadUrls)
