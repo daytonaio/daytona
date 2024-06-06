@@ -1295,6 +1295,7 @@ components:
         defaultProjectPostStartCommands:
         - defaultProjectPostStartCommands
         - defaultProjectPostStartCommands
+        builderImage: builderImage
         apiPort: 0
         headscalePort: 1
         serverDownloadUrl: serverDownloadUrl
@@ -1312,6 +1313,8 @@ components:
         apiPort:
           type: integer
         binariesPath:
+          type: string
+        builderImage:
           type: string
         defaultProjectImage:
           type: string

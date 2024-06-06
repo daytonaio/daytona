@@ -6,6 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **ApiPort** | Pointer to **int32** |  | [optional] 
 **BinariesPath** | Pointer to **string** |  | [optional] 
+**BuilderImage** | Pointer to **string** |  | [optional] 
 **DefaultProjectImage** | Pointer to **string** |  | [optional] 
 **DefaultProjectPostStartCommands** | Pointer to **[]string** |  | [optional] 
 **DefaultProjectUser** | Pointer to **string** |  | [optional] 
@@ -86,6 +87,31 @@ SetBinariesPath sets BinariesPath field to given value.
 `func (o *ServerConfig) HasBinariesPath() bool`
 
 HasBinariesPath returns a boolean if a field has been set.
+
+### GetBuilderImage
+
+`func (o *ServerConfig) GetBuilderImage() string`
+
+GetBuilderImage returns the BuilderImage field if non-nil, zero value otherwise.
+
+### GetBuilderImageOk
+
+`func (o *ServerConfig) GetBuilderImageOk() (*string, bool)`
+
+GetBuilderImageOk returns a tuple with the BuilderImage field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetBuilderImage
+
+`func (o *ServerConfig) SetBuilderImage(v string)`
+
+SetBuilderImage sets BuilderImage field to given value.
+
+### HasBuilderImage
+
+`func (o *ServerConfig) HasBuilderImage() bool`
+
+HasBuilderImage returns a boolean if a field has been set.
 
 ### GetDefaultProjectImage
 

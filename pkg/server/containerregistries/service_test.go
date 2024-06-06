@@ -35,4 +35,21 @@ func TestContainerRegistryService(t *testing.T) {
 		require.Nil(t, err)
 		require.EqualValues(t, crOrg, cr)
 	})
+
+	t.Run("FindByImageName", func(t *testing.T) {
+		var crOrg = &containerregistry.ContainerRegistry{
+			Server:   "example.com",
+			Username: "user",
+			Password: "password",
+		}
+
+		err := service.Save(crOrg)
+
+		require.Nil(t, err)
+
+		cr, err := service.FindByImageName("example.com/image/image")
+
+		require.Nil(t, err)
+		require.EqualValues(t, crOrg, cr)
+	})
 }

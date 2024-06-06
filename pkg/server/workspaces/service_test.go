@@ -9,7 +9,6 @@ import (
 	"time"
 
 	t_targets "github.com/daytonaio/daytona/internal/testing/provider/targets"
-	t_containerregistries "github.com/daytonaio/daytona/internal/testing/server/containerregistries"
 	t_workspaces "github.com/daytonaio/daytona/internal/testing/server/workspaces"
 	"github.com/daytonaio/daytona/internal/testing/server/workspaces/mocks"
 	"github.com/daytonaio/daytona/pkg/apikey"
@@ -38,12 +37,6 @@ var target = provider.ProviderTarget{
 		Version: "test",
 	},
 	Options: "test-options",
-}
-
-var cr = containerregistry.ContainerRegistry{
-	Server:   "test-server",
-	Username: "test-username",
-	Password: "test-password",
 }
 
 var createWorkspaceRequest = dto.CreateWorkspaceRequest{
@@ -81,12 +74,10 @@ var workspaceInfo = workspace.WorkspaceInfo{
 func TestWorkspaceService(t *testing.T) {
 	workspaceStore := t_workspaces.NewInMemoryWorkspaceStore()
 
-	crStore := t_containerregistries.NewInMemoryContainerRegistryStore()
-	err := crStore.Save(&cr)
-	require.Nil(t, err)
+	containerRegistryService := mocks.NewMockContainerRegistryService()
 
 	targetStore := t_targets.NewInMemoryTargetStore()
-	err = targetStore.Save(&target)
+	err := targetStore.Save(&target)
 	require.Nil(t, err)
 
 	apiKeyService := mocks.NewMockApiKeyService()
@@ -102,7 +93,7 @@ func TestWorkspaceService(t *testing.T) {
 		TargetStore:                     targetStore,
 		ServerApiUrl:                    serverApiUrl,
 		ServerUrl:                       serverUrl,
-		ContainerRegistryStore:          crStore,
+		ContainerRegistryService:        containerRegistryService,
 		DefaultProjectImage:             defaultProjectImage,
 		DefaultProjectUser:              defaultProjectUser,
 		DefaultProjectPostStartCommands: defaultProjectPostStartCommands,
@@ -115,6 +106,8 @@ func TestWorkspaceService(t *testing.T) {
 
 	t.Run("CreateWorkspace", func(t *testing.T) {
 		var containerRegistry *containerregistry.ContainerRegistry
+
+		containerRegistryService.On("FindByImageName", defaultProjectImage).Return(containerRegistry, containerregistry.ErrContainerRegistryNotFound)
 
 		provisioner.On("CreateWorkspace", mock.Anything, &target).Return(nil)
 		provisioner.On("StartWorkspace", mock.Anything, &target).Return(nil)

@@ -21,6 +21,7 @@ var _ MappedNullable = &ServerConfig{}
 type ServerConfig struct {
 	ApiPort                         *int32      `json:"apiPort,omitempty"`
 	BinariesPath                    *string     `json:"binariesPath,omitempty"`
+	BuilderImage                    *string     `json:"builderImage,omitempty"`
 	DefaultProjectImage             *string     `json:"defaultProjectImage,omitempty"`
 	DefaultProjectPostStartCommands []string    `json:"defaultProjectPostStartCommands,omitempty"`
 	DefaultProjectUser              *string     `json:"defaultProjectUser,omitempty"`
@@ -113,6 +114,38 @@ func (o *ServerConfig) HasBinariesPath() bool {
 // SetBinariesPath gets a reference to the given string and assigns it to the BinariesPath field.
 func (o *ServerConfig) SetBinariesPath(v string) {
 	o.BinariesPath = &v
+}
+
+// GetBuilderImage returns the BuilderImage field value if set, zero value otherwise.
+func (o *ServerConfig) GetBuilderImage() string {
+	if o == nil || IsNil(o.BuilderImage) {
+		var ret string
+		return ret
+	}
+	return *o.BuilderImage
+}
+
+// GetBuilderImageOk returns a tuple with the BuilderImage field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ServerConfig) GetBuilderImageOk() (*string, bool) {
+	if o == nil || IsNil(o.BuilderImage) {
+		return nil, false
+	}
+	return o.BuilderImage, true
+}
+
+// HasBuilderImage returns a boolean if a field has been set.
+func (o *ServerConfig) HasBuilderImage() bool {
+	if o != nil && !IsNil(o.BuilderImage) {
+		return true
+	}
+
+	return false
+}
+
+// SetBuilderImage gets a reference to the given string and assigns it to the BuilderImage field.
+func (o *ServerConfig) SetBuilderImage(v string) {
+	o.BuilderImage = &v
 }
 
 // GetDefaultProjectImage returns the DefaultProjectImage field value if set, zero value otherwise.
@@ -482,6 +515,9 @@ func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.BinariesPath) {
 		toSerialize["binariesPath"] = o.BinariesPath
+	}
+	if !IsNil(o.BuilderImage) {
+		toSerialize["builderImage"] = o.BuilderImage
 	}
 	if !IsNil(o.DefaultProjectImage) {
 		toSerialize["defaultProjectImage"] = o.DefaultProjectImage
