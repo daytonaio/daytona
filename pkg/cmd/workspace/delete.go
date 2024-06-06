@@ -6,12 +6,12 @@ package workspace
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
@@ -119,15 +119,21 @@ var DeleteCmd = &cobra.Command{
 				}
 
 				if forceFlag {
-					_ = forceRemoveWorkspace(workspace)
+					err := removeWorkspace(ctx, apiClient, workspace, true)
+					if err != nil {
+						log.Fatal(err)
+					}
 				} else {
-					err := removeWorkspace(ctx, apiClient, workspace)
+					err := removeWorkspace(ctx, apiClient, workspace, false)
 					if err != nil {
 						log.Fatal(err)
 					}
 				}
 			} else {
-				_ = forceRemoveWorkspace(workspace)
+				err := removeWorkspace(ctx, apiClient, workspace, true)
+				if err != nil {
+					log.Fatal(err)
+				}
 			}
 		} else {
 			fmt.Println("Operation canceled.")
@@ -171,8 +177,16 @@ func DeleteAllWorkspaces() error {
 	return nil
 }
 
-func removeWorkspace(ctx context.Context, apiClient *apiclient.APIClient, workspace *apiclient.WorkspaceDTO) error {
-	res, err := apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
+func removeWorkspace(ctx context.Context, apiClient *apiclient.APIClient, workspace *apiclient.WorkspaceDTO, force bool) error {
+	var res *http.Response
+	var err error
+
+	if force {
+		res, err = apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
+	} else {
+		res, err = apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).ExecuteForce()
+	}
+
 	if err != nil {
 		log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 	}
@@ -193,12 +207,5 @@ func removeWorkspace(ctx context.Context, apiClient *apiclient.APIClient, worksp
 	}
 
 	views.RenderInfoMessage(fmt.Sprintf("Workspace %s successfully deleted", *workspace.Name))
-	return nil
-}
-
-func forceRemoveWorkspace(workspace *apiclient.WorkspaceDTO) error {
-	server := server.GetInstance(nil)
-	_ = server.WorkspaceService.ForceRemoveWorkspace(*workspace.Id)
-
 	return nil
 }
