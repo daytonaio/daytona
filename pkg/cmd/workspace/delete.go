@@ -6,7 +6,6 @@ package workspace
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/charmbracelet/huh"
@@ -178,14 +177,7 @@ func DeleteAllWorkspaces() error {
 }
 
 func removeWorkspace(ctx context.Context, apiClient *apiclient.APIClient, workspace *apiclient.WorkspaceDTO, force bool) error {
-	var res *http.Response
-	var err error
-
-	if force {
-		res, err = apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
-	} else {
-		res, err = apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).ExecuteForce()
-	}
+	res, err := apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Force(force).Execute()
 
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)

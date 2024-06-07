@@ -394,14 +394,17 @@ type ApiRemoveWorkspaceRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceAPIService
 	workspaceId string
+	force       *bool
+}
+
+// Force
+func (r ApiRemoveWorkspaceRequest) Force(force bool) ApiRemoveWorkspaceRequest {
+	r.force = &force
+	return r
 }
 
 func (r ApiRemoveWorkspaceRequest) Execute() (*http.Response, error) {
-	return r.ApiService.RemoveWorkspaceExecute(r, false)
-}
-
-func (r ApiRemoveWorkspaceRequest) ExecuteForce() (*http.Response, error) {
-	return r.ApiService.RemoveWorkspaceExecute(r, true)
+	return r.ApiService.RemoveWorkspaceExecute(r)
 }
 
 /*
@@ -422,12 +425,11 @@ func (a *WorkspaceAPIService) RemoveWorkspace(ctx context.Context, workspaceId s
 }
 
 // Execute executes the request
-func (a *WorkspaceAPIService) RemoveWorkspaceExecute(r ApiRemoveWorkspaceRequest, force bool) (*http.Response, error) {
+func (a *WorkspaceAPIService) RemoveWorkspaceExecute(r ApiRemoveWorkspaceRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod = http.MethodDelete
 		localVarPostBody   interface{}
 		formFiles          []formFile
-		localVarPath	   string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.RemoveWorkspace")
@@ -435,17 +437,16 @@ func (a *WorkspaceAPIService) RemoveWorkspaceExecute(r ApiRemoveWorkspaceRequest
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	if force {
-		localVarPath = localBasePath + "/workspace/{workspaceId}/force"
-	} else {
-		localVarPath = localBasePath + "/workspace/{workspaceId}"
-	}
+	localVarPath := localBasePath + "/workspace/{workspaceId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.force != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "force", r.force, "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

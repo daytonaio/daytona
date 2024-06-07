@@ -79,32 +79,35 @@ func ListWorkspaces(ctx *gin.Context) {
 //	@Summary		Remove workspace
 //	@Description	Remove workspace
 //	@Param			workspaceId	path	string	true	"Workspace ID"
+//	@Param			force		query	bool	false	"Force"
 //	@Success		200
 //	@Router			/workspace/{workspaceId} [delete]
 //
 //	@id				RemoveWorkspace
 func RemoveWorkspace(ctx *gin.Context) {
 	workspaceId := ctx.Param("workspaceId")
+	forceQuery := ctx.Query("force")
+	var err error
+	force := false
 
-	server := server.GetInstance(nil)
-
-	err := server.WorkspaceService.RemoveWorkspace(workspaceId)
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to remove workspace: %s", err.Error()))
-		return
+	if forceQuery != "" {
+		force, err = strconv.ParseBool(forceQuery)
+		if err != nil {
+			ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for force flag"))
+			return
+		}
 	}
 
-	ctx.Status(200)
-}
-
-func ForceRemoveWorkspace(ctx *gin.Context) {
-	workspaceId := ctx.Param("workspaceId")
-
 	server := server.GetInstance(nil)
 
-	err := server.WorkspaceService.ForceRemoveWorkspace(workspaceId)
+	if force {
+		err = server.WorkspaceService.ForceRemoveWorkspace(workspaceId)
+	} else {
+		err = server.WorkspaceService.RemoveWorkspace(workspaceId)
+	}
+
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to force remove workspace: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to remove workspace: %s", err.Error()))
 		return
 	}
 
