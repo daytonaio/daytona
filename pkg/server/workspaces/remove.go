@@ -72,7 +72,7 @@ func (s *WorkspaceService) RemoveWorkspace(workspaceId string) error {
 }
 
 func (s *WorkspaceService) ForceRemoveWorkspace(workspaceId string) error {
-	// This version of RemoveWorkspace ignores provider errors and continues with the deletion
+	// ForceRemoveWorkspace ignores provider errors and makes sure the workspace is removed from storage.
 
 	workspace, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
@@ -84,10 +84,19 @@ func (s *WorkspaceService) ForceRemoveWorkspace(workspaceId string) error {
 	target, _ := s.targetStore.Find(workspace.Target)
 
 	for _, project := range workspace.Projects {
-		_ = s.provisioner.DestroyProject(project, target)
+		//	todo: go routines
+		err := s.provisioner.DestroyProject(project, target)
+		if err != nil {
+			log.Error(err)
+		}
 	}
 
-	_ = s.provisioner.DestroyWorkspace(workspace, target)
+	err = s.provisioner.DestroyWorkspace(workspace, target)
+	if err != nil {
+		log.Error(err)
+
+	}
+
 	_ = s.apiKeyService.Revoke(workspace.Id)
 
 	for _, project := range workspace.Projects {
@@ -97,7 +106,10 @@ func (s *WorkspaceService) ForceRemoveWorkspace(workspaceId string) error {
 		_ = projectLogger.Cleanup()
 	}
 
-	_ = s.workspaceStore.Delete(workspace)
+	err = s.workspaceStore.Delete(workspace)
+	if err != nil {
+		return err
+	}
 
 	log.Infof("Workspace %s destroyed", workspace.Id)
 	return nil
