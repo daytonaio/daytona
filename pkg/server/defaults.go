@@ -21,7 +21,7 @@ const defaultServerDownloadUrl = "https://download.daytona.io/daytona/install.sh
 const defaultHeadscalePort = 3987
 const defaultApiPort = 3986
 const defaultRegistryPort = 3988
-const defaultBuilderImage = "daytonaio/workspace-builder:latest"
+const defaultBuilderImage = "daytonaio/workspace-project:latest"
 const defaultProjectImage = "daytonaio/workspace-project:latest"
 const defaultProjectUser = "daytona"
 
