@@ -114,22 +114,6 @@ var DeleteCmd = &cobra.Command{
 		if !yesFlag {
 			fmt.Println("Operation canceled.")
 		} else {
-			if !forceFlag {
-				form := huh.NewForm(
-					huh.NewGroup(
-						huh.NewConfirm().
-							Title(fmt.Sprintf("Delete workspace(s): [%s] by force?", strings.Join(workspaceDeleteListNames, ", "))).
-							Description("Provider resources might not be removed if you don't use this option").
-							Value(&forceFlag),
-					),
-				).WithTheme(views.GetCustomTheme())
-
-				err := form.Run()
-				if err != nil {
-					log.Fatal(err)
-				}
-			}
-
 			for _, workspace := range workspaceDeleteList {
 				err := removeWorkspace(ctx, apiClient, workspace, forceFlag)
 				if err != nil {
