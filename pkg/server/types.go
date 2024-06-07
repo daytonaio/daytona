@@ -36,7 +36,6 @@ type Config struct {
 	ServerDownloadUrl               string      `json:"serverDownloadUrl"`
 	Frps                            *FRPSConfig `json:"frps,omitempty"`
 	ApiPort                         uint32      `json:"apiPort"`
-	RegistryPort                    uint32      `json:"registryPort"`
 	HeadscalePort                   uint32      `json:"headscalePort"`
 	BinariesPath                    string      `json:"binariesPath"`
 	LogFilePath                     string      `json:"logFilePath"`
@@ -44,4 +43,7 @@ type Config struct {
 	DefaultProjectUser              string      `json:"defaultProjectUser"`
 	DefaultProjectPostStartCommands []string    `json:"defaultProjectPostStartCommands"`
 	BuilderImage                    string      `json:"builderImage"`
+	LocalBuilderRegistryPort        uint32      `json:"localBuilderRegistryPort"`
+	BuilderRegistryServer           string      `json:"builderRegistryServer"`
+	BuildImageNamespace             string      `json:"buildImageNamespace"`
 } // @name ServerConfig

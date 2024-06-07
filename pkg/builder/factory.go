@@ -5,8 +5,10 @@ package builder
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
@@ -25,7 +27,8 @@ type IBuilderFactory interface {
 
 type BuilderFactory struct {
 	serverConfigFolder              string
-	localContainerRegistryServer    string
+	containerRegistryServer         string
+	buildImageNamespace             string
 	basePath                        string
 	loggerFactory                   logger.LoggerFactory
 	image                           string
@@ -39,7 +42,8 @@ func NewBuilderFactory(config BuilderConfig) IBuilderFactory {
 	return &BuilderFactory{
 		image:                           config.Image,
 		serverConfigFolder:              config.ServerConfigFolder,
-		localContainerRegistryServer:    config.LocalContainerRegistryServer,
+		containerRegistryServer:         config.ContainerRegistryServer,
+		buildImageNamespace:             config.BuildImageNamespace,
 		containerRegistryService:        config.ContainerRegistryService,
 		basePath:                        config.BasePath,
 		loggerFactory:                   config.LoggerFactory,
@@ -116,7 +120,8 @@ func (f *BuilderFactory) Create(p workspace.Project, gpc *gitprovider.GitProvide
 				image:                           f.image,
 				containerRegistryService:        f.containerRegistryService,
 				serverConfigFolder:              f.serverConfigFolder,
-				localContainerRegistryServer:    f.localContainerRegistryServer,
+				containerRegistryServer:         f.containerRegistryServer,
+				buildImageNamespace:             f.buildImageNamespace,
 				basePath:                        f.basePath,
 				loggerFactory:                   f.loggerFactory,
 				defaultProjectImage:             f.defaultProjectImage,
@@ -157,6 +162,11 @@ func (f *BuilderFactory) CheckExistingBuild(p workspace.Project) (*BuildResult, 
 	err = decoder.Decode(&result)
 	if err != nil {
 		return nil, err
+	}
+
+	// If the builder registry changed, we need to rebuild and push again
+	if !strings.HasPrefix(result.ImageName, fmt.Sprintf("%s%s", f.containerRegistryServer, f.buildImageNamespace)) {
+		return nil, nil
 	}
 
 	return &result, nil

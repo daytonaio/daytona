@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -106,15 +107,28 @@ var ServeCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		//	todo: skip container registry option from config
-		localContainerRegistry := registry.NewLocalContainerRegistry(&registry.LocalContainerRegistryConfig{
-			DataPath: filepath.Join(configDir, "registry"),
-			Port:     c.RegistryPort,
-		})
-
 		containerRegistryService := containerregistries.NewContainerRegistryService(containerregistries.ContainerRegistryServiceConfig{
 			Store: containerRegistryStore,
 		})
+
+		var localContainerRegistry server.ILocalContainerRegistry
+
+		if c.BuilderRegistryServer != "local" {
+			_, err := containerRegistryService.Find(c.BuilderRegistryServer)
+			if err != nil {
+				log.Errorf("Failed to find container registry credentials for builder registry server %s\n", c.BuilderRegistryServer)
+				log.Errorf("Defaulting to local container registry. To use %s as the builder registry, add credentials for the registry server with 'daytona container-registry set' and restart the server\n", c.BuilderRegistryServer)
+				c.BuilderRegistryServer = "local"
+			}
+		}
+
+		if c.BuilderRegistryServer == "local" {
+			localContainerRegistry = registry.NewLocalContainerRegistry(&registry.LocalContainerRegistryConfig{
+				DataPath: filepath.Join(configDir, "registry"),
+				Port:     c.LocalBuilderRegistryPort,
+			})
+			c.BuilderRegistryServer = util.GetFrpcRegistryDomain(c.Id, c.Frps.Domain)
+		}
 
 		providerTargetService := providertargets.NewProviderTargetService(providertargets.ProviderTargetServiceConfig{
 			TargetStore: providerTargetStore,
@@ -134,10 +148,18 @@ var ServeCmd = &cobra.Command{
 				return headscaleServer.CreateAuthKey()
 			},
 		})
+
+		buildImageNamespace := c.BuildImageNamespace
+		if buildImageNamespace != "" {
+			buildImageNamespace = fmt.Sprintf("/%s", buildImageNamespace)
+		}
+		buildImageNamespace = strings.TrimSuffix(buildImageNamespace, "/")
+
 		builderFactory := builder.NewBuilderFactory(builder.BuilderConfig{
 			ServerConfigFolder:              configDir,
-			LocalContainerRegistryServer:    util.GetFrpcRegistryDomain(c.Id, c.Frps.Domain),
+			ContainerRegistryServer:         c.BuilderRegistryServer,
 			BasePath:                        filepath.Join(configDir, "builds"),
+			BuildImageNamespace:             buildImageNamespace,
 			LoggerFactory:                   loggerFactory,
 			DefaultProjectImage:             c.DefaultProjectImage,
 			DefaultProjectUser:              c.DefaultProjectUser,

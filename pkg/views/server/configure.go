@@ -20,11 +20,19 @@ type ServerUpdateKeyView struct {
 	PathToPrivateKey string
 }
 
-func ConfigurationForm(config *apiclient.ServerConfig) *apiclient.ServerConfig {
+func ConfigurationForm(config *apiclient.ServerConfig, containerRegistries []apiclient.ContainerRegistry) *apiclient.ServerConfig {
 	apiPortView := strconv.Itoa(int(config.GetApiPort()))
 	headscalePortView := strconv.Itoa(int(config.GetHeadscalePort()))
 	frpsPortView := strconv.Itoa(int(config.Frps.GetPort()))
-	registryPortView := strconv.Itoa(int(config.GetRegistryPort()))
+	localBuilderRegistryPort := strconv.Itoa(int(config.GetLocalBuilderRegistryPort()))
+
+	builderContainerRegistryOptions := []huh.Option[string]{{
+		Key:   "Local registry managed by Daytona",
+		Value: "local",
+	}}
+	for _, cr := range containerRegistries {
+		builderContainerRegistryOptions = append(builderContainerRegistryOptions, huh.Option[string]{Key: *cr.Server, Value: *cr.Server})
+	}
 
 	form := huh.NewForm(
 		huh.NewGroup(
@@ -54,11 +62,26 @@ func ConfigurationForm(config *apiclient.ServerConfig) *apiclient.ServerConfig {
 				Title("Builder Image").
 				Description("Image dependencies: docker, @devcontainers/cli (node package)").
 				Value(config.BuilderImage),
+			huh.NewSelect[string]().
+				Title("Builder Registry").
+				Description("To add options, add a container registry with 'daytona cr set'").
+				Options(
+					builderContainerRegistryOptions...,
+				).
+				Value(config.BuilderRegistryServer),
 			huh.NewInput().
-				Title("Build Registry Port").
-				Value(&registryPortView).
-				Validate(createPortValidator(config, &registryPortView, config.RegistryPort)),
+				Title("Build Image Namespace").
+				Description("Namespace to be used when tagging and pushing build images").
+				Value(config.BuildImageNamespace),
 		),
+		huh.NewGroup(
+			huh.NewInput().
+				Title("Local Builder Registry Port").
+				Value(&localBuilderRegistryPort).
+				Validate(createPortValidator(config, &localBuilderRegistryPort, config.LocalBuilderRegistryPort)),
+		).WithHideFunc(func() bool {
+			return config.BuilderRegistryServer == nil || *config.BuilderRegistryServer != "local"
+		}),
 		huh.NewGroup(
 			huh.NewInput().
 				Title("API Port").
