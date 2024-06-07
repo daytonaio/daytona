@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
@@ -41,7 +40,7 @@ func GetContainerRegistry(ctx *gin.Context) {
 		return
 	}
 
-	cr.Password = strings.Repeat("*", len(cr.Password))
+	cr.Password = ""
 
 	ctx.JSON(200, cr)
 }
@@ -66,7 +65,7 @@ func ListContainerRegistries(ctx *gin.Context) {
 	}
 
 	for _, cr := range crs {
-		cr.Password = strings.Repeat("*", len(cr.Password))
+		cr.Password = ""
 	}
 
 	ctx.JSON(200, crs)
