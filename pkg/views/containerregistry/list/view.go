@@ -6,6 +6,7 @@ package list
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -36,7 +37,7 @@ func getRowFromRowData(rowData rowData) []string {
 	row := []string{
 		views.NameStyle.Render(rowData.Server),
 		views.DefaultRowDataStyle.Render(rowData.Username),
-		views.DefaultRowDataStyle.Render(rowData.Password),
+		views.DefaultRowDataStyle.Render(strings.Repeat("*", 10)),
 	}
 
 	return row
