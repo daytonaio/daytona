@@ -4,6 +4,8 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+
+	gitnessclient "github.com/daytonaio/daytona/pkg/gitnessclient"
 )
 
 type GitNessGitProvider struct {
@@ -29,9 +31,9 @@ func (g *GitNessGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	return client.GetSpaces()
 }
 
-func (g *GitNessGitProvider) getApiClient() *GitnessClient {
+func (g *GitNessGitProvider) getApiClient() *gitnessclient.GitnessClient {
 	url, _ := url.Parse(*g.baseApiUrl)
-	return NewGitnessClient(g.token, url)
+	return gitnessclient.NewGitnessClient(g.token, url)
 }
 
 func (g *GitNessGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {

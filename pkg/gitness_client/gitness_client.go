@@ -1,4 +1,4 @@
-package gitprovider
+package gitnessclient
 
 import (
 	"context"
@@ -10,158 +10,11 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	gitProvider "github.com/daytonaio/daytona/pkg/gitprovider"
 )
 
-// Intermediate structs for the API response
-
-type apiMembershipResponse struct {
-	Created int64    `json:"created"`
-	Updated int64    `json:"updated"`
-	Role    string   `json:"role"`
-	Space   apiSpace `json:"space"`
-	AddedBy apiUser  `json:"added_by"`
-}
-
-type apiSpace struct {
-	ID          int    `json:"id"`
-	ParentID    int    `json:"parent_id"`
-	Path        string `json:"path"`
-	Identifier  string `json:"identifier"`
-	Description string `json:"description"`
-	IsPublic    bool   `json:"is_public"`
-	CreatedBy   int    `json:"created_by"`
-	Created     int64  `json:"created"`
-	Updated     int64  `json:"updated"`
-	UID         string `json:"uid"`
-}
-
-type apiUser struct {
-	ID          int    `json:"id"`
-	UID         string `json:"uid"`
-	DisplayName string `json:"display_name"`
-	Email       string `json:"email"`
-	Type        string `json:"type"`
-	Created     int64  `json:"created"`
-	Updated     int64  `json:"updated"`
-}
-
-type apiUserResponse struct {
-	UID         string `json:"uid"`
-	Email       string `json:"email"`
-	DisplayName string `json:"display_name"`
-	Admin       bool   `json:"admin"`
-	Blocked     bool   `json:"blocked"`
-	Created     int64  `json:"created"`
-	Updated     int64  `json:"updated"`
-}
-
-type apiPR struct {
-	Title        string `json:"title"`
-	SourceBranch string `json:"source_branch"`
-	SourceSha    string `json:"source_sha"`
-	SourceRepoId int    `json:"source_repo_id"`
-	Author       struct {
-		DisplayName string `json:"display_name"`
-		Email       string `json:"email"`
-	} `json:"author"`
-}
-
-type Commit struct {
-	Sha        string   `json:"sha"`
-	ParentShas []string `json:"parent_shas"`
-	Title      string   `json:"title"`
-	Message    string   `json:"message"`
-	Author     struct {
-		Identity struct {
-			Name  string `json:"name"`
-			Email string `json:"email"`
-		} `json:"identity"`
-		When time.Time `json:"when"`
-	} `json:"author"`
-	Committer struct {
-		Identity struct {
-			Name  string `json:"name"`
-			Email string `json:"email"`
-		} `json:"identity"`
-		When time.Time `json:"when"`
-	} `json:"committer"`
-	Stats struct {
-		Total struct {
-			Insertions int `json:"insertions"`
-			Deletions  int `json:"deletions"`
-			Changes    int `json:"changes"`
-		} `json:"total"`
-	} `json:"stats"`
-}
-type CommitsResponse struct {
-	Commits []Commit `json:"commits"`
-}
-
-type PullRequest struct {
-	Number           int     `json:"number"`
-	Created          int64   `json:"created"`
-	Edited           int64   `json:"edited"`
-	State            string  `json:"state"`
-	IsDraft          bool    `json:"is_draft"`
-	Title            string  `json:"title"`
-	Description      string  `json:"description"`
-	SourceRepoID     int     `json:"source_repo_id"`
-	SourceBranch     string  `json:"source_branch"`
-	SourceSha        string  `json:"source_sha"`
-	TargetRepoID     int     `json:"target_repo_id"`
-	TargetBranch     string  `json:"target_branch"`
-	Merged           *bool   `json:"merged"`
-	MergeMethod      *string `json:"merge_method"`
-	MergeCheckStatus string  `json:"merge_check_status"`
-	MergeTargetSha   string  `json:"merge_target_sha"`
-	MergeBaseSha     string  `json:"merge_base_sha"`
-	Author           struct {
-		ID          int    `json:"id"`
-		UID         string `json:"uid"`
-		DisplayName string `json:"display_name"`
-		Email       string `json:"email"`
-		Type        string `json:"type"`
-		Created     int64  `json:"created"`
-		Updated     int64  `json:"updated"`
-	} `json:"author"`
-	Merger *struct {
-		ID          int    `json:"id"`
-		UID         string `json:"uid"`
-		DisplayName string `json:"display_name"`
-		Email       string `json:"email"`
-		Type        string `json:"type"`
-		Created     int64  `json:"created"`
-		Updated     int64  `json:"updated"`
-	} `json:"merger"`
-	Stats struct {
-		Commits      int `json:"commits"`
-		FilesChanged int `json:"files_changed"`
-	} `json:"stats"`
-}
-
-type ApiRepository struct {
-	Id             int    `json:"id"`
-	ParentId       int    `json:"parent_id"`
-	Identifier     string `json:"identifier"`
-	Path           string `json:"path"`
-	Description    string `json:"description"`
-	IsPublic       bool   `json:"is_public"`
-	CreatedBy      int    `json:"created_by"`
-	Created        int64  `json:"created"`
-	Updated        int64  `json:"updated"`
-	Size           int    `json:"size"`
-	SizeUpdated    int    `json:"size_updated"`
-	DefaultBranch  string `json:"default_branch"`
-	ForkId         int    `json:"fork_id"`
-	NumForks       int    `json:"num_forks"`
-	NumPulls       int    `json:"num_pulls"`
-	NumClosedPulls int    `json:"num_closed_pulls"`
-	NumOpenPulls   int    `json:"num_open_pulls"`
-	NumMergedPulls int    `json:"num_merged_pulls"`
-	Importing      bool   `json:"importing"`
-	GitUrl         string `json:"git_url"`
-	Uid            string `json:"uid"`
-}
+const personalNamespaceId = "<PERSONAL>"
 
 // GitnessClient is a client for interacting with the Gitness API.
 type GitnessClient struct {
@@ -176,51 +29,8 @@ func NewGitnessClient(token string, baseUrl *url.URL) *GitnessClient {
 	}
 
 }
-func (g *GitnessClient) GetUser() (*GitUser, error) {
-	userURL := g.BaseURL.ResolveReference(&url.URL{Path: "/api/v1/user"}).String()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	req, err := http.NewRequestWithContext(ctx, "GET", userURL, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("accept", "application/json")
-	req.Header.Set("Authorization", "Bearer "+g.Token)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to perform request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %w", err)
-	}
-	var apiUser apiUserResponse
-	if err := json.Unmarshal(body, &apiUser); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal response body: %w", err)
-	}
-
-	user := &GitUser{
-		Id:       apiUser.UID,
-		Username: apiUser.UID,
-		Name:     apiUser.DisplayName,
-		Email:    apiUser.Email,
-	}
-
-	return user, nil
-}
-
-func (g *GitnessClient) GetSpaces() ([]*GitNamespace, error) {
+func (g *GitnessClient) GetSpaces() ([]*gitProvider.GitNamespace, error) {
 	spacesURL := g.BaseURL.ResolveReference(&url.URL{Path: "/api/v1/user/memberships"}).String()
 
 	values := url.Values{}
@@ -259,9 +69,9 @@ func (g *GitnessClient) GetSpaces() ([]*GitNamespace, error) {
 		return nil, fmt.Errorf("failed to unmarshal response body: %w", err)
 	}
 
-	var namespaces []*GitNamespace
+	var namespaces []*gitProvider.GitNamespace
 	for _, membership := range apiMemberships {
-		namespace := &GitNamespace{
+		namespace := &gitProvider.GitNamespace{
 			Id:   membership.Space.UID,
 			Name: membership.Space.Identifier,
 		}
@@ -271,7 +81,51 @@ func (g *GitnessClient) GetSpaces() ([]*GitNamespace, error) {
 	return namespaces, nil
 }
 
-func (g *GitnessClient) GetRepositories(namespace string) ([]*GitRepository, error) {
+func (g *GitnessClient) GetUser() (*gitProvider.GitUser, error) {
+	userURL := g.BaseURL.ResolveReference(&url.URL{Path: "/api/v1/user"}).String()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "GET", userURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("accept", "application/json")
+	req.Header.Set("Authorization", "Bearer "+g.Token)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to perform request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+	var apiUser apiUserResponse
+	if err := json.Unmarshal(body, &apiUser); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal response body: %w", err)
+	}
+
+	user := &gitProvider.GitUser{
+		Id:       apiUser.UID,
+		Username: apiUser.UID,
+		Name:     apiUser.DisplayName,
+		Email:    apiUser.Email,
+	}
+
+	return user, nil
+}
+
+func (g *GitnessClient) GetRepositories(namespace string) ([]*gitProvider.GitRepository, error) {
 	space := ""
 	if namespace == personalNamespaceId {
 		user, err := g.GetUser()
@@ -317,14 +171,14 @@ func (g *GitnessClient) GetRepositories(namespace string) ([]*GitRepository, err
 		return nil, err
 	}
 
-	var repos []*GitRepository
+	var repos []*gitProvider.GitRepository
 
 	for _, apiRepo := range apiRepos {
 		u, err := url.Parse(apiRepo.GitUrl)
 		if err != nil {
 			return nil, err
 		}
-		repo := &GitRepository{
+		repo := &gitProvider.GitRepository{
 			Id:     apiRepo.Identifier,
 			Name:   apiRepo.Identifier,
 			Url:    apiRepo.GitUrl,
@@ -338,7 +192,7 @@ func (g *GitnessClient) GetRepositories(namespace string) ([]*GitRepository, err
 	return repos, nil
 }
 
-func (g *GitnessClient) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {
+func (g *GitnessClient) GetRepoBranches(repositoryId string, namespaceId string) ([]*gitProvider.GitBranch, error) {
 	branchesURL := g.BaseURL.ResolveReference(&url.URL{
 		Path: fmt.Sprintf("/api/v1/repos/%s%%2F%s/branches", namespaceId, repositoryId),
 	}).String()
@@ -367,7 +221,7 @@ func (g *GitnessClient) GetRepoBranches(repositoryId string, namespaceId string)
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	var branches []*GitBranch
+	var branches []*gitProvider.GitBranch
 	if err := json.Unmarshal(body, &branches); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response body: %w", err)
 	}
@@ -375,7 +229,7 @@ func (g *GitnessClient) GetRepoBranches(repositoryId string, namespaceId string)
 	return branches, nil
 }
 
-func (g *GitnessClient) GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error) {
+func (g *GitnessClient) GetRepoPRs(repositoryId string, namespaceId string) ([]*gitProvider.GitPullRequest, error) {
 	prsURL := g.BaseURL.ResolveReference(&url.URL{
 		Path: fmt.Sprintf("/api/v1/repos/%s%%2F%s/pullreq", namespaceId, repositoryId),
 	}).String()
@@ -413,9 +267,9 @@ func (g *GitnessClient) GetRepoPRs(repositoryId string, namespaceId string) ([]*
 		return nil, fmt.Errorf("failed to unmarshal response body: %w", err)
 	}
 
-	var pullRequests []*GitPullRequest
+	var pullRequests []*gitProvider.GitPullRequest
 	for _, pr := range apiPRs {
-		pullRequest := &GitPullRequest{
+		pullRequest := &gitProvider.GitPullRequest{
 			Name:            pr.Title,
 			Branch:          pr.SourceBranch,
 			Sha:             pr.SourceSha,
@@ -430,7 +284,7 @@ func (g *GitnessClient) GetRepoPRs(repositoryId string, namespaceId string) ([]*
 	return pullRequests, nil
 }
 
-func (g *GitnessClient) GetLastCommitSha(staticContext *StaticGitContext) (string, error) {
+func (g *GitnessClient) GetLastCommitSha(staticContext *gitProvider.StaticGitContext) (string, error) {
 
 	path := getRepoRef(staticContext.Url)
 
@@ -504,7 +358,7 @@ func getLastCommit(jsonData []byte) (Commit, error) {
 	return commitsResponse.Commits[len(commitsResponse.Commits)-1], nil
 }
 
-func (g *GitnessClient) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
+func (g *GitnessClient) getPrContext(staticContext *gitProvider.StaticGitContext) (*gitProvider.StaticGitContext, error) {
 	if staticContext.PrNumber == nil {
 		return staticContext, nil
 	}
