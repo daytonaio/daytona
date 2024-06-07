@@ -125,7 +125,7 @@ func (g *GitnessClient) GetUser() (*gitProvider.GitUser, error) {
 	return user, nil
 }
 
-func (g *GitnessClient) GetRepositories(namespace string) ([]*gitProvider.GitRepository, error) {
+func (g *GitnessClient) GetRepositories(namespace string, page string, limit string) ([]*gitProvider.GitRepository, error) {
 	space := ""
 	if namespace == personalNamespaceId {
 		user, err := g.GetUser()
@@ -137,7 +137,7 @@ func (g *GitnessClient) GetRepositories(namespace string) ([]*gitProvider.GitRep
 		space = namespace
 	}
 
-	reposURL, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/spaces/%s/+/repos?page=1&limit=100", space))
+	reposURL, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/spaces/%s/+/repos?page=%s&limit=%s", space, page, limit))
 	if err != nil {
 		return nil, err
 	}
