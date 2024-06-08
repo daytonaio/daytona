@@ -34,6 +34,10 @@ type apiUser struct {
 	Created     int64  `json:"created"`
 	Updated     int64  `json:"updated"`
 }
+type apiRepoBranch struct {
+	Name string `json:"name"`
+	Sha  string `json:"sha"`
+}
 
 type apiUserResponse struct {
 	UID         string `json:"uid"`
@@ -151,4 +155,16 @@ type ApiRepository struct {
 	Importing      bool   `json:"importing"`
 	GitUrl         string `json:"git_url"`
 	Uid            string `json:"uid"`
+}
+
+type StaticContext struct {
+	Id       string  `json:"id"`
+	Url      string  `json:"url"`
+	Name     string  `json:"name"`
+	Branch   *string `json:"branch,omitempty"`
+	Sha      *string `json:"sha,omitempty"`
+	Owner    string  `json:"owner"`
+	PrNumber *uint32 `json:"prNumber,omitempty"`
+	Source   string  `json:"source"`
+	Path     *string `json:"path,omitempty"`
 }
