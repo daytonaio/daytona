@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"github.com/daytonaio/daytona/pkg/gitnessclient"
 )
 
 type GitNessGitProvider struct {
