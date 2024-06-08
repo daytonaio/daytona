@@ -10,8 +10,6 @@ import (
 	"sort"
 	"strings"
 	"time"
-
-	gitProvider "github.com/daytonaio/daytona/pkg/gitprovider"
 )
 
 const personalNamespaceId = "<PERSONAL>"
@@ -30,7 +28,7 @@ func NewGitnessClient(token string, baseUrl *url.URL) *GitnessClient {
 
 }
 
-func (g *GitnessClient) GetSpaces() ([]*gitProvider.GitNamespace, error) {
+func (g *GitnessClient) GetSpaces() ([]apiMembershipResponse, error) {
 	spacesURL := g.BaseURL.ResolveReference(&url.URL{Path: "/api/v1/user/memberships"}).String()
 
 	values := url.Values{}
@@ -69,19 +67,10 @@ func (g *GitnessClient) GetSpaces() ([]*gitProvider.GitNamespace, error) {
 		return nil, fmt.Errorf("failed to unmarshal response body: %w", err)
 	}
 
-	var namespaces []*gitProvider.GitNamespace
-	for _, membership := range apiMemberships {
-		namespace := &gitProvider.GitNamespace{
-			Id:   membership.Space.UID,
-			Name: membership.Space.Identifier,
-		}
-		namespaces = append(namespaces, namespace)
-	}
-
-	return namespaces, nil
+	return apiMemberships, nil
 }
 
-func (g *GitnessClient) GetUser() (*gitProvider.GitUser, error) {
+func (g *GitnessClient) GetUser() (*apiUserResponse, error) {
 	userURL := g.BaseURL.ResolveReference(&url.URL{Path: "/api/v1/user"}).String()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -115,24 +104,17 @@ func (g *GitnessClient) GetUser() (*gitProvider.GitUser, error) {
 		return nil, fmt.Errorf("failed to unmarshal response body: %w", err)
 	}
 
-	user := &gitProvider.GitUser{
-		Id:       apiUser.UID,
-		Username: apiUser.UID,
-		Name:     apiUser.DisplayName,
-		Email:    apiUser.Email,
-	}
-
-	return user, nil
+	return &apiUser, nil
 }
 
-func (g *GitnessClient) GetRepositories(namespace string, page string, limit string) ([]*gitProvider.GitRepository, error) {
+func (g *GitnessClient) GetRepositories(namespace string, page string, limit string) ([]ApiRepository, error) {
 	space := ""
 	if namespace == personalNamespaceId {
 		user, err := g.GetUser()
 		if err != nil {
 			return nil, err
 		}
-		space = user.Username
+		space = user.UID
 	} else {
 		space = namespace
 	}
@@ -171,28 +153,10 @@ func (g *GitnessClient) GetRepositories(namespace string, page string, limit str
 		return nil, err
 	}
 
-	var repos []*gitProvider.GitRepository
-
-	for _, apiRepo := range apiRepos {
-		u, err := url.Parse(apiRepo.GitUrl)
-		if err != nil {
-			return nil, err
-		}
-		repo := &gitProvider.GitRepository{
-			Id:     apiRepo.Identifier,
-			Name:   apiRepo.Identifier,
-			Url:    apiRepo.GitUrl,
-			Branch: &apiRepo.DefaultBranch,
-			Source: u.Host,
-		}
-
-		repos = append(repos, repo)
-	}
-
-	return repos, nil
+	return apiRepos, nil
 }
 
-func (g *GitnessClient) GetRepoBranches(repositoryId string, namespaceId string) ([]*gitProvider.GitBranch, error) {
+func (g *GitnessClient) GetRepoBranches(repositoryId string, namespaceId string) ([]*apiRepoBranch, error) {
 	branchesURL := g.BaseURL.ResolveReference(&url.URL{
 		Path: fmt.Sprintf("/api/v1/repos/%s%%2F%s/branches", namespaceId, repositoryId),
 	}).String()
@@ -221,7 +185,7 @@ func (g *GitnessClient) GetRepoBranches(repositoryId string, namespaceId string)
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	var branches []*gitProvider.GitBranch
+	var branches []*apiRepoBranch
 	if err := json.Unmarshal(body, &branches); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response body: %w", err)
 	}
@@ -229,7 +193,7 @@ func (g *GitnessClient) GetRepoBranches(repositoryId string, namespaceId string)
 	return branches, nil
 }
 
-func (g *GitnessClient) GetRepoPRs(repositoryId string, namespaceId string) ([]*gitProvider.GitPullRequest, error) {
+func (g *GitnessClient) GetRepoPRs(repositoryId string, namespaceId string) ([]*apiPR, error) {
 	prsURL := g.BaseURL.ResolveReference(&url.URL{
 		Path: fmt.Sprintf("/api/v1/repos/%s%%2F%s/pullreq", namespaceId, repositoryId),
 	}).String()
@@ -262,29 +226,15 @@ func (g *GitnessClient) GetRepoPRs(repositoryId string, namespaceId string) ([]*
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	var apiPRs []apiPR
+	var apiPRs []*apiPR
 	if err := json.Unmarshal(body, &apiPRs); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response body: %w", err)
 	}
 
-	var pullRequests []*gitProvider.GitPullRequest
-	for _, pr := range apiPRs {
-		pullRequest := &gitProvider.GitPullRequest{
-			Name:            pr.Title,
-			Branch:          pr.SourceBranch,
-			Sha:             pr.SourceSha,
-			SourceRepoId:    fmt.Sprintf("%d", pr.SourceRepoId),
-			SourceRepoUrl:   fmt.Sprintf("%s/%s/%s", g.BaseURL.String(), namespaceId, repositoryId),
-			SourceRepoOwner: pr.Author.DisplayName,
-			SourceRepoName:  repositoryId,
-		}
-		pullRequests = append(pullRequests, pullRequest)
-	}
-
-	return pullRequests, nil
+	return apiPRs, nil
 }
 
-func (g *GitnessClient) GetLastCommitSha(staticContext *gitProvider.StaticGitContext) (string, error) {
+func (g *GitnessClient) GetLastCommitSha(staticContext *StaticContext) (string, error) {
 
 	path := getRepoRef(staticContext.Url)
 
@@ -358,7 +308,7 @@ func getLastCommit(jsonData []byte) (Commit, error) {
 	return commitsResponse.Commits[len(commitsResponse.Commits)-1], nil
 }
 
-func (g *GitnessClient) getPrContext(staticContext *gitProvider.StaticGitContext) (*gitProvider.StaticGitContext, error) {
+func (g *GitnessClient) getPrContext(staticContext *StaticContext) (*StaticContext, error) {
 	if staticContext.PrNumber == nil {
 		return staticContext, nil
 	}
