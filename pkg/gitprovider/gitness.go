@@ -5,8 +5,6 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-
-	"github.com/daytonaio/daytona/pkg/gitnessclient"
 )
 
 type GitNessGitProvider struct {
@@ -44,9 +42,9 @@ func (g *GitNessGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	return namespaces, nil
 }
 
-func (g *GitNessGitProvider) getApiClient() *gitnessclient.GitnessClient {
+func (g *GitNessGitProvider) getApiClient() *GitnessClient {
 	url, _ := url.Parse(*g.baseApiUrl)
-	return gitnessclient.NewGitnessClient(g.token, url)
+	return NewGitnessClient(g.token, url)
 }
 
 func (g *GitNessGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
@@ -135,13 +133,34 @@ func (g *GitNessGitProvider) GetUser() (*GitUser, error) {
 
 func (g *GitNessGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (string, error) {
 	client := g.getApiClient()
-
-	return client.GetLastCommitSha(staticContext)
+	context := &StaticContext{
+		Id:       staticContext.Id,
+		Url:      staticContext.Url,
+		Name:     staticContext.Name,
+		Branch:   staticContext.Branch,
+		Sha:      staticContext.Sha,
+		Owner:    staticContext.Owner,
+		PrNumber: staticContext.PrNumber,
+		Source:   staticContext.Source,
+		Path:     staticContext.Path,
+	}
+	return client.GetLastCommitSha(context)
 }
 
 func (g *GitNessGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
 	client := g.getApiClient()
-	return client.getPrContext(staticContext)
+	context := &StaticContext{
+		Id:       staticContext.Id,
+		Url:      staticContext.Url,
+		Name:     staticContext.Name,
+		Branch:   staticContext.Branch,
+		Sha:      staticContext.Sha,
+		Owner:    staticContext.Owner,
+		PrNumber: staticContext.PrNumber,
+		Source:   staticContext.Source,
+		Path:     staticContext.Path,
+	}
+	return client.getPrContext(context)
 }
 
 func (g *GitNessGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
