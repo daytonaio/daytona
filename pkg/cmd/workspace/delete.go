@@ -30,7 +30,7 @@ var DeleteCmd = &cobra.Command{
 		if allFlag {
 			if yesFlag {
 				fmt.Println("Deleting all workspaces.")
-				err := DeleteAllWorkspaces()
+				err := DeleteAllWorkspaces(forceFlag)
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -50,7 +50,7 @@ var DeleteCmd = &cobra.Command{
 				}
 
 				if yesFlag {
-					err := DeleteAllWorkspaces()
+					err := DeleteAllWorkspaces(forceFlag)
 					if err != nil {
 						log.Fatal(err)
 					}
@@ -137,7 +137,7 @@ func init() {
 	DeleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Delete a workspace by force")
 }
 
-func DeleteAllWorkspaces() error {
+func DeleteAllWorkspaces(force bool) error {
 	ctx := context.Background()
 	apiClient, err := apiclient_util.GetApiClient(nil)
 	if err != nil {
@@ -150,7 +150,7 @@ func DeleteAllWorkspaces() error {
 	}
 
 	for _, workspace := range workspaceList {
-		res, err := apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
+		res, err := apiClient.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Force(force).Execute()
 		if err != nil {
 			log.Errorf("Failed to delete workspace %s: %v", *workspace.Name, apiclient_util.HandleErrorResponse(res, err))
 			continue
