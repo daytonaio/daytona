@@ -148,23 +148,21 @@ func (g *GitNessGitProvider) getPrContext(staticContext *StaticGitContext) (*Sta
 	}
 	client := g.getApiClient()
 
-	prContext, err := client.GetPrContext(staticContext.Url, *staticContext.PrNumber)
+	pullReq, err := client.GetPr(staticContext.Url, *staticContext.PrNumber)
 	if err != nil {
 		return nil, err
 	}
 
-	gitContext := StaticGitContext{
-		Id:       prContext.Id,
-		Url:      prContext.Url,
-		Name:     prContext.Name,
-		Branch:   prContext.Branch,
-		Sha:      prContext.Sha,
-		Owner:    prContext.Owner,
-		PrNumber: prContext.PrNumber,
-		Source:   prContext.Source,
-		Path:     prContext.Path,
-	}
-	return &gitContext, nil
+	prUrl := client.GetRepoRef(staticContext.Url)
+
+	repo := *staticContext
+	repo.Branch = &pullReq.SourceBranch
+	repo.Url = pullReq.GitUrl
+	repo.Id = fmt.Sprint(pullReq.SourceRepoID)
+	repo.Name = prUrl
+	repo.Owner = pullReq.Author.UID
+
+	return &repo, nil
 
 }
 
