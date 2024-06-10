@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 
+	"net/url"
+
 	bitbucketv1 "github.com/gfleury/go-bitbucket-v1"
 	"github.com/mitchellh/mapstructure"
 )
@@ -111,7 +113,7 @@ func (g *BitbucketServerGitProvider) GetRepositories(namespace string) ([]*GitRe
 		for _, repo := range pageRepos {
 			var repoUrl string
 			for _, link := range repo.Links.Clone {
-				if link.Name == "https" {
+				if link.Name == "https" || link.Name == "ssh" {
 					repoUrl = link.Href
 					break
 				}
@@ -122,11 +124,16 @@ func (g *BitbucketServerGitProvider) GetRepositories(namespace string) ([]*GitRe
 				ownerName = repo.Owner.Name
 			}
 
+			baseURL, err := url.Parse(*g.baseApiUrl)
+			if err != nil {
+				return nil, err
+			}
+
 			response = append(response, &GitRepository{
 				Id:     repo.Slug,
 				Name:   repo.Name,
 				Url:    repoUrl,
-				Source: *g.baseApiUrl,
+				Source: baseURL.Host,
 				Owner:  ownerName,
 			})
 		}
@@ -190,7 +197,7 @@ func (g *BitbucketServerGitProvider) GetRepoPRs(repositoryId string, namespaceId
 	for _, pr := range pullRequest {
 		var repoUrl string
 		for _, link := range pr.FromRef.Repository.Links.Clone {
-			if link.Name == "https" {
+			if link.Name == "https" || link.Name == "ssh" {
 				repoUrl = link.Href
 				break
 			}
