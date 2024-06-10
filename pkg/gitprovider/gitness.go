@@ -1,3 +1,6 @@
+// Copyright 2024 Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
 package gitprovider
 
 import (
@@ -5,7 +8,8 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"github.com/daytonaio/daytona/pkg/gitnessclient"
+
+	gitnessclient "github.com/daytonaio/daytona/pkg/gitnessclient"
 )
 
 type GitNessGitProvider struct {
@@ -43,14 +47,14 @@ func (g *GitNessGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	return namespaces, nil
 }
 
-func (g *GitNessGitProvider) getApiClient() *GitnessClient {
+func (g *GitNessGitProvider) getApiClient() *gitnessclient.GitnessClient {
 	url, _ := url.Parse(*g.baseApiUrl)
-	return NewGitnessClient(g.token, url)
+	return gitnessclient.NewGitnessClient(g.token, url)
 }
 
 func (g *GitNessGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
 	client := g.getApiClient()
-	response, err := client.GetRepositories(namespace)
+	response, err := client.GetRepositories(namespace, "1", "100")
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Repositories : %w", err)
 	}
@@ -134,34 +138,34 @@ func (g *GitNessGitProvider) GetUser() (*GitUser, error) {
 
 func (g *GitNessGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (string, error) {
 	client := g.getApiClient()
-	context := &StaticContext{
-		Id:       staticContext.Id,
-		Url:      staticContext.Url,
-		Name:     staticContext.Name,
-		Branch:   staticContext.Branch,
-		Sha:      staticContext.Sha,
-		Owner:    staticContext.Owner,
-		PrNumber: staticContext.PrNumber,
-		Source:   staticContext.Source,
-		Path:     staticContext.Path,
-	}
-	return client.GetLastCommitSha(context)
+
+	return client.GetLastCommitSha(staticContext.Url, staticContext.Branch)
 }
 
 func (g *GitNessGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
-	client := g.getApiClient()
-	context := &StaticContext{
-		Id:       staticContext.Id,
-		Url:      staticContext.Url,
-		Name:     staticContext.Name,
-		Branch:   staticContext.Branch,
-		Sha:      staticContext.Sha,
-		Owner:    staticContext.Owner,
-		PrNumber: staticContext.PrNumber,
-		Source:   staticContext.Source,
-		Path:     staticContext.Path,
+	if staticContext.PrNumber == nil {
+		return staticContext, nil
 	}
-	return client.getPrContext(context)
+	client := g.getApiClient()
+
+	prContext, err := client.GetPrContext(staticContext.Url, *staticContext.PrNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	gitContext := StaticGitContext{
+		Id:       prContext.Id,
+		Url:      prContext.Url,
+		Name:     prContext.Name,
+		Branch:   prContext.Branch,
+		Sha:      prContext.Sha,
+		Owner:    prContext.Owner,
+		PrNumber: prContext.PrNumber,
+		Source:   prContext.Source,
+		Path:     prContext.Path,
+	}
+	return &gitContext, nil
+
 }
 
 func (g *GitNessGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
