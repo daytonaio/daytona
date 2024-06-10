@@ -95,6 +95,7 @@ type CommitsResponse struct {
 }
 
 type PullRequest struct {
+	GitUrl           string
 	Number           int     `json:"number"`
 	Created          int64   `json:"created"`
 	Edited           int64   `json:"edited"`
@@ -158,16 +159,4 @@ type ApiRepository struct {
 	Importing      bool   `json:"importing"`
 	GitUrl         string `json:"git_url"`
 	Uid            string `json:"uid"`
-}
-
-type StaticContext struct {
-	Id       string  `json:"id"`
-	Url      string  `json:"url"`
-	Name     string  `json:"name"`
-	Branch   *string `json:"branch,omitempty"`
-	Sha      *string `json:"sha,omitempty"`
-	Owner    string  `json:"owner"`
-	PrNumber *uint32 `json:"prNumber,omitempty"`
-	Source   string  `json:"source"`
-	Path     *string `json:"path,omitempty"`
 }

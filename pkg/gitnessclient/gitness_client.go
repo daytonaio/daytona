@@ -238,7 +238,7 @@ func (g *GitnessClient) GetRepoPRs(repositoryId string, namespaceId string) ([]*
 
 func (g *GitnessClient) GetLastCommitSha(repoURL string, branch *string) (string, error) {
 
-	path := getRepoRef(repoURL)
+	path := g.GetRepoRef(repoURL)
 
 	apiURL := ""
 	if branch != nil {
@@ -280,7 +280,7 @@ func (g *GitnessClient) GetLastCommitSha(repoURL string, branch *string) (string
 
 }
 
-func getRepoRef(url string) string {
+func (g *GitnessClient) GetRepoRef(url string) string {
 
 	parts := strings.Split(url, "/")
 	path := fmt.Sprintf("%s/%s", parts[3], parts[4])
@@ -305,9 +305,9 @@ func getLastCommit(jsonData []byte) (Commit, error) {
 	return commitsResponse.Commits[len(commitsResponse.Commits)-1], nil
 }
 
-func (g *GitnessClient) GetPrContext(repoURL string, prNumber uint32) (*StaticContext, error) {
+func (g *GitnessClient) GetPr(repoURL string, prNumber uint32) (*PullRequest, error) {
 
-	repoRef := getRepoRef(repoURL)
+	repoRef := g.GetRepoRef(repoURL)
 	apiURL := fmt.Sprintf("%s/api/v1/repos/%s/pullreq/%d", g.BaseURL.String(), repoRef, prNumber)
 
 	req, err := http.NewRequest("GET", apiURL, nil)
@@ -339,12 +339,6 @@ func (g *GitnessClient) GetPrContext(repoURL string, prNumber uint32) (*StaticCo
 	if err != nil {
 		return nil, err
 	}
-	prContext := &StaticContext{
-		Url:    fmt.Sprintf("%s/%s.git", g.BaseURL.String(), repoRef),
-		Branch: &pr.SourceBranch,
-		Name:   repoRef,
-		Owner:  pr.Author.UID,
-	}
-
-	return prContext, nil
+	pr.GitUrl = fmt.Sprintf("%s/%s.git", g.BaseURL.String(), repoRef)
+	return &pr, nil
 }
