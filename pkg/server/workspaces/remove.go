@@ -94,7 +94,6 @@ func (s *WorkspaceService) ForceRemoveWorkspace(workspaceId string) error {
 	err = s.provisioner.DestroyWorkspace(workspace, target)
 	if err != nil {
 		log.Error(err)
-
 	}
 
 	_ = s.apiKeyService.Revoke(workspace.Id)
