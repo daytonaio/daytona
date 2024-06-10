@@ -94,7 +94,7 @@ func GetScopesFromGitProvider(providerId string) string {
 	case "gitea":
 		return "read:organization,write:repository,read:user"
 	case "gitness":
-		return "read:project,write:repository,read:user"
+		fallthrough
 	default:
 		return ""
 	}
