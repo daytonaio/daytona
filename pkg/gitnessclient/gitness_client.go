@@ -1,3 +1,6 @@
+// Copyright 2024 Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
 package gitnessclient
 
 import (
@@ -14,7 +17,6 @@ import (
 
 const personalNamespaceId = "<PERSONAL>"
 
-// GitnessClient is a client for interacting with the Gitness API.
 type GitnessClient struct {
 	Token   string
 	BaseURL *url.URL
@@ -234,15 +236,14 @@ func (g *GitnessClient) GetRepoPRs(repositoryId string, namespaceId string) ([]*
 	return apiPRs, nil
 }
 
-func (g *GitnessClient) GetLastCommitSha(staticContext *StaticContext) (string, error) {
+func (g *GitnessClient) GetLastCommitSha(repoURL string, branch *string) (string, error) {
 
-	path := getRepoRef(staticContext.Url)
+	path := getRepoRef(repoURL)
 
 	apiURL := ""
-	if staticContext.Branch != nil {
-		apiURL = fmt.Sprintf("%s/api/v1/repos/%s/commits?git_ref=%s&page=1&include_stats=false", g.BaseURL.String(), path, *staticContext.Branch)
+	if branch != nil {
+		apiURL = fmt.Sprintf("%s/api/v1/repos/%s/commits?git_ref=%s&page=1&include_stats=false", g.BaseURL.String(), path, *branch)
 	} else {
-		// In this case gitness will use default branch of the repository
 		apiURL = fmt.Sprintf("%s/api/v1/repos/%s/commits?page=1&include_stats=false", g.BaseURL.String(), path)
 	}
 
@@ -270,13 +271,11 @@ func (g *GitnessClient) GetLastCommitSha(staticContext *StaticContext) (string, 
 		return "", err
 	}
 
-	// Use the getLastCommit function to get the last commit
 	lastCommit, err := getLastCommit(body)
 	if err != nil {
 		return "", err
 	}
 
-	// Return the SHA of the last commit
 	return lastCommit.Sha, nil
 
 }
@@ -295,12 +294,10 @@ func getLastCommit(jsonData []byte) (Commit, error) {
 		return Commit{}, err
 	}
 
-	// Sort the commits by the "when" field
 	sort.Slice(commitsResponse.Commits, func(i, j int) bool {
 		return commitsResponse.Commits[i].Committer.When.Before(commitsResponse.Commits[j].Committer.When)
 	})
 
-	// Return the last commit
 	if len(commitsResponse.Commits) == 0 {
 		return Commit{}, fmt.Errorf("no commits found")
 	}
@@ -308,12 +305,10 @@ func getLastCommit(jsonData []byte) (Commit, error) {
 	return commitsResponse.Commits[len(commitsResponse.Commits)-1], nil
 }
 
-func (g *GitnessClient) getPrContext(staticContext *StaticContext) (*StaticContext, error) {
-	if staticContext.PrNumber == nil {
-		return staticContext, nil
-	}
-	repoRef := getRepoRef(staticContext.Url)
-	apiURL := fmt.Sprintf("%s/api/v1/repos/%s/pullreq/%d", g.BaseURL.String(), repoRef, *staticContext.PrNumber)
+func (g *GitnessClient) GetPrContext(repoURL string, prNumber uint32) (*StaticContext, error) {
+
+	repoRef := getRepoRef(repoURL)
+	apiURL := fmt.Sprintf("%s/api/v1/repos/%s/pullreq/%d", g.BaseURL.String(), repoRef, prNumber)
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -344,12 +339,12 @@ func (g *GitnessClient) getPrContext(staticContext *StaticContext) (*StaticConte
 	if err != nil {
 		return nil, err
 	}
-	repo := *staticContext
-	repo.Branch = &pr.SourceBranch
-	repo.Url = fmt.Sprintf("%s/%s.git", g.BaseURL.String(), repoRef)
-	repo.Id = staticContext.Name
-	repo.Name = staticContext.Name
-	repo.Owner = pr.Author.UID
+	prContext := &StaticContext{
+		Url:    fmt.Sprintf("%s/%s.git", g.BaseURL.String(), repoRef),
+		Branch: &pr.SourceBranch,
+		Name:   repoRef,
+		Owner:  pr.Author.UID,
+	}
 
-	return &repo, nil
+	return prContext, nil
 }

@@ -50,7 +50,7 @@ func GetSupportedGitProviders() []GitProvider {
 		{"bitbucket", "Bitbucket"},
 		{"codeberg", "Codeberg"},
 		{"gitea", "Gitea"},
-		{"gitness", "GitNess"},
+		{"gitness", "Gitness"},
 	}
 }
 
