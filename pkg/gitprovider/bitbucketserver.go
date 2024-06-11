@@ -332,7 +332,8 @@ func (g *BitbucketServerGitProvider) getPrContext(staticContext *StaticGitContex
 func (g *BitbucketServerGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
 	var staticContext StaticGitContext
 
-	re := regexp.MustCompile(`(https?://[^/]+)/rest/api/[^/]+/projects/([^/]+)/repos/([^/]+)(?:/([^/]+))?(?:/([^/]+))?`)
+	// optional string - '/rest/api/'
+	re := regexp.MustCompile(`(https?://[^/]+)(?:/rest/api/[^/]+)?/projects/([^/]+)/repos/([^/]+)(?:/([^/?]+))?(?:/([^/?]+))?(?:\?at=refs/heads/([^/?]+))?`)
 	matches := re.FindStringSubmatch(repoUrl)
 
 	if len(matches) < 4 {
@@ -342,10 +343,11 @@ func (g *BitbucketServerGitProvider) parseStaticGitContext(repoUrl string) (*Sta
 	baseUrl := matches[1]
 	projectKey := matches[2]
 	repoName := matches[3]
-	// action is either 'pull-requests', 'browse', 'commits', 'branches'
 	action := matches[4]
+	// action is either 'pull-requests', 'browse', 'commits'
 	// identifier is either pull request number or path or commit SHA
 	identifier := matches[5]
+	branchName := matches[6]
 
 	staticContext.Id = projectKey
 	staticContext.Name = repoName
@@ -362,19 +364,25 @@ func (g *BitbucketServerGitProvider) parseStaticGitContext(repoUrl string) (*Sta
 			staticContext.PrNumber = &prUint
 		}
 	case "browse":
-		if identifier != "" {
-			staticContext.Path = &identifier
+		if branchName != "" {
+			staticContext.Branch = &branchName
+		} else if strings.Contains(repoUrl, "browse/") {
+			if identifier != "" {
+				staticContext.Path = &identifier
+			}
+		} else if strings.Contains(repoUrl, "browse?") {
+			if strings.Contains(repoUrl, "at=refs/heads/") {
+				parts := strings.Split(repoUrl, "at=refs/heads/")
+				if len(parts) == 2 {
+					branchName = parts[1]
+					staticContext.Branch = &branchName
+				}
+			}
 		}
 	case "commits":
 		if identifier != "" {
 			staticContext.Sha = &identifier
-		}
-	case "branches":
-		if identifier != "" {
-			staticContext.Branch = &identifier
-		}
-	default:
-		if strings.Contains(repoUrl, "commits?until=") {
+		} else if strings.Contains(repoUrl, "commits?until=") {
 			parts := strings.Split(repoUrl, "commits?until=")
 			if len(parts) == 2 {
 				sha := parts[1]
