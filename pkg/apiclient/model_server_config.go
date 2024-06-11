@@ -21,16 +21,18 @@ var _ MappedNullable = &ServerConfig{}
 type ServerConfig struct {
 	ApiPort                         *int32      `json:"apiPort,omitempty"`
 	BinariesPath                    *string     `json:"binariesPath,omitempty"`
+	BuildImageNamespace             *string     `json:"buildImageNamespace,omitempty"`
 	BuilderImage                    *string     `json:"builderImage,omitempty"`
+	BuilderRegistryServer           *string     `json:"builderRegistryServer,omitempty"`
 	DefaultProjectImage             *string     `json:"defaultProjectImage,omitempty"`
 	DefaultProjectPostStartCommands []string    `json:"defaultProjectPostStartCommands,omitempty"`
 	DefaultProjectUser              *string     `json:"defaultProjectUser,omitempty"`
 	Frps                            *FRPSConfig `json:"frps,omitempty"`
 	HeadscalePort                   *int32      `json:"headscalePort,omitempty"`
 	Id                              *string     `json:"id,omitempty"`
+	LocalBuilderRegistryPort        *int32      `json:"localBuilderRegistryPort,omitempty"`
 	LogFilePath                     *string     `json:"logFilePath,omitempty"`
 	ProvidersDir                    *string     `json:"providersDir,omitempty"`
-	RegistryPort                    *int32      `json:"registryPort,omitempty"`
 	RegistryUrl                     *string     `json:"registryUrl,omitempty"`
 	ServerDownloadUrl               *string     `json:"serverDownloadUrl,omitempty"`
 }
@@ -116,6 +118,38 @@ func (o *ServerConfig) SetBinariesPath(v string) {
 	o.BinariesPath = &v
 }
 
+// GetBuildImageNamespace returns the BuildImageNamespace field value if set, zero value otherwise.
+func (o *ServerConfig) GetBuildImageNamespace() string {
+	if o == nil || IsNil(o.BuildImageNamespace) {
+		var ret string
+		return ret
+	}
+	return *o.BuildImageNamespace
+}
+
+// GetBuildImageNamespaceOk returns a tuple with the BuildImageNamespace field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ServerConfig) GetBuildImageNamespaceOk() (*string, bool) {
+	if o == nil || IsNil(o.BuildImageNamespace) {
+		return nil, false
+	}
+	return o.BuildImageNamespace, true
+}
+
+// HasBuildImageNamespace returns a boolean if a field has been set.
+func (o *ServerConfig) HasBuildImageNamespace() bool {
+	if o != nil && !IsNil(o.BuildImageNamespace) {
+		return true
+	}
+
+	return false
+}
+
+// SetBuildImageNamespace gets a reference to the given string and assigns it to the BuildImageNamespace field.
+func (o *ServerConfig) SetBuildImageNamespace(v string) {
+	o.BuildImageNamespace = &v
+}
+
 // GetBuilderImage returns the BuilderImage field value if set, zero value otherwise.
 func (o *ServerConfig) GetBuilderImage() string {
 	if o == nil || IsNil(o.BuilderImage) {
@@ -146,6 +180,38 @@ func (o *ServerConfig) HasBuilderImage() bool {
 // SetBuilderImage gets a reference to the given string and assigns it to the BuilderImage field.
 func (o *ServerConfig) SetBuilderImage(v string) {
 	o.BuilderImage = &v
+}
+
+// GetBuilderRegistryServer returns the BuilderRegistryServer field value if set, zero value otherwise.
+func (o *ServerConfig) GetBuilderRegistryServer() string {
+	if o == nil || IsNil(o.BuilderRegistryServer) {
+		var ret string
+		return ret
+	}
+	return *o.BuilderRegistryServer
+}
+
+// GetBuilderRegistryServerOk returns a tuple with the BuilderRegistryServer field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ServerConfig) GetBuilderRegistryServerOk() (*string, bool) {
+	if o == nil || IsNil(o.BuilderRegistryServer) {
+		return nil, false
+	}
+	return o.BuilderRegistryServer, true
+}
+
+// HasBuilderRegistryServer returns a boolean if a field has been set.
+func (o *ServerConfig) HasBuilderRegistryServer() bool {
+	if o != nil && !IsNil(o.BuilderRegistryServer) {
+		return true
+	}
+
+	return false
+}
+
+// SetBuilderRegistryServer gets a reference to the given string and assigns it to the BuilderRegistryServer field.
+func (o *ServerConfig) SetBuilderRegistryServer(v string) {
+	o.BuilderRegistryServer = &v
 }
 
 // GetDefaultProjectImage returns the DefaultProjectImage field value if set, zero value otherwise.
@@ -340,6 +406,38 @@ func (o *ServerConfig) SetId(v string) {
 	o.Id = &v
 }
 
+// GetLocalBuilderRegistryPort returns the LocalBuilderRegistryPort field value if set, zero value otherwise.
+func (o *ServerConfig) GetLocalBuilderRegistryPort() int32 {
+	if o == nil || IsNil(o.LocalBuilderRegistryPort) {
+		var ret int32
+		return ret
+	}
+	return *o.LocalBuilderRegistryPort
+}
+
+// GetLocalBuilderRegistryPortOk returns a tuple with the LocalBuilderRegistryPort field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ServerConfig) GetLocalBuilderRegistryPortOk() (*int32, bool) {
+	if o == nil || IsNil(o.LocalBuilderRegistryPort) {
+		return nil, false
+	}
+	return o.LocalBuilderRegistryPort, true
+}
+
+// HasLocalBuilderRegistryPort returns a boolean if a field has been set.
+func (o *ServerConfig) HasLocalBuilderRegistryPort() bool {
+	if o != nil && !IsNil(o.LocalBuilderRegistryPort) {
+		return true
+	}
+
+	return false
+}
+
+// SetLocalBuilderRegistryPort gets a reference to the given int32 and assigns it to the LocalBuilderRegistryPort field.
+func (o *ServerConfig) SetLocalBuilderRegistryPort(v int32) {
+	o.LocalBuilderRegistryPort = &v
+}
+
 // GetLogFilePath returns the LogFilePath field value if set, zero value otherwise.
 func (o *ServerConfig) GetLogFilePath() string {
 	if o == nil || IsNil(o.LogFilePath) {
@@ -402,38 +500,6 @@ func (o *ServerConfig) HasProvidersDir() bool {
 // SetProvidersDir gets a reference to the given string and assigns it to the ProvidersDir field.
 func (o *ServerConfig) SetProvidersDir(v string) {
 	o.ProvidersDir = &v
-}
-
-// GetRegistryPort returns the RegistryPort field value if set, zero value otherwise.
-func (o *ServerConfig) GetRegistryPort() int32 {
-	if o == nil || IsNil(o.RegistryPort) {
-		var ret int32
-		return ret
-	}
-	return *o.RegistryPort
-}
-
-// GetRegistryPortOk returns a tuple with the RegistryPort field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *ServerConfig) GetRegistryPortOk() (*int32, bool) {
-	if o == nil || IsNil(o.RegistryPort) {
-		return nil, false
-	}
-	return o.RegistryPort, true
-}
-
-// HasRegistryPort returns a boolean if a field has been set.
-func (o *ServerConfig) HasRegistryPort() bool {
-	if o != nil && !IsNil(o.RegistryPort) {
-		return true
-	}
-
-	return false
-}
-
-// SetRegistryPort gets a reference to the given int32 and assigns it to the RegistryPort field.
-func (o *ServerConfig) SetRegistryPort(v int32) {
-	o.RegistryPort = &v
 }
 
 // GetRegistryUrl returns the RegistryUrl field value if set, zero value otherwise.
@@ -516,8 +582,14 @@ func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.BinariesPath) {
 		toSerialize["binariesPath"] = o.BinariesPath
 	}
+	if !IsNil(o.BuildImageNamespace) {
+		toSerialize["buildImageNamespace"] = o.BuildImageNamespace
+	}
 	if !IsNil(o.BuilderImage) {
 		toSerialize["builderImage"] = o.BuilderImage
+	}
+	if !IsNil(o.BuilderRegistryServer) {
+		toSerialize["builderRegistryServer"] = o.BuilderRegistryServer
 	}
 	if !IsNil(o.DefaultProjectImage) {
 		toSerialize["defaultProjectImage"] = o.DefaultProjectImage
@@ -537,14 +609,14 @@ func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Id) {
 		toSerialize["id"] = o.Id
 	}
+	if !IsNil(o.LocalBuilderRegistryPort) {
+		toSerialize["localBuilderRegistryPort"] = o.LocalBuilderRegistryPort
+	}
 	if !IsNil(o.LogFilePath) {
 		toSerialize["logFilePath"] = o.LogFilePath
 	}
 	if !IsNil(o.ProvidersDir) {
 		toSerialize["providersDir"] = o.ProvidersDir
-	}
-	if !IsNil(o.RegistryPort) {
-		toSerialize["registryPort"] = o.RegistryPort
 	}
 	if !IsNil(o.RegistryUrl) {
 		toSerialize["registryUrl"] = o.RegistryUrl
