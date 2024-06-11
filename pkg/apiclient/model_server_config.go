@@ -30,6 +30,7 @@ type ServerConfig struct {
 	Frps                            *FRPSConfig `json:"frps,omitempty"`
 	HeadscalePort                   *int32      `json:"headscalePort,omitempty"`
 	Id                              *string     `json:"id,omitempty"`
+	IpWithProtocol                  *string     `json:"ipWithProtocol,omitempty"`
 	LocalBuilderRegistryPort        *int32      `json:"localBuilderRegistryPort,omitempty"`
 	LogFilePath                     *string     `json:"logFilePath,omitempty"`
 	ProvidersDir                    *string     `json:"providersDir,omitempty"`
@@ -406,6 +407,38 @@ func (o *ServerConfig) SetId(v string) {
 	o.Id = &v
 }
 
+// GetIpWithProtocol returns the IpWithProtocol field value if set, zero value otherwise.
+func (o *ServerConfig) GetIpWithProtocol() string {
+	if o == nil || IsNil(o.IpWithProtocol) {
+		var ret string
+		return ret
+	}
+	return *o.IpWithProtocol
+}
+
+// GetIpWithProtocolOk returns a tuple with the IpWithProtocol field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ServerConfig) GetIpWithProtocolOk() (*string, bool) {
+	if o == nil || IsNil(o.IpWithProtocol) {
+		return nil, false
+	}
+	return o.IpWithProtocol, true
+}
+
+// HasIpWithProtocol returns a boolean if a field has been set.
+func (o *ServerConfig) HasIpWithProtocol() bool {
+	if o != nil && !IsNil(o.IpWithProtocol) {
+		return true
+	}
+
+	return false
+}
+
+// SetIpWithProtocol gets a reference to the given string and assigns it to the IpWithProtocol field.
+func (o *ServerConfig) SetIpWithProtocol(v string) {
+	o.IpWithProtocol = &v
+}
+
 // GetLocalBuilderRegistryPort returns the LocalBuilderRegistryPort field value if set, zero value otherwise.
 func (o *ServerConfig) GetLocalBuilderRegistryPort() int32 {
 	if o == nil || IsNil(o.LocalBuilderRegistryPort) {
@@ -608,6 +641,9 @@ func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Id) {
 		toSerialize["id"] = o.Id
+	}
+	if !IsNil(o.IpWithProtocol) {
+		toSerialize["ipWithProtocol"] = o.IpWithProtocol
 	}
 	if !IsNil(o.LocalBuilderRegistryPort) {
 		toSerialize["localBuilderRegistryPort"] = o.LocalBuilderRegistryPort

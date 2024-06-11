@@ -26,6 +26,10 @@ func ConfigurationForm(config *apiclient.ServerConfig, containerRegistries []api
 	frpsPortView := strconv.Itoa(int(config.Frps.GetPort()))
 	localBuilderRegistryPort := strconv.Itoa(int(config.GetLocalBuilderRegistryPort()))
 
+	if config.IpWithProtocol == nil {
+		config.IpWithProtocol = new(string)
+	}
+
 	builderContainerRegistryOptions := []huh.Option[string]{{
 		Key:   "Local registry managed by Daytona",
 		Value: "local",
@@ -59,6 +63,30 @@ func ConfigurationForm(config *apiclient.ServerConfig, containerRegistries []api
 		),
 		huh.NewGroup(
 			huh.NewInput().
+				Title("Server IP with Protocol").
+				// TODO: Add docs entry link
+				Description("If the server has a static IP address, you can set it here to avoid using our reverse proxy\nNOTE: Due to current limitations of our Headscale server, the IP must be accessible over https").
+				Value(config.IpWithProtocol).
+				Validate(func(s string) error {
+					if s == "" {
+						return nil
+					}
+					if !strings.HasPrefix(s, "http://") && !strings.HasPrefix(s, "https://") {
+						return errors.New("invalid protocol")
+					}
+					return nil
+				}),
+			huh.NewInput().
+				Title("API Port").
+				Value(&apiPortView).
+				Validate(createPortValidator(config, &apiPortView, config.ApiPort)),
+			huh.NewInput().
+				Title("Headscale Port").
+				Value(&headscalePortView).
+				Validate(createPortValidator(config, &headscalePortView, config.HeadscalePort)),
+		),
+		huh.NewGroup(
+			huh.NewInput().
 				Title("Builder Image").
 				Description("Image dependencies: docker, @devcontainers/cli (node package)").
 				Value(config.BuilderImage),
@@ -83,14 +111,6 @@ func ConfigurationForm(config *apiclient.ServerConfig, containerRegistries []api
 			return config.BuilderRegistryServer == nil || *config.BuilderRegistryServer != "local"
 		}),
 		huh.NewGroup(
-			huh.NewInput().
-				Title("API Port").
-				Value(&apiPortView).
-				Validate(createPortValidator(config, &apiPortView, config.ApiPort)),
-			huh.NewInput().
-				Title("Headscale Port").
-				Value(&headscalePortView).
-				Validate(createPortValidator(config, &headscalePortView, config.HeadscalePort)),
 			huh.NewInput().
 				Title("Binaries Path").
 				Description("Directory will be created if it does not exist").
@@ -120,7 +140,7 @@ func ConfigurationForm(config *apiclient.ServerConfig, containerRegistries []api
 			huh.NewInput().
 				Title("Frps Protocol").
 				Value(config.Frps.Protocol),
-		),
+		).Description("Frps is a reverse proxy server that is used for connecting workspaces to the server and public port forwarding"),
 	).WithTheme(views.GetCustomTheme())
 
 	err := form.Run()

@@ -15,6 +15,7 @@ Name | Type | Description | Notes
 **Frps** | Pointer to [**FRPSConfig**](FRPSConfig.md) |  | [optional] 
 **HeadscalePort** | Pointer to **int32** |  | [optional] 
 **Id** | Pointer to **string** |  | [optional] 
+**IpWithProtocol** | Pointer to **string** |  | [optional] 
 **LocalBuilderRegistryPort** | Pointer to **int32** |  | [optional] 
 **LogFilePath** | Pointer to **string** |  | [optional] 
 **ProvidersDir** | Pointer to **string** |  | [optional] 
@@ -314,6 +315,31 @@ SetId sets Id field to given value.
 `func (o *ServerConfig) HasId() bool`
 
 HasId returns a boolean if a field has been set.
+
+### GetIpWithProtocol
+
+`func (o *ServerConfig) GetIpWithProtocol() string`
+
+GetIpWithProtocol returns the IpWithProtocol field if non-nil, zero value otherwise.
+
+### GetIpWithProtocolOk
+
+`func (o *ServerConfig) GetIpWithProtocolOk() (*string, bool)`
+
+GetIpWithProtocolOk returns a tuple with the IpWithProtocol field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetIpWithProtocol
+
+`func (o *ServerConfig) SetIpWithProtocol(v string)`
+
+SetIpWithProtocol sets IpWithProtocol field to given value.
+
+### HasIpWithProtocol
+
+`func (o *ServerConfig) HasIpWithProtocol() bool`
+
+HasIpWithProtocol returns a boolean if a field has been set.
 
 ### GetLocalBuilderRegistryPort
 

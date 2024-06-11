@@ -4,22 +4,23 @@
 package binary
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 
 	"github.com/daytonaio/daytona/internal/constants"
+	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
 
 // Used in projects to download the Daytona binary
 func GetDaytonaScript(ctx *gin.Context) {
-	scheme := "http"
-	if ctx.Request.TLS != nil || ctx.GetHeader("X-Forwarded-Proto") == "https" {
-		scheme = "https"
+	c, err := server.GetConfig()
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, err.Error())
+		return
 	}
 
-	downloadUrl, _ := url.JoinPath(fmt.Sprintf("%s://%s", scheme, ctx.Request.Host), "binary")
+	downloadUrl, _ := url.JoinPath(c.GetApiUrl(), "binary")
 	getServerScript := constants.GetDaytonaScript(downloadUrl)
 
 	ctx.String(http.StatusOK, getServerScript)
