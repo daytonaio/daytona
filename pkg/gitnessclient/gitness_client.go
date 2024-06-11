@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"sort"
@@ -239,6 +240,9 @@ func (g *GitnessClient) GetRepoPRs(repositoryId string, namespaceId string) ([]*
 func (g *GitnessClient) GetLastCommitSha(repoURL string, branch *string) (string, error) {
 
 	path := g.GetRepoRef(repoURL)
+	path = strings.Replace(path, "/", "%2F", -1)
+
+	log.Print(path)
 
 	apiURL := ""
 	if branch != nil {
@@ -246,6 +250,8 @@ func (g *GitnessClient) GetLastCommitSha(repoURL string, branch *string) (string
 	} else {
 		apiURL = fmt.Sprintf("%s/api/v1/repos/%s/commits?page=1&include_stats=false", g.BaseURL.String(), path)
 	}
+
+	log.Print(apiURL)
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -281,9 +287,15 @@ func (g *GitnessClient) GetLastCommitSha(repoURL string, branch *string) (string
 }
 
 func (g *GitnessClient) GetRepoRef(url string) string {
+	repoUrl := strings.TrimSuffix(url, ".git")
+	parts := strings.Split(repoUrl, "/")
+	var path string
+	if parts[3] == "git" {
+		path = fmt.Sprintf("%s/%s", parts[4], parts[5])
+	} else {
+		path = fmt.Sprintf("%s/%s", parts[3], parts[4])
+	}
 
-	parts := strings.Split(url, "/")
-	path := fmt.Sprintf("%s/%s", parts[3], parts[4])
 	return path
 }
 
