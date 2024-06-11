@@ -113,10 +113,14 @@ func (g *BitbucketServerGitProvider) GetRepositories(namespace string) ([]*GitRe
 		for _, repo := range pageRepos {
 			var repoUrl string
 			for _, link := range repo.Links.Clone {
-				if link.Name == "https" || link.Name == "ssh" {
+				if link.Name == "https" || link.Name == "http" || link.Name == "ssh" {
 					repoUrl = link.Href
 					break
 				}
+			}
+
+			if len(repoUrl) == 0 {
+				repoUrl = repo.Links.Self[0].Href
 			}
 
 			var ownerName string
@@ -197,10 +201,14 @@ func (g *BitbucketServerGitProvider) GetRepoPRs(repositoryId string, namespaceId
 	for _, pr := range pullRequest {
 		var repoUrl string
 		for _, link := range pr.FromRef.Repository.Links.Clone {
-			if link.Name == "https" || link.Name == "ssh" {
+			if link.Name == "https" || link.Name == "http" || link.Name == "ssh" {
 				repoUrl = link.Href
 				break
 			}
+		}
+
+		if len(repoUrl) == 0 {
+			repoUrl = pr.FromRef.Repository.Links.Self[0].Href
 		}
 
 		response = append(response, &GitPullRequest{
