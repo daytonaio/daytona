@@ -9,8 +9,9 @@ daytona delete [WORKSPACE] [flags]
 ### Options
 
 ```
-  -a, --all   Delete all workspaces
-  -y, --yes   Confirm deletion without prompt
+  -a, --all     Delete all workspaces
+  -f, --force   Delete a workspace by force
+  -y, --yes     Confirm deletion without prompt
 ```
 
 ### Options inherited from parent commands

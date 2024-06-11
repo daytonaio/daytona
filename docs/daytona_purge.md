@@ -13,7 +13,8 @@ daytona purge [flags]
 ### Options
 
 ```
-  -y, --yes   Execute purge without prompt
+  -f, --force   Delete all workspaces by force
+  -y, --yes     Execute purge without prompt
 ```
 
 ### Options inherited from parent commands
