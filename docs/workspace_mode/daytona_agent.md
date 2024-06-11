@@ -21,6 +21,6 @@ daytona agent [flags]
 
 ### SEE ALSO
 
-* [daytona](daytona.md)	 - Use the Daytona CLI to manage your project
+* [daytona](daytona.md)	 - Use the Daytona CLI to manage your workspace
 * [daytona agent logs](daytona_agent_logs.md)	 - Output Daytona Agent logs
 
