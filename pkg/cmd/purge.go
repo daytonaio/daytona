@@ -14,6 +14,7 @@ import (
 )
 
 var yesFlag bool
+var forceFlag bool
 
 var purgeCmd = &cobra.Command{
 	Use:   "purge",
@@ -52,7 +53,7 @@ var purgeCmd = &cobra.Command{
 		}
 
 		views.RenderLine("\nDeleting all workspaces")
-		err = workspace.DeleteAllWorkspaces()
+		err = workspace.DeleteAllWorkspaces(forceFlag)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -87,4 +88,5 @@ var purgeCmd = &cobra.Command{
 
 func init() {
 	purgeCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Execute purge without prompt")
+	purgeCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Delete all workspaces by force")
 }

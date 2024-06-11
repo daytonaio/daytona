@@ -220,7 +220,7 @@ Name | Type | Description  | Notes
 
 ## RemoveWorkspace
 
-> RemoveWorkspace(ctx, workspaceId).Execute()
+> RemoveWorkspace(ctx, workspaceId).Force(force).Execute()
 
 Remove workspace
 
@@ -240,10 +240,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID
+	force := true // bool | Force (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.WorkspaceAPI.RemoveWorkspace(context.Background(), workspaceId).Execute()
+	r, err := apiClient.WorkspaceAPI.RemoveWorkspace(context.Background(), workspaceId).Force(force).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.RemoveWorkspace``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -267,6 +268,7 @@ Other parameters are passed through a pointer to a apiRemoveWorkspaceRequest str
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
+ **force** | **bool** | Force | 
 
 ### Return type
 

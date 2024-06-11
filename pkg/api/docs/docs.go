@@ -953,6 +953,12 @@ const docTemplate = `{
                         "name": "workspaceId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+                        "in": "query"
                     }
                 ],
                 "responses": {

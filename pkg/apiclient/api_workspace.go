@@ -394,6 +394,13 @@ type ApiRemoveWorkspaceRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceAPIService
 	workspaceId string
+	force       *bool
+}
+
+// Force
+func (r ApiRemoveWorkspaceRequest) Force(force bool) ApiRemoveWorkspaceRequest {
+	r.force = &force
+	return r
 }
 
 func (r ApiRemoveWorkspaceRequest) Execute() (*http.Response, error) {
@@ -437,6 +444,9 @@ func (a *WorkspaceAPIService) RemoveWorkspaceExecute(r ApiRemoveWorkspaceRequest
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.force != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "force", r.force, "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

@@ -650,6 +650,11 @@ paths:
         required: true
         schema:
           type: string
+      - description: Force
+        in: query
+        name: force
+        schema:
+          type: boolean
       responses:
         "200":
           content: {}
