@@ -104,8 +104,12 @@ func (b *DevcontainerBuilder) Publish() error {
 		ApiClient: cliBuilder,
 	})
 
-	//	todo: registry auth (from container registry store)
-	return dockerClient.PushImage(b.buildImageName, nil, projectLogger)
+	cr, err := b.containerRegistryService.Find(b.containerRegistryServer)
+	if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
+		return err
+	}
+
+	return dockerClient.PushImage(b.buildImageName, cr, projectLogger)
 }
 
 func (b *DevcontainerBuilder) buildDevcontainer() error {
@@ -184,7 +188,8 @@ func (b *DevcontainerBuilder) buildDevcontainer() error {
 	}
 
 	tag := b.project.Repository.Sha
-	imageName := fmt.Sprintf("%s/p-%s:%s", b.localContainerRegistryServer, b.id, tag)
+	namespace := b.buildImageNamespace
+	imageName := fmt.Sprintf("%s%s/p-%s:%s", b.containerRegistryServer, namespace, b.id, tag)
 
 	_, err = builderCli.ContainerCommit(context.Background(), buildOutcome.ContainerId, container.CommitOptions{
 		Reference: imageName,
@@ -295,9 +300,14 @@ func (b *DevcontainerBuilder) startContainer() error {
 		return err
 	}
 
+	serverHost, err := containerregistry.GetServerHostname(b.containerRegistryServer)
+	if err != nil {
+		return err
+	}
+
 	_, err = cli.ContainerCreate(ctx, &container.Config{
 		Image:      b.image,
-		Entrypoint: []string{"sudo", "dockerd", "-H", fmt.Sprintf("tcp://0.0.0.0:%d", b.builderDockerPort), "-H", "unix:///var/run/docker.sock", "--insecure-registry", b.localContainerRegistryServer},
+		Entrypoint: []string{"sudo", "dockerd", "-H", fmt.Sprintf("tcp://0.0.0.0:%d", b.builderDockerPort), "-H", "unix:///var/run/docker.sock", "--insecure-registry", serverHost},
 		ExposedPorts: nat.PortSet{
 			nat.Port(fmt.Sprintf("%d/tcp", b.builderDockerPort)): {},
 		},

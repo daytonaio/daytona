@@ -23,10 +23,12 @@ type BuildResult struct {
 }
 
 type BuilderConfig struct {
-	Image                           string
-	ContainerRegistryService        containerregistries.IContainerRegistryService
-	ServerConfigFolder              string
-	LocalContainerRegistryServer    string
+	Image                    string
+	ContainerRegistryService containerregistries.IContainerRegistryService
+	ServerConfigFolder       string
+	ContainerRegistryServer  string
+	// Namespace to be used when tagging and pushing the build image
+	BuildImageNamespace             string
 	BasePath                        string
 	LoggerFactory                   logger.LoggerFactory
 	DefaultProjectImage             string
@@ -50,8 +52,9 @@ type Builder struct {
 
 	image                           string
 	containerRegistryService        containerregistries.IContainerRegistryService
+	containerRegistryServer         string
+	buildImageNamespace             string
 	serverConfigFolder              string
-	localContainerRegistryServer    string
 	basePath                        string
 	loggerFactory                   logger.LoggerFactory
 	defaultProjectImage             string

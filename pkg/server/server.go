@@ -18,6 +18,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/profiledata"
 	"github.com/daytonaio/daytona/pkg/server/providertargets"
+	"github.com/daytonaio/daytona/pkg/server/registry"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/hashicorp/go-plugin"
 
@@ -97,11 +98,17 @@ func (s *Server) Start(errCh chan error) error {
 		return err
 	}
 
-	//	todo: from config - allow to skip
-	log.Info("Starting local container registry")
-	err = s.LocalContainerRegistry.Start()
-	if err != nil {
-		log.Fatal(err)
+	if s.LocalContainerRegistry != nil {
+		log.Info("Starting local container registry")
+		err = s.LocalContainerRegistry.Start()
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		err := registry.RemoveRegistryContainer()
+		if err != nil {
+			log.Fatalf("Failed to remove local container registry: %s", err.Error())
+		}
 	}
 
 	go func() {
@@ -129,22 +136,24 @@ func (s *Server) Start(errCh chan error) error {
 		}
 	}()
 
-	_, registryFrpcService, err := frpc.GetService(frpc.FrpcConnectParams{
-		ServerDomain: s.config.Frps.Domain,
-		ServerPort:   int(s.config.Frps.Port),
-		Name:         fmt.Sprintf("daytona-server-registry-%s", s.config.Id),
-		Port:         int(s.config.RegistryPort),
-		SubDomain:    fmt.Sprintf("registry-%s", s.config.Id),
-	})
-	if err != nil {
-		return err
-	}
-	go func() {
-		err := registryFrpcService.Run(context.Background())
+	if s.LocalContainerRegistry != nil {
+		_, registryFrpcService, err := frpc.GetService(frpc.FrpcConnectParams{
+			ServerDomain: s.config.Frps.Domain,
+			ServerPort:   int(s.config.Frps.Port),
+			Name:         fmt.Sprintf("daytona-server-registry-%s", s.config.Id),
+			Port:         int(s.config.LocalBuilderRegistryPort),
+			SubDomain:    fmt.Sprintf("registry-%s", s.config.Id),
+		})
 		if err != nil {
-			errCh <- err
+			return err
 		}
-	}()
+		go func() {
+			err := registryFrpcService.Run(context.Background())
+			if err != nil {
+				errCh <- err
+			}
+		}()
+	}
 
 	go func() {
 		interruptChannel := make(chan os.Signal, 1)

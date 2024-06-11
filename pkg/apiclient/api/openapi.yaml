@@ -1291,20 +1291,22 @@ components:
     ServerConfig:
       example:
         registryUrl: registryUrl
+        localBuilderRegistryPort: 5
         defaultProjectUser: defaultProjectUser
+        builderRegistryServer: builderRegistryServer
         defaultProjectPostStartCommands:
         - defaultProjectPostStartCommands
         - defaultProjectPostStartCommands
         builderImage: builderImage
         apiPort: 0
         headscalePort: 1
+        buildImageNamespace: buildImageNamespace
         serverDownloadUrl: serverDownloadUrl
         binariesPath: binariesPath
         logFilePath: logFilePath
         defaultProjectImage: defaultProjectImage
         providersDir: providersDir
         id: id
-        registryPort: 5
         frps:
           protocol: protocol
           port: 6
@@ -1314,7 +1316,11 @@ components:
           type: integer
         binariesPath:
           type: string
+        buildImageNamespace:
+          type: string
         builderImage:
+          type: string
+        builderRegistryServer:
           type: string
         defaultProjectImage:
           type: string
@@ -1330,12 +1336,12 @@ components:
           type: integer
         id:
           type: string
+        localBuilderRegistryPort:
+          type: integer
         logFilePath:
           type: string
         providersDir:
           type: string
-        registryPort:
-          type: integer
         registryUrl:
           type: string
         serverDownloadUrl:

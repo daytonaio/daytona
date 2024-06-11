@@ -1533,7 +1533,13 @@ const docTemplate = `{
                 "binariesPath": {
                     "type": "string"
                 },
+                "buildImageNamespace": {
+                    "type": "string"
+                },
                 "builderImage": {
+                    "type": "string"
+                },
+                "builderRegistryServer": {
                     "type": "string"
                 },
                 "defaultProjectImage": {
@@ -1557,14 +1563,14 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "localBuilderRegistryPort": {
+                    "type": "integer"
+                },
                 "logFilePath": {
                     "type": "string"
                 },
                 "providersDir": {
                     "type": "string"
-                },
-                "registryPort": {
-                    "type": "integer"
                 },
                 "registryUrl": {
                     "type": "string"
