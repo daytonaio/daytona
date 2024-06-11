@@ -53,26 +53,10 @@ func (s *LocalContainerRegistry) Start() error {
 		ApiClient: cli,
 	})
 
-	containers, err := cli.ContainerList(ctx, container.ListOptions{All: true})
-	if err != nil {
+	//	we want to always create a new container
+	//	to avoid conflicts with configuration changes
+	if err := RemoveRegistryContainer(); err != nil {
 		return err
-	}
-
-	for _, c := range containers {
-		for _, name := range c.Names {
-			if name == "/daytona-registry" {
-				//	we want to always create a new container
-				//	to avoid conflicts with configuration changes
-				removeOptions := container.RemoveOptions{
-					Force: true,
-				}
-
-				if err := cli.ContainerRemove(ctx, c.ID, removeOptions); err != nil {
-					return err
-				}
-				break
-			}
-		}
 	}
 
 	// Pull the image
@@ -110,6 +94,37 @@ func (s *LocalContainerRegistry) Start() error {
 
 	if err := cli.ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func RemoveRegistryContainer() error {
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		return err
+	}
+
+	ctx := context.Background()
+
+	containers, err := cli.ContainerList(ctx, container.ListOptions{All: true})
+	if err != nil {
+		return err
+	}
+
+	for _, c := range containers {
+		for _, name := range c.Names {
+			if name == "/daytona-registry" {
+				removeOptions := container.RemoveOptions{
+					Force: true,
+				}
+
+				if err := cli.ContainerRemove(ctx, c.ID, removeOptions); err != nil {
+					return err
+				}
+				return nil
+			}
+		}
 	}
 
 	return nil
