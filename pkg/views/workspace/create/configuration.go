@@ -83,6 +83,11 @@ func ConfigureProjects(projectList []apiclient.CreateWorkspaceRequestProject, ap
 			projectList[i].PostStartCommands = projectConfigurationData.PostStartCommands
 			projectList[i].EnvVars = &projectConfigurationData.EnvVars
 
+			if projectConfigurationData.BuilderChoice == "custom-image" {
+				projectList[i].Build = nil
+				continue
+			}
+
 			if projectConfigurationData.BuilderChoice == "auto" {
 				projectList[i].Build = &apiclient.ProjectBuild{}
 				continue
