@@ -15,5 +15,5 @@ daytona version [flags]
 
 ### SEE ALSO
 
-* [daytona](daytona.md)	 - Use the Daytona CLI to manage your project
+* [daytona](daytona.md)	 - Use the Daytona CLI to manage your workspace
 
