@@ -46,15 +46,6 @@ func GetConfig() (*Config, error) {
 		return nil, err
 	}
 
-	if c.BinariesPath == "" {
-		binariesPath, err := getDefaultBinariesPath()
-		if err != nil {
-			return nil, err
-		}
-
-		c.BinariesPath = binariesPath
-	}
-
 	return &c, nil
 }
 
