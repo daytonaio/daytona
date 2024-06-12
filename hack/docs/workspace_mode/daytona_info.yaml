@@ -9,4 +9,4 @@ inherited_options:
       shorthand: o
       usage: Output format. Must be one of (yaml, json)
 see_also:
-    - daytona - Use the Daytona CLI to manage your project
+    - daytona - Use the Daytona CLI to manage your workspace

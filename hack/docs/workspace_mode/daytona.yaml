@@ -1,6 +1,6 @@
 name: daytona
-synopsis: Use the Daytona CLI to manage your project
-description: Use the Daytona CLI to manage your project
+synopsis: Use the Daytona CLI to manage your workspace
+description: Use the Daytona CLI to manage your workspace
 usage: daytona [flags]
 options:
     - name: help

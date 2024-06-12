@@ -1,10 +1,10 @@
 ## daytona
 
-Use the Daytona CLI to manage your project
+Use the Daytona CLI to manage your workspace
 
 ### Synopsis
 
-Use the Daytona CLI to manage your project
+Use the Daytona CLI to manage your workspace
 
 ```
 daytona [flags]
