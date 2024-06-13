@@ -265,8 +265,13 @@ func processCmdArguments(args []string, apiClient *apiclient.APIClient, projects
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
+	projectName, err := workspace_util.GetSanitizedProjectName(*repoResponse.Name)
+	if err != nil {
+		return err
+	}
+
 	project := &apiclient.CreateWorkspaceRequestProject{
-		Name: *repoResponse.Name,
+		Name: projectName,
 		Source: &apiclient.CreateWorkspaceRequestProjectSource{
 			Repository: repoResponse,
 		},

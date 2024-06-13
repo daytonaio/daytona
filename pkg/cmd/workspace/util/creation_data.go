@@ -5,6 +5,7 @@ package util
 
 import (
 	"fmt"
+	"net/url"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -43,8 +44,13 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 		}
 	}
 
+	providerRepoName, err := GetSanitizedProjectName(*providerRepo.Name)
+	if err != nil {
+		return "", nil, err
+	}
+
 	projectList = []apiclient.CreateWorkspaceRequestProject{{
-		Name: *providerRepo.Name,
+		Name: providerRepoName,
 		Source: &apiclient.CreateWorkspaceRequestProjectSource{
 			Repository: providerRepo,
 		},
@@ -75,8 +81,13 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 				}
 			}
 
+			providerRepoName, err := GetSanitizedProjectName(*providerRepo.Name)
+			if err != nil {
+				return "", nil, err
+			}
+
 			projectList = append(projectList, apiclient.CreateWorkspaceRequestProject{
-				Name: *providerRepo.Name,
+				Name: providerRepoName,
 				Source: &apiclient.CreateWorkspaceRequestProjectSource{
 					Repository: providerRepo,
 				},
@@ -131,4 +142,14 @@ func GetSuggestedWorkspaceName(firstProjectName string, existingWorkspaceNames [
 			i++
 		}
 	}
+}
+
+func GetSanitizedProjectName(projectName string) (string, error) {
+	projectName, err := url.QueryUnescape(projectName)
+	if err != nil {
+		return "", err
+	}
+	projectName = strings.ReplaceAll(projectName, " ", "-")
+
+	return projectName, nil
 }
