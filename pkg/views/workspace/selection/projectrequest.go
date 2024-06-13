@@ -33,10 +33,10 @@ type projectRequestModel struct {
 	model[apiclient.CreateWorkspaceRequestProject]
 }
 
-func selectProjectRequestPrompt(projects []apiclient.CreateWorkspaceRequestProject, choiceChan chan<- *apiclient.CreateWorkspaceRequestProject) {
+func selectProjectRequestPrompt(projects *[]apiclient.CreateWorkspaceRequestProject, choiceChan chan<- *apiclient.CreateWorkspaceRequestProject) {
 	items := []list.Item{}
 
-	for _, project := range projects {
+	for _, project := range *projects {
 		var name string
 		var image string
 		var user string
@@ -107,7 +107,7 @@ func selectProjectRequestPrompt(projects []apiclient.CreateWorkspaceRequestProje
 	}
 }
 
-func GetProjectRequestFromPrompt(projects []apiclient.CreateWorkspaceRequestProject) *apiclient.CreateWorkspaceRequestProject {
+func GetProjectRequestFromPrompt(projects *[]apiclient.CreateWorkspaceRequestProject) *apiclient.CreateWorkspaceRequestProject {
 	choiceChan := make(chan *apiclient.CreateWorkspaceRequestProject)
 
 	go selectProjectRequestPrompt(projects, choiceChan)

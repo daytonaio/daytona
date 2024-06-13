@@ -16,6 +16,15 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
 
+type BuildChoice string
+
+const (
+	AUTOMATIC    BuildChoice = "auto"
+	DEVCONTAINER BuildChoice = "devcontainer"
+	CUSTOMIMAGE  BuildChoice = "custom-image"
+	NONE         BuildChoice = "none"
+)
+
 var configurationHelpLine = lipgloss.NewStyle().Foreground(views.Gray).Render("enter: next  f10: advanced configuration")
 
 type ProjectConfigurationData struct {
@@ -27,42 +36,66 @@ type ProjectConfigurationData struct {
 	EnvVars              map[string]string
 }
 
-func ConfigureProjects(projectList []apiclient.CreateWorkspaceRequestProject, apiServerConfig apiclient.ServerConfig) ([]apiclient.CreateWorkspaceRequestProject, error) {
+func NewProjectConfigurationData(builderChoice BuildChoice, devContainerFilePath string, currentProject *apiclient.CreateWorkspaceRequestProject) *ProjectConfigurationData {
+	var image, user string
+	commands := []string{}
+	envVars := map[string]string{}
+
+	if currentProject.Image != nil {
+		image = *currentProject.Image
+	}
+
+	if currentProject.User != nil {
+		user = *currentProject.User
+	}
+
+	if currentProject.PostStartCommands != nil {
+		commands = currentProject.PostStartCommands
+	}
+
+	if currentProject.EnvVars != nil {
+		envVars = *currentProject.EnvVars
+	}
+
+	return &ProjectConfigurationData{
+		BuilderChoice:        string(builderChoice),
+		DevcontainerFilePath: devContainerFilePath,
+		Image:                image,
+		User:                 user,
+		PostStartCommands:    commands,
+		EnvVars:              envVars,
+	}
+}
+
+func ConfigureProjects(projectList *[]apiclient.CreateWorkspaceRequestProject, apiServerConfig apiclient.ServerConfig) (bool, error) {
 	var currentProject *apiclient.CreateWorkspaceRequestProject
 
-	if len(projectList) > 1 {
+	if len(*projectList) > 1 {
 		currentProject = selection.GetProjectRequestFromPrompt(projectList)
 		if currentProject == nil {
-			return projectList, errors.New("project is required")
+			return false, errors.New("project is required")
 		}
 	} else {
-		currentProject = &projectList[0]
+		currentProject = &((*projectList)[0])
 	}
 
 	if currentProject.Name == selection.DoneConfiguring.Name {
-		return projectList, nil
+		return false, nil
 	}
 
 	devContainerFilePath := ".devcontainer/devcontainer.json"
-	builderChoice := "auto"
+	builderChoice := AUTOMATIC
 
 	if currentProject.Build != nil {
 		if currentProject.Build.Devcontainer != nil {
-			builderChoice = "devcontainer"
+			builderChoice = DEVCONTAINER
 			devContainerFilePath = *currentProject.Build.Devcontainer.DevContainerFilePath
 		}
 	} else {
-		builderChoice = "none"
+		builderChoice = NONE
 	}
 
-	projectConfigurationData := &ProjectConfigurationData{
-		BuilderChoice:        builderChoice,
-		DevcontainerFilePath: devContainerFilePath,
-		Image:                *currentProject.Image,
-		User:                 *currentProject.User,
-		PostStartCommands:    currentProject.PostStartCommands,
-		EnvVars:              *currentProject.EnvVars,
-	}
+	projectConfigurationData := NewProjectConfigurationData(builderChoice, devContainerFilePath, currentProject)
 
 	form := GetProjectConfigurationForm(projectConfigurationData)
 	err := form.Run()
@@ -70,53 +103,58 @@ func ConfigureProjects(projectList []apiclient.CreateWorkspaceRequestProject, ap
 		log.Fatal(err)
 	}
 
-	for i := range projectList {
-		if projectList[i].Name == currentProject.Name {
-			if projectConfigurationData.BuilderChoice == "none" {
-				projectList[i].Image = apiServerConfig.DefaultProjectImage
-				projectList[i].User = apiServerConfig.DefaultProjectUser
-				continue
+	for i := range *projectList {
+		if (*projectList)[i].Name == currentProject.Name {
+			if projectConfigurationData.BuilderChoice == string(NONE) {
+				(*projectList)[i].Build = nil
+				(*projectList)[i].Image = apiServerConfig.DefaultProjectImage
+				(*projectList)[i].User = apiServerConfig.DefaultProjectUser
+				(*projectList)[i].PostStartCommands = projectConfigurationData.PostStartCommands
 			}
 
-			projectList[i].Image = &projectConfigurationData.Image
-			projectList[i].User = &projectConfigurationData.User
-			projectList[i].PostStartCommands = projectConfigurationData.PostStartCommands
-			projectList[i].EnvVars = &projectConfigurationData.EnvVars
-
-			if projectConfigurationData.BuilderChoice == "custom-image" {
-				projectList[i].Build = nil
-				continue
+			if projectConfigurationData.BuilderChoice == string(CUSTOMIMAGE) {
+				(*projectList)[i].Build = nil
+				(*projectList)[i].Image = &projectConfigurationData.Image
+				(*projectList)[i].User = &projectConfigurationData.User
+				(*projectList)[i].PostStartCommands = projectConfigurationData.PostStartCommands
 			}
 
-			if projectConfigurationData.BuilderChoice == "auto" {
-				projectList[i].Build = &apiclient.ProjectBuild{}
-				continue
+			if projectConfigurationData.BuilderChoice == string(AUTOMATIC) {
+				(*projectList)[i].Build = &apiclient.ProjectBuild{}
+				(*projectList)[i].Image = apiServerConfig.DefaultProjectImage
+				(*projectList)[i].User = apiServerConfig.DefaultProjectUser
+				(*projectList)[i].PostStartCommands = projectConfigurationData.PostStartCommands
 			}
 
-			if projectConfigurationData.BuilderChoice == "devcontainer" {
-				projectList[i].Build = &apiclient.ProjectBuild{
+			if projectConfigurationData.BuilderChoice == string(DEVCONTAINER) {
+				(*projectList)[i].Build = &apiclient.ProjectBuild{
 					Devcontainer: &apiclient.ProjectBuildDevcontainer{
 						DevContainerFilePath: &projectConfigurationData.DevcontainerFilePath,
 					},
 				}
+				(*projectList)[i].Image = nil
+				(*projectList)[i].User = nil
+				(*projectList)[i].PostStartCommands = nil
 			}
+
+			(*projectList)[i].EnvVars = &projectConfigurationData.EnvVars
 		}
 	}
 
-	if len(projectList) == 1 {
-		return projectList, nil
+	if len(*projectList) == 1 {
+		return true, nil
 	}
 
 	return ConfigureProjects(projectList, apiServerConfig)
 }
 
 func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData) *huh.Form {
-	var buildOptions []huh.Option[string]
-	// TODO: move to variable
-	buildOptions = append(buildOptions, huh.Option[string]{Key: "Automatic", Value: "auto"})
-	buildOptions = append(buildOptions, huh.Option[string]{Key: "Devcontainer", Value: "devcontainer"})
-	buildOptions = append(buildOptions, huh.Option[string]{Key: "Custom image", Value: "custom-image"})
-	buildOptions = append(buildOptions, huh.Option[string]{Key: "None", Value: "none"})
+	buildOptions := []huh.Option[string]{
+		{Key: "Automatic", Value: string(AUTOMATIC)},
+		{Key: "Devcontainer", Value: string(DEVCONTAINER)},
+		{Key: "Custom image", Value: string(CUSTOMIMAGE)},
+		{Key: "None", Value: string(NONE)},
+	}
 
 	form := huh.NewForm(
 		huh.NewGroup(
@@ -135,7 +173,7 @@ func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData)
 				Title("Container user").
 				Value(&projectConfiguration.User),
 		).WithHideFunc(func() bool {
-			return projectConfiguration.BuilderChoice != "custom-image"
+			return projectConfiguration.BuilderChoice != string(CUSTOMIMAGE)
 		}),
 		huh.NewGroup(
 			huh.NewInput().
@@ -147,12 +185,12 @@ func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData)
 				return nil
 			}),
 		).WithHideFunc(func() bool {
-			return projectConfiguration.BuilderChoice != "devcontainer"
+			return projectConfiguration.BuilderChoice != string(DEVCONTAINER)
 		}),
 		huh.NewGroup(
 			configure.GetPostStartCommandsInput(&projectConfiguration.PostStartCommands, "Post start commands"),
 		).WithHideFunc(func() bool {
-			return projectConfiguration.BuilderChoice == "devcontainer"
+			return projectConfiguration.BuilderChoice == string(DEVCONTAINER)
 		}),
 		huh.NewGroup(
 			views.GetEnvVarsInput(&projectConfiguration.EnvVars),
