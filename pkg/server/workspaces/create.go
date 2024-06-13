@@ -43,6 +43,11 @@ func (s *WorkspaceService) CreateWorkspace(req dto.CreateWorkspaceRequest) (*wor
 	w.Projects = []*workspace.Project{}
 
 	for _, project := range req.Projects {
+		isValidProjectName := regexp.MustCompile(`^[a-zA-Z0-9-_.]+$`).MatchString
+		if !isValidProjectName(project.Name) {
+			return nil, ErrInvalidProjectName
+		}
+
 		if project.Source.Repository != nil && project.Source.Repository.Sha == "" {
 			sha, err := s.gitProviderService.GetLastCommitSha(project.Source.Repository)
 			if err != nil {
