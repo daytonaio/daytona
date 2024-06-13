@@ -15,6 +15,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/tailscale"
 	"github.com/google/uuid"
 	"tailscale.com/tsnet"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func GetConnection(profile *config.Profile) (*tsnet.Server, error) {
@@ -54,7 +56,9 @@ func GetConnection(profile *config.Profile) (*tsnet.Server, error) {
 		AuthKey:    networkKey.Key,
 		ControlURL: controlURL,
 		Dir:        filepath.Join(configDir, "tailscale", cliId),
-		Logf:       func(format string, args ...any) {},
-		Hostname:   fmt.Sprintf("cli-%s", cliId),
+		Logf: func(format string, args ...any) {
+			log.Tracef(format, args...)
+		},
+		Hostname: fmt.Sprintf("cli-%s", cliId),
 	})
 }

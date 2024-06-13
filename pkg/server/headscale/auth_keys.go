@@ -17,11 +17,11 @@ func (s *HeadscaleServer) CreateAuthKey() (string, error) {
 	log.Debug("Creating headscale auth key")
 
 	request := &v1.CreatePreAuthKeyRequest{
-		Reusable: false,
-		User:     "daytona",
+		Reusable:   false,
+		User:       "daytona",
+		Ephemeral:  true,
+		Expiration: timestamppb.New(time.Now().Add(100000 * time.Hour)),
 	}
-	request.Expiration = timestamppb.New(time.Now().Add(100000 * time.Hour))
-	request.Ephemeral = true
 
 	ctx, client, conn, cancel, err := s.getClient()
 	if err != nil {
