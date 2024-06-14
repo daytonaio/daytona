@@ -54,7 +54,11 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 		Source: &apiclient.CreateWorkspaceRequestProjectSource{
 			Repository: providerRepo,
 		},
-		Build: &apiclient.ProjectBuild{},
+		Build:             &apiclient.ProjectBuild{},
+		Image:             config.ApiServerConfig.DefaultProjectImage,
+		User:              config.ApiServerConfig.DefaultProjectUser,
+		PostStartCommands: config.ApiServerConfig.DefaultProjectPostStartCommands,
+		EnvVars:           &map[string]string{},
 	}}
 
 	if config.MultiProject {
@@ -91,7 +95,11 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 				Source: &apiclient.CreateWorkspaceRequestProjectSource{
 					Repository: providerRepo,
 				},
-				Build: &apiclient.ProjectBuild{},
+				Build:             &apiclient.ProjectBuild{},
+				Image:             config.ApiServerConfig.DefaultProjectImage,
+				User:              config.ApiServerConfig.DefaultProjectUser,
+				PostStartCommands: config.ApiServerConfig.DefaultProjectPostStartCommands,
+				EnvVars:           &map[string]string{},
 			})
 		}
 	}
