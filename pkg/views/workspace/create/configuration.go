@@ -37,8 +37,9 @@ type ProjectConfigurationData struct {
 	EnvVars              map[string]string
 }
 
-func NewProjectConfigurationData(builderChoice BuildChoice, devContainerFilePath string, currentProject *apiclient.CreateWorkspaceRequestProject) *ProjectConfigurationData {
-	var image, user string
+func NewProjectConfigurationData(builderChoice BuildChoice, devContainerFilePath string, currentProject *apiclient.CreateWorkspaceRequestProject, apiServerConfig *apiclient.ServerConfig) *ProjectConfigurationData {
+	image := *apiServerConfig.DefaultProjectImage
+	user := *apiServerConfig.DefaultProjectUser
 	commands := []string{}
 	envVars := map[string]string{}
 
@@ -100,9 +101,9 @@ func ConfigureProjects(projectList *[]apiclient.CreateWorkspaceRequestProject, a
 		}
 	}
 
-	projectConfigurationData := NewProjectConfigurationData(builderChoice, devContainerFilePath, currentProject)
+	projectConfigurationData := NewProjectConfigurationData(builderChoice, devContainerFilePath, currentProject, &apiServerConfig)
 
-	form := GetProjectConfigurationForm(projectConfigurationData, &apiServerConfig)
+	form := GetProjectConfigurationForm(projectConfigurationData)
 	err := form.Run()
 	if err != nil {
 		log.Fatal(err)
@@ -153,7 +154,7 @@ func ConfigureProjects(projectList *[]apiclient.CreateWorkspaceRequestProject, a
 	return ConfigureProjects(projectList, apiServerConfig)
 }
 
-func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData, apiServerConfig *apiclient.ServerConfig) *huh.Form {
+func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData) *huh.Form {
 	buildOptions := []huh.Option[string]{
 		{Key: "Automatic", Value: string(AUTOMATIC)},
 		{Key: "Devcontainer", Value: string(DEVCONTAINER)},
@@ -168,27 +169,7 @@ func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData,
 				Options(
 					buildOptions...,
 				).
-				Value(&projectConfiguration.BuilderChoice).
-				Validate(func(s string) error {
-					switch BuildChoice(projectConfiguration.BuilderChoice) {
-					case AUTOMATIC:
-						fallthrough
-					case NONE:
-						fallthrough
-					case CUSTOMIMAGE:
-						if projectConfiguration.Image == "" {
-							projectConfiguration.Image = *apiServerConfig.DefaultProjectImage
-						}
-						if projectConfiguration.User == "" {
-							projectConfiguration.User = *apiServerConfig.DefaultProjectUser
-						}
-					case DEVCONTAINER:
-						if projectConfiguration.DevcontainerFilePath == "" {
-							projectConfiguration.DevcontainerFilePath = DEVCONTAINER_FILEPATH
-						}
-					}
-					return nil
-				}),
+				Value(&projectConfiguration.BuilderChoice),
 		),
 		huh.NewGroup(
 			huh.NewInput().
