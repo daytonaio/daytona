@@ -38,6 +38,7 @@ func (d *DockerClient) CreateWorkspace(workspace *workspace.Workspace, logWriter
 
 	_, err = d.apiClient.NetworkCreate(ctx, workspace.Id, types.NetworkCreate{
 		Attachable: true,
+		Driver:     "bridge",
 	})
 	if err != nil {
 		return err
@@ -70,6 +71,9 @@ func (d *DockerClient) initProjectContainer(project *workspace.Project, daytonaD
 				Source: d.GetProjectVolumeName(project),
 				Target: fmt.Sprintf("/home/%s/%s", project.User, project.Name),
 			},
+		},
+		ExtraHosts: []string{
+			"host.docker.internal:host-gateway",
 		},
 	}, nil, nil, d.GetProjectContainerName(project))
 	if err != nil {

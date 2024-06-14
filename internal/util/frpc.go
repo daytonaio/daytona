@@ -15,7 +15,7 @@ func GetFrpcServerDomain(serverId, frpsDomain string) string {
 	return fmt.Sprintf("%s.%s", serverId, frpsDomain)
 }
 
-func GetFrpcServerUrl(protocol, serverId, frpsDomain string) string {
+func GetFrpcHeadscaleUrl(protocol, serverId, frpsDomain string) string {
 	return fmt.Sprintf("%s://%s", protocol, GetFrpcServerDomain(serverId, frpsDomain))
 }
 

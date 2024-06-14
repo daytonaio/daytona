@@ -14,13 +14,18 @@ type ProviderInfo struct {
 }
 
 type InitializeProviderRequest struct {
-	BasePath          string
-	ServerDownloadUrl string
-	ServerVersion     string
-	ServerUrl         string
-	NetworkKey        string
-	ServerApiUrl      string
-	LogsDir           string
+	BasePath           string
+	DaytonaDownloadUrl string
+	DaytonaVersion     string
+	LogsDir            string
+
+	NetworkKey string
+	ServerUrl  string
+	ApiUrl     string
+	// ServerPort is used if the target supports direct server access
+	ServerPort uint32
+	// ApiPort is used if the target supports direct server access
+	ApiPort uint32
 }
 
 type WorkspaceRequest struct {
