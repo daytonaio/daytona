@@ -19,10 +19,11 @@ import (
 type BuildChoice string
 
 const (
-	AUTOMATIC    BuildChoice = "auto"
-	DEVCONTAINER BuildChoice = "devcontainer"
-	CUSTOMIMAGE  BuildChoice = "custom-image"
-	NONE         BuildChoice = "none"
+	AUTOMATIC             BuildChoice = "auto"
+	DEVCONTAINER          BuildChoice = "devcontainer"
+	CUSTOMIMAGE           BuildChoice = "custom-image"
+	NONE                  BuildChoice = "none"
+	DEVCONTAINER_FILEPATH             = ".devcontainer/devcontainer.json"
 )
 
 var configurationHelpLine = lipgloss.NewStyle().Foreground(views.Gray).Render("enter: next  f10: advanced configuration")
@@ -83,7 +84,7 @@ func ConfigureProjects(projectList *[]apiclient.CreateWorkspaceRequestProject, a
 		return false, nil
 	}
 
-	devContainerFilePath := ".devcontainer/devcontainer.json"
+	devContainerFilePath := DEVCONTAINER_FILEPATH
 	builderChoice := AUTOMATIC
 
 	if currentProject.Build != nil {
@@ -92,12 +93,16 @@ func ConfigureProjects(projectList *[]apiclient.CreateWorkspaceRequestProject, a
 			devContainerFilePath = *currentProject.Build.Devcontainer.DevContainerFilePath
 		}
 	} else {
-		builderChoice = NONE
+		if *currentProject.Image == *apiServerConfig.DefaultProjectImage && *currentProject.User == *apiServerConfig.DefaultProjectUser {
+			builderChoice = NONE
+		} else {
+			builderChoice = CUSTOMIMAGE
+		}
 	}
 
 	projectConfigurationData := NewProjectConfigurationData(builderChoice, devContainerFilePath, currentProject)
 
-	form := GetProjectConfigurationForm(projectConfigurationData)
+	form := GetProjectConfigurationForm(projectConfigurationData, &apiServerConfig)
 	err := form.Run()
 	if err != nil {
 		log.Fatal(err)
@@ -148,7 +153,7 @@ func ConfigureProjects(projectList *[]apiclient.CreateWorkspaceRequestProject, a
 	return ConfigureProjects(projectList, apiServerConfig)
 }
 
-func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData) *huh.Form {
+func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData, apiServerConfig *apiclient.ServerConfig) *huh.Form {
 	buildOptions := []huh.Option[string]{
 		{Key: "Automatic", Value: string(AUTOMATIC)},
 		{Key: "Devcontainer", Value: string(DEVCONTAINER)},
@@ -163,7 +168,27 @@ func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData)
 				Options(
 					buildOptions...,
 				).
-				Value(&projectConfiguration.BuilderChoice),
+				Value(&projectConfiguration.BuilderChoice).
+				Validate(func(s string) error {
+					switch BuildChoice(projectConfiguration.BuilderChoice) {
+					case AUTOMATIC:
+						fallthrough
+					case NONE:
+						fallthrough
+					case CUSTOMIMAGE:
+						if projectConfiguration.Image == "" {
+							projectConfiguration.Image = *apiServerConfig.DefaultProjectImage
+						}
+						if projectConfiguration.User == "" {
+							projectConfiguration.User = *apiServerConfig.DefaultProjectUser
+						}
+					case DEVCONTAINER:
+						if projectConfiguration.DevcontainerFilePath == "" {
+							projectConfiguration.DevcontainerFilePath = DEVCONTAINER_FILEPATH
+						}
+					}
+					return nil
+				}),
 		),
 		huh.NewGroup(
 			huh.NewInput().

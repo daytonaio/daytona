@@ -20,14 +20,14 @@ import (
 type ProjectDetail string
 
 const (
-	Build             ProjectDetail = "Build"
-	FilePath          ProjectDetail = "File Path"
-	Image             ProjectDetail = "Image"
-	User              ProjectDetail = "User"
-	PostStartCommands ProjectDetail = "Post Start Commands"
-	EnvVars           ProjectDetail = "Env Vars"
-	EMPTY_STRING                    = ""
-	DEFAULT_PADDING                 = 21
+	Build              ProjectDetail = "Build"
+	DevcontainerConfig ProjectDetail = "Devcontainer Config"
+	Image              ProjectDetail = "Image"
+	User               ProjectDetail = "User"
+	PostStartCommands  ProjectDetail = "Post Start Commands"
+	EnvVars            ProjectDetail = "Env Vars"
+	EMPTY_STRING                     = ""
+	DEFAULT_PADDING                  = 21
 )
 
 type SummaryModel struct {
@@ -76,8 +76,12 @@ func RunSubmissionForm(workspaceName *string, suggestedName string, workspaceNam
 }
 
 func RenderSummary(workspaceName string, projectList []apiclient.CreateWorkspaceRequestProject, apiServerConfig *apiclient.ServerConfig) (string, error) {
-
-	output := views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - Workspace %s", workspaceName))
+	var output string
+	if workspaceName == "" {
+		output = views.GetStyledMainTitle("SUMMARY")
+	} else {
+		output = views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - Workspace %s", workspaceName))
+	}
 
 	for _, project := range projectList {
 		if project.Source == nil || project.Source.Repository == nil || project.Source.Repository.Url == nil {
@@ -88,11 +92,16 @@ func RenderSummary(workspaceName string, projectList []apiclient.CreateWorkspace
 	output += "\n\n"
 
 	for i := range projectList {
-		output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("%s #%d", "Project", i+1)), (*projectList[i].Source.Repository.Url))
+		if len(projectList) == 1 {
+			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render("Project"), (*projectList[i].Source.Repository.Url))
+		} else {
+			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("%s #%d", "Project", i+1)), (*projectList[i].Source.Repository.Url))
+		}
+
 		projectBuildChoice, choiceName := getProjectBuildChoice(projectList[i], apiServerConfig)
 		output += renderProjectDetails(projectList[i], projectBuildChoice, choiceName)
 		if i < len(projectList)-1 {
-			output += "\n"
+			output += "\n\n"
 		}
 	}
 
@@ -107,7 +116,7 @@ func renderProjectDetails(project apiclient.CreateWorkspaceRequestProject, build
 			if project.Build.Devcontainer != nil {
 				if project.Build.Devcontainer.DevContainerFilePath != nil {
 					output += "\n"
-					output += projectDetailOutput(FilePath, *project.Build.Devcontainer.DevContainerFilePath)
+					output += projectDetailOutput(DevcontainerConfig, *project.Build.Devcontainer.DevContainerFilePath)
 				}
 			}
 		}
