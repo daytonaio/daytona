@@ -339,7 +339,7 @@ func (g *BitbucketServerGitProvider) parseStaticGitContext(repoUrl string) (*Sta
 	var staticContext StaticGitContext
 
 	// optional string - '/rest/api/'
-	re := regexp.MustCompile(`(https?://[^/]+)(?:/rest/api/[^/]+)?/projects/([^/]+)/repos/([^/]+)(?:/([^/?]+))?(?:/([^/?]+))?(?:\?at=refs/heads/([^/?]+))?`)
+	re := regexp.MustCompile(`(https?://[^/]+)(?:/rest/api/[^/]+)?/projects/([^/]+)/repos/([^/]+)(?:/([^/?]+))?(?:/([^/?]+))?(?:\?at=refs%2Fheads%2F([^/?]+))?`)
 	matches := re.FindStringSubmatch(repoUrl)
 
 	if len(matches) < 4 {
@@ -377,8 +377,8 @@ func (g *BitbucketServerGitProvider) parseStaticGitContext(repoUrl string) (*Sta
 				staticContext.Path = &identifier
 			}
 		} else if strings.Contains(repoUrl, "browse?") {
-			if strings.Contains(repoUrl, "at=refs/heads/") {
-				parts := strings.Split(repoUrl, "at=refs/heads/")
+			if strings.Contains(repoUrl, "at=refs%2Fheads%2F") {
+				parts := strings.Split(repoUrl, "at=refs%2Fheads%2F")
 				if len(parts) == 2 {
 					branchName = parts[1]
 					staticContext.Branch = &branchName

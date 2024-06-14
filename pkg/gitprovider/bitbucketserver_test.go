@@ -67,14 +67,14 @@ func (b *BitbucketServerGitProviderTestSuite) TestParseStaticGitContext_Blob() {
 }
 
 func (b *BitbucketServerGitProviderTestSuite) TestParseStaticGitContext_Branch() {
-	branchUrl := "https://bitbucket.example.com/rest/api/latest/projects/PROJECT_KEY/repos/REPO_NAME/browse?at=refs/heads/master"
+	branchUrl := "https://bitbucket.example.com/rest/api/latest/projects/PROJECT_KEY/repos/REPO_NAME/browse?at=refs%2Fheads%2Fmain"
 	branchContext := &StaticGitContext{
 		Id:       "PROJECT_KEY",
 		Name:     "REPO_NAME",
 		Owner:    "PROJECT_KEY",
 		Url:      "https://bitbucket.example.com/scm/PROJECT_KEY/REPO_NAME.git",
 		Source:   "bitbucket.example.com",
-		Branch:   &[]string{"master"}[0],
+		Branch:   &[]string{"main"}[0],
 		Sha:      nil,
 		PrNumber: nil,
 		Path:     nil,
