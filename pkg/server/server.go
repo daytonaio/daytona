@@ -10,7 +10,6 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/frpc"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
@@ -227,8 +226,4 @@ func (s *Server) Start(errCh chan error) error {
 	}
 
 	return nil
-}
-
-func (s *Server) GetApiUrl() string {
-	return util.GetFrpcApiUrl(s.config.Frps.Protocol, s.config.Id, s.config.Frps.Domain)
 }

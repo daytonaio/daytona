@@ -6,6 +6,7 @@ package tailscale
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
@@ -39,9 +40,16 @@ func GetConnection(profile *config.Profile) (*tsnet.Server, error) {
 
 	cliId := uuid.New().String()
 
+	var controlURL string
+	if strings.Contains(profile.Api.Url, "localhost") || strings.Contains(profile.Api.Url, "0.0.0.0") || strings.Contains(profile.Api.Url, "127.0.0.1") {
+		controlURL = fmt.Sprintf("http://localhost:%d", *serverConfig.HeadscalePort)
+	} else {
+		controlURL = util.GetFrpcHeadscaleUrl(*serverConfig.Frps.Protocol, *serverConfig.Id, *serverConfig.Frps.Domain)
+	}
+
 	return tailscale.GetConnection(&tailscale.TsnetConnConfig{
 		AuthKey:    *networkKey.Key,
-		ControlURL: util.GetFrpcServerUrl(*serverConfig.Frps.Protocol, *serverConfig.Id, *serverConfig.Frps.Domain),
+		ControlURL: controlURL,
 		Dir:        filepath.Join(configDir, "tailscale", cliId),
 		Logf:       func(format string, args ...any) {},
 		Hostname:   fmt.Sprintf("cli-%s", cliId),

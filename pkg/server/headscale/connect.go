@@ -9,7 +9,6 @@ import (
 
 	"tailscale.com/tsnet"
 
-	"github.com/daytonaio/daytona/internal/util"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -28,7 +27,7 @@ func (s *HeadscaleServer) Connect() error {
 		log.Fatal(err)
 	}
 
-	tsNetServer.ControlURL = util.GetFrpcServerUrl(s.frpsProtocol, s.serverId, s.frpsDomain)
+	tsNetServer.ControlURL = fmt.Sprintf("http://localhost:%d", s.headscalePort)
 	tsNetServer.AuthKey = authKey
 
 	defer tsNetServer.Close()

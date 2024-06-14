@@ -136,17 +136,22 @@ var ServeCmd = &cobra.Command{
 		apiKeyService := apikeys.NewApiKeyService(apikeys.ApiKeyServiceConfig{
 			ApiKeyStore: apiKeyStore,
 		})
+
+		headscaleUrl := util.GetFrpcHeadscaleUrl(c.Frps.Protocol, c.Id, c.Frps.Domain)
+
 		providerManager := manager.NewProviderManager(manager.ProviderManagerConfig{
 			LogsDir:               logsDir,
 			ProviderTargetService: providerTargetService,
-			ServerApiUrl:          util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
-			ServerDownloadUrl:     getDaytonaScriptUrl(c),
-			ServerUrl:             util.GetFrpcServerUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+			ApiUrl:                util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+			DaytonaDownloadUrl:    getDaytonaScriptUrl(c),
+			ServerUrl:             headscaleUrl,
 			RegistryUrl:           c.RegistryUrl,
 			BaseDir:               c.ProvidersDir,
 			CreateProviderNetworkKey: func(providerName string) (string, error) {
 				return headscaleServer.CreateAuthKey()
 			},
+			ServerPort: c.HeadscalePort,
+			ApiPort:    c.ApiPort,
 		})
 
 		buildImageNamespace := c.BuildImageNamespace
@@ -181,7 +186,7 @@ var ServeCmd = &cobra.Command{
 			GitProviderService:              gitProviderService,
 			ContainerRegistryService:        containerRegistryService,
 			ServerApiUrl:                    util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
-			ServerUrl:                       util.GetFrpcServerUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+			ServerUrl:                       headscaleUrl,
 			DefaultProjectImage:             c.DefaultProjectImage,
 			DefaultProjectUser:              c.DefaultProjectUser,
 			DefaultProjectPostStartCommands: c.DefaultProjectPostStartCommands,
