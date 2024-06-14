@@ -119,7 +119,7 @@ func (g *BitbucketServerGitProvider) GetRepositories(namespace string) ([]*GitRe
 				}
 			}
 
-			if len(repoUrl) == 0 {
+			if len(repoUrl) == 0 && repo.Links != nil {
 				repoUrl = repo.Links.Self[0].Href
 			}
 
@@ -207,17 +207,21 @@ func (g *BitbucketServerGitProvider) GetRepoPRs(repositoryId string, namespaceId
 			}
 		}
 
-		if len(repoUrl) == 0 {
+		if len(repoUrl) == 0 && pr.FromRef.Repository.Links != nil {
 			repoUrl = pr.FromRef.Repository.Links.Self[0].Href
 		}
 
+		var repoOwner string
+		if pr.FromRef.Repository.Owner != nil {
+			repoOwner = pr.FromRef.Repository.Owner.Name
+		}
 		response = append(response, &GitPullRequest{
 			Name:            pr.Title,
 			Branch:          pr.FromRef.DisplayID,
 			Sha:             pr.FromRef.LatestCommit,
 			SourceRepoId:    pr.FromRef.Repository.Slug,
 			SourceRepoUrl:   repoUrl,
-			SourceRepoOwner: pr.FromRef.Repository.Owner.Name,
+			SourceRepoOwner: repoOwner,
 			SourceRepoName:  pr.FromRef.Repository.Name,
 		})
 	}
@@ -321,7 +325,9 @@ func (g *BitbucketServerGitProvider) getPrContext(staticContext *StaticGitContex
 		return nil, err
 	}
 
-	repo.Owner = prInfo.FromRef.Repository.Owner.DisplayName
+	if prInfo.FromRef.Repository.Owner != nil {
+		repo.Owner = prInfo.FromRef.Repository.Owner.DisplayName
+	}
 	repo.Name = prInfo.FromRef.Repository.Slug
 	repo.Id = prInfo.FromRef.Repository.Slug
 	repo.Branch = &prInfo.FromRef.DisplayID
