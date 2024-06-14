@@ -45,35 +45,41 @@ type IProviderManager interface {
 }
 
 type ProviderManagerConfig struct {
-	ServerDownloadUrl        string
+	DaytonaDownloadUrl       string
 	ServerUrl                string
-	ServerApiUrl             string
+	ApiUrl                   string
 	LogsDir                  string
 	ProviderTargetService    providertargets.IProviderTargetService
 	RegistryUrl              string
 	BaseDir                  string
 	CreateProviderNetworkKey func(providerName string) (string, error)
+	ServerPort               uint32
+	ApiPort                  uint32
 }
 
 func NewProviderManager(config ProviderManagerConfig) *ProviderManager {
 	return &ProviderManager{
 		pluginRefs:               make(map[string]*pluginRef),
-		serverDownloadUrl:        config.ServerDownloadUrl,
+		daytonaDownloadUrl:       config.DaytonaDownloadUrl,
 		serverUrl:                config.ServerUrl,
-		serverApiUrl:             config.ServerApiUrl,
+		apiUrl:                   config.ApiUrl,
 		logsDir:                  config.LogsDir,
 		providerTargetService:    config.ProviderTargetService,
 		registryUrl:              config.RegistryUrl,
 		baseDir:                  config.BaseDir,
 		createProviderNetworkKey: config.CreateProviderNetworkKey,
+		serverPort:               config.ServerPort,
+		apiPort:                  config.ApiPort,
 	}
 }
 
 type ProviderManager struct {
 	pluginRefs               map[string]*pluginRef
-	serverDownloadUrl        string
+	daytonaDownloadUrl       string
 	serverUrl                string
-	serverApiUrl             string
+	apiUrl                   string
+	serverPort               uint32
+	apiPort                  uint32
 	logsDir                  string
 	providerTargetService    providertargets.IProviderTargetService
 	registryUrl              string
@@ -242,13 +248,15 @@ func (m *ProviderManager) initializeProvider(pluginPath string) (*pluginRef, err
 	}
 
 	_, err = (*p).Initialize(InitializeProviderRequest{
-		BasePath:          pluginBasePath,
-		ServerDownloadUrl: m.serverDownloadUrl,
-		ServerVersion:     internal.Version,
-		ServerUrl:         m.serverUrl,
-		ServerApiUrl:      m.serverApiUrl,
-		LogsDir:           m.logsDir,
-		NetworkKey:        networkKey,
+		BasePath:           pluginBasePath,
+		DaytonaDownloadUrl: m.daytonaDownloadUrl,
+		DaytonaVersion:     internal.Version,
+		ServerUrl:          m.serverUrl,
+		ApiUrl:             m.apiUrl,
+		LogsDir:            m.logsDir,
+		NetworkKey:         networkKey,
+		ServerPort:         m.serverPort,
+		ApiPort:            m.apiPort,
 	})
 	if err != nil {
 		return nil, errors.New("failed to initialize provider: " + err.Error())

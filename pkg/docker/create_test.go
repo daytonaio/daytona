@@ -24,6 +24,7 @@ func (s *DockerClientTestSuite) TestCreateWorkspace() {
 	s.mockClient.On("NetworkCreate", mock.Anything, workspace1.Id,
 		types.NetworkCreate{
 			Attachable: true,
+			Driver:     "bridge",
 		},
 	).Return(types.NetworkCreateResponse{}, nil)
 
@@ -55,6 +56,9 @@ func (s *DockerClientTestSuite) TestCreateProject() {
 					Source: s.dockerClient.GetProjectVolumeName(project1),
 					Target: fmt.Sprintf("/home/%s/%s", project1.User, project1.Name),
 				},
+			},
+			ExtraHosts: []string{
+				"host.docker.internal:host-gateway",
 			},
 		},
 		networkingConfig,
