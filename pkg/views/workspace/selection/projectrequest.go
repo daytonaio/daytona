@@ -22,8 +22,8 @@ var DoneConfiguring = apiclient.CreateWorkspaceRequestProject{Name: "DoneConfigu
 
 type projectRequestItem struct {
 	item[apiclient.CreateWorkspaceRequestProject]
-	name, image, user, postStartCommands string
-	project                              apiclient.CreateWorkspaceRequestProject
+	name, image, user, postStartCommands, devcontainerConfig string
+	project                                                  apiclient.CreateWorkspaceRequestProject
 }
 
 type projectRequestItemDelegate struct {
@@ -33,14 +33,15 @@ type projectRequestModel struct {
 	model[apiclient.CreateWorkspaceRequestProject]
 }
 
-func selectProjectRequestPrompt(projects []apiclient.CreateWorkspaceRequestProject, choiceChan chan<- *apiclient.CreateWorkspaceRequestProject) {
+func selectProjectRequestPrompt(projects *[]apiclient.CreateWorkspaceRequestProject, choiceChan chan<- *apiclient.CreateWorkspaceRequestProject) {
 	items := []list.Item{}
 
-	for _, project := range projects {
+	for _, project := range *projects {
 		var name string
 		var image string
 		var user string
 		var postStartCommands string
+		var devcontainerConfig string
 
 		if project.Name != "" {
 			name = fmt.Sprintf("%s %s", "Project:", project.Name)
@@ -51,11 +52,11 @@ func selectProjectRequestPrompt(projects []apiclient.CreateWorkspaceRequestProje
 		if project.User != nil {
 			user = fmt.Sprintf("%s %s", "User:", *project.User)
 		}
-		if user == "" {
-			user = "User: not defined"
+		if project.Build != nil && project.Build.Devcontainer != nil && project.Build.Devcontainer.DevContainerFilePath != nil {
+			devcontainerConfig = fmt.Sprintf("%s %s", "Devcontainer Config:", *project.Build.Devcontainer.DevContainerFilePath)
 		}
 
-		newItem := projectRequestItem{name: name, image: image, user: user, project: project}
+		newItem := projectRequestItem{name: name, image: image, user: user, project: project, devcontainerConfig: devcontainerConfig}
 
 		newItem.SetId(name)
 
@@ -107,7 +108,7 @@ func selectProjectRequestPrompt(projects []apiclient.CreateWorkspaceRequestProje
 	}
 }
 
-func GetProjectRequestFromPrompt(projects []apiclient.CreateWorkspaceRequestProject) *apiclient.CreateWorkspaceRequestProject {
+func GetProjectRequestFromPrompt(projects *[]apiclient.CreateWorkspaceRequestProject) *apiclient.CreateWorkspaceRequestProject {
 	choiceChan := make(chan *apiclient.CreateWorkspaceRequestProject)
 
 	go selectProjectRequestPrompt(projects, choiceChan)
@@ -152,12 +153,14 @@ func (d projectRequestItemDelegate) Render(w io.Writer, m list.Model, index int,
 
 	name := baseStyles.Copy().Render(i.Name())
 	imageLine := baseStyles.Copy().Render(i.Image())
+	devcontainerConfigLine := baseStyles.Copy().Render(i.DevcontainerConfig())
 	userLine := baseStyles.Copy().Foreground(views.Gray).Render(i.User())
 	postStartCommandsLine := baseStyles.Copy().Foreground(views.Gray).Render(i.PostStartCommands())
 
 	// Adjust styles as the user moves through the menu
 	if isSelected {
 		name = selectedStyles.Copy().Foreground(views.Green).Render(i.Name())
+		devcontainerConfigLine = selectedStyles.Copy().Foreground(views.DimmedGreen).Render(i.DevcontainerConfig())
 		imageLine = selectedStyles.Copy().Foreground(views.DimmedGreen).Render(i.Image())
 		userLine = selectedStyles.Copy().Foreground(views.Gray).Render(i.User())
 		postStartCommandsLine = selectedStyles.Copy().Foreground(views.Gray).Render(i.PostStartCommands())
@@ -175,7 +178,11 @@ func (d projectRequestItemDelegate) Render(w io.Writer, m list.Model, index int,
 	} else {
 		s.WriteString(name)
 		s.WriteRune('\n')
-		s.WriteString(imageLine)
+		if i.DevcontainerConfig() != "" {
+			s.WriteString(devcontainerConfigLine)
+		} else {
+			s.WriteString(imageLine)
+		}
 		s.WriteRune('\n')
 		s.WriteString(userLine)
 		s.WriteRune('\n')
@@ -187,12 +194,13 @@ func (d projectRequestItemDelegate) Render(w io.Writer, m list.Model, index int,
 }
 
 func (d projectRequestItemDelegate) Height() int {
-	height := lipgloss.NewStyle().GetVerticalFrameSize() + 8
+	height := lipgloss.NewStyle().GetVerticalFrameSize() + 10
 	return height
 }
 
-func (i projectRequestItem) Name() string              { return i.name }
-func (i projectRequestItem) Image() string             { return i.image }
-func (i projectRequestItem) User() string              { return i.user }
-func (i projectRequestItem) PostStartCommands() string { return i.postStartCommands }
-func (i projectRequestItem) SetId(id string)           { i.id = id }
+func (i projectRequestItem) Name() string               { return i.name }
+func (i projectRequestItem) Image() string              { return i.image }
+func (i projectRequestItem) User() string               { return i.user }
+func (i projectRequestItem) PostStartCommands() string  { return i.postStartCommands }
+func (i projectRequestItem) DevcontainerConfig() string { return i.devcontainerConfig }
+func (i projectRequestItem) SetId(id string)            { i.id = id }
