@@ -15,6 +15,34 @@ type apiMembershipResponse struct {
 	AddedBy apiUser  `json:"added_by"`
 }
 
+type Principal struct {
+	ID          int64  `json:"id"`
+	UID         string `json:"uid"`
+	DisplayName string `json:"display_name"`
+	Email       string `json:"email"`
+	Type        string `json:"type"`
+	Created     int64  `json:"created"`
+	Updated     int64  `json:"updated"`
+}
+
+type AddedBy struct {
+	ID          int64  `json:"id"`
+	UID         string `json:"uid"`
+	DisplayName string `json:"display_name"`
+	Email       string `json:"email"`
+	Type        string `json:"type"`
+	Created     int64  `json:"created"`
+	Updated     int64  `json:"updated"`
+}
+
+type apiSpaceMemberResponse struct {
+	Created   int64     `json:"created"`
+	Updated   int64     `json:"updated"`
+	Role      string    `json:"role"`
+	Principal Principal `json:"principal"`
+	AddedBy   AddedBy   `json:"added_by"`
+}
+
 type apiSpace struct {
 	ID          int    `json:"id"`
 	ParentID    int    `json:"parent_id"`

@@ -8,12 +8,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"sort"
 	"strings"
-	"time"
 )
 
 const personalNamespaceId = "<PERSONAL>"
@@ -31,17 +29,68 @@ func NewGitnessClient(token string, baseUrl *url.URL) *GitnessClient {
 
 }
 
-func (g *GitnessClient) GetSpaces() ([]apiMembershipResponse, error) {
-	spacesURL := g.BaseURL.ResolveReference(&url.URL{Path: "/api/v1/user/memberships"}).String()
+func (g *GitnessClient) GetSpaceAdmin(spaceName string) (*apiSpaceMemberResponse, error) {
 
+	spacesURL, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/spaces/%s/members", spaceName))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse url : %w", err)
+	}
+
+	req, err := http.NewRequestWithContext(context.Background(), "GET", spacesURL.String(), nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("accept", "application/json")
+	req.Header.Set("Authorization", "Bearer "+g.Token)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to perform request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	var apiMemberships []apiSpaceMemberResponse
+	if err := json.Unmarshal(body, &apiMemberships); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal response body: %w", err)
+	}
+	var admin *apiSpaceMemberResponse
+	for _, member := range apiMemberships {
+		if member.Role == "space_owner" {
+			admin = &member
+			break
+		}
+	}
+	if admin == nil {
+		return nil, fmt.Errorf("failed to unmarshal response body: %w", err)
+	}
+	return admin, nil
+
+}
+
+func (g *GitnessClient) GetSpaces() ([]apiMembershipResponse, error) {
+	spacesURL, err := g.BaseURL.Parse("/api/v1/user/memberships")
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse url : %w", err)
+	}
 	values := url.Values{}
 	values.Add("order", "asc")
 	values.Add("sort", "identifier")
 	values.Add("page", "1")
 	values.Add("limit", "100")
-	spacesURL += "?" + values.Encode()
+	apiUrl := spacesURL.String() + "?" + values.Encode()
 
-	req, err := http.NewRequestWithContext(context.Background(), "GET", spacesURL, nil)
+	req, err := http.NewRequestWithContext(context.Background(), "GET", apiUrl, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
@@ -74,12 +123,12 @@ func (g *GitnessClient) GetSpaces() ([]apiMembershipResponse, error) {
 }
 
 func (g *GitnessClient) GetUser() (*apiUserResponse, error) {
-	userURL := g.BaseURL.ResolveReference(&url.URL{Path: "/api/v1/user"}).String()
+	userURL, err := g.BaseURL.Parse("/api/v1/user")
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse url : %w", err)
+	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	req, err := http.NewRequestWithContext(ctx, "GET", userURL, nil)
+	req, err := http.NewRequestWithContext(context.Background(), "GET", userURL.String(), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
@@ -110,7 +159,7 @@ func (g *GitnessClient) GetUser() (*apiUserResponse, error) {
 	return &apiUser, nil
 }
 
-func (g *GitnessClient) GetRepositories(namespace string, page string, limit string) ([]ApiRepository, error) {
+func (g *GitnessClient) GetRepositories(namespace string) ([]ApiRepository, error) {
 	space := ""
 	if namespace == personalNamespaceId {
 		user, err := g.GetUser()
@@ -122,9 +171,9 @@ func (g *GitnessClient) GetRepositories(namespace string, page string, limit str
 		space = namespace
 	}
 
-	reposURL, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/spaces/%s/+/repos?page=%s&limit=%s", space, page, limit))
+	reposURL, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/spaces/%s/+/repos", space))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to parse url : %w", err)
 	}
 
 	req, err := http.NewRequest("GET", reposURL.String(), nil)
@@ -160,11 +209,12 @@ func (g *GitnessClient) GetRepositories(namespace string, page string, limit str
 }
 
 func (g *GitnessClient) GetRepoBranches(repositoryId string, namespaceId string) ([]*apiRepoBranch, error) {
-	branchesURL := g.BaseURL.ResolveReference(&url.URL{
-		Path: fmt.Sprintf("/api/v1/repos/%s%%2F%s/branches", namespaceId, repositoryId),
-	}).String()
+	branchesURL, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/branches", url.PathEscape(namespaceId+"/"+repositoryId)))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse url : %w", err)
+	}
 
-	req, err := http.NewRequestWithContext(context.Background(), "GET", branchesURL, nil)
+	req, err := http.NewRequestWithContext(context.Background(), "GET", branchesURL.String(), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
@@ -197,15 +247,15 @@ func (g *GitnessClient) GetRepoBranches(repositoryId string, namespaceId string)
 }
 
 func (g *GitnessClient) GetRepoPRs(repositoryId string, namespaceId string) ([]*apiPR, error) {
-	prsURL := g.BaseURL.ResolveReference(&url.URL{
-		Path: fmt.Sprintf("/api/v1/repos/%s%%2F%s/pullreq", namespaceId, repositoryId),
-	}).String()
-
+	prsURL, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/pullreq", url.PathEscape(namespaceId+"/"+repositoryId)))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse url : %w", err)
+	}
 	values := url.Values{}
 	values.Add("state", "open")
-	prsURL += "?" + values.Encode()
+	apiUrl := prsURL.String() + "?" + values.Encode()
 
-	req, err := http.NewRequestWithContext(context.Background(), "GET", prsURL, nil)
+	req, err := http.NewRequestWithContext(context.Background(), "GET", apiUrl, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
@@ -238,20 +288,18 @@ func (g *GitnessClient) GetRepoPRs(repositoryId string, namespaceId string) ([]*
 }
 
 func (g *GitnessClient) GetLastCommitSha(repoURL string, branch *string) (string, error) {
-
-	path := g.GetRepoRef(repoURL)
-	path = strings.Replace(path, "/", "%2F", -1)
-
-	log.Print(path)
-
+	ref := g.GetRepoRef(repoURL)
+	fmt.Printf(repoURL, ref)
+	api, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/commits", url.PathEscape(ref)))
+	if err != nil {
+		return "", fmt.Errorf("failed to parse url : %w", err)
+	}
 	apiURL := ""
 	if branch != nil {
-		apiURL = fmt.Sprintf("%s/api/v1/repos/%s/commits?git_ref=%s&page=1&include_stats=false", g.BaseURL.String(), path, *branch)
-	} else {
-		apiURL = fmt.Sprintf("%s/api/v1/repos/%s/commits?page=1&include_stats=false", g.BaseURL.String(), path)
+		v := url.Values{}
+		v.Add("git_ref", *branch)
+		apiURL = api.String() + "?" + v.Encode()
 	}
-
-	log.Print(apiURL)
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -286,17 +334,10 @@ func (g *GitnessClient) GetLastCommitSha(repoURL string, branch *string) (string
 
 }
 
-func (g *GitnessClient) GetRepoRef(url string) string {
-	repoUrl := strings.TrimSuffix(url, ".git")
-	parts := strings.Split(repoUrl, "/")
-	var path string
-	if parts[3] == "git" {
-		path = fmt.Sprintf("%s/%s", parts[4], parts[5])
-	} else {
-		path = fmt.Sprintf("%s/%s", parts[3], parts[4])
-	}
-
-	return path
+func (g *GitnessClient) GetRepoRef(repoUrl string) string {
+	u1, _ := url.Parse(repoUrl)
+	ref := strings.TrimSuffix(strings.Split(u1.Path, "git/")[1], ".git")
+	return ref
 }
 
 func getLastCommit(jsonData []byte) (Commit, error) {
@@ -318,11 +359,14 @@ func getLastCommit(jsonData []byte) (Commit, error) {
 }
 
 func (g *GitnessClient) GetPr(repoURL string, prNumber uint32) (*PullRequest, error) {
-
 	repoRef := g.GetRepoRef(repoURL)
-	apiURL := fmt.Sprintf("%s/api/v1/repos/%s/pullreq/%d", g.BaseURL.String(), repoRef, prNumber)
 
-	req, err := http.NewRequest("GET", apiURL, nil)
+	apiUrl, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/pullreq/%d", url.PathEscape(repoRef), prNumber))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse url : %w", err)
+	}
+
+	req, err := http.NewRequest("GET", apiUrl.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -351,6 +395,13 @@ func (g *GitnessClient) GetPr(repoURL string, prNumber uint32) (*PullRequest, er
 	if err != nil {
 		return nil, err
 	}
-	pr.GitUrl = fmt.Sprintf("%s/%s.git", g.BaseURL.String(), repoRef)
+	refPart := strings.Split(repoRef, "/")
+	pr.GitUrl = GetGitnessCloneUrl(g.BaseURL.Host, refPart[0], refPart[1])
 	return &pr, nil
+}
+
+func GetGitnessCloneUrl(source, owner, repo string) string {
+
+	return fmt.Sprintf("https://%s/git/%s/%s.git", source, owner, repo)
+
 }

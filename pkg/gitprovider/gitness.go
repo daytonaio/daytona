@@ -14,7 +14,6 @@ import (
 
 type GitNessGitProvider struct {
 	*AbstractGitProvider
-
 	token      string
 	baseApiUrl *string // http://localhost:3000/api/v1/
 }
@@ -54,7 +53,11 @@ func (g *GitNessGitProvider) getApiClient() *gitnessclient.GitnessClient {
 
 func (g *GitNessGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
 	client := g.getApiClient()
-	response, err := client.GetRepositories(namespace, "1", "100")
+	response, err := client.GetRepositories(namespace)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch Repositories : %w", err)
+	}
+	admin, err := client.GetSpaceAdmin(namespace)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Repositories : %w", err)
 	}
@@ -71,6 +74,7 @@ func (g *GitNessGitProvider) GetRepositories(namespace string) ([]*GitRepository
 			Url:    repo.GitUrl,
 			Branch: &repo.DefaultBranch,
 			Source: u.Host,
+			Owner:  admin.Principal.DisplayName,
 		}
 
 		repos = append(repos, repo)
@@ -111,7 +115,7 @@ func (g *GitNessGitProvider) GetRepoPRs(repositoryId string, namespaceId string)
 			Branch:          pr.SourceBranch,
 			Sha:             pr.SourceSha,
 			SourceRepoId:    fmt.Sprintf("%d", pr.SourceRepoId),
-			SourceRepoUrl:   fmt.Sprintf("%s/%s/%s", *g.baseApiUrl, namespaceId, repositoryId),
+			SourceRepoUrl:   gitnessclient.GetGitnessCloneUrl(*g.baseApiUrl, namespaceId, repositoryId),
 			SourceRepoOwner: pr.Author.DisplayName,
 			SourceRepoName:  repositoryId,
 		}
@@ -153,24 +157,26 @@ func (g *GitNessGitProvider) getPrContext(staticContext *StaticGitContext) (*Sta
 		return nil, err
 	}
 
-	prUrl := client.GetRepoRef(staticContext.Url)
+	prUrl := strings.Split(client.GetRepoRef(staticContext.Url), "/")
 
 	repo := *staticContext
 	repo.Branch = &pullReq.SourceBranch
 	repo.Url = pullReq.GitUrl
 	repo.Id = fmt.Sprint(pullReq.SourceRepoID)
-	repo.Name = prUrl
-	repo.Owner = pullReq.Author.UID
+	repo.Name = prUrl[1]
+	repo.Owner = pullReq.Author.DisplayName
 
 	return &repo, nil
 
 }
 
 func (g *GitNessGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
+	fmt.Println("parseStaticGitContext ", repoUrl)
 	staticContext, err := g.AbstractGitProvider.parseStaticGitContext(repoUrl)
 	if err != nil {
 		return nil, err
 	}
+	staticContext.Url = gitnessclient.GetGitnessCloneUrl(staticContext.Source, staticContext.Owner, staticContext.Name)
 
 	if staticContext.Path == nil {
 		return staticContext, nil
@@ -179,25 +185,31 @@ func (g *GitNessGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitCo
 	parts := strings.Split(*staticContext.Path, "/")
 
 	switch {
+
 	case len(parts) >= 2 && parts[0] == "pulls":
 		prNumber, _ := strconv.Atoi(parts[1])
 		prUint := uint32(prNumber)
 		staticContext.PrNumber = &prUint
 		staticContext.Path = nil
-	case len(parts) >= 1 && parts[0] == "files" && parts[2] != "~":
+
+	case len(parts) == 4 && parts[0] == "files" && parts[2] == "~":
+		staticContext.Branch = &parts[1]
+		branchPath := strings.Join(parts[2:], "/")
+		staticContext.Path = &branchPath
+
+	case len(parts) >= 1 && parts[0] == "files" && parts[1] != "~":
 		staticContext.Branch = &parts[1]
 		staticContext.Path = nil
-	case len(parts) >= 2 && parts[0] == "files" && parts[2] == "~":
-		staticContext.Branch = &parts[1]
-		branchPath := strings.Join(parts[1:], "/")
-		staticContext.Path = &branchPath
+
 	case len(parts) >= 2 && parts[0] == "commits":
 		staticContext.Branch = &parts[1]
 		staticContext.Path = nil
+
 	case len(parts) >= 2 && parts[0] == "commit":
 		staticContext.Sha = &parts[1]
 		staticContext.Branch = staticContext.Sha
 		staticContext.Path = nil
+
 	}
 
 	return staticContext, nil
