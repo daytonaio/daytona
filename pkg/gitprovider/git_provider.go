@@ -45,19 +45,20 @@ type AbstractGitProvider struct {
 func (a *AbstractGitProvider) GetRepositoryFromUrl(repositoryUrl string) (*GitRepository, error) {
 	staticContext, err := a.GitProvider.parseStaticGitContext(repositoryUrl)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Error while parsing git context %s", err.Error())
 	}
 
 	if staticContext.PrNumber != nil {
 		staticContext, err = a.getPrContext(staticContext)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Error while fetching PR context %s", err.Error())
 		}
+
 	}
 
 	lastCommitSha, err := a.GetLastCommitSha(staticContext)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Error while fetching last commit SHA %s", err.Error())
 	}
 
 	return &GitRepository{
@@ -102,10 +103,12 @@ func (a *AbstractGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitC
 	branchPath := strings.Join(parts[2:], "/")
 	if branchPath != "" {
 		repo.Path = &branchPath
+	} else {
+		defaultBranch := "main"
+		repo.Path = &defaultBranch
 	}
 
 	repo.Url = getCloneUrl(repo.Source, repo.Owner, repo.Name)
-
 	return repo, nil
 }
 

@@ -209,7 +209,6 @@ func (g *GitNessGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitCo
 		staticContext.Sha = &parts[1]
 		staticContext.Branch = staticContext.Sha
 		staticContext.Path = nil
-
 	}
 
 	return staticContext, nil
