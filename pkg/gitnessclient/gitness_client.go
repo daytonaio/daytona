@@ -289,7 +289,6 @@ func (g *GitnessClient) GetRepoPRs(repositoryId string, namespaceId string) ([]*
 
 func (g *GitnessClient) GetLastCommitSha(repoURL string, branch *string) (string, error) {
 	ref := g.GetRepoRef(repoURL)
-	fmt.Printf(repoURL, ref)
 	api, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/commits", url.PathEscape(ref)))
 	if err != nil {
 		return "", fmt.Errorf("failed to parse url : %w", err)
@@ -299,11 +298,12 @@ func (g *GitnessClient) GetLastCommitSha(repoURL string, branch *string) (string
 		v := url.Values{}
 		v.Add("git_ref", *branch)
 		apiURL = api.String() + "?" + v.Encode()
+	} else {
+		apiURL = api.String()
 	}
-
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("error while making reuest: %s", err.Error())
 	}
 
 	req.Header.Set("accept", "application/json")
@@ -312,39 +312,45 @@ func (g *GitnessClient) GetLastCommitSha(repoURL string, branch *string) (string
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("error while making request: %s", err.Error())
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("failed to get commits: status code %d", resp.StatusCode)
+		return "", fmt.Errorf("failed to get commits status code %d: ", resp.StatusCode)
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("error while reading response: %s", err.Error())
 	}
 
 	lastCommit, err := getLastCommit(body)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("error while fetching last commit from list: %s", err.Error())
 	}
 
 	return lastCommit.Sha, nil
 
 }
 
-func (g *GitnessClient) GetRepoRef(repoUrl string) string {
-	u1, _ := url.Parse(repoUrl)
-	ref := strings.TrimSuffix(strings.Split(u1.Path, "git/")[1], ".git")
-	return ref
-}
+func (g *GitnessClient) GetRepoRef(url string) string {
+	repoUrl := strings.TrimSuffix(url, ".git")
+	parts := strings.Split(repoUrl, "/")
+	var path string
+	if parts[3] == "git" {
+		path = fmt.Sprintf("%s/%s", parts[4], parts[5])
+	} else {
+		path = fmt.Sprintf("%s/%s", parts[3], parts[4])
+	}
 
+	return path
+}
 func getLastCommit(jsonData []byte) (Commit, error) {
 	var commitsResponse CommitsResponse
 	err := json.Unmarshal(jsonData, &commitsResponse)
 	if err != nil {
-		return Commit{}, err
+		return Commit{}, fmt.Errorf("json Unmarshling failed: %s", err.Error())
 	}
 
 	sort.Slice(commitsResponse.Commits, func(i, j int) bool {
