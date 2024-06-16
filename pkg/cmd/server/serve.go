@@ -8,12 +8,14 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/apikey"
+	"github.com/daytonaio/daytona/pkg/builder"
 	"github.com/daytonaio/daytona/pkg/db"
 	"github.com/daytonaio/daytona/pkg/logger"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
@@ -25,6 +27,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/daytonaio/daytona/pkg/server/profiledata"
 	"github.com/daytonaio/daytona/pkg/server/providertargets"
+	"github.com/daytonaio/daytona/pkg/server/registry"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	started_view "github.com/daytonaio/daytona/pkg/views/server/started"
 
@@ -40,6 +43,11 @@ var ServeCmd = &cobra.Command{
 		if log.GetLevel() < log.InfoLevel {
 			//	for now, force the log level to info when running the server
 			log.SetLevel(log.InfoLevel)
+		}
+
+		configDir, err := server.GetConfigDir()
+		if err != nil {
+			log.Fatal(err)
 		}
 
 		c, err := server.GetConfig()
@@ -103,23 +111,66 @@ var ServeCmd = &cobra.Command{
 			Store: containerRegistryStore,
 		})
 
+		var localContainerRegistry server.ILocalContainerRegistry
+
+		if c.BuilderRegistryServer != "local" {
+			_, err := containerRegistryService.Find(c.BuilderRegistryServer)
+			if err != nil {
+				log.Errorf("Failed to find container registry credentials for builder registry server %s\n", c.BuilderRegistryServer)
+				log.Errorf("Defaulting to local container registry. To use %s as the builder registry, add credentials for the registry server with 'daytona container-registry set' and restart the server\n", c.BuilderRegistryServer)
+				c.BuilderRegistryServer = "local"
+			}
+		}
+
+		if c.BuilderRegistryServer == "local" {
+			localContainerRegistry = registry.NewLocalContainerRegistry(&registry.LocalContainerRegistryConfig{
+				DataPath: filepath.Join(configDir, "registry"),
+				Port:     c.LocalBuilderRegistryPort,
+			})
+			c.BuilderRegistryServer = util.GetFrpcRegistryDomain(c.Id, c.Frps.Domain)
+		}
+
 		providerTargetService := providertargets.NewProviderTargetService(providertargets.ProviderTargetServiceConfig{
 			TargetStore: providerTargetStore,
 		})
 		apiKeyService := apikeys.NewApiKeyService(apikeys.ApiKeyServiceConfig{
 			ApiKeyStore: apiKeyStore,
 		})
+
+		headscaleUrl := util.GetFrpcHeadscaleUrl(c.Frps.Protocol, c.Id, c.Frps.Domain)
+
 		providerManager := manager.NewProviderManager(manager.ProviderManagerConfig{
 			LogsDir:               logsDir,
 			ProviderTargetService: providerTargetService,
-			ServerApiUrl:          util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
-			ServerDownloadUrl:     getDaytonaScriptUrl(c),
-			ServerUrl:             util.GetFrpcServerUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+			ApiUrl:                util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+			DaytonaDownloadUrl:    getDaytonaScriptUrl(c),
+			ServerUrl:             headscaleUrl,
 			RegistryUrl:           c.RegistryUrl,
 			BaseDir:               c.ProvidersDir,
 			CreateProviderNetworkKey: func(providerName string) (string, error) {
 				return headscaleServer.CreateAuthKey()
 			},
+			ServerPort: c.HeadscalePort,
+			ApiPort:    c.ApiPort,
+		})
+
+		buildImageNamespace := c.BuildImageNamespace
+		if buildImageNamespace != "" {
+			buildImageNamespace = fmt.Sprintf("/%s", buildImageNamespace)
+		}
+		buildImageNamespace = strings.TrimSuffix(buildImageNamespace, "/")
+
+		builderFactory := builder.NewBuilderFactory(builder.BuilderConfig{
+			ServerConfigFolder:              configDir,
+			ContainerRegistryServer:         c.BuilderRegistryServer,
+			BasePath:                        filepath.Join(configDir, "builds"),
+			BuildImageNamespace:             buildImageNamespace,
+			LoggerFactory:                   loggerFactory,
+			DefaultProjectImage:             c.DefaultProjectImage,
+			DefaultProjectUser:              c.DefaultProjectUser,
+			DefaultProjectPostStartCommands: c.DefaultProjectPostStartCommands,
+			Image:                           c.BuilderImage,
+			ContainerRegistryService:        containerRegistryService,
 		})
 		provisioner := provisioner.NewProvisioner(provisioner.ProvisionerConfig{
 			ProviderManager: providerManager,
@@ -132,17 +183,17 @@ var ServeCmd = &cobra.Command{
 			WorkspaceStore:                  workspaceStore,
 			TargetStore:                     providerTargetStore,
 			ApiKeyService:                   apiKeyService,
-			ContainerRegistryStore:          containerRegistryStore,
+			GitProviderService:              gitProviderService,
+			ContainerRegistryService:        containerRegistryService,
 			ServerApiUrl:                    util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
-			ServerUrl:                       util.GetFrpcServerUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+			ServerUrl:                       headscaleUrl,
 			DefaultProjectImage:             c.DefaultProjectImage,
 			DefaultProjectUser:              c.DefaultProjectUser,
 			DefaultProjectPostStartCommands: c.DefaultProjectPostStartCommands,
 			Provisioner:                     provisioner,
 			LoggerFactory:                   loggerFactory,
-			GitProviderService:              gitProviderService,
+			BuilderFactory:                  builderFactory,
 		})
-
 		profileDataService := profiledata.NewProfileDataService(profiledata.ProfileDataServiceConfig{
 			ProfileDataStore: profileDataStore,
 		})
@@ -152,6 +203,7 @@ var ServeCmd = &cobra.Command{
 			TailscaleServer:          headscaleServer,
 			ProviderTargetService:    providerTargetService,
 			ContainerRegistryService: containerRegistryService,
+			LocalContainerRegistry:   localContainerRegistry,
 			ApiKeyService:            apiKeyService,
 			WorkspaceService:         workspaceService,
 			GitProviderService:       gitProviderService,

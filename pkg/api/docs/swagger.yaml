@@ -36,6 +36,8 @@ definitions:
     type: object
   CreateWorkspaceRequestProject:
     properties:
+      build:
+        $ref: '#/definitions/ProjectBuild'
       envVars:
         additionalProperties:
           type: string
@@ -186,10 +188,16 @@ definitions:
     type: object
   Project:
     properties:
+      build:
+        $ref: '#/definitions/ProjectBuild'
       image:
         type: string
       name:
         type: string
+      postCreateCommands:
+        items:
+          type: string
+        type: array
       postStartCommands:
         items:
           type: string
@@ -203,6 +211,16 @@ definitions:
       user:
         type: string
       workspaceId:
+        type: string
+    type: object
+  ProjectBuild:
+    properties:
+      devcontainer:
+        $ref: '#/definitions/ProjectBuildDevcontainer'
+    type: object
+  ProjectBuildDevcontainer:
+    properties:
+      devContainerFilePath:
         type: string
     type: object
   ProjectInfo:
@@ -254,6 +272,12 @@ definitions:
         type: integer
       binariesPath:
         type: string
+      buildImageNamespace:
+        type: string
+      builderImage:
+        type: string
+      builderRegistryServer:
+        type: string
       defaultProjectImage:
         type: string
       defaultProjectPostStartCommands:
@@ -268,6 +292,8 @@ definitions:
         type: integer
       id:
         type: string
+      localBuilderRegistryPort:
+        type: integer
       logFilePath:
         type: string
       providersDir:
@@ -1018,6 +1044,10 @@ paths:
         name: workspaceId
         required: true
         type: string
+      - description: Force
+        in: query
+        name: force
+        type: boolean
       responses:
         "200":
           description: OK

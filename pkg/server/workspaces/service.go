@@ -7,11 +7,12 @@ import (
 	"errors"
 	"io"
 
-	"github.com/daytonaio/daytona/pkg/containerregistry"
+	"github.com/daytonaio/daytona/pkg/builder"
 	"github.com/daytonaio/daytona/pkg/logger"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
+	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	"github.com/daytonaio/daytona/pkg/workspace"
@@ -24,6 +25,7 @@ type IWorkspaceService interface {
 	GetProjectLogReader(workspaceId, projectName string) (io.Reader, error)
 	ListWorkspaces(verbose bool) ([]dto.WorkspaceDTO, error)
 	RemoveWorkspace(workspaceId string) error
+	ForceRemoveWorkspace(workspaceId string) error
 	SetProjectState(workspaceId string, projectName string, state *workspace.ProjectState) (*workspace.Workspace, error)
 	StartProject(workspaceId string, projectName string) error
 	StartWorkspace(workspaceId string) error
@@ -38,7 +40,7 @@ type targetStore interface {
 type WorkspaceServiceConfig struct {
 	WorkspaceStore                  workspace.Store
 	TargetStore                     targetStore
-	ContainerRegistryStore          containerregistry.Store
+	ContainerRegistryService        containerregistries.IContainerRegistryService
 	ServerApiUrl                    string
 	ServerUrl                       string
 	Provisioner                     provisioner.IProvisioner
@@ -48,13 +50,14 @@ type WorkspaceServiceConfig struct {
 	ApiKeyService                   apikeys.IApiKeyService
 	LoggerFactory                   logger.LoggerFactory
 	GitProviderService              gitproviders.IGitProviderService
+	BuilderFactory                  builder.IBuilderFactory
 }
 
 func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 	return &WorkspaceService{
 		workspaceStore:                  config.WorkspaceStore,
 		targetStore:                     config.TargetStore,
-		containerRegistryStore:          config.ContainerRegistryStore,
+		containerRegistryService:        config.ContainerRegistryService,
 		serverApiUrl:                    config.ServerApiUrl,
 		serverUrl:                       config.ServerUrl,
 		defaultProjectImage:             config.DefaultProjectImage,
@@ -64,13 +67,14 @@ func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 		loggerFactory:                   config.LoggerFactory,
 		apiKeyService:                   config.ApiKeyService,
 		gitProviderService:              config.GitProviderService,
+		builderFactory:                  config.BuilderFactory,
 	}
 }
 
 type WorkspaceService struct {
 	workspaceStore                  workspace.Store
 	targetStore                     targetStore
-	containerRegistryStore          containerregistry.Store
+	containerRegistryService        containerregistries.IContainerRegistryService
 	provisioner                     provisioner.IProvisioner
 	apiKeyService                   apikeys.IApiKeyService
 	serverApiUrl                    string
@@ -80,6 +84,7 @@ type WorkspaceService struct {
 	defaultProjectPostStartCommands []string
 	loggerFactory                   logger.LoggerFactory
 	gitProviderService              gitproviders.IGitProviderService
+	builderFactory                  builder.IBuilderFactory
 }
 
 func (s *WorkspaceService) SetProjectState(workspaceId, projectName string, state *workspace.ProjectState) (*workspace.Workspace, error) {

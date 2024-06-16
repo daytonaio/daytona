@@ -10,7 +10,6 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/frpc"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
@@ -18,6 +17,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/profiledata"
 	"github.com/daytonaio/daytona/pkg/server/providertargets"
+	"github.com/daytonaio/daytona/pkg/server/registry"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/hashicorp/go-plugin"
 
@@ -29,6 +29,7 @@ type ServerInstanceConfig struct {
 	TailscaleServer          TailscaleServer
 	ProviderTargetService    providertargets.IProviderTargetService
 	ContainerRegistryService containerregistries.IContainerRegistryService
+	LocalContainerRegistry   ILocalContainerRegistry
 	WorkspaceService         workspaces.IWorkspaceService
 	ApiKeyService            apikeys.IApiKeyService
 	GitProviderService       gitproviders.IGitProviderService
@@ -52,6 +53,7 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 			TailscaleServer:          serverConfig.TailscaleServer,
 			ProviderTargetService:    serverConfig.ProviderTargetService,
 			ContainerRegistryService: serverConfig.ContainerRegistryService,
+			LocalContainerRegistry:   serverConfig.LocalContainerRegistry,
 			WorkspaceService:         serverConfig.WorkspaceService,
 			ApiKeyService:            serverConfig.ApiKeyService,
 			GitProviderService:       serverConfig.GitProviderService,
@@ -66,8 +68,9 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 type Server struct {
 	config                   Config
 	TailscaleServer          TailscaleServer
-	ContainerRegistryService containerregistries.IContainerRegistryService
 	ProviderTargetService    providertargets.IProviderTargetService
+	ContainerRegistryService containerregistries.IContainerRegistryService
+	LocalContainerRegistry   ILocalContainerRegistry
 	WorkspaceService         workspaces.IWorkspaceService
 	ApiKeyService            apikeys.IApiKeyService
 	GitProviderService       gitproviders.IGitProviderService
@@ -94,6 +97,19 @@ func (s *Server) Start(errCh chan error) error {
 		return err
 	}
 
+	if s.LocalContainerRegistry != nil {
+		log.Info("Starting local container registry")
+		err = s.LocalContainerRegistry.Start()
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		err := registry.RemoveRegistryContainer()
+		if err != nil {
+			log.Fatalf("Failed to remove local container registry: %s", err.Error())
+		}
+	}
+
 	go func() {
 		err := headscaleFrpcService.Run(context.Background())
 		if err != nil {
@@ -118,6 +134,25 @@ func (s *Server) Start(errCh chan error) error {
 			errCh <- err
 		}
 	}()
+
+	if s.LocalContainerRegistry != nil {
+		_, registryFrpcService, err := frpc.GetService(frpc.FrpcConnectParams{
+			ServerDomain: s.config.Frps.Domain,
+			ServerPort:   int(s.config.Frps.Port),
+			Name:         fmt.Sprintf("daytona-server-registry-%s", s.config.Id),
+			Port:         int(s.config.LocalBuilderRegistryPort),
+			SubDomain:    fmt.Sprintf("registry-%s", s.config.Id),
+		})
+		if err != nil {
+			return err
+		}
+		go func() {
+			err := registryFrpcService.Run(context.Background())
+			if err != nil {
+				errCh <- err
+			}
+		}()
+	}
 
 	go func() {
 		interruptChannel := make(chan os.Signal, 1)
@@ -191,8 +226,4 @@ func (s *Server) Start(errCh chan error) error {
 	}
 
 	return nil
-}
-
-func (s *Server) GetApiUrl() string {
-	return util.GetFrpcApiUrl(s.config.Frps.Protocol, s.config.Id, s.config.Frps.Domain)
 }

@@ -20,8 +20,13 @@ const defaultRegistryUrl = "https://download.daytona.io/daytona"
 const defaultServerDownloadUrl = "https://download.daytona.io/daytona/install.sh"
 const defaultHeadscalePort = 3987
 const defaultApiPort = 3986
+const defaultBuilderImage = "daytonaio/workspace-project:latest"
 const defaultProjectImage = "daytonaio/workspace-project:latest"
 const defaultProjectUser = "daytona"
+
+const defaultLocalBuilderRegistryPort = 3988
+const defaultBuilderRegistryServer = "local"
+const defaultBuildImageNamespace = ""
 
 var defaultProjectPostStartCommands = []string{"sudo dockerd"}
 
@@ -109,6 +114,10 @@ func getDefaultConfig() (*Config, error) {
 		DefaultProjectImage:             defaultProjectImage,
 		DefaultProjectUser:              defaultProjectUser,
 		DefaultProjectPostStartCommands: defaultProjectPostStartCommands,
+		BuilderImage:                    defaultBuilderImage,
+		LocalBuilderRegistryPort:        defaultLocalBuilderRegistryPort,
+		BuilderRegistryServer:           defaultBuilderRegistryServer,
+		BuildImageNamespace:             defaultBuildImageNamespace,
 	}
 
 	if os.Getenv("DEFAULT_REGISTRY_URL") != "" {

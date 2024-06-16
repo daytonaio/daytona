@@ -24,10 +24,11 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "daytona",
-	Short: "Daytona is a Dev Environment Manager",
-	Long:  "Daytona is a Dev Environment Manager",
-	Run:   RunInitialScreenFlow,
+	Use:               "daytona",
+	Short:             "Daytona is a Dev Environment Manager",
+	Long:              "Daytona is a Dev Environment Manager",
+	DisableAutoGenTag: true,
+	Run:               RunInitialScreenFlow,
 }
 
 var originalStdout *os.File
@@ -68,6 +69,8 @@ func SetupRootCommand(cmd *cobra.Command) {
 	cmd.AddCommand(AutoCompleteCmd)
 	cmd.AddCommand(versionCmd)
 	cmd.AddCommand(ListCmd)
+	cmd.AddCommand(generateDocsCmd)
+	cmd.AddCommand(DocsCmd)
 
 	cmd.CompletionOptions.HiddenDefaultCmd = true
 	cmd.PersistentFlags().BoolP("help", "", false, "help for daytona")
@@ -102,6 +105,8 @@ func RunInitialScreenFlow(cmd *cobra.Command, args []string) {
 		GitProviderAddCmd.Run(cmd, []string{})
 	case "target set":
 		TargetSetCmd.Run(cmd, []string{})
+	case "docs":
+		DocsCmd.Run(cmd, []string{})
 	case "help":
 		err := cmd.Help()
 		if err != nil {

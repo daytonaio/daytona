@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/daytonaio/daytona/pkg/cmd/server/daemon"
+	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
@@ -21,8 +22,13 @@ var restartCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		c, err := server.GetConfig()
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		views.RenderInfoMessage("Starting the Daytona Server daemon...")
-		err = daemon.Start()
+		err = daemon.Start(c.LogFilePath)
 		if err != nil {
 			log.Fatal(err)
 		}

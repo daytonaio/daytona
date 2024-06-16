@@ -1,0 +1,12 @@
+name: daytona autocomplete
+synopsis: Adds completion script for your shell enviornment
+usage: daytona autocomplete [bash|zsh|fish|powershell] [flags]
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+    - name: output
+      shorthand: o
+      usage: Output format. Must be one of (yaml, json)
+see_also:
+    - daytona - Use the Daytona CLI to manage your workspace

@@ -4,12 +4,15 @@
 package docker_test
 
 import (
+	"fmt"
+
 	t_docker "github.com/daytonaio/daytona/internal/testing/docker"
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/image"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/stretchr/testify/mock"
@@ -21,6 +24,7 @@ func (s *DockerClientTestSuite) TestCreateWorkspace() {
 	s.mockClient.On("NetworkCreate", mock.Anything, workspace1.Id,
 		types.NetworkCreate{
 			Attachable: true,
+			Driver:     "bridge",
 		},
 	).Return(types.NetworkCreateResponse{}, nil)
 
@@ -40,12 +44,22 @@ func (s *DockerClientTestSuite) TestCreateProject() {
 		},
 	).Return([]image.Summary{}, nil)
 
-	s.mockClient.On("ImagePull", mock.Anything, project1.Image, image.PullOptions{}).Return(t_docker.NewPipeReader(""), nil)
+	s.mockClient.On("ImagePull", mock.Anything, project1.Image, mock.Anything).Return(t_docker.NewPipeReader(""), nil)
 
 	s.mockClient.On("ContainerCreate", mock.Anything, docker.GetContainerCreateConfig(project1, "download-url"),
 		&container.HostConfig{
 			Privileged:  true,
 			NetworkMode: container.NetworkMode(project1.WorkspaceId),
+			Mounts: []mount.Mount{
+				{
+					Type:   mount.TypeVolume,
+					Source: s.dockerClient.GetProjectVolumeName(project1),
+					Target: fmt.Sprintf("/home/%s/%s", project1.User, project1.Name),
+				},
+			},
+			ExtraHosts: []string{
+				"host.docker.internal:host-gateway",
+			},
 		},
 		networkingConfig,
 		platform,

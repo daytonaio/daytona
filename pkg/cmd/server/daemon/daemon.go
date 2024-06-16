@@ -4,6 +4,7 @@
 package daemon
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"runtime"
@@ -17,7 +18,7 @@ type program struct {
 	service.Interface
 }
 
-func Start() error {
+func Start(logFilePath string) error {
 	cfg, err := getServiceConfig()
 	if err != nil {
 		return err
@@ -31,12 +32,26 @@ func Start() error {
 		return err
 	}
 
+	logFile, err := os.OpenFile(logFilePath, os.O_TRUNC|os.O_CREATE|os.O_RDONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer logFile.Close()
+	go func() {
+		reader := bufio.NewReader(logFile)
+		for {
+			bytes := make([]byte, 1024)
+			_, err := reader.Read(bytes)
+			if err == nil {
+				fmt.Print(string(bytes))
+			}
+		}
+	}()
+
 	err = s.Start()
 	if err != nil {
 		return err
 	}
-
-	// logFilePath := server.GetLogFilePath()
 
 	time.Sleep(5 * time.Second)
 	status, err := s.Status()
@@ -52,13 +67,6 @@ func Start() error {
 	if err != nil {
 		return err
 	}
-
-	// TODO: return this
-	// logContent, err := os.ReadFile(*logFilePath)
-	// if err != nil {
-	// 	return err
-	// }
-	// fmt.Println(string(logContent))
 
 	if status == service.StatusStopped {
 		return fmt.Errorf("daemon stopped unexpectedly")
@@ -96,13 +104,16 @@ func getServiceConfig() (*service.Config, error) {
 		DisplayName: "Daytona Server",
 		Description: "This is the Daytona Server daemon.",
 		Arguments:   []string{"serve"},
-		UserName:    user,
 	}
 
 	switch runtime.GOOS {
 	case "windows":
 		return nil, fmt.Errorf("daemon mode not supported on Windows")
 	case "linux":
+		// Fix for running as root on Linux
+		if user == "root" {
+			svcConfig.UserName = user
+		}
 		if !strings.HasSuffix(service.Platform(), "systemd") {
 			return nil, fmt.Errorf("on Linux, `server -d` is only supported with systemd. %s detected", service.Platform())
 		}

@@ -37,6 +37,16 @@ func RenderConfig(config *server.Config) {
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Logs Path: "), config.LogFilePath) + "\n\n"
 
+	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Builder Image: "), config.BuilderImage) + "\n\n"
+
+	if config.BuilderRegistryServer == "local" {
+		output += fmt.Sprintf("%s %d", views.GetPropertyKey("Local Builder Registry Port: "), config.LocalBuilderRegistryPort) + "\n\n"
+	} else {
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Builder Registry: "), config.BuilderRegistryServer) + "\n\n"
+	}
+
+	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Build Image Namespace: "), config.BuildImageNamespace) + "\n\n"
+
 	output += views.SeparatorString + "\n\n"
 
 	output += fmt.Sprintf("To edit these values run: %s", lipgloss.NewStyle().Foreground(views.Green).Render("daytona server configure")) + "\n\n"

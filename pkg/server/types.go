@@ -15,6 +15,10 @@ type TailscaleServer interface {
 	Start() error
 }
 
+type ILocalContainerRegistry interface {
+	Start() error
+}
+
 type FRPSConfig struct {
 	Domain   string `json:"domain"`
 	Port     uint32 `json:"port"`
@@ -38,4 +42,8 @@ type Config struct {
 	DefaultProjectImage             string      `json:"defaultProjectImage"`
 	DefaultProjectUser              string      `json:"defaultProjectUser"`
 	DefaultProjectPostStartCommands []string    `json:"defaultProjectPostStartCommands"`
+	BuilderImage                    string      `json:"builderImage"`
+	LocalBuilderRegistryPort        uint32      `json:"localBuilderRegistryPort"`
+	BuilderRegistryServer           string      `json:"builderRegistryServer"`
+	BuildImageNamespace             string      `json:"buildImageNamespace"`
 } // @name ServerConfig

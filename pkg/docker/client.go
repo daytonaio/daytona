@@ -26,8 +26,11 @@ type IDockerClient interface {
 	GetWorkspaceInfo(ws *workspace.Workspace) (*workspace.WorkspaceInfo, error)
 
 	GetProjectContainerName(project *workspace.Project) string
+	GetProjectVolumeName(project *workspace.Project) string
 	ExecSync(containerID string, config types.ExecConfig, outputWriter io.Writer) (*ExecResult, error)
 	GetContainerLogs(containerName string, logWriter io.Writer) error
+	PullImage(imageName string, cr *containerregistry.ContainerRegistry, logWriter io.Writer) error
+	PushImage(imageName string, cr *containerregistry.ContainerRegistry, logWriter io.Writer) error
 }
 
 type DockerClientConfig struct {
@@ -45,5 +48,9 @@ type DockerClient struct {
 }
 
 func (d *DockerClient) GetProjectContainerName(project *workspace.Project) string {
+	return project.WorkspaceId + "-" + project.Name
+}
+
+func (d *DockerClient) GetProjectVolumeName(project *workspace.Project) string {
 	return project.WorkspaceId + "-" + project.Name
 }

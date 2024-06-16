@@ -950,6 +950,12 @@
                         "name": "workspaceId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1169,6 +1175,9 @@
                 "name"
             ],
             "properties": {
+                "build": {
+                    "$ref": "#/definitions/ProjectBuild"
+                },
                 "envVars": {
                     "type": "object",
                     "additionalProperties": {
@@ -1398,11 +1407,20 @@
         "Project": {
             "type": "object",
             "properties": {
+                "build": {
+                    "$ref": "#/definitions/ProjectBuild"
+                },
                 "image": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "postCreateCommands": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "postStartCommands": {
                     "type": "array",
@@ -1423,6 +1441,22 @@
                     "type": "string"
                 },
                 "workspaceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProjectBuild": {
+            "type": "object",
+            "properties": {
+                "devcontainer": {
+                    "$ref": "#/definitions/ProjectBuildDevcontainer"
+                }
+            }
+        },
+        "ProjectBuildDevcontainer": {
+            "type": "object",
+            "properties": {
+                "devContainerFilePath": {
                     "type": "string"
                 }
             }
@@ -1502,6 +1536,15 @@
                 "binariesPath": {
                     "type": "string"
                 },
+                "buildImageNamespace": {
+                    "type": "string"
+                },
+                "builderImage": {
+                    "type": "string"
+                },
+                "builderRegistryServer": {
+                    "type": "string"
+                },
                 "defaultProjectImage": {
                     "type": "string"
                 },
@@ -1522,6 +1565,9 @@
                 },
                 "id": {
                     "type": "string"
+                },
+                "localBuilderRegistryPort": {
+                    "type": "integer"
                 },
                 "logFilePath": {
                     "type": "string"

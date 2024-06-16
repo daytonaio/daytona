@@ -5,6 +5,7 @@ package util
 
 import (
 	"fmt"
+	"net/url"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -43,11 +44,21 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 		}
 	}
 
+	providerRepoName, err := GetSanitizedProjectName(*providerRepo.Name)
+	if err != nil {
+		return "", nil, err
+	}
+
 	projectList = []apiclient.CreateWorkspaceRequestProject{{
-		Name: *providerRepo.Name,
+		Name: providerRepoName,
 		Source: &apiclient.CreateWorkspaceRequestProjectSource{
 			Repository: providerRepo,
 		},
+		Build:             &apiclient.ProjectBuild{},
+		Image:             config.ApiServerConfig.DefaultProjectImage,
+		User:              config.ApiServerConfig.DefaultProjectUser,
+		PostStartCommands: config.ApiServerConfig.DefaultProjectPostStartCommands,
+		EnvVars:           &map[string]string{},
 	}}
 
 	if config.MultiProject {
@@ -74,11 +85,21 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 				}
 			}
 
+			providerRepoName, err := GetSanitizedProjectName(*providerRepo.Name)
+			if err != nil {
+				return "", nil, err
+			}
+
 			projectList = append(projectList, apiclient.CreateWorkspaceRequestProject{
-				Name: *providerRepo.Name,
+				Name: providerRepoName,
 				Source: &apiclient.CreateWorkspaceRequestProjectSource{
 					Repository: providerRepo,
 				},
+				Build:             &apiclient.ProjectBuild{},
+				Image:             config.ApiServerConfig.DefaultProjectImage,
+				User:              config.ApiServerConfig.DefaultProjectUser,
+				PostStartCommands: config.ApiServerConfig.DefaultProjectPostStartCommands,
+				EnvVars:           &map[string]string{},
 			})
 		}
 	}
@@ -88,6 +109,22 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 	err = create.RunSubmissionForm(&workspaceName, suggestedName, config.ExistingWorkspaceNames, &projectList, config.ApiServerConfig)
 	if err != nil {
 		return "", nil, err
+	}
+
+	for _, project := range projectList {
+		if project.Build != nil {
+			if project.Image != nil {
+				*project.Image = ""
+			}
+			if project.User != nil {
+				*project.User = ""
+			}
+			if project.Build.Devcontainer != nil || *project.Build == (apiclient.ProjectBuild{}) {
+				if project.PostStartCommands != nil {
+					project.PostStartCommands = []string{}
+				}
+			}
+		}
 	}
 
 	return workspaceName, projectList, nil
@@ -113,4 +150,14 @@ func GetSuggestedWorkspaceName(firstProjectName string, existingWorkspaceNames [
 			i++
 		}
 	}
+}
+
+func GetSanitizedProjectName(projectName string) (string, error) {
+	projectName, err := url.QueryUnescape(projectName)
+	if err != nil {
+		return "", err
+	}
+	projectName = strings.ReplaceAll(projectName, " ", "-")
+
+	return projectName, nil
 }

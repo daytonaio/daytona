@@ -6,12 +6,16 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **ApiPort** | Pointer to **int32** |  | [optional] 
 **BinariesPath** | Pointer to **string** |  | [optional] 
+**BuildImageNamespace** | Pointer to **string** |  | [optional] 
+**BuilderImage** | Pointer to **string** |  | [optional] 
+**BuilderRegistryServer** | Pointer to **string** |  | [optional] 
 **DefaultProjectImage** | Pointer to **string** |  | [optional] 
 **DefaultProjectPostStartCommands** | Pointer to **[]string** |  | [optional] 
 **DefaultProjectUser** | Pointer to **string** |  | [optional] 
 **Frps** | Pointer to [**FRPSConfig**](FRPSConfig.md) |  | [optional] 
 **HeadscalePort** | Pointer to **int32** |  | [optional] 
 **Id** | Pointer to **string** |  | [optional] 
+**LocalBuilderRegistryPort** | Pointer to **int32** |  | [optional] 
 **LogFilePath** | Pointer to **string** |  | [optional] 
 **ProvidersDir** | Pointer to **string** |  | [optional] 
 **RegistryUrl** | Pointer to **string** |  | [optional] 
@@ -85,6 +89,81 @@ SetBinariesPath sets BinariesPath field to given value.
 `func (o *ServerConfig) HasBinariesPath() bool`
 
 HasBinariesPath returns a boolean if a field has been set.
+
+### GetBuildImageNamespace
+
+`func (o *ServerConfig) GetBuildImageNamespace() string`
+
+GetBuildImageNamespace returns the BuildImageNamespace field if non-nil, zero value otherwise.
+
+### GetBuildImageNamespaceOk
+
+`func (o *ServerConfig) GetBuildImageNamespaceOk() (*string, bool)`
+
+GetBuildImageNamespaceOk returns a tuple with the BuildImageNamespace field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetBuildImageNamespace
+
+`func (o *ServerConfig) SetBuildImageNamespace(v string)`
+
+SetBuildImageNamespace sets BuildImageNamespace field to given value.
+
+### HasBuildImageNamespace
+
+`func (o *ServerConfig) HasBuildImageNamespace() bool`
+
+HasBuildImageNamespace returns a boolean if a field has been set.
+
+### GetBuilderImage
+
+`func (o *ServerConfig) GetBuilderImage() string`
+
+GetBuilderImage returns the BuilderImage field if non-nil, zero value otherwise.
+
+### GetBuilderImageOk
+
+`func (o *ServerConfig) GetBuilderImageOk() (*string, bool)`
+
+GetBuilderImageOk returns a tuple with the BuilderImage field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetBuilderImage
+
+`func (o *ServerConfig) SetBuilderImage(v string)`
+
+SetBuilderImage sets BuilderImage field to given value.
+
+### HasBuilderImage
+
+`func (o *ServerConfig) HasBuilderImage() bool`
+
+HasBuilderImage returns a boolean if a field has been set.
+
+### GetBuilderRegistryServer
+
+`func (o *ServerConfig) GetBuilderRegistryServer() string`
+
+GetBuilderRegistryServer returns the BuilderRegistryServer field if non-nil, zero value otherwise.
+
+### GetBuilderRegistryServerOk
+
+`func (o *ServerConfig) GetBuilderRegistryServerOk() (*string, bool)`
+
+GetBuilderRegistryServerOk returns a tuple with the BuilderRegistryServer field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetBuilderRegistryServer
+
+`func (o *ServerConfig) SetBuilderRegistryServer(v string)`
+
+SetBuilderRegistryServer sets BuilderRegistryServer field to given value.
+
+### HasBuilderRegistryServer
+
+`func (o *ServerConfig) HasBuilderRegistryServer() bool`
+
+HasBuilderRegistryServer returns a boolean if a field has been set.
 
 ### GetDefaultProjectImage
 
@@ -235,6 +314,31 @@ SetId sets Id field to given value.
 `func (o *ServerConfig) HasId() bool`
 
 HasId returns a boolean if a field has been set.
+
+### GetLocalBuilderRegistryPort
+
+`func (o *ServerConfig) GetLocalBuilderRegistryPort() int32`
+
+GetLocalBuilderRegistryPort returns the LocalBuilderRegistryPort field if non-nil, zero value otherwise.
+
+### GetLocalBuilderRegistryPortOk
+
+`func (o *ServerConfig) GetLocalBuilderRegistryPortOk() (*int32, bool)`
+
+GetLocalBuilderRegistryPortOk returns a tuple with the LocalBuilderRegistryPort field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLocalBuilderRegistryPort
+
+`func (o *ServerConfig) SetLocalBuilderRegistryPort(v int32)`
+
+SetLocalBuilderRegistryPort sets LocalBuilderRegistryPort field to given value.
+
+### HasLocalBuilderRegistryPort
+
+`func (o *ServerConfig) HasLocalBuilderRegistryPort() bool`
+
+HasLocalBuilderRegistryPort returns a boolean if a field has been set.
 
 ### GetLogFilePath
 

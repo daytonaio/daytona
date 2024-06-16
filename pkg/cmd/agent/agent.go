@@ -77,11 +77,12 @@ var AgentCmd = &cobra.Command{
 		}
 
 		agent := agent.Agent{
-			Config:    c,
-			Git:       git,
-			Ssh:       sshServer,
-			Tailscale: tailscaleServer,
-			LogWriter: agentLogWriter,
+			Config:                 c,
+			Git:                    git,
+			Ssh:                    sshServer,
+			Tailscale:              tailscaleServer,
+			LogWriter:              agentLogWriter,
+			PostCreateLockFilePath: filepath.Join(os.Getenv("HOME"), ".daytona_post_create.lock"),
 		}
 
 		err = agent.Start()

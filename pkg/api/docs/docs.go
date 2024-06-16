@@ -953,6 +953,12 @@ const docTemplate = `{
                         "name": "workspaceId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1172,6 +1178,9 @@ const docTemplate = `{
                 "name"
             ],
             "properties": {
+                "build": {
+                    "$ref": "#/definitions/ProjectBuild"
+                },
                 "envVars": {
                     "type": "object",
                     "additionalProperties": {
@@ -1401,11 +1410,20 @@ const docTemplate = `{
         "Project": {
             "type": "object",
             "properties": {
+                "build": {
+                    "$ref": "#/definitions/ProjectBuild"
+                },
                 "image": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "postCreateCommands": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "postStartCommands": {
                     "type": "array",
@@ -1426,6 +1444,22 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "workspaceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProjectBuild": {
+            "type": "object",
+            "properties": {
+                "devcontainer": {
+                    "$ref": "#/definitions/ProjectBuildDevcontainer"
+                }
+            }
+        },
+        "ProjectBuildDevcontainer": {
+            "type": "object",
+            "properties": {
+                "devContainerFilePath": {
                     "type": "string"
                 }
             }
@@ -1505,6 +1539,15 @@ const docTemplate = `{
                 "binariesPath": {
                     "type": "string"
                 },
+                "buildImageNamespace": {
+                    "type": "string"
+                },
+                "builderImage": {
+                    "type": "string"
+                },
+                "builderRegistryServer": {
+                    "type": "string"
+                },
                 "defaultProjectImage": {
                     "type": "string"
                 },
@@ -1525,6 +1568,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
+                },
+                "localBuilderRegistryPort": {
+                    "type": "integer"
                 },
                 "logFilePath": {
                     "type": "string"

@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/workspace"
@@ -85,7 +86,7 @@ func (s *Service) CloneRepository(project *workspace.Project, auth *http.BasicAu
 }
 
 func (s *Service) RepositoryExists(project *workspace.Project) (bool, error) {
-	_, err := os.Stat(s.ProjectDir)
+	_, err := os.Stat(filepath.Join(s.ProjectDir, ".git"))
 	if os.IsNotExist(err) {
 		return false, nil
 	}

@@ -15,10 +15,18 @@ func GetFrpcServerDomain(serverId, frpsDomain string) string {
 	return fmt.Sprintf("%s.%s", serverId, frpsDomain)
 }
 
-func GetFrpcServerUrl(protocol, serverId, frpsDomain string) string {
+func GetFrpcHeadscaleUrl(protocol, serverId, frpsDomain string) string {
 	return fmt.Sprintf("%s://%s", protocol, GetFrpcServerDomain(serverId, frpsDomain))
 }
 
 func GetFrpcApiUrl(protocol, serverId, frpsDomain string) string {
 	return fmt.Sprintf("%s://%s", protocol, GetFrpcApiDomain(serverId, frpsDomain))
+}
+
+func GetFrpcRegistryDomain(serverId, frpsDomain string) string {
+	return fmt.Sprintf("registry-%s", GetFrpcServerDomain(serverId, frpsDomain))
+}
+
+func GetFrpcRegistryUrl(protocol, serverId, frpsDomain string) string {
+	return fmt.Sprintf("%s://%s", protocol, GetFrpcRegistryDomain(serverId, frpsDomain))
 }

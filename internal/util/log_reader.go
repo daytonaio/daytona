@@ -5,10 +5,8 @@ package util
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"io"
-	"time"
 )
 
 func ReadLog(ctx context.Context, logReader io.Reader, follow bool, c chan []byte, errChan chan error) {
@@ -19,7 +17,8 @@ func ReadLog(ctx context.Context, logReader io.Reader, follow bool, c chan []byt
 		case <-ctx.Done():
 			return
 		default:
-			line, err := reader.ReadBytes('\n')
+			bytes := make([]byte, 1024)
+			_, err := reader.Read(bytes)
 			if err != nil {
 				if err != io.EOF {
 					errChan <- err
@@ -27,12 +26,9 @@ func ReadLog(ctx context.Context, logReader io.Reader, follow bool, c chan []byt
 					errChan <- io.EOF
 					return
 				}
-				time.Sleep(500 * time.Millisecond) // Sleep to avoid busy loop
 				continue
 			}
-			// Trim the newline character
-			line = bytes.TrimRight(line, "\n")
-			c <- line
+			c <- bytes
 		}
 	}
 }

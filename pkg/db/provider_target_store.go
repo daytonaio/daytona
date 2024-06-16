@@ -42,6 +42,9 @@ func (s *ProviderTargetStore) Find(targetName string) (*provider.ProviderTarget,
 	providerTargetDTO := ProviderTargetDTO{}
 	tx := s.db.Where("name = ?", targetName).First(&providerTargetDTO)
 	if tx.Error != nil {
+		if IsRecordNotFound(tx.Error) {
+			return nil, provider.ErrTargetNotFound
+		}
 		return nil, tx.Error
 	}
 
@@ -61,6 +64,9 @@ func (s *ProviderTargetStore) Delete(target *provider.ProviderTarget) error {
 	tx := s.db.Delete(ToProviderTargetDTO(target))
 	if tx.Error != nil {
 		return tx.Error
+	}
+	if tx.RowsAffected == 0 {
+		return provider.ErrTargetNotFound
 	}
 
 	return nil

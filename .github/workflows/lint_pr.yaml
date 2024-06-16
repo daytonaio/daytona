@@ -37,6 +37,19 @@ jobs:
           go fmt ./...
           git diff --exit-code pkg/apiclient/* || (echo "API clients are out of sync! Please generate with './hack/swagger.sh' and commit" && exit 1)
           git diff --exit-code '**/*.go' || (echo "Code is not formatted! Please run 'go fmt ./...' and commit" && exit 1)
+  cli-docs:
+    name: cli-docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: cli-docs
+        run: |
+          ./hack/generate-cli-docs.sh
+          git diff --exit-code docs/* || (echo "CLI Documentation is out of sync! Please generate it with './hack/generate-cli-docs.sh' and commit" && exit 1)
+          git diff --exit-code hack/docs/* || (echo "CLI Documentation is out of sync! Please generate it with './hack/generate-cli-docs.sh' and commit" && exit 1)
   test:
     name: Unit tests
     runs-on: ubuntu-latest
