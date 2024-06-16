@@ -23,8 +23,12 @@ type GitnessClient struct {
 
 func NewGitnessClient(token string, baseUrl *url.URL) *GitnessClient {
 	return &GitnessClient{
-		Token:   token,
-		BaseURL: baseUrl,
+		Token: token,
+		BaseURL: &url.URL{
+			Scheme: "http",
+			Host:   baseUrl.Host,
+			Path:   baseUrl.Path,
+		},
 	}
 }
 
