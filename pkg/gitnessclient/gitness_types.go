@@ -5,8 +5,6 @@ package gitnessclient
 
 import "time"
 
-// Intermediate structs for the API response
-
 type apiMembershipResponse struct {
 	Created int64    `json:"created"`
 	Updated int64    `json:"updated"`

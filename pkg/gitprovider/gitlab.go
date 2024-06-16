@@ -27,7 +27,6 @@ func NewGitLabGitProvider(token string, baseApiUrl *string) *GitLabGitProvider {
 		AbstractGitProvider: &AbstractGitProvider{},
 	}
 	gitProvider.AbstractGitProvider.GitProvider = gitProvider
-
 	return gitProvider
 }
 

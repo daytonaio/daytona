@@ -26,7 +26,6 @@ func NewGitnessClient(token string, baseUrl *url.URL) *GitnessClient {
 		Token:   token,
 		BaseURL: baseUrl,
 	}
-
 }
 
 func (g *GitnessClient) GetSpaceAdmin(spaceName string) (*apiSpaceMemberResponse, error) {

@@ -23,7 +23,6 @@ func NewGitNessGitProviderTestSuite() *GitNessGitProviderTestSuite {
 
 func (g *GitNessGitProviderTestSuite) TestGetNamespaces() {
 	namespaces, err := g.gitProvider.GetNamespaces()
-
 	require := g.Require()
 	require.Nil(err)
 	require.NotEmpty(namespaces)
