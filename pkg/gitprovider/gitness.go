@@ -171,6 +171,7 @@ func (g *GitNessGitProvider) getPrContext(staticContext *StaticGitContext) (*Sta
 }
 
 func (g *GitNessGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
+	fmt.Println("parseStaticGitContext.repoUrl: ", repoUrl)
 	staticContext, err := g.AbstractGitProvider.parseStaticGitContext(repoUrl)
 	if err != nil {
 		return nil, err
