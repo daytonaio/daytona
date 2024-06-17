@@ -43,6 +43,36 @@ var CreateCmd = &cobra.Command{
 		var workspaceName string
 		var existingWorkspaceNames []string
 
+		if multiProjectFlag && (builderFlag != "" || devcontainerPathFlag != "" || customImageFlag != "" || customImageUserFlag != "") {
+			log.Fatal("Can't use single project only flags (--builder, --devcontainer, --custom-image, --custom-image-user) with --multi-project flag.")
+			return
+		}
+
+		if devcontainerPathFlag != "" && (customImageFlag != "" || customImageUserFlag != "") {
+			log.Fatal("Can't declare devcontainer file path with custom image and user flags. Choose either.")
+			return
+		}
+
+		if builderFlag != "" && builderFlag != "Automatic" && builderFlag != "Devcontainer" && builderFlag != "None" {
+			log.Fatal("Can't specify unsupported builder type! Please specify one of the following: Automatic/Devcontainer/None.")
+			return
+		}
+
+		if builderFlag != "" && builderFlag != "Devcontainer" && devcontainerPathFlag != "" {
+			log.Fatal("Can't set devcontainer file path if builder is not set to Devcontainer.")
+			return
+		}
+
+		if builderFlag == "Devcontainer" && (customImageFlag != "" || customImageUserFlag != "") {
+			log.Fatal("Can't choose Devcontainer as builder type and set custom image and user for it.")
+			return
+		}
+
+		if (customImageFlag != "" && customImageUserFlag == "") || (customImageFlag == "" && customImageUserFlag != "") {
+			log.Fatal("Must specify both: custom image and custom image user.")
+			return
+		}
+
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
@@ -107,6 +137,28 @@ var CreateCmd = &cobra.Command{
 			}
 			visited[*projects[i].Source.Repository.Url] = true
 			projects[i].EnvVars = getEnvVariables(&projects[i], profileData)
+
+			if builderFlag == "Devcontainer" || devcontainerPathFlag != "" {
+				projects[i].Build = &apiclient.ProjectBuild{
+					Devcontainer: &apiclient.ProjectBuildDevcontainer{},
+				}
+				if devcontainerPathFlag != "" {
+					projects[i].Build.Devcontainer.DevContainerFilePath = &devcontainerPathFlag
+				}
+			}
+
+			if builderFlag == "Automatic" {
+				projects[i].Build = &apiclient.ProjectBuild{}
+			}
+
+			if builderFlag == "None" {
+				projects[i].Build = nil
+			}
+
+			if customImageFlag != "" || customImageUserFlag != "" {
+				projects[i].Image = &customImageFlag
+				projects[i].User = &customImageUserFlag
+			}
 		}
 
 		projectNames := []string{}
@@ -202,6 +254,11 @@ var CreateCmd = &cobra.Command{
 var providerFlag string
 var nameFlag string
 var targetNameFlag string
+var customImageFlag string
+var customImageUserFlag string
+var devcontainerPathFlag string
+var builderFlag string
+
 var manualFlag bool
 var multiProjectFlag bool
 var codeFlag bool
@@ -211,6 +268,11 @@ func init() {
 	CreateCmd.Flags().StringVar(&providerFlag, "provider", "", "Specify the provider (e.g. 'docker-provider')")
 	CreateCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", "Specify the IDE ('vscode' or 'browser')")
 	CreateCmd.Flags().StringVarP(&targetNameFlag, "target", "t", "", "Specify the target (e.g. 'local')")
+	CreateCmd.Flags().StringVar(&customImageFlag, "custom-image", "", "Create the project with the custom image passed as the flag value; Requires setting --custom-image-user flag as well")
+	CreateCmd.Flags().StringVar(&customImageUserFlag, "custom-image-user", "", "Create the project with the custom image user passed as the flag value; Requires setting --custom-image flag as well")
+	CreateCmd.Flags().StringVar(&devcontainerPathFlag, "devcontainer-path", "", "Automatically assign the devcontainer builder with the path passed as the flag value")
+	CreateCmd.Flags().StringVar(&builderFlag, "builder", "", "Specify the builder (currently Automatic/Devcontainer/None)")
+
 	CreateCmd.Flags().BoolVar(&manualFlag, "manual", false, "Manually enter the git repositories")
 	CreateCmd.Flags().BoolVar(&multiProjectFlag, "multi-project", false, "Workspace with multiple projects/repos")
 	CreateCmd.Flags().BoolVarP(&codeFlag, "code", "c", false, "Open the workspace in the IDE after workspace creation")
