@@ -12,7 +12,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/logger"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/ports"
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/workspace"
@@ -30,7 +30,7 @@ type BuilderFactory struct {
 	containerRegistryServer         string
 	buildImageNamespace             string
 	basePath                        string
-	loggerFactory                   logger.LoggerFactory
+	loggerFactory                   logs.LoggerFactory
 	image                           string
 	containerRegistryService        containerregistries.IContainerRegistryService
 	defaultProjectImage             string
@@ -68,7 +68,7 @@ func (f *BuilderFactory) Create(p workspace.Project, gpc *gitprovider.GitProvide
 		return nil, err
 	}
 
-	projectLogger := f.loggerFactory.CreateProjectLogger(p.WorkspaceId, p.Name)
+	projectLogger := f.loggerFactory.CreateProjectLogger(p.WorkspaceId, p.Name, logs.LogSourceBuilder)
 	defer projectLogger.Close()
 
 	gitservice := git.Service{

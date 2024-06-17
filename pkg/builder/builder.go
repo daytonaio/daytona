@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/logger"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
@@ -30,7 +30,7 @@ type BuilderConfig struct {
 	// Namespace to be used when tagging and pushing the build image
 	BuildImageNamespace             string
 	BasePath                        string
-	LoggerFactory                   logger.LoggerFactory
+	LoggerFactory                   logs.LoggerFactory
 	DefaultProjectImage             string
 	DefaultProjectUser              string
 	DefaultProjectPostStartCommands []string
@@ -56,7 +56,7 @@ type Builder struct {
 	buildImageNamespace             string
 	serverConfigFolder              string
 	basePath                        string
-	loggerFactory                   logger.LoggerFactory
+	loggerFactory                   logs.LoggerFactory
 	defaultProjectImage             string
 	defaultProjectUser              string
 	defaultProjectPostStartCommands []string

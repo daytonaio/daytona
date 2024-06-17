@@ -10,22 +10,21 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"sync"
 	"time"
 
-	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/cmd/tailscale"
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	ssh_config "github.com/daytonaio/daytona/pkg/agent/ssh/config"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/views"
+	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
 	"github.com/daytonaio/daytona/pkg/views/target"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/docker/docker/pkg/stringid"
-	"github.com/gorilla/websocket"
 	"tailscale.com/tsnet"
 
 	log "github.com/sirupsen/logrus"
@@ -110,6 +109,19 @@ var CreateCmd = &cobra.Command{
 			projects[i].EnvVars = getEnvVariables(&projects[i], profileData)
 		}
 
+		projectNames := []string{}
+		for _, project := range projects {
+			projectNames = append(projectNames, project.Name)
+		}
+
+		logs_view.CalculateLongestPrefixLength(projectNames)
+
+		requestSubmittedLog := logs.LogEntry{
+			Msg: "Request submitted\n",
+		}
+
+		logs_view.DisplayLogEntry(requestSubmittedLog, logs_view.WORKSPACE_INDEX)
+
 		target, err := getTarget(activeProfile.Name)
 		if err != nil {
 			log.Fatal(err)
@@ -129,7 +141,7 @@ var CreateCmd = &cobra.Command{
 		id := stringid.GenerateRandomID()
 		id = stringid.TruncateID(id)
 
-		go readWorkspaceLogs(activeProfile, id, projects, &stopLogs)
+		go apiclient_util.ReadWorkspaceLogs(activeProfile, id, projectNames, &stopLogs)
 
 		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(apiclient.CreateWorkspaceRequest{
 			Id:       &id,
@@ -283,51 +295,6 @@ func processCmdArguments(args []string, apiClient *apiclient.APIClient, projects
 	return nil
 }
 
-func readWorkspaceLogs(activeProfile config.Profile, workspaceId string, projects []apiclient.CreateWorkspaceRequestProject, stopLogs *bool) {
-	var wg sync.WaitGroup
-	for _, project := range projects {
-		wg.Add(1)
-		go func(project apiclient.CreateWorkspaceRequestProject) {
-			defer wg.Done()
-			query := "follow=true"
-
-			for {
-				ws, _, err := apiclient_util.GetWebsocketConn(fmt.Sprintf("/log/workspace/%s/%s", workspaceId, project.Name), &activeProfile, &query)
-				// We want to retry getting the logs if it fails
-				if err != nil {
-					// TODO: return log.Trace once https://github.com/daytonaio/daytona/issues/696 is resolved
-					// log.Trace(apiclient_util.HandleErrorResponse(res, err))
-					time.Sleep(500 * time.Millisecond)
-					continue
-				}
-
-				readLog(ws, stopLogs)
-				ws.Close()
-				break
-			}
-		}(project)
-	}
-
-	query := "follow=true"
-
-	for {
-		ws, _, err := apiclient_util.GetWebsocketConn(fmt.Sprintf("/log/workspace/%s", workspaceId), &activeProfile, &query)
-		// We want to retry getting the logs if it fails
-		if err != nil {
-			// TODO: return log.Trace once https://github.com/daytonaio/daytona/issues/696 is resolved
-			// log.Trace(apiclient_util.HandleErrorResponse(res, err))
-			time.Sleep(500 * time.Millisecond)
-			continue
-		}
-
-		readLog(ws, stopLogs)
-		ws.Close()
-		break
-	}
-
-	wg.Wait()
-}
-
 func waitForDial(tsConn *tsnet.Server, workspaceId string, projectName string, dialStartTime time.Time, dialTimeout time.Duration) error {
 	for {
 		if time.Since(dialStartTime) > dialTimeout {
@@ -343,31 +310,6 @@ func waitForDial(tsConn *tsnet.Server, workspaceId string, projectName string, d
 		time.Sleep(time.Second)
 	}
 	return nil
-}
-
-func readLog(ws *websocket.Conn, stopLogs *bool) {
-	if internal.Version == "v0.0.0-dev" {
-		err := ws.SetReadDeadline(time.Time{})
-		if err != nil {
-			panic(err)
-		}
-	}
-	for {
-		_, msg, err := ws.ReadMessage()
-		if err != nil {
-			return
-		}
-
-		if *stopLogs {
-			return
-		}
-
-		fmt.Print(string(msg))
-
-		if *stopLogs {
-			return
-		}
-	}
 }
 
 func getEnvVariables(project *apiclient.CreateWorkspaceRequestProject, profileData *apiclient.ProfileData) *map[string]string {
