@@ -111,22 +111,6 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 		return "", nil, err
 	}
 
-	for _, project := range projectList {
-		if project.Build != nil {
-			if project.Image != nil {
-				*project.Image = ""
-			}
-			if project.User != nil {
-				*project.User = ""
-			}
-			if project.Build.Devcontainer != nil || *project.Build == (apiclient.ProjectBuild{}) {
-				if project.PostStartCommands != nil {
-					project.PostStartCommands = []string{}
-				}
-			}
-		}
-	}
-
 	return workspaceName, projectList, nil
 }
 
