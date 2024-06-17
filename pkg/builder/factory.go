@@ -90,46 +90,26 @@ func (f *BuilderFactory) Create(p workspace.Project, gpc *gitprovider.GitProvide
 		return nil, err
 	}
 
-	buildConfig := p.Build
+	if p.Build == nil || *p.Build != (workspace.ProjectBuild{}) {
+		if p.Build != nil && p.Build.Devcontainer != nil {
+			return f.newDevcontainerBuilder(buildId, p, gpc, hash, projectDir)
+		}
 
-	if buildConfig == nil || *buildConfig != (workspace.ProjectBuild{}) {
 		return nil, nil
 	}
+
+	// Autodetect
 
 	devcontainerConfigFilePath, err := detectDevcontainerConfigFilePath(projectDir)
 	if err != nil {
 		return nil, err
 	}
 	if devcontainerConfigFilePath != "" {
-		buildConfig.Devcontainer = &workspace.ProjectBuildDevcontainer{
+		p.Build.Devcontainer = &workspace.ProjectBuildDevcontainer{
 			DevContainerFilePath: devcontainerConfigFilePath,
 		}
 
-		builderDockerPort, err := ports.GetAvailableEphemeralPort()
-		if err != nil {
-			return nil, err
-		}
-
-		return &DevcontainerBuilder{
-			Builder: &Builder{
-				id:                              buildId,
-				project:                         p,
-				gitProviderConfig:               gpc,
-				hash:                            hash,
-				projectVolumePath:               projectDir,
-				image:                           f.image,
-				containerRegistryService:        f.containerRegistryService,
-				serverConfigFolder:              f.serverConfigFolder,
-				containerRegistryServer:         f.containerRegistryServer,
-				buildImageNamespace:             f.buildImageNamespace,
-				basePath:                        f.basePath,
-				loggerFactory:                   f.loggerFactory,
-				defaultProjectImage:             f.defaultProjectImage,
-				defaultProjectUser:              f.defaultProjectUser,
-				defaultProjectPostStartCommands: f.defaultProjectPostStartCommands,
-			},
-			builderDockerPort: builderDockerPort,
-		}, nil
+		return f.newDevcontainerBuilder(buildId, p, gpc, hash, projectDir)
 	}
 
 	return nil, nil
@@ -170,6 +150,34 @@ func (f *BuilderFactory) CheckExistingBuild(p workspace.Project) (*BuildResult, 
 	}
 
 	return &result, nil
+}
+
+func (f *BuilderFactory) newDevcontainerBuilder(buildId string, p workspace.Project, gpc *gitprovider.GitProviderConfig, hash, projectDir string) (*DevcontainerBuilder, error) {
+	builderDockerPort, err := ports.GetAvailableEphemeralPort()
+	if err != nil {
+		return nil, err
+	}
+
+	return &DevcontainerBuilder{
+		Builder: &Builder{
+			id:                              buildId,
+			project:                         p,
+			gitProviderConfig:               gpc,
+			hash:                            hash,
+			projectVolumePath:               projectDir,
+			image:                           f.image,
+			containerRegistryService:        f.containerRegistryService,
+			serverConfigFolder:              f.serverConfigFolder,
+			containerRegistryServer:         f.containerRegistryServer,
+			buildImageNamespace:             f.buildImageNamespace,
+			basePath:                        f.basePath,
+			loggerFactory:                   f.loggerFactory,
+			defaultProjectImage:             f.defaultProjectImage,
+			defaultProjectUser:              f.defaultProjectUser,
+			defaultProjectPostStartCommands: f.defaultProjectPostStartCommands,
+		},
+		builderDockerPort: builderDockerPort,
+	}, nil
 }
 
 func fileExists(filePath string) (bool, error) {
