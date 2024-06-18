@@ -17,6 +17,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/server"
 )
 
+const CLIENT_VERSION_HEADER = "X-Client-Version"
+
 var apiClient *apiclient.APIClient
 
 func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
@@ -61,7 +63,7 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 	}
 
 	clientConfig.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", apiKey))
-	clientConfig.AddDefaultHeader("X-Client-Version", internal.Version)
+	clientConfig.AddDefaultHeader(CLIENT_VERSION_HEADER, internal.Version)
 
 	apiClient = apiclient.NewAPIClient(clientConfig)
 
@@ -81,7 +83,7 @@ func GetAgentApiClient(apiUrl, apiKey string) (*apiclient.APIClient, error) {
 	}
 
 	clientConfig.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", apiKey))
-	clientConfig.AddDefaultHeader("X-Client-Version", internal.Version)
+	clientConfig.AddDefaultHeader(CLIENT_VERSION_HEADER, internal.Version)
 
 	apiClient = apiclient.NewAPIClient(clientConfig)
 

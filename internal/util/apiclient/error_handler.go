@@ -6,10 +6,12 @@ package apiclient
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 
 	"github.com/daytonaio/daytona/internal"
+	"github.com/daytonaio/daytona/pkg/api/middlewares"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -29,9 +31,9 @@ func HandleErrorResponse(res *http.Response, requestErr error) error {
 		return err
 	}
 
-	version := res.Header.Get("X-Server-Version")
-	if internal.Version != version {
-		log.Warn("Version mismatch! Server and client version are not the same. Please, update your Daytona versions.")
+	serverVersion := res.Header.Get(middlewares.SERVER_VERSION_HEADER)
+	if internal.Version != serverVersion {
+		log.Warn(fmt.Sprintf("Version mismatch detected. CLI is on version %s, Daytona Server is on version %s. To ensure maximum compatibility, please make sure the versions are aligned.", serverVersion, internal.Version))
 	}
 
 	var errResponse ApiErrorResponse

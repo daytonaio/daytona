@@ -8,8 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func VersionCheckMiddleware() gin.HandlerFunc {
+const SERVER_VERSION_HEADER = "X-Server-Version"
+
+func SetVersionMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		ctx.Writer.Header().Add("X-Server-Version", internal.Version)
+		ctx.Writer.Header().Add(SERVER_VERSION_HEADER, internal.Version)
 	}
 }
