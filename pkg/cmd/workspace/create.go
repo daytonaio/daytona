@@ -43,34 +43,9 @@ var CreateCmd = &cobra.Command{
 		var workspaceName string
 		var existingWorkspaceNames []string
 
-		if multiProjectFlag && (builderFlag != "" || devcontainerPathFlag != "" || customImageFlag != "" || customImageUserFlag != "") {
-			log.Fatal("Can't use single project only flags (--builder, --devcontainer, --custom-image, --custom-image-user) with --multi-project flag.")
-			return
-		}
-
-		if devcontainerPathFlag != "" && (customImageFlag != "" || customImageUserFlag != "") {
-			log.Fatal("Can't declare devcontainer file path with custom image and user flags. Choose either.")
-			return
-		}
-
-		if builderFlag != "" && builderFlag != "Automatic" && builderFlag != "Devcontainer" && builderFlag != "None" {
-			log.Fatal("Can't specify unsupported builder type! Please specify one of the following: Automatic/Devcontainer/None.")
-			return
-		}
-
-		if builderFlag != "" && builderFlag != "Devcontainer" && devcontainerPathFlag != "" {
-			log.Fatal("Can't set devcontainer file path if builder is not set to Devcontainer.")
-			return
-		}
-
-		if builderFlag == "Devcontainer" && (customImageFlag != "" || customImageUserFlag != "") {
-			log.Fatal("Can't choose Devcontainer as builder type and set custom image and user for it.")
-			return
-		}
-
-		if (customImageFlag != "" && customImageUserFlag == "") || (customImageFlag == "" && customImageUserFlag != "") {
-			log.Fatal("Must specify both: custom image and custom image user.")
-			return
+		err := validateFlags()
+		if err != nil {
+			log.Fatal(err)
 		}
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -276,6 +251,34 @@ func init() {
 	CreateCmd.Flags().BoolVar(&manualFlag, "manual", false, "Manually enter the git repositories")
 	CreateCmd.Flags().BoolVar(&multiProjectFlag, "multi-project", false, "Workspace with multiple projects/repos")
 	CreateCmd.Flags().BoolVarP(&codeFlag, "code", "c", false, "Open the workspace in the IDE after workspace creation")
+}
+
+func validateFlags() error {
+	if multiProjectFlag && (builderFlag != "" || devcontainerPathFlag != "" || customImageFlag != "" || customImageUserFlag != "") {
+		return errors.New("Can't use single project only flags (--builder, --devcontainer, --custom-image, --custom-image-user) with --multi-project flag.")
+	}
+
+	if devcontainerPathFlag != "" && (customImageFlag != "" || customImageUserFlag != "") {
+		return errors.New("Can't declare devcontainer file path with custom image and user flags. Choose either.")
+	}
+
+	if builderFlag != "" && builderFlag != "Automatic" && builderFlag != "Devcontainer" && builderFlag != "None" {
+		return errors.New("Can't specify unsupported builder type! Please specify one of the following: Automatic/Devcontainer/None.")
+	}
+
+	if builderFlag != "" && builderFlag != "Devcontainer" && devcontainerPathFlag != "" {
+		return errors.New("Can't set devcontainer file path if builder is not set to Devcontainer.")
+	}
+
+	if builderFlag == "Devcontainer" && (customImageFlag != "" || customImageUserFlag != "") {
+		return errors.New("Can't choose Devcontainer as builder type and set custom image and user for it.")
+	}
+
+	if (customImageFlag != "" && customImageUserFlag == "") || (customImageFlag == "" && customImageUserFlag != "") {
+		return errors.New("Must specify both: custom image and custom image user.")
+	}
+
+	return nil
 }
 
 func getTarget(activeProfileName string) (*apiclient.ProviderTarget, error) {
