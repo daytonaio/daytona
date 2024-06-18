@@ -25,7 +25,7 @@ func OpenVSCode(activeProfile config.Profile, workspaceId string, projectName st
 
 	commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", projectHostname, projectDir)
 
-	var vscCommand *exec.Cmd = exec.Command("code", "--folder-uri", commandArgument)
+	var vscCommand *exec.Cmd = exec.Command("code", "--folder-uri", commandArgument, "--disable-extension", "ms-vscode-remote.remote-containers")
 
 	return vscCommand.Run()
 }

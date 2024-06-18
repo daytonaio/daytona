@@ -79,7 +79,7 @@ func GetLogFilePath() *string {
 		return nil
 	}
 
-	logFilePath = strings.Replace(logFilePath, "$HOME", os.Getenv("HOME"), 1)
+	logFilePath = strings.Replace(logFilePath, "(HOME)", os.Getenv("HOME"), 1)
 
 	return &logFilePath
 }

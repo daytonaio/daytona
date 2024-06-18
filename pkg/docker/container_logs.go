@@ -16,6 +16,11 @@ func (d *DockerClient) GetContainerLogs(containerName string, logWriter io.Write
 		return nil
 	}
 
+	inspect, err := d.apiClient.ContainerInspect(context.Background(), containerName)
+	if err != nil {
+		return err
+	}
+
 	logs, err := d.apiClient.ContainerLogs(context.Background(), containerName, container.LogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
@@ -25,6 +30,11 @@ func (d *DockerClient) GetContainerLogs(containerName string, logWriter io.Write
 		return err
 	}
 	defer logs.Close()
+
+	if inspect.Config.Tty {
+		_, err = io.Copy(logWriter, logs)
+		return err
+	}
 
 	_, err = stdcopy.StdCopy(logWriter, logWriter, logs)
 

@@ -4,46 +4,78 @@
 package docker
 
 import (
-	"context"
+	"errors"
+	"fmt"
+	"io"
 	"time"
 
+	"github.com/daytonaio/daytona/pkg/builder/detect"
+	"github.com/daytonaio/daytona/pkg/provider/util"
+	"github.com/daytonaio/daytona/pkg/ssh"
 	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types"
 )
 
-func (d *DockerClient) StartProject(project *workspace.Project) error {
-	return d.startProjectContainer(project)
-}
+func (d *DockerClient) StartProject(opts *CreateProjectOptions, daytonaDownloadUrl string) error {
+	var err error
+	containerUser := opts.Project.User
 
-func (d *DockerClient) startProjectContainer(project *workspace.Project) error {
-	containerName := d.GetProjectContainerName(project)
-	ctx := context.Background()
-
-	inspect, err := d.apiClient.ContainerInspect(ctx, containerName)
-
-	if err == nil && inspect.State.Running {
-		return nil
+	var sshClient *ssh.Client
+	if opts.SshSessionConfig != nil {
+		sshClient, err = ssh.NewClient(opts.SshSessionConfig)
+		if err != nil {
+			return err
+		}
+		defer sshClient.Close()
 	}
 
-	err = d.apiClient.ContainerStart(ctx, containerName, container.StartOptions{})
+	builderType, err := detect.DetectProjectBuilderType(opts.Project, opts.ProjectDir, sshClient)
 	if err != nil {
 		return err
 	}
 
-	// make sure container is running
-	//	TODO: timeout
-	for {
-		inspect, err := d.apiClient.ContainerInspect(ctx, containerName)
-		if err != nil {
-			return err
-		}
-
-		if inspect.State.Running {
-			break
-		}
-
-		time.Sleep(1 * time.Second)
+	switch builderType {
+	case detect.BuilderTypeDevcontainer:
+		var remoteUser RemoteUser
+		remoteUser, err = d.startDevcontainerProject(opts, sshClient)
+		containerUser = string(remoteUser)
+	case detect.BuilderTypeImage:
+		err = d.startImageProject(opts)
+	default:
+		return fmt.Errorf("unknown builder type: %s", builderType)
 	}
 
-	return nil
+	if err != nil {
+		return err
+	}
+
+	return d.startDaytonaAgent(opts.Project, containerUser, daytonaDownloadUrl, opts.LogWriter)
+}
+
+func (d *DockerClient) startDaytonaAgent(project *workspace.Project, containerUser, daytonaDownloadUrl string, logWriter io.Writer) error {
+	errChan := make(chan error)
+
+	go func() {
+		result, err := d.ExecSync(d.GetProjectContainerName(project), types.ExecConfig{
+			Cmd:          []string{"bash", "-c", util.GetProjectStartScript(daytonaDownloadUrl, project.ApiKey)},
+			AttachStdout: true,
+			AttachStderr: true,
+			User:         containerUser,
+		}, logWriter)
+		if err != nil {
+			errChan <- err
+		}
+
+		if result.ExitCode != 0 {
+			errChan <- errors.New(result.StdErr)
+		}
+	}()
+
+	go func() {
+		// TODO: Figure out how to check if the agent is running here
+		time.Sleep(5 * time.Second)
+		errChan <- nil
+	}()
+
+	return <-errChan
 }
