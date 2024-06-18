@@ -102,6 +102,11 @@ func (m *MockApiClient) ContainerInspect(ctx context.Context, container string) 
 	return args.Get(0).(types.ContainerJSON), args.Error(1)
 }
 
+func (m *MockApiClient) ContainerList(ctx context.Context, options container.ListOptions) ([]types.Container, error) {
+	args := m.Called(ctx, options)
+	return args.Get(0).([]types.Container), args.Error(1)
+}
+
 func (m *MockApiClient) VolumeRemove(ctx context.Context, volume string, force bool) error {
 	args := m.Called(ctx, volume, force)
 	return args.Error(0)

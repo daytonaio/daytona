@@ -43,6 +43,10 @@ var AgentCmd = &cobra.Command{
 		}
 		c.ProjectDir = filepath.Join(os.Getenv("HOME"), c.ProjectName)
 
+		if projectDir := os.Getenv("DAYTONA_PROJECT_DIR"); projectDir != "" {
+			c.ProjectDir = projectDir
+		}
+
 		gitLogWriter := io.MultiWriter(os.Stdout)
 		var agentLogWriter io.Writer
 		if c.LogFilePath != nil {

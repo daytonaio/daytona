@@ -8,4 +8,4 @@ RUN apt update -y && \
 
 USER daytona
 
-ENTRYPOINT ["tail", "-f", "/dev/null"]
+ENTRYPOINT ["sudo", "dockerd"]

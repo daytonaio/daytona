@@ -44,8 +44,8 @@ func GetWorkspaceEnvVars(workspace *Workspace, params WorkspaceEnvVarParams) map
 		"DAYTONA_SERVER_VERSION": params.ServerVersion,
 		"DAYTONA_SERVER_URL":     params.ServerUrl,
 		"DAYTONA_SERVER_API_URL": params.ApiUrl,
-		// $HOME will be replaced at runtime
-		"DAYTONA_AGENT_LOG_FILE_PATH": "$HOME/.daytona-agent.log",
+		// (HOME) will be replaced at runtime
+		"DAYTONA_AGENT_LOG_FILE_PATH": "(HOME)/.daytona-agent.log",
 	}
 
 	return envVars

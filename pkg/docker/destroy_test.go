@@ -11,22 +11,18 @@ import (
 )
 
 func (s *DockerClientTestSuite) TestDestroyWorkspace() {
-	networks := []types.NetworkResource{
-		{
-			ID:   workspace1.Id,
-			Name: workspace1.Id,
-		},
-	}
-
-	s.mockClient.On("NetworkList", mock.Anything, types.NetworkListOptions{}).Return(networks, nil)
-	s.mockClient.On("NetworkRemove", mock.Anything, workspace1.Id).Return(nil)
-
 	err := s.dockerClient.DestroyWorkspace(workspace1)
 	require.Nil(s.T(), err)
 }
 
 func (s *DockerClientTestSuite) TestDestroyProject() {
+	s.mockClient.On("ContainerList", mock.Anything, mock.Anything).Return([]types.Container{}, nil)
+
 	containerName := s.dockerClient.GetProjectContainerName(project1)
+
+	s.mockClient.On("ContainerInspect", mock.Anything, containerName).Return(types.ContainerJSON{
+		Config: &container.Config{},
+	}, nil)
 
 	s.mockClient.On("ContainerRemove", mock.Anything, containerName,
 		container.RemoveOptions{
