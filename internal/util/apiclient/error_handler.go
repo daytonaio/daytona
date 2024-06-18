@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/pkg/api/middlewares"
@@ -31,11 +32,6 @@ func HandleErrorResponse(res *http.Response, requestErr error) error {
 		return err
 	}
 
-	serverVersion := res.Header.Get(middlewares.SERVER_VERSION_HEADER)
-	if internal.Version != serverVersion {
-		log.Warn(fmt.Sprintf("Version mismatch detected. CLI is on version %s, Daytona Server is on version %s. To ensure maximum compatibility, please make sure the versions are aligned.", serverVersion, internal.Version))
-	}
-
 	var errResponse ApiErrorResponse
 
 	err = json.Unmarshal(body, &errResponse)
@@ -43,5 +39,17 @@ func HandleErrorResponse(res *http.Response, requestErr error) error {
 		return errors.New(string(body))
 	}
 
+	checkVersionsMismatch(res, errResponse)
+
 	return errors.New(errResponse.Error)
+}
+
+func checkVersionsMismatch(res *http.Response, err ApiErrorResponse) {
+	// Ignore check if error comes from health-check response
+	if !strings.Contains(err.Error, "failed to check server health at:") {
+		serverVersion := res.Header.Get(middlewares.SERVER_VERSION_HEADER)
+		if internal.Version != serverVersion {
+			log.Warn(fmt.Sprintf("Version mismatch detected. CLI is on version %s, Daytona Server is on version %s. To ensure maximum compatibility, please make sure the versions are aligned.", serverVersion, internal.Version))
+		}
+	}
 }
