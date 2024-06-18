@@ -11,6 +11,7 @@ import (
 	"net/url"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/server"
@@ -60,6 +61,7 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 	}
 
 	clientConfig.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", apiKey))
+	clientConfig.AddDefaultHeader("X-Client-Version", internal.Version)
 
 	apiClient = apiclient.NewAPIClient(clientConfig)
 
@@ -79,6 +81,7 @@ func GetAgentApiClient(apiUrl, apiKey string) (*apiclient.APIClient, error) {
 	}
 
 	clientConfig.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", apiKey))
+	clientConfig.AddDefaultHeader("X-Client-Version", internal.Version)
 
 	apiClient = apiclient.NewAPIClient(clientConfig)
 

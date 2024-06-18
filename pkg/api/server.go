@@ -87,6 +87,7 @@ func (a *ApiServer) Start() error {
 	}
 
 	a.router.Use(middlewares.LoggingMiddleware())
+	a.router.Use(middlewares.VersionCheckMiddleware())
 
 	public := a.router.Group("/")
 	public.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
