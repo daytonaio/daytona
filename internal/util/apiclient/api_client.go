@@ -52,7 +52,7 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 
 	_, err = http.Head(healthUrl)
 	if err != nil {
-		return nil, fmt.Errorf("failed to check server health at: %s. Make sure Daytona is running on the appropriate port", healthUrl)
+		return nil, ErrHealthCheckFailed(healthUrl)
 	}
 
 	clientConfig := apiclient.NewConfiguration()
