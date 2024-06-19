@@ -19,10 +19,10 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/views"
 	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
 	"github.com/daytonaio/daytona/pkg/views/target"
+	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/docker/docker/pkg/stringid"
@@ -32,14 +32,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
-)
-
-type BuilderChoice string
-
-const (
-	AUTOMATIC    BuilderChoice = "Automatic"
-	DEVCONTAINER BuilderChoice = "Devcontainer"
-	NONE         BuilderChoice = "None"
 )
 
 var CreateCmd = &cobra.Command{
@@ -122,7 +114,7 @@ var CreateCmd = &cobra.Command{
 			visited[*projects[i].Source.Repository.Url] = true
 			projects[i].EnvVars = getEnvVariables(&projects[i], profileData)
 
-			if builderFlag == string(DEVCONTAINER) || devcontainerPathFlag != "" {
+			if builderFlag == string(create.DEVCONTAINER) || devcontainerPathFlag != "" {
 				projects[i].Build = &apiclient.ProjectBuild{
 					Devcontainer: &apiclient.ProjectBuildDevcontainer{},
 				}
@@ -131,20 +123,12 @@ var CreateCmd = &cobra.Command{
 				}
 			}
 
-			if builderFlag == string(AUTOMATIC) || builderFlag == string(NONE) {
-				config, err := server.GetConfig()
-				if err != nil {
-					log.Fatal("Can't obtain server configuration.")
-				}
+			if builderFlag == string(create.AUTOMATIC) {
+				projects[i].Build = &apiclient.ProjectBuild{}
+			}
 
-				projects[i].Image = &config.DefaultProjectImage
-				projects[i].User = &config.DefaultProjectUser
-
-				if builderFlag == string(AUTOMATIC) {
-					projects[i].Build = &apiclient.ProjectBuild{}
-				} else {
-					projects[i].Build = nil
-				}
+			if builderFlag == string(create.NONE) {
+				projects[i].Build = nil
 			}
 
 			if customImageFlag != "" || customImageUserFlag != "" {
@@ -264,7 +248,7 @@ func init() {
 	CreateCmd.Flags().StringVar(&customImageFlag, "custom-image", "", "Create the project with the custom image passed as the flag value; Requires setting --custom-image-user flag as well")
 	CreateCmd.Flags().StringVar(&customImageUserFlag, "custom-image-user", "", "Create the project with the custom image user passed as the flag value; Requires setting --custom-image flag as well")
 	CreateCmd.Flags().StringVar(&devcontainerPathFlag, "devcontainer-path", "", "Automatically assign the devcontainer builder with the path passed as the flag value")
-	CreateCmd.Flags().StringVar(&builderFlag, "builder", "", "Specify the builder (currently Automatic/Devcontainer/None)")
+	CreateCmd.Flags().StringVar(&builderFlag, "builder", "", fmt.Sprintf("Specify the builder (currently %s/%s/%s)", string(create.AUTOMATIC), string(create.DEVCONTAINER), string(create.NONE)))
 
 	CreateCmd.Flags().BoolVar(&manualFlag, "manual", false, "Manually enter the git repositories")
 	CreateCmd.Flags().BoolVar(&multiProjectFlag, "multi-project", false, "Workspace with multiple projects/repos")
@@ -280,12 +264,12 @@ func validateFlags() error {
 		return errors.New("Can't declare devcontainer file path with custom image and user flags. Choose either.")
 	}
 
-	if builderFlag != "" && builderFlag != string(AUTOMATIC) && builderFlag != string(DEVCONTAINER) && builderFlag != string(NONE) {
-		return errors.New("Can't specify unsupported builder type! Please specify one of the following: Automatic/Devcontainer/None.")
+	if builderFlag != "" && builderFlag != string(create.AUTOMATIC) && builderFlag != string(create.DEVCONTAINER) && builderFlag != string(create.NONE) {
+		return fmt.Errorf("Can't specify unsupported builder type! Please specify one of the following: %s/%s/%s", string(create.AUTOMATIC), string(create.DEVCONTAINER), string(create.NONE))
 	}
 
-	if builderFlag != "" && builderFlag != string(DEVCONTAINER) && devcontainerPathFlag != "" {
-		return errors.New("Can't set devcontainer file path if builder is not set to Devcontainer.")
+	if builderFlag != "" && builderFlag != string(create.DEVCONTAINER) && devcontainerPathFlag != "" {
+		return fmt.Errorf("Can't set devcontainer file path if builder is not set to %s.", string(create.DEVCONTAINER))
 	}
 
 	if builderFlag != "" && (customImageFlag != "" || customImageUserFlag != "") {
