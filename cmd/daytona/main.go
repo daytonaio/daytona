@@ -6,6 +6,10 @@ package main
 import (
 	"os"
 	"time"
+	"os/signal"
+	"os/exec"
+	"syscall"
+	"fmt"
 
 	golog "log"
 
@@ -18,6 +22,8 @@ import (
 )
 
 func main() {
+	setupSignalHandler()
+
 	if util.WorkspaceMode() {
 		workspacemode.Execute()
 		return
@@ -60,4 +66,31 @@ func init() {
 	})
 
 	golog.SetOutput(&util.DebugLogWriter{})
+}
+
+// setupSignalHandler sets up a handler for SIGINT and SIGTERM to clean up the terminal.
+func setupSignalHandler() {
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		<-sigs
+		cleanup()
+		os.Exit(1)
+	}()
+}
+
+// cleanup function to reset the terminal
+func cleanup() {
+	fmt.Println("\nAborting process and resetting terminal...")
+
+	// Reset the terminal
+	cmd := exec.Command("stty", "sane")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		fmt.Println("Failed to reset terminal:", err)
+	}
+
+	fmt.Println("Terminal reset complete.")
 }
