@@ -3,7 +3,7 @@ synopsis: Create a workspace
 usage: daytona create [REPOSITORY_URL] [flags]
 options:
     - name: builder
-      usage: Specify the builder (currently Automatic/Devcontainer/None)
+      usage: Specify the builder (currently auto/devcontainer/none)
     - name: code
       shorthand: c
       default_value: "false"
