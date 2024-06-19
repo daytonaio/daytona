@@ -7,6 +7,8 @@ import (
 	"os"
 	"time"
 
+    "os/signal"
+	"syscall"
 	golog "log"
 
 	"github.com/daytonaio/daytona/internal/util"
@@ -22,6 +24,15 @@ func main() {
 		workspacemode.Execute()
 		return
 	}
+
+	sigs := make(chan os.Signal, 1)
+    signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
+    go func() {
+        <-sigs
+        cleanup()
+        os.Exit(1)
+    }()
 
 	cmd.Execute()
 }
@@ -60,4 +71,19 @@ func init() {
 	})
 
 	golog.SetOutput(&util.DebugLogWriter{})
+}
+
+// cleanup function to reset the terminal
+func cleanup() {
+    fmt.Println("\nAborting process and resetting terminal...")
+
+    // Reset the terminal
+    cmd := exec.Command("stty", "sane")
+    cmd.Stdout = os.Stdout
+    cmd.Stderr = os.Stderr
+    if err := cmd.Run(); err != nil {
+        fmt.Println("Failed to reset terminal:", err)
+    }
+
+    fmt.Println("Terminal reset complete.")
 }
