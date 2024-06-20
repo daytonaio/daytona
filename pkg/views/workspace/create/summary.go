@@ -108,7 +108,7 @@ func RenderSummary(workspaceName string, projectList []apiclient.CreateWorkspace
 	return output, nil
 }
 
-func renderProjectDetails(project apiclient.CreateWorkspaceRequestProject, buildChoice BuildChoice, choiceName string) string {
+func renderProjectDetails(project apiclient.CreateWorkspaceRequestProject, buildChoice BuilderChoice, choiceName string) string {
 	output := projectDetailOutput(Build, choiceName)
 
 	if buildChoice == DEVCONTAINER {
@@ -168,7 +168,7 @@ func projectDetailOutput(projectDetailKey ProjectDetail, projectDetailValue stri
 	return fmt.Sprintf("\t%s%-*s%s", lipgloss.NewStyle().Foreground(views.Green).Render(string(projectDetailKey)), DEFAULT_PADDING-len(string(projectDetailKey)), EMPTY_STRING, projectDetailValue)
 }
 
-func getProjectBuildChoice(project apiclient.CreateWorkspaceRequestProject, apiServerConfig *apiclient.ServerConfig) (BuildChoice, string) {
+func getProjectBuildChoice(project apiclient.CreateWorkspaceRequestProject, apiServerConfig *apiclient.ServerConfig) (BuilderChoice, string) {
 	if project.Build == nil {
 		if *project.Image == *apiServerConfig.DefaultProjectImage && *project.User == *apiServerConfig.DefaultProjectUser {
 			return NONE, "None"

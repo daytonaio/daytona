@@ -31,7 +31,7 @@ type ProjectConfigurationData struct {
 	EnvVars              map[string]string
 }
 
-func NewProjectConfigurationData(builderChoice BuildChoice, devContainerFilePath string, currentProject *apiclient.CreateWorkspaceRequestProject, apiServerConfig *apiclient.ServerConfig) *ProjectConfigurationData {
+func NewProjectConfigurationData(builderChoice BuilderChoice, devContainerFilePath string, currentProject *apiclient.CreateWorkspaceRequestProject, apiServerConfig *apiclient.ServerConfig) *ProjectConfigurationData {
 	image := *apiServerConfig.DefaultProjectImage
 	user := *apiServerConfig.DefaultProjectUser
 	commands := []string{}

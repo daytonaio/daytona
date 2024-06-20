@@ -15,6 +15,13 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 )
 
+type CmdCustoms struct {
+	BuildChoice          create.BuilderChoice
+	Image                string
+	ImageUser            string
+	DevcontainerFilePath string
+}
+
 type CreateDataPromptConfig struct {
 	ApiServerConfig        *apiclient.ServerConfig
 	ExistingWorkspaceNames []string
@@ -22,6 +29,7 @@ type CreateDataPromptConfig struct {
 	Manual                 bool
 	MultiProject           bool
 	ApiClient              *apiclient.APIClient
+	Customs                *CmdCustoms
 }
 
 func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclient.CreateWorkspaceRequestProject, error) {
@@ -49,17 +57,7 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 		return "", nil, err
 	}
 
-	projectList = []apiclient.CreateWorkspaceRequestProject{{
-		Name: providerRepoName,
-		Source: &apiclient.CreateWorkspaceRequestProjectSource{
-			Repository: providerRepo,
-		},
-		Build:             &apiclient.ProjectBuild{},
-		Image:             config.ApiServerConfig.DefaultProjectImage,
-		User:              config.ApiServerConfig.DefaultProjectUser,
-		PostStartCommands: config.ApiServerConfig.DefaultProjectPostStartCommands,
-		EnvVars:           &map[string]string{},
-	}}
+	projectList = initializeProjectList(config, providerRepo, providerRepoName)
 
 	if config.MultiProject {
 		addMore := true
@@ -112,6 +110,47 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 	}
 
 	return workspaceName, projectList, nil
+}
+
+func initializeProjectList(config CreateDataPromptConfig, providerRepo *apiclient.GitRepository, providerRepoName string) []apiclient.CreateWorkspaceRequestProject {
+	project := apiclient.CreateWorkspaceRequestProject{
+		Name: providerRepoName,
+		Source: &apiclient.CreateWorkspaceRequestProjectSource{
+			Repository: providerRepo,
+		},
+		Build:             &apiclient.ProjectBuild{},
+		Image:             config.ApiServerConfig.DefaultProjectImage,
+		User:              config.ApiServerConfig.DefaultProjectUser,
+		PostStartCommands: config.ApiServerConfig.DefaultProjectPostStartCommands,
+		EnvVars:           &map[string]string{},
+	}
+
+	if config.Customs != nil {
+		if config.Customs.BuildChoice == create.DEVCONTAINER || config.Customs.DevcontainerFilePath != "" {
+			project.Image = nil
+			project.User = nil
+			project.PostStartCommands = nil
+
+			devcontainerFilePath := create.DEVCONTAINER_FILEPATH
+			if config.Customs.DevcontainerFilePath != "" {
+				devcontainerFilePath = config.Customs.DevcontainerFilePath
+			}
+			project.Build.Devcontainer = &apiclient.ProjectBuildDevcontainer{
+				DevContainerFilePath: &devcontainerFilePath,
+			}
+		}
+
+		if config.Customs.BuildChoice == create.NONE || config.Customs.Image != "" || config.Customs.ImageUser != "" {
+			project.Build = nil
+			if config.Customs.Image != "" || config.Customs.ImageUser != "" {
+				project.Image = &config.Customs.Image
+				project.User = &config.Customs.ImageUser
+			}
+		}
+	}
+
+	return []apiclient.CreateWorkspaceRequestProject{project}
+
 }
 
 func GetProjectNameFromRepo(repoUrl string) string {

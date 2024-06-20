@@ -108,25 +108,6 @@ var CreateCmd = &cobra.Command{
 			}
 			visited[*projects[i].Source.Repository.Url] = true
 			projects[i].EnvVars = getEnvVariables(&projects[i], profileData)
-
-			if builderFlag == create.AUTOMATIC {
-				projects[i].Build = &apiclient.ProjectBuild{}
-			}
-
-			if builderFlag == create.DEVCONTAINER || devcontainerPathFlag != "" {
-				projects[i].Build.Devcontainer = &apiclient.ProjectBuildDevcontainer{}
-				if devcontainerPathFlag != "" {
-					projects[i].Build.Devcontainer.DevContainerFilePath = &devcontainerPathFlag
-				}
-			}
-
-			if builderFlag == create.NONE || customImageFlag != "" || customImageUserFlag != "" {
-				projects[i].Build = nil
-				if customImageFlag != "" || customImageUserFlag != "" {
-					projects[i].Image = &customImageFlag
-					projects[i].User = &customImageUserFlag
-				}
-			}
 		}
 
 		projectNames := []string{}
@@ -226,7 +207,7 @@ var customImageFlag string
 var customImageUserFlag string
 var devcontainerPathFlag string
 
-var builderFlag create.BuildChoice
+var builderFlag create.BuilderChoice
 
 var manualFlag bool
 var multiProjectFlag bool
@@ -299,7 +280,13 @@ func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, pro
 		Manual:                 manualFlag,
 		MultiProject:           multiProjectFlag,
 		ApiClient:              apiClient,
-	})
+		Customs: &workspace_util.CmdCustoms{
+			BuildChoice:          builderFlag,
+			Image:                customImageFlag,
+			ImageUser:            customImageUserFlag,
+			DevcontainerFilePath: devcontainerPathFlag,
+		}},
+	)
 	if err != nil {
 		return err
 	}
@@ -335,6 +322,25 @@ func processCmdArguments(args []string, apiClient *apiclient.APIClient, projects
 			Repository: repoResponse,
 		},
 		Build: &apiclient.ProjectBuild{},
+	}
+
+	if builderFlag == create.DEVCONTAINER || devcontainerPathFlag != "" {
+		devcontainerFilePath := create.DEVCONTAINER_FILEPATH
+		if devcontainerPathFlag != "" {
+			devcontainerFilePath = devcontainerPathFlag
+		}
+		project.Build.Devcontainer = &apiclient.ProjectBuildDevcontainer{
+			DevContainerFilePath: &devcontainerFilePath,
+		}
+
+	}
+
+	if builderFlag == create.NONE || customImageFlag != "" || customImageUserFlag != "" {
+		project.Build = nil
+		if customImageFlag != "" || customImageUserFlag != "" {
+			project.Image = &customImageFlag
+			project.User = &customImageUserFlag
+		}
 	}
 
 	*projects = append(*projects, *project)
