@@ -16,14 +16,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
 
-type BuildChoice string
-
 const (
-	AUTOMATIC             BuildChoice = "auto"
-	DEVCONTAINER          BuildChoice = "devcontainer"
-	CUSTOMIMAGE           BuildChoice = "custom-image"
-	NONE                  BuildChoice = "none"
-	DEVCONTAINER_FILEPATH             = ".devcontainer/devcontainer.json"
+	DEVCONTAINER_FILEPATH = ".devcontainer/devcontainer.json"
 )
 
 var configurationHelpLine = lipgloss.NewStyle().Foreground(views.Gray).Render("enter: next  f10: advanced configuration")
