@@ -42,7 +42,7 @@ func DisplayLogEntry(logEntry logs.LogEntry, index int) {
 		// Check if carriage return exists and if it does, remove the characters before it unless it is the last character of the line
 		lastIndex := strings.LastIndex(line, "\r")
 		if lastIndex != -1 {
-			if !strings.HasSuffix(line, "\r") {
+			if !strings.HasSuffix(line, "\r") && !strings.HasSuffix(line, "\r\n") {
 				line = line[lastIndex+1:]
 			}
 		}
