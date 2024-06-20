@@ -27,7 +27,7 @@ func main() {
 }
 
 func init() {
-	logLevel := log.ErrorLevel
+	logLevel := log.WarnLevel
 
 	logLevelEnv, logLevelSet := os.LookupEnv("LOG_LEVEL")
 	if logLevelSet {
@@ -41,7 +41,7 @@ func init() {
 		case "error":
 			logLevel = log.ErrorLevel
 		default:
-			logLevel = log.ErrorLevel
+			logLevel = log.WarnLevel
 		}
 	}
 
