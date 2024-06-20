@@ -108,29 +108,6 @@ var CreateCmd = &cobra.Command{
 			}
 			visited[*projects[i].Source.Repository.Url] = true
 			projects[i].EnvVars = getEnvVariables(&projects[i], profileData)
-
-			if builderFlag == create.DEVCONTAINER || devcontainerPathFlag != "" {
-				projects[i].Build = &apiclient.ProjectBuild{
-					Devcontainer: &apiclient.ProjectBuildDevcontainer{},
-				}
-				if devcontainerPathFlag != "" {
-					projects[i].Build.Devcontainer.DevContainerFilePath = &devcontainerPathFlag
-				}
-			}
-
-			if builderFlag == create.AUTOMATIC {
-				projects[i].Build = &apiclient.ProjectBuild{}
-			}
-
-			if builderFlag == create.NONE {
-				projects[i].Build = nil
-			}
-
-			if customImageFlag != "" || customImageUserFlag != "" {
-				projects[i].Build = nil
-				projects[i].Image = &customImageFlag
-				projects[i].User = &customImageUserFlag
-			}
 		}
 
 		projectNames := []string{}
@@ -339,6 +316,21 @@ func processCmdArguments(args []string, apiClient *apiclient.APIClient, projects
 			Repository: repoResponse,
 		},
 		Build: &apiclient.ProjectBuild{},
+	}
+
+	if builderFlag == create.DEVCONTAINER || devcontainerPathFlag != "" {
+		project.Build.Devcontainer = &apiclient.ProjectBuildDevcontainer{}
+		if devcontainerPathFlag != "" {
+			project.Build.Devcontainer.DevContainerFilePath = &devcontainerPathFlag
+		}
+	}
+
+	if builderFlag == create.NONE || customImageFlag != "" || customImageUserFlag != "" {
+		project.Build = nil
+		if customImageFlag != "" || customImageUserFlag != "" {
+			project.Image = &customImageFlag
+			project.User = &customImageUserFlag
+		}
 	}
 
 	*projects = append(*projects, *project)
