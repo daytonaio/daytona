@@ -11,10 +11,13 @@ import (
 	"net/url"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/server"
 )
+
+const CLIENT_VERSION_HEADER = "X-Client-Version"
 
 var apiClient *apiclient.APIClient
 
@@ -49,7 +52,7 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 
 	_, err = http.Head(healthUrl)
 	if err != nil {
-		return nil, fmt.Errorf("failed to check server health at: %s. Make sure Daytona is running on the appropriate port", healthUrl)
+		return nil, ErrHealthCheckFailed(healthUrl)
 	}
 
 	clientConfig := apiclient.NewConfiguration()
@@ -60,6 +63,7 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 	}
 
 	clientConfig.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", apiKey))
+	clientConfig.AddDefaultHeader(CLIENT_VERSION_HEADER, internal.Version)
 
 	apiClient = apiclient.NewAPIClient(clientConfig)
 
@@ -79,6 +83,7 @@ func GetAgentApiClient(apiUrl, apiKey string) (*apiclient.APIClient, error) {
 	}
 
 	clientConfig.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", apiKey))
+	clientConfig.AddDefaultHeader(CLIENT_VERSION_HEADER, internal.Version)
 
 	apiClient = apiclient.NewAPIClient(clientConfig)
 
