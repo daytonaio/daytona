@@ -6,10 +6,10 @@ package gitprovider
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
-	"net/http"
 )
 
 const personalNamespaceId = "<PERSONAL>"
@@ -124,14 +124,13 @@ func (a *AbstractGitProvider) parseSshGitUrl(gitURL string) (*StaticGitContext, 
 	repo.Name = matches[3]
 	repo.Id = matches[3]
 
-	repo.Url = getCloneUrl(repo.Source, repo.Owner, repo.Name)
+	repo.Url = getCloneUrl(fmt.Sprintf("https://%s/%s/%s", repo.Source, repo.Owner, repo.Name))
 
 	return repo, nil
 }
 
 // checkHTTPSAvailable checks if the given URL is accessible via HTTPS
-func checkHTTPSAvailable(source, owner, repo string) bool {
-	url := fmt.Sprintf("https://%s/%s/%s.git", source, owner, repo)
+func checkHTTPSAvailable(url string) bool {
 	resp, err := http.Head(url)
 	if err != nil || resp.StatusCode != http.StatusOK {
 		return false
@@ -140,9 +139,9 @@ func checkHTTPSAvailable(source, owner, repo string) bool {
 }
 
 // getCloneUrl constructs the clone URL using the appropriate protocol
-func getCloneUrl(source, owner, repo string) string {
-	if checkHTTPSAvailable(source, owner, repo) {
-		return fmt.Sprintf("https://%s/%s/%s.git", source, owner, repo)
+func getCloneUrl(url string) string {
+	if checkHTTPSAvailable(url) {
+		return url
 	}
-	return fmt.Sprintf("http://%s/%s/%s.git", source, owner, repo)
+	return strings.Replace(url, "https://", "http://", 1)
 }
