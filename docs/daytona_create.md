@@ -9,7 +9,7 @@ daytona create [REPOSITORY_URL] [flags]
 ### Options
 
 ```
-      --builder string             Specify the builder (currently auto/devcontainer/none)
+      --builder BuildChoice        Specify the builder (currently auto/devcontainer/none)
   -c, --code                       Open the workspace in the IDE after workspace creation
       --custom-image string        Create the project with the custom image passed as the flag value; Requires setting --custom-image-user flag as well
       --custom-image-user string   Create the project with the custom image user passed as the flag value; Requires setting --custom-image flag as well
