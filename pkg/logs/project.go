@@ -1,12 +1,15 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package logger
+package logs
 
 import (
+	"encoding/json"
 	"io"
 	"os"
 	"path/filepath"
+
+	"github.com/sirupsen/logrus"
 )
 
 type projectLogger struct {
@@ -14,6 +17,8 @@ type projectLogger struct {
 	workspaceId string
 	projectName string
 	logFile     *os.File
+	logger      *logrus.Logger
+	source      LogSource
 }
 
 func (pl *projectLogger) Write(p []byte) (n int, err error) {
@@ -21,17 +26,36 @@ func (pl *projectLogger) Write(p []byte) (n int, err error) {
 		filePath := filepath.Join(pl.logsDir, pl.workspaceId, pl.projectName, "log")
 		err = os.MkdirAll(filepath.Dir(filePath), 0755)
 		if err != nil {
-			return 0, err
+			return len(p), err
 		}
 
 		logFile, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
-			return 0, err
+			return len(p), err
 		}
 		pl.logFile = logFile
+		pl.logger.SetOutput(pl.logFile)
 	}
 
-	return pl.logFile.Write(p)
+	var entry LogEntry
+	entry.Msg = string(p)
+	entry.Source = string(pl.source)
+	entry.WorkspaceId = pl.workspaceId
+	entry.ProjectName = pl.projectName
+
+	b, err := json.Marshal(entry)
+	if err != nil {
+		return len(p), err
+	}
+
+	b = append(b, []byte(LogDelimiter)...)
+
+	_, err = pl.logFile.Write(b)
+	if err != nil {
+		return len(p), err
+	}
+
+	return len(p), nil
 }
 
 func (pl *projectLogger) Close() error {
@@ -56,8 +80,16 @@ func (pl *projectLogger) Cleanup() error {
 	return os.RemoveAll(projectLogsDir)
 }
 
-func (l *loggerFactoryImpl) CreateProjectLogger(workspaceId, projectName string) Logger {
-	return &projectLogger{workspaceId: workspaceId, logsDir: l.logsDir, projectName: projectName}
+func (l *loggerFactoryImpl) CreateProjectLogger(workspaceId, projectName string, source LogSource) Logger {
+	logger := logrus.New()
+
+	return &projectLogger{
+		workspaceId: workspaceId,
+		logsDir:     l.logsDir,
+		projectName: projectName,
+		logger:      logger,
+		source:      source,
+	}
 }
 
 func (l *loggerFactoryImpl) CreateProjectLogReader(workspaceId, projectName string) (io.Reader, error) {

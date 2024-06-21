@@ -6,6 +6,7 @@ package workspaces
 import (
 	"fmt"
 
+	"github.com/daytonaio/daytona/pkg/logs"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -47,7 +48,7 @@ func (s *WorkspaceService) RemoveWorkspace(workspaceId string) error {
 			// Should not fail the whole operation if the API key cannot be revoked
 			log.Error(err)
 		}
-		projectLogger := s.loggerFactory.CreateProjectLogger(workspace.Id, project.Name)
+		projectLogger := s.loggerFactory.CreateProjectLogger(workspace.Id, project.Name, logs.LogSourceServer)
 		err = projectLogger.Cleanup()
 		if err != nil {
 			// Should not fail the whole operation if the project logger cannot be cleaned up
@@ -55,7 +56,7 @@ func (s *WorkspaceService) RemoveWorkspace(workspaceId string) error {
 		}
 	}
 
-	logger := s.loggerFactory.CreateWorkspaceLogger(workspace.Id)
+	logger := s.loggerFactory.CreateWorkspaceLogger(workspace.Id, logs.LogSourceServer)
 	err = logger.Cleanup()
 	if err != nil {
 		// Should not fail the whole operation if the workspace logger cannot be cleaned up
@@ -106,7 +107,7 @@ func (s *WorkspaceService) ForceRemoveWorkspace(workspaceId string) error {
 			log.Error(err)
 		}
 
-		projectLogger := s.loggerFactory.CreateProjectLogger(workspace.Id, project.Name)
+		projectLogger := s.loggerFactory.CreateProjectLogger(workspace.Id, project.Name, logs.LogSourceServer)
 		err = projectLogger.Cleanup()
 		if err != nil {
 			log.Error(err)
