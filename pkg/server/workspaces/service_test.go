@@ -14,7 +14,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/logger"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
@@ -99,7 +99,7 @@ func TestWorkspaceService(t *testing.T) {
 		DefaultProjectPostStartCommands: defaultProjectPostStartCommands,
 		ApiKeyService:                   apiKeyService,
 		Provisioner:                     provisioner,
-		LoggerFactory:                   logger.NewLoggerFactory(logsDir),
+		LoggerFactory:                   logs.NewLoggerFactory(logsDir),
 		GitProviderService:              gitProviderService,
 		BuilderFactory:                  mockBuilderFactory,
 	})

@@ -17,7 +17,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/builder"
 	"github.com/daytonaio/daytona/pkg/db"
-	"github.com/daytonaio/daytona/pkg/logger"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server"
@@ -63,7 +63,7 @@ var ServeCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		loggerFactory := logger.NewLoggerFactory(logsDir)
+		loggerFactory := logs.NewLoggerFactory(logsDir)
 
 		dbPath, err := getDbPath()
 		if err != nil {

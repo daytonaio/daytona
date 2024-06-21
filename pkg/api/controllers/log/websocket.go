@@ -83,6 +83,69 @@ func readLog(ginCtx *gin.Context, logReader io.Reader) {
 	}
 }
 
+func writeJSONToWs(ws *websocket.Conn, c chan interface{}, errChan chan error) {
+	for {
+		value := <-c
+		err := ws.WriteJSON(value)
+		if err != nil {
+			errChan <- err
+			break
+		}
+	}
+}
+
+func readJSONLog(ginCtx *gin.Context, logReader io.Reader) {
+	followQuery := ginCtx.Query("follow")
+	follow := followQuery == "true"
+
+	ws, err := upgrader.Upgrade(ginCtx.Writer, ginCtx.Request, nil)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	defer ws.Close()
+
+	msgChannel := make(chan interface{})
+	errChannel := make(chan error)
+	ctx, cancel := context.WithCancel(context.Background())
+
+	defer cancel()
+	go util.ReadJSONLog(ctx, logReader, follow, msgChannel, errChannel)
+	go writeJSONToWs(ws, msgChannel, errChannel)
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				err := <-errChannel
+				if err != nil {
+					if err.Error() != "EOF" {
+						log.Error(err)
+					}
+					ws.Close()
+					cancel()
+				}
+			}
+		}
+	}()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			_, _, err := ws.ReadMessage()
+			if err != nil {
+				ws.Close()
+				cancel()
+				return
+			}
+		}
+	}
+}
+
 func ReadServerLog(ginCtx *gin.Context) {
 	server := server.GetInstance(nil)
 
@@ -106,7 +169,7 @@ func ReadWorkspaceLog(ginCtx *gin.Context) {
 		return
 	}
 
-	readLog(ginCtx, wsLogReader)
+	readJSONLog(ginCtx, wsLogReader)
 }
 
 func ReadProjectLog(ginCtx *gin.Context) {
@@ -121,5 +184,5 @@ func ReadProjectLog(ginCtx *gin.Context) {
 		return
 	}
 
-	readLog(ginCtx, projectLogReader)
+	readJSONLog(ginCtx, projectLogReader)
 }

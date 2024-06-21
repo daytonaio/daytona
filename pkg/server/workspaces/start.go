@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/workspace"
 
@@ -24,7 +25,7 @@ func (s *WorkspaceService) StartWorkspace(workspaceId string) error {
 		return err
 	}
 
-	workspaceLogger := s.loggerFactory.CreateWorkspaceLogger(w.Id)
+	workspaceLogger := s.loggerFactory.CreateWorkspaceLogger(w.Id, logs.LogSourceServer)
 	defer workspaceLogger.Close()
 
 	wsLogWriter := io.MultiWriter(&util.InfoLogWriter{}, workspaceLogger)
@@ -48,7 +49,7 @@ func (s *WorkspaceService) StartProject(workspaceId, projectName string) error {
 		return err
 	}
 
-	projectLogger := s.loggerFactory.CreateProjectLogger(w.Id, project.Name)
+	projectLogger := s.loggerFactory.CreateProjectLogger(w.Id, project.Name, logs.LogSourceServer)
 	defer projectLogger.Close()
 
 	return s.startProject(project, target, projectLogger)
@@ -63,7 +64,7 @@ func (s *WorkspaceService) startWorkspace(workspace *workspace.Workspace, target
 	}
 
 	for _, project := range workspace.Projects {
-		projectLogger := s.loggerFactory.CreateProjectLogger(workspace.Id, project.Name)
+		projectLogger := s.loggerFactory.CreateProjectLogger(workspace.Id, project.Name, logs.LogSourceServer)
 		defer projectLogger.Close()
 
 		err = s.startProject(project, target, projectLogger)

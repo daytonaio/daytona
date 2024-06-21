@@ -20,6 +20,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/builder/devcontainer"
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/docker"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
@@ -92,7 +93,7 @@ func (b *DevcontainerBuilder) CleanUp() error {
 }
 
 func (b *DevcontainerBuilder) Publish() error {
-	projectLogger := b.loggerFactory.CreateProjectLogger(b.project.WorkspaceId, b.project.Name)
+	projectLogger := b.loggerFactory.CreateProjectLogger(b.project.WorkspaceId, b.project.Name, logs.LogSourceBuilder)
 	defer projectLogger.Close()
 
 	cliBuilder, err := b.getBuilderDockerClient()
@@ -113,7 +114,7 @@ func (b *DevcontainerBuilder) Publish() error {
 }
 
 func (b *DevcontainerBuilder) buildDevcontainer() error {
-	projectLogger := b.loggerFactory.CreateProjectLogger(b.project.WorkspaceId, b.project.Name)
+	projectLogger := b.loggerFactory.CreateProjectLogger(b.project.WorkspaceId, b.project.Name, logs.LogSourceBuilder)
 	defer projectLogger.Close()
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -204,7 +205,7 @@ func (b *DevcontainerBuilder) buildDevcontainer() error {
 }
 
 func (b *DevcontainerBuilder) readConfiguration() error {
-	projectLogger := b.loggerFactory.CreateProjectLogger(b.project.WorkspaceId, b.project.Name)
+	projectLogger := b.loggerFactory.CreateProjectLogger(b.project.WorkspaceId, b.project.Name, logs.LogSourceBuilder)
 	defer projectLogger.Close()
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -278,7 +279,7 @@ func (b *DevcontainerBuilder) readConfiguration() error {
 func (b *DevcontainerBuilder) startContainer() error {
 	ctx := context.Background()
 
-	projectLogger := b.loggerFactory.CreateProjectLogger(b.project.WorkspaceId, b.project.Name)
+	projectLogger := b.loggerFactory.CreateProjectLogger(b.project.WorkspaceId, b.project.Name, logs.LogSourceBuilder)
 	defer projectLogger.Close()
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())

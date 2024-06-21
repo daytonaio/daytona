@@ -8,7 +8,7 @@ import (
 	"io"
 
 	"github.com/daytonaio/daytona/pkg/builder"
-	"github.com/daytonaio/daytona/pkg/logger"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
@@ -48,7 +48,7 @@ type WorkspaceServiceConfig struct {
 	DefaultProjectUser              string
 	DefaultProjectPostStartCommands []string
 	ApiKeyService                   apikeys.IApiKeyService
-	LoggerFactory                   logger.LoggerFactory
+	LoggerFactory                   logs.LoggerFactory
 	GitProviderService              gitproviders.IGitProviderService
 	BuilderFactory                  builder.IBuilderFactory
 }
@@ -82,7 +82,7 @@ type WorkspaceService struct {
 	defaultProjectImage             string
 	defaultProjectUser              string
 	defaultProjectPostStartCommands []string
-	loggerFactory                   logger.LoggerFactory
+	loggerFactory                   logs.LoggerFactory
 	gitProviderService              gitproviders.IGitProviderService
 	builderFactory                  builder.IBuilderFactory
 }

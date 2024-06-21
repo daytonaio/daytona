@@ -13,8 +13,11 @@ import (
 
 var (
 	Green       = lipgloss.AdaptiveColor{Light: "#23cc71", Dark: "#23cc71"}
+	Blue        = lipgloss.AdaptiveColor{Light: "#017ffe", Dark: "#017ffe"}
+	Yellow      = lipgloss.AdaptiveColor{Light: "#d4ed2d", Dark: "#d4ed2d"}
+	Cyan        = lipgloss.AdaptiveColor{Light: "#3ef7e5", Dark: "#3ef7e5"}
 	DimmedGreen = lipgloss.AdaptiveColor{Light: "#7be0a9", Dark: "#7be0a9"}
-	Orange      = lipgloss.AdaptiveColor{Light: "#eb9834", Dark: "#eb9834"}
+	Orange      = lipgloss.AdaptiveColor{Light: "#e3881b", Dark: "#e3881b"}
 	Light       = lipgloss.AdaptiveColor{Light: "#000", Dark: "#fff"}
 	Dark        = lipgloss.AdaptiveColor{Light: "#fff", Dark: "#000"}
 	Gray        = lipgloss.AdaptiveColor{Light: "243", Dark: "243"}
@@ -36,6 +39,10 @@ var (
 	BaseCellStyle       = lipgloss.NewRenderer(os.Stdout).NewStyle().Padding(0, 4, 1, 0)
 	TableHeaderStyle    = BaseCellStyle.Copy().Foreground(LightGray).Bold(false).Padding(0).MarginRight(4)
 )
+
+var LogPrefixColors = []lipgloss.AdaptiveColor{
+	Blue, Yellow, Orange, Cyan,
+}
 
 func GetStyledSelectList(items []list.Item) list.Model {
 
