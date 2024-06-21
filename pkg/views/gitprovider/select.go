@@ -132,7 +132,7 @@ func providerRequiresUsername(gitProviderId string) bool {
 }
 
 func providerRequiresApiUrl(gitProviderId string) bool {
-	return gitProviderId == "github-enterprise-server" || gitProviderId == "gitlab-self-managed" || gitProviderId == "gitea"
+	return gitProviderId == "gitness" || gitProviderId == "github-enterprise-server" || gitProviderId == "gitlab-self-managed" || gitProviderId == "gitea"
 }
 
 func getApiUrlDescription(gitProviderId string) string {
@@ -142,6 +142,8 @@ func getApiUrlDescription(gitProviderId string) string {
 		return "For example: https://github-host"
 	} else if gitProviderId == "gitea" {
 		return "For example: http://gitea-host"
+	} else if gitProviderId == "gitness" {
+		return "For example: http://gitness-host/api/v1/"
 	}
 	return ""
 }

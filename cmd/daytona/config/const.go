@@ -50,6 +50,7 @@ func GetSupportedGitProviders() []GitProvider {
 		{"bitbucket", "Bitbucket"},
 		{"codeberg", "Codeberg"},
 		{"gitea", "Gitea"},
+		{"gitness", "Gitness"},
 	}
 }
 
@@ -69,6 +70,8 @@ func GetDocsLinkFromGitProvider(providerId string) string {
 		return "https://docs.codeberg.org/advanced/access-token/"
 	case "gitea":
 		return "https://docs.gitea.com/1.21/development/api-usage#generating-and-listing-api-tokens"
+	case "gitness":
+		return "https://docs.gitness.com/administration/user-management#generate-user-token"
 	default:
 		return ""
 	}
@@ -90,6 +93,8 @@ func GetScopesFromGitProvider(providerId string) string {
 		fallthrough
 	case "gitea":
 		return "read:organization,write:repository,read:user"
+	case "gitness":
+		return "/"
 	default:
 		return ""
 	}
