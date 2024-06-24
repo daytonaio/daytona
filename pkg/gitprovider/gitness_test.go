@@ -8,17 +8,17 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type GitNessGitProviderTestSuite struct {
+type GitnessGitProviderTestSuite struct {
 	gitProvider *GitnessGitProvider
 	suite.Suite
 }
 
-func NewGitNessGitProviderTestSuite() *GitNessGitProviderTestSuite {
-	return &GitNessGitProviderTestSuite{
+func NewGitnessGitProviderTestSuite() *GitnessGitProviderTestSuite {
+	return &GitnessGitProviderTestSuite{
 		gitProvider: NewGitnessGitProvider("", nil),
 	}
 }
-func (g *GitNessGitProviderTestSuite) TestParseStaticGitContext_PR() {
+func (g *GitnessGitProviderTestSuite) TestParseStaticGitContext_PR() {
 	prUrl := "https://localhost:3000/test/test/pulls/1"
 	prContext := &StaticGitContext{
 		Id:       "test",
@@ -38,7 +38,7 @@ func (g *GitNessGitProviderTestSuite) TestParseStaticGitContext_PR() {
 	require.Equal(prContext, httpContext)
 }
 
-func (g *GitNessGitProviderTestSuite) TestParseStaticGitContext_Files() {
+func (g *GitnessGitProviderTestSuite) TestParseStaticGitContext_Files() {
 	blobUrl := "https://localhost:3000/test/test/files/main/~/test.md"
 	blobContext := &StaticGitContext{
 		Id:       "test",
@@ -58,7 +58,7 @@ func (g *GitNessGitProviderTestSuite) TestParseStaticGitContext_Files() {
 	require.Equal(blobContext, httpContext)
 }
 
-func (g *GitNessGitProviderTestSuite) TestParseStaticGitContext_Branch() {
+func (g *GitnessGitProviderTestSuite) TestParseStaticGitContext_Branch() {
 	branchUrl := "https://localhost:3000/test/test/files/newbranch"
 	branchContext := &StaticGitContext{
 		Id:       "test",
@@ -78,7 +78,7 @@ func (g *GitNessGitProviderTestSuite) TestParseStaticGitContext_Branch() {
 	require.Equal(branchContext, httpContext)
 }
 
-func (g *GitNessGitProviderTestSuite) TestParseStaticGitContext_Commits() {
+func (g *GitnessGitProviderTestSuite) TestParseStaticGitContext_Commits() {
 	commitUrl := "https://localhost:3000/test/test/commits/newbranch"
 	commitContext := &StaticGitContext{
 		Id:       "test",
@@ -98,7 +98,7 @@ func (g *GitNessGitProviderTestSuite) TestParseStaticGitContext_Commits() {
 	require.Equal(commitContext, httpContext)
 }
 
-func (g *GitNessGitProviderTestSuite) TestParseStaticGitContext_Commit() {
+func (g *GitnessGitProviderTestSuite) TestParseStaticGitContext_Commit() {
 	commitUrl := "https://localhost:3000/test/test/commit/COMMIT_SHA"
 	commitContext := &StaticGitContext{
 		Id:       "test",
@@ -118,6 +118,6 @@ func (g *GitNessGitProviderTestSuite) TestParseStaticGitContext_Commit() {
 	require.Equal(commitContext, httpContext)
 }
 
-func TestGitNessGitProvider(t *testing.T) {
-	suite.Run(t, NewGitNessGitProviderTestSuite())
+func TestGitnessGitProvider(t *testing.T) {
+	suite.Run(t, NewGitnessGitProviderTestSuite())
 }
