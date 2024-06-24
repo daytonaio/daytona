@@ -207,7 +207,7 @@ var customImageFlag string
 var customImageUserFlag string
 var devcontainerPathFlag string
 
-var builderFlag create.BuilderChoice
+var builderFlag create.BuildChoice
 
 var manualFlag bool
 var multiProjectFlag bool
@@ -273,18 +273,40 @@ func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, pro
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
+	image := apiServerConfig.DefaultProjectImage
+	user := apiServerConfig.DefaultProjectUser
+	postStartCommands := apiServerConfig.DefaultProjectPostStartCommands
+	devcontainerFilePath := ""
+
+	if builderFlag == create.DEVCONTAINER || devcontainerPathFlag != "" {
+		image = nil
+		user = nil
+		postStartCommands = nil
+		if devcontainerPathFlag != "" {
+			devcontainerFilePath = devcontainerPathFlag
+		} else {
+			devcontainerFilePath = create.DEVCONTAINER_FILEPATH
+		}
+	}
+
+	if customImageFlag != "" || customImageUserFlag != "" {
+		builderFlag = create.CUSTOMIMAGE
+		image = &customImageFlag
+		user = &customImageUserFlag
+	}
+
 	*workspaceName, *projects, err = workspace_util.GetCreationDataFromPrompt(workspace_util.CreateDataPromptConfig{
-		ApiServerConfig:        apiServerConfig,
 		ExistingWorkspaceNames: workspaceNames,
 		UserGitProviders:       gitProviders,
 		Manual:                 manualFlag,
 		MultiProject:           multiProjectFlag,
 		ApiClient:              apiClient,
-		Customs: &workspace_util.CmdCustoms{
+		Defaults: &create.ProjectDefaults{
 			BuildChoice:          builderFlag,
-			Image:                customImageFlag,
-			ImageUser:            customImageUserFlag,
-			DevcontainerFilePath: devcontainerPathFlag,
+			Image:                image,
+			ImageUser:            user,
+			DevcontainerFilePath: devcontainerFilePath,
+			PostStartCommands:    postStartCommands,
 		}},
 	)
 	if err != nil {

@@ -15,21 +15,13 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 )
 
-type CmdCustoms struct {
-	BuildChoice          create.BuilderChoice
-	Image                string
-	ImageUser            string
-	DevcontainerFilePath string
-}
-
 type CreateDataPromptConfig struct {
-	ApiServerConfig        *apiclient.ServerConfig
 	ExistingWorkspaceNames []string
 	UserGitProviders       []apiclient.GitProvider
 	Manual                 bool
 	MultiProject           bool
 	ApiClient              *apiclient.APIClient
-	Customs                *CmdCustoms
+	Defaults               *create.ProjectDefaults
 }
 
 func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclient.CreateWorkspaceRequestProject, error) {
@@ -94,9 +86,9 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 					Repository: providerRepo,
 				},
 				Build:             &apiclient.ProjectBuild{},
-				Image:             config.ApiServerConfig.DefaultProjectImage,
-				User:              config.ApiServerConfig.DefaultProjectUser,
-				PostStartCommands: config.ApiServerConfig.DefaultProjectPostStartCommands,
+				Image:             config.Defaults.Image,
+				User:              config.Defaults.ImageUser,
+				PostStartCommands: config.Defaults.PostStartCommands,
 				EnvVars:           &map[string]string{},
 			})
 		}
@@ -104,7 +96,7 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 
 	suggestedName := GetSuggestedWorkspaceName(projectList[0].Name, config.ExistingWorkspaceNames)
 
-	err = create.RunSubmissionForm(&workspaceName, suggestedName, config.ExistingWorkspaceNames, &projectList, config.ApiServerConfig)
+	err = create.RunSubmissionForm(&workspaceName, suggestedName, config.ExistingWorkspaceNames, &projectList, config.Defaults)
 	if err != nil {
 		return "", nil, err
 	}
@@ -119,34 +111,23 @@ func initializeProjectList(config CreateDataPromptConfig, providerRepo *apiclien
 			Repository: providerRepo,
 		},
 		Build:             &apiclient.ProjectBuild{},
-		Image:             config.ApiServerConfig.DefaultProjectImage,
-		User:              config.ApiServerConfig.DefaultProjectUser,
-		PostStartCommands: config.ApiServerConfig.DefaultProjectPostStartCommands,
+		Image:             config.Defaults.Image,
+		User:              config.Defaults.ImageUser,
+		PostStartCommands: config.Defaults.PostStartCommands,
 		EnvVars:           &map[string]string{},
 	}
 
-	if config.Customs != nil {
-		if config.Customs.BuildChoice == create.DEVCONTAINER || config.Customs.DevcontainerFilePath != "" {
-			project.Image = nil
-			project.User = nil
-			project.PostStartCommands = nil
-
-			devcontainerFilePath := create.DEVCONTAINER_FILEPATH
-			if config.Customs.DevcontainerFilePath != "" {
-				devcontainerFilePath = config.Customs.DevcontainerFilePath
-			}
-			project.Build.Devcontainer = &apiclient.ProjectBuildDevcontainer{
-				DevContainerFilePath: &devcontainerFilePath,
-			}
+	if config.Defaults.BuildChoice == create.DEVCONTAINER || config.Defaults.DevcontainerFilePath != "" {
+		project.Image = nil
+		project.User = nil
+		project.PostStartCommands = nil
+		project.Build.Devcontainer = &apiclient.ProjectBuildDevcontainer{
+			DevContainerFilePath: &config.Defaults.DevcontainerFilePath,
 		}
+	}
 
-		if config.Customs.BuildChoice == create.NONE || config.Customs.Image != "" || config.Customs.ImageUser != "" {
-			project.Build = nil
-			if config.Customs.Image != "" || config.Customs.ImageUser != "" {
-				project.Image = &config.Customs.Image
-				project.User = &config.Customs.ImageUser
-			}
-		}
+	if config.Defaults.BuildChoice == create.NONE || config.Defaults.BuildChoice == create.CUSTOMIMAGE {
+		project.Build = nil
 	}
 
 	return []apiclient.CreateWorkspaceRequestProject{project}

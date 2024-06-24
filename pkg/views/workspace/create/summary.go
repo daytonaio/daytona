@@ -30,25 +30,33 @@ const (
 	DEFAULT_PADDING                  = 21
 )
 
+type ProjectDefaults struct {
+	BuildChoice          BuildChoice
+	Image                *string
+	ImageUser            *string
+	DevcontainerFilePath string
+	PostStartCommands    []string
+}
+
 type SummaryModel struct {
-	lg              *lipgloss.Renderer
-	styles          *Styles
-	form            *huh.Form
-	width           int
-	quitting        bool
-	workspaceName   string
-	projectList     []apiclient.CreateWorkspaceRequestProject
-	apiServerConfig *apiclient.ServerConfig
+	lg            *lipgloss.Renderer
+	styles        *Styles
+	form          *huh.Form
+	width         int
+	quitting      bool
+	workspaceName string
+	projectList   []apiclient.CreateWorkspaceRequestProject
+	defaults      *ProjectDefaults
 }
 
 var configureCheck bool
 var userCancelled bool
 var projectsConfigurationChanged bool
 
-func RunSubmissionForm(workspaceName *string, suggestedName string, workspaceNames []string, projectList *[]apiclient.CreateWorkspaceRequestProject, apiServerConfig *apiclient.ServerConfig) error {
+func RunSubmissionForm(workspaceName *string, suggestedName string, workspaceNames []string, projectList *[]apiclient.CreateWorkspaceRequestProject, defaults *ProjectDefaults) error {
 	configureCheck = false
 
-	m := NewSummaryModel(workspaceName, suggestedName, workspaceNames, *projectList, apiServerConfig)
+	m := NewSummaryModel(workspaceName, suggestedName, workspaceNames, *projectList, defaults)
 
 	if _, err := tea.NewProgram(m).Run(); err != nil {
 		return err
@@ -62,20 +70,20 @@ func RunSubmissionForm(workspaceName *string, suggestedName string, workspaceNam
 		return nil
 	}
 
-	if apiServerConfig.DefaultProjectImage == nil || apiServerConfig.DefaultProjectUser == nil || apiServerConfig.DefaultProjectPostStartCommands == nil {
+	if defaults.Image == nil || defaults.ImageUser == nil || defaults.PostStartCommands == nil {
 		return fmt.Errorf("default project entries are not set")
 	}
 
 	var err error
-	projectsConfigurationChanged, err = ConfigureProjects(projectList, *apiServerConfig)
+	projectsConfigurationChanged, err = ConfigureProjects(projectList, *defaults)
 	if err != nil {
 		return err
 	}
 
-	return RunSubmissionForm(workspaceName, suggestedName, workspaceNames, projectList, apiServerConfig)
+	return RunSubmissionForm(workspaceName, suggestedName, workspaceNames, projectList, defaults)
 }
 
-func RenderSummary(workspaceName string, projectList []apiclient.CreateWorkspaceRequestProject, apiServerConfig *apiclient.ServerConfig) (string, error) {
+func RenderSummary(workspaceName string, projectList []apiclient.CreateWorkspaceRequestProject, defaults *ProjectDefaults) (string, error) {
 	var output string
 	if workspaceName == "" {
 		output = views.GetStyledMainTitle("SUMMARY")
@@ -98,7 +106,7 @@ func RenderSummary(workspaceName string, projectList []apiclient.CreateWorkspace
 			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("%s #%d", "Project", i+1)), (*projectList[i].Source.Repository.Url))
 		}
 
-		projectBuildChoice, choiceName := getProjectBuildChoice(projectList[i], apiServerConfig)
+		projectBuildChoice, choiceName := getProjectBuildChoice(projectList[i], defaults)
 		output += renderProjectDetails(projectList[i], projectBuildChoice, choiceName)
 		if i < len(projectList)-1 {
 			output += "\n\n"
@@ -108,7 +116,7 @@ func RenderSummary(workspaceName string, projectList []apiclient.CreateWorkspace
 	return output, nil
 }
 
-func renderProjectDetails(project apiclient.CreateWorkspaceRequestProject, buildChoice BuilderChoice, choiceName string) string {
+func renderProjectDetails(project apiclient.CreateWorkspaceRequestProject, buildChoice BuildChoice, choiceName string) string {
 	output := projectDetailOutput(Build, choiceName)
 
 	if buildChoice == DEVCONTAINER {
@@ -168,9 +176,9 @@ func projectDetailOutput(projectDetailKey ProjectDetail, projectDetailValue stri
 	return fmt.Sprintf("\t%s%-*s%s", lipgloss.NewStyle().Foreground(views.Green).Render(string(projectDetailKey)), DEFAULT_PADDING-len(string(projectDetailKey)), EMPTY_STRING, projectDetailValue)
 }
 
-func getProjectBuildChoice(project apiclient.CreateWorkspaceRequestProject, apiServerConfig *apiclient.ServerConfig) (BuilderChoice, string) {
+func getProjectBuildChoice(project apiclient.CreateWorkspaceRequestProject, defaults *ProjectDefaults) (BuildChoice, string) {
 	if project.Build == nil {
-		if *project.Image == *apiServerConfig.DefaultProjectImage && *project.User == *apiServerConfig.DefaultProjectUser {
+		if *project.Image == *defaults.Image && *project.User == *defaults.ImageUser {
 			return NONE, "None"
 		} else {
 			return CUSTOMIMAGE, "Custom Image"
@@ -184,13 +192,13 @@ func getProjectBuildChoice(project apiclient.CreateWorkspaceRequestProject, apiS
 	}
 }
 
-func NewSummaryModel(workspaceName *string, suggestedName string, workspaceNames []string, projectList []apiclient.CreateWorkspaceRequestProject, apiServerConfig *apiclient.ServerConfig) SummaryModel {
+func NewSummaryModel(workspaceName *string, suggestedName string, workspaceNames []string, projectList []apiclient.CreateWorkspaceRequestProject, defaults *ProjectDefaults) SummaryModel {
 	m := SummaryModel{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
 	m.workspaceName = *workspaceName
 	m.projectList = projectList
-	m.apiServerConfig = apiServerConfig
+	m.defaults = defaults
 
 	if *workspaceName == "" {
 		*workspaceName = suggestedName
@@ -267,7 +275,7 @@ func (m SummaryModel) View() string {
 	view := m.form.View() + configurationHelpLine
 
 	if len(m.projectList) > 1 || len(m.projectList) == 1 && projectsConfigurationChanged {
-		summary, err := RenderSummary(m.workspaceName, m.projectList, m.apiServerConfig)
+		summary, err := RenderSummary(m.workspaceName, m.projectList, m.defaults)
 		if err != nil {
 			log.Fatal(err)
 		}

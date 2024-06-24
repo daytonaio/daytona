@@ -5,25 +5,25 @@ package create
 
 import "fmt"
 
-type BuilderChoice string
+type BuildChoice string
 
 const (
-	AUTOMATIC    BuilderChoice = "auto"
-	DEVCONTAINER BuilderChoice = "devcontainer"
-	CUSTOMIMAGE  BuilderChoice = "custom-image"
-	NONE         BuilderChoice = "none"
+	AUTOMATIC    BuildChoice = "auto"
+	DEVCONTAINER BuildChoice = "devcontainer"
+	CUSTOMIMAGE  BuildChoice = "custom-image"
+	NONE         BuildChoice = "none"
 )
 
 // String is used both by fmt.Print and by Cobra in help text
-func (c *BuilderChoice) String() string {
+func (c *BuildChoice) String() string {
 	return string(*c)
 }
 
 // Set must have pointer receiver so it doesn't change the value of a copy
-func (c *BuilderChoice) Set(v string) error {
+func (c *BuildChoice) Set(v string) error {
 	switch v {
 	case string(AUTOMATIC), string(DEVCONTAINER), string(CUSTOMIMAGE), string(NONE):
-		*c = BuilderChoice(v)
+		*c = BuildChoice(v)
 		return nil
 	default:
 		return fmt.Errorf("Build type must be one of %s/%s/%s", AUTOMATIC, DEVCONTAINER, NONE)
@@ -31,6 +31,6 @@ func (c *BuilderChoice) Set(v string) error {
 }
 
 // Type is only used in help text
-func (c *BuilderChoice) Type() string {
+func (c *BuildChoice) Type() string {
 	return "BuildChoice"
 }
