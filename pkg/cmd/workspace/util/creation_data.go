@@ -49,7 +49,7 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 		return "", nil, err
 	}
 
-	projectList = initializeProjectList(config, providerRepo, providerRepoName)
+	projectList = []apiclient.CreateWorkspaceRequestProject{newCreateProjectRequest(config, providerRepo, providerRepoName)}
 
 	if config.MultiProject {
 		addMore := true
@@ -80,17 +80,7 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 				return "", nil, err
 			}
 
-			projectList = append(projectList, apiclient.CreateWorkspaceRequestProject{
-				Name: providerRepoName,
-				Source: &apiclient.CreateWorkspaceRequestProjectSource{
-					Repository: providerRepo,
-				},
-				Build:             &apiclient.ProjectBuild{},
-				Image:             config.Defaults.Image,
-				User:              config.Defaults.ImageUser,
-				PostStartCommands: config.Defaults.PostStartCommands,
-				EnvVars:           &map[string]string{},
-			})
+			projectList = append(projectList, newCreateProjectRequest(config, providerRepo, providerRepoName))
 		}
 	}
 
@@ -104,7 +94,7 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 	return workspaceName, projectList, nil
 }
 
-func initializeProjectList(config CreateDataPromptConfig, providerRepo *apiclient.GitRepository, providerRepoName string) []apiclient.CreateWorkspaceRequestProject {
+func newCreateProjectRequest(config CreateDataPromptConfig, providerRepo *apiclient.GitRepository, providerRepoName string) apiclient.CreateWorkspaceRequestProject {
 	project := apiclient.CreateWorkspaceRequestProject{
 		Name: providerRepoName,
 		Source: &apiclient.CreateWorkspaceRequestProjectSource{
@@ -117,20 +107,7 @@ func initializeProjectList(config CreateDataPromptConfig, providerRepo *apiclien
 		EnvVars:           &map[string]string{},
 	}
 
-	if config.Defaults.BuildChoice == create.DEVCONTAINER || config.Defaults.DevcontainerFilePath != "" {
-		project.Image = nil
-		project.User = nil
-		project.PostStartCommands = nil
-		project.Build.Devcontainer = &apiclient.ProjectBuildDevcontainer{
-			DevContainerFilePath: &config.Defaults.DevcontainerFilePath,
-		}
-	}
-
-	if config.Defaults.BuildChoice == create.NONE || config.Defaults.BuildChoice == create.CUSTOMIMAGE {
-		project.Build = nil
-	}
-
-	return []apiclient.CreateWorkspaceRequestProject{project}
+	return project
 
 }
 

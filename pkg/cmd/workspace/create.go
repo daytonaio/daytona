@@ -263,6 +263,10 @@ func getTarget(activeProfileName string) (*apiclient.ProviderTarget, error) {
 }
 
 func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, projects *[]apiclient.CreateWorkspaceRequestProject, workspaceNames []string, ctx context.Context) error {
+	if builderFlag != "" || customImageFlag != "" || customImageUserFlag != "" || devcontainerPathFlag != "" {
+		return fmt.Errorf("Please provide repository URL in order to set up custom project details through CLI.")
+	}
+
 	gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)
@@ -273,28 +277,6 @@ func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, pro
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	image := apiServerConfig.DefaultProjectImage
-	user := apiServerConfig.DefaultProjectUser
-	postStartCommands := apiServerConfig.DefaultProjectPostStartCommands
-	devcontainerFilePath := ""
-
-	if builderFlag == create.DEVCONTAINER || devcontainerPathFlag != "" {
-		image = nil
-		user = nil
-		postStartCommands = nil
-		if devcontainerPathFlag != "" {
-			devcontainerFilePath = devcontainerPathFlag
-		} else {
-			devcontainerFilePath = create.DEVCONTAINER_FILEPATH
-		}
-	}
-
-	if customImageFlag != "" || customImageUserFlag != "" {
-		builderFlag = create.CUSTOMIMAGE
-		image = &customImageFlag
-		user = &customImageUserFlag
-	}
-
 	*workspaceName, *projects, err = workspace_util.GetCreationDataFromPrompt(workspace_util.CreateDataPromptConfig{
 		ExistingWorkspaceNames: workspaceNames,
 		UserGitProviders:       gitProviders,
@@ -302,11 +284,11 @@ func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, pro
 		MultiProject:           multiProjectFlag,
 		ApiClient:              apiClient,
 		Defaults: &create.ProjectDefaults{
-			BuildChoice:          builderFlag,
-			Image:                image,
-			ImageUser:            user,
-			DevcontainerFilePath: devcontainerFilePath,
-			PostStartCommands:    postStartCommands,
+			BuildChoice:          create.AUTOMATIC,
+			Image:                apiServerConfig.DefaultProjectImage,
+			ImageUser:            apiServerConfig.DefaultProjectUser,
+			DevcontainerFilePath: create.DEVCONTAINER_FILEPATH,
+			PostStartCommands:    apiServerConfig.DefaultProjectPostStartCommands,
 		}},
 	)
 	if err != nil {

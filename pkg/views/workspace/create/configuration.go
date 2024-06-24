@@ -32,35 +32,32 @@ type ProjectConfigurationData struct {
 }
 
 func NewProjectConfigurationData(buildChoice BuildChoice, devContainerFilePath string, currentProject *apiclient.CreateWorkspaceRequestProject, defaults *ProjectDefaults) *ProjectConfigurationData {
-	image := *defaults.Image
-	user := *defaults.ImageUser
-	commands := []string{}
-	envVars := map[string]string{}
+	projectConfigurationData := &ProjectConfigurationData{
+		BuildChoice:          string(buildChoice),
+		DevcontainerFilePath: defaults.DevcontainerFilePath,
+		Image:                *defaults.Image,
+		User:                 *defaults.ImageUser,
+		PostStartCommands:    defaults.PostStartCommands,
+		EnvVars:              map[string]string{},
+	}
 
 	if currentProject.Image != nil {
-		image = *currentProject.Image
+		projectConfigurationData.Image = *currentProject.Image
 	}
 
 	if currentProject.User != nil {
-		user = *currentProject.User
+		projectConfigurationData.User = *currentProject.User
 	}
 
 	if currentProject.PostStartCommands != nil {
-		commands = currentProject.PostStartCommands
+		projectConfigurationData.PostStartCommands = currentProject.PostStartCommands
 	}
 
 	if currentProject.EnvVars != nil {
-		envVars = *currentProject.EnvVars
+		projectConfigurationData.EnvVars = *currentProject.EnvVars
 	}
 
-	return &ProjectConfigurationData{
-		BuildChoice:          string(buildChoice),
-		DevcontainerFilePath: devContainerFilePath,
-		Image:                image,
-		User:                 user,
-		PostStartCommands:    commands,
-		EnvVars:              envVars,
-	}
+	return projectConfigurationData
 }
 
 func ConfigureProjects(projectList *[]apiclient.CreateWorkspaceRequestProject, defaults ProjectDefaults) (bool, error) {
@@ -79,7 +76,7 @@ func ConfigureProjects(projectList *[]apiclient.CreateWorkspaceRequestProject, d
 		return false, nil
 	}
 
-	devContainerFilePath := DEVCONTAINER_FILEPATH
+	devContainerFilePath := defaults.DevcontainerFilePath
 	builderChoice := AUTOMATIC
 
 	if currentProject.Build != nil {
