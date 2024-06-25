@@ -326,10 +326,11 @@ func (g *BitbucketServerGitProvider) getPrContext(staticContext *StaticGitContex
 	}
 
 	if prInfo.FromRef.Repository.Owner != nil {
-		repo.Owner = prInfo.FromRef.Repository.Owner.DisplayName
+		ownerName := prInfo.FromRef.Repository.Owner.DisplayName
+		repo.Owner = ownerName
+		repo.Id = ownerName
 	}
 	repo.Name = prInfo.FromRef.Repository.Slug
-	repo.Id = prInfo.FromRef.Repository.Slug
 	repo.Branch = &prInfo.FromRef.DisplayID
 
 	return &repo, nil
