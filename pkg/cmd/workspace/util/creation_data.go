@@ -16,12 +16,12 @@ import (
 )
 
 type CreateDataPromptConfig struct {
-	ApiServerConfig        *apiclient.ServerConfig
 	ExistingWorkspaceNames []string
 	UserGitProviders       []apiclient.GitProvider
 	Manual                 bool
 	MultiProject           bool
 	ApiClient              *apiclient.APIClient
+	Defaults               *create.ProjectDefaults
 }
 
 func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclient.CreateWorkspaceRequestProject, error) {
@@ -49,17 +49,7 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 		return "", nil, err
 	}
 
-	projectList = []apiclient.CreateWorkspaceRequestProject{{
-		Name: providerRepoName,
-		Source: &apiclient.CreateWorkspaceRequestProjectSource{
-			Repository: providerRepo,
-		},
-		Build:             &apiclient.ProjectBuild{},
-		Image:             config.ApiServerConfig.DefaultProjectImage,
-		User:              config.ApiServerConfig.DefaultProjectUser,
-		PostStartCommands: config.ApiServerConfig.DefaultProjectPostStartCommands,
-		EnvVars:           &map[string]string{},
-	}}
+	projectList = []apiclient.CreateWorkspaceRequestProject{newCreateProjectRequest(config, providerRepo, providerRepoName)}
 
 	if config.MultiProject {
 		addMore := true
@@ -90,28 +80,35 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 				return "", nil, err
 			}
 
-			projectList = append(projectList, apiclient.CreateWorkspaceRequestProject{
-				Name: providerRepoName,
-				Source: &apiclient.CreateWorkspaceRequestProjectSource{
-					Repository: providerRepo,
-				},
-				Build:             &apiclient.ProjectBuild{},
-				Image:             config.ApiServerConfig.DefaultProjectImage,
-				User:              config.ApiServerConfig.DefaultProjectUser,
-				PostStartCommands: config.ApiServerConfig.DefaultProjectPostStartCommands,
-				EnvVars:           &map[string]string{},
-			})
+			projectList = append(projectList, newCreateProjectRequest(config, providerRepo, providerRepoName))
 		}
 	}
 
 	suggestedName := GetSuggestedWorkspaceName(projectList[0].Name, config.ExistingWorkspaceNames)
 
-	err = create.RunSubmissionForm(&workspaceName, suggestedName, config.ExistingWorkspaceNames, &projectList, config.ApiServerConfig)
+	err = create.RunSubmissionForm(&workspaceName, suggestedName, config.ExistingWorkspaceNames, &projectList, config.Defaults)
 	if err != nil {
 		return "", nil, err
 	}
 
 	return workspaceName, projectList, nil
+}
+
+func newCreateProjectRequest(config CreateDataPromptConfig, providerRepo *apiclient.GitRepository, providerRepoName string) apiclient.CreateWorkspaceRequestProject {
+	project := apiclient.CreateWorkspaceRequestProject{
+		Name: providerRepoName,
+		Source: &apiclient.CreateWorkspaceRequestProjectSource{
+			Repository: providerRepo,
+		},
+		Build:             &apiclient.ProjectBuild{},
+		Image:             config.Defaults.Image,
+		User:              config.Defaults.ImageUser,
+		PostStartCommands: config.Defaults.PostStartCommands,
+		EnvVars:           &map[string]string{},
+	}
+
+	return project
+
 }
 
 func GetProjectNameFromRepo(repoUrl string) string {
