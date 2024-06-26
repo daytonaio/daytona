@@ -74,12 +74,13 @@ func (a *AbstractGitProvider) GetRepositoryFromUrl(repositoryUrl string) (*GitRe
 }
 
 func (a *AbstractGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
-	if strings.HasPrefix(repoUrl, "git@") {
+	isHttps := true
+	if strings.HasPrefix(repoUrl, "http://") {
+		isHttps = false
+	} else if strings.HasPrefix(repoUrl, "git@") {
 		return a.parseSshGitUrl(repoUrl)
-	}
-
-	if !strings.HasPrefix(repoUrl, "http") {
-		return nil, errors.New("can not parse git URL: " + repoUrl)
+	} else if !strings.HasPrefix(repoUrl, "http") {
+		return nil, errors.New("cannot parse git URL: " + repoUrl)
 	}
 
 	repoUrl = strings.TrimSuffix(repoUrl, ".git")
@@ -104,7 +105,7 @@ func (a *AbstractGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitC
 		repo.Path = &branchPath
 	}
 
-	repo.Url = getCloneUrl(repo.Source, repo.Owner, repo.Name)
+	repo.Url = getCloneUrl(repo.Source, repo.Owner, repo.Name, isHttps)
 
 	return repo, nil
 }
@@ -123,11 +124,15 @@ func (a *AbstractGitProvider) parseSshGitUrl(gitURL string) (*StaticGitContext, 
 	repo.Name = matches[3]
 	repo.Id = matches[3]
 
-	repo.Url = getCloneUrl(repo.Source, repo.Owner, repo.Name)
+	repo.Url = getCloneUrl(repo.Source, repo.Owner, repo.Name, true)
 
 	return repo, nil
 }
 
-func getCloneUrl(source, owner, repo string) string {
-	return fmt.Sprintf("https://%s/%s/%s.git", source, owner, repo)
+func getCloneUrl(source, owner, repo string, isHttps bool) string {
+	scheme := "http"
+	if isHttps {
+		scheme = "https"
+	}
+	return fmt.Sprintf("%s://%s/%s/%s.git", scheme, source, owner, repo)
 }
