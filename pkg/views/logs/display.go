@@ -17,6 +17,8 @@ var WORKSPACE_PREFIX = "WORKSPACE"
 
 var longestPrefixLength = len(WORKSPACE_PREFIX)
 var maxPrefixLength = 20
+var prefixDelimiter = " | "
+var prefixPadding = " "
 
 func DisplayLogs(logEntriesChan <-chan logs.LogEntry, index int) {
 	for logEntry := range logEntriesChan {
@@ -37,20 +39,27 @@ func DisplayLogEntry(logEntry logs.LogEntry, index int) {
 	prefix := lipgloss.NewStyle().Foreground(prefixColor).Bold(true).Render(formatPrefixText(prefixText))
 
 	if index == WORKSPACE_INDEX {
-		line = fmt.Sprintf(" %s%s \033[1m%s\033[0m", prefix, views.CheckmarkSymbol, line)
-	} else {
-		// Check if carriage return exists and if it does, remove the characters before it unless it is the last character of the line
-		lastIndex := strings.LastIndex(line, "\r")
-		if lastIndex != -1 {
-			if !strings.HasSuffix(line, "\r") && !strings.HasSuffix(line, "\r\n") {
-				line = line[lastIndex+1:]
-			}
-		}
-
-		line = fmt.Sprintf("\r %s%s", prefix, line)
+		line = fmt.Sprintf("%s%s%s \033[1m%s\033[0m", prefixPadding, prefix, views.CheckmarkSymbol, line)
+		fmt.Print(line)
+		return
 	}
 
-	fmt.Print(line)
+	// Ensure the cursor moving never overwrites the prefix
+	cursorOffset := longestPrefixLength + len(prefixDelimiter) + 2*len(prefixPadding)
+	line = strings.ReplaceAll(line, "\r", fmt.Sprintf("\u001b[%dG", cursorOffset))
+	line = strings.ReplaceAll(line, "\u001b[0G", fmt.Sprintf("\u001b[%dG", cursorOffset))
+
+	parts := strings.Split(line, "\n")
+
+	result := prefix
+	for _, part := range parts {
+		if part == "" {
+			continue
+		}
+		result += fmt.Sprintf("\r%s%s%s\n", prefixPadding, prefix, strings.TrimSuffix(part, "\r"))
+	}
+
+	fmt.Print(result)
 }
 
 func CalculateLongestPrefixLength(projectNames []string) {
@@ -76,10 +85,10 @@ func formatPrefixText(input string) string {
 
 	// Pad input with spaces if shorter than maxPrefixLength
 	for len(input) < prefixLength {
-		input += " "
+		input += prefixPadding
 	}
 
-	input += " | "
+	input += prefixDelimiter
 	return input
 }
 
