@@ -340,7 +340,7 @@ func (g *BitbucketServerGitProvider) parseStaticGitContext(repoUrl string) (*Sta
 	var staticContext StaticGitContext
 
 	// optional string - '/rest/api/'
-	re := regexp.MustCompile(`(https?://[^/]+)(?:/rest/api/[^/]+)?/projects/([^/]+)/repos/([^/]+)(?:/([^/?]+))?(?:/([^/?]+))?(?:\?at=refs%2Fheads%2F([^/?]+))?`)
+	re := regexp.MustCompile(`(https?://[^/]+)(?:/rest/api/[^/]+)?/projects/([^/]+)/repos/([^/]+)(?:/([^/?#]+))?(?:/([^/?#\\]+))?(?:\?at=refs%2Fheads%2F([^/?#]+))?`)
 	matches := re.FindStringSubmatch(repoUrl)
 
 	if len(matches) < 4 {
@@ -389,11 +389,13 @@ func (g *BitbucketServerGitProvider) parseStaticGitContext(repoUrl string) (*Sta
 	case "commits":
 		if identifier != "" {
 			staticContext.Sha = &identifier
+			staticContext.Branch = &identifier
 		} else if strings.Contains(repoUrl, "commits?until=") {
 			parts := strings.Split(repoUrl, "commits?until=")
 			if len(parts) == 2 {
 				sha := parts[1]
 				staticContext.Sha = &sha
+				staticContext.Branch = &sha
 			}
 		}
 	}

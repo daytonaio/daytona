@@ -96,7 +96,7 @@ func (b *BitbucketServerGitProviderTestSuite) TestParseStaticGitContext_Commits(
 		Owner:    "PROJECT_KEY",
 		Url:      "https://bitbucket.example.com/scm/PROJECT_KEY/REPO_NAME.git",
 		Source:   "bitbucket.example.com",
-		Branch:   nil,
+		Branch:   &[]string{"COMMIT_SHA"}[0],
 		Sha:      &[]string{"COMMIT_SHA"}[0],
 		PrNumber: nil,
 		Path:     nil,
@@ -118,7 +118,7 @@ func (b *BitbucketServerGitProviderTestSuite) TestParseStaticGitContext_Commit()
 		Owner:    "PROJECT_KEY",
 		Url:      "https://bitbucket.example.com/scm/PROJECT_KEY/REPO_NAME.git",
 		Source:   "bitbucket.example.com",
-		Branch:   nil,
+		Branch:   &[]string{"COMMIT_SHA"}[0],
 		Sha:      &[]string{"COMMIT_SHA"}[0],
 		PrNumber: nil,
 		Path:     nil,
@@ -127,6 +127,29 @@ func (b *BitbucketServerGitProviderTestSuite) TestParseStaticGitContext_Commit()
 	require := b.Require()
 
 	httpContext, err := b.gitProvider.parseStaticGitContext(commitUrl)
+
+	require.Nil(err)
+	require.Equal(commitContext, httpContext)
+}
+
+// edge case for parsing all paths containing a anchor at the end.
+func (b *BitbucketServerGitProviderTestSuite) TestParseStaticGitContext_Repo_Urls_With_Anchor() {
+	commitWithAnchorUrl := "https://bitbucket.example.com/rest/api/latest/projects/PROJECT_KEY/repos/REPO_NAME/commits/COMMIT_SHA\\#test.txt"
+	commitContext := &StaticGitContext{
+		Id:       "PROJECT_KEY",
+		Name:     "REPO_NAME",
+		Owner:    "PROJECT_KEY",
+		Url:      "https://bitbucket.example.com/scm/PROJECT_KEY/REPO_NAME.git",
+		Source:   "bitbucket.example.com",
+		Branch:   &[]string{"COMMIT_SHA"}[0],
+		Sha:      &[]string{"COMMIT_SHA"}[0],
+		PrNumber: nil,
+		Path:     nil,
+	}
+
+	require := b.Require()
+
+	httpContext, err := b.gitProvider.parseStaticGitContext(commitWithAnchorUrl)
 
 	require.Nil(err)
 	require.Equal(commitContext, httpContext)
