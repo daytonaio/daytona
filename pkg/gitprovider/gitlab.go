@@ -106,7 +106,7 @@ func (g *GitLabGitProvider) GetRepositories(namespace string) ([]*GitRepository,
 		})
 	}
 
-	return response, err
+	return response, nil
 }
 
 func (g *GitLabGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {
@@ -230,6 +230,14 @@ func (g *GitLabGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitCon
 		return g.parseSshGitUrl(repoUrl)
 	}
 
+	// Determine protocol based on baseApiUrl or repoUrl
+	isHttps := true
+	if g.baseApiUrl != nil && strings.HasPrefix(*g.baseApiUrl, "http://") {
+		isHttps = false
+	} else if strings.HasPrefix(repoUrl, "http://") {
+		isHttps = false
+	}
+
 	if !strings.HasPrefix(repoUrl, "http") {
 		return nil, fmt.Errorf("can not parse git URL: %s", repoUrl)
 	}
@@ -264,7 +272,7 @@ func (g *GitLabGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitCon
 
 	staticContext.Name = ownerRepoParts[len(ownerRepoParts)-1]
 	staticContext.Owner = strings.Join(ownerRepoParts[:len(ownerRepoParts)-1], "/")
-	staticContext.Url = getCloneUrl(staticContext.Source, staticContext.Owner, staticContext.Name)
+	staticContext.Url = getCloneUrl(staticContext.Source, staticContext.Owner, staticContext.Name, isHttps)
 	staticContext.Id = fmt.Sprintf("%s/%s", staticContext.Owner, staticContext.Name)
 
 	if staticContext.Path == nil {
