@@ -34,11 +34,15 @@ func NewClient(config *SessionConfig) (*Client, error) {
 		User:    config.Username,
 	}
 
+	auth := []ssh.AuthMethod{}
+
 	if config.Password != nil {
-		sshConfig.Auth = []ssh.AuthMethod{
+		auth = append(auth, []ssh.AuthMethod{
 			ssh.Password(*config.Password),
-		}
-	} else if config.PrivateKeyPath != nil {
+		}...)
+	}
+
+	if config.PrivateKeyPath != nil {
 		buf, err := os.ReadFile(*config.PrivateKeyPath)
 		if err != nil {
 			return nil, fmt.Errorf("reading SSH key file %s: %w", *config.PrivateKeyPath, err)
@@ -49,10 +53,12 @@ func NewClient(config *SessionConfig) (*Client, error) {
 			return nil, err
 		}
 
-		sshConfig.Auth = []ssh.AuthMethod{
+		auth = append(auth, []ssh.AuthMethod{
 			ssh.PublicKeys(privateKey),
-		}
+		}...)
 	}
+
+	sshConfig.Auth = auth
 
 	client, err := ssh.Dial("tcp", server, sshConfig)
 	if err != nil {
