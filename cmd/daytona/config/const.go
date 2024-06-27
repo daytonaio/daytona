@@ -48,6 +48,7 @@ func GetSupportedGitProviders() []GitProvider {
 		{"gitlab", "GitLab"},
 		{"gitlab-self-managed", "GitLab Self-managed"},
 		{"bitbucket", "Bitbucket"},
+		{"bitbucket-server", "Bitbucket Server"},
 		{"codeberg", "Codeberg"},
 		{"gitea", "Gitea"},
 		{"gitness", "Gitness"},
@@ -67,6 +68,8 @@ func GetDocsLinkFromGitProvider(providerId string) string {
 		return "https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token"
 	case "bitbucket":
 		return "https://support.atlassian.com/bitbucket-cloud/docs/create-an-app-password"
+	case "bitbucket-server":
+		return "https://confluence.atlassian.com/bitbucketserver/http-access-tokens-939515499.html"
 	case "codeberg":
 		return "https://docs.codeberg.org/advanced/access-token/"
 	case "gitea":
@@ -92,6 +95,8 @@ func GetScopesFromGitProvider(providerId string) string {
 		return "api,read_user,write_repository"
 	case "bitbucket":
 		return "account:read,repositories:write,pullrequests:read"
+	case "bitbucket-server":
+		return "PROJECT_READ,REPOSITORY_WRITE"
 	case "codeberg":
 		fallthrough
 	case "gitea":
