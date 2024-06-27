@@ -113,7 +113,7 @@ func (g *BitbucketServerGitProvider) GetRepositories(namespace string) ([]*GitRe
 		for _, repo := range pageRepos {
 			var repoUrl string
 			for _, link := range repo.Links.Clone {
-				if link.Name == "https" || link.Name == "http" || link.Name == "ssh" {
+				if link.Name == "https" || link.Name == "http" {
 					repoUrl = link.Href
 					break
 				}
@@ -201,7 +201,7 @@ func (g *BitbucketServerGitProvider) GetRepoPRs(repositoryId string, namespaceId
 	for _, pr := range pullRequest {
 		var repoUrl string
 		for _, link := range pr.FromRef.Repository.Links.Clone {
-			if link.Name == "https" || link.Name == "http" || link.Name == "ssh" {
+			if link.Name == "https" || link.Name == "http" {
 				repoUrl = link.Href
 				break
 			}
@@ -236,9 +236,9 @@ func (g *BitbucketServerGitProvider) GetUser() (*GitUser, error) {
 	}
 
 	// Since BitbucketServer or gfleury/go-bitbucket-v1 doesn't offer an endpoint to query the
-	// currently authenticated user, We instead query the '/rest/api/1.0/application-properties' endpoint
+	// currently authenticated user, we instead query the '/rest/api/1.0/application-properties' endpoint
 	// which does not put load on the server and then extract the username from the response header.
-	// Refer this developer community comment: https://community.developer.atlassian.com/t/obtain-authorised-users-username-from-api/24422/2
+	// Refer to this developer community comment: https://community.developer.atlassian.com/t/obtain-authorised-users-username-from-api/24422/2
 	res, err := client.DefaultApi.GetApplicationProperties()
 	if err != nil {
 		return nil, err
@@ -359,7 +359,7 @@ func (g *BitbucketServerGitProvider) parseStaticGitContext(repoUrl string) (*Sta
 	staticContext.Id = projectKey
 	staticContext.Name = repoName
 	staticContext.Owner = projectKey
-	// For '.git' or repo clone over https format, refer https://community.atlassian.com/t5/Bitbucket-questions/Project-key-in-repositories-URL/qaq-p/578207
+	// For '.git' or repo clone over https format, refer to https://community.atlassian.com/t5/Bitbucket-questions/Project-key-in-repositories-URL/qaq-p/578207
 	// and https://community.atlassian.com/t5/Bitbucket-questions/remote-url-in-Bitbucket-server-what-does-scm-represent-is-it/qaq-p/2060987
 	staticContext.Url = fmt.Sprintf("%s/scm/%s/%s.git", baseUrl, projectKey, repoName)
 	staticContext.Source = strings.TrimPrefix(baseUrl, "https://")
