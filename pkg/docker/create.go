@@ -9,6 +9,7 @@ import (
 	"io"
 	"os/user"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/daytonaio/daytona/pkg/builder/detect"
@@ -66,7 +67,9 @@ func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions, sshCli
 
 	cloneUrl := opts.Project.Repository.Url
 	if opts.Gpc != nil {
-		cloneUrl = fmt.Sprintf("https://%s:%s@%s", opts.Gpc.Username, opts.Gpc.Token, opts.Project.Repository.Url)
+		repoUrl := strings.TrimPrefix(cloneUrl, "https://")
+		repoUrl = strings.TrimPrefix(repoUrl, "http://")
+		cloneUrl = fmt.Sprintf("https://%s:%s@%s", opts.Gpc.Username, opts.Gpc.Token, repoUrl)
 	}
 
 	cloneCmd := []string{"git", "clone", cloneUrl, fmt.Sprintf("/workdir/%s-%s", opts.Project.WorkspaceId, opts.Project.Name)}

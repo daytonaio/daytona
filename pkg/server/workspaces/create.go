@@ -168,7 +168,12 @@ func (s *WorkspaceService) createProject(project *workspace.Project, target *pro
 		return err
 	}
 
-	err = s.provisioner.CreateProject(project, target, cr)
+	gc, err := s.gitProviderService.GetConfigForUrl(project.Repository.Url)
+	if err != nil && !gitprovider.IsGitProviderNotFound(err) {
+		return err
+	}
+
+	err = s.provisioner.CreateProject(project, target, cr, gc)
 	if err != nil {
 		return err
 	}
