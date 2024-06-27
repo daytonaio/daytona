@@ -128,11 +128,11 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.GitProvider, userGit
 }
 
 func providerRequiresUsername(gitProviderId string) bool {
-	return gitProviderId == "bitbucket"
+	return gitProviderId == "bitbucket" || gitProviderId == "bitbucket-server"
 }
 
 func providerRequiresApiUrl(gitProviderId string) bool {
-	return gitProviderId == "gitness" || gitProviderId == "github-enterprise-server" || gitProviderId == "gitlab-self-managed" || gitProviderId == "gitea" || gitProviderId == "azure-devops"
+	return gitProviderId == "gitness" || gitProviderId == "github-enterprise-server" || gitProviderId == "gitlab-self-managed" || gitProviderId == "gitea" || gitProviderId == "bitbucket-server" || gitProviderId == "azure-devops"
 }
 
 func getApiUrlDescription(gitProviderId string) string {
@@ -146,6 +146,8 @@ func getApiUrlDescription(gitProviderId string) string {
 		return "For example: http://gitness-host/api/v1/"
 	} else if gitProviderId == "azure-devops" {
 		return "For example: https://dev.azure.com/organization"
+	} else if gitProviderId == "bitbucket-server" {
+		return "For example: https://bitbucket.host.com/rest"
 	}
 	return ""
 }
