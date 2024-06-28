@@ -6,6 +6,7 @@ package create
 import (
 	"errors"
 	"log"
+	"path/filepath"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/huh"
@@ -145,6 +146,14 @@ func ConfigureProjects(projectList *[]apiclient.CreateWorkspaceRequestProject, d
 	return ConfigureProjects(projectList, defaults)
 }
 
+func validateDevcontainerFilename(filename string) error {
+	baseName := filepath.Base(filename)
+	if baseName != "devcontainer.json" && baseName != ".devcontainer.json" {
+		return errors.New("filename must be devcontainer.json or .devcontainer.json")
+	}
+	return nil
+}
+
 func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData) *huh.Form {
 	buildOptions := []huh.Option[string]{
 		{Key: "Automatic", Value: string(AUTOMATIC)},
@@ -175,12 +184,7 @@ func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData)
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Devcontainer file path").
-				Value(&projectConfiguration.DevcontainerFilePath).Validate(func(s string) error {
-				if s == "" {
-					return errors.New("devcontainer file path is required")
-				}
-				return nil
-			}),
+				Value(&projectConfiguration.DevcontainerFilePath).Validate(validateDevcontainerFilename),
 		).WithHideFunc(func() bool {
 			return projectConfiguration.BuildChoice != string(DEVCONTAINER)
 		}),
