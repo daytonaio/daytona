@@ -49,14 +49,22 @@ func DisplayLogEntry(logEntry logs.LogEntry, index int) {
 	line = strings.ReplaceAll(line, "\r", fmt.Sprintf("\u001b[%dG", cursorOffset))
 	line = strings.ReplaceAll(line, "\u001b[0G", fmt.Sprintf("\u001b[%dG", cursorOffset))
 
+	if line == "\n" {
+		fmt.Print(line)
+		return
+	}
+
 	parts := strings.Split(line, "\n")
 
-	result := prefix
+	var result string
 	for _, part := range parts {
 		if part == "" {
 			continue
 		}
-		result += fmt.Sprintf("\r%s%s%s\n", prefixPadding, prefix, strings.TrimSuffix(part, "\r"))
+		result = fmt.Sprintf("%s\r%s%s%s", result, prefixPadding, prefix, part)
+		if len(parts) > 1 {
+			result = fmt.Sprintf("%s\n", result)
+		}
 	}
 
 	fmt.Print(result)

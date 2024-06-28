@@ -115,12 +115,6 @@ func TestWorkspaceService(t *testing.T) {
 		apiKeyService.On("Generate", apikey.ApiKeyTypeWorkspace, createWorkspaceRequest.Id).Return(createWorkspaceRequest.Id, nil)
 		gitProviderService.On("GetLastCommitSha", createWorkspaceRequest.Projects[0].Source.Repository).Return("123", nil)
 
-		for _, project := range createWorkspaceRequest.Projects {
-			apiKeyService.On("Generate", apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", createWorkspaceRequest.Id, project.Name)).Return(project.Name, nil)
-		}
-		provisioner.On("CreateProject", mock.Anything, &target, containerRegistry).Return(nil)
-		provisioner.On("StartProject", mock.Anything, &target).Return(nil)
-
 		baseApiUrl := "https://api.github.com"
 		gitProviderConfig := gitprovider.GitProviderConfig{
 			Id:         "github",
@@ -128,6 +122,12 @@ func TestWorkspaceService(t *testing.T) {
 			Token:      "test-token",
 			BaseApiUrl: &baseApiUrl,
 		}
+
+		for _, project := range createWorkspaceRequest.Projects {
+			apiKeyService.On("Generate", apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", createWorkspaceRequest.Id, project.Name)).Return(project.Name, nil)
+		}
+		provisioner.On("CreateProject", mock.Anything, &target, containerRegistry, &gitProviderConfig).Return(nil)
+		provisioner.On("StartProject", mock.Anything, &target).Return(nil)
 
 		gitProviderService.On("GetConfigForUrl", "https://github.com/daytonaio/daytona").Return(&gitProviderConfig, nil)
 
@@ -257,10 +257,19 @@ func TestWorkspaceService(t *testing.T) {
 		apiKeyService.On("Generate", apikey.ApiKeyTypeWorkspace, createWorkspaceRequest.Id).Return(createWorkspaceRequest.Id, nil)
 		gitProviderService.On("GetLastCommitSha", createWorkspaceRequest.Projects[0].Source.Repository).Return("123", nil)
 
+		baseApiUrl := "https://api.github.com"
+		gitProviderConfig := gitprovider.GitProviderConfig{
+			Id:         "github",
+			Username:   "test-username",
+			Token:      "test-token",
+			BaseApiUrl: &baseApiUrl,
+		}
+		gitProviderService.On("GetConfigForUrl", "https://github.com/daytonaio/daytona").Return(&gitProviderConfig, nil)
+
 		for _, project := range createWorkspaceRequest.Projects {
 			apiKeyService.On("Generate", apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", createWorkspaceRequest.Id, project.Name)).Return(project.Name, nil)
 		}
-		provisioner.On("CreateProject", mock.Anything, &target, containerRegistry).Return(nil)
+		provisioner.On("CreateProject", mock.Anything, &target, containerRegistry, &gitProviderConfig).Return(nil)
 		provisioner.On("StartProject", mock.Anything, &target).Return(nil)
 
 		_, _ = service.CreateWorkspace(createWorkspaceRequest)

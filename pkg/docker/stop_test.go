@@ -11,6 +11,8 @@ import (
 )
 
 func (s *DockerClientTestSuite) TestStopProject() {
+	s.mockClient.On("ContainerList", mock.Anything, mock.Anything).Return([]types.Container{}, nil)
+
 	containerName := s.dockerClient.GetProjectContainerName(project1)
 
 	s.mockClient.On("ContainerStop", mock.Anything, containerName, container.StopOptions{}).Return(nil)
@@ -20,8 +22,11 @@ func (s *DockerClientTestSuite) TestStopProject() {
 				Running: false,
 			},
 		},
+		Config: &container.Config{
+			Labels: map[string]string{},
+		},
 	}, nil)
 
-	err := s.dockerClient.StopProject(project1)
+	err := s.dockerClient.StopProject(project1, nil)
 	require.Nil(s.T(), err)
 }

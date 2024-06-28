@@ -20,6 +20,12 @@ err() {
   exit 1
 }
 
+# Check if daytona is already installed
+if [ -x "$(command -v daytona)" ]; then
+  echo "Daytona already installed. Skipping installation..."
+  exit 0
+fi
+
 # Check machine architecture
 ARCH=$(uname -m)
 # Check operating system

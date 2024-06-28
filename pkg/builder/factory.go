@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/daytonaio/daytona/pkg/builder/detect"
 	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
@@ -99,20 +100,19 @@ func (f *BuilderFactory) Create(p workspace.Project, gpc *gitprovider.GitProvide
 	}
 
 	// Autodetect
-
-	devcontainerConfigFilePath, err := detectDevcontainerConfigFilePath(projectDir)
+	builderType, err := detect.DetectProjectBuilderType(&p, projectDir, nil)
 	if err != nil {
 		return nil, err
 	}
-	if devcontainerConfigFilePath != "" {
-		p.Build.Devcontainer = &workspace.ProjectBuildDevcontainer{
-			DevContainerFilePath: devcontainerConfigFilePath,
-		}
 
+	switch builderType {
+	case detect.BuilderTypeDevcontainer:
 		return f.newDevcontainerBuilder(buildId, p, gpc, hash, projectDir)
+	case detect.BuilderTypeImage:
+		return nil, nil
+	default:
+		return nil, fmt.Errorf("unknown builder type: %s", builderType)
 	}
-
-	return nil, nil
 }
 
 func (f *BuilderFactory) CheckExistingBuild(p workspace.Project) (*BuildResult, error) {
@@ -178,32 +178,4 @@ func (f *BuilderFactory) newDevcontainerBuilder(buildId string, p workspace.Proj
 		},
 		builderDockerPort: builderDockerPort,
 	}, nil
-}
-
-func fileExists(filePath string) (bool, error) {
-	_, err := os.Stat(filePath)
-	if os.IsNotExist(err) {
-		return false, nil
-	} else if err != nil {
-		// There was an error checking for the file
-		return false, err
-	}
-	return true, nil
-}
-
-func detectDevcontainerConfigFilePath(projectDir string) (string, error) {
-	devcontainerPath := ".devcontainer/devcontainer.json"
-	isDevcontainer, err := fileExists(filepath.Join(projectDir, devcontainerPath))
-	if err != nil {
-		devcontainerPath = ".devcontainer.json"
-		isDevcontainer, err = fileExists(filepath.Join(projectDir, devcontainerPath))
-		if err != nil {
-			return devcontainerPath, nil
-		}
-	}
-	if isDevcontainer {
-		return devcontainerPath, nil
-	} else {
-		return "", nil
-	}
 }

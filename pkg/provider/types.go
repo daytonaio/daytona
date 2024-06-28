@@ -5,6 +5,7 @@ package provider
 
 import (
 	"github.com/daytonaio/daytona/pkg/containerregistry"
+	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
@@ -37,6 +38,7 @@ type ProjectRequest struct {
 	TargetOptions     string
 	ContainerRegistry *containerregistry.ContainerRegistry
 	Project           *workspace.Project
+	GitProviderConfig *gitprovider.GitProviderConfig
 }
 
 type ProviderTarget struct {

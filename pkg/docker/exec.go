@@ -25,7 +25,7 @@ func (d *DockerClient) ExecSync(containerID string, config types.ExecConfig, out
 	config.AttachStdout = true
 	config.AttachStdin = false
 
-	config.Env = append(config.Env, "DEBIAN_FRONTEND=noninteractive")
+	config.Env = append([]string{"DEBIAN_FRONTEND=noninteractive"}, config.Env...)
 
 	response, err := d.apiClient.ContainerExecCreate(ctx, containerID, config)
 	if err != nil {
