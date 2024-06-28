@@ -4,6 +4,8 @@
 package docker_test
 
 import (
+	"github.com/daytonaio/daytona/pkg/docker"
+	"github.com/daytonaio/daytona/pkg/provider/util"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/stretchr/testify/mock"
@@ -11,6 +13,8 @@ import (
 )
 
 func (s *DockerClientTestSuite) TestStartProject() {
+	s.mockClient.On("ContainerList", mock.Anything, mock.Anything).Return([]types.Container{}, nil)
+
 	containerName := s.dockerClient.GetProjectContainerName(project1)
 
 	s.mockClient.On("ContainerStart", mock.Anything, containerName, container.StartOptions{}).Return(nil)
@@ -20,6 +24,9 @@ func (s *DockerClientTestSuite) TestStartProject() {
 				Running: false,
 			},
 		},
+		Config: &container.Config{
+			Labels: map[string]string{},
+		},
 	}, nil).Once()
 	s.mockClient.On("ContainerInspect", mock.Anything, containerName).Return(types.ContainerJSON{
 		ContainerJSONBase: &types.ContainerJSONBase{
@@ -27,8 +34,15 @@ func (s *DockerClientTestSuite) TestStartProject() {
 				Running: true,
 			},
 		},
+		Config: &container.Config{
+			Labels: map[string]string{},
+		},
 	}, nil)
 
-	err := s.dockerClient.StartProject(project1)
+	s.setupExecTest([]string{"bash", "-c", util.GetProjectStartScript("", project1.ApiKey)}, containerName, project1.User, []string{})
+
+	err := s.dockerClient.StartProject(&docker.CreateProjectOptions{
+		Project: project1,
+	}, "")
 	require.Nil(s.T(), err)
 }

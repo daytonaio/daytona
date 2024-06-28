@@ -4,23 +4,38 @@
 package docker
 
 import (
+	"context"
+	"fmt"
 	"io"
 
 	"github.com/daytonaio/daytona/pkg/containerregistry"
+	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/ssh"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 )
 
+type CreateProjectOptions struct {
+	Project          *workspace.Project
+	ProjectDir       string
+	Cr               *containerregistry.ContainerRegistry
+	LogWriter        io.Writer
+	Gpc              *gitprovider.GitProviderConfig
+	SshSessionConfig *ssh.SessionConfig
+}
+
 type IDockerClient interface {
-	CreateProject(project *workspace.Project, serverDownloadUrl string, cr *containerregistry.ContainerRegistry, logWriter io.Writer) error
+	CreateProject(opts *CreateProjectOptions) error
 	CreateWorkspace(workspace *workspace.Workspace, logWriter io.Writer) error
 
 	DestroyProject(project *workspace.Project) error
 	DestroyWorkspace(workspace *workspace.Workspace) error
 
-	StartProject(project *workspace.Project) error
-	StopProject(project *workspace.Project) error
+	StartProject(opts *CreateProjectOptions, daytonaDownloadUrl string) error
+	StopProject(project *workspace.Project, logWriter io.Writer) error
 
 	GetProjectInfo(project *workspace.Project) (*workspace.ProjectInfo, error)
 	GetWorkspaceInfo(ws *workspace.Workspace) (*workspace.WorkspaceInfo, error)
@@ -48,9 +63,32 @@ type DockerClient struct {
 }
 
 func (d *DockerClient) GetProjectContainerName(project *workspace.Project) string {
-	return project.WorkspaceId + "-" + project.Name
+	containers, err := d.apiClient.ContainerList(context.Background(), container.ListOptions{
+		Filters: filters.NewArgs(filters.Arg("label", fmt.Sprintf("daytona.workspace.id=%s", project.WorkspaceId)), filters.Arg("label", fmt.Sprintf("daytona.project.name=%s", project.Name))),
+		All:     true,
+	})
+	if err != nil || len(containers) == 0 {
+		return project.WorkspaceId + "-" + project.Name
+	}
+
+	return containers[0].ID
 }
 
 func (d *DockerClient) GetProjectVolumeName(project *workspace.Project) string {
 	return project.WorkspaceId + "-" + project.Name
+}
+
+func (d *DockerClient) getComposeContainers(c types.ContainerJSON) (string, []types.Container, error) {
+	ctx := context.Background()
+
+	for k, v := range c.Config.Labels {
+		if k == "com.docker.compose.project" {
+			containers, err := d.apiClient.ContainerList(ctx, container.ListOptions{
+				Filters: filters.NewArgs(filters.Arg("label", fmt.Sprintf("com.docker.compose.project=%s", v))),
+			})
+			return v, containers, err
+		}
+	}
+
+	return "", nil, nil
 }

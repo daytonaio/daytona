@@ -20,7 +20,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const startVSCodeServerCommand = "$HOME/vscode-server/bin/openvscode-server --start-server --port=63000 --host=0.0.0.0 --without-connection-token --disable-workspace-trust --default-folder=$HOME/$DAYTONA_WS_PROJECT_NAME"
+const startVSCodeServerCommand = "$HOME/vscode-server/bin/openvscode-server --start-server --port=63000 --host=0.0.0.0 --without-connection-token --disable-workspace-trust --default-folder="
 
 func OpenBrowserIDE(activeProfile config.Profile, workspaceId string, projectName string) error {
 	// Download and start IDE
@@ -41,10 +41,15 @@ func OpenBrowserIDE(activeProfile config.Profile, workspaceId string, projectNam
 		return err
 	}
 
+	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName)
+	if err != nil {
+		return err
+	}
+
 	views.RenderInfoMessageBold("Starting OpenVSCode Server...")
 
 	go func() {
-		startServerCommand := exec.CommandContext(context.Background(), "ssh", projectHostname, startVSCodeServerCommand)
+		startServerCommand := exec.CommandContext(context.Background(), "ssh", projectHostname, fmt.Sprintf("%s%s", startVSCodeServerCommand, projectDir))
 		startServerCommand.Stdout = io.Writer(&util.DebugLogWriter{})
 		startServerCommand.Stderr = io.Writer(&util.DebugLogWriter{})
 

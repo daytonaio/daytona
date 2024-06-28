@@ -14,15 +14,32 @@ import (
 )
 
 func (s *DockerClientTestSuite) TestExecSync() {
+	s.mockClient.On("ContainerList", mock.Anything, mock.Anything).Return([]types.Container{}, nil)
+
 	containerName := s.dockerClient.GetProjectContainerName(project1)
+
+	s.setupExecTest([]string{"test-cmd"}, containerName, project1.User, []string{})
+
+	result, err := s.dockerClient.ExecSync(containerName, types.ExecConfig{
+		Cmd:  []string{"test-cmd"},
+		User: project1.User,
+	}, nil)
+	require.Nil(s.T(), err)
+	require.Equal(s.T(), 0, result.ExitCode)
+	require.Equal(s.T(), "", result.StdOut)
+}
+
+func (s *DockerClientTestSuite) setupExecTest(cmd []string, containerName, user string, env []string) {
 	_, client := net.Pipe()
 
 	s.mockClient.On("ContainerExecCreate", mock.Anything, containerName, types.ExecConfig{
 		AttachStdout: true,
 		AttachStderr: true,
-		Cmd:          []string{"test-cmd"},
-		User:         project1.User,
-		Env:          []string{"DEBIAN_FRONTEND=noninteractive"},
+		Cmd:          cmd,
+		User:         user,
+		Env: append([]string{
+			"DEBIAN_FRONTEND=noninteractive",
+		}, env...),
 	}).Return(types.IDResponse{
 		ID: "123",
 	}, nil)
@@ -33,12 +50,4 @@ func (s *DockerClientTestSuite) TestExecSync() {
 	s.mockClient.On("ContainerExecInspect", mock.Anything, "123").Return(types.ContainerExecInspect{
 		ExitCode: 0,
 	}, nil)
-
-	result, err := s.dockerClient.ExecSync(containerName, types.ExecConfig{
-		Cmd:  []string{"test-cmd"},
-		User: project1.User,
-	}, nil)
-	require.Nil(s.T(), err)
-	require.Equal(s.T(), 0, result.ExitCode)
-	require.Equal(s.T(), "", result.StdOut)
 }
