@@ -1569,6 +1569,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "ipWithProtocol": {
+                    "type": "string"
+                },
                 "localBuilderRegistryPort": {
                     "type": "integer"
                 },
