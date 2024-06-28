@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -23,7 +24,6 @@ import (
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/google/uuid"
-	"github.com/tailscale/hujson"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -58,7 +58,7 @@ func (d *DockerClient) createProjectFromDevcontainer(opts *CreateProjectOptions,
 	projectTarget := path.Join("/project", filepath.Base(opts.ProjectDir))
 	targetConfigFilePath := path.Join(projectTarget, opts.Project.Build.Devcontainer.DevContainerFilePath)
 
-	config, err := d.readDevcontainerConfig(opts, socketForwardId, projectTarget, targetConfigFilePath)
+	rawConfig, config, err := d.readDevcontainerConfig(opts, socketForwardId, projectTarget, targetConfigFilePath, sshClient)
 	if err != nil {
 		return "", err
 	}
@@ -73,28 +73,16 @@ func (d *DockerClient) createProjectFromDevcontainer(opts *CreateProjectOptions,
 		return "", fmt.Errorf("unable to determine remote user from devcontainer configuration")
 	}
 
-	var devcontainerConfigContent []byte
-	if sshClient != nil {
-		configFilePath := path.Join(opts.ProjectDir, opts.Project.Build.Devcontainer.DevContainerFilePath)
-		devcontainerConfigContent, err = sshClient.ReadFile(configFilePath)
-	} else {
-		configFilePath := filepath.Join(opts.ProjectDir, opts.Project.Build.Devcontainer.DevContainerFilePath)
-		devcontainerConfigContent, err = os.ReadFile(configFilePath)
-	}
+	var mergedConfig map[string]interface{}
+
+	err = json.Unmarshal([]byte(rawConfig), &mergedConfig)
 	if err != nil {
 		return "", err
 	}
 
-	var devcontainerConfig map[string]interface{}
-
-	standardized, err := hujson.Standardize(devcontainerConfigContent)
-	if err != nil {
-		return "", err
-	}
-
-	err = json.Unmarshal(standardized, &devcontainerConfig)
-	if err != nil {
-		return "", err
+	devcontainerConfig, ok := mergedConfig["configuration"].(map[string]interface{})
+	if !ok {
+		return "", fmt.Errorf("unable to find devcontainer configuration in merged configuration")
 	}
 
 	envVars := map[string]string{}
@@ -224,11 +212,9 @@ func (d *DockerClient) createProjectFromDevcontainer(opts *CreateProjectOptions,
 
 	cmd := []string{"-c", strings.Join(devcontainerCmd, " ")}
 
-	if prebuild {
-		err = d.runInitializeCommand(config.MergedConfiguration.InitializeCommand, opts.LogWriter, sshClient)
-		if err != nil {
-			return "", err
-		}
+	err = d.runInitializeCommand(config.MergedConfiguration.InitializeCommand, opts.LogWriter, sshClient)
+	if err != nil {
+		return "", err
 	}
 
 	c, err := d.apiClient.ContainerCreate(ctx, &container.Config{
@@ -348,36 +334,58 @@ func (d *DockerClient) ensureDockerSockForward(logWriter io.Writer) (string, err
 	return c.ID, d.apiClient.ContainerStart(ctx, dockerSockForwardContainer, container.StartOptions{})
 }
 
-func (d *DockerClient) readDevcontainerConfig(opts *CreateProjectOptions, socketForwardId, projectTarget, configFilePath string) (*devcontainer.Root, error) {
+func (d *DockerClient) readDevcontainerConfig(opts *CreateProjectOptions, socketForwardId, projectTarget, configFilePath string, sshClient *ssh.Client) (string, *devcontainer.Root, error) {
 	opts.LogWriter.Write([]byte("Reading devcontainer configuration...\n"))
 
-	devcontainerCmd := []string{
+	env := os.Environ()
+	if sshClient != nil {
+		var err error
+		env, err = sshClient.GetEnv(nil)
+		if err != nil {
+			return "", nil, err
+		}
+	}
+
+	env = slices.DeleteFunc(env, func(el string) bool {
+		return strings.Contains(el, ";") || strings.Contains(el, "PATH")
+	})
+
+	sanitizedEnv := []string{}
+	for _, el := range env {
+		parts := strings.Split(el, "=")
+		santizedEl := fmt.Sprintf(`%s="%s"`, parts[0], parts[1])
+		sanitizedEnv = append(sanitizedEnv, santizedEl+";")
+	}
+
+	devcontainerCmd := append(sanitizedEnv, []string{
 		"devcontainer",
 		"read-configuration",
 		"--workspace-folder=" + projectTarget,
 		"--config=" + configFilePath,
 		"--include-merged-configuration",
-	}
+	}...)
 
 	cmd := strings.Join(devcontainerCmd, " ")
 
 	output, err := d.execInContainer(cmd, opts, projectTarget, socketForwardId, projectTarget)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
 	configStartIndex := strings.Index(output, "{")
 	if configStartIndex == -1 {
-		return nil, fmt.Errorf("unable to find start of JSON in devcontainer configuration")
+		return "", nil, fmt.Errorf("unable to find start of JSON in devcontainer configuration")
 	}
+
+	rawConfig := output[configStartIndex:]
 
 	var rootConfig devcontainer.Root
-	err = json.Unmarshal([]byte(output[configStartIndex:]), &rootConfig)
+	err = json.Unmarshal([]byte(rawConfig), &rootConfig)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
-	return &rootConfig, nil
+	return rawConfig, &rootConfig, nil
 }
 
 func (d *DockerClient) runInitializeCommand(initializeCommand interface{}, logWriter io.Writer, sshClient *ssh.Client) error {
@@ -476,7 +484,7 @@ func (d *DockerClient) execInContainer(cmd string, opts *CreateProjectOptions, w
 		return "", err
 	}
 
-	defer d.removeContainer(c.ID) // nolint:errcheck
+	// defer d.removeContainer(c.ID) // nolint:errcheck
 
 	waitResponse, errChan := d.apiClient.ContainerWait(ctx, c.ID, container.WaitConditionNextExit)
 
