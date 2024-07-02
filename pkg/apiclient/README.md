@@ -94,6 +94,8 @@ Class | Method | HTTP request | Description
 *GitProviderAPI* | [**ListGitProviders**](docs/GitProviderAPI.md#listgitproviders) | **Get** /gitprovider | List Git providers
 *GitProviderAPI* | [**RemoveGitProvider**](docs/GitProviderAPI.md#removegitprovider) | **Delete** /gitprovider/{gitProviderId} | Remove Git provider
 *GitProviderAPI* | [**SetGitProvider**](docs/GitProviderAPI.md#setgitprovider) | **Put** /gitprovider | Set Git provider
+*PrebuildAPI* | [**RegisterPrebuildWebhook**](docs/PrebuildAPI.md#registerprebuildwebhook) | **Post** /prebuild/register-webhook | RegisterPrebuildWebhook
+*PrebuildAPI* | [**WebhookEvent**](docs/PrebuildAPI.md#webhookevent) | **Post** /prebuild/webhook-event | WebhookEvent
 *ProfileAPI* | [**DeleteProfileData**](docs/ProfileAPI.md#deleteprofiledata) | **Delete** /profile | Delete profile data
 *ProfileAPI* | [**GetProfileData**](docs/ProfileAPI.md#getprofiledata) | **Get** /profile | Get profile data
 *ProfileAPI* | [**SetProfileData**](docs/ProfileAPI.md#setprofiledata) | **Put** /profile | Set profile data
@@ -148,6 +150,7 @@ Class | Method | HTTP request | Description
  - [ProviderProviderTargetProperty](docs/ProviderProviderTargetProperty.md)
  - [ProviderProviderTargetPropertyType](docs/ProviderProviderTargetPropertyType.md)
  - [ProviderTarget](docs/ProviderTarget.md)
+ - [RegisterPrebuildWebhookRequest](docs/RegisterPrebuildWebhookRequest.md)
  - [ServerConfig](docs/ServerConfig.md)
  - [SetProjectState](docs/SetProjectState.md)
  - [Status](docs/Status.md)

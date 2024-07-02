@@ -379,6 +379,44 @@ paths:
       summary: Get Git repository PRs
       tags:
       - gitProvider
+  /prebuild/register-webhook:
+    post:
+      description: RegisterPrebuildWebhook
+      operationId: RegisterPrebuildWebhook
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/RegisterPrebuildWebhookRequest'
+        description: Register prebuild webhook
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: RegisterPrebuildWebhook
+      tags:
+      - prebuild
+      x-codegen-request-body-name: prebuildWebhook
+  /prebuild/webhook-event:
+    post:
+      description: WebhookEvent
+      operationId: WebhookEvent
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: object
+        description: Webhook event
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: WebhookEvent
+      tags:
+      - prebuild
+      x-codegen-request-body-name: workspace
   /profile:
     delete:
       description: Delete profile data
@@ -1292,6 +1330,13 @@ components:
     ProviderTargetManifest:
       additionalProperties:
         $ref: '#/components/schemas/provider.ProviderTargetProperty'
+      type: object
+    RegisterPrebuildWebhookRequest:
+      example:
+        gitUrl: gitUrl
+      properties:
+        gitUrl:
+          type: string
       type: object
     ServerConfig:
       example:

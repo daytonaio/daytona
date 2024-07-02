@@ -88,7 +88,7 @@ func GetScopesFromGitProvider(providerId string) string {
 	case "github":
 		fallthrough
 	case "github-enterprise-server":
-		return "repo,read:user,user:email"
+		return "repo,read:user,user:email\noptional: admin:hooks"
 	case "gitlab":
 		fallthrough
 	case "gitlab-self-managed":
@@ -105,6 +105,15 @@ func GetScopesFromGitProvider(providerId string) string {
 		return "/"
 	case "azure-devops":
 		return "Code (Status, Read & Write); User Profile (Read); Project and Team (Read)"
+	default:
+		return ""
+	}
+}
+
+func GetWebhookEventHeaderKeyFromGitProvider(providerId string) string {
+	switch providerId {
+	case "github":
+		return "X-GitHub-Event"
 	default:
 		return ""
 	}

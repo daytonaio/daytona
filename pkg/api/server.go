@@ -35,6 +35,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/containerregistry"
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider"
 	log_controller "github.com/daytonaio/daytona/pkg/api/controllers/log"
+	"github.com/daytonaio/daytona/pkg/api/controllers/prebuild"
 	"github.com/daytonaio/daytona/pkg/api/controllers/profiledata"
 	"github.com/daytonaio/daytona/pkg/api/controllers/provider"
 	"github.com/daytonaio/daytona/pkg/api/controllers/server"
@@ -45,6 +46,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/daytonaio/daytona/internal/constants"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -52,8 +54,6 @@ import (
 type ApiServerConfig struct {
 	ApiPort int
 }
-
-const HEALTH_CHECK_ROUTE = "/health"
 
 func NewApiServer(config ApiServerConfig) *ApiServer {
 	return &ApiServer{
@@ -91,7 +91,7 @@ func (a *ApiServer) Start() error {
 
 	public := a.router.Group("/")
 	public.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-	public.GET(HEALTH_CHECK_ROUTE, func(c *gin.Context) {
+	public.GET(constants.HEALTH_CHECK_ROUTE, func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
@@ -180,6 +180,17 @@ func (a *ApiServer) Start() error {
 		profileDataController.DELETE("/", profiledata.DeleteProfileData)
 	}
 
+	prebuildController := public.Group("/prebuild")
+	{
+		// create
+		// delete
+		// list
+		// update?
+		prebuildController.POST("/register-webhook", prebuild.RegisterPrebuildWebhook)
+	}
+
+	public.POST(constants.WEBHOOK_EVENT_ROUTE, prebuild.WebhookEvent)
+
 	projectGroup := protected.Group("/")
 	projectGroup.Use(middlewares.ProjectAuthMiddleware())
 	{
@@ -202,7 +213,7 @@ func (a *ApiServer) Start() error {
 }
 
 func (a *ApiServer) HealthCheck() error {
-	resp, err := http.Get(fmt.Sprintf("http://localhost:%d%s", a.apiPort, HEALTH_CHECK_ROUTE))
+	resp, err := http.Get(fmt.Sprintf("http://localhost:%d%s", a.apiPort, constants.HEALTH_CHECK_ROUTE))
 	if err != nil {
 		return err
 	}

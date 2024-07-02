@@ -25,6 +25,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
+	"github.com/daytonaio/daytona/pkg/server/prebuilds"
 	"github.com/daytonaio/daytona/pkg/server/profiledata"
 	"github.com/daytonaio/daytona/pkg/server/providertargets"
 	"github.com/daytonaio/daytona/pkg/server/registry"
@@ -198,6 +199,8 @@ var ServeCmd = &cobra.Command{
 			ProfileDataStore: profileDataStore,
 		})
 
+		prebuildsService := prebuilds.NewPrebuildService(prebuilds.PrebuildServiceConfig{})
+
 		server := server.GetInstance(&server.ServerInstanceConfig{
 			Config:                   *c,
 			TailscaleServer:          headscaleServer,
@@ -209,6 +212,7 @@ var ServeCmd = &cobra.Command{
 			GitProviderService:       gitProviderService,
 			ProviderManager:          providerManager,
 			ProfileDataService:       profileDataService,
+			PrebuildService:          prebuildsService,
 		})
 
 		errCh := make(chan error)

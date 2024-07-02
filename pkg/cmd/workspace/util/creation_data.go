@@ -31,7 +31,7 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 	var workspaceName string
 
 	if !config.Manual && config.UserGitProviders != nil && len(config.UserGitProviders) > 0 {
-		providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, 0)
+		providerRepo, err = GetRepositoryFromWizard(config.UserGitProviders, 0)
 		if err != nil {
 			return "", nil, err
 		}
@@ -57,7 +57,7 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 			var providerRepo *apiclient.GitRepository
 
 			if !config.Manual && config.UserGitProviders != nil && len(config.UserGitProviders) > 0 {
-				providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, i)
+				providerRepo, err = GetRepositoryFromWizard(config.UserGitProviders, i)
 				if err != nil {
 					return "", nil, err
 				}

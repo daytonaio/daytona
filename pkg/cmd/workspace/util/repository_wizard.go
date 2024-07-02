@@ -17,7 +17,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
 
-func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additionalProjectOrder int) (*apiclient.GitRepository, error) {
+func GetRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additionalProjectOrder int) (*apiclient.GitRepository, error) {
 	var providerId string
 	var namespaceId string
 	var checkoutOptions []selection.CheckoutOption

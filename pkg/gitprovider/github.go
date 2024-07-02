@@ -5,6 +5,7 @@ package gitprovider
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
@@ -12,6 +13,10 @@ import (
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
 )
+
+type GithubWebhookPayload struct {
+	Url string
+}
 
 type GitHubGitProvider struct {
 	*AbstractGitProvider
@@ -317,4 +322,38 @@ func (g *GitHubGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitCon
 	}
 
 	return staticContext, nil
+}
+
+type PrebuildConfig struct {
+	Branch string
+}
+
+func (g *GitHubGitProvider) RegisterPrebuildWebhook(repo *GitRepository) error {
+	client := g.getApiClient()
+
+	// config, err := server.GetConfig()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// apiUrl := util.GetFrpcApiUrl(config.Frps.Protocol, config.Id, config.Frps.Domain)
+	// endpointUrl := fmt.Sprintf("%s%s", apiUrl, constants.WEBHOOK_EVENT_ROUTE)
+	endpointUrl := "temp"
+
+	hook, res, err := client.Repositories.CreateHook(context.Background(), repo.Owner, repo.Name, &github.Hook{
+		Active: github.Bool(true),
+		Events: []string{"push"},
+		Config: map[string]interface{}{
+			"url":          endpointUrl,
+			"content_type": "json",
+		},
+	})
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(hook)
+	fmt.Println(res)
+
+	return nil
 }

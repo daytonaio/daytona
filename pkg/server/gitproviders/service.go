@@ -6,6 +6,7 @@ package gitproviders
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
@@ -16,6 +17,7 @@ type IGitProviderService interface {
 	GetConfigForUrl(url string) (*gitprovider.GitProviderConfig, error)
 	GetGitProvider(id string) (gitprovider.GitProvider, error)
 	GetGitProviderForUrl(url string) (gitprovider.GitProvider, error)
+	GetGitProviderForHttpRequest(req *http.Request) (gitprovider.GitProvider, error)
 	GetGitUser(gitProviderId string) (*gitprovider.GitUser, error)
 	GetNamespaces(gitProviderId string) ([]*gitprovider.GitNamespace, error)
 	GetRepoBranches(gitProviderId string, namespaceId string, repositoryId string) ([]*gitprovider.GitBranch, error)
@@ -25,6 +27,8 @@ type IGitProviderService interface {
 	RemoveGitProvider(gitProviderId string) error
 	SetGitProviderConfig(providerConfig *gitprovider.GitProviderConfig) error
 	GetLastCommitSha(repo *gitprovider.GitRepository) (string, error)
+	RegisterPrebuildWebhook(gitProviderId string, repo *gitprovider.GitRepository) error
+	ProcessWebhookEvent(gitProviderId string, payload interface{}) error
 }
 
 type GitProviderServiceConfig struct {

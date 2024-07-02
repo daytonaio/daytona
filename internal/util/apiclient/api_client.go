@@ -12,7 +12,7 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal"
-	"github.com/daytonaio/daytona/pkg/api"
+	"github.com/daytonaio/daytona/internal/constants"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/server"
 )
@@ -45,7 +45,7 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 	serverUrl := activeProfile.Api.Url
 	apiKey := activeProfile.Api.Key
 
-	healthUrl, err := url.JoinPath(serverUrl, api.HEALTH_CHECK_ROUTE)
+	healthUrl, err := url.JoinPath(serverUrl, constants.HEALTH_CHECK_ROUTE)
 	if err != nil {
 		return nil, err
 	}

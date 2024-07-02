@@ -266,6 +266,11 @@ definitions:
     additionalProperties:
       $ref: '#/definitions/provider.ProviderTargetProperty'
     type: object
+  RegisterPrebuildWebhookRequest:
+    properties:
+      gitUrl:
+        type: string
+    type: object
   ServerConfig:
     properties:
       apiPort:
@@ -783,6 +788,42 @@ paths:
       summary: Get Git provider
       tags:
       - gitProvider
+  /prebuild/register-webhook:
+    post:
+      description: RegisterPrebuildWebhook
+      operationId: RegisterPrebuildWebhook
+      parameters:
+      - description: Register prebuild webhook
+        in: body
+        name: prebuildWebhook
+        required: true
+        schema:
+          $ref: '#/definitions/RegisterPrebuildWebhookRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: RegisterPrebuildWebhook
+      tags:
+      - prebuild
+  /prebuild/webhook-event:
+    post:
+      description: WebhookEvent
+      operationId: WebhookEvent
+      parameters:
+      - description: Webhook event
+        in: body
+        name: workspace
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+      summary: WebhookEvent
+      tags:
+      - prebuild
   /profile:
     delete:
       description: Delete profile data

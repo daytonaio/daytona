@@ -533,6 +533,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/prebuild/register-webhook": {
+            "post": {
+                "description": "RegisterPrebuildWebhook",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "prebuild"
+                ],
+                "summary": "RegisterPrebuildWebhook",
+                "operationId": "RegisterPrebuildWebhook",
+                "parameters": [
+                    {
+                        "description": "Register prebuild webhook",
+                        "name": "prebuildWebhook",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/RegisterPrebuildWebhookRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/prebuild/webhook-event": {
+            "post": {
+                "description": "WebhookEvent",
+                "tags": [
+                    "prebuild"
+                ],
+                "summary": "WebhookEvent",
+                "operationId": "WebhookEvent",
+                "parameters": [
+                    {
+                        "description": "Webhook event",
+                        "name": "workspace",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/profile": {
             "get": {
                 "description": "Get profile data",
@@ -1528,6 +1583,14 @@ const docTemplate = `{
             "type": "object",
             "additionalProperties": {
                 "$ref": "#/definitions/provider.ProviderTargetProperty"
+            }
+        },
+        "RegisterPrebuildWebhookRequest": {
+            "type": "object",
+            "properties": {
+                "gitUrl": {
+                    "type": "string"
+                }
             }
         },
         "ServerConfig": {

@@ -6,9 +6,11 @@ package gitproviders
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 )
 
@@ -44,6 +46,32 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 
 	hostname := strings.TrimPrefix(u.Hostname(), "www.")
 	providerId := strings.Split(hostname, ".")[0]
+
+	return s.newGitProvider(&gitprovider.GitProviderConfig{
+		Id:         providerId,
+		Username:   "",
+		Token:      "",
+		BaseApiUrl: nil,
+	})
+}
+
+func (s *GitProviderService) GetGitProviderForHttpRequest(req *http.Request) (gitprovider.GitProvider, error) {
+	var providerId string
+
+	gitProviders, err := s.configStore.List()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, p := range gitProviders {
+		header := req.Header.Get(config.GetWebhookEventHeaderKeyFromGitProvider(p.Id))
+		if header == "" {
+			continue
+		} else {
+			providerId = p.Id
+			break
+		}
+	}
 
 	return s.newGitProvider(&gitprovider.GitProviderConfig{
 		Id:         providerId,
