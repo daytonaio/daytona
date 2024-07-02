@@ -87,7 +87,16 @@ var CodeCmd = &cobra.Command{
 			ideId = ideFlag
 		}
 
-		views.RenderInfoMessage(fmt.Sprintf("Opening the project '%s' from workspace '%s' in your preferred IDE.", projectName, *workspace.Name))
+		ideList := config.GetIdeList()
+		ideName := ""
+		for _, ide := range ideList {
+			if ide.Id == ideId {
+				ideName = ide.Name
+				break
+			}
+		}
+
+		views.RenderInfoMessage(fmt.Sprintf("Opening the project '%s' from workspace '%s' in %s", projectName, *workspace.Name, ideName))
 
 		err = openIDE(ideId, activeProfile, workspaceId, projectName)
 		if err != nil {
