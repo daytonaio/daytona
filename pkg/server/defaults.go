@@ -28,7 +28,7 @@ const defaultLocalBuilderRegistryPort = 3988
 const defaultBuilderRegistryServer = "local"
 const defaultBuildImageNamespace = ""
 
-var defaultProjectPostStartCommands = []string{"sudo dockerd"}
+var defaultProjectPostStartCommands = []string{}
 
 var us_defaultFrpsConfig = FRPSConfig{
 	Domain:   "try-us.daytona.app",
