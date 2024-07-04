@@ -61,7 +61,7 @@ type Model struct {
 	width  int
 }
 
-func GetRepositoryFromUrlInput(multiProject bool, apiClient *apiclient.APIClient) (*apiclient.GitRepository, error) {
+func GetRepositoryFromUrlInput(multiProject bool, apiClient *apiclient.APIClient, selectedRepos map[string]bool) (*apiclient.GitRepository, error) {
 	m := Model{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
@@ -101,46 +101,70 @@ func GetRepositoryFromUrlInput(multiProject bool, apiClient *apiclient.APIClient
 		return nil, err
 	}
 
+	selectedRepos[initialRepoUrl] = true
+
 	return repo, nil
 }
 
-func RunAdditionalProjectRepoForm(index int, apiClient *apiclient.APIClient) (*apiclient.GitRepository, bool, error) {
+func RunAdditionalProjectRepoForm(index int, apiClient *apiclient.APIClient, selectedRepos map[string]bool) (*apiclient.GitRepository, bool, error) {
 	m := Model{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
+	isDuplicateEntry := false
+	duplicateRepoUrl := ""
 
 	var repoUrl string
 	var repo *apiclient.GitRepository
 
 	var addAnother bool
 
-	repositoryUrlInput :=
-		huh.NewInput().
-			Title(getOrderNumberString(index) + " project repository").
-			Value(&repoUrl).
-			Key(fmt.Sprintf("additionalRepo%d", index)).
-			Validate(func(str string) error {
-				var err error
-				repo, err = validateRepoUrl(str, apiClient)
-				return err
-			})
+	for {
+		title := getOrderNumberString(index) + " project repository"
+		if isDuplicateEntry {
+			title = fmt.Sprintf("DUPLICATE ENTRY detected: %s, \nRetry with different repo url. ", duplicateRepoUrl) + title
+		}
 
-	confirmInput :=
-		huh.NewConfirm().
-			Title("Add another project?").
-			Value(&addAnother)
+		repositoryUrlInput :=
+			huh.NewInput().
+				Title(title).
+				Value(&repoUrl).
+				Key(fmt.Sprintf("additionalRepo%d", index)).
+				Validate(func(str string) error {
+					var err error
+					repo, err = validateRepoUrl(str, apiClient)
+					if err == nil && selectedRepos[str] {
+						isDuplicateEntry = true
+					} else {
+						isDuplicateEntry = false
+					}
+					return err
+				})
 
-	m.form = huh.NewForm(
-		huh.NewGroup(repositoryUrlInput, confirmInput),
-	).
-		WithWidth(maxWidth).
-		WithShowHelp(false).
-		WithShowErrors(true).
-		WithTheme(views.GetCustomTheme())
+		confirmInput :=
+			huh.NewConfirm().
+				Title("Add another project?").
+				Value(&addAnother)
 
-	err := m.form.Run()
-	if err != nil {
-		return nil, false, err
+		m.form = huh.NewForm(
+			huh.NewGroup(repositoryUrlInput, confirmInput),
+		).
+			WithWidth(maxWidth).
+			WithShowHelp(false).
+			WithShowErrors(true).
+			WithTheme(views.GetCustomTheme())
+
+		err := m.form.Run()
+		if err != nil {
+			return nil, false, err
+		}
+
+		if isDuplicateEntry {
+			duplicateRepoUrl = repoUrl
+			continue
+		} else {
+			selectedRepos[repoUrl] = true
+			break
+		}
 	}
 
 	return repo, addAnother, nil

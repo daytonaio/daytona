@@ -14,42 +14,68 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectRepositoryPrompt(repositories []apiclient.GitRepository, index int, choiceChan chan<- string) {
-	items := []list.Item{}
+const redColor = "\033[31m"
 
-	// Populate items with titles and descriptions from workspaces.
-	for _, repository := range repositories {
-		newItem := item[string]{id: *repository.Url, title: *repository.Name, choiceProperty: *repository.Url, desc: *repository.Url}
-		items = append(items, newItem)
-	}
+func selectRepositoryPrompt(repositories []apiclient.GitRepository, index int, choiceChan chan<- string, selectedRepos map[string]bool) {
+	isDuplicateEntry := false
+	duplicateEntryErrorMessage := "DUPLICATE ENTRY detected, Retry with different option.\n"
+	for {
+		items := []list.Item{}
 
-	l := views.GetStyledSelectList(items)
+		// Populate items with titles and descriptions from workspaces.
+		for _, repository := range repositories {
+			title := *repository.Name
+			// Index > 1 indicates 'multi-project' use
+			if index > 1 && len(selectedRepos) > 0 && selectedRepos[*repository.Url] {
+				// Hack to set red as font color
+				title += fmt.Sprintf(" %s(ALREADY SELECTED)", redColor)
+			}
+			newItem := item[string]{id: *repository.Url, title: title, choiceProperty: *repository.Url, desc: *repository.Url}
+			items = append(items, newItem)
+		}
 
-	title := "Choose a Repository"
-	if index > 0 {
-		title += fmt.Sprintf(" (Project #%d)", index)
-	}
-	l.Title = views.GetStyledMainTitle(title)
-	l.Styles.Title = titleStyle
-	m := model[string]{list: l}
+		l := views.GetStyledSelectList(items)
 
-	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
-	if err != nil {
-		fmt.Println("Error running program:", err)
-		os.Exit(1)
-	}
+		title := ""
+		if isDuplicateEntry {
+			title = duplicateEntryErrorMessage
+		}
 
-	if m, ok := p.(model[string]); ok && m.choice != nil {
-		choiceChan <- *m.choice
-	} else {
-		choiceChan <- ""
+		title += "Choose a Repository"
+		if index > 1 {
+			title += fmt.Sprintf(" (Project #%d)", index)
+		}
+		l.Title = views.GetStyledMainTitle(title)
+		l.Styles.Title = titleStyle
+		m := model[string]{list: l}
+
+		p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
+		if err != nil {
+			fmt.Println("Error running program:", err)
+			os.Exit(1)
+		}
+
+		if m, ok := p.(model[string]); ok && m.choice != nil {
+			choice := *m.choice
+			if index > 1 && len(selectedRepos) > 0 && selectedRepos[choice] {
+				// Duplicate entry, loop continues until user selects some other repo option
+				isDuplicateEntry = true
+			} else {
+				selectedRepos[choice] = true
+				choiceChan <- choice
+				break
+			}
+		} else {
+			choiceChan <- ""
+			break
+		}
 	}
 }
 
-func GetRepositoryFromPrompt(repositories []apiclient.GitRepository, index int) *apiclient.GitRepository {
+func GetRepositoryFromPrompt(repositories []apiclient.GitRepository, index int, selectedRepos map[string]bool) *apiclient.GitRepository {
 	choiceChan := make(chan string)
 
-	go selectRepositoryPrompt(repositories, index, choiceChan)
+	go selectRepositoryPrompt(repositories, index, choiceChan, selectedRepos)
 
 	choice := <-choiceChan
 
