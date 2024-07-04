@@ -128,7 +128,7 @@ func (m model[T]) View() string {
 		return ""
 	}
 
-	return views.DocStyle.Width(terminalWidth - 4).Height(terminalHeight - 4).Render(m.list.View() + m.footer)
+	return views.DocStyle.MaxWidth(terminalWidth - 4).MaxHeight(terminalHeight - 4).Render(m.list.View() + m.footer)
 }
 
 type ItemDelegate[T any] struct {
