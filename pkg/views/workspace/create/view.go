@@ -81,7 +81,7 @@ func GetRepositoryFromUrlInput(multiProject bool, apiClient *apiclient.APIClient
 		Key("initialProjectRepo").
 		Validate(func(str string) error {
 			var err error
-			repo, err = validateRepoUrl(str, apiClient)
+			repo, err = validateRepoUrl(str, apiClient, selectedRepos)
 			return err
 		})
 
@@ -110,62 +110,42 @@ func RunAdditionalProjectRepoForm(index int, apiClient *apiclient.APIClient, sel
 	m := Model{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
-	isDuplicateEntry := false
-	duplicateRepoUrl := ""
 
 	var repoUrl string
 	var repo *apiclient.GitRepository
 
 	var addAnother bool
 
-	for {
-		title := getOrderNumberString(index) + " project repository"
-		if isDuplicateEntry {
-			title = fmt.Sprintf("DUPLICATE ENTRY detected: %s, \nRetry with different repo url. ", duplicateRepoUrl) + title
-		}
+	repositoryUrlInput :=
+		huh.NewInput().
+			Title(getOrderNumberString(index) + " project repository").
+			Value(&repoUrl).
+			Key(fmt.Sprintf("additionalRepo%d", index)).
+			Validate(func(str string) error {
+				var err error
+				repo, err = validateRepoUrl(str, apiClient, selectedRepos)
+				return err
+			})
 
-		repositoryUrlInput :=
-			huh.NewInput().
-				Title(title).
-				Value(&repoUrl).
-				Key(fmt.Sprintf("additionalRepo%d", index)).
-				Validate(func(str string) error {
-					var err error
-					repo, err = validateRepoUrl(str, apiClient)
-					if err == nil && selectedRepos[str] {
-						isDuplicateEntry = true
-					} else {
-						isDuplicateEntry = false
-					}
-					return err
-				})
+	confirmInput :=
+		huh.NewConfirm().
+			Title("Add another project?").
+			Value(&addAnother)
 
-		confirmInput :=
-			huh.NewConfirm().
-				Title("Add another project?").
-				Value(&addAnother)
+	m.form = huh.NewForm(
+		huh.NewGroup(repositoryUrlInput, confirmInput),
+	).
+		WithWidth(maxWidth).
+		WithShowHelp(false).
+		WithShowErrors(true).
+		WithTheme(views.GetCustomTheme())
 
-		m.form = huh.NewForm(
-			huh.NewGroup(repositoryUrlInput, confirmInput),
-		).
-			WithWidth(maxWidth).
-			WithShowHelp(false).
-			WithShowErrors(true).
-			WithTheme(views.GetCustomTheme())
-
-		err := m.form.Run()
-		if err != nil {
-			return nil, false, err
-		}
-
-		if isDuplicateEntry {
-			duplicateRepoUrl = repoUrl
-			continue
-		} else {
-			selectedRepos[repoUrl] = true
-			break
-		}
+	err := m.form.Run()
+	if err != nil {
+		return nil, false, err
 	}
+
+	selectedRepos[repoUrl] = true
 
 	return repo, addAnother, nil
 }
@@ -231,11 +211,16 @@ func getOrderNumberString(number int) string {
 	return "Invalid"
 }
 
-func validateRepoUrl(repoUrl string, apiClient *apiclient.APIClient) (*apiclient.GitRepository, error) {
+func validateRepoUrl(repoUrl string, apiClient *apiclient.APIClient, selectedRepos map[string]bool) (*apiclient.GitRepository, error) {
 	result, err := util.GetValidatedUrl(repoUrl)
 	if err != nil {
 		return nil, err
 	}
+
+	if selectedRepos[repoUrl] {
+		return nil, fmt.Errorf("duplicate entry, please try with a different repository")
+	}
+
 	encodedURLParam := url.QueryEscape(result)
 	repo, _, err := apiClient.GitProviderAPI.GetGitContext(context.Background(), encodedURLParam).Execute()
 	if err != nil {

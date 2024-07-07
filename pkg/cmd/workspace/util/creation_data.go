@@ -31,9 +31,12 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 	var workspaceName string
 	// Keeps track of visited repos, lookups will help in avoiding duplicated repo entries
 	selectedRepos := make(map[string]bool)
+	// Keeps track of visited git provider, helps in disabling a git provider option from further selection
+	// for workspace creation if all repos under this git provider is already selected for a workspace.
+	selectedReposGitProvider := make(map[string]bool)
 
 	if !config.Manual && config.UserGitProviders != nil && len(config.UserGitProviders) > 0 {
-		providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, 0, selectedRepos)
+		providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, 0, selectedReposGitProvider, selectedRepos)
 		if err != nil {
 			return "", nil, err
 		}
@@ -59,7 +62,7 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 			var providerRepo *apiclient.GitRepository
 
 			if !config.Manual && config.UserGitProviders != nil && len(config.UserGitProviders) > 0 {
-				providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, i, selectedRepos)
+				providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, i, selectedReposGitProvider, selectedRepos)
 				if err != nil {
 					return "", nil, err
 				}
