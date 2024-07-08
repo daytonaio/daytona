@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/cmd/tailscale"
 	defaultPortForwardCmd "github.com/daytonaio/daytona/pkg/cmd/ports"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -21,12 +22,21 @@ var portForwardCmd = &cobra.Command{
 	Short: "Forward a port from the project to your local machine",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		c, err := config.GetConfig()
+		if err != nil {
+			log.Fatal(err)
+		}
+		activeProfile, err := c.GetActiveProfile()
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		port, err := strconv.Atoi(args[0])
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		hostPort, errChan := tailscale.ForwardPort(workspaceId, projectName, uint16(port))
+		hostPort, errChan := tailscale.ForwardPort(workspaceId, projectName, uint16(port), activeProfile)
 
 		if hostPort == nil {
 			if err = <-errChan; err != nil {
