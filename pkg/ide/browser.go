@@ -60,7 +60,7 @@ func OpenBrowserIDE(activeProfile config.Profile, workspaceId string, projectNam
 	}()
 
 	// Forward IDE port
-	browserPort, errChan := tailscale.ForwardPort(workspaceId, projectName, 63000)
+	browserPort, errChan := tailscale.ForwardPort(workspaceId, projectName, 63000, activeProfile)
 	if browserPort == nil {
 		if err := <-errChan; err != nil {
 			return err
