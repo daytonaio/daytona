@@ -14,7 +14,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectRepositoryPrompt(repositories []apiclient.GitRepository, index int, choiceChan chan<- string, providerId string, selectedReposGitProvider map[string]bool, selectedRepos map[string]bool) {
+func selectRepositoryPrompt(repositories []apiclient.GitRepository, index int, choiceChan chan<- string, parentId string, selectedReposParentMap map[string]bool, selectedRepos map[string]bool) {
 	items := []list.Item{}
 	disabledReposCount := 0
 
@@ -58,7 +58,7 @@ func selectRepositoryPrompt(repositories []apiclient.GitRepository, index int, c
 		selectedRepos[choice] = true
 		disabledReposCount++
 		if disabledReposCount == len(repositories) {
-			selectedReposGitProvider[providerId] = true
+			selectedReposParentMap[parentId] = true
 		}
 
 		choiceChan <- choice
@@ -67,10 +67,10 @@ func selectRepositoryPrompt(repositories []apiclient.GitRepository, index int, c
 	}
 }
 
-func GetRepositoryFromPrompt(repositories []apiclient.GitRepository, index int, providerId string, selectedReposGitProvider map[string]bool, selectedRepos map[string]bool) *apiclient.GitRepository {
+func GetRepositoryFromPrompt(repositories []apiclient.GitRepository, index int, parentId string, selectedReposParentMap map[string]bool, selectedRepos map[string]bool) *apiclient.GitRepository {
 	choiceChan := make(chan string)
 
-	go selectRepositoryPrompt(repositories, index, choiceChan, providerId, selectedReposGitProvider, selectedRepos)
+	go selectRepositoryPrompt(repositories, index, choiceChan, parentId, selectedReposParentMap, selectedRepos)
 
 	choice := <-choiceChan
 

@@ -29,14 +29,18 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 	var providerRepo *apiclient.GitRepository
 	var err error
 	var workspaceName string
-	// Keeps track of visited repos, lookups will help in avoiding duplicated repo entries
+	// Below 3 maps keeps track of visited repos, their respective namespaces and git providers.
+	// During workspace creation, Lookups will help in avoiding duplicated repo entries and disabling specific
+	// namespaces and git providers list options from further selection under which all repos are visited.
+	// The hierarchy is :
+	// Git Provider ----> Namespaces (organizations/projects) ----> Repositories
+	// Git Provider ----> Repositories (if no orgs available)
 	selectedRepos := make(map[string]bool)
-	// Keeps track of visited git provider, helps in disabling a git provider option from further selection
-	// for workspace creation if all repos under this git provider is already selected for a workspace.
-	selectedReposGitProvider := make(map[string]bool)
+	selectedReposNamespaces := make(map[string]bool)
+	selectedReposGitProviders := make(map[string]bool)
 
 	if !config.Manual && config.UserGitProviders != nil && len(config.UserGitProviders) > 0 {
-		providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, 0, selectedReposGitProvider, selectedRepos)
+		providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, 0, selectedReposGitProviders, selectedReposNamespaces, selectedRepos)
 		if err != nil {
 			return "", nil, err
 		}
@@ -62,7 +66,7 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 			var providerRepo *apiclient.GitRepository
 
 			if !config.Manual && config.UserGitProviders != nil && len(config.UserGitProviders) > 0 {
-				providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, i, selectedReposGitProvider, selectedRepos)
+				providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, i, selectedReposGitProviders, selectedReposNamespaces, selectedRepos)
 				if err != nil {
 					return "", nil, err
 				}

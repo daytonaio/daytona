@@ -153,6 +153,15 @@ func (m model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.list.SetSize(msg.Width-h, msg.Height-v)
 	}
 
+	// default case: Ensure the cursor starts from the first non-disabled item
+	for i := 0; i < len(m.list.Items()); i++ {
+		item := m.list.Items()[i].(item[T])
+		if !item.isDisabled {
+			m.list.Select(i)
+			break
+		}
+	}
+
 	var cmd tea.Cmd
 	m.list, cmd = m.list.Update(msg)
 	return m, cmd

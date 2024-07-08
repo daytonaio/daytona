@@ -17,7 +17,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
 
-func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additionalProjectOrder int, selectedReposGitProvider map[string]bool, selectedRepos map[string]bool) (*apiclient.GitRepository, error) {
+func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additionalProjectOrder int, selectedReposGitProviders map[string]bool, selectedReposNamespaces map[string]bool, selectedRepos map[string]bool) (*apiclient.GitRepository, error) {
 	var providerId string
 	var namespaceId string
 	var checkoutOptions []selection.CheckoutOption
@@ -38,7 +38,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 			}
 		}
 	}
-	providerId = selection.GetProviderIdFromPrompt(gitProviderViewList, additionalProjectOrder, selectedReposGitProvider)
+	providerId = selection.GetProviderIdFromPrompt(gitProviderViewList, additionalProjectOrder, selectedReposGitProviders)
 	if providerId == "" {
 		return nil, errors.New("must select a provider")
 	}
@@ -67,7 +67,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 	if len(namespaceList) == 1 {
 		namespaceId = *namespaceList[0].Id
 	} else {
-		namespaceId = selection.GetNamespaceIdFromPrompt(namespaceList, additionalProjectOrder)
+		namespaceId = selection.GetNamespaceIdFromPrompt(namespaceList, additionalProjectOrder, providerId, selectedReposGitProviders, selectedReposNamespaces)
 		if namespaceId == "" {
 			return nil, errors.New("namespace not found")
 		}
@@ -83,7 +83,12 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 		return nil, err
 	}
 
-	chosenRepo := selection.GetRepositoryFromPrompt(providerRepos, additionalProjectOrder, providerId, selectedReposGitProvider, selectedRepos)
+	var chosenRepo *apiclient.GitRepository
+	if len(namespaceList) > 1 {
+		chosenRepo = selection.GetRepositoryFromPrompt(providerRepos, additionalProjectOrder, namespaceId, selectedReposNamespaces, selectedRepos)
+	} else {
+		chosenRepo = selection.GetRepositoryFromPrompt(providerRepos, additionalProjectOrder, providerId, selectedReposGitProviders, selectedRepos)
+	}
 	if chosenRepo == nil {
 		return nil, errors.New("must select a repository")
 	}
