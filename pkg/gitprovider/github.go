@@ -38,7 +38,7 @@ func (g *GitHubGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 		return nil, err
 	}
 
-	orgList, _, err := client.Organizations.List(context.Background(), user.Username, &github.ListOptions{
+	orgList, _, err := client.Organizations.List(context.Background(), "", &github.ListOptions{
 		PerPage: 100,
 		Page:    1,
 	})
