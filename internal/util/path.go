@@ -5,7 +5,7 @@ package util
 
 import (
 	"os/exec"
-	"path/filepath"
+	"path"
 	"strings"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -49,5 +49,5 @@ func GetProjectDir(activeProfile config.Profile, workspaceId string, projectName
 		return "", err
 	}
 
-	return filepath.Join(homeDir, projectName), nil
+	return path.Join(homeDir, projectName), nil
 }
