@@ -27,7 +27,7 @@ func selectNamespacePrompt(namespaces []apiclient.GitNamespace, additionalProjec
 		// additionalProjectOrder > 1 indicates use of 'multi-project' command
 		if additionalProjectOrder > 1 && len(selectedReposNamespaces) > 0 && selectedReposNamespaces[id] {
 			title += statusMessageDangerStyle(" (All repositories under this are already selected)")
-			// isDisabled property helps in skipping over this specific repo option, refer
+			// isDisabled property helps in skipping over this specific namespace option, refer
 			// handling of up/down key press under update method in ./view.go file
 			isDisabled = true
 			disabledNamespacesCount++
