@@ -29,7 +29,7 @@ func selectProviderPrompt(gitProviders []gitprovider_view.GitProviderView, addit
 		// additionalProjectOrder > 1 indicates use of 'multi-project' command
 		if additionalProjectOrder > 1 && len(disabledGitProviders) > 0 && disabledGitProviders[id] {
 			title += statusMessageDangerStyle(" (All repositories under this are already selected)")
-			// isDisabled property helps in skipping over this specific git provider option, refer
+			// isDisabled property helps in skipping over this specific git provider option, refer to
 			// handling of up/down key press under update method in ./view.go file
 			isDisabled = true
 		}

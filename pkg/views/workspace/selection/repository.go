@@ -27,7 +27,7 @@ func selectRepositoryPrompt(repositories []apiclient.GitRepository, index int, c
 		// Index > 1 indicates use of 'multi-project' command
 		if index > 1 && len(selectedRepos) > 0 && selectedRepos[url] {
 			title += statusMessageDangerStyle(" (Already selected)")
-			// isDisabled property helps in skipping over this specific repo option, refer
+			// isDisabled property helps in skipping over this specific repo option, refer to
 			// handling of up/down key press under update method in ./view.go file
 			isDisabled = true
 			disabledReposCount++

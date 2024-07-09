@@ -29,8 +29,8 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 	var providerRepo *apiclient.GitRepository
 	var err error
 	var workspaceName string
-	// Below 3 maps keeps track of visited repos, their respective namespaces and git providers.
-	// During workspace creation, Lookups will help in avoiding duplicated repo entries and disabling specific
+	// The following three maps keep track of visited repos and their respective namespaces and Git providers
+	// During workspace creation, lookups will help in avoiding duplicated repo entries and disabling specific
 	// namespaces and git providers list options from further selection under which all repos are visited.
 	// The hierarchy is :
 	// Git Provider ----> Namespaces (organizations/projects) ----> Repositories
