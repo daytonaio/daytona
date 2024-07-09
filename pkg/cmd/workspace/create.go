@@ -191,7 +191,7 @@ var CreateCmd = &cobra.Command{
 			return
 		}
 
-		views.RenderCreationInfoMessage("Opening the workspace in your preferred editor ...")
+		views.RenderCreationInfoMessage(fmt.Sprintf("Opening the workspace in %s ...", chosenIde.Name))
 
 		err = openIDE(chosenIdeId, activeProfile, *createdWorkspace.Id, *wsInfo.Projects[0].Name)
 		if err != nil {
