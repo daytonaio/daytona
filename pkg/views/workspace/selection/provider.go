@@ -17,7 +17,7 @@ import (
 
 var titleStyle = lipgloss.NewStyle()
 
-func selectProviderPrompt(gitProviders []gitprovider_view.GitProviderView, additionalProjectOrder int, selectedReposGitProviders map[string]bool, choiceChan chan<- string) {
+func selectProviderPrompt(gitProviders []gitprovider_view.GitProviderView, additionalProjectOrder int, disabledGitProviders map[string]bool, choiceChan chan<- string) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
@@ -27,7 +27,7 @@ func selectProviderPrompt(gitProviders []gitprovider_view.GitProviderView, addit
 		isDisabled := false
 
 		// additionalProjectOrder > 1 indicates use of 'multi-project' command
-		if additionalProjectOrder > 1 && len(selectedReposGitProviders) > 0 && selectedReposGitProviders[id] {
+		if additionalProjectOrder > 1 && len(disabledGitProviders) > 0 && disabledGitProviders[id] {
 			title += statusMessageDangerStyle(" (All repositories under this are already selected)")
 			// isDisabled property helps in skipping over this specific git provider option, refer
 			// handling of up/down key press under update method in ./view.go file
@@ -64,10 +64,10 @@ func selectProviderPrompt(gitProviders []gitprovider_view.GitProviderView, addit
 	}
 }
 
-func GetProviderIdFromPrompt(gitProviders []gitprovider_view.GitProviderView, additionalProjectOrder int, selectedReposGitProviders map[string]bool) string {
+func GetProviderIdFromPrompt(gitProviders []gitprovider_view.GitProviderView, additionalProjectOrder int, disabledGitProviders map[string]bool) string {
 	choiceChan := make(chan string)
 
-	go selectProviderPrompt(gitProviders, additionalProjectOrder, selectedReposGitProviders, choiceChan)
+	go selectProviderPrompt(gitProviders, additionalProjectOrder, disabledGitProviders, choiceChan)
 
 	return <-choiceChan
 }

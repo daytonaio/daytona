@@ -36,11 +36,11 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 	// Git Provider ----> Namespaces (organizations/projects) ----> Repositories
 	// Git Provider ----> Repositories (if no orgs available)
 	selectedRepos := make(map[string]bool)
-	selectedReposNamespaces := make(map[string]bool)
-	selectedReposGitProviders := make(map[string]bool)
+	disabledNamespaces := make(map[string]bool)
+	disabledGitProviders := make(map[string]bool)
 
 	if !config.Manual && config.UserGitProviders != nil && len(config.UserGitProviders) > 0 {
-		providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, 0, selectedReposGitProviders, selectedReposNamespaces, selectedRepos)
+		providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, 0, disabledGitProviders, disabledNamespaces, selectedRepos)
 		if err != nil {
 			return "", nil, err
 		}
@@ -66,7 +66,7 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 			var providerRepo *apiclient.GitRepository
 
 			if !config.Manual && config.UserGitProviders != nil && len(config.UserGitProviders) > 0 {
-				providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, i, selectedReposGitProviders, selectedReposNamespaces, selectedRepos)
+				providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, i, disabledGitProviders, disabledNamespaces, selectedRepos)
 				if err != nil {
 					return "", nil, err
 				}

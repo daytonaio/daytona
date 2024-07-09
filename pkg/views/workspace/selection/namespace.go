@@ -13,7 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
-func selectNamespacePrompt(namespaces []apiclient.GitNamespace, additionalProjectOrder int, choiceChan chan<- string, providerId string, selectedReposGitProviders map[string]bool, selectedReposNamespaces map[string]bool) {
+func selectNamespacePrompt(namespaces []apiclient.GitNamespace, additionalProjectOrder int, choiceChan chan<- string, providerId string, disabledGitProviders map[string]bool, disabledNamespaces map[string]bool) {
 	items := []list.Item{}
 	var desc string
 	disabledNamespacesCount := 0
@@ -25,7 +25,7 @@ func selectNamespacePrompt(namespaces []apiclient.GitNamespace, additionalProjec
 		title := *namespace.Name
 
 		// additionalProjectOrder > 1 indicates use of 'multi-project' command
-		if additionalProjectOrder > 1 && len(selectedReposNamespaces) > 0 && selectedReposNamespaces[id] {
+		if additionalProjectOrder > 1 && len(disabledNamespaces) > 0 && disabledNamespaces[id] {
 			title += statusMessageDangerStyle(" (All repositories under this are already selected)")
 			// isDisabled property helps in skipping over this specific namespace option, refer
 			// handling of up/down key press under update method in ./view.go file
@@ -43,7 +43,7 @@ func selectNamespacePrompt(namespaces []apiclient.GitNamespace, additionalProjec
 	}
 
 	if disabledNamespacesCount == len(namespaces) {
-		selectedReposGitProviders[providerId] = true
+		disabledGitProviders[providerId] = true
 	}
 
 	l := views.GetStyledSelectList(items)
@@ -69,10 +69,10 @@ func selectNamespacePrompt(namespaces []apiclient.GitNamespace, additionalProjec
 	}
 }
 
-func GetNamespaceIdFromPrompt(namespaces []apiclient.GitNamespace, additionalProjectOrder int, providerId string, selectedReposGitProviders map[string]bool, selectedReposNamespaces map[string]bool) string {
+func GetNamespaceIdFromPrompt(namespaces []apiclient.GitNamespace, additionalProjectOrder int, providerId string, disabledGitProviders map[string]bool, disabledNamespaces map[string]bool) string {
 	choiceChan := make(chan string)
 
-	go selectNamespacePrompt(namespaces, additionalProjectOrder, choiceChan, providerId, selectedReposGitProviders, selectedReposNamespaces)
+	go selectNamespacePrompt(namespaces, additionalProjectOrder, choiceChan, providerId, disabledGitProviders, disabledNamespaces)
 
 	return <-choiceChan
 }
