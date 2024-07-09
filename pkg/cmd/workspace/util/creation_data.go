@@ -29,16 +29,25 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 	var providerRepo *apiclient.GitRepository
 	var err error
 	var workspaceName string
+	// The following three maps keep track of visited repos and their respective namespaces and Git providers
+	// During workspace creation, lookups will help in avoiding duplicated repo entries and disabling specific
+	// namespaces and git providers list options from further selection under which all repos are visited.
+	// The hierarchy is :
+	// Git Provider ----> Namespaces (organizations/projects) ----> Repositories
+	// Git Provider ----> Repositories (if no orgs available)
+	selectedRepos := make(map[string]bool)
+	disabledNamespaces := make(map[string]bool)
+	disabledGitProviders := make(map[string]bool)
 
 	if !config.Manual && config.UserGitProviders != nil && len(config.UserGitProviders) > 0 {
-		providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, 0)
+		providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, 0, disabledGitProviders, disabledNamespaces, selectedRepos)
 		if err != nil {
 			return "", nil, err
 		}
 	}
 
 	if providerRepo == nil {
-		providerRepo, err = create.GetRepositoryFromUrlInput(config.MultiProject, config.ApiClient)
+		providerRepo, err = create.GetRepositoryFromUrlInput(config.MultiProject, config.ApiClient, selectedRepos)
 		if err != nil {
 			return "", nil, err
 		}
@@ -57,14 +66,14 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 			var providerRepo *apiclient.GitRepository
 
 			if !config.Manual && config.UserGitProviders != nil && len(config.UserGitProviders) > 0 {
-				providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, i)
+				providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, i, disabledGitProviders, disabledNamespaces, selectedRepos)
 				if err != nil {
 					return "", nil, err
 				}
 			}
 
 			if providerRepo == nil {
-				providerRepo, addMore, err = create.RunAdditionalProjectRepoForm(i, config.ApiClient)
+				providerRepo, addMore, err = create.RunAdditionalProjectRepoForm(i, config.ApiClient, selectedRepos)
 				if err != nil {
 					return "", nil, err
 				}
