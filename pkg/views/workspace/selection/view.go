@@ -67,7 +67,6 @@ func (m model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if err != nil {
 			m.list.SetWidth(150)
 		}
-		m.initialWidthSet = true
 	}
 
 	switch msg := msg.(type) {
@@ -99,8 +98,8 @@ func (m model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.WindowSizeMsg:
 		h, v := views.DocStyle.GetFrameSize()
-		// The height here minus the height occupied by the title header
-		m.list.SetSize(msg.Width-h, msg.Height-v-3)
+		// The height here minus the height occupied by the title header and footer
+		m.list.SetSize(msg.Width-h, msg.Height-v-4)
 	}
 
 	var cmd tea.Cmd
