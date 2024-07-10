@@ -109,11 +109,10 @@ func newCreateProjectRequest(config CreateDataPromptConfig, providerRepo *apicli
 		Source: &apiclient.CreateWorkspaceRequestProjectSource{
 			Repository: providerRepo,
 		},
-		Build:             &apiclient.ProjectBuild{},
-		Image:             config.Defaults.Image,
-		User:              config.Defaults.ImageUser,
-		PostStartCommands: config.Defaults.PostStartCommands,
-		EnvVars:           &map[string]string{},
+		Build:   &apiclient.ProjectBuild{},
+		Image:   config.Defaults.Image,
+		User:    config.Defaults.ImageUser,
+		EnvVars: &map[string]string{},
 	}
 
 	return project

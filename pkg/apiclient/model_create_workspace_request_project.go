@@ -21,13 +21,12 @@ var _ MappedNullable = &CreateWorkspaceRequestProject{}
 
 // CreateWorkspaceRequestProject struct for CreateWorkspaceRequestProject
 type CreateWorkspaceRequestProject struct {
-	Build             *ProjectBuild                        `json:"build,omitempty"`
-	EnvVars           *map[string]string                   `json:"envVars,omitempty"`
-	Image             *string                              `json:"image,omitempty"`
-	Name              string                               `json:"name"`
-	PostStartCommands []string                             `json:"postStartCommands,omitempty"`
-	Source            *CreateWorkspaceRequestProjectSource `json:"source,omitempty"`
-	User              *string                              `json:"user,omitempty"`
+	Build   *ProjectBuild                        `json:"build,omitempty"`
+	EnvVars *map[string]string                   `json:"envVars,omitempty"`
+	Image   *string                              `json:"image,omitempty"`
+	Name    string                               `json:"name"`
+	Source  *CreateWorkspaceRequestProjectSource `json:"source,omitempty"`
+	User    *string                              `json:"user,omitempty"`
 }
 
 type _CreateWorkspaceRequestProject CreateWorkspaceRequestProject
@@ -170,38 +169,6 @@ func (o *CreateWorkspaceRequestProject) SetName(v string) {
 	o.Name = v
 }
 
-// GetPostStartCommands returns the PostStartCommands field value if set, zero value otherwise.
-func (o *CreateWorkspaceRequestProject) GetPostStartCommands() []string {
-	if o == nil || IsNil(o.PostStartCommands) {
-		var ret []string
-		return ret
-	}
-	return o.PostStartCommands
-}
-
-// GetPostStartCommandsOk returns a tuple with the PostStartCommands field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *CreateWorkspaceRequestProject) GetPostStartCommandsOk() ([]string, bool) {
-	if o == nil || IsNil(o.PostStartCommands) {
-		return nil, false
-	}
-	return o.PostStartCommands, true
-}
-
-// HasPostStartCommands returns a boolean if a field has been set.
-func (o *CreateWorkspaceRequestProject) HasPostStartCommands() bool {
-	if o != nil && !IsNil(o.PostStartCommands) {
-		return true
-	}
-
-	return false
-}
-
-// SetPostStartCommands gets a reference to the given []string and assigns it to the PostStartCommands field.
-func (o *CreateWorkspaceRequestProject) SetPostStartCommands(v []string) {
-	o.PostStartCommands = v
-}
-
 // GetSource returns the Source field value if set, zero value otherwise.
 func (o *CreateWorkspaceRequestProject) GetSource() CreateWorkspaceRequestProjectSource {
 	if o == nil || IsNil(o.Source) {
@@ -286,9 +253,6 @@ func (o CreateWorkspaceRequestProject) ToMap() (map[string]interface{}, error) {
 		toSerialize["image"] = o.Image
 	}
 	toSerialize["name"] = o.Name
-	if !IsNil(o.PostStartCommands) {
-		toSerialize["postStartCommands"] = o.PostStartCommands
-	}
 	if !IsNil(o.Source) {
 		toSerialize["source"] = o.Source
 	}

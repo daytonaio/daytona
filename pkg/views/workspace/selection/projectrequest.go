@@ -22,8 +22,8 @@ var DoneConfiguring = apiclient.CreateWorkspaceRequestProject{Name: "DoneConfigu
 
 type projectRequestItem struct {
 	item[apiclient.CreateWorkspaceRequestProject]
-	name, image, user, postStartCommands, devcontainerConfig string
-	project                                                  apiclient.CreateWorkspaceRequestProject
+	name, image, user, devcontainerConfig string
+	project                               apiclient.CreateWorkspaceRequestProject
 }
 
 type projectRequestItemDelegate struct {
@@ -40,7 +40,6 @@ func selectProjectRequestPrompt(projects *[]apiclient.CreateWorkspaceRequestProj
 		var name string
 		var image string
 		var user string
-		var postStartCommands string
 		var devcontainerConfig string
 
 		if project.Name != "" {
@@ -60,22 +59,10 @@ func selectProjectRequestPrompt(projects *[]apiclient.CreateWorkspaceRequestProj
 
 		newItem.SetId(name)
 
-		if len(project.PostStartCommands) > 0 {
-			postStartCommands = fmt.Sprintf("%d post start command%s", len(project.PostStartCommands), func() string {
-				if len(project.PostStartCommands) == 1 {
-					return ""
-				} else {
-					return "s"
-				}
-			}())
-		}
-
-		newItem.postStartCommands = postStartCommands
-
 		items = append(items, newItem)
 	}
 
-	newItem := projectRequestItem{name: "Done configuring", image: "Return to summary view", user: "", postStartCommands: "", project: DoneConfiguring}
+	newItem := projectRequestItem{name: "Done configuring", image: "Return to summary view", user: "", project: DoneConfiguring}
 
 	items = append(items, newItem)
 
@@ -155,7 +142,6 @@ func (d projectRequestItemDelegate) Render(w io.Writer, m list.Model, index int,
 	imageLine := baseStyles.Copy().Render(i.Image())
 	devcontainerConfigLine := baseStyles.Copy().Render(i.DevcontainerConfig())
 	userLine := baseStyles.Copy().Foreground(views.Gray).Render(i.User())
-	postStartCommandsLine := baseStyles.Copy().Foreground(views.Gray).Render(i.PostStartCommands())
 
 	// Adjust styles as the user moves through the menu
 	if isSelected {
@@ -163,7 +149,6 @@ func (d projectRequestItemDelegate) Render(w io.Writer, m list.Model, index int,
 		devcontainerConfigLine = selectedStyles.Copy().Foreground(views.DimmedGreen).Render(i.DevcontainerConfig())
 		imageLine = selectedStyles.Copy().Foreground(views.DimmedGreen).Render(i.Image())
 		userLine = selectedStyles.Copy().Foreground(views.Gray).Render(i.User())
-		postStartCommandsLine = selectedStyles.Copy().Foreground(views.Gray).Render(i.PostStartCommands())
 	}
 
 	// Render to the terminal
@@ -186,8 +171,6 @@ func (d projectRequestItemDelegate) Render(w io.Writer, m list.Model, index int,
 		s.WriteRune('\n')
 		s.WriteString(userLine)
 		s.WriteRune('\n')
-		s.WriteString(postStartCommandsLine)
-		s.WriteRune('\n')
 	}
 
 	fmt.Fprint(w, s.String())
@@ -201,6 +184,5 @@ func (d projectRequestItemDelegate) Height() int {
 func (i projectRequestItem) Name() string               { return i.name }
 func (i projectRequestItem) Image() string              { return i.image }
 func (i projectRequestItem) User() string               { return i.user }
-func (i projectRequestItem) PostStartCommands() string  { return i.postStartCommands }
 func (i projectRequestItem) DevcontainerConfig() string { return i.devcontainerConfig }
 func (i projectRequestItem) SetId(id string)            { i.id = id }

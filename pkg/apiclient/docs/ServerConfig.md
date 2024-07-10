@@ -10,7 +10,6 @@ Name | Type | Description | Notes
 **BuilderImage** | Pointer to **string** |  | [optional] 
 **BuilderRegistryServer** | Pointer to **string** |  | [optional] 
 **DefaultProjectImage** | Pointer to **string** |  | [optional] 
-**DefaultProjectPostStartCommands** | Pointer to **[]string** |  | [optional] 
 **DefaultProjectUser** | Pointer to **string** |  | [optional] 
 **Frps** | Pointer to [**FRPSConfig**](FRPSConfig.md) |  | [optional] 
 **HeadscalePort** | Pointer to **int32** |  | [optional] 
@@ -189,31 +188,6 @@ SetDefaultProjectImage sets DefaultProjectImage field to given value.
 `func (o *ServerConfig) HasDefaultProjectImage() bool`
 
 HasDefaultProjectImage returns a boolean if a field has been set.
-
-### GetDefaultProjectPostStartCommands
-
-`func (o *ServerConfig) GetDefaultProjectPostStartCommands() []string`
-
-GetDefaultProjectPostStartCommands returns the DefaultProjectPostStartCommands field if non-nil, zero value otherwise.
-
-### GetDefaultProjectPostStartCommandsOk
-
-`func (o *ServerConfig) GetDefaultProjectPostStartCommandsOk() (*[]string, bool)`
-
-GetDefaultProjectPostStartCommandsOk returns a tuple with the DefaultProjectPostStartCommands field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetDefaultProjectPostStartCommands
-
-`func (o *ServerConfig) SetDefaultProjectPostStartCommands(v []string)`
-
-SetDefaultProjectPostStartCommands sets DefaultProjectPostStartCommands field to given value.
-
-### HasDefaultProjectPostStartCommands
-
-`func (o *ServerConfig) HasDefaultProjectPostStartCommands() bool`
-
-HasDefaultProjectPostStartCommands returns a boolean if a field has been set.
 
 ### GetDefaultProjectUser
 

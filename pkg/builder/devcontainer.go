@@ -17,7 +17,6 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/daytonaio/daytona/pkg/builder/devcontainer"
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/logs"
@@ -37,11 +36,9 @@ type BuildOutcome struct {
 
 type DevcontainerBuilder struct {
 	*Builder
-	buildImageName     string
-	user               string
-	builderDockerPort  uint16
-	postCreateCommands []string
-	postStartCommands  []string
+	buildImageName    string
+	user              string
+	builderDockerPort uint16
 }
 
 func (b *DevcontainerBuilder) Build() (*BuildResult, error) {
@@ -55,17 +52,10 @@ func (b *DevcontainerBuilder) Build() (*BuildResult, error) {
 		return nil, err
 	}
 
-	err = b.readConfiguration()
-	if err != nil {
-		return nil, err
-	}
-
 	return &BuildResult{
-		User:               b.user,
-		ImageName:          b.buildImageName,
-		ProjectVolumePath:  b.projectVolumePath,
-		PostCreateCommands: b.postCreateCommands,
-		PostStartCommands:  b.postStartCommands,
+		User:              b.user,
+		ImageName:         b.buildImageName,
+		ProjectVolumePath: b.projectVolumePath,
 	}, nil
 }
 
@@ -200,78 +190,6 @@ func (b *DevcontainerBuilder) buildDevcontainer() error {
 	}
 
 	b.buildImageName = imageName
-
-	return nil
-}
-
-func (b *DevcontainerBuilder) readConfiguration() error {
-	projectLogger := b.loggerFactory.CreateProjectLogger(b.project.WorkspaceId, b.project.Name, logs.LogSourceBuilder)
-	defer projectLogger.Close()
-
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	if err != nil {
-		return err
-	}
-
-	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
-		ApiClient: cli,
-	})
-
-	cmd := []string{"devcontainer", "read-configuration", "--include-features-configuration", "--include-merged-configuration", "--workspace-folder", "/project"}
-	if b.project.Build.Devcontainer.DevContainerFilePath != "" {
-		cmd = append(cmd, "--config", filepath.Join("/project", b.project.Build.Devcontainer.DevContainerFilePath))
-	}
-
-	execConfig := types.ExecConfig{
-		AttachStdout: true,
-		AttachStderr: true,
-		Cmd:          cmd,
-		Tty:          true,
-	}
-
-	result, err := dockerClient.ExecSync(b.id, execConfig, nil)
-	if err != nil {
-		return err
-	}
-
-	if result.ExitCode != 0 {
-		return errors.New(result.StdErr)
-	}
-
-	// Convert result.Stdout to string
-	stdoutStr := string(result.StdOut)
-	stdoutStr = strings.TrimSuffix(stdoutStr, "\n")
-
-	// Find the index of the last newline character
-	lastNewline := strings.LastIndex(stdoutStr, "\n")
-
-	// If there is a newline character, slice the string from the index after the newline to the end
-	if lastNewline != -1 {
-		stdoutStr = stdoutStr[lastNewline+1:]
-	}
-
-	// Create a new Root object
-	root := &devcontainer.Root{}
-
-	// Unmarshal the JSON into the Root object
-	err = json.Unmarshal([]byte(stdoutStr), root)
-	if err != nil {
-		return err
-	}
-
-	postCreateCommands, err := devcontainer.ConvertToArray(root.MergedConfiguration.PostCreateCommands)
-	if err != nil {
-		projectLogger.Write([]byte(fmt.Sprintf("Error converting post create commands: %v\n", err)))
-	}
-
-	postStartCommands, err := devcontainer.ConvertToArray(root.MergedConfiguration.PostStartCommands)
-	if err != nil {
-		projectLogger.Write([]byte(fmt.Sprintf("Error converting post start commands: %v\n", err)))
-	}
-
-	b.postCreateCommands = append(b.postCreateCommands, postCreateCommands...)
-	b.postStartCommands = append(b.postStartCommands, root.MergedConfiguration.Entrypoints...)
-	b.postStartCommands = append(b.postStartCommands, postStartCommands...)
 
 	return nil
 }

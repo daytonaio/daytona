@@ -15,11 +15,9 @@ import (
 )
 
 type BuildResult struct {
-	User               string
-	ImageName          string
-	ProjectVolumePath  string
-	PostCreateCommands []string
-	PostStartCommands  []string
+	User              string
+	ImageName         string
+	ProjectVolumePath string
 }
 
 type BuilderConfig struct {
@@ -28,12 +26,11 @@ type BuilderConfig struct {
 	ServerConfigFolder       string
 	ContainerRegistryServer  string
 	// Namespace to be used when tagging and pushing the build image
-	BuildImageNamespace             string
-	BasePath                        string
-	LoggerFactory                   logs.LoggerFactory
-	DefaultProjectImage             string
-	DefaultProjectUser              string
-	DefaultProjectPostStartCommands []string
+	BuildImageNamespace string
+	BasePath            string
+	LoggerFactory       logs.LoggerFactory
+	DefaultProjectImage string
+	DefaultProjectUser  string
 }
 
 type IBuilder interface {
@@ -50,16 +47,15 @@ type Builder struct {
 	hash              string
 	projectVolumePath string
 
-	image                           string
-	containerRegistryService        containerregistries.IContainerRegistryService
-	containerRegistryServer         string
-	buildImageNamespace             string
-	serverConfigFolder              string
-	basePath                        string
-	loggerFactory                   logs.LoggerFactory
-	defaultProjectImage             string
-	defaultProjectUser              string
-	defaultProjectPostStartCommands []string
+	image                    string
+	containerRegistryService containerregistries.IContainerRegistryService
+	containerRegistryServer  string
+	buildImageNamespace      string
+	serverConfigFolder       string
+	basePath                 string
+	loggerFactory            logs.LoggerFactory
+	defaultProjectImage      string
+	defaultProjectUser       string
 }
 
 func (b *Builder) SaveBuildResults(r BuildResult) error {

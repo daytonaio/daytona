@@ -7,8 +7,6 @@ Name | Type | Description | Notes
 **Build** | Pointer to [**ProjectBuild**](ProjectBuild.md) |  | [optional] 
 **Image** | Pointer to **string** |  | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
-**PostCreateCommands** | Pointer to **[]string** |  | [optional] 
-**PostStartCommands** | Pointer to **[]string** |  | [optional] 
 **Repository** | Pointer to [**GitRepository**](GitRepository.md) |  | [optional] 
 **State** | Pointer to [**ProjectState**](ProjectState.md) |  | [optional] 
 **Target** | Pointer to **string** |  | [optional] 
@@ -108,56 +106,6 @@ SetName sets Name field to given value.
 `func (o *Project) HasName() bool`
 
 HasName returns a boolean if a field has been set.
-
-### GetPostCreateCommands
-
-`func (o *Project) GetPostCreateCommands() []string`
-
-GetPostCreateCommands returns the PostCreateCommands field if non-nil, zero value otherwise.
-
-### GetPostCreateCommandsOk
-
-`func (o *Project) GetPostCreateCommandsOk() (*[]string, bool)`
-
-GetPostCreateCommandsOk returns a tuple with the PostCreateCommands field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetPostCreateCommands
-
-`func (o *Project) SetPostCreateCommands(v []string)`
-
-SetPostCreateCommands sets PostCreateCommands field to given value.
-
-### HasPostCreateCommands
-
-`func (o *Project) HasPostCreateCommands() bool`
-
-HasPostCreateCommands returns a boolean if a field has been set.
-
-### GetPostStartCommands
-
-`func (o *Project) GetPostStartCommands() []string`
-
-GetPostStartCommands returns the PostStartCommands field if non-nil, zero value otherwise.
-
-### GetPostStartCommandsOk
-
-`func (o *Project) GetPostStartCommandsOk() (*[]string, bool)`
-
-GetPostStartCommandsOk returns a tuple with the PostStartCommands field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetPostStartCommands
-
-`func (o *Project) SetPostStartCommands(v []string)`
-
-SetPostStartCommands sets PostStartCommands field to given value.
-
-### HasPostStartCommands
-
-`func (o *Project) HasPostStartCommands() bool`
-
-HasPostStartCommands returns a boolean if a field has been set.
 
 ### GetRepository
 
