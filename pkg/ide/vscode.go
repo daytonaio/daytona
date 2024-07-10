@@ -6,6 +6,7 @@ package ide
 import (
 	"fmt"
 	"os/exec"
+	"runtime"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
@@ -37,6 +38,9 @@ func checkAndAlertVSCodeInstalled() {
 
 		errorMessage := "Please install Visual Studio Code and ensure it's in your PATH. "
 		infoMessage := "More information on: 'https://code.visualstudio.com/docs/editor/command-line#_launching-from-command-line'"
+		if runtime.GOOS == "darwin" {
+			infoMessage = "More information on: 'https://code.visualstudio.com/docs/setup/mac#_launching-from-the-command-line'"
+		}
 
 		log.Error(redBold + errorMessage + reset + infoMessage)
 
