@@ -422,6 +422,62 @@ paths:
       summary: Get Git repository PRs
       tags:
       - gitProvider
+  /prebuild:
+    delete:
+      description: Delete prebuild
+      operationId: DeletePrebuild
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrebuildConfig'
+        description: Prebuild
+        required: true
+      responses:
+        "204":
+          content: {}
+          description: No Content
+      summary: Delete prebuild
+      tags:
+      - prebuild
+      x-codegen-request-body-name: prebuild
+    get:
+      description: Upsert prebuild
+      operationId: SetPrebuild
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrebuildConfig'
+        description: Prebuild
+        required: true
+      responses:
+        "201":
+          content: {}
+          description: Created
+      summary: Upsert prebuild
+      tags:
+      - prebuild
+      x-codegen-request-body-name: prebuild
+  /prebuild/list:
+    get:
+      description: List prebuilds
+      operationId: ListPrebuilds
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/prebuild.PrebuildFilter'
+        description: Prebuild Filter
+        required: true
+      responses:
+        "201":
+          content: {}
+          description: Created
+      summary: List prebuilds
+      tags:
+      - prebuild
+      x-codegen-request-body-name: prebuild
   /profile:
     delete:
       description: Delete profile data
@@ -1276,6 +1332,36 @@ components:
         key:
           type: string
       type: object
+    PrebuildConfig:
+      example:
+        projectConfig: "{}"
+        commitInterval: 0
+        branch: branch
+        key: key
+        triggerFiles:
+        - triggerFiles
+        - triggerFiles
+      properties:
+        branch:
+          description: Branch to watch for changes
+          type: string
+        commitInterval:
+          description: Number of commits between each new prebuild
+          type: integer
+        key:
+          description: Composite key (project-config-name+branch-name) for the prebuild
+          type: string
+        projectConfig:
+          allOf:
+          - $ref: '#/components/schemas/ProjectConfig'
+          description: Project configuration
+          type: object
+        triggerFiles:
+          description: Files that should trigger a new prebuild if changed
+          items:
+            type: string
+          type: array
+      type: object
     ProfileData:
       example:
         envVars:
@@ -1788,6 +1874,11 @@ components:
       - ApiKeyTypeClient
       - ApiKeyTypeProject
       - ApiKeyTypeWorkspace
+    prebuild.PrebuildFilter:
+      properties:
+        projectConfigName:
+          type: string
+      type: object
     provider.ProviderInfo:
       example:
         name: name

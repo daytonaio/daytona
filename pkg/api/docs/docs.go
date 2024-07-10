@@ -595,6 +595,91 @@ const docTemplate = `{
                 }
             }
         },
+        "/prebuild": {
+            "get": {
+                "description": "Upsert prebuild",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "prebuild"
+                ],
+                "summary": "Upsert prebuild",
+                "operationId": "SetPrebuild",
+                "parameters": [
+                    {
+                        "description": "Prebuild",
+                        "name": "prebuild",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/PrebuildConfig"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete prebuild",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "prebuild"
+                ],
+                "summary": "Delete prebuild",
+                "operationId": "DeletePrebuild",
+                "parameters": [
+                    {
+                        "description": "Prebuild",
+                        "name": "prebuild",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/PrebuildConfig"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/prebuild/list": {
+            "get": {
+                "description": "List prebuilds",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "prebuild"
+                ],
+                "summary": "List prebuilds",
+                "operationId": "ListPrebuilds",
+                "parameters": [
+                    {
+                        "description": "Prebuild Filter",
+                        "name": "prebuild",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/prebuild.PrebuildFilter"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            }
+        },
         "/profile": {
             "get": {
                 "description": "Get profile data",
@@ -1614,6 +1699,38 @@ const docTemplate = `{
                 }
             }
         },
+        "PrebuildConfig": {
+            "type": "object",
+            "properties": {
+                "branch": {
+                    "description": "Branch to watch for changes",
+                    "type": "string"
+                },
+                "commitInterval": {
+                    "description": "Number of commits between each new prebuild",
+                    "type": "integer"
+                },
+                "key": {
+                    "description": "Composite key (project-config-name+branch-name) for the prebuild",
+                    "type": "string"
+                },
+                "projectConfig": {
+                    "description": "Project configuration",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/ProjectConfig"
+                        }
+                    ]
+                },
+                "triggerFiles": {
+                    "description": "Files that should trigger a new prebuild if changed",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "ProfileData": {
             "type": "object",
             "properties": {
@@ -1925,6 +2042,14 @@ const docTemplate = `{
                 "ApiKeyTypeProject",
                 "ApiKeyTypeWorkspace"
             ]
+        },
+        "prebuild.PrebuildFilter": {
+            "type": "object",
+            "properties": {
+                "projectConfigName": {
+                    "type": "string"
+                }
+            }
         },
         "provider.ProviderInfo": {
             "type": "object",

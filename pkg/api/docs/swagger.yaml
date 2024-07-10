@@ -178,6 +178,27 @@ definitions:
       key:
         type: string
     type: object
+  PrebuildConfig:
+    properties:
+      branch:
+        description: Branch to watch for changes
+        type: string
+      commitInterval:
+        description: Number of commits between each new prebuild
+        type: integer
+      key:
+        description: Composite key (project-config-name+branch-name) for the prebuild
+        type: string
+      projectConfig:
+        allOf:
+        - $ref: '#/definitions/ProjectConfig'
+        description: Project configuration
+      triggerFiles:
+        description: Files that should trigger a new prebuild if changed
+        items:
+          type: string
+        type: array
+    type: object
   ProfileData:
     properties:
       envVars:
@@ -388,6 +409,11 @@ definitions:
     - ApiKeyTypeClient
     - ApiKeyTypeProject
     - ApiKeyTypeWorkspace
+  prebuild.PrebuildFilter:
+    properties:
+      projectConfigName:
+        type: string
+    type: object
   provider.ProviderInfo:
     properties:
       name:
@@ -833,6 +859,62 @@ paths:
       summary: Get Git provider ID
       tags:
       - gitProvider
+  /prebuild:
+    delete:
+      consumes:
+      - application/json
+      description: Delete prebuild
+      operationId: DeletePrebuild
+      parameters:
+      - description: Prebuild
+        in: body
+        name: prebuild
+        required: true
+        schema:
+          $ref: '#/definitions/PrebuildConfig'
+      responses:
+        "204":
+          description: No Content
+      summary: Delete prebuild
+      tags:
+      - prebuild
+    get:
+      consumes:
+      - application/json
+      description: Upsert prebuild
+      operationId: SetPrebuild
+      parameters:
+      - description: Prebuild
+        in: body
+        name: prebuild
+        required: true
+        schema:
+          $ref: '#/definitions/PrebuildConfig'
+      responses:
+        "201":
+          description: Created
+      summary: Upsert prebuild
+      tags:
+      - prebuild
+  /prebuild/list:
+    get:
+      consumes:
+      - application/json
+      description: List prebuilds
+      operationId: ListPrebuilds
+      parameters:
+      - description: Prebuild Filter
+        in: body
+        name: prebuild
+        required: true
+        schema:
+          $ref: '#/definitions/prebuild.PrebuildFilter'
+      responses:
+        "201":
+          description: Created
+      summary: List prebuilds
+      tags:
+      - prebuild
   /profile:
     delete:
       description: Delete profile data

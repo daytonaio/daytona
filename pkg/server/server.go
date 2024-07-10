@@ -15,6 +15,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
+	"github.com/daytonaio/daytona/pkg/server/prebuild"
 	"github.com/daytonaio/daytona/pkg/server/profiledata"
 	"github.com/daytonaio/daytona/pkg/server/projectconfig"
 	"github.com/daytonaio/daytona/pkg/server/providertargets"
@@ -38,6 +39,7 @@ type ServerInstanceConfig struct {
 	GitProviderService       gitproviders.IGitProviderService
 	ProviderManager          manager.IProviderManager
 	ProfileDataService       profiledata.IProfileDataService
+	PrebuildService          prebuild.IPrebuildService
 	TelemetryService         telemetry.TelemetryService
 }
 
@@ -65,6 +67,7 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 			GitProviderService:       serverConfig.GitProviderService,
 			ProviderManager:          serverConfig.ProviderManager,
 			ProfileDataService:       serverConfig.ProfileDataService,
+			PrebuildService:          serverConfig.PrebuildService,
 			TelemetryService:         serverConfig.TelemetryService,
 		}
 	}
@@ -85,6 +88,7 @@ type Server struct {
 	GitProviderService       gitproviders.IGitProviderService
 	ProviderManager          manager.IProviderManager
 	ProfileDataService       profiledata.IProfileDataService
+	PrebuildService          prebuild.IPrebuildService
 	TelemetryService         telemetry.TelemetryService
 }
 

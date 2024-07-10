@@ -32,6 +32,7 @@ daytona [flags]
 * [daytona ide](daytona_ide.md)	 - Choose the default IDE
 * [daytona info](daytona_info.md)	 - Show workspace info
 * [daytona list](daytona_list.md)	 - List workspaces
+* [daytona prebuild](daytona_prebuild.md)	 - Manage prebuilds
 * [daytona profile](daytona_profile.md)	 - Manage profiles
 * [daytona project-config](daytona_project-config.md)	 - Manage project configs
 * [daytona provider](daytona_provider.md)	 - Manage providers

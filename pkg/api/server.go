@@ -37,6 +37,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/containerregistry"
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider"
 	log_controller "github.com/daytonaio/daytona/pkg/api/controllers/log"
+	"github.com/daytonaio/daytona/pkg/api/controllers/prebuild"
 	"github.com/daytonaio/daytona/pkg/api/controllers/profiledata"
 	"github.com/daytonaio/daytona/pkg/api/controllers/projectconfig"
 	"github.com/daytonaio/daytona/pkg/api/controllers/provider"
@@ -197,6 +198,14 @@ func (a *ApiServer) Start() error {
 		profileDataController.GET("/", profiledata.GetProfileData)
 		profileDataController.PUT("/", profiledata.SetProfileData)
 		profileDataController.DELETE("/", profiledata.DeleteProfileData)
+	}
+
+	prebuildController := protected.Group("/prebuild")
+	{
+		prebuildController.GET("/:key", prebuild.FindPrebuild)
+		prebuildController.PUT("/", prebuild.SetPrebuild)
+		prebuildController.DELETE("/", prebuild.DeletePrebuild)
+		prebuildController.GET("/list", prebuild.ListPrebuilds)
 	}
 
 	projectGroup := protected.Group("/")

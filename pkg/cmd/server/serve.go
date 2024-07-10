@@ -30,6 +30,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
+	"github.com/daytonaio/daytona/pkg/server/prebuild"
 	"github.com/daytonaio/daytona/pkg/server/profiledata"
 	"github.com/daytonaio/daytona/pkg/server/projectconfig"
 	"github.com/daytonaio/daytona/pkg/server/providertargets"
@@ -123,6 +124,10 @@ var ServeCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 		profileDataStore, err := db.NewProfileDataStore(dbConnection)
+		if err != nil {
+			log.Fatal(err)
+		}
+		prebuildStore, err := db.NewPrebuildStore(dbConnection)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -247,8 +252,13 @@ var ServeCmd = &cobra.Command{
 			BuilderFactory:           builderFactory,
 			TelemetryService:         telemetryService,
 		})
+
 		profileDataService := profiledata.NewProfileDataService(profiledata.ProfileDataServiceConfig{
 			ProfileDataStore: profileDataStore,
+		})
+
+		prebuildService := prebuild.NewPrebuildService(prebuild.PrebuildServiceConfig{
+			PrebuildStore: prebuildStore,
 		})
 
 		server := server.GetInstance(&server.ServerInstanceConfig{
@@ -263,6 +273,7 @@ var ServeCmd = &cobra.Command{
 			GitProviderService:       gitProviderService,
 			ProviderManager:          providerManager,
 			ProfileDataService:       profileDataService,
+			PrebuildService:          prebuildService,
 			TelemetryService:         telemetryService,
 		})
 
