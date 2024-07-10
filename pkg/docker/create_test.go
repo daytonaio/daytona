@@ -63,6 +63,7 @@ func (s *DockerClientTestSuite) TestCreateProject() {
 		Image:      "daytonaio/workspace-project",
 		Entrypoint: []string{"sleep"},
 		Cmd:        []string{"infinity"},
+		Env:        []string{"GIT_SSL_NO_VERIFY=true"},
 	}, &container.HostConfig{
 		Mounts: []mount.Mount{
 			{
