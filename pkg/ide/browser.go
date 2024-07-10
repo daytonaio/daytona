@@ -13,6 +13,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/cmd/tailscale"
 	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/builder/devcontainer"
 	"github.com/daytonaio/daytona/pkg/ports"
 	"github.com/daytonaio/daytona/pkg/views"
 
@@ -22,7 +23,7 @@ import (
 
 const startVSCodeServerCommand = "$HOME/vscode-server/bin/openvscode-server --start-server --port=63000 --host=0.0.0.0 --without-connection-token --disable-workspace-trust --default-folder="
 
-func OpenBrowserIDE(activeProfile config.Profile, workspaceId string, projectName string) error {
+func OpenBrowserIDE(activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string) error {
 	// Download and start IDE
 	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName)
 	if err != nil {
@@ -81,6 +82,11 @@ func OpenBrowserIDE(activeProfile config.Profile, workspaceId string, projectNam
 	err = browser.OpenURL(ideURL)
 	if err != nil {
 		log.Error("Error opening URL: " + err.Error())
+	}
+
+	err = setupIdeCustomizations(projectHostname, projectProviderMetadata, devcontainer.Browser, "*/vscode-server/bin/openvscode-server", "$HOME/.openvscode-server/data/Machine/settings.json")
+	if err != nil {
+		log.Errorf("Error setting up IDE customizations: %s", err)
 	}
 
 	for {

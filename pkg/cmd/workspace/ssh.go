@@ -66,7 +66,7 @@ var SshCmd = &cobra.Command{
 			if selectedProject == nil {
 				return
 			}
-			projectName = *selectedProject
+			projectName = *selectedProject.Name
 		}
 
 		if len(args) == 2 {
