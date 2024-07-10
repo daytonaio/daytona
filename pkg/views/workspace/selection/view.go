@@ -98,8 +98,7 @@ func (m model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.WindowSizeMsg:
 		h, v := views.DocStyle.GetFrameSize()
-		// The height here minus the height occupied by the title header and footer
-		m.list.SetSize(msg.Width-h, msg.Height-v-4)
+		m.list.SetSize(msg.Width-h, msg.Height-v)
 	}
 
 	var cmd tea.Cmd
@@ -127,7 +126,11 @@ func (m model[T]) View() string {
 		return ""
 	}
 
-	return views.DocStyle.MaxWidth(terminalWidth - 4).MaxHeight(terminalHeight - 4).Render(m.list.View() + m.footer)
+	if m.list.FilterState() == list.Filtering {
+		return views.DocStyle.MaxWidth(terminalWidth - 4).MaxHeight(terminalHeight - 4).Render(m.list.View() + m.footer)
+	}
+
+	return views.DocStyle.MaxWidth(terminalWidth - 4).Height(terminalHeight - 2).Render(m.list.View() + m.footer)
 }
 
 type ItemDelegate[T any] struct {
