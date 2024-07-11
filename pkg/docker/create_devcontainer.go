@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"github.com/compose-spec/compose-go/v2/cli"
-	"github.com/daytonaio/daytona/pkg/builder/devcontainer"
+	"github.com/daytonaio/daytona/pkg/build/devcontainer"
 	"github.com/daytonaio/daytona/pkg/ssh"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"

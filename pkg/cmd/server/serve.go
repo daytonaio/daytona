@@ -15,7 +15,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/apikey"
-	"github.com/daytonaio/daytona/pkg/builder"
+	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/db"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
@@ -95,6 +95,10 @@ var ServeCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+		buildResultStore, err := db.NewBuildResultStore(dbConnection)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		headscaleServer := headscale.NewHeadscaleServer(&headscale.HeadscaleServerConfig{
 			ServerId:      c.Id,
@@ -160,11 +164,12 @@ var ServeCmd = &cobra.Command{
 		}
 		buildImageNamespace = strings.TrimSuffix(buildImageNamespace, "/")
 
-		builderFactory := builder.NewBuilderFactory(builder.BuilderConfig{
+		builderFactory := build.NewBuilderFactory(build.BuilderConfig{
 			ServerConfigFolder:       configDir,
 			ContainerRegistryServer:  c.BuilderRegistryServer,
 			BasePath:                 filepath.Join(configDir, "builds"),
 			BuildImageNamespace:      buildImageNamespace,
+			BuildResultStore:         buildResultStore,
 			LoggerFactory:            loggerFactory,
 			DefaultProjectImage:      c.DefaultProjectImage,
 			DefaultProjectUser:       c.DefaultProjectUser,

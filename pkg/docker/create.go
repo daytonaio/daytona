@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/builder/detect"
+	"github.com/daytonaio/daytona/pkg/build/detect"
 	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/daytonaio/daytona/pkg/ssh"
 	"github.com/daytonaio/daytona/pkg/workspace"

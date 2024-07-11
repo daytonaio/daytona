@@ -1,30 +1,21 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package builder
+package build
 
 import (
-	"encoding/json"
-	"os"
-	"path/filepath"
-
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
-type BuildResult struct {
-	User              string
-	ImageName         string
-	ProjectVolumePath string
-}
-
 type BuilderConfig struct {
 	Image                    string
 	ContainerRegistryService containerregistries.IContainerRegistryService
 	ServerConfigFolder       string
 	ContainerRegistryServer  string
+	BuildResultStore         Store
 	// Namespace to be used when tagging and pushing the build image
 	BuildImageNamespace string
 	BasePath            string
@@ -51,6 +42,7 @@ type Builder struct {
 	containerRegistryService containerregistries.IContainerRegistryService
 	containerRegistryServer  string
 	buildImageNamespace      string
+	buildResultStore         Store
 	serverConfigFolder       string
 	basePath                 string
 	loggerFactory            logs.LoggerFactory
@@ -59,22 +51,5 @@ type Builder struct {
 }
 
 func (b *Builder) SaveBuildResults(r BuildResult) error {
-	err := os.MkdirAll(filepath.Join(b.serverConfigFolder, "builds", b.hash), 0755)
-	if err != nil {
-		return err
-	}
-
-	file, err := os.Create(filepath.Join(b.serverConfigFolder, "builds", b.hash, "build.json"))
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	encoder := json.NewEncoder(file)
-	err = encoder.Encode(r)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return b.buildResultStore.Save(&r)
 }

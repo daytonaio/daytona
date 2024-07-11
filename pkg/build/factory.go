@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package builder
+package build
 
 import (
 	"encoding/json"
@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/daytonaio/daytona/pkg/builder/detect"
+	"github.com/daytonaio/daytona/pkg/build/detect"
 	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
@@ -30,6 +30,7 @@ type BuilderFactory struct {
 	serverConfigFolder       string
 	containerRegistryServer  string
 	buildImageNamespace      string
+	buildResultStore         Store
 	basePath                 string
 	loggerFactory            logs.LoggerFactory
 	image                    string
@@ -44,6 +45,7 @@ func NewBuilderFactory(config BuilderConfig) IBuilderFactory {
 		serverConfigFolder:       config.ServerConfigFolder,
 		containerRegistryServer:  config.ContainerRegistryServer,
 		buildImageNamespace:      config.BuildImageNamespace,
+		buildResultStore:         config.BuildResultStore,
 		containerRegistryService: config.ContainerRegistryService,
 		basePath:                 config.BasePath,
 		loggerFactory:            config.LoggerFactory,
@@ -168,6 +170,7 @@ func (f *BuilderFactory) newDevcontainerBuilder(buildId string, p workspace.Proj
 			serverConfigFolder:       f.serverConfigFolder,
 			containerRegistryServer:  f.containerRegistryServer,
 			buildImageNamespace:      f.buildImageNamespace,
+			buildResultStore:         f.buildResultStore,
 			basePath:                 f.basePath,
 			loggerFactory:            f.loggerFactory,
 			defaultProjectImage:      f.defaultProjectImage,
