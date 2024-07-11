@@ -72,22 +72,16 @@ func (s *WorkspaceService) CreateWorkspace(req dto.CreateWorkspaceRequest) (*wor
 			projectUser = *project.User
 		}
 
-		postStartCommands := s.defaultProjectPostStartCommands
-		if project.PostStartCommands != nil {
-			postStartCommands = *project.PostStartCommands
-		}
-
 		p := &workspace.Project{
-			Name:              project.Name,
-			Image:             projectImage,
-			User:              projectUser,
-			Build:             project.Build,
-			PostStartCommands: postStartCommands,
-			Repository:        project.Source.Repository,
-			WorkspaceId:       w.Id,
-			ApiKey:            apiKey,
-			Target:            w.Target,
-			EnvVars:           project.EnvVars,
+			Name:        project.Name,
+			Image:       projectImage,
+			User:        projectUser,
+			Build:       project.Build,
+			Repository:  project.Source.Repository,
+			WorkspaceId: w.Id,
+			ApiKey:      apiKey,
+			Target:      w.Target,
+			EnvVars:     project.EnvVars,
 		}
 		w.Projects = append(w.Projects, p)
 	}
@@ -112,8 +106,6 @@ func (s *WorkspaceService) createBuild(project *workspace.Project, gc *gitprovid
 		if lastBuildResult != nil {
 			project.Image = lastBuildResult.ImageName
 			project.User = lastBuildResult.User
-			project.PostStartCommands = lastBuildResult.PostStartCommands
-			project.PostCreateCommands = lastBuildResult.PostCreateCommands
 			return project, nil
 		}
 
@@ -151,8 +143,6 @@ func (s *WorkspaceService) createBuild(project *workspace.Project, gc *gitprovid
 
 		project.Image = buildResult.ImageName
 		project.User = buildResult.User
-		project.PostStartCommands = buildResult.PostStartCommands
-		project.PostCreateCommands = buildResult.PostCreateCommands
 
 		return project, nil
 	}
@@ -254,5 +244,4 @@ func (s *WorkspaceService) handleBuildError(project *workspace.Project, builder 
 	logWriter.Write([]byte("Creating project with default image\n"))
 	project.Image = s.defaultProjectImage
 	project.User = s.defaultProjectUser
-	project.PostStartCommands = s.defaultProjectPostStartCommands
 }

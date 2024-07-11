@@ -47,32 +47,28 @@ type ProjectBuildDTO struct {
 }
 
 type ProjectDTO struct {
-	Name               string           `json:"name"`
-	Image              string           `json:"image"`
-	User               string           `json:"user"`
-	Build              *ProjectBuildDTO `json:"build,omitempty" gorm:"serializer:json"`
-	Repository         RepositoryDTO    `json:"repository"`
-	WorkspaceId        string           `json:"workspaceId"`
-	Target             string           `json:"target"`
-	ApiKey             string           `json:"apiKey"`
-	State              *ProjectStateDTO `json:"state,omitempty" gorm:"serializer:json"`
-	PostStartCommands  []string         `json:"postStartCommands,omitempty"`
-	PostCreateCommands []string         `json:"postCreateCommands,omitempty"`
+	Name        string           `json:"name"`
+	Image       string           `json:"image"`
+	User        string           `json:"user"`
+	Build       *ProjectBuildDTO `json:"build,omitempty" gorm:"serializer:json"`
+	Repository  RepositoryDTO    `json:"repository"`
+	WorkspaceId string           `json:"workspaceId"`
+	Target      string           `json:"target"`
+	ApiKey      string           `json:"apiKey"`
+	State       *ProjectStateDTO `json:"state,omitempty" gorm:"serializer:json"`
 }
 
 func ToProjectDTO(project *workspace.Project, workspace *workspace.Workspace) ProjectDTO {
 	return ProjectDTO{
-		Name:               project.Name,
-		Image:              project.Image,
-		User:               project.User,
-		Build:              ToProjectBuildDTO(project.Build),
-		Repository:         ToRepositoryDTO(project.Repository),
-		WorkspaceId:        project.WorkspaceId,
-		Target:             project.Target,
-		State:              ToProjectStateDTO(project.State),
-		PostStartCommands:  project.PostStartCommands,
-		PostCreateCommands: project.PostCreateCommands,
-		ApiKey:             workspace.ApiKey,
+		Name:        project.Name,
+		Image:       project.Image,
+		User:        project.User,
+		Build:       ToProjectBuildDTO(project.Build),
+		Repository:  ToRepositoryDTO(project.Repository),
+		WorkspaceId: project.WorkspaceId,
+		Target:      project.Target,
+		State:       ToProjectStateDTO(project.State),
+		ApiKey:      workspace.ApiKey,
 	}
 }
 
@@ -151,17 +147,15 @@ func ToProjectBuildDTO(build *workspace.ProjectBuild) *ProjectBuildDTO {
 
 func ToProject(projectDTO ProjectDTO) *workspace.Project {
 	return &workspace.Project{
-		Name:               projectDTO.Name,
-		Image:              projectDTO.Image,
-		User:               projectDTO.User,
-		Build:              ToProjectBuild(projectDTO.Build),
-		Repository:         ToRepository(projectDTO.Repository),
-		WorkspaceId:        projectDTO.WorkspaceId,
-		Target:             projectDTO.Target,
-		State:              ToProjectState(projectDTO.State),
-		PostStartCommands:  projectDTO.PostStartCommands,
-		PostCreateCommands: projectDTO.PostCreateCommands,
-		ApiKey:             projectDTO.ApiKey,
+		Name:        projectDTO.Name,
+		Image:       projectDTO.Image,
+		User:        projectDTO.User,
+		Build:       ToProjectBuild(projectDTO.Build),
+		Repository:  ToRepository(projectDTO.Repository),
+		WorkspaceId: projectDTO.WorkspaceId,
+		Target:      projectDTO.Target,
+		State:       ToProjectState(projectDTO.State),
+		ApiKey:      projectDTO.ApiKey,
 	}
 }
 

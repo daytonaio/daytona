@@ -28,8 +28,6 @@ const serverUrl = "http://localhost:3987"
 const defaultProjectImage = "daytonaio/workspace-project:latest"
 const defaultProjectUser = "daytona"
 
-var defaultProjectPostStartCommands = []string{}
-
 var target = provider.ProviderTarget{
 	Name: "test-target",
 	ProviderInfo: provider.ProviderInfo{
@@ -89,19 +87,18 @@ func TestWorkspaceService(t *testing.T) {
 	mockBuilderFactory := &mocks.MockBuilderFactory{}
 
 	service := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
-		WorkspaceStore:                  workspaceStore,
-		TargetStore:                     targetStore,
-		ServerApiUrl:                    serverApiUrl,
-		ServerUrl:                       serverUrl,
-		ContainerRegistryService:        containerRegistryService,
-		DefaultProjectImage:             defaultProjectImage,
-		DefaultProjectUser:              defaultProjectUser,
-		DefaultProjectPostStartCommands: defaultProjectPostStartCommands,
-		ApiKeyService:                   apiKeyService,
-		Provisioner:                     provisioner,
-		LoggerFactory:                   logs.NewLoggerFactory(logsDir),
-		GitProviderService:              gitProviderService,
-		BuilderFactory:                  mockBuilderFactory,
+		WorkspaceStore:           workspaceStore,
+		TargetStore:              targetStore,
+		ServerApiUrl:             serverApiUrl,
+		ServerUrl:                serverUrl,
+		ContainerRegistryService: containerRegistryService,
+		DefaultProjectImage:      defaultProjectImage,
+		DefaultProjectUser:       defaultProjectUser,
+		ApiKeyService:            apiKeyService,
+		Provisioner:              provisioner,
+		LoggerFactory:            logs.NewLoggerFactory(logsDir),
+		GitProviderService:       gitProviderService,
+		BuilderFactory:           mockBuilderFactory,
 	})
 
 	t.Run("CreateWorkspace", func(t *testing.T) {

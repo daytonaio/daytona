@@ -38,53 +38,50 @@ type targetStore interface {
 }
 
 type WorkspaceServiceConfig struct {
-	WorkspaceStore                  workspace.Store
-	TargetStore                     targetStore
-	ContainerRegistryService        containerregistries.IContainerRegistryService
-	ServerApiUrl                    string
-	ServerUrl                       string
-	Provisioner                     provisioner.IProvisioner
-	DefaultProjectImage             string
-	DefaultProjectUser              string
-	DefaultProjectPostStartCommands []string
-	ApiKeyService                   apikeys.IApiKeyService
-	LoggerFactory                   logs.LoggerFactory
-	GitProviderService              gitproviders.IGitProviderService
-	BuilderFactory                  builder.IBuilderFactory
+	WorkspaceStore           workspace.Store
+	TargetStore              targetStore
+	ContainerRegistryService containerregistries.IContainerRegistryService
+	ServerApiUrl             string
+	ServerUrl                string
+	Provisioner              provisioner.IProvisioner
+	DefaultProjectImage      string
+	DefaultProjectUser       string
+	ApiKeyService            apikeys.IApiKeyService
+	LoggerFactory            logs.LoggerFactory
+	GitProviderService       gitproviders.IGitProviderService
+	BuilderFactory           builder.IBuilderFactory
 }
 
 func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 	return &WorkspaceService{
-		workspaceStore:                  config.WorkspaceStore,
-		targetStore:                     config.TargetStore,
-		containerRegistryService:        config.ContainerRegistryService,
-		serverApiUrl:                    config.ServerApiUrl,
-		serverUrl:                       config.ServerUrl,
-		defaultProjectImage:             config.DefaultProjectImage,
-		defaultProjectUser:              config.DefaultProjectUser,
-		defaultProjectPostStartCommands: config.DefaultProjectPostStartCommands,
-		provisioner:                     config.Provisioner,
-		loggerFactory:                   config.LoggerFactory,
-		apiKeyService:                   config.ApiKeyService,
-		gitProviderService:              config.GitProviderService,
-		builderFactory:                  config.BuilderFactory,
+		workspaceStore:           config.WorkspaceStore,
+		targetStore:              config.TargetStore,
+		containerRegistryService: config.ContainerRegistryService,
+		serverApiUrl:             config.ServerApiUrl,
+		serverUrl:                config.ServerUrl,
+		defaultProjectImage:      config.DefaultProjectImage,
+		defaultProjectUser:       config.DefaultProjectUser,
+		provisioner:              config.Provisioner,
+		loggerFactory:            config.LoggerFactory,
+		apiKeyService:            config.ApiKeyService,
+		gitProviderService:       config.GitProviderService,
+		builderFactory:           config.BuilderFactory,
 	}
 }
 
 type WorkspaceService struct {
-	workspaceStore                  workspace.Store
-	targetStore                     targetStore
-	containerRegistryService        containerregistries.IContainerRegistryService
-	provisioner                     provisioner.IProvisioner
-	apiKeyService                   apikeys.IApiKeyService
-	serverApiUrl                    string
-	serverUrl                       string
-	defaultProjectImage             string
-	defaultProjectUser              string
-	defaultProjectPostStartCommands []string
-	loggerFactory                   logs.LoggerFactory
-	gitProviderService              gitproviders.IGitProviderService
-	builderFactory                  builder.IBuilderFactory
+	workspaceStore           workspace.Store
+	targetStore              targetStore
+	containerRegistryService containerregistries.IContainerRegistryService
+	provisioner              provisioner.IProvisioner
+	apiKeyService            apikeys.IApiKeyService
+	serverApiUrl             string
+	serverUrl                string
+	defaultProjectImage      string
+	defaultProjectUser       string
+	loggerFactory            logs.LoggerFactory
+	gitProviderService       gitproviders.IGitProviderService
+	builderFactory           builder.IBuilderFactory
 }
 
 func (s *WorkspaceService) SetProjectState(workspaceId, projectName string, state *workspace.ProjectState) (*workspace.Workspace, error) {

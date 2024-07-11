@@ -161,16 +161,15 @@ var ServeCmd = &cobra.Command{
 		buildImageNamespace = strings.TrimSuffix(buildImageNamespace, "/")
 
 		builderFactory := builder.NewBuilderFactory(builder.BuilderConfig{
-			ServerConfigFolder:              configDir,
-			ContainerRegistryServer:         c.BuilderRegistryServer,
-			BasePath:                        filepath.Join(configDir, "builds"),
-			BuildImageNamespace:             buildImageNamespace,
-			LoggerFactory:                   loggerFactory,
-			DefaultProjectImage:             c.DefaultProjectImage,
-			DefaultProjectUser:              c.DefaultProjectUser,
-			DefaultProjectPostStartCommands: c.DefaultProjectPostStartCommands,
-			Image:                           c.BuilderImage,
-			ContainerRegistryService:        containerRegistryService,
+			ServerConfigFolder:       configDir,
+			ContainerRegistryServer:  c.BuilderRegistryServer,
+			BasePath:                 filepath.Join(configDir, "builds"),
+			BuildImageNamespace:      buildImageNamespace,
+			LoggerFactory:            loggerFactory,
+			DefaultProjectImage:      c.DefaultProjectImage,
+			DefaultProjectUser:       c.DefaultProjectUser,
+			Image:                    c.BuilderImage,
+			ContainerRegistryService: containerRegistryService,
 		})
 		provisioner := provisioner.NewProvisioner(provisioner.ProvisionerConfig{
 			ProviderManager: providerManager,
@@ -180,19 +179,18 @@ var ServeCmd = &cobra.Command{
 		})
 
 		workspaceService := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
-			WorkspaceStore:                  workspaceStore,
-			TargetStore:                     providerTargetStore,
-			ApiKeyService:                   apiKeyService,
-			GitProviderService:              gitProviderService,
-			ContainerRegistryService:        containerRegistryService,
-			ServerApiUrl:                    util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
-			ServerUrl:                       headscaleUrl,
-			DefaultProjectImage:             c.DefaultProjectImage,
-			DefaultProjectUser:              c.DefaultProjectUser,
-			DefaultProjectPostStartCommands: c.DefaultProjectPostStartCommands,
-			Provisioner:                     provisioner,
-			LoggerFactory:                   loggerFactory,
-			BuilderFactory:                  builderFactory,
+			WorkspaceStore:           workspaceStore,
+			TargetStore:              providerTargetStore,
+			ApiKeyService:            apiKeyService,
+			GitProviderService:       gitProviderService,
+			ContainerRegistryService: containerRegistryService,
+			ServerApiUrl:             util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+			ServerUrl:                headscaleUrl,
+			DefaultProjectImage:      c.DefaultProjectImage,
+			DefaultProjectUser:       c.DefaultProjectUser,
+			Provisioner:              provisioner,
+			LoggerFactory:            loggerFactory,
+			BuilderFactory:           builderFactory,
 		})
 		profileDataService := profiledata.NewProfileDataService(profiledata.ProfileDataServiceConfig{
 			ProfileDataStore: profileDataStore,
