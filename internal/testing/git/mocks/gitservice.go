@@ -21,6 +21,11 @@ func (m *MockGitService) CloneRepository(project *workspace.Project, auth *http.
 	return args.Error(0)
 }
 
+func (m *MockGitService) CloneRepositoryCmd(project *workspace.Project, auth *http.BasicAuth) []string {
+	args := m.Called(project, auth)
+	return args.Get(0).([]string)
+}
+
 func (m *MockGitService) RepositoryExists(project *workspace.Project) (bool, error) {
 	args := m.Called(project)
 	return args.Bool(0), args.Error(1)

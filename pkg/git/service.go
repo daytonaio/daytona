@@ -5,9 +5,11 @@ package git
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/workspace"
@@ -32,6 +34,7 @@ var MapStatus map[git.StatusCode]workspace.Status = map[git.StatusCode]workspace
 
 type IGitService interface {
 	CloneRepository(project *workspace.Project, auth *http.BasicAuth) error
+	CloneRepositoryCmd(project *workspace.Project, auth *http.BasicAuth) []string
 	RepositoryExists(project *workspace.Project) (bool, error)
 	SetGitConfig(userData *gitprovider.GitUser) error
 	GetGitStatus() (*workspace.GitStatus, error)
@@ -94,6 +97,31 @@ func (s *Service) CloneRepository(project *workspace.Project, auth *http.BasicAu
 	}
 
 	return err
+}
+
+func (s *Service) CloneRepositoryCmd(project *workspace.Project, auth *http.BasicAuth) []string {
+	cloneCmd := []string{"git", "clone", "--single-branch"}
+
+	if s.shouldCloneBranch(project) {
+		cloneCmd = append(cloneCmd, "--branch", *project.Repository.Branch)
+	}
+
+	if auth != nil {
+		repoUrl := strings.TrimPrefix(project.Repository.Url, "https://")
+		repoUrl = strings.TrimPrefix(repoUrl, "http://")
+		cloneCmd = append(cloneCmd, fmt.Sprintf("https://%s:%s@%s", auth.Username, auth.Password, repoUrl))
+	} else {
+		cloneCmd = append(cloneCmd, project.Repository.Url)
+	}
+
+	cloneCmd = append(cloneCmd, s.ProjectDir)
+
+	if s.shouldCheckoutSha(project) {
+		cloneCmd = append(cloneCmd, "&&", "cd", s.ProjectDir)
+		cloneCmd = append(cloneCmd, "&&", "git", "checkout", project.Repository.Sha)
+	}
+
+	return cloneCmd
 }
 
 func (s *Service) RepositoryExists(project *workspace.Project) (bool, error) {

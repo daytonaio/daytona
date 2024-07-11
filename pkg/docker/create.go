@@ -13,11 +13,13 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/pkg/builder/detect"
+	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/daytonaio/daytona/pkg/ssh"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -65,19 +67,27 @@ func (d *DockerClient) CreateProject(opts *CreateProjectOptions) error {
 func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions, sshClient *ssh.Client) error {
 	ctx := context.Background()
 
-	cloneUrl := opts.Project.Repository.Url
+	var auth *http.BasicAuth
 	if opts.Gpc != nil {
-		repoUrl := strings.TrimPrefix(cloneUrl, "https://")
-		repoUrl = strings.TrimPrefix(repoUrl, "http://")
-		cloneUrl = fmt.Sprintf("https://%s:%s@%s", opts.Gpc.Username, opts.Gpc.Token, repoUrl)
+		auth = &http.BasicAuth{
+			Username: opts.Gpc.Username,
+			Password: opts.Gpc.Token,
+		}
 	}
 
-	cloneCmd := []string{"git", "clone", cloneUrl, fmt.Sprintf("/workdir/%s-%s", opts.Project.WorkspaceId, opts.Project.Name)}
+	gitService := git.Service{
+		ProjectDir: fmt.Sprintf("/workdir/%s-%s", opts.Project.WorkspaceId, opts.Project.Name),
+	}
+
+	cloneCmd := gitService.CloneRepositoryCmd(opts.Project, auth)
 
 	c, err := d.apiClient.ContainerCreate(ctx, &container.Config{
 		Image:      "daytonaio/workspace-project",
 		Entrypoint: []string{"sleep"},
 		Cmd:        []string{"infinity"},
+		Env: []string{
+			"GIT_SSL_NO_VERIFY=true",
+		},
 	}, &container.HostConfig{
 		Mounts: []mount.Mount{
 			{
@@ -149,7 +159,7 @@ func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions, sshCli
 
 	res, err := d.ExecSync(c.ID, types.ExecConfig{
 		User: containerUser,
-		Cmd:  cloneCmd,
+		Cmd:  append([]string{"sh", "-c"}, strings.Join(cloneCmd, " ")),
 	}, opts.LogWriter)
 	if err != nil {
 		return err
