@@ -831,9 +831,6 @@ components:
       example:
         projects:
         - image: image
-          postStartCommands:
-          - postStartCommands
-          - postStartCommands
           build:
             devcontainer:
               devContainerFilePath: devContainerFilePath
@@ -853,9 +850,6 @@ components:
               url: url
           user: user
         - image: image
-          postStartCommands:
-          - postStartCommands
-          - postStartCommands
           build:
             devcontainer:
               devContainerFilePath: devContainerFilePath
@@ -894,9 +888,6 @@ components:
     CreateWorkspaceRequestProject:
       example:
         image: image
-        postStartCommands:
-        - postStartCommands
-        - postStartCommands
         build:
           devcontainer:
             devContainerFilePath: devContainerFilePath
@@ -926,10 +917,6 @@ components:
           type: string
         name:
           type: string
-        postStartCommands:
-          items:
-            type: string
-          type: array
         source:
           $ref: '#/components/schemas/CreateWorkspaceRequestProjectSource'
         user:
@@ -1143,12 +1130,6 @@ components:
     Project:
       example:
         image: image
-        postCreateCommands:
-        - postCreateCommands
-        - postCreateCommands
-        postStartCommands:
-        - postStartCommands
-        - postStartCommands
         build:
           devcontainer:
             devContainerFilePath: devContainerFilePath
@@ -1187,14 +1168,6 @@ components:
           type: string
         name:
           type: string
-        postCreateCommands:
-          items:
-            type: string
-          type: array
-        postStartCommands:
-          items:
-            type: string
-          type: array
         repository:
           $ref: '#/components/schemas/GitRepository'
         state:
@@ -1299,9 +1272,6 @@ components:
         localBuilderRegistryPort: 5
         defaultProjectUser: defaultProjectUser
         builderRegistryServer: builderRegistryServer
-        defaultProjectPostStartCommands:
-        - defaultProjectPostStartCommands
-        - defaultProjectPostStartCommands
         builderImage: builderImage
         apiPort: 0
         headscalePort: 1
@@ -1329,10 +1299,6 @@ components:
           type: string
         defaultProjectImage:
           type: string
-        defaultProjectPostStartCommands:
-          items:
-            type: string
-          type: array
         defaultProjectUser:
           type: string
         frps:
@@ -1396,12 +1362,6 @@ components:
       example:
         projects:
         - image: image
-          postCreateCommands:
-          - postCreateCommands
-          - postCreateCommands
-          postStartCommands:
-          - postStartCommands
-          - postStartCommands
           build:
             devcontainer:
               devContainerFilePath: devContainerFilePath
@@ -1434,12 +1394,6 @@ components:
           target: target
           workspaceId: workspaceId
         - image: image
-          postCreateCommands:
-          - postCreateCommands
-          - postCreateCommands
-          postStartCommands:
-          - postStartCommands
-          - postStartCommands
           build:
             devcontainer:
               devContainerFilePath: devContainerFilePath
@@ -1490,12 +1444,6 @@ components:
       example:
         projects:
         - image: image
-          postCreateCommands:
-          - postCreateCommands
-          - postCreateCommands
-          postStartCommands:
-          - postStartCommands
-          - postStartCommands
           build:
             devcontainer:
               devContainerFilePath: devContainerFilePath
@@ -1528,12 +1476,6 @@ components:
           target: target
           workspaceId: workspaceId
         - image: image
-          postCreateCommands:
-          - postCreateCommands
-          - postCreateCommands
-          postStartCommands:
-          - postStartCommands
-          - postStartCommands
           build:
             devcontainer:
               devContainerFilePath: devContainerFilePath

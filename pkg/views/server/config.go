@@ -27,8 +27,6 @@ func RenderConfig(config *server.Config) {
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Default Project User: "), config.DefaultProjectUser) + "\n\n"
 
-	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Default Project Post Start Commands: "), config.DefaultProjectPostStartCommands) + "\n\n"
-
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("FRPS Domain: "), config.Frps.Domain) + "\n\n"
 
 	output += fmt.Sprintf("%s %d", views.GetPropertyKey("Headscale Port: "), config.HeadscalePort) + "\n\n"

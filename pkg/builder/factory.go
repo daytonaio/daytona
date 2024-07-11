@@ -27,30 +27,28 @@ type IBuilderFactory interface {
 }
 
 type BuilderFactory struct {
-	serverConfigFolder              string
-	containerRegistryServer         string
-	buildImageNamespace             string
-	basePath                        string
-	loggerFactory                   logs.LoggerFactory
-	image                           string
-	containerRegistryService        containerregistries.IContainerRegistryService
-	defaultProjectImage             string
-	defaultProjectUser              string
-	defaultProjectPostStartCommands []string
+	serverConfigFolder       string
+	containerRegistryServer  string
+	buildImageNamespace      string
+	basePath                 string
+	loggerFactory            logs.LoggerFactory
+	image                    string
+	containerRegistryService containerregistries.IContainerRegistryService
+	defaultProjectImage      string
+	defaultProjectUser       string
 }
 
 func NewBuilderFactory(config BuilderConfig) IBuilderFactory {
 	return &BuilderFactory{
-		image:                           config.Image,
-		serverConfigFolder:              config.ServerConfigFolder,
-		containerRegistryServer:         config.ContainerRegistryServer,
-		buildImageNamespace:             config.BuildImageNamespace,
-		containerRegistryService:        config.ContainerRegistryService,
-		basePath:                        config.BasePath,
-		loggerFactory:                   config.LoggerFactory,
-		defaultProjectImage:             config.DefaultProjectImage,
-		defaultProjectUser:              config.DefaultProjectUser,
-		defaultProjectPostStartCommands: config.DefaultProjectPostStartCommands,
+		image:                    config.Image,
+		serverConfigFolder:       config.ServerConfigFolder,
+		containerRegistryServer:  config.ContainerRegistryServer,
+		buildImageNamespace:      config.BuildImageNamespace,
+		containerRegistryService: config.ContainerRegistryService,
+		basePath:                 config.BasePath,
+		loggerFactory:            config.LoggerFactory,
+		defaultProjectImage:      config.DefaultProjectImage,
+		defaultProjectUser:       config.DefaultProjectUser,
 	}
 }
 
@@ -160,21 +158,20 @@ func (f *BuilderFactory) newDevcontainerBuilder(buildId string, p workspace.Proj
 
 	return &DevcontainerBuilder{
 		Builder: &Builder{
-			id:                              buildId,
-			project:                         p,
-			gitProviderConfig:               gpc,
-			hash:                            hash,
-			projectVolumePath:               projectDir,
-			image:                           f.image,
-			containerRegistryService:        f.containerRegistryService,
-			serverConfigFolder:              f.serverConfigFolder,
-			containerRegistryServer:         f.containerRegistryServer,
-			buildImageNamespace:             f.buildImageNamespace,
-			basePath:                        f.basePath,
-			loggerFactory:                   f.loggerFactory,
-			defaultProjectImage:             f.defaultProjectImage,
-			defaultProjectUser:              f.defaultProjectUser,
-			defaultProjectPostStartCommands: f.defaultProjectPostStartCommands,
+			id:                       buildId,
+			project:                  p,
+			gitProviderConfig:        gpc,
+			hash:                     hash,
+			projectVolumePath:        projectDir,
+			image:                    f.image,
+			containerRegistryService: f.containerRegistryService,
+			serverConfigFolder:       f.serverConfigFolder,
+			containerRegistryServer:  f.containerRegistryServer,
+			buildImageNamespace:      f.buildImageNamespace,
+			basePath:                 f.basePath,
+			loggerFactory:            f.loggerFactory,
+			defaultProjectImage:      f.defaultProjectImage,
+			defaultProjectUser:       f.defaultProjectUser,
 		},
 		builderDockerPort: builderDockerPort,
 	}, nil

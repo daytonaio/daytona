@@ -46,10 +46,6 @@ definitions:
         type: string
       name:
         type: string
-      postStartCommands:
-        items:
-          type: string
-        type: array
       source:
         $ref: '#/definitions/CreateWorkspaceRequestProjectSource'
       user:
@@ -194,14 +190,6 @@ definitions:
         type: string
       name:
         type: string
-      postCreateCommands:
-        items:
-          type: string
-        type: array
-      postStartCommands:
-        items:
-          type: string
-        type: array
       repository:
         $ref: '#/definitions/GitRepository'
       state:
@@ -280,10 +268,6 @@ definitions:
         type: string
       defaultProjectImage:
         type: string
-      defaultProjectPostStartCommands:
-        items:
-          type: string
-        type: array
       defaultProjectUser:
         type: string
       frps:

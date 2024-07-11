@@ -20,11 +20,10 @@ type TailscaleServer interface {
 }
 
 type Agent struct {
-	Config                 *config.Config
-	Git                    git.IGitService
-	Ssh                    SshServer
-	Tailscale              TailscaleServer
-	LogWriter              io.Writer
-	PostCreateLockFilePath string
-	startTime              time.Time
+	Config    *config.Config
+	Git       git.IGitService
+	Ssh       SshServer
+	Tailscale TailscaleServer
+	LogWriter io.Writer
+	startTime time.Time
 }

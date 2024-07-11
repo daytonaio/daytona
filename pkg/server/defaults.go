@@ -28,8 +28,6 @@ const defaultLocalBuilderRegistryPort = 3988
 const defaultBuilderRegistryServer = "local"
 const defaultBuildImageNamespace = ""
 
-var defaultProjectPostStartCommands = []string{}
-
 var us_defaultFrpsConfig = FRPSConfig{
 	Domain:   "try-us.daytona.app",
 	Port:     7000,
@@ -102,22 +100,21 @@ func getDefaultConfig() (*Config, error) {
 	}
 
 	c := Config{
-		Id:                              generateUuid(),
-		RegistryUrl:                     defaultRegistryUrl,
-		ProvidersDir:                    providersDir,
-		ServerDownloadUrl:               defaultServerDownloadUrl,
-		ApiPort:                         defaultApiPort,
-		HeadscalePort:                   defaultHeadscalePort,
-		BinariesPath:                    binariesPath,
-		Frps:                            getDefaultFRPSConfig(),
-		LogFilePath:                     logFilePath,
-		DefaultProjectImage:             defaultProjectImage,
-		DefaultProjectUser:              defaultProjectUser,
-		DefaultProjectPostStartCommands: defaultProjectPostStartCommands,
-		BuilderImage:                    defaultBuilderImage,
-		LocalBuilderRegistryPort:        defaultLocalBuilderRegistryPort,
-		BuilderRegistryServer:           defaultBuilderRegistryServer,
-		BuildImageNamespace:             defaultBuildImageNamespace,
+		Id:                       generateUuid(),
+		RegistryUrl:              defaultRegistryUrl,
+		ProvidersDir:             providersDir,
+		ServerDownloadUrl:        defaultServerDownloadUrl,
+		ApiPort:                  defaultApiPort,
+		HeadscalePort:            defaultHeadscalePort,
+		BinariesPath:             binariesPath,
+		Frps:                     getDefaultFRPSConfig(),
+		LogFilePath:              logFilePath,
+		DefaultProjectImage:      defaultProjectImage,
+		DefaultProjectUser:       defaultProjectUser,
+		BuilderImage:             defaultBuilderImage,
+		LocalBuilderRegistryPort: defaultLocalBuilderRegistryPort,
+		BuilderRegistryServer:    defaultBuilderRegistryServer,
+		BuildImageNamespace:      defaultBuildImageNamespace,
 	}
 
 	if os.Getenv("DEFAULT_REGISTRY_URL") != "" {

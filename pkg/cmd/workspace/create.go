@@ -288,7 +288,6 @@ func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, pro
 			Image:                apiServerConfig.DefaultProjectImage,
 			ImageUser:            apiServerConfig.DefaultProjectUser,
 			DevcontainerFilePath: create.DEVCONTAINER_FILEPATH,
-			PostStartCommands:    apiServerConfig.DefaultProjectPostStartCommands,
 		}},
 	)
 	if err != nil {

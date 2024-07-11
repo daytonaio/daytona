@@ -1190,12 +1190,6 @@
                 "name": {
                     "type": "string"
                 },
-                "postStartCommands": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "source": {
                     "$ref": "#/definitions/CreateWorkspaceRequestProjectSource"
                 },
@@ -1416,18 +1410,6 @@
                 "name": {
                     "type": "string"
                 },
-                "postCreateCommands": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "postStartCommands": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "repository": {
                     "$ref": "#/definitions/GitRepository"
                 },
@@ -1547,12 +1529,6 @@
                 },
                 "defaultProjectImage": {
                     "type": "string"
-                },
-                "defaultProjectPostStartCommands": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 },
                 "defaultProjectUser": {
                     "type": "string"

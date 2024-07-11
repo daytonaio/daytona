@@ -1193,12 +1193,6 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "postStartCommands": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "source": {
                     "$ref": "#/definitions/CreateWorkspaceRequestProjectSource"
                 },
@@ -1419,18 +1413,6 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "postCreateCommands": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "postStartCommands": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "repository": {
                     "$ref": "#/definitions/GitRepository"
                 },
@@ -1550,12 +1532,6 @@ const docTemplate = `{
                 },
                 "defaultProjectImage": {
                     "type": "string"
-                },
-                "defaultProjectPostStartCommands": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 },
                 "defaultProjectUser": {
                     "type": "string"

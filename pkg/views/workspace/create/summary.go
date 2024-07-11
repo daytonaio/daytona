@@ -24,7 +24,6 @@ const (
 	DevcontainerConfig ProjectDetail = "Devcontainer Config"
 	Image              ProjectDetail = "Image"
 	User               ProjectDetail = "User"
-	PostStartCommands  ProjectDetail = "Post Start Commands"
 	EnvVars            ProjectDetail = "Env Vars"
 	EMPTY_STRING                     = ""
 	DEFAULT_PADDING                  = 21
@@ -35,7 +34,6 @@ type ProjectDefaults struct {
 	Image                *string
 	ImageUser            *string
 	DevcontainerFilePath string
-	PostStartCommands    []string
 }
 
 type SummaryModel struct {
@@ -70,7 +68,7 @@ func RunSubmissionForm(workspaceName *string, suggestedName string, workspaceNam
 		return nil
 	}
 
-	if defaults.Image == nil || defaults.ImageUser == nil || defaults.PostStartCommands == nil {
+	if defaults.Image == nil || defaults.ImageUser == nil {
 		return fmt.Errorf("default project entries are not set")
 	}
 
@@ -141,19 +139,6 @@ func renderProjectDetails(project apiclient.CreateWorkspaceRequestProject, build
 				output += "\n"
 			}
 			output += projectDetailOutput(User, *project.User)
-		}
-
-		if project.PostStartCommands != nil && len(project.PostStartCommands) > 0 {
-			if output != "" {
-				output += "\n"
-			}
-
-			var commands string
-			for _, command := range project.PostStartCommands {
-				commands += command
-				commands += "; "
-			}
-			output += projectDetailOutput(PostStartCommands, strings.TrimSuffix(commands, "; "))
 		}
 	}
 

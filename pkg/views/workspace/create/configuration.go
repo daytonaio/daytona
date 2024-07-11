@@ -13,7 +13,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
-	configure "github.com/daytonaio/daytona/pkg/views/server"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
 
@@ -28,7 +27,6 @@ type ProjectConfigurationData struct {
 	DevcontainerFilePath string
 	Image                string
 	User                 string
-	PostStartCommands    []string
 	EnvVars              map[string]string
 }
 
@@ -38,7 +36,6 @@ func NewProjectConfigurationData(buildChoice BuildChoice, devContainerFilePath s
 		DevcontainerFilePath: defaults.DevcontainerFilePath,
 		Image:                *defaults.Image,
 		User:                 *defaults.ImageUser,
-		PostStartCommands:    defaults.PostStartCommands,
 		EnvVars:              map[string]string{},
 	}
 
@@ -48,10 +45,6 @@ func NewProjectConfigurationData(buildChoice BuildChoice, devContainerFilePath s
 
 	if currentProject.User != nil {
 		projectConfigurationData.User = *currentProject.User
-	}
-
-	if currentProject.PostStartCommands != nil {
-		projectConfigurationData.PostStartCommands = currentProject.PostStartCommands
 	}
 
 	if currentProject.EnvVars != nil {
@@ -107,21 +100,18 @@ func ConfigureProjects(projectList *[]apiclient.CreateWorkspaceRequestProject, d
 				(*projectList)[i].Build = nil
 				(*projectList)[i].Image = defaults.Image
 				(*projectList)[i].User = defaults.ImageUser
-				(*projectList)[i].PostStartCommands = projectConfigurationData.PostStartCommands
 			}
 
 			if projectConfigurationData.BuildChoice == string(CUSTOMIMAGE) {
 				(*projectList)[i].Build = nil
 				(*projectList)[i].Image = &projectConfigurationData.Image
 				(*projectList)[i].User = &projectConfigurationData.User
-				(*projectList)[i].PostStartCommands = projectConfigurationData.PostStartCommands
 			}
 
 			if projectConfigurationData.BuildChoice == string(AUTOMATIC) {
 				(*projectList)[i].Build = &apiclient.ProjectBuild{}
 				(*projectList)[i].Image = defaults.Image
 				(*projectList)[i].User = defaults.ImageUser
-				(*projectList)[i].PostStartCommands = projectConfigurationData.PostStartCommands
 			}
 
 			if projectConfigurationData.BuildChoice == string(DEVCONTAINER) {
@@ -132,7 +122,6 @@ func ConfigureProjects(projectList *[]apiclient.CreateWorkspaceRequestProject, d
 				}
 				(*projectList)[i].Image = nil
 				(*projectList)[i].User = nil
-				(*projectList)[i].PostStartCommands = nil
 			}
 
 			(*projectList)[i].EnvVars = &projectConfigurationData.EnvVars
@@ -187,11 +176,6 @@ func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData)
 				Value(&projectConfiguration.DevcontainerFilePath).Validate(validateDevcontainerFilename),
 		).WithHideFunc(func() bool {
 			return projectConfiguration.BuildChoice != string(DEVCONTAINER)
-		}),
-		huh.NewGroup(
-			configure.GetPostStartCommandsInput(&projectConfiguration.PostStartCommands, "Post start commands"),
-		).WithHideFunc(func() bool {
-			return projectConfiguration.BuildChoice == string(DEVCONTAINER)
 		}),
 		huh.NewGroup(
 			views.GetEnvVarsInput(&projectConfiguration.EnvVars),
