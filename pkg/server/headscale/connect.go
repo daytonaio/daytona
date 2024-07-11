@@ -27,7 +27,7 @@ func (s *HeadscaleServer) Connect() error {
 		log.Fatal(err)
 	}
 
-	tsNetServer.ControlURL = fmt.Sprintf("http://localhost:%d", s.headscalePort)
+	tsNetServer.ControlURL = s.serverUrl
 	tsNetServer.AuthKey = authKey
 
 	defer tsNetServer.Close()

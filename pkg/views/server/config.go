@@ -7,17 +7,20 @@ import (
 	"fmt"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
 func RenderConfig(config *server.Config) {
-	apiUrl := util.GetFrpcApiUrl(config.Frps.Protocol, config.Id, config.Frps.Domain)
+	apiUrl := config.GetApiUrl()
 
 	output := views.GetStyledMainTitle("Daytona Server Config") + "\n\n"
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Server ID: "), config.Id) + "\n\n"
+
+	if config.IpWithProtocol != nil {
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Server IP: "), *config.IpWithProtocol) + "\n\n"
+	}
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("API URL: "), apiUrl) + "\n\n"
 

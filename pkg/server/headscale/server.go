@@ -11,26 +11,23 @@ import (
 )
 
 type HeadscaleServerConfig struct {
-	ServerId      string
-	FrpsDomain    string
-	FrpsProtocol  string
-	HeadscalePort uint32
+	ServerId  string
+	Port      uint32
+	ServerUrl string
 }
 
 func NewHeadscaleServer(config *HeadscaleServerConfig) *HeadscaleServer {
 	return &HeadscaleServer{
-		serverId:      config.ServerId,
-		frpsDomain:    config.FrpsDomain,
-		frpsProtocol:  config.FrpsProtocol,
-		headscalePort: config.HeadscalePort,
+		serverId:  config.ServerId,
+		port:      config.Port,
+		serverUrl: config.ServerUrl,
 	}
 }
 
 type HeadscaleServer struct {
-	serverId      string
-	frpsDomain    string
-	frpsProtocol  string
-	headscalePort uint32
+	serverId  string
+	port      uint32
+	serverUrl string
 }
 
 func (s *HeadscaleServer) Init() error {
