@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"os/user"
 	"path/filepath"
 	"strings"
@@ -23,8 +24,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (d *DockerClient) CreateWorkspace(workspace *workspace.Workspace, logWriter io.Writer) error {
-	return nil
+func (d *DockerClient) CreateWorkspace(workspace *workspace.Workspace, workspaceDir string, logWriter io.Writer, sshClient *ssh.Client) error {
+	var err error
+	if sshClient == nil {
+		err = os.MkdirAll(workspaceDir, 0755)
+	} else {
+		err = sshClient.Exec(fmt.Sprintf("mkdir -p %s", workspaceDir), nil)
+	}
+
+	return err
 }
 
 func (d *DockerClient) CreateProject(opts *CreateProjectOptions) error {
@@ -34,28 +42,19 @@ func (d *DockerClient) CreateProject(opts *CreateProjectOptions) error {
 		return err
 	}
 
-	var sshClient *ssh.Client
-	if opts.SshSessionConfig != nil {
-		sshClient, err = ssh.NewClient(opts.SshSessionConfig)
-		if err != nil {
-			return err
-		}
-		defer sshClient.Close()
-	}
-
-	err = d.cloneProjectRepository(opts, sshClient)
+	err = d.cloneProjectRepository(opts)
 	if err != nil {
 		return err
 	}
 
-	builderType, err := detect.DetectProjectBuilderType(opts.Project, opts.ProjectDir, sshClient)
+	builderType, err := detect.DetectProjectBuilderType(opts.Project, opts.ProjectDir, opts.SshClient)
 	if err != nil {
 		return err
 	}
 
 	switch builderType {
 	case detect.BuilderTypeDevcontainer:
-		_, err := d.createProjectFromDevcontainer(opts, true, sshClient)
+		_, err := d.createProjectFromDevcontainer(opts, true)
 		return err
 	case detect.BuilderTypeImage:
 		return d.createProjectFromImage(opts)
@@ -64,8 +63,20 @@ func (d *DockerClient) CreateProject(opts *CreateProjectOptions) error {
 	}
 }
 
-func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions, sshClient *ssh.Client) error {
+func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions) error {
 	ctx := context.Background()
+
+	if opts.SshClient != nil {
+		err := opts.SshClient.Exec(fmt.Sprintf("mkdir -p %s", opts.ProjectDir), nil)
+		if err != nil {
+			return err
+		}
+	} else {
+		err := os.MkdirAll(opts.ProjectDir, 0755)
+		if err != nil {
+			return err
+		}
+	}
 
 	var auth *http.BasicAuth
 	if opts.Gpc != nil {
@@ -128,8 +139,8 @@ func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions, sshCli
 	newUid := currentUser.Uid
 	newGid := currentUser.Gid
 
-	if sshClient != nil {
-		newUid, newGid, err = sshClient.GetUserUidGid()
+	if opts.SshClient != nil {
+		newUid, newGid, err = opts.SshClient.GetUserUidGid()
 		if err != nil {
 			return err
 		}

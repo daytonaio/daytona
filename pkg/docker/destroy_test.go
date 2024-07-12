@@ -4,6 +4,8 @@
 package docker_test
 
 import (
+	"os"
+
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/stretchr/testify/mock"
@@ -11,8 +13,13 @@ import (
 )
 
 func (s *DockerClientTestSuite) TestDestroyWorkspace() {
-	err := s.dockerClient.DestroyWorkspace(workspace1)
+	workspaceDir := s.T().TempDir()
+
+	err := s.dockerClient.DestroyWorkspace(workspace1, workspaceDir, nil)
 	require.Nil(s.T(), err)
+
+	_, err = os.Stat(workspaceDir)
+	require.True(s.T(), os.IsNotExist(err))
 }
 
 func (s *DockerClientTestSuite) TestDestroyProject() {
@@ -33,6 +40,11 @@ func (s *DockerClientTestSuite) TestDestroyProject() {
 
 	s.mockClient.On("VolumeRemove", mock.Anything, s.dockerClient.GetProjectVolumeName(project1), true).Return(nil)
 
-	err := s.dockerClient.DestroyProject(project1)
+	projectDir := s.T().TempDir()
+
+	err := s.dockerClient.DestroyProject(project1, projectDir, nil)
 	require.Nil(s.T(), err)
+
+	_, err = os.Stat(projectDir)
+	require.True(s.T(), os.IsNotExist(err))
 }

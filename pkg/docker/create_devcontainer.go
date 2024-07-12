@@ -39,7 +39,7 @@ type DevcontainerPaths struct {
 	TargetConfigFilePath string
 }
 
-func (d *DockerClient) createProjectFromDevcontainer(opts *CreateProjectOptions, prebuild bool, sshClient *ssh.Client) (RemoteUser, error) {
+func (d *DockerClient) createProjectFromDevcontainer(opts *CreateProjectOptions, prebuild bool) (RemoteUser, error) {
 	socketForwardId, err := d.ensureDockerSockForward(opts.LogWriter)
 	if err != nil {
 		return "", err
@@ -49,8 +49,8 @@ func (d *DockerClient) createProjectFromDevcontainer(opts *CreateProjectOptions,
 
 	paths := d.getDevcontainerPaths(opts)
 
-	if sshClient != nil {
-		err = sshClient.Exec(fmt.Sprintf("mkdir -p %s", paths.OverridesDir), opts.LogWriter)
+	if opts.SshClient != nil {
+		err = opts.SshClient.Exec(fmt.Sprintf("mkdir -p %s", paths.OverridesDir), opts.LogWriter)
 		if err != nil {
 			return "", err
 		}
@@ -61,7 +61,7 @@ func (d *DockerClient) createProjectFromDevcontainer(opts *CreateProjectOptions,
 		}
 	}
 
-	rawConfig, config, err := d.readDevcontainerConfig(opts, paths, socketForwardId, sshClient)
+	rawConfig, config, err := d.readDevcontainerConfig(opts, paths, socketForwardId)
 	if err != nil {
 		return "", err
 	}
@@ -114,7 +114,7 @@ func (d *DockerClient) createProjectFromDevcontainer(opts *CreateProjectOptions,
 	if _, ok := devcontainerConfig["dockerComposeFile"]; ok {
 		composeFilePath := devcontainerConfig["dockerComposeFile"].(string)
 
-		if opts.SshSessionConfig != nil {
+		if opts.SshClient != nil {
 			composeFilePath = path.Join(opts.ProjectDir, filepath.Dir(opts.Project.Build.Devcontainer.DevContainerFilePath), composeFilePath)
 
 			composeFileContent, err := d.getRemoteComposeContent(opts, paths, socketForwardId, composeFilePath)
@@ -156,13 +156,13 @@ func (d *DockerClient) createProjectFromDevcontainer(opts *CreateProjectOptions,
 			return "", err
 		}
 
-		if sshClient != nil {
+		if opts.SshClient != nil {
 			err = os.RemoveAll(composeFilePath)
 			if err != nil {
 				opts.LogWriter.Write([]byte(fmt.Sprintf("Error removing override compose file: %v\n", err)))
 				return "", err
 			}
-			res, err := sshClient.WriteFile(string(overrideComposeContent), filepath.Join(paths.OverridesDir, "daytona-compose-override.yml"))
+			res, err := opts.SshClient.WriteFile(string(overrideComposeContent), filepath.Join(paths.OverridesDir, "daytona-compose-override.yml"))
 			if err != nil {
 				opts.LogWriter.Write([]byte(fmt.Sprintf("Error writing override compose file: %s\n", string(res))))
 				return "", err
@@ -186,8 +186,8 @@ func (d *DockerClient) createProjectFromDevcontainer(opts *CreateProjectOptions,
 		return "", err
 	}
 
-	if sshClient != nil {
-		res, err := sshClient.WriteFile(string(configString), path.Join(paths.OverridesDir, "devcontainer.json"))
+	if opts.SshClient != nil {
+		res, err := opts.SshClient.WriteFile(string(configString), path.Join(paths.OverridesDir, "devcontainer.json"))
 		if err != nil {
 			opts.LogWriter.Write([]byte(fmt.Sprintf("Error writing override compose file: %s\n", string(res))))
 			return "", err
@@ -216,7 +216,7 @@ func (d *DockerClient) createProjectFromDevcontainer(opts *CreateProjectOptions,
 
 	cmd := []string{"-c", strings.Join(devcontainerCmd, " ")}
 
-	err = d.runInitializeCommand(config.MergedConfiguration.InitializeCommand, opts.LogWriter, sshClient)
+	err = d.runInitializeCommand(config.MergedConfiguration.InitializeCommand, opts.LogWriter, opts.SshClient)
 	if err != nil {
 		return "", err
 	}
@@ -338,13 +338,13 @@ func (d *DockerClient) ensureDockerSockForward(logWriter io.Writer) (string, err
 	return c.ID, d.apiClient.ContainerStart(ctx, dockerSockForwardContainer, container.StartOptions{})
 }
 
-func (d *DockerClient) readDevcontainerConfig(opts *CreateProjectOptions, paths DevcontainerPaths, socketForwardId string, sshClient *ssh.Client) (string, *devcontainer.Root, error) {
+func (d *DockerClient) readDevcontainerConfig(opts *CreateProjectOptions, paths DevcontainerPaths, socketForwardId string) (string, *devcontainer.Root, error) {
 	opts.LogWriter.Write([]byte("Reading devcontainer configuration...\n"))
 
 	env := os.Environ()
-	if sshClient != nil {
+	if opts.SshClient != nil {
 		var err error
-		env, err = sshClient.GetEnv(nil)
+		env, err = opts.SshClient.GetEnv(nil)
 		if err != nil {
 			return "", nil, err
 		}
@@ -544,7 +544,7 @@ func (d *DockerClient) execInContainer(cmd string, opts *CreateProjectOptions, p
 }
 
 func (d *DockerClient) getRemoteComposeContent(opts *CreateProjectOptions, paths DevcontainerPaths, socketForwardId, composePath string) (string, error) {
-	if opts.SshSessionConfig == nil {
+	if opts.SshClient == nil {
 		return "", nil
 	}
 
