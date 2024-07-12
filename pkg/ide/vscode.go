@@ -116,7 +116,13 @@ func setupIdeCustomizations(projectHostname string, projectProviderMetadata stri
 	}
 
 	// Create lock file to indicate that customizations are set up
-	return exec.Command("ssh", projectHostname, "touch", fmt.Sprintf("$HOME/.daytona-customizations-lock-%s", string(tool))).Run()
+	err = exec.Command("ssh", projectHostname, "touch", fmt.Sprintf("$HOME/.daytona-customizations-lock-%s", string(tool))).Run()
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("IDE customizations set up successfully")
+	return nil
 }
 
 func setIdeSettings(projectHostname string, customizations *devcontainer.Customizations, settingsPath string) error {
@@ -151,7 +157,13 @@ func setIdeSettings(projectHostname string, customizations *devcontainer.Customi
 		return err
 	}
 
-	return exec.Command("ssh", projectHostname, "echo", fmt.Sprintf(`'%s'`, string(settingsJson)), ">", settingsPath).Run()
+	err = exec.Command("ssh", projectHostname, "echo", fmt.Sprintf(`'%s'`, string(settingsJson)), ">", settingsPath).Run()
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("IDE settings set up successfully")
+	return nil
 }
 
 func checkAndAlertVSCodeInstalled() {
