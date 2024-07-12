@@ -19,20 +19,20 @@ import (
 )
 
 type CreateProjectOptions struct {
-	Project          *workspace.Project
-	ProjectDir       string
-	Cr               *containerregistry.ContainerRegistry
-	LogWriter        io.Writer
-	Gpc              *gitprovider.GitProviderConfig
-	SshSessionConfig *ssh.SessionConfig
+	Project    *workspace.Project
+	ProjectDir string
+	Cr         *containerregistry.ContainerRegistry
+	LogWriter  io.Writer
+	Gpc        *gitprovider.GitProviderConfig
+	SshClient  *ssh.Client
 }
 
 type IDockerClient interface {
 	CreateProject(opts *CreateProjectOptions) error
-	CreateWorkspace(workspace *workspace.Workspace, logWriter io.Writer) error
+	CreateWorkspace(workspace *workspace.Workspace, workspaceDir string, logWriter io.Writer, sshClient *ssh.Client) error
 
-	DestroyProject(project *workspace.Project) error
-	DestroyWorkspace(workspace *workspace.Workspace) error
+	DestroyProject(project *workspace.Project, projectDir string, sshClient *ssh.Client) error
+	DestroyWorkspace(workspace *workspace.Workspace, workspaceDir string, sshClient *ssh.Client) error
 
 	StartProject(opts *CreateProjectOptions, daytonaDownloadUrl string) error
 	StopProject(project *workspace.Project, logWriter io.Writer) error
