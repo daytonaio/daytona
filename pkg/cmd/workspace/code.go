@@ -76,7 +76,7 @@ var CodeCmd = &cobra.Command{
 			if selectedProject == nil {
 				return
 			}
-			projectName = *selectedProject
+			projectName = *selectedProject.Name
 		}
 
 		if len(args) == 2 {
@@ -98,7 +98,18 @@ var CodeCmd = &cobra.Command{
 
 		views.RenderInfoMessage(fmt.Sprintf("Opening the project '%s' from workspace '%s' in %s", projectName, *workspace.Name, ideName))
 
-		err = openIDE(ideId, activeProfile, workspaceId, projectName)
+		providerMetadata := ""
+		for _, project := range workspace.Info.Projects {
+			if *project.Name == projectName {
+				if project.ProviderMetadata == nil {
+					log.Fatal(errors.New("project provider metadata is missing"))
+				}
+				providerMetadata = *project.ProviderMetadata
+				break
+			}
+		}
+
+		err = openIDE(ideId, activeProfile, workspaceId, projectName, providerMetadata)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -115,7 +126,7 @@ var CodeCmd = &cobra.Command{
 	},
 }
 
-func selectWorkspaceProject(workspaceId string, profile *config.Profile) (*string, error) {
+func selectWorkspaceProject(workspaceId string, profile *config.Profile) (*apiclient.Project, error) {
 	ctx := context.Background()
 
 	apiClient, err := apiclient_util.GetApiClient(profile)
@@ -133,22 +144,22 @@ func selectWorkspaceProject(workspaceId string, profile *config.Profile) (*strin
 		if selectedProject == nil {
 			return nil, nil
 		}
-		return selectedProject.Name, nil
+		return selectedProject, nil
 	} else if len(wsInfo.Projects) == 1 {
-		return wsInfo.Projects[0].Name, nil
+		return &wsInfo.Projects[0], nil
 	}
 
 	return nil, errors.New("no projects found in workspace")
 }
 
-func openIDE(ideId string, activeProfile config.Profile, workspaceId string, projectName string) error {
+func openIDE(ideId string, activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string) error {
 	switch ideId {
 	case "vscode":
-		return ide.OpenVSCode(activeProfile, workspaceId, projectName)
+		return ide.OpenVSCode(activeProfile, workspaceId, projectName, projectProviderMetadata)
 	case "ssh":
 		return ide.OpenTerminalSsh(activeProfile, workspaceId, projectName)
 	case "browser":
-		return ide.OpenBrowserIDE(activeProfile, workspaceId, projectName)
+		return ide.OpenBrowserIDE(activeProfile, workspaceId, projectName, projectProviderMetadata)
 	default:
 		_, ok := jetbrains.GetIdes()[jetbrains.Id(ideId)]
 		if ok {
