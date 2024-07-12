@@ -193,7 +193,18 @@ var CreateCmd = &cobra.Command{
 
 		views.RenderCreationInfoMessage(fmt.Sprintf("Opening the workspace in %s ...", chosenIde.Name))
 
-		err = openIDE(chosenIdeId, activeProfile, *createdWorkspace.Id, *wsInfo.Projects[0].Name)
+		providerMetadata := ""
+		for _, project := range wsInfo.Info.Projects {
+			if *project.Name == *wsInfo.Projects[0].Name {
+				if project.ProviderMetadata == nil {
+					log.Fatal(errors.New("project provider metadata is missing"))
+				}
+				providerMetadata = *project.ProviderMetadata
+				break
+			}
+		}
+
+		err = openIDE(chosenIdeId, activeProfile, *createdWorkspace.Id, *wsInfo.Projects[0].Name, providerMetadata)
 		if err != nil {
 			log.Fatal(err)
 		}
