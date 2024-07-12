@@ -5,18 +5,34 @@ package docker
 
 import (
 	"context"
+	"fmt"
+	"os"
 
+	"github.com/daytonaio/daytona/pkg/ssh"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 )
 
-func (d *DockerClient) DestroyWorkspace(workspace *workspace.Workspace) error {
-	return nil
+func (d *DockerClient) DestroyWorkspace(workspace *workspace.Workspace, workspaceDir string, sshClient *ssh.Client) error {
+	if sshClient == nil {
+		return os.RemoveAll(workspaceDir)
+	} else {
+		return sshClient.Exec(fmt.Sprintf("rm -rf %s", workspaceDir), nil)
+	}
 }
 
-func (d *DockerClient) DestroyProject(project *workspace.Project) error {
-	return d.removeProjectContainer(project)
+func (d *DockerClient) DestroyProject(project *workspace.Project, projectDir string, sshClient *ssh.Client) error {
+	err := d.removeProjectContainer(project)
+	if err != nil {
+		return err
+	}
+
+	if sshClient == nil {
+		return os.RemoveAll(projectDir)
+	} else {
+		return sshClient.Exec(fmt.Sprintf("rm -rf %s", projectDir), nil)
+	}
 }
 
 func (d *DockerClient) removeProjectContainer(project *workspace.Project) error {

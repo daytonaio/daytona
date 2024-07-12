@@ -11,7 +11,6 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/builder/detect"
 	"github.com/daytonaio/daytona/pkg/provider/util"
-	"github.com/daytonaio/daytona/pkg/ssh"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/docker/docker/api/types"
 )
@@ -20,16 +19,7 @@ func (d *DockerClient) StartProject(opts *CreateProjectOptions, daytonaDownloadU
 	var err error
 	containerUser := opts.Project.User
 
-	var sshClient *ssh.Client
-	if opts.SshSessionConfig != nil {
-		sshClient, err = ssh.NewClient(opts.SshSessionConfig)
-		if err != nil {
-			return err
-		}
-		defer sshClient.Close()
-	}
-
-	builderType, err := detect.DetectProjectBuilderType(opts.Project, opts.ProjectDir, sshClient)
+	builderType, err := detect.DetectProjectBuilderType(opts.Project, opts.ProjectDir, opts.SshClient)
 	if err != nil {
 		return err
 	}
@@ -37,7 +27,7 @@ func (d *DockerClient) StartProject(opts *CreateProjectOptions, daytonaDownloadU
 	switch builderType {
 	case detect.BuilderTypeDevcontainer:
 		var remoteUser RemoteUser
-		remoteUser, err = d.startDevcontainerProject(opts, sshClient)
+		remoteUser, err = d.startDevcontainerProject(opts)
 		containerUser = string(remoteUser)
 	case detect.BuilderTypeImage:
 		err = d.startImageProject(opts)

@@ -24,7 +24,12 @@ import (
 )
 
 func (s *DockerClientTestSuite) TestCreateWorkspace() {
-	err := s.dockerClient.CreateWorkspace(workspace1, nil)
+	workspaceDir := s.T().TempDir()
+
+	err := s.dockerClient.CreateWorkspace(workspace1, workspaceDir, nil, nil)
+	require.Nil(s.T(), err)
+
+	_, err = os.Stat(workspaceDir)
 	require.Nil(s.T(), err)
 }
 
@@ -94,12 +99,12 @@ func (s *DockerClientTestSuite) TestCreateProject() {
 	).Return(container.CreateResponse{ID: "123"}, nil)
 
 	err := s.dockerClient.CreateProject(&docker.CreateProjectOptions{
-		Project:          project1,
-		ProjectDir:       projectDir,
-		Cr:               nil,
-		LogWriter:        nil,
-		Gpc:              nil,
-		SshSessionConfig: nil,
+		Project:    project1,
+		ProjectDir: projectDir,
+		Cr:         nil,
+		LogWriter:  nil,
+		Gpc:        nil,
+		SshClient:  nil,
 	})
 	require.Nil(s.T(), err)
 }

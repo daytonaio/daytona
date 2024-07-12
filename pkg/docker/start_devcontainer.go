@@ -8,11 +8,10 @@ import (
 	"path"
 	"strings"
 
-	"github.com/daytonaio/daytona/pkg/ssh"
 	"github.com/docker/docker/api/types/mount"
 )
 
-func (d *DockerClient) startDevcontainerProject(opts *CreateProjectOptions, sshClient *ssh.Client) (RemoteUser, error) {
+func (d *DockerClient) startDevcontainerProject(opts *CreateProjectOptions) (RemoteUser, error) {
 	go func() {
 		err := d.runDevcontainerUserCommands(opts)
 		if err != nil {
@@ -20,7 +19,7 @@ func (d *DockerClient) startDevcontainerProject(opts *CreateProjectOptions, sshC
 		}
 	}()
 
-	return d.createProjectFromDevcontainer(opts, false, sshClient)
+	return d.createProjectFromDevcontainer(opts, false)
 }
 
 func (d *DockerClient) runDevcontainerUserCommands(opts *CreateProjectOptions) error {
