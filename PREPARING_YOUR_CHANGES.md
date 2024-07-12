@@ -2,7 +2,7 @@
 
 This document contains information related to preparing changes for a pull request. Here's a quick checklist for a good PR, more details below:
 
-1. A discussion around the change on [Slack](https://join.slack.com/t/daytonacommunity/shared_invite/zt-273yohksh-Q5YSB5V7tnQzX2RoTARr7Q) or in an issue.
+1. A discussion around the change on [Slack](https://go.daytona.io/slack) or in an issue.
 1. A GitHub Issue with a good description associated with the PR
 1. One feature/change per PR
 1. One commit per PR
@@ -19,7 +19,7 @@ For example, if a descriptive title covers what the commit does in practice, the
 However, if the commit has an out-sized impact relative to other commits, its description will need to reflect that.
 
 Reviewers may ask you to amend your commits if they are not descriptive enough.
-Since the descriptiveness of a commit is subjective, please feel free to talk to us on [Slack](https://join.slack.com/t/daytonacommunity/shared_invite/zt-273yohksh-Q5YSB5V7tnQzX2RoTARr7Q) if you have any questions.
+Since the descriptiveness of a commit is subjective, please feel free to talk to us on [Slack](https://go.daytona.io/slack) if you have any questions.
 
 ### Optional Commit Template
 
