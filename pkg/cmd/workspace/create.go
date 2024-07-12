@@ -5,7 +5,6 @@ package workspace
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -154,10 +153,7 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
-		dialStartTime := time.Now()
-		dialTimeout := 3 * time.Minute
-
-		err = waitForDial(tsConn, *createdWorkspace.Id, *createdWorkspace.Projects[0].Name, dialStartTime, dialTimeout)
+		err = waitForDial(tsConn, *createdWorkspace.Id, *createdWorkspace.Projects[0].Name)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -362,12 +358,8 @@ func processCmdArguments(args []string, apiClient *apiclient.APIClient, projects
 	return nil
 }
 
-func waitForDial(tsConn *tsnet.Server, workspaceId string, projectName string, dialStartTime time.Time, dialTimeout time.Duration) error {
+func waitForDial(tsConn *tsnet.Server, workspaceId string, projectName string) error {
 	for {
-		if time.Since(dialStartTime) > dialTimeout {
-			return errors.New("timeout: dialing timed out after 3 minutes")
-		}
-
 		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", workspace.GetProjectHostname(workspaceId, projectName), ssh_config.SSH_PORT))
 		if err == nil {
 			defer dialConn.Close()
