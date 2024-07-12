@@ -2,21 +2,39 @@
 
 The team at Daytona welcomes contributions from the community. There are many ways to get involved!
 
+Thanks for taking the time to contribute! ❤️
+
+> And if you like the project but don't have time to contribute, that's perfectly okay. There are other simple ways to support the project and show your appreciation, which we would greatly appreciate:
+> - Star the project
+> - Tweet about it
+> - Contribute to our [Docs](https://github.com/daytonaio/docs/)
+> - Refer this project in your project's readme
+> - Mention the project at local meetups and tell your friends/colleagues
+
+## Code of Conduct
+
+This project and everyone participating in it is governed by the
+[Daytona Code of Conduct](https://github.com/daytonaio/daytona/blob/contributing-update/CODE_OF_CONDUCT.md).
+By participating, you are expected to uphold this code. Please report unacceptable behavior
+to [info@daytona.io](mailto:info@daytona.io).
+
 ## Provide Feedback
 
 You might find things that can be improved while you are using Daytona. You can help by [submitting an issue](https://github.com/daytonaio/daytona/issues/new) when:
 
+* A new feature or an enhancement to an existing feature will improve the utility or usability of Daytona.
 * Daytona crashes, or you encounter a bug that can only be resolved by restarting Daytona.
 * An error occurs that is unrecoverable, causes workspace integrity problems or loss, or generally prevents you from using a workspace.
-* A new feature or an enhancement to an existing feature will improve the utility or usability of Daytona.
 
 Before creating a new issue, please confirm that an existing issue doesn't already exist.
+
+We will then take care of the issue as soon as possible.
 
 ## Participate in the Community
 You can engage with our community by:
 
-* Helping other users on [Slack](https://join.slack.com/t/daytonacommunity/shared_invite/zt-273yohksh-Q5YSB5V7tnQzX2RoTARr7Q).
-* Improving documentation
+* Helping other users on [Daytona Community Slack](https://go.daytona.io/slack).
+* Improving [documentation](https://github.com/daytonaio/docs/)
 * Participating in general discussions about development and DevOps
 * Authoring new Daytona Plugins and sharing those Plugins
 * Authoring new dev containers and sharing examples
@@ -28,7 +46,7 @@ You can contribute to Daytona by:
 * Fixing bugs
 * Adding new features and capabilities
 
-Before starting your contribution, especially for core features, we encourage you to reach out to us on [Slack](https://join.slack.com/t/daytonacommunity/shared_invite/zt-273yohksh-Q5YSB5V7tnQzX2RoTARr7Q). This allows us to ensure that your proposed feature aligns with the project's roadmap and goals. Developers are the key to making Daytona the best tool it can be, and we value input from the community.
+Before starting your contribution, especially for core features, we encourage you to reach out to us on [Slack](https://go.daytona.io/slack). This allows us to ensure that your proposed feature aligns with the project's roadmap and goals. Developers are the key to making Daytona the best tool it can be, and we value input from the community.
 
 We look forward to working with you to improve Daytona and make development environments as easy as possible for developers everywhere.
 
@@ -59,4 +77,4 @@ Here is what being a contributor means for you:
 * License all our contributions to the project under the Apache License, Version 2.0
 * Have the legal rights to license our contributions ourselves, or get permission to license them from our employers, clients, or others who may have them
 
-For more information, see the [README](README.md) and feel free to reach out to us on [Slack](https://join.slack.com/t/daytonacommunity/shared_invite/zt-273yohksh-Q5YSB5V7tnQzX2RoTARr7Q).
+For more information, see the [README](README.md) and feel free to reach out to us on [Slack](https://go.daytona.io/slack).
