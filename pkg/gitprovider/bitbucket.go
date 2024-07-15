@@ -76,45 +76,58 @@ func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]*GitReposito
 		namespace = user.Username
 	}
 
-	repoList, err := client.Repositories.ListForAccount(&bitbucket.RepositoriesOptions{
-		Owner:   namespace,
-		Keyword: nil,
-	})
-	if err != nil {
-		return nil, g.FormatError(err)
-	}
-
-	for _, repo := range repoList.Items {
-		htmlLink, ok := repo.Links["html"].(map[string]interface{})
-		if !ok {
-			return nil, errors.New("invalid repo links")
-		}
-
-		repoUrl, ok := htmlLink["href"].(string)
-		if !ok {
-			return nil, errors.New("invalid repo html link")
-		}
-
-		u, err := url.Parse(repoUrl)
-		if err != nil {
-			return nil, err
-		}
-
-		owner, name, err := g.getOwnerAndRepoFromFullName(repo.Full_name)
-		if err != nil {
-			return nil, err
-		}
-
-		response = append(response, &GitRepository{
-			Id:     repo.Full_name,
-			Name:   name,
-			Url:    repoUrl,
-			Source: u.Host,
-			Owner:  owner,
+	page := 1
+	for {
+		repoList, err := client.Repositories.ListForAccount(&bitbucket.RepositoriesOptions{
+			Owner:   namespace,
+			Page:    &page,
+			Keyword: nil,
 		})
+		if err != nil {
+			return nil, g.FormatError(err)
+		}
+
+		for _, repo := range repoList.Items {
+			htmlLink, ok := repo.Links["html"].(map[string]interface{})
+			if !ok {
+				return nil, fmt.Errorf("invalid repo links")
+			}
+
+			repoUrl, ok := htmlLink["href"].(string)
+			if !ok {
+				return nil, fmt.Errorf("invalid repo html link")
+			}
+
+			u, err := url.Parse(repoUrl)
+			if err != nil {
+				return nil, err
+			}
+
+			owner, name, err := g.getOwnerAndRepoFromFullName(repo.Full_name)
+			if err != nil {
+				return nil, err
+			}
+
+			response = append(response, &GitRepository{
+				Id:     repo.Full_name,
+				Name:   name,
+				Url:    repoUrl,
+				Source: u.Host,
+				Owner:  owner,
+			})
+		}
+
+		// Returns 10 repos (at max) in a page by default
+		// this does leaves behind a edge case when the last page has exact 10 repos,
+		// but cant find a way around this..
+		if len(repoList.Items) < 10 {
+			break
+		}
+
+		page++
 	}
 
-	return response, err
+	return response, nil
 }
 
 func (g *BitbucketGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {

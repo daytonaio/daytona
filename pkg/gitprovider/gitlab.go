@@ -80,34 +80,48 @@ func (g *GitLabGitProvider) GetRepositories(namespace string) ([]*GitRepository,
 	client := g.getApiClient()
 	var response []*GitRepository
 	var repoList []*gitlab.Project
+	var err error
 
-	if namespace == personalNamespaceId {
-		user, err := g.GetUser()
-		if err != nil {
-			return nil, err
+	page := 1
+
+	for {
+		var projects []*gitlab.Project
+		var response *gitlab.Response
+
+		if namespace == personalNamespaceId {
+			user, err := g.GetUser()
+			if err != nil {
+				return nil, err
+			}
+
+			projects, response, err = client.Projects.ListUserProjects(user.Id, &gitlab.ListProjectsOptions{
+				ListOptions: gitlab.ListOptions{
+					PerPage: 100,
+					Page:    page,
+				},
+			})
+			if err != nil {
+				return nil, g.FormatError(err)
+			}
+		} else {
+			projects, response, err = client.Groups.ListGroupProjects(namespace, &gitlab.ListGroupProjectsOptions{
+				ListOptions: gitlab.ListOptions{
+					PerPage: 100,
+					Page:    page,
+				},
+			})
+			if err != nil {
+				return nil, g.FormatError(err)
+			}
 		}
 
-		repos, _, err := client.Projects.ListUserProjects(user.Id, &gitlab.ListProjectsOptions{
-			ListOptions: gitlab.ListOptions{
-				PerPage: 100,
-				Page:    1,
-			},
-		})
-		if err != nil {
-			return nil, g.FormatError(err)
+		repoList = append(repoList, projects...)
+
+		if response.CurrentPage >= response.TotalPages {
+			break
 		}
-		repoList = repos
-	} else {
-		repos, _, err := client.Groups.ListGroupProjects(namespace, &gitlab.ListGroupProjectsOptions{
-			ListOptions: gitlab.ListOptions{
-				PerPage: 100,
-				Page:    1,
-			},
-		})
-		if err != nil {
-			return nil, g.FormatError(err)
-		}
-		repoList = repos
+
+		page++
 	}
 
 	for _, repo := range repoList {

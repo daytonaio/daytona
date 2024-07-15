@@ -56,25 +56,33 @@ func (g *GitHubGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 		return nil, err
 	}
 
-	orgList, _, err := client.Organizations.List(context.Background(), "", &github.ListOptions{
-		PerPage: 100,
-		Page:    1,
-	})
-	if err != nil {
-		return nil, g.FormatError(err)
-	}
-
 	namespaces := []*GitNamespace{}
+	page := 1
 
-	for _, org := range orgList {
-		namespace := &GitNamespace{}
-		if org.Login != nil {
-			namespace.Id = *org.Login
-			namespace.Name = *org.Login
-		} else if org.Name != nil {
-			namespace.Name = *org.Name
+	for {
+		orgList, response, err := client.Organizations.List(context.Background(), "", &github.ListOptions{
+			PerPage: 100,
+			Page:    page,
+		})
+		if err != nil {
+			return nil, g.FormatError(err)
 		}
-		namespaces = append(namespaces, namespace)
+
+		for _, org := range orgList {
+			namespace := &GitNamespace{}
+			if org.Login != nil {
+				namespace.Id = *org.Login
+				namespace.Name = *org.Login
+			} else if org.Name != nil {
+				namespace.Name = *org.Name
+			}
+			namespaces = append(namespaces, namespace)
+		}
+
+		if response.NextPage == 0 {
+			break
+		}
+		page = response.NextPage
 	}
 
 	namespaces = append([]*GitNamespace{{Id: personalNamespaceId, Name: user.Username}}, namespaces...)
@@ -84,7 +92,7 @@ func (g *GitHubGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 
 func (g *GitHubGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
 	client := g.getApiClient()
-	var response []*GitRepository
+	var repos []*GitRepository
 	query := "fork:true "
 
 	if namespace == personalNamespaceId {
@@ -97,33 +105,45 @@ func (g *GitHubGitProvider) GetRepositories(namespace string) ([]*GitRepository,
 		query += "org:" + namespace
 	}
 
-	repoList, _, err := client.Search.Repositories(context.Background(), query, &github.SearchOptions{
+	ctx := context.Background()
+
+	opts := &github.SearchOptions{
 		ListOptions: github.ListOptions{
 			PerPage: 100,
 			Page:    1,
 		},
-	})
-
-	if err != nil {
-		return nil, g.FormatError(err)
 	}
 
-	for _, repo := range repoList.Repositories {
-		u, err := url.Parse(*repo.HTMLURL)
+	for {
+		repoList, response, err := client.Search.Repositories(ctx, query, opts)
 		if err != nil {
-			return nil, err
+			return nil, g.FormatError(err)
 		}
-		response = append(response, &GitRepository{
-			Id:     *repo.Name,
-			Name:   *repo.Name,
-			Url:    *repo.HTMLURL,
-			Branch: *repo.DefaultBranch,
-			Owner:  *repo.Owner.Login,
-			Source: u.Host,
-		})
+
+		for _, repo := range repoList.Repositories {
+			u, err := url.Parse(*repo.HTMLURL)
+			if err != nil {
+				return nil, err
+			}
+			repos = append(repos, &GitRepository{
+				Id:     *repo.Name,
+				Name:   *repo.Name,
+				Url:    *repo.HTMLURL,
+				Branch: *repo.DefaultBranch,
+				Owner:  *repo.Owner.Login,
+				Source: u.Host,
+			})
+		}
+
+		// Break if there is no next page
+		if response.NextPage == 0 {
+			break
+		}
+
+		opts.Page = response.NextPage
 	}
 
-	return response, err
+	return repos, nil
 }
 
 func (g *GitHubGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {
