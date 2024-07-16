@@ -6,13 +6,13 @@
 package mocks
 
 import (
-	"github.com/daytonaio/daytona/pkg/builder"
+	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/stretchr/testify/mock"
 )
 
-var MockBuildResults = &builder.BuildResult{
+var MockBuildResults = &build.BuildResult{
 	User:              "test",
 	ImageName:         "test",
 	ProjectVolumePath: "test",
@@ -26,11 +26,11 @@ type MockBuilderFactory struct {
 	mock.Mock
 }
 
-func (f *MockBuilderFactory) Create(p workspace.Project, gpc *gitprovider.GitProviderConfig) (builder.IBuilder, error) {
+func (f *MockBuilderFactory) Create(p workspace.Project, gpc *gitprovider.GitProviderConfig) (build.IBuilder, error) {
 	return &mockBuilder{}, nil
 }
 
-func (f *MockBuilderFactory) CheckExistingBuild(p workspace.Project) (*builder.BuildResult, error) {
+func (f *MockBuilderFactory) CheckExistingBuild(p workspace.Project) (*build.BuildResult, error) {
 	return MockBuildResults, nil
 }
 
@@ -38,7 +38,7 @@ type mockBuilder struct {
 	mock.Mock
 }
 
-func (b *mockBuilder) Build() (*builder.BuildResult, error) {
+func (b *mockBuilder) Build() (*build.BuildResult, error) {
 	return MockBuildResults, nil
 }
 
@@ -50,7 +50,7 @@ func (b *mockBuilder) Publish() error {
 	return nil
 }
 
-func (p *mockBuilder) SaveBuildResults(r builder.BuildResult) error {
+func (p *mockBuilder) SaveBuildResults(r build.BuildResult) error {
 	args := p.Called(r)
 	return args.Error(0)
 }

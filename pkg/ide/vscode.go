@@ -14,7 +14,7 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/pkg/builder/devcontainer"
+	"github.com/daytonaio/daytona/pkg/build/devcontainer"
 
 	log "github.com/sirupsen/logrus"
 )

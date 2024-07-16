@@ -9,7 +9,7 @@ import (
 	"regexp"
 
 	"github.com/daytonaio/daytona/pkg/apikey"
-	"github.com/daytonaio/daytona/pkg/builder"
+	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
@@ -231,7 +231,7 @@ func (s *WorkspaceService) createWorkspace(ws *workspace.Workspace) (*workspace.
 	return ws, nil
 }
 
-func (s *WorkspaceService) handleBuildError(project *workspace.Project, builder builder.IBuilder, logWriter io.Writer, err error) {
+func (s *WorkspaceService) handleBuildError(project *workspace.Project, builder build.IBuilder, logWriter io.Writer, err error) {
 	logWriter.Write([]byte("################################################\n"))
 	logWriter.Write([]byte(fmt.Sprintf("#### BUILD FAILED FOR PROJECT %s: %s\n", project.Name, err.Error())))
 	logWriter.Write([]byte("################################################\n"))

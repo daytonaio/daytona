@@ -5,6 +5,7 @@ package server
 
 import (
 	"fmt"
+	"io"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -15,8 +16,9 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/apikey"
-	"github.com/daytonaio/daytona/pkg/builder"
+	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/db"
+	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/provisioner"
@@ -95,6 +97,10 @@ var ServeCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+		buildResultStore, err := db.NewBuildResultStore(dbConnection)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		headscaleServer := headscale.NewHeadscaleServer(&headscale.HeadscaleServerConfig{
 			ServerId:      c.Id,
@@ -160,20 +166,33 @@ var ServeCmd = &cobra.Command{
 		}
 		buildImageNamespace = strings.TrimSuffix(buildImageNamespace, "/")
 
-		builderFactory := builder.NewBuilderFactory(builder.BuilderConfig{
+		builderConfig := build.BuilderConfig{
 			ServerConfigFolder:       configDir,
 			ContainerRegistryServer:  c.BuilderRegistryServer,
 			BasePath:                 filepath.Join(configDir, "builds"),
 			BuildImageNamespace:      buildImageNamespace,
+			BuildResultStore:         buildResultStore,
 			LoggerFactory:            loggerFactory,
 			DefaultProjectImage:      c.DefaultProjectImage,
 			DefaultProjectUser:       c.DefaultProjectUser,
 			Image:                    c.BuilderImage,
 			ContainerRegistryService: containerRegistryService,
+		}
+
+		builderFactory := build.NewBuilderFactory(build.BuilderFactoryConfig{
+			BuilderConfig: builderConfig,
+			CreateGitService: func(projectDir string, logWriter io.Writer) git.IGitService {
+				return &git.Service{
+					ProjectDir: projectDir,
+					LogWriter:  logWriter,
+				}
+			},
 		})
+
 		provisioner := provisioner.NewProvisioner(provisioner.ProvisionerConfig{
 			ProviderManager: providerManager,
 		})
+
 		gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
 			ConfigStore: gitProviderConfigStore,
 		})
