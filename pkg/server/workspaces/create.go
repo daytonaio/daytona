@@ -18,7 +18,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
-func isValidRepoName(name string) bool {
+func isValidWorkspaceName(name string) bool {
 	// The repository name can only contain ASCII letters, digits, and the characters ., -, and _.
 	var validRepoName = regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
 
@@ -42,7 +42,7 @@ func (s *WorkspaceService) CreateWorkspace(req dto.CreateWorkspaceRequest) (*wor
 	}
 
 	// Repo name is taken as the name for workspace by default
-	if !isValidRepoName(req.Name) {
+	if !isValidWorkspaceName(req.Name) {
 		return nil, ErrInvalidWorkspaceName
 	}
 
