@@ -12,7 +12,6 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	"github.com/daytonaio/daytona/pkg/apikey"
-	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
@@ -140,62 +139,6 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 	return w, err
 }
 
-func (s *WorkspaceService) createBuild(p *project.Project, gc *gitprovider.GitProviderConfig, logWriter io.Writer) (*project.Project, error) {
-	// FIXME: skip build completely for now
-	return p, nil
-
-	if p.BuildConfig != nil { // nolint:govet
-		lastBuildResult, err := s.builderFactory.CheckExistingBuild(*p)
-		if err != nil {
-			return nil, err
-		}
-		if lastBuildResult != nil {
-			p.Image = lastBuildResult.ImageName
-			p.User = lastBuildResult.User
-			return p, nil
-		}
-
-		builder, err := s.builderFactory.Create(*p, gc)
-		if err != nil {
-			return nil, err
-		}
-
-		if builder == nil {
-			return p, nil
-		}
-
-		buildResult, err := builder.Build()
-		if err != nil {
-			s.handleBuildError(p, builder, logWriter, err)
-			return p, nil
-		}
-
-		err = builder.Publish()
-		if err != nil {
-			s.handleBuildError(p, builder, logWriter, err)
-			return p, nil
-		}
-
-		err = builder.SaveBuildResults(*buildResult)
-		if err != nil {
-			s.handleBuildError(p, builder, logWriter, err)
-			return p, nil
-		}
-
-		err = builder.CleanUp()
-		if err != nil {
-			logWriter.Write([]byte(fmt.Sprintf("Error cleaning up build: %s\n", err.Error())))
-		}
-
-		p.Image = buildResult.ImageName
-		p.User = buildResult.User
-
-		return p, nil
-	}
-
-	return p, nil
-}
-
 func (s *WorkspaceService) createProject(p *project.Project, target *provider.ProviderTarget, logWriter io.Writer) error {
 	logWriter.Write([]byte(fmt.Sprintf("Creating project %s\n", p.Name)))
 
@@ -240,8 +183,6 @@ func (s *WorkspaceService) createWorkspace(ctx context.Context, ws *workspace.Wo
 		projectLogger := s.loggerFactory.CreateProjectLogger(ws.Id, p.Name, logs.LogSourceServer)
 		defer projectLogger.Close()
 
-		gc, _ := s.gitProviderService.GetConfigForUrl(p.Repository.Url)
-
 		projectWithEnv := *p
 		projectWithEnv.EnvVars = project.GetProjectEnvVars(p, project.ProjectEnvVarParams{
 			ApiUrl:    s.serverApiUrl,
@@ -255,10 +196,7 @@ func (s *WorkspaceService) createWorkspace(ctx context.Context, ws *workspace.Wo
 
 		var err error
 
-		p, err = s.createBuild(&projectWithEnv, gc, projectLogger)
-		if err != nil {
-			return nil, err
-		}
+		p = &projectWithEnv
 
 		ws.Projects[i] = p
 		err = s.workspaceStore.Save(ws)
@@ -280,19 +218,4 @@ func (s *WorkspaceService) createWorkspace(ctx context.Context, ws *workspace.Wo
 	}
 
 	return ws, nil
-}
-
-func (s *WorkspaceService) handleBuildError(p *project.Project, builder build.IBuilder, logWriter io.Writer, err error) {
-	logWriter.Write([]byte("################################################\n"))
-	logWriter.Write([]byte(fmt.Sprintf("#### BUILD FAILED FOR PROJECT %s: %s\n", p.Name, err.Error())))
-	logWriter.Write([]byte("################################################\n"))
-
-	cleanupErr := builder.CleanUp()
-	if cleanupErr != nil {
-		logWriter.Write([]byte(fmt.Sprintf("Error cleaning up build: %s\n", cleanupErr.Error())))
-	}
-
-	logWriter.Write([]byte("Creating project with default image\n"))
-	p.Image = s.defaultProjectImage
-	p.User = s.defaultProjectUser
 }

@@ -34,8 +34,10 @@ type LogEntry struct {
 type LoggerFactory interface {
 	CreateWorkspaceLogger(workspaceId string, source LogSource) Logger
 	CreateProjectLogger(workspaceId, projectName string, source LogSource) Logger
+	CreateBuildLogger(projectName, buildId string, source LogSource) Logger
 	CreateWorkspaceLogReader(workspaceId string) (io.Reader, error)
 	CreateProjectLogReader(workspaceId, projectName string) (io.Reader, error)
+	CreateBuildLogReader(projectName, buildId string) (io.Reader, error)
 }
 
 type loggerFactoryImpl struct {
