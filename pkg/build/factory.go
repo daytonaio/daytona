@@ -1,16 +1,17 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package builder
+package build
 
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/daytonaio/daytona/pkg/builder/detect"
+	"github.com/daytonaio/daytona/pkg/build/detect"
 	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
@@ -30,25 +31,34 @@ type BuilderFactory struct {
 	serverConfigFolder       string
 	containerRegistryServer  string
 	buildImageNamespace      string
+	buildResultStore         Store
 	basePath                 string
 	loggerFactory            logs.LoggerFactory
 	image                    string
 	containerRegistryService containerregistries.IContainerRegistryService
 	defaultProjectImage      string
 	defaultProjectUser       string
+	createGitService         func(projectDir string, logWriter io.Writer) git.IGitService
 }
 
-func NewBuilderFactory(config BuilderConfig) IBuilderFactory {
+type BuilderFactoryConfig struct {
+	BuilderConfig
+	CreateGitService func(projectDir string, logWriter io.Writer) git.IGitService
+}
+
+func NewBuilderFactory(config BuilderFactoryConfig) IBuilderFactory {
 	return &BuilderFactory{
 		image:                    config.Image,
 		serverConfigFolder:       config.ServerConfigFolder,
 		containerRegistryServer:  config.ContainerRegistryServer,
 		buildImageNamespace:      config.BuildImageNamespace,
+		buildResultStore:         config.BuildResultStore,
 		containerRegistryService: config.ContainerRegistryService,
 		basePath:                 config.BasePath,
 		loggerFactory:            config.LoggerFactory,
 		defaultProjectImage:      config.DefaultProjectImage,
 		defaultProjectUser:       config.DefaultProjectUser,
+		createGitService:         config.CreateGitService,
 	}
 }
 
@@ -67,14 +77,14 @@ func (f *BuilderFactory) Create(p workspace.Project, gpc *gitprovider.GitProvide
 		return nil, err
 	}
 
-	projectLogger := f.loggerFactory.CreateProjectLogger(p.WorkspaceId, p.Name, logs.LogSourceBuilder)
-	defer projectLogger.Close()
+	var projectLogger logs.Logger
 
-	gitservice := git.Service{
-		ProjectDir:        projectDir,
-		GitConfigFileName: "",
-		LogWriter:         projectLogger,
+	if f.loggerFactory != nil {
+		projectLogger = f.loggerFactory.CreateProjectLogger(p.WorkspaceId, p.Name, logs.LogSourceBuilder)
+		defer projectLogger.Close()
 	}
+
+	gitservice := f.createGitService(projectDir, projectLogger)
 
 	var auth *http.BasicAuth
 	if gpc != nil {
@@ -168,6 +178,7 @@ func (f *BuilderFactory) newDevcontainerBuilder(buildId string, p workspace.Proj
 			serverConfigFolder:       f.serverConfigFolder,
 			containerRegistryServer:  f.containerRegistryServer,
 			buildImageNamespace:      f.buildImageNamespace,
+			buildResultStore:         f.buildResultStore,
 			basePath:                 f.basePath,
 			loggerFactory:            f.loggerFactory,
 			defaultProjectImage:      f.defaultProjectImage,

@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package builder
+package build
 
 import (
 	"bufio"
@@ -53,6 +53,7 @@ func (b *DevcontainerBuilder) Build() (*BuildResult, error) {
 	}
 
 	return &BuildResult{
+		Hash:              b.hash,
 		User:              b.user,
 		ImageName:         b.buildImageName,
 		ProjectVolumePath: b.projectVolumePath,

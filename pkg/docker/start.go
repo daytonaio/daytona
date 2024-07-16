@@ -9,7 +9,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/builder/detect"
+	"github.com/daytonaio/daytona/pkg/build/detect"
 	"github.com/daytonaio/daytona/pkg/provider/util"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/docker/docker/api/types"
