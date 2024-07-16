@@ -6,7 +6,7 @@ package build
 import "errors"
 
 type Store interface {
-	Get(hash string) (*BuildResult, error)
+	Find(hash string) (*BuildResult, error)
 	List() ([]*BuildResult, error)
 	Save(buildResult *BuildResult) error
 	Delete(hash string) error

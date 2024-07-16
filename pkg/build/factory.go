@@ -6,6 +6,7 @@ package build
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -37,9 +38,15 @@ type BuilderFactory struct {
 	containerRegistryService containerregistries.IContainerRegistryService
 	defaultProjectImage      string
 	defaultProjectUser       string
+	createGitService         func(projectDir string, logWriter io.Writer) git.IGitService
 }
 
-func NewBuilderFactory(config BuilderConfig) IBuilderFactory {
+type BuilderFactoryConfig struct {
+	BuilderConfig
+	CreateGitService func(projectDir string, logWriter io.Writer) git.IGitService
+}
+
+func NewBuilderFactory(config BuilderFactoryConfig) IBuilderFactory {
 	return &BuilderFactory{
 		image:                    config.Image,
 		serverConfigFolder:       config.ServerConfigFolder,
@@ -51,6 +58,7 @@ func NewBuilderFactory(config BuilderConfig) IBuilderFactory {
 		loggerFactory:            config.LoggerFactory,
 		defaultProjectImage:      config.DefaultProjectImage,
 		defaultProjectUser:       config.DefaultProjectUser,
+		createGitService:         config.CreateGitService,
 	}
 }
 
@@ -69,14 +77,14 @@ func (f *BuilderFactory) Create(p workspace.Project, gpc *gitprovider.GitProvide
 		return nil, err
 	}
 
-	projectLogger := f.loggerFactory.CreateProjectLogger(p.WorkspaceId, p.Name, logs.LogSourceBuilder)
-	defer projectLogger.Close()
+	var projectLogger logs.Logger
 
-	gitservice := git.Service{
-		ProjectDir:        projectDir,
-		GitConfigFileName: "",
-		LogWriter:         projectLogger,
+	if f.loggerFactory != nil {
+		projectLogger = f.loggerFactory.CreateProjectLogger(p.WorkspaceId, p.Name, logs.LogSourceBuilder)
+		defer projectLogger.Close()
 	}
+
+	gitservice := f.createGitService(projectDir, projectLogger)
 
 	var auth *http.BasicAuth
 	if gpc != nil {

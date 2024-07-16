@@ -22,7 +22,7 @@ func NewBuildResultStore(db *gorm.DB) (*BuildResultStore, error) {
 	return &BuildResultStore{db: db}, nil
 }
 
-func (b *BuildResultStore) Get(hash string) (*build.BuildResult, error) {
+func (b *BuildResultStore) Find(hash string) (*build.BuildResult, error) {
 	buildResultDTO := BuildResultDTO{}
 	tx := b.db.Where("hash = ?", hash).First(&buildResultDTO)
 	if tx.Error != nil {
