@@ -5,6 +5,7 @@ package gitprovider
 
 import (
 	"context"
+	"net/url"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
@@ -36,6 +37,14 @@ var GitProviderAddCmd = &cobra.Command{
 
 		if *gitProviderData.Id == "" {
 			return
+		}
+
+		// This can be removed when #841 is merged.
+		if *gitProviderData.Id == "aws-codecommit" {
+			Username := url.QueryEscape(*gitProviderData.Username)
+			Token := url.QueryEscape(*gitProviderData.Token)
+			gitProviderData.Username = &Username
+			gitProviderData.Token = &Token
 		}
 
 		_, err = apiClient.GitProviderAPI.SetGitProvider(ctx).GitProviderConfig(gitProviderData).Execute()

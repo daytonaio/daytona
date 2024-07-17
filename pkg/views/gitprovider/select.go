@@ -114,7 +114,9 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.GitProvider, userGit
 					}
 					return nil
 				}),
-		).WithHide(isDeleting),
+		).WithHideFunc(func() bool {
+			return isDeleting
+		}),
 	).WithTheme(views.GetCustomTheme())
 
 	if !isDeleting {
@@ -128,11 +130,11 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.GitProvider, userGit
 }
 
 func providerRequiresUsername(gitProviderId string) bool {
-	return gitProviderId == "bitbucket" || gitProviderId == "bitbucket-server"
+	return gitProviderId == "bitbucket" || gitProviderId == "bitbucket-server" || gitProviderId == "aws-codecommit"
 }
 
 func providerRequiresApiUrl(gitProviderId string) bool {
-	return gitProviderId == "gitness" || gitProviderId == "github-enterprise-server" || gitProviderId == "gitlab-self-managed" || gitProviderId == "gitea" || gitProviderId == "bitbucket-server" || gitProviderId == "azure-devops"
+	return gitProviderId == "gitness" || gitProviderId == "github-enterprise-server" || gitProviderId == "gitlab-self-managed" || gitProviderId == "gitea" || gitProviderId == "bitbucket-server" || gitProviderId == "azure-devops" || gitProviderId == "aws-codecommit"
 }
 
 func getApiUrlDescription(gitProviderId string) string {
@@ -148,6 +150,8 @@ func getApiUrlDescription(gitProviderId string) string {
 		return "For example: https://dev.azure.com/organization"
 	} else if gitProviderId == "bitbucket-server" {
 		return "For example: https://bitbucket.host.com/rest"
+	} else if gitProviderId == "aws-codecommit" {
+		return "For example: https://ap-south-1.console.aws.amazon.com"
 	}
 	return ""
 }
