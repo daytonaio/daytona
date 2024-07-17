@@ -38,7 +38,7 @@ var statusMessageDangerStyle = lipgloss.NewStyle().Bold(true).
 type item[T any] struct {
 	id, title, desc, createdTime, uptime, target string
 	choiceProperty                               T
-	markForDeletion, isDisabled                  bool
+	markForDeletion                              bool
 }
 
 func (i item[T]) Title() string       { return i.title }
@@ -72,63 +72,11 @@ func (m model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch keypress := msg.String(); keypress {
-		case "down", "j":
-			for {
-				isSubsequentItemsDisabled := true
-				curIndex := m.list.Index()
-				lastIndex := len(m.list.Items()) - 1
-				for i := curIndex + 1; i <= lastIndex; i++ {
-					if !m.list.Items()[i].(item[T]).isDisabled {
-						isSubsequentItemsDisabled = false
-						break
-					}
-				}
-				// no need of moving cursor down if all subsequent items after current index have
-				// disabled property true.
-				if isSubsequentItemsDisabled {
-					break
-				}
-
-				m.list.CursorDown()
-				item := m.list.SelectedItem().(item[T])
-				if !item.isDisabled {
-					break
-				}
-			}
-			return m, nil
-		case "up", "k":
-			for {
-				isPrecedingItemsDisabled := true
-				curIndex := m.list.Index()
-				for i := curIndex - 1; i >= 0; i-- {
-					if !m.list.Items()[i].(item[T]).isDisabled {
-						isPrecedingItemsDisabled = false
-						break
-					}
-				}
-
-				// no need of moving cursor up if all preceding items before current index have
-				// disabled property true.
-				if isPrecedingItemsDisabled {
-					break
-				}
-
-				m.list.CursorUp()
-				item := m.list.SelectedItem().(item[T])
-				if !item.isDisabled {
-					break
-				}
-			}
-			return m, nil
 		case "ctrl+c":
 			return m, tea.Quit
 
 		case "enter":
 			i, ok := m.list.SelectedItem().(item[T])
-			if i.isDisabled {
-				// avoid any action for 'enter' keypress on the disabled option
-				break
-			}
 			if ok {
 				m.choice = &i.choiceProperty
 			}
@@ -151,15 +99,6 @@ func (m model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		h, v := views.DocStyle.GetFrameSize()
 		m.list.SetSize(msg.Width-h, msg.Height-v)
-	}
-
-	// default case: Ensure the cursor starts from the first non-disabled item
-	for i := 0; i < len(m.list.Items()); i++ {
-		item := m.list.Items()[i].(item[T])
-		if !item.isDisabled {
-			m.list.Select(i)
-			break
-		}
 	}
 
 	var cmd tea.Cmd
