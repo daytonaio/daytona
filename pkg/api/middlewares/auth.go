@@ -15,20 +15,21 @@ func AuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		bearerToken := ctx.GetHeader("Authorization")
 		if bearerToken == "" {
-			ctx.AbortWithError(401, errors.New("unauthorized"))
+			ctx.AbortWithError(401, errors.New("unauthorized: missing bearer token"))
 			return
 		}
 
 		token := ExtractToken(bearerToken)
 		if token == "" {
-			ctx.AbortWithError(401, errors.New("unauthorized"))
+			ctx.AbortWithError(401, errors.New("unauthorized: invalid bearer token format"))
 			return
 		}
 
 		server := server.GetInstance(nil)
 
 		if !server.ApiKeyService.IsValidApiKey(token) {
-			ctx.AbortWithError(401, errors.New("unauthorized"))
+			ctx.AbortWithError(401, errors.New("unauthorized: invalid API token"))
+			return
 		}
 
 		ctx.Next()
