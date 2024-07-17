@@ -50,7 +50,7 @@ var CodeCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 {
-			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Verbose(true).Execute()
 			if err != nil {
 				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
@@ -99,13 +99,15 @@ var CodeCmd = &cobra.Command{
 		views.RenderInfoMessage(fmt.Sprintf("Opening the project '%s' from workspace '%s' in %s", projectName, *workspace.Name, ideName))
 
 		providerMetadata := ""
-		for _, project := range workspace.Info.Projects {
-			if *project.Name == projectName {
-				if project.ProviderMetadata == nil {
-					log.Fatal(errors.New("project provider metadata is missing"))
+		if workspace.Info != nil {
+			for _, project := range workspace.Info.Projects {
+				if *project.Name == projectName {
+					if project.ProviderMetadata == nil {
+						log.Fatal(errors.New("project provider metadata is missing"))
+					}
+					providerMetadata = *project.ProviderMetadata
+					break
 				}
-				providerMetadata = *project.ProviderMetadata
-				break
 			}
 		}
 
