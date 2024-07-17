@@ -29,7 +29,9 @@ func Start(logFilePath string) error {
 	}
 	err = s.Install()
 	if err != nil {
-		return err
+		if !strings.Contains(err.Error(), "Init already exists") {
+			return err
+		}
 	}
 
 	logFile, err := os.OpenFile(logFilePath, os.O_TRUNC|os.O_CREATE|os.O_RDONLY, 0644)
