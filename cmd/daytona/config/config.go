@@ -23,9 +23,15 @@ type Profile struct {
 }
 
 type Config struct {
-	ActiveProfileId string    `json:"activeProfile"`
-	DefaultIdeId    string    `json:"defaultIde"`
-	Profiles        []Profile `json:"profiles"`
+	ActiveProfileId   string    `json:"activeProfile"`
+	DefaultIdeId      string    `json:"defaultIde"`
+	Profiles          []Profile `json:"profiles"`
+	ProvidersDir      string    `json:"providersDir"`
+	RegistryURL       string    `json:"registryUrl"`
+	ServerDownloadURL string    `json:"serverDownloadUrl"`
+	LogFilePath       string    `json:"logFilePath"`
+	FRPSPort          int       `json:"frpsPort"`
+	FRPSProtocol      string    `json:"frpsProtocol"`
 }
 
 type Ide struct {
