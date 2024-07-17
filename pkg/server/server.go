@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
 	"os/signal"
 	"time"
 
@@ -94,6 +95,12 @@ func (s *Server) Start(errCh chan error) error {
 		SubDomain:    s.config.Id,
 	})
 	if err != nil {
+		return err
+	}
+
+	_, err = exec.Command("docker").Output()
+	if err != nil {
+		log.Fatalf("Docker is not installed, please ensure docker is installed before proceeding: %s", err.Error())
 		return err
 	}
 
