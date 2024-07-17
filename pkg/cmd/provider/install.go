@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/provider"
+	view_utils "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 
 	log "github.com/sirupsen/logrus"
@@ -77,16 +78,25 @@ var providerInstallCmd = &cobra.Command{
 		}
 
 		downloadUrls := convertToStringMap((*providersManifest)[*providerToInstall.Name].Versions[*providerToInstall.Version].DownloadUrls)
-		res, err = apiClient.ProviderAPI.InstallProviderExecute(apiclient.ApiInstallProviderRequest{}.Provider(apiclient.InstallProviderRequest{
-			Name:         providerToInstall.Name,
-			DownloadUrls: &downloadUrls,
-		}))
-		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
-		}
+		err = view_utils.WithSpinner("Installing", func() error {
+			res, err = apiClient.ProviderAPI.InstallProviderExecute(apiclient.ApiInstallProviderRequest{}.Provider(apiclient.InstallProviderRequest{
+				Name:         providerToInstall.Name,
+				DownloadUrls: &downloadUrls,
+			}))
+
+			if err != nil {
+				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			}
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			return nil
+		})
 
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("Failed to execute download with spinner: %v", err)
 		}
 
 		views.RenderInfoMessageBold(fmt.Sprintf("Provider %s has been successfully installed", *providerToInstall.Name))
