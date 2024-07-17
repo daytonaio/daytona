@@ -100,7 +100,7 @@ func (s *Server) Start(errCh chan error) error {
 
 	_, err = exec.Command("docker").Output()
 	if err != nil {
-		log.Fatalf("Docker is not installed, please ensure docker is installed before proceeding: %s", err.Error())
+		log.Fatalf("Docker is not installed, please ensure docker is installed before proceeding : %s", err.Error())
 		return err
 	}
 
