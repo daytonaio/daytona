@@ -29,7 +29,7 @@ func main() {
 func init() {
 	logLevel := log.WarnLevel
 
-	logLevelEnv, logLevelSet := os.LookupEnv("LOG_LEVEL")
+	logLevelEnv, logLevelSet := os.LookupEnv("AGENT_LOG_LEVEL")
 	if logLevelSet {
 		switch logLevelEnv {
 		case "debug":
