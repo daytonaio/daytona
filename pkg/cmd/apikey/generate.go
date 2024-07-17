@@ -5,21 +5,16 @@ package apikey
 
 import (
 	"context"
-	"fmt"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/server/apikey"
 	view "github.com/daytonaio/daytona/pkg/views/server/apikey"
 )
-
-var saveFlag bool
 
 var GenerateCmd = &cobra.Command{
 	Use:     "generate [NAME]",
@@ -43,7 +38,7 @@ var GenerateCmd = &cobra.Command{
 		if len(args) == 1 {
 			keyName = args[0]
 		} else {
-			apikey.ApiKeyCreationView(&keyName, &saveFlag, apiKeyList)
+			apikey.ApiKeyCreationView(&keyName, apiKeyList)
 		}
 
 		for _, key := range apiKeyList {
@@ -57,15 +52,6 @@ var GenerateCmd = &cobra.Command{
 			log.Fatal(apiclient_util.HandleErrorResponse(nil, err))
 		}
 
-		if saveFlag {
-			err := saveKeyToDefaultProfile(key)
-			if err != nil {
-				log.Fatal(err)
-			}
-			views.RenderBorderedMessage("API key saved to your default profile")
-			return
-		}
-
 		serverConfig, _, err := apiClient.ServerAPI.GetConfigExecute(apiclient.ApiGetConfigRequest{})
 		if err != nil {
 			log.Fatal(err)
@@ -75,24 +61,4 @@ var GenerateCmd = &cobra.Command{
 
 		view.Render(key, apiUrl)
 	},
-}
-
-func saveKeyToDefaultProfile(key string) error {
-	c, err := config.GetConfig()
-	if err != nil {
-		return err
-	}
-
-	for _, p := range c.Profiles {
-		if p.Id == "default" {
-			p.Api.Key = key
-			return c.EditProfile(p)
-		}
-	}
-
-	return fmt.Errorf("default profile not found")
-}
-
-func init() {
-	GenerateCmd.Flags().BoolVarP(&saveFlag, "save", "s", false, "Save the API key to your default profile on this machine")
 }
