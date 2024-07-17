@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -17,9 +18,10 @@ import (
 var stopProjectFlag string
 
 var StopCmd = &cobra.Command{
-	Use:   "stop [WORKSPACE]",
-	Short: "Stop a workspace",
-	Args:  cobra.RangeArgs(0, 1),
+	Use:     "stop [WORKSPACE]",
+	Short:   "Stop a workspace",
+	GroupID: util.WORKSPACE_GROUP,
+	Args:    cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var workspaceId string
 		var message string

@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util"
 
 	log "github.com/sirupsen/logrus"
 
@@ -17,9 +18,10 @@ import (
 )
 
 var ProfileUseCmd = &cobra.Command{
-	Use:   "use",
-	Short: "Use profile [PROFILE_NAME]",
-	Args:  cobra.MaximumNArgs(1),
+	Use:     "use",
+	Short:   "Use profile [PROFILE_NAME]",
+	Args:    cobra.MaximumNArgs(1),
+	GroupID: util.PROFILE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {
 		c, err := config.GetConfig()
 		if err != nil {
