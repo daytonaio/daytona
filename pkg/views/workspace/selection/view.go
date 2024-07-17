@@ -179,7 +179,7 @@ func (m model[T]) View() string {
 			log.Fatal(err)
 		}
 
-		m.footer = views.GetListFooter(activeProfile.Name)
+		m.footer = views.GetListFooter(activeProfile.Name, views.DefaultListFooterPadding)
 	}
 
 	terminalWidth, terminalHeight, err := term.GetSize(int(os.Stdout.Fd()))
