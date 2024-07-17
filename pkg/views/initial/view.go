@@ -4,7 +4,6 @@
 package daytona
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -171,5 +170,6 @@ func GetCommand() (string, error) {
 		return m.choice, nil
 	}
 
-	return "", errors.New("no command selected")
+	// return on ctrl+c
+	return "", nil
 }
