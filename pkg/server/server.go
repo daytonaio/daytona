@@ -108,7 +108,8 @@ func (s *Server) Start(errCh chan error) error {
 		log.Info("Starting local container registry")
 		err = s.LocalContainerRegistry.Start()
 		if err != nil {
-			log.Fatal(err)
+			// log.Fatalf(err)
+			log.Fatalf("Docker daemon is not running, please ensure docker daemon is running before proceeding : %s", err.Error())
 		}
 	} else {
 		err := registry.RemoveRegistryContainer()
