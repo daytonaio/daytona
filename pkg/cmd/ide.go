@@ -14,6 +14,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func getMoreInfoContentLink(ideName string) string {
+	switch ideName {
+	case "VS Code":
+		return "https://www.daytona.io/dotfiles/seamless-developer-experience-with-vs-code-and-daytona"
+	default:
+		return ""
+	}
+}
+
 var ideCmd = &cobra.Command{
 	Use:   "ide",
 	Short: "Choose the default IDE",
@@ -35,6 +44,7 @@ var ideCmd = &cobra.Command{
 		for _, ide := range ideList {
 			if ide.Id == chosenIdeId {
 				chosenIde = ide
+				break
 			}
 		}
 
@@ -47,5 +57,8 @@ var ideCmd = &cobra.Command{
 
 		content := fmt.Sprintf("%s %s", views.GetPropertyKey("Default IDE: "), chosenIde.Name)
 		views.RenderContainerLayout(views.GetInfoMessage(content))
+
+		moreInfoContent := "More information on: " + getMoreInfoContentLink(chosenIde.Name)
+		views.RenderContainerLayout(views.GetBorderedMessage(moreInfoContent))
 	},
 }
