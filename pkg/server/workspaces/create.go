@@ -20,10 +20,10 @@ import (
 
 func isValidWorkspaceName(name string) bool {
 	// The repository name can only contain ASCII letters, digits, and the characters ., -, and _.
-	var validRepoName = regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
+	var validName = regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
 
 	// Check if the name matches the basic regex
-	if !validRepoName.MatchString(name) {
+	if !validName.MatchString(name) {
 		return false
 	}
 
