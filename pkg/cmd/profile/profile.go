@@ -5,6 +5,7 @@ package profile
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -38,7 +39,7 @@ var ProfileCmd = &cobra.Command{
 
 		chosenProfile, err := profile.GetProfileFromPrompt(profilesList, c.ActiveProfileId, true)
 		if err != nil {
-			log.Fatal(err)
+			os.Exit(1)
 		}
 
 		if chosenProfile.Id == profile.NewProfileId {
