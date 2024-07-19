@@ -52,7 +52,7 @@ stop_daytona_server() {
     if [ "$CONFIRM_FLAG" = true ]; then
       echo "Attempting to stop the Daytona server..."
       if daytona server stop; then
-        continue
+        echo -e "Stopping the daytona server"
       else
         pkill -x "daytona"
       fi
