@@ -97,6 +97,8 @@ func RunInitialScreenFlow(cmd *cobra.Command, args []string) {
 	}
 
 	switch command {
+	case "server":
+		ServerCmd.Run(cmd, []string{})
 	case "create":
 		CreateCmd.Run(cmd, []string{})
 	case "code":
