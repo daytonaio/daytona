@@ -1217,6 +1217,18 @@ paths:
         name: namespaceId
         required: true
         type: string
+      - description: Page
+        in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+      - description: Per page
+        in: query
+        name: perPage
+        required: false
+        schema:
+          type: integer
       produces:
       - application/json
       responses:

@@ -461,17 +461,17 @@ paths:
         schema:
           type: string
       - description: Page
-        in: path
+        in: query
         name: page
-        required: true
+        required: false
         schema:
-          type: string
+          type: integer
       - description: Per page
-        in: path
+        in: query
         name: perPage
-        required: true
+        required: false
         schema:
-          type: string
+          type: integer
       responses:
         "200":
           content:

@@ -131,7 +131,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 	for {
 		var repos []apiclient.GitRepository
 		err = views_util.WithSpinner("Loading", func() error {
-			repos, _, err = config.ApiClient.GitProviderAPI.GetRepositories(ctx, providerId, namespaceId, page, perPage).Execute()
+			repos, _, err = config.ApiClient.GitProviderAPI.GetRepositories(ctx, providerId, namespaceId).Page(page).PerPage(perPage).Execute()
 			return err
 		})
 		if err != nil {

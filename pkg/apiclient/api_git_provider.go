@@ -13,6 +13,7 @@ package apiclient
 import (
 	"bytes"
 	"context"
+	"strconv"
 	"io"
 	"net/http"
 	"net/url"
@@ -881,6 +882,16 @@ type ApiGetRepositoriesRequest struct {
 	perPage       *int
 }
 
+func (r ApiGetRepositoriesRequest) Page(page int) ApiGetRepositoriesRequest {
+	r.page = &page
+	return r
+}
+
+func (r ApiGetRepositoriesRequest) PerPage(perPage int) ApiGetRepositoriesRequest {
+	r.perPage = &perPage
+	return r
+}
+
 func (r ApiGetRepositoriesRequest) Execute() ([]GitRepository, *http.Response, error) {
 	return r.ApiService.GetRepositoriesExecute(r)
 }
@@ -895,14 +906,12 @@ Get Git repositories
 	@param namespaceId Namespace
 	@return ApiGetRepositoriesRequest
 */
-func (a *GitProviderAPIService) GetRepositories(ctx context.Context, gitProviderId string, namespaceId string, page, perPage int) ApiGetRepositoriesRequest {
+func (a *GitProviderAPIService) GetRepositories(ctx context.Context, gitProviderId string, namespaceId string) ApiGetRepositoriesRequest {
 	return ApiGetRepositoriesRequest{
 		ApiService:    a,
 		ctx:           ctx,
 		gitProviderId: gitProviderId,
 		namespaceId:   namespaceId,
-		page:          &page,
-		perPage:       &perPage,
 	}
 }
 
@@ -929,6 +938,13 @@ func (a *GitProviderAPIService) GetRepositoriesExecute(r ApiGetRepositoriesReque
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+
+	if r.page != nil {
+		localVarQueryParams.Add("page", strconv.Itoa(*r.page))
+	}
+	if r.perPage != nil {
+		localVarQueryParams.Add("per_page", strconv.Itoa(*r.perPage))
+	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

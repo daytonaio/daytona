@@ -5,6 +5,7 @@ package gitprovider
 
 import (
 	"errors"
+	"net/http"
 
 	"strconv"
 
@@ -21,6 +22,8 @@ import (
 //	@Description	Get Git repositories
 //	@Param			gitProviderId	path	string	true	"Git provider"
 //	@Param			namespaceId		path	string	true	"Namespace"
+//	@Param			page			query	integer	false	"Page"
+//	@Param			perPage			query	integer	false	"Per page"
 //	@Produce		json
 //	@Success		200	{array}	GitRepository
 //	@Router			/gitprovider/{gitProviderId}/{namespaceId}/repositories [get]
@@ -29,13 +32,27 @@ import (
 func GetRepositories(ctx *gin.Context) {
 	gitProviderId := ctx.Param("gitProviderId")
 	namespaceId := ctx.Param("namespaceId")
-	page, err := strconv.Atoi(ctx.Param("page"))
-	if err != nil {
-		page = 1
+	pageQuery := ctx.Query("page")
+	perPageQuery := ctx.Query("per_page")
+
+	var err error
+	page := 1
+	perPage := 100
+
+	if pageQuery != "" {
+		page, err = strconv.Atoi(pageQuery)
+		if err != nil {
+			ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for page flag"))
+			return
+		}
 	}
-	perPage, err := strconv.Atoi(ctx.Param("perPage"))
-	if err != nil {
-		perPage = 100
+
+	if perPageQuery != "" {
+		perPage, err = strconv.Atoi(perPageQuery)
+		if err != nil {
+			ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for per_page flag"))
+			return
+		}
 	}
 
 	server := server.GetInstance(nil)
