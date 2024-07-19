@@ -64,7 +64,7 @@ func (g *BitbucketGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	return namespaces, nil
 }
 
-func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
+func (g *BitbucketGitProvider) GetRepositories(namespace string, page, perPage int) ([]*GitRepository, error) {
 	client := g.getApiClient()
 	var response []*GitRepository
 
@@ -76,12 +76,12 @@ func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]*GitReposito
 		namespace = user.Username
 	}
 
-	page := 1
+	// Since bitbucket doesnt supports perPage arg,
+	// Fetch repos page by page until no more items are returned
 	for {
 		repoList, err := client.Repositories.ListForAccount(&bitbucket.RepositoriesOptions{
-			Owner:   namespace,
-			Page:    &page,
-			Keyword: nil,
+			Owner: namespace,
+			Page:  &page,
 		})
 		if err != nil {
 			return nil, g.FormatError(err)
@@ -117,9 +117,7 @@ func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]*GitReposito
 			})
 		}
 
-		// Returns 10 repos (at max) in a page by default
-		// this does leaves behind a edge case when the last page has exact 10 repos,
-		// but cant find a way around this..
+		// If fewer than 10 items are returned, it indicates the last page
 		if len(repoList.Items) < 10 {
 			break
 		}

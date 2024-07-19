@@ -125,13 +125,26 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 	}
 
 	var providerRepos []apiclient.GitRepository
-	err = views_util.WithSpinner("Loading", func() error {
-		providerRepos, _, err = config.ApiClient.GitProviderAPI.GetRepositories(ctx, gitProviderConfigId, namespaceId).Execute()
-		return err
-	})
+	page := 1
+	perPage := 100
 
-	if err != nil {
-		return nil, err
+	for {
+		var repos []apiclient.GitRepository
+		err = views_util.WithSpinner("Loading", func() error {
+			repos, _, err = config.ApiClient.GitProviderAPI.GetRepositories(ctx, providerId, namespaceId, page, perPage).Execute()
+			return err
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		providerRepos = append(providerRepos, repos...)
+
+		if len(repos) < perPage {
+			break
+		}
+
+		page++
 	}
 
 	parentIdentifier := fmt.Sprintf("%s/%s", providerId, namespace)

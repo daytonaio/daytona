@@ -877,6 +877,8 @@ type ApiGetRepositoriesRequest struct {
 	ApiService    *GitProviderAPIService
 	gitProviderId string
 	namespaceId   string
+	page          *int
+	perPage       *int
 }
 
 func (r ApiGetRepositoriesRequest) Execute() ([]GitRepository, *http.Response, error) {
@@ -893,12 +895,14 @@ Get Git repositories
 	@param namespaceId Namespace
 	@return ApiGetRepositoriesRequest
 */
-func (a *GitProviderAPIService) GetRepositories(ctx context.Context, gitProviderId string, namespaceId string) ApiGetRepositoriesRequest {
+func (a *GitProviderAPIService) GetRepositories(ctx context.Context, gitProviderId string, namespaceId string, page, perPage int) ApiGetRepositoriesRequest {
 	return ApiGetRepositoriesRequest{
 		ApiService:    a,
 		ctx:           ctx,
 		gitProviderId: gitProviderId,
 		namespaceId:   namespaceId,
+		page:          &page,
+		perPage:       &perPage,
 	}
 }
 

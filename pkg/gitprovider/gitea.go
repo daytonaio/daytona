@@ -85,14 +85,14 @@ func (g *GiteaGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	return namespaces, nil
 }
 
-func (g *GiteaGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
+func (g *GiteaGitProvider) GetRepositories(namespace string, page, perPage int) ([]*GitRepository, error) {
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, err
 	}
 
+	response := []*GitRepository{}
 	var repoList []*gitea.Repository
-	page := 1
 
 	for {
 		var repos []*gitea.Repository
@@ -135,8 +135,6 @@ func (g *GiteaGitProvider) GetRepositories(namespace string) ([]*GitRepository, 
 		repoList = repos
 	}
 
-	response := []*GitRepository{}
-
 	for _, repo := range repoList {
 		u, err := url.Parse(repo.HTMLURL)
 		if err != nil {
@@ -152,7 +150,7 @@ func (g *GiteaGitProvider) GetRepositories(namespace string) ([]*GitRepository, 
 		})
 	}
 
-	return response, err
+	return response, nil
 }
 
 func (g *GiteaGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {

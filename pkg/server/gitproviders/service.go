@@ -22,7 +22,7 @@ type IGitProviderService interface {
 	GetNamespaces(gitProviderId string) ([]*gitprovider.GitNamespace, error)
 	GetRepoBranches(gitProviderId string, namespaceId string, repositoryId string) ([]*gitprovider.GitBranch, error)
 	GetRepoPRs(gitProviderId string, namespaceId string, repositoryId string) ([]*gitprovider.GitPullRequest, error)
-	GetRepositories(gitProviderId string, namespaceId string) ([]*gitprovider.GitRepository, error)
+	GetRepositories(gitProviderId string, namespaceId string, page, perPage int) ([]*gitprovider.GitRepository, error)
 	ListConfigs() ([]*gitprovider.GitProviderConfig, error)
 	RemoveGitProvider(gitProviderId string) error
 	SetGitProviderConfig(providerConfig *gitprovider.GitProviderConfig) error

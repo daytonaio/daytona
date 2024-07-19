@@ -90,7 +90,7 @@ func (g *GitHubGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	return namespaces, nil
 }
 
-func (g *GitHubGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
+func (g *GitHubGitProvider) GetRepositories(namespace string, page, perPage int) ([]*GitRepository, error) {
 	client := g.getApiClient()
 	var repos []*GitRepository
 	query := "fork:true "
@@ -109,13 +109,18 @@ func (g *GitHubGitProvider) GetRepositories(namespace string) ([]*GitRepository,
 
 	opts := &github.SearchOptions{
 		ListOptions: github.ListOptions{
-			PerPage: 100,
-			Page:    1,
+			PerPage: perPage,
+			Page:    page,
 		},
 	}
 
-	for {
-		repoList, response, err := client.Search.Repositories(ctx, query, opts)
+	repoList, _, err := client.Search.Repositories(ctx, query, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, repo := range repoList.Repositories {
+		u, err := url.Parse(*repo.HTMLURL)
 		if err != nil {
 			return nil, g.FormatError(err)
 		}

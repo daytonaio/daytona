@@ -6,7 +6,10 @@ package gitprovider
 import (
 	"errors"
 
+	"strconv"
+
 	"github.com/daytonaio/daytona/pkg/api/controllers"
+
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
@@ -26,10 +29,18 @@ import (
 func GetRepositories(ctx *gin.Context) {
 	gitProviderId := ctx.Param("gitProviderId")
 	namespaceId := ctx.Param("namespaceId")
+	page, err := strconv.Atoi(ctx.Param("page"))
+	if err != nil {
+		page = 1
+	}
+	perPage, err := strconv.Atoi(ctx.Param("perPage"))
+	if err != nil {
+		perPage = 100
+	}
 
 	server := server.GetInstance(nil)
 
-	response, err := server.GitProviderService.GetRepositories(gitProviderId, namespaceId)
+	response, err := server.GitProviderService.GetRepositories(gitProviderId, namespaceId, page, perPage)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {

@@ -61,7 +61,7 @@ func (g *GitnessGitProvider) getApiClient() *gitnessclient.GitnessClient {
 	return gitnessclient.NewGitnessClient(g.token, url)
 }
 
-func (g *GitnessGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
+func (g *GitnessGitProvider) GetRepositories(namespace string, page, perPage int) ([]*GitRepository, error) {
 	client := g.getApiClient()
 	response, err := client.GetRepositories(namespace)
 	if err != nil {

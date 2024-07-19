@@ -76,7 +76,7 @@ func (g *GitLabGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	return namespaces, nil
 }
 
-func (g *GitLabGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
+func (g *GitLabGitProvider) GetRepositories(namespace string, page, perPage int) ([]*GitRepository, error) {
 	client := g.getApiClient()
 	var response []*GitRepository
 	var repoList []*gitlab.Project
@@ -115,13 +115,25 @@ func (g *GitLabGitProvider) GetRepositories(namespace string) ([]*GitRepository,
 			}
 		}
 
-		repoList = append(repoList, projects...)
-
-		if response.CurrentPage >= response.TotalPages {
-			break
+		repoList, _, err = client.Projects.ListUserProjects(user.Id, &gitlab.ListProjectsOptions{
+			ListOptions: gitlab.ListOptions{
+				PerPage: perPage,
+				Page:    page,
+			},
+		})
+		if err != nil {
+			return nil, err
 		}
-
-		page++
+	} else {
+		repoList, _, err = client.Groups.ListGroupProjects(namespace, &gitlab.ListGroupProjectsOptions{
+			ListOptions: gitlab.ListOptions{
+				PerPage: perPage,
+				Page:    page,
+			},
+		})
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	for _, repo := range repoList {
