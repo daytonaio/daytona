@@ -45,7 +45,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
-func With(fn func() error) error {
+func WithSpinner(fn func() error) error {
 	p := start()
 	defer stop(p)
 	return fn()
