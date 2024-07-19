@@ -63,7 +63,7 @@ func (g *AzureDevOpsGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	return nil, err
 }
 
-func (g *AzureDevOpsGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
+func (g *AzureDevOpsGitProvider) GetRepositories(namespace string, page, perPage int) ([]*GitRepository, error) {
 	client, err := g.getGitClient()
 	if err != nil {
 		return nil, err

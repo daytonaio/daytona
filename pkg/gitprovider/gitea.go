@@ -71,56 +71,41 @@ func (g *GiteaGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	return namespaces, nil
 }
 
-func (g *GiteaGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
+func (g *GiteaGitProvider) GetRepositories(namespace string, page, perPage int) ([]*GitRepository, error) {
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, err
 	}
 
+	response := []*GitRepository{}
 	var repoList []*gitea.Repository
-	page := 1
 
-	for {
-		var repos []*gitea.Repository
-		var response *gitea.Response
-
-		if namespace == personalNamespaceId {
-			user, err := g.GetUser()
-			if err != nil {
-				return nil, err
-			}
-
-			repos, response, err = client.ListUserRepos(user.Username, gitea.ListReposOptions{
-				ListOptions: gitea.ListOptions{
-					Page:     page,
-					PageSize: 100,
-				},
-			})
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			repos, response, err = client.ListOrgRepos(namespace, gitea.ListOrgReposOptions{
-				ListOptions: gitea.ListOptions{
-					Page:     page,
-					PageSize: 100,
-				},
-			})
-			if err != nil {
-				return nil, err
-			}
+	if namespace == personalNamespaceId {
+		user, err := g.GetUser()
+		if err != nil {
+			return nil, err
 		}
 
-		repoList = append(repoList, repos...)
-
-		page++
-
-		if page >= response.LastPage {
-			break
+		repoList, _, err = client.ListUserRepos(user.Username, gitea.ListReposOptions{
+			ListOptions: gitea.ListOptions{
+				Page:     page,
+				PageSize: perPage,
+			},
+		})
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		repoList, _, err = client.ListOrgRepos(namespace, gitea.ListOrgReposOptions{
+			ListOptions: gitea.ListOptions{
+				Page:     page,
+				PageSize: perPage,
+			},
+		})
+		if err != nil {
+			return nil, err
 		}
 	}
-
-	response := []*GitRepository{}
 
 	for _, repo := range repoList {
 		u, err := url.Parse(repo.HTMLURL)
@@ -137,7 +122,7 @@ func (g *GiteaGitProvider) GetRepositories(namespace string) ([]*GitRepository, 
 		})
 	}
 
-	return response, err
+	return response, nil
 }
 
 func (g *GiteaGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {

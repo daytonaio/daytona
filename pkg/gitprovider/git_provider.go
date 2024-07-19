@@ -27,7 +27,7 @@ type StaticGitContext struct {
 
 type GitProvider interface {
 	GetNamespaces() ([]*GitNamespace, error)
-	GetRepositories(namespace string) ([]*GitRepository, error)
+	GetRepositories(namespace string, page, perPage int) ([]*GitRepository, error)
 	GetUser() (*GitUser, error)
 	GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error)
 	GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error)

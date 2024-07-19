@@ -74,13 +74,26 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 	}
 
 	var providerRepos []apiclient.GitRepository
-	err = views_util.WithSpinner("Loading", func() error {
-		providerRepos, _, err = apiClient.GitProviderAPI.GetRepositories(ctx, providerId, namespaceId).Execute()
-		return err
-	})
+	page := 1
+	perPage := 100
 
-	if err != nil {
-		return nil, err
+	for {
+		var repos []apiclient.GitRepository
+		err = views_util.WithSpinner(func() error {
+			repos, _, err = apiClient.GitProviderAPI.GetRepositories(ctx, providerId, namespaceId, page, perPage).Execute()
+			return err
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		providerRepos = append(providerRepos, repos...)
+
+		if len(repos) < perPage {
+			break
+		}
+
+		page++
 	}
 
 	chosenRepo := selection.GetRepositoryFromPrompt(providerRepos, additionalProjectOrder, selectedRepos)

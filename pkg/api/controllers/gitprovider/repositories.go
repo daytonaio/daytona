@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"strconv"
+
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
@@ -26,10 +28,18 @@ import (
 func GetRepositories(ctx *gin.Context) {
 	gitProviderId := ctx.Param("gitProviderId")
 	namespaceId := ctx.Param("namespaceId")
+	page, err := strconv.Atoi(ctx.Param("page"))
+	if err != nil {
+		page = 1
+	}
+	perPage, err := strconv.Atoi(ctx.Param("perPage"))
+	if err != nil {
+		perPage = 100
+	}
 
 	server := server.GetInstance(nil)
 
-	response, err := server.GitProviderService.GetRepositories(gitProviderId, namespaceId)
+	response, err := server.GitProviderService.GetRepositories(gitProviderId, namespaceId, page, perPage)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get repositories for url: %s", err.Error()))
 		return
