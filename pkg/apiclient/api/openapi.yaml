@@ -460,6 +460,18 @@ paths:
         required: true
         schema:
           type: string
+      - description: Page
+        in: path
+        name: page
+        required: true
+        schema:
+          type: string
+      - description: Per page
+        in: path
+        name: perPage
+        required: true
+        schema:
+          type: string
       responses:
         "200":
           content:

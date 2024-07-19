@@ -65,7 +65,7 @@ func (m *MockGitProviderService) GetRepoPRs(gitProviderId string, namespaceId st
 	return args.Get(0).([]*gitprovider.GitPullRequest), args.Error(1)
 }
 
-func (m *MockGitProviderService) GetRepositories(gitProviderId string, namespaceId string) ([]*gitprovider.GitRepository, error) {
+func (m *MockGitProviderService) GetRepositories(gitProviderId string, namespaceId string, page, perPage int) ([]*gitprovider.GitRepository, error) {
 	args := m.Called(gitProviderId, namespaceId)
 	return args.Get(0).([]*gitprovider.GitRepository), args.Error(1)
 }
