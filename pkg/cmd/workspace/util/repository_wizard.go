@@ -89,7 +89,8 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 
 		providerRepos = append(providerRepos, repos...)
 
-		if len(repos) < perPage {
+		// Break for git providers with unsupported pagination OR on reaching exhausted items.
+		if providerId == "azure-devops" || providerId == "bitbucket" || providerId == "gitness" || len(repos) < perPage {
 			break
 		}
 
