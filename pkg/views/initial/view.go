@@ -65,6 +65,7 @@ type CommandView struct {
 }
 
 var commandViews []CommandView = []CommandView{
+	{Command: "server", Name: "daytona server", Desc: "(start the Daytona Server daemon)"},
 	{Command: "create", Name: "daytona create", Desc: "(create a new workspace)"},
 	{Command: "code", Name: "daytona code", Desc: "(open a workspace in your preferred IDE)"},
 	{Command: "git-provider add", Name: "daytona git-provider add", Desc: "(register a Git provider account)"},
