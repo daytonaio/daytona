@@ -66,7 +66,7 @@ func (s *Server) initLogs() error {
 }
 
 func (s *Server) GetLogReader() (io.Reader, error) {
-	file, err := os.Open(s.config.LogFilePath)
+	file, err := os.OpenFile(s.config.LogFilePath, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return nil, err
 	}
