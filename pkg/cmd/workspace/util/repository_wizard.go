@@ -80,7 +80,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 	for {
 		var repos []apiclient.GitRepository
 		err = views_util.WithSpinner(func() error {
-			repos, _, err = apiClient.GitProviderAPI.GetRepositories(ctx, providerId, namespaceId, page, perPage).Execute()
+			repos, _, err = apiClient.GitProviderAPI.GetRepositories(ctx, providerId, namespaceId).Page(page).PerPage(perPage).Execute()
 			return err
 		})
 		if err != nil {
