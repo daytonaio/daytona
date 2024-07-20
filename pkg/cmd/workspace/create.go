@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -96,17 +97,20 @@ var CreateCmd = &cobra.Command{
 			log.Fatal("workspace name and repository urls are required")
 			return
 		}
-
-		visited := make(map[string]bool)
+		visited := make(map[string]int)
 
 		for i := range projects {
 			if projects[i].Source == nil || projects[i].Source.Repository == nil || projects[i].Source.Repository.Url == nil {
 				log.Fatal("Error: repository url is required")
 			}
-			if visited[*projects[i].Source.Repository.Url] {
-				log.Fatalf("Error: duplicate repository url: %s", *projects[i].Source.Repository.Url)
+
+			visited[*projects[i].Source.Repository.Url]++
+			// Append occurence number to keep duplicate project names unique
+			// since these are later saved into the db under a unique constraint field.
+			if visited[*projects[i].Source.Repository.Url] > 1 {
+				projects[i].Name += strconv.Itoa(visited[*projects[i].Source.Repository.Url])
 			}
-			visited[*projects[i].Source.Repository.Url] = true
+
 			projects[i].EnvVars = getEnvVariables(&projects[i], profileData)
 		}
 
