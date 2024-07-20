@@ -20,10 +20,13 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/daytonaio/daytona/pkg/api/docs"
@@ -68,7 +71,7 @@ type ApiServer struct {
 }
 
 func (a *ApiServer) Start() error {
-	docs.SwaggerInfo.Version = "0.1"
+	docs.SwaggerInfo.Version = getDaytonaLatestReleaseTag()
 	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Description = "Daytona Server API"
 	docs.SwaggerInfo.Title = "Daytona Server API"
@@ -220,4 +223,29 @@ func (a *ApiServer) Stop() {
 	if err := a.httpServer.Shutdown(ctx); err != nil {
 		log.Error(err)
 	}
+}
+
+func getDaytonaLatestReleaseTag() string {
+	url := "https://api.github.com/repos/daytonaio/daytona/releases/latest"
+	type release struct {
+		TagName string `json:"tag_name"`
+	}
+
+	res, err := http.Get(url)
+	if err != nil {
+		log.Error(err)
+	}
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		log.Error(err)
+	}
+	
+	var daytonaRelease release
+	err = json.Unmarshal(body, &daytonaRelease)
+	if err != nil {
+		log.Error(err)
+	}
+	
+	return strings.Replace(daytonaRelease.TagName, "v", "", -1)
 }
