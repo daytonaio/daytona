@@ -6,6 +6,7 @@ package profile
 import (
 	"errors"
 	"log"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -65,6 +66,12 @@ func ProfileCreationView(c *config.Config, profileAddView *ProfileAddView, editi
 					if str == "" {
 						return errors.New("server API Key can not be blank")
 					}
+
+					_, err := url.ParseRequestURI(str)
+					if err != nil {
+						return errors.New("invalid URL url, must be of http/https/ssh format")
+					}
+
 					return nil
 				}),
 		),
