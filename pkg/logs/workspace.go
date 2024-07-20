@@ -90,5 +90,13 @@ func (l *loggerFactoryImpl) CreateWorkspaceLogger(workspaceId string, source Log
 
 func (l *loggerFactoryImpl) CreateWorkspaceLogReader(workspaceId string) (io.Reader, error) {
 	filePath := filepath.Join(l.logsDir, workspaceId, "log")
-	return os.Open(filePath)
+
+	for {
+		file, err := os.Open(filePath)
+		if err != nil {
+			continue
+		} else {
+			return file, nil
+		}
+	}
 }
