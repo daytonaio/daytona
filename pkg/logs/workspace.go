@@ -5,9 +5,11 @@ package logs
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -90,13 +92,25 @@ func (l *loggerFactoryImpl) CreateWorkspaceLogger(workspaceId string, source Log
 
 func (l *loggerFactoryImpl) CreateWorkspaceLogReader(workspaceId string) (io.Reader, error) {
 	filePath := filepath.Join(l.logsDir, workspaceId, "log")
+	maxRetries := 5
+	delay := 1 * time.Second
 
-	for {
+	file, err := openFileWithRetries(filePath, maxRetries, delay)
+	if err != nil {
+		return nil, err
+	}
+
+	return file, nil
+}
+
+func openFileWithRetries(filePath string, maxRetries int, delay time.Duration) (*os.File, error) {
+	for i := 0; i < maxRetries; i++ {
 		file, err := os.Open(filePath)
-		if err != nil {
-			continue
-		} else {
+		if err == nil {
 			return file, nil
 		}
+		time.Sleep(delay)
 	}
+
+	return nil, fmt.Errorf("failed to open file after %d attempts", maxRetries)
 }
