@@ -178,7 +178,7 @@ The default setting for Daytona is VS Code locally. If you prefer, you can switc
 ```bash
 daytona ide
 ```
-## Note: Also added the support of Positron IDE
+## Note: Also add the support of Positron IDE
 Now that you have installed and initialized Daytona, you can proceed to setting up your development environments and start coding instantly.
 
 
