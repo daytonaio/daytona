@@ -1,6 +1,5 @@
 name: daytona profile
 synopsis: Manage profiles
-usage: daytona profile [flags]
 inherited_options:
     - name: help
       default_value: "false"
@@ -14,4 +13,4 @@ see_also:
     - daytona profile delete - Delete profile [PROFILE_NAME]
     - daytona profile edit - Edit profile [PROFILE_NAME]
     - daytona profile list - List profiles
-    - daytona use - Set the active profile
+    - daytona use - Use profile [PROFILE_NAME]
