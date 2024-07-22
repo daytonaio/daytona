@@ -32,6 +32,6 @@ see_also:
     - daytona start - Start a workspace
     - daytona stop - Stop a workspace
     - daytona target - Manage provider targets
-    - daytona use - Set the active profile
+    - daytona use - Use profile [PROFILE_NAME]
     - daytona version - Print the version number
     - daytona whoami - Display information about the active user
