@@ -25,7 +25,7 @@ type StaticGitContext struct {
 	Path     *string `json:"path,omitempty"`
 } // @name StaticGitContext
 
-// ListOptions holds additional parameters for api responses.
+// ListOptions holds additional parameters for list api responses.
 type ListOptions struct {
 	Page    int `json:"page,omitempty"`
 	PerPage int `json:"perPage,omitempty"`

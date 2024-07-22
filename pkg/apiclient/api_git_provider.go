@@ -13,7 +13,6 @@ package apiclient
 import (
 	"bytes"
 	"context"
-	"strconv"
 	"io"
 	"net/http"
 	"net/url"
@@ -38,9 +37,9 @@ GetGitContext Get Git context
 
 Get Git context
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param gitUrl Git URL
-	@return ApiGetGitContextRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param gitUrl Git URL
+ @return ApiGetGitContextRequest
 */
 func (a *GitProviderAPIService) GetGitContext(ctx context.Context, gitUrl string) ApiGetGitContextRequest {
 	return ApiGetGitContextRequest{
@@ -156,9 +155,9 @@ GetGitProviderForUrl Get Git provider
 
 Get Git provider
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param url Url
-	@return ApiGetGitProviderForUrlRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param url Url
+ @return ApiGetGitProviderForUrlRequest
 */
 func (a *GitProviderAPIService) GetGitProviderForUrl(ctx context.Context, url string) ApiGetGitProviderForUrlRequest {
 	return ApiGetGitProviderForUrlRequest{
@@ -274,9 +273,9 @@ GetGitUser Get Git context
 
 Get Git context
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param gitProviderId Git Provider Id
-	@return ApiGetGitUserRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param gitProviderId Git Provider Id
+ @return ApiGetGitUserRequest
 */
 func (a *GitProviderAPIService) GetGitUser(ctx context.Context, gitProviderId string) ApiGetGitUserRequest {
 	return ApiGetGitUserRequest{
@@ -377,33 +376,21 @@ func (a *GitProviderAPIService) GetGitUserExecute(r ApiGetGitUserRequest) (*GitU
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ListOptions struct {
-	page    *int
-	perPage *int
-}
-
-func (l *ListOptions) SetPage(page int) {
-	l.page = &page
-}
-
-func (l *ListOptions) SetPerPage(perPage int) {
-	l.perPage = &perPage
-}
-
 type ApiGetNamespacesRequest struct {
 	ctx           context.Context
 	ApiService    *GitProviderAPIService
 	gitProviderId string
-	ListOptions
+	page          *int
+	perPage       *int
 }
 
 func (r ApiGetNamespacesRequest) Page(page int) ApiGetNamespacesRequest {
-	r.SetPage(page)
+	r.page = &page
 	return r
 }
 
 func (r ApiGetNamespacesRequest) PerPage(perPage int) ApiGetNamespacesRequest {
-	r.SetPerPage(perPage)
+	r.perPage = &perPage
 	return r
 }
 
@@ -416,9 +403,9 @@ GetNamespaces Get Git namespaces
 
 Get Git namespaces
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param gitProviderId Git provider
-	@return ApiGetNamespacesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param gitProviderId Git provider
+ @return ApiGetNamespacesRequest
 */
 func (a *GitProviderAPIService) GetNamespaces(ctx context.Context, gitProviderId string) ApiGetNamespacesRequest {
 	return ApiGetNamespacesRequest{
@@ -452,10 +439,10 @@ func (a *GitProviderAPIService) GetNamespacesExecute(r ApiGetNamespacesRequest) 
 	localVarFormParams := url.Values{}
 
 	if r.page != nil {
-		localVarQueryParams.Add("page", strconv.Itoa(*r.page))
+		parameterAddToHeaderOrQuery(localVarQueryParams, "page", r.page, "")
 	}
 	if r.perPage != nil {
-		localVarQueryParams.Add("per_page", strconv.Itoa(*r.perPage))
+		parameterAddToHeaderOrQuery(localVarQueryParams, "per_page", r.perPage, "")
 	}
 
 	// to determine the Content-Type header
@@ -532,16 +519,17 @@ type ApiGetRepoBranchesRequest struct {
 	gitProviderId string
 	namespaceId   string
 	repositoryId  string
-	ListOptions
+	page          *int
+	perPage       *int
 }
 
 func (r ApiGetRepoBranchesRequest) Page(page int) ApiGetRepoBranchesRequest {
-	r.SetPage(page)
+	r.page = &page
 	return r
 }
 
 func (r ApiGetRepoBranchesRequest) PerPage(perPage int) ApiGetRepoBranchesRequest {
-	r.SetPerPage(perPage)
+	r.perPage = &perPage
 	return r
 }
 
@@ -554,11 +542,11 @@ GetRepoBranches Get Git repository branches
 
 Get Git repository branches
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param gitProviderId Git provider
-	@param namespaceId Namespace
-	@param repositoryId Repository
-	@return ApiGetRepoBranchesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param gitProviderId Git provider
+ @param namespaceId Namespace
+ @param repositoryId Repository
+ @return ApiGetRepoBranchesRequest
 */
 func (a *GitProviderAPIService) GetRepoBranches(ctx context.Context, gitProviderId string, namespaceId string, repositoryId string) ApiGetRepoBranchesRequest {
 	return ApiGetRepoBranchesRequest{
@@ -596,10 +584,10 @@ func (a *GitProviderAPIService) GetRepoBranchesExecute(r ApiGetRepoBranchesReque
 	localVarFormParams := url.Values{}
 
 	if r.page != nil {
-		localVarQueryParams.Add("page", strconv.Itoa(*r.page))
+		parameterAddToHeaderOrQuery(localVarQueryParams, "page", r.page, "")
 	}
 	if r.perPage != nil {
-		localVarQueryParams.Add("per_page", strconv.Itoa(*r.perPage))
+		parameterAddToHeaderOrQuery(localVarQueryParams, "per_page", r.perPage, "")
 	}
 
 	// to determine the Content-Type header
@@ -676,16 +664,17 @@ type ApiGetRepoPRsRequest struct {
 	gitProviderId string
 	namespaceId   string
 	repositoryId  string
-	ListOptions
+	page          *int
+	perPage       *int
 }
 
 func (r ApiGetRepoPRsRequest) Page(page int) ApiGetRepoPRsRequest {
-	r.SetPage(page)
+	r.page = &page
 	return r
 }
 
 func (r ApiGetRepoPRsRequest) PerPage(perPage int) ApiGetRepoPRsRequest {
-	r.SetPerPage(perPage)
+	r.perPage = &perPage
 	return r
 }
 
@@ -698,11 +687,11 @@ GetRepoPRs Get Git repository PRs
 
 Get Git repository PRs
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param gitProviderId Git provider
-	@param namespaceId Namespace
-	@param repositoryId Repository
-	@return ApiGetRepoPRsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param gitProviderId Git provider
+ @param namespaceId Namespace
+ @param repositoryId Repository
+ @return ApiGetRepoPRsRequest
 */
 func (a *GitProviderAPIService) GetRepoPRs(ctx context.Context, gitProviderId string, namespaceId string, repositoryId string) ApiGetRepoPRsRequest {
 	return ApiGetRepoPRsRequest{
@@ -740,10 +729,10 @@ func (a *GitProviderAPIService) GetRepoPRsExecute(r ApiGetRepoPRsRequest) ([]Git
 	localVarFormParams := url.Values{}
 
 	if r.page != nil {
-		localVarQueryParams.Add("page", strconv.Itoa(*r.page))
+		parameterAddToHeaderOrQuery(localVarQueryParams, "page", r.page, "")
 	}
 	if r.perPage != nil {
-		localVarQueryParams.Add("per_page", strconv.Itoa(*r.perPage))
+		parameterAddToHeaderOrQuery(localVarQueryParams, "per_page", r.perPage, "")
 	}
 
 	// to determine the Content-Type header
@@ -819,16 +808,17 @@ type ApiGetRepositoriesRequest struct {
 	ApiService    *GitProviderAPIService
 	gitProviderId string
 	namespaceId   string
-	ListOptions
+	page          *int
+	perPage       *int
 }
 
 func (r ApiGetRepositoriesRequest) Page(page int) ApiGetRepositoriesRequest {
-	r.SetPage(page)
+	r.page = &page
 	return r
 }
 
 func (r ApiGetRepositoriesRequest) PerPage(perPage int) ApiGetRepositoriesRequest {
-	r.SetPerPage(perPage)
+	r.perPage = &perPage
 	return r
 }
 
@@ -841,10 +831,10 @@ GetRepositories Get Git repositories
 
 Get Git repositories
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param gitProviderId Git provider
-	@param namespaceId Namespace
-	@return ApiGetRepositoriesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param gitProviderId Git provider
+ @param namespaceId Namespace
+ @return ApiGetRepositoriesRequest
 */
 func (a *GitProviderAPIService) GetRepositories(ctx context.Context, gitProviderId string, namespaceId string) ApiGetRepositoriesRequest {
 	return ApiGetRepositoriesRequest{
@@ -880,12 +870,11 @@ func (a *GitProviderAPIService) GetRepositoriesExecute(r ApiGetRepositoriesReque
 	localVarFormParams := url.Values{}
 
 	if r.page != nil {
-		localVarQueryParams.Add("page", strconv.Itoa(*r.page))
+		parameterAddToHeaderOrQuery(localVarQueryParams, "page", r.page, "")
 	}
 	if r.perPage != nil {
-		localVarQueryParams.Add("per_page", strconv.Itoa(*r.perPage))
+		parameterAddToHeaderOrQuery(localVarQueryParams, "per_page", r.perPage, "")
 	}
-
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -968,8 +957,8 @@ ListGitProviders List Git providers
 
 List Git providers
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiListGitProvidersRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiListGitProvidersRequest
 */
 func (a *GitProviderAPIService) ListGitProviders(ctx context.Context) ApiListGitProvidersRequest {
 	return ApiListGitProvidersRequest{
@@ -1083,9 +1072,9 @@ RemoveGitProvider Remove Git provider
 
 Remove Git provider
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param gitProviderId Git provider
-	@return ApiRemoveGitProviderRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param gitProviderId Git provider
+ @return ApiRemoveGitProviderRequest
 */
 func (a *GitProviderAPIService) RemoveGitProvider(ctx context.Context, gitProviderId string) ApiRemoveGitProviderRequest {
 	return ApiRemoveGitProviderRequest{
@@ -1195,8 +1184,8 @@ SetGitProvider Set Git provider
 
 Set Git provider
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiSetGitProviderRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiSetGitProviderRequest
 */
 func (a *GitProviderAPIService) SetGitProvider(ctx context.Context) ApiSetGitProviderRequest {
 	return ApiSetGitProviderRequest{
