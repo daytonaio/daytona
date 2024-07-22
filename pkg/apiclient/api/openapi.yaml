@@ -463,13 +463,11 @@ paths:
       - description: Page number
         in: query
         name: page
-        required: false
         schema:
           type: integer
       - description: Number of items per page
         in: query
         name: per_page
-        required: false
         schema:
           type: integer
       responses:

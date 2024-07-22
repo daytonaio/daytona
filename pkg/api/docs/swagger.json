@@ -653,15 +653,13 @@
                         "type": "integer",
                         "description": "Page number",
                         "name": "page",
-                        "in": "query",
-                        "required": false
+                        "in": "query"
                     },
                     {
                         "type": "integer",
                         "description": "Number of items per page",
                         "name": "per_page",
-                        "in": "query",
-                        "required": false
+                        "in": "query"
                     }
                 ],
                 "responses": {

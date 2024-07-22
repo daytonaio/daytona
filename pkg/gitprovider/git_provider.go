@@ -38,7 +38,7 @@ type GetRepositoryContext struct {
 	Path     *string `json:"path,omitempty" validate:"optional"`
 } // @name GetRepositoryContext
 
-// ListOptions holds additional parameters for api responses.
+// ListOptions holds additional parameters for list api responses.
 type ListOptions struct {
 	Page    int `json:"page,omitempty"`
 	PerPage int `json:"perPage,omitempty"`

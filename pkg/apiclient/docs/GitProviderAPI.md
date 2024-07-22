@@ -297,7 +297,7 @@ Name | Type | Description  | Notes
 
 ## GetNamespaces
 
-> []GitNamespace GetNamespaces(ctx, gitProviderId).Execute()
+> []GitNamespace GetNamespaces(ctx, gitProviderId).Page(page).PerPage(perPage).Execute()
 
 Get Git namespaces
 
@@ -317,6 +317,8 @@ import (
 
 func main() {
 	gitProviderId := "gitProviderId_example" // string | Git provider
+	page := int32(56) // int32 | Page number (optional)
+	perPage := int32(56) // int32 | Number of items per page (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -345,7 +347,8 @@ Other parameters are passed through a pointer to a apiGetNamespacesRequest struc
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-
+**page** | **int32** | Page number | 
+**perPage** | **int32** | Number of items per page | 
 
 ### Return type
 
@@ -367,7 +370,7 @@ Name | Type | Description  | Notes
 
 ## GetRepoBranches
 
-> []GitBranch GetRepoBranches(ctx, gitProviderId, namespaceId, repositoryId).Execute()
+> []GitBranch GetRepoBranches(ctx, gitProviderId, namespaceId, repositoryId).Page(page).PerPage(perPage).Execute()
 
 Get Git repository branches
 
@@ -389,6 +392,8 @@ func main() {
 	gitProviderId := "gitProviderId_example" // string | Git provider
 	namespaceId := "namespaceId_example" // string | Namespace
 	repositoryId := "repositoryId_example" // string | Repository
+	page := int32(56) // int32 | Page number (optional)
+	perPage := int32(56) // int32 | Number of items per page (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -419,7 +424,8 @@ Other parameters are passed through a pointer to a apiGetRepoBranchesRequest str
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-
+**page** | **int32** | Page number | 
+**perPage** | **int32** | Number of items per page | 
 
 
 
@@ -443,7 +449,7 @@ Name | Type | Description  | Notes
 
 ## GetRepoPRs
 
-> []GitPullRequest GetRepoPRs(ctx, gitProviderId, namespaceId, repositoryId).Execute()
+> []GitPullRequest GetRepoPRs(ctx, gitProviderId, namespaceId, repositoryId).Page(page).PerPage(perPage).Execute()
 
 Get Git repository PRs
 
@@ -465,6 +471,8 @@ func main() {
 	gitProviderId := "gitProviderId_example" // string | Git provider
 	namespaceId := "namespaceId_example" // string | Namespace
 	repositoryId := "repositoryId_example" // string | Repository
+	page := int32(56) // int32 | Page number (optional)
+	perPage := int32(56) // int32 | Number of items per page (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -495,7 +503,8 @@ Other parameters are passed through a pointer to a apiGetRepoPRsRequest struct v
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-
+**page** | **int32** | Page number | 
+**perPage** | **int32** | Number of items per page | 
 
 
 
@@ -519,7 +528,7 @@ Name | Type | Description  | Notes
 
 ## GetRepositories
 
-> []GitRepository GetRepositories(ctx, gitProviderId, namespaceId).Execute()
+> []GitRepository GetRepositories(ctx, gitProviderId, namespaceId).Page(page).PerPage(perPage).Execute()
 
 Get Git repositories
 
@@ -540,10 +549,12 @@ import (
 func main() {
 	gitProviderId := "gitProviderId_example" // string | Git provider
 	namespaceId := "namespaceId_example" // string | Namespace
+	page := int32(56) // int32 | Page number (optional)
+	perPage := int32(56) // int32 | Number of items per page (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.GitProviderAPI.GetRepositories(context.Background(), gitProviderId, namespaceId).Execute()
+	resp, r, err := apiClient.GitProviderAPI.GetRepositories(context.Background(), gitProviderId, namespaceId).Page(page).PerPage(perPage).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `GitProviderAPI.GetRepositories``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -569,7 +580,8 @@ Other parameters are passed through a pointer to a apiGetRepositoriesRequest str
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-
+**page** | **int32** | Page number | 
+**perPage** | **int32** | Number of items per page | 
 
 
 ### Return type
