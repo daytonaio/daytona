@@ -17,6 +17,15 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
 
+func isPaginationUnsupportedGitProvider(providerId string) bool {
+	switch providerId {
+	case "azure-devops", "bitbucket", "gitness":
+		return true
+	default:
+		return false
+	}
+}
+
 func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additionalProjectOrder int, selectedRepos map[string]int) (*apiclient.GitRepository, error) {
 	var providerId string
 	var namespaceId string
@@ -55,13 +64,27 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 	}
 
 	var namespaceList []apiclient.GitNamespace
+	page := 1
+	perPage := 100
 
-	err = views_util.WithSpinner("Loading", func() error {
-		namespaceList, _, err = apiClient.GitProviderAPI.GetNamespaces(ctx, providerId).Execute()
-		return err
-	})
-	if err != nil {
-		return nil, err
+	for {
+		var namespaces []apiclient.GitNamespace
+		err = views_util.WithSpinner(func() error {
+			namespaces, _, err = apiClient.GitProviderAPI.GetNamespaces(ctx, providerId).Page(page).PerPage(perPage).Execute()
+			return err
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		namespaceList = append(namespaceList, namespaces...)
+
+		// Break for git providers with unsupported pagination OR on reaching exhausted items.
+		if isPaginationUnsupportedGitProvider(providerId) || len(namespaces) < perPage {
+			break
+		}
+
+		page++
 	}
 
 	if len(namespaceList) == 1 {
@@ -74,8 +97,8 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 	}
 
 	var providerRepos []apiclient.GitRepository
-	page := 1
-	perPage := 100
+	page = 1
+	perPage = 100
 
 	for {
 		var repos []apiclient.GitRepository
@@ -90,7 +113,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 		providerRepos = append(providerRepos, repos...)
 
 		// Break for git providers with unsupported pagination OR on reaching exhausted items.
-		if providerId == "azure-devops" || providerId == "bitbucket" || providerId == "gitness" || len(repos) < perPage {
+		if isPaginationUnsupportedGitProvider(providerId) || len(repos) < perPage {
 			break
 		}
 
@@ -103,13 +126,28 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 	}
 
 	var branchList []apiclient.GitBranch
-	err = views_util.WithSpinner("Loading", func() error {
-		branchList, _, err = apiClient.GitProviderAPI.GetRepoBranches(ctx, providerId, namespaceId, url.QueryEscape(*chosenRepo.Id)).Execute()
-		return err
-	})
+	page = 1
+	perPage = 100
 
-	if err != nil {
-		return nil, err
+	for {
+		var branches []apiclient.GitBranch
+		err = views_util.WithSpinner(func() error {
+			branches, _, err = apiClient.GitProviderAPI.GetRepoBranches(ctx, providerId, namespaceId, url.QueryEscape(*chosenRepo.Id)).Page(page).PerPage(perPage).Execute()
+			return err
+		})
+
+		if err != nil {
+			return nil, err
+		}
+
+		branchList = append(branchList, branches...)
+
+		// Break for git providers with unsupported pagination OR on reaching exhausted items.
+		if isPaginationUnsupportedGitProvider(providerId) || len(branches) < perPage {
+			break
+		}
+
+		page++
 	}
 
 	if len(branchList) == 0 {
@@ -123,13 +161,28 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 	}
 
 	var prList []apiclient.GitPullRequest
-	err = views_util.WithSpinner("Loading", func() error {
-		prList, _, err = apiClient.GitProviderAPI.GetRepoPRs(ctx, providerId, namespaceId, url.QueryEscape(*chosenRepo.Id)).Execute()
-		return err
-	})
+	page = 1
+	perPage = 100
 
-	if err != nil {
-		return nil, err
+	for {
+		var pullRequests []apiclient.GitPullRequest
+		err = views_util.WithSpinner(func() error {
+			pullRequests, _, err = apiClient.GitProviderAPI.GetRepoPRs(ctx, providerId, namespaceId, url.QueryEscape(*chosenRepo.Id)).Page(page).PerPage(perPage).Execute()
+			return err
+		})
+
+		if err != nil {
+			return nil, err
+		}
+
+		prList = append(prList, pullRequests...)
+
+		// Break for git providers with unsupported pagination OR on reaching exhausted items.
+		if isPaginationUnsupportedGitProvider(providerId) || len(pullRequests) < perPage {
+			break
+		}
+
+		page++
 	}
 
 	var branch *apiclient.GitBranch

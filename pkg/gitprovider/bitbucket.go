@@ -31,7 +31,7 @@ func NewBitbucketGitProvider(username string, token string) *BitbucketGitProvide
 	return provider
 }
 
-func (g *BitbucketGitProvider) GetNamespaces() ([]*GitNamespace, error) {
+func (g *BitbucketGitProvider) GetNamespaces(options ListOptions) ([]*GitNamespace, error) {
 	client := g.getApiClient()
 	wsList, err := client.Workspaces.List()
 	if err != nil {
@@ -50,7 +50,7 @@ func (g *BitbucketGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	return namespaces, nil
 }
 
-func (g *BitbucketGitProvider) GetRepositories(namespace string, page, perPage int) ([]*GitRepository, error) {
+func (g *BitbucketGitProvider) GetRepositories(namespace string, options ListOptions) ([]*GitRepository, error) {
 	client := g.getApiClient()
 	var response []*GitRepository
 
@@ -67,7 +67,7 @@ func (g *BitbucketGitProvider) GetRepositories(namespace string, page, perPage i
 	for {
 		repoList, err := client.Repositories.ListForAccount(&bitbucket.RepositoriesOptions{
 			Owner: namespace,
-			Page:  &page,
+			Page:  &options.Page,
 		})
 		if err != nil {
 			return nil, err
@@ -108,13 +108,13 @@ func (g *BitbucketGitProvider) GetRepositories(namespace string, page, perPage i
 			break
 		}
 
-		page++
+		options.Page++
 	}
 
 	return response, nil
 }
 
-func (g *BitbucketGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {
+func (g *BitbucketGitProvider) GetRepoBranches(repositoryId string, namespaceId string, options ListOptions) ([]*GitBranch, error) {
 	client := g.getApiClient()
 	var response []*GitBranch
 
@@ -146,7 +146,7 @@ func (g *BitbucketGitProvider) GetRepoBranches(repositoryId string, namespaceId 
 	return response, nil
 }
 
-func (g *BitbucketGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error) {
+func (g *BitbucketGitProvider) GetRepoPRs(repositoryId string, namespaceId string, options ListOptions) ([]*GitPullRequest, error) {
 	client := g.getApiClient()
 	var response []*GitPullRequest
 

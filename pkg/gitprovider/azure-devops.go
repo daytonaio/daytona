@@ -37,7 +37,7 @@ func NewAzureDevOpsGitProvider(token string, baseApiUrl string) *AzureDevOpsGitP
 	return provider
 }
 
-func (g *AzureDevOpsGitProvider) GetNamespaces() ([]*GitNamespace, error) {
+func (g *AzureDevOpsGitProvider) GetNamespaces(options ListOptions) ([]*GitNamespace, error) {
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, err
@@ -63,7 +63,7 @@ func (g *AzureDevOpsGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	return nil, err
 }
 
-func (g *AzureDevOpsGitProvider) GetRepositories(namespace string, page, perPage int) ([]*GitRepository, error) {
+func (g *AzureDevOpsGitProvider) GetRepositories(namespace string, options ListOptions) ([]*GitRepository, error) {
 	client, err := g.getGitClient()
 	if err != nil {
 		return nil, err
@@ -129,7 +129,7 @@ func (g *AzureDevOpsGitProvider) GetUser() (*GitUser, error) {
 	return user, nil
 }
 
-func (g *AzureDevOpsGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {
+func (g *AzureDevOpsGitProvider) GetRepoBranches(repositoryId string, namespaceId string, options ListOptions) ([]*GitBranch, error) {
 	client, err := g.getGitClient()
 	if err != nil {
 		return nil, err
@@ -159,7 +159,7 @@ func (g *AzureDevOpsGitProvider) GetRepoBranches(repositoryId string, namespaceI
 	return response, nil
 }
 
-func (g *AzureDevOpsGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error) {
+func (g *AzureDevOpsGitProvider) GetRepoPRs(repositoryId string, namespaceId string, options ListOptions) ([]*GitPullRequest, error) {
 	client, err := g.getGitClient()
 	if err != nil {
 		return nil, err
