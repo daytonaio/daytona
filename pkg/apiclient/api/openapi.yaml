@@ -460,15 +460,15 @@ paths:
         required: true
         schema:
           type: string
-      - description: Page
+      - description: Page number
         in: query
         name: page
         required: false
         schema:
           type: integer
-      - description: Per page
+      - description: Number of items per page
         in: query
-        name: perPage
+        name: per_page
         required: false
         schema:
           type: integer
