@@ -158,6 +158,8 @@ func openIDE(ideId string, activeProfile config.Profile, workspaceId string, pro
 	switch ideId {
 	case "vscode":
 		return ide.OpenVSCode(activeProfile, workspaceId, projectName, projectProviderMetadata)
+	case "cursor":
+		return ide.OpenVSCode(activeProfile, workspaceId, projectName, projectProviderMetadata)
 	case "ssh":
 		return ide.OpenTerminalSsh(activeProfile, workspaceId, projectName)
 	case "browser":

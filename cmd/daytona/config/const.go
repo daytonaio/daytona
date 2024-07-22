@@ -25,6 +25,7 @@ func GetBinaryUrls() map[os.OperatingSystem]string {
 func GetIdeList() []Ide {
 	ides := []Ide{
 		{"vscode", "VS Code"},
+		{"cursor", "Cursor"},
 		{"browser", "VS Code - Browser"},
 		{"ssh", "Terminal SSH"},
 	}
