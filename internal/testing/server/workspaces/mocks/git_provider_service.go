@@ -50,22 +50,22 @@ func (m *MockGitProviderService) GetGitUser(gitProviderId string) (*gitprovider.
 	return args.Get(0).(*gitprovider.GitUser), args.Error(1)
 }
 
-func (m *MockGitProviderService) GetNamespaces(gitProviderId string) ([]*gitprovider.GitNamespace, error) {
+func (m *MockGitProviderService) GetNamespaces(gitProviderId string, options gitprovider.ListOptions) ([]*gitprovider.GitNamespace, error) {
 	args := m.Called(gitProviderId)
 	return args.Get(0).([]*gitprovider.GitNamespace), args.Error(1)
 }
 
-func (m *MockGitProviderService) GetRepoBranches(gitProviderId string, namespaceId string, repositoryId string) ([]*gitprovider.GitBranch, error) {
+func (m *MockGitProviderService) GetRepoBranches(gitProviderId string, namespaceId string, repositoryId string, options gitprovider.ListOptions) ([]*gitprovider.GitBranch, error) {
 	args := m.Called(gitProviderId, namespaceId, repositoryId)
 	return args.Get(0).([]*gitprovider.GitBranch), args.Error(1)
 }
 
-func (m *MockGitProviderService) GetRepoPRs(gitProviderId string, namespaceId string, repositoryId string) ([]*gitprovider.GitPullRequest, error) {
+func (m *MockGitProviderService) GetRepoPRs(gitProviderId string, namespaceId string, repositoryId string, options gitprovider.ListOptions) ([]*gitprovider.GitPullRequest, error) {
 	args := m.Called(gitProviderId, namespaceId, repositoryId)
 	return args.Get(0).([]*gitprovider.GitPullRequest), args.Error(1)
 }
 
-func (m *MockGitProviderService) GetRepositories(gitProviderId string, namespaceId string, page, perPage int) ([]*gitprovider.GitRepository, error) {
+func (m *MockGitProviderService) GetRepositories(gitProviderId string, namespaceId string, options gitprovider.ListOptions) ([]*gitprovider.GitRepository, error) {
 	args := m.Called(gitProviderId, namespaceId)
 	return args.Get(0).([]*gitprovider.GitRepository), args.Error(1)
 }
