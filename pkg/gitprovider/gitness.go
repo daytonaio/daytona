@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	gitnessclient "github.com/daytonaio/daytona/pkg/gitnessclient"
+	gitnessclient "github.com/daytonaio/daytona/pkg/gitprovider/gitnessclient"
 )
 
 type GitnessGitProvider struct {
