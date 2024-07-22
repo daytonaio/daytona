@@ -46,6 +46,10 @@ var ServerCmd = &cobra.Command{
 		})
 
 		views.RenderInfoMessageBold("Starting the Daytona Server daemon...")
+		err = daemon.Stop()
+		if err != nil {
+			log.Trace(err)
+		}
 		err = daemon.Start(c.LogFilePath)
 		if err != nil {
 			log.Fatal(err)
