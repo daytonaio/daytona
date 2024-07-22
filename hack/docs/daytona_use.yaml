@@ -1,5 +1,5 @@
 name: daytona use
-synopsis: Set the active profile
+synopsis: Use profile [PROFILE_NAME]
 usage: daytona use [flags]
 inherited_options:
     - name: help

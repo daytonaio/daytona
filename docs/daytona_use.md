@@ -1,6 +1,6 @@
 ## daytona use
 
-Set the active profile
+Use profile [PROFILE_NAME]
 
 ```
 daytona use [flags]
