@@ -26,6 +26,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/pkg/api/docs"
 	"github.com/daytonaio/daytona/pkg/api/middlewares"
 	"github.com/gin-contrib/cors"
@@ -68,7 +69,7 @@ type ApiServer struct {
 }
 
 func (a *ApiServer) Start() error {
-	docs.SwaggerInfo.Version = "0.1"
+	docs.SwaggerInfo.Version = internal.Version
 	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Description = "Daytona Server API"
 	docs.SwaggerInfo.Title = "Daytona Server API"
