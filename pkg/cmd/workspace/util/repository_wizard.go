@@ -19,6 +19,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+func isPaginationUnsupportedGitProvider(providerId string) bool {
+	switch providerId {
+	case "azure-devops", "bitbucket", "gitness":
+		return true
+	default:
+		return false
+	}
+}
+
 type RepositoryWizardConfig struct {
 	ApiClient           *apiclient.APIClient
 	UserGitProviders    []apiclient.GitProvider
@@ -99,13 +108,27 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 	}
 
 	var namespaceList []apiclient.GitNamespace
+	page := 1
+	perPage := 100
 
-	err = views_util.WithSpinner("Loading", func() error {
-		namespaceList, _, err = config.ApiClient.GitProviderAPI.GetNamespaces(ctx, gitProviderConfigId).Execute()
-		return err
-	})
-	if err != nil {
-		return nil, err
+	for {
+		var namespaces []apiclient.GitNamespace
+		err = views_util.WithSpinner("Loading", func() error {
+			namespaces, _, err = config.ApiClient.GitProviderAPI.GetNamespaces(ctx, providerId).Page(page).PerPage(perPage).Execute()
+			return err
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		namespaceList = append(namespaceList, namespaces...)
+
+		// Break for git providers with unsupported pagination OR on reaching exhausted items.
+		if isPaginationUnsupportedGitProvider(providerId) || len(namespaces) < perPage {
+			break
+		}
+
+		page++
 	}
 
 	namespace := ""
@@ -125,8 +148,8 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 	}
 
 	var providerRepos []apiclient.GitRepository
-	page := 1
-	perPage := 100
+	page = 1
+	perPage = 100
 
 	for {
 		var repos []apiclient.GitRepository
@@ -141,7 +164,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		providerRepos = append(providerRepos, repos...)
 
 		// Break for git providers with unsupported pagination OR on reaching exhausted items.
-		if providerId == "azure-devops" || providerId == "bitbucket" || providerId == "gitness" || len(repos) < perPage {
+		if isPaginationUnsupportedGitProvider(providerId) || len(repos) < perPage {
 			break
 		}
 

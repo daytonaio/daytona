@@ -44,7 +44,7 @@ func (g *GiteaGitProvider) CanHandle(repoUrl string) (bool, error) {
 	return strings.Contains(g.baseApiUrl, staticContext.Source), nil
 }
 
-func (g *GiteaGitProvider) GetNamespaces() ([]*GitNamespace, error) {
+func (g *GiteaGitProvider) GetNamespaces(options ListOptions) ([]*GitNamespace, error) {
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, err
@@ -56,28 +56,19 @@ func (g *GiteaGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	}
 
 	var namespaces []*GitNamespace
-	page := 1
 
-	for {
-		orgList, res, err := client.ListMyOrgs(gitea.ListOrgsOptions{
-			ListOptions: gitea.ListOptions{
-				Page:     page,
-				PageSize: 100,
-			},
-		})
-		if err != nil {
-			return nil, g.FormatError(res, err)
-		}
+	orgList, _, err := client.ListMyOrgs(gitea.ListOrgsOptions{
+		ListOptions: gitea.ListOptions{
+			Page:     options.Page,
+			PageSize: options.PerPage,
+		},
+	})
+	if err != nil {
+		return nil, g.FormatError(res, err)
+	}
 
-		for _, org := range orgList {
-			namespaces = append(namespaces, &GitNamespace{Id: org.UserName, Name: org.UserName})
-		}
-
-		page++
-
-		if page >= res.LastPage {
-			break
-		}
+	for _, org := range orgList {
+		namespaces = append(namespaces, &GitNamespace{Id: org.UserName, Name: org.UserName})
 	}
 
 	namespaces = append([]*GitNamespace{{Id: personalNamespaceId, Name: user.Username}}, namespaces...)
@@ -85,7 +76,7 @@ func (g *GiteaGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	return namespaces, nil
 }
 
-func (g *GiteaGitProvider) GetRepositories(namespace string, page, perPage int) ([]*GitRepository, error) {
+func (g *GiteaGitProvider) GetRepositories(namespace string, options ListOptions) ([]*GitRepository, error) {
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, err
@@ -125,12 +116,24 @@ func (g *GiteaGitProvider) GetRepositories(namespace string, page, perPage int) 
 			}
 		}
 
-		repoList = append(repoList, repos...)
-
-		page++
-
-		if page >= res.LastPage {
-			break
+		repoList, _, err = client.ListUserRepos(user.Username, gitea.ListReposOptions{
+			ListOptions: gitea.ListOptions{
+				Page:     options.Page,
+				PageSize: options.PerPage,
+			},
+		})
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		repoList, _, err = client.ListOrgRepos(namespace, gitea.ListOrgReposOptions{
+			ListOptions: gitea.ListOptions{
+				Page:     options.Page,
+				PageSize: options.PerPage,
+			},
+		})
+		if err != nil {
+			return nil, err
 		}
 		repoList = repos
 	}
@@ -153,7 +156,7 @@ func (g *GiteaGitProvider) GetRepositories(namespace string, page, perPage int) 
 	return response, nil
 }
 
-func (g *GiteaGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {
+func (g *GiteaGitProvider) GetRepoBranches(repositoryId string, namespaceId string, options ListOptions) ([]*GitBranch, error) {
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, err
@@ -168,40 +171,31 @@ func (g *GiteaGitProvider) GetRepoBranches(repositoryId string, namespaceId stri
 	}
 
 	var branches []*GitBranch
-	page := 1
 
-	for {
-		repoBranches, res, err := client.ListRepoBranches(namespaceId, repositoryId, gitea.ListRepoBranchesOptions{
-			ListOptions: gitea.ListOptions{
-				Page:     page,
-				PageSize: 100,
-			},
-		})
-		if err != nil {
-			return nil, g.FormatError(res, err)
+	repoBranches, res, err := client.ListRepoBranches(namespaceId, repositoryId, gitea.ListRepoBranchesOptions{
+		ListOptions: gitea.ListOptions{
+			Page:     options.Page,
+			PageSize: options.PerPage,
+		},
+	})
+	if err != nil {
+		return nil, g.FormatError(res, err)
+	}
+
+	for _, branch := range repoBranches {
+		responseBranch := &GitBranch{
+			Name: branch.Name,
 		}
-
-		for _, branch := range repoBranches {
-			responseBranch := &GitBranch{
-				Name: branch.Name,
-			}
-			if branch.Commit != nil {
-				responseBranch.Sha = branch.Commit.ID
-			}
-			branches = append(branches, responseBranch)
+		if branch.Commit != nil {
+			responseBranch.Sha = branch.Commit.ID
 		}
-
-		page++
-
-		if page >= res.LastPage {
-			break
-		}
+		branches = append(branches, responseBranch)
 	}
 
 	return branches, nil
 }
 
-func (g *GiteaGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error) {
+func (g *GiteaGitProvider) GetRepoPRs(repositoryId string, namespaceId string, options ListOptions) ([]*GitPullRequest, error) {
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, err
@@ -217,8 +211,8 @@ func (g *GiteaGitProvider) GetRepoPRs(repositoryId string, namespaceId string) (
 
 	prList, res, err := client.ListRepoPullRequests(namespaceId, repositoryId, gitea.ListPullRequestsOptions{
 		ListOptions: gitea.ListOptions{
-			Page:     1,
-			PageSize: 100,
+			Page:     options.Page,
+			PageSize: options.PerPage,
 		},
 		State: gitea.StateOpen,
 		Sort:  "recentupdate",

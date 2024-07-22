@@ -26,9 +26,7 @@ type BitbucketServerGitProvider struct {
 	baseApiUrl string
 }
 
-const bitbucketServerResponseLimit = 100
-
-func NewBitbucketServerGitProvider(username string, token string, baseApiUrl string) *BitbucketServerGitProvider {
+func NewBitbucketServerGitProvider(username string, token string, baseApiUrl *string) *BitbucketServerGitProvider {
 	provider := &BitbucketServerGitProvider{
 		username:            username,
 		token:               token,
@@ -59,7 +57,7 @@ func (g *BitbucketServerGitProvider) getApiClient() (*bitbucketv1.APIClient, err
 	return client, nil
 }
 
-func (g *BitbucketServerGitProvider) GetNamespaces() ([]*GitNamespace, error) {
+func (g *BitbucketServerGitProvider) GetNamespaces(options ListOptions) ([]*GitNamespace, error) {
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, err
@@ -68,7 +66,8 @@ func (g *BitbucketServerGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	var namespaces []*GitNamespace
 
 	projectsRaw, err := client.DefaultApi.GetProjects(map[string]any{
-		"limit": bitbucketServerResponseLimit,
+		"start": options.Page,
+		"limit": options.PerPage,
 	})
 	if err != nil {
 		return nil, g.FormatError(projectsRaw.StatusCode, projectsRaw.Message)
@@ -92,7 +91,7 @@ func (g *BitbucketServerGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	return namespaces, nil
 }
 
-func (g *BitbucketServerGitProvider) GetRepositories(namespace string, page, perPage int) ([]*GitRepository, error) {
+func (g *BitbucketServerGitProvider) GetRepositories(namespace string, options ListOptions) ([]*GitRepository, error) {
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, err
@@ -102,8 +101,8 @@ func (g *BitbucketServerGitProvider) GetRepositories(namespace string, page, per
 	var repoList *bitbucketv1.APIResponse
 
 	opts := map[string]interface{}{
-		"start": page,
-		"limit": perPage,
+		"start": options.Page,
+		"limit": options.PerPage,
 	}
 	if namespace == personalNamespaceId {
 		repoList, err = client.DefaultApi.GetRepositories_19(opts)
@@ -155,7 +154,7 @@ func (g *BitbucketServerGitProvider) GetRepositories(namespace string, page, per
 	return response, nil
 }
 
-func (g *BitbucketServerGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {
+func (g *BitbucketServerGitProvider) GetRepoBranches(repositoryId string, namespaceId string, options ListOptions) ([]*GitBranch, error) {
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, err
@@ -163,7 +162,10 @@ func (g *BitbucketServerGitProvider) GetRepoBranches(repositoryId string, namesp
 
 	var response []*GitBranch
 
-	branches, err := client.DefaultApi.GetBranches(namespaceId, repositoryId, nil)
+	branches, err := client.DefaultApi.GetBranches(namespaceId, repositoryId, map[string]interface{}{
+		"start": options.Page,
+		"limit": options.PerPage,
+	})
 	if err != nil {
 		return nil, g.FormatError(branches.StatusCode, branches.Message)
 	}
@@ -183,7 +185,7 @@ func (g *BitbucketServerGitProvider) GetRepoBranches(repositoryId string, namesp
 	return response, nil
 }
 
-func (g *BitbucketServerGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error) {
+func (g *BitbucketServerGitProvider) GetRepoPRs(repositoryId string, namespaceId string, options ListOptions) ([]*GitPullRequest, error) {
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, err
@@ -191,7 +193,10 @@ func (g *BitbucketServerGitProvider) GetRepoPRs(repositoryId string, namespaceId
 
 	var response []*GitPullRequest
 
-	prList, err := client.DefaultApi.GetPullRequests(nil)
+	prList, err := client.DefaultApi.GetPullRequests(map[string]interface{}{
+		"start": options.Page,
+		"limit": options.PerPage,
+	})
 	if err != nil {
 		return nil, g.FormatError(prList.StatusCode, prList.Message)
 	}

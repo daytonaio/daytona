@@ -9,13 +9,13 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 )
 
-func (s *GitProviderService) GetNamespaces(gitProviderId string) ([]*gitprovider.GitNamespace, error) {
+func (s *GitProviderService) GetNamespaces(gitProviderId string, options gitprovider.ListOptions) ([]*gitprovider.GitNamespace, error) {
 	gitProvider, err := s.GetGitProvider(gitProviderId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get git provider: %w", err)
 	}
 
-	response, err := gitProvider.GetNamespaces()
+	response, err := gitProvider.GetNamespaces(options)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get namespaces: %w", err)
 	}

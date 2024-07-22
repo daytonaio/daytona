@@ -503,10 +503,34 @@ func (a *GitProviderAPIService) GetGitUserExecute(r ApiGetGitUserRequest) (*GitU
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ListOptions struct {
+	page    *int
+	perPage *int
+}
+
+func (l *ListOptions) SetPage(page int) {
+	l.page = &page
+}
+
+func (l *ListOptions) SetPerPage(perPage int) {
+	l.perPage = &perPage
+}
+
 type ApiGetNamespacesRequest struct {
 	ctx           context.Context
 	ApiService    *GitProviderAPIService
 	gitProviderId string
+	ListOptions
+}
+
+func (r ApiGetNamespacesRequest) Page(page int) ApiGetNamespacesRequest {
+	r.SetPage(page)
+	return r
+}
+
+func (r ApiGetNamespacesRequest) PerPage(perPage int) ApiGetNamespacesRequest {
+	r.SetPerPage(perPage)
+	return r
 }
 
 func (r ApiGetNamespacesRequest) Execute() ([]GitNamespace, *http.Response, error) {
@@ -552,6 +576,13 @@ func (a *GitProviderAPIService) GetNamespacesExecute(r ApiGetNamespacesRequest) 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+
+	if r.page != nil {
+		localVarQueryParams.Add("page", strconv.Itoa(*r.page))
+	}
+	if r.perPage != nil {
+		localVarQueryParams.Add("per_page", strconv.Itoa(*r.perPage))
+	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -627,6 +658,17 @@ type ApiGetRepoBranchesRequest struct {
 	gitProviderId string
 	namespaceId   string
 	repositoryId  string
+	ListOptions
+}
+
+func (r ApiGetRepoBranchesRequest) Page(page int) ApiGetRepoBranchesRequest {
+	r.SetPage(page)
+	return r
+}
+
+func (r ApiGetRepoBranchesRequest) PerPage(perPage int) ApiGetRepoBranchesRequest {
+	r.SetPerPage(perPage)
+	return r
 }
 
 func (r ApiGetRepoBranchesRequest) Execute() ([]GitBranch, *http.Response, error) {
@@ -678,6 +720,13 @@ func (a *GitProviderAPIService) GetRepoBranchesExecute(r ApiGetRepoBranchesReque
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+
+	if r.page != nil {
+		localVarQueryParams.Add("page", strconv.Itoa(*r.page))
+	}
+	if r.perPage != nil {
+		localVarQueryParams.Add("per_page", strconv.Itoa(*r.perPage))
+	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -753,6 +802,17 @@ type ApiGetRepoPRsRequest struct {
 	gitProviderId string
 	namespaceId   string
 	repositoryId  string
+	ListOptions
+}
+
+func (r ApiGetRepoPRsRequest) Page(page int) ApiGetRepoPRsRequest {
+	r.SetPage(page)
+	return r
+}
+
+func (r ApiGetRepoPRsRequest) PerPage(perPage int) ApiGetRepoPRsRequest {
+	r.SetPerPage(perPage)
+	return r
 }
 
 func (r ApiGetRepoPRsRequest) Execute() ([]GitPullRequest, *http.Response, error) {
@@ -804,6 +864,13 @@ func (a *GitProviderAPIService) GetRepoPRsExecute(r ApiGetRepoPRsRequest) ([]Git
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+
+	if r.page != nil {
+		localVarQueryParams.Add("page", strconv.Itoa(*r.page))
+	}
+	if r.perPage != nil {
+		localVarQueryParams.Add("per_page", strconv.Itoa(*r.perPage))
+	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -878,17 +945,16 @@ type ApiGetRepositoriesRequest struct {
 	ApiService    *GitProviderAPIService
 	gitProviderId string
 	namespaceId   string
-	page          *int
-	perPage       *int
+	ListOptions
 }
 
 func (r ApiGetRepositoriesRequest) Page(page int) ApiGetRepositoriesRequest {
-	r.page = &page
+	r.SetPage(page)
 	return r
 }
 
 func (r ApiGetRepositoriesRequest) PerPage(perPage int) ApiGetRepositoriesRequest {
-	r.perPage = &perPage
+	r.SetPerPage(perPage)
 	return r
 }
 

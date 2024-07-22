@@ -29,16 +29,30 @@ type BranchWizardConfig struct {
 func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, error) {
 	var branchList []apiclient.GitBranch
 	var checkoutOptions []selection.CheckoutOption
+	page := 1
+	perPage := 100
 	var err error
 	ctx := context.Background()
 
-	err = views_util.WithSpinner("Loading", func() error {
-		branchList, _, err = config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.GitProviderConfigId, url.QueryEscape(config.NamespaceId), url.QueryEscape(config.ChosenRepo.Id)).Execute()
-		return err
-	})
+	for {
+		var branches []apiclient.GitBranch
+		err = views_util.WithSpinner("Loading", func() error {
+			branchList, _, err = config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.ProviderId, config.NamespaceId, url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
+			return err
+		})
 
-	if err != nil {
-		return nil, err
+		if err != nil {
+			return nil, err
+		}
+
+		branchList = append(branchList, branches...)
+
+		// Break for git providers with unsupported pagination OR on reaching exhausted items.
+		if isPaginationUnsupportedGitProvider(config.ProviderId) || len(branches) < perPage {
+			break
+		}
+
+		page++
 	}
 
 	if len(branchList) == 0 {
@@ -52,13 +66,28 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	}
 
 	var prList []apiclient.GitPullRequest
-	err = views_util.WithSpinner("Loading", func() error {
-		prList, _, err = config.ApiClient.GitProviderAPI.GetRepoPRs(ctx, config.GitProviderConfigId, url.QueryEscape(config.NamespaceId), url.QueryEscape(config.ChosenRepo.Id)).Execute()
-		return err
-	})
+	page = 1
+	perPage = 100
 
-	if err != nil {
-		return nil, err
+	for {
+		var pullRequests []apiclient.GitPullRequest
+		err = views_util.WithSpinner("Loading", func() error {
+			prList, _, err = config.ApiClient.GitProviderAPI.GetRepoPRs(ctx, config.ProviderId, config.NamespaceId, url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
+			return err
+		})
+
+		if err != nil {
+			return nil, err
+		}
+
+		prList = append(prList, pullRequests...)
+
+		// Break for git providers with unsupported pagination OR on reaching exhausted items.
+		if isPaginationUnsupportedGitProvider(config.ProviderId) || len(pullRequests) < perPage {
+			break
+		}
+
+		page++
 	}
 
 	var branch *apiclient.GitBranch

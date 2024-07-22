@@ -11,6 +11,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/api/controllers"
 
+	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
@@ -42,7 +43,7 @@ func GetRepositories(ctx *gin.Context) {
 	if pageQuery != "" {
 		page, err = strconv.Atoi(pageQuery)
 		if err != nil {
-			ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for page flag"))
+			ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for 'page' query param"))
 			return
 		}
 	}
@@ -50,14 +51,19 @@ func GetRepositories(ctx *gin.Context) {
 	if perPageQuery != "" {
 		perPage, err = strconv.Atoi(perPageQuery)
 		if err != nil {
-			ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for per_page flag"))
+			ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for 'per_page' query param"))
 			return
 		}
 	}
 
+	options := gitprovider.ListOptions{
+		Page:    page,
+		PerPage: perPage,
+	}
+
 	server := server.GetInstance(nil)
 
-	response, err := server.GitProviderService.GetRepositories(gitProviderId, namespaceId, page, perPage)
+	response, err := server.GitProviderService.GetRepositories(gitProviderId, namespaceId, options)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {
