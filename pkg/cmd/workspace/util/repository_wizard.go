@@ -17,7 +17,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
 
-func isPaginationUnsupportedGitProvider(providerId string) bool {
+func isGitProviderWithUnsupportedPagination(providerId string) bool {
 	switch providerId {
 	case "azure-devops", "bitbucket", "gitness":
 		return true
@@ -80,7 +80,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 		namespaceList = append(namespaceList, namespaces...)
 
 		// Break for git providers with unsupported pagination OR on reaching exhausted items.
-		if isPaginationUnsupportedGitProvider(providerId) || len(namespaces) < perPage {
+		if isGitProviderWithUnsupportedPagination(providerId) || len(namespaces) < perPage {
 			break
 		}
 
@@ -113,7 +113,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 		providerRepos = append(providerRepos, repos...)
 
 		// Break for git providers with unsupported pagination OR on reaching exhausted items.
-		if isPaginationUnsupportedGitProvider(providerId) || len(repos) < perPage {
+		if isGitProviderWithUnsupportedPagination(providerId) || len(repos) < perPage {
 			break
 		}
 
@@ -143,7 +143,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 		branchList = append(branchList, branches...)
 
 		// Break for git providers with unsupported pagination OR on reaching exhausted items.
-		if isPaginationUnsupportedGitProvider(providerId) || len(branches) < perPage {
+		if isGitProviderWithUnsupportedPagination(providerId) || len(branches) < perPage {
 			break
 		}
 
@@ -178,7 +178,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 		prList = append(prList, pullRequests...)
 
 		// Break for git providers with unsupported pagination OR on reaching exhausted items.
-		if isPaginationUnsupportedGitProvider(providerId) || len(pullRequests) < perPage {
+		if isGitProviderWithUnsupportedPagination(providerId) || len(pullRequests) < perPage {
 			break
 		}
 
