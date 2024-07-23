@@ -19,7 +19,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func isPaginationUnsupportedGitProvider(providerId string) bool {
+func isGitProviderWithUnsupportedPagination(providerId string) bool {
 	switch providerId {
 	case "azure-devops", "bitbucket", "gitness":
 		return true
@@ -124,7 +124,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		namespaceList = append(namespaceList, namespaces...)
 
 		// Break for git providers with unsupported pagination OR on reaching exhausted items.
-		if isPaginationUnsupportedGitProvider(providerId) || len(namespaces) < perPage {
+		if isGitProviderWithUnsupportedPagination(providerId) || len(namespaces) < perPage {
 			break
 		}
 
@@ -164,7 +164,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		providerRepos = append(providerRepos, repos...)
 
 		// Break for git providers with unsupported pagination OR on reaching exhausted items.
-		if isPaginationUnsupportedGitProvider(providerId) || len(repos) < perPage {
+		if isGitProviderWithUnsupportedPagination(providerId) || len(repos) < perPage {
 			break
 		}
 
