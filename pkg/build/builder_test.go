@@ -12,18 +12,21 @@ import (
 	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
+	project_build "github.com/daytonaio/daytona/pkg/workspace/project/build"
+	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
-var project workspace.Project = workspace.Project{
-	Repository: &gitprovider.GitRepository{},
-	Build: &workspace.ProjectBuild{
-		Devcontainer: &workspace.ProjectBuildDevcontainer{
-			DevContainerFilePath: ".devcontainer/devcontainer.json",
-		},
-	},
+var p project.Project = project.Project{
+	ProjectConfig: config.ProjectConfig{
+		Repository: &gitprovider.GitRepository{},
+		Build: &project_build.ProjectBuildConfig{
+			Devcontainer: &project_build.DevcontainerConfig{
+				FilePath: ".devcontainer/devcontainer.json",
+			},
+		}},
 }
 
 var predefBuildResult build.BuildResult = build.BuildResult{
@@ -65,7 +68,7 @@ func (s *BuilderTestSuite) SetupTest() {
 		},
 	})
 	s.mockGitService.On("CloneRepository", mock.Anything, mock.Anything).Return(nil)
-	s.builder, _ = factory.Create(project, nil)
+	s.builder, _ = factory.Create(p, nil)
 	err := s.buildResultStore.Save(&predefBuildResult)
 	if err != nil {
 		panic(err)

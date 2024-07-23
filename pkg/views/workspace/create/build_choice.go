@@ -3,7 +3,11 @@
 
 package create
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/daytonaio/daytona/pkg/apiclient"
+)
 
 type BuildChoice string
 
@@ -13,6 +17,25 @@ const (
 	CUSTOMIMAGE  BuildChoice = "custom-image"
 	NONE         BuildChoice = "none"
 )
+
+func GetProjectBuildChoice(project apiclient.CreateProjectConfigDTO, defaults *ProjectDefaults) (BuildChoice, string) {
+	if project.Build == nil {
+		if project.Image != nil && project.User != nil &&
+			defaults.Image != nil && defaults.ImageUser != nil &&
+			*project.Image == *defaults.Image &&
+			*project.User == *defaults.ImageUser {
+			return NONE, "None"
+		} else {
+			return CUSTOMIMAGE, "Custom Image"
+		}
+	} else {
+		if project.Build.Devcontainer != nil {
+			return DEVCONTAINER, "Devcontainer"
+		} else {
+			return AUTOMATIC, "Automatic"
+		}
+	}
+}
 
 // String is used both by fmt.Print and by Cobra in help text
 func (c *BuildChoice) String() string {

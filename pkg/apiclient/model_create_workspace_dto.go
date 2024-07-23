@@ -16,39 +16,39 @@ import (
 	"fmt"
 )
 
-// checks if the CreateWorkspaceRequest type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &CreateWorkspaceRequest{}
+// checks if the CreateWorkspaceDTO type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &CreateWorkspaceDTO{}
 
-// CreateWorkspaceRequest struct for CreateWorkspaceRequest
-type CreateWorkspaceRequest struct {
-	Id       *string                         `json:"id,omitempty"`
-	Name     *string                         `json:"name,omitempty"`
-	Projects []CreateWorkspaceRequestProject `json:"projects"`
-	Target   *string                         `json:"target,omitempty"`
+// CreateWorkspaceDTO struct for CreateWorkspaceDTO
+type CreateWorkspaceDTO struct {
+	Id       *string            `json:"id,omitempty"`
+	Name     *string            `json:"name,omitempty"`
+	Projects []CreateProjectDTO `json:"projects"`
+	Target   *string            `json:"target,omitempty"`
 }
 
-type _CreateWorkspaceRequest CreateWorkspaceRequest
+type _CreateWorkspaceDTO CreateWorkspaceDTO
 
-// NewCreateWorkspaceRequest instantiates a new CreateWorkspaceRequest object
+// NewCreateWorkspaceDTO instantiates a new CreateWorkspaceDTO object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateWorkspaceRequest(projects []CreateWorkspaceRequestProject) *CreateWorkspaceRequest {
-	this := CreateWorkspaceRequest{}
+func NewCreateWorkspaceDTO(projects []CreateProjectDTO) *CreateWorkspaceDTO {
+	this := CreateWorkspaceDTO{}
 	this.Projects = projects
 	return &this
 }
 
-// NewCreateWorkspaceRequestWithDefaults instantiates a new CreateWorkspaceRequest object
+// NewCreateWorkspaceDTOWithDefaults instantiates a new CreateWorkspaceDTO object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewCreateWorkspaceRequestWithDefaults() *CreateWorkspaceRequest {
-	this := CreateWorkspaceRequest{}
+func NewCreateWorkspaceDTOWithDefaults() *CreateWorkspaceDTO {
+	this := CreateWorkspaceDTO{}
 	return &this
 }
 
 // GetId returns the Id field value if set, zero value otherwise.
-func (o *CreateWorkspaceRequest) GetId() string {
+func (o *CreateWorkspaceDTO) GetId() string {
 	if o == nil || IsNil(o.Id) {
 		var ret string
 		return ret
@@ -58,7 +58,7 @@ func (o *CreateWorkspaceRequest) GetId() string {
 
 // GetIdOk returns a tuple with the Id field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CreateWorkspaceRequest) GetIdOk() (*string, bool) {
+func (o *CreateWorkspaceDTO) GetIdOk() (*string, bool) {
 	if o == nil || IsNil(o.Id) {
 		return nil, false
 	}
@@ -66,7 +66,7 @@ func (o *CreateWorkspaceRequest) GetIdOk() (*string, bool) {
 }
 
 // HasId returns a boolean if a field has been set.
-func (o *CreateWorkspaceRequest) HasId() bool {
+func (o *CreateWorkspaceDTO) HasId() bool {
 	if o != nil && !IsNil(o.Id) {
 		return true
 	}
@@ -75,12 +75,12 @@ func (o *CreateWorkspaceRequest) HasId() bool {
 }
 
 // SetId gets a reference to the given string and assigns it to the Id field.
-func (o *CreateWorkspaceRequest) SetId(v string) {
+func (o *CreateWorkspaceDTO) SetId(v string) {
 	o.Id = &v
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
-func (o *CreateWorkspaceRequest) GetName() string {
+func (o *CreateWorkspaceDTO) GetName() string {
 	if o == nil || IsNil(o.Name) {
 		var ret string
 		return ret
@@ -90,7 +90,7 @@ func (o *CreateWorkspaceRequest) GetName() string {
 
 // GetNameOk returns a tuple with the Name field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CreateWorkspaceRequest) GetNameOk() (*string, bool) {
+func (o *CreateWorkspaceDTO) GetNameOk() (*string, bool) {
 	if o == nil || IsNil(o.Name) {
 		return nil, false
 	}
@@ -98,7 +98,7 @@ func (o *CreateWorkspaceRequest) GetNameOk() (*string, bool) {
 }
 
 // HasName returns a boolean if a field has been set.
-func (o *CreateWorkspaceRequest) HasName() bool {
+func (o *CreateWorkspaceDTO) HasName() bool {
 	if o != nil && !IsNil(o.Name) {
 		return true
 	}
@@ -107,14 +107,14 @@ func (o *CreateWorkspaceRequest) HasName() bool {
 }
 
 // SetName gets a reference to the given string and assigns it to the Name field.
-func (o *CreateWorkspaceRequest) SetName(v string) {
+func (o *CreateWorkspaceDTO) SetName(v string) {
 	o.Name = &v
 }
 
 // GetProjects returns the Projects field value
-func (o *CreateWorkspaceRequest) GetProjects() []CreateWorkspaceRequestProject {
+func (o *CreateWorkspaceDTO) GetProjects() []CreateProjectDTO {
 	if o == nil {
-		var ret []CreateWorkspaceRequestProject
+		var ret []CreateProjectDTO
 		return ret
 	}
 
@@ -123,7 +123,7 @@ func (o *CreateWorkspaceRequest) GetProjects() []CreateWorkspaceRequestProject {
 
 // GetProjectsOk returns a tuple with the Projects field value
 // and a boolean to check if the value has been set.
-func (o *CreateWorkspaceRequest) GetProjectsOk() ([]CreateWorkspaceRequestProject, bool) {
+func (o *CreateWorkspaceDTO) GetProjectsOk() ([]CreateProjectDTO, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -131,12 +131,12 @@ func (o *CreateWorkspaceRequest) GetProjectsOk() ([]CreateWorkspaceRequestProjec
 }
 
 // SetProjects sets field value
-func (o *CreateWorkspaceRequest) SetProjects(v []CreateWorkspaceRequestProject) {
+func (o *CreateWorkspaceDTO) SetProjects(v []CreateProjectDTO) {
 	o.Projects = v
 }
 
 // GetTarget returns the Target field value if set, zero value otherwise.
-func (o *CreateWorkspaceRequest) GetTarget() string {
+func (o *CreateWorkspaceDTO) GetTarget() string {
 	if o == nil || IsNil(o.Target) {
 		var ret string
 		return ret
@@ -146,7 +146,7 @@ func (o *CreateWorkspaceRequest) GetTarget() string {
 
 // GetTargetOk returns a tuple with the Target field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CreateWorkspaceRequest) GetTargetOk() (*string, bool) {
+func (o *CreateWorkspaceDTO) GetTargetOk() (*string, bool) {
 	if o == nil || IsNil(o.Target) {
 		return nil, false
 	}
@@ -154,7 +154,7 @@ func (o *CreateWorkspaceRequest) GetTargetOk() (*string, bool) {
 }
 
 // HasTarget returns a boolean if a field has been set.
-func (o *CreateWorkspaceRequest) HasTarget() bool {
+func (o *CreateWorkspaceDTO) HasTarget() bool {
 	if o != nil && !IsNil(o.Target) {
 		return true
 	}
@@ -163,11 +163,11 @@ func (o *CreateWorkspaceRequest) HasTarget() bool {
 }
 
 // SetTarget gets a reference to the given string and assigns it to the Target field.
-func (o *CreateWorkspaceRequest) SetTarget(v string) {
+func (o *CreateWorkspaceDTO) SetTarget(v string) {
 	o.Target = &v
 }
 
-func (o CreateWorkspaceRequest) MarshalJSON() ([]byte, error) {
+func (o CreateWorkspaceDTO) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -175,7 +175,7 @@ func (o CreateWorkspaceRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o CreateWorkspaceRequest) ToMap() (map[string]interface{}, error) {
+func (o CreateWorkspaceDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Id) {
 		toSerialize["id"] = o.Id
@@ -190,7 +190,7 @@ func (o CreateWorkspaceRequest) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *CreateWorkspaceRequest) UnmarshalJSON(data []byte) (err error) {
+func (o *CreateWorkspaceDTO) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -212,53 +212,53 @@ func (o *CreateWorkspaceRequest) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varCreateWorkspaceRequest := _CreateWorkspaceRequest{}
+	varCreateWorkspaceDTO := _CreateWorkspaceDTO{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCreateWorkspaceRequest)
+	err = decoder.Decode(&varCreateWorkspaceDTO)
 
 	if err != nil {
 		return err
 	}
 
-	*o = CreateWorkspaceRequest(varCreateWorkspaceRequest)
+	*o = CreateWorkspaceDTO(varCreateWorkspaceDTO)
 
 	return err
 }
 
-type NullableCreateWorkspaceRequest struct {
-	value *CreateWorkspaceRequest
+type NullableCreateWorkspaceDTO struct {
+	value *CreateWorkspaceDTO
 	isSet bool
 }
 
-func (v NullableCreateWorkspaceRequest) Get() *CreateWorkspaceRequest {
+func (v NullableCreateWorkspaceDTO) Get() *CreateWorkspaceDTO {
 	return v.value
 }
 
-func (v *NullableCreateWorkspaceRequest) Set(val *CreateWorkspaceRequest) {
+func (v *NullableCreateWorkspaceDTO) Set(val *CreateWorkspaceDTO) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableCreateWorkspaceRequest) IsSet() bool {
+func (v NullableCreateWorkspaceDTO) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableCreateWorkspaceRequest) Unset() {
+func (v *NullableCreateWorkspaceDTO) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableCreateWorkspaceRequest(val *CreateWorkspaceRequest) *NullableCreateWorkspaceRequest {
-	return &NullableCreateWorkspaceRequest{value: val, isSet: true}
+func NewNullableCreateWorkspaceDTO(val *CreateWorkspaceDTO) *NullableCreateWorkspaceDTO {
+	return &NullableCreateWorkspaceDTO{value: val, isSet: true}
 }
 
-func (v NullableCreateWorkspaceRequest) MarshalJSON() ([]byte, error) {
+func (v NullableCreateWorkspaceDTO) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableCreateWorkspaceRequest) UnmarshalJSON(src []byte) error {
+func (v *NullableCreateWorkspaceDTO) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

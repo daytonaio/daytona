@@ -31,7 +31,7 @@ func selectNamespacePrompt(namespaces []apiclient.GitNamespace, additionalProjec
 	l := views.GetStyledSelectList(items)
 
 	title := "Choose a Namespace"
-	if additionalProjectOrder > 0 {
+	if additionalProjectOrder > 1 {
 		title += fmt.Sprintf(" (Project #%d)", additionalProjectOrder)
 	}
 	l.Title = views.GetStyledMainTitle(title)

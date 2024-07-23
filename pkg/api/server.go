@@ -38,6 +38,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider"
 	log_controller "github.com/daytonaio/daytona/pkg/api/controllers/log"
 	"github.com/daytonaio/daytona/pkg/api/controllers/profiledata"
+	"github.com/daytonaio/daytona/pkg/api/controllers/projectconfig"
 	"github.com/daytonaio/daytona/pkg/api/controllers/provider"
 	"github.com/daytonaio/daytona/pkg/api/controllers/server"
 	"github.com/daytonaio/daytona/pkg/api/controllers/target"
@@ -129,6 +130,15 @@ func (a *ApiServer) Start() error {
 		workspaceController.POST("/:workspaceId/:projectId/stop", workspace.StopProject)
 	}
 
+	projectConfigController := protected.Group("/project-config")
+	{
+		projectConfigController.GET("/:configName", projectconfig.GetProjectConfig)
+		projectConfigController.GET("/", projectconfig.ListProjectConfigs)
+		projectConfigController.GET("/default/:gitUrl", projectconfig.GetDefaultProjectConfig)
+		projectConfigController.PUT("/", projectconfig.SetProjectConfig)
+		projectConfigController.DELETE("/:configName", projectconfig.DeleteProjectConfig)
+	}
+
 	providerController := protected.Group("/provider")
 	{
 		providerController.POST("/install", provider.InstallProvider)
@@ -171,6 +181,7 @@ func (a *ApiServer) Start() error {
 		gitProviderController.GET("/:gitProviderId/:namespaceId/:repositoryId/pull-requests", gitprovider.GetRepoPRs)
 		gitProviderController.GET("/context/:gitUrl", gitprovider.GetGitContext)
 		gitProviderController.POST("/context/url", gitprovider.GetUrlFromRepository)
+		gitProviderController.GET("/id-for-url/:url", gitprovider.GetGitProviderIdForUrl)
 	}
 
 	apiKeyController := protected.Group("/apikey")

@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	log "github.com/sirupsen/logrus"
@@ -68,7 +68,7 @@ func (d *DockerClient) initProjectContainer(opts *CreateProjectOptions) error {
 	return nil
 }
 
-func GetContainerCreateConfig(project *workspace.Project) *container.Config {
+func GetContainerCreateConfig(project *project.Project) *container.Config {
 	envVars := []string{}
 
 	for key, value := range project.EnvVars {

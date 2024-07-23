@@ -29,7 +29,7 @@ func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, additional
 	l := views.GetStyledSelectList(items)
 
 	title := "Choose a Pull/Merge Request"
-	if additionalProjectOrder > 0 {
+	if additionalProjectOrder > 1 {
 		title += fmt.Sprintf(" (Project #%d)", additionalProjectOrder)
 	}
 	l.Title = views.GetStyledMainTitle(title)

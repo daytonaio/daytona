@@ -35,7 +35,7 @@ func selectCheckoutPrompt(checkoutOptions []CheckoutOption, additionalProjectOrd
 	l := views.GetStyledSelectList(items)
 
 	title := "Cloning Options"
-	if additionalProjectOrder > 0 {
+	if additionalProjectOrder > 1 {
 		title += fmt.Sprintf(" (Project #%d)", additionalProjectOrder)
 	}
 	l.Title = views.GetStyledMainTitle(title)

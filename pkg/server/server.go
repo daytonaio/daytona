@@ -16,6 +16,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/profiledata"
+	"github.com/daytonaio/daytona/pkg/server/projectconfig"
 	"github.com/daytonaio/daytona/pkg/server/providertargets"
 	"github.com/daytonaio/daytona/pkg/server/registry"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
@@ -30,6 +31,7 @@ type ServerInstanceConfig struct {
 	TailscaleServer          TailscaleServer
 	ProviderTargetService    providertargets.IProviderTargetService
 	ContainerRegistryService containerregistries.IContainerRegistryService
+	ProjectConfigService     projectconfig.IProjectConfigService
 	LocalContainerRegistry   ILocalContainerRegistry
 	WorkspaceService         workspaces.IWorkspaceService
 	ApiKeyService            apikeys.IApiKeyService
@@ -56,6 +58,7 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 			TailscaleServer:          serverConfig.TailscaleServer,
 			ProviderTargetService:    serverConfig.ProviderTargetService,
 			ContainerRegistryService: serverConfig.ContainerRegistryService,
+			ProjectConfigService:     serverConfig.ProjectConfigService,
 			LocalContainerRegistry:   serverConfig.LocalContainerRegistry,
 			WorkspaceService:         serverConfig.WorkspaceService,
 			ApiKeyService:            serverConfig.ApiKeyService,
@@ -75,6 +78,7 @@ type Server struct {
 	TailscaleServer          TailscaleServer
 	ProviderTargetService    providertargets.IProviderTargetService
 	ContainerRegistryService containerregistries.IContainerRegistryService
+	ProjectConfigService     projectconfig.IProjectConfigService
 	LocalContainerRegistry   ILocalContainerRegistry
 	WorkspaceService         workspaces.IWorkspaceService
 	ApiKeyService            apikeys.IApiKeyService

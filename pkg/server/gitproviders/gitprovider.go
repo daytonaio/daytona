@@ -9,18 +9,23 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 )
 
-func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.GitProvider, error) {
+func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.GitProvider, string, error) {
 	gitProviders, err := s.configStore.List()
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	for _, p := range gitProviders {
 		if strings.Contains(repoUrl, fmt.Sprintf("%s.", p.Id)) {
-			return s.GetGitProvider(p.Id)
+			gitProvider, err := s.GetGitProvider(p.Id)
+			if err != nil {
+				return nil, "", err
+			}
+			return gitProvider, p.Id, nil
 		}
 
 		if p.BaseApiUrl == nil || *p.BaseApiUrl == "" {
@@ -29,28 +34,34 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 
 		hostname, err := getHostnameFromUrl(*p.BaseApiUrl)
 		if err != nil {
-			return nil, err
+			return nil, "", nil
 		}
 
 		if p.BaseApiUrl != nil && strings.Contains(repoUrl, hostname) {
-			return s.GetGitProvider(p.Id)
+			gitProvider, err := s.GetGitProvider(p.Id)
+			if err != nil {
+				return nil, "", err
+			}
+			return gitProvider, p.Id, nil
 		}
 	}
 
 	u, err := url.Parse(repoUrl)
 	if err != nil {
-		return nil, err
+		return nil, "", nil
 	}
 
 	hostname := strings.TrimPrefix(u.Hostname(), "www.")
 	providerId := strings.Split(hostname, ".")[0]
 
-	return s.newGitProvider(&gitprovider.GitProviderConfig{
+	gitProvider, err := s.newGitProvider(&gitprovider.GitProviderConfig{
 		Id:         providerId,
 		Username:   "",
 		Token:      "",
 		BaseApiUrl: nil,
 	})
+
+	return gitProvider, providerId, err
 }
 
 func (s *GitProviderService) GetConfigForUrl(repoUrl string) (*gitprovider.GitProviderConfig, error) {
@@ -78,6 +89,15 @@ func (s *GitProviderService) GetConfigForUrl(repoUrl string) (*gitprovider.GitPr
 
 		if p.BaseApiUrl != nil && strings.Contains(repoUrl, hostname) {
 			return p, nil
+		}
+	}
+
+	supportedGitProviders := config.GetSupportedGitProviders()
+	for _, provider := range supportedGitProviders {
+		if strings.Contains(repoUrl, provider.Id) {
+			return &gitprovider.GitProviderConfig{
+				Id: provider.Id,
+			}, nil
 		}
 	}
 

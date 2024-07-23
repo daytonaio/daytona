@@ -2,6 +2,9 @@ name: daytona create
 synopsis: Create a workspace
 usage: daytona create [REPOSITORY_URL] [flags]
 options:
+    - name: blank
+      default_value: "false"
+      usage: Create a blank project without using existing configurations
     - name: builder
       usage: Specify the builder (currently auto/devcontainer/none)
     - name: code

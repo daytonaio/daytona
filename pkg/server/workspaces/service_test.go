@@ -17,9 +17,12 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/provider"
+	projectconfig_dto "github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -38,18 +41,20 @@ var target = provider.ProviderTarget{
 	Options: "test-options",
 }
 
-var createWorkspaceRequest = dto.CreateWorkspaceRequest{
+var createWorkspaceRequest = dto.CreateWorkspaceDTO{
 	Name:   "test",
 	Id:     "test",
 	Target: target.Name,
-	Projects: []dto.CreateWorkspaceRequestProject{
+	Projects: []dto.CreateProjectDTO{
 		{
-			Name: "project1",
-			Source: dto.CreateWorkspaceRequestProjectSource{
-				Repository: &gitprovider.GitRepository{
-					Id:   "123",
-					Url:  "https://github.com/daytonaio/daytona",
-					Name: "daytona",
+			NewConfig: &projectconfig_dto.CreateProjectConfigDTO{
+				Name: "project1",
+				Source: projectconfig_dto.CreateProjectConfigSourceDTO{
+					Repository: &gitprovider.GitRepository{
+						Id:   "123",
+						Url:  "https://github.com/daytonaio/daytona",
+						Name: "daytona",
+					},
 				},
 			},
 		},
@@ -59,9 +64,9 @@ var createWorkspaceRequest = dto.CreateWorkspaceRequest{
 var workspaceInfo = workspace.WorkspaceInfo{
 	Name:             createWorkspaceRequest.Name,
 	ProviderMetadata: "provider-metadata-test",
-	Projects: []*workspace.ProjectInfo{
+	Projects: []*project.ProjectInfo{
 		{
-			Name:             createWorkspaceRequest.Projects[0].Name,
+			Name:             createWorkspaceRequest.Projects[0].NewConfig.Name,
 			Created:          "1 min ago",
 			IsRunning:        true,
 			ProviderMetadata: "provider-metadata-test",
@@ -74,6 +79,8 @@ func TestWorkspaceService(t *testing.T) {
 	workspaceStore := t_workspaces.NewInMemoryWorkspaceStore()
 
 	containerRegistryService := mocks.NewMockContainerRegistryService()
+
+	projectConfigService := mocks.NewMockProjectConfigService()
 
 	targetStore := t_targets.NewInMemoryTargetStore()
 	err := targetStore.Save(&target)
@@ -93,6 +100,7 @@ func TestWorkspaceService(t *testing.T) {
 		ServerApiUrl:             serverApiUrl,
 		ServerUrl:                serverUrl,
 		ContainerRegistryService: containerRegistryService,
+		ProjectConfigService:     projectConfigService,
 		DefaultProjectImage:      defaultProjectImage,
 		DefaultProjectUser:       defaultProjectUser,
 		ApiKeyService:            apiKeyService,
@@ -111,7 +119,7 @@ func TestWorkspaceService(t *testing.T) {
 		provisioner.On("StartWorkspace", mock.Anything, &target).Return(nil)
 
 		apiKeyService.On("Generate", apikey.ApiKeyTypeWorkspace, createWorkspaceRequest.Id).Return(createWorkspaceRequest.Id, nil)
-		gitProviderService.On("GetLastCommitSha", createWorkspaceRequest.Projects[0].Source.Repository).Return("123", nil)
+		gitProviderService.On("GetLastCommitSha", createWorkspaceRequest.Projects[0].NewConfig.Source.Repository).Return("123", nil)
 
 		baseApiUrl := "https://api.github.com"
 		gitProviderConfig := gitprovider.GitProviderConfig{
@@ -122,12 +130,25 @@ func TestWorkspaceService(t *testing.T) {
 		}
 
 		for _, project := range createWorkspaceRequest.Projects {
-			apiKeyService.On("Generate", apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", createWorkspaceRequest.Id, project.Name)).Return(project.Name, nil)
+			apiKeyService.On("Generate", apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", createWorkspaceRequest.Id, project.NewConfig.Name)).Return(project.NewConfig.Name, nil)
 		}
 		provisioner.On("CreateProject", mock.Anything, &target, containerRegistry, &gitProviderConfig).Return(nil)
 		provisioner.On("StartProject", mock.Anything, &target).Return(nil)
 
 		gitProviderService.On("GetConfigForUrl", "https://github.com/daytonaio/daytona").Return(&gitProviderConfig, nil)
+
+		projectConfig := config.ProjectConfig{
+			Name: createWorkspaceRequest.Projects[0].NewConfig.Name,
+			Repository: &gitprovider.GitRepository{
+				Id:   createWorkspaceRequest.Projects[0].NewConfig.Source.Repository.Id,
+				Url:  createWorkspaceRequest.Projects[0].NewConfig.Source.Repository.Url,
+				Name: createWorkspaceRequest.Projects[0].NewConfig.Source.Repository.Name,
+			},
+			Image: defaultProjectImage,
+			User:  defaultProjectUser,
+		}
+
+		projectConfigService.On("ToProjectConfig", mock.Anything).Return(&projectConfig)
 
 		workspace, err := service.CreateWorkspace(context.TODO(), createWorkspaceRequest)
 
@@ -210,7 +231,7 @@ func TestWorkspaceService(t *testing.T) {
 		provisioner.On("StartWorkspace", mock.Anything, &target).Return(nil)
 		provisioner.On("StartProject", mock.Anything, &target).Return(nil)
 
-		err := service.StartProject(context.TODO(), createWorkspaceRequest.Id, createWorkspaceRequest.Projects[0].Name)
+		err := service.StartProject(context.TODO(), createWorkspaceRequest.Id, createWorkspaceRequest.Projects[0].NewConfig.Name)
 
 		require.Nil(t, err)
 	})
@@ -228,7 +249,7 @@ func TestWorkspaceService(t *testing.T) {
 		provisioner.On("StopWorkspace", mock.Anything, &target).Return(nil)
 		provisioner.On("StopProject", mock.Anything, &target).Return(nil)
 
-		err := service.StopProject(context.TODO(), createWorkspaceRequest.Id, createWorkspaceRequest.Projects[0].Name)
+		err := service.StopProject(context.TODO(), createWorkspaceRequest.Id, createWorkspaceRequest.Projects[0].NewConfig.Name)
 
 		require.Nil(t, err)
 	})
@@ -253,7 +274,7 @@ func TestWorkspaceService(t *testing.T) {
 		provisioner.On("StartWorkspace", mock.Anything, &target).Return(nil)
 
 		apiKeyService.On("Generate", apikey.ApiKeyTypeWorkspace, createWorkspaceRequest.Id).Return(createWorkspaceRequest.Id, nil)
-		gitProviderService.On("GetLastCommitSha", createWorkspaceRequest.Projects[0].Source.Repository).Return("123", nil)
+		gitProviderService.On("GetLastCommitSha", createWorkspaceRequest.Projects[0].NewConfig.Source.Repository).Return("123", nil)
 
 		baseApiUrl := "https://api.github.com"
 		gitProviderConfig := gitprovider.GitProviderConfig{
@@ -265,7 +286,7 @@ func TestWorkspaceService(t *testing.T) {
 		gitProviderService.On("GetConfigForUrl", "https://github.com/daytonaio/daytona").Return(&gitProviderConfig, nil)
 
 		for _, project := range createWorkspaceRequest.Projects {
-			apiKeyService.On("Generate", apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", createWorkspaceRequest.Id, project.Name)).Return(project.Name, nil)
+			apiKeyService.On("Generate", apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", createWorkspaceRequest.Id, project.NewConfig.Name)).Return(project.NewConfig.Name, nil)
 		}
 		provisioner.On("CreateProject", mock.Anything, &target, containerRegistry, &gitProviderConfig).Return(nil)
 		provisioner.On("StartProject", mock.Anything, &target).Return(nil)
@@ -290,10 +311,10 @@ func TestWorkspaceService(t *testing.T) {
 
 		projectName := ws.Projects[0].Name
 		updatedAt := time.Now().Format(time.RFC1123)
-		res, err := service.SetProjectState(ws.Id, projectName, &workspace.ProjectState{
+		res, err := service.SetProjectState(ws.Id, projectName, &project.ProjectState{
 			UpdatedAt: updatedAt,
 			Uptime:    10,
-			GitStatus: &workspace.GitStatus{
+			GitStatus: &project.GitStatus{
 				CurrentBranch: "main",
 			},
 		})
@@ -310,7 +331,7 @@ func TestWorkspaceService(t *testing.T) {
 	})
 }
 
-func workspaceEquals(t *testing.T, req dto.CreateWorkspaceRequest, workspace *workspace.Workspace, projectImage string) {
+func workspaceEquals(t *testing.T, req dto.CreateWorkspaceDTO, workspace *workspace.Workspace, projectImage string) {
 	t.Helper()
 
 	require.Equal(t, req.Id, workspace.Id)
@@ -318,17 +339,17 @@ func workspaceEquals(t *testing.T, req dto.CreateWorkspaceRequest, workspace *wo
 	require.Equal(t, req.Target, workspace.Target)
 
 	for i, project := range workspace.Projects {
-		require.Equal(t, req.Projects[i].Name, project.Name)
-		require.Equal(t, req.Projects[i].Source.Repository.Id, project.Repository.Id)
-		require.Equal(t, req.Projects[i].Source.Repository.Url, project.Repository.Url)
-		require.Equal(t, req.Projects[i].Source.Repository.Name, project.Repository.Name)
+		require.Equal(t, req.Projects[i].NewConfig.Name, project.Name)
+		require.Equal(t, req.Projects[i].NewConfig.Source.Repository.Id, project.Repository.Id)
+		require.Equal(t, req.Projects[i].NewConfig.Source.Repository.Url, project.Repository.Url)
+		require.Equal(t, req.Projects[i].NewConfig.Source.Repository.Name, project.Repository.Name)
 		require.Equal(t, project.ApiKey, project.Name)
 		require.Equal(t, project.Target, req.Target)
 		require.Equal(t, project.Image, projectImage)
 	}
 }
 
-func workspaceDtoEquals(t *testing.T, req dto.CreateWorkspaceRequest, workspace dto.WorkspaceDTO, workspaceInfo workspace.WorkspaceInfo, projectImage string, verbose bool) {
+func workspaceDtoEquals(t *testing.T, req dto.CreateWorkspaceDTO, workspace dto.WorkspaceDTO, workspaceInfo workspace.WorkspaceInfo, projectImage string, verbose bool) {
 	t.Helper()
 
 	require.Equal(t, req.Id, workspace.Id)
@@ -343,10 +364,10 @@ func workspaceDtoEquals(t *testing.T, req dto.CreateWorkspaceRequest, workspace 
 	}
 
 	for i, project := range workspace.Projects {
-		require.Equal(t, req.Projects[i].Name, project.Name)
-		require.Equal(t, req.Projects[i].Source.Repository.Id, project.Repository.Id)
-		require.Equal(t, req.Projects[i].Source.Repository.Url, project.Repository.Url)
-		require.Equal(t, req.Projects[i].Source.Repository.Name, project.Repository.Name)
+		require.Equal(t, req.Projects[i].NewConfig.Name, project.Name)
+		require.Equal(t, req.Projects[i].NewConfig.Source.Repository.Id, project.Repository.Id)
+		require.Equal(t, req.Projects[i].NewConfig.Source.Repository.Url, project.Repository.Url)
+		require.Equal(t, req.Projects[i].NewConfig.Source.Repository.Name, project.Repository.Name)
 		require.Equal(t, project.ApiKey, project.Name)
 		require.Equal(t, project.Target, req.Target)
 		require.Equal(t, project.Image, projectImage)

@@ -118,8 +118,8 @@ func (b *DevcontainerBuilder) buildDevcontainer() error {
 	})
 
 	cmd := []string{"devcontainer", "up", "--prebuild", "--workspace-folder", "/project"}
-	if b.project.Build.Devcontainer.DevContainerFilePath != "" {
-		cmd = append(cmd, "--config", filepath.Join("/project", b.project.Build.Devcontainer.DevContainerFilePath))
+	if b.project.Build.Devcontainer.FilePath != "" {
+		cmd = append(cmd, "--config", filepath.Join("/project", b.project.Build.Devcontainer.FilePath))
 	}
 
 	execConfig := types.ExecConfig{

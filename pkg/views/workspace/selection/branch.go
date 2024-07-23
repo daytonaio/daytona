@@ -29,7 +29,7 @@ func selectBranchPrompt(branches []apiclient.GitBranch, additionalProjectOrder i
 	l := views.GetStyledSelectList(items)
 
 	title := "Choose a Branch"
-	if additionalProjectOrder > 0 {
+	if additionalProjectOrder > 1 {
 		title += fmt.Sprintf(" (Project #%d)", additionalProjectOrder)
 	}
 	l.Title = views.GetStyledMainTitle(title)

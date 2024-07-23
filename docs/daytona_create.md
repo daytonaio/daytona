@@ -9,6 +9,7 @@ daytona create [REPOSITORY_URL] [flags]
 ### Options
 
 ```
+      --blank                      Create a blank project without using existing configurations
       --builder BuildChoice        Specify the builder (currently auto/devcontainer/none)
   -c, --code                       Open the workspace in the IDE after workspace creation
       --custom-image string        Create the project with the custom image passed as the flag value; Requires setting --custom-image-user flag as well

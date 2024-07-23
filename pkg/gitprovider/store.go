@@ -13,9 +13,9 @@ type ConfigStore interface {
 }
 
 var (
-	ErrGitProviderNotFound = errors.New("git provider not found")
+	ErrGitProviderConfigNotFound = errors.New("git provider config not found")
 )
 
 func IsGitProviderNotFound(err error) bool {
-	return err.Error() == ErrGitProviderNotFound.Error()
+	return err.Error() == ErrGitProviderConfigNotFound.Error()
 }

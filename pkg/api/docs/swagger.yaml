@@ -19,25 +19,10 @@ definitions:
       username:
         type: string
     type: object
-  CreateWorkspaceRequest:
-    properties:
-      id:
-        type: string
-      name:
-        type: string
-      projects:
-        items:
-          $ref: '#/definitions/CreateWorkspaceRequestProject'
-        type: array
-      target:
-        type: string
-    required:
-    - projects
-    type: object
-  CreateWorkspaceRequestProject:
+  CreateProjectConfigDTO:
     properties:
       build:
-        $ref: '#/definitions/ProjectBuild'
+        $ref: '#/definitions/ProjectBuildConfig'
       envVars:
         additionalProperties:
           type: string
@@ -47,16 +32,50 @@ definitions:
       name:
         type: string
       source:
-        $ref: '#/definitions/CreateWorkspaceRequestProjectSource'
+        $ref: '#/definitions/CreateProjectConfigSourceDTO'
       user:
         type: string
-    required:
-    - name
     type: object
-  CreateWorkspaceRequestProjectSource:
+  CreateProjectConfigSourceDTO:
     properties:
       repository:
         $ref: '#/definitions/GitRepository'
+    type: object
+  CreateProjectDTO:
+    properties:
+      existingConfig:
+        $ref: '#/definitions/ExistingConfigDTO'
+      newConfig:
+        $ref: '#/definitions/CreateProjectConfigDTO'
+    type: object
+  CreateWorkspaceDTO:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      projects:
+        items:
+          $ref: '#/definitions/CreateProjectDTO'
+        type: array
+      target:
+        type: string
+    required:
+    - projects
+    type: object
+  DevcontainerConfig:
+    properties:
+      filePath:
+        type: string
+    type: object
+  ExistingConfigDTO:
+    properties:
+      branch:
+        type: string
+      configName:
+        type: string
+      projectName:
+        type: string
     type: object
   FRPSConfig:
     properties:
@@ -185,7 +204,9 @@ definitions:
   Project:
     properties:
       build:
-        $ref: '#/definitions/ProjectBuild'
+        $ref: '#/definitions/ProjectBuildConfig'
+      default:
+        type: boolean
       image:
         type: string
       name:
@@ -201,14 +222,24 @@ definitions:
       workspaceId:
         type: string
     type: object
-  ProjectBuild:
+  ProjectBuildConfig:
     properties:
       devcontainer:
-        $ref: '#/definitions/ProjectBuildDevcontainer'
+        $ref: '#/definitions/DevcontainerConfig'
     type: object
-  ProjectBuildDevcontainer:
+  ProjectConfig:
     properties:
-      devContainerFilePath:
+      build:
+        $ref: '#/definitions/ProjectBuildConfig'
+      default:
+        type: boolean
+      image:
+        type: string
+      name:
+        type: string
+      repository:
+        $ref: '#/definitions/GitRepository'
+      user:
         type: string
     type: object
   ProjectInfo:
@@ -790,6 +821,26 @@ paths:
       summary: Get Git provider
       tags:
       - gitProvider
+  /gitprovider/id-for-url/{url}:
+    get:
+      description: Get Git provider ID
+      operationId: GetGitProviderIdForUrl
+      parameters:
+      - description: Url
+        in: path
+        name: url
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Get Git provider ID
+      tags:
+      - gitProvider
   /profile:
     delete:
       description: Delete profile data
@@ -831,6 +882,95 @@ paths:
       summary: Set profile data
       tags:
       - profile
+  /project-config:
+    get:
+      description: List project configs
+      operationId: ListProjectConfigs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ProjectConfig'
+            type: array
+      summary: List project configs
+      tags:
+      - project-config
+    put:
+      consumes:
+      - application/json
+      description: Set project config data
+      operationId: SetProjectConfig
+      parameters:
+      - description: Project config
+        in: body
+        name: projectConfig
+        required: true
+        schema:
+          $ref: '#/definitions/CreateProjectConfigDTO'
+      responses:
+        "201":
+          description: Created
+      summary: Set project config data
+      tags:
+      - project-config
+  /project-config/{configName}:
+    delete:
+      description: Delete project config data
+      operationId: DeleteProjectConfig
+      parameters:
+      - description: Config name
+        in: path
+        name: configName
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      summary: Delete project config data
+      tags:
+      - project-config
+    get:
+      consumes:
+      - application/json
+      description: Get project config data
+      operationId: GetProjectConfig
+      parameters:
+      - description: Config name
+        in: path
+        name: configName
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ProjectConfig'
+      summary: Get project config data
+      tags:
+      - project-config
+  /project-config/default/{gitUrl}:
+    get:
+      description: Get project configs by git url
+      operationId: GetDefaultProjectConfig
+      parameters:
+      - description: Git URL
+        in: path
+        name: gitUrl
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ProjectConfig'
+      summary: Get project configs by git url
+      tags:
+      - project-config
   /provider:
     get:
       description: List providers
@@ -1030,7 +1170,7 @@ paths:
         name: workspace
         required: true
         schema:
-          $ref: '#/definitions/CreateWorkspaceRequest'
+          $ref: '#/definitions/CreateWorkspaceDTO'
       produces:
       - application/json
       responses:

@@ -17,14 +17,14 @@ import (
 //	@Tags			workspace
 //	@Summary		Create a workspace
 //	@Description	Create a workspace
-//	@Param			workspace	body	CreateWorkspaceRequest	true	"Create workspace"
+//	@Param			workspace	body	dto.CreateWorkspaceDTO	true	"Create workspace"
 //	@Produce		json
 //	@Success		200	{object}	Workspace
 //	@Router			/workspace [post]
 //
 //	@id				CreateWorkspace
 func CreateWorkspace(ctx *gin.Context) {
-	var createWorkspaceReq dto.CreateWorkspaceRequest
+	var createWorkspaceReq dto.CreateWorkspaceDTO
 	err := ctx.BindJSON(&createWorkspaceReq)
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %s", err.Error()))

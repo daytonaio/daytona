@@ -1,4 +1,4 @@
-# CreateWorkspaceRequestProjectSource
+# CreateProjectConfigSourceDTO
 
 ## Properties
 
@@ -8,45 +8,45 @@ Name | Type | Description | Notes
 
 ## Methods
 
-### NewCreateWorkspaceRequestProjectSource
+### NewCreateProjectConfigSourceDTO
 
-`func NewCreateWorkspaceRequestProjectSource() *CreateWorkspaceRequestProjectSource`
+`func NewCreateProjectConfigSourceDTO() *CreateProjectConfigSourceDTO`
 
-NewCreateWorkspaceRequestProjectSource instantiates a new CreateWorkspaceRequestProjectSource object
+NewCreateProjectConfigSourceDTO instantiates a new CreateProjectConfigSourceDTO object
 This constructor will assign default values to properties that have it defined,
 and makes sure properties required by API are set, but the set of arguments
 will change when the set of required properties is changed
 
-### NewCreateWorkspaceRequestProjectSourceWithDefaults
+### NewCreateProjectConfigSourceDTOWithDefaults
 
-`func NewCreateWorkspaceRequestProjectSourceWithDefaults() *CreateWorkspaceRequestProjectSource`
+`func NewCreateProjectConfigSourceDTOWithDefaults() *CreateProjectConfigSourceDTO`
 
-NewCreateWorkspaceRequestProjectSourceWithDefaults instantiates a new CreateWorkspaceRequestProjectSource object
+NewCreateProjectConfigSourceDTOWithDefaults instantiates a new CreateProjectConfigSourceDTO object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
 ### GetRepository
 
-`func (o *CreateWorkspaceRequestProjectSource) GetRepository() GitRepository`
+`func (o *CreateProjectConfigSourceDTO) GetRepository() GitRepository`
 
 GetRepository returns the Repository field if non-nil, zero value otherwise.
 
 ### GetRepositoryOk
 
-`func (o *CreateWorkspaceRequestProjectSource) GetRepositoryOk() (*GitRepository, bool)`
+`func (o *CreateProjectConfigSourceDTO) GetRepositoryOk() (*GitRepository, bool)`
 
 GetRepositoryOk returns a tuple with the Repository field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetRepository
 
-`func (o *CreateWorkspaceRequestProjectSource) SetRepository(v GitRepository)`
+`func (o *CreateProjectConfigSourceDTO) SetRepository(v GitRepository)`
 
 SetRepository sets Repository field to given value.
 
 ### HasRepository
 
-`func (o *CreateWorkspaceRequestProjectSource) HasRepository() bool`
+`func (o *CreateProjectConfigSourceDTO) HasRepository() bool`
 
 HasRepository returns a boolean if a field has been set.
 

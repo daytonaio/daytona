@@ -6,11 +6,24 @@ package util
 import (
 	"fmt"
 	"net/url"
+	"os"
 	"regexp"
 	"strings"
 )
 
-func GetValidatedWorkspaceName(input string) (string, error) {
+func WorkspaceMode() bool {
+	_, devEnv := os.LookupEnv("DAYTONA_DEV")
+	if devEnv {
+		return false
+	}
+	val, wsMode := os.LookupEnv("DAYTONA_WS_ID")
+	if wsMode && val != "" {
+		return true
+	}
+	return false
+}
+
+func GetValidatedName(input string) (string, error) {
 	// input = strings.ToLower(input)
 
 	input = strings.ReplaceAll(input, " ", "-")
@@ -62,4 +75,10 @@ func GetRepositorySlugFromUrl(url string, specifyGitProviders bool) string {
 	}
 
 	return parts[len(parts)-2] + "/" + parts[len(parts)-1]
+}
+
+func CleanUpRepositoryUrl(url string) string {
+	url = strings.ToLower(url)
+	url = strings.TrimSuffix(url, "/")
+	return strings.TrimSuffix(url, ".git")
 }

@@ -13,6 +13,7 @@ var (
 	ErrWorkspaceNotFound      = errors.New("workspace not found")
 	ErrProjectNotFound        = errors.New("project not found")
 	ErrInvalidProjectName     = errors.New("project name is not valid. Only [a-zA-Z0-9-_.] are allowed")
+	ErrInvalidProjectConfig   = errors.New("project config is invalid")
 )
 
 func IsWorkspaceAlreadyExists(err error) bool {

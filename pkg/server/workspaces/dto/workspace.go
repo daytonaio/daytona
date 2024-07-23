@@ -4,8 +4,9 @@
 package dto
 
 import (
-	"github.com/daytonaio/daytona/pkg/gitprovider"
+	projectconfig_dto "github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
 	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 )
 
 type WorkspaceDTO struct {
@@ -14,26 +15,24 @@ type WorkspaceDTO struct {
 } //	@name	WorkspaceDTO
 
 type ProjectDTO struct {
-	workspace.Project
-	Info *workspace.ProjectInfo
+	project.Project
+	Info *project.ProjectInfo
 } //	@name	ProjectDTO
 
-type CreateWorkspaceRequestProjectSource struct {
-	Repository *gitprovider.GitRepository `json:"repository"`
-} // @name CreateWorkspaceRequestProjectSource
+type CreateProjectDTO struct {
+	NewConfig      *projectconfig_dto.CreateProjectConfigDTO
+	ExistingConfig *ExistingConfigDTO
+} //	@name	CreateProjectDTO
 
-type CreateWorkspaceRequestProject struct {
-	Name    string                              `json:"name" validate:"required,gt=0"`
-	Image   *string                             `json:"image,omitempty"`
-	User    *string                             `json:"user,omitempty"`
-	Build   *workspace.ProjectBuild             `json:"build,omitempty"`
-	Source  CreateWorkspaceRequestProjectSource `json:"source"`
-	EnvVars map[string]string                   `json:"envVars"`
-} // @name CreateWorkspaceRequestProject
+type ExistingConfigDTO struct {
+	ConfigName  string `json:"configName"`
+	ProjectName string `json:"projectName"`
+	Branch      string `json:"branch"`
+} //	@name	ExistingConfigDTO
 
-type CreateWorkspaceRequest struct {
-	Id       string                          `json:"id"`
-	Name     string                          `json:"name"`
-	Target   string                          `json:"target"`
-	Projects []CreateWorkspaceRequestProject `json:"projects" validate:"required,gt=0,dive"`
-} //	@name	CreateWorkspaceRequest
+type CreateWorkspaceDTO struct {
+	Id       string             `json:"id"`
+	Name     string             `json:"name"`
+	Target   string             `json:"target"`
+	Projects []CreateProjectDTO `json:"projects" validate:"required,gt=0,dive"`
+} //	@name	CreateWorkspaceDTO

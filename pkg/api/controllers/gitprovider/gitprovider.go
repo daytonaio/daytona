@@ -73,6 +73,37 @@ func GetGitProviderForUrl(ctx *gin.Context) {
 	ctx.JSON(200, gitProvider)
 }
 
+// GetGitProviderIdForUrl 			godoc
+//
+//	@Tags			gitProvider
+//	@Summary		Get Git provider ID
+//	@Description	Get Git provider ID
+//	@Produce		plain
+//	@Param			url	path		string	true	"Url"
+//	@Success		200	{string}	providerId
+//	@Router			/gitprovider/id-for-url/{url} [get]
+//
+//	@id				GetGitProviderIdForUrl
+func GetGitProviderIdForUrl(ctx *gin.Context) {
+	urlParam := ctx.Param("url")
+
+	decodedUrl, err := url.QueryUnescape(urlParam)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode query param: %s", err.Error()))
+		return
+	}
+
+	server := server.GetInstance(nil)
+
+	_, providerId, err := server.GitProviderService.GetGitProviderForUrl(decodedUrl)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %s", err.Error()))
+		return
+	}
+
+	ctx.String(200, providerId)
+}
+
 // SetGitProvider 			godoc
 //
 //	@Tags			gitProvider

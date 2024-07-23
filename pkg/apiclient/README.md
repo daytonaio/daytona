@@ -86,6 +86,7 @@ Class | Method | HTTP request | Description
 *ContainerRegistryAPI* | [**SetContainerRegistry**](docs/ContainerRegistryAPI.md#setcontainerregistry) | **Put** /container-registry/{server} | Set container registry credentials
 *GitProviderAPI* | [**GetGitContext**](docs/GitProviderAPI.md#getgitcontext) | **Get** /gitprovider/context/{gitUrl} | Get Git context
 *GitProviderAPI* | [**GetGitProviderForUrl**](docs/GitProviderAPI.md#getgitproviderforurl) | **Get** /gitprovider/for-url/{url} | Get Git provider
+*GitProviderAPI* | [**GetGitProviderIdForUrl**](docs/GitProviderAPI.md#getgitprovideridforurl) | **Get** /gitprovider/id-for-url/{url} | Get Git provider ID
 *GitProviderAPI* | [**GetGitUser**](docs/GitProviderAPI.md#getgituser) | **Get** /gitprovider/{gitProviderId}/user | Get Git context
 *GitProviderAPI* | [**GetNamespaces**](docs/GitProviderAPI.md#getnamespaces) | **Get** /gitprovider/{gitProviderId}/namespaces | Get Git namespaces
 *GitProviderAPI* | [**GetRepoBranches**](docs/GitProviderAPI.md#getrepobranches) | **Get** /gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/branches | Get Git repository branches
@@ -98,6 +99,11 @@ Class | Method | HTTP request | Description
 *ProfileAPI* | [**DeleteProfileData**](docs/ProfileAPI.md#deleteprofiledata) | **Delete** /profile | Delete profile data
 *ProfileAPI* | [**GetProfileData**](docs/ProfileAPI.md#getprofiledata) | **Get** /profile | Get profile data
 *ProfileAPI* | [**SetProfileData**](docs/ProfileAPI.md#setprofiledata) | **Put** /profile | Set profile data
+*ProjectConfigAPI* | [**DeleteProjectConfig**](docs/ProjectConfigAPI.md#deleteprojectconfig) | **Delete** /project-config/{configName} | Delete project config data
+*ProjectConfigAPI* | [**GetDefaultProjectConfig**](docs/ProjectConfigAPI.md#getdefaultprojectconfig) | **Get** /project-config/default/{gitUrl} | Get project configs by git url
+*ProjectConfigAPI* | [**GetProjectConfig**](docs/ProjectConfigAPI.md#getprojectconfig) | **Get** /project-config/{configName} | Get project config data
+*ProjectConfigAPI* | [**ListProjectConfigs**](docs/ProjectConfigAPI.md#listprojectconfigs) | **Get** /project-config | List project configs
+*ProjectConfigAPI* | [**SetProjectConfig**](docs/ProjectConfigAPI.md#setprojectconfig) | **Put** /project-config | Set project config data
 *ProviderAPI* | [**GetTargetManifest**](docs/ProviderAPI.md#gettargetmanifest) | **Get** /provider/{provider}/target-manifest | Get provider target manifest
 *ProviderAPI* | [**InstallProvider**](docs/ProviderAPI.md#installprovider) | **Post** /provider/install | Install a provider
 *ProviderAPI* | [**ListProviders**](docs/ProviderAPI.md#listproviders) | **Get** /provider | List providers
@@ -124,9 +130,12 @@ Class | Method | HTTP request | Description
  - [ApiKey](docs/ApiKey.md)
  - [ApikeyApiKeyType](docs/ApikeyApiKeyType.md)
  - [ContainerRegistry](docs/ContainerRegistry.md)
- - [CreateWorkspaceRequest](docs/CreateWorkspaceRequest.md)
- - [CreateWorkspaceRequestProject](docs/CreateWorkspaceRequestProject.md)
- - [CreateWorkspaceRequestProjectSource](docs/CreateWorkspaceRequestProjectSource.md)
+ - [CreateProjectConfigDTO](docs/CreateProjectConfigDTO.md)
+ - [CreateProjectConfigSourceDTO](docs/CreateProjectConfigSourceDTO.md)
+ - [CreateProjectDTO](docs/CreateProjectDTO.md)
+ - [CreateWorkspaceDTO](docs/CreateWorkspaceDTO.md)
+ - [DevcontainerConfig](docs/DevcontainerConfig.md)
+ - [ExistingConfigDTO](docs/ExistingConfigDTO.md)
  - [FRPSConfig](docs/FRPSConfig.md)
  - [FileStatus](docs/FileStatus.md)
  - [GitBranch](docs/GitBranch.md)
@@ -140,8 +149,8 @@ Class | Method | HTTP request | Description
  - [NetworkKey](docs/NetworkKey.md)
  - [ProfileData](docs/ProfileData.md)
  - [Project](docs/Project.md)
- - [ProjectBuild](docs/ProjectBuild.md)
- - [ProjectBuildDevcontainer](docs/ProjectBuildDevcontainer.md)
+ - [ProjectBuildConfig](docs/ProjectBuildConfig.md)
+ - [ProjectConfig](docs/ProjectConfig.md)
  - [ProjectInfo](docs/ProjectInfo.md)
  - [ProjectState](docs/ProjectState.md)
  - [Provider](docs/Provider.md)

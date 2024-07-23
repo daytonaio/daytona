@@ -37,7 +37,7 @@ import (
 )
 
 func main() {
-	workspace := *openapiclient.NewCreateWorkspaceRequest([]openapiclient.CreateWorkspaceRequestProject{*openapiclient.NewCreateWorkspaceRequestProject("Name_example")}) // CreateWorkspaceRequest | Create workspace
+	workspace := *openapiclient.NewCreateWorkspaceDTO([]openapiclient.CreateProjectDTO{*openapiclient.NewCreateProjectDTO()}) // CreateWorkspaceDTO | Create workspace
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -62,7 +62,7 @@ Other parameters are passed through a pointer to a apiCreateWorkspaceRequest str
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **workspace** | [**CreateWorkspaceRequest**](CreateWorkspaceRequest.md) | Create workspace | 
+ **workspace** | [**CreateWorkspaceDTO**](CreateWorkspaceDTO.md) | Create workspace | 
 
 ### Return type
 
