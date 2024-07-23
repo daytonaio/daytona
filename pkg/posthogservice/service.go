@@ -42,19 +42,19 @@ func (p *posthogService) Close() error {
 	return p.client.Close()
 }
 
-func (p *posthogService) TrackCliEvent(event telemetry.CliEvent, cliId string, properties map[string]interface{}) error {
+func (p *posthogService) TrackCliEvent(event telemetry.CliEvent, clientId string, properties map[string]interface{}) error {
 	p.AbstractTelemetryService.SetCommonProps(properties)
 	return p.client.Enqueue(posthog.Capture{
-		DistinctId: cliId,
+		DistinctId: clientId,
 		Event:      string(event),
 		Properties: properties,
 	})
 }
 
-func (p *posthogService) TrackServerEvent(event telemetry.ServerEvent, cliId string, properties map[string]interface{}) error {
+func (p *posthogService) TrackServerEvent(event telemetry.ServerEvent, clientId string, properties map[string]interface{}) error {
 	p.AbstractTelemetryService.SetCommonProps(properties)
 	return p.client.Enqueue(posthog.Capture{
-		DistinctId: cliId,
+		DistinctId: clientId,
 		Event:      string(event),
 		Properties: properties,
 	})

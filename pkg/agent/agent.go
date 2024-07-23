@@ -137,7 +137,7 @@ func (a *Agent) startProjectMode() error {
 func (a *Agent) getProject() (*workspace.Project, error) {
 	ctx := context.Background()
 
-	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey, a.Config.CliId, a.TelemetryEnabled)
+	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey, a.Config.ClientId, a.TelemetryEnabled)
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +159,7 @@ func (a *Agent) getProject() (*workspace.Project, error) {
 func (a *Agent) getGitProvider(repoUrl string) (*apiclient.GitProvider, error) {
 	ctx := context.Background()
 
-	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey, a.Config.CliId, a.TelemetryEnabled)
+	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey, a.Config.ClientId, a.TelemetryEnabled)
 	if err != nil {
 		return nil, err
 	}
@@ -178,7 +178,7 @@ func (a *Agent) getGitProvider(repoUrl string) (*apiclient.GitProvider, error) {
 }
 
 func (a *Agent) getGitUser(gitProviderId string) (*apiclient.GitUser, error) {
-	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey, a.Config.CliId, a.TelemetryEnabled)
+	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey, a.Config.ClientId, a.TelemetryEnabled)
 	if err != nil {
 		return nil, err
 	}
@@ -206,7 +206,7 @@ func (a *Agent) setDefaultConfig() error {
 	}
 
 	config := &config.Config{
-		Id:              a.Config.CliId,
+		Id:              a.Config.ClientId,
 		ActiveProfileId: "default",
 		DefaultIdeId:    "vscode",
 		Profiles: []config.Profile{
@@ -231,7 +231,7 @@ func (a *Agent) uptime() int32 {
 }
 
 func (a *Agent) updateProjectState() error {
-	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey, a.Config.CliId, a.TelemetryEnabled)
+	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey, a.Config.ClientId, a.TelemetryEnabled)
 	if err != nil {
 		return err
 	}

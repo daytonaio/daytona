@@ -12,24 +12,10 @@ import (
 	"github.com/google/uuid"
 )
 
-const ENABLED_HEADER = "X-Daytona-Telemetry-Enabled"
-const SESSION_ID_HEADER = "X-Daytona-Session-Id"
-const SOURCE_HEADER = "X-Daytona-Source"
-const CLI_ID_HEADER = "X-Daytona-CLI-Id"
-
-type TelemetryContextKey string
-
-var (
-	ENABLED_CONTEXT_KEY    TelemetryContextKey = "telemetry-enabled"
-	CLI_ID_CONTEXT_KEY     TelemetryContextKey = "cli-id"
-	SESSION_ID_CONTEXT_KEY TelemetryContextKey = "session-id"
-	SERVER_ID_CONTEXT_KEY  TelemetryContextKey = "server-id"
-)
-
 type TelemetryService interface {
 	io.Closer
-	TrackCliEvent(event CliEvent, cliId string, properties map[string]interface{}) error
-	TrackServerEvent(event ServerEvent, cliId string, properties map[string]interface{}) error
+	TrackCliEvent(event CliEvent, clientId string, properties map[string]interface{}) error
+	TrackServerEvent(event ServerEvent, clientId string, properties map[string]interface{}) error
 	SetCommonProps(properties map[string]interface{})
 }
 
@@ -42,11 +28,11 @@ func TelemetryEnabled(ctx context.Context) bool {
 	return enabled
 }
 
-func CliId(ctx context.Context) string {
-	id, ok := ctx.Value(CLI_ID_CONTEXT_KEY).(string)
+func ClientId(ctx context.Context) string {
+	id, ok := ctx.Value(CLIENT_ID_CONTEXT_KEY).(string)
 	if !ok {
-		// To identify requests that had no CLI ID set
-		return fmt.Sprintf("%s-invalid-cli-id", uuid.NewString()[0:16])
+		// To identify requests that had no client ID set
+		return fmt.Sprintf("%s-invalid-client-id", uuid.NewString()[0:16])
 	}
 
 	return id

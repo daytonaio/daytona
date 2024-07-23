@@ -81,7 +81,7 @@ var AgentCmd = &cobra.Command{
 			Hostname:         tailscaleHostname,
 			Server:           c.Server,
 			TelemetryEnabled: telemetryEnabled,
-			CliId:            c.CliId,
+			ClientId:         c.ClientId,
 		}
 
 		agent := agent.Agent{

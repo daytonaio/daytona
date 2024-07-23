@@ -224,10 +224,10 @@ func TelemetryEnabled() bool {
 	return c.TelemetryEnabled
 }
 
-func GetCliId() string {
-	cliId := os.Getenv("DAYTONA_CLI_ID")
-	if cliId != "" {
-		return cliId
+func GetClientId() string {
+	clientId := os.Getenv("DAYTONA_CLIENT_ID")
+	if clientId != "" {
+		return clientId
 	}
 
 	c, err := GetConfig()

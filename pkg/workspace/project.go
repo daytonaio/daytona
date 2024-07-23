@@ -89,7 +89,7 @@ const (
 type ProjectEnvVarParams struct {
 	ApiUrl    string
 	ServerUrl string
-	CliId     string
+	ClientId  string
 }
 
 func GetProjectEnvVars(project *Project, params ProjectEnvVarParams, telemetryEnabled bool) map[string]string {
@@ -101,7 +101,7 @@ func GetProjectEnvVars(project *Project, params ProjectEnvVarParams, telemetryEn
 		"DAYTONA_SERVER_VERSION":            internal.Version,
 		"DAYTONA_SERVER_URL":                params.ServerUrl,
 		"DAYTONA_SERVER_API_URL":            params.ApiUrl,
-		"DAYTONA_CLI_ID":                    params.CliId,
+		"DAYTONA_CLIENT_ID":                 params.ClientId,
 		// (HOME) will be replaced at runtime
 		"DAYTONA_AGENT_LOG_FILE_PATH": "(HOME)/.daytona-agent.log",
 	}

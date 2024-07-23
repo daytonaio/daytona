@@ -27,9 +27,9 @@ func TelemetryMiddleware(telemetryService telemetry.TelemetryService) gin.Handle
 			return
 		}
 
-		cliId := ctx.GetHeader(telemetry.CLI_ID_HEADER)
-		if cliId == "" {
-			cliId = uuid.NewString()
+		clientId := ctx.GetHeader(telemetry.CLIENT_ID_HEADER)
+		if clientId == "" {
+			clientId = uuid.NewString()
 		}
 
 		sessionId := ctx.GetHeader(telemetry.SESSION_ID_HEADER)
@@ -40,7 +40,7 @@ func TelemetryMiddleware(telemetryService telemetry.TelemetryService) gin.Handle
 		server := server.GetInstance(nil)
 
 		telemetryCtx := context.WithValue(ctx.Request.Context(), telemetry.ENABLED_CONTEXT_KEY, true)
-		telemetryCtx = context.WithValue(telemetryCtx, telemetry.CLI_ID_CONTEXT_KEY, cliId)
+		telemetryCtx = context.WithValue(telemetryCtx, telemetry.CLIENT_ID_CONTEXT_KEY, clientId)
 		telemetryCtx = context.WithValue(telemetryCtx, telemetry.SESSION_ID_CONTEXT_KEY, sessionId)
 		telemetryCtx = context.WithValue(telemetryCtx, telemetry.SERVER_ID_CONTEXT_KEY, server.Id)
 
@@ -53,7 +53,7 @@ func TelemetryMiddleware(telemetryService telemetry.TelemetryService) gin.Handle
 
 		query := ctx.Request.URL.RawQuery
 
-		err := telemetryService.TrackServerEvent(telemetry.ServerEventApiRequestStarted, cliId, map[string]interface{}{
+		err := telemetryService.TrackServerEvent(telemetry.ServerEventApiRequestStarted, clientId, map[string]interface{}{
 			"method":     reqMethod,
 			"URI":        reqUri,
 			"query":      query,
@@ -86,7 +86,7 @@ func TelemetryMiddleware(telemetryService telemetry.TelemetryService) gin.Handle
 			properties["error"] = ctx.Errors.String()
 		}
 
-		err = telemetryService.TrackServerEvent(telemetry.ServerEventApiResponseSent, cliId, properties)
+		err = telemetryService.TrackServerEvent(telemetry.ServerEventApiResponseSent, clientId, properties)
 		if err != nil {
 			log.Trace(err)
 		}

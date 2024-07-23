@@ -71,7 +71,7 @@ func (s *WorkspaceService) RemoveWorkspace(ctx context.Context, workspaceId stri
 		return err
 	}
 
-	cliId := telemetry.CliId(ctx)
+	clientId := telemetry.ClientId(ctx)
 
 	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, workspace, target)
 	event := telemetry.ServerEventWorkspaceDestroyed
@@ -79,7 +79,7 @@ func (s *WorkspaceService) RemoveWorkspace(ctx context.Context, workspaceId stri
 		telemetryProps["error"] = err.Error()
 		event = telemetry.ServerEventWorkspaceDestroyError
 	}
-	telemetryError := s.telemetryService.TrackServerEvent(event, cliId, telemetryProps)
+	telemetryError := s.telemetryService.TrackServerEvent(event, clientId, telemetryProps)
 	if telemetryError != nil {
 		log.Trace(telemetryError)
 	}
@@ -135,7 +135,7 @@ func (s *WorkspaceService) ForceRemoveWorkspace(ctx context.Context, workspaceId
 		return err
 	}
 
-	cliId := telemetry.CliId(ctx)
+	clientId := telemetry.ClientId(ctx)
 
 	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, workspace, target)
 	event := telemetry.ServerEventWorkspaceDestroyed
@@ -143,7 +143,7 @@ func (s *WorkspaceService) ForceRemoveWorkspace(ctx context.Context, workspaceId
 		telemetryProps["error"] = err.Error()
 		event = telemetry.ServerEventWorkspaceDestroyError
 	}
-	telemetryError := s.telemetryService.TrackServerEvent(event, cliId, telemetryProps)
+	telemetryError := s.telemetryService.TrackServerEvent(event, clientId, telemetryProps)
 	if telemetryError != nil {
 		log.Trace(telemetryError)
 	}

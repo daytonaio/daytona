@@ -68,11 +68,11 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 	if c.TelemetryEnabled {
 		clientConfig.AddDefaultHeader(telemetry.ENABLED_HEADER, "true")
 		clientConfig.AddDefaultHeader(telemetry.SESSION_ID_HEADER, internal.SESSION_ID)
-		clientConfig.AddDefaultHeader(telemetry.CLI_ID_HEADER, c.Id)
+		clientConfig.AddDefaultHeader(telemetry.CLIENT_ID_HEADER, c.Id)
 		if internal.WorkspaceMode() {
-			clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, "cli-project")
+			clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, string(telemetry.CLI_PROJECT_SOURCE))
 		} else {
-			clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, "cli")
+			clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, string(telemetry.CLI_SOURCE))
 		}
 	}
 
@@ -85,7 +85,7 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 	return apiClient, nil
 }
 
-func GetAgentApiClient(apiUrl, apiKey, cliId string, telemetryEnabled bool) (*apiclient.APIClient, error) {
+func GetAgentApiClient(apiUrl, apiKey, clientId string, telemetryEnabled bool) (*apiclient.APIClient, error) {
 	clientConfig := apiclient.NewConfiguration()
 	clientConfig.Servers = apiclient.ServerConfigurations{
 		{
@@ -99,8 +99,8 @@ func GetAgentApiClient(apiUrl, apiKey, cliId string, telemetryEnabled bool) (*ap
 	if telemetryEnabled {
 		clientConfig.AddDefaultHeader(telemetry.ENABLED_HEADER, "true")
 		clientConfig.AddDefaultHeader(telemetry.SESSION_ID_HEADER, internal.SESSION_ID)
-		clientConfig.AddDefaultHeader(telemetry.CLI_ID_HEADER, cliId)
-		clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, "agent")
+		clientConfig.AddDefaultHeader(telemetry.CLIENT_ID_HEADER, clientId)
+		clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, string(telemetry.AGENT_SOURCE))
 	}
 
 	apiClient = apiclient.NewAPIClient(clientConfig)

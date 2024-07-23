@@ -40,7 +40,7 @@ func (s *WorkspaceService) StopWorkspace(ctx context.Context, workspaceId string
 		return err
 	}
 
-	cliId := telemetry.CliId(ctx)
+	clientId := telemetry.ClientId(ctx)
 
 	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, workspace, target)
 	event := telemetry.ServerEventWorkspaceStopped
@@ -48,7 +48,7 @@ func (s *WorkspaceService) StopWorkspace(ctx context.Context, workspaceId string
 		telemetryProps["error"] = err.Error()
 		event = telemetry.ServerEventWorkspaceStopError
 	}
-	telemetryError := s.telemetryService.TrackServerEvent(event, cliId, telemetryProps)
+	telemetryError := s.telemetryService.TrackServerEvent(event, clientId, telemetryProps)
 	if telemetryError != nil {
 		log.Trace(telemetryError)
 	}

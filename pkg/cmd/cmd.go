@@ -90,7 +90,7 @@ func SetupRootCommand(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVarP(&output.FormatFlag, "output", "o", output.FormatFlag, `Output format. Must be one of (yaml, json)`)
 
 	var telemetryService telemetry.TelemetryService
-	cliId := config.GetCliId()
+	clientId := config.GetClientId()
 	telemetryEnabled := config.TelemetryEnabled()
 
 	if telemetryEnabled {
@@ -104,7 +104,7 @@ func SetupRootCommand(cmd *cobra.Command) {
 
 	cmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
 		if telemetryService != nil {
-			err := telemetryService.TrackCliEvent(telemetry.CliEventCmdStart, cliId, getCmdTelemetryData(cmd))
+			err := telemetryService.TrackCliEvent(telemetry.CliEventCmdStart, clientId, getCmdTelemetryData(cmd))
 			if err != nil {
 				log.Error(err)
 			}
@@ -126,7 +126,7 @@ func SetupRootCommand(cmd *cobra.Command) {
 			props := getCmdTelemetryData(cmd)
 			props["exec time (µs)"] = execTime.Microseconds()
 
-			err := telemetryService.TrackCliEvent(telemetry.CliEventCmdEnd, cliId, props)
+			err := telemetryService.TrackCliEvent(telemetry.CliEventCmdEnd, clientId, props)
 			if err != nil {
 				log.Error(err)
 			}
@@ -173,9 +173,9 @@ func getCmdTelemetryData(cmd *cobra.Command) map[string]interface{} {
 		path = strings.TrimPrefix(path, "daytona ")
 	}
 
-	source := "cli"
+	source := telemetry.CLI_SOURCE
 	if internal.WorkspaceMode() {
-		source = "cli-project"
+		source = telemetry.CLI_PROJECT_SOURCE
 	}
 
 	calledAs := cmd.CalledAs()

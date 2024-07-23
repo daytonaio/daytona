@@ -123,7 +123,7 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 		return w, err
 	}
 
-	cliId := telemetry.CliId(ctx)
+	clientId := telemetry.ClientId(ctx)
 
 	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, w, target)
 	event := telemetry.ServerEventWorkspaceCreated
@@ -131,7 +131,7 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 		telemetryProps["error"] = err.Error()
 		event = telemetry.ServerEventWorkspaceCreateError
 	}
-	telemetryError := s.telemetryService.TrackServerEvent(event, cliId, telemetryProps)
+	telemetryError := s.telemetryService.TrackServerEvent(event, clientId, telemetryProps)
 	if telemetryError != nil {
 		log.Trace(err)
 	}
@@ -232,7 +232,7 @@ func (s *WorkspaceService) createWorkspace(ctx context.Context, ws *workspace.Wo
 	ws.EnvVars = workspace.GetWorkspaceEnvVars(ws, workspace.WorkspaceEnvVarParams{
 		ApiUrl:    s.serverApiUrl,
 		ServerUrl: s.serverUrl,
-		CliId:     telemetry.CliId(ctx),
+		ClientId:  telemetry.ClientId(ctx),
 	}, telemetry.TelemetryEnabled(ctx))
 
 	for i, project := range ws.Projects {
@@ -245,7 +245,7 @@ func (s *WorkspaceService) createWorkspace(ctx context.Context, ws *workspace.Wo
 		projectWithEnv.EnvVars = workspace.GetProjectEnvVars(project, workspace.ProjectEnvVarParams{
 			ApiUrl:    s.serverApiUrl,
 			ServerUrl: s.serverUrl,
-			CliId:     telemetry.CliId(ctx),
+			ClientId:  telemetry.ClientId(ctx),
 		}, telemetry.TelemetryEnabled(ctx))
 
 		for k, v := range project.EnvVars {
