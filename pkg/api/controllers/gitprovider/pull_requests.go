@@ -24,6 +24,8 @@ import (
 //	@Param			gitProviderId	path	string	true	"Git provider"
 //	@Param			namespaceId		path	string	true	"Namespace"
 //	@Param			repositoryId	path	string	true	"Repository"
+//	@Param			page			query	int		false	"Page number"
+//	@Param			per_page		query	int		false	"Number of items per page"
 //	@Produce		json
 //	@Success		200	{array}	GitPullRequest
 //	@Router			/gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/pull-requests [get]

@@ -322,7 +322,7 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.GitProviderAPI.GetNamespaces(context.Background(), gitProviderId).Execute()
+	resp, r, err := apiClient.GitProviderAPI.GetNamespaces(context.Background(), gitProviderId).Page(page).PerPage(perPage).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `GitProviderAPI.GetNamespaces``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -347,8 +347,9 @@ Other parameters are passed through a pointer to a apiGetNamespacesRequest struc
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-**page** | **int32** | Page number | 
-**perPage** | **int32** | Number of items per page | 
+
+ **page** | **int32** | Page number | 
+ **perPage** | **int32** | Number of items per page | 
 
 ### Return type
 
@@ -397,7 +398,7 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.GitProviderAPI.GetRepoBranches(context.Background(), gitProviderId, namespaceId, repositoryId).Execute()
+	resp, r, err := apiClient.GitProviderAPI.GetRepoBranches(context.Background(), gitProviderId, namespaceId, repositoryId).Page(page).PerPage(perPage).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `GitProviderAPI.GetRepoBranches``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -424,10 +425,11 @@ Other parameters are passed through a pointer to a apiGetRepoBranchesRequest str
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-**page** | **int32** | Page number | 
-**perPage** | **int32** | Number of items per page | 
 
 
+
+ **page** | **int32** | Page number | 
+ **perPage** | **int32** | Number of items per page | 
 
 ### Return type
 
@@ -476,7 +478,7 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.GitProviderAPI.GetRepoPRs(context.Background(), gitProviderId, namespaceId, repositoryId).Execute()
+	resp, r, err := apiClient.GitProviderAPI.GetRepoPRs(context.Background(), gitProviderId, namespaceId, repositoryId).Page(page).PerPage(perPage).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `GitProviderAPI.GetRepoPRs``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -503,10 +505,11 @@ Other parameters are passed through a pointer to a apiGetRepoPRsRequest struct v
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-**page** | **int32** | Page number | 
-**perPage** | **int32** | Number of items per page | 
 
 
+
+ **page** | **int32** | Page number | 
+ **perPage** | **int32** | Number of items per page | 
 
 ### Return type
 
@@ -580,9 +583,10 @@ Other parameters are passed through a pointer to a apiGetRepositoriesRequest str
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-**page** | **int32** | Page number | 
-**perPage** | **int32** | Number of items per page | 
 
+
+ **page** | **int32** | Page number | 
+ **perPage** | **int32** | Number of items per page | 
 
 ### Return type
 

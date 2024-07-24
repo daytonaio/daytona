@@ -1158,6 +1158,14 @@ paths:
         name: repositoryId
         required: true
         type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Number of items per page
+        in: query
+        name: per_page
+        type: integer
       produces:
       - application/json
       responses:
@@ -1190,6 +1198,14 @@ paths:
         name: repositoryId
         required: true
         type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Number of items per page
+        in: query
+        name: per_page
+        type: integer
       produces:
       - application/json
       responses:
@@ -1220,13 +1236,11 @@ paths:
       - description: Page number
         in: query
         name: page
-        schema:
-          type: integer
+        type: integer
       - description: Number of items per page
         in: query
         name: per_page
-        schema:
-          type: integer
+        type: integer
       produces:
       - application/json
       responses:
@@ -1249,6 +1263,14 @@ paths:
         name: gitProviderId
         required: true
         type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Number of items per page
+        in: query
+        name: per_page
+        type: integer
       produces:
       - application/json
       responses:
