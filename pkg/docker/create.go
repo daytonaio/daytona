@@ -130,43 +130,7 @@ func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions) error 
 		}
 	}()
 
-	currentUser, err := user.Current()
-	if err != nil {
-		return err
-	}
-
-	containerUser := "daytona"
-	newUid := currentUser.Uid
-	newGid := currentUser.Gid
-
-	if opts.SshClient != nil {
-		newUid, newGid, err = opts.SshClient.GetUserUidGid()
-		if err != nil {
-			return err
-		}
-	}
-
-	if newUid == "0" && newGid == "0" {
-		containerUser = "root"
-	}
-
-	/*
-		Patch UID and GID of the user cloning the repository
-	*/
-	if containerUser != "root" {
-		_, err = d.ExecSync(c.ID, types.ExecConfig{
-			User: "root",
-			Cmd:  []string{"sh", "-c", UPDATE_UID_GID_SCRIPT},
-			Env: []string{
-				fmt.Sprintf("REMOTE_USER=%s", containerUser),
-				fmt.Sprintf("NEW_UID=%s", newUid),
-				fmt.Sprintf("NEW_GID=%s", newGid),
-			},
-		}, opts.LogWriter)
-		if err != nil {
-			return err
-		}
-	}
+	containerUser, err := d.updateContainerUserUidGid(c.ID, opts)
 
 	res, err := d.ExecSync(c.ID, types.ExecConfig{
 		User: containerUser,
@@ -180,6 +144,48 @@ func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions) error 
 	}
 
 	return nil
+}
+
+func (d *DockerClient) updateContainerUserUidGid(containerId string, opts *CreateProjectOptions) (string, error) {
+	currentUser, err := user.Current()
+	if err != nil {
+		return "", err
+	}
+
+	containerUser := "daytona"
+	newUid := currentUser.Uid
+	newGid := currentUser.Gid
+
+	if opts.SshClient != nil {
+		newUid, newGid, err = opts.SshClient.GetUserUidGid()
+		if err != nil {
+			return "", err
+		}
+	}
+
+	if newUid == "0" && newGid == "0" {
+		containerUser = "root"
+	}
+
+	/*
+		Patch UID and GID of the user cloning the repository
+	*/
+	if containerUser != "root" {
+		_, err = d.ExecSync(containerId, types.ExecConfig{
+			User: "root",
+			Cmd:  []string{"sh", "-c", UPDATE_UID_GID_SCRIPT},
+			Env: []string{
+				fmt.Sprintf("REMOTE_USER=%s", containerUser),
+				fmt.Sprintf("NEW_UID=%s", newUid),
+				fmt.Sprintf("NEW_GID=%s", newGid),
+			},
+		}, opts.LogWriter)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return containerUser, nil
 }
 
 const UPDATE_UID_GID_SCRIPT = `eval $(sed -n "s/${REMOTE_USER}:[^:]*:\([^:]*\):\([^:]*\):[^:]*:\([^:]*\).*/OLD_UID=\1;OLD_GID=\2;HOME_FOLDER=\3/p" /etc/passwd); \
