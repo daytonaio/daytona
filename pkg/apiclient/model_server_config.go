@@ -32,6 +32,7 @@ type ServerConfig struct {
 	LocalBuilderRegistryPort *int32      `json:"localBuilderRegistryPort,omitempty"`
 	LogFilePath              *string     `json:"logFilePath,omitempty"`
 	ProvidersDir             *string     `json:"providersDir,omitempty"`
+	RegistryImage            *string     `json:"registryImage,omitempty"`
 	RegistryUrl              *string     `json:"registryUrl,omitempty"`
 	ServerDownloadUrl        *string     `json:"serverDownloadUrl,omitempty"`
 }
@@ -469,6 +470,38 @@ func (o *ServerConfig) SetProvidersDir(v string) {
 	o.ProvidersDir = &v
 }
 
+// GetRegistryImage returns the RegistryImage field value if set, zero value otherwise.
+func (o *ServerConfig) GetRegistryImage() string {
+	if o == nil || IsNil(o.RegistryImage) {
+		var ret string
+		return ret
+	}
+	return *o.RegistryImage
+}
+
+// GetRegistryImageOk returns a tuple with the RegistryImage field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ServerConfig) GetRegistryImageOk() (*string, bool) {
+	if o == nil || IsNil(o.RegistryImage) {
+		return nil, false
+	}
+	return o.RegistryImage, true
+}
+
+// HasRegistryImage returns a boolean if a field has been set.
+func (o *ServerConfig) HasRegistryImage() bool {
+	if o != nil && !IsNil(o.RegistryImage) {
+		return true
+	}
+
+	return false
+}
+
+// SetRegistryImage gets a reference to the given string and assigns it to the RegistryImage field.
+func (o *ServerConfig) SetRegistryImage(v string) {
+	o.RegistryImage = &v
+}
+
 // GetRegistryUrl returns the RegistryUrl field value if set, zero value otherwise.
 func (o *ServerConfig) GetRegistryUrl() string {
 	if o == nil || IsNil(o.RegistryUrl) {
@@ -581,6 +614,9 @@ func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.ProvidersDir) {
 		toSerialize["providersDir"] = o.ProvidersDir
+	}
+	if !IsNil(o.RegistryImage) {
+		toSerialize["registryImage"] = o.RegistryImage
 	}
 	if !IsNil(o.RegistryUrl) {
 		toSerialize["registryUrl"] = o.RegistryUrl

@@ -1554,6 +1554,9 @@ const docTemplate = `{
                 "providersDir": {
                     "type": "string"
                 },
+                "registryImage": {
+                    "type": "string"
+                },
                 "registryUrl": {
                     "type": "string"
                 },

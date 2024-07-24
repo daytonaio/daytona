@@ -17,6 +17,7 @@ Name | Type | Description | Notes
 **LocalBuilderRegistryPort** | Pointer to **int32** |  | [optional] 
 **LogFilePath** | Pointer to **string** |  | [optional] 
 **ProvidersDir** | Pointer to **string** |  | [optional] 
+**RegistryImage** | Pointer to **string** |  | [optional] 
 **RegistryUrl** | Pointer to **string** |  | [optional] 
 **ServerDownloadUrl** | Pointer to **string** |  | [optional] 
 
@@ -363,6 +364,31 @@ SetProvidersDir sets ProvidersDir field to given value.
 `func (o *ServerConfig) HasProvidersDir() bool`
 
 HasProvidersDir returns a boolean if a field has been set.
+
+### GetRegistryImage
+
+`func (o *ServerConfig) GetRegistryImage() string`
+
+GetRegistryImage returns the RegistryImage field if non-nil, zero value otherwise.
+
+### GetRegistryImageOk
+
+`func (o *ServerConfig) GetRegistryImageOk() (*string, bool)`
+
+GetRegistryImageOk returns a tuple with the RegistryImage field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetRegistryImage
+
+`func (o *ServerConfig) SetRegistryImage(v string)`
+
+SetRegistryImage sets RegistryImage field to given value.
+
+### HasRegistryImage
+
+`func (o *ServerConfig) HasRegistryImage() bool`
+
+HasRegistryImage returns a boolean if a field has been set.
 
 ### GetRegistryUrl
 
