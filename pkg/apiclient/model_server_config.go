@@ -34,6 +34,8 @@ type ServerConfig struct {
 	ProvidersDir             *string     `json:"providersDir,omitempty"`
 	RegistryUrl              *string     `json:"registryUrl,omitempty"`
 	ServerDownloadUrl        *string     `json:"serverDownloadUrl,omitempty"`
+	FrpsPort                 *int32      `json:"frpsPort,omitempty"`
+	FrpsProtocol             *string     `json:"frpsProtocol,omitempty"`
 }
 
 // NewServerConfig instantiates a new ServerConfig object
@@ -541,6 +543,66 @@ func (o ServerConfig) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
+// GetFrpsPort returns the FrpsPort field value if set, zero value otherwise.
+func (o *ServerConfig) GetFrpsPort() int32 {
+	if o == nil || IsNil(o.FrpsPort) {
+		var ret int32
+		return ret
+	}
+	return *o.FrpsPort
+}
+
+// GetFrpsPortOk returns a tuple with the FrpsPort field value if set, nil otherwise
+func (o *ServerConfig) GetFrpsPortOk() (*int32, bool) {
+	if o == nil || IsNil(o.FrpsPort) {
+		return nil, false
+	}
+	return o.FrpsPort, true
+}
+
+// HasFrpsPort returns a boolean if a field has been set.
+func (o *ServerConfig) HasFrpsPort() bool {
+	if o != nil && !IsNil(o.FrpsPort) {
+		return true
+	}
+	return false
+}
+
+// SetFrpsPort gets a reference to the given int32 and assigns it to the FrpsPort field.
+func (o *ServerConfig) SetFrpsPort(v int32) {
+	o.FrpsPort = &v
+}
+
+// GetFrpsProtocol returns the FrpsProtocol field value if set, zero value otherwise.
+func (o *ServerConfig) GetFrpsProtocol() string {
+	if o == nil || IsNil(o.FrpsProtocol) {
+		var ret string
+		return ret
+	}
+	return *o.FrpsProtocol
+}
+
+// GetFrpsProtocolOk returns a tuple with the FrpsProtocol field value if set, nil otherwise
+func (o *ServerConfig) GetFrpsProtocolOk() (*string, bool) {
+	if o == nil || IsNil(o.FrpsProtocol) {
+		return nil, false
+	}
+	return o.FrpsProtocol, true
+}
+
+// HasFrpsProtocol returns a boolean if a field has been set.
+func (o *ServerConfig) HasFrpsProtocol() bool {
+	if o != nil && !IsNil(o.FrpsProtocol) {
+		return true
+	}
+	return false
+}
+
+// SetFrpsProtocol gets a reference to the given string and assigns it to the FrpsProtocol field.
+func (o *ServerConfig) SetFrpsProtocol(v string) {
+	o.FrpsProtocol = &v
+}
+
 func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.ApiPort) {
@@ -587,6 +649,12 @@ func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.ServerDownloadUrl) {
 		toSerialize["serverDownloadUrl"] = o.ServerDownloadUrl
+	}
+	if (!IsNil(o.FrpsPort)) {
+		toSerialize["frpsPort"] = o.FrpsPort
+	}
+	if (!IsNil(o.FrpsProtocol)) {
+		toSerialize["frpsProtocol"] = o.FrpsProtocol
 	}
 	return toSerialize, nil
 }
