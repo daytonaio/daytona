@@ -15,20 +15,27 @@ import (
 )
 
 type LocalContainerRegistryConfig struct {
-	DataPath string
-	Port     uint32
+	DataPath      string
+	Port          uint32
+	RegistryImage string
 }
 
 func NewLocalContainerRegistry(config *LocalContainerRegistryConfig) *LocalContainerRegistry {
+	registryImage := config.RegistryImage
+	if registryImage == "" {
+		registryImage = "registry:2.8.3"
+	}
 	return &LocalContainerRegistry{
-		dataPath: config.DataPath,
-		port:     config.Port,
+		dataPath:      config.DataPath,
+		port:          config.Port,
+		registryImage: registryImage,
 	}
 }
 
 type LocalContainerRegistry struct {
-	dataPath string
-	port     uint32
+	dataPath      string
+	port          uint32
+	registryImage string
 }
 
 func (s *LocalContainerRegistry) Start() error {
@@ -60,14 +67,14 @@ func (s *LocalContainerRegistry) Start() error {
 	}
 
 	// Pull the image
-	err = dockerClient.PullImage("registry:2.8.3", nil, os.Stdout)
+	err = dockerClient.PullImage(s.registryImage, nil, os.Stdout)
 	if err != nil {
 		return err
 	}
 
 	//	todo: enable TLS
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
-		Image: "registry:2.8.3",
+		Image: s.registryImage,
 		Env: []string{
 			fmt.Sprintf("REGISTRY_HTTP_ADDR=0.0.0.0:%d", s.port),
 		},

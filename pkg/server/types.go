@@ -32,6 +32,7 @@ type NetworkKey struct {
 type Config struct {
 	ProvidersDir             string      `json:"providersDir"`
 	RegistryUrl              string      `json:"registryUrl"`
+	RegistryImage            string      `json:"registryImage"`
 	Id                       string      `json:"id"`
 	ServerDownloadUrl        string      `json:"serverDownloadUrl"`
 	Frps                     *FRPSConfig `json:"frps,omitempty"`
