@@ -64,8 +64,8 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 	}
 
 	var namespaceList []apiclient.GitNamespace
-	page := 1
-	perPage := 100
+	page := int32(1)
+	perPage := int32(100)
 
 	for {
 		var namespaces []apiclient.GitNamespace
@@ -80,7 +80,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 		namespaceList = append(namespaceList, namespaces...)
 
 		// Break for git providers with unsupported pagination OR on reaching exhausted items.
-		if isGitProviderWithUnsupportedPagination(providerId) || len(namespaces) < perPage {
+		if isGitProviderWithUnsupportedPagination(providerId) || int32(len(namespaces)) < perPage {
 			break
 		}
 
@@ -113,7 +113,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 		providerRepos = append(providerRepos, repos...)
 
 		// Break for git providers with unsupported pagination OR on reaching exhausted items.
-		if isGitProviderWithUnsupportedPagination(providerId) || len(repos) < perPage {
+		if isGitProviderWithUnsupportedPagination(providerId) || int32(len(repos)) < perPage {
 			break
 		}
 
@@ -143,7 +143,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 		branchList = append(branchList, branches...)
 
 		// Break for git providers with unsupported pagination OR on reaching exhausted items.
-		if isGitProviderWithUnsupportedPagination(providerId) || len(branches) < perPage {
+		if isGitProviderWithUnsupportedPagination(providerId) || int32(len(branches)) < perPage {
 			break
 		}
 
@@ -178,7 +178,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 		prList = append(prList, pullRequests...)
 
 		// Break for git providers with unsupported pagination OR on reaching exhausted items.
-		if isGitProviderWithUnsupportedPagination(providerId) || len(pullRequests) < perPage {
+		if isGitProviderWithUnsupportedPagination(providerId) || int32(len(pullRequests)) < perPage {
 			break
 		}
 
