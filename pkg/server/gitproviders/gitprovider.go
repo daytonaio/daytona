@@ -64,7 +64,7 @@ func (s *GitProviderService) GetConfigForUrl(repoUrl string) (*gitprovider.GitPr
 	}
 
 	for _, p := range gitProviders {
-		if p.Id == "aws-codecommit" && strings.Contains(url, "git-codecommit") {
+		if p.Id == "aws-codecommit" && strings.Contains(repoUrl, "git-codecommit") {
 			return p, nil
 		}
 
