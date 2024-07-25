@@ -118,6 +118,7 @@ func (g *BitbucketGitProvider) GetRepositories(namespace string, options ListOpt
 		}
 
 		// If fewer than 10 items are returned, it indicates the last page
+		// refer to https://github.com/ktrysmt/go-bitbucket/blob/master/client.go#L23
 		if len(repoList.Items) < 10 {
 			break
 		}
