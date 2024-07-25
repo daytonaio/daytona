@@ -59,7 +59,7 @@ func ProfileCreationView(c *config.Config, profileAddView *ProfileAddView, editi
 
 					_, err := url.ParseRequestURI(str)
 					if err != nil {
-						return errors.New("invalid url, must be of http/https/ssh format")
+						return errors.New("invalid url, must be of http/https format")
 					}
 
 					return nil
