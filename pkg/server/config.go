@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/google/uuid"
 )
 
 func GetConfig() (*Config, error) {
@@ -42,6 +44,14 @@ func GetConfig() (*Config, error) {
 	}
 
 	err = json.Unmarshal(configContent, &c)
+	if err != nil {
+		return nil, err
+	}
+
+	if c.Id == "" {
+		c.Id = uuid.NewString()
+	}
+	err = Save(c)
 	if err != nil {
 		return nil, err
 	}

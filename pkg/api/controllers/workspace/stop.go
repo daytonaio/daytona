@@ -26,7 +26,7 @@ func StopWorkspace(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err := server.WorkspaceService.StopWorkspace(workspaceId)
+	err := server.WorkspaceService.StopWorkspace(ctx.Request.Context(), workspaceId)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to stop workspace %s: %s", workspaceId, err.Error()))
 		return
@@ -52,7 +52,7 @@ func StopProject(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err := server.WorkspaceService.StopProject(workspaceId, projectId)
+	err := server.WorkspaceService.StopProject(ctx.Request.Context(), workspaceId, projectId)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to stop project %s: %s", projectId, err.Error()))
 		return

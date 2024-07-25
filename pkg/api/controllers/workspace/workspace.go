@@ -29,7 +29,7 @@ func GetWorkspace(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	w, err := server.WorkspaceService.GetWorkspace(workspaceId)
+	w, err := server.WorkspaceService.GetWorkspace(ctx.Request.Context(), workspaceId)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get workspace: %s", err.Error()))
 		return
@@ -101,9 +101,9 @@ func RemoveWorkspace(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
 	if force {
-		err = server.WorkspaceService.ForceRemoveWorkspace(workspaceId)
+		err = server.WorkspaceService.ForceRemoveWorkspace(ctx.Request.Context(), workspaceId)
 	} else {
-		err = server.WorkspaceService.RemoveWorkspace(workspaceId)
+		err = server.WorkspaceService.RemoveWorkspace(ctx.Request.Context(), workspaceId)
 	}
 
 	if err != nil {

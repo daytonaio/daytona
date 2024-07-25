@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/google/uuid"
 )
 
 type ServerApi struct {
@@ -23,9 +25,11 @@ type Profile struct {
 }
 
 type Config struct {
-	ActiveProfileId string    `json:"activeProfile"`
-	DefaultIdeId    string    `json:"defaultIde"`
-	Profiles        []Profile `json:"profiles"`
+	Id               string    `json:"id"`
+	ActiveProfileId  string    `json:"activeProfile"`
+	DefaultIdeId     string    `json:"defaultIde"`
+	Profiles         []Profile `json:"profiles"`
+	TelemetryEnabled bool      `json:"telemetryEnabled"`
 }
 
 type Ide struct {
@@ -70,6 +74,14 @@ func GetConfig() (*Config, error) {
 	err = json.Unmarshal(configContent, &c)
 	if err != nil {
 		return nil, err
+	}
+
+	if c.Id == "" {
+		c.Id = uuid.NewString()
+		err := c.Save()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &c, nil
@@ -154,6 +166,18 @@ func (c *Config) GetProfile(profileId string) (Profile, error) {
 	return Profile{}, errors.New("profile not found")
 }
 
+func (c *Config) EnableTelemetry() error {
+	c.TelemetryEnabled = true
+
+	return c.Save()
+}
+
+func (c *Config) DisableTelemetry() error {
+	c.TelemetryEnabled = false
+
+	return c.Save()
+}
+
 func getConfigPath() (string, error) {
 	configDir, err := GetConfigDir()
 	if err != nil {
@@ -184,4 +208,32 @@ func DeleteConfigDir() error {
 	}
 
 	return nil
+}
+
+func TelemetryEnabled() bool {
+	telemetryEnabled := os.Getenv("DAYTONA_TELEMETRY_ENABLED")
+	if telemetryEnabled != "" {
+		return telemetryEnabled == "true"
+	}
+
+	c, err := GetConfig()
+	if err != nil {
+		return false
+	}
+
+	return c.TelemetryEnabled
+}
+
+func GetClientId() string {
+	clientId := os.Getenv("DAYTONA_CLIENT_ID")
+	if clientId != "" {
+		return clientId
+	}
+
+	c, err := GetConfig()
+	if err != nil {
+		return ""
+	}
+
+	return c.Id
 }
