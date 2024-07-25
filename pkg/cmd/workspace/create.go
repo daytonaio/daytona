@@ -162,6 +162,9 @@ var CreateCmd = &cobra.Command{
 
 		stopLogs = true
 
+		// Make sure terminal cursor is reset
+		fmt.Print("\033[?25h")
+
 		wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceName).Execute()
 		if err != nil {
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
