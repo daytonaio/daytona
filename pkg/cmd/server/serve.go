@@ -133,7 +133,7 @@ var ServeCmd = &cobra.Command{
 			localContainerRegistry = registry.NewLocalContainerRegistry(&registry.LocalContainerRegistryConfig{
 				DataPath: filepath.Join(configDir, "registry"),
 				Port:     c.LocalBuilderRegistryPort,
-				Image:    c.RegistryImage,
+				Image:    c.LocalBuilderRegistryImage,
 			})
 			c.BuilderRegistryServer = util.GetFrpcRegistryDomain(c.Id, c.Frps.Domain)
 		}
