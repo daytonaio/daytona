@@ -26,7 +26,7 @@ func StartWorkspace(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err := server.WorkspaceService.StartWorkspace(workspaceId)
+	err := server.WorkspaceService.StartWorkspace(ctx.Request.Context(), workspaceId)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to start workspace %s: %s", workspaceId, err.Error()))
 		return
@@ -52,7 +52,7 @@ func StartProject(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err := server.WorkspaceService.StartProject(workspaceId, projectId)
+	err := server.WorkspaceService.StartProject(ctx.Request.Context(), workspaceId, projectId)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to start project %s: %s", projectId, err.Error()))
 		return

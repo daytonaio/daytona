@@ -4,10 +4,14 @@
 package workspaces
 
 import (
+	"context"
 	"time"
+
+	"github.com/daytonaio/daytona/pkg/telemetry"
+	log "github.com/sirupsen/logrus"
 )
 
-func (s *WorkspaceService) StopWorkspace(workspaceId string) error {
+func (s *WorkspaceService) StopWorkspace(ctx context.Context, workspaceId string) error {
 	workspace, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
 		return ErrWorkspaceNotFound
@@ -31,6 +35,24 @@ func (s *WorkspaceService) StopWorkspace(workspaceId string) error {
 	}
 
 	err = s.provisioner.StopWorkspace(workspace, target)
+
+	if !telemetry.TelemetryEnabled(ctx) {
+		return err
+	}
+
+	clientId := telemetry.ClientId(ctx)
+
+	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, workspace, target)
+	event := telemetry.ServerEventWorkspaceStopped
+	if err != nil {
+		telemetryProps["error"] = err.Error()
+		event = telemetry.ServerEventWorkspaceStopError
+	}
+	telemetryError := s.telemetryService.TrackServerEvent(event, clientId, telemetryProps)
+	if telemetryError != nil {
+		log.Trace(telemetryError)
+	}
+
 	if err != nil {
 		return err
 	}
@@ -38,7 +60,7 @@ func (s *WorkspaceService) StopWorkspace(workspaceId string) error {
 	return s.workspaceStore.Save(workspace)
 }
 
-func (s *WorkspaceService) StopProject(workspaceId, projectName string) error {
+func (s *WorkspaceService) StopProject(ctx context.Context, workspaceId, projectName string) error {
 	w, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
 		return ErrWorkspaceNotFound

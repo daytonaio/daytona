@@ -1,0 +1,13 @@
+name: daytona telemetry
+synopsis: Manage telemetry collection
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+    - name: output
+      shorthand: o
+      usage: Output format. Must be one of (yaml, json)
+see_also:
+    - daytona - Daytona is a Dev Environment Manager
+    - daytona telemetry disable - Disable telemetry collection
+    - daytona telemetry enable - Enable telemetry collection
