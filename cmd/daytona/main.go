@@ -23,25 +23,42 @@ func main() {
 		return
 	}
 
+	settingLog()
 	cmd.Execute()
 }
 
-func init() {
+func settingLog() {
 	logLevel := log.WarnLevel
 
-	logLevelEnv, logLevelSet := os.LookupEnv("LOG_LEVEL")
-	if logLevelSet {
-		switch logLevelEnv {
-		case "debug":
-			logLevel = log.DebugLevel
-		case "info":
-			logLevel = log.InfoLevel
-		case "warn":
-			logLevel = log.WarnLevel
-		case "error":
-			logLevel = log.ErrorLevel
-		default:
-			logLevel = log.WarnLevel
+	if os.Getenv("DAYTONA_SERVER_MODE") == "agent" {
+		if logLevelEnv, logLevelSet := os.LookupEnv("AGENT_LOG_LEVEL"); logLevelSet {
+			switch logLevelEnv {
+			case "debug":
+				logLevel = log.DebugLevel
+			case "info":
+				logLevel = log.InfoLevel
+			case "warn":
+				logLevel = log.WarnLevel
+			case "error":
+				logLevel = log.ErrorLevel
+			default:
+				logLevel = log.WarnLevel
+			}
+		}
+	} else {
+		if logLevelEnv, logLevelSet := os.LookupEnv("LOG_LEVEL"); logLevelSet {
+			switch logLevelEnv {
+			case "debug":
+				logLevel = log.DebugLevel
+			case "info":
+				logLevel = log.InfoLevel
+			case "warn":
+				logLevel = log.WarnLevel
+			case "error":
+				logLevel = log.ErrorLevel
+			default:
+				logLevel = log.WarnLevel
+			}
 		}
 	}
 
