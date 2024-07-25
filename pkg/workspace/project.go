@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
@@ -102,6 +103,12 @@ func GetProjectEnvVars(project *Project, apiUrl, serverUrl string) map[string]st
 }
 
 func GetProjectHostname(workspaceId string, projectName string) string {
+	// Replace special chars with hyphen to form valid hostname
+	// String resulting in consecutive hyphens is also valid
+	projectName = strings.ReplaceAll(projectName, "_", "-")
+	projectName = strings.ReplaceAll(projectName, "*", "-")
+	projectName = strings.ReplaceAll(projectName, ".", "-")
+
 	hostname := fmt.Sprintf("%s-%s", workspaceId, projectName)
 
 	if len(hostname) > 63 {
