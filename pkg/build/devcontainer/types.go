@@ -110,3 +110,10 @@ type MergedConfiguration struct {
 	PostStartCommands     interface{} `json:"postStartCommands"`
 	PostAttachCommands    interface{} `json:"postAttachCommands"`
 }
+
+type DevcontainerUpResult struct {
+	Outcome               string `json:"outcome"`
+	ContainerId           string `json:"containerId"`
+	RemoteUser            string `json:"remoteUser"`
+	RemoteWorkspaceFolder string `json:"remoteWorkspaceFolder"`
+}
