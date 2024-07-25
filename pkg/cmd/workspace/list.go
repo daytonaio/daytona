@@ -6,6 +6,7 @@ package workspace
 import (
 	"context"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
@@ -58,7 +59,17 @@ var ListCmd = &cobra.Command{
 			return
 		}
 
-		list_view.ListWorkspaces(workspaceList, specifyGitProviders, verbose)
+		c, err := config.GetConfig()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		activeProfile, err := c.GetActiveProfile()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		list_view.ListWorkspaces(workspaceList, specifyGitProviders, verbose, activeProfile.Name)
 	},
 }
 

@@ -37,7 +37,7 @@ func GetRegistryFromPrompt(registries []apiclient.ContainerRegistry, activeProfi
 	l := views.GetStyledSelectList(items)
 	m := model{list: l}
 	m.list.Title = "Choose a container registry"
-	m.footer = views.GetListFooter(activeProfileName)
+	m.footer = views.GetListFooter(activeProfileName, views.DefaultListFooterPadding)
 
 	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
 	if err != nil {
