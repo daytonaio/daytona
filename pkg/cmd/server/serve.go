@@ -38,9 +38,10 @@ import (
 )
 
 var ServeCmd = &cobra.Command{
-	Use:   "serve",
-	Short: "Run the server process in the current terminal session",
-	Args:  cobra.NoArgs,
+	Use:     "serve",
+	Short:   "Run the server process in the current terminal session",
+	GroupID: util.SERVER_GROUP,
+	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		if log.GetLevel() < log.InfoLevel {
 			//	for now, force the log level to info when running the server

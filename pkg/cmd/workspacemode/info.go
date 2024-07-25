@@ -4,6 +4,7 @@
 package workspacemode
 
 import (
+	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/output"
@@ -17,6 +18,7 @@ var infoCmd = &cobra.Command{
 	Short:   "Show project info",
 	Aliases: []string{"view"},
 	Args:    cobra.ExactArgs(0),
+	GroupID: util.WORKSPACE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {
 		var workspace *apiclient.WorkspaceDTO
 

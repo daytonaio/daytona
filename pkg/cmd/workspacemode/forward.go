@@ -9,6 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/cmd/tailscale"
+	"github.com/daytonaio/daytona/internal/util"
 	defaultPortForwardCmd "github.com/daytonaio/daytona/pkg/cmd/ports"
 	"github.com/daytonaio/daytona/pkg/views"
 	log "github.com/sirupsen/logrus"
@@ -18,9 +19,10 @@ import (
 var publicPreview bool
 
 var portForwardCmd = &cobra.Command{
-	Use:   "forward [PORT]",
-	Short: "Forward a port from the project to your local machine",
-	Args:  cobra.ExactArgs(1),
+	Use:     "forward [PORT]",
+	Short:   "Forward a port from the project to your local machine",
+	Args:    cobra.ExactArgs(1),
+	GroupID: util.WORKSPACE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {
 		c, err := config.GetConfig()
 		if err != nil {

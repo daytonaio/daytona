@@ -6,6 +6,7 @@ package workspacemode
 import (
 	"os"
 
+	"github.com/daytonaio/daytona/internal/util"
 	cmd "github.com/daytonaio/daytona/pkg/cmd"
 	. "github.com/daytonaio/daytona/pkg/cmd/agent"
 	log "github.com/sirupsen/logrus"
@@ -31,7 +32,7 @@ var workspaceModeRootCmd = &cobra.Command{
 
 func Execute() {
 	cmd.SetupRootCommand(workspaceModeRootCmd)
-
+	workspaceModeRootCmd.AddGroup(&cobra.Group{ID: util.WORKSPACE_GROUP, Title: "Project & Workspace"})
 	workspaceModeRootCmd.AddCommand(gitCredCmd)
 	workspaceModeRootCmd.AddCommand(AgentCmd)
 	workspaceModeRootCmd.AddCommand(startCmd)

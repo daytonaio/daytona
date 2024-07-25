@@ -6,6 +6,7 @@ package cmd
 import (
 	"os"
 
+	. "github.com/daytonaio/daytona/internal/util"
 	. "github.com/daytonaio/daytona/pkg/cmd/apikey"
 	. "github.com/daytonaio/daytona/pkg/cmd/containerregistry"
 	. "github.com/daytonaio/daytona/pkg/cmd/gitprovider"
@@ -34,6 +35,10 @@ var rootCmd = &cobra.Command{
 var originalStdout *os.File
 
 func Execute() {
+	rootCmd.AddGroup(&cobra.Group{ID: WORKSPACE_GROUP, Title: "Workspaces & Projects"})
+	rootCmd.AddGroup(&cobra.Group{ID: SERVER_GROUP, Title: "Server"})
+	rootCmd.AddGroup(&cobra.Group{ID: PROFILE_GROUP, Title: "Profile"})
+
 	rootCmd.AddCommand(CodeCmd)
 	rootCmd.AddCommand(SshCmd)
 	rootCmd.AddCommand(SshProxyCmd)

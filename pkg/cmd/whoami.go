@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util"
 
 	"github.com/daytonaio/daytona/pkg/cmd/output"
 	view "github.com/daytonaio/daytona/pkg/views/whoami"
@@ -17,6 +18,7 @@ var whoamiCmd = &cobra.Command{
 	Short:   "Display information about the active user",
 	Args:    cobra.NoArgs,
 	Aliases: []string{"who", "user"},
+	GroupID: util.PROFILE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {
 		c, err := config.GetConfig()
 		if err != nil {
