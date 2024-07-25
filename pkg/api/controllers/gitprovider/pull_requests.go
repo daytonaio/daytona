@@ -4,13 +4,10 @@
 package gitprovider
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
-	"strconv"
 
-	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
@@ -34,8 +31,11 @@ func GetRepoPRs(ctx *gin.Context) {
 	gitProviderId := ctx.Param("gitProviderId")
 	namespaceArg := ctx.Param("namespaceId")
 	repositoryArg := ctx.Param("repositoryId")
-	pageQuery := ctx.Query("page")
-	perPageQuery := ctx.Query("per_page")
+	options, err := getListOptions(ctx)
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
 
 	namespaceId, err := url.QueryUnescape(namespaceArg)
 	if err != nil {
@@ -47,30 +47,6 @@ func GetRepoPRs(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to parse repository: %s", err.Error()))
 		return
-	}
-
-	page := 1
-	perPage := 100
-
-	if pageQuery != "" {
-		page, err = strconv.Atoi(pageQuery)
-		if err != nil {
-			ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for 'page' query param"))
-			return
-		}
-	}
-
-	if perPageQuery != "" {
-		perPage, err = strconv.Atoi(perPageQuery)
-		if err != nil {
-			ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for 'per_page' query param"))
-			return
-		}
-	}
-
-	options := gitprovider.ListOptions{
-		Page:    page,
-		PerPage: perPage,
 	}
 
 	server := server.GetInstance(nil)
