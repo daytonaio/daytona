@@ -4,6 +4,7 @@
 package server
 
 import (
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/cmd/server/daemon"
 	"github.com/daytonaio/daytona/pkg/server"
@@ -17,9 +18,10 @@ import (
 var yesFlag bool
 
 var ServerCmd = &cobra.Command{
-	Use:   "server",
-	Short: "Start the server process in daemon mode",
-	Args:  cobra.NoArgs,
+	Use:     "server",
+	Short:   "Start the server process in daemon mode",
+	GroupID: util.SERVER_GROUP,
+	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		confirmCheck := true
 

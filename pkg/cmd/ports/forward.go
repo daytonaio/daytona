@@ -13,6 +13,7 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/cmd/tailscale"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/frpc"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -26,9 +27,10 @@ var workspaceId string
 var projectName string
 
 var PortForwardCmd = &cobra.Command{
-	Use:   "forward [PORT] [WORKSPACE] [PROJECT]",
-	Short: "Forward a port from a project to your local machine",
-	Args:  cobra.RangeArgs(2, 3),
+	Use:     "forward [PORT] [WORKSPACE] [PROJECT]",
+	Short:   "Forward a port from a project to your local machine",
+	GroupID: util.WORKSPACE_GROUP,
+	Args:    cobra.RangeArgs(2, 3),
 	Run: func(cmd *cobra.Command, args []string) {
 		c, err := config.GetConfig()
 		if err != nil {

@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/ide"
 
@@ -15,8 +16,9 @@ import (
 )
 
 var ideCmd = &cobra.Command{
-	Use:   "ide",
-	Short: "Choose the default IDE",
+	Use:     "ide",
+	Short:   "Choose the default IDE",
+	GroupID: util.PROFILE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {
 		c, err := config.GetConfig()
 		if err != nil {

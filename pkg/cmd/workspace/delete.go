@@ -10,6 +10,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -25,6 +26,7 @@ var forceFlag bool
 var DeleteCmd = &cobra.Command{
 	Use:     "delete [WORKSPACE]",
 	Short:   "Delete a workspace",
+	GroupID: util.WORKSPACE_GROUP,
 	Aliases: []string{"remove", "rm"},
 	Run: func(cmd *cobra.Command, args []string) {
 		if allFlag {
