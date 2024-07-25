@@ -13,6 +13,13 @@ import (
 	"golang.org/x/term"
 )
 
+type Padding struct {
+	Top    int
+	Right  int
+	Bottom int
+	Left   int
+}
+
 var DocStyle = lipgloss.
 	NewStyle().
 	Margin(3, 2, 1, 2).
@@ -22,6 +29,8 @@ var BasicLayout = lipgloss.
 	NewStyle().
 	Margin(1, 0).
 	PaddingLeft(2)
+
+var DefaultListFooterPadding = &Padding{Left: 2}
 
 var DefaultLayoutMarginTop = 1
 
@@ -67,8 +76,11 @@ func RenderBorderedMessage(message string) {
 	fmt.Println(GetBorderedMessage(message))
 }
 
-func GetListFooter(profileName string) string {
-	return lipgloss.NewStyle().Bold(true).PaddingLeft(2).Render("\n\nActive profile: " + profileName)
+func GetListFooter(profileName string, padding *Padding) string {
+	style := lipgloss.NewStyle().Bold(true)
+	style = style.Padding(padding.Top, padding.Right, padding.Bottom, padding.Left)
+
+	return style.Render("\n\nActive profile: " + profileName)
 }
 
 func GetStyledMainTitle(content string) string {
