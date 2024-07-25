@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -72,9 +73,46 @@ func Execute() {
 
 	SetupRootCommand(rootCmd)
 
+	cmd, err := validateCommands(rootCmd, os.Args[1:])
+	if err != nil {
+		fmt.Printf("Error: %v\n\n", err)
+		err := cmd.Help()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
+
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command, err error) {
+	rootCmd.InitDefaultHelpCmd()
+	currentCmd := rootCmd
+
+	for len(args) > 0 {
+		subCmd, subArgs, err := currentCmd.Find(args)
+		if err != nil {
+			return currentCmd, err
+		}
+
+		if subCmd == currentCmd {
+			break
+		}
+
+		currentCmd = subCmd
+		args = subArgs
+	}
+
+	if len(args) > 0 {
+		if err := currentCmd.ValidateArgs(args); err != nil {
+			return currentCmd, err
+		}
+	}
+
+	return currentCmd, nil
 }
 
 func SetupRootCommand(cmd *cobra.Command) {
