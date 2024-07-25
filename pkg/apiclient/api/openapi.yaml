@@ -1272,6 +1272,7 @@ components:
         localBuilderRegistryPort: 5
         defaultProjectUser: defaultProjectUser
         builderRegistryServer: builderRegistryServer
+        registryImage: registryImage
         builderImage: builderImage
         apiPort: 0
         headscalePort: 1
@@ -1312,6 +1313,8 @@ components:
         logFilePath:
           type: string
         providersDir:
+          type: string
+        registryImage:
           type: string
         registryUrl:
           type: string

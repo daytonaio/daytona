@@ -282,6 +282,8 @@ definitions:
         type: string
       providersDir:
         type: string
+      registryImage:
+        type: string
       registryUrl:
         type: string
       serverDownloadUrl:

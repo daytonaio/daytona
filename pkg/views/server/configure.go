@@ -77,6 +77,9 @@ func ConfigurationForm(config *apiclient.ServerConfig, containerRegistries []api
 				Title("Local Builder Registry Port").
 				Value(&localBuilderRegistryPort).
 				Validate(createPortValidator(config, &localBuilderRegistryPort, config.LocalBuilderRegistryPort)),
+			huh.NewInput().
+				Title("Local Builder Registry Image").
+				Value(config.RegistryImage),
 		).WithHideFunc(func() bool {
 			return config.BuilderRegistryServer == nil || *config.BuilderRegistryServer != "local"
 		}),
