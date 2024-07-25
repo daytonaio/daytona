@@ -61,7 +61,7 @@ type Model struct {
 	width  int
 }
 
-func GetRepositoryFromUrlInput(multiProject bool, apiClient *apiclient.APIClient) (*apiclient.GitRepository, error) {
+func GetRepositoryFromUrlInput(multiProject bool, apiClient *apiclient.APIClient, selectedRepos map[string]int) (*apiclient.GitRepository, error) {
 	m := Model{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
@@ -101,10 +101,12 @@ func GetRepositoryFromUrlInput(multiProject bool, apiClient *apiclient.APIClient
 		return nil, err
 	}
 
+	selectedRepos[initialRepoUrl]++
+
 	return repo, nil
 }
 
-func RunAdditionalProjectRepoForm(index int, apiClient *apiclient.APIClient) (*apiclient.GitRepository, bool, error) {
+func RunAdditionalProjectRepoForm(index int, apiClient *apiclient.APIClient, selectedRepos map[string]int) (*apiclient.GitRepository, bool, error) {
 	m := Model{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
@@ -142,6 +144,8 @@ func RunAdditionalProjectRepoForm(index int, apiClient *apiclient.APIClient) (*a
 	if err != nil {
 		return nil, false, err
 	}
+
+	selectedRepos[repoUrl]++
 
 	return repo, addAnother, nil
 }

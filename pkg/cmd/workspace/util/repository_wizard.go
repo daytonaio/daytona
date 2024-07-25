@@ -17,7 +17,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
 
-func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additionalProjectOrder int) (*apiclient.GitRepository, error) {
+func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additionalProjectOrder int, selectedRepos map[string]int) (*apiclient.GitRepository, error) {
 	var providerId string
 	var namespaceId string
 	var checkoutOptions []selection.CheckoutOption
@@ -83,7 +83,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 		return nil, err
 	}
 
-	chosenRepo := selection.GetRepositoryFromPrompt(providerRepos, additionalProjectOrder)
+	chosenRepo := selection.GetRepositoryFromPrompt(providerRepos, additionalProjectOrder, selectedRepos)
 	if chosenRepo == nil {
 		return nil, errors.New("must select a repository")
 	}

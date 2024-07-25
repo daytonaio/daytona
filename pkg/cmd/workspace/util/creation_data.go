@@ -29,16 +29,19 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 	var providerRepo *apiclient.GitRepository
 	var err error
 	var workspaceName string
+	// keep track of visited repos, will help in keeping project names unique
+	// since these are later saved into the db under a unique constraint field.
+	selectedRepos := make(map[string]int)
 
 	if !config.Manual && config.UserGitProviders != nil && len(config.UserGitProviders) > 0 {
-		providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, 0)
+		providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, 0, selectedRepos)
 		if err != nil {
 			return "", nil, err
 		}
 	}
 
 	if providerRepo == nil {
-		providerRepo, err = create.GetRepositoryFromUrlInput(config.MultiProject, config.ApiClient)
+		providerRepo, err = create.GetRepositoryFromUrlInput(config.MultiProject, config.ApiClient, selectedRepos)
 		if err != nil {
 			return "", nil, err
 		}
@@ -57,14 +60,14 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 			var providerRepo *apiclient.GitRepository
 
 			if !config.Manual && config.UserGitProviders != nil && len(config.UserGitProviders) > 0 {
-				providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, i)
+				providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, i, selectedRepos)
 				if err != nil {
 					return "", nil, err
 				}
 			}
 
 			if providerRepo == nil {
-				providerRepo, addMore, err = create.RunAdditionalProjectRepoForm(i, config.ApiClient)
+				providerRepo, addMore, err = create.RunAdditionalProjectRepoForm(i, config.ApiClient, selectedRepos)
 				if err != nil {
 					return "", nil, err
 				}
