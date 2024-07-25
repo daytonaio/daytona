@@ -79,7 +79,7 @@ func ConfigurationForm(config *apiclient.ServerConfig, containerRegistries []api
 				Validate(createPortValidator(config, &localBuilderRegistryPort, config.LocalBuilderRegistryPort)),
 			huh.NewInput().
 				Title("Local Builder Registry Image").
-				Value(config.RegistryImage),
+				Value(config.LocalBuilderRegistryImage),
 		).WithHideFunc(func() bool {
 			return config.BuilderRegistryServer == nil || *config.BuilderRegistryServer != "local"
 		}),

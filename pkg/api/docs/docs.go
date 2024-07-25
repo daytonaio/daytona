@@ -1545,6 +1545,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "localBuilderRegistryImage": {
+                    "type": "string"
+                },
                 "localBuilderRegistryPort": {
                     "type": "integer"
                 },
@@ -1552,9 +1555,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "providersDir": {
-                    "type": "string"
-                },
-                "registryImage": {
                     "type": "string"
                 },
                 "registryUrl": {

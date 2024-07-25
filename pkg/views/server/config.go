@@ -44,7 +44,7 @@ func RenderConfig(config *server.Config) {
 	if config.BuilderRegistryServer == "local" {
 		output += fmt.Sprintf("%s %d", views.GetPropertyKey("Local Builder Registry Port: "), config.LocalBuilderRegistryPort) + "\n\n"
 
-		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Local Builder Registry Image: "), config.RegistryImage) + "\n\n"
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Local Builder Registry Image: "), config.LocalBuilderRegistryImage) + "\n\n"
 	} else {
 		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Builder Registry: "), config.BuilderRegistryServer) + "\n\n"
 	}
