@@ -25,6 +25,7 @@ const defaultProjectImage = "daytonaio/workspace-project:latest"
 const defaultProjectUser = "daytona"
 
 const defaultLocalBuilderRegistryPort = 3988
+const defaultLocalBuilderRegistryImage = "registry:2.8.3"
 const defaultBuilderRegistryServer = "local"
 const defaultBuildImageNamespace = ""
 
@@ -100,21 +101,22 @@ func getDefaultConfig() (*Config, error) {
 	}
 
 	c := Config{
-		Id:                       generateUuid(),
-		RegistryUrl:              defaultRegistryUrl,
-		ProvidersDir:             providersDir,
-		ServerDownloadUrl:        defaultServerDownloadUrl,
-		ApiPort:                  defaultApiPort,
-		HeadscalePort:            defaultHeadscalePort,
-		BinariesPath:             binariesPath,
-		Frps:                     getDefaultFRPSConfig(),
-		LogFilePath:              logFilePath,
-		DefaultProjectImage:      defaultProjectImage,
-		DefaultProjectUser:       defaultProjectUser,
-		BuilderImage:             defaultBuilderImage,
-		LocalBuilderRegistryPort: defaultLocalBuilderRegistryPort,
-		BuilderRegistryServer:    defaultBuilderRegistryServer,
-		BuildImageNamespace:      defaultBuildImageNamespace,
+		Id:                        generateUuid(),
+		RegistryUrl:               defaultRegistryUrl,
+		ProvidersDir:              providersDir,
+		ServerDownloadUrl:         defaultServerDownloadUrl,
+		ApiPort:                   defaultApiPort,
+		HeadscalePort:             defaultHeadscalePort,
+		BinariesPath:              binariesPath,
+		Frps:                      getDefaultFRPSConfig(),
+		LogFilePath:               logFilePath,
+		DefaultProjectImage:       defaultProjectImage,
+		DefaultProjectUser:        defaultProjectUser,
+		BuilderImage:              defaultBuilderImage,
+		LocalBuilderRegistryPort:  defaultLocalBuilderRegistryPort,
+		LocalBuilderRegistryImage: defaultLocalBuilderRegistryImage,
+		BuilderRegistryServer:     defaultBuilderRegistryServer,
+		BuildImageNamespace:       defaultBuildImageNamespace,
 	}
 
 	if os.Getenv("DEFAULT_REGISTRY_URL") != "" {

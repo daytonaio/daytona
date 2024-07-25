@@ -276,13 +276,13 @@ definitions:
         type: integer
       id:
         type: string
+      localBuilderRegistryImage:
+        type: string
       localBuilderRegistryPort:
         type: integer
       logFilePath:
         type: string
       providersDir:
-        type: string
-      registryImage:
         type: string
       registryUrl:
         type: string

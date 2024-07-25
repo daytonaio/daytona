@@ -1270,9 +1270,9 @@ components:
       example:
         registryUrl: registryUrl
         localBuilderRegistryPort: 5
+        localBuilderRegistryImage: localBuilderRegistryImage
         defaultProjectUser: defaultProjectUser
         builderRegistryServer: builderRegistryServer
-        registryImage: registryImage
         builderImage: builderImage
         apiPort: 0
         headscalePort: 1
@@ -1308,13 +1308,13 @@ components:
           type: integer
         id:
           type: string
+        localBuilderRegistryImage:
+          type: string
         localBuilderRegistryPort:
           type: integer
         logFilePath:
           type: string
         providersDir:
-          type: string
-        registryImage:
           type: string
         registryUrl:
           type: string
