@@ -35,9 +35,10 @@ import (
 )
 
 var CreateCmd = &cobra.Command{
-	Use:   "create [REPOSITORY_URL]",
-	Short: "Create a workspace",
-	Args:  cobra.RangeArgs(0, 1),
+	Use:     "create [REPOSITORY_URL]",
+	Short:   "Create a workspace",
+	Args:    cobra.RangeArgs(0, 1),
+	GroupID: util.WORKSPACE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 		var projects []apiclient.CreateWorkspaceRequestProject
@@ -160,6 +161,9 @@ var CreateCmd = &cobra.Command{
 		}
 
 		stopLogs = true
+
+		// Make sure terminal cursor is reset
+		fmt.Print("\033[?25h")
 
 		wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceName).Execute()
 		if err != nil {

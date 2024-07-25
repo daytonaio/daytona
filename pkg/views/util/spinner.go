@@ -17,15 +17,16 @@ import (
 type model struct {
 	spinner  spinner.Model
 	quitting bool
+	message  string
 }
 
 type Msg string
 
-func initialModel() model {
+func initialModel(message string) model {
 	s := spinner.New()
 	s.Spinner = spinner.Dot
 	s.Style = lipgloss.NewStyle().Foreground(views.Green)
-	return model{spinner: s}
+	return model{spinner: s, message: message}
 }
 
 func (m model) Init() tea.Cmd {
@@ -45,14 +46,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
-func With(fn func() error) error {
-	p := start()
+func WithSpinner(message string, fn func() error) error {
+	p := start(message)
 	defer stop(p)
 	return fn()
 }
 
-func start() *tea.Program {
-	p := tea.NewProgram(initialModel(), tea.WithAltScreen())
+func start(message string) *tea.Program {
+	p := tea.NewProgram(initialModel(message), tea.WithAltScreen())
 	go func() {
 		if _, err := p.Run(); err != nil {
 			fmt.Println(err)
@@ -76,7 +77,7 @@ func (m model) View() string {
 		return ""
 	}
 
-	str := views.DocStyle.Render(fmt.Sprintf("\n\n   %s Loading...\n\n", m.spinner.View()))
+	str := views.DocStyle.Render(fmt.Sprintf("\n\n   %s %s...\n\n", m.spinner.View(), m.message))
 
 	return str
 }

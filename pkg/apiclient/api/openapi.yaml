@@ -1270,6 +1270,7 @@ components:
       example:
         registryUrl: registryUrl
         localBuilderRegistryPort: 5
+        localBuilderRegistryImage: localBuilderRegistryImage
         defaultProjectUser: defaultProjectUser
         builderRegistryServer: builderRegistryServer
         builderImage: builderImage
@@ -1306,6 +1307,8 @@ components:
         headscalePort:
           type: integer
         id:
+          type: string
+        localBuilderRegistryImage:
           type: string
         localBuilderRegistryPort:
           type: integer

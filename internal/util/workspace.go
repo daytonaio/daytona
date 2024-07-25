@@ -6,22 +6,9 @@ package util
 import (
 	"fmt"
 	"net/url"
-	"os"
 	"regexp"
 	"strings"
 )
-
-func WorkspaceMode() bool {
-	_, devEnv := os.LookupEnv("DAYTONA_DEV")
-	if devEnv {
-		return false
-	}
-	val, wsMode := os.LookupEnv("DAYTONA_WS_ID")
-	if wsMode && val != "" {
-		return true
-	}
-	return false
-}
 
 func GetValidatedWorkspaceName(input string) (string, error) {
 	// input = strings.ToLower(input)

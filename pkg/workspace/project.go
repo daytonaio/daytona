@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
@@ -85,23 +86,40 @@ const (
 	UpdatedButUnmerged Status = "Updated but unmerged"
 )
 
-func GetProjectEnvVars(project *Project, apiUrl, serverUrl string) map[string]string {
+type ProjectEnvVarParams struct {
+	ApiUrl    string
+	ServerUrl string
+	ClientId  string
+}
+
+func GetProjectEnvVars(project *Project, params ProjectEnvVarParams, telemetryEnabled bool) map[string]string {
 	envVars := map[string]string{
 		"DAYTONA_WS_ID":                     project.WorkspaceId,
 		"DAYTONA_WS_PROJECT_NAME":           project.Name,
 		"DAYTONA_WS_PROJECT_REPOSITORY_URL": project.Repository.Url,
 		"DAYTONA_SERVER_API_KEY":            project.ApiKey,
 		"DAYTONA_SERVER_VERSION":            internal.Version,
-		"DAYTONA_SERVER_URL":                serverUrl,
-		"DAYTONA_SERVER_API_URL":            apiUrl,
+		"DAYTONA_SERVER_URL":                params.ServerUrl,
+		"DAYTONA_SERVER_API_URL":            params.ApiUrl,
+		"DAYTONA_CLIENT_ID":                 params.ClientId,
 		// (HOME) will be replaced at runtime
 		"DAYTONA_AGENT_LOG_FILE_PATH": "(HOME)/.daytona-agent.log",
+	}
+
+	if telemetryEnabled {
+		envVars["DAYTONA_TELEMETRY_ENABLED"] = "true"
 	}
 
 	return envVars
 }
 
 func GetProjectHostname(workspaceId string, projectName string) string {
+	// Replace special chars with hyphen to form valid hostname
+	// String resulting in consecutive hyphens is also valid
+	projectName = strings.ReplaceAll(projectName, "_", "-")
+	projectName = strings.ReplaceAll(projectName, "*", "-")
+	projectName = strings.ReplaceAll(projectName, ".", "-")
+
 	hostname := fmt.Sprintf("%s-%s", workspaceId, projectName)
 
 	if len(hostname) > 63 {

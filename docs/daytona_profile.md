@@ -2,10 +2,6 @@
 
 Manage profiles
 
-```
-daytona profile [flags]
-```
-
 ### Options inherited from parent commands
 
 ```
@@ -20,5 +16,5 @@ daytona profile [flags]
 * [daytona profile delete](daytona_profile_delete.md)	 - Delete profile [PROFILE_NAME]
 * [daytona profile edit](daytona_profile_edit.md)	 - Edit profile [PROFILE_NAME]
 * [daytona profile list](daytona_profile_list.md)	 - List profiles
-* [daytona profile use](daytona_profile_use.md)	 - Set the active profile
+* [daytona profile use](daytona_profile_use.md)	 - Use profile [PROFILE_NAME]
 

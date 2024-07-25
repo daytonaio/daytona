@@ -10,6 +10,7 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/jetbrains"
+	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/ide"
@@ -25,6 +26,7 @@ var CodeCmd = &cobra.Command{
 	Short:   "Open a workspace in your preferred IDE",
 	Args:    cobra.RangeArgs(0, 2),
 	Aliases: []string{"open"},
+	GroupID: util.WORKSPACE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {
 		c, err := config.GetConfig()
 		if err != nil {

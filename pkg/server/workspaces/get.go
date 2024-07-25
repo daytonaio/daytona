@@ -4,10 +4,12 @@
 package workspaces
 
 import (
+	"context"
+
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 )
 
-func (s *WorkspaceService) GetWorkspace(workspaceId string) (*dto.WorkspaceDTO, error) {
+func (s *WorkspaceService) GetWorkspace(ctx context.Context, workspaceId string) (*dto.WorkspaceDTO, error) {
 	workspace, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
 		return nil, ErrWorkspaceNotFound

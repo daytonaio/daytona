@@ -4,13 +4,15 @@
 package workspaces
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *WorkspaceService) RemoveWorkspace(workspaceId string) error {
+func (s *WorkspaceService) RemoveWorkspace(ctx context.Context, workspaceId string) error {
 	workspace, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
 		return ErrWorkspaceNotFound
@@ -64,16 +66,29 @@ func (s *WorkspaceService) RemoveWorkspace(workspaceId string) error {
 	}
 
 	err = s.workspaceStore.Delete(workspace)
-	if err != nil {
+
+	if !telemetry.TelemetryEnabled(ctx) {
 		return err
 	}
 
-	log.Infof("Workspace %s destroyed", workspace.Id)
-	return nil
+	clientId := telemetry.ClientId(ctx)
+
+	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, workspace, target)
+	event := telemetry.ServerEventWorkspaceDestroyed
+	if err != nil {
+		telemetryProps["error"] = err.Error()
+		event = telemetry.ServerEventWorkspaceDestroyError
+	}
+	telemetryError := s.telemetryService.TrackServerEvent(event, clientId, telemetryProps)
+	if telemetryError != nil {
+		log.Trace(telemetryError)
+	}
+
+	return err
 }
 
 // ForceRemoveWorkspace ignores provider errors and makes sure the workspace is removed from storage.
-func (s *WorkspaceService) ForceRemoveWorkspace(workspaceId string) error {
+func (s *WorkspaceService) ForceRemoveWorkspace(ctx context.Context, workspaceId string) error {
 	workspace, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
 		return ErrWorkspaceNotFound
@@ -115,10 +130,23 @@ func (s *WorkspaceService) ForceRemoveWorkspace(workspaceId string) error {
 	}
 
 	err = s.workspaceStore.Delete(workspace)
-	if err != nil {
+
+	if !telemetry.TelemetryEnabled(ctx) {
 		return err
 	}
 
-	log.Infof("Workspace %s destroyed", workspace.Id)
-	return nil
+	clientId := telemetry.ClientId(ctx)
+
+	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, workspace, target)
+	event := telemetry.ServerEventWorkspaceDestroyed
+	if err != nil {
+		telemetryProps["error"] = err.Error()
+		event = telemetry.ServerEventWorkspaceDestroyError
+	}
+	telemetryError := s.telemetryService.TrackServerEvent(event, clientId, telemetryProps)
+	if telemetryError != nil {
+		log.Trace(telemetryError)
+	}
+
+	return err
 }

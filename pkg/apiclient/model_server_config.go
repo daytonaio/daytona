@@ -19,21 +19,22 @@ var _ MappedNullable = &ServerConfig{}
 
 // ServerConfig struct for ServerConfig
 type ServerConfig struct {
-	ApiPort                  *int32      `json:"apiPort,omitempty"`
-	BinariesPath             *string     `json:"binariesPath,omitempty"`
-	BuildImageNamespace      *string     `json:"buildImageNamespace,omitempty"`
-	BuilderImage             *string     `json:"builderImage,omitempty"`
-	BuilderRegistryServer    *string     `json:"builderRegistryServer,omitempty"`
-	DefaultProjectImage      *string     `json:"defaultProjectImage,omitempty"`
-	DefaultProjectUser       *string     `json:"defaultProjectUser,omitempty"`
-	Frps                     *FRPSConfig `json:"frps,omitempty"`
-	HeadscalePort            *int32      `json:"headscalePort,omitempty"`
-	Id                       *string     `json:"id,omitempty"`
-	LocalBuilderRegistryPort *int32      `json:"localBuilderRegistryPort,omitempty"`
-	LogFilePath              *string     `json:"logFilePath,omitempty"`
-	ProvidersDir             *string     `json:"providersDir,omitempty"`
-	RegistryUrl              *string     `json:"registryUrl,omitempty"`
-	ServerDownloadUrl        *string     `json:"serverDownloadUrl,omitempty"`
+	ApiPort                   *int32      `json:"apiPort,omitempty"`
+	BinariesPath              *string     `json:"binariesPath,omitempty"`
+	BuildImageNamespace       *string     `json:"buildImageNamespace,omitempty"`
+	BuilderImage              *string     `json:"builderImage,omitempty"`
+	BuilderRegistryServer     *string     `json:"builderRegistryServer,omitempty"`
+	DefaultProjectImage       *string     `json:"defaultProjectImage,omitempty"`
+	DefaultProjectUser        *string     `json:"defaultProjectUser,omitempty"`
+	Frps                      *FRPSConfig `json:"frps,omitempty"`
+	HeadscalePort             *int32      `json:"headscalePort,omitempty"`
+	Id                        *string     `json:"id,omitempty"`
+	LocalBuilderRegistryImage *string     `json:"localBuilderRegistryImage,omitempty"`
+	LocalBuilderRegistryPort  *int32      `json:"localBuilderRegistryPort,omitempty"`
+	LogFilePath               *string     `json:"logFilePath,omitempty"`
+	ProvidersDir              *string     `json:"providersDir,omitempty"`
+	RegistryUrl               *string     `json:"registryUrl,omitempty"`
+	ServerDownloadUrl         *string     `json:"serverDownloadUrl,omitempty"`
 }
 
 // NewServerConfig instantiates a new ServerConfig object
@@ -373,6 +374,38 @@ func (o *ServerConfig) SetId(v string) {
 	o.Id = &v
 }
 
+// GetLocalBuilderRegistryImage returns the LocalBuilderRegistryImage field value if set, zero value otherwise.
+func (o *ServerConfig) GetLocalBuilderRegistryImage() string {
+	if o == nil || IsNil(o.LocalBuilderRegistryImage) {
+		var ret string
+		return ret
+	}
+	return *o.LocalBuilderRegistryImage
+}
+
+// GetLocalBuilderRegistryImageOk returns a tuple with the LocalBuilderRegistryImage field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ServerConfig) GetLocalBuilderRegistryImageOk() (*string, bool) {
+	if o == nil || IsNil(o.LocalBuilderRegistryImage) {
+		return nil, false
+	}
+	return o.LocalBuilderRegistryImage, true
+}
+
+// HasLocalBuilderRegistryImage returns a boolean if a field has been set.
+func (o *ServerConfig) HasLocalBuilderRegistryImage() bool {
+	if o != nil && !IsNil(o.LocalBuilderRegistryImage) {
+		return true
+	}
+
+	return false
+}
+
+// SetLocalBuilderRegistryImage gets a reference to the given string and assigns it to the LocalBuilderRegistryImage field.
+func (o *ServerConfig) SetLocalBuilderRegistryImage(v string) {
+	o.LocalBuilderRegistryImage = &v
+}
+
 // GetLocalBuilderRegistryPort returns the LocalBuilderRegistryPort field value if set, zero value otherwise.
 func (o *ServerConfig) GetLocalBuilderRegistryPort() int32 {
 	if o == nil || IsNil(o.LocalBuilderRegistryPort) {
@@ -572,6 +605,9 @@ func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Id) {
 		toSerialize["id"] = o.Id
+	}
+	if !IsNil(o.LocalBuilderRegistryImage) {
+		toSerialize["localBuilderRegistryImage"] = o.LocalBuilderRegistryImage
 	}
 	if !IsNil(o.LocalBuilderRegistryPort) {
 		toSerialize["localBuilderRegistryPort"] = o.LocalBuilderRegistryPort

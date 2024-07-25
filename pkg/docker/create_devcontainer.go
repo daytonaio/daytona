@@ -15,7 +15,6 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
-	"time"
 
 	"github.com/compose-spec/compose-go/v2/cli"
 	"github.com/daytonaio/daytona/pkg/build/devcontainer"
@@ -24,8 +23,6 @@ import (
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/google/uuid"
-
-	log "github.com/sirupsen/logrus"
 )
 
 const dockerSockForwardContainer = "daytona-sock-forward"
@@ -72,9 +69,6 @@ func (d *DockerClient) createProjectFromDevcontainer(opts *CreateProjectOptions,
 	}
 
 	remoteUser := config.MergedConfiguration.RemoteUser
-	if remoteUser == "" {
-		return "", fmt.Errorf("unable to determine remote user from devcontainer configuration")
-	}
 
 	var mergedConfig map[string]interface{}
 
@@ -214,76 +208,40 @@ func (d *DockerClient) createProjectFromDevcontainer(opts *CreateProjectOptions,
 		devcontainerCmd = append(devcontainerCmd, "--prebuild")
 	}
 
-	cmd := []string{"-c", strings.Join(devcontainerCmd, " ")}
-
 	err = d.runInitializeCommand(config.MergedConfiguration.InitializeCommand, opts.LogWriter, opts.SshClient)
 	if err != nil {
 		return "", err
 	}
 
-	c, err := d.apiClient.ContainerCreate(ctx, &container.Config{
-		Image:        "daytonaio/workspace-project",
-		Entrypoint:   []string{"sh"},
-		Env:          []string{"DOCKER_HOST=tcp://localhost:2375"},
-		Cmd:          cmd,
-		AttachStdout: true,
-		AttachStderr: true,
-		Tty:          true,
-	}, &container.HostConfig{
-		Privileged:  true,
-		NetworkMode: container.NetworkMode(fmt.Sprintf("container:%s", socketForwardId)),
-		Mounts: []mount.Mount{
-			{
-				Type:   mount.TypeBind,
-				Source: opts.ProjectDir,
-				Target: paths.ProjectTarget,
-			},
-			{
-				Type:   mount.TypeBind,
-				Source: paths.OverridesDir,
-				Target: paths.OverridesTarget,
-			},
+	output, err := d.execInContainer(strings.Join(devcontainerCmd, " "), opts, paths, paths.ProjectTarget, socketForwardId, true, []mount.Mount{
+		{
+			Type:   mount.TypeBind,
+			Source: paths.OverridesDir,
+			Target: paths.OverridesTarget,
 		},
-	}, nil, nil, uuid.NewString())
+	})
 	if err != nil {
 		return "", err
 	}
 
-	defer d.removeContainer(c.ID) // nolint:errcheck
+	if remoteUser != "" {
+		return RemoteUser(remoteUser), nil
+	}
 
-	waitResponse, errChan := d.apiClient.ContainerWait(ctx, c.ID, container.WaitConditionNextExit)
+	resultIndex := strings.LastIndex(output, "{")
+	if resultIndex == -1 {
+		return "", fmt.Errorf("unable to find result in devcontainer output")
+	}
 
-	err = d.apiClient.ContainerStart(ctx, c.ID, container.StartOptions{})
+	resultRaw := output[resultIndex:]
+
+	var result devcontainer.DevcontainerUpResult
+	err = json.Unmarshal([]byte(resultRaw), &result)
 	if err != nil {
 		return "", err
 	}
 
-	go func() {
-		for {
-			err = d.GetContainerLogs(c.ID, opts.LogWriter)
-			if err == nil {
-				break
-			}
-			log.Error(err)
-			time.Sleep(100 * time.Millisecond)
-		}
-	}()
-
-	select {
-	case err := <-errChan:
-		if err != nil {
-			return "", err
-		}
-	case resp := <-waitResponse:
-		if resp.StatusCode != 0 {
-			return "", fmt.Errorf("container exited with status %d", resp.StatusCode)
-		}
-		if resp.Error != nil {
-			return "", fmt.Errorf("container exited with error: %s", resp.Error.Message)
-		}
-	}
-
-	return RemoteUser(remoteUser), nil
+	return RemoteUser(result.RemoteUser), nil
 }
 
 func (d *DockerClient) ensureDockerSockForward(logWriter io.Writer) (string, error) {
@@ -522,7 +480,7 @@ func (d *DockerClient) execInContainer(cmd string, opts *CreateProjectOptions, p
 	go func() {
 		err = d.GetContainerLogs(c.ID, writer)
 		if err != nil {
-			opts.LogWriter.Write([]byte(fmt.Sprintf("Error reading devcontainer configuration: %v\n", err)))
+			opts.LogWriter.Write([]byte(fmt.Sprintf("Error running command in container: %v\n", err)))
 		}
 	}()
 

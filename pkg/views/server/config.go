@@ -29,21 +29,33 @@ func RenderConfig(config *server.Config) {
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("FRPS Domain: "), config.Frps.Domain) + "\n\n"
 
+	output += fmt.Sprintf("%s %d", views.GetPropertyKey("FRPS Port: "), config.Frps.Port) + "\n\n"
+
+	output += fmt.Sprintf("%s %s", views.GetPropertyKey("FRPS Protocol: "), config.Frps.Protocol) + "\n\n"
+
 	output += fmt.Sprintf("%s %d", views.GetPropertyKey("Headscale Port: "), config.HeadscalePort) + "\n\n"
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Binaries Path: "), config.BinariesPath) + "\n\n"
 
-	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Logs Path: "), config.LogFilePath) + "\n\n"
+	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Log File Path: "), config.LogFilePath) + "\n\n"
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Builder Image: "), config.BuilderImage) + "\n\n"
 
 	if config.BuilderRegistryServer == "local" {
 		output += fmt.Sprintf("%s %d", views.GetPropertyKey("Local Builder Registry Port: "), config.LocalBuilderRegistryPort) + "\n\n"
+
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Local Builder Registry Image: "), config.LocalBuilderRegistryImage) + "\n\n"
 	} else {
 		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Builder Registry: "), config.BuilderRegistryServer) + "\n\n"
 	}
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Build Image Namespace: "), config.BuildImageNamespace) + "\n\n"
+
+	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Providers Dir: "), config.ProvidersDir) + "\n\n"
+
+	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Registry URL: "), config.RegistryUrl) + "\n\n"
+
+	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Server Download URL: "), config.ServerDownloadUrl) + "\n\n"
 
 	output += views.SeparatorString + "\n\n"
 

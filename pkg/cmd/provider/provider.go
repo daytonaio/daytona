@@ -4,12 +4,14 @@
 package provider
 
 import (
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/spf13/cobra"
 )
 
 var ProviderCmd = &cobra.Command{
-	Use:   "provider",
-	Short: "Manage providers",
+	Use:     "provider",
+	Short:   "Manage providers",
+	GroupID: util.SERVER_GROUP,
 }
 
 func init() {

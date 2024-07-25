@@ -8,11 +8,13 @@ import (
 	"io"
 	"net/url"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/apikey"
@@ -20,6 +22,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/db"
 	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/pkg/posthogservice"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server"
@@ -38,9 +41,10 @@ import (
 )
 
 var ServeCmd = &cobra.Command{
-	Use:   "serve",
-	Short: "Run the server process in the current terminal session",
-	Args:  cobra.NoArgs,
+	Use:     "serve",
+	Short:   "Run the server process in the current terminal session",
+	GroupID: util.SERVER_GROUP,
+	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		if log.GetLevel() < log.InfoLevel {
 			//	for now, force the log level to info when running the server
@@ -57,8 +61,23 @@ var ServeCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		telemetryService := posthogservice.NewTelemetryService(posthogservice.PosthogServiceConfig{
+			ApiKey:   internal.PosthogApiKey,
+			Endpoint: internal.PosthogEndpoint,
+		})
+		go func() {
+			interruptChannel := make(chan os.Signal, 1)
+			signal.Notify(interruptChannel, os.Interrupt)
+
+			for range interruptChannel {
+				log.Info("Shutting down")
+				telemetryService.Close()
+			}
+		}()
+
 		apiServer := api.NewApiServer(api.ApiServerConfig{
-			ApiPort: int(c.ApiPort),
+			ApiPort:          int(c.ApiPort),
+			TelemetryService: telemetryService,
 		})
 
 		logsDir, err := server.GetWorkspaceLogsDir()
@@ -132,6 +151,7 @@ var ServeCmd = &cobra.Command{
 			localContainerRegistry = registry.NewLocalContainerRegistry(&registry.LocalContainerRegistryConfig{
 				DataPath: filepath.Join(configDir, "registry"),
 				Port:     c.LocalBuilderRegistryPort,
+				Image:    c.LocalBuilderRegistryImage,
 			})
 			c.BuilderRegistryServer = util.GetFrpcRegistryDomain(c.Id, c.Frps.Domain)
 		}
@@ -210,6 +230,7 @@ var ServeCmd = &cobra.Command{
 			Provisioner:              provisioner,
 			LoggerFactory:            loggerFactory,
 			BuilderFactory:           builderFactory,
+			TelemetryService:         telemetryService,
 		})
 		profileDataService := profiledata.NewProfileDataService(profiledata.ProfileDataServiceConfig{
 			ProfileDataStore: profileDataStore,
@@ -226,6 +247,7 @@ var ServeCmd = &cobra.Command{
 			GitProviderService:       gitProviderService,
 			ProviderManager:          providerManager,
 			ProfileDataService:       profileDataService,
+			TelemetryService:         telemetryService,
 		})
 
 		errCh := make(chan error)
@@ -357,6 +379,7 @@ func setDefaultConfig(server *server.Server, apiPort uint32) error {
 				},
 			},
 		},
+		TelemetryEnabled: true,
 	}
 
 	return config.Save()

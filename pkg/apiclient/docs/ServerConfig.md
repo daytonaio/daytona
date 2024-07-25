@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **Frps** | Pointer to [**FRPSConfig**](FRPSConfig.md) |  | [optional] 
 **HeadscalePort** | Pointer to **int32** |  | [optional] 
 **Id** | Pointer to **string** |  | [optional] 
+**LocalBuilderRegistryImage** | Pointer to **string** |  | [optional] 
 **LocalBuilderRegistryPort** | Pointer to **int32** |  | [optional] 
 **LogFilePath** | Pointer to **string** |  | [optional] 
 **ProvidersDir** | Pointer to **string** |  | [optional] 
@@ -288,6 +289,31 @@ SetId sets Id field to given value.
 `func (o *ServerConfig) HasId() bool`
 
 HasId returns a boolean if a field has been set.
+
+### GetLocalBuilderRegistryImage
+
+`func (o *ServerConfig) GetLocalBuilderRegistryImage() string`
+
+GetLocalBuilderRegistryImage returns the LocalBuilderRegistryImage field if non-nil, zero value otherwise.
+
+### GetLocalBuilderRegistryImageOk
+
+`func (o *ServerConfig) GetLocalBuilderRegistryImageOk() (*string, bool)`
+
+GetLocalBuilderRegistryImageOk returns a tuple with the LocalBuilderRegistryImage field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLocalBuilderRegistryImage
+
+`func (o *ServerConfig) SetLocalBuilderRegistryImage(v string)`
+
+SetLocalBuilderRegistryImage sets LocalBuilderRegistryImage field to given value.
+
+### HasLocalBuilderRegistryImage
+
+`func (o *ServerConfig) HasLocalBuilderRegistryImage() bool`
+
+HasLocalBuilderRegistryImage returns a boolean if a field has been set.
 
 ### GetLocalBuilderRegistryPort
 

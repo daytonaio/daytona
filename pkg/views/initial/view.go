@@ -46,14 +46,14 @@ var gradientColors = []lipgloss.AdaptiveColor{
 	{Light: "#000", Dark: "#fff"},
 	{Light: "#000", Dark: "#fff"},
 	{Light: "#000", Dark: "#fff"},
+	{Light: "#000", Dark: "#fff"},
+	{Light: "#000", Dark: "#fff"},
+	{Light: "#000", Dark: "#fff"},
 	{Light: "#4e4f4f", Dark: "#B9B9B9"},
 	{Light: "#686969", Dark: "#B2B2B2"},
 	{Light: "#686969", Dark: "#A4A4A4"},
 	{Light: "#a3a3a3", Dark: "#969696"},
 	{Light: "#a3a3a3", Dark: "#585858"},
-	{Light: "#bbbcbd", Dark: "#363636"},
-	{Light: "#bbbcbd", Dark: "#343434"},
-	{Light: "#d9d9d9", Dark: "#343434"},
 }
 
 var gradientSigil string
@@ -65,6 +65,7 @@ type CommandView struct {
 }
 
 var commandViews []CommandView = []CommandView{
+	{Command: "server", Name: "daytona server", Desc: "(start the Daytona Server daemon)"},
 	{Command: "create", Name: "daytona create", Desc: "(create a new workspace)"},
 	{Command: "code", Name: "daytona code", Desc: "(open a workspace in your preferred IDE)"},
 	{Command: "git-provider add", Name: "daytona git-provider add", Desc: "(register a Git provider account)"},

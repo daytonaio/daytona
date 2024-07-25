@@ -1,0 +1,12 @@
+name: daytona telemetry disable
+synopsis: Disable telemetry collection
+usage: daytona telemetry disable [flags]
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+    - name: output
+      shorthand: o
+      usage: Output format. Must be one of (yaml, json)
+see_also:
+    - daytona telemetry - Manage telemetry collection

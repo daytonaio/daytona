@@ -57,7 +57,7 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 	})
 }
 
-func (s *GitProviderService) GetConfigForUrl(url string) (*gitprovider.GitProviderConfig, error) {
+func (s *GitProviderService) GetConfigForUrl(repoUrl string) (*gitprovider.GitProviderConfig, error) {
 	gitProviders, err := s.configStore.List()
 	if err != nil {
 		return nil, err
@@ -68,7 +68,11 @@ func (s *GitProviderService) GetConfigForUrl(url string) (*gitprovider.GitProvid
 			return p, nil
 		}
 
-		if strings.Contains(url, fmt.Sprintf("%s.", p.Id)) {
+		p.Token = url.QueryEscape(p.Token)
+		p.Username = url.QueryEscape(p.Username)
+
+		if strings.Contains(repoUrl, fmt.Sprintf("%s.", p.Id)) {
+
 			return p, nil
 		}
 
@@ -81,7 +85,7 @@ func (s *GitProviderService) GetConfigForUrl(url string) (*gitprovider.GitProvid
 			return nil, err
 		}
 
-		if p.BaseApiUrl != nil && strings.Contains(url, hostname) {
+		if p.BaseApiUrl != nil && strings.Contains(repoUrl, hostname) {
 			return p, nil
 		}
 	}

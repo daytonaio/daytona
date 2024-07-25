@@ -7,6 +7,7 @@ import (
 	"context"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/ide"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -16,9 +17,10 @@ import (
 )
 
 var SshCmd = &cobra.Command{
-	Use:   "ssh [WORKSPACE] [PROJECT]",
-	Short: "SSH into a project using the terminal",
-	Args:  cobra.RangeArgs(0, 2),
+	Use:     "ssh [WORKSPACE] [PROJECT]",
+	Short:   "SSH into a project using the terminal",
+	Args:    cobra.RangeArgs(0, 2),
+	GroupID: util.WORKSPACE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {
 		c, err := config.GetConfig()
 		if err != nil {

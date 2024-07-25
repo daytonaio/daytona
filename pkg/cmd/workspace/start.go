@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -25,9 +26,10 @@ var startProjectFlag string
 var allFlag bool
 
 var StartCmd = &cobra.Command{
-	Use:   "start [WORKSPACE]",
-	Short: "Start a workspace",
-	Args:  cobra.RangeArgs(0, 1),
+	Use:     "start [WORKSPACE]",
+	Short:   "Start a workspace",
+	Args:    cobra.RangeArgs(0, 1),
+	GroupID: util.WORKSPACE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {
 		var workspaceId string
 		var message string
