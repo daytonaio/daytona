@@ -21,14 +21,10 @@ type LocalContainerRegistryConfig struct {
 }
 
 func NewLocalContainerRegistry(config *LocalContainerRegistryConfig) *LocalContainerRegistry {
-	registryImage := config.Image
-	if registryImage == "" {
-		registryImage = "registry:2.8.3"
-	}
 	return &LocalContainerRegistry{
 		dataPath: config.DataPath,
 		port:     config.Port,
-		image:    registryImage,
+		image:    config.Image,
 	}
 }
 
