@@ -56,7 +56,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 
 	var namespaceList []apiclient.GitNamespace
 
-	err = views_util.WithSpinner(func() error {
+	err = views_util.WithSpinner("Loading", func() error {
 		namespaceList, _, err = apiClient.GitProviderAPI.GetNamespaces(ctx, providerId).Execute()
 		return err
 	})
@@ -74,7 +74,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 	}
 
 	var providerRepos []apiclient.GitRepository
-	err = views_util.WithSpinner(func() error {
+	err = views_util.WithSpinner("Loading", func() error {
 		providerRepos, _, err = apiClient.GitProviderAPI.GetRepositories(ctx, providerId, namespaceId).Execute()
 		return err
 	})
@@ -94,7 +94,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 	}
 
 	var branchList []apiclient.GitBranch
-	err = views_util.WithSpinner(func() error {
+	err = views_util.WithSpinner("Loading", func() error {
 		branchList, _, err = apiClient.GitProviderAPI.GetRepoBranches(ctx, providerId, namespaceId, url.QueryEscape(*chosenRepo.Id)).Execute()
 		return err
 	})
@@ -114,7 +114,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 	}
 
 	var prList []apiclient.GitPullRequest
-	err = views_util.WithSpinner(func() error {
+	err = views_util.WithSpinner("Loading", func() error {
 		prList, _, err = apiClient.GitProviderAPI.GetRepoPRs(ctx, providerId, namespaceId, url.QueryEscape(*chosenRepo.Id)).Execute()
 		return err
 	})
