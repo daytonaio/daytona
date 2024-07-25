@@ -92,6 +92,7 @@ func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command
 	rootCmd.InitDefaultHelpCmd()
 	currentCmd := rootCmd
 
+<<<<<<< HEAD
 	// Filter flags from args
 	sanitzedArgs := []string{}
 	for i := 0; i < len(args); i++ {
@@ -106,6 +107,10 @@ func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command
 
 	for len(sanitzedArgs) > 0 {
 		subCmd, subArgs, err := currentCmd.Find(sanitzedArgs)
+=======
+	for len(args) > 0 {
+		subCmd, subArgs, err := currentCmd.Find(args)
+>>>>>>> 6ba5f6b (feat: show help menu on unknown command (#793))
 		if err != nil {
 			return currentCmd, err
 		}
@@ -115,11 +120,19 @@ func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command
 		}
 
 		currentCmd = subCmd
+<<<<<<< HEAD
 		sanitzedArgs = subArgs
 	}
 
 	if len(sanitzedArgs) > 0 {
 		if err := currentCmd.ValidateArgs(sanitzedArgs); err != nil {
+=======
+		args = subArgs
+	}
+
+	if len(args) > 0 {
+		if err := currentCmd.ValidateArgs(args); err != nil {
+>>>>>>> 6ba5f6b (feat: show help menu on unknown command (#793))
 			return currentCmd, err
 		}
 	}
