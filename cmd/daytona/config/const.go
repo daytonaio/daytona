@@ -53,7 +53,7 @@ func GetSupportedGitProviders() []GitProvider {
 		{"gitea", "Gitea"},
 		{"gitness", "Gitness"},
 		{"azure-devops", "Azure DevOps"},
-		{"aws-codecommit", "Aws CodeCommit"},
+		{"aws-codecommit", "AWS CodeCommit"},
 	}
 }
 
@@ -80,7 +80,7 @@ func GetDocsLinkFromGitProvider(providerId string) string {
 	case "azure-devops":
 		return "https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=Windows#create-a-pat"
 	case "aws-codecommit":
-		return "https://aws.amazon.com/codecommit/resources and to configure AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY & AWS_DEFAULT_REGION read https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html  "
+		return "https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-gc.html and to configure AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY & AWS_DEFAULT_REGION read https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html  "
 	default:
 		return ""
 	}

@@ -49,7 +49,7 @@ Set up a development environment on any infrastructure, with a single command.
 * __Configuration File Support__: Initially support for [dev container](https://containers.dev/), ability to expand to DevFile, Nix & Flox (Contributions welcome here!).
 * __Prebuilds System__: Drastically improve environment setup times (Contributions welcome here!).
 * __IDE Support__ : Seamlessly supports [VS Code](https://github.com/microsoft/vscode) & [JetBrains](https://www.jetbrains.com/remote-development/gateway/) locally, ready to use without configuration. Includes a built-in Web IDE for added convenience.
-* __Git Provider Integration__: GitHub, GitLab, Bitbucket, Bitbucket Server, Gitea, Gitness, AWS CodeCommit & Azure DevOps can be connected, allowing easy repo branch or PR pull and commit back from the workspaces.
+* __Git Provider Integration__: GitHub, GitLab, Bitbucket, Bitbucket Server, Gitea, Gitness, Azure DevOps & AWS CodeCommit can be connected, allowing easy repo branch or PR pull and commit back from the workspaces.
 * __Multiple Project Workspace__: Support for multiple project repositories in the same workspace, making it easy to develop using a micro-service architecture.
 * __Reverse Proxy Integration__: Enable collaboration and streamline feedback loops by leveraging reverse proxy functionality. Access preview ports and the Web IDE seamlessly, even behind firewalls.
 * __Extensibility__: Enable extensibility with plugin or provider development. Moreover, in any dynamic language, not just Go(Contributions welcome here!).

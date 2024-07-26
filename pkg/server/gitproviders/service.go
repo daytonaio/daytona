@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/sirupsen/logrus"
 )
 
 type IGitProviderService interface {
@@ -45,7 +44,6 @@ func NewGitProviderService(config GitProviderServiceConfig) IGitProviderService 
 var codebergUrl = "https://codeberg.org"
 
 func (s *GitProviderService) GetGitProvider(id string) (gitprovider.GitProvider, error) {
-	logrus.Info("GetGitProvider: ", id)
 	providerConfig, err := s.configStore.Find(id)
 	if err != nil {
 		return nil, err

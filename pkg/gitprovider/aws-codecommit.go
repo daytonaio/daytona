@@ -282,7 +282,6 @@ func (g *AwsCodeCommitGitProvider) parseStaticGitContext(repoUrl string) (*Stati
 		case "commit":
 			sha := parts[2]
 			staticContext.Sha = &sha
-			staticContext.Branch = &sha
 		case "pull-requests":
 			prNumber, err := strconv.ParseUint(parts[2], 10, 32)
 			if err == nil {
