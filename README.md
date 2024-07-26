@@ -159,7 +159,7 @@ This initiates the Daytona Server in daemon mode. Use the command:
 daytona server
 ```
 __2. Add Your Git Provider of Choice:__
-Daytona supports GitHub, GitLab, Bitbucket, Bitbucket Server, Gitea, Gitness, Aws CodeCommit and Azure DevOps. To add them to your profile, use the command:
+Daytona supports GitHub, GitLab, Bitbucket, Bitbucket Server, Gitea, Gitness, AWS CodeCommit and Azure DevOps. To add them to your profile, use the command:
 ```bash
 daytona git-providers add
 

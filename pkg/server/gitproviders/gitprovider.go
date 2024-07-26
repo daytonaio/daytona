@@ -64,12 +64,12 @@ func (s *GitProviderService) GetConfigForUrl(repoUrl string) (*gitprovider.GitPr
 	}
 
 	for _, p := range gitProviders {
+		p.Token = url.QueryEscape(p.Token)
+		p.Username = url.QueryEscape(p.Username)
+
 		if p.Id == "aws-codecommit" && strings.Contains(repoUrl, "git-codecommit") {
 			return p, nil
 		}
-
-		p.Token = url.QueryEscape(p.Token)
-		p.Username = url.QueryEscape(p.Username)
 
 		if strings.Contains(repoUrl, fmt.Sprintf("%s.", p.Id)) {
 

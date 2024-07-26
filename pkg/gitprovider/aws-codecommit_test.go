@@ -113,13 +113,14 @@ func (g *AwsCodeCommitGitProviderTestSuite) TestParseStaticGitContext_Commits() 
 
 func (g *AwsCodeCommitGitProviderTestSuite) TestParseStaticGitContext_Commit() {
 	prUrl := "https://ap-south-1.console.aws.amazon.com/codesuite/codecommit/repositories/Test/commit/c98e121383bc4e85d71891bdc54953187f2dd878"
+	branch := "main"
 	sha := "c98e121383bc4e85d71891bdc54953187f2dd878"
 	prContext := &StaticGitContext{
 		Id:       "Test",
 		Name:     "Test",
 		Owner:    "Test",
 		Url:      "https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/Test",
-		Branch:   &sha,
+		Branch:   &branch,
 		Source:   "ap-south-1.console.aws.amazon.com",
 		Sha:      &sha,
 		Path:     nil,
