@@ -224,16 +224,16 @@ func (s *WorkspaceService) createWorkspace(ctx context.Context, ws *workspace.Wo
 
 	wsLogger.Write([]byte(fmt.Sprintf("Creating workspace %s (%s)\n", ws.Name, ws.Id)))
 
-	err := s.provisioner.CreateWorkspace(ws, target)
-	if err != nil {
-		return nil, err
-	}
-
 	ws.EnvVars = workspace.GetWorkspaceEnvVars(ws, workspace.WorkspaceEnvVarParams{
 		ApiUrl:    s.serverApiUrl,
 		ServerUrl: s.serverUrl,
 		ClientId:  telemetry.ClientId(ctx),
 	}, telemetry.TelemetryEnabled(ctx))
+
+	err := s.provisioner.CreateWorkspace(ws, target)
+	if err != nil {
+		return nil, err
+	}
 
 	for i, project := range ws.Projects {
 		projectLogger := s.loggerFactory.CreateProjectLogger(ws.Id, project.Name, logs.LogSourceServer)
