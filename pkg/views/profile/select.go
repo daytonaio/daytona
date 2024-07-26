@@ -27,6 +27,7 @@ func GetProfileFromPrompt(profiles []config.Profile, activeProfileName string, w
 		name := NewProfileId
 		items = append(items, item{
 			profile: config.Profile{
+				Id:   NewProfileId,
 				Name: name,
 			},
 		})
