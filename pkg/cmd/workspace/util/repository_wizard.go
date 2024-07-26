@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -40,7 +41,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 	}
 	providerId = selection.GetProviderIdFromPrompt(gitProviderViewList, additionalProjectOrder, disabledGitProviders)
 	if providerId == "" {
-		return nil, errors.New("ctrl-c exit")
+		return nil, common.ErrCtrlCAbort
 	}
 
 	if providerId == selection.CustomRepoIdentifier {
@@ -90,7 +91,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 		chosenRepo = selection.GetRepositoryFromPrompt(providerRepos, additionalProjectOrder, providerId, disabledGitProviders, selectedRepos)
 	}
 	if chosenRepo == nil {
-		return nil, errors.New("ctrl-c exit")
+		return nil, common.ErrCtrlCAbort
 	}
 
 	var branchList []apiclient.GitBranch
@@ -127,7 +128,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 	if len(prList) == 0 {
 		branch = selection.GetBranchFromPrompt(branchList, additionalProjectOrder)
 		if branch == nil {
-			return nil, errors.New("ctrl-c exit")
+			return nil, common.ErrCtrlCAbort
 		}
 
 		chosenRepo.Branch = branch.Name
@@ -148,14 +149,14 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 	if chosenCheckoutOption == selection.CheckoutBranch {
 		branch = selection.GetBranchFromPrompt(branchList, additionalProjectOrder)
 		if branch == nil {
-			return nil, errors.New("ctrl-c exit")
+			return nil, common.ErrCtrlCAbort
 		}
 		chosenRepo.Branch = branch.Name
 		chosenRepo.Sha = branch.Sha
 	} else if chosenCheckoutOption == selection.CheckoutPR {
 		chosenPullRequest := selection.GetPullRequestFromPrompt(prList, additionalProjectOrder)
 		if chosenPullRequest == nil {
-			return nil, errors.New("ctrl-c exit")
+			return nil, common.ErrCtrlCAbort
 		}
 
 		chosenRepo.Branch = chosenPullRequest.Branch

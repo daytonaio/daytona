@@ -4,12 +4,11 @@
 package target
 
 import (
-	"errors"
-
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
@@ -47,5 +46,5 @@ func GetTargetFromPrompt(targets []apiclient.ProviderTarget, activeProfileName s
 		return m.choice, nil
 	}
 
-	return nil, errors.New("ctrl-c exit")
+	return nil, common.ErrCtrlCAbort
 }

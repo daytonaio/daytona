@@ -67,7 +67,7 @@ var TargetSetCmd = &cobra.Command{
 
 		selectedTarget, err := target.GetTargetFromPrompt(filteredTargets, activeProfile.Name, true)
 		if err != nil {
-			if err.Error() == "ctrl-c exit" {
+			if common.IsCtrlCAbort(err) {
 				return
 			} else {
 				log.Fatal(err)

@@ -74,7 +74,7 @@ var providerInstallCmd = &cobra.Command{
 
 			providerToInstall, err = provider.GetProviderFromPrompt(providerList, "Choose a specific provider to install", false)
 			if err != nil {
-				if err.Error() == "ctrl-c exit" {
+				if common.IsCtrlCAbort(err) {
 					return
 				} else {
 					log.Fatal(err)
