@@ -47,5 +47,5 @@ func GetTargetFromPrompt(targets []apiclient.ProviderTarget, activeProfileName s
 		return m.choice, nil
 	}
 
-	return nil, errors.New("no target selected")
+	return nil, errors.New("ctrl-c exit")
 }

@@ -8,6 +8,7 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/os"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -57,7 +58,11 @@ var providerInstallCmd = &cobra.Command{
 
 		providerToInstall, err := provider.GetProviderFromPrompt(providerList, "Choose a provider to install", false)
 		if err != nil {
-			log.Fatal(err)
+			if common.IsCtrlCAbort(err) {
+				return
+			} else {
+				log.Fatal(err)
+			}
 		}
 
 		if providerToInstall == nil {
@@ -69,7 +74,11 @@ var providerInstallCmd = &cobra.Command{
 
 			providerToInstall, err = provider.GetProviderFromPrompt(providerList, "Choose a specific provider to install", false)
 			if err != nil {
-				log.Fatal(err)
+				if err.Error() == "ctrl-c exit" {
+					return
+				} else {
+					log.Fatal(err)
+				}
 			}
 
 			if providerToInstall == nil {

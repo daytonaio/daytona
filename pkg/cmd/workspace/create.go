@@ -18,6 +18,7 @@ import (
 	ssh_config "github.com/daytonaio/daytona/pkg/agent/ssh/config"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/views"
 	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
@@ -80,7 +81,11 @@ var CreateCmd = &cobra.Command{
 		if len(args) == 0 {
 			err = processPrompting(apiClient, &workspaceName, &projects, existingWorkspaceNames, ctx)
 			if err != nil {
-				log.Fatal(err)
+				if common.IsCtrlCAbort(err) {
+					return
+				} else {
+					log.Fatal(err)
+				}
 			}
 		} else {
 			err = processCmdArguments(args, apiClient, &projects, ctx)

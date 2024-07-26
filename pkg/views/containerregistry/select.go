@@ -48,5 +48,5 @@ func GetRegistryFromPrompt(registries []apiclient.ContainerRegistry, activeProfi
 		return m.choice, nil
 	}
 
-	return nil, errors.New("no container registry selected")
+	return nil, errors.New("ctrl-c exit")
 }

@@ -45,5 +45,5 @@ func GetApiKeyFromPrompt(apiKeys []apiclient.ApiKey, title string, withNewApiKey
 		return m.choice, nil
 	}
 
-	return nil, errors.New("no API key selected")
+	return nil, errors.New("ctrl-c exit")
 }

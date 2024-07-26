@@ -40,7 +40,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 	}
 	providerId = selection.GetProviderIdFromPrompt(gitProviderViewList, additionalProjectOrder, disabledGitProviders)
 	if providerId == "" {
-		return nil, errors.New("must select a provider")
+		return nil, errors.New("ctrl-c exit")
 	}
 
 	if providerId == selection.CustomRepoIdentifier {
@@ -90,7 +90,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 		chosenRepo = selection.GetRepositoryFromPrompt(providerRepos, additionalProjectOrder, providerId, disabledGitProviders, selectedRepos)
 	}
 	if chosenRepo == nil {
-		return nil, errors.New("must select a repository")
+		return nil, errors.New("ctrl-c exit")
 	}
 
 	var branchList []apiclient.GitBranch
@@ -127,7 +127,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 	if len(prList) == 0 {
 		branch = selection.GetBranchFromPrompt(branchList, additionalProjectOrder)
 		if branch == nil {
-			return nil, errors.New("must select a branch")
+			return nil, errors.New("ctrl-c exit")
 		}
 
 		chosenRepo.Branch = branch.Name
@@ -148,14 +148,14 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 	if chosenCheckoutOption == selection.CheckoutBranch {
 		branch = selection.GetBranchFromPrompt(branchList, additionalProjectOrder)
 		if branch == nil {
-			return nil, errors.New("must select a branch")
+			return nil, errors.New("ctrl-c exit")
 		}
 		chosenRepo.Branch = branch.Name
 		chosenRepo.Sha = branch.Sha
 	} else if chosenCheckoutOption == selection.CheckoutPR {
 		chosenPullRequest := selection.GetPullRequestFromPrompt(prList, additionalProjectOrder)
 		if chosenPullRequest == nil {
-			return nil, errors.New("must select a pull request")
+			return nil, errors.New("ctrl-c exit")
 		}
 
 		chosenRepo.Branch = chosenPullRequest.Branch

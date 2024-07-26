@@ -11,6 +11,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	"github.com/daytonaio/daytona/pkg/common"
 	containerregistry_view "github.com/daytonaio/daytona/pkg/views/containerregistry"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -53,7 +54,11 @@ var containerRegistryDeleteCmd = &cobra.Command{
 
 			registryDto, err = containerregistry_view.GetRegistryFromPrompt(containerRegistries, activeProfile.Name, false)
 			if err != nil {
-				log.Fatal(err)
+				if common.IsCtrlCAbort(err) {
+					return
+				} else {
+					log.Fatal(err)
+				}
 			}
 
 			selectedServer = *registryDto.Server

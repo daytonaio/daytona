@@ -45,5 +45,5 @@ func GetProviderFromPrompt(providers []apiclient.Provider, title string, withNew
 		return m.choice, nil
 	}
 
-	return nil, errors.New("no provider selected")
+	return nil, errors.New("ctrl-c exit")
 }
