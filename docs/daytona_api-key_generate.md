@@ -6,12 +6,6 @@ Generate a new API key
 daytona api-key generate [NAME] [flags]
 ```
 
-### Options
-
-```
-  -s, --save   Save the API key to your default profile on this machine
-```
-
 ### Options inherited from parent commands
 
 ```

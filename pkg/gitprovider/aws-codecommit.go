@@ -202,9 +202,12 @@ func (g *AwsCodeCommitGitProvider) GetLastCommitSha(staticContext *StaticGitCont
 	if err != nil {
 		return "", fmt.Errorf("failed to get client: %s", err.Error())
 	}
-	branch, err := client.GetBranch(context.TODO(), &codecommit.GetBranchInput{
-		RepositoryName: &staticContext.Name,
+	if staticContext.Branch != nil {
+		staticContext.Branch = &[]string{"main"}[0]
+	}
+	branch, err := client.GetBranch(context.Background(), &codecommit.GetBranchInput{
 		BranchName:     staticContext.Branch,
+		RepositoryName: &staticContext.Name,
 	})
 	if err != nil {
 		return "", fmt.Errorf("failed to fetch branch details: %w", err)
@@ -238,18 +241,16 @@ func (g *AwsCodeCommitGitProvider) parseStaticGitContext(repoUrl string) (*Stati
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse url: %s with error: %v", repoUrl, err.Error())
 	}
-	branch := "main"
 	if strings.Contains(repoUrl, "git-codecommit") {
 		reponame := strings.TrimPrefix(url.Path, "/v1/repos/")
-		branchpath := fmt.Sprintf("refs/heads/%s/", branch)
 		return &StaticGitContext{
 			Id:       reponame,
 			Name:     reponame,
 			Owner:    reponame,
 			Source:   url.Host,
 			Url:      getCodeCommitCloneUrl(g.region, reponame),
-			Path:     &branchpath,
-			Branch:   &branch,
+			Path:     nil,
+			Branch:   &[]string{"main"}[0],
 			Sha:      nil,
 			PrNumber: nil,
 		}, nil
@@ -262,7 +263,7 @@ func (g *AwsCodeCommitGitProvider) parseStaticGitContext(repoUrl string) (*Stati
 		Name:     reponame,
 		Owner:    reponame,
 		Source:   url.Host,
-		Branch:   &branch,
+		Branch:   &[]string{"main"}[0],
 		Url:      getCodeCommitCloneUrl(g.region, reponame),
 		Sha:      nil,
 		PrNumber: nil,
@@ -275,19 +276,21 @@ func (g *AwsCodeCommitGitProvider) parseStaticGitContext(repoUrl string) (*Stati
 				branchpath := fmt.Sprintf("refs/heads/%s", parts[4])
 				if len(parts) > 5 && parts[5] == "--" {
 					branchpath = fmt.Sprintf("refs/heads/%s/--/%s", parts[4], parts[6])
+					staticContext.Path = &branchpath
 				}
 				staticContext.Branch = &parts[4]
-				staticContext.Path = &branchpath
 			}
 		case "commit":
 			sha := parts[2]
 			staticContext.Sha = &sha
+			staticContext.Branch = &sha
 		case "pull-requests":
 			prNumber, err := strconv.ParseUint(parts[2], 10, 32)
 			if err == nil {
 				prNum := uint32(prNumber)
 				staticContext.PrNumber = &prNum
 			}
+			staticContext.Branch = nil
 		}
 	}
 	return staticContext, nil

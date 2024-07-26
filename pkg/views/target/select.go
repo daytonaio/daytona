@@ -36,7 +36,7 @@ func GetTargetFromPrompt(targets []apiclient.ProviderTarget, activeProfileName s
 	l := views.GetStyledSelectList(items)
 	m := model{list: l}
 	m.list.Title = views.GetStyledMainTitle("Choose a Target")
-	m.footer = views.GetListFooter(activeProfileName)
+	m.footer = views.GetListFooter(activeProfileName, views.DefaultListFooterPadding)
 
 	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
 	if err != nil {

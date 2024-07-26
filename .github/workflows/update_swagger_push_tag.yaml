@@ -1,0 +1,60 @@
+name: "[Release] Update swagger and push tag"
+
+on:
+  workflow_dispatch:
+    inputs:
+        tag_version:
+          description: 'Tag version'
+          required: true
+
+concurrency:
+  # New commit on branch cancels running workflows of the same branch
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update-swagger-and-push-tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUBBOT_TOKEN }}
+
+      - name: Update swagger version in server.go
+        run: |
+          sed  -i 's/\(@version[[:space:]]*\)[0-9]\+\(\.[0-9]\+\)*\(\.[0-9]\+\)*/\1${{ github.event.inputs.tag_version }}/' pkg/api/server.go
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Setup go dependencies
+        run: |
+          go install github.com/swaggo/swag/cmd/swag@v1.16.3
+          go mod tidy
+
+      - name: Update swagger
+        run: |
+          ./hack/swagger.sh
+          go fmt ./...
+
+      - name: Commit swagger update
+        uses: stefanzweifel/git-auto-commit-action@v5
+        id: commit
+        with:
+          file_pattern: 'pkg/api/server.go pkg/api/docs/swagger.json pkg/api/docs/swagger.yaml'
+          branch: main
+          commit_message: "chore: automated swagger version update to - ${{ github.event.inputs.tag_version }} [skip ci]"
+
+      - name: Commit tag
+        id: tag
+        if: steps.commit.outputs.changes_detected == 'true'
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: ${{ github.event.inputs.tag_version }}

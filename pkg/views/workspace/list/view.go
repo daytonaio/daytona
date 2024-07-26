@@ -27,7 +27,7 @@ type RowData struct {
 	Branch     string
 }
 
-func ListWorkspaces(workspaceList []apiclient.WorkspaceDTO, specifyGitProviders bool, verbose bool) {
+func ListWorkspaces(workspaceList []apiclient.WorkspaceDTO, specifyGitProviders bool, verbose bool, activeProfileName string) {
 	sortWorkspaces(&workspaceList, verbose)
 
 	re := lipgloss.NewRenderer(os.Stdout)
@@ -98,7 +98,9 @@ func ListWorkspaces(workspaceList []apiclient.WorkspaceDTO, specifyGitProviders 
 			return views.BaseCellStyle
 		}).Width(breakpointWidth - 2*views.BaseTableStyleHorizontalPadding - 1)
 
-	fmt.Println(views.BaseTableStyle.Render(t.String()))
+	footer := lipgloss.NewStyle().Foreground(views.LightGray).Render(views.GetListFooter(activeProfileName, &views.Padding{}))
+
+	fmt.Println(views.BaseTableStyle.Render(t.String() + "\n" + footer))
 }
 
 func renderUnstyledList(workspaceList []apiclient.WorkspaceDTO) {

@@ -18,7 +18,7 @@ var workspaceLogsStarted bool
 
 func ReadWorkspaceLogs(activeProfile config.Profile, workspaceId string, projectNames []string, stopLogs *bool) {
 	var wg sync.WaitGroup
-	query := "follow=true"
+	query := "follow=true&retry=true"
 
 	logs_view.CalculateLongestPrefixLength(projectNames)
 
