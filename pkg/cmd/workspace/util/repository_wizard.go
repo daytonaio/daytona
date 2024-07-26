@@ -163,6 +163,12 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 
 		providerRepos = append(providerRepos, repos...)
 
+		// For bitbucket, pagination is only supported for fetch repos api
+		if providerId == "bitbucket" {
+			page++
+			continue
+		}
+
 		// Break for git providers with unsupported pagination OR on reaching exhausted items.
 		if isGitProviderWithUnsupportedPagination(providerId) || int32(len(repos)) < perPage {
 			break
