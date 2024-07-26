@@ -52,6 +52,8 @@ func (g *BitbucketGitProvider) GetNamespaces(options ListOptions) ([]*GitNamespa
 
 func (g *BitbucketGitProvider) GetRepositories(namespace string, options ListOptions) ([]*GitRepository, error) {
 	client := g.getApiClient()
+	// Bitbucket has 'page' param but doesnt supports 'perPage' param in fetch repos api
+	client.Pagelen = options.PerPage
 	var response []*GitRepository
 
 	if namespace == personalNamespaceId {
@@ -62,54 +64,42 @@ func (g *BitbucketGitProvider) GetRepositories(namespace string, options ListOpt
 		namespace = user.Username
 	}
 
-	// Since bitbucket doesnt supports perPage arg,
-	// Fetch repos page by page until no more items are returned
-	for {
-		repoList, err := client.Repositories.ListForAccount(&bitbucket.RepositoriesOptions{
-			Owner: namespace,
-			Page:  &options.Page,
-		})
+	repoList, err := client.Repositories.ListForAccount(&bitbucket.RepositoriesOptions{
+		Owner: namespace,
+		Page:  &options.Page,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, repo := range repoList.Items {
+		htmlLink, ok := repo.Links["html"].(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("Invalid repo links")
+		}
+
+		repoUrl, ok := htmlLink["href"].(string)
+		if !ok {
+			return nil, fmt.Errorf("Invalid repo html link")
+		}
+
+		u, err := url.Parse(repoUrl)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, repo := range repoList.Items {
-			htmlLink, ok := repo.Links["html"].(map[string]interface{})
-			if !ok {
-				return nil, fmt.Errorf("Invalid repo links")
-			}
-
-			repoUrl, ok := htmlLink["href"].(string)
-			if !ok {
-				return nil, fmt.Errorf("Invalid repo html link")
-			}
-
-			u, err := url.Parse(repoUrl)
-			if err != nil {
-				return nil, err
-			}
-
-			owner, name, err := g.getOwnerAndRepoFromFullName(repo.Full_name)
-			if err != nil {
-				return nil, err
-			}
-
-			response = append(response, &GitRepository{
-				Id:     repo.Full_name,
-				Name:   name,
-				Url:    repoUrl,
-				Source: u.Host,
-				Owner:  owner,
-			})
+		owner, name, err := g.getOwnerAndRepoFromFullName(repo.Full_name)
+		if err != nil {
+			return nil, err
 		}
 
-		// If fewer than 10 items are returned, it indicates the last page
-		// refer to https://github.com/ktrysmt/go-bitbucket/blob/master/client.go#L23
-		if len(repoList.Items) < 10 {
-			break
-		}
-
-		options.Page++
+		response = append(response, &GitRepository{
+			Id:     repo.Full_name,
+			Name:   name,
+			Url:    repoUrl,
+			Source: u.Host,
+			Owner:  owner,
+		})
 	}
 
 	return response, nil
@@ -202,6 +192,10 @@ func (g *BitbucketGitProvider) GetRepoPRs(repositoryId string, namespaceId strin
 
 func (g *BitbucketGitProvider) GetUser() (*GitUser, error) {
 	client := g.getApiClient()
+	// set pagelen to a big number since all fetch apis (except fetch repos api)
+	// doesnt support pagination args like page, perPage..
+	// Refer to https://github.com/ktrysmt/go-bitbucket/blob/master/client.go#L259
+	client.Pagelen = 1000
 
 	user, err := client.User.Profile()
 	if err != nil {
