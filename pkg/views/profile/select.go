@@ -4,8 +4,6 @@
 package profile
 
 import (
-	"errors"
-
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -46,5 +44,5 @@ func GetProfileFromPrompt(profiles []config.Profile, activeProfileName string, w
 		return m.choice, nil
 	}
 
-	return nil, errors.New("no profile selected")
+	return nil, nil
 }

@@ -32,7 +32,7 @@ var profileEditCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 
-			if chosenProfile.Id == "" {
+			if chosenProfile == nil {
 				return
 			}
 		} else {
