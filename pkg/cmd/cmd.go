@@ -92,8 +92,20 @@ func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command
 	rootCmd.InitDefaultHelpCmd()
 	currentCmd := rootCmd
 
-	for len(args) > 0 {
-		subCmd, subArgs, err := currentCmd.Find(args)
+	// Filter flags from args
+	sanitzedArgs := []string{}
+	for i := 0; i < len(args); i++ {
+		if strings.HasPrefix(args[i], "-") {
+			if i+1 < len(args) && !strings.HasPrefix(args[i+1], "-") {
+				i++
+			}
+			continue
+		}
+		sanitzedArgs = append(sanitzedArgs, args[i])
+	}
+
+	for len(sanitzedArgs) > 0 {
+		subCmd, subArgs, err := currentCmd.Find(sanitzedArgs)
 		if err != nil {
 			return currentCmd, err
 		}
@@ -103,11 +115,11 @@ func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command
 		}
 
 		currentCmd = subCmd
-		args = subArgs
+		sanitzedArgs = subArgs
 	}
 
-	if len(args) > 0 {
-		if err := currentCmd.ValidateArgs(args); err != nil {
+	if len(sanitzedArgs) > 0 {
+		if err := currentCmd.ValidateArgs(sanitzedArgs); err != nil {
 			return currentCmd, err
 		}
 	}
