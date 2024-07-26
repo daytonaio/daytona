@@ -46,6 +46,10 @@ var ProfileUseCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 
+			if chosenProfile == nil {
+				return
+			}
+
 			if chosenProfile.Id == profile.NewProfileId {
 				_, err = CreateProfile(c, nil, true)
 				if err != nil {
