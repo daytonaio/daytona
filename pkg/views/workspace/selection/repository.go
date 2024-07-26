@@ -6,7 +6,6 @@ package selection
 import (
 	"fmt"
 	"os"
-	"strconv"
 
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -20,15 +19,7 @@ func selectRepositoryPrompt(repositories []apiclient.GitRepository, index int, c
 
 	// Populate items with titles and descriptions from workspaces.
 	for _, repository := range repositories {
-		url := *repository.Url
-
-		// Index > 1 indicates use of 'multi-project' command
-		// Append occurence number so as to keep unique names for duplicate entries.
-		if index > 1 && len(selectedRepos) > 0 && selectedRepos[url] > 0 {
-			*repository.Name += strconv.Itoa(selectedRepos[url] + 1)
-		}
-
-		newItem := item[string]{id: url, title: *repository.Name, choiceProperty: url, desc: url}
+		newItem := item[string]{id: *repository.Url, title: *repository.Name, choiceProperty: *repository.Url, desc: *repository.Url}
 		items = append(items, newItem)
 	}
 
@@ -52,7 +43,6 @@ func selectRepositoryPrompt(repositories []apiclient.GitRepository, index int, c
 		choice := *m.choice
 
 		selectedRepos[choice]++
-
 		choiceChan <- choice
 	} else {
 		choiceChan <- ""

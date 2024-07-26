@@ -101,7 +101,7 @@ func GetRepositoryFromUrlInput(multiProject bool, apiClient *apiclient.APIClient
 		return nil, err
 	}
 
-	selectedRepos[initialRepoUrl]++
+	selectedRepos[*repo.Url]++
 
 	return repo, nil
 }
@@ -145,7 +145,7 @@ func RunAdditionalProjectRepoForm(index int, apiClient *apiclient.APIClient, sel
 		return nil, false, err
 	}
 
-	selectedRepos[repoUrl]++
+	selectedRepos[*repo.Url]++
 
 	return repo, addAnother, nil
 }

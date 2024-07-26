@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/apiclient"
@@ -76,6 +77,12 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 				if err != nil {
 					return "", nil, err
 				}
+			}
+
+			// Append occurence number to keep duplicate entries unique
+			repoUrl := *providerRepo.Url
+			if len(selectedRepos) > 0 && selectedRepos[repoUrl] > 1 {
+				*providerRepo.Name += strconv.Itoa(selectedRepos[repoUrl])
 			}
 
 			providerRepoName, err := GetSanitizedProjectName(*providerRepo.Name)
