@@ -7,6 +7,7 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/server"
@@ -14,6 +15,8 @@ import (
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 )
+
+const TIMEOUT = 300 * time.Millisecond
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
@@ -97,6 +100,8 @@ func writeJSONToWs(ws *websocket.Conn, c chan interface{}, errChan chan error) {
 func readJSONLog(ginCtx *gin.Context, logReader io.Reader) {
 	followQuery := ginCtx.Query("follow")
 	follow := followQuery == "true"
+	retryQuery := ginCtx.Query("retry")
+	retry := retryQuery == "true"
 
 	ws, err := upgrader.Upgrade(ginCtx.Writer, ginCtx.Request, nil)
 	if err != nil {
@@ -110,7 +115,7 @@ func readJSONLog(ginCtx *gin.Context, logReader io.Reader) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	defer cancel()
-	go util.ReadJSONLog(ctx, logReader, follow, msgChannel, errChannel)
+	go util.ReadJSONLog(ctx, logReader, follow, retry, msgChannel, errChannel)
 	go writeJSONToWs(ws, msgChannel, errChannel)
 
 	go func() {
@@ -148,6 +153,19 @@ func readJSONLog(ginCtx *gin.Context, logReader io.Reader) {
 
 func ReadServerLog(ginCtx *gin.Context) {
 	server := server.GetInstance(nil)
+	retryQuery := ginCtx.DefaultQuery("retry", "true")
+	retry := retryQuery == "true"
+
+	if retry {
+		for {
+			reader, err := server.GetLogReader()
+			if err == nil {
+				readLog(ginCtx, reader)
+				return
+			}
+			time.Sleep(TIMEOUT)
+		}
+	}
 
 	reader, err := server.GetLogReader()
 	if err != nil {
@@ -160,8 +178,21 @@ func ReadServerLog(ginCtx *gin.Context) {
 
 func ReadWorkspaceLog(ginCtx *gin.Context) {
 	workspaceId := ginCtx.Param("workspaceId")
+	retryQuery := ginCtx.DefaultQuery("retry", "true")
+	retry := retryQuery == "true"
 
 	server := server.GetInstance(nil)
+
+	if retry {
+		for {
+			wsLogReader, err := server.WorkspaceService.GetWorkspaceLogReader(workspaceId)
+			if err == nil {
+				readJSONLog(ginCtx, wsLogReader)
+				return
+			}
+			time.Sleep(TIMEOUT)
+		}
+	}
 
 	wsLogReader, err := server.WorkspaceService.GetWorkspaceLogReader(workspaceId)
 	if err != nil {
@@ -175,8 +206,21 @@ func ReadWorkspaceLog(ginCtx *gin.Context) {
 func ReadProjectLog(ginCtx *gin.Context) {
 	workspaceId := ginCtx.Param("workspaceId")
 	projectName := ginCtx.Param("projectName")
+	retryQuery := ginCtx.DefaultQuery("retry", "true")
+	retry := retryQuery == "true"
 
 	server := server.GetInstance(nil)
+
+	if retry {
+		for {
+			projectLogReader, err := server.WorkspaceService.GetProjectLogReader(workspaceId, projectName)
+			if err == nil {
+				readJSONLog(ginCtx, projectLogReader)
+				return
+			}
+			time.Sleep(TIMEOUT)
+		}
+	}
 
 	projectLogReader, err := server.WorkspaceService.GetProjectLogReader(workspaceId, projectName)
 	if err != nil {

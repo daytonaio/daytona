@@ -37,8 +37,9 @@ func ReadLog(ctx context.Context, logReader io.Reader, follow bool, c chan []byt
 	}
 }
 
-func ReadJSONLog(ctx context.Context, logReader io.Reader, follow bool, c chan interface{}, errChan chan error) {
+func ReadJSONLog(ctx context.Context, logReader io.Reader, follow bool, retry bool, c chan interface{}, errChan chan error) {
 	var buffer bytes.Buffer
+	var err error
 	reader := bufio.NewReader(logReader)
 	delimiter := []byte(logs.LogDelimiter)
 
@@ -48,16 +49,31 @@ func ReadJSONLog(ctx context.Context, logReader io.Reader, follow bool, c chan i
 			return
 		default:
 			byteChunk := make([]byte, 1024)
-			n, err := reader.Read(byteChunk)
-			if err != nil {
-				if err != io.EOF {
-					errChan <- err
-				} else if !follow {
-					errChan <- io.EOF
-					return
+
+			if retry {
+				for {
+					n, err := reader.Read(byteChunk)
+					if err == nil {
+						buffer.Write(byteChunk[:n])
+						break
+					} else if !follow && err == io.EOF {
+						errChan <- io.EOF
+						return
+					}
 				}
+			} else {
+				n, err := reader.Read(byteChunk)
+				if err != nil {
+					if err != io.EOF {
+						errChan <- err
+					} else if !follow {
+						errChan <- io.EOF
+						return
+					}
+				}
+				buffer.Write(byteChunk[:n])
 			}
-			buffer.Write(byteChunk[:n])
+
 			data := buffer.Bytes()
 
 			index := bytes.Index(data, delimiter)
