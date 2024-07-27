@@ -301,7 +301,8 @@ func (g *GitHubGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitCon
 		staticContext.PrNumber = &prUint
 		staticContext.Path = nil
 	case len(parts) >= 1 && parts[0] == "tree":
-		staticContext.Branch = &parts[1]
+		branchPath := strings.Join(parts[1:], "/")
+		staticContext.Branch = &branchPath
 		staticContext.Path = nil
 	case len(parts) >= 2 && parts[0] == "blob":
 		staticContext.Branch = &parts[1]
