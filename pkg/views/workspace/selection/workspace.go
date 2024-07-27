@@ -13,6 +13,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/output"
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
@@ -100,6 +101,12 @@ func getWorkspaceProgramEssentials(modelTitle string, actionVerb string, workspa
 }
 
 func selectWorkspacePrompt(workspaces []apiclient.WorkspaceDTO, actionVerb string, choiceChan chan<- *apiclient.WorkspaceDTO) {
+	if os.Stdout == nil {
+		os.Stdout = output.OriginalStdout
+		defer func() {
+			os.Stdout = nil
+		}()
+	}
 
 	p := getWorkspaceProgramEssentials("Select a Workspace To ", actionVerb, workspaces, "")
 	if m, ok := p.(model[apiclient.WorkspaceDTO]); ok && m.choice != nil {
@@ -113,7 +120,6 @@ func GetWorkspaceFromPrompt(workspaces []apiclient.WorkspaceDTO, actionVerb stri
 	choiceChan := make(chan *apiclient.WorkspaceDTO)
 
 	go selectWorkspacePrompt(workspaces, actionVerb, choiceChan)
-
 	return <-choiceChan
 }
 

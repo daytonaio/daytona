@@ -13,6 +13,7 @@ import (
 
 var FormatFlag string
 var Output interface{}
+var OriginalStdout *os.File
 
 type Formatter interface {
 	Format(data interface{}) (string, error)
