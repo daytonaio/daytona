@@ -15,6 +15,7 @@ import (
 var FIRST_PROJECT_INDEX = 0
 var WORKSPACE_INDEX = -1
 var WORKSPACE_PREFIX = "WORKSPACE"
+var PROJECT_INDEX = 0
 
 var longestPrefixLength = len(WORKSPACE_PREFIX)
 var maxPrefixLength = 20
