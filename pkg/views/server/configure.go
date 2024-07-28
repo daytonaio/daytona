@@ -143,7 +143,7 @@ func createPortValidator(config *apiclient.ServerConfig, portView *string, port 
 		}
 		*port = int32(validatePort)
 
-		if *config.ApiPort == *config.HeadscalePort {
+		if config.ApiPort != nil && config.HeadscalePort != nil && *config.ApiPort == *config.HeadscalePort {
 			return errors.New("port conflict")
 		}
 
@@ -153,6 +153,9 @@ func createPortValidator(config *apiclient.ServerConfig, portView *string, port 
 
 func directoryValidator(path *string) func(string) error {
 	return func(string) error {
+		if path == nil || *path == "" {
+			return nil
+		}
 		_, err := os.Stat(*path)
 		if os.IsNotExist(err) {
 			return os.MkdirAll(*path, 0700)
