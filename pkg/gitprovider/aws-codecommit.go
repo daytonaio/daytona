@@ -202,17 +202,39 @@ func (g *AwsCodeCommitGitProvider) GetLastCommitSha(staticContext *StaticGitCont
 	if err != nil {
 		return "", fmt.Errorf("failed to get client: %s", err.Error())
 	}
+	sha := ""
 	if staticContext.Branch != nil {
-		staticContext.Branch = &[]string{"main"}[0]
+		sha = *staticContext.Branch
 	}
-	branch, err := client.GetBranch(context.Background(), &codecommit.GetBranchInput{
-		BranchName:     staticContext.Branch,
-		RepositoryName: &staticContext.Name,
-	})
-	if err != nil {
-		return "", fmt.Errorf("failed to fetch branch details: %w", err)
+	if staticContext.Sha != nil {
+		sha = *staticContext.Sha
 	}
-	return *branch.Branch.CommitId, nil
+	commitSha := ""
+	if staticContext.Branch == staticContext.Sha {
+		commit, err := client.GetCommit(context.Background(), &codecommit.GetCommitInput{
+			CommitId:       &sha,
+			RepositoryName: &staticContext.Name,
+		})
+
+		if err != nil {
+			return "", fmt.Errorf("failed to fetch branch details: %w", err)
+		}
+		commitSha = *commit.Commit.CommitId
+	} else {
+		if sha == "" {
+			sha = "main"
+		}
+		branch, err := client.GetBranch(context.Background(), &codecommit.GetBranchInput{
+			BranchName:     &sha,
+			RepositoryName: &staticContext.Name,
+		})
+
+		if err != nil {
+			return "", fmt.Errorf("failed to fetch branch details: %w", err)
+		}
+		commitSha = *branch.Branch.CommitId
+	}
+	return commitSha, nil
 }
 
 func (g *AwsCodeCommitGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
