@@ -41,7 +41,7 @@ var CreateCmd = &cobra.Command{
 	GroupID: util.WORKSPACE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
-		var projects []apiclient.CreateProjectDTO
+		var projects []apiclient.CreateProjectConfigDTO
 		var workspaceName string
 		var existingWorkspaceNames []string
 
@@ -92,7 +92,7 @@ var CreateCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 
-			initialSuggestion := getWorkspaceFirstProjectName(projects[0])
+			initialSuggestion := *projects[0].Name
 
 			if workspaceName == "" {
 				workspaceName = workspace_util.GetSuggestedName(initialSuggestion, existingWorkspaceNames)
@@ -106,13 +106,8 @@ var CreateCmd = &cobra.Command{
 
 		projectNames := []string{}
 		for i := range projects {
-			projects[i].NewConfig.EnvVars = workspace_util.GetEnvVariables(&projects[i], profileData)
-
-			if projects[i].ExistingConfig != nil && *projects[i].ExistingConfig.ConfigName != "" {
-				projectNames = append(projectNames, *projects[i].ExistingConfig.ConfigName)
-			} else if projects[i].NewConfig != nil && projects[i].NewConfig.Name != nil {
-				projectNames = append(projectNames, *projects[i].NewConfig.Name)
-			}
+			projects[i].EnvVars = workspace_util.GetEnvVariables(&projects[i], profileData)
+			projectNames = append(projectNames, *projects[i].Name)
 		}
 
 		logs_view.CalculateLongestPrefixLength(projectNames)
@@ -275,7 +270,7 @@ func getTarget(activeProfileName string) (*apiclient.ProviderTarget, error) {
 	return target.GetTargetFromPrompt(targets, activeProfileName, false)
 }
 
-func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, projects *[]apiclient.CreateProjectDTO, workspaceNames []string, ctx context.Context) error {
+func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, projects *[]apiclient.CreateProjectConfigDTO, workspaceNames []string, ctx context.Context) error {
 	if builderFlag != "" || customImageFlag != "" || customImageUserFlag != "" || devcontainerPathFlag != "" {
 		return fmt.Errorf("Please provide repository URL in order to set up custom project details through CLI.")
 	}
@@ -316,7 +311,7 @@ func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, pro
 		return err
 	}
 
-	initialSuggestion := getWorkspaceFirstProjectName((*projects)[0])
+	initialSuggestion := *(*projects)[0].Name
 
 	suggestedName := workspace_util.GetSuggestedName(initialSuggestion, workspaceNames)
 
@@ -337,7 +332,7 @@ func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, pro
 	return nil
 }
 
-func processCmdArguments(args []string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectDTO, ctx context.Context) error {
+func processCmdArguments(args []string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectConfigDTO, ctx context.Context) error {
 	if builderFlag != "" && builderFlag != create.DEVCONTAINER && devcontainerPathFlag != "" {
 		return fmt.Errorf("Can't set devcontainer file path if builder is not set to %s.", create.DEVCONTAINER)
 	}
@@ -354,11 +349,15 @@ func processCmdArguments(args []string, apiClient *apiclient.APIClient, projects
 	if !blankFlag {
 		projectConfig, res, err := apiClient.ProjectConfigAPI.GetDefaultProjectConfig(ctx, encodedURLParam).Execute()
 		if err == nil {
-			project := &apiclient.CreateProjectDTO{
-				ExistingConfig: &apiclient.ExistingConfigDTO{
-					ConfigName:  projectConfig.Name,
-					ProjectName: projectConfig.Name,
+			project := &apiclient.CreateProjectConfigDTO{
+				Name: projectConfig.Name,
+				Source: &apiclient.CreateProjectConfigSourceDTO{
+					Repository: projectConfig.Repository,
 				},
+				BuildConfig: projectConfig.BuildConfig,
+				Image:       projectConfig.Image,
+				User:        projectConfig.User,
+				EnvVars:     projectConfig.EnvVars,
 			}
 			*projects = append(*projects, *project)
 			return nil
@@ -379,14 +378,12 @@ func processCmdArguments(args []string, apiClient *apiclient.APIClient, projects
 		return err
 	}
 
-	project := &apiclient.CreateProjectDTO{
-		NewConfig: &apiclient.CreateProjectConfigDTO{
-			Name: &projectName,
-			Source: &apiclient.CreateProjectConfigSourceDTO{
-				Repository: repoResponse,
-			},
-			Build: &apiclient.ProjectBuildConfig{},
+	project := &apiclient.CreateProjectConfigDTO{
+		Name: &projectName,
+		Source: &apiclient.CreateProjectConfigSourceDTO{
+			Repository: repoResponse,
 		},
+		BuildConfig: &apiclient.ProjectBuildConfig{},
 	}
 
 	if builderFlag == create.DEVCONTAINER || devcontainerPathFlag != "" {
@@ -394,17 +391,17 @@ func processCmdArguments(args []string, apiClient *apiclient.APIClient, projects
 		if devcontainerPathFlag != "" {
 			devcontainerFilePath = devcontainerPathFlag
 		}
-		project.NewConfig.Build.Devcontainer = &apiclient.DevcontainerConfig{
+		project.BuildConfig.Devcontainer = &apiclient.DevcontainerConfig{
 			FilePath: &devcontainerFilePath,
 		}
 
 	}
 
 	if builderFlag == create.NONE || customImageFlag != "" || customImageUserFlag != "" {
-		project.NewConfig.Build = nil
+		project.BuildConfig = nil
 		if customImageFlag != "" || customImageUserFlag != "" {
-			project.NewConfig.Image = &customImageFlag
-			project.NewConfig.User = &customImageUserFlag
+			project.Image = &customImageFlag
+			project.User = &customImageUserFlag
 		}
 	}
 
@@ -424,14 +421,4 @@ func waitForDial(tsConn *tsnet.Server, workspaceId string, projectName string) e
 		time.Sleep(time.Second)
 	}
 	return nil
-}
-
-func getWorkspaceFirstProjectName(project apiclient.CreateProjectDTO) string {
-	var firstProjectName string
-	if project.ExistingConfig != nil && project.ExistingConfig.ConfigName != nil {
-		firstProjectName = *project.ExistingConfig.ConfigName
-	} else if project.NewConfig != nil && project.NewConfig.Name != nil {
-		firstProjectName = *project.NewConfig.Name
-	}
-	return firstProjectName
 }

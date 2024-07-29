@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	"github.com/daytonaio/daytona/pkg/views/projectconfig/info"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"golang.org/x/term"
@@ -51,7 +52,7 @@ func ListProjectConfigs(projectConfigList []apiclient.ProjectConfig, apiServerCo
 	minWidth := views_util.GetTableMinimumWidth(data)
 
 	if breakpointWidth == 0 || minWidth > breakpointWidth {
-		renderUnstyledList(projectConfigList)
+		renderUnstyledList(projectConfigList, apiServerConfig)
 		return
 	}
 
@@ -70,15 +71,13 @@ func ListProjectConfigs(projectConfigList []apiclient.ProjectConfig, apiServerCo
 	fmt.Println(views.BaseTableStyle.Render(t.String()))
 }
 
-func renderUnstyledList(projectConfigList []apiclient.ProjectConfig) {
+func renderUnstyledList(projectConfigList []apiclient.ProjectConfig, apiServerConfig *apiclient.ServerConfig) {
 	for _, pc := range projectConfigList {
-		// render info
-		// info_view.Render(&workspace, "", true)
+		info.Render(&pc, apiServerConfig, true)
 
 		if pc.Name != projectConfigList[len(projectConfigList)-1].Name {
 			fmt.Printf("\n%s\n\n", views.SeparatorString)
 		}
-
 	}
 }
 
@@ -113,11 +112,11 @@ func getTableRowData(projectConfig apiclient.ProjectConfig, apiServerConfig *api
 		ImageUser: apiServerConfig.DefaultProjectUser,
 	}
 
-	createProjectConfigDTO := apiclient.CreateProjectConfigDTO{
-		Build: projectConfig.Build,
+	createCreateProjectConfigDTO := apiclient.CreateProjectConfigDTO{
+		BuildConfig: projectConfig.BuildConfig,
 	}
 
-	_, rowData.Build = create.GetProjectBuildChoice(createProjectConfigDTO, projectDefaults)
+	_, rowData.Build = create.GetProjectBuildChoice(createCreateProjectConfigDTO, projectDefaults)
 
 	if *projectConfig.Default {
 		rowData.IsDefault = "1"

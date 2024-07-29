@@ -18,7 +18,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/ports"
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
-	"github.com/daytonaio/daytona/pkg/workspace/project/build"
+	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
 	"github.com/docker/docker/pkg/stringid"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
@@ -100,8 +100,8 @@ func (f *BuilderFactory) Create(p project.Project, gpc *gitprovider.GitProviderC
 		return nil, err
 	}
 
-	if p.Build == nil || *p.Build != (build.ProjectBuildConfig{}) {
-		if p.Build != nil && p.Build.Devcontainer != nil {
+	if p.BuildConfig == nil || *p.BuildConfig != (buildconfig.ProjectBuildConfig{}) {
+		if p.BuildConfig != nil && p.BuildConfig.Devcontainer != nil {
 			return f.newDevcontainerBuilder(buildId, p, gpc, hash, projectDir)
 		}
 

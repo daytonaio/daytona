@@ -14,7 +14,7 @@ import (
 	"golang.org/x/term"
 )
 
-const propertyNameWidth = 16
+const propertyNameWidth = 20
 
 var propertyNameStyle = lipgloss.NewStyle().
 	Foreground(views.LightGray)
@@ -35,16 +35,16 @@ func Render(projectConfig *apiclient.ProjectConfig, apiServerConfig *apiclient.S
 		output += getInfoLine("Repository", *projectConfig.Repository.Url) + "\n"
 	}
 
-	if GetLabelFromBuild(projectConfig.Build) != "" {
+	if GetLabelFromBuild(projectConfig.BuildConfig) != "" {
 		projectDefaults := &create.ProjectDefaults{
 			Image:     apiServerConfig.DefaultProjectImage,
 			ImageUser: apiServerConfig.DefaultProjectUser,
 		}
 
-		createProjectConfigDTO := apiclient.CreateProjectConfigDTO{
-			Build: projectConfig.Build,
+		createCreateProjectConfigDTO := apiclient.CreateProjectConfigDTO{
+			BuildConfig: projectConfig.BuildConfig,
 		}
-		_, buildChoice := create.GetProjectBuildChoice(createProjectConfigDTO, projectDefaults)
+		_, buildChoice := create.GetProjectBuildChoice(createCreateProjectConfigDTO, projectDefaults)
 		output += getInfoLine("Build", buildChoice) + "\n"
 	}
 
@@ -56,8 +56,8 @@ func Render(projectConfig *apiclient.ProjectConfig, apiServerConfig *apiclient.S
 		output += getInfoLine("User", *projectConfig.User) + "\n"
 	}
 
-	if projectConfig.Build != nil && projectConfig.Build.Devcontainer != nil && projectConfig.Build.Devcontainer.FilePath != nil {
-		output += getInfoLine("Devcontainer path", *projectConfig.Build.Devcontainer.FilePath) + "\n"
+	if projectConfig.BuildConfig != nil && projectConfig.BuildConfig.Devcontainer != nil && projectConfig.BuildConfig.Devcontainer.FilePath != nil {
+		output += getInfoLine("Devcontainer path", *projectConfig.BuildConfig.Devcontainer.FilePath) + "\n"
 	}
 
 	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))

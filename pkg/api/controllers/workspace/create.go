@@ -17,7 +17,7 @@ import (
 //	@Tags			workspace
 //	@Summary		Create a workspace
 //	@Description	Create a workspace
-//	@Param			workspace	body	dto.CreateWorkspaceDTO	true	"Create workspace"
+//	@Param			workspace	body	CreateWorkspaceDTO	true	"Create workspace"
 //	@Produce		json
 //	@Success		200	{object}	Workspace
 //	@Router			/workspace [post]

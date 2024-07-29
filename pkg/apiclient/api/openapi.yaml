@@ -965,10 +965,10 @@ components:
       type: object
     CreateProjectConfigDTO:
       example:
-        image: image
-        build:
+        buildConfig:
           devcontainer:
             filePath: filePath
+        image: image
         envVars:
           key: envVars
         name: name
@@ -985,7 +985,7 @@ components:
             url: url
         user: user
       properties:
-        build:
+        buildConfig:
           $ref: '#/components/schemas/ProjectBuildConfig'
         envVars:
           additionalProperties:
@@ -1016,17 +1016,13 @@ components:
         repository:
           $ref: '#/components/schemas/GitRepository'
       type: object
-    CreateProjectDTO:
+    CreateWorkspaceDTO:
       example:
-        existingConfig:
-          configName: configName
-          projectName: projectName
-          branch: branch
-        newConfig:
-          image: image
-          build:
+        projects:
+        - buildConfig:
             devcontainer:
               filePath: filePath
+          image: image
           envVars:
             key: envVars
           name: name
@@ -1042,63 +1038,25 @@ components:
               sha: sha
               url: url
           user: user
-      properties:
-        existingConfig:
-          $ref: '#/components/schemas/ExistingConfigDTO'
-        newConfig:
-          $ref: '#/components/schemas/CreateProjectConfigDTO'
-      type: object
-    CreateWorkspaceDTO:
-      example:
-        projects:
-        - existingConfig:
-            configName: configName
-            projectName: projectName
-            branch: branch
-          newConfig:
-            image: image
-            build:
-              devcontainer:
-                filePath: filePath
-            envVars:
-              key: envVars
-            name: name
-            source:
-              repository:
-                owner: owner
-                path: path
-                name: name
-                id: id
-                source: source
-                prNumber: 0
-                branch: branch
-                sha: sha
-                url: url
-            user: user
-        - existingConfig:
-            configName: configName
-            projectName: projectName
-            branch: branch
-          newConfig:
-            image: image
-            build:
-              devcontainer:
-                filePath: filePath
-            envVars:
-              key: envVars
-            name: name
-            source:
-              repository:
-                owner: owner
-                path: path
-                name: name
-                id: id
-                source: source
-                prNumber: 0
-                branch: branch
-                sha: sha
-                url: url
-            user: user
+        - buildConfig:
+            devcontainer:
+              filePath: filePath
+          image: image
+          envVars:
+            key: envVars
+          name: name
+          source:
+            repository:
+              owner: owner
+              path: path
+              name: name
+              id: id
+              source: source
+              prNumber: 0
+              branch: branch
+              sha: sha
+              url: url
+          user: user
         name: name
         id: id
         target: target
@@ -1109,7 +1067,7 @@ components:
           type: string
         projects:
           items:
-            $ref: '#/components/schemas/CreateProjectDTO'
+            $ref: '#/components/schemas/CreateProjectConfigDTO'
           type: array
         target:
           type: string
@@ -1121,19 +1079,6 @@ components:
         filePath: filePath
       properties:
         filePath:
-          type: string
-      type: object
-    ExistingConfigDTO:
-      example:
-        configName: configName
-        projectName: projectName
-        branch: branch
-      properties:
-        branch:
-          type: string
-        configName:
-          type: string
-        projectName:
           type: string
       type: object
     FRPSConfig:
@@ -1325,11 +1270,13 @@ components:
       type: object
     Project:
       example:
-        image: image
-        default: true
-        build:
+        buildConfig:
           devcontainer:
             filePath: filePath
+        image: image
+        default: true
+        envVars:
+          key: envVars
         name: name
         state:
           gitStatus:
@@ -1359,10 +1306,14 @@ components:
         target: target
         workspaceId: workspaceId
       properties:
-        build:
+        buildConfig:
           $ref: '#/components/schemas/ProjectBuildConfig'
         default:
           type: boolean
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
         image:
           type: string
         name:
@@ -1388,11 +1339,13 @@ components:
       type: object
     ProjectConfig:
       example:
-        image: image
-        default: true
-        build:
+        buildConfig:
           devcontainer:
             filePath: filePath
+        image: image
+        default: true
+        envVars:
+          key: envVars
         name: name
         repository:
           owner: owner
@@ -1406,10 +1359,14 @@ components:
           url: url
         user: user
       properties:
-        build:
+        buildConfig:
           $ref: '#/components/schemas/ProjectBuildConfig'
         default:
           type: boolean
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
         image:
           type: string
         name:
@@ -1589,11 +1546,13 @@ components:
     Workspace:
       example:
         projects:
-        - image: image
-          default: true
-          build:
+        - buildConfig:
             devcontainer:
               filePath: filePath
+          image: image
+          default: true
+          envVars:
+            key: envVars
           name: name
           state:
             gitStatus:
@@ -1622,11 +1581,13 @@ components:
           user: user
           target: target
           workspaceId: workspaceId
-        - image: image
-          default: true
-          build:
+        - buildConfig:
             devcontainer:
               filePath: filePath
+          image: image
+          default: true
+          envVars:
+            key: envVars
           name: name
           state:
             gitStatus:
@@ -1673,11 +1634,13 @@ components:
     WorkspaceDTO:
       example:
         projects:
-        - image: image
-          default: true
-          build:
+        - buildConfig:
             devcontainer:
               filePath: filePath
+          image: image
+          default: true
+          envVars:
+            key: envVars
           name: name
           state:
             gitStatus:
@@ -1706,11 +1669,13 @@ components:
           user: user
           target: target
           workspaceId: workspaceId
-        - image: image
-          default: true
-          build:
+        - buildConfig:
             devcontainer:
               filePath: filePath
+          image: image
+          default: true
+          envVars:
+            key: envVars
           name: name
           state:
             gitStatus:

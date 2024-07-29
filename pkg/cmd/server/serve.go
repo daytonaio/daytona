@@ -101,7 +101,7 @@ var ServeCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		projectConfigStore, err := db.NewConfigStore(dbConnection)
+		projectConfigStore, err := db.NewProjectConfigStore(dbConnection)
 		if err != nil {
 			log.Fatal(err)
 		}

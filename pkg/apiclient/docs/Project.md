@@ -4,8 +4,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Build** | Pointer to [**ProjectBuildConfig**](ProjectBuildConfig.md) |  | [optional] 
+**BuildConfig** | Pointer to [**ProjectBuildConfig**](ProjectBuildConfig.md) |  | [optional] 
 **Default** | Pointer to **bool** |  | [optional] 
+**EnvVars** | Pointer to **map[string]string** |  | [optional] 
 **Image** | Pointer to **string** |  | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
 **Repository** | Pointer to [**GitRepository**](GitRepository.md) |  | [optional] 
@@ -33,30 +34,30 @@ NewProjectWithDefaults instantiates a new Project object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
-### GetBuild
+### GetBuildConfig
 
-`func (o *Project) GetBuild() ProjectBuildConfig`
+`func (o *Project) GetBuildConfig() ProjectBuildConfig`
 
-GetBuild returns the Build field if non-nil, zero value otherwise.
+GetBuildConfig returns the BuildConfig field if non-nil, zero value otherwise.
 
-### GetBuildOk
+### GetBuildConfigOk
 
-`func (o *Project) GetBuildOk() (*ProjectBuildConfig, bool)`
+`func (o *Project) GetBuildConfigOk() (*ProjectBuildConfig, bool)`
 
-GetBuildOk returns a tuple with the Build field if it's non-nil, zero value otherwise
+GetBuildConfigOk returns a tuple with the BuildConfig field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetBuild
+### SetBuildConfig
 
-`func (o *Project) SetBuild(v ProjectBuildConfig)`
+`func (o *Project) SetBuildConfig(v ProjectBuildConfig)`
 
-SetBuild sets Build field to given value.
+SetBuildConfig sets BuildConfig field to given value.
 
-### HasBuild
+### HasBuildConfig
 
-`func (o *Project) HasBuild() bool`
+`func (o *Project) HasBuildConfig() bool`
 
-HasBuild returns a boolean if a field has been set.
+HasBuildConfig returns a boolean if a field has been set.
 
 ### GetDefault
 
@@ -82,6 +83,31 @@ SetDefault sets Default field to given value.
 `func (o *Project) HasDefault() bool`
 
 HasDefault returns a boolean if a field has been set.
+
+### GetEnvVars
+
+`func (o *Project) GetEnvVars() map[string]string`
+
+GetEnvVars returns the EnvVars field if non-nil, zero value otherwise.
+
+### GetEnvVarsOk
+
+`func (o *Project) GetEnvVarsOk() (*map[string]string, bool)`
+
+GetEnvVarsOk returns a tuple with the EnvVars field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetEnvVars
+
+`func (o *Project) SetEnvVars(v map[string]string)`
+
+SetEnvVars sets EnvVars field to given value.
+
+### HasEnvVars
+
+`func (o *Project) HasEnvVars() bool`
+
+HasEnvVars returns a boolean if a field has been set.
 
 ### GetImage
 

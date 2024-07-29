@@ -31,7 +31,7 @@ type ProjectConfigurationData struct {
 	EnvVars              map[string]string
 }
 
-func NewConfigurationData(buildChoice BuildChoice, devContainerFilePath string, currentProject *apiclient.CreateProjectDTO, defaults *ProjectDefaults) *ProjectConfigurationData {
+func NewConfigurationData(buildChoice BuildChoice, devContainerFilePath string, currentProject *apiclient.CreateProjectConfigDTO, defaults *ProjectDefaults) *ProjectConfigurationData {
 	projectConfigurationData := &ProjectConfigurationData{
 		BuildChoice:          string(buildChoice),
 		DevcontainerFilePath: defaults.DevcontainerFilePath,
@@ -40,23 +40,23 @@ func NewConfigurationData(buildChoice BuildChoice, devContainerFilePath string, 
 		EnvVars:              map[string]string{},
 	}
 
-	if currentProject.NewConfig.Image != nil {
-		projectConfigurationData.Image = *currentProject.NewConfig.Image
+	if currentProject.Image != nil {
+		projectConfigurationData.Image = *currentProject.Image
 	}
 
-	if currentProject.NewConfig.User != nil {
-		projectConfigurationData.User = *currentProject.NewConfig.User
+	if currentProject.User != nil {
+		projectConfigurationData.User = *currentProject.User
 	}
 
-	if currentProject.NewConfig.EnvVars != nil {
-		projectConfigurationData.EnvVars = *currentProject.NewConfig.EnvVars
+	if currentProject.EnvVars != nil {
+		projectConfigurationData.EnvVars = *currentProject.EnvVars
 	}
 
 	return projectConfigurationData
 }
 
-func ConfigureProjects(projectList *[]apiclient.CreateProjectDTO, defaults ProjectDefaults) (bool, error) {
-	var currentProject *apiclient.CreateProjectDTO
+func ConfigureProjects(projectList *[]apiclient.CreateProjectConfigDTO, defaults ProjectDefaults) (bool, error) {
+	var currentProject *apiclient.CreateProjectConfigDTO
 
 	if len(*projectList) > 1 {
 		// TODO: disable editing of request's existing project config entries
@@ -68,21 +68,21 @@ func ConfigureProjects(projectList *[]apiclient.CreateProjectDTO, defaults Proje
 		currentProject = &((*projectList)[0])
 	}
 
-	if currentProject.NewConfig.Name == selection.DoneConfiguring.NewConfig.Name {
+	if currentProject.Name == selection.DoneConfiguring.Name {
 		return false, nil
 	}
 
 	devContainerFilePath := defaults.DevcontainerFilePath
 	builderChoice := AUTOMATIC
 
-	if currentProject.NewConfig.Build != nil {
-		if currentProject.NewConfig.Build.Devcontainer != nil {
+	if currentProject.BuildConfig != nil {
+		if currentProject.BuildConfig.Devcontainer != nil {
 			builderChoice = DEVCONTAINER
-			devContainerFilePath = *currentProject.NewConfig.Build.Devcontainer.FilePath
+			devContainerFilePath = *currentProject.BuildConfig.Devcontainer.FilePath
 		}
 	} else {
-		if currentProject.NewConfig.Image == nil && currentProject.NewConfig.User == nil ||
-			*currentProject.NewConfig.Image == *defaults.Image && *currentProject.NewConfig.User == *defaults.ImageUser {
+		if currentProject.Image == nil && currentProject.User == nil ||
+			*currentProject.Image == *defaults.Image && *currentProject.User == *defaults.ImageUser {
 			builderChoice = NONE
 		} else {
 			builderChoice = CUSTOMIMAGE
@@ -98,36 +98,36 @@ func ConfigureProjects(projectList *[]apiclient.CreateProjectDTO, defaults Proje
 	}
 
 	for i := range *projectList {
-		if (*projectList)[i].NewConfig.Name == currentProject.NewConfig.Name {
+		if (*projectList)[i].Name == currentProject.Name {
 			if projectConfigurationData.BuildChoice == string(NONE) {
-				(*projectList)[i].NewConfig.Build = nil
-				(*projectList)[i].NewConfig.Image = defaults.Image
-				(*projectList)[i].NewConfig.User = defaults.ImageUser
+				(*projectList)[i].BuildConfig = nil
+				(*projectList)[i].Image = defaults.Image
+				(*projectList)[i].User = defaults.ImageUser
 			}
 
 			if projectConfigurationData.BuildChoice == string(CUSTOMIMAGE) {
-				(*projectList)[i].NewConfig.Build = nil
-				(*projectList)[i].NewConfig.Image = &projectConfigurationData.Image
-				(*projectList)[i].NewConfig.User = &projectConfigurationData.User
+				(*projectList)[i].BuildConfig = nil
+				(*projectList)[i].Image = &projectConfigurationData.Image
+				(*projectList)[i].User = &projectConfigurationData.User
 			}
 
 			if projectConfigurationData.BuildChoice == string(AUTOMATIC) {
-				(*projectList)[i].NewConfig.Build = &apiclient.ProjectBuildConfig{}
-				(*projectList)[i].NewConfig.Image = defaults.Image
-				(*projectList)[i].NewConfig.User = defaults.ImageUser
+				(*projectList)[i].BuildConfig = &apiclient.ProjectBuildConfig{}
+				(*projectList)[i].Image = defaults.Image
+				(*projectList)[i].User = defaults.ImageUser
 			}
 
 			if projectConfigurationData.BuildChoice == string(DEVCONTAINER) {
-				(*projectList)[i].NewConfig.Build = &apiclient.ProjectBuildConfig{
+				(*projectList)[i].BuildConfig = &apiclient.ProjectBuildConfig{
 					Devcontainer: &apiclient.DevcontainerConfig{
 						FilePath: &projectConfigurationData.DevcontainerFilePath,
 					},
 				}
-				(*projectList)[i].NewConfig.Image = nil
-				(*projectList)[i].NewConfig.User = nil
+				(*projectList)[i].Image = nil
+				(*projectList)[i].User = nil
 			}
 
-			(*projectList)[i].NewConfig.EnvVars = &projectConfigurationData.EnvVars
+			(*projectList)[i].EnvVars = &projectConfigurationData.EnvVars
 		}
 	}
 

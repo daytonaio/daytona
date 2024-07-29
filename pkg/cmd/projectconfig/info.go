@@ -19,7 +19,7 @@ import (
 var projectConfigInfoCmd = &cobra.Command{
 	Use:     "info",
 	Short:   "Show project config info",
-	Aliases: []string{"view"},
+	Aliases: []string{"view", "inspect"},
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()

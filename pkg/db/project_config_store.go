@@ -14,8 +14,8 @@ type ProjectConfigStore struct {
 	db *gorm.DB
 }
 
-func NewConfigStore(db *gorm.DB) (*ProjectConfigStore, error) {
-	err := db.AutoMigrate(&ProjectConfigDTO{})
+func NewProjectConfigStore(db *gorm.DB) (*ProjectConfigStore, error) {
+	err := db.AutoMigrate(&CreateProjectConfigDTO{})
 	if err != nil {
 		return nil, err
 	}
@@ -24,7 +24,7 @@ func NewConfigStore(db *gorm.DB) (*ProjectConfigStore, error) {
 }
 
 func (s *ProjectConfigStore) List() ([]*config.ProjectConfig, error) {
-	projectConfigsDTOs := []ProjectConfigDTO{}
+	projectConfigsDTOs := []CreateProjectConfigDTO{}
 	tx := s.db.Find(&projectConfigsDTOs)
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -39,7 +39,7 @@ func (s *ProjectConfigStore) List() ([]*config.ProjectConfig, error) {
 }
 
 func (s *ProjectConfigStore) Find(projectConfigName string) (*config.ProjectConfig, error) {
-	projectConfigDTO := ProjectConfigDTO{}
+	projectConfigDTO := CreateProjectConfigDTO{}
 	tx := s.db.Where("name = ?", projectConfigName).First(&projectConfigDTO)
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
@@ -52,7 +52,7 @@ func (s *ProjectConfigStore) Find(projectConfigName string) (*config.ProjectConf
 }
 
 func (s *ProjectConfigStore) Save(projectConfig *config.ProjectConfig) error {
-	tx := s.db.Save(ToProjectConfigDTO(projectConfig))
+	tx := s.db.Save(ToCreateProjectConfigDTO(projectConfig))
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -61,7 +61,7 @@ func (s *ProjectConfigStore) Save(projectConfig *config.ProjectConfig) error {
 }
 
 func (s *ProjectConfigStore) Delete(projectConfig *config.ProjectConfig) error {
-	tx := s.db.Delete(ToProjectConfigDTO(projectConfig))
+	tx := s.db.Delete(ToCreateProjectConfigDTO(projectConfig))
 	if tx.Error != nil {
 		return tx.Error
 	}

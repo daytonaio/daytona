@@ -21,7 +21,7 @@ definitions:
     type: object
   CreateProjectConfigDTO:
     properties:
-      build:
+      buildConfig:
         $ref: '#/definitions/ProjectBuildConfig'
       envVars:
         additionalProperties:
@@ -41,13 +41,6 @@ definitions:
       repository:
         $ref: '#/definitions/GitRepository'
     type: object
-  CreateProjectDTO:
-    properties:
-      existingConfig:
-        $ref: '#/definitions/ExistingConfigDTO'
-      newConfig:
-        $ref: '#/definitions/CreateProjectConfigDTO'
-    type: object
   CreateWorkspaceDTO:
     properties:
       id:
@@ -56,7 +49,7 @@ definitions:
         type: string
       projects:
         items:
-          $ref: '#/definitions/CreateProjectDTO'
+          $ref: '#/definitions/CreateProjectConfigDTO'
         type: array
       target:
         type: string
@@ -66,15 +59,6 @@ definitions:
   DevcontainerConfig:
     properties:
       filePath:
-        type: string
-    type: object
-  ExistingConfigDTO:
-    properties:
-      branch:
-        type: string
-      configName:
-        type: string
-      projectName:
         type: string
     type: object
   FRPSConfig:
@@ -203,10 +187,14 @@ definitions:
     type: object
   Project:
     properties:
-      build:
+      buildConfig:
         $ref: '#/definitions/ProjectBuildConfig'
       default:
         type: boolean
+      envVars:
+        additionalProperties:
+          type: string
+        type: object
       image:
         type: string
       name:
@@ -229,10 +217,14 @@ definitions:
     type: object
   ProjectConfig:
     properties:
-      build:
+      buildConfig:
         $ref: '#/definitions/ProjectBuildConfig'
       default:
         type: boolean
+      envVars:
+        additionalProperties:
+          type: string
+        type: object
       image:
         type: string
       name:

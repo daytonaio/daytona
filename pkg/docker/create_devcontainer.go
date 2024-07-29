@@ -109,7 +109,7 @@ func (d *DockerClient) createProjectFromDevcontainer(opts *CreateProjectOptions,
 		composeFilePath := devcontainerConfig["dockerComposeFile"].(string)
 
 		if opts.SshClient != nil {
-			composeFilePath = path.Join(opts.ProjectDir, filepath.Dir(opts.Project.Build.Devcontainer.FilePath), composeFilePath)
+			composeFilePath = path.Join(opts.ProjectDir, filepath.Dir(opts.Project.BuildConfig.Devcontainer.FilePath), composeFilePath)
 
 			composeFileContent, err := d.getRemoteComposeContent(opts, paths, socketForwardId, composeFilePath)
 			if err != nil {
@@ -122,7 +122,7 @@ func (d *DockerClient) createProjectFromDevcontainer(opts *CreateProjectOptions,
 				return "", err
 			}
 		} else {
-			composeFilePath = filepath.Join(opts.ProjectDir, filepath.Dir(opts.Project.Build.Devcontainer.FilePath), composeFilePath)
+			composeFilePath = filepath.Join(opts.ProjectDir, filepath.Dir(opts.Project.BuildConfig.Devcontainer.FilePath), composeFilePath)
 		}
 
 		options, err := cli.NewProjectOptions([]string{composeFilePath}, cli.WithOsEnv, cli.WithDotEnv)
@@ -511,7 +511,7 @@ func (d *DockerClient) getRemoteComposeContent(opts *CreateProjectOptions, paths
 
 func (d *DockerClient) getDevcontainerPaths(opts *CreateProjectOptions) DevcontainerPaths {
 	projectTarget := path.Join("/project", filepath.Base(opts.ProjectDir))
-	targetConfigFilePath := path.Join(projectTarget, opts.Project.Build.Devcontainer.FilePath)
+	targetConfigFilePath := path.Join(projectTarget, opts.Project.BuildConfig.Devcontainer.FilePath)
 
 	overridesDir := filepath.Join(filepath.Dir(opts.ProjectDir), fmt.Sprintf("%s-data", filepath.Base(opts.ProjectDir)))
 	overridesTarget := "/tmp/overrides"

@@ -19,8 +19,9 @@ var _ MappedNullable = &Project{}
 
 // Project struct for Project
 type Project struct {
-	Build       *ProjectBuildConfig `json:"build,omitempty"`
+	BuildConfig *ProjectBuildConfig `json:"buildConfig,omitempty"`
 	Default     *bool               `json:"default,omitempty"`
+	EnvVars     *map[string]string  `json:"envVars,omitempty"`
 	Image       *string             `json:"image,omitempty"`
 	Name        *string             `json:"name,omitempty"`
 	Repository  *GitRepository      `json:"repository,omitempty"`
@@ -47,36 +48,36 @@ func NewProjectWithDefaults() *Project {
 	return &this
 }
 
-// GetBuild returns the Build field value if set, zero value otherwise.
-func (o *Project) GetBuild() ProjectBuildConfig {
-	if o == nil || IsNil(o.Build) {
+// GetBuildConfig returns the BuildConfig field value if set, zero value otherwise.
+func (o *Project) GetBuildConfig() ProjectBuildConfig {
+	if o == nil || IsNil(o.BuildConfig) {
 		var ret ProjectBuildConfig
 		return ret
 	}
-	return *o.Build
+	return *o.BuildConfig
 }
 
-// GetBuildOk returns a tuple with the Build field value if set, nil otherwise
+// GetBuildConfigOk returns a tuple with the BuildConfig field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Project) GetBuildOk() (*ProjectBuildConfig, bool) {
-	if o == nil || IsNil(o.Build) {
+func (o *Project) GetBuildConfigOk() (*ProjectBuildConfig, bool) {
+	if o == nil || IsNil(o.BuildConfig) {
 		return nil, false
 	}
-	return o.Build, true
+	return o.BuildConfig, true
 }
 
-// HasBuild returns a boolean if a field has been set.
-func (o *Project) HasBuild() bool {
-	if o != nil && !IsNil(o.Build) {
+// HasBuildConfig returns a boolean if a field has been set.
+func (o *Project) HasBuildConfig() bool {
+	if o != nil && !IsNil(o.BuildConfig) {
 		return true
 	}
 
 	return false
 }
 
-// SetBuild gets a reference to the given ProjectBuildConfig and assigns it to the Build field.
-func (o *Project) SetBuild(v ProjectBuildConfig) {
-	o.Build = &v
+// SetBuildConfig gets a reference to the given ProjectBuildConfig and assigns it to the BuildConfig field.
+func (o *Project) SetBuildConfig(v ProjectBuildConfig) {
+	o.BuildConfig = &v
 }
 
 // GetDefault returns the Default field value if set, zero value otherwise.
@@ -109,6 +110,38 @@ func (o *Project) HasDefault() bool {
 // SetDefault gets a reference to the given bool and assigns it to the Default field.
 func (o *Project) SetDefault(v bool) {
 	o.Default = &v
+}
+
+// GetEnvVars returns the EnvVars field value if set, zero value otherwise.
+func (o *Project) GetEnvVars() map[string]string {
+	if o == nil || IsNil(o.EnvVars) {
+		var ret map[string]string
+		return ret
+	}
+	return *o.EnvVars
+}
+
+// GetEnvVarsOk returns a tuple with the EnvVars field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Project) GetEnvVarsOk() (*map[string]string, bool) {
+	if o == nil || IsNil(o.EnvVars) {
+		return nil, false
+	}
+	return o.EnvVars, true
+}
+
+// HasEnvVars returns a boolean if a field has been set.
+func (o *Project) HasEnvVars() bool {
+	if o != nil && !IsNil(o.EnvVars) {
+		return true
+	}
+
+	return false
+}
+
+// SetEnvVars gets a reference to the given map[string]string and assigns it to the EnvVars field.
+func (o *Project) SetEnvVars(v map[string]string) {
+	o.EnvVars = &v
 }
 
 // GetImage returns the Image field value if set, zero value otherwise.
@@ -345,11 +378,14 @@ func (o Project) MarshalJSON() ([]byte, error) {
 
 func (o Project) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Build) {
-		toSerialize["build"] = o.Build
+	if !IsNil(o.BuildConfig) {
+		toSerialize["buildConfig"] = o.BuildConfig
 	}
 	if !IsNil(o.Default) {
 		toSerialize["default"] = o.Default
+	}
+	if !IsNil(o.EnvVars) {
+		toSerialize["envVars"] = o.EnvVars
 	}
 	if !IsNil(o.Image) {
 		toSerialize["image"] = o.Image

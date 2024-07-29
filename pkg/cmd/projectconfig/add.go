@@ -20,7 +20,7 @@ var projectConfigAddCmd = &cobra.Command{
 	Short: "Add a project config",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		var projects []apiclient.CreateProjectDTO
+		var projects []apiclient.CreateProjectConfigDTO
 		var existingProjectConfigNames []string
 		ctx := context.Background()
 
@@ -35,11 +35,6 @@ var projectConfigAddCmd = &cobra.Command{
 		}
 
 		apiServerConfig, res, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
-		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
-		}
-
-		profileData, res, err := apiClient.ProfileAPI.GetProfileData(ctx).Execute()
 		if err != nil {
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
@@ -81,23 +76,17 @@ var projectConfigAddCmd = &cobra.Command{
 			log.Fatal("no projects found")
 		}
 
-		if projects[0].NewConfig == nil {
-			log.Fatal("project config is required")
-		}
-
-		if projects[0].NewConfig.Name == nil {
+		if projects[0].Name == nil {
 			log.Fatal("project config name is required")
 		}
 
-		initialSuggestion := *projects[0].NewConfig.Name
+		initialSuggestion := *projects[0].Name
 
-		suggestedName := workspace_util.GetSuggestedName(initialSuggestion, existingProjectConfigNames)
-
-		chosenName := suggestedName
+		chosenName := workspace_util.GetSuggestedName(initialSuggestion, existingProjectConfigNames)
 
 		submissionFormConfig := create.SubmissionFormConfig{
 			ChosenName:    &chosenName,
-			SuggestedName: suggestedName,
+			SuggestedName: chosenName,
 			ExistingNames: existingProjectConfigNames,
 			ProjectList:   &projects,
 			NameLabel:     "Project config",
@@ -110,16 +99,16 @@ var projectConfigAddCmd = &cobra.Command{
 		}
 
 		newProjectConfig := apiclient.CreateProjectConfigDTO{
-			Name:  &chosenName,
-			Build: projects[0].NewConfig.Build,
-			Image: projects[0].NewConfig.Image,
-			User:  projects[0].NewConfig.User,
+			Name:        &chosenName,
+			BuildConfig: projects[0].BuildConfig,
+			Image:       projects[0].Image,
+			User:        projects[0].User,
 			Source: &apiclient.CreateProjectConfigSourceDTO{
-				Repository: projects[0].NewConfig.Source.Repository,
+				Repository: projects[0].Source.Repository,
 			},
 		}
 
-		newProjectConfig.EnvVars = workspace_util.GetEnvVariables(&projects[0], profileData)
+		newProjectConfig.EnvVars = workspace_util.GetEnvVariables(&projects[0], nil)
 
 		res, err = apiClient.ProjectConfigAPI.SetProjectConfig(ctx).ProjectConfig(newProjectConfig).Execute()
 		if err != nil {

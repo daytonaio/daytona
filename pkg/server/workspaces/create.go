@@ -9,6 +9,7 @@ import (
 	"io"
 	"regexp"
 
+	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/containerregistry"
@@ -19,7 +20,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
-	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -67,24 +67,7 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 	w.Projects = []*project.Project{}
 
 	for _, p := range req.Projects {
-		var projectConfig *config.ProjectConfig
-
-		if p.NewConfig != nil {
-			projectConfig = s.projectConfigService.ToProjectConfig(*p.NewConfig)
-		}
-
-		if p.ExistingConfig != nil {
-			projectConfig, err = s.projectConfigService.Find(p.ExistingConfig.ConfigName)
-			if err != nil {
-				return nil, err
-			}
-			projectConfig.Repository.Branch = &p.ExistingConfig.Branch
-			projectConfig.Name = p.ExistingConfig.ProjectName
-		}
-
-		if projectConfig == nil {
-			return nil, ErrInvalidProjectConfig
-		}
+		projectConfig := conversion.ToProjectConfig(p)
 
 		isValidProjectName := regexp.MustCompile(`^[a-zA-Z0-9-_.]+$`).MatchString
 		if !isValidProjectName(projectConfig.Name) {
@@ -149,7 +132,7 @@ func (s *WorkspaceService) createBuild(p *project.Project, gc *gitprovider.GitPr
 	// FIXME: skip build completely for now
 	return p, nil
 
-	if p.Build != nil { // nolint:govet
+	if p.BuildConfig != nil { // nolint:govet
 		lastBuildResult, err := s.builderFactory.CheckExistingBuild(*p)
 		if err != nil {
 			return nil, err

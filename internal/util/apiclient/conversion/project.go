@@ -6,7 +6,9 @@ package conversion
 import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 )
 
@@ -36,12 +38,23 @@ func ToProject(projectDTO *apiclient.Project) *project.Project {
 		}
 	}
 
+	var projectBuild *buildconfig.ProjectBuildConfig
+	if projectDTO.BuildConfig != nil {
+		projectBuild = &buildconfig.ProjectBuildConfig{}
+		if projectDTO.BuildConfig.Devcontainer != nil && projectDTO.BuildConfig.Devcontainer.FilePath != nil {
+			projectBuild.Devcontainer = &buildconfig.DevcontainerConfig{
+				FilePath: *projectDTO.BuildConfig.Devcontainer.FilePath,
+			}
+		}
+	}
+
 	project := &project.Project{
 		ProjectConfig: config.ProjectConfig{
-			Name:       *projectDTO.Name,
-			Image:      *projectDTO.Image,
-			User:       *projectDTO.User,
-			Repository: repository,
+			Name:        *projectDTO.Name,
+			Image:       *projectDTO.Image,
+			User:        *projectDTO.User,
+			BuildConfig: projectBuild,
+			Repository:  repository,
 		},
 		Target:      *projectDTO.Target,
 		WorkspaceId: *projectDTO.WorkspaceId,
@@ -102,4 +115,26 @@ func ToGitStatusDTO(gitStatus *project.GitStatus) *apiclient.GitStatus {
 		CurrentBranch: &gitStatus.CurrentBranch,
 		FileStatus:    fileStatusDTO,
 	}
+}
+
+func ToProjectConfig(createProjectConfigDto dto.CreateProjectConfigDTO) *config.ProjectConfig {
+	result := &config.ProjectConfig{
+		Name:        createProjectConfigDto.Name,
+		BuildConfig: createProjectConfigDto.BuildConfig,
+		EnvVars:     createProjectConfigDto.EnvVars,
+	}
+
+	if createProjectConfigDto.Source.Repository != nil {
+		result.Repository = createProjectConfigDto.Source.Repository
+	}
+
+	if createProjectConfigDto.Image != nil {
+		result.Image = *createProjectConfigDto.Image
+	}
+
+	if createProjectConfigDto.User != nil {
+		result.User = *createProjectConfigDto.User
+	}
+
+	return result
 }

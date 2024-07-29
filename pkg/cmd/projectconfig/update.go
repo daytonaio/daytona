@@ -22,7 +22,7 @@ var projectConfigUpdateCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		var projectConfig *apiclient.ProjectConfig
-		var projects []apiclient.CreateProjectDTO
+		var projects []apiclient.CreateProjectConfigDTO
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -41,21 +41,14 @@ var projectConfigUpdateCmd = &cobra.Command{
 			log.Fatal("project config not found")
 		}
 
-		projects = append(projects, apiclient.CreateProjectDTO{
-			NewConfig: &apiclient.CreateProjectConfigDTO{
-				Name: projectConfig.Name,
-				Source: &apiclient.CreateProjectConfigSourceDTO{
-					Repository: projectConfig.Repository,
-				},
-				Build:   projectConfig.Build,
-				EnvVars: &map[string]string{},
+		projects = append(projects, apiclient.CreateProjectConfigDTO{
+			Name: projectConfig.Name,
+			Source: &apiclient.CreateProjectConfigSourceDTO{
+				Repository: projectConfig.Repository,
 			},
+			BuildConfig: projectConfig.BuildConfig,
+			EnvVars:     &map[string]string{},
 		})
-
-		profileData, res, err := apiClient.ProfileAPI.GetProfileData(ctx).Execute()
-		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
-		}
 
 		projectDefaults := &create.ProjectDefaults{
 			BuildChoice: create.AUTOMATIC,
@@ -69,8 +62,8 @@ var projectConfigUpdateCmd = &cobra.Command{
 			projectDefaults.ImageUser = projectConfig.User
 		}
 
-		if projectConfig.Build != nil && projectConfig.Build.Devcontainer != nil && projectConfig.Build.Devcontainer.FilePath != nil {
-			projectDefaults.DevcontainerFilePath = *projectConfig.Build.Devcontainer.FilePath
+		if projectConfig.BuildConfig != nil && projectConfig.BuildConfig.Devcontainer != nil && projectConfig.BuildConfig.Devcontainer.FilePath != nil {
+			projectDefaults.DevcontainerFilePath = *projectConfig.BuildConfig.Devcontainer.FilePath
 		}
 
 		create.ProjectsConfigurationChanged, err = create.ConfigureProjects(&projects, *projectDefaults)
@@ -79,16 +72,16 @@ var projectConfigUpdateCmd = &cobra.Command{
 		}
 
 		newProjectConfig := apiclient.CreateProjectConfigDTO{
-			Name:  projectConfig.Name,
-			Build: projects[0].NewConfig.Build,
-			Image: projects[0].NewConfig.Image,
-			User:  projects[0].NewConfig.User,
+			Name:        projectConfig.Name,
+			BuildConfig: projects[0].BuildConfig,
+			Image:       projects[0].Image,
+			User:        projects[0].User,
 			Source: &apiclient.CreateProjectConfigSourceDTO{
-				Repository: projects[0].NewConfig.Source.Repository,
+				Repository: projects[0].Source.Repository,
 			},
 		}
 
-		newProjectConfig.EnvVars = workspace_util.GetEnvVariables(&projects[0], profileData)
+		newProjectConfig.EnvVars = workspace_util.GetEnvVariables(&projects[0], nil)
 
 		res, err = apiClient.ProjectConfigAPI.SetProjectConfig(ctx).ProjectConfig(newProjectConfig).Execute()
 		if err != nil {

@@ -1347,7 +1347,7 @@ const docTemplate = `{
         "CreateProjectConfigDTO": {
             "type": "object",
             "properties": {
-                "build": {
+                "buildConfig": {
                     "$ref": "#/definitions/ProjectBuildConfig"
                 },
                 "envVars": {
@@ -1378,17 +1378,6 @@ const docTemplate = `{
                 }
             }
         },
-        "CreateProjectDTO": {
-            "type": "object",
-            "properties": {
-                "existingConfig": {
-                    "$ref": "#/definitions/ExistingConfigDTO"
-                },
-                "newConfig": {
-                    "$ref": "#/definitions/CreateProjectConfigDTO"
-                }
-            }
-        },
         "CreateWorkspaceDTO": {
             "type": "object",
             "required": [
@@ -1404,7 +1393,7 @@ const docTemplate = `{
                 "projects": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/CreateProjectDTO"
+                        "$ref": "#/definitions/CreateProjectConfigDTO"
                     }
                 },
                 "target": {
@@ -1416,20 +1405,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "filePath": {
-                    "type": "string"
-                }
-            }
-        },
-        "ExistingConfigDTO": {
-            "type": "object",
-            "properties": {
-                "branch": {
-                    "type": "string"
-                },
-                "configName": {
-                    "type": "string"
-                },
-                "projectName": {
                     "type": "string"
                 }
             }
@@ -1629,11 +1604,17 @@ const docTemplate = `{
         "Project": {
             "type": "object",
             "properties": {
-                "build": {
+                "buildConfig": {
                     "$ref": "#/definitions/ProjectBuildConfig"
                 },
                 "default": {
                     "type": "boolean"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "image": {
                     "type": "string"
@@ -1669,11 +1650,17 @@ const docTemplate = `{
         "ProjectConfig": {
             "type": "object",
             "properties": {
-                "build": {
+                "buildConfig": {
                     "$ref": "#/definitions/ProjectBuildConfig"
                 },
                 "default": {
                     "type": "boolean"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "image": {
                     "type": "string"

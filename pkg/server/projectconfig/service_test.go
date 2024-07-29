@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	projectconfig_internal "github.com/daytonaio/daytona/internal/testing/server/projectconfig"
+	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/server/projectconfig"
 	"github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
@@ -18,10 +19,10 @@ var projectConfig1Image = "image1"
 var projectConfig1User = "user1"
 
 var projectConfig1 *config.ProjectConfig = &config.ProjectConfig{
-	Name:  "pc1",
-	Image: projectConfig1Image,
-	User:  projectConfig1User,
-	Build: nil,
+	Name:        "pc1",
+	Image:       projectConfig1Image,
+	User:        projectConfig1User,
+	BuildConfig: nil,
 	Repository: &gitprovider.GitRepository{
 		Url: "url1",
 	},
@@ -29,40 +30,40 @@ var projectConfig1 *config.ProjectConfig = &config.ProjectConfig{
 }
 
 var projectConfig2 *config.ProjectConfig = &config.ProjectConfig{
-	Name:  "pc2",
-	Image: "image2",
-	User:  "user2",
-	Build: nil,
+	Name:        "pc2",
+	Image:       "image2",
+	User:        "user2",
+	BuildConfig: nil,
 	Repository: &gitprovider.GitRepository{
 		Url: "url1",
 	},
 }
 
 var projectConfig3 *config.ProjectConfig = &config.ProjectConfig{
-	Name:  "pc3",
-	Image: "image3",
-	User:  "user3",
-	Build: nil,
+	Name:        "pc3",
+	Image:       "image3",
+	User:        "user3",
+	BuildConfig: nil,
 	Repository: &gitprovider.GitRepository{
 		Url: "url3",
 	},
 }
 
 var projectConfig4 *config.ProjectConfig = &config.ProjectConfig{
-	Name:  "pc4",
-	Image: "image4",
-	User:  "user4",
-	Build: nil,
+	Name:        "pc4",
+	Image:       "image4",
+	User:        "user4",
+	BuildConfig: nil,
 	Repository: &gitprovider.GitRepository{
 		Url: "url4",
 	},
 }
 
 var createProjectConfig1Dto *dto.CreateProjectConfigDTO = &dto.CreateProjectConfigDTO{
-	Name:  "pc1",
-	Image: &projectConfig1Image,
-	User:  &projectConfig1User,
-	Build: nil,
+	Name:        "pc1",
+	Image:       &projectConfig1Image,
+	User:        &projectConfig1User,
+	BuildConfig: nil,
 	Source: dto.CreateProjectConfigSourceDTO{
 		Repository: &gitprovider.GitRepository{
 			Url: "url1",
@@ -123,7 +124,7 @@ func TestProjectConfigService(t *testing.T) {
 func (s *ProjectConfigServiceTestSuite) TestList() {
 	require := s.Require()
 
-	projectConfigs, err := s.projectConfigService.List()
+	projectConfigs, err := s.projectConfigService.List("")
 	require.Nil(err)
 	require.ElementsMatch(expectedProjectConfigs, projectConfigs)
 }
@@ -142,14 +143,6 @@ func (s *ProjectConfigServiceTestSuite) TestFindDefault() {
 	projectConfig, err := s.projectConfigService.FindDefault("url1")
 	require.Nil(err)
 	require.Equal(true, projectConfig.IsDefault)
-}
-
-func (s *ProjectConfigServiceTestSuite) TestFilterByGitUrl() {
-	require := s.Require()
-
-	projectConfigs, err := s.projectConfigService.FilterByGitUrl("url1")
-	require.Nil(err)
-	require.ElementsMatch(expectedFilteredProjectConfigs, projectConfigs)
 }
 func (s *ProjectConfigServiceTestSuite) TestSetDefault() {
 	require := s.Require()
@@ -171,7 +164,7 @@ func (s *ProjectConfigServiceTestSuite) TestSave() {
 	err := s.projectConfigService.Save(projectConfig4)
 	require.Nil(err)
 
-	projectConfigs, err := s.projectConfigService.List()
+	projectConfigs, err := s.projectConfigService.List("")
 	require.Nil(err)
 	require.ElementsMatch(expectedProjectConfigs, projectConfigs)
 }
@@ -184,7 +177,7 @@ func (s *ProjectConfigServiceTestSuite) TestDelete() {
 	err := s.projectConfigService.Delete(projectConfig3.Name)
 	require.Nil(err)
 
-	projectConfigs, err := s.projectConfigService.List()
+	projectConfigs, err := s.projectConfigService.List("")
 	require.Nil(err)
 	require.ElementsMatch(expectedProjectConfigs, projectConfigs)
 }
@@ -192,6 +185,6 @@ func (s *ProjectConfigServiceTestSuite) TestDelete() {
 func (s *ProjectConfigServiceTestSuite) TestToProjectConfig() {
 	require := s.Require()
 
-	projectConfig := s.projectConfigService.ToProjectConfig(*createProjectConfig1Dto)
+	projectConfig := conversion.ToProjectConfig(*createProjectConfig1Dto)
 	require.Equal(projectConfig1, projectConfig)
 }

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
@@ -86,7 +87,7 @@ func GetDefaultProjectConfig(ctx *gin.Context) {
 func ListProjectConfigs(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
-	projectConfigs, err := server.ProjectConfigService.List()
+	projectConfigs, err := server.ProjectConfigService.List("")
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list project configs: %s", err.Error()))
 		return
@@ -101,7 +102,7 @@ func ListProjectConfigs(ctx *gin.Context) {
 //	@Summary		Set project config data
 //	@Description	Set project config data
 //	@Accept			json
-//	@Param			projectConfig	body	dto.CreateProjectConfigDTO	true	"Project config"
+//	@Param			projectConfig	body	CreateProjectConfigDTO	true	"Project config"
 //	@Success		201
 //	@Router			/project-config [put]
 //
@@ -116,7 +117,7 @@ func SetProjectConfig(ctx *gin.Context) {
 
 	s := server.GetInstance(nil)
 
-	projectConfig := s.ProjectConfigService.ToProjectConfig(req)
+	projectConfig := conversion.ToProjectConfig(req)
 
 	err = s.ProjectConfigService.Save(projectConfig)
 	if err != nil {

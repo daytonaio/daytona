@@ -24,8 +24,6 @@ func WorkspaceMode() bool {
 }
 
 func GetValidatedName(input string) (string, error) {
-	// input = strings.ToLower(input)
-
 	input = strings.ReplaceAll(input, " ", "-")
 
 	// Regular expression that catches letters, numbers, and dashes

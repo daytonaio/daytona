@@ -37,7 +37,7 @@ import (
 )
 
 func main() {
-	workspace := *openapiclient.NewCreateWorkspaceDTO([]openapiclient.CreateProjectDTO{*openapiclient.NewCreateProjectDTO()}) // CreateWorkspaceDTO | Create workspace
+	workspace := *openapiclient.NewCreateWorkspaceDTO([]openapiclient.CreateProjectConfigDTO{*openapiclient.NewCreateProjectConfigDTO()}) // CreateWorkspaceDTO | Create workspace
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

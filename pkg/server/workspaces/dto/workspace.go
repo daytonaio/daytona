@@ -19,20 +19,9 @@ type ProjectDTO struct {
 	Info *project.ProjectInfo
 } //	@name	ProjectDTO
 
-type CreateProjectDTO struct {
-	NewConfig      *projectconfig_dto.CreateProjectConfigDTO
-	ExistingConfig *ExistingConfigDTO
-} //	@name	CreateProjectDTO
-
-type ExistingConfigDTO struct {
-	ConfigName  string `json:"configName"`
-	ProjectName string `json:"projectName"`
-	Branch      string `json:"branch"`
-} //	@name	ExistingConfigDTO
-
 type CreateWorkspaceDTO struct {
-	Id       string             `json:"id"`
-	Name     string             `json:"name"`
-	Target   string             `json:"target"`
-	Projects []CreateProjectDTO `json:"projects" validate:"required,gt=0,dive"`
+	Id       string                                     `json:"id"`
+	Name     string                                     `json:"name"`
+	Target   string                                     `json:"target"`
+	Projects []projectconfig_dto.CreateProjectConfigDTO `json:"projects" validate:"required,gt=0,dive"`
 } //	@name	CreateWorkspaceDTO

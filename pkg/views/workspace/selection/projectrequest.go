@@ -19,26 +19,24 @@ import (
 )
 
 var doneConfiguringName = "DoneConfiguringName"
-var DoneConfiguring = apiclient.CreateProjectDTO{
-	NewConfig: &apiclient.CreateProjectConfigDTO{
-		Name: &doneConfiguringName,
-	},
+var DoneConfiguring = apiclient.CreateProjectConfigDTO{
+	Name: &doneConfiguringName,
 }
 
 type projectRequestItem struct {
-	item[apiclient.CreateProjectDTO]
+	item[apiclient.CreateProjectConfigDTO]
 	name, image, user, devcontainerConfig string
-	project                               apiclient.CreateProjectDTO
+	project                               apiclient.CreateProjectConfigDTO
 }
 
 type projectRequestItemDelegate struct {
-	ItemDelegate[apiclient.CreateProjectDTO]
+	ItemDelegate[apiclient.CreateProjectConfigDTO]
 }
 type projectRequestModel struct {
-	model[apiclient.CreateProjectDTO]
+	model[apiclient.CreateProjectConfigDTO]
 }
 
-func selectProjectRequestPrompt(projects *[]apiclient.CreateProjectDTO, choiceChan chan<- *apiclient.CreateProjectDTO) {
+func selectProjectRequestPrompt(projects *[]apiclient.CreateProjectConfigDTO, choiceChan chan<- *apiclient.CreateProjectConfigDTO) {
 	items := []list.Item{}
 
 	for _, project := range *projects {
@@ -47,17 +45,17 @@ func selectProjectRequestPrompt(projects *[]apiclient.CreateProjectDTO, choiceCh
 		var user string
 		var devcontainerConfig string
 
-		if project.NewConfig.Name != nil {
-			name = fmt.Sprintf("%s %s", "Project:", *project.NewConfig.Name)
+		if project.Name != nil {
+			name = fmt.Sprintf("%s %s", "Project:", *project.Name)
 		}
-		if project.NewConfig.Image != nil {
-			image = fmt.Sprintf("%s %s", "Image:", *project.NewConfig.Image)
+		if project.Image != nil {
+			image = fmt.Sprintf("%s %s", "Image:", *project.Image)
 		}
-		if project.NewConfig.User != nil {
-			user = fmt.Sprintf("%s %s", "User:", *project.NewConfig.User)
+		if project.User != nil {
+			user = fmt.Sprintf("%s %s", "User:", *project.User)
 		}
-		if project.NewConfig.Build != nil && project.NewConfig.Build.Devcontainer != nil && project.NewConfig.Build.Devcontainer.FilePath != nil {
-			devcontainerConfig = fmt.Sprintf("%s %s", "Devcontainer Config:", *project.NewConfig.Build.Devcontainer.FilePath)
+		if project.BuildConfig != nil && project.BuildConfig.Devcontainer != nil && project.BuildConfig.Devcontainer.FilePath != nil {
+			devcontainerConfig = fmt.Sprintf("%s %s", "Devcontainer Config:", *project.BuildConfig.Devcontainer.FilePath)
 		}
 
 		newItem := projectRequestItem{name: name, image: image, user: user, project: project, devcontainerConfig: devcontainerConfig}
@@ -100,8 +98,8 @@ func selectProjectRequestPrompt(projects *[]apiclient.CreateProjectDTO, choiceCh
 	}
 }
 
-func GetProjectRequestFromPrompt(projects *[]apiclient.CreateProjectDTO) *apiclient.CreateProjectDTO {
-	choiceChan := make(chan *apiclient.CreateProjectDTO)
+func GetProjectRequestFromPrompt(projects *[]apiclient.CreateProjectConfigDTO) *apiclient.CreateProjectConfigDTO {
+	choiceChan := make(chan *apiclient.CreateProjectConfigDTO)
 
 	go selectProjectRequestPrompt(projects, choiceChan)
 
@@ -157,7 +155,7 @@ func (d projectRequestItemDelegate) Render(w io.Writer, m list.Model, index int,
 	}
 
 	// Render to the terminal
-	if i.project.NewConfig.Name == DoneConfiguring.NewConfig.Name {
+	if i.project.Name == DoneConfiguring.Name {
 		s.WriteRune('\n')
 		s.WriteString(name)
 		s.WriteRune('\n')

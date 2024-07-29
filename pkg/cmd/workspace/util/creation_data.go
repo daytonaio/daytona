@@ -32,15 +32,24 @@ type ProjectsDataPromptConfig struct {
 	Defaults            *create.ProjectDefaults
 }
 
-func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apiclient.CreateProjectDTO, error) {
-	var projectList []apiclient.CreateProjectDTO
+func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apiclient.CreateProjectConfigDTO, error) {
+	var projectList []apiclient.CreateProjectConfigDTO
 	// keep track of visited repos, will help in keeping project names unique
 	// since these are later saved into the db under a unique constraint field.
 	selectedRepos := make(map[string]int)
 
-	addMore := config.MultiProject
+	for i := 1; config.MultiProject || i == 1; i++ {
+		var err error
 
-	for i := 1; addMore || i == 1; i++ {
+		if i > 2 {
+			addMore, err := create.RunAddMoreProjectsForm()
+			if err != nil {
+				return nil, err
+			}
+			if !addMore {
+				break
+			}
+		}
 
 		if len(config.ProjectConfigs) > 0 && !config.BlankProject {
 			projectConfig := selection.GetProjectConfigFromPrompt(config.ProjectConfigs, i, true, "Use")
@@ -51,10 +60,8 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 			projectNames := []string{}
 			for _, p := range projectList {
 				var currentName string
-				if p.NewConfig.Name != nil {
-					currentName = *p.NewConfig.Name
-				} else if p.ExistingConfig != nil && p.ExistingConfig.ProjectName != nil {
-					currentName = *p.ExistingConfig.ProjectName
+				if p.Name != nil {
+					currentName = *p.Name
 				}
 				projectNames = append(projectNames, currentName)
 			}
@@ -73,12 +80,18 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 					return nil, err
 				}
 
-				projectList = append(projectList, apiclient.CreateProjectDTO{
-					ExistingConfig: &apiclient.ExistingConfigDTO{
-						ConfigName:  projectConfig.Name,
-						ProjectName: &projectName,
-						Branch:      &branch,
+				configRepo := projectConfig.Repository
+				configRepo.Branch = &branch
+
+				projectList = append(projectList, apiclient.CreateProjectConfigDTO{
+					Name: &projectName,
+					Source: &apiclient.CreateProjectConfigSourceDTO{
+						Repository: configRepo,
 					},
+					BuildConfig: projectConfig.BuildConfig,
+					Image:       config.Defaults.Image,
+					User:        config.Defaults.ImageUser,
+					EnvVars:     projectConfig.EnvVars,
 				})
 				continue
 			}
@@ -95,19 +108,12 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 			return nil, err
 		}
 
-		if i > 1 {
-			addMore, err = create.RunAddMoreProjectsForm()
-			if err != nil {
-				return nil, err
-			}
-		}
-
 		providerRepoName, err := GetSanitizedProjectName(*providerRepo.Name)
 		if err != nil {
 			return nil, err
 		}
 
-		projectList = append(projectList, newCreateProjectDTO(config, providerRepo, providerRepoName))
+		projectList = append(projectList, newCreateProjectConfigDTO(config, providerRepo, providerRepoName))
 	}
 
 	return projectList, nil
@@ -145,10 +151,10 @@ func GetSanitizedProjectName(projectName string) (string, error) {
 	return projectName, nil
 }
 
-func GetEnvVariables(project *apiclient.CreateProjectDTO, profileData *apiclient.ProfileData) *map[string]string {
+func GetEnvVariables(projectConfigDto *apiclient.CreateProjectConfigDTO, profileData *apiclient.ProfileData) *map[string]string {
 	envVars := map[string]string{}
 
-	if profileData.EnvVars != nil {
+	if profileData != nil && profileData.EnvVars != nil {
 		for k, v := range *profileData.EnvVars {
 			if strings.HasPrefix(v, "$") {
 				env, ok := os.LookupEnv(v[1:])
@@ -163,8 +169,8 @@ func GetEnvVariables(project *apiclient.CreateProjectDTO, profileData *apiclient
 		}
 	}
 
-	if project.NewConfig.EnvVars != nil {
-		for k, v := range *project.NewConfig.EnvVars {
+	if projectConfigDto.EnvVars != nil {
+		for k, v := range *projectConfigDto.EnvVars {
 			if strings.HasPrefix(v, "$") {
 				env, ok := os.LookupEnv(v[1:])
 				if ok {
@@ -209,21 +215,25 @@ func GetBranchFromProjectConfig(projectConfig *apiclient.ProjectConfig, apiClien
 		return "", err
 	}
 
-	return *repo.Branch, nil
+	var result string
+
+	if repo.Branch != nil {
+		result = *repo.Branch
+	}
+
+	return result, nil
 }
 
-func newCreateProjectDTO(config ProjectsDataPromptConfig, providerRepo *apiclient.GitRepository, providerRepoName string) apiclient.CreateProjectDTO {
-	project := apiclient.CreateProjectDTO{
-		NewConfig: &apiclient.CreateProjectConfigDTO{
-			Name: &providerRepoName,
-			Source: &apiclient.CreateProjectConfigSourceDTO{
-				Repository: providerRepo,
-			},
-			Build:   &apiclient.ProjectBuildConfig{},
-			Image:   config.Defaults.Image,
-			User:    config.Defaults.ImageUser,
-			EnvVars: &map[string]string{},
+func newCreateProjectConfigDTO(config ProjectsDataPromptConfig, providerRepo *apiclient.GitRepository, providerRepoName string) apiclient.CreateProjectConfigDTO {
+	project := apiclient.CreateProjectConfigDTO{
+		Name: &providerRepoName,
+		Source: &apiclient.CreateProjectConfigSourceDTO{
+			Repository: providerRepo,
 		},
+		BuildConfig: &apiclient.ProjectBuildConfig{},
+		Image:       config.Defaults.Image,
+		User:        config.Defaults.ImageUser,
+		EnvVars:     &map[string]string{},
 	}
 
 	return project

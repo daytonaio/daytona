@@ -13,7 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
-	project_build "github.com/daytonaio/daytona/pkg/workspace/project/build"
+	buildconfig "github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -22,8 +22,8 @@ import (
 var p project.Project = project.Project{
 	ProjectConfig: config.ProjectConfig{
 		Repository: &gitprovider.GitRepository{},
-		Build: &project_build.ProjectBuildConfig{
-			Devcontainer: &project_build.DevcontainerConfig{
+		BuildConfig: &buildconfig.ProjectBuildConfig{
+			Devcontainer: &buildconfig.DevcontainerConfig{
 				FilePath: ".devcontainer/devcontainer.json",
 			},
 		}},

@@ -26,6 +26,13 @@ func GetProjectConfigFromPrompt(projectConfigs []apiclient.ProjectConfig, additi
 func selectProjectConfigPrompt(projectConfigs []apiclient.ProjectConfig, additionalProjectOrder int, showBlankOption bool, actionVerb string, choiceChan chan<- *apiclient.ProjectConfig) {
 	items := []list.Item{}
 
+	if showBlankOption {
+		newItem := item[apiclient.ProjectConfig]{title: "Make a blank project", desc: "(default project configuration)", choiceProperty: apiclient.ProjectConfig{
+			Name: &BlankProjectIdentifier,
+		}}
+		items = append(items, newItem)
+	}
+
 	for _, pc := range projectConfigs {
 		var projectConfigName string
 		if pc.Name != nil {
@@ -38,13 +45,6 @@ func selectProjectConfigPrompt(projectConfigs []apiclient.ProjectConfig, additio
 			desc = *pc.Repository.Url
 		}
 		newItem := item[apiclient.ProjectConfig]{title: projectConfigName, desc: desc, choiceProperty: pc}
-		items = append(items, newItem)
-	}
-
-	if showBlankOption {
-		newItem := item[apiclient.ProjectConfig]{title: "Make a blank project", desc: "(default project configuration)", choiceProperty: apiclient.ProjectConfig{
-			Name: &BlankProjectIdentifier,
-		}}
 		items = append(items, newItem)
 	}
 

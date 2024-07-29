@@ -19,12 +19,12 @@ var _ MappedNullable = &CreateProjectConfigDTO{}
 
 // CreateProjectConfigDTO struct for CreateProjectConfigDTO
 type CreateProjectConfigDTO struct {
-	Build   *ProjectBuildConfig           `json:"build,omitempty"`
-	EnvVars *map[string]string            `json:"envVars,omitempty"`
-	Image   *string                       `json:"image,omitempty"`
-	Name    *string                       `json:"name,omitempty"`
-	Source  *CreateProjectConfigSourceDTO `json:"source,omitempty"`
-	User    *string                       `json:"user,omitempty"`
+	BuildConfig *ProjectBuildConfig           `json:"buildConfig,omitempty"`
+	EnvVars     *map[string]string            `json:"envVars,omitempty"`
+	Image       *string                       `json:"image,omitempty"`
+	Name        *string                       `json:"name,omitempty"`
+	Source      *CreateProjectConfigSourceDTO `json:"source,omitempty"`
+	User        *string                       `json:"user,omitempty"`
 }
 
 // NewCreateProjectConfigDTO instantiates a new CreateProjectConfigDTO object
@@ -44,36 +44,36 @@ func NewCreateProjectConfigDTOWithDefaults() *CreateProjectConfigDTO {
 	return &this
 }
 
-// GetBuild returns the Build field value if set, zero value otherwise.
-func (o *CreateProjectConfigDTO) GetBuild() ProjectBuildConfig {
-	if o == nil || IsNil(o.Build) {
+// GetBuildConfig returns the BuildConfig field value if set, zero value otherwise.
+func (o *CreateProjectConfigDTO) GetBuildConfig() ProjectBuildConfig {
+	if o == nil || IsNil(o.BuildConfig) {
 		var ret ProjectBuildConfig
 		return ret
 	}
-	return *o.Build
+	return *o.BuildConfig
 }
 
-// GetBuildOk returns a tuple with the Build field value if set, nil otherwise
+// GetBuildConfigOk returns a tuple with the BuildConfig field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CreateProjectConfigDTO) GetBuildOk() (*ProjectBuildConfig, bool) {
-	if o == nil || IsNil(o.Build) {
+func (o *CreateProjectConfigDTO) GetBuildConfigOk() (*ProjectBuildConfig, bool) {
+	if o == nil || IsNil(o.BuildConfig) {
 		return nil, false
 	}
-	return o.Build, true
+	return o.BuildConfig, true
 }
 
-// HasBuild returns a boolean if a field has been set.
-func (o *CreateProjectConfigDTO) HasBuild() bool {
-	if o != nil && !IsNil(o.Build) {
+// HasBuildConfig returns a boolean if a field has been set.
+func (o *CreateProjectConfigDTO) HasBuildConfig() bool {
+	if o != nil && !IsNil(o.BuildConfig) {
 		return true
 	}
 
 	return false
 }
 
-// SetBuild gets a reference to the given ProjectBuildConfig and assigns it to the Build field.
-func (o *CreateProjectConfigDTO) SetBuild(v ProjectBuildConfig) {
-	o.Build = &v
+// SetBuildConfig gets a reference to the given ProjectBuildConfig and assigns it to the BuildConfig field.
+func (o *CreateProjectConfigDTO) SetBuildConfig(v ProjectBuildConfig) {
+	o.BuildConfig = &v
 }
 
 // GetEnvVars returns the EnvVars field value if set, zero value otherwise.
@@ -246,8 +246,8 @@ func (o CreateProjectConfigDTO) MarshalJSON() ([]byte, error) {
 
 func (o CreateProjectConfigDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Build) {
-		toSerialize["build"] = o.Build
+	if !IsNil(o.BuildConfig) {
+		toSerialize["buildConfig"] = o.BuildConfig
 	}
 	if !IsNil(o.EnvVars) {
 		toSerialize["envVars"] = o.EnvVars

@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Build** | Pointer to [**ProjectBuildConfig**](ProjectBuildConfig.md) |  | [optional] 
+**BuildConfig** | Pointer to [**ProjectBuildConfig**](ProjectBuildConfig.md) |  | [optional] 
 **EnvVars** | Pointer to **map[string]string** |  | [optional] 
 **Image** | Pointer to **string** |  | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
@@ -30,30 +30,30 @@ NewCreateProjectConfigDTOWithDefaults instantiates a new CreateProjectConfigDTO 
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
-### GetBuild
+### GetBuildConfig
 
-`func (o *CreateProjectConfigDTO) GetBuild() ProjectBuildConfig`
+`func (o *CreateProjectConfigDTO) GetBuildConfig() ProjectBuildConfig`
 
-GetBuild returns the Build field if non-nil, zero value otherwise.
+GetBuildConfig returns the BuildConfig field if non-nil, zero value otherwise.
 
-### GetBuildOk
+### GetBuildConfigOk
 
-`func (o *CreateProjectConfigDTO) GetBuildOk() (*ProjectBuildConfig, bool)`
+`func (o *CreateProjectConfigDTO) GetBuildConfigOk() (*ProjectBuildConfig, bool)`
 
-GetBuildOk returns a tuple with the Build field if it's non-nil, zero value otherwise
+GetBuildConfigOk returns a tuple with the BuildConfig field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetBuild
+### SetBuildConfig
 
-`func (o *CreateProjectConfigDTO) SetBuild(v ProjectBuildConfig)`
+`func (o *CreateProjectConfigDTO) SetBuildConfig(v ProjectBuildConfig)`
 
-SetBuild sets Build field to given value.
+SetBuildConfig sets BuildConfig field to given value.
 
-### HasBuild
+### HasBuildConfig
 
-`func (o *CreateProjectConfigDTO) HasBuild() bool`
+`func (o *CreateProjectConfigDTO) HasBuildConfig() bool`
 
-HasBuild returns a boolean if a field has been set.
+HasBuildConfig returns a boolean if a field has been set.
 
 ### GetEnvVars
 

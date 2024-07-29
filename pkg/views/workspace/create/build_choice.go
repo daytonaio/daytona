@@ -19,7 +19,7 @@ const (
 )
 
 func GetProjectBuildChoice(project apiclient.CreateProjectConfigDTO, defaults *ProjectDefaults) (BuildChoice, string) {
-	if project.Build == nil {
+	if project.BuildConfig == nil {
 		if project.Image != nil && project.User != nil &&
 			defaults.Image != nil && defaults.ImageUser != nil &&
 			*project.Image == *defaults.Image &&
@@ -29,7 +29,7 @@ func GetProjectBuildChoice(project apiclient.CreateProjectConfigDTO, defaults *P
 			return CUSTOMIMAGE, "Custom Image"
 		}
 	} else {
-		if project.Build.Devcontainer != nil {
+		if project.BuildConfig.Devcontainer != nil {
 			return DEVCONTAINER, "Devcontainer"
 		} else {
 			return AUTOMATIC, "Automatic"

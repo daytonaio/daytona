@@ -7,7 +7,6 @@ import (
 	"errors"
 
 	util "github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 )
 
@@ -15,11 +14,9 @@ type IProjectConfigService interface {
 	Delete(projectConfigName string) error
 	Find(projectConfigName string) (*config.ProjectConfig, error)
 	FindDefault(url string) (*config.ProjectConfig, error)
-	List() ([]*config.ProjectConfig, error)
-	FilterByGitUrl(url string) ([]*config.ProjectConfig, error)
+	List(url string) ([]*config.ProjectConfig, error)
 	SetDefault(projectConfigName string) error
 	Save(projectConfig *config.ProjectConfig) error
-	ToProjectConfig(createProjectConfigDto dto.CreateProjectConfigDTO) *config.ProjectConfig
 }
 
 type ProjectConfigServiceConfig struct {
@@ -36,19 +33,19 @@ func NewConfigService(config ProjectConfigServiceConfig) IProjectConfigService {
 	}
 }
 
-func (s *ProjectConfigService) List() ([]*config.ProjectConfig, error) {
-	return s.configStore.List()
-}
-
-func (s *ProjectConfigService) FilterByGitUrl(url string) ([]*config.ProjectConfig, error) {
+func (s *ProjectConfigService) List(url string) ([]*config.ProjectConfig, error) {
 	projectConfigs, err := s.configStore.List()
 	if err != nil {
 		return nil, err
 	}
 
-	url = util.CleanUpRepositoryUrl(url)
+	if url == "" {
+		return projectConfigs, nil
+	}
 
 	var response []*config.ProjectConfig
+
+	url = util.CleanUpRepositoryUrl(url)
 
 	for _, pc := range projectConfigs {
 		if pc.Repository == nil {
@@ -65,10 +62,11 @@ func (s *ProjectConfigService) FilterByGitUrl(url string) ([]*config.ProjectConf
 	}
 
 	return response, nil
+
 }
 
 func (s *ProjectConfigService) FindDefault(url string) (*config.ProjectConfig, error) {
-	projectConfigs, err := s.FilterByGitUrl(url)
+	projectConfigs, err := s.List(url)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +94,7 @@ func (s *ProjectConfigService) SetDefault(projectConfigName string) error {
 		return errors.New("project config does not have a repository")
 	}
 
-	projectConfigs, err := s.FilterByGitUrl(projectConfig.Repository.Url)
+	projectConfigs, err := s.List(projectConfig.Repository.Url)
 	if err != nil {
 		return err
 	}
@@ -135,23 +133,4 @@ func (s *ProjectConfigService) Delete(projectConfigName string) error {
 		return err
 	}
 	return s.configStore.Delete(pc)
-}
-
-func (s *ProjectConfigService) ToProjectConfig(createProjectConfigDto dto.CreateProjectConfigDTO) *config.ProjectConfig {
-	result := &config.ProjectConfig{
-		Name:       createProjectConfigDto.Name,
-		Build:      createProjectConfigDto.Build,
-		Repository: createProjectConfigDto.Source.Repository,
-		EnvVars:    createProjectConfigDto.EnvVars,
-	}
-
-	if createProjectConfigDto.Image != nil {
-		result.Image = *createProjectConfigDto.Image
-	}
-
-	if createProjectConfigDto.User != nil {
-		result.User = *createProjectConfigDto.User
-	}
-
-	return result
 }

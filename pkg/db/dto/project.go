@@ -9,7 +9,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
-	"github.com/daytonaio/daytona/pkg/workspace/project/build"
+	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 )
 
@@ -63,51 +63,17 @@ type ProjectDTO struct {
 	State       *ProjectStateDTO `json:"state,omitempty" gorm:"serializer:json"`
 }
 
-type ProjectConfigDTO struct {
-	Name       string           `gorm:"primaryKey"`
-	Image      string           `json:"image"`
-	User       string           `json:"user"`
-	Build      *ProjectBuildDTO `json:"build,omitempty" gorm:"serializer:json"`
-	Repository RepositoryDTO    `gorm:"serializer:json"`
-	EnvVars    string           `json:"envVars"`
-	IsDefault  bool             `json:"isDefault"`
-}
-
 func ToProjectDTO(project *project.Project, workspace *workspace.Workspace) ProjectDTO {
 	return ProjectDTO{
 		Name:        project.Name,
 		Image:       project.Image,
 		User:        project.User,
-		Build:       ToProjectBuildDTO(project.Build),
+		Build:       ToProjectBuildDTO(project.BuildConfig),
 		Repository:  ToRepositoryDTO(project.Repository),
 		WorkspaceId: project.WorkspaceId,
 		Target:      project.Target,
 		State:       ToProjectStateDTO(project.State),
 		ApiKey:      workspace.ApiKey,
-	}
-}
-
-func ToProjectConfigDTO(projectConfig *config.ProjectConfig) ProjectConfigDTO {
-	return ProjectConfigDTO{
-		Name:       projectConfig.Name,
-		Image:      projectConfig.Image,
-		User:       projectConfig.User,
-		Build:      ToProjectBuildDTO(projectConfig.Build),
-		Repository: ToRepositoryDTO(projectConfig.Repository),
-		EnvVars:    ToEnvVarsString(projectConfig.EnvVars),
-		IsDefault:  projectConfig.IsDefault,
-	}
-}
-
-func ToProjectConfig(projectConfigDTO ProjectConfigDTO) *config.ProjectConfig {
-	return &config.ProjectConfig{
-		Name:       projectConfigDTO.Name,
-		Image:      projectConfigDTO.Image,
-		User:       projectConfigDTO.User,
-		Build:      ToProjectBuild(projectConfigDTO.Build),
-		Repository: ToRepository(projectConfigDTO.Repository),
-		EnvVars:    ToEnvVarsMap(projectConfigDTO.EnvVars),
-		IsDefault:  projectConfigDTO.IsDefault,
 	}
 }
 
@@ -168,7 +134,7 @@ func ToProjectStateDTO(state *project.ProjectState) *ProjectStateDTO {
 	}
 }
 
-func ToProjectBuildDTO(build *build.ProjectBuildConfig) *ProjectBuildDTO {
+func ToProjectBuildDTO(build *buildconfig.ProjectBuildConfig) *ProjectBuildDTO {
 	if build == nil {
 		return nil
 	}
@@ -187,11 +153,11 @@ func ToProjectBuildDTO(build *build.ProjectBuildConfig) *ProjectBuildDTO {
 func ToProject(projectDTO ProjectDTO) *project.Project {
 	return &project.Project{
 		ProjectConfig: config.ProjectConfig{
-			Name:       projectDTO.Name,
-			Image:      projectDTO.Image,
-			User:       projectDTO.User,
-			Build:      ToProjectBuild(projectDTO.Build),
-			Repository: ToRepository(projectDTO.Repository),
+			Name:        projectDTO.Name,
+			Image:       projectDTO.Image,
+			User:        projectDTO.User,
+			BuildConfig: ToProjectBuild(projectDTO.Build),
+			Repository:  ToRepository(projectDTO.Repository),
 		},
 		WorkspaceId: projectDTO.WorkspaceId,
 		Target:      projectDTO.Target,
@@ -257,17 +223,17 @@ func ToRepository(repoDTO RepositoryDTO) *gitprovider.GitRepository {
 	return &repo
 }
 
-func ToProjectBuild(buildDTO *ProjectBuildDTO) *build.ProjectBuildConfig {
+func ToProjectBuild(buildDTO *ProjectBuildDTO) *buildconfig.ProjectBuildConfig {
 	if buildDTO == nil {
 		return nil
 	}
 
 	if buildDTO.Devcontainer == nil {
-		return &build.ProjectBuildConfig{}
+		return &buildconfig.ProjectBuildConfig{}
 	}
 
-	return &build.ProjectBuildConfig{
-		Devcontainer: &build.DevcontainerConfig{
+	return &buildconfig.ProjectBuildConfig{
+		Devcontainer: &buildconfig.DevcontainerConfig{
 			FilePath: buildDTO.Devcontainer.DevContainerFilePath,
 		},
 	}

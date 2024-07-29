@@ -6,7 +6,6 @@
 package mocks
 
 import (
-	"github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 	"github.com/stretchr/testify/mock"
 )
@@ -34,12 +33,7 @@ func (m *mockProjectConfigService) FindDefault(url string) (*config.ProjectConfi
 	return args.Get(0).(*config.ProjectConfig), args.Error(1)
 }
 
-func (m *mockProjectConfigService) List() ([]*config.ProjectConfig, error) {
-	args := m.Called()
-	return args.Get(0).([]*config.ProjectConfig), args.Error(1)
-}
-
-func (m *mockProjectConfigService) FilterByGitUrl(url string) ([]*config.ProjectConfig, error) {
+func (m *mockProjectConfigService) List(url string) ([]*config.ProjectConfig, error) {
 	args := m.Called(url)
 	return args.Get(0).([]*config.ProjectConfig), args.Error(1)
 }
@@ -52,9 +46,4 @@ func (m *mockProjectConfigService) SetDefault(name string) error {
 func (m *mockProjectConfigService) Save(pc *config.ProjectConfig) error {
 	args := m.Called(pc)
 	return args.Error(0)
-}
-
-func (m *mockProjectConfigService) ToProjectConfig(createProjectConfigDto dto.CreateProjectConfigDTO) *config.ProjectConfig {
-	args := m.Called(createProjectConfigDto)
-	return args.Get(0).(*config.ProjectConfig)
 }
