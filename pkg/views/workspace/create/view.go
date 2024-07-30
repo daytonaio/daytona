@@ -61,7 +61,7 @@ type Model struct {
 	width  int
 }
 
-func GetRepositoryFromUrlInput(multiProject bool, apiClient *apiclient.APIClient, selectedRepos map[string]bool) (*apiclient.GitRepository, error) {
+func GetRepositoryFromUrlInput(multiProject bool, apiClient *apiclient.APIClient, selectedRepos map[string]int) (*apiclient.GitRepository, error) {
 	m := Model{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
@@ -81,7 +81,7 @@ func GetRepositoryFromUrlInput(multiProject bool, apiClient *apiclient.APIClient
 		Key("initialProjectRepo").
 		Validate(func(str string) error {
 			var err error
-			repo, err = validateRepoUrl(str, apiClient, selectedRepos)
+			repo, err = validateRepoUrl(str, apiClient)
 			return err
 		})
 
@@ -101,12 +101,12 @@ func GetRepositoryFromUrlInput(multiProject bool, apiClient *apiclient.APIClient
 		return nil, err
 	}
 
-	selectedRepos[initialRepoUrl] = true
+	selectedRepos[*repo.Url]++
 
 	return repo, nil
 }
 
-func RunAdditionalProjectRepoForm(index int, apiClient *apiclient.APIClient, selectedRepos map[string]bool) (*apiclient.GitRepository, bool, error) {
+func RunAdditionalProjectRepoForm(index int, apiClient *apiclient.APIClient, selectedRepos map[string]int) (*apiclient.GitRepository, bool, error) {
 	m := Model{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
@@ -123,7 +123,7 @@ func RunAdditionalProjectRepoForm(index int, apiClient *apiclient.APIClient, sel
 			Key(fmt.Sprintf("additionalRepo%d", index)).
 			Validate(func(str string) error {
 				var err error
-				repo, err = validateRepoUrl(str, apiClient, selectedRepos)
+				repo, err = validateRepoUrl(str, apiClient)
 				return err
 			})
 
@@ -145,7 +145,7 @@ func RunAdditionalProjectRepoForm(index int, apiClient *apiclient.APIClient, sel
 		return nil, false, err
 	}
 
-	selectedRepos[repoUrl] = true
+	selectedRepos[*repo.Url]++
 
 	return repo, addAnother, nil
 }
@@ -211,16 +211,11 @@ func getOrderNumberString(number int) string {
 	return "Invalid"
 }
 
-func validateRepoUrl(repoUrl string, apiClient *apiclient.APIClient, selectedRepos map[string]bool) (*apiclient.GitRepository, error) {
+func validateRepoUrl(repoUrl string, apiClient *apiclient.APIClient) (*apiclient.GitRepository, error) {
 	result, err := util.GetValidatedUrl(repoUrl)
 	if err != nil {
 		return nil, err
 	}
-
-	if selectedRepos[repoUrl] {
-		return nil, fmt.Errorf("duplicate entry, please try with a different repository")
-	}
-
 	encodedURLParam := url.QueryEscape(result)
 	repo, _, err := apiClient.GitProviderAPI.GetGitContext(context.Background(), encodedURLParam).Execute()
 	if err != nil {
