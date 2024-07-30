@@ -11,6 +11,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/target"
 	"github.com/spf13/cobra"
@@ -46,7 +47,11 @@ var targetRemoveCmd = &cobra.Command{
 
 			selectedTarget, err := target.GetTargetFromPrompt(targets, activeProfile.Name, false)
 			if err != nil {
-				log.Fatal(err)
+				if common.IsCtrlCAbort(err) {
+					return
+				} else {
+					log.Fatal(err)
+				}
 			}
 
 			selectedTargetName = *selectedTarget.Name

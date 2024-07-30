@@ -24,6 +24,7 @@ import (
 	. "github.com/daytonaio/daytona/pkg/cmd/target"
 	. "github.com/daytonaio/daytona/pkg/cmd/telemetry"
 	. "github.com/daytonaio/daytona/pkg/cmd/workspace"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	view "github.com/daytonaio/daytona/pkg/views/initial"
@@ -190,7 +191,11 @@ func SetupRootCommand(cmd *cobra.Command) {
 func RunInitialScreenFlow(cmd *cobra.Command, args []string) {
 	command, err := view.GetCommand()
 	if err != nil {
-		log.Fatal(err)
+		if common.IsCtrlCAbort(err) {
+			return
+		} else {
+			log.Fatal(err)
+		}
 	}
 
 	switch command {

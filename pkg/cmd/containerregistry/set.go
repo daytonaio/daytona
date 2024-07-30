@@ -10,6 +10,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	containerregistry_view "github.com/daytonaio/daytona/pkg/views/containerregistry"
 	"github.com/spf13/cobra"
@@ -59,7 +60,11 @@ var containerRegistrySetCmd = &cobra.Command{
 			} else {
 				registryDto, err := containerregistry_view.GetRegistryFromPrompt(containerRegistries, activeProfile.Name, true)
 				if err != nil {
-					log.Fatal(err)
+					if common.IsCtrlCAbort(err) {
+						return
+					} else {
+						log.Fatal(err)
+					}
 				}
 
 				editing := true

@@ -4,7 +4,6 @@
 package daytona
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -12,6 +11,7 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/internal"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
@@ -171,5 +171,5 @@ func GetCommand() (string, error) {
 		return m.choice, nil
 	}
 
-	return "", errors.New("no command selected")
+	return "", common.ErrCtrlCAbort
 }

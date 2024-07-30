@@ -15,6 +15,7 @@ import (
 	"github.com/daytonaio/daytona/internal/apikeys"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/server/apikey"
 )
@@ -61,7 +62,11 @@ var revokeCmd = &cobra.Command{
 		} else {
 			selectedApiKey, err = apikey.GetApiKeyFromPrompt(apiKeyList, "Select an API key to revoke", false)
 			if err != nil {
-				log.Fatal(err)
+				if common.IsCtrlCAbort(err) {
+					return
+				} else {
+					log.Fatal(err)
+				}
 			}
 		}
 
