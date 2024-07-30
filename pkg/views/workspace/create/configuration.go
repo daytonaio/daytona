@@ -12,6 +12,7 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
@@ -60,7 +61,7 @@ func ConfigureProjects(projectList *[]apiclient.CreateWorkspaceRequestProject, d
 	if len(*projectList) > 1 {
 		currentProject = selection.GetProjectRequestFromPrompt(projectList)
 		if currentProject == nil {
-			return false, errors.New("project is required")
+			return false, common.ErrCtrlCAbort
 		}
 	} else {
 		currentProject = &((*projectList)[0])

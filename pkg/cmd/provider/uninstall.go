@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/spf13/cobra"
@@ -28,7 +29,11 @@ var providerUninstallCmd = &cobra.Command{
 
 		providerToUninstall, err := provider.GetProviderFromPrompt(providerList, "Choose a provider to uninstall", false)
 		if err != nil {
-			log.Fatal(err)
+			if common.IsCtrlCAbort(err) {
+				return
+			} else {
+				log.Fatal(err)
+			}
 		}
 
 		if providerToUninstall == nil {

@@ -8,6 +8,7 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/spf13/cobra"
@@ -61,7 +62,11 @@ var providerUpdateCmd = &cobra.Command{
 
 		providerToUpdate, err := provider.GetProviderFromPrompt(providerList, "Choose a provider to update", false)
 		if err != nil {
-			log.Fatal(err)
+			if common.IsCtrlCAbort(err) {
+				return
+			} else {
+				log.Fatal(err)
+			}
 		}
 		if providerToUpdate == nil {
 			return
