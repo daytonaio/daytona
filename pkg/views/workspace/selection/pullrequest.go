@@ -14,7 +14,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, additionalProjectOrder int, choiceChan chan<- string) {
+func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, additionalProjectOrder int, parentIdentifier string, choiceChan chan<- string) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
@@ -26,7 +26,7 @@ func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, additional
 		items = append(items, newItem)
 	}
 
-	l := views.GetStyledSelectList(items)
+	l := views.GetStyledSelectList(items, parentIdentifier)
 
 	title := "Choose a Pull/Merge Request"
 	if additionalProjectOrder > 0 {
@@ -49,10 +49,10 @@ func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, additional
 	}
 }
 
-func GetPullRequestFromPrompt(pullRequests []apiclient.GitPullRequest, additionalProjectOrder int) *apiclient.GitPullRequest {
+func GetPullRequestFromPrompt(pullRequests []apiclient.GitPullRequest, additionalProjectOrder int, parentIdentifier string) *apiclient.GitPullRequest {
 	choiceChan := make(chan string)
 
-	go selectPullRequestPrompt(pullRequests, additionalProjectOrder, choiceChan)
+	go selectPullRequestPrompt(pullRequests, additionalProjectOrder, parentIdentifier, choiceChan)
 
 	pullRequestName := <-choiceChan
 

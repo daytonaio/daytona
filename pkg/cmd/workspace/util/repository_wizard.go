@@ -83,7 +83,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 		return nil, err
 	}
 
-	chosenRepo := selection.GetRepositoryFromPrompt(providerRepos, additionalProjectOrder, selectedRepos)
+	chosenRepo := selection.GetRepositoryFromPrompt(providerRepos, additionalProjectOrder, selectedRepos, providerId)
 	if chosenRepo == nil {
 		return nil, errors.New("must select a repository")
 	}
@@ -120,7 +120,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 
 	var branch *apiclient.GitBranch
 	if len(prList) == 0 {
-		branch = selection.GetBranchFromPrompt(branchList, additionalProjectOrder)
+		branch = selection.GetBranchFromPrompt(branchList, additionalProjectOrder, *chosenRepo.Name)
 		if branch == nil {
 			return nil, errors.New("must select a branch")
 		}
@@ -141,14 +141,14 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 	}
 
 	if chosenCheckoutOption == selection.CheckoutBranch {
-		branch = selection.GetBranchFromPrompt(branchList, additionalProjectOrder)
+		branch = selection.GetBranchFromPrompt(branchList, additionalProjectOrder, *chosenRepo.Name)
 		if branch == nil {
 			return nil, errors.New("must select a branch")
 		}
 		chosenRepo.Branch = branch.Name
 		chosenRepo.Sha = branch.Sha
 	} else if chosenCheckoutOption == selection.CheckoutPR {
-		chosenPullRequest := selection.GetPullRequestFromPrompt(prList, additionalProjectOrder)
+		chosenPullRequest := selection.GetPullRequestFromPrompt(prList, additionalProjectOrder, *chosenRepo.Name)
 		if chosenPullRequest == nil {
 			return nil, errors.New("must select a pull request")
 		}

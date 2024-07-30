@@ -14,7 +14,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectRepositoryPrompt(repositories []apiclient.GitRepository, index int, choiceChan chan<- string, selectedRepos map[string]int) {
+func selectRepositoryPrompt(repositories []apiclient.GitRepository, index int, choiceChan chan<- string, selectedRepos map[string]int, parentIdentifier string) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
@@ -23,7 +23,7 @@ func selectRepositoryPrompt(repositories []apiclient.GitRepository, index int, c
 		items = append(items, newItem)
 	}
 
-	l := views.GetStyledSelectList(items)
+	l := views.GetStyledSelectList(items, parentIdentifier)
 
 	title := "Choose a Repository"
 	if index > 1 {
@@ -49,10 +49,10 @@ func selectRepositoryPrompt(repositories []apiclient.GitRepository, index int, c
 	}
 }
 
-func GetRepositoryFromPrompt(repositories []apiclient.GitRepository, index int, selectedRepos map[string]int) *apiclient.GitRepository {
+func GetRepositoryFromPrompt(repositories []apiclient.GitRepository, index int, selectedRepos map[string]int, parentIdentifier string) *apiclient.GitRepository {
 	choiceChan := make(chan string)
 
-	go selectRepositoryPrompt(repositories, index, choiceChan, selectedRepos)
+	go selectRepositoryPrompt(repositories, index, choiceChan, selectedRepos, parentIdentifier)
 
 	choice := <-choiceChan
 

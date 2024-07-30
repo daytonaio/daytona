@@ -44,7 +44,7 @@ var LogPrefixColors = []lipgloss.AdaptiveColor{
 	Blue, Yellow, Orange, Cyan,
 }
 
-func GetStyledSelectList(items []list.Item) list.Model {
+func GetStyledSelectList(items []list.Item, parentIdentifier ...string) list.Model {
 
 	d := list.NewDefaultDelegate()
 
@@ -67,7 +67,21 @@ func GetStyledSelectList(items []list.Item) list.Model {
 	l.FilterInput.PromptStyle = lipgloss.NewStyle().Foreground(Green)
 	l.FilterInput.TextStyle = lipgloss.NewStyle().Foreground(Green)
 
-	l.SetStatusBarItemName("item\n\n"+lipgloss.NewStyle().Foreground(LightGray).Render("==="), "items\n\n"+lipgloss.NewStyle().Foreground(LightGray).Render("==="))
+	singularItemName := "item " + lipgloss.NewStyle().Foreground(LightGray).Render("===")
+	var pluralItemName string
+	if len(parentIdentifier) == 0 {
+		pluralItemName = "items " + lipgloss.NewStyle().Foreground(LightGray).Render("===")
+	} else {
+		pluralItemName = "items " + lipgloss.NewStyle().Foreground(LightGray).Render("")
+
+		parentIdentifierStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#FFFF00")).Bold(true)
+		formattedParentIdentifier := parentIdentifierStyle.Render("(" + parentIdentifier[0] + ")")
+
+		pluralItemName += formattedParentIdentifier
+		pluralItemName += " " + lipgloss.NewStyle().Foreground(LightGray).Render("===")
+	}
+
+	l.SetStatusBarItemName(singularItemName, pluralItemName)
 
 	return l
 }
