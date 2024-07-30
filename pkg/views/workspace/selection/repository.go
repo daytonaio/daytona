@@ -14,25 +14,12 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectRepositoryPrompt(repositories []apiclient.GitRepository, index int, choiceChan chan<- string, parentId string, selectedReposParentMap map[string]bool, selectedRepos map[string]bool) {
+func selectRepositoryPrompt(repositories []apiclient.GitRepository, index int, choiceChan chan<- string, selectedRepos map[string]int) {
 	items := []list.Item{}
-	disabledReposCount := 0
 
 	// Populate items with titles and descriptions from workspaces.
 	for _, repository := range repositories {
-		url := *repository.Url
-		title := *repository.Name
-		isDisabled := false
-
-		// Index > 1 indicates use of 'multi-project' command
-		if index > 1 && len(selectedRepos) > 0 && selectedRepos[url] {
-			title += statusMessageDangerStyle(" (Already selected)")
-			// isDisabled property helps in skipping over this specific repo option, refer to
-			// handling of up/down key press under update method in ./view.go file
-			isDisabled = true
-			disabledReposCount++
-		}
-		newItem := item[string]{id: url, title: title, choiceProperty: url, desc: url, isDisabled: isDisabled}
+		newItem := item[string]{id: *repository.Url, title: *repository.Name, choiceProperty: *repository.Url, desc: *repository.Url}
 		items = append(items, newItem)
 	}
 
@@ -55,22 +42,17 @@ func selectRepositoryPrompt(repositories []apiclient.GitRepository, index int, c
 	if m, ok := p.(model[string]); ok && m.choice != nil {
 		choice := *m.choice
 
-		selectedRepos[choice] = true
-		disabledReposCount++
-		if disabledReposCount == len(repositories) {
-			selectedReposParentMap[parentId] = true
-		}
-
+		selectedRepos[choice]++
 		choiceChan <- choice
 	} else {
 		choiceChan <- ""
 	}
 }
 
-func GetRepositoryFromPrompt(repositories []apiclient.GitRepository, index int, parentId string, selectedReposParentMap map[string]bool, selectedRepos map[string]bool) *apiclient.GitRepository {
+func GetRepositoryFromPrompt(repositories []apiclient.GitRepository, index int, selectedRepos map[string]int) *apiclient.GitRepository {
 	choiceChan := make(chan string)
 
-	go selectRepositoryPrompt(repositories, index, choiceChan, parentId, selectedReposParentMap, selectedRepos)
+	go selectRepositoryPrompt(repositories, index, choiceChan, selectedRepos)
 
 	choice := <-choiceChan
 
