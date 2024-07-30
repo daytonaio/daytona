@@ -70,7 +70,7 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 	} else {
 		namespaceId = selection.GetNamespaceIdFromPrompt(namespaceList, additionalProjectOrder, providerId, disabledGitProviders, disabledNamespaces)
 		if namespaceId == "" {
-			return nil, errors.New("namespace not found")
+			return nil, common.ErrCtrlCAbort
 		}
 	}
 
