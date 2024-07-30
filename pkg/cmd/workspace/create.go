@@ -97,17 +97,10 @@ var CreateCmd = &cobra.Command{
 			return
 		}
 
-		for i := range projects {
-			if projects[i].Source == nil || projects[i].Source.Repository == nil || projects[i].Source.Repository.Url == nil {
-				log.Fatal("Error: repository url is required")
-			}
-
-			projects[i].EnvVars = getEnvVariables(&projects[i], profileData)
-		}
-
 		projectNames := []string{}
-		for _, project := range projects {
-			projectNames = append(projectNames, project.Name)
+		for i := range projects {
+			projects[i].EnvVars = getEnvVariables(&projects[i], profileData)
+			projectNames = append(projectNames, projects[i].Name)
 		}
 
 		logs_view.CalculateLongestPrefixLength(projectNames)
