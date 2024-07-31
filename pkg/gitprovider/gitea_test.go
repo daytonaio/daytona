@@ -130,6 +130,88 @@ func (g *GiteaGitProviderTestSuite) TestParseStaticGitContext_Commit() {
 	require.Equal(httpContext, commitContext)
 }
 
+func (g *GiteaGitProviderTestSuite) TestGetUrlFromRepo_Bare() {
+	repo := &GitRepository{
+		Id:     "daytona",
+		Name:   "daytona",
+		Owner:  "daytonaio",
+		Source: "gitea.com",
+		Url:    "https://gitea.com/daytonaio/daytona.git",
+	}
+
+	require := g.Require()
+
+	url := g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://gitea.com/daytonaio/daytona", url)
+}
+
+func (g *GiteaGitProviderTestSuite) TestGetUrlFromRepo_Branch() {
+	repo := &GitRepository{
+		Id:     "daytona",
+		Name:   "daytona",
+		Owner:  "daytonaio",
+		Source: "gitea.com",
+		Url:    "https://gitea.com/daytonaio/daytona.git",
+		Branch: &[]string{"test-branch"}[0],
+	}
+
+	require := g.Require()
+
+	url := g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://gitea.com/daytonaio/daytona/src/branch/test-branch", url)
+}
+
+func (g *GiteaGitProviderTestSuite) TestGetUrlFromRepo_Path() {
+	repo := &GitRepository{
+		Id:     "daytona",
+		Name:   "daytona",
+		Owner:  "daytonaio",
+		Source: "gitea.com",
+		Url:    "https://gitea.com/daytonaio/daytona.git",
+		Branch: &[]string{"test-branch"}[0],
+		Path:   &[]string{"README.md"}[0],
+	}
+
+	require := g.Require()
+
+	url := g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://gitea.com/daytonaio/daytona/src/branch/test-branch/README.md", url)
+
+	repo.Branch = nil
+
+	url = g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://gitea.com/daytonaio/daytona/src/branch/main/README.md", url)
+}
+
+func (g *GiteaGitProviderTestSuite) TestGetUrlFromRepo_Commit() {
+	repo := &GitRepository{
+		Id:     "daytona",
+		Name:   "daytona",
+		Owner:  "daytonaio",
+		Source: "gitea.com",
+		Url:    "https://gitea.com/daytonaio/daytona.git",
+		Path:   &[]string{"README.md"}[0],
+		Sha:    "COMMIT_SHA",
+		Branch: &[]string{"COMMIT_SHA"}[0],
+	}
+
+	require := g.Require()
+
+	url := g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://gitea.com/daytonaio/daytona/src/commit/COMMIT_SHA/README.md", url)
+
+	repo.Path = nil
+
+	url = g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://gitea.com/daytonaio/daytona/src/commit/COMMIT_SHA", url)
+}
+
 func TestGiteaGitProvider(t *testing.T) {
 	suite.Run(t, NewGiteaGitProviderTestSuite())
 }

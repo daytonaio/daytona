@@ -176,6 +176,28 @@ paths:
       tags:
       - gitProvider
       x-codegen-request-body-name: gitProviderConfig
+  /gitprovider/context/url:
+    post:
+      description: Get URL from Git repository
+      operationId: GetUrlFromRepository
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/GitRepository'
+        description: Git repository
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: OK
+      summary: Get URL from Git repository
+      tags:
+      - gitProvider
+      x-codegen-request-body-name: repository
   /gitprovider/context/{gitUrl}:
     get:
       description: Get Git context
