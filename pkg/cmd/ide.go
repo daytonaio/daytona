@@ -8,6 +8,7 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
+	ide_util "github.com/daytonaio/daytona/pkg/ide"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/ide"
 
@@ -37,6 +38,15 @@ var ideCmd = &cobra.Command{
 		for _, ide := range ideList {
 			if ide.Id == chosenIdeId {
 				chosenIde = ide
+			}
+		}
+
+		isChosenIdeInstalled := false
+		if chosenIde.Name == "VS Code" {
+			isChosenIdeInstalled = ide_util.CheckAndAlertVSCodeInstalled()
+
+			if !isChosenIdeInstalled {
+				return
 			}
 		}
 
