@@ -193,7 +193,12 @@ func (d *DockerClient) createProjectFromDevcontainer(opts *CreateProjectOptions,
 		}
 	}
 
-	devcontainerCmd := []string{
+	hostEnvVars, err := d.getHostEnvVars(opts.SshClient)
+	if err != nil {
+		return "", err
+	}
+
+	devcontainerCmd := append(hostEnvVars, []string{
 		"devcontainer",
 		"up",
 		"--workspace-folder=" + paths.ProjectTarget,
@@ -202,7 +207,7 @@ func (d *DockerClient) createProjectFromDevcontainer(opts *CreateProjectOptions,
 		"--id-label=daytona.workspace.id=" + opts.Project.WorkspaceId,
 		"--id-label=daytona.project.name=" + opts.Project.Name,
 		"--skip-non-blocking-commands",
-	}
+	}...)
 
 	if prebuild {
 		devcontainerCmd = append(devcontainerCmd, "--prebuild")
@@ -299,27 +304,12 @@ func (d *DockerClient) ensureDockerSockForward(logWriter io.Writer) (string, err
 func (d *DockerClient) readDevcontainerConfig(opts *CreateProjectOptions, paths DevcontainerPaths, socketForwardId string) (string, *devcontainer.Root, error) {
 	opts.LogWriter.Write([]byte("Reading devcontainer configuration...\n"))
 
-	env := os.Environ()
-	if opts.SshClient != nil {
-		var err error
-		env, err = opts.SshClient.GetEnv(nil)
-		if err != nil {
-			return "", nil, err
-		}
+	envVars, err := d.getHostEnvVars(opts.SshClient)
+	if err != nil {
+		return "", nil, err
 	}
 
-	env = slices.DeleteFunc(env, func(el string) bool {
-		return strings.Contains(el, ";") || strings.Contains(el, "PATH")
-	})
-
-	sanitizedEnv := []string{}
-	for _, el := range env {
-		parts := strings.Split(el, "=")
-		santizedEl := fmt.Sprintf(`%s="%s"`, parts[0], parts[1])
-		sanitizedEnv = append(sanitizedEnv, santizedEl+";")
-	}
-
-	devcontainerCmd := append(sanitizedEnv, []string{
+	devcontainerCmd := append(envVars, []string{
 		"devcontainer",
 		"read-configuration",
 		"--workspace-folder=" + paths.ProjectTarget,
@@ -329,7 +319,7 @@ func (d *DockerClient) readDevcontainerConfig(opts *CreateProjectOptions, paths 
 
 	cmd := strings.Join(devcontainerCmd, " ")
 
-	output, err := d.execInContainer(cmd, opts, paths, paths.ProjectTarget, socketForwardId, false, nil)
+	output, err := d.execInContainer(cmd, opts, paths, paths.ProjectTarget, socketForwardId, true, nil)
 	if err != nil {
 		return "", nil, err
 	}
@@ -532,6 +522,30 @@ func (d *DockerClient) getDevcontainerPaths(opts *CreateProjectOptions) Devconta
 		ProjectTarget:        projectTarget,
 		TargetConfigFilePath: targetConfigFilePath,
 	}
+}
+
+func (d *DockerClient) getHostEnvVars(sshClient *ssh.Client) ([]string, error) {
+	env := os.Environ()
+	if sshClient != nil {
+		var err error
+		env, err = sshClient.GetEnv(nil)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	env = slices.DeleteFunc(env, func(el string) bool {
+		return strings.Contains(el, ";") || strings.Contains(el, "PATH")
+	})
+
+	sanitizedEnv := []string{}
+	for _, el := range env {
+		parts := strings.Split(el, "=")
+		santizedEl := fmt.Sprintf(`%s="%s"`, parts[0], parts[1])
+		sanitizedEnv = append(sanitizedEnv, santizedEl)
+	}
+
+	return sanitizedEnv, nil
 }
 
 func execDevcontainerCommand(command []string, logWriter io.Writer, sshClient *ssh.Client) error {

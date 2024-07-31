@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/apiclient"
@@ -29,18 +30,12 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 	var providerRepo *apiclient.GitRepository
 	var err error
 	var workspaceName string
-	// The following three maps keep track of visited repos and their respective namespaces and Git providers
-	// During workspace creation, lookups will help in avoiding duplicated repo entries and disabling specific
-	// namespaces and git providers list options from further selection under which all repos are visited.
-	// The hierarchy is :
-	// Git Provider ----> Namespaces (organizations/projects) ----> Repositories
-	// Git Provider ----> Repositories (if no orgs available)
-	selectedRepos := make(map[string]bool)
-	disabledNamespaces := make(map[string]bool)
-	disabledGitProviders := make(map[string]bool)
+	// keep track of visited repos, will help in keeping project names unique
+	// since these are later saved into the db under a unique constraint field.
+	selectedRepos := make(map[string]int)
 
 	if !config.Manual && config.UserGitProviders != nil && len(config.UserGitProviders) > 0 {
-		providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, 0, disabledGitProviders, disabledNamespaces, selectedRepos)
+		providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, 0, selectedRepos)
 		if err != nil {
 			return "", nil, err
 		}
@@ -66,7 +61,7 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 			var providerRepo *apiclient.GitRepository
 
 			if !config.Manual && config.UserGitProviders != nil && len(config.UserGitProviders) > 0 {
-				providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, i, disabledGitProviders, disabledNamespaces, selectedRepos)
+				providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, i, selectedRepos)
 				if err != nil {
 					return "", nil, err
 				}
@@ -82,6 +77,12 @@ func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclie
 				if err != nil {
 					return "", nil, err
 				}
+			}
+
+			// Append occurence number to keep duplicate entries unique
+			repoUrl := *providerRepo.Url
+			if len(selectedRepos) > 0 && selectedRepos[repoUrl] > 1 {
+				*providerRepo.Name += strconv.Itoa(selectedRepos[repoUrl])
 			}
 
 			providerRepoName, err := GetSanitizedProjectName(*providerRepo.Name)

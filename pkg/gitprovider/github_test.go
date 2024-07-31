@@ -86,6 +86,27 @@ func (g *GitHubGitProviderTestSuite) TestParseStaticGitContext_Branch() {
 	require.Equal(httpContext, branchContext)
 }
 
+func (g *GitHubGitProviderTestSuite) TestParseStaticGitContext_BranchNameWithSlash() {
+	commitUrl := "https://github.com/daytonaio/daytona/tree/test/test-branch"
+	commitContext := &StaticGitContext{
+		Id:       "daytona",
+		Name:     "daytona",
+		Owner:    "daytonaio",
+		Source:   "github.com",
+		Url:      "https://github.com/daytonaio/daytona.git",
+		Branch:   &[]string{"test/test-branch"}[0],
+		Sha:      nil,
+		PrNumber: nil,
+		Path:     nil,
+	}
+
+	require := g.Require()
+
+	httpContext, err := g.gitProvider.parseStaticGitContext(commitUrl)
+
+	require.Nil(err)
+	require.Equal(httpContext, commitContext)
+}
 func (g *GitHubGitProviderTestSuite) TestParseStaticGitContext_Commits() {
 	commitsUrl := "https://github.com/daytonaio/daytona/commits/test-branch"
 	commitsContext := &StaticGitContext{

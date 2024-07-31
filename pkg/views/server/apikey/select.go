@@ -4,11 +4,10 @@
 package apikey
 
 import (
-	"errors"
-
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
@@ -45,5 +44,5 @@ func GetApiKeyFromPrompt(apiKeys []apiclient.ApiKey, title string, withNewApiKey
 		return m.choice, nil
 	}
 
-	return nil, errors.New("no API key selected")
+	return nil, common.ErrCtrlCAbort
 }

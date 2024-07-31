@@ -5,6 +5,7 @@ package middlewares
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/daytonaio/daytona/internal"
@@ -15,6 +16,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var ignorePaths = map[string]bool{
+	"/health": true,
+	"/workspace/:workspaceId/:projectId/state": true,
+	"/server/network-key":                      true,
+}
+
 func TelemetryMiddleware(telemetryService telemetry.TelemetryService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		if telemetryService == nil {
@@ -23,6 +30,12 @@ func TelemetryMiddleware(telemetryService telemetry.TelemetryService) gin.Handle
 		}
 
 		if ctx.GetHeader(telemetry.ENABLED_HEADER) != "true" {
+			ctx.Next()
+			return
+		}
+
+		reqUri := ctx.FullPath()
+		if ignorePaths[reqUri] {
 			ctx.Next()
 			return
 		}
@@ -49,17 +62,22 @@ func TelemetryMiddleware(telemetryService telemetry.TelemetryService) gin.Handle
 		source := ctx.GetHeader(telemetry.SOURCE_HEADER)
 
 		reqMethod := ctx.Request.Method
-		reqUri := ctx.FullPath()
 
 		query := ctx.Request.URL.RawQuery
 
+		remoteProfile := false
+		if source == string(telemetry.CLI_SOURCE) && !strings.Contains(ctx.Request.Host, "localhost") {
+			remoteProfile = true
+		}
+
 		err := telemetryService.TrackServerEvent(telemetry.ServerEventApiRequestStarted, clientId, map[string]interface{}{
-			"method":     reqMethod,
-			"URI":        reqUri,
-			"query":      query,
-			"source":     source,
-			"server_id":  server.Id,
-			"session_id": sessionId,
+			"method":         reqMethod,
+			"URI":            reqUri,
+			"query":          query,
+			"source":         source,
+			"server_id":      server.Id,
+			"session_id":     sessionId,
+			"remote_profile": remoteProfile,
 		})
 		if err != nil {
 			log.Trace(err)
@@ -80,6 +98,7 @@ func TelemetryMiddleware(telemetryService telemetry.TelemetryService) gin.Handle
 			"exec time (µs)": execTime.Microseconds(),
 			"server_id":      server.Id,
 			"session_id":     sessionId,
+			"remote_profile": remoteProfile,
 		}
 
 		if len(ctx.Errors) > 0 {

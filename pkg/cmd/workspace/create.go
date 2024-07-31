@@ -18,6 +18,7 @@ import (
 	ssh_config "github.com/daytonaio/daytona/pkg/agent/ssh/config"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/views"
 	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
@@ -80,7 +81,11 @@ var CreateCmd = &cobra.Command{
 		if len(args) == 0 {
 			err = processPrompting(apiClient, &workspaceName, &projects, existingWorkspaceNames, ctx)
 			if err != nil {
-				log.Fatal(err)
+				if common.IsCtrlCAbort(err) {
+					return
+				} else {
+					log.Fatal(err)
+				}
 			}
 		} else {
 			err = processCmdArguments(args, apiClient, &projects, ctx)
@@ -98,22 +103,10 @@ var CreateCmd = &cobra.Command{
 			return
 		}
 
-		visited := make(map[string]bool)
-
-		for i := range projects {
-			if projects[i].Source == nil || projects[i].Source.Repository == nil || projects[i].Source.Repository.Url == nil {
-				log.Fatal("Error: repository url is required")
-			}
-			if visited[*projects[i].Source.Repository.Url] {
-				log.Fatalf("Error: duplicate repository url: %s", *projects[i].Source.Repository.Url)
-			}
-			visited[*projects[i].Source.Repository.Url] = true
-			projects[i].EnvVars = getEnvVariables(&projects[i], profileData)
-		}
-
 		projectNames := []string{}
-		for _, project := range projects {
-			projectNames = append(projectNames, project.Name)
+		for i := range projects {
+			projects[i].EnvVars = getEnvVariables(&projects[i], profileData)
+			projectNames = append(projectNames, projects[i].Name)
 		}
 
 		logs_view.CalculateLongestPrefixLength(projectNames)

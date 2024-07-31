@@ -10,6 +10,7 @@ import (
 	internal_util "github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/daytonaio/daytona/pkg/views/target"
@@ -41,7 +42,11 @@ var TargetSetCmd = &cobra.Command{
 
 		selectedProvider, err := provider.GetProviderFromPrompt(pluginList, "Choose a provider", false)
 		if err != nil {
-			log.Fatal(err)
+			if common.IsCtrlCAbort(err) {
+				return
+			} else {
+				log.Fatal(err)
+			}
 		}
 
 		if selectedProvider == nil {
@@ -62,7 +67,11 @@ var TargetSetCmd = &cobra.Command{
 
 		selectedTarget, err := target.GetTargetFromPrompt(filteredTargets, activeProfile.Name, true)
 		if err != nil {
-			log.Fatal(err)
+			if common.IsCtrlCAbort(err) {
+				return
+			} else {
+				log.Fatal(err)
+			}
 		}
 
 		client, err := apiclient_util.GetApiClient(nil)

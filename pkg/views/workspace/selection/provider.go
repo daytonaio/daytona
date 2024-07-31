@@ -17,24 +17,12 @@ import (
 
 var titleStyle = lipgloss.NewStyle()
 
-func selectProviderPrompt(gitProviders []gitprovider_view.GitProviderView, additionalProjectOrder int, disabledGitProviders map[string]bool, choiceChan chan<- string) {
+func selectProviderPrompt(gitProviders []gitprovider_view.GitProviderView, additionalProjectOrder int, choiceChan chan<- string) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
 	for _, provider := range gitProviders {
-		id := provider.Id
-		title := provider.Name
-		isDisabled := false
-
-		// additionalProjectOrder > 1 indicates use of 'multi-project' command
-		if additionalProjectOrder > 1 && len(disabledGitProviders) > 0 && disabledGitProviders[id] {
-			title += statusMessageDangerStyle(" (All repositories under this are already selected)")
-			// isDisabled property helps in skipping over this specific git provider option, refer to
-			// handling of up/down key press under update method in ./view.go file
-			isDisabled = true
-		}
-
-		newItem := item[string]{id: id, title: title, choiceProperty: id, isDisabled: isDisabled}
+		newItem := item[string]{id: provider.Id, title: provider.Name, choiceProperty: provider.Id}
 		items = append(items, newItem)
 	}
 
@@ -44,7 +32,7 @@ func selectProviderPrompt(gitProviders []gitprovider_view.GitProviderView, addit
 	l := views.GetStyledSelectList(items)
 
 	title := "Choose a Provider"
-	if additionalProjectOrder > 1 {
+	if additionalProjectOrder > 0 {
 		title += fmt.Sprintf(" (Project #%d)", additionalProjectOrder)
 	}
 	l.Title = views.GetStyledMainTitle(title)
@@ -64,10 +52,10 @@ func selectProviderPrompt(gitProviders []gitprovider_view.GitProviderView, addit
 	}
 }
 
-func GetProviderIdFromPrompt(gitProviders []gitprovider_view.GitProviderView, additionalProjectOrder int, disabledGitProviders map[string]bool) string {
+func GetProviderIdFromPrompt(gitProviders []gitprovider_view.GitProviderView, additionalProjectOrder int) string {
 	choiceChan := make(chan string)
 
-	go selectProviderPrompt(gitProviders, additionalProjectOrder, disabledGitProviders, choiceChan)
+	go selectProviderPrompt(gitProviders, additionalProjectOrder, choiceChan)
 
 	return <-choiceChan
 }
