@@ -187,6 +187,7 @@ func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData)
 		NewLine: key.NewBinding(key.WithKeys("alt+enter"), key.WithHelp("alt+enter", "new line")),
 		Next:    key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "next")),
 		Prev:    key.NewBinding(key.WithKeys("shift+tab"), key.WithHelp("shift+tab", "prev")),
+		Submit:  key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "submit")),
 	}
 
 	form = form.WithKeyMap(keyMap)
