@@ -41,13 +41,8 @@ var ideCmd = &cobra.Command{
 			}
 		}
 
-		isChosenIdeInstalled := false
 		if chosenIde.Name == "VS Code" {
-			isChosenIdeInstalled = ide_util.CheckAndAlertVSCodeInstalled()
-
-			if !isChosenIdeInstalled {
-				return
-			}
+			ide_util.CheckAndAlertVSCodeInstalled()
 		}
 
 		c.DefaultIdeId = chosenIde.Id

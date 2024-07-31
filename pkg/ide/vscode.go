@@ -166,7 +166,7 @@ func setIdeSettings(projectHostname string, customizations *devcontainer.Customi
 	return nil
 }
 
-func CheckAndAlertVSCodeInstalled() bool {
+func CheckAndAlertVSCodeInstalled() {
 	if err := isVSCodeInstalled(); err != nil {
 		redBold := "\033[1;31m" // ANSI escape code for red and bold
 		reset := "\033[0m"      // ANSI escape code to reset text formatting
@@ -179,10 +179,8 @@ func CheckAndAlertVSCodeInstalled() bool {
 
 		log.Error(redBold + errorMessage + reset + infoMessage)
 
-		return false
+		return
 	}
-
-	return true
 }
 
 func isVSCodeInstalled() error {
