@@ -9,6 +9,7 @@ import (
 	"io"
 	"regexp"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/build"
@@ -74,12 +75,23 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 			return nil, ErrInvalidProjectName
 		}
 
-		if projectConfig.Repository != nil && projectConfig.Repository.Sha == "" {
-			sha, err := s.gitProviderService.GetLastCommitSha(projectConfig.Repository)
-			if err != nil {
-				return nil, err
+		if projectConfig.Repository != nil {
+			projectConfig.Repository.Url = util.CleanUpRepositoryUrl(projectConfig.Repository.Url)
+			if projectConfig.Repository.Sha != "" {
+				sha, err := s.gitProviderService.GetLastCommitSha(projectConfig.Repository)
+				if err != nil {
+					return nil, err
+				}
+				projectConfig.Repository.Sha = sha
 			}
-			projectConfig.Repository.Sha = sha
+		}
+
+		if projectConfig.Image == "" {
+			projectConfig.Image = s.defaultProjectImage
+		}
+
+		if projectConfig.User == "" {
+			projectConfig.User = s.defaultProjectUser
 		}
 
 		apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", w.Id, projectConfig.Name))

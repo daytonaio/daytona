@@ -33,8 +33,8 @@ func (m *mockProjectConfigService) FindDefault(url string) (*config.ProjectConfi
 	return args.Get(0).(*config.ProjectConfig), args.Error(1)
 }
 
-func (m *mockProjectConfigService) List(url string) ([]*config.ProjectConfig, error) {
-	args := m.Called(url)
+func (m *mockProjectConfigService) List(filter *config.Filter) ([]*config.ProjectConfig, error) {
+	args := m.Called(filter)
 	return args.Get(0).([]*config.ProjectConfig), args.Error(1)
 }
 

@@ -18,7 +18,7 @@ const (
 	NONE         BuildChoice = "none"
 )
 
-func GetProjectBuildChoice(project apiclient.CreateProjectConfigDTO, defaults *ProjectDefaults) (BuildChoice, string) {
+func GetProjectBuildChoice(project apiclient.CreateProjectConfigDTO, defaults *ProjectConfigDefaults) (BuildChoice, string) {
 	if project.BuildConfig == nil {
 		if project.Image != nil && project.User != nil &&
 			defaults.Image != nil && defaults.ImageUser != nil &&

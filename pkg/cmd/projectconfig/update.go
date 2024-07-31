@@ -22,7 +22,7 @@ var projectConfigUpdateCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		var projectConfig *apiclient.ProjectConfig
-		var projects []apiclient.CreateProjectConfigDTO
+		var projectConfigs []apiclient.CreateProjectConfigDTO
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -41,7 +41,7 @@ var projectConfigUpdateCmd = &cobra.Command{
 			log.Fatal("project config not found")
 		}
 
-		projects = append(projects, apiclient.CreateProjectConfigDTO{
+		projectConfigs = append(projectConfigs, apiclient.CreateProjectConfigDTO{
 			Name: projectConfig.Name,
 			Source: &apiclient.CreateProjectConfigSourceDTO{
 				Repository: projectConfig.Repository,
@@ -50,7 +50,7 @@ var projectConfigUpdateCmd = &cobra.Command{
 			EnvVars:     &map[string]string{},
 		})
 
-		projectDefaults := &create.ProjectDefaults{
+		projectDefaults := &create.ProjectConfigDefaults{
 			BuildChoice: create.AUTOMATIC,
 		}
 
@@ -66,22 +66,22 @@ var projectConfigUpdateCmd = &cobra.Command{
 			projectDefaults.DevcontainerFilePath = *projectConfig.BuildConfig.Devcontainer.FilePath
 		}
 
-		create.ProjectsConfigurationChanged, err = create.ConfigureProjects(&projects, *projectDefaults)
+		create.ProjectsConfigurationChanged, err = create.RunProjectConfiguration(&projectConfigs, *projectDefaults)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		newProjectConfig := apiclient.CreateProjectConfigDTO{
 			Name:        projectConfig.Name,
-			BuildConfig: projects[0].BuildConfig,
-			Image:       projects[0].Image,
-			User:        projects[0].User,
+			BuildConfig: projectConfigs[0].BuildConfig,
+			Image:       projectConfigs[0].Image,
+			User:        projectConfigs[0].User,
 			Source: &apiclient.CreateProjectConfigSourceDTO{
-				Repository: projects[0].Source.Repository,
+				Repository: projectConfigs[0].Source.Repository,
 			},
 		}
 
-		newProjectConfig.EnvVars = workspace_util.GetEnvVariables(&projects[0], nil)
+		newProjectConfig.EnvVars = workspace_util.GetEnvVariables(&projectConfigs[0], nil)
 
 		res, err = apiClient.ProjectConfigAPI.SetProjectConfig(ctx).ProjectConfig(newProjectConfig).Execute()
 		if err != nil {

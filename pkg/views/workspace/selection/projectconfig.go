@@ -17,13 +17,13 @@ import (
 
 var BlankProjectIdentifier = "<BLANK_PROJECT>"
 
-func GetProjectConfigFromPrompt(projectConfigs []apiclient.ProjectConfig, additionalProjectOrder int, showBlankOption bool, actionVerb string) *apiclient.ProjectConfig {
+func GetProjectConfigFromPrompt(projectConfigs []apiclient.ProjectConfig, projectOrder int, showBlankOption bool, actionVerb string) *apiclient.ProjectConfig {
 	choiceChan := make(chan *apiclient.ProjectConfig)
-	go selectProjectConfigPrompt(projectConfigs, additionalProjectOrder, showBlankOption, actionVerb, choiceChan)
+	go selectProjectConfigPrompt(projectConfigs, projectOrder, showBlankOption, actionVerb, choiceChan)
 	return <-choiceChan
 }
 
-func selectProjectConfigPrompt(projectConfigs []apiclient.ProjectConfig, additionalProjectOrder int, showBlankOption bool, actionVerb string, choiceChan chan<- *apiclient.ProjectConfig) {
+func selectProjectConfigPrompt(projectConfigs []apiclient.ProjectConfig, projectOrder int, showBlankOption bool, actionVerb string, choiceChan chan<- *apiclient.ProjectConfig) {
 	items := []list.Item{}
 
 	if showBlankOption {
@@ -68,8 +68,8 @@ func selectProjectConfigPrompt(projectConfigs []apiclient.ProjectConfig, additio
 	l.FilterInput.TextStyle = lipgloss.NewStyle().Foreground(views.Green)
 
 	title := "Select a Project Config To " + actionVerb
-	if additionalProjectOrder > 1 {
-		title += fmt.Sprintf(" (Project #%d)", additionalProjectOrder)
+	if projectOrder > 1 {
+		title += fmt.Sprintf(" (Project #%d)", projectOrder)
 	}
 	l.Title = views.GetStyledMainTitle(title)
 	l.Styles.Title = titleStyle

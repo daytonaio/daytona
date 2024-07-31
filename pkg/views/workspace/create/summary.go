@@ -29,7 +29,7 @@ const (
 	DEFAULT_PADDING                  = 21
 )
 
-type ProjectDefaults struct {
+type ProjectConfigDefaults struct {
 	BuildChoice          BuildChoice
 	Image                *string
 	ImageUser            *string
@@ -44,7 +44,7 @@ type SummaryModel struct {
 	quitting    bool
 	name        string
 	projectList []apiclient.CreateProjectConfigDTO
-	defaults    *ProjectDefaults
+	defaults    *ProjectConfigDefaults
 	nameLabel   string
 }
 
@@ -54,7 +54,7 @@ type SubmissionFormConfig struct {
 	ExistingNames []string
 	ProjectList   *[]apiclient.CreateProjectConfigDTO
 	NameLabel     string
-	Defaults      *ProjectDefaults
+	Defaults      *ProjectConfigDefaults
 }
 
 var configureCheck bool
@@ -83,7 +83,7 @@ func RunSubmissionForm(config SubmissionFormConfig) error {
 	}
 
 	var err error
-	ProjectsConfigurationChanged, err = ConfigureProjects(config.ProjectList, *config.Defaults)
+	ProjectsConfigurationChanged, err = RunProjectConfiguration(config.ProjectList, *config.Defaults)
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,7 @@ func RunSubmissionForm(config SubmissionFormConfig) error {
 	return RunSubmissionForm(config)
 }
 
-func RenderSummary(name string, projectList []apiclient.CreateProjectConfigDTO, defaults *ProjectDefaults, nameLabel string) (string, error) {
+func RenderSummary(name string, projectList []apiclient.CreateProjectConfigDTO, defaults *ProjectConfigDefaults, nameLabel string) (string, error) {
 	var output string
 	if name == "" {
 		output = views.GetStyledMainTitle("SUMMARY")

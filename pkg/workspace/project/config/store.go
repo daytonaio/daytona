@@ -5,8 +5,12 @@ package config
 
 import "errors"
 
+type Filter struct {
+	Url *string
+}
+
 type Store interface {
-	List() ([]*ProjectConfig, error)
+	List(filter *Filter) ([]*ProjectConfig, error)
 	Find(name string) (*ProjectConfig, error)
 	Save(projectConfig *ProjectConfig) error
 	Delete(projectConfig *ProjectConfig) error

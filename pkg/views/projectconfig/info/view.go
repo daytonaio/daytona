@@ -36,7 +36,7 @@ func Render(projectConfig *apiclient.ProjectConfig, apiServerConfig *apiclient.S
 	}
 
 	if GetLabelFromBuild(projectConfig.BuildConfig) != "" {
-		projectDefaults := &create.ProjectDefaults{
+		projectDefaults := &create.ProjectConfigDefaults{
 			Image:     apiServerConfig.DefaultProjectImage,
 			ImageUser: apiServerConfig.DefaultProjectUser,
 		}

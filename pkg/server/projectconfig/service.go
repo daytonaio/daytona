@@ -6,7 +6,7 @@ package projectconfig
 import (
 	"errors"
 
-	util "github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 )
 
@@ -14,7 +14,7 @@ type IProjectConfigService interface {
 	Delete(projectConfigName string) error
 	Find(projectConfigName string) (*config.ProjectConfig, error)
 	FindDefault(url string) (*config.ProjectConfig, error)
-	List(url string) ([]*config.ProjectConfig, error)
+	List(filter *config.Filter) ([]*config.ProjectConfig, error)
 	SetDefault(projectConfigName string) error
 	Save(projectConfig *config.ProjectConfig) error
 }
@@ -33,40 +33,16 @@ func NewConfigService(config ProjectConfigServiceConfig) IProjectConfigService {
 	}
 }
 
-func (s *ProjectConfigService) List(url string) ([]*config.ProjectConfig, error) {
-	projectConfigs, err := s.configStore.List()
-	if err != nil {
-		return nil, err
-	}
-
-	if url == "" {
-		return projectConfigs, nil
-	}
-
-	var response []*config.ProjectConfig
-
-	url = util.CleanUpRepositoryUrl(url)
-
-	for _, pc := range projectConfigs {
-		if pc.Repository == nil {
-			continue
-		}
-
-		currentUrl := util.CleanUpRepositoryUrl(pc.Repository.Url)
-
-		if currentUrl != url {
-			continue
-		}
-
-		response = append(response, pc)
-	}
-
-	return response, nil
-
+func (s *ProjectConfigService) List(filter *config.Filter) ([]*config.ProjectConfig, error) {
+	return s.configStore.List(filter)
 }
 
 func (s *ProjectConfigService) FindDefault(url string) (*config.ProjectConfig, error) {
-	projectConfigs, err := s.List(url)
+	url = util.CleanUpRepositoryUrl(url)
+
+	projectConfigs, err := s.List(&config.Filter{
+		Url: &url,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +70,9 @@ func (s *ProjectConfigService) SetDefault(projectConfigName string) error {
 		return errors.New("project config does not have a repository")
 	}
 
-	projectConfigs, err := s.List(projectConfig.Repository.Url)
+	projectConfigs, err := s.List(&config.Filter{
+		Url: &projectConfig.Repository.Url,
+	})
 	if err != nil {
 		return err
 	}
@@ -119,6 +97,10 @@ func (s *ProjectConfigService) Find(projectConfigName string) (*config.ProjectCo
 }
 
 func (s *ProjectConfigService) Save(projectConfig *config.ProjectConfig) error {
+	if projectConfig.Repository != nil && projectConfig.Repository.Url != "" {
+		projectConfig.Repository.Url = util.CleanUpRepositoryUrl(projectConfig.Repository.Url)
+	}
+
 	err := s.configStore.Save(projectConfig)
 	if err != nil {
 		return err

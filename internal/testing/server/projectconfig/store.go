@@ -19,7 +19,7 @@ func NewInMemoryProjectConfigStore() config.Store {
 	}
 }
 
-func (s *InMemoryProjectConfigStore) List() ([]*config.ProjectConfig, error) {
+func (s *InMemoryProjectConfigStore) List(filter *config.Filter) ([]*config.ProjectConfig, error) {
 	projectConfigs := []*config.ProjectConfig{}
 	for _, t := range s.projectConfigs {
 		projectConfigs = append(projectConfigs, t)

@@ -7,10 +7,8 @@ import (
 	"testing"
 
 	projectconfig_internal "github.com/daytonaio/daytona/internal/testing/server/projectconfig"
-	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/server/projectconfig"
-	"github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 	"github.com/stretchr/testify/suite"
 )
@@ -56,18 +54,6 @@ var projectConfig4 *config.ProjectConfig = &config.ProjectConfig{
 	BuildConfig: nil,
 	Repository: &gitprovider.GitRepository{
 		Url: "url4",
-	},
-}
-
-var createProjectConfig1Dto *dto.CreateProjectConfigDTO = &dto.CreateProjectConfigDTO{
-	Name:        "pc1",
-	Image:       &projectConfig1Image,
-	User:        &projectConfig1User,
-	BuildConfig: nil,
-	Source: dto.CreateProjectConfigSourceDTO{
-		Repository: &gitprovider.GitRepository{
-			Url: "url1",
-		},
 	},
 }
 
@@ -124,7 +110,7 @@ func TestProjectConfigService(t *testing.T) {
 func (s *ProjectConfigServiceTestSuite) TestList() {
 	require := s.Require()
 
-	projectConfigs, err := s.projectConfigService.List("")
+	projectConfigs, err := s.projectConfigService.List(nil)
 	require.Nil(err)
 	require.ElementsMatch(expectedProjectConfigs, projectConfigs)
 }
@@ -164,7 +150,7 @@ func (s *ProjectConfigServiceTestSuite) TestSave() {
 	err := s.projectConfigService.Save(projectConfig4)
 	require.Nil(err)
 
-	projectConfigs, err := s.projectConfigService.List("")
+	projectConfigs, err := s.projectConfigService.List(nil)
 	require.Nil(err)
 	require.ElementsMatch(expectedProjectConfigs, projectConfigs)
 }
@@ -177,14 +163,7 @@ func (s *ProjectConfigServiceTestSuite) TestDelete() {
 	err := s.projectConfigService.Delete(projectConfig3.Name)
 	require.Nil(err)
 
-	projectConfigs, err := s.projectConfigService.List("")
+	projectConfigs, err := s.projectConfigService.List(nil)
 	require.Nil(err)
 	require.ElementsMatch(expectedProjectConfigs, projectConfigs)
-}
-
-func (s *ProjectConfigServiceTestSuite) TestToProjectConfig() {
-	require := s.Require()
-
-	projectConfig := conversion.ToProjectConfig(*createProjectConfig1Dto)
-	require.Equal(projectConfig1, projectConfig)
 }

@@ -5,6 +5,8 @@ options:
     - name: blank
       default_value: "false"
       usage: Create a blank project without using existing configurations
+    - name: branch
+      usage: Specify the Git branch to use in the project
     - name: builder
       usage: Specify the builder (currently auto/devcontainer/none)
     - name: code

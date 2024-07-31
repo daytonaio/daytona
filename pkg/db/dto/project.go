@@ -4,8 +4,6 @@
 package dto
 
 import (
-	"strings"
-
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
@@ -237,40 +235,4 @@ func ToProjectBuild(buildDTO *ProjectBuildDTO) *buildconfig.ProjectBuildConfig {
 			FilePath: buildDTO.Devcontainer.DevContainerFilePath,
 		},
 	}
-}
-
-// TODO: handle special characters in env vars (e.g. newline, backslash, equals)
-
-func ToEnvVarsString(envVars map[string]string) string {
-	if envVars == nil {
-		return ""
-	}
-
-	var builder strings.Builder
-	for key, value := range envVars {
-		builder.WriteString(key)
-		builder.WriteString("=")
-		builder.WriteString(value)
-		builder.WriteString("\n")
-	}
-
-	result := builder.String()
-	return strings.TrimSuffix(result, "\n")
-}
-
-func ToEnvVarsMap(envVars string) map[string]string {
-	if envVars == "" {
-		return nil
-	}
-
-	envMap := make(map[string]string)
-	lines := strings.Split(envVars, "\n")
-	for _, line := range lines {
-		parts := strings.SplitN(line, "=", 2)
-		if len(parts) == 2 {
-			envMap[parts[0]] = parts[1]
-		}
-	}
-
-	return envMap
 }

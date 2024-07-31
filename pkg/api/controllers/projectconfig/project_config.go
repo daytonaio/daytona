@@ -87,7 +87,7 @@ func GetDefaultProjectConfig(ctx *gin.Context) {
 func ListProjectConfigs(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
-	projectConfigs, err := server.ProjectConfigService.List("")
+	projectConfigs, err := server.ProjectConfigService.List(nil)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list project configs: %s", err.Error()))
 		return

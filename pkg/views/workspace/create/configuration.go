@@ -31,7 +31,7 @@ type ProjectConfigurationData struct {
 	EnvVars              map[string]string
 }
 
-func NewConfigurationData(buildChoice BuildChoice, devContainerFilePath string, currentProject *apiclient.CreateProjectConfigDTO, defaults *ProjectDefaults) *ProjectConfigurationData {
+func NewConfigurationData(buildChoice BuildChoice, devContainerFilePath string, currentProject *apiclient.CreateProjectConfigDTO, defaults *ProjectConfigDefaults) *ProjectConfigurationData {
 	projectConfigurationData := &ProjectConfigurationData{
 		BuildChoice:          string(buildChoice),
 		DevcontainerFilePath: defaults.DevcontainerFilePath,
@@ -55,11 +55,10 @@ func NewConfigurationData(buildChoice BuildChoice, devContainerFilePath string, 
 	return projectConfigurationData
 }
 
-func ConfigureProjects(projectList *[]apiclient.CreateProjectConfigDTO, defaults ProjectDefaults) (bool, error) {
+func RunProjectConfiguration(projectList *[]apiclient.CreateProjectConfigDTO, defaults ProjectConfigDefaults) (bool, error) {
 	var currentProject *apiclient.CreateProjectConfigDTO
 
 	if len(*projectList) > 1 {
-		// TODO: disable editing of request's existing project config entries
 		currentProject = selection.GetProjectRequestFromPrompt(projectList)
 		if currentProject == nil {
 			return false, common.ErrCtrlCAbort
@@ -135,7 +134,7 @@ func ConfigureProjects(projectList *[]apiclient.CreateProjectConfigDTO, defaults
 		return true, nil
 	}
 
-	return ConfigureProjects(projectList, defaults)
+	return RunProjectConfiguration(projectList, defaults)
 }
 
 func validateDevcontainerFilename(filename string) error {

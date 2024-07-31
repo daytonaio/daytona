@@ -107,7 +107,7 @@ func getTableRowData(projectConfig apiclient.ProjectConfig, apiServerConfig *api
 	rowData.Repository = util.GetRepositorySlugFromUrl(*projectConfig.Repository.Url, specifyGitProviders)
 	rowData.IsDefault = ""
 
-	projectDefaults := &create.ProjectDefaults{
+	projectDefaults := &create.ProjectConfigDefaults{
 		Image:     apiServerConfig.DefaultProjectImage,
 		ImageUser: apiServerConfig.DefaultProjectUser,
 	}

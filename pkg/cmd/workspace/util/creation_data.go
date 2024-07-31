@@ -29,7 +29,7 @@ type ProjectsDataPromptConfig struct {
 	MultiProject        bool
 	BlankProject        bool
 	ApiClient           *apiclient.APIClient
-	Defaults            *create.ProjectDefaults
+	Defaults            *create.ProjectConfigDefaults
 }
 
 func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apiclient.CreateProjectConfigDTO, error) {
@@ -98,11 +98,12 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 		}
 
 		providerRepo, err := getRepositoryFromWizard(RepositoryWizardConfig{
-			ApiClient:        config.ApiClient,
-			UserGitProviders: config.UserGitProviders,
-			MultiProject:     config.MultiProject,
-			ProjectOrder:     i,
-			SelectedRepos:    selectedRepos,
+			ApiClient:           config.ApiClient,
+			UserGitProviders:    config.UserGitProviders,
+			MultiProject:        config.MultiProject,
+			SkipBranchSelection: config.SkipBranchSelection,
+			ProjectOrder:        i,
+			SelectedRepos:       selectedRepos,
 		})
 		if err != nil {
 			return nil, err

@@ -9,6 +9,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	log "github.com/sirupsen/logrus"
@@ -47,7 +48,7 @@ var projectConfigAddCmd = &cobra.Command{
 			existingProjectConfigNames = append(existingProjectConfigNames, *pc.Name)
 		}
 
-		projectDefaults := &create.ProjectDefaults{
+		projectDefaults := &create.ProjectConfigDefaults{
 			BuildChoice:          create.AUTOMATIC,
 			Image:                apiServerConfig.DefaultProjectImage,
 			ImageUser:            apiServerConfig.DefaultProjectUser,
@@ -64,10 +65,14 @@ var projectConfigAddCmd = &cobra.Command{
 		},
 		)
 		if err != nil {
-			log.Fatal(err)
+			if common.IsCtrlCAbort(err) {
+				return
+			} else {
+				log.Fatal(err)
+			}
 		}
 
-		create.ProjectsConfigurationChanged, err = create.ConfigureProjects(&projects, *projectDefaults)
+		create.ProjectsConfigurationChanged, err = create.RunProjectConfiguration(&projects, *projectDefaults)
 		if err != nil {
 			log.Fatal(err)
 		}

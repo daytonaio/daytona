@@ -15,7 +15,7 @@ type ProjectConfigStore struct {
 }
 
 func NewProjectConfigStore(db *gorm.DB) (*ProjectConfigStore, error) {
-	err := db.AutoMigrate(&CreateProjectConfigDTO{})
+	err := db.AutoMigrate(&ProjectConfigDTO{})
 	if err != nil {
 		return nil, err
 	}
@@ -23,9 +23,17 @@ func NewProjectConfigStore(db *gorm.DB) (*ProjectConfigStore, error) {
 	return &ProjectConfigStore{db: db}, nil
 }
 
-func (s *ProjectConfigStore) List() ([]*config.ProjectConfig, error) {
-	projectConfigsDTOs := []CreateProjectConfigDTO{}
-	tx := s.db.Find(&projectConfigsDTOs)
+func (s *ProjectConfigStore) List(filter *config.Filter) ([]*config.ProjectConfig, error) {
+	projectConfigsDTOs := []ProjectConfigDTO{}
+	tx := s.db
+
+	if filter != nil {
+		if filter.Url != nil {
+			tx = tx.Where("json_extract(repository, '$.url') = ?", *filter.Url)
+		}
+	}
+	tx.Find(&projectConfigsDTOs)
+
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -39,7 +47,7 @@ func (s *ProjectConfigStore) List() ([]*config.ProjectConfig, error) {
 }
 
 func (s *ProjectConfigStore) Find(projectConfigName string) (*config.ProjectConfig, error) {
-	projectConfigDTO := CreateProjectConfigDTO{}
+	projectConfigDTO := ProjectConfigDTO{}
 	tx := s.db.Where("name = ?", projectConfigName).First(&projectConfigDTO)
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
@@ -52,7 +60,7 @@ func (s *ProjectConfigStore) Find(projectConfigName string) (*config.ProjectConf
 }
 
 func (s *ProjectConfigStore) Save(projectConfig *config.ProjectConfig) error {
-	tx := s.db.Save(ToCreateProjectConfigDTO(projectConfig))
+	tx := s.db.Save(ToProjectConfigDTO(projectConfig))
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -61,7 +69,7 @@ func (s *ProjectConfigStore) Save(projectConfig *config.ProjectConfig) error {
 }
 
 func (s *ProjectConfigStore) Delete(projectConfig *config.ProjectConfig) error {
-	tx := s.db.Delete(ToCreateProjectConfigDTO(projectConfig))
+	tx := s.db.Delete(ToProjectConfigDTO(projectConfig))
 	if tx.Error != nil {
 		return tx.Error
 	}
