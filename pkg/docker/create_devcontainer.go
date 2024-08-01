@@ -13,7 +13,6 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
-	"slices"
 	"strings"
 
 	"github.com/compose-spec/compose-go/v2/cli"
@@ -193,12 +192,7 @@ func (d *DockerClient) createProjectFromDevcontainer(opts *CreateProjectOptions,
 		}
 	}
 
-	hostEnvVars, err := d.getHostEnvVars(opts.SshClient)
-	if err != nil {
-		return "", err
-	}
-
-	devcontainerCmd := append(hostEnvVars, []string{
+	devcontainerCmd := []string{
 		"devcontainer",
 		"up",
 		"--workspace-folder=" + paths.ProjectTarget,
@@ -207,7 +201,7 @@ func (d *DockerClient) createProjectFromDevcontainer(opts *CreateProjectOptions,
 		"--id-label=daytona.workspace.id=" + opts.Project.WorkspaceId,
 		"--id-label=daytona.project.name=" + opts.Project.Name,
 		"--skip-non-blocking-commands",
-	}...)
+	}
 
 	if prebuild {
 		devcontainerCmd = append(devcontainerCmd, "--prebuild")
@@ -304,22 +298,37 @@ func (d *DockerClient) ensureDockerSockForward(logWriter io.Writer) (string, err
 func (d *DockerClient) readDevcontainerConfig(opts *CreateProjectOptions, paths DevcontainerPaths, socketForwardId string) (string, *devcontainer.Root, error) {
 	opts.LogWriter.Write([]byte("Reading devcontainer configuration...\n"))
 
+	// Sleep is there to make sure the logs get read
+	cmd := []string{"cat", paths.TargetConfigFilePath, "&&", "sleep", "1"}
+
+	// We need to override localEnvs to the host env variables
+	// FIXME: This will not work for features that require localEnv
+	configEnvOverride, err := d.execInContainer(strings.Join(cmd, " "), opts, paths, paths.ProjectTarget, socketForwardId, false, nil)
+	if err != nil {
+		return "", nil, err
+	}
+
 	envVars, err := d.getHostEnvVars(opts.SshClient)
 	if err != nil {
 		return "", nil, err
 	}
 
-	devcontainerCmd := append(envVars, []string{
+	for k, v := range envVars {
+		configEnvOverride = strings.ReplaceAll(configEnvOverride, fmt.Sprintf("${localEnv:%s}", k), v)
+	}
+
+	writeOverrideCmd := []string{"echo", fmt.Sprintf(`'%s'`, configEnvOverride), ">", "/tmp/devcontainer.json", "&&"}
+
+	devcontainerCmd := append(writeOverrideCmd, []string{
 		"devcontainer",
 		"read-configuration",
 		"--workspace-folder=" + paths.ProjectTarget,
 		"--config=" + paths.TargetConfigFilePath,
+		"--override-config=/tmp/devcontainer.json",
 		"--include-merged-configuration",
 	}...)
 
-	cmd := strings.Join(devcontainerCmd, " ")
-
-	output, err := d.execInContainer(cmd, opts, paths, paths.ProjectTarget, socketForwardId, true, nil)
+	output, err := d.execInContainer(strings.Join(devcontainerCmd, " "), opts, paths, paths.ProjectTarget, socketForwardId, false, nil)
 	if err != nil {
 		return "", nil, err
 	}
@@ -524,7 +533,7 @@ func (d *DockerClient) getDevcontainerPaths(opts *CreateProjectOptions) Devconta
 	}
 }
 
-func (d *DockerClient) getHostEnvVars(sshClient *ssh.Client) ([]string, error) {
+func (d *DockerClient) getHostEnvVars(sshClient *ssh.Client) (map[string]string, error) {
 	env := os.Environ()
 	if sshClient != nil {
 		var err error
@@ -534,18 +543,13 @@ func (d *DockerClient) getHostEnvVars(sshClient *ssh.Client) ([]string, error) {
 		}
 	}
 
-	env = slices.DeleteFunc(env, func(el string) bool {
-		return strings.Contains(el, ";") || strings.Contains(el, "PATH")
-	})
-
-	sanitizedEnv := []string{}
+	envMap := map[string]string{}
 	for _, el := range env {
 		parts := strings.Split(el, "=")
-		santizedEl := fmt.Sprintf(`%s="%s"`, parts[0], parts[1])
-		sanitizedEnv = append(sanitizedEnv, santizedEl)
+		envMap[parts[0]] = parts[1]
 	}
 
-	return sanitizedEnv, nil
+	return envMap, nil
 }
 
 func execDevcontainerCommand(command []string, logWriter io.Writer, sshClient *ssh.Client) error {
