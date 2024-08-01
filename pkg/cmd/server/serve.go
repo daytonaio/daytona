@@ -34,6 +34,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/providertargets"
 	"github.com/daytonaio/daytona/pkg/server/registry"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
+	"github.com/daytonaio/daytona/pkg/views"
 	started_view "github.com/daytonaio/daytona/pkg/views/server/started"
 
 	log "github.com/sirupsen/logrus"
@@ -46,6 +47,10 @@ var ServeCmd = &cobra.Command{
 	GroupID: util.SERVER_GROUP,
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
+		if os.Getenv("USER") == "root" {
+			views.RenderInfoMessageBold("Running the server as root is not recommended because\nDaytona will not be able to remap project directory ownership.\nPlease run the server as a non-root user.")
+		}
+
 		if log.GetLevel() < log.InfoLevel {
 			//	for now, force the log level to info when running the server
 			log.SetLevel(log.InfoLevel)
