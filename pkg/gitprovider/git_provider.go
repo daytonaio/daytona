@@ -33,6 +33,7 @@ type GitProvider interface {
 	GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error)
 
 	GetRepositoryFromUrl(repositoryUrl string) (*GitRepository, error)
+	GetUrlFromRepository(repository *GitRepository) string
 	GetLastCommitSha(staticContext *StaticGitContext) (string, error)
 	getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error)
 	parseStaticGitContext(repoUrl string) (*StaticGitContext, error)

@@ -91,6 +91,7 @@ Class | Method | HTTP request | Description
 *GitProviderAPI* | [**GetRepoBranches**](docs/GitProviderAPI.md#getrepobranches) | **Get** /gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/branches | Get Git repository branches
 *GitProviderAPI* | [**GetRepoPRs**](docs/GitProviderAPI.md#getrepoprs) | **Get** /gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/pull-requests | Get Git repository PRs
 *GitProviderAPI* | [**GetRepositories**](docs/GitProviderAPI.md#getrepositories) | **Get** /gitprovider/{gitProviderId}/{namespaceId}/repositories | Get Git repositories
+*GitProviderAPI* | [**GetUrlFromRepository**](docs/GitProviderAPI.md#geturlfromrepository) | **Post** /gitprovider/context/url | Get URL from Git repository
 *GitProviderAPI* | [**ListGitProviders**](docs/GitProviderAPI.md#listgitproviders) | **Get** /gitprovider | List Git providers
 *GitProviderAPI* | [**RemoveGitProvider**](docs/GitProviderAPI.md#removegitprovider) | **Delete** /gitprovider/{gitProviderId} | Remove Git provider
 *GitProviderAPI* | [**SetGitProvider**](docs/GitProviderAPI.md#setgitprovider) | **Put** /gitprovider | Set Git provider

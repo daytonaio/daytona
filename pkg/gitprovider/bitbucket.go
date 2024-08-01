@@ -265,6 +265,24 @@ func (g *BitbucketGitProvider) GetLastCommitSha(staticContext *StaticGitContext)
 	return commitHash, nil
 }
 
+func (g *BitbucketGitProvider) GetUrlFromRepository(repository *GitRepository) string {
+	url := strings.TrimSuffix(repository.Url, ".git")
+
+	if repository.Branch != nil && *repository.Branch != "" {
+		if repository.Path != nil {
+			url += "/src/" + *repository.Branch + "/" + *repository.Path
+		} else if repository.Sha == *repository.Branch {
+			url += "/commit/" + *repository.Branch
+		} else {
+			url += "/branch/" + *repository.Branch
+		}
+	} else if repository.Path != nil {
+		url += "/src/main/" + *repository.Path
+	}
+
+	return url
+}
+
 func (g *BitbucketGitProvider) getApiClient() *bitbucket.Client {
 	client := bitbucket.NewBasicAuth(g.username, g.token)
 	return client

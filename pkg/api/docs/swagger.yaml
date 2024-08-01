@@ -749,6 +749,27 @@ paths:
       summary: Get Git context
       tags:
       - gitProvider
+  /gitprovider/context/url:
+    post:
+      description: Get URL from Git repository
+      operationId: GetUrlFromRepository
+      parameters:
+      - description: Git repository
+        in: body
+        name: repository
+        required: true
+        schema:
+          $ref: '#/definitions/GitRepository'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Get URL from Git repository
+      tags:
+      - gitProvider
   /gitprovider/for-url/{url}:
     get:
       description: Get Git provider

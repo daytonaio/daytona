@@ -133,3 +133,85 @@ func (g *AzureDevOpsGitProviderTestSuite) TestParseStaticGitContext_Blob() {
 	require.Nil(err)
 	require.Equal(httpContext, blobContext)
 }
+
+func (g *AzureDevOpsGitProviderTestSuite) TestGetUrlFromRepo_Bare() {
+	repo := &GitRepository{
+		Id:     "daytona",
+		Name:   "daytona",
+		Owner:  "daytonaio",
+		Source: "dev.azure.com",
+		Url:    "https://dev.azure.com/daytonaio/daytona.git",
+	}
+
+	require := g.Require()
+
+	url := g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://dev.azure.com/daytonaio/daytona", url)
+}
+
+func (g *AzureDevOpsGitProviderTestSuite) TestGetUrlFromRepo_Branch() {
+	repo := &GitRepository{
+		Id:     "daytona",
+		Name:   "daytona",
+		Owner:  "daytonaio",
+		Source: "dev.azure.com",
+		Url:    "https://dev.azure.com/daytonaio/daytona.git",
+		Branch: &[]string{"test-branch"}[0],
+	}
+
+	require := g.Require()
+
+	url := g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://dev.azure.com/daytonaio/_git/daytona?version=GBtest-branch", url)
+}
+
+func (g *AzureDevOpsGitProviderTestSuite) TestGetUrlFromRepo_Path() {
+	repo := &GitRepository{
+		Id:     "daytona",
+		Name:   "daytona",
+		Owner:  "daytonaio",
+		Source: "dev.azure.com",
+		Url:    "https://dev.azure.com/daytonaio/daytona.git",
+		Branch: &[]string{"test-branch"}[0],
+		Path:   &[]string{"README.md"}[0],
+	}
+
+	require := g.Require()
+
+	url := g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://dev.azure.com/daytonaio/_git/daytona?version=GBtest-branch&path=README.md", url)
+
+	repo.Branch = nil
+
+	url = g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://dev.azure.com/daytonaio/_git/daytona?version=GBmain&path=README.md", url)
+}
+
+func (g *AzureDevOpsGitProviderTestSuite) TestGetUrlFromRepo_Commit() {
+	repo := &GitRepository{
+		Id:     "daytona",
+		Name:   "daytona",
+		Owner:  "daytonaio",
+		Source: "dev.azure.com",
+		Url:    "https://dev.azure.com/daytonaio/daytona.git",
+		Path:   &[]string{"README.md"}[0],
+		Sha:    "COMMIT_SHA",
+		Branch: &[]string{"COMMIT_SHA"}[0],
+	}
+
+	require := g.Require()
+
+	url := g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://dev.azure.com/daytonaio/_git/daytona?version=GCCOMMIT_SHA&path=README.md", url)
+
+	repo.Path = nil
+
+	url = g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://dev.azure.com/daytonaio/_git/daytona?version=GCCOMMIT_SHA", url)
+}
