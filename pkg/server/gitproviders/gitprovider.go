@@ -90,13 +90,11 @@ func (s *GitProviderService) SetGitProviderConfig(providerConfig *gitprovider.Gi
 		return err
 	}
 
-	if providerConfig.Username == "" {
-		userData, err := gitProvider.GetUser()
-		if err != nil {
-			return err
-		}
-		providerConfig.Username = userData.Username
+	userData, err := gitProvider.GetUser()
+	if err != nil {
+		return err
 	}
+	providerConfig.Username = userData.Username
 
 	return s.configStore.Save(providerConfig)
 }
