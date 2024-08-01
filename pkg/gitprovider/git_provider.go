@@ -25,12 +25,18 @@ type StaticGitContext struct {
 	Path     *string `json:"path,omitempty"`
 } // @name StaticGitContext
 
+// ListOptions holds additional parameters for list api responses.
+type ListOptions struct {
+	Page    int `json:"page,omitempty"`
+	PerPage int `json:"perPage,omitempty"`
+}
+
 type GitProvider interface {
-	GetNamespaces() ([]*GitNamespace, error)
-	GetRepositories(namespace string) ([]*GitRepository, error)
+	GetNamespaces(options ListOptions) ([]*GitNamespace, error)
+	GetRepositories(namespace string, options ListOptions) ([]*GitRepository, error)
 	GetUser() (*GitUser, error)
-	GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error)
-	GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error)
+	GetRepoBranches(repositoryId string, namespaceId string, options ListOptions) ([]*GitBranch, error)
+	GetRepoPRs(repositoryId string, namespaceId string, options ListOptions) ([]*GitPullRequest, error)
 
 	GetRepositoryFromUrl(repositoryUrl string) (*GitRepository, error)
 	GetUrlFromRepository(repository *GitRepository) string

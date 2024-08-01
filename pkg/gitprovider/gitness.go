@@ -29,7 +29,7 @@ func NewGitnessGitProvider(token string, baseApiUrl *string) *GitnessGitProvider
 	return gitProvider
 }
 
-func (g *GitnessGitProvider) GetNamespaces() ([]*GitNamespace, error) {
+func (g *GitnessGitProvider) GetNamespaces(options ListOptions) ([]*GitNamespace, error) {
 	client := g.getApiClient()
 	response, err := client.GetSpaces()
 	if err != nil {
@@ -51,7 +51,7 @@ func (g *GitnessGitProvider) getApiClient() *gitnessclient.GitnessClient {
 	return gitnessclient.NewGitnessClient(g.token, url)
 }
 
-func (g *GitnessGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
+func (g *GitnessGitProvider) GetRepositories(namespace string, options ListOptions) ([]*GitRepository, error) {
 	client := g.getApiClient()
 	response, err := client.GetRepositories(namespace)
 	if err != nil {
@@ -80,7 +80,7 @@ func (g *GitnessGitProvider) GetRepositories(namespace string) ([]*GitRepository
 	return repos, nil
 }
 
-func (g *GitnessGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {
+func (g *GitnessGitProvider) GetRepoBranches(repositoryId string, namespaceId string, options ListOptions) ([]*GitBranch, error) {
 	client := g.getApiClient()
 	response, err := client.GetRepoBranches(repositoryId, namespaceId)
 	if err != nil {
@@ -97,7 +97,7 @@ func (g *GitnessGitProvider) GetRepoBranches(repositoryId string, namespaceId st
 	return branches, nil
 }
 
-func (g *GitnessGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error) {
+func (g *GitnessGitProvider) GetRepoPRs(repositoryId string, namespaceId string, options ListOptions) ([]*GitPullRequest, error) {
 	client := g.getApiClient()
 	response, err := client.GetRepoPRs(repositoryId, namespaceId)
 	if err != nil {

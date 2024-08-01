@@ -380,6 +380,20 @@ type ApiGetNamespacesRequest struct {
 	ctx           context.Context
 	ApiService    *GitProviderAPIService
 	gitProviderId string
+	page          *int32
+	perPage       *int32
+}
+
+// Page number
+func (r ApiGetNamespacesRequest) Page(page int32) ApiGetNamespacesRequest {
+	r.page = &page
+	return r
+}
+
+// Number of items per page
+func (r ApiGetNamespacesRequest) PerPage(perPage int32) ApiGetNamespacesRequest {
+	r.perPage = &perPage
+	return r
 }
 
 func (r ApiGetNamespacesRequest) Execute() ([]GitNamespace, *http.Response, error) {
@@ -426,6 +440,12 @@ func (a *GitProviderAPIService) GetNamespacesExecute(r ApiGetNamespacesRequest) 
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.page != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "page", r.page, "")
+	}
+	if r.perPage != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "per_page", r.perPage, "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -500,6 +520,20 @@ type ApiGetRepoBranchesRequest struct {
 	gitProviderId string
 	namespaceId   string
 	repositoryId  string
+	page          *int32
+	perPage       *int32
+}
+
+// Page number
+func (r ApiGetRepoBranchesRequest) Page(page int32) ApiGetRepoBranchesRequest {
+	r.page = &page
+	return r
+}
+
+// Number of items per page
+func (r ApiGetRepoBranchesRequest) PerPage(perPage int32) ApiGetRepoBranchesRequest {
+	r.perPage = &perPage
+	return r
 }
 
 func (r ApiGetRepoBranchesRequest) Execute() ([]GitBranch, *http.Response, error) {
@@ -552,6 +586,12 @@ func (a *GitProviderAPIService) GetRepoBranchesExecute(r ApiGetRepoBranchesReque
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.page != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "page", r.page, "")
+	}
+	if r.perPage != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "per_page", r.perPage, "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -626,6 +666,20 @@ type ApiGetRepoPRsRequest struct {
 	gitProviderId string
 	namespaceId   string
 	repositoryId  string
+	page          *int32
+	perPage       *int32
+}
+
+// Page number
+func (r ApiGetRepoPRsRequest) Page(page int32) ApiGetRepoPRsRequest {
+	r.page = &page
+	return r
+}
+
+// Number of items per page
+func (r ApiGetRepoPRsRequest) PerPage(perPage int32) ApiGetRepoPRsRequest {
+	r.perPage = &perPage
+	return r
 }
 
 func (r ApiGetRepoPRsRequest) Execute() ([]GitPullRequest, *http.Response, error) {
@@ -678,6 +732,12 @@ func (a *GitProviderAPIService) GetRepoPRsExecute(r ApiGetRepoPRsRequest) ([]Git
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.page != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "page", r.page, "")
+	}
+	if r.perPage != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "per_page", r.perPage, "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -751,6 +811,20 @@ type ApiGetRepositoriesRequest struct {
 	ApiService    *GitProviderAPIService
 	gitProviderId string
 	namespaceId   string
+	page          *int32
+	perPage       *int32
+}
+
+// Page number
+func (r ApiGetRepositoriesRequest) Page(page int32) ApiGetRepositoriesRequest {
+	r.page = &page
+	return r
+}
+
+// Number of items per page
+func (r ApiGetRepositoriesRequest) PerPage(perPage int32) ApiGetRepositoriesRequest {
+	r.perPage = &perPage
+	return r
 }
 
 func (r ApiGetRepositoriesRequest) Execute() ([]GitRepository, *http.Response, error) {
@@ -800,6 +874,12 @@ func (a *GitProviderAPIService) GetRepositoriesExecute(r ApiGetRepositoriesReque
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.page != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "page", r.page, "")
+	}
+	if r.perPage != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "per_page", r.perPage, "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

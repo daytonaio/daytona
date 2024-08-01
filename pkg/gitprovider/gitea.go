@@ -30,7 +30,7 @@ func NewGiteaGitProvider(token string, baseApiUrl string) *GiteaGitProvider {
 	return provider
 }
 
-func (g *GiteaGitProvider) GetNamespaces() ([]*GitNamespace, error) {
+func (g *GiteaGitProvider) GetNamespaces(options ListOptions) ([]*GitNamespace, error) {
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, err
@@ -41,32 +41,34 @@ func (g *GiteaGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 		return nil, err
 	}
 
+	var namespaces []*GitNamespace
+
 	orgList, _, err := client.ListMyOrgs(gitea.ListOrgsOptions{
 		ListOptions: gitea.ListOptions{
-			Page:     1,
-			PageSize: 100,
+			Page:     options.Page,
+			PageSize: options.PerPage,
 		},
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	namespaces := []*GitNamespace{}
-
 	for _, org := range orgList {
 		namespaces = append(namespaces, &GitNamespace{Id: org.UserName, Name: org.UserName})
 	}
+
 	namespaces = append([]*GitNamespace{{Id: personalNamespaceId, Name: user.Username}}, namespaces...)
 
 	return namespaces, nil
 }
 
-func (g *GiteaGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
+func (g *GiteaGitProvider) GetRepositories(namespace string, options ListOptions) ([]*GitRepository, error) {
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, err
 	}
 
+	response := []*GitRepository{}
 	var repoList []*gitea.Repository
 
 	if namespace == personalNamespaceId {
@@ -77,8 +79,8 @@ func (g *GiteaGitProvider) GetRepositories(namespace string) ([]*GitRepository, 
 
 		repoList, _, err = client.ListUserRepos(user.Username, gitea.ListReposOptions{
 			ListOptions: gitea.ListOptions{
-				Page:     1,
-				PageSize: 100,
+				Page:     options.Page,
+				PageSize: options.PerPage,
 			},
 		})
 		if err != nil {
@@ -87,16 +89,14 @@ func (g *GiteaGitProvider) GetRepositories(namespace string) ([]*GitRepository, 
 	} else {
 		repoList, _, err = client.ListOrgRepos(namespace, gitea.ListOrgReposOptions{
 			ListOptions: gitea.ListOptions{
-				Page:     1,
-				PageSize: 100,
+				Page:     options.Page,
+				PageSize: options.PerPage,
 			},
 		})
 		if err != nil {
 			return nil, err
 		}
 	}
-
-	response := []*GitRepository{}
 
 	for _, repo := range repoList {
 		u, err := url.Parse(repo.HTMLURL)
@@ -113,10 +113,10 @@ func (g *GiteaGitProvider) GetRepositories(namespace string) ([]*GitRepository, 
 		})
 	}
 
-	return response, err
+	return response, nil
 }
 
-func (g *GiteaGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {
+func (g *GiteaGitProvider) GetRepoBranches(repositoryId string, namespaceId string, options ListOptions) ([]*GitBranch, error) {
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, err
@@ -130,17 +130,17 @@ func (g *GiteaGitProvider) GetRepoBranches(repositoryId string, namespaceId stri
 		namespaceId = user.Username
 	}
 
+	var branches []*GitBranch
+
 	repoBranches, _, err := client.ListRepoBranches(namespaceId, repositoryId, gitea.ListRepoBranchesOptions{
 		ListOptions: gitea.ListOptions{
-			Page:     1,
-			PageSize: 100,
+			Page:     options.Page,
+			PageSize: options.PerPage,
 		},
 	})
 	if err != nil {
 		return nil, err
 	}
-
-	response := []*GitBranch{}
 
 	for _, branch := range repoBranches {
 		responseBranch := &GitBranch{
@@ -149,13 +149,13 @@ func (g *GiteaGitProvider) GetRepoBranches(repositoryId string, namespaceId stri
 		if branch.Commit != nil {
 			responseBranch.Sha = branch.Commit.ID
 		}
-		response = append(response, responseBranch)
+		branches = append(branches, responseBranch)
 	}
 
-	return response, nil
+	return branches, nil
 }
 
-func (g *GiteaGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error) {
+func (g *GiteaGitProvider) GetRepoPRs(repositoryId string, namespaceId string, options ListOptions) ([]*GitPullRequest, error) {
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, err
@@ -171,8 +171,8 @@ func (g *GiteaGitProvider) GetRepoPRs(repositoryId string, namespaceId string) (
 
 	prList, _, err := client.ListRepoPullRequests(namespaceId, repositoryId, gitea.ListPullRequestsOptions{
 		ListOptions: gitea.ListOptions{
-			Page:     1,
-			PageSize: 100,
+			Page:     options.Page,
+			PageSize: options.PerPage,
 		},
 		State: gitea.StateOpen,
 		Sort:  "recentupdate",
