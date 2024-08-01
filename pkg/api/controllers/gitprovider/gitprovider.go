@@ -97,7 +97,7 @@ func SetGitProvider(ctx *gin.Context) {
 
 	err = server.GitProviderService.SetGitProviderConfig(&gitProviderData)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to set git provider: %s", err.Error()))
+		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to set git provider: %s", err.Error()))
 		return
 	}
 

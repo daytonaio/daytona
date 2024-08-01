@@ -38,9 +38,9 @@ var GitProviderAddCmd = &cobra.Command{
 			return
 		}
 
-		_, err = apiClient.GitProviderAPI.SetGitProvider(ctx).GitProviderConfig(gitProviderData).Execute()
+		res, err := apiClient.GitProviderAPI.SetGitProvider(ctx).GitProviderConfig(gitProviderData).Execute()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
 		views.RenderInfoMessage("Git provider has been registered")
