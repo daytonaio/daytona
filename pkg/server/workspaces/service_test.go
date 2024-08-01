@@ -12,6 +12,7 @@ import (
 	t_targets "github.com/daytonaio/daytona/internal/testing/provider/targets"
 	t_workspaces "github.com/daytonaio/daytona/internal/testing/server/workspaces"
 	"github.com/daytonaio/daytona/internal/testing/server/workspaces/mocks"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
@@ -28,9 +29,8 @@ import (
 
 const serverApiUrl = "http://localhost:3986"
 const serverUrl = "http://localhost:3987"
-
-var defaultProjectUser = "daytona"
-var defaultProjectImage = "daytonaio/workspace-project:latest"
+const defaultProjectUser = "daytona"
+const defaultProjectImage = "daytonaio/workspace-project:latest"
 
 var target = provider.ProviderTarget{
 	Name: "test-target",
@@ -55,8 +55,8 @@ var createWorkspaceDto = dto.CreateWorkspaceDTO{
 					Name: "daytona",
 				},
 			},
-			Image: &defaultProjectImage,
-			User:  &defaultProjectUser,
+			Image: util.Pointer(defaultProjectImage),
+			User:  util.Pointer(defaultProjectUser),
 		},
 	},
 }

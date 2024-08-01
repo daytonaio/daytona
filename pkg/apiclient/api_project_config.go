@@ -478,6 +478,112 @@ func (a *ProjectConfigAPIService) ListProjectConfigsExecute(r ApiListProjectConf
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiSetDefaultProjectConfigRequest struct {
+	ctx        context.Context
+	ApiService *ProjectConfigAPIService
+	configName string
+}
+
+func (r ApiSetDefaultProjectConfigRequest) Execute() (*http.Response, error) {
+	return r.ApiService.SetDefaultProjectConfigExecute(r)
+}
+
+/*
+SetDefaultProjectConfig Set project config to default
+
+Set project config to default
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param configName Config name
+	@return ApiSetDefaultProjectConfigRequest
+*/
+func (a *ProjectConfigAPIService) SetDefaultProjectConfig(ctx context.Context, configName string) ApiSetDefaultProjectConfigRequest {
+	return ApiSetDefaultProjectConfigRequest{
+		ApiService: a,
+		ctx:        ctx,
+		configName: configName,
+	}
+}
+
+// Execute executes the request
+func (a *ProjectConfigAPIService) SetDefaultProjectConfigExecute(r ApiSetDefaultProjectConfigRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPatch
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProjectConfigAPIService.SetDefaultProjectConfig")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/project-config/{configName}/set-default"
+	localVarPath = strings.Replace(localVarPath, "{"+"configName"+"}", url.PathEscape(parameterValueToString(r.configName, "configName")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["Bearer"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
 type ApiSetProjectConfigRequest struct {
 	ctx           context.Context
 	ApiService    *ProjectConfigAPIService

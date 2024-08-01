@@ -134,8 +134,9 @@ func (a *ApiServer) Start() error {
 	{
 		projectConfigController.GET("/:configName", projectconfig.GetProjectConfig)
 		projectConfigController.GET("/", projectconfig.ListProjectConfigs)
-		projectConfigController.GET("/default/:gitUrl", projectconfig.GetDefaultProjectConfig)
 		projectConfigController.PUT("/", projectconfig.SetProjectConfig)
+		projectConfigController.GET("/default/:gitUrl", projectconfig.GetDefaultProjectConfig)
+		projectConfigController.PATCH("/:configName/set-default", projectconfig.SetDefaultProjectConfig)
 		projectConfigController.DELETE("/:configName", projectconfig.DeleteProjectConfig)
 	}
 

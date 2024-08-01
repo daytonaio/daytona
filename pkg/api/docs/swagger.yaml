@@ -943,6 +943,22 @@ paths:
       summary: Get project config data
       tags:
       - project-config
+  /project-config/{configName}/set-default:
+    patch:
+      description: Set project config to default
+      operationId: SetDefaultProjectConfig
+      parameters:
+      - description: Config name
+        in: path
+        name: configName
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Set project config to default
+      tags:
+      - project-config
   /project-config/default/{gitUrl}:
     get:
       description: Get project configs by git url

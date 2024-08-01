@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	projectconfig_internal "github.com/daytonaio/daytona/internal/testing/server/projectconfig"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/server/projectconfig"
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
@@ -99,7 +100,7 @@ func (s *ProjectConfigServiceTestSuite) SetupTest() {
 	})
 
 	for _, pc := range expectedProjectConfigs {
-		_ = s.projectConfigService.Save(pc)
+		_ = s.projectConfigStore.Save(pc)
 	}
 }
 
@@ -118,17 +119,11 @@ func (s *ProjectConfigServiceTestSuite) TestList() {
 func (s *ProjectConfigServiceTestSuite) TestFind() {
 	require := s.Require()
 
-	projectConfig, err := s.projectConfigService.Find(projectConfig1.Name)
+	projectConfig, err := s.projectConfigService.Find(&config.Filter{
+		Name: &projectConfig1.Name,
+	})
 	require.Nil(err)
 	require.Equal(projectConfig1, projectConfig)
-}
-
-func (s *ProjectConfigServiceTestSuite) TestFindDefault() {
-	require := s.Require()
-
-	projectConfig, err := s.projectConfigService.FindDefault("url1")
-	require.Nil(err)
-	require.Equal(true, projectConfig.IsDefault)
 }
 func (s *ProjectConfigServiceTestSuite) TestSetDefault() {
 	require := s.Require()
@@ -136,7 +131,10 @@ func (s *ProjectConfigServiceTestSuite) TestSetDefault() {
 	err := s.projectConfigService.SetDefault(projectConfig2.Name)
 	require.Nil(err)
 
-	projectConfig, err := s.projectConfigService.FindDefault("url1")
+	projectConfig, err := s.projectConfigService.Find(&config.Filter{
+		Url:     util.Pointer("url1"),
+		Default: util.Pointer(true),
+	})
 	require.Nil(err)
 
 	require.Equal(projectConfig2, projectConfig)

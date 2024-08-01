@@ -103,6 +103,7 @@ Class | Method | HTTP request | Description
 *ProjectConfigAPI* | [**GetDefaultProjectConfig**](docs/ProjectConfigAPI.md#getdefaultprojectconfig) | **Get** /project-config/default/{gitUrl} | Get project configs by git url
 *ProjectConfigAPI* | [**GetProjectConfig**](docs/ProjectConfigAPI.md#getprojectconfig) | **Get** /project-config/{configName} | Get project config data
 *ProjectConfigAPI* | [**ListProjectConfigs**](docs/ProjectConfigAPI.md#listprojectconfigs) | **Get** /project-config | List project configs
+*ProjectConfigAPI* | [**SetDefaultProjectConfig**](docs/ProjectConfigAPI.md#setdefaultprojectconfig) | **Patch** /project-config/{configName}/set-default | Set project config to default
 *ProjectConfigAPI* | [**SetProjectConfig**](docs/ProjectConfigAPI.md#setprojectconfig) | **Put** /project-config | Set project config data
 *ProviderAPI* | [**GetTargetManifest**](docs/ProviderAPI.md#gettargetmanifest) | **Get** /provider/{provider}/target-manifest | Get provider target manifest
 *ProviderAPI* | [**InstallProvider**](docs/ProviderAPI.md#installprovider) | **Post** /provider/install | Install a provider

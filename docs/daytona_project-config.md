@@ -16,5 +16,6 @@ Manage project configs
 * [daytona project-config delete](daytona_project-config_delete.md)	 - Delete a project config
 * [daytona project-config info](daytona_project-config_info.md)	 - Show project config info
 * [daytona project-config list](daytona_project-config_list.md)	 - Lists project configs
+* [daytona project-config set-default](daytona_project-config_set-default.md)	 - Set project config info
 * [daytona project-config update](daytona_project-config_update.md)	 - Update a project config
 

@@ -789,6 +789,30 @@ const docTemplate = `{
                 }
             }
         },
+        "/project-config/{configName}/set-default": {
+            "patch": {
+                "description": "Set project config to default",
+                "tags": [
+                    "project-config"
+                ],
+                "summary": "Set project config to default",
+                "operationId": "SetDefaultProjectConfig",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Config name",
+                        "name": "configName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/provider": {
             "get": {
                 "description": "List providers",

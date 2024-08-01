@@ -557,6 +557,24 @@ paths:
       summary: Get project config data
       tags:
       - project-config
+  /project-config/{configName}/set-default:
+    patch:
+      description: Set project config to default
+      operationId: SetDefaultProjectConfig
+      parameters:
+      - description: Config name
+        in: path
+        name: configName
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Set project config to default
+      tags:
+      - project-config
   /provider:
     get:
       description: List providers

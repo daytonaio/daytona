@@ -23,13 +23,8 @@ func (m *mockProjectConfigService) Delete(name string) error {
 	return args.Error(0)
 }
 
-func (m *mockProjectConfigService) Find(name string) (*config.ProjectConfig, error) {
-	args := m.Called(name)
-	return args.Get(0).(*config.ProjectConfig), args.Error(1)
-}
-
-func (m *mockProjectConfigService) FindDefault(url string) (*config.ProjectConfig, error) {
-	args := m.Called(url)
+func (m *mockProjectConfigService) Find(filter *config.Filter) (*config.ProjectConfig, error) {
+	args := m.Called(filter)
 	return args.Get(0).(*config.ProjectConfig), args.Error(1)
 }
 

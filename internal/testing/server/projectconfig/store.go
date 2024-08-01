@@ -6,6 +6,8 @@
 package projectconfig
 
 import (
+	"fmt"
+
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 )
 
@@ -20,21 +22,19 @@ func NewInMemoryProjectConfigStore() config.Store {
 }
 
 func (s *InMemoryProjectConfigStore) List(filter *config.Filter) ([]*config.ProjectConfig, error) {
-	projectConfigs := []*config.ProjectConfig{}
-	for _, t := range s.projectConfigs {
-		projectConfigs = append(projectConfigs, t)
-	}
-
-	return projectConfigs, nil
+	return s.processFilters(filter)
 }
 
-func (s *InMemoryProjectConfigStore) Find(projectConfigName string) (*config.ProjectConfig, error) {
-	projectConfig, ok := s.projectConfigs[projectConfigName]
-	if !ok {
+func (s *InMemoryProjectConfigStore) Find(filter *config.Filter) (*config.ProjectConfig, error) {
+	projectConfigs, err := s.processFilters(filter)
+	if err != nil {
+		return nil, err
+	}
+	if len(projectConfigs) == 0 {
 		return nil, config.ErrProjectConfigNotFound
 	}
 
-	return projectConfig, nil
+	return projectConfigs[0], nil
 }
 
 func (s *InMemoryProjectConfigStore) Save(projectConfig *config.ProjectConfig) error {
@@ -45,4 +45,43 @@ func (s *InMemoryProjectConfigStore) Save(projectConfig *config.ProjectConfig) e
 func (s *InMemoryProjectConfigStore) Delete(projectConfig *config.ProjectConfig) error {
 	delete(s.projectConfigs, projectConfig.Name)
 	return nil
+}
+
+func (s *InMemoryProjectConfigStore) processFilters(filter *config.Filter) ([]*config.ProjectConfig, error) {
+	var result []*config.ProjectConfig
+	filteredProjectConfigs := make(map[string]*config.ProjectConfig)
+	for k, v := range s.projectConfigs {
+		filteredProjectConfigs[k] = v
+	}
+
+	if filter != nil {
+		if filter.Name != nil {
+			projectConfig, ok := s.projectConfigs[*filter.Name]
+			if ok {
+				return []*config.ProjectConfig{projectConfig}, nil
+			} else {
+				return []*config.ProjectConfig{}, fmt.Errorf("project config with name %s not found", *filter.Name)
+			}
+		}
+		if filter.Url != nil {
+			for _, projectConfig := range filteredProjectConfigs {
+				if projectConfig.Repository.Url != *filter.Url {
+					delete(filteredProjectConfigs, projectConfig.Name)
+				}
+			}
+		}
+		if filter.Default != nil {
+			for _, projectConfig := range filteredProjectConfigs {
+				if projectConfig.IsDefault != *filter.Default {
+					delete(filteredProjectConfigs, projectConfig.Name)
+				}
+			}
+		}
+	}
+
+	for _, projectConfig := range filteredProjectConfigs {
+		result = append(result, projectConfig)
+	}
+
+	return result, nil
 }

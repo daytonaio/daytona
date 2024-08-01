@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
@@ -31,7 +32,9 @@ func GetProjectConfig(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	projectConfig, err := server.ProjectConfigService.Find(configName)
+	projectConfig, err := server.ProjectConfigService.Find(&config.Filter{
+		Name: &configName,
+	})
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get project config: %s", err.Error()))
 		return
@@ -62,7 +65,10 @@ func GetDefaultProjectConfig(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	projectConfigs, err := server.ProjectConfigService.FindDefault(decodedURLParam)
+	projectConfigs, err := server.ProjectConfigService.Find(&config.Filter{
+		Url:     &decodedURLParam,
+		Default: util.Pointer(true),
+	})
 	if err != nil {
 		statusCode := http.StatusInternalServerError
 		if config.IsProjectConfigNotFound(err) {
@@ -128,6 +134,30 @@ func SetProjectConfig(ctx *gin.Context) {
 	ctx.Status(201)
 }
 
+// SetDefaultProjectConfig godoc
+//
+//	@Tags			project-config
+//	@Summary		Set project config to default
+//	@Description	Set project config to default
+//	@Param			configName	path	string	true	"Config name"
+//	@Success		200
+//	@Router			/project-config/{configName}/set-default [patch]
+//
+//	@id				SetDefaultProjectConfig
+func SetDefaultProjectConfig(ctx *gin.Context) {
+	configName := ctx.Param("configName")
+
+	server := server.GetInstance(nil)
+
+	err := server.ProjectConfigService.SetDefault(configName)
+	if err != nil {
+		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to set project config to default: %s", err.Error()))
+		return
+	}
+
+	ctx.Status(200)
+}
+
 // DeleteProjectConfig godoc
 //
 //	@Tags			project-config
@@ -143,7 +173,9 @@ func DeleteProjectConfig(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	projectConfig, err := server.ProjectConfigService.Find(configName)
+	projectConfig, err := server.ProjectConfigService.Find(&config.Filter{
+		Name: &configName,
+	})
 	if err != nil {
 		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to find project config: %s", err.Error()))
 		return

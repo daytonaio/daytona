@@ -6,12 +6,14 @@ package config
 import "errors"
 
 type Filter struct {
-	Url *string
+	Name    *string
+	Url     *string
+	Default *bool
 }
 
 type Store interface {
 	List(filter *Filter) ([]*ProjectConfig, error)
-	Find(name string) (*ProjectConfig, error)
+	Find(filter *Filter) (*ProjectConfig, error)
 	Save(projectConfig *ProjectConfig) error
 	Delete(projectConfig *ProjectConfig) error
 }

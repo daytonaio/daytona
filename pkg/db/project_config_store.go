@@ -25,14 +25,7 @@ func NewProjectConfigStore(db *gorm.DB) (*ProjectConfigStore, error) {
 
 func (s *ProjectConfigStore) List(filter *config.Filter) ([]*config.ProjectConfig, error) {
 	projectConfigsDTOs := []ProjectConfigDTO{}
-	tx := s.db
-
-	if filter != nil {
-		if filter.Url != nil {
-			tx = tx.Where("json_extract(repository, '$.url') = ?", *filter.Url)
-		}
-	}
-	tx.Find(&projectConfigsDTOs)
+	tx := processFilters(s.db, filter).Find(&projectConfigsDTOs)
 
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -46,9 +39,10 @@ func (s *ProjectConfigStore) List(filter *config.Filter) ([]*config.ProjectConfi
 	return projectConfigs, nil
 }
 
-func (s *ProjectConfigStore) Find(projectConfigName string) (*config.ProjectConfig, error) {
+func (s *ProjectConfigStore) Find(filter *config.Filter) (*config.ProjectConfig, error) {
 	projectConfigDTO := ProjectConfigDTO{}
-	tx := s.db.Where("name = ?", projectConfigName).First(&projectConfigDTO)
+	tx := processFilters(s.db, filter).First(&projectConfigDTO)
+
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
 			return nil, config.ErrProjectConfigNotFound
@@ -78,4 +72,20 @@ func (s *ProjectConfigStore) Delete(projectConfig *config.ProjectConfig) error {
 	}
 
 	return nil
+}
+
+func processFilters(tx *gorm.DB, filter *config.Filter) *gorm.DB {
+	if filter != nil {
+		if filter.Name != nil {
+			tx = tx.Where("name = ?", *filter.Name)
+		}
+		if filter.Url != nil {
+			tx = tx.Where("json_extract(repository, '$.url') = ?", *filter.Url)
+		}
+		if filter.Default != nil {
+			tx = tx.Where("is_default = ?", *filter.Default)
+		}
+	}
+
+	return tx
 }

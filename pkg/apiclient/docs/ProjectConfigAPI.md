@@ -8,6 +8,7 @@ Method | HTTP request | Description
 [**GetDefaultProjectConfig**](ProjectConfigAPI.md#GetDefaultProjectConfig) | **Get** /project-config/default/{gitUrl} | Get project configs by git url
 [**GetProjectConfig**](ProjectConfigAPI.md#GetProjectConfig) | **Get** /project-config/{configName} | Get project config data
 [**ListProjectConfigs**](ProjectConfigAPI.md#ListProjectConfigs) | **Get** /project-config | List project configs
+[**SetDefaultProjectConfig**](ProjectConfigAPI.md#SetDefaultProjectConfig) | **Patch** /project-config/{configName}/set-default | Set project config to default
 [**SetProjectConfig**](ProjectConfigAPI.md#SetProjectConfig) | **Put** /project-config | Set project config data
 
 
@@ -275,6 +276,74 @@ Other parameters are passed through a pointer to a apiListProjectConfigsRequest 
 
 - **Content-Type**: Not defined
 - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## SetDefaultProjectConfig
+
+> SetDefaultProjectConfig(ctx, configName).Execute()
+
+Set project config to default
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	configName := "configName_example" // string | Config name
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	r, err := apiClient.ProjectConfigAPI.SetDefaultProjectConfig(context.Background(), configName).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `ProjectConfigAPI.SetDefaultProjectConfig``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**configName** | **string** | Config name | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiSetDefaultProjectConfigRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
