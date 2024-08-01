@@ -232,6 +232,26 @@ func (g *GitHubGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (s
 	return *commits[0].SHA, nil
 }
 
+func (g *GitHubGitProvider) GetUrlFromRepository(repository *GitRepository) string {
+	url := strings.TrimSuffix(repository.Url, ".git")
+
+	if repository.Branch != nil && *repository.Branch != "" {
+		if repository.Sha == *repository.Branch {
+			url += "/commit/" + *repository.Branch
+		} else {
+			url += "/tree/" + *repository.Branch
+		}
+
+		if repository.Path != nil {
+			url += "/" + *repository.Path
+		}
+	} else if repository.Path != nil {
+		url += "/blob/main/" + *repository.Path
+	}
+
+	return url
+}
+
 func (g *GitHubGitProvider) getApiClient() *github.Client {
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(

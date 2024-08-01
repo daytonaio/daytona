@@ -246,6 +246,38 @@
                 }
             }
         },
+        "/gitprovider/context/url": {
+            "post": {
+                "description": "Get URL from Git repository",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gitProvider"
+                ],
+                "summary": "Get URL from Git repository",
+                "operationId": "GetUrlFromRepository",
+                "parameters": [
+                    {
+                        "description": "Git repository",
+                        "name": "repository",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GitRepository"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/gitprovider/context/{gitUrl}": {
             "get": {
                 "description": "Get Git context",

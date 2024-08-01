@@ -134,6 +134,22 @@ func (g *GitnessGitProvider) GetUser() (*GitUser, error) {
 	return user, nil
 }
 
+func (g *GitnessGitProvider) GetUrlFromRepository(repo *GitRepository) string {
+	url := strings.TrimSuffix(repo.Url, ".git")
+
+	if repo.Branch != nil && *repo.Branch != "" {
+		url += "/files/" + *repo.Branch
+
+		if repo.Path != nil && *repo.Path != "" {
+			url += "/~/" + *repo.Path
+		}
+	} else if repo.Path != nil {
+		url += "/files/main/~/" + *repo.Path
+	}
+
+	return url
+}
+
 func (g *GitnessGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (string, error) {
 	client := g.getApiClient()
 	return client.GetLastCommitSha(staticContext.Url, staticContext.Branch)
