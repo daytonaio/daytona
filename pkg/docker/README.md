@@ -1,17 +1,17 @@
 ## Package Purpose
 
 The purpose of the `docker` package is to provide a single library that providers can use to easily create workspaces and projects.
-Most providers will import the package and call commands from the `DockerClient` in order to create workspace and projects on provided targets.
+Most providers will import the package and call commands from the `DockerClient` in order to create workspaces and projects on provided targets.
 
 ## Usage
 
-To use the Daytona `DockerClient`, the consumer of the library must provide a Docker API client from the `github.com/docker/docker/client`.
+To use the Daytona `DockerClient`, the consumer of the library must provide a Docker API client from `github.com/docker/docker/client`.
 
 Example:
 ```golang
 import (
   "github.com/docker/docker/client"
-	"github.com/daytonaio/daytona/pkg/docker"
+  "github.com/daytonaio/daytona/pkg/docker"
 )
 
 func GetDockerClient() (docker.IDockerClient, error) {
