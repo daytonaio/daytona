@@ -47,9 +47,7 @@ var ServeCmd = &cobra.Command{
 	GroupID: util.SERVER_GROUP,
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		user := os.Getenv("USER")
-		switch user {
-		case "root":
+		if os.Getenv("USER") == "root" {
 			views.RenderInfoMessageBold("Running the server as root is not recommended because\nDaytona will not be able to remap repository ownership.\nPlease run the server as a non-root user.")
 		}
 
