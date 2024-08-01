@@ -114,9 +114,7 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.GitProvider, userGit
 					}
 					return nil
 				}),
-		).WithHideFunc(func() bool {
-			return isDeleting
-		}),
+		).WithHide(isDeleting),
 	).WithTheme(views.GetCustomTheme())
 
 	if !isDeleting {

@@ -38,7 +38,7 @@ func NewAwsCodeCommitGitProvider(baseApiUrl string) *AwsCodeCommitGitProvider {
 
 func (g *AwsCodeCommitGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	// AWS CodeCommit does not have a project and repository structure similar to other git providers.
-	// Therefore, returning an repositories as array of type GitNamespace.
+	// Therefore, returning repositories as an array of type GitNamespace.
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get client: %s", err.Error())
