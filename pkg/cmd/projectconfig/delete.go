@@ -18,7 +18,7 @@ var projectConfigDeleteCmd = &cobra.Command{
 	Use:     "delete",
 	Aliases: []string{"remove", "rm"},
 	Short:   "Delete a project config",
-	Args:    cobra.RangeArgs(0, 2),
+	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var selectedProjectConfig *apiclient.ProjectConfig
 		var selectedProjectConfigName string

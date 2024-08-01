@@ -5,6 +5,7 @@ package projectconfig
 
 import (
 	"context"
+	"net/http"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
@@ -19,10 +20,11 @@ import (
 var projectConfigUpdateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Update a project config",
-	Args:  cobra.NoArgs,
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var projectConfig *apiclient.ProjectConfig
 		var projectConfigs []apiclient.CreateProjectConfigDTO
+		var res *http.Response
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -30,12 +32,19 @@ var projectConfigUpdateCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		projectConfigList, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(ctx).Execute()
-		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
-		}
+		if len(args) == 0 {
+			projectConfigList, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(ctx).Execute()
+			if err != nil {
+				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			}
 
-		projectConfig = selection.GetProjectConfigFromPrompt(projectConfigList, 0, false, "Update")
+			projectConfig = selection.GetProjectConfigFromPrompt(projectConfigList, 0, false, "Update")
+		} else {
+			projectConfig, res, err = apiClient.ProjectConfigAPI.GetProjectConfig(ctx, args[0]).Execute()
+			if err != nil {
+				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			}
+		}
 
 		if projectConfig == nil || projectConfig.Name == nil {
 			log.Fatal("project config not found")
@@ -47,7 +56,7 @@ var projectConfigUpdateCmd = &cobra.Command{
 				Repository: projectConfig.Repository,
 			},
 			BuildConfig: projectConfig.BuildConfig,
-			EnvVars:     &map[string]string{},
+			EnvVars:     projectConfig.EnvVars,
 		})
 
 		projectDefaults := &create.ProjectConfigDefaults{

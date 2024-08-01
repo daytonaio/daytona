@@ -17,9 +17,10 @@ import (
 )
 
 var projectConfigAddCmd = &cobra.Command{
-	Use:   "add",
-	Short: "Add a project config",
-	Args:  cobra.NoArgs,
+	Use:     "add",
+	Aliases: []string{"new"},
+	Short:   "Add a project config",
+	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		var projects []apiclient.CreateProjectConfigDTO
 		var existingProjectConfigNames []string
@@ -57,7 +58,7 @@ var projectConfigAddCmd = &cobra.Command{
 
 		projects, err = workspace_util.GetProjectsCreationDataFromPrompt(workspace_util.ProjectsDataPromptConfig{
 			UserGitProviders:    gitProviders,
-			Manual:              false,
+			Manual:              manualFlag,
 			MultiProject:        false,
 			SkipBranchSelection: true,
 			ApiClient:           apiClient,
@@ -122,4 +123,10 @@ var projectConfigAddCmd = &cobra.Command{
 
 		views.RenderInfoMessage("Project config added successfully")
 	},
+}
+
+var manualFlag bool
+
+func init() {
+	projectConfigAddCmd.Flags().BoolVar(&manualFlag, "manual", false, "Manually enter the Git repository")
 }

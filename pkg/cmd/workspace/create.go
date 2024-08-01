@@ -239,7 +239,7 @@ func init() {
 
 	CreateCmd.Flags().Var(&builderFlag, "builder", fmt.Sprintf("Specify the builder (currently %s/%s/%s)", create.AUTOMATIC, create.DEVCONTAINER, create.NONE))
 
-	CreateCmd.Flags().BoolVar(&manualFlag, "manual", false, "Manually enter the git repositories")
+	CreateCmd.Flags().BoolVar(&manualFlag, "manual", false, "Manually enter the Git repositories")
 	CreateCmd.Flags().BoolVar(&multiProjectFlag, "multi-project", false, "Workspace with multiple projects/repos")
 	CreateCmd.Flags().BoolVar(&blankFlag, "blank", false, "Create a blank project without using existing configurations")
 	CreateCmd.Flags().BoolVarP(&codeFlag, "code", "c", false, "Open the workspace in the IDE after workspace creation")

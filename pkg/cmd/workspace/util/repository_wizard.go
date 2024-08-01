@@ -18,6 +18,7 @@ import (
 type RepositoryWizardConfig struct {
 	ApiClient           *apiclient.APIClient
 	UserGitProviders    []apiclient.GitProvider
+	Manual              bool
 	MultiProject        bool
 	SkipBranchSelection bool
 	ProjectOrder        int
@@ -31,7 +32,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 
 	ctx := context.Background()
 
-	if len(config.UserGitProviders) == 0 {
+	if len(config.UserGitProviders) == 0 || config.Manual {
 		return create.GetRepositoryFromUrlInput(config.MultiProject, config.ProjectOrder, config.ApiClient, config.SelectedRepos)
 	}
 

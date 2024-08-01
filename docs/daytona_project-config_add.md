@@ -6,6 +6,12 @@ Add a project config
 daytona project-config add [flags]
 ```
 
+### Options
+
+```
+      --manual   Manually enter the Git repository
+```
+
 ### Options inherited from parent commands
 
 ```

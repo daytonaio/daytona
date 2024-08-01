@@ -100,6 +100,7 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 		providerRepo, err := getRepositoryFromWizard(RepositoryWizardConfig{
 			ApiClient:           config.ApiClient,
 			UserGitProviders:    config.UserGitProviders,
+			Manual:              config.Manual,
 			MultiProject:        config.MultiProject,
 			SkipBranchSelection: config.SkipBranchSelection,
 			ProjectOrder:        i,

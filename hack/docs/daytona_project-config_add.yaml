@@ -1,6 +1,10 @@
 name: daytona project-config add
 synopsis: Add a project config
 usage: daytona project-config add [flags]
+options:
+    - name: manual
+      default_value: "false"
+      usage: Manually enter the Git repository
 inherited_options:
     - name: help
       default_value: "false"
