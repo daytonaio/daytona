@@ -20,7 +20,7 @@ import (
 )
 
 func OpenVSCode(activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string) error {
-	checkAndAlertVSCodeInstalled()
+	CheckAndAlertVSCodeInstalled()
 
 	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
 
@@ -166,7 +166,7 @@ func setIdeSettings(projectHostname string, customizations *devcontainer.Customi
 	return nil
 }
 
-func checkAndAlertVSCodeInstalled() {
+func CheckAndAlertVSCodeInstalled() {
 	if err := isVSCodeInstalled(); err != nil {
 		redBold := "\033[1;31m" // ANSI escape code for red and bold
 		reset := "\033[0m"      // ANSI escape code to reset text formatting

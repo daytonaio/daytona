@@ -4,6 +4,10 @@
 package server
 
 import (
+	"fmt"
+	"os"
+	"runtime"
+
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/cmd/server/daemon"
@@ -57,6 +61,11 @@ var ServerCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 		printServerStartedMessage(c, true)
+
+		switch runtime.GOOS {
+		case "linux":
+			fmt.Printf("Use `loginctl enable-linger %s` to allow the service to run after logging out.\n", os.Getenv("USER"))
+		}
 	},
 }
 

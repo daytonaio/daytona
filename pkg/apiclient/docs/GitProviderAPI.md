@@ -11,6 +11,7 @@ Method | HTTP request | Description
 [**GetRepoBranches**](GitProviderAPI.md#GetRepoBranches) | **Get** /gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/branches | Get Git repository branches
 [**GetRepoPRs**](GitProviderAPI.md#GetRepoPRs) | **Get** /gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/pull-requests | Get Git repository PRs
 [**GetRepositories**](GitProviderAPI.md#GetRepositories) | **Get** /gitprovider/{gitProviderId}/{namespaceId}/repositories | Get Git repositories
+[**GetUrlFromRepository**](GitProviderAPI.md#GetUrlFromRepository) | **Post** /gitprovider/context/url | Get URL from Git repository
 [**ListGitProviders**](GitProviderAPI.md#ListGitProviders) | **Get** /gitprovider | List Git providers
 [**RemoveGitProvider**](GitProviderAPI.md#RemoveGitProvider) | **Delete** /gitprovider/{gitProviderId} | Remove Git provider
 [**SetGitProvider**](GitProviderAPI.md#SetGitProvider) | **Put** /gitprovider | Set Git provider
@@ -507,6 +508,72 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**[]GitRepository**](GitRepository.md)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetUrlFromRepository
+
+> string GetUrlFromRepository(ctx).Repository(repository).Execute()
+
+Get URL from Git repository
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	repository := *openapiclient.NewGitRepository() // GitRepository | Git repository
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.GitProviderAPI.GetUrlFromRepository(context.Background()).Repository(repository).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `GitProviderAPI.GetUrlFromRepository``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetUrlFromRepository`: string
+	fmt.Fprintf(os.Stdout, "Response from `GitProviderAPI.GetUrlFromRepository`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetUrlFromRepositoryRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **repository** | [**GitRepository**](GitRepository.md) | Git repository | 
+
+### Return type
+
+**string**
 
 ### Authorization
 

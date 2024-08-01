@@ -14,6 +14,8 @@ import (
 	"github.com/kardianos/service"
 )
 
+const serviceName = "DaytonaServerDaemon"
+
 type program struct {
 	service.Interface
 }
@@ -100,9 +102,9 @@ func getServiceConfig() (*service.Config, error) {
 	}
 
 	svcConfig := &service.Config{
-		Name:        "DaytonaServerDaemon",
+		Name:        serviceName,
 		DisplayName: "Daytona Server",
-		Description: "This is the Daytona Server daemon.",
+		Description: "Daytona Server daemon.",
 		Arguments:   []string{"serve"},
 	}
 
@@ -115,7 +117,7 @@ func getServiceConfig() (*service.Config, error) {
 			svcConfig.UserName = user
 		}
 		if !strings.HasSuffix(service.Platform(), "systemd") {
-			return nil, fmt.Errorf("on Linux, `server -d` is only supported with systemd. %s detected", service.Platform())
+			return nil, fmt.Errorf("on Linux, `server` is only supported with systemd. %s detected", service.Platform())
 		}
 		fallthrough
 	case "darwin":

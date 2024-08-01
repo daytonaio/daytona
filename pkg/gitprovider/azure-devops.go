@@ -254,6 +254,39 @@ func (g *AzureDevOpsGitProvider) GetLastCommitSha(staticContext *StaticGitContex
 	return *(*commits)[0].CommitId, nil
 }
 
+func (g *AzureDevOpsGitProvider) GetUrlFromRepository(repo *GitRepository) string {
+	url := strings.TrimSuffix(repo.Url, ".git")
+	url = strings.TrimSuffix(url, repo.Name)
+	url += "_git/" + repo.Name
+	query := ""
+
+	if repo.Branch != nil && *repo.Branch != "" {
+		if repo.Sha == *repo.Branch {
+			query += "version=GC" + *repo.Branch
+		} else {
+			query += "version=GB" + *repo.Branch
+		}
+
+		if repo.Path != nil && *repo.Path != "" {
+			if query != "" {
+				query += "&"
+			}
+
+			query += "path=" + *repo.Path
+		}
+	} else if repo.Path != nil {
+		query = "version=GBmain&path=" + *repo.Path
+	} else {
+		url = strings.Replace(url, "/_git", "", 1)
+	}
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	return url
+}
+
 func (g *AzureDevOpsGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
 	var pullRequestId int
 	if staticContext.PrNumber == nil {
