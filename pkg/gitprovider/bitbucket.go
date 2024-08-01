@@ -104,6 +104,18 @@ func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]*GitReposito
 	return response, err
 }
 
+func (g *BitbucketGitProvider) IsValidUser(username, token string) (bool, error) {
+	client := bitbucket.NewBasicAuth(username, token)
+
+	// Fetch the user's profile to verify credentials
+	_, err := client.User.Profile()
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
 func (g *BitbucketGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {
 	client := g.getApiClient()
 	var response []*GitBranch

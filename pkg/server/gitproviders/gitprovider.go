@@ -96,6 +96,11 @@ func (s *GitProviderService) SetGitProviderConfig(providerConfig *gitprovider.Gi
 			return err
 		}
 		providerConfig.Username = userData.Username
+	} else {
+		_, err := gitProvider.IsValidUser(providerConfig.Username, providerConfig.Token)
+		if err != nil {
+			return err
+		}
 	}
 
 	return s.configStore.Save(providerConfig)
