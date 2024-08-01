@@ -188,6 +188,11 @@ func getConfigPath() (string, error) {
 }
 
 func GetConfigDir() (string, error) {
+	daytonaConfigDir := os.Getenv("DAYTONA_CONFIG_DIR")
+	if daytonaConfigDir != "" {
+		return daytonaConfigDir, nil
+	}
+
 	userConfigDir, err := os.UserConfigDir()
 	if err != nil {
 		return "", err
