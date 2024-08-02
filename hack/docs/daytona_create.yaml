@@ -2,6 +2,11 @@ name: daytona create
 synopsis: Create a workspace
 usage: daytona create [REPOSITORY_URL] [flags]
 options:
+    - name: blank
+      default_value: "false"
+      usage: Create a blank project without using existing configurations
+    - name: branch
+      usage: Specify the Git branch to use in the project
     - name: builder
       usage: Specify the builder (currently auto/devcontainer/none)
     - name: code
@@ -22,7 +27,7 @@ options:
       usage: Specify the IDE ('vscode' or 'browser')
     - name: manual
       default_value: "false"
-      usage: Manually enter the git repositories
+      usage: Manually enter the Git repositories
     - name: multi-project
       default_value: "false"
       usage: Workspace with multiple projects/repos

@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/protocol/packp/capability"
@@ -21,23 +21,23 @@ import (
 	"gopkg.in/ini.v1"
 )
 
-var MapStatus map[git.StatusCode]workspace.Status = map[git.StatusCode]workspace.Status{
-	git.Unmodified:         workspace.Unmodified,
-	git.Untracked:          workspace.Untracked,
-	git.Modified:           workspace.Modified,
-	git.Added:              workspace.Added,
-	git.Deleted:            workspace.Deleted,
-	git.Renamed:            workspace.Renamed,
-	git.Copied:             workspace.Copied,
-	git.UpdatedButUnmerged: workspace.UpdatedButUnmerged,
+var MapStatus map[git.StatusCode]project.Status = map[git.StatusCode]project.Status{
+	git.Unmodified:         project.Unmodified,
+	git.Untracked:          project.Untracked,
+	git.Modified:           project.Modified,
+	git.Added:              project.Added,
+	git.Deleted:            project.Deleted,
+	git.Renamed:            project.Renamed,
+	git.Copied:             project.Copied,
+	git.UpdatedButUnmerged: project.UpdatedButUnmerged,
 }
 
 type IGitService interface {
-	CloneRepository(project *workspace.Project, auth *http.BasicAuth) error
-	CloneRepositoryCmd(project *workspace.Project, auth *http.BasicAuth) []string
-	RepositoryExists(project *workspace.Project) (bool, error)
+	CloneRepository(project *project.Project, auth *http.BasicAuth) error
+	CloneRepositoryCmd(project *project.Project, auth *http.BasicAuth) []string
+	RepositoryExists(project *project.Project) (bool, error)
 	SetGitConfig(userData *gitprovider.GitUser) error
-	GetGitStatus() (*workspace.GitStatus, error)
+	GetGitStatus() (*project.GitStatus, error)
 }
 
 type Service struct {
@@ -47,7 +47,7 @@ type Service struct {
 	OpenRepository    *git.Repository
 }
 
-func (s *Service) CloneRepository(project *workspace.Project, auth *http.BasicAuth) error {
+func (s *Service) CloneRepository(project *project.Project, auth *http.BasicAuth) error {
 	cloneOptions := &git.CloneOptions{
 		URL:             project.Repository.Url,
 		SingleBranch:    true,
@@ -99,32 +99,32 @@ func (s *Service) CloneRepository(project *workspace.Project, auth *http.BasicAu
 	return err
 }
 
-func (s *Service) CloneRepositoryCmd(project *workspace.Project, auth *http.BasicAuth) []string {
+func (s *Service) CloneRepositoryCmd(p *project.Project, auth *http.BasicAuth) []string {
 	cloneCmd := []string{"git", "clone", "--single-branch"}
 
-	if s.shouldCloneBranch(project) {
-		cloneCmd = append(cloneCmd, "--branch", *project.Repository.Branch)
+	if s.shouldCloneBranch(p) {
+		cloneCmd = append(cloneCmd, "--branch", *p.Repository.Branch)
 	}
 
 	if auth != nil {
-		repoUrl := strings.TrimPrefix(project.Repository.Url, "https://")
+		repoUrl := strings.TrimPrefix(p.Repository.Url, "https://")
 		repoUrl = strings.TrimPrefix(repoUrl, "http://")
 		cloneCmd = append(cloneCmd, fmt.Sprintf("https://%s:%s@%s", auth.Username, auth.Password, repoUrl))
 	} else {
-		cloneCmd = append(cloneCmd, project.Repository.Url)
+		cloneCmd = append(cloneCmd, p.Repository.Url)
 	}
 
 	cloneCmd = append(cloneCmd, s.ProjectDir)
 
-	if s.shouldCheckoutSha(project) {
+	if s.shouldCheckoutSha(p) {
 		cloneCmd = append(cloneCmd, "&&", "cd", s.ProjectDir)
-		cloneCmd = append(cloneCmd, "&&", "git", "checkout", project.Repository.Sha)
+		cloneCmd = append(cloneCmd, "&&", "git", "checkout", p.Repository.Sha)
 	}
 
 	return cloneCmd
 }
 
-func (s *Service) RepositoryExists(project *workspace.Project) (bool, error) {
+func (s *Service) RepositoryExists(p *project.Project) (bool, error) {
 	_, err := os.Stat(filepath.Join(s.ProjectDir, ".git"))
 	if os.IsNotExist(err) {
 		return false, nil
@@ -194,7 +194,7 @@ func (s *Service) SetGitConfig(userData *gitprovider.GitUser) error {
 	return nil
 }
 
-func (s *Service) GetGitStatus() (*workspace.GitStatus, error) {
+func (s *Service) GetGitStatus() (*project.GitStatus, error) {
 	repo, err := git.PlainOpen(s.ProjectDir)
 	if err != nil {
 		return nil, err
@@ -215,9 +215,9 @@ func (s *Service) GetGitStatus() (*workspace.GitStatus, error) {
 		return nil, err
 	}
 
-	files := []*workspace.FileStatus{}
+	files := []*project.FileStatus{}
 	for path, file := range status {
-		files = append(files, &workspace.FileStatus{
+		files = append(files, &project.FileStatus{
 			Name:     path,
 			Extra:    file.Extra,
 			Staging:  MapStatus[file.Staging],
@@ -225,32 +225,32 @@ func (s *Service) GetGitStatus() (*workspace.GitStatus, error) {
 		})
 	}
 
-	return &workspace.GitStatus{
+	return &project.GitStatus{
 		CurrentBranch: ref.Name().Short(),
 		Files:         files,
 	}, nil
 }
 
-func (s *Service) shouldCloneBranch(project *workspace.Project) bool {
-	if project.Repository.Branch == nil || *project.Repository.Branch == "" {
+func (s *Service) shouldCloneBranch(p *project.Project) bool {
+	if p.Repository.Branch == nil || *p.Repository.Branch == "" {
 		return false
 	}
 
-	if project.Repository.Sha == "" {
+	if p.Repository.Sha == "" {
 		return true
 	}
 
-	return *project.Repository.Branch != project.Repository.Sha
+	return *p.Repository.Branch != p.Repository.Sha
 }
 
-func (s *Service) shouldCheckoutSha(project *workspace.Project) bool {
-	if project.Repository.Sha == "" {
+func (s *Service) shouldCheckoutSha(p *project.Project) bool {
+	if p.Repository.Sha == "" {
 		return false
 	}
 
-	if project.Repository.Branch == nil || *project.Repository.Branch == "" {
+	if p.Repository.Branch == nil || *p.Repository.Branch == "" {
 		return false
 	}
 
-	return *project.Repository.Branch == project.Repository.Sha
+	return *p.Repository.Branch == p.Repository.Sha
 }

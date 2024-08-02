@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 )
@@ -22,7 +23,7 @@ func (d *DockerClient) GetWorkspaceInfo(ws *workspace.Workspace) (*workspace.Wor
 		ProviderMetadata: fmt.Sprintf(WorkspaceMetadataFormat, ws.Id),
 	}
 
-	projectInfos := []*workspace.ProjectInfo{}
+	projectInfos := []*project.ProjectInfo{}
 	for _, project := range ws.Projects {
 		projectInfo, err := d.GetProjectInfo(project)
 		if err != nil {
@@ -35,9 +36,9 @@ func (d *DockerClient) GetWorkspaceInfo(ws *workspace.Workspace) (*workspace.Wor
 	return workspaceInfo, nil
 }
 
-func (d *DockerClient) GetProjectInfo(project *workspace.Project) (*workspace.ProjectInfo, error) {
+func (d *DockerClient) GetProjectInfo(p *project.Project) (*project.ProjectInfo, error) {
 	isRunning := true
-	info, err := d.getContainerInfo(project)
+	info, err := d.getContainerInfo(p)
 	if err != nil {
 		if client.IsErrNotFound(err) {
 			isRunning = false
@@ -47,16 +48,16 @@ func (d *DockerClient) GetProjectInfo(project *workspace.Project) (*workspace.Pr
 	}
 
 	if info == nil || info.State == nil {
-		return &workspace.ProjectInfo{
-			Name:             project.Name,
+		return &project.ProjectInfo{
+			Name:             p.Name,
 			IsRunning:        isRunning,
 			Created:          "",
 			ProviderMetadata: ContainerNotFoundMetadata,
 		}, nil
 	}
 
-	projectInfo := &workspace.ProjectInfo{
-		Name:      project.Name,
+	projectInfo := &project.ProjectInfo{
+		Name:      p.Name,
 		IsRunning: isRunning,
 		Created:   info.Created,
 	}
@@ -72,10 +73,10 @@ func (d *DockerClient) GetProjectInfo(project *workspace.Project) (*workspace.Pr
 	return projectInfo, nil
 }
 
-func (d *DockerClient) getContainerInfo(project *workspace.Project) (*types.ContainerJSON, error) {
+func (d *DockerClient) getContainerInfo(p *project.Project) (*types.ContainerJSON, error) {
 	ctx := context.Background()
 
-	info, err := d.apiClient.ContainerInspect(ctx, d.GetProjectContainerName(project))
+	info, err := d.apiClient.ContainerInspect(ctx, d.GetProjectContainerName(p))
 	if err != nil {
 		return nil, err
 	}

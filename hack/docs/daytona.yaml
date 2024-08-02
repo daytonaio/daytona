@@ -24,6 +24,7 @@ see_also:
     - daytona info - Show workspace info
     - daytona list - List workspaces
     - daytona profile - Manage profiles
+    - daytona project-config - Manage project configs
     - daytona provider - Manage providers
     - daytona purge - Purges all Daytona data from the current device
     - daytona serve - Run the server process in the current terminal session

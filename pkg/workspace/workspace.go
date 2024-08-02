@@ -7,24 +7,25 @@ import (
 	"errors"
 
 	"github.com/daytonaio/daytona/internal"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 )
 
 type Workspace struct {
-	Id       string            `json:"id"`
-	Name     string            `json:"name"`
-	Projects []*Project        `json:"projects"`
-	Target   string            `json:"target"`
-	ApiKey   string            `json:"-"`
-	EnvVars  map[string]string `json:"-"`
+	Id       string             `json:"id"`
+	Name     string             `json:"name"`
+	Projects []*project.Project `json:"projects"`
+	Target   string             `json:"target"`
+	ApiKey   string             `json:"-"`
+	EnvVars  map[string]string  `json:"-"`
 } // @name Workspace
 
 type WorkspaceInfo struct {
-	Name             string         `json:"name"`
-	Projects         []*ProjectInfo `json:"projects"`
-	ProviderMetadata string         `json:"providerMetadata,omitempty"`
+	Name             string                 `json:"name"`
+	Projects         []*project.ProjectInfo `json:"projects"`
+	ProviderMetadata string                 `json:"providerMetadata,omitempty"`
 } // @name WorkspaceInfo
 
-func (w *Workspace) GetProject(projectName string) (*Project, error) {
+func (w *Workspace) GetProject(projectName string) (*project.Project, error) {
 	for _, project := range w.Projects {
 		if project.Name == projectName {
 			return project, nil

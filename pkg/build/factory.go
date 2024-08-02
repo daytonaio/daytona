@@ -17,14 +17,15 @@ import (
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/ports"
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
 	"github.com/docker/docker/pkg/stringid"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
 type IBuilderFactory interface {
-	Create(p workspace.Project, gpc *gitprovider.GitProviderConfig) (IBuilder, error)
-	CheckExistingBuild(p workspace.Project) (*BuildResult, error)
+	Create(p project.Project, gpc *gitprovider.GitProviderConfig) (IBuilder, error)
+	CheckExistingBuild(p project.Project) (*BuildResult, error)
 }
 
 type BuilderFactory struct {
@@ -62,7 +63,7 @@ func NewBuilderFactory(config BuilderFactoryConfig) IBuilderFactory {
 	}
 }
 
-func (f *BuilderFactory) Create(p workspace.Project, gpc *gitprovider.GitProviderConfig) (IBuilder, error) {
+func (f *BuilderFactory) Create(p project.Project, gpc *gitprovider.GitProviderConfig) (IBuilder, error) {
 	buildId := stringid.GenerateRandomID()
 	buildId = stringid.TruncateID(buildId)
 
@@ -99,8 +100,8 @@ func (f *BuilderFactory) Create(p workspace.Project, gpc *gitprovider.GitProvide
 		return nil, err
 	}
 
-	if p.Build == nil || *p.Build != (workspace.ProjectBuild{}) {
-		if p.Build != nil && p.Build.Devcontainer != nil {
+	if p.BuildConfig == nil || *p.BuildConfig != (buildconfig.ProjectBuildConfig{}) {
+		if p.BuildConfig != nil && p.BuildConfig.Devcontainer != nil {
 			return f.newDevcontainerBuilder(buildId, p, gpc, hash, projectDir)
 		}
 
@@ -123,7 +124,7 @@ func (f *BuilderFactory) Create(p workspace.Project, gpc *gitprovider.GitProvide
 	}
 }
 
-func (f *BuilderFactory) CheckExistingBuild(p workspace.Project) (*BuildResult, error) {
+func (f *BuilderFactory) CheckExistingBuild(p project.Project) (*BuildResult, error) {
 	hash, err := p.GetConfigHash()
 	if err != nil {
 		return nil, err
@@ -160,7 +161,7 @@ func (f *BuilderFactory) CheckExistingBuild(p workspace.Project) (*BuildResult, 
 	return &result, nil
 }
 
-func (f *BuilderFactory) newDevcontainerBuilder(buildId string, p workspace.Project, gpc *gitprovider.GitProviderConfig, hash, projectDir string) (*DevcontainerBuilder, error) {
+func (f *BuilderFactory) newDevcontainerBuilder(buildId string, p project.Project, gpc *gitprovider.GitProviderConfig, hash, projectDir string) (*DevcontainerBuilder, error) {
 	builderDockerPort, err := ports.GetAvailableEphemeralPort()
 	if err != nil {
 		return nil, err

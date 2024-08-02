@@ -341,6 +341,36 @@ const docTemplate = `{
                 }
             }
         },
+        "/gitprovider/id-for-url/{url}": {
+            "get": {
+                "description": "Get Git provider ID",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "gitProvider"
+                ],
+                "summary": "Get Git provider ID",
+                "operationId": "GetGitProviderIdForUrl",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Url",
+                        "name": "url",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/gitprovider/{gitProviderId}": {
             "delete": {
                 "description": "Remove Git provider",
@@ -622,6 +652,163 @@ const docTemplate = `{
                 "responses": {
                     "204": {
                         "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/project-config": {
+            "get": {
+                "description": "List project configs",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "project-config"
+                ],
+                "summary": "List project configs",
+                "operationId": "ListProjectConfigs",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ProjectConfig"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Set project config data",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "project-config"
+                ],
+                "summary": "Set project config data",
+                "operationId": "SetProjectConfig",
+                "parameters": [
+                    {
+                        "description": "Project config",
+                        "name": "projectConfig",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateProjectConfigDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            }
+        },
+        "/project-config/default/{gitUrl}": {
+            "get": {
+                "description": "Get project configs by git url",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "project-config"
+                ],
+                "summary": "Get project configs by git url",
+                "operationId": "GetDefaultProjectConfig",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Git URL",
+                        "name": "gitUrl",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ProjectConfig"
+                        }
+                    }
+                }
+            }
+        },
+        "/project-config/{configName}": {
+            "get": {
+                "description": "Get project config data",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "project-config"
+                ],
+                "summary": "Get project config data",
+                "operationId": "GetProjectConfig",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Config name",
+                        "name": "configName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ProjectConfig"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete project config data",
+                "tags": [
+                    "project-config"
+                ],
+                "summary": "Delete project config data",
+                "operationId": "DeleteProjectConfig",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Config name",
+                        "name": "configName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/project-config/{configName}/set-default": {
+            "patch": {
+                "description": "Set project config to default",
+                "tags": [
+                    "project-config"
+                ],
+                "summary": "Set project config to default",
+                "operationId": "SetDefaultProjectConfig",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Config name",
+                        "name": "configName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
                     }
                 }
             }
@@ -928,7 +1115,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/CreateWorkspaceRequest"
+                            "$ref": "#/definitions/CreateWorkspaceDTO"
                         }
                     }
                 ],
@@ -1181,37 +1368,11 @@ const docTemplate = `{
                 }
             }
         },
-        "CreateWorkspaceRequest": {
+        "CreateProjectConfigDTO": {
             "type": "object",
-            "required": [
-                "projects"
-            ],
             "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "projects": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/CreateWorkspaceRequestProject"
-                    }
-                },
-                "target": {
-                    "type": "string"
-                }
-            }
-        },
-        "CreateWorkspaceRequestProject": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "build": {
-                    "$ref": "#/definitions/ProjectBuild"
+                "buildConfig": {
+                    "$ref": "#/definitions/ProjectBuildConfig"
                 },
                 "envVars": {
                     "type": "object",
@@ -1226,18 +1387,49 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "source": {
-                    "$ref": "#/definitions/CreateWorkspaceRequestProjectSource"
+                    "$ref": "#/definitions/CreateProjectConfigSourceDTO"
                 },
                 "user": {
                     "type": "string"
                 }
             }
         },
-        "CreateWorkspaceRequestProjectSource": {
+        "CreateProjectConfigSourceDTO": {
             "type": "object",
             "properties": {
                 "repository": {
                     "$ref": "#/definitions/GitRepository"
+                }
+            }
+        },
+        "CreateWorkspaceDTO": {
+            "type": "object",
+            "required": [
+                "projects"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/CreateProjectConfigDTO"
+                    }
+                },
+                "target": {
+                    "type": "string"
+                }
+            }
+        },
+        "DevcontainerConfig": {
+            "type": "object",
+            "properties": {
+                "filePath": {
+                    "type": "string"
                 }
             }
         },
@@ -1436,8 +1628,17 @@ const docTemplate = `{
         "Project": {
             "type": "object",
             "properties": {
-                "build": {
-                    "$ref": "#/definitions/ProjectBuild"
+                "buildConfig": {
+                    "$ref": "#/definitions/ProjectBuildConfig"
+                },
+                "default": {
+                    "type": "boolean"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "image": {
                     "type": "string"
@@ -1462,18 +1663,39 @@ const docTemplate = `{
                 }
             }
         },
-        "ProjectBuild": {
+        "ProjectBuildConfig": {
             "type": "object",
             "properties": {
                 "devcontainer": {
-                    "$ref": "#/definitions/ProjectBuildDevcontainer"
+                    "$ref": "#/definitions/DevcontainerConfig"
                 }
             }
         },
-        "ProjectBuildDevcontainer": {
+        "ProjectConfig": {
             "type": "object",
             "properties": {
-                "devContainerFilePath": {
+                "buildConfig": {
+                    "$ref": "#/definitions/ProjectBuildConfig"
+                },
+                "default": {
+                    "type": "boolean"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "repository": {
+                    "$ref": "#/definitions/GitRepository"
+                },
+                "user": {
                     "type": "string"
                 }
             }

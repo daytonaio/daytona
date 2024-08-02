@@ -4,120 +4,121 @@
 package util
 
 import (
+	"context"
 	"fmt"
 	"net/url"
+	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
 	"strconv"
 	"strings"
 
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
+	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
+	log "github.com/sirupsen/logrus"
 )
 
-type CreateDataPromptConfig struct {
-	ExistingWorkspaceNames []string
-	UserGitProviders       []apiclient.GitProvider
-	Manual                 bool
-	MultiProject           bool
-	ApiClient              *apiclient.APIClient
-	Defaults               *create.ProjectDefaults
+type ProjectsDataPromptConfig struct {
+	UserGitProviders    []apiclient.GitProvider
+	ProjectConfigs      []apiclient.ProjectConfig
+	Manual              bool
+	SkipBranchSelection bool
+	MultiProject        bool
+	BlankProject        bool
+	ApiClient           *apiclient.APIClient
+	Defaults            *create.ProjectConfigDefaults
 }
 
-func GetCreationDataFromPrompt(config CreateDataPromptConfig) (string, []apiclient.CreateWorkspaceRequestProject, error) {
-	var projectList []apiclient.CreateWorkspaceRequestProject
-	var providerRepo *apiclient.GitRepository
-	var err error
-	var workspaceName string
+func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apiclient.CreateProjectConfigDTO, error) {
+	var projectList []apiclient.CreateProjectConfigDTO
 	// keep track of visited repos, will help in keeping project names unique
 	// since these are later saved into the db under a unique constraint field.
 	selectedRepos := make(map[string]int)
 
-	if !config.Manual && config.UserGitProviders != nil && len(config.UserGitProviders) > 0 {
-		providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, 0, selectedRepos)
-		if err != nil {
-			return "", nil, err
+	for i := 1; config.MultiProject || i == 1; i++ {
+		var err error
+
+		if i > 2 {
+			addMore, err := create.RunAddMoreProjectsForm()
+			if err != nil {
+				return nil, err
+			}
+			if !addMore {
+				break
+			}
 		}
-	}
 
-	if providerRepo == nil {
-		providerRepo, err = create.GetRepositoryFromUrlInput(config.MultiProject, config.ApiClient, selectedRepos)
-		if err != nil {
-			return "", nil, err
-		}
-	}
-
-	providerRepoName, err := GetSanitizedProjectName(*providerRepo.Name)
-	if err != nil {
-		return "", nil, err
-	}
-
-	projectList = []apiclient.CreateWorkspaceRequestProject{newCreateProjectRequest(config, providerRepo, providerRepoName)}
-
-	if config.MultiProject {
-		addMore := true
-		for i := 2; addMore; i++ {
-			var providerRepo *apiclient.GitRepository
-
-			if !config.Manual && config.UserGitProviders != nil && len(config.UserGitProviders) > 0 {
-				providerRepo, err = getRepositoryFromWizard(config.UserGitProviders, i, selectedRepos)
-				if err != nil {
-					return "", nil, err
-				}
+		if len(config.ProjectConfigs) > 0 && !config.BlankProject {
+			projectConfig := selection.GetProjectConfigFromPrompt(config.ProjectConfigs, i, true, "Use")
+			if projectConfig == nil {
+				return nil, fmt.Errorf("must select a project config")
 			}
 
-			if providerRepo == nil {
-				providerRepo, addMore, err = create.RunAdditionalProjectRepoForm(i, config.ApiClient, selectedRepos)
-				if err != nil {
-					return "", nil, err
+			projectNames := []string{}
+			for _, p := range projectList {
+				var currentName string
+				if p.Name != nil {
+					currentName = *p.Name
 				}
-			} else {
-				addMore, err = create.RunAddMoreProjectsForm()
-				if err != nil {
-					return "", nil, err
-				}
+				projectNames = append(projectNames, currentName)
 			}
 
 			// Append occurence number to keep duplicate entries unique
-			repoUrl := *providerRepo.Url
+			repoUrl := *projectConfig.Repository.Url
 			if len(selectedRepos) > 0 && selectedRepos[repoUrl] > 1 {
-				*providerRepo.Name += strconv.Itoa(selectedRepos[repoUrl])
+				*projectConfig.Name += strconv.Itoa(selectedRepos[repoUrl])
 			}
 
-			providerRepoName, err := GetSanitizedProjectName(*providerRepo.Name)
-			if err != nil {
-				return "", nil, err
-			}
+			if *projectConfig.Name != selection.BlankProjectIdentifier {
+				projectName := GetSuggestedName(*projectConfig.Name, projectNames)
 
-			projectList = append(projectList, newCreateProjectRequest(config, providerRepo, providerRepoName))
+				branch, err := GetBranchFromProjectConfig(projectConfig, config.ApiClient, i)
+				if err != nil {
+					return nil, err
+				}
+
+				configRepo := projectConfig.Repository
+				configRepo.Branch = &branch
+
+				projectList = append(projectList, apiclient.CreateProjectConfigDTO{
+					Name: &projectName,
+					Source: &apiclient.CreateProjectConfigSourceDTO{
+						Repository: configRepo,
+					},
+					BuildConfig: projectConfig.BuildConfig,
+					Image:       config.Defaults.Image,
+					User:        config.Defaults.ImageUser,
+					EnvVars:     projectConfig.EnvVars,
+				})
+				continue
+			}
 		}
+
+		providerRepo, err := getRepositoryFromWizard(RepositoryWizardConfig{
+			ApiClient:           config.ApiClient,
+			UserGitProviders:    config.UserGitProviders,
+			Manual:              config.Manual,
+			MultiProject:        config.MultiProject,
+			SkipBranchSelection: config.SkipBranchSelection,
+			ProjectOrder:        i,
+			SelectedRepos:       selectedRepos,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		providerRepoName, err := GetSanitizedProjectName(*providerRepo.Name)
+		if err != nil {
+			return nil, err
+		}
+
+		projectList = append(projectList, newCreateProjectConfigDTO(config, providerRepo, providerRepoName))
 	}
 
-	suggestedName := GetSuggestedWorkspaceName(projectList[0].Name, config.ExistingWorkspaceNames)
-
-	err = create.RunSubmissionForm(&workspaceName, suggestedName, config.ExistingWorkspaceNames, &projectList, config.Defaults)
-	if err != nil {
-		return "", nil, err
-	}
-
-	return workspaceName, projectList, nil
-}
-
-func newCreateProjectRequest(config CreateDataPromptConfig, providerRepo *apiclient.GitRepository, providerRepoName string) apiclient.CreateWorkspaceRequestProject {
-	project := apiclient.CreateWorkspaceRequestProject{
-		Name: providerRepoName,
-		Source: &apiclient.CreateWorkspaceRequestProjectSource{
-			Repository: providerRepo,
-		},
-		Build:   &apiclient.ProjectBuild{},
-		Image:   config.Defaults.Image,
-		User:    config.Defaults.ImageUser,
-		EnvVars: &map[string]string{},
-	}
-
-	return project
-
+	return projectList, nil
 }
 
 func GetProjectNameFromRepo(repoUrl string) string {
@@ -125,16 +126,16 @@ func GetProjectNameFromRepo(repoUrl string) string {
 	return projectNameSlugRegex.ReplaceAllString(strings.TrimSuffix(strings.ToLower(filepath.Base(repoUrl)), ".git"), "-")
 }
 
-func GetSuggestedWorkspaceName(firstProjectName string, existingWorkspaceNames []string) string {
-	suggestion := firstProjectName
+func GetSuggestedName(initialSuggestion string, existingNames []string) string {
+	suggestion := initialSuggestion
 
-	if !slices.Contains(existingWorkspaceNames, suggestion) {
+	if !slices.Contains(existingNames, suggestion) {
 		return suggestion
 	} else {
 		i := 2
 		for {
 			newSuggestion := fmt.Sprintf("%s%d", suggestion, i)
-			if !slices.Contains(existingWorkspaceNames, newSuggestion) {
+			if !slices.Contains(existingNames, newSuggestion) {
 				return newSuggestion
 			}
 			i++
@@ -150,4 +151,92 @@ func GetSanitizedProjectName(projectName string) (string, error) {
 	projectName = strings.ReplaceAll(projectName, " ", "-")
 
 	return projectName, nil
+}
+
+func GetEnvVariables(projectConfigDto *apiclient.CreateProjectConfigDTO, profileData *apiclient.ProfileData) *map[string]string {
+	envVars := map[string]string{}
+
+	if profileData != nil && profileData.EnvVars != nil {
+		for k, v := range *profileData.EnvVars {
+			if strings.HasPrefix(v, "$") {
+				env, ok := os.LookupEnv(v[1:])
+				if ok {
+					envVars[k] = env
+				} else {
+					log.Warnf("Environment variable %s not found", v[1:])
+				}
+			} else {
+				envVars[k] = v
+			}
+		}
+	}
+
+	if projectConfigDto.EnvVars != nil {
+		for k, v := range *projectConfigDto.EnvVars {
+			if strings.HasPrefix(v, "$") {
+				env, ok := os.LookupEnv(v[1:])
+				if ok {
+					envVars[k] = env
+				} else {
+					log.Warnf("Environment variable %s not found", v[1:])
+				}
+			} else {
+				envVars[k] = v
+			}
+		}
+	}
+
+	return &envVars
+}
+
+func GetBranchFromProjectConfig(projectConfig *apiclient.ProjectConfig, apiClient *apiclient.APIClient, projectOrder int) (string, error) {
+	ctx := context.Background()
+
+	encodedURLParam := url.QueryEscape(*projectConfig.Repository.Url)
+
+	repoResponse, res, err := apiClient.GitProviderAPI.GetGitContext(ctx, encodedURLParam).Execute()
+	if err != nil {
+		return "", apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	providerId, res, err := apiClient.GitProviderAPI.GetGitProviderIdForUrl(ctx, encodedURLParam).Execute()
+	if err != nil {
+		return "", apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	branchWizardConfig := BranchWizardConfig{
+		ApiClient:    apiClient,
+		ProviderId:   providerId,
+		NamespaceId:  *repoResponse.Owner,
+		ChosenRepo:   repoResponse,
+		ProjectOrder: projectOrder,
+	}
+
+	repo, err := GetBranchFromWizard(branchWizardConfig)
+	if err != nil {
+		return "", err
+	}
+
+	var result string
+
+	if repo.Branch != nil {
+		result = *repo.Branch
+	}
+
+	return result, nil
+}
+
+func newCreateProjectConfigDTO(config ProjectsDataPromptConfig, providerRepo *apiclient.GitRepository, providerRepoName string) apiclient.CreateProjectConfigDTO {
+	project := apiclient.CreateProjectConfigDTO{
+		Name: &providerRepoName,
+		Source: &apiclient.CreateProjectConfigSourceDTO{
+			Repository: providerRepo,
+		},
+		BuildConfig: &apiclient.ProjectBuildConfig{},
+		Image:       config.Defaults.Image,
+		User:        config.Defaults.ImageUser,
+		EnvVars:     &map[string]string{},
+	}
+
+	return project
 }

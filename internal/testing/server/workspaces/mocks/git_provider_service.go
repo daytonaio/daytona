@@ -33,9 +33,9 @@ func (m *mockGitProviderService) GetGitProvider(id string) (gitprovider.GitProvi
 	return args.Get(0).(gitprovider.GitProvider), args.Error(1)
 }
 
-func (m *mockGitProviderService) GetGitProviderForUrl(url string) (gitprovider.GitProvider, error) {
+func (m *mockGitProviderService) GetGitProviderForUrl(url string) (gitprovider.GitProvider, string, error) {
 	args := m.Called(url)
-	return args.Get(0).(gitprovider.GitProvider), args.Error(1)
+	return args.Get(0).(gitprovider.GitProvider), args.String(0), args.Error(1)
 }
 
 func (m *mockGitProviderService) GetGitUser(gitProviderId string) (*gitprovider.GitUser, error) {

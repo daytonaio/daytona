@@ -17,18 +17,22 @@ import (
 	"github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
+	project_config "github.com/daytonaio/daytona/pkg/workspace/project/config"
 )
 
-var project1 = &workspace.Project{
-	Name: "test",
-	Repository: &gitprovider.GitRepository{
-		Id:   "123",
-		Url:  "https://github.com/daytonaio/daytona",
-		Name: "daytona",
+var project1 = &project.Project{
+	ProjectConfig: project_config.ProjectConfig{
+		Name: "test",
+		Repository: &gitprovider.GitRepository{
+			Id:   "123",
+			Url:  "https://github.com/daytonaio/daytona",
+			Name: "daytona",
+		},
 	},
 	WorkspaceId: "123",
 	Target:      "local",
-	State: &workspace.ProjectState{
+	State: &project.ProjectState{
 		UpdatedAt: "123",
 		Uptime:    148,
 		GitStatus: gitStatus1,
@@ -39,18 +43,18 @@ var workspace1 = &workspace.Workspace{
 	Id:     "123",
 	Name:   "test",
 	Target: "local",
-	Projects: []*workspace.Project{
+	Projects: []*project.Project{
 		project1,
 	},
 }
 
-var gitStatus1 = &workspace.GitStatus{
+var gitStatus1 = &project.GitStatus{
 	CurrentBranch: "main",
-	Files: []*workspace.FileStatus{{
+	Files: []*project.FileStatus{{
 		Name:     "File1",
 		Extra:    "",
-		Staging:  workspace.Modified,
-		Worktree: workspace.Modified,
+		Staging:  project.Modified,
+		Worktree: project.Modified,
 	}},
 }
 

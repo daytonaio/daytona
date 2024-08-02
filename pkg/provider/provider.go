@@ -8,6 +8,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/provider/util"
 	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/hashicorp/go-plugin"
 )
 
@@ -28,7 +29,7 @@ type Provider interface {
 	StartProject(*ProjectRequest) (*util.Empty, error)
 	StopProject(*ProjectRequest) (*util.Empty, error)
 	DestroyProject(*ProjectRequest) (*util.Empty, error)
-	GetProjectInfo(*ProjectRequest) (*workspace.ProjectInfo, error)
+	GetProjectInfo(*ProjectRequest) (*project.ProjectInfo, error)
 }
 
 type ProviderPlugin struct {

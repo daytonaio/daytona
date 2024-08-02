@@ -35,7 +35,7 @@ func GetGitContext(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	gitProvider, err := server.GitProviderService.GetGitProviderForUrl(decodedURLParam)
+	gitProvider, _, err := server.GitProviderService.GetGitProviderForUrl(decodedURLParam)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %s", err.Error()))
 		return
@@ -70,7 +70,7 @@ func GetUrlFromRepository(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	gitProvider, err := server.GitProviderService.GetGitProviderForUrl(gitRepository.Url)
+	gitProvider, _, err := server.GitProviderService.GetGitProviderForUrl(gitRepository.Url)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %s", err.Error()))
 		return

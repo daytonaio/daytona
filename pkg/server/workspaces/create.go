@@ -9,6 +9,8 @@ import (
 	"io"
 	"regexp"
 
+	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/containerregistry"
@@ -18,6 +20,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -39,7 +42,7 @@ func isValidWorkspaceName(name string) bool {
 	return true
 }
 
-func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWorkspaceRequest) (*workspace.Workspace, error) {
+func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWorkspaceDTO) (*workspace.Workspace, error) {
 	_, err := s.workspaceStore.Find(req.Name)
 	if err == nil {
 		return nil, ErrWorkspaceAlreadyExists
@@ -62,47 +65,45 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 	}
 	w.ApiKey = apiKey
 
-	w.Projects = []*workspace.Project{}
+	w.Projects = []*project.Project{}
 
-	for _, project := range req.Projects {
+	for _, p := range req.Projects {
+		projectConfig := conversion.ToProjectConfig(p)
+
 		isValidProjectName := regexp.MustCompile(`^[a-zA-Z0-9-_.]+$`).MatchString
-		if !isValidProjectName(project.Name) {
+		if !isValidProjectName(projectConfig.Name) {
 			return nil, ErrInvalidProjectName
 		}
 
-		if project.Source.Repository != nil && project.Source.Repository.Sha == "" {
-			sha, err := s.gitProviderService.GetLastCommitSha(project.Source.Repository)
-			if err != nil {
-				return nil, err
+		if projectConfig.Repository != nil {
+			projectConfig.Repository.Url = util.CleanUpRepositoryUrl(projectConfig.Repository.Url)
+			if projectConfig.Repository.Sha != "" {
+				sha, err := s.gitProviderService.GetLastCommitSha(projectConfig.Repository)
+				if err != nil {
+					return nil, err
+				}
+				projectConfig.Repository.Sha = sha
 			}
-			project.Source.Repository.Sha = sha
 		}
 
-		apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", w.Id, project.Name))
+		if projectConfig.Image == "" {
+			projectConfig.Image = s.defaultProjectImage
+		}
+
+		if projectConfig.User == "" {
+			projectConfig.User = s.defaultProjectUser
+		}
+
+		apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", w.Id, projectConfig.Name))
 		if err != nil {
 			return nil, err
 		}
 
-		projectImage := s.defaultProjectImage
-		if project.Image != nil {
-			projectImage = *project.Image
-		}
-
-		projectUser := s.defaultProjectUser
-		if project.User != nil {
-			projectUser = *project.User
-		}
-
-		p := &workspace.Project{
-			Name:        project.Name,
-			Image:       projectImage,
-			User:        projectUser,
-			Build:       project.Build,
-			Repository:  project.Source.Repository,
-			WorkspaceId: w.Id,
-			ApiKey:      apiKey,
-			Target:      w.Target,
-			EnvVars:     project.EnvVars,
+		p := &project.Project{
+			ProjectConfig: *projectConfig,
+			WorkspaceId:   w.Id,
+			ApiKey:        apiKey,
+			Target:        w.Target,
 		}
 		w.Projects = append(w.Projects, p)
 	}
@@ -139,46 +140,46 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 	return w, err
 }
 
-func (s *WorkspaceService) createBuild(project *workspace.Project, gc *gitprovider.GitProviderConfig, logWriter io.Writer) (*workspace.Project, error) {
+func (s *WorkspaceService) createBuild(p *project.Project, gc *gitprovider.GitProviderConfig, logWriter io.Writer) (*project.Project, error) {
 	// FIXME: skip build completely for now
-	return project, nil
+	return p, nil
 
-	if project.Build != nil { // nolint:govet
-		lastBuildResult, err := s.builderFactory.CheckExistingBuild(*project)
+	if p.BuildConfig != nil { // nolint:govet
+		lastBuildResult, err := s.builderFactory.CheckExistingBuild(*p)
 		if err != nil {
 			return nil, err
 		}
 		if lastBuildResult != nil {
-			project.Image = lastBuildResult.ImageName
-			project.User = lastBuildResult.User
-			return project, nil
+			p.Image = lastBuildResult.ImageName
+			p.User = lastBuildResult.User
+			return p, nil
 		}
 
-		builder, err := s.builderFactory.Create(*project, gc)
+		builder, err := s.builderFactory.Create(*p, gc)
 		if err != nil {
 			return nil, err
 		}
 
 		if builder == nil {
-			return project, nil
+			return p, nil
 		}
 
 		buildResult, err := builder.Build()
 		if err != nil {
-			s.handleBuildError(project, builder, logWriter, err)
-			return project, nil
+			s.handleBuildError(p, builder, logWriter, err)
+			return p, nil
 		}
 
 		err = builder.Publish()
 		if err != nil {
-			s.handleBuildError(project, builder, logWriter, err)
-			return project, nil
+			s.handleBuildError(p, builder, logWriter, err)
+			return p, nil
 		}
 
 		err = builder.SaveBuildResults(*buildResult)
 		if err != nil {
-			s.handleBuildError(project, builder, logWriter, err)
-			return project, nil
+			s.handleBuildError(p, builder, logWriter, err)
+			return p, nil
 		}
 
 		err = builder.CleanUp()
@@ -186,34 +187,34 @@ func (s *WorkspaceService) createBuild(project *workspace.Project, gc *gitprovid
 			logWriter.Write([]byte(fmt.Sprintf("Error cleaning up build: %s\n", err.Error())))
 		}
 
-		project.Image = buildResult.ImageName
-		project.User = buildResult.User
+		p.Image = buildResult.ImageName
+		p.User = buildResult.User
 
-		return project, nil
+		return p, nil
 	}
 
-	return project, nil
+	return p, nil
 }
 
-func (s *WorkspaceService) createProject(project *workspace.Project, target *provider.ProviderTarget, logWriter io.Writer) error {
-	logWriter.Write([]byte(fmt.Sprintf("Creating project %s\n", project.Name)))
+func (s *WorkspaceService) createProject(p *project.Project, target *provider.ProviderTarget, logWriter io.Writer) error {
+	logWriter.Write([]byte(fmt.Sprintf("Creating project %s\n", p.Name)))
 
-	cr, err := s.containerRegistryService.FindByImageName(project.Image)
+	cr, err := s.containerRegistryService.FindByImageName(p.Image)
 	if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
 		return err
 	}
 
-	gc, err := s.gitProviderService.GetConfigForUrl(project.Repository.Url)
+	gc, err := s.gitProviderService.GetConfigForUrl(p.Repository.Url)
 	if err != nil && !gitprovider.IsGitProviderNotFound(err) {
 		return err
 	}
 
-	err = s.provisioner.CreateProject(project, target, cr, gc)
+	err = s.provisioner.CreateProject(p, target, cr, gc)
 	if err != nil {
 		return err
 	}
 
-	logWriter.Write([]byte(fmt.Sprintf("Project %s created\n", project.Name)))
+	logWriter.Write([]byte(fmt.Sprintf("Project %s created\n", p.Name)))
 
 	return nil
 }
@@ -235,37 +236,37 @@ func (s *WorkspaceService) createWorkspace(ctx context.Context, ws *workspace.Wo
 		return nil, err
 	}
 
-	for i, project := range ws.Projects {
-		projectLogger := s.loggerFactory.CreateProjectLogger(ws.Id, project.Name, logs.LogSourceServer)
+	for i, p := range ws.Projects {
+		projectLogger := s.loggerFactory.CreateProjectLogger(ws.Id, p.Name, logs.LogSourceServer)
 		defer projectLogger.Close()
 
-		gc, _ := s.gitProviderService.GetConfigForUrl(project.Repository.Url)
+		gc, _ := s.gitProviderService.GetConfigForUrl(p.Repository.Url)
 
-		projectWithEnv := *project
-		projectWithEnv.EnvVars = workspace.GetProjectEnvVars(project, workspace.ProjectEnvVarParams{
+		projectWithEnv := *p
+		projectWithEnv.EnvVars = project.GetProjectEnvVars(p, project.ProjectEnvVarParams{
 			ApiUrl:    s.serverApiUrl,
 			ServerUrl: s.serverUrl,
 			ClientId:  telemetry.ClientId(ctx),
 		}, telemetry.TelemetryEnabled(ctx))
 
-		for k, v := range project.EnvVars {
+		for k, v := range p.EnvVars {
 			projectWithEnv.EnvVars[k] = v
 		}
 
 		var err error
 
-		project, err = s.createBuild(&projectWithEnv, gc, projectLogger)
+		p, err = s.createBuild(&projectWithEnv, gc, projectLogger)
 		if err != nil {
 			return nil, err
 		}
 
-		ws.Projects[i] = project
+		ws.Projects[i] = p
 		err = s.workspaceStore.Save(ws)
 		if err != nil {
 			return nil, err
 		}
 
-		err = s.createProject(project, target, projectLogger)
+		err = s.createProject(p, target, projectLogger)
 		if err != nil {
 			return nil, err
 		}
@@ -281,9 +282,9 @@ func (s *WorkspaceService) createWorkspace(ctx context.Context, ws *workspace.Wo
 	return ws, nil
 }
 
-func (s *WorkspaceService) handleBuildError(project *workspace.Project, builder build.IBuilder, logWriter io.Writer, err error) {
+func (s *WorkspaceService) handleBuildError(p *project.Project, builder build.IBuilder, logWriter io.Writer, err error) {
 	logWriter.Write([]byte("################################################\n"))
-	logWriter.Write([]byte(fmt.Sprintf("#### BUILD FAILED FOR PROJECT %s: %s\n", project.Name, err.Error())))
+	logWriter.Write([]byte(fmt.Sprintf("#### BUILD FAILED FOR PROJECT %s: %s\n", p.Name, err.Error())))
 	logWriter.Write([]byte("################################################\n"))
 
 	cleanupErr := builder.CleanUp()
@@ -292,6 +293,6 @@ func (s *WorkspaceService) handleBuildError(project *workspace.Project, builder 
 	}
 
 	logWriter.Write([]byte("Creating project with default image\n"))
-	project.Image = s.defaultProjectImage
-	project.User = s.defaultProjectUser
+	p.Image = s.defaultProjectImage
+	p.User = s.defaultProjectUser
 }

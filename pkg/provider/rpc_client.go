@@ -8,6 +8,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/provider/util"
 	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 )
 
 type ProviderRPCClient struct {
@@ -84,8 +85,8 @@ func (m *ProviderRPCClient) DestroyProject(projectReq *ProjectRequest) (*util.Em
 	return new(util.Empty), err
 }
 
-func (m *ProviderRPCClient) GetProjectInfo(projectReq *ProjectRequest) (*workspace.ProjectInfo, error) {
-	var resp workspace.ProjectInfo
+func (m *ProviderRPCClient) GetProjectInfo(projectReq *ProjectRequest) (*project.ProjectInfo, error) {
+	var resp project.ProjectInfo
 	err := m.client.Call("Plugin.GetProjectInfo", projectReq, &resp)
 	return &resp, err
 }

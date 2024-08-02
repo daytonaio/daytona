@@ -6,10 +6,13 @@ package conversion
 import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
+	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 )
 
-func ToProject(projectDTO *apiclient.Project) *workspace.Project {
+func ToProject(projectDTO *apiclient.Project) *project.Project {
 	if projectDTO == nil {
 		return nil
 	}
@@ -25,23 +28,36 @@ func ToProject(projectDTO *apiclient.Project) *workspace.Project {
 		Url:    *projectDTO.Repository.Url,
 	}
 
-	var projectState *workspace.ProjectState
+	var projectState *project.ProjectState
 	if projectDTO.State != nil {
 		uptime := *projectDTO.State.Uptime
-		projectState = &workspace.ProjectState{
+		projectState = &project.ProjectState{
 			UpdatedAt: *projectDTO.State.UpdatedAt,
 			Uptime:    uint64(uptime),
 			GitStatus: ToGitStatus(projectDTO.State.GitStatus),
 		}
 	}
 
-	project := &workspace.Project{
-		Name:        *projectDTO.Name,
+	var projectBuild *buildconfig.ProjectBuildConfig
+	if projectDTO.BuildConfig != nil {
+		projectBuild = &buildconfig.ProjectBuildConfig{}
+		if projectDTO.BuildConfig.Devcontainer != nil && projectDTO.BuildConfig.Devcontainer.FilePath != nil {
+			projectBuild.Devcontainer = &buildconfig.DevcontainerConfig{
+				FilePath: *projectDTO.BuildConfig.Devcontainer.FilePath,
+			}
+		}
+	}
+
+	project := &project.Project{
+		ProjectConfig: config.ProjectConfig{
+			Name:        *projectDTO.Name,
+			Image:       *projectDTO.Image,
+			User:        *projectDTO.User,
+			BuildConfig: projectBuild,
+			Repository:  repository,
+		},
 		Target:      *projectDTO.Target,
 		WorkspaceId: *projectDTO.WorkspaceId,
-		Image:       *projectDTO.Image,
-		User:        *projectDTO.User,
-		Repository:  repository,
 		State:       projectState,
 	}
 
@@ -53,16 +69,16 @@ func ToProject(projectDTO *apiclient.Project) *workspace.Project {
 	return project
 }
 
-func ToGitStatus(gitStatusDTO *apiclient.GitStatus) *workspace.GitStatus {
+func ToGitStatus(gitStatusDTO *apiclient.GitStatus) *project.GitStatus {
 	if gitStatusDTO == nil {
 		return nil
 	}
 
-	files := []*workspace.FileStatus{}
+	files := []*project.FileStatus{}
 	for _, fileDTO := range gitStatusDTO.FileStatus {
-		staging := workspace.Status(string(*fileDTO.Staging))
-		worktree := workspace.Status(string(*fileDTO.Worktree))
-		file := &workspace.FileStatus{
+		staging := project.Status(string(*fileDTO.Staging))
+		worktree := project.Status(string(*fileDTO.Worktree))
+		file := &project.FileStatus{
 			Name:     *fileDTO.Name,
 			Extra:    *fileDTO.Extra,
 			Staging:  staging,
@@ -71,13 +87,13 @@ func ToGitStatus(gitStatusDTO *apiclient.GitStatus) *workspace.GitStatus {
 		files = append(files, file)
 	}
 
-	return &workspace.GitStatus{
+	return &project.GitStatus{
 		CurrentBranch: *gitStatusDTO.CurrentBranch,
 		Files:         files,
 	}
 }
 
-func ToGitStatusDTO(gitStatus *workspace.GitStatus) *apiclient.GitStatus {
+func ToGitStatusDTO(gitStatus *project.GitStatus) *apiclient.GitStatus {
 	if gitStatus == nil {
 		return nil
 	}
@@ -99,4 +115,26 @@ func ToGitStatusDTO(gitStatus *workspace.GitStatus) *apiclient.GitStatus {
 		CurrentBranch: &gitStatus.CurrentBranch,
 		FileStatus:    fileStatusDTO,
 	}
+}
+
+func ToProjectConfig(createProjectConfigDto dto.CreateProjectConfigDTO) *config.ProjectConfig {
+	result := &config.ProjectConfig{
+		Name:        createProjectConfigDto.Name,
+		BuildConfig: createProjectConfigDto.BuildConfig,
+		EnvVars:     createProjectConfigDto.EnvVars,
+	}
+
+	if createProjectConfigDto.Source.Repository != nil {
+		result.Repository = createProjectConfigDto.Source.Repository
+	}
+
+	if createProjectConfigDto.Image != nil {
+		result.Image = *createProjectConfigDto.Image
+	}
+
+	if createProjectConfigDto.User != nil {
+		result.User = *createProjectConfigDto.User
+	}
+
+	return result
 }

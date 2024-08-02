@@ -10,17 +10,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 )
 
-func (d *DockerClient) StopProject(project *workspace.Project, logWriter io.Writer) error {
-	return d.stopProjectContainer(project, logWriter)
+func (d *DockerClient) StopProject(p *project.Project, logWriter io.Writer) error {
+	return d.stopProjectContainer(p, logWriter)
 }
 
-func (d *DockerClient) stopProjectContainer(project *workspace.Project, logWriter io.Writer) error {
-	containerName := d.GetProjectContainerName(project)
+func (d *DockerClient) stopProjectContainer(p *project.Project, logWriter io.Writer) error {
+	containerName := d.GetProjectContainerName(p)
 	ctx := context.Background()
 
 	err := d.apiClient.ContainerStop(ctx, containerName, container.StopOptions{})

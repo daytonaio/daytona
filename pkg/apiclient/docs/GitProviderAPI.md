@@ -6,6 +6,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**GetGitContext**](GitProviderAPI.md#GetGitContext) | **Get** /gitprovider/context/{gitUrl} | Get Git context
 [**GetGitProviderForUrl**](GitProviderAPI.md#GetGitProviderForUrl) | **Get** /gitprovider/for-url/{url} | Get Git provider
+[**GetGitProviderIdForUrl**](GitProviderAPI.md#GetGitProviderIdForUrl) | **Get** /gitprovider/id-for-url/{url} | Get Git provider ID
 [**GetGitUser**](GitProviderAPI.md#GetGitUser) | **Get** /gitprovider/{gitProviderId}/user | Get Git context
 [**GetNamespaces**](GitProviderAPI.md#GetNamespaces) | **Get** /gitprovider/{gitProviderId}/namespaces | Get Git namespaces
 [**GetRepoBranches**](GitProviderAPI.md#GetRepoBranches) | **Get** /gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/branches | Get Git repository branches
@@ -152,6 +153,76 @@ Name | Type | Description  | Notes
 
 - **Content-Type**: Not defined
 - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetGitProviderIdForUrl
+
+> string GetGitProviderIdForUrl(ctx, url).Execute()
+
+Get Git provider ID
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	url := "url_example" // string | Url
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.GitProviderAPI.GetGitProviderIdForUrl(context.Background(), url).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `GitProviderAPI.GetGitProviderIdForUrl``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetGitProviderIdForUrl`: string
+	fmt.Fprintf(os.Stdout, "Response from `GitProviderAPI.GetGitProviderIdForUrl`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**url** | **string** | Url | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetGitProviderIdForUrlRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+**string**
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: text/plain
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

@@ -61,7 +61,7 @@ type Model struct {
 	width  int
 }
 
-func GetRepositoryFromUrlInput(multiProject bool, apiClient *apiclient.APIClient, selectedRepos map[string]int) (*apiclient.GitRepository, error) {
+func GetRepositoryFromUrlInput(multiProject bool, projectOrder int, apiClient *apiclient.APIClient, selectedRepos map[string]int) (*apiclient.GitRepository, error) {
 	m := Model{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
@@ -69,7 +69,7 @@ func GetRepositoryFromUrlInput(multiProject bool, apiClient *apiclient.APIClient
 	title := "Git repository"
 
 	if multiProject {
-		title = "First project repository"
+		title = getOrderNumberString(projectOrder) + " project repository"
 	}
 
 	var initialRepoUrl string
@@ -104,50 +104,6 @@ func GetRepositoryFromUrlInput(multiProject bool, apiClient *apiclient.APIClient
 	selectedRepos[*repo.Url]++
 
 	return repo, nil
-}
-
-func RunAdditionalProjectRepoForm(index int, apiClient *apiclient.APIClient, selectedRepos map[string]int) (*apiclient.GitRepository, bool, error) {
-	m := Model{width: maxWidth}
-	m.lg = lipgloss.DefaultRenderer()
-	m.styles = NewStyles(m.lg)
-
-	var repoUrl string
-	var repo *apiclient.GitRepository
-
-	var addAnother bool
-
-	repositoryUrlInput :=
-		huh.NewInput().
-			Title(getOrderNumberString(index) + " project repository").
-			Value(&repoUrl).
-			Key(fmt.Sprintf("additionalRepo%d", index)).
-			Validate(func(str string) error {
-				var err error
-				repo, err = validateRepoUrl(str, apiClient)
-				return err
-			})
-
-	confirmInput :=
-		huh.NewConfirm().
-			Title("Add another project?").
-			Value(&addAnother)
-
-	m.form = huh.NewForm(
-		huh.NewGroup(repositoryUrlInput, confirmInput),
-	).
-		WithWidth(maxWidth).
-		WithShowHelp(false).
-		WithShowErrors(true).
-		WithTheme(views.GetCustomTheme())
-
-	err := m.form.Run()
-	if err != nil {
-		return nil, false, err
-	}
-
-	selectedRepos[*repo.Url]++
-
-	return repo, addAnother, nil
 }
 
 func RunAddMoreProjectsForm() (bool, error) {

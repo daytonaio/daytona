@@ -6,6 +6,7 @@ package provider
 import (
 	"github.com/daytonaio/daytona/pkg/provider/util"
 	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 )
 
 type ProviderRPCServer struct {
@@ -97,7 +98,7 @@ func (m *ProviderRPCServer) DestroyProject(arg *ProjectRequest, resp *util.Empty
 	return err
 }
 
-func (m *ProviderRPCServer) GetProjectInfo(arg *ProjectRequest, resp *workspace.ProjectInfo) error {
+func (m *ProviderRPCServer) GetProjectInfo(arg *ProjectRequest, resp *project.ProjectInfo) error {
 	info, err := m.Impl.GetProjectInfo(arg)
 	if err != nil {
 		return err

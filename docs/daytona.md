@@ -33,6 +33,7 @@ daytona [flags]
 * [daytona info](daytona_info.md)	 - Show workspace info
 * [daytona list](daytona_list.md)	 - List workspaces
 * [daytona profile](daytona_profile.md)	 - Manage profiles
+* [daytona project-config](daytona_project-config.md)	 - Manage project configs
 * [daytona provider](daytona_provider.md)	 - Manage providers
 * [daytona purge](daytona_purge.md)	 - Purges all Daytona data from the current device
 * [daytona serve](daytona_serve.md)	 - Run the server process in the current terminal session
