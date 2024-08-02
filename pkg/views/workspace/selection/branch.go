@@ -14,7 +14,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectBranchPrompt(branches []apiclient.GitBranch, additionalProjectOrder int, choiceChan chan<- string) {
+func selectBranchPrompt(branches []apiclient.GitBranch, additionalProjectOrder int, parentIdentifier string, choiceChan chan<- string) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
@@ -26,7 +26,7 @@ func selectBranchPrompt(branches []apiclient.GitBranch, additionalProjectOrder i
 		items = append(items, newItem)
 	}
 
-	l := views.GetStyledSelectList(items)
+	l := views.GetStyledSelectList(items, parentIdentifier)
 
 	title := "Choose a Branch"
 	if additionalProjectOrder > 0 {
@@ -49,10 +49,10 @@ func selectBranchPrompt(branches []apiclient.GitBranch, additionalProjectOrder i
 	}
 }
 
-func GetBranchFromPrompt(branches []apiclient.GitBranch, additionalProjectOrder int) *apiclient.GitBranch {
+func GetBranchFromPrompt(branches []apiclient.GitBranch, additionalProjectOrder int, parentIdentifier string) *apiclient.GitBranch {
 	choiceChan := make(chan string)
 
-	go selectBranchPrompt(branches, additionalProjectOrder, choiceChan)
+	go selectBranchPrompt(branches, additionalProjectOrder, parentIdentifier, choiceChan)
 
 	branchName := <-choiceChan
 
