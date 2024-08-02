@@ -71,6 +71,14 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 	}
 
 	for _, p := range gitProviders {
+		if p.Id == "aws-codecommit" && strings.Contains(repo.Url, ".amazonaws.com/") {
+			provider, err = s.GetGitProvider(p.Id)
+			if err == nil {
+				return "", err
+			}
+			providerFound = true
+			break
+		}
 		if strings.Contains(repo.Url, fmt.Sprintf("%s.", p.Id)) {
 			provider, err = s.GetGitProvider(p.Id)
 			if err == nil {
@@ -93,6 +101,7 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 			providerFound = true
 			break
 		}
+
 	}
 
 	if !providerFound {
@@ -145,6 +154,8 @@ func (s *GitProviderService) newGitProvider(config *gitprovider.GitProviderConfi
 		return gitprovider.NewGitnessGitProvider(config.Token, config.BaseApiUrl), nil
 	case "azure-devops":
 		return gitprovider.NewAzureDevOpsGitProvider(config.Token, *config.BaseApiUrl), nil
+	case "aws-codecommit":
+		return gitprovider.NewAwsCodeCommitGitProvider(*config.BaseApiUrl), nil
 	default:
 		return nil, errors.New("git provider not found")
 	}

@@ -65,19 +65,21 @@ require (
 	github.com/alexbrainman/sspi v0.0.0-20231016080023-1a75b4708caa // indirect
 	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be // indirect
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5 // indirect
-	github.com/aws/aws-sdk-go-v2 v1.21.0 // indirect
-	github.com/aws/aws-sdk-go-v2/config v1.18.42 // indirect
-	github.com/aws/aws-sdk-go-v2/credentials v1.13.40 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.13.11 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.41 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.35 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.43 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.35 // indirect
+	github.com/aws/aws-sdk-go-v2 v1.30.3 // indirect
+	github.com/aws/aws-sdk-go-v2/config v1.27.26 // indirect
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.26 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.11 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.15 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.15 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/iam v1.34.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.11.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.11.17 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.38.0 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.14.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.17.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sts v1.22.0 // indirect
-	github.com/aws/smithy-go v1.14.2 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.22.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.26.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.30.3 // indirect
+	github.com/aws/smithy-go v1.20.3 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bytedance/sonic v1.11.2 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
@@ -278,6 +280,8 @@ require (
 require (
 	github.com/alecthomas/chroma v0.10.0 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
+	github.com/aws/aws-sdk-go v1.54.19
+	github.com/aws/aws-sdk-go-v2/service/codecommit v1.24.3
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/catppuccin/go v0.2.0 // indirect
