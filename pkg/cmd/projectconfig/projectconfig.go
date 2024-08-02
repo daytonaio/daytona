@@ -4,6 +4,7 @@
 package projectconfig
 
 import (
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/spf13/cobra"
 )
 
@@ -11,6 +12,7 @@ var ProjectConfigCmd = &cobra.Command{
 	Use:     "project-config",
 	Short:   "Manage project configs",
 	Aliases: []string{"pc"},
+	GroupID: util.WORKSPACE_GROUP,
 }
 
 func init() {
