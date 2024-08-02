@@ -7,7 +7,7 @@
         "description": "Daytona Server API",
         "title": "Daytona Server API",
         "contact": {},
-        "version": "0.1.0"
+        "version": "0.24.0"
     },
     "host": "localhost:3986",
     "basePath": "/",
