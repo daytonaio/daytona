@@ -1,4 +1,4 @@
-// Copyright 2024 Daytona Platforms Inc.
+// Copyright 2024 demorepo Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 package gitprovider
@@ -124,4 +124,86 @@ func (g *AwsCodeCommitGitProviderTestSuite) TestParseStaticGitContext_Commit() {
 	httpContext, err := g.gitProvider.parseStaticGitContext(prUrl)
 	require.Nil(err)
 	require.Equal(prContext, httpContext)
+}
+
+func (g *AwsCodeCommitGitProviderTestSuite) TestGetUrlFromRepo_Bare() {
+	repo := &GitRepository{
+		Id:     "demorepo",
+		Name:   "demorepo",
+		Owner:  "demorepo",
+		Source: "ap-south-1.console.aws.amazon.com",
+		Url:    "https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/demorepo",
+	}
+
+	require := g.Require()
+
+	url := g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://ap-south-1.console.aws.amazon.com/codesuite/codecommit/repositories/demorepo/browse", url)
+}
+
+func (g *AwsCodeCommitGitProviderTestSuite) TestGetUrlFromRepo_Branch() {
+	repo := &GitRepository{
+		Id:     "demorepo",
+		Name:   "demorepo",
+		Owner:  "demorepo",
+		Source: "ap-south-1.console.aws.amazon.com",
+		Url:    "https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/demorepo",
+		Branch: &[]string{"test-branch"}[0],
+	}
+
+	require := g.Require()
+
+	url := g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://ap-south-1.console.aws.amazon.com/codesuite/codecommit/repositories/demorepo/browse/refs/heads/test-branch", url)
+}
+
+func (g *AwsCodeCommitGitProviderTestSuite) TestGetUrlFromRepo_Path() {
+	repo := &GitRepository{
+		Id:     "demorepo",
+		Name:   "demorepo",
+		Owner:  "demorepo",
+		Source: "ap-south-1.console.aws.amazon.com",
+		Url:    "https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/demorepo",
+		Branch: &[]string{"test-branch"}[0],
+		Path:   &[]string{"README.md"}[0],
+	}
+
+	require := g.Require()
+
+	url := g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://ap-south-1.console.aws.amazon.com/codesuite/codecommit/repositories/demorepo/browse/refs/heads/test-branch/--/README.md", url)
+
+	repo.Branch = nil
+
+	url = g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://ap-south-1.console.aws.amazon.com/codesuite/codecommit/repositories/demorepo/browse/refs/heads/main/--/README.md", url)
+}
+
+func (g *AwsCodeCommitGitProviderTestSuite) TestGetUrlFromRepo_Commit() {
+	repo := &GitRepository{
+		Id:     "demorepo",
+		Name:   "demorepo",
+		Owner:  "demorepo",
+		Source: "ap-south-1.console.aws.amazon.com",
+		Url:    "https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/demorepo",
+		Path:   &[]string{"README.md"}[0],
+		Sha:    "COMMIT_SHA",
+		Branch: &[]string{"COMMIT_SHA"}[0],
+	}
+
+	require := g.Require()
+
+	url := g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://ap-south-1.console.aws.amazon.com/codesuite/codecommit/repositories/demorepo/commit/COMMIT_SHA", url)
+
+	repo.Path = nil
+
+	url = g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://ap-south-1.console.aws.amazon.com/codesuite/codecommit/repositories/demorepo/commit/COMMIT_SHA", url)
 }

@@ -60,6 +60,39 @@ func (g *AwsCodeCommitGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 
 	return namespaces, nil
 }
+func (g *AwsCodeCommitGitProvider) GetUrlFromRepository(repository *GitRepository) string {
+	baseURL := ""
+	if strings.Contains(repository.Source, "git-codecommit") {
+		region := strings.Split(repository.Source, ".")[1]
+		baseURL = fmt.Sprintf("https://%s.console.aws.amazon.com/codesuite/codecommit/repositories/%s", region, repository.Name)
+	} else {
+		baseURL = fmt.Sprintf("https://%s/codesuite/codecommit/repositories/%s", repository.Source, repository.Name)
+	}
+
+	if repository.Sha != "" {
+		return fmt.Sprintf("%s/commit/%s", baseURL, repository.Sha)
+	}
+
+	if repository.PrNumber != nil {
+		return fmt.Sprintf("%s/pull-requests/%d", baseURL, *repository.PrNumber)
+	}
+
+	if repository.Branch != nil && *repository.Branch != "" {
+		branchURL := fmt.Sprintf("%s/browse/refs/heads/%s", baseURL, *repository.Branch)
+
+		if repository.Path != nil && *repository.Path != "" {
+			return fmt.Sprintf("%s/--/%s", branchURL, *repository.Path)
+		}
+		return branchURL
+	}
+
+	if repository.Path != nil && *repository.Path != "" {
+		return fmt.Sprintf("%s/browse/refs/heads/main/--/%s", baseURL, *repository.Path)
+	}
+
+	return fmt.Sprintf("%s/browse", baseURL)
+
+}
 
 func (g *AwsCodeCommitGitProvider) getApiClient() (*codecommit.Client, error) {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
