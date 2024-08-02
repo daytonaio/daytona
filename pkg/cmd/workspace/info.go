@@ -6,6 +6,7 @@ package workspace
 import (
 	"context"
 	"os/exec"
+	"strconv"
 	"strings"
 
 	"github.com/daytonaio/daytona/internal/util"
