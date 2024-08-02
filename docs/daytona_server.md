@@ -9,7 +9,7 @@ daytona server [flags]
 ### Options
 
 ```
-  -y, --yes   Execute purge without prompt
+  -y, --yes   Skip the confirmation prompt
 ```
 
 ### Options inherited from parent commands
