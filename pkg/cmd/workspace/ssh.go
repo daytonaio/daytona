@@ -5,11 +5,15 @@ package workspace
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/internal/util/apiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
+	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/ide"
+	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
 	log "github.com/sirupsen/logrus"
@@ -33,10 +37,10 @@ var SshCmd = &cobra.Command{
 		}
 
 		ctx := context.Background()
-		var workspaceId string
+		var workspace *apiclient.WorkspaceDTO
 		var projectName string
 
-		apiClient, err := apiclient.GetApiClient(&activeProfile)
+		apiClient, err := apiclient_util.GetApiClient(&activeProfile)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -44,24 +48,22 @@ var SshCmd = &cobra.Command{
 		if len(args) == 0 {
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
-				log.Fatal(apiclient.HandleErrorResponse(res, err))
+				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
 
-			workspace := selection.GetWorkspaceFromPrompt(workspaceList, "SSH Into")
+			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "SSH Into")
 			if workspace == nil {
 				return
 			}
-			workspaceId = *workspace.Id
 		} else {
-			workspace, err := apiclient.GetWorkspace(args[0])
+			workspace, err = apiclient_util.GetWorkspace(args[0])
 			if err != nil {
 				log.Fatal(err)
 			}
-			workspaceId = *workspace.Id
 		}
 
 		if len(args) == 0 || len(args) == 1 {
-			selectedProject, err := selectWorkspaceProject(workspaceId, &activeProfile)
+			selectedProject, err := selectWorkspaceProject(*workspace.Id, &activeProfile)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -75,7 +77,12 @@ var SshCmd = &cobra.Command{
 			projectName = args[1]
 		}
 
-		err = ide.OpenTerminalSsh(activeProfile, workspaceId, projectName)
+		if !workspace_util.IsProjectRunning(workspace, projectName) {
+			views.RenderInfoMessage(fmt.Sprintf("Project '%s' from workspace '%s' is not in running state", projectName, *workspace.Name))
+			return
+		}
+
+		err = ide.OpenTerminalSsh(activeProfile, *workspace.Id, projectName)
 		if err != nil {
 			log.Fatal(err)
 		}
