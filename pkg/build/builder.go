@@ -7,7 +7,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 )
 
 type BuilderConfig struct {
@@ -33,7 +33,7 @@ type IBuilder interface {
 
 type Builder struct {
 	id                string
-	project           workspace.Project
+	project           project.Project
 	gitProviderConfig *gitprovider.GitProviderConfig
 	hash              string
 	projectVolumePath string

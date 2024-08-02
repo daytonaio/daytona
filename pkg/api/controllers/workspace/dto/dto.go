@@ -3,9 +3,11 @@
 
 package dto
 
-import "github.com/daytonaio/daytona/pkg/workspace"
+import (
+	"github.com/daytonaio/daytona/pkg/workspace/project"
+)
 
 type SetProjectState struct {
-	Uptime    uint64              `json:"uptime"`
-	GitStatus workspace.GitStatus `json:"gitStatus"`
+	Uptime    uint64            `json:"uptime"`
+	GitStatus project.GitStatus `json:"gitStatus"`
 } // @name SetProjectState

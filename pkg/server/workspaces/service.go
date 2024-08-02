@@ -15,20 +15,22 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
+	"github.com/daytonaio/daytona/pkg/server/projectconfig"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 )
 
 type IWorkspaceService interface {
-	CreateWorkspace(ctx context.Context, req dto.CreateWorkspaceRequest) (*workspace.Workspace, error)
+	CreateWorkspace(ctx context.Context, req dto.CreateWorkspaceDTO) (*workspace.Workspace, error)
 	GetWorkspace(ctx context.Context, workspaceId string) (*dto.WorkspaceDTO, error)
 	GetWorkspaceLogReader(workspaceId string) (io.Reader, error)
 	GetProjectLogReader(workspaceId, projectName string) (io.Reader, error)
 	ListWorkspaces(verbose bool) ([]dto.WorkspaceDTO, error)
 	RemoveWorkspace(ctx context.Context, workspaceId string) error
 	ForceRemoveWorkspace(ctx context.Context, workspaceId string) error
-	SetProjectState(workspaceId string, projectName string, state *workspace.ProjectState) (*workspace.Workspace, error)
+	SetProjectState(workspaceId string, projectName string, state *project.ProjectState) (*workspace.Workspace, error)
 	StartProject(ctx context.Context, workspaceId string, projectName string) error
 	StartWorkspace(ctx context.Context, workspaceId string) error
 	StopProject(ctx context.Context, workspaceId string, projectName string) error
@@ -43,6 +45,7 @@ type WorkspaceServiceConfig struct {
 	WorkspaceStore           workspace.Store
 	TargetStore              targetStore
 	ContainerRegistryService containerregistries.IContainerRegistryService
+	ProjectConfigService     projectconfig.IProjectConfigService
 	ServerApiUrl             string
 	ServerUrl                string
 	Provisioner              provisioner.IProvisioner
@@ -60,6 +63,7 @@ func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 		workspaceStore:           config.WorkspaceStore,
 		targetStore:              config.TargetStore,
 		containerRegistryService: config.ContainerRegistryService,
+		projectConfigService:     config.ProjectConfigService,
 		serverApiUrl:             config.ServerApiUrl,
 		serverUrl:                config.ServerUrl,
 		defaultProjectImage:      config.DefaultProjectImage,
@@ -77,6 +81,7 @@ type WorkspaceService struct {
 	workspaceStore           workspace.Store
 	targetStore              targetStore
 	containerRegistryService containerregistries.IContainerRegistryService
+	projectConfigService     projectconfig.IProjectConfigService
 	provisioner              provisioner.IProvisioner
 	apiKeyService            apikeys.IApiKeyService
 	serverApiUrl             string
@@ -89,7 +94,7 @@ type WorkspaceService struct {
 	telemetryService         telemetry.TelemetryService
 }
 
-func (s *WorkspaceService) SetProjectState(workspaceId, projectName string, state *workspace.ProjectState) (*workspace.Workspace, error) {
+func (s *WorkspaceService) SetProjectState(workspaceId, projectName string, state *project.ProjectState) (*workspace.Workspace, error) {
 	ws, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
 		return nil, err

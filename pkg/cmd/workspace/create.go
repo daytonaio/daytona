@@ -7,9 +7,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
-	"os"
-	"strings"
 	"time"
 
 	"github.com/daytonaio/daytona/internal/cmd/tailscale"
@@ -25,7 +24,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/target"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/docker/docker/pkg/stringid"
 	"tailscale.com/tsnet"
 
@@ -42,9 +41,10 @@ var CreateCmd = &cobra.Command{
 	GroupID: util.WORKSPACE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
-		var projects []apiclient.CreateWorkspaceRequestProject
+		var projects []apiclient.CreateProjectConfigDTO
 		var workspaceName string
 		var existingWorkspaceNames []string
+		var existingProjectConfigName *string
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
@@ -88,13 +88,15 @@ var CreateCmd = &cobra.Command{
 				}
 			}
 		} else {
-			err = processCmdArguments(args, apiClient, &projects, ctx)
+			existingProjectConfigName, err = processCmdArgument(args[0], apiClient, &projects, ctx)
 			if err != nil {
 				log.Fatal(err)
 			}
 
+			initialSuggestion := *projects[0].Name
+
 			if workspaceName == "" {
-				workspaceName = workspace_util.GetSuggestedWorkspaceName(projects[0].Name, existingWorkspaceNames)
+				workspaceName = workspace_util.GetSuggestedName(initialSuggestion, existingWorkspaceNames)
 			}
 		}
 
@@ -105,17 +107,22 @@ var CreateCmd = &cobra.Command{
 
 		projectNames := []string{}
 		for i := range projects {
-			projects[i].EnvVars = getEnvVariables(&projects[i], profileData)
-			projectNames = append(projectNames, projects[i].Name)
+			projects[i].EnvVars = workspace_util.GetEnvVariables(&projects[i], profileData)
+			projectNames = append(projectNames, *projects[i].Name)
 		}
 
 		logs_view.CalculateLongestPrefixLength(projectNames)
 
-		requestSubmittedLog := logs.LogEntry{
+		logs_view.DisplayLogEntry(logs.LogEntry{
 			Msg: "Request submitted\n",
-		}
+		}, logs_view.WORKSPACE_INDEX)
 
-		logs_view.DisplayLogEntry(requestSubmittedLog, logs_view.WORKSPACE_INDEX)
+		if existingProjectConfigName != nil {
+			logs_view.DisplayLogEntry(logs.LogEntry{
+				ProjectName: *existingProjectConfigName,
+				Msg:         fmt.Sprintf("Using detected project config '%s'\n", *existingProjectConfigName),
+			}, logs_view.FIRST_PROJECT_INDEX)
+		}
 
 		target, err := getTarget(activeProfile.Name)
 		if err != nil {
@@ -138,7 +145,7 @@ var CreateCmd = &cobra.Command{
 
 		go apiclient_util.ReadWorkspaceLogs(activeProfile, id, projectNames, &stopLogs)
 
-		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(apiclient.CreateWorkspaceRequest{
+		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(apiclient.CreateWorkspaceDTO{
 			Id:       &id,
 			Name:     &workspaceName,
 			Target:   target.Name,
@@ -211,12 +218,14 @@ var targetNameFlag string
 var customImageFlag string
 var customImageUserFlag string
 var devcontainerPathFlag string
+var branchFlag string
 
 var builderFlag create.BuildChoice
 
 var manualFlag bool
 var multiProjectFlag bool
 var codeFlag bool
+var blankFlag bool
 
 func init() {
 	CreateCmd.Flags().StringVar(&nameFlag, "name", "", "Specify the workspace name")
@@ -225,12 +234,14 @@ func init() {
 	CreateCmd.Flags().StringVarP(&targetNameFlag, "target", "t", "", "Specify the target (e.g. 'local')")
 	CreateCmd.Flags().StringVar(&customImageFlag, "custom-image", "", "Create the project with the custom image passed as the flag value; Requires setting --custom-image-user flag as well")
 	CreateCmd.Flags().StringVar(&customImageUserFlag, "custom-image-user", "", "Create the project with the custom image user passed as the flag value; Requires setting --custom-image flag as well")
+	CreateCmd.Flags().StringVar(&branchFlag, "branch", "", "Specify the Git branch to use in the project")
 	CreateCmd.Flags().StringVar(&devcontainerPathFlag, "devcontainer-path", "", "Automatically assign the devcontainer builder with the path passed as the flag value")
 
 	CreateCmd.Flags().Var(&builderFlag, "builder", fmt.Sprintf("Specify the builder (currently %s/%s/%s)", create.AUTOMATIC, create.DEVCONTAINER, create.NONE))
 
-	CreateCmd.Flags().BoolVar(&manualFlag, "manual", false, "Manually enter the git repositories")
+	CreateCmd.Flags().BoolVar(&manualFlag, "manual", false, "Manually enter the Git repositories")
 	CreateCmd.Flags().BoolVar(&multiProjectFlag, "multi-project", false, "Workspace with multiple projects/repos")
+	CreateCmd.Flags().BoolVar(&blankFlag, "blank", false, "Create a blank project without using existing configurations")
 	CreateCmd.Flags().BoolVarP(&codeFlag, "code", "c", false, "Open the workspace in the IDE after workspace creation")
 
 	CreateCmd.MarkFlagsMutuallyExclusive("multi-project", "custom-image")
@@ -267,12 +278,17 @@ func getTarget(activeProfileName string) (*apiclient.ProviderTarget, error) {
 	return target.GetTargetFromPrompt(targets, activeProfileName, false)
 }
 
-func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, projects *[]apiclient.CreateWorkspaceRequestProject, workspaceNames []string, ctx context.Context) error {
+func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, projects *[]apiclient.CreateProjectConfigDTO, workspaceNames []string, ctx context.Context) error {
 	if builderFlag != "" || customImageFlag != "" || customImageUserFlag != "" || devcontainerPathFlag != "" {
-		return fmt.Errorf("Please provide repository URL in order to set up custom project details through CLI.")
+		return fmt.Errorf("please provide the repository URL in order to set up custom project details through CLI")
 	}
 
 	gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
+	if err != nil {
+		return apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	projectConfigs, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(ctx).Execute()
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
@@ -282,54 +298,104 @@ func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, pro
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	*workspaceName, *projects, err = workspace_util.GetCreationDataFromPrompt(workspace_util.CreateDataPromptConfig{
-		ExistingWorkspaceNames: workspaceNames,
-		UserGitProviders:       gitProviders,
-		Manual:                 manualFlag,
-		MultiProject:           multiProjectFlag,
-		ApiClient:              apiClient,
-		Defaults: &create.ProjectDefaults{
-			BuildChoice:          create.AUTOMATIC,
-			Image:                apiServerConfig.DefaultProjectImage,
-			ImageUser:            apiServerConfig.DefaultProjectUser,
-			DevcontainerFilePath: create.DEVCONTAINER_FILEPATH,
-		}},
+	projectDefaults := &create.ProjectConfigDefaults{
+		BuildChoice:          create.AUTOMATIC,
+		Image:                apiServerConfig.DefaultProjectImage,
+		ImageUser:            apiServerConfig.DefaultProjectUser,
+		DevcontainerFilePath: create.DEVCONTAINER_FILEPATH,
+	}
+
+	*projects, err = workspace_util.GetProjectsCreationDataFromPrompt(workspace_util.ProjectsDataPromptConfig{
+		UserGitProviders: gitProviders,
+		ProjectConfigs:   projectConfigs,
+		Manual:           manualFlag,
+		MultiProject:     multiProjectFlag,
+		BlankProject:     blankFlag,
+		ApiClient:        apiClient,
+		Defaults:         projectDefaults,
+	},
 	)
 	if err != nil {
 		return err
 	}
-	return nil
-}
 
-func processCmdArguments(args []string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateWorkspaceRequestProject, ctx context.Context) error {
-	if builderFlag != "" && builderFlag != create.DEVCONTAINER && devcontainerPathFlag != "" {
-		return fmt.Errorf("Can't set devcontainer file path if builder is not set to %s.", create.DEVCONTAINER)
+	initialSuggestion := *(*projects)[0].Name
+
+	suggestedName := workspace_util.GetSuggestedName(initialSuggestion, workspaceNames)
+
+	submissionFormConfig := create.SubmissionFormConfig{
+		ChosenName:    workspaceName,
+		SuggestedName: suggestedName,
+		ExistingNames: workspaceNames,
+		ProjectList:   projects,
+		NameLabel:     "Workspace",
+		Defaults:      projectDefaults,
 	}
 
-	repoUrl := args[0]
-
-	repoUrl, err := util.GetValidatedUrl(repoUrl)
+	err = create.RunSubmissionForm(submissionFormConfig)
 	if err != nil {
 		return err
 	}
 
+	return nil
+}
+
+func processCmdArgument(argument string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectConfigDTO, ctx context.Context) (*string, error) {
+	if builderFlag != "" && builderFlag != create.DEVCONTAINER && devcontainerPathFlag != "" {
+		return nil, fmt.Errorf("can't set devcontainer file path if builder is not set to %s", create.DEVCONTAINER)
+	}
+
+	var projectConfig *apiclient.ProjectConfig
+
+	repoUrl, err := util.GetValidatedUrl(argument)
+	if err == nil {
+		// The argument is a Git URL
+		return processGitURL(repoUrl, apiClient, projects, ctx)
+	}
+
+	// The argument is not a Git URL - try getting the project config
+	projectConfig, _, err = apiClient.ProjectConfigAPI.GetProjectConfig(ctx, argument).Execute()
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse the URL or fetch the project config for '%s'", argument)
+	}
+
+	return workspace_util.AddProjectFromConfig(projectConfig, apiClient, projects, branchFlag)
+}
+
+func processGitURL(repoUrl string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectConfigDTO, ctx context.Context) (*string, error) {
 	encodedURLParam := url.QueryEscape(repoUrl)
+
+	if !blankFlag {
+		projectConfig, res, err := apiClient.ProjectConfigAPI.GetDefaultProjectConfig(ctx, encodedURLParam).Execute()
+		if err == nil {
+			return workspace_util.AddProjectFromConfig(projectConfig, apiClient, projects, branchFlag)
+		}
+
+		if res.StatusCode != http.StatusNotFound {
+			return nil, apiclient_util.HandleErrorResponse(res, err)
+		}
+	}
+
 	repoResponse, res, err := apiClient.GitProviderAPI.GetGitContext(ctx, encodedURLParam).Execute()
 	if err != nil {
-		return apiclient_util.HandleErrorResponse(res, err)
+		return nil, apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	if branchFlag != "" {
+		repoResponse.Branch = &branchFlag
 	}
 
 	projectName, err := workspace_util.GetSanitizedProjectName(*repoResponse.Name)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	project := &apiclient.CreateWorkspaceRequestProject{
-		Name: projectName,
-		Source: &apiclient.CreateWorkspaceRequestProjectSource{
+	project := &apiclient.CreateProjectConfigDTO{
+		Name: &projectName,
+		Source: &apiclient.CreateProjectConfigSourceDTO{
 			Repository: repoResponse,
 		},
-		Build: &apiclient.ProjectBuild{},
+		BuildConfig: &apiclient.ProjectBuildConfig{},
 	}
 
 	if builderFlag == create.DEVCONTAINER || devcontainerPathFlag != "" {
@@ -337,14 +403,14 @@ func processCmdArguments(args []string, apiClient *apiclient.APIClient, projects
 		if devcontainerPathFlag != "" {
 			devcontainerFilePath = devcontainerPathFlag
 		}
-		project.Build.Devcontainer = &apiclient.ProjectBuildDevcontainer{
-			DevContainerFilePath: &devcontainerFilePath,
+		project.BuildConfig.Devcontainer = &apiclient.DevcontainerConfig{
+			FilePath: &devcontainerFilePath,
 		}
 
 	}
 
 	if builderFlag == create.NONE || customImageFlag != "" || customImageUserFlag != "" {
-		project.Build = nil
+		project.BuildConfig = nil
 		if customImageFlag != "" || customImageUserFlag != "" {
 			project.Image = &customImageFlag
 			project.User = &customImageUserFlag
@@ -353,12 +419,12 @@ func processCmdArguments(args []string, apiClient *apiclient.APIClient, projects
 
 	*projects = append(*projects, *project)
 
-	return nil
+	return nil, nil
 }
 
 func waitForDial(tsConn *tsnet.Server, workspaceId string, projectName string) error {
 	for {
-		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", workspace.GetProjectHostname(workspaceId, projectName), ssh_config.SSH_PORT))
+		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", project.GetProjectHostname(workspaceId, projectName), ssh_config.SSH_PORT))
 		if err == nil {
 			defer dialConn.Close()
 			break
@@ -367,40 +433,4 @@ func waitForDial(tsConn *tsnet.Server, workspaceId string, projectName string) e
 		time.Sleep(time.Second)
 	}
 	return nil
-}
-
-func getEnvVariables(project *apiclient.CreateWorkspaceRequestProject, profileData *apiclient.ProfileData) *map[string]string {
-	envVars := map[string]string{}
-
-	if profileData.EnvVars != nil {
-		for k, v := range *profileData.EnvVars {
-			if strings.HasPrefix(v, "$") {
-				env, ok := os.LookupEnv(v[1:])
-				if ok {
-					envVars[k] = env
-				} else {
-					log.Warnf("Environment variable %s not found", v[1:])
-				}
-			} else {
-				envVars[k] = v
-			}
-		}
-	}
-
-	if project.EnvVars != nil {
-		for k, v := range *project.EnvVars {
-			if strings.HasPrefix(v, "$") {
-				env, ok := os.LookupEnv(v[1:])
-				if ok {
-					envVars[k] = env
-				} else {
-					log.Warnf("Environment variable %s not found", v[1:])
-				}
-			} else {
-				envVars[k] = v
-			}
-		}
-	}
-
-	return &envVars
 }

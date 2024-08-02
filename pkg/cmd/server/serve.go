@@ -31,6 +31,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/daytonaio/daytona/pkg/server/profiledata"
+	"github.com/daytonaio/daytona/pkg/server/projectconfig"
 	"github.com/daytonaio/daytona/pkg/server/providertargets"
 	"github.com/daytonaio/daytona/pkg/server/registry"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
@@ -105,6 +106,10 @@ var ServeCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+		projectConfigStore, err := db.NewProjectConfigStore(dbConnection)
+		if err != nil {
+			log.Fatal(err)
+		}
 		gitProviderConfigStore, err := db.NewGitProviderConfigStore(dbConnection)
 		if err != nil {
 			log.Fatal(err)
@@ -139,6 +144,10 @@ var ServeCmd = &cobra.Command{
 
 		containerRegistryService := containerregistries.NewContainerRegistryService(containerregistries.ContainerRegistryServiceConfig{
 			Store: containerRegistryStore,
+		})
+
+		projectConfigService := projectconfig.NewConfigService(projectconfig.ProjectConfigServiceConfig{
+			ConfigStore: projectConfigStore,
 		})
 
 		var localContainerRegistry server.ILocalContainerRegistry
@@ -228,6 +237,7 @@ var ServeCmd = &cobra.Command{
 			ApiKeyService:            apiKeyService,
 			GitProviderService:       gitProviderService,
 			ContainerRegistryService: containerRegistryService,
+			ProjectConfigService:     projectConfigService,
 			ServerApiUrl:             util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 			ServerUrl:                headscaleUrl,
 			DefaultProjectImage:      c.DefaultProjectImage,
@@ -246,6 +256,7 @@ var ServeCmd = &cobra.Command{
 			TailscaleServer:          headscaleServer,
 			ProviderTargetService:    providerTargetService,
 			ContainerRegistryService: containerRegistryService,
+			ProjectConfigService:     projectConfigService,
 			LocalContainerRegistry:   localContainerRegistry,
 			ApiKeyService:            apiKeyService,
 			WorkspaceService:         workspaceService,

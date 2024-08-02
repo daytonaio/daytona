@@ -8,7 +8,7 @@ package mocks
 import (
 	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -26,11 +26,11 @@ type MockBuilderFactory struct {
 	mock.Mock
 }
 
-func (f *MockBuilderFactory) Create(p workspace.Project, gpc *gitprovider.GitProviderConfig) (build.IBuilder, error) {
+func (f *MockBuilderFactory) Create(p project.Project, gpc *gitprovider.GitProviderConfig) (build.IBuilder, error) {
 	return &mockBuilder{}, nil
 }
 
-func (f *MockBuilderFactory) CheckExistingBuild(p workspace.Project) (*build.BuildResult, error) {
+func (f *MockBuilderFactory) CheckExistingBuild(p project.Project) (*build.BuildResult, error) {
 	return MockBuildResults, nil
 }
 

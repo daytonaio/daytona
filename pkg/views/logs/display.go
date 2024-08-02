@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
+var FIRST_PROJECT_INDEX = 0
 var WORKSPACE_INDEX = -1
 var WORKSPACE_PREFIX = "WORKSPACE"
 

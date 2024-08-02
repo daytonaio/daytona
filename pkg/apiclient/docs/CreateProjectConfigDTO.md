@@ -1,177 +1,182 @@
-# CreateWorkspaceRequestProject
+# CreateProjectConfigDTO
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Build** | Pointer to [**ProjectBuild**](ProjectBuild.md) |  | [optional] 
+**BuildConfig** | Pointer to [**ProjectBuildConfig**](ProjectBuildConfig.md) |  | [optional] 
 **EnvVars** | Pointer to **map[string]string** |  | [optional] 
 **Image** | Pointer to **string** |  | [optional] 
-**Name** | **string** |  | 
-**Source** | Pointer to [**CreateWorkspaceRequestProjectSource**](CreateWorkspaceRequestProjectSource.md) |  | [optional] 
+**Name** | Pointer to **string** |  | [optional] 
+**Source** | Pointer to [**CreateProjectConfigSourceDTO**](CreateProjectConfigSourceDTO.md) |  | [optional] 
 **User** | Pointer to **string** |  | [optional] 
 
 ## Methods
 
-### NewCreateWorkspaceRequestProject
+### NewCreateProjectConfigDTO
 
-`func NewCreateWorkspaceRequestProject(name string, ) *CreateWorkspaceRequestProject`
+`func NewCreateProjectConfigDTO() *CreateProjectConfigDTO`
 
-NewCreateWorkspaceRequestProject instantiates a new CreateWorkspaceRequestProject object
+NewCreateProjectConfigDTO instantiates a new CreateProjectConfigDTO object
 This constructor will assign default values to properties that have it defined,
 and makes sure properties required by API are set, but the set of arguments
 will change when the set of required properties is changed
 
-### NewCreateWorkspaceRequestProjectWithDefaults
+### NewCreateProjectConfigDTOWithDefaults
 
-`func NewCreateWorkspaceRequestProjectWithDefaults() *CreateWorkspaceRequestProject`
+`func NewCreateProjectConfigDTOWithDefaults() *CreateProjectConfigDTO`
 
-NewCreateWorkspaceRequestProjectWithDefaults instantiates a new CreateWorkspaceRequestProject object
+NewCreateProjectConfigDTOWithDefaults instantiates a new CreateProjectConfigDTO object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
-### GetBuild
+### GetBuildConfig
 
-`func (o *CreateWorkspaceRequestProject) GetBuild() ProjectBuild`
+`func (o *CreateProjectConfigDTO) GetBuildConfig() ProjectBuildConfig`
 
-GetBuild returns the Build field if non-nil, zero value otherwise.
+GetBuildConfig returns the BuildConfig field if non-nil, zero value otherwise.
 
-### GetBuildOk
+### GetBuildConfigOk
 
-`func (o *CreateWorkspaceRequestProject) GetBuildOk() (*ProjectBuild, bool)`
+`func (o *CreateProjectConfigDTO) GetBuildConfigOk() (*ProjectBuildConfig, bool)`
 
-GetBuildOk returns a tuple with the Build field if it's non-nil, zero value otherwise
+GetBuildConfigOk returns a tuple with the BuildConfig field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetBuild
+### SetBuildConfig
 
-`func (o *CreateWorkspaceRequestProject) SetBuild(v ProjectBuild)`
+`func (o *CreateProjectConfigDTO) SetBuildConfig(v ProjectBuildConfig)`
 
-SetBuild sets Build field to given value.
+SetBuildConfig sets BuildConfig field to given value.
 
-### HasBuild
+### HasBuildConfig
 
-`func (o *CreateWorkspaceRequestProject) HasBuild() bool`
+`func (o *CreateProjectConfigDTO) HasBuildConfig() bool`
 
-HasBuild returns a boolean if a field has been set.
+HasBuildConfig returns a boolean if a field has been set.
 
 ### GetEnvVars
 
-`func (o *CreateWorkspaceRequestProject) GetEnvVars() map[string]string`
+`func (o *CreateProjectConfigDTO) GetEnvVars() map[string]string`
 
 GetEnvVars returns the EnvVars field if non-nil, zero value otherwise.
 
 ### GetEnvVarsOk
 
-`func (o *CreateWorkspaceRequestProject) GetEnvVarsOk() (*map[string]string, bool)`
+`func (o *CreateProjectConfigDTO) GetEnvVarsOk() (*map[string]string, bool)`
 
 GetEnvVarsOk returns a tuple with the EnvVars field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetEnvVars
 
-`func (o *CreateWorkspaceRequestProject) SetEnvVars(v map[string]string)`
+`func (o *CreateProjectConfigDTO) SetEnvVars(v map[string]string)`
 
 SetEnvVars sets EnvVars field to given value.
 
 ### HasEnvVars
 
-`func (o *CreateWorkspaceRequestProject) HasEnvVars() bool`
+`func (o *CreateProjectConfigDTO) HasEnvVars() bool`
 
 HasEnvVars returns a boolean if a field has been set.
 
 ### GetImage
 
-`func (o *CreateWorkspaceRequestProject) GetImage() string`
+`func (o *CreateProjectConfigDTO) GetImage() string`
 
 GetImage returns the Image field if non-nil, zero value otherwise.
 
 ### GetImageOk
 
-`func (o *CreateWorkspaceRequestProject) GetImageOk() (*string, bool)`
+`func (o *CreateProjectConfigDTO) GetImageOk() (*string, bool)`
 
 GetImageOk returns a tuple with the Image field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetImage
 
-`func (o *CreateWorkspaceRequestProject) SetImage(v string)`
+`func (o *CreateProjectConfigDTO) SetImage(v string)`
 
 SetImage sets Image field to given value.
 
 ### HasImage
 
-`func (o *CreateWorkspaceRequestProject) HasImage() bool`
+`func (o *CreateProjectConfigDTO) HasImage() bool`
 
 HasImage returns a boolean if a field has been set.
 
 ### GetName
 
-`func (o *CreateWorkspaceRequestProject) GetName() string`
+`func (o *CreateProjectConfigDTO) GetName() string`
 
 GetName returns the Name field if non-nil, zero value otherwise.
 
 ### GetNameOk
 
-`func (o *CreateWorkspaceRequestProject) GetNameOk() (*string, bool)`
+`func (o *CreateProjectConfigDTO) GetNameOk() (*string, bool)`
 
 GetNameOk returns a tuple with the Name field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetName
 
-`func (o *CreateWorkspaceRequestProject) SetName(v string)`
+`func (o *CreateProjectConfigDTO) SetName(v string)`
 
 SetName sets Name field to given value.
 
+### HasName
+
+`func (o *CreateProjectConfigDTO) HasName() bool`
+
+HasName returns a boolean if a field has been set.
 
 ### GetSource
 
-`func (o *CreateWorkspaceRequestProject) GetSource() CreateWorkspaceRequestProjectSource`
+`func (o *CreateProjectConfigDTO) GetSource() CreateProjectConfigSourceDTO`
 
 GetSource returns the Source field if non-nil, zero value otherwise.
 
 ### GetSourceOk
 
-`func (o *CreateWorkspaceRequestProject) GetSourceOk() (*CreateWorkspaceRequestProjectSource, bool)`
+`func (o *CreateProjectConfigDTO) GetSourceOk() (*CreateProjectConfigSourceDTO, bool)`
 
 GetSourceOk returns a tuple with the Source field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetSource
 
-`func (o *CreateWorkspaceRequestProject) SetSource(v CreateWorkspaceRequestProjectSource)`
+`func (o *CreateProjectConfigDTO) SetSource(v CreateProjectConfigSourceDTO)`
 
 SetSource sets Source field to given value.
 
 ### HasSource
 
-`func (o *CreateWorkspaceRequestProject) HasSource() bool`
+`func (o *CreateProjectConfigDTO) HasSource() bool`
 
 HasSource returns a boolean if a field has been set.
 
 ### GetUser
 
-`func (o *CreateWorkspaceRequestProject) GetUser() string`
+`func (o *CreateProjectConfigDTO) GetUser() string`
 
 GetUser returns the User field if non-nil, zero value otherwise.
 
 ### GetUserOk
 
-`func (o *CreateWorkspaceRequestProject) GetUserOk() (*string, bool)`
+`func (o *CreateProjectConfigDTO) GetUserOk() (*string, bool)`
 
 GetUserOk returns a tuple with the User field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetUser
 
-`func (o *CreateWorkspaceRequestProject) SetUser(v string)`
+`func (o *CreateProjectConfigDTO) SetUser(v string)`
 
 SetUser sets User field to given value.
 
 ### HasUser
 
-`func (o *CreateWorkspaceRequestProject) HasUser() bool`
+`func (o *CreateProjectConfigDTO) HasUser() bool`
 
 HasUser returns a boolean if a field has been set.
 

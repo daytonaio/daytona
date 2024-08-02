@@ -19,7 +19,7 @@ import (
 var InfoCmd = &cobra.Command{
 	Use:     "info [WORKSPACE]",
 	Short:   "Show workspace info",
-	Aliases: []string{"view"},
+	Aliases: []string{"view", "inspect"},
 	Args:    cobra.RangeArgs(0, 1),
 	GroupID: util.WORKSPACE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {

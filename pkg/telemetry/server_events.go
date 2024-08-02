@@ -53,9 +53,9 @@ func NewWorkspaceEventProps(ctx context.Context, workspace *workspace.Workspace,
 			if project.Repository != nil && isPublic(project.Repository.Url) {
 				publicRepos = append(publicRepos, project.Repository.Url)
 			}
-			if project.Build == nil {
+			if project.BuildConfig == nil {
 				builders["none"]++
-			} else if project.Build.Devcontainer != nil {
+			} else if project.BuildConfig.Devcontainer != nil {
 				builders["devcontainer"]++
 			} else {
 				builders["automatic"]++

@@ -15,7 +15,7 @@ type IGitProviderService interface {
 	GetConfig(id string) (*gitprovider.GitProviderConfig, error)
 	GetConfigForUrl(url string) (*gitprovider.GitProviderConfig, error)
 	GetGitProvider(id string) (gitprovider.GitProvider, error)
-	GetGitProviderForUrl(url string) (gitprovider.GitProvider, error)
+	GetGitProviderForUrl(url string) (gitprovider.GitProvider, string, error)
 	GetGitUser(gitProviderId string) (*gitprovider.GitUser, error)
 	GetNamespaces(gitProviderId string) ([]*gitprovider.GitNamespace, error)
 	GetRepoBranches(gitProviderId string, namespaceId string, repositoryId string) ([]*gitprovider.GitBranch, error)
@@ -46,7 +46,17 @@ var codebergUrl = "https://codeberg.org"
 func (s *GitProviderService) GetGitProvider(id string) (gitprovider.GitProvider, error) {
 	providerConfig, err := s.configStore.Find(id)
 	if err != nil {
-		return nil, err
+		// If config is not defined, use the default (public) client without token
+		if gitprovider.IsGitProviderNotFound(err) {
+			providerConfig = &gitprovider.GitProviderConfig{
+				Id:         id,
+				Username:   "",
+				Token:      "",
+				BaseApiUrl: nil,
+			}
+		} else {
+			return nil, err
+		}
 	}
 
 	return s.newGitProvider(providerConfig)
