@@ -73,33 +73,32 @@ func GetStyledSelectList(items []list.Item) list.Model {
 }
 
 func GetCustomTheme() *huh.Theme {
-	newTheme := huh.ThemeCharm()
+	t := huh.ThemeCharm()
 
-	b := &newTheme.Blurred
-	b.FocusedButton.Background(Green)
-	b.FocusedButton.Bold(true)
-	b.TextInput.Prompt.Foreground(Light)
-	b.TextInput.Cursor.Foreground(Light)
-	b.SelectSelector.Foreground(Green)
-	b.Title.Foreground(Gray).Bold(true)
-	b.Description.Foreground(LightGray)
+	t.Blurred.FocusedButton = t.Blurred.FocusedButton.Background(Green)
+	t.Blurred.FocusedButton = t.Blurred.FocusedButton.Bold(true)
+	t.Blurred.TextInput.Prompt = t.Blurred.TextInput.Prompt.Foreground(Light)
+	t.Blurred.TextInput.Cursor = t.Blurred.TextInput.Cursor.Foreground(Light)
+	t.Blurred.SelectSelector = t.Blurred.SelectSelector.Foreground(Green)
+	t.Blurred.Title = t.Blurred.Title.Foreground(Gray).Bold(true)
+	t.Blurred.Description = t.Blurred.Description.Foreground(LightGray)
 
-	f := &newTheme.Focused
-	f.Title.Foreground(Green).Bold(true)
-	f.Description.Foreground(LightGray).Bold(true)
-	f.FocusedButton.Bold(true)
-	f.FocusedButton.Background(Green)
-	f.TextInput.Prompt.Foreground(Green)
-	f.TextInput.Cursor.Foreground(Light)
-	f.SelectSelector.Foreground(Green)
-	f.SelectedOption.Foreground(Green)
+	t.Focused.Title = t.Focused.Title.Foreground(Green).Bold(true)
+	t.Focused.Description = t.Focused.Description.Foreground(LightGray).Bold(true)
+	t.Focused.FocusedButton = t.Focused.FocusedButton.Bold(true)
+	t.Focused.FocusedButton = t.Focused.FocusedButton.Background(Green)
+	t.Focused.TextInput.Prompt = t.Focused.TextInput.Prompt.Foreground(Green)
+	t.Focused.TextInput.Cursor = t.Focused.TextInput.Cursor.Foreground(Light)
+	t.Focused.SelectSelector = t.Focused.SelectSelector.Foreground(Green)
+	t.Focused.SelectedOption = t.Focused.SelectedOption.Foreground(Green)
 
-	f.Base.BorderForeground(Green)
+	t.Focused.Base = t.Focused.Base.BorderForeground(Green)
+	t.Focused.Base = t.Focused.Base.BorderBottomForeground(Green)
 
-	f.Base.MarginTop(DefaultLayoutMarginTop)
-	b.Base.MarginTop(DefaultLayoutMarginTop)
+	t.Focused.Base = t.Focused.Base.MarginTop(DefaultLayoutMarginTop)
+	t.Blurred.Base = t.Blurred.Base.MarginTop(DefaultLayoutMarginTop)
 
-	return newTheme
+	return t
 }
 
 func GetInitialCommandTheme() *huh.Theme {
