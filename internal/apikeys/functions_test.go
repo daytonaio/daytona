@@ -78,18 +78,13 @@ func TestEqualsKeyHashFromApi(t *testing.T) {
 			ExpectedKeyHash:    "nonemptyhash",
 			ExpectedComparison: false,
 		},
-		// {
-		// 	Name:               "Case 3 - Valid key and correct hash",
-		// 	Key:                "daytona_api1",
-		// 	ExpectedKeyHash:    HashKey("daytona_api1"), 
-		// 	ExpectedComparison: true,
-		// },
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.Name, func(t *testing.T) {
 			comparisonResult := EqualsKeyHashFromApi(tc.Key, tc.ExpectedKeyHash)
-			assert.Equal(t, tc.ExpectedComparison, comparisonResult)
+			assert.Equal(t, tc.ExpectedComparison, comparisonResult,"expected comparism should match the actual comparism")
+			assert.NotNil(t, comparisonResult, "actual comparison shouldn't be nil")
 		})
 	}
 }
