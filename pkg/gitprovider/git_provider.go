@@ -37,6 +37,7 @@ type GitProvider interface {
 	GetLastCommitSha(staticContext *StaticGitContext) (string, error)
 	getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error)
 	parseStaticGitContext(repoUrl string) (*StaticGitContext, error)
+	GetBranchNamebyCommit(staticContext *StaticGitContext) (string, error)
 }
 
 type AbstractGitProvider struct {

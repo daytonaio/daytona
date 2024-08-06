@@ -90,13 +90,6 @@ func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions) error 
 		ProjectDir: fmt.Sprintf("/workdir/%s-%s", opts.Project.WorkspaceId, opts.Project.Name),
 	}
 
-	branchName, err := gitService.FindBranchByCommit(opts.Project, auth)
-	if err != nil {
-		return err
-	}
-
-	opts.Project.Repository.Branch = &branchName
-
 	cloneCmd := gitService.CloneRepositoryCmd(opts.Project, auth)
 
 	c, err := d.apiClient.ContainerCreate(ctx, &container.Config{
