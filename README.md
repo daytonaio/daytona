@@ -1,3 +1,5 @@
+<br>
+
 <div align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://github.com/daytonaio/daytona/raw/main/assets/images/Daytona-logotype-white.png">
@@ -5,14 +7,16 @@
   </picture>
 </div>
 
-<br><br>
+<br>
 
 <div align="center">
 
+[![Documentation](https://img.shields.io/github/v/release/daytonaio/docs?label=Docs&color=23cc71)](https://www.daytona.io/docs)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue)](#license)
 [![Go Report Card](https://goreportcard.com/badge/github.com/daytonaio/daytona)](https://goreportcard.com/report/github.com/daytonaio/daytona)
 [![Issues - daytona](https://img.shields.io/github/issues/daytonaio/daytona)](https://github.com/daytonaio/daytona/issues)
 ![GitHub Release](https://img.shields.io/github/v/release/daytonaio/daytona)
+<br>
 [![Open Bounties](https://img.shields.io/endpoint?url=https%3A%2F%2Fconsole.algora.io%2Fapi%2Fshields%2Fdaytonaio%2Fbounties%3Fstatus%3Dopen)](https://console.algora.io/org/daytonaio/bounties?status=open)
 [![Rewarded Bounties](https://img.shields.io/endpoint?url=https%3A%2F%2Fconsole.algora.io%2Fapi%2Fshields%2Fdaytonaio%2Fbounties%3Fstatus%3Dcompleted)](https://console.algora.io/org/daytonaio/bounties?status=completed)
 
@@ -32,6 +36,8 @@ Set up a development environment on any infrastructure, with a single command.
 
 
 <p align="center">
+    <a href="https://www.daytona.io/docs">Documentation</a>
+    ·
     <a href="https://github.com/daytonaio/daytona/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=%F0%9F%90%9B+Bug+Report%3A+">Report Bug</a>
     ·
     <a href="https://github.com/daytonaio/daytona/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.md&title=%F0%9F%9A%80+Feature%3A+">Request Feature</a>
@@ -59,7 +65,7 @@ Set up a development environment on any infrastructure, with a single command.
 ## Quick Start
 ### Mac / Linux
 ```bash
-(curl -sf -L https://download.daytona.io/daytona/install.sh | sudo bash) && daytona server -y && daytona
+curl -sfL https://download.daytona.io/daytona/install.sh | sudo bash && daytona server -y && daytona
 ```
 ### Windows
 <details>
