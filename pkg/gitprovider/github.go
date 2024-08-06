@@ -5,6 +5,7 @@ package gitprovider
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
@@ -278,6 +279,35 @@ func (g *GitHubGitProvider) getApiClient() *github.Client {
 	}
 
 	return client
+}
+
+func (g *GitHubGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
+	if staticContext.Sha == nil || *staticContext.Sha == "" {
+		return *staticContext.Sha, nil
+	}
+
+	client := g.getApiClient()
+
+	branches, _, err := client.Repositories.ListBranches(context.Background(), staticContext.Owner, staticContext.Name, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to list branches: %v", err)
+	}
+
+	var branchName string
+	for _, branch := range branches {
+		branchCommitSHA := branch.GetCommit().GetSHA()
+
+		if branchCommitSHA == *staticContext.Sha {
+			branchName = branch.GetName()
+			break
+		}
+	}
+
+	if branchName != "" {
+		return "", nil
+	}
+
+	return branchName, nil
 }
 
 func (g *GitHubGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
