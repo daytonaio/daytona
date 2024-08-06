@@ -3,7 +3,7 @@ info:
   contact: {}
   description: Daytona Server API
   title: Daytona Server API
-  version: 0.24.0
+  version: v0.0.0-dev
 servers:
 - url: http://localhost:3986/
 security:
