@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //	@title			Daytona Server API
-//	@version		0.24.0
+//	@version		v0.0.0-dev
 //	@description	Daytona Server API
 
 //	@host		localhost:3986
