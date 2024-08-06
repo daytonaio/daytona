@@ -32,7 +32,10 @@ var configureCmd = &cobra.Command{
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		apiServerConfig = server_view.ConfigurationForm(apiServerConfig, containerRegistries)
+		apiServerConfig, err = server_view.ConfigurationForm(apiServerConfig, containerRegistries)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		_, res, err = apiClient.ServerAPI.SetConfig(context.Background()).Config(*apiServerConfig).Execute()
 		if err != nil {
