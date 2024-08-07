@@ -5,7 +5,6 @@ package headscale
 
 import (
 	"os"
-	"path/filepath"
 
 	"github.com/juanfont/headscale/hscontrol"
 )
@@ -15,6 +14,7 @@ type HeadscaleServerConfig struct {
 	FrpsDomain    string
 	FrpsProtocol  string
 	HeadscalePort uint32
+	ConfigDir     string
 }
 
 func NewHeadscaleServer(config *HeadscaleServerConfig) *HeadscaleServer {
@@ -23,6 +23,7 @@ func NewHeadscaleServer(config *HeadscaleServerConfig) *HeadscaleServer {
 		frpsDomain:    config.FrpsDomain,
 		frpsProtocol:  config.FrpsProtocol,
 		headscalePort: config.HeadscalePort,
+		configDir:     config.ConfigDir,
 	}
 }
 
@@ -31,15 +32,11 @@ type HeadscaleServer struct {
 	frpsDomain    string
 	frpsProtocol  string
 	headscalePort uint32
+	configDir     string
 }
 
 func (s *HeadscaleServer) Init() error {
-	headscaleConfigDir, err := s.getHeadscaleConfigDir()
-	if err != nil {
-		return err
-	}
-
-	return os.MkdirAll(headscaleConfigDir, 0700)
+	return os.MkdirAll(s.configDir, 0700)
 }
 
 func (s *HeadscaleServer) Start() error {
@@ -54,12 +51,4 @@ func (s *HeadscaleServer) Start() error {
 	}
 
 	return app.Serve()
-}
-
-func (s *HeadscaleServer) getHeadscaleConfigDir() (string, error) {
-	userConfigDir, err := os.UserConfigDir()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(userConfigDir, "daytona", "server", "headscale"), nil
 }

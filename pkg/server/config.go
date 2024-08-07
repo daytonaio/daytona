@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/google/uuid"
 )
 
@@ -93,12 +94,12 @@ func Save(c Config) error {
 }
 
 func GetConfigDir() (string, error) {
-	userConfigDir, err := os.UserConfigDir()
+	configDir, err := config.GetConfigDir()
 	if err != nil {
 		return "", err
 	}
 
-	return filepath.Join(userConfigDir, "daytona", "server"), nil
+	return filepath.Join(configDir, "server"), nil
 }
 
 func GetWorkspaceLogsDir() (string, error) {
