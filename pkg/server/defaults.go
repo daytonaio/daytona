@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/google/uuid"
 
 	log "github.com/sirupsen/logrus"
@@ -164,12 +165,12 @@ func parsePort(port string) (uint32, error) {
 }
 
 func getDefaultProvidersDir() (string, error) {
-	userConfigDir, err := os.UserConfigDir()
+	configDir, err := config.GetConfigDir()
 	if err != nil {
 		return "", err
 	}
 
-	return filepath.Join(userConfigDir, "daytona", "providers"), nil
+	return filepath.Join(configDir, "providers"), nil
 }
 
 func getDefaultLogFilePath() (string, error) {

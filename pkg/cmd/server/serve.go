@@ -136,6 +136,7 @@ var ServeCmd = &cobra.Command{
 			FrpsDomain:    c.Frps.Domain,
 			FrpsProtocol:  c.Frps.Protocol,
 			HeadscalePort: c.HeadscalePort,
+			ConfigDir:     filepath.Join(configDir, "headscale"),
 		})
 		err = headscaleServer.Init()
 		if err != nil {
@@ -332,19 +333,17 @@ func printServerStartedMessage(c *server.Config, runAsDaemon bool) {
 }
 
 func getDbPath() (string, error) {
-	userConfigDir, err := os.UserConfigDir()
+	configDir, err := config.GetConfigDir()
 	if err != nil {
 		return "", err
 	}
 
-	dir := filepath.Join(userConfigDir, "daytona")
-
-	err = os.MkdirAll(dir, 0755)
+	err = os.MkdirAll(configDir, 0755)
 	if err != nil {
 		return "", err
 	}
 
-	return filepath.Join(dir, "db"), nil
+	return filepath.Join(configDir, "db"), nil
 }
 
 func setDefaultConfig(server *server.Server, apiPort uint32) error {
