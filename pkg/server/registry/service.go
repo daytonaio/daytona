@@ -16,6 +16,8 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
+const registryContainerName = "daytona-registry"
+
 type LocalContainerRegistryConfig struct {
 	DataPath string
 	Port     uint32
@@ -105,7 +107,7 @@ func (s *LocalContainerRegistry) Start() error {
 				},
 			},
 		},
-	}, nil, nil, "daytona-registry")
+	}, nil, nil, registryContainerName)
 	if err != nil {
 		return err
 	}
@@ -115,6 +117,19 @@ func (s *LocalContainerRegistry) Start() error {
 	}
 
 	return nil
+}
+
+func (s *LocalContainerRegistry) Stop() error {
+	return RemoveRegistryContainer()
+}
+
+func (s *LocalContainerRegistry) Purge() error {
+	err := s.Stop()
+	if err != nil {
+		return err
+	}
+
+	return os.RemoveAll(s.dataPath)
 }
 
 func RemoveRegistryContainer() error {
@@ -132,7 +147,7 @@ func RemoveRegistryContainer() error {
 
 	for _, c := range containers {
 		for _, name := range c.Names {
-			if name == "/daytona-registry" {
+			if name == fmt.Sprintf("/%s", registryContainerName) {
 				removeOptions := container.RemoveOptions{
 					Force: true,
 				}
