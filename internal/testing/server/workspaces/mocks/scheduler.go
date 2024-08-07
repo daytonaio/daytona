@@ -9,19 +9,19 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type MockSchedulerPlugin struct {
+type MockScheduler struct {
 	mock.Mock
 }
 
-func (s *MockSchedulerPlugin) Start() {
+func (s *MockScheduler) Start() {
 	s.Called()
 }
 
-func (s *MockSchedulerPlugin) Stop() {
+func (s *MockScheduler) Stop() {
 	s.Called()
 }
 
-func (s *MockSchedulerPlugin) AddFunc(spec string, cmd func()) error {
+func (s *MockScheduler) AddFunc(spec string, cmd func()) error {
 	args := s.Called(spec, cmd)
 	return args.Error(0)
 }

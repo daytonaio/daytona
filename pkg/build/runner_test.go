@@ -17,8 +17,8 @@ import (
 type BuildRunnerTestSuite struct {
 	suite.Suite
 	mockBuilderFactory mocks.MockBuilderFactory
-	mockBuilder        mocks.MockBuilderPlugin
-	mockScheduler      mocks.MockSchedulerPlugin
+	mockBuilder        mocks.MockBuilder
+	mockScheduler      mocks.MockScheduler
 	loggerFactory      logs.LoggerFactory
 	buildStore         build.Store
 	Runner             build.BuildRunner
@@ -32,8 +32,8 @@ func TestBuildRunner(t *testing.T) {
 	s := NewBuildRunnerTestSuite()
 
 	s.mockBuilderFactory = mocks.MockBuilderFactory{}
-	s.mockBuilder = mocks.MockBuilderPlugin{}
-	s.mockScheduler = mocks.MockSchedulerPlugin{}
+	s.mockBuilder = mocks.MockBuilder{}
+	s.mockScheduler = mocks.MockScheduler{}
 
 	s.buildStore = t_build.NewInMemoryBuildStore()
 	s.loggerFactory = logs.NewLoggerFactory(t.TempDir())
@@ -81,25 +81,22 @@ func (s *BuildRunnerTestSuite) TestStop() {
 // TODO FIXME: Need to figure out how to test the RunBuildProcess goroutine
 func (s *BuildRunnerTestSuite) TestRun() {
 	s.T().Skip("Need to figure out how to test the runBuildProcess goroutine")
-
-	s.mockBuilderFactory.On("Create", mocks.MockBuild).Return(&s.mockBuilder, nil)
-	s.mockBuilder.On("Build", mocks.MockBuild).Return(mocks.MockBuild, nil)
-	s.mockBuilder.On("Publish", mocks.MockBuild).Return(nil)
-	s.mockBuilder.On("CleanUp").Return(nil)
-
-	s.Runner.Run()
-
-	s.mockBuilderFactory.AssertExpectations(s.T())
-	s.mockBuilder.AssertExpectations(s.T())
 }
 
-// TODO FIXME: Need to figure out how to test the RunBuildProcess
 func (s *BuildRunnerTestSuite) TestRunBuildProcess() {
-	s.T().Skip("Need to figure out how to test the RunBuildProcess")
+	pendingBuild := *mocks.MockBuild
+	s.mockBuilderFactory.On("Create", pendingBuild).Return(&s.mockBuilder, nil)
 
-	s.mockBuilderFactory.On("Create", mocks.MockBuild).Return(&s.mockBuilder, nil)
-	s.mockBuilder.On("Build", mocks.MockBuild).Return("image", "user", nil)
-	s.mockBuilder.On("Publish", mocks.MockBuild).Return(nil)
+	runningBuild := *mocks.MockBuild
+	runningBuild.State = build.BuildStateRunning
+	s.mockBuilder.On("Build", runningBuild).Return("image", "user", nil)
+
+	successBuild := *mocks.MockBuild
+	successBuild.State = build.BuildStateSuccess
+	successBuild.Image = "image"
+	successBuild.User = "user"
+	s.mockBuilder.On("Publish", successBuild).Return(nil)
+
 	s.mockBuilder.On("CleanUp").Return(nil)
 
 	s.Runner.RunBuildProcess(mocks.MockBuild, nil)
@@ -109,4 +106,5 @@ func (s *BuildRunnerTestSuite) TestRunBuildProcess() {
 
 	s.Require().Equal(mocks.MockBuild.Image, "image")
 	s.Require().Equal(mocks.MockBuild.User, "user")
+	s.Require().Equal(mocks.MockBuild.State, build.BuildStatePublished)
 }
