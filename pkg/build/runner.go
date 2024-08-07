@@ -9,7 +9,6 @@ import (
 	"sync"
 
 	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/poller"
 	"github.com/daytonaio/daytona/pkg/scheduler"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	log "github.com/sirupsen/logrus"
@@ -22,33 +21,52 @@ type BuildRunnerInstanceConfig struct {
 	BuildStore       Store
 	BuilderFactory   IBuilderFactory
 	LoggerFactory    logs.LoggerFactory
+	TelemetryEnabled bool
 	TelemetryService telemetry.TelemetryService
 }
 
 type BuildRunner struct {
-	poller.AbstractPoller
 	Id               string
+	scheduler        scheduler.IScheduler
+	interval         string
 	buildStore       Store
 	builderFactory   IBuilderFactory
 	loggerFactory    logs.LoggerFactory
+	telemetryEnabled bool
 	telemetryService telemetry.TelemetryService
 }
 
 func NewBuildRunner(config BuildRunnerInstanceConfig) *BuildRunner {
 	runner := &BuildRunner{
-		AbstractPoller:   *poller.NewPoller(config.Interval, config.Scheduler),
 		Id:               config.BuildRunnerId,
+		scheduler:        config.Scheduler,
+		interval:         config.Interval,
 		buildStore:       config.BuildStore,
 		builderFactory:   config.BuilderFactory,
 		loggerFactory:    config.LoggerFactory,
+		telemetryEnabled: config.TelemetryEnabled,
 		telemetryService: config.TelemetryService,
 	}
-	runner.AbstractPoller.IPoller = runner
 
 	return runner
 }
 
-func (r *BuildRunner) Poll() {
+func (r *BuildRunner) Start() error {
+	err := r.scheduler.AddFunc(r.interval, func() { r.Run() })
+	if err != nil {
+		return err
+	}
+
+	r.scheduler.Start()
+
+	return nil
+}
+
+func (r *BuildRunner) Stop() {
+	r.scheduler.Stop()
+}
+
+func (r *BuildRunner) Run() {
 	pendingState := BuildStatePending
 	builds, err := r.buildStore.List(&BuildFilter{State: &pendingState})
 	if err != nil {
@@ -59,14 +77,17 @@ func (r *BuildRunner) Poll() {
 	var wg sync.WaitGroup
 	for _, build := range builds {
 		wg.Add(1)
-		go r.runBuildProcess(&wg, build)
+		go r.RunBuildProcess(build, &wg)
 	}
 
 	wg.Wait()
+
 }
 
-func (r *BuildRunner) runBuildProcess(wg *sync.WaitGroup, build *Build) {
-	defer wg.Done()
+func (r *BuildRunner) RunBuildProcess(build *Build, wg *sync.WaitGroup) {
+	if wg != nil {
+		defer wg.Done()
+	}
 
 	if build.Project.BuildConfig == nil {
 		return
@@ -122,7 +143,9 @@ func (r *BuildRunner) runBuildProcess(wg *sync.WaitGroup, build *Build) {
 		buildLogger.Write([]byte(errMsg + "\n"))
 	}
 
-	r.logTelemetry(context.Background(), *build, err)
+	if r.telemetryEnabled {
+		r.logTelemetry(context.Background(), *build, err)
+	}
 
 }
 
@@ -145,7 +168,9 @@ func (r *BuildRunner) handleBuildError(build Build, builder IBuilder, err error,
 
 	buildLogger.Write([]byte(errMsg + "\n"))
 
-	r.logTelemetry(context.Background(), build, err)
+	if r.telemetryEnabled {
+		r.logTelemetry(context.Background(), build, err)
+	}
 }
 
 func (r *BuildRunner) logTelemetry(ctx context.Context, build Build, err error) {

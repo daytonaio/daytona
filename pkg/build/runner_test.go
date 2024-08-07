@@ -10,7 +10,6 @@ import (
 	"github.com/daytonaio/daytona/internal/testing/server/workspaces/mocks"
 	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/poller"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
@@ -22,7 +21,7 @@ type BuildRunnerTestSuite struct {
 	mockScheduler      mocks.MockSchedulerPlugin
 	loggerFactory      logs.LoggerFactory
 	buildStore         build.Store
-	Poller             poller.IPoller
+	Runner             build.BuildRunner
 }
 
 func NewBuildRunnerTestSuite() *BuildRunnerTestSuite {
@@ -38,12 +37,15 @@ func TestBuildRunner(t *testing.T) {
 
 	s.buildStore = t_build.NewInMemoryBuildStore()
 	s.loggerFactory = logs.NewLoggerFactory(t.TempDir())
-	s.Poller = build.NewBuildRunner(build.BuildRunnerInstanceConfig{
-		Scheduler:      &s.mockScheduler,
-		Interval:       "0 */5 * * * *",
-		BuilderFactory: &s.mockBuilderFactory,
-		BuildStore:     s.buildStore,
-		LoggerFactory:  s.loggerFactory,
+
+	s.Runner = *build.NewBuildRunner(build.BuildRunnerInstanceConfig{
+		Interval:         "0 */5 * * * *",
+		Scheduler:        &s.mockScheduler,
+		BuildRunnerId:    "1",
+		BuildStore:       s.buildStore,
+		BuilderFactory:   &s.mockBuilderFactory,
+		LoggerFactory:    s.loggerFactory,
+		TelemetryEnabled: false,
 	})
 
 	suite.Run(t, s)
@@ -62,7 +64,7 @@ func (s *BuildRunnerTestSuite) TestStart() {
 
 	require := s.Require()
 
-	err := s.Poller.Start()
+	err := s.Runner.Start()
 	require.NoError(err)
 
 	s.mockScheduler.AssertExpectations(s.T())
@@ -71,13 +73,13 @@ func (s *BuildRunnerTestSuite) TestStart() {
 func (s *BuildRunnerTestSuite) TestStop() {
 	s.mockScheduler.On("Stop").Return()
 
-	s.Poller.Stop()
+	s.Runner.Stop()
 
 	s.mockScheduler.AssertExpectations(s.T())
 }
 
-// TODO FIXME: Need to figure out how to test the runBuildProcess goroutine
-func (s *BuildRunnerTestSuite) TestPoll() {
+// TODO FIXME: Need to figure out how to test the RunBuildProcess goroutine
+func (s *BuildRunnerTestSuite) TestRun() {
 	s.T().Skip("Need to figure out how to test the runBuildProcess goroutine")
 
 	s.mockBuilderFactory.On("Create", mocks.MockBuild).Return(&s.mockBuilder, nil)
@@ -85,8 +87,26 @@ func (s *BuildRunnerTestSuite) TestPoll() {
 	s.mockBuilder.On("Publish", mocks.MockBuild).Return(nil)
 	s.mockBuilder.On("CleanUp").Return(nil)
 
-	s.Poller.Poll()
+	s.Runner.Run()
 
 	s.mockBuilderFactory.AssertExpectations(s.T())
 	s.mockBuilder.AssertExpectations(s.T())
+}
+
+// TODO FIXME: Need to figure out how to test the RunBuildProcess
+func (s *BuildRunnerTestSuite) TestRunBuildProcess() {
+	s.T().Skip("Need to figure out how to test the RunBuildProcess")
+
+	s.mockBuilderFactory.On("Create", mocks.MockBuild).Return(&s.mockBuilder, nil)
+	s.mockBuilder.On("Build", mocks.MockBuild).Return("image", "user", nil)
+	s.mockBuilder.On("Publish", mocks.MockBuild).Return(nil)
+	s.mockBuilder.On("CleanUp").Return(nil)
+
+	s.Runner.RunBuildProcess(mocks.MockBuild, nil)
+
+	s.mockBuilderFactory.AssertExpectations(s.T())
+	s.mockBuilder.AssertExpectations(s.T())
+
+	s.Require().Equal(mocks.MockBuild.Image, "image")
+	s.Require().Equal(mocks.MockBuild.User, "user")
 }

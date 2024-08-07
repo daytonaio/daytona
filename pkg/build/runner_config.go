@@ -15,8 +15,9 @@ import (
 const DEFAULT_POLLER_INTERVAL = "0 */5 * * * *"
 
 type Config struct {
-	Id       string `json:"id"`
-	Interval string `json:"interval"`
+	Id               string `json:"id"`
+	Interval         string `json:"interval"`
+	TelemetryEnabled bool   `json:"telemetryEnabled"`
 } // @name BuildRunnerConfig
 
 func GetConfig() (*Config, error) {
@@ -102,7 +103,8 @@ func GetConfigDir() (string, error) {
 
 func getDefaultConfig() *Config {
 	return &Config{
-		Id:       uuid.NewString(),
-		Interval: DEFAULT_POLLER_INTERVAL,
+		Id:               uuid.NewString(),
+		Interval:         DEFAULT_POLLER_INTERVAL,
+		TelemetryEnabled: false,
 	}
 }

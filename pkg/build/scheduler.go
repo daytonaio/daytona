@@ -4,18 +4,32 @@
 package build
 
 import (
-	"github.com/daytonaio/daytona/pkg/scheduler"
+	"github.com/robfig/cron/v3"
 )
 
-type BuildScheduler struct {
-	scheduler.AbstractScheduler
+// CronScheduler is a wrapper around the cron library.
+// It implements the IScheduler interface.
+// It is used to schedule tasks at specific intervals.
+// Wrapping the cron library is necessary to enable proper mocking while testing dependent code.
+type CronScheduler struct {
+	cron *cron.Cron
 }
 
-func NewBuildScheduler() *BuildScheduler {
-	scheduler := &BuildScheduler{
-		AbstractScheduler: *scheduler.NewAbstractScheduler(),
+func NewCronScheduler() *CronScheduler {
+	return &CronScheduler{
+		cron: cron.New(cron.WithSeconds()),
 	}
-	scheduler.AbstractScheduler.IScheduler = scheduler
+}
 
-	return scheduler
+func (s *CronScheduler) Start() {
+	s.cron.Start()
+}
+
+func (s *CronScheduler) Stop() {
+	s.cron.Stop()
+}
+
+func (s *CronScheduler) AddFunc(interval string, cmd func()) error {
+	_, err := s.cron.AddFunc(interval, cmd)
+	return err
 }

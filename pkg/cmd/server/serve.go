@@ -245,7 +245,7 @@ var ServeCmd = &cobra.Command{
 
 		buildRunner := build.NewBuildRunner(build.BuildRunnerInstanceConfig{
 			Interval:         buildRunnerConfig.Interval,
-			Scheduler:        build.NewBuildScheduler(),
+			Scheduler:        build.NewCronScheduler(),
 			BuildRunnerId:    buildRunnerConfig.Id,
 			BuildStore:       buildStore,
 			BuilderFactory:   builderFactory,
