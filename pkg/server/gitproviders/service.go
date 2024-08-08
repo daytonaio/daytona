@@ -81,7 +81,8 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 	}
 
 	for _, p := range gitProviders {
-		if p.Id == "aws-codecommit" && strings.Contains(repo.Url, ".amazonaws.com/") {
+		 isAwsUrl  := strings.Contains(repo.Url, ".amazonaws.com/") || strings.Contains(repo.Url, ".console.aws.amazon.com/")
+		if p.Id == "aws-codecommit" && isAwsUrl {
 			provider, err = s.GetGitProvider(p.Id)
 			if err == nil {
 				return "", err
@@ -89,6 +90,7 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 			providerFound = true
 			break
 		}
+
 		if strings.Contains(repo.Url, fmt.Sprintf("%s.", p.Id)) {
 			provider, err = s.GetGitProvider(p.Id)
 			if err == nil {
