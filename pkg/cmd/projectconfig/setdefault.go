@@ -34,6 +34,9 @@ var projectConfigSetDefaultCmd = &cobra.Command{
 			}
 
 			projectConfig := selection.GetProjectConfigFromPrompt(projectConfigList, 0, false, "Make Default")
+			if projectConfig == nil {
+				return
+			}
 			projectConfigName = *projectConfig.Name
 		} else {
 			projectConfigName = args[0]
