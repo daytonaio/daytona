@@ -275,7 +275,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/RepositoryUrl"
                         }
                     }
                 }
@@ -1764,6 +1764,14 @@ const docTemplate = `{
             "type": "object",
             "additionalProperties": {
                 "$ref": "#/definitions/provider.ProviderTargetProperty"
+            }
+        },
+        "RepositoryUrl": {
+            "type": "object",
+            "properties": {
+                "url": {
+                    "type": "string"
+                }
             }
         },
         "ServerConfig": {
