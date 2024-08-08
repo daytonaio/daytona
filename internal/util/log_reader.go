@@ -38,9 +38,8 @@ func ReadLog(ctx context.Context, logReader io.Reader, follow bool, c chan []byt
 }
 
 func ReadJSONLog(ctx context.Context, logReader io.Reader, follow bool, retry bool, c chan interface{}, errChan chan error) {
-	var buffer bytes.Buffer
-	var err error
 	reader := bufio.NewReader(logReader)
+	var buffer bytes.Buffer
 	delimiter := []byte(logs.LogDelimiter)
 
 	for {
@@ -66,31 +65,41 @@ func ReadJSONLog(ctx context.Context, logReader io.Reader, follow bool, retry bo
 				if err != nil {
 					if err != io.EOF {
 						errChan <- err
-					} else if !follow {
+					} else if !follow && err == io.EOF {
 						errChan <- io.EOF
 						return
 					}
+					continue
 				}
 				buffer.Write(byteChunk[:n])
 			}
 
 			data := buffer.Bytes()
 
-			index := bytes.Index(data, delimiter)
-
-			if index != -1 { // if the delimiter is found, process the log entry
-
-				var logEntry logs.LogEntry
-
-				err = json.Unmarshal(data[:index], &logEntry)
-				if err != nil {
-					return
+			for {
+				index := bytes.Index(data, delimiter)
+				if index == -1 {
+					break
 				}
 
+				jsonData := data[:index]
+				var logEntry logs.LogEntry
+				err := json.Unmarshal(jsonData, &logEntry)
+				if err != nil {
+					if err != io.EOF {
+						errChan <- err
+					} else if !follow {
+						errChan <- io.EOF
+						return
+					}
+				}
 				c <- logEntry
-				buffer.Reset()
-				buffer.Write(data[index+len(delimiter):]) // write remaining data to buffer
+
+				data = data[index+len(delimiter):]
 			}
+
+			buffer.Reset()
+			buffer.Write(data)
 		}
 	}
 }
