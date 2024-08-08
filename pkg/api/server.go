@@ -79,6 +79,11 @@ func (a *ApiServer) Start() error {
 	docs.SwaggerInfo.Description = "Daytona Server API"
 	docs.SwaggerInfo.Title = "Daytona Server API"
 
+	_, err := net.Dial("tcp", fmt.Sprintf(":%d", a.apiPort))
+	if err == nil {
+		return fmt.Errorf("cannot start API server, port %d is already in use", a.apiPort)
+	}
+
 	binding.Validator = new(defaultValidator)
 
 	if mode, ok := os.LookupEnv("DAYTONA_SERVER_MODE"); ok && mode == "development" {
