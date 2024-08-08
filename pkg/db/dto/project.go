@@ -5,7 +5,6 @@ package dto
 
 import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
@@ -54,14 +53,14 @@ type ProjectDTO struct {
 	Image       string           `json:"image"`
 	User        string           `json:"user"`
 	Build       *ProjectBuildDTO `json:"build,omitempty" gorm:"serializer:json"`
-	Repository  RepositoryDTO    `json:"repository"`
+	Repository  RepositoryDTO    `json:"repository" gorm:"serializer:json"`
 	WorkspaceId string           `json:"workspaceId"`
 	Target      string           `json:"target"`
 	ApiKey      string           `json:"apiKey"`
 	State       *ProjectStateDTO `json:"state,omitempty" gorm:"serializer:json"`
 }
 
-func ToProjectDTO(project *project.Project, workspace *workspace.Workspace) ProjectDTO {
+func ToProjectDTO(project *project.Project) ProjectDTO {
 	return ProjectDTO{
 		Name:        project.Name,
 		Image:       project.Image,
@@ -71,7 +70,7 @@ func ToProjectDTO(project *project.Project, workspace *workspace.Workspace) Proj
 		WorkspaceId: project.WorkspaceId,
 		Target:      project.Target,
 		State:       ToProjectStateDTO(project.State),
-		ApiKey:      workspace.ApiKey,
+		ApiKey:      project.ApiKey,
 	}
 }
 

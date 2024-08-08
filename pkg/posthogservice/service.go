@@ -4,6 +4,7 @@
 package posthogservice
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -55,6 +56,15 @@ func (p *posthogService) TrackServerEvent(event telemetry.ServerEvent, clientId 
 	p.AbstractTelemetryService.SetCommonProps(properties)
 	return p.client.Enqueue(posthog.Capture{
 		DistinctId: clientId,
+		Event:      string(event),
+		Properties: properties,
+	})
+}
+
+func (p *posthogService) TrackBuildEvent(event telemetry.BuildEvent, buildPollerId string, properties map[string]interface{}) error {
+	p.AbstractTelemetryService.SetCommonProps(properties)
+	return p.client.Enqueue(posthog.Capture{
+		DistinctId: fmt.Sprintf("build-poller-%s", buildPollerId),
 		Event:      string(event),
 		Properties: properties,
 	})
