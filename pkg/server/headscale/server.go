@@ -4,6 +4,8 @@
 package headscale
 
 import (
+	"fmt"
+	"net"
 	"os"
 
 	"github.com/juanfont/headscale/hscontrol"
@@ -40,6 +42,11 @@ func (s *HeadscaleServer) Init() error {
 }
 
 func (s *HeadscaleServer) Start() error {
+	_, err := net.Dial("tcp", fmt.Sprintf(":%d", s.headscalePort))
+	if err == nil {
+		return fmt.Errorf("cannot start Headscale server, port %d is already in use", s.headscalePort)
+	}
+
 	cfg, err := s.getHeadscaleConfig()
 	if err != nil {
 		return err

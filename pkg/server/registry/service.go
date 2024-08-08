@@ -6,6 +6,7 @@ package registry
 import (
 	"context"
 	"fmt"
+	"net"
 	"os"
 
 	"github.com/daytonaio/daytona/pkg/docker"
@@ -37,7 +38,12 @@ type LocalContainerRegistry struct {
 func (s *LocalContainerRegistry) Start() error {
 	ctx := context.Background()
 
-	_, err := os.Stat(s.dataPath)
+	_, err := net.Dial("tcp", fmt.Sprintf(":%d", s.port))
+	if err == nil {
+		return fmt.Errorf("cannot start registry, port %d is already in use", s.port)
+	}
+
+	_, err = os.Stat(s.dataPath)
 	if os.IsNotExist(err) {
 		err = os.MkdirAll(s.dataPath, 0755)
 		if err != nil {
