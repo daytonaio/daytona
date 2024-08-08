@@ -38,12 +38,7 @@ type LocalContainerRegistry struct {
 func (s *LocalContainerRegistry) Start() error {
 	ctx := context.Background()
 
-	_, err := net.Dial("tcp", fmt.Sprintf(":%d", s.port))
-	if err == nil {
-		return fmt.Errorf("cannot start registry, port %d is already in use", s.port)
-	}
-
-	_, err = os.Stat(s.dataPath)
+	_, err := os.Stat(s.dataPath)
 	if os.IsNotExist(err) {
 		err = os.MkdirAll(s.dataPath, 0755)
 		if err != nil {
@@ -66,6 +61,11 @@ func (s *LocalContainerRegistry) Start() error {
 	//	to avoid conflicts with configuration changes
 	if err := RemoveRegistryContainer(); err != nil {
 		return err
+	}
+
+	_, err = net.Dial("tcp", fmt.Sprintf(":%d", s.port))
+	if err == nil {
+		return fmt.Errorf("cannot start registry, port %d is already in use", s.port)
 	}
 
 	// Pull the image
