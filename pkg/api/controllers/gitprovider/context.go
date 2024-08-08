@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider/dto"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
@@ -57,7 +58,7 @@ func GetGitContext(ctx *gin.Context) {
 //	@Description	Get URL from Git repository
 //	@Produce		json
 //	@Param			repository	body		GitRepository	true	"Git repository"
-//	@Success		200			{string}	url
+//	@Success		200			{object}	RepositoryUrl
 //	@Router			/gitprovider/context/url [post]
 //
 //	@id				GetUrlFromRepository
@@ -78,5 +79,9 @@ func GetUrlFromRepository(ctx *gin.Context) {
 
 	url := gitProvider.GetUrlFromRepository(&gitRepository)
 
-	ctx.String(200, url)
+	response := dto.RepositoryUrl{
+		URL: url,
+	}
+
+	ctx.JSON(200, response)
 }

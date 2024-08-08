@@ -157,6 +157,7 @@ Class | Method | HTTP request | Description
  - [ProviderProviderTargetProperty](docs/ProviderProviderTargetProperty.md)
  - [ProviderProviderTargetPropertyType](docs/ProviderProviderTargetPropertyType.md)
  - [ProviderTarget](docs/ProviderTarget.md)
+ - [RepositoryUrl](docs/RepositoryUrl.md)
  - [ServerConfig](docs/ServerConfig.md)
  - [SetProjectState](docs/SetProjectState.md)
  - [Status](docs/Status.md)

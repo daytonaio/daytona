@@ -998,7 +998,7 @@ func (r ApiGetUrlFromRepositoryRequest) Repository(repository GitRepository) Api
 	return r
 }
 
-func (r ApiGetUrlFromRepositoryRequest) Execute() (string, *http.Response, error) {
+func (r ApiGetUrlFromRepositoryRequest) Execute() (*RepositoryUrl, *http.Response, error) {
 	return r.ApiService.GetUrlFromRepositoryExecute(r)
 }
 
@@ -1019,13 +1019,13 @@ func (a *GitProviderAPIService) GetUrlFromRepository(ctx context.Context) ApiGet
 
 // Execute executes the request
 //
-//	@return string
-func (a *GitProviderAPIService) GetUrlFromRepositoryExecute(r ApiGetUrlFromRepositoryRequest) (string, *http.Response, error) {
+//	@return RepositoryUrl
+func (a *GitProviderAPIService) GetUrlFromRepositoryExecute(r ApiGetUrlFromRepositoryRequest) (*RepositoryUrl, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue string
+		localVarReturnValue *RepositoryUrl
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitProviderAPIService.GetUrlFromRepository")

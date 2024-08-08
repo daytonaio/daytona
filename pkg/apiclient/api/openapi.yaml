@@ -192,7 +192,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/RepositoryUrl'
           description: OK
       summary: Get URL from Git repository
       tags:
@@ -1465,6 +1465,13 @@ components:
     ProviderTargetManifest:
       additionalProperties:
         $ref: '#/components/schemas/provider.ProviderTargetProperty'
+      type: object
+    RepositoryUrl:
+      example:
+        url: url
+      properties:
+        url:
+          type: string
       type: object
     ServerConfig:
       example:

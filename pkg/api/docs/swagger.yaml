@@ -277,6 +277,11 @@ definitions:
     additionalProperties:
       $ref: '#/definitions/provider.ProviderTargetProperty'
     type: object
+  RepositoryUrl:
+    properties:
+      url:
+        type: string
+    type: object
   ServerConfig:
     properties:
       apiPort:
@@ -789,7 +794,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: string
+            $ref: '#/definitions/RepositoryUrl'
       summary: Get URL from Git repository
       tags:
       - gitProvider

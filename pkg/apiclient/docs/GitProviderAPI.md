@@ -596,7 +596,7 @@ Name | Type | Description  | Notes
 
 ## GetUrlFromRepository
 
-> string GetUrlFromRepository(ctx).Repository(repository).Execute()
+> RepositoryUrl GetUrlFromRepository(ctx).Repository(repository).Execute()
 
 Get URL from Git repository
 
@@ -624,7 +624,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error when calling `GitProviderAPI.GetUrlFromRepository``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `GetUrlFromRepository`: string
+	// response from `GetUrlFromRepository`: RepositoryUrl
 	fmt.Fprintf(os.Stdout, "Response from `GitProviderAPI.GetUrlFromRepository`: %v\n", resp)
 }
 ```
@@ -644,7 +644,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**string**
+[**RepositoryUrl**](RepositoryUrl.md)
 
 ### Authorization
 
