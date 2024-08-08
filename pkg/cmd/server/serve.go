@@ -5,7 +5,6 @@ package server
 
 import (
 	"fmt"
-	"io"
 	"net/url"
 	"os"
 	"os/signal"
@@ -20,7 +19,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/db"
-	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
@@ -126,7 +124,7 @@ var ServeCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		buildResultStore, err := db.NewBuildResultStore(dbConnection)
+		buildStore, err := db.NewBuildStore(dbConnection)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -174,6 +172,7 @@ var ServeCmd = &cobra.Command{
 		providerTargetService := providertargets.NewProviderTargetService(providertargets.ProviderTargetServiceConfig{
 			TargetStore: providerTargetStore,
 		})
+
 		apiKeyService := apikeys.NewApiKeyService(apikeys.ApiKeyServiceConfig{
 			ApiKeyStore: apiKeyStore,
 		})
@@ -201,27 +200,15 @@ var ServeCmd = &cobra.Command{
 		}
 		buildImageNamespace = strings.TrimSuffix(buildImageNamespace, "/")
 
-		builderConfig := build.BuilderConfig{
-			ServerConfigFolder:       configDir,
+		builderFactory := build.NewBuilderFactory(build.BuilderFactoryConfig{
 			ContainerRegistryServer:  c.BuilderRegistryServer,
-			BasePath:                 filepath.Join(configDir, "builds"),
 			BuildImageNamespace:      buildImageNamespace,
-			BuildResultStore:         buildResultStore,
+			BuildStore:               buildStore,
 			LoggerFactory:            loggerFactory,
 			DefaultProjectImage:      c.DefaultProjectImage,
 			DefaultProjectUser:       c.DefaultProjectUser,
 			Image:                    c.BuilderImage,
 			ContainerRegistryService: containerRegistryService,
-		}
-
-		builderFactory := build.NewBuilderFactory(build.BuilderFactoryConfig{
-			BuilderConfig: builderConfig,
-			CreateGitService: func(projectDir string, logWriter io.Writer) git.IGitService {
-				return &git.Service{
-					ProjectDir: projectDir,
-					LogWriter:  logWriter,
-				}
-			},
 		})
 
 		provisioner := provisioner.NewProvisioner(provisioner.ProvisionerConfig{
@@ -245,11 +232,26 @@ var ServeCmd = &cobra.Command{
 			DefaultProjectUser:       c.DefaultProjectUser,
 			Provisioner:              provisioner,
 			LoggerFactory:            loggerFactory,
-			BuilderFactory:           builderFactory,
 			TelemetryService:         telemetryService,
 		})
+
 		profileDataService := profiledata.NewProfileDataService(profiledata.ProfileDataServiceConfig{
 			ProfileDataStore: profileDataStore,
+		})
+
+		buildRunnerConfig, err := build.GetConfig()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		buildRunner := build.NewBuildRunner(build.BuildRunnerInstanceConfig{
+			Interval:         buildRunnerConfig.Interval,
+			Scheduler:        build.NewCronScheduler(),
+			BuildRunnerId:    buildRunnerConfig.Id,
+			BuildStore:       buildStore,
+			BuilderFactory:   builderFactory,
+			LoggerFactory:    loggerFactory,
+			TelemetryService: telemetryService,
 		})
 
 		server := server.GetInstance(&server.ServerInstanceConfig{
@@ -274,6 +276,11 @@ var ServeCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		err = buildRunner.Start()
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		go func() {
 			err := apiServer.Start()
 			if err != nil {
@@ -284,6 +291,7 @@ var ServeCmd = &cobra.Command{
 		go func() {
 			err := <-errCh
 			if err != nil {
+				buildRunner.Stop()
 				log.Fatal(err)
 			}
 		}()
