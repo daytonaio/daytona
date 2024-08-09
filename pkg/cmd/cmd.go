@@ -161,13 +161,7 @@ func SetupRootCommand(cmd *cobra.Command) {
 			if err != nil {
 				log.Error(err)
 			}
-		}
-
-		if output.FormatFlag == "" {
-			return
-		}
-		originalStdout = os.Stdout
-		os.Stdout = nil
+		}	
 	}
 
 	cmd.PersistentPostRun = func(cmd *cobra.Command, args []string) {
@@ -185,7 +179,6 @@ func SetupRootCommand(cmd *cobra.Command) {
 			}
 		}
 
-		os.Stdout = originalStdout
 		output.Print(output.Output, output.FormatFlag)
 	}
 }
