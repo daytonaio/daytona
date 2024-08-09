@@ -13,10 +13,14 @@ type TailscaleServer interface {
 	CreateUser() error
 	HTTPClient() *http.Client
 	Start() error
+	Stop() error
+	Purge() error
 }
 
 type ILocalContainerRegistry interface {
 	Start() error
+	Stop() error
+	Purge() error
 }
 
 type FRPSConfig struct {

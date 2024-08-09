@@ -10,15 +10,13 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
-func ServerStoppedPrompt(serverStoppedCheck *bool) {
+func DefaultProfileNoticePrompt(confirmCheck *bool) {
 	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewConfirm().
-				Title("Please stop the Daytona Server before continuing").
-				Description("Purging all data requires the Daytona Server to be stopped.").
-				Affirmative("Continue").
-				Negative("Abort").
-				Value(serverStoppedCheck),
+				Title("Non-default profile detected").
+				Description("Purging Daytona will only remove local data. Remote server data will be kept in tact. Do you wish to continue?").
+				Value(confirmCheck),
 		),
 	).WithTheme(views.GetCustomTheme())
 

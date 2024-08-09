@@ -230,10 +230,5 @@ func (s *Server) Start(errCh chan error) error {
 		return err
 	}
 
-	err = s.registerProviders()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return s.registerProviders()
 }
