@@ -95,7 +95,7 @@ func (s *ProjectConfigServiceTestSuite) SetupTest() {
 	}
 
 	s.projectConfigStore = projectconfig_internal.NewInMemoryProjectConfigStore()
-	s.projectConfigService = projectconfig.NewConfigService(projectconfig.ProjectConfigServiceConfig{
+	s.projectConfigService = projectconfig.NewProjectConfigService(projectconfig.ProjectConfigServiceConfig{
 		ConfigStore: s.projectConfigStore,
 	})
 

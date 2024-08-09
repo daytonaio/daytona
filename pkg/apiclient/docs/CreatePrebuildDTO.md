@@ -7,6 +7,7 @@ Name | Type | Description | Notes
 **Branch** | Pointer to **string** |  | [optional] 
 **CommitInterval** | Pointer to **int32** |  | [optional] 
 **ProjectConfigName** | Pointer to **string** |  | [optional] 
+**RunAtInit** | Pointer to **bool** |  | [optional] 
 **TriggerFiles** | Pointer to **[]string** |  | [optional] 
 
 ## Methods
@@ -102,6 +103,31 @@ SetProjectConfigName sets ProjectConfigName field to given value.
 `func (o *CreatePrebuildDTO) HasProjectConfigName() bool`
 
 HasProjectConfigName returns a boolean if a field has been set.
+
+### GetRunAtInit
+
+`func (o *CreatePrebuildDTO) GetRunAtInit() bool`
+
+GetRunAtInit returns the RunAtInit field if non-nil, zero value otherwise.
+
+### GetRunAtInitOk
+
+`func (o *CreatePrebuildDTO) GetRunAtInitOk() (*bool, bool)`
+
+GetRunAtInitOk returns a tuple with the RunAtInit field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetRunAtInit
+
+`func (o *CreatePrebuildDTO) SetRunAtInit(v bool)`
+
+SetRunAtInit sets RunAtInit field to given value.
+
+### HasRunAtInit
+
+`func (o *CreatePrebuildDTO) HasRunAtInit() bool`
+
+HasRunAtInit returns a boolean if a field has been set.
 
 ### GetTriggerFiles
 

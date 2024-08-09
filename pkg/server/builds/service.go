@@ -4,14 +4,16 @@
 package builds
 
 import (
+	"fmt"
+
 	"github.com/daytonaio/daytona/pkg/build"
 )
 
 type IBuildService interface {
-	Delete(hash string) error
-	Find(hash string) (*build.Build, error)
+	Create(*build.Build) error
+	Find(id string) (*build.Build, error)
 	List(filter *build.BuildFilter) ([]*build.Build, error)
-	Save(*build.Build) error
+	Delete(id string) error
 }
 
 type BuildServiceConfig struct {
@@ -28,18 +30,28 @@ func NewBuildService(config BuildServiceConfig) IBuildService {
 	}
 }
 
-func (s *BuildService) List(filter *build.BuildFilter) ([]*build.Build, error) {
-	return s.buildStore.List(filter)
-}
-
-func (s *BuildService) Find(hash string) (*build.Build, error) {
-	return s.buildStore.Find(hash)
-}
-
-func (s *BuildService) Save(b *build.Build) error {
+func (s *BuildService) Create(b *build.Build) error {
+	b.Hash = "test"
+	b.Id = "asdf"
+	b.State = build.BuildStatePending
 	return s.buildStore.Save(b)
 }
 
-func (s *BuildService) Delete(hash string) error {
-	return s.buildStore.Delete(hash)
+func (s *BuildService) Find(id string) (*build.Build, error) {
+	return s.buildStore.Find(id)
+}
+
+func (s *BuildService) List(filter *build.BuildFilter) ([]*build.Build, error) {
+	result, err := s.buildStore.List(filter)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println(result[0])
+
+	return result, nil
+}
+
+func (s *BuildService) Delete(id string) error {
+	return s.buildStore.Delete(id)
 }

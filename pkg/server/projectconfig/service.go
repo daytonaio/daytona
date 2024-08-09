@@ -5,8 +5,12 @@ package projectconfig
 
 import (
 	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/build"
+	"github.com/daytonaio/daytona/pkg/server/builds"
 	"github.com/daytonaio/daytona/pkg/server/projectconfig/prebuild"
+	"github.com/daytonaio/daytona/pkg/server/projectconfig/prebuild/dto"
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
+	prebuild_cnf "github.com/daytonaio/daytona/pkg/workspace/project/config/prebuild"
 )
 
 type IProjectConfigService interface {
@@ -15,23 +19,30 @@ type IProjectConfigService interface {
 	List(filter *config.Filter) ([]*config.ProjectConfig, error)
 	SetDefault(projectConfigName string) error
 	Save(projectConfig *config.ProjectConfig) error
-	Prebuilds() prebuild.IPrebuildService
+	SetPrebuild(dto.CreatePrebuildDTO) error
+	FindPrebuild(projectConfigName, id string) (*prebuild_cnf.PrebuildConfig, error)
+	ListPrebuilds(*config.PrebuildFilter) ([]*dto.PrebuildDTO, error)
+	DeletePrebuild(projectConfigName string, prebuild *prebuild_cnf.PrebuildConfig) error
 }
 
 type ProjectConfigServiceConfig struct {
-	ConfigStore config.Store
+	ConfigStore     config.Store
+	BuildService    builds.IBuildService
+	PrebuildService prebuild.IPrebuildService
 }
 
 type ProjectConfigService struct {
 	configStore     config.Store
+	buildService    builds.IBuildService
 	prebuildService prebuild.IPrebuildService
 }
 
-func NewConfigService(config ProjectConfigServiceConfig) IProjectConfigService {
+func NewProjectConfigService(config ProjectConfigServiceConfig) IProjectConfigService {
 	prebuildService := prebuild.NewPrebuildService(config.ConfigStore)
 
 	return &ProjectConfigService{
 		configStore:     config.ConfigStore,
+		buildService:    config.BuildService,
 		prebuildService: prebuildService,
 	}
 }
@@ -95,6 +106,41 @@ func (s *ProjectConfigService) Delete(projectConfigName string) error {
 	return s.configStore.Delete(pc)
 }
 
-func (s *ProjectConfigService) Prebuilds() prebuild.IPrebuildService {
-	return s.prebuildService
+func (s *ProjectConfigService) SetPrebuild(createPrebuildDto dto.CreatePrebuildDTO) error {
+	err := s.prebuildService.Set(createPrebuildDto)
+	if err != nil {
+		return err
+	}
+
+	if createPrebuildDto.RunAtInit {
+		projectConfig, err := s.Find(&config.Filter{
+			Name: &createPrebuildDto.ProjectConfigName,
+		})
+		if err != nil {
+			return err
+		}
+
+		build := &build.Build{
+			ProjectConfig: *projectConfig,
+		}
+
+		err = s.buildService.Create(build)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *ProjectConfigService) FindPrebuild(projectConfigName, id string) (*prebuild_cnf.PrebuildConfig, error) {
+	return nil, nil
+}
+
+func (s *ProjectConfigService) ListPrebuilds(*config.PrebuildFilter) ([]*dto.PrebuildDTO, error) {
+	return nil, nil
+}
+
+func (s *ProjectConfigService) DeletePrebuild(projectConfigName string, prebuild *prebuild_cnf.PrebuildConfig) error {
+	return nil
 }

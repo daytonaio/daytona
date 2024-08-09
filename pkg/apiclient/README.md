@@ -80,6 +80,7 @@ Class | Method | HTTP request | Description
 *ApiKeyAPI* | [**GenerateApiKey**](docs/ApiKeyAPI.md#generateapikey) | **Post** /apikey/{apiKeyName} | Generate an API key
 *ApiKeyAPI* | [**ListClientApiKeys**](docs/ApiKeyAPI.md#listclientapikeys) | **Get** /apikey | List API keys
 *ApiKeyAPI* | [**RevokeApiKey**](docs/ApiKeyAPI.md#revokeapikey) | **Delete** /apikey/{apiKeyName} | Revoke API key
+*BuildAPI* | [**ListBuilds**](docs/BuildAPI.md#listbuilds) | **Get** /build | List builds
 *ContainerRegistryAPI* | [**GetContainerRegistry**](docs/ContainerRegistryAPI.md#getcontainerregistry) | **Get** /container-registry/{server} | Get container registry credentials
 *ContainerRegistryAPI* | [**ListContainerRegistries**](docs/ContainerRegistryAPI.md#listcontainerregistries) | **Get** /container-registry | List container registries
 *ContainerRegistryAPI* | [**RemoveContainerRegistry**](docs/ContainerRegistryAPI.md#removecontainerregistry) | **Delete** /container-registry/{server} | Remove a container registry credentials
@@ -134,7 +135,10 @@ Class | Method | HTTP request | Description
 
  - [ApiKey](docs/ApiKey.md)
  - [ApikeyApiKeyType](docs/ApikeyApiKeyType.md)
+ - [Build](docs/Build.md)
+ - [BuildBuildState](docs/BuildBuildState.md)
  - [ContainerRegistry](docs/ContainerRegistry.md)
+ - [CreatePrebuildDTO](docs/CreatePrebuildDTO.md)
  - [CreateProjectConfigDTO](docs/CreateProjectConfigDTO.md)
  - [CreateProjectConfigSourceDTO](docs/CreateProjectConfigSourceDTO.md)
  - [CreateWorkspaceDTO](docs/CreateWorkspaceDTO.md)

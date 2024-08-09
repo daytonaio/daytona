@@ -25,6 +25,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
+	"github.com/daytonaio/daytona/pkg/server/builds"
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
@@ -104,6 +105,10 @@ var ServeCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+		buildStore, err := db.NewBuildStore(dbConnection)
+		if err != nil {
+			log.Fatal(err)
+		}
 		projectConfigStore, err := db.NewProjectConfigStore(dbConnection)
 		if err != nil {
 			log.Fatal(err)
@@ -124,10 +129,6 @@ var ServeCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		buildStore, err := db.NewBuildStore(dbConnection)
-		if err != nil {
-			log.Fatal(err)
-		}
 
 		headscaleServer := headscale.NewHeadscaleServer(&headscale.HeadscaleServerConfig{
 			ServerId:      c.Id,
@@ -145,8 +146,14 @@ var ServeCmd = &cobra.Command{
 			Store: containerRegistryStore,
 		})
 
-		projectConfigService := projectconfig.NewConfigService(projectconfig.ProjectConfigServiceConfig{
+		buildService := builds.NewBuildService(builds.BuildServiceConfig{
+			BuildStore: buildStore,
+		})
+
+		projectConfigService := projectconfig.NewProjectConfigService(projectconfig.ProjectConfigServiceConfig{
 			ConfigStore: projectConfigStore,
+			// TODO: check - build store ?
+			BuildService: buildService,
 		})
 
 		var localContainerRegistry server.ILocalContainerRegistry
@@ -259,6 +266,7 @@ var ServeCmd = &cobra.Command{
 			TailscaleServer:          headscaleServer,
 			ProviderTargetService:    providerTargetService,
 			ContainerRegistryService: containerRegistryService,
+			BuildService:             buildService,
 			ProjectConfigService:     projectConfigService,
 			LocalContainerRegistry:   localContainerRegistry,
 			ApiKeyService:            apiKeyService,

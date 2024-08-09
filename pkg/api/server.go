@@ -34,6 +34,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/api/controllers/apikey"
 	"github.com/daytonaio/daytona/pkg/api/controllers/binary"
+	"github.com/daytonaio/daytona/pkg/api/controllers/build"
 	"github.com/daytonaio/daytona/pkg/api/controllers/containerregistry"
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider"
 	log_controller "github.com/daytonaio/daytona/pkg/api/controllers/log"
@@ -170,6 +171,11 @@ func (a *ApiServer) Start() error {
 		containerRegistryController.GET("/:server", containerregistry.GetContainerRegistry)
 		containerRegistryController.PUT("/:server", containerregistry.SetContainerRegistry)
 		containerRegistryController.DELETE("/:server", containerregistry.RemoveContainerRegistry)
+	}
+
+	buildController := protected.Group("/build")
+	{
+		buildController.GET("/", build.ListBuilds)
 	}
 
 	targetController := protected.Group("/target")

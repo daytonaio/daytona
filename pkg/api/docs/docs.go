@@ -91,6 +91,30 @@ const docTemplate = `{
                 }
             }
         },
+        "/build": {
+            "get": {
+                "description": "List builds",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "build"
+                ],
+                "summary": "List builds",
+                "operationId": "ListBuilds",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Build"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/container-registry": {
             "get": {
                 "description": "List container registries",
@@ -786,7 +810,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/PrebuildDTO"
+                            "$ref": "#/definitions/CreatePrebuildDTO"
                         }
                     }
                 ],
@@ -1467,6 +1491,23 @@ const docTemplate = `{
                 }
             }
         },
+        "Build": {
+            "type": "object",
+            "properties": {
+                "hash": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "projectConfig": {
+                    "$ref": "#/definitions/ProjectConfig"
+                },
+                "state": {
+                    "$ref": "#/definitions/build.BuildState"
+                }
+            }
+        },
         "ContainerRegistry": {
             "type": "object",
             "properties": {
@@ -1478,6 +1519,29 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "CreatePrebuildDTO": {
+            "type": "object",
+            "properties": {
+                "branch": {
+                    "type": "string"
+                },
+                "commitInterval": {
+                    "type": "integer"
+                },
+                "projectConfigName": {
+                    "type": "string"
+                },
+                "runAtInit": {
+                    "type": "boolean"
+                },
+                "triggerFiles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -2097,6 +2161,23 @@ const docTemplate = `{
                 "ApiKeyTypeClient",
                 "ApiKeyTypeProject",
                 "ApiKeyTypeWorkspace"
+            ]
+        },
+        "build.BuildState": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "running",
+                "error",
+                "success",
+                "published"
+            ],
+            "x-enum-varnames": [
+                "BuildStatePending",
+                "BuildStateRunning",
+                "BuildStateError",
+                "BuildStateSuccess",
+                "BuildStatePublished"
             ]
         },
         "provider.ProviderInfo": {

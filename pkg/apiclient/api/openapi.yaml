@@ -63,6 +63,22 @@ paths:
       summary: Generate an API key
       tags:
       - apiKey
+  /build:
+    get:
+      description: List builds
+      operationId: ListBuilds
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Build'
+                type: array
+          description: OK
+      summary: List builds
+      tags:
+      - build
   /container-registry:
     get:
       description: List container registries
@@ -567,7 +583,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PrebuildDTO'
+              $ref: '#/components/schemas/CreatePrebuildDTO'
         description: Prebuild
         required: true
       responses:
@@ -1046,6 +1062,54 @@ components:
         type:
           $ref: '#/components/schemas/apikey.ApiKeyType'
       type: object
+    Build:
+      example:
+        projectConfig:
+          prebuilds:
+          - commitInterval: 0
+            id: id
+            branch: branch
+            triggerFiles:
+            - triggerFiles
+            - triggerFiles
+          - commitInterval: 0
+            id: id
+            branch: branch
+            triggerFiles:
+            - triggerFiles
+            - triggerFiles
+          buildConfig:
+            devcontainer:
+              filePath: filePath
+          image: image
+          default: true
+          envVars:
+            key: envVars
+          name: name
+          repository:
+            owner: owner
+            path: path
+            name: name
+            id: id
+            source: source
+            prNumber: 6
+            branch: branch
+            sha: sha
+            url: url
+          user: user
+        id: id
+        state: null
+        hash: hash
+      properties:
+        hash:
+          type: string
+        id:
+          type: string
+        projectConfig:
+          $ref: '#/components/schemas/ProjectConfig'
+        state:
+          $ref: '#/components/schemas/build.BuildState'
+      type: object
     ContainerRegistry:
       example:
         server: server
@@ -1058,6 +1122,29 @@ components:
           type: string
         username:
           type: string
+      type: object
+    CreatePrebuildDTO:
+      example:
+        projectConfigName: projectConfigName
+        commitInterval: 0
+        branch: branch
+        runAtInit: true
+        triggerFiles:
+        - triggerFiles
+        - triggerFiles
+      properties:
+        branch:
+          type: string
+        commitInterval:
+          type: integer
+        projectConfigName:
+          type: string
+        runAtInit:
+          type: boolean
+        triggerFiles:
+          items:
+            type: string
+          type: array
       type: object
     CreateProjectConfigDTO:
       example:
@@ -1075,7 +1162,7 @@ components:
             name: name
             id: id
             source: source
-            prNumber: 0
+            prNumber: 6
             branch: branch
             sha: sha
             url: url
@@ -1104,7 +1191,7 @@ components:
           name: name
           id: id
           source: source
-          prNumber: 0
+          prNumber: 6
           branch: branch
           sha: sha
           url: url
@@ -1129,7 +1216,7 @@ components:
               name: name
               id: id
               source: source
-              prNumber: 0
+              prNumber: 6
               branch: branch
               sha: sha
               url: url
@@ -1148,7 +1235,7 @@ components:
               name: name
               id: id
               source: source
-              prNumber: 0
+              prNumber: 6
               branch: branch
               sha: sha
               url: url
@@ -1274,7 +1361,7 @@ components:
         name: name
         id: id
         source: source
-        prNumber: 0
+        prNumber: 6
         branch: branch
         sha: sha
         url: url
@@ -1447,7 +1534,7 @@ components:
           name: name
           id: id
           source: source
-          prNumber: 0
+          prNumber: 6
           branch: branch
           sha: sha
           url: url
@@ -1519,7 +1606,7 @@ components:
           name: name
           id: id
           source: source
-          prNumber: 0
+          prNumber: 6
           branch: branch
           sha: sha
           url: url
@@ -1764,7 +1851,7 @@ components:
             name: name
             id: id
             source: source
-            prNumber: 0
+            prNumber: 6
             branch: branch
             sha: sha
             url: url
@@ -1812,7 +1899,7 @@ components:
             name: name
             id: id
             source: source
-            prNumber: 0
+            prNumber: 6
             branch: branch
             sha: sha
             url: url
@@ -1878,7 +1965,7 @@ components:
             name: name
             id: id
             source: source
-            prNumber: 0
+            prNumber: 6
             branch: branch
             sha: sha
             url: url
@@ -1926,7 +2013,7 @@ components:
             name: name
             id: id
             source: source
-            prNumber: 0
+            prNumber: 6
             branch: branch
             sha: sha
             url: url
@@ -1999,6 +2086,20 @@ components:
       - ApiKeyTypeClient
       - ApiKeyTypeProject
       - ApiKeyTypeWorkspace
+    build.BuildState:
+      enum:
+      - pending
+      - running
+      - error
+      - success
+      - published
+      type: string
+      x-enum-varnames:
+      - BuildStatePending
+      - BuildStateRunning
+      - BuildStateError
+      - BuildStateSuccess
+      - BuildStatePublished
     provider.ProviderInfo:
       example:
         name: name

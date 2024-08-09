@@ -10,6 +10,17 @@ definitions:
       type:
         $ref: '#/definitions/apikey.ApiKeyType'
     type: object
+  Build:
+    properties:
+      hash:
+        type: string
+      id:
+        type: string
+      projectConfig:
+        $ref: '#/definitions/ProjectConfig'
+      state:
+        $ref: '#/definitions/build.BuildState'
+    type: object
   ContainerRegistry:
     properties:
       password:
@@ -18,6 +29,21 @@ definitions:
         type: string
       username:
         type: string
+    type: object
+  CreatePrebuildDTO:
+    properties:
+      branch:
+        type: string
+      commitInterval:
+        type: integer
+      projectConfigName:
+        type: string
+      runAtInit:
+        type: boolean
+      triggerFiles:
+        items:
+          type: string
+        type: array
     type: object
   CreateProjectConfigDTO:
     properties:
@@ -427,6 +453,20 @@ definitions:
     - ApiKeyTypeClient
     - ApiKeyTypeProject
     - ApiKeyTypeWorkspace
+  build.BuildState:
+    enum:
+    - pending
+    - running
+    - error
+    - success
+    - published
+    type: string
+    x-enum-varnames:
+    - BuildStatePending
+    - BuildStateRunning
+    - BuildStateError
+    - BuildStateSuccess
+    - BuildStatePublished
   provider.ProviderInfo:
     properties:
       name:
@@ -534,6 +574,22 @@ paths:
       summary: Generate an API key
       tags:
       - apiKey
+  /build:
+    get:
+      description: List builds
+      operationId: ListBuilds
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/Build'
+            type: array
+      summary: List builds
+      tags:
+      - build
   /container-registry:
     get:
       description: List container registries
@@ -1069,7 +1125,7 @@ paths:
         name: prebuild
         required: true
         schema:
-          $ref: '#/definitions/PrebuildDTO'
+          $ref: '#/definitions/CreatePrebuildDTO'
       responses:
         "201":
           description: Created

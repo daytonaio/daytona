@@ -28,7 +28,7 @@ func FindPrebuild(ctx *gin.Context) {
 	key := ctx.Param("key")
 
 	server := server.GetInstance(nil)
-	res, err := server.ProjectConfigService.Prebuilds().Find(key, key)
+	res, err := server.ProjectConfigService.FindPrebuild(key, key)
 	if err != nil {
 		if config.IsPrebuildNotFound(err) {
 			ctx.JSON(200, &prebuild.PrebuildConfig{})
@@ -47,13 +47,13 @@ func FindPrebuild(ctx *gin.Context) {
 // @Summary		Set prebuild
 // @Description	Set prebuild
 // @Accept			json
-// @Param			prebuild	body	PrebuildDTO	true	"Prebuild"
+// @Param			prebuild	body	CreatePrebuildDTO	true	"Prebuild"
 // @Success		201
 // @Router			/project-config/prebuild [post]
 //
 // @id				SetPrebuild
 func SetPrebuild(ctx *gin.Context) {
-	var req dto.PrebuildDTO
+	var req dto.CreatePrebuildDTO
 	err := ctx.BindJSON(&req)
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %s", err.Error()))
@@ -61,7 +61,7 @@ func SetPrebuild(ctx *gin.Context) {
 	}
 
 	server := server.GetInstance(nil)
-	err = server.ProjectConfigService.Prebuilds().Set(req)
+	err = server.ProjectConfigService.SetPrebuild(req)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to set prebuild: %s", err.Error()))
 		return
@@ -95,7 +95,7 @@ func ListPrebuilds(ctx *gin.Context) {
 	}
 
 	server := server.GetInstance(nil)
-	res, err := server.ProjectConfigService.Prebuilds().List(filter)
+	res, err := server.ProjectConfigService.ListPrebuilds(filter)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get prebuilds: %s", err.Error()))
 		return
@@ -124,7 +124,7 @@ func DeletePrebuild(ctx *gin.Context) {
 	}
 
 	server := server.GetInstance(nil)
-	err = server.ProjectConfigService.Prebuilds().Delete("", &req)
+	err = server.ProjectConfigService.DeletePrebuild("", &req)
 	if err != nil {
 		if config.IsPrebuildNotFound(err) {
 			ctx.Status(204)

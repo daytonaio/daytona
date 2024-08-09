@@ -7,7 +7,7 @@ package mocks
 
 import (
 	"github.com/daytonaio/daytona/pkg/build"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -27,8 +27,8 @@ func (f *MockBuilderFactory) Create(build build.Build) (build.IBuilder, error) {
 	return args.Get(0).(*MockBuilder), args.Error(1)
 }
 
-func (f *MockBuilderFactory) CheckExistingBuild(p project.Project) (*build.Build, error) {
-	args := f.Called(p)
+func (f *MockBuilderFactory) CheckExistingBuild(pc config.ProjectConfig) (*build.Build, error) {
+	args := f.Called(pc)
 	return args.Get(0).(*build.Build), args.Error(1)
 }
 

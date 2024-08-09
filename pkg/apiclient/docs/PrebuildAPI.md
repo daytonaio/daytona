@@ -230,7 +230,7 @@ import (
 )
 
 func main() {
-	prebuild := *openapiclient.NewPrebuildDTO() // PrebuildDTO | Prebuild
+	prebuild := *openapiclient.NewCreatePrebuildDTO() // CreatePrebuildDTO | Prebuild
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -253,7 +253,7 @@ Other parameters are passed through a pointer to a apiSetPrebuildRequest struct 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **prebuild** | [**PrebuildDTO**](PrebuildDTO.md) | Prebuild | 
+ **prebuild** | [**CreatePrebuildDTO**](CreatePrebuildDTO.md) | Prebuild | 
 
 ### Return type
 

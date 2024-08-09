@@ -4,6 +4,10 @@
 package config
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
 	"github.com/daytonaio/daytona/pkg/workspace/project/config/prebuild"
@@ -46,4 +50,23 @@ func (pc *ProjectConfig) RemovePrebuild(p *prebuild.PrebuildConfig) error {
 		}
 	}
 	return nil
+}
+
+// GetConfigHash returns a SHA-256 hash of the project's build configuration, repository URL, and environment variables.
+func (pc *ProjectConfig) GetConfigHash() (string, error) {
+	buildJson, err := json.Marshal(pc.BuildConfig)
+	if err != nil {
+		return "", err
+	}
+
+	envVarsJson, err := json.Marshal(pc.EnvVars)
+	if err != nil {
+		return "", err
+	}
+
+	data := string(buildJson) + pc.Repository.Sha + string(envVarsJson)
+	hash := sha256.Sum256([]byte(data))
+	hashStr := hex.EncodeToString(hash[:])
+
+	return hashStr, nil
 }

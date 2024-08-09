@@ -13,7 +13,7 @@ import (
 
 type IPrebuildService interface {
 	Find(projectConfigName, id string) (*prebuild.PrebuildConfig, error)
-	Set(dto.PrebuildDTO) error
+	Set(dto.CreatePrebuildDTO) error
 	List(*config.PrebuildFilter) ([]*dto.PrebuildDTO, error)
 	Delete(projectConfigName string, prebuild *prebuild.PrebuildConfig) error
 }
@@ -36,7 +36,7 @@ func (s *PrebuildService) Find(projectConfigName, id string) (*prebuild.Prebuild
 	return nil, nil
 }
 
-func (s *PrebuildService) Set(createPrebuildDto dto.PrebuildDTO) error {
+func (s *PrebuildService) Set(createPrebuildDto dto.CreatePrebuildDTO) error {
 	pc, err := s.configStore.Find(&config.Filter{
 		Name: &createPrebuildDto.ProjectConfigName,
 	})
@@ -60,7 +60,12 @@ func (s *PrebuildService) Set(createPrebuildDto dto.PrebuildDTO) error {
 		return err
 	}
 
-	return s.configStore.Save(pc)
+	err = s.configStore.Save(pc)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *PrebuildService) List(filter *config.PrebuildFilter) ([]*dto.PrebuildDTO, error) {

@@ -9,12 +9,12 @@ import (
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/ports"
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 )
 
 type IBuilderFactory interface {
 	Create(build Build) (IBuilder, error)
-	CheckExistingBuild(p project.Project) (*Build, error)
+	CheckExistingBuild(pc config.ProjectConfig) (*Build, error)
 }
 
 type BuilderFactory struct {
@@ -60,8 +60,8 @@ func (f *BuilderFactory) Create(build Build) (IBuilder, error) {
 	return f.newDevcontainerBuilder(build)
 }
 
-func (f *BuilderFactory) CheckExistingBuild(p project.Project) (*Build, error) {
-	hash, err := p.GetConfigHash()
+func (f *BuilderFactory) CheckExistingBuild(pc config.ProjectConfig) (*Build, error) {
+	hash, err := pc.GetConfigHash()
 	if err != nil {
 		return nil, err
 	}

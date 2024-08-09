@@ -51,11 +51,12 @@ var prebuildAddCmd = &cobra.Command{
 
 		add.PrebuildCreationView(&prebuildAddView, false)
 
-		newPrebuild := apiclient.PrebuildDTO{
+		newPrebuild := apiclient.CreatePrebuildDTO{
 			ProjectConfigName: &prebuildAddView.ProjectConfigName,
 			Branch:            &prebuildAddView.Branch,
 			CommitInterval:    util.Pointer(int32(10)),
 			TriggerFiles:      []string{prebuildAddView.TriggerFiles},
+			RunAtInit:         &runFlag,
 		}
 
 		res, err = apiClient.PrebuildAPI.SetPrebuild(ctx).Prebuild(newPrebuild).Execute()
@@ -63,4 +64,10 @@ var prebuildAddCmd = &cobra.Command{
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 	},
+}
+
+var runFlag bool
+
+func init() {
+	prebuildAddCmd.Flags().BoolVar(&runFlag, "run", false, "Run the prebuild once after adding it")
 }

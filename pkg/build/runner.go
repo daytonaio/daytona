@@ -81,7 +81,6 @@ func (r *BuildRunner) Run() {
 	}
 
 	wg.Wait()
-
 }
 
 func (r *BuildRunner) RunBuildProcess(build *Build, wg *sync.WaitGroup) {
@@ -146,7 +145,6 @@ func (r *BuildRunner) RunBuildProcess(build *Build, wg *sync.WaitGroup) {
 	if r.telemetryEnabled {
 		r.logTelemetry(context.Background(), *build, err)
 	}
-
 }
 
 func (r *BuildRunner) handleBuildError(build Build, builder IBuilder, err error, buildLogger logs.Logger) {
