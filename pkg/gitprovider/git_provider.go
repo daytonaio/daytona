@@ -37,6 +37,7 @@ type GitProvider interface {
 	GetLastCommitSha(staticContext *StaticGitContext) (string, error)
 	getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error)
 	parseStaticGitContext(repoUrl string) (*StaticGitContext, error)
+	GetBranchByCommit(staticContext *StaticGitContext) (string, error)
 }
 
 type AbstractGitProvider struct {
@@ -56,6 +57,16 @@ func (a *AbstractGitProvider) GetRepositoryFromUrl(repositoryUrl string) (*GitRe
 		}
 	}
 
+	var target CloneTarget = CloneTargetBranch
+	if staticContext.Branch == staticContext.Sha {
+		target = CloneTargetCommit
+		branch, err := a.GetBranchByCommit(staticContext)
+		if err != nil {
+			return nil, err
+		}
+		*staticContext.Branch = branch
+	}
+
 	lastCommitSha, err := a.GetLastCommitSha(staticContext)
 	if err != nil {
 		return nil, err
@@ -71,6 +82,7 @@ func (a *AbstractGitProvider) GetRepositoryFromUrl(repositoryUrl string) (*GitRe
 		PrNumber: staticContext.PrNumber,
 		Source:   staticContext.Source,
 		Path:     staticContext.Path,
+		Target:   target,
 	}, nil
 }
 

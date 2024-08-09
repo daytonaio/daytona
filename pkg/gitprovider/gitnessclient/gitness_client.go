@@ -232,6 +232,35 @@ func (g *GitnessClient) GetLastCommitSha(repoURL string, branch *string) (string
 	return lastCommit.Sha, nil
 }
 
+func (g *GitnessClient) GetCommits(sha string, owner string, repositoryName string, branch *string) (*[]Commit, error) {
+	api, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/commits", url.PathEscape(fmt.Sprintf("%s/%s", owner, repositoryName))))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse url : %w", err)
+	}
+
+	apiURL := ""
+	if branch != nil {
+		v := url.Values{}
+		v.Add("git_ref", *branch)
+		apiURL = api.String() + "?" + v.Encode()
+	} else {
+		apiURL = api.String()
+	}
+
+	body, err := g.performRequest("GET", apiURL)
+	if err != nil {
+		return nil, fmt.Errorf("error while making request: %s", err.Error())
+	}
+
+	var commitsResponse CommitsResponse
+	err = json.Unmarshal(body, &commitsResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return &commitsResponse.Commits, nil
+}
+
 func (g *GitnessClient) GetRepoRef(url string) (*string, error) {
 	repoUrl := strings.TrimSuffix(url, ".git")
 	parts := strings.Split(repoUrl, "/")

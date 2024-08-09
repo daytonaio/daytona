@@ -5,6 +5,7 @@ package gitprovider
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
@@ -278,6 +279,57 @@ func (g *GitHubGitProvider) getApiClient() *github.Client {
 	}
 
 	return client
+}
+
+func (g *GitHubGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
+	if staticContext.Sha == nil || *staticContext.Sha == "" {
+		return *staticContext.Sha, nil
+	}
+
+	client := g.getApiClient()
+
+	branches, _, err := client.Repositories.ListBranches(context.Background(), staticContext.Owner, staticContext.Name, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to list branches: %v", err)
+	}
+
+	var branchName string
+	for _, branch := range branches {
+		branchCommitSHA := branch.GetCommit().GetSHA()
+
+		if branchCommitSHA == *staticContext.Sha {
+			branchName = branch.GetName()
+			break
+		}
+
+		commits, _, err := client.Repositories.ListCommits(context.Background(), staticContext.Owner, staticContext.Name, &github.CommitsListOptions{
+			SHA: *staticContext.Sha,
+		})
+		if err != nil {
+			return "", err
+		}
+
+		if len(commits) == 0 {
+			continue
+		}
+
+		for _, commit := range commits {
+			if *staticContext.Sha == *commit.SHA {
+				branchName = branch.GetName()
+				break
+			}
+		}
+
+		if branchName != "" {
+			break
+		}
+	}
+
+	if branchName != "" {
+		return "", nil
+	}
+
+	return branchName, nil
 }
 
 func (g *GitHubGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {

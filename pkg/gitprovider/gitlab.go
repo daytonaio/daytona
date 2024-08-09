@@ -131,6 +131,55 @@ func (g *GitLabGitProvider) GetRepoBranches(repositoryId string, namespaceId str
 	return response, nil
 }
 
+func (g *GitLabGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
+	if staticContext.Sha == nil || *staticContext.Sha == "" {
+		return *staticContext.Branch, nil
+	}
+
+	client := g.getApiClient()
+
+	branches, _, err := client.Branches.ListBranches(staticContext.Id, &gitlab.ListBranchesOptions{})
+	if err != nil {
+		return "", err
+	}
+
+	var branchName string
+	for _, branch := range branches {
+		if *staticContext.Sha == branch.Commit.ID {
+			branchName = branch.Name
+			break
+		}
+
+		commits, _, err := client.Commits.ListCommits(staticContext.Id, &gitlab.ListCommitsOptions{
+			RefName: staticContext.Sha,
+		})
+		if err != nil {
+			return "", err
+		}
+
+		if len(commits) == 0 {
+			continue
+		}
+
+		for _, commit := range commits {
+			if commit.ID == *staticContext.Sha {
+				branchName = branch.Name
+				break
+			}
+		}
+
+		if branchName == "" {
+			break
+		}
+	}
+
+	if branchName == "" {
+		return "", fmt.Errorf("branch not found for SHA: %s", *staticContext.Sha)
+	}
+
+	return branchName, nil
+}
+
 func (g *GitLabGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error) {
 	client := g.getApiClient()
 	var response []*GitPullRequest
