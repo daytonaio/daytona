@@ -16,36 +16,36 @@ import (
 
 type Project struct {
 	config.ProjectConfig
-	WorkspaceId string        `json:"workspaceId"`
+	WorkspaceId string        `json:"workspaceId" validate:"required"`
 	ApiKey      string        `json:"-"`
-	Target      string        `json:"target"`
-	State       *ProjectState `json:"state,omitempty"`
+	Target      string        `json:"target" validate:"required"`
+	State       *ProjectState `json:"state,omitempty" validate:"optional"`
 } // @name Project
 
 type ProjectInfo struct {
-	Name             string `json:"name"`
-	Created          string `json:"created"`
-	IsRunning        bool   `json:"isRunning"`
-	ProviderMetadata string `json:"providerMetadata,omitempty"`
-	WorkspaceId      string `json:"workspaceId"`
+	Name             string `json:"name" validate:"required"`
+	Created          string `json:"created" validate:"required"`
+	IsRunning        bool   `json:"isRunning" validate:"required"`
+	ProviderMetadata string `json:"providerMetadata,omitempty" validate:"optional"`
+	WorkspaceId      string `json:"workspaceId" validate:"required"`
 } // @name ProjectInfo
 
 type ProjectState struct {
-	UpdatedAt string     `json:"updatedAt"`
-	Uptime    uint64     `json:"uptime"`
-	GitStatus *GitStatus `json:"gitStatus"`
+	UpdatedAt string     `json:"updatedAt" validate:"required"`
+	Uptime    uint64     `json:"uptime" validate:"required"`
+	GitStatus *GitStatus `json:"gitStatus" validate:"required"`
 } // @name ProjectState
 
 type GitStatus struct {
-	CurrentBranch string        `json:"currentBranch"`
-	Files         []*FileStatus `json:"fileStatus"`
+	CurrentBranch string        `json:"currentBranch" validate:"required"`
+	Files         []*FileStatus `json:"fileStatus" validate:"required"`
 } // @name GitStatus
 
 type FileStatus struct {
-	Name     string `json:"name"`
-	Extra    string `json:"extra"`
-	Staging  Status `json:"staging"`
-	Worktree Status `json:"worktree"`
+	Name     string `json:"name" validate:"required"`
+	Extra    string `json:"extra" validate:"required"`
+	Staging  Status `json:"staging" validate:"required"`
+	Worktree Status `json:"worktree" validate:"required"`
 } // @name FileStatus
 
 // Status status code of a file in the Worktree

@@ -615,7 +615,7 @@ import (
 )
 
 func main() {
-	repository := *openapiclient.NewGitRepository() // GitRepository | Git repository
+	repository := *openapiclient.NewGitRepository("Id_example", "Name_example", "Owner_example", "Sha_example", "Source_example", "Url_example") // GitRepository | Git repository
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -810,7 +810,7 @@ import (
 )
 
 func main() {
-	gitProviderConfig := *openapiclient.NewGitProvider() // GitProvider | Git provider
+	gitProviderConfig := *openapiclient.NewSetGitProviderConfig("Id_example", "Token_example") // SetGitProviderConfig | Git provider
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -833,7 +833,7 @@ Other parameters are passed through a pointer to a apiSetGitProviderRequest stru
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **gitProviderConfig** | [**GitProvider**](GitProvider.md) | Git provider | 
+ **gitProviderConfig** | [**SetGitProviderConfig**](SetGitProviderConfig.md) | Git provider | 
 
 ### Return type
 

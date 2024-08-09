@@ -11,7 +11,9 @@ API version: v0.0.0-dev
 package apiclient
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the CreateProjectConfigSourceDTO type satisfies the MappedNullable interface at compile time
@@ -19,15 +21,18 @@ var _ MappedNullable = &CreateProjectConfigSourceDTO{}
 
 // CreateProjectConfigSourceDTO struct for CreateProjectConfigSourceDTO
 type CreateProjectConfigSourceDTO struct {
-	Repository *GitRepository `json:"repository,omitempty"`
+	Repository GitRepository `json:"repository"`
 }
+
+type _CreateProjectConfigSourceDTO CreateProjectConfigSourceDTO
 
 // NewCreateProjectConfigSourceDTO instantiates a new CreateProjectConfigSourceDTO object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateProjectConfigSourceDTO() *CreateProjectConfigSourceDTO {
+func NewCreateProjectConfigSourceDTO(repository GitRepository) *CreateProjectConfigSourceDTO {
 	this := CreateProjectConfigSourceDTO{}
+	this.Repository = repository
 	return &this
 }
 
@@ -39,36 +44,28 @@ func NewCreateProjectConfigSourceDTOWithDefaults() *CreateProjectConfigSourceDTO
 	return &this
 }
 
-// GetRepository returns the Repository field value if set, zero value otherwise.
+// GetRepository returns the Repository field value
 func (o *CreateProjectConfigSourceDTO) GetRepository() GitRepository {
-	if o == nil || IsNil(o.Repository) {
+	if o == nil {
 		var ret GitRepository
 		return ret
 	}
-	return *o.Repository
+
+	return o.Repository
 }
 
-// GetRepositoryOk returns a tuple with the Repository field value if set, nil otherwise
+// GetRepositoryOk returns a tuple with the Repository field value
 // and a boolean to check if the value has been set.
 func (o *CreateProjectConfigSourceDTO) GetRepositoryOk() (*GitRepository, bool) {
-	if o == nil || IsNil(o.Repository) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Repository, true
+	return &o.Repository, true
 }
 
-// HasRepository returns a boolean if a field has been set.
-func (o *CreateProjectConfigSourceDTO) HasRepository() bool {
-	if o != nil && !IsNil(o.Repository) {
-		return true
-	}
-
-	return false
-}
-
-// SetRepository gets a reference to the given GitRepository and assigns it to the Repository field.
+// SetRepository sets field value
 func (o *CreateProjectConfigSourceDTO) SetRepository(v GitRepository) {
-	o.Repository = &v
+	o.Repository = v
 }
 
 func (o CreateProjectConfigSourceDTO) MarshalJSON() ([]byte, error) {
@@ -81,10 +78,45 @@ func (o CreateProjectConfigSourceDTO) MarshalJSON() ([]byte, error) {
 
 func (o CreateProjectConfigSourceDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Repository) {
-		toSerialize["repository"] = o.Repository
-	}
+	toSerialize["repository"] = o.Repository
 	return toSerialize, nil
+}
+
+func (o *CreateProjectConfigSourceDTO) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	requiredProperties := []string{
+		"repository",
+	}
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	for _, requiredProperty := range requiredProperties {
+		if _, exists := allProperties[requiredProperty]; !exists {
+			return fmt.Errorf("no value given for required property %v", requiredProperty)
+		}
+	}
+
+	varCreateProjectConfigSourceDTO := _CreateProjectConfigSourceDTO{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&varCreateProjectConfigSourceDTO)
+
+	if err != nil {
+		return err
+	}
+
+	*o = CreateProjectConfigSourceDTO(varCreateProjectConfigSourceDTO)
+
+	return err
 }
 
 type NullableCreateProjectConfigSourceDTO struct {

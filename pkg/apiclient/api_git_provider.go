@@ -1335,11 +1335,11 @@ func (a *GitProviderAPIService) RemoveGitProviderExecute(r ApiRemoveGitProviderR
 type ApiSetGitProviderRequest struct {
 	ctx               context.Context
 	ApiService        *GitProviderAPIService
-	gitProviderConfig *GitProvider
+	gitProviderConfig *SetGitProviderConfig
 }
 
 // Git provider
-func (r ApiSetGitProviderRequest) GitProviderConfig(gitProviderConfig GitProvider) ApiSetGitProviderRequest {
+func (r ApiSetGitProviderRequest) GitProviderConfig(gitProviderConfig SetGitProviderConfig) ApiSetGitProviderRequest {
 	r.gitProviderConfig = &gitProviderConfig
 	return r
 }

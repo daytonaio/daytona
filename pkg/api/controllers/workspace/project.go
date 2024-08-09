@@ -42,7 +42,7 @@ func SetProjectState(ctx *gin.Context) {
 	_, err = server.WorkspaceService.SetProjectState(workspaceId, projectId, &project.ProjectState{
 		Uptime:    setProjectStateDTO.Uptime,
 		UpdatedAt: time.Now().Format(time.RFC1123),
-		GitStatus: &setProjectStateDTO.GitStatus,
+		GitStatus: setProjectStateDTO.GitStatus,
 	})
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to stop workspace %s: %s", workspaceId, err.Error()))

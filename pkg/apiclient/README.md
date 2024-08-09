@@ -159,6 +159,7 @@ Class | Method | HTTP request | Description
  - [ProviderTarget](docs/ProviderTarget.md)
  - [RepositoryUrl](docs/RepositoryUrl.md)
  - [ServerConfig](docs/ServerConfig.md)
+ - [SetGitProviderConfig](docs/SetGitProviderConfig.md)
  - [SetProjectState](docs/SetProjectState.md)
  - [Status](docs/Status.md)
  - [Workspace](docs/Workspace.md)

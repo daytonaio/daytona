@@ -6,6 +6,7 @@ package util
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -60,21 +61,17 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 
 			projectNames := []string{}
 			for _, p := range projectList {
-				var currentName string
-				if p.Name != nil {
-					currentName = *p.Name
-				}
-				projectNames = append(projectNames, currentName)
+				projectNames = append(projectNames, p.Name)
 			}
 
 			// Append occurence number to keep duplicate entries unique
-			repoUrl := *projectConfig.Repository.Url
+			repoUrl := projectConfig.Repository.Url
 			if len(selectedRepos) > 0 && selectedRepos[repoUrl] > 1 {
-				*projectConfig.Name += strconv.Itoa(selectedRepos[repoUrl])
+				projectConfig.Name += strconv.Itoa(selectedRepos[repoUrl])
 			}
 
-			if *projectConfig.Name != selection.BlankProjectIdentifier {
-				projectName := GetSuggestedName(*projectConfig.Name, projectNames)
+			if projectConfig.Name != selection.BlankProjectIdentifier {
+				projectName := GetSuggestedName(projectConfig.Name, projectNames)
 
 				branch, err := GetBranchFromProjectConfig(projectConfig, config.ApiClient, i)
 				if err != nil {
@@ -85,8 +82,8 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 				configRepo.Branch = &branch
 
 				projectList = append(projectList, apiclient.CreateProjectConfigDTO{
-					Name: &projectName,
-					Source: &apiclient.CreateProjectConfigSourceDTO{
+					Name: projectName,
+					Source: apiclient.CreateProjectConfigSourceDTO{
 						Repository: configRepo,
 					},
 					BuildConfig: projectConfig.BuildConfig,
@@ -111,7 +108,13 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 			return nil, err
 		}
 
-		providerRepoName, err := GetSanitizedProjectName(*providerRepo.Name)
+		var res *http.Response
+		providerRepo, res, err = config.ApiClient.GitProviderAPI.GetGitContext(context.Background(), url.QueryEscape(providerRepo.Url)).Execute()
+		if err != nil {
+			return nil, apiclient_util.HandleErrorResponse(res, err)
+		}
+
+		providerRepoName, err := GetSanitizedProjectName(providerRepo.Name)
 		if err != nil {
 			return nil, err
 		}
@@ -158,7 +161,7 @@ func GetEnvVariables(projectConfigDto *apiclient.CreateProjectConfigDTO, profile
 	envVars := map[string]string{}
 
 	if profileData != nil && profileData.EnvVars != nil {
-		for k, v := range *profileData.EnvVars {
+		for k, v := range profileData.EnvVars {
 			if strings.HasPrefix(v, "$") {
 				env, ok := os.LookupEnv(v[1:])
 				if ok {
@@ -173,7 +176,7 @@ func GetEnvVariables(projectConfigDto *apiclient.CreateProjectConfigDTO, profile
 	}
 
 	if projectConfigDto.EnvVars != nil {
-		for k, v := range *projectConfigDto.EnvVars {
+		for k, v := range projectConfigDto.EnvVars {
 			if strings.HasPrefix(v, "$") {
 				env, ok := os.LookupEnv(v[1:])
 				if ok {
@@ -193,7 +196,7 @@ func GetEnvVariables(projectConfigDto *apiclient.CreateProjectConfigDTO, profile
 func GetBranchFromProjectConfig(projectConfig *apiclient.ProjectConfig, apiClient *apiclient.APIClient, projectOrder int) (string, error) {
 	ctx := context.Background()
 
-	encodedURLParam := url.QueryEscape(*projectConfig.Repository.Url)
+	encodedURLParam := url.QueryEscape(projectConfig.Repository.Url)
 
 	repoResponse, res, err := apiClient.GitProviderAPI.GetGitContext(ctx, encodedURLParam).Execute()
 	if err != nil {
@@ -208,7 +211,7 @@ func GetBranchFromProjectConfig(projectConfig *apiclient.ProjectConfig, apiClien
 	branchWizardConfig := BranchWizardConfig{
 		ApiClient:    apiClient,
 		ProviderId:   providerId,
-		NamespaceId:  *repoResponse.Owner,
+		NamespaceId:  repoResponse.Owner,
 		ChosenRepo:   repoResponse,
 		ProjectOrder: projectOrder,
 	}
@@ -229,14 +232,14 @@ func GetBranchFromProjectConfig(projectConfig *apiclient.ProjectConfig, apiClien
 
 func newCreateProjectConfigDTO(config ProjectsDataPromptConfig, providerRepo *apiclient.GitRepository, providerRepoName string) apiclient.CreateProjectConfigDTO {
 	project := apiclient.CreateProjectConfigDTO{
-		Name: &providerRepoName,
-		Source: &apiclient.CreateProjectConfigSourceDTO{
-			Repository: providerRepo,
+		Name: providerRepoName,
+		Source: apiclient.CreateProjectConfigSourceDTO{
+			Repository: *providerRepo,
 		},
 		BuildConfig: &apiclient.ProjectBuildConfig{},
 		Image:       config.Defaults.Image,
 		User:        config.Defaults.ImageUser,
-		EnvVars:     &map[string]string{},
+		EnvVars:     map[string]string{},
 	}
 
 	return project

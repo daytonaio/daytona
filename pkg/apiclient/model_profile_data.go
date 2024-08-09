@@ -11,7 +11,9 @@ API version: v0.0.0-dev
 package apiclient
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the ProfileData type satisfies the MappedNullable interface at compile time
@@ -19,15 +21,18 @@ var _ MappedNullable = &ProfileData{}
 
 // ProfileData struct for ProfileData
 type ProfileData struct {
-	EnvVars *map[string]string `json:"envVars,omitempty"`
+	EnvVars map[string]string `json:"envVars"`
 }
+
+type _ProfileData ProfileData
 
 // NewProfileData instantiates a new ProfileData object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProfileData() *ProfileData {
+func NewProfileData(envVars map[string]string) *ProfileData {
 	this := ProfileData{}
+	this.EnvVars = envVars
 	return &this
 }
 
@@ -39,36 +44,28 @@ func NewProfileDataWithDefaults() *ProfileData {
 	return &this
 }
 
-// GetEnvVars returns the EnvVars field value if set, zero value otherwise.
+// GetEnvVars returns the EnvVars field value
 func (o *ProfileData) GetEnvVars() map[string]string {
-	if o == nil || IsNil(o.EnvVars) {
+	if o == nil {
 		var ret map[string]string
 		return ret
 	}
-	return *o.EnvVars
+
+	return o.EnvVars
 }
 
-// GetEnvVarsOk returns a tuple with the EnvVars field value if set, nil otherwise
+// GetEnvVarsOk returns a tuple with the EnvVars field value
 // and a boolean to check if the value has been set.
 func (o *ProfileData) GetEnvVarsOk() (*map[string]string, bool) {
-	if o == nil || IsNil(o.EnvVars) {
+	if o == nil {
 		return nil, false
 	}
-	return o.EnvVars, true
+	return &o.EnvVars, true
 }
 
-// HasEnvVars returns a boolean if a field has been set.
-func (o *ProfileData) HasEnvVars() bool {
-	if o != nil && !IsNil(o.EnvVars) {
-		return true
-	}
-
-	return false
-}
-
-// SetEnvVars gets a reference to the given map[string]string and assigns it to the EnvVars field.
+// SetEnvVars sets field value
 func (o *ProfileData) SetEnvVars(v map[string]string) {
-	o.EnvVars = &v
+	o.EnvVars = v
 }
 
 func (o ProfileData) MarshalJSON() ([]byte, error) {
@@ -81,10 +78,45 @@ func (o ProfileData) MarshalJSON() ([]byte, error) {
 
 func (o ProfileData) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.EnvVars) {
-		toSerialize["envVars"] = o.EnvVars
-	}
+	toSerialize["envVars"] = o.EnvVars
 	return toSerialize, nil
+}
+
+func (o *ProfileData) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	requiredProperties := []string{
+		"envVars",
+	}
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	for _, requiredProperty := range requiredProperties {
+		if _, exists := allProperties[requiredProperty]; !exists {
+			return fmt.Errorf("no value given for required property %v", requiredProperty)
+		}
+	}
+
+	varProfileData := _ProfileData{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&varProfileData)
+
+	if err != nil {
+		return err
+	}
+
+	*o = ProfileData(varProfileData)
+
+	return err
 }
 
 type NullableProfileData struct {

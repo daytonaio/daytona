@@ -11,7 +11,9 @@ API version: v0.0.0-dev
 package apiclient
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the ProviderTarget type satisfies the MappedNullable interface at compile time
@@ -19,18 +21,23 @@ var _ MappedNullable = &ProviderTarget{}
 
 // ProviderTarget struct for ProviderTarget
 type ProviderTarget struct {
-	Name *string `json:"name,omitempty"`
+	Name string `json:"name"`
 	// JSON encoded map of options
-	Options      *string               `json:"options,omitempty"`
-	ProviderInfo *ProviderProviderInfo `json:"providerInfo,omitempty"`
+	Options      string               `json:"options"`
+	ProviderInfo ProviderProviderInfo `json:"providerInfo"`
 }
+
+type _ProviderTarget ProviderTarget
 
 // NewProviderTarget instantiates a new ProviderTarget object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProviderTarget() *ProviderTarget {
+func NewProviderTarget(name string, options string, providerInfo ProviderProviderInfo) *ProviderTarget {
 	this := ProviderTarget{}
+	this.Name = name
+	this.Options = options
+	this.ProviderInfo = providerInfo
 	return &this
 }
 
@@ -42,100 +49,76 @@ func NewProviderTargetWithDefaults() *ProviderTarget {
 	return &this
 }
 
-// GetName returns the Name field value if set, zero value otherwise.
+// GetName returns the Name field value
 func (o *ProviderTarget) GetName() string {
-	if o == nil || IsNil(o.Name) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Name
+
+	return o.Name
 }
 
-// GetNameOk returns a tuple with the Name field value if set, nil otherwise
+// GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
 func (o *ProviderTarget) GetNameOk() (*string, bool) {
-	if o == nil || IsNil(o.Name) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Name, true
+	return &o.Name, true
 }
 
-// HasName returns a boolean if a field has been set.
-func (o *ProviderTarget) HasName() bool {
-	if o != nil && !IsNil(o.Name) {
-		return true
-	}
-
-	return false
-}
-
-// SetName gets a reference to the given string and assigns it to the Name field.
+// SetName sets field value
 func (o *ProviderTarget) SetName(v string) {
-	o.Name = &v
+	o.Name = v
 }
 
-// GetOptions returns the Options field value if set, zero value otherwise.
+// GetOptions returns the Options field value
 func (o *ProviderTarget) GetOptions() string {
-	if o == nil || IsNil(o.Options) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Options
+
+	return o.Options
 }
 
-// GetOptionsOk returns a tuple with the Options field value if set, nil otherwise
+// GetOptionsOk returns a tuple with the Options field value
 // and a boolean to check if the value has been set.
 func (o *ProviderTarget) GetOptionsOk() (*string, bool) {
-	if o == nil || IsNil(o.Options) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Options, true
+	return &o.Options, true
 }
 
-// HasOptions returns a boolean if a field has been set.
-func (o *ProviderTarget) HasOptions() bool {
-	if o != nil && !IsNil(o.Options) {
-		return true
-	}
-
-	return false
-}
-
-// SetOptions gets a reference to the given string and assigns it to the Options field.
+// SetOptions sets field value
 func (o *ProviderTarget) SetOptions(v string) {
-	o.Options = &v
+	o.Options = v
 }
 
-// GetProviderInfo returns the ProviderInfo field value if set, zero value otherwise.
+// GetProviderInfo returns the ProviderInfo field value
 func (o *ProviderTarget) GetProviderInfo() ProviderProviderInfo {
-	if o == nil || IsNil(o.ProviderInfo) {
+	if o == nil {
 		var ret ProviderProviderInfo
 		return ret
 	}
-	return *o.ProviderInfo
+
+	return o.ProviderInfo
 }
 
-// GetProviderInfoOk returns a tuple with the ProviderInfo field value if set, nil otherwise
+// GetProviderInfoOk returns a tuple with the ProviderInfo field value
 // and a boolean to check if the value has been set.
 func (o *ProviderTarget) GetProviderInfoOk() (*ProviderProviderInfo, bool) {
-	if o == nil || IsNil(o.ProviderInfo) {
+	if o == nil {
 		return nil, false
 	}
-	return o.ProviderInfo, true
+	return &o.ProviderInfo, true
 }
 
-// HasProviderInfo returns a boolean if a field has been set.
-func (o *ProviderTarget) HasProviderInfo() bool {
-	if o != nil && !IsNil(o.ProviderInfo) {
-		return true
-	}
-
-	return false
-}
-
-// SetProviderInfo gets a reference to the given ProviderProviderInfo and assigns it to the ProviderInfo field.
+// SetProviderInfo sets field value
 func (o *ProviderTarget) SetProviderInfo(v ProviderProviderInfo) {
-	o.ProviderInfo = &v
+	o.ProviderInfo = v
 }
 
 func (o ProviderTarget) MarshalJSON() ([]byte, error) {
@@ -148,16 +131,49 @@ func (o ProviderTarget) MarshalJSON() ([]byte, error) {
 
 func (o ProviderTarget) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Name) {
-		toSerialize["name"] = o.Name
-	}
-	if !IsNil(o.Options) {
-		toSerialize["options"] = o.Options
-	}
-	if !IsNil(o.ProviderInfo) {
-		toSerialize["providerInfo"] = o.ProviderInfo
-	}
+	toSerialize["name"] = o.Name
+	toSerialize["options"] = o.Options
+	toSerialize["providerInfo"] = o.ProviderInfo
 	return toSerialize, nil
+}
+
+func (o *ProviderTarget) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	requiredProperties := []string{
+		"name",
+		"options",
+		"providerInfo",
+	}
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	for _, requiredProperty := range requiredProperties {
+		if _, exists := allProperties[requiredProperty]; !exists {
+			return fmt.Errorf("no value given for required property %v", requiredProperty)
+		}
+	}
+
+	varProviderTarget := _ProviderTarget{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&varProviderTarget)
+
+	if err != nil {
+		return err
+	}
+
+	*o = ProviderTarget(varProviderTarget)
+
+	return err
 }
 
 type NullableProviderTarget struct {

@@ -10,9 +10,9 @@ import (
 
 // ContainerRegistry represents a container registry credentials
 type ContainerRegistry struct {
-	Server   string `json:"server"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Server   string `json:"server" validate:"required"`
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
 } // @name ContainerRegistry
 
 func GetServerHostname(server string) (string, error) {

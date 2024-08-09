@@ -23,15 +23,15 @@ func AddProjectFromConfig(projectConfig *apiclient.ProjectConfig, apiClient *api
 
 	project := &apiclient.CreateProjectConfigDTO{
 		Name: projectConfig.Name,
-		Source: &apiclient.CreateProjectConfigSourceDTO{
+		Source: apiclient.CreateProjectConfigSourceDTO{
 			Repository: configRepo,
 		},
 		BuildConfig: projectConfig.BuildConfig,
-		Image:       projectConfig.Image,
-		User:        projectConfig.User,
+		Image:       &projectConfig.Image,
+		User:        &projectConfig.User,
 		EnvVars:     projectConfig.EnvVars,
 	}
 	*projects = append(*projects, *project)
 
-	return projectConfig.Name, nil
+	return &projectConfig.Name, nil
 }

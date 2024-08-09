@@ -61,7 +61,7 @@ var containerRegistryDeleteCmd = &cobra.Command{
 				}
 			}
 
-			selectedServer = *registryDto.Server
+			selectedServer = registryDto.Server
 		} else {
 			selectedServer = args[0]
 		}

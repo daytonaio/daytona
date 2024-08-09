@@ -49,13 +49,13 @@ var projectConfigUpdateCmd = &cobra.Command{
 			}
 		}
 
-		if projectConfig == nil || projectConfig.Name == nil {
-			log.Fatal("project config not found")
+		if projectConfig == nil {
+			return
 		}
 
 		projectConfigs = append(projectConfigs, apiclient.CreateProjectConfigDTO{
 			Name: projectConfig.Name,
-			Source: &apiclient.CreateProjectConfigSourceDTO{
+			Source: apiclient.CreateProjectConfigSourceDTO{
 				Repository: projectConfig.Repository,
 			},
 			BuildConfig: projectConfig.BuildConfig,
@@ -64,18 +64,12 @@ var projectConfigUpdateCmd = &cobra.Command{
 
 		projectDefaults := &create.ProjectConfigDefaults{
 			BuildChoice: create.AUTOMATIC,
+			Image:       &projectConfig.Image,
+			ImageUser:   &projectConfig.User,
 		}
 
-		if projectConfig.Image != nil {
-			projectDefaults.Image = projectConfig.Image
-		}
-
-		if projectConfig.User != nil {
-			projectDefaults.ImageUser = projectConfig.User
-		}
-
-		if projectConfig.BuildConfig != nil && projectConfig.BuildConfig.Devcontainer != nil && projectConfig.BuildConfig.Devcontainer.FilePath != nil {
-			projectDefaults.DevcontainerFilePath = *projectConfig.BuildConfig.Devcontainer.FilePath
+		if projectConfig.BuildConfig != nil && projectConfig.BuildConfig.Devcontainer != nil {
+			projectDefaults.DevcontainerFilePath = projectConfig.BuildConfig.Devcontainer.FilePath
 		}
 
 		create.ProjectsConfigurationChanged, err = create.RunProjectConfiguration(&projectConfigs, *projectDefaults)
@@ -88,12 +82,12 @@ var projectConfigUpdateCmd = &cobra.Command{
 			BuildConfig: projectConfigs[0].BuildConfig,
 			Image:       projectConfigs[0].Image,
 			User:        projectConfigs[0].User,
-			Source: &apiclient.CreateProjectConfigSourceDTO{
+			Source: apiclient.CreateProjectConfigSourceDTO{
 				Repository: projectConfigs[0].Source.Repository,
 			},
 		}
 
-		newProjectConfig.EnvVars = workspace_util.GetEnvVariables(&projectConfigs[0], nil)
+		newProjectConfig.EnvVars = *workspace_util.GetEnvVariables(&projectConfigs[0], nil)
 
 		res, err = apiClient.ProjectConfigAPI.SetProjectConfig(ctx).ProjectConfig(newProjectConfig).Execute()
 		if err != nil {

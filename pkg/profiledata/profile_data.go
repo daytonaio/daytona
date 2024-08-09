@@ -4,5 +4,5 @@
 package profiledata
 
 type ProfileData struct {
-	EnvVars map[string]string `json:"envVars"`
+	EnvVars map[string]string `json:"envVars" validate:"required"`
 } // @name ProfileData

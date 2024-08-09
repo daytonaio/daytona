@@ -5,20 +5,20 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Branch** | Pointer to **string** |  | [optional] 
-**Id** | Pointer to **string** |  | [optional] 
-**Name** | Pointer to **string** |  | [optional] 
-**Owner** | Pointer to **string** |  | [optional] 
+**Id** | **string** |  | 
+**Name** | **string** |  | 
+**Owner** | **string** |  | 
 **Path** | Pointer to **string** |  | [optional] 
 **PrNumber** | Pointer to **int32** |  | [optional] 
-**Sha** | Pointer to **string** |  | [optional] 
-**Source** | Pointer to **string** |  | [optional] 
-**Url** | Pointer to **string** |  | [optional] 
+**Sha** | **string** |  | 
+**Source** | **string** |  | 
+**Url** | **string** |  | 
 
 ## Methods
 
 ### NewGitRepository
 
-`func NewGitRepository() *GitRepository`
+`func NewGitRepository(id string, name string, owner string, sha string, source string, url string, ) *GitRepository`
 
 NewGitRepository instantiates a new GitRepository object
 This constructor will assign default values to properties that have it defined,
@@ -77,11 +77,6 @@ and a boolean to check if the value has been set.
 
 SetId sets Id field to given value.
 
-### HasId
-
-`func (o *GitRepository) HasId() bool`
-
-HasId returns a boolean if a field has been set.
 
 ### GetName
 
@@ -102,11 +97,6 @@ and a boolean to check if the value has been set.
 
 SetName sets Name field to given value.
 
-### HasName
-
-`func (o *GitRepository) HasName() bool`
-
-HasName returns a boolean if a field has been set.
 
 ### GetOwner
 
@@ -127,11 +117,6 @@ and a boolean to check if the value has been set.
 
 SetOwner sets Owner field to given value.
 
-### HasOwner
-
-`func (o *GitRepository) HasOwner() bool`
-
-HasOwner returns a boolean if a field has been set.
 
 ### GetPath
 
@@ -202,11 +187,6 @@ and a boolean to check if the value has been set.
 
 SetSha sets Sha field to given value.
 
-### HasSha
-
-`func (o *GitRepository) HasSha() bool`
-
-HasSha returns a boolean if a field has been set.
 
 ### GetSource
 
@@ -227,11 +207,6 @@ and a boolean to check if the value has been set.
 
 SetSource sets Source field to given value.
 
-### HasSource
-
-`func (o *GitRepository) HasSource() bool`
-
-HasSource returns a boolean if a field has been set.
 
 ### GetUrl
 
@@ -252,11 +227,6 @@ and a boolean to check if the value has been set.
 
 SetUrl sets Url field to given value.
 
-### HasUrl
-
-`func (o *GitRepository) HasUrl() bool`
-
-HasUrl returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

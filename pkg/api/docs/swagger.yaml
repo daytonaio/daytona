@@ -9,6 +9,10 @@ definitions:
         type: string
       type:
         $ref: '#/definitions/apikey.ApiKeyType'
+    required:
+    - keyHash
+    - name
+    - type
     type: object
   ContainerRegistry:
     properties:
@@ -18,6 +22,10 @@ definitions:
         type: string
       username:
         type: string
+    required:
+    - password
+    - server
+    - username
     type: object
   CreateProjectConfigDTO:
     properties:
@@ -35,11 +43,17 @@ definitions:
         $ref: '#/definitions/CreateProjectConfigSourceDTO'
       user:
         type: string
+    required:
+    - envVars
+    - name
+    - source
     type: object
   CreateProjectConfigSourceDTO:
     properties:
       repository:
         $ref: '#/definitions/GitRepository'
+    required:
+    - repository
     type: object
   CreateWorkspaceDTO:
     properties:
@@ -54,12 +68,17 @@ definitions:
       target:
         type: string
     required:
+    - id
+    - name
     - projects
+    - target
     type: object
   DevcontainerConfig:
     properties:
       filePath:
         type: string
+    required:
+    - filePath
     type: object
   FRPSConfig:
     properties:
@@ -69,6 +88,10 @@ definitions:
         type: integer
       protocol:
         type: string
+    required:
+    - domain
+    - port
+    - protocol
     type: object
   FileStatus:
     properties:
@@ -80,6 +103,11 @@ definitions:
         $ref: '#/definitions/Status'
       worktree:
         $ref: '#/definitions/Status'
+    required:
+    - extra
+    - name
+    - staging
+    - worktree
     type: object
   GitBranch:
     properties:
@@ -87,6 +115,9 @@ definitions:
         type: string
       sha:
         type: string
+    required:
+    - name
+    - sha
     type: object
   GitNamespace:
     properties:
@@ -94,6 +125,9 @@ definitions:
         type: string
       name:
         type: string
+    required:
+    - id
+    - name
     type: object
   GitProvider:
     properties:
@@ -105,6 +139,10 @@ definitions:
         type: string
       username:
         type: string
+    required:
+    - id
+    - token
+    - username
     type: object
   GitPullRequest:
     properties:
@@ -122,6 +160,14 @@ definitions:
         type: string
       sourceRepoUrl:
         type: string
+    required:
+    - branch
+    - name
+    - sha
+    - sourceRepoId
+    - sourceRepoName
+    - sourceRepoOwner
+    - sourceRepoUrl
     type: object
   GitRepository:
     properties:
@@ -143,6 +189,13 @@ definitions:
         type: string
       url:
         type: string
+    required:
+    - id
+    - name
+    - owner
+    - sha
+    - source
+    - url
     type: object
   GitStatus:
     properties:
@@ -152,6 +205,9 @@ definitions:
         items:
           $ref: '#/definitions/FileStatus'
         type: array
+    required:
+    - currentBranch
+    - fileStatus
     type: object
   GitUser:
     properties:
@@ -163,6 +219,11 @@ definitions:
         type: string
       username:
         type: string
+    required:
+    - email
+    - id
+    - name
+    - username
     type: object
   InstallProviderRequest:
     properties:
@@ -172,11 +233,16 @@ definitions:
         type: object
       name:
         type: string
+    required:
+    - downloadUrls
+    - name
     type: object
   NetworkKey:
     properties:
       key:
         type: string
+    required:
+    - key
     type: object
   ProfileData:
     properties:
@@ -184,6 +250,8 @@ definitions:
         additionalProperties:
           type: string
         type: object
+    required:
+    - envVars
     type: object
   Project:
     properties:
@@ -209,6 +277,15 @@ definitions:
         type: string
       workspaceId:
         type: string
+    required:
+    - default
+    - envVars
+    - image
+    - name
+    - repository
+    - target
+    - user
+    - workspaceId
     type: object
   ProjectBuildConfig:
     properties:
@@ -233,6 +310,13 @@ definitions:
         $ref: '#/definitions/GitRepository'
       user:
         type: string
+    required:
+    - default
+    - envVars
+    - image
+    - name
+    - repository
+    - user
     type: object
   ProjectInfo:
     properties:
@@ -246,6 +330,11 @@ definitions:
         type: string
       workspaceId:
         type: string
+    required:
+    - created
+    - isRunning
+    - name
+    - workspaceId
     type: object
   ProjectState:
     properties:
@@ -255,6 +344,10 @@ definitions:
         type: string
       uptime:
         type: integer
+    required:
+    - gitStatus
+    - updatedAt
+    - uptime
     type: object
   Provider:
     properties:
@@ -262,6 +355,9 @@ definitions:
         type: string
       version:
         type: string
+    required:
+    - name
+    - version
     type: object
   ProviderTarget:
     properties:
@@ -272,6 +368,10 @@ definitions:
         type: string
       providerInfo:
         $ref: '#/definitions/provider.ProviderInfo'
+    required:
+    - name
+    - options
+    - providerInfo
     type: object
   ProviderTargetManifest:
     additionalProperties:
@@ -281,6 +381,8 @@ definitions:
     properties:
       url:
         type: string
+    required:
+    - url
     type: object
   ServerConfig:
     properties:
@@ -316,6 +418,35 @@ definitions:
         type: string
       serverDownloadUrl:
         type: string
+    required:
+    - apiPort
+    - binariesPath
+    - builderImage
+    - builderRegistryServer
+    - defaultProjectImage
+    - defaultProjectUser
+    - headscalePort
+    - id
+    - localBuilderRegistryImage
+    - localBuilderRegistryPort
+    - logFilePath
+    - providersDir
+    - registryUrl
+    - serverDownloadUrl
+    type: object
+  SetGitProviderConfig:
+    properties:
+      baseApiUrl:
+        type: string
+      id:
+        type: string
+      token:
+        type: string
+      username:
+        type: string
+    required:
+    - id
+    - token
     type: object
   SetProjectState:
     properties:
@@ -323,6 +454,8 @@ definitions:
         $ref: '#/definitions/GitStatus'
       uptime:
         type: integer
+    required:
+    - uptime
     type: object
   Status:
     enum:
@@ -356,6 +489,11 @@ definitions:
         type: array
       target:
         type: string
+    required:
+    - id
+    - name
+    - projects
+    - target
     type: object
   WorkspaceDTO:
     properties:
@@ -371,6 +509,11 @@ definitions:
         type: array
       target:
         type: string
+    required:
+    - id
+    - name
+    - projects
+    - target
     type: object
   WorkspaceInfo:
     properties:
@@ -382,6 +525,9 @@ definitions:
         type: array
       providerMetadata:
         type: string
+    required:
+    - name
+    - projects
     type: object
   apikey.ApiKeyType:
     enum:
@@ -399,6 +545,9 @@ definitions:
         type: string
       version:
         type: string
+    required:
+    - name
+    - version
     type: object
   provider.ProviderTargetProperty:
     properties:
@@ -597,7 +746,7 @@ paths:
         name: gitProviderConfig
         required: true
         schema:
-          $ref: '#/definitions/GitProvider'
+          $ref: '#/definitions/SetGitProviderConfig'
       produces:
       - application/json
       responses:
