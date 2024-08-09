@@ -301,6 +301,28 @@ func (g *GitHubGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (
 			branchName = branch.GetName()
 			break
 		}
+
+		commits, _, err := client.Repositories.ListCommits(context.Background(), staticContext.Owner, staticContext.Name, &github.CommitsListOptions{
+			SHA: *staticContext.Sha,
+		})
+		if err != nil {
+			return "", err
+		}
+
+		if len(commits) == 0 {
+			continue
+		}
+
+		for _, commit := range commits {
+			if *staticContext.Sha == *commit.SHA {
+				branchName = branch.GetName()
+				break
+			}
+		}
+
+		if branchName != "" {
+			break
+		}
 	}
 
 	if branchName != "" {

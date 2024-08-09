@@ -183,6 +183,28 @@ func (g *GiteaGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (s
 			branchName = branch.Name
 			break
 		}
+
+		commits, _, err := client.ListRepoCommits(staticContext.Owner, staticContext.Id, gitea.ListCommitOptions{
+			SHA: *staticContext.Sha,
+		})
+		if err != nil {
+			return "", err
+		}
+
+		if len(commits) == 0 {
+			continue
+		}
+
+		for _, commit := range commits {
+			if *staticContext.Sha == commit.SHA {
+				branchName = branch.Name
+				break
+			}
+		}
+
+		if branchName != "" {
+			break
+		}
 	}
 
 	if branchName == "" {

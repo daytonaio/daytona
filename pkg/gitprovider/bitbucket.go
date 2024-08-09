@@ -369,7 +369,6 @@ func (g *BitbucketGitProvider) GetBranchByCommit(staticContext *StaticGitContext
 
 	var branchName string
 	for _, branch := range branches.Branches {
-
 		hash, ok := branch.Target["hash"].(string)
 		if !ok {
 			log.Infof("failed to get branch info for %s", branch.Name)
@@ -378,7 +377,51 @@ func (g *BitbucketGitProvider) GetBranchByCommit(staticContext *StaticGitContext
 
 		if hash == *staticContext.Sha {
 			branchName = branch.Name
+			break
 		}
+
+		commits, err := client.Repositories.Commits.GetCommits(&bitbucket.CommitsOptions{
+			RepoSlug:    repo,
+			Owner:       owner,
+			Branchortag: branch.Name,
+		})
+		if err != nil {
+			return "", err
+		}
+		commitsResponse, ok := commits.(map[string]interface{})
+		if !ok {
+			return "", fmt.Errorf("Invalid commits response")
+		}
+
+		valuesResponse, ok := commitsResponse["values"].([]interface{})
+		if !ok {
+			return "", fmt.Errorf("Invalid commits values")
+		}
+
+		if len(valuesResponse) == 0 {
+			continue
+		}
+
+		for _, commit := range valuesResponse {
+			commitResponse, ok := commit.(map[string]interface{})
+			if !ok {
+				return "", fmt.Errorf("Invalid commit response")
+			}
+
+			commitHash, ok := commitResponse["hash"].(string)
+			if !ok {
+				return "", fmt.Errorf("Invalid commit hash")
+			}
+			if commitHash == *staticContext.Sha {
+				branchName = branch.Name
+				break
+			}
+		}
+
+		if branchName != "" {
+			break
+		}
+
 	}
 
 	if branchName == "" {

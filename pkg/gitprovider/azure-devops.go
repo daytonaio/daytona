@@ -310,6 +310,39 @@ func (g *AzureDevOpsGitProvider) GetBranchByCommit(staticContext *StaticGitConte
 			branchName = *branch.Name
 			break
 		}
+
+		searchCriteria := &git.GitQueryCommitsCriteria{
+			ItemVersion: &git.GitVersionDescriptor{
+				Version:     &branchName,
+				VersionType: &git.GitVersionTypeValues.Branch,
+			},
+			FromCommitId: staticContext.Sha,
+			ToCommitId:   staticContext.Sha,
+		}
+
+		commits, err := client.GetCommitsBatch(context.Background(), git.GetCommitsBatchArgs{
+			SearchCriteria: searchCriteria,
+			RepositoryId:   &staticContext.Name,
+		})
+		if err != nil {
+			return "", err
+		}
+
+		if len(*commits) == 0 {
+			continue
+		}
+
+		for _, commit := range *commits {
+			if *commit.CommitId == *staticContext.Sha {
+				branchName = *branch.Name
+				break
+			}
+
+		}
+		if branchName != "" {
+			break
+		}
+
 	}
 
 	if branchName == "" {

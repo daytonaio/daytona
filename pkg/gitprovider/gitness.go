@@ -115,6 +115,25 @@ func (g *GitnessGitProvider) GetBranchByCommit(staticContext *StaticGitContext) 
 			branchName = branch.Name
 			break
 		}
+
+		commits, err := client.GetCommits(*staticContext.Sha, staticContext.Owner, staticContext.Name, staticContext.Branch)
+		if err != nil {
+			return "", err
+		}
+
+		if len(*commits) == 0 {
+			continue
+		}
+
+		for _, commit := range *commits {
+			if commit.Sha == *staticContext.Sha {
+				branchName = branch.Name
+				break
+			}
+		}
+		if branchName != "" {
+			break
+		}
 	}
 
 	if branchName == "" {

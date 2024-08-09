@@ -363,7 +363,7 @@ func (g *BitbucketServerGitProvider) GetBranchByCommit(staticContext *StaticGitC
 		return "", err
 	}
 
-	branches, err := client.DefaultApi.GetBranches(staticContext.Owner, staticContext.Name, nil)
+	branches, err := client.DefaultApi.GetBranches(staticContext.Owner, staticContext.Name, map[string]interface{}{})
 	if err != nil {
 		return "", err
 	}
@@ -375,12 +375,37 @@ func (g *BitbucketServerGitProvider) GetBranchByCommit(staticContext *StaticGitC
 
 	var branchName string
 	for _, branch := range branchList {
-
 		if branch.LatestCommit == *staticContext.Sha {
 			branchName = branch.DisplayID
 			break
 		}
 
+		commits, err := client.DefaultApi.GetCommits(staticContext.Owner, staticContext.Name, map[string]interface{}{
+			"until": *staticContext.Sha,
+		})
+		if err != nil {
+			return "", err
+		}
+
+		if len(commits.Values) == 0 {
+			continue
+		}
+
+		commitList, err := bitbucketv1.GetCommitsResponse(commits)
+		if err != nil {
+			return "", err
+		}
+
+		for _, commit := range commitList {
+			if *staticContext.Sha == commit.ID {
+				branchName = branch.DisplayID
+				break
+			}
+		}
+
+		if branchName != "" {
+			break
+		}
 	}
 
 	if branchName == "" {
