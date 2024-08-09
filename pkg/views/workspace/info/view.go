@@ -37,9 +37,9 @@ func Render(workspace *apiclient.WorkspaceDTO, ide string, forceUnstyled bool) {
 	}
 
 	output += "\n"
-	output += getInfoLine(nameLabel, *workspace.Name) + "\n"
+	output += getInfoLine(nameLabel, workspace.Name) + "\n"
 
-	output += getInfoLine("ID", *workspace.Id) + "\n"
+	output += getInfoLine("ID", workspace.Id) + "\n"
 
 	if isCreationView {
 		output += getInfoLine("Editor", ide) + "\n"
@@ -90,27 +90,23 @@ func getSingleProjectOutput(project *apiclient.Project, isCreationView bool) str
 	var output string
 	var repositoryUrl string
 
-	if project.Repository != nil {
-		repositoryUrl = *project.Repository.Url
-		repositoryUrl = strings.TrimPrefix(repositoryUrl, "https://")
-		repositoryUrl = strings.TrimPrefix(repositoryUrl, "http://")
-	}
+	repositoryUrl = project.Repository.Url
+	repositoryUrl = strings.TrimPrefix(repositoryUrl, "https://")
+	repositoryUrl = strings.TrimPrefix(repositoryUrl, "http://")
 
 	if project.State != nil {
 		output += getInfoLineState("State", project.State) + "\n"
-		if project.State.GitStatus != nil {
-			output += getInfoLineGitStatus("Branch", project.State.GitStatus) + "\n"
-		}
+		output += getInfoLineGitStatus("Branch", &project.State.GitStatus) + "\n"
 	}
 
-	if project.Target != nil && !isCreationView {
-		output += getInfoLine("Target", *project.Target) + "\n"
+	if !isCreationView {
+		output += getInfoLine("Target", project.Target) + "\n"
 	}
 	output += getInfoLine("Repository", repositoryUrl)
 
-	if project.Name != nil && !isCreationView {
+	if !isCreationView {
 		output += "\n"
-		output += getInfoLine("Project", *project.Name)
+		output += getInfoLine("Project", project.Name)
 	}
 
 	return output
@@ -119,17 +115,15 @@ func getSingleProjectOutput(project *apiclient.Project, isCreationView bool) str
 func getProjectsOutputs(projects []apiclient.Project, isCreationView bool) string {
 	var output string
 	for i, project := range projects {
-		output += getInfoLine(fmt.Sprintf("Project #%d", i+1), *project.Name)
+		output += getInfoLine(fmt.Sprintf("Project #%d", i+1), project.Name)
 		output += getInfoLineState("State", project.State)
-		if project.State != nil && project.State.GitStatus != nil {
-			output += getInfoLineGitStatus("Branch", project.State.GitStatus)
+		if project.State != nil {
+			output += getInfoLineGitStatus("Branch", &project.State.GitStatus)
 		}
-		if project.Target != nil && !isCreationView {
-			output += getInfoLine("Target", *project.Target)
+		if !isCreationView {
+			output += getInfoLine("Target", project.Target)
 		}
-		if project.Repository != nil {
-			output += getInfoLine("Repository", *project.Repository.Url)
-		}
+		output += getInfoLine("Repository", project.Repository.Url)
 		if project.Name != projects[len(projects)-1].Name {
 			output += "\n"
 		}
@@ -145,10 +139,10 @@ func getInfoLineState(key string, state *apiclient.ProjectState) string {
 	var uptime int
 	var stateProperty string
 
-	if state == nil || state.Uptime == nil {
+	if state == nil {
 		uptime = 0
 	} else {
-		uptime = int(*state.Uptime)
+		uptime = int(state.Uptime)
 	}
 
 	if uptime == 0 {
@@ -162,10 +156,7 @@ func getInfoLineState(key string, state *apiclient.ProjectState) string {
 
 func getInfoLineGitStatus(key string, status *apiclient.GitStatus) string {
 	output := propertyNameStyle.Render(fmt.Sprintf("%-*s", propertyNameWidth, key))
-	if status.CurrentBranch == nil {
-		return output + propertyValueStyle.Foreground(views.Gray).Render("No branch") + "\n"
-	}
-	output += propertyNameStyle.Foreground(views.Gray).Render(fmt.Sprintf("%-*s", propertyNameWidth, *status.CurrentBranch))
+	output += propertyNameStyle.Foreground(views.Gray).Render(fmt.Sprintf("%-*s", propertyNameWidth, status.CurrentBranch))
 
 	changesOutput := ""
 	if status.FileStatus == nil {

@@ -19,7 +19,12 @@ func selectRepositoryPrompt(repositories []apiclient.GitRepository, projectOrder
 
 	// Populate items with titles and descriptions from workspaces.
 	for _, repository := range repositories {
-		newItem := item[string]{id: *repository.Url, title: *repository.Name, choiceProperty: *repository.Url, desc: *repository.Url}
+		newItem := item[string]{
+			id:             repository.Url,
+			title:          repository.Name,
+			choiceProperty: repository.Url,
+			desc:           repository.Url,
+		}
 		items = append(items, newItem)
 	}
 
@@ -57,7 +62,7 @@ func GetRepositoryFromPrompt(repositories []apiclient.GitRepository, projectOrde
 	choice := <-choiceChan
 
 	for _, repository := range repositories {
-		if *repository.Url == choice {
+		if repository.Url == choice {
 			return &repository
 		}
 	}

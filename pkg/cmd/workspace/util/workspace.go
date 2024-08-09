@@ -8,8 +8,7 @@ import "github.com/daytonaio/daytona/pkg/apiclient"
 func IsProjectRunning(workspace *apiclient.WorkspaceDTO, projectName string) bool {
 	for _, project := range workspace.GetProjects() {
 		if project.GetName() == projectName {
-			uptime := project.GetState().Uptime
-			return uptime != nil && *uptime != 0
+			return project.GetState().Uptime != 0
 		}
 	}
 	return false

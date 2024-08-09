@@ -160,7 +160,7 @@ import (
 )
 
 func main() {
-	target := *openapiclient.NewProviderTarget() // ProviderTarget | Target to set
+	target := *openapiclient.NewProviderTarget("Name_example", "Options_example", *openapiclient.NewProviderProviderInfo("Name_example", "Version_example")) // ProviderTarget | Target to set
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

@@ -165,7 +165,7 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/GitProvider'
+              $ref: '#/components/schemas/SetGitProviderConfig'
         description: Git provider
         required: true
       responses:
@@ -967,6 +967,10 @@ components:
           type: string
         type:
           $ref: '#/components/schemas/apikey.ApiKeyType'
+      required:
+      - keyHash
+      - name
+      - type
       type: object
     ContainerRegistry:
       example:
@@ -980,6 +984,10 @@ components:
           type: string
         username:
           type: string
+      required:
+      - password
+      - server
+      - username
       type: object
     CreateProjectConfigDTO:
       example:
@@ -1017,6 +1025,10 @@ components:
           $ref: '#/components/schemas/CreateProjectConfigSourceDTO'
         user:
           type: string
+      required:
+      - envVars
+      - name
+      - source
       type: object
     CreateProjectConfigSourceDTO:
       example:
@@ -1033,6 +1045,8 @@ components:
       properties:
         repository:
           $ref: '#/components/schemas/GitRepository'
+      required:
+      - repository
       type: object
     CreateWorkspaceDTO:
       example:
@@ -1090,7 +1104,10 @@ components:
         target:
           type: string
       required:
+      - id
+      - name
       - projects
+      - target
       type: object
     DevcontainerConfig:
       example:
@@ -1098,6 +1115,8 @@ components:
       properties:
         filePath:
           type: string
+      required:
+      - filePath
       type: object
     FRPSConfig:
       example:
@@ -1111,6 +1130,10 @@ components:
           type: integer
         protocol:
           type: string
+      required:
+      - domain
+      - port
+      - protocol
       type: object
     FileStatus:
       example:
@@ -1127,6 +1150,11 @@ components:
           $ref: '#/components/schemas/Status'
         worktree:
           $ref: '#/components/schemas/Status'
+      required:
+      - extra
+      - name
+      - staging
+      - worktree
       type: object
     GitBranch:
       example:
@@ -1137,6 +1165,9 @@ components:
           type: string
         sha:
           type: string
+      required:
+      - name
+      - sha
       type: object
     GitNamespace:
       example:
@@ -1147,6 +1178,9 @@ components:
           type: string
         name:
           type: string
+      required:
+      - id
+      - name
       type: object
     GitProvider:
       example:
@@ -1163,6 +1197,10 @@ components:
           type: string
         username:
           type: string
+      required:
+      - id
+      - token
+      - username
       type: object
     GitPullRequest:
       example:
@@ -1188,6 +1226,14 @@ components:
           type: string
         sourceRepoUrl:
           type: string
+      required:
+      - branch
+      - name
+      - sha
+      - sourceRepoId
+      - sourceRepoName
+      - sourceRepoOwner
+      - sourceRepoUrl
       type: object
     GitRepository:
       example:
@@ -1219,6 +1265,13 @@ components:
           type: string
         url:
           type: string
+      required:
+      - id
+      - name
+      - owner
+      - sha
+      - source
+      - url
       type: object
     GitStatus:
       example:
@@ -1239,6 +1292,9 @@ components:
           items:
             $ref: '#/components/schemas/FileStatus'
           type: array
+      required:
+      - currentBranch
+      - fileStatus
       type: object
     GitUser:
       example:
@@ -1255,6 +1311,11 @@ components:
           type: string
         username:
           type: string
+      required:
+      - email
+      - id
+      - name
+      - username
       type: object
     InstallProviderRequest:
       example:
@@ -1268,6 +1329,9 @@ components:
           type: object
         name:
           type: string
+      required:
+      - downloadUrls
+      - name
       type: object
     NetworkKey:
       example:
@@ -1275,6 +1339,8 @@ components:
       properties:
         key:
           type: string
+      required:
+      - key
       type: object
     ProfileData:
       example:
@@ -1285,6 +1351,8 @@ components:
           additionalProperties:
             type: string
           type: object
+      required:
+      - envVars
       type: object
     Project:
       example:
@@ -1346,6 +1414,15 @@ components:
           type: string
         workspaceId:
           type: string
+      required:
+      - default
+      - envVars
+      - image
+      - name
+      - repository
+      - target
+      - user
+      - workspaceId
       type: object
     ProjectBuildConfig:
       example:
@@ -1393,6 +1470,13 @@ components:
           $ref: '#/components/schemas/GitRepository'
         user:
           type: string
+      required:
+      - default
+      - envVars
+      - image
+      - name
+      - repository
+      - user
       type: object
     ProjectInfo:
       example:
@@ -1412,6 +1496,11 @@ components:
           type: string
         workspaceId:
           type: string
+      required:
+      - created
+      - isRunning
+      - name
+      - workspaceId
       type: object
     ProjectState:
       example:
@@ -1435,6 +1524,10 @@ components:
           type: string
         uptime:
           type: integer
+      required:
+      - gitStatus
+      - updatedAt
+      - uptime
       type: object
     Provider:
       example:
@@ -1445,6 +1538,9 @@ components:
           type: string
         version:
           type: string
+      required:
+      - name
+      - version
       type: object
     ProviderTarget:
       example:
@@ -1461,6 +1557,10 @@ components:
           type: string
         providerInfo:
           $ref: '#/components/schemas/provider.ProviderInfo'
+      required:
+      - name
+      - options
+      - providerInfo
       type: object
     ProviderTargetManifest:
       additionalProperties:
@@ -1472,6 +1572,8 @@ components:
       properties:
         url:
           type: string
+      required:
+      - url
       type: object
     ServerConfig:
       example:
@@ -1527,6 +1629,40 @@ components:
           type: string
         serverDownloadUrl:
           type: string
+      required:
+      - apiPort
+      - binariesPath
+      - builderImage
+      - builderRegistryServer
+      - defaultProjectImage
+      - defaultProjectUser
+      - headscalePort
+      - id
+      - localBuilderRegistryImage
+      - localBuilderRegistryPort
+      - logFilePath
+      - providersDir
+      - registryUrl
+      - serverDownloadUrl
+      type: object
+    SetGitProviderConfig:
+      example:
+        baseApiUrl: baseApiUrl
+        id: id
+        token: token
+        username: username
+      properties:
+        baseApiUrl:
+          type: string
+        id:
+          type: string
+        token:
+          type: string
+        username:
+          type: string
+      required:
+      - id
+      - token
       type: object
     SetProjectState:
       example:
@@ -1547,6 +1683,8 @@ components:
           $ref: '#/components/schemas/GitStatus'
         uptime:
           type: integer
+      required:
+      - uptime
       type: object
     Status:
       enum:
@@ -1655,6 +1793,11 @@ components:
           type: array
         target:
           type: string
+      required:
+      - id
+      - name
+      - projects
+      - target
       type: object
     WorkspaceDTO:
       example:
@@ -1759,6 +1902,11 @@ components:
           type: array
         target:
           type: string
+      required:
+      - id
+      - name
+      - projects
+      - target
       type: object
     WorkspaceInfo:
       example:
@@ -1784,6 +1932,9 @@ components:
           type: array
         providerMetadata:
           type: string
+      required:
+      - name
+      - projects
       type: object
     apikey.ApiKeyType:
       enum:
@@ -1804,6 +1955,9 @@ components:
           type: string
         version:
           type: string
+      required:
+      - name
+      - version
       type: object
     provider.ProviderTargetProperty:
       properties:

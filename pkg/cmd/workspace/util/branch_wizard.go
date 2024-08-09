@@ -37,7 +37,7 @@ func GetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	ctx := context.Background()
 
 	err = views_util.WithSpinner("Loading", func() error {
-		branchList, _, err = config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.ProviderId, config.NamespaceId, url.QueryEscape(*config.ChosenRepo.Id)).Execute()
+		branchList, _, err = config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.ProviderId, config.NamespaceId, url.QueryEscape(config.ChosenRepo.Id)).Execute()
 		return err
 	})
 
@@ -50,14 +50,14 @@ func GetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	}
 
 	if len(branchList) == 1 {
-		config.ChosenRepo.Branch = branchList[0].Name
+		config.ChosenRepo.Branch = &branchList[0].Name
 		config.ChosenRepo.Sha = branchList[0].Sha
 		return config.ChosenRepo, nil
 	}
 
 	var prList []apiclient.GitPullRequest
 	err = views_util.WithSpinner("Loading", func() error {
-		prList, _, err = config.ApiClient.GitProviderAPI.GetRepoPRs(ctx, config.ProviderId, config.NamespaceId, url.QueryEscape(*config.ChosenRepo.Id)).Execute()
+		prList, _, err = config.ApiClient.GitProviderAPI.GetRepoPRs(ctx, config.ProviderId, config.NamespaceId, url.QueryEscape(config.ChosenRepo.Id)).Execute()
 		return err
 	})
 
@@ -72,7 +72,7 @@ func GetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 			return nil, errors.New("must select a branch")
 		}
 
-		config.ChosenRepo.Branch = branch.Name
+		config.ChosenRepo.Branch = &branch.Name
 		config.ChosenRepo.Sha = branch.Sha
 
 		return config.ChosenRepo, nil
@@ -92,7 +92,7 @@ func GetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 		if branch == nil {
 			return nil, errors.New("must select a branch")
 		}
-		config.ChosenRepo.Branch = branch.Name
+		config.ChosenRepo.Branch = &branch.Name
 		config.ChosenRepo.Sha = branch.Sha
 	} else if chosenCheckoutOption == selection.CheckoutPR {
 		chosenPullRequest := selection.GetPullRequestFromPrompt(prList, config.ProjectOrder)
@@ -100,7 +100,7 @@ func GetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 			return nil, errors.New("must select a pull request")
 		}
 
-		config.ChosenRepo.Branch = chosenPullRequest.Branch
+		config.ChosenRepo.Branch = &chosenPullRequest.Branch
 		config.ChosenRepo.Sha = chosenPullRequest.Sha
 		config.ChosenRepo.Id = chosenPullRequest.SourceRepoId
 		config.ChosenRepo.Name = chosenPullRequest.SourceRepoName

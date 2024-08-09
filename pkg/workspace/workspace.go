@@ -11,18 +11,18 @@ import (
 )
 
 type Workspace struct {
-	Id       string             `json:"id"`
-	Name     string             `json:"name"`
-	Projects []*project.Project `json:"projects"`
-	Target   string             `json:"target"`
+	Id       string             `json:"id" validate:"required"`
+	Name     string             `json:"name" validate:"required"`
+	Projects []*project.Project `json:"projects" validate:"required"`
+	Target   string             `json:"target" validate:"required"`
 	ApiKey   string             `json:"-"`
 	EnvVars  map[string]string  `json:"-"`
 } // @name Workspace
 
 type WorkspaceInfo struct {
-	Name             string                 `json:"name"`
-	Projects         []*project.ProjectInfo `json:"projects"`
-	ProviderMetadata string                 `json:"providerMetadata,omitempty"`
+	Name             string                 `json:"name" validate:"required"`
+	Projects         []*project.ProjectInfo `json:"projects" validate:"required"`
+	ProviderMetadata string                 `json:"providerMetadata,omitempty" validate:"optional"`
 } // @name WorkspaceInfo
 
 func (w *Workspace) GetProject(projectName string) (*project.Project, error) {

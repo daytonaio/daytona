@@ -102,7 +102,7 @@ import (
 )
 
 func main() {
-	provider := *openapiclient.NewInstallProviderRequest() // InstallProviderRequest | Provider to install
+	provider := *openapiclient.NewInstallProviderRequest(map[string]string{"key": "Inner_example"}, "Name_example") // InstallProviderRequest | Provider to install
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

@@ -4,28 +4,28 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**ApiPort** | Pointer to **int32** |  | [optional] 
-**BinariesPath** | Pointer to **string** |  | [optional] 
+**ApiPort** | **int32** |  | 
+**BinariesPath** | **string** |  | 
 **BuildImageNamespace** | Pointer to **string** |  | [optional] 
-**BuilderImage** | Pointer to **string** |  | [optional] 
-**BuilderRegistryServer** | Pointer to **string** |  | [optional] 
-**DefaultProjectImage** | Pointer to **string** |  | [optional] 
-**DefaultProjectUser** | Pointer to **string** |  | [optional] 
+**BuilderImage** | **string** |  | 
+**BuilderRegistryServer** | **string** |  | 
+**DefaultProjectImage** | **string** |  | 
+**DefaultProjectUser** | **string** |  | 
 **Frps** | Pointer to [**FRPSConfig**](FRPSConfig.md) |  | [optional] 
-**HeadscalePort** | Pointer to **int32** |  | [optional] 
-**Id** | Pointer to **string** |  | [optional] 
-**LocalBuilderRegistryImage** | Pointer to **string** |  | [optional] 
-**LocalBuilderRegistryPort** | Pointer to **int32** |  | [optional] 
-**LogFilePath** | Pointer to **string** |  | [optional] 
-**ProvidersDir** | Pointer to **string** |  | [optional] 
-**RegistryUrl** | Pointer to **string** |  | [optional] 
-**ServerDownloadUrl** | Pointer to **string** |  | [optional] 
+**HeadscalePort** | **int32** |  | 
+**Id** | **string** |  | 
+**LocalBuilderRegistryImage** | **string** |  | 
+**LocalBuilderRegistryPort** | **int32** |  | 
+**LogFilePath** | **string** |  | 
+**ProvidersDir** | **string** |  | 
+**RegistryUrl** | **string** |  | 
+**ServerDownloadUrl** | **string** |  | 
 
 ## Methods
 
 ### NewServerConfig
 
-`func NewServerConfig() *ServerConfig`
+`func NewServerConfig(apiPort int32, binariesPath string, builderImage string, builderRegistryServer string, defaultProjectImage string, defaultProjectUser string, headscalePort int32, id string, localBuilderRegistryImage string, localBuilderRegistryPort int32, logFilePath string, providersDir string, registryUrl string, serverDownloadUrl string, ) *ServerConfig`
 
 NewServerConfig instantiates a new ServerConfig object
 This constructor will assign default values to properties that have it defined,
@@ -59,11 +59,6 @@ and a boolean to check if the value has been set.
 
 SetApiPort sets ApiPort field to given value.
 
-### HasApiPort
-
-`func (o *ServerConfig) HasApiPort() bool`
-
-HasApiPort returns a boolean if a field has been set.
 
 ### GetBinariesPath
 
@@ -84,11 +79,6 @@ and a boolean to check if the value has been set.
 
 SetBinariesPath sets BinariesPath field to given value.
 
-### HasBinariesPath
-
-`func (o *ServerConfig) HasBinariesPath() bool`
-
-HasBinariesPath returns a boolean if a field has been set.
 
 ### GetBuildImageNamespace
 
@@ -134,11 +124,6 @@ and a boolean to check if the value has been set.
 
 SetBuilderImage sets BuilderImage field to given value.
 
-### HasBuilderImage
-
-`func (o *ServerConfig) HasBuilderImage() bool`
-
-HasBuilderImage returns a boolean if a field has been set.
 
 ### GetBuilderRegistryServer
 
@@ -159,11 +144,6 @@ and a boolean to check if the value has been set.
 
 SetBuilderRegistryServer sets BuilderRegistryServer field to given value.
 
-### HasBuilderRegistryServer
-
-`func (o *ServerConfig) HasBuilderRegistryServer() bool`
-
-HasBuilderRegistryServer returns a boolean if a field has been set.
 
 ### GetDefaultProjectImage
 
@@ -184,11 +164,6 @@ and a boolean to check if the value has been set.
 
 SetDefaultProjectImage sets DefaultProjectImage field to given value.
 
-### HasDefaultProjectImage
-
-`func (o *ServerConfig) HasDefaultProjectImage() bool`
-
-HasDefaultProjectImage returns a boolean if a field has been set.
 
 ### GetDefaultProjectUser
 
@@ -209,11 +184,6 @@ and a boolean to check if the value has been set.
 
 SetDefaultProjectUser sets DefaultProjectUser field to given value.
 
-### HasDefaultProjectUser
-
-`func (o *ServerConfig) HasDefaultProjectUser() bool`
-
-HasDefaultProjectUser returns a boolean if a field has been set.
 
 ### GetFrps
 
@@ -259,11 +229,6 @@ and a boolean to check if the value has been set.
 
 SetHeadscalePort sets HeadscalePort field to given value.
 
-### HasHeadscalePort
-
-`func (o *ServerConfig) HasHeadscalePort() bool`
-
-HasHeadscalePort returns a boolean if a field has been set.
 
 ### GetId
 
@@ -284,11 +249,6 @@ and a boolean to check if the value has been set.
 
 SetId sets Id field to given value.
 
-### HasId
-
-`func (o *ServerConfig) HasId() bool`
-
-HasId returns a boolean if a field has been set.
 
 ### GetLocalBuilderRegistryImage
 
@@ -309,11 +269,6 @@ and a boolean to check if the value has been set.
 
 SetLocalBuilderRegistryImage sets LocalBuilderRegistryImage field to given value.
 
-### HasLocalBuilderRegistryImage
-
-`func (o *ServerConfig) HasLocalBuilderRegistryImage() bool`
-
-HasLocalBuilderRegistryImage returns a boolean if a field has been set.
 
 ### GetLocalBuilderRegistryPort
 
@@ -334,11 +289,6 @@ and a boolean to check if the value has been set.
 
 SetLocalBuilderRegistryPort sets LocalBuilderRegistryPort field to given value.
 
-### HasLocalBuilderRegistryPort
-
-`func (o *ServerConfig) HasLocalBuilderRegistryPort() bool`
-
-HasLocalBuilderRegistryPort returns a boolean if a field has been set.
 
 ### GetLogFilePath
 
@@ -359,11 +309,6 @@ and a boolean to check if the value has been set.
 
 SetLogFilePath sets LogFilePath field to given value.
 
-### HasLogFilePath
-
-`func (o *ServerConfig) HasLogFilePath() bool`
-
-HasLogFilePath returns a boolean if a field has been set.
 
 ### GetProvidersDir
 
@@ -384,11 +329,6 @@ and a boolean to check if the value has been set.
 
 SetProvidersDir sets ProvidersDir field to given value.
 
-### HasProvidersDir
-
-`func (o *ServerConfig) HasProvidersDir() bool`
-
-HasProvidersDir returns a boolean if a field has been set.
 
 ### GetRegistryUrl
 
@@ -409,11 +349,6 @@ and a boolean to check if the value has been set.
 
 SetRegistryUrl sets RegistryUrl field to given value.
 
-### HasRegistryUrl
-
-`func (o *ServerConfig) HasRegistryUrl() bool`
-
-HasRegistryUrl returns a boolean if a field has been set.
 
 ### GetServerDownloadUrl
 
@@ -434,11 +369,6 @@ and a boolean to check if the value has been set.
 
 SetServerDownloadUrl sets ServerDownloadUrl field to given value.
 
-### HasServerDownloadUrl
-
-`func (o *ServerConfig) HasServerDownloadUrl() bool`
-
-HasServerDownloadUrl returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

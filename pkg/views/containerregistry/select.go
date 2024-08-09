@@ -26,9 +26,9 @@ func GetRegistryFromPrompt(registries []apiclient.ContainerRegistry, activeProfi
 		emptyString := ""
 		items = append(items, item{
 			registry: apiclient.ContainerRegistry{
-				Password: &emptyString,
-				Username: &emptyString,
-				Server:   &name,
+				Password: emptyString,
+				Username: emptyString,
+				Server:   name,
 			},
 		})
 	}

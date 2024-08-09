@@ -11,7 +11,9 @@ API version: v0.0.0-dev
 package apiclient
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the NetworkKey type satisfies the MappedNullable interface at compile time
@@ -19,15 +21,18 @@ var _ MappedNullable = &NetworkKey{}
 
 // NetworkKey struct for NetworkKey
 type NetworkKey struct {
-	Key *string `json:"key,omitempty"`
+	Key string `json:"key"`
 }
+
+type _NetworkKey NetworkKey
 
 // NewNetworkKey instantiates a new NetworkKey object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewNetworkKey() *NetworkKey {
+func NewNetworkKey(key string) *NetworkKey {
 	this := NetworkKey{}
+	this.Key = key
 	return &this
 }
 
@@ -39,36 +44,28 @@ func NewNetworkKeyWithDefaults() *NetworkKey {
 	return &this
 }
 
-// GetKey returns the Key field value if set, zero value otherwise.
+// GetKey returns the Key field value
 func (o *NetworkKey) GetKey() string {
-	if o == nil || IsNil(o.Key) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Key
+
+	return o.Key
 }
 
-// GetKeyOk returns a tuple with the Key field value if set, nil otherwise
+// GetKeyOk returns a tuple with the Key field value
 // and a boolean to check if the value has been set.
 func (o *NetworkKey) GetKeyOk() (*string, bool) {
-	if o == nil || IsNil(o.Key) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Key, true
+	return &o.Key, true
 }
 
-// HasKey returns a boolean if a field has been set.
-func (o *NetworkKey) HasKey() bool {
-	if o != nil && !IsNil(o.Key) {
-		return true
-	}
-
-	return false
-}
-
-// SetKey gets a reference to the given string and assigns it to the Key field.
+// SetKey sets field value
 func (o *NetworkKey) SetKey(v string) {
-	o.Key = &v
+	o.Key = v
 }
 
 func (o NetworkKey) MarshalJSON() ([]byte, error) {
@@ -81,10 +78,45 @@ func (o NetworkKey) MarshalJSON() ([]byte, error) {
 
 func (o NetworkKey) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Key) {
-		toSerialize["key"] = o.Key
-	}
+	toSerialize["key"] = o.Key
 	return toSerialize, nil
+}
+
+func (o *NetworkKey) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	requiredProperties := []string{
+		"key",
+	}
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	for _, requiredProperty := range requiredProperties {
+		if _, exists := allProperties[requiredProperty]; !exists {
+			return fmt.Errorf("no value given for required property %v", requiredProperty)
+		}
+	}
+
+	varNetworkKey := _NetworkKey{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&varNetworkKey)
+
+	if err != nil {
+		return err
+	}
+
+	*o = NetworkKey(varNetworkKey)
+
+	return err
 }
 
 type NullableNetworkKey struct {

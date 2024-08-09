@@ -26,7 +26,7 @@ type GitProviderView struct {
 
 var commonGitProviderIds = []string{"github", "gitlab", "bitbucket"}
 
-func GitProviderSelectionView(gitProviderAddView *apiclient.GitProvider, userGitProviders []apiclient.GitProvider, isDeleting bool) {
+func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig, userGitProviders []apiclient.GitProvider, isDeleting bool) {
 	supportedProviders := config.GetSupportedGitProviders()
 
 	var gitProviderOptions []huh.Option[string]
@@ -34,7 +34,7 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.GitProvider, userGit
 	for _, supportedProvider := range supportedProviders {
 		if isDeleting {
 			for _, userProvider := range userGitProviders {
-				if *userProvider.Id == supportedProvider.Id {
+				if userProvider.Id == supportedProvider.Id {
 					gitProviderOptions = append(gitProviderOptions, huh.Option[string]{Key: supportedProvider.Name, Value: supportedProvider.Id})
 				}
 			}
@@ -58,15 +58,15 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.GitProvider, userGit
 				Options(
 					gitProviderOptions...,
 				).
-				Value(gitProviderAddView.Id)),
+				Value(&gitProviderAddView.Id)),
 		huh.NewGroup(
 			huh.NewSelect[string]().
 				Title("Choose a Git provider").
 				Options(
 					otherGitProviderOptions...,
 				).
-				Value(gitProviderAddView.Id)).WithHideFunc(func() bool {
-			return *gitProviderAddView.Id != "other"
+				Value(&gitProviderAddView.Id)).WithHideFunc(func() bool {
+			return gitProviderAddView.Id != "other"
 		}),
 	).WithTheme(views.GetCustomTheme())
 
@@ -87,13 +87,13 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.GitProvider, userGit
 					return nil
 				}),
 		).WithHideFunc(func() bool {
-			return isDeleting || !providerRequiresUsername(*gitProviderAddView.Id)
+			return isDeleting || !providerRequiresUsername(gitProviderAddView.Id)
 		}),
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Self-managed API URL").
 				Value(gitProviderAddView.BaseApiUrl).
-				Description(getApiUrlDescription(*gitProviderAddView.Id)).
+				Description(getApiUrlDescription(gitProviderAddView.Id)).
 				Validate(func(str string) error {
 					if str == "" {
 						return errors.New("URL can not be blank")
@@ -101,12 +101,12 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.GitProvider, userGit
 					return nil
 				}),
 		).WithHideFunc(func() bool {
-			return isDeleting || !providerRequiresApiUrl(*gitProviderAddView.Id)
+			return isDeleting || !providerRequiresApiUrl(gitProviderAddView.Id)
 		}),
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Personal access token").
-				Value(gitProviderAddView.Token).
+				Value(&gitProviderAddView.Token).
 				Password(true).
 				Validate(func(str string) error {
 					if str == "" {
@@ -118,7 +118,7 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.GitProvider, userGit
 	).WithTheme(views.GetCustomTheme())
 
 	if !isDeleting {
-		views.RenderInfoMessage(getGitProviderHelpMessage(*gitProviderAddView.Id))
+		views.RenderInfoMessage(getGitProviderHelpMessage(gitProviderAddView.Id))
 	}
 
 	err = userDataForm.Run()

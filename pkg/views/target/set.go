@@ -47,7 +47,7 @@ func SetTargetForm(target *apiclient.ProviderTarget, targetManifest map[string]a
 	groups := []*huh.Group{}
 	options := make(map[string]interface{})
 
-	err := json.Unmarshal([]byte(*target.Options), &options)
+	err := json.Unmarshal([]byte(target.Options), &options)
 	if err != nil {
 		return err
 	}
@@ -61,7 +61,7 @@ func SetTargetForm(target *apiclient.ProviderTarget, targetManifest map[string]a
 	for _, name := range sortedKeys {
 		property := targetManifest[name]
 		if property.DisabledPredicate != nil && *property.DisabledPredicate != "" {
-			if matched, err := regexp.Match(*property.DisabledPredicate, []byte(*target.Name)); err == nil && matched {
+			if matched, err := regexp.Match(*property.DisabledPredicate, []byte(target.Name)); err == nil && matched {
 				continue
 			}
 		}
@@ -123,7 +123,7 @@ func SetTargetForm(target *apiclient.ProviderTarget, targetManifest map[string]a
 
 	for name, property := range targetManifest {
 		if property.DisabledPredicate != nil && *property.DisabledPredicate != "" {
-			if matched, err := regexp.Match(*property.DisabledPredicate, []byte(*target.Name)); err == nil && matched {
+			if matched, err := regexp.Match(*property.DisabledPredicate, []byte(target.Name)); err == nil && matched {
 				continue
 			}
 		}
@@ -151,7 +151,7 @@ func SetTargetForm(target *apiclient.ProviderTarget, targetManifest map[string]a
 	}
 	content := string(jsonContent)
 
-	target.Options = &content
+	target.Options = content
 	return nil
 }
 

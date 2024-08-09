@@ -35,9 +35,9 @@ func getRowFromRowData(rowData RowData) []string {
 func getRowData(target *apiclient.ProviderTarget) *RowData {
 	rowData := RowData{"", "", ""}
 
-	rowData.Target = *target.Name
-	rowData.Provider = *target.ProviderInfo.Name
-	rowData.Options = *target.Options
+	rowData.Target = target.Name
+	rowData.Provider = target.ProviderInfo.Name
+	rowData.Options = target.Options
 
 	return &rowData
 }
@@ -96,7 +96,7 @@ func sortTargets(targets *[]apiclient.ProviderTarget) {
 	sort.Slice(*targets, func(i, j int) bool {
 		t1 := (*targets)[i]
 		t2 := (*targets)[j]
-		return *t1.ProviderInfo.Name < *t2.ProviderInfo.Name
+		return t1.ProviderInfo.Name < t2.ProviderInfo.Name
 	})
 }
 
@@ -104,11 +104,11 @@ func renderUnstyledList(targetList []apiclient.ProviderTarget) {
 	output := "\n"
 
 	for _, target := range targetList {
-		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Target Name: "), *target.Name) + "\n\n"
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Target Name: "), target.Name) + "\n\n"
 
-		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Target Provider: "), *target.ProviderInfo.Name) + "\n\n"
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Target Provider: "), target.ProviderInfo.Name) + "\n\n"
 
-		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Target Options: "), *target.Options) + "\n"
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Target Options: "), target.Options) + "\n"
 
 		if target.Name != targetList[len(targetList)-1].Name {
 			output += views.SeparatorString + "\n\n"

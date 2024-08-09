@@ -26,9 +26,9 @@ type rowData struct {
 func getRowData(registry *apiclient.ContainerRegistry) *rowData {
 	rowData := rowData{"", "", ""}
 
-	rowData.Server = *registry.Server
-	rowData.Username = *registry.Username
-	rowData.Password = *registry.Password
+	rowData.Server = registry.Server
+	rowData.Username = registry.Username
+	rowData.Password = registry.Password
 
 	return &rowData
 }
@@ -91,11 +91,11 @@ func renderUnstyledList(registryList []apiclient.ContainerRegistry) {
 	output := "\n"
 
 	for _, registry := range registryList {
-		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Server: "), *registry.Server) + "\n\n"
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Server: "), registry.Server) + "\n\n"
 
-		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Username: "), *registry.Username) + "\n\n"
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Username: "), registry.Username) + "\n\n"
 
-		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Password: "), *registry.Password) + "\n\n"
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Password: "), registry.Password) + "\n\n"
 
 		if registry.Server != registryList[len(registryList)-1].Server {
 			output += views.SeparatorString + "\n\n"

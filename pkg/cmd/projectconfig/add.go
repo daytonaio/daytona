@@ -46,13 +46,13 @@ var projectConfigAddCmd = &cobra.Command{
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 		for _, pc := range existingProjectConfigs {
-			existingProjectConfigNames = append(existingProjectConfigNames, *pc.Name)
+			existingProjectConfigNames = append(existingProjectConfigNames, pc.Name)
 		}
 
 		projectDefaults := &create.ProjectConfigDefaults{
 			BuildChoice:          create.AUTOMATIC,
-			Image:                apiServerConfig.DefaultProjectImage,
-			ImageUser:            apiServerConfig.DefaultProjectUser,
+			Image:                &apiServerConfig.DefaultProjectImage,
+			ImageUser:            &apiServerConfig.DefaultProjectUser,
 			DevcontainerFilePath: create.DEVCONTAINER_FILEPATH,
 		}
 
@@ -82,11 +82,11 @@ var projectConfigAddCmd = &cobra.Command{
 			log.Fatal("no projects found")
 		}
 
-		if projects[0].Name == nil {
+		if projects[0].Name == "" {
 			log.Fatal("project config name is required")
 		}
 
-		initialSuggestion := *projects[0].Name
+		initialSuggestion := projects[0].Name
 
 		chosenName := workspace_util.GetSuggestedName(initialSuggestion, existingProjectConfigNames)
 
@@ -105,16 +105,16 @@ var projectConfigAddCmd = &cobra.Command{
 		}
 
 		newProjectConfig := apiclient.CreateProjectConfigDTO{
-			Name:        &chosenName,
+			Name:        chosenName,
 			BuildConfig: projects[0].BuildConfig,
 			Image:       projects[0].Image,
 			User:        projects[0].User,
-			Source: &apiclient.CreateProjectConfigSourceDTO{
+			Source: apiclient.CreateProjectConfigSourceDTO{
 				Repository: projects[0].Source.Repository,
 			},
 		}
 
-		newProjectConfig.EnvVars = workspace_util.GetEnvVariables(&projects[0], nil)
+		newProjectConfig.EnvVars = *workspace_util.GetEnvVariables(&projects[0], nil)
 
 		res, err = apiClient.ProjectConfigAPI.SetProjectConfig(ctx).ProjectConfig(newProjectConfig).Execute()
 		if err != nil {

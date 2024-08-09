@@ -4,15 +4,15 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**GitStatus** | Pointer to [**GitStatus**](GitStatus.md) |  | [optional] 
-**UpdatedAt** | Pointer to **string** |  | [optional] 
-**Uptime** | Pointer to **int32** |  | [optional] 
+**GitStatus** | [**GitStatus**](GitStatus.md) |  | 
+**UpdatedAt** | **string** |  | 
+**Uptime** | **int32** |  | 
 
 ## Methods
 
 ### NewProjectState
 
-`func NewProjectState() *ProjectState`
+`func NewProjectState(gitStatus GitStatus, updatedAt string, uptime int32, ) *ProjectState`
 
 NewProjectState instantiates a new ProjectState object
 This constructor will assign default values to properties that have it defined,
@@ -46,11 +46,6 @@ and a boolean to check if the value has been set.
 
 SetGitStatus sets GitStatus field to given value.
 
-### HasGitStatus
-
-`func (o *ProjectState) HasGitStatus() bool`
-
-HasGitStatus returns a boolean if a field has been set.
 
 ### GetUpdatedAt
 
@@ -71,11 +66,6 @@ and a boolean to check if the value has been set.
 
 SetUpdatedAt sets UpdatedAt field to given value.
 
-### HasUpdatedAt
-
-`func (o *ProjectState) HasUpdatedAt() bool`
-
-HasUpdatedAt returns a boolean if a field has been set.
 
 ### GetUptime
 
@@ -96,11 +86,6 @@ and a boolean to check if the value has been set.
 
 SetUptime sets Uptime field to given value.
 
-### HasUptime
-
-`func (o *ProjectState) HasUptime() bool`
-
-HasUptime returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

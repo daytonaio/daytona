@@ -16,10 +16,10 @@ const (
 )
 
 type Build struct {
-	Id      string          `json:"id"`
-	Hash    string          `json:"hash"`
-	State   BuildState      `json:"state"`
-	Project project.Project `json:"project"`
-	User    string          `json:"user"`
-	Image   string          `json:"image"`
+	Id      string          `json:"id" validate:"required"`
+	Hash    string          `json:"hash" validate:"required"`
+	State   BuildState      `json:"state" validate:"required"`
+	Project project.Project `json:"project" validate:"required"`
+	User    string          `json:"user" validate:"required"`
+	Image   string          `json:"image" validate:"required"`
 } // @name Build

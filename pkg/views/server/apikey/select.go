@@ -26,7 +26,7 @@ func GetApiKeyFromPrompt(apiKeys []apiclient.ApiKey, title string, withNewApiKey
 		name := NewApiKeyName
 		items = append(items, item{
 			apiKey: apiclient.ApiKey{
-				Name: &name,
+				Name: name,
 			},
 		})
 	}
