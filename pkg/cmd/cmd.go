@@ -42,8 +42,6 @@ var rootCmd = &cobra.Command{
 	Run:               RunInitialScreenFlow,
 }
 
-var originalStdout *os.File
-
 func Execute() {
 	rootCmd.AddGroup(&cobra.Group{ID: WORKSPACE_GROUP, Title: "Workspaces & Projects"})
 	rootCmd.AddGroup(&cobra.Group{ID: SERVER_GROUP, Title: "Server"})
@@ -162,12 +160,6 @@ func SetupRootCommand(cmd *cobra.Command) {
 				log.Error(err)
 			}
 		}
-
-		if output.FormatFlag == "" {
-			return
-		}
-		originalStdout = os.Stdout
-		os.Stdout = nil
 	}
 
 	cmd.PersistentPostRun = func(cmd *cobra.Command, args []string) {
@@ -185,7 +177,6 @@ func SetupRootCommand(cmd *cobra.Command) {
 			}
 		}
 
-		os.Stdout = originalStdout
 		output.Print(output.Output, output.FormatFlag)
 	}
 }

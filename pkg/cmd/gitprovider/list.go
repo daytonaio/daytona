@@ -36,8 +36,6 @@ var gitProviderListCmd = &cobra.Command{
 			return
 		}
 
-		views.RenderMainTitle("Registered Git Providers:")
-
 		supportedProviders := config.GetSupportedGitProviders()
 		var gitProviderViewList []gitprovider_view.GitProviderView
 
@@ -59,6 +57,8 @@ var gitProviderListCmd = &cobra.Command{
 			output.Output = gitProviderViewList
 			return
 		}
+
+		views.RenderMainTitle("Registered Git Providers:")
 
 		for _, gitProviderView := range gitProviderViewList {
 			views.RenderListLine(fmt.Sprintf("%s (%s)", gitProviderView.Name, gitProviderView.Username))
