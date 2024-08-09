@@ -70,6 +70,13 @@ func configFilePath() (string, error) {
 }
 
 func Save(c Config) error {
+	if err := directoryValidator(&c.BinariesPath); err != nil {
+		return err
+	}
+	if err := directoryValidator(&c.ProvidersDir); err != nil {
+		return err
+	}
+
 	configFilePath, err := configFilePath()
 	if err != nil {
 		return err
@@ -109,4 +116,12 @@ func GetWorkspaceLogsDir() (string, error) {
 	}
 
 	return filepath.Join(configDir, "logs"), nil
+}
+
+func directoryValidator(path *string) error {
+	_, err := os.Stat(*path)
+	if os.IsNotExist(err) {
+		return os.MkdirAll(*path, 0700)
+	}
+	return err
 }

@@ -59,8 +59,7 @@ func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *h
 			huh.NewInput().
 				Title("Providers Directory").
 				Description("Directory will be created if it does not exist").
-				Value(m.config.ProvidersDir).
-				Validate(directoryValidator(m.config.ProvidersDir)),
+				Value(m.config.ProvidersDir),
 			huh.NewInput().
 				Title("Registry URL").
 				Value(m.config.RegistryUrl),
@@ -116,8 +115,7 @@ func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *h
 			huh.NewInput().
 				Title("Binaries Path").
 				Description("Directory will be created if it does not exist").
-				Value(m.config.BinariesPath).
-				Validate(directoryValidator(m.config.BinariesPath)),
+				Value(m.config.BinariesPath),
 			huh.NewInput().
 				Title("Log File Path").
 				Description("File will be created if it does not exist").
@@ -233,16 +231,5 @@ func createPortValidator(config *apiclient.ServerConfig, portView *string, port 
 		}
 
 		return nil
-	}
-}
-
-func directoryValidator(path *string) func(string) error {
-	return func(string) error {
-		_, err := os.Stat(*path)
-		if os.IsNotExist(err) {
-			return os.MkdirAll(*path, 0700)
-		}
-
-		return err
 	}
 }
