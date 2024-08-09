@@ -224,7 +224,7 @@ func (a *Agent) setDefaultConfig() error {
 
 // Agent uptime in seconds
 func (a *Agent) uptime() int32 {
-	return int32(time.Since(a.startTime).Seconds())
+	return max(int32(time.Since(a.startTime).Seconds()), 1)
 }
 
 func (a *Agent) updateProjectState() error {
