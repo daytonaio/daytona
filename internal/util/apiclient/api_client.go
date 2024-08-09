@@ -176,12 +176,12 @@ func GetFirstWorkspaceProjectName(workspaceId string, projectName string, profil
 			return "", errors.New("no projects found in workspace")
 		}
 
-		return *wsInfo.Projects[0].Name, nil
+		return wsInfo.Projects[0].Name, nil
 	}
 
 	for _, project := range wsInfo.Projects {
-		if *project.Name == projectName {
-			return *project.Name, nil
+		if project.Name == projectName {
+			return project.Name, nil
 		}
 	}
 

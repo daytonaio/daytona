@@ -11,7 +11,9 @@ API version: v0.0.0-dev
 package apiclient
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the CreateProjectConfigDTO type satisfies the MappedNullable interface at compile time
@@ -19,20 +21,25 @@ var _ MappedNullable = &CreateProjectConfigDTO{}
 
 // CreateProjectConfigDTO struct for CreateProjectConfigDTO
 type CreateProjectConfigDTO struct {
-	BuildConfig *ProjectBuildConfig           `json:"buildConfig,omitempty"`
-	EnvVars     *map[string]string            `json:"envVars,omitempty"`
-	Image       *string                       `json:"image,omitempty"`
-	Name        *string                       `json:"name,omitempty"`
-	Source      *CreateProjectConfigSourceDTO `json:"source,omitempty"`
-	User        *string                       `json:"user,omitempty"`
+	BuildConfig *ProjectBuildConfig          `json:"buildConfig,omitempty"`
+	EnvVars     map[string]string            `json:"envVars"`
+	Image       *string                      `json:"image,omitempty"`
+	Name        string                       `json:"name"`
+	Source      CreateProjectConfigSourceDTO `json:"source"`
+	User        *string                      `json:"user,omitempty"`
 }
+
+type _CreateProjectConfigDTO CreateProjectConfigDTO
 
 // NewCreateProjectConfigDTO instantiates a new CreateProjectConfigDTO object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateProjectConfigDTO() *CreateProjectConfigDTO {
+func NewCreateProjectConfigDTO(envVars map[string]string, name string, source CreateProjectConfigSourceDTO) *CreateProjectConfigDTO {
 	this := CreateProjectConfigDTO{}
+	this.EnvVars = envVars
+	this.Name = name
+	this.Source = source
 	return &this
 }
 
@@ -76,36 +83,28 @@ func (o *CreateProjectConfigDTO) SetBuildConfig(v ProjectBuildConfig) {
 	o.BuildConfig = &v
 }
 
-// GetEnvVars returns the EnvVars field value if set, zero value otherwise.
+// GetEnvVars returns the EnvVars field value
 func (o *CreateProjectConfigDTO) GetEnvVars() map[string]string {
-	if o == nil || IsNil(o.EnvVars) {
+	if o == nil {
 		var ret map[string]string
 		return ret
 	}
-	return *o.EnvVars
+
+	return o.EnvVars
 }
 
-// GetEnvVarsOk returns a tuple with the EnvVars field value if set, nil otherwise
+// GetEnvVarsOk returns a tuple with the EnvVars field value
 // and a boolean to check if the value has been set.
 func (o *CreateProjectConfigDTO) GetEnvVarsOk() (*map[string]string, bool) {
-	if o == nil || IsNil(o.EnvVars) {
+	if o == nil {
 		return nil, false
 	}
-	return o.EnvVars, true
+	return &o.EnvVars, true
 }
 
-// HasEnvVars returns a boolean if a field has been set.
-func (o *CreateProjectConfigDTO) HasEnvVars() bool {
-	if o != nil && !IsNil(o.EnvVars) {
-		return true
-	}
-
-	return false
-}
-
-// SetEnvVars gets a reference to the given map[string]string and assigns it to the EnvVars field.
+// SetEnvVars sets field value
 func (o *CreateProjectConfigDTO) SetEnvVars(v map[string]string) {
-	o.EnvVars = &v
+	o.EnvVars = v
 }
 
 // GetImage returns the Image field value if set, zero value otherwise.
@@ -140,68 +139,52 @@ func (o *CreateProjectConfigDTO) SetImage(v string) {
 	o.Image = &v
 }
 
-// GetName returns the Name field value if set, zero value otherwise.
+// GetName returns the Name field value
 func (o *CreateProjectConfigDTO) GetName() string {
-	if o == nil || IsNil(o.Name) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Name
+
+	return o.Name
 }
 
-// GetNameOk returns a tuple with the Name field value if set, nil otherwise
+// GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
 func (o *CreateProjectConfigDTO) GetNameOk() (*string, bool) {
-	if o == nil || IsNil(o.Name) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Name, true
+	return &o.Name, true
 }
 
-// HasName returns a boolean if a field has been set.
-func (o *CreateProjectConfigDTO) HasName() bool {
-	if o != nil && !IsNil(o.Name) {
-		return true
-	}
-
-	return false
-}
-
-// SetName gets a reference to the given string and assigns it to the Name field.
+// SetName sets field value
 func (o *CreateProjectConfigDTO) SetName(v string) {
-	o.Name = &v
+	o.Name = v
 }
 
-// GetSource returns the Source field value if set, zero value otherwise.
+// GetSource returns the Source field value
 func (o *CreateProjectConfigDTO) GetSource() CreateProjectConfigSourceDTO {
-	if o == nil || IsNil(o.Source) {
+	if o == nil {
 		var ret CreateProjectConfigSourceDTO
 		return ret
 	}
-	return *o.Source
+
+	return o.Source
 }
 
-// GetSourceOk returns a tuple with the Source field value if set, nil otherwise
+// GetSourceOk returns a tuple with the Source field value
 // and a boolean to check if the value has been set.
 func (o *CreateProjectConfigDTO) GetSourceOk() (*CreateProjectConfigSourceDTO, bool) {
-	if o == nil || IsNil(o.Source) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Source, true
+	return &o.Source, true
 }
 
-// HasSource returns a boolean if a field has been set.
-func (o *CreateProjectConfigDTO) HasSource() bool {
-	if o != nil && !IsNil(o.Source) {
-		return true
-	}
-
-	return false
-}
-
-// SetSource gets a reference to the given CreateProjectConfigSourceDTO and assigns it to the Source field.
+// SetSource sets field value
 func (o *CreateProjectConfigDTO) SetSource(v CreateProjectConfigSourceDTO) {
-	o.Source = &v
+	o.Source = v
 }
 
 // GetUser returns the User field value if set, zero value otherwise.
@@ -249,22 +232,55 @@ func (o CreateProjectConfigDTO) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.BuildConfig) {
 		toSerialize["buildConfig"] = o.BuildConfig
 	}
-	if !IsNil(o.EnvVars) {
-		toSerialize["envVars"] = o.EnvVars
-	}
+	toSerialize["envVars"] = o.EnvVars
 	if !IsNil(o.Image) {
 		toSerialize["image"] = o.Image
 	}
-	if !IsNil(o.Name) {
-		toSerialize["name"] = o.Name
-	}
-	if !IsNil(o.Source) {
-		toSerialize["source"] = o.Source
-	}
+	toSerialize["name"] = o.Name
+	toSerialize["source"] = o.Source
 	if !IsNil(o.User) {
 		toSerialize["user"] = o.User
 	}
 	return toSerialize, nil
+}
+
+func (o *CreateProjectConfigDTO) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	requiredProperties := []string{
+		"envVars",
+		"name",
+		"source",
+	}
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	for _, requiredProperty := range requiredProperties {
+		if _, exists := allProperties[requiredProperty]; !exists {
+			return fmt.Errorf("no value given for required property %v", requiredProperty)
+		}
+	}
+
+	varCreateProjectConfigDTO := _CreateProjectConfigDTO{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&varCreateProjectConfigDTO)
+
+	if err != nil {
+		return err
+	}
+
+	*o = CreateProjectConfigDTO(varCreateProjectConfigDTO)
+
+	return err
 }
 
 type NullableCreateProjectConfigDTO struct {

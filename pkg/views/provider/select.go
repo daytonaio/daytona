@@ -26,7 +26,7 @@ func GetProviderFromPrompt(providers []apiclient.Provider, title string, withNew
 		name := NewProviderId
 		items = append(items, item{
 			provider: apiclient.Provider{
-				Name: &name,
+				Name: name,
 			},
 		})
 	}

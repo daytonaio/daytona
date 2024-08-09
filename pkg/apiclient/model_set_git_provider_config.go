@@ -16,41 +16,40 @@ import (
 	"fmt"
 )
 
-// checks if the GitProvider type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &GitProvider{}
+// checks if the SetGitProviderConfig type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &SetGitProviderConfig{}
 
-// GitProvider struct for GitProvider
-type GitProvider struct {
+// SetGitProviderConfig struct for SetGitProviderConfig
+type SetGitProviderConfig struct {
 	BaseApiUrl *string `json:"baseApiUrl,omitempty"`
 	Id         string  `json:"id"`
 	Token      string  `json:"token"`
-	Username   string  `json:"username"`
+	Username   *string `json:"username,omitempty"`
 }
 
-type _GitProvider GitProvider
+type _SetGitProviderConfig SetGitProviderConfig
 
-// NewGitProvider instantiates a new GitProvider object
+// NewSetGitProviderConfig instantiates a new SetGitProviderConfig object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGitProvider(id string, token string, username string) *GitProvider {
-	this := GitProvider{}
+func NewSetGitProviderConfig(id string, token string) *SetGitProviderConfig {
+	this := SetGitProviderConfig{}
 	this.Id = id
 	this.Token = token
-	this.Username = username
 	return &this
 }
 
-// NewGitProviderWithDefaults instantiates a new GitProvider object
+// NewSetGitProviderConfigWithDefaults instantiates a new SetGitProviderConfig object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewGitProviderWithDefaults() *GitProvider {
-	this := GitProvider{}
+func NewSetGitProviderConfigWithDefaults() *SetGitProviderConfig {
+	this := SetGitProviderConfig{}
 	return &this
 }
 
 // GetBaseApiUrl returns the BaseApiUrl field value if set, zero value otherwise.
-func (o *GitProvider) GetBaseApiUrl() string {
+func (o *SetGitProviderConfig) GetBaseApiUrl() string {
 	if o == nil || IsNil(o.BaseApiUrl) {
 		var ret string
 		return ret
@@ -60,7 +59,7 @@ func (o *GitProvider) GetBaseApiUrl() string {
 
 // GetBaseApiUrlOk returns a tuple with the BaseApiUrl field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *GitProvider) GetBaseApiUrlOk() (*string, bool) {
+func (o *SetGitProviderConfig) GetBaseApiUrlOk() (*string, bool) {
 	if o == nil || IsNil(o.BaseApiUrl) {
 		return nil, false
 	}
@@ -68,7 +67,7 @@ func (o *GitProvider) GetBaseApiUrlOk() (*string, bool) {
 }
 
 // HasBaseApiUrl returns a boolean if a field has been set.
-func (o *GitProvider) HasBaseApiUrl() bool {
+func (o *SetGitProviderConfig) HasBaseApiUrl() bool {
 	if o != nil && !IsNil(o.BaseApiUrl) {
 		return true
 	}
@@ -77,12 +76,12 @@ func (o *GitProvider) HasBaseApiUrl() bool {
 }
 
 // SetBaseApiUrl gets a reference to the given string and assigns it to the BaseApiUrl field.
-func (o *GitProvider) SetBaseApiUrl(v string) {
+func (o *SetGitProviderConfig) SetBaseApiUrl(v string) {
 	o.BaseApiUrl = &v
 }
 
 // GetId returns the Id field value
-func (o *GitProvider) GetId() string {
+func (o *SetGitProviderConfig) GetId() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -93,7 +92,7 @@ func (o *GitProvider) GetId() string {
 
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
-func (o *GitProvider) GetIdOk() (*string, bool) {
+func (o *SetGitProviderConfig) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -101,12 +100,12 @@ func (o *GitProvider) GetIdOk() (*string, bool) {
 }
 
 // SetId sets field value
-func (o *GitProvider) SetId(v string) {
+func (o *SetGitProviderConfig) SetId(v string) {
 	o.Id = v
 }
 
 // GetToken returns the Token field value
-func (o *GitProvider) GetToken() string {
+func (o *SetGitProviderConfig) GetToken() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -117,7 +116,7 @@ func (o *GitProvider) GetToken() string {
 
 // GetTokenOk returns a tuple with the Token field value
 // and a boolean to check if the value has been set.
-func (o *GitProvider) GetTokenOk() (*string, bool) {
+func (o *SetGitProviderConfig) GetTokenOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -125,35 +124,43 @@ func (o *GitProvider) GetTokenOk() (*string, bool) {
 }
 
 // SetToken sets field value
-func (o *GitProvider) SetToken(v string) {
+func (o *SetGitProviderConfig) SetToken(v string) {
 	o.Token = v
 }
 
-// GetUsername returns the Username field value
-func (o *GitProvider) GetUsername() string {
-	if o == nil {
+// GetUsername returns the Username field value if set, zero value otherwise.
+func (o *SetGitProviderConfig) GetUsername() string {
+	if o == nil || IsNil(o.Username) {
 		var ret string
 		return ret
 	}
-
-	return o.Username
+	return *o.Username
 }
 
-// GetUsernameOk returns a tuple with the Username field value
+// GetUsernameOk returns a tuple with the Username field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *GitProvider) GetUsernameOk() (*string, bool) {
-	if o == nil {
+func (o *SetGitProviderConfig) GetUsernameOk() (*string, bool) {
+	if o == nil || IsNil(o.Username) {
 		return nil, false
 	}
-	return &o.Username, true
+	return o.Username, true
 }
 
-// SetUsername sets field value
-func (o *GitProvider) SetUsername(v string) {
-	o.Username = v
+// HasUsername returns a boolean if a field has been set.
+func (o *SetGitProviderConfig) HasUsername() bool {
+	if o != nil && !IsNil(o.Username) {
+		return true
+	}
+
+	return false
 }
 
-func (o GitProvider) MarshalJSON() ([]byte, error) {
+// SetUsername gets a reference to the given string and assigns it to the Username field.
+func (o *SetGitProviderConfig) SetUsername(v string) {
+	o.Username = &v
+}
+
+func (o SetGitProviderConfig) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -161,25 +168,26 @@ func (o GitProvider) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o GitProvider) ToMap() (map[string]interface{}, error) {
+func (o SetGitProviderConfig) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.BaseApiUrl) {
 		toSerialize["baseApiUrl"] = o.BaseApiUrl
 	}
 	toSerialize["id"] = o.Id
 	toSerialize["token"] = o.Token
-	toSerialize["username"] = o.Username
+	if !IsNil(o.Username) {
+		toSerialize["username"] = o.Username
+	}
 	return toSerialize, nil
 }
 
-func (o *GitProvider) UnmarshalJSON(data []byte) (err error) {
+func (o *SetGitProviderConfig) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"id",
 		"token",
-		"username",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -196,53 +204,53 @@ func (o *GitProvider) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varGitProvider := _GitProvider{}
+	varSetGitProviderConfig := _SetGitProviderConfig{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varGitProvider)
+	err = decoder.Decode(&varSetGitProviderConfig)
 
 	if err != nil {
 		return err
 	}
 
-	*o = GitProvider(varGitProvider)
+	*o = SetGitProviderConfig(varSetGitProviderConfig)
 
 	return err
 }
 
-type NullableGitProvider struct {
-	value *GitProvider
+type NullableSetGitProviderConfig struct {
+	value *SetGitProviderConfig
 	isSet bool
 }
 
-func (v NullableGitProvider) Get() *GitProvider {
+func (v NullableSetGitProviderConfig) Get() *SetGitProviderConfig {
 	return v.value
 }
 
-func (v *NullableGitProvider) Set(val *GitProvider) {
+func (v *NullableSetGitProviderConfig) Set(val *SetGitProviderConfig) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableGitProvider) IsSet() bool {
+func (v NullableSetGitProviderConfig) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableGitProvider) Unset() {
+func (v *NullableSetGitProviderConfig) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableGitProvider(val *GitProvider) *NullableGitProvider {
-	return &NullableGitProvider{value: val, isSet: true}
+func NewNullableSetGitProviderConfig(val *SetGitProviderConfig) *NullableSetGitProviderConfig {
+	return &NullableSetGitProviderConfig{value: val, isSet: true}
 }
 
-func (v NullableGitProvider) MarshalJSON() ([]byte, error) {
+func (v NullableSetGitProviderConfig) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableGitProvider) UnmarshalJSON(src []byte) error {
+func (v *NullableSetGitProviderConfig) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

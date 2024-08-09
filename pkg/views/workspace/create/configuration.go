@@ -49,7 +49,7 @@ func NewConfigurationData(buildChoice BuildChoice, devContainerFilePath string, 
 	}
 
 	if currentProject.EnvVars != nil {
-		projectConfigurationData.EnvVars = *currentProject.EnvVars
+		projectConfigurationData.EnvVars = currentProject.EnvVars
 	}
 
 	return projectConfigurationData
@@ -77,7 +77,7 @@ func RunProjectConfiguration(projectList *[]apiclient.CreateProjectConfigDTO, de
 	if currentProject.BuildConfig != nil {
 		if currentProject.BuildConfig.Devcontainer != nil {
 			builderChoice = DEVCONTAINER
-			devContainerFilePath = *currentProject.BuildConfig.Devcontainer.FilePath
+			devContainerFilePath = currentProject.BuildConfig.Devcontainer.FilePath
 		}
 	} else {
 		if currentProject.Image == nil && currentProject.User == nil ||
@@ -119,14 +119,14 @@ func RunProjectConfiguration(projectList *[]apiclient.CreateProjectConfigDTO, de
 			if projectConfigurationData.BuildChoice == string(DEVCONTAINER) {
 				(*projectList)[i].BuildConfig = &apiclient.ProjectBuildConfig{
 					Devcontainer: &apiclient.DevcontainerConfig{
-						FilePath: &projectConfigurationData.DevcontainerFilePath,
+						FilePath: projectConfigurationData.DevcontainerFilePath,
 					},
 				}
 				(*projectList)[i].Image = nil
 				(*projectList)[i].User = nil
 			}
 
-			(*projectList)[i].EnvVars = &projectConfigurationData.EnvVars
+			(*projectList)[i].EnvVars = projectConfigurationData.EnvVars
 		}
 	}
 

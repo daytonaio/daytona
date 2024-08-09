@@ -17,11 +17,11 @@ type item struct {
 	apiKey apiclient.ApiKey
 }
 
-func (i item) Title() string { return *i.apiKey.Name }
+func (i item) Title() string { return i.apiKey.Name }
 func (i item) Description() string {
-	return string(*i.apiKey.Type)
+	return string(i.apiKey.Type)
 }
-func (i item) FilterValue() string { return *i.apiKey.Name }
+func (i item) FilterValue() string { return i.apiKey.Name }
 
 type model struct {
 	list   list.Model

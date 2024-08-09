@@ -63,14 +63,14 @@ var SshCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 || len(args) == 1 {
-			selectedProject, err := selectWorkspaceProject(*workspace.Id, &activeProfile)
+			selectedProject, err := selectWorkspaceProject(workspace.Id, &activeProfile)
 			if err != nil {
 				log.Fatal(err)
 			}
 			if selectedProject == nil {
 				return
 			}
-			projectName = *selectedProject.Name
+			projectName = selectedProject.Name
 		}
 
 		if len(args) == 2 {
@@ -78,11 +78,11 @@ var SshCmd = &cobra.Command{
 		}
 
 		if !workspace_util.IsProjectRunning(workspace, projectName) {
-			views.RenderInfoMessage(fmt.Sprintf("Project '%s' from workspace '%s' is not in running state", projectName, *workspace.Name))
+			views.RenderInfoMessage(fmt.Sprintf("Project '%s' from workspace '%s' is not in running state", projectName, workspace.Name))
 			return
 		}
 
-		err = ide.OpenTerminalSsh(activeProfile, *workspace.Id, projectName)
+		err = ide.OpenTerminalSsh(activeProfile, workspace.Id, projectName)
 		if err != nil {
 			log.Fatal(err)
 		}

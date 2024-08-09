@@ -9,6 +9,7 @@ import (
 
 	"net/url"
 
+	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider/dto"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
@@ -109,24 +110,34 @@ func GetGitProviderIdForUrl(ctx *gin.Context) {
 //	@Tags			gitProvider
 //	@Summary		Set Git provider
 //	@Description	Set Git provider
-//	@Param			gitProviderConfig	body	gitprovider.GitProviderConfig	true	"Git provider"
+//	@Param			gitProviderConfig	body	SetGitProviderConfig	true	"Git provider"
 //	@Produce		json
 //	@Success		200
 //	@Router			/gitprovider [put]
 //
 //	@id				SetGitProvider
 func SetGitProvider(ctx *gin.Context) {
-	var gitProviderData gitprovider.GitProviderConfig
+	var setConfigDto dto.SetGitProviderConfig
 
-	err := ctx.BindJSON(&gitProviderData)
+	err := ctx.BindJSON(&setConfigDto)
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %s", err.Error()))
 		return
 	}
 
+	gitProviderConfig := gitprovider.GitProviderConfig{
+		Id:         setConfigDto.Id,
+		Token:      setConfigDto.Token,
+		BaseApiUrl: setConfigDto.BaseApiUrl,
+	}
+
+	if setConfigDto.Username != nil {
+		gitProviderConfig.Username = *setConfigDto.Username
+	}
+
 	server := server.GetInstance(nil)
 
-	err = server.GitProviderService.SetGitProviderConfig(&gitProviderData)
+	err = server.GitProviderService.SetGitProviderConfig(&gitProviderConfig)
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to set git provider: %s", err.Error()))
 		return

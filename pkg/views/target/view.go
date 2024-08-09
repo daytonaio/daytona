@@ -17,14 +17,11 @@ type item struct {
 	target apiclient.ProviderTarget
 }
 
-func (i item) Title() string { return *i.target.Name }
+func (i item) Title() string { return i.target.Name }
 func (i item) Description() string {
-	if i.target.ProviderInfo != nil {
-		return *i.target.ProviderInfo.Name
-	}
-	return ""
+	return i.target.ProviderInfo.Name
 }
-func (i item) FilterValue() string { return *i.target.Name }
+func (i item) FilterValue() string { return i.target.Name }
 
 type model struct {
 	list   list.Model

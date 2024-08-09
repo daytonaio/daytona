@@ -33,17 +33,17 @@ var listCmd = &cobra.Command{
 
 		if output.FormatFlag != "" {
 			if profileData.EnvVars == nil {
-				profileData.EnvVars = &map[string]string{}
+				profileData.EnvVars = map[string]string{}
 			}
-			output.Output = *profileData.EnvVars
+			output.Output = profileData.EnvVars
 			return
 		}
 
-		if profileData.EnvVars == nil || len(*profileData.EnvVars) == 0 {
+		if profileData.EnvVars == nil || len(profileData.EnvVars) == 0 {
 			views.RenderInfoMessageBold("No environment variables set")
 			return
 		}
 
-		env.List(*profileData.EnvVars)
+		env.List(profileData.EnvVars)
 	},
 }

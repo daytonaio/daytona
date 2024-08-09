@@ -28,23 +28,18 @@ func selectProjectConfigPrompt(projectConfigs []apiclient.ProjectConfig, project
 
 	if showBlankOption {
 		newItem := item[apiclient.ProjectConfig]{title: "Make a blank project", desc: "(default project configuration)", choiceProperty: apiclient.ProjectConfig{
-			Name: &BlankProjectIdentifier,
+			Name: BlankProjectIdentifier,
 		}}
 		items = append(items, newItem)
 	}
 
 	for _, pc := range projectConfigs {
-		var projectConfigName string
-		if pc.Name != nil {
-			projectConfigName = *pc.Name
-		} else {
+		projectConfigName := pc.Name
+		if pc.Name == "" {
 			projectConfigName = "Unnamed Project Config"
 		}
-		desc := ""
-		if pc.Repository != nil && pc.Repository.Url != nil {
-			desc = *pc.Repository.Url
-		}
-		newItem := item[apiclient.ProjectConfig]{title: projectConfigName, desc: desc, choiceProperty: pc}
+
+		newItem := item[apiclient.ProjectConfig]{title: projectConfigName, desc: pc.Repository.Url, choiceProperty: pc}
 		items = append(items, newItem)
 	}
 

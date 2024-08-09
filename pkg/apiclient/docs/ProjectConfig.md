@@ -5,18 +5,18 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **BuildConfig** | Pointer to [**ProjectBuildConfig**](ProjectBuildConfig.md) |  | [optional] 
-**Default** | Pointer to **bool** |  | [optional] 
-**EnvVars** | Pointer to **map[string]string** |  | [optional] 
-**Image** | Pointer to **string** |  | [optional] 
-**Name** | Pointer to **string** |  | [optional] 
-**Repository** | Pointer to [**GitRepository**](GitRepository.md) |  | [optional] 
-**User** | Pointer to **string** |  | [optional] 
+**Default** | **bool** |  | 
+**EnvVars** | **map[string]string** |  | 
+**Image** | **string** |  | 
+**Name** | **string** |  | 
+**Repository** | [**GitRepository**](GitRepository.md) |  | 
+**User** | **string** |  | 
 
 ## Methods
 
 ### NewProjectConfig
 
-`func NewProjectConfig() *ProjectConfig`
+`func NewProjectConfig(default_ bool, envVars map[string]string, image string, name string, repository GitRepository, user string, ) *ProjectConfig`
 
 NewProjectConfig instantiates a new ProjectConfig object
 This constructor will assign default values to properties that have it defined,
@@ -75,11 +75,6 @@ and a boolean to check if the value has been set.
 
 SetDefault sets Default field to given value.
 
-### HasDefault
-
-`func (o *ProjectConfig) HasDefault() bool`
-
-HasDefault returns a boolean if a field has been set.
 
 ### GetEnvVars
 
@@ -100,11 +95,6 @@ and a boolean to check if the value has been set.
 
 SetEnvVars sets EnvVars field to given value.
 
-### HasEnvVars
-
-`func (o *ProjectConfig) HasEnvVars() bool`
-
-HasEnvVars returns a boolean if a field has been set.
 
 ### GetImage
 
@@ -125,11 +115,6 @@ and a boolean to check if the value has been set.
 
 SetImage sets Image field to given value.
 
-### HasImage
-
-`func (o *ProjectConfig) HasImage() bool`
-
-HasImage returns a boolean if a field has been set.
 
 ### GetName
 
@@ -150,11 +135,6 @@ and a boolean to check if the value has been set.
 
 SetName sets Name field to given value.
 
-### HasName
-
-`func (o *ProjectConfig) HasName() bool`
-
-HasName returns a boolean if a field has been set.
 
 ### GetRepository
 
@@ -175,11 +155,6 @@ and a boolean to check if the value has been set.
 
 SetRepository sets Repository field to given value.
 
-### HasRepository
-
-`func (o *ProjectConfig) HasRepository() bool`
-
-HasRepository returns a boolean if a field has been set.
 
 ### GetUser
 
@@ -200,11 +175,6 @@ and a boolean to check if the value has been set.
 
 SetUser sets User field to given value.
 
-### HasUser
-
-`func (o *ProjectConfig) HasUser() bool`
-
-HasUser returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

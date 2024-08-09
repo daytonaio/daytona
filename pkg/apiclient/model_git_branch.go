@@ -11,7 +11,9 @@ API version: v0.0.0-dev
 package apiclient
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the GitBranch type satisfies the MappedNullable interface at compile time
@@ -19,16 +21,20 @@ var _ MappedNullable = &GitBranch{}
 
 // GitBranch struct for GitBranch
 type GitBranch struct {
-	Name *string `json:"name,omitempty"`
-	Sha  *string `json:"sha,omitempty"`
+	Name string `json:"name"`
+	Sha  string `json:"sha"`
 }
+
+type _GitBranch GitBranch
 
 // NewGitBranch instantiates a new GitBranch object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGitBranch() *GitBranch {
+func NewGitBranch(name string, sha string) *GitBranch {
 	this := GitBranch{}
+	this.Name = name
+	this.Sha = sha
 	return &this
 }
 
@@ -40,68 +46,52 @@ func NewGitBranchWithDefaults() *GitBranch {
 	return &this
 }
 
-// GetName returns the Name field value if set, zero value otherwise.
+// GetName returns the Name field value
 func (o *GitBranch) GetName() string {
-	if o == nil || IsNil(o.Name) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Name
+
+	return o.Name
 }
 
-// GetNameOk returns a tuple with the Name field value if set, nil otherwise
+// GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
 func (o *GitBranch) GetNameOk() (*string, bool) {
-	if o == nil || IsNil(o.Name) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Name, true
+	return &o.Name, true
 }
 
-// HasName returns a boolean if a field has been set.
-func (o *GitBranch) HasName() bool {
-	if o != nil && !IsNil(o.Name) {
-		return true
-	}
-
-	return false
-}
-
-// SetName gets a reference to the given string and assigns it to the Name field.
+// SetName sets field value
 func (o *GitBranch) SetName(v string) {
-	o.Name = &v
+	o.Name = v
 }
 
-// GetSha returns the Sha field value if set, zero value otherwise.
+// GetSha returns the Sha field value
 func (o *GitBranch) GetSha() string {
-	if o == nil || IsNil(o.Sha) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Sha
+
+	return o.Sha
 }
 
-// GetShaOk returns a tuple with the Sha field value if set, nil otherwise
+// GetShaOk returns a tuple with the Sha field value
 // and a boolean to check if the value has been set.
 func (o *GitBranch) GetShaOk() (*string, bool) {
-	if o == nil || IsNil(o.Sha) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Sha, true
+	return &o.Sha, true
 }
 
-// HasSha returns a boolean if a field has been set.
-func (o *GitBranch) HasSha() bool {
-	if o != nil && !IsNil(o.Sha) {
-		return true
-	}
-
-	return false
-}
-
-// SetSha gets a reference to the given string and assigns it to the Sha field.
+// SetSha sets field value
 func (o *GitBranch) SetSha(v string) {
-	o.Sha = &v
+	o.Sha = v
 }
 
 func (o GitBranch) MarshalJSON() ([]byte, error) {
@@ -114,13 +104,47 @@ func (o GitBranch) MarshalJSON() ([]byte, error) {
 
 func (o GitBranch) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Name) {
-		toSerialize["name"] = o.Name
-	}
-	if !IsNil(o.Sha) {
-		toSerialize["sha"] = o.Sha
-	}
+	toSerialize["name"] = o.Name
+	toSerialize["sha"] = o.Sha
 	return toSerialize, nil
+}
+
+func (o *GitBranch) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	requiredProperties := []string{
+		"name",
+		"sha",
+	}
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	for _, requiredProperty := range requiredProperties {
+		if _, exists := allProperties[requiredProperty]; !exists {
+			return fmt.Errorf("no value given for required property %v", requiredProperty)
+		}
+	}
+
+	varGitBranch := _GitBranch{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&varGitBranch)
+
+	if err != nil {
+		return err
+	}
+
+	*o = GitBranch(varGitBranch)
+
+	return err
 }
 
 type NullableGitBranch struct {

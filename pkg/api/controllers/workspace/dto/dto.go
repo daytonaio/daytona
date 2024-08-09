@@ -8,6 +8,6 @@ import (
 )
 
 type SetProjectState struct {
-	Uptime    uint64            `json:"uptime"`
-	GitStatus project.GitStatus `json:"gitStatus"`
+	Uptime    uint64             `json:"uptime" validate:"required"`
+	GitStatus *project.GitStatus `json:"gitStatus,omitempty" validate:"optional"`
 } // @name SetProjectState

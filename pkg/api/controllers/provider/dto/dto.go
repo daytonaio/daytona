@@ -8,11 +8,11 @@ import (
 )
 
 type Provider struct {
-	Name    string `json:"name"`
-	Version string `json:"version"`
+	Name    string `json:"name" validate:"required"`
+	Version string `json:"version" validate:"required"`
 } //	@name	Provider
 
 type InstallProviderRequest struct {
-	Name         string                        `json:"name"`
-	DownloadUrls map[os.OperatingSystem]string `json:"downloadUrls"`
+	Name         string                        `json:"name" validate:"required"`
+	DownloadUrls map[os.OperatingSystem]string `json:"downloadUrls" validate:"required"`
 } //	@name	InstallProviderRequest

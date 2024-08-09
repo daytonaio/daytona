@@ -4,7 +4,7 @@
 package buildconfig
 
 type DevcontainerConfig struct {
-	FilePath string `json:"filePath"`
+	FilePath string `json:"filePath" validate:"required"`
 } // @name DevcontainerConfig
 
 /*
@@ -16,7 +16,7 @@ type DockerfileConfig struct {
 */
 
 type ProjectBuildConfig struct {
-	Devcontainer *DevcontainerConfig `json:"devcontainer"`
+	Devcontainer *DevcontainerConfig `json:"devcontainer,omitempty" validate:"optional"`
 	/*
 		Dockerfile   *ProjectBuildDockerfile   `json:"dockerfile"`
 	*/

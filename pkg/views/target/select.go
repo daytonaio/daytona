@@ -26,8 +26,8 @@ func GetTargetFromPrompt(targets []apiclient.ProviderTarget, activeProfileName s
 		options := "{}"
 		items = append(items, item{
 			target: apiclient.ProviderTarget{
-				Name:    &name,
-				Options: &options,
+				Name:    name,
+				Options: options,
 			},
 		})
 	}

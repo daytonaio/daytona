@@ -4,14 +4,14 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**DownloadUrls** | Pointer to **map[string]string** |  | [optional] 
-**Name** | Pointer to **string** |  | [optional] 
+**DownloadUrls** | **map[string]string** |  | 
+**Name** | **string** |  | 
 
 ## Methods
 
 ### NewInstallProviderRequest
 
-`func NewInstallProviderRequest() *InstallProviderRequest`
+`func NewInstallProviderRequest(downloadUrls map[string]string, name string, ) *InstallProviderRequest`
 
 NewInstallProviderRequest instantiates a new InstallProviderRequest object
 This constructor will assign default values to properties that have it defined,
@@ -45,11 +45,6 @@ and a boolean to check if the value has been set.
 
 SetDownloadUrls sets DownloadUrls field to given value.
 
-### HasDownloadUrls
-
-`func (o *InstallProviderRequest) HasDownloadUrls() bool`
-
-HasDownloadUrls returns a boolean if a field has been set.
 
 ### GetName
 
@@ -70,11 +65,6 @@ and a boolean to check if the value has been set.
 
 SetName sets Name field to given value.
 
-### HasName
-
-`func (o *InstallProviderRequest) HasName() bool`
-
-HasName returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

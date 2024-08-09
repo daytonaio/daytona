@@ -101,7 +101,7 @@ func GetRepositoryFromUrlInput(multiProject bool, projectOrder int, apiClient *a
 		return nil, err
 	}
 
-	selectedRepos[*repo.Url]++
+	selectedRepos[repo.Url]++
 
 	return repo, nil
 }

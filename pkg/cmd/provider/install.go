@@ -35,7 +35,7 @@ var providerInstallCmd = &cobra.Command{
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
-		providerManager := manager.NewProviderManager(manager.ProviderManagerConfig{RegistryUrl: *serverConfig.RegistryUrl})
+		providerManager := manager.NewProviderManager(manager.ProviderManagerConfig{RegistryUrl: serverConfig.RegistryUrl})
 
 		providersManifest, err := providerManager.GetProvidersManifest()
 		if err != nil {
@@ -54,7 +54,7 @@ var providerInstallCmd = &cobra.Command{
 		providerList := convertToDTO(providersManifestLatest)
 		specificProviderName := "Select a specific version"
 		specificProviderVersion := ""
-		providerList = append(providerList, apiclient.Provider{Name: &specificProviderName, Version: &specificProviderVersion})
+		providerList = append(providerList, apiclient.Provider{Name: specificProviderName, Version: specificProviderVersion})
 
 		providerToInstall, err := provider.GetProviderFromPrompt(providerList, "Choose a provider to install", false)
 		if err != nil {
@@ -69,7 +69,7 @@ var providerInstallCmd = &cobra.Command{
 			return
 		}
 
-		if *providerToInstall.Name == specificProviderName {
+		if providerToInstall.Name == specificProviderName {
 			providerList = convertToDTO(providersManifest)
 
 			providerToInstall, err = provider.GetProviderFromPrompt(providerList, "Choose a specific provider to install", false)
@@ -86,11 +86,11 @@ var providerInstallCmd = &cobra.Command{
 			}
 		}
 
-		downloadUrls := convertToStringMap((*providersManifest)[*providerToInstall.Name].Versions[*providerToInstall.Version].DownloadUrls)
+		downloadUrls := convertToStringMap((*providersManifest)[providerToInstall.Name].Versions[providerToInstall.Version].DownloadUrls)
 		err = view_utils.WithSpinner("Installing", func() error {
 			res, err = apiClient.ProviderAPI.InstallProviderExecute(apiclient.ApiInstallProviderRequest{}.Provider(apiclient.InstallProviderRequest{
 				Name:         providerToInstall.Name,
-				DownloadUrls: &downloadUrls,
+				DownloadUrls: downloadUrls,
 			}))
 
 			if err != nil {
@@ -108,7 +108,7 @@ var providerInstallCmd = &cobra.Command{
 			log.Fatalf("Failed to execute download with spinner: %v", err)
 		}
 
-		views.RenderInfoMessageBold(fmt.Sprintf("Provider %s has been successfully installed", *providerToInstall.Name))
+		views.RenderInfoMessageBold(fmt.Sprintf("Provider %s has been successfully installed", providerToInstall.Name))
 	},
 }
 
@@ -117,8 +117,8 @@ func convertToDTO(manifest *manager.ProvidersManifest) []apiclient.Provider {
 	for pluginName, pluginManifest := range *manifest {
 		for version := range pluginManifest.Versions {
 			pluginList = append(pluginList, apiclient.Provider{
-				Name:    &pluginName,
-				Version: &version,
+				Name:    pluginName,
+				Version: version,
 			})
 		}
 	}

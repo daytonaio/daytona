@@ -18,21 +18,21 @@ func ToProject(projectDTO *apiclient.Project) *project.Project {
 	}
 
 	repository := &gitprovider.GitRepository{
-		Id:     *projectDTO.Repository.Id,
-		Name:   *projectDTO.Repository.Name,
+		Id:     projectDTO.Repository.Id,
+		Name:   projectDTO.Repository.Name,
 		Branch: projectDTO.Repository.Branch,
-		Owner:  *projectDTO.Repository.Owner,
+		Owner:  projectDTO.Repository.Owner,
 		Path:   projectDTO.Repository.Path,
-		Sha:    *projectDTO.Repository.Sha,
-		Source: *projectDTO.Repository.Source,
-		Url:    *projectDTO.Repository.Url,
+		Sha:    projectDTO.Repository.Sha,
+		Source: projectDTO.Repository.Source,
+		Url:    projectDTO.Repository.Url,
 	}
 
 	var projectState *project.ProjectState
 	if projectDTO.State != nil {
-		uptime := *projectDTO.State.Uptime
+		uptime := projectDTO.State.Uptime
 		projectState = &project.ProjectState{
-			UpdatedAt: *projectDTO.State.UpdatedAt,
+			UpdatedAt: projectDTO.State.UpdatedAt,
 			Uptime:    uint64(uptime),
 			GitStatus: ToGitStatus(projectDTO.State.GitStatus),
 		}
@@ -41,23 +41,23 @@ func ToProject(projectDTO *apiclient.Project) *project.Project {
 	var projectBuild *buildconfig.ProjectBuildConfig
 	if projectDTO.BuildConfig != nil {
 		projectBuild = &buildconfig.ProjectBuildConfig{}
-		if projectDTO.BuildConfig.Devcontainer != nil && projectDTO.BuildConfig.Devcontainer.FilePath != nil {
+		if projectDTO.BuildConfig.Devcontainer != nil {
 			projectBuild.Devcontainer = &buildconfig.DevcontainerConfig{
-				FilePath: *projectDTO.BuildConfig.Devcontainer.FilePath,
+				FilePath: projectDTO.BuildConfig.Devcontainer.FilePath,
 			}
 		}
 	}
 
 	project := &project.Project{
 		ProjectConfig: config.ProjectConfig{
-			Name:        *projectDTO.Name,
-			Image:       *projectDTO.Image,
-			User:        *projectDTO.User,
+			Name:        projectDTO.Name,
+			Image:       projectDTO.Image,
+			User:        projectDTO.User,
 			BuildConfig: projectBuild,
 			Repository:  repository,
 		},
-		Target:      *projectDTO.Target,
-		WorkspaceId: *projectDTO.WorkspaceId,
+		Target:      projectDTO.Target,
+		WorkspaceId: projectDTO.WorkspaceId,
 		State:       projectState,
 	}
 
@@ -69,18 +69,14 @@ func ToProject(projectDTO *apiclient.Project) *project.Project {
 	return project
 }
 
-func ToGitStatus(gitStatusDTO *apiclient.GitStatus) *project.GitStatus {
-	if gitStatusDTO == nil {
-		return nil
-	}
-
+func ToGitStatus(gitStatusDTO apiclient.GitStatus) *project.GitStatus {
 	files := []*project.FileStatus{}
 	for _, fileDTO := range gitStatusDTO.FileStatus {
-		staging := project.Status(string(*fileDTO.Staging))
-		worktree := project.Status(string(*fileDTO.Worktree))
+		staging := project.Status(string(fileDTO.Staging))
+		worktree := project.Status(string(fileDTO.Worktree))
 		file := &project.FileStatus{
-			Name:     *fileDTO.Name,
-			Extra:    *fileDTO.Extra,
+			Name:     fileDTO.Name,
+			Extra:    fileDTO.Extra,
 			Staging:  staging,
 			Worktree: worktree,
 		}
@@ -88,7 +84,7 @@ func ToGitStatus(gitStatusDTO *apiclient.GitStatus) *project.GitStatus {
 	}
 
 	return &project.GitStatus{
-		CurrentBranch: *gitStatusDTO.CurrentBranch,
+		CurrentBranch: gitStatusDTO.CurrentBranch,
 		Files:         files,
 	}
 }
@@ -103,16 +99,16 @@ func ToGitStatusDTO(gitStatus *project.GitStatus) *apiclient.GitStatus {
 		staging := apiclient.Status(string(file.Staging))
 		worktree := apiclient.Status(string(file.Worktree))
 		fileDTO := apiclient.FileStatus{
-			Name:     &file.Name,
-			Extra:    &file.Extra,
-			Staging:  &staging,
-			Worktree: &worktree,
+			Name:     file.Name,
+			Extra:    file.Extra,
+			Staging:  staging,
+			Worktree: worktree,
 		}
 		fileStatusDTO = append(fileStatusDTO, fileDTO)
 	}
 
 	return &apiclient.GitStatus{
-		CurrentBranch: &gitStatus.CurrentBranch,
+		CurrentBranch: gitStatus.CurrentBranch,
 		FileStatus:    fileStatusDTO,
 	}
 }

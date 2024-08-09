@@ -25,12 +25,11 @@ func selectProjectPrompt(projects []apiclient.Project, actionVerb string, choice
 	items := []list.Item{}
 
 	for _, project := range projects {
-		var projectName string
-		if project.Name != nil {
-			projectName = *project.Name
-		} else {
+		projectName := project.Name
+		if project.Name == "" {
 			projectName = "Unnamed Project"
 		}
+
 		newItem := item[apiclient.Project]{title: projectName, desc: "", choiceProperty: project}
 		items = append(items, newItem)
 	}

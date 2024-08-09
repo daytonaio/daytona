@@ -235,7 +235,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/GitProvider"
+                            "$ref": "#/definitions/SetGitProviderConfig"
                         }
                     }
                 ],
@@ -1338,6 +1338,11 @@
     "definitions": {
         "ApiKey": {
             "type": "object",
+            "required": [
+                "keyHash",
+                "name",
+                "type"
+            ],
             "properties": {
                 "keyHash": {
                     "type": "string"
@@ -1353,6 +1358,11 @@
         },
         "ContainerRegistry": {
             "type": "object",
+            "required": [
+                "password",
+                "server",
+                "username"
+            ],
             "properties": {
                 "password": {
                     "type": "string"
@@ -1367,6 +1377,11 @@
         },
         "CreateProjectConfigDTO": {
             "type": "object",
+            "required": [
+                "envVars",
+                "name",
+                "source"
+            ],
             "properties": {
                 "buildConfig": {
                     "$ref": "#/definitions/ProjectBuildConfig"
@@ -1393,6 +1408,9 @@
         },
         "CreateProjectConfigSourceDTO": {
             "type": "object",
+            "required": [
+                "repository"
+            ],
             "properties": {
                 "repository": {
                     "$ref": "#/definitions/GitRepository"
@@ -1402,7 +1420,10 @@
         "CreateWorkspaceDTO": {
             "type": "object",
             "required": [
-                "projects"
+                "id",
+                "name",
+                "projects",
+                "target"
             ],
             "properties": {
                 "id": {
@@ -1424,6 +1445,9 @@
         },
         "DevcontainerConfig": {
             "type": "object",
+            "required": [
+                "filePath"
+            ],
             "properties": {
                 "filePath": {
                     "type": "string"
@@ -1432,6 +1456,11 @@
         },
         "FRPSConfig": {
             "type": "object",
+            "required": [
+                "domain",
+                "port",
+                "protocol"
+            ],
             "properties": {
                 "domain": {
                     "type": "string"
@@ -1446,6 +1475,12 @@
         },
         "FileStatus": {
             "type": "object",
+            "required": [
+                "extra",
+                "name",
+                "staging",
+                "worktree"
+            ],
             "properties": {
                 "extra": {
                     "type": "string"
@@ -1463,6 +1498,10 @@
         },
         "GitBranch": {
             "type": "object",
+            "required": [
+                "name",
+                "sha"
+            ],
             "properties": {
                 "name": {
                     "type": "string"
@@ -1474,6 +1513,10 @@
         },
         "GitNamespace": {
             "type": "object",
+            "required": [
+                "id",
+                "name"
+            ],
             "properties": {
                 "id": {
                     "type": "string"
@@ -1485,6 +1528,11 @@
         },
         "GitProvider": {
             "type": "object",
+            "required": [
+                "id",
+                "token",
+                "username"
+            ],
             "properties": {
                 "baseApiUrl": {
                     "type": "string"
@@ -1502,6 +1550,15 @@
         },
         "GitPullRequest": {
             "type": "object",
+            "required": [
+                "branch",
+                "name",
+                "sha",
+                "sourceRepoId",
+                "sourceRepoName",
+                "sourceRepoOwner",
+                "sourceRepoUrl"
+            ],
             "properties": {
                 "branch": {
                     "type": "string"
@@ -1528,6 +1585,14 @@
         },
         "GitRepository": {
             "type": "object",
+            "required": [
+                "id",
+                "name",
+                "owner",
+                "sha",
+                "source",
+                "url"
+            ],
             "properties": {
                 "branch": {
                     "type": "string"
@@ -1560,6 +1625,10 @@
         },
         "GitStatus": {
             "type": "object",
+            "required": [
+                "currentBranch",
+                "fileStatus"
+            ],
             "properties": {
                 "currentBranch": {
                     "type": "string"
@@ -1574,6 +1643,12 @@
         },
         "GitUser": {
             "type": "object",
+            "required": [
+                "email",
+                "id",
+                "name",
+                "username"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -1591,6 +1666,10 @@
         },
         "InstallProviderRequest": {
             "type": "object",
+            "required": [
+                "downloadUrls",
+                "name"
+            ],
             "properties": {
                 "downloadUrls": {
                     "type": "object",
@@ -1605,6 +1684,9 @@
         },
         "NetworkKey": {
             "type": "object",
+            "required": [
+                "key"
+            ],
             "properties": {
                 "key": {
                     "type": "string"
@@ -1613,6 +1695,9 @@
         },
         "ProfileData": {
             "type": "object",
+            "required": [
+                "envVars"
+            ],
             "properties": {
                 "envVars": {
                     "type": "object",
@@ -1624,6 +1709,16 @@
         },
         "Project": {
             "type": "object",
+            "required": [
+                "default",
+                "envVars",
+                "image",
+                "name",
+                "repository",
+                "target",
+                "user",
+                "workspaceId"
+            ],
             "properties": {
                 "buildConfig": {
                     "$ref": "#/definitions/ProjectBuildConfig"
@@ -1670,6 +1765,14 @@
         },
         "ProjectConfig": {
             "type": "object",
+            "required": [
+                "default",
+                "envVars",
+                "image",
+                "name",
+                "repository",
+                "user"
+            ],
             "properties": {
                 "buildConfig": {
                     "$ref": "#/definitions/ProjectBuildConfig"
@@ -1699,6 +1802,12 @@
         },
         "ProjectInfo": {
             "type": "object",
+            "required": [
+                "created",
+                "isRunning",
+                "name",
+                "workspaceId"
+            ],
             "properties": {
                 "created": {
                     "type": "string"
@@ -1719,6 +1828,11 @@
         },
         "ProjectState": {
             "type": "object",
+            "required": [
+                "gitStatus",
+                "updatedAt",
+                "uptime"
+            ],
             "properties": {
                 "gitStatus": {
                     "$ref": "#/definitions/GitStatus"
@@ -1733,6 +1847,10 @@
         },
         "Provider": {
             "type": "object",
+            "required": [
+                "name",
+                "version"
+            ],
             "properties": {
                 "name": {
                     "type": "string"
@@ -1744,6 +1862,11 @@
         },
         "ProviderTarget": {
             "type": "object",
+            "required": [
+                "name",
+                "options",
+                "providerInfo"
+            ],
             "properties": {
                 "name": {
                     "type": "string"
@@ -1765,6 +1888,9 @@
         },
         "RepositoryUrl": {
             "type": "object",
+            "required": [
+                "url"
+            ],
             "properties": {
                 "url": {
                     "type": "string"
@@ -1773,6 +1899,22 @@
         },
         "ServerConfig": {
             "type": "object",
+            "required": [
+                "apiPort",
+                "binariesPath",
+                "builderImage",
+                "builderRegistryServer",
+                "defaultProjectImage",
+                "defaultProjectUser",
+                "headscalePort",
+                "id",
+                "localBuilderRegistryImage",
+                "localBuilderRegistryPort",
+                "logFilePath",
+                "providersDir",
+                "registryUrl",
+                "serverDownloadUrl"
+            ],
             "properties": {
                 "apiPort": {
                     "type": "integer"
@@ -1824,8 +1966,32 @@
                 }
             }
         },
+        "SetGitProviderConfig": {
+            "type": "object",
+            "required": [
+                "id",
+                "token"
+            ],
+            "properties": {
+                "baseApiUrl": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "SetProjectState": {
             "type": "object",
+            "required": [
+                "uptime"
+            ],
             "properties": {
                 "gitStatus": {
                     "$ref": "#/definitions/GitStatus"
@@ -1860,6 +2026,12 @@
         },
         "Workspace": {
             "type": "object",
+            "required": [
+                "id",
+                "name",
+                "projects",
+                "target"
+            ],
             "properties": {
                 "id": {
                     "type": "string"
@@ -1880,6 +2052,12 @@
         },
         "WorkspaceDTO": {
             "type": "object",
+            "required": [
+                "id",
+                "name",
+                "projects",
+                "target"
+            ],
             "properties": {
                 "id": {
                     "type": "string"
@@ -1903,6 +2081,10 @@
         },
         "WorkspaceInfo": {
             "type": "object",
+            "required": [
+                "name",
+                "projects"
+            ],
             "properties": {
                 "name": {
                     "type": "string"
@@ -1933,6 +2115,10 @@
         },
         "provider.ProviderInfo": {
             "type": "object",
+            "required": [
+                "name",
+                "version"
+            ],
             "properties": {
                 "name": {
                     "type": "string"

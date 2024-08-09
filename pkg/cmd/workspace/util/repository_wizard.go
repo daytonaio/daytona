@@ -41,12 +41,12 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 
 	for _, gitProvider := range config.UserGitProviders {
 		for _, supportedProvider := range supportedProviders {
-			if *gitProvider.Id == supportedProvider.Id {
+			if gitProvider.Id == supportedProvider.Id {
 				gitProviderViewList = append(gitProviderViewList,
 					gitprovider_view.GitProviderView{
-						Id:       *gitProvider.Id,
+						Id:       gitProvider.Id,
 						Name:     supportedProvider.Name,
-						Username: *gitProvider.Username,
+						Username: gitProvider.Username,
 					},
 				)
 			}
@@ -72,7 +72,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 	}
 
 	if len(namespaceList) == 1 {
-		namespaceId = *namespaceList[0].Id
+		namespaceId = namespaceList[0].Id
 	} else {
 		namespaceId = selection.GetNamespaceIdFromPrompt(namespaceList, config.ProjectOrder)
 		if namespaceId == "" {

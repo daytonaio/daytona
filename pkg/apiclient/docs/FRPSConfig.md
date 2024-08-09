@@ -4,15 +4,15 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Domain** | Pointer to **string** |  | [optional] 
-**Port** | Pointer to **int32** |  | [optional] 
-**Protocol** | Pointer to **string** |  | [optional] 
+**Domain** | **string** |  | 
+**Port** | **int32** |  | 
+**Protocol** | **string** |  | 
 
 ## Methods
 
 ### NewFRPSConfig
 
-`func NewFRPSConfig() *FRPSConfig`
+`func NewFRPSConfig(domain string, port int32, protocol string, ) *FRPSConfig`
 
 NewFRPSConfig instantiates a new FRPSConfig object
 This constructor will assign default values to properties that have it defined,
@@ -46,11 +46,6 @@ and a boolean to check if the value has been set.
 
 SetDomain sets Domain field to given value.
 
-### HasDomain
-
-`func (o *FRPSConfig) HasDomain() bool`
-
-HasDomain returns a boolean if a field has been set.
 
 ### GetPort
 
@@ -71,11 +66,6 @@ and a boolean to check if the value has been set.
 
 SetPort sets Port field to given value.
 
-### HasPort
-
-`func (o *FRPSConfig) HasPort() bool`
-
-HasPort returns a boolean if a field has been set.
 
 ### GetProtocol
 
@@ -96,11 +86,6 @@ and a boolean to check if the value has been set.
 
 SetProtocol sets Protocol field to given value.
 
-### HasProtocol
-
-`func (o *FRPSConfig) HasProtocol() bool`
-
-HasProtocol returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

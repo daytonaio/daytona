@@ -78,7 +78,7 @@ func (s *Server) getNetworkKey() (string, error) {
 		return s.getNetworkKey()
 	}
 
-	return *networkKey.Key, nil
+	return networkKey.Key, nil
 }
 
 func (s *Server) getTsnetServer() (*tsnet.Server, error) {

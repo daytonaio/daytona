@@ -5,17 +5,17 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **BuildConfig** | Pointer to [**ProjectBuildConfig**](ProjectBuildConfig.md) |  | [optional] 
-**EnvVars** | Pointer to **map[string]string** |  | [optional] 
+**EnvVars** | **map[string]string** |  | 
 **Image** | Pointer to **string** |  | [optional] 
-**Name** | Pointer to **string** |  | [optional] 
-**Source** | Pointer to [**CreateProjectConfigSourceDTO**](CreateProjectConfigSourceDTO.md) |  | [optional] 
+**Name** | **string** |  | 
+**Source** | [**CreateProjectConfigSourceDTO**](CreateProjectConfigSourceDTO.md) |  | 
 **User** | Pointer to **string** |  | [optional] 
 
 ## Methods
 
 ### NewCreateProjectConfigDTO
 
-`func NewCreateProjectConfigDTO() *CreateProjectConfigDTO`
+`func NewCreateProjectConfigDTO(envVars map[string]string, name string, source CreateProjectConfigSourceDTO, ) *CreateProjectConfigDTO`
 
 NewCreateProjectConfigDTO instantiates a new CreateProjectConfigDTO object
 This constructor will assign default values to properties that have it defined,
@@ -74,11 +74,6 @@ and a boolean to check if the value has been set.
 
 SetEnvVars sets EnvVars field to given value.
 
-### HasEnvVars
-
-`func (o *CreateProjectConfigDTO) HasEnvVars() bool`
-
-HasEnvVars returns a boolean if a field has been set.
 
 ### GetImage
 
@@ -124,11 +119,6 @@ and a boolean to check if the value has been set.
 
 SetName sets Name field to given value.
 
-### HasName
-
-`func (o *CreateProjectConfigDTO) HasName() bool`
-
-HasName returns a boolean if a field has been set.
 
 ### GetSource
 
@@ -149,11 +139,6 @@ and a boolean to check if the value has been set.
 
 SetSource sets Source field to given value.
 
-### HasSource
-
-`func (o *CreateProjectConfigDTO) HasSource() bool`
-
-HasSource returns a boolean if a field has been set.
 
 ### GetUser
 
