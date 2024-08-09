@@ -25,13 +25,23 @@ func Start(logFilePath string) error {
 	if err != nil {
 		return err
 	}
+
 	s, err := service.New(program{}, cfg)
 	if err != nil {
 		return err
 	}
-	err = s.Install()
+
+	serviceFilePath, err := getServiceFilePath(cfg)
 	if err != nil {
 		return err
+	}
+
+	_, err = os.Stat(serviceFilePath)
+	if os.IsNotExist(err) {
+		err = s.Install()
+		if err != nil {
+			return err
+		}
 	}
 
 	logFile, err := os.OpenFile(logFilePath, os.O_TRUNC|os.O_CREATE|os.O_RDONLY, 0644)
@@ -127,4 +137,26 @@ func getServiceConfig() (*service.Config, error) {
 	}
 
 	return svcConfig, nil
+}
+
+func getServiceFilePath(cfg *service.Config) (string, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	switch runtime.GOOS {
+	case "linux":
+		if cfg.UserName == "root" {
+			return fmt.Sprintf("/etc/systemd/system/%s.service", cfg.Name), nil
+		}
+		return fmt.Sprintf("%s/.config/systemd/user/%s.service", homeDir, cfg.Name), nil
+	case "darwin":
+		if cfg.UserName == "root" {
+			return fmt.Sprintf("/Library/LaunchDaemons/%s.plist", cfg.Name), nil
+		}
+		return fmt.Sprintf("%s/Library/LaunchAgents/%s.plist", homeDir, cfg.Name), nil
+	}
+
+	return "", fmt.Errorf("daemon mode not supported on current OS")
 }
