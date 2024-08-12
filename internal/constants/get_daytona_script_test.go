@@ -8,33 +8,33 @@ import (
 
 func TestGetDaytonaScript(t *testing.T) {
 	tests := []struct {
-		Name     string
-		BaseUrl  string
+		Name           string
+		BaseUrl        string
 		ExpectedString string
 	}{
 		{
-			Name:     "replace default base URL with custom URL",
-			BaseUrl:  "https://custom.url/daytona",
+			Name:           "replace default base URL with custom URL",
+			BaseUrl:        "https://custom.url/daytona",
 			ExpectedString: "https://custom.url/daytona",
 		},
 		{
-			Name:     "replace with localhost URL",
-			BaseUrl:  "http://localhost:8080/daytona",
+			Name:           "replace with localhost URL",
+			BaseUrl:        "http://localhost:8080/daytona",
 			ExpectedString: "http://localhost:8080/daytona",
 		},
 		{
-			Name:     "malformed URL",
-			BaseUrl:  "htp:/bad-url",
+			Name:           "malformed URL",
+			BaseUrl:        "htp:/bad-url",
 			ExpectedString: "htp:/bad-url",
 		},
 		{
-			Name:     "no substitution needed when default URL is used",
-			BaseUrl:  "https://download.daytona.io/daytona",
+			Name:           "no substitution needed when default URL is used",
+			BaseUrl:        "https://download.daytona.io/daytona",
 			ExpectedString: "https://download.daytona.io/daytona",
 		},
 		{
-			Name:     "trailing slash in base URL",
-			BaseUrl:  "https://example.com/daytona/",
+			Name:           "trailing slash in base URL",
+			BaseUrl:        "https://example.com/daytona/",
 			ExpectedString: "https://example.com/daytona/",
 		},
 	}

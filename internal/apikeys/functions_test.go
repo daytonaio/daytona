@@ -83,7 +83,7 @@ func TestEqualsKeyHashFromApi(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.Name, func(t *testing.T) {
 			comparisonResult := EqualsKeyHashFromApi(tc.Key, tc.ExpectedKeyHash)
-			assert.Equal(t, tc.ExpectedComparison, comparisonResult,"expected comparism should match the actual comparism")
+			assert.Equal(t, tc.ExpectedComparison, comparisonResult, "expected comparism should match the actual comparism")
 			assert.NotNil(t, comparisonResult, "actual comparison shouldn't be nil")
 		})
 	}
