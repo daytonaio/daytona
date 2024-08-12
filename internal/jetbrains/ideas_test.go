@@ -78,7 +78,7 @@ func TestGetIdeas(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("Tetsing IDE %s", tc.expectedIDE.Name), func(t *testing.T) {
 			ide, exists := ideas[tc.id]
-			assert.True(t, exists, "IDE sould exist in map")
+			assert.True(t, exists, "IDE should exist in map")
 			assert.Equal(t, tc.expectedIDE, ide, "expedted IDE should match the returned IDE")
 			assert.NotNil(t, tc.expectedIDE, "IDE should not be nil")
 			//actual url assertions for system architecture
