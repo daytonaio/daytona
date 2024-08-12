@@ -43,7 +43,7 @@ type IDockerClient interface {
 
 	GetProjectContainerName(project *project.Project) string
 	GetProjectVolumeName(project *project.Project) string
-	ExecSync(containerID string, config types.ExecConfig, outputWriter io.Writer) (*ExecResult, error)
+	ExecSync(containerID string, config container.ExecOptions, outputWriter io.Writer) (*ExecResult, error)
 	GetContainerLogs(containerName string, logWriter io.Writer) error
 	PullImage(imageName string, cr *containerregistry.ContainerRegistry, logWriter io.Writer) error
 	PushImage(imageName string, cr *containerregistry.ContainerRegistry, logWriter io.Writer) error

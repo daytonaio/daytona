@@ -16,6 +16,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var formatFlag string
 var projectConfigInfoCmd = &cobra.Command{
 	Use:     "info",
 	Short:   "Show project config info",
@@ -42,7 +43,13 @@ var projectConfigInfoCmd = &cobra.Command{
 				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
 
+			if formatFlag != "" {
+				output.OpenStdOut()
+			}
 			projectConfig = selection.GetProjectConfigFromPrompt(projectConfigList, 0, false, "View")
+			if formatFlag != "" {
+				output.BlockStdOut()
+			}
 		} else {
 			var res *http.Response
 			projectConfig, res, err = apiClient.ProjectConfigAPI.GetProjectConfig(ctx, args[0]).Execute()
@@ -55,8 +62,9 @@ var projectConfigInfoCmd = &cobra.Command{
 			return
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = projectConfig
+		if formatFlag != "" {
+			display := output.NewOutputFormatter(projectConfig, formatFlag)
+			display.Print()
 			return
 		}
 
@@ -65,4 +73,10 @@ var projectConfigInfoCmd = &cobra.Command{
 }
 
 func init() {
+	projectConfigInfoCmd.PersistentFlags().StringVarP(&formatFlag, output.FormatFlagName, output.FormatFlagShortHand, formatFlag, output.FormatDescription)
+	projectConfigInfoCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		if formatFlag != "" {
+			output.BlockStdOut()
+		}
+	}
 }

@@ -18,7 +18,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
@@ -108,7 +107,7 @@ func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, er
 		cmd = append(cmd, "--config", filepath.Join("/project", build.Project.BuildConfig.Devcontainer.FilePath))
 	}
 
-	execConfig := types.ExecConfig{
+	execConfig := container.ExecOptions{
 		AttachStdout: true,
 		AttachStderr: true,
 		Cmd:          cmd,

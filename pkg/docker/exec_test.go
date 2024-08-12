@@ -9,6 +9,7 @@ import (
 
 	t_docker "github.com/daytonaio/daytona/internal/testing/docker"
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -20,7 +21,7 @@ func (s *DockerClientTestSuite) TestExecSync() {
 
 	s.setupExecTest([]string{"test-cmd"}, containerName, project1.User, []string{})
 
-	result, err := s.dockerClient.ExecSync(containerName, types.ExecConfig{
+	result, err := s.dockerClient.ExecSync(containerName, container.ExecOptions{
 		Cmd:  []string{"test-cmd"},
 		User: project1.User,
 	}, nil)
@@ -32,7 +33,7 @@ func (s *DockerClientTestSuite) TestExecSync() {
 func (s *DockerClientTestSuite) setupExecTest(cmd []string, containerName, user string, env []string) {
 	_, client := net.Pipe()
 
-	s.mockClient.On("ContainerExecCreate", mock.Anything, containerName, types.ExecConfig{
+	s.mockClient.On("ContainerExecCreate", mock.Anything, containerName, container.ExecOptions{
 		AttachStdout: true,
 		AttachStderr: true,
 		Cmd:          cmd,
@@ -43,11 +44,11 @@ func (s *DockerClientTestSuite) setupExecTest(cmd []string, containerName, user 
 	}).Return(types.IDResponse{
 		ID: "123",
 	}, nil)
-	s.mockClient.On("ContainerExecAttach", mock.Anything, "123", types.ExecStartCheck{}).Return(types.HijackedResponse{
+	s.mockClient.On("ContainerExecAttach", mock.Anything, "123", container.ExecStartOptions{}).Return(types.HijackedResponse{
 		Conn:   client,
 		Reader: bufio.NewReader(t_docker.NewPipeReader("")),
 	}, nil)
-	s.mockClient.On("ContainerExecInspect", mock.Anything, "123").Return(types.ContainerExecInspect{
+	s.mockClient.On("ContainerExecInspect", mock.Anything, "123").Return(container.ExecInspect{
 		ExitCode: 0,
 	}, nil)
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var formatFlag string
 var whoamiCmd = &cobra.Command{
 	Use:     "whoami",
 	Short:   "Display information about the active user",
@@ -30,11 +31,21 @@ var whoamiCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = profile
+		if formatFlag != "" {
+			display := output.NewOutputFormatter(profile, formatFlag)
+			display.Print()
 			return
 		}
 
 		view.Render(profile)
 	},
+}
+
+func init() {
+	whoamiCmd.PersistentFlags().StringVarP(&formatFlag, output.FormatFlagName, output.FormatFlagShortHand, formatFlag, output.FormatDescription)
+	whoamiCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		if formatFlag != "" {
+			output.BlockStdOut()
+		}
+	}
 }

@@ -16,6 +16,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var formatFlag string
 var gitProviderListCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
@@ -55,8 +56,9 @@ var gitProviderListCmd = &cobra.Command{
 			}
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = gitProviderViewList
+		if formatFlag != "" {
+			display := output.NewOutputFormatter(gitProviderViewList, formatFlag)
+			display.Print()
 			return
 		}
 
@@ -64,4 +66,13 @@ var gitProviderListCmd = &cobra.Command{
 			views.RenderListLine(fmt.Sprintf("%s (%s)", gitProviderView.Name, gitProviderView.Username))
 		}
 	},
+}
+
+func init() {
+	gitProviderListCmd.PersistentFlags().StringVarP(&formatFlag, output.FormatFlagName, output.FormatFlagShortHand, formatFlag, output.FormatDescription)
+	gitProviderListCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		if formatFlag != "" {
+			output.BlockStdOut()
+		}
+	}
 }

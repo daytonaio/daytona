@@ -15,6 +15,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var formatFlag string
 var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List profile environment variables",
@@ -31,11 +32,13 @@ var listCmd = &cobra.Command{
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		if output.FormatFlag != "" {
+		if formatFlag != "" {
 			if profileData.EnvVars == nil {
 				profileData.EnvVars = map[string]string{}
 			}
-			output.Output = profileData.EnvVars
+
+			display := output.NewOutputFormatter(profileData.EnvVars, formatFlag)
+			display.Print()
 			return
 		}
 
@@ -46,4 +49,13 @@ var listCmd = &cobra.Command{
 
 		env.List(profileData.EnvVars)
 	},
+}
+
+func init() {
+	listCmd.PersistentFlags().StringVarP(&formatFlag, output.FormatFlagName, output.FormatFlagShortHand, formatFlag, output.FormatDescription)
+	listCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		if formatFlag != "" {
+			output.BlockStdOut()
+		}
+	}
 }

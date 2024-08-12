@@ -17,7 +17,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/daytonaio/daytona/pkg/ssh"
 	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
@@ -132,7 +131,7 @@ func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions) error 
 
 	containerUser, err := d.updateContainerUserUidGid(c.ID, opts)
 
-	res, err := d.ExecSync(c.ID, types.ExecConfig{
+	res, err := d.ExecSync(c.ID, container.ExecOptions{
 		User: containerUser,
 		Cmd:  append([]string{"sh", "-c"}, strings.Join(cloneCmd, " ")),
 	}, opts.LogWriter)
@@ -171,7 +170,7 @@ func (d *DockerClient) updateContainerUserUidGid(containerId string, opts *Creat
 		Patch UID and GID of the user cloning the repository
 	*/
 	if containerUser != "root" {
-		_, err = d.ExecSync(containerId, types.ExecConfig{
+		_, err = d.ExecSync(containerId, container.ExecOptions{
 			User: "root",
 			Cmd:  []string{"sh", "-c", UPDATE_UID_GID_SCRIPT},
 			Env: []string{

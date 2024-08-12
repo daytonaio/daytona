@@ -8,11 +8,11 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/cmd/output"
 	"github.com/daytonaio/daytona/pkg/server"
 )
 
+var formatFlag string
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Output local Daytona Server config",
@@ -22,9 +22,21 @@ var configCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		apiUrl := util.GetFrpcApiUrl(config.Frps.Protocol, config.Id, config.Frps.Domain)
-		output.Output = apiUrl
+		if formatFlag != "" {
+			display := output.NewOutputFormatter(config, formatFlag)
+			display.Print()
+			return
+		}
 
 		view.RenderConfig(config)
 	},
+}
+
+func init() {
+	configCmd.PersistentFlags().StringVarP(&formatFlag, output.FormatFlagName, output.FormatFlagShortHand, formatFlag, output.FormatDescription)
+	configCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		if formatFlag != "" {
+			output.BlockStdOut()
+		}
+	}
 }

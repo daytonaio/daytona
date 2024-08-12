@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var formatFlag string
 var targetListCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List targets",
@@ -30,11 +31,21 @@ var targetListCmd = &cobra.Command{
 			return
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = targets
+		if formatFlag != "" {
+			display := output.NewOutputFormatter(targets, formatFlag)
+			display.Print()
 			return
 		}
 
 		list_view.ListTargets(targets)
 	},
+}
+
+func init() {
+	targetListCmd.PersistentFlags().StringVarP(&formatFlag, output.FormatFlagName, output.FormatFlagShortHand, formatFlag, output.FormatDescription)
+	targetListCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		if formatFlag != "" {
+			output.BlockStdOut()
+		}
+	}
 }

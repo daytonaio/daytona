@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var formatFlag string
 var infoCmd = &cobra.Command{
 	Use:     "info",
 	Short:   "Show project info",
@@ -31,11 +32,21 @@ var infoCmd = &cobra.Command{
 			return
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = workspace
+		if formatFlag != "" {
+			display := output.NewOutputFormatter(workspace, formatFlag)
+			display.Print()
 			return
 		}
 
 		info.Render(workspace, "", false)
 	},
+}
+
+func init() {
+	infoCmd.PersistentFlags().StringVarP(&formatFlag, output.FormatFlagName, output.FormatFlagShortHand, formatFlag, output.FormatDescription)
+	infoCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		if formatFlag != "" {
+			output.BlockStdOut()
+		}
+	}
 }

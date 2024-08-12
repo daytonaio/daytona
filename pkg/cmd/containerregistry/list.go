@@ -15,6 +15,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var formatFlag string
 var containerRegistryListCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "Lists container registries",
@@ -36,11 +37,21 @@ var containerRegistryListCmd = &cobra.Command{
 			return
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = containerRegistries
+		if formatFlag != "" {
+			display := output.NewOutputFormatter(containerRegistries, formatFlag)
+			display.Print()
 			return
 		}
 
 		containerregistry_view.ListRegistries(containerRegistries)
 	},
+}
+
+func init() {
+	containerRegistryListCmd.PersistentFlags().StringVarP(&formatFlag, output.FormatFlagName, output.FormatFlagShortHand, formatFlag, output.FormatDescription)
+	containerRegistryListCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		if formatFlag != "" {
+			output.BlockStdOut()
+		}
+	}
 }

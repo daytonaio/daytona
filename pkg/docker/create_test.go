@@ -58,12 +58,12 @@ func (s *DockerClientTestSuite) TestCreateProject() {
 	s.mockClient.On("ContainerStop", mock.Anything, "123", container.StopOptions{}).Return(nil)
 
 	_, client := net.Pipe()
-	s.mockClient.On("ContainerExecAttach", mock.Anything, "exec-id", types.ExecStartCheck{}).
+	s.mockClient.On("ContainerExecAttach", mock.Anything, "exec-id", container.ExecStartOptions{}).
 		Return(types.HijackedResponse{
 			Conn:   client,
 			Reader: bufio.NewReader(t_docker.NewPipeReader("")),
 		}, nil)
-	s.mockClient.On("ContainerExecInspect", mock.Anything, "exec-id").Return(types.ContainerExecInspect{}, nil)
+	s.mockClient.On("ContainerExecInspect", mock.Anything, "exec-id").Return(container.ExecInspect{}, nil)
 
 	s.mockClient.On("ContainerCreate", mock.Anything, &container.Config{
 		Image:      "daytonaio/workspace-project",

@@ -16,6 +16,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var formatFlag string
 var InfoCmd = &cobra.Command{
 	Use:     "info [WORKSPACE]",
 	Short:   "Show workspace info",
@@ -38,7 +39,13 @@ var InfoCmd = &cobra.Command{
 				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
 
+			if formatFlag != "" {
+				output.OpenStdOut()
+			}
 			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "View")
+			if formatFlag != "" {
+				output.BlockStdOut()
+			}
 		} else {
 			workspace, err = apiclient_util.GetWorkspace(args[0])
 			if err != nil {
@@ -50,8 +57,9 @@ var InfoCmd = &cobra.Command{
 			return
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = workspace
+		if formatFlag != "" {
+			display := output.NewOutputFormatter(workspace, formatFlag)
+			display.Print()
 			return
 		}
 
@@ -64,4 +72,13 @@ var InfoCmd = &cobra.Command{
 
 		return getWorkspaceNameCompletions()
 	},
+}
+
+func init() {
+	InfoCmd.PersistentFlags().StringVarP(&formatFlag, output.FormatFlagName, output.FormatFlagShortHand, formatFlag, output.FormatDescription)
+	InfoCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		if formatFlag != "" {
+			output.BlockStdOut()
+		}
+	}
 }

@@ -52,11 +52,21 @@ var projectConfigListCmd = &cobra.Command{
 			return
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = projectConfigs
+		if formatFlag != "" {
+			display := output.NewOutputFormatter(projectConfigs, formatFlag)
+			display.Print()
 			return
 		}
 
 		projectconfig_view.ListProjectConfigs(projectConfigs, apiServerConfig, specifyGitProviders)
 	},
+}
+
+func init() {
+	projectConfigListCmd.PersistentFlags().StringVarP(&formatFlag, output.FormatFlagName, output.FormatFlagShortHand, formatFlag, output.FormatDescription)
+	projectConfigListCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		if formatFlag != "" {
+			output.BlockStdOut()
+		}
+	}
 }

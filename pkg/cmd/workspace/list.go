@@ -18,7 +18,6 @@ import (
 )
 
 var verbose bool
-
 var ListCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List workspaces",
@@ -35,7 +34,6 @@ var ListCmd = &cobra.Command{
 		}
 
 		workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Verbose(verbose).Execute()
-
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
@@ -49,8 +47,9 @@ var ListCmd = &cobra.Command{
 			specifyGitProviders = true
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = workspaceList
+		if formatFlag != "" {
+			display := output.NewOutputFormatter(workspaceList, formatFlag)
+			display.Print()
 			return
 		}
 
@@ -75,4 +74,10 @@ var ListCmd = &cobra.Command{
 
 func init() {
 	ListCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose output")
+	ListCmd.PersistentFlags().StringVarP(&formatFlag, output.FormatFlagName, output.FormatFlagShortHand, formatFlag, output.FormatDescription)
+	ListCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		if formatFlag != "" {
+			output.BlockStdOut()
+		}
+	}
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var formatFlag string
 var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List API keys",
@@ -30,11 +31,21 @@ var listCmd = &cobra.Command{
 			log.Fatal(apiclient.HandleErrorResponse(nil, err))
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = apiKeyList
+		if formatFlag != "" {
+			display := output.NewOutputFormatter(apiKeyList, formatFlag)
+			display.Print()
 			return
 		}
 
 		apikey.ListApiKeys(apiKeyList)
 	},
+}
+
+func init() {
+	listCmd.PersistentFlags().StringVarP(&formatFlag, output.FormatFlagName, output.FormatFlagShortHand, formatFlag, output.FormatDescription)
+	listCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		if formatFlag != "" {
+			output.BlockStdOut()
+		}
+	}
 }

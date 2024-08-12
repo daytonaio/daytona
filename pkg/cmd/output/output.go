@@ -11,8 +11,38 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var FormatFlag string
-var Output interface{}
+const (
+	FormatDescription   = `Output format. Must be one of (yaml, json)`
+	FormatFlagName      = "format"
+	FormatFlagShortHand = "f"
+)
+
+var standardOut *os.File
+
+type OutputFormatter struct {
+	data      interface{}
+	formatter Formatter
+}
+
+func NewOutputFormatter(data interface{}, format string) *OutputFormatter {
+	var formatter Formatter
+	switch format {
+	case "json":
+		formatter = JSONFormatter{}
+	case "yaml":
+		formatter = YAMLFormatter{}
+	case "":
+		formatter = nil
+	default:
+		formatter = JSONFormatter{} // Default to JSON
+	}
+
+	return &OutputFormatter{
+		data:      data,
+		formatter: formatter,
+	}
+
+}
 
 type Formatter interface {
 	Format(data interface{}) (string, error)
@@ -38,29 +68,28 @@ func (f YAMLFormatter) Format(data interface{}) (string, error) {
 	return string(yamlData), nil
 }
 
-func Print(data interface{}, format string) {
-	var formatter Formatter
+func (f *OutputFormatter) Print() {
 
-	if data == nil {
-		return
-	}
-
-	switch format {
-	case "json":
-		formatter = JSONFormatter{}
-	case "yaml":
-		formatter = YAMLFormatter{}
-	case "":
-		return
-	default:
-		formatter = JSONFormatter{} // Default to JSON
-	}
-
-	formattedOutput, err := formatter.Format(data)
+	formattedOutput, err := f.formatter.Format(f.data)
 	if err != nil {
 		fmt.Printf("Error formatting output: %v\n", err)
 		os.Exit(1)
 	}
 
+	OpenStdOut()
 	fmt.Println(formattedOutput)
+}
+
+func BlockStdOut() {
+	if os.Stdout != nil {
+		standardOut = os.Stdout
+		os.Stdout = nil
+	}
+}
+
+func OpenStdOut() {
+	if os.Stdout == nil {
+		os.Stdout = standardOut
+		standardOut = nil
+	}
 }

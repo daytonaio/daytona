@@ -12,6 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var formatFlag string
 var providerListCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List installed providers",
@@ -23,11 +24,21 @@ var providerListCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = providerList
+		if formatFlag != "" {
+			display := output.NewOutputFormatter(providerList, formatFlag)
+			display.Print()
 			return
 		}
 
 		provider.List(providerList)
 	},
+}
+
+func init() {
+	providerListCmd.PersistentFlags().StringVarP(&formatFlag, output.FormatFlagName, output.FormatFlagShortHand, formatFlag, output.FormatDescription)
+	providerListCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		if formatFlag != "" {
+			output.BlockStdOut()
+		}
+	}
 }

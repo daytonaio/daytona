@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var formatFlag string
 var profileListCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List profiles",
@@ -22,11 +23,21 @@ var profileListCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = c.Profiles
+		if formatFlag != "" {
+			display := output.NewOutputFormatter(c.Profiles, formatFlag)
+			display.Print()
 			return
 		}
 
 		profile.ListProfiles(c.Profiles, c.ActiveProfileId)
 	},
+}
+
+func init() {
+	profileListCmd.PersistentFlags().StringVarP(&formatFlag, output.FormatFlagName, output.FormatFlagShortHand, formatFlag, output.FormatDescription)
+	profileListCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		if formatFlag != "" {
+			output.BlockStdOut()
+		}
+	}
 }
