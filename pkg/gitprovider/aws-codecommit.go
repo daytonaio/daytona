@@ -286,7 +286,6 @@ func (g *AwsCodeCommitGitProvider) GetBranchByCommit(staticContext *StaticGitCon
 
 	var branchName string
 	for _, branch := range branches.Branches {
-
 		branchInfo, err := client.GetBranch(context.TODO(), &codecommit.GetBranchInput{
 			RepositoryName: aws.String(staticContext.Name),
 			BranchName:     aws.String(branch),
