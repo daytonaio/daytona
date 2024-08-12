@@ -12,11 +12,11 @@ import (
 )
 
 func TestGetDaytonaScript(t *testing.T) {
-	BaseUrl := "https://download.daytona.io/daytona"
-	ExpectedString := "https://download.daytona.io/daytona"
+	baseUrl := "http://localhost:8080/daytona"
+	expectedString := "http://localhost:8080/daytona"
 	t.Run("Test_Get_Daytona_Script", func(t *testing.T) {
-		script := GetDaytonaScript(BaseUrl)
-		assert.Contains(t, script, ExpectedString, "the script should contain the correct base URL")
+		script := GetDaytonaScript(baseUrl)
+		assert.Contains(t, script, expectedString, "the script should contain the correct base URL")
 	})
 
 }
