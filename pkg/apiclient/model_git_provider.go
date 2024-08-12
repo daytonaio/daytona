@@ -21,6 +21,7 @@ var _ MappedNullable = &GitProvider{}
 type GitProvider struct {
 	BaseApiUrl *string `json:"baseApiUrl,omitempty"`
 	Id         *string `json:"id,omitempty"`
+	Identity   *string `json:"identity,omitempty"`
 	Token      *string `json:"token,omitempty"`
 	Username   *string `json:"username,omitempty"`
 }
@@ -185,6 +186,9 @@ func (o GitProvider) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Id) {
 		toSerialize["id"] = o.Id
+	}
+	if !IsNil(o.Identity) {
+		toSerialize["identity"] = o.Identity
 	}
 	if !IsNil(o.Token) {
 		toSerialize["token"] = o.Token

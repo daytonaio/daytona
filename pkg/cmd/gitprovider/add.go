@@ -5,6 +5,7 @@ package gitprovider
 
 import (
 	"context"
+	"fmt"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
@@ -17,7 +18,7 @@ import (
 var GitProviderAddCmd = &cobra.Command{
 	Use:     "add",
 	Aliases: []string{"new", "register", "update"},
-	Short:   "Register a Git providers",
+	Short:   "Register a Git provider identity",
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
@@ -28,13 +29,14 @@ var GitProviderAddCmd = &cobra.Command{
 
 		gitProviderData := apiclient.GitProvider{}
 		gitProviderData.Id = new(string)
+		gitProviderData.Identity = new(string)
 		gitProviderData.Username = new(string)
 		gitProviderData.Token = new(string)
 		gitProviderData.BaseApiUrl = new(string)
 
 		gitprovider_view.GitProviderSelectionView(&gitProviderData, nil, false)
 
-		if *gitProviderData.Id == "" {
+		if *gitProviderData.Id == "" || *gitProviderData.Identity == "" {
 			return
 		}
 
@@ -43,6 +45,6 @@ var GitProviderAddCmd = &cobra.Command{
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
-		views.RenderInfoMessage("Git provider has been registered")
+		views.RenderInfoMessage(fmt.Sprintf("Git provider identity '%s' has been registered", *gitProviderData.Identity))
 	},
 }

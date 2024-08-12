@@ -5,6 +5,7 @@ package gitprovider
 
 type GitProviderConfig struct {
 	Id         string  `json:"id"`
+	Identity   string  `json:"identity"`
 	Username   string  `json:"username"`
 	Token      string  `json:"token"`
 	BaseApiUrl *string `json:"baseApiUrl,omitempty"`

@@ -20,9 +20,12 @@ var titleStyle = lipgloss.NewStyle()
 func selectProviderPrompt(gitProviders []gitprovider_view.GitProviderView, projectOrder int, choiceChan chan<- string) {
 	items := []list.Item{}
 
-	// Populate items with titles and descriptions from workspaces.
 	for _, provider := range gitProviders {
-		newItem := item[string]{id: provider.Id, title: provider.Name, choiceProperty: provider.Id}
+		newItem := item[gitprovider_view.GitProviderView]{
+			id:             provider.Id,
+			title:          fmt.Sprintf("%s (%s)", provider.Name, provider.Identity),
+			choiceProperty: provider,
+		}
 		items = append(items, newItem)
 	}
 

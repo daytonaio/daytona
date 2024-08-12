@@ -32,19 +32,26 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.GitProvider, userGit
 	var gitProviderOptions []huh.Option[string]
 	var otherGitProviderOptions []huh.Option[string]
 	for _, supportedProvider := range supportedProviders {
-		if isDeleting {
-			for _, userProvider := range userGitProviders {
-				if *userProvider.Id == supportedProvider.Id {
-					gitProviderOptions = append(gitProviderOptions, huh.Option[string]{Key: supportedProvider.Name, Value: supportedProvider.Id})
-				}
-			}
-		} else {
-			if slices.Contains(commonGitProviderIds, supportedProvider.Id) {
-				gitProviderOptions = append(gitProviderOptions, huh.Option[string]{Key: supportedProvider.Name, Value: supportedProvider.Id})
-			} else {
-				otherGitProviderOptions = append(otherGitProviderOptions, huh.Option[string]{Key: supportedProvider.Name, Value: supportedProvider.Id})
-			}
+		if !isDeleting {
+		identityForm := huh.NewForm(
+			huh.NewGroup(
+				huh.NewInput().
+					Title("Enter a unique identity name for this Git provider").
+					Value(gitProviderAddView.Identity).
+					Validate(func(str string) error {
+						if str == "" {
+							return errors.New("identity can not be blank")
+						}
+						return nil
+					}),
+			),
+		).WithTheme(views.GetCustomTheme())
+
+		err := identityForm.Run()
+		if err != nil {
+			log.Fatal(err)
 		}
+	}
 	}
 
 	if len(otherGitProviderOptions) > 0 {

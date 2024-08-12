@@ -9,6 +9,7 @@ import (
 
 type GitProviderConfigDTO struct {
 	Id         string  `gorm:"primaryKey"`
+	Identity   string  `gorm:"uniqueIndex:idx_provider_identity"`
 	Username   string  `json:"username"`
 	Token      string  `json:"token"`
 	BaseApiUrl *string `json:"baseApiUrl,omitempty"`
@@ -17,6 +18,7 @@ type GitProviderConfigDTO struct {
 func ToGitProviderConfigDTO(gitProvider gitprovider.GitProviderConfig) GitProviderConfigDTO {
 	gitProviderDTO := GitProviderConfigDTO{
 		Id:         gitProvider.Id,
+		Identity:   gitProvider.Identity,
 		Username:   gitProvider.Username,
 		Token:      gitProvider.Token,
 		BaseApiUrl: gitProvider.BaseApiUrl,
@@ -28,6 +30,7 @@ func ToGitProviderConfigDTO(gitProvider gitprovider.GitProviderConfig) GitProvid
 func ToGitProviderConfig(gitProviderDTO GitProviderConfigDTO) gitprovider.GitProviderConfig {
 	return gitprovider.GitProviderConfig{
 		Id:         gitProviderDTO.Id,
+		Identity:   gitProviderDTO.Identity,
 		Username:   gitProviderDTO.Username,
 		Token:      gitProviderDTO.Token,
 		BaseApiUrl: gitProviderDTO.BaseApiUrl,
