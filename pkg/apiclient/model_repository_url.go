@@ -11,7 +11,9 @@ API version: v0.0.0-dev
 package apiclient
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the RepositoryUrl type satisfies the MappedNullable interface at compile time
@@ -19,15 +21,18 @@ var _ MappedNullable = &RepositoryUrl{}
 
 // RepositoryUrl struct for RepositoryUrl
 type RepositoryUrl struct {
-	Url *string `json:"url,omitempty"`
+	Url string `json:"url"`
 }
+
+type _RepositoryUrl RepositoryUrl
 
 // NewRepositoryUrl instantiates a new RepositoryUrl object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRepositoryUrl() *RepositoryUrl {
+func NewRepositoryUrl(url string) *RepositoryUrl {
 	this := RepositoryUrl{}
+	this.Url = url
 	return &this
 }
 
@@ -39,36 +44,28 @@ func NewRepositoryUrlWithDefaults() *RepositoryUrl {
 	return &this
 }
 
-// GetUrl returns the Url field value if set, zero value otherwise.
+// GetUrl returns the Url field value
 func (o *RepositoryUrl) GetUrl() string {
-	if o == nil || IsNil(o.Url) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Url
+
+	return o.Url
 }
 
-// GetUrlOk returns a tuple with the Url field value if set, nil otherwise
+// GetUrlOk returns a tuple with the Url field value
 // and a boolean to check if the value has been set.
 func (o *RepositoryUrl) GetUrlOk() (*string, bool) {
-	if o == nil || IsNil(o.Url) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Url, true
+	return &o.Url, true
 }
 
-// HasUrl returns a boolean if a field has been set.
-func (o *RepositoryUrl) HasUrl() bool {
-	if o != nil && !IsNil(o.Url) {
-		return true
-	}
-
-	return false
-}
-
-// SetUrl gets a reference to the given string and assigns it to the Url field.
+// SetUrl sets field value
 func (o *RepositoryUrl) SetUrl(v string) {
-	o.Url = &v
+	o.Url = v
 }
 
 func (o RepositoryUrl) MarshalJSON() ([]byte, error) {
@@ -81,10 +78,45 @@ func (o RepositoryUrl) MarshalJSON() ([]byte, error) {
 
 func (o RepositoryUrl) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Url) {
-		toSerialize["url"] = o.Url
-	}
+	toSerialize["url"] = o.Url
 	return toSerialize, nil
+}
+
+func (o *RepositoryUrl) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	requiredProperties := []string{
+		"url",
+	}
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	for _, requiredProperty := range requiredProperties {
+		if _, exists := allProperties[requiredProperty]; !exists {
+			return fmt.Errorf("no value given for required property %v", requiredProperty)
+		}
+	}
+
+	varRepositoryUrl := _RepositoryUrl{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&varRepositoryUrl)
+
+	if err != nil {
+		return err
+	}
+
+	*o = RepositoryUrl(varRepositoryUrl)
+
+	return err
 }
 
 type NullableRepositoryUrl struct {

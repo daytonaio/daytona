@@ -5,13 +5,13 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **GitStatus** | Pointer to [**GitStatus**](GitStatus.md) |  | [optional] 
-**Uptime** | Pointer to **int32** |  | [optional] 
+**Uptime** | **int32** |  | 
 
 ## Methods
 
 ### NewSetProjectState
 
-`func NewSetProjectState() *SetProjectState`
+`func NewSetProjectState(uptime int32, ) *SetProjectState`
 
 NewSetProjectState instantiates a new SetProjectState object
 This constructor will assign default values to properties that have it defined,
@@ -70,11 +70,6 @@ and a boolean to check if the value has been set.
 
 SetUptime sets Uptime field to given value.
 
-### HasUptime
-
-`func (o *SetProjectState) HasUptime() bool`
-
-HasUptime returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

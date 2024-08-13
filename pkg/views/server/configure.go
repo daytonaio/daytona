@@ -51,7 +51,7 @@ func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *h
 		Value: "local",
 	}}
 	for _, cr := range containerRegistries {
-		builderContainerRegistryOptions = append(builderContainerRegistryOptions, huh.Option[string]{Key: *cr.Server, Value: *cr.Server})
+		builderContainerRegistryOptions = append(builderContainerRegistryOptions, huh.Option[string]{Key: cr.Server, Value: cr.Server})
 	}
 
 	return huh.NewForm(
@@ -59,34 +59,34 @@ func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *h
 			huh.NewInput().
 				Title("Providers Directory").
 				Description("Directory will be created if it does not exist").
-				Value(m.config.ProvidersDir),
+				Value(&m.config.ProvidersDir),
 			huh.NewInput().
 				Title("Registry URL").
-				Value(m.config.RegistryUrl),
+				Value(&m.config.RegistryUrl),
 			huh.NewInput().
 				Title("Server Download URL").
-				Value(m.config.ServerDownloadUrl),
+				Value(&m.config.ServerDownloadUrl),
 		),
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Default Project Image").
-				Value(m.config.DefaultProjectImage),
+				Value(&m.config.DefaultProjectImage),
 			huh.NewInput().
 				Title("Default Project User").
-				Value(m.config.DefaultProjectUser),
+				Value(&m.config.DefaultProjectUser),
 		),
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Builder Image").
 				Description("Image dependencies: docker, @devcontainers/cli (node package)").
-				Value(m.config.BuilderImage),
+				Value(&m.config.BuilderImage),
 			huh.NewSelect[string]().
 				Title("Builder Registry").
 				Description("To add options, add a container registry with 'daytona cr set'").
 				Options(
 					builderContainerRegistryOptions...,
 				).
-				Value(m.config.BuilderRegistryServer),
+				Value(&m.config.BuilderRegistryServer),
 			huh.NewInput().
 				Title("Build Image Namespace").
 				Description("Namespace to be used when tagging and pushing build images").
@@ -96,30 +96,30 @@ func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *h
 			huh.NewInput().
 				Title("Local Builder Registry Port").
 				Value(&localBuilderRegistryPort).
-				Validate(createPortValidator(m.config, &localBuilderRegistryPort, m.config.LocalBuilderRegistryPort)),
+				Validate(createPortValidator(m.config, &localBuilderRegistryPort, &m.config.LocalBuilderRegistryPort)),
 			huh.NewInput().
 				Title("Local Builder Registry Image").
-				Value(m.config.LocalBuilderRegistryImage),
+				Value(&m.config.LocalBuilderRegistryImage),
 		).WithHideFunc(func() bool {
-			return m.config.BuilderRegistryServer == nil || *m.config.BuilderRegistryServer != "local"
+			return m.config.BuilderRegistryServer != "local"
 		}),
 		huh.NewGroup(
 			huh.NewInput().
 				Title("API Port").
 				Value(&apiPortView).
-				Validate(createPortValidator(m.config, &apiPortView, m.config.ApiPort)),
+				Validate(createPortValidator(m.config, &apiPortView, &m.config.ApiPort)),
 			huh.NewInput().
 				Title("Headscale Port").
 				Value(&headscalePortView).
-				Validate(createPortValidator(m.config, &headscalePortView, m.config.HeadscalePort)),
+				Validate(createPortValidator(m.config, &headscalePortView, &m.config.HeadscalePort)),
 			huh.NewInput().
 				Title("Binaries Path").
 				Description("Directory will be created if it does not exist").
-				Value(m.config.BinariesPath),
+				Value(&m.config.BinariesPath),
 			huh.NewInput().
 				Title("Log File Path").
 				Description("File will be created if it does not exist").
-				Value(m.config.LogFilePath).
+				Value(&m.config.LogFilePath).
 				Validate(func(s string) error {
 					_, err := os.Stat(s)
 					if os.IsNotExist(err) {
@@ -132,14 +132,14 @@ func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *h
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Frps Domain").
-				Value(m.config.Frps.Domain),
+				Value(&m.config.Frps.Domain),
 			huh.NewInput().
 				Title("Frps Port").
 				Value(&frpsPortView).
-				Validate(createPortValidator(m.config, &frpsPortView, m.config.Frps.Port)),
+				Validate(createPortValidator(m.config, &frpsPortView, &m.config.Frps.Port)),
 			huh.NewInput().
 				Title("Frps Protocol").
-				Value(m.config.Frps.Protocol),
+				Value(&m.config.Frps.Protocol),
 		),
 	).WithTheme(views.GetCustomTheme())
 }
@@ -226,7 +226,7 @@ func createPortValidator(config *apiclient.ServerConfig, portView *string, port 
 		}
 		*port = int32(validatePort)
 
-		if *config.ApiPort == *config.HeadscalePort {
+		if config.ApiPort == config.HeadscalePort {
 			return errors.New("port conflict")
 		}
 

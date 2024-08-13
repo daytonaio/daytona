@@ -11,7 +11,9 @@ API version: v0.0.0-dev
 package apiclient
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the GitPullRequest type satisfies the MappedNullable interface at compile time
@@ -19,21 +21,30 @@ var _ MappedNullable = &GitPullRequest{}
 
 // GitPullRequest struct for GitPullRequest
 type GitPullRequest struct {
-	Branch          *string `json:"branch,omitempty"`
-	Name            *string `json:"name,omitempty"`
-	Sha             *string `json:"sha,omitempty"`
-	SourceRepoId    *string `json:"sourceRepoId,omitempty"`
-	SourceRepoName  *string `json:"sourceRepoName,omitempty"`
-	SourceRepoOwner *string `json:"sourceRepoOwner,omitempty"`
-	SourceRepoUrl   *string `json:"sourceRepoUrl,omitempty"`
+	Branch          string `json:"branch"`
+	Name            string `json:"name"`
+	Sha             string `json:"sha"`
+	SourceRepoId    string `json:"sourceRepoId"`
+	SourceRepoName  string `json:"sourceRepoName"`
+	SourceRepoOwner string `json:"sourceRepoOwner"`
+	SourceRepoUrl   string `json:"sourceRepoUrl"`
 }
+
+type _GitPullRequest GitPullRequest
 
 // NewGitPullRequest instantiates a new GitPullRequest object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGitPullRequest() *GitPullRequest {
+func NewGitPullRequest(branch string, name string, sha string, sourceRepoId string, sourceRepoName string, sourceRepoOwner string, sourceRepoUrl string) *GitPullRequest {
 	this := GitPullRequest{}
+	this.Branch = branch
+	this.Name = name
+	this.Sha = sha
+	this.SourceRepoId = sourceRepoId
+	this.SourceRepoName = sourceRepoName
+	this.SourceRepoOwner = sourceRepoOwner
+	this.SourceRepoUrl = sourceRepoUrl
 	return &this
 }
 
@@ -45,228 +56,172 @@ func NewGitPullRequestWithDefaults() *GitPullRequest {
 	return &this
 }
 
-// GetBranch returns the Branch field value if set, zero value otherwise.
+// GetBranch returns the Branch field value
 func (o *GitPullRequest) GetBranch() string {
-	if o == nil || IsNil(o.Branch) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Branch
+
+	return o.Branch
 }
 
-// GetBranchOk returns a tuple with the Branch field value if set, nil otherwise
+// GetBranchOk returns a tuple with the Branch field value
 // and a boolean to check if the value has been set.
 func (o *GitPullRequest) GetBranchOk() (*string, bool) {
-	if o == nil || IsNil(o.Branch) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Branch, true
+	return &o.Branch, true
 }
 
-// HasBranch returns a boolean if a field has been set.
-func (o *GitPullRequest) HasBranch() bool {
-	if o != nil && !IsNil(o.Branch) {
-		return true
-	}
-
-	return false
-}
-
-// SetBranch gets a reference to the given string and assigns it to the Branch field.
+// SetBranch sets field value
 func (o *GitPullRequest) SetBranch(v string) {
-	o.Branch = &v
+	o.Branch = v
 }
 
-// GetName returns the Name field value if set, zero value otherwise.
+// GetName returns the Name field value
 func (o *GitPullRequest) GetName() string {
-	if o == nil || IsNil(o.Name) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Name
+
+	return o.Name
 }
 
-// GetNameOk returns a tuple with the Name field value if set, nil otherwise
+// GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
 func (o *GitPullRequest) GetNameOk() (*string, bool) {
-	if o == nil || IsNil(o.Name) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Name, true
+	return &o.Name, true
 }
 
-// HasName returns a boolean if a field has been set.
-func (o *GitPullRequest) HasName() bool {
-	if o != nil && !IsNil(o.Name) {
-		return true
-	}
-
-	return false
-}
-
-// SetName gets a reference to the given string and assigns it to the Name field.
+// SetName sets field value
 func (o *GitPullRequest) SetName(v string) {
-	o.Name = &v
+	o.Name = v
 }
 
-// GetSha returns the Sha field value if set, zero value otherwise.
+// GetSha returns the Sha field value
 func (o *GitPullRequest) GetSha() string {
-	if o == nil || IsNil(o.Sha) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Sha
+
+	return o.Sha
 }
 
-// GetShaOk returns a tuple with the Sha field value if set, nil otherwise
+// GetShaOk returns a tuple with the Sha field value
 // and a boolean to check if the value has been set.
 func (o *GitPullRequest) GetShaOk() (*string, bool) {
-	if o == nil || IsNil(o.Sha) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Sha, true
+	return &o.Sha, true
 }
 
-// HasSha returns a boolean if a field has been set.
-func (o *GitPullRequest) HasSha() bool {
-	if o != nil && !IsNil(o.Sha) {
-		return true
-	}
-
-	return false
-}
-
-// SetSha gets a reference to the given string and assigns it to the Sha field.
+// SetSha sets field value
 func (o *GitPullRequest) SetSha(v string) {
-	o.Sha = &v
+	o.Sha = v
 }
 
-// GetSourceRepoId returns the SourceRepoId field value if set, zero value otherwise.
+// GetSourceRepoId returns the SourceRepoId field value
 func (o *GitPullRequest) GetSourceRepoId() string {
-	if o == nil || IsNil(o.SourceRepoId) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.SourceRepoId
+
+	return o.SourceRepoId
 }
 
-// GetSourceRepoIdOk returns a tuple with the SourceRepoId field value if set, nil otherwise
+// GetSourceRepoIdOk returns a tuple with the SourceRepoId field value
 // and a boolean to check if the value has been set.
 func (o *GitPullRequest) GetSourceRepoIdOk() (*string, bool) {
-	if o == nil || IsNil(o.SourceRepoId) {
+	if o == nil {
 		return nil, false
 	}
-	return o.SourceRepoId, true
+	return &o.SourceRepoId, true
 }
 
-// HasSourceRepoId returns a boolean if a field has been set.
-func (o *GitPullRequest) HasSourceRepoId() bool {
-	if o != nil && !IsNil(o.SourceRepoId) {
-		return true
-	}
-
-	return false
-}
-
-// SetSourceRepoId gets a reference to the given string and assigns it to the SourceRepoId field.
+// SetSourceRepoId sets field value
 func (o *GitPullRequest) SetSourceRepoId(v string) {
-	o.SourceRepoId = &v
+	o.SourceRepoId = v
 }
 
-// GetSourceRepoName returns the SourceRepoName field value if set, zero value otherwise.
+// GetSourceRepoName returns the SourceRepoName field value
 func (o *GitPullRequest) GetSourceRepoName() string {
-	if o == nil || IsNil(o.SourceRepoName) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.SourceRepoName
+
+	return o.SourceRepoName
 }
 
-// GetSourceRepoNameOk returns a tuple with the SourceRepoName field value if set, nil otherwise
+// GetSourceRepoNameOk returns a tuple with the SourceRepoName field value
 // and a boolean to check if the value has been set.
 func (o *GitPullRequest) GetSourceRepoNameOk() (*string, bool) {
-	if o == nil || IsNil(o.SourceRepoName) {
+	if o == nil {
 		return nil, false
 	}
-	return o.SourceRepoName, true
+	return &o.SourceRepoName, true
 }
 
-// HasSourceRepoName returns a boolean if a field has been set.
-func (o *GitPullRequest) HasSourceRepoName() bool {
-	if o != nil && !IsNil(o.SourceRepoName) {
-		return true
-	}
-
-	return false
-}
-
-// SetSourceRepoName gets a reference to the given string and assigns it to the SourceRepoName field.
+// SetSourceRepoName sets field value
 func (o *GitPullRequest) SetSourceRepoName(v string) {
-	o.SourceRepoName = &v
+	o.SourceRepoName = v
 }
 
-// GetSourceRepoOwner returns the SourceRepoOwner field value if set, zero value otherwise.
+// GetSourceRepoOwner returns the SourceRepoOwner field value
 func (o *GitPullRequest) GetSourceRepoOwner() string {
-	if o == nil || IsNil(o.SourceRepoOwner) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.SourceRepoOwner
+
+	return o.SourceRepoOwner
 }
 
-// GetSourceRepoOwnerOk returns a tuple with the SourceRepoOwner field value if set, nil otherwise
+// GetSourceRepoOwnerOk returns a tuple with the SourceRepoOwner field value
 // and a boolean to check if the value has been set.
 func (o *GitPullRequest) GetSourceRepoOwnerOk() (*string, bool) {
-	if o == nil || IsNil(o.SourceRepoOwner) {
+	if o == nil {
 		return nil, false
 	}
-	return o.SourceRepoOwner, true
+	return &o.SourceRepoOwner, true
 }
 
-// HasSourceRepoOwner returns a boolean if a field has been set.
-func (o *GitPullRequest) HasSourceRepoOwner() bool {
-	if o != nil && !IsNil(o.SourceRepoOwner) {
-		return true
-	}
-
-	return false
-}
-
-// SetSourceRepoOwner gets a reference to the given string and assigns it to the SourceRepoOwner field.
+// SetSourceRepoOwner sets field value
 func (o *GitPullRequest) SetSourceRepoOwner(v string) {
-	o.SourceRepoOwner = &v
+	o.SourceRepoOwner = v
 }
 
-// GetSourceRepoUrl returns the SourceRepoUrl field value if set, zero value otherwise.
+// GetSourceRepoUrl returns the SourceRepoUrl field value
 func (o *GitPullRequest) GetSourceRepoUrl() string {
-	if o == nil || IsNil(o.SourceRepoUrl) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.SourceRepoUrl
+
+	return o.SourceRepoUrl
 }
 
-// GetSourceRepoUrlOk returns a tuple with the SourceRepoUrl field value if set, nil otherwise
+// GetSourceRepoUrlOk returns a tuple with the SourceRepoUrl field value
 // and a boolean to check if the value has been set.
 func (o *GitPullRequest) GetSourceRepoUrlOk() (*string, bool) {
-	if o == nil || IsNil(o.SourceRepoUrl) {
+	if o == nil {
 		return nil, false
 	}
-	return o.SourceRepoUrl, true
+	return &o.SourceRepoUrl, true
 }
 
-// HasSourceRepoUrl returns a boolean if a field has been set.
-func (o *GitPullRequest) HasSourceRepoUrl() bool {
-	if o != nil && !IsNil(o.SourceRepoUrl) {
-		return true
-	}
-
-	return false
-}
-
-// SetSourceRepoUrl gets a reference to the given string and assigns it to the SourceRepoUrl field.
+// SetSourceRepoUrl sets field value
 func (o *GitPullRequest) SetSourceRepoUrl(v string) {
-	o.SourceRepoUrl = &v
+	o.SourceRepoUrl = v
 }
 
 func (o GitPullRequest) MarshalJSON() ([]byte, error) {
@@ -279,28 +234,57 @@ func (o GitPullRequest) MarshalJSON() ([]byte, error) {
 
 func (o GitPullRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Branch) {
-		toSerialize["branch"] = o.Branch
-	}
-	if !IsNil(o.Name) {
-		toSerialize["name"] = o.Name
-	}
-	if !IsNil(o.Sha) {
-		toSerialize["sha"] = o.Sha
-	}
-	if !IsNil(o.SourceRepoId) {
-		toSerialize["sourceRepoId"] = o.SourceRepoId
-	}
-	if !IsNil(o.SourceRepoName) {
-		toSerialize["sourceRepoName"] = o.SourceRepoName
-	}
-	if !IsNil(o.SourceRepoOwner) {
-		toSerialize["sourceRepoOwner"] = o.SourceRepoOwner
-	}
-	if !IsNil(o.SourceRepoUrl) {
-		toSerialize["sourceRepoUrl"] = o.SourceRepoUrl
-	}
+	toSerialize["branch"] = o.Branch
+	toSerialize["name"] = o.Name
+	toSerialize["sha"] = o.Sha
+	toSerialize["sourceRepoId"] = o.SourceRepoId
+	toSerialize["sourceRepoName"] = o.SourceRepoName
+	toSerialize["sourceRepoOwner"] = o.SourceRepoOwner
+	toSerialize["sourceRepoUrl"] = o.SourceRepoUrl
 	return toSerialize, nil
+}
+
+func (o *GitPullRequest) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	requiredProperties := []string{
+		"branch",
+		"name",
+		"sha",
+		"sourceRepoId",
+		"sourceRepoName",
+		"sourceRepoOwner",
+		"sourceRepoUrl",
+	}
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	for _, requiredProperty := range requiredProperties {
+		if _, exists := allProperties[requiredProperty]; !exists {
+			return fmt.Errorf("no value given for required property %v", requiredProperty)
+		}
+	}
+
+	varGitPullRequest := _GitPullRequest{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&varGitPullRequest)
+
+	if err != nil {
+		return err
+	}
+
+	*o = GitPullRequest(varGitPullRequest)
+
+	return err
 }
 
 type NullableGitPullRequest struct {

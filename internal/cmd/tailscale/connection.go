@@ -42,13 +42,16 @@ func GetConnection(profile *config.Profile) (*tsnet.Server, error) {
 
 	var controlURL string
 	if strings.Contains(profile.Api.Url, "localhost") || strings.Contains(profile.Api.Url, "0.0.0.0") || strings.Contains(profile.Api.Url, "127.0.0.1") {
-		controlURL = fmt.Sprintf("http://localhost:%d", *serverConfig.HeadscalePort)
+		controlURL = fmt.Sprintf("http://localhost:%d", serverConfig.HeadscalePort)
 	} else {
-		controlURL = util.GetFrpcHeadscaleUrl(*serverConfig.Frps.Protocol, *serverConfig.Id, *serverConfig.Frps.Domain)
+		if serverConfig.Frps == nil {
+			return nil, fmt.Errorf("frps config is missing")
+		}
+		controlURL = util.GetFrpcHeadscaleUrl(serverConfig.Frps.Protocol, serverConfig.Id, serverConfig.Frps.Domain)
 	}
 
 	return tailscale.GetConnection(&tailscale.TsnetConnConfig{
-		AuthKey:    *networkKey.Key,
+		AuthKey:    networkKey.Key,
 		ControlURL: controlURL,
 		Dir:        filepath.Join(configDir, "tailscale", cliId),
 		Logf:       func(format string, args ...any) {},

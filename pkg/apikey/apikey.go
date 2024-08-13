@@ -12,8 +12,8 @@ const (
 )
 
 type ApiKey struct {
-	KeyHash string     `json:"keyHash"`
-	Type    ApiKeyType `json:"type"`
+	KeyHash string     `json:"keyHash" validate:"required"`
+	Type    ApiKeyType `json:"type" validate:"required"`
 	// Project or client name
-	Name string `json:"name"`
+	Name string `json:"name" validate:"required"`
 } // @name ApiKey

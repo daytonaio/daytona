@@ -62,13 +62,13 @@ var CodeCmd = &cobra.Command{
 			if workspace == nil {
 				return
 			}
-			workspaceId = *workspace.Id
+			workspaceId = workspace.Id
 		} else {
 			workspace, err = apiclient_util.GetWorkspace(args[0])
 			if err != nil {
 				log.Fatal(err)
 			}
-			workspaceId = *workspace.Id
+			workspaceId = workspace.Id
 		}
 
 		if len(args) == 0 || len(args) == 1 {
@@ -79,7 +79,7 @@ var CodeCmd = &cobra.Command{
 			if selectedProject == nil {
 				return
 			}
-			projectName = *selectedProject.Name
+			projectName = selectedProject.Name
 		}
 
 		if len(args) == 2 {
@@ -102,9 +102,9 @@ var CodeCmd = &cobra.Command{
 		providerMetadata := ""
 		if workspace.Info != nil {
 			for _, project := range workspace.Info.Projects {
-				if *project.Name == projectName {
+				if project.Name == projectName {
 					if !project.GetIsRunning() {
-						views.RenderInfoMessage(fmt.Sprintf("Project '%s' from workspace '%s' is not in running state", projectName, *workspace.Name))
+						views.RenderInfoMessage(fmt.Sprintf("Project '%s' from workspace '%s' is not in running state", projectName, workspace.Name))
 						return
 					}
 					if project.ProviderMetadata == nil {
@@ -117,11 +117,11 @@ var CodeCmd = &cobra.Command{
 		}
 
 		if !workspace_util.IsProjectRunning(workspace, projectName) {
-			views.RenderInfoMessage(fmt.Sprintf("Project '%s' from workspace '%s' is not in running state", projectName, *workspace.Name))
+			views.RenderInfoMessage(fmt.Sprintf("Project '%s' from workspace '%s' is not in running state", projectName, workspace.Name))
 			return
 		}
 
-		views.RenderInfoMessage(fmt.Sprintf("Opening the project '%s' from workspace '%s' in %s", projectName, *workspace.Name, ideName))
+		views.RenderInfoMessage(fmt.Sprintf("Opening the project '%s' from workspace '%s' in %s", projectName, workspace.Name, ideName))
 
 		err = openIDE(ideId, activeProfile, workspaceId, projectName, providerMetadata)
 		if err != nil {

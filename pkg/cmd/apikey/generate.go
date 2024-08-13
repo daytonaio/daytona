@@ -42,7 +42,7 @@ var GenerateCmd = &cobra.Command{
 		}
 
 		for _, key := range apiKeyList {
-			if *key.Name == keyName {
+			if key.Name == keyName {
 				log.Fatal("key name already exists, please choose a different one")
 			}
 		}
@@ -57,7 +57,11 @@ var GenerateCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		apiUrl := util.GetFrpcApiUrl(*serverConfig.Frps.Protocol, *serverConfig.Id, *serverConfig.Frps.Domain)
+		if serverConfig.Frps == nil {
+			log.Fatal("frps config is missing")
+		}
+
+		apiUrl := util.GetFrpcApiUrl(serverConfig.Frps.Protocol, serverConfig.Id, serverConfig.Frps.Domain)
 
 		view.Render(key, apiUrl)
 	},

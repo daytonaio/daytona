@@ -43,7 +43,7 @@ var projectConfigDeleteCmd = &cobra.Command{
 			if selectedProjectConfig == nil {
 				return
 			}
-			selectedProjectConfigName = *selectedProjectConfig.Name
+			selectedProjectConfigName = selectedProjectConfig.Name
 		} else {
 			selectedProjectConfigName = args[0]
 		}

@@ -4,13 +4,13 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Key** | Pointer to **string** |  | [optional] 
+**Key** | **string** |  | 
 
 ## Methods
 
 ### NewNetworkKey
 
-`func NewNetworkKey() *NetworkKey`
+`func NewNetworkKey(key string, ) *NetworkKey`
 
 NewNetworkKey instantiates a new NetworkKey object
 This constructor will assign default values to properties that have it defined,
@@ -44,11 +44,6 @@ and a boolean to check if the value has been set.
 
 SetKey sets Key field to given value.
 
-### HasKey
-
-`func (o *NetworkKey) HasKey() bool`
-
-HasKey returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

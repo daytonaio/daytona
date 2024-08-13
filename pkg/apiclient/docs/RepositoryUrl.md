@@ -4,13 +4,13 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Url** | Pointer to **string** |  | [optional] 
+**Url** | **string** |  | 
 
 ## Methods
 
 ### NewRepositoryUrl
 
-`func NewRepositoryUrl() *RepositoryUrl`
+`func NewRepositoryUrl(url string, ) *RepositoryUrl`
 
 NewRepositoryUrl instantiates a new RepositoryUrl object
 This constructor will assign default values to properties that have it defined,
@@ -44,11 +44,6 @@ and a boolean to check if the value has been set.
 
 SetUrl sets Url field to given value.
 
-### HasUrl
-
-`func (o *RepositoryUrl) HasUrl() bool`
-
-HasUrl returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

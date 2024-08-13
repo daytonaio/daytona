@@ -46,12 +46,12 @@ var providerUninstallCmd = &cobra.Command{
 		}
 		ctx := context.Background()
 
-		res, err := apiClient.ProviderAPI.UninstallProvider(ctx, *providerToUninstall.Name).Execute()
+		res, err := apiClient.ProviderAPI.UninstallProvider(ctx, providerToUninstall.Name).Execute()
 
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		views.RenderInfoMessageBold(fmt.Sprintf("Provider %s has been successfully uninstalled", *providerToUninstall.Name))
+		views.RenderInfoMessageBold(fmt.Sprintf("Provider %s has been successfully uninstalled", providerToUninstall.Name))
 	},
 }

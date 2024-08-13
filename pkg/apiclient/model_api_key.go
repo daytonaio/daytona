@@ -11,7 +11,9 @@ API version: v0.0.0-dev
 package apiclient
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the ApiKey type satisfies the MappedNullable interface at compile time
@@ -19,18 +21,23 @@ var _ MappedNullable = &ApiKey{}
 
 // ApiKey struct for ApiKey
 type ApiKey struct {
-	KeyHash *string `json:"keyHash,omitempty"`
+	KeyHash string `json:"keyHash"`
 	// Project or client name
-	Name *string           `json:"name,omitempty"`
-	Type *ApikeyApiKeyType `json:"type,omitempty"`
+	Name string           `json:"name"`
+	Type ApikeyApiKeyType `json:"type"`
 }
+
+type _ApiKey ApiKey
 
 // NewApiKey instantiates a new ApiKey object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewApiKey() *ApiKey {
+func NewApiKey(keyHash string, name string, type_ ApikeyApiKeyType) *ApiKey {
 	this := ApiKey{}
+	this.KeyHash = keyHash
+	this.Name = name
+	this.Type = type_
 	return &this
 }
 
@@ -42,100 +49,76 @@ func NewApiKeyWithDefaults() *ApiKey {
 	return &this
 }
 
-// GetKeyHash returns the KeyHash field value if set, zero value otherwise.
+// GetKeyHash returns the KeyHash field value
 func (o *ApiKey) GetKeyHash() string {
-	if o == nil || IsNil(o.KeyHash) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.KeyHash
+
+	return o.KeyHash
 }
 
-// GetKeyHashOk returns a tuple with the KeyHash field value if set, nil otherwise
+// GetKeyHashOk returns a tuple with the KeyHash field value
 // and a boolean to check if the value has been set.
 func (o *ApiKey) GetKeyHashOk() (*string, bool) {
-	if o == nil || IsNil(o.KeyHash) {
+	if o == nil {
 		return nil, false
 	}
-	return o.KeyHash, true
+	return &o.KeyHash, true
 }
 
-// HasKeyHash returns a boolean if a field has been set.
-func (o *ApiKey) HasKeyHash() bool {
-	if o != nil && !IsNil(o.KeyHash) {
-		return true
-	}
-
-	return false
-}
-
-// SetKeyHash gets a reference to the given string and assigns it to the KeyHash field.
+// SetKeyHash sets field value
 func (o *ApiKey) SetKeyHash(v string) {
-	o.KeyHash = &v
+	o.KeyHash = v
 }
 
-// GetName returns the Name field value if set, zero value otherwise.
+// GetName returns the Name field value
 func (o *ApiKey) GetName() string {
-	if o == nil || IsNil(o.Name) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Name
+
+	return o.Name
 }
 
-// GetNameOk returns a tuple with the Name field value if set, nil otherwise
+// GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
 func (o *ApiKey) GetNameOk() (*string, bool) {
-	if o == nil || IsNil(o.Name) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Name, true
+	return &o.Name, true
 }
 
-// HasName returns a boolean if a field has been set.
-func (o *ApiKey) HasName() bool {
-	if o != nil && !IsNil(o.Name) {
-		return true
-	}
-
-	return false
-}
-
-// SetName gets a reference to the given string and assigns it to the Name field.
+// SetName sets field value
 func (o *ApiKey) SetName(v string) {
-	o.Name = &v
+	o.Name = v
 }
 
-// GetType returns the Type field value if set, zero value otherwise.
+// GetType returns the Type field value
 func (o *ApiKey) GetType() ApikeyApiKeyType {
-	if o == nil || IsNil(o.Type) {
+	if o == nil {
 		var ret ApikeyApiKeyType
 		return ret
 	}
-	return *o.Type
+
+	return o.Type
 }
 
-// GetTypeOk returns a tuple with the Type field value if set, nil otherwise
+// GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 func (o *ApiKey) GetTypeOk() (*ApikeyApiKeyType, bool) {
-	if o == nil || IsNil(o.Type) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Type, true
+	return &o.Type, true
 }
 
-// HasType returns a boolean if a field has been set.
-func (o *ApiKey) HasType() bool {
-	if o != nil && !IsNil(o.Type) {
-		return true
-	}
-
-	return false
-}
-
-// SetType gets a reference to the given ApikeyApiKeyType and assigns it to the Type field.
+// SetType sets field value
 func (o *ApiKey) SetType(v ApikeyApiKeyType) {
-	o.Type = &v
+	o.Type = v
 }
 
 func (o ApiKey) MarshalJSON() ([]byte, error) {
@@ -148,16 +131,49 @@ func (o ApiKey) MarshalJSON() ([]byte, error) {
 
 func (o ApiKey) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.KeyHash) {
-		toSerialize["keyHash"] = o.KeyHash
-	}
-	if !IsNil(o.Name) {
-		toSerialize["name"] = o.Name
-	}
-	if !IsNil(o.Type) {
-		toSerialize["type"] = o.Type
-	}
+	toSerialize["keyHash"] = o.KeyHash
+	toSerialize["name"] = o.Name
+	toSerialize["type"] = o.Type
 	return toSerialize, nil
+}
+
+func (o *ApiKey) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	requiredProperties := []string{
+		"keyHash",
+		"name",
+		"type",
+	}
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	for _, requiredProperty := range requiredProperties {
+		if _, exists := allProperties[requiredProperty]; !exists {
+			return fmt.Errorf("no value given for required property %v", requiredProperty)
+		}
+	}
+
+	varApiKey := _ApiKey{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&varApiKey)
+
+	if err != nil {
+		return err
+	}
+
+	*o = ApiKey(varApiKey)
+
+	return err
 }
 
 type NullableApiKey struct {

@@ -103,13 +103,13 @@ func getRowFromRowData(rowData RowData) []string {
 func getTableRowData(projectConfig apiclient.ProjectConfig, apiServerConfig *apiclient.ServerConfig, specifyGitProviders bool) *RowData {
 	rowData := RowData{"", "", "", ""}
 
-	rowData.Name = *projectConfig.Name + views_util.AdditionalPropertyPadding
-	rowData.Repository = util.GetRepositorySlugFromUrl(*projectConfig.Repository.Url, specifyGitProviders)
+	rowData.Name = projectConfig.Name + views_util.AdditionalPropertyPadding
+	rowData.Repository = util.GetRepositorySlugFromUrl(projectConfig.Repository.Url, specifyGitProviders)
 	rowData.IsDefault = ""
 
 	projectDefaults := &create.ProjectConfigDefaults{
-		Image:     apiServerConfig.DefaultProjectImage,
-		ImageUser: apiServerConfig.DefaultProjectUser,
+		Image:     &apiServerConfig.DefaultProjectImage,
+		ImageUser: &apiServerConfig.DefaultProjectUser,
 	}
 
 	createCreateProjectConfigDTO := apiclient.CreateProjectConfigDTO{
@@ -118,7 +118,7 @@ func getTableRowData(projectConfig apiclient.ProjectConfig, apiServerConfig *api
 
 	_, rowData.Build = create.GetProjectBuildChoice(createCreateProjectConfigDTO, projectDefaults)
 
-	if *projectConfig.Default {
+	if projectConfig.Default {
 		rowData.IsDefault = "1"
 	}
 

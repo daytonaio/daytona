@@ -14,14 +14,14 @@ type item struct {
 	registry apiclient.ContainerRegistry
 }
 
-func (i item) Title() string { return *i.registry.Server }
+func (i item) Title() string { return i.registry.Server }
 func (i item) Description() string {
-	if *i.registry.Server == NewRegistryServerIdentifier {
+	if i.registry.Server == NewRegistryServerIdentifier {
 		return "Add a new container registry"
 	}
-	return *i.registry.Username
+	return i.registry.Username
 }
-func (i item) FilterValue() string { return *i.registry.Server }
+func (i item) FilterValue() string { return i.registry.Server }
 
 type model struct {
 	list   list.Model

@@ -4,13 +4,13 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Repository** | Pointer to [**GitRepository**](GitRepository.md) |  | [optional] 
+**Repository** | [**GitRepository**](GitRepository.md) |  | 
 
 ## Methods
 
 ### NewCreateProjectConfigSourceDTO
 
-`func NewCreateProjectConfigSourceDTO() *CreateProjectConfigSourceDTO`
+`func NewCreateProjectConfigSourceDTO(repository GitRepository, ) *CreateProjectConfigSourceDTO`
 
 NewCreateProjectConfigSourceDTO instantiates a new CreateProjectConfigSourceDTO object
 This constructor will assign default values to properties that have it defined,
@@ -44,11 +44,6 @@ and a boolean to check if the value has been set.
 
 SetRepository sets Repository field to given value.
 
-### HasRepository
-
-`func (o *CreateProjectConfigSourceDTO) HasRepository() bool`
-
-HasRepository returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

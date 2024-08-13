@@ -46,8 +46,8 @@ var gitCredCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Println("username=" + *gitProvider.Username)
-		fmt.Println("password=" + *gitProvider.Token)
+		fmt.Println("username=" + gitProvider.Username)
+		fmt.Println("password=" + gitProvider.Token)
 	},
 }
 

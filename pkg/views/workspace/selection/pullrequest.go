@@ -19,9 +19,11 @@ func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrd
 
 	// Populate items with titles and descriptions from workspaces.
 	for _, pr := range pullRequests {
-		newItem := item[string]{id: *pr.Name, title: *pr.Name, choiceProperty: *pr.Name}
-		if *pr.Branch != "" {
-			newItem.desc = fmt.Sprintf("Branch: %s", *pr.Branch)
+		newItem := item[string]{
+			id:             pr.Name,
+			title:          pr.Name,
+			choiceProperty: pr.Name,
+			desc:           fmt.Sprintf("Branch: %s", pr.Branch),
 		}
 		items = append(items, newItem)
 	}
@@ -57,7 +59,7 @@ func GetPullRequestFromPrompt(pullRequests []apiclient.GitPullRequest, projectOr
 	pullRequestName := <-choiceChan
 
 	for _, pr := range pullRequests {
-		if *pr.Name == pullRequestName {
+		if pr.Name == pullRequestName {
 			return &pr
 		}
 	}

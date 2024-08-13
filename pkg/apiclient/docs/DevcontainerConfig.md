@@ -4,13 +4,13 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**FilePath** | Pointer to **string** |  | [optional] 
+**FilePath** | **string** |  | 
 
 ## Methods
 
 ### NewDevcontainerConfig
 
-`func NewDevcontainerConfig() *DevcontainerConfig`
+`func NewDevcontainerConfig(filePath string, ) *DevcontainerConfig`
 
 NewDevcontainerConfig instantiates a new DevcontainerConfig object
 This constructor will assign default values to properties that have it defined,
@@ -44,11 +44,6 @@ and a boolean to check if the value has been set.
 
 SetFilePath sets FilePath field to given value.
 
-### HasFilePath
-
-`func (o *DevcontainerConfig) HasFilePath() bool`
-
-HasFilePath returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
