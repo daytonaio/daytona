@@ -227,6 +227,7 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 			DataPath: filepath.Join(configDir, "registry"),
 			Port:     c.LocalBuilderRegistryPort,
 			Image:    c.LocalBuilderRegistryImage,
+			Logger:   log.StandardLogger().Writer(),
 		})
 		c.BuilderRegistryServer = util.GetFrpcRegistryDomain(c.Id, c.Frps.Domain)
 	}
