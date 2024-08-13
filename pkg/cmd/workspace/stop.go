@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -17,9 +18,10 @@ import (
 var stopProjectFlag string
 
 var StopCmd = &cobra.Command{
-	Use:   "stop [WORKSPACE]",
-	Short: "Stop a workspace",
-	Args:  cobra.RangeArgs(0, 1),
+	Use:     "stop [WORKSPACE]",
+	Short:   "Stop a workspace",
+	GroupID: util.WORKSPACE_GROUP,
+	Args:    cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var workspaceId string
 		var message string
@@ -56,7 +58,7 @@ var StopCmd = &cobra.Command{
 			if workspace == nil {
 				return
 			}
-			workspaceId = *workspace.Name
+			workspaceId = workspace.Name
 		} else {
 			workspaceId = args[0]
 		}
@@ -104,12 +106,12 @@ func stopAllWorkspaces() error {
 	}
 
 	for _, workspace := range workspaceList {
-		res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, *workspace.Id).Execute()
+		res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, workspace.Id).Execute()
 		if err != nil {
-			log.Errorf("Failed to stop workspace %s: %v", *workspace.Name, apiclient.HandleErrorResponse(res, err))
+			log.Errorf("Failed to stop workspace %s: %v", workspace.Name, apiclient.HandleErrorResponse(res, err))
 			continue
 		}
-		fmt.Printf("Workspace '%s' is stopping\n", *workspace.Name)
+		fmt.Printf("Workspace '%s' is stopping\n", workspace.Name)
 	}
 	return nil
 }

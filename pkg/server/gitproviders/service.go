@@ -15,7 +15,7 @@ type IGitProviderService interface {
 	GetConfig(id string) (*gitprovider.GitProviderConfig, error)
 	GetConfigForUrl(url string) (*gitprovider.GitProviderConfig, error)
 	GetGitProvider(id string) (gitprovider.GitProvider, error)
-	GetGitProviderForUrl(url string) (gitprovider.GitProvider, error)
+	GetGitProviderForUrl(url string) (gitprovider.GitProvider, string, error)
 	GetGitUser(gitProviderId string) (*gitprovider.GitUser, error)
 	GetNamespaces(gitProviderId string) ([]*gitprovider.GitNamespace, error)
 	GetRepoBranches(gitProviderId string, namespaceId string, repositoryId string) ([]*gitprovider.GitBranch, error)
@@ -46,7 +46,17 @@ var codebergUrl = "https://codeberg.org"
 func (s *GitProviderService) GetGitProvider(id string) (gitprovider.GitProvider, error) {
 	providerConfig, err := s.configStore.Find(id)
 	if err != nil {
-		return nil, err
+		// If config is not defined, use the default (public) client without token
+		if gitprovider.IsGitProviderNotFound(err) {
+			providerConfig = &gitprovider.GitProviderConfig{
+				Id:         id,
+				Username:   "",
+				Token:      "",
+				BaseApiUrl: nil,
+			}
+		} else {
+			return nil, err
+		}
 	}
 
 	return s.newGitProvider(providerConfig)
@@ -71,6 +81,14 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 	}
 
 	for _, p := range gitProviders {
+		if p.Id == "aws-codecommit" && strings.Contains(repo.Url, ".amazonaws.com/") {
+			provider, err = s.GetGitProvider(p.Id)
+			if err == nil {
+				return "", err
+			}
+			providerFound = true
+			break
+		}
 		if strings.Contains(repo.Url, fmt.Sprintf("%s.", p.Id)) {
 			provider, err = s.GetGitProvider(p.Id)
 			if err == nil {
@@ -93,6 +111,7 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 			providerFound = true
 			break
 		}
+
 	}
 
 	if !providerFound {
@@ -145,6 +164,8 @@ func (s *GitProviderService) newGitProvider(config *gitprovider.GitProviderConfi
 		return gitprovider.NewGitnessGitProvider(config.Token, config.BaseApiUrl), nil
 	case "azure-devops":
 		return gitprovider.NewAzureDevOpsGitProvider(config.Token, *config.BaseApiUrl), nil
+	case "aws-codecommit":
+		return gitprovider.NewAwsCodeCommitGitProvider(*config.BaseApiUrl), nil
 	default:
 		return nil, errors.New("git provider not found")
 	}

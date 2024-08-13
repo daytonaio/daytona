@@ -13,6 +13,7 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/cmd/tailscale"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/frpc"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -26,9 +27,10 @@ var workspaceId string
 var projectName string
 
 var PortForwardCmd = &cobra.Command{
-	Use:   "forward [PORT] [WORKSPACE] [PROJECT]",
-	Short: "Forward a port from a project to your local machine",
-	Args:  cobra.RangeArgs(2, 3),
+	Use:     "forward [PORT] [WORKSPACE] [PROJECT]",
+	Short:   "Forward a port from a project to your local machine",
+	GroupID: util.WORKSPACE_GROUP,
+	Args:    cobra.RangeArgs(2, 3),
 	Run: func(cmd *cobra.Command, args []string) {
 		c, err := config.GetConfig()
 		if err != nil {
@@ -47,7 +49,7 @@ var PortForwardCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		workspaceId = *workspace.Id
+		workspaceId = workspace.Id
 
 		if len(args) == 3 {
 			projectName = args[2]
@@ -104,20 +106,24 @@ func ForwardPublicPort(workspaceId, projectName string, hostPort, targetPort uin
 	}
 
 	h := fnv.New64()
-	h.Write([]byte(fmt.Sprintf("%s-%s-%s", workspaceId, projectName, *serverConfig.Id)))
+	h.Write([]byte(fmt.Sprintf("%s-%s-%s", workspaceId, projectName, serverConfig.Id)))
 
 	subDomain := fmt.Sprintf("%d-%s", targetPort, base64.RawURLEncoding.EncodeToString([]byte(fmt.Sprint(h.Sum64()))))
 
+	if serverConfig.Frps == nil {
+		return fmt.Errorf("frps config is missing")
+	}
+
 	go func() {
 		time.Sleep(1 * time.Second)
-		var url = fmt.Sprintf("%s://%s.%s", *serverConfig.Frps.Protocol, subDomain, *serverConfig.Frps.Domain)
+		var url = fmt.Sprintf("%s://%s.%s", serverConfig.Frps.Protocol, subDomain, serverConfig.Frps.Domain)
 		views.RenderInfoMessage(fmt.Sprintf("Port available at %s", url))
 		renderQr(url)
 	}()
 
 	_, service, err := frpc.GetService(frpc.FrpcConnectParams{
-		ServerDomain: *serverConfig.Frps.Domain,
-		ServerPort:   int(*serverConfig.Frps.Port),
+		ServerDomain: serverConfig.Frps.Domain,
+		ServerPort:   int(serverConfig.Frps.Port),
 		Name:         subDomain,
 		SubDomain:    subDomain,
 		Port:         int(hostPort),

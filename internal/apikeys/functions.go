@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// returns the SHA-256 hash of a given key as a hexadecimal string.
 func HashKey(key string) string {
 	keyHash := sha256.Sum256([]byte(key))
 	return string(keyHash[:])

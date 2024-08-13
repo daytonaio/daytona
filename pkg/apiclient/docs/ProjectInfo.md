@@ -4,17 +4,17 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Created** | Pointer to **string** |  | [optional] 
-**IsRunning** | Pointer to **bool** |  | [optional] 
-**Name** | Pointer to **string** |  | [optional] 
+**Created** | **string** |  | 
+**IsRunning** | **bool** |  | 
+**Name** | **string** |  | 
 **ProviderMetadata** | Pointer to **string** |  | [optional] 
-**WorkspaceId** | Pointer to **string** |  | [optional] 
+**WorkspaceId** | **string** |  | 
 
 ## Methods
 
 ### NewProjectInfo
 
-`func NewProjectInfo() *ProjectInfo`
+`func NewProjectInfo(created string, isRunning bool, name string, workspaceId string, ) *ProjectInfo`
 
 NewProjectInfo instantiates a new ProjectInfo object
 This constructor will assign default values to properties that have it defined,
@@ -48,11 +48,6 @@ and a boolean to check if the value has been set.
 
 SetCreated sets Created field to given value.
 
-### HasCreated
-
-`func (o *ProjectInfo) HasCreated() bool`
-
-HasCreated returns a boolean if a field has been set.
 
 ### GetIsRunning
 
@@ -73,11 +68,6 @@ and a boolean to check if the value has been set.
 
 SetIsRunning sets IsRunning field to given value.
 
-### HasIsRunning
-
-`func (o *ProjectInfo) HasIsRunning() bool`
-
-HasIsRunning returns a boolean if a field has been set.
 
 ### GetName
 
@@ -98,11 +88,6 @@ and a boolean to check if the value has been set.
 
 SetName sets Name field to given value.
 
-### HasName
-
-`func (o *ProjectInfo) HasName() bool`
-
-HasName returns a boolean if a field has been set.
 
 ### GetProviderMetadata
 
@@ -148,11 +133,6 @@ and a boolean to check if the value has been set.
 
 SetWorkspaceId sets WorkspaceId field to given value.
 
-### HasWorkspaceId
-
-`func (o *ProjectInfo) HasWorkspaceId() bool`
-
-HasWorkspaceId returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

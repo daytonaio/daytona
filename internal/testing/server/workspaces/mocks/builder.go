@@ -7,50 +7,53 @@ package mocks
 
 import (
 	"github.com/daytonaio/daytona/pkg/build"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/stretchr/testify/mock"
 )
 
-var MockBuildResults = &build.BuildResult{
-	User:              "test",
-	ImageName:         "test",
-	ProjectVolumePath: "test",
-}
-
-type MockBuilderPlugin struct {
-	mock.Mock
+var MockBuild = &build.Build{
+	Id:      "1",
+	Hash:    "test",
+	Project: MockProject,
+	State:   build.BuildStatePending,
+	User:    "test",
+	Image:   "test",
 }
 
 type MockBuilderFactory struct {
 	mock.Mock
 }
 
-func (f *MockBuilderFactory) Create(p workspace.Project, gpc *gitprovider.GitProviderConfig) (build.IBuilder, error) {
-	return &mockBuilder{}, nil
+func (f *MockBuilderFactory) Create(build build.Build) (build.IBuilder, error) {
+	args := f.Called(build)
+	return args.Get(0).(*MockBuilder), args.Error(1)
 }
 
-func (f *MockBuilderFactory) CheckExistingBuild(p workspace.Project) (*build.BuildResult, error) {
-	return MockBuildResults, nil
+func (f *MockBuilderFactory) CheckExistingBuild(p project.Project) (*build.Build, error) {
+	args := f.Called(p)
+	return args.Get(0).(*build.Build), args.Error(1)
 }
 
-type mockBuilder struct {
+type MockBuilder struct {
 	mock.Mock
 }
 
-func (b *mockBuilder) Build() (*build.BuildResult, error) {
-	return MockBuildResults, nil
+func (b *MockBuilder) Build(build build.Build) (string, string, error) {
+	args := b.Called(build)
+	return args.String(0), args.String(1), args.Error(2)
 }
 
-func (b *mockBuilder) CleanUp() error {
-	return nil
+func (b *MockBuilder) CleanUp() error {
+	args := b.Called()
+	return args.Error(0)
 }
 
-func (b *mockBuilder) Publish() error {
-	return nil
+func (b *MockBuilder) Publish(build build.Build) error {
+	args := b.Called(build)
+	return args.Error(0)
 }
 
-func (p *mockBuilder) SaveBuildResults(r build.BuildResult) error {
-	args := p.Called(r)
+func (b *MockBuilder) SaveBuild(r build.Build) error {
+	args := b.Called(r)
 	return args.Error(0)
 }

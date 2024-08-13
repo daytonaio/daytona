@@ -11,7 +11,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/build/detect"
 	"github.com/daytonaio/daytona/pkg/provider/util"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/docker/docker/api/types"
 )
 
@@ -42,12 +42,12 @@ func (d *DockerClient) StartProject(opts *CreateProjectOptions, daytonaDownloadU
 	return d.startDaytonaAgent(opts.Project, containerUser, daytonaDownloadUrl, opts.LogWriter)
 }
 
-func (d *DockerClient) startDaytonaAgent(project *workspace.Project, containerUser, daytonaDownloadUrl string, logWriter io.Writer) error {
+func (d *DockerClient) startDaytonaAgent(p *project.Project, containerUser, daytonaDownloadUrl string, logWriter io.Writer) error {
 	errChan := make(chan error)
 
 	go func() {
-		result, err := d.ExecSync(d.GetProjectContainerName(project), types.ExecConfig{
-			Cmd:          []string{"bash", "-c", util.GetProjectStartScript(daytonaDownloadUrl, project.ApiKey)},
+		result, err := d.ExecSync(d.GetProjectContainerName(p), types.ExecConfig{
+			Cmd:          []string{"bash", "-c", util.GetProjectStartScript(daytonaDownloadUrl, p.ApiKey)},
 			AttachStdout: true,
 			AttachStderr: true,
 			User:         containerUser,

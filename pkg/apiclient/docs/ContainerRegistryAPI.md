@@ -232,7 +232,7 @@ import (
 
 func main() {
 	server := "server_example" // string | Container Registry server name
-	containerRegistry := *openapiclient.NewContainerRegistry() // ContainerRegistry | Container Registry credentials to set
+	containerRegistry := *openapiclient.NewContainerRegistry("Password_example", "Server_example", "Username_example") // ContainerRegistry | Container Registry credentials to set
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

@@ -6,11 +6,11 @@ package apikey
 import (
 	"context"
 
+	"github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/views/server/apikey"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-
-	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/pkg/views/server/apikey"
 )
 
 var listCmd = &cobra.Command{
@@ -28,6 +28,11 @@ var listCmd = &cobra.Command{
 		apiKeyList, _, err := apiClient.ApiKeyAPI.ListClientApiKeys(ctx).Execute()
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(nil, err))
+		}
+
+		if output.FormatFlag != "" {
+			output.Output = apiKeyList
+			return
 		}
 
 		apikey.ListApiKeys(apiKeyList)

@@ -10,8 +10,10 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/jetbrains"
+	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/ide"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -25,6 +27,7 @@ var CodeCmd = &cobra.Command{
 	Short:   "Open a workspace in your preferred IDE",
 	Args:    cobra.RangeArgs(0, 2),
 	Aliases: []string{"open"},
+	GroupID: util.WORKSPACE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {
 		c, err := config.GetConfig()
 		if err != nil {
@@ -59,13 +62,13 @@ var CodeCmd = &cobra.Command{
 			if workspace == nil {
 				return
 			}
-			workspaceId = *workspace.Id
+			workspaceId = workspace.Id
 		} else {
 			workspace, err = apiclient_util.GetWorkspace(args[0])
 			if err != nil {
 				log.Fatal(err)
 			}
-			workspaceId = *workspace.Id
+			workspaceId = workspace.Id
 		}
 
 		if len(args) == 0 || len(args) == 1 {
@@ -76,7 +79,7 @@ var CodeCmd = &cobra.Command{
 			if selectedProject == nil {
 				return
 			}
-			projectName = *selectedProject.Name
+			projectName = selectedProject.Name
 		}
 
 		if len(args) == 2 {
@@ -96,12 +99,14 @@ var CodeCmd = &cobra.Command{
 			}
 		}
 
-		views.RenderInfoMessage(fmt.Sprintf("Opening the project '%s' from workspace '%s' in %s", projectName, *workspace.Name, ideName))
-
 		providerMetadata := ""
 		if workspace.Info != nil {
 			for _, project := range workspace.Info.Projects {
-				if *project.Name == projectName {
+				if project.Name == projectName {
+					if !project.GetIsRunning() {
+						views.RenderInfoMessage(fmt.Sprintf("Project '%s' from workspace '%s' is not in running state", projectName, workspace.Name))
+						return
+					}
 					if project.ProviderMetadata == nil {
 						log.Fatal(errors.New("project provider metadata is missing"))
 					}
@@ -110,6 +115,13 @@ var CodeCmd = &cobra.Command{
 				}
 			}
 		}
+
+		if !workspace_util.IsProjectRunning(workspace, projectName) {
+			views.RenderInfoMessage(fmt.Sprintf("Project '%s' from workspace '%s' is not in running state", projectName, workspace.Name))
+			return
+		}
+
+		views.RenderInfoMessage(fmt.Sprintf("Opening the project '%s' from workspace '%s' in %s", projectName, workspace.Name, ideName))
 
 		err = openIDE(ideId, activeProfile, workspaceId, projectName, providerMetadata)
 		if err != nil {

@@ -18,22 +18,25 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-var DoneConfiguring = apiclient.CreateWorkspaceRequestProject{Name: "DoneConfiguringName"}
+var doneConfiguringName = "DoneConfiguringName"
+var DoneConfiguring = apiclient.CreateProjectConfigDTO{
+	Name: doneConfiguringName,
+}
 
 type projectRequestItem struct {
-	item[apiclient.CreateWorkspaceRequestProject]
+	item[apiclient.CreateProjectConfigDTO]
 	name, image, user, devcontainerConfig string
-	project                               apiclient.CreateWorkspaceRequestProject
+	project                               apiclient.CreateProjectConfigDTO
 }
 
 type projectRequestItemDelegate struct {
-	ItemDelegate[apiclient.CreateWorkspaceRequestProject]
+	ItemDelegate[apiclient.CreateProjectConfigDTO]
 }
 type projectRequestModel struct {
-	model[apiclient.CreateWorkspaceRequestProject]
+	model[apiclient.CreateProjectConfigDTO]
 }
 
-func selectProjectRequestPrompt(projects *[]apiclient.CreateWorkspaceRequestProject, choiceChan chan<- *apiclient.CreateWorkspaceRequestProject) {
+func selectProjectRequestPrompt(projects *[]apiclient.CreateProjectConfigDTO, choiceChan chan<- *apiclient.CreateProjectConfigDTO) {
 	items := []list.Item{}
 
 	for _, project := range *projects {
@@ -42,17 +45,15 @@ func selectProjectRequestPrompt(projects *[]apiclient.CreateWorkspaceRequestProj
 		var user string
 		var devcontainerConfig string
 
-		if project.Name != "" {
-			name = fmt.Sprintf("%s %s", "Project:", project.Name)
-		}
+		name = fmt.Sprintf("%s %s", "Project:", project.Name)
 		if project.Image != nil {
 			image = fmt.Sprintf("%s %s", "Image:", *project.Image)
 		}
 		if project.User != nil {
 			user = fmt.Sprintf("%s %s", "User:", *project.User)
 		}
-		if project.Build != nil && project.Build.Devcontainer != nil && project.Build.Devcontainer.DevContainerFilePath != nil {
-			devcontainerConfig = fmt.Sprintf("%s %s", "Devcontainer Config:", *project.Build.Devcontainer.DevContainerFilePath)
+		if project.BuildConfig != nil && project.BuildConfig.Devcontainer != nil {
+			devcontainerConfig = fmt.Sprintf("%s %s", "Devcontainer Config:", project.BuildConfig.Devcontainer.FilePath)
 		}
 
 		newItem := projectRequestItem{name: name, image: image, user: user, project: project, devcontainerConfig: devcontainerConfig}
@@ -95,8 +96,8 @@ func selectProjectRequestPrompt(projects *[]apiclient.CreateWorkspaceRequestProj
 	}
 }
 
-func GetProjectRequestFromPrompt(projects *[]apiclient.CreateWorkspaceRequestProject) *apiclient.CreateWorkspaceRequestProject {
-	choiceChan := make(chan *apiclient.CreateWorkspaceRequestProject)
+func GetProjectRequestFromPrompt(projects *[]apiclient.CreateProjectConfigDTO) *apiclient.CreateProjectConfigDTO {
+	choiceChan := make(chan *apiclient.CreateProjectConfigDTO)
 
 	go selectProjectRequestPrompt(projects, choiceChan)
 

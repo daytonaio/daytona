@@ -4,12 +4,14 @@
 package target
 
 import (
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/spf13/cobra"
 )
 
 var TargetCmd = &cobra.Command{
-	Use:   "target",
-	Short: "Manage provider targets",
+	Use:     "target",
+	Short:   "Manage provider targets",
+	GroupID: util.SERVER_GROUP,
 }
 
 func init() {

@@ -2,10 +2,17 @@ name: daytona server logs
 synopsis: Output Daytona Server logs
 usage: daytona server logs [flags]
 options:
+    - name: file
+      default_value: "false"
+      usage: Read logs from local server log file
     - name: follow
       shorthand: f
       default_value: "false"
       usage: Follow logs
+    - name: retry
+      shorthand: r
+      default_value: "false"
+      usage: Retry connection
 inherited_options:
     - name: help
       default_value: "false"

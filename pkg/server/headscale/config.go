@@ -20,11 +20,6 @@ import (
 )
 
 func (s *HeadscaleServer) getHeadscaleConfig() (*hstypes.Config, error) {
-	headscaleConfigDir, err := s.getHeadscaleConfigDir()
-	if err != nil {
-		return nil, err
-	}
-
 	cfg := &hstypes.Config{
 		DBtype:                         "sqlite3",
 		ServerURL:                      fmt.Sprintf("https://%s.%s", s.serverId, s.frpsDomain),
@@ -39,7 +34,7 @@ func (s *HeadscaleServer) getHeadscaleConfig() (*hstypes.Config, error) {
 			ServerRegionCode:                   "local",
 			ServerRegionName:                   "Daytona embedded DERP",
 			Paths:                              []string{},
-			ServerPrivateKeyPath:               filepath.Join(headscaleConfigDir, "derp_server_private.key"),
+			ServerPrivateKeyPath:               filepath.Join(s.configDir, "derp_server_private.key"),
 			UpdateFrequency:                    24 * time.Hour,
 			AutoUpdate:                         true,
 			STUNAddr:                           "0.0.0.0:3478",
@@ -66,10 +61,10 @@ func (s *HeadscaleServer) getHeadscaleConfig() (*hstypes.Config, error) {
 				},
 			},
 		},
-		DBpath:               filepath.Join(headscaleConfigDir, "headscale.db"),
-		UnixSocket:           filepath.Join(headscaleConfigDir, "headscale.sock"),
+		DBpath:               filepath.Join(s.configDir, "headscale.db"),
+		UnixSocket:           filepath.Join(s.configDir, "headscale.sock"),
 		UnixSocketPermission: fs.FileMode.Perm(0700),
-		NoisePrivateKeyPath:  filepath.Join(headscaleConfigDir, "noise_private.key"),
+		NoisePrivateKeyPath:  filepath.Join(s.configDir, "noise_private.key"),
 		CLI: hstypes.CLIConfig{
 			Timeout: 10 * time.Second,
 		},
@@ -77,6 +72,7 @@ func (s *HeadscaleServer) getHeadscaleConfig() (*hstypes.Config, error) {
 
 	logLevelEnv, logLevelSet := os.LookupEnv("LOG_LEVEL")
 	if logLevelSet {
+		var err error
 		cfg.Log.Level, err = zerolog.ParseLevel(logLevelEnv)
 		if err != nil {
 			cfg.Log.Level = zerolog.ErrorLevel

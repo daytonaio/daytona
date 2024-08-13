@@ -4,13 +4,15 @@
 package apikey
 
 import (
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/spf13/cobra"
 )
 
 var ApiKeyCmd = &cobra.Command{
-	Use:   "api-key",
-	Short: "Api Key commands",
-	Args:  cobra.NoArgs,
+	Use:     "api-key",
+	Short:   "Api Key commands",
+	Args:    cobra.NoArgs,
+	GroupID: util.SERVER_GROUP,
 }
 
 func init() {

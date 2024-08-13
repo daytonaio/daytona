@@ -32,7 +32,7 @@ var setCmd = &cobra.Command{
 		}
 
 		if profileData.EnvVars == nil {
-			profileData.EnvVars = &map[string]string{}
+			profileData.EnvVars = map[string]string{}
 		}
 
 		if len(args) > 0 {
@@ -41,12 +41,12 @@ var setCmd = &cobra.Command{
 				if len(kv) != 2 {
 					log.Fatalf("Invalid key-value pair: %s", arg)
 				}
-				(*profileData.EnvVars)[kv[0]] = kv[1]
+				(profileData.EnvVars)[kv[0]] = kv[1]
 			}
 		} else {
 			form := huh.NewForm(
 				huh.NewGroup(
-					views.GetEnvVarsInput(profileData.EnvVars),
+					views.GetEnvVarsInput(&profileData.EnvVars),
 				),
 			).WithTheme(views.GetCustomTheme()).WithHeight(12)
 

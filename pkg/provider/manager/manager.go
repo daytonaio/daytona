@@ -42,6 +42,7 @@ type IProviderManager interface {
 	RegisterProvider(pluginPath string) error
 	TerminateProviderProcesses(providersBasePath string) error
 	UninstallProvider(name string) error
+	Purge() error
 }
 
 type ProviderManagerConfig struct {
@@ -203,6 +204,19 @@ func (m *ProviderManager) TerminateProviderProcesses(providersBasePath string) e
 	}
 
 	return nil
+}
+
+func (m *ProviderManager) Purge() error {
+	for name := range m.pluginRefs {
+		err := m.UninstallProvider(name)
+		if err != nil {
+			return err
+		}
+	}
+
+	plugin.CleanupClients()
+
+	return os.RemoveAll(m.baseDir)
 }
 
 func (m *ProviderManager) initializeProvider(pluginPath string) (*pluginRef, error) {

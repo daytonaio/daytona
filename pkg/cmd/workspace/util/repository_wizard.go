@@ -5,59 +5,66 @@ package util
 
 import (
 	"context"
-	"errors"
-	"log"
-	"net/url"
 
-	"github.com/daytonaio/daytona/cmd/daytona/config"
-	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	config_const "github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
+	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
 
-func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additionalProjectOrder int, disabledGitProviders map[string]bool, disabledNamespaces map[string]bool, selectedRepos map[string]bool) (*apiclient.GitRepository, error) {
+type RepositoryWizardConfig struct {
+	ApiClient           *apiclient.APIClient
+	UserGitProviders    []apiclient.GitProvider
+	Manual              bool
+	MultiProject        bool
+	SkipBranchSelection bool
+	ProjectOrder        int
+	SelectedRepos       map[string]int
+}
+
+func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepository, error) {
 	var providerId string
 	var namespaceId string
-	var checkoutOptions []selection.CheckoutOption
+	var err error
 
-	supportedProviders := config.GetSupportedGitProviders()
+	ctx := context.Background()
+
+	if len(config.UserGitProviders) == 0 || config.Manual {
+		return create.GetRepositoryFromUrlInput(config.MultiProject, config.ProjectOrder, config.ApiClient, config.SelectedRepos)
+	}
+
+	supportedProviders := config_const.GetSupportedGitProviders()
 	var gitProviderViewList []gitprovider_view.GitProviderView
 
-	for _, gitProvider := range userGitProviders {
+	for _, gitProvider := range config.UserGitProviders {
 		for _, supportedProvider := range supportedProviders {
-			if *gitProvider.Id == supportedProvider.Id {
+			if gitProvider.Id == supportedProvider.Id {
 				gitProviderViewList = append(gitProviderViewList,
 					gitprovider_view.GitProviderView{
-						Id:       *gitProvider.Id,
+						Id:       gitProvider.Id,
 						Name:     supportedProvider.Name,
-						Username: *gitProvider.Username,
+						Username: gitProvider.Username,
 					},
 				)
 			}
 		}
 	}
-	providerId = selection.GetProviderIdFromPrompt(gitProviderViewList, additionalProjectOrder, disabledGitProviders)
+	providerId = selection.GetProviderIdFromPrompt(gitProviderViewList, config.ProjectOrder)
 	if providerId == "" {
-		return nil, errors.New("must select a provider")
+		return nil, common.ErrCtrlCAbort
 	}
 
 	if providerId == selection.CustomRepoIdentifier {
-		return nil, nil
-	}
-
-	ctx := context.Background()
-
-	apiClient, err := apiclient_util.GetApiClient(nil)
-	if err != nil {
-		log.Fatal(err)
+		return create.GetRepositoryFromUrlInput(config.MultiProject, config.ProjectOrder, config.ApiClient, config.SelectedRepos)
 	}
 
 	var namespaceList []apiclient.GitNamespace
 
-	err = views_util.With(func() error {
-		namespaceList, _, err = apiClient.GitProviderAPI.GetNamespaces(ctx, providerId).Execute()
+	err = views_util.WithSpinner("Loading", func() error {
+		namespaceList, _, err = config.ApiClient.GitProviderAPI.GetNamespaces(ctx, providerId).Execute()
 		return err
 	})
 	if err != nil {
@@ -65,17 +72,17 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 	}
 
 	if len(namespaceList) == 1 {
-		namespaceId = *namespaceList[0].Id
+		namespaceId = namespaceList[0].Id
 	} else {
-		namespaceId = selection.GetNamespaceIdFromPrompt(namespaceList, additionalProjectOrder, providerId, disabledGitProviders, disabledNamespaces)
+		namespaceId = selection.GetNamespaceIdFromPrompt(namespaceList, config.ProjectOrder)
 		if namespaceId == "" {
-			return nil, errors.New("namespace not found")
+			return nil, common.ErrCtrlCAbort
 		}
 	}
 
 	var providerRepos []apiclient.GitRepository
-	err = views_util.With(func() error {
-		providerRepos, _, err = apiClient.GitProviderAPI.GetRepositories(ctx, providerId, namespaceId).Execute()
+	err = views_util.WithSpinner("Loading", func() error {
+		providerRepos, _, err = config.ApiClient.GitProviderAPI.GetRepositories(ctx, providerId, namespaceId).Execute()
 		return err
 	})
 
@@ -83,88 +90,20 @@ func getRepositoryFromWizard(userGitProviders []apiclient.GitProvider, additiona
 		return nil, err
 	}
 
-	var chosenRepo *apiclient.GitRepository
-	if len(namespaceList) > 1 {
-		chosenRepo = selection.GetRepositoryFromPrompt(providerRepos, additionalProjectOrder, namespaceId, disabledNamespaces, selectedRepos)
-	} else {
-		chosenRepo = selection.GetRepositoryFromPrompt(providerRepos, additionalProjectOrder, providerId, disabledGitProviders, selectedRepos)
-	}
+	chosenRepo := selection.GetRepositoryFromPrompt(providerRepos, config.ProjectOrder, config.SelectedRepos)
 	if chosenRepo == nil {
-		return nil, errors.New("must select a repository")
+		return nil, common.ErrCtrlCAbort
 	}
 
-	var branchList []apiclient.GitBranch
-	err = views_util.With(func() error {
-		branchList, _, err = apiClient.GitProviderAPI.GetRepoBranches(ctx, providerId, namespaceId, url.QueryEscape(*chosenRepo.Id)).Execute()
-		return err
+	if config.SkipBranchSelection {
+		return chosenRepo, nil
+	}
+
+	return GetBranchFromWizard(BranchWizardConfig{
+		ApiClient:    config.ApiClient,
+		ProviderId:   providerId,
+		NamespaceId:  namespaceId,
+		ChosenRepo:   chosenRepo,
+		ProjectOrder: config.ProjectOrder,
 	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	if len(branchList) == 0 {
-		return nil, errors.New("no branches found")
-	}
-
-	if len(branchList) == 1 {
-		chosenRepo.Branch = branchList[0].Name
-		chosenRepo.Sha = branchList[0].Sha
-		return chosenRepo, nil
-	}
-
-	var prList []apiclient.GitPullRequest
-	err = views_util.With(func() error {
-		prList, _, err = apiClient.GitProviderAPI.GetRepoPRs(ctx, providerId, namespaceId, url.QueryEscape(*chosenRepo.Id)).Execute()
-		return err
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	var branch *apiclient.GitBranch
-	if len(prList) == 0 {
-		branch = selection.GetBranchFromPrompt(branchList, additionalProjectOrder)
-		if branch == nil {
-			return nil, errors.New("must select a branch")
-		}
-
-		chosenRepo.Branch = branch.Name
-		chosenRepo.Sha = branch.Sha
-
-		return chosenRepo, nil
-	}
-
-	checkoutOptions = append(checkoutOptions, selection.CheckoutDefault)
-	checkoutOptions = append(checkoutOptions, selection.CheckoutBranch)
-	checkoutOptions = append(checkoutOptions, selection.CheckoutPR)
-
-	chosenCheckoutOption := selection.GetCheckoutOptionFromPrompt(additionalProjectOrder, checkoutOptions)
-	if chosenCheckoutOption == selection.CheckoutDefault {
-		return chosenRepo, nil
-	}
-
-	if chosenCheckoutOption == selection.CheckoutBranch {
-		branch = selection.GetBranchFromPrompt(branchList, additionalProjectOrder)
-		if branch == nil {
-			return nil, errors.New("must select a branch")
-		}
-		chosenRepo.Branch = branch.Name
-		chosenRepo.Sha = branch.Sha
-	} else if chosenCheckoutOption == selection.CheckoutPR {
-		chosenPullRequest := selection.GetPullRequestFromPrompt(prList, additionalProjectOrder)
-		if chosenPullRequest == nil {
-			return nil, errors.New("must select a pull request")
-		}
-
-		chosenRepo.Branch = chosenPullRequest.Branch
-		chosenRepo.Sha = chosenPullRequest.Sha
-		chosenRepo.Id = chosenPullRequest.SourceRepoId
-		chosenRepo.Name = chosenPullRequest.SourceRepoName
-		chosenRepo.Owner = chosenPullRequest.SourceRepoOwner
-		chosenRepo.Url = chosenPullRequest.SourceRepoUrl
-	}
-
-	return chosenRepo, nil
 }

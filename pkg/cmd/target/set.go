@@ -10,6 +10,7 @@ import (
 	internal_util "github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/daytonaio/daytona/pkg/views/target"
@@ -41,7 +42,11 @@ var TargetSetCmd = &cobra.Command{
 
 		selectedProvider, err := provider.GetProviderFromPrompt(pluginList, "Choose a provider", false)
 		if err != nil {
-			log.Fatal(err)
+			if common.IsCtrlCAbort(err) {
+				return
+			} else {
+				log.Fatal(err)
+			}
 		}
 
 		if selectedProvider == nil {
@@ -55,14 +60,18 @@ var TargetSetCmd = &cobra.Command{
 
 		filteredTargets := []apiclient.ProviderTarget{}
 		for _, t := range targets {
-			if *t.ProviderInfo.Name == *selectedProvider.Name {
+			if t.ProviderInfo.Name == selectedProvider.Name {
 				filteredTargets = append(filteredTargets, t)
 			}
 		}
 
 		selectedTarget, err := target.GetTargetFromPrompt(filteredTargets, activeProfile.Name, true)
 		if err != nil {
-			log.Fatal(err)
+			if common.IsCtrlCAbort(err) {
+				return
+			} else {
+				log.Fatal(err)
+			}
 		}
 
 		client, err := apiclient_util.GetApiClient(nil)
@@ -70,15 +79,15 @@ var TargetSetCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		targetManifest, res, err := client.ProviderAPI.GetTargetManifest(context.Background(), *selectedProvider.Name).Execute()
+		targetManifest, res, err := client.ProviderAPI.GetTargetManifest(context.Background(), selectedProvider.Name).Execute()
 		if err != nil {
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
-		if *selectedTarget.Name == target.NewTargetName {
-			*selectedTarget.Name = ""
-			err = target.NewTargetNameInput(selectedTarget.Name, internal_util.ArrayMap(targets, func(t apiclient.ProviderTarget) string {
-				return *t.Name
+		if selectedTarget.Name == target.NewTargetName {
+			selectedTarget.Name = ""
+			err = target.NewTargetNameInput(&selectedTarget.Name, internal_util.ArrayMap(targets, func(t apiclient.ProviderTarget) string {
+				return t.Name
 			}))
 			if err != nil {
 				log.Fatal(err)
@@ -90,7 +99,7 @@ var TargetSetCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		selectedTarget.ProviderInfo = &apiclient.ProviderProviderInfo{
+		selectedTarget.ProviderInfo = apiclient.ProviderProviderInfo{
 			Name:    selectedProvider.Name,
 			Version: selectedProvider.Version,
 		}

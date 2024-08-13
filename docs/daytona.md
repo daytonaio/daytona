@@ -33,6 +33,7 @@ daytona [flags]
 * [daytona info](daytona_info.md)	 - Show workspace info
 * [daytona list](daytona_list.md)	 - List workspaces
 * [daytona profile](daytona_profile.md)	 - Manage profiles
+* [daytona project-config](daytona_project-config.md)	 - Manage project configs
 * [daytona provider](daytona_provider.md)	 - Manage providers
 * [daytona purge](daytona_purge.md)	 - Purges all Daytona data from the current device
 * [daytona serve](daytona_serve.md)	 - Run the server process in the current terminal session
@@ -41,7 +42,8 @@ daytona [flags]
 * [daytona start](daytona_start.md)	 - Start a workspace
 * [daytona stop](daytona_stop.md)	 - Stop a workspace
 * [daytona target](daytona_target.md)	 - Manage provider targets
-* [daytona use](daytona_use.md)	 - Set the active profile
+* [daytona telemetry](daytona_telemetry.md)	 - Manage telemetry collection
+* [daytona use](daytona_use.md)	 - Use profile [PROFILE_NAME]
 * [daytona version](daytona_version.md)	 - Print the version number
 * [daytona whoami](daytona_whoami.md)	 - Display information about the active user
 

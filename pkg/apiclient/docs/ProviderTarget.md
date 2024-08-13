@@ -4,15 +4,15 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Name** | Pointer to **string** |  | [optional] 
-**Options** | Pointer to **string** | JSON encoded map of options | [optional] 
-**ProviderInfo** | Pointer to [**ProviderProviderInfo**](ProviderProviderInfo.md) |  | [optional] 
+**Name** | **string** |  | 
+**Options** | **string** | JSON encoded map of options | 
+**ProviderInfo** | [**ProviderProviderInfo**](ProviderProviderInfo.md) |  | 
 
 ## Methods
 
 ### NewProviderTarget
 
-`func NewProviderTarget() *ProviderTarget`
+`func NewProviderTarget(name string, options string, providerInfo ProviderProviderInfo, ) *ProviderTarget`
 
 NewProviderTarget instantiates a new ProviderTarget object
 This constructor will assign default values to properties that have it defined,
@@ -46,11 +46,6 @@ and a boolean to check if the value has been set.
 
 SetName sets Name field to given value.
 
-### HasName
-
-`func (o *ProviderTarget) HasName() bool`
-
-HasName returns a boolean if a field has been set.
 
 ### GetOptions
 
@@ -71,11 +66,6 @@ and a boolean to check if the value has been set.
 
 SetOptions sets Options field to given value.
 
-### HasOptions
-
-`func (o *ProviderTarget) HasOptions() bool`
-
-HasOptions returns a boolean if a field has been set.
 
 ### GetProviderInfo
 
@@ -96,11 +86,6 @@ and a boolean to check if the value has been set.
 
 SetProviderInfo sets ProviderInfo field to given value.
 
-### HasProviderInfo
-
-`func (o *ProviderTarget) HasProviderInfo() bool`
-
-HasProviderInfo returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

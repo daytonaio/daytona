@@ -9,18 +9,86 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 )
 
-func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.GitProvider, error) {
+func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.GitProvider, string, error) {
+	gitProviders, err := s.configStore.List()
+	if err != nil {
+		return nil, "", err
+	}
+
+	for _, p := range gitProviders {
+		if p.Id == "aws-codecommit" && strings.Contains(repoUrl, "git-codecommit") {
+			gitProvider, err := s.GetGitProvider(p.Id)
+			if err != nil {
+				return nil, "", err
+			}
+			return gitProvider, p.Id, nil
+		}
+
+		if strings.Contains(repoUrl, fmt.Sprintf("%s.", p.Id)) {
+			gitProvider, err := s.GetGitProvider(p.Id)
+			if err != nil {
+				return nil, "", err
+			}
+			return gitProvider, p.Id, nil
+		}
+
+		if p.BaseApiUrl == nil || *p.BaseApiUrl == "" {
+			continue
+		}
+
+		hostname, err := getHostnameFromUrl(*p.BaseApiUrl)
+		if err != nil {
+			return nil, "", nil
+		}
+
+		if p.BaseApiUrl != nil && strings.Contains(repoUrl, hostname) {
+			gitProvider, err := s.GetGitProvider(p.Id)
+			if err != nil {
+				return nil, "", err
+			}
+			return gitProvider, p.Id, nil
+		}
+	}
+
+	u, err := url.Parse(repoUrl)
+	if err != nil {
+		return nil, "", nil
+	}
+
+	hostname := strings.TrimPrefix(u.Hostname(), "www.")
+	providerId := strings.Split(hostname, ".")[0]
+
+	gitProvider, err := s.newGitProvider(&gitprovider.GitProviderConfig{
+		Id:         providerId,
+		Username:   "",
+		Token:      "",
+		BaseApiUrl: nil,
+	})
+
+	return gitProvider, providerId, err
+}
+
+func (s *GitProviderService) GetConfigForUrl(repoUrl string) (*gitprovider.GitProviderConfig, error) {
 	gitProviders, err := s.configStore.List()
 	if err != nil {
 		return nil, err
 	}
 
 	for _, p := range gitProviders {
+		p.Token = url.QueryEscape(p.Token)
+		p.Username = url.QueryEscape(p.Username)
+
+		if p.Id == "aws-codecommit" && strings.Contains(repoUrl, "git-codecommit") {
+			return p, nil
+		}
+
 		if strings.Contains(repoUrl, fmt.Sprintf("%s.", p.Id)) {
-			return s.GetGitProvider(p.Id)
+
+			return p, nil
 		}
 
 		if p.BaseApiUrl == nil || *p.BaseApiUrl == "" {
@@ -33,48 +101,16 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 		}
 
 		if p.BaseApiUrl != nil && strings.Contains(repoUrl, hostname) {
-			return s.GetGitProvider(p.Id)
-		}
-	}
-
-	u, err := url.Parse(repoUrl)
-	if err != nil {
-		return nil, err
-	}
-
-	hostname := strings.TrimPrefix(u.Hostname(), "www.")
-	providerId := strings.Split(hostname, ".")[0]
-
-	return s.newGitProvider(&gitprovider.GitProviderConfig{
-		Id:         providerId,
-		Username:   "",
-		Token:      "",
-		BaseApiUrl: nil,
-	})
-}
-
-func (s *GitProviderService) GetConfigForUrl(url string) (*gitprovider.GitProviderConfig, error) {
-	gitProviders, err := s.configStore.List()
-	if err != nil {
-		return nil, err
-	}
-
-	for _, p := range gitProviders {
-		if strings.Contains(url, fmt.Sprintf("%s.", p.Id)) {
 			return p, nil
 		}
+	}
 
-		if p.BaseApiUrl == nil || *p.BaseApiUrl == "" {
-			continue
-		}
-
-		hostname, err := getHostnameFromUrl(*p.BaseApiUrl)
-		if err != nil {
-			return nil, err
-		}
-
-		if p.BaseApiUrl != nil && strings.Contains(url, hostname) {
-			return p, nil
+	supportedGitProviders := config.GetSupportedGitProviders()
+	for _, provider := range supportedGitProviders {
+		if strings.Contains(repoUrl, provider.Id) {
+			return &gitprovider.GitProviderConfig{
+				Id: provider.Id,
+			}, nil
 		}
 	}
 
@@ -87,13 +123,11 @@ func (s *GitProviderService) SetGitProviderConfig(providerConfig *gitprovider.Gi
 		return err
 	}
 
-	if providerConfig.Username == "" {
-		userData, err := gitProvider.GetUser()
-		if err != nil {
-			return err
-		}
-		providerConfig.Username = userData.Username
+	userData, err := gitProvider.GetUser()
+	if err != nil {
+		return err
 	}
+	providerConfig.Username = userData.Username
 
 	return s.configStore.Save(providerConfig)
 }

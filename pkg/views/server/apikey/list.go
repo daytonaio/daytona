@@ -32,8 +32,8 @@ func getRowFromRowData(rowData RowData) []string {
 func getRowData(apiKey *apiclient.ApiKey) *RowData {
 	rowData := RowData{"", ""}
 
-	rowData.Name = *apiKey.Name
-	rowData.Type = string(*apiKey.Type)
+	rowData.Name = apiKey.Name
+	rowData.Type = string(apiKey.Type)
 
 	return &rowData
 }
@@ -90,9 +90,9 @@ func renderUnstyledList(apiKeyList []apiclient.ApiKey) {
 	output := "\n"
 
 	for _, apiKey := range apiKeyList {
-		output += fmt.Sprintf("%s %s", views.GetPropertyKey("API Key Name: "), *apiKey.Name) + "\n\n"
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("API Key Name: "), apiKey.Name) + "\n\n"
 
-		output += fmt.Sprintf("%s %s", views.GetPropertyKey("API Key Type: "), *apiKey.Type) + "\n\n"
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("API Key Type: "), apiKey.Type) + "\n\n"
 
 		if apiKey.Name != apiKeyList[len(apiKeyList)-1].Name {
 			output += views.SeparatorString + "\n\n"

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //	@title			Daytona Server API
-//	@version		0.1.0
+//	@version		v0.0.0-dev
 //	@description	Daytona Server API
 
 //	@host		localhost:3986
@@ -26,8 +26,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/pkg/api/docs"
 	"github.com/daytonaio/daytona/pkg/api/middlewares"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/gin-contrib/cors"
 
 	"github.com/daytonaio/daytona/pkg/api/controllers/apikey"
@@ -36,6 +38,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider"
 	log_controller "github.com/daytonaio/daytona/pkg/api/controllers/log"
 	"github.com/daytonaio/daytona/pkg/api/controllers/profiledata"
+	"github.com/daytonaio/daytona/pkg/api/controllers/projectconfig"
 	"github.com/daytonaio/daytona/pkg/api/controllers/provider"
 	"github.com/daytonaio/daytona/pkg/api/controllers/server"
 	"github.com/daytonaio/daytona/pkg/api/controllers/target"
@@ -50,28 +53,36 @@ import (
 )
 
 type ApiServerConfig struct {
-	ApiPort int
+	ApiPort          int
+	TelemetryService telemetry.TelemetryService
 }
 
 const HEALTH_CHECK_ROUTE = "/health"
 
 func NewApiServer(config ApiServerConfig) *ApiServer {
 	return &ApiServer{
-		apiPort: config.ApiPort,
+		apiPort:          config.ApiPort,
+		telemetryService: config.TelemetryService,
 	}
 }
 
 type ApiServer struct {
-	apiPort    int
-	httpServer *http.Server
-	router     *gin.Engine
+	apiPort          int
+	telemetryService telemetry.TelemetryService
+	httpServer       *http.Server
+	router           *gin.Engine
 }
 
 func (a *ApiServer) Start() error {
-	docs.SwaggerInfo.Version = "0.1"
+	docs.SwaggerInfo.Version = internal.Version
 	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Description = "Daytona Server API"
 	docs.SwaggerInfo.Title = "Daytona Server API"
+
+	_, err := net.Dial("tcp", fmt.Sprintf(":%d", a.apiPort))
+	if err == nil {
+		return fmt.Errorf("cannot start API server, port %d is already in use", a.apiPort)
+	}
 
 	binding.Validator = new(defaultValidator)
 
@@ -86,6 +97,7 @@ func (a *ApiServer) Start() error {
 		a.router.Use(gin.Recovery())
 	}
 
+	a.router.Use(middlewares.TelemetryMiddleware(a.telemetryService))
 	a.router.Use(middlewares.LoggingMiddleware())
 	a.router.Use(middlewares.SetVersionMiddleware())
 
@@ -121,6 +133,16 @@ func (a *ApiServer) Start() error {
 		workspaceController.DELETE("/:workspaceId", workspace.RemoveWorkspace)
 		workspaceController.POST("/:workspaceId/:projectId/start", workspace.StartProject)
 		workspaceController.POST("/:workspaceId/:projectId/stop", workspace.StopProject)
+	}
+
+	projectConfigController := protected.Group("/project-config")
+	{
+		projectConfigController.GET("/:configName", projectconfig.GetProjectConfig)
+		projectConfigController.GET("/", projectconfig.ListProjectConfigs)
+		projectConfigController.PUT("/", projectconfig.SetProjectConfig)
+		projectConfigController.GET("/default/:gitUrl", projectconfig.GetDefaultProjectConfig)
+		projectConfigController.PATCH("/:configName/set-default", projectconfig.SetDefaultProjectConfig)
+		projectConfigController.DELETE("/:configName", projectconfig.DeleteProjectConfig)
 	}
 
 	providerController := protected.Group("/provider")
@@ -164,6 +186,8 @@ func (a *ApiServer) Start() error {
 		gitProviderController.GET("/:gitProviderId/:namespaceId/:repositoryId/branches", gitprovider.GetRepoBranches)
 		gitProviderController.GET("/:gitProviderId/:namespaceId/:repositoryId/pull-requests", gitprovider.GetRepoPRs)
 		gitProviderController.GET("/context/:gitUrl", gitprovider.GetGitContext)
+		gitProviderController.POST("/context/url", gitprovider.GetUrlFromRepository)
+		gitProviderController.GET("/id-for-url/:url", gitprovider.GetGitProviderIdForUrl)
 	}
 
 	apiKeyController := protected.Group("/apikey")

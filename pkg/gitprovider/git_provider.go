@@ -14,15 +14,15 @@ import (
 const personalNamespaceId = "<PERSONAL>"
 
 type StaticGitContext struct {
-	Id       string  `json:"id"`
-	Url      string  `json:"url"`
-	Name     string  `json:"name"`
-	Branch   *string `json:"branch,omitempty"`
-	Sha      *string `json:"sha,omitempty"`
-	Owner    string  `json:"owner"`
-	PrNumber *uint32 `json:"prNumber,omitempty"`
-	Source   string  `json:"source"`
-	Path     *string `json:"path,omitempty"`
+	Id       string  `json:"id" validate:"required"`
+	Url      string  `json:"url" validate:"required"`
+	Name     string  `json:"name" validate:"required"`
+	Branch   *string `json:"branch,omitempty" validate:"optional"`
+	Sha      *string `json:"sha,omitempty" validate:"optional"`
+	Owner    string  `json:"owner" validate:"required"`
+	PrNumber *uint32 `json:"prNumber,omitempty" validate:"optional"`
+	Source   string  `json:"source" validate:"required"`
+	Path     *string `json:"path,omitempty" validate:"optional"`
 } // @name StaticGitContext
 
 type GitProvider interface {
@@ -33,6 +33,7 @@ type GitProvider interface {
 	GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error)
 
 	GetRepositoryFromUrl(repositoryUrl string) (*GitRepository, error)
+	GetUrlFromRepository(repository *GitRepository) string
 	GetLastCommitSha(staticContext *StaticGitContext) (string, error)
 	getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error)
 	parseStaticGitContext(repoUrl string) (*StaticGitContext, error)

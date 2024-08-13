@@ -6,10 +6,12 @@ package docker
 import (
 	"context"
 	"fmt"
+	"time"
 
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
+	log "github.com/sirupsen/logrus"
 )
 
 func (d *DockerClient) createProjectFromImage(opts *CreateProjectOptions) error {
@@ -18,25 +20,47 @@ func (d *DockerClient) createProjectFromImage(opts *CreateProjectOptions) error 
 		return err
 	}
 
-	return d.initProjectContainer(opts.Project, opts.ProjectDir)
+	return d.initProjectContainer(opts)
 }
 
-func (d *DockerClient) initProjectContainer(project *workspace.Project, projectDir string) error {
+func (d *DockerClient) initProjectContainer(opts *CreateProjectOptions) error {
 	ctx := context.Background()
 
-	_, err := d.apiClient.ContainerCreate(ctx, GetContainerCreateConfig(project), &container.HostConfig{
+	c, err := d.apiClient.ContainerCreate(ctx, GetContainerCreateConfig(opts.Project), &container.HostConfig{
 		Privileged: true,
 		Mounts: []mount.Mount{
 			{
 				Type:   mount.TypeBind,
-				Source: projectDir,
-				Target: fmt.Sprintf("/home/%s/%s", project.User, project.Name),
+				Source: opts.ProjectDir,
+				Target: fmt.Sprintf("/home/%s/%s", opts.Project.User, opts.Project.Name),
 			},
 		},
 		ExtraHosts: []string{
 			"host.docker.internal:host-gateway",
 		},
-	}, nil, nil, d.GetProjectContainerName(project))
+	}, nil, nil, d.GetProjectContainerName(opts.Project))
+	if err != nil {
+		return err
+	}
+
+	err = d.apiClient.ContainerStart(ctx, c.ID, container.StartOptions{})
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		for {
+			err = d.GetContainerLogs(c.ID, opts.LogWriter)
+			if err == nil {
+				break
+			}
+			log.Error(err)
+			time.Sleep(100 * time.Millisecond)
+		}
+	}()
+
+	_, err = d.updateContainerUserUidGid(c.ID, opts)
+	err = d.apiClient.ContainerStop(ctx, c.ID, container.StopOptions{})
 	if err != nil {
 		return err
 	}
@@ -44,7 +68,7 @@ func (d *DockerClient) initProjectContainer(project *workspace.Project, projectD
 	return nil
 }
 
-func GetContainerCreateConfig(project *workspace.Project) *container.Config {
+func GetContainerCreateConfig(project *project.Project) *container.Config {
 	envVars := []string{}
 
 	for key, value := range project.EnvVars {

@@ -4,6 +4,11 @@
 package server
 
 import (
+	"fmt"
+	"os"
+	"runtime"
+
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/cmd/server/daemon"
 	"github.com/daytonaio/daytona/pkg/server"
@@ -17,9 +22,10 @@ import (
 var yesFlag bool
 
 var ServerCmd = &cobra.Command{
-	Use:   "server",
-	Short: "Start the server process in daemon mode",
-	Args:  cobra.NoArgs,
+	Use:     "server",
+	Short:   "Start the server process in daemon mode",
+	GroupID: util.SERVER_GROUP,
+	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		confirmCheck := true
 
@@ -55,6 +61,11 @@ var ServerCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 		printServerStartedMessage(c, true)
+
+		switch runtime.GOOS {
+		case "linux":
+			fmt.Printf("Use `loginctl enable-linger %s` to allow the service to run after logging out.\n", os.Getenv("USER"))
+		}
 	},
 }
 
@@ -71,5 +82,5 @@ func init() {
 	ServerCmd.AddCommand(startCmd)
 	ServerCmd.AddCommand(stopCmd)
 	ServerCmd.AddCommand(restartCmd)
-	ServerCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Execute purge without prompt")
+	ServerCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Skip the confirmation prompt")
 }

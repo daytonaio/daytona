@@ -15,6 +15,7 @@ import (
 	"github.com/daytonaio/daytona/internal/apikeys"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/server/apikey"
 )
@@ -53,7 +54,7 @@ var revokeCmd = &cobra.Command{
 
 		if len(args) == 1 {
 			for _, apiKey := range apiKeyList {
-				if *apiKey.Name == args[0] {
+				if apiKey.Name == args[0] {
 					selectedApiKey = &apiKey
 					break
 				}
@@ -61,7 +62,11 @@ var revokeCmd = &cobra.Command{
 		} else {
 			selectedApiKey, err = apikey.GetApiKeyFromPrompt(apiKeyList, "Select an API key to revoke", false)
 			if err != nil {
-				log.Fatal(err)
+				if common.IsCtrlCAbort(err) {
+					return
+				} else {
+					log.Fatal(err)
+				}
 			}
 		}
 
@@ -70,11 +75,11 @@ var revokeCmd = &cobra.Command{
 		}
 
 		if !yesFlag {
-			title := fmt.Sprintf("Revoke API Key '%s'?", *selectedApiKey.Name)
-			description := fmt.Sprintf("Are you sure you want to revoke '%s'?", *selectedApiKey.Name)
-			if apikeys.EqualsKeyHashFromApi(activeProfile.Api.Key, *selectedApiKey.KeyHash) {
-				title = fmt.Sprintf("Warning! API Key '%s' is attached to your active profile", *selectedApiKey.Name)
-				description = fmt.Sprintf("Revoking '%s' will lock out your active profile from accessing the server.", *selectedApiKey.Name)
+			title := fmt.Sprintf("Revoke API Key '%s'?", selectedApiKey.Name)
+			description := fmt.Sprintf("Are you sure you want to revoke '%s'?", selectedApiKey.Name)
+			if apikeys.EqualsKeyHashFromApi(activeProfile.Api.Key, selectedApiKey.KeyHash) {
+				title = fmt.Sprintf("Warning! API Key '%s' is attached to your active profile", selectedApiKey.Name)
+				description = fmt.Sprintf("Revoking '%s' will lock out your active profile from accessing the server.", selectedApiKey.Name)
 			}
 
 			form := huh.NewForm(
@@ -93,7 +98,7 @@ var revokeCmd = &cobra.Command{
 		}
 
 		if yesFlag {
-			_, err = apiClient.ApiKeyAPI.RevokeApiKey(ctx, *selectedApiKey.Name).Execute()
+			_, err = apiClient.ApiKeyAPI.RevokeApiKey(ctx, selectedApiKey.Name).Execute()
 			if err != nil {
 				log.Fatal(apiclient_util.HandleErrorResponse(nil, err))
 			}

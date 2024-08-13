@@ -10,6 +10,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	containerregistry_view "github.com/daytonaio/daytona/pkg/views/containerregistry"
 	"github.com/spf13/cobra"
@@ -59,19 +60,23 @@ var containerRegistrySetCmd = &cobra.Command{
 			} else {
 				registryDto, err := containerregistry_view.GetRegistryFromPrompt(containerRegistries, activeProfile.Name, true)
 				if err != nil {
-					log.Fatal(err)
+					if common.IsCtrlCAbort(err) {
+						return
+					} else {
+						log.Fatal(err)
+					}
 				}
 
 				editing := true
-				selectedServer = *registryDto.Server
+				selectedServer = registryDto.Server
 
-				if *registryDto.Server == containerregistry_view.NewRegistryServerIdentifier {
+				if registryDto.Server == containerregistry_view.NewRegistryServerIdentifier {
 					editing = false
 					registryView.Server, registryView.Username, registryView.Password = "", "", ""
 				} else {
-					registryView.Server = *registryDto.Server
-					registryView.Username = *registryDto.Username
-					registryView.Password = *registryDto.Password
+					registryView.Server = registryDto.Server
+					registryView.Username = registryDto.Username
+					registryView.Password = registryDto.Password
 				}
 
 				containerregistry_view.RegistryCreationView(&registryView, containerRegistries, editing)
@@ -79,9 +84,9 @@ var containerRegistrySetCmd = &cobra.Command{
 		}
 
 		registryDto = &apiclient.ContainerRegistry{
-			Server:   &registryView.Server,
-			Username: &registryView.Username,
-			Password: &registryView.Password,
+			Server:   registryView.Server,
+			Username: registryView.Username,
+			Password: registryView.Password,
 		}
 
 		res, err = apiClient.ContainerRegistryAPI.SetContainerRegistry(context.Background(), url.QueryEscape(selectedServer)).ContainerRegistry(*registryDto).Execute()

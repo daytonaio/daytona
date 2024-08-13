@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	gitnessclient "github.com/daytonaio/daytona/pkg/gitnessclient"
+	gitnessclient "github.com/daytonaio/daytona/pkg/gitprovider/gitnessclient"
 )
 
 type GitnessGitProvider struct {
@@ -132,6 +132,22 @@ func (g *GitnessGitProvider) GetUser() (*GitUser, error) {
 		Email:    response.Email,
 	}
 	return user, nil
+}
+
+func (g *GitnessGitProvider) GetUrlFromRepository(repo *GitRepository) string {
+	url := strings.TrimSuffix(repo.Url, ".git")
+
+	if repo.Branch != nil && *repo.Branch != "" {
+		url += "/files/" + *repo.Branch
+
+		if repo.Path != nil && *repo.Path != "" {
+			url += "/~/" + *repo.Path
+		}
+	} else if repo.Path != nil {
+		url += "/files/main/~/" + *repo.Path
+	}
+
+	return url
 }
 
 func (g *GitnessGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (string, error) {

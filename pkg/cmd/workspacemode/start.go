@@ -6,6 +6,7 @@ package workspacemode
 import (
 	"context"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	log "github.com/sirupsen/logrus"
@@ -13,9 +14,10 @@ import (
 )
 
 var startCmd = &cobra.Command{
-	Use:   "start",
-	Short: "Start the project",
-	Args:  cobra.NoArgs,
+	Use:     "start",
+	Short:   "Start the project",
+	Args:    cobra.NoArgs,
+	GroupID: util.WORKSPACE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 

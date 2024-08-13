@@ -232,6 +232,26 @@ func (g *GitHubGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (s
 	return *commits[0].SHA, nil
 }
 
+func (g *GitHubGitProvider) GetUrlFromRepository(repository *GitRepository) string {
+	url := strings.TrimSuffix(repository.Url, ".git")
+
+	if repository.Branch != nil && *repository.Branch != "" {
+		if repository.Sha == *repository.Branch {
+			url += "/commit/" + *repository.Branch
+		} else {
+			url += "/tree/" + *repository.Branch
+		}
+
+		if repository.Path != nil {
+			url += "/" + *repository.Path
+		}
+	} else if repository.Path != nil {
+		url += "/blob/main/" + *repository.Path
+	}
+
+	return url
+}
+
 func (g *GitHubGitProvider) getApiClient() *github.Client {
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(
@@ -301,7 +321,8 @@ func (g *GitHubGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitCon
 		staticContext.PrNumber = &prUint
 		staticContext.Path = nil
 	case len(parts) >= 1 && parts[0] == "tree":
-		staticContext.Branch = &parts[1]
+		branchPath := strings.Join(parts[1:], "/")
+		staticContext.Branch = &branchPath
 		staticContext.Path = nil
 	case len(parts) >= 2 && parts[0] == "blob":
 		staticContext.Branch = &parts[1]

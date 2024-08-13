@@ -256,6 +256,26 @@ func (g *GiteaGitProvider) getApiClient() (*gitea.Client, error) {
 	return gitea.NewClient(g.baseApiUrl, options...)
 }
 
+func (g *GiteaGitProvider) GetUrlFromRepository(repository *GitRepository) string {
+	url := strings.TrimSuffix(repository.Url, ".git")
+
+	if repository.Branch != nil && *repository.Branch != "" {
+		if repository.Sha == *repository.Branch {
+			url += "/src/commit/" + *repository.Branch
+		} else {
+			url += "/src/branch/" + *repository.Branch
+		}
+
+		if repository.Path != nil && *repository.Path != "" {
+			url += "/" + *repository.Path
+		}
+	} else if repository.Path != nil {
+		url += "/src/branch/main/" + *repository.Path
+	}
+
+	return url
+}
+
 func (g *GiteaGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
 	if staticContext.PrNumber == nil {
 		return staticContext, nil

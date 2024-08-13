@@ -32,8 +32,8 @@ func getRowFromRowData(rowData RowData) []string {
 func getRowData(provider *apiclient.Provider) *RowData {
 	rowData := RowData{"", ""}
 
-	rowData.Name = *provider.Name
-	rowData.Version = *provider.Version
+	rowData.Name = provider.Name
+	rowData.Version = provider.Version
 
 	return &rowData
 }
@@ -90,9 +90,9 @@ func renderUnstyledList(providerList []apiclient.Provider) {
 	output := "\n"
 
 	for _, provider := range providerList {
-		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Provider Name: "), *provider.Name) + "\n\n"
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Provider Name: "), provider.Name) + "\n\n"
 
-		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Provider Version: "), *provider.Version) + "\n"
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Provider Version: "), provider.Version) + "\n"
 
 		if provider.Name != providerList[len(providerList)-1].Name {
 			output += views.SeparatorString + "\n\n"

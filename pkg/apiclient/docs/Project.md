@@ -4,20 +4,22 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Build** | Pointer to [**ProjectBuild**](ProjectBuild.md) |  | [optional] 
-**Image** | Pointer to **string** |  | [optional] 
-**Name** | Pointer to **string** |  | [optional] 
-**Repository** | Pointer to [**GitRepository**](GitRepository.md) |  | [optional] 
+**BuildConfig** | Pointer to [**ProjectBuildConfig**](ProjectBuildConfig.md) |  | [optional] 
+**Default** | **bool** |  | 
+**EnvVars** | **map[string]string** |  | 
+**Image** | **string** |  | 
+**Name** | **string** |  | 
+**Repository** | [**GitRepository**](GitRepository.md) |  | 
 **State** | Pointer to [**ProjectState**](ProjectState.md) |  | [optional] 
-**Target** | Pointer to **string** |  | [optional] 
-**User** | Pointer to **string** |  | [optional] 
-**WorkspaceId** | Pointer to **string** |  | [optional] 
+**Target** | **string** |  | 
+**User** | **string** |  | 
+**WorkspaceId** | **string** |  | 
 
 ## Methods
 
 ### NewProject
 
-`func NewProject() *Project`
+`func NewProject(default_ bool, envVars map[string]string, image string, name string, repository GitRepository, target string, user string, workspaceId string, ) *Project`
 
 NewProject instantiates a new Project object
 This constructor will assign default values to properties that have it defined,
@@ -32,30 +34,70 @@ NewProjectWithDefaults instantiates a new Project object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
-### GetBuild
+### GetBuildConfig
 
-`func (o *Project) GetBuild() ProjectBuild`
+`func (o *Project) GetBuildConfig() ProjectBuildConfig`
 
-GetBuild returns the Build field if non-nil, zero value otherwise.
+GetBuildConfig returns the BuildConfig field if non-nil, zero value otherwise.
 
-### GetBuildOk
+### GetBuildConfigOk
 
-`func (o *Project) GetBuildOk() (*ProjectBuild, bool)`
+`func (o *Project) GetBuildConfigOk() (*ProjectBuildConfig, bool)`
 
-GetBuildOk returns a tuple with the Build field if it's non-nil, zero value otherwise
+GetBuildConfigOk returns a tuple with the BuildConfig field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetBuild
+### SetBuildConfig
 
-`func (o *Project) SetBuild(v ProjectBuild)`
+`func (o *Project) SetBuildConfig(v ProjectBuildConfig)`
 
-SetBuild sets Build field to given value.
+SetBuildConfig sets BuildConfig field to given value.
 
-### HasBuild
+### HasBuildConfig
 
-`func (o *Project) HasBuild() bool`
+`func (o *Project) HasBuildConfig() bool`
 
-HasBuild returns a boolean if a field has been set.
+HasBuildConfig returns a boolean if a field has been set.
+
+### GetDefault
+
+`func (o *Project) GetDefault() bool`
+
+GetDefault returns the Default field if non-nil, zero value otherwise.
+
+### GetDefaultOk
+
+`func (o *Project) GetDefaultOk() (*bool, bool)`
+
+GetDefaultOk returns a tuple with the Default field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetDefault
+
+`func (o *Project) SetDefault(v bool)`
+
+SetDefault sets Default field to given value.
+
+
+### GetEnvVars
+
+`func (o *Project) GetEnvVars() map[string]string`
+
+GetEnvVars returns the EnvVars field if non-nil, zero value otherwise.
+
+### GetEnvVarsOk
+
+`func (o *Project) GetEnvVarsOk() (*map[string]string, bool)`
+
+GetEnvVarsOk returns a tuple with the EnvVars field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetEnvVars
+
+`func (o *Project) SetEnvVars(v map[string]string)`
+
+SetEnvVars sets EnvVars field to given value.
+
 
 ### GetImage
 
@@ -76,11 +118,6 @@ and a boolean to check if the value has been set.
 
 SetImage sets Image field to given value.
 
-### HasImage
-
-`func (o *Project) HasImage() bool`
-
-HasImage returns a boolean if a field has been set.
 
 ### GetName
 
@@ -101,11 +138,6 @@ and a boolean to check if the value has been set.
 
 SetName sets Name field to given value.
 
-### HasName
-
-`func (o *Project) HasName() bool`
-
-HasName returns a boolean if a field has been set.
 
 ### GetRepository
 
@@ -126,11 +158,6 @@ and a boolean to check if the value has been set.
 
 SetRepository sets Repository field to given value.
 
-### HasRepository
-
-`func (o *Project) HasRepository() bool`
-
-HasRepository returns a boolean if a field has been set.
 
 ### GetState
 
@@ -176,11 +203,6 @@ and a boolean to check if the value has been set.
 
 SetTarget sets Target field to given value.
 
-### HasTarget
-
-`func (o *Project) HasTarget() bool`
-
-HasTarget returns a boolean if a field has been set.
 
 ### GetUser
 
@@ -201,11 +223,6 @@ and a boolean to check if the value has been set.
 
 SetUser sets User field to given value.
 
-### HasUser
-
-`func (o *Project) HasUser() bool`
-
-HasUser returns a boolean if a field has been set.
 
 ### GetWorkspaceId
 
@@ -226,11 +243,6 @@ and a boolean to check if the value has been set.
 
 SetWorkspaceId sets WorkspaceId field to given value.
 
-### HasWorkspaceId
-
-`func (o *Project) HasWorkspaceId() bool`
-
-HasWorkspaceId returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

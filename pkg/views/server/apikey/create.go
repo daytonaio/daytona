@@ -13,7 +13,7 @@ import (
 	"github.com/charmbracelet/huh"
 )
 
-func ApiKeyCreationView(name *string, saveToDefaultProfile *bool, clientKeys []apiclient.ApiKey) {
+func ApiKeyCreationView(name *string, clientKeys []apiclient.ApiKey) {
 	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().
@@ -24,15 +24,12 @@ func ApiKeyCreationView(name *string, saveToDefaultProfile *bool, clientKeys []a
 						return errors.New("name can not be blank")
 					}
 					for _, key := range clientKeys {
-						if *key.Name == str {
+						if key.Name == str {
 							return errors.New("key name already exists")
 						}
 					}
 					return nil
 				}),
-			huh.NewConfirm().
-				Title("Save to default profile automatically").
-				Value(saveToDefaultProfile),
 		),
 	).WithTheme(views.GetCustomTheme())
 

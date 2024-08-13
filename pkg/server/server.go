@@ -16,9 +16,11 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/profiledata"
+	"github.com/daytonaio/daytona/pkg/server/projectconfig"
 	"github.com/daytonaio/daytona/pkg/server/providertargets"
 	"github.com/daytonaio/daytona/pkg/server/registry"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/hashicorp/go-plugin"
 
 	log "github.com/sirupsen/logrus"
@@ -29,12 +31,14 @@ type ServerInstanceConfig struct {
 	TailscaleServer          TailscaleServer
 	ProviderTargetService    providertargets.IProviderTargetService
 	ContainerRegistryService containerregistries.IContainerRegistryService
+	ProjectConfigService     projectconfig.IProjectConfigService
 	LocalContainerRegistry   ILocalContainerRegistry
 	WorkspaceService         workspaces.IWorkspaceService
 	ApiKeyService            apikeys.IApiKeyService
 	GitProviderService       gitproviders.IGitProviderService
 	ProviderManager          manager.IProviderManager
 	ProfileDataService       profiledata.IProfileDataService
+	TelemetryService         telemetry.TelemetryService
 }
 
 var server *Server
@@ -49,16 +53,19 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 			log.Fatal("Server not initialized")
 		}
 		server = &Server{
+			Id:                       serverConfig.Config.Id,
 			config:                   serverConfig.Config,
 			TailscaleServer:          serverConfig.TailscaleServer,
 			ProviderTargetService:    serverConfig.ProviderTargetService,
 			ContainerRegistryService: serverConfig.ContainerRegistryService,
+			ProjectConfigService:     serverConfig.ProjectConfigService,
 			LocalContainerRegistry:   serverConfig.LocalContainerRegistry,
 			WorkspaceService:         serverConfig.WorkspaceService,
 			ApiKeyService:            serverConfig.ApiKeyService,
 			GitProviderService:       serverConfig.GitProviderService,
 			ProviderManager:          serverConfig.ProviderManager,
 			ProfileDataService:       serverConfig.ProfileDataService,
+			TelemetryService:         serverConfig.TelemetryService,
 		}
 	}
 
@@ -66,16 +73,19 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 }
 
 type Server struct {
+	Id                       string
 	config                   Config
 	TailscaleServer          TailscaleServer
 	ProviderTargetService    providertargets.IProviderTargetService
 	ContainerRegistryService containerregistries.IContainerRegistryService
+	ProjectConfigService     projectconfig.IProjectConfigService
 	LocalContainerRegistry   ILocalContainerRegistry
 	WorkspaceService         workspaces.IWorkspaceService
 	ApiKeyService            apikeys.IApiKeyService
 	GitProviderService       gitproviders.IGitProviderService
 	ProviderManager          manager.IProviderManager
 	ProfileDataService       profiledata.IProfileDataService
+	TelemetryService         telemetry.TelemetryService
 }
 
 func (s *Server) Start(errCh chan error) error {
@@ -220,10 +230,5 @@ func (s *Server) Start(errCh chan error) error {
 		return err
 	}
 
-	err = s.registerProviders()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return s.registerProviders()
 }

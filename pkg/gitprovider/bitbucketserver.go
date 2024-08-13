@@ -303,6 +303,23 @@ func (g *BitbucketServerGitProvider) GetLastCommitSha(staticContext *StaticGitCo
 	return commitList[0].ID, nil
 }
 
+func (g *BitbucketServerGitProvider) GetUrlFromRepository(repository *GitRepository) string {
+	url := strings.TrimSuffix(repository.Url, ".git")
+	url = strings.Replace(url, "/scm/", "/", 1)
+
+	if repository.Branch != nil && *repository.Branch != "" {
+		url += "/src/" + *repository.Branch
+
+		if repository.Path != nil && *repository.Path != "" {
+			url += "/" + *repository.Path
+		}
+	} else if repository.Path != nil && *repository.Path != "" {
+		url += "/src/main/" + *repository.Path
+	}
+
+	return url
+}
+
 func (g *BitbucketServerGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
 	if staticContext.PrNumber == nil {
 		return staticContext, nil

@@ -11,6 +11,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/target"
 	"github.com/spf13/cobra"
@@ -46,10 +47,14 @@ var targetRemoveCmd = &cobra.Command{
 
 			selectedTarget, err := target.GetTargetFromPrompt(targets, activeProfile.Name, false)
 			if err != nil {
-				log.Fatal(err)
+				if common.IsCtrlCAbort(err) {
+					return
+				} else {
+					log.Fatal(err)
+				}
 			}
 
-			selectedTargetName = *selectedTarget.Name
+			selectedTargetName = selectedTarget.Name
 		} else {
 			selectedTargetName = args[0]
 		}
@@ -112,17 +117,17 @@ func RemoveTargetWorkspaces(ctx context.Context, client *apiclient.APIClient, ta
 	}
 
 	for _, workspace := range workspaceList {
-		if *workspace.Target != target {
+		if workspace.Target != target {
 			continue
 		}
 
-		res, err := client.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
+		res, err := client.WorkspaceAPI.RemoveWorkspace(ctx, workspace.Id).Execute()
 		if err != nil {
-			log.Errorf("Failed to delete workspace %s: %v", *workspace.Name, apiclient_util.HandleErrorResponse(res, err))
+			log.Errorf("Failed to delete workspace %s: %v", workspace.Name, apiclient_util.HandleErrorResponse(res, err))
 			continue
 		}
 
-		views.RenderLine(fmt.Sprintf("- Workspace %s successfully deleted\n", *workspace.Name))
+		views.RenderLine(fmt.Sprintf("- Workspace %s successfully deleted\n", workspace.Name))
 	}
 
 	return nil

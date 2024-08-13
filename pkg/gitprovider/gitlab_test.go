@@ -174,6 +174,88 @@ func (g *GitLabGitProviderTestSuite) TestParseStaticGitContext_Commit() {
 	require.Equal(httpContext, commitContext)
 }
 
+func (g *GitLabGitProviderTestSuite) TestGetUrlFromRepo_Bare() {
+	repo := &GitRepository{
+		Id:     "daytona",
+		Name:   "daytona",
+		Owner:  "daytonaio",
+		Source: "gitlab.com",
+		Url:    "https://gitlab.com/daytonaio/daytona.git",
+	}
+
+	require := g.Require()
+
+	url := g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://gitlab.com/daytonaio/daytona", url)
+}
+
+func (g *GitLabGitProviderTestSuite) TestGetUrlFromRepo_Branch() {
+	repo := &GitRepository{
+		Id:     "daytona",
+		Name:   "daytona",
+		Owner:  "daytonaio",
+		Source: "gitlab.com",
+		Url:    "https://gitlab.com/daytonaio/daytona.git",
+		Branch: &[]string{"test-branch"}[0],
+	}
+
+	require := g.Require()
+
+	url := g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://gitlab.com/daytonaio/daytona/-/tree/test-branch", url)
+}
+
+func (g *GitLabGitProviderTestSuite) TestGetUrlFromRepo_Path() {
+	repo := &GitRepository{
+		Id:     "daytona",
+		Name:   "daytona",
+		Owner:  "daytonaio",
+		Source: "gitlab.com",
+		Url:    "https://gitlab.com/daytonaio/daytona.git",
+		Branch: &[]string{"test-branch"}[0],
+		Path:   &[]string{"README.md"}[0],
+	}
+
+	require := g.Require()
+
+	url := g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal(url, "https://gitlab.com/daytonaio/daytona/-/tree/test-branch/README.md")
+
+	repo.Branch = nil
+
+	url = g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://gitlab.com/daytonaio/daytona/-/blob/main/README.md", url)
+}
+
+func (g *GitLabGitProviderTestSuite) TestGetUrlFromRepo_Commit() {
+	repo := &GitRepository{
+		Id:     "daytona",
+		Name:   "daytona",
+		Owner:  "daytonaio",
+		Source: "gitlab.com",
+		Url:    "https://gitlab.com/daytonaio/daytona.git",
+		Path:   &[]string{"README.md"}[0],
+		Sha:    "COMMIT_SHA",
+		Branch: &[]string{"COMMIT_SHA"}[0],
+	}
+
+	require := g.Require()
+
+	url := g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://gitlab.com/daytonaio/daytona/-/commit/COMMIT_SHA/README.md", url)
+
+	repo.Path = nil
+
+	url = g.gitProvider.GetUrlFromRepository(repo)
+
+	require.Equal("https://gitlab.com/daytonaio/daytona/-/commit/COMMIT_SHA", url)
+}
+
 func TestGitLabGitProvider(t *testing.T) {
 	suite.Run(t, NewGitLabGitProviderTestSuite())
 }

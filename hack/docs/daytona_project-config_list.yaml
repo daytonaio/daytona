@@ -1,0 +1,12 @@
+name: daytona project-config list
+synopsis: Lists project configs
+usage: daytona project-config list [flags]
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+    - name: output
+      shorthand: o
+      usage: Output format. Must be one of (yaml, json)
+see_also:
+    - daytona project-config - Manage project configs

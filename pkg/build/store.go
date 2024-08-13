@@ -3,12 +3,18 @@
 
 package build
 
-import "errors"
+import (
+	"errors"
+)
+
+type BuildFilter struct {
+	State *BuildState
+}
 
 type Store interface {
-	Find(hash string) (*BuildResult, error)
-	List() ([]*BuildResult, error)
-	Save(buildResult *BuildResult) error
+	Find(hash string) (*Build, error)
+	List(filter *BuildFilter) ([]*Build, error)
+	Save(build *Build) error
 	Delete(hash string) error
 }
 

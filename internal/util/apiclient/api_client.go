@@ -14,7 +14,7 @@ import (
 	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	"github.com/daytonaio/daytona/pkg/server"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 )
 
 const CLIENT_VERSION_HEADER = "X-Client-Version"
@@ -65,6 +65,17 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 	clientConfig.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", apiKey))
 	clientConfig.AddDefaultHeader(CLIENT_VERSION_HEADER, internal.Version)
 
+	if c.TelemetryEnabled {
+		clientConfig.AddDefaultHeader(telemetry.ENABLED_HEADER, "true")
+		clientConfig.AddDefaultHeader(telemetry.SESSION_ID_HEADER, internal.SESSION_ID)
+		clientConfig.AddDefaultHeader(telemetry.CLIENT_ID_HEADER, c.Id)
+		if internal.WorkspaceMode() {
+			clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, string(telemetry.CLI_PROJECT_SOURCE))
+		} else {
+			clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, string(telemetry.CLI_SOURCE))
+		}
+	}
+
 	apiClient = apiclient.NewAPIClient(clientConfig)
 
 	apiClient.GetConfig().HTTPClient = &http.Client{
@@ -74,7 +85,7 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 	return apiClient, nil
 }
 
-func GetAgentApiClient(apiUrl, apiKey string) (*apiclient.APIClient, error) {
+func GetAgentApiClient(apiUrl, apiKey, clientId string, telemetryEnabled bool) (*apiclient.APIClient, error) {
 	clientConfig := apiclient.NewConfiguration()
 	clientConfig.Servers = apiclient.ServerConfigurations{
 		{
@@ -85,6 +96,13 @@ func GetAgentApiClient(apiUrl, apiKey string) (*apiclient.APIClient, error) {
 	clientConfig.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", apiKey))
 	clientConfig.AddDefaultHeader(CLIENT_VERSION_HEADER, internal.Version)
 
+	if telemetryEnabled {
+		clientConfig.AddDefaultHeader(telemetry.ENABLED_HEADER, "true")
+		clientConfig.AddDefaultHeader(telemetry.SESSION_ID_HEADER, internal.SESSION_ID)
+		clientConfig.AddDefaultHeader(telemetry.CLIENT_ID_HEADER, clientId)
+		clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, string(telemetry.AGENT_SOURCE))
+	}
+
 	apiClient = apiclient.NewAPIClient(clientConfig)
 
 	apiClient.GetConfig().HTTPClient = &http.Client{
@@ -92,22 +110,6 @@ func GetAgentApiClient(apiUrl, apiKey string) (*apiclient.APIClient, error) {
 	}
 
 	return apiClient, nil
-}
-
-func ToServerConfig(config apiclient.ServerConfig) server.Config {
-	return server.Config{
-		ProvidersDir:      *config.ProvidersDir,
-		RegistryUrl:       *config.RegistryUrl,
-		Id:                *config.Id,
-		ServerDownloadUrl: *config.ServerDownloadUrl,
-		Frps: &server.FRPSConfig{
-			Domain:   *config.Frps.Domain,
-			Port:     uint32(*config.Frps.Port),
-			Protocol: *config.Frps.Protocol,
-		},
-		ApiPort:       uint32(*config.ApiPort),
-		HeadscalePort: uint32(*config.HeadscalePort),
-	}
 }
 
 func GetProviderList() ([]apiclient.Provider, error) {
@@ -174,12 +176,12 @@ func GetFirstWorkspaceProjectName(workspaceId string, projectName string, profil
 			return "", errors.New("no projects found in workspace")
 		}
 
-		return *wsInfo.Projects[0].Name, nil
+		return wsInfo.Projects[0].Name, nil
 	}
 
 	for _, project := range wsInfo.Projects {
-		if *project.Name == projectName {
-			return *project.Name, nil
+		if project.Name == projectName {
+			return project.Name, nil
 		}
 	}
 

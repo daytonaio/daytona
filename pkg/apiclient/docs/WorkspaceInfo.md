@@ -4,15 +4,15 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Name** | Pointer to **string** |  | [optional] 
-**Projects** | Pointer to [**[]ProjectInfo**](ProjectInfo.md) |  | [optional] 
+**Name** | **string** |  | 
+**Projects** | [**[]ProjectInfo**](ProjectInfo.md) |  | 
 **ProviderMetadata** | Pointer to **string** |  | [optional] 
 
 ## Methods
 
 ### NewWorkspaceInfo
 
-`func NewWorkspaceInfo() *WorkspaceInfo`
+`func NewWorkspaceInfo(name string, projects []ProjectInfo, ) *WorkspaceInfo`
 
 NewWorkspaceInfo instantiates a new WorkspaceInfo object
 This constructor will assign default values to properties that have it defined,
@@ -46,11 +46,6 @@ and a boolean to check if the value has been set.
 
 SetName sets Name field to given value.
 
-### HasName
-
-`func (o *WorkspaceInfo) HasName() bool`
-
-HasName returns a boolean if a field has been set.
 
 ### GetProjects
 
@@ -71,11 +66,6 @@ and a boolean to check if the value has been set.
 
 SetProjects sets Projects field to given value.
 
-### HasProjects
-
-`func (o *WorkspaceInfo) HasProjects() bool`
-
-HasProjects returns a boolean if a field has been set.
 
 ### GetProviderMetadata
 

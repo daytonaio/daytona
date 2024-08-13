@@ -36,7 +36,7 @@ func ToWorkspaceDTO(workspace *workspace.Workspace) WorkspaceDTO {
 	}
 
 	for _, project := range workspace.Projects {
-		workspaceDTO.Projects = append(workspaceDTO.Projects, ToProjectDTO(project, workspace))
+		workspaceDTO.Projects = append(workspaceDTO.Projects, ToProjectDTO(project))
 	}
 
 	return workspaceDTO

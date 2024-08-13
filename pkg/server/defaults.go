@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/google/uuid"
 
 	log "github.com/sirupsen/logrus"
@@ -25,6 +26,7 @@ const defaultProjectImage = "daytonaio/workspace-project:latest"
 const defaultProjectUser = "daytona"
 
 const defaultLocalBuilderRegistryPort = 3988
+const defaultLocalBuilderRegistryImage = "registry:2.8.3"
 const defaultBuilderRegistryServer = "local"
 const defaultBuildImageNamespace = ""
 
@@ -100,21 +102,22 @@ func getDefaultConfig() (*Config, error) {
 	}
 
 	c := Config{
-		Id:                       generateUuid(),
-		RegistryUrl:              defaultRegistryUrl,
-		ProvidersDir:             providersDir,
-		ServerDownloadUrl:        defaultServerDownloadUrl,
-		ApiPort:                  defaultApiPort,
-		HeadscalePort:            defaultHeadscalePort,
-		BinariesPath:             binariesPath,
-		Frps:                     getDefaultFRPSConfig(),
-		LogFilePath:              logFilePath,
-		DefaultProjectImage:      defaultProjectImage,
-		DefaultProjectUser:       defaultProjectUser,
-		BuilderImage:             defaultBuilderImage,
-		LocalBuilderRegistryPort: defaultLocalBuilderRegistryPort,
-		BuilderRegistryServer:    defaultBuilderRegistryServer,
-		BuildImageNamespace:      defaultBuildImageNamespace,
+		Id:                        uuid.NewString(),
+		RegistryUrl:               defaultRegistryUrl,
+		ProvidersDir:              providersDir,
+		ServerDownloadUrl:         defaultServerDownloadUrl,
+		ApiPort:                   defaultApiPort,
+		HeadscalePort:             defaultHeadscalePort,
+		BinariesPath:              binariesPath,
+		Frps:                      getDefaultFRPSConfig(),
+		LogFilePath:               logFilePath,
+		DefaultProjectImage:       defaultProjectImage,
+		DefaultProjectUser:        defaultProjectUser,
+		BuilderImage:              defaultBuilderImage,
+		LocalBuilderRegistryPort:  defaultLocalBuilderRegistryPort,
+		LocalBuilderRegistryImage: defaultLocalBuilderRegistryImage,
+		BuilderRegistryServer:     defaultBuilderRegistryServer,
+		BuildImageNamespace:       defaultBuildImageNamespace,
 	}
 
 	if os.Getenv("DEFAULT_REGISTRY_URL") != "" {
@@ -162,12 +165,12 @@ func parsePort(port string) (uint32, error) {
 }
 
 func getDefaultProvidersDir() (string, error) {
-	userConfigDir, err := os.UserConfigDir()
+	configDir, err := config.GetConfigDir()
 	if err != nil {
 		return "", err
 	}
 
-	return filepath.Join(userConfigDir, "daytona", "providers"), nil
+	return filepath.Join(configDir, "providers"), nil
 }
 
 func getDefaultLogFilePath() (string, error) {
@@ -186,9 +189,4 @@ func getDefaultBinariesPath() (string, error) {
 	}
 
 	return filepath.Join(configDir, "binaries"), nil
-}
-
-func generateUuid() string {
-	uuid := uuid.New()
-	return uuid.String()
 }

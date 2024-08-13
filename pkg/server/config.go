@@ -8,6 +8,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/google/uuid"
 )
 
 func GetConfig() (*Config, error) {
@@ -46,6 +49,14 @@ func GetConfig() (*Config, error) {
 		return nil, err
 	}
 
+	if c.Id == "" {
+		c.Id = uuid.NewString()
+	}
+	err = Save(c)
+	if err != nil {
+		return nil, err
+	}
+
 	return &c, nil
 }
 
@@ -59,6 +70,13 @@ func configFilePath() (string, error) {
 }
 
 func Save(c Config) error {
+	if err := directoryValidator(&c.BinariesPath); err != nil {
+		return err
+	}
+	if err := directoryValidator(&c.ProvidersDir); err != nil {
+		return err
+	}
+
 	configFilePath, err := configFilePath()
 	if err != nil {
 		return err
@@ -83,19 +101,22 @@ func Save(c Config) error {
 }
 
 func GetConfigDir() (string, error) {
-	userConfigDir, err := os.UserConfigDir()
+	configDir, err := config.GetConfigDir()
 	if err != nil {
 		return "", err
 	}
 
-	return filepath.Join(userConfigDir, "daytona", "server"), nil
+	return filepath.Join(configDir, "server"), nil
 }
 
-func GetWorkspaceLogsDir() (string, error) {
-	configDir, err := GetConfigDir()
-	if err != nil {
-		return "", err
-	}
-
+func GetWorkspaceLogsDir(configDir string) (string, error) {
 	return filepath.Join(configDir, "logs"), nil
+}
+
+func directoryValidator(path *string) error {
+	_, err := os.Stat(*path)
+	if os.IsNotExist(err) {
+		return os.MkdirAll(*path, 0700)
+	}
+	return err
 }

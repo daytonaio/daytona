@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
 	"regexp"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -24,24 +23,19 @@ func GetWebsocketConn(path string, profile *config.Profile, query *string) (*web
 	var serverUrl string
 	var apiKey string
 
-	if envApiUrl, ok := os.LookupEnv("DAYTONA_SERVER_API_URL"); ok {
-		serverUrl = envApiUrl
-		apiKey = os.Getenv("DAYTONA_SERVER_API_KEY")
-	} else {
-		var activeProfile config.Profile
-		if profile == nil {
-			var err error
-			activeProfile, err = c.GetActiveProfile()
-			if err != nil {
-				return nil, nil, err
-			}
-		} else {
-			activeProfile = *profile
+	var activeProfile config.Profile
+	if profile == nil {
+		var err error
+		activeProfile, err = c.GetActiveProfile()
+		if err != nil {
+			return nil, nil, err
 		}
-
-		serverUrl = activeProfile.Api.Url
-		apiKey = activeProfile.Api.Key
+	} else {
+		activeProfile = *profile
 	}
+
+	serverUrl = activeProfile.Api.Url
+	apiKey = activeProfile.Api.Key
 
 	url, err := url.JoinPath(serverUrl, path)
 	if err != nil {

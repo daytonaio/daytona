@@ -15,7 +15,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/agent/ssh"
 	"github.com/daytonaio/daytona/pkg/agent/tailscale"
 	"github.com/daytonaio/daytona/pkg/git"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -27,9 +27,7 @@ var AgentCmd = &cobra.Command{
 	Short: "Start the agent process",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		if log.GetLevel() < log.InfoLevel {
-			log.SetLevel(log.InfoLevel)
-		}
+		setLogLevel()
 
 		agentMode := config.ModeProject
 
@@ -70,22 +68,27 @@ var AgentCmd = &cobra.Command{
 			DefaultProjectDir: os.Getenv("HOME"),
 		}
 
-		tailscaleHostname := workspace.GetProjectHostname(c.WorkspaceId, c.ProjectName)
+		tailscaleHostname := project.GetProjectHostname(c.WorkspaceId, c.ProjectName)
 		if hostModeFlag {
 			tailscaleHostname = c.WorkspaceId
 		}
 
+		telemetryEnabled := os.Getenv("DAYTONA_TELEMETRY_ENABLED") == "true"
+
 		tailscaleServer := &tailscale.Server{
-			Hostname: tailscaleHostname,
-			Server:   c.Server,
+			Hostname:         tailscaleHostname,
+			Server:           c.Server,
+			TelemetryEnabled: telemetryEnabled,
+			ClientId:         c.ClientId,
 		}
 
 		agent := agent.Agent{
-			Config:    c,
-			Git:       git,
-			Ssh:       sshServer,
-			Tailscale: tailscaleServer,
-			LogWriter: agentLogWriter,
+			Config:           c,
+			Git:              git,
+			Ssh:              sshServer,
+			Tailscale:        tailscaleServer,
+			LogWriter:        agentLogWriter,
+			TelemetryEnabled: telemetryEnabled,
 		}
 
 		err = agent.Start()
@@ -98,4 +101,18 @@ var AgentCmd = &cobra.Command{
 func init() {
 	AgentCmd.Flags().BoolVar(&hostModeFlag, "host", false, "Run the agent in host mode")
 	AgentCmd.AddCommand(logsCmd)
+}
+
+func setLogLevel() {
+	agentLogLevel := os.Getenv("AGENT_LOG_LEVEL")
+	if agentLogLevel != "" {
+		level, err := log.ParseLevel(agentLogLevel)
+		if err != nil {
+			log.Errorf("Invalid log level: %s, defaulting to info level", agentLogLevel)
+			level = log.InfoLevel
+		}
+		log.SetLevel(level)
+	} else {
+		log.SetLevel(log.InfoLevel)
+	}
 }

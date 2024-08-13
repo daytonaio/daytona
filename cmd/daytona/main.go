@@ -9,6 +9,7 @@ import (
 
 	golog "log"
 
+	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/cmd"
 	"github.com/daytonaio/daytona/pkg/cmd/workspacemode"
@@ -18,7 +19,7 @@ import (
 )
 
 func main() {
-	if util.WorkspaceMode() {
+	if internal.WorkspaceMode() {
 		workspacemode.Execute()
 		return
 	}
@@ -30,17 +31,11 @@ func init() {
 	logLevel := log.WarnLevel
 
 	logLevelEnv, logLevelSet := os.LookupEnv("LOG_LEVEL")
+
 	if logLevelSet {
-		switch logLevelEnv {
-		case "debug":
-			logLevel = log.DebugLevel
-		case "info":
-			logLevel = log.InfoLevel
-		case "warn":
-			logLevel = log.WarnLevel
-		case "error":
-			logLevel = log.ErrorLevel
-		default:
+		var err error
+		logLevel, err = log.ParseLevel(logLevelEnv)
+		if err != nil {
 			logLevel = log.WarnLevel
 		}
 	}

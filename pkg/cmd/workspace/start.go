@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -25,9 +26,10 @@ var startProjectFlag string
 var allFlag bool
 
 var StartCmd = &cobra.Command{
-	Use:   "start [WORKSPACE]",
-	Short: "Start a workspace",
-	Args:  cobra.RangeArgs(0, 1),
+	Use:     "start [WORKSPACE]",
+	Short:   "Start a workspace",
+	Args:    cobra.RangeArgs(0, 1),
+	GroupID: util.WORKSPACE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {
 		var workspaceId string
 		var message string
@@ -64,7 +66,7 @@ var StartCmd = &cobra.Command{
 			if workspace == nil {
 				return
 			}
-			workspaceId = *workspace.Name
+			workspaceId = workspace.Name
 		} else {
 			workspaceId = args[0]
 		}
@@ -117,12 +119,12 @@ func startAllWorkspaces() error {
 	}
 
 	for _, workspace := range workspaceList {
-		res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, *workspace.Id).Execute()
+		res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspace.Id).Execute()
 		if err != nil {
-			log.Errorf("Failed to start workspace %s: %v", *workspace.Name, apiclient.HandleErrorResponse(res, err))
+			log.Errorf("Failed to start workspace %s: %v", workspace.Name, apiclient.HandleErrorResponse(res, err))
 			continue
 		}
-		fmt.Printf("Workspace '%s' is starting\n", *workspace.Name)
+		fmt.Printf("Workspace '%s' is starting\n", workspace.Name)
 	}
 	return nil
 }
@@ -142,7 +144,7 @@ func getProjectNameCompletions(cmd *cobra.Command, args []string, toComplete str
 
 	var choices []string
 	for _, project := range workspace.Projects {
-		choices = append(choices, *project.Name)
+		choices = append(choices, project.Name)
 	}
 	return choices, cobra.ShellCompDirectiveDefault
 }
@@ -161,7 +163,7 @@ func getWorkspaceNameCompletions() ([]string, cobra.ShellCompDirective) {
 
 	var choices []string
 	for _, v := range workspaceList {
-		choices = append(choices, *v.Name)
+		choices = append(choices, v.Name)
 	}
 
 	return choices, cobra.ShellCompDirectiveNoFileComp
@@ -182,12 +184,12 @@ func getAllWorkspacesByState(state WorkspaceState) ([]string, cobra.ShellCompDir
 	var choices []string
 	for _, workspace := range workspaceList {
 		for _, project := range workspace.Info.Projects {
-			if state == WORKSPACE_STATUS_RUNNING && *project.IsRunning {
-				choices = append(choices, *workspace.Name)
+			if state == WORKSPACE_STATUS_RUNNING && project.IsRunning {
+				choices = append(choices, workspace.Name)
 				break
 			}
-			if state == WORKSPACE_STATUS_STOPPED && !*project.IsRunning {
-				choices = append(choices, *workspace.Name)
+			if state == WORKSPACE_STATUS_STOPPED && !project.IsRunning {
+				choices = append(choices, workspace.Name)
 				break
 			}
 		}

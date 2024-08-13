@@ -4,15 +4,15 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**KeyHash** | Pointer to **string** |  | [optional] 
-**Name** | Pointer to **string** | Project or client name | [optional] 
-**Type** | Pointer to [**ApikeyApiKeyType**](ApikeyApiKeyType.md) |  | [optional] 
+**KeyHash** | **string** |  | 
+**Name** | **string** | Project or client name | 
+**Type** | [**ApikeyApiKeyType**](ApikeyApiKeyType.md) |  | 
 
 ## Methods
 
 ### NewApiKey
 
-`func NewApiKey() *ApiKey`
+`func NewApiKey(keyHash string, name string, type_ ApikeyApiKeyType, ) *ApiKey`
 
 NewApiKey instantiates a new ApiKey object
 This constructor will assign default values to properties that have it defined,
@@ -46,11 +46,6 @@ and a boolean to check if the value has been set.
 
 SetKeyHash sets KeyHash field to given value.
 
-### HasKeyHash
-
-`func (o *ApiKey) HasKeyHash() bool`
-
-HasKeyHash returns a boolean if a field has been set.
 
 ### GetName
 
@@ -71,11 +66,6 @@ and a boolean to check if the value has been set.
 
 SetName sets Name field to given value.
 
-### HasName
-
-`func (o *ApiKey) HasName() bool`
-
-HasName returns a boolean if a field has been set.
 
 ### GetType
 
@@ -96,11 +86,6 @@ and a boolean to check if the value has been set.
 
 SetType sets Type field to given value.
 
-### HasType
-
-`func (o *ApiKey) HasType() bool`
-
-HasType returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

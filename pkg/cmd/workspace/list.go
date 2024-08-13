@@ -6,6 +6,8 @@ package workspace
 import (
 	"context"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/output"
@@ -22,6 +24,7 @@ var ListCmd = &cobra.Command{
 	Short:   "List workspaces",
 	Args:    cobra.ExactArgs(0),
 	Aliases: []string{"ls"},
+	GroupID: util.WORKSPACE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 		var specifyGitProviders bool
@@ -56,7 +59,17 @@ var ListCmd = &cobra.Command{
 			return
 		}
 
-		list_view.ListWorkspaces(workspaceList, specifyGitProviders, verbose)
+		c, err := config.GetConfig()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		activeProfile, err := c.GetActiveProfile()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		list_view.ListWorkspaces(workspaceList, specifyGitProviders, verbose, activeProfile.Name)
 	},
 }
 

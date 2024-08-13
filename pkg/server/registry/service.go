@@ -6,7 +6,10 @@ package registry
 import (
 	"context"
 	"fmt"
+	"io"
+	"net"
 	"os"
+	"os/exec"
 
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/docker/docker/api/types/container"
@@ -14,21 +17,29 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
+const registryContainerName = "daytona-registry"
+
 type LocalContainerRegistryConfig struct {
 	DataPath string
 	Port     uint32
+	Image    string
+	Logger   io.Writer
 }
 
 func NewLocalContainerRegistry(config *LocalContainerRegistryConfig) *LocalContainerRegistry {
 	return &LocalContainerRegistry{
 		dataPath: config.DataPath,
 		port:     config.Port,
+		image:    config.Image,
+		logger:   config.Logger,
 	}
 }
 
 type LocalContainerRegistry struct {
 	dataPath string
 	port     uint32
+	image    string
+	logger   io.Writer
 }
 
 func (s *LocalContainerRegistry) Start() error {
@@ -49,6 +60,14 @@ func (s *LocalContainerRegistry) Start() error {
 		return err
 	}
 
+	if _, err := exec.LookPath("docker"); err != nil {
+		return fmt.Errorf("cannot find Docker installation. Please install by following https://docs.docker.com/engine/install/ and try again")
+	}
+
+	if _, err := cli.Info(ctx); err != nil {
+		return fmt.Errorf("cannot connect to the Docker daemon. Is the Docker daemon running?")
+	}
+
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
 		ApiClient: cli,
 	})
@@ -59,15 +78,20 @@ func (s *LocalContainerRegistry) Start() error {
 		return err
 	}
 
+	_, err = net.Dial("tcp", fmt.Sprintf(":%d", s.port))
+	if err == nil {
+		return fmt.Errorf("cannot start registry, port %d is already in use", s.port)
+	}
+
 	// Pull the image
-	err = dockerClient.PullImage("registry:2.8.3", nil, os.Stdout)
+	err = dockerClient.PullImage(s.image, nil, s.logger)
 	if err != nil {
 		return err
 	}
 
 	//	todo: enable TLS
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
-		Image: "registry:2.8.3",
+		Image: s.image,
 		Env: []string{
 			fmt.Sprintf("REGISTRY_HTTP_ADDR=0.0.0.0:%d", s.port),
 		},
@@ -87,16 +111,25 @@ func (s *LocalContainerRegistry) Start() error {
 				},
 			},
 		},
-	}, nil, nil, "daytona-registry")
+	}, nil, nil, registryContainerName)
 	if err != nil {
 		return err
 	}
 
-	if err := cli.ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
+	return cli.ContainerStart(ctx, resp.ID, container.StartOptions{})
+}
+
+func (s *LocalContainerRegistry) Stop() error {
+	return RemoveRegistryContainer()
+}
+
+func (s *LocalContainerRegistry) Purge() error {
+	err := s.Stop()
+	if err != nil {
 		return err
 	}
 
-	return nil
+	return os.RemoveAll(s.dataPath)
 }
 
 func RemoveRegistryContainer() error {
@@ -114,7 +147,7 @@ func RemoveRegistryContainer() error {
 
 	for _, c := range containers {
 		for _, name := range c.Names {
-			if name == "/daytona-registry" {
+			if name == fmt.Sprintf("/%s", registryContainerName) {
 				removeOptions := container.RemoveOptions{
 					Force: true,
 				}

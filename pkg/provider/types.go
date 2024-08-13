@@ -7,11 +7,12 @@ import (
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 )
 
 type ProviderInfo struct {
-	Name    string `json:"name"`
-	Version string `json:"version"`
+	Name    string `json:"name" validate:"required"`
+	Version string `json:"version" validate:"required"`
 }
 
 type InitializeProviderRequest struct {
@@ -37,15 +38,15 @@ type WorkspaceRequest struct {
 type ProjectRequest struct {
 	TargetOptions     string
 	ContainerRegistry *containerregistry.ContainerRegistry
-	Project           *workspace.Project
+	Project           *project.Project
 	GitProviderConfig *gitprovider.GitProviderConfig
 }
 
 type ProviderTarget struct {
-	Name         string       `json:"name"`
-	ProviderInfo ProviderInfo `json:"providerInfo"`
+	Name         string       `json:"name" validate:"required"`
+	ProviderInfo ProviderInfo `json:"providerInfo" validate:"required"`
 	// JSON encoded map of options
-	Options string `json:"options"`
+	Options string `json:"options" validate:"required"`
 } // @name ProviderTarget
 
 type ProviderTargetManifest map[string]ProviderTargetProperty // @name ProviderTargetManifest

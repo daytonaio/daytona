@@ -10,6 +10,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/ssh"
 	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 )
@@ -22,7 +23,7 @@ func (d *DockerClient) DestroyWorkspace(workspace *workspace.Workspace, workspac
 	}
 }
 
-func (d *DockerClient) DestroyProject(project *workspace.Project, projectDir string, sshClient *ssh.Client) error {
+func (d *DockerClient) DestroyProject(project *project.Project, projectDir string, sshClient *ssh.Client) error {
 	err := d.removeProjectContainer(project)
 	if err != nil {
 		return err
@@ -35,10 +36,10 @@ func (d *DockerClient) DestroyProject(project *workspace.Project, projectDir str
 	}
 }
 
-func (d *DockerClient) removeProjectContainer(project *workspace.Project) error {
+func (d *DockerClient) removeProjectContainer(p *project.Project) error {
 	ctx := context.Background()
 
-	containerName := d.GetProjectContainerName(project)
+	containerName := d.GetProjectContainerName(p)
 
 	c, err := d.apiClient.ContainerInspect(ctx, containerName)
 	if err != nil {
