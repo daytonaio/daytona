@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/logs"
 	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
 	"github.com/gorilla/websocket"
+	log "github.com/sirupsen/logrus"
 )
 
 var workspaceLogsStarted bool
@@ -34,11 +35,10 @@ func ReadWorkspaceLogs(activeProfile config.Profile, workspaceId string, project
 					continue
 				}
 
-				ws, _, err := GetWebsocketConn(fmt.Sprintf("/log/workspace/%s/%s", workspaceId, projectName), &activeProfile, &query)
+				ws, res, err := GetWebsocketConn(fmt.Sprintf("/log/workspace/%s/%s", workspaceId, projectName), &activeProfile, &query)
 				// We want to retry getting the logs if it fails
 				if err != nil {
-					// TODO: return log.Trace once https://github.com/daytonaio/daytona/issues/696 is resolved
-					// log.Trace(apiclient_util.HandleErrorResponse(res, err))
+					log.Trace(HandleErrorResponse(res, err))
 					time.Sleep(500 * time.Millisecond)
 					continue
 				}
@@ -51,11 +51,10 @@ func ReadWorkspaceLogs(activeProfile config.Profile, workspaceId string, project
 	}
 
 	for {
-		ws, _, err := GetWebsocketConn(fmt.Sprintf("/log/workspace/%s", workspaceId), &activeProfile, &query)
+		ws, res, err := GetWebsocketConn(fmt.Sprintf("/log/workspace/%s", workspaceId), &activeProfile, &query)
 		// We want to retry getting the logs if it fails
 		if err != nil {
-			// TODO: return log.Trace once https://github.com/daytonaio/daytona/issues/696 is resolved
-			// log.Trace(apiclient_util.HandleErrorResponse(res, err))
+			log.Trace(HandleErrorResponse(res, err))
 			time.Sleep(250 * time.Millisecond)
 			continue
 		}
