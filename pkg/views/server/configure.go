@@ -119,7 +119,7 @@ func ConfigurationForm(config *apiclient.ServerConfig, containerRegistries []api
 				Title("Frps Protocol").
 				Value(config.Frps.Protocol),
 		),
-	).WithTheme(views.GetCustomTheme())
+	).WithTheme(views.GetCustomTheme()).WithHeight(15)
 
 	err := form.Run()
 	if err != nil {

@@ -6,7 +6,7 @@ require (
 	code.gitea.io/sdk/gitea v0.17.1
 	github.com/charmbracelet/bubbles v0.18.0
 	github.com/charmbracelet/bubbletea v0.26.3
-	github.com/charmbracelet/huh v0.4.0
+	github.com/charmbracelet/huh v0.3.0
 	github.com/charmbracelet/lipgloss v0.11.0
 	github.com/compose-spec/compose-go/v2 v2.1.3
 	github.com/creack/pty v1.1.21

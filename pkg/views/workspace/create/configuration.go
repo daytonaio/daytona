@@ -159,7 +159,7 @@ func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData)
 					buildOptions...,
 				).
 				Value(&projectConfiguration.BuildChoice),
-		),
+		).WithHeight(8),
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Custom container image").
@@ -167,19 +167,19 @@ func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData)
 			huh.NewInput().
 				Title("Container user").
 				Value(&projectConfiguration.User),
-		).WithHideFunc(func() bool {
+		).WithHeight(5).WithHideFunc(func() bool {
 			return projectConfiguration.BuildChoice != string(CUSTOMIMAGE)
 		}),
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Devcontainer file path").
 				Value(&projectConfiguration.DevcontainerFilePath).Validate(validateDevcontainerFilename),
-		).WithHideFunc(func() bool {
+		).WithHeight(5).WithHideFunc(func() bool {
 			return projectConfiguration.BuildChoice != string(DEVCONTAINER)
 		}),
 		huh.NewGroup(
 			views.GetEnvVarsInput(&projectConfiguration.EnvVars),
-		),
+		).WithHeight(12),
 	).WithTheme(views.GetCustomTheme())
 
 	keyMap := huh.NewDefaultKeyMap()

@@ -58,14 +58,14 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.GitProvider, userGit
 				Options(
 					gitProviderOptions...,
 				).
-				Value(gitProviderAddView.Id)),
+				Value(gitProviderAddView.Id)).WithHeight(8),
 		huh.NewGroup(
 			huh.NewSelect[string]().
 				Title("Choose a Git provider").
 				Options(
 					otherGitProviderOptions...,
 				).
-				Value(gitProviderAddView.Id)).WithHideFunc(func() bool {
+				Value(gitProviderAddView.Id)).WithHeight(11).WithHideFunc(func() bool {
 			return *gitProviderAddView.Id != "other"
 		}),
 	).WithTheme(views.GetCustomTheme())
