@@ -6,6 +6,7 @@ package registry
 import (
 	"context"
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"os/exec"
@@ -16,10 +17,13 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
+const registryContainerName = "daytona-registry"
+
 type LocalContainerRegistryConfig struct {
 	DataPath string
 	Port     uint32
 	Image    string
+	Logger   io.Writer
 }
 
 func NewLocalContainerRegistry(config *LocalContainerRegistryConfig) *LocalContainerRegistry {
@@ -27,6 +31,7 @@ func NewLocalContainerRegistry(config *LocalContainerRegistryConfig) *LocalConta
 		dataPath: config.DataPath,
 		port:     config.Port,
 		image:    config.Image,
+		logger:   config.Logger,
 	}
 }
 
@@ -34,6 +39,7 @@ type LocalContainerRegistry struct {
 	dataPath string
 	port     uint32
 	image    string
+	logger   io.Writer
 }
 
 func (s *LocalContainerRegistry) Start() error {
@@ -78,7 +84,7 @@ func (s *LocalContainerRegistry) Start() error {
 	}
 
 	// Pull the image
-	err = dockerClient.PullImage(s.image, nil, os.Stdout)
+	err = dockerClient.PullImage(s.image, nil, s.logger)
 	if err != nil {
 		return err
 	}
@@ -105,16 +111,25 @@ func (s *LocalContainerRegistry) Start() error {
 				},
 			},
 		},
-	}, nil, nil, "daytona-registry")
+	}, nil, nil, registryContainerName)
 	if err != nil {
 		return err
 	}
 
-	if err := cli.ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
+	return cli.ContainerStart(ctx, resp.ID, container.StartOptions{})
+}
+
+func (s *LocalContainerRegistry) Stop() error {
+	return RemoveRegistryContainer()
+}
+
+func (s *LocalContainerRegistry) Purge() error {
+	err := s.Stop()
+	if err != nil {
 		return err
 	}
 
-	return nil
+	return os.RemoveAll(s.dataPath)
 }
 
 func RemoveRegistryContainer() error {
@@ -132,7 +147,7 @@ func RemoveRegistryContainer() error {
 
 	for _, c := range containers {
 		for _, name := range c.Names {
-			if name == "/daytona-registry" {
+			if name == fmt.Sprintf("/%s", registryContainerName) {
 				removeOptions := container.RemoveOptions{
 					Force: true,
 				}

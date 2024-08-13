@@ -109,12 +109,7 @@ func GetConfigDir() (string, error) {
 	return filepath.Join(configDir, "server"), nil
 }
 
-func GetWorkspaceLogsDir() (string, error) {
-	configDir, err := GetConfigDir()
-	if err != nil {
-		return "", err
-	}
-
+func GetWorkspaceLogsDir(configDir string) (string, error) {
 	return filepath.Join(configDir, "logs"), nil
 }
 
