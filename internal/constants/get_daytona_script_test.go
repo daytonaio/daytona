@@ -14,9 +14,7 @@ import (
 func TestGetDaytonaScript(t *testing.T) {
 	baseUrl := "http://localhost:8080/daytona"
 	expectedString := "http://localhost:8080/daytona"
-	t.Run("Test_Get_Daytona_Script", func(t *testing.T) {
-		script := GetDaytonaScript(baseUrl)
-		assert.Contains(t, script, expectedString, "the script should contain the correct base URL")
-	})
+	script := GetDaytonaScript(baseUrl)
+	assert.Contains(t, script, expectedString, "the script should contain the correct base URL")
 
 }
