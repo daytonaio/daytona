@@ -16,6 +16,7 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	log "github.com/sirupsen/logrus"
@@ -54,7 +55,7 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 		if len(config.ProjectConfigs) > 0 && !config.BlankProject {
 			projectConfig := selection.GetProjectConfigFromPrompt(config.ProjectConfigs, i, true, "Use")
 			if projectConfig == nil {
-				return nil, fmt.Errorf("must select a project config")
+				return nil, common.ErrCtrlCAbort
 			}
 
 			projectNames := []string{}

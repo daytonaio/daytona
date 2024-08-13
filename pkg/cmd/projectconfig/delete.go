@@ -40,6 +40,9 @@ var projectConfigDeleteCmd = &cobra.Command{
 			}
 
 			selectedProjectConfig = selection.GetProjectConfigFromPrompt(projectConfigs, 0, false, "Delete")
+			if selectedProjectConfig == nil {
+				return
+			}
 			selectedProjectConfigName = *selectedProjectConfig.Name
 		} else {
 			selectedProjectConfigName = args[0]

@@ -39,6 +39,9 @@ var projectConfigUpdateCmd = &cobra.Command{
 			}
 
 			projectConfig = selection.GetProjectConfigFromPrompt(projectConfigList, 0, false, "Update")
+			if projectConfig == nil {
+				return
+			}
 		} else {
 			projectConfig, res, err = apiClient.ProjectConfigAPI.GetProjectConfig(ctx, args[0]).Execute()
 			if err != nil {
