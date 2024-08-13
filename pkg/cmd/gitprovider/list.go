@@ -43,12 +43,12 @@ var gitProviderListCmd = &cobra.Command{
 
 		for _, gitProvider := range gitProviders {
 			for _, supportedProvider := range supportedProviders {
-				if *gitProvider.Id == supportedProvider.Id {
+				if gitProvider.Id == supportedProvider.Id {
 					gitProviderViewList = append(gitProviderViewList,
 						gitprovider_view.GitProviderView{
-							Id:       *gitProvider.Id,
+							Id:       gitProvider.Id,
 							Name:     supportedProvider.Name,
-							Username: *gitProvider.Username,
+							Username: gitProvider.Username,
 						},
 					)
 				}

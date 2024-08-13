@@ -58,7 +58,7 @@ var StopCmd = &cobra.Command{
 			if workspace == nil {
 				return
 			}
-			workspaceId = *workspace.Name
+			workspaceId = workspace.Name
 		} else {
 			workspaceId = args[0]
 		}
@@ -106,12 +106,12 @@ func stopAllWorkspaces() error {
 	}
 
 	for _, workspace := range workspaceList {
-		res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, *workspace.Id).Execute()
+		res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, workspace.Id).Execute()
 		if err != nil {
-			log.Errorf("Failed to stop workspace %s: %v", *workspace.Name, apiclient.HandleErrorResponse(res, err))
+			log.Errorf("Failed to stop workspace %s: %v", workspace.Name, apiclient.HandleErrorResponse(res, err))
 			continue
 		}
-		fmt.Printf("Workspace '%s' is stopping\n", *workspace.Name)
+		fmt.Printf("Workspace '%s' is stopping\n", workspace.Name)
 	}
 	return nil
 }

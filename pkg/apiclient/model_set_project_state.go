@@ -11,7 +11,9 @@ API version: v0.0.0-dev
 package apiclient
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the SetProjectState type satisfies the MappedNullable interface at compile time
@@ -20,15 +22,18 @@ var _ MappedNullable = &SetProjectState{}
 // SetProjectState struct for SetProjectState
 type SetProjectState struct {
 	GitStatus *GitStatus `json:"gitStatus,omitempty"`
-	Uptime    *int32     `json:"uptime,omitempty"`
+	Uptime    int32      `json:"uptime"`
 }
+
+type _SetProjectState SetProjectState
 
 // NewSetProjectState instantiates a new SetProjectState object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSetProjectState() *SetProjectState {
+func NewSetProjectState(uptime int32) *SetProjectState {
 	this := SetProjectState{}
+	this.Uptime = uptime
 	return &this
 }
 
@@ -72,36 +77,28 @@ func (o *SetProjectState) SetGitStatus(v GitStatus) {
 	o.GitStatus = &v
 }
 
-// GetUptime returns the Uptime field value if set, zero value otherwise.
+// GetUptime returns the Uptime field value
 func (o *SetProjectState) GetUptime() int32 {
-	if o == nil || IsNil(o.Uptime) {
+	if o == nil {
 		var ret int32
 		return ret
 	}
-	return *o.Uptime
+
+	return o.Uptime
 }
 
-// GetUptimeOk returns a tuple with the Uptime field value if set, nil otherwise
+// GetUptimeOk returns a tuple with the Uptime field value
 // and a boolean to check if the value has been set.
 func (o *SetProjectState) GetUptimeOk() (*int32, bool) {
-	if o == nil || IsNil(o.Uptime) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Uptime, true
+	return &o.Uptime, true
 }
 
-// HasUptime returns a boolean if a field has been set.
-func (o *SetProjectState) HasUptime() bool {
-	if o != nil && !IsNil(o.Uptime) {
-		return true
-	}
-
-	return false
-}
-
-// SetUptime gets a reference to the given int32 and assigns it to the Uptime field.
+// SetUptime sets field value
 func (o *SetProjectState) SetUptime(v int32) {
-	o.Uptime = &v
+	o.Uptime = v
 }
 
 func (o SetProjectState) MarshalJSON() ([]byte, error) {
@@ -117,10 +114,45 @@ func (o SetProjectState) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.GitStatus) {
 		toSerialize["gitStatus"] = o.GitStatus
 	}
-	if !IsNil(o.Uptime) {
-		toSerialize["uptime"] = o.Uptime
-	}
+	toSerialize["uptime"] = o.Uptime
 	return toSerialize, nil
+}
+
+func (o *SetProjectState) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	requiredProperties := []string{
+		"uptime",
+	}
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	for _, requiredProperty := range requiredProperties {
+		if _, exists := allProperties[requiredProperty]; !exists {
+			return fmt.Errorf("no value given for required property %v", requiredProperty)
+		}
+	}
+
+	varSetProjectState := _SetProjectState{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&varSetProjectState)
+
+	if err != nil {
+		return err
+	}
+
+	*o = SetProjectState(varSetProjectState)
+
+	return err
 }
 
 type NullableSetProjectState struct {

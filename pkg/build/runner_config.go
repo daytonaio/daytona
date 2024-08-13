@@ -15,9 +15,9 @@ import (
 const DEFAULT_POLLER_INTERVAL = "0 */5 * * * *"
 
 type Config struct {
-	Id               string `json:"id"`
-	Interval         string `json:"interval"`
-	TelemetryEnabled bool   `json:"telemetryEnabled"`
+	Id               string `json:"id" validate:"required"`
+	Interval         string `json:"interval" validate:"required"`
+	TelemetryEnabled bool   `json:"telemetryEnabled" validate:"required"`
 } // @name BuildRunnerConfig
 
 func GetConfig() (*Config, error) {

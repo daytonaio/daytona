@@ -20,7 +20,7 @@ import (
 
 var doneConfiguringName = "DoneConfiguringName"
 var DoneConfiguring = apiclient.CreateProjectConfigDTO{
-	Name: &doneConfiguringName,
+	Name: doneConfiguringName,
 }
 
 type projectRequestItem struct {
@@ -45,17 +45,15 @@ func selectProjectRequestPrompt(projects *[]apiclient.CreateProjectConfigDTO, ch
 		var user string
 		var devcontainerConfig string
 
-		if project.Name != nil {
-			name = fmt.Sprintf("%s %s", "Project:", *project.Name)
-		}
+		name = fmt.Sprintf("%s %s", "Project:", project.Name)
 		if project.Image != nil {
 			image = fmt.Sprintf("%s %s", "Image:", *project.Image)
 		}
 		if project.User != nil {
 			user = fmt.Sprintf("%s %s", "User:", *project.User)
 		}
-		if project.BuildConfig != nil && project.BuildConfig.Devcontainer != nil && project.BuildConfig.Devcontainer.FilePath != nil {
-			devcontainerConfig = fmt.Sprintf("%s %s", "Devcontainer Config:", *project.BuildConfig.Devcontainer.FilePath)
+		if project.BuildConfig != nil && project.BuildConfig.Devcontainer != nil {
+			devcontainerConfig = fmt.Sprintf("%s %s", "Devcontainer Config:", project.BuildConfig.Devcontainer.FilePath)
 		}
 
 		newItem := projectRequestItem{name: name, image: image, user: user, project: project, devcontainerConfig: devcontainerConfig}

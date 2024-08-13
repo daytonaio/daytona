@@ -75,7 +75,7 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 		for _, workspaceInfo := range workspaceList {
-			existingWorkspaceNames = append(existingWorkspaceNames, *workspaceInfo.Name)
+			existingWorkspaceNames = append(existingWorkspaceNames, workspaceInfo.Name)
 		}
 
 		if len(args) == 0 {
@@ -93,7 +93,7 @@ var CreateCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 
-			initialSuggestion := *projects[0].Name
+			initialSuggestion := projects[0].Name
 
 			if workspaceName == "" {
 				workspaceName = workspace_util.GetSuggestedName(initialSuggestion, existingWorkspaceNames)
@@ -107,8 +107,8 @@ var CreateCmd = &cobra.Command{
 
 		projectNames := []string{}
 		for i := range projects {
-			projects[i].EnvVars = workspace_util.GetEnvVariables(&projects[i], profileData)
-			projectNames = append(projectNames, *projects[i].Name)
+			projects[i].EnvVars = *workspace_util.GetEnvVariables(&projects[i], profileData)
+			projectNames = append(projectNames, projects[i].Name)
 		}
 
 		logs_view.CalculateLongestPrefixLength(projectNames)
@@ -146,8 +146,8 @@ var CreateCmd = &cobra.Command{
 		go apiclient_util.ReadWorkspaceLogs(activeProfile, id, projectNames, &stopLogs)
 
 		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(apiclient.CreateWorkspaceDTO{
-			Id:       &id,
-			Name:     &workspaceName,
+			Id:       id,
+			Name:     workspaceName,
 			Target:   target.Name,
 			Projects: projects,
 		}).Execute()
@@ -155,7 +155,7 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
-		err = waitForDial(tsConn, *createdWorkspace.Id, *createdWorkspace.Projects[0].Name)
+		err = waitForDial(tsConn, createdWorkspace.Id, createdWorkspace.Projects[0].Name)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -196,7 +196,7 @@ var CreateCmd = &cobra.Command{
 
 		providerMetadata := ""
 		for _, project := range wsInfo.Info.Projects {
-			if *project.Name == *wsInfo.Projects[0].Name {
+			if project.Name == wsInfo.Projects[0].Name {
 				if project.ProviderMetadata == nil {
 					log.Fatal(errors.New("project provider metadata is missing"))
 				}
@@ -205,7 +205,7 @@ var CreateCmd = &cobra.Command{
 			}
 		}
 
-		err = openIDE(chosenIdeId, activeProfile, *createdWorkspace.Id, *wsInfo.Projects[0].Name, providerMetadata)
+		err = openIDE(chosenIdeId, activeProfile, createdWorkspace.Id, wsInfo.Projects[0].Name, providerMetadata)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -264,7 +264,7 @@ func getTarget(activeProfileName string) (*apiclient.ProviderTarget, error) {
 
 	if targetNameFlag != "" {
 		for _, t := range targets {
-			if *t.Name == targetNameFlag {
+			if t.Name == targetNameFlag {
 				return &t, nil
 			}
 		}
@@ -300,8 +300,8 @@ func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, pro
 
 	projectDefaults := &create.ProjectConfigDefaults{
 		BuildChoice:          create.AUTOMATIC,
-		Image:                apiServerConfig.DefaultProjectImage,
-		ImageUser:            apiServerConfig.DefaultProjectUser,
+		Image:                &apiServerConfig.DefaultProjectImage,
+		ImageUser:            &apiServerConfig.DefaultProjectUser,
 		DevcontainerFilePath: create.DEVCONTAINER_FILEPATH,
 	}
 
@@ -319,7 +319,7 @@ func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, pro
 		return err
 	}
 
-	initialSuggestion := *(*projects)[0].Name
+	initialSuggestion := (*projects)[0].Name
 
 	suggestedName := workspace_util.GetSuggestedName(initialSuggestion, workspaceNames)
 
@@ -385,15 +385,15 @@ func processGitURL(repoUrl string, apiClient *apiclient.APIClient, projects *[]a
 		repoResponse.Branch = &branchFlag
 	}
 
-	projectName, err := workspace_util.GetSanitizedProjectName(*repoResponse.Name)
+	projectName, err := workspace_util.GetSanitizedProjectName(repoResponse.Name)
 	if err != nil {
 		return nil, err
 	}
 
 	project := &apiclient.CreateProjectConfigDTO{
-		Name: &projectName,
-		Source: &apiclient.CreateProjectConfigSourceDTO{
-			Repository: repoResponse,
+		Name: projectName,
+		Source: apiclient.CreateProjectConfigSourceDTO{
+			Repository: *repoResponse,
 		},
 		BuildConfig: &apiclient.ProjectBuildConfig{},
 	}
@@ -404,7 +404,7 @@ func processGitURL(repoUrl string, apiClient *apiclient.APIClient, projects *[]a
 			devcontainerFilePath = devcontainerPathFlag
 		}
 		project.BuildConfig.Devcontainer = &apiclient.DevcontainerConfig{
-			FilePath: &devcontainerFilePath,
+			FilePath: devcontainerFilePath,
 		}
 
 	}

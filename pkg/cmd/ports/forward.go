@@ -49,7 +49,7 @@ var PortForwardCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		workspaceId = *workspace.Id
+		workspaceId = workspace.Id
 
 		if len(args) == 3 {
 			projectName = args[2]
@@ -106,20 +106,24 @@ func ForwardPublicPort(workspaceId, projectName string, hostPort, targetPort uin
 	}
 
 	h := fnv.New64()
-	h.Write([]byte(fmt.Sprintf("%s-%s-%s", workspaceId, projectName, *serverConfig.Id)))
+	h.Write([]byte(fmt.Sprintf("%s-%s-%s", workspaceId, projectName, serverConfig.Id)))
 
 	subDomain := fmt.Sprintf("%d-%s", targetPort, base64.RawURLEncoding.EncodeToString([]byte(fmt.Sprint(h.Sum64()))))
 
+	if serverConfig.Frps == nil {
+		return fmt.Errorf("frps config is missing")
+	}
+
 	go func() {
 		time.Sleep(1 * time.Second)
-		var url = fmt.Sprintf("%s://%s.%s", *serverConfig.Frps.Protocol, subDomain, *serverConfig.Frps.Domain)
+		var url = fmt.Sprintf("%s://%s.%s", serverConfig.Frps.Protocol, subDomain, serverConfig.Frps.Domain)
 		views.RenderInfoMessage(fmt.Sprintf("Port available at %s", url))
 		renderQr(url)
 	}()
 
 	_, service, err := frpc.GetService(frpc.FrpcConnectParams{
-		ServerDomain: *serverConfig.Frps.Domain,
-		ServerPort:   int(*serverConfig.Frps.Port),
+		ServerDomain: serverConfig.Frps.Domain,
+		ServerPort:   int(serverConfig.Frps.Port),
 		Name:         subDomain,
 		SubDomain:    subDomain,
 		Port:         int(hostPort),

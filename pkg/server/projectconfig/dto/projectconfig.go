@@ -9,14 +9,14 @@ import (
 )
 
 type CreateProjectConfigDTO struct {
-	Name        string                          `json:"name"`
-	Image       *string                         `json:"image,omitempty"`
-	User        *string                         `json:"user,omitempty"`
-	BuildConfig *buildconfig.ProjectBuildConfig `json:"buildConfig,omitempty"`
-	Source      CreateProjectConfigSourceDTO    `json:"source"`
-	EnvVars     map[string]string               `json:"envVars"`
+	Name        string                          `json:"name" validate:"required"`
+	Image       *string                         `json:"image,omitempty" validate:"optional"`
+	User        *string                         `json:"user,omitempty" validate:"optional"`
+	BuildConfig *buildconfig.ProjectBuildConfig `json:"buildConfig,omitempty" validate:"optional"`
+	Source      CreateProjectConfigSourceDTO    `json:"source" validate:"required"`
+	EnvVars     map[string]string               `json:"envVars" validate:"required"`
 } // @name CreateProjectConfigDTO
 
 type CreateProjectConfigSourceDTO struct {
-	Repository *gitprovider.GitRepository `json:"repository"`
+	Repository *gitprovider.GitRepository `json:"repository" validate:"required"`
 } // @name CreateProjectConfigSourceDTO

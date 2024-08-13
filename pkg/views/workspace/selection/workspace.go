@@ -30,36 +30,34 @@ func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO) []list.Item {
 		}
 
 		if len(workspace.Projects) == 1 {
-			if workspace.Projects[0].Repository != nil && workspace.Projects[0].Repository.Url != nil {
-				projectsInfo = append(projectsInfo, util.GetRepositorySlugFromUrl(*workspace.Projects[0].Repository.Url, true))
-			}
+			projectsInfo = append(projectsInfo, util.GetRepositorySlugFromUrl(workspace.Projects[0].Repository.Url, true))
 		} else {
 			for _, project := range workspace.Projects {
-				projectsInfo = append(projectsInfo, *project.Name)
+				projectsInfo = append(projectsInfo, project.Name)
 			}
 		}
 
 		// Get the time if available
 		uptime := ""
 		createdTime := ""
-		if workspace.Info != nil && workspace.Info.Projects != nil && len(workspace.Info.Projects) > 0 && workspace.Info.Projects[0].Created != nil {
-			createdTime = util.FormatCreatedTime(*workspace.Info.Projects[0].Created)
+		if workspace.Info != nil && workspace.Info.Projects != nil && len(workspace.Info.Projects) > 0 {
+			createdTime = util.FormatCreatedTime(workspace.Info.Projects[0].Created)
 		}
-		if len(workspace.Projects) > 0 && workspace.Projects[0].State != nil && workspace.Projects[0].State.Uptime != nil {
-			if *workspace.Projects[0].State.Uptime == 0 {
+		if len(workspace.Projects) > 0 && workspace.Projects[0].State != nil {
+			if workspace.Projects[0].State.Uptime == 0 {
 				uptime = "STOPPED"
 			} else {
-				uptime = fmt.Sprintf("up %s", util.FormatUptime(*workspace.Projects[0].State.Uptime))
+				uptime = fmt.Sprintf("up %s", util.FormatUptime(workspace.Projects[0].State.Uptime))
 			}
 		}
 
 		newItem := item[apiclient.WorkspaceDTO]{
-			title:          *workspace.Name,
-			id:             *workspace.Id,
+			title:          workspace.Name,
+			id:             workspace.Id,
 			desc:           strings.Join(projectsInfo, ", "),
 			createdTime:    createdTime,
 			uptime:         uptime,
-			target:         *workspace.Target,
+			target:         workspace.Target,
 			choiceProperty: workspace,
 		}
 

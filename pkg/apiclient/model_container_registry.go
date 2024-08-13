@@ -11,7 +11,9 @@ API version: v0.0.0-dev
 package apiclient
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the ContainerRegistry type satisfies the MappedNullable interface at compile time
@@ -19,17 +21,22 @@ var _ MappedNullable = &ContainerRegistry{}
 
 // ContainerRegistry struct for ContainerRegistry
 type ContainerRegistry struct {
-	Password *string `json:"password,omitempty"`
-	Server   *string `json:"server,omitempty"`
-	Username *string `json:"username,omitempty"`
+	Password string `json:"password"`
+	Server   string `json:"server"`
+	Username string `json:"username"`
 }
+
+type _ContainerRegistry ContainerRegistry
 
 // NewContainerRegistry instantiates a new ContainerRegistry object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewContainerRegistry() *ContainerRegistry {
+func NewContainerRegistry(password string, server string, username string) *ContainerRegistry {
 	this := ContainerRegistry{}
+	this.Password = password
+	this.Server = server
+	this.Username = username
 	return &this
 }
 
@@ -41,100 +48,76 @@ func NewContainerRegistryWithDefaults() *ContainerRegistry {
 	return &this
 }
 
-// GetPassword returns the Password field value if set, zero value otherwise.
+// GetPassword returns the Password field value
 func (o *ContainerRegistry) GetPassword() string {
-	if o == nil || IsNil(o.Password) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Password
+
+	return o.Password
 }
 
-// GetPasswordOk returns a tuple with the Password field value if set, nil otherwise
+// GetPasswordOk returns a tuple with the Password field value
 // and a boolean to check if the value has been set.
 func (o *ContainerRegistry) GetPasswordOk() (*string, bool) {
-	if o == nil || IsNil(o.Password) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Password, true
+	return &o.Password, true
 }
 
-// HasPassword returns a boolean if a field has been set.
-func (o *ContainerRegistry) HasPassword() bool {
-	if o != nil && !IsNil(o.Password) {
-		return true
-	}
-
-	return false
-}
-
-// SetPassword gets a reference to the given string and assigns it to the Password field.
+// SetPassword sets field value
 func (o *ContainerRegistry) SetPassword(v string) {
-	o.Password = &v
+	o.Password = v
 }
 
-// GetServer returns the Server field value if set, zero value otherwise.
+// GetServer returns the Server field value
 func (o *ContainerRegistry) GetServer() string {
-	if o == nil || IsNil(o.Server) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Server
+
+	return o.Server
 }
 
-// GetServerOk returns a tuple with the Server field value if set, nil otherwise
+// GetServerOk returns a tuple with the Server field value
 // and a boolean to check if the value has been set.
 func (o *ContainerRegistry) GetServerOk() (*string, bool) {
-	if o == nil || IsNil(o.Server) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Server, true
+	return &o.Server, true
 }
 
-// HasServer returns a boolean if a field has been set.
-func (o *ContainerRegistry) HasServer() bool {
-	if o != nil && !IsNil(o.Server) {
-		return true
-	}
-
-	return false
-}
-
-// SetServer gets a reference to the given string and assigns it to the Server field.
+// SetServer sets field value
 func (o *ContainerRegistry) SetServer(v string) {
-	o.Server = &v
+	o.Server = v
 }
 
-// GetUsername returns the Username field value if set, zero value otherwise.
+// GetUsername returns the Username field value
 func (o *ContainerRegistry) GetUsername() string {
-	if o == nil || IsNil(o.Username) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Username
+
+	return o.Username
 }
 
-// GetUsernameOk returns a tuple with the Username field value if set, nil otherwise
+// GetUsernameOk returns a tuple with the Username field value
 // and a boolean to check if the value has been set.
 func (o *ContainerRegistry) GetUsernameOk() (*string, bool) {
-	if o == nil || IsNil(o.Username) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Username, true
+	return &o.Username, true
 }
 
-// HasUsername returns a boolean if a field has been set.
-func (o *ContainerRegistry) HasUsername() bool {
-	if o != nil && !IsNil(o.Username) {
-		return true
-	}
-
-	return false
-}
-
-// SetUsername gets a reference to the given string and assigns it to the Username field.
+// SetUsername sets field value
 func (o *ContainerRegistry) SetUsername(v string) {
-	o.Username = &v
+	o.Username = v
 }
 
 func (o ContainerRegistry) MarshalJSON() ([]byte, error) {
@@ -147,16 +130,49 @@ func (o ContainerRegistry) MarshalJSON() ([]byte, error) {
 
 func (o ContainerRegistry) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Password) {
-		toSerialize["password"] = o.Password
-	}
-	if !IsNil(o.Server) {
-		toSerialize["server"] = o.Server
-	}
-	if !IsNil(o.Username) {
-		toSerialize["username"] = o.Username
-	}
+	toSerialize["password"] = o.Password
+	toSerialize["server"] = o.Server
+	toSerialize["username"] = o.Username
 	return toSerialize, nil
+}
+
+func (o *ContainerRegistry) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	requiredProperties := []string{
+		"password",
+		"server",
+		"username",
+	}
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	for _, requiredProperty := range requiredProperties {
+		if _, exists := allProperties[requiredProperty]; !exists {
+			return fmt.Errorf("no value given for required property %v", requiredProperty)
+		}
+	}
+
+	varContainerRegistry := _ContainerRegistry{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&varContainerRegistry)
+
+	if err != nil {
+		return err
+	}
+
+	*o = ContainerRegistry(varContainerRegistry)
+
+	return err
 }
 
 type NullableContainerRegistry struct {

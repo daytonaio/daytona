@@ -11,7 +11,9 @@ API version: v0.0.0-dev
 package apiclient
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the FileStatus type satisfies the MappedNullable interface at compile time
@@ -19,18 +21,24 @@ var _ MappedNullable = &FileStatus{}
 
 // FileStatus struct for FileStatus
 type FileStatus struct {
-	Extra    *string `json:"extra,omitempty"`
-	Name     *string `json:"name,omitempty"`
-	Staging  *Status `json:"staging,omitempty"`
-	Worktree *Status `json:"worktree,omitempty"`
+	Extra    string `json:"extra"`
+	Name     string `json:"name"`
+	Staging  Status `json:"staging"`
+	Worktree Status `json:"worktree"`
 }
+
+type _FileStatus FileStatus
 
 // NewFileStatus instantiates a new FileStatus object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewFileStatus() *FileStatus {
+func NewFileStatus(extra string, name string, staging Status, worktree Status) *FileStatus {
 	this := FileStatus{}
+	this.Extra = extra
+	this.Name = name
+	this.Staging = staging
+	this.Worktree = worktree
 	return &this
 }
 
@@ -42,132 +50,100 @@ func NewFileStatusWithDefaults() *FileStatus {
 	return &this
 }
 
-// GetExtra returns the Extra field value if set, zero value otherwise.
+// GetExtra returns the Extra field value
 func (o *FileStatus) GetExtra() string {
-	if o == nil || IsNil(o.Extra) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Extra
+
+	return o.Extra
 }
 
-// GetExtraOk returns a tuple with the Extra field value if set, nil otherwise
+// GetExtraOk returns a tuple with the Extra field value
 // and a boolean to check if the value has been set.
 func (o *FileStatus) GetExtraOk() (*string, bool) {
-	if o == nil || IsNil(o.Extra) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Extra, true
+	return &o.Extra, true
 }
 
-// HasExtra returns a boolean if a field has been set.
-func (o *FileStatus) HasExtra() bool {
-	if o != nil && !IsNil(o.Extra) {
-		return true
-	}
-
-	return false
-}
-
-// SetExtra gets a reference to the given string and assigns it to the Extra field.
+// SetExtra sets field value
 func (o *FileStatus) SetExtra(v string) {
-	o.Extra = &v
+	o.Extra = v
 }
 
-// GetName returns the Name field value if set, zero value otherwise.
+// GetName returns the Name field value
 func (o *FileStatus) GetName() string {
-	if o == nil || IsNil(o.Name) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Name
+
+	return o.Name
 }
 
-// GetNameOk returns a tuple with the Name field value if set, nil otherwise
+// GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
 func (o *FileStatus) GetNameOk() (*string, bool) {
-	if o == nil || IsNil(o.Name) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Name, true
+	return &o.Name, true
 }
 
-// HasName returns a boolean if a field has been set.
-func (o *FileStatus) HasName() bool {
-	if o != nil && !IsNil(o.Name) {
-		return true
-	}
-
-	return false
-}
-
-// SetName gets a reference to the given string and assigns it to the Name field.
+// SetName sets field value
 func (o *FileStatus) SetName(v string) {
-	o.Name = &v
+	o.Name = v
 }
 
-// GetStaging returns the Staging field value if set, zero value otherwise.
+// GetStaging returns the Staging field value
 func (o *FileStatus) GetStaging() Status {
-	if o == nil || IsNil(o.Staging) {
+	if o == nil {
 		var ret Status
 		return ret
 	}
-	return *o.Staging
+
+	return o.Staging
 }
 
-// GetStagingOk returns a tuple with the Staging field value if set, nil otherwise
+// GetStagingOk returns a tuple with the Staging field value
 // and a boolean to check if the value has been set.
 func (o *FileStatus) GetStagingOk() (*Status, bool) {
-	if o == nil || IsNil(o.Staging) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Staging, true
+	return &o.Staging, true
 }
 
-// HasStaging returns a boolean if a field has been set.
-func (o *FileStatus) HasStaging() bool {
-	if o != nil && !IsNil(o.Staging) {
-		return true
-	}
-
-	return false
-}
-
-// SetStaging gets a reference to the given Status and assigns it to the Staging field.
+// SetStaging sets field value
 func (o *FileStatus) SetStaging(v Status) {
-	o.Staging = &v
+	o.Staging = v
 }
 
-// GetWorktree returns the Worktree field value if set, zero value otherwise.
+// GetWorktree returns the Worktree field value
 func (o *FileStatus) GetWorktree() Status {
-	if o == nil || IsNil(o.Worktree) {
+	if o == nil {
 		var ret Status
 		return ret
 	}
-	return *o.Worktree
+
+	return o.Worktree
 }
 
-// GetWorktreeOk returns a tuple with the Worktree field value if set, nil otherwise
+// GetWorktreeOk returns a tuple with the Worktree field value
 // and a boolean to check if the value has been set.
 func (o *FileStatus) GetWorktreeOk() (*Status, bool) {
-	if o == nil || IsNil(o.Worktree) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Worktree, true
+	return &o.Worktree, true
 }
 
-// HasWorktree returns a boolean if a field has been set.
-func (o *FileStatus) HasWorktree() bool {
-	if o != nil && !IsNil(o.Worktree) {
-		return true
-	}
-
-	return false
-}
-
-// SetWorktree gets a reference to the given Status and assigns it to the Worktree field.
+// SetWorktree sets field value
 func (o *FileStatus) SetWorktree(v Status) {
-	o.Worktree = &v
+	o.Worktree = v
 }
 
 func (o FileStatus) MarshalJSON() ([]byte, error) {
@@ -180,19 +156,51 @@ func (o FileStatus) MarshalJSON() ([]byte, error) {
 
 func (o FileStatus) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Extra) {
-		toSerialize["extra"] = o.Extra
-	}
-	if !IsNil(o.Name) {
-		toSerialize["name"] = o.Name
-	}
-	if !IsNil(o.Staging) {
-		toSerialize["staging"] = o.Staging
-	}
-	if !IsNil(o.Worktree) {
-		toSerialize["worktree"] = o.Worktree
-	}
+	toSerialize["extra"] = o.Extra
+	toSerialize["name"] = o.Name
+	toSerialize["staging"] = o.Staging
+	toSerialize["worktree"] = o.Worktree
 	return toSerialize, nil
+}
+
+func (o *FileStatus) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	requiredProperties := []string{
+		"extra",
+		"name",
+		"staging",
+		"worktree",
+	}
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	for _, requiredProperty := range requiredProperties {
+		if _, exists := allProperties[requiredProperty]; !exists {
+			return fmt.Errorf("no value given for required property %v", requiredProperty)
+		}
+	}
+
+	varFileStatus := _FileStatus{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&varFileStatus)
+
+	if err != nil {
+		return err
+	}
+
+	*o = FileStatus(varFileStatus)
+
+	return err
 }
 
 type NullableFileStatus struct {

@@ -37,7 +37,7 @@ var projectConfigSetDefaultCmd = &cobra.Command{
 			if projectConfig == nil {
 				return
 			}
-			projectConfigName = *projectConfig.Name
+			projectConfigName = projectConfig.Name
 		} else {
 			projectConfigName = args[0]
 		}

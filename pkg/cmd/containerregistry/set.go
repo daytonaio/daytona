@@ -68,15 +68,15 @@ var containerRegistrySetCmd = &cobra.Command{
 				}
 
 				editing := true
-				selectedServer = *registryDto.Server
+				selectedServer = registryDto.Server
 
-				if *registryDto.Server == containerregistry_view.NewRegistryServerIdentifier {
+				if registryDto.Server == containerregistry_view.NewRegistryServerIdentifier {
 					editing = false
 					registryView.Server, registryView.Username, registryView.Password = "", "", ""
 				} else {
-					registryView.Server = *registryDto.Server
-					registryView.Username = *registryDto.Username
-					registryView.Password = *registryDto.Password
+					registryView.Server = registryDto.Server
+					registryView.Username = registryDto.Username
+					registryView.Password = registryDto.Password
 				}
 
 				containerregistry_view.RegistryCreationView(&registryView, containerRegistries, editing)
@@ -84,9 +84,9 @@ var containerRegistrySetCmd = &cobra.Command{
 		}
 
 		registryDto = &apiclient.ContainerRegistry{
-			Server:   &registryView.Server,
-			Username: &registryView.Username,
-			Password: &registryView.Password,
+			Server:   registryView.Server,
+			Username: registryView.Username,
+			Password: registryView.Password,
 		}
 
 		res, err = apiClient.ContainerRegistryAPI.SetContainerRegistry(context.Background(), url.QueryEscape(selectedServer)).ContainerRegistry(*registryDto).Execute()

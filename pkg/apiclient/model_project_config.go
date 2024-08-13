@@ -11,7 +11,9 @@ API version: v0.0.0-dev
 package apiclient
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the ProjectConfig type satisfies the MappedNullable interface at compile time
@@ -20,20 +22,28 @@ var _ MappedNullable = &ProjectConfig{}
 // ProjectConfig struct for ProjectConfig
 type ProjectConfig struct {
 	BuildConfig *ProjectBuildConfig `json:"buildConfig,omitempty"`
-	Default     *bool               `json:"default,omitempty"`
-	EnvVars     *map[string]string  `json:"envVars,omitempty"`
-	Image       *string             `json:"image,omitempty"`
-	Name        *string             `json:"name,omitempty"`
-	Repository  *GitRepository      `json:"repository,omitempty"`
-	User        *string             `json:"user,omitempty"`
+	Default     bool                `json:"default"`
+	EnvVars     map[string]string   `json:"envVars"`
+	Image       string              `json:"image"`
+	Name        string              `json:"name"`
+	Repository  GitRepository       `json:"repository"`
+	User        string              `json:"user"`
 }
+
+type _ProjectConfig ProjectConfig
 
 // NewProjectConfig instantiates a new ProjectConfig object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProjectConfig() *ProjectConfig {
+func NewProjectConfig(default_ bool, envVars map[string]string, image string, name string, repository GitRepository, user string) *ProjectConfig {
 	this := ProjectConfig{}
+	this.Default = default_
+	this.EnvVars = envVars
+	this.Image = image
+	this.Name = name
+	this.Repository = repository
+	this.User = user
 	return &this
 }
 
@@ -77,196 +87,148 @@ func (o *ProjectConfig) SetBuildConfig(v ProjectBuildConfig) {
 	o.BuildConfig = &v
 }
 
-// GetDefault returns the Default field value if set, zero value otherwise.
+// GetDefault returns the Default field value
 func (o *ProjectConfig) GetDefault() bool {
-	if o == nil || IsNil(o.Default) {
+	if o == nil {
 		var ret bool
 		return ret
 	}
-	return *o.Default
+
+	return o.Default
 }
 
-// GetDefaultOk returns a tuple with the Default field value if set, nil otherwise
+// GetDefaultOk returns a tuple with the Default field value
 // and a boolean to check if the value has been set.
 func (o *ProjectConfig) GetDefaultOk() (*bool, bool) {
-	if o == nil || IsNil(o.Default) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Default, true
+	return &o.Default, true
 }
 
-// HasDefault returns a boolean if a field has been set.
-func (o *ProjectConfig) HasDefault() bool {
-	if o != nil && !IsNil(o.Default) {
-		return true
-	}
-
-	return false
-}
-
-// SetDefault gets a reference to the given bool and assigns it to the Default field.
+// SetDefault sets field value
 func (o *ProjectConfig) SetDefault(v bool) {
-	o.Default = &v
+	o.Default = v
 }
 
-// GetEnvVars returns the EnvVars field value if set, zero value otherwise.
+// GetEnvVars returns the EnvVars field value
 func (o *ProjectConfig) GetEnvVars() map[string]string {
-	if o == nil || IsNil(o.EnvVars) {
+	if o == nil {
 		var ret map[string]string
 		return ret
 	}
-	return *o.EnvVars
+
+	return o.EnvVars
 }
 
-// GetEnvVarsOk returns a tuple with the EnvVars field value if set, nil otherwise
+// GetEnvVarsOk returns a tuple with the EnvVars field value
 // and a boolean to check if the value has been set.
 func (o *ProjectConfig) GetEnvVarsOk() (*map[string]string, bool) {
-	if o == nil || IsNil(o.EnvVars) {
+	if o == nil {
 		return nil, false
 	}
-	return o.EnvVars, true
+	return &o.EnvVars, true
 }
 
-// HasEnvVars returns a boolean if a field has been set.
-func (o *ProjectConfig) HasEnvVars() bool {
-	if o != nil && !IsNil(o.EnvVars) {
-		return true
-	}
-
-	return false
-}
-
-// SetEnvVars gets a reference to the given map[string]string and assigns it to the EnvVars field.
+// SetEnvVars sets field value
 func (o *ProjectConfig) SetEnvVars(v map[string]string) {
-	o.EnvVars = &v
+	o.EnvVars = v
 }
 
-// GetImage returns the Image field value if set, zero value otherwise.
+// GetImage returns the Image field value
 func (o *ProjectConfig) GetImage() string {
-	if o == nil || IsNil(o.Image) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Image
+
+	return o.Image
 }
 
-// GetImageOk returns a tuple with the Image field value if set, nil otherwise
+// GetImageOk returns a tuple with the Image field value
 // and a boolean to check if the value has been set.
 func (o *ProjectConfig) GetImageOk() (*string, bool) {
-	if o == nil || IsNil(o.Image) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Image, true
+	return &o.Image, true
 }
 
-// HasImage returns a boolean if a field has been set.
-func (o *ProjectConfig) HasImage() bool {
-	if o != nil && !IsNil(o.Image) {
-		return true
-	}
-
-	return false
-}
-
-// SetImage gets a reference to the given string and assigns it to the Image field.
+// SetImage sets field value
 func (o *ProjectConfig) SetImage(v string) {
-	o.Image = &v
+	o.Image = v
 }
 
-// GetName returns the Name field value if set, zero value otherwise.
+// GetName returns the Name field value
 func (o *ProjectConfig) GetName() string {
-	if o == nil || IsNil(o.Name) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Name
+
+	return o.Name
 }
 
-// GetNameOk returns a tuple with the Name field value if set, nil otherwise
+// GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
 func (o *ProjectConfig) GetNameOk() (*string, bool) {
-	if o == nil || IsNil(o.Name) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Name, true
+	return &o.Name, true
 }
 
-// HasName returns a boolean if a field has been set.
-func (o *ProjectConfig) HasName() bool {
-	if o != nil && !IsNil(o.Name) {
-		return true
-	}
-
-	return false
-}
-
-// SetName gets a reference to the given string and assigns it to the Name field.
+// SetName sets field value
 func (o *ProjectConfig) SetName(v string) {
-	o.Name = &v
+	o.Name = v
 }
 
-// GetRepository returns the Repository field value if set, zero value otherwise.
+// GetRepository returns the Repository field value
 func (o *ProjectConfig) GetRepository() GitRepository {
-	if o == nil || IsNil(o.Repository) {
+	if o == nil {
 		var ret GitRepository
 		return ret
 	}
-	return *o.Repository
+
+	return o.Repository
 }
 
-// GetRepositoryOk returns a tuple with the Repository field value if set, nil otherwise
+// GetRepositoryOk returns a tuple with the Repository field value
 // and a boolean to check if the value has been set.
 func (o *ProjectConfig) GetRepositoryOk() (*GitRepository, bool) {
-	if o == nil || IsNil(o.Repository) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Repository, true
+	return &o.Repository, true
 }
 
-// HasRepository returns a boolean if a field has been set.
-func (o *ProjectConfig) HasRepository() bool {
-	if o != nil && !IsNil(o.Repository) {
-		return true
-	}
-
-	return false
-}
-
-// SetRepository gets a reference to the given GitRepository and assigns it to the Repository field.
+// SetRepository sets field value
 func (o *ProjectConfig) SetRepository(v GitRepository) {
-	o.Repository = &v
+	o.Repository = v
 }
 
-// GetUser returns the User field value if set, zero value otherwise.
+// GetUser returns the User field value
 func (o *ProjectConfig) GetUser() string {
-	if o == nil || IsNil(o.User) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.User
+
+	return o.User
 }
 
-// GetUserOk returns a tuple with the User field value if set, nil otherwise
+// GetUserOk returns a tuple with the User field value
 // and a boolean to check if the value has been set.
 func (o *ProjectConfig) GetUserOk() (*string, bool) {
-	if o == nil || IsNil(o.User) {
+	if o == nil {
 		return nil, false
 	}
-	return o.User, true
+	return &o.User, true
 }
 
-// HasUser returns a boolean if a field has been set.
-func (o *ProjectConfig) HasUser() bool {
-	if o != nil && !IsNil(o.User) {
-		return true
-	}
-
-	return false
-}
-
-// SetUser gets a reference to the given string and assigns it to the User field.
+// SetUser sets field value
 func (o *ProjectConfig) SetUser(v string) {
-	o.User = &v
+	o.User = v
 }
 
 func (o ProjectConfig) MarshalJSON() ([]byte, error) {
@@ -282,25 +244,55 @@ func (o ProjectConfig) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.BuildConfig) {
 		toSerialize["buildConfig"] = o.BuildConfig
 	}
-	if !IsNil(o.Default) {
-		toSerialize["default"] = o.Default
-	}
-	if !IsNil(o.EnvVars) {
-		toSerialize["envVars"] = o.EnvVars
-	}
-	if !IsNil(o.Image) {
-		toSerialize["image"] = o.Image
-	}
-	if !IsNil(o.Name) {
-		toSerialize["name"] = o.Name
-	}
-	if !IsNil(o.Repository) {
-		toSerialize["repository"] = o.Repository
-	}
-	if !IsNil(o.User) {
-		toSerialize["user"] = o.User
-	}
+	toSerialize["default"] = o.Default
+	toSerialize["envVars"] = o.EnvVars
+	toSerialize["image"] = o.Image
+	toSerialize["name"] = o.Name
+	toSerialize["repository"] = o.Repository
+	toSerialize["user"] = o.User
 	return toSerialize, nil
+}
+
+func (o *ProjectConfig) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	requiredProperties := []string{
+		"default",
+		"envVars",
+		"image",
+		"name",
+		"repository",
+		"user",
+	}
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	for _, requiredProperty := range requiredProperties {
+		if _, exists := allProperties[requiredProperty]; !exists {
+			return fmt.Errorf("no value given for required property %v", requiredProperty)
+		}
+	}
+
+	varProjectConfig := _ProjectConfig{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&varProjectConfig)
+
+	if err != nil {
+		return err
+	}
+
+	*o = ProjectConfig(varProjectConfig)
+
+	return err
 }
 
 type NullableProjectConfig struct {

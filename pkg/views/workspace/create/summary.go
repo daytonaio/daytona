@@ -99,19 +99,13 @@ func RenderSummary(name string, projectList []apiclient.CreateProjectConfigDTO, 
 		output = views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - %s %s", nameLabel, name))
 	}
 
-	for _, project := range projectList {
-		if project.Source == nil || project.Source.Repository == nil || project.Source.Repository.Url == nil {
-			return "", fmt.Errorf("repository is required")
-		}
-	}
-
 	output += "\n\n"
 
 	for i := range projectList {
 		if len(projectList) == 1 {
-			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render("Project"), (*projectList[i].Source.Repository.Url))
+			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render("Project"), (projectList[i].Source.Repository.Url))
 		} else {
-			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("%s #%d", "Project", i+1)), (*projectList[i].Source.Repository.Url))
+			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("%s #%d", "Project", i+1)), (projectList[i].Source.Repository.Url))
 		}
 
 		projectBuildChoice, choiceName := GetProjectBuildChoice(projectList[i], defaults)
@@ -130,10 +124,8 @@ func renderProjectDetails(project apiclient.CreateProjectConfigDTO, buildChoice 
 	if buildChoice == DEVCONTAINER {
 		if project.BuildConfig != nil {
 			if project.BuildConfig.Devcontainer != nil {
-				if project.BuildConfig.Devcontainer.FilePath != nil {
-					output += "\n"
-					output += projectDetailOutput(DevcontainerConfig, *project.BuildConfig.Devcontainer.FilePath)
-				}
+				output += "\n"
+				output += projectDetailOutput(DevcontainerConfig, project.BuildConfig.Devcontainer.FilePath)
 			}
 		}
 	} else {
@@ -152,13 +144,13 @@ func renderProjectDetails(project apiclient.CreateProjectConfigDTO, buildChoice 
 		}
 	}
 
-	if project.EnvVars != nil && len(*project.EnvVars) > 0 {
+	if project.EnvVars != nil && len(project.EnvVars) > 0 {
 		if output != "" {
 			output += "\n"
 		}
 
 		var envVars string
-		for key, val := range *project.EnvVars {
+		for key, val := range project.EnvVars {
 			envVars += fmt.Sprintf("%s=%s; ", key, val)
 		}
 		output += projectDetailOutput(EnvVars, strings.TrimSuffix(envVars, "; "))

@@ -11,7 +11,9 @@ API version: v0.0.0-dev
 package apiclient
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the WorkspaceDTO type satisfies the MappedNullable interface at compile time
@@ -19,19 +21,25 @@ var _ MappedNullable = &WorkspaceDTO{}
 
 // WorkspaceDTO struct for WorkspaceDTO
 type WorkspaceDTO struct {
-	Id       *string        `json:"id,omitempty"`
+	Id       string         `json:"id"`
 	Info     *WorkspaceInfo `json:"info,omitempty"`
-	Name     *string        `json:"name,omitempty"`
-	Projects []Project      `json:"projects,omitempty"`
-	Target   *string        `json:"target,omitempty"`
+	Name     string         `json:"name"`
+	Projects []Project      `json:"projects"`
+	Target   string         `json:"target"`
 }
+
+type _WorkspaceDTO WorkspaceDTO
 
 // NewWorkspaceDTO instantiates a new WorkspaceDTO object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewWorkspaceDTO() *WorkspaceDTO {
+func NewWorkspaceDTO(id string, name string, projects []Project, target string) *WorkspaceDTO {
 	this := WorkspaceDTO{}
+	this.Id = id
+	this.Name = name
+	this.Projects = projects
+	this.Target = target
 	return &this
 }
 
@@ -43,36 +51,28 @@ func NewWorkspaceDTOWithDefaults() *WorkspaceDTO {
 	return &this
 }
 
-// GetId returns the Id field value if set, zero value otherwise.
+// GetId returns the Id field value
 func (o *WorkspaceDTO) GetId() string {
-	if o == nil || IsNil(o.Id) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Id
+
+	return o.Id
 }
 
-// GetIdOk returns a tuple with the Id field value if set, nil otherwise
+// GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 func (o *WorkspaceDTO) GetIdOk() (*string, bool) {
-	if o == nil || IsNil(o.Id) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Id, true
+	return &o.Id, true
 }
 
-// HasId returns a boolean if a field has been set.
-func (o *WorkspaceDTO) HasId() bool {
-	if o != nil && !IsNil(o.Id) {
-		return true
-	}
-
-	return false
-}
-
-// SetId gets a reference to the given string and assigns it to the Id field.
+// SetId sets field value
 func (o *WorkspaceDTO) SetId(v string) {
-	o.Id = &v
+	o.Id = v
 }
 
 // GetInfo returns the Info field value if set, zero value otherwise.
@@ -107,100 +107,76 @@ func (o *WorkspaceDTO) SetInfo(v WorkspaceInfo) {
 	o.Info = &v
 }
 
-// GetName returns the Name field value if set, zero value otherwise.
+// GetName returns the Name field value
 func (o *WorkspaceDTO) GetName() string {
-	if o == nil || IsNil(o.Name) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Name
+
+	return o.Name
 }
 
-// GetNameOk returns a tuple with the Name field value if set, nil otherwise
+// GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
 func (o *WorkspaceDTO) GetNameOk() (*string, bool) {
-	if o == nil || IsNil(o.Name) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Name, true
+	return &o.Name, true
 }
 
-// HasName returns a boolean if a field has been set.
-func (o *WorkspaceDTO) HasName() bool {
-	if o != nil && !IsNil(o.Name) {
-		return true
-	}
-
-	return false
-}
-
-// SetName gets a reference to the given string and assigns it to the Name field.
+// SetName sets field value
 func (o *WorkspaceDTO) SetName(v string) {
-	o.Name = &v
+	o.Name = v
 }
 
-// GetProjects returns the Projects field value if set, zero value otherwise.
+// GetProjects returns the Projects field value
 func (o *WorkspaceDTO) GetProjects() []Project {
-	if o == nil || IsNil(o.Projects) {
+	if o == nil {
 		var ret []Project
 		return ret
 	}
+
 	return o.Projects
 }
 
-// GetProjectsOk returns a tuple with the Projects field value if set, nil otherwise
+// GetProjectsOk returns a tuple with the Projects field value
 // and a boolean to check if the value has been set.
 func (o *WorkspaceDTO) GetProjectsOk() ([]Project, bool) {
-	if o == nil || IsNil(o.Projects) {
+	if o == nil {
 		return nil, false
 	}
 	return o.Projects, true
 }
 
-// HasProjects returns a boolean if a field has been set.
-func (o *WorkspaceDTO) HasProjects() bool {
-	if o != nil && !IsNil(o.Projects) {
-		return true
-	}
-
-	return false
-}
-
-// SetProjects gets a reference to the given []Project and assigns it to the Projects field.
+// SetProjects sets field value
 func (o *WorkspaceDTO) SetProjects(v []Project) {
 	o.Projects = v
 }
 
-// GetTarget returns the Target field value if set, zero value otherwise.
+// GetTarget returns the Target field value
 func (o *WorkspaceDTO) GetTarget() string {
-	if o == nil || IsNil(o.Target) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Target
+
+	return o.Target
 }
 
-// GetTargetOk returns a tuple with the Target field value if set, nil otherwise
+// GetTargetOk returns a tuple with the Target field value
 // and a boolean to check if the value has been set.
 func (o *WorkspaceDTO) GetTargetOk() (*string, bool) {
-	if o == nil || IsNil(o.Target) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Target, true
+	return &o.Target, true
 }
 
-// HasTarget returns a boolean if a field has been set.
-func (o *WorkspaceDTO) HasTarget() bool {
-	if o != nil && !IsNil(o.Target) {
-		return true
-	}
-
-	return false
-}
-
-// SetTarget gets a reference to the given string and assigns it to the Target field.
+// SetTarget sets field value
 func (o *WorkspaceDTO) SetTarget(v string) {
-	o.Target = &v
+	o.Target = v
 }
 
 func (o WorkspaceDTO) MarshalJSON() ([]byte, error) {
@@ -213,22 +189,54 @@ func (o WorkspaceDTO) MarshalJSON() ([]byte, error) {
 
 func (o WorkspaceDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Id) {
-		toSerialize["id"] = o.Id
-	}
+	toSerialize["id"] = o.Id
 	if !IsNil(o.Info) {
 		toSerialize["info"] = o.Info
 	}
-	if !IsNil(o.Name) {
-		toSerialize["name"] = o.Name
-	}
-	if !IsNil(o.Projects) {
-		toSerialize["projects"] = o.Projects
-	}
-	if !IsNil(o.Target) {
-		toSerialize["target"] = o.Target
-	}
+	toSerialize["name"] = o.Name
+	toSerialize["projects"] = o.Projects
+	toSerialize["target"] = o.Target
 	return toSerialize, nil
+}
+
+func (o *WorkspaceDTO) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	requiredProperties := []string{
+		"id",
+		"name",
+		"projects",
+		"target",
+	}
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	for _, requiredProperty := range requiredProperties {
+		if _, exists := allProperties[requiredProperty]; !exists {
+			return fmt.Errorf("no value given for required property %v", requiredProperty)
+		}
+	}
+
+	varWorkspaceDTO := _WorkspaceDTO{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&varWorkspaceDTO)
+
+	if err != nil {
+		return err
+	}
+
+	*o = WorkspaceDTO(varWorkspaceDTO)
+
+	return err
 }
 
 type NullableWorkspaceDTO struct {

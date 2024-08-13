@@ -9,11 +9,11 @@ import (
 )
 
 type ProjectConfig struct {
-	Name        string                          `json:"name"`
-	Image       string                          `json:"image"`
-	User        string                          `json:"user"`
-	BuildConfig *buildconfig.ProjectBuildConfig `json:"buildConfig"`
-	Repository  *gitprovider.GitRepository      `json:"repository"`
-	EnvVars     map[string]string               `json:"envVars"`
-	IsDefault   bool                            `json:"default"`
+	Name        string                          `json:"name" validate:"required"`
+	Image       string                          `json:"image" validate:"required"`
+	User        string                          `json:"user" validate:"required"`
+	BuildConfig *buildconfig.ProjectBuildConfig `json:"buildConfig,omitempty" validate:"optional"`
+	Repository  *gitprovider.GitRepository      `json:"repository" validate:"required"`
+	EnvVars     map[string]string               `json:"envVars" validate:"required"`
+	IsDefault   bool                            `json:"default" validate:"required"`
 } // @name ProjectConfig

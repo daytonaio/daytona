@@ -19,9 +19,9 @@ func selectBranchPrompt(branches []apiclient.GitBranch, projectOrder int, choice
 
 	// Populate items with titles and descriptions from workspaces.
 	for _, branch := range branches {
-		newItem := item[string]{id: *branch.Name, title: *branch.Name, choiceProperty: *branch.Name}
-		if *branch.Sha != "" {
-			newItem.desc = fmt.Sprintf("SHA: %s", *branch.Sha)
+		newItem := item[string]{id: branch.Name, title: branch.Name, choiceProperty: branch.Name}
+		if branch.Sha != "" {
+			newItem.desc = fmt.Sprintf("SHA: %s", branch.Sha)
 		}
 		items = append(items, newItem)
 	}
@@ -57,7 +57,7 @@ func GetBranchFromPrompt(branches []apiclient.GitBranch, projectOrder int) *apic
 	branchName := <-choiceChan
 
 	for _, b := range branches {
-		if *b.Name == branchName {
+		if b.Name == branchName {
 			return &b
 		}
 	}

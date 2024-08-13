@@ -4,16 +4,16 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Extra** | Pointer to **string** |  | [optional] 
-**Name** | Pointer to **string** |  | [optional] 
-**Staging** | Pointer to [**Status**](Status.md) |  | [optional] 
-**Worktree** | Pointer to [**Status**](Status.md) |  | [optional] 
+**Extra** | **string** |  | 
+**Name** | **string** |  | 
+**Staging** | [**Status**](Status.md) |  | 
+**Worktree** | [**Status**](Status.md) |  | 
 
 ## Methods
 
 ### NewFileStatus
 
-`func NewFileStatus() *FileStatus`
+`func NewFileStatus(extra string, name string, staging Status, worktree Status, ) *FileStatus`
 
 NewFileStatus instantiates a new FileStatus object
 This constructor will assign default values to properties that have it defined,
@@ -47,11 +47,6 @@ and a boolean to check if the value has been set.
 
 SetExtra sets Extra field to given value.
 
-### HasExtra
-
-`func (o *FileStatus) HasExtra() bool`
-
-HasExtra returns a boolean if a field has been set.
 
 ### GetName
 
@@ -72,11 +67,6 @@ and a boolean to check if the value has been set.
 
 SetName sets Name field to given value.
 
-### HasName
-
-`func (o *FileStatus) HasName() bool`
-
-HasName returns a boolean if a field has been set.
 
 ### GetStaging
 
@@ -97,11 +87,6 @@ and a boolean to check if the value has been set.
 
 SetStaging sets Staging field to given value.
 
-### HasStaging
-
-`func (o *FileStatus) HasStaging() bool`
-
-HasStaging returns a boolean if a field has been set.
 
 ### GetWorktree
 
@@ -122,11 +107,6 @@ and a boolean to check if the value has been set.
 
 SetWorktree sets Worktree field to given value.
 
-### HasWorktree
-
-`func (o *FileStatus) HasWorktree() bool`
-
-HasWorktree returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
