@@ -142,6 +142,7 @@ func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *h
 				Value(&m.config.Frps.Protocol),
 		),
 	).WithTheme(views.GetCustomTheme()).WithHeight(15)
+}
 
 func (m Model) Init() tea.Cmd {
 	return m.form.Init()
