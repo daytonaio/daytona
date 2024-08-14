@@ -39,7 +39,7 @@ var listCmd = &cobra.Command{
 			return
 		}
 
-		if profileData.EnvVars == nil || len(profileData.EnvVars) == 0 {
+		if len(profileData.EnvVars) == 0 {
 			views.RenderInfoMessageBold("No environment variables set")
 			return
 		}
