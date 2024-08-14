@@ -303,7 +303,6 @@ func (g *BitbucketServerGitProvider) GetLastCommitSha(staticContext *StaticGitCo
 	return commitList[0].ID, nil
 }
 
-
 func (g *BitbucketServerGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
 	if staticContext.Sha == nil || *staticContext.Sha == "" {
 		return *staticContext.Branch, nil
@@ -416,7 +415,6 @@ func (g *BitbucketServerGitProvider) getPrContext(staticContext *StaticGitContex
 
 	return &repo, nil
 }
-
 
 func (g *BitbucketServerGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
 	var staticContext StaticGitContext
