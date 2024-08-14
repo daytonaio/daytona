@@ -102,7 +102,7 @@ func (s *Service) CloneRepository(project *project.Project, auth *http.BasicAuth
 func (s *Service) CloneRepositoryCmd(p *project.Project, auth *http.BasicAuth) []string {
 	cloneCmd := []string{"git", "clone", "--single-branch"}
 
-	if s.shouldCloneBranch(p) {
+	if p.Repository.Branch != nil {
 		cloneCmd = append(cloneCmd, "--branch", *p.Repository.Branch)
 	}
 
@@ -116,7 +116,7 @@ func (s *Service) CloneRepositoryCmd(p *project.Project, auth *http.BasicAuth) [
 
 	cloneCmd = append(cloneCmd, s.ProjectDir)
 
-	if s.shouldCheckoutSha(p) {
+	if p.Repository.Target == gitprovider.CloneTargetCommit {
 		cloneCmd = append(cloneCmd, "&&", "cd", s.ProjectDir)
 		cloneCmd = append(cloneCmd, "&&", "git", "checkout", p.Repository.Sha)
 	}
