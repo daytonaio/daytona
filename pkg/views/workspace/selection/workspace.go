@@ -25,7 +25,7 @@ func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO) []list.Item {
 	for _, workspace := range workspaces {
 		var projectsInfo []string
 
-		if workspace.Projects == nil || len(workspace.Projects) == 0 {
+		if len(workspace.Projects) == 0 {
 			continue
 		}
 

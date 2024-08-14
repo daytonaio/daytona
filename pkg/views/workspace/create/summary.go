@@ -144,7 +144,7 @@ func renderProjectDetails(project apiclient.CreateProjectConfigDTO, buildChoice 
 		}
 	}
 
-	if project.EnvVars != nil && len(project.EnvVars) > 0 {
+	if len(project.EnvVars) > 0 {
 		if output != "" {
 			output += "\n"
 		}
