@@ -301,10 +301,37 @@ func (g *GitHubGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (
 			branchName = branch.GetName()
 			break
 		}
+
+		commitId := branchCommitSHA
+		for commitId != "" {
+			commit, _, err := client.Repositories.GetCommit(context.Background(), staticContext.Owner, staticContext.Name, commitId)
+			if err != nil {
+				return "", err
+			}
+
+			if *commit.SHA == *staticContext.Sha {
+				branchName = branch.GetName()
+				break
+			}
+
+			if len(commit.Parents) > 0 {
+				commitId := commit.Parents[0].SHA
+				if *staticContext.Sha == *commitId {
+					branchName = branch.GetName()
+					break
+				}
+			} else {
+				commitId = ""
+			}
+		}
+
+		if branchName != "" {
+			break
+		}
 	}
 
 	if branchName != "" {
-		return "", nil
+		return "", fmt.Errorf("branch not found for SHA: %s", *staticContext.Sha)
 	}
 
 	return branchName, nil
