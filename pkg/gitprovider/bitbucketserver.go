@@ -303,55 +303,6 @@ func (g *BitbucketServerGitProvider) GetLastCommitSha(staticContext *StaticGitCo
 	return commitList[0].ID, nil
 }
 
-func (g *BitbucketServerGitProvider) GetUrlFromRepository(repository *GitRepository) string {
-	url := strings.TrimSuffix(repository.Url, ".git")
-	url = strings.Replace(url, "/scm/", "/", 1)
-
-	if repository.Branch != nil && *repository.Branch != "" {
-		url += "/src/" + *repository.Branch
-
-		if repository.Path != nil && *repository.Path != "" {
-			url += "/" + *repository.Path
-		}
-	} else if repository.Path != nil && *repository.Path != "" {
-		url += "/src/main/" + *repository.Path
-	}
-
-	return url
-}
-
-func (g *BitbucketServerGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
-	if staticContext.PrNumber == nil {
-		return staticContext, nil
-	}
-
-	repo := *staticContext
-
-	client, err := g.getApiClient()
-	if err != nil {
-		return nil, err
-	}
-
-	pr, err := client.DefaultApi.GetPullRequest(staticContext.Id, staticContext.Name, int(*staticContext.PrNumber))
-	if err != nil {
-		return nil, err
-	}
-
-	prInfo, err := bitbucketv1.GetPullRequestResponse(pr)
-	if err != nil {
-		return nil, err
-	}
-
-	if prInfo.FromRef.Repository.Owner != nil {
-		ownerName := prInfo.FromRef.Repository.Owner.DisplayName
-		repo.Owner = ownerName
-		repo.Id = ownerName
-	}
-	repo.Name = prInfo.FromRef.Repository.Slug
-	repo.Branch = &prInfo.FromRef.DisplayID
-
-	return &repo, nil
-}
 
 func (g *BitbucketServerGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
 	if staticContext.Sha == nil || *staticContext.Sha == "" {
@@ -415,6 +366,57 @@ func (g *BitbucketServerGitProvider) GetBranchByCommit(staticContext *StaticGitC
 
 	return branchName, nil
 }
+
+func (g *BitbucketServerGitProvider) GetUrlFromRepository(repository *GitRepository) string {
+	url := strings.TrimSuffix(repository.Url, ".git")
+	url = strings.Replace(url, "/scm/", "/", 1)
+
+	if repository.Branch != nil && *repository.Branch != "" {
+		url += "/src/" + *repository.Branch
+
+		if repository.Path != nil && *repository.Path != "" {
+			url += "/" + *repository.Path
+		}
+	} else if repository.Path != nil && *repository.Path != "" {
+		url += "/src/main/" + *repository.Path
+	}
+
+	return url
+}
+
+func (g *BitbucketServerGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
+	if staticContext.PrNumber == nil {
+		return staticContext, nil
+	}
+
+	repo := *staticContext
+
+	client, err := g.getApiClient()
+	if err != nil {
+		return nil, err
+	}
+
+	pr, err := client.DefaultApi.GetPullRequest(staticContext.Id, staticContext.Name, int(*staticContext.PrNumber))
+	if err != nil {
+		return nil, err
+	}
+
+	prInfo, err := bitbucketv1.GetPullRequestResponse(pr)
+	if err != nil {
+		return nil, err
+	}
+
+	if prInfo.FromRef.Repository.Owner != nil {
+		ownerName := prInfo.FromRef.Repository.Owner.DisplayName
+		repo.Owner = ownerName
+		repo.Id = ownerName
+	}
+	repo.Name = prInfo.FromRef.Repository.Slug
+	repo.Branch = &prInfo.FromRef.DisplayID
+
+	return &repo, nil
+}
+
 
 func (g *BitbucketServerGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
 	var staticContext StaticGitContext
