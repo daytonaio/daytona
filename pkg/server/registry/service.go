@@ -9,7 +9,6 @@ import (
 	"io"
 	"net"
 	"os"
-	"os/exec"
 
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/docker/docker/api/types/container"
@@ -60,12 +59,8 @@ func (s *LocalContainerRegistry) Start() error {
 		return err
 	}
 
-	if _, err := exec.LookPath("docker"); err != nil {
-		return fmt.Errorf("cannot find Docker installation. Please install by following https://docs.docker.com/engine/install/ and try again")
-	}
-
 	if _, err := cli.Info(ctx); err != nil {
-		return fmt.Errorf("cannot connect to the Docker daemon. Is the Docker daemon running?")
+		return fmt.Errorf("cannot connect to the Docker daemon. Is the Docker daemon running?\nIf Docker is not installed, please install it by following https://docs.docker.com/engine/install/ and try again")
 	}
 
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
