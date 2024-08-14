@@ -172,7 +172,7 @@ func sortWorkspaces(workspaceList *[]apiclient.WorkspaceDTO, verbose bool) {
 func getWorkspaceTableRowData(workspace apiclient.WorkspaceDTO, specifyGitProviders bool) *RowData {
 	rowData := RowData{"", "", "", "", "", ""}
 	rowData.Name = workspace.Name + views_util.AdditionalPropertyPadding
-	if workspace.Projects != nil && len(workspace.Projects) > 0 {
+	if len(workspace.Projects) > 0 {
 		rowData.Repository = util.GetRepositorySlugFromUrl(workspace.Projects[0].Repository.Url, specifyGitProviders)
 		if workspace.Projects[0].Repository.Branch != nil {
 			rowData.Branch = *workspace.Projects[0].Repository.Branch
