@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/ktrysmt/go-bitbucket"
+	log "github.com/sirupsen/logrus"
 )
 
 type BitbucketGitProvider struct {
@@ -263,6 +264,90 @@ func (g *BitbucketGitProvider) GetLastCommitSha(staticContext *StaticGitContext)
 	}
 
 	return commitHash, nil
+}
+
+func (g *BitbucketGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
+	if staticContext.Sha == nil || *staticContext.Sha == "" {
+		return *staticContext.Branch, nil
+	}
+
+	client := g.getApiClient()
+
+	owner, repo, err := g.getOwnerAndRepoFromFullName(staticContext.Id)
+	if err != nil {
+		return "", err
+	}
+
+	branches, err := client.Repositories.Repository.ListBranches(&bitbucket.RepositoryBranchOptions{
+		RepoSlug: repo,
+		Owner:    owner,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	var branchName string
+	for _, branch := range branches.Branches {
+		hash, ok := branch.Target["hash"].(string)
+		if !ok {
+			log.Infof("failed to get branch info for %s", branch.Name)
+			continue
+		}
+
+		if hash == *staticContext.Sha {
+			branchName = branch.Name
+			break
+		}
+
+		commits, err := client.Repositories.Commits.GetCommits(&bitbucket.CommitsOptions{
+			RepoSlug:    repo,
+			Owner:       owner,
+			Branchortag: branch.Name,
+		})
+		if err != nil {
+			return "", err
+		}
+		commitsResponse, ok := commits.(map[string]interface{})
+		if !ok {
+			return "", fmt.Errorf("Invalid commits response")
+		}
+
+		valuesResponse, ok := commitsResponse["values"].([]interface{})
+		if !ok {
+			return "", fmt.Errorf("Invalid commits values")
+		}
+
+		if len(valuesResponse) == 0 {
+			continue
+		}
+
+		for _, commit := range valuesResponse {
+			commitResponse, ok := commit.(map[string]interface{})
+			if !ok {
+				return "", fmt.Errorf("Invalid commit response")
+			}
+
+			commitHash, ok := commitResponse["hash"].(string)
+			if !ok {
+				return "", fmt.Errorf("Invalid commit hash")
+			}
+			if commitHash == *staticContext.Sha {
+				branchName = branch.Name
+				break
+			}
+		}
+
+		if branchName != "" {
+			break
+		}
+
+	}
+
+	if branchName == "" {
+		return "", fmt.Errorf("branch not found for SHA: %s", *staticContext.Sha)
+	}
+
+	return branchName, nil
 }
 
 func (g *BitbucketGitProvider) GetUrlFromRepository(repository *GitRepository) string {
