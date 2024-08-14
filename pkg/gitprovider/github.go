@@ -302,7 +302,7 @@ func (g *GitHubGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (
 			break
 		}
 
-		commitId := branchCommitSHA
+		commitId := *staticContext.Sha
 		for commitId != "" {
 			commit, _, err := client.Repositories.GetCommit(context.Background(), staticContext.Owner, staticContext.Name, commitId)
 			if err != nil {

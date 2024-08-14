@@ -294,7 +294,12 @@ func (g *AwsCodeCommitGitProvider) GetBranchByCommit(staticContext *StaticGitCon
 			continue
 		}
 
-		commitID := branchInfo.Branch.CommitId
+		if *staticContext.Sha == *branchInfo.Branch.CommitId {
+			branchName = branch
+			break
+		}
+
+		commitID := staticContext.Sha
 		for commitID != nil {
 			commit, err := client.GetCommit(context.Background(), &codecommit.GetCommitInput{
 				RepositoryName: aws.String(staticContext.Name),
