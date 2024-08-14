@@ -325,7 +325,7 @@ func (g *GitHubGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (
 			}
 		}
 
-		if branchName != "" {
+		if branchName == "" {
 			break
 		}
 	}
