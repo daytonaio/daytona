@@ -283,7 +283,6 @@ func (g *AwsCodeCommitGitProvider) GetBranchByCommit(staticContext *StaticGitCon
 	if err != nil {
 		return "", fmt.Errorf("failed to list branches, %v", err)
 	}
-
 	var branchName string
 	for _, branch := range branches.Branches {
 		branchInfo, err := client.GetBranch(context.TODO(), &codecommit.GetBranchInput{
@@ -295,8 +294,32 @@ func (g *AwsCodeCommitGitProvider) GetBranchByCommit(staticContext *StaticGitCon
 			continue
 		}
 
-		if branchInfo.Branch.CommitId != nil && *branchInfo.Branch.CommitId == *staticContext.Sha {
-			branchName = branch
+		commitID := branchInfo.Branch.CommitId
+		for commitID != nil {
+			commit, err := client.GetCommit(context.Background(), &codecommit.GetCommitInput{
+				RepositoryName: aws.String(staticContext.Name),
+				CommitId:       commitID,
+			})
+			if err != nil {
+				return "", fmt.Errorf("failed to get commit %s in branch %s: %v", *commitID, branch, err)
+			}
+
+			if *commit.Commit.CommitId == *staticContext.Sha {
+				branchName = branch
+				break
+			}
+
+			if len(commit.Commit.Parents) > 0 {
+				commitID = &commit.Commit.Parents[0]
+				if *staticContext.Sha == *commitID {
+					branchName = branch
+					break
+				}
+			} else {
+				commitID = nil
+			}
+		}
+		if branchName != "" {
 			break
 		}
 	}
