@@ -68,7 +68,7 @@ func (s *Service) CloneRepository(project *project.Project, auth *http.BasicAuth
 		capability.ThinPack,
 	}
 
-	if s.shouldCloneBranch(project) {
+	if project.Repository.Branch != nil {
 		cloneOptions.ReferenceName = plumbing.ReferenceName("refs/heads/" + *project.Repository.Branch)
 	}
 
@@ -77,7 +77,7 @@ func (s *Service) CloneRepository(project *project.Project, auth *http.BasicAuth
 		return err
 	}
 
-	if s.shouldCheckoutSha(project) {
+	if project.Repository.Target == gitprovider.CloneTargetCommit {
 		repo, err := git.PlainOpen(s.ProjectDir)
 		if err != nil {
 			return err
@@ -229,28 +229,4 @@ func (s *Service) GetGitStatus() (*project.GitStatus, error) {
 		CurrentBranch: ref.Name().Short(),
 		Files:         files,
 	}, nil
-}
-
-func (s *Service) shouldCloneBranch(p *project.Project) bool {
-	if p.Repository.Branch == nil || *p.Repository.Branch == "" {
-		return false
-	}
-
-	if p.Repository.Sha == "" {
-		return true
-	}
-
-	return *p.Repository.Branch != p.Repository.Sha
-}
-
-func (s *Service) shouldCheckoutSha(p *project.Project) bool {
-	if p.Repository.Sha == "" {
-		return false
-	}
-
-	if p.Repository.Branch == nil || *p.Repository.Branch == "" {
-		return false
-	}
-
-	return *p.Repository.Branch == p.Repository.Sha
 }

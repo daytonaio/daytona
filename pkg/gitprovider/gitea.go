@@ -246,7 +246,7 @@ func (g *GiteaGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (s
 			break
 		}
 
-		commitId := *staticContext.Sha
+		commitId := branch.Commit.ID
 		for commitId != "" {
 			commit, _, err := client.GetSingleCommit(staticContext.Owner, staticContext.Id, commitId)
 			if err != nil {
