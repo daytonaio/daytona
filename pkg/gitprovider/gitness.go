@@ -225,7 +225,6 @@ func (g *GitnessGitProvider) getPrContext(staticContext *StaticGitContext) (*Sta
 	}
 	return &repo, nil
 }
-
 func (g *GitnessGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
 	staticContext, err := g.AbstractGitProvider.parseStaticGitContext(repoUrl)
 	if err != nil {
