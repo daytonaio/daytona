@@ -133,15 +133,27 @@ definitions:
     properties:
       baseApiUrl:
         type: string
+      configId:
+        type: integer
       id:
         type: string
       token:
         type: string
+      tokenIdentity:
+        type: string
+      tokenScope:
+        type: string
+      tokenScopeType:
+        $ref: '#/definitions/gitprovider.TokenScopeType'
       username:
         type: string
     required:
+    - configId
     - id
     - token
+    - tokenIdentity
+    - tokenScope
+    - tokenScopeType
     - username
     type: object
   GitPullRequest:
@@ -539,6 +551,20 @@ definitions:
     - ApiKeyTypeClient
     - ApiKeyTypeProject
     - ApiKeyTypeWorkspace
+  gitprovider.TokenScopeType:
+    enum:
+    - GLOBAL
+    - ORGANIZATION
+    - REPOSITORY
+    type: string
+    x-enum-comments:
+      TokenScopeTypeGlobal: Token has access to all repos and orgs
+      TokenScopeTypeOrganization: Token is scoped to a specific organization
+      TokenScopeTypeRepository: Token is scoped to a specific repository
+    x-enum-varnames:
+    - TokenScopeTypeGlobal
+    - TokenScopeTypeOrganization
+    - TokenScopeTypeRepository
   provider.ProviderInfo:
     properties:
       name:

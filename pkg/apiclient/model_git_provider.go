@@ -21,10 +21,14 @@ var _ MappedNullable = &GitProvider{}
 
 // GitProvider struct for GitProvider
 type GitProvider struct {
-	BaseApiUrl *string `json:"baseApiUrl,omitempty"`
-	Id         string  `json:"id"`
-	Token      string  `json:"token"`
-	Username   string  `json:"username"`
+	BaseApiUrl     *string                   `json:"baseApiUrl,omitempty"`
+	ConfigId       int32                     `json:"configId"`
+	Id             string                    `json:"id"`
+	Token          string                    `json:"token"`
+	TokenIdentity  string                    `json:"tokenIdentity"`
+	TokenScope     string                    `json:"tokenScope"`
+	TokenScopeType GitproviderTokenScopeType `json:"tokenScopeType"`
+	Username       string                    `json:"username"`
 }
 
 type _GitProvider GitProvider
@@ -33,10 +37,14 @@ type _GitProvider GitProvider
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGitProvider(id string, token string, username string) *GitProvider {
+func NewGitProvider(configId int32, id string, token string, tokenIdentity string, tokenScope string, tokenScopeType GitproviderTokenScopeType, username string) *GitProvider {
 	this := GitProvider{}
+	this.ConfigId = configId
 	this.Id = id
 	this.Token = token
+	this.TokenIdentity = tokenIdentity
+	this.TokenScope = tokenScope
+	this.TokenScopeType = tokenScopeType
 	this.Username = username
 	return &this
 }
@@ -79,6 +87,30 @@ func (o *GitProvider) HasBaseApiUrl() bool {
 // SetBaseApiUrl gets a reference to the given string and assigns it to the BaseApiUrl field.
 func (o *GitProvider) SetBaseApiUrl(v string) {
 	o.BaseApiUrl = &v
+}
+
+// GetConfigId returns the ConfigId field value
+func (o *GitProvider) GetConfigId() int32 {
+	if o == nil {
+		var ret int32
+		return ret
+	}
+
+	return o.ConfigId
+}
+
+// GetConfigIdOk returns a tuple with the ConfigId field value
+// and a boolean to check if the value has been set.
+func (o *GitProvider) GetConfigIdOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.ConfigId, true
+}
+
+// SetConfigId sets field value
+func (o *GitProvider) SetConfigId(v int32) {
+	o.ConfigId = v
 }
 
 // GetId returns the Id field value
@@ -129,6 +161,78 @@ func (o *GitProvider) SetToken(v string) {
 	o.Token = v
 }
 
+// GetTokenIdentity returns the TokenIdentity field value
+func (o *GitProvider) GetTokenIdentity() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.TokenIdentity
+}
+
+// GetTokenIdentityOk returns a tuple with the TokenIdentity field value
+// and a boolean to check if the value has been set.
+func (o *GitProvider) GetTokenIdentityOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.TokenIdentity, true
+}
+
+// SetTokenIdentity sets field value
+func (o *GitProvider) SetTokenIdentity(v string) {
+	o.TokenIdentity = v
+}
+
+// GetTokenScope returns the TokenScope field value
+func (o *GitProvider) GetTokenScope() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.TokenScope
+}
+
+// GetTokenScopeOk returns a tuple with the TokenScope field value
+// and a boolean to check if the value has been set.
+func (o *GitProvider) GetTokenScopeOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.TokenScope, true
+}
+
+// SetTokenScope sets field value
+func (o *GitProvider) SetTokenScope(v string) {
+	o.TokenScope = v
+}
+
+// GetTokenScopeType returns the TokenScopeType field value
+func (o *GitProvider) GetTokenScopeType() GitproviderTokenScopeType {
+	if o == nil {
+		var ret GitproviderTokenScopeType
+		return ret
+	}
+
+	return o.TokenScopeType
+}
+
+// GetTokenScopeTypeOk returns a tuple with the TokenScopeType field value
+// and a boolean to check if the value has been set.
+func (o *GitProvider) GetTokenScopeTypeOk() (*GitproviderTokenScopeType, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.TokenScopeType, true
+}
+
+// SetTokenScopeType sets field value
+func (o *GitProvider) SetTokenScopeType(v GitproviderTokenScopeType) {
+	o.TokenScopeType = v
+}
+
 // GetUsername returns the Username field value
 func (o *GitProvider) GetUsername() string {
 	if o == nil {
@@ -166,8 +270,12 @@ func (o GitProvider) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.BaseApiUrl) {
 		toSerialize["baseApiUrl"] = o.BaseApiUrl
 	}
+	toSerialize["configId"] = o.ConfigId
 	toSerialize["id"] = o.Id
 	toSerialize["token"] = o.Token
+	toSerialize["tokenIdentity"] = o.TokenIdentity
+	toSerialize["tokenScope"] = o.TokenScope
+	toSerialize["tokenScopeType"] = o.TokenScopeType
 	toSerialize["username"] = o.Username
 	return toSerialize, nil
 }
@@ -177,8 +285,12 @@ func (o *GitProvider) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"configId",
 		"id",
 		"token",
+		"tokenIdentity",
+		"tokenScope",
+		"tokenScopeType",
 		"username",
 	}
 

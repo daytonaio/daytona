@@ -5,15 +5,19 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **BaseApiUrl** | Pointer to **string** |  | [optional] 
+**ConfigId** | **int32** |  | 
 **Id** | **string** |  | 
 **Token** | **string** |  | 
+**TokenIdentity** | **string** |  | 
+**TokenScope** | **string** |  | 
+**TokenScopeType** | [**GitproviderTokenScopeType**](GitproviderTokenScopeType.md) |  | 
 **Username** | **string** |  | 
 
 ## Methods
 
 ### NewGitProvider
 
-`func NewGitProvider(id string, token string, username string, ) *GitProvider`
+`func NewGitProvider(configId int32, id string, token string, tokenIdentity string, tokenScope string, tokenScopeType GitproviderTokenScopeType, username string, ) *GitProvider`
 
 NewGitProvider instantiates a new GitProvider object
 This constructor will assign default values to properties that have it defined,
@@ -53,6 +57,26 @@ SetBaseApiUrl sets BaseApiUrl field to given value.
 
 HasBaseApiUrl returns a boolean if a field has been set.
 
+### GetConfigId
+
+`func (o *GitProvider) GetConfigId() int32`
+
+GetConfigId returns the ConfigId field if non-nil, zero value otherwise.
+
+### GetConfigIdOk
+
+`func (o *GitProvider) GetConfigIdOk() (*int32, bool)`
+
+GetConfigIdOk returns a tuple with the ConfigId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetConfigId
+
+`func (o *GitProvider) SetConfigId(v int32)`
+
+SetConfigId sets ConfigId field to given value.
+
+
 ### GetId
 
 `func (o *GitProvider) GetId() string`
@@ -91,6 +115,66 @@ and a boolean to check if the value has been set.
 `func (o *GitProvider) SetToken(v string)`
 
 SetToken sets Token field to given value.
+
+
+### GetTokenIdentity
+
+`func (o *GitProvider) GetTokenIdentity() string`
+
+GetTokenIdentity returns the TokenIdentity field if non-nil, zero value otherwise.
+
+### GetTokenIdentityOk
+
+`func (o *GitProvider) GetTokenIdentityOk() (*string, bool)`
+
+GetTokenIdentityOk returns a tuple with the TokenIdentity field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTokenIdentity
+
+`func (o *GitProvider) SetTokenIdentity(v string)`
+
+SetTokenIdentity sets TokenIdentity field to given value.
+
+
+### GetTokenScope
+
+`func (o *GitProvider) GetTokenScope() string`
+
+GetTokenScope returns the TokenScope field if non-nil, zero value otherwise.
+
+### GetTokenScopeOk
+
+`func (o *GitProvider) GetTokenScopeOk() (*string, bool)`
+
+GetTokenScopeOk returns a tuple with the TokenScope field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTokenScope
+
+`func (o *GitProvider) SetTokenScope(v string)`
+
+SetTokenScope sets TokenScope field to given value.
+
+
+### GetTokenScopeType
+
+`func (o *GitProvider) GetTokenScopeType() GitproviderTokenScopeType`
+
+GetTokenScopeType returns the TokenScopeType field if non-nil, zero value otherwise.
+
+### GetTokenScopeTypeOk
+
+`func (o *GitProvider) GetTokenScopeTypeOk() (*GitproviderTokenScopeType, bool)`
+
+GetTokenScopeTypeOk returns a tuple with the TokenScopeType field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTokenScopeType
+
+`func (o *GitProvider) SetTokenScopeType(v GitproviderTokenScopeType)`
+
+SetTokenScopeType sets TokenScopeType field to given value.
 
 
 ### GetUsername

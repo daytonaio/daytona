@@ -3,11 +3,23 @@
 
 package gitprovider
 
+type TokenScopeType string
+
+const (
+	TokenScopeTypeGlobal       TokenScopeType = "GLOBAL"       // Token has access to all repos and orgs
+	TokenScopeTypeOrganization TokenScopeType = "ORGANIZATION" // Token is scoped to a specific organization
+	TokenScopeTypeRepository   TokenScopeType = "REPOSITORY"   // Token is scoped to a specific repository
+)
+
 type GitProviderConfig struct {
-	Id         string  `json:"id" validate:"required"`
-	Username   string  `json:"username" validate:"required"`
-	Token      string  `json:"token" validate:"required"`
-	BaseApiUrl *string `json:"baseApiUrl,omitempty" validate:"optional"`
+	ConfigId       uint           `json:"configId" validate:"required"`
+	Id             string         `json:"id" validate:"required"`
+	Username       string         `json:"username" validate:"required"`
+	BaseApiUrl     *string        `json:"baseApiUrl,omitempty" validate:"optional"`
+	Token          string         `json:"token" validate:"required"`
+	TokenIdentity  string         `json:"tokenIdentity" validate:"required"`
+	TokenScope     string         `json:"tokenScope" validate:"required"`
+	TokenScopeType TokenScopeType `json:"tokenScopeType" validate:"required"`
 } // @name GitProvider
 
 type GitUser struct {

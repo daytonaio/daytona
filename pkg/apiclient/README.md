@@ -144,6 +144,7 @@ Class | Method | HTTP request | Description
  - [GitRepository](docs/GitRepository.md)
  - [GitStatus](docs/GitStatus.md)
  - [GitUser](docs/GitUser.md)
+ - [GitproviderTokenScopeType](docs/GitproviderTokenScopeType.md)
  - [InstallProviderRequest](docs/InstallProviderRequest.md)
  - [NetworkKey](docs/NetworkKey.md)
  - [ProfileData](docs/ProfileData.md)

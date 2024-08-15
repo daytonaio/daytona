@@ -1532,19 +1532,35 @@ const docTemplate = `{
         "GitProvider": {
             "type": "object",
             "required": [
+                "configId",
                 "id",
                 "token",
+                "tokenIdentity",
+                "tokenScope",
+                "tokenScopeType",
                 "username"
             ],
             "properties": {
                 "baseApiUrl": {
                     "type": "string"
                 },
+                "configId": {
+                    "type": "integer"
+                },
                 "id": {
                     "type": "string"
                 },
                 "token": {
                     "type": "string"
+                },
+                "tokenIdentity": {
+                    "type": "string"
+                },
+                "tokenScope": {
+                    "type": "string"
+                },
+                "tokenScopeType": {
+                    "$ref": "#/definitions/gitprovider.TokenScopeType"
                 },
                 "username": {
                     "type": "string"
@@ -2114,6 +2130,24 @@ const docTemplate = `{
                 "ApiKeyTypeClient",
                 "ApiKeyTypeProject",
                 "ApiKeyTypeWorkspace"
+            ]
+        },
+        "gitprovider.TokenScopeType": {
+            "type": "string",
+            "enum": [
+                "GLOBAL",
+                "ORGANIZATION",
+                "REPOSITORY"
+            ],
+            "x-enum-comments": {
+                "TokenScopeTypeGlobal": "Token has access to all repos and orgs",
+                "TokenScopeTypeOrganization": "Token is scoped to a specific organization",
+                "TokenScopeTypeRepository": "Token is scoped to a specific repository"
+            },
+            "x-enum-varnames": [
+                "TokenScopeTypeGlobal",
+                "TokenScopeTypeOrganization",
+                "TokenScopeTypeRepository"
             ]
         },
         "provider.ProviderInfo": {
