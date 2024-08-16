@@ -326,6 +326,9 @@ func (d *DockerClient) readDevcontainerConfig(opts *CreateProjectOptions, paths 
 		"--config=" + paths.TargetConfigFilePath,
 		"--override-config=/tmp/devcontainer.json",
 		"--include-merged-configuration",
+		"&&",
+		"sleep",
+		"1",
 	}...)
 
 	output, err := d.execInContainer(strings.Join(devcontainerCmd, " "), opts, paths, paths.ProjectTarget, socketForwardId, false, nil)
