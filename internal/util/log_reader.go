@@ -52,6 +52,7 @@ func ReadJSONLog(ctx context.Context, logReader io.Reader, follow bool, retry bo
 
 			if retry {
 				for {
+					byteChunk := make([]byte, 1024)
 					n, err := reader.Read(byteChunk)
 					if err == nil {
 						buffer.Write(byteChunk[:n])

@@ -21,7 +21,12 @@ var maxPrefixLength = 20
 var prefixDelimiter = " | "
 var prefixPadding = " "
 
+var workspaceLogsCursorPosition = 2
+var projectsLogsCursorPosition = 7
+
 func DisplayLogs(logEntriesChan <-chan logs.LogEntry, index int) {
+	fmt.Printf("\033[%d;1H", projectsLogsCursorPosition)
+	fmt.Print("\033[s")
 	for logEntry := range logEntriesChan {
 		DisplayLogEntry(logEntry, index)
 	}
@@ -40,8 +45,13 @@ func DisplayLogEntry(logEntry logs.LogEntry, index int) {
 	prefix := lipgloss.NewStyle().Foreground(prefixColor).Bold(true).Render(formatPrefixText(prefixText))
 
 	if index == WORKSPACE_INDEX {
+		fmt.Printf("\033[%d;1H", workspaceLogsCursorPosition)
+
 		line = fmt.Sprintf("%s%s%s \033[1m%s\033[0m", prefixPadding, prefix, views.CheckmarkSymbol, line)
 		fmt.Print(line)
+
+		workspaceLogsCursorPosition += 1
+		fmt.Print("\033[u")
 		return
 	}
 
@@ -52,6 +62,7 @@ func DisplayLogEntry(logEntry logs.LogEntry, index int) {
 
 	if line == "\n" {
 		fmt.Print(line)
+		fmt.Print("\033[s")
 		return
 	}
 
@@ -69,6 +80,7 @@ func DisplayLogEntry(logEntry logs.LogEntry, index int) {
 	}
 
 	fmt.Print(result)
+	fmt.Print("\033[s")
 }
 
 func CalculateLongestPrefixLength(projectNames []string) {
