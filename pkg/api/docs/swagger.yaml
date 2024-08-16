@@ -173,6 +173,8 @@ definitions:
     properties:
       branch:
         type: string
+      clonetarget:
+        $ref: '#/definitions/gitprovider.CloneTarget'
       id:
         type: string
       name:
@@ -189,13 +191,6 @@ definitions:
         type: string
       url:
         type: string
-    required:
-    - id
-    - name
-    - owner
-    - sha
-    - source
-    - url
     type: object
   GitStatus:
     properties:
@@ -539,6 +534,14 @@ definitions:
     - ApiKeyTypeClient
     - ApiKeyTypeProject
     - ApiKeyTypeWorkspace
+  gitprovider.CloneTarget:
+    enum:
+    - branch
+    - commit
+    type: string
+    x-enum-varnames:
+    - CloneTargetBranch
+    - CloneTargetCommit
   provider.ProviderInfo:
     properties:
       name:

@@ -6,8 +6,8 @@ package gitprovider
 type GitProviderConfig struct {
 	Id         string  `json:"id" validate:"required"`
 	Username   string  `json:"username" validate:"required"`
-	Token      string  `json:"token" validate:"required"`
 	BaseApiUrl *string `json:"baseApiUrl,omitempty" validate:"optional"`
+	Token      string  `json:"token" validate:"required"`
 } // @name GitProvider
 
 type GitUser struct {

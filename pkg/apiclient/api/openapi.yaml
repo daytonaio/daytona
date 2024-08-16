@@ -1000,6 +1000,7 @@ components:
         name: name
         source:
           repository:
+            clonetarget: null
             owner: owner
             path: path
             name: name
@@ -1033,6 +1034,7 @@ components:
     CreateProjectConfigSourceDTO:
       example:
         repository:
+          clonetarget: null
           owner: owner
           path: path
           name: name
@@ -1060,6 +1062,7 @@ components:
           name: name
           source:
             repository:
+              clonetarget: null
               owner: owner
               path: path
               name: name
@@ -1079,6 +1082,7 @@ components:
           name: name
           source:
             repository:
+              clonetarget: null
               owner: owner
               path: path
               name: name
@@ -1237,6 +1241,7 @@ components:
       type: object
     GitRepository:
       example:
+        clonetarget: null
         owner: owner
         path: path
         name: name
@@ -1249,6 +1254,8 @@ components:
       properties:
         branch:
           type: string
+        clonetarget:
+          $ref: '#/components/schemas/gitprovider.CloneTarget'
         id:
           type: string
         name:
@@ -1265,13 +1272,6 @@ components:
           type: string
         url:
           type: string
-      required:
-      - id
-      - name
-      - owner
-      - sha
-      - source
-      - url
       type: object
     GitStatus:
       example:
@@ -1379,6 +1379,7 @@ components:
           updatedAt: updatedAt
           uptime: 0
         repository:
+          clonetarget: null
           owner: owner
           path: path
           name: name
@@ -1443,6 +1444,7 @@ components:
           key: envVars
         name: name
         repository:
+          clonetarget: null
           owner: owner
           path: path
           name: name
@@ -1732,6 +1734,7 @@ components:
             updatedAt: updatedAt
             uptime: 0
           repository:
+            clonetarget: null
             owner: owner
             path: path
             name: name
@@ -1767,6 +1770,7 @@ components:
             updatedAt: updatedAt
             uptime: 0
           repository:
+            clonetarget: null
             owner: owner
             path: path
             name: name
@@ -1825,6 +1829,7 @@ components:
             updatedAt: updatedAt
             uptime: 0
           repository:
+            clonetarget: null
             owner: owner
             path: path
             name: name
@@ -1860,6 +1865,7 @@ components:
             updatedAt: updatedAt
             uptime: 0
           repository:
+            clonetarget: null
             owner: owner
             path: path
             name: name
@@ -1946,6 +1952,14 @@ components:
       - ApiKeyTypeClient
       - ApiKeyTypeProject
       - ApiKeyTypeWorkspace
+    gitprovider.CloneTarget:
+      enum:
+      - branch
+      - commit
+      type: string
+      x-enum-varnames:
+      - CloneTargetBranch
+      - CloneTargetCommit
     provider.ProviderInfo:
       example:
         name: name

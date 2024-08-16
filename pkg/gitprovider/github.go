@@ -330,7 +330,7 @@ func (g *GitHubGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (
 		}
 	}
 
-	if branchName != "" {
+	if branchName == "" {
 		return "", fmt.Errorf("branch not found for SHA: %s", *staticContext.Sha)
 	}
 
