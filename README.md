@@ -264,6 +264,8 @@ Others are allowed to make their own distribution of the software, but they cann
 
 We explicitly grant permission for you to make a build that includes our trademarks while developing Daytona itself. You may not publish or share the build, and you may not use that build to run Daytona for any other purpose.
 
+You can read more in our [packinging guidelines](PACKAGING.md).
+
 ## Code of Conduct
 
 
