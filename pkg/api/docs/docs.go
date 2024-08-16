@@ -1359,6 +1359,17 @@ const docTemplate = `{
                 }
             }
         },
+        "CloneTarget": {
+            "type": "string",
+            "enum": [
+                "branch",
+                "commit"
+            ],
+            "x-enum-varnames": [
+                "CloneTargetBranch",
+                "CloneTargetCommit"
+            ]
+        },
         "ContainerRegistry": {
             "type": "object",
             "required": [
@@ -1588,12 +1599,20 @@ const docTemplate = `{
         },
         "GitRepository": {
             "type": "object",
+            "required": [
+                "id",
+                "name",
+                "owner",
+                "sha",
+                "source",
+                "url"
+            ],
             "properties": {
                 "branch": {
                     "type": "string"
                 },
                 "clonetarget": {
-                    "$ref": "#/definitions/gitprovider.CloneTarget"
+                    "$ref": "#/definitions/CloneTarget"
                 },
                 "id": {
                     "type": "string"
@@ -2109,17 +2128,6 @@ const docTemplate = `{
                 "ApiKeyTypeClient",
                 "ApiKeyTypeProject",
                 "ApiKeyTypeWorkspace"
-            ]
-        },
-        "gitprovider.CloneTarget": {
-            "type": "string",
-            "enum": [
-                "branch",
-                "commit"
-            ],
-            "x-enum-varnames": [
-                "CloneTargetBranch",
-                "CloneTargetCommit"
             ]
         },
         "provider.ProviderInfo": {

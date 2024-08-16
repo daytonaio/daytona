@@ -11,7 +11,9 @@ API version: v0.0.0-dev
 package apiclient
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the GitRepository type satisfies the MappedNullable interface at compile time
@@ -19,24 +21,32 @@ var _ MappedNullable = &GitRepository{}
 
 // GitRepository struct for GitRepository
 type GitRepository struct {
-	Branch      *string                 `json:"branch,omitempty"`
-	Clonetarget *GitproviderCloneTarget `json:"clonetarget,omitempty"`
-	Id          *string                 `json:"id,omitempty"`
-	Name        *string                 `json:"name,omitempty"`
-	Owner       *string                 `json:"owner,omitempty"`
-	Path        *string                 `json:"path,omitempty"`
-	PrNumber    *int32                  `json:"prNumber,omitempty"`
-	Sha         *string                 `json:"sha,omitempty"`
-	Source      *string                 `json:"source,omitempty"`
-	Url         *string                 `json:"url,omitempty"`
+	Branch      *string      `json:"branch,omitempty"`
+	Clonetarget *CloneTarget `json:"clonetarget,omitempty"`
+	Id          string       `json:"id"`
+	Name        string       `json:"name"`
+	Owner       string       `json:"owner"`
+	Path        *string      `json:"path,omitempty"`
+	PrNumber    *int32       `json:"prNumber,omitempty"`
+	Sha         string       `json:"sha"`
+	Source      string       `json:"source"`
+	Url         string       `json:"url"`
 }
+
+type _GitRepository GitRepository
 
 // NewGitRepository instantiates a new GitRepository object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGitRepository() *GitRepository {
+func NewGitRepository(id string, name string, owner string, sha string, source string, url string) *GitRepository {
 	this := GitRepository{}
+	this.Id = id
+	this.Name = name
+	this.Owner = owner
+	this.Sha = sha
+	this.Source = source
+	this.Url = url
 	return &this
 }
 
@@ -81,9 +91,9 @@ func (o *GitRepository) SetBranch(v string) {
 }
 
 // GetClonetarget returns the Clonetarget field value if set, zero value otherwise.
-func (o *GitRepository) GetClonetarget() GitproviderCloneTarget {
+func (o *GitRepository) GetClonetarget() CloneTarget {
 	if o == nil || IsNil(o.Clonetarget) {
-		var ret GitproviderCloneTarget
+		var ret CloneTarget
 		return ret
 	}
 	return *o.Clonetarget
@@ -91,7 +101,7 @@ func (o *GitRepository) GetClonetarget() GitproviderCloneTarget {
 
 // GetClonetargetOk returns a tuple with the Clonetarget field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *GitRepository) GetClonetargetOk() (*GitproviderCloneTarget, bool) {
+func (o *GitRepository) GetClonetargetOk() (*CloneTarget, bool) {
 	if o == nil || IsNil(o.Clonetarget) {
 		return nil, false
 	}
@@ -107,105 +117,81 @@ func (o *GitRepository) HasClonetarget() bool {
 	return false
 }
 
-// SetClonetarget gets a reference to the given GitproviderCloneTarget and assigns it to the Clonetarget field.
-func (o *GitRepository) SetClonetarget(v GitproviderCloneTarget) {
+// SetClonetarget gets a reference to the given CloneTarget and assigns it to the Clonetarget field.
+func (o *GitRepository) SetClonetarget(v CloneTarget) {
 	o.Clonetarget = &v
 }
 
-// GetId returns the Id field value if set, zero value otherwise.
+// GetId returns the Id field value
 func (o *GitRepository) GetId() string {
-	if o == nil || IsNil(o.Id) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Id
+
+	return o.Id
 }
 
-// GetIdOk returns a tuple with the Id field value if set, nil otherwise
+// GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 func (o *GitRepository) GetIdOk() (*string, bool) {
-	if o == nil || IsNil(o.Id) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Id, true
+	return &o.Id, true
 }
 
-// HasId returns a boolean if a field has been set.
-func (o *GitRepository) HasId() bool {
-	if o != nil && !IsNil(o.Id) {
-		return true
-	}
-
-	return false
-}
-
-// SetId gets a reference to the given string and assigns it to the Id field.
+// SetId sets field value
 func (o *GitRepository) SetId(v string) {
-	o.Id = &v
+	o.Id = v
 }
 
-// GetName returns the Name field value if set, zero value otherwise.
+// GetName returns the Name field value
 func (o *GitRepository) GetName() string {
-	if o == nil || IsNil(o.Name) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Name
+
+	return o.Name
 }
 
-// GetNameOk returns a tuple with the Name field value if set, nil otherwise
+// GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
 func (o *GitRepository) GetNameOk() (*string, bool) {
-	if o == nil || IsNil(o.Name) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Name, true
+	return &o.Name, true
 }
 
-// HasName returns a boolean if a field has been set.
-func (o *GitRepository) HasName() bool {
-	if o != nil && !IsNil(o.Name) {
-		return true
-	}
-
-	return false
-}
-
-// SetName gets a reference to the given string and assigns it to the Name field.
+// SetName sets field value
 func (o *GitRepository) SetName(v string) {
-	o.Name = &v
+	o.Name = v
 }
 
-// GetOwner returns the Owner field value if set, zero value otherwise.
+// GetOwner returns the Owner field value
 func (o *GitRepository) GetOwner() string {
-	if o == nil || IsNil(o.Owner) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Owner
+
+	return o.Owner
 }
 
-// GetOwnerOk returns a tuple with the Owner field value if set, nil otherwise
+// GetOwnerOk returns a tuple with the Owner field value
 // and a boolean to check if the value has been set.
 func (o *GitRepository) GetOwnerOk() (*string, bool) {
-	if o == nil || IsNil(o.Owner) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Owner, true
+	return &o.Owner, true
 }
 
-// HasOwner returns a boolean if a field has been set.
-func (o *GitRepository) HasOwner() bool {
-	if o != nil && !IsNil(o.Owner) {
-		return true
-	}
-
-	return false
-}
-
-// SetOwner gets a reference to the given string and assigns it to the Owner field.
+// SetOwner sets field value
 func (o *GitRepository) SetOwner(v string) {
-	o.Owner = &v
+	o.Owner = v
 }
 
 // GetPath returns the Path field value if set, zero value otherwise.
@@ -272,100 +258,76 @@ func (o *GitRepository) SetPrNumber(v int32) {
 	o.PrNumber = &v
 }
 
-// GetSha returns the Sha field value if set, zero value otherwise.
+// GetSha returns the Sha field value
 func (o *GitRepository) GetSha() string {
-	if o == nil || IsNil(o.Sha) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Sha
+
+	return o.Sha
 }
 
-// GetShaOk returns a tuple with the Sha field value if set, nil otherwise
+// GetShaOk returns a tuple with the Sha field value
 // and a boolean to check if the value has been set.
 func (o *GitRepository) GetShaOk() (*string, bool) {
-	if o == nil || IsNil(o.Sha) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Sha, true
+	return &o.Sha, true
 }
 
-// HasSha returns a boolean if a field has been set.
-func (o *GitRepository) HasSha() bool {
-	if o != nil && !IsNil(o.Sha) {
-		return true
-	}
-
-	return false
-}
-
-// SetSha gets a reference to the given string and assigns it to the Sha field.
+// SetSha sets field value
 func (o *GitRepository) SetSha(v string) {
-	o.Sha = &v
+	o.Sha = v
 }
 
-// GetSource returns the Source field value if set, zero value otherwise.
+// GetSource returns the Source field value
 func (o *GitRepository) GetSource() string {
-	if o == nil || IsNil(o.Source) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Source
+
+	return o.Source
 }
 
-// GetSourceOk returns a tuple with the Source field value if set, nil otherwise
+// GetSourceOk returns a tuple with the Source field value
 // and a boolean to check if the value has been set.
 func (o *GitRepository) GetSourceOk() (*string, bool) {
-	if o == nil || IsNil(o.Source) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Source, true
+	return &o.Source, true
 }
 
-// HasSource returns a boolean if a field has been set.
-func (o *GitRepository) HasSource() bool {
-	if o != nil && !IsNil(o.Source) {
-		return true
-	}
-
-	return false
-}
-
-// SetSource gets a reference to the given string and assigns it to the Source field.
+// SetSource sets field value
 func (o *GitRepository) SetSource(v string) {
-	o.Source = &v
+	o.Source = v
 }
 
-// GetUrl returns the Url field value if set, zero value otherwise.
+// GetUrl returns the Url field value
 func (o *GitRepository) GetUrl() string {
-	if o == nil || IsNil(o.Url) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Url
+
+	return o.Url
 }
 
-// GetUrlOk returns a tuple with the Url field value if set, nil otherwise
+// GetUrlOk returns a tuple with the Url field value
 // and a boolean to check if the value has been set.
 func (o *GitRepository) GetUrlOk() (*string, bool) {
-	if o == nil || IsNil(o.Url) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Url, true
+	return &o.Url, true
 }
 
-// HasUrl returns a boolean if a field has been set.
-func (o *GitRepository) HasUrl() bool {
-	if o != nil && !IsNil(o.Url) {
-		return true
-	}
-
-	return false
-}
-
-// SetUrl gets a reference to the given string and assigns it to the Url field.
+// SetUrl sets field value
 func (o *GitRepository) SetUrl(v string) {
-	o.Url = &v
+	o.Url = v
 }
 
 func (o GitRepository) MarshalJSON() ([]byte, error) {
@@ -384,31 +346,61 @@ func (o GitRepository) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Clonetarget) {
 		toSerialize["clonetarget"] = o.Clonetarget
 	}
-	if !IsNil(o.Id) {
-		toSerialize["id"] = o.Id
-	}
-	if !IsNil(o.Name) {
-		toSerialize["name"] = o.Name
-	}
-	if !IsNil(o.Owner) {
-		toSerialize["owner"] = o.Owner
-	}
+	toSerialize["id"] = o.Id
+	toSerialize["name"] = o.Name
+	toSerialize["owner"] = o.Owner
 	if !IsNil(o.Path) {
 		toSerialize["path"] = o.Path
 	}
 	if !IsNil(o.PrNumber) {
 		toSerialize["prNumber"] = o.PrNumber
 	}
-	if !IsNil(o.Sha) {
-		toSerialize["sha"] = o.Sha
-	}
-	if !IsNil(o.Source) {
-		toSerialize["source"] = o.Source
-	}
-	if !IsNil(o.Url) {
-		toSerialize["url"] = o.Url
-	}
+	toSerialize["sha"] = o.Sha
+	toSerialize["source"] = o.Source
+	toSerialize["url"] = o.Url
 	return toSerialize, nil
+}
+
+func (o *GitRepository) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	requiredProperties := []string{
+		"id",
+		"name",
+		"owner",
+		"sha",
+		"source",
+		"url",
+	}
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	for _, requiredProperty := range requiredProperties {
+		if _, exists := allProperties[requiredProperty]; !exists {
+			return fmt.Errorf("no value given for required property %v", requiredProperty)
+		}
+	}
+
+	varGitRepository := _GitRepository{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&varGitRepository)
+
+	if err != nil {
+		return err
+	}
+
+	*o = GitRepository(varGitRepository)
+
+	return err
 }
 
 type NullableGitRepository struct {

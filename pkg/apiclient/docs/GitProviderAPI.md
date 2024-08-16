@@ -615,7 +615,7 @@ import (
 )
 
 func main() {
-	repository := *openapiclient.NewGitRepository() // GitRepository | Git repository
+	repository := *openapiclient.NewGitRepository("Id_example", "Name_example", "Owner_example", "Sha_example", "Source_example", "Url_example") // GitRepository | Git repository
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

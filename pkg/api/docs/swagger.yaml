@@ -14,6 +14,14 @@ definitions:
     - name
     - type
     type: object
+  CloneTarget:
+    enum:
+    - branch
+    - commit
+    type: string
+    x-enum-varnames:
+    - CloneTargetBranch
+    - CloneTargetCommit
   ContainerRegistry:
     properties:
       password:
@@ -174,7 +182,7 @@ definitions:
       branch:
         type: string
       clonetarget:
-        $ref: '#/definitions/gitprovider.CloneTarget'
+        $ref: '#/definitions/CloneTarget'
       id:
         type: string
       name:
@@ -191,6 +199,13 @@ definitions:
         type: string
       url:
         type: string
+    required:
+    - id
+    - name
+    - owner
+    - sha
+    - source
+    - url
     type: object
   GitStatus:
     properties:
@@ -534,14 +549,6 @@ definitions:
     - ApiKeyTypeClient
     - ApiKeyTypeProject
     - ApiKeyTypeWorkspace
-  gitprovider.CloneTarget:
-    enum:
-    - branch
-    - commit
-    type: string
-    x-enum-varnames:
-    - CloneTargetBranch
-    - CloneTargetCommit
   provider.ProviderInfo:
     properties:
       name:

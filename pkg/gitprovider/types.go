@@ -17,7 +17,7 @@ type GitUser struct {
 	Email    string `json:"email" validate:"required"`
 } // @name GitUser
 
-type CloneTarget string
+type CloneTarget string // @name CloneTarget
 
 const (
 	CloneTargetBranch CloneTarget = "branch"
@@ -25,16 +25,16 @@ const (
 )
 
 type GitRepository struct {
-	Id       string      `json:"id"`
-	Url      string      `json:"url"`
-	Name     string      `json:"name"`
-	Branch   *string     `json:"branch,omitempty"`
-	Sha      string      `json:"sha"`
-	Owner    string      `json:"owner"`
-	PrNumber *uint32     `json:"prNumber,omitempty"`
-	Source   string      `json:"source"`
-	Path     *string     `json:"path,omitempty"`
-	Target   CloneTarget `json:"clonetarget,omitempty"`
+	Id       string      `json:"id" validate:"required"`
+	Url      string      `json:"url" validate:"required"`
+	Name     string      `json:"name" validate:"required"`
+	Branch   *string     `json:"branch,omitempty" validate:"optional"`
+	Sha      string      `json:"sha" validate:"required"`
+	Owner    string      `json:"owner" validate:"required"`
+	PrNumber *uint32     `json:"prNumber,omitempty" validate:"optional"`
+	Source   string      `json:"source" validate:"required"`
+	Path     *string     `json:"path,omitempty" validate:"optional"`
+	Target   CloneTarget `json:"clonetarget,omitempty" validate:"optional"`
 } // @name GitRepository
 
 type GitNamespace struct {

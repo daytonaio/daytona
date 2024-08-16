@@ -972,6 +972,14 @@ components:
       - name
       - type
       type: object
+    CloneTarget:
+      enum:
+      - branch
+      - commit
+      type: string
+      x-enum-varnames:
+      - CloneTargetBranch
+      - CloneTargetCommit
     ContainerRegistry:
       example:
         server: server
@@ -1255,7 +1263,7 @@ components:
         branch:
           type: string
         clonetarget:
-          $ref: '#/components/schemas/gitprovider.CloneTarget'
+          $ref: '#/components/schemas/CloneTarget'
         id:
           type: string
         name:
@@ -1272,6 +1280,13 @@ components:
           type: string
         url:
           type: string
+      required:
+      - id
+      - name
+      - owner
+      - sha
+      - source
+      - url
       type: object
     GitStatus:
       example:
@@ -1952,14 +1967,6 @@ components:
       - ApiKeyTypeClient
       - ApiKeyTypeProject
       - ApiKeyTypeWorkspace
-    gitprovider.CloneTarget:
-      enum:
-      - branch
-      - commit
-      type: string
-      x-enum-varnames:
-      - CloneTargetBranch
-      - CloneTargetCommit
     provider.ProviderInfo:
       example:
         name: name
