@@ -64,7 +64,7 @@ func (a *AbstractGitProvider) GetRepositoryFromUrl(repositoryUrl string) (*GitRe
 		if err != nil {
 			return nil, err
 		}
-		*staticContext.Branch = branch
+		staticContext.Branch = &branch
 	} else {
 		lastCommitSha, err := a.GetLastCommitSha(staticContext)
 		if err != nil {
