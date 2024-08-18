@@ -133,8 +133,6 @@ definitions:
     properties:
       baseApiUrl:
         type: string
-      configId:
-        type: integer
       id:
         type: string
       token:
@@ -148,7 +146,6 @@ definitions:
       username:
         type: string
     required:
-    - configId
     - id
     - token
     - tokenIdentity

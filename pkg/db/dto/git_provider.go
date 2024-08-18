@@ -16,8 +16,7 @@ const (
 )
 
 type GitProviderConfigDTO struct {
-	ConfigId       uint           `gorm:"primaryKey;autoIncrement"`
-	Id             string         `json:"id"`
+	Id             string         `gorm:"primaryKey"`
 	Username       string         `json:"username"`
 	BaseApiUrl     *string        `json:"baseApiUrl,omitempty"`
 	Token          string         `json:"token"`
@@ -28,7 +27,6 @@ type GitProviderConfigDTO struct {
 
 func ToGitProviderConfigDTO(gitProvider gitprovider.GitProviderConfig) GitProviderConfigDTO {
 	gitProviderDTO := GitProviderConfigDTO{
-		ConfigId:       gitProvider.ConfigId,
 		Id:             gitProvider.Id,
 		Username:       gitProvider.Username,
 		BaseApiUrl:     gitProvider.BaseApiUrl,
@@ -43,7 +41,6 @@ func ToGitProviderConfigDTO(gitProvider gitprovider.GitProviderConfig) GitProvid
 
 func ToGitProviderConfig(gitProviderDTO GitProviderConfigDTO) gitprovider.GitProviderConfig {
 	return gitprovider.GitProviderConfig{
-		ConfigId:       gitProviderDTO.ConfigId,
 		Id:             gitProviderDTO.Id,
 		Username:       gitProviderDTO.Username,
 		BaseApiUrl:     gitProviderDTO.BaseApiUrl,

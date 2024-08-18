@@ -12,7 +12,6 @@ const (
 )
 
 type GitProviderConfig struct {
-	ConfigId       uint           `json:"configId" validate:"required"`
 	Id             string         `json:"id" validate:"required"`
 	Username       string         `json:"username" validate:"required"`
 	BaseApiUrl     *string        `json:"baseApiUrl,omitempty" validate:"optional"`

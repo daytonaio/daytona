@@ -1529,7 +1529,6 @@
         "GitProvider": {
             "type": "object",
             "required": [
-                "configId",
                 "id",
                 "token",
                 "tokenIdentity",
@@ -1540,9 +1539,6 @@
             "properties": {
                 "baseApiUrl": {
                     "type": "string"
-                },
-                "configId": {
-                    "type": "integer"
                 },
                 "id": {
                     "type": "string"

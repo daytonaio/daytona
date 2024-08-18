@@ -1532,7 +1532,6 @@ const docTemplate = `{
         "GitProvider": {
             "type": "object",
             "required": [
-                "configId",
                 "id",
                 "token",
                 "tokenIdentity",
@@ -1543,9 +1542,6 @@ const docTemplate = `{
             "properties": {
                 "baseApiUrl": {
                     "type": "string"
-                },
-                "configId": {
-                    "type": "integer"
                 },
                 "id": {
                     "type": "string"

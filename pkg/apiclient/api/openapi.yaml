@@ -1186,7 +1186,6 @@ components:
       example:
         tokenScope: tokenScope
         tokenScopeType: null
-        configId: 0
         tokenIdentity: tokenIdentity
         baseApiUrl: baseApiUrl
         id: id
@@ -1195,8 +1194,6 @@ components:
       properties:
         baseApiUrl:
           type: string
-        configId:
-          type: integer
         id:
           type: string
         token:
@@ -1210,7 +1207,6 @@ components:
         username:
           type: string
       required:
-      - configId
       - id
       - token
       - tokenIdentity

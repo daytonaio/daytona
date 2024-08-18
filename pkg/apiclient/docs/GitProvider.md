@@ -5,7 +5,6 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **BaseApiUrl** | Pointer to **string** |  | [optional] 
-**ConfigId** | **int32** |  | 
 **Id** | **string** |  | 
 **Token** | **string** |  | 
 **TokenIdentity** | **string** |  | 
@@ -17,7 +16,7 @@ Name | Type | Description | Notes
 
 ### NewGitProvider
 
-`func NewGitProvider(configId int32, id string, token string, tokenIdentity string, tokenScope string, tokenScopeType GitproviderTokenScopeType, username string, ) *GitProvider`
+`func NewGitProvider(id string, token string, tokenIdentity string, tokenScope string, tokenScopeType GitproviderTokenScopeType, username string, ) *GitProvider`
 
 NewGitProvider instantiates a new GitProvider object
 This constructor will assign default values to properties that have it defined,
@@ -56,26 +55,6 @@ SetBaseApiUrl sets BaseApiUrl field to given value.
 `func (o *GitProvider) HasBaseApiUrl() bool`
 
 HasBaseApiUrl returns a boolean if a field has been set.
-
-### GetConfigId
-
-`func (o *GitProvider) GetConfigId() int32`
-
-GetConfigId returns the ConfigId field if non-nil, zero value otherwise.
-
-### GetConfigIdOk
-
-`func (o *GitProvider) GetConfigIdOk() (*int32, bool)`
-
-GetConfigIdOk returns a tuple with the ConfigId field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetConfigId
-
-`func (o *GitProvider) SetConfigId(v int32)`
-
-SetConfigId sets ConfigId field to given value.
-
 
 ### GetId
 
