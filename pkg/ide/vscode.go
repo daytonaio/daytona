@@ -81,7 +81,7 @@ func setupIdeCustomizations(projectHostname string, projectProviderMetadata stri
 			time.Sleep(2 * time.Second)
 			// Wait for code to be installed
 			var err error
-			if vscodePath, err = exec.Command("ssh", projectHostname, "find", "/home", "-path", fmt.Sprintf(`"%s"`, codeServerPath)).Output(); err == nil && len(vscodePath) > 0 {
+			if vscodePath, err = exec.Command("ssh", projectHostname, "find", "$HOME", "-path", fmt.Sprintf(`"%s"`, codeServerPath)).Output(); err == nil && len(vscodePath) > 0 {
 				break
 			}
 		}
