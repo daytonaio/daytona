@@ -30,7 +30,11 @@
       "console": "integratedTerminal",
       "args": [
         "serve"
-      ]
+      ],
+      "env": {
+        "DAYTONA_DEV": "1",
+        "DAYTONA_CONFIG_DIR": "/home/daytona/.config/daytona-dev",
+      }
     },
     {
       "name": "CLI Create",
@@ -41,7 +45,11 @@
       "console": "integratedTerminal",
       "args": [
         "create"
-      ]
+      ],
+      "env": {
+        "DAYTONA_DEV": "1",
+        "DAYTONA_CONFIG_DIR": "/home/daytona/.config/daytona-dev",
+      }
     }
   ]
 }
