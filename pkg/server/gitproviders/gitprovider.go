@@ -19,7 +19,35 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 		return nil, "", err
 	}
 
+	parsedUrl, err := url.Parse(repoUrl)
+	if err != nil {
+		return nil, "", err
+	}
+
 	for _, p := range gitProviders {
+		if p.TokenScopeType != gitprovider.TokenScopeTypeGlobal && p.TokenScopeType != "" {
+			parts := strings.Split(p.TokenScope, "/")
+			isOrgMatched := strings.Contains(parsedUrl.Path, parts[0])
+			isRepoMatched := strings.Contains(parsedUrl.Path, parts[1])
+
+			if p.TokenScopeType == gitprovider.TokenScopeTypeRepository && isOrgMatched && isRepoMatched {
+				gitProvider, err := s.GetGitProvider(p.Id)
+				if err != nil {
+					return nil, "", err
+				}
+				return gitProvider, p.Id, nil
+			}
+
+			if p.TokenScopeType == gitprovider.TokenScopeTypeOrganization && isOrgMatched {
+				gitProvider, err := s.GetGitProvider(p.Id)
+				if err != nil {
+					return nil, "", err
+				}
+				return gitProvider, p.Id, nil
+			}
+		}
+
+		// Assumes that git provider added before this update has global access
 		if p.Id == "aws-codecommit" && strings.Contains(repoUrl, "git-codecommit") {
 			gitProvider, err := s.GetGitProvider(p.Id)
 			if err != nil {
@@ -78,9 +106,28 @@ func (s *GitProviderService) GetConfigForUrl(repoUrl string) (*gitprovider.GitPr
 		return nil, err
 	}
 
+	parsedUrl, err := url.Parse(repoUrl)
+	if err != nil {
+		return nil, err
+	}
+
 	for _, p := range gitProviders {
 		p.Token = url.QueryEscape(p.Token)
 		p.Username = url.QueryEscape(p.Username)
+
+		if p.TokenScopeType != gitprovider.TokenScopeTypeGlobal && p.TokenScopeType != "" {
+			parts := strings.Split(p.TokenScope, "/")
+			isOrgMatched := strings.Contains(parsedUrl.Path, parts[0])
+			isRepoMatched := strings.Contains(parsedUrl.Path, parts[1])
+
+			if p.TokenScopeType == gitprovider.TokenScopeTypeRepository && isOrgMatched && isRepoMatched {
+				return p, nil
+			}
+
+			if p.TokenScopeType == gitprovider.TokenScopeTypeOrganization && isOrgMatched {
+				return p, nil
+			}
+		}
 
 		if p.Id == "aws-codecommit" && strings.Contains(repoUrl, "git-codecommit") {
 			return p, nil

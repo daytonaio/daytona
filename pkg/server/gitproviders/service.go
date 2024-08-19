@@ -6,6 +6,7 @@ package gitproviders
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
@@ -80,7 +81,36 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 		return "", err
 	}
 
+	parsedUrl, err := url.Parse(repo.Url)
+	if err != nil {
+		return "", err
+	}
+
 	for _, p := range gitProviders {
+		if p.TokenScopeType != gitprovider.TokenScopeTypeGlobal && p.TokenScopeType != "" {
+			parts := strings.Split(p.TokenScope, "/")
+			isOrgMatched := strings.Contains(parsedUrl.Path, parts[0])
+			isRepoMatched := strings.Contains(parsedUrl.Path, parts[1])
+
+			if p.TokenScopeType == gitprovider.TokenScopeTypeRepository && isOrgMatched && isRepoMatched {
+				provider, err = s.GetGitProvider(p.Id)
+				if err == nil {
+					return "", err
+				}
+				providerFound = true
+				break
+			}
+
+			if p.TokenScopeType == gitprovider.TokenScopeTypeOrganization && isOrgMatched {
+				provider, err = s.GetGitProvider(p.Id)
+				if err == nil {
+					return "", err
+				}
+				providerFound = true
+				break
+			}
+		}
+
 		if p.Id == "aws-codecommit" && strings.Contains(repo.Url, ".amazonaws.com/") {
 			provider, err = s.GetGitProvider(p.Id)
 			if err == nil {
