@@ -74,7 +74,6 @@ func ReadJSONLog(ws *websocket.Conn, index int, stopLogs ...*bool) {
 		var logEntry logs.LogEntry
 		err := ws.ReadJSON(&logEntry)
 		if err != nil {
-			fmt.Println(err.Error())
 			return
 		}
 		logEntriesChan <- logEntry

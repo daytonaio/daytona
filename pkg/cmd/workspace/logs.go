@@ -65,13 +65,13 @@ var LogsCmd = &cobra.Command{
 			if workspace == nil {
 				return
 			}
-			workspaceId = *workspace.Id
+			workspaceId = workspace.Id
 		} else {
 			workspace, err := apiclient_util.GetWorkspace(args[0])
 			if err != nil {
 				log.Fatal(err)
 			}
-			workspaceId = *workspace.Id
+			workspaceId = workspace.Id
 		}
 
 		if len(args) == 2 {
