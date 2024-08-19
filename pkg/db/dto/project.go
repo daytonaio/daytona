@@ -10,16 +10,24 @@ import (
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 )
 
+type CloneTarget string
+
+const (
+	CloneTargetBranch CloneTarget = "branch"
+	CloneTargetCommit CloneTarget = "commit"
+)
+
 type RepositoryDTO struct {
-	Id       string  `json:"id"`
-	Url      string  `json:"url"`
-	Name     string  `json:"name"`
-	Owner    string  `json:"owner"`
-	Sha      string  `json:"sha"`
-	Source   string  `json:"source"`
-	Branch   *string `default:"main" json:"branch,omitempty"`
-	PrNumber *uint32 `json:"prNumber,omitempty"`
-	Path     *string `json:"path,omitempty"`
+	Id       string      `json:"id"`
+	Url      string      `json:"url"`
+	Name     string      `json:"name"`
+	Owner    string      `json:"owner"`
+	Sha      string      `json:"sha"`
+	Source   string      `json:"source"`
+	Branch   *string     `default:"main" json:"branch,omitempty"`
+	PrNumber *uint32     `json:"prNumber,omitempty"`
+	Path     *string     `json:"path,omitempty"`
+	Target   CloneTarget `json:"clonetarget,omitempty"`
 }
 
 type FileStatusDTO struct {
@@ -85,6 +93,7 @@ func ToRepositoryDTO(repo *gitprovider.GitRepository) RepositoryDTO {
 		Branch:   repo.Branch,
 		PrNumber: repo.PrNumber,
 		Path:     repo.Path,
+		Target:   CloneTarget(repo.Target),
 	}
 
 	return repoDTO
@@ -215,6 +224,7 @@ func ToRepository(repoDTO RepositoryDTO) *gitprovider.GitRepository {
 		PrNumber: repoDTO.PrNumber,
 		Source:   repoDTO.Source,
 		Path:     repoDTO.Path,
+		Target:   gitprovider.CloneTarget(repoDTO.Target),
 	}
 
 	return &repo
