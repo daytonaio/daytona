@@ -223,7 +223,7 @@ func (g *GitLabGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (
 
 		}
 
-		if branchName == "" {
+		if branchName != "" {
 			break
 		}
 	}

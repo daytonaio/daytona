@@ -5,7 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Branch** | Pointer to **string** |  | [optional] 
-**Clonetarget** | Pointer to [**CloneTarget**](CloneTarget.md) |  | [optional] 
+**CloneTarget** | Pointer to [**CloneTarget**](CloneTarget.md) |  | [optional] 
 **Id** | **string** |  | 
 **Name** | **string** |  | 
 **Owner** | **string** |  | 
@@ -59,30 +59,30 @@ SetBranch sets Branch field to given value.
 
 HasBranch returns a boolean if a field has been set.
 
-### GetClonetarget
+### GetCloneTarget
 
-`func (o *GitRepository) GetClonetarget() CloneTarget`
+`func (o *GitRepository) GetCloneTarget() CloneTarget`
 
-GetClonetarget returns the Clonetarget field if non-nil, zero value otherwise.
+GetCloneTarget returns the CloneTarget field if non-nil, zero value otherwise.
 
-### GetClonetargetOk
+### GetCloneTargetOk
 
-`func (o *GitRepository) GetClonetargetOk() (*CloneTarget, bool)`
+`func (o *GitRepository) GetCloneTargetOk() (*CloneTarget, bool)`
 
-GetClonetargetOk returns a tuple with the Clonetarget field if it's non-nil, zero value otherwise
+GetCloneTargetOk returns a tuple with the CloneTarget field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetClonetarget
+### SetCloneTarget
 
-`func (o *GitRepository) SetClonetarget(v CloneTarget)`
+`func (o *GitRepository) SetCloneTarget(v CloneTarget)`
 
-SetClonetarget sets Clonetarget field to given value.
+SetCloneTarget sets CloneTarget field to given value.
 
-### HasClonetarget
+### HasCloneTarget
 
-`func (o *GitRepository) HasClonetarget() bool`
+`func (o *GitRepository) HasCloneTarget() bool`
 
-HasClonetarget returns a boolean if a field has been set.
+HasCloneTarget returns a boolean if a field has been set.
 
 ### GetId
 

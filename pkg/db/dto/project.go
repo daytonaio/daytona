@@ -27,7 +27,7 @@ type RepositoryDTO struct {
 	Branch   *string     `default:"main" json:"branch,omitempty"`
 	PrNumber *uint32     `json:"prNumber,omitempty"`
 	Path     *string     `json:"path,omitempty"`
-	Target   CloneTarget `json:"clonetarget,omitempty"`
+	Target   CloneTarget `json:"cloneTarget,omitempty"`
 }
 
 type FileStatusDTO struct {

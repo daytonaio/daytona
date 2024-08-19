@@ -34,7 +34,7 @@ type GitRepository struct {
 	PrNumber *uint32     `json:"prNumber,omitempty" validate:"optional"`
 	Source   string      `json:"source" validate:"required"`
 	Path     *string     `json:"path,omitempty" validate:"optional"`
-	Target   CloneTarget `json:"clonetarget,omitempty" validate:"optional"`
+	Target   CloneTarget `json:"cloneTarget,omitempty" validate:"optional"`
 } // @name GitRepository
 
 type GitNamespace struct {

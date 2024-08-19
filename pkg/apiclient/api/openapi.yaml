@@ -1008,7 +1008,6 @@ components:
         name: name
         source:
           repository:
-            clonetarget: null
             owner: owner
             path: path
             name: name
@@ -1016,6 +1015,7 @@ components:
             source: source
             prNumber: 0
             branch: branch
+            cloneTarget: null
             sha: sha
             url: url
         user: user
@@ -1042,7 +1042,6 @@ components:
     CreateProjectConfigSourceDTO:
       example:
         repository:
-          clonetarget: null
           owner: owner
           path: path
           name: name
@@ -1050,6 +1049,7 @@ components:
           source: source
           prNumber: 0
           branch: branch
+          cloneTarget: null
           sha: sha
           url: url
       properties:
@@ -1070,7 +1070,6 @@ components:
           name: name
           source:
             repository:
-              clonetarget: null
               owner: owner
               path: path
               name: name
@@ -1078,6 +1077,7 @@ components:
               source: source
               prNumber: 0
               branch: branch
+              cloneTarget: null
               sha: sha
               url: url
           user: user
@@ -1090,7 +1090,6 @@ components:
           name: name
           source:
             repository:
-              clonetarget: null
               owner: owner
               path: path
               name: name
@@ -1098,6 +1097,7 @@ components:
               source: source
               prNumber: 0
               branch: branch
+              cloneTarget: null
               sha: sha
               url: url
           user: user
@@ -1249,7 +1249,6 @@ components:
       type: object
     GitRepository:
       example:
-        clonetarget: null
         owner: owner
         path: path
         name: name
@@ -1257,12 +1256,13 @@ components:
         source: source
         prNumber: 0
         branch: branch
+        cloneTarget: null
         sha: sha
         url: url
       properties:
         branch:
           type: string
-        clonetarget:
+        cloneTarget:
           $ref: '#/components/schemas/CloneTarget'
         id:
           type: string
@@ -1394,7 +1394,6 @@ components:
           updatedAt: updatedAt
           uptime: 0
         repository:
-          clonetarget: null
           owner: owner
           path: path
           name: name
@@ -1402,6 +1401,7 @@ components:
           source: source
           prNumber: 0
           branch: branch
+          cloneTarget: null
           sha: sha
           url: url
         user: user
@@ -1459,7 +1459,6 @@ components:
           key: envVars
         name: name
         repository:
-          clonetarget: null
           owner: owner
           path: path
           name: name
@@ -1467,6 +1466,7 @@ components:
           source: source
           prNumber: 0
           branch: branch
+          cloneTarget: null
           sha: sha
           url: url
         user: user
@@ -1749,7 +1749,6 @@ components:
             updatedAt: updatedAt
             uptime: 0
           repository:
-            clonetarget: null
             owner: owner
             path: path
             name: name
@@ -1757,6 +1756,7 @@ components:
             source: source
             prNumber: 0
             branch: branch
+            cloneTarget: null
             sha: sha
             url: url
           user: user
@@ -1785,7 +1785,6 @@ components:
             updatedAt: updatedAt
             uptime: 0
           repository:
-            clonetarget: null
             owner: owner
             path: path
             name: name
@@ -1793,6 +1792,7 @@ components:
             source: source
             prNumber: 0
             branch: branch
+            cloneTarget: null
             sha: sha
             url: url
           user: user
@@ -1844,7 +1844,6 @@ components:
             updatedAt: updatedAt
             uptime: 0
           repository:
-            clonetarget: null
             owner: owner
             path: path
             name: name
@@ -1852,6 +1851,7 @@ components:
             source: source
             prNumber: 0
             branch: branch
+            cloneTarget: null
             sha: sha
             url: url
           user: user
@@ -1880,7 +1880,6 @@ components:
             updatedAt: updatedAt
             uptime: 0
           repository:
-            clonetarget: null
             owner: owner
             path: path
             name: name
@@ -1888,6 +1887,7 @@ components:
             source: source
             prNumber: 0
             branch: branch
+            cloneTarget: null
             sha: sha
             url: url
           user: user

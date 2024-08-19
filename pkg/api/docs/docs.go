@@ -1611,7 +1611,7 @@ const docTemplate = `{
                 "branch": {
                     "type": "string"
                 },
-                "clonetarget": {
+                "cloneTarget": {
                     "$ref": "#/definitions/CloneTarget"
                 },
                 "id": {
