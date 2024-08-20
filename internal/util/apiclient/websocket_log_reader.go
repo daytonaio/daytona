@@ -43,7 +43,7 @@ func ReadWorkspaceLogs(activeProfile config.Profile, workspaceId string, project
 					continue
 				}
 
-				ReadJSONLog(ws, index, stopLogs)
+				ReadJSONLog(ws, stopLogs, index)
 				ws.Close()
 				break
 			}
@@ -59,7 +59,7 @@ func ReadWorkspaceLogs(activeProfile config.Profile, workspaceId string, project
 			continue
 		}
 
-		ReadJSONLog(ws, logs_view.WORKSPACE_INDEX, stopLogs)
+		ReadJSONLog(ws, stopLogs, logs_view.WORKSPACE_INDEX)
 		ws.Close()
 		break
 	}
@@ -67,7 +67,7 @@ func ReadWorkspaceLogs(activeProfile config.Profile, workspaceId string, project
 	wg.Wait()
 }
 
-func ReadJSONLog(ws *websocket.Conn, index int, stopLogs ...*bool) {
+func ReadJSONLog(ws *websocket.Conn, stopLogs *bool, index int) {
 	logEntriesChan := make(chan logs.LogEntry)
 	go logs_view.DisplayLogs(logEntriesChan, index)
 	for {
@@ -80,7 +80,7 @@ func ReadJSONLog(ws *websocket.Conn, index int, stopLogs ...*bool) {
 		if !workspaceLogsStarted && index == logs_view.WORKSPACE_INDEX {
 			workspaceLogsStarted = true
 		}
-		if len(stopLogs) > 0 && stopLogs[0] != nil && *stopLogs[0] {
+		if *stopLogs {
 			return
 		}
 	}

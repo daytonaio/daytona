@@ -2,14 +2,18 @@ name: daytona logs
 synopsis: View logs for a workspace or project
 usage: daytona logs [WORKSPACE] [PROJECT] [flags]
 options:
+    - name: all
+      shorthand: a
+      default_value: "false"
+      usage: Show logs for workspace and project together
     - name: follow
       shorthand: f
       default_value: "false"
       usage: Follow logs
-    - name: retry
-      shorthand: r
+    - name: workspace
+      shorthand: w
       default_value: "false"
-      usage: Retry connection
+      usage: Show logs for workspace only
 inherited_options:
     - name: help
       default_value: "false"

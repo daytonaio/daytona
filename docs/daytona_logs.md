@@ -9,8 +9,9 @@ daytona logs [WORKSPACE] [PROJECT] [flags]
 ### Options
 
 ```
-  -f, --follow   Follow logs
-  -r, --retry    Retry connection
+  -a, --all         Show logs for workspace and project together
+  -f, --follow      Follow logs
+  -w, --workspace   Show logs for workspace only
 ```
 
 ### Options inherited from parent commands
