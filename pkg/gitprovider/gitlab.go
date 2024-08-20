@@ -199,9 +199,9 @@ func (g *GitLabGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (
 			break
 		}
 
-		commitId := staticContext.Sha
-		for commitId != nil {
-			commit, _, err := client.Commits.GetCommit(staticContext.Id, *staticContext.Sha)
+		commitId := branch.Commit.ID
+		for commitId != "" {
+			commit, _, err := client.Commits.GetCommit(staticContext.Id, commitId)
 			if err != nil {
 				return "", err
 			}
@@ -212,13 +212,13 @@ func (g *GitLabGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (
 			}
 
 			if len(commit.ParentIDs) > 0 {
-				commitId = &commit.ParentIDs[0]
-				if *staticContext.Sha == *commitId {
+				commitId = commit.ParentIDs[0]
+				if *staticContext.Sha == commitId {
 					branchName = branch.Name
 					break
 				}
 			} else {
-				commitId = nil
+				commitId = ""
 			}
 
 		}
