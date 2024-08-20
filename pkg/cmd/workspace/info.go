@@ -9,7 +9,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	log "github.com/sirupsen/logrus"
@@ -38,7 +38,15 @@ var InfoCmd = &cobra.Command{
 				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
 
+			if format.FormatFlag != "" {
+				format.UnblockStdOut()
+			}
+
 			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "View")
+			if format.FormatFlag != "" {
+				format.BlockStdOut()
+			}
+
 		} else {
 			workspace, err = apiclient_util.GetWorkspace(args[0])
 			if err != nil {
@@ -50,8 +58,9 @@ var InfoCmd = &cobra.Command{
 			return
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = workspace
+		if format.FormatFlag != "" {
+			formatter := format.NewFormatter(workspace)
+			formatter.Print()
 			return
 		}
 
@@ -64,4 +73,8 @@ var InfoCmd = &cobra.Command{
 
 		return getWorkspaceNameCompletions()
 	},
+}
+
+func init() {
+	format.RegisterFormatFlag(InfoCmd)
 }

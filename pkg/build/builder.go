@@ -4,31 +4,46 @@
 package build
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
+
+	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 )
 
 type IBuilder interface {
 	Build(build Build) (string, string, error)
 	CleanUp() error
 	Publish(build Build) error
-	SaveBuild(build Build) error
+	GetImageName(build Build) (string, error)
 }
 
 type Builder struct {
-	id                       string
-	hash                     string
-	projectDir               string
-	image                    string
-	containerRegistryService containerregistries.IContainerRegistryService
-	containerRegistryServer  string
-	buildStore               Store
-	buildImageNamespace      string
-	loggerFactory            logs.LoggerFactory
-	defaultProjectImage      string
-	defaultProjectUser       string
+	id                  string
+	projectDir          string
+	image               string
+	containerRegistry   *containerregistry.ContainerRegistry
+	buildStore          Store
+	buildImageNamespace string
+	loggerFactory       logs.LoggerFactory
+	defaultProjectImage string
+	defaultProjectUser  string
 }
 
-func (b *Builder) SaveBuild(build Build) error {
-	return b.buildStore.Save(&build)
+func (b *Builder) GetImageName(build Build) (string, error) {
+	hash, err := build.GetBuildHash()
+	if err != nil {
+		return "", err
+	}
+	tagBytes := sha256.Sum256([]byte(fmt.Sprintf("%s%s", hash, build.Repository.Sha)))
+	nameBytes := sha256.Sum256([]byte(build.Repository.Url))
+
+	tag := hex.EncodeToString(tagBytes[:])[:16]
+	name := hex.EncodeToString(nameBytes[:])[:16]
+
+	namespace := b.buildImageNamespace
+	imageName := fmt.Sprintf("%s%s/p-%s:%s", b.containerRegistry.Server, namespace, name, tag)
+
+	return imageName, nil
 }

@@ -28,13 +28,13 @@ func RemoveTarget(ctx *gin.Context) {
 
 	target, err := server.ProviderTargetService.Find(targetName)
 	if err != nil {
-		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to find target: %s", err.Error()))
+		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to find target: %w", err))
 		return
 	}
 
 	err = server.ProviderTargetService.Delete(target)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to remove target: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to remove target: %w", err))
 		return
 	}
 

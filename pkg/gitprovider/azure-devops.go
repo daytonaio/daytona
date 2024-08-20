@@ -90,7 +90,7 @@ func (g *AzureDevOpsGitProvider) GetRepositories(namespace string) ([]*GitReposi
 		gitRepo := &GitRepository{
 			Id:     repo.Id.String(),
 			Name:   *repo.Name,
-			Branch: &defaultBranch,
+			Branch: defaultBranch,
 			Url:    *repo.WebUrl,
 			Source: u.Host,
 		}
@@ -254,28 +254,91 @@ func (g *AzureDevOpsGitProvider) GetLastCommitSha(staticContext *StaticGitContex
 	return *(*commits)[0].CommitId, nil
 }
 
-func (g *AzureDevOpsGitProvider) GetUrlFromRepository(repo *GitRepository) string {
-	url := strings.TrimSuffix(repo.Url, ".git")
-	url = strings.TrimSuffix(url, repo.Name)
-	url += "_git/" + repo.Name
-	query := ""
+func (g *AzureDevOpsGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
+	client, err := g.getGitClient()
+	if err != nil {
+		return "", err
+	}
 
-	if repo.Branch != nil && *repo.Branch != "" {
-		if repo.Sha == *repo.Branch {
-			query += "version=GC" + *repo.Branch
-		} else {
-			query += "version=GB" + *repo.Branch
+	branches, err := client.GetBranches(context.Background(), git.GetBranchesArgs{
+		RepositoryId: &staticContext.Id,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	var branchName string
+	for _, branch := range *branches {
+		if *branch.Commit.CommitId == *staticContext.Sha {
+			branchName = *branch.Name
+			break
 		}
 
-		if repo.Path != nil && *repo.Path != "" {
+		searchCriteria := &git.GitQueryCommitsCriteria{
+			ItemVersion: &git.GitVersionDescriptor{
+				Version:     &branchName,
+				VersionType: &git.GitVersionTypeValues.Branch,
+			},
+			FromCommitId: staticContext.Sha,
+			ToCommitId:   staticContext.Sha,
+		}
+
+		commits, err := client.GetCommitsBatch(context.Background(), git.GetCommitsBatchArgs{
+			SearchCriteria: searchCriteria,
+			RepositoryId:   &staticContext.Id,
+		})
+		if err != nil {
+			continue
+		}
+
+		if len(*commits) == 0 {
+			continue
+		}
+
+		for _, commit := range *commits {
+			if *commit.CommitId == *staticContext.Sha {
+				branchName = *branch.Name
+				break
+			}
+
+		}
+		if branchName != "" {
+			break
+		}
+
+	}
+
+	if branchName == "" {
+		return "", fmt.Errorf("branch not found for SHA: %s", *staticContext.Sha)
+	}
+
+	return branchName, nil
+}
+
+func (g *AzureDevOpsGitProvider) GetUrlFromContext(repoContext *GetRepositoryContext) string {
+	url := strings.TrimSuffix(repoContext.Url, ".git")
+	if repoContext.Name != nil {
+		url = strings.TrimSuffix(url, *repoContext.Name)
+		url += "_git/" + *repoContext.Name
+	}
+	query := ""
+
+	if repoContext.Branch != nil && *repoContext.Branch != "" {
+		if repoContext.Sha != nil && *repoContext.Sha == *repoContext.Branch {
+			query += "version=GC" + *repoContext.Branch
+		} else {
+			query += "version=GB" + *repoContext.Branch
+		}
+
+		if repoContext.Path != nil && *repoContext.Path != "" {
 			if query != "" {
 				query += "&"
 			}
 
-			query += "path=" + *repo.Path
+			query += "path=" + *repoContext.Path
 		}
-	} else if repo.Path != nil {
-		query = "version=GBmain&path=" + *repo.Path
+	} else if repoContext.Path != nil {
+		query = "version=GBmain&path=" + *repoContext.Path
 	} else {
 		url = strings.Replace(url, "/_git", "", 1)
 	}
@@ -287,7 +350,7 @@ func (g *AzureDevOpsGitProvider) GetUrlFromRepository(repo *GitRepository) strin
 	return url
 }
 
-func (g *AzureDevOpsGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
+func (g *AzureDevOpsGitProvider) GetPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
 	var pullRequestId int
 	if staticContext.PrNumber == nil {
 		return staticContext, nil
@@ -325,7 +388,7 @@ func (g *AzureDevOpsGitProvider) getPrContext(staticContext *StaticGitContext) (
 	return &repo, nil
 }
 
-func (g *AzureDevOpsGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
+func (g *AzureDevOpsGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
 	repoUrl = strings.TrimSpace(repoUrl)
 	if strings.HasPrefix(repoUrl, "git@") {
 		return g.parseAzureDevopsSshGitUrl(repoUrl)
@@ -336,6 +399,25 @@ func (g *AzureDevOpsGitProvider) parseStaticGitContext(repoUrl string) (*StaticG
 	}
 
 	return nil, errors.New("can not parse git URL: " + repoUrl)
+}
+
+func (g *AzureDevOpsGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*string, error) {
+	client, err := g.getGitClient()
+	if err != nil {
+		return nil, err
+	}
+
+	ctx := context.Background()
+	repo, err := client.GetRepository(ctx, git.GetRepositoryArgs{
+		RepositoryId: &staticContext.Id,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	defaultBranch := *repo.DefaultBranch
+	defaultBranch = strings.TrimPrefix(defaultBranch, "refs/heads/")
+	return &defaultBranch, nil
 }
 
 func (g *AzureDevOpsGitProvider) parseAzureDevopsSshGitUrl(gitURL string) (*StaticGitContext, error) {

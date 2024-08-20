@@ -35,6 +35,9 @@ func (s *WorkspaceService) StopWorkspace(ctx context.Context, workspaceId string
 	}
 
 	err = s.provisioner.StopWorkspace(workspace, target)
+	if err == nil {
+		err = s.workspaceStore.Save(workspace)
+	}
 
 	if !telemetry.TelemetryEnabled(ctx) {
 		return err
@@ -53,11 +56,7 @@ func (s *WorkspaceService) StopWorkspace(ctx context.Context, workspaceId string
 		log.Trace(telemetryError)
 	}
 
-	if err != nil {
-		return err
-	}
-
-	return s.workspaceStore.Save(workspace)
+	return err
 }
 
 func (s *WorkspaceService) StopProject(ctx context.Context, workspaceId, projectName string) error {

@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	"github.com/daytonaio/daytona/pkg/apikey"
+	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
@@ -20,6 +21,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -66,44 +68,46 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 
 	w.Projects = []*project.Project{}
 
-	for _, p := range req.Projects {
-		projectConfig := conversion.ToProjectConfig(p)
+	for _, projectDto := range req.Projects {
+		p := conversion.CreateDtoToProject(projectDto)
 
 		isValidProjectName := regexp.MustCompile(`^[a-zA-Z0-9-_.]+$`).MatchString
-		if !isValidProjectName(projectConfig.Name) {
+		if !isValidProjectName(p.Name) {
 			return nil, ErrInvalidProjectName
 		}
 
-		if projectConfig.Repository != nil {
-			projectConfig.Repository.Url = util.CleanUpRepositoryUrl(projectConfig.Repository.Url)
-			if projectConfig.Repository.Sha == "" {
-				sha, err := s.gitProviderService.GetLastCommitSha(projectConfig.Repository)
-				if err != nil {
-					return nil, err
-				}
-				projectConfig.Repository.Sha = sha
+		p.Repository.Url = util.CleanUpRepositoryUrl(p.Repository.Url)
+		if p.Repository.Sha == "" {
+			sha, err := s.gitProviderService.GetLastCommitSha(p.Repository)
+			if err != nil {
+				return nil, err
+			}
+			p.Repository.Sha = sha
+		}
+
+		if p.BuildConfig != nil {
+			cachedBuild, err := s.getCachedBuildForProject(p)
+			if err == nil {
+				p.BuildConfig.CachedBuild = cachedBuild
 			}
 		}
 
-		if projectConfig.Image == "" {
-			projectConfig.Image = s.defaultProjectImage
+		if p.Image == "" {
+			p.Image = s.defaultProjectImage
 		}
 
-		if projectConfig.User == "" {
-			projectConfig.User = s.defaultProjectUser
+		if p.User == "" {
+			p.User = s.defaultProjectUser
 		}
 
-		apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", w.Id, projectConfig.Name))
+		apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", w.Id, p.Name))
 		if err != nil {
 			return nil, err
 		}
 
-		p := &project.Project{
-			ProjectConfig: *projectConfig,
-			WorkspaceId:   w.Id,
-			ApiKey:        apiKey,
-			Target:        w.Target,
-		}
+		p.WorkspaceId = w.Id
+		p.ApiKey = apiKey
+		p.Target = w.Target
 		w.Projects = append(w.Projects, p)
 	}
 
@@ -218,4 +222,28 @@ func (s *WorkspaceService) createWorkspace(ctx context.Context, ws *workspace.Wo
 	}
 
 	return ws, nil
+}
+
+func (s *WorkspaceService) getCachedBuildForProject(p *project.Project) (*buildconfig.CachedBuild, error) {
+	validStates := &[]build.BuildState{
+		build.BuildState(build.BuildStatePublished),
+	}
+
+	build, err := s.buildService.Find(&build.Filter{
+		States:        validStates,
+		RepositoryUrl: &p.Repository.Url,
+		Branch:        &p.Repository.Branch,
+		EnvVars:       &p.EnvVars,
+		BuildConfig:   p.BuildConfig,
+		GetNewest:     util.Pointer(true),
+	})
+	if err != nil {
+		return nil, err
+	}
+	cachedBuild := &buildconfig.CachedBuild{
+		User:  build.User,
+		Image: build.Image,
+	}
+
+	return cachedBuild, nil
 }

@@ -4,7 +4,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Branch** | Pointer to **string** |  | [optional] 
+**Branch** | **string** |  | 
+**CloneTarget** | Pointer to [**CloneTarget**](CloneTarget.md) |  | [optional] 
 **Id** | **string** |  | 
 **Name** | **string** |  | 
 **Owner** | **string** |  | 
@@ -18,7 +19,7 @@ Name | Type | Description | Notes
 
 ### NewGitRepository
 
-`func NewGitRepository(id string, name string, owner string, sha string, source string, url string, ) *GitRepository`
+`func NewGitRepository(branch string, id string, name string, owner string, sha string, source string, url string, ) *GitRepository`
 
 NewGitRepository instantiates a new GitRepository object
 This constructor will assign default values to properties that have it defined,
@@ -52,11 +53,31 @@ and a boolean to check if the value has been set.
 
 SetBranch sets Branch field to given value.
 
-### HasBranch
 
-`func (o *GitRepository) HasBranch() bool`
+### GetCloneTarget
 
-HasBranch returns a boolean if a field has been set.
+`func (o *GitRepository) GetCloneTarget() CloneTarget`
+
+GetCloneTarget returns the CloneTarget field if non-nil, zero value otherwise.
+
+### GetCloneTargetOk
+
+`func (o *GitRepository) GetCloneTargetOk() (*CloneTarget, bool)`
+
+GetCloneTargetOk returns a tuple with the CloneTarget field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetCloneTarget
+
+`func (o *GitRepository) SetCloneTarget(v CloneTarget)`
+
+SetCloneTarget sets CloneTarget field to given value.
+
+### HasCloneTarget
+
+`func (o *GitRepository) HasCloneTarget() bool`
+
+HasCloneTarget returns a boolean if a field has been set.
 
 ### GetId
 

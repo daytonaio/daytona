@@ -4,7 +4,7 @@ All URIs are relative to *http://localhost:3986*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**GetGitContext**](GitProviderAPI.md#GetGitContext) | **Get** /gitprovider/context/{gitUrl} | Get Git context
+[**GetGitContext**](GitProviderAPI.md#GetGitContext) | **Post** /gitprovider/context | Get Git context
 [**GetGitProviderForUrl**](GitProviderAPI.md#GetGitProviderForUrl) | **Get** /gitprovider/for-url/{url} | Get Git provider
 [**GetGitProviderIdForUrl**](GitProviderAPI.md#GetGitProviderIdForUrl) | **Get** /gitprovider/id-for-url/{url} | Get Git provider ID
 [**GetGitUser**](GitProviderAPI.md#GetGitUser) | **Get** /gitprovider/{gitProviderId}/user | Get Git context
@@ -21,7 +21,7 @@ Method | HTTP request | Description
 
 ## GetGitContext
 
-> GitRepository GetGitContext(ctx, gitUrl).Execute()
+> GitRepository GetGitContext(ctx).Repository(repository).Execute()
 
 Get Git context
 
@@ -40,11 +40,11 @@ import (
 )
 
 func main() {
-	gitUrl := "gitUrl_example" // string | Git URL
+	repository := *openapiclient.NewGetRepositoryContext("Url_example") // GetRepositoryContext | Get repository context
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.GitProviderAPI.GetGitContext(context.Background(), gitUrl).Execute()
+	resp, r, err := apiClient.GitProviderAPI.GetGitContext(context.Background()).Repository(repository).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `GitProviderAPI.GetGitContext``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -57,10 +57,6 @@ func main() {
 ### Path Parameters
 
 
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**gitUrl** | **string** | Git URL | 
 
 ### Other Parameters
 
@@ -69,7 +65,7 @@ Other parameters are passed through a pointer to a apiGetGitContextRequest struc
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-
+ **repository** | [**GetRepositoryContext**](GetRepositoryContext.md) | Get repository context | 
 
 ### Return type
 
@@ -615,7 +611,7 @@ import (
 )
 
 func main() {
-	repository := *openapiclient.NewGitRepository("Id_example", "Name_example", "Owner_example", "Sha_example", "Source_example", "Url_example") // GitRepository | Git repository
+	repository := *openapiclient.NewGitRepository("Branch_example", "Id_example", "Name_example", "Owner_example", "Sha_example", "Source_example", "Url_example") // GitRepository | Git repository
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

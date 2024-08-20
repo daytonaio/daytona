@@ -7,7 +7,7 @@ import (
 	"context"
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/server/apikey"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -30,11 +30,16 @@ var listCmd = &cobra.Command{
 			log.Fatal(apiclient.HandleErrorResponse(nil, err))
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = apiKeyList
+		if format.FormatFlag != "" {
+			formatter := format.NewFormatter(apiKeyList)
+			formatter.Print()
 			return
 		}
 
 		apikey.ListApiKeys(apiKeyList)
 	},
+}
+
+func init() {
+	format.RegisterFormatFlag(listCmd)
 }

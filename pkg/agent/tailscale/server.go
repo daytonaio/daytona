@@ -13,10 +13,10 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/agent/config"
-	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"tailscale.com/tsnet"
 
+	"github.com/daytonaio/daytona/internal/constants"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -32,7 +32,7 @@ func (s *Server) Start() error {
 
 	tsnetServer, err := s.connect()
 	if err != nil {
-		return fmt.Errorf("failed to connect to server: %v", err)
+		return fmt.Errorf("failed to connect to server: %w", err)
 	}
 
 	go func(tsnetServer *tsnet.Server) {
@@ -40,7 +40,7 @@ func (s *Server) Start() error {
 			time.Sleep(5 * time.Second)
 			httpClient := tsnetServer.HTTPClient()
 			httpClient.Timeout = 5 * time.Second
-			_, err := httpClient.Get(fmt.Sprintf("http://server%s", api.HEALTH_CHECK_ROUTE))
+			_, err := httpClient.Get(fmt.Sprintf("http://server%s", constants.HEALTH_CHECK_ROUTE))
 			if err != nil {
 				log.Errorf("Failed to connect to server: %v. Reconnecting...", err)
 				// Close the tsnet server and reconnect
@@ -90,7 +90,7 @@ func (s *Server) getTsnetServer() (*tsnet.Server, error) {
 
 	networkKey, err := s.getNetworkKey()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get network key: %v", err)
+		return nil, fmt.Errorf("failed to get network key: %w", err)
 	}
 
 	tsnetServer.AuthKey = networkKey

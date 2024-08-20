@@ -11,7 +11,6 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/daytonaio/daytona/pkg/cmd/output"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/profile"
 	"github.com/spf13/cobra"
@@ -96,11 +95,6 @@ var ProfileUseCmd = &cobra.Command{
 			err = c.Save()
 			if err != nil {
 				log.Fatal(err)
-			}
-
-			if output.FormatFlag != "" {
-				output.Output = chosenProfile.Id
-				return
 			}
 
 			views.RenderInfoMessage(fmt.Sprintf("Active profile set to: %s", chosenProfile.Name))

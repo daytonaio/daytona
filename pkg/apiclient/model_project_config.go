@@ -21,13 +21,14 @@ var _ MappedNullable = &ProjectConfig{}
 
 // ProjectConfig struct for ProjectConfig
 type ProjectConfig struct {
-	BuildConfig *ProjectBuildConfig `json:"buildConfig,omitempty"`
-	Default     bool                `json:"default"`
-	EnvVars     map[string]string   `json:"envVars"`
-	Image       string              `json:"image"`
-	Name        string              `json:"name"`
-	Repository  GitRepository       `json:"repository"`
-	User        string              `json:"user"`
+	BuildConfig   *BuildConfig      `json:"buildConfig,omitempty"`
+	Default       bool              `json:"default"`
+	EnvVars       map[string]string `json:"envVars"`
+	Image         string            `json:"image"`
+	Name          string            `json:"name"`
+	Prebuilds     []PrebuildConfig  `json:"prebuilds,omitempty"`
+	RepositoryUrl string            `json:"repositoryUrl"`
+	User          string            `json:"user"`
 }
 
 type _ProjectConfig ProjectConfig
@@ -36,13 +37,13 @@ type _ProjectConfig ProjectConfig
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProjectConfig(default_ bool, envVars map[string]string, image string, name string, repository GitRepository, user string) *ProjectConfig {
+func NewProjectConfig(default_ bool, envVars map[string]string, image string, name string, repositoryUrl string, user string) *ProjectConfig {
 	this := ProjectConfig{}
 	this.Default = default_
 	this.EnvVars = envVars
 	this.Image = image
 	this.Name = name
-	this.Repository = repository
+	this.RepositoryUrl = repositoryUrl
 	this.User = user
 	return &this
 }
@@ -56,9 +57,9 @@ func NewProjectConfigWithDefaults() *ProjectConfig {
 }
 
 // GetBuildConfig returns the BuildConfig field value if set, zero value otherwise.
-func (o *ProjectConfig) GetBuildConfig() ProjectBuildConfig {
+func (o *ProjectConfig) GetBuildConfig() BuildConfig {
 	if o == nil || IsNil(o.BuildConfig) {
-		var ret ProjectBuildConfig
+		var ret BuildConfig
 		return ret
 	}
 	return *o.BuildConfig
@@ -66,7 +67,7 @@ func (o *ProjectConfig) GetBuildConfig() ProjectBuildConfig {
 
 // GetBuildConfigOk returns a tuple with the BuildConfig field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ProjectConfig) GetBuildConfigOk() (*ProjectBuildConfig, bool) {
+func (o *ProjectConfig) GetBuildConfigOk() (*BuildConfig, bool) {
 	if o == nil || IsNil(o.BuildConfig) {
 		return nil, false
 	}
@@ -82,8 +83,8 @@ func (o *ProjectConfig) HasBuildConfig() bool {
 	return false
 }
 
-// SetBuildConfig gets a reference to the given ProjectBuildConfig and assigns it to the BuildConfig field.
-func (o *ProjectConfig) SetBuildConfig(v ProjectBuildConfig) {
+// SetBuildConfig gets a reference to the given BuildConfig and assigns it to the BuildConfig field.
+func (o *ProjectConfig) SetBuildConfig(v BuildConfig) {
 	o.BuildConfig = &v
 }
 
@@ -183,28 +184,60 @@ func (o *ProjectConfig) SetName(v string) {
 	o.Name = v
 }
 
-// GetRepository returns the Repository field value
-func (o *ProjectConfig) GetRepository() GitRepository {
+// GetPrebuilds returns the Prebuilds field value if set, zero value otherwise.
+func (o *ProjectConfig) GetPrebuilds() []PrebuildConfig {
+	if o == nil || IsNil(o.Prebuilds) {
+		var ret []PrebuildConfig
+		return ret
+	}
+	return o.Prebuilds
+}
+
+// GetPrebuildsOk returns a tuple with the Prebuilds field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ProjectConfig) GetPrebuildsOk() ([]PrebuildConfig, bool) {
+	if o == nil || IsNil(o.Prebuilds) {
+		return nil, false
+	}
+	return o.Prebuilds, true
+}
+
+// HasPrebuilds returns a boolean if a field has been set.
+func (o *ProjectConfig) HasPrebuilds() bool {
+	if o != nil && !IsNil(o.Prebuilds) {
+		return true
+	}
+
+	return false
+}
+
+// SetPrebuilds gets a reference to the given []PrebuildConfig and assigns it to the Prebuilds field.
+func (o *ProjectConfig) SetPrebuilds(v []PrebuildConfig) {
+	o.Prebuilds = v
+}
+
+// GetRepositoryUrl returns the RepositoryUrl field value
+func (o *ProjectConfig) GetRepositoryUrl() string {
 	if o == nil {
-		var ret GitRepository
+		var ret string
 		return ret
 	}
 
-	return o.Repository
+	return o.RepositoryUrl
 }
 
-// GetRepositoryOk returns a tuple with the Repository field value
+// GetRepositoryUrlOk returns a tuple with the RepositoryUrl field value
 // and a boolean to check if the value has been set.
-func (o *ProjectConfig) GetRepositoryOk() (*GitRepository, bool) {
+func (o *ProjectConfig) GetRepositoryUrlOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Repository, true
+	return &o.RepositoryUrl, true
 }
 
-// SetRepository sets field value
-func (o *ProjectConfig) SetRepository(v GitRepository) {
-	o.Repository = v
+// SetRepositoryUrl sets field value
+func (o *ProjectConfig) SetRepositoryUrl(v string) {
+	o.RepositoryUrl = v
 }
 
 // GetUser returns the User field value
@@ -248,7 +281,10 @@ func (o ProjectConfig) ToMap() (map[string]interface{}, error) {
 	toSerialize["envVars"] = o.EnvVars
 	toSerialize["image"] = o.Image
 	toSerialize["name"] = o.Name
-	toSerialize["repository"] = o.Repository
+	if !IsNil(o.Prebuilds) {
+		toSerialize["prebuilds"] = o.Prebuilds
+	}
+	toSerialize["repositoryUrl"] = o.RepositoryUrl
 	toSerialize["user"] = o.User
 	return toSerialize, nil
 }
@@ -262,7 +298,7 @@ func (o *ProjectConfig) UnmarshalJSON(data []byte) (err error) {
 		"envVars",
 		"image",
 		"name",
-		"repository",
+		"repositoryUrl",
 		"user",
 	}
 

@@ -7,7 +7,7 @@ import (
 	"context"
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/env"
 	"github.com/spf13/cobra"
@@ -31,11 +31,9 @@ var listCmd = &cobra.Command{
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}
 
-		if output.FormatFlag != "" {
-			if profileData.EnvVars == nil {
-				profileData.EnvVars = map[string]string{}
-			}
-			output.Output = profileData.EnvVars
+		if format.FormatFlag != "" {
+			formatter := format.NewFormatter(profileData.EnvVars)
+			formatter.Print()
 			return
 		}
 
@@ -46,4 +44,8 @@ var listCmd = &cobra.Command{
 
 		env.List(profileData.EnvVars)
 	},
+}
+
+func init() {
+	format.RegisterFormatFlag(listCmd)
 }

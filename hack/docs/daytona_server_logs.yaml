@@ -9,16 +9,9 @@ options:
       shorthand: f
       default_value: "false"
       usage: Follow logs
-    - name: retry
-      shorthand: r
-      default_value: "false"
-      usage: Retry connection
 inherited_options:
     - name: help
       default_value: "false"
       usage: help for daytona
-    - name: output
-      shorthand: o
-      usage: Output format. Must be one of (yaml, json)
 see_also:
     - daytona server - Start the server process in daemon mode

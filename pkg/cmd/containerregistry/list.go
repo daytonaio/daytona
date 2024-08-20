@@ -8,7 +8,7 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views"
 	containerregistry_view "github.com/daytonaio/daytona/pkg/views/containerregistry/list"
 	log "github.com/sirupsen/logrus"
@@ -36,11 +36,16 @@ var containerRegistryListCmd = &cobra.Command{
 			return
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = containerRegistries
+		if format.FormatFlag != "" {
+			formatter := format.NewFormatter(containerRegistries)
+			formatter.Print()
 			return
 		}
 
 		containerregistry_view.ListRegistries(containerRegistries)
 	},
+}
+
+func init() {
+	format.RegisterFormatFlag(containerRegistryListCmd)
 }

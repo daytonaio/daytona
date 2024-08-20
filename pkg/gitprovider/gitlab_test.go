@@ -6,6 +6,7 @@ package gitprovider
 import (
 	"testing"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -36,7 +37,7 @@ func (g *GitLabGitProviderTestSuite) TestParseStaticGitContext_HTTP() {
 
 	require := g.Require()
 
-	httpContext, err := g.gitProvider.parseStaticGitContext(httpSimple)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(httpSimple)
 
 	require.Nil(err)
 	require.Equal(httpContext, simpleContext)
@@ -58,7 +59,7 @@ func (g *GitLabGitProviderTestSuite) TestParseStaticGitContext_HTTP_Subgroups() 
 
 	require := g.Require()
 
-	httpContext, err := g.gitProvider.parseStaticGitContext(httpSimple)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(httpSimple)
 
 	require.Nil(err)
 	require.Equal(httpContext, simpleContext)
@@ -74,13 +75,13 @@ func (g *GitLabGitProviderTestSuite) TestParseStaticGitContext_MR() {
 		Source:   "gitlab.com",
 		Branch:   nil,
 		Sha:      nil,
-		PrNumber: &[]uint32{1}[0],
+		PrNumber: util.Pointer(uint32(1)),
 		Path:     nil,
 	}
 
 	require := g.Require()
 
-	httpContext, err := g.gitProvider.parseStaticGitContext(mrUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(mrUrl)
 
 	require.Nil(err)
 	require.Equal(httpContext, mrContext)
@@ -94,15 +95,15 @@ func (g *GitLabGitProviderTestSuite) TestParseStaticGitContext_Blob() {
 		Owner:    "gitlab-org",
 		Url:      "https://gitlab.com/gitlab-org/gitlab.git",
 		Source:   "gitlab.com",
-		Branch:   &[]string{"master"}[0],
+		Branch:   util.Pointer("master"),
 		Sha:      nil,
 		PrNumber: nil,
-		Path:     &[]string{"README.md"}[0],
+		Path:     util.Pointer("README.md"),
 	}
 
 	require := g.Require()
 
-	httpContext, err := g.gitProvider.parseStaticGitContext(blobUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(blobUrl)
 
 	require.Nil(err)
 	require.Equal(httpContext, blobContext)
@@ -116,7 +117,7 @@ func (g *GitLabGitProviderTestSuite) TestParseStaticGitContext_Branch() {
 		Owner:    "gitlab-org",
 		Url:      "https://gitlab.com/gitlab-org/gitlab.git",
 		Source:   "gitlab.com",
-		Branch:   &[]string{"test-branch"}[0],
+		Branch:   util.Pointer("test-branch"),
 		Sha:      nil,
 		PrNumber: nil,
 		Path:     nil,
@@ -124,7 +125,7 @@ func (g *GitLabGitProviderTestSuite) TestParseStaticGitContext_Branch() {
 
 	require := g.Require()
 
-	httpContext, err := g.gitProvider.parseStaticGitContext(branchUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(branchUrl)
 
 	require.Nil(err)
 	require.Equal(httpContext, branchContext)
@@ -138,7 +139,7 @@ func (g *GitLabGitProviderTestSuite) TestParseStaticGitContext_Commits() {
 		Owner:    "gitlab-org",
 		Url:      "https://gitlab.com/gitlab-org/gitlab.git",
 		Source:   "gitlab.com",
-		Branch:   &[]string{"master"}[0],
+		Branch:   util.Pointer("master"),
 		Sha:      nil,
 		PrNumber: nil,
 		Path:     nil,
@@ -146,7 +147,7 @@ func (g *GitLabGitProviderTestSuite) TestParseStaticGitContext_Commits() {
 
 	require := g.Require()
 
-	httpContext, err := g.gitProvider.parseStaticGitContext(commitsUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(commitsUrl)
 
 	require.Nil(err)
 	require.Equal(httpContext, commitsContext)
@@ -160,98 +161,98 @@ func (g *GitLabGitProviderTestSuite) TestParseStaticGitContext_Commit() {
 		Owner:    "gitlab-org",
 		Url:      "https://gitlab.com/gitlab-org/gitlab.git",
 		Source:   "gitlab.com",
-		Branch:   &[]string{"COMMIT_SHA"}[0],
-		Sha:      &[]string{"COMMIT_SHA"}[0],
+		Branch:   util.Pointer("COMMIT_SHA"),
+		Sha:      util.Pointer("COMMIT_SHA"),
 		PrNumber: nil,
 		Path:     nil,
 	}
 
 	require := g.Require()
 
-	httpContext, err := g.gitProvider.parseStaticGitContext(commitUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(commitUrl)
 
 	require.Nil(err)
 	require.Equal(httpContext, commitContext)
 }
 
 func (g *GitLabGitProviderTestSuite) TestGetUrlFromRepo_Bare() {
-	repo := &GitRepository{
-		Id:     "daytona",
-		Name:   "daytona",
-		Owner:  "daytonaio",
-		Source: "gitlab.com",
+	repo := &GetRepositoryContext{
+		Id:     util.Pointer("daytona"),
+		Name:   util.Pointer("daytona"),
+		Owner:  util.Pointer("daytonaio"),
+		Source: util.Pointer("gitlab.com"),
 		Url:    "https://gitlab.com/daytonaio/daytona.git",
 	}
 
 	require := g.Require()
 
-	url := g.gitProvider.GetUrlFromRepository(repo)
+	url := g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://gitlab.com/daytonaio/daytona", url)
 }
 
 func (g *GitLabGitProviderTestSuite) TestGetUrlFromRepo_Branch() {
-	repo := &GitRepository{
-		Id:     "daytona",
-		Name:   "daytona",
-		Owner:  "daytonaio",
-		Source: "gitlab.com",
+	repo := &GetRepositoryContext{
+		Id:     util.Pointer("daytona"),
+		Name:   util.Pointer("daytona"),
+		Owner:  util.Pointer("daytonaio"),
+		Source: util.Pointer("gitlab.com"),
 		Url:    "https://gitlab.com/daytonaio/daytona.git",
-		Branch: &[]string{"test-branch"}[0],
+		Branch: util.Pointer("test-branch"),
 	}
 
 	require := g.Require()
 
-	url := g.gitProvider.GetUrlFromRepository(repo)
+	url := g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://gitlab.com/daytonaio/daytona/-/tree/test-branch", url)
 }
 
 func (g *GitLabGitProviderTestSuite) TestGetUrlFromRepo_Path() {
-	repo := &GitRepository{
-		Id:     "daytona",
-		Name:   "daytona",
-		Owner:  "daytonaio",
-		Source: "gitlab.com",
+	repo := &GetRepositoryContext{
+		Id:     util.Pointer("daytona"),
+		Name:   util.Pointer("daytona"),
+		Owner:  util.Pointer("daytonaio"),
+		Source: util.Pointer("gitlab.com"),
 		Url:    "https://gitlab.com/daytonaio/daytona.git",
-		Branch: &[]string{"test-branch"}[0],
-		Path:   &[]string{"README.md"}[0],
+		Branch: util.Pointer("test-branch"),
+		Path:   util.Pointer("README.md"),
 	}
 
 	require := g.Require()
 
-	url := g.gitProvider.GetUrlFromRepository(repo)
+	url := g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal(url, "https://gitlab.com/daytonaio/daytona/-/tree/test-branch/README.md")
 
 	repo.Branch = nil
 
-	url = g.gitProvider.GetUrlFromRepository(repo)
+	url = g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://gitlab.com/daytonaio/daytona/-/blob/main/README.md", url)
 }
 
 func (g *GitLabGitProviderTestSuite) TestGetUrlFromRepo_Commit() {
-	repo := &GitRepository{
-		Id:     "daytona",
-		Name:   "daytona",
-		Owner:  "daytonaio",
-		Source: "gitlab.com",
+	repo := &GetRepositoryContext{
+		Id:     util.Pointer("daytona"),
+		Name:   util.Pointer("daytona"),
+		Owner:  util.Pointer("daytonaio"),
+		Source: util.Pointer("gitlab.com"),
 		Url:    "https://gitlab.com/daytonaio/daytona.git",
-		Path:   &[]string{"README.md"}[0],
-		Sha:    "COMMIT_SHA",
-		Branch: &[]string{"COMMIT_SHA"}[0],
+		Branch: util.Pointer("COMMIT_SHA"),
+		Sha:    util.Pointer("COMMIT_SHA"),
+		Path:   util.Pointer("README.md"),
 	}
 
 	require := g.Require()
 
-	url := g.gitProvider.GetUrlFromRepository(repo)
+	url := g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://gitlab.com/daytonaio/daytona/-/commit/COMMIT_SHA/README.md", url)
 
 	repo.Path = nil
 
-	url = g.gitProvider.GetUrlFromRepository(repo)
+	url = g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://gitlab.com/daytonaio/daytona/-/commit/COMMIT_SHA", url)
 }

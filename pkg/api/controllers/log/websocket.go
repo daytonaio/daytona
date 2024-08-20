@@ -100,8 +100,6 @@ func writeJSONToWs(ws *websocket.Conn, c chan interface{}, errChan chan error) {
 func readJSONLog(ginCtx *gin.Context, logReader io.Reader) {
 	followQuery := ginCtx.Query("follow")
 	follow := followQuery == "true"
-	retryQuery := ginCtx.Query("retry")
-	retry := retryQuery == "true"
 
 	ws, err := upgrader.Upgrade(ginCtx.Writer, ginCtx.Request, nil)
 	if err != nil {
@@ -115,7 +113,7 @@ func readJSONLog(ginCtx *gin.Context, logReader io.Reader) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	defer cancel()
-	go util.ReadJSONLog(ctx, logReader, follow, retry, msgChannel, errChannel)
+	go util.ReadJSONLog(ctx, logReader, follow, msgChannel, errChannel)
 	go writeJSONToWs(ws, msgChannel, errChannel)
 
 	go func() {
@@ -229,4 +227,32 @@ func ReadProjectLog(ginCtx *gin.Context) {
 	}
 
 	readJSONLog(ginCtx, projectLogReader)
+}
+
+func ReadBuildLog(ginCtx *gin.Context) {
+	buildId := ginCtx.Param("buildId")
+	retryQuery := ginCtx.DefaultQuery("retry", "true")
+	retry := retryQuery == "true"
+
+	server := server.GetInstance(nil)
+
+	if retry {
+		for {
+			buildLogReader, err := server.BuildService.GetBuildLogReader(buildId)
+
+			if err == nil {
+				readJSONLog(ginCtx, buildLogReader)
+				return
+			}
+			time.Sleep(TIMEOUT)
+		}
+	}
+
+	buildLogReader, err := server.BuildService.GetBuildLogReader(buildId)
+	if err != nil {
+		ginCtx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	readJSONLog(ginCtx, buildLogReader)
 }

@@ -132,7 +132,7 @@ func getRowFromRowData(rowData RowData, isMultiProjectAccordion bool) []string {
 		views.DefaultRowDataStyle.Render(rowData.Target),
 		state,
 		views.DefaultRowDataStyle.Render(rowData.Created),
-		views.DefaultRowDataStyle.Render(rowData.Branch),
+		views.DefaultRowDataStyle.Render(views.GetBranchNameLabel(rowData.Branch)),
 	}
 
 	if rowData.Status != "" {
@@ -174,15 +174,13 @@ func getWorkspaceTableRowData(workspace apiclient.WorkspaceDTO, specifyGitProvid
 	rowData.Name = workspace.Name + views_util.AdditionalPropertyPadding
 	if len(workspace.Projects) > 0 {
 		rowData.Repository = util.GetRepositorySlugFromUrl(workspace.Projects[0].Repository.Url, specifyGitProviders)
-		if workspace.Projects[0].Repository.Branch != nil {
-			rowData.Branch = *workspace.Projects[0].Repository.Branch
-		}
+		rowData.Branch = workspace.Projects[0].Repository.Branch
 	}
 
 	rowData.Target = workspace.Target + views_util.AdditionalPropertyPadding
 
 	if workspace.Info != nil && workspace.Info.Projects != nil && len(workspace.Info.Projects) > 0 {
-		rowData.Created = util.FormatCreatedTime(workspace.Info.Projects[0].Created)
+		rowData.Created = util.FormatTimestamp(workspace.Info.Projects[0].Created)
 	}
 	if len(workspace.Projects) > 0 && workspace.Projects[0].State != nil && workspace.Projects[0].State.Uptime > 0 {
 		rowData.Status = util.FormatUptime(workspace.Projects[0].State.Uptime)
@@ -195,9 +193,7 @@ func getProjectTableRowData(workspaceDTO apiclient.WorkspaceDTO, project apiclie
 	rowData.Name = " └ " + project.Name
 
 	rowData.Repository = util.GetRepositorySlugFromUrl(project.Repository.Url, specifyGitProviders)
-	if project.Repository.Branch != nil {
-		rowData.Branch = *project.Repository.Branch
-	}
+	rowData.Branch = project.Repository.Branch
 
 	rowData.Target = project.Target + views_util.AdditionalPropertyPadding
 
@@ -211,7 +207,7 @@ func getProjectTableRowData(workspaceDTO apiclient.WorkspaceDTO, project apiclie
 
 	for _, projectInfo := range workspaceDTO.Info.Projects {
 		if projectInfo.Name == project.Name {
-			rowData.Created = util.FormatCreatedTime(projectInfo.Created)
+			rowData.Created = util.FormatTimestamp(projectInfo.Created)
 			break
 		}
 	}

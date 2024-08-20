@@ -19,7 +19,7 @@ var workspaceLogsStarted bool
 
 func ReadWorkspaceLogs(activeProfile config.Profile, workspaceId string, projectNames []string, stopLogs *bool) {
 	var wg sync.WaitGroup
-	query := "follow=true&retry=true"
+	query := "follow=true"
 
 	logs_view.CalculateLongestPrefixLength(projectNames)
 
@@ -67,6 +67,24 @@ func ReadWorkspaceLogs(activeProfile config.Profile, workspaceId string, project
 	wg.Wait()
 }
 
+func ReadBuildLogs(activeProfile config.Profile, buildId string, query string, stopLogs *bool) {
+	logs_view.CalculateLongestPrefixLength([]string{buildId})
+
+	for {
+		ws, res, err := GetWebsocketConn(fmt.Sprintf("/log/build/%s", buildId), &activeProfile, &query)
+		// We want to retry getting the logs if it fails
+		if err != nil {
+			log.Trace(HandleErrorResponse(res, err))
+			time.Sleep(250 * time.Millisecond)
+			continue
+		}
+
+		readJSONLog(ws, stopLogs, logs_view.FIRST_PROJECT_INDEX)
+		ws.Close()
+		break
+	}
+}
+
 func readJSONLog(ws *websocket.Conn, stopLogs *bool, index int) {
 	logEntriesChan := make(chan logs.LogEntry)
 	go logs_view.DisplayLogs(logEntriesChan, index)
@@ -75,7 +93,7 @@ func readJSONLog(ws *websocket.Conn, stopLogs *bool, index int) {
 		var logEntry logs.LogEntry
 		err := ws.ReadJSON(&logEntry)
 		if err != nil {
-			fmt.Println(err.Error())
+			log.Trace(err)
 			return
 		}
 

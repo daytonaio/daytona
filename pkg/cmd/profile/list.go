@@ -5,7 +5,7 @@ package profile
 
 import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/profile"
 
 	log "github.com/sirupsen/logrus"
@@ -22,11 +22,16 @@ var profileListCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = c.Profiles
+		if format.FormatFlag != "" {
+			formatter := format.NewFormatter(c.Profiles)
+			formatter.Print()
 			return
 		}
 
 		profile.ListProfiles(c.Profiles, c.ActiveProfileId)
 	},
+}
+
+func init() {
+	format.RegisterFormatFlag(profileListCmd)
 }

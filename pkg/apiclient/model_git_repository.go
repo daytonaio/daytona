@@ -21,15 +21,16 @@ var _ MappedNullable = &GitRepository{}
 
 // GitRepository struct for GitRepository
 type GitRepository struct {
-	Branch   *string `json:"branch,omitempty"`
-	Id       string  `json:"id"`
-	Name     string  `json:"name"`
-	Owner    string  `json:"owner"`
-	Path     *string `json:"path,omitempty"`
-	PrNumber *int32  `json:"prNumber,omitempty"`
-	Sha      string  `json:"sha"`
-	Source   string  `json:"source"`
-	Url      string  `json:"url"`
+	Branch      string       `json:"branch"`
+	CloneTarget *CloneTarget `json:"cloneTarget,omitempty"`
+	Id          string       `json:"id"`
+	Name        string       `json:"name"`
+	Owner       string       `json:"owner"`
+	Path        *string      `json:"path,omitempty"`
+	PrNumber    *int32       `json:"prNumber,omitempty"`
+	Sha         string       `json:"sha"`
+	Source      string       `json:"source"`
+	Url         string       `json:"url"`
 }
 
 type _GitRepository GitRepository
@@ -38,8 +39,9 @@ type _GitRepository GitRepository
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGitRepository(id string, name string, owner string, sha string, source string, url string) *GitRepository {
+func NewGitRepository(branch string, id string, name string, owner string, sha string, source string, url string) *GitRepository {
 	this := GitRepository{}
+	this.Branch = branch
 	this.Id = id
 	this.Name = name
 	this.Owner = owner
@@ -57,36 +59,60 @@ func NewGitRepositoryWithDefaults() *GitRepository {
 	return &this
 }
 
-// GetBranch returns the Branch field value if set, zero value otherwise.
+// GetBranch returns the Branch field value
 func (o *GitRepository) GetBranch() string {
-	if o == nil || IsNil(o.Branch) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Branch
+
+	return o.Branch
 }
 
-// GetBranchOk returns a tuple with the Branch field value if set, nil otherwise
+// GetBranchOk returns a tuple with the Branch field value
 // and a boolean to check if the value has been set.
 func (o *GitRepository) GetBranchOk() (*string, bool) {
-	if o == nil || IsNil(o.Branch) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Branch, true
+	return &o.Branch, true
 }
 
-// HasBranch returns a boolean if a field has been set.
-func (o *GitRepository) HasBranch() bool {
-	if o != nil && !IsNil(o.Branch) {
+// SetBranch sets field value
+func (o *GitRepository) SetBranch(v string) {
+	o.Branch = v
+}
+
+// GetCloneTarget returns the CloneTarget field value if set, zero value otherwise.
+func (o *GitRepository) GetCloneTarget() CloneTarget {
+	if o == nil || IsNil(o.CloneTarget) {
+		var ret CloneTarget
+		return ret
+	}
+	return *o.CloneTarget
+}
+
+// GetCloneTargetOk returns a tuple with the CloneTarget field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitRepository) GetCloneTargetOk() (*CloneTarget, bool) {
+	if o == nil || IsNil(o.CloneTarget) {
+		return nil, false
+	}
+	return o.CloneTarget, true
+}
+
+// HasCloneTarget returns a boolean if a field has been set.
+func (o *GitRepository) HasCloneTarget() bool {
+	if o != nil && !IsNil(o.CloneTarget) {
 		return true
 	}
 
 	return false
 }
 
-// SetBranch gets a reference to the given string and assigns it to the Branch field.
-func (o *GitRepository) SetBranch(v string) {
-	o.Branch = &v
+// SetCloneTarget gets a reference to the given CloneTarget and assigns it to the CloneTarget field.
+func (o *GitRepository) SetCloneTarget(v CloneTarget) {
+	o.CloneTarget = &v
 }
 
 // GetId returns the Id field value
@@ -307,8 +333,9 @@ func (o GitRepository) MarshalJSON() ([]byte, error) {
 
 func (o GitRepository) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Branch) {
-		toSerialize["branch"] = o.Branch
+	toSerialize["branch"] = o.Branch
+	if !IsNil(o.CloneTarget) {
+		toSerialize["cloneTarget"] = o.CloneTarget
 	}
 	toSerialize["id"] = o.Id
 	toSerialize["name"] = o.Name
@@ -330,6 +357,7 @@ func (o *GitRepository) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"branch",
 		"id",
 		"name",
 		"owner",

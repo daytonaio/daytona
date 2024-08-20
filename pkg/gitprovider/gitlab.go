@@ -100,7 +100,7 @@ func (g *GitLabGitProvider) GetRepositories(namespace string) ([]*GitRepository,
 			Id:     strconv.Itoa(repo.ID),
 			Name:   repo.Path,
 			Url:    repo.WebURL,
-			Branch: &repo.DefaultBranch,
+			Branch: repo.DefaultBranch,
 			Owner:  repo.Namespace.Path,
 			Source: u.Host,
 		})
@@ -180,6 +180,57 @@ func (g *GitLabGitProvider) GetUser() (*GitUser, error) {
 	return response, nil
 }
 
+func (g *GitLabGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
+	client := g.getApiClient()
+
+	branches, _, err := client.Branches.ListBranches(staticContext.Id, &gitlab.ListBranchesOptions{})
+	if err != nil {
+		return "", err
+	}
+
+	var branchName string
+	for _, branch := range branches {
+		if *staticContext.Sha == branch.Commit.ID {
+			branchName = branch.Name
+			break
+		}
+
+		commitId := branch.Commit.ID
+		for commitId != "" {
+			commit, _, err := client.Commits.GetCommit(staticContext.Id, commitId)
+			if err != nil {
+				return "", err
+			}
+
+			if *staticContext.Sha == commit.ID {
+				branchName = branch.Name
+				break
+			}
+
+			if len(commit.ParentIDs) > 0 {
+				commitId = commit.ParentIDs[0]
+				if *staticContext.Sha == commitId {
+					branchName = branch.Name
+					break
+				}
+			} else {
+				commitId = ""
+			}
+
+		}
+
+		if branchName != "" {
+			break
+		}
+	}
+
+	if branchName == "" {
+		return "", fmt.Errorf("branch not found for SHA: %s", *staticContext.Sha)
+	}
+
+	return branchName, nil
+}
+
 func (g *GitLabGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (string, error) {
 	client := g.getApiClient()
 
@@ -209,21 +260,21 @@ func (g *GitLabGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (s
 	return commits[0].ID, nil
 }
 
-func (g *GitLabGitProvider) GetUrlFromRepository(repository *GitRepository) string {
-	url := strings.TrimSuffix(repository.Url, ".git")
+func (g *GitLabGitProvider) GetUrlFromContext(repoContext *GetRepositoryContext) string {
+	url := strings.TrimSuffix(repoContext.Url, ".git")
 
-	if repository.Branch != nil && *repository.Branch != "" {
-		if repository.Sha == *repository.Branch {
-			url += "/-/commit/" + *repository.Branch
+	if repoContext.Branch != nil && *repoContext.Branch != "" {
+		if repoContext.Sha != nil && *repoContext.Sha == *repoContext.Branch {
+			url += "/-/commit/" + *repoContext.Branch
 		} else {
-			url += "/-/tree/" + *repository.Branch
+			url += "/-/tree/" + *repoContext.Branch
 		}
 
-		if repository.Path != nil {
-			url += "/" + *repository.Path
+		if repoContext.Path != nil {
+			url += "/" + *repoContext.Path
 		}
-	} else if repository.Path != nil {
-		url += "/-/blob/main/" + *repository.Path
+	} else if repoContext.Path != nil {
+		url += "/-/blob/main/" + *repoContext.Path
 	}
 
 	return url
@@ -245,7 +296,7 @@ func (g *GitLabGitProvider) getApiClient() *gitlab.Client {
 	return client
 }
 
-func (g *GitLabGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
+func (g *GitLabGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
 	if strings.HasPrefix(repoUrl, "git@") {
 		return g.parseSshGitUrl(repoUrl)
 	}
@@ -372,7 +423,7 @@ func (g *GitLabGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitCon
 	return staticContext, nil
 }
 
-func (g *GitLabGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
+func (g *GitLabGitProvider) GetPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
 	if staticContext.PrNumber == nil {
 		return staticContext, nil
 	}
@@ -395,4 +446,15 @@ func (g *GitLabGitProvider) getPrContext(staticContext *StaticGitContext) (*Stat
 	repo.Owner = pull.Author.Username
 
 	return &repo, nil
+}
+
+func (g *GitLabGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*string, error) {
+	client := g.getApiClient()
+
+	project, _, err := client.Projects.GetProject(staticContext.Id, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return &project.DefaultBranch, nil
 }

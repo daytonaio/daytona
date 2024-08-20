@@ -4,18 +4,18 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**BuildConfig** | Pointer to [**ProjectBuildConfig**](ProjectBuildConfig.md) |  | [optional] 
+**BuildConfig** | Pointer to [**BuildConfig**](BuildConfig.md) |  | [optional] 
 **EnvVars** | **map[string]string** |  | 
 **Image** | Pointer to **string** |  | [optional] 
 **Name** | **string** |  | 
-**Source** | [**CreateProjectConfigSourceDTO**](CreateProjectConfigSourceDTO.md) |  | 
+**RepositoryUrl** | **string** |  | 
 **User** | Pointer to **string** |  | [optional] 
 
 ## Methods
 
 ### NewCreateProjectConfigDTO
 
-`func NewCreateProjectConfigDTO(envVars map[string]string, name string, source CreateProjectConfigSourceDTO, ) *CreateProjectConfigDTO`
+`func NewCreateProjectConfigDTO(envVars map[string]string, name string, repositoryUrl string, ) *CreateProjectConfigDTO`
 
 NewCreateProjectConfigDTO instantiates a new CreateProjectConfigDTO object
 This constructor will assign default values to properties that have it defined,
@@ -32,20 +32,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetBuildConfig
 
-`func (o *CreateProjectConfigDTO) GetBuildConfig() ProjectBuildConfig`
+`func (o *CreateProjectConfigDTO) GetBuildConfig() BuildConfig`
 
 GetBuildConfig returns the BuildConfig field if non-nil, zero value otherwise.
 
 ### GetBuildConfigOk
 
-`func (o *CreateProjectConfigDTO) GetBuildConfigOk() (*ProjectBuildConfig, bool)`
+`func (o *CreateProjectConfigDTO) GetBuildConfigOk() (*BuildConfig, bool)`
 
 GetBuildConfigOk returns a tuple with the BuildConfig field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetBuildConfig
 
-`func (o *CreateProjectConfigDTO) SetBuildConfig(v ProjectBuildConfig)`
+`func (o *CreateProjectConfigDTO) SetBuildConfig(v BuildConfig)`
 
 SetBuildConfig sets BuildConfig field to given value.
 
@@ -120,24 +120,24 @@ and a boolean to check if the value has been set.
 SetName sets Name field to given value.
 
 
-### GetSource
+### GetRepositoryUrl
 
-`func (o *CreateProjectConfigDTO) GetSource() CreateProjectConfigSourceDTO`
+`func (o *CreateProjectConfigDTO) GetRepositoryUrl() string`
 
-GetSource returns the Source field if non-nil, zero value otherwise.
+GetRepositoryUrl returns the RepositoryUrl field if non-nil, zero value otherwise.
 
-### GetSourceOk
+### GetRepositoryUrlOk
 
-`func (o *CreateProjectConfigDTO) GetSourceOk() (*CreateProjectConfigSourceDTO, bool)`
+`func (o *CreateProjectConfigDTO) GetRepositoryUrlOk() (*string, bool)`
 
-GetSourceOk returns a tuple with the Source field if it's non-nil, zero value otherwise
+GetRepositoryUrlOk returns a tuple with the RepositoryUrl field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetSource
+### SetRepositoryUrl
 
-`func (o *CreateProjectConfigDTO) SetSource(v CreateProjectConfigSourceDTO)`
+`func (o *CreateProjectConfigDTO) SetRepositoryUrl(v string)`
 
-SetSource sets Source field to given value.
+SetRepositoryUrl sets RepositoryUrl field to given value.
 
 
 ### GetUser

@@ -7,7 +7,7 @@ import (
 	"log"
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views"
 	list_view "github.com/daytonaio/daytona/pkg/views/target/list"
 	"github.com/spf13/cobra"
@@ -30,11 +30,16 @@ var targetListCmd = &cobra.Command{
 			return
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = targets
+		if format.FormatFlag != "" {
+			formatter := format.NewFormatter(targets)
+			formatter.Print()
 			return
 		}
 
 		list_view.ListTargets(targets)
 	},
+}
+
+func init() {
+	format.RegisterFormatFlag(targetListCmd)
 }

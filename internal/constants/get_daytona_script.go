@@ -69,9 +69,34 @@ temp_file="daytona-$RANDOM"
 # Ensure the temporary file is deleted on exit
 trap 'rm -f "$temp_file"' EXIT
 
-if ! curl -fsSL "$DOWNLOAD_URL" -H "Authorization: Bearer $DAYTONA_SERVER_API_KEY" -o "$temp_file"; then
-  err "Daytona binary download failed"
-fi
+i=1
+max_retry=10
+while :; do
+  exit_code=""
+  if command -v wget > /dev/null 2>&1; then
+    wget -q $DOWNLOAD_URL -O $temp_file --header="Authorization: Bearer $DAYTONA_SERVER_API_KEY" && break
+    exit_code=$?
+  elif command -v curl > /dev/null 2>&1; then
+    curl -fsSL "$DOWNLOAD_URL" -H "Authorization: Bearer $DAYTONA_SERVER_API_KEY" -o "$temp_file" && break
+    exit_code=$?
+  else
+    echo "error: Make sure curl or wget is available in the project container"
+    exit 127
+  fi
+  >&2 echo "error: Daytona binary download failed"
+  >&2 echo "Exit Code: ${exit_code}"
+  
+  i=$((i+1))
+  
+  if [ "$i" -gt "$max_retry" ]; then
+    >&2 echo "error: failed to download daytona after $max_retry attempts"
+    exit 1
+  fi
+
+  >&2 echo "Trying again in 2 seconds..."
+  sleep 2
+done
+
 chmod +x "$temp_file"
 
 echo "Installing server to $DESTINATION"

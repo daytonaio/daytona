@@ -6,9 +6,10 @@ package projectconfig_test
 import (
 	"testing"
 
+	git_provider_mock "github.com/daytonaio/daytona/internal/testing/gitprovider/mocks"
 	projectconfig_internal "github.com/daytonaio/daytona/internal/testing/server/projectconfig"
+	"github.com/daytonaio/daytona/internal/testing/server/workspaces/mocks"
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/server/projectconfig"
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 	"github.com/stretchr/testify/suite"
@@ -18,44 +19,40 @@ var projectConfig1Image = "image1"
 var projectConfig1User = "user1"
 
 var projectConfig1 *config.ProjectConfig = &config.ProjectConfig{
-	Name:        "pc1",
-	Image:       projectConfig1Image,
-	User:        projectConfig1User,
-	BuildConfig: nil,
-	Repository: &gitprovider.GitRepository{
-		Url: "url1",
+	Name:          "pc1",
+	Image:         projectConfig1Image,
+	User:          projectConfig1User,
+	BuildConfig:   nil,
+	RepositoryUrl: repository1.Url,
+	IsDefault:     true,
+	Prebuilds: []*config.PrebuildConfig{
+		prebuild1,
+		prebuild2,
 	},
-	IsDefault: true,
 }
 
 var projectConfig2 *config.ProjectConfig = &config.ProjectConfig{
-	Name:        "pc2",
-	Image:       "image2",
-	User:        "user2",
-	BuildConfig: nil,
-	Repository: &gitprovider.GitRepository{
-		Url: "url1",
-	},
+	Name:          "pc2",
+	Image:         "image2",
+	User:          "user2",
+	BuildConfig:   nil,
+	RepositoryUrl: "https://github.com/daytonaio/daytona.git",
 }
 
 var projectConfig3 *config.ProjectConfig = &config.ProjectConfig{
-	Name:        "pc3",
-	Image:       "image3",
-	User:        "user3",
-	BuildConfig: nil,
-	Repository: &gitprovider.GitRepository{
-		Url: "url3",
-	},
+	Name:          "pc3",
+	Image:         "image3",
+	User:          "user3",
+	BuildConfig:   nil,
+	RepositoryUrl: "https://github.com/daytonaio/daytona3.git",
 }
 
 var projectConfig4 *config.ProjectConfig = &config.ProjectConfig{
-	Name:        "pc4",
-	Image:       "image4",
-	User:        "user4",
-	BuildConfig: nil,
-	Repository: &gitprovider.GitRepository{
-		Url: "url4",
-	},
+	Name:          "pc4",
+	Image:         "image4",
+	User:          "user4",
+	BuildConfig:   nil,
+	RepositoryUrl: "https://github.com/daytonaio/daytona4.git",
 }
 
 var expectedProjectConfigs []*config.ProjectConfig
@@ -68,6 +65,9 @@ type ProjectConfigServiceTestSuite struct {
 	suite.Suite
 	projectConfigService projectconfig.IProjectConfigService
 	projectConfigStore   config.Store
+	gitProviderService   mocks.MockGitProviderService
+	buildService         mocks.MockBuildService
+	gitProvider          git_provider_mock.MockGitProvider
 }
 
 func NewConfigServiceTestSuite() *ProjectConfigServiceTestSuite {
@@ -79,14 +79,27 @@ func (s *ProjectConfigServiceTestSuite) SetupTest() {
 		projectConfig1, projectConfig2, projectConfig3,
 	}
 
+	expectedPrebuilds = []*config.PrebuildConfig{
+		prebuild1, prebuild2,
+	}
+
 	expectedProjectConfigsMap = map[string]*config.ProjectConfig{
 		projectConfig1.Name: projectConfig1,
 		projectConfig2.Name: projectConfig2,
 		projectConfig3.Name: projectConfig3,
 	}
 
+	expectedPrebuildsMap = map[string]*config.PrebuildConfig{
+		prebuild1.Id: prebuild1,
+		prebuild2.Id: prebuild2,
+	}
+
 	expectedFilteredProjectConfigs = []*config.ProjectConfig{
 		projectConfig1, projectConfig2,
+	}
+
+	expectedFilteredPrebuilds = []*config.PrebuildConfig{
+		prebuild1,
 	}
 
 	expectedFilteredProjectConfigsMap = map[string]*config.ProjectConfig{
@@ -94,9 +107,15 @@ func (s *ProjectConfigServiceTestSuite) SetupTest() {
 		projectConfig2.Name: projectConfig2,
 	}
 
+	expectedFilteredPrebuildsMap = map[string]*config.PrebuildConfig{
+		prebuild1.Id: prebuild1,
+	}
+
 	s.projectConfigStore = projectconfig_internal.NewInMemoryProjectConfigStore()
-	s.projectConfigService = projectconfig.NewConfigService(projectconfig.ProjectConfigServiceConfig{
-		ConfigStore: s.projectConfigStore,
+	s.projectConfigService = projectconfig.NewProjectConfigService(projectconfig.ProjectConfigServiceConfig{
+		ConfigStore:        s.projectConfigStore,
+		GitProviderService: &s.gitProviderService,
+		BuildService:       &s.buildService,
 	})
 
 	for _, pc := range expectedProjectConfigs {
@@ -119,7 +138,7 @@ func (s *ProjectConfigServiceTestSuite) TestList() {
 func (s *ProjectConfigServiceTestSuite) TestFind() {
 	require := s.Require()
 
-	projectConfig, err := s.projectConfigService.Find(&config.Filter{
+	projectConfig, err := s.projectConfigService.Find(&config.ProjectConfigFilter{
 		Name: &projectConfig1.Name,
 	})
 	require.Nil(err)
@@ -131,8 +150,8 @@ func (s *ProjectConfigServiceTestSuite) TestSetDefault() {
 	err := s.projectConfigService.SetDefault(projectConfig2.Name)
 	require.Nil(err)
 
-	projectConfig, err := s.projectConfigService.Find(&config.Filter{
-		Url:     util.Pointer("url1"),
+	projectConfig, err := s.projectConfigService.Find(&config.ProjectConfigFilter{
+		Url:     util.Pointer(projectConfig1.RepositoryUrl),
 		Default: util.Pointer(true),
 	})
 	require.Nil(err)
@@ -158,10 +177,19 @@ func (s *ProjectConfigServiceTestSuite) TestDelete() {
 
 	require := s.Require()
 
-	err := s.projectConfigService.Delete(projectConfig3.Name)
+	err := s.projectConfigService.Delete(projectConfig3.Name, false)
 	require.Nil(err)
 
-	projectConfigs, err := s.projectConfigService.List(nil)
-	require.Nil(err)
+	projectConfigs, errs := s.projectConfigService.List(nil)
+	require.Nil(errs)
 	require.ElementsMatch(expectedProjectConfigs, projectConfigs)
+}
+
+func (s *ProjectConfigServiceTestSuite) AfterTest(_, _ string) {
+	s.gitProviderService.AssertExpectations(s.T())
+	s.gitProviderService.ExpectedCalls = nil
+	s.buildService.AssertExpectations(s.T())
+	s.buildService.ExpectedCalls = nil
+	s.gitProvider.AssertExpectations(s.T())
+	s.gitProvider.ExpectedCalls = nil
 }

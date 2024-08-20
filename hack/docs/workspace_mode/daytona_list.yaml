@@ -2,6 +2,9 @@ name: daytona list
 synopsis: List workspaces
 usage: daytona list [flags]
 options:
+    - name: format
+      shorthand: f
+      usage: Output format. Must be one of (yaml, json)
     - name: verbose
       shorthand: v
       default_value: "false"
@@ -10,8 +13,5 @@ inherited_options:
     - name: help
       default_value: "false"
       usage: help for daytona
-    - name: output
-      shorthand: o
-      usage: Output format. Must be one of (yaml, json)
 see_also:
     - daytona - Use the Daytona CLI to manage your workspace

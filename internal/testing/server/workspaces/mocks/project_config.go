@@ -6,18 +6,15 @@
 package mocks
 
 import (
-	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 )
 
 var MockProjectConfig = config.ProjectConfig{
-	BuildConfig: &buildconfig.ProjectBuildConfig{
+	BuildConfig: &buildconfig.BuildConfig{
 		Devcontainer: &buildconfig.DevcontainerConfig{
 			FilePath: ".devcontainer/devcontainer.json",
 		},
 	},
-	Repository: &gitprovider.GitRepository{
-		Url: "url",
-	},
+	RepositoryUrl: "https://github.com/daytonaio/daytona",
 }

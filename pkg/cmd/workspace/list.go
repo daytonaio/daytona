@@ -10,7 +10,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views"
 	list_view "github.com/daytonaio/daytona/pkg/views/workspace/list"
 	log "github.com/sirupsen/logrus"
@@ -49,8 +49,9 @@ var ListCmd = &cobra.Command{
 			specifyGitProviders = true
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = workspaceList
+		if format.FormatFlag != "" {
+			formatter := format.NewFormatter(workspaceList)
+			formatter.Print()
 			return
 		}
 
@@ -74,5 +75,5 @@ var ListCmd = &cobra.Command{
 }
 
 func init() {
-	ListCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose output")
+	format.RegisterFormatFlag(ListCmd)
 }
