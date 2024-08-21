@@ -54,7 +54,7 @@ func DetectProjectBuilderType(project *project.Project, projectDir string, sshCl
 func findDevcontainerConfigFilePath(projectDir string) (string, error) {
 	devcontainerPath := ".devcontainer/devcontainer.json"
 	isDevcontainer, err := fileExists(filepath.Join(projectDir, devcontainerPath))
-	if err != nil {
+	if !isDevcontainer || err != nil {
 		devcontainerPath = ".devcontainer.json"
 		isDevcontainer, err = fileExists(filepath.Join(projectDir, devcontainerPath))
 		if err != nil {
