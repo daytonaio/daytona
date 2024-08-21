@@ -16,7 +16,7 @@ type ProjectConfigurationFlags struct {
 	Builder          *views_util.BuildChoice
 	CustomImage      *string
 	CustomImageUser  *string
-	Branch           *string
+	Branches         *[]string
 	DevcontainerPath *string
 	EnvVars          *[]string
 	Manual           *bool
@@ -25,7 +25,6 @@ type ProjectConfigurationFlags struct {
 func AddProjectConfigurationFlags(cmd *cobra.Command, flags ProjectConfigurationFlags, multiProjectFlagException bool) {
 	cmd.Flags().StringVar(flags.CustomImage, "custom-image", "", "Create the project with the custom image passed as the flag value; Requires setting --custom-image-user flag as well")
 	cmd.Flags().StringVar(flags.CustomImageUser, "custom-image-user", "", "Create the project with the custom image user passed as the flag value; Requires setting --custom-image flag as well")
-	cmd.Flags().StringVar(flags.Branch, "branch", "", "Specify the Git branch to use in the project")
 	cmd.Flags().StringVar(flags.DevcontainerPath, "devcontainer-path", "", "Automatically assign the devcontainer builder with the path passed as the flag value")
 	cmd.Flags().Var(flags.Builder, "builder", fmt.Sprintf("Specify the builder (currently %s/%s/%s)", views_util.AUTOMATIC, views_util.DEVCONTAINER, views_util.NONE))
 	cmd.Flags().StringArrayVar(flags.EnvVars, "env", []string{}, "Specify environment variables (e.g. --env 'KEY1=VALUE1' --env 'KEY2=VALUE2' ...')")
@@ -47,7 +46,7 @@ func AddProjectConfigurationFlags(cmd *cobra.Command, flags ProjectConfiguration
 }
 
 func CheckAnyProjectConfigurationFlagSet(flags ProjectConfigurationFlags) bool {
-	return *flags.CustomImage != "" || *flags.CustomImageUser != "" || *flags.Branch != "" || *flags.DevcontainerPath != "" || *flags.Builder != "" || len(*flags.EnvVars) > 0
+	return *flags.CustomImage != "" || *flags.CustomImageUser != "" || (*flags.Branches != nil && len(*flags.Branches) > 0) || *flags.DevcontainerPath != "" || *flags.Builder != "" || len(*flags.EnvVars) > 0
 }
 
 func IsProjectRunning(workspace *apiclient.WorkspaceDTO, projectName string) bool {
