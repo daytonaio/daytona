@@ -268,10 +268,6 @@ func (g *AwsCodeCommitGitProvider) getPrContext(staticContext *StaticGitContext)
 }
 
 func (g *AwsCodeCommitGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
-	if staticContext.Sha == nil || *staticContext.Sha == "" {
-		return *staticContext.Branch, nil
-	}
-
 	client, err := g.getApiClient()
 	if err != nil {
 		return "", err
@@ -290,7 +286,6 @@ func (g *AwsCodeCommitGitProvider) GetBranchByCommit(staticContext *StaticGitCon
 			BranchName:     aws.String(branch),
 		})
 		if err != nil {
-			log.Infof("failed to get branch info for %s, %v", branch, err)
 			continue
 		}
 
@@ -306,7 +301,7 @@ func (g *AwsCodeCommitGitProvider) GetBranchByCommit(staticContext *StaticGitCon
 				CommitId:       commitID,
 			})
 			if err != nil {
-				return "", fmt.Errorf("failed to get commit %s in branch %s: %v", *commitID, branch, err)
+				continue
 			}
 
 			if *commit.Commit.CommitId == *staticContext.Sha {
@@ -332,7 +327,6 @@ func (g *AwsCodeCommitGitProvider) GetBranchByCommit(staticContext *StaticGitCon
 	if branchName == "" {
 		return "", fmt.Errorf("branch not found for SHA: %s", *staticContext.Sha)
 	}
-
 	return branchName, nil
 }
 

@@ -255,10 +255,6 @@ func (g *AzureDevOpsGitProvider) GetLastCommitSha(staticContext *StaticGitContex
 }
 
 func (g *AzureDevOpsGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
-	if staticContext.Sha == nil || *staticContext.Sha == "" {
-		return *staticContext.Branch, nil
-	}
-
 	client, err := g.getGitClient()
 	if err != nil {
 		return "", err
@@ -289,10 +285,10 @@ func (g *AzureDevOpsGitProvider) GetBranchByCommit(staticContext *StaticGitConte
 
 		commits, err := client.GetCommitsBatch(context.Background(), git.GetCommitsBatchArgs{
 			SearchCriteria: searchCriteria,
-			RepositoryId:   &staticContext.Name,
+			RepositoryId:   &staticContext.Id,
 		})
 		if err != nil {
-			return "", err
+			continue
 		}
 
 		if len(*commits) == 0 {

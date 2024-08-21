@@ -58,7 +58,7 @@ func (a *AbstractGitProvider) GetRepositoryFromUrl(repositoryUrl string) (*GitRe
 	}
 
 	var target CloneTarget = CloneTargetBranch
-	if staticContext.Branch == staticContext.Sha {
+	if staticContext.Sha != nil && staticContext.Branch == staticContext.Sha {
 		target = CloneTargetCommit
 		branch, err := a.GetBranchByCommit(staticContext)
 		if err != nil {
@@ -70,9 +70,8 @@ func (a *AbstractGitProvider) GetRepositoryFromUrl(repositoryUrl string) (*GitRe
 		if err != nil {
 			return nil, err
 		}
-		*staticContext.Sha = lastCommitSha
+		staticContext.Sha = &lastCommitSha
 	}
-
 	return &GitRepository{
 		Id:       staticContext.Id,
 		Name:     staticContext.Name,

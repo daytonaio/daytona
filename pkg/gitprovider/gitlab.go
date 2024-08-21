@@ -181,10 +181,6 @@ func (g *GitLabGitProvider) GetUser() (*GitUser, error) {
 }
 
 func (g *GitLabGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
-	if staticContext.Sha == nil || *staticContext.Sha == "" {
-		return *staticContext.Branch, nil
-	}
-
 	client := g.getApiClient()
 
 	branches, _, err := client.Branches.ListBranches(staticContext.Id, &gitlab.ListBranchesOptions{})

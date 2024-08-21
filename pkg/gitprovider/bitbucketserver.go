@@ -304,10 +304,6 @@ func (g *BitbucketServerGitProvider) GetLastCommitSha(staticContext *StaticGitCo
 }
 
 func (g *BitbucketServerGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
-	if staticContext.Sha == nil || *staticContext.Sha == "" {
-		return *staticContext.Branch, nil
-	}
-
 	client, err := g.getApiClient()
 	if err != nil {
 		return "", err

@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/ktrysmt/go-bitbucket"
-	log "github.com/sirupsen/logrus"
 )
 
 type BitbucketGitProvider struct {
@@ -267,20 +266,11 @@ func (g *BitbucketGitProvider) GetLastCommitSha(staticContext *StaticGitContext)
 }
 
 func (g *BitbucketGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
-	if staticContext.Sha == nil || *staticContext.Sha == "" {
-		return *staticContext.Branch, nil
-	}
-
 	client := g.getApiClient()
 
-	owner, repo, err := g.getOwnerAndRepoFromFullName(staticContext.Id)
-	if err != nil {
-		return "", err
-	}
-
 	branches, err := client.Repositories.Repository.ListBranches(&bitbucket.RepositoryBranchOptions{
-		RepoSlug: repo,
-		Owner:    owner,
+		RepoSlug: staticContext.Name,
+		Owner:    staticContext.Owner,
 	})
 	if err != nil {
 		return "", err
@@ -290,7 +280,6 @@ func (g *BitbucketGitProvider) GetBranchByCommit(staticContext *StaticGitContext
 	for _, branch := range branches.Branches {
 		hash, ok := branch.Target["hash"].(string)
 		if !ok {
-			log.Infof("failed to get branch info for %s", branch.Name)
 			continue
 		}
 
@@ -300,8 +289,8 @@ func (g *BitbucketGitProvider) GetBranchByCommit(staticContext *StaticGitContext
 		}
 
 		commits, err := client.Repositories.Commits.GetCommits(&bitbucket.CommitsOptions{
-			RepoSlug:    repo,
-			Owner:       owner,
+			RepoSlug:    staticContext.Name,
+			Owner:       staticContext.Owner,
 			Branchortag: branch.Name,
 		})
 		if err != nil {

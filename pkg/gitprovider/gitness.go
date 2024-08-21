@@ -151,10 +151,6 @@ func (g *GitnessGitProvider) GetUrlFromRepository(repo *GitRepository) string {
 }
 
 func (g *GitnessGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
-	if staticContext.Sha != nil || *staticContext.Sha == "" {
-		return *staticContext.Branch, nil
-	}
-
 	client := g.getApiClient()
 
 	response, err := client.GetRepoBranches(staticContext.Name, staticContext.Owner)
