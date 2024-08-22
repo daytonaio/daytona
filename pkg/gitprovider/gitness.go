@@ -165,7 +165,7 @@ func (g *GitnessGitProvider) GetBranchByCommit(staticContext *StaticGitContext) 
 			break
 		}
 
-		commits, err := client.GetCommits(staticContext.Owner, staticContext.Name, staticContext.Branch)
+		commits, err := client.GetCommits(staticContext.Owner, staticContext.Name, &branch.Name)
 		if err != nil {
 			return "", err
 		}
