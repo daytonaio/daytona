@@ -18,6 +18,7 @@ type BranchWizardConfig struct {
 	ApiClient    *apiclient.APIClient
 	ProviderId   string
 	NamespaceId  string
+	Namespace    string
 	ChosenRepo   *apiclient.GitRepository
 	ProjectOrder int
 }
@@ -58,7 +59,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	}
 
 	var branch *apiclient.GitBranch
-	parentIdentifier := config.ProviderId + "/" + config.NamespaceId + "/" + config.ChosenRepo.Name
+	parentIdentifier := config.ProviderId + "/" + config.Namespace + "/" + config.ChosenRepo.Name
 	if len(prList) == 0 {
 		branch = selection.GetBranchFromPrompt(branchList, config.ProjectOrder, parentIdentifier)
 		if branch == nil {

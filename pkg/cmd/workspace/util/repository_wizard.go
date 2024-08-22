@@ -96,12 +96,19 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		return nil, err
 	}
 
+	namespace := ""
 	if len(namespaceList) == 1 {
 		namespaceId = namespaceList[0].Id
+		namespace = namespaceList[0].Name
 	} else {
 		namespaceId = selection.GetNamespaceIdFromPrompt(namespaceList, config.ProjectOrder, providerId)
 		if namespaceId == "" {
 			return nil, common.ErrCtrlCAbort
+		}
+		for _, namespaceItem := range namespaceList {
+			if namespaceItem.Id == namespaceId {
+				namespace = namespaceItem.Name
+			}
 		}
 	}
 
@@ -115,7 +122,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		return nil, err
 	}
 
-	parentIdentifier := providerId + "/" + namespaceId
+	parentIdentifier := providerId + "/" + namespace
 	chosenRepo := selection.GetRepositoryFromPrompt(providerRepos, config.ProjectOrder, config.SelectedRepos, parentIdentifier)
 	if chosenRepo == nil {
 		return nil, common.ErrCtrlCAbort
@@ -129,6 +136,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		ApiClient:    config.ApiClient,
 		ProviderId:   providerId,
 		NamespaceId:  namespaceId,
+		Namespace:    namespace,
 		ChosenRepo:   chosenRepo,
 		ProjectOrder: config.ProjectOrder,
 	})
