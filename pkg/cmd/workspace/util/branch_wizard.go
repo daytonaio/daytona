@@ -58,8 +58,9 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	}
 
 	var branch *apiclient.GitBranch
+	parentIdentifier := config.ProviderId + "/" + config.NamespaceId + "/" + config.ChosenRepo.Name
 	if len(prList) == 0 {
-		branch = selection.GetBranchFromPrompt(branchList, config.ProjectOrder)
+		branch = selection.GetBranchFromPrompt(branchList, config.ProjectOrder, parentIdentifier)
 		if branch == nil {
 			return nil, errors.New("must select a branch")
 		}
@@ -90,14 +91,14 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	}
 
 	if chosenCheckoutOption == selection.CheckoutBranch {
-		branch = selection.GetBranchFromPrompt(branchList, config.ProjectOrder)
+		branch = selection.GetBranchFromPrompt(branchList, config.ProjectOrder, parentIdentifier)
 		if branch == nil {
 			return nil, errors.New("must select a branch")
 		}
 		config.ChosenRepo.Branch = branch.Name
 		config.ChosenRepo.Sha = branch.Sha
 	} else if chosenCheckoutOption == selection.CheckoutPR {
-		chosenPullRequest := selection.GetPullRequestFromPrompt(prList, config.ProjectOrder)
+		chosenPullRequest := selection.GetPullRequestFromPrompt(prList, config.ProjectOrder, parentIdentifier)
 		if chosenPullRequest == nil {
 			return nil, errors.New("must select a pull request")
 		}
