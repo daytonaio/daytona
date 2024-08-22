@@ -112,6 +112,7 @@ var CreateCmd = &cobra.Command{
 		}
 
 		logs_view.CalculateLongestPrefixLength(projectNames)
+		logs_view.SetCursorPositions()
 
 		logs_view.DisplayLogEntry(logs.LogEntry{
 			Msg: "Request submitted\n",
