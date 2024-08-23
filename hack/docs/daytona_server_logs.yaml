@@ -9,10 +9,6 @@ options:
       shorthand: f
       default_value: "false"
       usage: Follow logs
-    - name: retry
-      shorthand: r
-      default_value: "false"
-      usage: Retry connection
 inherited_options:
     - name: help
       default_value: "false"

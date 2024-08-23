@@ -11,7 +11,6 @@ daytona server logs [flags]
 ```
       --file     Read logs from local server log file
   -f, --follow   Follow logs
-  -r, --retry    Retry connection
 ```
 
 ### Options inherited from parent commands
