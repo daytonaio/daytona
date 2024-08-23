@@ -18,17 +18,14 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
-	project_config "github.com/daytonaio/daytona/pkg/workspace/project/config"
 )
 
 var project1 = &project.Project{
-	ProjectConfig: project_config.ProjectConfig{
-		Name: "test",
-		Repository: &gitprovider.GitRepository{
-			Id:   "123",
-			Url:  "https://github.com/daytonaio/daytona",
-			Name: "daytona",
-		},
+	Name: "test",
+	Repository: &gitprovider.GitRepository{
+		Id:   "123",
+		Url:  "https://github.com/daytonaio/daytona",
+		Name: "daytona",
 	},
 	WorkspaceId: "123",
 	Target:      "local",
@@ -77,7 +74,7 @@ func TestAgent(t *testing.T) {
 	mockConfig.Server.ApiUrl = apiServer.URL
 
 	mockGitService := mock_git.NewMockGitService()
-	mockGitService.On("RepositoryExists", project1).Return(true, nil)
+	mockGitService.On("RepositoryExists").Return(true, nil)
 	mockGitService.On("SetGitConfig", mock.Anything).Return(nil)
 	mockGitService.On("GetGitStatus").Return(gitStatus1, nil)
 

@@ -288,7 +288,7 @@ func (g *BitbucketGitProvider) getApiClient() *bitbucket.Client {
 	return client
 }
 
-func (g *BitbucketGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
+func (g *BitbucketGitProvider) GetPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
 	if staticContext.PrNumber == nil {
 		return staticContext, nil
 	}
@@ -346,8 +346,8 @@ func (g *BitbucketGitProvider) getPrContext(staticContext *StaticGitContext) (*S
 	return &repo, nil
 }
 
-func (g *BitbucketGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
-	staticContext, err := g.AbstractGitProvider.parseStaticGitContext(repoUrl)
+func (g *BitbucketGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
+	staticContext, err := g.AbstractGitProvider.ParseStaticGitContext(repoUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -382,6 +382,25 @@ func (g *BitbucketGitProvider) parseStaticGitContext(repoUrl string) (*StaticGit
 	}
 
 	return staticContext, nil
+}
+
+func (g *BitbucketGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*string, error) {
+	client := g.getApiClient()
+	branches, err := client.Repositories.Repository.ListBranches(&bitbucket.RepositoryBranchOptions{
+		Owner:    staticContext.Owner,
+		RepoSlug: staticContext.Id,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, branch := range branches.Branches {
+		if branch.Type == "main" {
+			return &branch.Name, nil
+		}
+	}
+
+	return nil, fmt.Errorf("Default branch not found")
 }
 
 func (b *BitbucketGitProvider) getOwnerAndRepoFromFullName(fullName string) (string, string, error) {

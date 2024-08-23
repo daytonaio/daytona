@@ -1,6 +1,11 @@
 name: daytona project-config delete
 synopsis: Delete a project config
 usage: daytona project-config delete [flags]
+options:
+    - name: force
+      shorthand: f
+      default_value: "false"
+      usage: Force delete prebuild
 inherited_options:
     - name: help
       default_value: "false"

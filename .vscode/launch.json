@@ -28,6 +28,10 @@
       "mode": "debug",
       "program": "${workspaceFolder}/cmd/daytona",
       "console": "integratedTerminal",
+      "env": {
+        "DAYTONA_DEV": "1",
+        "DAYTONA_CONFIG_DIR": "/home/daytona/.config/daytona-dev",
+      },
       "args": [
         "serve"
       ]

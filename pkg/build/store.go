@@ -5,17 +5,15 @@ package build
 
 import (
 	"errors"
+
+	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
 )
 
-type BuildFilter struct {
-	State *BuildState
-}
-
 type Store interface {
-	Find(hash string) (*Build, error)
-	List(filter *BuildFilter) ([]*Build, error)
+	Find(filter *Filter) (*Build, error)
+	List(filter *Filter) ([]*Build, error)
 	Save(build *Build) error
-	Delete(hash string) error
+	Delete(id string) error
 }
 
 var (
@@ -24,4 +22,31 @@ var (
 
 func IsBuildNotFound(err error) bool {
 	return err.Error() == ErrBuildNotFound.Error()
+}
+
+type Filter struct {
+	Id            *string
+	States        *[]BuildState
+	PrebuildIds   *[]string
+	GetNewest     *bool
+	BuildConfig   *buildconfig.BuildConfig
+	RepositoryUrl *string
+	Branch        *string
+	EnvVars       *map[string]string
+}
+
+func (f *Filter) StatesToInterface() []interface{} {
+	args := make([]interface{}, len(*f.States))
+	for i, v := range *f.States {
+		args[i] = v
+	}
+	return args
+}
+
+func (f *Filter) PrebuildIdsToInterface() []interface{} {
+	args := make([]interface{}, len(*f.PrebuildIds))
+	for i, v := range *f.PrebuildIds {
+		args[i] = v
+	}
+	return args
 }

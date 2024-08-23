@@ -287,7 +287,7 @@ func (g *AzureDevOpsGitProvider) GetUrlFromRepository(repo *GitRepository) strin
 	return url
 }
 
-func (g *AzureDevOpsGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
+func (g *AzureDevOpsGitProvider) GetPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
 	var pullRequestId int
 	if staticContext.PrNumber == nil {
 		return staticContext, nil
@@ -325,7 +325,7 @@ func (g *AzureDevOpsGitProvider) getPrContext(staticContext *StaticGitContext) (
 	return &repo, nil
 }
 
-func (g *AzureDevOpsGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
+func (g *AzureDevOpsGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
 	repoUrl = strings.TrimSpace(repoUrl)
 	if strings.HasPrefix(repoUrl, "git@") {
 		return g.parseAzureDevopsSshGitUrl(repoUrl)
@@ -336,6 +336,25 @@ func (g *AzureDevOpsGitProvider) parseStaticGitContext(repoUrl string) (*StaticG
 	}
 
 	return nil, errors.New("can not parse git URL: " + repoUrl)
+}
+
+func (g *AzureDevOpsGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*string, error) {
+	client, err := g.getGitClient()
+	if err != nil {
+		return nil, err
+	}
+
+	ctx := context.Background()
+	repo, err := client.GetRepository(ctx, git.GetRepositoryArgs{
+		RepositoryId: &staticContext.Id,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	defaultBranch := *repo.DefaultBranch
+	defaultBranch = strings.TrimPrefix(defaultBranch, "refs/heads/")
+	return &defaultBranch, nil
 }
 
 func (g *AzureDevOpsGitProvider) parseAzureDevopsSshGitUrl(gitURL string) (*StaticGitContext, error) {

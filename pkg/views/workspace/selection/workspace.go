@@ -41,7 +41,7 @@ func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO) []list.Item {
 		uptime := ""
 		createdTime := ""
 		if workspace.Info != nil && workspace.Info.Projects != nil && len(workspace.Info.Projects) > 0 {
-			createdTime = util.FormatCreatedTime(workspace.Info.Projects[0].Created)
+			createdTime = util.FormatTimestamp(workspace.Info.Projects[0].Created)
 		}
 		if len(workspace.Projects) > 0 && workspace.Projects[0].State != nil {
 			if workspace.Projects[0].State.Uptime == 0 {

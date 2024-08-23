@@ -23,27 +23,39 @@ const (
 )
 
 type LogEntry struct {
-	Source      string `json:"source"`
-	WorkspaceId string `json:"workspaceId"`
-	ProjectName string `json:"projectName"`
-	Msg         string `json:"msg"`
-	Level       string `json:"level"`
-	Time        string `json:"time"`
+	Source      string  `json:"source"`
+	WorkspaceId *string `json:"workspaceId,omitempty"`
+	ProjectName *string `json:"projectName,omitempty"`
+	BuildId     *string `json:"buildId,omitempty"`
+	Msg         string  `json:"msg"`
+	Level       string  `json:"level"`
+	Time        string  `json:"time"`
 }
 
 type LoggerFactory interface {
 	CreateWorkspaceLogger(workspaceId string, source LogSource) Logger
 	CreateProjectLogger(workspaceId, projectName string, source LogSource) Logger
-	CreateBuildLogger(projectName, buildId string, source LogSource) Logger
+	CreateBuildLogger(buildId string, source LogSource) Logger
 	CreateWorkspaceLogReader(workspaceId string) (io.Reader, error)
 	CreateProjectLogReader(workspaceId, projectName string) (io.Reader, error)
-	CreateBuildLogReader(projectName, buildId string) (io.Reader, error)
+	CreateBuildLogReader(buildId string) (io.Reader, error)
 }
 
 type loggerFactoryImpl struct {
-	logsDir string
+	wsLogsDir    string
+	buildLogsDir string
 }
 
-func NewLoggerFactory(logsDir string) LoggerFactory {
-	return &loggerFactoryImpl{logsDir: logsDir}
+func NewLoggerFactory(wsLogsDir *string, buildLogsDir *string) LoggerFactory {
+	loggerFactoryImpl := &loggerFactoryImpl{}
+
+	if wsLogsDir != nil {
+		loggerFactoryImpl.wsLogsDir = *wsLogsDir
+	}
+
+	if buildLogsDir != nil {
+		loggerFactoryImpl.buildLogsDir = *buildLogsDir
+	}
+
+	return loggerFactoryImpl
 }

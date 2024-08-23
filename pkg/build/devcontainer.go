@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/daytonaio/daytona/pkg/build/detect"
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/logs"
@@ -38,7 +39,16 @@ type DevcontainerBuilder struct {
 }
 
 func (b *DevcontainerBuilder) Build(build Build) (string, string, error) {
-	err := b.startContainer(build)
+	builderType, err := detect.DetectProjectBuilderType(build.BuildConfig, b.projectDir, nil)
+	if err != nil {
+		return "", "", err
+	}
+
+	if builderType != detect.BuilderTypeDevcontainer {
+		return "", "", fmt.Errorf("failed to detect devcontainer config")
+	}
+
+	err = b.startContainer(build)
 	if err != nil {
 		return "", "", err
 	}
@@ -49,28 +59,23 @@ func (b *DevcontainerBuilder) Build(build Build) (string, string, error) {
 func (b *DevcontainerBuilder) CleanUp() error {
 	ctx := context.Background()
 
+	err := os.RemoveAll(b.projectDir)
+	if err != nil {
+		return err
+	}
+
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return err
 	}
 
-	err = cli.ContainerRemove(ctx, b.id, container.RemoveOptions{
+	return cli.ContainerRemove(ctx, b.id, container.RemoveOptions{
 		Force: true,
 	})
-	if err != nil {
-		return err
-	}
-
-	err = os.RemoveAll(b.projectDir)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (b *DevcontainerBuilder) Publish(build Build) error {
-	buildLogger := b.loggerFactory.CreateBuildLogger(build.Project.Name, build.Id, logs.LogSourceBuilder)
+	buildLogger := b.loggerFactory.CreateBuildLogger(build.Id, logs.LogSourceBuilder)
 	defer buildLogger.Close()
 
 	cliBuilder, err := b.getBuilderDockerClient()
@@ -82,16 +87,11 @@ func (b *DevcontainerBuilder) Publish(build Build) error {
 		ApiClient: cliBuilder,
 	})
 
-	cr, err := b.containerRegistryService.Find(b.containerRegistryServer)
-	if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
-		return err
-	}
-
-	return dockerClient.PushImage(build.Image, cr, buildLogger)
+	return dockerClient.PushImage(build.Image, b.containerRegistry, buildLogger)
 }
 
 func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, error) {
-	buildLogger := b.loggerFactory.CreateBuildLogger(build.Project.Name, build.Id, logs.LogSourceBuilder)
+	buildLogger := b.loggerFactory.CreateBuildLogger(build.Id, logs.LogSourceBuilder)
 	defer buildLogger.Close()
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -104,8 +104,12 @@ func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, er
 	})
 
 	cmd := []string{"devcontainer", "up", "--prebuild", "--workspace-folder", "/project"}
-	if build.Project.BuildConfig.Devcontainer.FilePath != "" {
-		cmd = append(cmd, "--config", filepath.Join("/project", build.Project.BuildConfig.Devcontainer.FilePath))
+	if build.BuildConfig != nil && build.BuildConfig.Devcontainer != nil && build.BuildConfig.Devcontainer.FilePath != "" {
+		cmd = append(cmd, "--config", filepath.Join("/project", build.BuildConfig.Devcontainer.FilePath))
+	}
+
+	if build.BuildConfig.CachedBuild != nil {
+		cmd = append(cmd, "--cache-from", build.BuildConfig.CachedBuild.Image)
 	}
 
 	execConfig := types.ExecConfig{
@@ -161,9 +165,10 @@ func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, er
 		return b.defaultProjectImage, b.defaultProjectUser, err
 	}
 
-	tag := build.Project.Repository.Sha
-	namespace := b.buildImageNamespace
-	imageName := fmt.Sprintf("%s%s/p-%s:%s", b.containerRegistryServer, namespace, b.id, tag)
+	imageName, err := b.GetImageName(build)
+	if err != nil {
+		return b.defaultProjectImage, b.defaultProjectUser, err
+	}
 
 	_, err = builderCli.ContainerCommit(context.Background(), buildOutcome.ContainerId, container.CommitOptions{
 		Reference: imageName,
@@ -178,7 +183,7 @@ func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, er
 func (b *DevcontainerBuilder) startContainer(build Build) error {
 	ctx := context.Background()
 
-	buildLogger := b.loggerFactory.CreateBuildLogger(build.Project.Name, build.Id, logs.LogSourceBuilder)
+	buildLogger := b.loggerFactory.CreateBuildLogger(build.Id, logs.LogSourceBuilder)
 	defer buildLogger.Close()
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -190,17 +195,12 @@ func (b *DevcontainerBuilder) startContainer(build Build) error {
 		ApiClient: cli,
 	})
 
-	cr, err := b.containerRegistryService.FindByImageName(b.image)
-	if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
-		return err
-	}
-
-	err = dockerClient.PullImage(b.image, cr, buildLogger)
+	err = dockerClient.PullImage(b.image, b.containerRegistry, buildLogger)
 	if err != nil {
 		return err
 	}
 
-	serverHost, err := containerregistry.GetServerHostname(b.containerRegistryServer)
+	serverHost, err := containerregistry.GetServerHostname(b.containerRegistry.Server)
 	if err != nil {
 		return err
 	}

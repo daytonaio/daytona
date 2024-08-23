@@ -230,3 +230,31 @@ func ReadProjectLog(ginCtx *gin.Context) {
 
 	readJSONLog(ginCtx, projectLogReader)
 }
+
+func ReadBuildLog(ginCtx *gin.Context) {
+	buildId := ginCtx.Param("buildId")
+	retryQuery := ginCtx.DefaultQuery("retry", "true")
+	retry := retryQuery == "true"
+
+	server := server.GetInstance(nil)
+
+	if retry {
+		for {
+			buildLogReader, err := server.BuildService.GetBuildLogReader(buildId)
+
+			if err == nil {
+				readJSONLog(ginCtx, buildLogReader)
+				return
+			}
+			time.Sleep(TIMEOUT)
+		}
+	}
+
+	buildLogReader, err := server.BuildService.GetBuildLogReader(buildId)
+	if err != nil {
+		ginCtx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	readJSONLog(ginCtx, buildLogReader)
+}

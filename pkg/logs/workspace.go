@@ -38,7 +38,7 @@ func (w *workspaceLogger) Write(p []byte) (n int, err error) {
 	var entry LogEntry
 	entry.Msg = string(p)
 	entry.Source = string(w.source)
-	entry.WorkspaceId = w.workspaceId
+	entry.WorkspaceId = &w.workspaceId
 
 	b, err := json.Marshal(entry)
 	if err != nil {
@@ -82,13 +82,13 @@ func (l *loggerFactoryImpl) CreateWorkspaceLogger(workspaceId string, source Log
 
 	return &workspaceLogger{
 		workspaceId: workspaceId,
-		logsDir:     l.logsDir,
+		logsDir:     l.wsLogsDir,
 		logger:      logger,
 		source:      source,
 	}
 }
 
 func (l *loggerFactoryImpl) CreateWorkspaceLogReader(workspaceId string) (io.Reader, error) {
-	filePath := filepath.Join(l.logsDir, workspaceId, "log")
+	filePath := filepath.Join(l.wsLogsDir, workspaceId, "log")
 	return os.Open(filePath)
 }

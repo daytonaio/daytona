@@ -19,7 +19,7 @@ func (d *DockerClient) StartProject(opts *CreateProjectOptions, daytonaDownloadU
 	var err error
 	containerUser := opts.Project.User
 
-	builderType, err := detect.DetectProjectBuilderType(opts.Project, opts.ProjectDir, opts.SshClient)
+	builderType, err := detect.DetectProjectBuilderType(opts.Project.BuildConfig, opts.ProjectDir, opts.SshClient)
 	if err != nil {
 		return err
 	}

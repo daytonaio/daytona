@@ -3,35 +3,51 @@
 
 package dto
 
-import "github.com/daytonaio/daytona/pkg/build"
+import (
+	"time"
+
+	"github.com/daytonaio/daytona/pkg/build"
+)
 
 type BuildDTO struct {
-	Id      string     `json:"id"`
-	Hash    string     `gorm:"primaryKey"`
-	State   string     `json:"state"`
-	Project ProjectDTO `json:"project" gorm:"serializer:json"`
-	User    string     `json:"user"`
-	Image   string     `json:"image"`
+	Id          string            `json:"id" gorm:"primaryKey"`
+	State       string            `json:"state"`
+	Image       string            `json:"image"`
+	User        string            `json:"user"`
+	BuildConfig *ProjectBuildDTO  `json:"build,omitempty" gorm:"serializer:json"`
+	Repository  RepositoryDTO     `gorm:"serializer:json"`
+	EnvVars     map[string]string `json:"envVars" gorm:"serializer:json"`
+	PrebuildId  string            `json:"prebuildId"`
+	CreatedAt   time.Time         `json:"createdAt"`
+	UpdatedAt   time.Time         `json:"updatedAt"`
 }
 
 func ToBuildDTO(build *build.Build) BuildDTO {
 	return BuildDTO{
-		Id:      build.Id,
-		Hash:    build.Hash,
-		State:   string(build.State),
-		Project: ToProjectDTO(&build.Project),
-		User:    build.User,
-		Image:   build.Image,
+		Id:          build.Id,
+		State:       string(build.State),
+		Image:       build.Image,
+		User:        build.User,
+		BuildConfig: ToProjectBuildDTO(build.BuildConfig),
+		Repository:  ToRepositoryDTO(build.Repository),
+		EnvVars:     build.EnvVars,
+		PrebuildId:  build.PrebuildId,
+		CreatedAt:   build.CreatedAt,
+		UpdatedAt:   build.UpdatedAt,
 	}
 }
 
 func ToBuild(buildDTO BuildDTO) *build.Build {
 	return &build.Build{
-		Id:      buildDTO.Id,
-		Hash:    buildDTO.Hash,
-		State:   build.BuildState(buildDTO.State),
-		Project: *ToProject(buildDTO.Project),
-		User:    buildDTO.User,
-		Image:   buildDTO.Image,
+		Id:          buildDTO.Id,
+		State:       build.BuildState(buildDTO.State),
+		Image:       buildDTO.Image,
+		User:        buildDTO.User,
+		BuildConfig: ToProjectBuild(buildDTO.BuildConfig),
+		Repository:  ToRepository(buildDTO.Repository),
+		EnvVars:     buildDTO.EnvVars,
+		PrebuildId:  buildDTO.PrebuildId,
+		CreatedAt:   buildDTO.CreatedAt,
+		UpdatedAt:   buildDTO.UpdatedAt,
 	}
 }

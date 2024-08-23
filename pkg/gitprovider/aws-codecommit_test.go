@@ -39,7 +39,7 @@ func (g *AwsCodeCommitGitProviderTestSuite) TestParseStaticGitContext_PR() {
 	}
 
 	require := g.Require()
-	httpContext, err := g.gitProvider.parseStaticGitContext(prUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(prUrl)
 	require.Nil(err)
 	require.Equal(prContext, httpContext)
 }
@@ -60,7 +60,7 @@ func (g *AwsCodeCommitGitProviderTestSuite) TestParseStaticGitContext_Files() {
 	}
 
 	require := g.Require()
-	httpContext, err := g.gitProvider.parseStaticGitContext(prUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(prUrl)
 	require.Nil(err)
 	require.Equal(prContext, httpContext)
 }
@@ -80,7 +80,7 @@ func (g *AwsCodeCommitGitProviderTestSuite) TestParseStaticGitContext_Branch() {
 	}
 
 	require := g.Require()
-	httpContext, err := g.gitProvider.parseStaticGitContext(prUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(prUrl)
 	require.Nil(err)
 	require.Equal(prContext, httpContext)
 }
@@ -100,7 +100,7 @@ func (g *AwsCodeCommitGitProviderTestSuite) TestParseStaticGitContext_Commits() 
 	}
 
 	require := g.Require()
-	httpContext, err := g.gitProvider.parseStaticGitContext(prUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(prUrl)
 	require.Nil(err)
 	require.Equal(prContext, httpContext)
 
@@ -121,7 +121,7 @@ func (g *AwsCodeCommitGitProviderTestSuite) TestParseStaticGitContext_Commit() {
 	}
 
 	require := g.Require()
-	httpContext, err := g.gitProvider.parseStaticGitContext(prUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(prUrl)
 	require.Nil(err)
 	require.Equal(prContext, httpContext)
 }

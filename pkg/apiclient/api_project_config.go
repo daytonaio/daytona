@@ -26,6 +26,13 @@ type ApiDeleteProjectConfigRequest struct {
 	ctx        context.Context
 	ApiService *ProjectConfigAPIService
 	configName string
+	force      *bool
+}
+
+// Force
+func (r ApiDeleteProjectConfigRequest) Force(force bool) ApiDeleteProjectConfigRequest {
+	r.force = &force
+	return r
 }
 
 func (r ApiDeleteProjectConfigRequest) Execute() (*http.Response, error) {
@@ -69,6 +76,9 @@ func (a *ProjectConfigAPIService) DeleteProjectConfigExecute(r ApiDeleteProjectC
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.force != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "force", r.force, "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

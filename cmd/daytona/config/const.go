@@ -86,7 +86,7 @@ func GetDocsLinkFromGitProvider(providerId string) string {
 	}
 }
 
-func GetScopesFromGitProvider(providerId string) string {
+func GetRequiredScopesFromGitProviderId(providerId string) string {
 	switch providerId {
 	case "github":
 		fallthrough
@@ -110,6 +110,26 @@ func GetScopesFromGitProvider(providerId string) string {
 		return "Code (Status, Read & Write); User Profile (Read); Project and Team (Read)"
 	case "aws-codecommit":
 		return "/"
+	default:
+		return ""
+	}
+}
+
+func GetPrebuildScopesFromGitProviderId(providerId string) string {
+	switch providerId {
+	case "github":
+		fallthrough
+	case "github-enterprise-server":
+		return "admin:repo_hook"
+	default:
+		return ""
+	}
+}
+
+func GetWebhookEventHeaderKeyFromGitProvider(providerId string) string {
+	switch providerId {
+	case "github":
+		return "X-GitHub-Event"
 	default:
 		return ""
 	}

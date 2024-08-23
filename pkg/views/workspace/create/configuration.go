@@ -31,7 +31,7 @@ type ProjectConfigurationData struct {
 	EnvVars              map[string]string
 }
 
-func NewConfigurationData(buildChoice BuildChoice, devContainerFilePath string, currentProject *apiclient.CreateProjectConfigDTO, defaults *ProjectConfigDefaults) *ProjectConfigurationData {
+func NewConfigurationData(buildChoice BuildChoice, devContainerFilePath string, currentProject *apiclient.CreateProjectDTO, defaults *ProjectConfigDefaults) *ProjectConfigurationData {
 	projectConfigurationData := &ProjectConfigurationData{
 		BuildChoice:          string(buildChoice),
 		DevcontainerFilePath: defaults.DevcontainerFilePath,
@@ -55,8 +55,8 @@ func NewConfigurationData(buildChoice BuildChoice, devContainerFilePath string, 
 	return projectConfigurationData
 }
 
-func RunProjectConfiguration(projectList *[]apiclient.CreateProjectConfigDTO, defaults ProjectConfigDefaults) (bool, error) {
-	var currentProject *apiclient.CreateProjectConfigDTO
+func RunProjectConfiguration(projectList *[]apiclient.CreateProjectDTO, defaults ProjectConfigDefaults) (bool, error) {
+	var currentProject *apiclient.CreateProjectDTO
 
 	if len(*projectList) > 1 {
 		currentProject = selection.GetProjectRequestFromPrompt(projectList)
@@ -111,13 +111,13 @@ func RunProjectConfiguration(projectList *[]apiclient.CreateProjectConfigDTO, de
 			}
 
 			if projectConfigurationData.BuildChoice == string(AUTOMATIC) {
-				(*projectList)[i].BuildConfig = &apiclient.ProjectBuildConfig{}
+				(*projectList)[i].BuildConfig = &apiclient.BuildConfig{}
 				(*projectList)[i].Image = defaults.Image
 				(*projectList)[i].User = defaults.ImageUser
 			}
 
 			if projectConfigurationData.BuildChoice == string(DEVCONTAINER) {
-				(*projectList)[i].BuildConfig = &apiclient.ProjectBuildConfig{
+				(*projectList)[i].BuildConfig = &apiclient.BuildConfig{
 					Devcontainer: &apiclient.DevcontainerConfig{
 						FilePath: projectConfigurationData.DevcontainerFilePath,
 					},

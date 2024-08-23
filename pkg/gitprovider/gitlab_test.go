@@ -36,7 +36,7 @@ func (g *GitLabGitProviderTestSuite) TestParseStaticGitContext_HTTP() {
 
 	require := g.Require()
 
-	httpContext, err := g.gitProvider.parseStaticGitContext(httpSimple)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(httpSimple)
 
 	require.Nil(err)
 	require.Equal(httpContext, simpleContext)
@@ -58,7 +58,7 @@ func (g *GitLabGitProviderTestSuite) TestParseStaticGitContext_HTTP_Subgroups() 
 
 	require := g.Require()
 
-	httpContext, err := g.gitProvider.parseStaticGitContext(httpSimple)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(httpSimple)
 
 	require.Nil(err)
 	require.Equal(httpContext, simpleContext)
@@ -80,7 +80,7 @@ func (g *GitLabGitProviderTestSuite) TestParseStaticGitContext_MR() {
 
 	require := g.Require()
 
-	httpContext, err := g.gitProvider.parseStaticGitContext(mrUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(mrUrl)
 
 	require.Nil(err)
 	require.Equal(httpContext, mrContext)
@@ -102,7 +102,7 @@ func (g *GitLabGitProviderTestSuite) TestParseStaticGitContext_Blob() {
 
 	require := g.Require()
 
-	httpContext, err := g.gitProvider.parseStaticGitContext(blobUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(blobUrl)
 
 	require.Nil(err)
 	require.Equal(httpContext, blobContext)
@@ -124,7 +124,7 @@ func (g *GitLabGitProviderTestSuite) TestParseStaticGitContext_Branch() {
 
 	require := g.Require()
 
-	httpContext, err := g.gitProvider.parseStaticGitContext(branchUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(branchUrl)
 
 	require.Nil(err)
 	require.Equal(httpContext, branchContext)
@@ -146,7 +146,7 @@ func (g *GitLabGitProviderTestSuite) TestParseStaticGitContext_Commits() {
 
 	require := g.Require()
 
-	httpContext, err := g.gitProvider.parseStaticGitContext(commitsUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(commitsUrl)
 
 	require.Nil(err)
 	require.Equal(httpContext, commitsContext)
@@ -168,7 +168,7 @@ func (g *GitLabGitProviderTestSuite) TestParseStaticGitContext_Commit() {
 
 	require := g.Require()
 
-	httpContext, err := g.gitProvider.parseStaticGitContext(commitUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(commitUrl)
 
 	require.Nil(err)
 	require.Equal(httpContext, commitContext)

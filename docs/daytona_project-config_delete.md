@@ -6,6 +6,12 @@ Delete a project config
 daytona project-config delete [flags]
 ```
 
+### Options
+
+```
+  -f, --force   Force delete prebuild
+```
+
 ### Options inherited from parent commands
 
 ```

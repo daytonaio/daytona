@@ -47,6 +47,7 @@ type IDockerClient interface {
 	GetContainerLogs(containerName string, logWriter io.Writer) error
 	PullImage(imageName string, cr *containerregistry.ContainerRegistry, logWriter io.Writer) error
 	PushImage(imageName string, cr *containerregistry.ContainerRegistry, logWriter io.Writer) error
+	DeleteImage(imageName string, force bool, logWriter io.Writer) error
 }
 
 type DockerClientConfig struct {

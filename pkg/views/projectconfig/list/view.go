@@ -22,13 +22,14 @@ type RowData struct {
 	Name       string
 	Repository string
 	Build      string
+	Prebuilds  string
 	IsDefault  string
 }
 
 func ListProjectConfigs(projectConfigList []apiclient.ProjectConfig, apiServerConfig *apiclient.ServerConfig, specifyGitProviders bool) {
 	re := lipgloss.NewRenderer(os.Stdout)
 
-	headers := []string{"Name", "Repository", "Build", "Default"}
+	headers := []string{"Name", "Repository", "Build", "Prebuild rules", "Default"}
 
 	data := [][]string{}
 
@@ -94,6 +95,7 @@ func getRowFromRowData(rowData RowData) []string {
 		views.NameStyle.Render(rowData.Name),
 		views.DefaultRowDataStyle.Render(rowData.Repository),
 		views.DefaultRowDataStyle.Render(rowData.Build),
+		views.DefaultRowDataStyle.Render(rowData.Prebuilds),
 		isDefault,
 	}
 
@@ -101,10 +103,11 @@ func getRowFromRowData(rowData RowData) []string {
 }
 
 func getTableRowData(projectConfig apiclient.ProjectConfig, apiServerConfig *apiclient.ServerConfig, specifyGitProviders bool) *RowData {
-	rowData := RowData{"", "", "", ""}
+	rowData := RowData{"", "", "", "", ""}
 
 	rowData.Name = projectConfig.Name + views_util.AdditionalPropertyPadding
-	rowData.Repository = util.GetRepositorySlugFromUrl(projectConfig.Repository.Url, specifyGitProviders)
+	rowData.Repository = util.GetRepositorySlugFromUrl(projectConfig.RepositoryUrl, specifyGitProviders)
+	rowData.Prebuilds = "None"
 	rowData.IsDefault = ""
 
 	projectDefaults := &create.ProjectConfigDefaults{
@@ -112,14 +115,18 @@ func getTableRowData(projectConfig apiclient.ProjectConfig, apiServerConfig *api
 		ImageUser: &apiServerConfig.DefaultProjectUser,
 	}
 
-	createCreateProjectConfigDTO := apiclient.CreateProjectConfigDTO{
+	createProjectDto := apiclient.CreateProjectDTO{
 		BuildConfig: projectConfig.BuildConfig,
 	}
 
-	_, rowData.Build = create.GetProjectBuildChoice(createCreateProjectConfigDTO, projectDefaults)
+	_, rowData.Build = create.GetProjectBuildChoice(createProjectDto, projectDefaults)
 
 	if projectConfig.Default {
 		rowData.IsDefault = "1"
+	}
+
+	if len(projectConfig.Prebuilds) > 0 {
+		rowData.Prebuilds = fmt.Sprintf("%d", len(projectConfig.Prebuilds))
 	}
 
 	return &rowData

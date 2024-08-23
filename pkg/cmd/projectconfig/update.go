@@ -23,7 +23,6 @@ var projectConfigUpdateCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var projectConfig *apiclient.ProjectConfig
-		var projectConfigs []apiclient.CreateProjectConfigDTO
 		var res *http.Response
 		ctx := context.Background()
 
@@ -53,14 +52,18 @@ var projectConfigUpdateCmd = &cobra.Command{
 			return
 		}
 
-		projectConfigs = append(projectConfigs, apiclient.CreateProjectConfigDTO{
-			Name: projectConfig.Name,
-			Source: apiclient.CreateProjectConfigSourceDTO{
-				Repository: projectConfig.Repository,
+		createDto := []apiclient.CreateProjectDTO{
+			{
+				Name: projectConfig.Name,
+				Source: apiclient.CreateProjectSourceDTO{
+					Repository: apiclient.GitRepository{
+						Url: projectConfig.RepositoryUrl,
+					},
+				},
+				BuildConfig: projectConfig.BuildConfig,
+				EnvVars:     projectConfig.EnvVars,
 			},
-			BuildConfig: projectConfig.BuildConfig,
-			EnvVars:     projectConfig.EnvVars,
-		})
+		}
 
 		projectDefaults := &create.ProjectConfigDefaults{
 			BuildChoice: create.AUTOMATIC,
@@ -72,22 +75,20 @@ var projectConfigUpdateCmd = &cobra.Command{
 			projectDefaults.DevcontainerFilePath = projectConfig.BuildConfig.Devcontainer.FilePath
 		}
 
-		create.ProjectsConfigurationChanged, err = create.RunProjectConfiguration(&projectConfigs, *projectDefaults)
+		create.ProjectsConfigurationChanged, err = create.RunProjectConfiguration(&createDto, *projectDefaults)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		newProjectConfig := apiclient.CreateProjectConfigDTO{
-			Name:        projectConfig.Name,
-			BuildConfig: projectConfigs[0].BuildConfig,
-			Image:       projectConfigs[0].Image,
-			User:        projectConfigs[0].User,
-			Source: apiclient.CreateProjectConfigSourceDTO{
-				Repository: projectConfigs[0].Source.Repository,
-			},
+			Name:          projectConfig.Name,
+			BuildConfig:   createDto[0].BuildConfig,
+			Image:         createDto[0].Image,
+			User:          createDto[0].User,
+			RepositoryUrl: createDto[0].Source.Repository.Url,
 		}
 
-		newProjectConfig.EnvVars = *workspace_util.GetEnvVariables(&projectConfigs[0], nil)
+		newProjectConfig.EnvVars = *workspace_util.GetEnvVariables(createDto[0].EnvVars, nil)
 
 		res, err = apiClient.ProjectConfigAPI.SetProjectConfig(ctx).ProjectConfig(newProjectConfig).Execute()
 		if err != nil {

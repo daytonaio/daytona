@@ -21,16 +21,15 @@ var _ MappedNullable = &Project{}
 
 // Project struct for Project
 type Project struct {
-	BuildConfig *ProjectBuildConfig `json:"buildConfig,omitempty"`
-	Default     bool                `json:"default"`
-	EnvVars     map[string]string   `json:"envVars"`
-	Image       string              `json:"image"`
-	Name        string              `json:"name"`
-	Repository  GitRepository       `json:"repository"`
-	State       *ProjectState       `json:"state,omitempty"`
-	Target      string              `json:"target"`
-	User        string              `json:"user"`
-	WorkspaceId string              `json:"workspaceId"`
+	BuildConfig *BuildConfig      `json:"buildConfig,omitempty"`
+	EnvVars     map[string]string `json:"envVars"`
+	Image       string            `json:"image"`
+	Name        string            `json:"name"`
+	Repository  GitRepository     `json:"repository"`
+	State       *ProjectState     `json:"state,omitempty"`
+	Target      string            `json:"target"`
+	User        string            `json:"user"`
+	WorkspaceId string            `json:"workspaceId"`
 }
 
 type _Project Project
@@ -39,9 +38,8 @@ type _Project Project
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProject(default_ bool, envVars map[string]string, image string, name string, repository GitRepository, target string, user string, workspaceId string) *Project {
+func NewProject(envVars map[string]string, image string, name string, repository GitRepository, target string, user string, workspaceId string) *Project {
 	this := Project{}
-	this.Default = default_
 	this.EnvVars = envVars
 	this.Image = image
 	this.Name = name
@@ -61,9 +59,9 @@ func NewProjectWithDefaults() *Project {
 }
 
 // GetBuildConfig returns the BuildConfig field value if set, zero value otherwise.
-func (o *Project) GetBuildConfig() ProjectBuildConfig {
+func (o *Project) GetBuildConfig() BuildConfig {
 	if o == nil || IsNil(o.BuildConfig) {
-		var ret ProjectBuildConfig
+		var ret BuildConfig
 		return ret
 	}
 	return *o.BuildConfig
@@ -71,7 +69,7 @@ func (o *Project) GetBuildConfig() ProjectBuildConfig {
 
 // GetBuildConfigOk returns a tuple with the BuildConfig field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Project) GetBuildConfigOk() (*ProjectBuildConfig, bool) {
+func (o *Project) GetBuildConfigOk() (*BuildConfig, bool) {
 	if o == nil || IsNil(o.BuildConfig) {
 		return nil, false
 	}
@@ -87,33 +85,9 @@ func (o *Project) HasBuildConfig() bool {
 	return false
 }
 
-// SetBuildConfig gets a reference to the given ProjectBuildConfig and assigns it to the BuildConfig field.
-func (o *Project) SetBuildConfig(v ProjectBuildConfig) {
+// SetBuildConfig gets a reference to the given BuildConfig and assigns it to the BuildConfig field.
+func (o *Project) SetBuildConfig(v BuildConfig) {
 	o.BuildConfig = &v
-}
-
-// GetDefault returns the Default field value
-func (o *Project) GetDefault() bool {
-	if o == nil {
-		var ret bool
-		return ret
-	}
-
-	return o.Default
-}
-
-// GetDefaultOk returns a tuple with the Default field value
-// and a boolean to check if the value has been set.
-func (o *Project) GetDefaultOk() (*bool, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Default, true
-}
-
-// SetDefault sets field value
-func (o *Project) SetDefault(v bool) {
-	o.Default = v
 }
 
 // GetEnvVars returns the EnvVars field value
@@ -329,7 +303,6 @@ func (o Project) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.BuildConfig) {
 		toSerialize["buildConfig"] = o.BuildConfig
 	}
-	toSerialize["default"] = o.Default
 	toSerialize["envVars"] = o.EnvVars
 	toSerialize["image"] = o.Image
 	toSerialize["name"] = o.Name
@@ -348,7 +321,6 @@ func (o *Project) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"default",
 		"envVars",
 		"image",
 		"name",

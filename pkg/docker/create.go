@@ -47,7 +47,7 @@ func (d *DockerClient) CreateProject(opts *CreateProjectOptions) error {
 		return err
 	}
 
-	builderType, err := detect.DetectProjectBuilderType(opts.Project, opts.ProjectDir, opts.SshClient)
+	builderType, err := detect.DetectProjectBuilderType(opts.Project.BuildConfig, opts.ProjectDir, opts.SshClient)
 	if err != nil {
 		return err
 	}
@@ -90,7 +90,7 @@ func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions) error 
 		ProjectDir: fmt.Sprintf("/workdir/%s-%s", opts.Project.WorkspaceId, opts.Project.Name),
 	}
 
-	cloneCmd := gitService.CloneRepositoryCmd(opts.Project, auth)
+	cloneCmd := gitService.CloneRepositoryCmd(opts.Project.Repository, auth)
 
 	c, err := d.apiClient.ContainerCreate(ctx, &container.Config{
 		Image:      "daytonaio/workspace-project",

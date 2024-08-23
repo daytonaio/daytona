@@ -14,6 +14,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var forceFlag bool
+
 var projectConfigDeleteCmd = &cobra.Command{
 	Use:     "delete",
 	Aliases: []string{"remove", "rm"},
@@ -48,11 +50,15 @@ var projectConfigDeleteCmd = &cobra.Command{
 			selectedProjectConfigName = args[0]
 		}
 
-		res, err := apiClient.ProjectConfigAPI.DeleteProjectConfig(context.Background(), selectedProjectConfigName).Execute()
+		res, err := apiClient.ProjectConfigAPI.DeleteProjectConfig(context.Background(), selectedProjectConfigName).Force(forceFlag).Execute()
 		if err != nil {
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
 		views.RenderInfoMessage("Project config deleted successfully")
 	},
+}
+
+func init() {
+	projectConfigDeleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Force delete prebuild")
 }

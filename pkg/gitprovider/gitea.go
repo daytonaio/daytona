@@ -276,7 +276,7 @@ func (g *GiteaGitProvider) GetUrlFromRepository(repository *GitRepository) strin
 	return url
 }
 
-func (g *GiteaGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
+func (g *GiteaGitProvider) GetPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
 	if staticContext.PrNumber == nil {
 		return staticContext, nil
 	}
@@ -301,8 +301,8 @@ func (g *GiteaGitProvider) getPrContext(staticContext *StaticGitContext) (*Stati
 	return &repo, nil
 }
 
-func (g *GiteaGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
-	staticContext, err := g.AbstractGitProvider.parseStaticGitContext(repoUrl)
+func (g *GiteaGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
+	staticContext, err := g.AbstractGitProvider.ParseStaticGitContext(repoUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -349,4 +349,18 @@ func (g *GiteaGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitCont
 	}
 
 	return staticContext, nil
+}
+
+func (g *GiteaGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*string, error) {
+	client, err := g.getApiClient()
+	if err != nil {
+		return nil, err
+	}
+
+	repo, _, err := client.GetRepo(staticContext.Owner, staticContext.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &repo.DefaultBranch, nil
 }
