@@ -379,7 +379,7 @@ func (g *BitbucketServerGitProvider) GetUrlFromRepository(repository *GitReposit
 	return url
 }
 
-func (g *BitbucketServerGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
+func (g *BitbucketServerGitProvider) GetPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
 	if staticContext.PrNumber == nil {
 		return staticContext, nil
 	}
@@ -412,7 +412,7 @@ func (g *BitbucketServerGitProvider) getPrContext(staticContext *StaticGitContex
 	return &repo, nil
 }
 
-func (g *BitbucketServerGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
+func (g *BitbucketServerGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
 	var staticContext StaticGitContext
 
 	// optional string - '/rest/api/'
@@ -477,4 +477,29 @@ func (g *BitbucketServerGitProvider) parseStaticGitContext(repoUrl string) (*Sta
 	}
 
 	return &staticContext, nil
+}
+
+func (g *BitbucketServerGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*string, error) {
+	client, err := g.getApiClient()
+	if err != nil {
+		return nil, err
+	}
+
+	branches, err := client.DefaultApi.GetBranches(staticContext.Id, staticContext.Name, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	branchList, err := bitbucketv1.GetBranchesResponse(branches)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, branch := range branchList {
+		if branch.IsDefault {
+			return &branch.DisplayID, nil
+		}
+	}
+
+	return nil, fmt.Errorf("Default branch not found")
 }

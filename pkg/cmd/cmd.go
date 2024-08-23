@@ -13,10 +13,12 @@ import (
 	"github.com/daytonaio/daytona/internal"
 	. "github.com/daytonaio/daytona/internal/util"
 	. "github.com/daytonaio/daytona/pkg/cmd/apikey"
+	. "github.com/daytonaio/daytona/pkg/cmd/build"
 	. "github.com/daytonaio/daytona/pkg/cmd/containerregistry"
 	. "github.com/daytonaio/daytona/pkg/cmd/gitprovider"
 	"github.com/daytonaio/daytona/pkg/cmd/output"
 	. "github.com/daytonaio/daytona/pkg/cmd/ports"
+	. "github.com/daytonaio/daytona/pkg/cmd/prebuild"
 	. "github.com/daytonaio/daytona/pkg/cmd/profile"
 	. "github.com/daytonaio/daytona/pkg/cmd/profiledata/env"
 	. "github.com/daytonaio/daytona/pkg/cmd/projectconfig"
@@ -70,6 +72,8 @@ func Execute() {
 	rootCmd.AddCommand(StartCmd)
 	rootCmd.AddCommand(StopCmd)
 	rootCmd.AddCommand(InfoCmd)
+	rootCmd.AddCommand(PrebuildCmd)
+	rootCmd.AddCommand(BuildCmd)
 	rootCmd.AddCommand(PortForwardCmd)
 	rootCmd.AddCommand(EnvCmd)
 	rootCmd.AddCommand(TelemetryCmd)

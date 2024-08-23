@@ -21,10 +21,10 @@ var _ MappedNullable = &CreateWorkspaceDTO{}
 
 // CreateWorkspaceDTO struct for CreateWorkspaceDTO
 type CreateWorkspaceDTO struct {
-	Id       string                   `json:"id"`
-	Name     string                   `json:"name"`
-	Projects []CreateProjectConfigDTO `json:"projects"`
-	Target   string                   `json:"target"`
+	Id       string             `json:"id"`
+	Name     string             `json:"name"`
+	Projects []CreateProjectDTO `json:"projects"`
+	Target   string             `json:"target"`
 }
 
 type _CreateWorkspaceDTO CreateWorkspaceDTO
@@ -33,7 +33,7 @@ type _CreateWorkspaceDTO CreateWorkspaceDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateWorkspaceDTO(id string, name string, projects []CreateProjectConfigDTO, target string) *CreateWorkspaceDTO {
+func NewCreateWorkspaceDTO(id string, name string, projects []CreateProjectDTO, target string) *CreateWorkspaceDTO {
 	this := CreateWorkspaceDTO{}
 	this.Id = id
 	this.Name = name
@@ -99,9 +99,9 @@ func (o *CreateWorkspaceDTO) SetName(v string) {
 }
 
 // GetProjects returns the Projects field value
-func (o *CreateWorkspaceDTO) GetProjects() []CreateProjectConfigDTO {
+func (o *CreateWorkspaceDTO) GetProjects() []CreateProjectDTO {
 	if o == nil {
-		var ret []CreateProjectConfigDTO
+		var ret []CreateProjectDTO
 		return ret
 	}
 
@@ -110,7 +110,7 @@ func (o *CreateWorkspaceDTO) GetProjects() []CreateProjectConfigDTO {
 
 // GetProjectsOk returns a tuple with the Projects field value
 // and a boolean to check if the value has been set.
-func (o *CreateWorkspaceDTO) GetProjectsOk() ([]CreateProjectConfigDTO, bool) {
+func (o *CreateWorkspaceDTO) GetProjectsOk() ([]CreateProjectDTO, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -118,7 +118,7 @@ func (o *CreateWorkspaceDTO) GetProjectsOk() ([]CreateProjectConfigDTO, bool) {
 }
 
 // SetProjects sets field value
-func (o *CreateWorkspaceDTO) SetProjects(v []CreateProjectConfigDTO) {
+func (o *CreateWorkspaceDTO) SetProjects(v []CreateProjectDTO) {
 	o.Projects = v
 }
 

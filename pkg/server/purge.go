@@ -6,12 +6,13 @@ package server
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *Server) Purge(ctx context.Context, force bool) error {
+func (s *Server) Purge(ctx context.Context, force bool) []error {
 	log.SetLevel(log.PanicLevel)
 
 	telemetryEnabled := telemetry.TelemetryEnabled(ctx)
@@ -34,14 +35,14 @@ func (s *Server) Purge(ctx context.Context, force bool) error {
 	err := server.Start(errCh)
 	if err != nil {
 		s.trackPurgeError(ctx, force, err)
-		return err
+		return []error{err}
 	}
 
 	workspaces, err := s.WorkspaceService.ListWorkspaces(false)
 	if err != nil {
 		s.trackPurgeError(ctx, force, err)
 		if !force {
-			return err
+			return []error{err}
 		}
 	}
 
@@ -51,7 +52,7 @@ func (s *Server) Purge(ctx context.Context, force bool) error {
 			if err != nil {
 				s.trackPurgeError(ctx, force, err)
 				if !force {
-					return err
+					return []error{err}
 				} else {
 					fmt.Printf("Failed to delete %s: %v\n", workspace.Name, err)
 				}
@@ -69,7 +70,7 @@ func (s *Server) Purge(ctx context.Context, force bool) error {
 		if err != nil {
 			s.trackPurgeError(ctx, force, err)
 			if !force {
-				return err
+				return []error{err}
 			} else {
 				fmt.Printf("Failed to purge local container registry: %v\n", err)
 			}
@@ -81,7 +82,7 @@ func (s *Server) Purge(ctx context.Context, force bool) error {
 	if err != nil {
 		s.trackPurgeError(ctx, force, err)
 		if !force {
-			return err
+			return []error{err}
 		} else {
 			fmt.Printf("Failed to purge Tailscale server: %v\n", err)
 		}
@@ -92,9 +93,30 @@ func (s *Server) Purge(ctx context.Context, force bool) error {
 	if err != nil {
 		s.trackPurgeError(ctx, force, err)
 		if !force {
-			return err
+			return []error{err}
 		} else {
 			fmt.Printf("Failed to purge providers: %v\n", err)
+		}
+	}
+
+	fmt.Println("Purging builds...")
+	errs := s.BuildService.MarkForDeletion(nil)
+	if len(errs) > 0 {
+		s.trackPurgeError(ctx, force, errs[0])
+		if !force {
+			return errs
+		} else {
+			fmt.Printf("Failed to mark builds for deletion: %v\n", errs[0])
+		}
+	}
+
+	err = s.BuildService.AwaitEmptyList(time.Minute)
+	if err != nil {
+		s.trackPurgeError(ctx, force, err)
+		if !force {
+			return []error{err}
+		} else {
+			fmt.Printf("Failed to await empty build list: %v\n", err)
 		}
 	}
 

@@ -7,12 +7,17 @@ import (
 	"context"
 )
 
-type BuildEvent string
+type BuildRunnerEvent string
 
 const (
+	// Purge events
+	BuildRunnerEventPurgeStarted   BuildRunnerEvent = "build_runner_purge_started"
+	BuildRunnerEventPurgeCompleted BuildRunnerEvent = "build_runner_purge_completed"
+	BuildRunnerEventPurgeError     BuildRunnerEvent = "build_runner_purge_error"
+
 	// Build events
-	BuildEventRunBuild      BuildEvent = "server_run_build"
-	BuildEventRunBuildError BuildEvent = "server_run_build_error"
+	BuildRunnerEventRunBuild      BuildRunnerEvent = "build_runner_run_build"
+	BuildRunnerEventRunBuildError BuildRunnerEvent = "build_runner_run_build_error"
 )
 
 func NewBuildRunnerEventProps(ctx context.Context, buildId, buildState string) map[string]interface{} {

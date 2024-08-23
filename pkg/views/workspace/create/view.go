@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/url"
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
@@ -172,8 +171,10 @@ func validateRepoUrl(repoUrl string, apiClient *apiclient.APIClient) (*apiclient
 	if err != nil {
 		return nil, err
 	}
-	encodedURLParam := url.QueryEscape(result)
-	repo, _, err := apiClient.GitProviderAPI.GetGitContext(context.Background(), encodedURLParam).Execute()
+
+	repo, _, err := apiClient.GitProviderAPI.GetGitContext(context.Background()).Repository(apiclient.GetRepositoryContext{
+		Url: result,
+	}).Execute()
 	if err != nil {
 		return nil, errors.New("Failed to fetch repository information. Please check the URL and try again.")
 	}

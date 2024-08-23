@@ -6,6 +6,7 @@ package gitproviders
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -115,6 +116,31 @@ func (s *GitProviderService) GetConfigForUrl(repoUrl string) (*gitprovider.GitPr
 	}
 
 	return nil, errors.New("git provider not found")
+}
+
+func (s *GitProviderService) GetGitProviderForHttpRequest(req *http.Request) (gitprovider.GitProvider, error) {
+	var provider *gitprovider.GitProviderConfig
+
+	gitProviders, err := s.configStore.List()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, p := range gitProviders {
+		header := req.Header.Get(config.GetWebhookEventHeaderKeyFromGitProvider(p.Id))
+		if header == "" {
+			continue
+		} else {
+			provider = p
+			break
+		}
+	}
+
+	if provider == nil {
+		return nil, errors.New("git provider for HTTP request not found")
+	}
+
+	return s.newGitProvider(provider)
 }
 
 func (s *GitProviderService) SetGitProviderConfig(providerConfig *gitprovider.GitProviderConfig) error {

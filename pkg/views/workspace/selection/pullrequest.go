@@ -23,7 +23,7 @@ func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrd
 			id:             pr.Name,
 			title:          pr.Name,
 			choiceProperty: pr.Name,
-			desc:           fmt.Sprintf("Branch: %s", pr.Branch),
+			desc:           fmt.Sprintf("Branch: %s", views.GetBranchNameLabel(pr.Branch)),
 		}
 		items = append(items, newItem)
 	}

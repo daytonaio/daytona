@@ -4,22 +4,25 @@
 package project
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/daytonaio/daytona/internal"
-	"github.com/daytonaio/daytona/pkg/workspace/project/config"
+	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
 )
 
 type Project struct {
-	config.ProjectConfig
-	WorkspaceId string        `json:"workspaceId" validate:"required"`
-	ApiKey      string        `json:"-"`
-	Target      string        `json:"target" validate:"required"`
-	State       *ProjectState `json:"state,omitempty" validate:"optional"`
+	Name        string                     `json:"name" validate:"required"`
+	Image       string                     `json:"image" validate:"required"`
+	User        string                     `json:"user" validate:"required"`
+	BuildConfig *buildconfig.BuildConfig   `json:"buildConfig,omitempty" validate:"optional"`
+	Repository  *gitprovider.GitRepository `json:"repository" validate:"required"`
+	EnvVars     map[string]string          `json:"envVars" validate:"required"`
+	WorkspaceId string                     `json:"workspaceId" validate:"required"`
+	ApiKey      string                     `json:"-"`
+	Target      string                     `json:"target" validate:"required"`
+	State       *ProjectState              `json:"state,omitempty" validate:"optional"`
 } // @name Project
 
 type ProjectInfo struct {
@@ -103,25 +106,4 @@ func GetProjectHostname(workspaceId string, projectName string) string {
 	}
 
 	return hostname
-}
-
-// GetConfigHash returns a SHA-256 hash of the project's build configuration, repository URL, and environment variables.
-func (p *Project) GetConfigHash() (string, error) {
-	buildJson, err := json.Marshal(p.BuildConfig)
-	if err != nil {
-		return "", err
-	}
-
-	//	todo: atm env vars contain workspace env provided by the server
-	//		  this causes each workspace to have a different hash
-	// envVarsJson, err := json.Marshal(p.EnvVars)
-	// if err != nil {
-	// 	return "", err
-	// }
-
-	data := string(buildJson) + p.Repository.Sha /* + string(envVarsJson)*/
-	hash := sha256.Sum256([]byte(data))
-	hashStr := hex.EncodeToString(hash[:])
-
-	return hashStr, nil
 }

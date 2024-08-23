@@ -18,6 +18,7 @@ import (
 
 var allFlag bool
 var yesFlag bool
+var forceFlag bool
 
 var projectConfigDeleteCmd = &cobra.Command{
 	Use:     "delete",
@@ -97,7 +98,7 @@ var projectConfigDeleteCmd = &cobra.Command{
 			selectedProjectConfigName = args[0]
 		}
 
-		res, err := apiClient.ProjectConfigAPI.DeleteProjectConfig(context.Background(), selectedProjectConfigName).Execute()
+		res, err := apiClient.ProjectConfigAPI.DeleteProjectConfig(context.Background(), selectedProjectConfigName).Force(forceFlag).Execute()
 		if err != nil {
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
@@ -109,4 +110,5 @@ var projectConfigDeleteCmd = &cobra.Command{
 func init() {
 	projectConfigDeleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Delete all project configs")
 	projectConfigDeleteCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Confirm deletion without prompt")
+	projectConfigDeleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Force delete prebuild")
 }

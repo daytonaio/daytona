@@ -39,7 +39,7 @@ func selectProjectConfigPrompt(projectConfigs []apiclient.ProjectConfig, project
 			projectConfigName = "Unnamed Project Config"
 		}
 
-		newItem := item[apiclient.ProjectConfig]{title: projectConfigName, desc: pc.Repository.Url, choiceProperty: pc}
+		newItem := item[apiclient.ProjectConfig]{title: projectConfigName, desc: pc.RepositoryUrl, choiceProperty: pc}
 		items = append(items, newItem)
 	}
 
