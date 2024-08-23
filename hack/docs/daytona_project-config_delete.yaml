@@ -6,6 +6,10 @@ options:
       shorthand: a
       default_value: "false"
       usage: Delete all project configs
+    - name: force
+      shorthand: f
+      default_value: "false"
+      usage: Force delete prebuild
     - name: "yes"
       shorthand: "y"
       default_value: "false"

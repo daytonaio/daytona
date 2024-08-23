@@ -4,9 +4,11 @@
 package projectconfig
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
@@ -32,7 +34,7 @@ func GetProjectConfig(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	projectConfig, err := server.ProjectConfigService.Find(&config.Filter{
+	projectConfig, err := server.ProjectConfigService.Find(&config.ProjectConfigFilter{
 		Name: &configName,
 	})
 	if err != nil {
@@ -65,7 +67,7 @@ func GetDefaultProjectConfig(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	projectConfigs, err := server.ProjectConfigService.Find(&config.Filter{
+	projectConfigs, err := server.ProjectConfigService.Find(&config.ProjectConfigFilter{
 		Url:     &decodedURLParam,
 		Default: util.Pointer(true),
 	})
@@ -164,16 +166,29 @@ func SetDefaultProjectConfig(ctx *gin.Context) {
 //	@Summary		Delete project config data
 //	@Description	Delete project config data
 //	@Param			configName	path	string	true	"Config name"
+//	@Param			force		query	bool	false	"Force"
 //	@Success		204
 //	@Router			/project-config/{configName} [delete]
 //
 //	@id				DeleteProjectConfig
 func DeleteProjectConfig(ctx *gin.Context) {
 	configName := ctx.Param("configName")
+	forceQuery := ctx.Query("force")
+
+	var err error
+	var force bool
+
+	if forceQuery != "" {
+		force, err = strconv.ParseBool(forceQuery)
+		if err != nil {
+			ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for force flag"))
+			return
+		}
+	}
 
 	server := server.GetInstance(nil)
 
-	projectConfig, err := server.ProjectConfigService.Find(&config.Filter{
+	projectConfig, err := server.ProjectConfigService.Find(&config.ProjectConfigFilter{
 		Name: &configName,
 	})
 	if err != nil {
@@ -181,13 +196,16 @@ func DeleteProjectConfig(ctx *gin.Context) {
 		return
 	}
 
-	err = server.ProjectConfigService.Delete(projectConfig.Name)
-	if err != nil {
-		if config.IsProjectConfigNotFound(err) {
-			ctx.Status(204)
+	errs := server.ProjectConfigService.Delete(projectConfig.Name, force)
+	if len(errs) > 0 {
+		if config.IsProjectConfigNotFound(errs[0]) {
+			ctx.AbortWithError(http.StatusNotFound, errors.New("project config not found"))
 			return
 		}
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get project config: %s", err.Error()))
+		for _, err := range errs {
+			_ = ctx.Error(err)
+		}
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 

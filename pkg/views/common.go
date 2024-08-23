@@ -60,6 +60,10 @@ func RenderInfoMessage(message string) {
 	fmt.Println(lipgloss.NewStyle().Padding(1, 0, 1, 1).Render(message))
 }
 
+func RenderViewBuildLogsMessage(buildId string) {
+	RenderInfoMessage(fmt.Sprintf("The build has been scheduled for running. Use `daytona build logs %s -f` to view the progress.", buildId))
+}
+
 func RenderCreationInfoMessage(message string) {
 	fmt.Println(lipgloss.NewStyle().Foreground(Gray).Padding(1, 0, 1, 1).Render(message))
 }
@@ -101,6 +105,13 @@ func GetListLine(message string) string {
 
 func GetPropertyKey(key string) string {
 	return lipgloss.NewStyle().Foreground(LightGray).Render(key)
+}
+
+func GetBranchNameLabel(branch string) string {
+	if branch == "" {
+		return "Default branch"
+	}
+	return branch
 }
 
 func GetBorderedMessage(message string) string {

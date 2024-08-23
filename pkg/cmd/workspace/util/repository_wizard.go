@@ -99,7 +99,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		return chosenRepo, nil
 	}
 
-	return GetBranchFromWizard(BranchWizardConfig{
+	return SetBranchFromWizard(BranchWizardConfig{
 		ApiClient:    config.ApiClient,
 		ProviderId:   providerId,
 		NamespaceId:  namespaceId,

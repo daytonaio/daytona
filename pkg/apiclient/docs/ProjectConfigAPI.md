@@ -15,7 +15,7 @@ Method | HTTP request | Description
 
 ## DeleteProjectConfig
 
-> DeleteProjectConfig(ctx, configName).Execute()
+> DeleteProjectConfig(ctx, configName).Force(force).Execute()
 
 Delete project config data
 
@@ -35,10 +35,11 @@ import (
 
 func main() {
 	configName := "configName_example" // string | Config name
+	force := true // bool | Force (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.ProjectConfigAPI.DeleteProjectConfig(context.Background(), configName).Execute()
+	r, err := apiClient.ProjectConfigAPI.DeleteProjectConfig(context.Background(), configName).Force(force).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `ProjectConfigAPI.DeleteProjectConfig``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -62,6 +63,7 @@ Other parameters are passed through a pointer to a apiDeleteProjectConfigRequest
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
+ **force** | **bool** | Force | 
 
 ### Return type
 
@@ -371,7 +373,7 @@ import (
 )
 
 func main() {
-	projectConfig := *openapiclient.NewCreateProjectConfigDTO(map[string]string{"key": "Inner_example"}, "Name_example", *openapiclient.NewCreateProjectConfigSourceDTO(*openapiclient.NewGitRepository("Id_example", "Name_example", "Owner_example", "Sha_example", "Source_example", "Url_example"))) // CreateProjectConfigDTO | Project config
+	projectConfig := *openapiclient.NewCreateProjectConfigDTO(map[string]string{"key": "Inner_example"}, "Name_example", "RepositoryUrl_example") // CreateProjectConfigDTO | Project config
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

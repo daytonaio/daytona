@@ -11,21 +11,18 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
-	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 	"github.com/stretchr/testify/suite"
 )
 
 var project1 = &project.Project{
-	ProjectConfig: config.ProjectConfig{
-		Name: "test",
-		Repository: &gitprovider.GitRepository{
-			Id:   "123",
-			Url:  "https://github.com/daytonaio/daytona",
-			Name: "daytona",
-		},
-		Image: "test-image:tag",
-		User:  "test-user",
+	Name: "test",
+	Repository: &gitprovider.GitRepository{
+		Id:   "123",
+		Url:  "https://github.com/daytonaio/daytona",
+		Name: "daytona",
 	},
+	Image:       "test-image:tag",
+	User:        "test-user",
 	WorkspaceId: "123",
 	Target:      "local",
 }

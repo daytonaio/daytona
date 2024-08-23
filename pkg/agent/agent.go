@@ -69,7 +69,7 @@ func (a *Agent) startProjectMode() error {
 		auth.Password = gitProvider.Token
 	}
 
-	exists, err := a.Git.RepositoryExists(project)
+	exists, err := a.Git.RepositoryExists()
 	if err != nil {
 		log.Error(fmt.Sprintf("failed to clone repository: %s", err))
 	} else {
@@ -88,7 +88,7 @@ func (a *Agent) startProjectMode() error {
 			}
 
 			log.Info("Cloning repository...")
-			err = a.Git.CloneRepository(project, auth)
+			err = a.Git.CloneRepository(project.Repository, auth)
 			if err != nil {
 				log.Error(fmt.Sprintf("failed to clone repository: %s", err))
 			} else {

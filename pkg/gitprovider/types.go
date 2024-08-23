@@ -56,3 +56,11 @@ type GitPullRequest struct {
 	SourceRepoOwner string `json:"sourceRepoOwner" validate:"required"`
 	SourceRepoName  string `json:"sourceRepoName" validate:"required"`
 } // @name GitPullRequest
+
+type GitEventData struct {
+	Url           string   `json:"url" validate:"required"`
+	Branch        string   `json:"branch" validate:"required"`
+	Sha           string   `json:"sha" validate:"required"`
+	Owner         string   `json:"user" validate:"required"`
+	AffectedFiles []string `json:"affectedFiles" validate:"required"`
+} //	@name	GitEventData

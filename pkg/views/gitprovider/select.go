@@ -155,9 +155,19 @@ func getApiUrlDescription(gitProviderId string) string {
 }
 
 func getGitProviderHelpMessage(gitProviderId string) string {
-	return fmt.Sprintf("%s\n%s\n\n%s%s",
+	message := fmt.Sprintf("%s\n%s\n\n%s%s",
 		lipgloss.NewStyle().Foreground(views.Green).Bold(true).Render("More information on:"),
 		config.GetDocsLinkFromGitProvider(gitProviderId),
 		lipgloss.NewStyle().Foreground(views.Green).Bold(true).Render("Required scopes: "),
-		config.GetScopesFromGitProvider(gitProviderId))
+		config.GetRequiredScopesFromGitProviderId(gitProviderId))
+
+	prebuildScopes := config.GetPrebuildScopesFromGitProviderId(gitProviderId)
+	if prebuildScopes != "" {
+		message = fmt.Sprintf("%s\n%s%s",
+			message,
+			lipgloss.NewStyle().Foreground(views.Green).Bold(true).Render("Prebuild scopes: "),
+			prebuildScopes)
+	}
+
+	return message
 }

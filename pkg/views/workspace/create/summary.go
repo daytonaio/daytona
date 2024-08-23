@@ -43,7 +43,7 @@ type SummaryModel struct {
 	width       int
 	quitting    bool
 	name        string
-	projectList []apiclient.CreateProjectConfigDTO
+	projectList []apiclient.CreateProjectDTO
 	defaults    *ProjectConfigDefaults
 	nameLabel   string
 }
@@ -52,7 +52,7 @@ type SubmissionFormConfig struct {
 	ChosenName    *string
 	SuggestedName string
 	ExistingNames []string
-	ProjectList   *[]apiclient.CreateProjectConfigDTO
+	ProjectList   *[]apiclient.CreateProjectDTO
 	NameLabel     string
 	Defaults      *ProjectConfigDefaults
 }
@@ -91,7 +91,7 @@ func RunSubmissionForm(config SubmissionFormConfig) error {
 	return RunSubmissionForm(config)
 }
 
-func RenderSummary(name string, projectList []apiclient.CreateProjectConfigDTO, defaults *ProjectConfigDefaults, nameLabel string) (string, error) {
+func RenderSummary(name string, projectList []apiclient.CreateProjectDTO, defaults *ProjectConfigDefaults, nameLabel string) (string, error) {
 	var output string
 	if name == "" {
 		output = views.GetStyledMainTitle("SUMMARY")
@@ -118,7 +118,7 @@ func RenderSummary(name string, projectList []apiclient.CreateProjectConfigDTO, 
 	return output, nil
 }
 
-func renderProjectDetails(project apiclient.CreateProjectConfigDTO, buildChoice BuildChoice, choiceName string) string {
+func renderProjectDetails(project apiclient.CreateProjectDTO, buildChoice BuildChoice, choiceName string) string {
 	output := projectDetailOutput(Build, choiceName)
 
 	if buildChoice == DEVCONTAINER {
