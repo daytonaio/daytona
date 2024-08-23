@@ -29,6 +29,9 @@ var GitProviderAddCmd = &cobra.Command{
 		setGitProviderConfig := apiclient.SetGitProviderConfig{}
 		setGitProviderConfig.BaseApiUrl = new(string)
 		setGitProviderConfig.Username = new(string)
+		setGitProviderConfig.TokenIdentity = new(string)
+		setGitProviderConfig.TokenScope = new(string)
+		setGitProviderConfig.TokenScopeType = new(apiclient.GitproviderTokenScopeType)
 
 		gitprovider_view.GitProviderSelectionView(&setGitProviderConfig, nil, false)
 

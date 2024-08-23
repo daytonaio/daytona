@@ -6,6 +6,7 @@ package gitprovider
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
@@ -43,12 +44,14 @@ var gitProviderListCmd = &cobra.Command{
 
 		for _, gitProvider := range gitProviders {
 			for _, supportedProvider := range supportedProviders {
-				if gitProvider.Id == supportedProvider.Id {
+				gitProviderId := strings.Split(gitProvider.Id, "_")[0]
+				if gitProviderId == supportedProvider.Id {
 					gitProviderViewList = append(gitProviderViewList,
 						gitprovider_view.GitProviderView{
-							Id:       gitProvider.Id,
-							Name:     supportedProvider.Name,
-							Username: gitProvider.Username,
+							Id:                 gitProviderId,
+							Name:               supportedProvider.Name,
+							Username:           gitProvider.Username,
+							TokenScopeIdentity: gitProvider.TokenIdentity,
 						},
 					)
 				}
@@ -61,7 +64,7 @@ var gitProviderListCmd = &cobra.Command{
 		}
 
 		for _, gitProviderView := range gitProviderViewList {
-			views.RenderListLine(fmt.Sprintf("%s (%s)", gitProviderView.Name, gitProviderView.Username))
+			views.RenderListLine(fmt.Sprintf("%s  %s  %s", gitProviderView.Name, gitProviderView.Username, gitProviderView.TokenScopeIdentity))
 		}
 	},
 }

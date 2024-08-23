@@ -1997,6 +1997,15 @@ const docTemplate = `{
                 "token": {
                     "type": "string"
                 },
+                "tokenIdentity": {
+                    "type": "string"
+                },
+                "tokenScope": {
+                    "type": "string"
+                },
+                "tokenScopeType": {
+                    "$ref": "#/definitions/gitprovider.TokenScopeType"
+                },
                 "username": {
                     "type": "string"
                 }

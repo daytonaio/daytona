@@ -175,7 +175,8 @@ func (s *GitProviderService) SetGitProviderConfig(providerConfig *gitprovider.Gi
 		return err
 	}
 	providerConfig.Username = userData.Username
-
+	providerConfig.Id = fmt.Sprintf("%s_%s", providerConfig.Id, providerConfig.TokenIdentity)
+	fmt.Println(providerConfig.Id)
 	return s.configStore.Save(providerConfig)
 }
 

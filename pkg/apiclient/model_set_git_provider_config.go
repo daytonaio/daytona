@@ -21,10 +21,13 @@ var _ MappedNullable = &SetGitProviderConfig{}
 
 // SetGitProviderConfig struct for SetGitProviderConfig
 type SetGitProviderConfig struct {
-	BaseApiUrl *string `json:"baseApiUrl,omitempty"`
-	Id         string  `json:"id"`
-	Token      string  `json:"token"`
-	Username   *string `json:"username,omitempty"`
+	BaseApiUrl     *string                    `json:"baseApiUrl,omitempty"`
+	Id             string                     `json:"id"`
+	Token          string                     `json:"token"`
+	TokenIdentity  *string                    `json:"tokenIdentity,omitempty"`
+	TokenScope     *string                    `json:"tokenScope,omitempty"`
+	TokenScopeType *GitproviderTokenScopeType `json:"tokenScopeType,omitempty"`
+	Username       *string                    `json:"username,omitempty"`
 }
 
 type _SetGitProviderConfig SetGitProviderConfig
@@ -128,6 +131,102 @@ func (o *SetGitProviderConfig) SetToken(v string) {
 	o.Token = v
 }
 
+// GetTokenIdentity returns the TokenIdentity field value if set, zero value otherwise.
+func (o *SetGitProviderConfig) GetTokenIdentity() string {
+	if o == nil || IsNil(o.TokenIdentity) {
+		var ret string
+		return ret
+	}
+	return *o.TokenIdentity
+}
+
+// GetTokenIdentityOk returns a tuple with the TokenIdentity field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SetGitProviderConfig) GetTokenIdentityOk() (*string, bool) {
+	if o == nil || IsNil(o.TokenIdentity) {
+		return nil, false
+	}
+	return o.TokenIdentity, true
+}
+
+// HasTokenIdentity returns a boolean if a field has been set.
+func (o *SetGitProviderConfig) HasTokenIdentity() bool {
+	if o != nil && !IsNil(o.TokenIdentity) {
+		return true
+	}
+
+	return false
+}
+
+// SetTokenIdentity gets a reference to the given string and assigns it to the TokenIdentity field.
+func (o *SetGitProviderConfig) SetTokenIdentity(v string) {
+	o.TokenIdentity = &v
+}
+
+// GetTokenScope returns the TokenScope field value if set, zero value otherwise.
+func (o *SetGitProviderConfig) GetTokenScope() string {
+	if o == nil || IsNil(o.TokenScope) {
+		var ret string
+		return ret
+	}
+	return *o.TokenScope
+}
+
+// GetTokenScopeOk returns a tuple with the TokenScope field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SetGitProviderConfig) GetTokenScopeOk() (*string, bool) {
+	if o == nil || IsNil(o.TokenScope) {
+		return nil, false
+	}
+	return o.TokenScope, true
+}
+
+// HasTokenScope returns a boolean if a field has been set.
+func (o *SetGitProviderConfig) HasTokenScope() bool {
+	if o != nil && !IsNil(o.TokenScope) {
+		return true
+	}
+
+	return false
+}
+
+// SetTokenScope gets a reference to the given string and assigns it to the TokenScope field.
+func (o *SetGitProviderConfig) SetTokenScope(v string) {
+	o.TokenScope = &v
+}
+
+// GetTokenScopeType returns the TokenScopeType field value if set, zero value otherwise.
+func (o *SetGitProviderConfig) GetTokenScopeType() GitproviderTokenScopeType {
+	if o == nil || IsNil(o.TokenScopeType) {
+		var ret GitproviderTokenScopeType
+		return ret
+	}
+	return *o.TokenScopeType
+}
+
+// GetTokenScopeTypeOk returns a tuple with the TokenScopeType field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SetGitProviderConfig) GetTokenScopeTypeOk() (*GitproviderTokenScopeType, bool) {
+	if o == nil || IsNil(o.TokenScopeType) {
+		return nil, false
+	}
+	return o.TokenScopeType, true
+}
+
+// HasTokenScopeType returns a boolean if a field has been set.
+func (o *SetGitProviderConfig) HasTokenScopeType() bool {
+	if o != nil && !IsNil(o.TokenScopeType) {
+		return true
+	}
+
+	return false
+}
+
+// SetTokenScopeType gets a reference to the given GitproviderTokenScopeType and assigns it to the TokenScopeType field.
+func (o *SetGitProviderConfig) SetTokenScopeType(v GitproviderTokenScopeType) {
+	o.TokenScopeType = &v
+}
+
 // GetUsername returns the Username field value if set, zero value otherwise.
 func (o *SetGitProviderConfig) GetUsername() string {
 	if o == nil || IsNil(o.Username) {
@@ -175,6 +274,15 @@ func (o SetGitProviderConfig) ToMap() (map[string]interface{}, error) {
 	}
 	toSerialize["id"] = o.Id
 	toSerialize["token"] = o.Token
+	if !IsNil(o.TokenIdentity) {
+		toSerialize["tokenIdentity"] = o.TokenIdentity
+	}
+	if !IsNil(o.TokenScope) {
+		toSerialize["tokenScope"] = o.TokenScope
+	}
+	if !IsNil(o.TokenScopeType) {
+		toSerialize["tokenScopeType"] = o.TokenScopeType
+	}
 	if !IsNil(o.Username) {
 		toSerialize["username"] = o.Username
 	}

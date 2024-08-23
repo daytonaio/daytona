@@ -1659,6 +1659,9 @@ components:
       type: object
     SetGitProviderConfig:
       example:
+        tokenScope: tokenScope
+        tokenScopeType: null
+        tokenIdentity: tokenIdentity
         baseApiUrl: baseApiUrl
         id: id
         token: token
@@ -1670,6 +1673,12 @@ components:
           type: string
         token:
           type: string
+        tokenIdentity:
+          type: string
+        tokenScope:
+          type: string
+        tokenScopeType:
+          $ref: '#/components/schemas/gitprovider.TokenScopeType'
         username:
           type: string
       required:

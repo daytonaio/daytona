@@ -7,6 +7,9 @@ Name | Type | Description | Notes
 **BaseApiUrl** | Pointer to **string** |  | [optional] 
 **Id** | **string** |  | 
 **Token** | **string** |  | 
+**TokenIdentity** | Pointer to **string** |  | [optional] 
+**TokenScope** | Pointer to **string** |  | [optional] 
+**TokenScopeType** | Pointer to [**GitproviderTokenScopeType**](GitproviderTokenScopeType.md) |  | [optional] 
 **Username** | Pointer to **string** |  | [optional] 
 
 ## Methods
@@ -92,6 +95,81 @@ and a boolean to check if the value has been set.
 
 SetToken sets Token field to given value.
 
+
+### GetTokenIdentity
+
+`func (o *SetGitProviderConfig) GetTokenIdentity() string`
+
+GetTokenIdentity returns the TokenIdentity field if non-nil, zero value otherwise.
+
+### GetTokenIdentityOk
+
+`func (o *SetGitProviderConfig) GetTokenIdentityOk() (*string, bool)`
+
+GetTokenIdentityOk returns a tuple with the TokenIdentity field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTokenIdentity
+
+`func (o *SetGitProviderConfig) SetTokenIdentity(v string)`
+
+SetTokenIdentity sets TokenIdentity field to given value.
+
+### HasTokenIdentity
+
+`func (o *SetGitProviderConfig) HasTokenIdentity() bool`
+
+HasTokenIdentity returns a boolean if a field has been set.
+
+### GetTokenScope
+
+`func (o *SetGitProviderConfig) GetTokenScope() string`
+
+GetTokenScope returns the TokenScope field if non-nil, zero value otherwise.
+
+### GetTokenScopeOk
+
+`func (o *SetGitProviderConfig) GetTokenScopeOk() (*string, bool)`
+
+GetTokenScopeOk returns a tuple with the TokenScope field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTokenScope
+
+`func (o *SetGitProviderConfig) SetTokenScope(v string)`
+
+SetTokenScope sets TokenScope field to given value.
+
+### HasTokenScope
+
+`func (o *SetGitProviderConfig) HasTokenScope() bool`
+
+HasTokenScope returns a boolean if a field has been set.
+
+### GetTokenScopeType
+
+`func (o *SetGitProviderConfig) GetTokenScopeType() GitproviderTokenScopeType`
+
+GetTokenScopeType returns the TokenScopeType field if non-nil, zero value otherwise.
+
+### GetTokenScopeTypeOk
+
+`func (o *SetGitProviderConfig) GetTokenScopeTypeOk() (*GitproviderTokenScopeType, bool)`
+
+GetTokenScopeTypeOk returns a tuple with the TokenScopeType field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTokenScopeType
+
+`func (o *SetGitProviderConfig) SetTokenScopeType(v GitproviderTokenScopeType)`
+
+SetTokenScopeType sets TokenScopeType field to given value.
+
+### HasTokenScopeType
+
+`func (o *SetGitProviderConfig) HasTokenScopeType() bool`
+
+HasTokenScopeType returns a boolean if a field has been set.
 
 ### GetUsername
 
