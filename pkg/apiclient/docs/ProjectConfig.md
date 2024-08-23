@@ -4,19 +4,20 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**BuildConfig** | Pointer to [**ProjectBuildConfig**](ProjectBuildConfig.md) |  | [optional] 
+**BuildConfig** | Pointer to [**BuildConfig**](BuildConfig.md) |  | [optional] 
 **Default** | **bool** |  | 
 **EnvVars** | **map[string]string** |  | 
 **Image** | **string** |  | 
 **Name** | **string** |  | 
-**Repository** | [**GitRepository**](GitRepository.md) |  | 
+**Prebuilds** | Pointer to [**[]PrebuildConfig**](PrebuildConfig.md) |  | [optional] 
+**RepositoryUrl** | **string** |  | 
 **User** | **string** |  | 
 
 ## Methods
 
 ### NewProjectConfig
 
-`func NewProjectConfig(default_ bool, envVars map[string]string, image string, name string, repository GitRepository, user string, ) *ProjectConfig`
+`func NewProjectConfig(default_ bool, envVars map[string]string, image string, name string, repositoryUrl string, user string, ) *ProjectConfig`
 
 NewProjectConfig instantiates a new ProjectConfig object
 This constructor will assign default values to properties that have it defined,
@@ -33,20 +34,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetBuildConfig
 
-`func (o *ProjectConfig) GetBuildConfig() ProjectBuildConfig`
+`func (o *ProjectConfig) GetBuildConfig() BuildConfig`
 
 GetBuildConfig returns the BuildConfig field if non-nil, zero value otherwise.
 
 ### GetBuildConfigOk
 
-`func (o *ProjectConfig) GetBuildConfigOk() (*ProjectBuildConfig, bool)`
+`func (o *ProjectConfig) GetBuildConfigOk() (*BuildConfig, bool)`
 
 GetBuildConfigOk returns a tuple with the BuildConfig field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetBuildConfig
 
-`func (o *ProjectConfig) SetBuildConfig(v ProjectBuildConfig)`
+`func (o *ProjectConfig) SetBuildConfig(v BuildConfig)`
 
 SetBuildConfig sets BuildConfig field to given value.
 
@@ -136,24 +137,49 @@ and a boolean to check if the value has been set.
 SetName sets Name field to given value.
 
 
-### GetRepository
+### GetPrebuilds
 
-`func (o *ProjectConfig) GetRepository() GitRepository`
+`func (o *ProjectConfig) GetPrebuilds() []PrebuildConfig`
 
-GetRepository returns the Repository field if non-nil, zero value otherwise.
+GetPrebuilds returns the Prebuilds field if non-nil, zero value otherwise.
 
-### GetRepositoryOk
+### GetPrebuildsOk
 
-`func (o *ProjectConfig) GetRepositoryOk() (*GitRepository, bool)`
+`func (o *ProjectConfig) GetPrebuildsOk() (*[]PrebuildConfig, bool)`
 
-GetRepositoryOk returns a tuple with the Repository field if it's non-nil, zero value otherwise
+GetPrebuildsOk returns a tuple with the Prebuilds field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetRepository
+### SetPrebuilds
 
-`func (o *ProjectConfig) SetRepository(v GitRepository)`
+`func (o *ProjectConfig) SetPrebuilds(v []PrebuildConfig)`
 
-SetRepository sets Repository field to given value.
+SetPrebuilds sets Prebuilds field to given value.
+
+### HasPrebuilds
+
+`func (o *ProjectConfig) HasPrebuilds() bool`
+
+HasPrebuilds returns a boolean if a field has been set.
+
+### GetRepositoryUrl
+
+`func (o *ProjectConfig) GetRepositoryUrl() string`
+
+GetRepositoryUrl returns the RepositoryUrl field if non-nil, zero value otherwise.
+
+### GetRepositoryUrlOk
+
+`func (o *ProjectConfig) GetRepositoryUrlOk() (*string, bool)`
+
+GetRepositoryUrlOk returns a tuple with the RepositoryUrl field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetRepositoryUrl
+
+`func (o *ProjectConfig) SetRepositoryUrl(v string)`
+
+SetRepositoryUrl sets RepositoryUrl field to given value.
 
 
 ### GetUser

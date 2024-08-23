@@ -6,22 +6,36 @@ package build_test
 import (
 	"testing"
 
-	t_build "github.com/daytonaio/daytona/internal/testing/server/build"
+	t_build "github.com/daytonaio/daytona/internal/testing/build"
+	git_mocks "github.com/daytonaio/daytona/internal/testing/git/mocks"
+	logger_mocks "github.com/daytonaio/daytona/internal/testing/logger/mocks"
 	"github.com/daytonaio/daytona/internal/testing/server/workspaces/mocks"
 	"github.com/daytonaio/daytona/pkg/build"
+	t_gitprovider "github.com/daytonaio/daytona/pkg/build/mocks"
+	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
+var gitProviderConfig = gitprovider.GitProviderConfig{
+	Id:         "github",
+	Username:   "daytonaio",
+	Token:      "",
+	BaseApiUrl: nil,
+}
+
 type BuildRunnerTestSuite struct {
 	suite.Suite
-	mockBuilderFactory mocks.MockBuilderFactory
-	mockBuilder        mocks.MockBuilder
-	mockScheduler      mocks.MockScheduler
-	loggerFactory      logs.LoggerFactory
-	buildStore         build.Store
-	Runner             build.BuildRunner
+	mockBuilderFactory         mocks.MockBuilderFactory
+	mockBuilder                mocks.MockBuilder
+	mockScheduler              mocks.MockScheduler
+	mockGitService             git_mocks.MockGitService
+	loggerFactory              logs.LoggerFactory
+	mockBuildStore             build.Store
+	mockGitProviderConfigStore t_gitprovider.MockGitProviderConfigStore
+	Runner                     build.BuildRunner
 }
 
 func NewBuildRunnerTestSuite() *BuildRunnerTestSuite {
@@ -34,15 +48,18 @@ func TestBuildRunner(t *testing.T) {
 	s.mockBuilderFactory = mocks.MockBuilderFactory{}
 	s.mockBuilder = mocks.MockBuilder{}
 	s.mockScheduler = mocks.MockScheduler{}
+	s.mockGitProviderConfigStore = t_gitprovider.MockGitProviderConfigStore{}
 
-	s.buildStore = t_build.NewInMemoryBuildStore()
-	s.loggerFactory = logs.NewLoggerFactory(t.TempDir())
+	s.mockBuildStore = t_build.NewInMemoryBuildStore()
+	logTempDir := t.TempDir()
+	s.loggerFactory = logs.NewLoggerFactory(nil, &logTempDir)
 
 	s.Runner = *build.NewBuildRunner(build.BuildRunnerInstanceConfig{
 		Interval:         "0 */5 * * * *",
 		Scheduler:        &s.mockScheduler,
 		BuildRunnerId:    "1",
-		BuildStore:       s.buildStore,
+		BuildStore:       s.mockBuildStore,
+		GitProviderStore: &s.mockGitProviderConfigStore,
 		BuilderFactory:   &s.mockBuilderFactory,
 		LoggerFactory:    s.loggerFactory,
 		TelemetryEnabled: false,
@@ -52,7 +69,7 @@ func TestBuildRunner(t *testing.T) {
 }
 
 func (s *BuildRunnerTestSuite) SetupTest() {
-	err := s.buildStore.Save(mocks.MockBuild)
+	err := s.mockBuildStore.Save(mocks.MockBuild)
 	if err != nil {
 		s.T().Fatal(err)
 	}
@@ -85,7 +102,15 @@ func (s *BuildRunnerTestSuite) TestRun() {
 
 func (s *BuildRunnerTestSuite) TestRunBuildProcess() {
 	pendingBuild := *mocks.MockBuild
-	s.mockBuilderFactory.On("Create", pendingBuild).Return(&s.mockBuilder, nil)
+	s.mockGitProviderConfigStore.On("GetConfigForUrl", pendingBuild.Repository.Url).Return(&gitProviderConfig, nil)
+	s.mockGitService.On("CloneRepository", pendingBuild.Repository, &http.BasicAuth{
+		Username: gitProviderConfig.Username,
+	}).Return(nil)
+
+	mockGitService := git_mocks.NewMockGitService()
+	mockGitService.On("CloneRepository", pendingBuild.Repository, &http.BasicAuth{
+		Username: gitProviderConfig.Username,
+	}).Return(nil)
 
 	runningBuild := *mocks.MockBuild
 	runningBuild.State = build.BuildStateRunning
@@ -99,10 +124,21 @@ func (s *BuildRunnerTestSuite) TestRunBuildProcess() {
 
 	s.mockBuilder.On("CleanUp").Return(nil)
 
-	s.Runner.RunBuildProcess(mocks.MockBuild, nil)
+	mockLogger := logger_mocks.NewMockLogger()
+	mockLogger.On("Write", mock.Anything).Return(0, nil)
 
-	s.mockBuilderFactory.AssertExpectations(s.T())
+	s.Runner.RunBuildProcess(build.BuildProcessConfig{
+		Builder:     &s.mockBuilder,
+		BuildLogger: mockLogger,
+		Build:       mocks.MockBuild,
+		ProjectDir:  "",
+		GitService:  mockGitService,
+		Wg:          nil,
+	})
+
+	mockLogger.AssertExpectations(s.T())
 	s.mockBuilder.AssertExpectations(s.T())
+	s.mockGitProviderConfigStore.AssertExpectations(s.T())
 
 	s.Require().Equal(mocks.MockBuild.Image, "image")
 	s.Require().Equal(mocks.MockBuild.User, "user")

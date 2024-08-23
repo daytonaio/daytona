@@ -188,6 +188,30 @@ func (g *GitnessClient) GetRepositories(namespace string) ([]Repository, error) 
 	return apiRepos, nil
 }
 
+func (g *GitnessClient) GetRepository(url string) (*Repository, error) {
+	repoRef, err := g.GetRepoRef(url)
+	if err != nil {
+		return nil, err
+	}
+
+	repoURL, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s", *repoRef))
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := g.performRequest("GET", repoURL.String())
+	if err != nil {
+		return nil, err
+	}
+
+	var repo Repository
+	if err := json.Unmarshal(body, &repo); err != nil {
+		return nil, err
+	}
+
+	return &repo, nil
+}
+
 func (g *GitnessClient) GetRepoBranches(repositoryId string, namespaceId string) ([]*RepoBranch, error) {
 	branchesURL, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/branches", url.PathEscape(namespaceId+"/"+repositoryId)))
 	if err != nil {
@@ -317,6 +341,15 @@ func (g *GitnessClient) GetPr(repoURL string, prNumber uint32) (*PullRequest, er
 	refPart := strings.Split(*repoRef, "/")
 	pr.GitUrl = GetCloneUrl(g.BaseURL.Scheme, g.BaseURL.Host, refPart[0], refPart[1])
 	return &pr, nil
+}
+
+func (g *GitnessClient) GetDefaultBranch(url string) (*string, error) {
+	repo, err := g.GetRepository(url)
+	if err != nil {
+		return nil, err
+	}
+
+	return &repo.DefaultBranch, nil
 }
 
 func GetCloneUrl(protocol, host, owner, repo string) string {

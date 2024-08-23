@@ -296,7 +296,7 @@ func (g *GitLabGitProvider) getApiClient() *gitlab.Client {
 	return client
 }
 
-func (g *GitLabGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
+func (g *GitLabGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
 	if strings.HasPrefix(repoUrl, "git@") {
 		return g.parseSshGitUrl(repoUrl)
 	}
@@ -423,7 +423,7 @@ func (g *GitLabGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitCon
 	return staticContext, nil
 }
 
-func (g *GitLabGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
+func (g *GitLabGitProvider) GetPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
 	if staticContext.PrNumber == nil {
 		return staticContext, nil
 	}
@@ -446,4 +446,15 @@ func (g *GitLabGitProvider) getPrContext(staticContext *StaticGitContext) (*Stat
 	repo.Owner = pull.Author.Username
 
 	return &repo, nil
+}
+
+func (g *GitLabGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*string, error) {
+	client := g.getApiClient()
+
+	project, _, err := client.Projects.GetProject(staticContext.Id, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return &project.DefaultBranch, nil
 }

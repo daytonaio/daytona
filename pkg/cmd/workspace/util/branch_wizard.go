@@ -8,6 +8,7 @@ import (
 	"errors"
 	"net/url"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -21,16 +22,7 @@ type BranchWizardConfig struct {
 	ProjectOrder int
 }
 
-func GetBranchFromWizardFromRepo(branchList []apiclient.GitBranch) (*apiclient.GitBranch, error) {
-	branch := selection.GetBranchFromPrompt(branchList, 0)
-	if branch == nil {
-		return nil, errors.New("must select a branch")
-	}
-
-	return branch, nil
-}
-
-func GetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, error) {
+func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, error) {
 	var branchList []apiclient.GitBranch
 	var checkoutOptions []selection.CheckoutOption
 	var err error
@@ -84,6 +76,7 @@ func GetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 
 	chosenCheckoutOption := selection.GetCheckoutOptionFromPrompt(config.ProjectOrder, checkoutOptions)
 	if chosenCheckoutOption == selection.CheckoutDefault {
+		config.ChosenRepo.Branch = util.Pointer("")
 		return config.ChosenRepo, nil
 	}
 

@@ -197,7 +197,7 @@ func (g *GitnessGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (
 	return client.GetLastCommitSha(staticContext.Url, staticContext.Branch)
 }
 
-func (g *GitnessGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
+func (g *GitnessGitProvider) GetPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
 	if staticContext.PrNumber == nil {
 		return staticContext, nil
 	}
@@ -221,8 +221,9 @@ func (g *GitnessGitProvider) getPrContext(staticContext *StaticGitContext) (*Sta
 	}
 	return &repo, nil
 }
-func (g *GitnessGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
-	staticContext, err := g.AbstractGitProvider.parseStaticGitContext(repoUrl)
+
+func (g *GitnessGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
+	staticContext, err := g.AbstractGitProvider.ParseStaticGitContext(repoUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -264,4 +265,9 @@ func (g *GitnessGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitCo
 	}
 
 	return staticContext, nil
+}
+
+func (g *GitnessGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*string, error) {
+	client := g.getApiClient()
+	return client.GetDefaultBranch(staticContext.Url)
 }

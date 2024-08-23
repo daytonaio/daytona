@@ -14,10 +14,12 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal"
+	"github.com/daytonaio/daytona/internal/constants"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/build"
+	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/db"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
@@ -25,6 +27,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
+	"github.com/daytonaio/daytona/pkg/server/builds"
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
@@ -103,7 +106,7 @@ var ServeCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		buildRunner, err := getBuildRunner(c, buildRunnerConfig, configDir, telemetryService)
+		buildRunner, err := GetBuildRunner(c, buildRunnerConfig, telemetryService)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -149,11 +152,15 @@ var ServeCmd = &cobra.Command{
 }
 
 func GetInstance(c *server.Config, configDir string, telemetryService telemetry.TelemetryService) (*server.Server, error) {
-	logsDir, err := server.GetWorkspaceLogsDir(configDir)
+	wsLogsDir, err := server.GetWorkspaceLogsDir(configDir)
 	if err != nil {
 		return nil, err
 	}
-	loggerFactory := logs.NewLoggerFactory(logsDir)
+	buildLogsDir, err := build.GetBuildLogsDir()
+	if err != nil {
+		return nil, err
+	}
+	loggerFactory := logs.NewLoggerFactory(&wsLogsDir, &buildLogsDir)
 
 	dbPath, err := getDbPath()
 	if err != nil {
@@ -169,6 +176,10 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 	containerRegistryStore, err := db.NewContainerRegistryStore(dbConnection)
 	if err != nil {
 		return nil, err
+	}
+	buildStore, err := db.NewBuildStore(dbConnection)
+	if err != nil {
+		log.Fatal(err)
 	}
 	projectConfigStore, err := db.NewProjectConfigStore(dbConnection)
 	if err != nil {
@@ -207,9 +218,28 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 		Store: containerRegistryStore,
 	})
 
-	projectConfigService := projectconfig.NewConfigService(projectconfig.ProjectConfigServiceConfig{
-		ConfigStore: projectConfigStore,
+	buildService := builds.NewBuildService(builds.BuildServiceConfig{
+		BuildStore:    buildStore,
+		LoggerFactory: loggerFactory,
 	})
+
+	gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
+		ConfigStore: gitProviderConfigStore,
+	})
+
+	prebuildWebhookEndpoint := fmt.Sprintf("%s%s", util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain), constants.WEBHOOK_EVENT_ROUTE)
+
+	projectConfigService := projectconfig.NewProjectConfigService(projectconfig.ProjectConfigServiceConfig{
+		PrebuildWebhookEndpoint: prebuildWebhookEndpoint,
+		ConfigStore:             projectConfigStore,
+		BuildService:            buildService,
+		GitProviderService:      gitProviderService,
+	})
+
+	err = projectConfigService.StartRetentionPoller()
+	if err != nil {
+		return nil, err
+	}
 
 	var localContainerRegistry server.ILocalContainerRegistry
 
@@ -243,7 +273,7 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 	headscaleUrl := util.GetFrpcHeadscaleUrl(c.Frps.Protocol, c.Id, c.Frps.Domain)
 
 	providerManager := manager.NewProviderManager(manager.ProviderManagerConfig{
-		LogsDir:               logsDir,
+		LogsDir:               wsLogsDir,
 		ProviderTargetService: providerTargetService,
 		ApiUrl:                util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 		DaytonaDownloadUrl:    getDaytonaScriptUrl(c),
@@ -261,16 +291,13 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 		ProviderManager: providerManager,
 	})
 
-	gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
-		ConfigStore: gitProviderConfigStore,
-	})
-
 	workspaceService := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
 		WorkspaceStore:           workspaceStore,
 		TargetStore:              providerTargetStore,
 		ApiKeyService:            apiKeyService,
 		GitProviderService:       gitProviderService,
 		ContainerRegistryService: containerRegistryService,
+		BuildService:             buildService,
 		ProjectConfigService:     projectConfigService,
 		ServerApiUrl:             util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 		ServerUrl:                headscaleUrl,
@@ -290,6 +317,7 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 		TailscaleServer:          headscaleServer,
 		ProviderTargetService:    providerTargetService,
 		ContainerRegistryService: containerRegistryService,
+		BuildService:             buildService,
 		ProjectConfigService:     projectConfigService,
 		LocalContainerRegistry:   localContainerRegistry,
 		ApiKeyService:            apiKeyService,
@@ -301,12 +329,12 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 	}), nil
 }
 
-func getBuildRunner(c *server.Config, buildRunnerConfig *build.Config, configDir string, telemetryService telemetry.TelemetryService) (*build.BuildRunner, error) {
-	logsDir, err := server.GetWorkspaceLogsDir(configDir)
+func GetBuildRunner(c *server.Config, buildRunnerConfig *build.Config, telemetryService telemetry.TelemetryService) (*build.BuildRunner, error) {
+	logsDir, err := build.GetBuildLogsDir()
 	if err != nil {
 		return nil, err
 	}
-	loggerFactory := logs.NewLoggerFactory(logsDir)
+	loggerFactory := logs.NewLoggerFactory(nil, &logsDir)
 
 	dbPath, err := getDbPath()
 	if err != nil {
@@ -314,6 +342,15 @@ func getBuildRunner(c *server.Config, buildRunnerConfig *build.Config, configDir
 	}
 
 	dbConnection := db.GetSQLiteConnection(dbPath)
+
+	gitProviderConfigStore, err := db.NewGitProviderConfigStore(dbConnection)
+	if err != nil {
+		return nil, err
+	}
+
+	gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
+		ConfigStore: gitProviderConfigStore,
+	})
 
 	buildStore, err := db.NewBuildStore(dbConnection)
 	if err != nil {
@@ -335,25 +372,43 @@ func getBuildRunner(c *server.Config, buildRunnerConfig *build.Config, configDir
 		Store: containerRegistryStore,
 	})
 
+	var builderRegistry *containerregistry.ContainerRegistry
+
+	if c.BuilderRegistryServer != "local" {
+		builderRegistry, err = containerRegistryService.Find(c.BuilderRegistryServer)
+		if err != nil {
+			builderRegistry = &containerregistry.ContainerRegistry{
+				Server: c.BuilderRegistryServer,
+			}
+		}
+	}
+
+	configDir, err := config.GetConfigDir()
+	if err != nil {
+		return nil, err
+	}
+
 	builderFactory := build.NewBuilderFactory(build.BuilderFactoryConfig{
-		ContainerRegistryServer:  c.BuilderRegistryServer,
-		BuildImageNamespace:      buildImageNamespace,
-		BuildStore:               buildStore,
-		LoggerFactory:            loggerFactory,
-		DefaultProjectImage:      c.DefaultProjectImage,
-		DefaultProjectUser:       c.DefaultProjectUser,
-		Image:                    c.BuilderImage,
-		ContainerRegistryService: containerRegistryService,
+		Image:               c.BuilderImage,
+		ContainerRegistry:   builderRegistry,
+		BuildStore:          buildStore,
+		BuildImageNamespace: buildImageNamespace,
+		LoggerFactory:       loggerFactory,
+		DefaultProjectImage: c.DefaultProjectImage,
+		DefaultProjectUser:  c.DefaultProjectUser,
 	})
 
 	return build.NewBuildRunner(build.BuildRunnerInstanceConfig{
-		Interval:         buildRunnerConfig.Interval,
-		Scheduler:        build.NewCronScheduler(),
-		BuildRunnerId:    buildRunnerConfig.Id,
-		BuildStore:       buildStore,
-		BuilderFactory:   builderFactory,
-		LoggerFactory:    loggerFactory,
-		TelemetryService: telemetryService,
+		Interval:          buildRunnerConfig.Interval,
+		Scheduler:         build.NewCronScheduler(),
+		BuildRunnerId:     buildRunnerConfig.Id,
+		ContainerRegistry: builderRegistry,
+		GitProviderStore:  gitProviderService,
+		BuildStore:        buildStore,
+		BuilderFactory:    builderFactory,
+		LoggerFactory:     loggerFactory,
+		BasePath:          filepath.Join(configDir, "builds"),
+		TelemetryService:  telemetryService,
 	}), nil
 }
 

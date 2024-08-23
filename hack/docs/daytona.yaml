@@ -12,6 +12,7 @@ options:
 see_also:
     - daytona api-key - Api Key commands
     - daytona autocomplete - Adds completion script for your shell enviornment
+    - daytona build - Manage builds
     - daytona code - Open a workspace in your preferred IDE
     - daytona container-registry - Manage container registries
     - daytona create - Create a workspace
@@ -23,6 +24,7 @@ see_also:
     - daytona ide - Choose the default IDE
     - daytona info - Show workspace info
     - daytona list - List workspaces
+    - daytona prebuild - Manage prebuilds
     - daytona profile - Manage profiles
     - daytona project-config - Manage project configs
     - daytona provider - Manage providers

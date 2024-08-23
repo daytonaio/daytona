@@ -21,12 +21,12 @@ var _ MappedNullable = &CreateProjectConfigDTO{}
 
 // CreateProjectConfigDTO struct for CreateProjectConfigDTO
 type CreateProjectConfigDTO struct {
-	BuildConfig *ProjectBuildConfig          `json:"buildConfig,omitempty"`
-	EnvVars     map[string]string            `json:"envVars"`
-	Image       *string                      `json:"image,omitempty"`
-	Name        string                       `json:"name"`
-	Source      CreateProjectConfigSourceDTO `json:"source"`
-	User        *string                      `json:"user,omitempty"`
+	BuildConfig   *BuildConfig      `json:"buildConfig,omitempty"`
+	EnvVars       map[string]string `json:"envVars"`
+	Image         *string           `json:"image,omitempty"`
+	Name          string            `json:"name"`
+	RepositoryUrl string            `json:"repositoryUrl"`
+	User          *string           `json:"user,omitempty"`
 }
 
 type _CreateProjectConfigDTO CreateProjectConfigDTO
@@ -35,11 +35,11 @@ type _CreateProjectConfigDTO CreateProjectConfigDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateProjectConfigDTO(envVars map[string]string, name string, source CreateProjectConfigSourceDTO) *CreateProjectConfigDTO {
+func NewCreateProjectConfigDTO(envVars map[string]string, name string, repositoryUrl string) *CreateProjectConfigDTO {
 	this := CreateProjectConfigDTO{}
 	this.EnvVars = envVars
 	this.Name = name
-	this.Source = source
+	this.RepositoryUrl = repositoryUrl
 	return &this
 }
 
@@ -52,9 +52,9 @@ func NewCreateProjectConfigDTOWithDefaults() *CreateProjectConfigDTO {
 }
 
 // GetBuildConfig returns the BuildConfig field value if set, zero value otherwise.
-func (o *CreateProjectConfigDTO) GetBuildConfig() ProjectBuildConfig {
+func (o *CreateProjectConfigDTO) GetBuildConfig() BuildConfig {
 	if o == nil || IsNil(o.BuildConfig) {
-		var ret ProjectBuildConfig
+		var ret BuildConfig
 		return ret
 	}
 	return *o.BuildConfig
@@ -62,7 +62,7 @@ func (o *CreateProjectConfigDTO) GetBuildConfig() ProjectBuildConfig {
 
 // GetBuildConfigOk returns a tuple with the BuildConfig field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CreateProjectConfigDTO) GetBuildConfigOk() (*ProjectBuildConfig, bool) {
+func (o *CreateProjectConfigDTO) GetBuildConfigOk() (*BuildConfig, bool) {
 	if o == nil || IsNil(o.BuildConfig) {
 		return nil, false
 	}
@@ -78,8 +78,8 @@ func (o *CreateProjectConfigDTO) HasBuildConfig() bool {
 	return false
 }
 
-// SetBuildConfig gets a reference to the given ProjectBuildConfig and assigns it to the BuildConfig field.
-func (o *CreateProjectConfigDTO) SetBuildConfig(v ProjectBuildConfig) {
+// SetBuildConfig gets a reference to the given BuildConfig and assigns it to the BuildConfig field.
+func (o *CreateProjectConfigDTO) SetBuildConfig(v BuildConfig) {
 	o.BuildConfig = &v
 }
 
@@ -163,28 +163,28 @@ func (o *CreateProjectConfigDTO) SetName(v string) {
 	o.Name = v
 }
 
-// GetSource returns the Source field value
-func (o *CreateProjectConfigDTO) GetSource() CreateProjectConfigSourceDTO {
+// GetRepositoryUrl returns the RepositoryUrl field value
+func (o *CreateProjectConfigDTO) GetRepositoryUrl() string {
 	if o == nil {
-		var ret CreateProjectConfigSourceDTO
+		var ret string
 		return ret
 	}
 
-	return o.Source
+	return o.RepositoryUrl
 }
 
-// GetSourceOk returns a tuple with the Source field value
+// GetRepositoryUrlOk returns a tuple with the RepositoryUrl field value
 // and a boolean to check if the value has been set.
-func (o *CreateProjectConfigDTO) GetSourceOk() (*CreateProjectConfigSourceDTO, bool) {
+func (o *CreateProjectConfigDTO) GetRepositoryUrlOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Source, true
+	return &o.RepositoryUrl, true
 }
 
-// SetSource sets field value
-func (o *CreateProjectConfigDTO) SetSource(v CreateProjectConfigSourceDTO) {
-	o.Source = v
+// SetRepositoryUrl sets field value
+func (o *CreateProjectConfigDTO) SetRepositoryUrl(v string) {
+	o.RepositoryUrl = v
 }
 
 // GetUser returns the User field value if set, zero value otherwise.
@@ -237,7 +237,7 @@ func (o CreateProjectConfigDTO) ToMap() (map[string]interface{}, error) {
 		toSerialize["image"] = o.Image
 	}
 	toSerialize["name"] = o.Name
-	toSerialize["source"] = o.Source
+	toSerialize["repositoryUrl"] = o.RepositoryUrl
 	if !IsNil(o.User) {
 		toSerialize["user"] = o.User
 	}
@@ -251,7 +251,7 @@ func (o *CreateProjectConfigDTO) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"envVars",
 		"name",
-		"source",
+		"repositoryUrl",
 	}
 
 	allProperties := make(map[string]interface{})

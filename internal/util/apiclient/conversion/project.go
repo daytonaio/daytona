@@ -6,7 +6,8 @@ package conversion
 import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
+	pc_dto "github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
+	project_dto "github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
@@ -38,9 +39,9 @@ func ToProject(projectDTO *apiclient.Project) *project.Project {
 		}
 	}
 
-	var projectBuild *buildconfig.ProjectBuildConfig
+	var projectBuild *buildconfig.BuildConfig
 	if projectDTO.BuildConfig != nil {
-		projectBuild = &buildconfig.ProjectBuildConfig{}
+		projectBuild = &buildconfig.BuildConfig{}
 		if projectDTO.BuildConfig.Devcontainer != nil {
 			projectBuild.Devcontainer = &buildconfig.DevcontainerConfig{
 				FilePath: projectDTO.BuildConfig.Devcontainer.FilePath,
@@ -49,13 +50,11 @@ func ToProject(projectDTO *apiclient.Project) *project.Project {
 	}
 
 	project := &project.Project{
-		ProjectConfig: config.ProjectConfig{
-			Name:        projectDTO.Name,
-			Image:       projectDTO.Image,
-			User:        projectDTO.User,
-			BuildConfig: projectBuild,
-			Repository:  repository,
-		},
+		Name:        projectDTO.Name,
+		Image:       projectDTO.Image,
+		User:        projectDTO.User,
+		BuildConfig: projectBuild,
+		Repository:  repository,
 		Target:      projectDTO.Target,
 		WorkspaceId: projectDTO.WorkspaceId,
 		State:       projectState,
@@ -113,16 +112,14 @@ func ToGitStatusDTO(gitStatus *project.GitStatus) *apiclient.GitStatus {
 	}
 }
 
-func ToProjectConfig(createProjectConfigDto dto.CreateProjectConfigDTO) *config.ProjectConfig {
+func ToProjectConfig(createProjectConfigDto pc_dto.CreateProjectConfigDTO) *config.ProjectConfig {
 	result := &config.ProjectConfig{
 		Name:        createProjectConfigDto.Name,
 		BuildConfig: createProjectConfigDto.BuildConfig,
 		EnvVars:     createProjectConfigDto.EnvVars,
 	}
 
-	if createProjectConfigDto.Source.Repository != nil {
-		result.Repository = createProjectConfigDto.Source.Repository
-	}
+	result.RepositoryUrl = createProjectConfigDto.RepositoryUrl
 
 	if createProjectConfigDto.Image != nil {
 		result.Image = *createProjectConfigDto.Image
@@ -133,4 +130,36 @@ func ToProjectConfig(createProjectConfigDto dto.CreateProjectConfigDTO) *config.
 	}
 
 	return result
+}
+
+func CreateDtoToProject(createProjectDto project_dto.CreateProjectDTO) *project.Project {
+	p := &project.Project{
+		Name:        createProjectDto.Name,
+		BuildConfig: createProjectDto.BuildConfig,
+		Repository:  createProjectDto.Source.Repository,
+		EnvVars:     createProjectDto.EnvVars,
+	}
+
+	if createProjectDto.Image != nil {
+		p.Image = *createProjectDto.Image
+	}
+
+	if createProjectDto.User != nil {
+		p.User = *createProjectDto.User
+	}
+
+	return p
+}
+
+func CreateConfigDtoToProject(createProjectConfigDto pc_dto.CreateProjectConfigDTO) *project.Project {
+	return &project.Project{
+		Name:        createProjectConfigDto.Name,
+		Image:       *createProjectConfigDto.Image,
+		User:        *createProjectConfigDto.User,
+		BuildConfig: createProjectConfigDto.BuildConfig,
+		Repository: &gitprovider.GitRepository{
+			Url: createProjectConfigDto.RepositoryUrl,
+		},
+		EnvVars: createProjectConfigDto.EnvVars,
+	}
 }

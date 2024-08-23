@@ -33,9 +33,9 @@ var MapStatus map[git.StatusCode]project.Status = map[git.StatusCode]project.Sta
 }
 
 type IGitService interface {
-	CloneRepository(project *project.Project, auth *http.BasicAuth) error
-	CloneRepositoryCmd(project *project.Project, auth *http.BasicAuth) []string
-	RepositoryExists(project *project.Project) (bool, error)
+	CloneRepository(repo *gitprovider.GitRepository, auth *http.BasicAuth) error
+	CloneRepositoryCmd(repo *gitprovider.GitRepository, auth *http.BasicAuth) []string
+	RepositoryExists() (bool, error)
 	SetGitConfig(userData *gitprovider.GitUser) error
 	GetGitStatus() (*project.GitStatus, error)
 }
@@ -47,9 +47,9 @@ type Service struct {
 	OpenRepository    *git.Repository
 }
 
-func (s *Service) CloneRepository(project *project.Project, auth *http.BasicAuth) error {
+func (s *Service) CloneRepository(repo *gitprovider.GitRepository, auth *http.BasicAuth) error {
 	cloneOptions := &git.CloneOptions{
-		URL:             project.Repository.Url,
+		URL:             repo.Url,
 		SingleBranch:    true,
 		InsecureSkipTLS: true,
 		Auth:            auth,
@@ -68,8 +68,8 @@ func (s *Service) CloneRepository(project *project.Project, auth *http.BasicAuth
 		capability.ThinPack,
 	}
 
-	if project.Repository.Branch != nil {
-		cloneOptions.ReferenceName = plumbing.ReferenceName("refs/heads/" + *project.Repository.Branch)
+	if repo.Branch != nil {
+		cloneOptions.ReferenceName = plumbing.ReferenceName("refs/heads/" + *repo.Branch)
 	}
 
 	_, err := git.PlainClone(s.ProjectDir, false, cloneOptions)
@@ -77,19 +77,19 @@ func (s *Service) CloneRepository(project *project.Project, auth *http.BasicAuth
 		return err
 	}
 
-	if project.Repository.Target == gitprovider.CloneTargetCommit {
-		repo, err := git.PlainOpen(s.ProjectDir)
+	if repo.Target == gitprovider.CloneTargetCommit {
+		r, err := git.PlainOpen(s.ProjectDir)
 		if err != nil {
 			return err
 		}
 
-		w, err := repo.Worktree()
+		w, err := r.Worktree()
 		if err != nil {
 			return err
 		}
 
 		err = w.Checkout(&git.CheckoutOptions{
-			Hash: plumbing.NewHash(project.Repository.Sha),
+			Hash: plumbing.NewHash(repo.Sha),
 		})
 		if err != nil {
 			return err
@@ -99,32 +99,32 @@ func (s *Service) CloneRepository(project *project.Project, auth *http.BasicAuth
 	return err
 }
 
-func (s *Service) CloneRepositoryCmd(p *project.Project, auth *http.BasicAuth) []string {
+func (s *Service) CloneRepositoryCmd(repo *gitprovider.GitRepository, auth *http.BasicAuth) []string {
 	cloneCmd := []string{"git", "clone", "--single-branch"}
 
-	if p.Repository.Branch != nil {
-		cloneCmd = append(cloneCmd, "--branch", *p.Repository.Branch)
+	if repo.Branch != nil {
+		cloneCmd = append(cloneCmd, "--branch", *repo.Branch)
 	}
 
 	if auth != nil {
-		repoUrl := strings.TrimPrefix(p.Repository.Url, "https://")
+		repoUrl := strings.TrimPrefix(repo.Url, "https://")
 		repoUrl = strings.TrimPrefix(repoUrl, "http://")
 		cloneCmd = append(cloneCmd, fmt.Sprintf("https://%s:%s@%s", auth.Username, auth.Password, repoUrl))
 	} else {
-		cloneCmd = append(cloneCmd, p.Repository.Url)
+		cloneCmd = append(cloneCmd, repo.Url)
 	}
 
 	cloneCmd = append(cloneCmd, s.ProjectDir)
 
-	if p.Repository.Target == gitprovider.CloneTargetCommit {
+	if repo.Target == gitprovider.CloneTargetCommit {
 		cloneCmd = append(cloneCmd, "&&", "cd", s.ProjectDir)
-		cloneCmd = append(cloneCmd, "&&", "git", "checkout", p.Repository.Sha)
+		cloneCmd = append(cloneCmd, "&&", "git", "checkout", repo.Sha)
 	}
 
 	return cloneCmd
 }
 
-func (s *Service) RepositoryExists(p *project.Project) (bool, error) {
+func (s *Service) RepositoryExists() (bool, error) {
 	_, err := os.Stat(filepath.Join(s.ProjectDir, ".git"))
 	if os.IsNotExist(err) {
 		return false, nil

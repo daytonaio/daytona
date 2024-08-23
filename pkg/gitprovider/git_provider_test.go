@@ -34,7 +34,7 @@ func (a *AbstractGitProviderTestSuite) TestParseGitContext_HTTP() {
 
 	require := a.Require()
 
-	httpContext, err := a.AbstractGitProvider.parseStaticGitContext(httpSimple)
+	httpContext, err := a.AbstractGitProvider.ParseStaticGitContext(httpSimple)
 
 	require.Nil(err)
 	require.Equal(httpContext, simpleContext)
@@ -56,7 +56,7 @@ func (a *AbstractGitProviderTestSuite) TestParseGitContext_SSH() {
 
 	require := a.Require()
 
-	sshContext, err := a.AbstractGitProvider.parseStaticGitContext(sshSimple)
+	sshContext, err := a.AbstractGitProvider.ParseStaticGitContext(sshSimple)
 
 	require.Nil(err)
 	require.Equal(sshContext, simpleContext)
@@ -78,7 +78,7 @@ func (a *AbstractGitProviderTestSuite) TestParseGitContext_HTTPWithPath() {
 
 	require := a.Require()
 
-	httpContext, err := a.AbstractGitProvider.parseStaticGitContext(httpWithPath)
+	httpContext, err := a.AbstractGitProvider.ParseStaticGitContext(httpWithPath)
 
 	require.Nil(err)
 	require.Equal(httpContext, contextWithPath)

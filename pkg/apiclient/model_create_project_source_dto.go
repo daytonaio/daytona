@@ -16,36 +16,36 @@ import (
 	"fmt"
 )
 
-// checks if the CreateProjectConfigSourceDTO type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &CreateProjectConfigSourceDTO{}
+// checks if the CreateProjectSourceDTO type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &CreateProjectSourceDTO{}
 
-// CreateProjectConfigSourceDTO struct for CreateProjectConfigSourceDTO
-type CreateProjectConfigSourceDTO struct {
+// CreateProjectSourceDTO struct for CreateProjectSourceDTO
+type CreateProjectSourceDTO struct {
 	Repository GitRepository `json:"repository"`
 }
 
-type _CreateProjectConfigSourceDTO CreateProjectConfigSourceDTO
+type _CreateProjectSourceDTO CreateProjectSourceDTO
 
-// NewCreateProjectConfigSourceDTO instantiates a new CreateProjectConfigSourceDTO object
+// NewCreateProjectSourceDTO instantiates a new CreateProjectSourceDTO object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateProjectConfigSourceDTO(repository GitRepository) *CreateProjectConfigSourceDTO {
-	this := CreateProjectConfigSourceDTO{}
+func NewCreateProjectSourceDTO(repository GitRepository) *CreateProjectSourceDTO {
+	this := CreateProjectSourceDTO{}
 	this.Repository = repository
 	return &this
 }
 
-// NewCreateProjectConfigSourceDTOWithDefaults instantiates a new CreateProjectConfigSourceDTO object
+// NewCreateProjectSourceDTOWithDefaults instantiates a new CreateProjectSourceDTO object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewCreateProjectConfigSourceDTOWithDefaults() *CreateProjectConfigSourceDTO {
-	this := CreateProjectConfigSourceDTO{}
+func NewCreateProjectSourceDTOWithDefaults() *CreateProjectSourceDTO {
+	this := CreateProjectSourceDTO{}
 	return &this
 }
 
 // GetRepository returns the Repository field value
-func (o *CreateProjectConfigSourceDTO) GetRepository() GitRepository {
+func (o *CreateProjectSourceDTO) GetRepository() GitRepository {
 	if o == nil {
 		var ret GitRepository
 		return ret
@@ -56,7 +56,7 @@ func (o *CreateProjectConfigSourceDTO) GetRepository() GitRepository {
 
 // GetRepositoryOk returns a tuple with the Repository field value
 // and a boolean to check if the value has been set.
-func (o *CreateProjectConfigSourceDTO) GetRepositoryOk() (*GitRepository, bool) {
+func (o *CreateProjectSourceDTO) GetRepositoryOk() (*GitRepository, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -64,11 +64,11 @@ func (o *CreateProjectConfigSourceDTO) GetRepositoryOk() (*GitRepository, bool) 
 }
 
 // SetRepository sets field value
-func (o *CreateProjectConfigSourceDTO) SetRepository(v GitRepository) {
+func (o *CreateProjectSourceDTO) SetRepository(v GitRepository) {
 	o.Repository = v
 }
 
-func (o CreateProjectConfigSourceDTO) MarshalJSON() ([]byte, error) {
+func (o CreateProjectSourceDTO) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -76,13 +76,13 @@ func (o CreateProjectConfigSourceDTO) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o CreateProjectConfigSourceDTO) ToMap() (map[string]interface{}, error) {
+func (o CreateProjectSourceDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["repository"] = o.Repository
 	return toSerialize, nil
 }
 
-func (o *CreateProjectConfigSourceDTO) UnmarshalJSON(data []byte) (err error) {
+func (o *CreateProjectSourceDTO) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -104,53 +104,53 @@ func (o *CreateProjectConfigSourceDTO) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varCreateProjectConfigSourceDTO := _CreateProjectConfigSourceDTO{}
+	varCreateProjectSourceDTO := _CreateProjectSourceDTO{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCreateProjectConfigSourceDTO)
+	err = decoder.Decode(&varCreateProjectSourceDTO)
 
 	if err != nil {
 		return err
 	}
 
-	*o = CreateProjectConfigSourceDTO(varCreateProjectConfigSourceDTO)
+	*o = CreateProjectSourceDTO(varCreateProjectSourceDTO)
 
 	return err
 }
 
-type NullableCreateProjectConfigSourceDTO struct {
-	value *CreateProjectConfigSourceDTO
+type NullableCreateProjectSourceDTO struct {
+	value *CreateProjectSourceDTO
 	isSet bool
 }
 
-func (v NullableCreateProjectConfigSourceDTO) Get() *CreateProjectConfigSourceDTO {
+func (v NullableCreateProjectSourceDTO) Get() *CreateProjectSourceDTO {
 	return v.value
 }
 
-func (v *NullableCreateProjectConfigSourceDTO) Set(val *CreateProjectConfigSourceDTO) {
+func (v *NullableCreateProjectSourceDTO) Set(val *CreateProjectSourceDTO) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableCreateProjectConfigSourceDTO) IsSet() bool {
+func (v NullableCreateProjectSourceDTO) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableCreateProjectConfigSourceDTO) Unset() {
+func (v *NullableCreateProjectSourceDTO) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableCreateProjectConfigSourceDTO(val *CreateProjectConfigSourceDTO) *NullableCreateProjectConfigSourceDTO {
-	return &NullableCreateProjectConfigSourceDTO{value: val, isSet: true}
+func NewNullableCreateProjectSourceDTO(val *CreateProjectSourceDTO) *NullableCreateProjectSourceDTO {
+	return &NullableCreateProjectSourceDTO{value: val, isSet: true}
 }
 
-func (v NullableCreateProjectConfigSourceDTO) MarshalJSON() ([]byte, error) {
+func (v NullableCreateProjectSourceDTO) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableCreateProjectConfigSourceDTO) UnmarshalJSON(src []byte) error {
+func (v *NullableCreateProjectSourceDTO) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

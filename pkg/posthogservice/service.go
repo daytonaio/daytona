@@ -61,10 +61,10 @@ func (p *posthogService) TrackServerEvent(event telemetry.ServerEvent, clientId 
 	})
 }
 
-func (p *posthogService) TrackBuildEvent(event telemetry.BuildEvent, buildPollerId string, properties map[string]interface{}) error {
+func (p *posthogService) TrackBuildRunnerEvent(event telemetry.BuildRunnerEvent, buildRunnerId string, properties map[string]interface{}) error {
 	p.AbstractTelemetryService.SetCommonProps(properties)
 	return p.client.Enqueue(posthog.Capture{
-		DistinctId: fmt.Sprintf("build-poller-%s", buildPollerId),
+		DistinctId: fmt.Sprintf("build-runner-%s", buildRunnerId),
 		Event:      string(event),
 		Properties: properties,
 	})
