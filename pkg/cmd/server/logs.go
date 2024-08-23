@@ -20,7 +20,6 @@ import (
 )
 
 var followFlag bool
-var retryFlag bool
 var fileFlag bool
 
 var logsCmd = &cobra.Command{
@@ -38,11 +37,7 @@ var logsCmd = &cobra.Command{
 		}
 
 		query := ""
-		if retryFlag && followFlag {
-			query += "follow=true&retry=true"
-		} else if retryFlag {
-			query += "retry=true"
-		} else if followFlag {
+		if followFlag {
 			query += "follow=true"
 		}
 
@@ -128,6 +123,5 @@ func readServerLogFile() {
 
 func init() {
 	logsCmd.Flags().BoolVarP(&followFlag, "follow", "f", false, "Follow logs")
-	logsCmd.Flags().BoolVarP(&retryFlag, "retry", "r", false, "Retry connection")
 	logsCmd.Flags().BoolVar(&fileFlag, "file", false, "Read logs from local server log file")
 }
