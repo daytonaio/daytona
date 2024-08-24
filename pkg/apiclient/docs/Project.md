@@ -7,6 +7,7 @@ Name | Type | Description | Notes
 **BuildConfig** | Pointer to [**ProjectBuildConfig**](ProjectBuildConfig.md) |  | [optional] 
 **Default** | **bool** |  | 
 **EnvVars** | **map[string]string** |  | 
+**Identity** | **string** |  | 
 **Image** | **string** |  | 
 **Name** | **string** |  | 
 **Repository** | [**GitRepository**](GitRepository.md) |  | 
@@ -19,7 +20,7 @@ Name | Type | Description | Notes
 
 ### NewProject
 
-`func NewProject(default_ bool, envVars map[string]string, image string, name string, repository GitRepository, target string, user string, workspaceId string, ) *Project`
+`func NewProject(default_ bool, envVars map[string]string, identity string, image string, name string, repository GitRepository, target string, user string, workspaceId string, ) *Project`
 
 NewProject instantiates a new Project object
 This constructor will assign default values to properties that have it defined,
@@ -97,6 +98,26 @@ and a boolean to check if the value has been set.
 `func (o *Project) SetEnvVars(v map[string]string)`
 
 SetEnvVars sets EnvVars field to given value.
+
+
+### GetIdentity
+
+`func (o *Project) GetIdentity() string`
+
+GetIdentity returns the Identity field if non-nil, zero value otherwise.
+
+### GetIdentityOk
+
+`func (o *Project) GetIdentityOk() (*string, bool)`
+
+GetIdentityOk returns a tuple with the Identity field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetIdentity
+
+`func (o *Project) SetIdentity(v string)`
+
+SetIdentity sets Identity field to given value.
 
 
 ### GetImage

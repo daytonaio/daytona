@@ -35,9 +35,9 @@ import (
 )
 
 var CreateCmd = &cobra.Command{
-	Use:     "create [REPOSITORY_URL]",
+	Use:     "create [TOKEN_IDENTITY] [REPOSITORY_URL]",
 	Short:   "Create a workspace",
-	Args:    cobra.RangeArgs(0, 1),
+	Args:    cobra.RangeArgs(0, 2),
 	GroupID: util.WORKSPACE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
@@ -45,6 +45,10 @@ var CreateCmd = &cobra.Command{
 		var workspaceName string
 		var existingWorkspaceNames []string
 		var existingProjectConfigName *string
+
+		logs_view.DisplayLogEntry(logs.LogEntry{
+			Msg: fmt.Sprintf("1 %s 2 %s", args[0], args[1]),
+		}, logs_view.FIRST_PROJECT_INDEX)
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
@@ -88,7 +92,7 @@ var CreateCmd = &cobra.Command{
 				}
 			}
 		} else {
-			existingProjectConfigName, err = processCmdArgument(args[0], apiClient, &projects, ctx)
+			existingProjectConfigName, err = processCmdArgument(args, apiClient, &projects, ctx)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -340,21 +344,24 @@ func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, pro
 	return nil
 }
 
-func processCmdArgument(argument string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectConfigDTO, ctx context.Context) (*string, error) {
+func processCmdArgument(argument []string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectConfigDTO, ctx context.Context) (*string, error) {
 	if builderFlag != "" && builderFlag != create.DEVCONTAINER && devcontainerPathFlag != "" {
 		return nil, fmt.Errorf("can't set devcontainer file path if builder is not set to %s", create.DEVCONTAINER)
 	}
 
 	var projectConfig *apiclient.ProjectConfig
-
-	repoUrl, err := util.GetValidatedUrl(argument)
+	identity := argument[0]
+	logs_view.DisplayLogEntry(logs.LogEntry{
+		Msg: fmt.Sprintf("Identity from args %s\n", identity),
+	}, logs_view.WORKSPACE_INDEX)
+	repoUrl, err := util.GetValidatedUrl(argument[1])
 	if err == nil {
 		// The argument is a Git URL
-		return processGitURL(repoUrl, apiClient, projects, ctx)
+		return processGitURL(repoUrl, identity, apiClient, projects, ctx)
 	}
 
 	// The argument is not a Git URL - try getting the project config
-	projectConfig, _, err = apiClient.ProjectConfigAPI.GetProjectConfig(ctx, argument).Execute()
+	projectConfig, _, err = apiClient.ProjectConfigAPI.GetProjectConfig(ctx, argument[1]).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse the URL or fetch the project config for '%s'", argument)
 	}
@@ -362,7 +369,7 @@ func processCmdArgument(argument string, apiClient *apiclient.APIClient, project
 	return workspace_util.AddProjectFromConfig(projectConfig, apiClient, projects, branchFlag)
 }
 
-func processGitURL(repoUrl string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectConfigDTO, ctx context.Context) (*string, error) {
+func processGitURL(repoUrl string, identity string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectConfigDTO, ctx context.Context) (*string, error) {
 	encodedURLParam := url.QueryEscape(repoUrl)
 
 	if !blankFlag {
@@ -391,13 +398,16 @@ func processGitURL(repoUrl string, apiClient *apiclient.APIClient, projects *[]a
 	}
 
 	project := &apiclient.CreateProjectConfigDTO{
-		Name: projectName,
+		Name:     projectName,
+		Identity: identity,
 		Source: apiclient.CreateProjectConfigSourceDTO{
 			Repository: *repoResponse,
 		},
 		BuildConfig: &apiclient.ProjectBuildConfig{},
 	}
-
+	logs_view.DisplayLogEntry(logs.LogEntry{
+		Msg: fmt.Sprintf("processGitUrl: %s", project.Identity),
+	}, logs_view.WORKSPACE_INDEX)
 	if builderFlag == create.DEVCONTAINER || devcontainerPathFlag != "" {
 		devcontainerFilePath := create.DEVCONTAINER_FILEPATH
 		if devcontainerPathFlag != "" {

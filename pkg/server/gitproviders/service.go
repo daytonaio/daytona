@@ -13,7 +13,7 @@ import (
 )
 
 type IGitProviderService interface {
-	GetConfig(id string) (*gitprovider.GitProviderConfig, error)
+	GetConfig(id string, identity string) (*gitprovider.GitProviderConfig, error)
 	GetConfigForUrl(url string) (*gitprovider.GitProviderConfig, error)
 	GetGitProvider(id string) (gitprovider.GitProvider, error)
 	GetGitProviderForUrl(url string) (gitprovider.GitProvider, string, error)
@@ -67,8 +67,21 @@ func (s *GitProviderService) ListConfigs() ([]*gitprovider.GitProviderConfig, er
 	return s.configStore.List()
 }
 
-func (s *GitProviderService) GetConfig(id string) (*gitprovider.GitProviderConfig, error) {
-	return s.configStore.Find(id)
+func (s *GitProviderService) GetConfig(id string, identity string) (*gitprovider.GitProviderConfig, error) {
+	if id != "" {
+		return s.configStore.Find(id)
+	} else {
+		gcList, err := s.configStore.List()
+		if err != nil {
+			return nil, err
+		}
+		for _, gc := range gcList {
+			if gc.TokenIdentity == identity {
+				return gc, nil
+			}
+		}
+	}
+	return nil, errors.New("git provider config not found")
 }
 
 func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (string, error) {

@@ -995,6 +995,7 @@ components:
           devcontainer:
             filePath: filePath
         image: image
+        identity: identity
         envVars:
           key: envVars
         name: name
@@ -1017,6 +1018,8 @@ components:
           additionalProperties:
             type: string
           type: object
+        identity:
+          type: string
         image:
           type: string
         name:
@@ -1027,6 +1030,7 @@ components:
           type: string
       required:
       - envVars
+      - identity
       - name
       - source
       type: object
@@ -1055,6 +1059,7 @@ components:
             devcontainer:
               filePath: filePath
           image: image
+          identity: identity
           envVars:
             key: envVars
           name: name
@@ -1074,6 +1079,7 @@ components:
             devcontainer:
               filePath: filePath
           image: image
+          identity: identity
           envVars:
             key: envVars
           name: name
@@ -1373,6 +1379,7 @@ components:
             filePath: filePath
         image: image
         default: true
+        identity: identity
         envVars:
           key: envVars
         name: name
@@ -1412,6 +1419,8 @@ components:
           additionalProperties:
             type: string
           type: object
+        identity:
+          type: string
         image:
           type: string
         name:
@@ -1429,6 +1438,7 @@ components:
       required:
       - default
       - envVars
+      - identity
       - image
       - name
       - repository
@@ -1735,6 +1745,7 @@ components:
               filePath: filePath
           image: image
           default: true
+          identity: identity
           envVars:
             key: envVars
           name: name
@@ -1770,6 +1781,7 @@ components:
               filePath: filePath
           image: image
           default: true
+          identity: identity
           envVars:
             key: envVars
           name: name
@@ -1828,6 +1840,7 @@ components:
               filePath: filePath
           image: image
           default: true
+          identity: identity
           envVars:
             key: envVars
           name: name
@@ -1863,6 +1876,7 @@ components:
               filePath: filePath
           image: image
           default: true
+          identity: identity
           envVars:
             key: envVars
           name: name

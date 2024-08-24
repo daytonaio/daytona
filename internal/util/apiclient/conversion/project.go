@@ -59,6 +59,7 @@ func ToProject(projectDTO *apiclient.Project) *project.Project {
 		Target:      projectDTO.Target,
 		WorkspaceId: projectDTO.WorkspaceId,
 		State:       projectState,
+		Identity:    projectDTO.Identity,
 	}
 
 	if projectDTO.Repository.PrNumber != nil {

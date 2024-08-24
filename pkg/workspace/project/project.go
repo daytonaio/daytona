@@ -20,6 +20,7 @@ type Project struct {
 	ApiKey      string        `json:"-"`
 	Target      string        `json:"target" validate:"required"`
 	State       *ProjectState `json:"state,omitempty" validate:"optional"`
+	Identity    string        `json:"identity" validate:"required"`
 } // @name Project
 
 type ProjectInfo struct {

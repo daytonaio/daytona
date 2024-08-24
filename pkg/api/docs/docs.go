@@ -1382,6 +1382,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "envVars",
+                "identity",
                 "name",
                 "source"
             ],
@@ -1394,6 +1395,9 @@ const docTemplate = `{
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "identity": {
+                    "type": "string"
                 },
                 "image": {
                     "type": "string"
@@ -1727,6 +1731,7 @@ const docTemplate = `{
             "required": [
                 "default",
                 "envVars",
+                "identity",
                 "image",
                 "name",
                 "repository",
@@ -1746,6 +1751,9 @@ const docTemplate = `{
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "identity": {
+                    "type": "string"
                 },
                 "image": {
                     "type": "string"

@@ -6,6 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **BuildConfig** | Pointer to [**ProjectBuildConfig**](ProjectBuildConfig.md) |  | [optional] 
 **EnvVars** | **map[string]string** |  | 
+**Identity** | **string** |  | 
 **Image** | Pointer to **string** |  | [optional] 
 **Name** | **string** |  | 
 **Source** | [**CreateProjectConfigSourceDTO**](CreateProjectConfigSourceDTO.md) |  | 
@@ -15,7 +16,7 @@ Name | Type | Description | Notes
 
 ### NewCreateProjectConfigDTO
 
-`func NewCreateProjectConfigDTO(envVars map[string]string, name string, source CreateProjectConfigSourceDTO, ) *CreateProjectConfigDTO`
+`func NewCreateProjectConfigDTO(envVars map[string]string, identity string, name string, source CreateProjectConfigSourceDTO, ) *CreateProjectConfigDTO`
 
 NewCreateProjectConfigDTO instantiates a new CreateProjectConfigDTO object
 This constructor will assign default values to properties that have it defined,
@@ -73,6 +74,26 @@ and a boolean to check if the value has been set.
 `func (o *CreateProjectConfigDTO) SetEnvVars(v map[string]string)`
 
 SetEnvVars sets EnvVars field to given value.
+
+
+### GetIdentity
+
+`func (o *CreateProjectConfigDTO) GetIdentity() string`
+
+GetIdentity returns the Identity field if non-nil, zero value otherwise.
+
+### GetIdentityOk
+
+`func (o *CreateProjectConfigDTO) GetIdentityOk() (*string, bool)`
+
+GetIdentityOk returns a tuple with the Identity field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetIdentity
+
+`func (o *CreateProjectConfigDTO) SetIdentity(v string)`
+
+SetIdentity sets Identity field to given value.
 
 
 ### GetImage

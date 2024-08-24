@@ -1379,6 +1379,7 @@
             "type": "object",
             "required": [
                 "envVars",
+                "identity",
                 "name",
                 "source"
             ],
@@ -1391,6 +1392,9 @@
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "identity": {
+                    "type": "string"
                 },
                 "image": {
                     "type": "string"
@@ -1724,6 +1728,7 @@
             "required": [
                 "default",
                 "envVars",
+                "identity",
                 "image",
                 "name",
                 "repository",
@@ -1743,6 +1748,9 @@
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "identity": {
+                    "type": "string"
                 },
                 "image": {
                     "type": "string"

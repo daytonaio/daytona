@@ -35,6 +35,8 @@ definitions:
         additionalProperties:
           type: string
         type: object
+      identity:
+        type: string
       image:
         type: string
       name:
@@ -45,6 +47,7 @@ definitions:
         type: string
     required:
     - envVars
+    - identity
     - name
     - source
     type: object
@@ -272,6 +275,8 @@ definitions:
         additionalProperties:
           type: string
         type: object
+      identity:
+        type: string
       image:
         type: string
       name:
@@ -289,6 +294,7 @@ definitions:
     required:
     - default
     - envVars
+    - identity
     - image
     - name
     - repository

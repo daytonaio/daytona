@@ -24,6 +24,7 @@ type Project struct {
 	BuildConfig *ProjectBuildConfig `json:"buildConfig,omitempty"`
 	Default     bool                `json:"default"`
 	EnvVars     map[string]string   `json:"envVars"`
+	Identity    string              `json:"identity"`
 	Image       string              `json:"image"`
 	Name        string              `json:"name"`
 	Repository  GitRepository       `json:"repository"`
@@ -39,10 +40,11 @@ type _Project Project
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProject(default_ bool, envVars map[string]string, image string, name string, repository GitRepository, target string, user string, workspaceId string) *Project {
+func NewProject(default_ bool, envVars map[string]string, identity string, image string, name string, repository GitRepository, target string, user string, workspaceId string) *Project {
 	this := Project{}
 	this.Default = default_
 	this.EnvVars = envVars
+	this.Identity = identity
 	this.Image = image
 	this.Name = name
 	this.Repository = repository
@@ -138,6 +140,30 @@ func (o *Project) GetEnvVarsOk() (*map[string]string, bool) {
 // SetEnvVars sets field value
 func (o *Project) SetEnvVars(v map[string]string) {
 	o.EnvVars = v
+}
+
+// GetIdentity returns the Identity field value
+func (o *Project) GetIdentity() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Identity
+}
+
+// GetIdentityOk returns a tuple with the Identity field value
+// and a boolean to check if the value has been set.
+func (o *Project) GetIdentityOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Identity, true
+}
+
+// SetIdentity sets field value
+func (o *Project) SetIdentity(v string) {
+	o.Identity = v
 }
 
 // GetImage returns the Image field value
@@ -331,6 +357,7 @@ func (o Project) ToMap() (map[string]interface{}, error) {
 	}
 	toSerialize["default"] = o.Default
 	toSerialize["envVars"] = o.EnvVars
+	toSerialize["identity"] = o.Identity
 	toSerialize["image"] = o.Image
 	toSerialize["name"] = o.Name
 	toSerialize["repository"] = o.Repository
@@ -350,6 +377,7 @@ func (o *Project) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"default",
 		"envVars",
+		"identity",
 		"image",
 		"name",
 		"repository",

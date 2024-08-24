@@ -23,6 +23,7 @@ var _ MappedNullable = &CreateProjectConfigDTO{}
 type CreateProjectConfigDTO struct {
 	BuildConfig *ProjectBuildConfig          `json:"buildConfig,omitempty"`
 	EnvVars     map[string]string            `json:"envVars"`
+	Identity    string                       `json:"identity"`
 	Image       *string                      `json:"image,omitempty"`
 	Name        string                       `json:"name"`
 	Source      CreateProjectConfigSourceDTO `json:"source"`
@@ -35,9 +36,10 @@ type _CreateProjectConfigDTO CreateProjectConfigDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateProjectConfigDTO(envVars map[string]string, name string, source CreateProjectConfigSourceDTO) *CreateProjectConfigDTO {
+func NewCreateProjectConfigDTO(envVars map[string]string, identity string, name string, source CreateProjectConfigSourceDTO) *CreateProjectConfigDTO {
 	this := CreateProjectConfigDTO{}
 	this.EnvVars = envVars
+	this.Identity = identity
 	this.Name = name
 	this.Source = source
 	return &this
@@ -105,6 +107,30 @@ func (o *CreateProjectConfigDTO) GetEnvVarsOk() (*map[string]string, bool) {
 // SetEnvVars sets field value
 func (o *CreateProjectConfigDTO) SetEnvVars(v map[string]string) {
 	o.EnvVars = v
+}
+
+// GetIdentity returns the Identity field value
+func (o *CreateProjectConfigDTO) GetIdentity() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Identity
+}
+
+// GetIdentityOk returns a tuple with the Identity field value
+// and a boolean to check if the value has been set.
+func (o *CreateProjectConfigDTO) GetIdentityOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Identity, true
+}
+
+// SetIdentity sets field value
+func (o *CreateProjectConfigDTO) SetIdentity(v string) {
+	o.Identity = v
 }
 
 // GetImage returns the Image field value if set, zero value otherwise.
@@ -233,6 +259,7 @@ func (o CreateProjectConfigDTO) ToMap() (map[string]interface{}, error) {
 		toSerialize["buildConfig"] = o.BuildConfig
 	}
 	toSerialize["envVars"] = o.EnvVars
+	toSerialize["identity"] = o.Identity
 	if !IsNil(o.Image) {
 		toSerialize["image"] = o.Image
 	}
@@ -250,6 +277,7 @@ func (o *CreateProjectConfigDTO) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"envVars",
+		"identity",
 		"name",
 		"source",
 	}

@@ -58,6 +58,7 @@ type ProjectDTO struct {
 	Target      string           `json:"target"`
 	ApiKey      string           `json:"apiKey"`
 	State       *ProjectStateDTO `json:"state,omitempty" gorm:"serializer:json"`
+	Identity    string           `json:"identity" validate:"required"`
 }
 
 func ToProjectDTO(project *project.Project) ProjectDTO {
@@ -71,6 +72,7 @@ func ToProjectDTO(project *project.Project) ProjectDTO {
 		Target:      project.Target,
 		State:       ToProjectStateDTO(project.State),
 		ApiKey:      project.ApiKey,
+		Identity:    project.Identity,
 	}
 }
 
@@ -160,6 +162,7 @@ func ToProject(projectDTO ProjectDTO) *project.Project {
 		Target:      projectDTO.Target,
 		State:       ToProjectState(projectDTO.State),
 		ApiKey:      projectDTO.ApiKey,
+		Identity:    projectDTO.Identity,
 	}
 }
 
