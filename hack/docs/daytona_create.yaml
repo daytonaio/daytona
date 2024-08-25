@@ -1,6 +1,6 @@
 name: daytona create
 synopsis: Create a workspace
-usage: daytona create [REPOSITORY_URL] [flags]
+usage: daytona create [TOKEN_IDENTITY] [REPOSITORY_URL] [flags]
 options:
     - name: blank
       default_value: "false"
