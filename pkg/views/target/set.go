@@ -34,7 +34,7 @@ func NewTargetNameInput(targetName *string, existingTargetNames []string) error 
 			return nil
 		})
 
-	form := huh.NewForm(huh.NewGroup(input)).WithTheme(views.GetCustomTheme()).WithHeight(5)
+	form := huh.NewForm(huh.NewGroup(input)).WithTheme(views.GetCustomTheme())
 	err := form.Run()
 	if err != nil {
 		return err
