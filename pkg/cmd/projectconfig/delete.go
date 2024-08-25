@@ -5,14 +5,19 @@ package projectconfig
 
 import (
 	"context"
+	"fmt"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
+	"github.com/charmbracelet/huh"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
+
+var allFlag bool
+var yesFlag bool
 
 var projectConfigDeleteCmd = &cobra.Command{
 	Use:     "delete",
@@ -26,6 +31,49 @@ var projectConfigDeleteCmd = &cobra.Command{
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
+		}
+
+		if allFlag {
+			// Added a confirmation prompt using huh.NewForm
+			form := huh.NewForm(
+				huh.NewGroup(
+					huh.NewConfirm().
+						Title("Delete all project configs?").
+						Description("Are you sure you want to delete all project configs?").
+						Value(&yesFlag),
+				),
+			).WithTheme(views.GetCustomTheme())
+
+			err := form.Run()
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			if !yesFlag {
+				fmt.Println("Operation canceled.")
+				return
+			}
+
+			projectConfigs, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(context.Background()).Execute()
+			if err != nil {
+				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			}
+
+			if len(projectConfigs) == 0 {
+				views.RenderInfoMessage("No project configs found")
+				return
+			}
+
+			for _, projectConfig := range projectConfigs {
+				selectedProjectConfigName = projectConfig.Name
+				res, err := apiClient.ProjectConfigAPI.DeleteProjectConfig(context.Background(), selectedProjectConfigName).Execute()
+				if err != nil {
+					log.Error(apiclient_util.HandleErrorResponse(res, err))
+					continue
+				}
+				views.RenderInfoMessage("Deleted project config: " + selectedProjectConfigName)
+			}
+			return
 		}
 
 		if len(args) == 0 {
@@ -55,4 +103,9 @@ var projectConfigDeleteCmd = &cobra.Command{
 
 		views.RenderInfoMessage("Project config deleted successfully")
 	},
+}
+
+func init() {
+	projectConfigDeleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Delete all project configs")
+	projectConfigDeleteCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Confirm deletion without prompt")
 }
