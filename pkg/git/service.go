@@ -36,7 +36,7 @@ type IGitService interface {
 	CloneRepository(project *project.Project, auth *http.BasicAuth) error
 	CloneRepositoryCmd(project *project.Project, auth *http.BasicAuth) []string
 	RepositoryExists(project *project.Project) (bool, error)
-	SetGitConfig(userData *gitprovider.GitUser) error
+	SetGitConfig(userData *gitprovider.GitUser, providerConfig *gitprovider.GitProviderConfig) error
 	GetGitStatus() (*project.GitStatus, error)
 }
 
@@ -135,7 +135,7 @@ func (s *Service) RepositoryExists(p *project.Project) (bool, error) {
 	return true, nil
 }
 
-func (s *Service) SetGitConfig(userData *gitprovider.GitUser) error {
+func (s *Service) SetGitConfig(userData *gitprovider.GitUser, providerConfig *gitprovider.GitProviderConfig) error {
 	gitConfigFileName := s.GitConfigFileName
 
 	var gitConfigContent []byte
@@ -177,6 +177,41 @@ func (s *Service) SetGitConfig(userData *gitprovider.GitUser) error {
 		_, err = cfg.Section("user").NewKey("email", userData.Email)
 		if err != nil {
 			return err
+		}
+	}
+
+	if providerConfig != nil && providerConfig.SigningMethod != nil && providerConfig.SigningKey != nil {
+		if !cfg.HasSection("user") {
+			_, err := cfg.NewSection("user")
+			if err != nil {
+				return err
+			}
+		}
+
+		_, err := cfg.Section("user").NewKey("signingkey", *providerConfig.SigningKey)
+		if err != nil {
+			return err
+		}
+
+		if !cfg.HasSection("commit") {
+			_, err := cfg.NewSection("commit")
+			if err != nil {
+				return err
+			}
+		}
+
+		if *providerConfig.SigningMethod == "ssh" {
+			if !cfg.HasSection("gpg") {
+				_, err := cfg.NewSection("gpg")
+				if err != nil {
+					return err
+				}
+			}
+
+			_, err := cfg.Section("gpg").NewKey("format", "ssh")
+			if err != nil {
+				return err
+			}
 		}
 	}
 

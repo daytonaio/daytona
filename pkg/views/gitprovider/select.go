@@ -17,11 +17,13 @@ import (
 )
 
 type GitProviderView struct {
-	Id         string
-	Name       string
-	Username   string
-	BaseApiUrl string
-	Token      string
+	Id            string
+	Name          string
+	Username      string
+	BaseApiUrl    string
+	Token         string
+	SigningMethod string
+	SigningKey    string
 }
 
 var commonGitProviderIds = []string{"github", "gitlab", "bitbucket"}
@@ -115,6 +117,20 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig
 					return nil
 				}),
 		).WithHide(isDeleting),
+		huh.NewGroup(
+			huh.NewSelect[string]().Title("Commit Signing Method").Options(
+				huh.Option[string]{Key: "None", Value: "none"},
+				huh.Option[string]{Key: "SSH", Value: "ssh"},
+				huh.Option[string]{Key: "GPG", Value: "gpg"},
+			).Value(gitProviderAddView.SigningMethod),
+			huh.NewInput().Title("Signing Key").Value(gitProviderAddView.SigningKey).Validate(
+				func(str string) error {
+					if *gitProviderAddView.SigningMethod != "none" && str == "" {
+						return errors.New("ERROR: signing key cannot be blank when signing method is selected")
+					}
+					return nil
+				}),
+		),
 	).WithTheme(views.GetCustomTheme())
 
 	if !isDeleting {

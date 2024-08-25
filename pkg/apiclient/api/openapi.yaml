@@ -31,11 +31,13 @@ paths:
       operationId: RevokeApiKey
       parameters:
       - description: API key name
+        explode: false
         in: path
         name: apiKeyName
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content: {}
@@ -48,11 +50,13 @@ paths:
       operationId: GenerateApiKey
       parameters:
       - description: API key name
+        explode: false
         in: path
         name: apiKeyName
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -85,11 +89,13 @@ paths:
       operationId: RemoveContainerRegistry
       parameters:
       - description: Container Registry server name
+        explode: false
         in: path
         name: server
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "204":
           content: {}
@@ -102,11 +108,13 @@ paths:
       operationId: GetContainerRegistry
       parameters:
       - description: Container Registry server name
+        explode: false
         in: path
         name: server
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -122,11 +130,13 @@ paths:
       operationId: SetContainerRegistry
       parameters:
       - description: Container Registry server name
+        explode: false
         in: path
         name: server
         required: true
         schema:
           type: string
+        style: simple
       requestBody:
         content:
           '*/*':
@@ -204,11 +214,13 @@ paths:
       operationId: GetGitContext
       parameters:
       - description: Git URL
+        explode: false
         in: path
         name: gitUrl
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -225,11 +237,13 @@ paths:
       operationId: GetGitProviderForUrl
       parameters:
       - description: Url
+        explode: false
         in: path
         name: url
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -246,11 +260,13 @@ paths:
       operationId: GetGitProviderIdForUrl
       parameters:
       - description: Url
+        explode: false
         in: path
         name: url
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -267,11 +283,13 @@ paths:
       operationId: RemoveGitProvider
       parameters:
       - description: Git provider
+        explode: false
         in: path
         name: gitProviderId
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content: {}
@@ -285,11 +303,13 @@ paths:
       operationId: GetNamespaces
       parameters:
       - description: Git provider
+        explode: false
         in: path
         name: gitProviderId
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -308,11 +328,13 @@ paths:
       operationId: GetGitUser
       parameters:
       - description: Git Provider Id
+        explode: false
         in: path
         name: gitProviderId
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -329,17 +351,21 @@ paths:
       operationId: GetRepositories
       parameters:
       - description: Git provider
+        explode: false
         in: path
         name: gitProviderId
         required: true
         schema:
           type: string
+        style: simple
       - description: Namespace
+        explode: false
         in: path
         name: namespaceId
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -358,23 +384,29 @@ paths:
       operationId: GetRepoBranches
       parameters:
       - description: Git provider
+        explode: false
         in: path
         name: gitProviderId
         required: true
         schema:
           type: string
+        style: simple
       - description: Namespace
+        explode: false
         in: path
         name: namespaceId
         required: true
         schema:
           type: string
+        style: simple
       - description: Repository
+        explode: false
         in: path
         name: repositoryId
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -393,23 +425,29 @@ paths:
       operationId: GetRepoPRs
       parameters:
       - description: Git provider
+        explode: false
         in: path
         name: gitProviderId
         required: true
         schema:
           type: string
+        style: simple
       - description: Namespace
+        explode: false
         in: path
         name: namespaceId
         required: true
         schema:
           type: string
+        style: simple
       - description: Repository
+        explode: false
         in: path
         name: repositoryId
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -504,11 +542,13 @@ paths:
       operationId: GetDefaultProjectConfig
       parameters:
       - description: Git URL
+        explode: false
         in: path
         name: gitUrl
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -525,11 +565,13 @@ paths:
       operationId: DeleteProjectConfig
       parameters:
       - description: Config name
+        explode: false
         in: path
         name: configName
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "204":
           content: {}
@@ -542,11 +584,13 @@ paths:
       operationId: GetProjectConfig
       parameters:
       - description: Config name
+        explode: false
         in: path
         name: configName
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -563,11 +607,13 @@ paths:
       operationId: SetDefaultProjectConfig
       parameters:
       - description: Config name
+        explode: false
         in: path
         name: configName
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content: {}
@@ -616,11 +662,13 @@ paths:
       operationId: GetTargetManifest
       parameters:
       - description: Provider name
+        explode: false
         in: path
         name: provider
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -637,11 +685,13 @@ paths:
       operationId: UninstallProvider
       parameters:
       - description: Provider to uninstall
+        explode: false
         in: path
         name: provider
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content: {}
@@ -738,11 +788,13 @@ paths:
       operationId: RemoveTarget
       parameters:
       - description: Target name
+        explode: false
         in: path
         name: target
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "204":
           content: {}
@@ -756,10 +808,13 @@ paths:
       operationId: ListWorkspaces
       parameters:
       - description: Verbose
+        explode: true
         in: query
         name: verbose
+        required: false
         schema:
           type: boolean
+        style: form
       responses:
         "200":
           content:
@@ -799,16 +854,21 @@ paths:
       operationId: RemoveWorkspace
       parameters:
       - description: Workspace ID
+        explode: false
         in: path
         name: workspaceId
         required: true
         schema:
           type: string
+        style: simple
       - description: Force
+        explode: true
         in: query
         name: force
+        required: false
         schema:
           type: boolean
+        style: form
       responses:
         "200":
           content: {}
@@ -821,11 +881,13 @@ paths:
       operationId: GetWorkspace
       parameters:
       - description: Workspace ID or Name
+        explode: false
         in: path
         name: workspaceId
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -842,11 +904,13 @@ paths:
       operationId: StartWorkspace
       parameters:
       - description: Workspace ID or Name
+        explode: false
         in: path
         name: workspaceId
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content: {}
@@ -860,11 +924,13 @@ paths:
       operationId: StopWorkspace
       parameters:
       - description: Workspace ID or Name
+        explode: false
         in: path
         name: workspaceId
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content: {}
@@ -878,17 +944,21 @@ paths:
       operationId: StartProject
       parameters:
       - description: Workspace ID or Name
+        explode: false
         in: path
         name: workspaceId
         required: true
         schema:
           type: string
+        style: simple
       - description: Project ID
+        explode: false
         in: path
         name: projectId
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content: {}
@@ -902,17 +972,21 @@ paths:
       operationId: SetProjectState
       parameters:
       - description: Workspace ID or Name
+        explode: false
         in: path
         name: workspaceId
         required: true
         schema:
           type: string
+        style: simple
       - description: Project ID
+        explode: false
         in: path
         name: projectId
         required: true
         schema:
           type: string
+        style: simple
       requestBody:
         content:
           '*/*':
@@ -934,17 +1008,21 @@ paths:
       operationId: StopProject
       parameters:
       - description: Workspace ID or Name
+        explode: false
         in: path
         name: workspaceId
         required: true
         schema:
           type: string
+        style: simple
       - description: Project ID
+        explode: false
         in: path
         name: projectId
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content: {}
@@ -1188,6 +1266,8 @@ components:
         id: id
         token: token
         username: username
+        signingMethod: signingMethod
+        signingKey: signingKey
       properties:
         baseApiUrl:
           type: string
@@ -1196,6 +1276,10 @@ components:
         token:
           type: string
         username:
+          type: string
+        signingMethod:
+          type: string
+        signingKey:
           type: string
       required:
       - id
@@ -1651,6 +1735,8 @@ components:
         id: id
         token: token
         username: username
+        signingMethod: signingMethod
+        signingKey: signingKey
       properties:
         baseApiUrl:
           type: string
@@ -1659,6 +1745,10 @@ components:
         token:
           type: string
         username:
+          type: string
+        signingMethod:
+          type: string
+        signingKey:
           type: string
       required:
       - id

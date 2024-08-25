@@ -11,8 +11,8 @@ API version: v0.0.0-dev
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
+	"bytes"
 	"fmt"
 )
 
@@ -22,9 +22,11 @@ var _ MappedNullable = &SetGitProviderConfig{}
 // SetGitProviderConfig struct for SetGitProviderConfig
 type SetGitProviderConfig struct {
 	BaseApiUrl *string `json:"baseApiUrl,omitempty"`
-	Id         string  `json:"id"`
-	Token      string  `json:"token"`
-	Username   *string `json:"username,omitempty"`
+	Id string `json:"id"`
+	Token string `json:"token"`
+	Username *string `json:"username,omitempty"`
+	SigningMethod *string `json:"signingMethod,omitempty"`
+	SigningKey *string `json:"signingKey,omitempty"`
 }
 
 type _SetGitProviderConfig SetGitProviderConfig
@@ -160,8 +162,72 @@ func (o *SetGitProviderConfig) SetUsername(v string) {
 	o.Username = &v
 }
 
+// GetSigningMethod returns the SigningMethod field value if set, zero value otherwise.
+func (o *SetGitProviderConfig) GetSigningMethod() string {
+	if o == nil || IsNil(o.SigningMethod) {
+		var ret string
+		return ret
+	}
+	return *o.SigningMethod
+}
+
+// GetSigningMethodOk returns a tuple with the SigningMethod field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SetGitProviderConfig) GetSigningMethodOk() (*string, bool) {
+	if o == nil || IsNil(o.SigningMethod) {
+		return nil, false
+	}
+	return o.SigningMethod, true
+}
+
+// HasSigningMethod returns a boolean if a field has been set.
+func (o *SetGitProviderConfig) HasSigningMethod() bool {
+	if o != nil && !IsNil(o.SigningMethod) {
+		return true
+	}
+
+	return false
+}
+
+// SetSigningMethod gets a reference to the given string and assigns it to the SigningMethod field.
+func (o *SetGitProviderConfig) SetSigningMethod(v string) {
+	o.SigningMethod = &v
+}
+
+// GetSigningKey returns the SigningKey field value if set, zero value otherwise.
+func (o *SetGitProviderConfig) GetSigningKey() string {
+	if o == nil || IsNil(o.SigningKey) {
+		var ret string
+		return ret
+	}
+	return *o.SigningKey
+}
+
+// GetSigningKeyOk returns a tuple with the SigningKey field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SetGitProviderConfig) GetSigningKeyOk() (*string, bool) {
+	if o == nil || IsNil(o.SigningKey) {
+		return nil, false
+	}
+	return o.SigningKey, true
+}
+
+// HasSigningKey returns a boolean if a field has been set.
+func (o *SetGitProviderConfig) HasSigningKey() bool {
+	if o != nil && !IsNil(o.SigningKey) {
+		return true
+	}
+
+	return false
+}
+
+// SetSigningKey gets a reference to the given string and assigns it to the SigningKey field.
+func (o *SetGitProviderConfig) SetSigningKey(v string) {
+	o.SigningKey = &v
+}
+
 func (o SetGitProviderConfig) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -177,6 +243,12 @@ func (o SetGitProviderConfig) ToMap() (map[string]interface{}, error) {
 	toSerialize["token"] = o.Token
 	if !IsNil(o.Username) {
 		toSerialize["username"] = o.Username
+	}
+	if !IsNil(o.SigningMethod) {
+		toSerialize["signingMethod"] = o.SigningMethod
+	}
+	if !IsNil(o.SigningKey) {
+		toSerialize["signingKey"] = o.SigningKey
 	}
 	return toSerialize, nil
 }
@@ -195,10 +267,10 @@ func (o *SetGitProviderConfig) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -254,3 +326,5 @@ func (v *NullableSetGitProviderConfig) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

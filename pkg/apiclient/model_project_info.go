@@ -11,8 +11,8 @@ API version: v0.0.0-dev
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
+	"bytes"
 	"fmt"
 )
 
@@ -21,11 +21,11 @@ var _ MappedNullable = &ProjectInfo{}
 
 // ProjectInfo struct for ProjectInfo
 type ProjectInfo struct {
-	Created          string  `json:"created"`
-	IsRunning        bool    `json:"isRunning"`
-	Name             string  `json:"name"`
+	Created string `json:"created"`
+	IsRunning bool `json:"isRunning"`
+	Name string `json:"name"`
 	ProviderMetadata *string `json:"providerMetadata,omitempty"`
-	WorkspaceId      string  `json:"workspaceId"`
+	WorkspaceId string `json:"workspaceId"`
 }
 
 type _ProjectInfo ProjectInfo
@@ -180,7 +180,7 @@ func (o *ProjectInfo) SetWorkspaceId(v string) {
 }
 
 func (o ProjectInfo) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -215,10 +215,10 @@ func (o *ProjectInfo) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -274,3 +274,5 @@ func (v *NullableProjectInfo) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

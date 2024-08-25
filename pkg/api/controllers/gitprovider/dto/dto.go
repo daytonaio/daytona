@@ -8,8 +8,10 @@ type RepositoryUrl struct {
 } // @name RepositoryUrl
 
 type SetGitProviderConfig struct {
-	Id         string  `json:"id" validate:"required"`
-	Username   *string `json:"username" validate:"optional"`
-	Token      string  `json:"token" validate:"required"`
-	BaseApiUrl *string `json:"baseApiUrl,omitempty" validate:"optional"`
+	Id            string  `json:"id" validate:"required"`
+	Username      *string `json:"username" validate:"optional"`
+	Token         string  `json:"token" validate:"required"`
+	BaseApiUrl    *string `json:"baseApiUrl,omitempty" validate:"optional"`
+	SigningKey    *string `json:"signingKey,omitempty" validate:"optional"`
+	SigningMethod *string `json:"signingMethod,omitempty" validate:"optional"`
 } // @name SetGitProviderConfig

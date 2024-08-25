@@ -8,6 +8,8 @@ Name | Type | Description | Notes
 **Id** | **string** |  | 
 **Token** | **string** |  | 
 **Username** | **string** |  | 
+**SigningMethod** | Pointer to **string** |  | [optional] 
+**SigningKey** | Pointer to **string** |  | [optional] 
 
 ## Methods
 
@@ -112,6 +114,56 @@ and a boolean to check if the value has been set.
 
 SetUsername sets Username field to given value.
 
+
+### GetSigningMethod
+
+`func (o *GitProvider) GetSigningMethod() string`
+
+GetSigningMethod returns the SigningMethod field if non-nil, zero value otherwise.
+
+### GetSigningMethodOk
+
+`func (o *GitProvider) GetSigningMethodOk() (*string, bool)`
+
+GetSigningMethodOk returns a tuple with the SigningMethod field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetSigningMethod
+
+`func (o *GitProvider) SetSigningMethod(v string)`
+
+SetSigningMethod sets SigningMethod field to given value.
+
+### HasSigningMethod
+
+`func (o *GitProvider) HasSigningMethod() bool`
+
+HasSigningMethod returns a boolean if a field has been set.
+
+### GetSigningKey
+
+`func (o *GitProvider) GetSigningKey() string`
+
+GetSigningKey returns the SigningKey field if non-nil, zero value otherwise.
+
+### GetSigningKeyOk
+
+`func (o *GitProvider) GetSigningKeyOk() (*string, bool)`
+
+GetSigningKeyOk returns a tuple with the SigningKey field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetSigningKey
+
+`func (o *GitProvider) SetSigningKey(v string)`
+
+SetSigningKey sets SigningKey field to given value.
+
+### HasSigningKey
+
+`func (o *GitProvider) HasSigningKey() bool`
+
+HasSigningKey returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

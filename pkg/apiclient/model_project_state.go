@@ -11,8 +11,8 @@ API version: v0.0.0-dev
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
+	"bytes"
 	"fmt"
 )
 
@@ -22,8 +22,8 @@ var _ MappedNullable = &ProjectState{}
 // ProjectState struct for ProjectState
 type ProjectState struct {
 	GitStatus GitStatus `json:"gitStatus"`
-	UpdatedAt string    `json:"updatedAt"`
-	Uptime    int32     `json:"uptime"`
+	UpdatedAt string `json:"updatedAt"`
+	Uptime int32 `json:"uptime"`
 }
 
 type _ProjectState ProjectState
@@ -121,7 +121,7 @@ func (o *ProjectState) SetUptime(v int32) {
 }
 
 func (o ProjectState) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -151,10 +151,10 @@ func (o *ProjectState) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -210,3 +210,5 @@ func (v *NullableProjectState) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

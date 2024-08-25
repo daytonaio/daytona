@@ -11,8 +11,8 @@ API version: v0.0.0-dev
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
+	"bytes"
 	"fmt"
 )
 
@@ -23,7 +23,7 @@ var _ MappedNullable = &ProviderTarget{}
 type ProviderTarget struct {
 	Name string `json:"name"`
 	// JSON encoded map of options
-	Options      string               `json:"options"`
+	Options string `json:"options"`
 	ProviderInfo ProviderProviderInfo `json:"providerInfo"`
 }
 
@@ -122,7 +122,7 @@ func (o *ProviderTarget) SetProviderInfo(v ProviderProviderInfo) {
 }
 
 func (o ProviderTarget) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -152,10 +152,10 @@ func (o *ProviderTarget) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -211,3 +211,5 @@ func (v *NullableProviderTarget) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

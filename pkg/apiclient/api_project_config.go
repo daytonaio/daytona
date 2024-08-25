@@ -19,11 +19,12 @@ import (
 	"strings"
 )
 
+
 // ProjectConfigAPIService ProjectConfigAPI service
 type ProjectConfigAPIService service
 
 type ApiDeleteProjectConfigRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *ProjectConfigAPIService
 	configName string
 }
@@ -37,14 +38,14 @@ DeleteProjectConfig Delete project config data
 
 Delete project config data
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param configName Config name
-	@return ApiDeleteProjectConfigRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param configName Config name
+ @return ApiDeleteProjectConfigRequest
 */
 func (a *ProjectConfigAPIService) DeleteProjectConfig(ctx context.Context, configName string) ApiDeleteProjectConfigRequest {
 	return ApiDeleteProjectConfigRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 		configName: configName,
 	}
 }
@@ -52,9 +53,9 @@ func (a *ProjectConfigAPIService) DeleteProjectConfig(ctx context.Context, confi
 // Execute executes the request
 func (a *ProjectConfigAPIService) DeleteProjectConfigExecute(r ApiDeleteProjectConfigRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodDelete
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProjectConfigAPIService.DeleteProjectConfig")
@@ -129,9 +130,9 @@ func (a *ProjectConfigAPIService) DeleteProjectConfigExecute(r ApiDeleteProjectC
 }
 
 type ApiGetDefaultProjectConfigRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *ProjectConfigAPIService
-	gitUrl     string
+	gitUrl string
 }
 
 func (r ApiGetDefaultProjectConfigRequest) Execute() (*ProjectConfig, *http.Response, error) {
@@ -143,27 +144,26 @@ GetDefaultProjectConfig Get project configs by git url
 
 Get project configs by git url
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param gitUrl Git URL
-	@return ApiGetDefaultProjectConfigRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param gitUrl Git URL
+ @return ApiGetDefaultProjectConfigRequest
 */
 func (a *ProjectConfigAPIService) GetDefaultProjectConfig(ctx context.Context, gitUrl string) ApiGetDefaultProjectConfigRequest {
 	return ApiGetDefaultProjectConfigRequest{
 		ApiService: a,
-		ctx:        ctx,
-		gitUrl:     gitUrl,
+		ctx: ctx,
+		gitUrl: gitUrl,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ProjectConfig
+//  @return ProjectConfig
 func (a *ProjectConfigAPIService) GetDefaultProjectConfigExecute(r ApiGetDefaultProjectConfigRequest) (*ProjectConfig, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ProjectConfig
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ProjectConfig
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProjectConfigAPIService.GetDefaultProjectConfig")
@@ -247,7 +247,7 @@ func (a *ProjectConfigAPIService) GetDefaultProjectConfigExecute(r ApiGetDefault
 }
 
 type ApiGetProjectConfigRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *ProjectConfigAPIService
 	configName string
 }
@@ -261,27 +261,26 @@ GetProjectConfig Get project config data
 
 Get project config data
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param configName Config name
-	@return ApiGetProjectConfigRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param configName Config name
+ @return ApiGetProjectConfigRequest
 */
 func (a *ProjectConfigAPIService) GetProjectConfig(ctx context.Context, configName string) ApiGetProjectConfigRequest {
 	return ApiGetProjectConfigRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 		configName: configName,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ProjectConfig
+//  @return ProjectConfig
 func (a *ProjectConfigAPIService) GetProjectConfigExecute(r ApiGetProjectConfigRequest) (*ProjectConfig, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ProjectConfig
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ProjectConfig
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProjectConfigAPIService.GetProjectConfig")
@@ -365,7 +364,7 @@ func (a *ProjectConfigAPIService) GetProjectConfigExecute(r ApiGetProjectConfigR
 }
 
 type ApiListProjectConfigsRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *ProjectConfigAPIService
 }
 
@@ -378,25 +377,24 @@ ListProjectConfigs List project configs
 
 List project configs
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiListProjectConfigsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiListProjectConfigsRequest
 */
 func (a *ProjectConfigAPIService) ListProjectConfigs(ctx context.Context) ApiListProjectConfigsRequest {
 	return ApiListProjectConfigsRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return []ProjectConfig
+//  @return []ProjectConfig
 func (a *ProjectConfigAPIService) ListProjectConfigsExecute(r ApiListProjectConfigsRequest) ([]ProjectConfig, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []ProjectConfig
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []ProjectConfig
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProjectConfigAPIService.ListProjectConfigs")
@@ -479,7 +477,7 @@ func (a *ProjectConfigAPIService) ListProjectConfigsExecute(r ApiListProjectConf
 }
 
 type ApiSetDefaultProjectConfigRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *ProjectConfigAPIService
 	configName string
 }
@@ -493,14 +491,14 @@ SetDefaultProjectConfig Set project config to default
 
 Set project config to default
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param configName Config name
-	@return ApiSetDefaultProjectConfigRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param configName Config name
+ @return ApiSetDefaultProjectConfigRequest
 */
 func (a *ProjectConfigAPIService) SetDefaultProjectConfig(ctx context.Context, configName string) ApiSetDefaultProjectConfigRequest {
 	return ApiSetDefaultProjectConfigRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 		configName: configName,
 	}
 }
@@ -508,9 +506,9 @@ func (a *ProjectConfigAPIService) SetDefaultProjectConfig(ctx context.Context, c
 // Execute executes the request
 func (a *ProjectConfigAPIService) SetDefaultProjectConfigExecute(r ApiSetDefaultProjectConfigRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPatch
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProjectConfigAPIService.SetDefaultProjectConfig")
@@ -585,8 +583,8 @@ func (a *ProjectConfigAPIService) SetDefaultProjectConfigExecute(r ApiSetDefault
 }
 
 type ApiSetProjectConfigRequest struct {
-	ctx           context.Context
-	ApiService    *ProjectConfigAPIService
+	ctx context.Context
+	ApiService *ProjectConfigAPIService
 	projectConfig *CreateProjectConfigDTO
 }
 
@@ -605,22 +603,22 @@ SetProjectConfig Set project config data
 
 Set project config data
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiSetProjectConfigRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiSetProjectConfigRequest
 */
 func (a *ProjectConfigAPIService) SetProjectConfig(ctx context.Context) ApiSetProjectConfigRequest {
 	return ApiSetProjectConfigRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *ProjectConfigAPIService) SetProjectConfigExecute(r ApiSetProjectConfigRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPut
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProjectConfigAPIService.SetProjectConfig")

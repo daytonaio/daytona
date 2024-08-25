@@ -4,10 +4,12 @@
 package gitprovider
 
 type GitProviderConfig struct {
-	Id         string  `json:"id" validate:"required"`
-	Username   string  `json:"username" validate:"required"`
-	Token      string  `json:"token" validate:"required"`
-	BaseApiUrl *string `json:"baseApiUrl,omitempty" validate:"optional"`
+	Id            string  `json:"id" validate:"required"`
+	Username      string  `json:"username" validate:"required"`
+	Token         string  `json:"token" validate:"required"`
+	BaseApiUrl    *string `json:"baseApiUrl,omitempty" validate:"optional"`
+	SigningKey    *string `json:"signingKey,omitempty" validate:"optional"`
+	SigningMethod *string `json:"signingMethod,omitempty" validate:"optional"`
 } // @name GitProvider
 
 type GitUser struct {

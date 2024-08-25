@@ -31,8 +31,8 @@ func (m *MockGitService) RepositoryExists(p *project.Project) (bool, error) {
 	return args.Bool(0), args.Error(1)
 }
 
-func (m *MockGitService) SetGitConfig(userData *gitprovider.GitUser) error {
-	args := m.Called(userData)
+func (m *MockGitService) SetGitConfig(userData *gitprovider.GitUser, providerConfig *gitprovider.GitProviderConfig) error {
+	args := m.Called(userData, providerConfig)
 	return args.Error(0)
 }
 
