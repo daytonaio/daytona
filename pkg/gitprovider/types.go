@@ -6,8 +6,8 @@ package gitprovider
 type GitProviderConfig struct {
 	Id         string  `json:"id" validate:"required"`
 	Username   string  `json:"username" validate:"required"`
-	Token      string  `json:"token" validate:"required"`
 	BaseApiUrl *string `json:"baseApiUrl,omitempty" validate:"optional"`
+	Token      string  `json:"token" validate:"required"`
 } // @name GitProvider
 
 type GitUser struct {
@@ -17,16 +17,24 @@ type GitUser struct {
 	Email    string `json:"email" validate:"required"`
 } // @name GitUser
 
+type CloneTarget string // @name CloneTarget
+
+const (
+	CloneTargetBranch CloneTarget = "branch"
+	CloneTargetCommit CloneTarget = "commit"
+)
+
 type GitRepository struct {
-	Id       string  `json:"id" validate:"required"`
-	Url      string  `json:"url" validate:"required"`
-	Name     string  `json:"name" validate:"required"`
-	Branch   *string `json:"branch,omitempty" validate:"optional"`
-	Sha      string  `json:"sha" validate:"required"`
-	Owner    string  `json:"owner" validate:"required"`
-	PrNumber *uint32 `json:"prNumber,omitempty" validate:"optional"`
-	Source   string  `json:"source" validate:"required"`
-	Path     *string `json:"path,omitempty" validate:"optional"`
+	Id       string      `json:"id" validate:"required"`
+	Url      string      `json:"url" validate:"required"`
+	Name     string      `json:"name" validate:"required"`
+	Branch   *string     `json:"branch,omitempty" validate:"optional"`
+	Sha      string      `json:"sha" validate:"required"`
+	Owner    string      `json:"owner" validate:"required"`
+	PrNumber *uint32     `json:"prNumber,omitempty" validate:"optional"`
+	Source   string      `json:"source" validate:"required"`
+	Path     *string     `json:"path,omitempty" validate:"optional"`
+	Target   CloneTarget `json:"cloneTarget,omitempty" validate:"optional"`
 } // @name GitRepository
 
 type GitNamespace struct {

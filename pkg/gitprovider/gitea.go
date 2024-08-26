@@ -5,6 +5,7 @@ package gitprovider
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
@@ -215,6 +216,61 @@ func (g *GiteaGitProvider) GetUser() (*GitUser, error) {
 		Name:     user.FullName,
 		Email:    user.Email,
 	}, nil
+}
+
+func (g *GiteaGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
+	client, err := g.getApiClient()
+	if err != nil {
+		return "", err
+	}
+
+	repoBranches, _, err := client.ListRepoBranches(staticContext.Owner, staticContext.Name, gitea.ListRepoBranchesOptions{
+		ListOptions: gitea.ListOptions{
+			Page:     1,
+			PageSize: 100,
+		},
+	})
+	if err != nil {
+		return "", err
+	}
+	var branchName string
+	for _, branch := range repoBranches {
+		if *staticContext.Sha == branch.Commit.ID {
+			branchName = branch.Name
+			break
+		}
+
+		commitId := branch.Commit.ID
+		for commitId != "" {
+			commit, _, err := client.GetSingleCommit(staticContext.Owner, staticContext.Id, commitId)
+			if err != nil {
+				continue
+			}
+
+			if *staticContext.Sha == commit.SHA {
+				branchName = branch.Name
+				break
+			}
+			if len(commit.Parents) > 0 {
+				commitId = commit.Parents[0].SHA
+				if *staticContext.Sha == commitId {
+					branchName = branch.Name
+					break
+				}
+			} else {
+				commitId = ""
+			}
+		}
+
+		if branchName != "" {
+			break
+		}
+	}
+
+	if branchName == "" {
+		return "", fmt.Errorf("branch not found for SHA: %s", *staticContext.Sha)
+	}
+	return branchName, nil
 }
 
 func (g *GiteaGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (string, error) {

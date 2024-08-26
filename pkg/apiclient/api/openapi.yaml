@@ -972,6 +972,14 @@ components:
       - name
       - type
       type: object
+    CloneTarget:
+      enum:
+      - branch
+      - commit
+      type: string
+      x-enum-varnames:
+      - CloneTargetBranch
+      - CloneTargetCommit
     ContainerRegistry:
       example:
         server: server
@@ -1007,6 +1015,7 @@ components:
             source: source
             prNumber: 0
             branch: branch
+            cloneTarget: null
             sha: sha
             url: url
         user: user
@@ -1040,6 +1049,7 @@ components:
           source: source
           prNumber: 0
           branch: branch
+          cloneTarget: null
           sha: sha
           url: url
       properties:
@@ -1067,6 +1077,7 @@ components:
               source: source
               prNumber: 0
               branch: branch
+              cloneTarget: null
               sha: sha
               url: url
           user: user
@@ -1086,6 +1097,7 @@ components:
               source: source
               prNumber: 0
               branch: branch
+              cloneTarget: null
               sha: sha
               url: url
           user: user
@@ -1244,11 +1256,14 @@ components:
         source: source
         prNumber: 0
         branch: branch
+        cloneTarget: null
         sha: sha
         url: url
       properties:
         branch:
           type: string
+        cloneTarget:
+          $ref: '#/components/schemas/CloneTarget'
         id:
           type: string
         name:
@@ -1386,6 +1401,7 @@ components:
           source: source
           prNumber: 0
           branch: branch
+          cloneTarget: null
           sha: sha
           url: url
         user: user
@@ -1450,6 +1466,7 @@ components:
           source: source
           prNumber: 0
           branch: branch
+          cloneTarget: null
           sha: sha
           url: url
         user: user
@@ -1739,6 +1756,7 @@ components:
             source: source
             prNumber: 0
             branch: branch
+            cloneTarget: null
             sha: sha
             url: url
           user: user
@@ -1774,6 +1792,7 @@ components:
             source: source
             prNumber: 0
             branch: branch
+            cloneTarget: null
             sha: sha
             url: url
           user: user
@@ -1832,6 +1851,7 @@ components:
             source: source
             prNumber: 0
             branch: branch
+            cloneTarget: null
             sha: sha
             url: url
           user: user
@@ -1867,6 +1887,7 @@ components:
             source: source
             prNumber: 0
             branch: branch
+            cloneTarget: null
             sha: sha
             url: url
           user: user

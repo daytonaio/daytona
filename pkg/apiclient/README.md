@@ -130,6 +130,7 @@ Class | Method | HTTP request | Description
 
  - [ApiKey](docs/ApiKey.md)
  - [ApikeyApiKeyType](docs/ApikeyApiKeyType.md)
+ - [CloneTarget](docs/CloneTarget.md)
  - [ContainerRegistry](docs/ContainerRegistry.md)
  - [CreateProjectConfigDTO](docs/CreateProjectConfigDTO.md)
  - [CreateProjectConfigSourceDTO](docs/CreateProjectConfigSourceDTO.md)
