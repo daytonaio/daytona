@@ -35,7 +35,6 @@ var projectConfigDeleteCmd = &cobra.Command{
 
 		if allFlag {
 			if !yesFlag {
-				// Added a confirmation prompt using huh.NewForm
 				form := huh.NewForm(
 					huh.NewGroup(
 						huh.NewConfirm().
