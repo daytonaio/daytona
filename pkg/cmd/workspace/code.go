@@ -7,8 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/url"
-	"regexp"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/jetbrains"
@@ -54,21 +52,7 @@ var CodeCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		// Check if the user has provided a workspace name
-		if len(args) > 0 {
-			// Validate if the argument is a valid workspace name
-			if isInvalidWorkspaceName(args[0]) {
-				log.Fatal("Error: Invalid workspace name or URL provided. Please provide a valid workspace name. You can see all workspace names by running the command `daytona list`.")
-			}
-
-			// Fetch the workspace
-			workspace, err = apiclient_util.GetWorkspace(args[0])
-			if err != nil {
-				log.Fatal("Error: Workspace not found. Please provide a valid workspace name. You can see all workspace names by running the command `daytona list`.")
-			}
-			workspaceId = workspace.Id
-		} else {
-			// Prompt the user to select a workspace if none is provided
+		if len(args) == 0 {
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Verbose(true).Execute()
 			if err != nil {
 				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
@@ -77,6 +61,16 @@ var CodeCmd = &cobra.Command{
 			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "Open")
 			if workspace == nil {
 				return
+			}
+			workspaceId = workspace.Id
+		} else {
+			workspace, err = apiclient_util.GetWorkspace(args[0])
+			if err != nil {
+				if err.Error() == "404 page not found" {
+					log.Fatalf("%s \nWorkspace name required. Please provide a valid workspace name with the command. You can see all workspace names by running the command `daytona list`",err.Error())
+				} else {
+					log.Fatal(err)
+				}
 			}
 			workspaceId = workspace.Id
 		}
@@ -148,18 +142,6 @@ var CodeCmd = &cobra.Command{
 
 		return getWorkspaceNameCompletions()
 	},
-}
-
-// isInvalidWorkspaceName checks if the argument is a valid workspace name
-func isInvalidWorkspaceName(arg string) bool {
-	// Check if the argument is a URL
-	if _, err := url.ParseRequestURI(arg); err == nil {
-		return true
-	}
-
-	// Check if the argument contains any invalid characters for a workspace name
-	isValid := regexp.MustCompile(`^[a-zA-Z0-9-_]+$`).MatchString
-	return !isValid(arg)
 }
 
 func selectWorkspaceProject(workspaceId string, profile *config.Profile) (*apiclient.Project, error) {
