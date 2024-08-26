@@ -46,10 +46,6 @@ var CreateCmd = &cobra.Command{
 		var existingWorkspaceNames []string
 		var existingProjectConfigName *string
 
-		logs_view.DisplayLogEntry(logs.LogEntry{
-			Msg: fmt.Sprintf("1 %s 2 %s", args[0], args[1]),
-		}, logs_view.FIRST_PROJECT_INDEX)
-
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
@@ -351,9 +347,6 @@ func processCmdArgument(argument []string, apiClient *apiclient.APIClient, proje
 
 	var projectConfig *apiclient.ProjectConfig
 	identity := argument[0]
-	logs_view.DisplayLogEntry(logs.LogEntry{
-		Msg: fmt.Sprintf("Identity from args %s\n", identity),
-	}, logs_view.WORKSPACE_INDEX)
 	repoUrl, err := util.GetValidatedUrl(argument[1])
 	if err == nil {
 		// The argument is a Git URL
@@ -405,9 +398,7 @@ func processGitURL(repoUrl string, identity string, apiClient *apiclient.APIClie
 		},
 		BuildConfig: &apiclient.ProjectBuildConfig{},
 	}
-	logs_view.DisplayLogEntry(logs.LogEntry{
-		Msg: fmt.Sprintf("processGitUrl: %s", project.Identity),
-	}, logs_view.WORKSPACE_INDEX)
+
 	if builderFlag == create.DEVCONTAINER || devcontainerPathFlag != "" {
 		devcontainerFilePath := create.DEVCONTAINER_FILEPATH
 		if devcontainerPathFlag != "" {

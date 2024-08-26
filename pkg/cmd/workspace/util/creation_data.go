@@ -95,7 +95,7 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 			}
 		}
 
-		providerRepo, err := getRepositoryFromWizard(RepositoryWizardConfig{
+		providerRepo, identity, err := getRepositoryFromWizard(RepositoryWizardConfig{
 			ApiClient:           config.ApiClient,
 			UserGitProviders:    config.UserGitProviders,
 			Manual:              config.Manual,
@@ -119,7 +119,7 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 			return nil, err
 		}
 
-		projectList = append(projectList, newCreateProjectConfigDTO(config, providerRepo, providerRepoName))
+		projectList = append(projectList, newCreateProjectConfigDTO(config, providerRepo, providerRepoName, identity))
 	}
 
 	return projectList, nil
@@ -230,9 +230,10 @@ func GetBranchFromProjectConfig(projectConfig *apiclient.ProjectConfig, apiClien
 	return result, nil
 }
 
-func newCreateProjectConfigDTO(config ProjectsDataPromptConfig, providerRepo *apiclient.GitRepository, providerRepoName string) apiclient.CreateProjectConfigDTO {
+func newCreateProjectConfigDTO(config ProjectsDataPromptConfig, providerRepo *apiclient.GitRepository, providerRepoName string, identity string) apiclient.CreateProjectConfigDTO {
 	project := apiclient.CreateProjectConfigDTO{
-		Name: providerRepoName,
+		Name:     providerRepoName,
+		Identity: identity,
 		Source: apiclient.CreateProjectConfigSourceDTO{
 			Repository: *providerRepo,
 		},

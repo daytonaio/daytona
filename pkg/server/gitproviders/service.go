@@ -186,7 +186,8 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 }
 
 func (s *GitProviderService) newGitProvider(config *gitprovider.GitProviderConfig) (gitprovider.GitProvider, error) {
-	switch config.Id {
+	id := strings.Split(config.Id, "_")[0]
+	switch id {
 	case "github":
 		return gitprovider.NewGitHubGitProvider(config.Token, nil), nil
 	case "github-enterprise-server":

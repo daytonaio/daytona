@@ -91,7 +91,6 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 		if projectConfig.User == "" {
 			projectConfig.User = s.defaultProjectUser
 		}
-		log.Infoln(fmt.Sprintf("CreateWorkspace__identity 1: %s", p.Identity))
 		apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", w.Id, projectConfig.Name))
 		if err != nil {
 			return nil, err
@@ -184,8 +183,6 @@ func (s *WorkspaceService) createWorkspace(ctx context.Context, ws *workspace.Wo
 			}
 			gitProviderConfig = gc
 		}
-		wsLogger.Write([]byte(fmt.Sprintf("createWorkspace__identity 2: %s", p.Identity)))
-
 		var err error
 
 		p = &projectWithEnv

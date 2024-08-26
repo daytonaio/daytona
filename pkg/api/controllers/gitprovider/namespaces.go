@@ -24,7 +24,6 @@ import (
 //	@id				GetNamespaces
 func GetNamespaces(ctx *gin.Context) {
 	gitProviderId := ctx.Param("gitProviderId")
-
 	server := server.GetInstance(nil)
 
 	response, err := server.GitProviderService.GetNamespaces(gitProviderId)

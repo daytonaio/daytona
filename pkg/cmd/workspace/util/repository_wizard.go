@@ -5,6 +5,7 @@ package util
 
 import (
 	"context"
+	"strings"
 
 	config_const "github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/apiclient"
@@ -25,7 +26,7 @@ type RepositoryWizardConfig struct {
 	SelectedRepos       map[string]int
 }
 
-func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepository, error) {
+func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepository, string, error) {
 	var providerId string
 	var namespaceId string
 	var err error
@@ -33,7 +34,8 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 	ctx := context.Background()
 
 	if len(config.UserGitProviders) == 0 || config.Manual {
-		return create.GetRepositoryFromUrlInput(config.MultiProject, config.ProjectOrder, config.ApiClient, config.SelectedRepos)
+		repo, err := create.GetRepositoryFromUrlInput(config.MultiProject, config.ProjectOrder, config.ApiClient, config.SelectedRepos)
+		return repo, "", err
 	}
 
 	supportedProviders := config_const.GetSupportedGitProviders()
@@ -41,24 +43,32 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 
 	for _, gitProvider := range config.UserGitProviders {
 		for _, supportedProvider := range supportedProviders {
-			if gitProvider.Id == supportedProvider.Id {
+			gp := strings.Split(gitProvider.Id, "_")[0]
+			if gp == supportedProvider.Id {
 				gitProviderViewList = append(gitProviderViewList,
 					gitprovider_view.GitProviderView{
-						Id:       gitProvider.Id,
-						Name:     supportedProvider.Name,
-						Username: gitProvider.Username,
+						Id:                 gitProvider.Id,
+						Name:               supportedProvider.Name,
+						Username:           gitProvider.Username,
+						TokenScopeIdentity: gitProvider.TokenIdentity,
+						TokenScope:         gitProvider.TokenScope,
+						TokenScopeType:     string(gitProvider.TokenScopeType),
 					},
 				)
 			}
 		}
 	}
-	providerId = selection.GetProviderIdFromPrompt(gitProviderViewList, config.ProjectOrder)
-	if providerId == "" {
-		return nil, common.ErrCtrlCAbort
+	provider := selection.GetProviderIdFromPrompt(gitProviderViewList, config.ProjectOrder)
+	if provider["id"] == "" {
+		return nil, "", common.ErrCtrlCAbort
 	}
 
+	providerId = provider["id"]
+	identity := provider["idenitity"]
+
 	if providerId == selection.CustomRepoIdentifier {
-		return create.GetRepositoryFromUrlInput(config.MultiProject, config.ProjectOrder, config.ApiClient, config.SelectedRepos)
+		repo, err := create.GetRepositoryFromUrlInput(config.MultiProject, config.ProjectOrder, config.ApiClient, config.SelectedRepos)
+		return repo, "", err
 	}
 
 	var namespaceList []apiclient.GitNamespace
@@ -68,7 +78,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		return err
 	})
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	if len(namespaceList) == 1 {
@@ -76,7 +86,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 	} else {
 		namespaceId = selection.GetNamespaceIdFromPrompt(namespaceList, config.ProjectOrder)
 		if namespaceId == "" {
-			return nil, common.ErrCtrlCAbort
+			return nil, "", common.ErrCtrlCAbort
 		}
 	}
 
@@ -87,23 +97,23 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	chosenRepo := selection.GetRepositoryFromPrompt(providerRepos, config.ProjectOrder, config.SelectedRepos)
 	if chosenRepo == nil {
-		return nil, common.ErrCtrlCAbort
+		return nil, "", common.ErrCtrlCAbort
 	}
 
 	if config.SkipBranchSelection {
-		return chosenRepo, nil
+		return chosenRepo, identity, nil
 	}
-
-	return GetBranchFromWizard(BranchWizardConfig{
+	branch, err := GetBranchFromWizard(BranchWizardConfig{
 		ApiClient:    config.ApiClient,
 		ProviderId:   providerId,
 		NamespaceId:  namespaceId,
 		ChosenRepo:   chosenRepo,
 		ProjectOrder: config.ProjectOrder,
 	})
+	return branch, identity, err
 }

@@ -17,16 +17,16 @@ import (
 
 var titleStyle = lipgloss.NewStyle()
 
-func selectProviderPrompt(gitProviders []gitprovider_view.GitProviderView, projectOrder int, choiceChan chan<- string) {
+func selectProviderPrompt(gitProviders []gitprovider_view.GitProviderView, projectOrder int, choiceChan chan<- map[string]string) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
 	for _, provider := range gitProviders {
-		newItem := item[string]{id: provider.Id, title: provider.Name, choiceProperty: provider.Id}
+		newItem := item[map[string]string]{id: provider.Id, title: provider.Name, desc: provider.TokenScopeIdentity, choiceProperty: map[string]string{"id": provider.Id, "idenitity": provider.TokenScopeIdentity}}
 		items = append(items, newItem)
 	}
 
-	newItem := item[string]{id: CustomRepoIdentifier, title: "Enter a custom repository URL", choiceProperty: CustomRepoIdentifier}
+	newItem := item[map[string]string]{id: CustomRepoIdentifier, title: "Enter a custom repository URL", choiceProperty: map[string]string{"id": CustomRepoIdentifier, "idenitity": ""}}
 	items = append(items, newItem)
 
 	l := views.GetStyledSelectList(items)
@@ -37,7 +37,7 @@ func selectProviderPrompt(gitProviders []gitprovider_view.GitProviderView, proje
 	}
 	l.Title = views.GetStyledMainTitle(title)
 	l.Styles.Title = titleStyle
-	m := model[string]{list: l}
+	m := model[map[string]string]{list: l}
 
 	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
 	if err != nil {
@@ -45,15 +45,15 @@ func selectProviderPrompt(gitProviders []gitprovider_view.GitProviderView, proje
 		os.Exit(1)
 	}
 
-	if m, ok := p.(model[string]); ok && m.choice != nil {
+	if m, ok := p.(model[map[string]string]); ok && m.choice != nil {
 		choiceChan <- *m.choice
 	} else {
-		choiceChan <- ""
+		choiceChan <- map[string]string{"id": "", "idenitity": ""}
 	}
 }
 
-func GetProviderIdFromPrompt(gitProviders []gitprovider_view.GitProviderView, projectOrder int) string {
-	choiceChan := make(chan string)
+func GetProviderIdFromPrompt(gitProviders []gitprovider_view.GitProviderView, projectOrder int) map[string]string {
+	choiceChan := make(chan map[string]string)
 
 	go selectProviderPrompt(gitProviders, projectOrder, choiceChan)
 

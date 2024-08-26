@@ -45,7 +45,6 @@ var LogPrefixColors = []lipgloss.AdaptiveColor{
 }
 
 func GetStyledSelectList(items []list.Item) list.Model {
-
 	d := list.NewDefaultDelegate()
 
 	d.Styles.SelectedTitle = lipgloss.NewStyle().
@@ -54,7 +53,6 @@ func GetStyledSelectList(items []list.Item) list.Model {
 		Foreground(Green).
 		Bold(true).
 		Padding(0, 0, 0, 1)
-
 	d.Styles.SelectedDesc = d.Styles.SelectedTitle.Copy().Foreground(DimmedGreen).Bold(false)
 
 	l := list.New(items, d, 0, 0)

@@ -28,12 +28,6 @@ type GitProviderView struct {
 	TokenScopeType     string
 }
 
-// Identity*
-// Scope+
-// 		org
-// 		org/repo
-// 		global
-
 var commonGitProviderIds = []string{"github", "gitlab", "bitbucket"}
 
 func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig, userGitProviders []apiclient.GitProvider, isDeleting bool) {
