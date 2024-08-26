@@ -34,24 +34,26 @@ var projectConfigDeleteCmd = &cobra.Command{
 		}
 
 		if allFlag {
-			// Added a confirmation prompt using huh.NewForm
-			form := huh.NewForm(
-				huh.NewGroup(
-					huh.NewConfirm().
-						Title("Delete all project configs?").
-						Description("Are you sure you want to delete all project configs?").
-						Value(&yesFlag),
-				),
-			).WithTheme(views.GetCustomTheme())
-
-			err := form.Run()
-			if err != nil {
-				log.Fatal(err)
-			}
-
 			if !yesFlag {
-				fmt.Println("Operation canceled.")
-				return
+				// Added a confirmation prompt using huh.NewForm
+				form := huh.NewForm(
+					huh.NewGroup(
+						huh.NewConfirm().
+							Title("Delete all project configs?").
+							Description("Are you sure you want to delete all project configs?").
+							Value(&yesFlag),
+					),
+				).WithTheme(views.GetCustomTheme())
+
+				err := form.Run()
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				if !yesFlag {
+					fmt.Println("Operation canceled.")
+					return
+				}
 			}
 
 			projectConfigs, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(context.Background()).Execute()
