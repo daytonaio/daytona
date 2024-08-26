@@ -56,6 +56,35 @@ func (g *GitnessClient) performRequest(method, requestURL string) ([]byte, error
 	return body, nil
 }
 
+func (g *GitnessClient) GetCommits(owner string, repositoryName string, branch *string) (*[]Commit, error) {
+	api, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/commits", url.PathEscape(fmt.Sprintf("%s/%s", owner, repositoryName))))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse url : %w", err)
+	}
+
+	apiURL := ""
+	if branch != nil {
+		v := url.Values{}
+		v.Add("git_ref", *branch)
+		apiURL = api.String() + "?" + v.Encode()
+	} else {
+		apiURL = api.String()
+	}
+
+	body, err := g.performRequest("GET", apiURL)
+	if err != nil {
+		return nil, fmt.Errorf("error while making request: %s", err.Error())
+	}
+
+	var commitsResponse CommitsResponse
+	err = json.Unmarshal(body, &commitsResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return &commitsResponse.Commits, nil
+}
+
 func (g *GitnessClient) GetSpaceAdmin(spaceName string) (*SpaceMemberResponse, error) {
 	spacesURL, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/spaces/%s/members", spaceName))
 	if err != nil {

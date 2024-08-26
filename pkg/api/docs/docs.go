@@ -1359,6 +1359,17 @@ const docTemplate = `{
                 }
             }
         },
+        "CloneTarget": {
+            "type": "string",
+            "enum": [
+                "branch",
+                "commit"
+            ],
+            "x-enum-varnames": [
+                "CloneTargetBranch",
+                "CloneTargetCommit"
+            ]
+        },
         "ContainerRegistry": {
             "type": "object",
             "required": [
@@ -1599,6 +1610,9 @@ const docTemplate = `{
             "properties": {
                 "branch": {
                     "type": "string"
+                },
+                "cloneTarget": {
+                    "$ref": "#/definitions/CloneTarget"
                 },
                 "id": {
                     "type": "string"

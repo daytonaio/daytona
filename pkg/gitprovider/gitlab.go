@@ -180,6 +180,57 @@ func (g *GitLabGitProvider) GetUser() (*GitUser, error) {
 	return response, nil
 }
 
+func (g *GitLabGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
+	client := g.getApiClient()
+
+	branches, _, err := client.Branches.ListBranches(staticContext.Id, &gitlab.ListBranchesOptions{})
+	if err != nil {
+		return "", err
+	}
+
+	var branchName string
+	for _, branch := range branches {
+		if *staticContext.Sha == branch.Commit.ID {
+			branchName = branch.Name
+			break
+		}
+
+		commitId := branch.Commit.ID
+		for commitId != "" {
+			commit, _, err := client.Commits.GetCommit(staticContext.Id, commitId)
+			if err != nil {
+				return "", err
+			}
+
+			if *staticContext.Sha == commit.ID {
+				branchName = branch.Name
+				break
+			}
+
+			if len(commit.ParentIDs) > 0 {
+				commitId = commit.ParentIDs[0]
+				if *staticContext.Sha == commitId {
+					branchName = branch.Name
+					break
+				}
+			} else {
+				commitId = ""
+			}
+
+		}
+
+		if branchName != "" {
+			break
+		}
+	}
+
+	if branchName == "" {
+		return "", fmt.Errorf("branch not found for SHA: %s", *staticContext.Sha)
+	}
+
+	return branchName, nil
+}
+
 func (g *GitLabGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (string, error) {
 	client := g.getApiClient()
 

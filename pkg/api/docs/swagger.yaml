@@ -14,6 +14,14 @@ definitions:
     - name
     - type
     type: object
+  CloneTarget:
+    enum:
+    - branch
+    - commit
+    type: string
+    x-enum-varnames:
+    - CloneTargetBranch
+    - CloneTargetCommit
   ContainerRegistry:
     properties:
       password:
@@ -173,6 +181,8 @@ definitions:
     properties:
       branch:
         type: string
+      cloneTarget:
+        $ref: '#/definitions/CloneTarget'
       id:
         type: string
       name:
