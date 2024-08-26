@@ -31,7 +31,7 @@ func GetWorkspace(ctx *gin.Context) {
 
 	w, err := server.WorkspaceService.GetWorkspace(ctx.Request.Context(), workspaceId)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get workspace: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get workspace: %w", err))
 		return
 	}
 
