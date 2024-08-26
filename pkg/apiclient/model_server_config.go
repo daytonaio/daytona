@@ -36,6 +36,7 @@ type ServerConfig struct {
 	LogFilePath               string      `json:"logFilePath"`
 	ProvidersDir              string      `json:"providersDir"`
 	RegistryUrl               string      `json:"registryUrl"`
+	SamplesIndexUrl           *string     `json:"samplesIndexUrl,omitempty"`
 	ServerDownloadUrl         string      `json:"serverDownloadUrl"`
 }
 
@@ -448,6 +449,38 @@ func (o *ServerConfig) SetRegistryUrl(v string) {
 	o.RegistryUrl = v
 }
 
+// GetSamplesIndexUrl returns the SamplesIndexUrl field value if set, zero value otherwise.
+func (o *ServerConfig) GetSamplesIndexUrl() string {
+	if o == nil || IsNil(o.SamplesIndexUrl) {
+		var ret string
+		return ret
+	}
+	return *o.SamplesIndexUrl
+}
+
+// GetSamplesIndexUrlOk returns a tuple with the SamplesIndexUrl field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ServerConfig) GetSamplesIndexUrlOk() (*string, bool) {
+	if o == nil || IsNil(o.SamplesIndexUrl) {
+		return nil, false
+	}
+	return o.SamplesIndexUrl, true
+}
+
+// HasSamplesIndexUrl returns a boolean if a field has been set.
+func (o *ServerConfig) HasSamplesIndexUrl() bool {
+	if o != nil && !IsNil(o.SamplesIndexUrl) {
+		return true
+	}
+
+	return false
+}
+
+// SetSamplesIndexUrl gets a reference to the given string and assigns it to the SamplesIndexUrl field.
+func (o *ServerConfig) SetSamplesIndexUrl(v string) {
+	o.SamplesIndexUrl = &v
+}
+
 // GetServerDownloadUrl returns the ServerDownloadUrl field value
 func (o *ServerConfig) GetServerDownloadUrl() string {
 	if o == nil {
@@ -501,6 +534,9 @@ func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	toSerialize["logFilePath"] = o.LogFilePath
 	toSerialize["providersDir"] = o.ProvidersDir
 	toSerialize["registryUrl"] = o.RegistryUrl
+	if !IsNil(o.SamplesIndexUrl) {
+		toSerialize["samplesIndexUrl"] = o.SamplesIndexUrl
+	}
 	toSerialize["serverDownloadUrl"] = o.ServerDownloadUrl
 	return toSerialize, nil
 }

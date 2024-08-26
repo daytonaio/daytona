@@ -899,6 +899,22 @@ paths:
       summary: Uninstall a provider
       tags:
       - provider
+  /sample:
+    get:
+      description: List samples
+      operationId: ListSamples
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Sample'
+                type: array
+          description: OK
+      summary: List samples
+      tags:
+      - sample
   /server/config:
     get:
       description: Get the server configuration
@@ -2118,6 +2134,23 @@ components:
       required:
       - url
       type: object
+    Sample:
+      example:
+        name: name
+        description: description
+        gitUrl: gitUrl
+      properties:
+        description:
+          type: string
+        gitUrl:
+          type: string
+        name:
+          type: string
+      required:
+      - description
+      - gitUrl
+      - name
+      type: object
     ServerConfig:
       example:
         registryUrl: registryUrl
@@ -2132,6 +2165,7 @@ components:
         serverDownloadUrl: serverDownloadUrl
         binariesPath: binariesPath
         logFilePath: logFilePath
+        samplesIndexUrl: samplesIndexUrl
         defaultProjectImage: defaultProjectImage
         providersDir: providersDir
         id: id
@@ -2169,6 +2203,8 @@ components:
         providersDir:
           type: string
         registryUrl:
+          type: string
+        samplesIndexUrl:
           type: string
         serverDownloadUrl:
           type: string

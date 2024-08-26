@@ -21,6 +21,8 @@ import (
 
 var CustomRepoIdentifier = "<CUSTOM_REPO>"
 
+const CREATE_FROM_SAMPLE = "<CREATE_FROM_SAMPLE>"
+
 var selectedStyles = lipgloss.NewStyle().
 	Border(lipgloss.NormalBorder(), false, false, false, true).
 	BorderForeground(views.Green).

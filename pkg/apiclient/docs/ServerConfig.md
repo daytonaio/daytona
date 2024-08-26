@@ -19,6 +19,7 @@ Name | Type | Description | Notes
 **LogFilePath** | **string** |  | 
 **ProvidersDir** | **string** |  | 
 **RegistryUrl** | **string** |  | 
+**SamplesIndexUrl** | Pointer to **string** |  | [optional] 
 **ServerDownloadUrl** | **string** |  | 
 
 ## Methods
@@ -349,6 +350,31 @@ and a boolean to check if the value has been set.
 
 SetRegistryUrl sets RegistryUrl field to given value.
 
+
+### GetSamplesIndexUrl
+
+`func (o *ServerConfig) GetSamplesIndexUrl() string`
+
+GetSamplesIndexUrl returns the SamplesIndexUrl field if non-nil, zero value otherwise.
+
+### GetSamplesIndexUrlOk
+
+`func (o *ServerConfig) GetSamplesIndexUrlOk() (*string, bool)`
+
+GetSamplesIndexUrlOk returns a tuple with the SamplesIndexUrl field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetSamplesIndexUrl
+
+`func (o *ServerConfig) SetSamplesIndexUrl(v string)`
+
+SetSamplesIndexUrl sets SamplesIndexUrl field to given value.
+
+### HasSamplesIndexUrl
+
+`func (o *ServerConfig) HasSamplesIndexUrl() bool`
+
+HasSamplesIndexUrl returns a boolean if a field has been set.
 
 ### GetServerDownloadUrl
 

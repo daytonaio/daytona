@@ -50,4 +50,5 @@ type Config struct {
 	LocalBuilderRegistryImage string      `json:"localBuilderRegistryImage" validate:"required"`
 	BuilderRegistryServer     string      `json:"builderRegistryServer" validate:"required"`
 	BuildImageNamespace       string      `json:"buildImageNamespace" validate:"optional"`
+	SamplesIndexUrl           string      `json:"samplesIndexUrl" validate:"optional"`
 } // @name ServerConfig

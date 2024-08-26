@@ -66,6 +66,10 @@ func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *h
 			huh.NewInput().
 				Title("Server Download URL").
 				Value(&m.config.ServerDownloadUrl),
+			huh.NewInput().
+				Title("Samples Index URL").
+				Description("Leave empty to disable samples").
+				Value(m.config.SamplesIndexUrl),
 		),
 		huh.NewGroup(
 			huh.NewInput().
