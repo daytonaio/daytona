@@ -66,7 +66,7 @@ var CodeCmd = &cobra.Command{
 		} else {
 			workspace, err = apiclient_util.GetWorkspace(args[0])
 			if err != nil {
-				if err.Error() == "404 page not found" {
+				if err.Error() == "404 page not found" || err.Error() == "failed to get workspace: workspace not found"{
 					log.Debug(err)
 					log.Fatal("Workspace name required. Please provide a valid workspace name with the command. You can see all workspace names by running the command `daytona list`")
 				} else {
