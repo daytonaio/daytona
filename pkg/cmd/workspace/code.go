@@ -7,6 +7,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
+	"strings"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/jetbrains"
@@ -15,6 +17,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/ide"
+	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
@@ -64,15 +67,18 @@ var CodeCmd = &cobra.Command{
 			}
 			workspaceId = workspace.Id
 		} else {
-			workspace, err = apiclient_util.GetWorkspace(args[0])
+			encodedWorkspaceName := url.PathEscape(args[0])
+
+			workspace, err := apiclient_util.GetWorkspace(encodedWorkspaceName)
 			if err != nil {
-				if err.Error() == "404 page not found" || err.Error() == "failed to get workspace: workspace not found"{
+				if strings.Contains(err.Error(), workspaces.ErrWorkspaceNotFound.Error()) {
 					log.Debug(err)
 					log.Fatal("Workspace not found. You can see all workspace names by running the command `daytona list`")
 				} else {
 					log.Fatal(err)
 				}
 			}
+
 			workspaceId = workspace.Id
 		}
 
