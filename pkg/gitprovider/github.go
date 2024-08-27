@@ -283,7 +283,7 @@ func (g *GitHubGitProvider) getApiClient() *github.Client {
 
 func (g *GitHubGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
 	if staticContext.Sha == nil || *staticContext.Sha == "" {
-		return *staticContext.Sha, nil
+		return "", nil
 	}
 
 	client := g.getApiClient()
@@ -295,38 +295,14 @@ func (g *GitHubGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (
 
 	var branchName string
 	for _, branch := range branches {
-		branchCommitSHA := branch.GetCommit().GetSHA()
+		branchName = branch.GetName()
 
-		if branchCommitSHA == *staticContext.Sha {
-			branchName = branch.GetName()
-			break
+		commitComparison, _, err := client.Repositories.CompareCommits(context.Background(), staticContext.Owner, staticContext.Name, branchName, *staticContext.Sha)
+		if err != nil {
+			return "", fmt.Errorf("error comparing commits: %w", err)
 		}
-
-		commitId := branchCommitSHA
-		for commitId != "" {
-			commit, _, err := client.Repositories.GetCommit(context.Background(), staticContext.Owner, staticContext.Name, commitId)
-			if err != nil {
-				return "", err
-			}
-
-			if *commit.SHA == *staticContext.Sha {
-				branchName = branch.GetName()
-				break
-			}
-
-			if len(commit.Parents) > 0 {
-				commitId := commit.Parents[0].SHA
-				if *staticContext.Sha == *commitId {
-					branchName = branch.GetName()
-					break
-				}
-			} else {
-				commitId = ""
-			}
-		}
-
-		if branchName != "" {
-			break
+		if commitComparison.GetStatus() == "identical" || commitComparison.GetStatus() == "behind" {
+			return branchName, nil
 		}
 	}
 
