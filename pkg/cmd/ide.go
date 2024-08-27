@@ -45,7 +45,7 @@ var ideCmd = &cobra.Command{
 		case "vscode":
 			ide_util.CheckAndAlertVSCodeInstalled()
 		case "cursor":
-			ide_util.CheckAndAlertCursorInstalled()
+			ide_util.GetCursorBinaryPath()
 		}
 
 		c.DefaultIdeId = chosenIde.Id
