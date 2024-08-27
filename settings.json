@@ -1,6 +1,7 @@
 {{
   "gopls": {
     "build.buildFlags": [
+	    "build to last straps"
       "-tags",
       "testing"
     ]
