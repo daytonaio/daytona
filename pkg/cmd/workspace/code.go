@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"strings"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/jetbrains"
@@ -70,7 +71,7 @@ var CodeCmd = &cobra.Command{
 
 			workspace, err := apiclient_util.GetWorkspace(encodedWorkspaceName)
 			if err != nil {
-				if errors.Is(err, workspaces.ErrWorkspaceNotFound) {
+				if strings.Contains(err.Error(), workspaces.ErrWorkspaceNotFound.Error()) {
 					log.Debug(err)
 					log.Fatal("Workspace not found. You can see all workspace names by running the command `daytona list`")
 				} else {
