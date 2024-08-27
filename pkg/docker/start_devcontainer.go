@@ -19,7 +19,8 @@ func (d *DockerClient) startDevcontainerProject(opts *CreateProjectOptions) (Rem
 		}
 	}()
 
-	return d.createProjectFromDevcontainer(opts, false)
+	_, remoteUser, err := d.CreateFromDevcontainer(d.toCreateDevcontainerOptions(opts, false))
+	return remoteUser, err
 }
 
 func (d *DockerClient) runDevcontainerUserCommands(opts *CreateProjectOptions) error {
@@ -30,7 +31,7 @@ func (d *DockerClient) runDevcontainerUserCommands(opts *CreateProjectOptions) e
 
 	opts.LogWriter.Write([]byte("Running devcontainer user commands...\n"))
 
-	paths := d.getDevcontainerPaths(opts)
+	paths := d.getDevcontainerPaths(opts.ProjectDir, opts.Project.BuildConfig.Devcontainer.FilePath)
 
 	devcontainerCmd := []string{
 		"devcontainer",
@@ -44,7 +45,9 @@ func (d *DockerClient) runDevcontainerUserCommands(opts *CreateProjectOptions) e
 
 	cmd := strings.Join(devcontainerCmd, " ")
 
-	_, err = d.execInContainer(cmd, opts, paths, paths.ProjectTarget, socketForwardId, true, []mount.Mount{
+	createDevcontainerOptions := d.toCreateDevcontainerOptions(opts, true)
+
+	_, err = d.execDevcontainerCommand(cmd, &createDevcontainerOptions, paths, paths.ProjectTarget, socketForwardId, true, []mount.Mount{
 		{
 			Type:   mount.TypeBind,
 			Source: paths.OverridesDir,
