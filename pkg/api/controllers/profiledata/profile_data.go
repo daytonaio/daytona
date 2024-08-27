@@ -30,7 +30,7 @@ func GetProfileData(ctx *gin.Context) {
 			ctx.JSON(200, &profiledata.ProfileData{})
 			return
 		}
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get profile data: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get profile data: %w", err))
 		return
 	}
 
@@ -52,14 +52,14 @@ func SetProfileData(ctx *gin.Context) {
 	var req profiledata.ProfileData
 	err := ctx.BindJSON(&req)
 	if err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %s", err.Error()))
+		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
 		return
 	}
 
 	server := server.GetInstance(nil)
 	err = server.ProfileDataService.Save(&req)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to save profile data: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to save profile data: %w", err))
 		return
 	}
 
@@ -83,7 +83,7 @@ func DeleteProfileData(ctx *gin.Context) {
 			ctx.Status(204)
 			return
 		}
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get profile data: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get profile data: %w", err))
 		return
 	}
 

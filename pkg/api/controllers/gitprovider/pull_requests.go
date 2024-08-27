@@ -32,13 +32,13 @@ func GetRepoPRs(ctx *gin.Context) {
 
 	namespaceId, err := url.QueryUnescape(namespaceArg)
 	if err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to parse namespace: %s", err.Error()))
+		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to parse namespace: %w", err))
 		return
 	}
 
 	repositoryId, err := url.QueryUnescape(repositoryArg)
 	if err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to parse repository: %s", err.Error()))
+		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to parse repository: %w", err))
 		return
 	}
 
@@ -46,7 +46,7 @@ func GetRepoPRs(ctx *gin.Context) {
 
 	response, err := server.GitProviderService.GetRepoPRs(gitProviderId, namespaceId, repositoryId)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get repository pull requests: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get repository pull requests: %w", err))
 		return
 	}
 

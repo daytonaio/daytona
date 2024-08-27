@@ -30,7 +30,7 @@ func GetGitContext(ctx *gin.Context) {
 
 	decodedURLParam, err := url.QueryUnescape(gitUrl)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode query param: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode query param: %w", err))
 		return
 	}
 
@@ -38,13 +38,13 @@ func GetGitContext(ctx *gin.Context) {
 
 	gitProvider, _, err := server.GitProviderService.GetGitProviderForUrl(decodedURLParam)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %w", err))
 		return
 	}
 
 	repo, err := gitProvider.GetRepositoryFromUrl(decodedURLParam)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get repository: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get repository: %w", err))
 		return
 	}
 
@@ -65,7 +65,7 @@ func GetGitContext(ctx *gin.Context) {
 func GetUrlFromRepository(ctx *gin.Context) {
 	var gitRepository gitprovider.GitRepository
 	if err := ctx.ShouldBindJSON(&gitRepository); err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to bind json: %s", err.Error()))
+		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to bind json: %w", err))
 		return
 	}
 
@@ -73,7 +73,7 @@ func GetUrlFromRepository(ctx *gin.Context) {
 
 	gitProvider, _, err := server.GitProviderService.GetGitProviderForUrl(gitRepository.Url)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %w", err))
 		return
 	}
 

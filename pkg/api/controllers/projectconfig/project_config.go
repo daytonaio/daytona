@@ -36,7 +36,7 @@ func GetProjectConfig(ctx *gin.Context) {
 		Name: &configName,
 	})
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get project config: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get project config: %w", err))
 		return
 	}
 
@@ -59,7 +59,7 @@ func GetDefaultProjectConfig(ctx *gin.Context) {
 
 	decodedURLParam, err := url.QueryUnescape(gitUrl)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode query param: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode query param: %w", err))
 		return
 	}
 
@@ -74,7 +74,7 @@ func GetDefaultProjectConfig(ctx *gin.Context) {
 		if config.IsProjectConfigNotFound(err) {
 			statusCode = http.StatusNotFound
 		}
-		ctx.AbortWithError(statusCode, fmt.Errorf("failed to find project config by git url: %s", err.Error()))
+		ctx.AbortWithError(statusCode, fmt.Errorf("failed to find project config by git url: %w", err))
 	}
 
 	ctx.JSON(200, projectConfigs)
@@ -95,7 +95,7 @@ func ListProjectConfigs(ctx *gin.Context) {
 
 	projectConfigs, err := server.ProjectConfigService.List(nil)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list project configs: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list project configs: %w", err))
 		return
 	}
 
@@ -117,7 +117,7 @@ func SetProjectConfig(ctx *gin.Context) {
 	var req dto.CreateProjectConfigDTO
 	err := ctx.BindJSON(&req)
 	if err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %s", err.Error()))
+		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
 		return
 	}
 
@@ -127,7 +127,7 @@ func SetProjectConfig(ctx *gin.Context) {
 
 	err = s.ProjectConfigService.Save(projectConfig)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to save project config: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to save project config: %w", err))
 		return
 	}
 
@@ -151,7 +151,7 @@ func SetDefaultProjectConfig(ctx *gin.Context) {
 
 	err := server.ProjectConfigService.SetDefault(configName)
 	if err != nil {
-		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to set project config to default: %s", err.Error()))
+		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to set project config to default: %w", err))
 		return
 	}
 
@@ -177,7 +177,7 @@ func DeleteProjectConfig(ctx *gin.Context) {
 		Name: &configName,
 	})
 	if err != nil {
-		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to find project config: %s", err.Error()))
+		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to find project config: %w", err))
 		return
 	}
 
@@ -187,7 +187,7 @@ func DeleteProjectConfig(ctx *gin.Context) {
 			ctx.Status(204)
 			return
 		}
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get project config: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get project config: %w", err))
 		return
 	}
 

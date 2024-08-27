@@ -41,13 +41,13 @@ func (g *AwsCodeCommitGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	// Therefore, returning repositories as an array of type GitNamespace.
 	client, err := g.getApiClient()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get client: %s", err.Error())
+		return nil, fmt.Errorf("failed to get client: %w", err)
 	}
 	repositories, err := client.ListRepositories(context.TODO(), &codecommit.ListRepositoriesInput{
 		SortBy: types.SortByEnumRepositoryName,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch repositories: %s", err.Error())
+		return nil, fmt.Errorf("failed to fetch repositories: %w", err)
 	}
 	var namespaces []*GitNamespace
 	for _, repository := range repositories.Repositories {
@@ -107,7 +107,7 @@ func (g *AwsCodeCommitGitProvider) getApiClient() (*codecommit.Client, error) {
 func (g *AwsCodeCommitGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
 	client, err := g.getApiClient()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get client: %s", err.Error())
+		return nil, fmt.Errorf("failed to get client: %w", err)
 	}
 	var repos []*GitRepository
 	data, err := client.GetRepository(context.TODO(), &codecommit.GetRepositoryInput{
@@ -138,7 +138,7 @@ func (g *AwsCodeCommitGitProvider) GetRepositories(namespace string) ([]*GitRepo
 func (g *AwsCodeCommitGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {
 	client, err := g.getApiClient()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get client: %s", err.Error())
+		return nil, fmt.Errorf("failed to get client: %w", err)
 	}
 	branchesoutput, err := client.ListBranches(context.TODO(), &codecommit.ListBranchesInput{
 		RepositoryName: &repositoryId,
@@ -180,7 +180,7 @@ func (g *AwsCodeCommitGitProvider) GetUser() (*GitUser, error) {
 	iamclient := iam.NewFromConfig(cfg)
 	user, err := iamclient.GetUser(context.TODO(), &iam.GetUserInput{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch user: %s", err.Error())
+		return nil, fmt.Errorf("failed to fetch user: %w", err)
 	}
 
 	// IAM service does not provide the email in the GetUser API response.
@@ -198,14 +198,14 @@ func (g *AwsCodeCommitGitProvider) GetUser() (*GitUser, error) {
 func (g *AwsCodeCommitGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error) {
 	client, err := g.getApiClient()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get client: %s", err.Error())
+		return nil, fmt.Errorf("failed to get client: %w", err)
 	}
 	pullrequests, err := client.ListPullRequests(context.TODO(), &codecommit.ListPullRequestsInput{
 		RepositoryName:    &repositoryId,
 		PullRequestStatus: types.PullRequestStatusEnumOpen,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to get pull requests: %s", err.Error())
+		return nil, fmt.Errorf("failed to get pull requests: %w", err)
 	}
 	var pullRequests []*GitPullRequest
 	for _, pullrequestid := range pullrequests.PullRequestIds {
@@ -233,7 +233,7 @@ func (g *AwsCodeCommitGitProvider) GetRepoPRs(repositoryId string, namespaceId s
 func (g *AwsCodeCommitGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (string, error) {
 	client, err := g.getApiClient()
 	if err != nil {
-		return "", fmt.Errorf("failed to get client: %s", err.Error())
+		return "", fmt.Errorf("failed to get client: %w", err)
 	}
 	sha := ""
 	if staticContext.Branch != nil {
@@ -276,14 +276,14 @@ func (g *AwsCodeCommitGitProvider) getPrContext(staticContext *StaticGitContext)
 	}
 	client, err := g.getApiClient()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get client: %s", err.Error())
+		return nil, fmt.Errorf("failed to get client: %w", err)
 	}
 	prnumber := strconv.FormatUint(uint64(*staticContext.PrNumber), 10)
 	pr, err := client.GetPullRequest(context.TODO(), &codecommit.GetPullRequestInput{
 		PullRequestId: aws.String(prnumber),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to get pull request: %s", err.Error())
+		return nil, fmt.Errorf("failed to get pull request: %w", err)
 	}
 	repo := *staticContext
 	prbranchname := strings.TrimPrefix(*pr.PullRequest.PullRequestTargets[0].SourceReference, "refs/heads/")
