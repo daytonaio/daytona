@@ -1,0 +1,65 @@
+name: '[PR] Lint'
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v4
+        with:
+          version: latest
+          args: --timeout=5m ./...
+  fmt-and-swagger:
+    name: fmt-and-swagger
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: fmt-and-swagger
+        run: |
+          go install github.com/swaggo/swag/cmd/swag@v1.16.3
+          ./hack/swagger.sh
+          git diff --exit-code pkg/apiclient/* || (echo "API clients are out of sync! Please generate with './hack/swagger.sh' and commit" && exit 1)
+          git diff --exit-code '**/*.go' || (echo "Code is not formatted! Please run 'go fmt ./...' and commit" && exit 1)
+  cli-docs:
+    name: cli-docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: cli-docs
+        run: |
+          ./hack/generate-cli-docs.sh
+          git diff --exit-code docs/* || (echo "CLI Documentation is out of sync! Please generate it with './hack/generate-cli-docs.sh' and commit" && exit 1)
+          git diff --exit-code hack/docs/* || (echo "CLI Documentation is out of sync! Please generate it with './hack/generate-cli-docs.sh' and commit" && exit 1)
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - run: go build -tags testing ./...
+      - uses: robherley/go-test-action@v0
+        with:
+          testArguments: -tags testing ./...
+          omit: untested

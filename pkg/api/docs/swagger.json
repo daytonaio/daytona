@@ -1,0 +1,2208 @@
+{
+    "schemes": [
+        "http"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "Daytona Server API",
+        "title": "Daytona Server API",
+        "contact": {},
+        "version": "v0.0.0-dev"
+    },
+    "host": "localhost:3986",
+    "basePath": "/",
+    "paths": {
+        "/apikey": {
+            "get": {
+                "description": "List API keys",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "apiKey"
+                ],
+                "summary": "List API keys",
+                "operationId": "ListClientApiKeys",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ApiKey"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/apikey/{apiKeyName}": {
+            "post": {
+                "description": "Generate an API key",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "apiKey"
+                ],
+                "summary": "Generate an API key",
+                "operationId": "GenerateApiKey",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API key name",
+                        "name": "apiKeyName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Revoke API key",
+                "tags": [
+                    "apiKey"
+                ],
+                "summary": "Revoke API key",
+                "operationId": "RevokeApiKey",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API key name",
+                        "name": "apiKeyName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/container-registry": {
+            "get": {
+                "description": "List container registries",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container-registry"
+                ],
+                "summary": "List container registries",
+                "operationId": "ListContainerRegistries",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ContainerRegistry"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/container-registry/{server}": {
+            "get": {
+                "description": "Get container registry credentials",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container-registry"
+                ],
+                "summary": "Get container registry credentials",
+                "operationId": "GetContainerRegistry",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Container Registry server name",
+                        "name": "server",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ContainerRegistry"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Set container registry credentials",
+                "tags": [
+                    "container-registry"
+                ],
+                "summary": "Set container registry credentials",
+                "operationId": "SetContainerRegistry",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Container Registry server name",
+                        "name": "server",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Container Registry credentials to set",
+                        "name": "containerRegistry",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ContainerRegistry"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove a container registry credentials",
+                "tags": [
+                    "container-registry"
+                ],
+                "summary": "Remove a container registry credentials",
+                "operationId": "RemoveContainerRegistry",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Container Registry server name",
+                        "name": "server",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/gitprovider": {
+            "get": {
+                "description": "List Git providers",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gitProvider"
+                ],
+                "summary": "List Git providers",
+                "operationId": "ListGitProviders",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/GitProvider"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Set Git provider",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gitProvider"
+                ],
+                "summary": "Set Git provider",
+                "operationId": "SetGitProvider",
+                "parameters": [
+                    {
+                        "description": "Git provider",
+                        "name": "gitProviderConfig",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SetGitProviderConfig"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/gitprovider/context/url": {
+            "post": {
+                "description": "Get URL from Git repository",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gitProvider"
+                ],
+                "summary": "Get URL from Git repository",
+                "operationId": "GetUrlFromRepository",
+                "parameters": [
+                    {
+                        "description": "Git repository",
+                        "name": "repository",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GitRepository"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/RepositoryUrl"
+                        }
+                    }
+                }
+            }
+        },
+        "/gitprovider/context/{gitUrl}": {
+            "get": {
+                "description": "Get Git context",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gitProvider"
+                ],
+                "summary": "Get Git context",
+                "operationId": "GetGitContext",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Git URL",
+                        "name": "gitUrl",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GitRepository"
+                        }
+                    }
+                }
+            }
+        },
+        "/gitprovider/for-url/{url}": {
+            "get": {
+                "description": "Get Git provider",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gitProvider"
+                ],
+                "summary": "Get Git provider",
+                "operationId": "GetGitProviderForUrl",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Url",
+                        "name": "url",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GitProvider"
+                        }
+                    }
+                }
+            }
+        },
+        "/gitprovider/id-for-url/{url}": {
+            "get": {
+                "description": "Get Git provider ID",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "gitProvider"
+                ],
+                "summary": "Get Git provider ID",
+                "operationId": "GetGitProviderIdForUrl",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Url",
+                        "name": "url",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/gitprovider/{gitProviderId}": {
+            "delete": {
+                "description": "Remove Git provider",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gitProvider"
+                ],
+                "summary": "Remove Git provider",
+                "operationId": "RemoveGitProvider",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Git provider",
+                        "name": "gitProviderId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/gitprovider/{gitProviderId}/namespaces": {
+            "get": {
+                "description": "Get Git namespaces",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gitProvider"
+                ],
+                "summary": "Get Git namespaces",
+                "operationId": "GetNamespaces",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Git provider",
+                        "name": "gitProviderId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/GitNamespace"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/gitprovider/{gitProviderId}/user": {
+            "get": {
+                "description": "Get Git context",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gitProvider"
+                ],
+                "summary": "Get Git context",
+                "operationId": "GetGitUser",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Git Provider Id",
+                        "name": "gitProviderId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GitUser"
+                        }
+                    }
+                }
+            }
+        },
+        "/gitprovider/{gitProviderId}/{namespaceId}/repositories": {
+            "get": {
+                "description": "Get Git repositories",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gitProvider"
+                ],
+                "summary": "Get Git repositories",
+                "operationId": "GetRepositories",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Git provider",
+                        "name": "gitProviderId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Namespace",
+                        "name": "namespaceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/GitRepository"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/branches": {
+            "get": {
+                "description": "Get Git repository branches",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gitProvider"
+                ],
+                "summary": "Get Git repository branches",
+                "operationId": "GetRepoBranches",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Git provider",
+                        "name": "gitProviderId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Namespace",
+                        "name": "namespaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Repository",
+                        "name": "repositoryId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/GitBranch"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/pull-requests": {
+            "get": {
+                "description": "Get Git repository PRs",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gitProvider"
+                ],
+                "summary": "Get Git repository PRs",
+                "operationId": "GetRepoPRs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Git provider",
+                        "name": "gitProviderId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Namespace",
+                        "name": "namespaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Repository",
+                        "name": "repositoryId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/GitPullRequest"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/profile": {
+            "get": {
+                "description": "Get profile data",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "summary": "Get profile data",
+                "operationId": "GetProfileData",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ProfileData"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Set profile data",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "summary": "Set profile data",
+                "operationId": "SetProfileData",
+                "parameters": [
+                    {
+                        "description": "Profile data",
+                        "name": "profileData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ProfileData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete profile data",
+                "tags": [
+                    "profile"
+                ],
+                "summary": "Delete profile data",
+                "operationId": "DeleteProfileData",
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/project-config": {
+            "get": {
+                "description": "List project configs",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "project-config"
+                ],
+                "summary": "List project configs",
+                "operationId": "ListProjectConfigs",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ProjectConfig"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Set project config data",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "project-config"
+                ],
+                "summary": "Set project config data",
+                "operationId": "SetProjectConfig",
+                "parameters": [
+                    {
+                        "description": "Project config",
+                        "name": "projectConfig",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateProjectConfigDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            }
+        },
+        "/project-config/default/{gitUrl}": {
+            "get": {
+                "description": "Get project configs by git url",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "project-config"
+                ],
+                "summary": "Get project configs by git url",
+                "operationId": "GetDefaultProjectConfig",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Git URL",
+                        "name": "gitUrl",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ProjectConfig"
+                        }
+                    }
+                }
+            }
+        },
+        "/project-config/{configName}": {
+            "get": {
+                "description": "Get project config data",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "project-config"
+                ],
+                "summary": "Get project config data",
+                "operationId": "GetProjectConfig",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Config name",
+                        "name": "configName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ProjectConfig"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete project config data",
+                "tags": [
+                    "project-config"
+                ],
+                "summary": "Delete project config data",
+                "operationId": "DeleteProjectConfig",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Config name",
+                        "name": "configName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/project-config/{configName}/set-default": {
+            "patch": {
+                "description": "Set project config to default",
+                "tags": [
+                    "project-config"
+                ],
+                "summary": "Set project config to default",
+                "operationId": "SetDefaultProjectConfig",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Config name",
+                        "name": "configName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/provider": {
+            "get": {
+                "description": "List providers",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "provider"
+                ],
+                "summary": "List providers",
+                "operationId": "ListProviders",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Provider"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/install": {
+            "post": {
+                "description": "Install a provider",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "provider"
+                ],
+                "summary": "Install a provider",
+                "operationId": "InstallProvider",
+                "parameters": [
+                    {
+                        "description": "Provider to install",
+                        "name": "provider",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/InstallProviderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/provider/{provider}/target-manifest": {
+            "get": {
+                "description": "Get provider target manifest",
+                "tags": [
+                    "provider"
+                ],
+                "summary": "Get provider target manifest",
+                "operationId": "GetTargetManifest",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Provider name",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ProviderTargetManifest"
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/{provider}/uninstall": {
+            "post": {
+                "description": "Uninstall a provider",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "provider"
+                ],
+                "summary": "Uninstall a provider",
+                "operationId": "UninstallProvider",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Provider to uninstall",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/server/config": {
+            "get": {
+                "description": "Get the server configuration",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "server"
+                ],
+                "summary": "Get the server configuration",
+                "operationId": "GetConfig",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ServerConfig"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Set the server configuration",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "server"
+                ],
+                "summary": "Set the server configuration",
+                "operationId": "SetConfig",
+                "parameters": [
+                    {
+                        "description": "Server configuration",
+                        "name": "config",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ServerConfig"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ServerConfig"
+                        }
+                    }
+                }
+            }
+        },
+        "/server/network-key": {
+            "post": {
+                "description": "Generate a new authentication key",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "server"
+                ],
+                "summary": "Generate a new authentication key",
+                "operationId": "GenerateNetworkKey",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/NetworkKey"
+                        }
+                    }
+                }
+            }
+        },
+        "/target": {
+            "get": {
+                "description": "List targets",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "target"
+                ],
+                "summary": "List targets",
+                "operationId": "ListTargets",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ProviderTarget"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Set a target",
+                "tags": [
+                    "target"
+                ],
+                "summary": "Set a target",
+                "operationId": "SetTarget",
+                "parameters": [
+                    {
+                        "description": "Target to set",
+                        "name": "target",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ProviderTarget"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            }
+        },
+        "/target/{target}": {
+            "delete": {
+                "description": "Remove a target",
+                "tags": [
+                    "target"
+                ],
+                "summary": "Remove a target",
+                "operationId": "RemoveTarget",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target name",
+                        "name": "target",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/workspace": {
+            "get": {
+                "description": "List workspaces",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "List workspaces",
+                "operationId": "ListWorkspaces",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Verbose",
+                        "name": "verbose",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/WorkspaceDTO"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a workspace",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Create a workspace",
+                "operationId": "CreateWorkspace",
+                "parameters": [
+                    {
+                        "description": "Create workspace",
+                        "name": "workspace",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateWorkspaceDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Workspace"
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}": {
+            "get": {
+                "description": "Get workspace info",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Get workspace info",
+                "operationId": "GetWorkspace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/WorkspaceDTO"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove workspace",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Remove workspace",
+                "operationId": "RemoveWorkspace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/start": {
+            "post": {
+                "description": "Start workspace",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Start workspace",
+                "operationId": "StartWorkspace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/stop": {
+            "post": {
+                "description": "Stop workspace",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Stop workspace",
+                "operationId": "StopWorkspace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/start": {
+            "post": {
+                "description": "Start project",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Start project",
+                "operationId": "StartProject",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project ID",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/state": {
+            "post": {
+                "description": "Set project state",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Set project state",
+                "operationId": "SetProjectState",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project ID",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Set State",
+                        "name": "setState",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SetProjectState"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/stop": {
+            "post": {
+                "description": "Stop project",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Stop project",
+                "operationId": "StopProject",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project ID",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "ApiKey": {
+            "type": "object",
+            "required": [
+                "keyHash",
+                "name",
+                "type"
+            ],
+            "properties": {
+                "keyHash": {
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Project or client name",
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/apikey.ApiKeyType"
+                }
+            }
+        },
+        "CloneTarget": {
+            "type": "string",
+            "enum": [
+                "branch",
+                "commit"
+            ],
+            "x-enum-varnames": [
+                "CloneTargetBranch",
+                "CloneTargetCommit"
+            ]
+        },
+        "ContainerRegistry": {
+            "type": "object",
+            "required": [
+                "password",
+                "server",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "server": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "CreateProjectConfigDTO": {
+            "type": "object",
+            "required": [
+                "envVars",
+                "name",
+                "source"
+            ],
+            "properties": {
+                "buildConfig": {
+                    "$ref": "#/definitions/ProjectBuildConfig"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "source": {
+                    "$ref": "#/definitions/CreateProjectConfigSourceDTO"
+                },
+                "user": {
+                    "type": "string"
+                }
+            }
+        },
+        "CreateProjectConfigSourceDTO": {
+            "type": "object",
+            "required": [
+                "repository"
+            ],
+            "properties": {
+                "repository": {
+                    "$ref": "#/definitions/GitRepository"
+                }
+            }
+        },
+        "CreateWorkspaceDTO": {
+            "type": "object",
+            "required": [
+                "id",
+                "name",
+                "projects",
+                "target"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/CreateProjectConfigDTO"
+                    }
+                },
+                "target": {
+                    "type": "string"
+                }
+            }
+        },
+        "DevcontainerConfig": {
+            "type": "object",
+            "required": [
+                "filePath"
+            ],
+            "properties": {
+                "filePath": {
+                    "type": "string"
+                }
+            }
+        },
+        "FRPSConfig": {
+            "type": "object",
+            "required": [
+                "domain",
+                "port",
+                "protocol"
+            ],
+            "properties": {
+                "domain": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "protocol": {
+                    "type": "string"
+                }
+            }
+        },
+        "FileStatus": {
+            "type": "object",
+            "required": [
+                "extra",
+                "name",
+                "staging",
+                "worktree"
+            ],
+            "properties": {
+                "extra": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "staging": {
+                    "$ref": "#/definitions/Status"
+                },
+                "worktree": {
+                    "$ref": "#/definitions/Status"
+                }
+            }
+        },
+        "GitBranch": {
+            "type": "object",
+            "required": [
+                "name",
+                "sha"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "sha": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitNamespace": {
+            "type": "object",
+            "required": [
+                "id",
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitProvider": {
+            "type": "object",
+            "required": [
+                "id",
+                "token",
+                "username"
+            ],
+            "properties": {
+                "baseApiUrl": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitPullRequest": {
+            "type": "object",
+            "required": [
+                "branch",
+                "name",
+                "sha",
+                "sourceRepoId",
+                "sourceRepoName",
+                "sourceRepoOwner",
+                "sourceRepoUrl"
+            ],
+            "properties": {
+                "branch": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "sha": {
+                    "type": "string"
+                },
+                "sourceRepoId": {
+                    "type": "string"
+                },
+                "sourceRepoName": {
+                    "type": "string"
+                },
+                "sourceRepoOwner": {
+                    "type": "string"
+                },
+                "sourceRepoUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitRepository": {
+            "type": "object",
+            "required": [
+                "id",
+                "name",
+                "owner",
+                "sha",
+                "source",
+                "url"
+            ],
+            "properties": {
+                "branch": {
+                    "type": "string"
+                },
+                "cloneTarget": {
+                    "$ref": "#/definitions/CloneTarget"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "prNumber": {
+                    "type": "integer"
+                },
+                "sha": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitStatus": {
+            "type": "object",
+            "required": [
+                "currentBranch",
+                "fileStatus"
+            ],
+            "properties": {
+                "currentBranch": {
+                    "type": "string"
+                },
+                "fileStatus": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/FileStatus"
+                    }
+                }
+            }
+        },
+        "GitUser": {
+            "type": "object",
+            "required": [
+                "email",
+                "id",
+                "name",
+                "username"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "InstallProviderRequest": {
+            "type": "object",
+            "required": [
+                "downloadUrls",
+                "name"
+            ],
+            "properties": {
+                "downloadUrls": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "NetworkKey": {
+            "type": "object",
+            "required": [
+                "key"
+            ],
+            "properties": {
+                "key": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProfileData": {
+            "type": "object",
+            "required": [
+                "envVars"
+            ],
+            "properties": {
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "Project": {
+            "type": "object",
+            "required": [
+                "default",
+                "envVars",
+                "image",
+                "name",
+                "repository",
+                "target",
+                "user",
+                "workspaceId"
+            ],
+            "properties": {
+                "buildConfig": {
+                    "$ref": "#/definitions/ProjectBuildConfig"
+                },
+                "default": {
+                    "type": "boolean"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "repository": {
+                    "$ref": "#/definitions/GitRepository"
+                },
+                "state": {
+                    "$ref": "#/definitions/ProjectState"
+                },
+                "target": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                },
+                "workspaceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProjectBuildConfig": {
+            "type": "object",
+            "properties": {
+                "devcontainer": {
+                    "$ref": "#/definitions/DevcontainerConfig"
+                }
+            }
+        },
+        "ProjectConfig": {
+            "type": "object",
+            "required": [
+                "default",
+                "envVars",
+                "image",
+                "name",
+                "repository",
+                "user"
+            ],
+            "properties": {
+                "buildConfig": {
+                    "$ref": "#/definitions/ProjectBuildConfig"
+                },
+                "default": {
+                    "type": "boolean"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "repository": {
+                    "$ref": "#/definitions/GitRepository"
+                },
+                "user": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProjectInfo": {
+            "type": "object",
+            "required": [
+                "created",
+                "isRunning",
+                "name",
+                "workspaceId"
+            ],
+            "properties": {
+                "created": {
+                    "type": "string"
+                },
+                "isRunning": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "providerMetadata": {
+                    "type": "string"
+                },
+                "workspaceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProjectState": {
+            "type": "object",
+            "required": [
+                "gitStatus",
+                "updatedAt",
+                "uptime"
+            ],
+            "properties": {
+                "gitStatus": {
+                    "$ref": "#/definitions/GitStatus"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "uptime": {
+                    "type": "integer"
+                }
+            }
+        },
+        "Provider": {
+            "type": "object",
+            "required": [
+                "name",
+                "version"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProviderTarget": {
+            "type": "object",
+            "required": [
+                "name",
+                "options",
+                "providerInfo"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "options": {
+                    "description": "JSON encoded map of options",
+                    "type": "string"
+                },
+                "providerInfo": {
+                    "$ref": "#/definitions/provider.ProviderInfo"
+                }
+            }
+        },
+        "ProviderTargetManifest": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/provider.ProviderTargetProperty"
+            }
+        },
+        "RepositoryUrl": {
+            "type": "object",
+            "required": [
+                "url"
+            ],
+            "properties": {
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "ServerConfig": {
+            "type": "object",
+            "required": [
+                "apiPort",
+                "binariesPath",
+                "builderImage",
+                "builderRegistryServer",
+                "defaultProjectImage",
+                "defaultProjectUser",
+                "headscalePort",
+                "id",
+                "localBuilderRegistryImage",
+                "localBuilderRegistryPort",
+                "logFilePath",
+                "providersDir",
+                "registryUrl",
+                "serverDownloadUrl"
+            ],
+            "properties": {
+                "apiPort": {
+                    "type": "integer"
+                },
+                "binariesPath": {
+                    "type": "string"
+                },
+                "buildImageNamespace": {
+                    "type": "string"
+                },
+                "builderImage": {
+                    "type": "string"
+                },
+                "builderRegistryServer": {
+                    "type": "string"
+                },
+                "defaultProjectImage": {
+                    "type": "string"
+                },
+                "defaultProjectUser": {
+                    "type": "string"
+                },
+                "frps": {
+                    "$ref": "#/definitions/FRPSConfig"
+                },
+                "headscalePort": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "localBuilderRegistryImage": {
+                    "type": "string"
+                },
+                "localBuilderRegistryPort": {
+                    "type": "integer"
+                },
+                "logFilePath": {
+                    "type": "string"
+                },
+                "providersDir": {
+                    "type": "string"
+                },
+                "registryUrl": {
+                    "type": "string"
+                },
+                "serverDownloadUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "SetGitProviderConfig": {
+            "type": "object",
+            "required": [
+                "id",
+                "token"
+            ],
+            "properties": {
+                "baseApiUrl": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "SetProjectState": {
+            "type": "object",
+            "required": [
+                "uptime"
+            ],
+            "properties": {
+                "gitStatus": {
+                    "$ref": "#/definitions/GitStatus"
+                },
+                "uptime": {
+                    "type": "integer"
+                }
+            }
+        },
+        "Status": {
+            "type": "string",
+            "enum": [
+                "Unmodified",
+                "Untracked",
+                "Modified",
+                "Added",
+                "Deleted",
+                "Renamed",
+                "Copied",
+                "Updated but unmerged"
+            ],
+            "x-enum-varnames": [
+                "Unmodified",
+                "Untracked",
+                "Modified",
+                "Added",
+                "Deleted",
+                "Renamed",
+                "Copied",
+                "UpdatedButUnmerged"
+            ]
+        },
+        "Workspace": {
+            "type": "object",
+            "required": [
+                "id",
+                "name",
+                "projects",
+                "target"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Project"
+                    }
+                },
+                "target": {
+                    "type": "string"
+                }
+            }
+        },
+        "WorkspaceDTO": {
+            "type": "object",
+            "required": [
+                "id",
+                "name",
+                "projects",
+                "target"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "info": {
+                    "$ref": "#/definitions/WorkspaceInfo"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Project"
+                    }
+                },
+                "target": {
+                    "type": "string"
+                }
+            }
+        },
+        "WorkspaceInfo": {
+            "type": "object",
+            "required": [
+                "name",
+                "projects"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ProjectInfo"
+                    }
+                },
+                "providerMetadata": {
+                    "type": "string"
+                }
+            }
+        },
+        "apikey.ApiKeyType": {
+            "type": "string",
+            "enum": [
+                "client",
+                "project",
+                "workspace"
+            ],
+            "x-enum-varnames": [
+                "ApiKeyTypeClient",
+                "ApiKeyTypeProject",
+                "ApiKeyTypeWorkspace"
+            ]
+        },
+        "provider.ProviderInfo": {
+            "type": "object",
+            "required": [
+                "name",
+                "version"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "provider.ProviderTargetProperty": {
+            "type": "object",
+            "properties": {
+                "defaultValue": {
+                    "description": "DefaultValue is converted into the appropriate type based on the Type\nIf the property is a FilePath, the DefaultValue is a path to a directory",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "Brief description of the property",
+                    "type": "string"
+                },
+                "disabledPredicate": {
+                    "description": "A regex string matched with the name of the target to determine if the property should be disabled\nIf the regex matches the target name, the property will be disabled\nE.g. \"^local$\" will disable the property for the local target",
+                    "type": "string"
+                },
+                "inputMasked": {
+                    "type": "boolean"
+                },
+                "options": {
+                    "description": "Options is only used if the Type is ProviderTargetPropertyTypeOption",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "type": {
+                    "$ref": "#/definitions/provider.ProviderTargetPropertyType"
+                }
+            }
+        },
+        "provider.ProviderTargetPropertyType": {
+            "type": "string",
+            "enum": [
+                "string",
+                "option",
+                "boolean",
+                "int",
+                "float",
+                "file-path"
+            ],
+            "x-enum-varnames": [
+                "ProviderTargetPropertyTypeString",
+                "ProviderTargetPropertyTypeOption",
+                "ProviderTargetPropertyTypeBoolean",
+                "ProviderTargetPropertyTypeInt",
+                "ProviderTargetPropertyTypeFloat",
+                "ProviderTargetPropertyTypeFilePath"
+            ]
+        }
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "description": "\"Type 'Bearer TOKEN' to correctly set the API Key\"",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    },
+    "security": [
+        {
+            "Bearer": []
+        }
+    ]
+}

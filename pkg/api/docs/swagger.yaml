@@ -1,0 +1,1506 @@
+basePath: /
+definitions:
+  ApiKey:
+    properties:
+      keyHash:
+        type: string
+      name:
+        description: Project or client name
+        type: string
+      type:
+        $ref: '#/definitions/apikey.ApiKeyType'
+    required:
+    - keyHash
+    - name
+    - type
+    type: object
+  CloneTarget:
+    enum:
+    - branch
+    - commit
+    type: string
+    x-enum-varnames:
+    - CloneTargetBranch
+    - CloneTargetCommit
+  ContainerRegistry:
+    properties:
+      password:
+        type: string
+      server:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - server
+    - username
+    type: object
+  CreateProjectConfigDTO:
+    properties:
+      buildConfig:
+        $ref: '#/definitions/ProjectBuildConfig'
+      envVars:
+        additionalProperties:
+          type: string
+        type: object
+      image:
+        type: string
+      name:
+        type: string
+      source:
+        $ref: '#/definitions/CreateProjectConfigSourceDTO'
+      user:
+        type: string
+    required:
+    - envVars
+    - name
+    - source
+    type: object
+  CreateProjectConfigSourceDTO:
+    properties:
+      repository:
+        $ref: '#/definitions/GitRepository'
+    required:
+    - repository
+    type: object
+  CreateWorkspaceDTO:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      projects:
+        items:
+          $ref: '#/definitions/CreateProjectConfigDTO'
+        type: array
+      target:
+        type: string
+    required:
+    - id
+    - name
+    - projects
+    - target
+    type: object
+  DevcontainerConfig:
+    properties:
+      filePath:
+        type: string
+    required:
+    - filePath
+    type: object
+  FRPSConfig:
+    properties:
+      domain:
+        type: string
+      port:
+        type: integer
+      protocol:
+        type: string
+    required:
+    - domain
+    - port
+    - protocol
+    type: object
+  FileStatus:
+    properties:
+      extra:
+        type: string
+      name:
+        type: string
+      staging:
+        $ref: '#/definitions/Status'
+      worktree:
+        $ref: '#/definitions/Status'
+    required:
+    - extra
+    - name
+    - staging
+    - worktree
+    type: object
+  GitBranch:
+    properties:
+      name:
+        type: string
+      sha:
+        type: string
+    required:
+    - name
+    - sha
+    type: object
+  GitNamespace:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    required:
+    - id
+    - name
+    type: object
+  GitProvider:
+    properties:
+      baseApiUrl:
+        type: string
+      id:
+        type: string
+      token:
+        type: string
+      username:
+        type: string
+    required:
+    - id
+    - token
+    - username
+    type: object
+  GitPullRequest:
+    properties:
+      branch:
+        type: string
+      name:
+        type: string
+      sha:
+        type: string
+      sourceRepoId:
+        type: string
+      sourceRepoName:
+        type: string
+      sourceRepoOwner:
+        type: string
+      sourceRepoUrl:
+        type: string
+    required:
+    - branch
+    - name
+    - sha
+    - sourceRepoId
+    - sourceRepoName
+    - sourceRepoOwner
+    - sourceRepoUrl
+    type: object
+  GitRepository:
+    properties:
+      branch:
+        type: string
+      cloneTarget:
+        $ref: '#/definitions/CloneTarget'
+      id:
+        type: string
+      name:
+        type: string
+      owner:
+        type: string
+      path:
+        type: string
+      prNumber:
+        type: integer
+      sha:
+        type: string
+      source:
+        type: string
+      url:
+        type: string
+    required:
+    - id
+    - name
+    - owner
+    - sha
+    - source
+    - url
+    type: object
+  GitStatus:
+    properties:
+      currentBranch:
+        type: string
+      fileStatus:
+        items:
+          $ref: '#/definitions/FileStatus'
+        type: array
+    required:
+    - currentBranch
+    - fileStatus
+    type: object
+  GitUser:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - id
+    - name
+    - username
+    type: object
+  InstallProviderRequest:
+    properties:
+      downloadUrls:
+        additionalProperties:
+          type: string
+        type: object
+      name:
+        type: string
+    required:
+    - downloadUrls
+    - name
+    type: object
+  NetworkKey:
+    properties:
+      key:
+        type: string
+    required:
+    - key
+    type: object
+  ProfileData:
+    properties:
+      envVars:
+        additionalProperties:
+          type: string
+        type: object
+    required:
+    - envVars
+    type: object
+  Project:
+    properties:
+      buildConfig:
+        $ref: '#/definitions/ProjectBuildConfig'
+      default:
+        type: boolean
+      envVars:
+        additionalProperties:
+          type: string
+        type: object
+      image:
+        type: string
+      name:
+        type: string
+      repository:
+        $ref: '#/definitions/GitRepository'
+      state:
+        $ref: '#/definitions/ProjectState'
+      target:
+        type: string
+      user:
+        type: string
+      workspaceId:
+        type: string
+    required:
+    - default
+    - envVars
+    - image
+    - name
+    - repository
+    - target
+    - user
+    - workspaceId
+    type: object
+  ProjectBuildConfig:
+    properties:
+      devcontainer:
+        $ref: '#/definitions/DevcontainerConfig'
+    type: object
+  ProjectConfig:
+    properties:
+      buildConfig:
+        $ref: '#/definitions/ProjectBuildConfig'
+      default:
+        type: boolean
+      envVars:
+        additionalProperties:
+          type: string
+        type: object
+      image:
+        type: string
+      name:
+        type: string
+      repository:
+        $ref: '#/definitions/GitRepository'
+      user:
+        type: string
+    required:
+    - default
+    - envVars
+    - image
+    - name
+    - repository
+    - user
+    type: object
+  ProjectInfo:
+    properties:
+      created:
+        type: string
+      isRunning:
+        type: boolean
+      name:
+        type: string
+      providerMetadata:
+        type: string
+      workspaceId:
+        type: string
+    required:
+    - created
+    - isRunning
+    - name
+    - workspaceId
+    type: object
+  ProjectState:
+    properties:
+      gitStatus:
+        $ref: '#/definitions/GitStatus'
+      updatedAt:
+        type: string
+      uptime:
+        type: integer
+    required:
+    - gitStatus
+    - updatedAt
+    - uptime
+    type: object
+  Provider:
+    properties:
+      name:
+        type: string
+      version:
+        type: string
+    required:
+    - name
+    - version
+    type: object
+  ProviderTarget:
+    properties:
+      name:
+        type: string
+      options:
+        description: JSON encoded map of options
+        type: string
+      providerInfo:
+        $ref: '#/definitions/provider.ProviderInfo'
+    required:
+    - name
+    - options
+    - providerInfo
+    type: object
+  ProviderTargetManifest:
+    additionalProperties:
+      $ref: '#/definitions/provider.ProviderTargetProperty'
+    type: object
+  RepositoryUrl:
+    properties:
+      url:
+        type: string
+    required:
+    - url
+    type: object
+  ServerConfig:
+    properties:
+      apiPort:
+        type: integer
+      binariesPath:
+        type: string
+      buildImageNamespace:
+        type: string
+      builderImage:
+        type: string
+      builderRegistryServer:
+        type: string
+      defaultProjectImage:
+        type: string
+      defaultProjectUser:
+        type: string
+      frps:
+        $ref: '#/definitions/FRPSConfig'
+      headscalePort:
+        type: integer
+      id:
+        type: string
+      localBuilderRegistryImage:
+        type: string
+      localBuilderRegistryPort:
+        type: integer
+      logFilePath:
+        type: string
+      providersDir:
+        type: string
+      registryUrl:
+        type: string
+      serverDownloadUrl:
+        type: string
+    required:
+    - apiPort
+    - binariesPath
+    - builderImage
+    - builderRegistryServer
+    - defaultProjectImage
+    - defaultProjectUser
+    - headscalePort
+    - id
+    - localBuilderRegistryImage
+    - localBuilderRegistryPort
+    - logFilePath
+    - providersDir
+    - registryUrl
+    - serverDownloadUrl
+    type: object
+  SetGitProviderConfig:
+    properties:
+      baseApiUrl:
+        type: string
+      id:
+        type: string
+      token:
+        type: string
+      username:
+        type: string
+    required:
+    - id
+    - token
+    type: object
+  SetProjectState:
+    properties:
+      gitStatus:
+        $ref: '#/definitions/GitStatus'
+      uptime:
+        type: integer
+    required:
+    - uptime
+    type: object
+  Status:
+    enum:
+    - Unmodified
+    - Untracked
+    - Modified
+    - Added
+    - Deleted
+    - Renamed
+    - Copied
+    - Updated but unmerged
+    type: string
+    x-enum-varnames:
+    - Unmodified
+    - Untracked
+    - Modified
+    - Added
+    - Deleted
+    - Renamed
+    - Copied
+    - UpdatedButUnmerged
+  Workspace:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      projects:
+        items:
+          $ref: '#/definitions/Project'
+        type: array
+      target:
+        type: string
+    required:
+    - id
+    - name
+    - projects
+    - target
+    type: object
+  WorkspaceDTO:
+    properties:
+      id:
+        type: string
+      info:
+        $ref: '#/definitions/WorkspaceInfo'
+      name:
+        type: string
+      projects:
+        items:
+          $ref: '#/definitions/Project'
+        type: array
+      target:
+        type: string
+    required:
+    - id
+    - name
+    - projects
+    - target
+    type: object
+  WorkspaceInfo:
+    properties:
+      name:
+        type: string
+      projects:
+        items:
+          $ref: '#/definitions/ProjectInfo'
+        type: array
+      providerMetadata:
+        type: string
+    required:
+    - name
+    - projects
+    type: object
+  apikey.ApiKeyType:
+    enum:
+    - client
+    - project
+    - workspace
+    type: string
+    x-enum-varnames:
+    - ApiKeyTypeClient
+    - ApiKeyTypeProject
+    - ApiKeyTypeWorkspace
+  provider.ProviderInfo:
+    properties:
+      name:
+        type: string
+      version:
+        type: string
+    required:
+    - name
+    - version
+    type: object
+  provider.ProviderTargetProperty:
+    properties:
+      defaultValue:
+        description: |-
+          DefaultValue is converted into the appropriate type based on the Type
+          If the property is a FilePath, the DefaultValue is a path to a directory
+        type: string
+      description:
+        description: Brief description of the property
+        type: string
+      disabledPredicate:
+        description: |-
+          A regex string matched with the name of the target to determine if the property should be disabled
+          If the regex matches the target name, the property will be disabled
+          E.g. "^local$" will disable the property for the local target
+        type: string
+      inputMasked:
+        type: boolean
+      options:
+        description: Options is only used if the Type is ProviderTargetPropertyTypeOption
+        items:
+          type: string
+        type: array
+      type:
+        $ref: '#/definitions/provider.ProviderTargetPropertyType'
+    type: object
+  provider.ProviderTargetPropertyType:
+    enum:
+    - string
+    - option
+    - boolean
+    - int
+    - float
+    - file-path
+    type: string
+    x-enum-varnames:
+    - ProviderTargetPropertyTypeString
+    - ProviderTargetPropertyTypeOption
+    - ProviderTargetPropertyTypeBoolean
+    - ProviderTargetPropertyTypeInt
+    - ProviderTargetPropertyTypeFloat
+    - ProviderTargetPropertyTypeFilePath
+host: localhost:3986
+info:
+  contact: {}
+  description: Daytona Server API
+  title: Daytona Server API
+  version: v0.0.0-dev
+paths:
+  /apikey:
+    get:
+      description: List API keys
+      operationId: ListClientApiKeys
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ApiKey'
+            type: array
+      summary: List API keys
+      tags:
+      - apiKey
+  /apikey/{apiKeyName}:
+    delete:
+      description: Revoke API key
+      operationId: RevokeApiKey
+      parameters:
+      - description: API key name
+        in: path
+        name: apiKeyName
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Revoke API key
+      tags:
+      - apiKey
+    post:
+      description: Generate an API key
+      operationId: GenerateApiKey
+      parameters:
+      - description: API key name
+        in: path
+        name: apiKeyName
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Generate an API key
+      tags:
+      - apiKey
+  /container-registry:
+    get:
+      description: List container registries
+      operationId: ListContainerRegistries
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ContainerRegistry'
+            type: array
+      summary: List container registries
+      tags:
+      - container-registry
+  /container-registry/{server}:
+    delete:
+      description: Remove a container registry credentials
+      operationId: RemoveContainerRegistry
+      parameters:
+      - description: Container Registry server name
+        in: path
+        name: server
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      summary: Remove a container registry credentials
+      tags:
+      - container-registry
+    get:
+      description: Get container registry credentials
+      operationId: GetContainerRegistry
+      parameters:
+      - description: Container Registry server name
+        in: path
+        name: server
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ContainerRegistry'
+      summary: Get container registry credentials
+      tags:
+      - container-registry
+    put:
+      description: Set container registry credentials
+      operationId: SetContainerRegistry
+      parameters:
+      - description: Container Registry server name
+        in: path
+        name: server
+        required: true
+        type: string
+      - description: Container Registry credentials to set
+        in: body
+        name: containerRegistry
+        required: true
+        schema:
+          $ref: '#/definitions/ContainerRegistry'
+      responses:
+        "201":
+          description: Created
+      summary: Set container registry credentials
+      tags:
+      - container-registry
+  /gitprovider:
+    get:
+      description: List Git providers
+      operationId: ListGitProviders
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/GitProvider'
+            type: array
+      summary: List Git providers
+      tags:
+      - gitProvider
+    put:
+      description: Set Git provider
+      operationId: SetGitProvider
+      parameters:
+      - description: Git provider
+        in: body
+        name: gitProviderConfig
+        required: true
+        schema:
+          $ref: '#/definitions/SetGitProviderConfig'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Set Git provider
+      tags:
+      - gitProvider
+  /gitprovider/{gitProviderId}:
+    delete:
+      description: Remove Git provider
+      operationId: RemoveGitProvider
+      parameters:
+      - description: Git provider
+        in: path
+        name: gitProviderId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Remove Git provider
+      tags:
+      - gitProvider
+  /gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/branches:
+    get:
+      description: Get Git repository branches
+      operationId: GetRepoBranches
+      parameters:
+      - description: Git provider
+        in: path
+        name: gitProviderId
+        required: true
+        type: string
+      - description: Namespace
+        in: path
+        name: namespaceId
+        required: true
+        type: string
+      - description: Repository
+        in: path
+        name: repositoryId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/GitBranch'
+            type: array
+      summary: Get Git repository branches
+      tags:
+      - gitProvider
+  /gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/pull-requests:
+    get:
+      description: Get Git repository PRs
+      operationId: GetRepoPRs
+      parameters:
+      - description: Git provider
+        in: path
+        name: gitProviderId
+        required: true
+        type: string
+      - description: Namespace
+        in: path
+        name: namespaceId
+        required: true
+        type: string
+      - description: Repository
+        in: path
+        name: repositoryId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/GitPullRequest'
+            type: array
+      summary: Get Git repository PRs
+      tags:
+      - gitProvider
+  /gitprovider/{gitProviderId}/{namespaceId}/repositories:
+    get:
+      description: Get Git repositories
+      operationId: GetRepositories
+      parameters:
+      - description: Git provider
+        in: path
+        name: gitProviderId
+        required: true
+        type: string
+      - description: Namespace
+        in: path
+        name: namespaceId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/GitRepository'
+            type: array
+      summary: Get Git repositories
+      tags:
+      - gitProvider
+  /gitprovider/{gitProviderId}/namespaces:
+    get:
+      description: Get Git namespaces
+      operationId: GetNamespaces
+      parameters:
+      - description: Git provider
+        in: path
+        name: gitProviderId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/GitNamespace'
+            type: array
+      summary: Get Git namespaces
+      tags:
+      - gitProvider
+  /gitprovider/{gitProviderId}/user:
+    get:
+      description: Get Git context
+      operationId: GetGitUser
+      parameters:
+      - description: Git Provider Id
+        in: path
+        name: gitProviderId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/GitUser'
+      summary: Get Git context
+      tags:
+      - gitProvider
+  /gitprovider/context/{gitUrl}:
+    get:
+      description: Get Git context
+      operationId: GetGitContext
+      parameters:
+      - description: Git URL
+        in: path
+        name: gitUrl
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/GitRepository'
+      summary: Get Git context
+      tags:
+      - gitProvider
+  /gitprovider/context/url:
+    post:
+      description: Get URL from Git repository
+      operationId: GetUrlFromRepository
+      parameters:
+      - description: Git repository
+        in: body
+        name: repository
+        required: true
+        schema:
+          $ref: '#/definitions/GitRepository'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/RepositoryUrl'
+      summary: Get URL from Git repository
+      tags:
+      - gitProvider
+  /gitprovider/for-url/{url}:
+    get:
+      description: Get Git provider
+      operationId: GetGitProviderForUrl
+      parameters:
+      - description: Url
+        in: path
+        name: url
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/GitProvider'
+      summary: Get Git provider
+      tags:
+      - gitProvider
+  /gitprovider/id-for-url/{url}:
+    get:
+      description: Get Git provider ID
+      operationId: GetGitProviderIdForUrl
+      parameters:
+      - description: Url
+        in: path
+        name: url
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Get Git provider ID
+      tags:
+      - gitProvider
+  /profile:
+    delete:
+      description: Delete profile data
+      operationId: DeleteProfileData
+      responses:
+        "204":
+          description: No Content
+      summary: Delete profile data
+      tags:
+      - profile
+    get:
+      consumes:
+      - application/json
+      description: Get profile data
+      operationId: GetProfileData
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ProfileData'
+      summary: Get profile data
+      tags:
+      - profile
+    put:
+      consumes:
+      - application/json
+      description: Set profile data
+      operationId: SetProfileData
+      parameters:
+      - description: Profile data
+        in: body
+        name: profileData
+        required: true
+        schema:
+          $ref: '#/definitions/ProfileData'
+      responses:
+        "201":
+          description: Created
+      summary: Set profile data
+      tags:
+      - profile
+  /project-config:
+    get:
+      description: List project configs
+      operationId: ListProjectConfigs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ProjectConfig'
+            type: array
+      summary: List project configs
+      tags:
+      - project-config
+    put:
+      consumes:
+      - application/json
+      description: Set project config data
+      operationId: SetProjectConfig
+      parameters:
+      - description: Project config
+        in: body
+        name: projectConfig
+        required: true
+        schema:
+          $ref: '#/definitions/CreateProjectConfigDTO'
+      responses:
+        "201":
+          description: Created
+      summary: Set project config data
+      tags:
+      - project-config
+  /project-config/{configName}:
+    delete:
+      description: Delete project config data
+      operationId: DeleteProjectConfig
+      parameters:
+      - description: Config name
+        in: path
+        name: configName
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      summary: Delete project config data
+      tags:
+      - project-config
+    get:
+      consumes:
+      - application/json
+      description: Get project config data
+      operationId: GetProjectConfig
+      parameters:
+      - description: Config name
+        in: path
+        name: configName
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ProjectConfig'
+      summary: Get project config data
+      tags:
+      - project-config
+  /project-config/{configName}/set-default:
+    patch:
+      description: Set project config to default
+      operationId: SetDefaultProjectConfig
+      parameters:
+      - description: Config name
+        in: path
+        name: configName
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Set project config to default
+      tags:
+      - project-config
+  /project-config/default/{gitUrl}:
+    get:
+      description: Get project configs by git url
+      operationId: GetDefaultProjectConfig
+      parameters:
+      - description: Git URL
+        in: path
+        name: gitUrl
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ProjectConfig'
+      summary: Get project configs by git url
+      tags:
+      - project-config
+  /provider:
+    get:
+      description: List providers
+      operationId: ListProviders
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/Provider'
+            type: array
+      summary: List providers
+      tags:
+      - provider
+  /provider/{provider}/target-manifest:
+    get:
+      description: Get provider target manifest
+      operationId: GetTargetManifest
+      parameters:
+      - description: Provider name
+        in: path
+        name: provider
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ProviderTargetManifest'
+      summary: Get provider target manifest
+      tags:
+      - provider
+  /provider/{provider}/uninstall:
+    post:
+      consumes:
+      - application/json
+      description: Uninstall a provider
+      operationId: UninstallProvider
+      parameters:
+      - description: Provider to uninstall
+        in: path
+        name: provider
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Uninstall a provider
+      tags:
+      - provider
+  /provider/install:
+    post:
+      consumes:
+      - application/json
+      description: Install a provider
+      operationId: InstallProvider
+      parameters:
+      - description: Provider to install
+        in: body
+        name: provider
+        required: true
+        schema:
+          $ref: '#/definitions/InstallProviderRequest'
+      responses:
+        "200":
+          description: OK
+      summary: Install a provider
+      tags:
+      - provider
+  /server/config:
+    get:
+      description: Get the server configuration
+      operationId: GetConfig
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ServerConfig'
+      summary: Get the server configuration
+      tags:
+      - server
+    post:
+      consumes:
+      - application/json
+      description: Set the server configuration
+      operationId: SetConfig
+      parameters:
+      - description: Server configuration
+        in: body
+        name: config
+        required: true
+        schema:
+          $ref: '#/definitions/ServerConfig'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ServerConfig'
+      summary: Set the server configuration
+      tags:
+      - server
+  /server/network-key:
+    post:
+      description: Generate a new authentication key
+      operationId: GenerateNetworkKey
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/NetworkKey'
+      summary: Generate a new authentication key
+      tags:
+      - server
+  /target:
+    get:
+      description: List targets
+      operationId: ListTargets
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ProviderTarget'
+            type: array
+      summary: List targets
+      tags:
+      - target
+    put:
+      description: Set a target
+      operationId: SetTarget
+      parameters:
+      - description: Target to set
+        in: body
+        name: target
+        required: true
+        schema:
+          $ref: '#/definitions/ProviderTarget'
+      responses:
+        "201":
+          description: Created
+      summary: Set a target
+      tags:
+      - target
+  /target/{target}:
+    delete:
+      description: Remove a target
+      operationId: RemoveTarget
+      parameters:
+      - description: Target name
+        in: path
+        name: target
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      summary: Remove a target
+      tags:
+      - target
+  /workspace:
+    get:
+      description: List workspaces
+      operationId: ListWorkspaces
+      parameters:
+      - description: Verbose
+        in: query
+        name: verbose
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/WorkspaceDTO'
+            type: array
+      summary: List workspaces
+      tags:
+      - workspace
+    post:
+      description: Create a workspace
+      operationId: CreateWorkspace
+      parameters:
+      - description: Create workspace
+        in: body
+        name: workspace
+        required: true
+        schema:
+          $ref: '#/definitions/CreateWorkspaceDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Workspace'
+      summary: Create a workspace
+      tags:
+      - workspace
+  /workspace/{workspaceId}:
+    delete:
+      description: Remove workspace
+      operationId: RemoveWorkspace
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Force
+        in: query
+        name: force
+        type: boolean
+      responses:
+        "200":
+          description: OK
+      summary: Remove workspace
+      tags:
+      - workspace
+    get:
+      description: Get workspace info
+      operationId: GetWorkspace
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/WorkspaceDTO'
+      summary: Get workspace info
+      tags:
+      - workspace
+  /workspace/{workspaceId}/{projectId}/start:
+    post:
+      description: Start project
+      operationId: StartProject
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Start project
+      tags:
+      - workspace
+  /workspace/{workspaceId}/{projectId}/state:
+    post:
+      description: Set project state
+      operationId: SetProjectState
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Set State
+        in: body
+        name: setState
+        required: true
+        schema:
+          $ref: '#/definitions/SetProjectState'
+      responses:
+        "200":
+          description: OK
+      summary: Set project state
+      tags:
+      - workspace
+  /workspace/{workspaceId}/{projectId}/stop:
+    post:
+      description: Stop project
+      operationId: StopProject
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Stop project
+      tags:
+      - workspace
+  /workspace/{workspaceId}/start:
+    post:
+      description: Start workspace
+      operationId: StartWorkspace
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Start workspace
+      tags:
+      - workspace
+  /workspace/{workspaceId}/stop:
+    post:
+      description: Stop workspace
+      operationId: StopWorkspace
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Stop workspace
+      tags:
+      - workspace
+schemes:
+- http
+security:
+- Bearer: []
+securityDefinitions:
+  Bearer:
+    description: '"Type ''Bearer TOKEN'' to correctly set the API Key"'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
