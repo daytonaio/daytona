@@ -67,14 +67,7 @@ var CodeCmd = &cobra.Command{
 			}
 			workspaceId = workspace.Id
 		} else {
-			var workspaceName string
-			if _, err := url.ParseRequestURI(args[0]); err == nil {
-				workspaceName = url.PathEscape(args[0])
-			} else {
-				workspaceName = args[0]
-			}
-
-			workspace, err = apiclient_util.GetWorkspace(workspaceName)
+			workspace, err = apiclient_util.GetWorkspace(url.PathEscape(args[0]))
 			if err != nil {
 				if strings.Contains(err.Error(), workspaces.ErrWorkspaceNotFound.Error()) {
 					log.Debug(err)
