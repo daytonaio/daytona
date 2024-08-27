@@ -174,6 +174,8 @@ func openIDE(ideId string, activeProfile config.Profile, workspaceId string, pro
 		return ide.OpenTerminalSsh(activeProfile, workspaceId, projectName)
 	case "browser":
 		return ide.OpenBrowserIDE(activeProfile, workspaceId, projectName, projectProviderMetadata)
+	case "cursor":
+		return ide.OpenCursor(activeProfile, workspaceId, projectName, projectProviderMetadata)
 	default:
 		_, ok := jetbrains.GetIdes()[jetbrains.Id(ideId)]
 		if ok {
