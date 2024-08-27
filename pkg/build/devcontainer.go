@@ -253,7 +253,7 @@ func (b *DevcontainerBuilder) startContainer(build Build) error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("timeout waiting for dockerd to start: %v", err)
+		return fmt.Errorf("timeout waiting for dockerd to start: %w", err)
 	}
 
 	return nil

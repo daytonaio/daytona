@@ -23,12 +23,12 @@ func GetConfig() (*Config, error) {
 	if os.IsNotExist(err) {
 		c, err := getDefaultConfig()
 		if err != nil {
-			return nil, fmt.Errorf("failed to get default config: %v", err)
+			return nil, fmt.Errorf("failed to get default config: %w", err)
 		}
 
 		err = Save(*c)
 		if err != nil {
-			return nil, fmt.Errorf("failed to save default config file: %v", err)
+			return nil, fmt.Errorf("failed to save default config file: %w", err)
 		}
 
 		return c, nil

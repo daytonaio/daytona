@@ -114,7 +114,7 @@ func (g *AwsCodeCommitGitProvider) GetRepositories(namespace string) ([]*GitRepo
 		RepositoryName: &namespace,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch repository: %s with error: %v", namespace, err.Error())
+		return nil, fmt.Errorf("failed to fetch repository: %s with error: %w", namespace, err)
 	}
 	repository := &GitRepository{
 		Id:     *data.RepositoryMetadata.RepositoryName,
@@ -294,7 +294,7 @@ func (g *AwsCodeCommitGitProvider) getPrContext(staticContext *StaticGitContext)
 func (g *AwsCodeCommitGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
 	url, err := url.Parse(repoUrl)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse url: %s with error: %v", repoUrl, err.Error())
+		return nil, fmt.Errorf("failed to parse url: %s with error: %w", repoUrl, err)
 	}
 	if strings.Contains(repoUrl, "git-codecommit") {
 		reponame := strings.TrimPrefix(url.Path, "/v1/repos/")
