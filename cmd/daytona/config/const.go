@@ -26,6 +26,7 @@ func GetIdeList() []Ide {
 	ides := []Ide{
 		{"vscode", "VS Code"},
 		{"browser", "VS Code - Browser"},
+		{"cursor", "Cursor"},
 		{"ssh", "Terminal SSH"},
 	}
 

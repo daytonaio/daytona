@@ -38,12 +38,12 @@ func OpenVSCode(activeProfile config.Profile, workspaceId string, projectName st
 		return err
 	}
 
-	return setupIdeCustomizations(projectHostname, projectProviderMetadata, devcontainer.Vscode, "*/.vscode-server/*/bin/code-server", "$HOME/.vscode-server/data/Machine/settings.json")
+	return setupVSCodeCustomizations(projectHostname, projectProviderMetadata, devcontainer.Vscode, "*/.vscode-server/*/bin/code-server", "$HOME/.vscode-server/data/Machine/settings.json", ".daytona-customizations-lock-vscode")
 }
 
-func setupIdeCustomizations(projectHostname string, projectProviderMetadata string, tool devcontainer.Tool, codeServerPath string, settingsPath string) error {
+func setupVSCodeCustomizations(projectHostname string, projectProviderMetadata string, tool devcontainer.Tool, codeServerPath string, settingsPath string, lockFileName string) error {
 	// Check if customizations are already set up
-	err := exec.Command("ssh", projectHostname, "test", "-f", fmt.Sprintf("$HOME/.daytona-customizations-lock-%s", string(tool))).Run()
+	err := exec.Command("ssh", projectHostname, "test", "-f", fmt.Sprintf("$HOME/%s-%s", lockFileName, string(tool))).Run()
 	if err == nil {
 		return nil
 	}
@@ -109,14 +109,14 @@ func setupIdeCustomizations(projectHostname string, projectProviderMetadata stri
 			}
 		}
 
-		err := setIdeSettings(projectHostname, mergedCustomizations, settingsPath)
+		err := setupVSCodeSettings(projectHostname, mergedCustomizations, settingsPath)
 		if err != nil {
 			log.Errorf("Failed to set IDE settings: %s", err)
 		}
 	}
 
 	// Create lock file to indicate that customizations are set up
-	err = exec.Command("ssh", projectHostname, "touch", fmt.Sprintf("$HOME/.daytona-customizations-lock-%s", string(tool))).Run()
+	err = exec.Command("ssh", projectHostname, "touch", fmt.Sprintf("$HOME/%s-%s", lockFileName, string(tool))).Run()
 	if err != nil {
 		return err
 	}
@@ -125,7 +125,7 @@ func setupIdeCustomizations(projectHostname string, projectProviderMetadata stri
 	return nil
 }
 
-func setIdeSettings(projectHostname string, customizations *devcontainer.Customizations, settingsPath string) error {
+func setupVSCodeSettings(projectHostname string, customizations *devcontainer.Customizations, settingsPath string) error {
 	if customizations == nil {
 		return nil
 	}
