@@ -27,14 +27,14 @@ func NewMockApiClient() *MockApiClient {
 	return &MockApiClient{}
 }
 
-func (m *MockApiClient) NetworkList(ctx context.Context, options types.NetworkListOptions) ([]types.NetworkResource, error) {
+func (m *MockApiClient) NetworkList(ctx context.Context, options network.ListOptions) ([]network.Inspect, error) {
 	args := m.Called(ctx, options)
-	return args.Get(0).([]types.NetworkResource), args.Error(1)
+	return args.Get(0).([]network.Inspect), args.Error(1)
 }
 
-func (m *MockApiClient) NetworkCreate(ctx context.Context, name string, options types.NetworkCreate) (types.NetworkCreateResponse, error) {
+func (m *MockApiClient) NetworkCreate(ctx context.Context, name string, options network.CreateOptions) (network.CreateResponse, error) {
 	args := m.Called(ctx, name, options)
-	return args.Get(0).(types.NetworkCreateResponse), args.Error(1)
+	return args.Get(0).(network.CreateResponse), args.Error(1)
 }
 
 func (m *MockApiClient) NetworkRemove(ctx context.Context, networkID string) error {
@@ -77,24 +77,24 @@ func (m *MockApiClient) ContainerStop(ctx context.Context, container string, sto
 	return args.Error(0)
 }
 
-func (m *MockApiClient) ContainerExecCreate(ctx context.Context, container string, config types.ExecConfig) (types.IDResponse, error) {
+func (m *MockApiClient) ContainerExecCreate(ctx context.Context, container string, config container.ExecOptions) (types.IDResponse, error) {
 	args := m.Called(ctx, container, config)
 	return args.Get(0).(types.IDResponse), args.Error(1)
 }
 
-func (m *MockApiClient) ContainerExecStart(ctx context.Context, execID string, config types.ExecStartCheck) error {
+func (m *MockApiClient) ContainerExecStart(ctx context.Context, execID string, config container.ExecStartOptions) error {
 	args := m.Called(ctx, execID, config)
 	return args.Error(0)
 }
 
-func (m *MockApiClient) ContainerExecAttach(ctx context.Context, execID string, config types.ExecStartCheck) (types.HijackedResponse, error) {
+func (m *MockApiClient) ContainerExecAttach(ctx context.Context, execID string, config container.ExecStartOptions) (types.HijackedResponse, error) {
 	args := m.Called(ctx, execID, config)
 	return args.Get(0).(types.HijackedResponse), args.Error(1)
 }
 
-func (m *MockApiClient) ContainerExecInspect(ctx context.Context, execID string) (types.ContainerExecInspect, error) {
+func (m *MockApiClient) ContainerExecInspect(ctx context.Context, execID string) (container.ExecInspect, error) {
 	args := m.Called(ctx, execID)
-	return args.Get(0).(types.ContainerExecInspect), args.Error(1)
+	return args.Get(0).(container.ExecInspect), args.Error(1)
 }
 
 func (m *MockApiClient) ContainerInspect(ctx context.Context, container string) (types.ContainerJSON, error) {
