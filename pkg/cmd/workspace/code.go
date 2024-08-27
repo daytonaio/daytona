@@ -67,17 +67,20 @@ var CodeCmd = &cobra.Command{
 			}
 			workspaceId = workspace.Id
 		} else {
-			encodedWorkspaceName := url.PathEscape(args[0])
+			var workspaceName string
+			if _, err := url.ParseRequestURI(args[0]); err == nil {
+				workspaceName = url.PathEscape(args[0])
+			} else {
+				workspaceName = args[0]
+			}
 
-			workspace, err := apiclient_util.GetWorkspace(encodedWorkspaceName)
+			workspace, err = apiclient_util.GetWorkspace(workspaceName)
 			if err != nil {
 				if strings.Contains(err.Error(), workspaces.ErrWorkspaceNotFound.Error()) {
 					log.Fatal("Workspace not found. You can see all workspace names by running the command `daytona list`")
-				} else {
-					log.Fatal(err)
 				}
+				log.Fatal(err)
 			}
-
 			workspaceId = workspace.Id
 		}
 
