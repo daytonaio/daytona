@@ -174,9 +174,7 @@ func getWorkspaceTableRowData(workspace apiclient.WorkspaceDTO, specifyGitProvid
 	rowData.Name = workspace.Name + views_util.AdditionalPropertyPadding
 	if len(workspace.Projects) > 0 {
 		rowData.Repository = util.GetRepositorySlugFromUrl(workspace.Projects[0].Repository.Url, specifyGitProviders)
-		if workspace.Projects[0].Repository.Branch != nil {
-			rowData.Branch = *workspace.Projects[0].Repository.Branch
-		}
+		rowData.Branch = workspace.Projects[0].Repository.Branch
 	}
 
 	rowData.Target = workspace.Target + views_util.AdditionalPropertyPadding
@@ -195,9 +193,7 @@ func getProjectTableRowData(workspaceDTO apiclient.WorkspaceDTO, project apiclie
 	rowData.Name = " └ " + project.Name
 
 	rowData.Repository = util.GetRepositorySlugFromUrl(project.Repository.Url, specifyGitProviders)
-	if project.Repository.Branch != nil {
-		rowData.Branch = *project.Repository.Branch
-	}
+	rowData.Branch = project.Repository.Branch
 
 	rowData.Target = project.Target + views_util.AdditionalPropertyPadding
 

@@ -4,7 +4,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Branch** | Pointer to **string** |  | [optional] 
+**Branch** | **string** |  | 
+**EnvVars** | **map[string]string** |  | 
 **PrebuildId** | Pointer to **string** |  | [optional] 
 **ProjectConfigName** | **string** |  | 
 
@@ -12,7 +13,7 @@ Name | Type | Description | Notes
 
 ### NewCreateBuildDTO
 
-`func NewCreateBuildDTO(projectConfigName string, ) *CreateBuildDTO`
+`func NewCreateBuildDTO(branch string, envVars map[string]string, projectConfigName string, ) *CreateBuildDTO`
 
 NewCreateBuildDTO instantiates a new CreateBuildDTO object
 This constructor will assign default values to properties that have it defined,
@@ -46,11 +47,26 @@ and a boolean to check if the value has been set.
 
 SetBranch sets Branch field to given value.
 
-### HasBranch
 
-`func (o *CreateBuildDTO) HasBranch() bool`
+### GetEnvVars
 
-HasBranch returns a boolean if a field has been set.
+`func (o *CreateBuildDTO) GetEnvVars() map[string]string`
+
+GetEnvVars returns the EnvVars field if non-nil, zero value otherwise.
+
+### GetEnvVarsOk
+
+`func (o *CreateBuildDTO) GetEnvVarsOk() (*map[string]string, bool)`
+
+GetEnvVarsOk returns a tuple with the EnvVars field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetEnvVars
+
+`func (o *CreateBuildDTO) SetEnvVars(v map[string]string)`
+
+SetEnvVars sets EnvVars field to given value.
+
 
 ### GetPrebuildId
 

@@ -30,7 +30,7 @@ type Build struct {
 	Image       string                     `json:"image" validate:"required"`
 	User        string                     `json:"user" validate:"required"`
 	BuildConfig *buildconfig.BuildConfig   `json:"buildConfig" validate:"optional"`
-	Repository  *gitprovider.GitRepository `json:"repository" validate:"optional"`
+	Repository  *gitprovider.GitRepository `json:"repository" validate:"required"`
 	EnvVars     map[string]string          `json:"envVars" validate:"required"`
 	PrebuildId  string                     `json:"prebuildId" validate:"required"`
 	CreatedAt   time.Time                  `json:"createdAt" validate:"required"`
@@ -77,11 +77,8 @@ func (b *Build) GetBuildHash() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	var branch string
-	if b.Repository != nil && b.Repository.Branch != nil {
-		branch = *b.Repository.Branch
-	}
-	data := string(buildJson) + b.Repository.Url + branch + string(envVarsJson)
+
+	data := string(buildJson) + b.Repository.Url + b.Repository.Branch + string(envVarsJson)
 	hash := sha256.Sum256([]byte(data))
 	hashStr := hex.EncodeToString(hash[:])
 	return hashStr, nil
@@ -96,12 +93,7 @@ func (b *Build) getBuildHashWithoutBuildConfig() (string, error) {
 		return "", err
 	}
 
-	var branch string
-	if b.Repository != nil && b.Repository.Branch != nil {
-		branch = *b.Repository.Branch
-	}
-
-	data := branch + b.Repository.Url + string(envVarsJson)
+	data := b.Repository.Branch + b.Repository.Url + string(envVarsJson)
 	hash := sha256.Sum256([]byte(data))
 	hashStr := hex.EncodeToString(hash[:])
 

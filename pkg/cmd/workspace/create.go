@@ -107,7 +107,11 @@ var CreateCmd = &cobra.Command{
 
 		projectNames := []string{}
 		for i := range projects {
-			projects[i].EnvVars = *workspace_util.GetEnvVariables(projects[i].EnvVars, profileData)
+			if profileData != nil && profileData.EnvVars != nil {
+				projects[i].EnvVars = util.MergeEnvVars(profileData.EnvVars, projects[i].EnvVars)
+			} else {
+				projects[i].EnvVars = util.MergeEnvVars(projects[i].EnvVars)
+			}
 			projectNames = append(projectNames, projects[i].Name)
 		}
 

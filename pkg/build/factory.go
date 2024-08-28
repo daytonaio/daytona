@@ -55,12 +55,12 @@ func (f *BuilderFactory) Create(build Build, projectDir string) (IBuilder, error
 }
 
 func (f *BuilderFactory) CheckExistingBuild(b Build) (*Build, error) {
-	if b.Repository == nil || b.Repository.Branch == nil {
-		return nil, fmt.Errorf("repository and branch must be set")
+	if b.Repository == nil {
+		return nil, fmt.Errorf("repository must be set")
 	}
 
 	build, err := f.buildStore.Find(&Filter{
-		Branch:        b.Repository.Branch,
+		Branch:        &b.Repository.Branch,
 		RepositoryUrl: &b.Repository.Url,
 		BuildConfig:   b.BuildConfig,
 		EnvVars:       &b.EnvVars,

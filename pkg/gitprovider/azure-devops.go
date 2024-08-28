@@ -90,7 +90,7 @@ func (g *AzureDevOpsGitProvider) GetRepositories(namespace string) ([]*GitReposi
 		gitRepo := &GitRepository{
 			Id:     repo.Id.String(),
 			Name:   *repo.Name,
-			Branch: &defaultBranch,
+			Branch: defaultBranch,
 			Url:    *repo.WebUrl,
 			Source: u.Host,
 		}
@@ -315,28 +315,30 @@ func (g *AzureDevOpsGitProvider) GetBranchByCommit(staticContext *StaticGitConte
 	return branchName, nil
 }
 
-func (g *AzureDevOpsGitProvider) GetUrlFromRepository(repo *GitRepository) string {
-	url := strings.TrimSuffix(repo.Url, ".git")
-	url = strings.TrimSuffix(url, repo.Name)
-	url += "_git/" + repo.Name
+func (g *AzureDevOpsGitProvider) GetUrlFromContext(repoContext *GetRepositoryContext) string {
+	url := strings.TrimSuffix(repoContext.Url, ".git")
+	if repoContext.Name != nil {
+		url = strings.TrimSuffix(url, *repoContext.Name)
+		url += "_git/" + *repoContext.Name
+	}
 	query := ""
 
-	if repo.Branch != nil && *repo.Branch != "" {
-		if repo.Sha == *repo.Branch {
-			query += "version=GC" + *repo.Branch
+	if repoContext.Branch != nil && *repoContext.Branch != "" {
+		if repoContext.Sha != nil && *repoContext.Sha == *repoContext.Branch {
+			query += "version=GC" + *repoContext.Branch
 		} else {
-			query += "version=GB" + *repo.Branch
+			query += "version=GB" + *repoContext.Branch
 		}
 
-		if repo.Path != nil && *repo.Path != "" {
+		if repoContext.Path != nil && *repoContext.Path != "" {
 			if query != "" {
 				query += "&"
 			}
 
-			query += "path=" + *repo.Path
+			query += "path=" + *repoContext.Path
 		}
-	} else if repo.Path != nil {
-		query = "version=GBmain&path=" + *repo.Path
+	} else if repoContext.Path != nil {
+		query = "version=GBmain&path=" + *repoContext.Path
 	} else {
 		url = strings.Replace(url, "/_git", "", 1)
 	}

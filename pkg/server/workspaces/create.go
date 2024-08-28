@@ -232,7 +232,7 @@ func (s *WorkspaceService) getCachedBuildForProject(p *project.Project) (*buildc
 	build, err := s.buildService.Find(&build.Filter{
 		States:        validStates,
 		RepositoryUrl: &p.Repository.Url,
-		Branch:        p.Repository.Branch,
+		Branch:        &p.Repository.Branch,
 		EnvVars:       &p.EnvVars,
 		BuildConfig:   p.BuildConfig,
 		GetNewest:     util.Pointer(true),

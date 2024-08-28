@@ -8,6 +8,7 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 )
 
 func AddProjectFromConfig(projectConfig *apiclient.ProjectConfig, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectDTO, branchFlag string) (*string, error) {
@@ -18,9 +19,11 @@ func AddProjectFromConfig(projectConfig *apiclient.ProjectConfig, apiClient *api
 		if err != nil {
 			return nil, err
 		}
-		if chosenBranch != nil {
-			chosenBranchName = chosenBranch.Name
+		if chosenBranch == nil {
+			return nil, common.ErrCtrlCAbort
 		}
+
+		chosenBranchName = chosenBranch.Name
 	}
 
 	configRepo, res, err := apiClient.GitProviderAPI.GetGitContext(context.Background()).Repository(apiclient.GetRepositoryContext{

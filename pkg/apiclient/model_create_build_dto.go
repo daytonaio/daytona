@@ -21,9 +21,10 @@ var _ MappedNullable = &CreateBuildDTO{}
 
 // CreateBuildDTO struct for CreateBuildDTO
 type CreateBuildDTO struct {
-	Branch            *string `json:"branch,omitempty"`
-	PrebuildId        *string `json:"prebuildId,omitempty"`
-	ProjectConfigName string  `json:"projectConfigName"`
+	Branch            string            `json:"branch"`
+	EnvVars           map[string]string `json:"envVars"`
+	PrebuildId        *string           `json:"prebuildId,omitempty"`
+	ProjectConfigName string            `json:"projectConfigName"`
 }
 
 type _CreateBuildDTO CreateBuildDTO
@@ -32,8 +33,10 @@ type _CreateBuildDTO CreateBuildDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateBuildDTO(projectConfigName string) *CreateBuildDTO {
+func NewCreateBuildDTO(branch string, envVars map[string]string, projectConfigName string) *CreateBuildDTO {
 	this := CreateBuildDTO{}
+	this.Branch = branch
+	this.EnvVars = envVars
 	this.ProjectConfigName = projectConfigName
 	return &this
 }
@@ -46,36 +49,52 @@ func NewCreateBuildDTOWithDefaults() *CreateBuildDTO {
 	return &this
 }
 
-// GetBranch returns the Branch field value if set, zero value otherwise.
+// GetBranch returns the Branch field value
 func (o *CreateBuildDTO) GetBranch() string {
-	if o == nil || IsNil(o.Branch) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Branch
+
+	return o.Branch
 }
 
-// GetBranchOk returns a tuple with the Branch field value if set, nil otherwise
+// GetBranchOk returns a tuple with the Branch field value
 // and a boolean to check if the value has been set.
 func (o *CreateBuildDTO) GetBranchOk() (*string, bool) {
-	if o == nil || IsNil(o.Branch) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Branch, true
+	return &o.Branch, true
 }
 
-// HasBranch returns a boolean if a field has been set.
-func (o *CreateBuildDTO) HasBranch() bool {
-	if o != nil && !IsNil(o.Branch) {
-		return true
+// SetBranch sets field value
+func (o *CreateBuildDTO) SetBranch(v string) {
+	o.Branch = v
+}
+
+// GetEnvVars returns the EnvVars field value
+func (o *CreateBuildDTO) GetEnvVars() map[string]string {
+	if o == nil {
+		var ret map[string]string
+		return ret
 	}
 
-	return false
+	return o.EnvVars
 }
 
-// SetBranch gets a reference to the given string and assigns it to the Branch field.
-func (o *CreateBuildDTO) SetBranch(v string) {
-	o.Branch = &v
+// GetEnvVarsOk returns a tuple with the EnvVars field value
+// and a boolean to check if the value has been set.
+func (o *CreateBuildDTO) GetEnvVarsOk() (*map[string]string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.EnvVars, true
+}
+
+// SetEnvVars sets field value
+func (o *CreateBuildDTO) SetEnvVars(v map[string]string) {
+	o.EnvVars = v
 }
 
 // GetPrebuildId returns the PrebuildId field value if set, zero value otherwise.
@@ -144,9 +163,8 @@ func (o CreateBuildDTO) MarshalJSON() ([]byte, error) {
 
 func (o CreateBuildDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Branch) {
-		toSerialize["branch"] = o.Branch
-	}
+	toSerialize["branch"] = o.Branch
+	toSerialize["envVars"] = o.EnvVars
 	if !IsNil(o.PrebuildId) {
 		toSerialize["prebuildId"] = o.PrebuildId
 	}
@@ -159,6 +177,8 @@ func (o *CreateBuildDTO) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"branch",
+		"envVars",
 		"projectConfigName",
 	}
 

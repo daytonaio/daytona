@@ -77,6 +77,7 @@ func GetDefaultProjectConfig(ctx *gin.Context) {
 			statusCode = http.StatusNotFound
 		}
 		ctx.AbortWithError(statusCode, fmt.Errorf("failed to find project config by git url: %s", err.Error()))
+		return
 	}
 
 	ctx.JSON(200, projectConfigs)

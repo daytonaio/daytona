@@ -27,7 +27,7 @@ type Build struct {
 	Id          string            `json:"id"`
 	Image       string            `json:"image"`
 	PrebuildId  string            `json:"prebuildId"`
-	Repository  *GitRepository    `json:"repository,omitempty"`
+	Repository  GitRepository     `json:"repository"`
 	State       BuildBuildState   `json:"state"`
 	UpdatedAt   string            `json:"updatedAt"`
 	User        string            `json:"user"`
@@ -39,13 +39,14 @@ type _Build Build
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewBuild(createdAt string, envVars map[string]string, id string, image string, prebuildId string, state BuildBuildState, updatedAt string, user string) *Build {
+func NewBuild(createdAt string, envVars map[string]string, id string, image string, prebuildId string, repository GitRepository, state BuildBuildState, updatedAt string, user string) *Build {
 	this := Build{}
 	this.CreatedAt = createdAt
 	this.EnvVars = envVars
 	this.Id = id
 	this.Image = image
 	this.PrebuildId = prebuildId
+	this.Repository = repository
 	this.State = state
 	this.UpdatedAt = updatedAt
 	this.User = user
@@ -212,36 +213,28 @@ func (o *Build) SetPrebuildId(v string) {
 	o.PrebuildId = v
 }
 
-// GetRepository returns the Repository field value if set, zero value otherwise.
+// GetRepository returns the Repository field value
 func (o *Build) GetRepository() GitRepository {
-	if o == nil || IsNil(o.Repository) {
+	if o == nil {
 		var ret GitRepository
 		return ret
 	}
-	return *o.Repository
+
+	return o.Repository
 }
 
-// GetRepositoryOk returns a tuple with the Repository field value if set, nil otherwise
+// GetRepositoryOk returns a tuple with the Repository field value
 // and a boolean to check if the value has been set.
 func (o *Build) GetRepositoryOk() (*GitRepository, bool) {
-	if o == nil || IsNil(o.Repository) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Repository, true
+	return &o.Repository, true
 }
 
-// HasRepository returns a boolean if a field has been set.
-func (o *Build) HasRepository() bool {
-	if o != nil && !IsNil(o.Repository) {
-		return true
-	}
-
-	return false
-}
-
-// SetRepository gets a reference to the given GitRepository and assigns it to the Repository field.
+// SetRepository sets field value
 func (o *Build) SetRepository(v GitRepository) {
-	o.Repository = &v
+	o.Repository = v
 }
 
 // GetState returns the State field value
@@ -334,9 +327,7 @@ func (o Build) ToMap() (map[string]interface{}, error) {
 	toSerialize["id"] = o.Id
 	toSerialize["image"] = o.Image
 	toSerialize["prebuildId"] = o.PrebuildId
-	if !IsNil(o.Repository) {
-		toSerialize["repository"] = o.Repository
-	}
+	toSerialize["repository"] = o.Repository
 	toSerialize["state"] = o.State
 	toSerialize["updatedAt"] = o.UpdatedAt
 	toSerialize["user"] = o.User
@@ -353,6 +344,7 @@ func (o *Build) UnmarshalJSON(data []byte) (err error) {
 		"id",
 		"image",
 		"prebuildId",
+		"repository",
 		"state",
 		"updatedAt",
 		"user",

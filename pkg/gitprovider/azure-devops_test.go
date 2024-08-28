@@ -6,6 +6,7 @@ package gitprovider
 import (
 	"testing"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -27,7 +28,7 @@ func TestAzureDevopsGitProvider(t *testing.T) {
 func (g *AzureDevOpsGitProviderTestSuite) TestParseStaticGitContext_PR() {
 	prUrl := "https://dev.azure.com/dotslashtarun/dot-1/_git/dot-1/pullrequest/4"
 	prContext := &StaticGitContext{
-		PrNumber: &[]uint32{4}[0],
+		PrNumber: util.Pointer(uint32(4)),
 		Source:   "dev.azure.com",
 		Owner:    "dotslashtarun",
 		Name:     "dot-1",
@@ -54,7 +55,7 @@ func (g *AzureDevOpsGitProviderTestSuite) TestParseStaticGitContext_Branch() {
 		Owner:    "dotslashtarun",
 		Url:      "https://dev.azure.com/dotslashtarun/dot-1/_git/dot-1",
 		Source:   "dev.azure.com",
-		Branch:   &[]string{"main"}[0],
+		Branch:   util.Pointer("main"),
 		Sha:      nil,
 		PrNumber: nil,
 		Path:     nil,
@@ -76,8 +77,8 @@ func (g *AzureDevOpsGitProviderTestSuite) TestParseStaticGitContext_Commit() {
 		Owner:    "dotslashtarun",
 		Url:      "https://dev.azure.com/dotslashtarun/dot-1/_git/dot-1",
 		Source:   "dev.azure.com",
-		Branch:   &[]string{"COMMIT_SHA"}[0],
-		Sha:      &[]string{"COMMIT_SHA"}[0],
+		Branch:   util.Pointer("COMMIT_SHA"),
+		Sha:      util.Pointer("COMMIT_SHA"),
 		PrNumber: nil,
 		Path:     nil,
 	}
@@ -98,7 +99,7 @@ func (g *AzureDevOpsGitProviderTestSuite) TestParseStaticGitContext_Commits() {
 		Owner:    "dotslashtarun",
 		Url:      "https://dev.azure.com/dotslashtarun/dot-1/_git/dot-1",
 		Source:   "dev.azure.com",
-		Branch:   &[]string{"testbranch"}[0],
+		Branch:   util.Pointer("testbranch"),
 		Sha:      nil,
 		PrNumber: nil,
 		Path:     nil,
@@ -123,7 +124,7 @@ func (g *AzureDevOpsGitProviderTestSuite) TestParseStaticGitContext_Blob() {
 		Branch:   nil,
 		Sha:      nil,
 		PrNumber: nil,
-		Path:     &[]string{"README.md"}[0],
+		Path:     util.Pointer("README.md"),
 	}
 
 	require := g.Require()
@@ -135,83 +136,83 @@ func (g *AzureDevOpsGitProviderTestSuite) TestParseStaticGitContext_Blob() {
 }
 
 func (g *AzureDevOpsGitProviderTestSuite) TestGetUrlFromRepo_Bare() {
-	repo := &GitRepository{
-		Id:     "daytona",
-		Name:   "daytona",
-		Owner:  "daytonaio",
-		Source: "dev.azure.com",
+	repo := &GetRepositoryContext{
+		Id:     util.Pointer("daytona"),
+		Name:   util.Pointer("daytona"),
+		Owner:  util.Pointer("daytonaio"),
+		Source: util.Pointer("dev.azure.com"),
 		Url:    "https://dev.azure.com/daytonaio/daytona.git",
 	}
 
 	require := g.Require()
 
-	url := g.gitProvider.GetUrlFromRepository(repo)
+	url := g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://dev.azure.com/daytonaio/daytona", url)
 }
 
 func (g *AzureDevOpsGitProviderTestSuite) TestGetUrlFromRepo_Branch() {
-	repo := &GitRepository{
-		Id:     "daytona",
-		Name:   "daytona",
-		Owner:  "daytonaio",
-		Source: "dev.azure.com",
+	repo := &GetRepositoryContext{
+		Id:     util.Pointer("daytona"),
+		Name:   util.Pointer("daytona"),
+		Owner:  util.Pointer("daytonaio"),
+		Source: util.Pointer("dev.azure.com"),
 		Url:    "https://dev.azure.com/daytonaio/daytona.git",
-		Branch: &[]string{"test-branch"}[0],
+		Branch: util.Pointer("test-branch"),
 	}
 
 	require := g.Require()
 
-	url := g.gitProvider.GetUrlFromRepository(repo)
+	url := g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://dev.azure.com/daytonaio/_git/daytona?version=GBtest-branch", url)
 }
 
 func (g *AzureDevOpsGitProviderTestSuite) TestGetUrlFromRepo_Path() {
-	repo := &GitRepository{
-		Id:     "daytona",
-		Name:   "daytona",
-		Owner:  "daytonaio",
-		Source: "dev.azure.com",
+	repo := &GetRepositoryContext{
+		Id:     util.Pointer("daytona"),
+		Name:   util.Pointer("daytona"),
+		Owner:  util.Pointer("daytonaio"),
+		Source: util.Pointer("dev.azure.com"),
 		Url:    "https://dev.azure.com/daytonaio/daytona.git",
-		Branch: &[]string{"test-branch"}[0],
-		Path:   &[]string{"README.md"}[0],
+		Branch: util.Pointer("test-branch"),
+		Path:   util.Pointer("README.md"),
 	}
 
 	require := g.Require()
 
-	url := g.gitProvider.GetUrlFromRepository(repo)
+	url := g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://dev.azure.com/daytonaio/_git/daytona?version=GBtest-branch&path=README.md", url)
 
 	repo.Branch = nil
 
-	url = g.gitProvider.GetUrlFromRepository(repo)
+	url = g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://dev.azure.com/daytonaio/_git/daytona?version=GBmain&path=README.md", url)
 }
 
 func (g *AzureDevOpsGitProviderTestSuite) TestGetUrlFromRepo_Commit() {
-	repo := &GitRepository{
-		Id:     "daytona",
-		Name:   "daytona",
-		Owner:  "daytonaio",
-		Source: "dev.azure.com",
+	repo := &GetRepositoryContext{
+		Id:     util.Pointer("daytona"),
+		Name:   util.Pointer("daytona"),
+		Owner:  util.Pointer("daytonaio"),
+		Source: util.Pointer("dev.azure.com"),
 		Url:    "https://dev.azure.com/daytonaio/daytona.git",
-		Path:   &[]string{"README.md"}[0],
-		Sha:    "COMMIT_SHA",
-		Branch: &[]string{"COMMIT_SHA"}[0],
+		Branch: util.Pointer("COMMIT_SHA"),
+		Sha:    util.Pointer("COMMIT_SHA"),
+		Path:   util.Pointer("README.md"),
 	}
 
 	require := g.Require()
 
-	url := g.gitProvider.GetUrlFromRepository(repo)
+	url := g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://dev.azure.com/daytonaio/_git/daytona?version=GCCOMMIT_SHA&path=README.md", url)
 
 	repo.Path = nil
 
-	url = g.gitProvider.GetUrlFromRepository(repo)
+	url = g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://dev.azure.com/daytonaio/_git/daytona?version=GCCOMMIT_SHA", url)
 }

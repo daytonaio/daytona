@@ -34,7 +34,7 @@ import (
 )
 
 func main() {
-	createBuildDto := *openapiclient.NewCreateBuildDTO("ProjectConfigName_example") // CreateBuildDTO | Create Build DTO
+	createBuildDto := *openapiclient.NewCreateBuildDTO("Branch_example", map[string]string{"key": "Inner_example"}, "ProjectConfigName_example") // CreateBuildDTO | Create Build DTO
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

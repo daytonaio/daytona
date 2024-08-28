@@ -83,6 +83,7 @@ func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, er
 		},
 		ProjectDir: b.projectDir,
 		LogWriter:  buildLogger,
+		EnvVars:    build.EnvVars,
 	})
 	if err != nil {
 		return b.defaultProjectImage, b.defaultProjectUser, err
