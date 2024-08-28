@@ -77,8 +77,8 @@ func RunProjectConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []apic
 		SkipBranchSelection: true,
 		ApiClient:           apiClient,
 		Defaults:            projectDefaults,
-	},
-	)
+	})
+
 	if err != nil {
 		if common.IsCtrlCAbort(err) {
 			return nil, nil
