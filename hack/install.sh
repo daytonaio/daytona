@@ -16,7 +16,7 @@ CONFIRM_FLAG=false
 # Check for the -y flag
 for arg in "$@"; do
   case $arg in
-   -y)
+    -y)
     CONFIRM_FLAG=true
     shift
     ;;
@@ -77,7 +77,7 @@ stop_daytona_server() {
     if [ "$CONFIRM_FLAG" = false ]; then
       read -p "Daytona server is running. Do you want to stop it? (yes/no): " user_input < /dev/tty
       case $user_input in
-             [Yy][Ee][Ss] )
+          [Yy][Ee][Ss] )
           CONFIRM_FLAG=true
           ;;
         [Nn][Oo] )
@@ -92,7 +92,7 @@ stop_daytona_server() {
     fi
 
     if [ "$CONFIRM_FLAG" = true ]; then
-      echo -e "Attempting to stop the Daytona server..."
+      echo "Attempting to stop the Daytona server..."
       if daytona server stop; then
         echo "Stopping the Daytona server"
       else
@@ -142,18 +142,20 @@ esac
 
 if [ ! "$DAYTONA_PATH" ]; then
   echo "Default installation directory: /usr/local/bin"
-  echo "You can override this by setting the DAYTONA_PATH environment variable (ie., \`| DAYTONA_PATH=/home/user/bin bash\`)"
+  echo "You can override this by setting the DAYTONA_PATH environment variable (ie. \`| DAYTONA_PATH=/home/user/bin bash\`)"
 fi
 
 # Check if destination exists and is writable
 if [[ ! -d $DESTINATION ]]; then
+  # Inform user about missing directory or write permissions
   echo -e "\nWarning: Destination directory $DESTINATION does not exist."
+  # Provide instructions on how to create dir  
   echo "         Create the directory:"
   echo "           mkdir -p $DESTINATION"
   exit 1
 fi
 if [[ ! -w $DESTINATION ]]; then
-  echo -e "\nWarning: Destination directory $DESTINATION is not writable."
+  echo -e "\nWarning: Destination directory $DESTINATION is not writeable."
   echo "         Rerun the script with SUDO privileges:"
   if [ "$DAYTONA_PATH" ]; then
     echo "           curl -sf -L https://download.daytona.io/daytona/install.sh | DAYTONA_PATH=$DESTINATION sudo bash"
@@ -167,11 +169,23 @@ DOWNLOAD_URL="$BASE_URL/$VERSION/daytona-$FILENAME"
 
 echo -e "\nDownloading Daytona binary from $DOWNLOAD_URL"
 
-# Create a temporary file to download the Daytona binary
-temp_file=$(mktemp "${TMPDIR:-/tmp}/daytona.XXXXXX")
+# Create a temporary file to download the Daytona binary. Just in case the user
+# has file named "daytona" in the current directory.
+temp_file="daytona-$RANDOM"
 
 # Ensure the temporary file is deleted on exit
 trap 'rm -f "$temp_file"' EXIT
+
+# curl does not fail with a non-zero status code when the HTTP status
+# code is not successful (like 404 or 500). You can add -f flag to curl
+# command to fail silently on server errors.
+#
+# Flags:
+# -f, --fail: Fail silently on server errors.
+# -s, --silent: Silent mode. Don't show progress meter or error messages.
+# -S, --show-error: When used with -s, show error even if silent mode is enabled.
+# -L, --location: Follow redirects.
+# -o, --output <file>: Write output to <file> instead of stdout.
 
 # Function to download the file with progress bar and speed
 download_file() {
