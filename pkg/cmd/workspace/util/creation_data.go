@@ -54,7 +54,7 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 		}
 
 		if len(config.ProjectConfigs) > 0 && !config.BlankProject {
-			projectConfig := selection.GetProjectConfigFromPrompt(config.ProjectConfigs, i, true, "Use")
+			projectConfig := selection.GetProjectConfigFromPrompt(config.ProjectConfigs, i, true, false, "Use")
 			if projectConfig == nil {
 				return nil, common.ErrCtrlCAbort
 			}
