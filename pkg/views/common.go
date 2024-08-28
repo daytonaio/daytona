@@ -162,17 +162,20 @@ func GetEnvVarsInput(envVars *map[string]string) *huh.Text {
 		Description("Enter environment variables in the format KEY=VALUE\nTo pass machine env variables at runtime, use $VALUE").
 		Value(&inputText).
 		Validate(func(str string) error {
-			if str == "" {
-				return nil
-			}
-
+			tempEnvVars := map[string]string{}
 			for i, line := range strings.Split(str, "\n") {
+				if line == "" {
+					continue
+				}
+
 				parts := strings.SplitN(line, "=", 2)
 				if len(parts) != 2 {
 					return fmt.Errorf("invalid format: %s on line %d", line, i+1)
 				}
-				(*envVars)[parts[0]] = parts[1]
+
+				tempEnvVars[parts[0]] = parts[1]
 			}
+			*envVars = tempEnvVars
 
 			return nil
 		})
