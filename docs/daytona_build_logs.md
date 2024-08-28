@@ -9,7 +9,8 @@ daytona build logs [flags]
 ### Options
 
 ```
-  -f, --follow   Follow logs
+      --continue-on-completed   Continue streaming logs after the build is completed
+  -f, --follow                  Follow logs
 ```
 
 ### Options inherited from parent commands
