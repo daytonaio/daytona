@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -20,7 +19,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
-	log "github.com/sirupsen/logrus"
 )
 
 type ProjectsDataPromptConfig struct {
@@ -170,40 +168,6 @@ func GetSanitizedProjectName(projectName string) (string, error) {
 	return projectName, nil
 }
 
-func GetEnvVariables(currentEnvVars map[string]string, profileData *apiclient.ProfileData) *map[string]string {
-	envVars := map[string]string{}
-
-	if profileData != nil && profileData.EnvVars != nil {
-		for k, v := range profileData.EnvVars {
-			if strings.HasPrefix(v, "$") {
-				env, ok := os.LookupEnv(v[1:])
-				if ok {
-					envVars[k] = env
-				} else {
-					log.Warnf("Environment variable %s not found", v[1:])
-				}
-			} else {
-				envVars[k] = v
-			}
-		}
-	}
-
-	for k, v := range currentEnvVars {
-		if strings.HasPrefix(v, "$") {
-			env, ok := os.LookupEnv(v[1:])
-			if ok {
-				envVars[k] = env
-			} else {
-				log.Warnf("Environment variable %s not found", v[1:])
-			}
-		} else {
-			envVars[k] = v
-		}
-	}
-
-	return &envVars
-}
-
 func GetBranchFromProjectConfig(projectConfig *apiclient.ProjectConfig, apiClient *apiclient.APIClient, projectOrder int) (*apiclient.GitBranch, error) {
 	ctx := context.Background()
 
@@ -234,16 +198,14 @@ func GetBranchFromProjectConfig(projectConfig *apiclient.ProjectConfig, apiClien
 		return nil, err
 	}
 
-	var result *apiclient.GitBranch
-
-	if repo.Branch != nil {
-		result = &apiclient.GitBranch{
-			Name: *repo.Branch,
-			Sha:  repo.Sha,
-		}
+	if repo == nil {
+		return nil, common.ErrCtrlCAbort
 	}
 
-	return result, nil
+	return &apiclient.GitBranch{
+		Name: repo.Branch,
+		Sha:  repo.Sha,
+	}, nil
 }
 
 func newCreateProjectConfigDTO(config ProjectsDataPromptConfig, providerRepo *apiclient.GitRepository, providerRepoName string) apiclient.CreateProjectDTO {
@@ -269,10 +231,7 @@ func createGetRepoContextFromRepository(providerRepo *apiclient.GitRepository) a
 		Sha:    &providerRepo.Sha,
 		Source: &providerRepo.Source,
 		Url:    providerRepo.Url,
-	}
-
-	if providerRepo.Branch != nil {
-		result.Branch = providerRepo.Branch
+		Branch: &providerRepo.Branch,
 	}
 
 	if providerRepo.Path != nil {

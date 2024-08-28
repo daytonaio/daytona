@@ -8,7 +8,7 @@ import (
 	"errors"
 	"net/url"
 
-	"github.com/daytonaio/daytona/internal/util"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -42,7 +42,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	}
 
 	if len(branchList) == 1 {
-		config.ChosenRepo.Branch = &branchList[0].Name
+		config.ChosenRepo.Branch = branchList[0].Name
 		config.ChosenRepo.Sha = branchList[0].Sha
 		return config.ChosenRepo, nil
 	}
@@ -64,7 +64,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 			return nil, errors.New("must select a branch")
 		}
 
-		config.ChosenRepo.Branch = &branch.Name
+		config.ChosenRepo.Branch = branch.Name
 		config.ChosenRepo.Sha = branch.Sha
 
 		return config.ChosenRepo, nil
@@ -76,7 +76,16 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 
 	chosenCheckoutOption := selection.GetCheckoutOptionFromPrompt(config.ProjectOrder, checkoutOptions)
 	if chosenCheckoutOption == selection.CheckoutDefault {
-		config.ChosenRepo.Branch = util.Pointer("")
+		// Get the default branch from context
+		repo, res, err := config.ApiClient.GitProviderAPI.GetGitContext(ctx).Repository(apiclient.GetRepositoryContext{
+			Url: config.ChosenRepo.Url,
+		}).Execute()
+		if err != nil {
+			return nil, apiclient_util.HandleErrorResponse(res, err)
+		}
+
+		config.ChosenRepo.Branch = repo.Branch
+
 		return config.ChosenRepo, nil
 	}
 
@@ -85,7 +94,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 		if branch == nil {
 			return nil, errors.New("must select a branch")
 		}
-		config.ChosenRepo.Branch = &branch.Name
+		config.ChosenRepo.Branch = branch.Name
 		config.ChosenRepo.Sha = branch.Sha
 	} else if chosenCheckoutOption == selection.CheckoutPR {
 		chosenPullRequest := selection.GetPullRequestFromPrompt(prList, config.ProjectOrder)
@@ -93,7 +102,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 			return nil, errors.New("must select a pull request")
 		}
 
-		config.ChosenRepo.Branch = &chosenPullRequest.Branch
+		config.ChosenRepo.Branch = chosenPullRequest.Branch
 		config.ChosenRepo.Sha = chosenPullRequest.Sha
 		config.ChosenRepo.Id = chosenPullRequest.SourceRepoId
 		config.ChosenRepo.Name = chosenPullRequest.SourceRepoName

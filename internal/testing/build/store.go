@@ -127,7 +127,7 @@ func (s *InMemoryBuildStore) processFilters(filter *build.Filter) ([]*build.Buil
 		}
 		if filter.Branch != nil {
 			for _, b := range filteredBuilds {
-				if b.Repository == nil || b.Repository.Branch == nil || *b.Repository.Branch != *filter.Branch {
+				if b.Repository == nil || b.Repository.Branch != *filter.Branch {
 					delete(filteredBuilds, b.Id)
 				}
 			}

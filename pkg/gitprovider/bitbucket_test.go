@@ -6,6 +6,7 @@ package gitprovider
 import (
 	"testing"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -30,7 +31,7 @@ func (b *BitbucketGitProviderTestSuite) TestParseStaticGitContext_PR() {
 		Source:   "bitbucket.org",
 		Branch:   nil,
 		Sha:      nil,
-		PrNumber: &[]uint32{1}[0],
+		PrNumber: util.Pointer(uint32(1)),
 		Path:     nil,
 	}
 
@@ -50,10 +51,10 @@ func (b *BitbucketGitProviderTestSuite) TestParseStaticGitContext_Blob() {
 		Owner:    "atlassian",
 		Url:      "https://bitbucket.org/atlassian/bitbucket-upload-file.git",
 		Source:   "bitbucket.org",
-		Branch:   &[]string{"master"}[0],
+		Branch:   util.Pointer("master"),
 		Sha:      nil,
 		PrNumber: nil,
-		Path:     &[]string{"README.md"}[0],
+		Path:     util.Pointer("README.md"),
 	}
 
 	require := b.Require()
@@ -72,7 +73,7 @@ func (b *BitbucketGitProviderTestSuite) TestParseStaticGitContext_Branch() {
 		Owner:    "atlassian",
 		Url:      "https://bitbucket.org/atlassian/bitbucket-upload-file.git",
 		Source:   "bitbucket.org",
-		Branch:   &[]string{"master"}[0],
+		Branch:   util.Pointer("master"),
 		Sha:      nil,
 		PrNumber: nil,
 		Path:     nil,
@@ -94,7 +95,7 @@ func (b *BitbucketGitProviderTestSuite) TestParseStaticGitContext_Commits() {
 		Owner:    "atlassian",
 		Url:      "https://bitbucket.org/atlassian/bitbucket-upload-file.git",
 		Source:   "bitbucket.org",
-		Branch:   &[]string{"master"}[0],
+		Branch:   util.Pointer("master"),
 		Sha:      nil,
 		PrNumber: nil,
 		Path:     nil,
@@ -116,8 +117,8 @@ func (b *BitbucketGitProviderTestSuite) TestParseStaticGitContext_Commit() {
 		Owner:    "atlassian",
 		Url:      "https://bitbucket.org/atlassian/bitbucket-upload-file.git",
 		Source:   "bitbucket.org",
-		Branch:   &[]string{"COMMIT_SHA"}[0],
-		Sha:      &[]string{"COMMIT_SHA"}[0],
+		Branch:   util.Pointer("COMMIT_SHA"),
+		Sha:      util.Pointer("COMMIT_SHA"),
 		PrNumber: nil,
 		Path:     nil,
 	}
@@ -131,83 +132,83 @@ func (b *BitbucketGitProviderTestSuite) TestParseStaticGitContext_Commit() {
 }
 
 func (g *BitbucketGitProviderTestSuite) TestGetUrlFromRepo_Bare() {
-	repo := &GitRepository{
-		Id:     "daytona",
-		Name:   "daytona",
-		Owner:  "daytonaio",
-		Source: "bitbucket.org",
+	repo := &GetRepositoryContext{
+		Id:     util.Pointer("daytona"),
+		Name:   util.Pointer("daytona"),
+		Owner:  util.Pointer("daytonaio"),
+		Source: util.Pointer("bitbucket.org"),
 		Url:    "https://bitbucket.org/daytonaio/daytona.git",
 	}
 
 	require := g.Require()
 
-	url := g.gitProvider.GetUrlFromRepository(repo)
+	url := g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://bitbucket.org/daytonaio/daytona", url)
 }
 
 func (g *BitbucketGitProviderTestSuite) TestGetUrlFromRepo_Branch() {
-	repo := &GitRepository{
-		Id:     "daytona",
-		Name:   "daytona",
-		Owner:  "daytonaio",
-		Source: "bitbucket.org",
+	repo := &GetRepositoryContext{
+		Id:     util.Pointer("daytona"),
+		Name:   util.Pointer("daytona"),
+		Owner:  util.Pointer("daytonaio"),
+		Source: util.Pointer("bitbucket.org"),
 		Url:    "https://bitbucket.org/daytonaio/daytona.git",
-		Branch: &[]string{"test-branch"}[0],
+		Branch: util.Pointer("test-branch"),
 	}
 
 	require := g.Require()
 
-	url := g.gitProvider.GetUrlFromRepository(repo)
+	url := g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://bitbucket.org/daytonaio/daytona/branch/test-branch", url)
 }
 
 func (g *BitbucketGitProviderTestSuite) TestGetUrlFromRepo_Path() {
-	repo := &GitRepository{
-		Id:     "daytona",
-		Name:   "daytona",
-		Owner:  "daytonaio",
-		Source: "bitbucket.org",
+	repo := &GetRepositoryContext{
+		Id:     util.Pointer("daytona"),
+		Name:   util.Pointer("daytona"),
+		Owner:  util.Pointer("daytonaio"),
+		Source: util.Pointer("bitbucket.org"),
 		Url:    "https://bitbucket.org/daytonaio/daytona.git",
-		Branch: &[]string{"test-branch"}[0],
-		Path:   &[]string{"README.md"}[0],
+		Branch: util.Pointer("test-branch"),
+		Path:   util.Pointer("README.md"),
 	}
 
 	require := g.Require()
 
-	url := g.gitProvider.GetUrlFromRepository(repo)
+	url := g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://bitbucket.org/daytonaio/daytona/src/test-branch/README.md", url)
 
 	repo.Branch = nil
 
-	url = g.gitProvider.GetUrlFromRepository(repo)
+	url = g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://bitbucket.org/daytonaio/daytona/src/main/README.md", url)
 }
 
 func (g *BitbucketGitProviderTestSuite) TestGetUrlFromRepo_Commit() {
-	repo := &GitRepository{
-		Id:     "daytona",
-		Name:   "daytona",
-		Owner:  "daytonaio",
-		Source: "bitbucket.org",
+	repo := &GetRepositoryContext{
+		Id:     util.Pointer("daytona"),
+		Name:   util.Pointer("daytona"),
+		Owner:  util.Pointer("daytonaio"),
+		Source: util.Pointer("bitbucket.org"),
 		Url:    "https://bitbucket.org/daytonaio/daytona.git",
-		Path:   &[]string{"README.md"}[0],
-		Sha:    "COMMIT_SHA",
-		Branch: &[]string{"COMMIT_SHA"}[0],
+		Branch: util.Pointer("COMMIT_SHA"),
+		Sha:    util.Pointer("COMMIT_SHA"),
+		Path:   util.Pointer("README.md"),
 	}
 
 	require := g.Require()
 
-	url := g.gitProvider.GetUrlFromRepository(repo)
+	url := g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://bitbucket.org/daytonaio/daytona/src/COMMIT_SHA/README.md", url)
 
 	repo.Path = nil
 
-	url = g.gitProvider.GetUrlFromRepository(repo)
+	url = g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://bitbucket.org/daytonaio/daytona/commit/COMMIT_SHA", url)
 }

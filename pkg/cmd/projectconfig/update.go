@@ -9,7 +9,6 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -86,9 +85,8 @@ var projectConfigUpdateCmd = &cobra.Command{
 			Image:         createDto[0].Image,
 			User:          createDto[0].User,
 			RepositoryUrl: createDto[0].Source.Repository.Url,
+			EnvVars:       createDto[0].EnvVars,
 		}
-
-		newProjectConfig.EnvVars = *workspace_util.GetEnvVariables(createDto[0].EnvVars, nil)
 
 		res, err = apiClient.ProjectConfigAPI.SetProjectConfig(ctx).ProjectConfig(newProjectConfig).Execute()
 		if err != nil {

@@ -36,7 +36,7 @@ var projectConfig2 *config.ProjectConfig = &config.ProjectConfig{
 	Image:         "image2",
 	User:          "user2",
 	BuildConfig:   nil,
-	RepositoryUrl: "url1",
+	RepositoryUrl: "https://github.com/daytonaio/daytona.git",
 }
 
 var projectConfig3 *config.ProjectConfig = &config.ProjectConfig{
@@ -44,7 +44,7 @@ var projectConfig3 *config.ProjectConfig = &config.ProjectConfig{
 	Image:         "image3",
 	User:          "user3",
 	BuildConfig:   nil,
-	RepositoryUrl: "url3",
+	RepositoryUrl: "https://github.com/daytonaio/daytona3.git",
 }
 
 var projectConfig4 *config.ProjectConfig = &config.ProjectConfig{
@@ -52,7 +52,7 @@ var projectConfig4 *config.ProjectConfig = &config.ProjectConfig{
 	Image:         "image4",
 	User:          "user4",
 	BuildConfig:   nil,
-	RepositoryUrl: "url4",
+	RepositoryUrl: "https://github.com/daytonaio/daytona4.git",
 }
 
 var expectedProjectConfigs []*config.ProjectConfig
@@ -151,7 +151,7 @@ func (s *ProjectConfigServiceTestSuite) TestSetDefault() {
 	require.Nil(err)
 
 	projectConfig, err := s.projectConfigService.Find(&config.ProjectConfigFilter{
-		Url:     util.Pointer("url1"),
+		Url:     util.Pointer(projectConfig1.RepositoryUrl),
 		Default: util.Pointer(true),
 	})
 	require.Nil(err)

@@ -1809,11 +1809,19 @@
         "CreateBuildDTO": {
             "type": "object",
             "required": [
+                "branch",
+                "envVars",
                 "projectConfigName"
             ],
             "properties": {
                 "branch": {
                     "type": "string"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "prebuildId": {
                     "type": "string"
@@ -2126,6 +2134,7 @@
         "GitRepository": {
             "type": "object",
             "required": [
+                "branch",
                 "id",
                 "name",
                 "owner",

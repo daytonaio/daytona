@@ -1812,11 +1812,19 @@ const docTemplate = `{
         "CreateBuildDTO": {
             "type": "object",
             "required": [
+                "branch",
+                "envVars",
                 "projectConfigName"
             ],
             "properties": {
                 "branch": {
                     "type": "string"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "prebuildId": {
                     "type": "string"
@@ -2129,6 +2137,7 @@ const docTemplate = `{
         "GitRepository": {
             "type": "object",
             "required": [
+                "branch",
                 "id",
                 "name",
                 "owner",

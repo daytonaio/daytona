@@ -37,7 +37,7 @@ import (
 )
 
 func main() {
-	workspace := *openapiclient.NewCreateWorkspaceDTO("Id_example", "Name_example", []openapiclient.CreateProjectDTO{*openapiclient.NewCreateProjectDTO(map[string]string{"key": "Inner_example"}, "Name_example", *openapiclient.NewCreateProjectSourceDTO(*openapiclient.NewGitRepository("Id_example", "Name_example", "Owner_example", "Sha_example", "Source_example", "Url_example")))}, "Target_example") // CreateWorkspaceDTO | Create workspace
+	workspace := *openapiclient.NewCreateWorkspaceDTO("Id_example", "Name_example", []openapiclient.CreateProjectDTO{*openapiclient.NewCreateProjectDTO(map[string]string{"key": "Inner_example"}, "Name_example", *openapiclient.NewCreateProjectSourceDTO(*openapiclient.NewGitRepository("Branch_example", "Id_example", "Name_example", "Owner_example", "Sha_example", "Source_example", "Url_example")))}, "Target_example") // CreateWorkspaceDTO | Create workspace
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

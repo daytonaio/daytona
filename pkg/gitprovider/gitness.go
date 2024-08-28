@@ -71,7 +71,7 @@ func (g *GitnessGitProvider) GetRepositories(namespace string) ([]*GitRepository
 			Id:     repo.Identifier,
 			Name:   repo.Identifier,
 			Url:    repo.GitUrl,
-			Branch: &repo.DefaultBranch,
+			Branch: repo.DefaultBranch,
 			Source: u.Host,
 			Owner:  admin.Principal.DisplayName,
 		}
@@ -134,17 +134,17 @@ func (g *GitnessGitProvider) GetUser() (*GitUser, error) {
 	return user, nil
 }
 
-func (g *GitnessGitProvider) GetUrlFromRepository(repo *GitRepository) string {
-	url := strings.TrimSuffix(repo.Url, ".git")
+func (g *GitnessGitProvider) GetUrlFromContext(repoContext *GetRepositoryContext) string {
+	url := strings.TrimSuffix(repoContext.Url, ".git")
 
-	if repo.Branch != nil && *repo.Branch != "" {
-		url += "/files/" + *repo.Branch
+	if repoContext.Branch != nil && *repoContext.Branch != "" {
+		url += "/files/" + *repoContext.Branch
 
-		if repo.Path != nil && *repo.Path != "" {
-			url += "/~/" + *repo.Path
+		if repoContext.Path != nil && *repoContext.Path != "" {
+			url += "/~/" + *repoContext.Path
 		}
-	} else if repo.Path != nil {
-		url += "/files/main/~/" + *repo.Path
+	} else if repoContext.Path != nil {
+		url += "/files/main/~/" + *repoContext.Path
 	}
 
 	return url

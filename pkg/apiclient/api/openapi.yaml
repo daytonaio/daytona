@@ -1338,15 +1338,23 @@ components:
       example:
         prebuildId: prebuildId
         projectConfigName: projectConfigName
+        envVars:
+          key: envVars
         branch: branch
       properties:
         branch:
           type: string
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
         prebuildId:
           type: string
         projectConfigName:
           type: string
       required:
+      - branch
+      - envVars
       - projectConfigName
       type: object
     CreatePrebuildDTO:
@@ -1734,6 +1742,7 @@ components:
         url:
           type: string
       required:
+      - branch
       - id
       - name
       - owner

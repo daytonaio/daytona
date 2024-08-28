@@ -100,7 +100,7 @@ func (g *GitLabGitProvider) GetRepositories(namespace string) ([]*GitRepository,
 			Id:     strconv.Itoa(repo.ID),
 			Name:   repo.Path,
 			Url:    repo.WebURL,
-			Branch: &repo.DefaultBranch,
+			Branch: repo.DefaultBranch,
 			Owner:  repo.Namespace.Path,
 			Source: u.Host,
 		})
@@ -260,21 +260,21 @@ func (g *GitLabGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (s
 	return commits[0].ID, nil
 }
 
-func (g *GitLabGitProvider) GetUrlFromRepository(repository *GitRepository) string {
-	url := strings.TrimSuffix(repository.Url, ".git")
+func (g *GitLabGitProvider) GetUrlFromContext(repoContext *GetRepositoryContext) string {
+	url := strings.TrimSuffix(repoContext.Url, ".git")
 
-	if repository.Branch != nil && *repository.Branch != "" {
-		if repository.Sha == *repository.Branch {
-			url += "/-/commit/" + *repository.Branch
+	if repoContext.Branch != nil && *repoContext.Branch != "" {
+		if repoContext.Sha != nil && *repoContext.Sha == *repoContext.Branch {
+			url += "/-/commit/" + *repoContext.Branch
 		} else {
-			url += "/-/tree/" + *repository.Branch
+			url += "/-/tree/" + *repoContext.Branch
 		}
 
-		if repository.Path != nil {
-			url += "/" + *repository.Path
+		if repoContext.Path != nil {
+			url += "/" + *repoContext.Path
 		}
-	} else if repository.Path != nil {
-		url += "/-/blob/main/" + *repository.Path
+	} else if repoContext.Path != nil {
+		url += "/-/blob/main/" + *repoContext.Path
 	}
 
 	return url

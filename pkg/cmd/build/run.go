@@ -5,8 +5,11 @@ package build
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"log"
 
+	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
@@ -48,19 +51,48 @@ var buildRunCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		createBuildDto := apiclient.CreateBuildDTO{
-			ProjectConfigName: projectConfig.Name,
+		if chosenBranch == nil {
+			fmt.Println("Operation canceled")
+			return
 		}
 
-		if chosenBranch != nil && chosenBranch.Name != "" {
-			createBuildDto.Branch = &chosenBranch.Name
-		}
-
-		buildId, res, err := apiClient.BuildAPI.CreateBuild(ctx).CreateBuildDto(createBuildDto).Execute()
+		buildId, err := CreateBuild(apiClient, projectConfig, chosenBranch.Name, nil)
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			log.Fatal(err)
 		}
 
 		views.RenderViewBuildLogsMessage(buildId)
 	},
+}
+
+func CreateBuild(apiClient *apiclient.APIClient, projectConfig *apiclient.ProjectConfig, branch string, prebuildId *string) (string, error) {
+	ctx := context.Background()
+
+	profileData, res, err := apiClient.ProfileAPI.GetProfileData(ctx).Execute()
+	if err != nil {
+		return "", apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	if projectConfig.BuildConfig == nil {
+		return "", errors.New("the chosen project config does not have a build configuration")
+	}
+
+	createBuildDto := apiclient.CreateBuildDTO{
+		ProjectConfigName: projectConfig.Name,
+		Branch:            branch,
+		PrebuildId:        prebuildId,
+	}
+
+	if profileData != nil {
+		createBuildDto.EnvVars = util.MergeEnvVars(profileData.EnvVars, projectConfig.EnvVars)
+	} else {
+		createBuildDto.EnvVars = util.MergeEnvVars(projectConfig.EnvVars)
+	}
+
+	buildId, res, err := apiClient.BuildAPI.CreateBuild(ctx).CreateBuildDto(createBuildDto).Execute()
+	if err != nil {
+		return "", apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	return buildId, nil
 }

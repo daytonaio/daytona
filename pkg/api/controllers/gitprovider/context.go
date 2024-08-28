@@ -60,21 +60,21 @@ func GetGitContext(ctx *gin.Context) {
 //
 //	@id				GetUrlFromRepository
 func GetUrlFromRepository(ctx *gin.Context) {
-	var gitRepository gitprovider.GitRepository
-	if err := ctx.ShouldBindJSON(&gitRepository); err != nil {
+	var repoContext gitprovider.GetRepositoryContext
+	if err := ctx.ShouldBindJSON(&repoContext); err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to bind json: %s", err.Error()))
 		return
 	}
 
 	server := server.GetInstance(nil)
 
-	gitProvider, _, err := server.GitProviderService.GetGitProviderForUrl(gitRepository.Url)
+	gitProvider, _, err := server.GitProviderService.GetGitProviderForUrl(repoContext.Url)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %w", err))
 		return
 	}
 
-	url := gitProvider.GetUrlFromRepository(&gitRepository)
+	url := gitProvider.GetUrlFromContext(&repoContext)
 
 	response := dto.RepositoryUrl{
 		URL: url,
