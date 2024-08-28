@@ -94,7 +94,7 @@ stop_daytona_server() {
     if [ "$CONFIRM_FLAG" = true ]; then
       echo "Attempting to stop the Daytona server..."
       if daytona server stop; then
-        echo "Stopping the Daytona server"
+        echo -e "Stopping the daytona server"
       else
         pkill -x "daytona"
       fi
@@ -149,7 +149,7 @@ fi
 if [[ ! -d $DESTINATION ]]; then
   # Inform user about missing directory or write permissions
   echo -e "\nWarning: Destination directory $DESTINATION does not exist."
-  # Provide instructions on how to create dir  
+  # Provide instructions on how to create dir
   echo "         Create the directory:"
   echo "           mkdir -p $DESTINATION"
   exit 1
