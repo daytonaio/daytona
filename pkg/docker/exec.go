@@ -8,7 +8,7 @@ import (
 	"context"
 	"io"
 
-	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/pkg/stdcopy"
 )
 
@@ -18,7 +18,7 @@ type ExecResult struct {
 	ExitCode int
 }
 
-func (d *DockerClient) ExecSync(containerID string, config types.ExecConfig, outputWriter io.Writer) (*ExecResult, error) {
+func (d *DockerClient) ExecSync(containerID string, config container.ExecOptions, outputWriter io.Writer) (*ExecResult, error) {
 	ctx := context.Background()
 
 	config.AttachStderr = true
@@ -40,7 +40,7 @@ func (d *DockerClient) ExecSync(containerID string, config types.ExecConfig, out
 }
 
 func (d *DockerClient) inspectExecResp(ctx context.Context, id string, outputWriter io.Writer) (*ExecResult, error) {
-	resp, err := d.apiClient.ContainerExecAttach(ctx, id, types.ExecStartCheck{})
+	resp, err := d.apiClient.ContainerExecAttach(ctx, id, container.ExecStartOptions{})
 	if err != nil {
 		return nil, err
 	}

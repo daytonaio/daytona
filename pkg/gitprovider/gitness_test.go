@@ -33,7 +33,7 @@ func (g *GitnessGitProviderTestSuite) TestParseStaticGitContext_PR() {
 	}
 
 	require := g.Require()
-	httpContext, err := g.gitProvider.parseStaticGitContext(prUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(prUrl)
 	require.Nil(err)
 	require.Equal(prContext, httpContext)
 }
@@ -53,7 +53,7 @@ func (g *GitnessGitProviderTestSuite) TestParseStaticGitContext_Files() {
 	}
 
 	require := g.Require()
-	httpContext, err := g.gitProvider.parseStaticGitContext(blobUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(blobUrl)
 	require.Nil(err)
 	require.Equal(blobContext, httpContext)
 }
@@ -73,7 +73,7 @@ func (g *GitnessGitProviderTestSuite) TestParseStaticGitContext_Branch() {
 	}
 
 	require := g.Require()
-	httpContext, err := g.gitProvider.parseStaticGitContext(branchUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(branchUrl)
 	require.Nil(err)
 	require.Equal(branchContext, httpContext)
 }
@@ -93,7 +93,7 @@ func (g *GitnessGitProviderTestSuite) TestParseStaticGitContext_Commits() {
 	}
 
 	require := g.Require()
-	httpContext, err := g.gitProvider.parseStaticGitContext(commitUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(commitUrl)
 	require.Nil(err)
 	require.Equal(commitContext, httpContext)
 }
@@ -113,7 +113,7 @@ func (g *GitnessGitProviderTestSuite) TestParseStaticGitContext_Commit() {
 	}
 
 	require := g.Require()
-	httpContext, err := g.gitProvider.parseStaticGitContext(commitUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(commitUrl)
 	require.Nil(err)
 	require.Equal(commitContext, httpContext)
 }

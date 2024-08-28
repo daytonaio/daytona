@@ -265,6 +265,80 @@ func (g *BitbucketGitProvider) GetLastCommitSha(staticContext *StaticGitContext)
 	return commitHash, nil
 }
 
+func (g *BitbucketGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
+	client := g.getApiClient()
+
+	branches, err := client.Repositories.Repository.ListBranches(&bitbucket.RepositoryBranchOptions{
+		RepoSlug: staticContext.Name,
+		Owner:    staticContext.Owner,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	var branchName string
+	for _, branch := range branches.Branches {
+		hash, ok := branch.Target["hash"].(string)
+		if !ok {
+			continue
+		}
+
+		if hash == *staticContext.Sha {
+			branchName = branch.Name
+			break
+		}
+
+		commits, err := client.Repositories.Commits.GetCommits(&bitbucket.CommitsOptions{
+			RepoSlug:    staticContext.Name,
+			Owner:       staticContext.Owner,
+			Branchortag: branch.Name,
+		})
+		if err != nil {
+			return "", err
+		}
+		commitsResponse, ok := commits.(map[string]interface{})
+		if !ok {
+			return "", fmt.Errorf("Invalid commits response")
+		}
+
+		valuesResponse, ok := commitsResponse["values"].([]interface{})
+		if !ok {
+			return "", fmt.Errorf("Invalid commits values")
+		}
+
+		if len(valuesResponse) == 0 {
+			continue
+		}
+
+		for _, commit := range valuesResponse {
+			commitResponse, ok := commit.(map[string]interface{})
+			if !ok {
+				return "", fmt.Errorf("Invalid commit response")
+			}
+
+			commitHash, ok := commitResponse["hash"].(string)
+			if !ok {
+				return "", fmt.Errorf("Invalid commit hash")
+			}
+			if commitHash == *staticContext.Sha {
+				branchName = branch.Name
+				break
+			}
+		}
+
+		if branchName != "" {
+			break
+		}
+
+	}
+
+	if branchName == "" {
+		return "", fmt.Errorf("branch not found for SHA: %s", *staticContext.Sha)
+	}
+
+	return branchName, nil
+}
+
 func (g *BitbucketGitProvider) GetUrlFromRepository(repository *GitRepository) string {
 	url := strings.TrimSuffix(repository.Url, ".git")
 
@@ -288,7 +362,7 @@ func (g *BitbucketGitProvider) getApiClient() *bitbucket.Client {
 	return client
 }
 
-func (g *BitbucketGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
+func (g *BitbucketGitProvider) GetPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
 	if staticContext.PrNumber == nil {
 		return staticContext, nil
 	}
@@ -346,8 +420,8 @@ func (g *BitbucketGitProvider) getPrContext(staticContext *StaticGitContext) (*S
 	return &repo, nil
 }
 
-func (g *BitbucketGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
-	staticContext, err := g.AbstractGitProvider.parseStaticGitContext(repoUrl)
+func (g *BitbucketGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
+	staticContext, err := g.AbstractGitProvider.ParseStaticGitContext(repoUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -382,6 +456,25 @@ func (g *BitbucketGitProvider) parseStaticGitContext(repoUrl string) (*StaticGit
 	}
 
 	return staticContext, nil
+}
+
+func (g *BitbucketGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*string, error) {
+	client := g.getApiClient()
+	branches, err := client.Repositories.Repository.ListBranches(&bitbucket.RepositoryBranchOptions{
+		Owner:    staticContext.Owner,
+		RepoSlug: staticContext.Id,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, branch := range branches.Branches {
+		if branch.Type == "main" {
+			return &branch.Name, nil
+		}
+	}
+
+	return nil, fmt.Errorf("Default branch not found")
 }
 
 func (b *BitbucketGitProvider) getOwnerAndRepoFromFullName(fullName string) (string, string, error) {

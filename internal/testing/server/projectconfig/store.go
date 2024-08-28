@@ -21,11 +21,11 @@ func NewInMemoryProjectConfigStore() config.Store {
 	}
 }
 
-func (s *InMemoryProjectConfigStore) List(filter *config.Filter) ([]*config.ProjectConfig, error) {
+func (s *InMemoryProjectConfigStore) List(filter *config.ProjectConfigFilter) ([]*config.ProjectConfig, error) {
 	return s.processFilters(filter)
 }
 
-func (s *InMemoryProjectConfigStore) Find(filter *config.Filter) (*config.ProjectConfig, error) {
+func (s *InMemoryProjectConfigStore) Find(filter *config.ProjectConfigFilter) (*config.ProjectConfig, error) {
 	projectConfigs, err := s.processFilters(filter)
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func (s *InMemoryProjectConfigStore) Delete(projectConfig *config.ProjectConfig)
 	return nil
 }
 
-func (s *InMemoryProjectConfigStore) processFilters(filter *config.Filter) ([]*config.ProjectConfig, error) {
+func (s *InMemoryProjectConfigStore) processFilters(filter *config.ProjectConfigFilter) ([]*config.ProjectConfig, error) {
 	var result []*config.ProjectConfig
 	filteredProjectConfigs := make(map[string]*config.ProjectConfig)
 	for k, v := range s.projectConfigs {
@@ -65,7 +65,7 @@ func (s *InMemoryProjectConfigStore) processFilters(filter *config.Filter) ([]*c
 		}
 		if filter.Url != nil {
 			for _, projectConfig := range filteredProjectConfigs {
-				if projectConfig.Repository.Url != *filter.Url {
+				if projectConfig.RepositoryUrl != *filter.Url {
 					delete(filteredProjectConfigs, projectConfig.Name)
 				}
 			}

@@ -12,14 +12,14 @@ import (
 	"github.com/daytonaio/daytona/pkg/build/detect"
 	"github.com/daytonaio/daytona/pkg/provider/util"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
-	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 )
 
 func (d *DockerClient) StartProject(opts *CreateProjectOptions, daytonaDownloadUrl string) error {
 	var err error
 	containerUser := opts.Project.User
 
-	builderType, err := detect.DetectProjectBuilderType(opts.Project, opts.ProjectDir, opts.SshClient)
+	builderType, err := detect.DetectProjectBuilderType(opts.Project.BuildConfig, opts.ProjectDir, opts.SshClient)
 	if err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@ func (d *DockerClient) startDaytonaAgent(p *project.Project, containerUser, dayt
 	errChan := make(chan error)
 
 	go func() {
-		result, err := d.ExecSync(d.GetProjectContainerName(p), types.ExecConfig{
+		result, err := d.ExecSync(d.GetProjectContainerName(p), container.ExecOptions{
 			Cmd:          []string{"bash", "-c", util.GetProjectStartScript(daytonaDownloadUrl, p.ApiKey)},
 			AttachStdout: true,
 			AttachStderr: true,

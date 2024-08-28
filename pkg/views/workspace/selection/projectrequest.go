@@ -19,24 +19,24 @@ import (
 )
 
 var doneConfiguringName = "DoneConfiguringName"
-var DoneConfiguring = apiclient.CreateProjectConfigDTO{
+var DoneConfiguring = apiclient.CreateProjectDTO{
 	Name: doneConfiguringName,
 }
 
 type projectRequestItem struct {
-	item[apiclient.CreateProjectConfigDTO]
+	item[apiclient.CreateProjectDTO]
 	name, image, user, devcontainerConfig string
-	project                               apiclient.CreateProjectConfigDTO
+	project                               apiclient.CreateProjectDTO
 }
 
 type projectRequestItemDelegate struct {
-	ItemDelegate[apiclient.CreateProjectConfigDTO]
+	ItemDelegate[apiclient.CreateProjectDTO]
 }
 type projectRequestModel struct {
-	model[apiclient.CreateProjectConfigDTO]
+	model[apiclient.CreateProjectDTO]
 }
 
-func selectProjectRequestPrompt(projects *[]apiclient.CreateProjectConfigDTO, choiceChan chan<- *apiclient.CreateProjectConfigDTO) {
+func selectProjectRequestPrompt(projects *[]apiclient.CreateProjectDTO, choiceChan chan<- *apiclient.CreateProjectDTO) {
 	items := []list.Item{}
 
 	for _, project := range *projects {
@@ -96,8 +96,8 @@ func selectProjectRequestPrompt(projects *[]apiclient.CreateProjectConfigDTO, ch
 	}
 }
 
-func GetProjectRequestFromPrompt(projects *[]apiclient.CreateProjectConfigDTO) *apiclient.CreateProjectConfigDTO {
-	choiceChan := make(chan *apiclient.CreateProjectConfigDTO)
+func GetProjectRequestFromPrompt(projects *[]apiclient.CreateProjectDTO) *apiclient.CreateProjectDTO {
+	choiceChan := make(chan *apiclient.CreateProjectDTO)
 
 	go selectProjectRequestPrompt(projects, choiceChan)
 

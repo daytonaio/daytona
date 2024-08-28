@@ -49,7 +49,7 @@ func (d *DockerClient) removeProjectContainer(p *project.Project) error {
 		return err
 	}
 
-	err = d.removeContainer(containerName)
+	err = d.RemoveContainer(containerName)
 	if err != nil {
 		return err
 	}
@@ -82,7 +82,7 @@ func (d *DockerClient) removeProjectContainer(p *project.Project) error {
 	return nil
 }
 
-func (d *DockerClient) removeContainer(containerName string) error {
+func (d *DockerClient) RemoveContainer(containerName string) error {
 	ctx := context.Background()
 
 	err := d.apiClient.ContainerRemove(ctx, containerName, container.RemoveOptions{

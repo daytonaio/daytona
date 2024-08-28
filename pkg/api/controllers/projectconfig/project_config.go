@@ -4,9 +4,11 @@
 package projectconfig
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
@@ -32,11 +34,11 @@ func GetProjectConfig(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	projectConfig, err := server.ProjectConfigService.Find(&config.Filter{
+	projectConfig, err := server.ProjectConfigService.Find(&config.ProjectConfigFilter{
 		Name: &configName,
 	})
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get project config: %w", err))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get project config: %s", err.Error()))
 		return
 	}
 
@@ -59,13 +61,13 @@ func GetDefaultProjectConfig(ctx *gin.Context) {
 
 	decodedURLParam, err := url.QueryUnescape(gitUrl)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode query param: %w", err))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode query param: %s", err.Error()))
 		return
 	}
 
 	server := server.GetInstance(nil)
 
-	projectConfigs, err := server.ProjectConfigService.Find(&config.Filter{
+	projectConfigs, err := server.ProjectConfigService.Find(&config.ProjectConfigFilter{
 		Url:     &decodedURLParam,
 		Default: util.Pointer(true),
 	})
@@ -74,7 +76,7 @@ func GetDefaultProjectConfig(ctx *gin.Context) {
 		if config.IsProjectConfigNotFound(err) {
 			statusCode = http.StatusNotFound
 		}
-		ctx.AbortWithError(statusCode, fmt.Errorf("failed to find project config by git url: %w", err))
+		ctx.AbortWithError(statusCode, fmt.Errorf("failed to find project config by git url: %s", err.Error()))
 	}
 
 	ctx.JSON(200, projectConfigs)
@@ -95,7 +97,7 @@ func ListProjectConfigs(ctx *gin.Context) {
 
 	projectConfigs, err := server.ProjectConfigService.List(nil)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list project configs: %w", err))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list project configs: %s", err.Error()))
 		return
 	}
 
@@ -117,7 +119,7 @@ func SetProjectConfig(ctx *gin.Context) {
 	var req dto.CreateProjectConfigDTO
 	err := ctx.BindJSON(&req)
 	if err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
+		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %s", err.Error()))
 		return
 	}
 
@@ -127,7 +129,7 @@ func SetProjectConfig(ctx *gin.Context) {
 
 	err = s.ProjectConfigService.Save(projectConfig)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to save project config: %w", err))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to save project config: %s", err.Error()))
 		return
 	}
 
@@ -151,7 +153,7 @@ func SetDefaultProjectConfig(ctx *gin.Context) {
 
 	err := server.ProjectConfigService.SetDefault(configName)
 	if err != nil {
-		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to set project config to default: %w", err))
+		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to set project config to default: %s", err.Error()))
 		return
 	}
 
@@ -164,30 +166,46 @@ func SetDefaultProjectConfig(ctx *gin.Context) {
 //	@Summary		Delete project config data
 //	@Description	Delete project config data
 //	@Param			configName	path	string	true	"Config name"
+//	@Param			force		query	bool	false	"Force"
 //	@Success		204
 //	@Router			/project-config/{configName} [delete]
 //
 //	@id				DeleteProjectConfig
 func DeleteProjectConfig(ctx *gin.Context) {
 	configName := ctx.Param("configName")
+	forceQuery := ctx.Query("force")
+
+	var err error
+	var force bool
+
+	if forceQuery != "" {
+		force, err = strconv.ParseBool(forceQuery)
+		if err != nil {
+			ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for force flag"))
+			return
+		}
+	}
 
 	server := server.GetInstance(nil)
 
-	projectConfig, err := server.ProjectConfigService.Find(&config.Filter{
+	projectConfig, err := server.ProjectConfigService.Find(&config.ProjectConfigFilter{
 		Name: &configName,
 	})
 	if err != nil {
-		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to find project config: %w", err))
+		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to find project config: %s", err.Error()))
 		return
 	}
 
-	err = server.ProjectConfigService.Delete(projectConfig.Name)
-	if err != nil {
-		if config.IsProjectConfigNotFound(err) {
-			ctx.Status(204)
+	errs := server.ProjectConfigService.Delete(projectConfig.Name, force)
+	if len(errs) > 0 {
+		if config.IsProjectConfigNotFound(errs[0]) {
+			ctx.AbortWithError(http.StatusNotFound, errors.New("project config not found"))
 			return
 		}
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get project config: %w", err))
+		for _, err := range errs {
+			_ = ctx.Error(err)
+		}
+		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 

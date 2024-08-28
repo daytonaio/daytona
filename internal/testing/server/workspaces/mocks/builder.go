@@ -7,30 +7,36 @@ package mocks
 
 import (
 	"github.com/daytonaio/daytona/pkg/build"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
 	"github.com/stretchr/testify/mock"
 )
 
 var MockBuild = &build.Build{
-	Id:      "1",
-	Hash:    "test",
-	Project: MockProject,
-	State:   build.BuildStatePending,
-	User:    "test",
-	Image:   "test",
+	Id:    "1",
+	State: build.BuildStatePendingRun,
+	Image: "test",
+	User:  "test",
+	BuildConfig: &buildconfig.BuildConfig{
+		Devcontainer: MockProjectConfig.BuildConfig.Devcontainer,
+	},
+	Repository: &gitprovider.GitRepository{
+		Url: MockProjectConfig.RepositoryUrl,
+	},
+	EnvVars: map[string]string{},
 }
 
 type MockBuilderFactory struct {
 	mock.Mock
 }
 
-func (f *MockBuilderFactory) Create(build build.Build) (build.IBuilder, error) {
-	args := f.Called(build)
+func (f *MockBuilderFactory) Create(build build.Build, projectDir string) (build.IBuilder, error) {
+	args := f.Called(build, projectDir)
 	return args.Get(0).(*MockBuilder), args.Error(1)
 }
 
-func (f *MockBuilderFactory) CheckExistingBuild(p project.Project) (*build.Build, error) {
-	args := f.Called(p)
+func (f *MockBuilderFactory) CheckExistingBuild(b build.Build) (*build.Build, error) {
+	args := f.Called(b)
 	return args.Get(0).(*build.Build), args.Error(1)
 }
 
@@ -56,4 +62,9 @@ func (b *MockBuilder) Publish(build build.Build) error {
 func (b *MockBuilder) SaveBuild(r build.Build) error {
 	args := b.Called(r)
 	return args.Error(0)
+}
+
+func (b *MockBuilder) GetImageName(build build.Build) (string, error) {
+	args := b.Called(build)
+	return args.String(0), args.Error(1)
 }

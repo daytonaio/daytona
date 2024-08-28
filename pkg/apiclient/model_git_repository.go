@@ -21,15 +21,16 @@ var _ MappedNullable = &GitRepository{}
 
 // GitRepository struct for GitRepository
 type GitRepository struct {
-	Branch   *string `json:"branch,omitempty"`
-	Id       string  `json:"id"`
-	Name     string  `json:"name"`
-	Owner    string  `json:"owner"`
-	Path     *string `json:"path,omitempty"`
-	PrNumber *int32  `json:"prNumber,omitempty"`
-	Sha      string  `json:"sha"`
-	Source   string  `json:"source"`
-	Url      string  `json:"url"`
+	Branch      *string      `json:"branch,omitempty"`
+	CloneTarget *CloneTarget `json:"cloneTarget,omitempty"`
+	Id          string       `json:"id"`
+	Name        string       `json:"name"`
+	Owner       string       `json:"owner"`
+	Path        *string      `json:"path,omitempty"`
+	PrNumber    *int32       `json:"prNumber,omitempty"`
+	Sha         string       `json:"sha"`
+	Source      string       `json:"source"`
+	Url         string       `json:"url"`
 }
 
 type _GitRepository GitRepository
@@ -87,6 +88,38 @@ func (o *GitRepository) HasBranch() bool {
 // SetBranch gets a reference to the given string and assigns it to the Branch field.
 func (o *GitRepository) SetBranch(v string) {
 	o.Branch = &v
+}
+
+// GetCloneTarget returns the CloneTarget field value if set, zero value otherwise.
+func (o *GitRepository) GetCloneTarget() CloneTarget {
+	if o == nil || IsNil(o.CloneTarget) {
+		var ret CloneTarget
+		return ret
+	}
+	return *o.CloneTarget
+}
+
+// GetCloneTargetOk returns a tuple with the CloneTarget field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitRepository) GetCloneTargetOk() (*CloneTarget, bool) {
+	if o == nil || IsNil(o.CloneTarget) {
+		return nil, false
+	}
+	return o.CloneTarget, true
+}
+
+// HasCloneTarget returns a boolean if a field has been set.
+func (o *GitRepository) HasCloneTarget() bool {
+	if o != nil && !IsNil(o.CloneTarget) {
+		return true
+	}
+
+	return false
+}
+
+// SetCloneTarget gets a reference to the given CloneTarget and assigns it to the CloneTarget field.
+func (o *GitRepository) SetCloneTarget(v CloneTarget) {
+	o.CloneTarget = &v
 }
 
 // GetId returns the Id field value
@@ -309,6 +342,9 @@ func (o GitRepository) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Branch) {
 		toSerialize["branch"] = o.Branch
+	}
+	if !IsNil(o.CloneTarget) {
+		toSerialize["cloneTarget"] = o.CloneTarget
 	}
 	toSerialize["id"] = o.Id
 	toSerialize["name"] = o.Name

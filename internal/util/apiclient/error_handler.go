@@ -9,7 +9,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"strings"
+	"time"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/pkg/api/middlewares"
 	log "github.com/sirupsen/logrus"
@@ -29,6 +33,22 @@ func HandleErrorResponse(res *http.Response, requestErr error) error {
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
+	}
+
+	contentType := res.Header.Get("Content-Type")
+	if strings.HasPrefix(contentType, "text/html") {
+		errorLogsDir, err := config.GetErrorLogsDir()
+		if err != nil {
+			return errors.New(string(body))
+		}
+
+		fileName := fmt.Sprintf("%s/api-error-%s.html", errorLogsDir, time.Now().Format("2006-01-02-15-04-05"))
+		err = os.WriteFile(fileName, body, 0644)
+		if err != nil {
+			return errors.New(string(body))
+		}
+
+		return fmt.Errorf("an error occurred and an html page was returned. You can check the page at %s", fileName)
 	}
 
 	var errResponse ApiErrorResponse

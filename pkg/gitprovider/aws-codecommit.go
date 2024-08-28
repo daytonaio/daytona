@@ -60,6 +60,7 @@ func (g *AwsCodeCommitGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 
 	return namespaces, nil
 }
+
 func (g *AwsCodeCommitGitProvider) GetUrlFromRepository(repository *GitRepository) string {
 	baseURL := ""
 	if strings.Contains(repository.Source, "git-codecommit") {
@@ -235,42 +236,17 @@ func (g *AwsCodeCommitGitProvider) GetLastCommitSha(staticContext *StaticGitCont
 	if err != nil {
 		return "", fmt.Errorf("failed to get client: %w", err)
 	}
-	sha := ""
-	if staticContext.Branch != nil {
-		sha = *staticContext.Branch
+	branch, err := client.GetBranch(context.TODO(), &codecommit.GetBranchInput{
+		RepositoryName: &staticContext.Name,
+		BranchName:     staticContext.Branch,
+	})
+	if err != nil {
+		return "", fmt.Errorf("failed to fetch branch details: %w", err)
 	}
-	if staticContext.Sha != nil {
-		sha = *staticContext.Sha
-	}
-	commitSha := ""
-	if staticContext.Branch == staticContext.Sha {
-		commit, err := client.GetCommit(context.Background(), &codecommit.GetCommitInput{
-			CommitId:       &sha,
-			RepositoryName: &staticContext.Name,
-		})
-
-		if err != nil {
-			return "", fmt.Errorf("failed to fetch branch details: %w", err)
-		}
-		commitSha = *commit.Commit.CommitId
-	} else {
-		if sha == "" {
-			sha = "main"
-		}
-		branch, err := client.GetBranch(context.Background(), &codecommit.GetBranchInput{
-			BranchName:     &sha,
-			RepositoryName: &staticContext.Name,
-		})
-
-		if err != nil {
-			return "", fmt.Errorf("failed to fetch branch details: %w", err)
-		}
-		commitSha = *branch.Branch.CommitId
-	}
-	return commitSha, nil
+	return *branch.Branch.CommitId, nil
 }
 
-func (g *AwsCodeCommitGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
+func (g *AwsCodeCommitGitProvider) GetPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
 	if staticContext.PrNumber == nil {
 		return staticContext, nil
 	}
@@ -291,7 +267,70 @@ func (g *AwsCodeCommitGitProvider) getPrContext(staticContext *StaticGitContext)
 	return &repo, nil
 }
 
-func (g *AwsCodeCommitGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
+func (g *AwsCodeCommitGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
+	client, err := g.getApiClient()
+	if err != nil {
+		return "", err
+	}
+
+	branches, err := client.ListBranches(context.TODO(), &codecommit.ListBranchesInput{
+		RepositoryName: aws.String(staticContext.Name),
+	})
+	if err != nil {
+		return "", fmt.Errorf("failed to list branches, %v", err)
+	}
+	var branchName string
+	for _, branch := range branches.Branches {
+		branchInfo, err := client.GetBranch(context.TODO(), &codecommit.GetBranchInput{
+			RepositoryName: aws.String(staticContext.Name),
+			BranchName:     aws.String(branch),
+		})
+		if err != nil {
+			continue
+		}
+
+		if *staticContext.Sha == *branchInfo.Branch.CommitId {
+			branchName = branch
+			break
+		}
+
+		commitID := branchInfo.Branch.CommitId
+		for commitID != nil {
+			commit, err := client.GetCommit(context.Background(), &codecommit.GetCommitInput{
+				RepositoryName: aws.String(staticContext.Name),
+				CommitId:       commitID,
+			})
+			if err != nil {
+				continue
+			}
+
+			if *commit.Commit.CommitId == *staticContext.Sha {
+				branchName = branch
+				break
+			}
+
+			if len(commit.Commit.Parents) > 0 {
+				commitID = &commit.Commit.Parents[0]
+				if *staticContext.Sha == *commitID {
+					branchName = branch
+					break
+				}
+			} else {
+				commitID = nil
+			}
+		}
+		if branchName != "" {
+			break
+		}
+	}
+
+	if branchName == "" {
+		return "", fmt.Errorf("branch not found for SHA: %s", *staticContext.Sha)
+	}
+	return branchName, nil
+}
+
+func (g *AwsCodeCommitGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
 	url, err := url.Parse(repoUrl)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse url: %s with error: %w", repoUrl, err)
@@ -349,6 +388,21 @@ func (g *AwsCodeCommitGitProvider) parseStaticGitContext(repoUrl string) (*Stati
 		}
 	}
 	return staticContext, nil
+}
+
+func (g *AwsCodeCommitGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*string, error) {
+	client, err := g.getApiClient()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get client: %s", err.Error())
+	}
+	branch, err := client.GetBranch(context.TODO(), &codecommit.GetBranchInput{
+		BranchName:     aws.String("main"),
+		RepositoryName: &staticContext.Name,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get branch: %s", err.Error())
+	}
+	return branch.Branch.CommitId, nil
 }
 
 func getCodeCommitCloneUrl(region string, repositoryId string) string {

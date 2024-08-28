@@ -14,6 +14,65 @@ definitions:
     - name
     - type
     type: object
+  Build:
+    properties:
+      buildConfig:
+        $ref: '#/definitions/BuildConfig'
+      createdAt:
+        type: string
+      envVars:
+        additionalProperties:
+          type: string
+        type: object
+      id:
+        type: string
+      image:
+        type: string
+      prebuildId:
+        type: string
+      repository:
+        $ref: '#/definitions/GitRepository'
+      state:
+        $ref: '#/definitions/build.BuildState'
+      updatedAt:
+        type: string
+      user:
+        type: string
+    required:
+    - createdAt
+    - envVars
+    - id
+    - image
+    - prebuildId
+    - state
+    - updatedAt
+    - user
+    type: object
+  BuildConfig:
+    properties:
+      cachedBuild:
+        $ref: '#/definitions/CachedBuild'
+      devcontainer:
+        $ref: '#/definitions/DevcontainerConfig'
+    type: object
+  CachedBuild:
+    properties:
+      image:
+        type: string
+      user:
+        type: string
+    required:
+    - image
+    - user
+    type: object
+  CloneTarget:
+    enum:
+    - branch
+    - commit
+    type: string
+    x-enum-varnames:
+    - CloneTargetBranch
+    - CloneTargetCommit
   ContainerRegistry:
     properties:
       password:
@@ -27,10 +86,59 @@ definitions:
     - server
     - username
     type: object
+  CreateBuildDTO:
+    properties:
+      branch:
+        type: string
+      prebuildId:
+        type: string
+      projectConfigName:
+        type: string
+    required:
+    - projectConfigName
+    type: object
+  CreatePrebuildDTO:
+    properties:
+      branch:
+        type: string
+      commitInterval:
+        type: integer
+      id:
+        type: string
+      retention:
+        type: integer
+      triggerFiles:
+        items:
+          type: string
+        type: array
+    required:
+    - retention
+    type: object
   CreateProjectConfigDTO:
     properties:
       buildConfig:
-        $ref: '#/definitions/ProjectBuildConfig'
+        $ref: '#/definitions/BuildConfig'
+      envVars:
+        additionalProperties:
+          type: string
+        type: object
+      image:
+        type: string
+      name:
+        type: string
+      repositoryUrl:
+        type: string
+      user:
+        type: string
+    required:
+    - envVars
+    - name
+    - repositoryUrl
+    type: object
+  CreateProjectDTO:
+    properties:
+      buildConfig:
+        $ref: '#/definitions/BuildConfig'
       envVars:
         additionalProperties:
           type: string
@@ -40,7 +148,7 @@ definitions:
       name:
         type: string
       source:
-        $ref: '#/definitions/CreateProjectConfigSourceDTO'
+        $ref: '#/definitions/CreateProjectSourceDTO'
       user:
         type: string
     required:
@@ -48,7 +156,7 @@ definitions:
     - name
     - source
     type: object
-  CreateProjectConfigSourceDTO:
+  CreateProjectSourceDTO:
     properties:
       repository:
         $ref: '#/definitions/GitRepository'
@@ -63,7 +171,7 @@ definitions:
         type: string
       projects:
         items:
-          $ref: '#/definitions/CreateProjectConfigDTO'
+          $ref: '#/definitions/CreateProjectDTO'
         type: array
       target:
         type: string
@@ -108,6 +216,29 @@ definitions:
     - name
     - staging
     - worktree
+    type: object
+  GetRepositoryContext:
+    properties:
+      branch:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      owner:
+        type: string
+      path:
+        type: string
+      prNumber:
+        type: integer
+      sha:
+        type: string
+      source:
+        type: string
+      url:
+        type: string
+    required:
+    - url
     type: object
   GitBranch:
     properties:
@@ -173,6 +304,8 @@ definitions:
     properties:
       branch:
         type: string
+      cloneTarget:
+        $ref: '#/definitions/CloneTarget'
       id:
         type: string
       name:
@@ -244,6 +377,49 @@ definitions:
     required:
     - key
     type: object
+  PrebuildConfig:
+    properties:
+      branch:
+        type: string
+      commitInterval:
+        type: integer
+      id:
+        type: string
+      retention:
+        type: integer
+      triggerFiles:
+        items:
+          type: string
+        type: array
+    required:
+    - branch
+    - commitInterval
+    - id
+    - retention
+    - triggerFiles
+    type: object
+  PrebuildDTO:
+    properties:
+      branch:
+        type: string
+      commitInterval:
+        type: integer
+      id:
+        type: string
+      projectConfigName:
+        type: string
+      retention:
+        type: integer
+      triggerFiles:
+        items:
+          type: string
+        type: array
+    required:
+    - branch
+    - id
+    - projectConfigName
+    - retention
+    type: object
   ProfileData:
     properties:
       envVars:
@@ -256,9 +432,7 @@ definitions:
   Project:
     properties:
       buildConfig:
-        $ref: '#/definitions/ProjectBuildConfig'
-      default:
-        type: boolean
+        $ref: '#/definitions/BuildConfig'
       envVars:
         additionalProperties:
           type: string
@@ -278,7 +452,6 @@ definitions:
       workspaceId:
         type: string
     required:
-    - default
     - envVars
     - image
     - name
@@ -287,15 +460,10 @@ definitions:
     - user
     - workspaceId
     type: object
-  ProjectBuildConfig:
-    properties:
-      devcontainer:
-        $ref: '#/definitions/DevcontainerConfig'
-    type: object
   ProjectConfig:
     properties:
       buildConfig:
-        $ref: '#/definitions/ProjectBuildConfig'
+        $ref: '#/definitions/BuildConfig'
       default:
         type: boolean
       envVars:
@@ -306,8 +474,12 @@ definitions:
         type: string
       name:
         type: string
-      repository:
-        $ref: '#/definitions/GitRepository'
+      prebuilds:
+        items:
+          $ref: '#/definitions/PrebuildConfig'
+        type: array
+      repositoryUrl:
+        type: string
       user:
         type: string
     required:
@@ -315,7 +487,7 @@ definitions:
     - envVars
     - image
     - name
-    - repository
+    - repositoryUrl
     - user
     type: object
   ProjectInfo:
@@ -539,6 +711,24 @@ definitions:
     - ApiKeyTypeClient
     - ApiKeyTypeProject
     - ApiKeyTypeWorkspace
+  build.BuildState:
+    enum:
+    - pending-run
+    - running
+    - error
+    - success
+    - published
+    - pending-delete
+    - deleting
+    type: string
+    x-enum-varnames:
+    - BuildStatePendingRun
+    - BuildStateRunning
+    - BuildStateError
+    - BuildStateSuccess
+    - BuildStatePublished
+    - BuildStatePendingDelete
+    - BuildStateDeleting
   provider.ProviderInfo:
     properties:
       name:
@@ -649,6 +839,102 @@ paths:
       summary: Generate an API key
       tags:
       - apiKey
+  /build:
+    delete:
+      description: Delete ALL builds
+      operationId: DeleteAllBuilds
+      responses:
+        "204":
+          description: No Content
+      summary: Delete ALL builds
+      tags:
+      - build
+    get:
+      description: List builds
+      operationId: ListBuilds
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/Build'
+            type: array
+      summary: List builds
+      tags:
+      - build
+    post:
+      consumes:
+      - application/json
+      description: Create a build
+      operationId: CreateBuild
+      parameters:
+      - description: Create Build DTO
+        in: body
+        name: createBuildDto
+        required: true
+        schema:
+          $ref: '#/definitions/CreateBuildDTO'
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: string
+      summary: Create a build
+      tags:
+      - build
+  /build/{buildId}:
+    delete:
+      description: Delete build
+      operationId: DeleteBuild
+      parameters:
+      - description: Build ID
+        in: path
+        name: buildId
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      summary: Delete build
+      tags:
+      - build
+    get:
+      consumes:
+      - application/json
+      description: Get build data
+      operationId: GetBuild
+      parameters:
+      - description: Build ID
+        in: path
+        name: buildId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Build'
+      summary: Get build data
+      tags:
+      - build
+  /build/prebuild/{prebuildId}:
+    delete:
+      description: Delete builds
+      operationId: DeleteBuildsFromPrebuild
+      parameters:
+      - description: Prebuild ID
+        in: path
+        name: prebuildId
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      summary: Delete builds
+      tags:
+      - build
   /container-registry:
     get:
       description: List container registries
@@ -906,16 +1192,17 @@ paths:
       summary: Get Git context
       tags:
       - gitProvider
-  /gitprovider/context/{gitUrl}:
-    get:
+  /gitprovider/context:
+    post:
       description: Get Git context
       operationId: GetGitContext
       parameters:
-      - description: Git URL
-        in: path
-        name: gitUrl
+      - description: Get repository context
+        in: body
+        name: repository
         required: true
-        type: string
+        schema:
+          $ref: '#/definitions/GetRepositoryContext'
       produces:
       - application/json
       responses:
@@ -1072,6 +1359,10 @@ paths:
         name: configName
         required: true
         type: string
+      - description: Force
+        in: query
+        name: force
+        type: boolean
       responses:
         "204":
           description: No Content
@@ -1097,6 +1388,104 @@ paths:
       summary: Get project config data
       tags:
       - project-config
+  /project-config/{configName}/prebuild:
+    get:
+      consumes:
+      - application/json
+      description: List prebuilds for project config
+      operationId: ListPrebuildsForProjectConfig
+      parameters:
+      - description: Config name
+        in: path
+        name: configName
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/PrebuildDTO'
+            type: array
+      summary: List prebuilds for project config
+      tags:
+      - prebuild
+    put:
+      consumes:
+      - application/json
+      description: Set prebuild
+      operationId: SetPrebuild
+      parameters:
+      - description: Config name
+        in: path
+        name: configName
+        required: true
+        type: string
+      - description: Prebuild
+        in: body
+        name: prebuild
+        required: true
+        schema:
+          $ref: '#/definitions/CreatePrebuildDTO'
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: string
+      summary: Set prebuild
+      tags:
+      - prebuild
+  /project-config/{configName}/prebuild/{prebuildId}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete prebuild
+      operationId: DeletePrebuild
+      parameters:
+      - description: Project config name
+        in: path
+        name: configName
+        required: true
+        type: string
+      - description: Prebuild ID
+        in: path
+        name: prebuildId
+        required: true
+        type: string
+      - description: Force
+        in: query
+        name: force
+        type: boolean
+      responses:
+        "204":
+          description: No Content
+      summary: Delete prebuild
+      tags:
+      - prebuild
+    get:
+      consumes:
+      - application/json
+      description: Get prebuild
+      operationId: GetPrebuild
+      parameters:
+      - description: Project config name
+        in: path
+        name: configName
+        required: true
+        type: string
+      - description: Prebuild ID
+        in: path
+        name: prebuildId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/PrebuildDTO'
+      summary: Get prebuild
+      tags:
+      - prebuild
   /project-config/{configName}/set-default:
     patch:
       description: Set project config to default
@@ -1133,6 +1522,39 @@ paths:
       summary: Get project configs by git url
       tags:
       - project-config
+  /project-config/prebuild:
+    get:
+      consumes:
+      - application/json
+      description: List prebuilds
+      operationId: ListPrebuilds
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/PrebuildDTO'
+            type: array
+      summary: List prebuilds
+      tags:
+      - prebuild
+  /project-config/prebuild/process-git-event:
+    post:
+      description: ProcessGitEvent
+      operationId: ProcessGitEvent
+      parameters:
+      - description: Webhook event
+        in: body
+        name: workspace
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+      summary: ProcessGitEvent
+      tags:
+      - prebuild
   /provider:
     get:
       description: List providers

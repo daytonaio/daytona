@@ -36,7 +36,7 @@ func (g *GitHubGitProviderTestSuite) TestParseStaticGitContext_PR() {
 
 	require := g.Require()
 
-	httpContext, err := g.gitProvider.parseStaticGitContext(prUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(prUrl)
 
 	require.Nil(err)
 	require.Equal(httpContext, prContext)
@@ -58,7 +58,7 @@ func (g *GitHubGitProviderTestSuite) TestParseStaticGitContext_Blob() {
 
 	require := g.Require()
 
-	httpContext, err := g.gitProvider.parseStaticGitContext(blobUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(blobUrl)
 
 	require.Nil(err)
 	require.Equal(httpContext, blobContext)
@@ -80,7 +80,7 @@ func (g *GitHubGitProviderTestSuite) TestParseStaticGitContext_Branch() {
 
 	require := g.Require()
 
-	httpContext, err := g.gitProvider.parseStaticGitContext(branchUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(branchUrl)
 
 	require.Nil(err)
 	require.Equal(httpContext, branchContext)
@@ -102,7 +102,7 @@ func (g *GitHubGitProviderTestSuite) TestParseStaticGitContext_BranchNameWithSla
 
 	require := g.Require()
 
-	httpContext, err := g.gitProvider.parseStaticGitContext(commitUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(commitUrl)
 
 	require.Nil(err)
 	require.Equal(httpContext, commitContext)
@@ -123,7 +123,7 @@ func (g *GitHubGitProviderTestSuite) TestParseStaticGitContext_Commits() {
 
 	require := g.Require()
 
-	httpContext, err := g.gitProvider.parseStaticGitContext(commitsUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(commitsUrl)
 
 	require.Nil(err)
 	require.Equal(httpContext, commitsContext)
@@ -145,7 +145,7 @@ func (g *GitHubGitProviderTestSuite) TestParseStaticGitContext_Commit() {
 
 	require := g.Require()
 
-	httpContext, err := g.gitProvider.parseStaticGitContext(commitUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(commitUrl)
 
 	require.Nil(err)
 	require.Equal(httpContext, commitContext)
