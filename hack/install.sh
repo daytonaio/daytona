@@ -134,6 +134,22 @@ temp_file="daytona-$RANDOM"
 # Ensure the temporary file is deleted on exit
 trap 'rm -f "$temp_file"' EXIT
 
+# Function to determine file size in a cross-platform way
+get_file_size() {
+  local file=$1
+  case "$(uname)" in
+    Darwin)
+      stat -f "%z" "$file" 2>/dev/null || echo "0"
+      ;;
+    Linux)
+      stat --printf="%s" "$file" 2>/dev/null || echo "0"
+      ;;
+    *)
+      echo "0"
+      ;;
+  esac
+}
+
 # Function to display a progress bar with a spinner
 progress_bar_with_spinner() {
   local current_size=$1
@@ -171,7 +187,7 @@ download_file() {
   local curl_pid=$!
 
   while kill -0 $curl_pid 2>/dev/null; do
-    local downloaded_size=$(stat --printf="%s" "$temp_output")
+    local downloaded_size=$(get_file_size "$temp_output")
     progress_bar_with_spinner "$downloaded_size" "$total_size"
     sleep 0.1
   done
