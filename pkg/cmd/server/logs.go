@@ -96,7 +96,7 @@ func readServerLogFile() {
 
 	file, err := os.Open(cfg.LogFilePath)
 	if err != nil {
-		log.Fatal(fmt.Errorf("while opening server logs: %v", err).Error())
+		log.Fatal(fmt.Errorf("while opening server logs: %w", err).Error())
 	}
 	defer file.Close()
 	msgChan := make(chan []byte)

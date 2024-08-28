@@ -30,7 +30,7 @@ func ListProviders(ctx *gin.Context) {
 	for _, provider := range providers {
 		info, err := provider.GetInfo()
 		if err != nil {
-			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get provider: %s", err.Error()))
+			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get provider: %w", err))
 			return
 		}
 

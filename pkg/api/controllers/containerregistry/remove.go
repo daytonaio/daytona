@@ -27,7 +27,7 @@ func RemoveContainerRegistry(ctx *gin.Context) {
 
 	decodedServerURL, err := url.QueryUnescape(crServer)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode server URL: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode server URL: %w", err))
 		return
 	}
 
@@ -35,7 +35,7 @@ func RemoveContainerRegistry(ctx *gin.Context) {
 
 	err = server.ContainerRegistryService.Delete(decodedServerURL)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to remove container registry: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to remove container registry: %w", err))
 		return
 	}
 

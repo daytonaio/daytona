@@ -29,13 +29,13 @@ func GetTargetManifest(ctx *gin.Context) {
 
 	p, err := server.ProviderManager.GetProvider(providerName)
 	if err != nil {
-		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("provider not found: %s", err.Error()))
+		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("provider not found: %w", err))
 		return
 	}
 
 	manifest, err := (*p).GetTargetManifest()
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get provider manifest: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get provider manifest: %w", err))
 		return
 	}
 
