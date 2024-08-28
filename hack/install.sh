@@ -160,7 +160,14 @@ download_file() {
   local temp_output=$(mktemp)
 
   # Start downloading the file with `curl` and pipe the output to `dd` to track progress
-  curl -L -s "$url" -o "$temp_output" &
+  #
+  # Flags:
+  # -f, --fail: Fail silently on server errors.
+  # -s, --silent: Silent mode. Don't show progress meter or error messages.
+  # -S, --show-error: When used with -s, show error even if silent mode is enabled.
+  # -L, --location: Follow redirects.
+  # -o, --output <file>: Write output to <file> instead of stdout.
+  curl -fsSL "$url" -o "$temp_output" &
   local curl_pid=$!
 
   while kill -0 $curl_pid 2>/dev/null; do
@@ -176,13 +183,7 @@ download_file() {
 # curl does not fail with a non-zero status code when the HTTP status
 # code is not successful (like 404 or 500). You can add -f flag to curl
 # command to fail silently on server errors.
-#
-# Flags:
-# -f, --fail: Fail silently on server errors.
-# -s, --silent: Silent mode. Don't show progress meter or error messages.
-# -S, --show-error: When used with -s, show error even if silent mode is enabled.
-# -L, --location: Follow redirects.
-# -o, --output <file>: Write output to <file> instead of stdout.
+
 if ! download_file "$DOWNLOAD_URL" "$temp_file"; then
   err "Daytona binary download failed"
 fi
