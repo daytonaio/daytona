@@ -206,12 +206,14 @@ func (r *BuildRunner) DeleteBuilds() {
 
 			err := dockerClient.DeleteImage(b.Image, true, nil)
 			if err != nil {
-				log.Error(err)
+				r.handleBuildError(*b, nil, err, buildLogger)
+				return
 			}
 
 			err = r.buildStore.Delete(b.Id)
 			if err != nil {
-				log.Error(err)
+				r.handleBuildError(*b, nil, err, buildLogger)
+				return
 			}
 		}(b)
 	}

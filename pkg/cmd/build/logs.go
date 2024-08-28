@@ -89,7 +89,6 @@ func waitForBuildToComplete(buildId string, apiClient *apiclient.APIClient) erro
 		completedStates := []apiclient.BuildBuildState{
 			apiclient.BuildStatePublished,
 			apiclient.BuildStateError,
-			apiclient.BuildStateDeleting,
 		}
 
 		if slices.Contains(completedStates, build.State) {
