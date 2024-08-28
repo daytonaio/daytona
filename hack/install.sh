@@ -77,7 +77,7 @@ stop_daytona_server() {
     if [ "$CONFIRM_FLAG" = false ]; then
       read -p "Daytona server is running. Do you want to stop it? (yes/no): " user_input < /dev/tty
       case $user_input in
-          [Yy][Ee][Ss] )
+        [Yy][Ee][Ss] )
           CONFIRM_FLAG=true
           ;;
         [Nn][Oo] )
