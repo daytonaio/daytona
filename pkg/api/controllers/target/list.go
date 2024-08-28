@@ -26,7 +26,7 @@ func ListTargets(ctx *gin.Context) {
 
 	targets, err := server.ProviderTargetService.List()
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list targets: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list targets: %w", err))
 		return
 	}
 

@@ -29,7 +29,7 @@ func UninstallProvider(ctx *gin.Context) {
 
 	err := server.ProviderManager.UninstallProvider(provider)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to uninstall provider: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to uninstall provider: %w", err))
 		return
 	}
 

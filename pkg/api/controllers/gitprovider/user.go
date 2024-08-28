@@ -29,7 +29,7 @@ func GetGitUser(ctx *gin.Context) {
 
 	response, err := server.GitProviderService.GetGitUser(gitProviderId)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git user: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git user: %w", err))
 		return
 	}
 

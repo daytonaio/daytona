@@ -12,12 +12,12 @@ import (
 func (s *GitProviderService) GetRepositories(gitProviderId, namespaceId string) ([]*gitprovider.GitRepository, error) {
 	gitProvider, err := s.GetGitProvider(gitProviderId)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get git provider: %s", err.Error())
+		return nil, fmt.Errorf("failed to get git provider: %w", err)
 	}
 
 	response, err := gitProvider.GetRepositories(namespaceId)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get repositories: %s", err.Error())
+		return nil, fmt.Errorf("failed to get repositories: %w", err)
 	}
 
 	return response, nil

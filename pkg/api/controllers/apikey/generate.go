@@ -30,7 +30,7 @@ func GenerateApiKey(ctx *gin.Context) {
 
 	response, err := server.ApiKeyService.Generate(apikey.ApiKeyTypeClient, apiKeyName)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get API keys: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get API keys: %w", err))
 		return
 	}
 

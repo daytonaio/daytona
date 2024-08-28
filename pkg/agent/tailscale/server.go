@@ -32,7 +32,7 @@ func (s *Server) Start() error {
 
 	tsnetServer, err := s.connect()
 	if err != nil {
-		return fmt.Errorf("failed to connect to server: %v", err)
+		return fmt.Errorf("failed to connect to server: %w", err)
 	}
 
 	go func(tsnetServer *tsnet.Server) {
@@ -90,7 +90,7 @@ func (s *Server) getTsnetServer() (*tsnet.Server, error) {
 
 	networkKey, err := s.getNetworkKey()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get network key: %v", err)
+		return nil, fmt.Errorf("failed to get network key: %w", err)
 	}
 
 	tsnetServer.AuthKey = networkKey

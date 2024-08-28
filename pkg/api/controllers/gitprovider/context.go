@@ -70,7 +70,7 @@ func GetUrlFromRepository(ctx *gin.Context) {
 
 	gitProvider, _, err := server.GitProviderService.GetGitProviderForUrl(gitRepository.Url)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %w", err))
 		return
 	}
 

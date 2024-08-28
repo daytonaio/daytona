@@ -274,12 +274,12 @@ func (g *GitnessClient) GetLastCommitSha(repoURL string, branch *string) (string
 
 	body, err := g.performRequest("GET", apiURL)
 	if err != nil {
-		return "", fmt.Errorf("error while making request: %s", err.Error())
+		return "", fmt.Errorf("error while making request: %w", err)
 	}
 
 	lastCommit, err := getLastCommit(body)
 	if err != nil {
-		return "", fmt.Errorf("error while fetching last commit from list: %s", err.Error())
+		return "", fmt.Errorf("error while fetching last commit from list: %w", err)
 	}
 
 	return lastCommit.Sha, nil

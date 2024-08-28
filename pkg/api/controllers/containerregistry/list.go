@@ -28,7 +28,7 @@ func GetContainerRegistry(ctx *gin.Context) {
 
 	decodedServerURL, err := url.QueryUnescape(crServer)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode server URL: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode server URL: %w", err))
 		return
 	}
 
@@ -36,7 +36,7 @@ func GetContainerRegistry(ctx *gin.Context) {
 
 	cr, err := server.ContainerRegistryService.Find(decodedServerURL)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get container registry: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get container registry: %w", err))
 		return
 	}
 
@@ -60,7 +60,7 @@ func ListContainerRegistries(ctx *gin.Context) {
 
 	crs, err := server.ContainerRegistryService.List()
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list container registries: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list container registries: %w", err))
 		return
 	}
 

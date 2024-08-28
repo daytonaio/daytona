@@ -32,7 +32,7 @@ func ListGitProviders(ctx *gin.Context) {
 
 	response, err := server.GitProviderService.ListConfigs()
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list git providers: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list git providers: %w", err))
 		return
 	}
 
@@ -59,7 +59,7 @@ func GetGitProviderForUrl(ctx *gin.Context) {
 
 	decodedUrl, err := url.QueryUnescape(urlParam)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode query param: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode query param: %w", err))
 		return
 	}
 
@@ -67,7 +67,7 @@ func GetGitProviderForUrl(ctx *gin.Context) {
 
 	gitProvider, err := server.GitProviderService.GetConfigForUrl(decodedUrl)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %w", err))
 		return
 	}
 
@@ -90,7 +90,7 @@ func GetGitProviderIdForUrl(ctx *gin.Context) {
 
 	decodedUrl, err := url.QueryUnescape(urlParam)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode query param: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode query param: %w", err))
 		return
 	}
 
@@ -98,7 +98,7 @@ func GetGitProviderIdForUrl(ctx *gin.Context) {
 
 	_, providerId, err := server.GitProviderService.GetGitProviderForUrl(decodedUrl)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %w", err))
 		return
 	}
 
@@ -121,7 +121,7 @@ func SetGitProvider(ctx *gin.Context) {
 
 	err := ctx.BindJSON(&setConfigDto)
 	if err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %s", err.Error()))
+		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
 		return
 	}
 
@@ -139,7 +139,7 @@ func SetGitProvider(ctx *gin.Context) {
 
 	err = server.GitProviderService.SetGitProviderConfig(&gitProviderConfig)
 	if err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to set git provider: %s", err.Error()))
+		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to set git provider: %w", err))
 		return
 	}
 
@@ -164,7 +164,7 @@ func RemoveGitProvider(ctx *gin.Context) {
 
 	err := server.GitProviderService.RemoveGitProvider(gitProviderId)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to remove git provider: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to remove git provider: %w", err))
 		return
 	}
 
