@@ -44,7 +44,11 @@ var StartCmd = &cobra.Command{
 		}
 
 		if wscodeFlag {
-			CodeCmd.Run(cmd, []string{args[0]})
+			if len(args) > 0 && args[0] != "" {
+				CodeCmd.Run(cmd, []string{args[0]})
+			}else {
+				log.Fatalf("Cannot found Workspace: Use daytona start %s", args[0])
+			}
 		}
 
 		ctx := context.Background()
