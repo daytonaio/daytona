@@ -44,6 +44,7 @@ definitions:
     - id
     - image
     - prebuildId
+    - repository
     - state
     - updatedAt
     - user
@@ -90,11 +91,17 @@ definitions:
     properties:
       branch:
         type: string
+      envVars:
+        additionalProperties:
+          type: string
+        type: object
       prebuildId:
         type: string
       projectConfigName:
         type: string
     required:
+    - branch
+    - envVars
     - projectConfigName
     type: object
   CreatePrebuildDTO:
@@ -323,6 +330,7 @@ definitions:
       url:
         type: string
     required:
+    - branch
     - id
     - name
     - owner

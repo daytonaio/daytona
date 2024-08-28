@@ -48,8 +48,8 @@ var prebuild1Dto *dto.PrebuildDTO = &dto.PrebuildDTO{
 }
 
 var repository1 *gitprovider.GitRepository = &gitprovider.GitRepository{
-	Url:    "url1",
-	Branch: util.Pointer("main"),
+	Url:    "https://github.com/daytonaio/daytona.git",
+	Branch: "main",
 	Sha:    "sha1",
 }
 
@@ -152,10 +152,10 @@ func (s *ProjectConfigServiceTestSuite) TestProcessGitEventCommitInterval() {
 	}, nil)
 
 	data := gitprovider.GitEventData{
-		Url:           "url1",
+		Url:           repository1.Url,
 		Branch:        "feat",
 		Sha:           "sha4",
-		Owner:         "idagelic",
+		Owner:         repository1.Owner,
 		AffectedFiles: []string{},
 	}
 
@@ -181,10 +181,10 @@ func (s *ProjectConfigServiceTestSuite) TestProcessGitEventTriggerFiles() {
 	}).Return("", nil)
 
 	data := gitprovider.GitEventData{
-		Url:    "url1",
+		Url:    repository1.Url,
 		Branch: "feat",
 		Sha:    "sha4",
-		Owner:  "idagelic",
+		Owner:  repository1.Owner,
 		AffectedFiles: []string{
 			"file1",
 		},

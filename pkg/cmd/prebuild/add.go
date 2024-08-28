@@ -5,12 +5,14 @@ package prebuild
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strconv"
 
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/build"
 	"github.com/daytonaio/daytona/pkg/cmd/projectconfig"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -75,11 +77,13 @@ var prebuildAddCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		if chosenBranch != nil {
-			prebuildAddView.Branch = chosenBranch.Name
+		if chosenBranch == nil {
+			fmt.Println("Operation canceled")
+			return
 		}
 
 		prebuildAddView.RunBuildOnAdd = runOnAddFlag
+		prebuildAddView.Branch = chosenBranch.Name
 
 		add.PrebuildCreationView(&prebuildAddView, false)
 
@@ -118,13 +122,9 @@ var prebuildAddCmd = &cobra.Command{
 		views.RenderInfoMessage("Prebuild added successfully")
 
 		if prebuildAddView.RunBuildOnAdd {
-			buildId, res, err := apiClient.BuildAPI.CreateBuild(ctx).CreateBuildDto(apiclient.CreateBuildDTO{
-				ProjectConfigName: prebuildAddView.ProjectConfigName,
-				Branch:            &prebuildAddView.Branch,
-				PrebuildId:        &prebuildId,
-			}).Execute()
+			buildId, err := build.CreateBuild(apiClient, projectConfig, chosenBranch.Name, &prebuildId)
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				log.Fatal(err)
 			}
 
 			views.RenderViewBuildLogsMessage(buildId)

@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Branch** | Pointer to **string** |  | [optional] 
+**Branch** | **string** |  | 
 **CloneTarget** | Pointer to [**CloneTarget**](CloneTarget.md) |  | [optional] 
 **Id** | **string** |  | 
 **Name** | **string** |  | 
@@ -19,7 +19,7 @@ Name | Type | Description | Notes
 
 ### NewGitRepository
 
-`func NewGitRepository(id string, name string, owner string, sha string, source string, url string, ) *GitRepository`
+`func NewGitRepository(branch string, id string, name string, owner string, sha string, source string, url string, ) *GitRepository`
 
 NewGitRepository instantiates a new GitRepository object
 This constructor will assign default values to properties that have it defined,
@@ -53,11 +53,6 @@ and a boolean to check if the value has been set.
 
 SetBranch sets Branch field to given value.
 
-### HasBranch
-
-`func (o *GitRepository) HasBranch() bool`
-
-HasBranch returns a boolean if a field has been set.
 
 ### GetCloneTarget
 

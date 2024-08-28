@@ -362,18 +362,18 @@ func (g *BitbucketServerGitProvider) GetBranchByCommit(staticContext *StaticGitC
 	return branchName, nil
 }
 
-func (g *BitbucketServerGitProvider) GetUrlFromRepository(repository *GitRepository) string {
-	url := strings.TrimSuffix(repository.Url, ".git")
+func (g *BitbucketServerGitProvider) GetUrlFromContext(repoContext *GetRepositoryContext) string {
+	url := strings.TrimSuffix(repoContext.Url, ".git")
 	url = strings.Replace(url, "/scm/", "/", 1)
 
-	if repository.Branch != nil && *repository.Branch != "" {
-		url += "/src/" + *repository.Branch
+	if repoContext.Branch != nil && *repoContext.Branch != "" {
+		url += "/src/" + *repoContext.Branch
 
-		if repository.Path != nil && *repository.Path != "" {
-			url += "/" + *repository.Path
+		if repoContext.Path != nil && *repoContext.Path != "" {
+			url += "/" + *repoContext.Path
 		}
-	} else if repository.Path != nil && *repository.Path != "" {
-		url += "/src/main/" + *repository.Path
+	} else if repoContext.Path != nil && *repoContext.Path != "" {
+		url += "/src/main/" + *repoContext.Path
 	}
 
 	return url

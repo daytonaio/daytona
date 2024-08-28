@@ -28,7 +28,7 @@ type GitRepository struct {
 	Id       string      `json:"id" validate:"required"`
 	Url      string      `json:"url" validate:"required"`
 	Name     string      `json:"name" validate:"required"`
-	Branch   *string     `json:"branch,omitempty" validate:"optional"`
+	Branch   string      `json:"branch" validate:"required"`
 	Sha      string      `json:"sha" validate:"required"`
 	Owner    string      `json:"owner" validate:"required"`
 	PrNumber *uint32     `json:"prNumber,omitempty" validate:"optional"`

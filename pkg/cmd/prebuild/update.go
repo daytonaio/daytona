@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/build"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/prebuild/add"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -126,13 +127,14 @@ var prebuildUpdateCmd = &cobra.Command{
 		views.RenderInfoMessage("Prebuild updated successfully")
 
 		if prebuildAddView.RunBuildOnAdd {
-			buildId, res, err := apiClient.BuildAPI.CreateBuild(ctx).CreateBuildDto(apiclient.CreateBuildDTO{
-				ProjectConfigName: prebuildAddView.ProjectConfigName,
-				Branch:            &prebuildAddView.Branch,
-				PrebuildId:        &prebuildId,
-			}).Execute()
+			projectConfig, res, err := apiClient.ProjectConfigAPI.GetProjectConfig(ctx, prebuildAddView.ProjectConfigName).Execute()
 			if err != nil {
 				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			}
+
+			buildId, err := build.CreateBuild(apiClient, projectConfig, *newPrebuild.Branch, &prebuildId)
+			if err != nil {
+				log.Fatal(err)
 			}
 
 			views.RenderViewBuildLogsMessage(buildId)

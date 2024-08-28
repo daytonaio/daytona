@@ -51,8 +51,8 @@ func (m *MockGitProvider) GetRepositoryContext(repoContext gitprovider.GetReposi
 	return args.Get(0).(*gitprovider.GitRepository), args.Error(1)
 }
 
-func (m *MockGitProvider) GetUrlFromRepository(repository *gitprovider.GitRepository) string {
-	args := m.Called(repository)
+func (m *MockGitProvider) GetUrlFromContext(repoContext *gitprovider.GetRepositoryContext) string {
+	args := m.Called(repoContext)
 	return args.String(0)
 }
 

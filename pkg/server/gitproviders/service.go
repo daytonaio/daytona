@@ -141,7 +141,7 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 		Id:       repo.Id,
 		Url:      repo.Url,
 		Name:     repo.Name,
-		Branch:   repo.Branch,
+		Branch:   &repo.Branch,
 		Sha:      &repo.Sha,
 		Owner:    repo.Owner,
 		PrNumber: repo.PrNumber,

@@ -16,7 +16,7 @@ type RepositoryDTO struct {
 	Owner    string                  `json:"owner"`
 	Sha      string                  `json:"sha"`
 	Source   string                  `json:"source"`
-	Branch   *string                 `json:"branch,omitempty"`
+	Branch   string                  `json:"branch"`
 	PrNumber *uint32                 `json:"prNumber,omitempty"`
 	Path     *string                 `json:"path,omitempty"`
 	Target   gitprovider.CloneTarget `json:"cloneTarget,omitempty"`

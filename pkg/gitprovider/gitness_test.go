@@ -5,6 +5,7 @@ package gitprovider
 import (
 	"testing"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -119,83 +120,83 @@ func (g *GitnessGitProviderTestSuite) TestParseStaticGitContext_Commit() {
 }
 
 func (g *GitnessGitProviderTestSuite) TestGetUrlFromRepo_Bare() {
-	repo := &GitRepository{
-		Id:     "daytona",
-		Name:   "daytona",
-		Owner:  "daytonaio",
-		Source: "localhost:3000",
+	repo := &GetRepositoryContext{
+		Id:     util.Pointer("daytona"),
+		Name:   util.Pointer("daytona"),
+		Owner:  util.Pointer("daytonaio"),
+		Source: util.Pointer("localhost:3000"),
 		Url:    "https://localhost:3000/daytonaio/daytona.git",
 	}
 
 	require := g.Require()
 
-	url := g.gitProvider.GetUrlFromRepository(repo)
+	url := g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://localhost:3000/daytonaio/daytona", url)
 }
 
 func (g *GitnessGitProviderTestSuite) TestGetUrlFromRepo_Branch() {
-	repo := &GitRepository{
-		Id:     "daytona",
-		Name:   "daytona",
-		Owner:  "daytonaio",
-		Source: "localhost:3000",
+	repo := &GetRepositoryContext{
+		Id:     util.Pointer("daytona"),
+		Name:   util.Pointer("daytona"),
+		Owner:  util.Pointer("daytonaio"),
+		Source: util.Pointer("localhost:3000"),
 		Url:    "https://localhost:3000/daytonaio/daytona.git",
-		Branch: &[]string{"test-branch"}[0],
+		Branch: util.Pointer("test-branch"),
 	}
 
 	require := g.Require()
 
-	url := g.gitProvider.GetUrlFromRepository(repo)
+	url := g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://localhost:3000/daytonaio/daytona/files/test-branch", url)
 }
 
 func (g *GitnessGitProviderTestSuite) TestGetUrlFromRepo_Path() {
-	repo := &GitRepository{
-		Id:     "daytona",
-		Name:   "daytona",
-		Owner:  "daytonaio",
-		Source: "localhost:3000",
+	repo := &GetRepositoryContext{
+		Id:     util.Pointer("daytona"),
+		Name:   util.Pointer("daytona"),
+		Owner:  util.Pointer("daytonaio"),
+		Source: util.Pointer("localhost:3000"),
 		Url:    "https://localhost:3000/daytonaio/daytona.git",
-		Branch: &[]string{"test-branch"}[0],
-		Path:   &[]string{"README.md"}[0],
+		Branch: util.Pointer("test-branch"),
+		Path:   util.Pointer("README.md"),
 	}
 
 	require := g.Require()
 
-	url := g.gitProvider.GetUrlFromRepository(repo)
+	url := g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://localhost:3000/daytonaio/daytona/files/test-branch/~/README.md", url)
 
 	repo.Branch = nil
 
-	url = g.gitProvider.GetUrlFromRepository(repo)
+	url = g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://localhost:3000/daytonaio/daytona/files/main/~/README.md", url)
 }
 
 func (g *GitnessGitProviderTestSuite) TestGetUrlFromRepo_Commit() {
-	repo := &GitRepository{
-		Id:     "daytona",
-		Name:   "daytona",
-		Owner:  "daytonaio",
-		Source: "localhost:3000",
+	repo := &GetRepositoryContext{
+		Id:     util.Pointer("daytona"),
+		Name:   util.Pointer("daytona"),
+		Owner:  util.Pointer("daytonaio"),
+		Source: util.Pointer("localhost:3000"),
 		Url:    "https://localhost:3000/daytonaio/daytona.git",
-		Path:   &[]string{"README.md"}[0],
-		Sha:    "COMMIT_SHA",
-		Branch: &[]string{"COMMIT_SHA"}[0],
+		Branch: util.Pointer("COMMIT_SHA"),
+		Sha:    util.Pointer("COMMIT_SHA"),
+		Path:   util.Pointer("README.md"),
 	}
 
 	require := g.Require()
 
-	url := g.gitProvider.GetUrlFromRepository(repo)
+	url := g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://localhost:3000/daytonaio/daytona/files/COMMIT_SHA/~/README.md", url)
 
 	repo.Path = nil
 
-	url = g.gitProvider.GetUrlFromRepository(repo)
+	url = g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://localhost:3000/daytonaio/daytona/files/COMMIT_SHA", url)
 }

@@ -4,6 +4,8 @@
 package projectconfig
 
 import (
+	"strings"
+
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/server/builds"
@@ -86,6 +88,13 @@ func (s *ProjectConfigService) SetDefault(projectConfigName string) error {
 }
 
 func (s *ProjectConfigService) Find(filter *config.ProjectConfigFilter) (*config.ProjectConfig, error) {
+	if filter != nil && filter.Url != nil {
+		cleanedUrl := util.CleanUpRepositoryUrl(*filter.Url)
+		if !strings.HasSuffix(cleanedUrl, ".git") {
+			cleanedUrl = cleanedUrl + ".git"
+		}
+		filter.Url = util.Pointer(cleanedUrl)
+	}
 	return s.configStore.Find(filter)
 }
 

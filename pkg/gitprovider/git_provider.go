@@ -46,7 +46,7 @@ type GitProvider interface {
 	GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error)
 
 	GetRepositoryContext(repoContext GetRepositoryContext) (*GitRepository, error)
-	GetUrlFromRepository(repository *GitRepository) string
+	GetUrlFromContext(repoContext *GetRepositoryContext) string
 	GetLastCommitSha(staticContext *StaticGitContext) (string, error)
 	GetBranchByCommit(staticContext *StaticGitContext) (string, error)
 	GetPrContext(staticContext *StaticGitContext) (*StaticGitContext, error)
@@ -116,7 +116,7 @@ func (a *AbstractGitProvider) GetRepositoryContext(repoContext GetRepositoryCont
 		Id:       staticContext.Id,
 		Name:     staticContext.Name,
 		Url:      staticContext.Url,
-		Branch:   staticContext.Branch,
+		Branch:   *staticContext.Branch,
 		Sha:      *staticContext.Sha,
 		Owner:    staticContext.Owner,
 		PrNumber: staticContext.PrNumber,

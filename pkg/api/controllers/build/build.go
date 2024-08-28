@@ -52,15 +52,12 @@ func CreateBuild(ctx *gin.Context) {
 	}
 
 	repo, err := gitProvider.GetRepositoryContext(gitprovider.GetRepositoryContext{
-		Url: projectConfig.RepositoryUrl,
+		Url:    projectConfig.RepositoryUrl,
+		Branch: &createBuildDto.Branch,
 	})
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get repository: %s", err.Error()))
 		return
-	}
-
-	if createBuildDto.Branch != nil {
-		repo.Branch = createBuildDto.Branch
 	}
 
 	newBuildDto := builds_dto.BuildCreationData{
@@ -68,7 +65,7 @@ func CreateBuild(ctx *gin.Context) {
 		User:        projectConfig.User,
 		BuildConfig: projectConfig.BuildConfig,
 		Repository:  repo,
-		EnvVars:     projectConfig.EnvVars,
+		EnvVars:     createBuildDto.EnvVars,
 	}
 
 	if createBuildDto.PrebuildId != nil {

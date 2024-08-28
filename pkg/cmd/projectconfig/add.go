@@ -124,9 +124,8 @@ func RunProjectConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []apic
 		Image:         createDtos[0].Image,
 		User:          createDtos[0].User,
 		RepositoryUrl: createDtos[0].Source.Repository.Url,
+		EnvVars:       createDtos[0].EnvVars,
 	}
-
-	newProjectConfig.EnvVars = *workspace_util.GetEnvVariables(createDtos[0].EnvVars, nil)
 
 	res, err = apiClient.ProjectConfigAPI.SetProjectConfig(ctx).ProjectConfig(newProjectConfig).Execute()
 	if err != nil {

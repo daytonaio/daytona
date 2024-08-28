@@ -108,7 +108,7 @@ func (g *GiteaGitProvider) GetRepositories(namespace string) ([]*GitRepository, 
 			Id:     repo.Name,
 			Name:   repo.Name,
 			Url:    repo.HTMLURL,
-			Branch: &repo.DefaultBranch,
+			Branch: repo.DefaultBranch,
 			Owner:  repo.Owner.UserName,
 			Source: u.Host,
 		})
@@ -312,21 +312,21 @@ func (g *GiteaGitProvider) getApiClient() (*gitea.Client, error) {
 	return gitea.NewClient(g.baseApiUrl, options...)
 }
 
-func (g *GiteaGitProvider) GetUrlFromRepository(repository *GitRepository) string {
-	url := strings.TrimSuffix(repository.Url, ".git")
+func (g *GiteaGitProvider) GetUrlFromContext(repoContext *GetRepositoryContext) string {
+	url := strings.TrimSuffix(repoContext.Url, ".git")
 
-	if repository.Branch != nil && *repository.Branch != "" {
-		if repository.Sha == *repository.Branch {
-			url += "/src/commit/" + *repository.Branch
+	if repoContext.Branch != nil && *repoContext.Branch != "" {
+		if repoContext.Sha != nil && *repoContext.Sha == *repoContext.Branch {
+			url += "/src/commit/" + *repoContext.Branch
 		} else {
-			url += "/src/branch/" + *repository.Branch
+			url += "/src/branch/" + *repoContext.Branch
 		}
 
-		if repository.Path != nil && *repository.Path != "" {
-			url += "/" + *repository.Path
+		if repoContext.Path != nil && *repoContext.Path != "" {
+			url += "/" + *repoContext.Path
 		}
-	} else if repository.Path != nil {
-		url += "/src/branch/main/" + *repository.Path
+	} else if repoContext.Path != nil {
+		url += "/src/branch/main/" + *repoContext.Path
 	}
 
 	return url
