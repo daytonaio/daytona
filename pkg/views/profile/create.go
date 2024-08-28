@@ -7,10 +7,10 @@ import (
 	"errors"
 	"log"
 	"net/url"
-	"regexp"
 	"strings"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	util "github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/huh"
@@ -29,8 +29,9 @@ func ProfileCreationView(c *config.Config, profileAddView *ProfileAddView, editi
 			if str == "" {
 				return errors.New("profile name can not be blank")
 			}
-			if match, _ := regexp.MatchString("^[a-zA-Z0-9]+$", str); !match {
-				return errors.New("profile name must be alphanumeric only")
+			result, err := util.GetValidatedName(str)
+			if err != nil {
+				return err
 			}
 
 			if !editing {
@@ -40,7 +41,7 @@ func ProfileCreationView(c *config.Config, profileAddView *ProfileAddView, editi
 					}
 				}
 			}
-
+            profileAddView.ProfileName = result
 			return nil
 		}).
 		Value(&profileAddView.ProfileName)
