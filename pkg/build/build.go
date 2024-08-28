@@ -30,7 +30,7 @@ type Build struct {
 	Image       string                     `json:"image" validate:"required"`
 	User        string                     `json:"user" validate:"required"`
 	BuildConfig *buildconfig.BuildConfig   `json:"buildConfig" validate:"optional"`
-	Repository  *gitprovider.GitRepository `json:"repository" validate:"optional"`
+	Repository  *gitprovider.GitRepository `json:"repository" validate:"required"`
 	EnvVars     map[string]string          `json:"envVars" validate:"required"`
 	PrebuildId  string                     `json:"prebuildId" validate:"required"`
 	CreatedAt   time.Time                  `json:"createdAt" validate:"required"`

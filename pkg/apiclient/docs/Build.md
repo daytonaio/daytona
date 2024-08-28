@@ -10,7 +10,7 @@ Name | Type | Description | Notes
 **Id** | **string** |  | 
 **Image** | **string** |  | 
 **PrebuildId** | **string** |  | 
-**Repository** | Pointer to [**GitRepository**](GitRepository.md) |  | [optional] 
+**Repository** | [**GitRepository**](GitRepository.md) |  | 
 **State** | [**BuildBuildState**](BuildBuildState.md) |  | 
 **UpdatedAt** | **string** |  | 
 **User** | **string** |  | 
@@ -19,7 +19,7 @@ Name | Type | Description | Notes
 
 ### NewBuild
 
-`func NewBuild(createdAt string, envVars map[string]string, id string, image string, prebuildId string, state BuildBuildState, updatedAt string, user string, ) *Build`
+`func NewBuild(createdAt string, envVars map[string]string, id string, image string, prebuildId string, repository GitRepository, state BuildBuildState, updatedAt string, user string, ) *Build`
 
 NewBuild instantiates a new Build object
 This constructor will assign default values to properties that have it defined,
@@ -178,11 +178,6 @@ and a boolean to check if the value has been set.
 
 SetRepository sets Repository field to given value.
 
-### HasRepository
-
-`func (o *Build) HasRepository() bool`
-
-HasRepository returns a boolean if a field has been set.
 
 ### GetState
 

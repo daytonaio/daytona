@@ -1713,6 +1713,7 @@ const docTemplate = `{
                 "id",
                 "image",
                 "prebuildId",
+                "repository",
                 "state",
                 "updatedAt",
                 "user"

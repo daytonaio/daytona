@@ -35,9 +35,7 @@ func Render(b *apiclient.Build, apiServerConfig *apiclient.ServerConfig, forceUn
 
 	output += getInfoLine("State", string(b.State)) + "\n"
 
-	if b.Repository != nil {
-		output += getInfoLine("Repository", b.Repository.Url) + "\n"
-	}
+	output += getInfoLine("Repository", b.Repository.Url) + "\n"
 
 	output += getInfoLine("Image", b.Image) + "\n"
 
