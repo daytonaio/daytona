@@ -24,6 +24,7 @@ const (
 
 var startProjectFlag string
 var allFlag bool
+var wscodeFlag bool
 
 var StartCmd = &cobra.Command{
 	Use:     "start [WORKSPACE]",
@@ -40,6 +41,10 @@ var StartCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 			return
+		}
+
+		if wscodeFlag {
+			CodeCmd.Run(cmd, []string{args[0]})
 		}
 
 		ctx := context.Background()
@@ -99,6 +104,7 @@ var StartCmd = &cobra.Command{
 func init() {
 	StartCmd.PersistentFlags().StringVarP(&startProjectFlag, "project", "p", "", "Start a single project in the workspace (project name)")
 	StartCmd.PersistentFlags().BoolVarP(&allFlag, "all", "a", false, "Start all workspaces")
+	StartCmd.PersistentFlags().BoolVarP(&wscodeFlag, "code", "c", false, "Open the workspace in the default IDE")
 
 	err := StartCmd.RegisterFlagCompletionFunc("project", getProjectNameCompletions)
 	if err != nil {
