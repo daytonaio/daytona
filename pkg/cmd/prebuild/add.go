@@ -68,6 +68,8 @@ var prebuildAddCmd = &cobra.Command{
 			prebuildAddView.Branch = chosenBranch.Name
 		}
 
+		prebuildAddView.RunBuildOnAdd = runOnAddFlag
+
 		add.PrebuildCreationView(&prebuildAddView, false)
 
 		var commitInterval int
@@ -104,7 +106,7 @@ var prebuildAddCmd = &cobra.Command{
 
 		views.RenderInfoMessage("Prebuild added successfully")
 
-		if runFlag {
+		if prebuildAddView.RunBuildOnAdd {
 			buildId, res, err := apiClient.BuildAPI.CreateBuild(ctx).CreateBuildDto(apiclient.CreateBuildDTO{
 				ProjectConfigName: prebuildAddView.ProjectConfigName,
 				Branch:            &prebuildAddView.Branch,
@@ -119,8 +121,8 @@ var prebuildAddCmd = &cobra.Command{
 	},
 }
 
-var runFlag bool
+var runOnAddFlag bool
 
 func init() {
-	prebuildAddCmd.Flags().BoolVar(&runFlag, "run", false, "Run the prebuild once after adding it")
+	prebuildAddCmd.Flags().BoolVar(&runOnAddFlag, "run", true, "Run the prebuild once after adding it")
 }

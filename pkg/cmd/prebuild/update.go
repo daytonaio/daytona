@@ -87,6 +87,8 @@ var prebuildUpdateCmd = &cobra.Command{
 			prebuildAddView.TriggerFiles = prebuild.TriggerFiles
 		}
 
+		prebuildAddView.RunBuildOnAdd = runOnUpdateFlag
+
 		add.PrebuildCreationView(&prebuildAddView, true)
 
 		var commitInterval int
@@ -123,7 +125,7 @@ var prebuildUpdateCmd = &cobra.Command{
 
 		views.RenderInfoMessage("Prebuild updated successfully")
 
-		if runFlag {
+		if prebuildAddView.RunBuildOnAdd {
 			buildId, res, err := apiClient.BuildAPI.CreateBuild(ctx).CreateBuildDto(apiclient.CreateBuildDTO{
 				ProjectConfigName: prebuildAddView.ProjectConfigName,
 				Branch:            &prebuildAddView.Branch,
@@ -138,6 +140,8 @@ var prebuildUpdateCmd = &cobra.Command{
 	},
 }
 
+var runOnUpdateFlag bool
+
 func init() {
-	prebuildUpdateCmd.Flags().BoolVar(&runFlag, "run", false, "Run the prebuild once after updating it")
+	prebuildUpdateCmd.Flags().BoolVar(&runOnUpdateFlag, "run", false, "Run the prebuild once after updating it")
 }
