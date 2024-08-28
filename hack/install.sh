@@ -16,7 +16,7 @@ CONFIRM_FLAG=false
 # Check for the -y flag
 for arg in "$@"; do
   case $arg in
-  -y)
+   -y)
     CONFIRM_FLAG=true
     shift
     ;;
@@ -73,32 +73,32 @@ draw_animated_bar() {
 
 # Stop the Daytona server if it is running
 stop_daytona_server() {
-  if pgrep -x "daytona" >/dev/null; then
+  if pgrep -x "daytona" > /dev/null; then
     if [ "$CONFIRM_FLAG" = false ]; then
-      read -p "Daytona server is running. Do you want to stop it? (yes/no): " user_input
+      read -p "Daytona server is running. Do you want to stop it? (yes/no): " user_input < /dev/tty
       case $user_input in
-      [Yy][Ee][Ss])
-        CONFIRM_FLAG=true
-        ;;
-      [Nn][Oo])
-        echo "Please stop the Daytona server manually and rerun the script."
-        exit 0
-        ;;
-      *)
-        echo "Invalid input. Please enter 'yes' or 'no'."
-        exit 1
-        ;;
+             [Yy][Ee][Ss] )
+          CONFIRM_FLAG=true
+          ;;
+        [Nn][Oo] )
+          echo "Please stop the Daytona server manually and rerun the script."
+          exit 0
+          ;;
+        * )
+          echo "Invalid input. Please enter 'yes' or 'no'."
+          exit 1
+          ;;
       esac
     fi
 
     if [ "$CONFIRM_FLAG" = true ]; then
-      echo "Attempting to stop the Daytona server..."
+      echo -e "Attempting to stop the Daytona server..."
       if daytona server stop; then
         echo "Stopping the Daytona server"
       else
         pkill -x "daytona"
       fi
-      echo "Daytona server stopped.\n"
+      echo -e "Daytona server stopped.\n"
     fi
   fi
 }
@@ -108,8 +108,9 @@ stop_daytona_server
 
 echo -e "Installing Daytona...\n"
 
-# Determine machine architecture and operating system
+# Check machine architecture
 ARCH=$(uname -m)
+# Check operating system
 OS=$(uname -s)
 
 case $OS in
@@ -141,10 +142,10 @@ esac
 
 if [ ! "$DAYTONA_PATH" ]; then
   echo "Default installation directory: /usr/local/bin"
-  echo "You can override this by setting the DAYTONA_PATH environment variable (e.g., \`DAYTONA_PATH=/home/user/bin bash\`)"
+  echo "You can override this by setting the DAYTONA_PATH environment variable (ie., \`| DAYTONA_PATH=/home/user/bin bash\`)"
 fi
 
-# Verify if destination exists and is writable
+# Check if destination exists and is writable
 if [[ ! -d $DESTINATION ]]; then
   echo -e "\nWarning: Destination directory $DESTINATION does not exist."
   echo "         Create the directory:"
