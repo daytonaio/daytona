@@ -24,6 +24,7 @@ type PrebuildAddView struct {
 	CommitInterval    string
 	TriggerFiles      []string
 	Retention         string
+	RunBuildOnAdd     bool
 }
 
 func PrebuildCreationView(prebuildAddView *PrebuildAddView, editing bool) {
@@ -70,6 +71,9 @@ func PrebuildCreationView(prebuildAddView *PrebuildAddView, editing bool) {
 					_, err := strconv.Atoi(str)
 					return err
 				}),
+			huh.NewConfirm().
+				Title("Run the build once on submit?").
+				Value(&prebuildAddView.RunBuildOnAdd),
 		),
 	).WithTheme(views.GetCustomTheme())
 
