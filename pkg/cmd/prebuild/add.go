@@ -11,6 +11,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/projectconfig"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/prebuild/add"
@@ -33,12 +34,12 @@ var prebuildAddCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		userGitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
+		gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
 		if err != nil {
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
-		if len(userGitProviders) == 0 {
+		if len(gitProviders) == 0 {
 			views.RenderInfoMessage("No registered Git providers have been found - please register a Git provider using 'daytona git-provider add' in order to start using prebuilds.")
 			return
 		}
@@ -48,9 +49,19 @@ var prebuildAddCmd = &cobra.Command{
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
-		projectConfig = selection.GetProjectConfigFromPrompt(projectConfigList, 0, false, "Prebuild")
+		projectConfig = selection.GetProjectConfigFromPrompt(projectConfigList, 0, false, true, "Prebuild")
 		if projectConfig == nil {
 			log.Fatal("No project config selected")
+		}
+
+		if projectConfig.Name == selection.NewProjectConfigIdentifier {
+			projectConfig, err = projectconfig.RunProjectConfigAddFlow(apiClient, gitProviders, ctx)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if projectConfig == nil {
+				return
+			}
 		}
 
 		prebuildAddView.ProjectConfigName = projectConfig.Name

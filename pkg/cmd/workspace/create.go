@@ -313,8 +313,8 @@ func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, pro
 		BlankProject:     blankFlag,
 		ApiClient:        apiClient,
 		Defaults:         projectDefaults,
-	},
-	)
+	})
+
 	if err != nil {
 		return err
 	}

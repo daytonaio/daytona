@@ -42,7 +42,7 @@ var projectConfigInfoCmd = &cobra.Command{
 				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
 
-			projectConfig = selection.GetProjectConfigFromPrompt(projectConfigList, 0, false, "View")
+			projectConfig = selection.GetProjectConfigFromPrompt(projectConfigList, 0, false, false, "View")
 		} else {
 			var res *http.Response
 			projectConfig, res, err = apiClient.ProjectConfigAPI.GetProjectConfig(ctx, args[0]).Execute()
