@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/git"
@@ -283,7 +284,7 @@ func (r *BuildRunner) RunBuildProcess(config BuildProcessConfig) {
 		config.BuildLogger.Write([]byte(errMsg + "\n"))
 	}
 
-	config.BuildLogger.Write([]byte("\nBuild completed successfully\n"))
+	config.BuildLogger.Write([]byte("\n \n" + lipgloss.NewStyle().Bold(true).Render("Build completed successfully")))
 
 	if r.telemetryEnabled {
 		r.logTelemetry(context.Background(), *config.Build, err)
