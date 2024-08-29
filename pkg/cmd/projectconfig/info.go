@@ -9,7 +9,7 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/projectconfig/info"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	log "github.com/sirupsen/logrus"
@@ -42,7 +42,15 @@ var projectConfigInfoCmd = &cobra.Command{
 				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
 
+			if format.FormatFlag != "" {
+				format.UnblockStdOut()
+			}
+
 			projectConfig = selection.GetProjectConfigFromPrompt(projectConfigList, 0, false, false, "View")
+			if format.FormatFlag != "" {
+				format.BlockStdOut()
+			}
+
 		} else {
 			var res *http.Response
 			projectConfig, res, err = apiClient.ProjectConfigAPI.GetProjectConfig(ctx, args[0]).Execute()
@@ -55,8 +63,9 @@ var projectConfigInfoCmd = &cobra.Command{
 			return
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = projectConfig
+		if format.FormatFlag != "" {
+			formattedData := format.NewFormatter(projectConfig)
+			formattedData.Print()
 			return
 		}
 
@@ -65,4 +74,5 @@ var projectConfigInfoCmd = &cobra.Command{
 }
 
 func init() {
+	format.RegisterFormatFlag(projectConfigInfoCmd)
 }
