@@ -138,15 +138,15 @@ trap 'rm -f "$temp_file"' EXIT
 get_file_size() {
   local file=$1
   case "$(uname)" in
-    Darwin)
-      stat -f "%z" "$file" 2>/dev/null || echo "0"
-      ;;
-    Linux)
-      stat --printf="%s" "$file" 2>/dev/null || echo "0"
-      ;;
-    *)
-      echo "0"
-      ;;
+  Darwin)
+    stat -f "%z" "$file" 2>/dev/null || echo "0"
+    ;;
+  Linux)
+    stat --printf="%s" "$file" 2>/dev/null || echo "0"
+    ;;
+  *)
+    echo "0"
+    ;;
   esac
 }
 
@@ -161,7 +161,7 @@ progress_bar_with_spinner() {
   local spinner="⠋⠙⠸⠴⠦⠧⠇⠏"
   local spin_char=${spinner:$(($RANDOM % 8)):1}
 
-  printf "\r[%s] Downloading... [%-${bar_width}s] %d%%" "$spin_char" "$(printf "%0.s#" $(seq 1 $filled))$(printf "%0.s-" $(seq 1 $empty))" "$percent"
+  printf "\r\033[K[%s] Downloading... [%-${bar_width}s] %d%%" "$spin_char" "$(printf "%0.s#" $(seq 1 $filled))$(printf "%0.s-" $(seq 1 $empty))" "$percent"
 }
 
 # Download the file while showing a progress bar with a spinner
