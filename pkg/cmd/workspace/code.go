@@ -196,5 +196,5 @@ func openIDE(ideId string, activeProfile config.Profile, workspaceId string, pro
 var ideFlag string
 
 func init() {
-	CodeCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", "Specify the IDE ('vscode' or 'browser')")
+	CodeCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", "Specify the IDE ('vscode', 'browser', 'jetbrains', 'cursor', 'ssh')")
 }
