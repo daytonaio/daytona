@@ -15,7 +15,7 @@ type CreateProjectConfigDTO struct {
 	BuildConfig *buildconfig.ProjectBuildConfig `json:"buildConfig,omitempty" validate:"optional"`
 	Source      CreateProjectConfigSourceDTO    `json:"source" validate:"required"`
 	EnvVars     map[string]string               `json:"envVars" validate:"required"`
-	Identity    string                          `json:"identity" validate:"required"`
+	Identity    *string                         `json:"identity" validate:"optional"`
 } // @name CreateProjectConfigDTO
 
 type CreateProjectConfigSourceDTO struct {

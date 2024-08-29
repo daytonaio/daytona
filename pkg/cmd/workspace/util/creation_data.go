@@ -233,7 +233,7 @@ func GetBranchFromProjectConfig(projectConfig *apiclient.ProjectConfig, apiClien
 func newCreateProjectConfigDTO(config ProjectsDataPromptConfig, providerRepo *apiclient.GitRepository, providerRepoName string, identity string) apiclient.CreateProjectConfigDTO {
 	project := apiclient.CreateProjectConfigDTO{
 		Name:     providerRepoName,
-		Identity: identity,
+		Identity: &identity,
 		Source: apiclient.CreateProjectConfigSourceDTO{
 			Repository: *providerRepo,
 		},

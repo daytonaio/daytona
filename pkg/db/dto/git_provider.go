@@ -16,13 +16,13 @@ const (
 )
 
 type GitProviderConfigDTO struct {
-	Id             string         `gorm:"primaryKey"`
-	Username       string         `json:"username"`
-	BaseApiUrl     *string        `json:"baseApiUrl,omitempty"`
-	Token          string         `json:"token"`
-	TokenIdentity  string         `json:"tokenIdentity"`
-	TokenScope     string         `json:"tokenScope"`
-	TokenScopeType TokenScopeType `json:"tokenScopeType"`
+	Id             string                     `gorm:"primaryKey"`
+	Username       string                     `json:"username"`
+	BaseApiUrl     *string                    `json:"baseApiUrl,omitempty"`
+	Token          string                     `json:"token"`
+	TokenIdentity  string                     `json:"tokenIdentity"`
+	TokenScope     string                     `json:"tokenScope"`
+	TokenScopeType gitprovider.TokenScopeType `json:"tokenScopeType"`
 }
 
 func ToGitProviderConfigDTO(gitProvider gitprovider.GitProviderConfig) GitProviderConfigDTO {
@@ -33,7 +33,7 @@ func ToGitProviderConfigDTO(gitProvider gitprovider.GitProviderConfig) GitProvid
 		Token:          gitProvider.Token,
 		TokenIdentity:  gitProvider.TokenIdentity,
 		TokenScope:     gitProvider.TokenScope,
-		TokenScopeType: TokenScopeType(gitProvider.TokenScopeType),
+		TokenScopeType: gitProvider.TokenScopeType,
 	}
 
 	return gitProviderDTO
@@ -47,6 +47,6 @@ func ToGitProviderConfig(gitProviderDTO GitProviderConfigDTO) gitprovider.GitPro
 		Token:          gitProviderDTO.Token,
 		TokenIdentity:  gitProviderDTO.TokenIdentity,
 		TokenScope:     gitProviderDTO.TokenScope,
-		TokenScopeType: gitprovider.TokenScopeType(gitProviderDTO.TokenScopeType),
+		TokenScopeType: gitProviderDTO.TokenScopeType,
 	}
 }

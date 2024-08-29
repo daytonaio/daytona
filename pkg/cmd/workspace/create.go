@@ -345,16 +345,22 @@ func processCmdArgument(argument []string, apiClient *apiclient.APIClient, proje
 		return nil, fmt.Errorf("can't set devcontainer file path if builder is not set to %s", create.DEVCONTAINER)
 	}
 
+	identity := ""
+	repoUrlOrConfigName := argument[0]
+	if len(argument) == 2 {
+		identity = argument[0]
+		repoUrlOrConfigName = argument[1]
+	}
 	var projectConfig *apiclient.ProjectConfig
-	identity := argument[0]
-	repoUrl, err := util.GetValidatedUrl(argument[1])
+	repoUrl, err := util.GetValidatedUrl(repoUrlOrConfigName)
 	if err == nil {
+
 		// The argument is a Git URL
 		return processGitURL(repoUrl, identity, apiClient, projects, ctx)
 	}
 
 	// The argument is not a Git URL - try getting the project config
-	projectConfig, _, err = apiClient.ProjectConfigAPI.GetProjectConfig(ctx, argument[1]).Execute()
+	projectConfig, _, err = apiClient.ProjectConfigAPI.GetProjectConfig(ctx, repoUrlOrConfigName).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse the URL or fetch the project config for '%s'", argument)
 	}
@@ -392,7 +398,7 @@ func processGitURL(repoUrl string, identity string, apiClient *apiclient.APIClie
 
 	project := &apiclient.CreateProjectConfigDTO{
 		Name:     projectName,
-		Identity: identity,
+		Identity: &identity,
 		Source: apiclient.CreateProjectConfigSourceDTO{
 			Repository: *repoResponse,
 		},

@@ -186,10 +186,6 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig
 		log.Fatal(err)
 	}
 
-	if *gitProviderAddView.TokenScopeType == apiclient.TokenScopeTypeGlobal {
-		*gitProviderAddView.TokenScope = "global"
-	}
-
 }
 
 func providerRequiresUsername(gitProviderId string) bool {

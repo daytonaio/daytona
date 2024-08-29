@@ -10,7 +10,7 @@ import (
 )
 
 func (s *GitProviderService) GetRepoBranches(gitProviderId, namespaceId, repositoryId string) ([]*gitprovider.GitBranch, error) {
-	gitProvider, err := s.GetGitProvider(gitProviderId)
+	gitProvider, err := s.GetGitProvider(gitProviderId, "")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get git provider: %s", err.Error())
 	}

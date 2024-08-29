@@ -1382,7 +1382,6 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "envVars",
-                "identity",
                 "name",
                 "source"
             ],

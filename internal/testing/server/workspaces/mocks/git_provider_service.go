@@ -33,9 +33,14 @@ func (m *MockGitProviderService) GetConfigForUrl(url string) (*gitprovider.GitPr
 	return args.Get(0).(*gitprovider.GitProviderConfig), args.Error(1)
 }
 
-func (m *MockGitProviderService) GetGitProvider(id string) (gitprovider.GitProvider, error) {
-	args := m.Called(id)
-	return args.Get(0).(gitprovider.GitProvider), args.Error(1)
+func (m *MockGitProviderService) GetGitProvider(id string, identity string) (gitprovider.GitProvider, error) {
+	if id != "" {
+		args := m.Called(id)
+		return args.Get(0).(gitprovider.GitProvider), args.Error(1)
+	} else {
+		args := m.Called(identity)
+		return args.Get(0).(gitprovider.GitProvider), args.Error(1)
+	}
 }
 
 func (m *MockGitProviderService) GetGitProviderForUrl(url string) (gitprovider.GitProvider, string, error) {

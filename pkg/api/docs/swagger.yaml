@@ -47,7 +47,6 @@ definitions:
         type: string
     required:
     - envVars
-    - identity
     - name
     - source
     type: object

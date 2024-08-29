@@ -371,7 +371,7 @@ import (
 )
 
 func main() {
-	projectConfig := *openapiclient.NewCreateProjectConfigDTO(map[string]string{"key": "Inner_example"}, "Identity_example", "Name_example", *openapiclient.NewCreateProjectConfigSourceDTO(*openapiclient.NewGitRepository("Id_example", "Name_example", "Owner_example", "Sha_example", "Source_example", "Url_example"))) // CreateProjectConfigDTO | Project config
+	projectConfig := *openapiclient.NewCreateProjectConfigDTO(map[string]string{"key": "Inner_example"}, "Name_example", *openapiclient.NewCreateProjectConfigSourceDTO(*openapiclient.NewGitRepository("Id_example", "Name_example", "Owner_example", "Sha_example", "Source_example", "Url_example"))) // CreateProjectConfigDTO | Project config
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

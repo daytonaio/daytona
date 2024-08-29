@@ -19,37 +19,17 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 		return nil, "", err
 	}
 
-	parsedUrl, err := url.Parse(repoUrl)
-	if err != nil {
-		return nil, "", err
-	}
-
 	for _, p := range gitProviders {
-		if p.TokenScopeType != gitprovider.TokenScopeTypeGlobal && p.TokenScopeType != "" {
-			parts := strings.Split(p.TokenScope, "/")
-			isOrgMatched := strings.Contains(parsedUrl.Path, parts[0])
-			isRepoMatched := strings.Contains(parsedUrl.Path, parts[1])
-
-			if p.TokenScopeType == gitprovider.TokenScopeTypeRepository && isOrgMatched && isRepoMatched {
-				gitProvider, err := s.GetGitProvider(p.Id)
-				if err != nil {
-					return nil, "", err
-				}
-				return gitProvider, p.Id, nil
+		if strings.Contains(repoUrl, p.TokenScope) {
+			gitProvider, err := s.GetGitProvider(p.Id, "")
+			if err != nil {
+				return nil, "", err
 			}
-
-			if p.TokenScopeType == gitprovider.TokenScopeTypeOrganization && isOrgMatched {
-				gitProvider, err := s.GetGitProvider(p.Id)
-				if err != nil {
-					return nil, "", err
-				}
-				return gitProvider, p.Id, nil
-			}
+			return gitProvider, p.Id, nil
 		}
 
-		// Assumes that git provider added before this update has global access
 		if p.Id == "aws-codecommit" && strings.Contains(repoUrl, "git-codecommit") {
-			gitProvider, err := s.GetGitProvider(p.Id)
+			gitProvider, err := s.GetGitProvider(p.Id, "")
 			if err != nil {
 				return nil, "", err
 			}
@@ -57,7 +37,7 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 		}
 
 		if strings.Contains(repoUrl, fmt.Sprintf("%s.", p.Id)) {
-			gitProvider, err := s.GetGitProvider(p.Id)
+			gitProvider, err := s.GetGitProvider(p.Id, "")
 			if err != nil {
 				return nil, "", err
 			}
@@ -74,7 +54,7 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 		}
 
 		if p.BaseApiUrl != nil && strings.Contains(repoUrl, hostname) {
-			gitProvider, err := s.GetGitProvider(p.Id)
+			gitProvider, err := s.GetGitProvider(p.Id, "")
 			if err != nil {
 				return nil, "", err
 			}
@@ -106,27 +86,12 @@ func (s *GitProviderService) GetConfigForUrl(repoUrl string) (*gitprovider.GitPr
 		return nil, err
 	}
 
-	parsedUrl, err := url.Parse(repoUrl)
-	if err != nil {
-		return nil, err
-	}
-
 	for _, p := range gitProviders {
 		p.Token = url.QueryEscape(p.Token)
 		p.Username = url.QueryEscape(p.Username)
 
-		if p.TokenScopeType != gitprovider.TokenScopeTypeGlobal && p.TokenScopeType != "" {
-			parts := strings.Split(p.TokenScope, "/")
-			isOrgMatched := strings.Contains(parsedUrl.Path, parts[0])
-			isRepoMatched := strings.Contains(parsedUrl.Path, parts[1])
-
-			if p.TokenScopeType == gitprovider.TokenScopeTypeRepository && isOrgMatched && isRepoMatched {
-				return p, nil
-			}
-
-			if p.TokenScopeType == gitprovider.TokenScopeTypeOrganization && isOrgMatched {
-				return p, nil
-			}
+		if strings.Contains(repoUrl, p.TokenScope) {
+			return p, nil
 		}
 
 		if p.Id == "aws-codecommit" && strings.Contains(repoUrl, "git-codecommit") {
@@ -176,7 +141,6 @@ func (s *GitProviderService) SetGitProviderConfig(providerConfig *gitprovider.Gi
 	}
 	providerConfig.Username = userData.Username
 	providerConfig.Id = fmt.Sprintf("%s_%s", providerConfig.Id, providerConfig.TokenIdentity)
-	fmt.Println(providerConfig.Id)
 	return s.configStore.Save(providerConfig)
 }
 

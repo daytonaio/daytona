@@ -6,7 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **BuildConfig** | Pointer to [**ProjectBuildConfig**](ProjectBuildConfig.md) |  | [optional] 
 **EnvVars** | **map[string]string** |  | 
-**Identity** | **string** |  | 
+**Identity** | Pointer to **string** |  | [optional] 
 **Image** | Pointer to **string** |  | [optional] 
 **Name** | **string** |  | 
 **Source** | [**CreateProjectConfigSourceDTO**](CreateProjectConfigSourceDTO.md) |  | 
@@ -16,7 +16,7 @@ Name | Type | Description | Notes
 
 ### NewCreateProjectConfigDTO
 
-`func NewCreateProjectConfigDTO(envVars map[string]string, identity string, name string, source CreateProjectConfigSourceDTO, ) *CreateProjectConfigDTO`
+`func NewCreateProjectConfigDTO(envVars map[string]string, name string, source CreateProjectConfigSourceDTO, ) *CreateProjectConfigDTO`
 
 NewCreateProjectConfigDTO instantiates a new CreateProjectConfigDTO object
 This constructor will assign default values to properties that have it defined,
@@ -95,6 +95,11 @@ and a boolean to check if the value has been set.
 
 SetIdentity sets Identity field to given value.
 
+### HasIdentity
+
+`func (o *CreateProjectConfigDTO) HasIdentity() bool`
+
+HasIdentity returns a boolean if a field has been set.
 
 ### GetImage
 

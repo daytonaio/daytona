@@ -20,7 +20,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
-
 	log "github.com/sirupsen/logrus"
 )
 
@@ -100,7 +99,7 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 			WorkspaceId:   w.Id,
 			ApiKey:        apiKey,
 			Target:        w.Target,
-			Identity:      p.Identity,
+			Identity:      *p.Identity,
 		}
 		w.Projects = append(w.Projects, project)
 	}
@@ -142,6 +141,7 @@ func (s *WorkspaceService) createWorkspace(ctx context.Context, ws *workspace.Wo
 	defer wsLogger.Close()
 
 	wsLogger.Write([]byte(fmt.Sprintf("Creating workspace %s (%s)\n", ws.Name, ws.Id)))
+	log.Infoln(fmt.Sprintf("Creating %s\n", ws.Projects[0].Identity))
 
 	ws.EnvVars = workspace.GetWorkspaceEnvVars(ws, workspace.WorkspaceEnvVarParams{
 		ApiUrl:    s.serverApiUrl,
@@ -168,31 +168,31 @@ func (s *WorkspaceService) createWorkspace(ctx context.Context, ws *workspace.Wo
 		for k, v := range p.EnvVars {
 			projectWithEnv.EnvVars[k] = v
 		}
-		var gitProviderConfig *gitprovider.GitProviderConfig
+		var gitProviderConfig gitprovider.GitProviderConfig
 		if p.Identity == "" {
 			gc, err := s.gitProviderService.GetConfigForUrl(p.Repository.Url)
-			if err != nil && !gitprovider.IsGitProviderNotFound(err) {
+			if err != nil {
 				return nil, err
 			}
-			p.Identity = gc.TokenIdentity
-			gitProviderConfig = gc
+			gitProviderConfig = *gc
 		} else {
 			gc, err := s.gitProviderService.GetConfig("", p.Identity)
 			if err != nil {
 				return nil, err
 			}
-			gitProviderConfig = gc
+			gitProviderConfig = *gc
 		}
 		var err error
 
 		p = &projectWithEnv
+		p.Identity = gitProviderConfig.TokenIdentity
 
 		ws.Projects[i] = p
 		err = s.workspaceStore.Save(ws)
 		if err != nil {
 			return nil, err
 		}
-		err = s.createProject(p, gitProviderConfig, target, projectLogger)
+		err = s.createProject(p, &gitProviderConfig, target, projectLogger)
 		if err != nil {
 			return nil, err
 		}
@@ -209,6 +209,8 @@ func (s *WorkspaceService) createWorkspace(ctx context.Context, ws *workspace.Wo
 }
 
 func (s *WorkspaceService) createProject(p *project.Project, gitProviderConfig *gitprovider.GitProviderConfig, target *provider.ProviderTarget, logWriter io.Writer) error {
+	logWriter.Write([]byte(gitProviderConfig.TokenIdentity))
+
 	logWriter.Write([]byte(fmt.Sprintf("Creating project %s\n", p.Name)))
 
 	cr, err := s.containerRegistryService.FindByImageName(p.Image)
