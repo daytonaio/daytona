@@ -9,8 +9,10 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/cmd/tailscale"
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
@@ -227,10 +229,19 @@ var multiProjectFlag bool
 var codeFlag bool
 var blankFlag bool
 
+func generateIdeHelpText() string {
+	ideList := config.GetIdeList()
+	supportedIDEs := make([]string, len(ideList))
+	for i, ide := range ideList {
+		supportedIDEs[i] = fmt.Sprintf("'%s'", ide.Id)
+	}
+	return fmt.Sprintf("Specify the IDE (%s)", strings.Join(supportedIDEs, ", "))
+}
+
 func init() {
 	CreateCmd.Flags().StringVar(&nameFlag, "name", "", "Specify the workspace name")
 	CreateCmd.Flags().StringVar(&providerFlag, "provider", "", "Specify the provider (e.g. 'docker-provider')")
-	CreateCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", "Specify the IDE ('vscode' or 'browser')")
+	CreateCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", generateIdeHelpText())
 	CreateCmd.Flags().StringVarP(&targetNameFlag, "target", "t", "", "Specify the target (e.g. 'local')")
 	CreateCmd.Flags().StringVar(&customImageFlag, "custom-image", "", "Create the project with the custom image passed as the flag value; Requires setting --custom-image-user flag as well")
 	CreateCmd.Flags().StringVar(&customImageUserFlag, "custom-image-user", "", "Create the project with the custom image user passed as the flag value; Requires setting --custom-image flag as well")

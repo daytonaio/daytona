@@ -195,6 +195,15 @@ func openIDE(ideId string, activeProfile config.Profile, workspaceId string, pro
 
 var ideFlag string
 
+func generateIdeHelpText() string {
+	ideList := config.GetIdeList()
+	supportedIDEs := make([]string, len(ideList))
+	for i, ide := range ideList {
+		supportedIDEs[i] = fmt.Sprintf("'%s'", ide.Id)
+	}
+	return fmt.Sprintf("Specify the IDE (%s)", strings.Join(supportedIDEs, ", "))
+}
+
 func init() {
-	CodeCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", "Specify the IDE ('vscode', 'browser', 'jetbrains', 'cursor', 'ssh')")
+	CodeCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", generateIdeHelpText())
 }

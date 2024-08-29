@@ -9,7 +9,7 @@ daytona code [WORKSPACE] [PROJECT] [flags]
 ### Options
 
 ```
-  -i, --ide string   Specify the IDE ('vscode' or 'browser')
+  -i, --ide string   Specify the IDE (e.g., 'vscode', 'browser', 'cursor', 'ssh', 'jetbrains')
 ```
 
 ### Options inherited from parent commands

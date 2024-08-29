@@ -16,7 +16,7 @@ daytona create [REPOSITORY_URL] [flags]
       --custom-image string        Create the project with the custom image passed as the flag value; Requires setting --custom-image-user flag as well
       --custom-image-user string   Create the project with the custom image user passed as the flag value; Requires setting --custom-image flag as well
       --devcontainer-path string   Automatically assign the devcontainer builder with the path passed as the flag value
-  -i, --ide string                 Specify the IDE ('vscode' or 'browser')
+      -i, --ide string             (e.g., 'vscode', 'browser', 'cursor', 'ssh', 'jetbrains')
       --manual                     Manually enter the Git repositories
       --multi-project              Workspace with multiple projects/repos
       --name string                Specify the workspace name
@@ -33,5 +33,4 @@ daytona create [REPOSITORY_URL] [flags]
 
 ### SEE ALSO
 
-* [daytona](daytona.md)	 - Daytona is a Dev Environment Manager
-
+- [daytona](daytona.md) - Daytona is a Dev Environment Manager

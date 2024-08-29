@@ -4,11 +4,20 @@
 package config
 
 import (
+	"fmt"
 	"slices"
 	"strings"
 
 	"github.com/daytonaio/daytona/internal/jetbrains"
 	"github.com/daytonaio/daytona/pkg/os"
+)
+
+const (
+    IDE_VSCODE  = "vscode"
+    IDE_BROWSER = "browser"
+    IDE_CURSOR  = "cursor"
+    IDE_SSH     = "ssh"
+    IDE_JETBRAINS = "jetbrains"
 )
 
 func GetBinaryUrls() map[os.OperatingSystem]string {
@@ -24,10 +33,10 @@ func GetBinaryUrls() map[os.OperatingSystem]string {
 
 func GetIdeList() []Ide {
 	ides := []Ide{
-		{"vscode", "VS Code"},
-		{"browser", "VS Code - Browser"},
-		{"cursor", "Cursor"},
-		{"ssh", "Terminal SSH"},
+        {IDE_VSCODE, "VS Code"},
+        {IDE_BROWSER, "VS Code - Browser"},
+        {IDE_CURSOR, "Cursor"},
+        {IDE_SSH, "Terminal SSH"},
 	}
 
 	sortedJbIdes := []Ide{}
@@ -40,6 +49,15 @@ func GetIdeList() []Ide {
 	ides = append(ides, sortedJbIdes...)
 
 	return ides
+}
+
+func GenerateIdeHelpText() string {
+	ideList := GetIdeList()
+	supportedIDEs := make([]string, len(ideList))
+	for i, ide := range ideList {
+		supportedIDEs[i] = fmt.Sprintf("'%s'", ide.Id)
+	}
+	return fmt.Sprintf("Specify the IDE (%s)", strings.Join(supportedIDEs, ", "))
 }
 
 func GetSupportedGitProviders() []GitProvider {
