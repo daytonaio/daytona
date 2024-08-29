@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/constants"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/huh"
@@ -29,8 +30,8 @@ func ProfileCreationView(c *config.Config, profileAddView *ProfileAddView, editi
 			if str == "" {
 				return errors.New("profile name can not be blank")
 			}
-			if match, _ := regexp.MatchString("^[a-zA-Z0-9]+$", str); !match {
-				return errors.New("profile name must be alphanumeric only")
+			if match, _ := regexp.MatchString(constants.PROFILE_NAME_VALIDATION, str); !match {
+				return errors.New("only letters, digits, dashes, underscores and periods are allowed")
 			}
 
 			if !editing {
