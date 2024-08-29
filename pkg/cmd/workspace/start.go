@@ -43,14 +43,6 @@ var StartCmd = &cobra.Command{
 			return
 		}
 
-		if wscodeFlag {
-			if len(args) > 0 && args[0] != "" {
-				CodeCmd.Run(cmd, []string{args[0]})
-			} else {
-				log.Fatalf("Cannot found Workspace: Use daytona start %s", args[0])
-			}
-		}
-
 		ctx := context.Background()
 
 		apiClient, err := apiclient.GetApiClient(nil)
@@ -83,6 +75,9 @@ var StartCmd = &cobra.Command{
 		if startProjectFlag == "" {
 			message = fmt.Sprintf("Workspace '%s' is starting", workspaceId)
 			res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspaceId).Execute()
+			if wscodeFlag {
+				CodeCmd.Run(cmd, []string{workspaceId})
+			}
 			if err != nil {
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
