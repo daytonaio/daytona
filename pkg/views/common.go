@@ -34,8 +34,6 @@ var DefaultListFooterPadding = &Padding{Left: 2}
 
 var DefaultLayoutMarginTop = 1
 
-var DefaultLayoutMarginBottom = 2
-
 var DefaultHorizontalMargin = 1
 
 var TUITableMinimumWidth = 80
