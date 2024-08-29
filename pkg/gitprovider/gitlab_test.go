@@ -151,6 +151,23 @@ func (g *GitLabGitProviderTestSuite) TestParseStaticGitContext_Commits() {
 
 	require.Nil(err)
 	require.Equal(httpContext, commitsContext)
+
+	shaUrl := "https://gitlab.com/gitlab-org/gitlab/-/commits/c87cfbb77c2cf36356d010d1c0b21817c42f70ef"
+	shaContext := &StaticGitContext{
+		Id:       "gitlab-org/gitlab",
+		Name:     "gitlab",
+		Owner:    "gitlab-org",
+		Url:      "https://gitlab.com/gitlab-org/gitlab.git",
+		Source:   "gitlab.com",
+		Branch:   util.Pointer("c87cfbb77c2cf36356d010d1c0b21817c42f70ef"),
+		Sha:      util.Pointer("c87cfbb77c2cf36356d010d1c0b21817c42f70ef"),
+		PrNumber: nil,
+		Path:     nil,
+	}
+
+	httpContext, err = g.gitProvider.ParseStaticGitContext(shaUrl)
+	require.Nil(err)
+	require.Equal(httpContext, shaContext)
 }
 
 func (g *GitLabGitProviderTestSuite) TestParseStaticGitContext_Commit() {
