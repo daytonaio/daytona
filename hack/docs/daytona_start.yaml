@@ -6,6 +6,10 @@ options:
       shorthand: a
       default_value: "false"
       usage: Start all workspaces
+    - name: code
+      shorthand: c
+      default_value: "false"
+      usage: Open the workspace in the IDE after workspace start
     - name: project
       shorthand: p
       usage: Start a single project in the workspace (project name)

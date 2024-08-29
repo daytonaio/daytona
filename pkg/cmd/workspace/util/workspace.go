@@ -4,6 +4,7 @@
 package util
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/daytonaio/daytona/pkg/apiclient"
@@ -56,4 +57,18 @@ func IsProjectRunning(workspace *apiclient.WorkspaceDTO, projectName string) boo
 		}
 	}
 	return false
+}
+
+func GetProjectProviderMetadata(workspace *apiclient.WorkspaceDTO, projectName string) (string, error) {
+	if workspace.Info != nil {
+		for _, project := range workspace.Info.Projects {
+			if project.Name == projectName {
+				if project.ProviderMetadata == nil {
+					return "", errors.New("project provider metadata is missing")
+				}
+				return *project.ProviderMetadata, nil
+			}
+		}
+	}
+	return "", nil
 }

@@ -5,7 +5,6 @@ package workspace
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -200,18 +199,13 @@ var CreateCmd = &cobra.Command{
 
 		views.RenderCreationInfoMessage(fmt.Sprintf("Opening the workspace in %s ...", chosenIde.Name))
 
-		providerMetadata := ""
-		for _, project := range wsInfo.Info.Projects {
-			if project.Name == wsInfo.Projects[0].Name {
-				if project.ProviderMetadata == nil {
-					log.Fatal(errors.New("project provider metadata is missing"))
-				}
-				providerMetadata = *project.ProviderMetadata
-				break
-			}
+		projectName := wsInfo.Projects[0].Name
+		providerMetadata, err := workspace_util.GetProjectProviderMetadata(wsInfo, projectName)
+		if err != nil {
+			log.Fatal(err)
 		}
 
-		err = openIDE(chosenIdeId, activeProfile, createdWorkspace.Id, wsInfo.Projects[0].Name, providerMetadata)
+		err = openIDE(chosenIdeId, activeProfile, createdWorkspace.Id, projectName, providerMetadata)
 		if err != nil {
 			log.Fatal(err)
 		}
