@@ -36,6 +36,7 @@ func GetConnection(config *TsnetConnConfig) (*tsnet.Server, error) {
 		Dir:        config.Dir,
 		Logf:       config.Logf,
 		Hostname:   config.Hostname,
+		UserLogf:   config.Logf,
 		Ephemeral:  true,
 	}
 
