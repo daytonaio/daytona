@@ -7,12 +7,15 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"slices"
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
 )
@@ -60,11 +63,12 @@ var buildLogsCmd = &cobra.Command{
 			buildId = args[0]
 		}
 
+		var exists *bool
 		stopLogs := false
 		go apiclient_util.ReadBuildLogs(activeProfile, buildId, query, &stopLogs)
 
 		if !continueOnCompletedFlag {
-			err = waitForBuildToComplete(buildId, apiClient)
+			exists, err = waitForBuildToComplete(buildId, apiClient)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -76,14 +80,21 @@ var buildLogsCmd = &cobra.Command{
 
 		// Make sure the terminal cursor is reset
 		fmt.Print("\033[?25h")
+
+		if exists != nil && !*exists {
+			views.RenderInfoMessage(fmt.Sprintf("Build with ID %s does not exist in the database", buildId))
+		}
 	},
 }
 
-func waitForBuildToComplete(buildId string, apiClient *apiclient.APIClient) error {
+func waitForBuildToComplete(buildId string, apiClient *apiclient.APIClient) (*bool, error) {
 	for {
 		build, res, err := apiClient.BuildAPI.GetBuild(context.Background(), buildId).Execute()
 		if err != nil {
-			return apiclient_util.HandleErrorResponse(res, err)
+			if res.StatusCode == http.StatusNotFound {
+				return util.Pointer(false), nil
+			}
+			return nil, apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		completedStates := []apiclient.BuildBuildState{
@@ -94,7 +105,7 @@ func waitForBuildToComplete(buildId string, apiClient *apiclient.APIClient) erro
 		if slices.Contains(completedStates, build.State) {
 			// Allow the logs to be printed before exiting
 			time.Sleep(time.Second)
-			return nil
+			return util.Pointer(true), nil
 		}
 
 		time.Sleep(time.Second)

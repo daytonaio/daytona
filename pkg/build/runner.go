@@ -305,9 +305,11 @@ func (r *BuildRunner) handleBuildError(b Build, builder IBuilder, err error, bui
 		errMsg += fmt.Sprintf("Error saving build: %s\n", err.Error())
 	}
 
-	cleanupErr := builder.CleanUp()
-	if cleanupErr != nil {
-		errMsg += fmt.Sprintf("Error cleaning up build: %s\n", cleanupErr.Error())
+	if builder != nil {
+		cleanupErr := builder.CleanUp()
+		if cleanupErr != nil {
+			errMsg += fmt.Sprintf("Error cleaning up build: %s\n", cleanupErr.Error())
+		}
 	}
 
 	buildLogger.Write([]byte(errMsg + "\n"))
