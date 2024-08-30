@@ -40,7 +40,7 @@ var gitProviderDeleteCmd = &cobra.Command{
 			return
 		}
 
-		gitprovider_view.GitProviderSelectionView(&gitProviderData, gitProviders, true)
+		gitprovider_view.GitProviderSelectionView(&gitProviderData, gitProviders, true, false)
 
 		if gitProviderData.Id == "" {
 			log.Fatal("Git provider id can not be blank")

@@ -33,7 +33,7 @@ var GitProviderAddCmd = &cobra.Command{
 		setGitProviderConfig.TokenScope = new(string)
 		setGitProviderConfig.TokenScopeType = new(apiclient.GitproviderTokenScopeType)
 
-		gitprovider_view.GitProviderSelectionView(&setGitProviderConfig, nil, false)
+		gitprovider_view.GitProviderSelectionView(&setGitProviderConfig, nil, false, true)
 
 		if setGitProviderConfig.Id == "" {
 			return

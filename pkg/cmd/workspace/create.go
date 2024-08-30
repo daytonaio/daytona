@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/daytonaio/daytona/internal/cmd/tailscale"
@@ -20,6 +21,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/views"
+	"github.com/daytonaio/daytona/pkg/views/gitprovider"
 	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
 	"github.com/daytonaio/daytona/pkg/views/target"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
@@ -346,10 +348,46 @@ func processCmdArgument(argument []string, apiClient *apiclient.APIClient, proje
 	}
 
 	identity := ""
-	repoUrlOrConfigName := argument[0]
+	repoUrlOrConfigName := ""
 	if len(argument) == 2 {
 		identity = argument[0]
 		repoUrlOrConfigName = argument[1]
+	} else {
+		repoUrlOrConfigName = argument[0]
+		userGitProviders, _, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
+		if err != nil {
+			return nil, err
+		}
+		var globalGitProviders []apiclient.GitProvider
+		for _, gp := range userGitProviders {
+			if strings.Contains(repoUrlOrConfigName, gp.TokenScope) {
+				identity = gp.TokenIdentity
+				break
+			}
+
+			if gp.TokenScopeType == apiclient.TokenScopeTypeGlobal || gp.TokenScopeType == "" {
+				if gp.Id == "aws-codecommit" && strings.Contains(repoUrlOrConfigName, ".amazonaws.com/") {
+					globalGitProviders = append(globalGitProviders, gp)
+				}
+
+				if strings.Contains(repoUrlOrConfigName, fmt.Sprintf("%s.", gp.Id)) {
+					globalGitProviders = append(globalGitProviders, gp)
+				}
+
+				parsed, err := url.Parse(repoUrlOrConfigName)
+				if err != nil {
+					return nil, err
+				}
+
+				hostname := strings.TrimPrefix(parsed.Hostname(), "www.")
+				if gp.BaseApiUrl != nil && strings.Contains(repoUrlOrConfigName, hostname) {
+					globalGitProviders = append(globalGitProviders, gp)
+				}
+			}
+		}
+		if len(globalGitProviders) > 0 {
+			gitprovider.GitProviderSelectionViewForAutoSelection(&identity, globalGitProviders)
+		}
 	}
 	var projectConfig *apiclient.ProjectConfig
 	repoUrl, err := util.GetValidatedUrl(repoUrlOrConfigName)

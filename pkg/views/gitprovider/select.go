@@ -17,17 +17,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
-type GitProviderView struct {
-	Id                 string
-	Name               string
-	Username           string
-	BaseApiUrl         string
-	Token              string
-	TokenScopeIdentity string
-	TokenScope         string
-	TokenScopeType     string
-}
-
 var commonGitProviderIds = []string{"github", "gitlab", "bitbucket"}
 
 func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig, userGitProviders []apiclient.GitProvider, isDeleting bool) {
