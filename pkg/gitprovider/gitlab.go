@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -416,7 +417,13 @@ func (g *GitLabGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitCon
 			return nil, fmt.Errorf("can not parse git URL: %s", repoUrl)
 		}
 
-		staticContext.Branch = &branchParts[0]
+		sha1Pattern := regexp.MustCompile(`^[a-fA-F0-9]{40}$`)
+		if sha1Pattern.MatchString(branchParts[0]) {
+			staticContext.Sha = &branchParts[0]
+			staticContext.Branch = &branchParts[0]
+		} else {
+			staticContext.Branch = &branchParts[0]
+		}
 		staticContext.Path = nil
 	}
 
