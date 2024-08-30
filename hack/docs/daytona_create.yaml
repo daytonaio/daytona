@@ -22,13 +22,17 @@ options:
     - name: devcontainer-path
       usage: |
         Automatically assign the devcontainer builder with the path passed as the flag value
+    - name: env
+      default_value: '[]'
+      usage: |
+        Specify environment variables (e.g. --env 'KEY1=VALUE1,KEY2=VALUE2,...')
     - name: ide
       shorthand: i
       usage: |
         Specify the IDE (vscode, browser, cursor, ssh, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
     - name: manual
       default_value: "false"
-      usage: Manually enter the Git repositories
+      usage: Manually enter the Git repository
     - name: multi-project
       default_value: "false"
       usage: Workspace with multiple projects/repos

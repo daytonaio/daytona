@@ -23,6 +23,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
 	"github.com/daytonaio/daytona/pkg/views/target"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
@@ -220,17 +221,19 @@ var CreateCmd = &cobra.Command{
 var providerFlag string
 var nameFlag string
 var targetNameFlag string
-var customImageFlag string
-var customImageUserFlag string
-var devcontainerPathFlag string
-var branchFlag string
-
-var builderFlag create.BuildChoice
-
-var manualFlag bool
-var multiProjectFlag bool
 var codeFlag bool
 var blankFlag bool
+var multiProjectFlag bool
+
+var projectConfigurationFlags = workspace_util.ProjectConfigurationFlags{
+	Builder:          new(views_util.BuildChoice),
+	CustomImage:      new(string),
+	CustomImageUser:  new(string),
+	Branch:           new(string),
+	DevcontainerPath: new(string),
+	EnvVars:          new([]string),
+	Manual:           new(bool),
+}
 
 func init() {
 	ideList := config.GetIdeList()
@@ -244,28 +247,11 @@ func init() {
 	CreateCmd.Flags().StringVar(&providerFlag, "provider", "", "Specify the provider (e.g. 'docker-provider')")
 	CreateCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", fmt.Sprintf("Specify the IDE (%s)", ideListStr))
 	CreateCmd.Flags().StringVarP(&targetNameFlag, "target", "t", "", "Specify the target (e.g. 'local')")
-	CreateCmd.Flags().StringVar(&customImageFlag, "custom-image", "", "Create the project with the custom image passed as the flag value; Requires setting --custom-image-user flag as well")
-	CreateCmd.Flags().StringVar(&customImageUserFlag, "custom-image-user", "", "Create the project with the custom image user passed as the flag value; Requires setting --custom-image flag as well")
-	CreateCmd.Flags().StringVar(&branchFlag, "branch", "", "Specify the Git branch to use in the project")
-	CreateCmd.Flags().StringVar(&devcontainerPathFlag, "devcontainer-path", "", "Automatically assign the devcontainer builder with the path passed as the flag value")
-
-	CreateCmd.Flags().Var(&builderFlag, "builder", fmt.Sprintf("Specify the builder (currently %s/%s/%s)", create.AUTOMATIC, create.DEVCONTAINER, create.NONE))
-
-	CreateCmd.Flags().BoolVar(&manualFlag, "manual", false, "Manually enter the Git repositories")
-	CreateCmd.Flags().BoolVar(&multiProjectFlag, "multi-project", false, "Workspace with multiple projects/repos")
 	CreateCmd.Flags().BoolVar(&blankFlag, "blank", false, "Create a blank project without using existing configurations")
 	CreateCmd.Flags().BoolVarP(&codeFlag, "code", "c", false, "Open the workspace in the IDE after workspace creation")
+	CreateCmd.Flags().BoolVar(&multiProjectFlag, "multi-project", false, "Workspace with multiple projects/repos")
 
-	CreateCmd.MarkFlagsMutuallyExclusive("multi-project", "custom-image")
-	CreateCmd.MarkFlagsMutuallyExclusive("multi-project", "custom-image-user")
-	CreateCmd.MarkFlagsMutuallyExclusive("multi-project", "devcontainer-path")
-	CreateCmd.MarkFlagsMutuallyExclusive("multi-project", "builder")
-	CreateCmd.MarkFlagsMutuallyExclusive("builder", "custom-image")
-	CreateCmd.MarkFlagsMutuallyExclusive("builder", "custom-image-user")
-	CreateCmd.MarkFlagsMutuallyExclusive("devcontainer-path", "custom-image")
-	CreateCmd.MarkFlagsMutuallyExclusive("devcontainer-path", "custom-image-user")
-
-	CreateCmd.MarkFlagsRequiredTogether("custom-image", "custom-image-user")
+	workspace_util.AddProjectConfigurationFlags(CreateCmd, projectConfigurationFlags, true)
 }
 
 func getTarget(activeProfileName string) (*apiclient.ProviderTarget, error) {
@@ -291,8 +277,8 @@ func getTarget(activeProfileName string) (*apiclient.ProviderTarget, error) {
 }
 
 func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, projects *[]apiclient.CreateProjectDTO, workspaceNames []string, ctx context.Context) error {
-	if builderFlag != "" || customImageFlag != "" || customImageUserFlag != "" || devcontainerPathFlag != "" {
-		return fmt.Errorf("please provide the repository URL in order to set up custom project details through CLI")
+	if workspace_util.CheckAnyProjectConfigurationFlagSet(projectConfigurationFlags) {
+		return fmt.Errorf("please provide the repository URL in order to set up custom project details through the CLI")
 	}
 
 	gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
@@ -310,8 +296,8 @@ func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, pro
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	projectDefaults := &create.ProjectConfigDefaults{
-		BuildChoice:          create.AUTOMATIC,
+	projectDefaults := &views_util.ProjectConfigDefaults{
+		BuildChoice:          views_util.AUTOMATIC,
 		Image:                &apiServerConfig.DefaultProjectImage,
 		ImageUser:            &apiServerConfig.DefaultProjectUser,
 		DevcontainerFilePath: create.DEVCONTAINER_FILEPATH,
@@ -320,7 +306,7 @@ func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, pro
 	*projects, err = workspace_util.GetProjectsCreationDataFromPrompt(workspace_util.ProjectsDataPromptConfig{
 		UserGitProviders: gitProviders,
 		ProjectConfigs:   projectConfigs,
-		Manual:           manualFlag,
+		Manual:           *projectConfigurationFlags.Manual,
 		MultiProject:     multiProjectFlag,
 		BlankProject:     blankFlag,
 		ApiClient:        apiClient,
@@ -353,8 +339,8 @@ func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, pro
 }
 
 func processCmdArgument(argument string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectDTO, ctx context.Context) (*string, error) {
-	if builderFlag != "" && builderFlag != create.DEVCONTAINER && devcontainerPathFlag != "" {
-		return nil, fmt.Errorf("can't set devcontainer file path if builder is not set to %s", create.DEVCONTAINER)
+	if *projectConfigurationFlags.Builder != "" && *projectConfigurationFlags.Builder != views_util.DEVCONTAINER && *projectConfigurationFlags.DevcontainerPath != "" {
+		return nil, fmt.Errorf("can't set devcontainer file path if builder is not set to %s", views_util.DEVCONTAINER)
 	}
 
 	var projectConfig *apiclient.ProjectConfig
@@ -371,7 +357,7 @@ func processCmdArgument(argument string, apiClient *apiclient.APIClient, project
 		return nil, fmt.Errorf("failed to parse the URL or fetch the project config for '%s'", argument)
 	}
 
-	return workspace_util.AddProjectFromConfig(projectConfig, apiClient, projects, branchFlag)
+	return workspace_util.AddProjectFromConfig(projectConfig, apiClient, projects, *projectConfigurationFlags.Branch)
 }
 
 func processGitURL(repoUrl string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectDTO, ctx context.Context) (*string, error) {
@@ -380,7 +366,7 @@ func processGitURL(repoUrl string, apiClient *apiclient.APIClient, projects *[]a
 	if !blankFlag {
 		projectConfig, res, err := apiClient.ProjectConfigAPI.GetDefaultProjectConfig(ctx, encodedURLParam).Execute()
 		if err == nil {
-			return workspace_util.AddProjectFromConfig(projectConfig, apiClient, projects, branchFlag)
+			return workspace_util.AddProjectFromConfig(projectConfig, apiClient, projects, *projectConfigurationFlags.Branch)
 		}
 
 		if res.StatusCode != http.StatusNotFound {
@@ -389,8 +375,8 @@ func processGitURL(repoUrl string, apiClient *apiclient.APIClient, projects *[]a
 	}
 
 	var branch *string
-	if branchFlag != "" {
-		branch = &branchFlag
+	if *projectConfigurationFlags.Branch != "" {
+		branch = projectConfigurationFlags.Branch
 	}
 
 	repo, res, err := apiClient.GitProviderAPI.GetGitContext(ctx).Repository(apiclient.GetRepositoryContext{
@@ -406,31 +392,11 @@ func processGitURL(repoUrl string, apiClient *apiclient.APIClient, projects *[]a
 		return nil, err
 	}
 
-	project := &apiclient.CreateProjectDTO{
-		Name: projectName,
-		Source: apiclient.CreateProjectSourceDTO{
-			Repository: *repo,
-		},
-		BuildConfig: &apiclient.BuildConfig{},
-	}
+	project := workspace_util.GetCreateProjectDtoFromFlags(projectConfigurationFlags)
 
-	if builderFlag == create.DEVCONTAINER || devcontainerPathFlag != "" {
-		devcontainerFilePath := create.DEVCONTAINER_FILEPATH
-		if devcontainerPathFlag != "" {
-			devcontainerFilePath = devcontainerPathFlag
-		}
-		project.BuildConfig.Devcontainer = &apiclient.DevcontainerConfig{
-			FilePath: devcontainerFilePath,
-		}
-
-	}
-
-	if builderFlag == create.NONE || customImageFlag != "" || customImageUserFlag != "" {
-		project.BuildConfig = nil
-		if customImageFlag != "" || customImageUserFlag != "" {
-			project.Image = &customImageFlag
-			project.User = &customImageUserFlag
-		}
+	project.Name = projectName
+	project.Source = apiclient.CreateProjectSourceDTO{
+		Repository: *repo,
 	}
 
 	*projects = append(*projects, *project)

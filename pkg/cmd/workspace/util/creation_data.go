@@ -17,6 +17,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/common"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
@@ -29,7 +30,7 @@ type ProjectsDataPromptConfig struct {
 	MultiProject        bool
 	BlankProject        bool
 	ApiClient           *apiclient.APIClient
-	Defaults            *create.ProjectConfigDefaults
+	Defaults            *views_util.ProjectConfigDefaults
 }
 
 func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apiclient.CreateProjectDTO, error) {
@@ -206,6 +207,46 @@ func GetBranchFromProjectConfig(projectConfig *apiclient.ProjectConfig, apiClien
 		Name: repo.Branch,
 		Sha:  repo.Sha,
 	}, nil
+}
+
+func GetCreateProjectDtoFromFlags(projectConfigurationFlags ProjectConfigurationFlags) *apiclient.CreateProjectDTO {
+	project := &apiclient.CreateProjectDTO{
+		BuildConfig: &apiclient.BuildConfig{},
+	}
+
+	if *projectConfigurationFlags.Builder == views_util.DEVCONTAINER || *projectConfigurationFlags.DevcontainerPath != "" {
+		devcontainerFilePath := create.DEVCONTAINER_FILEPATH
+		if *projectConfigurationFlags.DevcontainerPath != "" {
+			devcontainerFilePath = *projectConfigurationFlags.DevcontainerPath
+		}
+		project.BuildConfig.Devcontainer = &apiclient.DevcontainerConfig{
+			FilePath: devcontainerFilePath,
+		}
+
+	}
+
+	if *projectConfigurationFlags.Builder == views_util.NONE || *projectConfigurationFlags.CustomImage != "" || *projectConfigurationFlags.CustomImageUser != "" {
+		project.BuildConfig = nil
+		if *projectConfigurationFlags.CustomImage != "" || *projectConfigurationFlags.CustomImageUser != "" {
+			project.Image = projectConfigurationFlags.CustomImage
+			project.User = projectConfigurationFlags.CustomImageUser
+		}
+	}
+
+	envVars := make(map[string]string)
+
+	for _, envVar := range *projectConfigurationFlags.EnvVars {
+		parts := strings.SplitN(envVar, "=", 2)
+		if len(parts) == 2 {
+			envVars[parts[0]] = parts[1]
+		} else {
+			fmt.Printf("Invalid environment variable format: %s\n", envVar)
+		}
+	}
+
+	project.EnvVars = envVars
+
+	return project
 }
 
 func newCreateProjectConfigDTO(config ProjectsDataPromptConfig, providerRepo *apiclient.GitRepository, providerRepoName string) apiclient.CreateProjectDTO {

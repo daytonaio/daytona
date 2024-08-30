@@ -10,6 +10,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	log "github.com/sirupsen/logrus"
@@ -64,8 +65,8 @@ var projectConfigUpdateCmd = &cobra.Command{
 			},
 		}
 
-		projectDefaults := &create.ProjectConfigDefaults{
-			BuildChoice: create.AUTOMATIC,
+		projectDefaults := &views_util.ProjectConfigDefaults{
+			BuildChoice: views_util.AUTOMATIC,
 			Image:       &projectConfig.Image,
 			ImageUser:   &projectConfig.User,
 		}
