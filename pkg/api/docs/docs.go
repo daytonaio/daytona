@@ -1266,6 +1266,30 @@ const docTemplate = `{
                 }
             }
         },
+        "/sample": {
+            "get": {
+                "description": "List samples",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sample"
+                ],
+                "summary": "List samples",
+                "operationId": "ListSamples",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Sample"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/server/config": {
             "get": {
                 "description": "Get the server configuration",
@@ -2509,6 +2533,25 @@ const docTemplate = `{
                 }
             }
         },
+        "Sample": {
+            "type": "object",
+            "required": [
+                "description",
+                "gitUrl",
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "gitUrl": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "ServerConfig": {
             "type": "object",
             "required": [
@@ -2571,6 +2614,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "registryUrl": {
+                    "type": "string"
+                },
+                "samplesIndexUrl": {
                     "type": "string"
                 },
                 "serverDownloadUrl": {
