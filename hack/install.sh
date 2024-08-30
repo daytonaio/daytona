@@ -201,6 +201,10 @@ download_file() {
     sleep 0.1
   done
 
+  # Ensure the progress bar reaches 100% on successful completion
+  progress_bar_with_spinner "$total_size" "$total_size"
+  printf "\n"
+
   mv "$temp_output" "$output"
   echo ""
 }
