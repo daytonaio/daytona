@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/daytonaio/daytona/internal/cmd/tailscale"
@@ -232,9 +233,16 @@ var codeFlag bool
 var blankFlag bool
 
 func init() {
+	ideList := config.GetIdeList()
+	ids := make([]string, len(ideList))
+	for i, ide := range ideList {
+		ids[i] = ide.Id
+	}
+	ideListStr := strings.Join(ids, ", ")
+
 	CreateCmd.Flags().StringVar(&nameFlag, "name", "", "Specify the workspace name")
 	CreateCmd.Flags().StringVar(&providerFlag, "provider", "", "Specify the provider (e.g. 'docker-provider')")
-	CreateCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", "Specify the IDE ('vscode' or 'browser')")
+	CreateCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", fmt.Sprintf("Specify the IDE (%s)", ideListStr))
 	CreateCmd.Flags().StringVarP(&targetNameFlag, "target", "t", "", "Specify the target (e.g. 'local')")
 	CreateCmd.Flags().StringVar(&customImageFlag, "custom-image", "", "Create the project with the custom image passed as the flag value; Requires setting --custom-image-user flag as well")
 	CreateCmd.Flags().StringVar(&customImageUserFlag, "custom-image-user", "", "Create the project with the custom image user passed as the flag value; Requires setting --custom-image flag as well")

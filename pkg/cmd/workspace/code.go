@@ -196,5 +196,11 @@ func openIDE(ideId string, activeProfile config.Profile, workspaceId string, pro
 var ideFlag string
 
 func init() {
-	CodeCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", "Specify the IDE ('vscode' or 'browser')")
+	ideList := config.GetIdeList()
+	ids := make([]string, len(ideList))
+	for i, ide := range ideList {
+		ids[i] = ide.Id
+	}
+	ideListStr := strings.Join(ids, ", ")
+	CodeCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", fmt.Sprintf("Specify the IDE (%s)", ideListStr))
 }
