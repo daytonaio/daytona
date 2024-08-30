@@ -156,12 +156,19 @@ progress_bar_with_spinner() {
   local total_size=$2
   local percent=$((current_size * 100 / total_size))
   local bar_width=40
-  local filled=$((percent * bar_width / 100))
+  local filled=$(((percent * bar_width + 99) / 100))
   local empty=$((bar_width - filled))
   local spinner="⠋⠙⠸⠴⠦⠧⠇⠏"
-  local spin_char=${spinner:$(($RANDOM % 8)):1}
+  local spin_char=${spinner:$(($RANDOM % ${#spinner})):1}
 
-  printf "\r\033[K[%s] Downloading... [%-${bar_width}s] %d%%" "$spin_char" "$(printf "%0.s#" $(seq 1 $filled))$(printf "%0.s-" $(seq 1 $empty))" "$percent"
+  # Generate the filled portion of the bar
+  local bar=$(printf "%0.s#" $(seq 1 $filled))
+
+  # Only add the empty portion if the download is not complete
+  if [ $percent -lt 100 ]; then
+    bar+=$(printf "%0.s-" $(seq 1 $empty))
+  fi
+  printf "\r\033[K[%s] Downloading... [%-${bar_width}s] %d%%" "$spin_char" "$bar" "$percent"
 }
 
 # Download the file while showing a progress bar with a spinner
@@ -188,7 +195,9 @@ download_file() {
 
   while kill -0 $curl_pid 2>/dev/null; do
     local downloaded_size=$(get_file_size "$temp_output")
-    progress_bar_with_spinner "$downloaded_size" "$total_size"
+    if [ "$downloaded_size" -gt 0 ]; then
+      progress_bar_with_spinner "$downloaded_size" "$total_size"
+    fi
     sleep 0.1
   done
 
