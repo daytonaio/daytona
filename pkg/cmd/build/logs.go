@@ -63,16 +63,16 @@ var buildLogsCmd = &cobra.Command{
 			buildId = args[0]
 		}
 
+		ctx, stopLogs := context.WithCancel(context.Background())
+		defer stopLogs()
+		go apiclient_util.ReadBuildLogs(ctx, activeProfile, buildId, query)
 		var exists *bool
-		stopLogs := false
-		go apiclient_util.ReadBuildLogs(activeProfile, buildId, query, &stopLogs)
 
 		if !continueOnCompletedFlag {
 			exists, err = waitForBuildToComplete(buildId, apiClient)
 			if err != nil {
 				log.Fatal(err)
 			}
-			stopLogs = true
 		} else {
 			// Sleep indefinitely
 			select {}

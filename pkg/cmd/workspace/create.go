@@ -144,11 +144,11 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		stopLogs := false
 		id := stringid.GenerateRandomID()
 		id = stringid.TruncateID(id)
 
-		go apiclient_util.ReadWorkspaceLogs(activeProfile, id, projectNames, &stopLogs)
+		logsContext, stopLogs := context.WithCancel(context.Background())
+		go apiclient_util.ReadWorkspaceLogs(logsContext, activeProfile, id, projectNames)
 
 		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(apiclient.CreateWorkspaceDTO{
 			Id:       id,
@@ -165,7 +165,7 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		stopLogs = true
+		stopLogs()
 
 		// Make sure terminal cursor is reset
 		fmt.Print("\033[?25h")
