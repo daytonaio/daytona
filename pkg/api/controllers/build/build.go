@@ -97,15 +97,19 @@ func GetBuild(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	build, err := server.BuildService.Find(&build.Filter{
+	b, err := server.BuildService.Find(&build.Filter{
 		Id: &buildId,
 	})
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get build: %s", err.Error()))
+		statusCode := http.StatusInternalServerError
+		if build.IsBuildNotFound(err) {
+			statusCode = http.StatusNotFound
+		}
+		ctx.AbortWithError(statusCode, fmt.Errorf("failed to find build: %w", err))
 		return
 	}
 
-	ctx.JSON(200, build)
+	ctx.JSON(200, b)
 }
 
 // ListBuilds godoc

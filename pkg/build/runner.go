@@ -206,12 +206,14 @@ func (r *BuildRunner) DeleteBuilds() {
 
 			err := dockerClient.DeleteImage(b.Image, true, nil)
 			if err != nil {
-				log.Error(err)
+				r.handleBuildError(*b, nil, err, buildLogger)
+				return
 			}
 
 			err = r.buildStore.Delete(b.Id)
 			if err != nil {
-				log.Error(err)
+				r.handleBuildError(*b, nil, err, buildLogger)
+				return
 			}
 		}(b)
 	}
@@ -303,9 +305,11 @@ func (r *BuildRunner) handleBuildError(b Build, builder IBuilder, err error, bui
 		errMsg += fmt.Sprintf("Error saving build: %s\n", err.Error())
 	}
 
-	cleanupErr := builder.CleanUp()
-	if cleanupErr != nil {
-		errMsg += fmt.Sprintf("Error cleaning up build: %s\n", cleanupErr.Error())
+	if builder != nil {
+		cleanupErr := builder.CleanUp()
+		if cleanupErr != nil {
+			errMsg += fmt.Sprintf("Error cleaning up build: %s\n", cleanupErr.Error())
+		}
 	}
 
 	buildLogger.Write([]byte(errMsg + "\n"))
