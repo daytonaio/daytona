@@ -49,7 +49,7 @@ require (
 	golang.org/x/oauth2 v0.20.0
 	golang.org/x/sync v0.8.0
 	golang.org/x/term v0.23.0
-	google.golang.org/grpc v1.64.0
+	google.golang.org/grpc v1.64.1
 	google.golang.org/protobuf v1.34.1
 	gopkg.in/ini.v1 v1.67.0
 	gorm.io/gorm v1.25.10
