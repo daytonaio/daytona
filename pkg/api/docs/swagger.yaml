@@ -564,6 +564,19 @@ definitions:
     required:
     - url
     type: object
+  Sample:
+    properties:
+      description:
+        type: string
+      gitUrl:
+        type: string
+      name:
+        type: string
+    required:
+    - description
+    - gitUrl
+    - name
+    type: object
   ServerConfig:
     properties:
       apiPort:
@@ -595,6 +608,8 @@ definitions:
       providersDir:
         type: string
       registryUrl:
+        type: string
+      samplesIndexUrl:
         type: string
       serverDownloadUrl:
         type: string
@@ -1634,6 +1649,22 @@ paths:
       summary: Install a provider
       tags:
       - provider
+  /sample:
+    get:
+      description: List samples
+      operationId: ListSamples
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/Sample'
+            type: array
+      summary: List samples
+      tags:
+      - sample
   /server/config:
     get:
       description: Get the server configuration

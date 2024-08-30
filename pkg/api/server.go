@@ -42,6 +42,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/projectconfig"
 	"github.com/daytonaio/daytona/pkg/api/controllers/projectconfig/prebuild"
 	"github.com/daytonaio/daytona/pkg/api/controllers/provider"
+	"github.com/daytonaio/daytona/pkg/api/controllers/sample"
 	"github.com/daytonaio/daytona/pkg/api/controllers/server"
 	"github.com/daytonaio/daytona/pkg/api/controllers/target"
 	"github.com/daytonaio/daytona/pkg/api/controllers/workspace"
@@ -232,6 +233,11 @@ func (a *ApiServer) Start() error {
 		profileDataController.GET("/", profiledata.GetProfileData)
 		profileDataController.PUT("/", profiledata.SetProfileData)
 		profileDataController.DELETE("/", profiledata.DeleteProfileData)
+	}
+
+	samplesController := protected.Group("/sample")
+	{
+		samplesController.GET("/", sample.ListSamples)
 	}
 
 	projectGroup := protected.Group("/")
