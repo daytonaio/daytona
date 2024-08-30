@@ -6,6 +6,10 @@ options:
     - name: help
       default_value: "false"
       usage: help for daytona
+    - name: version
+      shorthand: v
+      default_value: "false"
+      usage: Display the version of Daytona
 see_also:
     - daytona agent - Start the agent process
     - daytona autocomplete - Adds completion script for your shell enviornment

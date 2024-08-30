@@ -13,7 +13,8 @@ daytona [flags]
 ### Options
 
 ```
-      --help   help for daytona
+      --help      help for daytona
+  -v, --version   Display the version of Daytona
 ```
 
 ### SEE ALSO
