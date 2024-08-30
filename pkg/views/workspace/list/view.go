@@ -28,7 +28,7 @@ type RowData struct {
 }
 
 func ListWorkspaces(workspaceList []apiclient.WorkspaceDTO, specifyGitProviders bool, verbose bool, activeProfileName string) {
-	sortWorkspaces(&workspaceList, verbose)
+	SortWorkspaces(&workspaceList, verbose)
 
 	re := lipgloss.NewRenderer(os.Stdout)
 
@@ -142,16 +142,16 @@ func getRowFromRowData(rowData RowData, isMultiProjectAccordion bool) []string {
 	return row
 }
 
-func sortWorkspaces(workspaceList *[]apiclient.WorkspaceDTO, verbose bool) {
+func SortWorkspaces(workspaceList *[]apiclient.WorkspaceDTO, verbose bool) {
 	if verbose {
 		sort.Slice(*workspaceList, func(i, j int) bool {
 			ws1 := (*workspaceList)[i]
 			ws2 := (*workspaceList)[j]
 			if ws1.Info == nil || ws2.Info == nil || ws1.Info.Projects == nil || ws2.Info.Projects == nil {
-				return false
+				return true
 			}
 			if len(ws1.Info.Projects) == 0 || len(ws2.Info.Projects) == 0 {
-				return false
+				return true
 			}
 			return ws1.Info.Projects[0].Created > ws2.Info.Projects[0].Created
 		})
