@@ -46,7 +46,7 @@ var logsCmd = &cobra.Command{
 			readServerLogFile()
 
 		default:
-			ws, res, err := apiclient.GetWebsocketConn("/log/server", &activeProfile, &query)
+			ws, res, err := apiclient.GetWebsocketConn(context.Background(), "/log/server", &activeProfile, &query)
 
 			if err != nil {
 				log.Error(apiclient.HandleErrorResponse(res, err))
