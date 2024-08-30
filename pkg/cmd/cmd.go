@@ -141,6 +141,7 @@ func SetupRootCommand(cmd *cobra.Command) {
 
 	cmd.CompletionOptions.HiddenDefaultCmd = true
 	cmd.PersistentFlags().BoolP("help", "", false, "help for daytona")
+	cmd.Flags().BoolP("version", "v", false, "Display the version of Daytona")
 
 	var telemetryService telemetry.TelemetryService
 	clientId := config.GetClientId()
@@ -154,6 +155,14 @@ func SetupRootCommand(cmd *cobra.Command) {
 	}
 
 	startTime := time.Now()
+
+	cmd.PreRun = func(cmd *cobra.Command, args []string) {
+		versionFlag, _ := cmd.Flags().GetBool("version")
+		if versionFlag {
+			versionCmd.Run(cmd, []string{})
+			os.Exit(0)
+		}
+	}
 
 	cmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
 		if telemetryService != nil {
