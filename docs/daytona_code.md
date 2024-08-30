@@ -15,8 +15,7 @@ daytona code [WORKSPACE] [PROJECT] [flags]
 ### Options inherited from parent commands
 
 ```
-      --help            help for daytona
-  -o, --output string   Output format. Must be one of (yaml, json)
+      --help   help for daytona
 ```
 
 ### SEE ALSO

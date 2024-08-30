@@ -5,8 +5,7 @@ Manage profile environment variables that are added to all workspaces
 ### Options inherited from parent commands
 
 ```
-      --help            help for daytona
-  -o, --output string   Output format. Must be one of (yaml, json)
+      --help   help for daytona
 ```
 
 ### SEE ALSO

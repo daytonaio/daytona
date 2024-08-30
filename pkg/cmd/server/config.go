@@ -8,8 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/server"
 )
 
@@ -22,9 +21,15 @@ var configCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		apiUrl := util.GetFrpcApiUrl(config.Frps.Protocol, config.Id, config.Frps.Domain)
-		output.Output = apiUrl
+		if format.FormatFlag != "" {
+			formattedData := format.NewFormatter(config)
+			formattedData.Print()
+		}
 
 		view.RenderConfig(config)
 	},
+}
+
+func init() {
+	format.RegisterFormatFlag(configCmd)
 }

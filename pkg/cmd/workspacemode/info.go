@@ -7,7 +7,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -31,11 +31,16 @@ var infoCmd = &cobra.Command{
 			return
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = workspace
+		if format.FormatFlag != "" {
+			formattedData := format.NewFormatter(workspace)
+			formattedData.Print()
 			return
 		}
 
 		info.Render(workspace, "", false)
 	},
+}
+
+func init() {
+	format.RegisterFormatFlag(infoCmd)
 }

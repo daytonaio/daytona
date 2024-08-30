@@ -10,7 +10,7 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/build/info"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
@@ -41,7 +41,15 @@ var buildInfoCmd = &cobra.Command{
 				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
 
+			if format.FormatFlag != "" {
+				format.UnblockStdOut()
+			}
+
 			build = selection.GetBuildFromPrompt(buildList, "View")
+			if format.FormatFlag != "" {
+				format.BlockStdOut()
+			}
+
 			if build == nil {
 				return
 			}
@@ -53,11 +61,16 @@ var buildInfoCmd = &cobra.Command{
 			}
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = build
+		if format.FormatFlag != "" {
+			formattedData := format.NewFormatter(build)
+			formattedData.Print()
 			return
 		}
 
 		info.Render(build, apiServerConfig, false)
 	},
+}
+
+func init() {
+	format.RegisterFormatFlag(buildInfoCmd)
 }
