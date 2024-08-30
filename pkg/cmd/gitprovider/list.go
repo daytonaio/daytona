@@ -9,7 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
 	log "github.com/sirupsen/logrus"
@@ -55,8 +55,9 @@ var gitProviderListCmd = &cobra.Command{
 			}
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = gitProviderViewList
+		if format.FormatFlag != "" {
+			formattedData := format.NewFormatter(gitProviderViewList)
+			formattedData.Print()
 			return
 		}
 
@@ -64,4 +65,8 @@ var gitProviderListCmd = &cobra.Command{
 			views.RenderListLine(fmt.Sprintf("%s (%s)", gitProviderView.Name, gitProviderView.Username))
 		}
 	},
+}
+
+func init() {
+	format.RegisterFormatFlag(gitProviderListCmd)
 }

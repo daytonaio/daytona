@@ -8,7 +8,7 @@ import (
 	"log"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views"
 	view "github.com/daytonaio/daytona/pkg/views/prebuild/list"
 	"github.com/spf13/cobra"
@@ -37,11 +37,16 @@ var prebuildListCmd = &cobra.Command{
 			return
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = prebuildList
+		if format.FormatFlag != "" {
+			formattedData := format.NewFormatter(prebuildList)
+			formattedData.Print()
 			return
 		}
 
 		view.ListPrebuilds(prebuildList)
 	},
+}
+
+func init() {
+	format.RegisterFormatFlag(prebuildListCmd)
 }

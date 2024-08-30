@@ -10,7 +10,7 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/prebuild/info"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -54,7 +54,15 @@ var prebuildInfoCmd = &cobra.Command{
 				return
 			}
 
+			if format.FormatFlag != "" {
+				format.UnblockStdOut()
+			}
+
 			prebuild = selection.GetPrebuildFromPrompt(prebuilds, "View")
+			if format.FormatFlag != "" {
+				format.BlockStdOut()
+			}
+
 			if prebuild == nil {
 				return
 			}
@@ -65,11 +73,16 @@ var prebuildInfoCmd = &cobra.Command{
 			}
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = prebuild
+		if format.FormatFlag != "" {
+			formattedData := format.NewFormatter(prebuild)
+			formattedData.Print()
 			return
 		}
 
 		info.Render(prebuild, false)
 	},
+}
+
+func init() {
+	format.RegisterFormatFlag(prebuildInfoCmd)
 }
