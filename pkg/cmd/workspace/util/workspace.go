@@ -27,7 +27,7 @@ func AddProjectConfigurationFlags(cmd *cobra.Command, flags ProjectConfiguration
 	cmd.Flags().StringVar(flags.Branch, "branch", "", "Specify the Git branch to use in the project")
 	cmd.Flags().StringVar(flags.DevcontainerPath, "devcontainer-path", "", "Automatically assign the devcontainer builder with the path passed as the flag value")
 	cmd.Flags().Var(flags.Builder, "builder", fmt.Sprintf("Specify the builder (currently %s/%s/%s)", views_util.AUTOMATIC, views_util.DEVCONTAINER, views_util.NONE))
-	cmd.Flags().StringSliceVar(flags.EnvVars, "env", []string{}, "Specify environment variables (e.g. --env 'KEY1=VALUE1,KEY2=VALUE2,...')")
+	cmd.Flags().StringArrayVar(flags.EnvVars, "env", []string{}, "Specify environment variables (e.g. --env 'KEY1=VALUE1' --env 'KEY2=VALUE2' ...')")
 	cmd.Flags().BoolVar(flags.Manual, "manual", false, "Manually enter the Git repository")
 
 	cmd.MarkFlagsMutuallyExclusive("builder", "custom-image")

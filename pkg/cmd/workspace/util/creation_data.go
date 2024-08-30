@@ -209,7 +209,7 @@ func GetBranchFromProjectConfig(projectConfig *apiclient.ProjectConfig, apiClien
 	}, nil
 }
 
-func GetCreateProjectDtoFromFlags(projectConfigurationFlags ProjectConfigurationFlags) *apiclient.CreateProjectDTO {
+func GetCreateProjectDtoFromFlags(projectConfigurationFlags ProjectConfigurationFlags) (*apiclient.CreateProjectDTO, error) {
 	project := &apiclient.CreateProjectDTO{
 		BuildConfig: &apiclient.BuildConfig{},
 	}
@@ -240,13 +240,13 @@ func GetCreateProjectDtoFromFlags(projectConfigurationFlags ProjectConfiguration
 		if len(parts) == 2 {
 			envVars[parts[0]] = parts[1]
 		} else {
-			fmt.Printf("Invalid environment variable format: %s\n", envVar)
+			return nil, fmt.Errorf("Invalid environment variable format: %s\n", envVar)
 		}
 	}
 
 	project.EnvVars = envVars
 
-	return project
+	return project, nil
 }
 
 func newCreateProjectConfigDTO(config ProjectsDataPromptConfig, providerRepo *apiclient.GitRepository, providerRepoName string) apiclient.CreateProjectDTO {

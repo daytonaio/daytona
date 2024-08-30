@@ -392,7 +392,10 @@ func processGitURL(repoUrl string, apiClient *apiclient.APIClient, projects *[]a
 		return nil, err
 	}
 
-	project := workspace_util.GetCreateProjectDtoFromFlags(projectConfigurationFlags)
+	project, err := workspace_util.GetCreateProjectDtoFromFlags(projectConfigurationFlags)
+	if err != nil {
+		return nil, err
+	}
 
 	project.Name = projectName
 	project.Source = apiclient.CreateProjectSourceDTO{

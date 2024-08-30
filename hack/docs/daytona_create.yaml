@@ -25,7 +25,7 @@ options:
     - name: env
       default_value: '[]'
       usage: |
-        Specify environment variables (e.g. --env 'KEY1=VALUE1,KEY2=VALUE2,...')
+        Specify environment variables (e.g. --env 'KEY1=VALUE1' --env 'KEY2=VALUE2' ...')
     - name: ide
       shorthand: i
       usage: |

@@ -27,6 +27,7 @@ var projectConfigAddCmd = &cobra.Command{
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var projectConfig *apiclient.ProjectConfig
+		var projectConfigName *string
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -47,14 +48,19 @@ var projectConfigAddCmd = &cobra.Command{
 			if projectConfig == nil {
 				return
 			}
+			projectConfigName = &projectConfig.Name
 		} else {
-			err = processCmdArgument(args[0], apiClient, ctx)
+			projectConfigName, err = processCmdArgument(args[0], apiClient, ctx)
 			if err != nil {
 				log.Fatal(err)
 			}
 		}
 
-		views.RenderInfoMessage("Project config added successfully")
+		if projectConfigName == nil {
+			log.Fatal("project config name is required")
+		}
+
+		views.RenderInfoMessage(fmt.Sprintf("Project config %s added successfully", *projectConfigName))
 	},
 }
 
@@ -152,31 +158,34 @@ func RunProjectConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []apic
 	}, nil
 }
 
-func processCmdArgument(argument string, apiClient *apiclient.APIClient, ctx context.Context) error {
+func processCmdArgument(argument string, apiClient *apiclient.APIClient, ctx context.Context) (*string, error) {
 	if *projectConfigurationFlags.Builder != "" && *projectConfigurationFlags.Builder != views_util.DEVCONTAINER && *projectConfigurationFlags.DevcontainerPath != "" {
-		return fmt.Errorf("can't set devcontainer file path if builder is not set to %s", views_util.DEVCONTAINER)
+		return nil, fmt.Errorf("can't set devcontainer file path if builder is not set to %s", views_util.DEVCONTAINER)
 	}
 
 	apiServerConfig, res, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
 	if err != nil {
-		return apiclient_util.HandleErrorResponse(res, err)
+		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	existingProjectConfigNames := getExistingProjectConfigNames(apiClient)
 
 	repoUrl, err := util.GetValidatedUrl(argument)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	_, res, err = apiClient.GitProviderAPI.GetGitContext(ctx).Repository(apiclient.GetRepositoryContext{
 		Url: repoUrl,
 	}).Execute()
 	if err != nil {
-		return apiclient_util.HandleErrorResponse(res, err)
+		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	project := workspace_util.GetCreateProjectDtoFromFlags(projectConfigurationFlags)
+	project, err := workspace_util.GetCreateProjectDtoFromFlags(projectConfigurationFlags)
+	if err != nil {
+		return nil, err
+	}
 
 	var name string
 	if nameFlag != "" {
@@ -205,10 +214,10 @@ func processCmdArgument(argument string, apiClient *apiclient.APIClient, ctx con
 
 	res, err = apiClient.ProjectConfigAPI.SetProjectConfig(ctx).ProjectConfig(newProjectConfig).Execute()
 	if err != nil {
-		return apiclient_util.HandleErrorResponse(res, err)
+		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	return nil
+	return &newProjectConfig.Name, nil
 }
 
 func getExistingProjectConfigNames(apiClient *apiclient.APIClient) []string {
