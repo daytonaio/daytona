@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/daytonaio/daytona/internal/util"
 	gitnessclient "github.com/daytonaio/daytona/pkg/gitprovider/gitnessclient"
 )
 
@@ -270,4 +271,44 @@ func (g *GitnessGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitCo
 func (g *GitnessGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*string, error) {
 	client := g.getApiClient()
 	return client.GetDefaultBranch(staticContext.Url)
+}
+
+func (g *GitnessGitProvider) GetPrebuildWebhook(repository *GitRepository, endpointUrl string) (*string, error) {
+	client := g.getApiClient()
+
+	hooks, err := client.ListHooks(repository.Name, repository.Owner)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, hook := range hooks {
+		if hook.Url == endpointUrl {
+			return util.Pointer(strconv.Itoa(int(hook.Id))), nil
+		}
+	}
+
+	return nil, nil
+}
+
+func (g *GitnessGitProvider) RegisterPrebuildWebhook(repository *GitRepository, endpointUrl string) (string, error) {
+	client := g.getApiClient()
+
+	hook, err := client.CreateHook(repository.Name, repository.Owner, endpointUrl)
+	if err != nil {
+		return "", err
+	}
+
+	return strconv.Itoa(int(hook.Id)), nil
+}
+
+func (g *GitnessGitProvider) UnregisterPrebuildWebhook(repository *GitRepository, id string) error {
+	client := g.getApiClient()
+
+	err := client.DeleteHook(repository.Name, repository.Owner, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

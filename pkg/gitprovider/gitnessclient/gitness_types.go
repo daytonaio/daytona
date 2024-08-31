@@ -186,3 +186,22 @@ type Repository struct {
 	GitUrl         string `json:"git_url"`
 	Uid            string `json:"uid"`
 }
+
+type Hook struct {
+	Id          int64    `json:"id"`
+	Version     int64    `json:"version"`
+	ParentID    int64    `json:"parent_id"`
+	ParentType  string   `json:"parent_type"`
+	CreatedBy   int64    `json:"created_by"`
+	Created     int64    `json:"created"`
+	Updated     int64    `json:"updated"`
+	Identifier  string   `json:"identifier"`
+	DisplayName string   `json:"display_name"`
+	Description string   `json:"description"`
+	Url         string   `json:"url"`
+	Enabled     bool     `json:"enabled"`
+	Insecure    bool     `json:"insecure"`
+	Triggers    []string `json:"triggers"`
+	HasSecret   bool     `json:"has_secret"`
+	Uid         string   `json:"uid"`
+}

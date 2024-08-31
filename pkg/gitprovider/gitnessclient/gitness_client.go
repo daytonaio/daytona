@@ -355,3 +355,64 @@ func (g *GitnessClient) GetDefaultBranch(url string) (*string, error) {
 func GetCloneUrl(protocol, host, owner, repo string) string {
 	return fmt.Sprintf("%s://%s/git/%s/%s.git", protocol, host, owner, repo)
 }
+
+func (g *GitnessClient) ListHooks(repositoryId string, namespaceId string) ([]*Hook, error) {
+	hooksUrl, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/webhooks", url.PathEscape(namespaceId+"/"+repositoryId)))
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := g.performRequest("GET", hooksUrl.String())
+	if err != nil {
+		return nil, err
+	}
+
+	var hooks []*Hook
+	if err := json.Unmarshal(body, &hooks); err != nil {
+		return nil, err
+	}
+
+	return hooks, nil
+}
+
+func (g *GitnessClient) CreateHook(repositoryId string, namespaceId string, endpointUrl string) (*Hook, error) {
+	hookUrl, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/webhooks", url.PathEscape(namespaceId+"/"+repositoryId)))
+	if err != nil {
+		return nil, err
+	}
+
+	v := url.Values{}
+	v.Add("url", endpointUrl)
+
+	hookURL, err := url.Parse(hookUrl.String() + "?" + v.Encode())
+	if err != nil {
+		return nil, err
+	}
+	hookUrl = hookURL
+
+	body, err := g.performRequest("POST", hookUrl.String())
+	if err != nil {
+		return nil, err
+	}
+
+	var hook Hook
+	if err := json.Unmarshal(body, &hook); err != nil {
+		return nil, err
+	}
+
+	return &hook, nil
+}
+
+func (g *GitnessClient) DeleteHook(repositoryId string, namespaceId string, hookId string) error {
+	hookUrl, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/webhooks/%s", url.PathEscape(namespaceId+"/"+repositoryId), hookId))
+	if err != nil {
+		return err
+	}
+
+	_, err = g.performRequest("DELETE", hookUrl.String())
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
