@@ -267,6 +267,86 @@ func (g *GitnessGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitCo
 	return staticContext, nil
 }
 
+func (g *GitnessProvider) GetPrebuildWebhook(repo *GitRepository, endpointUrl string) (*string, error) {
+	client := g.getApiClient()
+
+	hooks, err := client.ListWebhooks(context.Background(), repo.Owner, repo.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, hook := range hooks {
+		if hook.Url == endpointUrl {
+			return util.Pointer(strconv.Itoa(int(hook.ID))), nil
+		}
+	}
+
+	return nil, nil
+}
+
+func (g *GitnessProvider) RegisterPrebuildWebhook(repo *GitRepository, endpointUrl string) (string, error) {
+	client := g.getApiClient()
+
+	hook, err := client.CreateWebhook(context.Background(), repo.Owner, repo.Name, &Webhook{
+		Active: true,
+		Events: []string{"push"},
+		Url:    endpointUrl,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return strconv.Itoa(int(hook.ID)), nil
+}
+
+func (g *GitnessProvider) UnregisterPrebuildWebhook(repo *GitRepository, id string) error {
+	client := g.getApiClient()
+
+	idInt, _ := strconv.Atoi(id)
+
+	_, err := client.DeleteWebhook(context.Background(), repo.Owner, repo.Name, int64(idInt))
+
+	return err
+}
+
+func (g *GitnessProvider) GetCommitsRange(repo *GitRepository, owner string, initialSha string, currentSha string) (int, error) {
+	client := g.getApiClient()
+
+	commits, err := client.CompareCommits(context.Background(), owner, repo.Name, initialSha, currentSha)
+	if err != nil {
+		return 0, err
+	}
+
+	return len(commits.Commits), nil
+}
+
+func (g *GitnessProvider) ParseEventData(request *http.Request) (*GitEventData, error) {
+	payload, err := io.ReadAll(request.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var eventData gitness.PushEvent
+	if err := json.Unmarshal(payload, &eventData); err != nil {
+		return nil, err
+	}
+
+	gitEventData := &GitEventData{
+		Url:    eventData.Repository.URL,
+		Branch: eventData.Ref,
+		Sha:    eventData.HeadCommit.ID,
+		Owner:  eventData.Repository.Owner,
+	}
+
+	for _, commit := range eventData.Commits {
+		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Added...)
+		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Modified...)
+		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Removed...)
+	}
+
+	return gitEventData, nil
+}
+
 func (g *GitnessGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*string, error) {
 	client := g.getApiClient()
 	return client.GetDefaultBranch(staticContext.Url)
