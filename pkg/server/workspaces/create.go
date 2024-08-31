@@ -78,6 +78,15 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 		}
 
 		p.Repository.Url = util.CleanUpRepositoryUrl(p.Repository.Url)
+		if p.GitProviderConfigId == nil || *p.GitProviderConfigId == "" {
+			_, id, err := s.gitProviderService.GetGitProviderForUrl(p.Repository.Url)
+			if err != nil {
+				return nil, err
+			}
+			p.GitProviderConfigId = &id
+
+		}
+
 		if p.Repository.Sha == "" {
 			sha, err := s.gitProviderService.GetLastCommitSha(p.Repository)
 			if err != nil {

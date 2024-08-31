@@ -228,13 +228,14 @@ var blankFlag bool
 var multiProjectFlag bool
 
 var projectConfigurationFlags = workspace_util.ProjectConfigurationFlags{
-	Builder:          new(views_util.BuildChoice),
-	CustomImage:      new(string),
-	CustomImageUser:  new(string),
-	Branches:         new([]string),
-	DevcontainerPath: new(string),
-	EnvVars:          new([]string),
-	Manual:           new(bool),
+	Builder:             new(views_util.BuildChoice),
+	CustomImage:         new(string),
+	CustomImageUser:     new(string),
+	Branches:            new([]string),
+	DevcontainerPath:    new(string),
+	EnvVars:             new([]string),
+	Manual:              new(bool),
+	GitProviderConfigId: new(string),
 }
 
 func init() {
@@ -403,6 +404,7 @@ func processGitURL(ctx context.Context, repoUrl string, apiClient *apiclient.API
 	if !blankFlag {
 		projectConfig, res, err := apiClient.ProjectConfigAPI.GetDefaultProjectConfig(ctx, encodedURLParam).Execute()
 		if err == nil {
+			projectConfig.GitProviderConfigId = projectConfigurationFlags.GitProviderConfigId
 			return workspace_util.AddProjectFromConfig(projectConfig, apiClient, projects, branch)
 		}
 

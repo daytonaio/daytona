@@ -42,12 +42,13 @@ var gitProviderListCmd = &cobra.Command{
 
 		for _, gitProvider := range gitProviders {
 			for _, supportedProvider := range supportedProviders {
-				if gitProvider.Id == supportedProvider.Id {
+				if gitProvider.ProviderId == supportedProvider.Id {
 					gitProviderViewList = append(gitProviderViewList,
 						gitprovider_view.GitProviderView{
-							Id:       gitProvider.Id,
+							Id:       gitProvider.ProviderId,
 							Name:     supportedProvider.Name,
 							Username: gitProvider.Username,
+							Alias:    gitProvider.Alias,
 						},
 					)
 				}
@@ -61,7 +62,7 @@ var gitProviderListCmd = &cobra.Command{
 		}
 
 		for _, gitProviderView := range gitProviderViewList {
-			views.RenderListLine(fmt.Sprintf("%s (%s)", gitProviderView.Name, gitProviderView.Username))
+			views.RenderListLine(fmt.Sprintf("%s (%s)", gitProviderView.Name, gitProviderView.Alias))
 		}
 		return nil
 	},

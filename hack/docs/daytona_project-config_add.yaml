@@ -17,6 +17,8 @@ options:
       default_value: '[]'
       usage: |
         Specify environment variables (e.g. --env 'KEY1=VALUE1' --env 'KEY2=VALUE2' ...')
+    - name: git-provider-config-id
+      usage: Specify the Git Provider Configuration Id
     - name: manual
       default_value: "false"
       usage: Manually enter the Git repository

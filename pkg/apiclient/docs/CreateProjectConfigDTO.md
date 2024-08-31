@@ -6,6 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **BuildConfig** | Pointer to [**BuildConfig**](BuildConfig.md) |  | [optional] 
 **EnvVars** | **map[string]string** |  | 
+**GitProviderConfigId** | **string** |  | 
 **Image** | Pointer to **string** |  | [optional] 
 **Name** | **string** |  | 
 **RepositoryUrl** | **string** |  | 
@@ -15,7 +16,7 @@ Name | Type | Description | Notes
 
 ### NewCreateProjectConfigDTO
 
-`func NewCreateProjectConfigDTO(envVars map[string]string, name string, repositoryUrl string, ) *CreateProjectConfigDTO`
+`func NewCreateProjectConfigDTO(envVars map[string]string, gitProviderConfigId string, name string, repositoryUrl string, ) *CreateProjectConfigDTO`
 
 NewCreateProjectConfigDTO instantiates a new CreateProjectConfigDTO object
 This constructor will assign default values to properties that have it defined,
@@ -73,6 +74,26 @@ and a boolean to check if the value has been set.
 `func (o *CreateProjectConfigDTO) SetEnvVars(v map[string]string)`
 
 SetEnvVars sets EnvVars field to given value.
+
+
+### GetGitProviderConfigId
+
+`func (o *CreateProjectConfigDTO) GetGitProviderConfigId() string`
+
+GetGitProviderConfigId returns the GitProviderConfigId field if non-nil, zero value otherwise.
+
+### GetGitProviderConfigIdOk
+
+`func (o *CreateProjectConfigDTO) GetGitProviderConfigIdOk() (*string, bool)`
+
+GetGitProviderConfigIdOk returns a tuple with the GitProviderConfigId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGitProviderConfigId
+
+`func (o *CreateProjectConfigDTO) SetGitProviderConfigId(v string)`
+
+SetGitProviderConfigId sets GitProviderConfigId field to given value.
 
 
 ### GetImage

@@ -21,15 +21,16 @@ var _ MappedNullable = &Project{}
 
 // Project struct for Project
 type Project struct {
-	BuildConfig *BuildConfig      `json:"buildConfig,omitempty"`
-	EnvVars     map[string]string `json:"envVars"`
-	Image       string            `json:"image"`
-	Name        string            `json:"name"`
-	Repository  GitRepository     `json:"repository"`
-	State       *ProjectState     `json:"state,omitempty"`
-	Target      string            `json:"target"`
-	User        string            `json:"user"`
-	WorkspaceId string            `json:"workspaceId"`
+	BuildConfig         *BuildConfig      `json:"buildConfig,omitempty"`
+	EnvVars             map[string]string `json:"envVars"`
+	GitProviderConfigId *string           `json:"gitProviderConfigId,omitempty"`
+	Image               string            `json:"image"`
+	Name                string            `json:"name"`
+	Repository          GitRepository     `json:"repository"`
+	State               *ProjectState     `json:"state,omitempty"`
+	Target              string            `json:"target"`
+	User                string            `json:"user"`
+	WorkspaceId         string            `json:"workspaceId"`
 }
 
 type _Project Project
@@ -112,6 +113,38 @@ func (o *Project) GetEnvVarsOk() (*map[string]string, bool) {
 // SetEnvVars sets field value
 func (o *Project) SetEnvVars(v map[string]string) {
 	o.EnvVars = v
+}
+
+// GetGitProviderConfigId returns the GitProviderConfigId field value if set, zero value otherwise.
+func (o *Project) GetGitProviderConfigId() string {
+	if o == nil || IsNil(o.GitProviderConfigId) {
+		var ret string
+		return ret
+	}
+	return *o.GitProviderConfigId
+}
+
+// GetGitProviderConfigIdOk returns a tuple with the GitProviderConfigId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Project) GetGitProviderConfigIdOk() (*string, bool) {
+	if o == nil || IsNil(o.GitProviderConfigId) {
+		return nil, false
+	}
+	return o.GitProviderConfigId, true
+}
+
+// HasGitProviderConfigId returns a boolean if a field has been set.
+func (o *Project) HasGitProviderConfigId() bool {
+	if o != nil && !IsNil(o.GitProviderConfigId) {
+		return true
+	}
+
+	return false
+}
+
+// SetGitProviderConfigId gets a reference to the given string and assigns it to the GitProviderConfigId field.
+func (o *Project) SetGitProviderConfigId(v string) {
+	o.GitProviderConfigId = &v
 }
 
 // GetImage returns the Image field value
@@ -304,6 +337,9 @@ func (o Project) ToMap() (map[string]interface{}, error) {
 		toSerialize["buildConfig"] = o.BuildConfig
 	}
 	toSerialize["envVars"] = o.EnvVars
+	if !IsNil(o.GitProviderConfigId) {
+		toSerialize["gitProviderConfigId"] = o.GitProviderConfigId
+	}
 	toSerialize["image"] = o.Image
 	toSerialize["name"] = o.Name
 	toSerialize["repository"] = o.Repository

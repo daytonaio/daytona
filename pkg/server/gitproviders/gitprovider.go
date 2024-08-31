@@ -11,6 +11,7 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/google/uuid"
 )
 
 func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.GitProvider, string, error) {
@@ -118,6 +119,13 @@ func (s *GitProviderService) SetGitProviderConfig(providerConfig *gitprovider.Gi
 		return err
 	}
 	providerConfig.Username = userData.Username
+	if providerConfig.Id == "" {
+		providerConfig.Id = uuid.NewString()
+	}
+
+	if providerConfig.Alias == "" {
+		providerConfig.Alias = userData.Username
+	}
 
 	return s.configStore.Save(providerConfig)
 }

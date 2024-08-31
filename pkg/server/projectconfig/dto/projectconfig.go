@@ -8,12 +8,13 @@ import (
 )
 
 type CreateProjectConfigDTO struct {
-	Name          string                   `json:"name" validate:"required"`
-	Image         *string                  `json:"image,omitempty" validate:"optional"`
-	User          *string                  `json:"user,omitempty" validate:"optional"`
-	BuildConfig   *buildconfig.BuildConfig `json:"buildConfig,omitempty" validate:"optional"`
-	RepositoryUrl string                   `json:"repositoryUrl" validate:"required"`
-	EnvVars       map[string]string        `json:"envVars" validate:"required"`
+	Name                string                   `json:"name" validate:"required"`
+	Image               *string                  `json:"image,omitempty" validate:"optional"`
+	User                *string                  `json:"user,omitempty" validate:"optional"`
+	BuildConfig         *buildconfig.BuildConfig `json:"buildConfig,omitempty" validate:"optional"`
+	RepositoryUrl       string                   `json:"repositoryUrl" validate:"required"`
+	EnvVars             map[string]string        `json:"envVars" validate:"required"`
+	GitProviderConfigId *string                  `json:"gitProviderConfigId" validate:"required"`
 } // @name CreateProjectConfigDTO
 
 type PrebuildDTO struct {

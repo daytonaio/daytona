@@ -1953,6 +1953,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "envVars",
+                "gitProviderConfigId",
                 "name",
                 "repositoryUrl"
             ],
@@ -1965,6 +1966,9 @@ const docTemplate = `{
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "gitProviderConfigId": {
+                    "type": "string"
                 },
                 "image": {
                     "type": "string"
@@ -1996,6 +2000,9 @@ const docTemplate = `{
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "gitProviderConfigId": {
+                    "type": "string"
                 },
                 "image": {
                     "type": "string"
@@ -2169,15 +2176,23 @@ const docTemplate = `{
         "GitProvider": {
             "type": "object",
             "required": [
+                "alias",
                 "id",
+                "providerId",
                 "token",
                 "username"
             ],
             "properties": {
+                "alias": {
+                    "type": "string"
+                },
                 "baseApiUrl": {
                     "type": "string"
                 },
                 "id": {
+                    "type": "string"
+                },
+                "providerId": {
                     "type": "string"
                 },
                 "token": {
@@ -2443,6 +2458,9 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "gitProviderConfigId": {
+                    "type": "string"
+                },
                 "image": {
                     "type": "string"
                 },
@@ -2488,6 +2506,9 @@ const docTemplate = `{
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "gitProviderConfigId": {
+                    "type": "string"
                 },
                 "image": {
                     "type": "string"
@@ -2700,14 +2721,20 @@ const docTemplate = `{
         "SetGitProviderConfig": {
             "type": "object",
             "required": [
-                "id",
+                "providerId",
                 "token"
             ],
             "properties": {
+                "alias": {
+                    "type": "string"
+                },
                 "baseApiUrl": {
                     "type": "string"
                 },
                 "id": {
+                    "type": "string"
+                },
+                "providerId": {
                     "type": "string"
                 },
                 "token": {

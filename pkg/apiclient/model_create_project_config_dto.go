@@ -21,12 +21,13 @@ var _ MappedNullable = &CreateProjectConfigDTO{}
 
 // CreateProjectConfigDTO struct for CreateProjectConfigDTO
 type CreateProjectConfigDTO struct {
-	BuildConfig   *BuildConfig      `json:"buildConfig,omitempty"`
-	EnvVars       map[string]string `json:"envVars"`
-	Image         *string           `json:"image,omitempty"`
-	Name          string            `json:"name"`
-	RepositoryUrl string            `json:"repositoryUrl"`
-	User          *string           `json:"user,omitempty"`
+	BuildConfig         *BuildConfig      `json:"buildConfig,omitempty"`
+	EnvVars             map[string]string `json:"envVars"`
+	GitProviderConfigId string            `json:"gitProviderConfigId"`
+	Image               *string           `json:"image,omitempty"`
+	Name                string            `json:"name"`
+	RepositoryUrl       string            `json:"repositoryUrl"`
+	User                *string           `json:"user,omitempty"`
 }
 
 type _CreateProjectConfigDTO CreateProjectConfigDTO
@@ -35,9 +36,10 @@ type _CreateProjectConfigDTO CreateProjectConfigDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateProjectConfigDTO(envVars map[string]string, name string, repositoryUrl string) *CreateProjectConfigDTO {
+func NewCreateProjectConfigDTO(envVars map[string]string, gitProviderConfigId string, name string, repositoryUrl string) *CreateProjectConfigDTO {
 	this := CreateProjectConfigDTO{}
 	this.EnvVars = envVars
+	this.GitProviderConfigId = gitProviderConfigId
 	this.Name = name
 	this.RepositoryUrl = repositoryUrl
 	return &this
@@ -105,6 +107,30 @@ func (o *CreateProjectConfigDTO) GetEnvVarsOk() (*map[string]string, bool) {
 // SetEnvVars sets field value
 func (o *CreateProjectConfigDTO) SetEnvVars(v map[string]string) {
 	o.EnvVars = v
+}
+
+// GetGitProviderConfigId returns the GitProviderConfigId field value
+func (o *CreateProjectConfigDTO) GetGitProviderConfigId() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.GitProviderConfigId
+}
+
+// GetGitProviderConfigIdOk returns a tuple with the GitProviderConfigId field value
+// and a boolean to check if the value has been set.
+func (o *CreateProjectConfigDTO) GetGitProviderConfigIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.GitProviderConfigId, true
+}
+
+// SetGitProviderConfigId sets field value
+func (o *CreateProjectConfigDTO) SetGitProviderConfigId(v string) {
+	o.GitProviderConfigId = v
 }
 
 // GetImage returns the Image field value if set, zero value otherwise.
@@ -233,6 +259,7 @@ func (o CreateProjectConfigDTO) ToMap() (map[string]interface{}, error) {
 		toSerialize["buildConfig"] = o.BuildConfig
 	}
 	toSerialize["envVars"] = o.EnvVars
+	toSerialize["gitProviderConfigId"] = o.GitProviderConfigId
 	if !IsNil(o.Image) {
 		toSerialize["image"] = o.Image
 	}
@@ -250,6 +277,7 @@ func (o *CreateProjectConfigDTO) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"envVars",
+		"gitProviderConfigId",
 		"name",
 		"repositoryUrl",
 	}
