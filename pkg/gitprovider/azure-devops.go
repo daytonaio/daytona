@@ -401,6 +401,88 @@ func (g *AzureDevOpsGitProvider) ParseStaticGitContext(repoUrl string) (*StaticG
 	return nil, errors.New("can not parse git URL: " + repoUrl)
 }
 
+func (a *AzureDevOpsProvider) GetPrebuildWebhook(repo *GitRepository, endpointUrl string) (*string, error) {
+	client := a.getApiClient()
+
+	hooks, err := client.ListHooks(context.Background(), repo.Project, repo.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, hook := range hooks {
+		if hook.Url == endpointUrl {
+			return util.Pointer(strconv.Itoa(int(hook.Id))), nil
+		}
+	}
+
+	return nil, nil
+}
+
+func (a *AzureDevOpsProvider) RegisterPrebuildWebhook(repo *GitRepository, endpointUrl string) (string, error) {
+	client := a.getApiClient()
+
+	hook, err := client.CreateHook(context.Background(), repo.Project, repo.Name, &ServiceHook{
+		// Service hook details
+		PublisherId: "tfs",
+		EventType:   "git.push",
+		Url:         endpointUrl,
+		// Other configuration parameters
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return strconv.Itoa(int(hook.Id)), nil
+}
+
+func (a *AzureDevOpsProvider) UnregisterPrebuildWebhook(repo *GitRepository, id string) error {
+	client := a.getApiClient()
+
+	idInt, _ := strconv.Atoi(id)
+
+	_, err := client.DeleteHook(context.Background(), repo.Project, repo.Name, int64(idInt))
+
+	return err
+}
+
+func (a *AzureDevOpsProvider) GetCommitsRange(repo *GitRepository, owner string, initialSha string, currentSha string) (int, error) {
+	client := a.getApiClient()
+
+	commits, err := client.CompareCommits(context.Background(), repo.Project, repo.Name, initialSha, currentSha)
+	if err != nil {
+		return 0, err
+	}
+
+	return len(commits.Commits), nil
+}
+
+func (a *AzureDevOpsProvider) ParseEventData(request *http.Request) (*GitEventData, error) {
+	payload, err := io.ReadAll(request.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var eventData azuredevops.PushEvent
+	if err := json.Unmarshal(payload, &eventData); err != nil {
+		return nil, err
+	}
+
+	gitEventData := &GitEventData{
+		Url:    eventData.Repository.URL,
+		Branch: eventData.RefUpdates[0].Name,
+		Sha:    eventData.RefUpdates[0].OldObjectID,
+		Owner:  eventData.Repository.Project.Name,
+	}
+
+	for _, change := range eventData.Commits {
+		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, change.Added...)
+		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, change.Modified...)
+		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, change.Removed...)
+	}
+
+	return gitEventData, nil
+}
+
 func (g *AzureDevOpsGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*string, error) {
 	client, err := g.getGitClient()
 	if err != nil {
