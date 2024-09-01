@@ -9,7 +9,7 @@ daytona code [WORKSPACE] [PROJECT] [flags]
 ### Options
 
 ```
-  -i, --ide string   Specify the IDE (vscode, browser, cursor, ssh, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
+  -i, --ide string   Specify the IDE (vscode, browser, cursor, jupyter, ssh, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
 ```
 
 ### Options inherited from parent commands

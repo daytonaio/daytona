@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"time"
 
@@ -15,12 +16,12 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/ports"
 	"github.com/daytonaio/daytona/pkg/views"
-
 	"github.com/pkg/browser"
+
 	log "github.com/sirupsen/logrus"
 )
 
-const startJupyterCommand = "jupyter notebook --no-browser --port=8888 --ip=0.0.0.0 --NotebookApp.token='' --NotebookApp.password=''"
+const startJupyterCommand = "notebook --no-browser --port=8888 --ip=0.0.0.0 --NotebookApp.token='' --NotebookApp.password=''"
 
 func OpenJupyterIDE(activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string) error {
 	// Download and start IDE
@@ -32,13 +33,22 @@ func OpenJupyterIDE(activeProfile config.Profile, workspaceId string, projectNam
 	views.RenderInfoMessageBold("Installing Jupyter Notebook...")
 	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
 
-	installJupyterCommand := exec.Command("ssh", projectHostname, "pip install jupyter")
+	// Install Jupyter Notebook
+	installJupyterCommand := exec.Command("ssh", projectHostname, "python3 -m pip install --user notebook && export PATH=$HOME/.local/bin:$PATH && echo $PATH")
 	installJupyterCommand.Stdout = io.Writer(&util.DebugLogWriter{})
 	installJupyterCommand.Stderr = io.Writer(&util.DebugLogWriter{})
 
 	err = installJupyterCommand.Run()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to install Jupyter Notebook: %w", err)
+	}
+
+	// Check Jupyter Notebook installation and print PATH
+	checkCommand := exec.Command("ssh", projectHostname, "export PATH=$HOME/.local/bin:$PATH && echo $PATH && $HOME/.local/bin/jupyter notebook --version")
+	checkCommand.Stdout = os.Stdout
+	checkCommand.Stderr = os.Stderr
+	if err := checkCommand.Run(); err != nil {
+		return fmt.Errorf("failed to check Jupyter Notebook installation: %w", err)
 	}
 
 	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName)
@@ -49,7 +59,7 @@ func OpenJupyterIDE(activeProfile config.Profile, workspaceId string, projectNam
 	views.RenderInfoMessageBold("Starting Jupyter Notebook...")
 
 	go func() {
-		startServerCommand := exec.CommandContext(context.Background(), "ssh", projectHostname, fmt.Sprintf("cd %s && %s", projectDir, startJupyterCommand))
+		startServerCommand := exec.CommandContext(context.Background(), "ssh", projectHostname, fmt.Sprintf("export PATH=$HOME/.local/bin:$PATH && cd %s && jupyter %s", projectDir, startJupyterCommand))
 		startServerCommand.Stdout = io.Writer(&util.DebugLogWriter{})
 		startServerCommand.Stderr = io.Writer(&util.DebugLogWriter{})
 
