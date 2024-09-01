@@ -9,8 +9,8 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
+	"github.com/leaanthony/spinner"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -31,14 +31,21 @@ var StartCmd = &cobra.Command{
 	Args:    cobra.RangeArgs(0, 1),
 	GroupID: util.WORKSPACE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {
+		s := spinner.New("Processing...")
+		s.Start()
+		defer s.Success()
+
 		var workspaceId string
 		var message string
 
 		if allFlag {
-			err := startAllWorkspaces()
+			s.UpdateMessage("Starting all workspaces...")
+			err := startAllWorkspaces(s)
 			if err != nil {
+				s.Error("Failed to start all workspaces.")
 				log.Fatal(err)
 			}
+			s.UpdateMessage("All workspaces started successfully.")
 			return
 		}
 
@@ -46,6 +53,7 @@ var StartCmd = &cobra.Command{
 
 		apiClient, err := apiclient.GetApiClient(nil)
 		if err != nil {
+			s.Error("Failed to create API client.")
 			log.Fatal(err)
 		}
 
@@ -53,17 +61,28 @@ var StartCmd = &cobra.Command{
 			if startProjectFlag != "" {
 				err := cmd.Help()
 				if err != nil {
+					s.Error("Failed to display help.")
 					log.Fatal(err)
 				}
 				return
 			}
+			s.UpdateMessage("Fetching workspace list...")
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
+				s.Error("Failed to retrieve workspaces.")
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
 
+			if len(workspaceList) == 0 {
+				s.Error("No workspaces available to stop.")
+				return
+			}
+
+			s.UpdateMessage("Selecting a workspace to stop...")
+
 			workspace := selection.GetWorkspaceFromPrompt(workspaceList, "Start")
 			if workspace == nil {
+				s.Error("No workspace selected.")
 				return
 			}
 			workspaceId = workspace.Name
@@ -72,20 +91,25 @@ var StartCmd = &cobra.Command{
 		}
 
 		if startProjectFlag == "" {
-			message = fmt.Sprintf("Workspace '%s' is starting", workspaceId)
+			s.UpdateMessage(fmt.Sprintf("Starting workspace '%s'...", workspaceId))
 			res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspaceId).Execute()
 			if err != nil {
+				s.Error(fmt.Sprintf("Failed to start workspace '%s'.", workspaceId))
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
+			message = fmt.Sprintf("Workspace '%s' started successfully.", workspaceId)
+			s.UpdateMessage(message)
 		} else {
-			message = fmt.Sprintf("Project '%s' from workspace '%s' is starting", startProjectFlag, workspaceId)
+			s.UpdateMessage(fmt.Sprintf("Starting project '%s' in workspace '%s'...", startProjectFlag, workspaceId))
 			res, err := apiClient.WorkspaceAPI.StartProject(ctx, workspaceId, startProjectFlag).Execute()
 			if err != nil {
+				s.Error(fmt.Sprintf("Failed to start project '%s' in workspace '%s'.", startProjectFlag, workspaceId))
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
+			message = fmt.Sprintf("Project '%s' in workspace '%s' started successfully.", startProjectFlag, workspaceId)
+			s.UpdateMessage(message)
 		}
 
-		views.RenderInfoMessage(message)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) != 0 {
@@ -106,7 +130,7 @@ func init() {
 	}
 }
 
-func startAllWorkspaces() error {
+func startAllWorkspaces(s *spinner.Spinner) error {
 	ctx := context.Background()
 	apiClient, err := apiclient.GetApiClient(nil)
 	if err != nil {
@@ -119,12 +143,14 @@ func startAllWorkspaces() error {
 	}
 
 	for _, workspace := range workspaceList {
+		s.UpdateMessage(fmt.Sprintf("Starting workspace '%s'...", workspace.Name))
+		s.Successf(fmt.Sprintf("Workspace '%s' started successfully", workspace.Name))
+		s.Start()
 		res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspace.Id).Execute()
 		if err != nil {
 			log.Errorf("Failed to start workspace %s: %v", workspace.Name, apiclient.HandleErrorResponse(res, err))
 			continue
 		}
-		fmt.Printf("Workspace '%s' is starting\n", workspace.Name)
 	}
 	return nil
 }
