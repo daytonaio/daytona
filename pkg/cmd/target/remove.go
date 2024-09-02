@@ -29,6 +29,12 @@ var targetRemoveCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var selectedTargetName string
 
+		ctx := context.Background()
+		apiClient, err := apiclient_util.GetApiClient(nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		c, err := config.GetConfig()
 		if err != nil {
 			log.Fatal(err)
@@ -40,12 +46,12 @@ var targetRemoveCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 
-			targets, err := apiclient_util.GetTargetList()
+			targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
 
-			selectedTarget, err := target.GetTargetFromPrompt(targets, activeProfile.Name, false)
+			selectedTarget, err := target.GetTargetFromPrompt(targetList, activeProfile.Name, false)
 			if err != nil {
 				if common.IsCtrlCAbort(err) {
 					return
@@ -59,15 +65,9 @@ var targetRemoveCmd = &cobra.Command{
 			selectedTargetName = args[0]
 		}
 
-		ctx := context.Background()
-		client, err := apiclient_util.GetApiClient(nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		if yesFlag {
 			fmt.Println("Deleting all workspaces.")
-			err := RemoveTargetWorkspaces(ctx, client, selectedTargetName)
+			err := RemoveTargetWorkspaces(ctx, apiClient, selectedTargetName)
 
 			if err != nil {
 				log.Fatal(err)
@@ -88,7 +88,7 @@ var targetRemoveCmd = &cobra.Command{
 			}
 
 			if yesFlag {
-				err := RemoveTargetWorkspaces(ctx, client, selectedTargetName)
+				err := RemoveTargetWorkspaces(ctx, apiClient, selectedTargetName)
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -97,7 +97,7 @@ var targetRemoveCmd = &cobra.Command{
 			}
 		}
 
-		res, err := client.TargetAPI.RemoveTarget(ctx, selectedTargetName).Execute()
+		res, err := apiClient.TargetAPI.RemoveTarget(ctx, selectedTargetName).Execute()
 		if err != nil {
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
