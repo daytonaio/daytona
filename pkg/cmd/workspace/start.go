@@ -144,7 +144,7 @@ func startAllWorkspaces(s *spinner.Spinner) error {
 
 	for _, workspace := range workspaceList {
 		s.UpdateMessage(fmt.Sprintf("Starting workspace '%s'...", workspace.Name))
-		s.Successf(fmt.Sprintf("Workspace '%s' started successfully", workspace.Name))
+		s.Success(fmt.Sprintf("Workspace '%s' started successfully", workspace.Name))
 		s.Start()
 		res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspace.Id).Execute()
 		if err != nil {

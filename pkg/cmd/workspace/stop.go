@@ -133,7 +133,7 @@ func stopAllWorkspaces(s *spinner.Spinner) error {
 
 	for _, workspace := range workspaceList {
 		s.UpdateMessage(fmt.Sprintf("Stopping workspace '%s'...", workspace.Name))
-		s.Successf(fmt.Sprintf("Workspace '%s' stopped successfully", workspace.Name))
+		s.Success(fmt.Sprintf("Workspace '%s' stopped successfully", workspace.Name))
 		s.Start()
 		res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, workspace.Id).Execute()
 		if err != nil {
