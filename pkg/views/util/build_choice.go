@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package create
+package util
 
 import (
 	"fmt"
@@ -17,6 +17,13 @@ const (
 	CUSTOMIMAGE  BuildChoice = "custom-image"
 	NONE         BuildChoice = "none"
 )
+
+type ProjectConfigDefaults struct {
+	BuildChoice          BuildChoice
+	Image                *string
+	ImageUser            *string
+	DevcontainerFilePath string
+}
 
 func GetProjectBuildChoice(project apiclient.CreateProjectDTO, defaults *ProjectConfigDefaults) (BuildChoice, string) {
 	if project.BuildConfig == nil {
