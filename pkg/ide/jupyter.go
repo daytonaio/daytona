@@ -1,6 +1,3 @@
-// Copyright 2024 Daytona Platforms Inc.
-// SPDX-License-Identifier: Apache-2.0
-
 package ide
 
 import (
@@ -23,34 +20,146 @@ import (
 
 const startJupyterCommand = "notebook --no-browser --port=8888 --ip=0.0.0.0 --NotebookApp.token='' --NotebookApp.password=''"
 
-func OpenJupyterIDE(activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string) error {
-	// Download and start IDE
+// OpenJupyterIDE manages the installation and startup of a Jupyter IDE on a remote workspace.
+func OpenJupyterIDE(activeProfile config.Profile, workspaceId, projectName, projectProviderMetadata string) error {
+	// Ensure SSH config entry is added
 	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName)
 	if err != nil {
 		return err
 	}
 
-	views.RenderInfoMessageBold("Installing Jupyter Notebook...")
 	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
 
+	// Check and install Python if necessary
+	if err := ensurePythonInstalled(projectHostname); err != nil {
+		return err
+	}
+
+	// Check and install pip if necessary
+	if err := ensurePipInstalled(projectHostname); err != nil {
+		return err
+	}
+
 	// Install Jupyter Notebook
-	installJupyterCommand := exec.Command("ssh", projectHostname, "python3 -m pip install --user notebook && export PATH=$HOME/.local/bin:$PATH && echo $PATH")
-	installJupyterCommand.Stdout = io.Writer(&util.DebugLogWriter{})
-	installJupyterCommand.Stderr = io.Writer(&util.DebugLogWriter{})
-
-	err = installJupyterCommand.Run()
-	if err != nil {
-		return fmt.Errorf("failed to install Jupyter Notebook: %w", err)
+	if err := installJupyter(projectHostname); err != nil {
+		return err
 	}
 
-	// Check Jupyter Notebook installation and print PATH
-	checkCommand := exec.Command("ssh", projectHostname, "export PATH=$HOME/.local/bin:$PATH && echo $PATH && $HOME/.local/bin/jupyter notebook --version")
-	checkCommand.Stdout = os.Stdout
-	checkCommand.Stderr = os.Stderr
-	if err := checkCommand.Run(); err != nil {
-		return fmt.Errorf("failed to check Jupyter Notebook installation: %w", err)
+	// Start Jupyter Notebook server
+	if err := startJupyterServer(projectHostname, activeProfile, workspaceId, projectName); err != nil {
+		return err
 	}
 
+	return nil
+}
+
+// ensurePythonInstalled checks if Python is installed and installs it if the user agrees.
+func ensurePythonInstalled(hostname string) error {
+	views.RenderInfoMessageBold("Checking Python installation...")
+
+	// Check if Python is installed
+	if err := runRemoteCommand(hostname, "python3 --version"); err != nil {
+		log.Error("Python3 is not installed on the remote workspace.")
+
+		// Prompt user to install Python
+		fmt.Print("Would you like to install Python3? (yes/no) [yes]: ")
+		var userInput string
+		fmt.Scanln(&userInput)
+		if userInput == "" || userInput == "yes" {
+			packageManager, err := detectPackageManager(hostname)
+			if err != nil {
+				return err
+			}
+			return installPythonWithPackageManager(hostname, packageManager)
+		} else {
+			return fmt.Errorf("python3 is required but not installed")
+		}
+	}
+	views.RenderInfoMessageBold("Python is already installed.")
+	return nil
+}
+
+// ensurePipInstalled checks if pip is installed and installs it if necessary
+func ensurePipInstalled(hostname string) error {
+	views.RenderInfoMessageBold("Checking pip installation...")
+
+	// Check if pip is installed
+	if err := runRemoteCommand(hostname, "python3 -m pip --version"); err != nil {
+		log.Error("pip is not installed on the remote workspace.")
+
+		// Check if we're on a Debian-based system
+		if err := runRemoteCommand(hostname, "command -v apt-get"); err == nil {
+			// We're on a Debian-based system, use apt to install pip and python3-venv
+			views.RenderInfoMessageBold("Installing pip and python3-venv using apt...")
+			if err := runRemoteCommand(hostname, "sudo apt-get update && sudo apt-get install -y python3-pip python3-venv"); err != nil {
+				return fmt.Errorf("failed to install pip and python3-venv using apt: %w", err)
+			}
+		} else {
+			// If not Debian-based, fall back to the get-pip.py method
+			views.RenderInfoMessageBold("Installing pip using get-pip.py...")
+			installCmd := "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py --user && rm get-pip.py"
+			if err := runRemoteCommand(hostname, installCmd); err != nil {
+				return fmt.Errorf("failed to install pip: %w", err)
+			}
+		}
+	}
+	views.RenderInfoMessageBold("pip is installed.")
+	return nil
+}
+
+// detectPackageManager detects the package manager on the remote host.
+func detectPackageManager(hostname string) (string, error) {
+	views.RenderInfoMessageBold("Detecting package manager...")
+	commands := map[string]string{
+		"apt-get": "dpkg -s apt >/dev/null 2>&1 && echo apt-get",
+		"yum":     "rpm -q yum >/dev/null 2>&1 && echo yum",
+		"brew":    "brew --version >/dev/null 2>&1 && echo brew",
+	}
+	for manager, cmd := range commands {
+		if err := runRemoteCommand(hostname, cmd); err == nil {
+			return manager, nil
+		}
+	}
+	return "", fmt.Errorf("no supported package manager found")
+}
+
+// installPythonWithPackageManager installs Python using the detected package manager.
+func installPythonWithPackageManager(hostname, manager string) error {
+	views.RenderInfoMessageBold(fmt.Sprintf("Installing Python3 using %s...", manager))
+	var installCmd string
+	switch manager {
+	case "apt-get":
+		installCmd = "sudo apt-get update && sudo apt-get install -y python3"
+	case "yum":
+		installCmd = "sudo yum install -y python3"
+	case "brew":
+		installCmd = "brew install python3"
+	default:
+		return fmt.Errorf("unsupported package manager: %s", manager)
+	}
+	return runRemoteCommand(hostname, installCmd)
+}
+
+// installJupyter installs Jupyter Notebook in a virtual environment on the remote workspace.
+func installJupyter(hostname string) error {
+	views.RenderInfoMessageBold("Installing python3-venv...")
+	installVenvCmd := "sudo apt-get update && sudo apt-get install -y python3-venv"
+	if err := runRemoteCommand(hostname, installVenvCmd); err != nil {
+		return fmt.Errorf("failed to install python3-venv: %w", err)
+	}
+
+	views.RenderInfoMessageBold("Installing Jupyter Notebook in a virtual environment...")
+	installCmd := `
+		python3 -m venv ~/.jupyter_venv &&
+		. ~/.jupyter_venv/bin/activate &&
+		pip install notebook &&
+		deactivate
+	`
+	return runRemoteCommand(hostname, installCmd)
+}
+
+// startJupyterServer starts the Jupyter Notebook server on the remote workspace.
+func startJupyterServer(hostname string, activeProfile config.Profile, workspaceId, projectName string) error {
 	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName)
 	if err != nil {
 		return err
@@ -58,18 +167,17 @@ func OpenJupyterIDE(activeProfile config.Profile, workspaceId string, projectNam
 
 	views.RenderInfoMessageBold("Starting Jupyter Notebook...")
 
+	// Start Jupyter Notebook server in the background
 	go func() {
-		startServerCommand := exec.CommandContext(context.Background(), "ssh", projectHostname, fmt.Sprintf("export PATH=$HOME/.local/bin:$PATH && cd %s && jupyter %s", projectDir, startJupyterCommand))
-		startServerCommand.Stdout = io.Writer(&util.DebugLogWriter{})
-		startServerCommand.Stderr = io.Writer(&util.DebugLogWriter{})
-
-		err = startServerCommand.Run()
-		if err != nil {
+		cmd := exec.CommandContext(context.Background(), "ssh", hostname, fmt.Sprintf(". ~/.jupyter_venv/bin/activate && cd %s && jupyter %s", projectDir, startJupyterCommand))
+		cmd.Stdout = io.Writer(&util.DebugLogWriter{})
+		cmd.Stderr = io.Writer(&util.DebugLogWriter{})
+		if err := cmd.Run(); err != nil {
 			log.Fatal(err)
 		}
 	}()
 
-	// Forward IDE port
+	// Forward the IDE port
 	browserPort, errChan := tailscale.ForwardPort(workspaceId, projectName, 8888, activeProfile)
 	if browserPort == nil {
 		if err := <-errChan; err != nil {
@@ -77,28 +185,39 @@ func OpenJupyterIDE(activeProfile config.Profile, workspaceId string, projectNam
 		}
 	}
 
+	// Open the browser with the forwarded port
 	ideURL := fmt.Sprintf("http://localhost:%d", *browserPort)
-	// Wait for the port to be ready
-	for {
-		if ports.IsPortReady(*browserPort) {
-			break
-		}
-		time.Sleep(500 * time.Millisecond)
-	}
+	waitForPort(*browserPort)
 
 	views.RenderInfoMessageBold(fmt.Sprintf("Forwarded %s Jupyter Notebook port to %s.\nOpening browser...\n", projectName, ideURL))
 
-	err = browser.OpenURL(ideURL)
-	if err != nil {
+	if err := browser.OpenURL(ideURL); err != nil {
 		log.Error("Error opening URL: " + err.Error())
 	}
 
+	// Handle errors from forwarding
 	for {
 		err := <-errChan
 		if err != nil {
-			// Log only in debug mode
-			// Connection errors to the forwarded port should not exit the process
 			log.Debug(err)
 		}
+	}
+}
+
+// runRemoteCommand runs a command on the remote host and handles output.
+func runRemoteCommand(hostname, command string) error {
+	cmd := exec.Command("ssh", hostname, command)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stdout
+	return cmd.Run()
+}
+
+// waitForPort waits until the specified port is ready.
+func waitForPort(port uint16) {
+	for {
+		if ports.IsPortReady(port) {
+			break
+		}
+		time.Sleep(500 * time.Millisecond)
 	}
 }
