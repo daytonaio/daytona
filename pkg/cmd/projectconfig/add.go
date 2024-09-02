@@ -118,7 +118,7 @@ func RunProjectConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []apic
 		return nil, err
 	}
 
-	newProjectConfig := apiclient.CreateProjectConfigDTO{
+	createProjectConfig := apiclient.CreateProjectConfigDTO{
 		Name:          chosenName,
 		BuildConfig:   createDtos[0].BuildConfig,
 		Image:         createDtos[0].Image,
@@ -127,21 +127,29 @@ func RunProjectConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []apic
 		EnvVars:       createDtos[0].EnvVars,
 	}
 
-	res, err = apiClient.ProjectConfigAPI.SetProjectConfig(ctx).ProjectConfig(newProjectConfig).Execute()
+	res, err = apiClient.ProjectConfigAPI.SetProjectConfig(ctx).ProjectConfig(createProjectConfig).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	return &apiclient.ProjectConfig{
-		BuildConfig:   newProjectConfig.BuildConfig,
+	projectConfig := apiclient.ProjectConfig{
+		BuildConfig:   createProjectConfig.BuildConfig,
 		Default:       false,
-		EnvVars:       newProjectConfig.EnvVars,
-		Image:         *newProjectConfig.Image,
-		Name:          newProjectConfig.Name,
+		EnvVars:       createProjectConfig.EnvVars,
+		Name:          createProjectConfig.Name,
 		Prebuilds:     nil,
-		RepositoryUrl: newProjectConfig.RepositoryUrl,
-		User:          *newProjectConfig.User,
-	}, nil
+		RepositoryUrl: createProjectConfig.RepositoryUrl,
+	}
+
+	if createProjectConfig.Image != nil {
+		projectConfig.Image = *createProjectConfig.Image
+	}
+
+	if createProjectConfig.User != nil {
+		projectConfig.User = *createProjectConfig.User
+	}
+
+	return &projectConfig, nil
 }
 
 var manualFlag bool
