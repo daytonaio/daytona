@@ -4,13 +4,17 @@
 package gitprovider
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -464,4 +468,109 @@ func (g *GitLabGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*
 	}
 
 	return &project.DefaultBranch, nil
+}
+
+func (g *GitLabGitProvider) RegisterPrebuildWebhook(repo *GitRepository, endpointUrl string) (string, error) {
+	client := g.getApiClient()
+
+	pushEvents := true
+	projectID := fmt.Sprintf("%s/%s", repo.Owner, repo.Name)
+
+	hook, _, err := client.Projects.AddProjectHook(projectID, &gitlab.AddProjectHookOptions{
+		URL:        &endpointUrl,
+		PushEvents: &pushEvents,
+	})
+	if err != nil {
+		return "", fmt.Errorf("failed to add project hook for project %s: %w", projectID, err)
+	}
+
+	return strconv.Itoa(hook.ID), nil
+}
+
+func (g *GitLabGitProvider) GetPrebuildWebhook(repo *GitRepository, endpointUrl string) (*string, error) {
+	client := g.getApiClient()
+
+	projectID := fmt.Sprintf("%s/%s", repo.Owner, repo.Name)
+	hooks, _, err := client.Projects.ListProjectHooks(projectID, &gitlab.ListProjectHooksOptions{
+		PerPage: 100,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, hook := range hooks {
+		if hook.URL == endpointUrl {
+			return util.Pointer(strconv.Itoa(hook.ID)), nil
+		}
+	}
+
+	return nil, nil
+}
+
+func (g *GitLabGitProvider) UnregisterPrebuildWebhook(repo *GitRepository, hookId string) error {
+	client := g.getApiClient()
+
+	hookIdInt, err := strconv.Atoi(hookId)
+	if err != nil {
+		return err
+	}
+
+	projectID := fmt.Sprintf("%s/%s", repo.Owner, repo.Name)
+	_, err = client.Projects.DeleteProjectHook(projectID, hookIdInt)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g *GitLabGitProvider) GetCommitsRange(repo *GitRepository, owner string, initialSha string, currentSha string) (int, error) {
+	client := g.getApiClient()
+
+	projectID := fmt.Sprintf("%s/%s", repo.Owner, repo.Name)
+	commits, _, err := client.Repositories.Compare(projectID, &gitlab.CompareOptions{
+		From: &initialSha,
+		To:   &currentSha,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(commits.Commits), nil
+}
+
+func (g *GitLabGitProvider) ParseEventData(request *http.Request) (*GitEventData, error) {
+	payload, err := io.ReadAll(request.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var webhookData gitlab.PushEvent
+	err = json.Unmarshal(payload, &webhookData)
+	if err != nil {
+		return nil, err
+	}
+	if webhookData.EventName != "push" {
+		return nil, nil
+	}
+
+	var owner string
+	if webhookData.Project.Namespace != "" {
+		owner = webhookData.Project.Namespace
+	}
+
+	gitEventData := &GitEventData{
+		Url:    util.CleanUpRepositoryUrl(webhookData.Project.WebURL) + ".git",
+		Branch: strings.TrimPrefix(webhookData.Ref, "refs/heads/"),
+		Sha:    webhookData.After,
+		Owner:  owner,
+	}
+
+	for _, commit := range webhookData.Commits {
+		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Added...)
+		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Modified...)
+		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Removed...)
+	}
+
+	return gitEventData, nil
 }
