@@ -14,7 +14,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/projectconfig/info"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
-	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"golang.org/x/term"
 )
 
@@ -110,7 +109,7 @@ func getTableRowData(projectConfig apiclient.ProjectConfig, apiServerConfig *api
 	rowData.Prebuilds = "None"
 	rowData.IsDefault = ""
 
-	projectDefaults := &create.ProjectConfigDefaults{
+	projectDefaults := &views_util.ProjectConfigDefaults{
 		Image:     &apiServerConfig.DefaultProjectImage,
 		ImageUser: &apiServerConfig.DefaultProjectUser,
 	}
@@ -119,7 +118,7 @@ func getTableRowData(projectConfig apiclient.ProjectConfig, apiServerConfig *api
 		BuildConfig: projectConfig.BuildConfig,
 	}
 
-	_, rowData.Build = create.GetProjectBuildChoice(createProjectDto, projectDefaults)
+	_, rowData.Build = views_util.GetProjectBuildChoice(createProjectDto, projectDefaults)
 
 	if projectConfig.Default {
 		rowData.IsDefault = "1"
