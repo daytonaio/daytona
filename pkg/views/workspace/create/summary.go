@@ -15,6 +15,7 @@ import (
 	util "github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 )
 
 type ProjectDetail string
@@ -29,13 +30,6 @@ const (
 	DEFAULT_PADDING                  = 21
 )
 
-type ProjectConfigDefaults struct {
-	BuildChoice          BuildChoice
-	Image                *string
-	ImageUser            *string
-	DevcontainerFilePath string
-}
-
 type SummaryModel struct {
 	lg          *lipgloss.Renderer
 	styles      *Styles
@@ -44,7 +38,7 @@ type SummaryModel struct {
 	quitting    bool
 	name        string
 	projectList []apiclient.CreateProjectDTO
-	defaults    *ProjectConfigDefaults
+	defaults    *views_util.ProjectConfigDefaults
 	nameLabel   string
 }
 
@@ -54,7 +48,7 @@ type SubmissionFormConfig struct {
 	ExistingNames []string
 	ProjectList   *[]apiclient.CreateProjectDTO
 	NameLabel     string
-	Defaults      *ProjectConfigDefaults
+	Defaults      *views_util.ProjectConfigDefaults
 }
 
 var configureCheck bool
@@ -91,7 +85,7 @@ func RunSubmissionForm(config SubmissionFormConfig) error {
 	return RunSubmissionForm(config)
 }
 
-func RenderSummary(name string, projectList []apiclient.CreateProjectDTO, defaults *ProjectConfigDefaults, nameLabel string) (string, error) {
+func RenderSummary(name string, projectList []apiclient.CreateProjectDTO, defaults *views_util.ProjectConfigDefaults, nameLabel string) (string, error) {
 	var output string
 	if name == "" {
 		output = views.GetStyledMainTitle("SUMMARY")
@@ -108,7 +102,7 @@ func RenderSummary(name string, projectList []apiclient.CreateProjectDTO, defaul
 			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("%s #%d", "Project", i+1)), (projectList[i].Source.Repository.Url))
 		}
 
-		projectBuildChoice, choiceName := GetProjectBuildChoice(projectList[i], defaults)
+		projectBuildChoice, choiceName := views_util.GetProjectBuildChoice(projectList[i], defaults)
 		output += renderProjectDetails(projectList[i], projectBuildChoice, choiceName)
 		if i < len(projectList)-1 {
 			output += "\n\n"
@@ -118,10 +112,10 @@ func RenderSummary(name string, projectList []apiclient.CreateProjectDTO, defaul
 	return output, nil
 }
 
-func renderProjectDetails(project apiclient.CreateProjectDTO, buildChoice BuildChoice, choiceName string) string {
+func renderProjectDetails(project apiclient.CreateProjectDTO, buildChoice views_util.BuildChoice, choiceName string) string {
 	output := projectDetailOutput(Build, choiceName)
 
-	if buildChoice == DEVCONTAINER {
+	if buildChoice == views_util.DEVCONTAINER {
 		if project.BuildConfig != nil {
 			if project.BuildConfig.Devcontainer != nil {
 				output += "\n"
