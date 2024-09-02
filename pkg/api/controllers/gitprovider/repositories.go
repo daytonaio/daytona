@@ -31,7 +31,7 @@ func GetRepositories(ctx *gin.Context) {
 
 	response, err := server.GitProviderService.GetRepositories(gitProviderId, namespaceId)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get repositories for url: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get repositories for url: %w", err))
 		return
 	}
 

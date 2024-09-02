@@ -5,11 +5,13 @@ package headscale
 
 import (
 	"context"
+	"time"
 
 	v1 "github.com/juanfont/headscale/gen/go/headscale/v1"
 	"github.com/juanfont/headscale/hscontrol/util"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/backoff"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
@@ -21,17 +23,19 @@ func (s *HeadscaleServer) getClient() (context.Context, v1.HeadscaleServiceClien
 
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.CLI.Timeout)
 
-	grpcOptions := []grpc.DialOption{
-		grpc.WithBlock(),
-	}
-
 	address := cfg.UnixSocket
 
-	grpcOptions = append(
-		grpcOptions,
+	grpcOptions := []grpc.DialOption{
+		grpc.WithConnectParams(grpc.ConnectParams{
+			Backoff: backoff.Config{
+				BaseDelay:  1 * time.Second,
+				Multiplier: 1.5,
+				MaxDelay:   30 * time.Second,
+			},
+		}),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithContextDialer(util.GrpcSocketDialer),
-	)
+	}
 
 	log.Trace().Caller().Str("address", address).Msg("Connecting via gRPC")
 	conn, err := grpc.DialContext(ctx, address, grpcOptions...) // nolint:staticcheck

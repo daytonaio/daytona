@@ -25,7 +25,13 @@ type GitProviderAPIService service
 type ApiGetGitContextRequest struct {
 	ctx        context.Context
 	ApiService *GitProviderAPIService
-	gitUrl     string
+	repository *GetRepositoryContext
+}
+
+// Get repository context
+func (r ApiGetGitContextRequest) Repository(repository GetRepositoryContext) ApiGetGitContextRequest {
+	r.repository = &repository
+	return r
 }
 
 func (r ApiGetGitContextRequest) Execute() (*GitRepository, *http.Response, error) {
@@ -38,14 +44,12 @@ GetGitContext Get Git context
 Get Git context
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param gitUrl Git URL
 	@return ApiGetGitContextRequest
 */
-func (a *GitProviderAPIService) GetGitContext(ctx context.Context, gitUrl string) ApiGetGitContextRequest {
+func (a *GitProviderAPIService) GetGitContext(ctx context.Context) ApiGetGitContextRequest {
 	return ApiGetGitContextRequest{
 		ApiService: a,
 		ctx:        ctx,
-		gitUrl:     gitUrl,
 	}
 }
 
@@ -54,7 +58,7 @@ func (a *GitProviderAPIService) GetGitContext(ctx context.Context, gitUrl string
 //	@return GitRepository
 func (a *GitProviderAPIService) GetGitContextExecute(r ApiGetGitContextRequest) (*GitRepository, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
+		localVarHTTPMethod  = http.MethodPost
 		localVarPostBody    interface{}
 		formFiles           []formFile
 		localVarReturnValue *GitRepository
@@ -65,12 +69,14 @@ func (a *GitProviderAPIService) GetGitContextExecute(r ApiGetGitContextRequest) 
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/gitprovider/context/{gitUrl}"
-	localVarPath = strings.Replace(localVarPath, "{"+"gitUrl"+"}", url.PathEscape(parameterValueToString(r.gitUrl, "gitUrl")), -1)
+	localVarPath := localBasePath + "/gitprovider/context"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+	if r.repository == nil {
+		return localVarReturnValue, nil, reportError("repository is required and must be specified")
+	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -89,6 +95,8 @@ func (a *GitProviderAPIService) GetGitContextExecute(r ApiGetGitContextRequest) 
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
+	// body params
+	localVarPostBody = r.repository
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {

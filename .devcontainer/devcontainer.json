@@ -8,5 +8,6 @@
 		"DAYTONA_WS_ID": ""
 	},
 	"postCreateCommand": ".devcontainer/postcreate.sh",
+	"postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
 	"remoteUser": "daytona"
 }

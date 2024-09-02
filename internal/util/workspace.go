@@ -64,6 +64,5 @@ func GetRepositorySlugFromUrl(url string, specifyGitProviders bool) string {
 
 func CleanUpRepositoryUrl(url string) string {
 	url = strings.ToLower(url)
-	url = strings.TrimSuffix(url, "/")
-	return strings.TrimSuffix(url, ".git")
+	return strings.TrimSuffix(url, "/")
 }

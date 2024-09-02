@@ -29,7 +29,7 @@ func GetNamespaces(ctx *gin.Context) {
 
 	response, err := server.GitProviderService.GetNamespaces(gitProviderId)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get namespaces: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get namespaces: %w", err))
 		return
 	}
 

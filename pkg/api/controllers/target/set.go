@@ -26,7 +26,7 @@ func SetTarget(ctx *gin.Context) {
 	var req provider.ProviderTarget
 	err := ctx.BindJSON(&req)
 	if err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %s", err.Error()))
+		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
 		return
 	}
 
@@ -42,7 +42,7 @@ func SetTarget(ctx *gin.Context) {
 
 	err = server.ProviderTargetService.Save(target)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to set target: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to set target: %w", err))
 		return
 	}
 

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/daytonaio/daytona/internal/cmd/tailscale"
@@ -41,7 +42,7 @@ var CreateCmd = &cobra.Command{
 	GroupID: util.WORKSPACE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
-		var projects []apiclient.CreateProjectConfigDTO
+		var projects []apiclient.CreateProjectDTO
 		var workspaceName string
 		var existingWorkspaceNames []string
 		var existingProjectConfigName *string
@@ -107,7 +108,11 @@ var CreateCmd = &cobra.Command{
 
 		projectNames := []string{}
 		for i := range projects {
-			projects[i].EnvVars = *workspace_util.GetEnvVariables(&projects[i], profileData)
+			if profileData != nil && profileData.EnvVars != nil {
+				projects[i].EnvVars = util.MergeEnvVars(profileData.EnvVars, projects[i].EnvVars)
+			} else {
+				projects[i].EnvVars = util.MergeEnvVars(projects[i].EnvVars)
+			}
 			projectNames = append(projectNames, projects[i].Name)
 		}
 
@@ -119,7 +124,7 @@ var CreateCmd = &cobra.Command{
 
 		if existingProjectConfigName != nil {
 			logs_view.DisplayLogEntry(logs.LogEntry{
-				ProjectName: *existingProjectConfigName,
+				ProjectName: existingProjectConfigName,
 				Msg:         fmt.Sprintf("Using detected project config '%s'\n", *existingProjectConfigName),
 			}, logs_view.FIRST_PROJECT_INDEX)
 		}
@@ -139,11 +144,11 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		stopLogs := false
 		id := stringid.GenerateRandomID()
 		id = stringid.TruncateID(id)
 
-		go apiclient_util.ReadWorkspaceLogs(activeProfile, id, projectNames, &stopLogs)
+		logsContext, stopLogs := context.WithCancel(context.Background())
+		go apiclient_util.ReadWorkspaceLogs(logsContext, activeProfile, id, projectNames)
 
 		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(apiclient.CreateWorkspaceDTO{
 			Id:       id,
@@ -160,7 +165,7 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		stopLogs = true
+		stopLogs()
 
 		// Make sure terminal cursor is reset
 		fmt.Print("\033[?25h")
@@ -228,9 +233,16 @@ var codeFlag bool
 var blankFlag bool
 
 func init() {
+	ideList := config.GetIdeList()
+	ids := make([]string, len(ideList))
+	for i, ide := range ideList {
+		ids[i] = ide.Id
+	}
+	ideListStr := strings.Join(ids, ", ")
+
 	CreateCmd.Flags().StringVar(&nameFlag, "name", "", "Specify the workspace name")
 	CreateCmd.Flags().StringVar(&providerFlag, "provider", "", "Specify the provider (e.g. 'docker-provider')")
-	CreateCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", "Specify the IDE ('vscode' or 'browser')")
+	CreateCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", fmt.Sprintf("Specify the IDE (%s)", ideListStr))
 	CreateCmd.Flags().StringVarP(&targetNameFlag, "target", "t", "", "Specify the target (e.g. 'local')")
 	CreateCmd.Flags().StringVar(&customImageFlag, "custom-image", "", "Create the project with the custom image passed as the flag value; Requires setting --custom-image-user flag as well")
 	CreateCmd.Flags().StringVar(&customImageUserFlag, "custom-image-user", "", "Create the project with the custom image user passed as the flag value; Requires setting --custom-image flag as well")
@@ -278,7 +290,7 @@ func getTarget(activeProfileName string) (*apiclient.ProviderTarget, error) {
 	return target.GetTargetFromPrompt(targets, activeProfileName, false)
 }
 
-func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, projects *[]apiclient.CreateProjectConfigDTO, workspaceNames []string, ctx context.Context) error {
+func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, projects *[]apiclient.CreateProjectDTO, workspaceNames []string, ctx context.Context) error {
 	if builderFlag != "" || customImageFlag != "" || customImageUserFlag != "" || devcontainerPathFlag != "" {
 		return fmt.Errorf("please provide the repository URL in order to set up custom project details through CLI")
 	}
@@ -313,8 +325,8 @@ func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, pro
 		BlankProject:     blankFlag,
 		ApiClient:        apiClient,
 		Defaults:         projectDefaults,
-	},
-	)
+	})
+
 	if err != nil {
 		return err
 	}
@@ -340,7 +352,7 @@ func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, pro
 	return nil
 }
 
-func processCmdArgument(argument string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectConfigDTO, ctx context.Context) (*string, error) {
+func processCmdArgument(argument string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectDTO, ctx context.Context) (*string, error) {
 	if builderFlag != "" && builderFlag != create.DEVCONTAINER && devcontainerPathFlag != "" {
 		return nil, fmt.Errorf("can't set devcontainer file path if builder is not set to %s", create.DEVCONTAINER)
 	}
@@ -362,7 +374,7 @@ func processCmdArgument(argument string, apiClient *apiclient.APIClient, project
 	return workspace_util.AddProjectFromConfig(projectConfig, apiClient, projects, branchFlag)
 }
 
-func processGitURL(repoUrl string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectConfigDTO, ctx context.Context) (*string, error) {
+func processGitURL(repoUrl string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectDTO, ctx context.Context) (*string, error) {
 	encodedURLParam := url.QueryEscape(repoUrl)
 
 	if !blankFlag {
@@ -376,26 +388,30 @@ func processGitURL(repoUrl string, apiClient *apiclient.APIClient, projects *[]a
 		}
 	}
 
-	repoResponse, res, err := apiClient.GitProviderAPI.GetGitContext(ctx, encodedURLParam).Execute()
+	var branch *string
+	if branchFlag != "" {
+		branch = &branchFlag
+	}
+
+	repo, res, err := apiClient.GitProviderAPI.GetGitContext(ctx).Repository(apiclient.GetRepositoryContext{
+		Url:    repoUrl,
+		Branch: branch,
+	}).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	if branchFlag != "" {
-		repoResponse.Branch = &branchFlag
-	}
-
-	projectName, err := workspace_util.GetSanitizedProjectName(repoResponse.Name)
+	projectName, err := workspace_util.GetSanitizedProjectName(repo.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	project := &apiclient.CreateProjectConfigDTO{
+	project := &apiclient.CreateProjectDTO{
 		Name: projectName,
-		Source: apiclient.CreateProjectConfigSourceDTO{
-			Repository: *repoResponse,
+		Source: apiclient.CreateProjectSourceDTO{
+			Repository: *repo,
 		},
-		BuildConfig: &apiclient.ProjectBuildConfig{},
+		BuildConfig: &apiclient.BuildConfig{},
 	}
 
 	if builderFlag == create.DEVCONTAINER || devcontainerPathFlag != "" {

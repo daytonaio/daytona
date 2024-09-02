@@ -7,7 +7,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 
-	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
 	view "github.com/daytonaio/daytona/pkg/views/whoami"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -30,11 +30,16 @@ var whoamiCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = profile
+		if format.FormatFlag != "" {
+			formattedData := format.NewFormatter(profile)
+			formattedData.Print()
 			return
 		}
 
 		view.Render(profile)
 	},
+}
+
+func init() {
+	format.RegisterFormatFlag(whoamiCmd)
 }

@@ -31,7 +31,7 @@ func GetWorkspace(ctx *gin.Context) {
 
 	w, err := server.WorkspaceService.GetWorkspace(ctx.Request.Context(), workspaceId)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get workspace: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get workspace: %w", err))
 		return
 	}
 
@@ -66,7 +66,7 @@ func ListWorkspaces(ctx *gin.Context) {
 
 	workspaceList, err := server.WorkspaceService.ListWorkspaces(verbose)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list workspaces: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list workspaces: %w", err))
 		return
 	}
 
@@ -107,7 +107,7 @@ func RemoveWorkspace(ctx *gin.Context) {
 	}
 
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to remove workspace: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to remove workspace: %w", err))
 		return
 	}
 

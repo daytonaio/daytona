@@ -7,7 +7,7 @@ import (
 	"context"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views"
 	projectconfig_view "github.com/daytonaio/daytona/pkg/views/projectconfig/list"
 	log "github.com/sirupsen/logrus"
@@ -52,11 +52,16 @@ var projectConfigListCmd = &cobra.Command{
 			return
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = projectConfigs
+		if format.FormatFlag != "" {
+			formattedData := format.NewFormatter(projectConfigs)
+			formattedData.Print()
 			return
 		}
 
 		projectconfig_view.ListProjectConfigs(projectConfigs, apiServerConfig, specifyGitProviders)
 	},
+}
+
+func init() {
+	format.RegisterFormatFlag(projectConfigListCmd)
 }

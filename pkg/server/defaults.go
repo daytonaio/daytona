@@ -19,6 +19,7 @@ import (
 
 const defaultRegistryUrl = "https://download.daytona.io/daytona"
 const defaultServerDownloadUrl = "https://download.daytona.io/daytona/install.sh"
+const defaultSamplesIndexUrl = "https://raw.githubusercontent.com/daytonaio/daytona/main/hack/samples/index.json"
 const defaultHeadscalePort = 3987
 const defaultApiPort = 3986
 const defaultBuilderImage = "daytonaio/workspace-project:latest"
@@ -118,6 +119,7 @@ func getDefaultConfig() (*Config, error) {
 		LocalBuilderRegistryImage: defaultLocalBuilderRegistryImage,
 		BuilderRegistryServer:     defaultBuilderRegistryServer,
 		BuildImageNamespace:       defaultBuildImageNamespace,
+		SamplesIndexUrl:           defaultSamplesIndexUrl,
 	}
 
 	if os.Getenv("DEFAULT_REGISTRY_URL") != "" {

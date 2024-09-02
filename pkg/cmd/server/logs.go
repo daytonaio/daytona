@@ -20,7 +20,6 @@ import (
 )
 
 var followFlag bool
-var retryFlag bool
 var fileFlag bool
 
 var logsCmd = &cobra.Command{
@@ -38,11 +37,7 @@ var logsCmd = &cobra.Command{
 		}
 
 		query := ""
-		if retryFlag && followFlag {
-			query += "follow=true&retry=true"
-		} else if retryFlag {
-			query += "retry=true"
-		} else if followFlag {
+		if followFlag {
 			query += "follow=true"
 		}
 
@@ -51,7 +46,7 @@ var logsCmd = &cobra.Command{
 			readServerLogFile()
 
 		default:
-			ws, res, err := apiclient.GetWebsocketConn("/log/server", &activeProfile, &query)
+			ws, res, err := apiclient.GetWebsocketConn(context.Background(), "/log/server", &activeProfile, &query)
 
 			if err != nil {
 				log.Error(apiclient.HandleErrorResponse(res, err))
@@ -101,7 +96,7 @@ func readServerLogFile() {
 
 	file, err := os.Open(cfg.LogFilePath)
 	if err != nil {
-		log.Fatal(fmt.Errorf("while opening server logs: %v", err).Error())
+		log.Fatal(fmt.Errorf("while opening server logs: %w", err).Error())
 	}
 	defer file.Close()
 	msgChan := make(chan []byte)
@@ -128,6 +123,5 @@ func readServerLogFile() {
 
 func init() {
 	logsCmd.Flags().BoolVarP(&followFlag, "follow", "f", false, "Follow logs")
-	logsCmd.Flags().BoolVarP(&retryFlag, "retry", "r", false, "Retry connection")
 	logsCmd.Flags().BoolVar(&fileFlag, "file", false, "Read logs from local server log file")
 }

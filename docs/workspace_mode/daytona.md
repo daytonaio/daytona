@@ -13,8 +13,8 @@ daytona [flags]
 ### Options
 
 ```
-      --help            help for daytona
-  -o, --output string   Output format. Must be one of (yaml, json)
+      --help      help for daytona
+  -v, --version   Display the version of Daytona
 ```
 
 ### SEE ALSO

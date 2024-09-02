@@ -12,12 +12,12 @@ import (
 func (s *GitProviderService) GetGitUser(gitProviderId string) (*gitprovider.GitUser, error) {
 	gitProvider, err := s.GetGitProvider(gitProviderId)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get git provider: %s", err.Error())
+		return nil, fmt.Errorf("failed to get git provider: %w", err)
 	}
 
 	user, err := gitProvider.GetUser()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get user: %s", err.Error())
+		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
 
 	return user, nil

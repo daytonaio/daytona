@@ -6,7 +6,6 @@ package gitprovider
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider/dto"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
@@ -20,29 +19,27 @@ import (
 //	@Summary		Get Git context
 //	@Description	Get Git context
 //	@Produce		json
-//	@Param			gitUrl	path		string	true	"Git URL"
-//	@Success		200		{object}	GitRepository
-//	@Router			/gitprovider/context/{gitUrl} [get]
+//	@Param			repository	body		GetRepositoryContext	true	"Get repository context"
+//	@Success		200			{object}	GitRepository
+//	@Router			/gitprovider/context [post]
 //
 //	@id				GetGitContext
 func GetGitContext(ctx *gin.Context) {
-	gitUrl := ctx.Param("gitUrl")
-
-	decodedURLParam, err := url.QueryUnescape(gitUrl)
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode query param: %s", err.Error()))
+	var repositoryContext gitprovider.GetRepositoryContext
+	if err := ctx.ShouldBindJSON(&repositoryContext); err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to bind json: %s", err.Error()))
 		return
 	}
 
 	server := server.GetInstance(nil)
 
-	gitProvider, _, err := server.GitProviderService.GetGitProviderForUrl(decodedURLParam)
+	gitProvider, _, err := server.GitProviderService.GetGitProviderForUrl(repositoryContext.Url)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %s", err.Error()))
 		return
 	}
 
-	repo, err := gitProvider.GetRepositoryFromUrl(decodedURLParam)
+	repo, err := gitProvider.GetRepositoryContext(repositoryContext)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get repository: %s", err.Error()))
 		return
@@ -63,21 +60,21 @@ func GetGitContext(ctx *gin.Context) {
 //
 //	@id				GetUrlFromRepository
 func GetUrlFromRepository(ctx *gin.Context) {
-	var gitRepository gitprovider.GitRepository
-	if err := ctx.ShouldBindJSON(&gitRepository); err != nil {
+	var repoContext gitprovider.GetRepositoryContext
+	if err := ctx.ShouldBindJSON(&repoContext); err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to bind json: %s", err.Error()))
 		return
 	}
 
 	server := server.GetInstance(nil)
 
-	gitProvider, _, err := server.GitProviderService.GetGitProviderForUrl(gitRepository.Url)
+	gitProvider, _, err := server.GitProviderService.GetGitProviderForUrl(repoContext.Url)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %w", err))
 		return
 	}
 
-	url := gitProvider.GetUrlFromRepository(&gitRepository)
+	url := gitProvider.GetUrlFromContext(&repoContext)
 
 	response := dto.RepositoryUrl{
 		URL: url,

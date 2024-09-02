@@ -12,7 +12,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
-	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -70,7 +70,7 @@ func (c *MockClient) GetProjectContainerName(p *project.Project) string {
 	return args.String(0)
 }
 
-func (c *MockClient) ExecSync(containerID string, config types.ExecConfig, outputWriter io.Writer) (*docker.ExecResult, error) {
+func (c *MockClient) ExecSync(containerID string, config container.ExecOptions, outputWriter io.Writer) (*docker.ExecResult, error) {
 	args := c.Called(containerID, config, outputWriter)
 	return args.Get(0).(*docker.ExecResult), args.Error(1)
 }

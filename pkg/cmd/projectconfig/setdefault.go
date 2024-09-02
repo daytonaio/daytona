@@ -33,7 +33,7 @@ var projectConfigSetDefaultCmd = &cobra.Command{
 				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
 
-			projectConfig := selection.GetProjectConfigFromPrompt(projectConfigList, 0, false, "Make Default")
+			projectConfig := selection.GetProjectConfigFromPrompt(projectConfigList, 0, false, false, "Make Default")
 			if projectConfig == nil {
 				return
 			}

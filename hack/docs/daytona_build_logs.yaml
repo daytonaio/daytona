@@ -1,0 +1,17 @@
+name: daytona build logs
+synopsis: View logs for build
+usage: daytona build logs [flags]
+options:
+    - name: continue-on-completed
+      default_value: "false"
+      usage: Continue streaming logs after the build is completed
+    - name: follow
+      shorthand: f
+      default_value: "false"
+      usage: Follow logs
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona build - Manage builds

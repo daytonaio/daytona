@@ -6,6 +6,7 @@ package gitprovider
 import (
 	"testing"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -35,11 +36,11 @@ func (g *AwsCodeCommitGitProviderTestSuite) TestParseStaticGitContext_PR() {
 		Sha:      nil,
 		Source:   "ap-south-1.console.aws.amazon.com",
 		Path:     nil,
-		PrNumber: &[]uint32{1}[0],
+		PrNumber: util.Pointer(uint32(1)),
 	}
 
 	require := g.Require()
-	httpContext, err := g.gitProvider.parseStaticGitContext(prUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(prUrl)
 	require.Nil(err)
 	require.Equal(prContext, httpContext)
 }
@@ -52,7 +53,7 @@ func (g *AwsCodeCommitGitProviderTestSuite) TestParseStaticGitContext_Files() {
 		Name:     "Test",
 		Owner:    "Test",
 		Url:      "https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/Test",
-		Branch:   &[]string{"main"}[0],
+		Branch:   util.Pointer("main"),
 		Sha:      nil,
 		Source:   "ap-south-1.console.aws.amazon.com",
 		Path:     &branchpath,
@@ -60,7 +61,7 @@ func (g *AwsCodeCommitGitProviderTestSuite) TestParseStaticGitContext_Files() {
 	}
 
 	require := g.Require()
-	httpContext, err := g.gitProvider.parseStaticGitContext(prUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(prUrl)
 	require.Nil(err)
 	require.Equal(prContext, httpContext)
 }
@@ -72,7 +73,7 @@ func (g *AwsCodeCommitGitProviderTestSuite) TestParseStaticGitContext_Branch() {
 		Name:     "Test",
 		Owner:    "Test",
 		Url:      "https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/Test",
-		Branch:   &[]string{"test2"}[0],
+		Branch:   util.Pointer("test2"),
 		Source:   "ap-south-1.console.aws.amazon.com",
 		Sha:      nil,
 		PrNumber: nil,
@@ -80,7 +81,7 @@ func (g *AwsCodeCommitGitProviderTestSuite) TestParseStaticGitContext_Branch() {
 	}
 
 	require := g.Require()
-	httpContext, err := g.gitProvider.parseStaticGitContext(prUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(prUrl)
 	require.Nil(err)
 	require.Equal(prContext, httpContext)
 }
@@ -92,7 +93,7 @@ func (g *AwsCodeCommitGitProviderTestSuite) TestParseStaticGitContext_Commits() 
 		Name:     "Test",
 		Owner:    "Test",
 		Url:      "https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/Test",
-		Branch:   &[]string{"main"}[0],
+		Branch:   util.Pointer("main"),
 		Source:   "ap-south-1.console.aws.amazon.com",
 		Sha:      nil,
 		Path:     nil,
@@ -100,7 +101,7 @@ func (g *AwsCodeCommitGitProviderTestSuite) TestParseStaticGitContext_Commits() 
 	}
 
 	require := g.Require()
-	httpContext, err := g.gitProvider.parseStaticGitContext(prUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(prUrl)
 	require.Nil(err)
 	require.Equal(prContext, httpContext)
 
@@ -114,96 +115,89 @@ func (g *AwsCodeCommitGitProviderTestSuite) TestParseStaticGitContext_Commit() {
 		Owner:    "Test",
 		Url:      "https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/Test",
 		Source:   "ap-south-1.console.aws.amazon.com",
-		Branch:   &[]string{"COMMIT_SHA"}[0],
-		Sha:      &[]string{"COMMIT_SHA"}[0],
+		Branch:   util.Pointer("COMMIT_SHA"),
+		Sha:      util.Pointer("COMMIT_SHA"),
 		Path:     nil,
 		PrNumber: nil,
 	}
 
 	require := g.Require()
-	httpContext, err := g.gitProvider.parseStaticGitContext(prUrl)
+	httpContext, err := g.gitProvider.ParseStaticGitContext(prUrl)
 	require.Nil(err)
 	require.Equal(prContext, httpContext)
 }
 
 func (g *AwsCodeCommitGitProviderTestSuite) TestGetUrlFromRepo_Bare() {
-	repo := &GitRepository{
-		Id:     "demorepo",
-		Name:   "demorepo",
-		Owner:  "demorepo",
-		Source: "ap-south-1.console.aws.amazon.com",
+	repo := &GetRepositoryContext{
+		Id:     util.Pointer("demorepo"),
+		Name:   util.Pointer("demorepo"),
+		Owner:  util.Pointer("demorepo"),
+		Source: util.Pointer("ap-south-1.console.aws.amazon.com"),
 		Url:    "https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/demorepo",
 	}
 
 	require := g.Require()
 
-	url := g.gitProvider.GetUrlFromRepository(repo)
+	url := g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://ap-south-1.console.aws.amazon.com/codesuite/codecommit/repositories/demorepo/browse", url)
 }
 
 func (g *AwsCodeCommitGitProviderTestSuite) TestGetUrlFromRepo_Branch() {
-	repo := &GitRepository{
-		Id:     "demorepo",
-		Name:   "demorepo",
-		Owner:  "demorepo",
-		Source: "ap-south-1.console.aws.amazon.com",
+	repo := &GetRepositoryContext{
+		Id:     util.Pointer("demorepo"),
+		Name:   util.Pointer("demorepo"),
+		Owner:  util.Pointer("demorepo"),
+		Source: util.Pointer("ap-south-1.console.aws.amazon.com"),
 		Url:    "https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/demorepo",
-		Branch: &[]string{"test-branch"}[0],
+		Branch: util.Pointer("test-branch"),
 	}
 
 	require := g.Require()
 
-	url := g.gitProvider.GetUrlFromRepository(repo)
+	url := g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://ap-south-1.console.aws.amazon.com/codesuite/codecommit/repositories/demorepo/browse/refs/heads/test-branch", url)
 }
 
 func (g *AwsCodeCommitGitProviderTestSuite) TestGetUrlFromRepo_Path() {
-	repo := &GitRepository{
-		Id:     "demorepo",
-		Name:   "demorepo",
-		Owner:  "demorepo",
-		Source: "ap-south-1.console.aws.amazon.com",
+	repo := &GetRepositoryContext{
+		Id:     util.Pointer("demorepo"),
+		Name:   util.Pointer("demorepo"),
+		Owner:  util.Pointer("demorepo"),
+		Source: util.Pointer("ap-south-1.console.aws.amazon.com"),
 		Url:    "https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/demorepo",
-		Branch: &[]string{"test-branch"}[0],
-		Path:   &[]string{"README.md"}[0],
+		Branch: util.Pointer("test-branch"),
+		Path:   util.Pointer("README.md"),
 	}
 
 	require := g.Require()
 
-	url := g.gitProvider.GetUrlFromRepository(repo)
+	url := g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://ap-south-1.console.aws.amazon.com/codesuite/codecommit/repositories/demorepo/browse/refs/heads/test-branch/--/README.md", url)
 
 	repo.Branch = nil
 
-	url = g.gitProvider.GetUrlFromRepository(repo)
+	url = g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://ap-south-1.console.aws.amazon.com/codesuite/codecommit/repositories/demorepo/browse/refs/heads/main/--/README.md", url)
 }
 
 func (g *AwsCodeCommitGitProviderTestSuite) TestGetUrlFromRepo_Commit() {
-	repo := &GitRepository{
-		Id:     "demorepo",
-		Name:   "demorepo",
-		Owner:  "demorepo",
-		Source: "ap-south-1.console.aws.amazon.com",
+	repo := &GetRepositoryContext{
+		Id:     util.Pointer("demorepo"),
+		Name:   util.Pointer("demorepo"),
+		Owner:  util.Pointer("demorepo"),
+		Source: util.Pointer("ap-south-1.console.aws.amazon.com"),
 		Url:    "https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/demorepo",
-		Path:   &[]string{"README.md"}[0],
-		Sha:    "COMMIT_SHA",
-		Branch: &[]string{"COMMIT_SHA"}[0],
+		Branch: util.Pointer("COMMIT_SHA"),
+		Sha:    util.Pointer("COMMIT_SHA"),
 	}
 
 	require := g.Require()
 
-	url := g.gitProvider.GetUrlFromRepository(repo)
-
-	require.Equal("https://ap-south-1.console.aws.amazon.com/codesuite/codecommit/repositories/demorepo/commit/COMMIT_SHA", url)
-
-	repo.Path = nil
-
-	url = g.gitProvider.GetUrlFromRepository(repo)
+	url := g.gitProvider.GetUrlFromContext(repo)
 
 	require.Equal("https://ap-south-1.console.aws.amazon.com/codesuite/codecommit/repositories/demorepo/commit/COMMIT_SHA", url)
 }

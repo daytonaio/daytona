@@ -29,14 +29,14 @@ func SetContainerRegistry(ctx *gin.Context) {
 
 	decodedServerURL, err := url.QueryUnescape(crServer)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode server URL: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode server URL: %w", err))
 		return
 	}
 
 	var req containerregistry.ContainerRegistry
 	err = ctx.BindJSON(&req)
 	if err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %s", err.Error()))
+		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
 		return
 	}
 
@@ -46,7 +46,7 @@ func SetContainerRegistry(ctx *gin.Context) {
 	if err == nil {
 		err = server.ContainerRegistryService.Delete(decodedServerURL)
 		if err != nil {
-			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to remove container registry: %s", err.Error()))
+			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to remove container registry: %w", err))
 			return
 		}
 
@@ -59,7 +59,7 @@ func SetContainerRegistry(ctx *gin.Context) {
 
 	err = server.ContainerRegistryService.Save(cr)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to set container registry: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to set container registry: %w", err))
 		return
 	}
 

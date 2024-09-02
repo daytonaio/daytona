@@ -40,8 +40,8 @@ func (pl *projectLogger) Write(p []byte) (n int, err error) {
 	var entry LogEntry
 	entry.Msg = string(p)
 	entry.Source = string(pl.source)
-	entry.WorkspaceId = pl.workspaceId
-	entry.ProjectName = pl.projectName
+	entry.WorkspaceId = &pl.workspaceId
+	entry.ProjectName = &pl.projectName
 
 	b, err := json.Marshal(entry)
 	if err != nil {
@@ -85,7 +85,7 @@ func (l *loggerFactoryImpl) CreateProjectLogger(workspaceId, projectName string,
 
 	return &projectLogger{
 		workspaceId: workspaceId,
-		logsDir:     l.logsDir,
+		logsDir:     l.wsLogsDir,
 		projectName: projectName,
 		logger:      logger,
 		source:      source,
@@ -93,6 +93,6 @@ func (l *loggerFactoryImpl) CreateProjectLogger(workspaceId, projectName string,
 }
 
 func (l *loggerFactoryImpl) CreateProjectLogReader(workspaceId, projectName string) (io.Reader, error) {
-	filePath := filepath.Join(l.logsDir, workspaceId, projectName, "log")
+	filePath := filepath.Join(l.wsLogsDir, workspaceId, projectName, "log")
 	return os.Open(filePath)
 }

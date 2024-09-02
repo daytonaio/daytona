@@ -9,10 +9,13 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/google/uuid"
 )
 
-const DEFAULT_POLLER_INTERVAL = "0 */5 * * * *"
+// TODO: add lock when running interval func
+// 10 second interval
+const DEFAULT_POLL_INTERVAL = "*/10 * * * * *"
 
 type Config struct {
 	Id               string `json:"id" validate:"required"`
@@ -21,7 +24,7 @@ type Config struct {
 } // @name BuildRunnerConfig
 
 func GetConfig() (*Config, error) {
-	configFilePath, err := configFilePath()
+	configFilePath, err := getConfigFilePath()
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +35,7 @@ func GetConfig() (*Config, error) {
 
 		err = Save(*c)
 		if err != nil {
-			return nil, fmt.Errorf("failed to save default config file: %v", err)
+			return nil, fmt.Errorf("failed to save default config file: %w", err)
 		}
 
 		return c, nil
@@ -64,8 +67,8 @@ func GetConfig() (*Config, error) {
 	return &c, nil
 }
 
-func configFilePath() (string, error) {
-	configDir, err := GetConfigDir()
+func getConfigFilePath() (string, error) {
+	configDir, err := GetRunnerConfigDir()
 	if err != nil {
 		return "", err
 	}
@@ -74,7 +77,7 @@ func configFilePath() (string, error) {
 }
 
 func Save(c Config) error {
-	configFilePath, err := configFilePath()
+	configFilePath, err := getConfigFilePath()
 	if err != nil {
 		return err
 	}
@@ -92,19 +95,19 @@ func Save(c Config) error {
 	return os.WriteFile(configFilePath, configContent, 0600)
 }
 
-func GetConfigDir() (string, error) {
-	userConfigDir, err := os.UserConfigDir()
+func GetRunnerConfigDir() (string, error) {
+	configDir, err := config.GetConfigDir()
 	if err != nil {
 		return "", err
 	}
 
-	return filepath.Join(userConfigDir, "daytona", "build-poller"), nil
+	return filepath.Join(configDir, "build-runner"), nil
 }
 
 func getDefaultConfig() *Config {
 	return &Config{
 		Id:               uuid.NewString(),
-		Interval:         DEFAULT_POLLER_INTERVAL,
+		Interval:         DEFAULT_POLL_INTERVAL,
 		TelemetryEnabled: false,
 	}
 }

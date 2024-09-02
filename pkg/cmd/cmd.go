@@ -13,10 +13,11 @@ import (
 	"github.com/daytonaio/daytona/internal"
 	. "github.com/daytonaio/daytona/internal/util"
 	. "github.com/daytonaio/daytona/pkg/cmd/apikey"
+	. "github.com/daytonaio/daytona/pkg/cmd/build"
 	. "github.com/daytonaio/daytona/pkg/cmd/containerregistry"
 	. "github.com/daytonaio/daytona/pkg/cmd/gitprovider"
-	"github.com/daytonaio/daytona/pkg/cmd/output"
 	. "github.com/daytonaio/daytona/pkg/cmd/ports"
+	. "github.com/daytonaio/daytona/pkg/cmd/prebuild"
 	. "github.com/daytonaio/daytona/pkg/cmd/profile"
 	. "github.com/daytonaio/daytona/pkg/cmd/profiledata/env"
 	. "github.com/daytonaio/daytona/pkg/cmd/projectconfig"
@@ -41,8 +42,6 @@ var rootCmd = &cobra.Command{
 	DisableAutoGenTag: true,
 	Run:               RunInitialScreenFlow,
 }
-
-var originalStdout *os.File
 
 func Execute() {
 	rootCmd.AddGroup(&cobra.Group{ID: WORKSPACE_GROUP, Title: "Workspaces & Projects"})
@@ -70,6 +69,8 @@ func Execute() {
 	rootCmd.AddCommand(StartCmd)
 	rootCmd.AddCommand(StopCmd)
 	rootCmd.AddCommand(InfoCmd)
+	rootCmd.AddCommand(PrebuildCmd)
+	rootCmd.AddCommand(BuildCmd)
 	rootCmd.AddCommand(PortForwardCmd)
 	rootCmd.AddCommand(EnvCmd)
 	rootCmd.AddCommand(TelemetryCmd)
@@ -140,7 +141,7 @@ func SetupRootCommand(cmd *cobra.Command) {
 
 	cmd.CompletionOptions.HiddenDefaultCmd = true
 	cmd.PersistentFlags().BoolP("help", "", false, "help for daytona")
-	cmd.PersistentFlags().StringVarP(&output.FormatFlag, "output", "o", output.FormatFlag, `Output format. Must be one of (yaml, json)`)
+	cmd.Flags().BoolP("version", "v", false, "Display the version of Daytona")
 
 	var telemetryService telemetry.TelemetryService
 	clientId := config.GetClientId()
@@ -155,6 +156,14 @@ func SetupRootCommand(cmd *cobra.Command) {
 
 	startTime := time.Now()
 
+	cmd.PreRun = func(cmd *cobra.Command, args []string) {
+		versionFlag, _ := cmd.Flags().GetBool("version")
+		if versionFlag {
+			versionCmd.Run(cmd, []string{})
+			os.Exit(0)
+		}
+	}
+
 	cmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
 		if telemetryService != nil {
 			err := telemetryService.TrackCliEvent(telemetry.CliEventCmdStart, clientId, getCmdTelemetryData(cmd))
@@ -162,12 +171,6 @@ func SetupRootCommand(cmd *cobra.Command) {
 				log.Error(err)
 			}
 		}
-
-		if output.FormatFlag == "" {
-			return
-		}
-		originalStdout = os.Stdout
-		os.Stdout = nil
 	}
 
 	cmd.PersistentPostRun = func(cmd *cobra.Command, args []string) {
@@ -184,9 +187,6 @@ func SetupRootCommand(cmd *cobra.Command) {
 				log.Error(err)
 			}
 		}
-
-		os.Stdout = originalStdout
-		output.Print(output.Output, output.FormatFlag)
 	}
 }
 

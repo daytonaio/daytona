@@ -6,8 +6,10 @@ package info
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
@@ -23,6 +25,8 @@ var propertyValueStyle = lipgloss.NewStyle().
 	Foreground(views.Light).
 	Bold(true)
 
+var prebuildDetailStyle = propertyNameStyle
+
 func Render(projectConfig *apiclient.ProjectConfig, apiServerConfig *apiclient.ServerConfig, forceUnstyled bool) {
 	var output string
 	output += "\n\n"
@@ -31,7 +35,11 @@ func Render(projectConfig *apiclient.ProjectConfig, apiServerConfig *apiclient.S
 
 	output += getInfoLine("Name", projectConfig.Name) + "\n"
 
-	output += getInfoLine("Repository", projectConfig.Repository.Url) + "\n"
+	output += getInfoLine("Repository", projectConfig.RepositoryUrl) + "\n"
+
+	if projectConfig.Default {
+		output += getInfoLine("Default", "Yes") + "\n"
+	}
 
 	if GetLabelFromBuild(projectConfig.BuildConfig) != "" {
 		projectDefaults := &create.ProjectConfigDefaults{
@@ -39,10 +47,10 @@ func Render(projectConfig *apiclient.ProjectConfig, apiServerConfig *apiclient.S
 			ImageUser: &apiServerConfig.DefaultProjectUser,
 		}
 
-		createCreateProjectConfigDTO := apiclient.CreateProjectConfigDTO{
+		createProjectDto := apiclient.CreateProjectDTO{
 			BuildConfig: projectConfig.BuildConfig,
 		}
-		_, buildChoice := create.GetProjectBuildChoice(createCreateProjectConfigDTO, projectDefaults)
+		_, buildChoice := create.GetProjectBuildChoice(createProjectDto, projectDefaults)
 		output += getInfoLine("Build", buildChoice) + "\n"
 	}
 
@@ -56,6 +64,23 @@ func Render(projectConfig *apiclient.ProjectConfig, apiServerConfig *apiclient.S
 
 	if projectConfig.BuildConfig != nil && projectConfig.BuildConfig.Devcontainer != nil {
 		output += getInfoLine("Devcontainer path", projectConfig.BuildConfig.Devcontainer.FilePath) + "\n"
+	}
+
+	prebuildCount := len(projectConfig.Prebuilds)
+
+	if prebuildCount > 0 {
+		if prebuildCount == 1 {
+			output += getInfoLine("Prebuild: ", getPrebuildLine(projectConfig.Prebuilds[0], nil)) + "\n"
+		} else {
+			output += getInfoLine("Prebuilds: ", "") + "\n"
+			for i, prebuild := range projectConfig.Prebuilds {
+				if len(projectConfig.Prebuilds) != 1 {
+					output += getPrebuildLine(prebuild, util.Pointer(i+1)) + "\n"
+				} else {
+					output += getPrebuildLine(prebuild, nil) + "\n"
+				}
+			}
+		}
 	}
 
 	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
@@ -89,7 +114,23 @@ func getInfoLine(key, value string) string {
 	return propertyNameStyle.Render(fmt.Sprintf("%-*s", propertyNameWidth, key)) + propertyValueStyle.Render(value) + "\n"
 }
 
-func GetLabelFromBuild(build *apiclient.ProjectBuildConfig) string {
+func getPrebuildLine(prebuild apiclient.PrebuildConfig, order *int) string {
+	var line string
+	if order != nil {
+		line += propertyNameStyle.Render(fmt.Sprintf("%s#%d%s", strings.Repeat(" ", 3), *order, strings.Repeat(" ", 2)))
+	}
+
+	line += propertyValueStyle.Render(views.GetBranchNameLabel(prebuild.Branch))
+	line += prebuildDetailStyle.Render(fmt.Sprintf(" - every %d commits - retention: %d builds", prebuild.CommitInterval, prebuild.Retention))
+
+	if order != nil {
+		line += "\n"
+	}
+
+	return line
+}
+
+func GetLabelFromBuild(build *apiclient.BuildConfig) string {
 	if build == nil {
 		return "Automatic"
 	}

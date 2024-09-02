@@ -27,7 +27,7 @@ func CreateWorkspace(ctx *gin.Context) {
 	var createWorkspaceReq dto.CreateWorkspaceDTO
 	err := ctx.BindJSON(&createWorkspaceReq)
 	if err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %s", err.Error()))
+		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
 		return
 	}
 
@@ -35,7 +35,7 @@ func CreateWorkspace(ctx *gin.Context) {
 
 	w, err := server.WorkspaceService.CreateWorkspace(ctx.Request.Context(), createWorkspaceReq)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to create workspace: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to create workspace: %w", err))
 		return
 	}
 

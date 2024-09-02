@@ -16,14 +16,15 @@ import (
 )
 
 var BlankProjectIdentifier = "<BLANK_PROJECT>"
+var NewProjectConfigIdentifier = "<NEW_PROJECT_CONFIG>"
 
-func GetProjectConfigFromPrompt(projectConfigs []apiclient.ProjectConfig, projectOrder int, showBlankOption bool, actionVerb string) *apiclient.ProjectConfig {
+func GetProjectConfigFromPrompt(projectConfigs []apiclient.ProjectConfig, projectOrder int, showBlankOption, withNewProjectConfig bool, actionVerb string) *apiclient.ProjectConfig {
 	choiceChan := make(chan *apiclient.ProjectConfig)
-	go selectProjectConfigPrompt(projectConfigs, projectOrder, showBlankOption, actionVerb, choiceChan)
+	go selectProjectConfigPrompt(projectConfigs, projectOrder, showBlankOption, withNewProjectConfig, actionVerb, choiceChan)
 	return <-choiceChan
 }
 
-func selectProjectConfigPrompt(projectConfigs []apiclient.ProjectConfig, projectOrder int, showBlankOption bool, actionVerb string, choiceChan chan<- *apiclient.ProjectConfig) {
+func selectProjectConfigPrompt(projectConfigs []apiclient.ProjectConfig, projectOrder int, showBlankOption, withNewProjectConfig bool, actionVerb string, choiceChan chan<- *apiclient.ProjectConfig) {
 	items := []list.Item{}
 
 	if showBlankOption {
@@ -39,7 +40,14 @@ func selectProjectConfigPrompt(projectConfigs []apiclient.ProjectConfig, project
 			projectConfigName = "Unnamed Project Config"
 		}
 
-		newItem := item[apiclient.ProjectConfig]{title: projectConfigName, desc: pc.Repository.Url, choiceProperty: pc}
+		newItem := item[apiclient.ProjectConfig]{title: projectConfigName, desc: pc.RepositoryUrl, choiceProperty: pc}
+		items = append(items, newItem)
+	}
+
+	if withNewProjectConfig {
+		newItem := item[apiclient.ProjectConfig]{title: "+ Create a new project configuration", desc: "", choiceProperty: apiclient.ProjectConfig{
+			Name: NewProjectConfigIdentifier,
+		}}
 		items = append(items, newItem)
 	}
 

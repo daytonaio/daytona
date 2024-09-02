@@ -7,19 +7,19 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
-	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 )
 
 type RepositoryDTO struct {
-	Id       string  `json:"id"`
-	Url      string  `json:"url"`
-	Name     string  `json:"name"`
-	Owner    string  `json:"owner"`
-	Sha      string  `json:"sha"`
-	Source   string  `json:"source"`
-	Branch   *string `default:"main" json:"branch,omitempty"`
-	PrNumber *uint32 `json:"prNumber,omitempty"`
-	Path     *string `json:"path,omitempty"`
+	Id       string                  `json:"id"`
+	Url      string                  `json:"url"`
+	Name     string                  `json:"name"`
+	Owner    string                  `json:"owner"`
+	Sha      string                  `json:"sha"`
+	Source   string                  `json:"source"`
+	Branch   string                  `json:"branch"`
+	PrNumber *uint32                 `json:"prNumber,omitempty"`
+	Path     *string                 `json:"path,omitempty"`
+	Target   gitprovider.CloneTarget `json:"cloneTarget,omitempty"`
 }
 
 type FileStatusDTO struct {
@@ -41,7 +41,7 @@ type ProjectStateDTO struct {
 }
 
 type ProjectBuildDevcontainerDTO struct {
-	DevContainerFilePath string `json:"devContainerFilePath"`
+	FilePath string `json:"filePath"`
 }
 
 type ProjectBuildDTO struct {
@@ -85,6 +85,7 @@ func ToRepositoryDTO(repo *gitprovider.GitRepository) RepositoryDTO {
 		Branch:   repo.Branch,
 		PrNumber: repo.PrNumber,
 		Path:     repo.Path,
+		Target:   repo.Target,
 	}
 
 	return repoDTO
@@ -131,7 +132,7 @@ func ToProjectStateDTO(state *project.ProjectState) *ProjectStateDTO {
 	}
 }
 
-func ToProjectBuildDTO(build *buildconfig.ProjectBuildConfig) *ProjectBuildDTO {
+func ToProjectBuildDTO(build *buildconfig.BuildConfig) *ProjectBuildDTO {
 	if build == nil {
 		return nil
 	}
@@ -142,20 +143,18 @@ func ToProjectBuildDTO(build *buildconfig.ProjectBuildConfig) *ProjectBuildDTO {
 
 	return &ProjectBuildDTO{
 		Devcontainer: &ProjectBuildDevcontainerDTO{
-			DevContainerFilePath: build.Devcontainer.FilePath,
+			FilePath: build.Devcontainer.FilePath,
 		},
 	}
 }
 
 func ToProject(projectDTO ProjectDTO) *project.Project {
 	return &project.Project{
-		ProjectConfig: config.ProjectConfig{
-			Name:        projectDTO.Name,
-			Image:       projectDTO.Image,
-			User:        projectDTO.User,
-			BuildConfig: ToProjectBuild(projectDTO.Build),
-			Repository:  ToRepository(projectDTO.Repository),
-		},
+		Name:        projectDTO.Name,
+		Image:       projectDTO.Image,
+		User:        projectDTO.User,
+		BuildConfig: ToProjectBuild(projectDTO.Build),
+		Repository:  ToRepository(projectDTO.Repository),
 		WorkspaceId: projectDTO.WorkspaceId,
 		Target:      projectDTO.Target,
 		State:       ToProjectState(projectDTO.State),
@@ -215,23 +214,24 @@ func ToRepository(repoDTO RepositoryDTO) *gitprovider.GitRepository {
 		PrNumber: repoDTO.PrNumber,
 		Source:   repoDTO.Source,
 		Path:     repoDTO.Path,
+		Target:   gitprovider.CloneTarget(repoDTO.Target),
 	}
 
 	return &repo
 }
 
-func ToProjectBuild(buildDTO *ProjectBuildDTO) *buildconfig.ProjectBuildConfig {
+func ToProjectBuild(buildDTO *ProjectBuildDTO) *buildconfig.BuildConfig {
 	if buildDTO == nil {
 		return nil
 	}
 
 	if buildDTO.Devcontainer == nil {
-		return &buildconfig.ProjectBuildConfig{}
+		return &buildconfig.BuildConfig{}
 	}
 
-	return &buildconfig.ProjectBuildConfig{
+	return &buildconfig.BuildConfig{
 		Devcontainer: &buildconfig.DevcontainerConfig{
-			FilePath: buildDTO.Devcontainer.DevContainerFilePath,
+			FilePath: buildDTO.Devcontainer.FilePath,
 		},
 	}
 }

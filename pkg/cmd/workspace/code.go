@@ -7,6 +7,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
+	"strings"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/jetbrains"
@@ -15,6 +17,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/ide"
+	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
@@ -64,8 +67,12 @@ var CodeCmd = &cobra.Command{
 			}
 			workspaceId = workspace.Id
 		} else {
-			workspace, err = apiclient_util.GetWorkspace(args[0])
+			workspace, err = apiclient_util.GetWorkspace(url.PathEscape(args[0]))
 			if err != nil {
+				if strings.Contains(err.Error(), workspaces.ErrWorkspaceNotFound.Error()) {
+					log.Debug(err)
+					log.Fatal("Workspace not found. You can see all workspace names by running the command `daytona list`")
+				}
 				log.Fatal(err)
 			}
 			workspaceId = workspace.Id
@@ -174,6 +181,8 @@ func openIDE(ideId string, activeProfile config.Profile, workspaceId string, pro
 		return ide.OpenTerminalSsh(activeProfile, workspaceId, projectName)
 	case "browser":
 		return ide.OpenBrowserIDE(activeProfile, workspaceId, projectName, projectProviderMetadata)
+	case "cursor":
+		return ide.OpenCursor(activeProfile, workspaceId, projectName, projectProviderMetadata)
 	default:
 		_, ok := jetbrains.GetIdes()[jetbrains.Id(ideId)]
 		if ok {
@@ -187,5 +196,11 @@ func openIDE(ideId string, activeProfile config.Profile, workspaceId string, pro
 var ideFlag string
 
 func init() {
-	CodeCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", "Specify the IDE ('vscode' or 'browser')")
+	ideList := config.GetIdeList()
+	ids := make([]string, len(ideList))
+	for i, ide := range ideList {
+		ids[i] = ide.Id
+	}
+	ideListStr := strings.Join(ids, ", ")
+	CodeCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", fmt.Sprintf("Specify the IDE (%s)", ideListStr))
 }

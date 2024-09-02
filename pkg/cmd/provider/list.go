@@ -5,7 +5,7 @@ package provider
 
 import (
 	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/spf13/cobra"
 
@@ -23,11 +23,16 @@ var providerListCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = providerList
+		if format.FormatFlag != "" {
+			formattedData := format.NewFormatter(providerList)
+			formattedData.Print()
 			return
 		}
 
 		provider.List(providerList)
 	},
+}
+
+func init() {
+	format.RegisterFormatFlag(providerListCmd)
 }

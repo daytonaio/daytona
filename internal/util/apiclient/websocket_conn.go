@@ -4,6 +4,7 @@
 package apiclient
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -14,7 +15,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func GetWebsocketConn(path string, profile *config.Profile, query *string) (*websocket.Conn, *http.Response, error) {
+func GetWebsocketConn(ctx context.Context, path string, profile *config.Profile, query *string) (*websocket.Conn, *http.Response, error) {
 	c, err := config.GetConfig()
 	if err != nil {
 		return nil, nil, err
@@ -51,7 +52,7 @@ func GetWebsocketConn(path string, profile *config.Profile, query *string) (*web
 		wsUrl = fmt.Sprintf("%s?%s", wsUrl, *query)
 	}
 
-	return websocket.DefaultDialer.Dial(wsUrl, http.Header{
+	return websocket.DefaultDialer.DialContext(ctx, wsUrl, http.Header{
 		"Authorization": []string{fmt.Sprintf("Bearer %s", apiKey)},
 	})
 }

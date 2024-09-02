@@ -7,12 +7,15 @@ import (
 	"context"
 
 	config_const "github.com/daytonaio/daytona/cmd/daytona/config"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/common"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type RepositoryWizardConfig struct {
@@ -32,7 +35,12 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 
 	ctx := context.Background()
 
-	if len(config.UserGitProviders) == 0 || config.Manual {
+	samples, res, err := config.ApiClient.SampleAPI.ListSamples(ctx).Execute()
+	if err != nil {
+		log.Debug("Error fetching samples: ", apiclient_util.HandleErrorResponse(res, err))
+	}
+
+	if (len(config.UserGitProviders) == 0 && len(samples) == 0) || config.Manual {
 		return create.GetRepositoryFromUrlInput(config.MultiProject, config.ProjectOrder, config.ApiClient, config.SelectedRepos)
 	}
 
@@ -52,13 +60,30 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 			}
 		}
 	}
-	providerId = selection.GetProviderIdFromPrompt(gitProviderViewList, config.ProjectOrder)
+
+	providerId = selection.GetProviderIdFromPrompt(gitProviderViewList, config.ProjectOrder, len(samples) > 0)
 	if providerId == "" {
 		return nil, common.ErrCtrlCAbort
 	}
 
 	if providerId == selection.CustomRepoIdentifier {
 		return create.GetRepositoryFromUrlInput(config.MultiProject, config.ProjectOrder, config.ApiClient, config.SelectedRepos)
+	}
+
+	if providerId == selection.CREATE_FROM_SAMPLE {
+		sample := selection.GetSampleFromPrompt(samples)
+		if sample == nil {
+			return nil, common.ErrCtrlCAbort
+		}
+
+		repo, res, err := config.ApiClient.GitProviderAPI.GetGitContext(ctx).Repository(apiclient.GetRepositoryContext{
+			Url: sample.GitUrl,
+		}).Execute()
+		if err != nil {
+			return nil, apiclient_util.HandleErrorResponse(res, err)
+		}
+
+		return repo, nil
 	}
 
 	var namespaceList []apiclient.GitNamespace
@@ -99,7 +124,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		return chosenRepo, nil
 	}
 
-	return GetBranchFromWizard(BranchWizardConfig{
+	return SetBranchFromWizard(BranchWizardConfig{
 		ApiClient:    config.ApiClient,
 		ProviderId:   providerId,
 		NamespaceId:  namespaceId,

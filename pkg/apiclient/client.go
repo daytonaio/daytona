@@ -50,15 +50,21 @@ type APIClient struct {
 
 	ApiKeyAPI *ApiKeyAPIService
 
+	BuildAPI *BuildAPIService
+
 	ContainerRegistryAPI *ContainerRegistryAPIService
 
 	GitProviderAPI *GitProviderAPIService
+
+	PrebuildAPI *PrebuildAPIService
 
 	ProfileAPI *ProfileAPIService
 
 	ProjectConfigAPI *ProjectConfigAPIService
 
 	ProviderAPI *ProviderAPIService
+
+	SampleAPI *SampleAPIService
 
 	ServerAPI *ServerAPIService
 
@@ -84,11 +90,14 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 
 	// API Services
 	c.ApiKeyAPI = (*ApiKeyAPIService)(&c.common)
+	c.BuildAPI = (*BuildAPIService)(&c.common)
 	c.ContainerRegistryAPI = (*ContainerRegistryAPIService)(&c.common)
 	c.GitProviderAPI = (*GitProviderAPIService)(&c.common)
+	c.PrebuildAPI = (*PrebuildAPIService)(&c.common)
 	c.ProfileAPI = (*ProfileAPIService)(&c.common)
 	c.ProjectConfigAPI = (*ProjectConfigAPIService)(&c.common)
 	c.ProviderAPI = (*ProviderAPIService)(&c.common)
+	c.SampleAPI = (*SampleAPIService)(&c.common)
 	c.ServerAPI = (*ServerAPIService)(&c.common)
 	c.TargetAPI = (*TargetAPIService)(&c.common)
 	c.WorkspaceAPI = (*WorkspaceAPIService)(&c.common)

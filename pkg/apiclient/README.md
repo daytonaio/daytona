@@ -80,11 +80,17 @@ Class | Method | HTTP request | Description
 *ApiKeyAPI* | [**GenerateApiKey**](docs/ApiKeyAPI.md#generateapikey) | **Post** /apikey/{apiKeyName} | Generate an API key
 *ApiKeyAPI* | [**ListClientApiKeys**](docs/ApiKeyAPI.md#listclientapikeys) | **Get** /apikey | List API keys
 *ApiKeyAPI* | [**RevokeApiKey**](docs/ApiKeyAPI.md#revokeapikey) | **Delete** /apikey/{apiKeyName} | Revoke API key
+*BuildAPI* | [**CreateBuild**](docs/BuildAPI.md#createbuild) | **Post** /build | Create a build
+*BuildAPI* | [**DeleteAllBuilds**](docs/BuildAPI.md#deleteallbuilds) | **Delete** /build | Delete ALL builds
+*BuildAPI* | [**DeleteBuild**](docs/BuildAPI.md#deletebuild) | **Delete** /build/{buildId} | Delete build
+*BuildAPI* | [**DeleteBuildsFromPrebuild**](docs/BuildAPI.md#deletebuildsfromprebuild) | **Delete** /build/prebuild/{prebuildId} | Delete builds
+*BuildAPI* | [**GetBuild**](docs/BuildAPI.md#getbuild) | **Get** /build/{buildId} | Get build data
+*BuildAPI* | [**ListBuilds**](docs/BuildAPI.md#listbuilds) | **Get** /build | List builds
 *ContainerRegistryAPI* | [**GetContainerRegistry**](docs/ContainerRegistryAPI.md#getcontainerregistry) | **Get** /container-registry/{server} | Get container registry credentials
 *ContainerRegistryAPI* | [**ListContainerRegistries**](docs/ContainerRegistryAPI.md#listcontainerregistries) | **Get** /container-registry | List container registries
 *ContainerRegistryAPI* | [**RemoveContainerRegistry**](docs/ContainerRegistryAPI.md#removecontainerregistry) | **Delete** /container-registry/{server} | Remove a container registry credentials
 *ContainerRegistryAPI* | [**SetContainerRegistry**](docs/ContainerRegistryAPI.md#setcontainerregistry) | **Put** /container-registry/{server} | Set container registry credentials
-*GitProviderAPI* | [**GetGitContext**](docs/GitProviderAPI.md#getgitcontext) | **Get** /gitprovider/context/{gitUrl} | Get Git context
+*GitProviderAPI* | [**GetGitContext**](docs/GitProviderAPI.md#getgitcontext) | **Post** /gitprovider/context | Get Git context
 *GitProviderAPI* | [**GetGitProviderForUrl**](docs/GitProviderAPI.md#getgitproviderforurl) | **Get** /gitprovider/for-url/{url} | Get Git provider
 *GitProviderAPI* | [**GetGitProviderIdForUrl**](docs/GitProviderAPI.md#getgitprovideridforurl) | **Get** /gitprovider/id-for-url/{url} | Get Git provider ID
 *GitProviderAPI* | [**GetGitUser**](docs/GitProviderAPI.md#getgituser) | **Get** /gitprovider/{gitProviderId}/user | Get Git context
@@ -96,6 +102,12 @@ Class | Method | HTTP request | Description
 *GitProviderAPI* | [**ListGitProviders**](docs/GitProviderAPI.md#listgitproviders) | **Get** /gitprovider | List Git providers
 *GitProviderAPI* | [**RemoveGitProvider**](docs/GitProviderAPI.md#removegitprovider) | **Delete** /gitprovider/{gitProviderId} | Remove Git provider
 *GitProviderAPI* | [**SetGitProvider**](docs/GitProviderAPI.md#setgitprovider) | **Put** /gitprovider | Set Git provider
+*PrebuildAPI* | [**DeletePrebuild**](docs/PrebuildAPI.md#deleteprebuild) | **Delete** /project-config/{configName}/prebuild/{prebuildId} | Delete prebuild
+*PrebuildAPI* | [**GetPrebuild**](docs/PrebuildAPI.md#getprebuild) | **Get** /project-config/{configName}/prebuild/{prebuildId} | Get prebuild
+*PrebuildAPI* | [**ListPrebuilds**](docs/PrebuildAPI.md#listprebuilds) | **Get** /project-config/prebuild | List prebuilds
+*PrebuildAPI* | [**ListPrebuildsForProjectConfig**](docs/PrebuildAPI.md#listprebuildsforprojectconfig) | **Get** /project-config/{configName}/prebuild | List prebuilds for project config
+*PrebuildAPI* | [**ProcessGitEvent**](docs/PrebuildAPI.md#processgitevent) | **Post** /project-config/prebuild/process-git-event | ProcessGitEvent
+*PrebuildAPI* | [**SetPrebuild**](docs/PrebuildAPI.md#setprebuild) | **Put** /project-config/{configName}/prebuild | Set prebuild
 *ProfileAPI* | [**DeleteProfileData**](docs/ProfileAPI.md#deleteprofiledata) | **Delete** /profile | Delete profile data
 *ProfileAPI* | [**GetProfileData**](docs/ProfileAPI.md#getprofiledata) | **Get** /profile | Get profile data
 *ProfileAPI* | [**SetProfileData**](docs/ProfileAPI.md#setprofiledata) | **Put** /profile | Set profile data
@@ -109,6 +121,7 @@ Class | Method | HTTP request | Description
 *ProviderAPI* | [**InstallProvider**](docs/ProviderAPI.md#installprovider) | **Post** /provider/install | Install a provider
 *ProviderAPI* | [**ListProviders**](docs/ProviderAPI.md#listproviders) | **Get** /provider | List providers
 *ProviderAPI* | [**UninstallProvider**](docs/ProviderAPI.md#uninstallprovider) | **Post** /provider/{provider}/uninstall | Uninstall a provider
+*SampleAPI* | [**ListSamples**](docs/SampleAPI.md#listsamples) | **Get** /sample | List samples
 *ServerAPI* | [**GenerateNetworkKey**](docs/ServerAPI.md#generatenetworkkey) | **Post** /server/network-key | Generate a new authentication key
 *ServerAPI* | [**GetConfig**](docs/ServerAPI.md#getconfig) | **Get** /server/config | Get the server configuration
 *ServerAPI* | [**SetConfig**](docs/ServerAPI.md#setconfig) | **Post** /server/config | Set the server configuration
@@ -130,13 +143,22 @@ Class | Method | HTTP request | Description
 
  - [ApiKey](docs/ApiKey.md)
  - [ApikeyApiKeyType](docs/ApikeyApiKeyType.md)
+ - [Build](docs/Build.md)
+ - [BuildBuildState](docs/BuildBuildState.md)
+ - [BuildConfig](docs/BuildConfig.md)
+ - [CachedBuild](docs/CachedBuild.md)
+ - [CloneTarget](docs/CloneTarget.md)
  - [ContainerRegistry](docs/ContainerRegistry.md)
+ - [CreateBuildDTO](docs/CreateBuildDTO.md)
+ - [CreatePrebuildDTO](docs/CreatePrebuildDTO.md)
  - [CreateProjectConfigDTO](docs/CreateProjectConfigDTO.md)
- - [CreateProjectConfigSourceDTO](docs/CreateProjectConfigSourceDTO.md)
+ - [CreateProjectDTO](docs/CreateProjectDTO.md)
+ - [CreateProjectSourceDTO](docs/CreateProjectSourceDTO.md)
  - [CreateWorkspaceDTO](docs/CreateWorkspaceDTO.md)
  - [DevcontainerConfig](docs/DevcontainerConfig.md)
  - [FRPSConfig](docs/FRPSConfig.md)
  - [FileStatus](docs/FileStatus.md)
+ - [GetRepositoryContext](docs/GetRepositoryContext.md)
  - [GitBranch](docs/GitBranch.md)
  - [GitNamespace](docs/GitNamespace.md)
  - [GitProvider](docs/GitProvider.md)
@@ -146,9 +168,10 @@ Class | Method | HTTP request | Description
  - [GitUser](docs/GitUser.md)
  - [InstallProviderRequest](docs/InstallProviderRequest.md)
  - [NetworkKey](docs/NetworkKey.md)
+ - [PrebuildConfig](docs/PrebuildConfig.md)
+ - [PrebuildDTO](docs/PrebuildDTO.md)
  - [ProfileData](docs/ProfileData.md)
  - [Project](docs/Project.md)
- - [ProjectBuildConfig](docs/ProjectBuildConfig.md)
  - [ProjectConfig](docs/ProjectConfig.md)
  - [ProjectInfo](docs/ProjectInfo.md)
  - [ProjectState](docs/ProjectState.md)
@@ -158,6 +181,7 @@ Class | Method | HTTP request | Description
  - [ProviderProviderTargetPropertyType](docs/ProviderProviderTargetPropertyType.md)
  - [ProviderTarget](docs/ProviderTarget.md)
  - [RepositoryUrl](docs/RepositoryUrl.md)
+ - [Sample](docs/Sample.md)
  - [ServerConfig](docs/ServerConfig.md)
  - [SetGitProviderConfig](docs/SetGitProviderConfig.md)
  - [SetProjectState](docs/SetProjectState.md)
