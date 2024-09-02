@@ -39,6 +39,7 @@ func Execute() {
 	workspaceModeRootCmd.AddCommand(stopCmd)
 	workspaceModeRootCmd.AddCommand(infoCmd)
 	workspaceModeRootCmd.AddCommand(portForwardCmd)
+	workspaceModeRootCmd.AddCommand(exposeCmd)
 
 	if err := workspaceModeRootCmd.Execute(); err != nil {
 		log.Fatal(err)
