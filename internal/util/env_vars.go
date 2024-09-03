@@ -39,3 +39,15 @@ func MergeEnvVars(envVars ...map[string]string) map[string]string {
 
 	return vars
 }
+
+func GetEnvVarsFromShell() map[string]string {
+	envMap := map[string]string{}
+
+	for _, env := range os.Environ() {
+		kv := strings.SplitN(env, "=", 2)
+		if len(kv) == 2 {
+			envMap[kv[0]] = kv[1]
+		}
+	}
+	return envMap
+}
