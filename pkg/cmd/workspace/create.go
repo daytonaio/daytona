@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -139,9 +140,12 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		tsConn, err := tailscale.GetConnection(&activeProfile)
-		if err != nil {
-			log.Fatal(err)
+		var tsConn *tsnet.Server
+		if target.Name != "local" {
+			tsConn, err = tailscale.GetConnection(&activeProfile)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 
 		id := stringid.GenerateRandomID()
@@ -160,7 +164,7 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
-		err = waitForDial(tsConn, createdWorkspace.Id, createdWorkspace.Projects[0].Name)
+		err = waitForDial(createdWorkspace, &activeProfile, tsConn)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -401,15 +405,36 @@ func processGitURL(repoUrl string, apiClient *apiclient.APIClient, projects *[]a
 	return nil, nil
 }
 
-func waitForDial(tsConn *tsnet.Server, workspaceId string, projectName string) error {
+func waitForDial(workspace *apiclient.Workspace, activeProfile *config.Profile, tsConn *tsnet.Server) error {
+	if workspace.Target == "local" {
+		err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspace.Id, workspace.Projects[0].Name)
+		if err != nil {
+			return err
+		}
+
+		projectHostname := config.GetProjectHostname(activeProfile.Id, workspace.Id, workspace.Projects[0].Name)
+
+		for {
+			sshCommand := exec.Command("ssh", projectHostname, "daytona", "version")
+			sshCommand.Stdin = nil
+			sshCommand.Stdout = nil
+			sshCommand.Stderr = &util.TraceLogWriter{}
+
+			err = sshCommand.Run()
+			if err == nil {
+				return nil
+			}
+
+			time.Sleep(time.Second)
+		}
+	}
+
 	for {
-		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", project.GetProjectHostname(workspaceId, projectName), ssh_config.SSH_PORT))
+		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", project.GetProjectHostname(workspace.Id, workspace.Projects[0].Name), ssh_config.SSH_PORT))
 		if err == nil {
-			defer dialConn.Close()
-			break
+			return dialConn.Close()
 		}
 
 		time.Sleep(time.Second)
 	}
-	return nil
 }
