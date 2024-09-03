@@ -449,9 +449,9 @@ func waitForDial(workspace *apiclient.Workspace, activeProfile *config.Profile, 
 			return err
 		}
 
-		for {
-			projectHostname := config.GetProjectHostname(activeProfile.Id, workspace.Id, workspace.Projects[0].Name)
+		projectHostname := config.GetProjectHostname(activeProfile.Id, workspace.Id, workspace.Projects[0].Name)
 
+		for {
 			sshCommand := exec.Command("ssh", projectHostname, "daytona", "version")
 			sshCommand.Stdin = nil
 			sshCommand.Stdout = nil
