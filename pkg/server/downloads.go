@@ -31,7 +31,13 @@ func (s *Server) GetBinaryPath(binaryName, binaryVersion string) (string, error)
 
 	// If the requested binary is the same as the host, return the current binary path
 	if *hostOs == binaryOs && binaryVersion == internal.Version {
-		return os.Executable()
+		executable, err := os.Executable()
+		if err == nil {
+			_, err := os.Stat(executable)
+			if err == nil {
+				return executable, nil
+			}
+		}
 	}
 
 	binaryPath := filepath.Join(s.config.BinariesPath, binaryVersion, binaryName)
