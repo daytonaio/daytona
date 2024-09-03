@@ -5,14 +5,17 @@ package target
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	internal_util "github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/provider"
 	"github.com/daytonaio/daytona/pkg/common"
+	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/views"
-	"github.com/daytonaio/daytona/pkg/views/provider"
+	provider_view "github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/daytonaio/daytona/pkg/views/target"
 	"github.com/spf13/cobra"
 
@@ -25,6 +28,13 @@ var TargetSetCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Aliases: []string{"s", "add", "update", "register", "edit"},
 	Run: func(cmd *cobra.Command, args []string) {
+		ctx := context.Background()
+
+		apiClient, err := apiclient_util.GetApiClient(nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		c, err := config.GetConfig()
 		if err != nil {
 			log.Fatal(err)
@@ -35,12 +45,33 @@ var TargetSetCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		pluginList, err := apiclient_util.GetProviderList()
+		serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(apiclient.ApiGetConfigRequest{})
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
-		selectedProvider, err := provider.GetProviderFromPrompt(pluginList, "Choose a provider", false)
+		providersManifest, err := manager.NewProviderManager(manager.ProviderManagerConfig{
+			RegistryUrl: serverConfig.RegistryUrl,
+		}).GetProvidersManifest()
+		if err != nil {
+			log.Error(err)
+		}
+
+		var latestProviders []apiclient.Provider
+		if providersManifest != nil {
+			providersManifestLatest := providersManifest.GetLatestVersions()
+			if providersManifestLatest == nil {
+				log.Fatal("Could not get latest provider versions")
+			}
+
+			latestProviders = provider.GetProviderListFromManifest(providersManifestLatest)
+		} else {
+			fmt.Println("Could not get provider manifest. Can't check for new providers to install")
+		}
+
+		providerViewList := provider.GetProviderViewOptions(apiClient, latestProviders, ctx)
+
+		selectedProvider, err := provider_view.GetProviderFromPrompt(providerViewList, "Choose a Provider", false)
 		if err != nil {
 			if common.IsCtrlCAbort(err) {
 				return
@@ -53,9 +84,19 @@ var TargetSetCmd = &cobra.Command{
 			return
 		}
 
-		targets, err := apiclient_util.GetTargetList()
+		if selectedProvider.Installed != nil && !*selectedProvider.Installed {
+			if providersManifest == nil {
+				log.Fatal("Could not get providers manifest")
+			}
+			err = provider.InstallProvider(apiClient, *selectedProvider, providersManifest)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
+		targets, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
 		filteredTargets := []apiclient.ProviderTarget{}
@@ -74,12 +115,7 @@ var TargetSetCmd = &cobra.Command{
 			}
 		}
 
-		client, err := apiclient_util.GetApiClient(nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		targetManifest, res, err := client.ProviderAPI.GetTargetManifest(context.Background(), selectedProvider.Name).Execute()
+		targetManifest, res, err := apiClient.ProviderAPI.GetTargetManifest(context.Background(), selectedProvider.Name).Execute()
 		if err != nil {
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
@@ -104,7 +140,7 @@ var TargetSetCmd = &cobra.Command{
 			Version: selectedProvider.Version,
 		}
 
-		res, err = client.TargetAPI.SetTarget(context.Background()).Target(*selectedTarget).Execute()
+		res, err = apiClient.TargetAPI.SetTarget(context.Background()).Target(*selectedTarget).Execute()
 		if err != nil {
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}

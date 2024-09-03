@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/provider"
@@ -22,12 +23,19 @@ var providerUninstallCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Aliases: []string{"u"},
 	Run: func(cmd *cobra.Command, args []string) {
-		providerList, err := apiclient.GetProviderList()
+		ctx := context.Background()
+
+		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		providerToUninstall, err := provider.GetProviderFromPrompt(providerList, "Choose a provider to uninstall", false)
+		providerList, res, err := apiClient.ProviderAPI.ListProviders(ctx).Execute()
+		if err != nil {
+			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+		}
+
+		providerToUninstall, err := provider.GetProviderFromPrompt(provider.ProviderListToView(providerList), "Choose a Provider to Uninstall", false)
 		if err != nil {
 			if common.IsCtrlCAbort(err) {
 				return
@@ -40,14 +48,7 @@ var providerUninstallCmd = &cobra.Command{
 			return
 		}
 
-		apiClient, err := apiclient.GetApiClient(nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-		ctx := context.Background()
-
-		res, err := apiClient.ProviderAPI.UninstallProvider(ctx, providerToUninstall.Name).Execute()
-
+		res, err = apiClient.ProviderAPI.UninstallProvider(ctx, providerToUninstall.Name).Execute()
 		if err != nil {
 			log.Fatal(apiclient.HandleErrorResponse(res, err))
 		}

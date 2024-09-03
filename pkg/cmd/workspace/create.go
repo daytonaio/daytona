@@ -130,7 +130,12 @@ var CreateCmd = &cobra.Command{
 			}, logs_view.FIRST_PROJECT_INDEX)
 		}
 
-		target, err := getTarget(activeProfile.Name)
+		targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
+		if err != nil {
+			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+		}
+
+		target, err := getTarget(targetList, activeProfile.Name)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -252,14 +257,9 @@ func init() {
 	workspace_util.AddProjectConfigurationFlags(CreateCmd, projectConfigurationFlags, true)
 }
 
-func getTarget(activeProfileName string) (*apiclient.ProviderTarget, error) {
-	targets, err := apiclient_util.GetTargetList()
-	if err != nil {
-		return nil, err
-	}
-
+func getTarget(targetList []apiclient.ProviderTarget, activeProfileName string) (*apiclient.ProviderTarget, error) {
 	if targetNameFlag != "" {
-		for _, t := range targets {
+		for _, t := range targetList {
 			if t.Name == targetNameFlag {
 				return &t, nil
 			}
@@ -267,11 +267,11 @@ func getTarget(activeProfileName string) (*apiclient.ProviderTarget, error) {
 		return nil, fmt.Errorf("target '%s' not found", targetNameFlag)
 	}
 
-	if len(targets) == 1 {
-		return &targets[0], nil
+	if len(targetList) == 1 {
+		return &targetList[0], nil
 	}
 
-	return target.GetTargetFromPrompt(targets, activeProfileName, false)
+	return target.GetTargetFromPrompt(targetList, activeProfileName, false)
 }
 
 func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, projects *[]apiclient.CreateProjectDTO, workspaceNames []string, ctx context.Context) error {
