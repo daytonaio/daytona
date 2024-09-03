@@ -15,6 +15,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/pkg/browser"
 
+	"github.com/charmbracelet/huh"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -22,6 +23,9 @@ const startJupyterCommand = "notebook --no-browser --port=8888 --ip=0.0.0.0 --No
 
 // OpenJupyterIDE manages the installation and startup of a Jupyter IDE on a remote workspace.
 func OpenJupyterIDE(activeProfile config.Profile, workspaceId, projectName, projectProviderMetadata string) error {
+	// Get the autoConfirm value from a flag or environment variable
+	autoConfirm := getAutoConfirmValue()
+
 	// Ensure SSH config entry is added
 	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName)
 	if err != nil {
@@ -31,12 +35,12 @@ func OpenJupyterIDE(activeProfile config.Profile, workspaceId, projectName, proj
 	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
 
 	// Check and install Python if necessary
-	if err := ensurePythonInstalled(projectHostname); err != nil {
+	if err := ensurePythonInstalled(projectHostname, autoConfirm); err != nil {
 		return err
 	}
 
 	// Check and install pip if necessary
-	if err := ensurePipInstalled(projectHostname); err != nil {
+	if err := ensurePipInstalled(projectHostname, autoConfirm); err != nil {
 		return err
 	}
 
@@ -53,24 +57,52 @@ func OpenJupyterIDE(activeProfile config.Profile, workspaceId, projectName, proj
 	return nil
 }
 
+// getAutoConfirmValue retrieves the autoConfirm value from a flag or environment variable
+func getAutoConfirmValue() bool {
+	// Check for a command-line flag
+	for _, arg := range os.Args {
+		if arg == "--yes" || arg == "-y" {
+			return true
+		}
+	}
+
+	// Check for an environment variable
+	if value, exists := os.LookupEnv("DAYTONA_AUTO_CONFIRM"); exists {
+		return value == "true" || value == "1"
+	}
+
+	return false
+}
+
 // ensurePythonInstalled checks if Python is installed and installs it if the user agrees.
-func ensurePythonInstalled(hostname string) error {
+func ensurePythonInstalled(hostname string, autoConfirm bool) error {
 	views.RenderInfoMessageBold("Checking Python installation...")
 
 	// Check if Python is installed
 	if err := runRemoteCommand(hostname, "python3 --version"); err != nil {
 		log.Error("Python3 is not installed on the remote workspace.")
 
-		// Prompt user to install Python
-		fmt.Print("Would you like to install Python3? (yes/no) [yes]: ")
-		var userInput string
-		fmt.Scanln(&userInput)
-		if userInput == "" || userInput == "yes" {
-			packageManager, err := detectPackageManager(hostname)
-			if err != nil {
-				return err
-			}
-			return installPythonWithPackageManager(hostname, packageManager)
+		if autoConfirm {
+			return installPython(hostname)
+		}
+
+		var confirmInstall bool
+		form := huh.NewForm(
+			huh.NewGroup(
+				huh.NewConfirm().
+					Title("Would you like to install Python3?").
+					Description("Python3 is required to run Jupyter Notebook.").
+					Value(&confirmInstall),
+			),
+		).WithTheme(views.GetCustomTheme())
+
+		err := form.Run()
+		if err != nil {
+			return fmt.Errorf("error prompting for Python installation: %w", err)
+		}
+
+		if confirmInstall {
+			return installPython(hostname)
 		} else {
 			return fmt.Errorf("python3 is required but not installed")
 		}
@@ -79,31 +111,67 @@ func ensurePythonInstalled(hostname string) error {
 	return nil
 }
 
+func installPython(hostname string) error {
+	packageManager, err := detectPackageManager(hostname)
+	if err != nil {
+		return err
+	}
+	return installPythonWithPackageManager(hostname, packageManager)
+}
+
 // ensurePipInstalled checks if pip is installed and installs it if necessary
-func ensurePipInstalled(hostname string) error {
+func ensurePipInstalled(hostname string, autoConfirm bool) error {
 	views.RenderInfoMessageBold("Checking pip installation...")
 
 	// Check if pip is installed
 	if err := runRemoteCommand(hostname, "python3 -m pip --version"); err != nil {
 		log.Error("pip is not installed on the remote workspace.")
 
-		// Check if we're on a Debian-based system
-		if err := runRemoteCommand(hostname, "command -v apt-get"); err == nil {
-			// We're on a Debian-based system, use apt to install pip and python3-venv
-			views.RenderInfoMessageBold("Installing pip and python3-venv using apt...")
-			if err := runRemoteCommand(hostname, "sudo apt-get update && sudo apt-get install -y python3-pip python3-venv"); err != nil {
-				return fmt.Errorf("failed to install pip and python3-venv using apt: %w", err)
-			}
+		if autoConfirm {
+			return installPip(hostname)
+		}
+
+		var confirmInstall bool
+		form := huh.NewForm(
+			huh.NewGroup(
+				huh.NewConfirm().
+					Title("pip is not installed. Would you like to install it?").
+					Description("pip is required to install Jupyter Notebook.").
+					Value(&confirmInstall),
+			),
+		).WithTheme(views.GetCustomTheme())
+
+		err := form.Run()
+		if err != nil {
+			return fmt.Errorf("error prompting for pip installation: %w", err)
+		}
+
+		if confirmInstall {
+			return installPip(hostname)
 		} else {
-			// If not Debian-based, fall back to the get-pip.py method
-			views.RenderInfoMessageBold("Installing pip using get-pip.py...")
-			installCmd := "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py --user && rm get-pip.py"
-			if err := runRemoteCommand(hostname, installCmd); err != nil {
-				return fmt.Errorf("failed to install pip: %w", err)
-			}
+			return fmt.Errorf("pip is required but not installed")
 		}
 	}
 	views.RenderInfoMessageBold("pip is installed.")
+	return nil
+}
+
+func installPip(hostname string) error {
+	// Check if we're on a Debian-based system
+	if err := runRemoteCommand(hostname, "command -v apt-get"); err == nil {
+		// We're on a Debian-based system, use apt to install pip and python3-venv
+		views.RenderInfoMessageBold("Installing pip and python3-venv using apt...")
+		if err := runRemoteCommand(hostname, "sudo apt-get update && sudo apt-get install -y python3-pip python3-venv"); err != nil {
+			return fmt.Errorf("failed to install pip and python3-venv using apt: %w", err)
+		}
+	} else {
+		// If not Debian-based, fall back to the get-pip.py method
+		views.RenderInfoMessageBold("Installing pip using get-pip.py...")
+		installCmd := "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py --user && rm get-pip.py"
+		if err := runRemoteCommand(hostname, installCmd); err != nil {
+			return fmt.Errorf("failed to install pip: %w", err)
+		}
+	}
 	return nil
 }
 
