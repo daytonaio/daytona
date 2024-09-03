@@ -121,7 +121,7 @@ var CreateCmd = &cobra.Command{
 
 		logs_view.DisplayLogEntry(logs.LogEntry{
 			Msg: "Request submitted\n",
-		}, logs_view.WORKSPACE_INDEX)
+		}, logs_view.STATIC_INDEX)
 
 		if existingProjectConfigName != nil {
 			logs_view.DisplayLogEntry(logs.LogEntry{
