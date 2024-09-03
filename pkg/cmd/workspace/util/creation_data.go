@@ -91,7 +91,7 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 					return nil, apiclient_util.HandleErrorResponse(res, err)
 				}
 
-				projectList = append(projectList, apiclient.CreateProjectDTO{
+				createProjectDto := apiclient.CreateProjectDTO{
 					Name: projectName,
 					Source: apiclient.CreateProjectSourceDTO{
 						Repository: *configRepo,
@@ -100,7 +100,17 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 					Image:       config.Defaults.Image,
 					User:        config.Defaults.ImageUser,
 					EnvVars:     projectConfig.EnvVars,
-				})
+				}
+
+				if projectConfig.Image != "" {
+					createProjectDto.Image = &projectConfig.Image
+				}
+
+				if projectConfig.User != "" {
+					createProjectDto.User = &projectConfig.User
+				}
+
+				projectList = append(projectList, createProjectDto)
 				continue
 			}
 		}
