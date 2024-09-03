@@ -239,14 +239,14 @@ func (s *ProjectConfigService) ProcessGitEvent(data gitprovider.GitEventData) er
 
 	gitProvider, _, err := s.gitProviderService.GetGitProviderForUrl(data.Url)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get git provider for URL: %s", err)
 	}
 
 	repo, err := gitProvider.GetRepositoryContext(gitprovider.GetRepositoryContext{
 		Url: data.Url,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get repository context: %s", err)
 	}
 
 	for _, projectConfig := range projectConfigs {
@@ -290,7 +290,7 @@ func (s *ProjectConfigService) ProcessGitEvent(data gitprovider.GitEventData) er
 
 		commitsRange, err := gitProvider.GetCommitsRange(repo, newestBuild.Repository.Sha, data.Sha)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to get commits range: %s", err)
 		}
 
 		// Check if the commit interval has been reached
@@ -318,7 +318,7 @@ func (s *ProjectConfigService) ProcessGitEvent(data gitprovider.GitEventData) er
 
 		_, err = s.buildService.Create(createBuildDto)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to create build: %s", err)
 		}
 	}
 

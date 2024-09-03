@@ -6,10 +6,13 @@ package gitprovider
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 
+	"github.com/daytonaio/daytona/internal/util"
+	bitbucketWebhook "github.com/go-playground/webhooks/v6/bitbucket"
 	"github.com/ktrysmt/go-bitbucket"
 )
 
@@ -479,7 +482,7 @@ func (g *BitbucketGitProvider) GetDefaultBranch(staticContext *StaticGitContext)
 func (b *BitbucketGitProvider) getOwnerAndRepoFromFullName(fullName string) (string, string, error) {
 	parts := strings.Split(fullName, "/")
 	if len(parts) < 2 {
-		return "", "", fmt.Errorf("invalid full name")
+		return "", "", fmt.Errorf("invalid full name %s", fullName)
 	}
 
 	name := parts[len(parts)-1]
@@ -506,4 +509,113 @@ type prResponseData struct {
 			} `json:"repository"`
 		} `json:"source"`
 	} `json:"values"`
+}
+
+func (g *BitbucketGitProvider) RegisterPrebuildWebhook(repo *GitRepository, endpointUrl string) (string, error) {
+	client := g.getApiClient()
+
+	hook, err := client.Repositories.Webhooks.Create(&bitbucket.WebhooksOptions{
+		Active:   true,
+		Owner:    repo.Owner,
+		Events:   []string{"repo:push"},
+		Url:      endpointUrl,
+		RepoSlug: repo.Id,
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	return hook.Uuid, nil
+}
+
+func (g *BitbucketGitProvider) GetPrebuildWebhook(repo *GitRepository, endpointUrl string) (*string, error) {
+	client := g.getApiClient()
+
+	hooks, err := client.Repositories.Webhooks.List(&bitbucket.WebhooksOptions{
+		Owner:    repo.Owner,
+		RepoSlug: repo.Id,
+		Events:   []string{"repo:push"},
+		Active:   true,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(hooks) == 0 {
+		return nil, nil
+	}
+
+	for _, hook := range hooks {
+		if hook.Url == endpointUrl {
+			return util.Pointer(hook.Uuid), nil
+		}
+	}
+
+	return nil, nil
+}
+
+func (g *BitbucketGitProvider) UnregisterPrebuildWebhook(repo *GitRepository, id string) error {
+	client := g.getApiClient()
+
+	_, err := client.Repositories.Webhooks.Delete(&bitbucket.WebhooksOptions{
+		Owner:    repo.Owner,
+		RepoSlug: repo.Id,
+		Uuid:     id,
+	})
+
+	return err
+}
+
+func (g *BitbucketGitProvider) GetCommitsRange(repo *GitRepository, owner string, initialSha string, currentSha string) (int, error) {
+	client := g.getApiClient()
+
+	_ = owner
+	commits, err := client.Repositories.Diff.GetDiffStat(&bitbucket.DiffStatOptions{
+		Owner:    repo.Owner,
+		RepoSlug: repo.Id,
+		Spec:     initialSha + ".." + currentSha,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	return commits.Size, nil
+}
+
+func (g *BitbucketGitProvider) ParseEventData(request *http.Request) (*GitEventData, error) {
+	if request.Header.Get("X-Event-Key") != "repo:push" {
+		return nil, fmt.Errorf("invalid event key")
+	}
+	hook, err := bitbucketWebhook.New()
+	if err != nil {
+		return nil, err
+	}
+
+	event, err := hook.Parse(request, bitbucketWebhook.RepoPushEvent)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse event")
+	}
+
+	pushEvent, ok := event.(bitbucketWebhook.RepoPushPayload)
+	if !ok {
+		return nil, fmt.Errorf("could not parse push event")
+	}
+	owner := pushEvent.Repository.Owner.DisplayName
+
+	gitEventData := &GitEventData{
+		Url:    util.CleanUpRepositoryUrl(pushEvent.Repository.Links.HTML.Href) + ".git",
+		Branch: pushEvent.Push.Changes[0].New.Name,
+		Sha:    pushEvent.Push.Changes[0].New.Target.Hash,
+		Owner:  owner,
+	}
+
+	for _, change := range pushEvent.Push.Changes {
+		for _, commit := range change.Commits {
+			gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Hash)
+		}
+	}
+
+	return gitEventData, nil
 }
