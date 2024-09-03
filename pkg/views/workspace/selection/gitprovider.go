@@ -17,7 +17,7 @@ import (
 
 var titleStyle = lipgloss.NewStyle()
 
-func selectProviderPrompt(gitProviders []gitprovider_view.GitProviderView, projectOrder int, choiceChan chan<- string, samplesEnabled bool) {
+func selectGitProviderPrompt(gitProviders []gitprovider_view.GitProviderView, projectOrder int, choiceChan chan<- string, samplesEnabled bool) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
@@ -36,7 +36,7 @@ func selectProviderPrompt(gitProviders []gitprovider_view.GitProviderView, proje
 
 	l := views.GetStyledSelectList(items)
 
-	title := "Choose a Provider"
+	title := "Choose a Git Provider"
 	if projectOrder > 1 {
 		title += fmt.Sprintf(" (Project #%d)", projectOrder)
 	}
@@ -60,7 +60,7 @@ func selectProviderPrompt(gitProviders []gitprovider_view.GitProviderView, proje
 func GetProviderIdFromPrompt(gitProviders []gitprovider_view.GitProviderView, projectOrder int, samplesEnabled bool) string {
 	choiceChan := make(chan string)
 
-	go selectProviderPrompt(gitProviders, projectOrder, choiceChan, samplesEnabled)
+	go selectGitProviderPrompt(gitProviders, projectOrder, choiceChan, samplesEnabled)
 
 	return <-choiceChan
 }
