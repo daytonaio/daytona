@@ -131,10 +131,6 @@ func InstallProvider(apiClient *apiclient.APIClient, providerToInstall provider_
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		if err != nil {
-			return err
-		}
-
 		return nil
 	})
 

@@ -84,10 +84,10 @@ var providerUpdateCmd = &cobra.Command{
 	},
 }
 
-func updateProvider(providerToUpdateName string, providersManifest *manager.ProvidersManifest, apiClient *apiclient.APIClient) error {
-	providerManifest, ok := (*providersManifest)[providerToUpdateName]
+func updateProvider(providerName string, providersManifest *manager.ProvidersManifest, apiClient *apiclient.APIClient) error {
+	providerManifest, ok := (*providersManifest)[providerName]
 	if !ok {
-		return fmt.Errorf("Provider %s not found in manifest", providerToUpdateName)
+		return fmt.Errorf("Provider %s not found in manifest", providerName)
 	}
 
 	version, ok := providerManifest.Versions["latest"]
@@ -99,7 +99,7 @@ func updateProvider(providerToUpdateName string, providersManifest *manager.Prov
 	downloadUrls := ConvertToStringMap(version.DownloadUrls)
 
 	res, err := apiClient.ProviderAPI.InstallProviderExecute(apiclient.ApiInstallProviderRequest{}.Provider(apiclient.InstallProviderRequest{
-		Name:         providerToUpdateName,
+		Name:         providerName,
 		DownloadUrls: downloadUrls,
 	}))
 	if err != nil {

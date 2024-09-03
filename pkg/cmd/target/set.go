@@ -5,6 +5,7 @@ package target
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	internal_util "github.com/daytonaio/daytona/internal/util"
@@ -53,19 +54,21 @@ var TargetSetCmd = &cobra.Command{
 			RegistryUrl: serverConfig.RegistryUrl,
 		}).GetProvidersManifest()
 		if err != nil {
-			log.Fatal(err)
+			log.Error(err)
 		}
 
-		if providersManifest == nil {
-			log.Fatal("Could not get providers manifest")
+		var latestProviders []apiclient.Provider
+		if providersManifest != nil {
+			providersManifestLatest := providersManifest.GetLatestVersions()
+			if providersManifestLatest == nil {
+				log.Fatal("Could not get latest provider versions")
+			}
+
+			latestProviders = provider.GetProviderListFromManifest(providersManifestLatest)
+		} else {
+			fmt.Println("Could not get providers manifest")
 		}
 
-		providersManifestLatest := providersManifest.GetLatestVersions()
-		if providersManifestLatest == nil {
-			log.Fatal("Could not get providers manifest")
-		}
-
-		latestProviders := provider.GetProviderListFromManifest(providersManifestLatest)
 		providerViewList := provider.GetProviderViewOptions(apiClient, latestProviders, ctx)
 
 		selectedProvider, err := provider_view.GetProviderFromPrompt(providerViewList, "Choose a Provider", false)
@@ -82,6 +85,9 @@ var TargetSetCmd = &cobra.Command{
 		}
 
 		if selectedProvider.Installed != nil && !*selectedProvider.Installed {
+			if providersManifest == nil {
+				log.Fatal("Could not get providers manifest")
+			}
 			err = provider.InstallProvider(apiClient, *selectedProvider, providersManifest)
 			if err != nil {
 				log.Fatal(err)
