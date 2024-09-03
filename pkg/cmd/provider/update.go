@@ -96,7 +96,7 @@ func updateProvider(providerName string, providersManifest *manager.ProvidersMan
 		version = *latest
 	}
 
-	downloadUrls := ConvertToStringMap(version.DownloadUrls)
+	downloadUrls := ConvertOSToStringMap(version.DownloadUrls)
 
 	res, err := apiClient.ProviderAPI.InstallProviderExecute(apiclient.ApiInstallProviderRequest{}.Provider(apiclient.InstallProviderRequest{
 		Name:         providerName,

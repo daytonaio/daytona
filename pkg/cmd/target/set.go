@@ -66,7 +66,7 @@ var TargetSetCmd = &cobra.Command{
 
 			latestProviders = provider.GetProviderListFromManifest(providersManifestLatest)
 		} else {
-			fmt.Println("Could not get providers manifest")
+			fmt.Println("Could not get provider manifest. Can't check for new providers to install")
 		}
 
 		providerViewList := provider.GetProviderViewOptions(apiClient, latestProviders, ctx)
