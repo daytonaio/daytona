@@ -20,3 +20,10 @@ func (w *InfoLogWriter) Write(p []byte) (n int, err error) {
 	log.Info(string(p))
 	return len(p), nil
 }
+
+type TraceLogWriter struct{}
+
+func (w *TraceLogWriter) Write(p []byte) (n int, err error) {
+	log.Trace(string(p))
+	return len(p), nil
+}
