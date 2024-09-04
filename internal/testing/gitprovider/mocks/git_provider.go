@@ -91,8 +91,8 @@ func (m *MockGitProvider) UnregisterPrebuildWebhook(repo *gitprovider.GitReposit
 	return args.Error(0)
 }
 
-func (m *MockGitProvider) GetCommitsRange(repo *gitprovider.GitRepository, owner string, initialSha string, currentSha string) (int, error) {
-	args := m.Called(repo, owner, initialSha, currentSha)
+func (m *MockGitProvider) GetCommitsRange(repo *gitprovider.GitRepository, initialSha string, currentSha string) (int, error) {
+	args := m.Called(repo, initialSha, currentSha)
 	return args.Int(0), args.Error(1)
 }
 

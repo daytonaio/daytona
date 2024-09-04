@@ -288,7 +288,7 @@ func (s *ProjectConfigService) ProcessGitEvent(data gitprovider.GitEventData) er
 			continue
 		}
 
-		commitsRange, err := gitProvider.GetCommitsRange(repo, data.Owner, newestBuild.Repository.Sha, data.Sha)
+		commitsRange, err := gitProvider.GetCommitsRange(repo, newestBuild.Repository.Sha, data.Sha)
 		if err != nil {
 			return err
 		}

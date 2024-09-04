@@ -424,10 +424,10 @@ func (g *GitHubGitProvider) UnregisterPrebuildWebhook(repo *GitRepository, id st
 	return err
 }
 
-func (g *GitHubGitProvider) GetCommitsRange(repo *GitRepository, owner string, initialSha string, currentSha string) (int, error) {
+func (g *GitHubGitProvider) GetCommitsRange(repo *GitRepository, initialSha string, currentSha string) (int, error) {
 	client := g.getApiClient()
 
-	commits, _, err := client.Repositories.CompareCommits(context.Background(), owner, repo.Name, initialSha, currentSha)
+	commits, _, err := client.Repositories.CompareCommits(context.Background(), repo.Owner, repo.Name, initialSha, currentSha)
 	if err != nil {
 		return 0, err
 	}

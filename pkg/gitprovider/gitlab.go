@@ -524,7 +524,7 @@ func (g *GitLabGitProvider) UnregisterPrebuildWebhook(repo *GitRepository, hookI
 	return nil
 }
 
-func (g *GitLabGitProvider) GetCommitsRange(repo *GitRepository, owner string, initialSha string, currentSha string) (int, error) {
+func (g *GitLabGitProvider) GetCommitsRange(repo *GitRepository, initialSha string, currentSha string) (int, error) {
 	client := g.getApiClient()
 
 	projectID := fmt.Sprintf("%s/%s", repo.Owner, repo.Name)
