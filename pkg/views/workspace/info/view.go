@@ -159,17 +159,27 @@ func getInfoLineGitStatus(key string, status *apiclient.GitStatus) string {
 	output += propertyNameStyle.Foreground(views.Gray).Render(fmt.Sprintf("%-*s", propertyNameWidth, status.CurrentBranch))
 
 	changesOutput := ""
-	if status.FileStatus == nil {
-		return output + "\n"
+
+	if status.FileStatus != nil {
+		filesNum := len(status.FileStatus)
+		if filesNum == 1 {
+			changesOutput = " (1 uncommitted change)"
+		} else if filesNum > 1 {
+			changesOutput = fmt.Sprintf(" (%d uncommitted changes)", filesNum)
+		}
 	}
 
-	filesNum := len(status.FileStatus)
-	if filesNum == 1 {
-		changesOutput = " (" + fmt.Sprint(filesNum) + " uncommited change)"
-	} else if filesNum > 1 {
-		changesOutput = " (" + fmt.Sprint(filesNum) + " uncommited changes)"
+	unpushedOutput := ""
+	if status.UnpushedCommits != nil {
+		unpushedCommitsNum := *status.UnpushedCommits
+		if unpushedCommitsNum == 1 {
+			unpushedOutput = " (1 unpushed commit)"
+		} else if unpushedCommitsNum > 1 {
+			unpushedOutput = fmt.Sprintf(" (%d unpushed commits)", unpushedCommitsNum)
+		}
 	}
-	output += changesOutput + propertyValueStyle.Foreground(views.Light).Render("\n")
+
+	output += changesOutput + unpushedOutput + propertyValueStyle.Foreground(views.Light).Render("\n")
 
 	return output
 }

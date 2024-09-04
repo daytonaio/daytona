@@ -40,8 +40,9 @@ type ProjectState struct {
 } // @name ProjectState
 
 type GitStatus struct {
-	CurrentBranch string        `json:"currentBranch" validate:"required"`
-	Files         []*FileStatus `json:"fileStatus" validate:"required"`
+	CurrentBranch   string        `json:"currentBranch" validate:"required"`
+	Files           []*FileStatus `json:"fileStatus" validate:"required"`
+	UnpushedCommits int           `json:"unpushedCommits" validate:"optional"`
 } // @name GitStatus
 
 type FileStatus struct {

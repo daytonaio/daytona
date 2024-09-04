@@ -346,6 +346,8 @@ definitions:
         items:
           $ref: '#/definitions/FileStatus'
         type: array
+      unpushedCommits:
+        type: integer
     required:
     - currentBranch
     - fileStatus

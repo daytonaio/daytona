@@ -30,8 +30,9 @@ type FileStatusDTO struct {
 }
 
 type GitStatusDTO struct {
-	CurrentBranch string           `json:"currentBranch"`
-	Files         []*FileStatusDTO `json:"fileStatus"`
+	CurrentBranch   string           `json:"currentBranch"`
+	Files           []*FileStatusDTO `json:"fileStatus"`
+	UnpushedCommits *int32           `json:"unpushedCommits,omitempty"`
 }
 
 type ProjectStateDTO struct {
@@ -117,6 +118,11 @@ func ToGitStatusDTO(status *project.GitStatus) *GitStatusDTO {
 		statusDTO.Files = append(statusDTO.Files, ToFileStatusDTO(file))
 	}
 
+	if status.UnpushedCommits != 0 {
+		value := int32(status.UnpushedCommits)
+		statusDTO.UnpushedCommits = &value
+	}
+
 	return statusDTO
 }
 
@@ -186,6 +192,10 @@ func ToGitStatus(statusDTO *GitStatusDTO) *project.GitStatus {
 
 	for _, file := range statusDTO.Files {
 		status.Files = append(status.Files, ToFileStatus(file))
+	}
+
+	if statusDTO.UnpushedCommits != nil {
+		status.UnpushedCommits = int(*statusDTO.UnpushedCommits)
 	}
 
 	return status
