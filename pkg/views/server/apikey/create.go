@@ -31,7 +31,7 @@ func ApiKeyCreationView(name *string, clientKeys []apiclient.ApiKey) {
 					return nil
 				}),
 		),
-	).WithTheme(views.GetCustomTheme())
+	).WithHeight(5).WithTheme(views.GetCustomTheme())
 
 	err := form.Run()
 	if err != nil {

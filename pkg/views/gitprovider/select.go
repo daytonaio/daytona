@@ -65,7 +65,7 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig
 				Options(
 					otherGitProviderOptions...,
 				).
-				Value(&gitProviderAddView.Id)).WithHeight(11).WithHideFunc(func() bool {
+				Value(&gitProviderAddView.Id)).WithHeight(12).WithHideFunc(func() bool {
 			return gitProviderAddView.Id != "other"
 		}),
 	).WithTheme(views.GetCustomTheme())
@@ -86,7 +86,7 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig
 					}
 					return nil
 				}),
-		).WithHideFunc(func() bool {
+		).WithHeight(5).WithHideFunc(func() bool {
 			return isDeleting || !providerRequiresUsername(gitProviderAddView.Id)
 		}),
 		huh.NewGroup(
@@ -100,7 +100,7 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig
 					}
 					return nil
 				}),
-		).WithHideFunc(func() bool {
+		).WithHeight(6).WithHideFunc(func() bool {
 			return isDeleting || !providerRequiresApiUrl(gitProviderAddView.Id)
 		}),
 		huh.NewGroup(
