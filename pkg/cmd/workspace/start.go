@@ -149,6 +149,7 @@ var StartCmd = &cobra.Command{
 		}
 
 		if codeFlag {
+			s.Success()
 			ide_views.RenderIdeOpeningMessage(workspaceIdOrName, startProjectFlag, ideId, ideList)
 			err = openIDE(ideId, activeProfile, workspaceId, startProjectFlag, projectProviderMetadata)
 			if err != nil {
