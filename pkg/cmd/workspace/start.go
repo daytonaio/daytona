@@ -11,7 +11,6 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
-	"github.com/daytonaio/daytona/pkg/views"
 	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/leaanthony/spinner"
@@ -28,7 +27,6 @@ const (
 
 var startProjectFlag string
 var allFlag bool
-var codeFlag bool
 
 var StartCmd = &cobra.Command{
 	Use:     "start [WORKSPACE]",
