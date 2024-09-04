@@ -56,7 +56,7 @@ type GitProvider interface {
 	RegisterPrebuildWebhook(repo *GitRepository, endpointUrl string) (string, error)
 	GetPrebuildWebhook(repo *GitRepository, endpointUrl string) (*string, error)
 	UnregisterPrebuildWebhook(repo *GitRepository, id string) error
-	GetCommitsRange(repo *GitRepository, owner string, initialSha string, currentSha string) (int, error)
+	GetCommitsRange(repo *GitRepository, initialSha string, currentSha string) (int, error)
 	ParseEventData(request *http.Request) (*GitEventData, error)
 }
 
@@ -175,7 +175,7 @@ func (g *AbstractGitProvider) UnregisterPrebuildWebhook(repo *GitRepository, id 
 	return errors.New("prebuilds not yet implemented for this git provider")
 }
 
-func (g *AbstractGitProvider) GetCommitsRange(repo *GitRepository, owner string, initialSha string, currentSha string) (int, error) {
+func (g *AbstractGitProvider) GetCommitsRange(repo *GitRepository, initialSha string, currentSha string) (int, error) {
 	return 0, errors.New("prebuilds not yet implemented for this git provider")
 }
 
