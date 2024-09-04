@@ -7,8 +7,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
+	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
+	"github.com/daytonaio/daytona/pkg/views"
+	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/leaanthony/spinner"
 	log "github.com/sirupsen/logrus"
@@ -24,6 +28,7 @@ const (
 
 var startProjectFlag string
 var allFlag bool
+var codeFlag bool
 
 var StartCmd = &cobra.Command{
 	Use:     "start [WORKSPACE]",
@@ -35,8 +40,13 @@ var StartCmd = &cobra.Command{
 		s.Start()
 		defer s.Success()
 
-		var workspaceId string
+		var workspaceIdOrName string
 		var message string
+		var activeProfile config.Profile
+		var ideId string
+		var workspaceId string
+		var ideList []config.Ide
+		projectProviderMetadata := ""
 
 		if allFlag {
 			s.UpdateMessage("Starting all workspaces...")
@@ -74,42 +84,79 @@ var StartCmd = &cobra.Command{
 			}
 
 			if len(workspaceList) == 0 {
-				s.Error("No workspaces available to stop.")
+				s.Error("No workspaces available to start.")
 				return
 			}
 
-			s.UpdateMessage("Selecting a workspace to stop...")
+			s.UpdateMessage("Selecting a workspace to start...")
 
 			workspace := selection.GetWorkspaceFromPrompt(workspaceList, "Start")
 			if workspace == nil {
 				s.Error("No workspace selected.")
 				return
 			}
-			workspaceId = workspace.Name
+			workspaceIdOrName = workspace.Name
 		} else {
-			workspaceId = args[0]
+			workspaceIdOrName = args[0]
+		}
+
+		if codeFlag {
+			c, err := config.GetConfig()
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			ideList = config.GetIdeList()
+
+			activeProfile, err = c.GetActiveProfile()
+			if err != nil {
+				log.Fatal(err)
+			}
+			ideId = c.DefaultIdeId
+
+			wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceIdOrName).Execute()
+			if err != nil {
+				log.Fatal(apiclient.HandleErrorResponse(res, err))
+			}
+			workspaceId = wsInfo.Id
+			if startProjectFlag == "" {
+				startProjectFlag = wsInfo.Projects[0].Name
+			}
+			if ideId != "ssh" {
+				projectProviderMetadata, err = workspace_util.GetProjectProviderMetadata(wsInfo, wsInfo.Projects[0].Name)
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
 		}
 
 		if startProjectFlag == "" {
-			s.UpdateMessage(fmt.Sprintf("Starting workspace '%s'...", workspaceId))
-			res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspaceId).Execute()
+			s.UpdateMessage(fmt.Sprintf("Starting workspace '%s'...", workspaceIdOrName))
+			res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspaceIdOrName).Execute()
 			if err != nil {
-				s.Error(fmt.Sprintf("Failed to start workspace '%s'.", workspaceId))
+				s.Error(fmt.Sprintf("Failed to start workspace '%s'.", workspaceIdOrName))
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
-			message = fmt.Sprintf("Workspace '%s' started successfully.", workspaceId)
+			message = fmt.Sprintf("Workspace '%s' started successfully.", workspaceIdOrName)
 			s.UpdateMessage(message)
 		} else {
-			s.UpdateMessage(fmt.Sprintf("Starting project '%s' in workspace '%s'...", startProjectFlag, workspaceId))
-			res, err := apiClient.WorkspaceAPI.StartProject(ctx, workspaceId, startProjectFlag).Execute()
+			s.UpdateMessage(fmt.Sprintf("Starting project '%s' in workspace '%s'...", startProjectFlag, workspaceIdOrName))
+			res, err := apiClient.WorkspaceAPI.StartProject(ctx, workspaceIdOrName, startProjectFlag).Execute()
 			if err != nil {
-				s.Error(fmt.Sprintf("Failed to start project '%s' in workspace '%s'.", startProjectFlag, workspaceId))
+				s.Error(fmt.Sprintf("Failed to start project '%s' in workspace '%s'.", startProjectFlag, workspaceIdOrName))
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
-			message = fmt.Sprintf("Project '%s' in workspace '%s' started successfully.", startProjectFlag, workspaceId)
+			message = fmt.Sprintf("Project '%s' in workspace '%s' started successfully.", startProjectFlag, workspaceIdOrName)
 			s.UpdateMessage(message)
 		}
 
+		if codeFlag {
+			ide_views.RenderIdeOpeningMessage(workspaceIdOrName, startProjectFlag, ideId, ideList)
+			err = openIDE(ideId, activeProfile, workspaceId, startProjectFlag, projectProviderMetadata)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) != 0 {
@@ -123,6 +170,7 @@ var StartCmd = &cobra.Command{
 func init() {
 	StartCmd.PersistentFlags().StringVarP(&startProjectFlag, "project", "p", "", "Start a single project in the workspace (project name)")
 	StartCmd.PersistentFlags().BoolVarP(&allFlag, "all", "a", false, "Start all workspaces")
+	StartCmd.PersistentFlags().BoolVarP(&codeFlag, "code", "c", false, "Open the workspace in the IDE after workspace start")
 
 	err := StartCmd.RegisterFlagCompletionFunc("project", getProjectNameCompletions)
 	if err != nil {
@@ -144,13 +192,13 @@ func startAllWorkspaces(s *spinner.Spinner) error {
 
 	for _, workspace := range workspaceList {
 		s.UpdateMessage(fmt.Sprintf("Starting workspace '%s'...", workspace.Name))
-		s.Success(fmt.Sprintf("Workspace '%s' started successfully", workspace.Name))
 		s.Start()
 		res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspace.Id).Execute()
 		if err != nil {
 			log.Errorf("Failed to start workspace %s: %v", workspace.Name, apiclient.HandleErrorResponse(res, err))
 			continue
 		}
+		s.Success(fmt.Sprintf("Workspace '%s' started successfully", workspace.Name))
 	}
 	return nil
 }

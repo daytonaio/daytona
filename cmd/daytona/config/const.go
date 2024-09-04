@@ -131,6 +131,10 @@ func GetWebhookEventHeaderKeyFromGitProvider(providerId string) string {
 	switch providerId {
 	case "github":
 		return "X-GitHub-Event"
+	case "gitlab":
+		fallthrough
+	case "gitlab-self-managed":
+		return "X-Gitlab-Event"
 	default:
 		return ""
 	}
