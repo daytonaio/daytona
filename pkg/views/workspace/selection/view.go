@@ -146,10 +146,10 @@ func (d ItemDelegate[T]) Render(w io.Writer, m list.Model, index int, listItem l
 
 	baseStyles := lipgloss.NewStyle().Padding(0, 0, 0, 2)
 
-	title := baseStyles.Copy().Render(i.Title())
+	title := baseStyles.Render(i.Title())
 	idWithTargetString := fmt.Sprintf("%s (%s)", i.Id(), i.Target())
-	idWithTarget := baseStyles.Copy().Foreground(views.Gray).Render(idWithTargetString)
-	description := baseStyles.Copy().Render(i.Description())
+	idWithTarget := baseStyles.Foreground(views.Gray).Render(idWithTargetString)
+	description := baseStyles.Render(i.Description())
 
 	// Add the created/updated time if it's available
 	timeWidth := m.Width() - baseStyles.GetHorizontalFrameSize() - lipgloss.Width(title)
@@ -165,10 +165,10 @@ func (d ItemDelegate[T]) Render(w io.Writer, m list.Model, index int, listItem l
 
 	// Adjust styles as the user moves through the menu
 	if isSelected {
-		title = selectedStyles.Copy().Foreground(views.Green).Render(i.Title())
-		idWithTarget = selectedStyles.Copy().Foreground(views.Gray).Render(idWithTargetString)
-		description = selectedStyles.Copy().Foreground(views.DimmedGreen).Render(i.Description())
-		timeString = timeStyles.Copy().Foreground(views.DimmedGreen).Render(timeString)
+		title = selectedStyles.Foreground(views.Green).Render(i.Title())
+		idWithTarget = selectedStyles.Foreground(views.Gray).Render(idWithTargetString)
+		description = selectedStyles.Foreground(views.DimmedGreen).Render(i.Description())
+		timeString = timeStyles.Foreground(views.DimmedGreen).Render(timeString)
 	}
 
 	// Render to the terminal

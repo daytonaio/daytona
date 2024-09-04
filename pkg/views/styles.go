@@ -22,6 +22,7 @@ var (
 	Dark        = lipgloss.AdaptiveColor{Light: "#fff", Dark: "#000"}
 	Gray        = lipgloss.AdaptiveColor{Light: "243", Dark: "243"}
 	LightGray   = lipgloss.AdaptiveColor{Light: "#828282", Dark: "#828282"}
+	Red         = lipgloss.AdaptiveColor{Light: "#FF4672", Dark: "#ED567A"}
 )
 
 var (
@@ -37,7 +38,7 @@ var (
 	InactiveStyle       = lipgloss.NewStyle().Foreground(Orange)
 	DefaultRowDataStyle = lipgloss.NewStyle().Foreground(Gray)
 	BaseCellStyle       = lipgloss.NewRenderer(os.Stdout).NewStyle().Padding(0, 4, 1, 0)
-	TableHeaderStyle    = BaseCellStyle.Copy().Foreground(LightGray).Bold(false).Padding(0).MarginRight(4)
+	TableHeaderStyle    = BaseCellStyle.Foreground(LightGray).Bold(false).Padding(0).MarginRight(4)
 )
 
 var LogPrefixColors = []lipgloss.AdaptiveColor{
@@ -55,7 +56,7 @@ func GetStyledSelectList(items []list.Item) list.Model {
 		Bold(true).
 		Padding(0, 0, 0, 1)
 
-	d.Styles.SelectedDesc = d.Styles.SelectedTitle.Copy().Foreground(DimmedGreen).Bold(false)
+	d.Styles.SelectedDesc = d.Styles.SelectedTitle.Foreground(DimmedGreen).Bold(false)
 
 	l := list.New(items, d, 0, 0)
 
@@ -92,6 +93,9 @@ func GetCustomTheme() *huh.Theme {
 	t.Focused.SelectSelector = t.Focused.SelectSelector.Foreground(Green)
 	t.Focused.SelectedOption = t.Focused.SelectedOption.Foreground(Green)
 
+	t.Focused.ErrorIndicator = t.Focused.ErrorIndicator.Foreground(Red)
+	t.Focused.ErrorMessage = t.Focused.ErrorMessage.Foreground(Red)
+
 	t.Focused.Base = t.Focused.Base.BorderForeground(Green)
 	t.Focused.Base = t.Focused.Base.BorderBottomForeground(Green)
 
@@ -108,24 +112,24 @@ func GetInitialCommandTheme() *huh.Theme {
 	newTheme.Blurred.Title = newTheme.Focused.Title
 
 	b := &newTheme.Blurred
-	b.FocusedButton.Background(Green)
-	b.FocusedButton.Bold(true)
-	b.TextInput.Prompt.Foreground(Green)
-	b.TextInput.Cursor.Foreground(Green)
-	b.SelectSelector.Foreground(Green)
+	b.FocusedButton = b.FocusedButton.Background(Green)
+	b.FocusedButton = b.FocusedButton.Bold(true)
+	b.TextInput.Prompt = b.TextInput.Prompt.Foreground(Green)
+	b.TextInput.Cursor = b.TextInput.Cursor.Foreground(Green)
+	b.SelectSelector = b.SelectSelector.Foreground(Green)
 
 	f := &newTheme.Focused
 	f.Base = f.Base.BorderForeground(lipgloss.Color("fff"))
-	f.Title.Foreground(Green).Bold(true)
-	f.FocusedButton.Bold(true)
-	f.FocusedButton.Background(Green)
-	f.TextInput.Prompt.Foreground(Green)
-	f.TextInput.Cursor.Foreground(Light)
-	f.SelectSelector.Foreground(Green)
+	f.Title = f.Title.Foreground(Green).Bold(true)
+	f.FocusedButton = f.FocusedButton.Bold(true)
+	f.FocusedButton = f.FocusedButton.Background(Green)
+	f.TextInput.Prompt = f.TextInput.Prompt.Foreground(Green)
+	f.TextInput.Cursor = f.TextInput.Cursor.Foreground(Light)
+	f.SelectSelector = f.SelectSelector.Foreground(Green)
 
-	f.Base.UnsetMarginLeft()
-	f.Base.UnsetPaddingLeft()
-	f.Base.BorderLeft(false)
+	f.Base = f.Base.UnsetMarginLeft()
+	f.Base = f.Base.UnsetPaddingLeft()
+	f.Base = f.Base.BorderLeft(false)
 
 	f.SelectedOption = lipgloss.NewStyle().Foreground(Green)
 

@@ -39,7 +39,7 @@ func selectBuildPrompt(builds []apiclient.Build, actionVerb string, choiceChan c
 		Bold(true).
 		Padding(0, 0, 0, 1)
 
-	d.Styles.SelectedDesc = d.Styles.SelectedTitle.Copy().Foreground(views.DimmedGreen)
+	d.Styles.SelectedDesc = d.Styles.SelectedTitle.Foreground(views.DimmedGreen)
 
 	l := list.New(items, d, 0, 0)
 
