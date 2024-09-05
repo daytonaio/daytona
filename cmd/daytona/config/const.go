@@ -122,10 +122,6 @@ func GetPrebuildScopesFromGitProviderId(providerId string) string {
 		fallthrough
 	case "github-enterprise-server":
 		return "admin:repo_hook"
-	case "gitlab":
-		fallthrough
-	case "gitlab-self-managed":
-		return "api,read_repository,write_repository"
 	case "bitbucket":
 		return "webhook"
 	default:

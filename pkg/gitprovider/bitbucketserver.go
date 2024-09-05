@@ -246,7 +246,7 @@ func (g *BitbucketServerGitProvider) GetUser() (*GitUser, error) {
 
 	username := res.Header.Get("X-Ausername")
 	if username == "" {
-		return nil, fmt.Errorf("header X-Ausername is missing")
+		return nil, fmt.Errorf("X-Ausername header is missing")
 	}
 
 	user, err := client.DefaultApi.GetUser(username)
