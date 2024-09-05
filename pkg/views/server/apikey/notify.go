@@ -32,18 +32,25 @@ func Render(key, apiUrl string) {
 
 	output += "You can connect to the Daytona Server from a client machine by running:"
 
-	formattedCommand := lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("daytona profile add -a %s -k %s", apiUrl, key))
-	command := lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("daytona profile add -a %s -k %s", apiUrl, key))
-	clipboard.WriteAll(fmt.Sprintf("daytona profile add -a %s -k %s", apiUrl, key))
+	formattedCommand := lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("daytona profile add -a \\\n%s \\\n-k %s", apiUrl, key))
+	command := fmt.Sprintf("daytona profile add -a %s -k %s", apiUrl, key)
+
+	clipboardMessage := copyToClipboard(command)
 
 	if terminalWidth >= minimumLayoutWidth {
-		output += "\n\n" + formattedCommand
-		output += "\n\n" +"The following command is copied to your clipboard."
+		output += "\n\n" + formattedCommand + "\n\n" + clipboardMessage
 		views.RenderContainerLayout(views.GetInfoMessage(output))
-		} else {
-			views.RenderContainerLayout(views.GetInfoMessage(output))
-			fmt.Println(command + "\n\n")
-			fmt.Println("The following command is copied to your clipboard.")
-		}
+	} else {
+		views.RenderContainerLayout(views.GetInfoMessage(output))
+		fmt.Println(formattedCommand + "\n\n")
+		fmt.Println(clipboardMessage)
+	}
+}
 
+func copyToClipboard(command string) string {
+	err := clipboard.WriteAll(command)
+	if err != nil {
+		return "Error: Unable to copy the command to the clipboard. Please copy it manually."
+	}
+	return "The command has been successfully copied to your clipboard."
 }
