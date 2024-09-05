@@ -158,7 +158,7 @@ func TestWorkspaceService(t *testing.T) {
 	})
 
 	t.Run("GetWorkspace", func(t *testing.T) {
-		provisioner.On("GetWorkspaceInfo", mock.Anything, &target).Return(&workspaceInfo, nil)
+		provisioner.On("GetWorkspaceInfo", mock.Anything, mock.Anything, &target).Return(&workspaceInfo, nil)
 
 		workspace, err := service.GetWorkspace(context.TODO(), createWorkspaceDto.Id)
 
@@ -176,9 +176,9 @@ func TestWorkspaceService(t *testing.T) {
 
 	t.Run("ListWorkspaces", func(t *testing.T) {
 		verbose := false
-		provisioner.On("GetWorkspaceInfo", mock.Anything, &target).Return(&workspaceInfo, nil)
+		provisioner.On("GetWorkspaceInfo", mock.Anything, mock.Anything, &target).Return(&workspaceInfo, nil)
 
-		workspaces, err := service.ListWorkspaces(verbose)
+		workspaces, err := service.ListWorkspaces(context.TODO(), verbose)
 
 		require.Nil(t, err)
 		require.Len(t, workspaces, 1)
@@ -190,9 +190,9 @@ func TestWorkspaceService(t *testing.T) {
 
 	t.Run("ListWorkspaces - verbose", func(t *testing.T) {
 		verbose := true
-		provisioner.On("GetWorkspaceInfo", mock.Anything, &target).Return(&workspaceInfo, nil)
+		provisioner.On("GetWorkspaceInfo", mock.Anything, mock.Anything, &target).Return(&workspaceInfo, nil)
 
-		workspaces, err := service.ListWorkspaces(verbose)
+		workspaces, err := service.ListWorkspaces(context.TODO(), verbose)
 
 		require.Nil(t, err)
 		require.Len(t, workspaces, 1)
