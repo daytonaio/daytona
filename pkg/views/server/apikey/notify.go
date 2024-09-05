@@ -38,11 +38,12 @@ func Render(key, apiUrl string) {
 	clipboardMessage := copyToClipboard(command)
 
 	if terminalWidth >= minimumLayoutWidth {
-		output += "\n\n" + formattedCommand + "\n\n" + clipboardMessage
+		output += "\n\n" + formattedCommand
+		output += "\n\n" + clipboardMessage
 		views.RenderContainerLayout(views.GetInfoMessage(output))
 	} else {
 		views.RenderContainerLayout(views.GetInfoMessage(output))
-		fmt.Println(formattedCommand + "\n\n")
+		fmt.Println(command + "\n\n")
 		fmt.Println(clipboardMessage)
 	}
 }
