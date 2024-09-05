@@ -255,7 +255,7 @@ func (g *BitbucketServerGitProvider) GetUser() (*GitUser, error) {
 	}
 
 	if user.Values == nil {
-		return nil, fmt.Errorf("User values are nil")
+		return nil, fmt.Errorf("user values are nil")
 	}
 	var userInfo bitbucketv1.User
 	err = mapstructure.Decode(user.Values, &userInfo)
@@ -292,7 +292,7 @@ func (g *BitbucketServerGitProvider) GetLastCommitSha(staticContext *StaticGitCo
 	}
 
 	if len(commits.Values) == 0 {
-		return "", fmt.Errorf("No commits found")
+		return "", fmt.Errorf("no commits found")
 	}
 
 	commitList, err := bitbucketv1.GetCommitsResponse(commits)
@@ -420,7 +420,7 @@ func (g *BitbucketServerGitProvider) ParseStaticGitContext(repoUrl string) (*Sta
 	matches := re.FindStringSubmatch(repoUrl)
 
 	if len(matches) < 4 {
-		return nil, fmt.Errorf("Could not extract project key and repo name from URL: %s", repoUrl)
+		return nil, fmt.Errorf("could not extract project key and repo name from URL: %s", repoUrl)
 	}
 
 	baseUrl := matches[1]
@@ -501,5 +501,5 @@ func (g *BitbucketServerGitProvider) GetDefaultBranch(staticContext *StaticGitCo
 		}
 	}
 
-	return nil, fmt.Errorf("Default branch not found")
+	return nil, fmt.Errorf("default branch not found")
 }
