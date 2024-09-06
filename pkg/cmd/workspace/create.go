@@ -214,7 +214,6 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-
 		autoConfirm, _ := cmd.Flags().GetBool("yes")
 
 		err = openIDE(chosenIdeId, activeProfile, createdWorkspace.Id, wsInfo.Projects[0].Name, providerMetadata, autoConfirm)
