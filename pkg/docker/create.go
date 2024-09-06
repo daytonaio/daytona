@@ -35,11 +35,15 @@ func (d *DockerClient) CreateWorkspace(workspace *workspace.Workspace, workspace
 }
 
 func (d *DockerClient) CreateProject(opts *CreateProjectOptions) error {
+	pulledImages := map[string]bool{}
+
 	// TODO: The image should be configurable
 	err := d.PullImage("daytonaio/workspace-project", nil, opts.LogWriter)
 	if err != nil {
 		return err
 	}
+	pulledImages["daytonaio/workspace-project"] = true
+	pulledImages["daytonaio/workspace-project:latest"] = true
 
 	err = d.cloneProjectRepository(opts)
 	if err != nil {
@@ -56,7 +60,7 @@ func (d *DockerClient) CreateProject(opts *CreateProjectOptions) error {
 		_, _, err := d.CreateFromDevcontainer(d.toCreateDevcontainerOptions(opts, true))
 		return err
 	case detect.BuilderTypeImage:
-		return d.createProjectFromImage(opts)
+		return d.createProjectFromImage(opts, pulledImages)
 	default:
 		return fmt.Errorf("unknown builder type: %s", builderType)
 	}

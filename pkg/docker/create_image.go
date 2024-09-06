@@ -14,11 +14,16 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (d *DockerClient) createProjectFromImage(opts *CreateProjectOptions) error {
+func (d *DockerClient) createProjectFromImage(opts *CreateProjectOptions, pulledImages map[string]bool) error {
+	if pulledImages[opts.Project.Image] {
+		return d.initProjectContainer(opts)
+	}
+
 	err := d.PullImage(opts.Project.Image, opts.Cr, opts.LogWriter)
 	if err != nil {
 		return err
 	}
+	pulledImages[opts.Project.Image] = true
 
 	return d.initProjectContainer(opts)
 }
