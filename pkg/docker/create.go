@@ -35,6 +35,7 @@ func (d *DockerClient) CreateWorkspace(workspace *workspace.Workspace, workspace
 }
 
 func (d *DockerClient) CreateProject(opts *CreateProjectOptions) error {
+	// pulledImages map keeps track of pulled images for project creation in order to avoid pulling the same image multiple times
 	pulledImages := map[string]bool{}
 
 	// TODO: The image should be configurable
