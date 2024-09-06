@@ -12,11 +12,13 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/google/uuid"
 	"github.com/microsoft/azure-devops-go-api/azuredevops"
 	"github.com/microsoft/azure-devops-go-api/azuredevops/core"
 	"github.com/microsoft/azure-devops-go-api/azuredevops/git"
 	"github.com/microsoft/azure-devops-go-api/azuredevops/location"
+	"github.com/microsoft/azure-devops-go-api/azuredevops/servicehooks"
 )
 
 type AzureDevOpsGitProvider struct {
@@ -401,6 +403,77 @@ func (g *AzureDevOpsGitProvider) ParseStaticGitContext(repoUrl string) (*StaticG
 	return nil, errors.New("can not parse git URL: " + repoUrl)
 }
 
+func (g *AzureDevOpsGitProvider) GetPrebuildWebhook(repo *GitRepository, endpointUrl string) (*string, error) {
+	connection := azuredevops.NewPatConnection(g.baseApiUrl, g.token)
+	ctx := context.Background()
+
+	servicehooksClient := servicehooks.NewClient(ctx, connection)
+
+	hooks, err := servicehooksClient.ListSubscriptions(ctx, servicehooks.ListSubscriptionsArgs{
+		ConsumerId: util.Pointer("webHooks"),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, hook := range *hooks {
+		if hook.Url == &endpointUrl {
+			return util.Pointer(hook.Id.String()), nil
+		}
+	}
+
+	return nil, nil
+}
+
+func (g *AzureDevOpsGitProvider) RegisterPrebuildWebhook(repo *GitRepository, endpointUrl string) (string, error) {
+	connection := azuredevops.NewPatConnection(g.baseApiUrl, g.token)
+	ctx := context.Background()
+
+	servicehooksClient := servicehooks.NewClient(ctx, connection)
+	subscription := servicehooks.Subscription{
+		PublisherId:      util.Pointer("tfs"),
+		EventType:        util.Pointer("build.complete"),
+		ConsumerId:       util.Pointer("webHooks"),
+		ConsumerActionId: util.Pointer("httpRequest"),
+		ResourceVersion:  util.Pointer("1.0"),
+		ConsumerInputs: &map[string]string{
+			"url": endpointUrl,
+		},
+		PublisherInputs: &map[string]string{
+			"buildStatus": "completed",
+		},
+	}
+
+	hook, err := servicehooksClient.CreateSubscription(ctx, servicehooks.CreateSubscriptionArgs{
+		Subscription: &subscription,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return hook.Id.String(), nil
+}
+
+func (g *AzureDevOpsGitProvider) UnregisterPrebuildWebhook(repo *GitRepository, id string) error {
+	connection := azuredevops.NewPatConnection(g.baseApiUrl, g.token)
+	ctx := context.Background()
+
+	servicehooksClient := servicehooks.NewClient(ctx, connection)
+	hookUUID, err := uuid.Parse(id)
+	if err != nil {
+		return err
+	}
+
+	err = servicehooksClient.DeleteSubscription(ctx, servicehooks.DeleteSubscriptionArgs{
+		SubscriptionId: &hookUUID,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (g *AzureDevOpsGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*string, error) {
 	client, err := g.getGitClient()
 	if err != nil {
@@ -450,17 +523,21 @@ func (g *AzureDevOpsGitProvider) parseAzureDevopsHttpGitUrl(gitURL string) (*Sta
 	}
 
 	repo := &StaticGitContext{}
-	urlPattern := `^(https?://)?(?P<source>[^/]+)/(?P<org>[^/]+)(?:/(?P<project>[^/_]+))?/_git/(?P<repo>[^/?]+)(?:\?.*)?(?:/.*)?$`
-	urlPatternRegex := regexp.MustCompile(urlPattern)
-	matches := urlPatternRegex.FindStringSubmatch(gitURL)
-	if len(matches) < 6 {
+	urlPattern := `^https:\/\/[a-zA-Z0-9]+@dev\.azure\.com\/[a-zA-Z0-9]+\/[a-zA-Z0-9_]+\/_git\/[a-zA-Z0-9_]+$`
+	_, err = regexp.MatchString(urlPattern, gitURL)
+	if err != nil {
+		return nil, err
+	}
+
+	urlSections := strings.Split(gitURL, "/")
+	if len(urlSections) < 6 {
 		return nil, errors.New("cannot parse git URL: " + gitURL)
 	}
 
 	repo.Source = u.Host
-	repo.Owner = matches[3]
-	repo.Name = matches[5]
-	projectName := matches[4]
+	repo.Owner = urlSections[3]
+	repo.Name = urlSections[6]
+	projectName := urlSections[4]
 
 	urlPath := strings.TrimPrefix(u.Path, "/")
 
