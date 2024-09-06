@@ -5,9 +5,5 @@
       "testing"
     ]
   },
-  "go.testTags": "testing",
-  "cSpell.words": [
-    "CUSTOMIMAGE",
-    "DEVCONTAINER"
-  ]
+  "go.testTags": "testing"
 }
