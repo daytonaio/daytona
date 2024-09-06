@@ -116,8 +116,7 @@ var CodeCmd = &cobra.Command{
 			}
 		}
 
-
-    autoConfirm, _ := cmd.Flags().GetBool("yes")
+		autoConfirm, _ := cmd.Flags().GetBool("yes")
 		ideList := config.GetIdeList()
 		ide_views.RenderIdeOpeningMessage(workspace.Name, projectName, ideId, ideList)
 		if err := openIDE(ideId, activeProfile, workspaceId, projectName, providerMetadata, autoConfirm); err != nil {
@@ -196,7 +195,7 @@ func init() {
 	ideListStr := strings.Join(ids, ", ")
 	CodeCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", fmt.Sprintf("Specify the IDE (%s)", ideListStr))
 
-	CodeCmd.Flags().BoolP("yes", "y", false, "Automatically confirm any prompts")
+	CodeCmd.Flags().BoolVarP(&autoStartFlag, "yes", "y", false, "Automatically confirm any prompts")
 
 	CodeCmd.Flags().BoolVarP(&autoStartFlag, "auto-start", "a", false, "Automatically start the project if it is not running")
 }
