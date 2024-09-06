@@ -15,6 +15,7 @@ import (
 )
 
 // pulledImages map keeps track of pulled images for project creation in order to avoid pulling the same image multiple times
+// This is only an optimisation for images with tag 'latest'
 func (d *DockerClient) createProjectFromImage(opts *CreateProjectOptions, pulledImages map[string]bool) error {
 	if pulledImages[opts.Project.Image] {
 		return d.initProjectContainer(opts)
