@@ -123,7 +123,7 @@ func GetPrebuildScopesFromGitProviderId(providerId string) string {
 	case "github-enterprise-server":
 		return "admin:repo_hook"
 	case "bitbucket":
-		return "webhook"
+		return "webhooks"
 	default:
 		return ""
 	}
