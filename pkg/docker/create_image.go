@@ -14,11 +14,18 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (d *DockerClient) createProjectFromImage(opts *CreateProjectOptions) error {
+// pulledImages map keeps track of pulled images for project creation in order to avoid pulling the same image multiple times
+// This is only an optimisation for images with tag 'latest'
+func (d *DockerClient) createProjectFromImage(opts *CreateProjectOptions, pulledImages map[string]bool) error {
+	if pulledImages[opts.Project.Image] {
+		return d.initProjectContainer(opts)
+	}
+
 	err := d.PullImage(opts.Project.Image, opts.Cr, opts.LogWriter)
 	if err != nil {
 		return err
 	}
+	pulledImages[opts.Project.Image] = true
 
 	return d.initProjectContainer(opts)
 }

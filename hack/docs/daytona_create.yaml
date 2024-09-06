@@ -38,8 +38,6 @@ options:
       usage: Workspace with multiple projects/repos
     - name: name
       usage: Specify the workspace name
-    - name: provider
-      usage: Specify the provider (e.g. 'docker-provider')
     - name: target
       shorthand: t
       usage: Specify the target (e.g. 'local')

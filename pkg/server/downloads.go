@@ -33,8 +33,9 @@ func (s *Server) GetBinaryPath(binaryName, binaryVersion string) (string, error)
 	if *hostOs == binaryOs && binaryVersion == internal.Version {
 		executable, err := os.Executable()
 		if err == nil {
-			_, err := os.Stat(executable)
+			f, err := os.Open(executable)
 			if err == nil {
+				defer f.Close() // nolint: errcheck
 				return executable, nil
 			}
 		}

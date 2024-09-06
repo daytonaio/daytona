@@ -236,9 +236,11 @@ func getCmdTelemetryData(cmd *cobra.Command) map[string]interface{} {
 	}
 
 	calledAs := cmd.CalledAs()
-	return map[string]interface{}{
-		"command":   path,
-		"called_as": calledAs,
-		"source":    source,
-	}
+
+	data := telemetry.AdditionalData
+	data["command"] = path
+	data["called_as"] = calledAs
+	data["source"] = source
+
+	return data
 }
