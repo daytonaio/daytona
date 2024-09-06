@@ -99,7 +99,7 @@ var CodeCmd = &cobra.Command{
 		}
 
 		if !workspace_util.IsProjectRunning(workspace, projectName) {
-			wsRunningStatus, err := AutoStartWorkspace(autoStartFlag, workspace.Name, projectName)
+			wsRunningStatus, err := AutoStartWorkspace(workspace.Name, projectName)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -116,10 +116,10 @@ var CodeCmd = &cobra.Command{
 			}
 		}
 
-		autoConfirm, _ := cmd.Flags().GetBool("yes")
+		yesFlag, _ := cmd.Flags().GetBool("yes")
 		ideList := config.GetIdeList()
 		ide_views.RenderIdeOpeningMessage(workspace.Name, projectName, ideId, ideList)
-		if err := openIDE(ideId, activeProfile, workspaceId, projectName, providerMetadata, autoConfirm); err != nil {
+		if err := openIDE(ideId, activeProfile, workspaceId, projectName, providerMetadata, yesFlag); err != nil {
 			log.Fatal(err)
 		}
 	},
@@ -161,7 +161,7 @@ func selectWorkspaceProject(workspaceId string, profile *config.Profile) (*apicl
 	return nil, errors.New("no projects found in workspace")
 }
 
-func openIDE(ideId string, activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string, autoConfirm bool) error {
+func openIDE(ideId string, activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string, yesFlag bool) error {
 	switch ideId {
 	case "vscode":
 		return ide.OpenVSCode(activeProfile, workspaceId, projectName, projectProviderMetadata)
@@ -172,7 +172,7 @@ func openIDE(ideId string, activeProfile config.Profile, workspaceId string, pro
 	case "cursor":
 		return ide.OpenCursor(activeProfile, workspaceId, projectName, projectProviderMetadata)
 	case "jupyter":
-		return ide.OpenJupyterIDE(activeProfile, workspaceId, projectName, projectProviderMetadata, autoConfirm)
+		return ide.OpenJupyterIDE(activeProfile, workspaceId, projectName, projectProviderMetadata, yesFlag)
 	default:
 		_, ok := jetbrains.GetIdes()[jetbrains.Id(ideId)]
 		if ok {
@@ -184,7 +184,6 @@ func openIDE(ideId string, activeProfile config.Profile, workspaceId string, pro
 }
 
 var ideFlag string
-var autoStartFlag bool
 
 func init() {
 	ideList := config.GetIdeList()
@@ -195,13 +194,12 @@ func init() {
 	ideListStr := strings.Join(ids, ", ")
 	CodeCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", fmt.Sprintf("Specify the IDE (%s)", ideListStr))
 
-	CodeCmd.Flags().BoolVarP(&autoStartFlag, "yes", "y", false, "Automatically confirm any prompts")
+	CodeCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Automatically confirm any prompts")
 
-	CodeCmd.Flags().BoolVarP(&autoStartFlag, "auto-start", "a", false, "Automatically start the project if it is not running")
 }
 
-func AutoStartWorkspace(autoStartFlag bool, workspaceId string, projectName string) (bool, error) {
-	if !autoStartFlag {
+func AutoStartWorkspace(workspaceId string, projectName string) (bool, error) {
+	if !yesFlag {
 		if !ide_views.RunStartWorkspaceForm(workspaceId) {
 			return false, nil
 		}

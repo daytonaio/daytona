@@ -9,7 +9,7 @@ daytona ssh [WORKSPACE] [PROJECT] [CMD...] [flags]
 ### Options
 
 ```
-  -a, --auto-start   Automatically start the project if it is not running
+  -y, --yes   Automatically confirm any prompts
 ```
 
 ### Options inherited from parent commands

@@ -77,7 +77,7 @@ var SshCmd = &cobra.Command{
 		}
 
 		if !workspace_util.IsProjectRunning(workspace, projectName) {
-			wsRunningStatus, err := AutoStartWorkspace(autoStartFlag, workspace.Name, projectName)
+			wsRunningStatus, err := AutoStartWorkspace(workspace.Name, projectName)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -109,5 +109,5 @@ var SshCmd = &cobra.Command{
 }
 
 func init() {
-	SshCmd.Flags().BoolVarP(&autoStartFlag, "auto-start", "a", false, "Automatically start the project if it is not running")
+	SshCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Automatically confirm any prompts")
 }

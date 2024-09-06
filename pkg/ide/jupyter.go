@@ -25,7 +25,7 @@ import (
 const startJupyterCommand = "notebook --no-browser --port=8888 --ip=0.0.0.0 --NotebookApp.token='' --NotebookApp.password=''"
 
 // OpenJupyterIDE manages the installation and startup of a Jupyter IDE on a remote workspace.
-func OpenJupyterIDE(activeProfile config.Profile, workspaceId, projectName, projectProviderMetadata string, autoConfirm bool) error {
+func OpenJupyterIDE(activeProfile config.Profile, workspaceId, projectName, projectProviderMetadata string, yesFlag bool) error {
 	// Ensure SSH config entry is added
 	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName)
 	if err != nil {
@@ -35,12 +35,12 @@ func OpenJupyterIDE(activeProfile config.Profile, workspaceId, projectName, proj
 	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
 
 	// Check and install Python if necessary
-	if err := ensurePythonInstalled(projectHostname, autoConfirm); err != nil {
+	if err := ensurePythonInstalled(projectHostname, yesFlag); err != nil {
 		return err
 	}
 
 	// Check and install pip if necessary
-	if err := ensurePipInstalled(projectHostname, autoConfirm); err != nil {
+	if err := ensurePipInstalled(projectHostname, yesFlag); err != nil {
 		return err
 	}
 
@@ -58,14 +58,14 @@ func OpenJupyterIDE(activeProfile config.Profile, workspaceId, projectName, proj
 }
 
 // ensurePythonInstalled checks if Python is installed and installs it if the user agrees.
-func ensurePythonInstalled(hostname string, autoConfirm bool) error {
+func ensurePythonInstalled(hostname string, yesFlag bool) error {
 	views.RenderInfoMessageBold("Checking Python installation...")
 
 	// Check if Python is installed
 	if err := runRemoteCommand(hostname, "python3 --version"); err != nil {
 		log.Error("Python3 is not installed on the remote workspace.")
 
-		if autoConfirm {
+		if yesFlag {
 			return installPython(hostname)
 		}
 
@@ -103,14 +103,14 @@ func installPython(hostname string) error {
 }
 
 // ensurePipInstalled checks if pip is installed and installs it if necessary
-func ensurePipInstalled(hostname string, autoConfirm bool) error {
+func ensurePipInstalled(hostname string, yesFlag bool) error {
 	views.RenderInfoMessageBold("Checking pip installation...")
 
 	// Check if pip is installed
 	if err := runRemoteCommand(hostname, "python3 -m pip --version"); err != nil {
 		log.Error("pip is not installed on the remote workspace.")
 
-		if autoConfirm {
+		if yesFlag {
 			return installPip(hostname)
 		}
 
