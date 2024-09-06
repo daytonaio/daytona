@@ -22,10 +22,7 @@ import (
 const startJupyterCommand = "notebook --no-browser --port=8888 --ip=0.0.0.0 --NotebookApp.token='' --NotebookApp.password=''"
 
 // OpenJupyterIDE manages the installation and startup of a Jupyter IDE on a remote workspace.
-func OpenJupyterIDE(activeProfile config.Profile, workspaceId, projectName, projectProviderMetadata string) error {
-	// Get the autoConfirm value from a flag or environment variable
-	autoConfirm := getAutoConfirmValue()
-
+func OpenJupyterIDE(activeProfile config.Profile, workspaceId, projectName, projectProviderMetadata string, autoConfirm bool) error {
 	// Ensure SSH config entry is added
 	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName)
 	if err != nil {
@@ -55,23 +52,6 @@ func OpenJupyterIDE(activeProfile config.Profile, workspaceId, projectName, proj
 	}
 
 	return nil
-}
-
-// getAutoConfirmValue retrieves the autoConfirm value from a flag or environment variable
-func getAutoConfirmValue() bool {
-	// Check for a command-line flag
-	for _, arg := range os.Args {
-		if arg == "--yes" || arg == "-y" {
-			return true
-		}
-	}
-
-	// Check for an environment variable
-	if value, exists := os.LookupEnv("DAYTONA_AUTO_CONFIRM"); exists {
-		return value == "true" || value == "1"
-	}
-
-	return false
 }
 
 // ensurePythonInstalled checks if Python is installed and installs it if the user agrees.

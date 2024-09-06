@@ -18,11 +18,12 @@ daytona create [REPOSITORY_URL] [flags]
       --devcontainer-path string   Automatically assign the devcontainer builder with the path passed as the flag value
       --env stringArray            Specify environment variables (e.g. --env 'KEY1=VALUE1' --env 'KEY2=VALUE2' ...')
   -i, --ide string                 Specify the IDE (vscode, browser, cursor, ssh, jupyter, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
-      --manual                     Manually enter the Git repositories
+      --manual                     Manually enter the Git repository
       --multi-project              Workspace with multiple projects/repos
       --name string                Specify the workspace name
       --provider string            Specify the provider (e.g. 'docker-provider')
   -t, --target string              Specify the target (e.g. 'local')
+  -y, --yes                        Automatically confirm any prompts
 ```
 
 ### Options inherited from parent commands

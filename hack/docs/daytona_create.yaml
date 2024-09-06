@@ -43,6 +43,10 @@ options:
     - name: target
       shorthand: t
       usage: Specify the target (e.g. 'local')
+    - name: "yes"
+      shorthand: "y"
+      default_value: "false"
+      usage: Automatically confirm any prompts
 inherited_options:
     - name: help
       default_value: "false"

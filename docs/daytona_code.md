@@ -10,6 +10,7 @@ daytona code [WORKSPACE] [PROJECT] [flags]
 
 ```
   -i, --ide string   Specify the IDE (vscode, browser, cursor, ssh, jupyter, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
+  -y, --yes          Automatically confirm any prompts
 ```
 
 ### Options inherited from parent commands

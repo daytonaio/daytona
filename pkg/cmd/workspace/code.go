@@ -130,7 +130,9 @@ var CodeCmd = &cobra.Command{
 
 		views.RenderInfoMessage(fmt.Sprintf("Opening the project '%s' from workspace '%s' in %s", projectName, workspace.Name, ideName))
 
-		err = openIDE(ideId, activeProfile, workspaceId, projectName, providerMetadata)
+		autoConfirm, _ := cmd.Flags().GetBool("yes")
+
+		err = openIDE(ideId, activeProfile, workspaceId, projectName, providerMetadata, autoConfirm)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -173,7 +175,7 @@ func selectWorkspaceProject(workspaceId string, profile *config.Profile) (*apicl
 	return nil, errors.New("no projects found in workspace")
 }
 
-func openIDE(ideId string, activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string) error {
+func openIDE(ideId string, activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string, autoConfirm bool) error {
 	switch ideId {
 	case "vscode":
 		return ide.OpenVSCode(activeProfile, workspaceId, projectName, projectProviderMetadata)
@@ -184,7 +186,7 @@ func openIDE(ideId string, activeProfile config.Profile, workspaceId string, pro
 	case "cursor":
 		return ide.OpenCursor(activeProfile, workspaceId, projectName, projectProviderMetadata)
 	case "jupyter":
-		return ide.OpenJupyterIDE(activeProfile, workspaceId, projectName, projectProviderMetadata)
+		return ide.OpenJupyterIDE(activeProfile, workspaceId, projectName, projectProviderMetadata, autoConfirm)
 	default:
 		_, ok := jetbrains.GetIdes()[jetbrains.Id(ideId)]
 		if ok {
@@ -205,4 +207,5 @@ func init() {
 	}
 	ideListStr := strings.Join(ids, ", ")
 	CodeCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", fmt.Sprintf("Specify the IDE (%s)", ideListStr))
+	CodeCmd.Flags().BoolP("yes", "y", false, "Automatically confirm any prompts")
 }
