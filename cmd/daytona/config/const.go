@@ -122,6 +122,10 @@ func GetPrebuildScopesFromGitProviderId(providerId string) string {
 		fallthrough
 	case "github-enterprise-server":
 		return "admin:repo_hook"
+	case "gitlab":
+		fallthrough
+	case "gitlab-self-managed":
+		return "api,write_repository"
 	default:
 		return ""
 	}
