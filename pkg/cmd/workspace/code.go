@@ -19,6 +19,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/ide"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/daytonaio/daytona/pkg/views"
+	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
 	log "github.com/sirupsen/logrus"
@@ -97,41 +98,27 @@ var CodeCmd = &cobra.Command{
 			ideId = ideFlag
 		}
 
-		ideList := config.GetIdeList()
-		ideName := ""
-		for _, ide := range ideList {
-			if ide.Id == ideId {
-				ideName = ide.Name
-				break
+		if !workspace_util.IsProjectRunning(workspace, projectName) {
+			wsRunningStatus, err := AutoStartWorkspace(autoStartFlag, workspace.Name, projectName)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if !wsRunningStatus {
+				return
 			}
 		}
 
 		providerMetadata := ""
-		if workspace.Info != nil {
-			for _, project := range workspace.Info.Projects {
-				if project.Name == projectName {
-					if !project.GetIsRunning() {
-						views.RenderInfoMessage(fmt.Sprintf("Project '%s' from workspace '%s' is not in running state", projectName, workspace.Name))
-						return
-					}
-					if project.ProviderMetadata == nil {
-						log.Fatal(errors.New("project provider metadata is missing"))
-					}
-					providerMetadata = *project.ProviderMetadata
-					break
-				}
+		if ideId != "ssh" {
+			providerMetadata, err = workspace_util.GetProjectProviderMetadata(workspace, projectName)
+			if err != nil {
+				log.Fatal(err)
 			}
 		}
 
-		if !workspace_util.IsProjectRunning(workspace, projectName) {
-			views.RenderInfoMessage(fmt.Sprintf("Project '%s' from workspace '%s' is not in running state", projectName, workspace.Name))
-			return
-		}
-
-		views.RenderInfoMessage(fmt.Sprintf("Opening the project '%s' from workspace '%s' in %s", projectName, workspace.Name, ideName))
-
-		err = openIDE(ideId, activeProfile, workspaceId, projectName, providerMetadata)
-		if err != nil {
+		ideList := config.GetIdeList()
+		ide_views.RenderIdeOpeningMessage(workspace.Name, projectName, ideId, ideList)
+		if err := openIDE(ideId, activeProfile, workspaceId, projectName, providerMetadata); err != nil {
 			log.Fatal(err)
 		}
 	},
@@ -194,6 +181,7 @@ func openIDE(ideId string, activeProfile config.Profile, workspaceId string, pro
 }
 
 var ideFlag string
+var autoStartFlag bool
 
 func init() {
 	ideList := config.GetIdeList()
@@ -203,4 +191,28 @@ func init() {
 	}
 	ideListStr := strings.Join(ids, ", ")
 	CodeCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", fmt.Sprintf("Specify the IDE (%s)", ideListStr))
+	CodeCmd.Flags().BoolVarP(&autoStartFlag, "auto-start", "a", false, "Automatically start the project if it is not running")
+}
+
+func AutoStartWorkspace(autoStartFlag bool, workspaceId string, projectName string) (bool, error) {
+	if !autoStartFlag {
+		if !ide_views.RunStartWorkspaceForm(workspaceId) {
+			return false, nil
+		}
+	}
+
+	apiClient, err := apiclient_util.GetApiClient(nil)
+	if err != nil {
+		return false, err
+	}
+
+	views.RenderInfoMessage(fmt.Sprintf("Project '%s' from workspace '%s' is starting", projectName, workspaceId))
+
+	ctx := context.Background()
+	res, err := apiClient.WorkspaceAPI.StartProject(ctx, workspaceId, projectName).Execute()
+	if err != nil {
+		return false, apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	return true, nil
 }

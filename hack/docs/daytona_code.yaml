@@ -2,6 +2,10 @@ name: daytona code
 synopsis: Open a workspace in your preferred IDE
 usage: daytona code [WORKSPACE] [PROJECT] [flags]
 options:
+    - name: auto-start
+      shorthand: a
+      default_value: "false"
+      usage: Automatically start the project if it is not running
     - name: ide
       shorthand: i
       usage: |

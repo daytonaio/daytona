@@ -5,7 +5,6 @@ package workspace
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
@@ -78,7 +77,13 @@ var SshCmd = &cobra.Command{
 		}
 
 		if !workspace_util.IsProjectRunning(workspace, projectName) {
-			log.Fatal(fmt.Sprintf("Project '%s' from workspace '%s' is not in running state", projectName, workspace.Name))
+			wsRunningStatus, err := AutoStartWorkspace(autoStartFlag, workspace.Name, projectName)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if !wsRunningStatus {
+				return
+			}
 		}
 
 		sshArgs := []string{}
@@ -101,4 +106,8 @@ var SshCmd = &cobra.Command{
 
 		return getWorkspaceNameCompletions()
 	},
+}
+
+func init() {
+	SshCmd.Flags().BoolVarP(&autoStartFlag, "auto-start", "a", false, "Automatically start the project if it is not running")
 }
