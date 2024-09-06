@@ -568,10 +568,9 @@ func (g *BitbucketGitProvider) UnregisterPrebuildWebhook(repo *GitRepository, id
 	return err
 }
 
-func (g *BitbucketGitProvider) GetCommitsRange(repo *GitRepository, owner string, initialSha string, currentSha string) (int, error) {
+func (g *BitbucketGitProvider) GetCommitsRange(repo *GitRepository, initialSha string, currentSha string) (int, error) {
 	client := g.getApiClient()
 
-	_ = owner
 	commits, err := client.Repositories.Diff.GetDiffStat(&bitbucket.DiffStatOptions{
 		Owner:    repo.Owner,
 		RepoSlug: repo.Id,
