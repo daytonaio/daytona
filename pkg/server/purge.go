@@ -38,7 +38,7 @@ func (s *Server) Purge(ctx context.Context, force bool) []error {
 		return []error{err}
 	}
 
-	workspaces, err := s.WorkspaceService.ListWorkspaces(false)
+	workspaces, err := s.WorkspaceService.ListWorkspaces(ctx, false)
 	if err != nil {
 		s.trackPurgeError(ctx, force, err)
 		if !force {
