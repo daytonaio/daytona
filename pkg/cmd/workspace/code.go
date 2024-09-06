@@ -18,6 +18,7 @@ import (
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/ide"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/views"
 	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -161,6 +162,8 @@ func selectWorkspaceProject(workspaceId string, profile *config.Profile) (*apicl
 }
 
 func openIDE(ideId string, activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string) error {
+	telemetry.AdditionalData["ide"] = ideId
+
 	switch ideId {
 	case "vscode":
 		return ide.OpenVSCode(activeProfile, workspaceId, projectName, projectProviderMetadata)
