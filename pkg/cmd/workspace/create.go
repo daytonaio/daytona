@@ -221,7 +221,6 @@ var CreateCmd = &cobra.Command{
 	},
 }
 
-var providerFlag string
 var nameFlag string
 var targetNameFlag string
 var codeFlag bool
@@ -247,7 +246,6 @@ func init() {
 	ideListStr := strings.Join(ids, ", ")
 
 	CreateCmd.Flags().StringVar(&nameFlag, "name", "", "Specify the workspace name")
-	CreateCmd.Flags().StringVar(&providerFlag, "provider", "", "Specify the provider (e.g. 'docker-provider')")
 	CreateCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", fmt.Sprintf("Specify the IDE (%s)", ideListStr))
 	CreateCmd.Flags().StringVarP(&targetNameFlag, "target", "t", "", "Specify the target (e.g. 'local')")
 	CreateCmd.Flags().BoolVar(&blankFlag, "blank", false, "Create a blank project without using existing configurations")

@@ -21,7 +21,6 @@ daytona create [REPOSITORY_URL] [flags]
       --manual                     Manually enter the Git repository
       --multi-project              Workspace with multiple projects/repos
       --name string                Specify the workspace name
-      --provider string            Specify the provider (e.g. 'docker-provider')
   -t, --target string              Specify the target (e.g. 'local')
 ```
 
