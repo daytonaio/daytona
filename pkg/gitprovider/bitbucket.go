@@ -108,15 +108,20 @@ func (g *BitbucketGitProvider) GetRepoBranches(repositoryId string, namespaceId 
 	client := g.getApiClient()
 	var response []*GitBranch
 
-	owner, repo, err := g.getOwnerAndRepoFromFullName(repositoryId)
-	if err != nil {
-		return nil, err
+	opts := &bitbucket.RepositoryBranchOptions{
+		RepoSlug: repositoryId,
+		Owner:    namespaceId,
 	}
 
-	branches, err := client.Repositories.Repository.ListBranches(&bitbucket.RepositoryBranchOptions{
-		RepoSlug: repo,
-		Owner:    owner,
-	})
+	owner, repo, err := g.getOwnerAndRepoFromFullName(repositoryId)
+	if err == nil {
+		opts = &bitbucket.RepositoryBranchOptions{
+			RepoSlug: repo,
+			Owner:    owner,
+		}
+	}
+
+	branches, err := client.Repositories.Repository.ListBranches(opts)
 	if err != nil {
 		return nil, err
 	}
