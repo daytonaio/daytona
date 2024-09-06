@@ -56,11 +56,19 @@ func ensureSshFilesLinked() error {
 			return err
 		}
 
-		if strings.Contains(string(content), "Include daytona_config") {
-			return nil
+		lines := strings.Split(string(content), "\n")
+		if !strings.Contains(string(content), "Include daytona_config") {
+			lines = append([]string{"Include daytona_config"}, lines...)
+		} else {
+			for i, line := range lines {
+				if strings.Contains(line, "Include daytona_config") {
+					lines = append([]string{"Include daytona_config"}, append(lines[:i], lines[i+1:]...)...)
+					break
+				}
+			}
 		}
 
-		newContent := "Include daytona_config\n\n" + string(content)
+		newContent := strings.Join(lines, "\n")
 		err = os.WriteFile(configFile, []byte(newContent), 0600)
 		if err != nil {
 			return err
