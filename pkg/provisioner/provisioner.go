@@ -4,6 +4,8 @@
 package provisioner
 
 import (
+	"context"
+
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/provider"
@@ -17,7 +19,7 @@ type IProvisioner interface {
 	CreateWorkspace(workspace *workspace.Workspace, target *provider.ProviderTarget) error
 	DestroyProject(project *project.Project, target *provider.ProviderTarget) error
 	DestroyWorkspace(workspace *workspace.Workspace, target *provider.ProviderTarget) error
-	GetWorkspaceInfo(workspace *workspace.Workspace, target *provider.ProviderTarget) (*workspace.WorkspaceInfo, error)
+	GetWorkspaceInfo(ctx context.Context, workspace *workspace.Workspace, target *provider.ProviderTarget) (*workspace.WorkspaceInfo, error)
 	StartProject(project *project.Project, target *provider.ProviderTarget) error
 	StartWorkspace(workspace *workspace.Workspace, target *provider.ProviderTarget) error
 	StopProject(project *project.Project, target *provider.ProviderTarget) error

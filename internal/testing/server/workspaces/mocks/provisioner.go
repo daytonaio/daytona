@@ -6,6 +6,8 @@
 package mocks
 
 import (
+	"context"
+
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/provider"
@@ -42,8 +44,8 @@ func (p *mockProvisioner) DestroyWorkspace(workspace *workspace.Workspace, targe
 	return args.Error(0)
 }
 
-func (p *mockProvisioner) GetWorkspaceInfo(w *workspace.Workspace, target *provider.ProviderTarget) (*workspace.WorkspaceInfo, error) {
-	args := p.Called(w, target)
+func (p *mockProvisioner) GetWorkspaceInfo(ctx context.Context, w *workspace.Workspace, target *provider.ProviderTarget) (*workspace.WorkspaceInfo, error) {
+	args := p.Called(ctx, w, target)
 	return args.Get(0).(*workspace.WorkspaceInfo), args.Error(1)
 }
 
