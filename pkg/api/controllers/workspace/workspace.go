@@ -64,7 +64,7 @@ func ListWorkspaces(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	workspaceList, err := server.WorkspaceService.ListWorkspaces(verbose)
+	workspaceList, err := server.WorkspaceService.ListWorkspaces(ctx.Request.Context(), verbose)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list workspaces: %w", err))
 		return
