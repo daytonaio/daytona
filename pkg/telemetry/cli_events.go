@@ -9,3 +9,5 @@ const (
 	CliEventCmdStart CliEvent = "cli_cmd_start"
 	CliEventCmdEnd   CliEvent = "cli_cmd_end"
 )
+
+var AdditionalData map[string]interface{} = map[string]interface{}{}

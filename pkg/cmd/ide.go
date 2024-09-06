@@ -9,6 +9,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 	ide_util "github.com/daytonaio/daytona/pkg/ide"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/ide"
 
@@ -52,6 +53,8 @@ var ideCmd = &cobra.Command{
 		}
 
 		c.DefaultIdeId = chosenIde.Id
+
+		telemetry.AdditionalData["ide"] = chosenIde.Id
 
 		err = c.Save()
 		if err != nil {
