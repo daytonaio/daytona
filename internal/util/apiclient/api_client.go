@@ -112,36 +112,6 @@ func GetAgentApiClient(apiUrl, apiKey, clientId string, telemetryEnabled bool) (
 	return apiClient, nil
 }
 
-func GetProviderList() ([]apiclient.Provider, error) {
-	apiClient, err := GetApiClient(nil)
-	if err != nil {
-		return nil, err
-	}
-
-	ctx := context.Background()
-
-	providersList, res, err := apiClient.ProviderAPI.ListProviders(ctx).Execute()
-	if err != nil {
-		return nil, HandleErrorResponse(res, err)
-	}
-
-	return providersList, nil
-}
-
-func GetTargetList() ([]apiclient.ProviderTarget, error) {
-	apiClient, err := GetApiClient(nil)
-	if err != nil {
-		return nil, err
-	}
-
-	targets, resp, err := apiClient.TargetAPI.ListTargets(context.Background()).Execute()
-	if err != nil {
-		return nil, HandleErrorResponse(resp, err)
-	}
-
-	return targets, nil
-}
-
 func GetWorkspace(workspaceNameOrId string) (*apiclient.WorkspaceDTO, error) {
 	ctx := context.Background()
 

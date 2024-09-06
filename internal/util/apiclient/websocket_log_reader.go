@@ -60,7 +60,7 @@ func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, worksp
 			continue
 		}
 
-		readJSONLog(ctx, ws, logs_view.WORKSPACE_INDEX)
+		readJSONLog(ctx, ws, logs_view.STATIC_INDEX)
 		ws.Close()
 		break
 	}
@@ -111,7 +111,7 @@ func readJSONLog(ctx context.Context, ws *websocket.Conn, index int) {
 			logs_view.DisplayLogEntry(logEntry, index)
 		}
 
-		if !workspaceLogsStarted && index == logs_view.WORKSPACE_INDEX {
+		if !workspaceLogsStarted && index == logs_view.STATIC_INDEX {
 			workspaceLogsStarted = true
 		}
 	}

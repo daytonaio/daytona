@@ -5,10 +5,10 @@ package workspace
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -121,7 +121,7 @@ var CreateCmd = &cobra.Command{
 
 		logs_view.DisplayLogEntry(logs.LogEntry{
 			Msg: "Request submitted\n",
-		}, logs_view.WORKSPACE_INDEX)
+		}, logs_view.STATIC_INDEX)
 
 		if existingProjectConfigName != nil {
 			logs_view.DisplayLogEntry(logs.LogEntry{
@@ -130,7 +130,12 @@ var CreateCmd = &cobra.Command{
 			}, logs_view.FIRST_PROJECT_INDEX)
 		}
 
-		target, err := getTarget(activeProfile.Name)
+		targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
+		if err != nil {
+			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+		}
+
+		target, err := getTarget(targetList, activeProfile.Name)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -140,9 +145,12 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		tsConn, err := tailscale.GetConnection(&activeProfile)
-		if err != nil {
-			log.Fatal(err)
+		var tsConn *tsnet.Server
+		if target.Name != "local" {
+			tsConn, err = tailscale.GetConnection(&activeProfile)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 
 		id := stringid.GenerateRandomID()
@@ -161,7 +169,7 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
-		err = waitForDial(tsConn, createdWorkspace.Id, createdWorkspace.Projects[0].Name)
+		err = waitForDial(createdWorkspace, &activeProfile, tsConn)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -200,20 +208,17 @@ var CreateCmd = &cobra.Command{
 
 		views.RenderCreationInfoMessage(fmt.Sprintf("Opening the workspace in %s ...", chosenIde.Name))
 
-		providerMetadata := ""
-		for _, project := range wsInfo.Info.Projects {
-			if project.Name == wsInfo.Projects[0].Name {
-				if project.ProviderMetadata == nil {
-					log.Fatal(errors.New("project provider metadata is missing"))
-				}
-				providerMetadata = *project.ProviderMetadata
-				break
-			}
+		projectName := wsInfo.Projects[0].Name
+		providerMetadata, err := workspace_util.GetProjectProviderMetadata(wsInfo, projectName)
+		if err != nil {
+			log.Fatal(err)
 		}
+
 
 		autoConfirm, _ := cmd.Flags().GetBool("yes")
 
 		err = openIDE(chosenIdeId, activeProfile, createdWorkspace.Id, wsInfo.Projects[0].Name, providerMetadata, autoConfirm)
+
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -257,14 +262,9 @@ func init() {
 	workspace_util.AddProjectConfigurationFlags(CreateCmd, projectConfigurationFlags, true)
 }
 
-func getTarget(activeProfileName string) (*apiclient.ProviderTarget, error) {
-	targets, err := apiclient_util.GetTargetList()
-	if err != nil {
-		return nil, err
-	}
-
+func getTarget(targetList []apiclient.ProviderTarget, activeProfileName string) (*apiclient.ProviderTarget, error) {
 	if targetNameFlag != "" {
-		for _, t := range targets {
+		for _, t := range targetList {
 			if t.Name == targetNameFlag {
 				return &t, nil
 			}
@@ -272,11 +272,11 @@ func getTarget(activeProfileName string) (*apiclient.ProviderTarget, error) {
 		return nil, fmt.Errorf("target '%s' not found", targetNameFlag)
 	}
 
-	if len(targets) == 1 {
-		return &targets[0], nil
+	if len(targetList) == 1 {
+		return &targetList[0], nil
 	}
 
-	return target.GetTargetFromPrompt(targets, activeProfileName, false)
+	return target.GetTargetFromPrompt(targetList, activeProfileName, false)
 }
 
 func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, projects *[]apiclient.CreateProjectDTO, workspaceNames []string, ctx context.Context) error {
@@ -410,15 +410,36 @@ func processGitURL(repoUrl string, apiClient *apiclient.APIClient, projects *[]a
 	return nil, nil
 }
 
-func waitForDial(tsConn *tsnet.Server, workspaceId string, projectName string) error {
+func waitForDial(workspace *apiclient.Workspace, activeProfile *config.Profile, tsConn *tsnet.Server) error {
+	if workspace.Target == "local" {
+		err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspace.Id, workspace.Projects[0].Name)
+		if err != nil {
+			return err
+		}
+
+		projectHostname := config.GetProjectHostname(activeProfile.Id, workspace.Id, workspace.Projects[0].Name)
+
+		for {
+			sshCommand := exec.Command("ssh", projectHostname, "daytona", "version")
+			sshCommand.Stdin = nil
+			sshCommand.Stdout = nil
+			sshCommand.Stderr = &util.TraceLogWriter{}
+
+			err = sshCommand.Run()
+			if err == nil {
+				return nil
+			}
+
+			time.Sleep(time.Second)
+		}
+	}
+
 	for {
-		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", project.GetProjectHostname(workspaceId, projectName), ssh_config.SSH_PORT))
+		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", project.GetProjectHostname(workspace.Id, workspace.Projects[0].Name), ssh_config.SSH_PORT))
 		if err == nil {
-			defer dialConn.Close()
-			break
+			return dialConn.Close()
 		}
 
 		time.Sleep(time.Second)
 	}
-	return nil
 }

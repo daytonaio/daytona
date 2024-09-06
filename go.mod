@@ -1,6 +1,9 @@
 module github.com/daytonaio/daytona
 
-go 1.22.2
+go 1.23.0
+
+// v0.5.0 breaks tailscale-connected docker clients so we need to pin it to v0.4.0
+replace github.com/docker/go-connections => github.com/docker/go-connections v0.4.0
 
 require (
 	code.gitea.io/sdk/gitea v0.17.1
@@ -11,7 +14,7 @@ require (
 	github.com/charmbracelet/huh v0.2.3
 	github.com/charmbracelet/lipgloss v0.9.1
 	github.com/compose-spec/compose-go/v2 v2.1.3
-	github.com/creack/pty v1.1.21
+	github.com/creack/pty v1.1.23
 	github.com/docker/docker v27.1.2+incompatible
 	github.com/docker/go-connections v0.5.0
 	github.com/fatedier/frp v0.54.0
@@ -26,7 +29,7 @@ require (
 	github.com/gorilla/websocket v1.5.1
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/go-plugin v1.6.0
-	github.com/juanfont/headscale v0.23.0-beta2
+	github.com/juanfont/headscale v0.23.0-beta3
 	github.com/kardianos/service v1.2.2
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/microsoft/azure-devops-go-api/azuredevops v1.0.0-b5
@@ -39,7 +42,7 @@ require (
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/sirupsen/logrus v1.9.3
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
@@ -53,7 +56,7 @@ require (
 	google.golang.org/protobuf v1.34.1
 	gopkg.in/ini.v1 v1.67.0
 	gorm.io/gorm v1.25.10
-	tailscale.com v1.68.0
+	tailscale.com v1.72.1
 )
 
 require (
@@ -90,6 +93,7 @@ require (
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.1 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
+	github.com/coder/websocket v1.8.12 // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/coreos/go-iptables v0.7.1-0.20240112124308-65c67c9f46e6 // indirect
 	github.com/coreos/go-oidc/v3 v3.10.0 // indirect
@@ -107,13 +111,13 @@ require (
 	github.com/fatedier/beego v0.0.0-20171024143340-6c6a4f5bd5eb // indirect
 	github.com/fatedier/golib v0.1.1-0.20230725122706-dcbaee8eef40 // indirect
 	github.com/fatedier/kcp-go v2.0.4-0.20190803094908-fe8645b0a904+incompatible // indirect
-	github.com/fatih/color v1.16.0 // indirect
+	github.com/fatih/color v1.17.0 // indirect
 	github.com/felixge/fgprof v0.9.4 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
-	github.com/fxamacker/cbor/v2 v2.5.0 // indirect
+	github.com/fxamacker/cbor/v2 v2.6.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
-	github.com/gaissmai/bart v0.4.1 // indirect
+	github.com/gaissmai/bart v0.11.1 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/glebarez/go-sqlite v1.22.0 // indirect
 	github.com/go-fed/httpsig v1.1.0 // indirect
@@ -122,7 +126,7 @@ require (
 	github.com/go-gormigrate/gormigrate/v2 v2.1.2 // indirect
 	github.com/go-jose/go-jose/v4 v4.0.1 // indirect
 	github.com/go-json-experiment/json v0.0.0-20231102232822-2e55bd4e08b0 // indirect
-	github.com/go-logr/logr v1.4.1 // indirect
+	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
@@ -208,9 +212,9 @@ require (
 	github.com/pkg/profile v1.7.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus-community/pro-bing v0.4.0 // indirect
-	github.com/prometheus/client_golang v1.18.0 // indirect
+	github.com/prometheus/client_golang v1.19.1 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
-	github.com/prometheus/common v0.46.0 // indirect
+	github.com/prometheus/common v0.48.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/puzpuzpuz/xsync/v3 v3.1.0 // indirect
 	github.com/quic-go/quic-go v0.42.0 // indirect
@@ -238,7 +242,7 @@ require (
 	github.com/tailscale/squibble v0.0.0-20240418235321-9ee0eeb78185 // indirect
 	github.com/tailscale/tailsql v0.0.0-20240418235827-820559f382c1 // indirect
 	github.com/tailscale/web-client-prebuilt v0.0.0-20240226180453-5db17b287bf1 // indirect
-	github.com/tailscale/wireguard-go v0.0.0-20240429185444-03c5a0ccf754 // indirect
+	github.com/tailscale/wireguard-go v0.0.0-20240731203015-71393c576b98 // indirect
 	github.com/tcnksm/go-httpstat v0.2.0 // indirect
 	github.com/templexxx/cpufeat v0.0.0-20180724012125-cef66df7f161 // indirect
 	github.com/templexxx/xor v0.0.0-20191217153810-f85b25db303b // indirect
@@ -275,13 +279,12 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gorm.io/driver/postgres v1.5.7 // indirect
 	gotest.tools/v3 v3.5.1 // indirect
-	gvisor.dev/gvisor v0.0.0-20240306221502-ee1e1f6070e3 // indirect
-	k8s.io/apimachinery v0.29.1 // indirect
+	gvisor.dev/gvisor v0.0.0-20240722211153-64c016c92987 // indirect
+	k8s.io/apimachinery v0.30.3 // indirect
 	modernc.org/libc v1.50.6 // indirect
 	modernc.org/mathutil v1.6.0 // indirect
 	modernc.org/memory v1.8.0 // indirect
 	modernc.org/sqlite v1.29.10 // indirect
-	nhooyr.io/websocket v1.8.10 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )

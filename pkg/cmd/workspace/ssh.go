@@ -5,7 +5,6 @@ package workspace
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
@@ -13,17 +12,17 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/ide"
-	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var SshCmd = &cobra.Command{
-	Use:     "ssh [WORKSPACE] [PROJECT]",
+	Use:     "ssh [WORKSPACE] [PROJECT] [CMD...]",
 	Short:   "SSH into a project using the terminal",
-	Args:    cobra.RangeArgs(0, 2),
+	Args:    cobra.ArbitraryArgs,
 	GroupID: util.WORKSPACE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {
 		c, err := config.GetConfig()
@@ -73,16 +72,26 @@ var SshCmd = &cobra.Command{
 			projectName = selectedProject.Name
 		}
 
-		if len(args) == 2 {
+		if len(args) >= 2 {
 			projectName = args[1]
 		}
 
 		if !workspace_util.IsProjectRunning(workspace, projectName) {
-			views.RenderInfoMessage(fmt.Sprintf("Project '%s' from workspace '%s' is not in running state", projectName, workspace.Name))
-			return
+			wsRunningStatus, err := AutoStartWorkspace(autoStartFlag, workspace.Name, projectName)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if !wsRunningStatus {
+				return
+			}
 		}
 
-		err = ide.OpenTerminalSsh(activeProfile, workspace.Id, projectName)
+		sshArgs := []string{}
+		if len(args) > 2 {
+			sshArgs = append(sshArgs, args[2:]...)
+		}
+
+		err = ide.OpenTerminalSsh(activeProfile, workspace.Id, workspace.Projects[0].Name, sshArgs...)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -97,4 +106,8 @@ var SshCmd = &cobra.Command{
 
 		return getWorkspaceNameCompletions()
 	},
+}
+
+func init() {
+	SshCmd.Flags().BoolVarP(&autoStartFlag, "auto-start", "a", false, "Automatically start the project if it is not running")
 }

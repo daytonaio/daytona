@@ -41,7 +41,7 @@ var (
 )
 
 var LogPrefixColors = []lipgloss.AdaptiveColor{
-	Blue, Yellow, Orange, Cyan,
+	Blue, Orange, Cyan, Yellow,
 }
 
 func GetStyledSelectList(items []list.Item) list.Model {

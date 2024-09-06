@@ -4,9 +4,10 @@
 package target
 
 import (
+	"context"
 	"log"
 
-	"github.com/daytonaio/daytona/internal/util/apiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views"
 	list_view "github.com/daytonaio/daytona/pkg/views/target/list"
@@ -19,24 +20,31 @@ var targetListCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Aliases: []string{"ls"},
 	Run: func(cmd *cobra.Command, args []string) {
-		targets, err := apiclient.GetTargetList()
+		ctx := context.Background()
+
+		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		if len(targets) == 0 {
+		targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
+		if err != nil {
+			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+		}
+
+		if len(targetList) == 0 {
 			views.RenderInfoMessageBold("No targets found")
 			views.RenderInfoMessage("Use 'daytona target set' to add a target")
 			return
 		}
 
 		if format.FormatFlag != "" {
-			formattedData := format.NewFormatter(targets)
+			formattedData := format.NewFormatter(targetList)
 			formattedData.Print()
 			return
 		}
 
-		list_view.ListTargets(targets)
+		list_view.ListTargets(targetList)
 	},
 }
 

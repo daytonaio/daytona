@@ -159,7 +159,7 @@ func (s *ProjectConfigServiceTestSuite) TestProcessGitEventCommitInterval() {
 		AffectedFiles: []string{},
 	}
 
-	s.gitProvider.On("GetCommitsRange", repository1, data.Owner, repository1.Sha, data.Sha).Return(3, nil)
+	s.gitProvider.On("GetCommitsRange", repository1, repository1.Sha, data.Sha).Return(3, nil)
 
 	err := s.projectConfigService.ProcessGitEvent(data)
 	require.Nil(err)

@@ -9,7 +9,8 @@ daytona code [WORKSPACE] [PROJECT] [flags]
 ### Options
 
 ```
-  -i, --ide string   Specify the IDE (vscode, browser, cursor, ssh, jupyter, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
+  -a, --auto-start   Automatically start the project if it is not running
+  -i, --ide string   Specify the IDE (vscode, browser, cursor, ssh, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
   -y, --yes          Automatically confirm any prompts
 ```
 

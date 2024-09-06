@@ -74,12 +74,12 @@ func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]*GitReposito
 	for _, repo := range repoList.Items {
 		htmlLink, ok := repo.Links["html"].(map[string]interface{})
 		if !ok {
-			return nil, fmt.Errorf("Invalid repo links")
+			return nil, fmt.Errorf("invalid repo links")
 		}
 
 		repoUrl, ok := htmlLink["href"].(string)
 		if !ok {
-			return nil, fmt.Errorf("Invalid repo html link")
+			return nil, fmt.Errorf("invalid repo html link")
 		}
 
 		u, err := url.Parse(repoUrl)
@@ -124,7 +124,7 @@ func (g *BitbucketGitProvider) GetRepoBranches(repositoryId string, namespaceId 
 	for _, branch := range branches.Branches {
 		hash, ok := branch.Target["hash"].(string)
 		if !ok {
-			return nil, fmt.Errorf("Invalid branch hash")
+			return nil, fmt.Errorf("invalid branch hash")
 		}
 
 		response = append(response, &GitBranch{
@@ -167,12 +167,12 @@ func (g *BitbucketGitProvider) GetRepoPRs(repositoryId string, namespaceId strin
 	for _, pr := range prResponse.Values {
 		htmlLink, ok := pr.Source.Repository.Links["html"].(map[string]interface{})
 		if !ok {
-			return nil, fmt.Errorf("Invalid repo links")
+			return nil, fmt.Errorf("invalid repo links")
 		}
 
 		repoUrl, ok := htmlLink["href"].(string)
 		if !ok {
-			return nil, fmt.Errorf("Invalid repo html link")
+			return nil, fmt.Errorf("invalid repo html link")
 		}
 
 		response = append(response, &GitPullRequest{
@@ -243,23 +243,23 @@ func (g *BitbucketGitProvider) GetLastCommitSha(staticContext *StaticGitContext)
 
 	commitsResponse, ok := commits.(map[string]interface{})
 	if !ok {
-		return "", fmt.Errorf("Invalid commits response")
+		return "", fmt.Errorf("invalid commits response")
 	}
 
 	valuesResponse, ok := commitsResponse["values"].([]interface{})
 	if !ok {
-		return "", fmt.Errorf("Invalid commits values")
+		return "", fmt.Errorf("invalid commits values")
 	}
 
 	commit := valuesResponse[0]
 	commitResponse, ok := commit.(map[string]interface{})
 	if !ok {
-		return "", fmt.Errorf("Invalid commit response")
+		return "", fmt.Errorf("invalid commit response")
 	}
 
 	commitHash, ok := commitResponse["hash"].(string)
 	if !ok {
-		return "", fmt.Errorf("Invalid commit hash")
+		return "", fmt.Errorf("invalid commit hash")
 	}
 
 	return commitHash, nil
@@ -298,12 +298,12 @@ func (g *BitbucketGitProvider) GetBranchByCommit(staticContext *StaticGitContext
 		}
 		commitsResponse, ok := commits.(map[string]interface{})
 		if !ok {
-			return "", fmt.Errorf("Invalid commits response")
+			return "", fmt.Errorf("invalid commits response")
 		}
 
 		valuesResponse, ok := commitsResponse["values"].([]interface{})
 		if !ok {
-			return "", fmt.Errorf("Invalid commits values")
+			return "", fmt.Errorf("invalid commits values")
 		}
 
 		if len(valuesResponse) == 0 {
@@ -313,12 +313,12 @@ func (g *BitbucketGitProvider) GetBranchByCommit(staticContext *StaticGitContext
 		for _, commit := range valuesResponse {
 			commitResponse, ok := commit.(map[string]interface{})
 			if !ok {
-				return "", fmt.Errorf("Invalid commit response")
+				return "", fmt.Errorf("invalid commit response")
 			}
 
 			commitHash, ok := commitResponse["hash"].(string)
 			if !ok {
-				return "", fmt.Errorf("Invalid commit hash")
+				return "", fmt.Errorf("invalid commit hash")
 			}
 			if commitHash == *staticContext.Sha {
 				branchName = branch.Name
@@ -383,22 +383,22 @@ func (g *BitbucketGitProvider) GetPrContext(staticContext *StaticGitContext) (*S
 	prMap := pr.(map[string]interface{})
 	source, ok := prMap["source"].(map[string]interface{})
 	if !ok {
-		return nil, fmt.Errorf("Invalid PR source")
+		return nil, fmt.Errorf("invalid PR source")
 	}
 
 	repository, ok := source["repository"].(map[string]interface{})
 	if !ok {
-		return nil, fmt.Errorf("Invalid PR repository")
+		return nil, fmt.Errorf("invalid PR repository")
 	}
 
 	fullName, ok := repository["full_name"].(string)
 	if !ok {
-		return nil, fmt.Errorf("Invalid PR repository full name")
+		return nil, fmt.Errorf("invalid PR repository full name")
 	}
 
 	parts := strings.Split(fullName, "/")
 	if len(parts) != 2 {
-		return nil, fmt.Errorf("Invalid PR repository full name")
+		return nil, fmt.Errorf("invalid PR repository full name")
 	}
 
 	repo.Owner = parts[0]
@@ -407,12 +407,12 @@ func (g *BitbucketGitProvider) GetPrContext(staticContext *StaticGitContext) (*S
 
 	branch, ok := source["branch"].(map[string]interface{})
 	if !ok {
-		return nil, fmt.Errorf("Invalid PR branch")
+		return nil, fmt.Errorf("invalid PR branch")
 	}
 
 	branchName, ok := branch["name"].(string)
 	if !ok {
-		return nil, fmt.Errorf("Invalid PR branch name")
+		return nil, fmt.Errorf("invalid PR branch name")
 	}
 
 	repo.Branch = &branchName
@@ -460,7 +460,7 @@ func (g *BitbucketGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGit
 
 func (g *BitbucketGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*string, error) {
 	client := g.getApiClient()
-	branches, err := client.Repositories.Repository.ListBranches(&bitbucket.RepositoryBranchOptions{
+	repo, err := client.Repositories.Repository.Get(&bitbucket.RepositoryOptions{
 		Owner:    staticContext.Owner,
 		RepoSlug: staticContext.Id,
 	})
@@ -468,19 +468,13 @@ func (g *BitbucketGitProvider) GetDefaultBranch(staticContext *StaticGitContext)
 		return nil, err
 	}
 
-	for _, branch := range branches.Branches {
-		if branch.Type == "main" {
-			return &branch.Name, nil
-		}
-	}
-
-	return nil, fmt.Errorf("Default branch not found")
+	return &repo.Mainbranch.Name, nil
 }
 
 func (b *BitbucketGitProvider) getOwnerAndRepoFromFullName(fullName string) (string, string, error) {
 	parts := strings.Split(fullName, "/")
 	if len(parts) < 2 {
-		return "", "", fmt.Errorf("Invalid full name")
+		return "", "", fmt.Errorf("invalid full name")
 	}
 
 	name := parts[len(parts)-1]

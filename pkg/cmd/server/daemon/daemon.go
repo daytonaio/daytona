@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/kardianos/service"
 )
 
@@ -135,6 +136,7 @@ func getServiceConfig() (*service.Config, error) {
 			svcConfig.Option = service.KeyValue{"UserService": true}
 		}
 	}
+	svcConfig.EnvVars = util.GetEnvVarsFromShell()
 
 	return svcConfig, nil
 }

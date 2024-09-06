@@ -7,10 +7,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
+	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/views"
+	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -31,8 +35,13 @@ var StartCmd = &cobra.Command{
 	Args:    cobra.RangeArgs(0, 1),
 	GroupID: util.WORKSPACE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {
-		var workspaceId string
+		var workspaceIdOrName string
 		var message string
+		var activeProfile config.Profile
+		var ideId string
+		var workspaceId string
+		var ideList []config.Ide
+		projectProviderMetadata := ""
 
 		if allFlag {
 			err := startAllWorkspaces()
@@ -66,26 +75,66 @@ var StartCmd = &cobra.Command{
 			if workspace == nil {
 				return
 			}
-			workspaceId = workspace.Name
+			workspaceIdOrName = workspace.Name
 		} else {
-			workspaceId = args[0]
+			workspaceIdOrName = args[0]
+		}
+
+		if codeFlag {
+			c, err := config.GetConfig()
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			ideList = config.GetIdeList()
+
+			activeProfile, err = c.GetActiveProfile()
+			if err != nil {
+				log.Fatal(err)
+			}
+			ideId = c.DefaultIdeId
+
+			wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceIdOrName).Execute()
+			if err != nil {
+				log.Fatal(apiclient.HandleErrorResponse(res, err))
+			}
+			workspaceId = wsInfo.Id
+			if startProjectFlag == "" {
+				startProjectFlag = wsInfo.Projects[0].Name
+			}
+			if ideId != "ssh" {
+				projectProviderMetadata, err = workspace_util.GetProjectProviderMetadata(wsInfo, wsInfo.Projects[0].Name)
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
 		}
 
 		if startProjectFlag == "" {
-			message = fmt.Sprintf("Workspace '%s' is starting", workspaceId)
-			res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspaceId).Execute()
+			message = fmt.Sprintf("Workspace '%s' is starting", workspaceIdOrName)
+			res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspaceIdOrName).Execute()
 			if err != nil {
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
 			}
+
+			views.RenderInfoMessage(message)
 		} else {
-			message = fmt.Sprintf("Project '%s' from workspace '%s' is starting", startProjectFlag, workspaceId)
-			res, err := apiClient.WorkspaceAPI.StartProject(ctx, workspaceId, startProjectFlag).Execute()
+			message = fmt.Sprintf("Project '%s' from workspace '%s' is starting", startProjectFlag, workspaceIdOrName)
+			res, err := apiClient.WorkspaceAPI.StartProject(ctx, workspaceIdOrName, startProjectFlag).Execute()
 			if err != nil {
 				log.Fatal(apiclient.HandleErrorResponse(res, err))
+			}
+
+			views.RenderInfoMessage(message)
+
+			if codeFlag {
+				ide_views.RenderIdeOpeningMessage(workspaceIdOrName, startProjectFlag, ideId, ideList)
+				err = openIDE(ideId, activeProfile, workspaceId, startProjectFlag, projectProviderMetadata)
+				if err != nil {
+					log.Fatal(err)
+				}
 			}
 		}
-
-		views.RenderInfoMessage(message)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) != 0 {
@@ -99,6 +148,7 @@ var StartCmd = &cobra.Command{
 func init() {
 	StartCmd.PersistentFlags().StringVarP(&startProjectFlag, "project", "p", "", "Start a single project in the workspace (project name)")
 	StartCmd.PersistentFlags().BoolVarP(&allFlag, "all", "a", false, "Start all workspaces")
+	StartCmd.PersistentFlags().BoolVarP(&codeFlag, "code", "c", false, "Open the workspace in the IDE after workspace start")
 
 	err := StartCmd.RegisterFlagCompletionFunc("project", getProjectNameCompletions)
 	if err != nil {
