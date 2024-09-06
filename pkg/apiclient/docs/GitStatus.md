@@ -6,6 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **CurrentBranch** | **string** |  | 
 **FileStatus** | [**[]FileStatus**](FileStatus.md) |  | 
+**UnpushedCommits** | Pointer to **int32** |  | [optional] 
 
 ## Methods
 
@@ -65,6 +66,31 @@ and a boolean to check if the value has been set.
 
 SetFileStatus sets FileStatus field to given value.
 
+
+### GetUnpushedCommits
+
+`func (o *GitStatus) GetUnpushedCommits() int32`
+
+GetUnpushedCommits returns the UnpushedCommits field if non-nil, zero value otherwise.
+
+### GetUnpushedCommitsOk
+
+`func (o *GitStatus) GetUnpushedCommitsOk() (*int32, bool)`
+
+GetUnpushedCommitsOk returns a tuple with the UnpushedCommits field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetUnpushedCommits
+
+`func (o *GitStatus) SetUnpushedCommits(v int32)`
+
+SetUnpushedCommits sets UnpushedCommits field to given value.
+
+### HasUnpushedCommits
+
+`func (o *GitStatus) HasUnpushedCommits() bool`
+
+HasUnpushedCommits returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

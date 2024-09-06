@@ -2215,6 +2215,9 @@
                     "items": {
                         "$ref": "#/definitions/FileStatus"
                     }
+                },
+                "unpushedCommits": {
+                    "type": "integer"
                 }
             }
         },
