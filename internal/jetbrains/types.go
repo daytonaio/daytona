@@ -25,4 +25,5 @@ const (
 	WebStorm Id = "webstorm"
 	Rider    Id = "rider"
 	RubyMine Id = "rubymine"
+	Fleet    Id = "fleet"
 )

@@ -28,6 +28,7 @@ func GetIdeList() []Ide {
 		{"browser", "VS Code - Browser"},
 		{"cursor", "Cursor"},
 		{"ssh", "Terminal SSH"},
+		{"fleet", "Jetbrains Fleet"},
 	}
 
 	sortedJbIdes := []Ide{}

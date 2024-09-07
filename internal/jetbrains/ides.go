@@ -13,6 +13,7 @@ func GetIdes() map[Id]Ide {
 		WebStorm: webstorm,
 		Rider:    rider,
 		RubyMine: rubymine,
+		Fleet:    fleet,
 	}
 }
 
@@ -85,5 +86,14 @@ var rubymine = Ide{
 	UrlTemplates: UrlTemplates{
 		Amd64: "https://download.jetbrains.com/ruby/RubyMine-%s.tar.gz",
 		Arm64: "https://download.jetbrains.com/ruby/RubyMine-%s-aarch64.tar.gz",
+	},
+}
+
+var fleet = Ide{
+	ProductCode: "FLL",
+	Name:        "Fleet",
+	UrlTemplates: UrlTemplates{
+		Amd64: "https://download.jetbrains.com/product?code=FLL&release.type=preview&release.type=eap&platform=linux_x64",
+		Arm64: "https://download.jetbrains.com/product?code=FLL&release.type=preview&release.type=eap&platform=linux_aarch64",
 	},
 }
