@@ -11,6 +11,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	workspace_cmd "github.com/daytonaio/daytona/pkg/cmd/workspace"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/target"
@@ -120,14 +121,13 @@ func RemoveTargetWorkspaces(ctx context.Context, client *apiclient.APIClient, ta
 		if workspace.Target != target {
 			continue
 		}
-
-		res, err := client.WorkspaceAPI.RemoveWorkspace(ctx, workspace.Id).Execute()
+		err := workspace_cmd.RemoveWorkspace(ctx, client, &workspace, false)
 		if err != nil {
-			log.Errorf("Failed to delete workspace %s: %v", workspace.Name, apiclient_util.HandleErrorResponse(res, err))
+			log.Errorf("Failed to delete workspace %s: %v", workspace.Name, err)
 			continue
 		}
 
-		views.RenderLine(fmt.Sprintf("- Workspace %s successfully deleted\n", workspace.Name))
+		views.RenderInfoMessage(fmt.Sprintf("- Workspace '%s' successfully deleted", workspace.Name))
 	}
 
 	return nil
