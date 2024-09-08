@@ -2218,6 +2218,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/FileStatus"
                     }
+                },
+                "unpushedCommits": {
+                    "type": "integer"
                 }
             }
         },

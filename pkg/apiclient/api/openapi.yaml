@@ -1778,6 +1778,7 @@ components:
           name: name
           staging: null
           worktree: null
+        unpushedCommits: 0
         currentBranch: currentBranch
       properties:
         currentBranch:
@@ -1786,6 +1787,8 @@ components:
           items:
             $ref: '#/components/schemas/FileStatus'
           type: array
+        unpushedCommits:
+          type: integer
       required:
       - currentBranch
       - fileStatus
@@ -1931,9 +1934,10 @@ components:
               name: name
               staging: null
               worktree: null
+            unpushedCommits: 0
             currentBranch: currentBranch
           updatedAt: updatedAt
-          uptime: 0
+          uptime: 6
         repository:
           owner: owner
           path: path
@@ -2073,9 +2077,10 @@ components:
             name: name
             staging: null
             worktree: null
+          unpushedCommits: 0
           currentBranch: currentBranch
         updatedAt: updatedAt
-        uptime: 0
+        uptime: 6
       properties:
         gitStatus:
           $ref: '#/components/schemas/GitStatus'
@@ -2255,6 +2260,7 @@ components:
             name: name
             staging: null
             worktree: null
+          unpushedCommits: 0
           currentBranch: currentBranch
         uptime: 0
       properties:
@@ -2309,9 +2315,10 @@ components:
                 name: name
                 staging: null
                 worktree: null
+              unpushedCommits: 0
               currentBranch: currentBranch
             updatedAt: updatedAt
-            uptime: 0
+            uptime: 6
           repository:
             owner: owner
             path: path
@@ -2347,9 +2354,10 @@ components:
                 name: name
                 staging: null
                 worktree: null
+              unpushedCommits: 0
               currentBranch: currentBranch
             updatedAt: updatedAt
-            uptime: 0
+            uptime: 6
           repository:
             owner: owner
             path: path
@@ -2408,9 +2416,10 @@ components:
                 name: name
                 staging: null
                 worktree: null
+              unpushedCommits: 0
               currentBranch: currentBranch
             updatedAt: updatedAt
-            uptime: 0
+            uptime: 6
           repository:
             owner: owner
             path: path
@@ -2446,9 +2455,10 @@ components:
                 name: name
                 staging: null
                 worktree: null
+              unpushedCommits: 0
               currentBranch: currentBranch
             updatedAt: updatedAt
-            uptime: 0
+            uptime: 6
           repository:
             owner: owner
             path: path
