@@ -17,7 +17,7 @@ import (
 	list_view "github.com/daytonaio/daytona/pkg/views/workspace/list"
 )
 
-func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO) []list.Item {
+func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO, isMultipleSelect bool) []list.Item {
 
 	// Initialize an empty list of items.
 	items := []list.Item{}
@@ -62,15 +62,19 @@ func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO) []list.Item {
 			choiceProperty: workspace,
 		}
 
+		if isMultipleSelect {
+			newItem.isMultipleSelect = true
+		}
+
 		items = append(items, newItem)
 	}
 
 	return items
 }
 
-func getWorkspaceProgramEssentials(modelTitle string, actionVerb string, workspaces []apiclient.WorkspaceDTO, footerText string) tea.Model {
+func getWorkspaceProgramEssentials(modelTitle string, actionVerb string, workspaces []apiclient.WorkspaceDTO, footerText string, isMultipleSelect bool) tea.Model {
 
-	items := generateWorkspaceList(workspaces)
+	items := generateWorkspaceList(workspaces, isMultipleSelect)
 
 	d := ItemDelegate[apiclient.WorkspaceDTO]{}
 
@@ -101,7 +105,7 @@ func getWorkspaceProgramEssentials(modelTitle string, actionVerb string, workspa
 func selectWorkspacePrompt(workspaces []apiclient.WorkspaceDTO, actionVerb string, choiceChan chan<- *apiclient.WorkspaceDTO) {
 	list_view.SortWorkspaces(&workspaces, true)
 
-	p := getWorkspaceProgramEssentials("Select a Workspace To ", actionVerb, workspaces, "")
+	p := getWorkspaceProgramEssentials("Select a Workspace To ", actionVerb, workspaces, "", false)
 	if m, ok := p.(model[apiclient.WorkspaceDTO]); ok && m.choice != nil {
 		choiceChan <- m.choice
 	} else {
@@ -121,7 +125,7 @@ func selectWorkspacesFromPrompt(workspaces []apiclient.WorkspaceDTO, actionVerb 
 	list_view.SortWorkspaces(&workspaces, true)
 
 	footerText := lipgloss.NewStyle().Bold(true).PaddingLeft(2).Render("\n\nPress 'x' to mark workspace for deletion.\nPress 'enter' to delete the current/marked workspaces.")
-	p := getWorkspaceProgramEssentials("Select Workspaces To ", actionVerb, workspaces, footerText)
+	p := getWorkspaceProgramEssentials("Select Workspaces To ", actionVerb, workspaces, footerText, true)
 
 	m, ok := p.(model[apiclient.WorkspaceDTO])
 	if ok && m.choices != nil {

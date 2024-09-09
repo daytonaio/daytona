@@ -41,6 +41,7 @@ type item[T any] struct {
 	id, title, desc, createdTime, uptime, target string
 	choiceProperty                               T
 	markForDeletion                              bool
+	isMultipleSelect                             bool
 }
 
 func (i item[T]) Title() string       { return i.title }
@@ -204,6 +205,9 @@ func (d ItemDelegate[T]) Update(msg tea.Msg, m *list.Model) tea.Cmd {
 	case tea.KeyMsg:
 		switch keypress := msg.String(); keypress {
 		case "x":
+			if !i.isMultipleSelect {
+				return nil
+			}
 			if i.markForDeletion {
 				i.title = strings.TrimPrefix(i.title, statusMessageDangerStyle("Delete: "))
 				i.markForDeletion = false
