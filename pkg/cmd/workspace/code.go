@@ -162,10 +162,9 @@ func selectWorkspaceProject(workspaceId string, profile *config.Profile) (*apicl
 	return nil, errors.New("no projects found in workspace")
 }
 
-
 func openIDE(ideId string, activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string, yesFlag bool) error {
-  telemetry.AdditionalData["ide"] = ideId
-  
+	telemetry.AdditionalData["ide"] = ideId
+
 	switch ideId {
 	case "vscode":
 		return ide.OpenVSCode(activeProfile, workspaceId, projectName, projectProviderMetadata)

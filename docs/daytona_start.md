@@ -12,7 +12,7 @@ daytona start [WORKSPACE] [flags]
   -a, --all              Start all workspaces
   -c, --code             Open the workspace in the IDE after workspace start
   -p, --project string   Start a single project in the workspace (project name)
-      --yes              Automatically confirm any prompts
+  -y, --yes              Automatically confirm any prompts
 ```
 
 ### Options inherited from parent commands

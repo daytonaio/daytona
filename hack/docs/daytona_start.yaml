@@ -14,6 +14,7 @@ options:
       shorthand: p
       usage: Start a single project in the workspace (project name)
     - name: "yes"
+      shorthand: "y"
       default_value: "false"
       usage: Automatically confirm any prompts
 inherited_options:
