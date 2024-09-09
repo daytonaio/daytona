@@ -45,7 +45,7 @@ func selectPrebuildPrompt(prebuilds []apiclient.PrebuildDTO, actionVerb string, 
 		Bold(true).
 		Padding(0, 0, 0, 1)
 
-	d.Styles.SelectedDesc = d.Styles.SelectedTitle.Copy().Foreground(views.DimmedGreen)
+	d.Styles.SelectedDesc = d.Styles.SelectedTitle.Foreground(views.DimmedGreen)
 
 	l := list.New(items, d, 0, 0)
 

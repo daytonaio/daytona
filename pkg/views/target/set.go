@@ -34,7 +34,7 @@ func NewTargetNameInput(targetName *string, existingTargetNames []string) error 
 			return nil
 		})
 
-	form := huh.NewForm(huh.NewGroup(input)).WithTheme(views.GetCustomTheme())
+	form := huh.NewForm(huh.NewGroup(input)).WithTheme(views.GetCustomTheme()).WithHeight(5)
 	err := form.Run()
 	if err != nil {
 		return err
@@ -267,7 +267,7 @@ func getFilePicker(name string, property apiclient.ProviderProviderTargetPropert
 				Title(name).
 				Options(options...).
 				Value(value),
-		),
+		).WithHeight(9),
 		huh.NewGroup(customPathInput).WithHideFunc(func() bool {
 			return *value != "custom-path"
 		}),

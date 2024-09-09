@@ -162,7 +162,7 @@ func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData)
 					buildOptions...,
 				).
 				Value(&projectConfiguration.BuildChoice),
-		),
+		).WithHeight(8),
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Custom container image").
@@ -170,19 +170,19 @@ func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData)
 			huh.NewInput().
 				Title("Container user").
 				Value(&projectConfiguration.User),
-		).WithHideFunc(func() bool {
+		).WithHeight(5).WithHideFunc(func() bool {
 			return projectConfiguration.BuildChoice != string(views_util.CUSTOMIMAGE)
 		}),
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Devcontainer file path").
 				Value(&projectConfiguration.DevcontainerFilePath).Validate(validateDevcontainerFilename),
-		).WithHideFunc(func() bool {
+		).WithHeight(5).WithHideFunc(func() bool {
 			return projectConfiguration.BuildChoice != string(views_util.DEVCONTAINER)
 		}),
 		huh.NewGroup(
 			views.GetEnvVarsInput(&projectConfiguration.EnvVars),
-		),
+		).WithHeight(12),
 	).WithTheme(views.GetCustomTheme())
 
 	keyMap := huh.NewDefaultKeyMap()
@@ -190,6 +190,7 @@ func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData)
 		NewLine: key.NewBinding(key.WithKeys("alt+enter"), key.WithHelp("alt+enter", "new line")),
 		Next:    key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "next")),
 		Prev:    key.NewBinding(key.WithKeys("shift+tab"), key.WithHelp("shift+tab", "prev")),
+		Submit:  key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "submit")),
 	}
 
 	form = form.WithKeyMap(keyMap)

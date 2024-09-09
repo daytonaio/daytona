@@ -48,7 +48,7 @@ func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 	var isSelected = index == m.Index()
 	itemStyles := lipgloss.NewStyle().Padding(0, 0, 0, 2)
 
-	ideString := itemStyles.Copy().Render(i.name)
+	ideString := itemStyles.Render(i.name)
 
 	if isSelected {
 		selectedItemStyle := lipgloss.NewStyle().
@@ -56,7 +56,7 @@ func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 			BorderForeground(views.Green).
 			Bold(true).
 			Padding(0, 0, 0, 1)
-		ideString = selectedItemStyle.Copy().Foreground(views.Green).Render(i.name)
+		ideString = selectedItemStyle.Foreground(views.Green).Render(i.name)
 	}
 	s.WriteString(ideString)
 	s.WriteRune('\n')

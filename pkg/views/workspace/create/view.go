@@ -46,7 +46,7 @@ func NewStyles(lg *lipgloss.Renderer) *Styles {
 		Bold(true)
 	s.Highlight = lg.NewStyle().
 		Foreground(lipgloss.Color("212"))
-	s.ErrorHeaderText = s.HeaderText.Copy().
+	s.ErrorHeaderText = s.HeaderText.
 		Foreground(views.Green)
 	s.Help = lg.NewStyle().
 		Foreground(lipgloss.Color("240"))
@@ -89,7 +89,7 @@ func GetRepositoryFromUrlInput(multiProject bool, projectOrder int, apiClient *a
 	m.form = huh.NewForm(
 		huh.NewGroup(
 			initialRepoInput,
-		),
+		).WithHeight(5),
 	).WithTheme(dTheme).
 		WithWidth(maxWidth).
 		WithShowHelp(false).

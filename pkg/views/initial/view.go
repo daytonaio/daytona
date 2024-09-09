@@ -94,7 +94,7 @@ func NewModel() Model {
 			huh.NewSelect[string]().
 				Key("command").
 				Options(options...).
-				Value(&m.choice),
+				Value(&m.choice).Height(10),
 		),
 	).WithTheme(views.GetInitialCommandTheme()).WithShowHelp(false)
 

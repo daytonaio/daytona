@@ -145,7 +145,7 @@ func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *h
 				Title("Frps Protocol").
 				Value(&m.config.Frps.Protocol),
 		),
-	).WithTheme(views.GetCustomTheme())
+	).WithTheme(views.GetCustomTheme()).WithHeight(15)
 }
 
 func (m Model) Init() tea.Cmd {

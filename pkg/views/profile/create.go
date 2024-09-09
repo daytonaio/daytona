@@ -76,7 +76,7 @@ func ProfileCreationView(c *config.Config, profileAddView *ProfileAddView, editi
 					return nil
 				}),
 		),
-	).WithTheme(views.GetCustomTheme())
+	).WithTheme(views.GetCustomTheme()).WithHeight(11)
 
 	err := form.Run()
 	if err != nil {
