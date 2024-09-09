@@ -16,7 +16,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
+	log "github.com/sirupsen/logrus"
 )
 
 // GetProjectConfig godoc
@@ -77,9 +77,7 @@ func GetDefaultProjectConfig(ctx *gin.Context) {
 		if config.IsProjectConfigNotFound(err) {
 			statusCode = http.StatusNotFound
 			ctx.AbortWithStatus(statusCode)
-			go func() {
-				log.Printf("Project config not added for git url: %s", decodedURLParam)
-			}()
+			log.Debugf("Project config not added for git url: %s", decodedURLParam)
 			return
 		}
 		ctx.AbortWithError(statusCode, fmt.Errorf("failed to find project config by git url: %s", err.Error()))
