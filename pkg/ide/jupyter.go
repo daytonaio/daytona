@@ -45,7 +45,7 @@ func OpenJupyterIDE(activeProfile config.Profile, workspaceId, projectName, proj
 	}
 
 	// Check and install Jupyter Notebook if necessary
-	if err := installJupyter(projectHostname); err != nil {
+	if err := ensureJupyterInstalled(projectHostname); err != nil {
 		return err
 	}
 
@@ -187,8 +187,8 @@ func installPythonWithPackageManager(hostname, manager string) error {
 	return runRemoteCommand(hostname, installCmd)
 }
 
-// installJupyter checks if Jupyter Notebook is installed and installs it if necessary
-func installJupyter(hostname string) error {
+// ensureJupyterInstalled checks if Jupyter Notebook is installed and installs it if necessary
+func ensureJupyterInstalled(hostname string) error {
 	views.RenderInfoMessageBold("Checking Jupyter Notebook installation...")
 
 	// Check if Jupyter is installed
