@@ -117,30 +117,17 @@ func (g *GitHubGitProvider) GetRepositories(namespace string, options ListOption
 			return nil, g.FormatError(err)
 		}
 
-		for _, repo := range repoList.Repositories {
-			u, err := url.Parse(*repo.HTMLURL)
-			if err != nil {
-				return nil, err
-			}
-			repos = append(repos, &GitRepository{
-				Id:     *repo.Name,
-				Name:   *repo.Name,
-				Url:    *repo.HTMLURL,
-				Branch: *repo.DefaultBranch,
-				Owner:  *repo.Owner.Login,
-				Source: u.Host,
-			})
-		}
-
-		// Break if there is no next page
-		if response.NextPage == 0 {
-			break
-		}
-
-		opts.Page = response.NextPage
+		repos = append(repos, &GitRepository{
+			Id:     *repo.Name,
+			Name:   *repo.Name,
+			Url:    *repo.HTMLURL,
+			Branch: *repo.DefaultBranch,
+			Owner:  *repo.Owner.Login,
+			Source: u.Host,
+		})
 	}
 
-	return repos, nil
+	return repos, err
 }
 
 func (g *GitHubGitProvider) GetRepoBranches(repositoryId string, namespaceId string, options ListOptions) ([]*GitBranch, error) {

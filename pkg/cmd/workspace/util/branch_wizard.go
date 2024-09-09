@@ -29,8 +29,8 @@ type BranchWizardConfig struct {
 func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, error) {
 	var branchList []apiclient.GitBranch
 	var checkoutOptions []selection.CheckoutOption
-	page := 1
-	perPage := 100
+	page := int32(1)
+	perPage := int32(100)
 	var err error
 	ctx := context.Background()
 
@@ -48,7 +48,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 		branchList = append(branchList, branches...)
 
 		// Break for git providers with unsupported pagination OR on reaching exhausted items.
-		if isPaginationUnsupportedGitProvider(config.ProviderId) || len(branches) < perPage {
+		if isGitProviderWithUnsupportedPagination(config.ProviderId) || int32(len(branches)) < perPage {
 			break
 		}
 
@@ -83,7 +83,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 		prList = append(prList, pullRequests...)
 
 		// Break for git providers with unsupported pagination OR on reaching exhausted items.
-		if isPaginationUnsupportedGitProvider(config.ProviderId) || len(pullRequests) < perPage {
+		if isGitProviderWithUnsupportedPagination(config.ProviderId) || int32(len(pullRequests)) < perPage {
 			break
 		}
 
