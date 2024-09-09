@@ -44,7 +44,7 @@ func OpenJupyterIDE(activeProfile config.Profile, workspaceId, projectName, proj
 		return err
 	}
 
-	// Install Jupyter Notebook
+	// Check and install Jupyter Notebook if necessary
 	if err := installJupyter(projectHostname); err != nil {
 		return err
 	}
@@ -63,8 +63,6 @@ func ensurePythonInstalled(hostname string, yesFlag bool) error {
 
 	// Check if Python is installed
 	if err := runRemoteCommand(hostname, "python3 --version"); err != nil {
-		log.Error("Python3 is not installed on the remote workspace.")
-
 		if yesFlag {
 			return installPython(hostname)
 		}
@@ -108,8 +106,6 @@ func ensurePipInstalled(hostname string, yesFlag bool) error {
 
 	// Check if pip is installed
 	if err := runRemoteCommand(hostname, "python3 -m pip --version"); err != nil {
-		log.Error("pip is not installed on the remote workspace.")
-
 		if yesFlag {
 			return installPip(hostname)
 		}
@@ -191,8 +187,17 @@ func installPythonWithPackageManager(hostname, manager string) error {
 	return runRemoteCommand(hostname, installCmd)
 }
 
-// installJupyter installs Jupyter Notebook in a virtual environment on the remote workspace.
+// installJupyter checks if Jupyter Notebook is installed and installs it if necessary
 func installJupyter(hostname string) error {
+	views.RenderInfoMessageBold("Checking Jupyter Notebook installation...")
+
+	// Check if Jupyter is installed
+	checkCmd := ". ~/.jupyter_venv/bin/activate && jupyter --version"
+	if err := runRemoteCommand(hostname, checkCmd); err == nil {
+		views.RenderInfoMessageBold("Jupyter Notebook is already installed.")
+		return nil
+	}
+
 	views.RenderInfoMessageBold("Installing python3-venv...")
 	installVenvCmd := "sudo apt-get update && sudo apt-get install -y python3-venv"
 	if err := runRemoteCommand(hostname, installVenvCmd); err != nil {
