@@ -1833,6 +1833,10 @@ paths:
         name: workspaceId
         required: true
         type: string
+      - description: Verbose
+        in: query
+        name: verbose
+        type: boolean
       produces:
       - application/json
       responses:

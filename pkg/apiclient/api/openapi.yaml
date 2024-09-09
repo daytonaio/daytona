@@ -1092,6 +1092,11 @@ paths:
         required: true
         schema:
           type: string
+      - description: Verbose
+        in: query
+        name: verbose
+        schema:
+          type: boolean
       responses:
         "200":
           content:
