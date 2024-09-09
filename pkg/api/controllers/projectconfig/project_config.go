@@ -16,6 +16,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 )
 
 // GetProjectConfig godoc
@@ -57,30 +58,35 @@ func GetProjectConfig(ctx *gin.Context) {
 //
 //	@id				GetDefaultProjectConfig
 func GetDefaultProjectConfig(ctx *gin.Context) {
-	gitUrl := ctx.Param("gitUrl")
+    gitUrl := ctx.Param("gitUrl")
 
-	decodedURLParam, err := url.QueryUnescape(gitUrl)
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode query param: %s", err.Error()))
-		return
-	}
+    decodedURLParam, err := url.QueryUnescape(gitUrl)
+    if err != nil {
+        ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to decode query param: %s", err.Error()))
+        return
+    }
 
-	server := server.GetInstance(nil)
+    server := server.GetInstance(nil)
 
-	projectConfigs, err := server.ProjectConfigService.Find(&config.ProjectConfigFilter{
-		Url:     &decodedURLParam,
-		Default: util.Pointer(true),
-	})
-	if err != nil {
+    projectConfigs, err := server.ProjectConfigService.Find(&config.ProjectConfigFilter{
+        Url:     &decodedURLParam,
+        Default: util.Pointer(true),
+    })
+    if err != nil {
 		statusCode := http.StatusInternalServerError
-		if config.IsProjectConfigNotFound(err) {
+        if config.IsProjectConfigNotFound(err) {
 			statusCode = http.StatusNotFound
-		}
-		ctx.AbortWithError(statusCode, fmt.Errorf("failed to find project config by git url: %s", err.Error()))
-		return
-	}
+            ctx.AbortWithStatus(statusCode)
+			go func() {
+                log.Printf("Project config not found for URL: %s", decodedURLParam)
+            }()
+            return
+        }
+        ctx.AbortWithError(statusCode, fmt.Errorf("failed to find project config by git url: %s", err.Error()))
+        return
+    }
 
-	ctx.JSON(200, projectConfigs)
+    ctx.JSON(200, projectConfigs)
 }
 
 // ListProjectConfigs godoc
