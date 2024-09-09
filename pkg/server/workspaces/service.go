@@ -24,7 +24,7 @@ import (
 
 type IWorkspaceService interface {
 	CreateWorkspace(ctx context.Context, req dto.CreateWorkspaceDTO) (*workspace.Workspace, error)
-	GetWorkspace(ctx context.Context, workspaceId string) (*dto.WorkspaceDTO, error)
+	GetWorkspace(ctx context.Context, workspaceId string, verbose bool) (*dto.WorkspaceDTO, error)
 	GetWorkspaceLogReader(workspaceId string) (io.Reader, error)
 	GetProjectLogReader(workspaceId, projectName string) (io.Reader, error)
 	ListWorkspaces(ctx context.Context, verbose bool) ([]dto.WorkspaceDTO, error)

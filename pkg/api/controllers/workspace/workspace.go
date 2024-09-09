@@ -20,16 +20,28 @@ import (
 //	@Description	Get workspace info
 //	@Produce		json
 //	@Param			workspaceId	path		string	true	"Workspace ID or Name"
+//	@Param			verbose		query		bool	false	"Verbose"
 //	@Success		200			{object}	WorkspaceDTO
 //	@Router			/workspace/{workspaceId} [get]
 //
 //	@id				GetWorkspace
 func GetWorkspace(ctx *gin.Context) {
 	workspaceId := ctx.Param("workspaceId")
+	verboseQuery := ctx.Query("verbose")
+	verbose := false
+	var err error
+
+	if verboseQuery != "" {
+		verbose, err = strconv.ParseBool(verboseQuery)
+		if err != nil {
+			ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for verbose flag"))
+			return
+		}
+	}
 
 	server := server.GetInstance(nil)
 
-	w, err := server.WorkspaceService.GetWorkspace(ctx.Request.Context(), workspaceId)
+	w, err := server.WorkspaceService.GetWorkspace(ctx.Request.Context(), workspaceId, verbose)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get workspace: %w", err))
 		return

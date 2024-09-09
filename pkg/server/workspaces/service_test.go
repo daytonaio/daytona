@@ -160,7 +160,7 @@ func TestWorkspaceService(t *testing.T) {
 	t.Run("GetWorkspace", func(t *testing.T) {
 		provisioner.On("GetWorkspaceInfo", mock.Anything, mock.Anything, &target).Return(&workspaceInfo, nil)
 
-		workspace, err := service.GetWorkspace(context.TODO(), createWorkspaceDto.Id)
+		workspace, err := service.GetWorkspace(context.TODO(), createWorkspaceDto.Id, true)
 
 		require.Nil(t, err)
 		require.NotNil(t, workspace)
@@ -169,7 +169,7 @@ func TestWorkspaceService(t *testing.T) {
 	})
 
 	t.Run("GetWorkspace fails when workspace not found", func(t *testing.T) {
-		_, err := service.GetWorkspace(context.TODO(), "invalid-id")
+		_, err := service.GetWorkspace(context.TODO(), "invalid-id", true)
 		require.NotNil(t, err)
 		require.Equal(t, workspaces.ErrWorkspaceNotFound, err)
 	})
@@ -247,7 +247,7 @@ func TestWorkspaceService(t *testing.T) {
 
 		require.Nil(t, err)
 
-		_, err = service.GetWorkspace(context.TODO(), createWorkspaceDto.Id)
+		_, err = service.GetWorkspace(context.TODO(), createWorkspaceDto.Id, true)
 		require.Equal(t, workspaces.ErrWorkspaceNotFound, err)
 	})
 
@@ -285,7 +285,7 @@ func TestWorkspaceService(t *testing.T) {
 
 		require.Nil(t, err)
 
-		_, err = service.GetWorkspace(context.TODO(), createWorkspaceDto.Id)
+		_, err = service.GetWorkspace(context.TODO(), createWorkspaceDto.Id, true)
 		require.Equal(t, workspaces.ErrWorkspaceNotFound, err)
 	})
 

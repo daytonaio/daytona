@@ -55,7 +55,7 @@ var SshCmd = &cobra.Command{
 				return
 			}
 		} else {
-			workspace, err = apiclient_util.GetWorkspace(args[0])
+			workspace, err = apiclient_util.GetWorkspace(args[0], true)
 			if err != nil {
 				log.Fatal(err)
 			}

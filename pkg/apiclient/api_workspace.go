@@ -152,6 +152,13 @@ type ApiGetWorkspaceRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceAPIService
 	workspaceId string
+	verbose     *bool
+}
+
+// Verbose
+func (r ApiGetWorkspaceRequest) Verbose(verbose bool) ApiGetWorkspaceRequest {
+	r.verbose = &verbose
+	return r
 }
 
 func (r ApiGetWorkspaceRequest) Execute() (*WorkspaceDTO, *http.Response, error) {
@@ -198,6 +205,9 @@ func (a *WorkspaceAPIService) GetWorkspaceExecute(r ApiGetWorkspaceRequest) (*Wo
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.verbose != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "verbose", r.verbose, "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

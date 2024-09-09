@@ -22,7 +22,7 @@ var infoCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var workspace *apiclient.WorkspaceDTO
 
-		workspace, err := apiclient_util.GetWorkspace(workspaceId)
+		workspace, err := apiclient_util.GetWorkspace(workspaceId, true)
 		if err != nil {
 			log.Fatal(err)
 		}

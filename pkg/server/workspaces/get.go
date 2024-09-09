@@ -14,7 +14,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *WorkspaceService) GetWorkspace(ctx context.Context, workspaceId string) (*dto.WorkspaceDTO, error) {
+func (s *WorkspaceService) GetWorkspace(ctx context.Context, workspaceId string, verbose bool) (*dto.WorkspaceDTO, error) {
 	ws, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
 		return nil, ErrWorkspaceNotFound
@@ -22,6 +22,10 @@ func (s *WorkspaceService) GetWorkspace(ctx context.Context, workspaceId string)
 
 	response := dto.WorkspaceDTO{
 		Workspace: *ws,
+	}
+
+	if !verbose {
+		return &response, nil
 	}
 
 	target, err := s.targetStore.Find(ws.Target)
