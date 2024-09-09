@@ -112,7 +112,7 @@ func GetAgentApiClient(apiUrl, apiKey, clientId string, telemetryEnabled bool) (
 	return apiClient, nil
 }
 
-func GetWorkspace(workspaceNameOrId string) (*apiclient.WorkspaceDTO, error) {
+func GetWorkspace(workspaceNameOrId string, verbose bool) (*apiclient.WorkspaceDTO, error) {
 	ctx := context.Background()
 
 	apiClient, err := GetApiClient(nil)
@@ -120,7 +120,7 @@ func GetWorkspace(workspaceNameOrId string) (*apiclient.WorkspaceDTO, error) {
 		return nil, err
 	}
 
-	workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceNameOrId).Execute()
+	workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceNameOrId).Verbose(verbose).Execute()
 	if err != nil {
 		return nil, HandleErrorResponse(res, err)
 	}

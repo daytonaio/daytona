@@ -45,7 +45,7 @@ var PortForwardCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		workspace, err := apiclient.GetWorkspace(args[1])
+		workspace, err := apiclient.GetWorkspace(args[1], true)
 		if err != nil {
 			log.Fatal(err)
 		}

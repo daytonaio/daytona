@@ -84,7 +84,7 @@ Name | Type | Description  | Notes
 
 ## GetWorkspace
 
-> WorkspaceDTO GetWorkspace(ctx, workspaceId).Execute()
+> WorkspaceDTO GetWorkspace(ctx, workspaceId).Verbose(verbose).Execute()
 
 Get workspace info
 
@@ -104,10 +104,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
+	verbose := true // bool | Verbose (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceAPI.GetWorkspace(context.Background(), workspaceId).Execute()
+	resp, r, err := apiClient.WorkspaceAPI.GetWorkspace(context.Background(), workspaceId).Verbose(verbose).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.GetWorkspace``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -133,6 +134,7 @@ Other parameters are passed through a pointer to a apiGetWorkspaceRequest struct
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
+ **verbose** | **bool** | Verbose | 
 
 ### Return type
 

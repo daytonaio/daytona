@@ -53,7 +53,7 @@ var SshProxyCmd = &cobra.Command{
 			}
 		}
 
-		workspace, err := apiclient.GetWorkspace(workspaceId)
+		workspace, err := apiclient.GetWorkspace(workspaceId, true)
 		if err != nil {
 			log.Fatal(err)
 		}

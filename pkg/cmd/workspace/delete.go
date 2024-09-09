@@ -83,7 +83,7 @@ var DeleteCmd = &cobra.Command{
 			}
 		} else {
 			for _, arg := range args {
-				workspace, err := apiclient_util.GetWorkspace(arg)
+				workspace, err := apiclient_util.GetWorkspace(arg, false)
 				if err != nil {
 					log.Error(fmt.Sprintf("[ %s ] : %v", arg, err))
 					continue
