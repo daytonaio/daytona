@@ -238,7 +238,7 @@ func (m SummaryModel) View() string {
 		return ""
 	}
 
-	view := m.form.View() + configurationHelpLine
+	view := m.form.WithHeight(5).View() + "\n" + configurationHelpLine
 
 	if len(m.projectList) > 1 || len(m.projectList) == 1 && ProjectsConfigurationChanged {
 		summary, err := RenderSummary(m.name, m.projectList, m.defaults, m.nameLabel)

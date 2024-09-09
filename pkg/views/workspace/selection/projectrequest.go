@@ -139,17 +139,17 @@ func (d projectRequestItemDelegate) Render(w io.Writer, m list.Model, index int,
 
 	baseStyles := lipgloss.NewStyle().Padding(0, 0, 0, 2)
 
-	name := baseStyles.Copy().Render(i.Name())
-	imageLine := baseStyles.Copy().Render(i.Image())
-	devcontainerConfigLine := baseStyles.Copy().Render(i.DevcontainerConfig())
-	userLine := baseStyles.Copy().Foreground(views.Gray).Render(i.User())
+	name := baseStyles.Render(i.Name())
+	imageLine := baseStyles.Render(i.Image())
+	devcontainerConfigLine := baseStyles.Render(i.DevcontainerConfig())
+	userLine := baseStyles.Foreground(views.Gray).Render(i.User())
 
 	// Adjust styles as the user moves through the menu
 	if isSelected {
-		name = selectedStyles.Copy().Foreground(views.Green).Render(i.Name())
-		devcontainerConfigLine = selectedStyles.Copy().Foreground(views.DimmedGreen).Render(i.DevcontainerConfig())
-		imageLine = selectedStyles.Copy().Foreground(views.DimmedGreen).Render(i.Image())
-		userLine = selectedStyles.Copy().Foreground(views.Gray).Render(i.User())
+		name = selectedStyles.Foreground(views.Green).Render(i.Name())
+		devcontainerConfigLine = selectedStyles.Foreground(views.DimmedGreen).Render(i.DevcontainerConfig())
+		imageLine = selectedStyles.Foreground(views.DimmedGreen).Render(i.Image())
+		userLine = selectedStyles.Foreground(views.Gray).Render(i.User())
 	}
 
 	// Render to the terminal

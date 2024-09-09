@@ -48,7 +48,7 @@ var setCmd = &cobra.Command{
 				huh.NewGroup(
 					views.GetEnvVarsInput(&profileData.EnvVars),
 				),
-			).WithTheme(views.GetCustomTheme())
+			).WithTheme(views.GetCustomTheme()).WithHeight(12)
 
 			err = form.Run()
 			if err != nil {
