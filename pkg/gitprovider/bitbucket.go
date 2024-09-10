@@ -145,7 +145,9 @@ func (g *BitbucketGitProvider) GetRepoPRs(repositoryId string, namespaceId strin
 	client := g.getApiClient()
 	var response []*GitPullRequest
 
-	owner, repo, err := g.getOwnerAndRepoFromFullName(repositoryId)
+	fullName := fmt.Sprintf("%s/%s", namespaceId, repositoryId)
+
+	owner, repo, err := g.getOwnerAndRepoFromFullName(fullName)
 	if err != nil {
 		return nil, err
 	}
