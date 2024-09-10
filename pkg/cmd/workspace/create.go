@@ -214,7 +214,8 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = openIDE(chosenIdeId, activeProfile, createdWorkspace.Id, projectName, providerMetadata)
+		err = openIDE(chosenIdeId, activeProfile, createdWorkspace.Id, wsInfo.Projects[0].Name, providerMetadata, yesFlag)
+
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -251,6 +252,7 @@ func init() {
 	CreateCmd.Flags().BoolVar(&blankFlag, "blank", false, "Create a blank project without using existing configurations")
 	CreateCmd.Flags().BoolVarP(&codeFlag, "code", "c", false, "Open the workspace in the IDE after workspace creation")
 	CreateCmd.Flags().BoolVar(&multiProjectFlag, "multi-project", false, "Workspace with multiple projects/repos")
+	CreateCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Automatically confirm any prompts")
 
 	workspace_util.AddProjectConfigurationFlags(CreateCmd, projectConfigurationFlags, true)
 }
