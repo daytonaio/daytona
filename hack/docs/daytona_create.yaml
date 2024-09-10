@@ -29,7 +29,7 @@ options:
     - name: ide
       shorthand: i
       usage: |
-        Specify the IDE (vscode, browser, cursor, ssh, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
+        Specify the IDE (vscode, browser, cursor, ssh, jupyter, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
     - name: manual
       default_value: "false"
       usage: Manually enter the Git repository
@@ -41,6 +41,10 @@ options:
     - name: target
       shorthand: t
       usage: Specify the target (e.g. 'local')
+    - name: "yes"
+      shorthand: "y"
+      default_value: "false"
+      usage: Automatically confirm any prompts
 inherited_options:
     - name: help
       default_value: "false"
