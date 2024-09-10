@@ -29,7 +29,7 @@ options:
     - name: ide
       shorthand: i
       usage: |
-        Specify the IDE (vscode, browser, cursor, ssh, jupyter, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm, fleet)
+        Specify the IDE (vscode, browser, cursor, ssh, jupyter, fleet, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
     - name: manual
       default_value: "false"
       usage: Manually enter the Git repository
