@@ -145,7 +145,7 @@ func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *h
 				Title("Frps Protocol").
 				Value(&m.config.Frps.Protocol),
 		),
-	).WithTheme(views.GetCustomTheme()).WithHeight(15)
+	).WithTheme(views.GetCustomTheme()).WithHeight(20)
 }
 
 func (m Model) Init() tea.Cmd {
@@ -200,13 +200,15 @@ func (m Model) View() string {
 		helpView = views.DefaultRowDataStyle.Render(" • " + m.help.ShortHelpView([]key.Binding{m.keymap.submit}))
 	}
 
+	// TODO: once huh is updated to properly focus fields, add alt screen titles
+	// return views.GetAltScreenTitle("SERVER CONFIGURATION") + m.form.View() + helpView
 	return m.form.View() + helpView
 }
 
 func ConfigurationForm(config *apiclient.ServerConfig, containerRegistries []apiclient.ContainerRegistry) (*apiclient.ServerConfig, error) {
 	m := NewModel(config, containerRegistries)
 
-	p, err := tea.NewProgram(m).Run()
+	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
 
 	if err != nil {
 		return nil, err
