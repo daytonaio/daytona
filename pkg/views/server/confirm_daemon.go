@@ -11,11 +11,12 @@ import (
 )
 
 func ConfirmPrompt(confirmCheck *bool) {
+	views.RenderInfoMessageBold("This commands registers and starts the Daytona Server daemon.\nFor running the Server in the current terminal session use 'daytona serve'.")
+
 	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewConfirm().
-				Title("This commands registers and starts the Daytona Server daemon. Do you want to continue?").
-				Description("For running the Server in the current terminal session use 'daytona serve'.").
+				Title(" Do you want to continue?").
 				Value(confirmCheck),
 		),
 	).WithTheme(views.GetCustomTheme())

@@ -67,7 +67,7 @@ func ProfileCreationView(c *config.Config, profileAddView *ProfileAddView, editi
 				}),
 			huh.NewInput().
 				Title("Server API Key").
-				Password(true).
+				EchoMode(huh.EchoModePassword).
 				Value(&profileAddView.ApiKey).
 				Validate(func(str string) error {
 					if str == "" {

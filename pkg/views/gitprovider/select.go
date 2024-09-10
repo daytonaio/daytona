@@ -107,7 +107,7 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig
 			huh.NewInput().
 				Title("Personal access token").
 				Value(&gitProviderAddView.Token).
-				Password(true).
+				EchoMode(huh.EchoModePassword).
 				Validate(func(str string) error {
 					if str == "" {
 						return errors.New("token can not be blank")
