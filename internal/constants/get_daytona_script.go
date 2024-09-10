@@ -20,6 +20,28 @@ err() {
   exit 1
 }
 
+try_download() {
+  echo "Downloading Daytona from $1"
+
+  local url=$1
+  local temp_file=$2
+  local exit_code=0
+
+  if command -v wget > /dev/null 2>&1; then
+    wget -q "$url" -O $temp_file --header="Authorization: Bearer $DAYTONA_SERVER_API_KEY" && return 0
+    exit_code=$?
+  elif command -v curl > /dev/null 2>&1; then
+    curl -fsSL "$url" -H "Authorization: Bearer $DAYTONA_SERVER_API_KEY" -o "$temp_file" && return 0
+    exit_code=$?
+  else
+    echo "error: Make sure curl or wget is available in the project container"
+    exit 127
+  fi
+  >&2 echo "error: Daytona binary download failed. Exit Code: ${exit_code}"
+
+  return 1
+}
+
 # Check if daytona is already installed
 if [ -x "$(command -v daytona)" ]; then
   echo "Daytona already installed. Skipping installation..."
@@ -58,9 +80,14 @@ case $ARCH in
   ;;
 esac
 
+DIRECT_DOWNLOAD_URL=https://download.daytona.io/daytona/$VERSION/daytona-$FILENAME
 DOWNLOAD_URL="$BASE_URL/$VERSION/daytona-$FILENAME"
 
-echo -e "\nDownloading Daytona binary from $DOWNLOAD_URL"
+if [[ ! "$DOWNLOAD_URL" =~ ^http://host.docker.internal ]]; then
+  if curl -sfI "$DIRECT_DOWNLOAD_URL" > /dev/null; then
+    DOWNLOAD_URL="$DIRECT_DOWNLOAD_URL"
+  fi
+fi
 
 # Create a temporary file to download the Daytona binary. Just in case the user
 # has file named "daytona" in the current directory.
@@ -72,19 +99,9 @@ trap 'rm -f "$temp_file"' EXIT
 i=1
 max_retry=10
 while :; do
-  exit_code=""
-  if command -v wget > /dev/null 2>&1; then
-    wget -q $DOWNLOAD_URL -O $temp_file --header="Authorization: Bearer $DAYTONA_SERVER_API_KEY" && break
-    exit_code=$?
-  elif command -v curl > /dev/null 2>&1; then
-    curl -fsSL "$DOWNLOAD_URL" -H "Authorization: Bearer $DAYTONA_SERVER_API_KEY" -o "$temp_file" && break
-    exit_code=$?
-  else
-    echo "error: Make sure curl or wget is available in the project container"
-    exit 127
+  if try_download "$DOWNLOAD_URL" "$temp_file"; then
+    break
   fi
-  >&2 echo "error: Daytona binary download failed"
-  >&2 echo "Exit Code: ${exit_code}"
   
   i=$((i+1))
   
@@ -97,6 +114,8 @@ while :; do
   sleep 2
 done
 
+echo "Daytona downloaded successfully"
+
 chmod +x "$temp_file"
 
 echo "Installing server to $DESTINATION"
@@ -105,5 +124,5 @@ mv "$temp_file" "$DESTINATION/daytona"
 `
 
 func GetDaytonaScript(baseUrl string) string {
-	return strings.ReplaceAll(getDaytonaScript, "https://download.daytona.io/daytona", baseUrl)
+	return strings.Replace(getDaytonaScript, "https://download.daytona.io/daytona", baseUrl, 1)
 }
