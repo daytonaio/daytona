@@ -35,7 +35,12 @@ func OpenJetbrainsIDE(activeProfile config.Profile, ide, workspaceId, projectNam
 		return fmt.Errorf("IDE not found")
 	}
 
-	downloadPath := filepath.ToSlash(filepath.Join("/home/daytona/.cache/JetBrains", ide))
+	home, err := util.GetHomeDir(activeProfile, workspaceId, projectName)
+	if err != nil {
+		return err
+	}
+
+	downloadPath := filepath.ToSlash(filepath.Join(home, "/.cache/JetBrains", ide))
 
 	downloadUrl := ""
 
