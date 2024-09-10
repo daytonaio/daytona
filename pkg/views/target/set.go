@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
@@ -115,7 +116,7 @@ func SetTargetForm(target *apiclient.ProviderTarget, targetManifest map[string]a
 		}
 	}
 
-	form := huh.NewForm(append([]*huh.Group{huh.NewGroup(fields...)}, groups...)...).WithTheme(views.GetCustomTheme())
+	form := huh.NewForm(append([]*huh.Group{huh.NewGroup(fields...)}, groups...)...).WithTheme(views.GetCustomTheme()).WithProgramOptions(tea.WithAltScreen())
 	err = form.Run()
 	if err != nil {
 		return err
@@ -161,11 +162,10 @@ func getInput(name string, property apiclient.ProviderProviderTargetProperty, in
 		value = initialValue
 	}
 
-	return huh.NewInput().
+	input := huh.NewInput().
 		Title(name).
 		Description(*property.Description).
 		Value(value).
-		Password(property.InputMasked != nil && *property.InputMasked).
 		Validate(func(s string) error {
 			switch *property.Type {
 			case apiclient.ProviderTargetPropertyTypeInt:
@@ -176,7 +176,13 @@ func getInput(name string, property apiclient.ProviderProviderTargetProperty, in
 				return err
 			}
 			return nil
-		}), value
+		})
+
+	if property.InputMasked != nil && *property.InputMasked {
+		input = input.EchoMode(huh.EchoModePassword)
+	}
+
+	return input, value
 }
 
 func getSelect(name string, property apiclient.ProviderProviderTargetProperty, initialValue *string) (*huh.Select[string], *string) {

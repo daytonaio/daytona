@@ -41,7 +41,7 @@ func RegistryCreationView(registryView *RegistryView, registries []apiclient.Con
 				}),
 			huh.NewInput().
 				Title("Password").
-				Password(true).
+				EchoMode(huh.EchoModePassword).
 				Value(&registryView.Password).
 				Validate(func(str string) error {
 					if str == "" {
