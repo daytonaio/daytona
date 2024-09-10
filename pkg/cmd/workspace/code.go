@@ -176,6 +176,8 @@ func openIDE(ideId string, activeProfile config.Profile, workspaceId string, pro
 		return ide.OpenCursor(activeProfile, workspaceId, projectName, projectProviderMetadata)
 	case "jupyter":
 		return ide.OpenJupyterIDE(activeProfile, workspaceId, projectName, projectProviderMetadata, yesFlag)
+	case "fleet":
+		return ide.OpenFleet(activeProfile, workspaceId, projectName)
 	default:
 		_, ok := jetbrains.GetIdes()[jetbrains.Id(ideId)]
 		if ok {
