@@ -14,7 +14,7 @@ import (
 )
 
 func OpenFleet(activeProfile config.Profile, workspaceId string, projectName string) error {
-	if err := checkFleetInstallation(); err != nil {
+	if err := CheckFleetInstallation(); err != nil {
 		return err
 	}
 
@@ -34,7 +34,7 @@ func OpenFleet(activeProfile config.Profile, workspaceId string, projectName str
 	return nil
 }
 
-func checkFleetInstallation() error {
+func CheckFleetInstallation() error {
 	_, err := exec.LookPath("fleet")
 	if err != nil {
 		redBold := "\033[1;31m" // ANSI escape code for red and bold
