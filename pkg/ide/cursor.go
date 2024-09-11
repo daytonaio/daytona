@@ -36,6 +36,10 @@ func OpenCursor(activeProfile config.Profile, workspaceId string, projectName st
 		return err
 	}
 
+	if projectProviderMetadata == "" {
+		return nil
+	}
+
 	return setupVSCodeCustomizations(projectHostname, projectProviderMetadata, devcontainer.Vscode, "*/.cursor-server/*/bin/cursor-server", "$HOME/.cursor-server/data/Machine/settings.json", ".daytona-customizations-lock-cursor")
 }
 

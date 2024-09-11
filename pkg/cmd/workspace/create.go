@@ -179,7 +179,7 @@ var CreateCmd = &cobra.Command{
 		// Make sure terminal cursor is reset
 		fmt.Print("\033[?25h")
 
-		wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceName).Execute()
+		wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceName).Verbose(true).Execute()
 		if err != nil {
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}

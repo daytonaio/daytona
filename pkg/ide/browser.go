@@ -84,6 +84,10 @@ func OpenBrowserIDE(activeProfile config.Profile, workspaceId string, projectNam
 		log.Error("Error opening URL: " + err.Error())
 	}
 
+	if projectProviderMetadata == "" {
+		return nil
+	}
+
 	err = setupVSCodeCustomizations(projectHostname, projectProviderMetadata, devcontainer.Browser, "*/vscode-server/bin/openvscode-server", "$HOME/.openvscode-server/data/Machine/settings.json", ".daytona-customizations-lock-vscode-browser")
 	if err != nil {
 		log.Errorf("Error setting up IDE customizations: %s", err)
