@@ -38,6 +38,10 @@ func OpenVSCode(activeProfile config.Profile, workspaceId string, projectName st
 		return err
 	}
 
+	if projectProviderMetadata == "" {
+		return nil
+	}
+
 	return setupVSCodeCustomizations(projectHostname, projectProviderMetadata, devcontainer.Vscode, "*/.vscode-server/*/bin/code-server", "$HOME/.vscode-server/data/Machine/settings.json", ".daytona-customizations-lock-vscode")
 }
 
