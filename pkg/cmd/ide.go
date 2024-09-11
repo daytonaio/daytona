@@ -50,6 +50,10 @@ var ideCmd = &cobra.Command{
 			if err != nil {
 				log.Error(err)
 			}
+		case "fleet":
+			if err := ide_util.CheckFleetInstallation(); err != nil {
+				log.Error(err)
+			}
 		}
 
 		c.DefaultIdeId = chosenIde.Id
