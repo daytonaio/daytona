@@ -54,6 +54,10 @@ var ideCmd = &cobra.Command{
 			if err := ide_util.CheckFleetInstallation(); err != nil {
 				log.Error(err)
 			}
+		case "zed":
+			if err := ide_util.IsZedInstalled(); err != nil {
+				log.Error(err)
+			}
 		}
 
 		c.DefaultIdeId = chosenIde.Id
