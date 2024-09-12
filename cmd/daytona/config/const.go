@@ -30,6 +30,7 @@ func GetIdeList() []Ide {
 		{"ssh", "Terminal SSH"},
 		{"jupyter", "Jupyter"},
 		{"fleet", "Fleet"},
+		{"zed", "Zed"},
 	}
 
 	sortedJbIdes := []Ide{}
