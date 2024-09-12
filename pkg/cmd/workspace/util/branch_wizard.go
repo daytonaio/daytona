@@ -77,7 +77,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	checkoutOptions = append(checkoutOptions, selection.CheckoutBranch)
 	checkoutOptions = append(checkoutOptions, selection.CheckoutPR)
 
-	chosenCheckoutOption := selection.GetCheckoutOptionFromPrompt(config.ProjectOrder, checkoutOptions)
+	chosenCheckoutOption := selection.GetCheckoutOptionFromPrompt(config.ProjectOrder, checkoutOptions, parentIdentifier)
 	if chosenCheckoutOption == selection.CheckoutDefault {
 		// Get the default branch from context
 		repo, res, err := config.ApiClient.GitProviderAPI.GetGitContext(ctx).Repository(apiclient.GetRepositoryContext{
