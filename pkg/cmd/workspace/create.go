@@ -146,7 +146,7 @@ var CreateCmd = &cobra.Command{
 		}
 
 		var tsConn *tsnet.Server
-		if target.Name != "local" {
+		if target.Name != "local" || activeProfile.Id != "default" {
 			tsConn, err = tailscale.GetConnection(&activeProfile)
 			if err != nil {
 				log.Fatal(err)
@@ -406,7 +406,7 @@ func processGitURL(repoUrl string, apiClient *apiclient.APIClient, projects *[]a
 }
 
 func waitForDial(workspace *apiclient.Workspace, activeProfile *config.Profile, tsConn *tsnet.Server) error {
-	if workspace.Target == "local" {
+	if workspace.Target == "local" && (activeProfile != nil && activeProfile.Id == "default") {
 		err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspace.Id, workspace.Projects[0].Name)
 		if err != nil {
 			return err
