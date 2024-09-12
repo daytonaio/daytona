@@ -6,7 +6,7 @@ go 1.23.0
 replace github.com/docker/go-connections => github.com/docker/go-connections v0.4.0
 
 require (
-	code.gitea.io/sdk/gitea v0.17.1
+	code.gitea.io/sdk/gitea v0.19.0
 	github.com/aws/aws-sdk-go-v2/config v1.27.26
 	github.com/aws/aws-sdk-go-v2/service/iam v1.34.3
 	github.com/charmbracelet/bubbles v0.20.0
