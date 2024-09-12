@@ -19,7 +19,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/ide"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/daytonaio/daytona/pkg/telemetry"
-	"github.com/daytonaio/daytona/pkg/views"
 	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
@@ -215,12 +214,9 @@ func AutoStartWorkspace(workspaceId string, projectName string) (bool, error) {
 		return false, err
 	}
 
-	views.RenderInfoMessage(fmt.Sprintf("Project '%s' from workspace '%s' is starting", projectName, workspaceId))
-
-	ctx := context.Background()
-	res, err := apiClient.WorkspaceAPI.StartProject(ctx, workspaceId, projectName).Execute()
+	err = StartWorkspace(apiClient, workspaceId, projectName)
 	if err != nil {
-		return false, apiclient_util.HandleErrorResponse(res, err)
+		return false, err
 	}
 
 	return true, nil

@@ -8,8 +8,10 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/internal/util/apiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -24,7 +26,6 @@ var StopCmd = &cobra.Command{
 	Args:    cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var workspaceId string
-		var message string
 
 		if allFlag {
 			err := stopAllWorkspaces()
@@ -36,7 +37,7 @@ var StopCmd = &cobra.Command{
 
 		ctx := context.Background()
 
-		apiClient, err := apiclient.GetApiClient(nil)
+		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -51,7 +52,7 @@ var StopCmd = &cobra.Command{
 			}
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
-				log.Fatal(apiclient.HandleErrorResponse(res, err))
+				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
 
 			workspace := selection.GetWorkspaceFromPrompt(workspaceList, "Stop")
@@ -63,21 +64,15 @@ var StopCmd = &cobra.Command{
 			workspaceId = args[0]
 		}
 
-		if stopProjectFlag == "" {
-			message = fmt.Sprintf("Workspace '%s' is stopping", workspaceId)
-			res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, workspaceId).Execute()
-			if err != nil {
-				log.Fatal(apiclient.HandleErrorResponse(res, err))
-			}
-		} else {
-			message = fmt.Sprintf("Project '%s' from workspace '%s' is stopping", stopProjectFlag, workspaceId)
-			res, err := apiClient.WorkspaceAPI.StopProject(ctx, workspaceId, stopProjectFlag).Execute()
-			if err != nil {
-				log.Fatal(apiclient.HandleErrorResponse(res, err))
-			}
+		err = StopWorkspace(apiClient, workspaceId, stopProjectFlag)
+		if err != nil {
+			log.Fatal(err)
 		}
-
-		views.RenderInfoMessage(message)
+		if stopProjectFlag != "" {
+			views.RenderInfoMessage(fmt.Sprintf("Project '%s' from workspace '%s' successfully stopped", stopProjectFlag, workspaceId))
+		} else {
+			views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' successfully stopped", workspaceId))
+		}
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) >= 1 {
@@ -95,23 +90,56 @@ func init() {
 
 func stopAllWorkspaces() error {
 	ctx := context.Background()
-	apiClient, err := apiclient.GetApiClient(nil)
+	apiClient, err := apiclient_util.GetApiClient(nil)
 	if err != nil {
 		return err
 	}
 
 	workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 	if err != nil {
-		return apiclient.HandleErrorResponse(res, err)
+		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	for _, workspace := range workspaceList {
-		res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, workspace.Id).Execute()
+		err := StopWorkspace(apiClient, workspace.Name, "")
 		if err != nil {
-			log.Errorf("Failed to stop workspace %s: %v", workspace.Name, apiclient.HandleErrorResponse(res, err))
+			log.Errorf("Failed to stop workspace %s: %v\n\n", workspace.Name, err)
 			continue
 		}
-		fmt.Printf("Workspace '%s' is stopping\n", workspace.Name)
+		views.RenderInfoMessage(fmt.Sprintf("- Workspace '%s' successfully stopped", workspace.Name))
 	}
+	return nil
+}
+
+func StopWorkspace(apiClient *apiclient.APIClient, workspaceId, projectName string) error {
+	ctx := context.Background()
+	var message string
+	var stopFunc func() error
+
+	if projectName == "" {
+		message = fmt.Sprintf("Workspace '%s' is stopping", workspaceId)
+		stopFunc = func() error {
+			res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, workspaceId).Execute()
+			if err != nil {
+				return apiclient_util.HandleErrorResponse(res, err)
+			}
+			return nil
+		}
+	} else {
+		message = fmt.Sprintf("Project '%s' from workspace '%s' is stopping", projectName, workspaceId)
+		stopFunc = func() error {
+			res, err := apiClient.WorkspaceAPI.StopProject(ctx, workspaceId, projectName).Execute()
+			if err != nil {
+				return apiclient_util.HandleErrorResponse(res, err)
+			}
+			return nil
+		}
+	}
+
+	err := views_util.WithInlineSpinner(message, stopFunc)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
