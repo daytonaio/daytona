@@ -6,6 +6,7 @@ package util
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/url"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
@@ -59,7 +60,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	}
 
 	var branch *apiclient.GitBranch
-	parentIdentifier := config.ProviderId + "/" + config.Namespace + "/" + config.ChosenRepo.Name
+	parentIdentifier := fmt.Sprintf("%s/%s/%s", config.ProviderId, config.Namespace, config.ChosenRepo.Name)
 	if len(prList) == 0 {
 		branch = selection.GetBranchFromPrompt(branchList, config.ProjectOrder, parentIdentifier)
 		if branch == nil {

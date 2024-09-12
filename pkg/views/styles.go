@@ -4,6 +4,7 @@
 package views
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/charmbracelet/bubbles/list"
@@ -68,18 +69,12 @@ func GetStyledSelectList(items []list.Item, parentIdentifier ...string) list.Mod
 	l.FilterInput.PromptStyle = lipgloss.NewStyle().Foreground(Green)
 	l.FilterInput.TextStyle = lipgloss.NewStyle().Foreground(Green)
 
-	singularItemName := "item " + lipgloss.NewStyle().Foreground(LightGray).Render("===")
+	singularItemName := "item " + SeparatorString
 	var pluralItemName string
 	if len(parentIdentifier) == 0 {
-		pluralItemName = "items " + lipgloss.NewStyle().Foreground(LightGray).Render("===")
+		pluralItemName = fmt.Sprintf("items\n\n%s", SeparatorString)
 	} else {
-		pluralItemName = "items " + lipgloss.NewStyle().Foreground(LightGray).Render("")
-
-		parentIdentifierStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#FFFF00")).Bold(true)
-		formattedParentIdentifier := parentIdentifierStyle.Render("(" + parentIdentifier[0] + ")")
-
-		pluralItemName += formattedParentIdentifier
-		pluralItemName += " " + lipgloss.NewStyle().Foreground(LightGray).Render("===")
+		pluralItemName = fmt.Sprintf("items (%s)\n\n%s", parentIdentifier[0], SeparatorString)
 	}
 
 	l.SetStatusBarItemName(singularItemName, pluralItemName)

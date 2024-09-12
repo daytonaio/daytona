@@ -5,6 +5,7 @@ package util
 
 import (
 	"context"
+	"fmt"
 
 	config_const "github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
@@ -122,7 +123,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		return nil, err
 	}
 
-	parentIdentifier := providerId + "/" + namespace
+	parentIdentifier := fmt.Sprintf("%s/%s", providerId, namespace)
 	chosenRepo := selection.GetRepositoryFromPrompt(providerRepos, config.ProjectOrder, config.SelectedRepos, parentIdentifier)
 	if chosenRepo == nil {
 		return nil, common.ErrCtrlCAbort
