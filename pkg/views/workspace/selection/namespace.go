@@ -13,7 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
-func selectNamespacePrompt(namespaces []apiclient.GitNamespace, projectOrder int, choiceChan chan<- string) {
+func selectNamespacePrompt(namespaces []apiclient.GitNamespace, projectOrder int, parentIdentifier string, choiceChan chan<- string) {
 	items := []list.Item{}
 	var desc string
 
@@ -28,7 +28,7 @@ func selectNamespacePrompt(namespaces []apiclient.GitNamespace, projectOrder int
 		items = append(items, newItem)
 	}
 
-	l := views.GetStyledSelectList(items)
+	l := views.GetStyledSelectList(items, parentIdentifier)
 
 	title := "Choose a Namespace"
 	if projectOrder > 1 {
@@ -51,10 +51,10 @@ func selectNamespacePrompt(namespaces []apiclient.GitNamespace, projectOrder int
 	}
 }
 
-func GetNamespaceIdFromPrompt(namespaces []apiclient.GitNamespace, projectOrder int) string {
+func GetNamespaceIdFromPrompt(namespaces []apiclient.GitNamespace, projectOrder int, parentIdentifier string) string {
 	choiceChan := make(chan string)
 
-	go selectNamespacePrompt(namespaces, projectOrder, choiceChan)
+	go selectNamespacePrompt(namespaces, projectOrder, parentIdentifier, choiceChan)
 
 	return <-choiceChan
 }

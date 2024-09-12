@@ -6,6 +6,7 @@ package util
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/url"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
@@ -18,6 +19,7 @@ type BranchWizardConfig struct {
 	ApiClient    *apiclient.APIClient
 	ProviderId   string
 	NamespaceId  string
+	Namespace    string
 	ChosenRepo   *apiclient.GitRepository
 	ProjectOrder int
 }
@@ -58,8 +60,9 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	}
 
 	var branch *apiclient.GitBranch
+	parentIdentifier := fmt.Sprintf("%s/%s/%s", config.ProviderId, config.Namespace, config.ChosenRepo.Name)
 	if len(prList) == 0 {
-		branch = selection.GetBranchFromPrompt(branchList, config.ProjectOrder)
+		branch = selection.GetBranchFromPrompt(branchList, config.ProjectOrder, parentIdentifier)
 		if branch == nil {
 			return nil, errors.New("must select a branch")
 		}
@@ -74,7 +77,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	checkoutOptions = append(checkoutOptions, selection.CheckoutBranch)
 	checkoutOptions = append(checkoutOptions, selection.CheckoutPR)
 
-	chosenCheckoutOption := selection.GetCheckoutOptionFromPrompt(config.ProjectOrder, checkoutOptions)
+	chosenCheckoutOption := selection.GetCheckoutOptionFromPrompt(config.ProjectOrder, checkoutOptions, parentIdentifier)
 	if chosenCheckoutOption == selection.CheckoutDefault {
 		// Get the default branch from context
 		repo, res, err := config.ApiClient.GitProviderAPI.GetGitContext(ctx).Repository(apiclient.GetRepositoryContext{
@@ -90,14 +93,14 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	}
 
 	if chosenCheckoutOption == selection.CheckoutBranch {
-		branch = selection.GetBranchFromPrompt(branchList, config.ProjectOrder)
+		branch = selection.GetBranchFromPrompt(branchList, config.ProjectOrder, parentIdentifier)
 		if branch == nil {
 			return nil, errors.New("must select a branch")
 		}
 		config.ChosenRepo.Branch = branch.Name
 		config.ChosenRepo.Sha = branch.Sha
 	} else if chosenCheckoutOption == selection.CheckoutPR {
-		chosenPullRequest := selection.GetPullRequestFromPrompt(prList, config.ProjectOrder)
+		chosenPullRequest := selection.GetPullRequestFromPrompt(prList, config.ProjectOrder, parentIdentifier)
 		if chosenPullRequest == nil {
 			return nil, errors.New("must select a pull request")
 		}
