@@ -24,7 +24,7 @@ var (
 	CheckoutPR      = CheckoutOption{Title: "Pull/Merge requests", Id: "pullrequest"}
 )
 
-func selectCheckoutPrompt(checkoutOptions []CheckoutOption, projectOrder int, choiceChan chan<- string) {
+func selectCheckoutPrompt(checkoutOptions []CheckoutOption, projectOrder int, parentIdentifier string, choiceChan chan<- string) {
 	items := []list.Item{}
 
 	for _, checkoutOption := range checkoutOptions {
@@ -32,7 +32,7 @@ func selectCheckoutPrompt(checkoutOptions []CheckoutOption, projectOrder int, ch
 		items = append(items, newItem)
 	}
 
-	l := views.GetStyledSelectList(items)
+	l := views.GetStyledSelectList(items, parentIdentifier)
 
 	title := "Cloning Options"
 	if projectOrder > 1 {
@@ -55,10 +55,10 @@ func selectCheckoutPrompt(checkoutOptions []CheckoutOption, projectOrder int, ch
 	}
 }
 
-func GetCheckoutOptionFromPrompt(projectOrder int, checkoutOptions []CheckoutOption) CheckoutOption {
+func GetCheckoutOptionFromPrompt(projectOrder int, checkoutOptions []CheckoutOption, parentIdentifier string) CheckoutOption {
 	choiceChan := make(chan string)
 
-	go selectCheckoutPrompt(checkoutOptions, projectOrder, choiceChan)
+	go selectCheckoutPrompt(checkoutOptions, projectOrder, parentIdentifier, choiceChan)
 
 	checkoutOptionId := <-choiceChan
 

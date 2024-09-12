@@ -4,6 +4,7 @@
 package views
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/charmbracelet/bubbles/list"
@@ -45,7 +46,7 @@ var LogPrefixColors = []lipgloss.AdaptiveColor{
 	Blue, Orange, Cyan, Yellow,
 }
 
-func GetStyledSelectList(items []list.Item) list.Model {
+func GetStyledSelectList(items []list.Item, parentIdentifier ...string) list.Model {
 
 	d := list.NewDefaultDelegate()
 
@@ -68,7 +69,15 @@ func GetStyledSelectList(items []list.Item) list.Model {
 	l.FilterInput.PromptStyle = lipgloss.NewStyle().Foreground(Green)
 	l.FilterInput.TextStyle = lipgloss.NewStyle().Foreground(Green)
 
-	l.SetStatusBarItemName("item\n\n"+lipgloss.NewStyle().Foreground(LightGray).Render("==="), "items\n\n"+lipgloss.NewStyle().Foreground(LightGray).Render("==="))
+	singularItemName := "item " + SeparatorString
+	var pluralItemName string
+	if len(parentIdentifier) == 0 {
+		pluralItemName = fmt.Sprintf("items\n\n%s", SeparatorString)
+	} else {
+		pluralItemName = fmt.Sprintf("items (%s)\n\n%s", parentIdentifier[0], SeparatorString)
+	}
+
+	l.SetStatusBarItemName(singularItemName, pluralItemName)
 
 	return l
 }
