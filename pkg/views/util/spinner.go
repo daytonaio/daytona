@@ -18,15 +18,16 @@ type model struct {
 	spinner  spinner.Model
 	quitting bool
 	message  string
+	inline   bool
 }
 
 type Msg string
 
-func initialModel(message string) model {
+func initialModel(message string, inline bool) model {
 	s := spinner.New()
 	s.Spinner = spinner.Dot
 	s.Style = lipgloss.NewStyle().Foreground(views.Green)
-	return model{spinner: s, message: message}
+	return model{spinner: s, message: message, inline: inline}
 }
 
 func (m model) Init() tea.Cmd {
@@ -47,13 +48,24 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func WithSpinner(message string, fn func() error) error {
-	p := start(message)
+	p := start(message, false)
 	defer stop(p)
 	return fn()
 }
 
-func start(message string) *tea.Program {
-	p := tea.NewProgram(initialModel(message), tea.WithAltScreen())
+func WithInlineSpinner(message string, fn func() error) error {
+	p := start(message, true)
+	defer stop(p)
+	return fn()
+}
+
+func start(message string, inline bool) *tea.Program {
+	var p *tea.Program
+	if inline {
+		p = tea.NewProgram(initialModel(message, true))
+	} else {
+		p = tea.NewProgram(initialModel(message, false), tea.WithAltScreen())
+	}
 	go func() {
 		if _, err := p.Run(); err != nil {
 			fmt.Println(err)
@@ -77,7 +89,12 @@ func (m model) View() string {
 		return ""
 	}
 
-	str := views.DocStyle.Render(fmt.Sprintf("\n\n   %s %s...\n\n", m.spinner.View(), m.message))
+	str := ""
+	if m.inline {
+		str = views.GetInfoMessage(fmt.Sprintf("%s %s...", m.spinner.View(), m.message))
+	} else {
+		str = views.DocStyle.Render(fmt.Sprintf("\n\n   %s %s...\n\n", m.spinner.View(), m.message))
+	}
 
 	return str
 }
