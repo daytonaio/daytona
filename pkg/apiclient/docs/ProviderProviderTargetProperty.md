@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **DisabledPredicate** | Pointer to **string** | A regex string matched with the name of the target to determine if the property should be disabled If the regex matches the target name, the property will be disabled E.g. \&quot;^local$\&quot; will disable the property for the local target | [optional] 
 **InputMasked** | Pointer to **bool** |  | [optional] 
 **Options** | Pointer to **[]string** | Options is only used if the Type is ProviderTargetPropertyTypeOption | [optional] 
+**Suggestions** | Pointer to **[]string** | Suggestions is an optional list of auto-complete values to assist the user while filling the field | [optional] 
 **Type** | Pointer to [**ProviderProviderTargetPropertyType**](ProviderProviderTargetPropertyType.md) |  | [optional] 
 
 ## Methods
@@ -154,6 +155,31 @@ SetOptions sets Options field to given value.
 `func (o *ProviderProviderTargetProperty) HasOptions() bool`
 
 HasOptions returns a boolean if a field has been set.
+
+### GetSuggestions
+
+`func (o *ProviderProviderTargetProperty) GetSuggestions() []string`
+
+GetSuggestions returns the Suggestions field if non-nil, zero value otherwise.
+
+### GetSuggestionsOk
+
+`func (o *ProviderProviderTargetProperty) GetSuggestionsOk() (*[]string, bool)`
+
+GetSuggestionsOk returns a tuple with the Suggestions field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetSuggestions
+
+`func (o *ProviderProviderTargetProperty) SetSuggestions(v []string)`
+
+SetSuggestions sets Suggestions field to given value.
+
+### HasSuggestions
+
+`func (o *ProviderProviderTargetProperty) HasSuggestions() bool`
+
+HasSuggestions returns a boolean if a field has been set.
 
 ### GetType
 
