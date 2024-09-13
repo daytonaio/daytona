@@ -76,4 +76,6 @@ type ProviderTargetProperty struct {
 	Description string
 	// Options is only used if the Type is ProviderTargetPropertyTypeOption
 	Options []string
+	// Suggestions is an optional list of auto-complete values to assist the user while filling the field
+	Suggestions []string
 }
