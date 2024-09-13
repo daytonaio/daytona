@@ -126,8 +126,6 @@ func GetPrebuildScopesFromGitProviderId(providerId string) string {
 		return "admin:repo_hook"
 	case "bitbucket":
 		return "webhooks"
-	case "gitea":
-		return "read:repository"
 	default:
 		return ""
 	}

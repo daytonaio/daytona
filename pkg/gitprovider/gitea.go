@@ -479,7 +479,10 @@ func (g *GiteaGitProvider) UnregisterPrebuildWebhook(repo *GitRepository, id str
 		return err
 	}
 
-	hookId, _ := strconv.Atoi(id)
+	hookId, err := strconv.Atoi(id)
+	if err != nil {
+		return err
+	}
 
 	_, err = client.DeleteRepoHook(repo.Owner, repo.Name, int64(hookId))
 
