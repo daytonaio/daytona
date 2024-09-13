@@ -2838,6 +2838,13 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "suggestions": {
+                    "description": "Suggestions is an optional list of auto-complete values to assist the user while filling the field",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "type": {
                     "$ref": "#/definitions/provider.ProviderTargetPropertyType"
                 }

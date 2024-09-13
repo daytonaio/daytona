@@ -2596,6 +2596,12 @@ components:
           items:
             type: string
           type: array
+        suggestions:
+          description: Suggestions is an optional list of auto-complete values to
+            assist the user while filling the field
+          items:
+            type: string
+          type: array
         type:
           $ref: '#/components/schemas/provider.ProviderTargetPropertyType'
       type: object
