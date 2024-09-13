@@ -6,11 +6,14 @@ package gitprovider
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 
 	"code.gitea.io/sdk/gitea"
+	"github.com/daytonaio/daytona/internal/util"
+	giteaWebhook "github.com/go-playground/webhooks/v6/gitea"
 )
 
 type GiteaGitProvider struct {
@@ -419,4 +422,130 @@ func (g *GiteaGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*s
 	}
 
 	return &repo.DefaultBranch, nil
+}
+
+func (g *GiteaGitProvider) RegisterPrebuildWebhook(repo *GitRepository, endpointUrl string) (string, error) {
+	client, err := g.getApiClient()
+	if err != nil {
+		return "", fmt.Errorf("failed to get api client: %w", err)
+	}
+
+	hookOpts := gitea.CreateHookOption{
+		Type: "gitea",
+		Config: map[string]string{
+			"url":          endpointUrl,
+			"content_type": "json",
+		},
+		Events: []string{"push"},
+		Active: true,
+	}
+
+	hook, _, err := client.CreateRepoHook(repo.Owner, repo.Name, hookOpts)
+	if err != nil {
+		return "", fmt.Errorf("failed to create webhook: %w", err)
+	}
+
+	return strconv.Itoa(int(hook.ID)), nil
+}
+
+func (g *GiteaGitProvider) GetPrebuildWebhook(repo *GitRepository, endpointUrl string) (*string, error) {
+	client, err := g.getApiClient()
+	if err != nil {
+		return nil, err
+	}
+
+	hooks, _, err := client.ListRepoHooks(repo.Owner, repo.Name, gitea.ListHooksOptions{
+		ListOptions: gitea.ListOptions{
+			PageSize: 100,
+			Page:     1,
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, hook := range hooks {
+		if hook.Config["url"] == endpointUrl {
+			return util.Pointer(strconv.Itoa(int(hook.ID))), nil
+		}
+	}
+
+	return nil, nil
+}
+
+func (g *GiteaGitProvider) UnregisterPrebuildWebhook(repo *GitRepository, id string) error {
+	client, err := g.getApiClient()
+	if err != nil {
+		return err
+	}
+
+	hookId, err := strconv.Atoi(id)
+	if err != nil {
+		return err
+	}
+
+	_, err = client.DeleteRepoHook(repo.Owner, repo.Name, int64(hookId))
+
+	return err
+}
+
+func (g *GiteaGitProvider) GetCommitsRange(repo *GitRepository, initialSha string, currentSha string) (int, error) {
+	client, err := g.getApiClient()
+	if err != nil {
+		return 0, err
+	}
+
+	initialCommits, _, err := client.ListRepoCommits(repo.Owner, repo.Name, gitea.ListCommitOptions{
+		SHA: initialSha,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	currentCommits, _, err := client.ListRepoCommits(repo.Owner, repo.Name, gitea.ListCommitOptions{
+		SHA: currentSha,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	return (len(currentCommits) - len(initialCommits)), nil
+}
+
+func (g *GiteaGitProvider) ParseEventData(request *http.Request) (*GitEventData, error) {
+	if request.Header.Get("X-Gitea-Event") != "push" {
+		return nil, fmt.Errorf("invalid event key")
+	}
+
+	hook, err := giteaWebhook.New()
+	if err != nil {
+		return nil, err
+	}
+
+	event, err := hook.Parse(request, giteaWebhook.PushEvent)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse event: %w", err)
+	}
+
+	pushEvent, ok := event.(giteaWebhook.PushPayload)
+	if !ok {
+		return nil, fmt.Errorf("failed to parse push event: %w", err)
+	}
+
+	owner := pushEvent.Repo.Owner.FullName
+
+	gitEventData := &GitEventData{
+		Owner:  owner,
+		Url:    util.CleanUpRepositoryUrl(pushEvent.Repo.HTMLURL) + ".git",
+		Branch: strings.TrimPrefix(pushEvent.Ref, "refs/heads/"),
+		Sha:    pushEvent.After,
+	}
+
+	for _, commit := range pushEvent.Commits {
+		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Added...)
+		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Modified...)
+		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Removed...)
+	}
+
+	return gitEventData, nil
 }
