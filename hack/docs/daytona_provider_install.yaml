@@ -1,6 +1,11 @@
 name: daytona provider install
 synopsis: Install provider
 usage: daytona provider install [flags]
+options:
+    - name: "yes"
+      shorthand: "y"
+      default_value: "false"
+      usage: Automatically confirm any prompts
 inherited_options:
     - name: help
       default_value: "false"
