@@ -6,6 +6,12 @@ Install provider
 daytona provider install [flags]
 ```
 
+### Options
+
+```
+  -y, --yes   Automatically confirm any prompts
+```
+
 ### Options inherited from parent commands
 
 ```
