@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/jetbrains"
 	"github.com/daytonaio/daytona/internal/util"
 	ide_util "github.com/daytonaio/daytona/pkg/ide"
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -52,6 +53,13 @@ var ideCmd = &cobra.Command{
 			}
 		case "fleet":
 			if err := ide_util.CheckFleetInstallation(); err != nil {
+				log.Error(err)
+			}
+		}
+
+		jetbrainsIdes := jetbrains.GetIdes()
+		if _, ok := jetbrainsIdes[jetbrains.Id(chosenIde.Id)]; ok {
+			if err := ide_util.IsJetBrainsGatewayInstalled(); err != nil {
 				log.Error(err)
 			}
 		}
