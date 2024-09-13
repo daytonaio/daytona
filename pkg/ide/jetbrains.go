@@ -5,6 +5,7 @@ package ide
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -23,6 +24,11 @@ import (
 )
 
 func OpenJetbrainsIDE(activeProfile config.Profile, ide, workspaceId, projectName string) error {
+	err := IsJetBrainsGatewayInstalled()
+	if err != nil {
+		return err
+	}
+
 	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName)
 	if err != nil {
 		return err
@@ -126,4 +132,16 @@ func getJetbrainsVersion(productCode string) (string, error) {
 		}
 	}
 	return "", fmt.Errorf("jetbrains: no version found for %s", productCode)
+}
+
+func IsJetBrainsGatewayInstalled() error {
+	_, err := exec.LookPath("gateway")
+	if err != nil {
+		redBold := "\033[1;31m" // ANSI escape code for red and bold
+
+		errorMessage := "Please install JetBrains Gateway via JetBrains Toolbox (https://www.jetbrains.com/toolbox-app) or download from https://www.jetbrains.com/remote-development/gateway/ and ensure it's in your PATH."
+
+		return errors.New(redBold + errorMessage)
+	}
+	return nil
 }
