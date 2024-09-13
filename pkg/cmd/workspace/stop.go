@@ -7,10 +7,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/views"
+	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	log "github.com/sirupsen/logrus"
@@ -41,7 +44,15 @@ var StopCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-
+		c, err := config.GetConfig()
+		if err != nil {
+			log.Fatal(err)
+		}
+		//start fetching logs for the stop command
+		activeProfile, err := c.GetActiveProfile()
+		if err != nil {
+			log.Fatal(err)
+		}
 		if len(args) == 0 {
 			if stopProjectFlag != "" {
 				err := cmd.Help()
@@ -63,11 +74,18 @@ var StopCmd = &cobra.Command{
 		} else {
 			workspaceId = args[0]
 		}
-
+		logs_view.DisplayLogEntry(logs.LogEntry{
+			Msg: fmt.Sprintf("Stopping Workspace %s..... \n", workspaceId),
+		}, logs_view.STATIC_INDEX)
+		projectNames := []string{workspaceId}
+		logsContext, stoplogs := context.WithCancel(ctx)
+		go apiclient_util.ReadWorkspaceLogs(logsContext, activeProfile, workspaceId, projectNames)
 		err = StopWorkspace(apiClient, workspaceId, stopProjectFlag)
 		if err != nil {
 			log.Fatal(err)
 		}
+		// Stop fetching logs after stop command finishes
+		stoplogs()
 		if stopProjectFlag != "" {
 			views.RenderInfoMessage(fmt.Sprintf("Project '%s' from workspace '%s' successfully stopped", stopProjectFlag, workspaceId))
 		} else {

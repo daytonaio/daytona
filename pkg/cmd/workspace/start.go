@@ -12,8 +12,10 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/views"
 	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
+	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
@@ -110,12 +112,18 @@ var StartCmd = &cobra.Command{
 				}
 			}
 		}
+		logs_view.DisplayLogEntry(logs.LogEntry{
+			Msg: fmt.Sprintf("Starting Workspace %s..... \n", workspaceIdOrName),
+		}, logs_view.STATIC_INDEX)
+		projectNames := []string{workspaceId}
+		logsContext, stoplogs := context.WithCancel(ctx)
+		go apiclient_util.ReadWorkspaceLogs(logsContext, activeProfile, workspaceId, projectNames)
 
 		err = StartWorkspace(apiClient, workspaceIdOrName, startProjectFlag)
 		if err != nil {
 			log.Fatal(err)
 		}
-
+		stoplogs()
 		if startProjectFlag == "" {
 			views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' started successfully", workspaceIdOrName))
 		} else {
