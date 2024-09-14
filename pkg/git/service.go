@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
@@ -98,7 +100,8 @@ func (s *Service) CloneRepository(repo *gitprovider.GitRepository, auth *http.Ba
 }
 
 func (s *Service) CloneRepositoryCmd(repo *gitprovider.GitRepository, auth *http.BasicAuth) []string {
-	cloneCmd := []string{"git", "clone", "--single-branch", "--branch", repo.Branch}
+	branch := fmt.Sprintf("\"%s\"", repo.Branch)
+	cloneCmd := []string{"git", "clone", "--single-branch", "--branch", branch}
 
 	if auth != nil {
 		repoUrl := strings.TrimPrefix(repo.Url, "https://")
@@ -188,6 +191,61 @@ func (s *Service) SetGitConfig(userData *gitprovider.GitUser) error {
 	return nil
 }
 
+func (s *Service) isBranchPublished() (bool, error) {
+	upstream, err := s.getUpstreamBranch()
+	if err != nil {
+		return false, err
+	}
+	return upstream != "", nil
+}
+
+func (s *Service) getUpstreamBranch() (string, error) {
+	cmd := exec.Command("git", "-C", s.ProjectDir, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", nil
+	}
+
+	return strings.TrimSpace(string(out)), nil
+}
+
+func (s *Service) getAheadBehindInfo() (int, int, error) {
+	upstream, err := s.getUpstreamBranch()
+	if err != nil {
+		return 0, 0, err
+	}
+	if upstream == "" {
+		return 0, 0, nil
+	}
+
+	cmd := exec.Command("git", "-C", s.ProjectDir, "rev-list", "--left-right", "--count", fmt.Sprintf("%s...HEAD", upstream))
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return 0, 0, nil
+	}
+
+	return parseAheadBehind(out)
+}
+
+func parseAheadBehind(output []byte) (int, int, error) {
+	counts := strings.Split(strings.TrimSpace(string(output)), "\t")
+	if len(counts) != 2 {
+		return 0, 0, nil
+	}
+
+	ahead, err := strconv.Atoi(counts[1])
+	if err != nil {
+		return 0, 0, nil
+	}
+
+	behind, err := strconv.Atoi(counts[0])
+	if err != nil {
+		return 0, 0, nil
+	}
+
+	return ahead, behind, nil
+}
+
 func (s *Service) GetGitStatus() (*project.GitStatus, error) {
 	repo, err := git.PlainOpen(s.ProjectDir)
 	if err != nil {
@@ -219,8 +277,21 @@ func (s *Service) GetGitStatus() (*project.GitStatus, error) {
 		})
 	}
 
+	branchPublished, err := s.isBranchPublished()
+	if err != nil {
+		return nil, err
+	}
+
+	ahead, behind, err := s.getAheadBehindInfo()
+	if err != nil {
+		return nil, err
+	}
+
 	return &project.GitStatus{
-		CurrentBranch: ref.Name().Short(),
-		Files:         files,
+		CurrentBranch:   ref.Name().Short(),
+		Files:           files,
+		BranchPublished: branchPublished,
+		Ahead:           ahead,
+		Behind:          behind,
 	}, nil
 }

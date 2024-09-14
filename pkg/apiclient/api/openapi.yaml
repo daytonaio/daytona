@@ -1774,6 +1774,7 @@ components:
       type: object
     GitStatus:
       example:
+        behind: 6
         fileStatus:
         - extra: extra
           name: name
@@ -1783,8 +1784,16 @@ components:
           name: name
           staging: null
           worktree: null
+        ahead: 0
+        branchPublished: true
         currentBranch: currentBranch
       properties:
+        ahead:
+          type: integer
+        behind:
+          type: integer
+        branchPublished:
+          type: boolean
         currentBranch:
           type: string
         fileStatus:
@@ -1927,6 +1936,7 @@ components:
         name: name
         state:
           gitStatus:
+            behind: 6
             fileStatus:
             - extra: extra
               name: name
@@ -1936,9 +1946,11 @@ components:
               name: name
               staging: null
               worktree: null
+            ahead: 0
+            branchPublished: true
             currentBranch: currentBranch
           updatedAt: updatedAt
-          uptime: 0
+          uptime: 1
         repository:
           owner: owner
           path: path
@@ -2069,6 +2081,7 @@ components:
     ProjectState:
       example:
         gitStatus:
+          behind: 6
           fileStatus:
           - extra: extra
             name: name
@@ -2078,9 +2091,11 @@ components:
             name: name
             staging: null
             worktree: null
+          ahead: 0
+          branchPublished: true
           currentBranch: currentBranch
         updatedAt: updatedAt
-        uptime: 0
+        uptime: 1
       properties:
         gitStatus:
           $ref: '#/components/schemas/GitStatus'
@@ -2251,6 +2266,7 @@ components:
     SetProjectState:
       example:
         gitStatus:
+          behind: 6
           fileStatus:
           - extra: extra
             name: name
@@ -2260,6 +2276,8 @@ components:
             name: name
             staging: null
             worktree: null
+          ahead: 0
+          branchPublished: true
           currentBranch: currentBranch
         uptime: 0
       properties:
@@ -2305,6 +2323,7 @@ components:
           name: name
           state:
             gitStatus:
+              behind: 6
               fileStatus:
               - extra: extra
                 name: name
@@ -2314,9 +2333,11 @@ components:
                 name: name
                 staging: null
                 worktree: null
+              ahead: 0
+              branchPublished: true
               currentBranch: currentBranch
             updatedAt: updatedAt
-            uptime: 0
+            uptime: 1
           repository:
             owner: owner
             path: path
@@ -2343,6 +2364,7 @@ components:
           name: name
           state:
             gitStatus:
+              behind: 6
               fileStatus:
               - extra: extra
                 name: name
@@ -2352,9 +2374,11 @@ components:
                 name: name
                 staging: null
                 worktree: null
+              ahead: 0
+              branchPublished: true
               currentBranch: currentBranch
             updatedAt: updatedAt
-            uptime: 0
+            uptime: 1
           repository:
             owner: owner
             path: path
@@ -2404,6 +2428,7 @@ components:
           name: name
           state:
             gitStatus:
+              behind: 6
               fileStatus:
               - extra: extra
                 name: name
@@ -2413,9 +2438,11 @@ components:
                 name: name
                 staging: null
                 worktree: null
+              ahead: 0
+              branchPublished: true
               currentBranch: currentBranch
             updatedAt: updatedAt
-            uptime: 0
+            uptime: 1
           repository:
             owner: owner
             path: path
@@ -2442,6 +2469,7 @@ components:
           name: name
           state:
             gitStatus:
+              behind: 6
               fileStatus:
               - extra: extra
                 name: name
@@ -2451,9 +2479,11 @@ components:
                 name: name
                 staging: null
                 worktree: null
+              ahead: 0
+              branchPublished: true
               currentBranch: currentBranch
             updatedAt: updatedAt
-            uptime: 0
+            uptime: 1
           repository:
             owner: owner
             path: path

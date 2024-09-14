@@ -159,17 +159,39 @@ func getInfoLineGitStatus(key string, status *apiclient.GitStatus) string {
 	output += propertyNameStyle.Foreground(views.Gray).Render(fmt.Sprintf("%-*s", propertyNameWidth, status.CurrentBranch))
 
 	changesOutput := ""
-	if status.FileStatus == nil {
-		return output + "\n"
+	if status.FileStatus != nil {
+		filesNum := len(status.FileStatus)
+		if filesNum == 1 {
+			changesOutput = " (1 uncommitted change)"
+		} else if filesNum > 1 {
+			changesOutput = fmt.Sprintf(" (%d uncommitted changes)", filesNum)
+		}
 	}
 
-	filesNum := len(status.FileStatus)
-	if filesNum == 1 {
-		changesOutput = " (" + fmt.Sprint(filesNum) + " uncommited change)"
-	} else if filesNum > 1 {
-		changesOutput = " (" + fmt.Sprint(filesNum) + " uncommited changes)"
+	unpushedOutput := ""
+
+	if status.Ahead != nil && *status.Ahead > 0 {
+		if *status.Ahead == 1 {
+			unpushedOutput += " (1 commit ahead)"
+		} else {
+			unpushedOutput += fmt.Sprintf(" (%d commits ahead)", *status.Ahead)
+		}
 	}
-	output += changesOutput + propertyValueStyle.Foreground(views.Light).Render("\n")
+
+	if status.Behind != nil && *status.Behind > 0 {
+		if *status.Behind == 1 {
+			unpushedOutput += " (1 commit behind)"
+		} else {
+			unpushedOutput += fmt.Sprintf(" (%d commits behind)", *status.Behind)
+		}
+	}
+
+	branchPublishedOutput := ""
+	if !*status.BranchPublished {
+		branchPublishedOutput = " (branch not published)"
+	}
+
+	output += changesOutput + unpushedOutput + branchPublishedOutput + propertyValueStyle.Foreground(views.Light).Render("\n")
 
 	return output
 }

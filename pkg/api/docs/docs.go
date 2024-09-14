@@ -2216,6 +2216,15 @@ const docTemplate = `{
                 "fileStatus"
             ],
             "properties": {
+                "ahead": {
+                    "type": "integer"
+                },
+                "behind": {
+                    "type": "integer"
+                },
+                "branchPublished": {
+                    "type": "boolean"
+                },
                 "currentBranch": {
                     "type": "string"
                 },
