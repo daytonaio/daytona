@@ -49,10 +49,7 @@ func (g *AwsCodeCommitGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 		SortBy: types.SortByEnumRepositoryName,
 	})
 	if err != nil {
-		if reqErr, ok := err.(awserr.RequestFailure); ok {
-			return nil, fmt.Errorf("status code: %d err: %s", reqErr.StatusCode(), reqErr.Message())
-		}
-		return nil, fmt.Errorf("failed to fetch repositories: %w", err)
+		return nil, g.FormatError(err)
 	}
 	var namespaces []*GitNamespace
 	for _, repository := range repositories.Repositories {
@@ -122,10 +119,7 @@ func (g *AwsCodeCommitGitProvider) GetRepositories(namespace string) ([]*GitRepo
 		RepositoryName: &namespace,
 	})
 	if err != nil {
-		if reqErr, ok := err.(awserr.RequestFailure); ok {
-			return nil, fmt.Errorf("status code: %d err: %s", reqErr.StatusCode(), reqErr.Message())
-		}
-		return nil, fmt.Errorf("failed to fetch repository: %s with error: %w", namespace, err)
+		return nil, g.FormatError(err)
 	}
 	repository := &GitRepository{
 		Id:     *data.RepositoryMetadata.RepositoryName,
@@ -155,10 +149,7 @@ func (g *AwsCodeCommitGitProvider) GetRepoBranches(repositoryId string, namespac
 		RepositoryName: &repositoryId,
 	})
 	if err != nil {
-		if reqErr, ok := err.(awserr.RequestFailure); ok {
-			return nil, fmt.Errorf("status code: %d err: %s", reqErr.StatusCode(), reqErr.Message())
-		}
-		return nil, fmt.Errorf("failed to fetch branches for repository: %s", repositoryId)
+		return nil, g.FormatError(err)
 	}
 	var gitbranches []*GitBranch
 	for _, branch := range branchesoutput.Branches {
@@ -194,10 +185,7 @@ func (g *AwsCodeCommitGitProvider) GetUser() (*GitUser, error) {
 	iamclient := iam.NewFromConfig(cfg)
 	user, err := iamclient.GetUser(context.TODO(), &iam.GetUserInput{})
 	if err != nil {
-		if reqErr, ok := err.(awserr.RequestFailure); ok {
-			return nil, fmt.Errorf("status code: %d err: %s", reqErr.StatusCode(), reqErr.Message())
-		}
-		return nil, fmt.Errorf("failed to fetch user: %w", err)
+		return nil, g.FormatError(err)
 	}
 
 	// IAM service does not provide the email in the GetUser API response.
@@ -222,10 +210,7 @@ func (g *AwsCodeCommitGitProvider) GetRepoPRs(repositoryId string, namespaceId s
 		PullRequestStatus: types.PullRequestStatusEnumOpen,
 	})
 	if err != nil {
-		if reqErr, ok := err.(awserr.RequestFailure); ok {
-			return nil, fmt.Errorf("status code: %d err: %s", reqErr.StatusCode(), reqErr.Message())
-		}
-		return nil, fmt.Errorf("failed to get pull requests: %w", err)
+		return nil, g.FormatError(err)
 	}
 	var pullRequests []*GitPullRequest
 	for _, pullrequestid := range pullrequests.PullRequestIds {
@@ -233,10 +218,7 @@ func (g *AwsCodeCommitGitProvider) GetRepoPRs(repositoryId string, namespaceId s
 			PullRequestId: &pullrequestid,
 		})
 		if err != nil {
-			if reqErr, ok := err.(awserr.RequestFailure); ok {
-				return nil, fmt.Errorf("status code: %d err: %s", reqErr.StatusCode(), reqErr.Message())
-			}
-			log.Warnf("failed to get pull request: %s error: %f", pullrequestid, err)
+			return nil, g.FormatError(err)
 		}
 		prbranch := strings.TrimPrefix(*pr.PullRequest.PullRequestTargets[0].SourceReference, "refs/heads/")
 		pullRequest := &GitPullRequest{
@@ -263,10 +245,7 @@ func (g *AwsCodeCommitGitProvider) GetLastCommitSha(staticContext *StaticGitCont
 		BranchName:     staticContext.Branch,
 	})
 	if err != nil {
-		if reqErr, ok := err.(awserr.RequestFailure); ok {
-			return "", fmt.Errorf("status code: %d err: %s", reqErr.StatusCode(), reqErr.Message())
-		}
-		return "", fmt.Errorf("failed to fetch branch details: %w", err)
+		return "", g.FormatError(err)
 	}
 	return *branch.Branch.CommitId, nil
 }
@@ -284,10 +263,7 @@ func (g *AwsCodeCommitGitProvider) GetPrContext(staticContext *StaticGitContext)
 		PullRequestId: aws.String(prnumber),
 	})
 	if err != nil {
-		if reqErr, ok := err.(awserr.RequestFailure); ok {
-			return nil, fmt.Errorf("status code: %d err: %s", reqErr.StatusCode(), reqErr.Message())
-		}
-		return nil, fmt.Errorf("failed to get pull request: %w", err)
+		return nil, g.FormatError(err)
 	}
 	repo := *staticContext
 	prbranchname := strings.TrimPrefix(*pr.PullRequest.PullRequestTargets[0].SourceReference, "refs/heads/")
@@ -305,10 +281,7 @@ func (g *AwsCodeCommitGitProvider) GetBranchByCommit(staticContext *StaticGitCon
 		RepositoryName: aws.String(staticContext.Name),
 	})
 	if err != nil {
-		if reqErr, ok := err.(awserr.RequestFailure); ok {
-			return "", fmt.Errorf("status code: %d err: %s", reqErr.StatusCode(), reqErr.Message())
-		}
-		return "", fmt.Errorf("failed to list branches, %v", err)
+		return "", g.FormatError(err)
 	}
 	var branchName string
 	for _, branch := range branches.Branches {
@@ -431,12 +404,17 @@ func (g *AwsCodeCommitGitProvider) GetDefaultBranch(staticContext *StaticGitCont
 		RepositoryName: &staticContext.Name,
 	})
 	if err != nil {
-		if reqErr, ok := err.(awserr.RequestFailure); ok {
-			return nil, fmt.Errorf("status code: %d err: %s", reqErr.StatusCode(), reqErr.Message())
-		}
-		return nil, fmt.Errorf("failed to get branch: %s", err.Error())
+
+		return nil, g.FormatError(err)
 	}
 	return branch.Branch.CommitId, nil
+}
+
+func (g *AwsCodeCommitGitProvider) FormatError(err error) error {
+	if reqErr, ok := err.(awserr.RequestFailure); ok {
+		return fmt.Errorf("status code: %d err: %s", reqErr.StatusCode(), reqErr.Message())
+	}
+	return fmt.Errorf("status code: %d err: failed to format the error message : %s", http.StatusInternalServerError, err.Error())
 }
 
 func getCodeCommitCloneUrl(region string, repositoryId string) string {

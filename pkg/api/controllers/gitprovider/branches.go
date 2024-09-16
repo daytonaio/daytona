@@ -4,6 +4,7 @@
 package gitprovider
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -52,7 +53,7 @@ func GetRepoBranches(ctx *gin.Context) {
 		if codeErr != nil {
 			ctx.AbortWithError(http.StatusInternalServerError, err)
 		}
-		ctx.AbortWithError(statusCode, fmt.Errorf("%s", message))
+		ctx.AbortWithError(statusCode, errors.New(message))
 		return
 	}
 

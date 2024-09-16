@@ -4,6 +4,7 @@
 package gitprovider
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -43,11 +44,10 @@ func GetGitContext(ctx *gin.Context) {
 	repo, err := gitProvider.GetRepositoryContext(repositoryContext)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
-		fmt.Println(statusCode, "  ", message)
 		if codeErr != nil {
 			ctx.AbortWithError(http.StatusInternalServerError, err)
 		}
-		ctx.AbortWithError(statusCode, fmt.Errorf("%s", message))
+		ctx.AbortWithError(statusCode, errors.New(message))
 		return
 	}
 

@@ -4,14 +4,12 @@
 package controllers
 
 import (
-	"errors"
-	"fmt"
+	"net/http"
 	"regexp"
 	"strconv"
 )
 
 func GetHTTPStatusCodeAndMessageFromError(err error) (int, string, error) {
-	fmt.Println(err.Error())
 
 	// pattern to match "status code: <3-digit number>. err: <error message>"
 	re := regexp.MustCompile(`status code: (\d{3}) err: (.+)`)
@@ -28,5 +26,5 @@ func GetHTTPStatusCodeAndMessageFromError(err error) (int, string, error) {
 		}
 	}
 
-	return 0, "", errors.New("no HTTP status code and error message found in error")
+	return http.StatusInternalServerError, "", err
 }
