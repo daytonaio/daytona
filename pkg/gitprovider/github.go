@@ -42,12 +42,12 @@ func (g *GitHubGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 		return nil, err
 	}
 
-	orgList, _, err := client.Organizations.List(context.Background(), "", &github.ListOptions{
+	orgList, res, err := client.Organizations.List(context.Background(), "", &github.ListOptions{
 		PerPage: 100,
 		Page:    1,
 	})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res, err)
 	}
 
 	namespaces := []*GitNamespace{}
@@ -83,7 +83,7 @@ func (g *GitHubGitProvider) GetRepositories(namespace string) ([]*GitRepository,
 		query += "org:" + namespace
 	}
 
-	repoList, _, err := client.Search.Repositories(context.Background(), query, &github.SearchOptions{
+	repoList, res, err := client.Search.Repositories(context.Background(), query, &github.SearchOptions{
 		ListOptions: github.ListOptions{
 			PerPage: 100,
 			Page:    1,
@@ -91,7 +91,7 @@ func (g *GitHubGitProvider) GetRepositories(namespace string) ([]*GitRepository,
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res, err)
 	}
 
 	for _, repo := range repoList.Repositories {
@@ -125,9 +125,9 @@ func (g *GitHubGitProvider) GetRepoBranches(repositoryId string, namespaceId str
 
 	var response []*GitBranch
 
-	repoBranches, _, err := client.Repositories.ListBranches(context.Background(), namespaceId, repositoryId, &github.ListOptions{})
+	repoBranches, res, err := client.Repositories.ListBranches(context.Background(), namespaceId, repositoryId, &github.ListOptions{})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res, err)
 	}
 
 	for _, branch := range repoBranches {
@@ -156,11 +156,11 @@ func (g *GitHubGitProvider) GetRepoPRs(repositoryId string, namespaceId string) 
 
 	var response []*GitPullRequest
 
-	prList, _, err := client.PullRequests.List(context.Background(), namespaceId, repositoryId, &github.PullRequestListOptions{
+	prList, res, err := client.PullRequests.List(context.Background(), namespaceId, repositoryId, &github.PullRequestListOptions{
 		State: "open",
 	})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res, err)
 	}
 
 	for _, pr := range prList {
@@ -181,9 +181,9 @@ func (g *GitHubGitProvider) GetRepoPRs(repositoryId string, namespaceId string) 
 func (g *GitHubGitProvider) GetUser() (*GitUser, error) {
 	client := g.getApiClient()
 
-	user, _, err := client.Users.Get(context.Background(), "")
+	user, res, err := client.Users.Get(context.Background(), "")
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res, err)
 	}
 
 	response := &GitUser{}
@@ -220,14 +220,14 @@ func (g *GitHubGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (s
 		sha = *staticContext.Sha
 	}
 
-	commits, _, err := client.Repositories.ListCommits(context.Background(), staticContext.Owner, staticContext.Name, &github.CommitsListOptions{
+	commits, res, err := client.Repositories.ListCommits(context.Background(), staticContext.Owner, staticContext.Name, &github.CommitsListOptions{
 		SHA: sha,
 		ListOptions: github.ListOptions{
 			PerPage: 1,
 		},
 	})
 	if err != nil {
-		return "", err
+		return "", g.FormatError(res, err)
 	}
 	if len(commits) == 0 {
 		return "", nil
@@ -291,18 +291,18 @@ func (g *GitHubGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (
 
 	client := g.getApiClient()
 
-	branches, _, err := client.Repositories.ListBranches(context.Background(), staticContext.Owner, staticContext.Name, nil)
+	branches, res, err := client.Repositories.ListBranches(context.Background(), staticContext.Owner, staticContext.Name, nil)
 	if err != nil {
-		return "", fmt.Errorf("failed to list branches: %v", err)
+		return "", g.FormatError(res, err)
 	}
 
 	var branchName string
 	for _, branch := range branches {
 		branchName = branch.GetName()
 
-		commitComparison, _, err := client.Repositories.CompareCommits(context.Background(), staticContext.Owner, staticContext.Name, branchName, *staticContext.Sha)
+		commitComparison, res, err := client.Repositories.CompareCommits(context.Background(), staticContext.Owner, staticContext.Name, branchName, *staticContext.Sha)
 		if err != nil {
-			return "", fmt.Errorf("error comparing commits: %w", err)
+			return "", g.FormatError(res, err)
 		}
 		if commitComparison.GetStatus() == "identical" || commitComparison.GetStatus() == "behind" {
 			return branchName, nil
@@ -310,7 +310,7 @@ func (g *GitHubGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (
 	}
 
 	if branchName == "" {
-		return "", fmt.Errorf("branch not found for SHA: %s", *staticContext.Sha)
+		return "", fmt.Errorf("status code: %d branch not found for SHA: %s", http.StatusNotFound, *staticContext.Sha)
 	}
 
 	return branchName, nil
@@ -323,9 +323,9 @@ func (g *GitHubGitProvider) GetPrContext(staticContext *StaticGitContext) (*Stat
 
 	client := g.getApiClient()
 
-	pr, _, err := client.PullRequests.Get(context.Background(), staticContext.Owner, staticContext.Name, int(*staticContext.PrNumber))
+	pr, res, err := client.PullRequests.Get(context.Background(), staticContext.Owner, staticContext.Name, int(*staticContext.PrNumber))
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res, err)
 	}
 
 	repo := *staticContext
@@ -379,11 +379,11 @@ func (g *GitHubGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitCon
 func (g *GitHubGitProvider) GetPrebuildWebhook(repo *GitRepository, endpointUrl string) (*string, error) {
 	client := g.getApiClient()
 
-	hooks, _, err := client.Repositories.ListHooks(context.Background(), repo.Owner, repo.Name, &github.ListOptions{
+	hooks, res, err := client.Repositories.ListHooks(context.Background(), repo.Owner, repo.Name, &github.ListOptions{
 		PerPage: 100,
 	})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res, err)
 	}
 
 	for _, hook := range hooks {
@@ -398,7 +398,7 @@ func (g *GitHubGitProvider) GetPrebuildWebhook(repo *GitRepository, endpointUrl 
 func (g *GitHubGitProvider) RegisterPrebuildWebhook(repo *GitRepository, endpointUrl string) (string, error) {
 	client := g.getApiClient()
 
-	hook, _, err := client.Repositories.CreateHook(context.Background(), repo.Owner, repo.Name, &github.Hook{
+	hook, res, err := client.Repositories.CreateHook(context.Background(), repo.Owner, repo.Name, &github.Hook{
 		Active: github.Bool(true),
 		Events: []string{"push"},
 		Config: map[string]interface{}{
@@ -408,7 +408,7 @@ func (g *GitHubGitProvider) RegisterPrebuildWebhook(repo *GitRepository, endpoin
 	})
 
 	if err != nil {
-		return "", err
+		return "", g.FormatError(res, err)
 	}
 
 	return strconv.Itoa(int(*hook.ID)), nil
@@ -419,17 +419,19 @@ func (g *GitHubGitProvider) UnregisterPrebuildWebhook(repo *GitRepository, id st
 
 	idInt, _ := strconv.Atoi(id)
 
-	_, err := client.Repositories.DeleteHook(context.Background(), repo.Owner, repo.Name, int64(idInt))
-
-	return err
+	res, err := client.Repositories.DeleteHook(context.Background(), repo.Owner, repo.Name, int64(idInt))
+	if err != nil {
+		return g.FormatError(res, err)
+	}
+	return nil
 }
 
 func (g *GitHubGitProvider) GetCommitsRange(repo *GitRepository, initialSha string, currentSha string) (int, error) {
 	client := g.getApiClient()
 
-	commits, _, err := client.Repositories.CompareCommits(context.Background(), repo.Owner, repo.Name, initialSha, currentSha)
+	commits, res, err := client.Repositories.CompareCommits(context.Background(), repo.Owner, repo.Name, initialSha, currentSha)
 	if err != nil {
-		return 0, err
+		return 0, g.FormatError(res, err)
 	}
 
 	return len(commits.Commits), nil
@@ -481,10 +483,14 @@ func (g *GitHubGitProvider) ParseEventData(request *http.Request) (*GitEventData
 func (g *GitHubGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*string, error) {
 	client := g.getApiClient()
 
-	repo, _, err := client.Repositories.Get(context.Background(), staticContext.Owner, staticContext.Name)
+	repo, res, err := client.Repositories.Get(context.Background(), staticContext.Owner, staticContext.Name)
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res, err)
 	}
 
 	return repo.DefaultBranch, nil
+}
+
+func (g *GitHubGitProvider) FormatError(response *github.Response, responseError error) error {
+	return fmt.Errorf("status code: %d err: %s", response.StatusCode, responseError.Error())
 }

@@ -43,9 +43,9 @@ func (g *GitLabGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 		return nil, err
 	}
 
-	groupList, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{})
+	groupList, res, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res)
 	}
 
 	namespaces := []*GitNamespace{}
@@ -66,7 +66,6 @@ func (g *GitLabGitProvider) GetRepositories(namespace string) ([]*GitRepository,
 	client := g.getApiClient()
 	var response []*GitRepository
 	var repoList []*gitlab.Project
-	var err error
 
 	if namespace == personalNamespaceId {
 		user, err := g.GetUser()
@@ -74,25 +73,27 @@ func (g *GitLabGitProvider) GetRepositories(namespace string) ([]*GitRepository,
 			return nil, err
 		}
 
-		repoList, _, err = client.Projects.ListUserProjects(user.Id, &gitlab.ListProjectsOptions{
+		repos, res, err := client.Projects.ListUserProjects(user.Id, &gitlab.ListProjectsOptions{
 			ListOptions: gitlab.ListOptions{
 				PerPage: 100,
 				Page:    1,
 			},
 		})
 		if err != nil {
-			return nil, err
+			return nil, g.FormatError(res)
 		}
+		repoList = repos
 	} else {
-		repoList, _, err = client.Groups.ListGroupProjects(namespace, &gitlab.ListGroupProjectsOptions{
+		repos, res, err := client.Groups.ListGroupProjects(namespace, &gitlab.ListGroupProjectsOptions{
 			ListOptions: gitlab.ListOptions{
 				PerPage: 100,
 				Page:    1,
 			},
 		})
 		if err != nil {
-			return nil, err
+			return nil, g.FormatError(res)
 		}
+		repoList = repos
 	}
 
 	for _, repo := range repoList {
@@ -118,9 +119,9 @@ func (g *GitLabGitProvider) GetRepoBranches(repositoryId string, namespaceId str
 	client := g.getApiClient()
 	var response []*GitBranch
 
-	branches, _, err := client.Branches.ListBranches(repositoryId, &gitlab.ListBranchesOptions{})
+	branches, res, err := client.Branches.ListBranches(repositoryId, &gitlab.ListBranchesOptions{})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res)
 	}
 
 	for _, branch := range branches {
@@ -140,15 +141,15 @@ func (g *GitLabGitProvider) GetRepoPRs(repositoryId string, namespaceId string) 
 	client := g.getApiClient()
 	var response []*GitPullRequest
 
-	mergeRequests, _, err := client.MergeRequests.ListProjectMergeRequests(repositoryId, &gitlab.ListProjectMergeRequestsOptions{})
+	mergeRequests, res, err := client.MergeRequests.ListProjectMergeRequests(repositoryId, &gitlab.ListProjectMergeRequestsOptions{})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res)
 	}
 
 	for _, mergeRequest := range mergeRequests {
-		sourceRepo, _, err := client.Projects.GetProject(mergeRequest.SourceProjectID, nil)
+		sourceRepo, res, err := client.Projects.GetProject(mergeRequest.SourceProjectID, nil)
 		if err != nil {
-			return nil, err
+			return nil, g.FormatError(res)
 		}
 
 		response = append(response, &GitPullRequest{
@@ -168,9 +169,9 @@ func (g *GitLabGitProvider) GetRepoPRs(repositoryId string, namespaceId string) 
 func (g *GitLabGitProvider) GetUser() (*GitUser, error) {
 	client := g.getApiClient()
 
-	user, _, err := client.Users.CurrentUser()
+	user, res, err := client.Users.CurrentUser()
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res)
 	}
 
 	userId := strconv.Itoa(user.ID)
@@ -188,9 +189,9 @@ func (g *GitLabGitProvider) GetUser() (*GitUser, error) {
 func (g *GitLabGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
 	client := g.getApiClient()
 
-	branches, _, err := client.Branches.ListBranches(staticContext.Id, &gitlab.ListBranchesOptions{})
+	branches, res, err := client.Branches.ListBranches(staticContext.Id, &gitlab.ListBranchesOptions{})
 	if err != nil {
-		return "", err
+		return "", g.FormatError(res)
 	}
 
 	var branchName string
@@ -202,9 +203,9 @@ func (g *GitLabGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (
 
 		commitId := branch.Commit.ID
 		for commitId != "" {
-			commit, _, err := client.Commits.GetCommit(staticContext.Id, commitId)
+			commit, res, err := client.Commits.GetCommit(staticContext.Id, commitId)
 			if err != nil {
-				return "", err
+				return "", g.FormatError(res)
 			}
 
 			if *staticContext.Sha == commit.ID {
@@ -230,7 +231,7 @@ func (g *GitLabGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (
 	}
 
 	if branchName == "" {
-		return "", fmt.Errorf("branch not found for SHA: %s", *staticContext.Sha)
+		return "", fmt.Errorf("status code: %d branch not found for SHA: %s", http.StatusNotFound, *staticContext.Sha)
 	}
 
 	return branchName, nil
@@ -249,14 +250,14 @@ func (g *GitLabGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (s
 		sha = staticContext.Sha
 	}
 
-	commits, _, err := client.Commits.ListCommits(staticContext.Id, &gitlab.ListCommitsOptions{
+	commits, res, err := client.Commits.ListCommits(staticContext.Id, &gitlab.ListCommitsOptions{
 		ListOptions: gitlab.ListOptions{
 			PerPage: 1,
 		},
 		RefName: sha,
 	})
 	if err != nil {
-		return "", err
+		return "", g.FormatError(res)
 	}
 	if len(commits) == 0 {
 		return "", nil
@@ -441,14 +442,14 @@ func (g *GitLabGitProvider) GetPrContext(staticContext *StaticGitContext) (*Stat
 
 	client := g.getApiClient()
 
-	pull, _, err := client.MergeRequests.GetMergeRequest(staticContext.Id, int(*staticContext.PrNumber), nil)
+	pull, res, err := client.MergeRequests.GetMergeRequest(staticContext.Id, int(*staticContext.PrNumber), nil)
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res)
 	}
 
-	project, _, err := client.Projects.GetProject(staticContext.Id, nil)
+	project, res, err := client.Projects.GetProject(staticContext.Id, nil)
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res)
 	}
 
 	repo := *staticContext
@@ -462,9 +463,9 @@ func (g *GitLabGitProvider) GetPrContext(staticContext *StaticGitContext) (*Stat
 func (g *GitLabGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*string, error) {
 	client := g.getApiClient()
 
-	project, _, err := client.Projects.GetProject(staticContext.Id, nil)
+	project, res, err := client.Projects.GetProject(staticContext.Id, nil)
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res)
 	}
 
 	return &project.DefaultBranch, nil
@@ -476,12 +477,12 @@ func (g *GitLabGitProvider) RegisterPrebuildWebhook(repo *GitRepository, endpoin
 	pushEvents := true
 	projectID := fmt.Sprintf("%s/%s", repo.Owner, repo.Name)
 
-	hook, _, err := client.Projects.AddProjectHook(projectID, &gitlab.AddProjectHookOptions{
+	hook, res, err := client.Projects.AddProjectHook(projectID, &gitlab.AddProjectHookOptions{
 		URL:        &endpointUrl,
 		PushEvents: &pushEvents,
 	})
 	if err != nil {
-		return "", fmt.Errorf("failed to add project hook for project %s: %w", projectID, err)
+		return "", g.FormatError(res)
 	}
 
 	return strconv.Itoa(hook.ID), nil
@@ -491,11 +492,11 @@ func (g *GitLabGitProvider) GetPrebuildWebhook(repo *GitRepository, endpointUrl 
 	client := g.getApiClient()
 
 	projectID := fmt.Sprintf("%s/%s", repo.Owner, repo.Name)
-	hooks, _, err := client.Projects.ListProjectHooks(projectID, &gitlab.ListProjectHooksOptions{
+	hooks, res, err := client.Projects.ListProjectHooks(projectID, &gitlab.ListProjectHooksOptions{
 		PerPage: 100,
 	})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res)
 	}
 
 	for _, hook := range hooks {
@@ -516,9 +517,9 @@ func (g *GitLabGitProvider) UnregisterPrebuildWebhook(repo *GitRepository, hookI
 	}
 
 	projectID := fmt.Sprintf("%s/%s", repo.Owner, repo.Name)
-	_, err = client.Projects.DeleteProjectHook(projectID, hookIdInt)
+	res, err := client.Projects.DeleteProjectHook(projectID, hookIdInt)
 	if err != nil {
-		return err
+		return g.FormatError(res)
 	}
 
 	return nil
@@ -528,12 +529,12 @@ func (g *GitLabGitProvider) GetCommitsRange(repo *GitRepository, initialSha stri
 	client := g.getApiClient()
 
 	projectID := fmt.Sprintf("%s/%s", repo.Owner, repo.Name)
-	commits, _, err := client.Repositories.Compare(projectID, &gitlab.CompareOptions{
+	commits, res, err := client.Repositories.Compare(projectID, &gitlab.CompareOptions{
 		From: &initialSha,
 		To:   &currentSha,
 	})
 	if err != nil {
-		return 0, err
+		return 0, g.FormatError(res)
 	}
 
 	return len(commits.Commits), nil
@@ -573,4 +574,13 @@ func (g *GitLabGitProvider) ParseEventData(request *http.Request) (*GitEventData
 	}
 
 	return gitEventData, nil
+}
+
+func (g *GitLabGitProvider) FormatError(response *gitlab.Response) error {
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return fmt.Errorf("status code: %d err: failed to read response body: %v", response.StatusCode, err)
+	}
+	defer response.Body.Close()
+	return fmt.Errorf("status code: %d err: %s", response.StatusCode, string(body))
 }

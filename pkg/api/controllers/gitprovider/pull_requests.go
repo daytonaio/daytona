@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/daytonaio/daytona/pkg/api/controllers"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
@@ -46,9 +47,12 @@ func GetRepoPRs(ctx *gin.Context) {
 
 	response, err := server.GitProviderService.GetRepoPRs(gitProviderId, namespaceId, repositoryId)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get repository pull requests: %w", err))
+		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
+		if codeErr != nil {
+			ctx.AbortWithError(http.StatusInternalServerError, err)
+		}
+		ctx.AbortWithError(statusCode, fmt.Errorf("%s", message))
 		return
 	}
-
 	ctx.JSON(200, response)
 }
