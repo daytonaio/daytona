@@ -15,6 +15,7 @@ see_also:
     - daytona autocomplete - Adds completion script for your shell enviornment
     - daytona build - Manage builds
     - daytona code - Open a workspace in your preferred IDE
+    - daytona config - Output Daytona configuration
     - daytona container-registry - Manage container registries
     - daytona create - Create a workspace
     - daytona delete - Delete a workspace
