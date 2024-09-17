@@ -98,7 +98,8 @@ func (s *Service) CloneRepository(repo *gitprovider.GitRepository, auth *http.Ba
 }
 
 func (s *Service) CloneRepositoryCmd(repo *gitprovider.GitRepository, auth *http.BasicAuth) []string {
-	cloneCmd := []string{"git", "clone", "--single-branch", "--branch", repo.Branch}
+	branch := fmt.Sprintf("\"%s\"", repo.Branch)
+	cloneCmd := []string{"git", "clone", "--single-branch", "--branch", branch}
 
 	if auth != nil {
 		repoUrl := strings.TrimPrefix(repo.Url, "https://")
