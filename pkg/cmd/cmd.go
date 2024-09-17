@@ -60,6 +60,7 @@ func Execute() {
 	rootCmd.AddCommand(ContainerRegistryCmd)
 	rootCmd.AddCommand(ProviderCmd)
 	rootCmd.AddCommand(TargetCmd)
+	rootCmd.AddCommand(configCmd)
 	rootCmd.AddCommand(ideCmd)
 	rootCmd.AddCommand(ProfileCmd)
 	rootCmd.AddCommand(ProfileUseCmd)

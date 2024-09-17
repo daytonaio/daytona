@@ -21,9 +21,10 @@ type RowData struct {
 	Name   string
 	Status string
 	ApiUrl string
+	ApiKey string
 }
 
-func getRowFromRowData(rowData RowData) []string {
+func getRowFromRowData(rowData RowData, showApiKeysFlag bool) []string {
 	var state string
 	if rowData.Status == "" {
 		state = views.InactiveStyle.Render("Inactive")
@@ -37,12 +38,15 @@ func getRowFromRowData(rowData RowData) []string {
 		state,
 		views.DefaultRowDataStyle.Render(rowData.ApiUrl),
 	}
+	if showApiKeysFlag {
+		row = append(row, views.DefaultRowDataStyle.Render(rowData.ApiKey))
+	}
 
 	return row
 }
 
-func getRowData(profile *config.Profile, activeProfileId string) *RowData {
-	rowData := RowData{"", "", "", ""}
+func getRowData(profile *config.Profile, activeProfileId string, showApiKeysFlag bool) *RowData {
+	rowData := RowData{"", "", "", "", ""}
 
 	rowData.ID = profile.Id
 	rowData.Name = profile.Name
@@ -50,15 +54,21 @@ func getRowData(profile *config.Profile, activeProfileId string) *RowData {
 	if profile.Id == activeProfileId {
 		rowData.Status = "1"
 	}
+	if showApiKeysFlag {
+		rowData.ApiKey = profile.Api.Key
+	}
 
 	return &rowData
 }
 
-func ListProfiles(profileList []config.Profile, activeProfileId string) {
+func ListProfiles(profileList []config.Profile, activeProfileId string, showApiKeysFlag bool) (string, error) {
 
 	re := lipgloss.NewRenderer(os.Stdout)
 
 	headers := []string{"ID", "Name", "Status", "API URL"}
+	if showApiKeysFlag {
+		headers = append(headers, "API Key")
+	}
 
 	data := [][]string{}
 
@@ -66,26 +76,24 @@ func ListProfiles(profileList []config.Profile, activeProfileId string) {
 		var rowData *RowData
 		var row []string
 
-		rowData = getRowData(&profile, activeProfileId)
+		rowData = getRowData(&profile, activeProfileId, showApiKeysFlag)
 		if rowData == nil {
 			continue
 		}
-		row = getRowFromRowData(*rowData)
+		row = getRowFromRowData(*rowData, showApiKeysFlag)
 		data = append(data, row)
 	}
 
 	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
-		fmt.Println(data)
-		return
+		return "", err
 	}
 
 	breakpointWidth := views.GetContainerBreakpointWidth(terminalWidth)
 	minWidth := views_util.GetTableMinimumWidth(data)
 
 	if breakpointWidth == 0 || terminalWidth < views.TUITableMinimumWidth || minWidth > breakpointWidth {
-		renderUnstyledList(profileList, activeProfileId)
-		return
+		return renderUnstyledList(profileList, activeProfileId, showApiKeysFlag), nil
 	}
 
 	t := table.New().
@@ -100,10 +108,10 @@ func ListProfiles(profileList []config.Profile, activeProfileId string) {
 			return views.BaseCellStyle
 		}).Width(breakpointWidth - 2*views.BaseTableStyleHorizontalPadding)
 
-	fmt.Println(views.BaseTableStyle.Render(t.String()))
+	return views.BaseTableStyle.Render(t.String()), nil
 }
 
-func renderUnstyledList(profileList []config.Profile, activeProfileId string) {
+func renderUnstyledList(profileList []config.Profile, activeProfileId string, showApiKeysFlag bool) string {
 	var status string
 	var isActive bool
 
@@ -127,6 +135,10 @@ func renderUnstyledList(profileList []config.Profile, activeProfileId string) {
 
 		output += fmt.Sprintf("%s %s", views.GetPropertyKey("API URL: "), profile.Api.Url) + "\n\n"
 
+		if showApiKeysFlag {
+			output += fmt.Sprintf("%s %s", views.GetPropertyKey("API Key: "), profile.Api.Key) + "\n\n"
+		}
+
 		if profile.Id != profileList[len(profileList)-1].Id {
 			output += views.SeparatorString + "\n\n"
 		}
@@ -134,5 +146,5 @@ func renderUnstyledList(profileList []config.Profile, activeProfileId string) {
 		isActive = false
 	}
 
-	fmt.Println(output)
+	return output
 }
