@@ -23,6 +23,7 @@ daytona [flags]
 * [daytona autocomplete](daytona_autocomplete.md)	 - Adds completion script for your shell enviornment
 * [daytona build](daytona_build.md)	 - Manage builds
 * [daytona code](daytona_code.md)	 - Open a workspace in your preferred IDE
+* [daytona config](daytona_config.md)	 - Output Daytona configuration
 * [daytona container-registry](daytona_container-registry.md)	 - Manage container registries
 * [daytona create](daytona_create.md)	 - Create a workspace
 * [daytona delete](daytona_delete.md)	 - Delete a workspace
