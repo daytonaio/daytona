@@ -379,7 +379,7 @@ func (d *DockerClient) readDevcontainerConfig(opts *CreateDevcontainerOptions, p
 	return rawConfig, &rootConfig, nil
 }
 
-func (d *DockerClient) runInitializeCommand(initializeCommand interface{}, logWriter io.Writer, sshClient *ssh.Client) error {
+func (d *DockerClient) runInitializeCommand(initializeCommand devcontainer.Command, logWriter io.Writer, sshClient *ssh.Client) error {
 	if initializeCommand == nil {
 		return nil
 	}
