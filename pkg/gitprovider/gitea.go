@@ -553,6 +553,5 @@ func (g *GiteaGitProvider) ParseEventData(request *http.Request) (*GitEventData,
 }
 
 func (g *GiteaGitProvider) FormatError(response *gitea.Response, err error) error {
-	fmt.Println(response.Body)
 	return fmt.Errorf("status code: %d err: %s", response.StatusCode, err.Error())
 }
