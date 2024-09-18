@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -622,12 +623,11 @@ func (g *BitbucketGitProvider) ParseEventData(request *http.Request) (*GitEventD
 }
 
 func (b *BitbucketGitProvider) FormatError(err error) error {
-	data, _ := json.Marshal(err)
-	jsonDat := make(map[string]string)
-	_ = json.Unmarshal(data, &jsonDat)
-	statusCode, err := strconv.Atoi(strings.Split(string(jsonDat["Status"]), " ")[0])
-	if err != nil {
-		return fmt.Errorf("status code: %d err: failed to format error message %s", http.StatusInternalServerError, err.Error())
+	re := regexp.MustCompile(`(\d{3})\s(.+)`)
+	match := re.FindStringSubmatch(err.Error())
+	if len(match) > 2 {
+		return fmt.Errorf("status code: %s err: %s", match[1], match[2])
 	}
-	return fmt.Errorf("status code: %d err: %s", statusCode, err)
+
+	return fmt.Errorf("status code: %d err: failed to format error message %s", http.StatusInternalServerError, err.Error())
 }
