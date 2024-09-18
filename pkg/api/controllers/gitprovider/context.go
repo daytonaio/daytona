@@ -37,7 +37,11 @@ func GetGitContext(ctx *gin.Context) {
 
 	gitProvider, _, err := server.GitProviderService.GetGitProviderForUrl(repositoryContext.Url)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %s", err.Error()))
+		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
+		if codeErr != nil {
+			ctx.AbortWithError(statusCode, codeErr)
+		}
+		ctx.AbortWithError(statusCode, errors.New(message))
 		return
 	}
 
@@ -45,7 +49,7 @@ func GetGitContext(ctx *gin.Context) {
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {
-			ctx.AbortWithError(http.StatusInternalServerError, err)
+			ctx.AbortWithError(statusCode, codeErr)
 		}
 		ctx.AbortWithError(statusCode, errors.New(message))
 		return
@@ -76,7 +80,11 @@ func GetUrlFromRepository(ctx *gin.Context) {
 
 	gitProvider, _, err := server.GitProviderService.GetGitProviderForUrl(repoContext.Url)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %w", err))
+		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
+		if codeErr != nil {
+			ctx.AbortWithError(statusCode, codeErr)
+		}
+		ctx.AbortWithError(statusCode, errors.New(message))
 		return
 	}
 

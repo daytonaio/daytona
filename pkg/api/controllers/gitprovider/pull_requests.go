@@ -50,7 +50,7 @@ func GetRepoPRs(ctx *gin.Context) {
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {
-			ctx.AbortWithError(http.StatusInternalServerError, err)
+			ctx.AbortWithError(statusCode, codeErr)
 		}
 		ctx.AbortWithError(statusCode, errors.New(message))
 		return

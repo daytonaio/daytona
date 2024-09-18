@@ -5,7 +5,6 @@ package gitprovider
 
 import (
 	"errors"
-	"net/http"
 
 	"github.com/daytonaio/daytona/pkg/api/controllers"
 	"github.com/daytonaio/daytona/pkg/server"
@@ -32,7 +31,7 @@ func GetNamespaces(ctx *gin.Context) {
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {
-			ctx.AbortWithError(http.StatusInternalServerError, err)
+			ctx.AbortWithError(statusCode, codeErr)
 		}
 		ctx.AbortWithError(statusCode, errors.New(message))
 		return
