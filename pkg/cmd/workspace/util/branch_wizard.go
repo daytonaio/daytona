@@ -11,6 +11,7 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
@@ -78,6 +79,11 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	checkoutOptions = append(checkoutOptions, selection.CheckoutPR)
 
 	chosenCheckoutOption := selection.GetCheckoutOptionFromPrompt(config.ProjectOrder, checkoutOptions, parentIdentifier)
+
+	if chosenCheckoutOption == (selection.CheckoutOption{}) {
+		return nil, common.ErrCtrlCAbort
+	}
+
 	if chosenCheckoutOption == selection.CheckoutDefault {
 		// Get the default branch from context
 		repo, res, err := config.ApiClient.GitProviderAPI.GetGitContext(ctx).Repository(apiclient.GetRepositoryContext{
