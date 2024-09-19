@@ -6,7 +6,7 @@
 package mocks
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -48,7 +48,7 @@ func NewMockRestServer(t *testing.T, workspace *workspace.Workspace) *httptest.S
 	{
 		gitproviderController.GET("/for-url/:url", func(ctx *gin.Context) {
 			// This simulates a non-configured git provider
-			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url"))
+			ctx.AbortWithError(http.StatusInternalServerError, errors.New("failed to get git provider for url"))
 		})
 	}
 

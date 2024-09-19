@@ -4,6 +4,7 @@
 package tailscale
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -47,7 +48,7 @@ func GetConnection(profile *config.Profile) (*tsnet.Server, error) {
 		controlURL = fmt.Sprintf("http://localhost:%d", serverConfig.HeadscalePort)
 	} else {
 		if serverConfig.Frps == nil {
-			return nil, fmt.Errorf("frps config is missing")
+			return nil, errors.New("frps config is missing")
 		}
 		controlURL = util.GetFrpcHeadscaleUrl(serverConfig.Frps.Protocol, serverConfig.Id, serverConfig.Frps.Domain)
 	}

@@ -5,6 +5,7 @@ package daemon
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"runtime"
@@ -82,9 +83,9 @@ func Start(logFilePath string) error {
 	}
 
 	if status == service.StatusStopped {
-		return fmt.Errorf("daemon stopped unexpectedly")
+		return errors.New("daemon stopped unexpectedly")
 	} else {
-		return fmt.Errorf("daemon status unknown")
+		return errors.New("daemon status unknown")
 	}
 }
 
@@ -109,7 +110,7 @@ func Stop() error {
 func getServiceConfig() (*service.Config, error) {
 	user, ok := os.LookupEnv("USER")
 	if !ok {
-		return nil, fmt.Errorf("could not determine user")
+		return nil, errors.New("could not determine user")
 	}
 
 	svcConfig := &service.Config{
@@ -121,7 +122,7 @@ func getServiceConfig() (*service.Config, error) {
 
 	switch runtime.GOOS {
 	case "windows":
-		return nil, fmt.Errorf("daemon mode not supported on Windows")
+		return nil, errors.New("daemon mode not supported on Windows")
 	case "linux":
 		// Fix for running as root on Linux
 		if user == "root" {
@@ -160,5 +161,5 @@ func getServiceFilePath(cfg *service.Config) (string, error) {
 		return fmt.Sprintf("%s/Library/LaunchAgents/%s.plist", homeDir, cfg.Name), nil
 	}
 
-	return "", fmt.Errorf("daemon mode not supported on current OS")
+	return "", errors.New("daemon mode not supported on current OS")
 }

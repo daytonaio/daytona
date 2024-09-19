@@ -5,6 +5,7 @@ package workspace
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -276,7 +277,7 @@ func getTarget(targetList []apiclient.ProviderTarget, activeProfileName string) 
 
 func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, projects *[]apiclient.CreateProjectDTO, workspaceNames []string, ctx context.Context) error {
 	if workspace_util.CheckAnyProjectConfigurationFlagSet(projectConfigurationFlags) {
-		return fmt.Errorf("please provide the repository URL in order to set up custom project details through the CLI")
+		return errors.New("please provide the repository URL in order to set up custom project details through the CLI")
 	}
 
 	gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()

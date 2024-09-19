@@ -73,7 +73,7 @@ func RunSubmissionForm(config SubmissionFormConfig) error {
 	}
 
 	if config.Defaults.Image == nil || config.Defaults.ImageUser == nil {
-		return fmt.Errorf("default project entries are not set")
+		return errors.New("default project entries are not set")
 	}
 
 	var err error

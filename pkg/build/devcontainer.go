@@ -6,7 +6,6 @@ package build
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 
 	"github.com/daytonaio/daytona/pkg/build/detect"
@@ -35,7 +34,7 @@ func (b *DevcontainerBuilder) Build(build Build) (string, string, error) {
 	}
 
 	if builderType != detect.BuilderTypeDevcontainer {
-		return "", "", fmt.Errorf("failed to detect devcontainer config")
+		return "", "", errors.New("failed to detect devcontainer config")
 	}
 
 	return b.buildDevcontainer(build)

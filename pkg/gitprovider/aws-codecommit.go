@@ -5,6 +5,7 @@ package gitprovider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -102,7 +103,7 @@ func (g *AwsCodeCommitGitProvider) GetUrlFromContext(repoContext *GetRepositoryC
 func (g *AwsCodeCommitGitProvider) getApiClient() (*codecommit.Client, error) {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
-		return nil, fmt.Errorf("failed to load AWS SDK configuration")
+		return nil, errors.New("failed to load AWS SDK configuration")
 	}
 	client := codecommit.NewFromConfig(cfg)
 
@@ -180,7 +181,7 @@ func (g *AwsCodeCommitGitProvider) GetUser() (*GitUser, error) {
 	// No extra configuration is needed for the IAM service API.
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
-		return nil, fmt.Errorf("failed to load AWS SDK configuration")
+		return nil, errors.New("failed to load AWS SDK configuration")
 	}
 	iamclient := iam.NewFromConfig(cfg)
 	user, err := iamclient.GetUser(context.TODO(), &iam.GetUserInput{})

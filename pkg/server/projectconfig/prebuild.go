@@ -4,6 +4,7 @@
 package projectconfig
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 
@@ -30,11 +31,11 @@ func (s *ProjectConfigService) SetPrebuild(projectConfigName string, createPrebu
 	})
 
 	if err == nil && createPrebuildDto.Id != nil && *createPrebuildDto.Id != existingPrebuild.Id {
-		return nil, fmt.Errorf("prebuild for the specified project config and branch already exists")
+		return nil, errors.New("prebuild for the specified project config and branch already exists")
 	}
 
 	if createPrebuildDto.CommitInterval == nil && len(createPrebuildDto.TriggerFiles) == 0 {
-		return nil, fmt.Errorf("either the commit interval or trigger files must be specified")
+		return nil, errors.New("either the commit interval or trigger files must be specified")
 	}
 
 	gitProvider, gitProviderId, err := s.gitProviderService.GetGitProviderForUrl(projectConfig.RepositoryUrl)

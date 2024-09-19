@@ -66,7 +66,7 @@ var projectConfigAddCmd = &cobra.Command{
 
 func RunProjectConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []apiclient.GitProvider, ctx context.Context) (*apiclient.ProjectConfig, error) {
 	if workspace_util.CheckAnyProjectConfigurationFlagSet(projectConfigurationFlags) {
-		return nil, fmt.Errorf("please provide the repository URL in order to set up custom project config details through the CLI")
+		return nil, errors.New("please provide the repository URL in order to set up custom project config details through the CLI")
 	}
 
 	var createDtos []apiclient.CreateProjectDTO

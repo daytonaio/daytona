@@ -5,7 +5,7 @@ package tailscale
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"time"
 
 	"tailscale.com/tsnet"
@@ -27,7 +27,7 @@ func GetConnection(config *TsnetConnConfig) (*tsnet.Server, error) {
 	}
 
 	if config == nil {
-		return nil, fmt.Errorf("connection not initialized")
+		return nil, errors.New("connection not initialized")
 	}
 
 	conn = &tsnet.Server{

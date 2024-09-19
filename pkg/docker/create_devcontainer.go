@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -79,7 +80,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 
 	workspaceFolder := config.Workspace.WorkspaceFolder
 	if workspaceFolder == "" {
-		return "", "", fmt.Errorf("unable to determine workspace folder from devcontainer configuration")
+		return "", "", errors.New("unable to determine workspace folder from devcontainer configuration")
 	}
 
 	remoteUser := config.MergedConfiguration.RemoteUser
@@ -93,7 +94,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 
 	devcontainerConfig, ok := mergedConfig["configuration"].(map[string]interface{})
 	if !ok {
-		return "", "", fmt.Errorf("unable to find devcontainer configuration in merged configuration")
+		return "", "", errors.New("unable to find devcontainer configuration in merged configuration")
 	}
 
 	envVars := map[string]string{}
@@ -252,7 +253,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 
 	resultIndex := strings.LastIndex(output, "{")
 	if resultIndex == -1 {
-		return "", "", fmt.Errorf("unable to find result in devcontainer output")
+		return "", "", errors.New("unable to find result in devcontainer output")
 	}
 
 	resultRaw := output[resultIndex:]
@@ -365,7 +366,7 @@ func (d *DockerClient) readDevcontainerConfig(opts *CreateDevcontainerOptions, p
 
 	configStartIndex := strings.Index(output, "{")
 	if configStartIndex == -1 {
-		return "", nil, fmt.Errorf("unable to find start of JSON in devcontainer configuration")
+		return "", nil, errors.New("unable to find start of JSON in devcontainer configuration")
 	}
 
 	rawConfig := output[configStartIndex:]
@@ -542,7 +543,7 @@ func (d *DockerClient) getRemoteComposeContent(opts *CreateDevcontainerOptions, 
 
 	nameIndex := strings.Index(output, "name: ")
 	if nameIndex == -1 {
-		return "", fmt.Errorf("unable to find service name in compose config")
+		return "", errors.New("unable to find service name in compose config")
 	}
 
 	return output[nameIndex:], nil
