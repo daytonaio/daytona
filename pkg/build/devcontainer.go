@@ -5,6 +5,7 @@ package build
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 
@@ -57,7 +58,11 @@ func (b *DevcontainerBuilder) Publish(build Build) error {
 		ApiClient: cli,
 	})
 
-	return dockerClient.PushImage(build.Image, b.containerRegistry, buildLogger)
+	if build.Image == nil {
+		return errors.New("build image is nil")
+	}
+
+	return dockerClient.PushImage(*build.Image, b.containerRegistry, buildLogger)
 }
 
 func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, error) {

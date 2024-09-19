@@ -204,10 +204,13 @@ func (r *BuildRunner) DeleteBuilds() {
 				return
 			}
 
-			err := dockerClient.DeleteImage(b.Image, true, nil)
-			if err != nil {
-				r.handleBuildError(*b, nil, err, buildLogger)
-				return
+			// If the build has an image, delete it first
+			if b.Image != nil {
+				err := dockerClient.DeleteImage(*b.Image, true, nil)
+				if err != nil {
+					r.handleBuildError(*b, nil, err, buildLogger)
+					return
+				}
 			}
 
 			err = r.buildStore.Delete(b.Id)
@@ -258,8 +261,8 @@ func (r *BuildRunner) RunBuildProcess(config BuildProcessConfig) {
 		return
 	}
 
-	config.Build.Image = image
-	config.Build.User = user
+	config.Build.Image = &image
+	config.Build.User = &user
 	config.Build.State = BuildStateSuccess
 	err = r.buildStore.Save(config.Build)
 	if err != nil {

@@ -11,6 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/server/builds/dto"
+	"github.com/daytonaio/daytona/pkg/workspace/project/containerconfig"
 	"github.com/docker/docker/pkg/stringid"
 )
 
@@ -49,8 +50,10 @@ func (s *BuildService) Create(b dto.BuildCreationData) (string, error) {
 
 	newBuild.Id = id
 	newBuild.State = build.BuildStatePendingRun
-	newBuild.Image = b.Image
-	newBuild.User = b.User
+	newBuild.ContainerConfig = containerconfig.ContainerConfig{
+		Image: b.Image,
+		User:  b.User,
+	}
 	newBuild.BuildConfig = b.BuildConfig
 	newBuild.Repository = b.Repository
 	newBuild.EnvVars = b.EnvVars
