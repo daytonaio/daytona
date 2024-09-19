@@ -603,14 +603,14 @@ func (g *AzureDevOpsGitProvider) getLocationClient() location.Client {
 func (g *AzureDevOpsGitProvider) FormatError(err error) error {
 	data, err := json.Marshal(err)
 	if err != nil {
-		return fmt.Errorf("status code: %d err: failed to format the error message : %s", http.StatusInternalServerError, err.Error())
+		return fmt.Errorf("status code: %d err: failed to format the error message: Request failed with %s", http.StatusInternalServerError, err.Error())
 	}
 
 	jsonData := azuredevops.WrappedError{}
 	err = json.Unmarshal(data, &jsonData)
 	if err != nil {
-		return fmt.Errorf("status code: %d err: failed to format the error message : %s", http.StatusInternalServerError, err.Error())
+		return fmt.Errorf("status code: %d err: failed to format the error message: Request failed with %s", http.StatusInternalServerError, err.Error())
 	}
 
-	return fmt.Errorf("status code: %d err: %s", *jsonData.StatusCode, *jsonData.Message)
+	return fmt.Errorf("status code: %d err: Request failed with %s", *jsonData.StatusCode, *jsonData.Message)
 }

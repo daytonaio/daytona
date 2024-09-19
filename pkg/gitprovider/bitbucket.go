@@ -626,8 +626,8 @@ func (b *BitbucketGitProvider) FormatError(err error) error {
 	re := regexp.MustCompile(`(\d{3})\s(.+)`)
 	match := re.FindStringSubmatch(err.Error())
 	if len(match) == 3 {
-		return fmt.Errorf("status code: %s err: %s", match[1], match[2])
+		return fmt.Errorf("status code: %s err: Request failed with %s", match[1], match[2])
 	}
 
-	return fmt.Errorf("status code: %d err: failed to format error message %s", http.StatusInternalServerError, err.Error())
+	return fmt.Errorf("status code: %d err: failed to format error message: Request failed with %s", http.StatusInternalServerError, err.Error())
 }

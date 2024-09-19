@@ -506,5 +506,6 @@ func (g *BitbucketServerGitProvider) GetDefaultBranch(staticContext *StaticGitCo
 }
 
 func (b *BitbucketServerGitProvider) FormatError(statusCode int, message string) error {
-	return fmt.Errorf("status code: %d err: %s", statusCode, message)
+
+	return fmt.Errorf("status code: %d err: Request failed with %s", statusCode, message)
 }

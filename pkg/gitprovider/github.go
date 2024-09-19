@@ -496,8 +496,8 @@ func (g *GitHubGitProvider) FormatError(err error) error {
 	re := regexp.MustCompile(`([A-Z]+)\s(https:\/\/\S+):\s(\d{3})\s(.+)\s\[\]`)
 	match := re.FindStringSubmatch(err.Error())
 	if len(match) == 5 {
-		return fmt.Errorf("status code: %s err: %s, %s, %s", match[3], match[4], match[2], match[1])
+		return fmt.Errorf("status code: %s err: Request to %s failed with %s", match[3], match[2], match[4])
 	}
 
-	return fmt.Errorf("status code: %d err: failed to format error message %s", http.StatusInternalServerError, err.Error())
+	return fmt.Errorf("status code: %d err: failed to format error message: Request failed with %s", http.StatusInternalServerError, err.Error())
 }

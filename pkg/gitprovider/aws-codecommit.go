@@ -412,9 +412,9 @@ func (g *AwsCodeCommitGitProvider) GetDefaultBranch(staticContext *StaticGitCont
 
 func (g *AwsCodeCommitGitProvider) FormatError(err error) error {
 	if reqErr, ok := err.(awserr.RequestFailure); ok {
-		return fmt.Errorf("status code: %d err: %s", reqErr.StatusCode(), reqErr.Message())
+		return fmt.Errorf("status code: %d err: Request failed with %s", reqErr.StatusCode(), reqErr.Message())
 	}
-	return fmt.Errorf("status code: %d err: failed to format the error message : %s", http.StatusInternalServerError, err.Error())
+	return fmt.Errorf("status code: %d err: failed to format the error message: Request failed with %s", http.StatusInternalServerError, err.Error())
 }
 
 func getCodeCommitCloneUrl(region string, repositoryId string) string {
