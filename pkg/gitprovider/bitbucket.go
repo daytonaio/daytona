@@ -625,7 +625,7 @@ func (g *BitbucketGitProvider) ParseEventData(request *http.Request) (*GitEventD
 func (b *BitbucketGitProvider) FormatError(err error) error {
 	re := regexp.MustCompile(`(\d{3})\s(.+)`)
 	match := re.FindStringSubmatch(err.Error())
-	if len(match) > 2 {
+	if len(match) == 3 {
 		return fmt.Errorf("status code: %s err: %s", match[1], match[2])
 	}
 

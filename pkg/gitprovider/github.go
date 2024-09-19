@@ -495,7 +495,7 @@ func (g *GitHubGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*
 func (g *GitHubGitProvider) FormatError(err error) error {
 	re := regexp.MustCompile(`([A-Z]+)\s(https:\/\/\S+):\s(\d{3})\s(.+)\s\[\]`)
 	match := re.FindStringSubmatch(err.Error())
-	if len(match) > 2 {
+	if len(match) == 5 {
 		return fmt.Errorf("status code: %s err: %s, %s, %s", match[3], match[4], match[2], match[1])
 	}
 
