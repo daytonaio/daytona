@@ -100,7 +100,7 @@ func (s *Server) Purge(ctx context.Context, force bool) []error {
 	}
 
 	fmt.Println("Purging builds...")
-	errs := s.BuildService.MarkForDeletion(nil)
+	errs := s.BuildService.MarkForDeletion(nil, force)
 	if len(errs) > 0 {
 		s.trackPurgeError(ctx, force, errs[0])
 		if !force {

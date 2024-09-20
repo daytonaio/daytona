@@ -29,7 +29,7 @@ var buildDeleteCmd = &cobra.Command{
 		}
 
 		if allFlag {
-			res, err := apiClient.BuildAPI.DeleteAllBuilds(ctx).Execute()
+			res, err := apiClient.BuildAPI.DeleteAllBuilds(ctx).Force(forceFlag).Execute()
 			if err != nil {
 				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
@@ -39,7 +39,7 @@ var buildDeleteCmd = &cobra.Command{
 		}
 
 		if prebuildIdFlag != "" {
-			res, err := apiClient.BuildAPI.DeleteBuildsFromPrebuild(ctx, prebuildIdFlag).Execute()
+			res, err := apiClient.BuildAPI.DeleteBuildsFromPrebuild(ctx, prebuildIdFlag).Force(forceFlag).Execute()
 			if err != nil {
 				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
@@ -63,7 +63,7 @@ var buildDeleteCmd = &cobra.Command{
 			buildId = args[0]
 		}
 
-		res, err := apiClient.BuildAPI.DeleteBuild(ctx, buildId).Execute()
+		res, err := apiClient.BuildAPI.DeleteBuild(ctx, buildId).Force(forceFlag).Execute()
 		if err != nil {
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
@@ -72,9 +72,11 @@ var buildDeleteCmd = &cobra.Command{
 }
 
 var allFlag bool
+var forceFlag bool
 var prebuildIdFlag string
 
 func init() {
 	buildDeleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Delete ALL builds")
+	buildDeleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Force delete build")
 	buildDeleteCmd.Flags().StringVar(&prebuildIdFlag, "prebuild-id", "", "Delete ALL builds from prebuild")
 }

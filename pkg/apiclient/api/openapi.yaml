@@ -67,6 +67,12 @@ paths:
     delete:
       description: Delete ALL builds
       operationId: DeleteAllBuilds
+      parameters:
+      - description: Force
+        in: query
+        name: force
+        schema:
+          type: boolean
       responses:
         "204":
           content: {}
@@ -121,6 +127,11 @@ paths:
         required: true
         schema:
           type: string
+      - description: Force
+        in: query
+        name: force
+        schema:
+          type: boolean
       responses:
         "204":
           content: {}
@@ -139,6 +150,11 @@ paths:
         required: true
         schema:
           type: string
+      - description: Force
+        in: query
+        name: force
+        schema:
+          type: boolean
       responses:
         "204":
           content: {}
@@ -2567,6 +2583,7 @@ components:
       - success
       - published
       - pending-delete
+      - pending-forced-delete
       - deleting
       type: string
       x-enum-varnames:
@@ -2576,6 +2593,7 @@ components:
       - BuildStateSuccess
       - BuildStatePublished
       - BuildStatePendingDelete
+      - BuildStatePendingForcedDelete
       - BuildStateDeleting
     provider.ProviderInfo:
       example:

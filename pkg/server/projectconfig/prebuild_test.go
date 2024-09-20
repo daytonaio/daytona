@@ -113,7 +113,7 @@ func (s *ProjectConfigServiceTestSuite) TestDeletePrebuild() {
 
 	s.buildService.On("MarkForDeletion", &build.Filter{
 		PrebuildIds: &[]string{prebuild2.Id},
-	}).Return([]error{})
+	}, false).Return([]error{})
 
 	err := s.projectConfigService.DeletePrebuild(projectConfig1.Name, prebuild2.Id, false)
 	require.Nil(err)
@@ -228,7 +228,7 @@ func (s *ProjectConfigServiceTestSuite) TestEnforceRetentionPolicy() {
 
 	s.buildService.On("MarkForDeletion", &build.Filter{
 		Id: util.Pointer("1"),
-	}).Return([]error{})
+	}, false).Return([]error{})
 
 	err := s.projectConfigService.EnforceRetentionPolicy()
 	require.Nil(err)

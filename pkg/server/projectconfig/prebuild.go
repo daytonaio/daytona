@@ -205,7 +205,7 @@ func (s *ProjectConfigService) DeletePrebuild(projectConfigName string, id strin
 
 	errs := s.buildService.MarkForDeletion(&build.Filter{
 		PrebuildIds: &[]string{id},
-	})
+	}, force)
 	if len(errs) > 0 {
 		if force {
 			for _, err := range errs {
@@ -370,7 +370,7 @@ func (s *ProjectConfigService) EnforceRetentionPolicy() error {
 			for i := 0; i < numToDelete; i++ {
 				errs := s.buildService.MarkForDeletion(&build.Filter{
 					Id: &associatedBuilds[i].Id,
-				})
+				}, false)
 				if len(errs) > 0 {
 					for _, err := range errs {
 						log.Error(err)

@@ -168,7 +168,7 @@ func (s *BuildServiceTestSuite) TestMarkForDeletion() {
 
 	err := s.buildService.MarkForDeletion(&build.Filter{
 		Id: &build3.Id,
-	})
+	}, false)
 	require.Nil(err)
 
 	b, errs := s.buildService.Find(&build.Filter{
