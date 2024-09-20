@@ -14,6 +14,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	list_view "github.com/daytonaio/daytona/pkg/views/build/list"
 )
 
 func GetBuildFromPrompt(builds []apiclient.Build, actionVerb string) *apiclient.Build {
@@ -23,6 +24,8 @@ func GetBuildFromPrompt(builds []apiclient.Build, actionVerb string) *apiclient.
 }
 
 func selectBuildPrompt(builds []apiclient.Build, actionVerb string, choiceChan chan<- *apiclient.Build) {
+	list_view.SortBuilds(&builds)
+
 	items := []list.Item{}
 
 	for _, b := range builds {
