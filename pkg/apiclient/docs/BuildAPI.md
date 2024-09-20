@@ -81,7 +81,7 @@ Name | Type | Description  | Notes
 
 ## DeleteAllBuilds
 
-> DeleteAllBuilds(ctx).Execute()
+> DeleteAllBuilds(ctx).Force(force).Execute()
 
 Delete ALL builds
 
@@ -100,10 +100,11 @@ import (
 )
 
 func main() {
+	force := true // bool | Force (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.BuildAPI.DeleteAllBuilds(context.Background()).Execute()
+	r, err := apiClient.BuildAPI.DeleteAllBuilds(context.Background()).Force(force).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `BuildAPI.DeleteAllBuilds``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -113,12 +114,16 @@ func main() {
 
 ### Path Parameters
 
-This endpoint does not need any parameter.
+
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiDeleteAllBuildsRequest struct via the builder pattern
 
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **force** | **bool** | Force | 
 
 ### Return type
 
@@ -140,7 +145,7 @@ Other parameters are passed through a pointer to a apiDeleteAllBuildsRequest str
 
 ## DeleteBuild
 
-> DeleteBuild(ctx, buildId).Execute()
+> DeleteBuild(ctx, buildId).Force(force).Execute()
 
 Delete build
 
@@ -160,10 +165,11 @@ import (
 
 func main() {
 	buildId := "buildId_example" // string | Build ID
+	force := true // bool | Force (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.BuildAPI.DeleteBuild(context.Background(), buildId).Execute()
+	r, err := apiClient.BuildAPI.DeleteBuild(context.Background(), buildId).Force(force).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `BuildAPI.DeleteBuild``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -187,6 +193,7 @@ Other parameters are passed through a pointer to a apiDeleteBuildRequest struct 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
+ **force** | **bool** | Force | 
 
 ### Return type
 
@@ -208,7 +215,7 @@ Name | Type | Description  | Notes
 
 ## DeleteBuildsFromPrebuild
 
-> DeleteBuildsFromPrebuild(ctx, prebuildId).Execute()
+> DeleteBuildsFromPrebuild(ctx, prebuildId).Force(force).Execute()
 
 Delete builds
 
@@ -228,10 +235,11 @@ import (
 
 func main() {
 	prebuildId := "prebuildId_example" // string | Prebuild ID
+	force := true // bool | Force (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.BuildAPI.DeleteBuildsFromPrebuild(context.Background(), prebuildId).Execute()
+	r, err := apiClient.BuildAPI.DeleteBuildsFromPrebuild(context.Background(), prebuildId).Force(force).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `BuildAPI.DeleteBuildsFromPrebuild``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -255,6 +263,7 @@ Other parameters are passed through a pointer to a apiDeleteBuildsFromPrebuildRe
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
+ **force** | **bool** | Force | 
 
 ### Return type
 

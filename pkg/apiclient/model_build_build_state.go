@@ -20,13 +20,14 @@ type BuildBuildState string
 
 // List of build.BuildState
 const (
-	BuildStatePendingRun    BuildBuildState = "pending-run"
-	BuildStateRunning       BuildBuildState = "running"
-	BuildStateError         BuildBuildState = "error"
-	BuildStateSuccess       BuildBuildState = "success"
-	BuildStatePublished     BuildBuildState = "published"
-	BuildStatePendingDelete BuildBuildState = "pending-delete"
-	BuildStateDeleting      BuildBuildState = "deleting"
+	BuildStatePendingRun          BuildBuildState = "pending-run"
+	BuildStateRunning             BuildBuildState = "running"
+	BuildStateError               BuildBuildState = "error"
+	BuildStateSuccess             BuildBuildState = "success"
+	BuildStatePublished           BuildBuildState = "published"
+	BuildStatePendingDelete       BuildBuildState = "pending-delete"
+	BuildStatePendingForcedDelete BuildBuildState = "pending-forced-delete"
+	BuildStateDeleting            BuildBuildState = "deleting"
 )
 
 // All allowed values of BuildBuildState enum
@@ -37,6 +38,7 @@ var AllowedBuildBuildStateEnumValues = []BuildBuildState{
 	"success",
 	"published",
 	"pending-delete",
+	"pending-forced-delete",
 	"deleting",
 }
 

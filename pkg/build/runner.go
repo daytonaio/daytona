@@ -172,7 +172,7 @@ func (r *BuildRunner) RunBuilds() {
 
 func (r *BuildRunner) DeleteBuilds() {
 	markedForDeletionBuilds, err := r.buildStore.List(&Filter{
-		States: &[]BuildState{BuildStatePendingDelete},
+		States: &[]BuildState{BuildStatePendingDelete, BuildStatePendingForcedDelete},
 	})
 	if err != nil {
 		log.Error(err)
@@ -197,6 +197,8 @@ func (r *BuildRunner) DeleteBuilds() {
 			buildLogger := r.loggerFactory.CreateBuildLogger(b.Id, logs.LogSourceBuilder)
 			defer buildLogger.Close()
 
+			force := b.State == BuildStatePendingForcedDelete
+
 			b.State = BuildStateDeleting
 			err = r.buildStore.Save(b)
 			if err != nil {
@@ -209,7 +211,9 @@ func (r *BuildRunner) DeleteBuilds() {
 				err := dockerClient.DeleteImage(*b.Image, true, nil)
 				if err != nil {
 					r.handleBuildError(*b, nil, err, buildLogger)
-					return
+					if !force {
+						return
+					}
 				}
 			}
 

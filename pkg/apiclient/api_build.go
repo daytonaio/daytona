@@ -151,6 +151,13 @@ func (a *BuildAPIService) CreateBuildExecute(r ApiCreateBuildRequest) (string, *
 type ApiDeleteAllBuildsRequest struct {
 	ctx        context.Context
 	ApiService *BuildAPIService
+	force      *bool
+}
+
+// Force
+func (r ApiDeleteAllBuildsRequest) Force(force bool) ApiDeleteAllBuildsRequest {
+	r.force = &force
+	return r
 }
 
 func (r ApiDeleteAllBuildsRequest) Execute() (*http.Response, error) {
@@ -191,6 +198,9 @@ func (a *BuildAPIService) DeleteAllBuildsExecute(r ApiDeleteAllBuildsRequest) (*
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.force != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "force", r.force, "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -254,6 +264,13 @@ type ApiDeleteBuildRequest struct {
 	ctx        context.Context
 	ApiService *BuildAPIService
 	buildId    string
+	force      *bool
+}
+
+// Force
+func (r ApiDeleteBuildRequest) Force(force bool) ApiDeleteBuildRequest {
+	r.force = &force
+	return r
 }
 
 func (r ApiDeleteBuildRequest) Execute() (*http.Response, error) {
@@ -297,6 +314,9 @@ func (a *BuildAPIService) DeleteBuildExecute(r ApiDeleteBuildRequest) (*http.Res
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.force != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "force", r.force, "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -360,6 +380,13 @@ type ApiDeleteBuildsFromPrebuildRequest struct {
 	ctx        context.Context
 	ApiService *BuildAPIService
 	prebuildId string
+	force      *bool
+}
+
+// Force
+func (r ApiDeleteBuildsFromPrebuildRequest) Force(force bool) ApiDeleteBuildsFromPrebuildRequest {
+	r.force = &force
+	return r
 }
 
 func (r ApiDeleteBuildsFromPrebuildRequest) Execute() (*http.Response, error) {
@@ -403,6 +430,9 @@ func (a *BuildAPIService) DeleteBuildsFromPrebuildExecute(r ApiDeleteBuildsFromP
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.force != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "force", r.force, "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

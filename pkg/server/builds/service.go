@@ -19,7 +19,7 @@ type IBuildService interface {
 	Create(dto.BuildCreationData) (string, error)
 	Find(filter *build.Filter) (*build.Build, error)
 	List(filter *build.Filter) ([]*build.Build, error)
-	MarkForDeletion(filter *build.Filter) []error
+	MarkForDeletion(filter *build.Filter, force bool) []error
 	Delete(id string) error
 	AwaitEmptyList(time.Duration) error
 	GetBuildLogReader(buildId string) (io.Reader, error)
@@ -75,7 +75,7 @@ func (s *BuildService) List(filter *build.Filter) ([]*build.Build, error) {
 	return s.buildStore.List(filter)
 }
 
-func (s *BuildService) MarkForDeletion(filter *build.Filter) []error {
+func (s *BuildService) MarkForDeletion(filter *build.Filter, force bool) []error {
 	var errors []error
 
 	builds, err := s.List(filter)
@@ -84,7 +84,12 @@ func (s *BuildService) MarkForDeletion(filter *build.Filter) []error {
 	}
 
 	for _, b := range builds {
-		b.State = build.BuildStatePendingDelete
+		if force {
+			b.State = build.BuildStatePendingForcedDelete
+		} else {
+			b.State = build.BuildStatePendingDelete
+		}
+
 		err = s.buildStore.Save(b)
 		if err != nil {
 			errors = append(errors, err)

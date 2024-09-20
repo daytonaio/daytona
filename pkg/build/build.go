@@ -16,13 +16,14 @@ import (
 type BuildState string
 
 const (
-	BuildStatePendingRun    BuildState = "pending-run"
-	BuildStateRunning       BuildState = "running"
-	BuildStateError         BuildState = "error"
-	BuildStateSuccess       BuildState = "success"
-	BuildStatePublished     BuildState = "published"
-	BuildStatePendingDelete BuildState = "pending-delete"
-	BuildStateDeleting      BuildState = "deleting"
+	BuildStatePendingRun          BuildState = "pending-run"
+	BuildStateRunning             BuildState = "running"
+	BuildStateError               BuildState = "error"
+	BuildStateSuccess             BuildState = "success"
+	BuildStatePublished           BuildState = "published"
+	BuildStatePendingDelete       BuildState = "pending-delete"
+	BuildStatePendingForcedDelete BuildState = "pending-forced-delete"
+	BuildStateDeleting            BuildState = "deleting"
 )
 
 type Build struct {

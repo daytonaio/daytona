@@ -37,8 +37,8 @@ func (m *MockBuildService) List(filter *build.Filter) ([]*build.Build, error) {
 	return args.Get(0).([]*build.Build), args.Error(1)
 }
 
-func (m *MockBuildService) MarkForDeletion(filter *build.Filter) []error {
-	args := m.Called(filter)
+func (m *MockBuildService) MarkForDeletion(filter *build.Filter, force bool) []error {
+	args := m.Called(filter, force)
 	return args.Get(0).([]error)
 }
 

@@ -10,6 +10,7 @@ daytona build delete [BUILD] [flags]
 
 ```
   -a, --all                  Delete ALL builds
+  -f, --force                Force delete build
       --prebuild-id string   Delete ALL builds from prebuild
 ```
 

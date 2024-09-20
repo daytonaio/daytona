@@ -753,6 +753,7 @@ definitions:
     - success
     - published
     - pending-delete
+    - pending-forced-delete
     - deleting
     type: string
     x-enum-varnames:
@@ -762,6 +763,7 @@ definitions:
     - BuildStateSuccess
     - BuildStatePublished
     - BuildStatePendingDelete
+    - BuildStatePendingForcedDelete
     - BuildStateDeleting
   provider.ProviderInfo:
     properties:
@@ -883,6 +885,11 @@ paths:
     delete:
       description: Delete ALL builds
       operationId: DeleteAllBuilds
+      parameters:
+      - description: Force
+        in: query
+        name: force
+        type: boolean
       responses:
         "204":
           description: No Content
@@ -934,6 +941,10 @@ paths:
         name: buildId
         required: true
         type: string
+      - description: Force
+        in: query
+        name: force
+        type: boolean
       responses:
         "204":
           description: No Content
@@ -969,6 +980,10 @@ paths:
         name: prebuildId
         required: true
         type: string
+      - description: Force
+        in: query
+        name: force
+        type: boolean
       responses:
         "204":
           description: No Content
