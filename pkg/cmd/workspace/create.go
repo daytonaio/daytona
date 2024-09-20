@@ -81,7 +81,7 @@ var CreateCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 {
-			err = processPrompting(apiClient, &workspaceName, &projects, existingWorkspaceNames, ctx)
+			err = processPrompting(ctx, apiClient, &workspaceName, &projects, existingWorkspaceNames)
 			if err != nil {
 				if common.IsCtrlCAbort(err) {
 					return
@@ -90,7 +90,7 @@ var CreateCmd = &cobra.Command{
 				}
 			}
 		} else {
-			existingProjectConfigNames, err = processCmdArguments(args, apiClient, &projects, ctx)
+			existingProjectConfigNames, err = processCmdArguments(ctx, args, apiClient, &projects)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -278,7 +278,7 @@ func getTarget(targetList []apiclient.ProviderTarget, activeProfileName string) 
 	return target.GetTargetFromPrompt(targetList, activeProfileName, false)
 }
 
-func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, projects *[]apiclient.CreateProjectDTO, workspaceNames []string, ctx context.Context) error {
+func processPrompting(ctx context.Context, apiClient *apiclient.APIClient, workspaceName *string, projects *[]apiclient.CreateProjectDTO, workspaceNames []string) error {
 	if workspace_util.CheckAnyProjectConfigurationFlagSet(projectConfigurationFlags) || (projectConfigurationFlags.Branches != nil && len(*projectConfigurationFlags.Branches) > 0) {
 		return errors.New("please provide the repository URL in order to set up custom project details through the CLI")
 	}
@@ -340,7 +340,7 @@ func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, pro
 	return nil
 }
 
-func processCmdArguments(repoUrls []string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectDTO, ctx context.Context) ([]string, error) {
+func processCmdArguments(ctx context.Context, repoUrls []string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectDTO) ([]string, error) {
 	if len(repoUrls) == 0 {
 		return nil, fmt.Errorf("no repository URLs provided")
 	}
@@ -358,15 +358,15 @@ func processCmdArguments(repoUrls []string, apiClient *apiclient.APIClient, proj
 	existingProjectConfigNames := []string{}
 
 	for i, repoUrl := range repoUrls {
-		branch := ""
+		var branch *string
 		if len(*projectConfigurationFlags.Branches) > i {
-			branch = (*projectConfigurationFlags.Branches)[i]
+			branch = &(*projectConfigurationFlags.Branches)[i]
 		}
 
 		validatedUrl, err := util.GetValidatedUrl(repoUrl)
 		if err == nil {
 			// The argument is a Git URL
-			existingProjectConfigName, err := processGitURL(ctx, validatedUrl, apiClient, projects, &branch)
+			existingProjectConfigName, err := processGitURL(ctx, validatedUrl, apiClient, projects, branch)
 			if err != nil {
 				return nil, err
 			}
@@ -407,11 +407,7 @@ func processGitURL(ctx context.Context, repoUrl string, apiClient *apiclient.API
 	if !blankFlag {
 		projectConfig, res, err := apiClient.ProjectConfigAPI.GetDefaultProjectConfig(ctx, encodedURLParam).Execute()
 		if err == nil {
-			b := ""
-			if branch != nil {
-				b = *branch
-			}
-			return workspace_util.AddProjectFromConfig(projectConfig, apiClient, projects, b)
+			return workspace_util.AddProjectFromConfig(projectConfig, apiClient, projects, branch)
 		}
 
 		if res.StatusCode != http.StatusNotFound {
