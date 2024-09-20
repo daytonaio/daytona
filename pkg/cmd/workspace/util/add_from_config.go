@@ -11,8 +11,11 @@ import (
 	"github.com/daytonaio/daytona/pkg/common"
 )
 
-func AddProjectFromConfig(projectConfig *apiclient.ProjectConfig, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectDTO, branchFlag string) (*string, error) {
-	chosenBranchName := branchFlag
+func AddProjectFromConfig(projectConfig *apiclient.ProjectConfig, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectDTO, branchFlag *string) (*string, error) {
+	chosenBranchName := ""
+	if branchFlag != nil {
+		chosenBranchName = *branchFlag
+	}
 
 	if chosenBranchName == "" {
 		chosenBranch, err := GetBranchFromProjectConfig(projectConfig, apiClient, 0)

@@ -61,7 +61,12 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	}
 
 	var branch *apiclient.GitBranch
-	parentIdentifier := fmt.Sprintf("%s/%s/%s", config.ProviderId, config.Namespace, config.ChosenRepo.Name)
+	namespace := config.Namespace
+	if namespace == "" {
+		namespace = config.ChosenRepo.Owner
+	}
+
+	parentIdentifier := fmt.Sprintf("%s/%s/%s", config.ProviderId, namespace, config.ChosenRepo.Name)
 	if len(prList) == 0 {
 		branch = selection.GetBranchFromPrompt(branchList, config.ProjectOrder, parentIdentifier)
 		if branch == nil {

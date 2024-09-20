@@ -249,7 +249,6 @@ var projectConfigurationFlags = workspace_util.ProjectConfigurationFlags{
 	Builder:          new(views_util.BuildChoice),
 	CustomImage:      new(string),
 	CustomImageUser:  new(string),
-	Branch:           new(string),
 	DevcontainerPath: new(string),
 	EnvVars:          new([]string),
 	Manual:           new(bool),
