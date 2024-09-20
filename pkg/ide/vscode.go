@@ -31,7 +31,7 @@ func OpenVSCode(activeProfile config.Profile, workspaceId string, projectName st
 
 	commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", projectHostname, projectDir)
 
-	vscCommand := exec.Command("code", "--folder-uri", commandArgument, "--disable-extension", "ms-vscode-remote.remote-containers")
+	vscCommand := exec.Command("code", "--disable-extension", "ms-vscode-remote.remote-containers", "--folder-uri", commandArgument)
 
 	err = vscCommand.Run()
 	if err != nil {

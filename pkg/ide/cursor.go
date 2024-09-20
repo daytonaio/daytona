@@ -29,9 +29,9 @@ func OpenCursor(activeProfile config.Profile, workspaceId string, projectName st
 
 	commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", projectHostname, projectDir)
 
-	vscCommand := exec.Command(path, "--folder-uri", commandArgument, "--disable-extension", "ms-vscode-remote.remote-containers")
+	cursorCommand := exec.Command(path, "--disable-extension", "ms-vscode-remote.remote-containers", "--folder-uri", commandArgument)
 
-	err = vscCommand.Run()
+	err = cursorCommand.Run()
 	if err != nil {
 		return err
 	}
