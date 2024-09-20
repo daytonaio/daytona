@@ -6,6 +6,7 @@ package ports
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"hash/fnv"
 	"strconv"
@@ -111,7 +112,7 @@ func ForwardPublicPort(workspaceId, projectName string, hostPort, targetPort uin
 	subDomain := fmt.Sprintf("%d-%s", targetPort, base64.RawURLEncoding.EncodeToString([]byte(fmt.Sprint(h.Sum64()))))
 
 	if serverConfig.Frps == nil {
-		return fmt.Errorf("frps config is missing")
+		return errors.New("frps config is missing")
 	}
 
 	go func() {

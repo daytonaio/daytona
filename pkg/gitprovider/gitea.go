@@ -5,6 +5,7 @@ package gitprovider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -516,7 +517,7 @@ func (g *GiteaGitProvider) GetCommitsRange(repo *GitRepository, initialSha strin
 
 func (g *GiteaGitProvider) ParseEventData(request *http.Request) (*GitEventData, error) {
 	if request.Header.Get("X-Gitea-Event") != "push" {
-		return nil, fmt.Errorf("invalid event key")
+		return nil, errors.New("invalid event key")
 	}
 
 	hook, err := giteaWebhook.New()
