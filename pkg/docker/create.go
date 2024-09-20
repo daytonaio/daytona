@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -135,7 +136,11 @@ func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions) error 
 		}
 	}()
 
-	containerUser, err := d.updateContainerUserUidGid(c.ID, opts)
+	containerUser := "daytona"
+
+	if runtime.GOOS != "windows" {
+		containerUser, err = d.updateContainerUserUidGid(c.ID, opts)
+	}
 
 	res, err := d.ExecSync(c.ID, container.ExecOptions{
 		User: containerUser,
