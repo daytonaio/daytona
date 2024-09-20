@@ -6,6 +6,7 @@ package docker
 import (
 	"context"
 	"fmt"
+	"runtime"
 	"time"
 
 	"github.com/daytonaio/daytona/pkg/workspace/project"
@@ -66,7 +67,10 @@ func (d *DockerClient) initProjectContainer(opts *CreateProjectOptions) error {
 		}
 	}()
 
-	_, err = d.updateContainerUserUidGid(c.ID, opts)
+	if runtime.GOOS != "windows" {
+		_, err = d.updateContainerUserUidGid(c.ID, opts)
+	}
+
 	err = d.apiClient.ContainerStop(ctx, c.ID, container.StopOptions{})
 	if err != nil {
 		return err
