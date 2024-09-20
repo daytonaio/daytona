@@ -38,19 +38,19 @@ func (g *GitnessClient) performRequest(method, requestURL string) ([]byte, error
 	req.Header.Set("Authorization", "Bearer "+g.token)
 
 	client := &http.Client{}
-	resp, err := client.Do(req)
+	res, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer res.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
 		return nil, err
 	}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("status code: %d err: %s", res.StatusCode, string(body))
 	}
 
 	return body, nil
