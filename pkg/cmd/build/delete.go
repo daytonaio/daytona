@@ -34,7 +34,7 @@ var buildDeleteCmd = &cobra.Command{
 				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
 
-			views.RenderInfoMessage("All builds deleted successfully")
+			views.RenderInfoMessage("All builds have been marked for deletion")
 			return
 		}
 
@@ -44,7 +44,7 @@ var buildDeleteCmd = &cobra.Command{
 				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
 
-			views.RenderInfoMessage(fmt.Sprintf("All builds from prebuild %s deleted\n", prebuildIdFlag))
+			views.RenderInfoMessage(fmt.Sprintf("All builds from prebuild %s have been marked for deletion\n", prebuildIdFlag))
 			return
 		}
 
@@ -67,7 +67,7 @@ var buildDeleteCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
-		views.RenderInfoMessage(fmt.Sprintf("Build %s deleted successfully", buildId))
+		views.RenderInfoMessage(fmt.Sprintf("Build %s has been marked for deletion", buildId))
 	},
 }
 
