@@ -77,6 +77,12 @@ func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, er
 		ApiClient: cli,
 	})
 
+	// TODO: The image should be configurable
+	err = dockerClient.PullImage("daytonaio/workspace-project", nil, buildLogger)
+	if err != nil {
+		return b.defaultProjectImage, b.defaultProjectUser, err
+	}
+
 	containerId, remoteUser, err := dockerClient.CreateFromDevcontainer(docker.CreateDevcontainerOptions{
 		BuildConfig:       build.BuildConfig,
 		ProjectName:       build.Id,
