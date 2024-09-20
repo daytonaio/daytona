@@ -29,22 +29,22 @@ var buildDeleteCmd = &cobra.Command{
 		}
 
 		if allFlag {
-			res, err := apiClient.BuildAPI.DeleteAllBuilds(ctx).Execute()
+			res, err := apiClient.BuildAPI.DeleteAllBuilds(ctx).Force(forceFlag).Execute()
 			if err != nil {
 				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
 
-			views.RenderInfoMessage("All builds deleted successfully")
+			views.RenderInfoMessage("All builds have been marked for deletion")
 			return
 		}
 
 		if prebuildIdFlag != "" {
-			res, err := apiClient.BuildAPI.DeleteBuildsFromPrebuild(ctx, prebuildIdFlag).Execute()
+			res, err := apiClient.BuildAPI.DeleteBuildsFromPrebuild(ctx, prebuildIdFlag).Force(forceFlag).Execute()
 			if err != nil {
 				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
 
-			views.RenderInfoMessage(fmt.Sprintf("All builds from prebuild %s deleted\n", prebuildIdFlag))
+			views.RenderInfoMessage(fmt.Sprintf("All builds from prebuild %s have been marked for deletion\n", prebuildIdFlag))
 			return
 		}
 
@@ -63,18 +63,20 @@ var buildDeleteCmd = &cobra.Command{
 			buildId = args[0]
 		}
 
-		res, err := apiClient.BuildAPI.DeleteBuild(ctx, buildId).Execute()
+		res, err := apiClient.BuildAPI.DeleteBuild(ctx, buildId).Force(forceFlag).Execute()
 		if err != nil {
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
-		views.RenderInfoMessage(fmt.Sprintf("Build %s deleted successfully", buildId))
+		views.RenderInfoMessage(fmt.Sprintf("Build %s has been marked for deletion", buildId))
 	},
 }
 
 var allFlag bool
+var forceFlag bool
 var prebuildIdFlag string
 
 func init() {
 	buildDeleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Delete ALL builds")
+	buildDeleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Force delete build")
 	buildDeleteCmd.Flags().StringVar(&prebuildIdFlag, "prebuild-id", "", "Delete ALL builds from prebuild")
 }

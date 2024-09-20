@@ -151,6 +151,14 @@ const docTemplate = `{
                 ],
                 "summary": "Delete ALL builds",
                 "operationId": "DeleteAllBuilds",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "204": {
                         "description": "No Content"
@@ -173,6 +181,12 @@ const docTemplate = `{
                         "name": "prebuildId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -225,6 +239,12 @@ const docTemplate = `{
                         "name": "buildId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -2803,6 +2823,7 @@ const docTemplate = `{
                 "success",
                 "published",
                 "pending-delete",
+                "pending-forced-delete",
                 "deleting"
             ],
             "x-enum-varnames": [
@@ -2812,6 +2833,7 @@ const docTemplate = `{
                 "BuildStateSuccess",
                 "BuildStatePublished",
                 "BuildStatePendingDelete",
+                "BuildStatePendingForcedDelete",
                 "BuildStateDeleting"
             ]
         },
