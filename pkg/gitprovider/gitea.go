@@ -45,14 +45,14 @@ func (g *GiteaGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 		return nil, err
 	}
 
-	orgList, _, err := client.ListMyOrgs(gitea.ListOrgsOptions{
+	orgList, res, err := client.ListMyOrgs(gitea.ListOrgsOptions{
 		ListOptions: gitea.ListOptions{
 			Page:     1,
 			PageSize: 100,
 		},
 	})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res, err)
 	}
 
 	namespaces := []*GitNamespace{}
@@ -79,25 +79,27 @@ func (g *GiteaGitProvider) GetRepositories(namespace string) ([]*GitRepository, 
 			return nil, err
 		}
 
-		repoList, _, err = client.ListUserRepos(user.Username, gitea.ListReposOptions{
+		repos, res, err := client.ListUserRepos(user.Username, gitea.ListReposOptions{
 			ListOptions: gitea.ListOptions{
 				Page:     1,
 				PageSize: 100,
 			},
 		})
 		if err != nil {
-			return nil, err
+			return nil, g.FormatError(res, err)
 		}
+		repoList = repos
 	} else {
-		repoList, _, err = client.ListOrgRepos(namespace, gitea.ListOrgReposOptions{
+		repos, res, err := client.ListOrgRepos(namespace, gitea.ListOrgReposOptions{
 			ListOptions: gitea.ListOptions{
 				Page:     1,
 				PageSize: 100,
 			},
 		})
 		if err != nil {
-			return nil, err
+			return nil, g.FormatError(res, err)
 		}
+		repoList = repos
 	}
 
 	response := []*GitRepository{}
@@ -134,14 +136,14 @@ func (g *GiteaGitProvider) GetRepoBranches(repositoryId string, namespaceId stri
 		namespaceId = user.Username
 	}
 
-	repoBranches, _, err := client.ListRepoBranches(namespaceId, repositoryId, gitea.ListRepoBranchesOptions{
+	repoBranches, res, err := client.ListRepoBranches(namespaceId, repositoryId, gitea.ListRepoBranchesOptions{
 		ListOptions: gitea.ListOptions{
 			Page:     1,
 			PageSize: 100,
 		},
 	})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res, err)
 	}
 
 	response := []*GitBranch{}
@@ -173,7 +175,7 @@ func (g *GiteaGitProvider) GetRepoPRs(repositoryId string, namespaceId string) (
 		namespaceId = user.Username
 	}
 
-	prList, _, err := client.ListRepoPullRequests(namespaceId, repositoryId, gitea.ListPullRequestsOptions{
+	prList, res, err := client.ListRepoPullRequests(namespaceId, repositoryId, gitea.ListPullRequestsOptions{
 		ListOptions: gitea.ListOptions{
 			Page:     1,
 			PageSize: 100,
@@ -182,7 +184,7 @@ func (g *GiteaGitProvider) GetRepoPRs(repositoryId string, namespaceId string) (
 		Sort:  "recentupdate",
 	})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res, err)
 	}
 
 	response := []*GitPullRequest{}
@@ -208,9 +210,9 @@ func (g *GiteaGitProvider) GetUser() (*GitUser, error) {
 		return nil, err
 	}
 
-	user, _, err := client.GetMyUserInfo()
+	user, res, err := client.GetMyUserInfo()
 	if user == nil || err != nil {
-		return nil, err
+		return nil, g.FormatError(res, err)
 	}
 
 	return &GitUser{
@@ -227,14 +229,14 @@ func (g *GiteaGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (s
 		return "", err
 	}
 
-	repoBranches, _, err := client.ListRepoBranches(staticContext.Owner, staticContext.Name, gitea.ListRepoBranchesOptions{
+	repoBranches, res, err := client.ListRepoBranches(staticContext.Owner, staticContext.Name, gitea.ListRepoBranchesOptions{
 		ListOptions: gitea.ListOptions{
 			Page:     1,
 			PageSize: 100,
 		},
 	})
 	if err != nil {
-		return "", err
+		return "", g.FormatError(res, err)
 	}
 	var branchName string
 	for _, branch := range repoBranches {
@@ -271,7 +273,7 @@ func (g *GiteaGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (s
 	}
 
 	if branchName == "" {
-		return "", fmt.Errorf("branch not found for SHA: %s", *staticContext.Sha)
+		return "", fmt.Errorf("status code: %d branch not found for SHA: %s", http.StatusNotFound, *staticContext.Sha)
 	}
 	return branchName, nil
 }
@@ -287,11 +289,11 @@ func (g *GiteaGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (st
 		branch = *staticContext.Branch
 	}
 
-	commits, _, err := client.ListRepoCommits(staticContext.Owner, staticContext.Id, gitea.ListCommitOptions{
+	commits, res, err := client.ListRepoCommits(staticContext.Owner, staticContext.Id, gitea.ListCommitOptions{
 		SHA: branch,
 	})
 	if err != nil {
-		return "", err
+		return "", g.FormatError(res, err)
 	}
 
 	if len(commits) == 0 {
@@ -345,9 +347,9 @@ func (g *GiteaGitProvider) GetPrContext(staticContext *StaticGitContext) (*Stati
 		return nil, err
 	}
 
-	pr, _, err := client.GetPullRequest(staticContext.Owner, staticContext.Id, int64(*staticContext.PrNumber))
+	pr, res, err := client.GetPullRequest(staticContext.Owner, staticContext.Id, int64(*staticContext.PrNumber))
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res, err)
 	}
 
 	repo := *staticContext
@@ -416,9 +418,9 @@ func (g *GiteaGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*s
 		return nil, err
 	}
 
-	repo, _, err := client.GetRepo(staticContext.Owner, staticContext.Id)
+	repo, res, err := client.GetRepo(staticContext.Owner, staticContext.Id)
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res, err)
 	}
 
 	return &repo.DefaultBranch, nil
@@ -440,9 +442,9 @@ func (g *GiteaGitProvider) RegisterPrebuildWebhook(repo *GitRepository, endpoint
 		Active: true,
 	}
 
-	hook, _, err := client.CreateRepoHook(repo.Owner, repo.Name, hookOpts)
+	hook, res, err := client.CreateRepoHook(repo.Owner, repo.Name, hookOpts)
 	if err != nil {
-		return "", fmt.Errorf("failed to create webhook: %w", err)
+		return "", g.FormatError(res, err)
 	}
 
 	return strconv.Itoa(int(hook.ID)), nil
@@ -454,14 +456,14 @@ func (g *GiteaGitProvider) GetPrebuildWebhook(repo *GitRepository, endpointUrl s
 		return nil, err
 	}
 
-	hooks, _, err := client.ListRepoHooks(repo.Owner, repo.Name, gitea.ListHooksOptions{
+	hooks, res, err := client.ListRepoHooks(repo.Owner, repo.Name, gitea.ListHooksOptions{
 		ListOptions: gitea.ListOptions{
 			PageSize: 100,
 			Page:     1,
 		},
 	})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res, err)
 	}
 
 	for _, hook := range hooks {
@@ -484,9 +486,9 @@ func (g *GiteaGitProvider) UnregisterPrebuildWebhook(repo *GitRepository, id str
 		return err
 	}
 
-	_, err = client.DeleteRepoHook(repo.Owner, repo.Name, int64(hookId))
+	res, err := client.DeleteRepoHook(repo.Owner, repo.Name, int64(hookId))
 
-	return err
+	return g.FormatError(res, err)
 }
 
 func (g *GiteaGitProvider) GetCommitsRange(repo *GitRepository, initialSha string, currentSha string) (int, error) {
@@ -495,18 +497,18 @@ func (g *GiteaGitProvider) GetCommitsRange(repo *GitRepository, initialSha strin
 		return 0, err
 	}
 
-	initialCommits, _, err := client.ListRepoCommits(repo.Owner, repo.Name, gitea.ListCommitOptions{
+	initialCommits, res, err := client.ListRepoCommits(repo.Owner, repo.Name, gitea.ListCommitOptions{
 		SHA: initialSha,
 	})
 	if err != nil {
-		return 0, err
+		return 0, g.FormatError(res, err)
 	}
 
-	currentCommits, _, err := client.ListRepoCommits(repo.Owner, repo.Name, gitea.ListCommitOptions{
+	currentCommits, res, err := client.ListRepoCommits(repo.Owner, repo.Name, gitea.ListCommitOptions{
 		SHA: currentSha,
 	})
 	if err != nil {
-		return 0, err
+		return 0, g.FormatError(res, err)
 	}
 
 	return (len(currentCommits) - len(initialCommits)), nil
@@ -548,4 +550,8 @@ func (g *GiteaGitProvider) ParseEventData(request *http.Request) (*GitEventData,
 	}
 
 	return gitEventData, nil
+}
+
+func (g *GiteaGitProvider) FormatError(response *gitea.Response, err error) error {
+	return fmt.Errorf("status code: %d err: Request failed with %s", response.StatusCode, err.Error())
 }

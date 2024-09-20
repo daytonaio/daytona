@@ -5,6 +5,7 @@ package gitprovider
 
 import (
 	"fmt"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
@@ -186,7 +187,7 @@ func (g *GitnessGitProvider) GetBranchByCommit(staticContext *StaticGitContext) 
 	}
 
 	if branchName == "" {
-		return "", fmt.Errorf("branch not found for SHA: %s", *staticContext.Sha)
+		return "", fmt.Errorf("status code: %d branch not found for SHA: %s", http.StatusNotFound, *staticContext.Sha)
 	}
 
 	return branchName, nil

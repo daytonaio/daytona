@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -47,7 +48,7 @@ func (g *GitHubGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 		Page:    1,
 	})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	namespaces := []*GitNamespace{}
@@ -91,7 +92,7 @@ func (g *GitHubGitProvider) GetRepositories(namespace string) ([]*GitRepository,
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	for _, repo := range repoList.Repositories {
@@ -127,7 +128,7 @@ func (g *GitHubGitProvider) GetRepoBranches(repositoryId string, namespaceId str
 
 	repoBranches, _, err := client.Repositories.ListBranches(context.Background(), namespaceId, repositoryId, &github.ListOptions{})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	for _, branch := range repoBranches {
@@ -160,7 +161,7 @@ func (g *GitHubGitProvider) GetRepoPRs(repositoryId string, namespaceId string) 
 		State: "open",
 	})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	for _, pr := range prList {
@@ -183,7 +184,7 @@ func (g *GitHubGitProvider) GetUser() (*GitUser, error) {
 
 	user, _, err := client.Users.Get(context.Background(), "")
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	response := &GitUser{}
@@ -227,7 +228,7 @@ func (g *GitHubGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (s
 		},
 	})
 	if err != nil {
-		return "", err
+		return "", g.FormatError(err)
 	}
 	if len(commits) == 0 {
 		return "", nil
@@ -293,7 +294,7 @@ func (g *GitHubGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (
 
 	branches, _, err := client.Repositories.ListBranches(context.Background(), staticContext.Owner, staticContext.Name, nil)
 	if err != nil {
-		return "", fmt.Errorf("failed to list branches: %v", err)
+		return "", g.FormatError(err)
 	}
 
 	var branchName string
@@ -302,7 +303,7 @@ func (g *GitHubGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (
 
 		commitComparison, _, err := client.Repositories.CompareCommits(context.Background(), staticContext.Owner, staticContext.Name, branchName, *staticContext.Sha)
 		if err != nil {
-			return "", fmt.Errorf("error comparing commits: %w", err)
+			return "", g.FormatError(err)
 		}
 		if commitComparison.GetStatus() == "identical" || commitComparison.GetStatus() == "behind" {
 			return branchName, nil
@@ -310,7 +311,7 @@ func (g *GitHubGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (
 	}
 
 	if branchName == "" {
-		return "", fmt.Errorf("branch not found for SHA: %s", *staticContext.Sha)
+		return "", fmt.Errorf("status code: %d branch not found for SHA: %s", http.StatusNotFound, *staticContext.Sha)
 	}
 
 	return branchName, nil
@@ -325,7 +326,7 @@ func (g *GitHubGitProvider) GetPrContext(staticContext *StaticGitContext) (*Stat
 
 	pr, _, err := client.PullRequests.Get(context.Background(), staticContext.Owner, staticContext.Name, int(*staticContext.PrNumber))
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	repo := *staticContext
@@ -383,7 +384,7 @@ func (g *GitHubGitProvider) GetPrebuildWebhook(repo *GitRepository, endpointUrl 
 		PerPage: 100,
 	})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	for _, hook := range hooks {
@@ -408,7 +409,7 @@ func (g *GitHubGitProvider) RegisterPrebuildWebhook(repo *GitRepository, endpoin
 	})
 
 	if err != nil {
-		return "", err
+		return "", g.FormatError(err)
 	}
 
 	return strconv.Itoa(int(*hook.ID)), nil
@@ -420,8 +421,10 @@ func (g *GitHubGitProvider) UnregisterPrebuildWebhook(repo *GitRepository, id st
 	idInt, _ := strconv.Atoi(id)
 
 	_, err := client.Repositories.DeleteHook(context.Background(), repo.Owner, repo.Name, int64(idInt))
-
-	return err
+	if err != nil {
+		return g.FormatError(err)
+	}
+	return nil
 }
 
 func (g *GitHubGitProvider) GetCommitsRange(repo *GitRepository, initialSha string, currentSha string) (int, error) {
@@ -429,7 +432,7 @@ func (g *GitHubGitProvider) GetCommitsRange(repo *GitRepository, initialSha stri
 
 	commits, _, err := client.Repositories.CompareCommits(context.Background(), repo.Owner, repo.Name, initialSha, currentSha)
 	if err != nil {
-		return 0, err
+		return 0, g.FormatError(err)
 	}
 
 	return len(commits.Commits), nil
@@ -483,8 +486,18 @@ func (g *GitHubGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*
 
 	repo, _, err := client.Repositories.Get(context.Background(), staticContext.Owner, staticContext.Name)
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	return repo.DefaultBranch, nil
+}
+
+func (g *GitHubGitProvider) FormatError(err error) error {
+	re := regexp.MustCompile(`([A-Z]+)\s(https:\/\/\S+):\s(\d{3})\s(.+)\s\[\]`)
+	match := re.FindStringSubmatch(err.Error())
+	if len(match) == 5 {
+		return fmt.Errorf("status code: %s err: Request to %s failed with %s", match[3], match[2], match[4])
+	}
+
+	return fmt.Errorf("status code: %d err: failed to format error message: Request failed with %s", http.StatusInternalServerError, err.Error())
 }

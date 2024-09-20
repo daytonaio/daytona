@@ -4,9 +4,11 @@
 package gitprovider
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
+	"github.com/daytonaio/daytona/pkg/api/controllers"
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider/dto"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/server"
@@ -35,13 +37,21 @@ func GetGitContext(ctx *gin.Context) {
 
 	gitProvider, _, err := server.GitProviderService.GetGitProviderForUrl(repositoryContext.Url)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %s", err.Error()))
+		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
+		if codeErr != nil {
+			ctx.AbortWithError(statusCode, codeErr)
+		}
+		ctx.AbortWithError(statusCode, errors.New(message))
 		return
 	}
 
 	repo, err := gitProvider.GetRepositoryContext(repositoryContext)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get repository: %s", err.Error()))
+		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
+		if codeErr != nil {
+			ctx.AbortWithError(statusCode, codeErr)
+		}
+		ctx.AbortWithError(statusCode, errors.New(message))
 		return
 	}
 
@@ -70,7 +80,11 @@ func GetUrlFromRepository(ctx *gin.Context) {
 
 	gitProvider, _, err := server.GitProviderService.GetGitProviderForUrl(repoContext.Url)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %w", err))
+		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
+		if codeErr != nil {
+			ctx.AbortWithError(statusCode, codeErr)
+		}
+		ctx.AbortWithError(statusCode, errors.New(message))
 		return
 	}
 
