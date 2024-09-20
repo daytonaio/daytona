@@ -1253,6 +1253,9 @@ components:
             filePath: filePath
         createdAt: createdAt
         image: image
+        containerConfig:
+          image: image
+          user: user
         prebuildId: prebuildId
         envVars:
           key: envVars
@@ -1274,6 +1277,8 @@ components:
       properties:
         buildConfig:
           $ref: '#/components/schemas/BuildConfig'
+        containerConfig:
+          $ref: '#/components/schemas/ContainerConfig'
         createdAt:
           type: string
         envVars:
@@ -1295,15 +1300,14 @@ components:
         user:
           type: string
       required:
+      - containerConfig
       - createdAt
       - envVars
       - id
-      - image
       - prebuildId
       - repository
       - state
       - updatedAt
-      - user
       type: object
     BuildConfig:
       example:
@@ -1339,6 +1343,19 @@ components:
       x-enum-varnames:
       - CloneTargetBranch
       - CloneTargetCommit
+    ContainerConfig:
+      example:
+        image: image
+        user: user
+      properties:
+        image:
+          type: string
+        user:
+          type: string
+      required:
+      - image
+      - user
+      type: object
     ContainerRegistry:
       example:
         server: server

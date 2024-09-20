@@ -18,6 +18,8 @@ definitions:
     properties:
       buildConfig:
         $ref: '#/definitions/BuildConfig'
+      containerConfig:
+        $ref: '#/definitions/ContainerConfig'
       createdAt:
         type: string
       envVars:
@@ -39,15 +41,14 @@ definitions:
       user:
         type: string
     required:
+    - containerConfig
     - createdAt
     - envVars
     - id
-    - image
     - prebuildId
     - repository
     - state
     - updatedAt
-    - user
     type: object
   BuildConfig:
     properties:
@@ -74,6 +75,16 @@ definitions:
     x-enum-varnames:
     - CloneTargetBranch
     - CloneTargetCommit
+  ContainerConfig:
+    properties:
+      image:
+        type: string
+      user:
+        type: string
+    required:
+    - image
+    - user
+    type: object
   ContainerRegistry:
     properties:
       password:

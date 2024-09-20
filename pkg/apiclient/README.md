@@ -148,6 +148,7 @@ Class | Method | HTTP request | Description
  - [BuildConfig](docs/BuildConfig.md)
  - [CachedBuild](docs/CachedBuild.md)
  - [CloneTarget](docs/CloneTarget.md)
+ - [ContainerConfig](docs/ContainerConfig.md)
  - [ContainerRegistry](docs/ContainerRegistry.md)
  - [CreateBuildDTO](docs/CreateBuildDTO.md)
  - [CreatePrebuildDTO](docs/CreatePrebuildDTO.md)

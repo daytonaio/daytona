@@ -37,9 +37,13 @@ func Render(b *apiclient.Build, apiServerConfig *apiclient.ServerConfig, forceUn
 
 	output += getInfoLine("Repository", b.Repository.Url) + "\n"
 
-	output += getInfoLine("Image", b.Image) + "\n"
+	if b.Image != nil {
+		output += getInfoLine("Image", *b.Image) + "\n"
+	}
 
-	output += getInfoLine("User", b.User) + "\n"
+	if b.User != nil {
+		output += getInfoLine("User", *b.User) + "\n"
+	}
 
 	if projectconfig_info.GetLabelFromBuild(b.BuildConfig) != "" {
 		projectDefaults := &views_util.ProjectConfigDefaults{
