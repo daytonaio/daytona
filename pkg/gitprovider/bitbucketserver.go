@@ -5,6 +5,7 @@ package gitprovider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -247,7 +248,7 @@ func (g *BitbucketServerGitProvider) GetUser() (*GitUser, error) {
 
 	username := res.Header.Get("X-Ausername")
 	if username == "" {
-		return nil, fmt.Errorf("X-Ausername header is missing")
+		return nil, errors.New("X-Ausername header is missing")
 	}
 
 	user, err := client.DefaultApi.GetUser(username)
@@ -256,7 +257,7 @@ func (g *BitbucketServerGitProvider) GetUser() (*GitUser, error) {
 	}
 
 	if user.Values == nil {
-		return nil, fmt.Errorf("user values are nil")
+		return nil, errors.New("user values are nil")
 	}
 	var userInfo bitbucketv1.User
 	err = mapstructure.Decode(user.Values, &userInfo)
@@ -293,7 +294,7 @@ func (g *BitbucketServerGitProvider) GetLastCommitSha(staticContext *StaticGitCo
 	}
 
 	if len(commits.Values) == 0 {
-		return "", fmt.Errorf("no commits found")
+		return "", errors.New("no commits found")
 	}
 
 	commitList, err := bitbucketv1.GetCommitsResponse(commits)
@@ -502,7 +503,7 @@ func (g *BitbucketServerGitProvider) GetDefaultBranch(staticContext *StaticGitCo
 		}
 	}
 
-	return nil, fmt.Errorf("default branch not found")
+	return nil, errors.New("default branch not found")
 }
 
 func (b *BitbucketServerGitProvider) FormatError(statusCode int, message string) error {
