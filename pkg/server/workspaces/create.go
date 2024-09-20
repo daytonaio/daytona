@@ -5,6 +5,7 @@ package workspaces
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"regexp"
@@ -240,10 +241,13 @@ func (s *WorkspaceService) getCachedBuildForProject(p *project.Project) (*buildc
 	if err != nil {
 		return nil, err
 	}
-	cachedBuild := &buildconfig.CachedBuild{
-		User:  build.User,
-		Image: build.Image,
+
+	if build.Image == nil || build.User == nil {
+		return nil, errors.New("cached build is missing image or user")
 	}
 
-	return cachedBuild, nil
+	return &buildconfig.CachedBuild{
+		User:  *build.User,
+		Image: *build.Image,
+	}, nil
 }

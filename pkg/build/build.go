@@ -10,6 +10,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
+	"github.com/daytonaio/daytona/pkg/workspace/project/containerconfig"
 )
 
 type BuildState string
@@ -25,16 +26,17 @@ const (
 )
 
 type Build struct {
-	Id          string                     `json:"id" validate:"required"`
-	State       BuildState                 `json:"state" validate:"required"`
-	Image       string                     `json:"image" validate:"required"`
-	User        string                     `json:"user" validate:"required"`
-	BuildConfig *buildconfig.BuildConfig   `json:"buildConfig" validate:"optional"`
-	Repository  *gitprovider.GitRepository `json:"repository" validate:"required"`
-	EnvVars     map[string]string          `json:"envVars" validate:"required"`
-	PrebuildId  string                     `json:"prebuildId" validate:"required"`
-	CreatedAt   time.Time                  `json:"createdAt" validate:"required"`
-	UpdatedAt   time.Time                  `json:"updatedAt" validate:"required"`
+	Id              string                          `json:"id" validate:"required"`
+	State           BuildState                      `json:"state" validate:"required"`
+	Image           *string                         `json:"image" validate:"optional"`
+	User            *string                         `json:"user" validate:"optional"`
+	ContainerConfig containerconfig.ContainerConfig `json:"containerConfig" validate:"required"`
+	BuildConfig     *buildconfig.BuildConfig        `json:"buildConfig" validate:"optional"`
+	Repository      *gitprovider.GitRepository      `json:"repository" validate:"required"`
+	EnvVars         map[string]string               `json:"envVars" validate:"required"`
+	PrebuildId      string                          `json:"prebuildId" validate:"required"`
+	CreatedAt       time.Time                       `json:"createdAt" validate:"required"`
+	UpdatedAt       time.Time                       `json:"updatedAt" validate:"required"`
 } // @name Build
 
 func (b *Build) Compare(other *Build) (bool, error) {
@@ -120,10 +122,10 @@ func GetCachedBuild(build *Build, builds []*Build) *buildconfig.CachedBuild {
 		}
 	}
 
-	if cachedBuild != nil {
+	if cachedBuild != nil && cachedBuild.Image != nil && cachedBuild.User != nil {
 		return &buildconfig.CachedBuild{
-			Image: cachedBuild.Image,
-			User:  cachedBuild.User,
+			Image: *cachedBuild.Image,
+			User:  *cachedBuild.User,
 		}
 	}
 

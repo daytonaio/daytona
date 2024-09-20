@@ -1738,19 +1738,21 @@ const docTemplate = `{
         "Build": {
             "type": "object",
             "required": [
+                "containerConfig",
                 "createdAt",
                 "envVars",
                 "id",
-                "image",
                 "prebuildId",
                 "repository",
                 "state",
-                "updatedAt",
-                "user"
+                "updatedAt"
             ],
             "properties": {
                 "buildConfig": {
                     "$ref": "#/definitions/BuildConfig"
+                },
+                "containerConfig": {
+                    "$ref": "#/definitions/ContainerConfig"
                 },
                 "createdAt": {
                     "type": "string"
@@ -1820,6 +1822,21 @@ const docTemplate = `{
                 "CloneTargetBranch",
                 "CloneTargetCommit"
             ]
+        },
+        "ContainerConfig": {
+            "type": "object",
+            "required": [
+                "image",
+                "user"
+            ],
+            "properties": {
+                "image": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                }
+            }
         },
         "ContainerRegistry": {
             "type": "object",

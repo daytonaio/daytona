@@ -21,16 +21,17 @@ var _ MappedNullable = &Build{}
 
 // Build struct for Build
 type Build struct {
-	BuildConfig *BuildConfig      `json:"buildConfig,omitempty"`
-	CreatedAt   string            `json:"createdAt"`
-	EnvVars     map[string]string `json:"envVars"`
-	Id          string            `json:"id"`
-	Image       string            `json:"image"`
-	PrebuildId  string            `json:"prebuildId"`
-	Repository  GitRepository     `json:"repository"`
-	State       BuildBuildState   `json:"state"`
-	UpdatedAt   string            `json:"updatedAt"`
-	User        string            `json:"user"`
+	BuildConfig     *BuildConfig      `json:"buildConfig,omitempty"`
+	ContainerConfig ContainerConfig   `json:"containerConfig"`
+	CreatedAt       string            `json:"createdAt"`
+	EnvVars         map[string]string `json:"envVars"`
+	Id              string            `json:"id"`
+	Image           *string           `json:"image,omitempty"`
+	PrebuildId      string            `json:"prebuildId"`
+	Repository      GitRepository     `json:"repository"`
+	State           BuildBuildState   `json:"state"`
+	UpdatedAt       string            `json:"updatedAt"`
+	User            *string           `json:"user,omitempty"`
 }
 
 type _Build Build
@@ -39,17 +40,16 @@ type _Build Build
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewBuild(createdAt string, envVars map[string]string, id string, image string, prebuildId string, repository GitRepository, state BuildBuildState, updatedAt string, user string) *Build {
+func NewBuild(containerConfig ContainerConfig, createdAt string, envVars map[string]string, id string, prebuildId string, repository GitRepository, state BuildBuildState, updatedAt string) *Build {
 	this := Build{}
+	this.ContainerConfig = containerConfig
 	this.CreatedAt = createdAt
 	this.EnvVars = envVars
 	this.Id = id
-	this.Image = image
 	this.PrebuildId = prebuildId
 	this.Repository = repository
 	this.State = state
 	this.UpdatedAt = updatedAt
-	this.User = user
 	return &this
 }
 
@@ -91,6 +91,30 @@ func (o *Build) HasBuildConfig() bool {
 // SetBuildConfig gets a reference to the given BuildConfig and assigns it to the BuildConfig field.
 func (o *Build) SetBuildConfig(v BuildConfig) {
 	o.BuildConfig = &v
+}
+
+// GetContainerConfig returns the ContainerConfig field value
+func (o *Build) GetContainerConfig() ContainerConfig {
+	if o == nil {
+		var ret ContainerConfig
+		return ret
+	}
+
+	return o.ContainerConfig
+}
+
+// GetContainerConfigOk returns a tuple with the ContainerConfig field value
+// and a boolean to check if the value has been set.
+func (o *Build) GetContainerConfigOk() (*ContainerConfig, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.ContainerConfig, true
+}
+
+// SetContainerConfig sets field value
+func (o *Build) SetContainerConfig(v ContainerConfig) {
+	o.ContainerConfig = v
 }
 
 // GetCreatedAt returns the CreatedAt field value
@@ -165,28 +189,36 @@ func (o *Build) SetId(v string) {
 	o.Id = v
 }
 
-// GetImage returns the Image field value
+// GetImage returns the Image field value if set, zero value otherwise.
 func (o *Build) GetImage() string {
-	if o == nil {
+	if o == nil || IsNil(o.Image) {
 		var ret string
 		return ret
 	}
-
-	return o.Image
+	return *o.Image
 }
 
-// GetImageOk returns a tuple with the Image field value
+// GetImageOk returns a tuple with the Image field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *Build) GetImageOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.Image) {
 		return nil, false
 	}
-	return &o.Image, true
+	return o.Image, true
 }
 
-// SetImage sets field value
+// HasImage returns a boolean if a field has been set.
+func (o *Build) HasImage() bool {
+	if o != nil && !IsNil(o.Image) {
+		return true
+	}
+
+	return false
+}
+
+// SetImage gets a reference to the given string and assigns it to the Image field.
 func (o *Build) SetImage(v string) {
-	o.Image = v
+	o.Image = &v
 }
 
 // GetPrebuildId returns the PrebuildId field value
@@ -285,28 +317,36 @@ func (o *Build) SetUpdatedAt(v string) {
 	o.UpdatedAt = v
 }
 
-// GetUser returns the User field value
+// GetUser returns the User field value if set, zero value otherwise.
 func (o *Build) GetUser() string {
-	if o == nil {
+	if o == nil || IsNil(o.User) {
 		var ret string
 		return ret
 	}
-
-	return o.User
+	return *o.User
 }
 
-// GetUserOk returns a tuple with the User field value
+// GetUserOk returns a tuple with the User field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *Build) GetUserOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.User) {
 		return nil, false
 	}
-	return &o.User, true
+	return o.User, true
 }
 
-// SetUser sets field value
+// HasUser returns a boolean if a field has been set.
+func (o *Build) HasUser() bool {
+	if o != nil && !IsNil(o.User) {
+		return true
+	}
+
+	return false
+}
+
+// SetUser gets a reference to the given string and assigns it to the User field.
 func (o *Build) SetUser(v string) {
-	o.User = v
+	o.User = &v
 }
 
 func (o Build) MarshalJSON() ([]byte, error) {
@@ -322,15 +362,20 @@ func (o Build) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.BuildConfig) {
 		toSerialize["buildConfig"] = o.BuildConfig
 	}
+	toSerialize["containerConfig"] = o.ContainerConfig
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["envVars"] = o.EnvVars
 	toSerialize["id"] = o.Id
-	toSerialize["image"] = o.Image
+	if !IsNil(o.Image) {
+		toSerialize["image"] = o.Image
+	}
 	toSerialize["prebuildId"] = o.PrebuildId
 	toSerialize["repository"] = o.Repository
 	toSerialize["state"] = o.State
 	toSerialize["updatedAt"] = o.UpdatedAt
-	toSerialize["user"] = o.User
+	if !IsNil(o.User) {
+		toSerialize["user"] = o.User
+	}
 	return toSerialize, nil
 }
 
@@ -339,15 +384,14 @@ func (o *Build) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"containerConfig",
 		"createdAt",
 		"envVars",
 		"id",
-		"image",
 		"prebuildId",
 		"repository",
 		"state",
 		"updatedAt",
-		"user",
 	}
 
 	allProperties := make(map[string]interface{})

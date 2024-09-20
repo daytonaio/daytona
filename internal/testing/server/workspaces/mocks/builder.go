@@ -6,17 +6,23 @@
 package mocks
 
 import (
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
+	"github.com/daytonaio/daytona/pkg/workspace/project/containerconfig"
 	"github.com/stretchr/testify/mock"
 )
 
 var MockBuild = &build.Build{
 	Id:    "1",
 	State: build.BuildStatePendingRun,
-	Image: "test",
-	User:  "test",
+	Image: util.Pointer("image"),
+	User:  util.Pointer("user"),
+	ContainerConfig: containerconfig.ContainerConfig{
+		Image: "test",
+		User:  "test",
+	},
 	BuildConfig: &buildconfig.BuildConfig{
 		Devcontainer: MockProjectConfig.BuildConfig.Devcontainer,
 	},
