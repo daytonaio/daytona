@@ -46,7 +46,7 @@ func AddProjectConfigurationFlags(cmd *cobra.Command, flags ProjectConfiguration
 }
 
 func CheckAnyProjectConfigurationFlagSet(flags ProjectConfigurationFlags) bool {
-	return *flags.CustomImage != "" || *flags.CustomImageUser != "" || (flags.Branches != nil && len(*flags.Branches) > 0) || *flags.DevcontainerPath != "" || *flags.Builder != "" || len(*flags.EnvVars) > 0
+	return *flags.CustomImage != "" || *flags.CustomImageUser != "" || *flags.DevcontainerPath != "" || *flags.Builder != "" || len(*flags.EnvVars) > 0
 }
 
 func IsProjectRunning(workspace *apiclient.WorkspaceDTO, projectName string) bool {

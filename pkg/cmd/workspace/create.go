@@ -279,7 +279,7 @@ func getTarget(targetList []apiclient.ProviderTarget, activeProfileName string) 
 }
 
 func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, projects *[]apiclient.CreateProjectDTO, workspaceNames []string, ctx context.Context) error {
-	if workspace_util.CheckAnyProjectConfigurationFlagSet(projectConfigurationFlags) {
+	if workspace_util.CheckAnyProjectConfigurationFlagSet(projectConfigurationFlags) || (projectConfigurationFlags.Branches != nil && len(*projectConfigurationFlags.Branches) > 0) {
 		return errors.New("please provide the repository URL in order to set up custom project details through the CLI")
 	}
 
