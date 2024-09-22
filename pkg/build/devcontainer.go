@@ -5,7 +5,7 @@ package build
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"os"
 
 	"github.com/daytonaio/daytona/pkg/build/detect"
@@ -34,7 +34,7 @@ func (b *DevcontainerBuilder) Build(build Build) (string, string, error) {
 	}
 
 	if builderType != detect.BuilderTypeDevcontainer {
-		return "", "", fmt.Errorf("failed to detect devcontainer config")
+		return "", "", errors.New("failed to detect devcontainer config")
 	}
 
 	return b.buildDevcontainer(build)
@@ -57,7 +57,11 @@ func (b *DevcontainerBuilder) Publish(build Build) error {
 		ApiClient: cli,
 	})
 
-	return dockerClient.PushImage(build.Image, b.containerRegistry, buildLogger)
+	if build.Image == nil {
+		return errors.New("build image is nil")
+	}
+
+	return dockerClient.PushImage(*build.Image, b.containerRegistry, buildLogger)
 }
 
 func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, error) {
@@ -72,6 +76,12 @@ func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, er
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
 		ApiClient: cli,
 	})
+
+	// TODO: The image should be configurable
+	err = dockerClient.PullImage("daytonaio/workspace-project", nil, buildLogger)
+	if err != nil {
+		return b.defaultProjectImage, b.defaultProjectUser, err
+	}
 
 	containerId, remoteUser, err := dockerClient.CreateFromDevcontainer(docker.CreateDevcontainerOptions{
 		BuildConfig:       build.BuildConfig,

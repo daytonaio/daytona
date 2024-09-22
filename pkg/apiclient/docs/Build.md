@@ -5,21 +5,22 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **BuildConfig** | Pointer to [**BuildConfig**](BuildConfig.md) |  | [optional] 
+**ContainerConfig** | [**ContainerConfig**](ContainerConfig.md) |  | 
 **CreatedAt** | **string** |  | 
 **EnvVars** | **map[string]string** |  | 
 **Id** | **string** |  | 
-**Image** | **string** |  | 
+**Image** | Pointer to **string** |  | [optional] 
 **PrebuildId** | **string** |  | 
 **Repository** | [**GitRepository**](GitRepository.md) |  | 
 **State** | [**BuildBuildState**](BuildBuildState.md) |  | 
 **UpdatedAt** | **string** |  | 
-**User** | **string** |  | 
+**User** | Pointer to **string** |  | [optional] 
 
 ## Methods
 
 ### NewBuild
 
-`func NewBuild(createdAt string, envVars map[string]string, id string, image string, prebuildId string, repository GitRepository, state BuildBuildState, updatedAt string, user string, ) *Build`
+`func NewBuild(containerConfig ContainerConfig, createdAt string, envVars map[string]string, id string, prebuildId string, repository GitRepository, state BuildBuildState, updatedAt string, ) *Build`
 
 NewBuild instantiates a new Build object
 This constructor will assign default values to properties that have it defined,
@@ -58,6 +59,26 @@ SetBuildConfig sets BuildConfig field to given value.
 `func (o *Build) HasBuildConfig() bool`
 
 HasBuildConfig returns a boolean if a field has been set.
+
+### GetContainerConfig
+
+`func (o *Build) GetContainerConfig() ContainerConfig`
+
+GetContainerConfig returns the ContainerConfig field if non-nil, zero value otherwise.
+
+### GetContainerConfigOk
+
+`func (o *Build) GetContainerConfigOk() (*ContainerConfig, bool)`
+
+GetContainerConfigOk returns a tuple with the ContainerConfig field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetContainerConfig
+
+`func (o *Build) SetContainerConfig(v ContainerConfig)`
+
+SetContainerConfig sets ContainerConfig field to given value.
+
 
 ### GetCreatedAt
 
@@ -138,6 +159,11 @@ and a boolean to check if the value has been set.
 
 SetImage sets Image field to given value.
 
+### HasImage
+
+`func (o *Build) HasImage() bool`
+
+HasImage returns a boolean if a field has been set.
 
 ### GetPrebuildId
 
@@ -238,6 +264,11 @@ and a boolean to check if the value has been set.
 
 SetUser sets User field to given value.
 
+### HasUser
+
+`func (o *Build) HasUser() bool`
+
+HasUser returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

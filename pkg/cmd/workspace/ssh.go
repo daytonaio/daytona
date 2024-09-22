@@ -91,7 +91,7 @@ var SshCmd = &cobra.Command{
 			sshArgs = append(sshArgs, args[2:]...)
 		}
 
-		err = ide.OpenTerminalSsh(activeProfile, workspace.Id, workspace.Projects[0].Name, sshArgs...)
+		err = ide.OpenTerminalSsh(activeProfile, workspace.Id, projectName, sshArgs...)
 		if err != nil {
 			log.Fatal(err)
 		}

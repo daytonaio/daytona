@@ -67,5 +67,5 @@ func GetCheckoutOptionFromPrompt(projectOrder int, checkoutOptions []CheckoutOpt
 			return checkoutOption
 		}
 	}
-	return CheckoutDefault
+	return CheckoutOption{}
 }

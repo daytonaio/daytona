@@ -45,7 +45,7 @@ func (g *GitLabGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 
 	groupList, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	namespaces := []*GitNamespace{}
@@ -66,7 +66,6 @@ func (g *GitLabGitProvider) GetRepositories(namespace string) ([]*GitRepository,
 	client := g.getApiClient()
 	var response []*GitRepository
 	var repoList []*gitlab.Project
-	var err error
 
 	if namespace == personalNamespaceId {
 		user, err := g.GetUser()
@@ -74,25 +73,27 @@ func (g *GitLabGitProvider) GetRepositories(namespace string) ([]*GitRepository,
 			return nil, err
 		}
 
-		repoList, _, err = client.Projects.ListUserProjects(user.Id, &gitlab.ListProjectsOptions{
+		repos, _, err := client.Projects.ListUserProjects(user.Id, &gitlab.ListProjectsOptions{
 			ListOptions: gitlab.ListOptions{
 				PerPage: 100,
 				Page:    1,
 			},
 		})
 		if err != nil {
-			return nil, err
+			return nil, g.FormatError(err)
 		}
+		repoList = repos
 	} else {
-		repoList, _, err = client.Groups.ListGroupProjects(namespace, &gitlab.ListGroupProjectsOptions{
+		repos, _, err := client.Groups.ListGroupProjects(namespace, &gitlab.ListGroupProjectsOptions{
 			ListOptions: gitlab.ListOptions{
 				PerPage: 100,
 				Page:    1,
 			},
 		})
 		if err != nil {
-			return nil, err
+			return nil, g.FormatError(err)
 		}
+		repoList = repos
 	}
 
 	for _, repo := range repoList {
@@ -120,7 +121,7 @@ func (g *GitLabGitProvider) GetRepoBranches(repositoryId string, namespaceId str
 
 	branches, _, err := client.Branches.ListBranches(repositoryId, &gitlab.ListBranchesOptions{})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	for _, branch := range branches {
@@ -142,13 +143,13 @@ func (g *GitLabGitProvider) GetRepoPRs(repositoryId string, namespaceId string) 
 
 	mergeRequests, _, err := client.MergeRequests.ListProjectMergeRequests(repositoryId, &gitlab.ListProjectMergeRequestsOptions{})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	for _, mergeRequest := range mergeRequests {
 		sourceRepo, _, err := client.Projects.GetProject(mergeRequest.SourceProjectID, nil)
 		if err != nil {
-			return nil, err
+			return nil, g.FormatError(err)
 		}
 
 		response = append(response, &GitPullRequest{
@@ -170,7 +171,7 @@ func (g *GitLabGitProvider) GetUser() (*GitUser, error) {
 
 	user, _, err := client.Users.CurrentUser()
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	userId := strconv.Itoa(user.ID)
@@ -190,7 +191,7 @@ func (g *GitLabGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (
 
 	branches, _, err := client.Branches.ListBranches(staticContext.Id, &gitlab.ListBranchesOptions{})
 	if err != nil {
-		return "", err
+		return "", g.FormatError(err)
 	}
 
 	var branchName string
@@ -204,7 +205,7 @@ func (g *GitLabGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (
 		for commitId != "" {
 			commit, _, err := client.Commits.GetCommit(staticContext.Id, commitId)
 			if err != nil {
-				return "", err
+				return "", g.FormatError(err)
 			}
 
 			if *staticContext.Sha == commit.ID {
@@ -230,7 +231,7 @@ func (g *GitLabGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (
 	}
 
 	if branchName == "" {
-		return "", fmt.Errorf("branch not found for SHA: %s", *staticContext.Sha)
+		return "", fmt.Errorf("status code: %d branch not found for SHA: %s", http.StatusNotFound, *staticContext.Sha)
 	}
 
 	return branchName, nil
@@ -256,7 +257,7 @@ func (g *GitLabGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (s
 		RefName: sha,
 	})
 	if err != nil {
-		return "", err
+		return "", g.FormatError(err)
 	}
 	if len(commits) == 0 {
 		return "", nil
@@ -443,12 +444,12 @@ func (g *GitLabGitProvider) GetPrContext(staticContext *StaticGitContext) (*Stat
 
 	pull, _, err := client.MergeRequests.GetMergeRequest(staticContext.Id, int(*staticContext.PrNumber), nil)
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	project, _, err := client.Projects.GetProject(staticContext.Id, nil)
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	repo := *staticContext
@@ -464,7 +465,7 @@ func (g *GitLabGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*
 
 	project, _, err := client.Projects.GetProject(staticContext.Id, nil)
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	return &project.DefaultBranch, nil
@@ -481,7 +482,7 @@ func (g *GitLabGitProvider) RegisterPrebuildWebhook(repo *GitRepository, endpoin
 		PushEvents: &pushEvents,
 	})
 	if err != nil {
-		return "", fmt.Errorf("failed to add project hook for project %s: %w", projectID, err)
+		return "", g.FormatError(err)
 	}
 
 	return strconv.Itoa(hook.ID), nil
@@ -495,7 +496,7 @@ func (g *GitLabGitProvider) GetPrebuildWebhook(repo *GitRepository, endpointUrl 
 		PerPage: 100,
 	})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	for _, hook := range hooks {
@@ -518,7 +519,7 @@ func (g *GitLabGitProvider) UnregisterPrebuildWebhook(repo *GitRepository, hookI
 	projectID := fmt.Sprintf("%s/%s", repo.Owner, repo.Name)
 	_, err = client.Projects.DeleteProjectHook(projectID, hookIdInt)
 	if err != nil {
-		return err
+		return g.FormatError(err)
 	}
 
 	return nil
@@ -533,7 +534,7 @@ func (g *GitLabGitProvider) GetCommitsRange(repo *GitRepository, initialSha stri
 		To:   &currentSha,
 	})
 	if err != nil {
-		return 0, err
+		return 0, g.FormatError(err)
 	}
 
 	return len(commits.Commits), nil
@@ -573,4 +574,14 @@ func (g *GitLabGitProvider) ParseEventData(request *http.Request) (*GitEventData
 	}
 
 	return gitEventData, nil
+}
+
+func (g *GitLabGitProvider) FormatError(err error) error {
+	re := regexp.MustCompile(`([A-Z]+)\s(https:\/\/\S+):\s(\d{3})\s(\{message:\s\d{3}\s.+\})`)
+	match := re.FindStringSubmatch(err.Error())
+	if len(match) == 5 {
+		return fmt.Errorf("status code: %s err: Request to %s failed with %s", match[3], match[2], match[4])
+	}
+
+	return fmt.Errorf("status code: %d err: failed to format error message Request failed with %s", http.StatusInternalServerError, err.Error())
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/builds"
 	"github.com/daytonaio/daytona/pkg/server/builds/dto"
 	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
+	"github.com/daytonaio/daytona/pkg/workspace/project/containerconfig"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -19,9 +20,11 @@ var build1Image = "image1"
 var build1User = "user1"
 
 var build1 *build.Build = &build.Build{
-	Id:          "id1",
-	Image:       build1Image,
-	User:        build1User,
+	Id: "id1",
+	ContainerConfig: containerconfig.ContainerConfig{
+		Image: build1Image,
+		User:  build1User,
+	},
 	BuildConfig: &buildconfig.BuildConfig{},
 	Repository: &gitprovider.GitRepository{
 		Sha: "sha1",
@@ -30,9 +33,11 @@ var build1 *build.Build = &build.Build{
 }
 
 var build2 *build.Build = &build.Build{
-	Id:          "id2",
-	Image:       "image2",
-	User:        "user2",
+	Id: "id2",
+	ContainerConfig: containerconfig.ContainerConfig{
+		Image: "image2",
+		User:  "user2",
+	},
 	BuildConfig: nil,
 	Repository: &gitprovider.GitRepository{
 		Sha: "sha2",
@@ -41,9 +46,11 @@ var build2 *build.Build = &build.Build{
 }
 
 var build3 *build.Build = &build.Build{
-	Id:          "id3",
-	Image:       "image3",
-	User:        "user3",
+	Id: "id3",
+	ContainerConfig: containerconfig.ContainerConfig{
+		Image: "image3",
+		User:  "user3",
+	},
 	BuildConfig: nil,
 	Repository: &gitprovider.GitRepository{
 		Sha: "sha3",
@@ -52,9 +59,11 @@ var build3 *build.Build = &build.Build{
 }
 
 var build4 *build.Build = &build.Build{
-	Id:          "id4",
-	Image:       "image4",
-	User:        "user4",
+	Id: "id4",
+	ContainerConfig: containerconfig.ContainerConfig{
+		Image: "image4",
+		User:  "user4",
+	},
 	BuildConfig: nil,
 	Repository: &gitprovider.GitRepository{
 		Sha: "sha4",
@@ -136,8 +145,8 @@ func (s *BuildServiceTestSuite) TestSave() {
 	require := s.Require()
 
 	createBuildDto := dto.BuildCreationData{
-		Image:       build4.Image,
-		User:        build4.User,
+		Image:       build4.ContainerConfig.Image,
+		User:        build4.ContainerConfig.User,
 		BuildConfig: build4.BuildConfig,
 		Repository:  build4.Repository,
 		EnvVars:     build4.EnvVars,
@@ -159,7 +168,7 @@ func (s *BuildServiceTestSuite) TestMarkForDeletion() {
 
 	err := s.buildService.MarkForDeletion(&build.Filter{
 		Id: &build3.Id,
-	})
+	}, false)
 	require.Nil(err)
 
 	b, errs := s.buildService.Find(&build.Filter{

@@ -18,6 +18,8 @@ definitions:
     properties:
       buildConfig:
         $ref: '#/definitions/BuildConfig'
+      containerConfig:
+        $ref: '#/definitions/ContainerConfig'
       createdAt:
         type: string
       envVars:
@@ -39,15 +41,14 @@ definitions:
       user:
         type: string
     required:
+    - containerConfig
     - createdAt
     - envVars
     - id
-    - image
     - prebuildId
     - repository
     - state
     - updatedAt
-    - user
     type: object
   BuildConfig:
     properties:
@@ -74,6 +75,16 @@ definitions:
     x-enum-varnames:
     - CloneTargetBranch
     - CloneTargetCommit
+  ContainerConfig:
+    properties:
+      image:
+        type: string
+      user:
+        type: string
+    required:
+    - image
+    - user
+    type: object
   ContainerRegistry:
     properties:
       password:
@@ -748,6 +759,7 @@ definitions:
     - success
     - published
     - pending-delete
+    - pending-forced-delete
     - deleting
     type: string
     x-enum-varnames:
@@ -757,6 +769,7 @@ definitions:
     - BuildStateSuccess
     - BuildStatePublished
     - BuildStatePendingDelete
+    - BuildStatePendingForcedDelete
     - BuildStateDeleting
   provider.ProviderInfo:
     properties:
@@ -788,6 +801,12 @@ definitions:
         type: boolean
       options:
         description: Options is only used if the Type is ProviderTargetPropertyTypeOption
+        items:
+          type: string
+        type: array
+      suggestions:
+        description: Suggestions is an optional list of auto-complete values to assist
+          the user while filling the field
         items:
           type: string
         type: array
@@ -872,6 +891,11 @@ paths:
     delete:
       description: Delete ALL builds
       operationId: DeleteAllBuilds
+      parameters:
+      - description: Force
+        in: query
+        name: force
+        type: boolean
       responses:
         "204":
           description: No Content
@@ -923,6 +947,10 @@ paths:
         name: buildId
         required: true
         type: string
+      - description: Force
+        in: query
+        name: force
+        type: boolean
       responses:
         "204":
           description: No Content
@@ -958,6 +986,10 @@ paths:
         name: prebuildId
         required: true
         type: string
+      - description: Force
+        in: query
+        name: force
+        type: boolean
       responses:
         "204":
           description: No Content

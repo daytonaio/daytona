@@ -6,6 +6,7 @@ package list
 import (
 	"fmt"
 	"os"
+	"sort"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/table"
@@ -26,6 +27,8 @@ type RowData struct {
 }
 
 func ListBuilds(buildList []apiclient.Build, apiServerConfig *apiclient.ServerConfig) {
+	SortBuilds(&buildList)
+
 	re := lipgloss.NewRenderer(os.Stdout)
 
 	headers := []string{"ID", "State", "Prebuild ID", "Created", "Updated"}
@@ -71,6 +74,14 @@ func ListBuilds(buildList []apiclient.Build, apiServerConfig *apiclient.ServerCo
 	fmt.Println(views.BaseTableStyle.Render(t.String()))
 }
 
+func SortBuilds(buildList *[]apiclient.Build) {
+	sort.Slice(*buildList, func(i, j int) bool {
+		b1 := (*buildList)[i]
+		b2 := (*buildList)[j]
+		return b1.UpdatedAt > b2.UpdatedAt
+	})
+}
+
 func renderUnstyledList(buildList []apiclient.Build, apiServerConfig *apiclient.ServerConfig) {
 	for _, b := range buildList {
 		info.Render(&b, apiServerConfig, true)
@@ -82,7 +93,6 @@ func renderUnstyledList(buildList []apiclient.Build, apiServerConfig *apiclient.
 }
 
 func getRowFromRowData(rowData RowData) []string {
-
 	row := []string{
 		views.NameStyle.Render(rowData.Id),
 		views.DefaultRowDataStyle.Render(rowData.State),

@@ -4,6 +4,7 @@
 package build
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/daytonaio/daytona/pkg/containerregistry"
@@ -56,7 +57,7 @@ func (f *BuilderFactory) Create(build Build, projectDir string) (IBuilder, error
 
 func (f *BuilderFactory) CheckExistingBuild(b Build) (*Build, error) {
 	if b.Repository == nil {
-		return nil, fmt.Errorf("repository must be set")
+		return nil, errors.New("repository must be set")
 	}
 
 	build, err := f.buildStore.Find(&Filter{

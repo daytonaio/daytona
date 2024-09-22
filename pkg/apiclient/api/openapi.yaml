@@ -67,6 +67,12 @@ paths:
     delete:
       description: Delete ALL builds
       operationId: DeleteAllBuilds
+      parameters:
+      - description: Force
+        in: query
+        name: force
+        schema:
+          type: boolean
       responses:
         "204":
           content: {}
@@ -121,6 +127,11 @@ paths:
         required: true
         schema:
           type: string
+      - description: Force
+        in: query
+        name: force
+        schema:
+          type: boolean
       responses:
         "204":
           content: {}
@@ -139,6 +150,11 @@ paths:
         required: true
         schema:
           type: string
+      - description: Force
+        in: query
+        name: force
+        schema:
+          type: boolean
       responses:
         "204":
           content: {}
@@ -1253,6 +1269,9 @@ components:
             filePath: filePath
         createdAt: createdAt
         image: image
+        containerConfig:
+          image: image
+          user: user
         prebuildId: prebuildId
         envVars:
           key: envVars
@@ -1274,6 +1293,8 @@ components:
       properties:
         buildConfig:
           $ref: '#/components/schemas/BuildConfig'
+        containerConfig:
+          $ref: '#/components/schemas/ContainerConfig'
         createdAt:
           type: string
         envVars:
@@ -1295,15 +1316,14 @@ components:
         user:
           type: string
       required:
+      - containerConfig
       - createdAt
       - envVars
       - id
-      - image
       - prebuildId
       - repository
       - state
       - updatedAt
-      - user
       type: object
     BuildConfig:
       example:
@@ -1339,6 +1359,19 @@ components:
       x-enum-varnames:
       - CloneTargetBranch
       - CloneTargetCommit
+    ContainerConfig:
+      example:
+        image: image
+        user: user
+      properties:
+        image:
+          type: string
+        user:
+          type: string
+      required:
+      - image
+      - user
+      type: object
     ContainerRegistry:
       example:
         server: server
@@ -2580,6 +2613,7 @@ components:
       - success
       - published
       - pending-delete
+      - pending-forced-delete
       - deleting
       type: string
       x-enum-varnames:
@@ -2589,6 +2623,7 @@ components:
       - BuildStateSuccess
       - BuildStatePublished
       - BuildStatePendingDelete
+      - BuildStatePendingForcedDelete
       - BuildStateDeleting
     provider.ProviderInfo:
       example:
@@ -2623,6 +2658,12 @@ components:
           type: boolean
         options:
           description: Options is only used if the Type is ProviderTargetPropertyTypeOption
+          items:
+            type: string
+          type: array
+        suggestions:
+          description: Suggestions is an optional list of auto-complete values to
+            assist the user while filling the field
           items:
             type: string
           type: array

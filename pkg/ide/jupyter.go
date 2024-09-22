@@ -5,6 +5,7 @@ package ide
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -85,7 +86,7 @@ func ensurePythonInstalled(hostname string, yesFlag bool) error {
 		if confirmInstall {
 			return installPython(hostname)
 		} else {
-			return fmt.Errorf("python3 is required but not installed")
+			return errors.New("python3 is required but not installed")
 		}
 	}
 	views.RenderInfoMessageBold("Python is already installed.")
@@ -128,7 +129,7 @@ func ensurePipInstalled(hostname string, yesFlag bool) error {
 		if confirmInstall {
 			return installPip(hostname)
 		} else {
-			return fmt.Errorf("pip is required but not installed")
+			return errors.New("pip is required but not installed")
 		}
 	}
 	views.RenderInfoMessageBold("pip is installed.")
@@ -167,7 +168,7 @@ func detectPackageManager(hostname string) (string, error) {
 			return manager, nil
 		}
 	}
-	return "", fmt.Errorf("no supported package manager found")
+	return "", errors.New("no supported package manager found")
 }
 
 // installPythonWithPackageManager installs Python using the detected package manager.

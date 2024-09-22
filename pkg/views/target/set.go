@@ -182,6 +182,10 @@ func getInput(name string, property apiclient.ProviderProviderTargetProperty, in
 		input = input.EchoMode(huh.EchoModePassword)
 	}
 
+	if len(property.Suggestions) > 0 {
+		input = input.Suggestions(property.Suggestions)
+	}
+
 	return input, value
 }
 

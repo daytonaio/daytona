@@ -5,11 +5,13 @@ package gitprovider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
 
+	"net/http"
 	"net/url"
 
 	bitbucketv1 "github.com/gfleury/go-bitbucket-v1"
@@ -60,7 +62,7 @@ func (g *BitbucketServerGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 		"limit": bitbucketServerResponseLimit,
 	})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(projectsRaw.StatusCode, projectsRaw.Message)
 	}
 
 	projectsRaw.Body.Close()
@@ -102,7 +104,7 @@ func (g *BitbucketServerGitProvider) GetRepositories(namespace string) ([]*GitRe
 		}
 
 		if err != nil {
-			return nil, err
+			return nil, g.FormatError(repoList.StatusCode, repoList.Message)
 		}
 
 		pageRepos, err := bitbucketv1.GetRepositoriesResponse(repoList)
@@ -162,7 +164,7 @@ func (g *BitbucketServerGitProvider) GetRepoBranches(repositoryId string, namesp
 
 	branches, err := client.DefaultApi.GetBranches(namespaceId, repositoryId, nil)
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(branches.StatusCode, branches.Message)
 	}
 
 	branchList, err := bitbucketv1.GetBranchesResponse(branches)
@@ -190,7 +192,7 @@ func (g *BitbucketServerGitProvider) GetRepoPRs(repositoryId string, namespaceId
 
 	prList, err := client.DefaultApi.GetPullRequests(nil)
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(prList.StatusCode, prList.Message)
 	}
 
 	pullRequest, err := bitbucketv1.GetPullRequestsResponse(prList)
@@ -241,12 +243,12 @@ func (g *BitbucketServerGitProvider) GetUser() (*GitUser, error) {
 	// Refer to this developer community comment: https://community.developer.atlassian.com/t/obtain-authorised-users-username-from-api/24422/2
 	res, err := client.DefaultApi.GetApplicationProperties()
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(res.StatusCode, res.Message)
 	}
 
 	username := res.Header.Get("X-Ausername")
 	if username == "" {
-		return nil, fmt.Errorf("X-Ausername header is missing")
+		return nil, errors.New("X-Ausername header is missing")
 	}
 
 	user, err := client.DefaultApi.GetUser(username)
@@ -255,7 +257,7 @@ func (g *BitbucketServerGitProvider) GetUser() (*GitUser, error) {
 	}
 
 	if user.Values == nil {
-		return nil, fmt.Errorf("user values are nil")
+		return nil, errors.New("user values are nil")
 	}
 	var userInfo bitbucketv1.User
 	err = mapstructure.Decode(user.Values, &userInfo)
@@ -288,11 +290,11 @@ func (g *BitbucketServerGitProvider) GetLastCommitSha(staticContext *StaticGitCo
 	})
 
 	if err != nil {
-		return "", err
+		return "", g.FormatError(commits.StatusCode, commits.Message)
 	}
 
 	if len(commits.Values) == 0 {
-		return "", fmt.Errorf("no commits found")
+		return "", errors.New("no commits found")
 	}
 
 	commitList, err := bitbucketv1.GetCommitsResponse(commits)
@@ -311,7 +313,7 @@ func (g *BitbucketServerGitProvider) GetBranchByCommit(staticContext *StaticGitC
 
 	branches, err := client.DefaultApi.GetBranches(staticContext.Owner, staticContext.Name, map[string]interface{}{})
 	if err != nil {
-		return "", err
+		return "", g.FormatError(branches.StatusCode, branches.Message)
 	}
 
 	branchList, err := bitbucketv1.GetBranchesResponse(branches)
@@ -331,7 +333,7 @@ func (g *BitbucketServerGitProvider) GetBranchByCommit(staticContext *StaticGitC
 			"until": branch.LatestCommit,
 		})
 		if err != nil {
-			return "", err
+			return "", g.FormatError(commits.StatusCode, commits.Message)
 		}
 
 		if len(commits.Values) == 0 {
@@ -356,7 +358,7 @@ func (g *BitbucketServerGitProvider) GetBranchByCommit(staticContext *StaticGitC
 	}
 
 	if branchName == "" {
-		return "", fmt.Errorf("branch not found for SHA: %s", *staticContext.Sha)
+		return "", fmt.Errorf("status code: %d branch not found for SHA: %s", http.StatusNotFound, *staticContext.Sha)
 	}
 
 	return branchName, nil
@@ -393,7 +395,7 @@ func (g *BitbucketServerGitProvider) GetPrContext(staticContext *StaticGitContex
 
 	pr, err := client.DefaultApi.GetPullRequest(staticContext.Id, staticContext.Name, int(*staticContext.PrNumber))
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(pr.StatusCode, pr.Message)
 	}
 
 	prInfo, err := bitbucketv1.GetPullRequestResponse(pr)
@@ -487,7 +489,7 @@ func (g *BitbucketServerGitProvider) GetDefaultBranch(staticContext *StaticGitCo
 
 	branches, err := client.DefaultApi.GetBranches(staticContext.Id, staticContext.Name, nil)
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(branches.StatusCode, branches.Message)
 	}
 
 	branchList, err := bitbucketv1.GetBranchesResponse(branches)
@@ -501,5 +503,10 @@ func (g *BitbucketServerGitProvider) GetDefaultBranch(staticContext *StaticGitCo
 		}
 	}
 
-	return nil, fmt.Errorf("default branch not found")
+	return nil, errors.New("default branch not found")
+}
+
+func (b *BitbucketServerGitProvider) FormatError(statusCode int, message string) error {
+
+	return fmt.Errorf("status code: %d err: Request failed with %s", statusCode, message)
 }

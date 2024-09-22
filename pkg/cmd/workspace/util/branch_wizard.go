@@ -11,6 +11,7 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
@@ -31,7 +32,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	ctx := context.Background()
 
 	err = views_util.WithSpinner("Loading", func() error {
-		branchList, _, err = config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.ProviderId, config.NamespaceId, url.QueryEscape(config.ChosenRepo.Id)).Execute()
+		branchList, _, err = config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.ProviderId, url.QueryEscape(config.NamespaceId), url.QueryEscape(config.ChosenRepo.Id)).Execute()
 		return err
 	})
 
@@ -51,7 +52,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 
 	var prList []apiclient.GitPullRequest
 	err = views_util.WithSpinner("Loading", func() error {
-		prList, _, err = config.ApiClient.GitProviderAPI.GetRepoPRs(ctx, config.ProviderId, config.NamespaceId, url.QueryEscape(config.ChosenRepo.Id)).Execute()
+		prList, _, err = config.ApiClient.GitProviderAPI.GetRepoPRs(ctx, config.ProviderId, url.QueryEscape(config.NamespaceId), url.QueryEscape(config.ChosenRepo.Id)).Execute()
 		return err
 	})
 
@@ -60,7 +61,12 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	}
 
 	var branch *apiclient.GitBranch
-	parentIdentifier := fmt.Sprintf("%s/%s/%s", config.ProviderId, config.Namespace, config.ChosenRepo.Name)
+	namespace := config.Namespace
+	if namespace == "" {
+		namespace = config.ChosenRepo.Owner
+	}
+
+	parentIdentifier := fmt.Sprintf("%s/%s/%s", config.ProviderId, namespace, config.ChosenRepo.Name)
 	if len(prList) == 0 {
 		branch = selection.GetBranchFromPrompt(branchList, config.ProjectOrder, parentIdentifier)
 		if branch == nil {
@@ -78,6 +84,11 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	checkoutOptions = append(checkoutOptions, selection.CheckoutPR)
 
 	chosenCheckoutOption := selection.GetCheckoutOptionFromPrompt(config.ProjectOrder, checkoutOptions, parentIdentifier)
+
+	if chosenCheckoutOption == (selection.CheckoutOption{}) {
+		return nil, common.ErrCtrlCAbort
+	}
+
 	if chosenCheckoutOption == selection.CheckoutDefault {
 		// Get the default branch from context
 		repo, res, err := config.ApiClient.GitProviderAPI.GetGitContext(ctx).Repository(apiclient.GetRepositoryContext{

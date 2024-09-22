@@ -4,6 +4,8 @@
 package profile
 
 import (
+	"fmt"
+
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/profile"
@@ -28,7 +30,12 @@ var profileListCmd = &cobra.Command{
 			return
 		}
 
-		profile.ListProfiles(c.Profiles, c.ActiveProfileId)
+		output, err := profile.ListProfiles(c.Profiles, c.ActiveProfileId, false)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Print(output)
 	},
 }
 

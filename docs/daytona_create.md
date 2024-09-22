@@ -3,14 +3,14 @@
 Create a workspace
 
 ```
-daytona create [REPOSITORY_URL] [flags]
+daytona create [REPOSITORY_URL | PROJECT_CONFIG_NAME]... [flags]
 ```
 
 ### Options
 
 ```
       --blank                      Create a blank project without using existing configurations
-      --branch string              Specify the Git branch to use in the project
+      --branch strings             Specify the Git branches to use in the projects
       --builder BuildChoice        Specify the builder (currently auto/devcontainer/none)
   -c, --code                       Open the workspace in the IDE after workspace creation
       --custom-image string        Create the project with the custom image passed as the flag value; Requires setting --custom-image-user flag as well

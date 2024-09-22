@@ -4,10 +4,12 @@
 package gitprovider
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 
+	"github.com/daytonaio/daytona/pkg/api/controllers"
 	_ "github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
@@ -47,7 +49,11 @@ func GetRepoBranches(ctx *gin.Context) {
 
 	response, err := server.GitProviderService.GetRepoBranches(gitProviderId, namespaceId, repositoryId)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get repo branches: %w", err))
+		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
+		if codeErr != nil {
+			ctx.AbortWithError(statusCode, codeErr)
+		}
+		ctx.AbortWithError(statusCode, errors.New(message))
 		return
 	}
 

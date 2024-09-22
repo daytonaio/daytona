@@ -4,6 +4,7 @@
 package projectconfig
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 
@@ -13,6 +14,7 @@ import (
 	build_dto "github.com/daytonaio/daytona/pkg/server/builds/dto"
 	"github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
+	"github.com/daytonaio/daytona/pkg/workspace/project/containerconfig"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -29,11 +31,11 @@ func (s *ProjectConfigService) SetPrebuild(projectConfigName string, createPrebu
 	})
 
 	if err == nil && createPrebuildDto.Id != nil && *createPrebuildDto.Id != existingPrebuild.Id {
-		return nil, fmt.Errorf("prebuild for the specified project config and branch already exists")
+		return nil, errors.New("prebuild for the specified project config and branch already exists")
 	}
 
 	if createPrebuildDto.CommitInterval == nil && len(createPrebuildDto.TriggerFiles) == 0 {
-		return nil, fmt.Errorf("either the commit interval or trigger files must be specified")
+		return nil, errors.New("either the commit interval or trigger files must be specified")
 	}
 
 	gitProvider, gitProviderId, err := s.gitProviderService.GetGitProviderForUrl(projectConfig.RepositoryUrl)
@@ -203,7 +205,7 @@ func (s *ProjectConfigService) DeletePrebuild(projectConfigName string, id strin
 
 	errs := s.buildService.MarkForDeletion(&build.Filter{
 		PrebuildIds: &[]string{id},
-	})
+	}, force)
 	if len(errs) > 0 {
 		if force {
 			for _, err := range errs {
@@ -261,8 +263,10 @@ func (s *ProjectConfigService) ProcessGitEvent(data gitprovider.GitEventData) er
 		if len(prebuild.TriggerFiles) > 0 {
 			if slicesHaveCommonEntry(prebuild.TriggerFiles, data.AffectedFiles) {
 				buildsToTrigger = append(buildsToTrigger, build.Build{
-					Image:       projectConfig.Image,
-					User:        projectConfig.User,
+					ContainerConfig: containerconfig.ContainerConfig{
+						Image: projectConfig.Image,
+						User:  projectConfig.User,
+					},
 					BuildConfig: projectConfig.BuildConfig,
 					Repository:  repo,
 					EnvVars:     projectConfig.EnvVars,
@@ -278,8 +282,10 @@ func (s *ProjectConfigService) ProcessGitEvent(data gitprovider.GitEventData) er
 		})
 		if err != nil {
 			buildsToTrigger = append(buildsToTrigger, build.Build{
-				Image:       projectConfig.Image,
-				User:        projectConfig.User,
+				ContainerConfig: containerconfig.ContainerConfig{
+					Image: projectConfig.Image,
+					User:  projectConfig.User,
+				},
 				BuildConfig: projectConfig.BuildConfig,
 				Repository:  repo,
 				EnvVars:     projectConfig.EnvVars,
@@ -296,8 +302,10 @@ func (s *ProjectConfigService) ProcessGitEvent(data gitprovider.GitEventData) er
 		// Check if the commit interval has been reached
 		if prebuild.CommitInterval != nil && commitsRange >= *prebuild.CommitInterval {
 			buildsToTrigger = append(buildsToTrigger, build.Build{
-				Image:       projectConfig.Image,
-				User:        projectConfig.User,
+				ContainerConfig: containerconfig.ContainerConfig{
+					Image: projectConfig.Image,
+					User:  projectConfig.User,
+				},
 				BuildConfig: projectConfig.BuildConfig,
 				Repository:  repo,
 				EnvVars:     projectConfig.EnvVars,
@@ -308,8 +316,8 @@ func (s *ProjectConfigService) ProcessGitEvent(data gitprovider.GitEventData) er
 
 	for _, build := range buildsToTrigger {
 		createBuildDto := build_dto.BuildCreationData{
-			Image:       build.Image,
-			User:        build.User,
+			Image:       build.ContainerConfig.Image,
+			User:        build.ContainerConfig.User,
 			BuildConfig: build.BuildConfig,
 			Repository:  build.Repository,
 			EnvVars:     build.EnvVars,
@@ -362,7 +370,7 @@ func (s *ProjectConfigService) EnforceRetentionPolicy() error {
 			for i := 0; i < numToDelete; i++ {
 				errs := s.buildService.MarkForDeletion(&build.Filter{
 					Id: &associatedBuilds[i].Id,
-				})
+				}, false)
 				if len(errs) > 0 {
 					for _, err := range errs {
 						log.Error(err)

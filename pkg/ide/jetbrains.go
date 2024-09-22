@@ -38,7 +38,7 @@ func OpenJetbrainsIDE(activeProfile config.Profile, ide, workspaceId, projectNam
 
 	jbIde, ok := jetbrains.GetIdes()[jetbrains.Id(ide)]
 	if !ok {
-		return fmt.Errorf("IDE not found")
+		return errors.New("IDE not found")
 	}
 
 	home, err := util.GetHomeDir(activeProfile, workspaceId, projectName)
@@ -66,7 +66,7 @@ func OpenJetbrainsIDE(activeProfile config.Profile, ide, workspaceId, projectNam
 	case ospkg.Linux_64_86:
 		downloadUrl = fmt.Sprintf(jbIde.UrlTemplates.Amd64, jbIdeVersion)
 	default:
-		return fmt.Errorf("JetBrains remote IDEs are only supported on Linux.")
+		return errors.New("JetBrains remote IDEs are only supported on Linux.")
 	}
 
 	err = downloadJetbrainsIDE(projectHostname, downloadUrl, downloadPath)

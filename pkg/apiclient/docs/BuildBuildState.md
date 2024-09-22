@@ -15,6 +15,8 @@
 
 * `BuildStatePendingDelete` (value: `"pending-delete"`)
 
+* `BuildStatePendingForcedDelete` (value: `"pending-forced-delete"`)
+
 * `BuildStateDeleting` (value: `"deleting"`)
 
 

@@ -94,7 +94,7 @@ func (tun *SshTunnel) Start(ctx context.Context) error {
 	tun.mutex.Lock()
 	if tun.started {
 		tun.mutex.Unlock()
-		return fmt.Errorf("already started")
+		return errors.New("already started")
 	}
 	tun.started = true
 	tun.ctx, tun.cancel = context.WithCancel(ctx)

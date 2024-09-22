@@ -5,8 +5,10 @@ package gitprovider
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -60,7 +62,7 @@ func (g *AzureDevOpsGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 			ContinuationToken: &pages.ContinuationToken,
 		}
 	}
-	return nil, err
+	return nil, g.FormatError(err)
 }
 
 func (g *AzureDevOpsGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
@@ -73,7 +75,7 @@ func (g *AzureDevOpsGitProvider) GetRepositories(namespace string) ([]*GitReposi
 		Project: &namespace,
 	})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	repositories := []*GitRepository{}
@@ -110,7 +112,7 @@ func (g *AzureDevOpsGitProvider) GetUser() (*GitUser, error) {
 	ctx := context.Background()
 	connectionData, err := client.GetConnectionData(ctx, location.GetConnectionDataArgs{})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	user := &GitUser{}
@@ -141,7 +143,7 @@ func (g *AzureDevOpsGitProvider) GetRepoBranches(repositoryId string, namespaceI
 		RepositoryId: &repositoryId,
 	})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	var response []*GitBranch
@@ -178,7 +180,7 @@ func (g *AzureDevOpsGitProvider) GetRepoPRs(repositoryId string, namespaceId str
 		},
 	})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	response := []*GitPullRequest{}
@@ -199,7 +201,7 @@ func (g *AzureDevOpsGitProvider) GetRepoPRs(repositoryId string, namespaceId str
 			RepositoryId: &repositoryId,
 		})
 		if err != nil {
-			return nil, err
+			return nil, g.FormatError(err)
 		}
 
 		pullrequest.SourceRepoUrl = *repo.WebUrl
@@ -245,7 +247,7 @@ func (g *AzureDevOpsGitProvider) GetLastCommitSha(staticContext *StaticGitContex
 		Top: &[]int{1}[0],
 	})
 	if err != nil {
-		return "", err
+		return "", g.FormatError(err)
 	}
 
 	if len(*commits) == 0 {
@@ -264,7 +266,7 @@ func (g *AzureDevOpsGitProvider) GetBranchByCommit(staticContext *StaticGitConte
 		RepositoryId: &staticContext.Id,
 	})
 	if err != nil {
-		return "", err
+		return "", g.FormatError(err)
 	}
 
 	var branchName string
@@ -309,7 +311,7 @@ func (g *AzureDevOpsGitProvider) GetBranchByCommit(staticContext *StaticGitConte
 	}
 
 	if branchName == "" {
-		return "", fmt.Errorf("branch not found for SHA: %s", *staticContext.Sha)
+		return "", fmt.Errorf("status code: %d branch not found for SHA: %s", http.StatusNotFound, *staticContext.Sha)
 	}
 
 	return branchName, nil
@@ -369,7 +371,7 @@ func (g *AzureDevOpsGitProvider) GetPrContext(staticContext *StaticGitContext) (
 		PullRequestId: &pullRequestId,
 	})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	repo := *staticContext
@@ -596,4 +598,19 @@ func (g *AzureDevOpsGitProvider) getLocationClient() location.Client {
 
 	client := location.NewClient(ctx, connection)
 	return client
+}
+
+func (g *AzureDevOpsGitProvider) FormatError(err error) error {
+	data, err := json.Marshal(err)
+	if err != nil {
+		return fmt.Errorf("status code: %d err: failed to format the error message: Request failed with %s", http.StatusInternalServerError, err.Error())
+	}
+
+	jsonData := azuredevops.WrappedError{}
+	err = json.Unmarshal(data, &jsonData)
+	if err != nil {
+		return fmt.Errorf("status code: %d err: failed to format the error message: Request failed with %s", http.StatusInternalServerError, err.Error())
+	}
+
+	return fmt.Errorf("status code: %d err: Request failed with %s", *jsonData.StatusCode, *jsonData.Message)
 }

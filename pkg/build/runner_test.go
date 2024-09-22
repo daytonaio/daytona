@@ -10,6 +10,7 @@ import (
 	git_mocks "github.com/daytonaio/daytona/internal/testing/git/mocks"
 	logger_mocks "github.com/daytonaio/daytona/internal/testing/logger/mocks"
 	"github.com/daytonaio/daytona/internal/testing/server/workspaces/mocks"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/build"
 	t_gitprovider "github.com/daytonaio/daytona/pkg/build/mocks"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
@@ -118,8 +119,8 @@ func (s *BuildRunnerTestSuite) TestRunBuildProcess() {
 
 	successBuild := *mocks.MockBuild
 	successBuild.State = build.BuildStateSuccess
-	successBuild.Image = "image"
-	successBuild.User = "user"
+	successBuild.Image = util.Pointer("image")
+	successBuild.User = util.Pointer("user")
 	s.mockBuilder.On("Publish", successBuild).Return(nil)
 
 	s.mockBuilder.On("CleanUp").Return(nil)
@@ -140,7 +141,7 @@ func (s *BuildRunnerTestSuite) TestRunBuildProcess() {
 	s.mockBuilder.AssertExpectations(s.T())
 	s.mockGitProviderConfigStore.AssertExpectations(s.T())
 
-	s.Require().Equal(mocks.MockBuild.Image, "image")
-	s.Require().Equal(mocks.MockBuild.User, "user")
+	s.Require().Equal(mocks.MockBuild.Image, util.Pointer("image"))
+	s.Require().Equal(mocks.MockBuild.User, util.Pointer("user"))
 	s.Require().Equal(mocks.MockBuild.State, build.BuildStatePublished)
 }

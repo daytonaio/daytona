@@ -6,6 +6,7 @@ package gitnessclient
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -38,19 +39,19 @@ func (g *GitnessClient) performRequest(method, requestURL string) ([]byte, error
 	req.Header.Set("Authorization", "Bearer "+g.token)
 
 	client := &http.Client{}
-	resp, err := client.Do(req)
+	res, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer res.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
 		return nil, err
 	}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("status code: %d err: %s", res.StatusCode, string(body))
 	}
 
 	return body, nil
@@ -289,7 +290,7 @@ func (g *GitnessClient) GetRepoRef(url string) (*string, error) {
 	repoUrl := strings.TrimSuffix(url, ".git")
 	parts := strings.Split(repoUrl, "/")
 	if len(parts) < 5 {
-		return nil, fmt.Errorf("failed to parse repository reference: invalid url passed")
+		return nil, errors.New("failed to parse repository reference: invalid url passed")
 	}
 	var path string
 	if parts[3] == "git" && len(parts) >= 6 {
@@ -312,7 +313,7 @@ func getLastCommit(jsonData []byte) (Commit, error) {
 	})
 
 	if len(commitsResponse.Commits) == 0 {
-		return Commit{}, fmt.Errorf("no commits found")
+		return Commit{}, errors.New("no commits found")
 	}
 
 	return commitsResponse.Commits[len(commitsResponse.Commits)-1], nil

@@ -37,7 +37,7 @@ var buildRunCmd = &cobra.Command{
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
-		projectConfig = selection.GetProjectConfigFromPrompt(projectConfigList, 0, false, false, "Update")
+		projectConfig = selection.GetProjectConfigFromPrompt(projectConfigList, 0, false, false, "Build")
 		if projectConfig == nil {
 			return
 		}

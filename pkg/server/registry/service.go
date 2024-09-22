@@ -5,6 +5,7 @@ package registry
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -60,7 +61,7 @@ func (s *LocalContainerRegistry) Start() error {
 	}
 
 	if _, err := cli.Info(ctx); err != nil {
-		return fmt.Errorf("cannot connect to the Docker daemon. Is the Docker daemon running?\nIf Docker is not installed, please install it by following https://docs.docker.com/engine/install/ and try again")
+		return errors.New("cannot connect to the Docker daemon. Is the Docker daemon running?\nIf Docker is not installed, please install it by following https://docs.docker.com/engine/install/ and try again")
 	}
 
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{

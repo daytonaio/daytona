@@ -151,6 +151,14 @@ const docTemplate = `{
                 ],
                 "summary": "Delete ALL builds",
                 "operationId": "DeleteAllBuilds",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "204": {
                         "description": "No Content"
@@ -173,6 +181,12 @@ const docTemplate = `{
                         "name": "prebuildId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -225,6 +239,12 @@ const docTemplate = `{
                         "name": "buildId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1738,19 +1758,21 @@ const docTemplate = `{
         "Build": {
             "type": "object",
             "required": [
+                "containerConfig",
                 "createdAt",
                 "envVars",
                 "id",
-                "image",
                 "prebuildId",
                 "repository",
                 "state",
-                "updatedAt",
-                "user"
+                "updatedAt"
             ],
             "properties": {
                 "buildConfig": {
                     "$ref": "#/definitions/BuildConfig"
+                },
+                "containerConfig": {
+                    "$ref": "#/definitions/ContainerConfig"
                 },
                 "createdAt": {
                     "type": "string"
@@ -1820,6 +1842,21 @@ const docTemplate = `{
                 "CloneTargetBranch",
                 "CloneTargetCommit"
             ]
+        },
+        "ContainerConfig": {
+            "type": "object",
+            "required": [
+                "image",
+                "user"
+            ],
+            "properties": {
+                "image": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                }
+            }
         },
         "ContainerRegistry": {
             "type": "object",
@@ -2795,6 +2832,7 @@ const docTemplate = `{
                 "success",
                 "published",
                 "pending-delete",
+                "pending-forced-delete",
                 "deleting"
             ],
             "x-enum-varnames": [
@@ -2804,6 +2842,7 @@ const docTemplate = `{
                 "BuildStateSuccess",
                 "BuildStatePublished",
                 "BuildStatePendingDelete",
+                "BuildStatePendingForcedDelete",
                 "BuildStateDeleting"
             ]
         },
@@ -2842,6 +2881,13 @@ const docTemplate = `{
                 },
                 "options": {
                     "description": "Options is only used if the Type is ProviderTargetPropertyTypeOption",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "suggestions": {
+                    "description": "Suggestions is an optional list of auto-complete values to assist the user while filling the field",
                     "type": "array",
                     "items": {
                         "type": "string"
