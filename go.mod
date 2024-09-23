@@ -296,7 +296,7 @@ require (
 )
 
 require (
-	github.com/atotto/clipboard v0.1.4 // indirect
+	github.com/atotto/clipboard v0.1.4
 	github.com/aws/aws-sdk-go v1.54.19
 	github.com/aws/aws-sdk-go-v2/service/codecommit v1.24.3
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
