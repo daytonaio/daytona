@@ -701,41 +701,41 @@ func (g *AzureDevOpsGitProvider) GetCommitsRange(repo *GitRepository, initialSha
 		return 0, err
 	}
 
-	commits, err := gitClient.GetCommits(context.Background(), git.GetCommitsArgs{
+	commits, err := gitClient.GetCommitDiffs(context.Background(), git.GetCommitDiffsArgs{
 		RepositoryId: &repo.Id,
 		Project:      &repo.Name,
-		SearchCriteria: &git.GitQueryCommitsCriteria{
-			FromCommitId: &initialSha,
-			ToCommitId:   &currentSha,
+		BaseVersionDescriptor: &git.GitBaseVersionDescriptor{
+			BaseVersion:     &initialSha,
+			BaseVersionType: &git.GitVersionTypeValues.Commit,
+		},
+		TargetVersionDescriptor: &git.GitTargetVersionDescriptor{
+			TargetVersion:     &currentSha,
+			TargetVersionType: &git.GitVersionTypeValues.Commit,
 		},
 	})
 	if err != nil {
 		return 0, err
 	}
-	return len(*commits), nil
+
+	return *commits.AheadCount, nil
 }
 
 func (g *AzureDevOpsGitProvider) ParseEventData(request *http.Request) (*GitEventData, error) {
 	if request.Header.Get("X-AzureDevops-Event") != "git.push" {
 		return nil, fmt.Errorf("invalid event key: %s", request.Header.Get("X-AzureDevops-Event"))
 	}
+
 	hook, err := azureWebhook.New()
 	if err != nil {
 		return nil, err
 	}
-
 	event, err := hook.Parse(request, azureWebhook.GitPushEventType)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse event: %w", err)
 	}
-
 	pushEvent, ok := event.(azureWebhook.GitPushEvent)
 	if !ok {
 		return nil, fmt.Errorf("failed to parse push event: %w", err)
-	}
-
-	if pushEvent.EventType != "git.push" {
-		return nil, fmt.Errorf("invalid event type: %s", pushEvent.EventType)
 	}
 
 	owner := request.Header.Get("X-Owner")
@@ -744,7 +744,7 @@ func (g *AzureDevOpsGitProvider) ParseEventData(request *http.Request) (*GitEven
 		Owner:  owner,
 		Url:    util.CleanUpRepositoryUrl(pushEvent.Resource.Repository.RemoteURL),
 		Branch: strings.TrimPrefix(pushEvent.Resource.Repository.DefaultBranch, "refs/heads/"),
-		Sha:    pushEvent.Resource.RefUpdates[0].NewObjectID,
+		Sha:    pushEvent.Resource.Commits[0].CommitID,
 	}
 
 	for _, commit := range pushEvent.Resource.Commits {
