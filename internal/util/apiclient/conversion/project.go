@@ -82,9 +82,25 @@ func ToGitStatus(gitStatusDTO apiclient.GitStatus) *project.GitStatus {
 		files = append(files, file)
 	}
 
+	var ahead, behind int
+	if gitStatusDTO.Ahead != nil {
+		ahead = int(*gitStatusDTO.Ahead)
+	}
+	if gitStatusDTO.Behind != nil {
+		behind = int(*gitStatusDTO.Behind)
+	}
+
+	var branchPublished bool
+	if gitStatusDTO.BranchPublished != nil {
+		branchPublished = *gitStatusDTO.BranchPublished
+	}
+
 	return &project.GitStatus{
-		CurrentBranch: gitStatusDTO.CurrentBranch,
-		Files:         files,
+		CurrentBranch:   gitStatusDTO.CurrentBranch,
+		Files:           files,
+		BranchPublished: branchPublished,
+		Ahead:           ahead,
+		Behind:          behind,
 	}
 }
 
@@ -106,9 +122,27 @@ func ToGitStatusDTO(gitStatus *project.GitStatus) *apiclient.GitStatus {
 		fileStatusDTO = append(fileStatusDTO, fileDTO)
 	}
 
+	var ahead, behind *int32
+	if gitStatus.Ahead != 0 {
+		value := int32(gitStatus.Ahead)
+		ahead = &value
+	}
+	if gitStatus.Behind != 0 {
+		value := int32(gitStatus.Behind)
+		behind = &value
+	}
+	var branchPublished *bool
+	if gitStatus.BranchPublished {
+		value := true
+		branchPublished = &value
+	}
+
 	return &apiclient.GitStatus{
-		CurrentBranch: gitStatus.CurrentBranch,
-		FileStatus:    fileStatusDTO,
+		CurrentBranch:   gitStatus.CurrentBranch,
+		FileStatus:      fileStatusDTO,
+		BranchPublished: branchPublished,
+		Ahead:           ahead,
+		Behind:          behind,
 	}
 }
 
