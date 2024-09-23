@@ -21,8 +21,11 @@ var _ MappedNullable = &GitStatus{}
 
 // GitStatus struct for GitStatus
 type GitStatus struct {
-	CurrentBranch string       `json:"currentBranch"`
-	FileStatus    []FileStatus `json:"fileStatus"`
+	Ahead           *int32       `json:"ahead,omitempty"`
+	Behind          *int32       `json:"behind,omitempty"`
+	BranchPublished *bool        `json:"branchPublished,omitempty"`
+	CurrentBranch   string       `json:"currentBranch"`
+	FileStatus      []FileStatus `json:"fileStatus"`
 }
 
 type _GitStatus GitStatus
@@ -44,6 +47,102 @@ func NewGitStatus(currentBranch string, fileStatus []FileStatus) *GitStatus {
 func NewGitStatusWithDefaults() *GitStatus {
 	this := GitStatus{}
 	return &this
+}
+
+// GetAhead returns the Ahead field value if set, zero value otherwise.
+func (o *GitStatus) GetAhead() int32 {
+	if o == nil || IsNil(o.Ahead) {
+		var ret int32
+		return ret
+	}
+	return *o.Ahead
+}
+
+// GetAheadOk returns a tuple with the Ahead field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitStatus) GetAheadOk() (*int32, bool) {
+	if o == nil || IsNil(o.Ahead) {
+		return nil, false
+	}
+	return o.Ahead, true
+}
+
+// HasAhead returns a boolean if a field has been set.
+func (o *GitStatus) HasAhead() bool {
+	if o != nil && !IsNil(o.Ahead) {
+		return true
+	}
+
+	return false
+}
+
+// SetAhead gets a reference to the given int32 and assigns it to the Ahead field.
+func (o *GitStatus) SetAhead(v int32) {
+	o.Ahead = &v
+}
+
+// GetBehind returns the Behind field value if set, zero value otherwise.
+func (o *GitStatus) GetBehind() int32 {
+	if o == nil || IsNil(o.Behind) {
+		var ret int32
+		return ret
+	}
+	return *o.Behind
+}
+
+// GetBehindOk returns a tuple with the Behind field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitStatus) GetBehindOk() (*int32, bool) {
+	if o == nil || IsNil(o.Behind) {
+		return nil, false
+	}
+	return o.Behind, true
+}
+
+// HasBehind returns a boolean if a field has been set.
+func (o *GitStatus) HasBehind() bool {
+	if o != nil && !IsNil(o.Behind) {
+		return true
+	}
+
+	return false
+}
+
+// SetBehind gets a reference to the given int32 and assigns it to the Behind field.
+func (o *GitStatus) SetBehind(v int32) {
+	o.Behind = &v
+}
+
+// GetBranchPublished returns the BranchPublished field value if set, zero value otherwise.
+func (o *GitStatus) GetBranchPublished() bool {
+	if o == nil || IsNil(o.BranchPublished) {
+		var ret bool
+		return ret
+	}
+	return *o.BranchPublished
+}
+
+// GetBranchPublishedOk returns a tuple with the BranchPublished field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitStatus) GetBranchPublishedOk() (*bool, bool) {
+	if o == nil || IsNil(o.BranchPublished) {
+		return nil, false
+	}
+	return o.BranchPublished, true
+}
+
+// HasBranchPublished returns a boolean if a field has been set.
+func (o *GitStatus) HasBranchPublished() bool {
+	if o != nil && !IsNil(o.BranchPublished) {
+		return true
+	}
+
+	return false
+}
+
+// SetBranchPublished gets a reference to the given bool and assigns it to the BranchPublished field.
+func (o *GitStatus) SetBranchPublished(v bool) {
+	o.BranchPublished = &v
 }
 
 // GetCurrentBranch returns the CurrentBranch field value
@@ -104,6 +203,15 @@ func (o GitStatus) MarshalJSON() ([]byte, error) {
 
 func (o GitStatus) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.Ahead) {
+		toSerialize["ahead"] = o.Ahead
+	}
+	if !IsNil(o.Behind) {
+		toSerialize["behind"] = o.Behind
+	}
+	if !IsNil(o.BranchPublished) {
+		toSerialize["branchPublished"] = o.BranchPublished
+	}
 	toSerialize["currentBranch"] = o.CurrentBranch
 	toSerialize["fileStatus"] = o.FileStatus
 	return toSerialize, nil

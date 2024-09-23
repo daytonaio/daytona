@@ -30,8 +30,11 @@ type FileStatusDTO struct {
 }
 
 type GitStatusDTO struct {
-	CurrentBranch string           `json:"currentBranch"`
-	Files         []*FileStatusDTO `json:"fileStatus"`
+	CurrentBranch   string           `json:"currentBranch"`
+	Files           []*FileStatusDTO `json:"fileStatus"`
+	BranchPublished bool             `json:"branchPublished,omitempty"`
+	Ahead           int32            `json:"ahead,omitempty"`
+	Behind          int32            `json:"behind,omitempty"`
 }
 
 type ProjectStateDTO struct {
@@ -110,7 +113,10 @@ func ToGitStatusDTO(status *project.GitStatus) *GitStatusDTO {
 	}
 
 	statusDTO := &GitStatusDTO{
-		CurrentBranch: status.CurrentBranch,
+		CurrentBranch:   status.CurrentBranch,
+		BranchPublished: status.BranchPublished,
+		Ahead:           int32(status.Ahead),
+		Behind:          int32(status.Behind),
 	}
 
 	for _, file := range status.Files {
@@ -181,7 +187,10 @@ func ToGitStatus(statusDTO *GitStatusDTO) *project.GitStatus {
 	}
 
 	status := &project.GitStatus{
-		CurrentBranch: statusDTO.CurrentBranch,
+		CurrentBranch:   statusDTO.CurrentBranch,
+		BranchPublished: statusDTO.BranchPublished,
+		Ahead:           int(statusDTO.Ahead),
+		Behind:          int(statusDTO.Behind),
 	}
 
 	for _, file := range statusDTO.Files {
