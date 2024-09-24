@@ -37,6 +37,7 @@ func Execute() {
 	workspaceModeRootCmd.AddCommand(AgentCmd)
 	workspaceModeRootCmd.AddCommand(startCmd)
 	workspaceModeRootCmd.AddCommand(stopCmd)
+	workspaceModeRootCmd.AddCommand(restartCmd)
 	workspaceModeRootCmd.AddCommand(infoCmd)
 	workspaceModeRootCmd.AddCommand(portForwardCmd)
 	workspaceModeRootCmd.AddCommand(exposeCmd)
