@@ -135,5 +135,5 @@ var prebuildAddCmd = &cobra.Command{
 var runOnAddFlag bool
 
 func init() {
-	prebuildAddCmd.Flags().BoolVar(&runOnAddFlag, "run", true, "Run the prebuild once after adding it")
+	prebuildAddCmd.Flags().BoolVar(&runOnAddFlag, "run", false, "Run the prebuild once after adding it")
 }
