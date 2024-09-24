@@ -14,7 +14,7 @@ Thanks for taking the time to contribute! ❤️
 ## Code of Conduct
 
 This project and everyone participating in it is governed by the
-[Daytona Code of Conduct](https://github.com/daytonaio/daytona/blob/contributing-update/CODE_OF_CONDUCT.md).
+[Daytona Code of Conduct](https://github.com/daytonaio/daytona/blob/main/CODE_OF_CONDUCT.md).
 By participating, you are expected to uphold this code. Please report unacceptable behavior
 to [info@daytona.io](mailto:info@daytona.io).
 
