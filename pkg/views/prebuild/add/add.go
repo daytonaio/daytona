@@ -40,41 +40,49 @@ func PrebuildCreationView(prebuildAddView *PrebuildAddView, editing bool) {
 		triggerFilesInput += triggerFile + "\n"
 	}
 
-	form := huh.NewForm(
-		huh.NewGroup(
-			huh.NewInput().
-				Title("Commit interval").
-				Description("Leave blank to ignore push events").
-				Value(&prebuildAddView.CommitInterval).
-				Validate(func(str string) error {
-					if str == "" {
-						return nil
-					}
-					num, err := strconv.Atoi(str)
-					if err != nil {
-						return err
-					}
-					if num == 0 {
-						return errors.New("commit interval cannot be 0")
-					}
+	formFields := []huh.Field{
+		huh.NewInput().
+			Title("Commit interval").
+			Description("Leave blank to ignore push events").
+			Value(&prebuildAddView.CommitInterval).
+			Validate(func(str string) error {
+				if str == "" {
 					return nil
-				}),
-			huh.NewText().
-				Title("Trigger files").
-				Description("Enter full paths for files whose changes you want to explicitly trigger a prebuild.\nUse newlines for multiple entries.").
-				Value(&triggerFilesInput).Lines(4),
-			huh.NewInput().
-				Title("Retention").
-				Description("Maximum number of resulting builds stored at a time").
-				Value(&prebuildAddView.Retention).
-				Validate(func(str string) error {
-					_, err := strconv.Atoi(str)
+				}
+				num, err := strconv.Atoi(str)
+				if err != nil {
 					return err
-				}),
-			huh.NewConfirm().
-				Title("Run the build once on submit?").
-				Value(&prebuildAddView.RunBuildOnAdd),
-		),
+				}
+				if num == 0 {
+					return errors.New("commit interval cannot be 0")
+				}
+				return nil
+			}),
+		huh.NewText().
+			Title("Trigger files").
+			Description("Enter full paths for files whose changes you want to explicitly trigger a prebuild.\nUse newlines for multiple entries.").
+			Value(&triggerFilesInput).Lines(4),
+		huh.NewInput().
+			Title("Retention").
+			Description("Maximum number of resulting builds stored at a time").
+			Value(&prebuildAddView.Retention).
+			Validate(func(str string) error {
+				_, err := strconv.Atoi(str)
+				return err
+			}),
+	}
+
+	if !prebuildAddView.RunBuildOnAdd {
+		// Set the default value to true if run flag is not passed
+		prebuildAddView.RunBuildOnAdd = true
+
+		formFields = append(formFields, huh.NewConfirm().
+			Title("Run the build once on submit?").
+			Value(&prebuildAddView.RunBuildOnAdd))
+	}
+
+	form := huh.NewForm(
+		huh.NewGroup(formFields...),
 	).WithTheme(views.GetCustomTheme())
 
 	keyMap := huh.NewDefaultKeyMap()

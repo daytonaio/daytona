@@ -9,7 +9,7 @@ daytona prebuild add [flags]
 ### Options
 
 ```
-      --run   Run the prebuild once after adding it (default true)
+      --run   Run the prebuild once after adding it
 ```
 
 ### Options inherited from parent commands
