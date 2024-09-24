@@ -7,12 +7,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/xanzy/go-gitlab"
@@ -149,7 +150,8 @@ func (g *GitLabGitProvider) GetRepoPRs(repositoryId string, namespaceId string) 
 	for _, mergeRequest := range mergeRequests {
 		sourceRepo, _, err := client.Projects.GetProject(mergeRequest.SourceProjectID, nil)
 		if err != nil {
-			return nil, g.FormatError(err)
+			log.Warn(g.FormatError(err))
+			continue
 		}
 
 		response = append(response, &GitPullRequest{
