@@ -21,6 +21,10 @@ import (
 
 func OpenVSCode(activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string) error {
 	CheckAndAlertVSCodeInstalled()
+	err := installRemoteSSHExtension()
+	if err != nil {
+		return err
+	}
 
 	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
 
@@ -190,4 +194,21 @@ func CheckAndAlertVSCodeInstalled() {
 func isVSCodeInstalled() error {
 	_, err := exec.LookPath("code")
 	return err
+}
+
+func installRemoteSSHExtension() error {
+	output, err := exec.Command("code", "--list-extensions").Output()
+	if err != nil {
+		return err
+	}
+
+	if !strings.Contains(string(output), "ms-vscode-remote.remote-ssh") {
+		fmt.Println("Installing Remote SSH extension...")
+		err = exec.Command("code", "--install-extension", "ms-vscode-remote.remote-ssh").Run()
+		if err != nil {
+			return err
+		}
+		fmt.Println("Remote SSH extension successfully installed")
+	}
+	return nil
 }
