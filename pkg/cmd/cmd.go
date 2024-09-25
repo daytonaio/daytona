@@ -69,6 +69,7 @@ func Execute() {
 	rootCmd.AddCommand(GitProviderCmd)
 	rootCmd.AddCommand(StartCmd)
 	rootCmd.AddCommand(StopCmd)
+	rootCmd.AddCommand(RestartCmd)
 	rootCmd.AddCommand(InfoCmd)
 	rootCmd.AddCommand(PrebuildCmd)
 	rootCmd.AddCommand(BuildCmd)

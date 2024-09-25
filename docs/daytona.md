@@ -39,6 +39,7 @@ daytona [flags]
 * [daytona project-config](daytona_project-config.md)	 - Manage project configs
 * [daytona provider](daytona_provider.md)	 - Manage providers
 * [daytona purge](daytona_purge.md)	 - Purges all Daytona data from the current device
+* [daytona restart](daytona_restart.md)	 - Restart a workspace
 * [daytona serve](daytona_serve.md)	 - Run the server process in the current terminal session
 * [daytona server](daytona_server.md)	 - Start the server process in daemon mode
 * [daytona ssh](daytona_ssh.md)	 - SSH into a project using the terminal
