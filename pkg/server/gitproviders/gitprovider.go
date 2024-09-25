@@ -5,7 +5,6 @@ package gitproviders
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -21,36 +20,15 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 	}
 
 	for _, p := range gitProviders {
-		if p.Id == "aws-codecommit" && strings.Contains(repoUrl, "git-codecommit") {
-			gitProvider, err := s.GetGitProvider(p.Id)
-			if err != nil {
-				return nil, "", err
-			}
-			return gitProvider, p.Id, nil
-		}
-
-		if strings.Contains(repoUrl, fmt.Sprintf("%s.", p.Id)) {
-			gitProvider, err := s.GetGitProvider(p.Id)
-			if err != nil {
-				return nil, "", err
-			}
-			return gitProvider, p.Id, nil
-		}
-
-		if p.BaseApiUrl == nil || *p.BaseApiUrl == "" {
-			continue
-		}
-
-		hostname, err := getHostnameFromUrl(*p.BaseApiUrl)
+		gitProvider, err := s.GetGitProvider(p.Id)
 		if err != nil {
-			return nil, "", nil
+			return nil, "", err
 		}
 
-		if p.BaseApiUrl != nil && strings.Contains(repoUrl, hostname) {
-			gitProvider, err := s.GetGitProvider(p.Id)
-			if err != nil {
-				return nil, "", err
-			}
+		_, err = gitProvider.GetRepositoryContext(gitprovider.GetRepositoryContext{
+			Url: repoUrl,
+		})
+		if err == nil {
 			return gitProvider, p.Id, nil
 		}
 	}
@@ -83,25 +61,15 @@ func (s *GitProviderService) GetConfigForUrl(repoUrl string) (*gitprovider.GitPr
 		p.Token = url.QueryEscape(p.Token)
 		p.Username = url.QueryEscape(p.Username)
 
-		if p.Id == "aws-codecommit" && strings.Contains(repoUrl, "git-codecommit") {
-			return p, nil
-		}
-
-		if strings.Contains(repoUrl, fmt.Sprintf("%s.", p.Id)) {
-
-			return p, nil
-		}
-
-		if p.BaseApiUrl == nil || *p.BaseApiUrl == "" {
-			continue
-		}
-
-		hostname, err := getHostnameFromUrl(*p.BaseApiUrl)
+		gitProvider, err := s.GetGitProvider(p.Id)
 		if err != nil {
 			return nil, err
 		}
 
-		if p.BaseApiUrl != nil && strings.Contains(repoUrl, hostname) {
+		_, err = gitProvider.GetRepositoryContext(gitprovider.GetRepositoryContext{
+			Url: repoUrl,
+		})
+		if err == nil {
 			return p, nil
 		}
 	}
