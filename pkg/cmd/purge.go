@@ -109,7 +109,7 @@ var purgeCmd = &cobra.Command{
 		}
 
 		ctx := context.Background()
-		ctx = context.WithValue(ctx, telemetry.CLIENT_ID_CONTEXT_KEY, c.Id)
+		ctx = context.WithValue(ctx, telemetry.CLIENT_ID_CONTEXT_KEY, config.GetClientId())
 		ctx = context.WithValue(ctx, telemetry.ENABLED_CONTEXT_KEY, c.TelemetryEnabled)
 
 		errCh := make(chan error)
