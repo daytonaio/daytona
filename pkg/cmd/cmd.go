@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"os/signal"
 	"strings"
 	"time"
 
@@ -39,6 +40,8 @@ var rootCmd = &cobra.Command{
 	Use:               "daytona",
 	Short:             "Daytona is a Dev Environment Manager",
 	Long:              "Daytona is a Dev Environment Manager",
+	SilenceUsage:      true,
+	SilenceErrors:     true,
 	DisableAutoGenTag: true,
 	Run:               RunInitialScreenFlow,
 }
@@ -79,22 +82,91 @@ func Execute() {
 
 	SetupRootCommand(rootCmd)
 
-	cmd, err := validateCommands(rootCmd, os.Args[1:])
+	var telemetryService telemetry.TelemetryService
+	clientId := config.GetClientId()
+	telemetryEnabled := config.TelemetryEnabled()
+
+	if telemetryEnabled {
+		telemetryService = posthogservice.NewTelemetryService(posthogservice.PosthogServiceConfig{
+			ApiKey:   internal.PosthogApiKey,
+			Endpoint: internal.PosthogEndpoint,
+		})
+	}
+
+	cmd, err := ValidateCommands(rootCmd, os.Args[1:])
 	if err != nil {
 		fmt.Printf("Error: %v\n\n", err)
-		err := cmd.Help()
-		if err != nil {
+		helpErr := cmd.Help()
+		if telemetryEnabled {
+			props := GetCmdTelemetryData(cmd)
+			props["command"] = os.Args[1]
+			props["called_as"] = os.Args[1]
+			err := telemetryService.TrackCliEvent(telemetry.CliEventInvalidCmd, clientId, props)
+			if err != nil {
+				log.Error(err)
+			}
+			telemetryService.Close()
+		}
+
+		if helpErr != nil {
 			log.Fatal(err)
 		}
 		return
 	}
 
-	if err := rootCmd.Execute(); err != nil {
+	startTime := time.Now()
+
+	if telemetryEnabled {
+		err := telemetryService.TrackCliEvent(telemetry.CliEventCmdStart, clientId, GetCmdTelemetryData(cmd))
+		if err != nil {
+			log.Error(err)
+		}
+
+		go func() {
+			interruptChannel := make(chan os.Signal, 1)
+			signal.Notify(interruptChannel, os.Interrupt)
+
+			for range interruptChannel {
+				endTime := time.Now()
+				execTime := endTime.Sub(startTime)
+				props := GetCmdTelemetryData(cmd)
+				props["exec time (µs)"] = execTime.Microseconds()
+				props["error"] = "interrupted"
+
+				err := telemetryService.TrackCliEvent(telemetry.CliEventCmdEnd, clientId, props)
+				if err != nil {
+					log.Error(err)
+				}
+				telemetryService.Close()
+				os.Exit(0)
+			}
+		}()
+	}
+
+	err = rootCmd.Execute()
+
+	endTime := time.Now()
+	if telemetryService != nil {
+		execTime := endTime.Sub(startTime)
+		props := GetCmdTelemetryData(cmd)
+		props["exec time (µs)"] = execTime.Microseconds()
+		if err != nil {
+			props["error"] = err.Error()
+		}
+
+		err := telemetryService.TrackCliEvent(telemetry.CliEventCmdEnd, clientId, props)
+		if err != nil {
+			log.Error(err)
+		}
+		telemetryService.Close()
+	}
+
+	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command, err error) {
+func ValidateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command, err error) {
 	rootCmd.InitDefaultHelpCmd()
 	currentCmd := rootCmd
 
@@ -145,49 +217,11 @@ func SetupRootCommand(cmd *cobra.Command) {
 	cmd.PersistentFlags().BoolP("help", "", false, "help for daytona")
 	cmd.Flags().BoolP("version", "v", false, "Display the version of Daytona")
 
-	var telemetryService telemetry.TelemetryService
-	clientId := config.GetClientId()
-	telemetryEnabled := config.TelemetryEnabled()
-
-	if telemetryEnabled {
-		telemetryService = posthogservice.NewTelemetryService(posthogservice.PosthogServiceConfig{
-			ApiKey:   internal.PosthogApiKey,
-			Endpoint: internal.PosthogEndpoint,
-		})
-	}
-
-	startTime := time.Now()
-
 	cmd.PreRun = func(cmd *cobra.Command, args []string) {
 		versionFlag, _ := cmd.Flags().GetBool("version")
 		if versionFlag {
 			versionCmd.Run(cmd, []string{})
 			os.Exit(0)
-		}
-	}
-
-	cmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
-		if telemetryService != nil {
-			err := telemetryService.TrackCliEvent(telemetry.CliEventCmdStart, clientId, getCmdTelemetryData(cmd))
-			if err != nil {
-				log.Error(err)
-			}
-		}
-	}
-
-	cmd.PersistentPostRun = func(cmd *cobra.Command, args []string) {
-		endTime := time.Now()
-
-		if telemetryService != nil {
-			defer telemetryService.Close()
-			execTime := endTime.Sub(startTime)
-			props := getCmdTelemetryData(cmd)
-			props["exec time (µs)"] = execTime.Microseconds()
-
-			err := telemetryService.TrackCliEvent(telemetry.CliEventCmdEnd, clientId, props)
-			if err != nil {
-				log.Error(err)
-			}
 		}
 	}
 }
@@ -223,7 +257,7 @@ func RunInitialScreenFlow(cmd *cobra.Command, args []string) {
 	}
 }
 
-func getCmdTelemetryData(cmd *cobra.Command) map[string]interface{} {
+func GetCmdTelemetryData(cmd *cobra.Command) map[string]interface{} {
 	path := cmd.CommandPath()
 
 	// Trim daytona from the path if a non-root command was invoked

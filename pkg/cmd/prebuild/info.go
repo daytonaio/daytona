@@ -5,7 +5,6 @@ package prebuild
 
 import (
 	"context"
-	"log"
 	"net/http"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
@@ -21,7 +20,7 @@ var prebuildInfoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "Show prebuild configuration info",
 	Args:  cobra.MaximumNArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var prebuild *apiclient.PrebuildDTO
 		var res *http.Response
 
@@ -29,7 +28,7 @@ var prebuildInfoCmd = &cobra.Command{
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if len(args) < 2 {
@@ -40,18 +39,18 @@ var prebuildInfoCmd = &cobra.Command{
 				selectedProjectConfigName = args[0]
 				prebuilds, res, err = apiClient.PrebuildAPI.ListPrebuildsForProjectConfig(context.Background(), selectedProjectConfigName).Execute()
 				if err != nil {
-					log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+					return apiclient_util.HandleErrorResponse(res, err)
 				}
 			} else {
 				prebuilds, res, err = apiClient.PrebuildAPI.ListPrebuilds(context.Background()).Execute()
 				if err != nil {
-					log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+					return apiclient_util.HandleErrorResponse(res, err)
 				}
 			}
 
 			if len(prebuilds) == 0 {
 				views.RenderInfoMessage("No prebuilds found")
-				return
+				return nil
 			}
 
 			if format.FormatFlag != "" {
@@ -64,22 +63,23 @@ var prebuildInfoCmd = &cobra.Command{
 			}
 
 			if prebuild == nil {
-				return
+				return nil
 			}
 		} else {
 			prebuild, res, err = apiClient.PrebuildAPI.GetPrebuild(ctx, args[0], args[1]).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 		}
 
 		if format.FormatFlag != "" {
 			formattedData := format.NewFormatter(prebuild)
 			formattedData.Print()
-			return
+			return nil
 		}
 
 		info.Render(prebuild, false)
+		return nil
 	},
 }
 

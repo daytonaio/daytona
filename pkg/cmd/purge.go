@@ -30,29 +30,29 @@ var purgeCmd = &cobra.Command{
 	Short: "Purges all Daytona data from the current device",
 	Long:  "Purges all Daytona data from the current device - including all workspaces, configuration files, and SSH files. This command is irreversible.",
 	Args:  cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var confirmCheck bool
 		var serverStoppedCheck bool
 		var defaultProfileNoticeConfirm bool
 
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		serverConfig, err := server.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		serverConfigDir, err := server.GetConfigDir()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		buildRunnerConfig, err := build.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if c.ActiveProfileId != "default" {
@@ -60,26 +60,26 @@ var purgeCmd = &cobra.Command{
 				view.DefaultProfileNoticePrompt(&defaultProfileNoticeConfirm)
 				if !defaultProfileNoticeConfirm {
 					fmt.Println("Operation cancelled.")
-					return
+					return nil
 				}
 			}
 		}
 
 		defaultProfile, err := c.GetProfile("default")
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		_, err = apiclient.GetApiClient(&defaultProfile)
 		if err != nil {
 			if !apiclient.IsHealthCheckFailed(err) {
-				log.Fatal(err)
+				return err
 			}
 		} else {
 			view.ServerStoppedPrompt(&serverStoppedCheck)
 			if !serverStoppedCheck {
 				fmt.Println("Operation cancelled.")
-				return
+				return nil
 			}
 		}
 
@@ -87,7 +87,7 @@ var purgeCmd = &cobra.Command{
 			view.ConfirmPrompt(&confirmCheck)
 			if !confirmCheck {
 				fmt.Println("Operation cancelled.")
-				return
+				return nil
 			}
 		}
 
@@ -101,11 +101,11 @@ var purgeCmd = &cobra.Command{
 		fmt.Println("Purging the server")
 		server, err := server_cmd.GetInstance(serverConfig, serverConfigDir, telemetryService)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		buildRunner, err := server_cmd.GetBuildRunner(serverConfig, buildRunnerConfig, telemetryService)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		ctx := context.Background()
@@ -118,7 +118,7 @@ var purgeCmd = &cobra.Command{
 		err = buildRunner.Start()
 		if err != nil {
 			if !forceFlag {
-				log.Fatal(err)
+				return err
 			}
 		}
 
@@ -142,19 +142,19 @@ var purgeCmd = &cobra.Command{
 		fmt.Println("\nDeleting the SSH configuration file")
 		err = config.UnlinkSshFiles()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		fmt.Println("Deleting autocompletion data")
 		err = config.DeleteAutocompletionData()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		fmt.Println("Deleting the Daytona config directory")
 		err = config.DeleteConfigDir()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		binaryMessage := "You may now delete the binary"
@@ -164,6 +164,7 @@ var purgeCmd = &cobra.Command{
 		}
 
 		views.RenderInfoMessage(fmt.Sprintf("All Daytona data has been successfully cleared from the device.\n%s", binaryMessage))
+		return nil
 	},
 }
 

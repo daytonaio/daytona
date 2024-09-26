@@ -19,16 +19,16 @@ var setCmd = &cobra.Command{
 	Use:     "set [KEY=VALUE]...",
 	Short:   "Set profile environment variables",
 	Aliases: []string{"s", "update", "add", "delete", "rm"},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		apiClient, err := apiclient.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		ctx := context.Background()
 
 		profileData, res, err := apiClient.ProfileAPI.GetProfileData(ctx).Execute()
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+			return apiclient.HandleErrorResponse(res, err)
 		}
 
 		if profileData.EnvVars == nil {
@@ -58,9 +58,10 @@ var setCmd = &cobra.Command{
 
 		res, err = apiClient.ProfileAPI.SetProfileData(ctx).ProfileData(*profileData).Execute()
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+			return apiclient.HandleErrorResponse(res, err)
 		}
 
 		views.RenderInfoMessageBold("Profile environment variables have been successfully set")
+		return nil
 	},
 }

@@ -9,8 +9,6 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/profile"
 	"github.com/spf13/cobra"
@@ -21,10 +19,10 @@ var ProfileUseCmd = &cobra.Command{
 	Short:   "Use profile [PROFILE_NAME]",
 	Args:    cobra.MaximumNArgs(1),
 	GroupID: util.PROFILE_GROUP,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if len(args) == 0 {
@@ -32,45 +30,42 @@ var ProfileUseCmd = &cobra.Command{
 
 			if len(profilesList) == 0 {
 				views.RenderInfoMessage("Add a profile by running `daytona profile add`")
-				return
+				return nil
 			}
 
 			if len(profilesList) == 1 {
 				views.RenderInfoMessage(fmt.Sprintf("You are using profile %s. Add a new profile by running `daytona profile add`", profilesList[0].Name))
-				return
+				return nil
 			}
 
 			chosenProfile, err := profile.GetProfileFromPrompt(profilesList, c.ActiveProfileId, true)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			if chosenProfile == nil {
-				return
+				return nil
 			}
 
 			if chosenProfile.Id == profile.NewProfileId {
 				_, err = CreateProfile(c, nil, true)
-				if err != nil {
-					log.Fatal(err)
-				}
-				return
+				return err
 			}
 
 			if chosenProfile.Id == "" {
-				return
+				return nil
 			}
 
 			profile, err := c.GetProfile(chosenProfile.Id)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			c.ActiveProfileId = profile.Id
 
 			err = c.Save()
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			views.RenderInfoMessage(fmt.Sprintf("Active profile set to: %s", profile.Name))
@@ -87,17 +82,18 @@ var ProfileUseCmd = &cobra.Command{
 			}
 
 			if chosenProfile == (config.Profile{}) {
-				log.Fatal("Profile does not exist: ", profileArg)
+				return fmt.Errorf("profile does not exist: %s", profileArg)
 			}
 
 			c.ActiveProfileId = chosenProfile.Id
 
 			err = c.Save()
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			views.RenderInfoMessage(fmt.Sprintf("Active profile set to: %s", chosenProfile.Name))
 		}
+		return nil
 	},
 }

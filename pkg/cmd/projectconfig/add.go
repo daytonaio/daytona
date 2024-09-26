@@ -25,28 +25,28 @@ var projectConfigAddCmd = &cobra.Command{
 	Aliases: []string{"new", "create"},
 	Short:   "Add a project config",
 	Args:    cobra.MaximumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var projectConfig *apiclient.ProjectConfig
 		var projectConfigName *string
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		if len(args) == 0 {
 			projectConfig, err = RunProjectConfigAddFlow(apiClient, gitProviders, ctx)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 			if projectConfig == nil {
-				return
+				return nil
 			}
 			projectConfigName = &projectConfig.Name
 		} else {
@@ -57,10 +57,11 @@ var projectConfigAddCmd = &cobra.Command{
 		}
 
 		if projectConfigName == nil {
-			log.Fatal("project config name is required")
+			return errors.New("project config name is required")
 		}
 
 		views.RenderInfoMessage(fmt.Sprintf("Project config %s added successfully", *projectConfigName))
+		return nil
 	},
 }
 
@@ -70,7 +71,10 @@ func RunProjectConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []apic
 	}
 
 	var createDtos []apiclient.CreateProjectDTO
-	existingProjectConfigNames := getExistingProjectConfigNames(apiClient)
+	existingProjectConfigNames, err := getExistingProjectConfigNames(apiClient)
+	if err != nil {
+		return nil, err
+	}
 
 	apiServerConfig, res, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
 	if err != nil {
@@ -176,7 +180,10 @@ func processCmdArgument(argument string, apiClient *apiclient.APIClient, ctx con
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	existingProjectConfigNames := getExistingProjectConfigNames(apiClient)
+	existingProjectConfigNames, err := getExistingProjectConfigNames(apiClient)
+	if err != nil {
+		return nil, err
+	}
 
 	repoUrl, err := util.GetValidatedUrl(argument)
 	if err != nil {
@@ -228,19 +235,19 @@ func processCmdArgument(argument string, apiClient *apiclient.APIClient, ctx con
 	return &newProjectConfig.Name, nil
 }
 
-func getExistingProjectConfigNames(apiClient *apiclient.APIClient) []string {
+func getExistingProjectConfigNames(apiClient *apiclient.APIClient) ([]string, error) {
 	var existingProjectConfigNames []string
 
 	existingProjectConfigs, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(context.Background()).Execute()
 	if err != nil {
-		log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	for _, pc := range existingProjectConfigs {
 		existingProjectConfigNames = append(existingProjectConfigNames, pc.Name)
 	}
 
-	return existingProjectConfigNames
+	return existingProjectConfigNames, nil
 }
 
 var nameFlag string

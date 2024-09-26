@@ -10,7 +10,6 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	workspace_cmd "github.com/daytonaio/daytona/pkg/cmd/workspace"
 	"github.com/daytonaio/daytona/pkg/views"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -19,15 +18,15 @@ var restartCmd = &cobra.Command{
 	Short:   "Restart the project",
 	Args:    cobra.NoArgs,
 	GroupID: util.WORKSPACE_GROUP,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		apiClient, err := apiclient.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		err = workspace_cmd.RestartWorkspace(apiClient, workspaceId, projectName)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if projectName != "" {
@@ -35,5 +34,6 @@ var restartCmd = &cobra.Command{
 		} else {
 			views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' successfully restarted", workspaceId))
 		}
+		return nil
 	},
 }

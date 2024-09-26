@@ -12,7 +12,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -22,12 +21,12 @@ var InfoCmd = &cobra.Command{
 	Aliases: []string{"view", "inspect"},
 	Args:    cobra.RangeArgs(0, 1),
 	GroupID: util.WORKSPACE_GROUP,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		var workspace *apiclient.WorkspaceDTO
@@ -35,7 +34,7 @@ var InfoCmd = &cobra.Command{
 		if len(args) == 0 {
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Verbose(true).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
 			if format.FormatFlag != "" {
@@ -50,21 +49,22 @@ var InfoCmd = &cobra.Command{
 		} else {
 			workspace, err = apiclient_util.GetWorkspace(args[0], true)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 		}
 
 		if workspace == nil {
-			return
+			return nil
 		}
 
 		if format.FormatFlag != "" {
 			formattedData := format.NewFormatter(workspace)
 			formattedData.Print()
-			return
+			return nil
 		}
 
 		info.Render(workspace, "", false)
+		return nil
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) > 0 {

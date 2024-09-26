@@ -5,7 +5,6 @@ package prebuild
 
 import (
 	"context"
-	"log"
 	"net/http"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
@@ -22,14 +21,14 @@ var prebuildDeleteCmd = &cobra.Command{
 	Short:   "Delete a prebuild configuration",
 	Aliases: []string{"remove", "rm"},
 	Args:    cobra.MaximumNArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var selectedPrebuild *apiclient.PrebuildDTO
 		var selectedPrebuildId string
 		var selectedProjectConfigName string
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if len(args) < 2 {
@@ -40,23 +39,23 @@ var prebuildDeleteCmd = &cobra.Command{
 				selectedProjectConfigName = args[0]
 				prebuilds, res, err = apiClient.PrebuildAPI.ListPrebuildsForProjectConfig(context.Background(), selectedProjectConfigName).Execute()
 				if err != nil {
-					log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+					return apiclient_util.HandleErrorResponse(res, err)
 				}
 			} else {
 				prebuilds, res, err = apiClient.PrebuildAPI.ListPrebuilds(context.Background()).Execute()
 				if err != nil {
-					log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+					return apiclient_util.HandleErrorResponse(res, err)
 				}
 			}
 
 			if len(prebuilds) == 0 {
 				views.RenderInfoMessage("No prebuilds found")
-				return
+				return nil
 			}
 
 			selectedPrebuild = selection.GetPrebuildFromPrompt(prebuilds, "Delete")
 			if selectedPrebuild == nil {
-				return
+				return nil
 			}
 			selectedPrebuildId = selectedPrebuild.Id
 			selectedProjectConfigName = selectedPrebuild.ProjectConfigName
@@ -67,10 +66,12 @@ var prebuildDeleteCmd = &cobra.Command{
 
 		res, err := apiClient.PrebuildAPI.DeletePrebuild(context.Background(), selectedProjectConfigName, selectedPrebuildId).Force(forceFlag).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		views.RenderInfoMessage("Prebuild deleted successfully")
+
+		return nil
 	},
 }
 

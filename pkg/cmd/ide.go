@@ -22,10 +22,10 @@ var ideCmd = &cobra.Command{
 	Use:     "ide",
 	Short:   "Choose the default IDE",
 	GroupID: util.PROFILE_GROUP,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		ideList := config.GetIdeList()
@@ -34,7 +34,7 @@ var ideCmd = &cobra.Command{
 		chosenIdeId := ide.GetIdeIdFromPrompt(ideList)
 
 		if chosenIdeId == "" {
-			return
+			return nil
 		}
 
 		for _, ide := range ideList {
@@ -70,10 +70,11 @@ var ideCmd = &cobra.Command{
 
 		err = c.Save()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		content := fmt.Sprintf("%s %s", views.GetPropertyKey("Default IDE: "), chosenIde.Name)
 		views.RenderContainerLayout(views.GetInfoMessage(content))
+		return nil
 	},
 }

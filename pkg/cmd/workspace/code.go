@@ -32,10 +32,10 @@ var CodeCmd = &cobra.Command{
 	Args:    cobra.RangeArgs(0, 2),
 	Aliases: []string{"open"},
 	GroupID: util.WORKSPACE_GROUP,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		ctx := context.Background()
@@ -46,25 +46,25 @@ var CodeCmd = &cobra.Command{
 
 		activeProfile, err := c.GetActiveProfile()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		ideId = c.DefaultIdeId
 
 		apiClient, err := apiclient_util.GetApiClient(&activeProfile)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if len(args) == 0 {
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Verbose(true).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
 			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "Open")
 			if workspace == nil {
-				return
+				return nil
 			}
 			workspaceId = workspace.Id
 		} else {
@@ -72,9 +72,9 @@ var CodeCmd = &cobra.Command{
 			if err != nil {
 				if strings.Contains(err.Error(), workspaces.ErrWorkspaceNotFound.Error()) {
 					log.Debug(err)
-					log.Fatal("Workspace not found. You can see all workspace names by running the command `daytona list`")
+					return errors.New("workspace not found. You can see all workspace names by running the command `daytona list`")
 				}
-				log.Fatal(err)
+				return err
 			}
 			workspaceId = workspace.Id
 		}
@@ -82,10 +82,10 @@ var CodeCmd = &cobra.Command{
 		if len(args) == 0 || len(args) == 1 {
 			selectedProject, err := selectWorkspaceProject(workspaceId, &activeProfile)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 			if selectedProject == nil {
-				return
+				return nil
 			}
 			projectName = selectedProject.Name
 		}
@@ -101,10 +101,10 @@ var CodeCmd = &cobra.Command{
 		if !workspace_util.IsProjectRunning(workspace, projectName) {
 			wsRunningStatus, err := AutoStartWorkspace(workspace.Name, projectName)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 			if !wsRunningStatus {
-				return
+				return nil
 			}
 		}
 
@@ -112,16 +112,14 @@ var CodeCmd = &cobra.Command{
 		if ideId != "ssh" {
 			providerMetadata, err = workspace_util.GetProjectProviderMetadata(workspace, projectName)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 		}
 
 		yesFlag, _ := cmd.Flags().GetBool("yes")
 		ideList := config.GetIdeList()
 		ide_views.RenderIdeOpeningMessage(workspace.Name, projectName, ideId, ideList)
-		if err := openIDE(ideId, activeProfile, workspaceId, projectName, providerMetadata, yesFlag); err != nil {
-			log.Fatal(err)
-		}
+		return openIDE(ideId, activeProfile, workspaceId, projectName, providerMetadata, yesFlag)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) >= 2 {

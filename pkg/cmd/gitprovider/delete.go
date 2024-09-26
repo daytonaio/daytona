@@ -5,6 +5,7 @@ package gitprovider
 
 import (
 	"context"
+	"errors"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
@@ -18,17 +19,17 @@ var gitProviderDeleteCmd = &cobra.Command{
 	Use:     "delete",
 	Aliases: []string{"remove", "rm"},
 	Short:   "Unregister a Git providers",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		var gitProviderData apiclient.SetGitProviderConfig
@@ -37,14 +38,13 @@ var gitProviderDeleteCmd = &cobra.Command{
 
 		if len(gitProviders) == 0 {
 			views.RenderInfoMessage("No git providers registered")
-			return
+			return nil
 		}
 
 		gitprovider_view.GitProviderSelectionView(&gitProviderData, gitProviders, true)
 
 		if gitProviderData.Id == "" {
-			log.Fatal("Git provider id can not be blank")
-			return
+			return errors.New("Git provider id can not be blank")
 		}
 
 		_, err = apiClient.GitProviderAPI.RemoveGitProvider(ctx, gitProviderData.Id).Execute()
@@ -53,5 +53,6 @@ var gitProviderDeleteCmd = &cobra.Command{
 		}
 
 		views.RenderInfoMessage("Git provider has been removed")
+		return nil
 	},
 }

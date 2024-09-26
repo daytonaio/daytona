@@ -29,13 +29,13 @@ var DeleteCmd = &cobra.Command{
 	Short:   "Delete a workspace",
 	GroupID: util.WORKSPACE_GROUP,
 	Aliases: []string{"remove", "rm"},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if allFlag {
 			if yesFlag {
 				fmt.Println("Deleting all workspaces.")
 				err := DeleteAllWorkspaces(forceFlag)
 				if err != nil {
-					log.Fatal(err)
+					return err
 				}
 			} else {
 				form := huh.NewForm(
@@ -49,19 +49,19 @@ var DeleteCmd = &cobra.Command{
 
 				err := form.Run()
 				if err != nil {
-					log.Fatal(err)
+					return err
 				}
 
 				if yesFlag {
 					err := DeleteAllWorkspaces(forceFlag)
 					if err != nil {
-						log.Fatal(err)
+						return err
 					}
 				} else {
 					fmt.Println("Operation canceled.")
 				}
 			}
-			return
+			return nil
 		}
 
 		ctx := context.Background()
@@ -70,13 +70,13 @@ var DeleteCmd = &cobra.Command{
 		var workspaceDeleteListNames = []string{}
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if len(args) == 0 {
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 			workspaceDeleteList = selection.GetWorkspacesFromPrompt(workspaceList, "Delete")
 			for _, workspace := range workspaceDeleteList {
@@ -95,7 +95,7 @@ var DeleteCmd = &cobra.Command{
 		}
 
 		if len(workspaceDeleteList) == 0 {
-			return
+			return nil
 		}
 
 		if !yesFlag {
@@ -110,7 +110,7 @@ var DeleteCmd = &cobra.Command{
 
 			err := form.Run()
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 		}
 
@@ -125,6 +125,7 @@ var DeleteCmd = &cobra.Command{
 				views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' successfully deleted", workspace.Name))
 			}
 		}
+		return nil
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) > 0 {

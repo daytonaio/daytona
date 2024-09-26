@@ -5,10 +5,10 @@ package apikey
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/charmbracelet/huh"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -27,29 +27,29 @@ var revokeCmd = &cobra.Command{
 	Short:   "Revoke an API key",
 	Aliases: []string{"r", "rm", "delete"},
 	Args:    cobra.RangeArgs(0, 1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		activeProfile, err := c.GetActiveProfile()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		var selectedApiKey *apiclient.ApiKey
 
 		apiKeyList, _, err := apiClient.ApiKeyAPI.ListClientApiKeys(ctx).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(nil, err))
+			return apiclient_util.HandleErrorResponse(nil, err)
 		}
 
 		if len(args) == 1 {
@@ -63,15 +63,15 @@ var revokeCmd = &cobra.Command{
 			selectedApiKey, err = apikey.GetApiKeyFromPrompt(apiKeyList, "Select an API key to revoke", false)
 			if err != nil {
 				if common.IsCtrlCAbort(err) {
-					return
+					return nil
 				} else {
-					log.Fatal(err)
+					return err
 				}
 			}
 		}
 
 		if selectedApiKey == nil {
-			log.Fatal("No API key selected")
+			return errors.New("No API key selected")
 		}
 
 		if !yesFlag {
@@ -93,20 +93,22 @@ var revokeCmd = &cobra.Command{
 
 			err := form.Run()
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 		}
 
 		if yesFlag {
-			_, err = apiClient.ApiKeyAPI.RevokeApiKey(ctx, selectedApiKey.Name).Execute()
+			res, err := apiClient.ApiKeyAPI.RevokeApiKey(ctx, selectedApiKey.Name).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(nil, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
 			views.RenderInfoMessage("API key revoked")
 		} else {
 			fmt.Println("Operation canceled.")
 		}
+
+		return nil
 	},
 }
 

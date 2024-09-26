@@ -32,23 +32,23 @@ var PortForwardCmd = &cobra.Command{
 	Short:   "Forward a port from a project to your local machine",
 	GroupID: util.WORKSPACE_GROUP,
 	Args:    cobra.RangeArgs(2, 3),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		activeProfile, err := c.GetActiveProfile()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		port, err := strconv.Atoi(args[0])
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		workspace, err := apiclient.GetWorkspace(args[1], true)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		workspaceId = workspace.Id
 
@@ -57,7 +57,7 @@ var PortForwardCmd = &cobra.Command{
 		} else {
 			projectName, err = apiclient.GetFirstWorkspaceProjectName(workspaceId, projectName, nil)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 		}
 
@@ -65,7 +65,7 @@ var PortForwardCmd = &cobra.Command{
 
 		if hostPort == nil {
 			if err = <-errChan; err != nil {
-				log.Fatal(err)
+				return err
 			}
 		} else {
 			if *hostPort != uint16(port) {

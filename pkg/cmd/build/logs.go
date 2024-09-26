@@ -6,7 +6,6 @@ package build
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"slices"
 	"time"
@@ -25,15 +24,15 @@ var buildLogsCmd = &cobra.Command{
 	Short:   "View logs for build",
 	Args:    cobra.RangeArgs(0, 1),
 	Aliases: []string{"log"},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		activeProfile, err := c.GetActiveProfile()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		query := ""
@@ -46,17 +45,17 @@ var buildLogsCmd = &cobra.Command{
 
 		apiClient, err := apiclient_util.GetApiClient(&activeProfile)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if len(args) == 0 {
 			buildList, res, err := apiClient.BuildAPI.ListBuilds(ctx).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 			build := selection.GetBuildFromPrompt(buildList, "Get Logs For")
 			if build == nil {
-				return
+				return nil
 			}
 			buildId = build.Id
 		} else {
@@ -71,7 +70,7 @@ var buildLogsCmd = &cobra.Command{
 		if !continueOnCompletedFlag {
 			exists, err = waitForBuildToComplete(buildId, apiClient)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 		} else {
 			// Sleep indefinitely
@@ -84,6 +83,7 @@ var buildLogsCmd = &cobra.Command{
 		if exists != nil && !*exists {
 			views.RenderInfoMessage(fmt.Sprintf("Build with ID %s does not exist in the database", buildId))
 		}
+		return nil
 	},
 }
 

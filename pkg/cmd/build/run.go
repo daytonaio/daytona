@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
@@ -23,45 +22,46 @@ var buildRunCmd = &cobra.Command{
 	Short:   "Run a build from a project config",
 	Aliases: []string{"create"},
 	Args:    cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var projectConfig *apiclient.ProjectConfig
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		projectConfigList, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(ctx).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		projectConfig = selection.GetProjectConfigFromPrompt(projectConfigList, 0, false, false, "Build")
 		if projectConfig == nil {
-			return
+			return nil
 		}
 
 		if projectConfig.BuildConfig == nil {
-			log.Fatal("The chosen project config does not have a build configuration")
+			return errors.New("The chosen project config does not have a build configuration")
 		}
 
 		chosenBranch, err := workspace_util.GetBranchFromProjectConfig(projectConfig, apiClient, 0)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if chosenBranch == nil {
 			fmt.Println("Operation canceled")
-			return
+			return nil
 		}
 
 		buildId, err := CreateBuild(apiClient, projectConfig, chosenBranch.Name, nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		views.RenderViewBuildLogsMessage(buildId)
+		return nil
 	},
 }
 
