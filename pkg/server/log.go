@@ -60,7 +60,7 @@ func (s *Server) initLogs() error {
 		frpOutput = os.Getenv("FRP_LOG_OUTPUT")
 	}
 
-	frp_log.InitLog(frpOutput, frpLogLevel, 0, false)
+	frp_log.InitLogger(frpOutput, frpLogLevel, 0, false)
 
 	return nil
 }
