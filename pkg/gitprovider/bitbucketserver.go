@@ -422,7 +422,12 @@ func (g *BitbucketServerGitProvider) ParseStaticGitContext(repoUrl string) (*Sta
 	matches := re.FindStringSubmatch(repoUrl)
 
 	if len(matches) < 4 {
-		return nil, fmt.Errorf("could not extract project key and repo name from URL: %s", repoUrl)
+		// // Handle scm format
+		re = regexp.MustCompile(`(https?://[^/]+)/scm/([^/]+)/([^/.]+)(?:\.git)?(?:/([^/?#]+))?(?:/([^/?#\\]+))?(?:\?at=refs%2Fheads%2F([^/?#]+))?`)
+		matches = re.FindStringSubmatch(repoUrl)
+		if len(matches) < 4 {
+			return nil, fmt.Errorf("could not extract project key and repo name from URL: %s", repoUrl)
+		}
 	}
 
 	baseUrl := matches[1]
