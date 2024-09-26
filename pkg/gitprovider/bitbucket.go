@@ -69,7 +69,6 @@ func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]*GitReposito
 
 	repoList, err := client.Repositories.ListForAccount(&bitbucket.RepositoriesOptions{
 		Owner:   namespace,
-		Page:    &[]int{1}[0],
 		Keyword: nil,
 	})
 	if err != nil {
