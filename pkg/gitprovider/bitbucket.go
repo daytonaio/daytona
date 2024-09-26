@@ -149,17 +149,20 @@ func (g *BitbucketGitProvider) GetRepoPRs(repositoryId string, namespaceId strin
 	client := g.getApiClient()
 	var response []*GitPullRequest
 
-	fullName := fmt.Sprintf("%s/%s", namespaceId, repositoryId)
-
-	owner, repo, err := g.getOwnerAndRepoFromFullName(fullName)
-	if err != nil {
-		return nil, err
+	opts := &bitbucket.PullRequestsOptions{
+		RepoSlug: repositoryId,
+		Owner:    namespaceId,
 	}
 
-	prList, err := client.Repositories.PullRequests.Get(&bitbucket.PullRequestsOptions{
-		Owner:    owner,
-		RepoSlug: repo,
-	})
+	owner, repo, err := g.getOwnerAndRepoFromFullName(repositoryId)
+	if err == nil {
+		opts = &bitbucket.PullRequestsOptions{
+			RepoSlug: repo,
+			Owner:    owner,
+		}
+	}
+
+	prList, err := client.Repositories.PullRequests.Get(opts)
 	if err != nil {
 		return nil, g.FormatError(err)
 	}
@@ -192,8 +195,8 @@ func (g *BitbucketGitProvider) GetRepoPRs(repositoryId string, namespaceId strin
 			Sha:             pr.Source.Commit.Hash,
 			SourceRepoId:    pr.Source.Repository.Full_name,
 			SourceRepoUrl:   repoUrl,
-			SourceRepoOwner: owner,
-			SourceRepoName:  repo,
+			SourceRepoOwner: opts.Owner,
+			SourceRepoName:  opts.RepoSlug,
 		})
 	}
 
