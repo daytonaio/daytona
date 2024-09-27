@@ -5,14 +5,13 @@ package env
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/spf13/cobra"
-
-	log "github.com/sirupsen/logrus"
 )
 
 var setCmd = &cobra.Command{
@@ -39,7 +38,7 @@ var setCmd = &cobra.Command{
 			for _, arg := range args {
 				kv := strings.Split(arg, "=")
 				if len(kv) != 2 {
-					log.Fatalf("Invalid key-value pair: %s", arg)
+					return fmt.Errorf("invalid key-value pair: %s", arg)
 				}
 				(profileData.EnvVars)[kv[0]] = kv[1]
 			}
@@ -52,7 +51,7 @@ var setCmd = &cobra.Command{
 
 			err = form.Run()
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 		}
 

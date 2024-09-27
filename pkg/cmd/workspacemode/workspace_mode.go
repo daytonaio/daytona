@@ -30,15 +30,12 @@ var workspaceModeRootCmd = &cobra.Command{
 	DisableAutoGenTag: true,
 	SilenceUsage:      true,
 	SilenceErrors:     true,
-	Run: func(cmd *cobra.Command, args []string) {
-		err := cmd.Help()
-		if err != nil {
-			log.Fatal(err)
-		}
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return cmd.Help()
 	},
 }
 
-func Execute() {
+func Execute() error {
 	cmd.SetupRootCommand(workspaceModeRootCmd)
 	workspaceModeRootCmd.AddGroup(&cobra.Group{ID: util.WORKSPACE_GROUP, Title: "Project & Workspace"})
 	workspaceModeRootCmd.AddCommand(gitCredCmd)
@@ -76,10 +73,7 @@ func Execute() {
 			telemetryService.Close()
 		}
 
-		if helpErr != nil {
-			log.Fatal(err)
-		}
-		return
+		return helpErr
 	}
 
 	if telemetryEnabled {
@@ -109,9 +103,7 @@ func Execute() {
 		telemetryService.Close()
 	}
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	return err
 }
 
 func init() {

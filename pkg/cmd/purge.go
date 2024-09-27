@@ -134,7 +134,7 @@ var purgeCmd = &cobra.Command{
 
 		errs := server.Purge(ctx, forceFlag)
 		if len(errs) > 0 {
-			log.Fatal(errs[0])
+			return errs[0]
 		}
 
 		fmt.Println("Server purged.")

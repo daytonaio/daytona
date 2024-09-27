@@ -119,7 +119,10 @@ func ForwardPublicPort(workspaceId, projectName string, hostPort, targetPort uin
 		time.Sleep(1 * time.Second)
 		var url = fmt.Sprintf("%s://%s.%s", serverConfig.Frps.Protocol, subDomain, serverConfig.Frps.Domain)
 		views.RenderInfoMessage(fmt.Sprintf("Port available at %s", url))
-		renderQr(url)
+		err := renderQr(url)
+		if err != nil {
+			log.Error(err)
+		}
 	}()
 
 	_, service, err := frpc.GetService(frpc.FrpcConnectParams{
@@ -136,10 +139,11 @@ func ForwardPublicPort(workspaceId, projectName string, hostPort, targetPort uin
 	return service.Run(context.Background())
 }
 
-func renderQr(s string) {
+func renderQr(s string) error {
 	q, err := qrcode.New(s, qrcode.Medium)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	fmt.Println(q.ToSmallString(true))
+	return nil
 }

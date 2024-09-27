@@ -16,7 +16,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -52,7 +51,7 @@ var projectConfigAddCmd = &cobra.Command{
 		} else {
 			projectConfigName, err = processCmdArgument(args[0], apiClient, ctx)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 		}
 

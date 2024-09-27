@@ -43,10 +43,10 @@ var rootCmd = &cobra.Command{
 	SilenceUsage:      true,
 	SilenceErrors:     true,
 	DisableAutoGenTag: true,
-	Run:               RunInitialScreenFlow,
+	RunE:              RunInitialScreenFlow,
 }
 
-func Execute() {
+func Execute() error {
 	rootCmd.AddGroup(&cobra.Group{ID: WORKSPACE_GROUP, Title: "Workspaces & Projects"})
 	rootCmd.AddGroup(&cobra.Group{ID: SERVER_GROUP, Title: "Server"})
 	rootCmd.AddGroup(&cobra.Group{ID: PROFILE_GROUP, Title: "Profile"})
@@ -108,10 +108,7 @@ func Execute() {
 			telemetryService.Close()
 		}
 
-		if helpErr != nil {
-			log.Fatal(err)
-		}
-		return
+		return helpErr
 	}
 
 	startTime := time.Now()
@@ -161,9 +158,7 @@ func Execute() {
 		telemetryService.Close()
 	}
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	return err
 }
 
 func ValidateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command, err error) {
@@ -226,35 +221,34 @@ func SetupRootCommand(cmd *cobra.Command) {
 	}
 }
 
-func RunInitialScreenFlow(cmd *cobra.Command, args []string) {
+func RunInitialScreenFlow(cmd *cobra.Command, args []string) error {
 	command, err := view.GetCommand()
 	if err != nil {
 		if common.IsCtrlCAbort(err) {
-			return
+			return nil
 		} else {
-			log.Fatal(err)
+			return err
 		}
 	}
 
 	switch command {
 	case "server":
-		ServerCmd.Run(cmd, []string{})
+		return ServerCmd.RunE(cmd, []string{})
 	case "create":
-		CreateCmd.Run(cmd, []string{})
+		return CreateCmd.RunE(cmd, []string{})
 	case "code":
-		CodeCmd.Run(cmd, []string{})
+		return CodeCmd.RunE(cmd, []string{})
 	case "git-provider add":
-		GitProviderAddCmd.Run(cmd, []string{})
+		return GitProviderAddCmd.RunE(cmd, []string{})
 	case "target set":
-		TargetSetCmd.Run(cmd, []string{})
+		return TargetSetCmd.RunE(cmd, []string{})
 	case "docs":
-		DocsCmd.Run(cmd, []string{})
+		return DocsCmd.RunE(cmd, []string{})
 	case "help":
-		err := cmd.Help()
-		if err != nil {
-			log.Fatal(err)
-		}
+		return cmd.Help()
 	}
+
+	return nil
 }
 
 func GetCmdTelemetryData(cmd *cobra.Command) map[string]interface{} {

@@ -11,7 +11,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -44,12 +43,12 @@ var gitProviderDeleteCmd = &cobra.Command{
 		gitprovider_view.GitProviderSelectionView(&gitProviderData, gitProviders, true)
 
 		if gitProviderData.Id == "" {
-			return errors.New("Git provider id can not be blank")
+			return errors.New("git provider id can not be blank")
 		}
 
 		_, err = apiClient.GitProviderAPI.RemoveGitProvider(ctx, gitProviderData.Id).Execute()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		views.RenderInfoMessage("Git provider has been removed")
