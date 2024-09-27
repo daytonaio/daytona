@@ -4,18 +4,13 @@
 package workspacemode
 
 import (
-	"fmt"
 	"os"
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/util"
 	cmd "github.com/daytonaio/daytona/pkg/cmd"
 	. "github.com/daytonaio/daytona/pkg/cmd/agent"
-	"github.com/daytonaio/daytona/pkg/posthogservice"
-	"github.com/daytonaio/daytona/pkg/telemetry"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"
 )
@@ -47,61 +42,19 @@ func Execute() error {
 	workspaceModeRootCmd.AddCommand(portForwardCmd)
 	workspaceModeRootCmd.AddCommand(exposeCmd)
 
-	var telemetryService telemetry.TelemetryService
 	clientId := config.GetClientId()
 	telemetryEnabled := config.TelemetryEnabled()
-
-	if telemetryEnabled {
-		telemetryService = posthogservice.NewTelemetryService(posthogservice.PosthogServiceConfig{
-			ApiKey:   internal.PosthogApiKey,
-			Endpoint: internal.PosthogEndpoint,
-		})
-	}
-
-	command, err := cmd.ValidateCommands(workspaceModeRootCmd, os.Args[1:])
-	if err != nil {
-		fmt.Printf("Error: %v\n\n", err)
-		helpErr := command.Help()
-		if telemetryEnabled {
-			props := cmd.GetCmdTelemetryData(command)
-			props["command"] = os.Args[1]
-			props["called_as"] = os.Args[1]
-			err := telemetryService.TrackCliEvent(telemetry.CliEventInvalidCmd, clientId, props)
-			if err != nil {
-				log.Error(err)
-			}
-			telemetryService.Close()
-		}
-
-		return helpErr
-	}
-
-	if telemetryEnabled {
-		err := telemetryService.TrackCliEvent(telemetry.CliEventCmdStart, clientId, cmd.GetCmdTelemetryData(command))
-		if err != nil {
-			log.Error(err)
-		}
-	}
-
 	startTime := time.Now()
+
+	telemetryService, command, err := cmd.PreRun(workspaceModeRootCmd, os.Args[1:], telemetryEnabled, clientId, startTime)
+	if err != nil {
+		return err
+	}
 
 	err = workspaceModeRootCmd.Execute()
 
 	endTime := time.Now()
-	if telemetryService != nil {
-		execTime := endTime.Sub(startTime)
-		props := cmd.GetCmdTelemetryData(command)
-		props["exec time (µs)"] = execTime.Microseconds()
-		if err != nil {
-			props["error"] = err.Error()
-		}
-
-		err := telemetryService.TrackCliEvent(telemetry.CliEventCmdEnd, clientId, props)
-		if err != nil {
-			log.Error(err)
-		}
-		telemetryService.Close()
-	}
+	cmd.PostRun(command, err, telemetryService, clientId, startTime, endTime)
 
 	return err
 }

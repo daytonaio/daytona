@@ -82,86 +82,26 @@ func Execute() error {
 
 	SetupRootCommand(rootCmd)
 
-	var telemetryService telemetry.TelemetryService
+	startTime := time.Now()
 	clientId := config.GetClientId()
 	telemetryEnabled := config.TelemetryEnabled()
 
-	if telemetryEnabled {
-		telemetryService = posthogservice.NewTelemetryService(posthogservice.PosthogServiceConfig{
-			ApiKey:   internal.PosthogApiKey,
-			Endpoint: internal.PosthogEndpoint,
-		})
-	}
-
-	cmd, err := ValidateCommands(rootCmd, os.Args[1:])
+	telemetryService, cmd, err := PreRun(rootCmd, os.Args[1:], telemetryEnabled, clientId, startTime)
 	if err != nil {
 		fmt.Printf("Error: %v\n\n", err)
-		helpErr := cmd.Help()
-		if telemetryEnabled {
-			props := GetCmdTelemetryData(cmd)
-			props["command"] = os.Args[1]
-			props["called_as"] = os.Args[1]
-			err := telemetryService.TrackCliEvent(telemetry.CliEventInvalidCmd, clientId, props)
-			if err != nil {
-				log.Error(err)
-			}
-			telemetryService.Close()
-		}
-
-		return helpErr
-	}
-
-	startTime := time.Now()
-
-	if telemetryEnabled {
-		err := telemetryService.TrackCliEvent(telemetry.CliEventCmdStart, clientId, GetCmdTelemetryData(cmd))
-		if err != nil {
-			log.Error(err)
-		}
-
-		go func() {
-			interruptChannel := make(chan os.Signal, 1)
-			signal.Notify(interruptChannel, os.Interrupt)
-
-			for range interruptChannel {
-				endTime := time.Now()
-				execTime := endTime.Sub(startTime)
-				props := GetCmdTelemetryData(cmd)
-				props["exec time (µs)"] = execTime.Microseconds()
-				props["error"] = "interrupted"
-
-				err := telemetryService.TrackCliEvent(telemetry.CliEventCmdEnd, clientId, props)
-				if err != nil {
-					log.Error(err)
-				}
-				telemetryService.Close()
-				os.Exit(0)
-			}
-		}()
+		return cmd.Help()
 	}
 
 	err = rootCmd.Execute()
 
 	endTime := time.Now()
-	if telemetryService != nil {
-		execTime := endTime.Sub(startTime)
-		props := GetCmdTelemetryData(cmd)
-		props["exec time (µs)"] = execTime.Microseconds()
-		if err != nil {
-			props["error"] = err.Error()
-		}
 
-		err := telemetryService.TrackCliEvent(telemetry.CliEventCmdEnd, clientId, props)
-		if err != nil {
-			log.Error(err)
-		}
-		telemetryService.Close()
-	}
+	PostRun(cmd, err, telemetryService, clientId, startTime, endTime)
 
 	return err
 }
 
-func ValidateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command, err error) {
+func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command, err error) {
 	rootCmd.InitDefaultHelpCmd()
 	currentCmd := rootCmd
 
@@ -273,4 +213,77 @@ func GetCmdTelemetryData(cmd *cobra.Command) map[string]interface{} {
 	data["source"] = source
 
 	return data
+}
+
+func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, clientId string, startTime time.Time) (telemetry.TelemetryService, *cobra.Command, error) {
+	var telemetryService telemetry.TelemetryService
+
+	if telemetryEnabled {
+		telemetryService = posthogservice.NewTelemetryService(posthogservice.PosthogServiceConfig{
+			ApiKey:   internal.PosthogApiKey,
+			Endpoint: internal.PosthogEndpoint,
+		})
+	}
+
+	cmd, err := validateCommands(rootCmd, os.Args[1:])
+	if err != nil {
+		if telemetryEnabled {
+			props := GetCmdTelemetryData(cmd)
+			props["command"] = os.Args[1]
+			props["called_as"] = os.Args[1]
+			err := telemetryService.TrackCliEvent(telemetry.CliEventInvalidCmd, clientId, props)
+			if err != nil {
+				log.Error(err)
+			}
+			telemetryService.Close()
+		}
+
+		return telemetryService, cmd, err
+	}
+
+	if telemetryEnabled {
+		err := telemetryService.TrackCliEvent(telemetry.CliEventCmdStart, clientId, GetCmdTelemetryData(cmd))
+		if err != nil {
+			log.Error(err)
+		}
+
+		go func() {
+			interruptChannel := make(chan os.Signal, 1)
+			signal.Notify(interruptChannel, os.Interrupt)
+
+			for range interruptChannel {
+				endTime := time.Now()
+				execTime := endTime.Sub(startTime)
+				props := GetCmdTelemetryData(cmd)
+				props["exec time (µs)"] = execTime.Microseconds()
+				props["error"] = "interrupted"
+
+				err := telemetryService.TrackCliEvent(telemetry.CliEventCmdEnd, clientId, props)
+				if err != nil {
+					log.Error(err)
+				}
+				telemetryService.Close()
+				os.Exit(0)
+			}
+		}()
+	}
+
+	return telemetryService, cmd, nil
+}
+
+func PostRun(cmd *cobra.Command, cmdErr error, telemetryService telemetry.TelemetryService, clientId string, startTime time.Time, endTime time.Time) {
+	if telemetryService != nil {
+		execTime := endTime.Sub(startTime)
+		props := GetCmdTelemetryData(cmd)
+		props["exec time (µs)"] = execTime.Microseconds()
+		if cmdErr != nil {
+			props["error"] = cmdErr.Error()
+		}
+
+		err := telemetryService.TrackCliEvent(telemetry.CliEventCmdEnd, clientId, props)
+		if err != nil {
+			log.Error(err)
+		}
+		telemetryService.Close()
+	}
 }
