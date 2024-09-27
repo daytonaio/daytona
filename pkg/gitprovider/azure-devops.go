@@ -755,16 +755,27 @@ func (g *AzureDevOpsGitProvider) ParseEventData(request *http.Request) (*GitEven
 }
 
 func (g *AzureDevOpsGitProvider) FormatError(err error) error {
-	data, err := json.Marshal(err)
-	if err != nil {
-		return fmt.Errorf("status code: %d err: failed to format the error message: Request failed with %s", http.StatusInternalServerError, err.Error())
+	data, marshalErr := json.Marshal(err)
+	if marshalErr != nil {
+		return fmt.Errorf("status code: %d err: failed to format the error message: Request failed with %s", http.StatusInternalServerError, marshalErr.Error())
 	}
 
 	jsonData := azuredevops.WrappedError{}
-	err = json.Unmarshal(data, &jsonData)
-	if err != nil {
-		return fmt.Errorf("status code: %d err: failed to format the error message: Request failed with %s", http.StatusInternalServerError, err.Error())
+	unmarshalErr := json.Unmarshal(data, &jsonData)
+	if unmarshalErr != nil {
+		return fmt.Errorf("status code: %d err: failed to format the error message: Request failed with %s", http.StatusInternalServerError, unmarshalErr.Error())
 	}
 
-	return fmt.Errorf("status code: %d err: Request failed with %s", *jsonData.StatusCode, *jsonData.Message)
+	statusCode := http.StatusInternalServerError
+	message := "unknown error"
+
+	if jsonData.StatusCode != nil {
+		statusCode = *jsonData.StatusCode
+	}
+
+	if jsonData.Message != nil {
+		message = *jsonData.Message
+	}
+
+	return fmt.Errorf("status code: %d err: Request failed with %s", statusCode, message)
 }
