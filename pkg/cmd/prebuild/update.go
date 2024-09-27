@@ -5,7 +5,7 @@ package prebuild
 
 import (
 	"context"
-	"log"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -23,24 +23,24 @@ var prebuildUpdateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Update a prebuild configuration",
 	Args:  cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var prebuildAddView add.PrebuildAddView
 		var prebuild *apiclient.PrebuildDTO
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		userGitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		if len(userGitProviders) == 0 {
 			views.RenderInfoMessage("No registered Git providers have been found - please register a Git provider using 'daytona git-provider add' in order to start using prebuilds.")
-			return
+			return nil
 		}
 
 		if len(args) < 2 {
@@ -52,28 +52,28 @@ var prebuildUpdateCmd = &cobra.Command{
 				selectedProjectConfigName = args[0]
 				prebuilds, res, err = apiClient.PrebuildAPI.ListPrebuildsForProjectConfig(context.Background(), selectedProjectConfigName).Execute()
 				if err != nil {
-					log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+					return apiclient_util.HandleErrorResponse(res, err)
 				}
 			} else {
 				prebuilds, res, err = apiClient.PrebuildAPI.ListPrebuilds(context.Background()).Execute()
 				if err != nil {
-					log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+					return apiclient_util.HandleErrorResponse(res, err)
 				}
 			}
 
 			if len(prebuilds) == 0 {
 				views.RenderInfoMessage("No prebuilds found")
-				return
+				return nil
 			}
 
 			prebuild = selection.GetPrebuildFromPrompt(prebuilds, "Update")
 			if prebuild == nil {
-				return
+				return nil
 			}
 		} else {
 			prebuild, res, err = apiClient.PrebuildAPI.GetPrebuild(ctx, args[0], args[1]).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 		}
 
@@ -96,13 +96,13 @@ var prebuildUpdateCmd = &cobra.Command{
 		if prebuildAddView.CommitInterval != "" {
 			commitInterval, err = strconv.Atoi(prebuildAddView.CommitInterval)
 			if err != nil {
-				log.Fatal("commit interval must be a number")
+				return errors.New("commit interval must be a number")
 			}
 		}
 
 		retention, err := strconv.Atoi(prebuildAddView.Retention)
 		if err != nil {
-			log.Fatal("retention must be a number")
+			return errors.New("retention must be a number")
 		}
 
 		newPrebuild := apiclient.CreatePrebuildDTO{
@@ -121,7 +121,7 @@ var prebuildUpdateCmd = &cobra.Command{
 
 		prebuildId, res, err := apiClient.PrebuildAPI.SetPrebuild(ctx, prebuildAddView.ProjectConfigName).Prebuild(newPrebuild).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		views.RenderInfoMessage("Prebuild updated successfully")
@@ -129,16 +129,17 @@ var prebuildUpdateCmd = &cobra.Command{
 		if prebuildAddView.RunBuildOnAdd {
 			projectConfig, res, err := apiClient.ProjectConfigAPI.GetProjectConfig(ctx, prebuildAddView.ProjectConfigName).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
 			buildId, err := build.CreateBuild(apiClient, projectConfig, *newPrebuild.Branch, &prebuildId)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			views.RenderViewBuildLogsMessage(buildId)
 		}
+		return nil
 	},
 }
 

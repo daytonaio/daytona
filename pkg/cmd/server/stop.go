@@ -4,7 +4,6 @@
 package server
 
 import (
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/daytonaio/daytona/pkg/cmd/server/daemon"
@@ -14,11 +13,8 @@ import (
 var stopCmd = &cobra.Command{
 	Use:   "stop",
 	Short: "Stops the Daytona Server daemon",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		views.RenderInfoMessageBold("Stopping the Daytona Server daemon...")
-		err := daemon.Stop()
-		if err != nil {
-			log.Fatal(err)
-		}
+		return daemon.Stop()
 	},
 }

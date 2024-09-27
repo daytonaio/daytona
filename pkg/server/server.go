@@ -173,9 +173,7 @@ func (s *Server) Start(errCh chan error) error {
 		signal.Notify(interruptChannel, os.Interrupt)
 
 		for range interruptChannel {
-			log.Info("Shutting down")
 			plugin.CleanupClients()
-			os.Exit(0)
 		}
 	}()
 

@@ -25,13 +25,13 @@ var projectConfigDeleteCmd = &cobra.Command{
 	Aliases: []string{"remove", "rm"},
 	Short:   "Delete a project config",
 	Args:    cobra.MaximumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var selectedProjectConfig *apiclient.ProjectConfig
 		var selectedProjectConfigName string
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if allFlag {
@@ -47,23 +47,23 @@ var projectConfigDeleteCmd = &cobra.Command{
 
 				err := form.Run()
 				if err != nil {
-					log.Fatal(err)
+					return err
 				}
 
 				if !yesFlag {
 					fmt.Println("Operation canceled.")
-					return
+					return nil
 				}
 			}
 
 			projectConfigs, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(context.Background()).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
 			if len(projectConfigs) == 0 {
 				views.RenderInfoMessage("No project configs found")
-				return
+				return nil
 			}
 
 			for _, projectConfig := range projectConfigs {
@@ -75,23 +75,23 @@ var projectConfigDeleteCmd = &cobra.Command{
 				}
 				views.RenderInfoMessage("Deleted project config: " + selectedProjectConfigName)
 			}
-			return
+			return nil
 		}
 
 		if len(args) == 0 {
 			projectConfigs, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(context.Background()).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
 			if len(projectConfigs) == 0 {
 				views.RenderInfoMessage("No project configs found")
-				return
+				return nil
 			}
 
 			selectedProjectConfig = selection.GetProjectConfigFromPrompt(projectConfigs, 0, false, false, "Delete")
 			if selectedProjectConfig == nil {
-				return
+				return nil
 			}
 			selectedProjectConfigName = selectedProjectConfig.Name
 		} else {
@@ -100,10 +100,11 @@ var projectConfigDeleteCmd = &cobra.Command{
 
 		res, err := apiClient.ProjectConfigAPI.DeleteProjectConfig(context.Background(), selectedProjectConfigName).Force(forceFlag).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		views.RenderInfoMessage("Project config deleted successfully")
+		return nil
 	},
 }
 

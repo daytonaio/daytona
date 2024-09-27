@@ -12,7 +12,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -23,33 +22,33 @@ var RestartCmd = &cobra.Command{
 	Short:   "Restart a workspace",
 	Args:    cobra.RangeArgs(0, 1),
 	GroupID: util.WORKSPACE_GROUP,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var workspaceId string
 
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if len(args) == 0 {
 			if restartProjectFlag != "" {
 				err := cmd.Help()
 				if err != nil {
-					log.Fatal(err)
+					return err
 				}
-				return
+				return nil
 			}
 
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
 			workspace := selection.GetWorkspaceFromPrompt(workspaceList, "Restart")
 			if workspace == nil {
-				return
+				return nil
 			}
 			workspaceId = workspace.Name
 		} else {
@@ -58,13 +57,14 @@ var RestartCmd = &cobra.Command{
 
 		err = RestartWorkspace(apiClient, workspaceId, restartProjectFlag)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		if restartProjectFlag != "" {
 			views.RenderInfoMessage(fmt.Sprintf("Project '%s' from workspace '%s' successfully restarted", restartProjectFlag, workspaceId))
 		} else {
 			views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' successfully restarted", workspaceId))
 		}
+		return nil
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) >= 1 {

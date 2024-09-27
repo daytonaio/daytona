@@ -13,7 +13,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	containerregistry_view "github.com/daytonaio/daytona/pkg/views/containerregistry"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -22,42 +21,42 @@ var containerRegistryDeleteCmd = &cobra.Command{
 	Aliases: []string{"remove", "rm"},
 	Short:   "Delete a container registry",
 	Args:    cobra.RangeArgs(0, 2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var registryDto *apiclient.ContainerRegistry
 		var selectedServer string
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if len(args) == 0 {
 			c, err := config.GetConfig()
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			activeProfile, err := c.GetActiveProfile()
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			containerRegistries, res, err := apiClient.ContainerRegistryAPI.ListContainerRegistries(context.Background()).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
 			if len(containerRegistries) == 0 {
 				views.RenderInfoMessage("No container registries found")
-				return
+				return nil
 			}
 
 			registryDto, err = containerregistry_view.GetRegistryFromPrompt(containerRegistries, activeProfile.Name, false)
 			if err != nil {
 				if common.IsCtrlCAbort(err) {
-					return
+					return nil
 				} else {
-					log.Fatal(err)
+					return err
 				}
 			}
 
@@ -68,9 +67,10 @@ var containerRegistryDeleteCmd = &cobra.Command{
 
 		res, err := apiClient.ContainerRegistryAPI.RemoveContainerRegistry(context.Background(), url.QueryEscape(selectedServer)).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		views.RenderInfoMessage("Container registry deleted successfully")
+		return nil
 	},
 }

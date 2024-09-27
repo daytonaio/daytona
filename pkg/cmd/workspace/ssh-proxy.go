@@ -29,10 +29,10 @@ var SshProxyCmd = &cobra.Command{
 	Use:    "ssh-proxy [PROFILE_ID] [WORKSPACE_ID] [PROJECT]",
 	Args:   cobra.RangeArgs(2, 3),
 	Hidden: true,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		profileId := args[0]
@@ -41,7 +41,7 @@ var SshProxyCmd = &cobra.Command{
 
 		profile, err := c.GetProfile(profileId)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if len(args) == 3 {
@@ -49,13 +49,13 @@ var SshProxyCmd = &cobra.Command{
 		} else {
 			projectName, err = apiclient.GetFirstWorkspaceProjectName(workspaceId, projectName, &profile)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 		}
 
 		workspace, err := apiclient.GetWorkspace(workspaceId, true)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if workspace.Target == "local" && profile.Id == "default" {
@@ -73,7 +73,7 @@ var SshProxyCmd = &cobra.Command{
 
 			cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
@@ -93,7 +93,7 @@ var SshProxyCmd = &cobra.Command{
 
 			response, err := cli.ContainerExecCreate(ctx, containerName, config)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			resp, err := cli.ContainerExecAttach(ctx, response.ID, container.ExecStartOptions{
@@ -101,7 +101,7 @@ var SshProxyCmd = &cobra.Command{
 			})
 
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			go func() {
@@ -121,7 +121,7 @@ var SshProxyCmd = &cobra.Command{
 			for {
 				res, err := cli.ContainerExecInspect(ctx, response.ID)
 				if err != nil {
-					log.Fatal(err)
+					return err
 				}
 
 				if !res.Running {
@@ -134,14 +134,14 @@ var SshProxyCmd = &cobra.Command{
 
 		tsConn, err := tailscale.GetConnection(&profile)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		errChan := make(chan error)
 
 		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", project.GetProjectHostname(workspaceId, projectName), ssh_config.SSH_PORT))
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		//	pipe stdio to con
@@ -161,8 +161,6 @@ var SshProxyCmd = &cobra.Command{
 			errChan <- nil
 		}()
 
-		if err := <-errChan; err != nil {
-			log.Fatal(err)
-		}
+		return <-errChan
 	},
 }

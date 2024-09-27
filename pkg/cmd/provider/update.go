@@ -24,29 +24,29 @@ var providerUpdateCmd = &cobra.Command{
 	Short:   "Update provider",
 	Args:    cobra.NoArgs,
 	Aliases: []string{"up"},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		providerList, res, err := apiClient.ProviderAPI.ListProviders(ctx).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(apiclient.ApiGetConfigRequest{})
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		providerManager := manager.NewProviderManager(manager.ProviderManagerConfig{RegistryUrl: serverConfig.RegistryUrl})
 
 		providersManifest, err := providerManager.GetProvidersManifest()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if allFlag {
@@ -60,34 +60,35 @@ var providerUpdateCmd = &cobra.Command{
 				}
 			}
 
-			return
+			return nil
 		}
 
 		providerToUpdate, err := provider.GetProviderFromPrompt(provider.ProviderListToView(providerList), "Choose a Provider to Update", false)
 		if err != nil {
 			if common.IsCtrlCAbort(err) {
-				return
+				return nil
 			} else {
-				log.Fatal(err)
+				return err
 			}
 		}
 		if providerToUpdate == nil {
-			return
+			return nil
 		}
 
 		err = updateProvider(providerToUpdate.Name, providersManifest, apiClient)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		fmt.Printf("Provider %s has been successfully updated\n", providerToUpdate.Name)
+		return nil
 	},
 }
 
 func updateProvider(providerName string, providersManifest *manager.ProvidersManifest, apiClient *apiclient.APIClient) error {
 	providerManifest, ok := (*providersManifest)[providerName]
 	if !ok {
-		return fmt.Errorf("Provider %s not found in manifest", providerName)
+		return fmt.Errorf("provider %s not found in manifest", providerName)
 	}
 
 	version, ok := providerManifest.Versions["latest"]

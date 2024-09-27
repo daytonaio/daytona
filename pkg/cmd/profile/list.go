@@ -10,7 +10,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/profile"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -18,24 +17,25 @@ var profileListCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List profiles",
 	Aliases: []string{"ls"},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if format.FormatFlag != "" {
 			formattedData := format.NewFormatter(c.Profiles)
 			formattedData.Print()
-			return
+			return nil
 		}
 
 		output, err := profile.ListProfiles(c.Profiles, c.ActiveProfileId, false)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		fmt.Print(output)
+		return nil
 	},
 }
 

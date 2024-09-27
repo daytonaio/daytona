@@ -5,7 +5,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -22,12 +21,9 @@ var DocsCmd = &cobra.Command{
 	Short:   "Opens the Daytona documentation in your default browser.",
 	Args:    cobra.NoArgs,
 	Aliases: []string{"documentation", "doc"},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		output := views.GetBoldedInfoMessage("Opening the Daytona documentation in your default browser. If opening fails, you can go to " + linkStyle.Render(docsURL) + " manually.")
 		fmt.Println(output)
-		err := browser.OpenURL(docsURL)
-		if err != nil {
-			log.Fatal(err)
-		}
+		return browser.OpenURL(docsURL)
 	},
 }

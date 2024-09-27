@@ -7,7 +7,6 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	config_view "github.com/daytonaio/daytona/pkg/views/config"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -18,10 +17,10 @@ var configCmd = &cobra.Command{
 	Short:   "Output Daytona configuration",
 	Aliases: []string{"cfg"},
 	Args:    cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if format.FormatFlag != "" {
@@ -34,10 +33,11 @@ var configCmd = &cobra.Command{
 
 			formattedData := format.NewFormatter(&c)
 			formattedData.Print()
-			return
+			return nil
 		}
 
 		config_view.Render(c, showApiKeysFlag)
+		return nil
 	},
 }
 

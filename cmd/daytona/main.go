@@ -20,11 +20,17 @@ import (
 
 func main() {
 	if internal.WorkspaceMode() {
-		workspacemode.Execute()
+		err := workspacemode.Execute()
+		if err != nil {
+			log.Fatal(err)
+		}
 		return
 	}
 
-	cmd.Execute()
+	err := cmd.Execute()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func init() {

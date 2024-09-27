@@ -7,7 +7,6 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"log"
 	"net/url"
 	"os"
 	"strings"
@@ -21,21 +20,21 @@ var gitCredCmd = &cobra.Command{
 	Aliases: []string{"rev"},
 	Args:    cobra.ExactArgs(1),
 	Hidden:  true,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if args[0] != "get" {
-			return
+			return nil
 		}
 		ctx := context.Background()
 		result, err := parseFromStdin()
 		host := result["host"]
 		if err != nil || host == "" {
 			fmt.Println("error parsing 'host' from stdin")
-			return
+			return nil
 		}
 
 		apiClient, err := apiclient.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		encodedUrl := url.QueryEscape(host)
@@ -43,11 +42,11 @@ var gitCredCmd = &cobra.Command{
 		if gitProvider == nil {
 			fmt.Println("error: git provider not found")
 			os.Exit(1)
-			return
 		}
 
 		fmt.Println("username=" + gitProvider.Username)
 		fmt.Println("password=" + gitProvider.Token)
+		return nil
 	},
 }
 

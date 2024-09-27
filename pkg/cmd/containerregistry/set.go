@@ -14,8 +14,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 	containerregistry_view "github.com/daytonaio/daytona/pkg/views/containerregistry"
 	"github.com/spf13/cobra"
-
-	log "github.com/sirupsen/logrus"
 )
 
 var containerRegistrySetCmd = &cobra.Command{
@@ -23,18 +21,18 @@ var containerRegistrySetCmd = &cobra.Command{
 	Short:   "Set container registry",
 	Args:    cobra.NoArgs,
 	Aliases: []string{"add", "update", "register"},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var registryDto *apiclient.ContainerRegistry
 		selectedServer := serverFlag
 
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		activeProfile, err := c.GetActiveProfile()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		registryView := containerregistry_view.RegistryView{
@@ -45,12 +43,12 @@ var containerRegistrySetCmd = &cobra.Command{
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		containerRegistries, res, err := apiClient.ContainerRegistryAPI.ListContainerRegistries(context.Background()).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		if serverFlag == "" || usernameFlag == "" || passwordFlag == "" {
@@ -61,9 +59,9 @@ var containerRegistrySetCmd = &cobra.Command{
 				registryDto, err := containerregistry_view.GetRegistryFromPrompt(containerRegistries, activeProfile.Name, true)
 				if err != nil {
 					if common.IsCtrlCAbort(err) {
-						return
+						return nil
 					} else {
-						log.Fatal(err)
+						return err
 					}
 				}
 
@@ -91,10 +89,11 @@ var containerRegistrySetCmd = &cobra.Command{
 
 		res, err = apiClient.ContainerRegistryAPI.SetContainerRegistry(context.Background(), url.QueryEscape(selectedServer)).ContainerRegistry(*registryDto).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		views.RenderInfoMessage("Registry set successfully")
+		return nil
 	},
 }
 
