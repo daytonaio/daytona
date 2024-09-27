@@ -14,6 +14,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 )
 
 const maxWidth = 160
@@ -79,9 +80,11 @@ func GetRepositoryFromUrlInput(multiProject bool, projectOrder int, apiClient *a
 		Value(&initialRepoUrl).
 		Key("initialProjectRepo").
 		Validate(func(str string) error {
-			var err error
-			repo, err = validateRepoUrl(str, apiClient)
-			return err
+			return views_util.WithInlineSpinner("Validating", func() error {
+				var err error
+				repo, err = validateRepoUrl(str, apiClient)
+				return err
+			})
 		})
 
 	dTheme := views.GetCustomTheme()
