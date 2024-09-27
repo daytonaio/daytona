@@ -463,13 +463,34 @@ func waitForDial(workspace *apiclient.Workspace, activeProfile *config.Profile, 
 		}
 	}
 
-	for {
-		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", project.GetProjectHostname(workspace.Id, workspace.Projects[0].Name), ssh_config.SSH_PORT))
-		if err == nil {
-			return dialConn.Close()
-		}
+	connectChan := make(chan error)
+	spinner := time.After(3 * time.Second)
+	timeout := time.After(60 * time.Second)
 
-		time.Sleep(time.Second)
+	go func() {
+		for {
+			dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", project.GetProjectHostname(workspace.Id, workspace.Projects[0].Name), ssh_config.SSH_PORT))
+			if err == nil {
+				connectChan <- dialConn.Close()
+				return
+			}
+			time.Sleep(time.Second)
+		}
+	}()
+
+	select {
+	case err := <-connectChan:
+		return err
+	case <-spinner:
+		err := views_util.WithInlineSpinner("Connection to tailscale is taking longer than usual", func() error {
+			select {
+			case err := <-connectChan:
+				return err
+			case <-timeout:
+				return errors.New("secure connection to the Daytona Server could not be established. Please check your internet connection or Tailscale availability")
+			}
+		})
+		return err
 	}
 }
 
