@@ -148,7 +148,7 @@ var purgeCmd = &cobra.Command{
 		fmt.Println("Deleting autocompletion data")
 		err = config.DeleteAutocompletionData()
 		if err != nil {
-			return err
+			fmt.Printf("Error deleting autocompletion data: %s\n", err)
 		}
 
 		fmt.Println("Deleting the Daytona config directory")
