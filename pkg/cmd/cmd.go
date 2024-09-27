@@ -86,7 +86,7 @@ func Execute() error {
 	clientId := config.GetClientId()
 	telemetryEnabled := config.TelemetryEnabled()
 
-	telemetryService, cmd, err := PreRun(rootCmd, os.Args[1:], telemetryEnabled, clientId, startTime)
+	telemetryService, cmd, flags, err := PreRun(rootCmd, os.Args[1:], telemetryEnabled, clientId, startTime)
 	if err != nil {
 		fmt.Printf("Error: %v\n\n", err)
 		return cmd.Help()
@@ -96,12 +96,12 @@ func Execute() error {
 
 	endTime := time.Now()
 
-	PostRun(cmd, err, telemetryService, clientId, startTime, endTime)
+	PostRun(cmd, err, telemetryService, clientId, startTime, endTime, flags)
 
 	return err
 }
 
-func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command, err error) {
+func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command, flags []string, err error) {
 	rootCmd.InitDefaultHelpCmd()
 	currentCmd := rootCmd
 
@@ -109,6 +109,7 @@ func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command
 	sanitzedArgs := []string{}
 	for i := 0; i < len(args); i++ {
 		if strings.HasPrefix(args[i], "-") {
+			flags = append(flags, args[i])
 			if i+1 < len(args) && !strings.HasPrefix(args[i+1], "-") {
 				i++
 			}
@@ -120,7 +121,7 @@ func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command
 	for len(sanitzedArgs) > 0 {
 		subCmd, subArgs, err := currentCmd.Find(sanitzedArgs)
 		if err != nil {
-			return currentCmd, err
+			return currentCmd, flags, err
 		}
 
 		if subCmd == currentCmd {
@@ -133,11 +134,11 @@ func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command
 
 	if len(sanitzedArgs) > 0 {
 		if err := currentCmd.ValidateArgs(sanitzedArgs); err != nil {
-			return currentCmd, err
+			return currentCmd, flags, err
 		}
 	}
 
-	return currentCmd, nil
+	return currentCmd, flags, nil
 }
 
 func SetupRootCommand(cmd *cobra.Command) {
@@ -191,7 +192,7 @@ func RunInitialScreenFlow(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func GetCmdTelemetryData(cmd *cobra.Command) map[string]interface{} {
+func GetCmdTelemetryData(cmd *cobra.Command, flags []string) map[string]interface{} {
 	path := cmd.CommandPath()
 
 	// Trim daytona from the path if a non-root command was invoked
@@ -211,11 +212,12 @@ func GetCmdTelemetryData(cmd *cobra.Command) map[string]interface{} {
 	data["command"] = path
 	data["called_as"] = calledAs
 	data["source"] = source
+	data["flags"] = flags
 
 	return data
 }
 
-func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, clientId string, startTime time.Time) (telemetry.TelemetryService, *cobra.Command, error) {
+func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, clientId string, startTime time.Time) (telemetry.TelemetryService, *cobra.Command, []string, error) {
 	var telemetryService telemetry.TelemetryService
 
 	if telemetryEnabled {
@@ -225,10 +227,10 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 		})
 	}
 
-	cmd, err := validateCommands(rootCmd, os.Args[1:])
+	cmd, flags, err := validateCommands(rootCmd, os.Args[1:])
 	if err != nil {
 		if telemetryEnabled {
-			props := GetCmdTelemetryData(cmd)
+			props := GetCmdTelemetryData(cmd, flags)
 			props["command"] = os.Args[1]
 			props["called_as"] = os.Args[1]
 			err := telemetryService.TrackCliEvent(telemetry.CliEventInvalidCmd, clientId, props)
@@ -238,11 +240,11 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 			telemetryService.Close()
 		}
 
-		return telemetryService, cmd, err
+		return telemetryService, cmd, flags, err
 	}
 
 	if telemetryEnabled {
-		err := telemetryService.TrackCliEvent(telemetry.CliEventCmdStart, clientId, GetCmdTelemetryData(cmd))
+		err := telemetryService.TrackCliEvent(telemetry.CliEventCmdStart, clientId, GetCmdTelemetryData(cmd, flags))
 		if err != nil {
 			log.Error(err)
 		}
@@ -254,7 +256,7 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 			for range interruptChannel {
 				endTime := time.Now()
 				execTime := endTime.Sub(startTime)
-				props := GetCmdTelemetryData(cmd)
+				props := GetCmdTelemetryData(cmd, flags)
 				props["exec time (µs)"] = execTime.Microseconds()
 				props["error"] = "interrupted"
 
@@ -268,13 +270,13 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 		}()
 	}
 
-	return telemetryService, cmd, nil
+	return telemetryService, cmd, flags, nil
 }
 
-func PostRun(cmd *cobra.Command, cmdErr error, telemetryService telemetry.TelemetryService, clientId string, startTime time.Time, endTime time.Time) {
+func PostRun(cmd *cobra.Command, cmdErr error, telemetryService telemetry.TelemetryService, clientId string, startTime time.Time, endTime time.Time, flags []string) {
 	if telemetryService != nil {
 		execTime := endTime.Sub(startTime)
-		props := GetCmdTelemetryData(cmd)
+		props := GetCmdTelemetryData(cmd, flags)
 		props["exec time (µs)"] = execTime.Microseconds()
 		if cmdErr != nil {
 			props["error"] = cmdErr.Error()
