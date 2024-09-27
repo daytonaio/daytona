@@ -68,7 +68,7 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 	if c.TelemetryEnabled {
 		clientConfig.AddDefaultHeader(telemetry.ENABLED_HEADER, "true")
 		clientConfig.AddDefaultHeader(telemetry.SESSION_ID_HEADER, internal.SESSION_ID)
-		clientConfig.AddDefaultHeader(telemetry.CLIENT_ID_HEADER, c.Id)
+		clientConfig.AddDefaultHeader(telemetry.CLIENT_ID_HEADER, config.GetClientId())
 		if internal.WorkspaceMode() {
 			clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, string(telemetry.CLI_PROJECT_SOURCE))
 		} else {
