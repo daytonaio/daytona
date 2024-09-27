@@ -25,15 +25,15 @@ var fileFlag bool
 var logsCmd = &cobra.Command{
 	Use:   "logs",
 	Short: "Output Daytona Server logs",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		activeProfile, err := c.GetActiveProfile()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		query := ""
@@ -43,7 +43,7 @@ var logsCmd = &cobra.Command{
 
 		switch {
 		case fileFlag:
-			readServerLogFile()
+			return readServerLogFile()
 
 		default:
 			ws, res, err := apiclient.GetWebsocketConn(context.Background(), "/log/server", &activeProfile, &query)
@@ -52,7 +52,7 @@ var logsCmd = &cobra.Command{
 				log.Error(apiclient.HandleErrorResponse(res, err))
 
 				if activeProfile.Id != "default" {
-					return
+					return nil
 				}
 
 				readLogsFile := true
@@ -64,39 +64,38 @@ var logsCmd = &cobra.Command{
 				).WithTheme(views.GetCustomTheme())
 				formErr := form.Run()
 				if formErr != nil {
-					log.Fatal(formErr)
+					return formErr
 				}
 
 				if readLogsFile {
-					readServerLogFile()
+					return readServerLogFile()
 				}
-				return
+				return nil
 
 			}
 
 			for {
 				_, msg, err := ws.ReadMessage()
 				if err != nil {
-					return
+					return nil
 				}
 
 				fmt.Println(string(msg))
 			}
 		}
-
 	},
 }
 
-func readServerLogFile() {
+func readServerLogFile() error {
 	views.RenderBorderedMessage("Reading from server log file...")
 	cfg, err := server.GetConfig()
 	if err != nil {
-		log.Fatal(fmt.Errorf("failed to get server config: %w", err).Error())
+		return fmt.Errorf("failed to get server config: %w", err)
 	}
 
 	file, err := os.Open(cfg.LogFilePath)
 	if err != nil {
-		log.Fatal(fmt.Errorf("while opening server logs: %w", err).Error())
+		return fmt.Errorf("while opening server logs: %w", err)
 	}
 	defer file.Close()
 	msgChan := make(chan []byte)
@@ -107,13 +106,13 @@ func readServerLogFile() {
 	for {
 		select {
 		case <-context.Background().Done():
-			return
+			return nil
 		case err := <-errChan:
 			if err != nil {
 				if err != io.EOF {
-					log.Fatal(err)
+					return err
 				}
-				return
+				return nil
 			}
 		case msg := <-msgChan:
 			fmt.Println(string(msg))

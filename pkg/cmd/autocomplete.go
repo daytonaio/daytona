@@ -16,12 +16,11 @@ var AutoCompleteCmd = &cobra.Command{
 	Use:   "autocomplete [bash|zsh|fish|powershell]",
 	Short: "Adds completion script for your shell enviornment",
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		shell := args[0]
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
-			fmt.Printf("Error finding user home directory: %s\n", err)
-			return
+			return fmt.Errorf("Error finding user home directory: %s\n", err)
 		}
 
 		var filePath, profilePath string
@@ -39,14 +38,12 @@ var AutoCompleteCmd = &cobra.Command{
 			filePath = filepath.Join(homeDir, "daytona.completion_script.ps1")
 			profilePath = filepath.Join(homeDir, "Documents", "WindowsPowerShell", "Microsoft.PowerShell_profile.ps1")
 		default:
-			fmt.Println("Unsupported shell type. Please use bash, zsh, fish, or powershell.")
-			return
+			return fmt.Errorf("Unsupported shell type. Please use bash, zsh, fish, or powershell.")
 		}
 
 		file, err := os.Create(filePath)
 		if err != nil {
-			fmt.Printf("Error creating completion script file: %s\n", err)
-			return
+			return fmt.Errorf("Error creating completion script file: %s\n", err)
 		}
 		defer file.Close()
 
@@ -62,8 +59,7 @@ var AutoCompleteCmd = &cobra.Command{
 		}
 
 		if err != nil {
-			fmt.Printf("Error generating completion script: %s\n", err)
-			return
+			return fmt.Errorf("Error generating completion script: %s\n", err)
 		}
 
 		sourceCommand := fmt.Sprintf("\nsource %s\n", filePath)
@@ -87,19 +83,19 @@ var AutoCompleteCmd = &cobra.Command{
 			// Append the source command to the shell's profile file if not present
 			profile, err := os.OpenFile(profilePath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 			if err != nil {
-				fmt.Printf("Error opening profile file (%s): %s\n", profilePath, err)
-				return
+				return fmt.Errorf("Error opening profile file (%s): %s\n", profilePath, err)
 			}
 			defer profile.Close()
 
 			if _, err := profile.WriteString(sourceCommand); err != nil {
-				fmt.Printf("Error writing to profile file (%s): %s\n", profilePath, err)
-				return
+				return fmt.Errorf("Error writing to profile file (%s): %s\n", profilePath, err)
 			}
 		}
 
 		fmt.Println("Autocomplete script generated and injected successfully.")
 		fmt.Printf("Please source your %s profile to apply the changes or restart your terminal.\n", shell)
 		fmt.Printf("For manual sourcing, use: source %s\n", profilePath)
+
+		return nil
 	},
 }

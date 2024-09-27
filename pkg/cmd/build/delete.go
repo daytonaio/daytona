@@ -6,7 +6,6 @@ package build
 import (
 	"context"
 	"fmt"
-	"log"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -19,44 +18,44 @@ var buildDeleteCmd = &cobra.Command{
 	Short:   "Delete a build",
 	Aliases: []string{"remove", "rm"},
 	Args:    cobra.RangeArgs(0, 1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		var buildId string
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if allFlag {
 			res, err := apiClient.BuildAPI.DeleteAllBuilds(ctx).Force(forceFlag).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
 			views.RenderInfoMessage("All builds have been marked for deletion")
-			return
+			return nil
 		}
 
 		if prebuildIdFlag != "" {
 			res, err := apiClient.BuildAPI.DeleteBuildsFromPrebuild(ctx, prebuildIdFlag).Force(forceFlag).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
 			views.RenderInfoMessage(fmt.Sprintf("All builds from prebuild %s have been marked for deletion\n", prebuildIdFlag))
-			return
+			return nil
 		}
 
 		if len(args) == 0 {
 			buildList, res, err := apiClient.BuildAPI.ListBuilds(ctx).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
 			build := selection.GetBuildFromPrompt(buildList, "Delete")
 			if build == nil {
-				return
+				return nil
 			}
 			buildId = build.Id
 		} else {
@@ -65,9 +64,10 @@ var buildDeleteCmd = &cobra.Command{
 
 		res, err := apiClient.BuildAPI.DeleteBuild(ctx, buildId).Force(forceFlag).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 		views.RenderInfoMessage(fmt.Sprintf("Build %s has been marked for deletion", buildId))
+		return nil
 	},
 }
 

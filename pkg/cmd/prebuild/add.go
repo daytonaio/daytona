@@ -5,8 +5,8 @@ package prebuild
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/daytonaio/daytona/internal/util"
@@ -26,60 +26,60 @@ var prebuildAddCmd = &cobra.Command{
 	Short:   "Add a prebuild configuration",
 	Args:    cobra.NoArgs,
 	Aliases: []string{"new", "create"},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var prebuildAddView add.PrebuildAddView
 		var projectConfig *apiclient.ProjectConfig
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		if len(gitProviders) == 0 {
 			views.RenderInfoMessage("No registered Git providers have been found - please register a Git provider using 'daytona git-provider add' in order to start using prebuilds.")
-			return
+			return nil
 		}
 
 		projectConfigList, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(ctx).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		projectConfig = selection.GetProjectConfigFromPrompt(projectConfigList, 0, false, true, "Prebuild")
 		if projectConfig == nil {
-			log.Fatal("No project config selected")
+			return errors.New("No project config selected")
 		}
 
 		if projectConfig.Name == selection.NewProjectConfigIdentifier {
 			projectConfig, err = projectconfig.RunProjectConfigAddFlow(apiClient, gitProviders, ctx)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 			if projectConfig == nil {
-				return
+				return nil
 			}
 		}
 
 		prebuildAddView.ProjectConfigName = projectConfig.Name
 
 		if projectConfig.BuildConfig == nil {
-			log.Fatal("The chosen project config does not have a build configuration")
+			return errors.New("The chosen project config does not have a build configuration")
 		}
 
 		chosenBranch, err := workspace_util.GetBranchFromProjectConfig(projectConfig, apiClient, 0)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if chosenBranch == nil {
 			fmt.Println("Operation canceled")
-			return
+			return nil
 		}
 
 		prebuildAddView.RunBuildOnAdd = runOnAddFlag
@@ -91,13 +91,13 @@ var prebuildAddCmd = &cobra.Command{
 		if prebuildAddView.CommitInterval != "" {
 			commitInterval, err = strconv.Atoi(prebuildAddView.CommitInterval)
 			if err != nil {
-				log.Fatal("commit interval must be a number")
+				return errors.New("commit interval must be a number")
 			}
 		}
 
 		retention, err := strconv.Atoi(prebuildAddView.Retention)
 		if err != nil {
-			log.Fatal("retention must be a number")
+			return errors.New("retention must be a number")
 
 		}
 
@@ -116,7 +116,7 @@ var prebuildAddCmd = &cobra.Command{
 
 		prebuildId, res, err := apiClient.PrebuildAPI.SetPrebuild(ctx, prebuildAddView.ProjectConfigName).Prebuild(newPrebuild).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		views.RenderInfoMessage("Prebuild added successfully")
@@ -124,11 +124,13 @@ var prebuildAddCmd = &cobra.Command{
 		if prebuildAddView.RunBuildOnAdd {
 			buildId, err := build.CreateBuild(apiClient, projectConfig, chosenBranch.Name, &prebuildId)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			views.RenderViewBuildLogsMessage(buildId)
 		}
+
+		return nil
 	},
 }
 

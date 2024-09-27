@@ -5,11 +5,12 @@ package workspacemode
 
 import (
 	"os"
+	"time"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 	cmd "github.com/daytonaio/daytona/pkg/cmd"
 	. "github.com/daytonaio/daytona/pkg/cmd/agent"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"
 )
@@ -22,15 +23,14 @@ var workspaceModeRootCmd = &cobra.Command{
 	Short:             "Use the Daytona CLI to manage your workspace",
 	Long:              "Use the Daytona CLI to manage your workspace",
 	DisableAutoGenTag: true,
-	Run: func(cmd *cobra.Command, args []string) {
-		err := cmd.Help()
-		if err != nil {
-			log.Fatal(err)
-		}
+	SilenceUsage:      true,
+	SilenceErrors:     true,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return cmd.Help()
 	},
 }
 
-func Execute() {
+func Execute() error {
 	cmd.SetupRootCommand(workspaceModeRootCmd)
 	workspaceModeRootCmd.AddGroup(&cobra.Group{ID: util.WORKSPACE_GROUP, Title: "Project & Workspace"})
 	workspaceModeRootCmd.AddCommand(gitCredCmd)
@@ -42,9 +42,21 @@ func Execute() {
 	workspaceModeRootCmd.AddCommand(portForwardCmd)
 	workspaceModeRootCmd.AddCommand(exposeCmd)
 
-	if err := workspaceModeRootCmd.Execute(); err != nil {
-		log.Fatal(err)
+	clientId := config.GetClientId()
+	telemetryEnabled := config.TelemetryEnabled()
+	startTime := time.Now()
+
+	telemetryService, command, err := cmd.PreRun(workspaceModeRootCmd, os.Args[1:], telemetryEnabled, clientId, startTime)
+	if err != nil {
+		return err
 	}
+
+	err = workspaceModeRootCmd.Execute()
+
+	endTime := time.Now()
+	cmd.PostRun(command, err, telemetryService, clientId, startTime, endTime)
+
+	return err
 }
 
 func init() {

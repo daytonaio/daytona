@@ -20,17 +20,17 @@ var exposeCmd = &cobra.Command{
 	Short:   "Expose a local port over stdout - Used by the Daytona CLI to make direct connections to the project",
 	Args:    cobra.ExactArgs(1),
 	GroupID: util.WORKSPACE_GROUP,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		port, err := strconv.Atoi(args[0])
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		targetUrl := fmt.Sprintf("localhost:%d", port)
 
 		dialConn, err := net.Dial("tcp", targetUrl)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		go func() {

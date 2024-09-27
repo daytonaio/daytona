@@ -23,26 +23,26 @@ var portForwardCmd = &cobra.Command{
 	Short:   "Forward a port from the project to your local machine",
 	Args:    cobra.ExactArgs(1),
 	GroupID: util.WORKSPACE_GROUP,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		activeProfile, err := c.GetActiveProfile()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		port, err := strconv.Atoi(args[0])
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		hostPort, errChan := tailscale.ForwardPort(workspaceId, projectName, uint16(port), activeProfile)
 
 		if hostPort == nil {
 			if err = <-errChan; err != nil {
-				log.Fatal(err)
+				return err
 			}
 		} else {
 			if *hostPort != uint16(port) {

@@ -49,7 +49,7 @@ var ServeCmd = &cobra.Command{
 	Short:   "Run the server process in the current terminal session",
 	GroupID: util.SERVER_GROUP,
 	Args:    cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if os.Getenv("USER") == "root" {
 			views.RenderInfoMessageBold("Running the server as root is not recommended because\nDaytona will not be able to remap project directory ownership.\nPlease run the server as a non-root user.")
 		}
@@ -61,12 +61,12 @@ var ServeCmd = &cobra.Command{
 
 		configDir, err := server.GetConfigDir()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		c, err := server.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		telemetryService := posthogservice.NewTelemetryService(posthogservice.PosthogServiceConfig{
@@ -80,7 +80,6 @@ var ServeCmd = &cobra.Command{
 
 			for range interruptChannel {
 				log.Info("Shutting down")
-				telemetryService.Close()
 			}
 		}()
 
@@ -91,35 +90,35 @@ var ServeCmd = &cobra.Command{
 
 		server, err := GetInstance(c, configDir, telemetryService)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		errCh := make(chan error)
 
 		err = server.Start(errCh)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		buildRunnerConfig, err := build.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		buildRunner, err := GetBuildRunner(c, buildRunnerConfig, telemetryService)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		err = buildRunner.Start()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		go func() {
 			err := apiServer.Start()
 			if err != nil {
-				log.Fatal(err)
+				errCh <- err
 			}
 		}()
 
@@ -127,27 +126,23 @@ var ServeCmd = &cobra.Command{
 			err := <-errCh
 			if err != nil {
 				buildRunner.Stop()
-				log.Fatal(err)
 			}
 		}()
 
 		err = waitForServerToStart(apiServer)
 
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		printServerStartedMessage(c, false)
 
 		err = setDefaultConfig(server, c.ApiPort)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
-		err = <-errCh
-		if err != nil {
-			log.Fatal(err)
-		}
+		return <-errCh
 	},
 }
 
@@ -179,7 +174,7 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 	}
 	buildStore, err := db.NewBuildStore(dbConnection)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	projectConfigStore, err := db.NewProjectConfigStore(dbConnection)
 	if err != nil {

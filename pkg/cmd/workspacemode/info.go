@@ -9,7 +9,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -19,25 +18,26 @@ var infoCmd = &cobra.Command{
 	Aliases: []string{"view", "inspect"},
 	Args:    cobra.ExactArgs(0),
 	GroupID: util.WORKSPACE_GROUP,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var workspace *apiclient.WorkspaceDTO
 
 		workspace, err := apiclient_util.GetWorkspace(workspaceId, true)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if workspace == nil {
-			return
+			return nil
 		}
 
 		if format.FormatFlag != "" {
 			formattedData := format.NewFormatter(workspace)
 			formattedData.Print()
-			return
+			return nil
 		}
 
 		info.Render(workspace, "", false)
+		return nil
 	},
 }
 

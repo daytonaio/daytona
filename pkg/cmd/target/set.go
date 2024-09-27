@@ -5,6 +5,7 @@ package target
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -27,27 +28,27 @@ var TargetSetCmd = &cobra.Command{
 	Short:   "Set provider target",
 	Args:    cobra.NoArgs,
 	Aliases: []string{"s", "add", "update", "register", "edit"},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		activeProfile, err := c.GetActiveProfile()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(apiclient.ApiGetConfigRequest{})
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		providersManifest, err := manager.NewProviderManager(manager.ProviderManagerConfig{
@@ -61,7 +62,7 @@ var TargetSetCmd = &cobra.Command{
 		if providersManifest != nil {
 			providersManifestLatest := providersManifest.GetLatestVersions()
 			if providersManifestLatest == nil {
-				log.Fatal("Could not get latest provider versions")
+				return errors.New("could not get latest provider versions")
 			}
 
 			latestProviders = provider.GetProviderListFromManifest(providersManifestLatest)
@@ -69,34 +70,37 @@ var TargetSetCmd = &cobra.Command{
 			fmt.Println("Could not get provider manifest. Can't check for new providers to install")
 		}
 
-		providerViewList := provider.GetProviderViewOptions(apiClient, latestProviders, ctx)
+		providerViewList, err := provider.GetProviderViewOptions(apiClient, latestProviders, ctx)
+		if err != nil {
+			return err
+		}
 
 		selectedProvider, err := provider_view.GetProviderFromPrompt(providerViewList, "Choose a Provider", false)
 		if err != nil {
 			if common.IsCtrlCAbort(err) {
-				return
+				return nil
 			} else {
-				log.Fatal(err)
+				return err
 			}
 		}
 
 		if selectedProvider == nil {
-			return
+			return nil
 		}
 
 		if selectedProvider.Installed != nil && !*selectedProvider.Installed {
 			if providersManifest == nil {
-				log.Fatal("Could not get providers manifest")
+				return errors.New("could not get providers manifest")
 			}
 			err = provider.InstallProvider(apiClient, *selectedProvider, providersManifest)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 		}
 
 		targets, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		filteredTargets := []apiclient.ProviderTarget{}
@@ -109,15 +113,15 @@ var TargetSetCmd = &cobra.Command{
 		selectedTarget, err := target.GetTargetFromPrompt(filteredTargets, activeProfile.Name, true)
 		if err != nil {
 			if common.IsCtrlCAbort(err) {
-				return
+				return nil
 			} else {
-				log.Fatal(err)
+				return err
 			}
 		}
 
 		targetManifest, res, err := apiClient.ProviderAPI.GetTargetManifest(context.Background(), selectedProvider.Name).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		if selectedTarget.Name == target.NewTargetName {
@@ -126,13 +130,13 @@ var TargetSetCmd = &cobra.Command{
 				return t.Name
 			}))
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 		}
 
 		err = target.SetTargetForm(selectedTarget, *targetManifest)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		selectedTarget.ProviderInfo = apiclient.ProviderProviderInfo{
@@ -142,9 +146,10 @@ var TargetSetCmd = &cobra.Command{
 
 		res, err = apiClient.TargetAPI.SetTarget(context.Background()).Target(*selectedTarget).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		views.RenderInfoMessage("Target set successfully")
+		return nil
 	},
 }

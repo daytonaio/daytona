@@ -5,7 +5,6 @@ package build
 
 import (
 	"context"
-	"log"
 	"net/http"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
@@ -21,24 +20,24 @@ var buildInfoCmd = &cobra.Command{
 	Short:   "Show build info",
 	Aliases: []string{"view", "inspect"},
 	Args:    cobra.RangeArgs(0, 1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		var build *apiclient.Build
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		apiServerConfig, res, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		if len(args) == 0 {
 			buildList, res, err := apiClient.BuildAPI.ListBuilds(ctx).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
 			if format.FormatFlag != "" {
@@ -51,23 +50,24 @@ var buildInfoCmd = &cobra.Command{
 			}
 
 			if build == nil {
-				return
+				return nil
 			}
 		} else {
 			var res *http.Response
 			build, res, err = apiClient.BuildAPI.GetBuild(ctx, args[0]).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 		}
 
 		if format.FormatFlag != "" {
 			formattedData := format.NewFormatter(build)
 			formattedData.Print()
-			return
+			return nil
 		}
 
 		info.Render(build, apiServerConfig, false)
+		return nil
 	},
 }
 

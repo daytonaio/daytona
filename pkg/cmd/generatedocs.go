@@ -8,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 )
@@ -19,10 +18,10 @@ var defaultDirectory = "docs"
 var generateDocsCmd = &cobra.Command{
 	Use:   "generate-docs",
 	Short: "Generate documentation for the Daytona CLI",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		directory, err := cmd.Flags().GetString("directory")
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if directory == "" {
@@ -31,25 +30,26 @@ var generateDocsCmd = &cobra.Command{
 
 		err = os.MkdirAll(directory, os.ModePerm)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		err = os.MkdirAll(filepath.Join(yamlDirectory, directory), os.ModePerm)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		err = doc.GenMarkdownTree(cmd.Root(), directory)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		err = doc.GenYamlTree(cmd.Root(), filepath.Join(yamlDirectory, directory))
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		fmt.Printf("Documentation generated at %s\n", directory)
+		return nil
 	},
 	Hidden: true,
 }
