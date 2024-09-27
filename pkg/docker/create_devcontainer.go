@@ -17,6 +17,7 @@ import (
 	"strings"
 
 	"github.com/compose-spec/compose-go/v2/cli"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/build/devcontainer"
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/ssh"
@@ -150,7 +151,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 			return "", "", err
 		}
 
-		project.Name = fmt.Sprintf("%s-%s", opts.ProjectName, uuid.NewString())
+		project.Name = fmt.Sprintf("%s-%s", opts.ProjectName, util.Hash(opts.ProjectDir))
 
 		for _, service := range project.Services {
 			if service.Build != nil {
