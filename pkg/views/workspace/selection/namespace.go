@@ -13,7 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
-func selectNamespacePrompt(namespaces []apiclient.GitNamespace, projectOrder int, parentIdentifier string, choiceChan chan<- string) {
+func selectNamespacePrompt(namespaces []apiclient.GitNamespace, projectOrder int, choiceChan chan<- string, navChan chan<- string, isPaginationDisabled bool, curPage, perPage int32) {
 	items := []list.Item{}
 	var desc string
 
@@ -28,7 +28,11 @@ func selectNamespacePrompt(namespaces []apiclient.GitNamespace, projectOrder int
 		items = append(items, newItem)
 	}
 
-	l := views.GetStyledSelectList(items, parentIdentifier)
+	if !isPaginationDisabled {
+		items = AddNavigationOptionsToList(items, len(namespaces), curPage, perPage)
+	}
+
+	l := views.GetStyledSelectList(items, curPage)
 
 	title := "Choose a Namespace"
 	if projectOrder > 1 {
@@ -44,17 +48,29 @@ func selectNamespacePrompt(namespaces []apiclient.GitNamespace, projectOrder int
 		os.Exit(1)
 	}
 
+	// Return either the choice or navigation
 	if m, ok := p.(model[string]); ok && m.choice != nil {
-		choiceChan <- *m.choice
+		choice := *m.choice
+		if choice == "next" || choice == "prev" {
+			navChan <- choice
+		} else {
+			choiceChan <- choice
+		}
 	} else {
 		choiceChan <- ""
 	}
 }
 
-func GetNamespaceIdFromPrompt(namespaces []apiclient.GitNamespace, projectOrder int, parentIdentifier string) string {
+func GetNamespaceIdFromPrompt(namespaces []apiclient.GitNamespace, projectOrder int, isPaginationDisabled bool, curPage, perPage int32) (string, string) {
 	choiceChan := make(chan string)
+	navChan := make(chan string)
 
-	go selectNamespacePrompt(namespaces, projectOrder, parentIdentifier, choiceChan)
+	go selectNamespacePrompt(namespaces, projectOrder, choiceChan, navChan, isPaginationDisabled, curPage, perPage)
 
-	return <-choiceChan
+	select {
+	case choice := <-choiceChan:
+		return choice, ""
+	case navigate := <-navChan:
+		return "", navigate
+	}
 }

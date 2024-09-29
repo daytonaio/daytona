@@ -14,7 +14,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrder int, parentIdentifier string, choiceChan chan<- string) {
+func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrder int, choiceChan chan<- string, navChan chan<- string, isPaginationDisabled bool, curPage, perPage int32) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
@@ -28,7 +28,11 @@ func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrd
 		items = append(items, newItem)
 	}
 
-	l := views.GetStyledSelectList(items, parentIdentifier)
+	if !isPaginationDisabled {
+		items = AddNavigationOptionsToList(items, len(pullRequests), curPage, perPage)
+	}
+
+	l := views.GetStyledSelectList(items, curPage)
 
 	title := "Choose a Pull/Merge Request"
 	if projectOrder > 1 {
@@ -45,23 +49,32 @@ func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrd
 	}
 
 	if m, ok := p.(model[string]); ok && m.choice != nil {
-		choiceChan <- *m.choice
+		choice := *m.choice
+		if choice == "next" || choice == "prev" {
+			navChan <- choice
+		} else {
+			choiceChan <- choice
+		}
 	} else {
 		choiceChan <- ""
 	}
 }
 
-func GetPullRequestFromPrompt(pullRequests []apiclient.GitPullRequest, projectOrder int, parentIdentifier string) *apiclient.GitPullRequest {
+func GetPullRequestFromPrompt(pullRequests []apiclient.GitPullRequest, projectOrder int, isPaginationDisabled bool, curPage, perPage int32) (*apiclient.GitPullRequest, string) {
 	choiceChan := make(chan string)
+	navChan := make(chan string)
 
-	go selectPullRequestPrompt(pullRequests, projectOrder, parentIdentifier, choiceChan)
+	go selectPullRequestPrompt(pullRequests, projectOrder, choiceChan, navChan, isPaginationDisabled, curPage, perPage)
 
-	pullRequestName := <-choiceChan
-
-	for _, pr := range pullRequests {
-		if pr.Name == pullRequestName {
-			return &pr
+	select {
+	case pullRequestName := <-choiceChan:
+		for _, pr := range pullRequests {
+			if pr.Name == pullRequestName {
+				return &pr, ""
+			}
 		}
+		return nil, ""
+	case navigate := <-navChan:
+		return nil, navigate
 	}
-	return nil
 }

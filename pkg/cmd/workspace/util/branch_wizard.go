@@ -6,7 +6,6 @@ package util
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/url"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
@@ -26,33 +25,72 @@ type BranchWizardConfig struct {
 	ProviderId          string
 }
 
-func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, error) {
+func runGetBranchFromPromptWithPagination(ctx context.Context, config BranchWizardConfig, page, perPage int32) (*apiclient.GitRepository, error) {
 	var branchList []apiclient.GitBranch
-	var checkoutOptions []selection.CheckoutOption
-	page := int32(1)
-	perPage := int32(100)
 	var err error
-	ctx := context.Background()
 
 	for {
-		var branches []apiclient.GitBranch
-		err = views_util.WithSpinner("Loading", func() error {
-			branchList, _, err = config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.ProviderId, config.NamespaceId, url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
-			return err
+		branchList = nil
+		err = views_util.WithSpinner("Loading Branches", func() error {
+			branches, _, err := config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.ProviderId, config.NamespaceId, url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
+			if err != nil {
+				return err
+			}
+
+			branchList = append(branchList, branches...)
+			return nil
 		})
 
 		if err != nil {
 			return nil, err
 		}
 
-		branchList = append(branchList, branches...)
+		// Check if the git provider supports pagination
+		isPaginationDisabled := isGitProviderWithUnsupportedPagination(config.ProviderId)
 
-		// Break for git providers with unsupported pagination OR on reaching exhausted items.
-		if isGitProviderWithUnsupportedPagination(config.ProviderId) || int32(len(branches)) < perPage {
-			break
+		// User will either choose a branch or navigate the pages
+		branch, navigate := selection.GetBranchFromPrompt(branchList, config.ProjectOrder, isPaginationDisabled, page, perPage)
+		if !isPaginationDisabled && navigate != "" {
+			if navigate == "next" {
+				page++
+				continue // Fetch the next page of branches
+			} else if navigate == "prev" && page > 1 {
+				page--
+				continue // Fetch the previous page of branches
+			}
+		} else if branch != nil {
+			config.ChosenRepo.Branch = branch.Name
+			config.ChosenRepo.Sha = branch.Sha
+
+			return config.ChosenRepo, nil
+		} else {
+			// If user aborts or there's no selection
+			return nil, errors.New("must select a branch")
+		}
+	}
+}
+
+func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, error) {
+	var branchList []apiclient.GitBranch
+	var checkoutOptions []selection.CheckoutOption
+	page := int32(1)
+	// Verify first if num of existing branches is greater than equal to 1
+	perPage := int32(2)
+	var err error
+	ctx := context.Background()
+
+	err = views_util.WithSpinner("Loading Branches", func() error {
+		branches, _, err := config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.ProviderId, config.NamespaceId, url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
+		if err != nil {
+			return err
 		}
 
-		page++
+		branchList = append(branchList, branches...)
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
 	}
 
 	if len(branchList) == 0 {
@@ -67,46 +105,25 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 
 	var prList []apiclient.GitPullRequest
 	page = 1
-	perPage = 100
+	// Verify first if there are any existing PRs
+	perPage = 1
 
-	for {
-		var pullRequests []apiclient.GitPullRequest
-		err = views_util.WithSpinner("Loading", func() error {
-			prList, _, err = config.ApiClient.GitProviderAPI.GetRepoPRs(ctx, config.ProviderId, config.NamespaceId, url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
-			return err
-		})
-
+	err = views_util.WithSpinner("Loading", func() error {
+		prs, _, err := config.ApiClient.GitProviderAPI.GetRepoPRs(ctx, config.ProviderId, config.NamespaceId, url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
 		if err != nil {
-			return nil, err
+			return err
 		}
 
-		prList = append(prList, pullRequests...)
+		prList = append(prList, prs...)
+		return nil
+	})
 
-		// Break for git providers with unsupported pagination OR on reaching exhausted items.
-		if isGitProviderWithUnsupportedPagination(config.ProviderId) || int32(len(pullRequests)) < perPage {
-			break
-		}
-
-		page++
+	if err != nil {
+		return nil, err
 	}
 
-	var branch *apiclient.GitBranch
-	namespace := config.Namespace
-	if namespace == "" {
-		namespace = config.ChosenRepo.Owner
-	}
-
-	parentIdentifier := fmt.Sprintf("%s/%s/%s", config.ProviderId, namespace, config.ChosenRepo.Name)
 	if len(prList) == 0 {
-		branch = selection.GetBranchFromPrompt(branchList, config.ProjectOrder, parentIdentifier)
-		if branch == nil {
-			return nil, errors.New("must select a branch")
-		}
-
-		config.ChosenRepo.Branch = branch.Name
-		config.ChosenRepo.Sha = branch.Sha
-
-		return config.ChosenRepo, nil
+		return runGetBranchFromPromptWithPagination(ctx, config, 1, 100)
 	}
 
 	checkoutOptions = append(checkoutOptions, selection.CheckoutDefault)
@@ -134,24 +151,53 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	}
 
 	if chosenCheckoutOption == selection.CheckoutBranch {
-		branch = selection.GetBranchFromPrompt(branchList, config.ProjectOrder, parentIdentifier)
-		if branch == nil {
-			return nil, errors.New("must select a branch")
-		}
-		config.ChosenRepo.Branch = branch.Name
-		config.ChosenRepo.Sha = branch.Sha
+		return runGetBranchFromPromptWithPagination(ctx, config, 1, 100)
 	} else if chosenCheckoutOption == selection.CheckoutPR {
-		chosenPullRequest := selection.GetPullRequestFromPrompt(prList, config.ProjectOrder, parentIdentifier)
-		if chosenPullRequest == nil {
-			return nil, errors.New("must select a pull request")
-		}
+		page = 1
+		perPage = 100
+		for {
+			prList = nil
+			err = views_util.WithSpinner("Loading Pull Requests", func() error {
+				branches, _, err := config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.ProviderId, config.NamespaceId, url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
+				if err != nil {
+					return err
+				}
 
-		config.ChosenRepo.Branch = chosenPullRequest.Branch
-		config.ChosenRepo.Sha = chosenPullRequest.Sha
-		config.ChosenRepo.Id = chosenPullRequest.SourceRepoId
-		config.ChosenRepo.Name = chosenPullRequest.SourceRepoName
-		config.ChosenRepo.Owner = chosenPullRequest.SourceRepoOwner
-		config.ChosenRepo.Url = chosenPullRequest.SourceRepoUrl
+				branchList = append(branchList, branches...)
+				return nil
+			})
+
+			if err != nil {
+				return nil, err
+			}
+
+			// Check if the git provider supports pagination
+			isPaginationDisabled := isGitProviderWithUnsupportedPagination(config.ProviderId)
+
+			// User will either choose a PR or navigate the pages
+			chosenPullRequest, navigate := selection.GetPullRequestFromPrompt(prList, config.ProjectOrder, isPaginationDisabled, page, perPage)
+			if !isPaginationDisabled && navigate != "" {
+				if navigate == "next" {
+					page++
+					continue
+				} else if navigate == "prev" && page > 1 {
+					page--
+					continue
+				}
+			} else if chosenPullRequest != nil {
+				config.ChosenRepo.Branch = chosenPullRequest.Branch
+				config.ChosenRepo.Sha = chosenPullRequest.Sha
+				config.ChosenRepo.Id = chosenPullRequest.SourceRepoId
+				config.ChosenRepo.Name = chosenPullRequest.SourceRepoName
+				config.ChosenRepo.Owner = chosenPullRequest.SourceRepoOwner
+				config.ChosenRepo.Url = chosenPullRequest.SourceRepoUrl
+
+				return config.ChosenRepo, nil
+			} else {
+				// If user aborts or there's no selection
+				return nil, errors.New("must select a pull request")
+			}
+		}
 	}
 
 	return config.ChosenRepo, nil

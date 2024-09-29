@@ -24,6 +24,7 @@ var (
 	Gray        = lipgloss.AdaptiveColor{Light: "243", Dark: "243"}
 	LightGray   = lipgloss.AdaptiveColor{Light: "#828282", Dark: "#828282"}
 	Red         = lipgloss.AdaptiveColor{Light: "#FF4672", Dark: "#ED567A"}
+	Purple      = lipgloss.AdaptiveColor{Light: "#800080", Dark: "#800080"}
 )
 
 var (
@@ -40,13 +41,14 @@ var (
 	DefaultRowDataStyle = lipgloss.NewStyle().Foreground(Gray)
 	BaseCellStyle       = lipgloss.NewRenderer(os.Stdout).NewStyle().Padding(0, 4, 1, 0)
 	TableHeaderStyle    = BaseCellStyle.Foreground(LightGray).Bold(false).Padding(0).MarginRight(4)
+	NavigationStyle     = lipgloss.NewStyle().Foreground(Purple)
 )
 
 var LogPrefixColors = []lipgloss.AdaptiveColor{
 	Blue, Orange, Cyan, Yellow,
 }
 
-func GetStyledSelectList(items []list.Item, parentIdentifier ...string) list.Model {
+func GetStyledSelectList(items []list.Item, parentIdentifier ...string, curPage ...int32) list.Model {
 
 	d := list.NewDefaultDelegate()
 
@@ -70,15 +72,19 @@ func GetStyledSelectList(items []list.Item, parentIdentifier ...string) list.Mod
 	l.FilterInput.TextStyle = lipgloss.NewStyle().Foreground(Green)
 
 	singularItemName := "item " + SeparatorString
-	var pluralItemName string
-	if len(parentIdentifier) == 0 {
-		pluralItemName = fmt.Sprintf("items\n\n%s", SeparatorString)
-	} else {
-		pluralItemName = fmt.Sprintf("items (%s)\n\n%s", parentIdentifier[0], SeparatorString)
+	pluralItemName := "items "
+
+	if curPage != nil {
+		pluralItemName += fmt.Sprintf("| Page %d", curPage[0])
 	}
 
-	l.SetStatusBarItemName(singularItemName, pluralItemName)
+	if len(parentIdentifier) > 0 {
+		pluralItemName += fmt.Sprintf(" (%s)", parentIdentifier[0])
+	}
 
+	pluralItemName += fmt.Sprintf("\n\n(%s)", SeparatorString)
+
+	l.SetStatusBarItemName(singularItemName, pluralItemName)
 	return l
 }
 

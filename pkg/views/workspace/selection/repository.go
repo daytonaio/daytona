@@ -14,7 +14,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectRepositoryPrompt(repositories []apiclient.GitRepository, projectOrder int, choiceChan chan<- string, selectedRepos map[string]int, parentIdentifier string) {
+func selectRepositoryPrompt(repositories []apiclient.GitRepository, projectOrder int, choiceChan chan<- string, navChan chan<- string, selectedRepos map[string]int, isPaginationDisabled bool, curPage, perPage int32) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
@@ -28,7 +28,11 @@ func selectRepositoryPrompt(repositories []apiclient.GitRepository, projectOrder
 		items = append(items, newItem)
 	}
 
-	l := views.GetStyledSelectList(items, parentIdentifier)
+	if !isPaginationDisabled {
+		items = AddNavigationOptionsToList(items, len(repositories), curPage, perPage)
+	}
+
+	l := views.GetStyledSelectList(items, curPage)
 
 	title := "Choose a Repository"
 	if projectOrder > 1 {
@@ -44,28 +48,35 @@ func selectRepositoryPrompt(repositories []apiclient.GitRepository, projectOrder
 		os.Exit(1)
 	}
 
+	// Return either the choice or navigation
 	if m, ok := p.(model[string]); ok && m.choice != nil {
 		choice := *m.choice
-
-		selectedRepos[choice]++
-		choiceChan <- choice
+		if choice == "next" || choice == "prev" {
+			navChan <- choice
+		} else {
+			selectedRepos[choice]++
+			choiceChan <- choice
+		}
 	} else {
 		choiceChan <- ""
 	}
 }
 
-func GetRepositoryFromPrompt(repositories []apiclient.GitRepository, projectOrder int, selectedRepos map[string]int, parentIdentifier string) *apiclient.GitRepository {
+func GetRepositoryFromPrompt(repositories []apiclient.GitRepository, projectOrder int, selectedRepos map[string]int, isPaginationDisabled bool, curPage, perPage int32) (*apiclient.GitRepository, string) {
 	choiceChan := make(chan string)
+	navChan := make(chan string)
 
-	go selectRepositoryPrompt(repositories, projectOrder, choiceChan, selectedRepos, parentIdentifier)
+	go selectRepositoryPrompt(repositories, projectOrder, choiceChan, navChan, selectedRepos, isPaginationDisabled, curPage, perPage)
 
-	choice := <-choiceChan
-
-	for _, repository := range repositories {
-		if repository.Url == choice {
-			return &repository
+	select {
+	case choice := <-choiceChan:
+		for _, repository := range repositories {
+			if repository.Url == choice {
+				return &repository, ""
+			}
 		}
+		return nil, ""
+	case navigate := <-navChan:
+		return nil, navigate
 	}
-
-	return nil
 }
