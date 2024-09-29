@@ -87,37 +87,10 @@ func (g *GitLabGitProvider) GetRepositories(namespace string, options ListOption
 	var repoList []*gitlab.Project
 	var err error
 
-	page := 1
-
-	for {
-		var projects []*gitlab.Project
-		var response *gitlab.Response
-
-		if namespace == personalNamespaceId {
-			user, err := g.GetUser()
-			if err != nil {
-				return nil, err
-			}
-
-			projects, response, err = client.Projects.ListUserProjects(user.Id, &gitlab.ListProjectsOptions{
-				ListOptions: gitlab.ListOptions{
-					PerPage: 100,
-					Page:    page,
-				},
-			})
-			if err != nil {
-				return nil, g.FormatError(err)
-			}
-		} else {
-			projects, response, err = client.Groups.ListGroupProjects(namespace, &gitlab.ListGroupProjectsOptions{
-				ListOptions: gitlab.ListOptions{
-					PerPage: 100,
-					Page:    page,
-				},
-			})
-			if err != nil {
-				return nil, g.FormatError(err)
-			}
+	if namespace == personalNamespaceId {
+		user, err := g.GetUser()
+		if err != nil {
+			return nil, err
 		}
 
 		repoList, _, err = client.Projects.ListUserProjects(user.Id, &gitlab.ListProjectsOptions{
@@ -127,7 +100,7 @@ func (g *GitLabGitProvider) GetRepositories(namespace string, options ListOption
 			},
 		})
 		if err != nil {
-			return nil, err
+			return nil, g.FormatError(err)
 		}
 	} else {
 		repoList, _, err = client.Groups.ListGroupProjects(namespace, &gitlab.ListGroupProjectsOptions{
@@ -137,7 +110,7 @@ func (g *GitLabGitProvider) GetRepositories(namespace string, options ListOption
 			},
 		})
 		if err != nil {
-			return nil, err
+			return nil, g.FormatError(err)
 		}
 	}
 

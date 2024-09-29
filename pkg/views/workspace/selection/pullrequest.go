@@ -14,7 +14,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrder int, choiceChan chan<- string, navChan chan<- string, isPaginationDisabled bool, curPage, perPage int32) {
+func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrder int, parentIdentifier string, choiceChan chan<- string, navChan chan<- string, isPaginationDisabled bool, curPage, perPage int32) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
@@ -32,7 +32,12 @@ func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrd
 		items = AddNavigationOptionsToList(items, len(pullRequests), curPage, perPage)
 	}
 
-	l := views.GetStyledSelectList(items, curPage)
+	listOptions := views.ListOptions{
+		ParentIdentifier: parentIdentifier,
+		CurPage:          curPage,
+	}
+
+	l := views.GetStyledSelectList(items, listOptions)
 
 	title := "Choose a Pull/Merge Request"
 	if projectOrder > 1 {
@@ -60,11 +65,11 @@ func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrd
 	}
 }
 
-func GetPullRequestFromPrompt(pullRequests []apiclient.GitPullRequest, projectOrder int, isPaginationDisabled bool, curPage, perPage int32) (*apiclient.GitPullRequest, string) {
+func GetPullRequestFromPrompt(pullRequests []apiclient.GitPullRequest, projectOrder int, parentIdentifier string, isPaginationDisabled bool, curPage, perPage int32) (*apiclient.GitPullRequest, string) {
 	choiceChan := make(chan string)
 	navChan := make(chan string)
 
-	go selectPullRequestPrompt(pullRequests, projectOrder, choiceChan, navChan, isPaginationDisabled, curPage, perPage)
+	go selectPullRequestPrompt(pullRequests, projectOrder, parentIdentifier, choiceChan, navChan, isPaginationDisabled, curPage, perPage)
 
 	select {
 	case pullRequestName := <-choiceChan:

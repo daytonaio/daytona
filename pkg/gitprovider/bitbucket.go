@@ -84,23 +84,23 @@ func (g *BitbucketGitProvider) GetRepositories(namespace string, options ListOpt
 		Keyword: nil,
 	})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	for _, repo := range repoList.Items {
 		htmlLink, ok := repo.Links["html"].(map[string]interface{})
 		if !ok {
-			return nil, fmt.Errorf("invalid repo links")
+			return nil, errors.New("invalid repo links")
 		}
 
 		repoUrl, ok := htmlLink["href"].(string)
 		if !ok {
-			return nil, fmt.Errorf("invalid repo html link")
+			return nil, errors.New("invalid repo html link")
 		}
 
 		u, err := url.Parse(repoUrl)
 		if err != nil {
-			return nil, g.FormatError(err)
+			return nil, err
 		}
 
 		owner, name, err := g.getOwnerAndRepoFromFullName(repo.Full_name)

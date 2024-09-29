@@ -108,13 +108,13 @@ func (g *GitHubGitProvider) GetRepositories(namespace string, options ListOption
 
 	repoList, _, err := client.Search.Repositories(ctx, query, opts)
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	for _, repo := range repoList.Repositories {
 		u, err := url.Parse(*repo.HTMLURL)
 		if err != nil {
-			return nil, g.FormatError(err)
+			return nil, err
 		}
 
 		repos = append(repos, &GitRepository{

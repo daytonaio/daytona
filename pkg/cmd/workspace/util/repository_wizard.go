@@ -5,6 +5,7 @@ package util
 
 import (
 	"context"
+	"fmt"
 
 	config_const "github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
@@ -110,6 +111,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 	page := int32(1)
 	perPage := int32(100)
 	var namespaceList []apiclient.GitNamespace
+	namespace := ""
 	isOnlySingleNamespaceAvailable := true
 
 	for {
@@ -129,6 +131,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 
 		if isOnlySingleNamespaceAvailable && len(namespaceList) == 1 {
 			namespaceId = namespaceList[0].Id
+			namespace = namespaceList[0].Name
 			break
 		} else {
 			isOnlySingleNamespaceAvailable = false
@@ -137,7 +140,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		// Check if the git provider supports pagination
 		isPaginationDisabled := isGitProviderWithUnsupportedPagination(providerId)
 
-		namespaceId, navigate = selection.GetNamespaceIdFromPrompt(namespaceList, config.ProjectOrder, isPaginationDisabled, page, perPage)
+		namespaceId, navigate = selection.GetNamespaceIdFromPrompt(namespaceList, config.ProjectOrder, providerId, isPaginationDisabled, page, perPage)
 		if !isPaginationDisabled && navigate != "" {
 			if navigate == "next" {
 				page++
@@ -147,6 +150,11 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 				continue
 			}
 		} else if namespaceId != "" {
+			for _, namespaceItem := range namespaceList {
+				if namespaceItem.Id == namespaceId {
+					namespace = namespaceItem.Name
+				}
+			}
 			break
 		} else {
 			// If user aborts or there's no selection
@@ -164,6 +172,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 	page = 1
 	perPage = 100
 
+	parentIdentifier := fmt.Sprintf("%s/%s", providerId, namespace)
 	for {
 		// Fetch repos for the current page
 		providerRepos = nil
@@ -186,7 +195,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		isPaginationDisabled := isGitProviderWithUnsupportedPagination(providerId) && providerId != "bitbucket"
 
 		// User will either choose a repo or navigate the pages
-		chosenRepo, navigate = selection.GetRepositoryFromPrompt(providerRepos, config.ProjectOrder, config.SelectedRepos, isPaginationDisabled, page, perPage)
+		chosenRepo, navigate = selection.GetRepositoryFromPrompt(providerRepos, config.ProjectOrder, config.SelectedRepos, parentIdentifier, isPaginationDisabled, page, perPage)
 		if !isPaginationDisabled && navigate != "" {
 			if navigate == "next" {
 				page++

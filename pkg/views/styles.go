@@ -48,7 +48,12 @@ var LogPrefixColors = []lipgloss.AdaptiveColor{
 	Blue, Orange, Cyan, Yellow,
 }
 
-func GetStyledSelectList(items []list.Item, parentIdentifier ...string, curPage ...int32) list.Model {
+type ListOptions struct {
+	ParentIdentifier string
+	CurPage          int32
+}
+
+func GetStyledSelectList(items []list.Item, listOptions ...ListOptions) list.Model {
 
 	d := list.NewDefaultDelegate()
 
@@ -72,17 +77,17 @@ func GetStyledSelectList(items []list.Item, parentIdentifier ...string, curPage 
 	l.FilterInput.TextStyle = lipgloss.NewStyle().Foreground(Green)
 
 	singularItemName := "item " + SeparatorString
-	pluralItemName := "items "
+	pluralItemName := "items"
 
-	if curPage != nil {
-		pluralItemName += fmt.Sprintf("| Page %d", curPage[0])
+	if len(listOptions) > 0 && listOptions[0].CurPage > 0 {
+		pluralItemName += fmt.Sprintf(" | Page %d", listOptions[0].CurPage)
 	}
 
-	if len(parentIdentifier) > 0 {
-		pluralItemName += fmt.Sprintf(" (%s)", parentIdentifier[0])
+	if len(listOptions) > 0 && len(listOptions[0].ParentIdentifier) > 0 {
+		pluralItemName += fmt.Sprintf(" | (%s)", listOptions[0].ParentIdentifier)
 	}
 
-	pluralItemName += fmt.Sprintf("\n\n(%s)", SeparatorString)
+	pluralItemName += fmt.Sprintf(" \n\n%s", SeparatorString)
 
 	l.SetStatusBarItemName(singularItemName, pluralItemName)
 	return l

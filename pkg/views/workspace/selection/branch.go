@@ -14,7 +14,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectBranchPrompt(branches []apiclient.GitBranch, projectOrder int, choiceChan chan<- string, navChan chan<- string, isPaginationDisabled bool, curPage, perPage int32) {
+func selectBranchPrompt(branches []apiclient.GitBranch, projectOrder int, parentIdentifier string, choiceChan chan<- string, navChan chan<- string, isPaginationDisabled bool, curPage, perPage int32) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
@@ -30,7 +30,11 @@ func selectBranchPrompt(branches []apiclient.GitBranch, projectOrder int, choice
 		items = AddNavigationOptionsToList(items, len(branches), curPage, perPage)
 	}
 
-	l := views.GetStyledSelectList(items, curPage)
+	listOptions := views.ListOptions{
+		ParentIdentifier: parentIdentifier,
+		CurPage:          curPage,
+	}
+	l := views.GetStyledSelectList(items, listOptions)
 
 	title := "Choose a Branch"
 	if projectOrder > 1 {
@@ -59,11 +63,11 @@ func selectBranchPrompt(branches []apiclient.GitBranch, projectOrder int, choice
 	}
 }
 
-func GetBranchFromPrompt(branches []apiclient.GitBranch, projectOrder int, isPaginationDisabled bool, curPage, perPage int32) (*apiclient.GitBranch, string) {
+func GetBranchFromPrompt(branches []apiclient.GitBranch, projectOrder int, parentIdentifier string, isPaginationDisabled bool, curPage, perPage int32) (*apiclient.GitBranch, string) {
 	choiceChan := make(chan string)
 	navChan := make(chan string)
 
-	go selectBranchPrompt(branches, projectOrder, choiceChan, navChan, isPaginationDisabled, curPage, perPage)
+	go selectBranchPrompt(branches, projectOrder, parentIdentifier, choiceChan, navChan, isPaginationDisabled, curPage, perPage)
 
 	select {
 	case branchName := <-choiceChan:

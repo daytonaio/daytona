@@ -14,7 +14,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectRepositoryPrompt(repositories []apiclient.GitRepository, projectOrder int, choiceChan chan<- string, navChan chan<- string, selectedRepos map[string]int, isPaginationDisabled bool, curPage, perPage int32) {
+func selectRepositoryPrompt(repositories []apiclient.GitRepository, projectOrder int, choiceChan chan<- string, navChan chan<- string, selectedRepos map[string]int, parentIdentifier string, isPaginationDisabled bool, curPage, perPage int32) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
@@ -32,7 +32,11 @@ func selectRepositoryPrompt(repositories []apiclient.GitRepository, projectOrder
 		items = AddNavigationOptionsToList(items, len(repositories), curPage, perPage)
 	}
 
-	l := views.GetStyledSelectList(items, curPage)
+	listOptions := views.ListOptions{
+		ParentIdentifier: parentIdentifier,
+		CurPage:          curPage,
+	}
+	l := views.GetStyledSelectList(items, listOptions)
 
 	title := "Choose a Repository"
 	if projectOrder > 1 {
@@ -62,11 +66,11 @@ func selectRepositoryPrompt(repositories []apiclient.GitRepository, projectOrder
 	}
 }
 
-func GetRepositoryFromPrompt(repositories []apiclient.GitRepository, projectOrder int, selectedRepos map[string]int, isPaginationDisabled bool, curPage, perPage int32) (*apiclient.GitRepository, string) {
+func GetRepositoryFromPrompt(repositories []apiclient.GitRepository, projectOrder int, selectedRepos map[string]int, parentIdentifier string, isPaginationDisabled bool, curPage, perPage int32) (*apiclient.GitRepository, string) {
 	choiceChan := make(chan string)
 	navChan := make(chan string)
 
-	go selectRepositoryPrompt(repositories, projectOrder, choiceChan, navChan, selectedRepos, isPaginationDisabled, curPage, perPage)
+	go selectRepositoryPrompt(repositories, projectOrder, choiceChan, navChan, selectedRepos, parentIdentifier, isPaginationDisabled, curPage, perPage)
 
 	select {
 	case choice := <-choiceChan:

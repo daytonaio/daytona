@@ -6,6 +6,7 @@ package util
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/url"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
@@ -25,7 +26,7 @@ type BranchWizardConfig struct {
 	ProviderId          string
 }
 
-func runGetBranchFromPromptWithPagination(ctx context.Context, config BranchWizardConfig, page, perPage int32) (*apiclient.GitRepository, error) {
+func runGetBranchFromPromptWithPagination(ctx context.Context, config BranchWizardConfig, parentIdentifier string, page, perPage int32) (*apiclient.GitRepository, error) {
 	var branchList []apiclient.GitBranch
 	var err error
 
@@ -49,7 +50,7 @@ func runGetBranchFromPromptWithPagination(ctx context.Context, config BranchWiza
 		isPaginationDisabled := isGitProviderWithUnsupportedPagination(config.ProviderId)
 
 		// User will either choose a branch or navigate the pages
-		branch, navigate := selection.GetBranchFromPrompt(branchList, config.ProjectOrder, isPaginationDisabled, page, perPage)
+		branch, navigate := selection.GetBranchFromPrompt(branchList, config.ProjectOrder, parentIdentifier, isPaginationDisabled, page, perPage)
 		if !isPaginationDisabled && navigate != "" {
 			if navigate == "next" {
 				page++
@@ -122,8 +123,13 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 		return nil, err
 	}
 
+	namespace := config.Namespace
+	if namespace == "" {
+		namespace = config.ChosenRepo.Owner
+	}
+	parentIdentifier := fmt.Sprintf("%s/%s/%s", config.ProviderId, namespace, config.ChosenRepo.Name)
 	if len(prList) == 0 {
-		return runGetBranchFromPromptWithPagination(ctx, config, 1, 100)
+		return runGetBranchFromPromptWithPagination(ctx, config, parentIdentifier, 1, 100)
 	}
 
 	checkoutOptions = append(checkoutOptions, selection.CheckoutDefault)
@@ -151,7 +157,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	}
 
 	if chosenCheckoutOption == selection.CheckoutBranch {
-		return runGetBranchFromPromptWithPagination(ctx, config, 1, 100)
+		return runGetBranchFromPromptWithPagination(ctx, config, parentIdentifier, 1, 100)
 	} else if chosenCheckoutOption == selection.CheckoutPR {
 		page = 1
 		perPage = 100
@@ -175,7 +181,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 			isPaginationDisabled := isGitProviderWithUnsupportedPagination(config.ProviderId)
 
 			// User will either choose a PR or navigate the pages
-			chosenPullRequest, navigate := selection.GetPullRequestFromPrompt(prList, config.ProjectOrder, isPaginationDisabled, page, perPage)
+			chosenPullRequest, navigate := selection.GetPullRequestFromPrompt(prList, config.ProjectOrder, parentIdentifier, isPaginationDisabled, page, perPage)
 			if !isPaginationDisabled && navigate != "" {
 				if navigate == "next" {
 					page++

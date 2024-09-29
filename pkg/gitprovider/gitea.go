@@ -57,7 +57,7 @@ func (g *GiteaGitProvider) GetNamespaces(options ListOptions) ([]*GitNamespace, 
 
 	var namespaces []*GitNamespace
 
-	orgList, _, err := client.ListMyOrgs(gitea.ListOrgsOptions{
+	orgList, res, err := client.ListMyOrgs(gitea.ListOrgsOptions{
 		ListOptions: gitea.ListOptions{
 			Page:     options.Page,
 			PageSize: options.PerPage,
@@ -82,61 +82,38 @@ func (g *GiteaGitProvider) GetRepositories(namespace string, options ListOptions
 		return nil, err
 	}
 
-	response := []*GitRepository{}
 	var repoList []*gitea.Repository
 
-	for {
-		var repos []*gitea.Repository
-		var res *gitea.Response
-
-		if namespace == personalNamespaceId {
-			user, err := g.GetUser()
-			if err != nil {
-				return nil, err
-			}
-
-			repos, res, err = client.ListUserRepos(user.Username, gitea.ListReposOptions{
-				ListOptions: gitea.ListOptions{
-					Page:     page,
-					PageSize: 100,
-				},
-			})
-			if err != nil {
-				return nil, g.FormatError(res, err)
-			}
-		} else {
-			repos, res, err = client.ListOrgRepos(namespace, gitea.ListOrgReposOptions{
-				ListOptions: gitea.ListOptions{
-					Page:     page,
-					PageSize: 100,
-				},
-			})
-			if err != nil {
-				return nil, g.FormatError(res, err)
-			}
+	if namespace == personalNamespaceId {
+		user, err := g.GetUser()
+		if err != nil {
+			return nil, err
 		}
 
-		repoList, _, err = client.ListUserRepos(user.Username, gitea.ListReposOptions{
+		repos, res, err := client.ListUserRepos(user.Username, gitea.ListReposOptions{
 			ListOptions: gitea.ListOptions{
 				Page:     options.Page,
 				PageSize: options.PerPage,
 			},
 		})
 		if err != nil {
-			return nil, err
+			return nil, g.FormatError(res, err)
 		}
+		repoList = repos
 	} else {
-		repoList, _, err = client.ListOrgRepos(namespace, gitea.ListOrgReposOptions{
+		repos, res, err := client.ListOrgRepos(namespace, gitea.ListOrgReposOptions{
 			ListOptions: gitea.ListOptions{
 				Page:     options.Page,
 				PageSize: options.PerPage,
 			},
 		})
 		if err != nil {
-			return nil, err
+			return nil, g.FormatError(res, err)
 		}
 		repoList = repos
 	}
+
+	response := []*GitRepository{}
 
 	for _, repo := range repoList {
 		u, err := url.Parse(repo.HTMLURL)

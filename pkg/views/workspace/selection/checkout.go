@@ -32,7 +32,10 @@ func selectCheckoutPrompt(checkoutOptions []CheckoutOption, projectOrder int, pa
 		items = append(items, newItem)
 	}
 
-	l := views.GetStyledSelectList(items, parentIdentifier)
+	listOptions := views.ListOptions{
+		ParentIdentifier: parentIdentifier,
+	}
+	l := views.GetStyledSelectList(items, listOptions)
 
 	title := "Cloning Options"
 	if projectOrder > 1 {
