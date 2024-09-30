@@ -18,9 +18,8 @@ import (
 
 var workspaceLogsStarted bool
 
-func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, workspaceId string, projectNames []string) {
+func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, workspaceId string, projectNames []string, query string) {
 	var wg sync.WaitGroup
-	query := "follow=true"
 
 	logs_view.CalculateLongestPrefixLength(projectNames)
 
