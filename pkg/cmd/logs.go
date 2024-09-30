@@ -10,6 +10,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
@@ -19,9 +20,9 @@ var followFlag bool
 var workspaceFlag bool
 
 var logsCmd = &cobra.Command{
-	Use:     "logs [WORKSPACE]",
+	Use:     "logs [WORKSPACE] [PROJECT_NAME]",
 	Short:   "View logs for a workspace/project",
-	Args:    cobra.RangeArgs(0, 1),
+	Args:    cobra.RangeArgs(0, 2),
 	GroupID: util.WORKSPACE_GROUP,
 	Aliases: []string{"lg", "log"},
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -57,22 +58,44 @@ var logsCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-
 		}
 
-		if workspace == nil {
-			return nil
+		var (
+			projectName       string
+			showWorkSpaceLogs bool
+		)
+
+		if len(args) == 0 || len(args) == 1 {
+			selectedProject, err := workspace_util.SelectWorkspaceProject(workspace.Id, &activeProfile)
+			if err != nil {
+				return err
+			}
+			if selectedProject == nil {
+				return nil
+			}
+			projectName = selectedProject.Name
+			showWorkSpaceLogs = true
 		}
+
+		if len(args) == 2 {
+			projectName = args[1]
+			if workspaceFlag {
+				showWorkSpaceLogs = true
+			} else {
+				showWorkSpaceLogs = false
+			}
+		}
+
 		var projectNames []string
 		if !workspaceFlag {
-			projectNames = []string{workspace.Name}
+			projectNames = []string{projectName}
 		}
 
-		query := ""
-		if followFlag {
-			query += "follow=true"
+		if workspace == nil || projectName == "" {
+			return nil
 		}
-		apiclient_util.ReadWorkspaceLogs(ctx, activeProfile, workspace.Id, projectNames, query)
+
+		apiclient_util.ReadWorkspaceLogs(ctx, activeProfile, workspace.Id, projectNames, followFlag, showWorkSpaceLogs)
 
 		return nil
 	},
@@ -80,5 +103,5 @@ var logsCmd = &cobra.Command{
 
 func init() {
 	logsCmd.Flags().BoolVarP(&followFlag, "follow", "f", false, "Follow logs")
-	logsCmd.Flags().BoolVarP(&workspaceFlag, "workspace", "w", false, "View workspace logs")
+	logsCmd.Flags().BoolVarP(&workspaceFlag, "workspace", "w", false, "View only the workspace logs")
 }

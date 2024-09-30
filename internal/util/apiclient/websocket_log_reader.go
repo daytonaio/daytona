@@ -18,9 +18,16 @@ import (
 
 var workspaceLogsStarted bool
 
-func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, workspaceId string, projectNames []string, query string) {
+func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, workspaceId string, projectNames []string, follow, showWorkSpaceLogs bool) {
 	var wg sync.WaitGroup
+	query := ""
+	if follow {
+		query = "follow=true"
+	}
 
+	if !showWorkSpaceLogs {
+		workspaceLogsStarted = true
+	}
 	logs_view.CalculateLongestPrefixLength(projectNames)
 
 	for index, projectName := range projectNames {
@@ -50,18 +57,20 @@ func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, worksp
 		}(projectName)
 	}
 
-	for {
-		ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/workspace/%s", workspaceId), &activeProfile, &query)
-		// We want to retry getting the logs if it fails
-		if err != nil {
-			log.Trace(HandleErrorResponse(res, err))
-			time.Sleep(250 * time.Millisecond)
-			continue
-		}
+	if showWorkSpaceLogs {
+		for {
+			ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/workspace/%s", workspaceId), &activeProfile, &query)
+			// We want to retry getting the logs if it fails
+			if err != nil {
+				log.Trace(HandleErrorResponse(res, err))
+				time.Sleep(250 * time.Millisecond)
+				continue
+			}
 
-		readJSONLog(ctx, ws, logs_view.STATIC_INDEX)
-		ws.Close()
-		break
+			readJSONLog(ctx, ws, logs_view.STATIC_INDEX)
+			ws.Close()
+			break
+		}
 	}
 
 	wg.Wait()

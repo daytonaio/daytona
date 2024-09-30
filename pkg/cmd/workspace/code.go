@@ -80,7 +80,7 @@ var CodeCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 || len(args) == 1 {
-			selectedProject, err := selectWorkspaceProject(workspaceId, &activeProfile)
+			selectedProject, err := SelectWorkspaceProject(workspaceId, &activeProfile)
 			if err != nil {
 				return err
 			}
@@ -133,7 +133,7 @@ var CodeCmd = &cobra.Command{
 	},
 }
 
-func selectWorkspaceProject(workspaceId string, profile *config.Profile) (*apiclient.Project, error) {
+func SelectWorkspaceProject(workspaceId string, profile *config.Profile) (*apiclient.Project, error) {
 	ctx := context.Background()
 
 	apiClient, err := apiclient_util.GetApiClient(profile)
