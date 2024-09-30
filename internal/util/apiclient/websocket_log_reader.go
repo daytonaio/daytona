@@ -18,14 +18,14 @@ import (
 
 var workspaceLogsStarted bool
 
-func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, workspaceId string, projectNames []string, follow, showWorkSpaceLogs bool) {
+func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, workspaceId string, projectNames []string, follow, showWorkspaceLogs bool) {
 	var wg sync.WaitGroup
 	query := ""
 	if follow {
 		query = "follow=true"
 	}
 
-	if !showWorkSpaceLogs {
+	if !showWorkspaceLogs {
 		workspaceLogsStarted = true
 	}
 	logs_view.CalculateLongestPrefixLength(projectNames)
@@ -57,7 +57,7 @@ func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, worksp
 		}(projectName)
 	}
 
-	if showWorkSpaceLogs {
+	if showWorkspaceLogs {
 		for {
 			ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/workspace/%s", workspaceId), &activeProfile, &query)
 			// We want to retry getting the logs if it fails

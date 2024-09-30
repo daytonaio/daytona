@@ -54,7 +54,7 @@ var logsCmd = &cobra.Command{
 			}
 			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "Get Logs For")
 		} else {
-			workspace, err = apiclient_util.GetWorkspace(args[0], true)
+			workspace, err = apiclient_util.GetWorkspace(args[0], false)
 			if err != nil {
 				return err
 			}
@@ -62,27 +62,25 @@ var logsCmd = &cobra.Command{
 
 		var (
 			projectName       string
-			showWorkSpaceLogs bool
+			showWorkspaceLogs bool
 		)
 
-		if len(args) == 0 || len(args) == 1 {
-			selectedProject, err := workspace_util.SelectWorkspaceProject(workspace.Id, &activeProfile)
-			if err != nil {
-				return err
-			}
-			if selectedProject == nil {
-				return nil
-			}
-			projectName = selectedProject.Name
-			showWorkSpaceLogs = true
+		selectedProject, err := workspace_util.SelectWorkspaceProject(workspace.Id, &activeProfile)
+		if err != nil {
+			return err
 		}
+		if selectedProject == nil {
+			return nil
+		}
+		projectName = selectedProject.Name
+		showWorkspaceLogs = true
 
 		if len(args) == 2 {
 			projectName = args[1]
 			if workspaceFlag {
-				showWorkSpaceLogs = true
+				showWorkspaceLogs = true
 			} else {
-				showWorkSpaceLogs = false
+				showWorkspaceLogs = false
 			}
 		}
 
@@ -95,7 +93,7 @@ var logsCmd = &cobra.Command{
 			return nil
 		}
 
-		apiclient_util.ReadWorkspaceLogs(ctx, activeProfile, workspace.Id, projectNames, followFlag, showWorkSpaceLogs)
+		apiclient_util.ReadWorkspaceLogs(ctx, activeProfile, workspace.Id, projectNames, followFlag, showWorkspaceLogs)
 
 		return nil
 	},
