@@ -5,12 +5,12 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
@@ -65,14 +65,6 @@ var logsCmd = &cobra.Command{
 			showWorkspaceLogs bool
 		)
 
-		selectedProject, err := workspace_util.SelectWorkspaceProject(workspace.Id, &activeProfile)
-		if err != nil {
-			return err
-		}
-		if selectedProject == nil {
-			return nil
-		}
-		projectName = selectedProject.Name
 		showWorkspaceLogs = true
 
 		if len(args) == 2 {
@@ -86,11 +78,20 @@ var logsCmd = &cobra.Command{
 
 		var projectNames []string
 		if !workspaceFlag {
-			projectNames = []string{projectName}
+			for _, project := range workspace.Projects {
+				if projectName == "" {
+					projectNames = append(projectNames, project.Name)
+				} else if project.Name == projectName {
+					projectNames = append(projectNames, projectName)
+					break
+				}
+			}
 		}
 
-		if workspace == nil || projectName == "" {
-			return nil
+		if len(workspace.Projects) == 0 {
+			return fmt.Errorf("no projects found in workspace")
+		} else if workspace == nil {
+			return fmt.Errorf("workspace not found")
 		}
 
 		apiclient_util.ReadWorkspaceLogs(ctx, activeProfile, workspace.Id, projectNames, followFlag, showWorkspaceLogs)
