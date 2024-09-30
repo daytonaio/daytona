@@ -60,7 +60,7 @@ var SshCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 || len(args) == 1 {
-			selectedProject, err := SelectWorkspaceProject(workspace.Id, &activeProfile)
+			selectedProject, err := selectWorkspaceProject(workspace.Id, &activeProfile)
 			if err != nil {
 				return err
 			}
