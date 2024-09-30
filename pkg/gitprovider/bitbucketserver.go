@@ -26,7 +26,7 @@ type BitbucketServerGitProvider struct {
 	baseApiUrl string
 }
 
-func NewBitbucketServerGitProvider(username string, token string, baseApiUrl *string) *BitbucketServerGitProvider {
+func NewBitbucketServerGitProvider(username string, token string, baseApiUrl string) *BitbucketServerGitProvider {
 	provider := &BitbucketServerGitProvider{
 		username:            username,
 		token:               token,
@@ -137,7 +137,7 @@ func (g *BitbucketServerGitProvider) GetRepositories(namespace string, options L
 			ownerName = repo.Owner.Name
 		}
 
-		baseURL, err := url.Parse(*g.baseApiUrl)
+		baseURL, err := url.Parse(g.baseApiUrl)
 		if err != nil {
 			return nil, g.FormatError(repoList.StatusCode, repoList.Message)
 		}
