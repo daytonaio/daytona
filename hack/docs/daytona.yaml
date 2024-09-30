@@ -26,6 +26,7 @@ see_also:
     - daytona ide - Choose the default IDE
     - daytona info - Show workspace info
     - daytona list - List workspaces
+    - daytona logs - View logs for a workspace/project
     - daytona prebuild - Manage prebuilds
     - daytona profile - Manage profiles
     - daytona project-config - Manage project configs

@@ -1,0 +1,18 @@
+name: daytona logs
+synopsis: View logs for a workspace/project
+usage: daytona logs [WORKSPACE] [flags]
+options:
+    - name: follow
+      shorthand: f
+      default_value: "false"
+      usage: Follow logs
+    - name: workspace
+      shorthand: w
+      default_value: "false"
+      usage: View workspace logs
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona - Daytona is a Dev Environment Manager
