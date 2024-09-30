@@ -156,7 +156,10 @@ func SetupRootCommand(cmd *cobra.Command) {
 	cmd.PreRun = func(cmd *cobra.Command, args []string) {
 		versionFlag, _ := cmd.Flags().GetBool("version")
 		if versionFlag {
-			versionCmd.Run(cmd, []string{})
+			err := versionCmd.RunE(cmd, []string{})
+			if err != nil {
+				log.Fatal(err)
+			}
 			os.Exit(0)
 		}
 	}
