@@ -31,7 +31,7 @@ err() {
 
 # Stop the Daytona server if it is running
 stop_daytona_server() {
-  if pgrep -x "daytona" >/dev/null; then
+  if pgrep -f "daytona serve" >/dev/null; then
     if [ "$CONFIRM_FLAG" = false ]; then
       read -p "Daytona server is running. Do you want to stop it? (yes/no): " user_input </dev/tty
       case $user_input in
@@ -52,9 +52,9 @@ stop_daytona_server() {
     if [ "$CONFIRM_FLAG" = true ]; then
       echo "Attempting to stop the Daytona server..."
       if daytona server stop; then
-        echo -e "Stopping the daytona server"
+        echo -e "Stopping the Daytona server"
       else
-        pkill -x "daytona"
+        pkill -f "daytona serve"
       fi
       echo -e "Daytona server stopped.\n"
     fi
