@@ -46,9 +46,10 @@ var gitProviderListCmd = &cobra.Command{
 				if gitProvider.Id == supportedProvider.Id {
 					gitProviderViewList = append(gitProviderViewList,
 						gitprovider_view.GitProviderView{
-							Id:       gitProvider.Id,
-							Name:     supportedProvider.Name,
-							Username: gitProvider.Username,
+							Id:            gitProvider.Id,
+							Name:          supportedProvider.Name,
+							Username:      gitProvider.Username,
+							SigningMethod: string(*gitProvider.SigningMethod),
 						},
 					)
 				}
