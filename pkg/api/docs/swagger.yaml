@@ -1335,6 +1335,20 @@ paths:
       summary: Get Git provider ID
       tags:
       - gitProvider
+  /health:
+    get:
+      description: Health check
+      operationId: HealthCheck
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health check
   /profile:
     delete:
       description: Delete profile data
