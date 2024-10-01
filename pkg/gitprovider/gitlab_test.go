@@ -21,6 +21,20 @@ func NewGitLabGitProviderTestSuite() *GitLabGitProviderTestSuite {
 	}
 }
 
+func (g *GitLabGitProviderTestSuite) TestCanHandle() {
+	repoUrl := "https://gitlab.com/daytonaio/daytona"
+	require := g.Require()
+	canHandle, _ := g.gitProvider.CanHandle(repoUrl)
+	require.True(canHandle)
+}
+
+func (g *GitLabGitProviderTestSuite) TestCanHandle_False() {
+	repoUrl := "https://github.com/daytonaio/daytona"
+	require := g.Require()
+	canHandle, _ := g.gitProvider.CanHandle(repoUrl)
+	require.False(canHandle)
+}
+
 func (g *GitLabGitProviderTestSuite) TestParseStaticGitContext_HTTP() {
 	httpSimple := "https://gitlab.com/gitlab-org/gitlab"
 	simpleContext := &StaticGitContext{

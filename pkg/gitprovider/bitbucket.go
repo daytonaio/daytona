@@ -36,6 +36,15 @@ func NewBitbucketGitProvider(username string, token string) *BitbucketGitProvide
 	return provider
 }
 
+func (g *BitbucketGitProvider) CanHandle(repoUrl string) (bool, error) {
+	staticContext, err := g.ParseStaticGitContext(repoUrl)
+	if err != nil {
+		return false, err
+	}
+
+	return staticContext.Source == "bitbucket.org", nil
+}
+
 func (g *BitbucketGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	client := g.getApiClient()
 	wsList, err := client.Workspaces.List()

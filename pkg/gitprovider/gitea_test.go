@@ -17,8 +17,22 @@ type GiteaGitProviderTestSuite struct {
 
 func NewGiteaGitProviderTestSuite() *GiteaGitProviderTestSuite {
 	return &GiteaGitProviderTestSuite{
-		gitProvider: NewGiteaGitProvider("", ""),
+		gitProvider: NewGiteaGitProvider("", "https://gitea.com"),
 	}
+}
+
+func (g *GiteaGitProviderTestSuite) TestCanHandle() {
+	repoUrl := "https://gitea.com/daytonaio/daytona"
+	require := g.Require()
+	canHandle, _ := g.gitProvider.CanHandle(repoUrl)
+	require.True(canHandle)
+}
+
+func (g *GiteaGitProviderTestSuite) TestCanHandle_False() {
+	repoUrl := "https://github.com/daytonaio/daytona"
+	require := g.Require()
+	canHandle, _ := g.gitProvider.CanHandle(repoUrl)
+	require.False(canHandle)
 }
 
 func (g *GiteaGitProviderTestSuite) TestParseStaticGitContext_PR() {

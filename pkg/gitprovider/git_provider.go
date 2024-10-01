@@ -45,6 +45,7 @@ type GitProvider interface {
 	GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error)
 	GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error)
 
+	CanHandle(repoUrl string) (bool, error)
 	GetRepositoryContext(repoContext GetRepositoryContext) (*GitRepository, error)
 	GetUrlFromContext(repoContext *GetRepositoryContext) string
 	GetLastCommitSha(staticContext *StaticGitContext) (string, error)

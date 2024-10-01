@@ -37,6 +37,19 @@ func NewGitLabGitProvider(token string, baseApiUrl *string) *GitLabGitProvider {
 	return gitProvider
 }
 
+func (g *GitLabGitProvider) CanHandle(repoUrl string) (bool, error) {
+	staticContext, err := g.ParseStaticGitContext(repoUrl)
+	if err != nil {
+		return false, err
+	}
+
+	if g.baseApiUrl == nil {
+		return staticContext.Source == "gitlab.com", nil
+	}
+
+	return strings.Contains(*g.baseApiUrl, staticContext.Source), nil
+}
+
 func (g *GitLabGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	client := g.getApiClient()
 	user, err := g.GetUser()
