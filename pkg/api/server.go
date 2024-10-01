@@ -37,6 +37,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/build"
 	"github.com/daytonaio/daytona/pkg/api/controllers/containerregistry"
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider"
+	"github.com/daytonaio/daytona/pkg/api/controllers/health"
 	log_controller "github.com/daytonaio/daytona/pkg/api/controllers/log"
 	"github.com/daytonaio/daytona/pkg/api/controllers/profiledata"
 	"github.com/daytonaio/daytona/pkg/api/controllers/projectconfig"
@@ -105,9 +106,11 @@ func (a *ApiServer) Start() error {
 
 	public := a.router.Group("/")
 	public.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-	public.GET(constants.HEALTH_CHECK_ROUTE, func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
-	})
+
+	healthController := public.Group(constants.HEALTH_CHECK_ROUTE)
+	{
+		healthController.GET("/", health.HealthCheck)
+	}
 
 	protected := a.router.Group("/")
 	protected.Use(middlewares.AuthMiddleware())
