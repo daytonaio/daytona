@@ -44,18 +44,22 @@ var gitProviderListCmd = &cobra.Command{
 		for _, gitProvider := range gitProviders {
 			for _, supportedProvider := range supportedProviders {
 				if gitProvider.Id == supportedProvider.Id {
+					signingMethod := ""
+					if gitProvider.SigningMethod != nil {
+						signingMethod = string(*gitProvider.SigningMethod)
+					}
+
 					gitProviderViewList = append(gitProviderViewList,
 						gitprovider_view.GitProviderView{
 							Id:            gitProvider.Id,
 							Name:          supportedProvider.Name,
 							Username:      gitProvider.Username,
-							SigningMethod: string(*gitProvider.SigningMethod),
+							SigningMethod: signingMethod,
 						},
 					)
 				}
 			}
 		}
-
 		if format.FormatFlag != "" {
 			formattedData := format.NewFormatter(gitProviderViewList)
 			formattedData.Print()
