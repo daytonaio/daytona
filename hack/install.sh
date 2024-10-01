@@ -29,9 +29,25 @@ err() {
   exit 1
 }
 
+# Get the user that is running the Daytona server
+get_daytona_server_user() {
+    local user
+    user=$(ps aux | grep 'daytona serve' | grep -v 'grep' | awk '{print $1}' | head -n 1)
+
+    if [ -z "$user" ]; then
+        echo "Error: daytona serve process not found" >&2
+        return 1
+    fi
+
+    echo "$user"
+}
+
 # Stop the Daytona server if it is running
 stop_daytona_server() {
-  if pgrep -f "daytona serve" >/dev/null; then
+  local pid
+  pid=$(pgrep -f "daytona serve" | head -n 1)
+
+  if [ ! -z "$pid" ]; then
     if [ "$CONFIRM_FLAG" = false ]; then
       read -p "Daytona server is running. Do you want to stop it? (yes/no): " user_input </dev/tty
       case $user_input in
@@ -51,12 +67,18 @@ stop_daytona_server() {
 
     if [ "$CONFIRM_FLAG" = true ]; then
       echo "Attempting to stop the Daytona server..."
-      if daytona server stop; then
-        echo -e "Stopping the Daytona server"
+      user=$(get_daytona_server_user)
+      if sudo -H -E -u $user bash -c 'daytona server stop'; then
+        echo "Daytona server stopped successfully."
       else
-        pkill -f "daytona serve"
+        echo "Failed to stop Daytona server gracefully. Attempting force stop on process $pid..."
+        if kill -9 $pid; then
+          echo "Daytona server forcefully stopped."
+        else
+          echo "Failed to stop Daytona server. Please stop it manually and rerun the script."
+          exit 1
+        fi
       fi
-      echo -e "Daytona server stopped.\n"
     fi
   fi
 }
