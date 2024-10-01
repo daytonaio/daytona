@@ -38,7 +38,7 @@ type IGitService interface {
 	CloneRepository(repo *gitprovider.GitRepository, auth *http.BasicAuth) error
 	CloneRepositoryCmd(repo *gitprovider.GitRepository, auth *http.BasicAuth) []string
 	RepositoryExists() (bool, error)
-	SetGitConfig(userData *gitprovider.GitUser) error
+	SetGitConfig(userData *gitprovider.GitUser, providerConfig *gitprovider.GitProviderConfig) error
 	GetGitStatus() (*project.GitStatus, error)
 }
 
@@ -132,7 +132,7 @@ func (s *Service) RepositoryExists() (bool, error) {
 	return true, nil
 }
 
-func (s *Service) SetGitConfig(userData *gitprovider.GitUser) error {
+func (s *Service) SetGitConfig(userData *gitprovider.GitUser, providerConfig *gitprovider.GitProviderConfig) error {
 	gitConfigFileName := s.GitConfigFileName
 
 	var gitConfigContent []byte
@@ -177,17 +177,61 @@ func (s *Service) SetGitConfig(userData *gitprovider.GitUser) error {
 		}
 	}
 
+	if err := setSigningConfig(cfg, providerConfig); err != nil {
+		return err
+	}
+
 	var buf bytes.Buffer
 	_, err = cfg.WriteTo(&buf)
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(gitConfigFileName, buf.Bytes(), 0644)
+	return os.WriteFile(gitConfigFileName, buf.Bytes(), 0644)
+}
+
+func setSigningConfig(cfg *ini.File, providerConfig *gitprovider.GitProviderConfig) error {
+	if providerConfig == nil || providerConfig.SigningMethod == nil || providerConfig.SigningKey == nil {
+		return nil
+	}
+
+	if !cfg.HasSection("user") {
+		_, err := cfg.NewSection("user")
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err := cfg.Section("user").NewKey("signingkey", *providerConfig.SigningKey)
 	if err != nil {
 		return err
 	}
 
+	if !cfg.HasSection("commit") {
+		_, err := cfg.NewSection("commit")
+		if err != nil {
+			return err
+		}
+	}
+
+	switch *providerConfig.SigningMethod {
+	case gitprovider.SigningMethodGPG:
+		_, err := cfg.Section("commit").NewKey("gpgSign", "true")
+		if err != nil {
+			return err
+		}
+	case gitprovider.SigningMethodSSH:
+		if !cfg.HasSection("gpg") {
+			_, err := cfg.NewSection("gpg")
+			if err != nil {
+				return err
+			}
+		}
+		_, err := cfg.Section("gpg").NewKey("format", "ssh")
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

@@ -89,6 +89,23 @@ func GetDocsLinkFromGitProvider(providerId string) string {
 	}
 }
 
+func GetDocsLinkForCommitSigning(providerId string) string {
+	switch providerId {
+	case "github", "github-enterprise-server":
+		return "https://docs.github.com/en/authentication/managing-commit-signature-verification"
+	case "gitlab", "gitlab-self-managed":
+		return "https://docs.gitlab.com/ee/user/project/repository/signed_commits"
+	case "gitea":
+		return "https://docs.gitea.com/administration/signing"
+	case "azure-devops":
+		return "https://learn.microsoft.com/en-us/azure/devops/repos/git/use-ssh-keys-to-authenticate?view=azure-devops"
+	case "aws-codecommit":
+		return "https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-ssh-unixes.html"
+	default:
+		return ""
+	}
+}
+
 func GetRequiredScopesFromGitProviderId(providerId string) string {
 	switch providerId {
 	case "github":

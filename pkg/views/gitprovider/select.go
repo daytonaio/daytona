@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"regexp"
 	"slices"
 
 	"github.com/charmbracelet/huh"
@@ -17,11 +18,13 @@ import (
 )
 
 type GitProviderView struct {
-	Id         string
-	Name       string
-	Username   string
-	BaseApiUrl string
-	Token      string
+	Id            string
+	Name          string
+	Username      string
+	BaseApiUrl    string
+	Token         string
+	SigningMethod string
+	SigningKey    string
 }
 
 var commonGitProviderIds = []string{"github", "gitlab", "bitbucket"}
@@ -75,6 +78,9 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig
 		log.Fatal(err)
 	}
 
+	var selectedSigningMethod string
+	var signingKey string
+
 	userDataForm := huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().
@@ -103,6 +109,7 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig
 		).WithHeight(6).WithHideFunc(func() bool {
 			return isDeleting || !providerRequiresApiUrl(gitProviderAddView.Id)
 		}),
+
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Personal access token").
@@ -115,6 +122,42 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig
 					return nil
 				}),
 		).WithHeight(5).WithHide(isDeleting),
+		huh.NewGroup(huh.NewSelect[string]().
+			Title("Commit Signing Method").
+			DescriptionFunc(func() string {
+				return getGitProviderSigningHelpMessage(gitProviderAddView.Id)
+			}, nil).
+			Options(
+				huh.Option[string]{Key: "None", Value: "none"},
+				huh.Option[string]{Key: "SSH", Value: "ssh"},
+				huh.Option[string]{Key: "GPG", Value: "gpg"},
+			).
+			Value(&selectedSigningMethod).WithHeight(6),
+		).WithHeight(8).WithHideFunc(func() bool {
+			return isDeleting || commitSigningNotSupported(gitProviderAddView.Id)
+		}),
+		huh.NewGroup(
+			huh.NewInput().
+				Title("Signing Key").
+				Value(&signingKey).
+				DescriptionFunc(func() string {
+					return getSigningKeyDescription(selectedSigningMethod)
+				}, nil).
+				Validate(func(str string) error {
+					if selectedSigningMethod != "none" && str == "" {
+						return errors.New("signing key cannot be blank when a signing method is selected")
+					}
+
+					if selectedSigningMethod == "ssh" {
+						if err := isValidSSHKey(str); err != nil {
+							return err
+						}
+					}
+					return nil
+				}),
+		).WithHeight(5).WithHideFunc(func() bool {
+			return selectedSigningMethod == "none" || isDeleting
+		}),
 	).WithTheme(views.GetCustomTheme())
 
 	if !isDeleting {
@@ -125,6 +168,19 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	if selectedSigningMethod != "none" {
+		*gitProviderAddView.SigningMethod = apiclient.SigningMethod(selectedSigningMethod)
+		*gitProviderAddView.SigningKey = signingKey
+	}
+}
+
+func isValidSSHKey(key string) error {
+	sshKeyPattern := regexp.MustCompile(`^(ssh-(rsa|ed25519|dss|ecdsa-sha2-nistp(256|384|521)))\s+[A-Za-z0-9+/=]+(\s+.+)?$`)
+	if !sshKeyPattern.MatchString(key) {
+		return errors.New("invalid SSH key: must start with valid SSH key type (e.g., ssh-rsa, ssh-ed25519)")
+	}
+	return nil
 }
 
 func providerRequiresUsername(gitProviderId string) bool {
@@ -133,6 +189,10 @@ func providerRequiresUsername(gitProviderId string) bool {
 
 func providerRequiresApiUrl(gitProviderId string) bool {
 	return gitProviderId == "gitness" || gitProviderId == "github-enterprise-server" || gitProviderId == "gitlab-self-managed" || gitProviderId == "gitea" || gitProviderId == "bitbucket-server" || gitProviderId == "azure-devops" || gitProviderId == "aws-codecommit"
+}
+
+func commitSigningNotSupported(gitProviderId string) bool {
+	return gitProviderId == "gitness" || gitProviderId == "bitbucket" || gitProviderId == "bitbucket-server"
 }
 
 func getApiUrlDescription(gitProviderId string) string {
@@ -154,6 +214,17 @@ func getApiUrlDescription(gitProviderId string) string {
 	return ""
 }
 
+func getSigningKeyDescription(signingMethod string) string {
+	switch signingMethod {
+	case "gpg":
+		return "Provide your GPG key ID (e.g., 30F2B65B9246B6CA) for signing commits."
+	case "ssh":
+		return "Provide your public SSH key (e.g., ssh-ed25519 AAAAC3...<rest of key>) for secure signing."
+	default:
+		return ""
+	}
+}
+
 func getGitProviderHelpMessage(gitProviderId string) string {
 	message := fmt.Sprintf("%s\n%s\n\n%s%s",
 		lipgloss.NewStyle().Foreground(views.Green).Bold(true).Render("More information on:"),
@@ -170,4 +241,13 @@ func getGitProviderHelpMessage(gitProviderId string) string {
 	}
 
 	return message
+}
+
+func getGitProviderSigningHelpMessage(gitProviderId string) string {
+	signingDocsLink := config.GetDocsLinkForCommitSigning(gitProviderId)
+
+	if signingDocsLink != "" {
+		return signingDocsLink
+	}
+	return ""
 }

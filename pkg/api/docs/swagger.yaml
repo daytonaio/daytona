@@ -284,6 +284,10 @@ definitions:
         type: string
       id:
         type: string
+      signingKey:
+        type: string
+      signingMethod:
+        $ref: '#/definitions/SigningMethod'
       token:
         type: string
       username:
@@ -652,6 +656,10 @@ definitions:
         type: string
       id:
         type: string
+      signingKey:
+        type: string
+      signingMethod:
+        $ref: '#/definitions/SigningMethod'
       token:
         type: string
       username:
@@ -669,6 +677,14 @@ definitions:
     required:
     - uptime
     type: object
+  SigningMethod:
+    enum:
+    - ssh
+    - gpg
+    type: string
+    x-enum-varnames:
+    - SigningMethodSSH
+    - SigningMethodGPG
   Status:
     enum:
     - Unmodified

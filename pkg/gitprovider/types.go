@@ -3,11 +3,20 @@
 
 package gitprovider
 
+type SigningMethod string // @name SigningMethod
+
+const (
+	SigningMethodSSH SigningMethod = "ssh"
+	SigningMethodGPG SigningMethod = "gpg"
+)
+
 type GitProviderConfig struct {
-	Id         string  `json:"id" validate:"required"`
-	Username   string  `json:"username" validate:"required"`
-	BaseApiUrl *string `json:"baseApiUrl,omitempty" validate:"optional"`
-	Token      string  `json:"token" validate:"required"`
+	Id            string         `json:"id" validate:"required"`
+	Username      string         `json:"username" validate:"required"`
+	BaseApiUrl    *string        `json:"baseApiUrl,omitempty" validate:"optional"`
+	Token         string         `json:"token" validate:"required"`
+	SigningKey    *string        `json:"signingKey,omitempty" validate:"optional"`
+	SigningMethod *SigningMethod `json:"signingMethod,omitempty" validate:"optional"`
 } // @name GitProvider
 
 type GitUser struct {

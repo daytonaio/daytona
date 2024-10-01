@@ -132,9 +132,11 @@ func SetGitProvider(ctx *gin.Context) {
 	}
 
 	gitProviderConfig := gitprovider.GitProviderConfig{
-		Id:         setConfigDto.Id,
-		Token:      setConfigDto.Token,
-		BaseApiUrl: setConfigDto.BaseApiUrl,
+		Id:            setConfigDto.Id,
+		Token:         setConfigDto.Token,
+		BaseApiUrl:    setConfigDto.BaseApiUrl,
+		SigningKey:    setConfigDto.SigningKey,
+		SigningMethod: setConfigDto.SigningMethod,
 	}
 
 	if setConfigDto.Username != nil {
