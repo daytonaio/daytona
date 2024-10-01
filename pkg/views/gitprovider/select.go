@@ -170,12 +170,8 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig
 	}
 
 	if selectedSigningMethod != "none" {
-		if gitProviderAddView.SigningMethod != nil {
-			*gitProviderAddView.SigningMethod = apiclient.SigningMethod(selectedSigningMethod)
-		}
-		if gitProviderAddView.SigningKey != nil {
-			*gitProviderAddView.SigningKey = signingKey
-		}
+		gitProviderAddView.SigningMethod = (*apiclient.SigningMethod)(&selectedSigningMethod)
+		gitProviderAddView.SigningKey = &signingKey
 	}
 }
 
