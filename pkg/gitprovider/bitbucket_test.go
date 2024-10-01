@@ -21,6 +21,20 @@ func NewBitbucketGitProviderTestSuite() *BitbucketGitProviderTestSuite {
 	}
 }
 
+func (b *BitbucketGitProviderTestSuite) TestCanHandle() {
+	repoUrl := "https://bitbucket.org/daytonaio/daytona"
+	require := b.Require()
+	canHandle, _ := b.gitProvider.CanHandle(repoUrl)
+	require.True(canHandle)
+}
+
+func (b *BitbucketGitProviderTestSuite) TestCanHandle_False() {
+	repoUrl := "https://github.com/daytonaio/daytona"
+	require := b.Require()
+	canHandle, _ := b.gitProvider.CanHandle(repoUrl)
+	require.False(canHandle)
+}
+
 func (b *BitbucketGitProviderTestSuite) TestParseStaticGitContext_PR() {
 	prUrl := "https://bitbucket.org/atlassian/bitbucket-upload-file/pull-requests/1"
 	prContext := &StaticGitContext{

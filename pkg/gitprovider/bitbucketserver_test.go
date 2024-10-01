@@ -16,10 +16,23 @@ type BitbucketServerGitProviderTestSuite struct {
 }
 
 func NewBitbucketServerGitProviderTestSuite() *BitbucketServerGitProviderTestSuite {
-	baseApiUrl := "https://bitbucket.example.com"
 	return &BitbucketServerGitProviderTestSuite{
-		gitProvider: NewBitbucketServerGitProvider("username", "token", &baseApiUrl),
+		gitProvider: NewBitbucketServerGitProvider("username", "token", "https://bitbucket.example.com"),
 	}
+}
+
+func (b *BitbucketServerGitProviderTestSuite) TestCanHandle() {
+	repoUrl := "https://bitbucket.example.com/scm/daytonaio/daytona.git"
+	require := b.Require()
+	canHandle, _ := b.gitProvider.CanHandle(repoUrl)
+	require.True(canHandle)
+}
+
+func (b *BitbucketServerGitProviderTestSuite) TestCanHandle_False() {
+	repoUrl := "https://github.com/daytonaio/daytona"
+	require := b.Require()
+	canHandle, _ := b.gitProvider.CanHandle(repoUrl)
+	require.False(canHandle)
 }
 
 func (b *BitbucketServerGitProviderTestSuite) TestParseStaticGitContext_PR() {

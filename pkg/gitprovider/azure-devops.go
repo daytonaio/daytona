@@ -42,6 +42,15 @@ func NewAzureDevOpsGitProvider(token string, baseApiUrl string) *AzureDevOpsGitP
 	return provider
 }
 
+func (g *AzureDevOpsGitProvider) CanHandle(repoUrl string) (bool, error) {
+	staticContext, err := g.ParseStaticGitContext(repoUrl)
+	if err != nil {
+		return false, err
+	}
+
+	return strings.Contains(g.baseApiUrl, staticContext.Source), nil
+}
+
 func (g *AzureDevOpsGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	client, _, err := g.getApiClient()
 	if err != nil {

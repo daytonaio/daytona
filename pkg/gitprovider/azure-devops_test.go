@@ -25,6 +25,20 @@ func TestAzureDevopsGitProvider(t *testing.T) {
 	suite.Run(t, NewAzureDevOpsGitProviderTestSuite())
 }
 
+func (g *AzureDevOpsGitProviderTestSuite) TestCanHandle() {
+	repoUrl := "https://dev.azure.com/dotslashtarun/dot-1/_git/dot-1"
+	require := g.Require()
+	canHandle, _ := g.gitProvider.CanHandle(repoUrl)
+	require.True(canHandle)
+}
+
+func (g *AzureDevOpsGitProviderTestSuite) TestCanHandle_False() {
+	repoUrl := "https://github.com/daytonaio/daytona"
+	require := g.Require()
+	canHandle, _ := g.gitProvider.CanHandle(repoUrl)
+	require.False(canHandle)
+}
+
 func (g *AzureDevOpsGitProviderTestSuite) TestParseStaticGitContext_PR() {
 	prUrl := "https://dev.azure.com/dotslashtarun/dot-1/_git/dot-1/pullrequest/4"
 	prContext := &StaticGitContext{

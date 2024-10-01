@@ -16,9 +16,24 @@ type GitnessGitProviderTestSuite struct {
 
 func NewGitnessGitProviderTestSuite() *GitnessGitProviderTestSuite {
 	return &GitnessGitProviderTestSuite{
-		gitProvider: NewGitnessGitProvider("", nil),
+		gitProvider: NewGitnessGitProvider("", "http://localhost:3000"),
 	}
 }
+
+func (g *GitnessGitProviderTestSuite) TestCanHandle() {
+	repoUrl := "https://localhost:3000/daytonaio/daytona"
+	require := g.Require()
+	canHandle, _ := g.gitProvider.CanHandle(repoUrl)
+	require.True(canHandle)
+}
+
+func (g *GitnessGitProviderTestSuite) TestCanHandle_False() {
+	repoUrl := "https://github.com/daytonaio/daytona"
+	require := g.Require()
+	canHandle, _ := g.gitProvider.CanHandle(repoUrl)
+	require.False(canHandle)
+}
+
 func (g *GitnessGitProviderTestSuite) TestParseStaticGitContext_PR() {
 	prUrl := "https://localhost:3000/test/test/pulls/1"
 	prContext := &StaticGitContext{
