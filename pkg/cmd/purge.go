@@ -70,14 +70,20 @@ var purgeCmd = &cobra.Command{
 			return err
 		}
 
-		_, err = apiclient.GetApiClient(&defaultProfile)
+		apiClient, err := apiclient.GetApiClient(&defaultProfile)
 		if err != nil {
 			if !apiclient.IsHealthCheckFailed(err) {
 				return err
 			}
 		} else {
 			view.ServerStoppedPrompt(&serverStoppedCheck)
-			if !serverStoppedCheck {
+			if serverStoppedCheck {
+				_, _, err = apiClient.DefaultAPI.HealthCheck(context.Background()).Execute()
+				if err == nil {
+					views.RenderInfoMessage("The Daytona Server is still running. Please stop it before continuing.")
+					return nil
+				}
+			} else {
 				fmt.Println("Operation cancelled.")
 				return nil
 			}
