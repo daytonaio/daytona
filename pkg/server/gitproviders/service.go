@@ -161,7 +161,7 @@ func (s *GitProviderService) newGitProvider(config *gitprovider.GitProviderConfi
 	case "bitbucket":
 		return gitprovider.NewBitbucketGitProvider(config.Username, config.Token), nil
 	case "bitbucket-server":
-		return gitprovider.NewBitbucketServerGitProvider(config.Username, config.Token, config.BaseApiUrl), nil
+		return gitprovider.NewBitbucketServerGitProvider(config.Username, config.Token, *config.BaseApiUrl), nil
 	case "gitlab-self-managed":
 		return gitprovider.NewGitLabGitProvider(config.Token, config.BaseApiUrl), nil
 	case "codeberg":
@@ -169,7 +169,7 @@ func (s *GitProviderService) newGitProvider(config *gitprovider.GitProviderConfi
 	case "gitea":
 		return gitprovider.NewGiteaGitProvider(config.Token, *config.BaseApiUrl), nil
 	case "gitness":
-		return gitprovider.NewGitnessGitProvider(config.Token, config.BaseApiUrl), nil
+		return gitprovider.NewGitnessGitProvider(config.Token, *config.BaseApiUrl), nil
 	case "azure-devops":
 		return gitprovider.NewAzureDevOpsGitProvider(config.Token, *config.BaseApiUrl), nil
 	case "aws-codecommit":
