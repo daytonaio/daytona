@@ -88,18 +88,22 @@ func ReadBuildLogs(ctx context.Context, activeProfile config.Profile, buildId st
 
 func readJSONLog(ctx context.Context, ws *websocket.Conn, index int) {
 	logEntriesChan := make(chan logs.LogEntry)
-
+	readErr := make(chan error)
 	go func() {
 		for {
 			var logEntry logs.LogEntry
 
 			err := ws.ReadJSON(&logEntry)
-			if err != nil {
-				log.Trace(err)
-				return
-			}
 
 			logEntriesChan <- logEntry
+
+			if err != nil {
+				if websocket.IsUnexpectedCloseError(err, websocket.CloseNormalClosure) {
+					log.Error(err)
+				}
+				readErr <- err
+				return
+			}
 		}
 	}()
 
@@ -109,6 +113,15 @@ func readJSONLog(ctx context.Context, ws *websocket.Conn, index int) {
 			return
 		case logEntry := <-logEntriesChan:
 			logs_view.DisplayLogEntry(logEntry, index)
+		case err := <-readErr:
+			if err != nil {
+				err := ws.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""), time.Now().Add(time.Second))
+				if err != nil {
+					log.Trace(err)
+				}
+				ws.Close()
+				return
+			}
 		}
 
 		if !workspaceLogsStarted && index == logs_view.STATIC_INDEX {
