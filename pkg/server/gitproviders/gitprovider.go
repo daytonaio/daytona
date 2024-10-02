@@ -14,11 +14,18 @@ import (
 	"github.com/google/uuid"
 )
 
+type GitProviderWithId struct {
+	GitProvider gitprovider.GitProvider
+	Id          string
+}
+
 func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.GitProvider, string, error) {
 	gitProviders, err := s.configStore.List()
 	if err != nil {
 		return nil, "", err
 	}
+
+	var selectedProvider []GitProviderWithId
 
 	for _, p := range gitProviders {
 		gitProvider, err := s.GetGitProvider(p.Id)
@@ -28,9 +35,25 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 
 		canHandle, _ := gitProvider.CanHandle(repoUrl)
 		if canHandle {
-			return gitProvider, p.Id, nil
+			_, err = gitProvider.GetRepositoryContext(gitprovider.GetRepositoryContext{
+				Url: repoUrl,
+			})
+			if err == nil {
+				userName := strings.ToLower(p.Username)
+				repo := strings.ToLower(repoUrl)
+				if strings.Contains(repo, userName) {
+					return gitProvider, p.Id, nil
+				} else {
+					selectedProvider = append(selectedProvider, GitProviderWithId{
+						GitProvider: gitProvider,
+						Id:          p.Id,
+					})
+				}
+			}
 		}
 	}
+
+	return selectedProvider[0].GitProvider, selectedProvider[0].Id, nil
 
 	u, err := url.Parse(repoUrl)
 	if err != nil {
@@ -69,6 +92,7 @@ func (s *GitProviderService) GetConfigForUrl(repoUrl string) (*gitprovider.GitPr
 		if canHandle {
 			return p, nil
 		}
+
 	}
 
 	supportedGitProviders := config.GetSupportedGitProviders()
