@@ -29,6 +29,7 @@ import (
 
 type ServerInstanceConfig struct {
 	Config                   Config
+	Version                  string
 	TailscaleServer          TailscaleServer
 	ProviderTargetService    providertargets.IProviderTargetService
 	ContainerRegistryService containerregistries.IContainerRegistryService
@@ -57,6 +58,7 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 		server = &Server{
 			Id:                       serverConfig.Config.Id,
 			config:                   serverConfig.Config,
+			Version:                  serverConfig.Version,
 			TailscaleServer:          serverConfig.TailscaleServer,
 			ProviderTargetService:    serverConfig.ProviderTargetService,
 			ContainerRegistryService: serverConfig.ContainerRegistryService,
@@ -78,6 +80,7 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 type Server struct {
 	Id                       string
 	config                   Config
+	Version                  string
 	TailscaleServer          TailscaleServer
 	ProviderTargetService    providertargets.IProviderTargetService
 	ContainerRegistryService containerregistries.IContainerRegistryService

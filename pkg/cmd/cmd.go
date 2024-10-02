@@ -227,6 +227,7 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 		telemetryService = posthogservice.NewTelemetryService(posthogservice.PosthogServiceConfig{
 			ApiKey:   internal.PosthogApiKey,
 			Endpoint: internal.PosthogEndpoint,
+			Version:  internal.Version,
 		})
 	}
 

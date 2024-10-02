@@ -63,9 +63,9 @@ type AbstractTelemetryService struct {
 	TelemetryService
 }
 
-func NewAbstractTelemetryService() *AbstractTelemetryService {
+func NewAbstractTelemetryService(version string) *AbstractTelemetryService {
 	return &AbstractTelemetryService{
-		daytonaVersion: internal.Version,
+		daytonaVersion: version,
 	}
 }
 

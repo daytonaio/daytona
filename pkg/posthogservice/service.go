@@ -15,6 +15,7 @@ import (
 type PosthogServiceConfig struct {
 	ApiKey   string
 	Endpoint string
+	Version  string
 }
 
 func NewTelemetryService(config PosthogServiceConfig) telemetry.TelemetryService {
@@ -25,7 +26,7 @@ func NewTelemetryService(config PosthogServiceConfig) telemetry.TelemetryService
 	})
 	posthogService := &posthogService{
 		client:                   client,
-		AbstractTelemetryService: telemetry.NewAbstractTelemetryService(),
+		AbstractTelemetryService: telemetry.NewAbstractTelemetryService(config.Version),
 	}
 
 	posthogService.AbstractTelemetryService.TelemetryService = posthogService
