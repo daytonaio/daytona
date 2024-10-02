@@ -65,10 +65,10 @@ var logsCmd = &cobra.Command{
 			}
 		}
 
-		if len(workspace.Projects) == 0 {
-			return errors.New("no projects found in workspace")
-		} else if workspace == nil {
+		if workspace == nil {
 			return errors.New("workspace not found")
+		} else if len(workspace.Projects) == 0 {
+			return errors.New("no projects found in workspace")
 		}
 
 		if len(args) == 2 {
