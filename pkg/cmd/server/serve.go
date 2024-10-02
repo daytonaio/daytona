@@ -72,6 +72,7 @@ var ServeCmd = &cobra.Command{
 		telemetryService := posthogservice.NewTelemetryService(posthogservice.PosthogServiceConfig{
 			ApiKey:   internal.PosthogApiKey,
 			Endpoint: internal.PosthogEndpoint,
+			Version:  internal.Version,
 		})
 
 		go func() {
@@ -86,9 +87,10 @@ var ServeCmd = &cobra.Command{
 		apiServer := api.NewApiServer(api.ApiServerConfig{
 			ApiPort:          int(c.ApiPort),
 			TelemetryService: telemetryService,
+			Version:          internal.Version,
 		})
 
-		server, err := GetInstance(c, configDir, telemetryService)
+		server, err := GetInstance(c, configDir, internal.Version, telemetryService)
 		if err != nil {
 			return err
 		}
@@ -146,7 +148,7 @@ var ServeCmd = &cobra.Command{
 	},
 }
 
-func GetInstance(c *server.Config, configDir string, telemetryService telemetry.TelemetryService) (*server.Server, error) {
+func GetInstance(c *server.Config, configDir string, version string, telemetryService telemetry.TelemetryService) (*server.Server, error) {
 	wsLogsDir, err := server.GetWorkspaceLogsDir(configDir)
 	if err != nil {
 		return nil, err
@@ -273,6 +275,7 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 		ApiUrl:                util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 		DaytonaDownloadUrl:    getDaytonaScriptUrl(c),
 		ServerUrl:             headscaleUrl,
+		ServerVersion:         version,
 		RegistryUrl:           c.RegistryUrl,
 		BaseDir:               c.ProvidersDir,
 		CreateProviderNetworkKey: func(providerName string) (string, error) {
@@ -295,6 +298,7 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 		BuildService:             buildService,
 		ProjectConfigService:     projectConfigService,
 		ServerApiUrl:             util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+		ServerVersion:            version,
 		ServerUrl:                headscaleUrl,
 		DefaultProjectImage:      c.DefaultProjectImage,
 		DefaultProjectUser:       c.DefaultProjectUser,
@@ -309,6 +313,7 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 
 	return server.GetInstance(&server.ServerInstanceConfig{
 		Config:                   *c,
+		Version:                  version,
 		TailscaleServer:          headscaleServer,
 		ProviderTargetService:    providerTargetService,
 		ContainerRegistryService: containerRegistryService,

@@ -6,7 +6,6 @@ package workspace
 import (
 	"errors"
 
-	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
 )
 
@@ -35,16 +34,17 @@ func (w *Workspace) GetProject(projectName string) (*project.Project, error) {
 }
 
 type WorkspaceEnvVarParams struct {
-	ApiUrl    string
-	ServerUrl string
-	ClientId  string
+	ApiUrl        string
+	ServerUrl     string
+	ServerVersion string
+	ClientId      string
 }
 
 func GetWorkspaceEnvVars(workspace *Workspace, params WorkspaceEnvVarParams, telemetryEnabled bool) map[string]string {
 	envVars := map[string]string{
 		"DAYTONA_WS_ID":          workspace.Id,
 		"DAYTONA_SERVER_API_KEY": workspace.ApiKey,
-		"DAYTONA_SERVER_VERSION": internal.Version,
+		"DAYTONA_SERVER_VERSION": params.ServerVersion,
 		"DAYTONA_SERVER_URL":     params.ServerUrl,
 		"DAYTONA_SERVER_API_URL": params.ApiUrl,
 		"DAYTONA_CLIENT_ID":      params.ClientId,

@@ -49,6 +49,7 @@ type WorkspaceServiceConfig struct {
 	ProjectConfigService     projectconfig.IProjectConfigService
 	ServerApiUrl             string
 	ServerUrl                string
+	ServerVersion            string
 	Provisioner              provisioner.IProvisioner
 	DefaultProjectImage      string
 	DefaultProjectUser       string
@@ -67,6 +68,7 @@ func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 		projectConfigService:     config.ProjectConfigService,
 		serverApiUrl:             config.ServerApiUrl,
 		serverUrl:                config.ServerUrl,
+		serverVersion:            config.ServerVersion,
 		defaultProjectImage:      config.DefaultProjectImage,
 		defaultProjectUser:       config.DefaultProjectUser,
 		provisioner:              config.Provisioner,
@@ -87,6 +89,7 @@ type WorkspaceService struct {
 	apiKeyService            apikeys.IApiKeyService
 	serverApiUrl             string
 	serverUrl                string
+	serverVersion            string
 	defaultProjectImage      string
 	defaultProjectUser       string
 	loggerFactory            logs.LoggerFactory
