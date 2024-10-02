@@ -82,9 +82,10 @@ func (s *WorkspaceService) startWorkspace(ctx context.Context, ws *workspace.Wor
 	wsLogWriter.Write([]byte("Starting workspace\n"))
 
 	ws.EnvVars = workspace.GetWorkspaceEnvVars(ws, workspace.WorkspaceEnvVarParams{
-		ApiUrl:    s.serverApiUrl,
-		ServerUrl: s.serverUrl,
-		ClientId:  telemetry.ClientId(ctx),
+		ApiUrl:        s.serverApiUrl,
+		ServerUrl:     s.serverUrl,
+		ServerVersion: s.serverVersion,
+		ClientId:      telemetry.ClientId(ctx),
 	}, telemetry.TelemetryEnabled(ctx))
 
 	err := s.provisioner.StartWorkspace(ws, target)
@@ -112,12 +113,13 @@ func (s *WorkspaceService) startProject(ctx context.Context, p *project.Project,
 
 	projectToStart := *p
 	projectToStart.EnvVars = project.GetProjectEnvVars(p, project.ProjectEnvVarParams{
-		ApiUrl:    s.serverApiUrl,
-		ServerUrl: s.serverUrl,
-		ClientId:  telemetry.ClientId(ctx),
+		ApiUrl:        s.serverApiUrl,
+		ServerUrl:     s.serverUrl,
+		ServerVersion: s.serverVersion,
+		ClientId:      telemetry.ClientId(ctx),
 	}, telemetry.TelemetryEnabled(ctx))
 
-	err := s.provisioner.StartProject(p, target)
+	err := s.provisioner.StartProject(&projectToStart, target)
 	if err != nil {
 		return err
 	}

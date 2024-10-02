@@ -100,12 +100,13 @@ var purgeCmd = &cobra.Command{
 		telemetryService := posthogservice.NewTelemetryService(posthogservice.PosthogServiceConfig{
 			ApiKey:   internal.PosthogApiKey,
 			Endpoint: internal.PosthogEndpoint,
+			Version:  internal.Version,
 		})
 
 		defer telemetryService.Close()
 
 		fmt.Println("Purging the server")
-		server, err := server_cmd.GetInstance(serverConfig, serverConfigDir, telemetryService)
+		server, err := server_cmd.GetInstance(serverConfig, serverConfigDir, internal.Version, telemetryService)
 		if err != nil {
 			return err
 		}

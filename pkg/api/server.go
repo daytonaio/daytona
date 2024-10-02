@@ -26,7 +26,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/pkg/api/docs"
 	"github.com/daytonaio/daytona/pkg/api/middlewares"
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -59,6 +58,7 @@ import (
 
 type ApiServerConfig struct {
 	ApiPort          int
+	Version          string
 	TelemetryService telemetry.TelemetryService
 }
 
@@ -66,6 +66,7 @@ func NewApiServer(config ApiServerConfig) *ApiServer {
 	return &ApiServer{
 		apiPort:          config.ApiPort,
 		telemetryService: config.TelemetryService,
+		version:          config.Version,
 	}
 }
 
@@ -74,10 +75,11 @@ type ApiServer struct {
 	telemetryService telemetry.TelemetryService
 	httpServer       *http.Server
 	router           *gin.Engine
+	version          string
 }
 
 func (a *ApiServer) Start() error {
-	docs.SwaggerInfo.Version = internal.Version
+	docs.SwaggerInfo.Version = a.version
 	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Description = "Daytona Server API"
 	docs.SwaggerInfo.Title = "Daytona Server API"
@@ -102,7 +104,7 @@ func (a *ApiServer) Start() error {
 
 	a.router.Use(middlewares.TelemetryMiddleware(a.telemetryService))
 	a.router.Use(middlewares.LoggingMiddleware())
-	a.router.Use(middlewares.SetVersionMiddleware())
+	a.router.Use(middlewares.SetVersionMiddleware(a.version))
 
 	public := a.router.Group("/")
 	public.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))

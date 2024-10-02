@@ -11,7 +11,6 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/util"
 	os_util "github.com/daytonaio/daytona/pkg/os"
 	. "github.com/daytonaio/daytona/pkg/provider"
@@ -48,6 +47,7 @@ type IProviderManager interface {
 type ProviderManagerConfig struct {
 	DaytonaDownloadUrl       string
 	ServerUrl                string
+	ServerVersion            string
 	ApiUrl                   string
 	LogsDir                  string
 	ProviderTargetService    providertargets.IProviderTargetService
@@ -63,6 +63,7 @@ func NewProviderManager(config ProviderManagerConfig) *ProviderManager {
 		pluginRefs:               make(map[string]*pluginRef),
 		daytonaDownloadUrl:       config.DaytonaDownloadUrl,
 		serverUrl:                config.ServerUrl,
+		serverVersion:            config.ServerVersion,
 		apiUrl:                   config.ApiUrl,
 		logsDir:                  config.LogsDir,
 		providerTargetService:    config.ProviderTargetService,
@@ -78,6 +79,7 @@ type ProviderManager struct {
 	pluginRefs               map[string]*pluginRef
 	daytonaDownloadUrl       string
 	serverUrl                string
+	serverVersion            string
 	apiUrl                   string
 	serverPort               uint32
 	apiPort                  uint32
@@ -264,7 +266,7 @@ func (m *ProviderManager) initializeProvider(pluginPath string) (*pluginRef, err
 	_, err = (*p).Initialize(InitializeProviderRequest{
 		BasePath:           pluginBasePath,
 		DaytonaDownloadUrl: m.daytonaDownloadUrl,
-		DaytonaVersion:     internal.Version,
+		DaytonaVersion:     m.serverVersion,
 		ServerUrl:          m.serverUrl,
 		ApiUrl:             m.apiUrl,
 		LogsDir:            m.logsDir,

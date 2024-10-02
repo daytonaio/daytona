@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
 )
@@ -69,9 +68,10 @@ const (
 )
 
 type ProjectEnvVarParams struct {
-	ApiUrl    string
-	ServerUrl string
-	ClientId  string
+	ApiUrl        string
+	ServerUrl     string
+	ServerVersion string
+	ClientId      string
 }
 
 func GetProjectEnvVars(project *Project, params ProjectEnvVarParams, telemetryEnabled bool) map[string]string {
@@ -80,7 +80,7 @@ func GetProjectEnvVars(project *Project, params ProjectEnvVarParams, telemetryEn
 		"DAYTONA_WS_PROJECT_NAME":           project.Name,
 		"DAYTONA_WS_PROJECT_REPOSITORY_URL": project.Repository.Url,
 		"DAYTONA_SERVER_API_KEY":            project.ApiKey,
-		"DAYTONA_SERVER_VERSION":            internal.Version,
+		"DAYTONA_SERVER_VERSION":            params.ServerVersion,
 		"DAYTONA_SERVER_URL":                params.ServerUrl,
 		"DAYTONA_SERVER_API_URL":            params.ApiUrl,
 		"DAYTONA_CLIENT_ID":                 params.ClientId,
