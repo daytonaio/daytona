@@ -5,7 +5,7 @@ package cmd
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
@@ -43,6 +43,11 @@ var logsCmd = &cobra.Command{
 			return err
 		}
 
+		var (
+			showWorkspaceLogs = true
+			projectNames      []string
+		)
+
 		if len(args) == 0 {
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
@@ -60,38 +65,36 @@ var logsCmd = &cobra.Command{
 			}
 		}
 
-		var (
-			projectName       string
-			showWorkspaceLogs bool
-		)
-
-		showWorkspaceLogs = true
+		if len(workspace.Projects) == 0 {
+			return errors.New("no projects found in workspace")
+		} else if workspace == nil {
+			return errors.New("workspace not found")
+		}
 
 		if len(args) == 2 {
-			projectName = args[1]
+			projects := util.ArrayMap(workspace.Projects, func(p apiclient.Project) string {
+				return p.Name
+			})
+			var found bool
+			for _, project := range projects {
+				if project == args[1] {
+					found = true
+					break
+				}
+			}
+			if !found {
+				return errors.New("project not found in workspace")
+			}
+			projectNames = append(projectNames, args[1])
 			if workspaceFlag {
 				showWorkspaceLogs = true
 			} else {
 				showWorkspaceLogs = false
 			}
-		}
-
-		var projectNames []string
-		if !workspaceFlag {
-			for _, project := range workspace.Projects {
-				if projectName == "" {
-					projectNames = append(projectNames, project.Name)
-				} else if project.Name == projectName {
-					projectNames = append(projectNames, projectName)
-					break
-				}
-			}
-		}
-
-		if len(workspace.Projects) == 0 {
-			return fmt.Errorf("no projects found in workspace")
-		} else if workspace == nil {
-			return fmt.Errorf("workspace not found")
+		} else if !workspaceFlag {
+			projectNames = util.ArrayMap(workspace.Projects, func(p apiclient.Project) string {
+				return p.Name
+			})
 		}
 
 		apiclient_util.ReadWorkspaceLogs(ctx, activeProfile, workspace.Id, projectNames, followFlag, showWorkspaceLogs)
@@ -102,5 +105,5 @@ var logsCmd = &cobra.Command{
 
 func init() {
 	logsCmd.Flags().BoolVarP(&followFlag, "follow", "f", false, "Follow logs")
-	logsCmd.Flags().BoolVarP(&workspaceFlag, "workspace", "w", false, "View only the workspace logs")
+	logsCmd.Flags().BoolVarP(&workspaceFlag, "workspace", "w", false, "View workspace logs")
 }

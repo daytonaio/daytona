@@ -9,7 +9,7 @@ options:
     - name: workspace
       shorthand: w
       default_value: "false"
-      usage: View only the workspace logs
+      usage: View workspace logs
 inherited_options:
     - name: help
       default_value: "false"

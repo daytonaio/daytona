@@ -10,7 +10,7 @@ daytona logs [WORKSPACE] [PROJECT_NAME] [flags]
 
 ```
   -f, --follow      Follow logs
-  -w, --workspace   View only the workspace logs
+  -w, --workspace   View workspace logs
 ```
 
 ### Options inherited from parent commands
