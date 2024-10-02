@@ -53,7 +53,9 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 		}
 	}
 
-	return selectedProvider[0].GitProvider, selectedProvider[0].Id, nil
+	if len(selectedProvider) > 0 {
+		return selectedProvider[0].GitProvider, selectedProvider[0].Id, nil
+	}
 
 	u, err := url.Parse(repoUrl)
 	if err != nil {
