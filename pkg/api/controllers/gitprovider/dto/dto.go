@@ -13,5 +13,5 @@ type SetGitProviderConfig struct {
 	Username   *string `json:"username,omitempty" validate:"optional"`
 	Token      string  `json:"token" validate:"required"`
 	BaseApiUrl *string `json:"baseApiUrl,omitempty" validate:"optional"`
-	Alias      string  `json:"alias" validate:"optional"`
+	Alias      *string `json:"alias" validate:"optional"`
 } // @name SetGitProviderConfig

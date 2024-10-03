@@ -136,7 +136,7 @@ func SetGitProvider(ctx *gin.Context) {
 		ProviderId: setConfigDto.ProviderId,
 		Token:      setConfigDto.Token,
 		BaseApiUrl: setConfigDto.BaseApiUrl,
-		Alias:      setConfigDto.Alias,
+		Alias:      *setConfigDto.Alias,
 	}
 
 	if setConfigDto.Username != nil {
