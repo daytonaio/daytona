@@ -177,7 +177,7 @@ func (s *Service) SetGitConfig(userData *gitprovider.GitUser, providerConfig *gi
 		}
 	}
 
-	if err := setSigningConfig(cfg, providerConfig); err != nil {
+	if err := s.setSigningConfig(cfg, providerConfig, userData); err != nil {
 		return err
 	}
 
@@ -190,7 +190,7 @@ func (s *Service) SetGitConfig(userData *gitprovider.GitUser, providerConfig *gi
 	return os.WriteFile(gitConfigFileName, buf.Bytes(), 0644)
 }
 
-func setSigningConfig(cfg *ini.File, providerConfig *gitprovider.GitProviderConfig) error {
+func (s *Service) setSigningConfig(cfg *ini.File, providerConfig *gitprovider.GitProviderConfig, userData *gitprovider.GitUser) error {
 	if providerConfig == nil || providerConfig.SigningMethod == nil || providerConfig.SigningKey == nil {
 		return nil
 	}
@@ -221,17 +221,62 @@ func setSigningConfig(cfg *ini.File, providerConfig *gitprovider.GitProviderConf
 			return err
 		}
 	case gitprovider.SigningMethodSSH:
+		err := s.configureAllowedSigners(userData.Email, *providerConfig.SigningKey)
+		if err != nil {
+			return err
+		}
+
 		if !cfg.HasSection("gpg") {
 			_, err := cfg.NewSection("gpg")
 			if err != nil {
 				return err
 			}
 		}
-		_, err := cfg.Section("gpg").NewKey("format", "ssh")
+		_, err = cfg.Section("gpg").NewKey("format", "ssh")
+		if err != nil {
+			return err
+		}
+
+		if !cfg.HasSection("gpg \"ssh\"") {
+			_, err := cfg.NewSection("gpg \"ssh\"")
+			if err != nil {
+				return err
+			}
+		}
+
+		allowedSignersFile := filepath.Join(os.Getenv("HOME"), ".config/git/allowed_signers")
+		_, err = cfg.Section("gpg \"ssh\"").NewKey("allowedSignersFile", allowedSignersFile)
 		if err != nil {
 			return err
 		}
 	}
+	return nil
+}
+
+func (s *Service) configureAllowedSigners(email, sshKey string) error {
+	homeDir := os.Getenv("HOME")
+	sshDir := filepath.Join(homeDir, ".ssh")
+	allowedSignersFile := filepath.Join(sshDir, "allowed_signers")
+
+	cmd := exec.Command("mkdir", "-p", sshDir)
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	cmd = exec.Command("touch", allowedSignersFile)
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	entry := fmt.Sprintf("%s namespaces=\"git\" %s\n", email, sshKey)
+	cmd = exec.Command("bash", "-c", fmt.Sprintf("echo '%s' >> %s", entry, allowedSignersFile))
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
