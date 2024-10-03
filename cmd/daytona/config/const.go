@@ -126,6 +126,8 @@ func GetPrebuildScopesFromGitProviderId(providerId string) string {
 		return "admin:repo_hook"
 	case "bitbucket":
 		return "webhooks"
+	case "bitbucket-server":
+		return "REPO_ADMIN"
 	case "azure-devops":
 		return "Work (Read, Write & Manage); Build (Read & Execute)"
 	default:
@@ -142,6 +144,8 @@ func GetWebhookEventHeaderKeyFromGitProvider(providerId string) string {
 	case "gitlab-self-managed":
 		return "X-Gitlab-Event"
 	case "bitbucket":
+		return "X-Event-Key"
+	case "bitbucket-server":
 		return "X-Event-Key"
 	case "gitea":
 		return "X-Gitea-Event"
