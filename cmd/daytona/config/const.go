@@ -165,6 +165,8 @@ func GetWebhookEventHeaderKeyFromGitProvider(providerId string) string {
 		return "X-Gitlab-Event"
 	case "bitbucket":
 		return "X-Event-Key"
+	case "bitbucket-server":
+		return "X-Event-Key"
 	case "gitea":
 		return "X-Gitea-Event"
 	case "azure-devops":
