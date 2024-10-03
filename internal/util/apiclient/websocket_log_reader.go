@@ -95,7 +95,11 @@ func readJSONLog(ctx context.Context, ws *websocket.Conn, index int) {
 
 			err := ws.ReadJSON(&logEntry)
 
-			logEntriesChan <- logEntry
+			// An empty entry will be sent from the server on close/EOF
+			// We don't want to print that
+			if logEntry != (logs.LogEntry{}) {
+				logEntriesChan <- logEntry
+			}
 
 			if err != nil {
 				if websocket.IsUnexpectedCloseError(err, websocket.CloseNormalClosure) {
