@@ -4,11 +4,17 @@
 package headscale
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"os"
+	"time"
 
+	"github.com/daytonaio/daytona/pkg/frpc"
+	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/juanfont/headscale/hscontrol"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type HeadscaleServerConfig struct {
@@ -17,6 +23,7 @@ type HeadscaleServerConfig struct {
 	FrpsProtocol  string
 	HeadscalePort uint32
 	ConfigDir     string
+	Frps          *server.FRPSConfig
 }
 
 func NewHeadscaleServer(config *HeadscaleServerConfig) *HeadscaleServer {
@@ -26,6 +33,7 @@ func NewHeadscaleServer(config *HeadscaleServerConfig) *HeadscaleServer {
 		frpsProtocol:  config.FrpsProtocol,
 		headscalePort: config.HeadscalePort,
 		configDir:     config.ConfigDir,
+		frps:          config.Frps,
 	}
 }
 
@@ -35,6 +43,7 @@ type HeadscaleServer struct {
 	frpsProtocol  string
 	headscalePort uint32
 	configDir     string
+	frps          *server.FRPSConfig
 
 	stopChan chan struct{}
 }
@@ -43,7 +52,8 @@ func (s *HeadscaleServer) Init() error {
 	return os.MkdirAll(s.configDir, 0700)
 }
 
-func (s *HeadscaleServer) Start() error {
+func (s *HeadscaleServer) Start(errChan chan error) error {
+	// Check if port is already in use
 	_, err := net.Dial("tcp", fmt.Sprintf(":%d", s.headscalePort))
 	if err == nil {
 		return fmt.Errorf("cannot start Headscale server, port %d is already in use", s.headscalePort)
@@ -60,7 +70,6 @@ func (s *HeadscaleServer) Start() error {
 	}
 
 	s.stopChan = make(chan struct{})
-	errChan := make(chan error)
 
 	go func() {
 		select {
@@ -72,7 +81,39 @@ func (s *HeadscaleServer) Start() error {
 		}
 	}()
 
-	return <-errChan
+	if s.frps != nil {
+		healthCheck, frpcService, err := frpc.GetService(frpc.FrpcConnectParams{
+			ServerDomain: s.frps.Domain,
+			ServerPort:   int(s.frps.Port),
+			Name:         fmt.Sprintf("daytona-server-%s", s.serverId),
+			Port:         int(s.headscalePort),
+			SubDomain:    s.serverId,
+		})
+		if err != nil {
+			return err
+		}
+
+		go func() {
+			err := frpcService.Run(context.Background())
+			if err != nil {
+				errChan <- err
+			}
+		}()
+
+		for i := 0; i < 5; i++ {
+			if err = healthCheck(); err != nil {
+				log.Debugf("Failed to connect to headscale frpc: %s", err)
+				time.Sleep(2 * time.Second)
+			} else {
+				break
+			}
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	return err
 }
 
 func (s *HeadscaleServer) Stop() error {

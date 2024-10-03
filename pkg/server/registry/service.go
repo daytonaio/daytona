@@ -10,11 +10,16 @@ import (
 	"io"
 	"net"
 	"os"
+	"time"
 
 	"github.com/daytonaio/daytona/pkg/docker"
+	"github.com/daytonaio/daytona/pkg/frpc"
+	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
+
+	log "github.com/sirupsen/logrus"
 )
 
 const registryContainerName = "daytona-registry"
@@ -24,6 +29,8 @@ type LocalContainerRegistryConfig struct {
 	Port     uint32
 	Image    string
 	Logger   io.Writer
+	Frps     *server.FRPSConfig
+	ServerId string
 }
 
 func NewLocalContainerRegistry(config *LocalContainerRegistryConfig) *LocalContainerRegistry {
@@ -32,6 +39,8 @@ func NewLocalContainerRegistry(config *LocalContainerRegistryConfig) *LocalConta
 		port:     config.Port,
 		image:    config.Image,
 		logger:   config.Logger,
+		frps:     config.Frps,
+		serverId: config.ServerId,
 	}
 }
 
@@ -40,6 +49,8 @@ type LocalContainerRegistry struct {
 	port     uint32
 	image    string
 	logger   io.Writer
+	frps     *server.FRPSConfig
+	serverId string
 }
 
 func (s *LocalContainerRegistry) Start() error {
@@ -112,7 +123,44 @@ func (s *LocalContainerRegistry) Start() error {
 		return err
 	}
 
-	return cli.ContainerStart(ctx, resp.ID, container.StartOptions{})
+	errChan := make(chan error)
+	go func() {
+		errChan <- cli.ContainerStart(ctx, resp.ID, container.StartOptions{})
+	}()
+
+	if s.frps != nil {
+		healthCheck, frpcService, err := frpc.GetService(frpc.FrpcConnectParams{
+			ServerDomain: s.frps.Domain,
+			ServerPort:   int(s.frps.Port),
+			Name:         fmt.Sprintf("daytona-server-registry-%s", s.serverId),
+			Port:         int(s.port),
+			SubDomain:    fmt.Sprintf("registry-%s", s.serverId),
+		})
+		if err != nil {
+			return err
+		}
+
+		go func() {
+			err := frpcService.Run(context.Background())
+			if err != nil {
+				errChan <- err
+			}
+		}()
+
+		for i := 0; i < 5; i++ {
+			if err = healthCheck(); err != nil {
+				log.Debugf("Failed to connect to registry frpc: %s", err)
+				time.Sleep(2 * time.Second)
+			} else {
+				break
+			}
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	return <-errChan
 }
 
 func (s *LocalContainerRegistry) Stop() error {
@@ -149,7 +197,7 @@ func RemoveRegistryContainer() error {
 				}
 
 				if err := cli.ContainerRemove(ctx, c.ID, removeOptions); err != nil {
-					return err
+					return fmt.Errorf("failed to remove local container registry: %w", err)
 				}
 				return nil
 			}
