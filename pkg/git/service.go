@@ -244,7 +244,7 @@ func (s *Service) setSigningConfig(cfg *ini.File, providerConfig *gitprovider.Gi
 			}
 		}
 
-		allowedSignersFile := filepath.Join(os.Getenv("HOME"), ".config/git/allowed_signers")
+		allowedSignersFile := filepath.Join(os.Getenv("HOME"), ".ssh/allowed_signers")
 		_, err = cfg.Section("gpg \"ssh\"").NewKey("allowedSignersFile", allowedSignersFile)
 		if err != nil {
 			return err
@@ -258,23 +258,23 @@ func (s *Service) configureAllowedSigners(email, sshKey string) error {
 	sshDir := filepath.Join(homeDir, ".ssh")
 	allowedSignersFile := filepath.Join(sshDir, "allowed_signers")
 
-	cmd := exec.Command("mkdir", "-p", sshDir)
-	err := cmd.Run()
+	err := os.MkdirAll(sshDir, 0700)
 	if err != nil {
-		return err
-	}
-
-	cmd = exec.Command("touch", allowedSignersFile)
-	err = cmd.Run()
-	if err != nil {
-		return err
+		return fmt.Errorf("failed to create SSH directory: %w", err)
 	}
 
 	entry := fmt.Sprintf("%s namespaces=\"git\" %s\n", email, sshKey)
-	cmd = exec.Command("bash", "-c", fmt.Sprintf("echo '%s' >> %s", entry, allowedSignersFile))
-	err = cmd.Run()
+
+	existingContent, err := os.ReadFile(allowedSignersFile)
+	if err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("failed to read allowed_signers file: %w", err)
+	}
+
+	newContent := string(existingContent) + entry
+
+	err = os.WriteFile(allowedSignersFile, []byte(newContent), 0600)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to write to allowed_signers file: %w", err)
 	}
 
 	return nil
