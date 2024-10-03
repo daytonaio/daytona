@@ -281,3 +281,40 @@ func (g *GitnessGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (
 	client := g.getApiClient()
 	return client.GetDefaultBranch(staticContext.Url)
 }
+
+func (g *GitnessGitProvider) RegisterPrebuildWebhook(repo *GitRepository, endpointUrl string) (string, error) {
+	client := g.getApiClient()
+	webhook, err := client.CreateWebhook(repo.Id, repo.Owner, endpointUrl)
+	if err != nil {
+		return "", err
+	}
+	return webhook.Uid, nil
+}
+
+func (g *GitnessGitProvider) GetPrebuildWebhook(repo *GitRepository, endpointUrl string) (*string, error) {
+	client := g.getApiClient()
+	webhooks, err := client.GetAllWebhooks(repo.Id, repo.Owner)
+	if err != nil {
+		return nil, err
+	}
+	for _, webhook := range webhooks {
+		if webhook.Url == endpointUrl {
+			return &webhook.Uid, nil
+		}
+	}
+	return nil, fmt.Errorf("webhook not found")
+}
+
+func (g *GitnessGitProvider) UnregisterPrebuildWebhook(repo *GitRepository, id string) error {
+	client := g.getApiClient()
+	return client.DeleteWebhook(repo.Id, repo.Owner, id)
+}
+
+func (g *GitnessGitProvider) GetCommitsRange(repo *GitRepository, initialSha string, currentSha string) (int, error) {
+	client := g.getApiClient()
+	commits, err := client.GetCommits(repo.Owner, repo.Name, &repo.Branch)
+	if err != nil {
+		return 0, err
+	}
+	return len(*commits), nil
+}

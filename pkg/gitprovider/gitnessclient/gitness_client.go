@@ -353,6 +353,64 @@ func (g *GitnessClient) GetDefaultBranch(url string) (*string, error) {
 	return &repo.DefaultBranch, nil
 }
 
+func (g *GitnessClient) CreateWebhook(repoId string, namespaceId string, callbackURL string) (*Webhook, error) {
+	webhookEndpoint, parseErr := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/webhooks", url.PathEscape(namespaceId+"/"+repoId)))
+	if parseErr != nil {
+		return nil, parseErr
+	}
+
+	params := url.Values{}
+	params.Add("url", callbackURL)
+	webHookUrl, urlErr := url.Parse(webhookEndpoint.String() + "?" + params.Encode())
+	if urlErr != nil {
+		return nil, urlErr
+	}
+	webhookEndpoint = webHookUrl
+	responseData, reqErr := g.performRequest("POST", webhookEndpoint.String())
+	if reqErr != nil {
+		return nil, reqErr
+	}
+
+	var newWebhook Webhook
+	if unmarshalErr := json.Unmarshal(responseData, &newWebhook); unmarshalErr != nil {
+		return nil, unmarshalErr
+	}
+
+	return &newWebhook, nil
+}
+
+func (g *GitnessClient) DeleteWebhook(repoID string, namespaceId string, webhookID string) error {
+	webhookEndpoint, parseErr := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/webhooks/%s", url.PathEscape(namespaceId+"/"+repoID), webhookID))
+	if parseErr != nil {
+		return parseErr
+	}
+	_, reqErr := g.performRequest("DELETE", webhookEndpoint.String())
+	if reqErr != nil {
+		return reqErr
+	}
+
+	return nil
+}
+
+func (g *GitnessClient) GetAllWebhooks(repoId string, namespaceId string) ([]*Webhook, error) {
+	webhookEndpoint, parseErr := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/webhooks", url.PathEscape(namespaceId+"/"+repoId)))
+	if parseErr != nil {
+		return nil, parseErr
+	}
+
+	responseData, reqErr := g.performRequest("GET", webhookEndpoint.String())
+	if reqErr != nil {
+		return nil, reqErr
+	}
+
+	var webhookList []*Webhook
+	if unmarshalErr := json.Unmarshal(responseData, &webhookList); unmarshalErr != nil {
+		return nil, unmarshalErr
+	}
+
+	return webhookList, nil
+}
+
 func GetCloneUrl(protocol, host, owner, repo string) string {
 	return fmt.Sprintf("%s://%s/git/%s/%s.git", protocol, host, owner, repo)
 }
