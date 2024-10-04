@@ -29,15 +29,10 @@ func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrd
 	}
 
 	if !isPaginationDisabled {
-		items = AddNavigationOptionsToList(items, len(pullRequests), curPage, perPage)
+		items = AddLoadMoreOptionToList(items, len(pullRequests), curPage, perPage)
 	}
 
-	listOptions := views.ListOptions{
-		ParentIdentifier: parentIdentifier,
-		CurPage:          curPage,
-	}
-
-	l := views.GetStyledSelectList(items, listOptions)
+	l := views.GetStyledSelectList(items, parentIdentifier)
 
 	title := "Choose a Pull/Merge Request"
 	if projectOrder > 1 {
@@ -55,7 +50,7 @@ func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrd
 
 	if m, ok := p.(model[string]); ok && m.choice != nil {
 		choice := *m.choice
-		if choice == "next" || choice == "prev" {
+		if choice == views.ListNavigationText {
 			navChan <- choice
 		} else {
 			choiceChan <- choice

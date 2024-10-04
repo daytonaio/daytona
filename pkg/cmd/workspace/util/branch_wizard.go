@@ -12,6 +12,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/common"
+	"github.com/daytonaio/daytona/pkg/views"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
@@ -31,7 +32,6 @@ func runGetBranchFromPromptWithPagination(ctx context.Context, config BranchWiza
 	var err error
 
 	for {
-		branchList = nil
 		err = views_util.WithSpinner("Loading Branches", func() error {
 			branches, _, err := config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.ProviderId, config.NamespaceId, url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
 			if err != nil {
@@ -52,12 +52,9 @@ func runGetBranchFromPromptWithPagination(ctx context.Context, config BranchWiza
 		// User will either choose a branch or navigate the pages
 		branch, navigate := selection.GetBranchFromPrompt(branchList, config.ProjectOrder, parentIdentifier, isPaginationDisabled, page, perPage)
 		if !isPaginationDisabled && navigate != "" {
-			if navigate == "next" {
+			if navigate == views.ListNavigationText {
 				page++
 				continue // Fetch the next page of branches
-			} else if navigate == "prev" && page > 1 {
-				page--
-				continue // Fetch the previous page of branches
 			}
 		} else if branch != nil {
 			config.ChosenRepo.Branch = branch.Name
@@ -162,7 +159,6 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 		page = 1
 		perPage = 100
 		for {
-			prList = nil
 			err = views_util.WithSpinner("Loading Pull Requests", func() error {
 				branches, _, err := config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.ProviderId, config.NamespaceId, url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
 				if err != nil {
@@ -183,11 +179,8 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 			// User will either choose a PR or navigate the pages
 			chosenPullRequest, navigate := selection.GetPullRequestFromPrompt(prList, config.ProjectOrder, parentIdentifier, isPaginationDisabled, page, perPage)
 			if !isPaginationDisabled && navigate != "" {
-				if navigate == "next" {
+				if navigate == views.ListNavigationText {
 					page++
-					continue
-				} else if navigate == "prev" && page > 1 {
-					page--
 					continue
 				}
 			} else if chosenPullRequest != nil {

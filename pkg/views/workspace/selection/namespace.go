@@ -29,14 +29,10 @@ func selectNamespacePrompt(namespaces []apiclient.GitNamespace, projectOrder int
 	}
 
 	if !isPaginationDisabled {
-		items = AddNavigationOptionsToList(items, len(namespaces), curPage, perPage)
+		items = AddLoadMoreOptionToList(items, len(namespaces), curPage, perPage)
 	}
 
-	listOptions := views.ListOptions{
-		ParentIdentifier: parentIdentifier,
-		CurPage:          curPage,
-	}
-	l := views.GetStyledSelectList(items, listOptions)
+	l := views.GetStyledSelectList(items, parentIdentifier)
 
 	title := "Choose a Namespace"
 	if projectOrder > 1 {
@@ -55,7 +51,7 @@ func selectNamespacePrompt(namespaces []apiclient.GitNamespace, projectOrder int
 	// Return either the choice or navigation
 	if m, ok := p.(model[string]); ok && m.choice != nil {
 		choice := *m.choice
-		if choice == "next" || choice == "prev" {
+		if choice == views.ListNavigationText {
 			navChan <- choice
 		} else {
 			choiceChan <- choice

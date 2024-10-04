@@ -12,6 +12,11 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+const (
+	ListNavigationText       = "load more"
+	ListNavigationRenderText = "Load more.."
+)
+
 var (
 	Green       = lipgloss.AdaptiveColor{Light: "#23cc71", Dark: "#23cc71"}
 	Blue        = lipgloss.AdaptiveColor{Light: "#017ffe", Dark: "#017ffe"}
@@ -48,12 +53,7 @@ var LogPrefixColors = []lipgloss.AdaptiveColor{
 	Blue, Orange, Cyan, Yellow,
 }
 
-type ListOptions struct {
-	ParentIdentifier string
-	CurPage          int32
-}
-
-func GetStyledSelectList(items []list.Item, listOptions ...ListOptions) list.Model {
+func GetStyledSelectList(items []list.Item, parentIdentifier ...string) list.Model {
 
 	d := list.NewDefaultDelegate()
 
@@ -77,19 +77,15 @@ func GetStyledSelectList(items []list.Item, listOptions ...ListOptions) list.Mod
 	l.FilterInput.TextStyle = lipgloss.NewStyle().Foreground(Green)
 
 	singularItemName := "item " + SeparatorString
-	pluralItemName := "items"
-
-	if len(listOptions) > 0 && listOptions[0].CurPage > 0 {
-		pluralItemName += fmt.Sprintf(" | Page %d", listOptions[0].CurPage)
+	var pluralItemName string
+	if len(parentIdentifier) == 0 {
+		pluralItemName = fmt.Sprintf("items\n\n%s", SeparatorString)
+	} else {
+		pluralItemName = fmt.Sprintf("items (%s)\n\n%s", parentIdentifier[0], SeparatorString)
 	}
-
-	if len(listOptions) > 0 && len(listOptions[0].ParentIdentifier) > 0 {
-		pluralItemName += fmt.Sprintf(" | (%s)", listOptions[0].ParentIdentifier)
-	}
-
-	pluralItemName += fmt.Sprintf(" \n\n%s", SeparatorString)
 
 	l.SetStatusBarItemName(singularItemName, pluralItemName)
+
 	return l
 }
 

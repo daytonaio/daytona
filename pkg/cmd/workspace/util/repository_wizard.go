@@ -11,6 +11,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/common"
+	"github.com/daytonaio/daytona/pkg/views"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
@@ -115,7 +116,6 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 	isOnlySingleNamespaceAvailable := true
 
 	for {
-		namespaceList = nil
 		err = views_util.WithSpinner("Loading Namespaces", func() error {
 			namespaces, _, err := config.ApiClient.GitProviderAPI.GetNamespaces(ctx, providerId).Page(page).PerPage(perPage).Execute()
 			if err != nil {
@@ -142,11 +142,8 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 
 		namespaceId, navigate = selection.GetNamespaceIdFromPrompt(namespaceList, config.ProjectOrder, providerId, isPaginationDisabled, page, perPage)
 		if !isPaginationDisabled && navigate != "" {
-			if navigate == "next" {
+			if navigate == views.ListNavigationText {
 				page++
-				continue
-			} else if navigate == "prev" && page > 1 {
-				page--
 				continue
 			}
 		} else if namespaceId != "" {
@@ -175,7 +172,6 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 	parentIdentifier := fmt.Sprintf("%s/%s", providerId, namespace)
 	for {
 		// Fetch repos for the current page
-		providerRepos = nil
 		err = views_util.WithSpinner("Loading Repositories", func() error {
 
 			repos, _, err := config.ApiClient.GitProviderAPI.GetRepositories(ctx, providerId, namespaceId).Page(page).PerPage(perPage).Execute()
@@ -197,12 +193,9 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		// User will either choose a repo or navigate the pages
 		chosenRepo, navigate = selection.GetRepositoryFromPrompt(providerRepos, config.ProjectOrder, config.SelectedRepos, parentIdentifier, isPaginationDisabled, page, perPage)
 		if !isPaginationDisabled && navigate != "" {
-			if navigate == "next" {
+			if navigate == views.ListNavigationText {
 				page++
 				continue // Fetch the next page of repos
-			} else if navigate == "prev" && page > 1 {
-				page--
-				continue // Fetch the previous page of repos
 			}
 		} else if chosenRepo != nil {
 			break
