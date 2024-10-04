@@ -30,9 +30,7 @@ func (s *Server) Purge(ctx context.Context, force bool) []error {
 
 	fmt.Println("Deleting all workspaces...")
 
-	errCh := make(chan error)
-
-	err := server.Start(errCh)
+	err := server.Start()
 	if err != nil {
 		s.trackPurgeError(ctx, force, err)
 		return []error{err}
@@ -62,30 +60,6 @@ func (s *Server) Purge(ctx context.Context, force bool) []error {
 		}
 	} else {
 		fmt.Printf("Failed to list workspaces: %v\n", err)
-	}
-
-	if s.LocalContainerRegistry != nil {
-		fmt.Println("Purging local container registry...")
-		err := s.LocalContainerRegistry.Purge()
-		if err != nil {
-			s.trackPurgeError(ctx, force, err)
-			if !force {
-				return []error{err}
-			} else {
-				fmt.Printf("Failed to purge local container registry: %v\n", err)
-			}
-		}
-	}
-
-	fmt.Println("Purging Tailscale server...")
-	err = s.TailscaleServer.Purge()
-	if err != nil {
-		s.trackPurgeError(ctx, force, err)
-		if !force {
-			return []error{err}
-		} else {
-			fmt.Printf("Failed to purge Tailscale server: %v\n", err)
-		}
 	}
 
 	fmt.Println("Purging providers...")
