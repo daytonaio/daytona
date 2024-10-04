@@ -15,8 +15,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
 	"github.com/spf13/cobra"
-
-	log "github.com/sirupsen/logrus"
 )
 
 var SshCmd = &cobra.Command{
@@ -24,15 +22,15 @@ var SshCmd = &cobra.Command{
 	Short:   "SSH into a project using the terminal",
 	Args:    cobra.ArbitraryArgs,
 	GroupID: util.WORKSPACE_GROUP,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		activeProfile, err := c.GetActiveProfile()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		ctx := context.Background()
@@ -41,33 +39,33 @@ var SshCmd = &cobra.Command{
 
 		apiClient, err := apiclient_util.GetApiClient(&activeProfile)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if len(args) == 0 {
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
 			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "SSH Into")
 			if workspace == nil {
-				return
+				return nil
 			}
 		} else {
 			workspace, err = apiclient_util.GetWorkspace(args[0], true)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 		}
 
 		if len(args) == 0 || len(args) == 1 {
 			selectedProject, err := selectWorkspaceProject(workspace.Id, &activeProfile)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 			if selectedProject == nil {
-				return
+				return nil
 			}
 			projectName = selectedProject.Name
 		}
@@ -79,10 +77,10 @@ var SshCmd = &cobra.Command{
 		if !workspace_util.IsProjectRunning(workspace, projectName) {
 			wsRunningStatus, err := AutoStartWorkspace(workspace.Name, projectName)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 			if !wsRunningStatus {
-				return
+				return nil
 			}
 		}
 
@@ -90,12 +88,10 @@ var SshCmd = &cobra.Command{
 		if len(args) > 2 {
 			sshArgs = append(sshArgs, args[2:]...)
 		}
-// TODO :  check for signing method
-		gpgForward := true
-		err = ide.OpenTerminalSsh(activeProfile, workspace.Id, projectName, gpgForward, sshArgs...)
-		if err != nil {
-			log.Fatal(err)
-		}
+    gpgForward := true
+
+		return ide.OpenTerminalSsh(activeProfile, workspace.Id, projectName, sshArgs...)
+
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) >= 2 {

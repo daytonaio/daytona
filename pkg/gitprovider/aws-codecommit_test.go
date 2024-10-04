@@ -25,6 +25,24 @@ func TestAwsCodeCommitGitProvider(t *testing.T) {
 	suite.Run(t, NewAwsCodeCommitGitProviderTestSuite())
 }
 
+func (g *AwsCodeCommitGitProviderTestSuite) TestCanHandle() {
+	repoUrl := "https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/Test"
+	require := g.Require()
+	canHandle, _ := g.gitProvider.CanHandle(repoUrl)
+	require.True(canHandle)
+
+	repoUrl = "https://ap-south-1.console.aws.amazon.com/codesuite/codecommit/repositories/Test/browse?region=ap-south-1"
+	canHandle, _ = g.gitProvider.CanHandle(repoUrl)
+	require.True(canHandle)
+}
+
+func (g *AwsCodeCommitGitProviderTestSuite) TestCanHandle_False() {
+	repoUrl := "https://github.com/daytonaio/daytona"
+	require := g.Require()
+	canHandle, _ := g.gitProvider.CanHandle(repoUrl)
+	require.False(canHandle)
+}
+
 func (g *AwsCodeCommitGitProviderTestSuite) TestParseStaticGitContext_PR() {
 	prUrl := "https://ap-south-1.console.aws.amazon.com/codesuite/codecommit/repositories/Test/pull-requests/1/details"
 	prContext := &StaticGitContext{

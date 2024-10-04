@@ -16,6 +16,11 @@ type MockGitProvider struct {
 	mock.Mock
 }
 
+func (m *MockGitProvider) CanHandle(repoUrl string) (bool, error) {
+	args := m.Called(repoUrl)
+	return args.Bool(0), args.Error(1)
+}
+
 func (m *MockGitProvider) GetNamespaces() ([]*gitprovider.GitNamespace, error) {
 	args := m.Called()
 	return args.Get(0).([]*gitprovider.GitNamespace), args.Error(1)

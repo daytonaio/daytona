@@ -26,7 +26,7 @@ var AgentCmd = &cobra.Command{
 	Use:   "agent",
 	Short: "Start the agent process",
 	Args:  cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		setLogLevel()
 
 		agentMode := config.ModeProject
@@ -37,7 +37,7 @@ var AgentCmd = &cobra.Command{
 
 		c, err := config.GetConfig(agentMode)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		c.ProjectDir = filepath.Join(os.Getenv("HOME"), c.ProjectName)
 
@@ -50,7 +50,7 @@ var AgentCmd = &cobra.Command{
 		if c.LogFilePath != nil {
 			logFile, err := os.OpenFile(*c.LogFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 			defer logFile.Close()
 			gitLogWriter = io.MultiWriter(os.Stdout, logFile)
@@ -91,10 +91,7 @@ var AgentCmd = &cobra.Command{
 			TelemetryEnabled: telemetryEnabled,
 		}
 
-		err = agent.Start()
-		if err != nil {
-			log.Fatal(err)
-		}
+		return agent.Start()
 	},
 }
 

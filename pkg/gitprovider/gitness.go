@@ -16,10 +16,10 @@ import (
 type GitnessGitProvider struct {
 	*AbstractGitProvider
 	token      string
-	baseApiUrl *string
+	baseApiUrl string
 }
 
-func NewGitnessGitProvider(token string, baseApiUrl *string) *GitnessGitProvider {
+func NewGitnessGitProvider(token string, baseApiUrl string) *GitnessGitProvider {
 	gitProvider := &GitnessGitProvider{
 		token:               token,
 		baseApiUrl:          baseApiUrl,
@@ -28,6 +28,15 @@ func NewGitnessGitProvider(token string, baseApiUrl *string) *GitnessGitProvider
 	gitProvider.AbstractGitProvider.GitProvider = gitProvider
 
 	return gitProvider
+}
+
+func (g *GitnessGitProvider) CanHandle(repoUrl string) (bool, error) {
+	staticContext, err := g.ParseStaticGitContext(repoUrl)
+	if err != nil {
+		return false, err
+	}
+
+	return strings.Contains(g.baseApiUrl, staticContext.Source), nil
 }
 
 func (g *GitnessGitProvider) GetNamespaces() ([]*GitNamespace, error) {
@@ -48,7 +57,7 @@ func (g *GitnessGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 }
 
 func (g *GitnessGitProvider) getApiClient() *gitnessclient.GitnessClient {
-	url, _ := url.Parse(*g.baseApiUrl)
+	url, _ := url.Parse(g.baseApiUrl)
 	return gitnessclient.NewGitnessClient(g.token, url)
 }
 

@@ -23,12 +23,12 @@ type BitbucketServerGitProvider struct {
 
 	username   string
 	token      string
-	baseApiUrl *string
+	baseApiUrl string
 }
 
 const bitbucketServerResponseLimit = 100
 
-func NewBitbucketServerGitProvider(username string, token string, baseApiUrl *string) *BitbucketServerGitProvider {
+func NewBitbucketServerGitProvider(username string, token string, baseApiUrl string) *BitbucketServerGitProvider {
 	provider := &BitbucketServerGitProvider{
 		username:            username,
 		token:               token,
@@ -40,8 +40,17 @@ func NewBitbucketServerGitProvider(username string, token string, baseApiUrl *st
 	return provider
 }
 
+func (g *BitbucketServerGitProvider) CanHandle(repoUrl string) (bool, error) {
+	staticContext, err := g.ParseStaticGitContext(repoUrl)
+	if err != nil {
+		return false, err
+	}
+
+	return strings.Contains(g.baseApiUrl, staticContext.Source), nil
+}
+
 func (g *BitbucketServerGitProvider) getApiClient() (*bitbucketv1.APIClient, error) {
-	conf := bitbucketv1.NewConfiguration(*g.baseApiUrl)
+	conf := bitbucketv1.NewConfiguration(g.baseApiUrl)
 	ctx := context.WithValue(context.Background(), bitbucketv1.ContextBasicAuth, bitbucketv1.BasicAuth{
 		UserName: g.username,
 		Password: g.token,
@@ -130,7 +139,7 @@ func (g *BitbucketServerGitProvider) GetRepositories(namespace string) ([]*GitRe
 				ownerName = repo.Owner.Name
 			}
 
-			baseURL, err := url.Parse(*g.baseApiUrl)
+			baseURL, err := url.Parse(g.baseApiUrl)
 			if err != nil {
 				return nil, err
 			}
@@ -422,7 +431,12 @@ func (g *BitbucketServerGitProvider) ParseStaticGitContext(repoUrl string) (*Sta
 	matches := re.FindStringSubmatch(repoUrl)
 
 	if len(matches) < 4 {
-		return nil, fmt.Errorf("could not extract project key and repo name from URL: %s", repoUrl)
+		// // Handle scm format
+		re = regexp.MustCompile(`(https?://[^/]+)/scm/([^/]+)/([^/.]+)(?:\.git)?(?:/([^/?#]+))?(?:/([^/?#\\]+))?(?:\?at=refs%2Fheads%2F([^/?#]+))?`)
+		matches = re.FindStringSubmatch(repoUrl)
+		if len(matches) < 4 {
+			return nil, fmt.Errorf("could not extract project key and repo name from URL: %s", repoUrl)
+		}
 	}
 
 	baseUrl := matches[1]

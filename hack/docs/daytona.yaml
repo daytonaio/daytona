@@ -26,11 +26,13 @@ see_also:
     - daytona ide - Choose the default IDE
     - daytona info - Show workspace info
     - daytona list - List workspaces
+    - daytona logs - View logs for a workspace/project
     - daytona prebuild - Manage prebuilds
     - daytona profile - Manage profiles
     - daytona project-config - Manage project configs
     - daytona provider - Manage providers
     - daytona purge - Purges all Daytona data from the current device
+    - daytona restart - Restart a workspace
     - daytona serve - Run the server process in the current terminal session
     - daytona server - Start the server process in daemon mode
     - daytona ssh - SSH into a project using the terminal

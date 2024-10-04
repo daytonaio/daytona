@@ -5,13 +5,13 @@ package agent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/agent/config"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -20,16 +20,16 @@ var followFlag bool
 var logsCmd = &cobra.Command{
 	Use:   "logs",
 	Short: "Output Daytona Agent logs",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		logFilePath := config.GetLogFilePath()
 
 		if logFilePath == nil {
-			log.Fatal("Log file path not set")
+			return errors.New("log file path not set")
 		}
 
 		file, err := os.Open(*logFilePath)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		defer file.Close()
 
@@ -41,13 +41,13 @@ var logsCmd = &cobra.Command{
 		for {
 			select {
 			case <-context.Background().Done():
-				return
+				return nil
 			case err := <-errChan:
 				if err != nil {
 					if err != io.EOF {
-						log.Fatal(err)
+						return err
 					}
-					return
+					return nil
 				}
 			case msg := <-msgChan:
 				fmt.Println(string(msg))

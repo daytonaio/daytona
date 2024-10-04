@@ -90,6 +90,7 @@ Class | Method | HTTP request | Description
 *ContainerRegistryAPI* | [**ListContainerRegistries**](docs/ContainerRegistryAPI.md#listcontainerregistries) | **Get** /container-registry | List container registries
 *ContainerRegistryAPI* | [**RemoveContainerRegistry**](docs/ContainerRegistryAPI.md#removecontainerregistry) | **Delete** /container-registry/{server} | Remove a container registry credentials
 *ContainerRegistryAPI* | [**SetContainerRegistry**](docs/ContainerRegistryAPI.md#setcontainerregistry) | **Put** /container-registry/{server} | Set container registry credentials
+*DefaultAPI* | [**HealthCheck**](docs/DefaultAPI.md#healthcheck) | **Get** /health | Health check
 *GitProviderAPI* | [**GetGitContext**](docs/GitProviderAPI.md#getgitcontext) | **Post** /gitprovider/context | Get Git context
 *GitProviderAPI* | [**GetGitProviderForUrl**](docs/GitProviderAPI.md#getgitproviderforurl) | **Get** /gitprovider/for-url/{url} | Get Git provider
 *GitProviderAPI* | [**GetGitProviderIdForUrl**](docs/GitProviderAPI.md#getgitprovideridforurl) | **Get** /gitprovider/id-for-url/{url} | Get Git provider ID

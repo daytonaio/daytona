@@ -158,6 +158,17 @@ func (s *Service) SetGitConfig(userData *gitprovider.GitUser, providerConfig *gi
 		return err
 	}
 
+	if !cfg.HasSection("safe") {
+		_, err := cfg.NewSection("safe")
+		if err != nil {
+			return err
+		}
+	}
+	_, err = cfg.Section("safe").NewKey("directory", s.ProjectDir)
+	if err != nil {
+		return err
+	}
+
 	if userData != nil {
 		if !cfg.HasSection("user") {
 			_, err := cfg.NewSection("user")

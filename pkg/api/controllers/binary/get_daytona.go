@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/daytonaio/daytona/internal/constants"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,7 +20,7 @@ func GetDaytonaScript(ctx *gin.Context) {
 	}
 
 	downloadUrl, _ := url.JoinPath(fmt.Sprintf("%s://%s", scheme, ctx.Request.Host), "binary")
-	getServerScript := constants.GetDaytonaScript(downloadUrl)
+	getServerScript := common.GetDaytonaScript(downloadUrl)
 
 	ctx.String(http.StatusOK, getServerScript)
 }

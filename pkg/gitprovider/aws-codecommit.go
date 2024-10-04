@@ -39,6 +39,15 @@ func NewAwsCodeCommitGitProvider(baseApiUrl string) *AwsCodeCommitGitProvider {
 	return gitProvider
 }
 
+func (g *AwsCodeCommitGitProvider) CanHandle(repoUrl string) (bool, error) {
+	staticContext, err := g.ParseStaticGitContext(repoUrl)
+	if err != nil {
+		return false, err
+	}
+
+	return staticContext.Source == fmt.Sprintf("git-codecommit.%s.amazonaws.com", g.region) || fmt.Sprintf("%s.console.aws.amazon.com", g.region) == staticContext.Source, nil
+}
+
 func (g *AwsCodeCommitGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	// AWS CodeCommit does not have a project and repository structure similar to other git providers.
 	// Therefore, returning repositories as an array of type GitNamespace.

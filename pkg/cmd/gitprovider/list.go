@@ -12,7 +12,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -20,20 +19,20 @@ var gitProviderListCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
 	Short:   "Lists your registered Git providers",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		apiClient, err := apiclient.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(context.Background()).Execute()
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+			return apiclient.HandleErrorResponse(res, err)
 		}
 
 		if len(gitProviders) == 0 {
 			views.RenderInfoMessage("No git providers registered. Add a new git provider by\npreparing a Personal Access Token and running 'daytona git-providers add'")
-			return
+			return nil
 		}
 
 		views.RenderMainTitle("Registered Git Providers:")
@@ -63,12 +62,13 @@ var gitProviderListCmd = &cobra.Command{
 		if format.FormatFlag != "" {
 			formattedData := format.NewFormatter(gitProviderViewList)
 			formattedData.Print()
-			return
+			return nil
 		}
 
 		for _, gitProviderView := range gitProviderViewList {
 			views.RenderListLine(fmt.Sprintf("%s (%s)", gitProviderView.Name, gitProviderView.Username))
 		}
+		return nil
 	},
 }
 

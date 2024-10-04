@@ -15,7 +15,7 @@ import (
 func Render(cfg *config.Config, showApiKeysFlag bool) {
 	output := "\n"
 
-	output += fmt.Sprintf("%s %s", views.GetPropertyKey("ID: "), cfg.Id) + "\n\n"
+	output += fmt.Sprintf("%s %s", views.GetPropertyKey("ID: "), config.GetClientId()) + "\n\n"
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Default IDE: "), cfg.DefaultIdeId) + "\n\n"
 

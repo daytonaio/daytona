@@ -49,7 +49,7 @@ var ServeCmd = &cobra.Command{
 	Short:   "Run the server process in the current terminal session",
 	GroupID: util.SERVER_GROUP,
 	Args:    cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if os.Getenv("USER") == "root" {
 			views.RenderInfoMessageBold("Running the server as root is not recommended because\nDaytona will not be able to remap project directory ownership.\nPlease run the server as a non-root user.")
 		}
@@ -61,97 +61,128 @@ var ServeCmd = &cobra.Command{
 
 		configDir, err := server.GetConfigDir()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		c, err := server.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		telemetryService := posthogservice.NewTelemetryService(posthogservice.PosthogServiceConfig{
 			ApiKey:   internal.PosthogApiKey,
 			Endpoint: internal.PosthogEndpoint,
+			Version:  internal.Version,
 		})
-
-		go func() {
-			interruptChannel := make(chan os.Signal, 1)
-			signal.Notify(interruptChannel, os.Interrupt)
-
-			for range interruptChannel {
-				log.Info("Shutting down")
-				telemetryService.Close()
-			}
-		}()
 
 		apiServer := api.NewApiServer(api.ApiServerConfig{
 			ApiPort:          int(c.ApiPort),
 			TelemetryService: telemetryService,
+			Version:          internal.Version,
+			ServerId:         c.Id,
+			Frps:             c.Frps,
 		})
 
-		server, err := GetInstance(c, configDir, telemetryService)
+		server, err := GetInstance(c, configDir, internal.Version, telemetryService)
 		if err != nil {
-			log.Fatal(err)
-		}
-
-		errCh := make(chan error)
-
-		err = server.Start(errCh)
-		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		buildRunnerConfig, err := build.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		buildRunner, err := GetBuildRunner(c, buildRunnerConfig, telemetryService)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		err = buildRunner.Start()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
+		apiServerErrChan := make(chan error)
+
 		go func() {
-			err := apiServer.Start()
+			log.Infof("Starting api server on port %d", c.ApiPort)
+			apiServerErrChan <- apiServer.Start()
+		}()
+
+		headscaleServerStartedChan := make(chan struct{})
+		headscaleServerErrChan := make(chan error)
+
+		go func() {
+			log.Info("Starting headscale server...")
+			err := server.TailscaleServer.Start(headscaleServerErrChan)
 			if err != nil {
-				log.Fatal(err)
+				headscaleServerErrChan <- err
+				return
+			}
+			headscaleServerStartedChan <- struct{}{}
+		}()
+
+		localContainerRegistryErrChan := make(chan error)
+
+		go func() {
+			if server.LocalContainerRegistry != nil {
+				log.Info("Starting local container registry...")
+				localContainerRegistryErrChan <- server.LocalContainerRegistry.Start()
+			} else {
+				localContainerRegistryErrChan <- registry.RemoveRegistryContainer()
 			}
 		}()
 
-		go func() {
-			err := <-errCh
-			if err != nil {
-				buildRunner.Stop()
-				log.Fatal(err)
-			}
-		}()
+		select {
+		case <-headscaleServerStartedChan:
+			log.Info("Headscale server started")
+			go func() {
+				headscaleServerErrChan <- server.TailscaleServer.Connect()
+			}()
+		case err := <-headscaleServerErrChan:
+			return err
+		}
 
-		err = waitForServerToStart(apiServer)
-
+		err = server.Start()
 		if err != nil {
-			log.Fatal(err)
+			return err
+		}
+
+		err = waitForApiServerToStart(apiServer)
+		if err != nil {
+			return err
+		}
+
+		err = <-localContainerRegistryErrChan
+		if err != nil {
+			return err
 		}
 
 		printServerStartedMessage(c, false)
 
 		err = setDefaultConfig(server, c.ApiPort)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
-		err = <-errCh
-		if err != nil {
-			log.Fatal(err)
+		interruptChannel := make(chan os.Signal, 1)
+		signal.Notify(interruptChannel, os.Interrupt)
+
+		select {
+		case err := <-apiServerErrChan:
+			return err
+		case err := <-headscaleServerErrChan:
+			return err
+		case <-interruptChannel:
+			log.Info("Shutting down")
+			// Exit will be handled by command PreRun
+			select {}
 		}
 	},
 }
 
-func GetInstance(c *server.Config, configDir string, telemetryService telemetry.TelemetryService) (*server.Server, error) {
+func GetInstance(c *server.Config, configDir string, version string, telemetryService telemetry.TelemetryService) (*server.Server, error) {
 	wsLogsDir, err := server.GetWorkspaceLogsDir(configDir)
 	if err != nil {
 		return nil, err
@@ -179,7 +210,7 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 	}
 	buildStore, err := db.NewBuildStore(dbConnection)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	projectConfigStore, err := db.NewProjectConfigStore(dbConnection)
 	if err != nil {
@@ -208,6 +239,7 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 		FrpsProtocol:  c.Frps.Protocol,
 		HeadscalePort: c.HeadscalePort,
 		ConfigDir:     filepath.Join(configDir, "headscale"),
+		Frps:          c.Frps,
 	})
 	err = headscaleServer.Init()
 	if err != nil {
@@ -258,6 +290,8 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 			Port:     c.LocalBuilderRegistryPort,
 			Image:    c.LocalBuilderRegistryImage,
 			Logger:   log.StandardLogger().Writer(),
+			Frps:     c.Frps,
+			ServerId: c.Id,
 		})
 		c.BuilderRegistryServer = util.GetFrpcRegistryDomain(c.Id, c.Frps.Domain)
 	}
@@ -278,6 +312,7 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 		ApiUrl:                util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 		DaytonaDownloadUrl:    getDaytonaScriptUrl(c),
 		ServerUrl:             headscaleUrl,
+		ServerVersion:         version,
 		RegistryUrl:           c.RegistryUrl,
 		BaseDir:               c.ProvidersDir,
 		CreateProviderNetworkKey: func(providerName string) (string, error) {
@@ -300,6 +335,7 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 		BuildService:             buildService,
 		ProjectConfigService:     projectConfigService,
 		ServerApiUrl:             util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+		ServerVersion:            version,
 		ServerUrl:                headscaleUrl,
 		DefaultProjectImage:      c.DefaultProjectImage,
 		DefaultProjectUser:       c.DefaultProjectUser,
@@ -312,8 +348,9 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 		ProfileDataStore: profileDataStore,
 	})
 
-	return server.GetInstance(&server.ServerInstanceConfig{
+	s := server.GetInstance(&server.ServerInstanceConfig{
 		Config:                   *c,
+		Version:                  version,
 		TailscaleServer:          headscaleServer,
 		ProviderTargetService:    providerTargetService,
 		ContainerRegistryService: containerRegistryService,
@@ -326,7 +363,9 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 		ProviderManager:          providerManager,
 		ProfileDataService:       profileDataService,
 		TelemetryService:         telemetryService,
-	}), nil
+	})
+
+	return s, s.Initialize()
 }
 
 func GetBuildRunner(c *server.Config, buildRunnerConfig *build.Config, telemetryService telemetry.TelemetryService) (*build.BuildRunner, error) {
@@ -412,7 +451,7 @@ func GetBuildRunner(c *server.Config, buildRunnerConfig *build.Config, telemetry
 	}), nil
 }
 
-func waitForServerToStart(apiServer *api.ApiServer) error {
+func waitForApiServerToStart(apiServer *api.ApiServer) error {
 	var err error
 	for i := 0; i < 30; i++ {
 		time.Sleep(1 * time.Second)

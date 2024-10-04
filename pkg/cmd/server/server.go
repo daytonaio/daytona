@@ -26,14 +26,14 @@ var ServerCmd = &cobra.Command{
 	Short:   "Start the server process in daemon mode",
 	GroupID: util.SERVER_GROUP,
 	Args:    cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		confirmCheck := true
 
 		if !yesFlag {
 			view.ConfirmPrompt(&confirmCheck)
 			if !confirmCheck {
 				views.RenderInfoMessage("Operation cancelled.")
-				return
+				return nil
 			}
 		}
 
@@ -44,7 +44,7 @@ var ServerCmd = &cobra.Command{
 
 		c, err := server.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		apiServer := api.NewApiServer(api.ApiServerConfig{
@@ -54,11 +54,11 @@ var ServerCmd = &cobra.Command{
 		views.RenderInfoMessageBold("Starting the Daytona Server daemon...")
 		err = daemon.Start(c.LogFilePath)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
-		err = waitForServerToStart(apiServer)
+		err = waitForApiServerToStart(apiServer)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		printServerStartedMessage(c, true)
 
@@ -66,13 +66,14 @@ var ServerCmd = &cobra.Command{
 		case "linux":
 			fmt.Printf("Use `loginctl enable-linger %s` to allow the service to run after logging out.\n", os.Getenv("USER"))
 		}
+		return nil
 	},
 }
 
 var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Start the Daytona Server daemon",
-	Run:   ServerCmd.Run,
+	RunE:  ServerCmd.RunE,
 }
 
 func init() {

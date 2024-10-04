@@ -12,7 +12,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/projectconfig/info"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -21,17 +20,17 @@ var projectConfigInfoCmd = &cobra.Command{
 	Short:   "Show project config info",
 	Aliases: []string{"view", "inspect"},
 	Args:    cobra.MaximumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		apiServerConfig, res, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		var projectConfig *apiclient.ProjectConfig
@@ -39,7 +38,7 @@ var projectConfigInfoCmd = &cobra.Command{
 		if len(args) == 0 {
 			projectConfigList, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(ctx).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
 			if format.FormatFlag != "" {
@@ -55,21 +54,22 @@ var projectConfigInfoCmd = &cobra.Command{
 			var res *http.Response
 			projectConfig, res, err = apiClient.ProjectConfigAPI.GetProjectConfig(ctx, args[0]).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 		}
 
 		if projectConfig == nil {
-			return
+			return nil
 		}
 
 		if format.FormatFlag != "" {
 			formattedData := format.NewFormatter(projectConfig)
 			formattedData.Print()
-			return
+			return nil
 		}
 
 		info.Render(projectConfig, apiServerConfig, false)
+		return nil
 	},
 }
 

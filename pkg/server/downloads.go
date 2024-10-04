@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/daytonaio/daytona/internal"
 	daytona_os "github.com/daytonaio/daytona/pkg/os"
 )
 
@@ -30,7 +29,7 @@ func (s *Server) GetBinaryPath(binaryName, binaryVersion string) (string, error)
 	binaryOs = daytona_os.OperatingSystem(fmt.Sprintf("%s-%s", split[1], strings.TrimSuffix(split[2], ".exe")))
 
 	// If the requested binary is the same as the host, return the current binary path
-	if *hostOs == binaryOs && binaryVersion == internal.Version {
+	if *hostOs == binaryOs && binaryVersion == s.Version {
 		executable, err := os.Executable()
 		if err == nil {
 			f, err := os.Open(executable)

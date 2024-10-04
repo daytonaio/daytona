@@ -5,7 +5,6 @@ package prebuild
 
 import (
 	"context"
-	"log"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
@@ -19,31 +18,32 @@ var prebuildListCmd = &cobra.Command{
 	Short:   "List prebuild configurations",
 	Aliases: []string{"ls"},
 	Args:    cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		prebuildList, res, err := apiClient.PrebuildAPI.ListPrebuilds(ctx).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		if len(prebuildList) == 0 {
 			views.RenderInfoMessage("No prebuilds found. Add a new prebuild by running 'daytona prebuild add'")
-			return
+			return nil
 		}
 
 		if format.FormatFlag != "" {
 			formattedData := format.NewFormatter(prebuildList)
 			formattedData.Print()
-			return
+			return nil
 		}
 
 		view.ListPrebuilds(prebuildList)
+		return nil
 	},
 }
 

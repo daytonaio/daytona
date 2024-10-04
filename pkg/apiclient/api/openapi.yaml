@@ -542,6 +542,20 @@ paths:
       summary: Get Git repository PRs
       tags:
       - gitProvider
+  /health:
+    get:
+      description: Health check
+      operationId: HealthCheck
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: OK
+      summary: Health check
   /profile:
     delete:
       description: Delete profile data

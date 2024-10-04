@@ -18,10 +18,16 @@ import (
 
 var workspaceLogsStarted bool
 
-func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, workspaceId string, projectNames []string) {
+func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, workspaceId string, projectNames []string, follow, showWorkspaceLogs bool) {
 	var wg sync.WaitGroup
-	query := "follow=true"
+	query := ""
+	if follow {
+		query = "follow=true"
+	}
 
+	if !showWorkspaceLogs {
+		workspaceLogsStarted = true
+	}
 	logs_view.CalculateLongestPrefixLength(projectNames)
 
 	for index, projectName := range projectNames {
@@ -51,18 +57,20 @@ func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, worksp
 		}(projectName)
 	}
 
-	for {
-		ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/workspace/%s", workspaceId), &activeProfile, &query)
-		// We want to retry getting the logs if it fails
-		if err != nil {
-			log.Trace(HandleErrorResponse(res, err))
-			time.Sleep(250 * time.Millisecond)
-			continue
-		}
+	if showWorkspaceLogs {
+		for {
+			ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/workspace/%s", workspaceId), &activeProfile, &query)
+			// We want to retry getting the logs if it fails
+			if err != nil {
+				log.Trace(HandleErrorResponse(res, err))
+				time.Sleep(250 * time.Millisecond)
+				continue
+			}
 
-		readJSONLog(ctx, ws, logs_view.STATIC_INDEX)
-		ws.Close()
-		break
+			readJSONLog(ctx, ws, logs_view.STATIC_INDEX)
+			ws.Close()
+			break
+		}
 	}
 
 	wg.Wait()
@@ -88,18 +96,26 @@ func ReadBuildLogs(ctx context.Context, activeProfile config.Profile, buildId st
 
 func readJSONLog(ctx context.Context, ws *websocket.Conn, index int) {
 	logEntriesChan := make(chan logs.LogEntry)
-
+	readErr := make(chan error)
 	go func() {
 		for {
 			var logEntry logs.LogEntry
 
 			err := ws.ReadJSON(&logEntry)
-			if err != nil {
-				log.Trace(err)
-				return
+
+			// An empty entry will be sent from the server on close/EOF
+			// We don't want to print that
+			if logEntry != (logs.LogEntry{}) {
+				logEntriesChan <- logEntry
 			}
 
-			logEntriesChan <- logEntry
+			if err != nil {
+				if websocket.IsUnexpectedCloseError(err, websocket.CloseNormalClosure) {
+					log.Error(err)
+				}
+				readErr <- err
+				return
+			}
 		}
 	}()
 
@@ -109,6 +125,15 @@ func readJSONLog(ctx context.Context, ws *websocket.Conn, index int) {
 			return
 		case logEntry := <-logEntriesChan:
 			logs_view.DisplayLogEntry(logEntry, index)
+		case err := <-readErr:
+			if err != nil {
+				err := ws.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""), time.Now().Add(time.Second))
+				if err != nil {
+					log.Trace(err)
+				}
+				ws.Close()
+				return
+			}
 		}
 
 		if !workspaceLogsStarted && index == logs_view.STATIC_INDEX {

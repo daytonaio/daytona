@@ -45,6 +45,7 @@ type GitProvider interface {
 	GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error)
 	GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error)
 
+	CanHandle(repoUrl string) (bool, error)
 	GetRepositoryContext(repoContext GetRepositoryContext) (*GitRepository, error)
 	GetUrlFromContext(repoContext *GetRepositoryContext) string
 	GetLastCommitSha(staticContext *StaticGitContext) (string, error)
@@ -147,6 +148,10 @@ func (a *AbstractGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitC
 
 	path := strings.TrimPrefix(u.Path, "/")
 	parts := strings.Split(path, "/")
+
+	if len(parts) < 2 {
+		return nil, errors.New("cannot parse git URL: " + repoUrl)
+	}
 
 	repo.Source = u.Host
 	repo.Owner = parts[0]

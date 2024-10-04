@@ -36,6 +36,19 @@ func NewGitHubGitProvider(token string, baseApiUrl *string) *GitHubGitProvider {
 	return gitProvider
 }
 
+func (g *GitHubGitProvider) CanHandle(repoUrl string) (bool, error) {
+	staticContext, err := g.ParseStaticGitContext(repoUrl)
+	if err != nil {
+		return false, err
+	}
+
+	if g.baseApiUrl == nil {
+		return staticContext.Source == "github.com", nil
+	}
+
+	return strings.Contains(*g.baseApiUrl, staticContext.Source), nil
+}
+
 func (g *GitHubGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	client := g.getApiClient()
 	user, err := g.GetUser()

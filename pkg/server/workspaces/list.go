@@ -12,7 +12,6 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
-	"github.com/daytonaio/daytona/pkg/workspace"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -26,16 +25,14 @@ func (s *WorkspaceService) ListWorkspaces(ctx context.Context, verbose bool) ([]
 	response := []dto.WorkspaceDTO{}
 
 	for i, w := range workspaces {
+		response = append(response, dto.WorkspaceDTO{Workspace: *w})
 		if !verbose {
-			response = append(response, dto.WorkspaceDTO{Workspace: *w})
 			continue
 		}
 
 		wg.Add(1)
-		go func(i int, w *workspace.Workspace) {
+		go func(i int) {
 			defer wg.Done()
-
-			workspaceDto := dto.WorkspaceDTO{Workspace: *w}
 
 			target, err := s.targetStore.Find(w.Target)
 			if err != nil {
@@ -57,21 +54,18 @@ func (s *WorkspaceService) ListWorkspaces(ctx context.Context, verbose bool) ([]
 			case res := <-resultCh:
 				if res.Err != nil {
 					log.Error(fmt.Errorf("failed to get workspace info for %s: %v", w.Name, res.Err))
-					response = append(response, workspaceDto)
 					return
 				}
 
-				workspaceDto.Info = res.Info
-				response = append(response, workspaceDto)
+				response[i].Info = res.Info
 			case <-ctx.Done():
 				if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 					log.Warn(fmt.Sprintf("timeout getting workspace info for %s", w.Name))
 				} else {
 					log.Warn(fmt.Sprintf("cancelled getting workspace info for %s", w.Name))
 				}
-				response = append(response, workspaceDto)
 			}
-		}(i, w)
+		}(i)
 	}
 
 	wg.Wait()

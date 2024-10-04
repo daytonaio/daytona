@@ -8,7 +8,6 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/views/profile"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -17,11 +16,11 @@ var ProfileAddCmd = &cobra.Command{
 	Short:   "Add profile",
 	Args:    cobra.NoArgs,
 	Aliases: []string{"new"},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {
 			if !config.IsNotExist(err) {
-				log.Fatal(err)
+				return err
 			}
 
 			c = &config.Config{
@@ -30,7 +29,7 @@ var ProfileAddCmd = &cobra.Command{
 			}
 
 			if err := c.Save(); err != nil {
-				log.Fatal(err)
+				return err
 			}
 		}
 
@@ -46,9 +45,7 @@ var ProfileAddCmd = &cobra.Command{
 			_, err = CreateProfile(c, &profileAddView, true)
 		}
 
-		if err != nil {
-			log.Fatal(err)
-		}
+		return err
 	},
 }
 

@@ -26,9 +26,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/pkg/api/docs"
 	"github.com/daytonaio/daytona/pkg/api/middlewares"
+	"github.com/daytonaio/daytona/pkg/frpc"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/gin-contrib/cors"
 
@@ -37,6 +37,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/build"
 	"github.com/daytonaio/daytona/pkg/api/controllers/containerregistry"
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider"
+	"github.com/daytonaio/daytona/pkg/api/controllers/health"
 	log_controller "github.com/daytonaio/daytona/pkg/api/controllers/log"
 	"github.com/daytonaio/daytona/pkg/api/controllers/profiledata"
 	"github.com/daytonaio/daytona/pkg/api/controllers/projectconfig"
@@ -52,19 +53,26 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/daytonaio/daytona/internal/constants"
+	daytonaServer "github.com/daytonaio/daytona/pkg/server"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type ApiServerConfig struct {
 	ApiPort          int
+	Version          string
 	TelemetryService telemetry.TelemetryService
+	Frps             *daytonaServer.FRPSConfig
+	ServerId         string
 }
 
 func NewApiServer(config ApiServerConfig) *ApiServer {
 	return &ApiServer{
 		apiPort:          config.ApiPort,
 		telemetryService: config.TelemetryService,
+		version:          config.Version,
+		frps:             config.Frps,
+		serverId:         config.ServerId,
 	}
 }
 
@@ -73,10 +81,13 @@ type ApiServer struct {
 	telemetryService telemetry.TelemetryService
 	httpServer       *http.Server
 	router           *gin.Engine
+	version          string
+	frps             *daytonaServer.FRPSConfig
+	serverId         string
 }
 
 func (a *ApiServer) Start() error {
-	docs.SwaggerInfo.Version = internal.Version
+	docs.SwaggerInfo.Version = a.version
 	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Description = "Daytona Server API"
 	docs.SwaggerInfo.Title = "Daytona Server API"
@@ -101,13 +112,15 @@ func (a *ApiServer) Start() error {
 
 	a.router.Use(middlewares.TelemetryMiddleware(a.telemetryService))
 	a.router.Use(middlewares.LoggingMiddleware())
-	a.router.Use(middlewares.SetVersionMiddleware())
+	a.router.Use(middlewares.SetVersionMiddleware(a.version))
 
 	public := a.router.Group("/")
 	public.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-	public.GET(constants.HEALTH_CHECK_ROUTE, func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
-	})
+
+	healthController := public.Group(constants.HEALTH_CHECK_ROUTE)
+	{
+		healthController.GET("/", health.HealthCheck)
+	}
 
 	protected := a.router.Group("/")
 	protected.Use(middlewares.AuthMiddleware())
@@ -257,8 +270,46 @@ func (a *ApiServer) Start() error {
 		return err
 	}
 
-	log.Infof("Starting api server on port %d", a.apiPort)
-	return a.httpServer.Serve(listener)
+	errChan := make(chan error)
+	go func() {
+		errChan <- a.httpServer.Serve(listener)
+	}()
+
+	if a.frps == nil {
+		return <-errChan
+	}
+
+	frpcHealthCheck, frpcService, err := frpc.GetService(frpc.FrpcConnectParams{
+		ServerDomain: a.frps.Domain,
+		ServerPort:   int(a.frps.Port),
+		Name:         fmt.Sprintf("daytona-server-api-%s", a.serverId),
+		Port:         int(a.apiPort),
+		SubDomain:    fmt.Sprintf("api-%s", a.serverId),
+	})
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		err := frpcService.Run(context.Background())
+		if err != nil {
+			errChan <- err
+		}
+	}()
+
+	for i := 0; i < 5; i++ {
+		if err = frpcHealthCheck(); err != nil {
+			log.Debugf("Failed to connect to api frpc: %s", err)
+			time.Sleep(2 * time.Second)
+		} else {
+			break
+		}
+	}
+	if err != nil {
+		return err
+	}
+
+	return <-errChan
 }
 
 func (a *ApiServer) HealthCheck() error {

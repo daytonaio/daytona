@@ -9,7 +9,6 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/views/profile"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -17,10 +16,10 @@ var profileEditCmd = &cobra.Command{
 	Use:   "edit",
 	Short: "Edit profile [PROFILE_NAME]",
 	Args:  cobra.RangeArgs(0, 1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		var chosenProfileId string
@@ -29,11 +28,11 @@ var profileEditCmd = &cobra.Command{
 		if len(args) == 0 {
 			chosenProfile, err = profile.GetProfileFromPrompt(c.Profiles, c.ActiveProfileId, false)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			if chosenProfile == nil {
-				return
+				return nil
 			}
 		} else {
 			chosenProfileId = args[0]
@@ -46,7 +45,7 @@ var profileEditCmd = &cobra.Command{
 		}
 
 		if chosenProfile == nil {
-			log.Fatal("Profile does not exist")
+			return errors.New("profile does not exist")
 		}
 
 		if profileNameFlag != "" {
@@ -60,11 +59,7 @@ var profileEditCmd = &cobra.Command{
 		}
 
 		if profileNameFlag == "" || apiUrlFlag == "" || apiKeyFlag == "" {
-			err = EditProfile(c, true, chosenProfile)
-			if err != nil {
-				log.Fatal(err)
-			}
-			return
+			return EditProfile(c, true, chosenProfile)
 		}
 
 		profileEditView := profile.ProfileAddView{
@@ -73,10 +68,7 @@ var profileEditCmd = &cobra.Command{
 			ApiKey:      apiKeyFlag,
 		}
 
-		err = editProfile(chosenProfile, profileEditView, c, true)
-		if err != nil {
-			log.Fatal(err)
-		}
+		return editProfile(chosenProfile, profileEditView, c, true)
 	},
 }
 

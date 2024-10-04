@@ -27,37 +27,37 @@ var targetRemoveCmd = &cobra.Command{
 	Short:   "Remove target",
 	Args:    cobra.RangeArgs(0, 1),
 	Aliases: []string{"rm", "delete"},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var selectedTargetName string
 
 		ctx := context.Background()
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if len(args) == 0 {
 			activeProfile, err := c.GetActiveProfile()
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
 			selectedTarget, err := target.GetTargetFromPrompt(targetList, activeProfile.Name, false)
 			if err != nil {
 				if common.IsCtrlCAbort(err) {
-					return
+					return nil
 				} else {
-					log.Fatal(err)
+					return err
 				}
 			}
 
@@ -71,7 +71,7 @@ var targetRemoveCmd = &cobra.Command{
 			err := RemoveTargetWorkspaces(ctx, apiClient, selectedTargetName)
 
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 		} else {
 			form := huh.NewForm(
@@ -85,13 +85,13 @@ var targetRemoveCmd = &cobra.Command{
 
 			err := form.Run()
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			if yesFlag {
 				err := RemoveTargetWorkspaces(ctx, apiClient, selectedTargetName)
 				if err != nil {
-					log.Fatal(err)
+					return err
 				}
 			} else {
 				fmt.Println("Proceeding with target removal without deleting workspaces.")
@@ -100,10 +100,11 @@ var targetRemoveCmd = &cobra.Command{
 
 		res, err := apiClient.TargetAPI.RemoveTarget(ctx, selectedTargetName).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		views.RenderInfoMessageBold(fmt.Sprintf("Target %s removed successfully", selectedTargetName))
+		return nil
 	},
 }
 

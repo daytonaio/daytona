@@ -26,6 +26,8 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 		return apiClient, nil
 	}
 
+	var newApiClient *apiclient.APIClient
+
 	c, err := config.GetConfig()
 	if err != nil {
 		return nil, err
@@ -45,16 +47,6 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 	serverUrl := activeProfile.Api.Url
 	apiKey := activeProfile.Api.Key
 
-	healthUrl, err := url.JoinPath(serverUrl, constants.HEALTH_CHECK_ROUTE)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = http.Head(healthUrl)
-	if err != nil {
-		return nil, ErrHealthCheckFailed(healthUrl)
-	}
-
 	clientConfig := apiclient.NewConfiguration()
 	clientConfig.Servers = apiclient.ServerConfigurations{
 		{
@@ -68,7 +60,7 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 	if c.TelemetryEnabled {
 		clientConfig.AddDefaultHeader(telemetry.ENABLED_HEADER, "true")
 		clientConfig.AddDefaultHeader(telemetry.SESSION_ID_HEADER, internal.SESSION_ID)
-		clientConfig.AddDefaultHeader(telemetry.CLIENT_ID_HEADER, c.Id)
+		clientConfig.AddDefaultHeader(telemetry.CLIENT_ID_HEADER, config.GetClientId())
 		if internal.WorkspaceMode() {
 			clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, string(telemetry.CLI_PROJECT_SOURCE))
 		} else {
@@ -76,12 +68,23 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 		}
 	}
 
-	apiClient = apiclient.NewAPIClient(clientConfig)
+	newApiClient = apiclient.NewAPIClient(clientConfig)
 
-	apiClient.GetConfig().HTTPClient = &http.Client{
+	newApiClient.GetConfig().HTTPClient = &http.Client{
 		Transport: http.DefaultTransport,
 	}
 
+	healthUrl, err := url.JoinPath(serverUrl, constants.HEALTH_CHECK_ROUTE)
+	if err != nil {
+		return nil, err
+	}
+
+	_, _, err = newApiClient.DefaultAPI.HealthCheck(context.Background()).Execute()
+	if err != nil {
+		return nil, ErrHealthCheckFailed(healthUrl)
+	}
+
+	apiClient = newApiClient
 	return apiClient, nil
 }
 

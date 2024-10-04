@@ -32,7 +32,6 @@ import (
 	"github.com/docker/docker/pkg/stringid"
 	"tailscale.com/tsnet"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -42,7 +41,7 @@ var CreateCmd = &cobra.Command{
 	Use:     "create [REPOSITORY_URL | PROJECT_CONFIG_NAME]...",
 	Short:   "Create a workspace",
 	GroupID: util.WORKSPACE_GROUP,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		var projects []apiclient.CreateProjectDTO
 		var workspaceName string
@@ -51,22 +50,22 @@ var CreateCmd = &cobra.Command{
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		activeProfile, err := c.GetActiveProfile()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		profileData, res, err := apiClient.ProfileAPI.GetProfileData(ctx).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		if nameFlag != "" {
@@ -75,7 +74,7 @@ var CreateCmd = &cobra.Command{
 
 		workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 		for _, workspaceInfo := range workspaceList {
 			existingWorkspaceNames = append(existingWorkspaceNames, workspaceInfo.Name)
@@ -85,15 +84,15 @@ var CreateCmd = &cobra.Command{
 			err = processPrompting(ctx, apiClient, &workspaceName, &projects, existingWorkspaceNames)
 			if err != nil {
 				if common.IsCtrlCAbort(err) {
-					return
+					return nil
 				} else {
-					log.Fatal(err)
+					return err
 				}
 			}
 		} else {
 			existingProjectConfigNames, err = processCmdArguments(ctx, args, apiClient, &projects)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			initialSuggestion := projects[0].Name
@@ -104,8 +103,7 @@ var CreateCmd = &cobra.Command{
 		}
 
 		if workspaceName == "" || len(projects) == 0 {
-			log.Fatal("workspace name and repository urls are required")
-			return
+			return errors.New("workspace name and repository urls are required")
 		}
 
 		projectNames := []string{}
@@ -136,24 +134,24 @@ var CreateCmd = &cobra.Command{
 
 		targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		target, err := getTarget(targetList, activeProfile.Name)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		activeProfile, err = c.GetActiveProfile()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		var tsConn *tsnet.Server
 		if target.Name != "local" || activeProfile.Id != "default" {
 			tsConn, err = tailscale.GetConnection(&activeProfile)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 		}
 
@@ -161,7 +159,7 @@ var CreateCmd = &cobra.Command{
 		id = stringid.TruncateID(id)
 
 		logsContext, stopLogs := context.WithCancel(context.Background())
-		go apiclient_util.ReadWorkspaceLogs(logsContext, activeProfile, id, projectNames)
+		go apiclient_util.ReadWorkspaceLogs(logsContext, activeProfile, id, projectNames, true, true)
 
 		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(apiclient.CreateWorkspaceDTO{
 			Id:       id,
@@ -170,7 +168,8 @@ var CreateCmd = &cobra.Command{
 			Projects: projects,
 		}).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			stopLogs()
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		encodedUrl := url.QueryEscape(createdWorkspace.Projects[0].Repository.Url)
@@ -193,7 +192,8 @@ var CreateCmd = &cobra.Command{
 		}
 		err = waitForDial(createdWorkspace, &activeProfile, tsConn, gpgkey)
 		if err != nil {
-			log.Fatal(err)
+			stopLogs()
+			return err
 		}
 
 		stopLogs()
@@ -203,7 +203,7 @@ var CreateCmd = &cobra.Command{
 
 		wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceName).Verbose(true).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		chosenIdeId := c.DefaultIdeId
@@ -225,7 +225,7 @@ var CreateCmd = &cobra.Command{
 
 		if !codeFlag {
 			views.RenderCreationInfoMessage("Run 'daytona code' when you're ready to start developing")
-			return
+			return nil
 		}
 
 		views.RenderCreationInfoMessage(fmt.Sprintf("Opening the workspace in %s ...", chosenIde.Name))
@@ -233,14 +233,10 @@ var CreateCmd = &cobra.Command{
 		projectName := wsInfo.Projects[0].Name
 		providerMetadata, err := workspace_util.GetProjectProviderMetadata(wsInfo, projectName)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
-		err = openIDE(chosenIdeId, activeProfile, createdWorkspace.Id, wsInfo.Projects[0].Name, providerMetadata, yesFlag)
-
-		if err != nil {
-			log.Fatal(err)
-		}
+		return openIDE(chosenIdeId, activeProfile, createdWorkspace.Id, wsInfo.Projects[0].Name, providerMetadata, yesFlag)
 	},
 }
 
@@ -500,13 +496,34 @@ func waitForDial(workspace *apiclient.Workspace, activeProfile *config.Profile, 
 		}
 	}
 
-	for {
-		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", project.GetProjectHostname(workspace.Id, workspace.Projects[0].Name), ssh_config.SSH_PORT))
-		if err == nil {
-			return dialConn.Close()
-		}
+	connectChan := make(chan error)
+	spinner := time.After(3 * time.Second)
+	timeout := time.After(60 * time.Second)
 
-		time.Sleep(time.Second)
+	go func() {
+		for {
+			dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", project.GetProjectHostname(workspace.Id, workspace.Projects[0].Name), ssh_config.SSH_PORT))
+			if err == nil {
+				connectChan <- dialConn.Close()
+				return
+			}
+			time.Sleep(time.Second)
+		}
+	}()
+
+	select {
+	case err := <-connectChan:
+		return err
+	case <-spinner:
+		err := views_util.WithInlineSpinner("Connection to tailscale is taking longer than usual", func() error {
+			select {
+			case err := <-connectChan:
+				return err
+			case <-timeout:
+				return errors.New("secure connection to the Daytona Server could not be established. Please check your internet connection or Tailscale availability")
+			}
+		})
+		return err
 	}
 }
 

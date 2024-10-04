@@ -34,11 +34,13 @@ daytona [flags]
 * [daytona ide](daytona_ide.md)	 - Choose the default IDE
 * [daytona info](daytona_info.md)	 - Show workspace info
 * [daytona list](daytona_list.md)	 - List workspaces
+* [daytona logs](daytona_logs.md)	 - View logs for a workspace/project
 * [daytona prebuild](daytona_prebuild.md)	 - Manage prebuilds
 * [daytona profile](daytona_profile.md)	 - Manage profiles
 * [daytona project-config](daytona_project-config.md)	 - Manage project configs
 * [daytona provider](daytona_provider.md)	 - Manage providers
 * [daytona purge](daytona_purge.md)	 - Purges all Daytona data from the current device
+* [daytona restart](daytona_restart.md)	 - Restart a workspace
 * [daytona serve](daytona_serve.md)	 - Run the server process in the current terminal session
 * [daytona server](daytona_server.md)	 - Start the server process in daemon mode
 * [daytona ssh](daytona_ssh.md)	 - SSH into a project using the terminal

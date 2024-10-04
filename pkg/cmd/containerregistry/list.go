@@ -11,7 +11,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views"
 	containerregistry_view "github.com/daytonaio/daytona/pkg/views/containerregistry/list"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -20,29 +19,30 @@ var containerRegistryListCmd = &cobra.Command{
 	Short:   "Lists container registries",
 	Aliases: []string{"ls"},
 	Args:    cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		containerRegistries, res, err := apiClient.ContainerRegistryAPI.ListContainerRegistries(context.Background()).Execute()
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+			return apiclient.HandleErrorResponse(res, err)
 		}
 
 		if len(containerRegistries) == 0 {
 			views.RenderInfoMessage("No container registries found. Set a new container registry by running 'daytona container-registry set'")
-			return
+			return nil
 		}
 
 		if format.FormatFlag != "" {
 			formattedData := format.NewFormatter(containerRegistries)
 			formattedData.Print()
-			return
+			return nil
 		}
 
 		containerregistry_view.ListRegistries(containerRegistries)
+		return nil
 	},
 }
 

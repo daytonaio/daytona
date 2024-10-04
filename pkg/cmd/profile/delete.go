@@ -4,6 +4,8 @@
 package profile
 
 import (
+	"errors"
+
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/views/profile"
 
@@ -16,10 +18,10 @@ var profileDeleteCmd = &cobra.Command{
 	Short:   "Delete profile [PROFILE_NAME]",
 	Args:    cobra.RangeArgs(0, 1),
 	Aliases: []string{"remove", "rm"},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		var chosenProfileId string
@@ -30,11 +32,11 @@ var profileDeleteCmd = &cobra.Command{
 
 			chosenProfile, err = profile.GetProfileFromPrompt(profilesList, c.ActiveProfileId, false)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			if chosenProfile == nil {
-				return
+				return nil
 			}
 
 			chosenProfileId = chosenProfile.Id
@@ -43,7 +45,7 @@ var profileDeleteCmd = &cobra.Command{
 		}
 
 		if chosenProfileId == "default" {
-			log.Fatal("Can not delete default profile")
+			return errors.New("can not delete default profile")
 		}
 
 		for _, profile := range c.Profiles {
@@ -54,8 +56,7 @@ var profileDeleteCmd = &cobra.Command{
 		}
 
 		if chosenProfile == nil {
-			log.Fatal("Profile does not exist")
-			return
+			return errors.New("profile does not exist")
 		}
 
 		if c.ActiveProfileId == chosenProfile.Id {
@@ -66,12 +67,13 @@ var profileDeleteCmd = &cobra.Command{
 			if profile.Name == chosenProfile.Name || profile.Id == chosenProfile.Id {
 				err = c.RemoveProfile(profile.Id)
 				if err != nil {
-					log.Fatal(err)
+					return err
 				}
 				break
 			}
 		}
 
 		log.Infof("Deleted profile %s", chosenProfile.Name)
+		return nil
 	},
 }

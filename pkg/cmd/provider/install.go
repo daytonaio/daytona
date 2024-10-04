@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"slices"
 
@@ -20,8 +21,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/target"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
-
-	log "github.com/sirupsen/logrus"
 )
 
 var yesFlag bool
@@ -31,31 +30,31 @@ var providerInstallCmd = &cobra.Command{
 	Short:   "Install provider",
 	Args:    cobra.NoArgs,
 	Aliases: []string{"i"},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(apiclient.ApiGetConfigRequest{})
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		providerManager := manager.NewProviderManager(manager.ProviderManagerConfig{RegistryUrl: serverConfig.RegistryUrl})
 
 		providersManifest, err := providerManager.GetProvidersManifest()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if providersManifest == nil {
-			log.Fatal("Could not get providers manifest")
+			return errors.New("could not get providers manifest")
 		}
 
 		providersManifestLatest := providersManifest.GetLatestVersions()
 		if providersManifestLatest == nil {
-			log.Fatal("Could not get providers manifest")
+			return errors.New("could not get providers manifest")
 		}
 
 		providerList := GetProviderListFromManifest(providersManifestLatest)
@@ -66,14 +65,14 @@ var providerInstallCmd = &cobra.Command{
 		providerToInstall, err := provider.GetProviderFromPrompt(provider.ProviderListToView(providerList), "Choose a Provider to Install", false)
 		if err != nil {
 			if common.IsCtrlCAbort(err) {
-				return
+				return nil
 			} else {
-				log.Fatal(err)
+				return err
 			}
 		}
 
 		if providerToInstall == nil {
-			return
+			return nil
 		}
 
 		if providerToInstall.Name == specificProviderName {
@@ -82,33 +81,33 @@ var providerInstallCmd = &cobra.Command{
 			providerToInstall, err = provider.GetProviderFromPrompt(provider.ProviderListToView(providerList), "Choose a specific provider to install", false)
 			if err != nil {
 				if common.IsCtrlCAbort(err) {
-					return
+					return nil
 				} else {
-					log.Fatal(err)
+					return err
 				}
 			}
 
 			if providerToInstall == nil {
-				return
+				return nil
 			}
 		}
 
 		err = InstallProvider(apiClient, *providerToInstall, providersManifest)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		views.RenderInfoMessageBold(fmt.Sprintf("Provider %s has been successfully installed", providerToInstall.Name))
 
 		targets, res, err := apiClient.TargetAPI.ListTargets(context.Background()).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		if slices.ContainsFunc(targets, func(t apiclient.ProviderTarget) bool {
 			return t.ProviderInfo.Name == providerToInstall.Name
 		}) {
-			return
+			return nil
 		}
 
 		if !yesFlag {
@@ -122,14 +121,14 @@ var providerInstallCmd = &cobra.Command{
 
 			err := form.Run()
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 		}
 
 		if yesFlag {
 			targetManifest, res, err := apiClient.ProviderAPI.GetTargetManifest(context.Background(), providerToInstall.Name).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
 			targetToSet := &apiclient.ProviderTarget{
@@ -142,24 +141,25 @@ var providerInstallCmd = &cobra.Command{
 
 			err = target.NewTargetNameInput(&targetToSet.Name, []string{})
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			err = target.SetTargetForm(targetToSet, *targetManifest)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			res, err = apiClient.TargetAPI.SetTarget(context.Background()).Target(*targetToSet).Execute()
 			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			views.RenderInfoMessage("Target set successfully")
 		}
+		return nil
 	},
 }
 

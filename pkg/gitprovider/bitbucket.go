@@ -36,6 +36,15 @@ func NewBitbucketGitProvider(username string, token string) *BitbucketGitProvide
 	return provider
 }
 
+func (g *BitbucketGitProvider) CanHandle(repoUrl string) (bool, error) {
+	staticContext, err := g.ParseStaticGitContext(repoUrl)
+	if err != nil {
+		return false, err
+	}
+
+	return staticContext.Source == "bitbucket.org", nil
+}
+
 func (g *BitbucketGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	client := g.getApiClient()
 	wsList, err := client.Workspaces.List()
@@ -69,7 +78,6 @@ func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]*GitReposito
 
 	repoList, err := client.Repositories.ListForAccount(&bitbucket.RepositoriesOptions{
 		Owner:   namespace,
-		Page:    &[]int{1}[0],
 		Keyword: nil,
 	})
 	if err != nil {
@@ -150,17 +158,20 @@ func (g *BitbucketGitProvider) GetRepoPRs(repositoryId string, namespaceId strin
 	client := g.getApiClient()
 	var response []*GitPullRequest
 
-	fullName := fmt.Sprintf("%s/%s", namespaceId, repositoryId)
-
-	owner, repo, err := g.getOwnerAndRepoFromFullName(fullName)
-	if err != nil {
-		return nil, err
+	opts := &bitbucket.PullRequestsOptions{
+		RepoSlug: repositoryId,
+		Owner:    namespaceId,
 	}
 
-	prList, err := client.Repositories.PullRequests.Get(&bitbucket.PullRequestsOptions{
-		Owner:    owner,
-		RepoSlug: repo,
-	})
+	owner, repo, err := g.getOwnerAndRepoFromFullName(repositoryId)
+	if err == nil {
+		opts = &bitbucket.PullRequestsOptions{
+			RepoSlug: repo,
+			Owner:    owner,
+		}
+	}
+
+	prList, err := client.Repositories.PullRequests.Get(opts)
 	if err != nil {
 		return nil, g.FormatError(err)
 	}
@@ -193,8 +204,8 @@ func (g *BitbucketGitProvider) GetRepoPRs(repositoryId string, namespaceId strin
 			Sha:             pr.Source.Commit.Hash,
 			SourceRepoId:    pr.Source.Repository.Full_name,
 			SourceRepoUrl:   repoUrl,
-			SourceRepoOwner: owner,
-			SourceRepoName:  repo,
+			SourceRepoOwner: opts.Owner,
+			SourceRepoName:  opts.RepoSlug,
 		})
 	}
 
