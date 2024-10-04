@@ -173,10 +173,7 @@ var CreateCmd = &cobra.Command{
 		}
 
 		encodedUrl := url.QueryEscape(createdWorkspace.Projects[0].Repository.Url)
-		gitProvider, res, err := apiClient.GitProviderAPI.GetGitProviderForUrl(ctx, encodedUrl).Execute()
-		if err != nil {
-			log.Fatal(encodedUrl, apiclient_util.HandleErrorResponse(res, err), err)
-		}
+		gitProvider, _, _ := apiClient.GitProviderAPI.GetGitProviderForUrl(ctx, encodedUrl).Execute()
 		var providerConfig *gitprovider.GitProviderConfig
 		gpgkey := ""
 		if gitProvider != nil {
