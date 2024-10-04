@@ -157,7 +157,7 @@ func selectWorkspaceProject(workspaceId string, profile *config.Profile) (*apicl
 	}
 
 	return nil, errors.New("no projects found in workspace")
-}// TODO :  check for signing method
+} // TODO :  check for signing method
 func openIDE(ideId string, activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string, yesFlag bool) error {
 	gpgForward := true
 	telemetry.AdditionalData["ide"] = ideId

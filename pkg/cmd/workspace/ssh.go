@@ -88,9 +88,9 @@ var SshCmd = &cobra.Command{
 		if len(args) > 2 {
 			sshArgs = append(sshArgs, args[2:]...)
 		}
-    gpgForward := true
+		gpgForward := true
 
-		return ide.OpenTerminalSsh(activeProfile, workspace.Id, projectName, sshArgs...)
+		return ide.OpenTerminalSsh(activeProfile, workspace.Id, projectName, gpgForward, sshArgs...)
 
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
