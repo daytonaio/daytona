@@ -90,8 +90,9 @@ var SshCmd = &cobra.Command{
 		if len(args) > 2 {
 			sshArgs = append(sshArgs, args[2:]...)
 		}
-
-		err = ide.OpenTerminalSsh(activeProfile, workspace.Id, projectName, sshArgs...)
+// TODO :  check for signing method
+		gpgForward := true
+		err = ide.OpenTerminalSsh(activeProfile, workspace.Id, projectName, gpgForward, sshArgs...)
 		if err != nil {
 			log.Fatal(err)
 		}

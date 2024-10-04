@@ -19,12 +19,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func OpenVSCode(activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string) error {
+func OpenVSCode(activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string, gpgForward bool) error {
 	CheckAndAlertVSCodeInstalled()
 
 	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
 
-	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName)
+	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName, gpgForward)
 	if err != nil {
 		return err
 	}

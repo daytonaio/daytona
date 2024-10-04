@@ -23,13 +23,13 @@ import (
 	"github.com/pkg/browser"
 )
 
-func OpenJetbrainsIDE(activeProfile config.Profile, ide, workspaceId, projectName string) error {
+func OpenJetbrainsIDE(activeProfile config.Profile, ide, workspaceId, projectName string, gpgForward bool) error {
 	err := IsJetBrainsGatewayInstalled()
 	if err != nil {
 		return err
 	}
 
-	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName)
+	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName, gpgForward)
 	if err != nil {
 		return err
 	}
@@ -41,7 +41,7 @@ func OpenJetbrainsIDE(activeProfile config.Profile, ide, workspaceId, projectNam
 		return errors.New("IDE not found")
 	}
 
-	home, err := util.GetHomeDir(activeProfile, workspaceId, projectName)
+	home, err := util.GetHomeDir(activeProfile, workspaceId, projectName, gpgForward)
 	if err != nil {
 		return err
 	}

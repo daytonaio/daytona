@@ -20,6 +20,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/common"
+	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/views"
 	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
@@ -172,7 +173,25 @@ var CreateCmd = &cobra.Command{
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
-		err = waitForDial(createdWorkspace, &activeProfile, tsConn)
+		encodedUrl := url.QueryEscape(createdWorkspace.Projects[0].Repository.Url)
+		gitProvider, res, err := apiClient.GitProviderAPI.GetGitProviderForUrl(ctx, encodedUrl).Execute()
+		if err != nil {
+			log.Fatal(encodedUrl, apiclient_util.HandleErrorResponse(res, err), err)
+		}
+		var providerConfig *gitprovider.GitProviderConfig
+		gpgkey := ""
+		if gitProvider != nil {
+			providerConfig = &gitprovider.GitProviderConfig{
+				SigningMethod: (*gitprovider.SigningMethod)(gitProvider.SigningMethod),
+				SigningKey:    gitProvider.SigningKey,
+			}
+			if providerConfig.SigningMethod != nil && providerConfig.SigningKey != nil {
+				if *providerConfig.SigningMethod == gitprovider.SigningMethodGPG {
+					gpgkey = *providerConfig.SigningKey
+				}
+			}
+		}
+		err = waitForDial(createdWorkspace, &activeProfile, tsConn, gpgkey)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -443,14 +462,28 @@ func processGitURL(ctx context.Context, repoUrl string, apiClient *apiclient.API
 	return nil, nil
 }
 
-func waitForDial(workspace *apiclient.Workspace, activeProfile *config.Profile, tsConn *tsnet.Server) error {
+func waitForDial(workspace *apiclient.Workspace, activeProfile *config.Profile, tsConn *tsnet.Server, gpgKey string) error {
 	if workspace.Target == "local" && (activeProfile != nil && activeProfile.Id == "default") {
-		err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspace.Id, workspace.Projects[0].Name)
-		if err != nil {
-			return err
-		}
-
 		projectHostname := config.GetProjectHostname(activeProfile.Id, workspace.Id, workspace.Projects[0].Name)
+
+		if gpgKey != "" {
+			err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspace.Id, workspace.Projects[0].Name, true)
+			if err != nil {
+				return err
+			}
+			// add you gpg key here after adding to ```dtn gp add```
+			//TODO fix Unauthorised 401 on line 177
+			// to test it please remove the check and comment out git provider logic
+			err = config.ExportGPGKey("44C255D0CE19BFF3", projectHostname)
+			if err != nil {
+				return err
+			}
+		} else {
+			err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspace.Id, workspace.Projects[0].Name, false)
+			if err != nil {
+				return err
+			}
+		}
 
 		for {
 			sshCommand := exec.Command("ssh", projectHostname, "daytona", "version")
@@ -458,7 +491,7 @@ func waitForDial(workspace *apiclient.Workspace, activeProfile *config.Profile, 
 			sshCommand.Stdout = nil
 			sshCommand.Stderr = &util.TraceLogWriter{}
 
-			err = sshCommand.Run()
+			err := sshCommand.Run()
 			if err == nil {
 				return nil
 			}

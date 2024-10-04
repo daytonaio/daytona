@@ -11,8 +11,8 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 )
 
-func GetHomeDir(activeProfile config.Profile, workspaceId string, projectName string) (string, error) {
-	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName)
+func GetHomeDir(activeProfile config.Profile, workspaceId string, projectName string, gpgForward bool) (string, error) {
+	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName, gpgForward)
 	if err != nil {
 		return "", err
 	}
@@ -27,8 +27,8 @@ func GetHomeDir(activeProfile config.Profile, workspaceId string, projectName st
 	return strings.TrimRight(string(homeDir), "\n"), nil
 }
 
-func GetProjectDir(activeProfile config.Profile, workspaceId string, projectName string) (string, error) {
-	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName)
+func GetProjectDir(activeProfile config.Profile, workspaceId string, projectName string, gpgforward bool) (string, error) {
+	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName, gpgforward)
 	if err != nil {
 		return "", err
 	}
@@ -44,7 +44,7 @@ func GetProjectDir(activeProfile config.Profile, workspaceId string, projectName
 		return strings.TrimRight(string(daytonaProjectDir), "\n"), nil
 	}
 
-	homeDir, err := GetHomeDir(activeProfile, workspaceId, projectName)
+	homeDir, err := GetHomeDir(activeProfile, workspaceId, projectName, gpgforward)
 	if err != nil {
 		return "", err
 	}

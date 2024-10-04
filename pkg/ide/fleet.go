@@ -13,13 +13,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func OpenFleet(activeProfile config.Profile, workspaceId string, projectName string) error {
+func OpenFleet(activeProfile config.Profile, workspaceId string, projectName string, gpgForward bool) error {
 	if err := CheckFleetInstallation(); err != nil {
 		return err
 	}
 
 	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
-	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName)
+	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName, gpgForward)
 	if err != nil {
 		return err
 	}

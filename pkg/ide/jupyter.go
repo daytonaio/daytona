@@ -26,9 +26,9 @@ import (
 const startJupyterCommand = "notebook --no-browser --port=8888 --ip=0.0.0.0 --NotebookApp.token='' --NotebookApp.password=''"
 
 // OpenJupyterIDE manages the installation and startup of a Jupyter IDE on a remote workspace.
-func OpenJupyterIDE(activeProfile config.Profile, workspaceId, projectName, projectProviderMetadata string, yesFlag bool) error {
+func OpenJupyterIDE(activeProfile config.Profile, workspaceId, projectName, projectProviderMetadata string, yesFlag bool, gpgForward bool) error {
 	// Ensure SSH config entry is added
-	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName)
+	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName, gpgForward)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func OpenJupyterIDE(activeProfile config.Profile, workspaceId, projectName, proj
 	}
 
 	// Start Jupyter Notebook server
-	if err := startJupyterServer(projectHostname, activeProfile, workspaceId, projectName); err != nil {
+	if err := startJupyterServer(projectHostname, activeProfile, workspaceId, projectName, gpgForward); err != nil {
 		return err
 	}
 
@@ -216,8 +216,8 @@ func ensureJupyterInstalled(hostname string) error {
 }
 
 // startJupyterServer starts the Jupyter Notebook server on the remote workspace.
-func startJupyterServer(hostname string, activeProfile config.Profile, workspaceId, projectName string) error {
-	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName)
+func startJupyterServer(hostname string, activeProfile config.Profile, workspaceId, projectName string, gpgForward bool) error {
+	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName, gpgForward)
 	if err != nil {
 		return err
 	}
