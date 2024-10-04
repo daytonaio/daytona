@@ -6,6 +6,7 @@ package target
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -110,7 +111,12 @@ func SetTargetForm(target *apiclient.ProviderTarget, targetManifest map[string]a
 			fields = append(fields, selectField)
 			options[name] = value
 		case apiclient.ProviderTargetPropertyTypeFilePath:
-			group, value := getFilePicker(name, property)
+			var initialValue *string
+			v, ok := options[name].(string)
+			if ok {
+				initialValue = &v
+			}
+			group, value := getFilePicker(name, property, initialValue)
 			groups = append(groups, group...)
 			options[name] = value
 		}
@@ -219,7 +225,7 @@ func getConfirm(name string, property apiclient.ProviderProviderTargetProperty, 
 		Value(&value), &value
 }
 
-func getFilePicker(name string, property apiclient.ProviderProviderTargetProperty) ([]*huh.Group, *string) {
+func getFilePicker(name string, property apiclient.ProviderProviderTargetProperty, initialValue *string) ([]*huh.Group, *string) {
 	dirPath := "~"
 
 	if property.DefaultValue != nil {
@@ -244,9 +250,15 @@ func getFilePicker(name string, property apiclient.ProviderProviderTargetPropert
 		}
 	}
 
+	var value *string = new(string)
+	if initialValue != nil {
+		*value = *initialValue
+	}
+
 	customPathInput := huh.NewInput().
 		Title(name).
 		Description(*property.Description).
+		Value(value).
 		Validate(func(filePath string) error {
 			fileInfo, err := os.Stat(filePath)
 			if os.IsNotExist(err) {
@@ -263,23 +275,30 @@ func getFilePicker(name string, property apiclient.ProviderProviderTargetPropert
 		})
 
 	if len(options) == 0 {
-		return []*huh.Group{}, nil
+		return []*huh.Group{huh.NewGroup(customPathInput)}, value
 	}
 
 	options = append(options, huh.NewOption("Custom path", "custom-path"))
 	options = append(options, huh.NewOption("None", "none"))
 
-	var value *string = new(string)
+	description := fmt.Sprintf("%s\nShowing files in: %s\nYou can select a file, choose None or enter a Custom path", *property.Description, dirPath)
 
 	return []*huh.Group{
 		huh.NewGroup(
 			huh.NewSelect[string]().
 				Title(name).
+				Description(description).
 				Options(options...).
-				Value(value),
-		).WithHeight(9),
+				Value(value).Validate(func(s string) error {
+				if s == "custom-path" {
+					*value = ""
+				}
+				return nil
+			}).
+				WithHeight(10 + strings.Count(description, "\n")),
+		),
 		huh.NewGroup(customPathInput).WithHideFunc(func() bool {
-			return *value != "custom-path"
+			return *value != ""
 		}),
 	}, value
 }
