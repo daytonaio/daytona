@@ -14,7 +14,6 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/daytonaio/daytona/internal/util"
 	bitbucketv1 "github.com/gfleury/go-bitbucket-v1"
 	bitbucketServerWebhook "github.com/go-playground/webhooks/v6/bitbucket-server"
 	"github.com/mitchellh/mapstructure"
@@ -251,7 +250,7 @@ func (g *BitbucketServerGitProvider) GetUser() (*GitUser, error) {
 	// Since BitbucketServer or gfleury/go-bitbucket-v1 doesn't offer an endpoint to query the
 	// currently authenticated user, we instead query the '/rest/api/1.0/application-properties' endpoint
 	// which does not put load on the server and then extract the username from the response header.
-	// Refer to this developer community comment: https://community.developer.atlassian.com/t/obtain-authorised-users-username-from-api/24422/2
+	// Refer to this developer community comment: https://community.developer.atlassian.com/t5/Bitbucket-questions/obtain-authorised-users-username-from-api/24422/2
 	res, err := client.DefaultApi.GetApplicationProperties()
 	if err != nil {
 		return nil, g.FormatError(res.StatusCode, res.Message)
@@ -322,7 +321,7 @@ func (g *BitbucketServerGitProvider) GetBranchByCommit(staticContext *StaticGitC
 		return "", err
 	}
 
-	branches, err := client.DefaultApi.GetBranches(staticContext.Owner, staticContext.Name, map[string]interface{}{})
+	branches, err := client.DefaultApi.GetBranches(staticContext.Id, staticContext.Name, map[string]interface{}{})
 	if err != nil {
 		return "", g.FormatError(branches.StatusCode, branches.Message)
 	}
@@ -452,7 +451,7 @@ func (g *BitbucketServerGitProvider) ParseStaticGitContext(repoUrl string) (*Sta
 
 	staticContext.Id = projectKey
 	staticContext.Name = repoName
-	staticContext.Owner = projectKey
+	staticContext.Owner = repoName
 	// For '.git' or repo clone over https format, refer to https://community.atlassian.com/t5/Bitbucket-questions/Project-key-in-repositories-URL/qaq-p/578207
 	// and https://community.atlassian.com/t5/Bitbucket-questions/remote-url-in-Bitbucket-server-what-does-scm-represent-is-it/qaq-p/2060987
 	staticContext.Url = fmt.Sprintf("%s/scm/%s/%s.git", baseUrl, projectKey, repoName)
@@ -523,7 +522,6 @@ func (g *BitbucketServerGitProvider) GetDefaultBranch(staticContext *StaticGitCo
 }
 
 func (b *BitbucketServerGitProvider) FormatError(statusCode int, message string) error {
-
 	return fmt.Errorf("status code: %d err: Request failed with %s", statusCode, message)
 }
 
@@ -533,23 +531,21 @@ func (b *BitbucketServerGitProvider) GetPrebuildWebhook(repo *GitRepository, end
 		return nil, err
 	}
 
-	hooks, err := client.DefaultApi.FindWebhooks(repo.Owner, repo.Id, nil)
+	hooks, err := client.DefaultApi.FindWebhooks(repo.Id, repo.Owner, nil)
 	if err != nil {
 		return nil, b.FormatError(hooks.StatusCode, hooks.Message)
 	}
 
-	if len(hooks.Values) == 0 {
+	if hooks.Values == nil {
 		return nil, nil
 	}
 
-	hookList, err := bitbucketv1.GetWebhooksResponse(hooks)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, hook := range hookList {
-		if hook.Url == endpointUrl {
-			return util.Pointer(strconv.Itoa(int(hook.ID))), nil
+	for _, hook := range hooks.Values["values"].([]interface{}) {
+		idVal := hook.(map[string]interface{})["id"].(float64)
+		url := hook.(map[string]interface{})["url"].(string)
+		if url == endpointUrl {
+			id := fmt.Sprintf("%d", int(idVal))
+			return &id, nil
 		}
 	}
 
@@ -562,14 +558,14 @@ func (b *BitbucketServerGitProvider) UnregisterPrebuildWebhook(repo *GitReposito
 		return err
 	}
 
-	idInt, err := strconv.Atoi(id)
+	hookId, err := strconv.Atoi(id)
 	if err != nil {
-		return fmt.Errorf("invalid webhook ID: %v", err)
+		return errors.New("unable to convert webhook id to int")
 	}
 
-	response, err := client.DefaultApi.DeleteWebhook(repo.Owner, repo.Id, int32(idInt))
+	resp, err := client.DefaultApi.DeleteWebhook(repo.Id, repo.Owner, int32(hookId))
 	if err != nil {
-		return b.FormatError(response.StatusCode, response.Message)
+		return b.FormatError(resp.StatusCode, resp.Message)
 	}
 
 	return nil
@@ -581,22 +577,17 @@ func (b *BitbucketServerGitProvider) RegisterPrebuildWebhook(repo *GitRepository
 		return "", err
 	}
 
-	hook, err := client.DefaultApi.CreateWebhook(repo.Owner, repo.Id, &bitbucketv1.Webhook{
+	hook, err := client.DefaultApi.CreateWebhook(repo.Id, repo.Owner, &bitbucketv1.Webhook{
 		Active: true,
-		Events: []string{"repo:push"},
+		Events: []string{"repo:refs_changed"},
 		Url:    endpointUrl,
-	}, []string{"repo:push"})
+	}, []string{"application/json"})
+
 	if err != nil {
 		return "", b.FormatError(hook.StatusCode, hook.Message)
 	}
 
-	webhook, err := bitbucketv1.GetWebhooksResponse(hook)
-	if err != nil {
-		return "", err
-	}
-
-	return strconv.Itoa(webhook[0].ID), nil
-
+	return fmt.Sprintf("%d", int(hook.Values["id"].(float64))), nil
 }
 
 func (b *BitbucketServerGitProvider) GetCommitsRange(repo *GitRepository, initialSha string, currentSha string) (int, error) {
@@ -605,7 +596,7 @@ func (b *BitbucketServerGitProvider) GetCommitsRange(repo *GitRepository, initia
 		return 0, err
 	}
 
-	commits, err := client.DefaultApi.GetCommits(repo.Owner, repo.Id, map[string]interface{}{
+	commits, err := client.DefaultApi.GetCommits(repo.Id, repo.Owner, map[string]interface{}{
 		"since": initialSha,
 		"until": currentSha,
 	})
@@ -613,12 +604,7 @@ func (b *BitbucketServerGitProvider) GetCommitsRange(repo *GitRepository, initia
 		return 0, b.FormatError(commits.StatusCode, commits.Message)
 	}
 
-	commitsResponse, err := bitbucketv1.GetCommitsResponse(commits)
-	if err != nil {
-		return 0, err
-	}
-
-	return len(commitsResponse), nil
+	return int(commits.Values["size"].(float64)), nil
 }
 
 func (b *BitbucketServerGitProvider) ParseEventData(request *http.Request) (*GitEventData, error) {
@@ -635,20 +621,19 @@ func (b *BitbucketServerGitProvider) ParseEventData(request *http.Request) (*Git
 		return nil, err
 	}
 
-	pushEvent, ok := event.(*bitbucketServerWebhook.RepositoryReferenceChangedPayload)
+	pushEvent, ok := event.(bitbucketServerWebhook.RepositoryReferenceChangedPayload)
 	if !ok {
-		return nil, errors.New("invalid event payload")
+		return nil, errors.New("could not parse push event")
 	}
 
-	if len(pushEvent.Changes) == 0 {
-		return nil, errors.New("no changes in the push event")
-	}
+	baseUrl := strings.TrimSuffix(b.baseApiUrl, "/rest")
+	gitEventUrl := fmt.Sprintf("%s/scm/%s/%s.git", baseUrl, pushEvent.Repository.Project.Key, pushEvent.Repository.Slug)
 
 	gitEventData := &GitEventData{
-		Url:    fmt.Sprintf("%s/scm/%s/%s.git", b.baseApiUrl, pushEvent.Repository.Project.Key, pushEvent.Repository.Slug),
-		Owner:  pushEvent.Repository.Project.Key,
-		Branch: pushEvent.Changes[0].Reference.DisplayID,
+		Url:    gitEventUrl,
+		Branch: strings.TrimPrefix(pushEvent.Changes[0].ReferenceID, "refs/heads/"),
 		Sha:    pushEvent.Changes[0].ToHash,
+		Owner:  pushEvent.Actor.DisplayName,
 	}
 
 	for _, change := range pushEvent.Changes {

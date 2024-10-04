@@ -199,7 +199,7 @@ func GetBranchFromProjectConfig(projectConfig *apiclient.ProjectConfig, apiClien
 	branchWizardConfig := BranchWizardConfig{
 		ApiClient:    apiClient,
 		ProviderId:   providerId,
-		NamespaceId:  repoResponse.Owner,
+		NamespaceId:  repoResponse.Id,
 		ChosenRepo:   repoResponse,
 		ProjectOrder: projectOrder,
 	}
