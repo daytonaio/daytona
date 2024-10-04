@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 
@@ -139,9 +140,72 @@ var purgeCmd = &cobra.Command{
 			}
 		}()
 
+		headscaleServerStartedChan := make(chan struct{})
+		headscaleServerErrChan := make(chan error)
+
+		go func() {
+			err := server.TailscaleServer.Start(headscaleServerErrChan)
+			if err != nil {
+				headscaleServerErrChan <- err
+				return
+			}
+			headscaleServerStartedChan <- struct{}{}
+		}()
+
+		localContainerRegistryErrChan := make(chan error)
+
+		go func() {
+			if server.LocalContainerRegistry != nil {
+				localContainerRegistryErrChan <- server.LocalContainerRegistry.Start()
+			} else {
+				localContainerRegistryErrChan <- nil
+			}
+		}()
+
+		select {
+		case <-headscaleServerStartedChan:
+			go func() {
+				headscaleServerErrChan <- server.TailscaleServer.Connect()
+			}()
+		case err := <-headscaleServerErrChan:
+			return err
+		}
+
+		err = <-localContainerRegistryErrChan
+		if err != nil {
+			return err
+		}
+
 		errs := server.Purge(ctx, forceFlag)
 		if len(errs) > 0 {
-			return errs[0]
+			errMessage := ""
+			for _, err := range errs {
+				errMessage += fmt.Sprintf("Failed to purge: %v\n", err)
+			}
+
+			return errors.New(errMessage)
+		}
+
+		if server.LocalContainerRegistry != nil {
+			fmt.Println("Purging local container registry...")
+			err := server.LocalContainerRegistry.Purge()
+			if err != nil {
+				if !forceFlag {
+					return err
+				} else {
+					fmt.Printf("Failed to purge local container registry: %v\n", err)
+				}
+			}
+		}
+
+		fmt.Println("Purging Tailscale server...")
+		err = server.TailscaleServer.Purge()
+		if err != nil {
+			if !forceFlag {
+				return err
+			} else {
+				fmt.Printf("Failed to purge Tailscale server: %v\n", err)
+			}
 		}
 
 		fmt.Println("Server purged.")

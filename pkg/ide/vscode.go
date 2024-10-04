@@ -94,7 +94,7 @@ func setupVSCodeCustomizations(projectHostname string, projectProviderMetadata s
 			}
 		}
 
-		if len(mergedCustomizations.Extensions) > 0 {
+		if mergedCustomizations != nil && len(mergedCustomizations.Extensions) > 0 {
 			extensionArgs := []string{}
 			for _, extension := range mergedCustomizations.Extensions {
 				extensionArgs = append(extensionArgs, "--install-extension", extension)
