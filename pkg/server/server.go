@@ -4,13 +4,9 @@
 package server
 
 import (
-	"context"
-	"fmt"
 	"os"
 	"os/signal"
-	"time"
 
-	"github.com/daytonaio/daytona/pkg/frpc"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
 	"github.com/daytonaio/daytona/pkg/server/builds"
@@ -19,7 +15,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/profiledata"
 	"github.com/daytonaio/daytona/pkg/server/projectconfig"
 	"github.com/daytonaio/daytona/pkg/server/providertargets"
-	"github.com/daytonaio/daytona/pkg/server/registry"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/hashicorp/go-plugin"
@@ -95,81 +90,12 @@ type Server struct {
 	TelemetryService         telemetry.TelemetryService
 }
 
-func (s *Server) Start(errCh chan error) error {
-	err := s.initLogs()
-	if err != nil {
-		return err
-	}
+func (s *Server) Initialize() error {
+	return s.initLogs()
+}
 
+func (s *Server) Start() error {
 	log.Info("Starting Daytona server")
-
-	headscaleFrpcHealthCheck, headscaleFrpcService, err := frpc.GetService(frpc.FrpcConnectParams{
-		ServerDomain: s.config.Frps.Domain,
-		ServerPort:   int(s.config.Frps.Port),
-		Name:         fmt.Sprintf("daytona-server-%s", s.config.Id),
-		Port:         int(s.config.HeadscalePort),
-		SubDomain:    s.config.Id,
-	})
-	if err != nil {
-		return err
-	}
-
-	if s.LocalContainerRegistry != nil {
-		log.Info("Starting local container registry")
-		err = s.LocalContainerRegistry.Start()
-		if err != nil {
-			log.Fatal(err)
-		}
-	} else {
-		err := registry.RemoveRegistryContainer()
-		if err != nil {
-			log.Fatalf("Failed to remove local container registry: %s", err.Error())
-		}
-	}
-
-	go func() {
-		err := headscaleFrpcService.Run(context.Background())
-		if err != nil {
-			errCh <- err
-		}
-	}()
-
-	apiFrpcHealthCheck, apiFrpcService, err := frpc.GetService(frpc.FrpcConnectParams{
-		ServerDomain: s.config.Frps.Domain,
-		ServerPort:   int(s.config.Frps.Port),
-		Name:         fmt.Sprintf("daytona-server-api-%s", s.config.Id),
-		Port:         int(s.config.ApiPort),
-		SubDomain:    fmt.Sprintf("api-%s", s.config.Id),
-	})
-	if err != nil {
-		return err
-	}
-
-	go func() {
-		err := apiFrpcService.Run(context.Background())
-		if err != nil {
-			errCh <- err
-		}
-	}()
-
-	if s.LocalContainerRegistry != nil {
-		_, registryFrpcService, err := frpc.GetService(frpc.FrpcConnectParams{
-			ServerDomain: s.config.Frps.Domain,
-			ServerPort:   int(s.config.Frps.Port),
-			Name:         fmt.Sprintf("daytona-server-registry-%s", s.config.Id),
-			Port:         int(s.config.LocalBuilderRegistryPort),
-			SubDomain:    fmt.Sprintf("registry-%s", s.config.Id),
-		})
-		if err != nil {
-			return err
-		}
-		go func() {
-			err := registryFrpcService.Run(context.Background())
-			if err != nil {
-				errCh <- err
-			}
-		}()
-	}
 
 	go func() {
 		interruptChannel := make(chan os.Signal, 1)
@@ -180,52 +106,8 @@ func (s *Server) Start(errCh chan error) error {
 		}
 	}()
 
-	go func() {
-		errChan := make(chan error)
-		go func() {
-			errChan <- s.TailscaleServer.Start()
-		}()
-
-		select {
-		case err := <-errChan:
-			errCh <- err
-		case <-time.After(1 * time.Second):
-			go func() {
-				errChan <- s.TailscaleServer.Connect()
-			}()
-		}
-
-		if err := <-errChan; err != nil {
-			errCh <- err
-		}
-	}()
-
-	for i := 0; i < 5; i++ {
-		if err = headscaleFrpcHealthCheck(); err != nil {
-			log.Debugf("Failed to connect to headscale frpc: %s", err)
-			time.Sleep(2 * time.Second)
-		} else {
-			break
-		}
-	}
-	if err != nil {
-		return err
-	}
-
-	for i := 0; i < 5; i++ {
-		if err = apiFrpcHealthCheck(); err != nil {
-			log.Debugf("Failed to connect to api frpc: %s", err)
-			time.Sleep(2 * time.Second)
-		} else {
-			break
-		}
-	}
-	if err != nil {
-		return err
-	}
-
 	// Terminate orphaned provider processes
-	err = s.ProviderManager.TerminateProviderProcesses(s.config.ProvidersDir)
+	err := s.ProviderManager.TerminateProviderProcesses(s.config.ProvidersDir)
 	if err != nil {
 		log.Errorf("Failed to terminate orphaned provider processes: %s", err)
 	}

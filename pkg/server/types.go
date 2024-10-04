@@ -12,7 +12,7 @@ type TailscaleServer interface {
 	CreateAuthKey() (string, error)
 	CreateUser() error
 	HTTPClient() *http.Client
-	Start() error
+	Start(errChan chan error) error
 	Stop() error
 	Purge() error
 }

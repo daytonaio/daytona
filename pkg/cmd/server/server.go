@@ -56,7 +56,7 @@ var ServerCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		err = waitForServerToStart(apiServer)
+		err = waitForApiServerToStart(apiServer)
 		if err != nil {
 			return err
 		}
