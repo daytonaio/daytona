@@ -158,7 +158,7 @@ var CreateCmd = &cobra.Command{
 		id = stringid.TruncateID(id)
 
 		logsContext, stopLogs := context.WithCancel(context.Background())
-		go apiclient_util.ReadWorkspaceLogs(logsContext, activeProfile, id, projectNames)
+		go apiclient_util.ReadWorkspaceLogs(logsContext, activeProfile, id, projectNames, true, true)
 
 		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(apiclient.CreateWorkspaceDTO{
 			Id:       id,
