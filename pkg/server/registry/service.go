@@ -128,36 +128,38 @@ func (s *LocalContainerRegistry) Start() error {
 		errChan <- cli.ContainerStart(ctx, resp.ID, container.StartOptions{})
 	}()
 
-	if s.frps != nil {
-		healthCheck, frpcService, err := frpc.GetService(frpc.FrpcConnectParams{
-			ServerDomain: s.frps.Domain,
-			ServerPort:   int(s.frps.Port),
-			Name:         fmt.Sprintf("daytona-server-registry-%s", s.serverId),
-			Port:         int(s.port),
-			SubDomain:    fmt.Sprintf("registry-%s", s.serverId),
-		})
-		if err != nil {
-			return err
-		}
+	if s.frps == nil {
+		return <-errChan
+	}
 
-		go func() {
-			err := frpcService.Run(context.Background())
-			if err != nil {
-				errChan <- err
-			}
-		}()
+	healthCheck, frpcService, err := frpc.GetService(frpc.FrpcConnectParams{
+		ServerDomain: s.frps.Domain,
+		ServerPort:   int(s.frps.Port),
+		Name:         fmt.Sprintf("daytona-server-registry-%s", s.serverId),
+		Port:         int(s.port),
+		SubDomain:    fmt.Sprintf("registry-%s", s.serverId),
+	})
+	if err != nil {
+		return err
+	}
 
-		for i := 0; i < 5; i++ {
-			if err = healthCheck(); err != nil {
-				log.Debugf("Failed to connect to registry frpc: %s", err)
-				time.Sleep(2 * time.Second)
-			} else {
-				break
-			}
-		}
+	go func() {
+		err := frpcService.Run(context.Background())
 		if err != nil {
-			return err
+			errChan <- err
 		}
+	}()
+
+	for i := 0; i < 5; i++ {
+		if err = healthCheck(); err != nil {
+			log.Debugf("Failed to connect to registry frpc: %s", err)
+			time.Sleep(2 * time.Second)
+		} else {
+			break
+		}
+	}
+	if err != nil {
+		return err
 	}
 
 	return <-errChan

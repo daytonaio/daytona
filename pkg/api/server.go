@@ -275,36 +275,38 @@ func (a *ApiServer) Start() error {
 		errChan <- a.httpServer.Serve(listener)
 	}()
 
-	if a.frps != nil {
-		frpcHealthCheck, frpcService, err := frpc.GetService(frpc.FrpcConnectParams{
-			ServerDomain: a.frps.Domain,
-			ServerPort:   int(a.frps.Port),
-			Name:         fmt.Sprintf("daytona-server-api-%s", a.serverId),
-			Port:         int(a.apiPort),
-			SubDomain:    fmt.Sprintf("api-%s", a.serverId),
-		})
-		if err != nil {
-			return err
-		}
+	if a.frps == nil {
+		return <-errChan
+	}
 
-		go func() {
-			err := frpcService.Run(context.Background())
-			if err != nil {
-				errChan <- err
-			}
-		}()
+	frpcHealthCheck, frpcService, err := frpc.GetService(frpc.FrpcConnectParams{
+		ServerDomain: a.frps.Domain,
+		ServerPort:   int(a.frps.Port),
+		Name:         fmt.Sprintf("daytona-server-api-%s", a.serverId),
+		Port:         int(a.apiPort),
+		SubDomain:    fmt.Sprintf("api-%s", a.serverId),
+	})
+	if err != nil {
+		return err
+	}
 
-		for i := 0; i < 5; i++ {
-			if err = frpcHealthCheck(); err != nil {
-				log.Debugf("Failed to connect to api frpc: %s", err)
-				time.Sleep(2 * time.Second)
-			} else {
-				break
-			}
-		}
+	go func() {
+		err := frpcService.Run(context.Background())
 		if err != nil {
-			return err
+			errChan <- err
 		}
+	}()
+
+	for i := 0; i < 5; i++ {
+		if err = frpcHealthCheck(); err != nil {
+			log.Debugf("Failed to connect to api frpc: %s", err)
+			time.Sleep(2 * time.Second)
+		} else {
+			break
+		}
+	}
+	if err != nil {
+		return err
 	}
 
 	return <-errChan
