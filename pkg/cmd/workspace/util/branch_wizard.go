@@ -29,6 +29,8 @@ type BranchWizardConfig struct {
 
 func runGetBranchFromPromptWithPagination(ctx context.Context, config BranchWizardConfig, parentIdentifier string, page, perPage int32) (*apiclient.GitRepository, error) {
 	var branchList []apiclient.GitBranch
+	disablePagination := false
+	curPageItemsNum := 0
 	var err error
 
 	for {
@@ -38,6 +40,7 @@ func runGetBranchFromPromptWithPagination(ctx context.Context, config BranchWiza
 				return err
 			}
 
+			curPageItemsNum = len(branches)
 			branchList = append(branchList, branches...)
 			return nil
 		})
@@ -46,12 +49,17 @@ func runGetBranchFromPromptWithPagination(ctx context.Context, config BranchWiza
 			return nil, err
 		}
 
-		// Check if the git provider supports pagination
-		isPaginationDisabled := isGitProviderWithUnsupportedPagination(config.ProviderId)
+		// Check first if the git provider supports pagination
+		if isGitProviderWithUnsupportedPagination(config.ProviderId) {
+			disablePagination = true
+		} else {
+			// Check if we have reached the end of the list
+			disablePagination = int32(curPageItemsNum) < perPage
+		}
 
 		// User will either choose a branch or navigate the pages
-		branch, navigate := selection.GetBranchFromPrompt(branchList, config.ProjectOrder, parentIdentifier, isPaginationDisabled, page, perPage)
-		if !isPaginationDisabled && navigate != "" {
+		branch, navigate := selection.GetBranchFromPrompt(branchList, config.ProjectOrder, parentIdentifier, disablePagination)
+		if !disablePagination && navigate != "" {
 			if navigate == views.ListNavigationText {
 				page++
 				continue // Fetch the next page of branches
@@ -77,7 +85,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	var err error
 	ctx := context.Background()
 
-	err = views_util.WithSpinner("Loading Branches", func() error {
+	err = views_util.WithSpinner("Loading", func() error {
 		branches, _, err := config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.ProviderId, config.NamespaceId, url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
 		if err != nil {
 			return err
@@ -158,6 +166,9 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	} else if chosenCheckoutOption == selection.CheckoutPR {
 		page = 1
 		perPage = 100
+		disablePagination := false
+		curPageItemsNum := 0
+
 		for {
 			err = views_util.WithSpinner("Loading Pull Requests", func() error {
 				branches, _, err := config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.ProviderId, config.NamespaceId, url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
@@ -165,6 +176,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 					return err
 				}
 
+				curPageItemsNum = len(branches)
 				branchList = append(branchList, branches...)
 				return nil
 			})
@@ -173,12 +185,17 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 				return nil, err
 			}
 
-			// Check if the git provider supports pagination
-			isPaginationDisabled := isGitProviderWithUnsupportedPagination(config.ProviderId)
+			// Check first if the git provider supports pagination
+			if isGitProviderWithUnsupportedPagination(config.ProviderId) {
+				disablePagination = true
+			} else {
+				// Check if we have reached the end of the list
+				disablePagination = int32(curPageItemsNum) < perPage
+			}
 
 			// User will either choose a PR or navigate the pages
-			chosenPullRequest, navigate := selection.GetPullRequestFromPrompt(prList, config.ProjectOrder, parentIdentifier, isPaginationDisabled, page, perPage)
-			if !isPaginationDisabled && navigate != "" {
+			chosenPullRequest, navigate := selection.GetPullRequestFromPrompt(prList, config.ProjectOrder, parentIdentifier, disablePagination)
+			if !disablePagination && navigate != "" {
 				if navigate == views.ListNavigationText {
 					page++
 					continue

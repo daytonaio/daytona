@@ -14,7 +14,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectBranchPrompt(branches []apiclient.GitBranch, projectOrder int, parentIdentifier string, choiceChan chan<- string, navChan chan<- string, isPaginationDisabled bool, curPage, perPage int32) {
+func selectBranchPrompt(branches []apiclient.GitBranch, projectOrder int, parentIdentifier string, choiceChan chan<- string, navChan chan<- string, isPaginationDisabled bool) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
@@ -27,7 +27,7 @@ func selectBranchPrompt(branches []apiclient.GitBranch, projectOrder int, parent
 	}
 
 	if !isPaginationDisabled {
-		items = AddLoadMoreOptionToList(items, len(branches), curPage, perPage)
+		items = AddLoadMoreOptionToList(items)
 	}
 
 	l := views.GetStyledSelectList(items, parentIdentifier)
@@ -49,7 +49,7 @@ func selectBranchPrompt(branches []apiclient.GitBranch, projectOrder int, parent
 	// Return either the choice or navigation
 	if m, ok := p.(model[string]); ok && m.choice != nil {
 		choice := *m.choice
-		if choice == views.ListNavigationText {
+		if !isPaginationDisabled && choice == views.ListNavigationText {
 			navChan <- choice
 		} else {
 			choiceChan <- choice
@@ -59,11 +59,11 @@ func selectBranchPrompt(branches []apiclient.GitBranch, projectOrder int, parent
 	}
 }
 
-func GetBranchFromPrompt(branches []apiclient.GitBranch, projectOrder int, parentIdentifier string, isPaginationDisabled bool, curPage, perPage int32) (*apiclient.GitBranch, string) {
+func GetBranchFromPrompt(branches []apiclient.GitBranch, projectOrder int, parentIdentifier string, isPaginationDisabled bool) (*apiclient.GitBranch, string) {
 	choiceChan := make(chan string)
 	navChan := make(chan string)
 
-	go selectBranchPrompt(branches, projectOrder, parentIdentifier, choiceChan, navChan, isPaginationDisabled, curPage, perPage)
+	go selectBranchPrompt(branches, projectOrder, parentIdentifier, choiceChan, navChan, isPaginationDisabled)
 
 	select {
 	case branchName := <-choiceChan:

@@ -14,7 +14,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrder int, parentIdentifier string, choiceChan chan<- string, navChan chan<- string, isPaginationDisabled bool, curPage, perPage int32) {
+func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrder int, parentIdentifier string, choiceChan chan<- string, navChan chan<- string, isPaginationDisabled bool) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
@@ -29,7 +29,7 @@ func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrd
 	}
 
 	if !isPaginationDisabled {
-		items = AddLoadMoreOptionToList(items, len(pullRequests), curPage, perPage)
+		items = AddLoadMoreOptionToList(items)
 	}
 
 	l := views.GetStyledSelectList(items, parentIdentifier)
@@ -50,7 +50,7 @@ func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrd
 
 	if m, ok := p.(model[string]); ok && m.choice != nil {
 		choice := *m.choice
-		if choice == views.ListNavigationText {
+		if !isPaginationDisabled && choice == views.ListNavigationText {
 			navChan <- choice
 		} else {
 			choiceChan <- choice
@@ -60,11 +60,11 @@ func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrd
 	}
 }
 
-func GetPullRequestFromPrompt(pullRequests []apiclient.GitPullRequest, projectOrder int, parentIdentifier string, isPaginationDisabled bool, curPage, perPage int32) (*apiclient.GitPullRequest, string) {
+func GetPullRequestFromPrompt(pullRequests []apiclient.GitPullRequest, projectOrder int, parentIdentifier string, isPaginationDisabled bool) (*apiclient.GitPullRequest, string) {
 	choiceChan := make(chan string)
 	navChan := make(chan string)
 
-	go selectPullRequestPrompt(pullRequests, projectOrder, parentIdentifier, choiceChan, navChan, isPaginationDisabled, curPage, perPage)
+	go selectPullRequestPrompt(pullRequests, projectOrder, parentIdentifier, choiceChan, navChan, isPaginationDisabled)
 
 	select {
 	case pullRequestName := <-choiceChan:

@@ -12,9 +12,9 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-const (
+var (
 	ListNavigationText       = "load more"
-	ListNavigationRenderText = "Load more.."
+	ListNavigationRenderText = "+ Load more.."
 )
 
 var (

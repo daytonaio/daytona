@@ -14,7 +14,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectRepositoryPrompt(repositories []apiclient.GitRepository, projectOrder int, choiceChan chan<- string, navChan chan<- string, selectedRepos map[string]int, parentIdentifier string, isPaginationDisabled bool, curPage, perPage int32) {
+func selectRepositoryPrompt(repositories []apiclient.GitRepository, projectOrder int, choiceChan chan<- string, navChan chan<- string, selectedRepos map[string]int, parentIdentifier string, isPaginationDisabled bool) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
@@ -29,7 +29,7 @@ func selectRepositoryPrompt(repositories []apiclient.GitRepository, projectOrder
 	}
 
 	if !isPaginationDisabled {
-		items = AddLoadMoreOptionToList(items, len(repositories), curPage, perPage)
+		items = AddLoadMoreOptionToList(items)
 	}
 
 	l := views.GetStyledSelectList(items, parentIdentifier)
@@ -51,7 +51,7 @@ func selectRepositoryPrompt(repositories []apiclient.GitRepository, projectOrder
 	// Return either the choice or navigation
 	if m, ok := p.(model[string]); ok && m.choice != nil {
 		choice := *m.choice
-		if choice == views.ListNavigationText {
+		if !isPaginationDisabled && choice == views.ListNavigationText {
 			navChan <- choice
 		} else {
 			selectedRepos[choice]++
@@ -62,11 +62,11 @@ func selectRepositoryPrompt(repositories []apiclient.GitRepository, projectOrder
 	}
 }
 
-func GetRepositoryFromPrompt(repositories []apiclient.GitRepository, projectOrder int, selectedRepos map[string]int, parentIdentifier string, isPaginationDisabled bool, curPage, perPage int32) (*apiclient.GitRepository, string) {
+func GetRepositoryFromPrompt(repositories []apiclient.GitRepository, projectOrder int, selectedRepos map[string]int, parentIdentifier string, isPaginationDisabled bool) (*apiclient.GitRepository, string) {
 	choiceChan := make(chan string)
 	navChan := make(chan string)
 
-	go selectRepositoryPrompt(repositories, projectOrder, choiceChan, navChan, selectedRepos, parentIdentifier, isPaginationDisabled, curPage, perPage)
+	go selectRepositoryPrompt(repositories, projectOrder, choiceChan, navChan, selectedRepos, parentIdentifier, isPaginationDisabled)
 
 	select {
 	case choice := <-choiceChan:

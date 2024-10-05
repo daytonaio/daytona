@@ -34,20 +34,13 @@ func AddNavigationOptionsToList(items []list.Item, totalItems int, curPage, perP
 
 // Adds 'Load more' option to a selection list for efficient pagination
 // totalItems count is exclusive of pagination options.
-func AddLoadMoreOptionToList(items []list.Item, totalItems int, curPage, perPage int32) []list.Item {
-	curPageItems := int32(totalItems)
-	if curPage > 1 {
-		curPageItems = (int32)(totalItems) - (perPage * curPage)
-	}
-
-	if curPageItems == perPage {
-		items = append(items, item[string]{
-			id:             views.ListNavigationText,
-			title:          views.NavigationStyle.Render(views.ListNavigationRenderText),
-			choiceProperty: views.ListNavigationText,
-			desc:           "Loads next set of remaining items",
-		})
-	}
+func AddLoadMoreOptionToList(items []list.Item) []list.Item {
+	items = append(items, item[string]{
+		id:             views.ListNavigationText,
+		title:          views.NavigationStyle.Render(views.ListNavigationRenderText),
+		choiceProperty: views.ListNavigationText,
+		desc:           "Loads next set of remaining items",
+	})
 
 	return items
 }
