@@ -115,11 +115,13 @@ var CodeCmd = &cobra.Command{
 				return err
 			}
 		}
+		gpgKey := ""
+		gpgKey, _ = GetGitProviderGpgKey(apiClient, ctx, activeProfile, workspace.Id)
 
 		yesFlag, _ := cmd.Flags().GetBool("yes")
 		ideList := config.GetIdeList()
 		ide_views.RenderIdeOpeningMessage(workspace.Name, projectName, ideId, ideList)
-		return openIDE(ideId, activeProfile, workspaceId, projectName, providerMetadata, yesFlag)
+		return openIDE(ideId, activeProfile, workspaceId, projectName, providerMetadata, yesFlag, gpgKey)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) >= 2 {
@@ -158,8 +160,7 @@ func selectWorkspaceProject(workspaceId string, profile *config.Profile) (*apicl
 
 	return nil, errors.New("no projects found in workspace")
 } // TODO :  check for signing method
-func openIDE(ideId string, activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string, yesFlag bool) error {
-	gpgKey := ""
+func openIDE(ideId string, activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string, yesFlag bool, gpgKey string) error {
 	telemetry.AdditionalData["ide"] = ideId
 
 	switch ideId {

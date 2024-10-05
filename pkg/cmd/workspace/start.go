@@ -108,6 +108,9 @@ var StartCmd = &cobra.Command{
 			return err
 		}
 
+		gpgKey := ""
+		gpgKey, _ = GetGitProviderGpgKey(apiClient, ctx, activeProfile, workspaceIdOrName)
+
 		if startProjectFlag == "" {
 			views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' started successfully", workspaceIdOrName))
 		} else {
@@ -115,7 +118,7 @@ var StartCmd = &cobra.Command{
 
 			if codeFlag {
 				ide_views.RenderIdeOpeningMessage(workspaceIdOrName, startProjectFlag, ideId, ideList)
-				err = openIDE(ideId, activeProfile, workspaceId, startProjectFlag, projectProviderMetadata, yesFlag)
+				err = openIDE(ideId, activeProfile, workspaceId, startProjectFlag, projectProviderMetadata, yesFlag, gpgKey)
 				if err != nil {
 					return err
 				}

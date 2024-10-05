@@ -5,14 +5,12 @@ package workspace
 
 import (
 	"context"
-	"net/url"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/ide"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
@@ -92,28 +90,13 @@ var SshCmd = &cobra.Command{
 			sshArgs = append(sshArgs, args[2:]...)
 		}
 
-		var providerConfig *gitprovider.GitProviderConfig
-		var gpgKey string
-
-		encodedUrl := url.QueryEscape(selectedProject.Repository.Url)
-		gitProvider, _, _ := apiClient.GitProviderAPI.GetGitProviderForUrl(ctx, encodedUrl).Execute()
-
-		if gitProvider != nil {
-
-			providerConfig = &gitprovider.GitProviderConfig{
-				SigningMethod: (*gitprovider.SigningMethod)(gitProvider.SigningMethod),
-				SigningKey:    gitProvider.SigningKey,
-			}
-
-			if providerConfig.SigningMethod != nil && providerConfig.SigningKey != nil {
-				if *providerConfig.SigningMethod == gitprovider.SigningMethodGPG {
-					gpgKey = *providerConfig.SigningKey
-				}
-			}
+		gpgKey := ""
+		gpgKey, err = GetGitProviderGpgKey(apiClient, ctx, activeProfile, workspace.Id)
+		if err != nil {
+			return err
 		}
 
 		return ide.OpenTerminalSsh(activeProfile, workspace.Id, projectName, gpgKey, sshArgs...)
-
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) >= 2 {

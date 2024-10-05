@@ -51,7 +51,7 @@ func OpenJupyterIDE(activeProfile config.Profile, workspaceId, projectName, proj
 	}
 
 	// Start Jupyter Notebook server
-	if err := startJupyterServer(projectHostname, activeProfile, workspaceId, projectName, ""); err != nil {
+	if err := startJupyterServer(projectHostname, activeProfile, workspaceId, projectName, gpgKey); err != nil {
 		return err
 	}
 
