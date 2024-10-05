@@ -159,26 +159,26 @@ func selectWorkspaceProject(workspaceId string, profile *config.Profile) (*apicl
 	return nil, errors.New("no projects found in workspace")
 } // TODO :  check for signing method
 func openIDE(ideId string, activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string, yesFlag bool) error {
-	gpgForward := true
+	gpgKey := ""
 	telemetry.AdditionalData["ide"] = ideId
 
 	switch ideId {
 	case "vscode":
-		return ide.OpenVSCode(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgForward)
+		return ide.OpenVSCode(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
 	case "ssh":
-		return ide.OpenTerminalSsh(activeProfile, workspaceId, projectName, gpgForward)
+		return ide.OpenTerminalSsh(activeProfile, workspaceId, projectName, gpgKey)
 	case "browser":
-		return ide.OpenBrowserIDE(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgForward)
+		return ide.OpenBrowserIDE(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
 	case "cursor":
-		return ide.OpenCursor(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgForward)
+		return ide.OpenCursor(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
 	case "jupyter":
-		return ide.OpenJupyterIDE(activeProfile, workspaceId, projectName, projectProviderMetadata, yesFlag, gpgForward)
+		return ide.OpenJupyterIDE(activeProfile, workspaceId, projectName, projectProviderMetadata, yesFlag, gpgKey)
 	case "fleet":
-		return ide.OpenFleet(activeProfile, workspaceId, projectName, gpgForward)
+		return ide.OpenFleet(activeProfile, workspaceId, projectName, gpgKey)
 	default:
 		_, ok := jetbrains.GetIdes()[jetbrains.Id(ideId)]
 		if ok {
-			return ide.OpenJetbrainsIDE(activeProfile, ideId, workspaceId, projectName, gpgForward)
+			return ide.OpenJetbrainsIDE(activeProfile, ideId, workspaceId, projectName, gpgKey)
 		}
 	}
 

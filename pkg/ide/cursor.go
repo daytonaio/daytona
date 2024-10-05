@@ -14,7 +14,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/build/devcontainer"
 )
 
-func OpenCursor(activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string, gpgForward bool) error {
+func OpenCursor(activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string, gpgkey string) error {
 	path, err := GetCursorBinaryPath()
 	if err != nil {
 		return err
@@ -22,7 +22,7 @@ func OpenCursor(activeProfile config.Profile, workspaceId string, projectName st
 
 	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
 
-	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName, gpgForward)
+	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName, gpgkey)
 	if err != nil {
 		return err
 	}

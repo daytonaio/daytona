@@ -134,7 +134,7 @@ func generateSshConfigEntry(profileId, workspaceId, projectName, knownHostsPath 
 	return config, nil
 }
 
-func EnsureSshConfigEntryAdded(profileId, workspaceName, projectName string, gpgForward bool) error {
+func EnsureSshConfigEntryAdded(profileId, workspaceName, projectName string, gpgKey string) error {
 	err := ensureSshFilesLinked()
 	if err != nil {
 		return err
@@ -157,9 +157,14 @@ func EnsureSshConfigEntryAdded(profileId, workspaceName, projectName string, gpg
 		return err
 	}
 
-	if gpgForward {
+	if gpgKey != "" {
 		// Generate SSH config entry with GPG forwarding and override previous config
 		err = appendSshConfigEntry(configPath, profileId, workspaceName, projectName, knownHostsFile, true, existingContent)
+		if err != nil {
+			return err
+		}
+		projectHostname := GetProjectHostname(profileId, workspaceName, projectName)
+		err = ExportGPGKey(gpgKey, projectHostname)
 		if err != nil {
 			return err
 		}
