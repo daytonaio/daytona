@@ -59,9 +59,8 @@ var SshCmd = &cobra.Command{
 			}
 		}
 
-		var selectedProject *apiclient.Project
 		if len(args) == 0 || len(args) == 1 {
-			selectedProject, err = selectWorkspaceProject(workspace.Id, &activeProfile)
+			selectedProject, err := selectWorkspaceProject(workspace.Id, &activeProfile)
 			if err != nil {
 				return err
 			}

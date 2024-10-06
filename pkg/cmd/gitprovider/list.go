@@ -59,6 +59,7 @@ var gitProviderListCmd = &cobra.Command{
 				}
 			}
 		}
+
 		if format.FormatFlag != "" {
 			formattedData := format.NewFormatter(gitProviderViewList)
 			formattedData.Print()
