@@ -171,7 +171,7 @@ var CreateCmd = &cobra.Command{
 			stopLogs()
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
-		var gpgKey string
+		gpgKey := ""
 		gpgKey, _ = GetGitProviderGpgKey(apiClient, ctx, activeProfile, createdWorkspace.Id)
 
 		err = waitForDial(createdWorkspace, &activeProfile, tsConn, gpgKey)
