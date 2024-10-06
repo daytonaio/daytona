@@ -161,7 +161,7 @@ var prebuildAddCmd = &cobra.Command{
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
-
+		views.RenderInfoMessage(fmt.Sprintf("Prebuild %s added successfully", prebuildId))
 		views.RenderInfoMessage("Prebuild added successfully")
 
 		if prebuildAddView.RunBuildOnAdd {

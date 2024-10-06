@@ -4,6 +4,7 @@
 package gitnessclient
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -50,7 +51,7 @@ func (g *GitnessClient) performRequest(method, requestURL string) ([]byte, error
 		return nil, err
 	}
 
-	if res.StatusCode != http.StatusOK {
+	if res.StatusCode >= 400 {
 		return nil, fmt.Errorf("status code: %d err: %s", res.StatusCode, string(body))
 	}
 
@@ -189,13 +190,13 @@ func (g *GitnessClient) GetRepositories(namespace string) ([]Repository, error) 
 	return apiRepos, nil
 }
 
-func (g *GitnessClient) GetRepository(url string) (*Repository, error) {
-	repoRef, err := g.GetRepoRef(url)
+func (g *GitnessClient) GetRepository(repoUrl string) (*Repository, error) {
+	repoRef, err := g.GetRepoRef(repoUrl)
 	if err != nil {
 		return nil, err
 	}
 
-	repoURL, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s", *repoRef))
+	repoURL, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s", url.PathEscape(*repoRef)))
 	if err != nil {
 		return nil, err
 	}
@@ -214,7 +215,7 @@ func (g *GitnessClient) GetRepository(url string) (*Repository, error) {
 }
 
 func (g *GitnessClient) GetRepoBranches(repositoryId string, namespaceId string) ([]*RepoBranch, error) {
-	branchesURL, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/branches", url.PathEscape(namespaceId+"/"+repositoryId)))
+	branchesURL, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/branches", url.PathEscape(fmt.Sprintf("%s/%s", namespaceId, repositoryId))))
 	if err != nil {
 		return nil, err
 	}
@@ -254,12 +255,10 @@ func (g *GitnessClient) GetRepoPRs(repositoryId string, namespaceId string) ([]*
 	return apiPRs, nil
 }
 
-func (g *GitnessClient) GetLastCommitSha(repoURL string, branch *string) (string, error) {
-	ref, err := g.GetRepoRef(repoURL)
-	if err != nil {
-		return "", err
-	}
-	api, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/commits", url.PathEscape(*ref)))
+func (g *GitnessClient) GetLastCommitSha(owner string, repositoryName string, branch *string) (string, error) {
+	fmt.Println("owner ", owner)
+	fmt.Println("repositoryName ", repositoryName)
+	api, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/commits", url.PathEscape(fmt.Sprintf("%s/%s", owner, repositoryName))))
 	if err != nil {
 		return "", fmt.Errorf("failed to parse url : %w", err)
 	}
@@ -286,18 +285,15 @@ func (g *GitnessClient) GetLastCommitSha(repoURL string, branch *string) (string
 	return lastCommit.Sha, nil
 }
 
-func (g *GitnessClient) GetRepoRef(url string) (*string, error) {
-	repoUrl := strings.TrimSuffix(url, ".git")
-	parts := strings.Split(repoUrl, "/")
-	if len(parts) < 5 {
-		return nil, errors.New("failed to parse repository reference: invalid url passed")
+func (g *GitnessClient) GetRepoRef(gitUrl string) (*string, error) {
+	fmt.Println("gitUrl ", gitUrl)
+	repoUrl := strings.TrimSuffix(gitUrl, ".git")
+	parsedRepoUrl, err := url.Parse(repoUrl)
+	if err != nil {
+		return nil, err
 	}
-	var path string
-	if parts[3] == "git" && len(parts) >= 6 {
-		path = fmt.Sprintf("%s/%s", parts[4], parts[5])
-	} else {
-		path = fmt.Sprintf("%s/%s", parts[3], parts[4])
-	}
+	parts := strings.Split(parsedRepoUrl.Path, "/")
+	path := fmt.Sprintf("%s/%s", parts[2], parts[3])
 	return &path, nil
 }
 
@@ -358,22 +354,47 @@ func (g *GitnessClient) CreateWebhook(repoId string, namespaceId string, callbac
 	if parseErr != nil {
 		return nil, parseErr
 	}
-
-	params := url.Values{}
-	params.Add("url", callbackURL)
-	webHookUrl, urlErr := url.Parse(webhookEndpoint.String() + "?" + params.Encode())
-	if urlErr != nil {
-		return nil, urlErr
+	webhookData := map[string]interface{}{
+		"triggers":     []string{"branch_updated"},
+		"url":          callbackURL,
+		"identifier":   "daytona-webhook/" + repoId,
+		"display_name": "Daytona Webhook",
+		"enabled":      true,
 	}
-	webhookEndpoint = webHookUrl
-	responseData, reqErr := g.performRequest("POST", webhookEndpoint.String())
-	if reqErr != nil {
-		return nil, reqErr
+
+	jsonData, err := json.Marshal(webhookData)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequestWithContext(context.Background(), "POST", webhookEndpoint.String(), bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Authorization", "Bearer "+g.token)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	responseData, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf("status code: %d err: %s", resp.StatusCode, string(responseData))
 	}
 
 	var newWebhook Webhook
-	if unmarshalErr := json.Unmarshal(responseData, &newWebhook); unmarshalErr != nil {
-		return nil, unmarshalErr
+	if err := json.Unmarshal(responseData, &newWebhook); err != nil {
+		return nil, err
 	}
 
 	return &newWebhook, nil
