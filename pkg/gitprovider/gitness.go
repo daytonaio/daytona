@@ -95,8 +95,6 @@ func (g *GitnessGitProvider) GetRepositories(namespace string, options ListOptio
 
 func (g *GitnessGitProvider) GetRepoBranches(repositoryId string, namespaceId string, options ListOptions) ([]*GitBranch, error) {
 	client := g.getApiClient()
-	fmt.Println("repositoryId", repositoryId)
-	fmt.Println("namespaceId", namespaceId)
 	response, err := client.GetRepoBranches(repositoryId, namespaceId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Branches: %w", err)
@@ -114,8 +112,6 @@ func (g *GitnessGitProvider) GetRepoBranches(repositoryId string, namespaceId st
 
 func (g *GitnessGitProvider) GetRepoPRs(repositoryId string, namespaceId string, options ListOptions) ([]*GitPullRequest, error) {
 	client := g.getApiClient()
-	fmt.Println("repositoryId", repositoryId)
-	fmt.Println("namespaceId", namespaceId)
 	response, err := client.GetRepoPRs(repositoryId, namespaceId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Pull Request : %w", err)
@@ -256,7 +252,6 @@ func (g *GitnessGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitCo
 		return nil, err
 	}
 	staticContext.Url = gitnessclient.GetCloneUrl(parsedUrl.Scheme, parsedUrl.Host, staticContext.Owner, staticContext.Name)
-	fmt.Println("staticContext.Url ", staticContext.Url)
 	if staticContext.Path == nil {
 		return staticContext, nil
 	}
@@ -341,16 +336,27 @@ func (g *GitnessGitProvider) ParseEventData(request *http.Request) (*GitEventDat
 	if err != nil {
 		return nil, err
 	}
-	var webhookEvent map[string]interface{}
+	var webhookEvent gitnessclient.WebhookEventData
 	err = json.Unmarshal(payload, &webhookEvent)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("webhookEvent", webhookEvent)
-	return &GitEventData{
-		Url:    webhookEvent["url"].(string),
-		Branch: webhookEvent["branch"].(string),
-		Sha:    webhookEvent["sha"].(string),
-		Owner:  webhookEvent["owner"].(string),
-	}, nil
+
+	if webhookEvent.Trigger != "branch_updated" {
+		return nil, nil
+	}
+
+	gitEventData := &GitEventData{
+		Url:    webhookEvent.Repo.GitURL,
+		Branch: webhookEvent.Ref.Name,
+		Sha:    webhookEvent.Sha,
+		Owner:  webhookEvent.Principal.DisplayName,
+	}
+
+	for _, commit := range webhookEvent.Commits {
+		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Modified...)
+		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Added...)
+		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Removed...)
+	}
+	return gitEventData, nil
 }
