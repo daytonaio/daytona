@@ -173,7 +173,7 @@ var CreateCmd = &cobra.Command{
 		}
 		projectHostname := config.GetProjectHostname(activeProfile.Id, createdWorkspace.Id, createdWorkspace.Projects[0].Name)
 		gpgKey := ""
-		gpgKey, _= GetGitProviderGpgKey(apiClient, ctx, activeProfile, createdWorkspace.Id, projectHostname)
+		gpgKey, _ = GetGitProviderGpgKey(apiClient, ctx, activeProfile, createdWorkspace.Id, projectHostname)
 
 		err = waitForDial(createdWorkspace, &activeProfile, tsConn, gpgKey)
 		if err != nil {
