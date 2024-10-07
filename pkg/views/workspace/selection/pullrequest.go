@@ -14,7 +14,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrder int, parentIdentifier string, choiceChan chan<- string, navChan chan<- string, isPaginationDisabled bool) {
+func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrder int, selectionListOptions views.SelectionListOptions, choiceChan chan<- string, navChan chan<- string) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
@@ -28,11 +28,11 @@ func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrd
 		items = append(items, newItem)
 	}
 
-	if !isPaginationDisabled {
+	if !selectionListOptions.IsPaginationDisabled {
 		items = AddLoadMoreOptionToList(items)
 	}
 
-	l := views.GetStyledSelectList(items, parentIdentifier)
+	l := views.GetStyledSelectList(items, selectionListOptions)
 
 	title := "Choose a Pull/Merge Request"
 	if projectOrder > 1 {
@@ -50,7 +50,7 @@ func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrd
 
 	if m, ok := p.(model[string]); ok && m.choice != nil {
 		choice := *m.choice
-		if !isPaginationDisabled && choice == views.ListNavigationText {
+		if !selectionListOptions.IsPaginationDisabled && choice == views.ListNavigationText {
 			navChan <- choice
 		} else {
 			choiceChan <- choice
@@ -60,11 +60,11 @@ func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrd
 	}
 }
 
-func GetPullRequestFromPrompt(pullRequests []apiclient.GitPullRequest, projectOrder int, parentIdentifier string, isPaginationDisabled bool) (*apiclient.GitPullRequest, string) {
+func GetPullRequestFromPrompt(pullRequests []apiclient.GitPullRequest, projectOrder int, selectionListOptions views.SelectionListOptions) (*apiclient.GitPullRequest, string) {
 	choiceChan := make(chan string)
 	navChan := make(chan string)
 
-	go selectPullRequestPrompt(pullRequests, projectOrder, parentIdentifier, choiceChan, navChan, isPaginationDisabled)
+	go selectPullRequestPrompt(pullRequests, projectOrder, selectionListOptions, choiceChan, navChan)
 
 	select {
 	case pullRequestName := <-choiceChan:

@@ -113,6 +113,9 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 	perPage := int32(100)
 	disablePagination := false
 	curPageItemsNum := 0
+	selectionListCursorIdx := 0
+	var selectionListOptions views.SelectionListOptions
+
 	var namespaceList []apiclient.GitNamespace
 	namespace := ""
 
@@ -145,7 +148,14 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 			disablePagination = int32(curPageItemsNum) < perPage
 		}
 
-		namespaceId, navigate = selection.GetNamespaceIdFromPrompt(namespaceList, config.ProjectOrder, providerId, disablePagination)
+		selectionListCursorIdx = (int)(page-1) * int(perPage)
+		selectionListOptions = views.SelectionListOptions{
+			ParentIdentifier:     providerId,
+			IsPaginationDisabled: disablePagination,
+			CursorIndex:          selectionListCursorIdx,
+		}
+
+		namespaceId, navigate = selection.GetNamespaceIdFromPrompt(namespaceList, config.ProjectOrder, selectionListOptions)
 
 		if !disablePagination && navigate != "" {
 			if navigate == views.ListNavigationText {
@@ -202,8 +212,15 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 			disablePagination = int32(curPageItemsNum) < perPage
 		}
 
+		selectionListCursorIdx = (int)(page-1) * int(perPage)
+		selectionListOptions = views.SelectionListOptions{
+			ParentIdentifier:     parentIdentifier,
+			IsPaginationDisabled: disablePagination,
+			CursorIndex:          selectionListCursorIdx,
+		}
+
 		// User will either choose a repo or navigate the pages
-		chosenRepo, navigate = selection.GetRepositoryFromPrompt(providerRepos, config.ProjectOrder, config.SelectedRepos, parentIdentifier, disablePagination)
+		chosenRepo, navigate = selection.GetRepositoryFromPrompt(providerRepos, config.ProjectOrder, config.SelectedRepos, selectionListOptions)
 		if !disablePagination && navigate != "" {
 			if navigate == views.ListNavigationText {
 				page++

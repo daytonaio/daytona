@@ -14,7 +14,7 @@ func AddNavigationOptionsToList(items []list.Item, totalItems int, curPage, perP
 	if curPage > 1 {
 		items = append([]list.Item{item[string]{
 			id:             "prev",
-			title:          views.NavigationStyle.Render("Previous Page"),
+			title:          "Previous Page",
 			choiceProperty: "prev",
 			desc:           "Go to the previous page",
 		}}, items...)
@@ -23,7 +23,7 @@ func AddNavigationOptionsToList(items []list.Item, totalItems int, curPage, perP
 	if totalItems == int(perPage) {
 		items = append(items, item[string]{
 			id:             "next",
-			title:          views.NavigationStyle.Render("Next Page"),
+			title:          "Next Page",
 			choiceProperty: "next",
 			desc:           "Go to the next page",
 		})
@@ -37,7 +37,7 @@ func AddNavigationOptionsToList(items []list.Item, totalItems int, curPage, perP
 func AddLoadMoreOptionToList(items []list.Item) []list.Item {
 	items = append(items, item[string]{
 		id:             views.ListNavigationText,
-		title:          views.NavigationStyle.Render(views.ListNavigationRenderText),
+		title:          views.ListNavigationRenderText,
 		choiceProperty: views.ListNavigationText,
 		desc:           "Loads next set of remaining items",
 	})

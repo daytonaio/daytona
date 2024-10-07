@@ -13,7 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
-func selectNamespacePrompt(namespaces []apiclient.GitNamespace, projectOrder int, parentIdentifier string, choiceChan chan<- string, navChan chan<- string, isPaginationDisabled bool) {
+func selectNamespacePrompt(namespaces []apiclient.GitNamespace, projectOrder int, selectionListOptions views.SelectionListOptions, choiceChan chan<- string, navChan chan<- string) {
 	items := []list.Item{}
 	var desc string
 
@@ -28,11 +28,11 @@ func selectNamespacePrompt(namespaces []apiclient.GitNamespace, projectOrder int
 		items = append(items, newItem)
 	}
 
-	if !isPaginationDisabled {
+	if !selectionListOptions.IsPaginationDisabled {
 		items = AddLoadMoreOptionToList(items)
 	}
 
-	l := views.GetStyledSelectList(items, parentIdentifier)
+	l := views.GetStyledSelectList(items, selectionListOptions)
 
 	title := "Choose a Namespace"
 	if projectOrder > 1 {
@@ -51,7 +51,7 @@ func selectNamespacePrompt(namespaces []apiclient.GitNamespace, projectOrder int
 	// Return either the choice or navigation
 	if m, ok := p.(model[string]); ok && m.choice != nil {
 		choice := *m.choice
-		if !isPaginationDisabled && choice == views.ListNavigationText {
+		if !selectionListOptions.IsPaginationDisabled && choice == views.ListNavigationText {
 			navChan <- choice
 		} else {
 			choiceChan <- choice
@@ -61,11 +61,11 @@ func selectNamespacePrompt(namespaces []apiclient.GitNamespace, projectOrder int
 	}
 }
 
-func GetNamespaceIdFromPrompt(namespaces []apiclient.GitNamespace, projectOrder int, parentIdentifier string, isPaginationDisabled bool) (string, string) {
+func GetNamespaceIdFromPrompt(namespaces []apiclient.GitNamespace, projectOrder int, selectionListOptions views.SelectionListOptions) (string, string) {
 	choiceChan := make(chan string)
 	navChan := make(chan string)
 
-	go selectNamespacePrompt(namespaces, projectOrder, parentIdentifier, choiceChan, navChan, isPaginationDisabled)
+	go selectNamespacePrompt(namespaces, projectOrder, selectionListOptions, choiceChan, navChan)
 
 	select {
 	case choice := <-choiceChan:

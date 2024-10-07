@@ -31,6 +31,8 @@ func runGetBranchFromPromptWithPagination(ctx context.Context, config BranchWiza
 	var branchList []apiclient.GitBranch
 	disablePagination := false
 	curPageItemsNum := 0
+	selectionListCursorIdx := 0
+	var selectionListOptions views.SelectionListOptions
 	var err error
 
 	for {
@@ -57,8 +59,15 @@ func runGetBranchFromPromptWithPagination(ctx context.Context, config BranchWiza
 			disablePagination = int32(curPageItemsNum) < perPage
 		}
 
+		selectionListCursorIdx = (int)(page-1) * int(perPage)
+		selectionListOptions = views.SelectionListOptions{
+			ParentIdentifier:     parentIdentifier,
+			IsPaginationDisabled: disablePagination,
+			CursorIndex:          selectionListCursorIdx,
+		}
+
 		// User will either choose a branch or navigate the pages
-		branch, navigate := selection.GetBranchFromPrompt(branchList, config.ProjectOrder, parentIdentifier, disablePagination)
+		branch, navigate := selection.GetBranchFromPrompt(branchList, config.ProjectOrder, selectionListOptions)
 		if !disablePagination && navigate != "" {
 			if navigate == views.ListNavigationText {
 				page++
@@ -168,6 +177,8 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 		perPage = 100
 		disablePagination := false
 		curPageItemsNum := 0
+		selectionListCursorIdx := 0
+		var selectionListOptions views.SelectionListOptions
 
 		for {
 			err = views_util.WithSpinner("Loading Pull Requests", func() error {
@@ -193,8 +204,15 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 				disablePagination = int32(curPageItemsNum) < perPage
 			}
 
+			selectionListCursorIdx = (int)(page-1) * int(perPage)
+			selectionListOptions = views.SelectionListOptions{
+				ParentIdentifier:     parentIdentifier,
+				IsPaginationDisabled: disablePagination,
+				CursorIndex:          selectionListCursorIdx,
+			}
+
 			// User will either choose a PR or navigate the pages
-			chosenPullRequest, navigate := selection.GetPullRequestFromPrompt(prList, config.ProjectOrder, parentIdentifier, disablePagination)
+			chosenPullRequest, navigate := selection.GetPullRequestFromPrompt(prList, config.ProjectOrder, selectionListOptions)
 			if !disablePagination && navigate != "" {
 				if navigate == views.ListNavigationText {
 					page++

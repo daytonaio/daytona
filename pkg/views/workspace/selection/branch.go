@@ -14,7 +14,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectBranchPrompt(branches []apiclient.GitBranch, projectOrder int, parentIdentifier string, choiceChan chan<- string, navChan chan<- string, isPaginationDisabled bool) {
+func selectBranchPrompt(branches []apiclient.GitBranch, projectOrder int, selectionListOptions views.SelectionListOptions, choiceChan chan<- string, navChan chan<- string) {
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
@@ -26,11 +26,11 @@ func selectBranchPrompt(branches []apiclient.GitBranch, projectOrder int, parent
 		items = append(items, newItem)
 	}
 
-	if !isPaginationDisabled {
+	if !selectionListOptions.IsPaginationDisabled {
 		items = AddLoadMoreOptionToList(items)
 	}
 
-	l := views.GetStyledSelectList(items, parentIdentifier)
+	l := views.GetStyledSelectList(items, selectionListOptions)
 
 	title := "Choose a Branch"
 	if projectOrder > 1 {
@@ -49,7 +49,7 @@ func selectBranchPrompt(branches []apiclient.GitBranch, projectOrder int, parent
 	// Return either the choice or navigation
 	if m, ok := p.(model[string]); ok && m.choice != nil {
 		choice := *m.choice
-		if !isPaginationDisabled && choice == views.ListNavigationText {
+		if !selectionListOptions.IsPaginationDisabled && choice == views.ListNavigationText {
 			navChan <- choice
 		} else {
 			choiceChan <- choice
@@ -59,11 +59,11 @@ func selectBranchPrompt(branches []apiclient.GitBranch, projectOrder int, parent
 	}
 }
 
-func GetBranchFromPrompt(branches []apiclient.GitBranch, projectOrder int, parentIdentifier string, isPaginationDisabled bool) (*apiclient.GitBranch, string) {
+func GetBranchFromPrompt(branches []apiclient.GitBranch, projectOrder int, selectionListOptions views.SelectionListOptions) (*apiclient.GitBranch, string) {
 	choiceChan := make(chan string)
 	navChan := make(chan string)
 
-	go selectBranchPrompt(branches, projectOrder, parentIdentifier, choiceChan, navChan, isPaginationDisabled)
+	go selectBranchPrompt(branches, projectOrder, selectionListOptions, choiceChan, navChan)
 
 	select {
 	case branchName := <-choiceChan:
