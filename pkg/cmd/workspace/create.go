@@ -171,8 +171,9 @@ var CreateCmd = &cobra.Command{
 			stopLogs()
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
+		projectHostname := config.GetProjectHostname(activeProfile.Id, createdWorkspace.Id, createdWorkspace.Projects[0].Name)
 		gpgKey := ""
-		gpgKey, _ = GetGitProviderGpgKey(apiClient, ctx, activeProfile, createdWorkspace.Id)
+		gpgKey, err = GetGitProviderGpgKey(apiClient, ctx, activeProfile, createdWorkspace.Id, projectHostname)
 
 		err = waitForDial(createdWorkspace, &activeProfile, tsConn, gpgKey)
 		if err != nil {
@@ -510,7 +511,7 @@ func dedupProjectNames(projects *[]apiclient.CreateProjectDTO) {
 	}
 }
 
-func GetGitProviderGpgKey(apiClient *apiclient.APIClient, ctx context.Context, activeProfile config.Profile, workspaceId string) (string, error) {
+func GetGitProviderGpgKey(apiClient *apiclient.APIClient, ctx context.Context, activeProfile config.Profile, workspaceId string, projectHostname string) (string, error) {
 	var providerConfig *gitprovider.GitProviderConfig
 	var gpgKey string
 
@@ -521,21 +522,6 @@ func GetGitProviderGpgKey(apiClient *apiclient.APIClient, ctx context.Context, a
 	}
 	// Ensure SSH config entry is added
 	err = config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, workspace.Projects[0].Name, "")
-	if err != nil {
-		return "", err
-	}
-
-	// Retrieve project hostname
-	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, workspace.Projects[0].Name)
-
-	// Get SSH config variables
-	apiURL, apiKey, clientID, err := config.GetSSHConfigVars(projectHostname)
-	if err != nil {
-		return "", err
-	}
-
-	// Get API client
-	apiClient, err = apiclient_util.GetAgentApiClient(apiURL, apiKey, clientID, false)
 	if err != nil {
 		return "", err
 	}

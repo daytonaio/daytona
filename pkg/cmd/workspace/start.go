@@ -108,8 +108,14 @@ var StartCmd = &cobra.Command{
 			return err
 		}
 
+		wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceIdOrName).Execute()
+		if err != nil {
+			return apiclient_util.HandleErrorResponse(res, err)
+		}
+
+		projectHostname := config.GetProjectHostname(activeProfile.Id, wsInfo.Id, wsInfo.Projects[0].Name)
 		gpgKey := ""
-		gpgKey, _ = GetGitProviderGpgKey(apiClient, ctx, activeProfile, workspaceIdOrName)
+		gpgKey, _ = GetGitProviderGpgKey(apiClient, ctx, activeProfile, wsInfo.Id, projectHostname)
 
 		if startProjectFlag == "" {
 			views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' started successfully", workspaceIdOrName))

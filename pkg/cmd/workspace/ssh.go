@@ -89,8 +89,9 @@ var SshCmd = &cobra.Command{
 			sshArgs = append(sshArgs, args[2:]...)
 		}
 
+		projectHostname := config.GetProjectHostname(activeProfile.Id, workspace.Id, workspace.Projects[0].Name)
 		gpgKey := ""
-		gpgKey, _ = GetGitProviderGpgKey(apiClient, ctx, activeProfile, workspace.Id)
+		gpgKey, _ = GetGitProviderGpgKey(apiClient, ctx, activeProfile, workspace.Id, projectHostname)
 
 		return ide.OpenTerminalSsh(activeProfile, workspace.Id, projectName, gpgKey, sshArgs...)
 	},

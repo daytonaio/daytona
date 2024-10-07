@@ -223,29 +223,6 @@ func getRemoteGPGSocket(projectHostname string) (string, error) {
 	return strings.TrimSpace(string(output)), nil
 }
 
-func GetSSHConfigVars(projectHostName string) (string, string, string, error) {
-	// Fetch API URL
-	apiURL, err := exec.Command("ssh", projectHostName, "echo $DAYTONA_SERVER_API_URL").Output()
-	if err != nil {
-		return "", "", "", fmt.Errorf("failed to get API URL: %w", err)
-	}
-
-	// Fetch API Key
-	apiKey, err := exec.Command("ssh", projectHostName, "echo $DAYTONA_SERVER_API_KEY").Output()
-	if err != nil {
-		return "", "", "", fmt.Errorf("failed to get API Key: %w", err)
-	}
-
-	// Fetch Client ID
-	clientID, err := exec.Command("ssh", projectHostName, "echo $DAYTONA_CLIENT_ID").Output()
-	if err != nil {
-		return "", "", "", fmt.Errorf("failed to get Client ID: %w", err)
-	}
-
-	// Return the environment variables, trimming the newline characters
-	return strings.TrimSpace(string(apiURL)), strings.TrimSpace(string(apiKey)), strings.TrimSpace(string(clientID)), nil
-}
-
 func ExportGPGKey(keyID, projectHostname string) error {
 	exportCmd := exec.Command("gpg", "--export", keyID)
 	var output bytes.Buffer

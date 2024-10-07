@@ -57,7 +57,7 @@ func ListGitProviders(ctx *gin.Context) {
 //	@Router			/gitprovider/for-url/{url} [get]
 //
 //	@id				GetGitProviderForUrl
-func GetGitProviderForUrl(ctx *gin.Context) {
+func GetGitProviderForUrl(ctx *gin.Context, maskToken bool) {
 	urlParam := ctx.Param("url")
 
 	decodedUrl, err := url.QueryUnescape(urlParam)
@@ -72,6 +72,10 @@ func GetGitProviderForUrl(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %w", err))
 		return
+	}
+
+	if maskToken {
+		gitProvider.Token = ""
 	}
 
 	ctx.JSON(200, gitProvider)

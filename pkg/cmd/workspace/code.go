@@ -115,8 +115,9 @@ var CodeCmd = &cobra.Command{
 				return err
 			}
 		}
+		projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, workspace.Projects[0].Name)
 		gpgKey := ""
-		gpgKey, _ = GetGitProviderGpgKey(apiClient, ctx, activeProfile, workspace.Id)
+		gpgKey, _ = GetGitProviderGpgKey(apiClient, ctx, activeProfile, workspace.Id, projectHostname)
 
 		yesFlag, _ := cmd.Flags().GetBool("yes")
 		ideList := config.GetIdeList()
