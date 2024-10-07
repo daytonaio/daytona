@@ -256,8 +256,6 @@ func (g *GitnessClient) GetRepoPRs(repositoryId string, namespaceId string) ([]*
 }
 
 func (g *GitnessClient) GetLastCommitSha(owner string, repositoryName string, branch *string) (string, error) {
-	fmt.Println("owner ", owner)
-	fmt.Println("repositoryName ", repositoryName)
 	api, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/commits", url.PathEscape(fmt.Sprintf("%s/%s", owner, repositoryName))))
 	if err != nil {
 		return "", fmt.Errorf("failed to parse url : %w", err)
@@ -286,7 +284,6 @@ func (g *GitnessClient) GetLastCommitSha(owner string, repositoryName string, br
 }
 
 func (g *GitnessClient) GetRepoRef(gitUrl string) (*string, error) {
-	fmt.Println("gitUrl ", gitUrl)
 	repoUrl := strings.TrimSuffix(gitUrl, ".git")
 	parsedRepoUrl, err := url.Parse(repoUrl)
 	if err != nil {
@@ -357,7 +354,7 @@ func (g *GitnessClient) CreateWebhook(repoId string, namespaceId string, callbac
 	webhookData := map[string]interface{}{
 		"triggers":     []string{"branch_updated"},
 		"url":          callbackURL,
-		"identifier":   "daytona-webhook/" + repoId,
+		"identifier":   "daytona-webhook_" + repoId,
 		"display_name": "Daytona Webhook",
 		"enabled":      true,
 	}

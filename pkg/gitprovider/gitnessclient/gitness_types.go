@@ -205,3 +205,108 @@ type Webhook struct {
 	HasSecret   bool     `json:"has_secret"`
 	Uid         string   `json:"uid"`
 }
+
+type WebhookEventData struct {
+	Commit struct {
+		Added  []string `json:"added"`
+		Author struct {
+			Identity struct {
+				Email string `json:"email"`
+				Name  string `json:"name"`
+			} `json:"identity"`
+			When time.Time `json:"when"`
+		} `json:"author"`
+		Committer struct {
+			Identity struct {
+				Email string `json:"email"`
+				Name  string `json:"name"`
+			} `json:"identity"`
+			When time.Time `json:"when"`
+		} `json:"committer"`
+		Message  string   `json:"message"`
+		Modified []string `json:"modified"`
+		Removed  []string `json:"removed"`
+		Sha      string   `json:"sha"`
+	} `json:"commit"`
+	Commits []struct {
+		Added  []string `json:"added"`
+		Author struct {
+			Identity struct {
+				Email string `json:"email"`
+				Name  string `json:"name"`
+			} `json:"identity"`
+			When time.Time `json:"when"`
+		} `json:"author"`
+		Committer struct {
+			Identity struct {
+				Email string `json:"email"`
+				Name  string `json:"name"`
+			} `json:"identity"`
+			When time.Time `json:"when"`
+		} `json:"committer"`
+		Message  string   `json:"message"`
+		Modified []string `json:"modified"`
+		Removed  []string `json:"removed"`
+		Sha      string   `json:"sha"`
+	} `json:"commits"`
+	Forced     bool `json:"forced"`
+	HeadCommit struct {
+		Added  []string `json:"added"`
+		Author struct {
+			Identity struct {
+				Email string `json:"email"`
+				Name  string `json:"name"`
+			} `json:"identity"`
+			When time.Time `json:"when"`
+		} `json:"author"`
+		Committer struct {
+			Identity struct {
+				Email string `json:"email"`
+				Name  string `json:"name"`
+			} `json:"identity"`
+			When time.Time `json:"when"`
+		} `json:"committer"`
+		Message  string   `json:"message"`
+		Modified []string `json:"modified"`
+		Removed  []string `json:"removed"`
+		Sha      string   `json:"sha"`
+	} `json:"head_commit"`
+	OldSha    string `json:"old_sha"`
+	Principal struct {
+		Created     int64  `json:"created"`
+		DisplayName string `json:"display_name"`
+		Email       string `json:"email"`
+		ID          int    `json:"id"`
+		Type        string `json:"type"`
+		UID         string `json:"uid"`
+		Updated     int64  `json:"updated"`
+	} `json:"principal"`
+	Ref struct {
+		Name string `json:"name"`
+		Repo struct {
+			DefaultBranch string `json:"default_branch"`
+			Description   string `json:"description"`
+			GitSSHURL     string `json:"git_ssh_url"`
+			GitURL        string `json:"git_url"`
+			ID            int    `json:"id"`
+			Identifier    string `json:"identifier"`
+			Path          string `json:"path"`
+			UID           string `json:"uid"`
+			URL           string `json:"url"`
+		} `json:"repo"`
+	} `json:"ref"`
+	Repo struct {
+		DefaultBranch string `json:"default_branch"`
+		Description   string `json:"description"`
+		GitSSHURL     string `json:"git_ssh_url"`
+		GitURL        string `json:"git_url"`
+		ID            int    `json:"id"`
+		Identifier    string `json:"identifier"`
+		Path          string `json:"path"`
+		UID           string `json:"uid"`
+		URL           string `json:"url"`
+	} `json:"repo"`
+	Sha               string `json:"sha"`
+	TotalCommitsCount int    `json:"total_commits_count"`
+	Trigger           string `json:"trigger"`
+}
