@@ -7,6 +7,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
@@ -29,7 +30,19 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		if !server.ApiKeyService.IsValidApiKey(token) {
 			ctx.AbortWithError(401, errors.New("unauthorized"))
+			return
 		}
+
+		// Determine the API key type and set it in the context
+		apiKeyType := apikey.ApiKeyTypeClient
+		if server.ApiKeyService.IsProjectApiKey(token) {
+			apiKeyType = apikey.ApiKeyTypeProject
+		} else if server.ApiKeyService.IsWorkspaceApiKey(token) {
+			apiKeyType = apikey.ApiKeyTypeWorkspace
+		}
+
+		// Set the determined apiKeyType in the context
+		ctx.Set("apiKeyType", apiKeyType)
 
 		ctx.Next()
 	}

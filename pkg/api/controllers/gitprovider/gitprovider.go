@@ -12,6 +12,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/api/controllers"
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider/dto"
+	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
@@ -57,7 +58,7 @@ func ListGitProviders(ctx *gin.Context) {
 //	@Router			/gitprovider/for-url/{url} [get]
 //
 //	@id				GetGitProviderForUrl
-func GetGitProviderForUrl(ctx *gin.Context, maskToken bool) {
+func GetGitProviderForUrl(ctx *gin.Context) {
 	urlParam := ctx.Param("url")
 
 	decodedUrl, err := url.QueryUnescape(urlParam)
@@ -74,7 +75,8 @@ func GetGitProviderForUrl(ctx *gin.Context, maskToken bool) {
 		return
 	}
 
-	if maskToken {
+	apiKeyType, ok := ctx.Get("apiKeyType")
+	if !ok || apiKeyType == apikey.ApiKeyTypeClient {
 		gitProvider.Token = ""
 	}
 
