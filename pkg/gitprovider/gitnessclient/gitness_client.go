@@ -347,20 +347,13 @@ func (g *GitnessClient) GetDefaultBranch(url string) (*string, error) {
 	return &repo.DefaultBranch, nil
 }
 
-func (g *GitnessClient) CreateWebhook(repoId string, namespaceId string, callbackURL string) (*Webhook, error) {
+func (g *GitnessClient) CreateWebhook(repoId string, namespaceId string, webHookData Webhook) (*Webhook, error) {
 	webhookEndpoint, parseErr := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/webhooks", url.PathEscape(namespaceId+"/"+repoId)))
 	if parseErr != nil {
 		return nil, parseErr
 	}
-	webhookData := map[string]interface{}{
-		"triggers":     []string{"branch_updated"},
-		"url":          callbackURL,
-		"identifier":   "daytona-webhook_" + repoId,
-		"display_name": "Daytona Webhook",
-		"enabled":      true,
-	}
 
-	jsonData, err := json.Marshal(webhookData)
+	jsonData, err := json.Marshal(webHookData)
 	if err != nil {
 		return nil, err
 	}
