@@ -140,6 +140,11 @@ func generateSshConfigEntry(profileId, workspaceId, projectName, knownHostsPath 
 		config += fmt.Sprintf(
 			tab+"StreamLocalBindUnlink yes\n"+
 				tab+"RemoteForward %s:%s\n\n", remoteSocket, localSocket)
+		err = RemoveWorkspaceSshEntries(profileId, workspaceId, projectName)
+		if err != nil {
+			log.Warn(err)
+			return config, nil
+		}
 	} else {
 		config += "\n"
 	}
@@ -199,8 +204,9 @@ func appendSshConfigEntry(configPath, profileId, workspaceId, projectName, known
 		return err
 	}
 
-	// Remove previous entries for the project hostname if they exist
-	RemoveWorkspaceSshEntries(profileId, workspaceId, projectName)
+	if strings.Contains(string(existingContent), data) {
+		return nil
+	}
 
 	// Combine the new data with existing content
 	newData := data + string(existingContent)
@@ -266,14 +272,15 @@ func RemoveWorkspaceSshEntries(profileId, workspaceId, projectName string) error
 	}
 	// Regex to match the SSH configuration entries
 	var regex *regexp.Regexp
+	var newContent string
 	// Update the regex to make projectName optional
 	if projectName != "" {
-		regex = regexp.MustCompile(fmt.Sprintf(`Host %s-%s-%s\n(?:\t.*\n?)*`, profileId, workspaceId, projectName))
+		regex = regexp.MustCompile(fmt.Sprintf(`Host %s-%s-%s-\n(?:\t.*\n?)*`, profileId, workspaceId, projectName))
+		newContent = regex.ReplaceAllString(string(existingContent), "")
 	} else {
 		regex = regexp.MustCompile(fmt.Sprintf(`Host %s-%s-\w+\n(?:\t.*\n?)*`, profileId, workspaceId))
+		newContent = regex.ReplaceAllString(string(existingContent), "")
 	}
-
-	newContent := regex.ReplaceAllString(string(existingContent), "")
 
 	newContent = strings.Trim(newContent, "\n")
 
