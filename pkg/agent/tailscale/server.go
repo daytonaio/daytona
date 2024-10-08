@@ -10,8 +10,10 @@ import (
 	"net"
 	"net/http"
 	"net/netip"
+	"path/filepath"
 	"time"
 
+	cfg "github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/apiclient"
@@ -98,10 +100,16 @@ func (s *Server) getNetworkKey() (string, error) {
 }
 
 func (s *Server) getTsnetServer() (*tsnet.Server, error) {
+	configDir, err := cfg.GetConfigDir()
+	if err != nil {
+		return nil, err
+	}
+
 	tsnetServer := &tsnet.Server{
 		Hostname:   s.Hostname,
 		ControlURL: s.Server.Url,
 		Ephemeral:  true,
+		Dir:        filepath.Join(configDir, "tsnet"),
 	}
 
 	networkKey, err := s.getNetworkKey()
