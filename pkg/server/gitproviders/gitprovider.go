@@ -11,21 +11,14 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/google/uuid"
+	"github.com/docker/docker/pkg/stringid"
 )
-
-type GitProviderWithId struct {
-	GitProvider gitprovider.GitProvider
-	Id          string
-}
 
 func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.GitProvider, string, error) {
 	gitProviders, err := s.configStore.List()
 	if err != nil {
 		return nil, "", err
 	}
-
-	var selectedProvider []GitProviderWithId
 
 	for _, p := range gitProviders {
 		gitProvider, err := s.GetGitProvider(p.Id)
@@ -39,22 +32,9 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 				Url: repoUrl,
 			})
 			if err == nil {
-				userName := strings.ToLower(p.Username)
-				repo := strings.ToLower(repoUrl)
-				if strings.Contains(repo, userName) {
-					return gitProvider, p.Id, nil
-				} else {
-					selectedProvider = append(selectedProvider, GitProviderWithId{
-						GitProvider: gitProvider,
-						Id:          p.Id,
-					})
-				}
+				return gitProvider, p.Id, nil
 			}
 		}
-	}
-
-	if len(selectedProvider) > 0 {
-		return selectedProvider[0].GitProvider, selectedProvider[0].Id, nil
 	}
 
 	u, err := url.Parse(repoUrl)
@@ -146,7 +126,9 @@ func (s *GitProviderService) SetGitProviderConfig(providerConfig *gitprovider.Gi
 	}
 	providerConfig.Username = userData.Username
 	if providerConfig.Id == "" {
-		providerConfig.Id = uuid.NewString()
+		id := stringid.GenerateRandomID()
+		id = stringid.TruncateID(id)
+		providerConfig.Id = id
 	}
 
 	if providerConfig.Alias == "" {

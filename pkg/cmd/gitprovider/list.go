@@ -45,7 +45,7 @@ var gitProviderListCmd = &cobra.Command{
 				if gitProvider.ProviderId == supportedProvider.Id {
 					gitProviderViewList = append(gitProviderViewList,
 						gitprovider_view.GitProviderView{
-							Id:       gitProvider.ProviderId,
+							Id:       gitProvider.Id,
 							Name:     supportedProvider.Name,
 							Username: gitProvider.Username,
 							Alias:    gitProvider.Alias,
