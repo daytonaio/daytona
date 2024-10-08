@@ -4,22 +4,25 @@
 package provisioner
 
 import (
+	"context"
+
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 )
 
 type IProvisioner interface {
-	CreateProject(project *workspace.Project, target *provider.ProviderTarget, cr *containerregistry.ContainerRegistry, gc *gitprovider.GitProviderConfig) error
+	CreateProject(project *project.Project, target *provider.ProviderTarget, cr *containerregistry.ContainerRegistry, gc *gitprovider.GitProviderConfig) error
 	CreateWorkspace(workspace *workspace.Workspace, target *provider.ProviderTarget) error
-	DestroyProject(project *workspace.Project, target *provider.ProviderTarget) error
+	DestroyProject(project *project.Project, target *provider.ProviderTarget) error
 	DestroyWorkspace(workspace *workspace.Workspace, target *provider.ProviderTarget) error
-	GetWorkspaceInfo(workspace *workspace.Workspace, target *provider.ProviderTarget) (*workspace.WorkspaceInfo, error)
-	StartProject(project *workspace.Project, target *provider.ProviderTarget) error
+	GetWorkspaceInfo(ctx context.Context, workspace *workspace.Workspace, target *provider.ProviderTarget) (*workspace.WorkspaceInfo, error)
+	StartProject(project *project.Project, target *provider.ProviderTarget) error
 	StartWorkspace(workspace *workspace.Workspace, target *provider.ProviderTarget) error
-	StopProject(project *workspace.Project, target *provider.ProviderTarget) error
+	StopProject(project *project.Project, target *provider.ProviderTarget) error
 	StopWorkspace(workspace *workspace.Workspace, target *provider.ProviderTarget) error
 }
 

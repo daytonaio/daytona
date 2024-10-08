@@ -4,6 +4,7 @@
 package apiclient
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -12,14 +13,21 @@ import (
 	"github.com/daytonaio/daytona/pkg/logs"
 	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
 	"github.com/gorilla/websocket"
+	log "github.com/sirupsen/logrus"
 )
 
 var workspaceLogsStarted bool
 
-func ReadWorkspaceLogs(activeProfile config.Profile, workspaceId string, projectNames []string, stopLogs *bool) {
+func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, workspaceId string, projectNames []string, follow, showWorkspaceLogs bool) {
 	var wg sync.WaitGroup
-	query := "follow=true&retry=true"
+	query := ""
+	if follow {
+		query = "follow=true"
+	}
 
+	if !showWorkspaceLogs {
+		workspaceLogsStarted = true
+	}
 	logs_view.CalculateLongestPrefixLength(projectNames)
 
 	for index, projectName := range projectNames {
@@ -34,60 +42,102 @@ func ReadWorkspaceLogs(activeProfile config.Profile, workspaceId string, project
 					continue
 				}
 
-				ws, _, err := GetWebsocketConn(fmt.Sprintf("/log/workspace/%s/%s", workspaceId, projectName), &activeProfile, &query)
+				ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/workspace/%s/%s", workspaceId, projectName), &activeProfile, &query)
 				// We want to retry getting the logs if it fails
 				if err != nil {
-					// TODO: return log.Trace once https://github.com/daytonaio/daytona/issues/696 is resolved
-					// log.Trace(apiclient_util.HandleErrorResponse(res, err))
+					log.Trace(HandleErrorResponse(res, err))
 					time.Sleep(500 * time.Millisecond)
 					continue
 				}
 
-				readJSONLog(ws, stopLogs, index)
+				readJSONLog(ctx, ws, index)
 				ws.Close()
 				break
 			}
 		}(projectName)
 	}
 
-	for {
-		ws, _, err := GetWebsocketConn(fmt.Sprintf("/log/workspace/%s", workspaceId), &activeProfile, &query)
-		// We want to retry getting the logs if it fails
-		if err != nil {
-			// TODO: return log.Trace once https://github.com/daytonaio/daytona/issues/696 is resolved
-			// log.Trace(apiclient_util.HandleErrorResponse(res, err))
-			time.Sleep(250 * time.Millisecond)
-			continue
-		}
+	if showWorkspaceLogs {
+		for {
+			ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/workspace/%s", workspaceId), &activeProfile, &query)
+			// We want to retry getting the logs if it fails
+			if err != nil {
+				log.Trace(HandleErrorResponse(res, err))
+				time.Sleep(250 * time.Millisecond)
+				continue
+			}
 
-		readJSONLog(ws, stopLogs, logs_view.WORKSPACE_INDEX)
-		ws.Close()
-		break
+			readJSONLog(ctx, ws, logs_view.STATIC_INDEX)
+			ws.Close()
+			break
+		}
 	}
 
 	wg.Wait()
 }
 
-func readJSONLog(ws *websocket.Conn, stopLogs *bool, index int) {
-	logEntriesChan := make(chan logs.LogEntry)
-	go logs_view.DisplayLogs(logEntriesChan, index)
+func ReadBuildLogs(ctx context.Context, activeProfile config.Profile, buildId string, query string) {
+	logs_view.CalculateLongestPrefixLength([]string{buildId})
 
 	for {
-		var logEntry logs.LogEntry
-		err := ws.ReadJSON(&logEntry)
+		ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/build/%s", buildId), &activeProfile, &query)
+		// We want to retry getting the logs if it fails
 		if err != nil {
-			fmt.Println(err.Error())
-			return
+			log.Trace(HandleErrorResponse(res, err))
+			time.Sleep(250 * time.Millisecond)
+			continue
 		}
 
-		logEntriesChan <- logEntry
+		readJSONLog(ctx, ws, logs_view.FIRST_PROJECT_INDEX)
+		ws.Close()
+		break
+	}
+}
 
-		if !workspaceLogsStarted && index == logs_view.WORKSPACE_INDEX {
+func readJSONLog(ctx context.Context, ws *websocket.Conn, index int) {
+	logEntriesChan := make(chan logs.LogEntry)
+	readErr := make(chan error)
+	go func() {
+		for {
+			var logEntry logs.LogEntry
+
+			err := ws.ReadJSON(&logEntry)
+
+			// An empty entry will be sent from the server on close/EOF
+			// We don't want to print that
+			if logEntry != (logs.LogEntry{}) {
+				logEntriesChan <- logEntry
+			}
+
+			if err != nil {
+				if websocket.IsUnexpectedCloseError(err, websocket.CloseNormalClosure) {
+					log.Error(err)
+				}
+				readErr <- err
+				return
+			}
+		}
+	}()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case logEntry := <-logEntriesChan:
+			logs_view.DisplayLogEntry(logEntry, index)
+		case err := <-readErr:
+			if err != nil {
+				err := ws.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""), time.Now().Add(time.Second))
+				if err != nil {
+					log.Trace(err)
+				}
+				ws.Close()
+				return
+			}
+		}
+
+		if !workspaceLogsStarted && index == logs_view.STATIC_INDEX {
 			workspaceLogsStarted = true
-		}
-
-		if *stopLogs {
-			return
 		}
 	}
 }

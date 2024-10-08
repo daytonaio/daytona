@@ -7,9 +7,8 @@ import (
 	"context"
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/server/apikey"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -17,24 +16,30 @@ var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List API keys",
 	Aliases: []string{"ls"},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
 		apiClient, err := apiclient.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
-		apiKeyList, _, err := apiClient.ApiKeyAPI.ListClientApiKeys(ctx).Execute()
+		apiKeyList, res, err := apiClient.ApiKeyAPI.ListClientApiKeys(ctx).Execute()
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(nil, err))
+			return apiclient.HandleErrorResponse(res, err)
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = apiKeyList
-			return
+		if format.FormatFlag != "" {
+			formattedData := format.NewFormatter(apiKeyList)
+			formattedData.Print()
+			return nil
 		}
 
 		apikey.ListApiKeys(apiKeyList)
+		return nil
 	},
+}
+
+func init() {
+	format.RegisterFormatFlag(listCmd)
 }

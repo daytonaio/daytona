@@ -4,52 +4,46 @@
 package build
 
 import (
-	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
+
+	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/server/containerregistries"
-	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
-type BuilderConfig struct {
-	Image                    string
-	ContainerRegistryService containerregistries.IContainerRegistryService
-	ServerConfigFolder       string
-	ContainerRegistryServer  string
-	BuildResultStore         Store
-	// Namespace to be used when tagging and pushing the build image
-	BuildImageNamespace string
-	BasePath            string
-	LoggerFactory       logs.LoggerFactory
-	DefaultProjectImage string
-	DefaultProjectUser  string
-}
-
 type IBuilder interface {
-	Build() (*BuildResult, error)
+	Build(build Build) (string, string, error)
 	CleanUp() error
-	Publish() error
-	SaveBuildResults(r BuildResult) error
+	Publish(build Build) error
+	GetImageName(build Build) (string, error)
 }
 
 type Builder struct {
-	id                string
-	project           workspace.Project
-	gitProviderConfig *gitprovider.GitProviderConfig
-	hash              string
-	projectVolumePath string
-
-	image                    string
-	containerRegistryService containerregistries.IContainerRegistryService
-	containerRegistryServer  string
-	buildImageNamespace      string
-	buildResultStore         Store
-	serverConfigFolder       string
-	basePath                 string
-	loggerFactory            logs.LoggerFactory
-	defaultProjectImage      string
-	defaultProjectUser       string
+	id                  string
+	projectDir          string
+	image               string
+	containerRegistry   *containerregistry.ContainerRegistry
+	buildStore          Store
+	buildImageNamespace string
+	loggerFactory       logs.LoggerFactory
+	defaultProjectImage string
+	defaultProjectUser  string
 }
 
-func (b *Builder) SaveBuildResults(r BuildResult) error {
-	return b.buildResultStore.Save(&r)
+func (b *Builder) GetImageName(build Build) (string, error) {
+	hash, err := build.GetBuildHash()
+	if err != nil {
+		return "", err
+	}
+	tagBytes := sha256.Sum256([]byte(fmt.Sprintf("%s%s", hash, build.Repository.Sha)))
+	nameBytes := sha256.Sum256([]byte(build.Repository.Url))
+
+	tag := hex.EncodeToString(tagBytes[:])[:16]
+	name := hex.EncodeToString(nameBytes[:])[:16]
+
+	namespace := b.buildImageNamespace
+	imageName := fmt.Sprintf("%s%s/p-%s:%s", b.containerRegistry.Server, namespace, name, tag)
+
+	return imageName, nil
 }

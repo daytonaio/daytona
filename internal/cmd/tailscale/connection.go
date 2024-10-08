@@ -4,6 +4,7 @@
 package tailscale
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -15,6 +16,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/tailscale"
 	"github.com/google/uuid"
 	"tailscale.com/tsnet"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func GetConnection(profile *config.Profile) (*tsnet.Server, error) {
@@ -42,16 +45,21 @@ func GetConnection(profile *config.Profile) (*tsnet.Server, error) {
 
 	var controlURL string
 	if strings.Contains(profile.Api.Url, "localhost") || strings.Contains(profile.Api.Url, "0.0.0.0") || strings.Contains(profile.Api.Url, "127.0.0.1") {
-		controlURL = fmt.Sprintf("http://localhost:%d", *serverConfig.HeadscalePort)
+		controlURL = fmt.Sprintf("http://localhost:%d", serverConfig.HeadscalePort)
 	} else {
-		controlURL = util.GetFrpcHeadscaleUrl(*serverConfig.Frps.Protocol, *serverConfig.Id, *serverConfig.Frps.Domain)
+		if serverConfig.Frps == nil {
+			return nil, errors.New("frps config is missing")
+		}
+		controlURL = util.GetFrpcHeadscaleUrl(serverConfig.Frps.Protocol, serverConfig.Id, serverConfig.Frps.Domain)
 	}
 
 	return tailscale.GetConnection(&tailscale.TsnetConnConfig{
-		AuthKey:    *networkKey.Key,
+		AuthKey:    networkKey.Key,
 		ControlURL: controlURL,
 		Dir:        filepath.Join(configDir, "tailscale", cliId),
-		Logf:       func(format string, args ...any) {},
-		Hostname:   fmt.Sprintf("cli-%s", cliId),
+		Logf: func(format string, args ...any) {
+			log.Tracef(format, args...)
+		},
+		Hostname: fmt.Sprintf("cli-%s", cliId),
 	})
 }

@@ -91,6 +91,169 @@ const docTemplate = `{
                 }
             }
         },
+        "/build": {
+            "get": {
+                "description": "List builds",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "build"
+                ],
+                "summary": "List builds",
+                "operationId": "ListBuilds",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Build"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a build",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "build"
+                ],
+                "summary": "Create a build",
+                "operationId": "CreateBuild",
+                "parameters": [
+                    {
+                        "description": "Create Build DTO",
+                        "name": "createBuildDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateBuildDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete ALL builds",
+                "tags": [
+                    "build"
+                ],
+                "summary": "Delete ALL builds",
+                "operationId": "DeleteAllBuilds",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/build/prebuild/{prebuildId}": {
+            "delete": {
+                "description": "Delete builds",
+                "tags": [
+                    "build"
+                ],
+                "summary": "Delete builds",
+                "operationId": "DeleteBuildsFromPrebuild",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Prebuild ID",
+                        "name": "prebuildId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/build/{buildId}": {
+            "get": {
+                "description": "Get build data",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "build"
+                ],
+                "summary": "Get build data",
+                "operationId": "GetBuild",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Build ID",
+                        "name": "buildId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Build"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete build",
+                "tags": [
+                    "build"
+                ],
+                "summary": "Delete build",
+                "operationId": "DeleteBuild",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Build ID",
+                        "name": "buildId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/container-registry": {
             "get": {
                 "description": "List container registries",
@@ -238,7 +401,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/GitProvider"
+                            "$ref": "#/definitions/SetGitProviderConfig"
                         }
                     }
                 ],
@@ -249,8 +412,8 @@ const docTemplate = `{
                 }
             }
         },
-        "/gitprovider/context/{gitUrl}": {
-            "get": {
+        "/gitprovider/context": {
+            "post": {
                 "description": "Get Git context",
                 "produces": [
                     "application/json"
@@ -262,11 +425,13 @@ const docTemplate = `{
                 "operationId": "GetGitContext",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Git URL",
-                        "name": "gitUrl",
-                        "in": "path",
-                        "required": true
+                        "description": "Get repository context",
+                        "name": "repository",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GetRepositoryContext"
+                        }
                     }
                 ],
                 "responses": {
@@ -274,6 +439,38 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/GitRepository"
+                        }
+                    }
+                }
+            }
+        },
+        "/gitprovider/context/url": {
+            "post": {
+                "description": "Get URL from Git repository",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gitProvider"
+                ],
+                "summary": "Get URL from Git repository",
+                "operationId": "GetUrlFromRepository",
+                "parameters": [
+                    {
+                        "description": "Git repository",
+                        "name": "repository",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GitRepository"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/RepositoryUrl"
                         }
                     }
                 }
@@ -304,6 +501,36 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/GitProvider"
+                        }
+                    }
+                }
+            }
+        },
+        "/gitprovider/id-for-url/{url}": {
+            "get": {
+                "description": "Get Git provider ID",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "gitProvider"
+                ],
+                "summary": "Get Git provider ID",
+                "operationId": "GetGitProviderIdForUrl",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Url",
+                        "name": "url",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
@@ -533,6 +760,27 @@ const docTemplate = `{
                 }
             }
         },
+        "/health": {
+            "get": {
+                "description": "Health check",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Health check",
+                "operationId": "HealthCheck",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/profile": {
             "get": {
                 "description": "Get profile data",
@@ -590,6 +838,364 @@ const docTemplate = `{
                 "responses": {
                     "204": {
                         "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/project-config": {
+            "get": {
+                "description": "List project configs",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "project-config"
+                ],
+                "summary": "List project configs",
+                "operationId": "ListProjectConfigs",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ProjectConfig"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Set project config data",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "project-config"
+                ],
+                "summary": "Set project config data",
+                "operationId": "SetProjectConfig",
+                "parameters": [
+                    {
+                        "description": "Project config",
+                        "name": "projectConfig",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateProjectConfigDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            }
+        },
+        "/project-config/default/{gitUrl}": {
+            "get": {
+                "description": "Get project configs by git url",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "project-config"
+                ],
+                "summary": "Get project configs by git url",
+                "operationId": "GetDefaultProjectConfig",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Git URL",
+                        "name": "gitUrl",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ProjectConfig"
+                        }
+                    }
+                }
+            }
+        },
+        "/project-config/prebuild": {
+            "get": {
+                "description": "List prebuilds",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "prebuild"
+                ],
+                "summary": "List prebuilds",
+                "operationId": "ListPrebuilds",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/PrebuildDTO"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/project-config/prebuild/process-git-event": {
+            "post": {
+                "description": "ProcessGitEvent",
+                "tags": [
+                    "prebuild"
+                ],
+                "summary": "ProcessGitEvent",
+                "operationId": "ProcessGitEvent",
+                "parameters": [
+                    {
+                        "description": "Webhook event",
+                        "name": "workspace",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/project-config/{configName}": {
+            "get": {
+                "description": "Get project config data",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "project-config"
+                ],
+                "summary": "Get project config data",
+                "operationId": "GetProjectConfig",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Config name",
+                        "name": "configName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ProjectConfig"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete project config data",
+                "tags": [
+                    "project-config"
+                ],
+                "summary": "Delete project config data",
+                "operationId": "DeleteProjectConfig",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Config name",
+                        "name": "configName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/project-config/{configName}/prebuild": {
+            "get": {
+                "description": "List prebuilds for project config",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "prebuild"
+                ],
+                "summary": "List prebuilds for project config",
+                "operationId": "ListPrebuildsForProjectConfig",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Config name",
+                        "name": "configName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/PrebuildDTO"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Set prebuild",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "prebuild"
+                ],
+                "summary": "Set prebuild",
+                "operationId": "SetPrebuild",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Config name",
+                        "name": "configName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Prebuild",
+                        "name": "prebuild",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreatePrebuildDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/project-config/{configName}/prebuild/{prebuildId}": {
+            "get": {
+                "description": "Get prebuild",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "prebuild"
+                ],
+                "summary": "Get prebuild",
+                "operationId": "GetPrebuild",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project config name",
+                        "name": "configName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Prebuild ID",
+                        "name": "prebuildId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/PrebuildDTO"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete prebuild",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "prebuild"
+                ],
+                "summary": "Delete prebuild",
+                "operationId": "DeletePrebuild",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project config name",
+                        "name": "configName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Prebuild ID",
+                        "name": "prebuildId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/project-config/{configName}/set-default": {
+            "patch": {
+                "description": "Set project config to default",
+                "tags": [
+                    "project-config"
+                ],
+                "summary": "Set project config to default",
+                "operationId": "SetDefaultProjectConfig",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Config name",
+                        "name": "configName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
                     }
                 }
             }
@@ -697,6 +1303,30 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK"
+                    }
+                }
+            }
+        },
+        "/sample": {
+            "get": {
+                "description": "List samples",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sample"
+                ],
+                "summary": "List samples",
+                "operationId": "ListSamples",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Sample"
+                            }
+                        }
                     }
                 }
             }
@@ -896,7 +1526,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/CreateWorkspaceRequest"
+                            "$ref": "#/definitions/CreateWorkspaceDTO"
                         }
                     }
                 ],
@@ -928,6 +1558,12 @@ const docTemplate = `{
                         "name": "workspaceId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Verbose",
+                        "name": "verbose",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1122,6 +1758,11 @@ const docTemplate = `{
     "definitions": {
         "ApiKey": {
             "type": "object",
+            "required": [
+                "keyHash",
+                "name",
+                "type"
+            ],
             "properties": {
                 "keyHash": {
                     "type": "string"
@@ -1135,8 +1776,116 @@ const docTemplate = `{
                 }
             }
         },
+        "Build": {
+            "type": "object",
+            "required": [
+                "containerConfig",
+                "createdAt",
+                "envVars",
+                "id",
+                "prebuildId",
+                "repository",
+                "state",
+                "updatedAt"
+            ],
+            "properties": {
+                "buildConfig": {
+                    "$ref": "#/definitions/BuildConfig"
+                },
+                "containerConfig": {
+                    "$ref": "#/definitions/ContainerConfig"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "prebuildId": {
+                    "type": "string"
+                },
+                "repository": {
+                    "$ref": "#/definitions/GitRepository"
+                },
+                "state": {
+                    "$ref": "#/definitions/build.BuildState"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                }
+            }
+        },
+        "BuildConfig": {
+            "type": "object",
+            "properties": {
+                "cachedBuild": {
+                    "$ref": "#/definitions/CachedBuild"
+                },
+                "devcontainer": {
+                    "$ref": "#/definitions/DevcontainerConfig"
+                }
+            }
+        },
+        "CachedBuild": {
+            "type": "object",
+            "required": [
+                "image",
+                "user"
+            ],
+            "properties": {
+                "image": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                }
+            }
+        },
+        "CloneTarget": {
+            "type": "string",
+            "enum": [
+                "branch",
+                "commit"
+            ],
+            "x-enum-varnames": [
+                "CloneTargetBranch",
+                "CloneTargetCommit"
+            ]
+        },
+        "ContainerConfig": {
+            "type": "object",
+            "required": [
+                "image",
+                "user"
+            ],
+            "properties": {
+                "image": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                }
+            }
+        },
         "ContainerRegistry": {
             "type": "object",
+            "required": [
+                "password",
+                "server",
+                "username"
+            ],
             "properties": {
                 "password": {
                     "type": "string"
@@ -1149,37 +1898,98 @@ const docTemplate = `{
                 }
             }
         },
-        "CreateWorkspaceRequest": {
+        "CreateBuildDTO": {
             "type": "object",
             "required": [
-                "projects"
+                "branch",
+                "envVars",
+                "projectConfigName"
             ],
             "properties": {
+                "branch": {
+                    "type": "string"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "prebuildId": {
+                    "type": "string"
+                },
+                "projectConfigName": {
+                    "type": "string"
+                }
+            }
+        },
+        "CreatePrebuildDTO": {
+            "type": "object",
+            "required": [
+                "retention"
+            ],
+            "properties": {
+                "branch": {
+                    "type": "string"
+                },
+                "commitInterval": {
+                    "type": "integer"
+                },
                 "id": {
+                    "type": "string"
+                },
+                "retention": {
+                    "type": "integer"
+                },
+                "triggerFiles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "CreateProjectConfigDTO": {
+            "type": "object",
+            "required": [
+                "envVars",
+                "name",
+                "repositoryUrl"
+            ],
+            "properties": {
+                "buildConfig": {
+                    "$ref": "#/definitions/BuildConfig"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "image": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
-                "projects": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/CreateWorkspaceRequestProject"
-                    }
+                "repositoryUrl": {
+                    "type": "string"
                 },
-                "target": {
+                "user": {
                     "type": "string"
                 }
             }
         },
-        "CreateWorkspaceRequestProject": {
+        "CreateProjectDTO": {
             "type": "object",
             "required": [
-                "name"
+                "envVars",
+                "name",
+                "source"
             ],
             "properties": {
-                "build": {
-                    "$ref": "#/definitions/ProjectBuild"
+                "buildConfig": {
+                    "$ref": "#/definitions/BuildConfig"
                 },
                 "envVars": {
                     "type": "object",
@@ -1194,23 +2004,68 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "source": {
-                    "$ref": "#/definitions/CreateWorkspaceRequestProjectSource"
+                    "$ref": "#/definitions/CreateProjectSourceDTO"
                 },
                 "user": {
                     "type": "string"
                 }
             }
         },
-        "CreateWorkspaceRequestProjectSource": {
+        "CreateProjectSourceDTO": {
             "type": "object",
+            "required": [
+                "repository"
+            ],
             "properties": {
                 "repository": {
                     "$ref": "#/definitions/GitRepository"
                 }
             }
         },
+        "CreateWorkspaceDTO": {
+            "type": "object",
+            "required": [
+                "id",
+                "name",
+                "projects",
+                "target"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/CreateProjectDTO"
+                    }
+                },
+                "target": {
+                    "type": "string"
+                }
+            }
+        },
+        "DevcontainerConfig": {
+            "type": "object",
+            "required": [
+                "filePath"
+            ],
+            "properties": {
+                "filePath": {
+                    "type": "string"
+                }
+            }
+        },
         "FRPSConfig": {
             "type": "object",
+            "required": [
+                "domain",
+                "port",
+                "protocol"
+            ],
             "properties": {
                 "domain": {
                     "type": "string"
@@ -1225,6 +2080,12 @@ const docTemplate = `{
         },
         "FileStatus": {
             "type": "object",
+            "required": [
+                "extra",
+                "name",
+                "staging",
+                "worktree"
+            ],
             "properties": {
                 "extra": {
                     "type": "string"
@@ -1240,73 +2101,11 @@ const docTemplate = `{
                 }
             }
         },
-        "GitBranch": {
+        "GetRepositoryContext": {
             "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "sha": {
-                    "type": "string"
-                }
-            }
-        },
-        "GitNamespace": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "GitProvider": {
-            "type": "object",
-            "properties": {
-                "baseApiUrl": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "token": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "GitPullRequest": {
-            "type": "object",
-            "properties": {
-                "branch": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "sha": {
-                    "type": "string"
-                },
-                "sourceRepoId": {
-                    "type": "string"
-                },
-                "sourceRepoName": {
-                    "type": "string"
-                },
-                "sourceRepoOwner": {
-                    "type": "string"
-                },
-                "sourceRepoUrl": {
-                    "type": "string"
-                }
-            }
-        },
-        "GitRepository": {
-            "type": "object",
+            "required": [
+                "url"
+            ],
             "properties": {
                 "branch": {
                     "type": "string"
@@ -1337,9 +2136,153 @@ const docTemplate = `{
                 }
             }
         },
+        "GitBranch": {
+            "type": "object",
+            "required": [
+                "name",
+                "sha"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "sha": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitNamespace": {
+            "type": "object",
+            "required": [
+                "id",
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitProvider": {
+            "type": "object",
+            "required": [
+                "id",
+                "token",
+                "username"
+            ],
+            "properties": {
+                "baseApiUrl": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitPullRequest": {
+            "type": "object",
+            "required": [
+                "branch",
+                "name",
+                "sha",
+                "sourceRepoId",
+                "sourceRepoName",
+                "sourceRepoOwner",
+                "sourceRepoUrl"
+            ],
+            "properties": {
+                "branch": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "sha": {
+                    "type": "string"
+                },
+                "sourceRepoId": {
+                    "type": "string"
+                },
+                "sourceRepoName": {
+                    "type": "string"
+                },
+                "sourceRepoOwner": {
+                    "type": "string"
+                },
+                "sourceRepoUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitRepository": {
+            "type": "object",
+            "required": [
+                "branch",
+                "id",
+                "name",
+                "owner",
+                "sha",
+                "source",
+                "url"
+            ],
+            "properties": {
+                "branch": {
+                    "type": "string"
+                },
+                "cloneTarget": {
+                    "$ref": "#/definitions/CloneTarget"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "prNumber": {
+                    "type": "integer"
+                },
+                "sha": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "GitStatus": {
             "type": "object",
+            "required": [
+                "currentBranch",
+                "fileStatus"
+            ],
             "properties": {
+                "ahead": {
+                    "type": "integer"
+                },
+                "behind": {
+                    "type": "integer"
+                },
+                "branchPublished": {
+                    "type": "boolean"
+                },
                 "currentBranch": {
                     "type": "string"
                 },
@@ -1353,6 +2296,12 @@ const docTemplate = `{
         },
         "GitUser": {
             "type": "object",
+            "required": [
+                "email",
+                "id",
+                "name",
+                "username"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -1370,6 +2319,10 @@ const docTemplate = `{
         },
         "InstallProviderRequest": {
             "type": "object",
+            "required": [
+                "downloadUrls",
+                "name"
+            ],
             "properties": {
                 "downloadUrls": {
                     "type": "object",
@@ -1384,14 +2337,82 @@ const docTemplate = `{
         },
         "NetworkKey": {
             "type": "object",
+            "required": [
+                "key"
+            ],
             "properties": {
                 "key": {
                     "type": "string"
                 }
             }
         },
+        "PrebuildConfig": {
+            "type": "object",
+            "required": [
+                "branch",
+                "commitInterval",
+                "id",
+                "retention",
+                "triggerFiles"
+            ],
+            "properties": {
+                "branch": {
+                    "type": "string"
+                },
+                "commitInterval": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "retention": {
+                    "type": "integer"
+                },
+                "triggerFiles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "PrebuildDTO": {
+            "type": "object",
+            "required": [
+                "branch",
+                "id",
+                "projectConfigName",
+                "retention"
+            ],
+            "properties": {
+                "branch": {
+                    "type": "string"
+                },
+                "commitInterval": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "projectConfigName": {
+                    "type": "string"
+                },
+                "retention": {
+                    "type": "integer"
+                },
+                "triggerFiles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "ProfileData": {
             "type": "object",
+            "required": [
+                "envVars"
+            ],
             "properties": {
                 "envVars": {
                     "type": "object",
@@ -1403,9 +2424,24 @@ const docTemplate = `{
         },
         "Project": {
             "type": "object",
+            "required": [
+                "envVars",
+                "image",
+                "name",
+                "repository",
+                "target",
+                "user",
+                "workspaceId"
+            ],
             "properties": {
-                "build": {
-                    "$ref": "#/definitions/ProjectBuild"
+                "buildConfig": {
+                    "$ref": "#/definitions/BuildConfig"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "image": {
                     "type": "string"
@@ -1430,24 +2466,57 @@ const docTemplate = `{
                 }
             }
         },
-        "ProjectBuild": {
+        "ProjectConfig": {
             "type": "object",
+            "required": [
+                "default",
+                "envVars",
+                "image",
+                "name",
+                "repositoryUrl",
+                "user"
+            ],
             "properties": {
-                "devcontainer": {
-                    "$ref": "#/definitions/ProjectBuildDevcontainer"
-                }
-            }
-        },
-        "ProjectBuildDevcontainer": {
-            "type": "object",
-            "properties": {
-                "devContainerFilePath": {
+                "buildConfig": {
+                    "$ref": "#/definitions/BuildConfig"
+                },
+                "default": {
+                    "type": "boolean"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "prebuilds": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/PrebuildConfig"
+                    }
+                },
+                "repositoryUrl": {
+                    "type": "string"
+                },
+                "user": {
                     "type": "string"
                 }
             }
         },
         "ProjectInfo": {
             "type": "object",
+            "required": [
+                "created",
+                "isRunning",
+                "name",
+                "workspaceId"
+            ],
             "properties": {
                 "created": {
                     "type": "string"
@@ -1468,6 +2537,11 @@ const docTemplate = `{
         },
         "ProjectState": {
             "type": "object",
+            "required": [
+                "gitStatus",
+                "updatedAt",
+                "uptime"
+            ],
             "properties": {
                 "gitStatus": {
                     "$ref": "#/definitions/GitStatus"
@@ -1482,6 +2556,10 @@ const docTemplate = `{
         },
         "Provider": {
             "type": "object",
+            "required": [
+                "name",
+                "version"
+            ],
             "properties": {
                 "name": {
                     "type": "string"
@@ -1493,6 +2571,11 @@ const docTemplate = `{
         },
         "ProviderTarget": {
             "type": "object",
+            "required": [
+                "name",
+                "options",
+                "providerInfo"
+            ],
             "properties": {
                 "name": {
                     "type": "string"
@@ -1512,8 +2595,54 @@ const docTemplate = `{
                 "$ref": "#/definitions/provider.ProviderTargetProperty"
             }
         },
+        "RepositoryUrl": {
+            "type": "object",
+            "required": [
+                "url"
+            ],
+            "properties": {
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "Sample": {
+            "type": "object",
+            "required": [
+                "description",
+                "gitUrl",
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "gitUrl": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "ServerConfig": {
             "type": "object",
+            "required": [
+                "apiPort",
+                "binariesPath",
+                "builderImage",
+                "builderRegistryServer",
+                "defaultProjectImage",
+                "defaultProjectUser",
+                "headscalePort",
+                "id",
+                "localBuilderRegistryImage",
+                "localBuilderRegistryPort",
+                "logFilePath",
+                "providersDir",
+                "registryUrl",
+                "serverDownloadUrl"
+            ],
             "properties": {
                 "apiPort": {
                     "type": "integer"
@@ -1560,13 +2689,40 @@ const docTemplate = `{
                 "registryUrl": {
                     "type": "string"
                 },
+                "samplesIndexUrl": {
+                    "type": "string"
+                },
                 "serverDownloadUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "SetGitProviderConfig": {
+            "type": "object",
+            "required": [
+                "id",
+                "token"
+            ],
+            "properties": {
+                "baseApiUrl": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "username": {
                     "type": "string"
                 }
             }
         },
         "SetProjectState": {
             "type": "object",
+            "required": [
+                "uptime"
+            ],
             "properties": {
                 "gitStatus": {
                     "$ref": "#/definitions/GitStatus"
@@ -1601,6 +2757,12 @@ const docTemplate = `{
         },
         "Workspace": {
             "type": "object",
+            "required": [
+                "id",
+                "name",
+                "projects",
+                "target"
+            ],
             "properties": {
                 "id": {
                     "type": "string"
@@ -1621,6 +2783,12 @@ const docTemplate = `{
         },
         "WorkspaceDTO": {
             "type": "object",
+            "required": [
+                "id",
+                "name",
+                "projects",
+                "target"
+            ],
             "properties": {
                 "id": {
                     "type": "string"
@@ -1644,6 +2812,10 @@ const docTemplate = `{
         },
         "WorkspaceInfo": {
             "type": "object",
+            "required": [
+                "name",
+                "projects"
+            ],
             "properties": {
                 "name": {
                     "type": "string"
@@ -1672,8 +2844,35 @@ const docTemplate = `{
                 "ApiKeyTypeWorkspace"
             ]
         },
+        "build.BuildState": {
+            "type": "string",
+            "enum": [
+                "pending-run",
+                "running",
+                "error",
+                "success",
+                "published",
+                "pending-delete",
+                "pending-forced-delete",
+                "deleting"
+            ],
+            "x-enum-varnames": [
+                "BuildStatePendingRun",
+                "BuildStateRunning",
+                "BuildStateError",
+                "BuildStateSuccess",
+                "BuildStatePublished",
+                "BuildStatePendingDelete",
+                "BuildStatePendingForcedDelete",
+                "BuildStateDeleting"
+            ]
+        },
         "provider.ProviderInfo": {
             "type": "object",
+            "required": [
+                "name",
+                "version"
+            ],
             "properties": {
                 "name": {
                     "type": "string"
@@ -1703,6 +2902,13 @@ const docTemplate = `{
                 },
                 "options": {
                     "description": "Options is only used if the Type is ProviderTargetPropertyTypeOption",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "suggestions": {
+                    "description": "Suggestions is an optional list of auto-complete values to assist the user while filling the field",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -1750,7 +2956,7 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "0.1.0",
+	Version:          "v0.0.0-dev",
 	Host:             "localhost:3986",
 	BasePath:         "/",
 	Schemes:          []string{"http"},

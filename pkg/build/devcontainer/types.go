@@ -4,17 +4,34 @@
 package devcontainer
 
 type Configuration struct {
-	Name              string                 `json:"name"`
-	DockerFile        string                 `json:"dockerFile"`
-	RunArgs           []string               `json:"runArgs"`
-	InitializeCommand string                 `json:"initializeCommand"`
-	PostCreateCommand string                 `json:"postCreateCommand"`
-	RemoteUser        string                 `json:"remoteUser"`
-	Features          map[string]interface{} `json:"features"`
-	ForwardPorts      []int                  `json:"forwardPorts"`
-	Customizations    map[string]interface{} `json:"customizations"`
-	ConfigFilePath    ConfigFilePath         `json:"configFilePath"`
+	Name                 string                 `json:"name"`
+	DockerFile           string                 `json:"dockerFile"`
+	RunArgs              []string               `json:"runArgs"`
+	InitializeCommand    Command                `json:"initializeCommand"`
+	OnCreateCommand      Command                `json:"onCreateCommand"`
+	UpdateContentCommand Command                `json:"updateContentCommand"`
+	PostCreateCommand    Command                `json:"postCreateCommand"`
+	PostStartCommand     Command                `json:"postStartCommand"`
+	PostAttachCommand    Command                `json:"postAttachCommand"`
+	WaitFor              WaitFor                `json:"waitFor"`
+	RemoteUser           string                 `json:"remoteUser"`
+	Features             map[string]interface{} `json:"features"`
+	ForwardPorts         []int                  `json:"forwardPorts"`
+	Customizations       map[string]interface{} `json:"customizations"`
+	ConfigFilePath       ConfigFilePath         `json:"configFilePath"`
 }
+
+type Command interface{}
+
+type WaitFor string
+
+const (
+	WaitForOnCreateCommand      WaitFor = "onCreateCommand"
+	WaitForPostCreateCommand    WaitFor = "postCreateCommand"
+	WaitForPostStartCommand     WaitFor = "postStartCommand"
+	WaitForInitializeCommand    WaitFor = "initializeCommand"
+	WaitForUpdateContentCommand WaitFor = "updateContentCommand"
+)
 
 type PortAttributes struct {
 	Label            *string
@@ -103,12 +120,12 @@ type MergedConfiguration struct {
 	PortsAttributes map[string]PortAttributes `json:"portsAttributes"`
 
 	// Commands
-	InitializeCommand     interface{} `json:"initializeCommand"`
-	OnCreateCommands      interface{} `json:"onCreateCommands"`
-	UpdateContentCommands interface{} `json:"updateContentCommands"`
-	PostCreateCommands    interface{} `json:"postCreateCommands"`
-	PostStartCommands     interface{} `json:"postStartCommands"`
-	PostAttachCommands    interface{} `json:"postAttachCommands"`
+	InitializeCommand    Command `json:"initializeCommand"`
+	OnCreateCommand      Command `json:"onCreateCommand"`
+	UpdateContentCommand Command `json:"updateContentCommand"`
+	PostCreateCommand    Command `json:"postCreateCommand"`
+	PostStartCommand     Command `json:"postStartCommand"`
+	PostAttachCommand    Command `json:"postAttachCommand"`
 }
 
 type DevcontainerUpResult struct {

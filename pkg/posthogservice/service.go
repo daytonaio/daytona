@@ -4,6 +4,7 @@
 package posthogservice
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -14,6 +15,7 @@ import (
 type PosthogServiceConfig struct {
 	ApiKey   string
 	Endpoint string
+	Version  string
 }
 
 func NewTelemetryService(config PosthogServiceConfig) telemetry.TelemetryService {
@@ -24,7 +26,7 @@ func NewTelemetryService(config PosthogServiceConfig) telemetry.TelemetryService
 	})
 	posthogService := &posthogService{
 		client:                   client,
-		AbstractTelemetryService: telemetry.NewAbstractTelemetryService(),
+		AbstractTelemetryService: telemetry.NewAbstractTelemetryService(config.Version),
 	}
 
 	posthogService.AbstractTelemetryService.TelemetryService = posthogService
@@ -55,6 +57,15 @@ func (p *posthogService) TrackServerEvent(event telemetry.ServerEvent, clientId 
 	p.AbstractTelemetryService.SetCommonProps(properties)
 	return p.client.Enqueue(posthog.Capture{
 		DistinctId: clientId,
+		Event:      string(event),
+		Properties: properties,
+	})
+}
+
+func (p *posthogService) TrackBuildRunnerEvent(event telemetry.BuildRunnerEvent, buildRunnerId string, properties map[string]interface{}) error {
+	p.AbstractTelemetryService.SetCommonProps(properties)
+	return p.client.Enqueue(posthog.Capture{
+		DistinctId: fmt.Sprintf("build-runner-%s", buildRunnerId),
 		Event:      string(event),
 		Properties: properties,
 	})

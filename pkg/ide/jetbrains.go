@@ -5,6 +5,7 @@ package ide
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -23,6 +24,11 @@ import (
 )
 
 func OpenJetbrainsIDE(activeProfile config.Profile, ide, workspaceId, projectName string) error {
+	err := IsJetBrainsGatewayInstalled()
+	if err != nil {
+		return err
+	}
+
 	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName)
 	if err != nil {
 		return err
@@ -32,10 +38,15 @@ func OpenJetbrainsIDE(activeProfile config.Profile, ide, workspaceId, projectNam
 
 	jbIde, ok := jetbrains.GetIdes()[jetbrains.Id(ide)]
 	if !ok {
-		return fmt.Errorf("IDE not found")
+		return errors.New("IDE not found")
 	}
 
-	downloadPath := filepath.ToSlash(filepath.Join("/home/daytona/.cache/JetBrains", ide))
+	home, err := util.GetHomeDir(activeProfile, workspaceId, projectName)
+	if err != nil {
+		return err
+	}
+
+	downloadPath := filepath.ToSlash(filepath.Join(home, "/.cache/JetBrains", ide))
 
 	downloadUrl := ""
 
@@ -55,7 +66,7 @@ func OpenJetbrainsIDE(activeProfile config.Profile, ide, workspaceId, projectNam
 	case ospkg.Linux_64_86:
 		downloadUrl = fmt.Sprintf(jbIde.UrlTemplates.Amd64, jbIdeVersion)
 	default:
-		return fmt.Errorf("JetBrains remote IDEs are only supported on Linux.")
+		return errors.New("JetBrains remote IDEs are only supported on Linux.")
 	}
 
 	err = downloadJetbrainsIDE(projectHostname, downloadUrl, downloadPath)
@@ -121,4 +132,16 @@ func getJetbrainsVersion(productCode string) (string, error) {
 		}
 	}
 	return "", fmt.Errorf("jetbrains: no version found for %s", productCode)
+}
+
+func IsJetBrainsGatewayInstalled() error {
+	_, err := exec.LookPath("gateway")
+	if err != nil {
+		redBold := "\033[1;31m" // ANSI escape code for red and bold
+
+		errorMessage := "Please install JetBrains Gateway via JetBrains Toolbox (https://www.jetbrains.com/toolbox-app) or download from https://www.jetbrains.com/remote-development/gateway/ and ensure it's in your PATH."
+
+		return errors.New(redBold + errorMessage)
+	}
+	return nil
 }

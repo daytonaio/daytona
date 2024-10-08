@@ -5,7 +5,6 @@ package server
 
 import (
 	"fmt"
-	"io"
 	"net/url"
 	"os"
 	"os/signal"
@@ -15,25 +14,30 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal"
+	"github.com/daytonaio/daytona/internal/constants"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/build"
+	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/db"
-	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
+	"github.com/daytonaio/daytona/pkg/server/builds"
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/daytonaio/daytona/pkg/server/profiledata"
+	"github.com/daytonaio/daytona/pkg/server/projectconfig"
 	"github.com/daytonaio/daytona/pkg/server/providertargets"
 	"github.com/daytonaio/daytona/pkg/server/registry"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
+	"github.com/daytonaio/daytona/pkg/telemetry"
+	"github.com/daytonaio/daytona/pkg/views"
 	started_view "github.com/daytonaio/daytona/pkg/views/server/started"
 
 	log "github.com/sirupsen/logrus"
@@ -45,7 +49,11 @@ var ServeCmd = &cobra.Command{
 	Short:   "Run the server process in the current terminal session",
 	GroupID: util.SERVER_GROUP,
 	Args:    cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if os.Getenv("USER") == "root" {
+			views.RenderInfoMessageBold("Running the server as root is not recommended because\nDaytona will not be able to remap project directory ownership.\nPlease run the server as a non-root user.")
+		}
+
 		if log.GetLevel() < log.InfoLevel {
 			//	for now, force the log level to info when running the server
 			log.SetLevel(log.InfoLevel)
@@ -53,245 +61,397 @@ var ServeCmd = &cobra.Command{
 
 		configDir, err := server.GetConfigDir()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		c, err := server.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		telemetryService := posthogservice.NewTelemetryService(posthogservice.PosthogServiceConfig{
 			ApiKey:   internal.PosthogApiKey,
 			Endpoint: internal.PosthogEndpoint,
+			Version:  internal.Version,
 		})
-		go func() {
-			interruptChannel := make(chan os.Signal, 1)
-			signal.Notify(interruptChannel, os.Interrupt)
-
-			for range interruptChannel {
-				log.Info("Shutting down")
-				telemetryService.Close()
-			}
-		}()
 
 		apiServer := api.NewApiServer(api.ApiServerConfig{
 			ApiPort:          int(c.ApiPort),
 			TelemetryService: telemetryService,
+			Version:          internal.Version,
+			ServerId:         c.Id,
+			Frps:             c.Frps,
 		})
 
-		logsDir, err := server.GetWorkspaceLogsDir()
+		server, err := GetInstance(c, configDir, internal.Version, telemetryService)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
-		loggerFactory := logs.NewLoggerFactory(logsDir)
 
-		dbPath, err := getDbPath()
+		buildRunnerConfig, err := build.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
-		dbConnection := db.GetSQLiteConnection(dbPath)
-		apiKeyStore, err := db.NewApiKeyStore(dbConnection)
+		buildRunner, err := GetBuildRunner(c, buildRunnerConfig, telemetryService)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
-		containerRegistryStore, err := db.NewContainerRegistryStore(dbConnection)
+
+		err = buildRunner.Start()
 		if err != nil {
-			log.Fatal(err)
-		}
-		gitProviderConfigStore, err := db.NewGitProviderConfigStore(dbConnection)
-		if err != nil {
-			log.Fatal(err)
-		}
-		providerTargetStore, err := db.NewProviderTargetStore(dbConnection)
-		if err != nil {
-			log.Fatal(err)
-		}
-		workspaceStore, err := db.NewWorkspaceStore(dbConnection)
-		if err != nil {
-			log.Fatal(err)
-		}
-		profileDataStore, err := db.NewProfileDataStore(dbConnection)
-		if err != nil {
-			log.Fatal(err)
-		}
-		buildResultStore, err := db.NewBuildResultStore(dbConnection)
-		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
-		headscaleServer := headscale.NewHeadscaleServer(&headscale.HeadscaleServerConfig{
-			ServerId:      c.Id,
-			FrpsDomain:    c.Frps.Domain,
-			FrpsProtocol:  c.Frps.Protocol,
-			HeadscalePort: c.HeadscalePort,
-		})
-		err = headscaleServer.Init()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		containerRegistryService := containerregistries.NewContainerRegistryService(containerregistries.ContainerRegistryServiceConfig{
-			Store: containerRegistryStore,
-		})
-
-		var localContainerRegistry server.ILocalContainerRegistry
-
-		if c.BuilderRegistryServer != "local" {
-			_, err := containerRegistryService.Find(c.BuilderRegistryServer)
-			if err != nil {
-				log.Errorf("Failed to find container registry credentials for builder registry server %s\n", c.BuilderRegistryServer)
-				log.Errorf("Defaulting to local container registry. To use %s as the builder registry, add credentials for the registry server with 'daytona container-registry set' and restart the server\n", c.BuilderRegistryServer)
-				c.BuilderRegistryServer = "local"
-			}
-		}
-
-		if c.BuilderRegistryServer == "local" {
-			localContainerRegistry = registry.NewLocalContainerRegistry(&registry.LocalContainerRegistryConfig{
-				DataPath: filepath.Join(configDir, "registry"),
-				Port:     c.LocalBuilderRegistryPort,
-				Image:    c.LocalBuilderRegistryImage,
-			})
-			c.BuilderRegistryServer = util.GetFrpcRegistryDomain(c.Id, c.Frps.Domain)
-		}
-
-		providerTargetService := providertargets.NewProviderTargetService(providertargets.ProviderTargetServiceConfig{
-			TargetStore: providerTargetStore,
-		})
-		apiKeyService := apikeys.NewApiKeyService(apikeys.ApiKeyServiceConfig{
-			ApiKeyStore: apiKeyStore,
-		})
-
-		headscaleUrl := util.GetFrpcHeadscaleUrl(c.Frps.Protocol, c.Id, c.Frps.Domain)
-
-		providerManager := manager.NewProviderManager(manager.ProviderManagerConfig{
-			LogsDir:               logsDir,
-			ProviderTargetService: providerTargetService,
-			ApiUrl:                util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
-			DaytonaDownloadUrl:    getDaytonaScriptUrl(c),
-			ServerUrl:             headscaleUrl,
-			RegistryUrl:           c.RegistryUrl,
-			BaseDir:               c.ProvidersDir,
-			CreateProviderNetworkKey: func(providerName string) (string, error) {
-				return headscaleServer.CreateAuthKey()
-			},
-			ServerPort: c.HeadscalePort,
-			ApiPort:    c.ApiPort,
-		})
-
-		buildImageNamespace := c.BuildImageNamespace
-		if buildImageNamespace != "" {
-			buildImageNamespace = fmt.Sprintf("/%s", buildImageNamespace)
-		}
-		buildImageNamespace = strings.TrimSuffix(buildImageNamespace, "/")
-
-		builderConfig := build.BuilderConfig{
-			ServerConfigFolder:       configDir,
-			ContainerRegistryServer:  c.BuilderRegistryServer,
-			BasePath:                 filepath.Join(configDir, "builds"),
-			BuildImageNamespace:      buildImageNamespace,
-			BuildResultStore:         buildResultStore,
-			LoggerFactory:            loggerFactory,
-			DefaultProjectImage:      c.DefaultProjectImage,
-			DefaultProjectUser:       c.DefaultProjectUser,
-			Image:                    c.BuilderImage,
-			ContainerRegistryService: containerRegistryService,
-		}
-
-		builderFactory := build.NewBuilderFactory(build.BuilderFactoryConfig{
-			BuilderConfig: builderConfig,
-			CreateGitService: func(projectDir string, logWriter io.Writer) git.IGitService {
-				return &git.Service{
-					ProjectDir: projectDir,
-					LogWriter:  logWriter,
-				}
-			},
-		})
-
-		provisioner := provisioner.NewProvisioner(provisioner.ProvisionerConfig{
-			ProviderManager: providerManager,
-		})
-
-		gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
-			ConfigStore: gitProviderConfigStore,
-		})
-
-		workspaceService := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
-			WorkspaceStore:           workspaceStore,
-			TargetStore:              providerTargetStore,
-			ApiKeyService:            apiKeyService,
-			GitProviderService:       gitProviderService,
-			ContainerRegistryService: containerRegistryService,
-			ServerApiUrl:             util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
-			ServerUrl:                headscaleUrl,
-			DefaultProjectImage:      c.DefaultProjectImage,
-			DefaultProjectUser:       c.DefaultProjectUser,
-			Provisioner:              provisioner,
-			LoggerFactory:            loggerFactory,
-			BuilderFactory:           builderFactory,
-			TelemetryService:         telemetryService,
-		})
-		profileDataService := profiledata.NewProfileDataService(profiledata.ProfileDataServiceConfig{
-			ProfileDataStore: profileDataStore,
-		})
-
-		server := server.GetInstance(&server.ServerInstanceConfig{
-			Config:                   *c,
-			TailscaleServer:          headscaleServer,
-			ProviderTargetService:    providerTargetService,
-			ContainerRegistryService: containerRegistryService,
-			LocalContainerRegistry:   localContainerRegistry,
-			ApiKeyService:            apiKeyService,
-			WorkspaceService:         workspaceService,
-			GitProviderService:       gitProviderService,
-			ProviderManager:          providerManager,
-			ProfileDataService:       profileDataService,
-			TelemetryService:         telemetryService,
-		})
-
-		errCh := make(chan error)
-
-		err = server.Start(errCh)
-		if err != nil {
-			log.Fatal(err)
-		}
+		apiServerErrChan := make(chan error)
 
 		go func() {
-			err := apiServer.Start()
+			log.Infof("Starting api server on port %d", c.ApiPort)
+			apiServerErrChan <- apiServer.Start()
+		}()
+
+		headscaleServerStartedChan := make(chan struct{})
+		headscaleServerErrChan := make(chan error)
+
+		go func() {
+			log.Info("Starting headscale server...")
+			err := server.TailscaleServer.Start(headscaleServerErrChan)
 			if err != nil {
-				log.Fatal(err)
+				headscaleServerErrChan <- err
+				return
+			}
+			headscaleServerStartedChan <- struct{}{}
+		}()
+
+		localContainerRegistryErrChan := make(chan error)
+
+		go func() {
+			if server.LocalContainerRegistry != nil {
+				log.Info("Starting local container registry...")
+				localContainerRegistryErrChan <- server.LocalContainerRegistry.Start()
+			} else {
+				localContainerRegistryErrChan <- registry.RemoveRegistryContainer()
 			}
 		}()
 
-		go func() {
-			err := <-errCh
-			if err != nil {
-				log.Fatal(err)
-			}
-		}()
+		select {
+		case <-headscaleServerStartedChan:
+			log.Info("Headscale server started")
+			go func() {
+				headscaleServerErrChan <- server.TailscaleServer.Connect()
+			}()
+		case err := <-headscaleServerErrChan:
+			return err
+		}
 
-		err = waitForServerToStart(apiServer)
-
+		err = server.Start()
 		if err != nil {
-			log.Fatal(err)
+			return err
+		}
+
+		err = waitForApiServerToStart(apiServer)
+		if err != nil {
+			return err
+		}
+
+		err = <-localContainerRegistryErrChan
+		if err != nil {
+			return err
 		}
 
 		printServerStartedMessage(c, false)
 
 		err = setDefaultConfig(server, c.ApiPort)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
-		err = <-errCh
-		if err != nil {
-			log.Fatal(err)
+		interruptChannel := make(chan os.Signal, 1)
+		signal.Notify(interruptChannel, os.Interrupt)
+
+		select {
+		case err := <-apiServerErrChan:
+			return err
+		case err := <-headscaleServerErrChan:
+			return err
+		case <-interruptChannel:
+			log.Info("Shutting down")
+			// Exit will be handled by command PreRun
+			select {}
 		}
 	},
 }
 
-func waitForServerToStart(apiServer *api.ApiServer) error {
+func GetInstance(c *server.Config, configDir string, version string, telemetryService telemetry.TelemetryService) (*server.Server, error) {
+	wsLogsDir, err := server.GetWorkspaceLogsDir(configDir)
+	if err != nil {
+		return nil, err
+	}
+	buildLogsDir, err := build.GetBuildLogsDir()
+	if err != nil {
+		return nil, err
+	}
+	loggerFactory := logs.NewLoggerFactory(&wsLogsDir, &buildLogsDir)
+
+	dbPath, err := getDbPath()
+	if err != nil {
+		return nil, err
+	}
+
+	dbConnection := db.GetSQLiteConnection(dbPath)
+
+	apiKeyStore, err := db.NewApiKeyStore(dbConnection)
+	if err != nil {
+		return nil, err
+	}
+	containerRegistryStore, err := db.NewContainerRegistryStore(dbConnection)
+	if err != nil {
+		return nil, err
+	}
+	buildStore, err := db.NewBuildStore(dbConnection)
+	if err != nil {
+		return nil, err
+	}
+	projectConfigStore, err := db.NewProjectConfigStore(dbConnection)
+	if err != nil {
+		return nil, err
+	}
+	gitProviderConfigStore, err := db.NewGitProviderConfigStore(dbConnection)
+	if err != nil {
+		return nil, err
+	}
+	providerTargetStore, err := db.NewProviderTargetStore(dbConnection)
+	if err != nil {
+		return nil, err
+	}
+	workspaceStore, err := db.NewWorkspaceStore(dbConnection)
+	if err != nil {
+		return nil, err
+	}
+	profileDataStore, err := db.NewProfileDataStore(dbConnection)
+	if err != nil {
+		return nil, err
+	}
+
+	headscaleServer := headscale.NewHeadscaleServer(&headscale.HeadscaleServerConfig{
+		ServerId:      c.Id,
+		FrpsDomain:    c.Frps.Domain,
+		FrpsProtocol:  c.Frps.Protocol,
+		HeadscalePort: c.HeadscalePort,
+		ConfigDir:     filepath.Join(configDir, "headscale"),
+		Frps:          c.Frps,
+	})
+	err = headscaleServer.Init()
+	if err != nil {
+		return nil, err
+	}
+
+	containerRegistryService := containerregistries.NewContainerRegistryService(containerregistries.ContainerRegistryServiceConfig{
+		Store: containerRegistryStore,
+	})
+
+	buildService := builds.NewBuildService(builds.BuildServiceConfig{
+		BuildStore:    buildStore,
+		LoggerFactory: loggerFactory,
+	})
+
+	gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
+		ConfigStore: gitProviderConfigStore,
+	})
+
+	prebuildWebhookEndpoint := fmt.Sprintf("%s%s", util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain), constants.WEBHOOK_EVENT_ROUTE)
+
+	projectConfigService := projectconfig.NewProjectConfigService(projectconfig.ProjectConfigServiceConfig{
+		PrebuildWebhookEndpoint: prebuildWebhookEndpoint,
+		ConfigStore:             projectConfigStore,
+		BuildService:            buildService,
+		GitProviderService:      gitProviderService,
+	})
+
+	err = projectConfigService.StartRetentionPoller()
+	if err != nil {
+		return nil, err
+	}
+
+	var localContainerRegistry server.ILocalContainerRegistry
+
+	if c.BuilderRegistryServer != "local" {
+		_, err := containerRegistryService.Find(c.BuilderRegistryServer)
+		if err != nil {
+			log.Errorf("Failed to find container registry credentials for builder registry server %s\n", c.BuilderRegistryServer)
+			log.Errorf("Defaulting to local container registry. To use %s as the builder registry, add credentials for the registry server with 'daytona container-registry set' and restart the server\n", c.BuilderRegistryServer)
+			c.BuilderRegistryServer = "local"
+		}
+	}
+
+	if c.BuilderRegistryServer == "local" {
+		localContainerRegistry = registry.NewLocalContainerRegistry(&registry.LocalContainerRegistryConfig{
+			DataPath: filepath.Join(configDir, "registry"),
+			Port:     c.LocalBuilderRegistryPort,
+			Image:    c.LocalBuilderRegistryImage,
+			Logger:   log.StandardLogger().Writer(),
+			Frps:     c.Frps,
+			ServerId: c.Id,
+		})
+		c.BuilderRegistryServer = util.GetFrpcRegistryDomain(c.Id, c.Frps.Domain)
+	}
+
+	providerTargetService := providertargets.NewProviderTargetService(providertargets.ProviderTargetServiceConfig{
+		TargetStore: providerTargetStore,
+	})
+
+	apiKeyService := apikeys.NewApiKeyService(apikeys.ApiKeyServiceConfig{
+		ApiKeyStore: apiKeyStore,
+	})
+
+	headscaleUrl := util.GetFrpcHeadscaleUrl(c.Frps.Protocol, c.Id, c.Frps.Domain)
+
+	providerManager := manager.NewProviderManager(manager.ProviderManagerConfig{
+		LogsDir:               wsLogsDir,
+		ProviderTargetService: providerTargetService,
+		ApiUrl:                util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+		DaytonaDownloadUrl:    getDaytonaScriptUrl(c),
+		ServerUrl:             headscaleUrl,
+		ServerVersion:         version,
+		RegistryUrl:           c.RegistryUrl,
+		BaseDir:               c.ProvidersDir,
+		CreateProviderNetworkKey: func(providerName string) (string, error) {
+			return headscaleServer.CreateAuthKey()
+		},
+		ServerPort: c.HeadscalePort,
+		ApiPort:    c.ApiPort,
+	})
+
+	provisioner := provisioner.NewProvisioner(provisioner.ProvisionerConfig{
+		ProviderManager: providerManager,
+	})
+
+	workspaceService := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
+		WorkspaceStore:           workspaceStore,
+		TargetStore:              providerTargetStore,
+		ApiKeyService:            apiKeyService,
+		GitProviderService:       gitProviderService,
+		ContainerRegistryService: containerRegistryService,
+		BuildService:             buildService,
+		ProjectConfigService:     projectConfigService,
+		ServerApiUrl:             util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+		ServerVersion:            version,
+		ServerUrl:                headscaleUrl,
+		DefaultProjectImage:      c.DefaultProjectImage,
+		DefaultProjectUser:       c.DefaultProjectUser,
+		Provisioner:              provisioner,
+		LoggerFactory:            loggerFactory,
+		TelemetryService:         telemetryService,
+	})
+
+	profileDataService := profiledata.NewProfileDataService(profiledata.ProfileDataServiceConfig{
+		ProfileDataStore: profileDataStore,
+	})
+
+	s := server.GetInstance(&server.ServerInstanceConfig{
+		Config:                   *c,
+		Version:                  version,
+		TailscaleServer:          headscaleServer,
+		ProviderTargetService:    providerTargetService,
+		ContainerRegistryService: containerRegistryService,
+		BuildService:             buildService,
+		ProjectConfigService:     projectConfigService,
+		LocalContainerRegistry:   localContainerRegistry,
+		ApiKeyService:            apiKeyService,
+		WorkspaceService:         workspaceService,
+		GitProviderService:       gitProviderService,
+		ProviderManager:          providerManager,
+		ProfileDataService:       profileDataService,
+		TelemetryService:         telemetryService,
+	})
+
+	return s, s.Initialize()
+}
+
+func GetBuildRunner(c *server.Config, buildRunnerConfig *build.Config, telemetryService telemetry.TelemetryService) (*build.BuildRunner, error) {
+	logsDir, err := build.GetBuildLogsDir()
+	if err != nil {
+		return nil, err
+	}
+	loggerFactory := logs.NewLoggerFactory(nil, &logsDir)
+
+	dbPath, err := getDbPath()
+	if err != nil {
+		return nil, err
+	}
+
+	dbConnection := db.GetSQLiteConnection(dbPath)
+
+	gitProviderConfigStore, err := db.NewGitProviderConfigStore(dbConnection)
+	if err != nil {
+		return nil, err
+	}
+
+	gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
+		ConfigStore: gitProviderConfigStore,
+	})
+
+	buildStore, err := db.NewBuildStore(dbConnection)
+	if err != nil {
+		return nil, err
+	}
+
+	buildImageNamespace := c.BuildImageNamespace
+	if buildImageNamespace != "" {
+		buildImageNamespace = fmt.Sprintf("/%s", buildImageNamespace)
+	}
+	buildImageNamespace = strings.TrimSuffix(buildImageNamespace, "/")
+
+	containerRegistryStore, err := db.NewContainerRegistryStore(dbConnection)
+	if err != nil {
+		return nil, err
+	}
+
+	containerRegistryService := containerregistries.NewContainerRegistryService(containerregistries.ContainerRegistryServiceConfig{
+		Store: containerRegistryStore,
+	})
+
+	var builderRegistry *containerregistry.ContainerRegistry
+
+	if c.BuilderRegistryServer != "local" {
+		builderRegistry, err = containerRegistryService.Find(c.BuilderRegistryServer)
+		if err != nil {
+			builderRegistry = &containerregistry.ContainerRegistry{
+				Server: c.BuilderRegistryServer,
+			}
+		}
+	}
+
+	configDir, err := config.GetConfigDir()
+	if err != nil {
+		return nil, err
+	}
+
+	builderFactory := build.NewBuilderFactory(build.BuilderFactoryConfig{
+		Image:               c.BuilderImage,
+		ContainerRegistry:   builderRegistry,
+		BuildStore:          buildStore,
+		BuildImageNamespace: buildImageNamespace,
+		LoggerFactory:       loggerFactory,
+		DefaultProjectImage: c.DefaultProjectImage,
+		DefaultProjectUser:  c.DefaultProjectUser,
+	})
+
+	return build.NewBuildRunner(build.BuildRunnerInstanceConfig{
+		Interval:          buildRunnerConfig.Interval,
+		Scheduler:         build.NewCronScheduler(),
+		BuildRunnerId:     buildRunnerConfig.Id,
+		ContainerRegistry: builderRegistry,
+		GitProviderStore:  gitProviderService,
+		BuildStore:        buildStore,
+		BuilderFactory:    builderFactory,
+		LoggerFactory:     loggerFactory,
+		BasePath:          filepath.Join(configDir, "builds"),
+		TelemetryService:  telemetryService,
+	}), nil
+}
+
+func waitForApiServerToStart(apiServer *api.ApiServer) error {
 	var err error
 	for i := 0; i < 30; i++ {
 		time.Sleep(1 * time.Second)
@@ -316,19 +476,17 @@ func printServerStartedMessage(c *server.Config, runAsDaemon bool) {
 }
 
 func getDbPath() (string, error) {
-	userConfigDir, err := os.UserConfigDir()
+	configDir, err := config.GetConfigDir()
 	if err != nil {
 		return "", err
 	}
 
-	dir := filepath.Join(userConfigDir, "daytona")
-
-	err = os.MkdirAll(dir, 0755)
+	err = os.MkdirAll(configDir, 0755)
 	if err != nil {
 		return "", err
 	}
 
-	return filepath.Join(dir, "db"), nil
+	return filepath.Join(configDir, "db"), nil
 }
 
 func setDefaultConfig(server *server.Server, apiPort uint32) error {

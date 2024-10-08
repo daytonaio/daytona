@@ -5,13 +5,18 @@ package target
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	internal_util "github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/provider"
+	"github.com/daytonaio/daytona/pkg/common"
+	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/views"
-	"github.com/daytonaio/daytona/pkg/views/provider"
+	provider_view "github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/daytonaio/daytona/pkg/views/target"
 	"github.com/spf13/cobra"
 
@@ -23,83 +28,128 @@ var TargetSetCmd = &cobra.Command{
 	Short:   "Set provider target",
 	Args:    cobra.NoArgs,
 	Aliases: []string{"s", "add", "update", "register", "edit"},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+
+		apiClient, err := apiclient_util.GetApiClient(nil)
+		if err != nil {
+			return err
+		}
+
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		activeProfile, err := c.GetActiveProfile()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
-		pluginList, err := apiclient_util.GetProviderList()
+		serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(apiclient.ApiGetConfigRequest{})
 		if err != nil {
-			log.Fatal(err)
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		selectedProvider, err := provider.GetProviderFromPrompt(pluginList, "Choose a provider", false)
+		providersManifest, err := manager.NewProviderManager(manager.ProviderManagerConfig{
+			RegistryUrl: serverConfig.RegistryUrl,
+		}).GetProvidersManifest()
 		if err != nil {
-			log.Fatal(err)
+			log.Error(err)
+		}
+
+		var latestProviders []apiclient.Provider
+		if providersManifest != nil {
+			providersManifestLatest := providersManifest.GetLatestVersions()
+			if providersManifestLatest == nil {
+				return errors.New("could not get latest provider versions")
+			}
+
+			latestProviders = provider.GetProviderListFromManifest(providersManifestLatest)
+		} else {
+			fmt.Println("Could not get provider manifest. Can't check for new providers to install")
+		}
+
+		providerViewList, err := provider.GetProviderViewOptions(apiClient, latestProviders, ctx)
+		if err != nil {
+			return err
+		}
+
+		selectedProvider, err := provider_view.GetProviderFromPrompt(providerViewList, "Choose a Provider", false)
+		if err != nil {
+			if common.IsCtrlCAbort(err) {
+				return nil
+			} else {
+				return err
+			}
 		}
 
 		if selectedProvider == nil {
-			return
+			return nil
 		}
 
-		targets, err := apiclient_util.GetTargetList()
+		if selectedProvider.Installed != nil && !*selectedProvider.Installed {
+			if providersManifest == nil {
+				return errors.New("could not get providers manifest")
+			}
+			err = provider.InstallProvider(apiClient, *selectedProvider, providersManifest)
+			if err != nil {
+				return err
+			}
+		}
+
+		targets, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
 		if err != nil {
-			log.Fatal(err)
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		filteredTargets := []apiclient.ProviderTarget{}
 		for _, t := range targets {
-			if *t.ProviderInfo.Name == *selectedProvider.Name {
+			if t.ProviderInfo.Name == selectedProvider.Name {
 				filteredTargets = append(filteredTargets, t)
 			}
 		}
 
 		selectedTarget, err := target.GetTargetFromPrompt(filteredTargets, activeProfile.Name, true)
 		if err != nil {
-			log.Fatal(err)
+			if common.IsCtrlCAbort(err) {
+				return nil
+			} else {
+				return err
+			}
 		}
 
-		client, err := apiclient_util.GetApiClient(nil)
+		targetManifest, res, err := apiClient.ProviderAPI.GetTargetManifest(context.Background(), selectedProvider.Name).Execute()
 		if err != nil {
-			log.Fatal(err)
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		targetManifest, res, err := client.ProviderAPI.GetTargetManifest(context.Background(), *selectedProvider.Name).Execute()
-		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
-		}
-
-		if *selectedTarget.Name == target.NewTargetName {
-			*selectedTarget.Name = ""
-			err = target.NewTargetNameInput(selectedTarget.Name, internal_util.ArrayMap(targets, func(t apiclient.ProviderTarget) string {
-				return *t.Name
+		if selectedTarget.Name == target.NewTargetName {
+			selectedTarget.Name = ""
+			err = target.NewTargetNameInput(&selectedTarget.Name, internal_util.ArrayMap(targets, func(t apiclient.ProviderTarget) string {
+				return t.Name
 			}))
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 		}
 
 		err = target.SetTargetForm(selectedTarget, *targetManifest)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
-		selectedTarget.ProviderInfo = &apiclient.ProviderProviderInfo{
+		selectedTarget.ProviderInfo = apiclient.ProviderProviderInfo{
 			Name:    selectedProvider.Name,
 			Version: selectedProvider.Version,
 		}
 
-		res, err = client.TargetAPI.SetTarget(context.Background()).Target(*selectedTarget).Execute()
+		res, err = apiClient.TargetAPI.SetTarget(context.Background()).Target(*selectedTarget).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		views.RenderInfoMessage("Target set successfully")
+		return nil
 	},
 }

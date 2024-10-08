@@ -4,7 +4,7 @@
 package ssh
 
 import (
-	"fmt"
+	"errors"
 	"regexp"
 )
 
@@ -23,7 +23,7 @@ func (c *Client) GetUserUidGid() (string, string, error) {
 	re := regexp.MustCompile(`uid=(\d+).*gid=(\d+)`)
 	matches := re.FindStringSubmatch(string(idResp))
 	if len(matches) < 3 {
-		return "", "", fmt.Errorf("could not parse uid and gid from id command")
+		return "", "", errors.New("could not parse uid and gid from id command")
 	}
 
 	return matches[1], matches[2], nil

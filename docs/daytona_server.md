@@ -9,14 +9,13 @@ daytona server [flags]
 ### Options
 
 ```
-  -y, --yes   Execute purge without prompt
+  -y, --yes   Skip the confirmation prompt
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --help            help for daytona
-  -o, --output string   Output format. Must be one of (yaml, json)
+      --help   help for daytona
 ```
 
 ### SEE ALSO

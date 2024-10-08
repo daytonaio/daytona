@@ -8,11 +8,11 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/spf13/cobra"
-
-	log "github.com/sirupsen/logrus"
 )
 
 var providerUninstallCmd = &cobra.Command{
@@ -20,33 +20,38 @@ var providerUninstallCmd = &cobra.Command{
 	Short:   "Uninstall provider",
 	Args:    cobra.NoArgs,
 	Aliases: []string{"u"},
-	Run: func(cmd *cobra.Command, args []string) {
-		providerList, err := apiclient.GetProviderList()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+
+		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
-		providerToUninstall, err := provider.GetProviderFromPrompt(providerList, "Choose a provider to uninstall", false)
+		providerList, res, err := apiClient.ProviderAPI.ListProviders(ctx).Execute()
 		if err != nil {
-			log.Fatal(err)
+			return apiclient_util.HandleErrorResponse(res, err)
+		}
+
+		providerToUninstall, err := provider.GetProviderFromPrompt(provider.ProviderListToView(providerList), "Choose a Provider to Uninstall", false)
+		if err != nil {
+			if common.IsCtrlCAbort(err) {
+				return nil
+			} else {
+				return err
+			}
 		}
 
 		if providerToUninstall == nil {
-			return
+			return nil
 		}
 
-		apiClient, err := apiclient.GetApiClient(nil)
+		res, err = apiClient.ProviderAPI.UninstallProvider(ctx, providerToUninstall.Name).Execute()
 		if err != nil {
-			log.Fatal(err)
-		}
-		ctx := context.Background()
-
-		res, err := apiClient.ProviderAPI.UninstallProvider(ctx, *providerToUninstall.Name).Execute()
-
-		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+			return apiclient.HandleErrorResponse(res, err)
 		}
 
-		views.RenderInfoMessageBold(fmt.Sprintf("Provider %s has been successfully uninstalled", *providerToUninstall.Name))
+		views.RenderInfoMessageBold(fmt.Sprintf("Provider %s has been successfully uninstalled", providerToUninstall.Name))
+		return nil
 	},
 }

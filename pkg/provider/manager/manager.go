@@ -11,7 +11,6 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/util"
 	os_util "github.com/daytonaio/daytona/pkg/os"
 	. "github.com/daytonaio/daytona/pkg/provider"
@@ -42,11 +41,13 @@ type IProviderManager interface {
 	RegisterProvider(pluginPath string) error
 	TerminateProviderProcesses(providersBasePath string) error
 	UninstallProvider(name string) error
+	Purge() error
 }
 
 type ProviderManagerConfig struct {
 	DaytonaDownloadUrl       string
 	ServerUrl                string
+	ServerVersion            string
 	ApiUrl                   string
 	LogsDir                  string
 	ProviderTargetService    providertargets.IProviderTargetService
@@ -62,6 +63,7 @@ func NewProviderManager(config ProviderManagerConfig) *ProviderManager {
 		pluginRefs:               make(map[string]*pluginRef),
 		daytonaDownloadUrl:       config.DaytonaDownloadUrl,
 		serverUrl:                config.ServerUrl,
+		serverVersion:            config.ServerVersion,
 		apiUrl:                   config.ApiUrl,
 		logsDir:                  config.LogsDir,
 		providerTargetService:    config.ProviderTargetService,
@@ -77,6 +79,7 @@ type ProviderManager struct {
 	pluginRefs               map[string]*pluginRef
 	daytonaDownloadUrl       string
 	serverUrl                string
+	serverVersion            string
 	apiUrl                   string
 	serverPort               uint32
 	apiPort                  uint32
@@ -205,6 +208,19 @@ func (m *ProviderManager) TerminateProviderProcesses(providersBasePath string) e
 	return nil
 }
 
+func (m *ProviderManager) Purge() error {
+	for name := range m.pluginRefs {
+		err := m.UninstallProvider(name)
+		if err != nil {
+			return err
+		}
+	}
+
+	plugin.CleanupClients()
+
+	return os.RemoveAll(m.baseDir)
+}
+
 func (m *ProviderManager) initializeProvider(pluginPath string) (*pluginRef, error) {
 	pluginName := filepath.Base(pluginPath)
 	pluginBasePath := filepath.Dir(pluginPath)
@@ -250,7 +266,7 @@ func (m *ProviderManager) initializeProvider(pluginPath string) (*pluginRef, err
 	_, err = (*p).Initialize(InitializeProviderRequest{
 		BasePath:           pluginBasePath,
 		DaytonaDownloadUrl: m.daytonaDownloadUrl,
-		DaytonaVersion:     internal.Version,
+		DaytonaVersion:     m.serverVersion,
 		ServerUrl:          m.serverUrl,
 		ApiUrl:             m.apiUrl,
 		LogsDir:            m.logsDir,

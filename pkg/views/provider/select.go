@@ -4,17 +4,26 @@
 package provider
 
 import (
-	"errors"
+	"sort"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
+type ProviderView struct {
+	Name      string
+	Version   string
+	Installed *bool
+}
+
 var NewProviderId = "+ New Provider"
 
-func GetProviderFromPrompt(providers []apiclient.Provider, title string, withNewProvider bool) (*apiclient.Provider, error) {
+func GetProviderFromPrompt(providers []ProviderView, title string, withNewProvider bool) (*ProviderView, error) {
+	sortProviders(&providers)
+
 	var items []list.Item
 
 	for _, p := range providers {
@@ -26,8 +35,8 @@ func GetProviderFromPrompt(providers []apiclient.Provider, title string, withNew
 	if withNewProvider {
 		name := NewProviderId
 		items = append(items, item{
-			provider: apiclient.Provider{
-				Name: &name,
+			provider: ProviderView{
+				Name: name,
 			},
 		})
 	}
@@ -45,5 +54,31 @@ func GetProviderFromPrompt(providers []apiclient.Provider, title string, withNew
 		return m.choice, nil
 	}
 
-	return nil, errors.New("no provider selected")
+	return nil, common.ErrCtrlCAbort
+}
+
+func ProviderListToView(providers []apiclient.Provider) []ProviderView {
+	var providerViews []ProviderView
+
+	for _, p := range providers {
+		providerViews = append(providerViews, ProviderView{
+			Name:      p.Name,
+			Version:   p.Version,
+			Installed: nil,
+		})
+	}
+
+	return providerViews
+}
+
+func sortProviders(providers *[]ProviderView) {
+	sort.Slice(*providers, func(i, j int) bool {
+		if (*providers)[i].Installed == nil {
+			return false
+		}
+		if (*providers)[j].Installed == nil {
+			return true
+		}
+		return *(*providers)[i].Installed
+	})
 }

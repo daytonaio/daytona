@@ -7,43 +7,47 @@ import (
 	"context"
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/env"
 	"github.com/spf13/cobra"
-
-	log "github.com/sirupsen/logrus"
 )
 
 var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List profile environment variables",
 	Aliases: []string{"ls"},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		apiClient, err := apiclient.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		ctx := context.Background()
 
 		profileData, res, err := apiClient.ProfileAPI.GetProfileData(ctx).Execute()
 		if err != nil {
-			log.Fatal(apiclient.HandleErrorResponse(res, err))
+			return apiclient.HandleErrorResponse(res, err)
 		}
 
-		if output.FormatFlag != "" {
+		if format.FormatFlag != "" {
 			if profileData.EnvVars == nil {
-				profileData.EnvVars = &map[string]string{}
+				profileData.EnvVars = map[string]string{}
 			}
-			output.Output = *profileData.EnvVars
-			return
+			formattedData := format.NewFormatter(profileData.EnvVars)
+			formattedData.Print()
+			return nil
 		}
 
-		if profileData.EnvVars == nil || len(*profileData.EnvVars) == 0 {
+		if len(profileData.EnvVars) == 0 {
 			views.RenderInfoMessageBold("No environment variables set")
-			return
+			return nil
 		}
 
-		env.List(*profileData.EnvVars)
+		env.List(profileData.EnvVars)
+		return nil
 	},
+}
+
+func init() {
+	format.RegisterFormatFlag(listCmd)
 }

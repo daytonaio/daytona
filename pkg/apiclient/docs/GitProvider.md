@@ -5,15 +5,15 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **BaseApiUrl** | Pointer to **string** |  | [optional] 
-**Id** | Pointer to **string** |  | [optional] 
-**Token** | Pointer to **string** |  | [optional] 
-**Username** | Pointer to **string** |  | [optional] 
+**Id** | **string** |  | 
+**Token** | **string** |  | 
+**Username** | **string** |  | 
 
 ## Methods
 
 ### NewGitProvider
 
-`func NewGitProvider() *GitProvider`
+`func NewGitProvider(id string, token string, username string, ) *GitProvider`
 
 NewGitProvider instantiates a new GitProvider object
 This constructor will assign default values to properties that have it defined,
@@ -72,11 +72,6 @@ and a boolean to check if the value has been set.
 
 SetId sets Id field to given value.
 
-### HasId
-
-`func (o *GitProvider) HasId() bool`
-
-HasId returns a boolean if a field has been set.
 
 ### GetToken
 
@@ -97,11 +92,6 @@ and a boolean to check if the value has been set.
 
 SetToken sets Token field to given value.
 
-### HasToken
-
-`func (o *GitProvider) HasToken() bool`
-
-HasToken returns a boolean if a field has been set.
 
 ### GetUsername
 
@@ -122,11 +112,6 @@ and a boolean to check if the value has been set.
 
 SetUsername sets Username field to given value.
 
-### HasUsername
-
-`func (o *GitProvider) HasUsername() bool`
-
-HasUsername returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

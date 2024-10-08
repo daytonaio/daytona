@@ -1,3 +1,5 @@
+<br>
+
 <div align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://github.com/daytonaio/daytona/raw/main/assets/images/Daytona-logotype-white.png">
@@ -5,14 +7,16 @@
   </picture>
 </div>
 
-<br><br>
+<br>
 
 <div align="center">
 
+[![Documentation](https://img.shields.io/github/v/release/daytonaio/docs?label=Docs&color=23cc71)](https://www.daytona.io/docs)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue)](#license)
 [![Go Report Card](https://goreportcard.com/badge/github.com/daytonaio/daytona)](https://goreportcard.com/report/github.com/daytonaio/daytona)
 [![Issues - daytona](https://img.shields.io/github/issues/daytonaio/daytona)](https://github.com/daytonaio/daytona/issues)
 ![GitHub Release](https://img.shields.io/github/v/release/daytonaio/daytona)
+<br>
 [![Open Bounties](https://img.shields.io/endpoint?url=https%3A%2F%2Fconsole.algora.io%2Fapi%2Fshields%2Fdaytonaio%2Fbounties%3Fstatus%3Dopen)](https://console.algora.io/org/daytonaio/bounties?status=open)
 [![Rewarded Bounties](https://img.shields.io/endpoint?url=https%3A%2F%2Fconsole.algora.io%2Fapi%2Fshields%2Fdaytonaio%2Fbounties%3Fstatus%3Dcompleted)](https://console.algora.io/org/daytonaio/bounties?status=completed)
 
@@ -32,6 +36,8 @@ Set up a development environment on any infrastructure, with a single command.
 
 
 <p align="center">
+    <a href="https://www.daytona.io/docs">Documentation</a>
+    ·
     <a href="https://github.com/daytonaio/daytona/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=%F0%9F%90%9B+Bug+Report%3A+">Report Bug</a>
     ·
     <a href="https://github.com/daytonaio/daytona/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.md&title=%F0%9F%9A%80+Feature%3A+">Request Feature</a>
@@ -49,7 +55,7 @@ Set up a development environment on any infrastructure, with a single command.
 * __Configuration File Support__: Initially support for [dev container](https://containers.dev/), ability to expand to DevFile, Nix & Flox (Contributions welcome here!).
 * __Prebuilds System__: Drastically improve environment setup times (Contributions welcome here!).
 * __IDE Support__ : Seamlessly supports [VS Code](https://github.com/microsoft/vscode) & [JetBrains](https://www.jetbrains.com/remote-development/gateway/) locally, ready to use without configuration. Includes a built-in Web IDE for added convenience.
-* __Git Provider Integration__: GitHub, GitLab, Bitbucket, Bitbucket Server, Gitea, Gitness & Azure DevOps can be connected, allowing easy repo branch or PR pull and commit back from the workspaces.
+* __Git Provider Integration__: GitHub, GitLab, Bitbucket, Bitbucket Server, Gitea, Gitness, Azure DevOps & AWS CodeCommit can be connected, allowing easy repo branch or PR pull and commit back from the workspaces.
 * __Multiple Project Workspace__: Support for multiple project repositories in the same workspace, making it easy to develop using a micro-service architecture.
 * __Reverse Proxy Integration__: Enable collaboration and streamline feedback loops by leveraging reverse proxy functionality. Access preview ports and the Web IDE seamlessly, even behind firewalls.
 * __Extensibility__: Enable extensibility with plugin or provider development. Moreover, in any dynamic language, not just Go(Contributions welcome here!).
@@ -59,7 +65,7 @@ Set up a development environment on any infrastructure, with a single command.
 ## Quick Start
 ### Mac / Linux
 ```bash
-(curl -sf -L https://download.daytona.io/daytona/install.sh | sudo bash) && daytona server -y && daytona
+curl -sfL https://download.daytona.io/daytona/install.sh | sudo bash && daytona server -y && daytona
 ```
 ### Windows
 <details>
@@ -159,7 +165,7 @@ This initiates the Daytona Server in daemon mode. Use the command:
 daytona server
 ```
 __2. Add Your Git Provider of Choice:__
-Daytona supports GitHub, GitLab, Bitbucket, Bitbucket Server, Gitea, Gitness and Azure DevOps. To add them to your profile, use the command:
+Daytona supports GitHub, GitLab, Bitbucket, Bitbucket Server, Gitea, Gitness, AWS CodeCommit and Azure DevOps. To add them to your profile, use the command:
 ```bash
 daytona git-providers add
 
@@ -257,6 +263,8 @@ Daytona is a product produced from this open source software, exclusively by Day
 Others are allowed to make their own distribution of the software, but they cannot use any of the Daytona trademarks, cloud services, etc.
 
 We explicitly grant permission for you to make a build that includes our trademarks while developing Daytona itself. You may not publish or share the build, and you may not use that build to run Daytona for any other purpose.
+
+You can read more in our [packinging guidelines](PACKAGING.md).
 
 ## Code of Conduct
 

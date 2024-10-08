@@ -4,10 +4,12 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/spf13/cobra"
@@ -22,64 +24,71 @@ var providerUpdateCmd = &cobra.Command{
 	Short:   "Update provider",
 	Args:    cobra.NoArgs,
 	Aliases: []string{"up"},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
-		providerList, err := apiclient_util.GetProviderList()
+		providerList, res, err := apiClient.ProviderAPI.ListProviders(ctx).Execute()
 		if err != nil {
-			log.Fatal(err)
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(apiclient.ApiGetConfigRequest{})
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		providerManager := manager.NewProviderManager(manager.ProviderManagerConfig{RegistryUrl: *serverConfig.RegistryUrl})
+		providerManager := manager.NewProviderManager(manager.ProviderManagerConfig{RegistryUrl: serverConfig.RegistryUrl})
 
 		providersManifest, err := providerManager.GetProvidersManifest()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if allFlag {
 			for _, provider := range providerList {
-				fmt.Printf("Updating provider %s\n", *provider.Name)
-				err := updateProvider(&provider, providersManifest, apiClient)
+				fmt.Printf("Updating provider %s\n", provider.Name)
+				err := updateProvider(provider.Name, providersManifest, apiClient)
 				if err != nil {
-					log.Error(fmt.Sprintf("Failed to update provider %s: %s", *provider.Name, err))
+					log.Error(fmt.Sprintf("Failed to update provider %s: %s", provider.Name, err))
 				} else {
-					fmt.Printf("Provider %s has been successfully updated\n", *provider.Name)
+					fmt.Printf("Provider %s has been successfully updated\n", provider.Name)
 				}
 			}
 
-			return
+			return nil
 		}
 
-		providerToUpdate, err := provider.GetProviderFromPrompt(providerList, "Choose a provider to update", false)
+		providerToUpdate, err := provider.GetProviderFromPrompt(provider.ProviderListToView(providerList), "Choose a Provider to Update", false)
 		if err != nil {
-			log.Fatal(err)
+			if common.IsCtrlCAbort(err) {
+				return nil
+			} else {
+				return err
+			}
 		}
 		if providerToUpdate == nil {
-			return
+			return nil
 		}
 
-		err = updateProvider(providerToUpdate, providersManifest, apiClient)
+		err = updateProvider(providerToUpdate.Name, providersManifest, apiClient)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
-		fmt.Printf("Provider %s has been successfully updated\n", *providerToUpdate.Name)
+		fmt.Printf("Provider %s has been successfully updated\n", providerToUpdate.Name)
+		return nil
 	},
 }
 
-func updateProvider(providerToUpdate *apiclient.Provider, providersManifest *manager.ProvidersManifest, apiClient *apiclient.APIClient) error {
-	providerManifest, ok := (*providersManifest)[*providerToUpdate.Name]
+func updateProvider(providerName string, providersManifest *manager.ProvidersManifest, apiClient *apiclient.APIClient) error {
+	providerManifest, ok := (*providersManifest)[providerName]
 	if !ok {
-		return fmt.Errorf("Provider %s not found in manifest", *providerToUpdate.Name)
+		return fmt.Errorf("provider %s not found in manifest", providerName)
 	}
 
 	version, ok := providerManifest.Versions["latest"]
@@ -88,11 +97,11 @@ func updateProvider(providerToUpdate *apiclient.Provider, providersManifest *man
 		version = *latest
 	}
 
-	downloadUrls := convertToStringMap(version.DownloadUrls)
+	downloadUrls := ConvertOSToStringMap(version.DownloadUrls)
 
 	res, err := apiClient.ProviderAPI.InstallProviderExecute(apiclient.ApiInstallProviderRequest{}.Provider(apiclient.InstallProviderRequest{
-		Name:         providerToUpdate.Name,
-		DownloadUrls: &downloadUrls,
+		Name:         providerName,
+		DownloadUrls: downloadUrls,
 	}))
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)

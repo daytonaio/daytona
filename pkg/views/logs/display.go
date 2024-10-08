@@ -12,8 +12,10 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
-var WORKSPACE_INDEX = -1
+var FIRST_PROJECT_INDEX = 0
+var STATIC_INDEX = -1
 var WORKSPACE_PREFIX = "WORKSPACE"
+var PROVIDER_PREFIX = "PROVIDER"
 
 var longestPrefixLength = len(WORKSPACE_PREFIX)
 var maxPrefixLength = 20
@@ -29,17 +31,33 @@ func DisplayLogs(logEntriesChan <-chan logs.LogEntry, index int) {
 func DisplayLogEntry(logEntry logs.LogEntry, index int) {
 	line := logEntry.Msg
 
-	prefixColor := getPrefixColor(index)
-	prefixText := logEntry.ProjectName
+	prefixColor := getPrefixColor(index, logEntry.Source)
+	var prefixText string
 
-	if index == WORKSPACE_INDEX {
-		prefixText = WORKSPACE_PREFIX
+	if logEntry.ProjectName != nil {
+		prefixText = *logEntry.ProjectName
+	}
+
+	if logEntry.BuildId != nil {
+		prefixText = *logEntry.BuildId
+	}
+
+	if index == STATIC_INDEX {
+		if logEntry.Source == string(logs.LogSourceProvider) {
+			prefixText = PROVIDER_PREFIX
+		} else {
+			prefixText = WORKSPACE_PREFIX
+		}
 	}
 
 	prefix := lipgloss.NewStyle().Foreground(prefixColor).Bold(true).Render(formatPrefixText(prefixText))
 
-	if index == WORKSPACE_INDEX {
-		line = fmt.Sprintf("%s%s%s \033[1m%s\033[0m", prefixPadding, prefix, views.CheckmarkSymbol, line)
+	if index == STATIC_INDEX {
+		if logEntry.Source == string(logs.LogSourceProvider) {
+			line = fmt.Sprintf("%s%s\033[1m%s\033[0m", prefixPadding, prefix, line)
+		} else {
+			line = fmt.Sprintf("%s%s%s \033[1m%s\033[0m", prefixPadding, prefix, views.CheckmarkSymbol, line)
+		}
 		fmt.Print(line)
 		return
 	}
@@ -100,9 +118,13 @@ func formatPrefixText(input string) string {
 	return input
 }
 
-func getPrefixColor(index int) lipgloss.AdaptiveColor {
-	if index == WORKSPACE_INDEX {
-		return views.Green
+func getPrefixColor(index int, source string) lipgloss.AdaptiveColor {
+	if index == STATIC_INDEX {
+		if source == string(logs.LogSourceProvider) {
+			return views.Yellow
+		} else {
+			return views.Green
+		}
 	}
 	return views.LogPrefixColors[index%len(views.LogPrefixColors)]
 }

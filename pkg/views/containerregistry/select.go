@@ -4,12 +4,11 @@
 package containerregistry
 
 import (
-	"errors"
-
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
@@ -27,9 +26,9 @@ func GetRegistryFromPrompt(registries []apiclient.ContainerRegistry, activeProfi
 		emptyString := ""
 		items = append(items, item{
 			registry: apiclient.ContainerRegistry{
-				Password: &emptyString,
-				Username: &emptyString,
-				Server:   &name,
+				Password: emptyString,
+				Username: emptyString,
+				Server:   name,
 			},
 		})
 	}
@@ -48,5 +47,5 @@ func GetRegistryFromPrompt(registries []apiclient.ContainerRegistry, activeProfi
 		return m.choice, nil
 	}
 
-	return nil, errors.New("no container registry selected")
+	return nil, common.ErrCtrlCAbort
 }

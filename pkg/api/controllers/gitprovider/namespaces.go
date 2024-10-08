@@ -4,9 +4,9 @@
 package gitprovider
 
 import (
-	"fmt"
-	"net/http"
+	"errors"
 
+	"github.com/daytonaio/daytona/pkg/api/controllers"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
@@ -29,7 +29,11 @@ func GetNamespaces(ctx *gin.Context) {
 
 	response, err := server.GitProviderService.GetNamespaces(gitProviderId)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get namespaces: %s", err.Error()))
+		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
+		if codeErr != nil {
+			ctx.AbortWithError(statusCode, codeErr)
+		}
+		ctx.AbortWithError(statusCode, errors.New(message))
 		return
 	}
 

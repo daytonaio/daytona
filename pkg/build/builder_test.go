@@ -4,49 +4,22 @@
 package build_test
 
 import (
-	"io"
 	"testing"
 
-	"github.com/daytonaio/daytona/internal/testing/git/mocks"
-	t_build "github.com/daytonaio/daytona/internal/testing/server/build"
+	t_build "github.com/daytonaio/daytona/internal/testing/build"
+	git_mocks "github.com/daytonaio/daytona/internal/testing/git/mocks"
+	builder_mocks "github.com/daytonaio/daytona/internal/testing/server/workspaces/mocks"
 	"github.com/daytonaio/daytona/pkg/build"
-	"github.com/daytonaio/daytona/pkg/git"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
-var project workspace.Project = workspace.Project{
-	Repository: &gitprovider.GitRepository{},
-	Build: &workspace.ProjectBuild{
-		Devcontainer: &workspace.ProjectBuildDevcontainer{
-			DevContainerFilePath: ".devcontainer/devcontainer.json",
-		},
-	},
-}
-
-var predefBuildResult build.BuildResult = build.BuildResult{
-	Hash:              "test-predef",
-	User:              "test-predef",
-	ImageName:         "test-predef",
-	ProjectVolumePath: "test-predef",
-}
-
-var buildResult build.BuildResult = build.BuildResult{
-	Hash:              "test",
-	User:              "test",
-	ImageName:         "test",
-	ProjectVolumePath: "test",
-}
-
-var expectedResults []*build.BuildResult
+var expectedBuilds []*build.Build
 
 type BuilderTestSuite struct {
 	suite.Suite
-	mockGitService   *mocks.MockGitService
-	builder          build.IBuilder
-	buildResultStore build.Store
+	mockGitService *git_mocks.MockGitService
+	mockBuildStore build.Store
+	builder        build.IBuilder
 }
 
 func NewBuilderTestSuite() *BuilderTestSuite {
@@ -54,38 +27,31 @@ func NewBuilderTestSuite() *BuilderTestSuite {
 }
 
 func (s *BuilderTestSuite) SetupTest() {
-	s.buildResultStore = t_build.NewInMemoryBuildStore()
-	s.mockGitService = mocks.NewMockGitService()
+	s.mockBuildStore = t_build.NewInMemoryBuildStore()
+	s.mockGitService = git_mocks.NewMockGitService()
 	factory := build.NewBuilderFactory(build.BuilderFactoryConfig{
-		BuilderConfig: build.BuilderConfig{
-			BuildResultStore: s.buildResultStore,
-		},
-		CreateGitService: func(projectDir string, w io.Writer) git.IGitService {
-			return s.mockGitService
-		},
+		BuildStore: s.mockBuildStore,
 	})
-	s.mockGitService.On("CloneRepository", mock.Anything, mock.Anything).Return(nil)
-	s.builder, _ = factory.Create(project, nil)
-	err := s.buildResultStore.Save(&predefBuildResult)
+	s.builder, _ = factory.Create(*builder_mocks.MockBuild, "")
+	err := s.mockBuildStore.Save(builder_mocks.MockBuild)
 	if err != nil {
 		panic(err)
 	}
-	expectedResults = append(expectedResults, &predefBuildResult)
 }
 
 func TestBuilder(t *testing.T) {
 	suite.Run(t, NewBuilderTestSuite())
 }
 
-func (s *BuilderTestSuite) TestSaveBuildResults() {
-	expectedResults := append(expectedResults, &buildResult)
+func (s *BuilderTestSuite) TestSaveBuild() {
+	expectedBuilds = append(expectedBuilds, builder_mocks.MockBuild)
 
 	require := s.Require()
 
-	err := s.builder.SaveBuildResults(buildResult)
+	err := s.mockBuildStore.Save(builder_mocks.MockBuild)
 	require.NoError(err)
 
-	savedResults, err := s.buildResultStore.List()
+	savedBuilds, err := s.mockBuildStore.List(nil)
 	require.NoError(err)
-	require.ElementsMatch(expectedResults, savedResults)
+	require.ElementsMatch(expectedBuilds, savedBuilds)
 }

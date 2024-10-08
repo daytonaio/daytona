@@ -14,9 +14,10 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	list_view "github.com/daytonaio/daytona/pkg/views/workspace/list"
 )
 
-func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO) []list.Item {
+func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO, isMultipleSelect bool) []list.Item {
 
 	// Initialize an empty list of items.
 	items := []list.Item{}
@@ -25,42 +26,44 @@ func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO) []list.Item {
 	for _, workspace := range workspaces {
 		var projectsInfo []string
 
-		if workspace.Projects == nil || len(workspace.Projects) == 0 {
+		if len(workspace.Projects) == 0 {
 			continue
 		}
 
 		if len(workspace.Projects) == 1 {
-			if workspace.Projects[0].Repository != nil && workspace.Projects[0].Repository.Url != nil {
-				projectsInfo = append(projectsInfo, util.GetRepositorySlugFromUrl(*workspace.Projects[0].Repository.Url, true))
-			}
+			projectsInfo = append(projectsInfo, util.GetRepositorySlugFromUrl(workspace.Projects[0].Repository.Url, true))
 		} else {
 			for _, project := range workspace.Projects {
-				projectsInfo = append(projectsInfo, *project.Name)
+				projectsInfo = append(projectsInfo, project.Name)
 			}
 		}
 
 		// Get the time if available
 		uptime := ""
 		createdTime := ""
-		if workspace.Info != nil && workspace.Info.Projects != nil && len(workspace.Info.Projects) > 0 && workspace.Info.Projects[0].Created != nil {
-			createdTime = util.FormatCreatedTime(*workspace.Info.Projects[0].Created)
+		if workspace.Info != nil && workspace.Info.Projects != nil && len(workspace.Info.Projects) > 0 {
+			createdTime = util.FormatTimestamp(workspace.Info.Projects[0].Created)
 		}
-		if len(workspace.Projects) > 0 && workspace.Projects[0].State != nil && workspace.Projects[0].State.Uptime != nil {
-			if *workspace.Projects[0].State.Uptime == 0 {
+		if len(workspace.Projects) > 0 && workspace.Projects[0].State != nil {
+			if workspace.Projects[0].State.Uptime == 0 {
 				uptime = "STOPPED"
 			} else {
-				uptime = fmt.Sprintf("up %s", util.FormatUptime(*workspace.Projects[0].State.Uptime))
+				uptime = fmt.Sprintf("up %s", util.FormatUptime(workspace.Projects[0].State.Uptime))
 			}
 		}
 
 		newItem := item[apiclient.WorkspaceDTO]{
-			title:          *workspace.Name,
-			id:             *workspace.Id,
+			title:          workspace.Name,
+			id:             workspace.Id,
 			desc:           strings.Join(projectsInfo, ", "),
 			createdTime:    createdTime,
 			uptime:         uptime,
-			target:         *workspace.Target,
+			target:         workspace.Target,
 			choiceProperty: workspace,
+		}
+
+		if isMultipleSelect {
+			newItem.isMultipleSelect = true
 		}
 
 		items = append(items, newItem)
@@ -69,9 +72,9 @@ func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO) []list.Item {
 	return items
 }
 
-func getWorkspaceProgramEssentials(modelTitle string, actionVerb string, workspaces []apiclient.WorkspaceDTO, footerText string) tea.Model {
+func getWorkspaceProgramEssentials(modelTitle string, actionVerb string, workspaces []apiclient.WorkspaceDTO, footerText string, isMultipleSelect bool) tea.Model {
 
-	items := generateWorkspaceList(workspaces)
+	items := generateWorkspaceList(workspaces, isMultipleSelect)
 
 	d := ItemDelegate[apiclient.WorkspaceDTO]{}
 
@@ -100,8 +103,9 @@ func getWorkspaceProgramEssentials(modelTitle string, actionVerb string, workspa
 }
 
 func selectWorkspacePrompt(workspaces []apiclient.WorkspaceDTO, actionVerb string, choiceChan chan<- *apiclient.WorkspaceDTO) {
+	list_view.SortWorkspaces(&workspaces, true)
 
-	p := getWorkspaceProgramEssentials("Select a Workspace To ", actionVerb, workspaces, "")
+	p := getWorkspaceProgramEssentials("Select a Workspace To ", actionVerb, workspaces, "", false)
 	if m, ok := p.(model[apiclient.WorkspaceDTO]); ok && m.choice != nil {
 		choiceChan <- m.choice
 	} else {
@@ -118,9 +122,10 @@ func GetWorkspaceFromPrompt(workspaces []apiclient.WorkspaceDTO, actionVerb stri
 }
 
 func selectWorkspacesFromPrompt(workspaces []apiclient.WorkspaceDTO, actionVerb string, choiceChan chan<- []*apiclient.WorkspaceDTO) {
+	list_view.SortWorkspaces(&workspaces, true)
 
 	footerText := lipgloss.NewStyle().Bold(true).PaddingLeft(2).Render("\n\nPress 'x' to mark workspace for deletion.\nPress 'enter' to delete the current/marked workspaces.")
-	p := getWorkspaceProgramEssentials("Select Workspaces To ", actionVerb, workspaces, footerText)
+	p := getWorkspaceProgramEssentials("Select Workspaces To ", actionVerb, workspaces, footerText, true)
 
 	m, ok := p.(model[apiclient.WorkspaceDTO])
 	if ok && m.choices != nil {

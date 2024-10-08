@@ -10,7 +10,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/api/controllers/workspace/dto"
 	"github.com/daytonaio/daytona/pkg/server"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/gin-gonic/gin"
 )
 
@@ -33,19 +33,19 @@ func SetProjectState(ctx *gin.Context) {
 	var setProjectStateDTO dto.SetProjectState
 	err := ctx.BindJSON(&setProjectStateDTO)
 	if err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %s", err.Error()))
+		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
 		return
 	}
 
 	server := server.GetInstance(nil)
 
-	_, err = server.WorkspaceService.SetProjectState(workspaceId, projectId, &workspace.ProjectState{
+	_, err = server.WorkspaceService.SetProjectState(workspaceId, projectId, &project.ProjectState{
 		Uptime:    setProjectStateDTO.Uptime,
 		UpdatedAt: time.Now().Format(time.RFC1123),
-		GitStatus: &setProjectStateDTO.GitStatus,
+		GitStatus: setProjectStateDTO.GitStatus,
 	})
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to stop workspace %s: %s", workspaceId, err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to stop workspace %s: %w", workspaceId, err))
 		return
 	}
 

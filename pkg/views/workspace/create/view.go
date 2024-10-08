@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/url"
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
@@ -15,6 +14,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 )
 
 const maxWidth = 160
@@ -47,7 +47,7 @@ func NewStyles(lg *lipgloss.Renderer) *Styles {
 		Bold(true)
 	s.Highlight = lg.NewStyle().
 		Foreground(lipgloss.Color("212"))
-	s.ErrorHeaderText = s.HeaderText.Copy().
+	s.ErrorHeaderText = s.HeaderText.
 		Foreground(views.Green)
 	s.Help = lg.NewStyle().
 		Foreground(lipgloss.Color("240"))
@@ -61,7 +61,7 @@ type Model struct {
 	width  int
 }
 
-func GetRepositoryFromUrlInput(multiProject bool, apiClient *apiclient.APIClient, selectedRepos map[string]bool) (*apiclient.GitRepository, error) {
+func GetRepositoryFromUrlInput(multiProject bool, projectOrder int, apiClient *apiclient.APIClient, selectedRepos map[string]int) (*apiclient.GitRepository, error) {
 	m := Model{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
@@ -69,7 +69,7 @@ func GetRepositoryFromUrlInput(multiProject bool, apiClient *apiclient.APIClient
 	title := "Git repository"
 
 	if multiProject {
-		title = "First project repository"
+		title = getOrderNumberString(projectOrder) + " project repository"
 	}
 
 	var initialRepoUrl string
@@ -80,9 +80,11 @@ func GetRepositoryFromUrlInput(multiProject bool, apiClient *apiclient.APIClient
 		Value(&initialRepoUrl).
 		Key("initialProjectRepo").
 		Validate(func(str string) error {
-			var err error
-			repo, err = validateRepoUrl(str, apiClient, selectedRepos)
-			return err
+			return views_util.WithInlineSpinner("Validating", func() error {
+				var err error
+				repo, err = validateRepoUrl(str, apiClient)
+				return err
+			})
 		})
 
 	dTheme := views.GetCustomTheme()
@@ -90,7 +92,7 @@ func GetRepositoryFromUrlInput(multiProject bool, apiClient *apiclient.APIClient
 	m.form = huh.NewForm(
 		huh.NewGroup(
 			initialRepoInput,
-		),
+		).WithHeight(5),
 	).WithTheme(dTheme).
 		WithWidth(maxWidth).
 		WithShowHelp(false).
@@ -101,53 +103,9 @@ func GetRepositoryFromUrlInput(multiProject bool, apiClient *apiclient.APIClient
 		return nil, err
 	}
 
-	selectedRepos[initialRepoUrl] = true
+	selectedRepos[repo.Url]++
 
 	return repo, nil
-}
-
-func RunAdditionalProjectRepoForm(index int, apiClient *apiclient.APIClient, selectedRepos map[string]bool) (*apiclient.GitRepository, bool, error) {
-	m := Model{width: maxWidth}
-	m.lg = lipgloss.DefaultRenderer()
-	m.styles = NewStyles(m.lg)
-
-	var repoUrl string
-	var repo *apiclient.GitRepository
-
-	var addAnother bool
-
-	repositoryUrlInput :=
-		huh.NewInput().
-			Title(getOrderNumberString(index) + " project repository").
-			Value(&repoUrl).
-			Key(fmt.Sprintf("additionalRepo%d", index)).
-			Validate(func(str string) error {
-				var err error
-				repo, err = validateRepoUrl(str, apiClient, selectedRepos)
-				return err
-			})
-
-	confirmInput :=
-		huh.NewConfirm().
-			Title("Add another project?").
-			Value(&addAnother)
-
-	m.form = huh.NewForm(
-		huh.NewGroup(repositoryUrlInput, confirmInput),
-	).
-		WithWidth(maxWidth).
-		WithShowHelp(false).
-		WithShowErrors(true).
-		WithTheme(views.GetCustomTheme())
-
-	err := m.form.Run()
-	if err != nil {
-		return nil, false, err
-	}
-
-	selectedRepos[repoUrl] = true
-
-	return repo, addAnother, nil
 }
 
 func RunAddMoreProjectsForm() (bool, error) {
@@ -211,18 +169,15 @@ func getOrderNumberString(number int) string {
 	return "Invalid"
 }
 
-func validateRepoUrl(repoUrl string, apiClient *apiclient.APIClient, selectedRepos map[string]bool) (*apiclient.GitRepository, error) {
+func validateRepoUrl(repoUrl string, apiClient *apiclient.APIClient) (*apiclient.GitRepository, error) {
 	result, err := util.GetValidatedUrl(repoUrl)
 	if err != nil {
 		return nil, err
 	}
 
-	if selectedRepos[repoUrl] {
-		return nil, fmt.Errorf("duplicate entry, please try with a different repository")
-	}
-
-	encodedURLParam := url.QueryEscape(result)
-	repo, _, err := apiClient.GitProviderAPI.GetGitContext(context.Background(), encodedURLParam).Execute()
+	repo, _, err := apiClient.GitProviderAPI.GetGitContext(context.Background()).Repository(apiclient.GetRepositoryContext{
+		Url: result,
+	}).Execute()
 	if err != nil {
 		return nil, errors.New("Failed to fetch repository information. Please check the URL and try again.")
 	}

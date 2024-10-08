@@ -11,6 +11,8 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	workspace_cmd "github.com/daytonaio/daytona/pkg/cmd/workspace"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/target"
 	"github.com/spf13/cobra"
@@ -25,47 +27,51 @@ var targetRemoveCmd = &cobra.Command{
 	Short:   "Remove target",
 	Args:    cobra.RangeArgs(0, 1),
 	Aliases: []string{"rm", "delete"},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var selectedTargetName string
+
+		ctx := context.Background()
+		apiClient, err := apiclient_util.GetApiClient(nil)
+		if err != nil {
+			return err
+		}
 
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if len(args) == 0 {
 			activeProfile, err := c.GetActiveProfile()
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
-			targets, err := apiclient_util.GetTargetList()
+			targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
 			if err != nil {
-				log.Fatal(err)
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
-			selectedTarget, err := target.GetTargetFromPrompt(targets, activeProfile.Name, false)
+			selectedTarget, err := target.GetTargetFromPrompt(targetList, activeProfile.Name, false)
 			if err != nil {
-				log.Fatal(err)
+				if common.IsCtrlCAbort(err) {
+					return nil
+				} else {
+					return err
+				}
 			}
 
-			selectedTargetName = *selectedTarget.Name
+			selectedTargetName = selectedTarget.Name
 		} else {
 			selectedTargetName = args[0]
 		}
 
-		ctx := context.Background()
-		client, err := apiclient_util.GetApiClient(nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		if yesFlag {
 			fmt.Println("Deleting all workspaces.")
-			err := RemoveTargetWorkspaces(ctx, client, selectedTargetName)
+			err := RemoveTargetWorkspaces(ctx, apiClient, selectedTargetName)
 
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 		} else {
 			form := huh.NewForm(
@@ -79,25 +85,26 @@ var targetRemoveCmd = &cobra.Command{
 
 			err := form.Run()
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			if yesFlag {
-				err := RemoveTargetWorkspaces(ctx, client, selectedTargetName)
+				err := RemoveTargetWorkspaces(ctx, apiClient, selectedTargetName)
 				if err != nil {
-					log.Fatal(err)
+					return err
 				}
 			} else {
 				fmt.Println("Proceeding with target removal without deleting workspaces.")
 			}
 		}
 
-		res, err := client.TargetAPI.RemoveTarget(ctx, selectedTargetName).Execute()
+		res, err := apiClient.TargetAPI.RemoveTarget(ctx, selectedTargetName).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		views.RenderInfoMessageBold(fmt.Sprintf("Target %s removed successfully", selectedTargetName))
+		return nil
 	},
 }
 
@@ -112,17 +119,16 @@ func RemoveTargetWorkspaces(ctx context.Context, client *apiclient.APIClient, ta
 	}
 
 	for _, workspace := range workspaceList {
-		if *workspace.Target != target {
+		if workspace.Target != target {
 			continue
 		}
-
-		res, err := client.WorkspaceAPI.RemoveWorkspace(ctx, *workspace.Id).Execute()
+		err := workspace_cmd.RemoveWorkspace(ctx, client, &workspace, false)
 		if err != nil {
-			log.Errorf("Failed to delete workspace %s: %v", *workspace.Name, apiclient_util.HandleErrorResponse(res, err))
+			log.Errorf("Failed to delete workspace %s: %v", workspace.Name, err)
 			continue
 		}
 
-		views.RenderLine(fmt.Sprintf("- Workspace %s successfully deleted\n", *workspace.Name))
+		views.RenderInfoMessage(fmt.Sprintf("- Workspace '%s' successfully deleted", workspace.Name))
 	}
 
 	return nil

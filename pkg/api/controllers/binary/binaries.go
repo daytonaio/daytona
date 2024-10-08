@@ -21,7 +21,7 @@ func GetBinary(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 	binaryPath, err := server.GetBinaryPath(binaryName, binaryVersion)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get binary path: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get binary path: %w", err))
 		return
 	}
 

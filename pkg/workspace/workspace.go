@@ -6,25 +6,25 @@ package workspace
 import (
 	"errors"
 
-	"github.com/daytonaio/daytona/internal"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 )
 
 type Workspace struct {
-	Id       string            `json:"id"`
-	Name     string            `json:"name"`
-	Projects []*Project        `json:"projects"`
-	Target   string            `json:"target"`
-	ApiKey   string            `json:"-"`
-	EnvVars  map[string]string `json:"-"`
+	Id       string             `json:"id" validate:"required"`
+	Name     string             `json:"name" validate:"required"`
+	Projects []*project.Project `json:"projects" validate:"required"`
+	Target   string             `json:"target" validate:"required"`
+	ApiKey   string             `json:"-"`
+	EnvVars  map[string]string  `json:"-"`
 } // @name Workspace
 
 type WorkspaceInfo struct {
-	Name             string         `json:"name"`
-	Projects         []*ProjectInfo `json:"projects"`
-	ProviderMetadata string         `json:"providerMetadata,omitempty"`
+	Name             string                 `json:"name" validate:"required"`
+	Projects         []*project.ProjectInfo `json:"projects" validate:"required"`
+	ProviderMetadata string                 `json:"providerMetadata,omitempty" validate:"optional"`
 } // @name WorkspaceInfo
 
-func (w *Workspace) GetProject(projectName string) (*Project, error) {
+func (w *Workspace) GetProject(projectName string) (*project.Project, error) {
 	for _, project := range w.Projects {
 		if project.Name == projectName {
 			return project, nil
@@ -34,16 +34,17 @@ func (w *Workspace) GetProject(projectName string) (*Project, error) {
 }
 
 type WorkspaceEnvVarParams struct {
-	ApiUrl    string
-	ServerUrl string
-	ClientId  string
+	ApiUrl        string
+	ServerUrl     string
+	ServerVersion string
+	ClientId      string
 }
 
 func GetWorkspaceEnvVars(workspace *Workspace, params WorkspaceEnvVarParams, telemetryEnabled bool) map[string]string {
 	envVars := map[string]string{
 		"DAYTONA_WS_ID":          workspace.Id,
 		"DAYTONA_SERVER_API_KEY": workspace.ApiKey,
-		"DAYTONA_SERVER_VERSION": internal.Version,
+		"DAYTONA_SERVER_VERSION": params.ServerVersion,
 		"DAYTONA_SERVER_URL":     params.ServerUrl,
 		"DAYTONA_SERVER_API_URL": params.ApiUrl,
 		"DAYTONA_CLIENT_ID":      params.ClientId,

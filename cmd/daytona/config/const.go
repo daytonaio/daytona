@@ -26,7 +26,10 @@ func GetIdeList() []Ide {
 	ides := []Ide{
 		{"vscode", "VS Code"},
 		{"browser", "VS Code - Browser"},
+		{"cursor", "Cursor"},
 		{"ssh", "Terminal SSH"},
+		{"jupyter", "Jupyter"},
+		{"fleet", "Fleet"},
 	}
 
 	sortedJbIdes := []Ide{}
@@ -53,6 +56,7 @@ func GetSupportedGitProviders() []GitProvider {
 		{"gitea", "Gitea"},
 		{"gitness", "Gitness"},
 		{"azure-devops", "Azure DevOps"},
+		{"aws-codecommit", "AWS CodeCommit"},
 	}
 }
 
@@ -78,12 +82,14 @@ func GetDocsLinkFromGitProvider(providerId string) string {
 		return "https://docs.gitness.com/administration/user-management#generate-user-token"
 	case "azure-devops":
 		return "https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=Windows#create-a-pat"
+	case "aws-codecommit":
+		return "https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-gc.html and to configure AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY & AWS_DEFAULT_REGION read https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html"
 	default:
 		return ""
 	}
 }
 
-func GetScopesFromGitProvider(providerId string) string {
+func GetRequiredScopesFromGitProviderId(providerId string) string {
 	switch providerId {
 	case "github":
 		fallthrough
@@ -105,6 +111,42 @@ func GetScopesFromGitProvider(providerId string) string {
 		return "/"
 	case "azure-devops":
 		return "Code (Status, Read & Write); User Profile (Read); Project and Team (Read)"
+	case "aws-codecommit":
+		return "/"
+	default:
+		return ""
+	}
+}
+
+func GetPrebuildScopesFromGitProviderId(providerId string) string {
+	switch providerId {
+	case "github":
+		fallthrough
+	case "github-enterprise-server":
+		return "admin:repo_hook"
+	case "bitbucket":
+		return "webhooks"
+	case "azure-devops":
+		return "Work (Read, Write & Manage); Build (Read & Execute)"
+	default:
+		return ""
+	}
+}
+
+func GetWebhookEventHeaderKeyFromGitProvider(providerId string) string {
+	switch providerId {
+	case "github":
+		return "X-GitHub-Event"
+	case "gitlab":
+		fallthrough
+	case "gitlab-self-managed":
+		return "X-Gitlab-Event"
+	case "bitbucket":
+		return "X-Event-Key"
+	case "gitea":
+		return "X-Gitea-Event"
+	case "azure-devops":
+		return "X-AzureDevops-Event"
 	default:
 		return ""
 	}

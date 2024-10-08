@@ -24,14 +24,14 @@ func ApiKeyCreationView(name *string, clientKeys []apiclient.ApiKey) {
 						return errors.New("name can not be blank")
 					}
 					for _, key := range clientKeys {
-						if *key.Name == str {
+						if key.Name == str {
 							return errors.New("key name already exists")
 						}
 					}
 					return nil
 				}),
 		),
-	).WithTheme(views.GetCustomTheme())
+	).WithHeight(5).WithTheme(views.GetCustomTheme())
 
 	err := form.Run()
 	if err != nil {

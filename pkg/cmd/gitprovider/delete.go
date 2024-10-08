@@ -5,12 +5,12 @@ package gitprovider
 
 import (
 	"context"
+	"errors"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -18,42 +18,40 @@ var gitProviderDeleteCmd = &cobra.Command{
 	Use:     "delete",
 	Aliases: []string{"remove", "rm"},
 	Short:   "Unregister a Git providers",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
 		if err != nil {
-			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		var gitProviderData apiclient.GitProvider
-		gitProviderData.Id = new(string)
-		gitProviderData.Username = new(string)
-		gitProviderData.Token = new(string)
+		var gitProviderData apiclient.SetGitProviderConfig
 		gitProviderData.BaseApiUrl = new(string)
+		gitProviderData.Username = new(string)
 
 		if len(gitProviders) == 0 {
 			views.RenderInfoMessage("No git providers registered")
-			return
+			return nil
 		}
 
 		gitprovider_view.GitProviderSelectionView(&gitProviderData, gitProviders, true)
 
-		if *gitProviderData.Id == "" {
-			log.Fatal("Git provider id can not be blank")
-			return
+		if gitProviderData.Id == "" {
+			return errors.New("git provider id can not be blank")
 		}
 
-		_, err = apiClient.GitProviderAPI.RemoveGitProvider(ctx, *gitProviderData.Id).Execute()
+		_, err = apiClient.GitProviderAPI.RemoveGitProvider(ctx, gitProviderData.Id).Execute()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		views.RenderInfoMessage("Git provider has been removed")
+		return nil
 	},
 }

@@ -17,9 +17,10 @@ import (
 	"github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 )
 
-var project1 = &workspace.Project{
+var project1 = &project.Project{
 	Name: "test",
 	Repository: &gitprovider.GitRepository{
 		Id:   "123",
@@ -28,7 +29,7 @@ var project1 = &workspace.Project{
 	},
 	WorkspaceId: "123",
 	Target:      "local",
-	State: &workspace.ProjectState{
+	State: &project.ProjectState{
 		UpdatedAt: "123",
 		Uptime:    148,
 		GitStatus: gitStatus1,
@@ -39,18 +40,18 @@ var workspace1 = &workspace.Workspace{
 	Id:     "123",
 	Name:   "test",
 	Target: "local",
-	Projects: []*workspace.Project{
+	Projects: []*project.Project{
 		project1,
 	},
 }
 
-var gitStatus1 = &workspace.GitStatus{
+var gitStatus1 = &project.GitStatus{
 	CurrentBranch: "main",
-	Files: []*workspace.FileStatus{{
+	Files: []*project.FileStatus{{
 		Name:     "File1",
 		Extra:    "",
-		Staging:  workspace.Modified,
-		Worktree: workspace.Modified,
+		Staging:  project.Modified,
+		Worktree: project.Modified,
 	}},
 }
 
@@ -73,7 +74,7 @@ func TestAgent(t *testing.T) {
 	mockConfig.Server.ApiUrl = apiServer.URL
 
 	mockGitService := mock_git.NewMockGitService()
-	mockGitService.On("RepositoryExists", project1).Return(true, nil)
+	mockGitService.On("RepositoryExists").Return(true, nil)
 	mockGitService.On("SetGitConfig", mock.Anything).Return(nil)
 	mockGitService.On("GetGitStatus").Return(gitStatus1, nil)
 

@@ -4,15 +4,13 @@
 package util
 
 import (
-	"fmt"
+	"errors"
 	"net/url"
 	"regexp"
 	"strings"
 )
 
-func GetValidatedWorkspaceName(input string) (string, error) {
-	// input = strings.ToLower(input)
-
+func GetValidatedName(input string) (string, error) {
 	input = strings.ReplaceAll(input, " ", "-")
 
 	// Regular expression that catches letters, numbers, and dashes
@@ -24,7 +22,7 @@ func GetValidatedWorkspaceName(input string) (string, error) {
 	}
 
 	if !matched {
-		return "", fmt.Errorf("only letters, numbers, and dashes are allowed")
+		return "", errors.New("only letters, numbers, and dashes are allowed")
 	}
 
 	return input, nil
@@ -33,13 +31,13 @@ func GetValidatedWorkspaceName(input string) (string, error) {
 func GetValidatedUrl(input string) (string, error) {
 	// Check if the input starts with a scheme (e.g., http:// or https://)
 	if !strings.HasPrefix(input, "http://") && !strings.HasPrefix(input, "https://") {
-		return "", fmt.Errorf("input is missing http:// or https://")
+		return "", errors.New("input is missing http:// or https://")
 	}
 
 	// Try to parse the input as a URL
 	parsedURL, err := url.Parse(input)
 	if err != nil {
-		return "", fmt.Errorf("input is not a valid URL")
+		return "", errors.New("input is not a valid URL")
 	}
 
 	// If parsing was successful, return the fixed URL
@@ -62,4 +60,9 @@ func GetRepositorySlugFromUrl(url string, specifyGitProviders bool) string {
 	}
 
 	return parts[len(parts)-2] + "/" + parts[len(parts)-1]
+}
+
+func CleanUpRepositoryUrl(url string) string {
+	url = strings.ToLower(url)
+	return strings.TrimSuffix(url, "/")
 }

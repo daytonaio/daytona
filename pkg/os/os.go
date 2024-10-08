@@ -4,7 +4,7 @@
 package os
 
 import (
-	"fmt"
+	"errors"
 	"os/exec"
 	"runtime"
 	"strings"
@@ -24,7 +24,7 @@ const (
 func OSFromUnameA(unameA string) (*OperatingSystem, error) {
 	fields := strings.Fields(unameA)
 	if len(fields) < 3 {
-		return nil, fmt.Errorf("unexpected output format")
+		return nil, errors.New("unexpected output format")
 	}
 
 	if strings.Contains(unameA, "Darwin") && strings.Contains(unameA, "arm64") {
@@ -40,7 +40,7 @@ func OSFromUnameA(unameA string) (*OperatingSystem, error) {
 		arch := Linux_64_86
 		return &arch, nil
 	} else {
-		return nil, fmt.Errorf("unsupported architecture in uname -a output")
+		return nil, errors.New("unsupported architecture in uname -a output")
 	}
 }
 
@@ -52,7 +52,7 @@ func OSFromEchoProcessor(output string) (*OperatingSystem, error) {
 		arch := Windows_64_86
 		return &arch, nil
 	} else {
-		return nil, fmt.Errorf("unsupported architecture in echo PROCESSOR_ARCHITECTURE output")
+		return nil, errors.New("unsupported architecture in echo PROCESSOR_ARCHITECTURE output")
 	}
 }
 

@@ -5,26 +5,32 @@ package server
 
 import (
 	view "github.com/daytonaio/daytona/pkg/views/server"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/server"
 )
 
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Output local Daytona Server config",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		config, err := server.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
-		apiUrl := util.GetFrpcApiUrl(config.Frps.Protocol, config.Id, config.Frps.Domain)
-		output.Output = apiUrl
+		if format.FormatFlag != "" {
+			formattedData := format.NewFormatter(config)
+			formattedData.Print()
+			return nil
+		}
 
 		view.RenderConfig(config)
+		return nil
 	},
+}
+
+func init() {
+	format.RegisterFormatFlag(configCmd)
 }

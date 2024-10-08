@@ -6,6 +6,7 @@ package gitproviders
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
@@ -15,7 +16,8 @@ type IGitProviderService interface {
 	GetConfig(id string) (*gitprovider.GitProviderConfig, error)
 	GetConfigForUrl(url string) (*gitprovider.GitProviderConfig, error)
 	GetGitProvider(id string) (gitprovider.GitProvider, error)
-	GetGitProviderForUrl(url string) (gitprovider.GitProvider, error)
+	GetGitProviderForUrl(url string) (gitprovider.GitProvider, string, error)
+	GetGitProviderForHttpRequest(req *http.Request) (gitprovider.GitProvider, error)
 	GetGitUser(gitProviderId string) (*gitprovider.GitUser, error)
 	GetNamespaces(gitProviderId string) ([]*gitprovider.GitNamespace, error)
 	GetRepoBranches(gitProviderId string, namespaceId string, repositoryId string) ([]*gitprovider.GitBranch, error)
@@ -25,6 +27,9 @@ type IGitProviderService interface {
 	RemoveGitProvider(gitProviderId string) error
 	SetGitProviderConfig(providerConfig *gitprovider.GitProviderConfig) error
 	GetLastCommitSha(repo *gitprovider.GitRepository) (string, error)
+	RegisterPrebuildWebhook(gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (string, error)
+	GetPrebuildWebhook(gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (*string, error)
+	UnregisterPrebuildWebhook(gitProviderId string, repo *gitprovider.GitRepository, id string) error
 }
 
 type GitProviderServiceConfig struct {
@@ -46,7 +51,17 @@ var codebergUrl = "https://codeberg.org"
 func (s *GitProviderService) GetGitProvider(id string) (gitprovider.GitProvider, error) {
 	providerConfig, err := s.configStore.Find(id)
 	if err != nil {
-		return nil, err
+		// If config is not defined, use the default (public) client without token
+		if gitprovider.IsGitProviderNotFound(err) {
+			providerConfig = &gitprovider.GitProviderConfig{
+				Id:         id,
+				Username:   "",
+				Token:      "",
+				BaseApiUrl: nil,
+			}
+		} else {
+			return nil, err
+		}
 	}
 
 	return s.newGitProvider(providerConfig)
@@ -71,6 +86,17 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 	}
 
 	for _, p := range gitProviders {
+
+		isAwsUrl := strings.Contains(repo.Url, ".amazonaws.com/") || strings.Contains(repo.Url, ".console.aws.amazon.com/")
+		if p.Id == "aws-codecommit" && isAwsUrl {
+			provider, err = s.GetGitProvider(p.Id)
+			if err == nil {
+				return "", err
+			}
+			providerFound = true
+			break
+		}
+
 		if strings.Contains(repo.Url, fmt.Sprintf("%s.", p.Id)) {
 			provider, err = s.GetGitProvider(p.Id)
 			if err == nil {
@@ -93,6 +119,7 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 			providerFound = true
 			break
 		}
+
 	}
 
 	if !providerFound {
@@ -114,7 +141,7 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 		Id:       repo.Id,
 		Url:      repo.Url,
 		Name:     repo.Name,
-		Branch:   repo.Branch,
+		Branch:   &repo.Branch,
 		Sha:      &repo.Sha,
 		Owner:    repo.Owner,
 		PrNumber: repo.PrNumber,
@@ -134,7 +161,7 @@ func (s *GitProviderService) newGitProvider(config *gitprovider.GitProviderConfi
 	case "bitbucket":
 		return gitprovider.NewBitbucketGitProvider(config.Username, config.Token), nil
 	case "bitbucket-server":
-		return gitprovider.NewBitbucketServerGitProvider(config.Username, config.Token, config.BaseApiUrl), nil
+		return gitprovider.NewBitbucketServerGitProvider(config.Username, config.Token, *config.BaseApiUrl), nil
 	case "gitlab-self-managed":
 		return gitprovider.NewGitLabGitProvider(config.Token, config.BaseApiUrl), nil
 	case "codeberg":
@@ -142,9 +169,11 @@ func (s *GitProviderService) newGitProvider(config *gitprovider.GitProviderConfi
 	case "gitea":
 		return gitprovider.NewGiteaGitProvider(config.Token, *config.BaseApiUrl), nil
 	case "gitness":
-		return gitprovider.NewGitnessGitProvider(config.Token, config.BaseApiUrl), nil
+		return gitprovider.NewGitnessGitProvider(config.Token, *config.BaseApiUrl), nil
 	case "azure-devops":
 		return gitprovider.NewAzureDevOpsGitProvider(config.Token, *config.BaseApiUrl), nil
+	case "aws-codecommit":
+		return gitprovider.NewAwsCodeCommitGitProvider(*config.BaseApiUrl), nil
 	default:
 		return nil, errors.New("git provider not found")
 	}

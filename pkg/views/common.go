@@ -60,6 +60,10 @@ func RenderInfoMessage(message string) {
 	fmt.Println(lipgloss.NewStyle().Padding(1, 0, 1, 1).Render(message))
 }
 
+func RenderViewBuildLogsMessage(buildId string) {
+	RenderInfoMessage(fmt.Sprintf("The build has been scheduled for running. Use `daytona build logs %s -f` to view the progress.", buildId))
+}
+
 func RenderCreationInfoMessage(message string) {
 	fmt.Println(lipgloss.NewStyle().Foreground(Gray).Padding(1, 0, 1, 1).Render(message))
 }
@@ -101,6 +105,13 @@ func GetListLine(message string) string {
 
 func GetPropertyKey(key string) string {
 	return lipgloss.NewStyle().Foreground(LightGray).Render(key)
+}
+
+func GetBranchNameLabel(branch string) string {
+	if branch == "" {
+		return "Default branch"
+	}
+	return branch
 }
 
 func GetBorderedMessage(message string) string {
@@ -151,17 +162,20 @@ func GetEnvVarsInput(envVars *map[string]string) *huh.Text {
 		Description("Enter environment variables in the format KEY=VALUE\nTo pass machine env variables at runtime, use $VALUE").
 		Value(&inputText).
 		Validate(func(str string) error {
-			if str == "" {
-				return nil
-			}
-
+			tempEnvVars := map[string]string{}
 			for i, line := range strings.Split(str, "\n") {
+				if line == "" {
+					continue
+				}
+
 				parts := strings.SplitN(line, "=", 2)
 				if len(parts) != 2 {
 					return fmt.Errorf("invalid format: %s on line %d", line, i+1)
 				}
-				(*envVars)[parts[0]] = parts[1]
+
+				tempEnvVars[parts[0]] = parts[1]
 			}
+			*envVars = tempEnvVars
 
 			return nil
 		})

@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/daytonaio/daytona/internal/util"
@@ -81,9 +82,10 @@ func (s *WorkspaceService) startWorkspace(ctx context.Context, ws *workspace.Wor
 	wsLogWriter.Write([]byte("Starting workspace\n"))
 
 	ws.EnvVars = workspace.GetWorkspaceEnvVars(ws, workspace.WorkspaceEnvVarParams{
-		ApiUrl:    s.serverApiUrl,
-		ServerUrl: s.serverUrl,
-		ClientId:  telemetry.ClientId(ctx),
+		ApiUrl:        s.serverApiUrl,
+		ServerUrl:     s.serverUrl,
+		ServerVersion: s.serverVersion,
+		ClientId:      telemetry.ClientId(ctx),
 	}, telemetry.TelemetryEnabled(ctx))
 
 	err := s.provisioner.StartWorkspace(ws, target)
@@ -106,22 +108,23 @@ func (s *WorkspaceService) startWorkspace(ctx context.Context, ws *workspace.Wor
 	return nil
 }
 
-func (s *WorkspaceService) startProject(ctx context.Context, project *workspace.Project, target *provider.ProviderTarget, logWriter io.Writer) error {
-	logWriter.Write([]byte(fmt.Sprintf("Starting project %s\n", project.Name)))
+func (s *WorkspaceService) startProject(ctx context.Context, p *project.Project, target *provider.ProviderTarget, logWriter io.Writer) error {
+	logWriter.Write([]byte(fmt.Sprintf("Starting project %s\n", p.Name)))
 
-	projectToStart := *project
-	projectToStart.EnvVars = workspace.GetProjectEnvVars(project, workspace.ProjectEnvVarParams{
-		ApiUrl:    s.serverApiUrl,
-		ServerUrl: s.serverUrl,
-		ClientId:  telemetry.ClientId(ctx),
+	projectToStart := *p
+	projectToStart.EnvVars = project.GetProjectEnvVars(p, project.ProjectEnvVarParams{
+		ApiUrl:        s.serverApiUrl,
+		ServerUrl:     s.serverUrl,
+		ServerVersion: s.serverVersion,
+		ClientId:      telemetry.ClientId(ctx),
 	}, telemetry.TelemetryEnabled(ctx))
 
-	err := s.provisioner.StartProject(project, target)
+	err := s.provisioner.StartProject(&projectToStart, target)
 	if err != nil {
 		return err
 	}
 
-	logWriter.Write([]byte(fmt.Sprintf("Project %s started\n", project.Name)))
+	logWriter.Write([]byte(fmt.Sprintf("Project %s started\n", p.Name)))
 
 	return nil
 }

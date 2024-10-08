@@ -6,6 +6,9 @@ package telemetry
 type CliEvent string
 
 const (
-	CliEventCmdStart CliEvent = "cli_cmd_start"
-	CliEventCmdEnd   CliEvent = "cli_cmd_end"
+	CliEventCmdStart   CliEvent = "cli_cmd_start"
+	CliEventCmdEnd     CliEvent = "cli_cmd_end"
+	CliEventInvalidCmd CliEvent = "cli_invalid_cmd"
 )
+
+var AdditionalData map[string]interface{} = map[string]interface{}{}

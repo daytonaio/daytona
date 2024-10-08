@@ -1,7 +1,13 @@
 name: daytona create
 synopsis: Create a workspace
-usage: daytona create [REPOSITORY_URL] [flags]
+usage: daytona create [REPOSITORY_URL | PROJECT_CONFIG_NAME]... [flags]
 options:
+    - name: blank
+      default_value: "false"
+      usage: Create a blank project without using existing configurations
+    - name: branch
+      default_value: '[]'
+      usage: Specify the Git branches to use in the projects
     - name: builder
       usage: Specify the builder (currently auto/devcontainer/none)
     - name: code
@@ -17,28 +23,32 @@ options:
     - name: devcontainer-path
       usage: |
         Automatically assign the devcontainer builder with the path passed as the flag value
+    - name: env
+      default_value: '[]'
+      usage: |
+        Specify environment variables (e.g. --env 'KEY1=VALUE1' --env 'KEY2=VALUE2' ...')
     - name: ide
       shorthand: i
-      usage: Specify the IDE ('vscode' or 'browser')
+      usage: |
+        Specify the IDE (vscode, browser, cursor, ssh, jupyter, fleet, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
     - name: manual
       default_value: "false"
-      usage: Manually enter the git repositories
+      usage: Manually enter the Git repository
     - name: multi-project
       default_value: "false"
       usage: Workspace with multiple projects/repos
     - name: name
       usage: Specify the workspace name
-    - name: provider
-      usage: Specify the provider (e.g. 'docker-provider')
     - name: target
       shorthand: t
       usage: Specify the target (e.g. 'local')
+    - name: "yes"
+      shorthand: "y"
+      default_value: "false"
+      usage: Automatically confirm any prompts
 inherited_options:
     - name: help
       default_value: "false"
       usage: help for daytona
-    - name: output
-      shorthand: o
-      usage: Output format. Must be one of (yaml, json)
 see_also:
     - daytona - Daytona is a Dev Environment Manager

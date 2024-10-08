@@ -18,6 +18,9 @@ type ServerEvent string
 const (
 	ServerEventApiRequestStarted ServerEvent = "server_api_request_started"
 	ServerEventApiResponseSent   ServerEvent = "server_api_response_sent"
+	ServerEventPurgeStarted      ServerEvent = "server_purge_started"
+	ServerEventPurgeCompleted    ServerEvent = "server_purge_completed"
+	ServerEventPurgeError        ServerEvent = "server_purge_error"
 
 	// Workspace events
 	ServerEventWorkspaceCreated      ServerEvent = "server_workspace_created"
@@ -53,9 +56,9 @@ func NewWorkspaceEventProps(ctx context.Context, workspace *workspace.Workspace,
 			if project.Repository != nil && isPublic(project.Repository.Url) {
 				publicRepos = append(publicRepos, project.Repository.Url)
 			}
-			if project.Build == nil {
+			if project.BuildConfig == nil {
 				builders["none"]++
-			} else if project.Build.Devcontainer != nil {
+			} else if project.BuildConfig.Devcontainer != nil {
 				builders["devcontainer"]++
 			} else {
 				builders["automatic"]++

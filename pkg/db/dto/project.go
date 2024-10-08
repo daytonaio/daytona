@@ -5,19 +5,21 @@ package dto
 
 import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
 )
 
 type RepositoryDTO struct {
-	Id       string  `json:"id"`
-	Url      string  `json:"url"`
-	Name     string  `json:"name"`
-	Owner    string  `json:"owner"`
-	Sha      string  `json:"sha"`
-	Source   string  `json:"source"`
-	Branch   *string `default:"main" json:"branch,omitempty"`
-	PrNumber *uint32 `json:"prNumber,omitempty"`
-	Path     *string `json:"path,omitempty"`
+	Id       string                  `json:"id"`
+	Url      string                  `json:"url"`
+	Name     string                  `json:"name"`
+	Owner    string                  `json:"owner"`
+	Sha      string                  `json:"sha"`
+	Source   string                  `json:"source"`
+	Branch   string                  `json:"branch"`
+	PrNumber *uint32                 `json:"prNumber,omitempty"`
+	Path     *string                 `json:"path,omitempty"`
+	Target   gitprovider.CloneTarget `json:"cloneTarget,omitempty"`
 }
 
 type FileStatusDTO struct {
@@ -28,8 +30,11 @@ type FileStatusDTO struct {
 }
 
 type GitStatusDTO struct {
-	CurrentBranch string           `json:"currentBranch"`
-	Files         []*FileStatusDTO `json:"fileStatus"`
+	CurrentBranch   string           `json:"currentBranch"`
+	Files           []*FileStatusDTO `json:"fileStatus"`
+	BranchPublished bool             `json:"branchPublished,omitempty"`
+	Ahead           int32            `json:"ahead,omitempty"`
+	Behind          int32            `json:"behind,omitempty"`
 }
 
 type ProjectStateDTO struct {
@@ -39,7 +44,7 @@ type ProjectStateDTO struct {
 }
 
 type ProjectBuildDevcontainerDTO struct {
-	DevContainerFilePath string `json:"devContainerFilePath"`
+	FilePath string `json:"filePath"`
 }
 
 type ProjectBuildDTO struct {
@@ -51,24 +56,24 @@ type ProjectDTO struct {
 	Image       string           `json:"image"`
 	User        string           `json:"user"`
 	Build       *ProjectBuildDTO `json:"build,omitempty" gorm:"serializer:json"`
-	Repository  RepositoryDTO    `json:"repository"`
+	Repository  RepositoryDTO    `json:"repository" gorm:"serializer:json"`
 	WorkspaceId string           `json:"workspaceId"`
 	Target      string           `json:"target"`
 	ApiKey      string           `json:"apiKey"`
 	State       *ProjectStateDTO `json:"state,omitempty" gorm:"serializer:json"`
 }
 
-func ToProjectDTO(project *workspace.Project, workspace *workspace.Workspace) ProjectDTO {
+func ToProjectDTO(project *project.Project) ProjectDTO {
 	return ProjectDTO{
 		Name:        project.Name,
 		Image:       project.Image,
 		User:        project.User,
-		Build:       ToProjectBuildDTO(project.Build),
+		Build:       ToProjectBuildDTO(project.BuildConfig),
 		Repository:  ToRepositoryDTO(project.Repository),
 		WorkspaceId: project.WorkspaceId,
 		Target:      project.Target,
 		State:       ToProjectStateDTO(project.State),
-		ApiKey:      workspace.ApiKey,
+		ApiKey:      project.ApiKey,
 	}
 }
 
@@ -83,12 +88,13 @@ func ToRepositoryDTO(repo *gitprovider.GitRepository) RepositoryDTO {
 		Branch:   repo.Branch,
 		PrNumber: repo.PrNumber,
 		Path:     repo.Path,
+		Target:   repo.Target,
 	}
 
 	return repoDTO
 }
 
-func ToFileStatusDTO(status *workspace.FileStatus) *FileStatusDTO {
+func ToFileStatusDTO(status *project.FileStatus) *FileStatusDTO {
 	if status == nil {
 		return nil
 	}
@@ -101,13 +107,16 @@ func ToFileStatusDTO(status *workspace.FileStatus) *FileStatusDTO {
 	}
 }
 
-func ToGitStatusDTO(status *workspace.GitStatus) *GitStatusDTO {
+func ToGitStatusDTO(status *project.GitStatus) *GitStatusDTO {
 	if status == nil {
 		return nil
 	}
 
 	statusDTO := &GitStatusDTO{
-		CurrentBranch: status.CurrentBranch,
+		CurrentBranch:   status.CurrentBranch,
+		BranchPublished: status.BranchPublished,
+		Ahead:           int32(status.Ahead),
+		Behind:          int32(status.Behind),
 	}
 
 	for _, file := range status.Files {
@@ -117,7 +126,7 @@ func ToGitStatusDTO(status *workspace.GitStatus) *GitStatusDTO {
 	return statusDTO
 }
 
-func ToProjectStateDTO(state *workspace.ProjectState) *ProjectStateDTO {
+func ToProjectStateDTO(state *project.ProjectState) *ProjectStateDTO {
 	if state == nil {
 		return nil
 	}
@@ -129,7 +138,7 @@ func ToProjectStateDTO(state *workspace.ProjectState) *ProjectStateDTO {
 	}
 }
 
-func ToProjectBuildDTO(build *workspace.ProjectBuild) *ProjectBuildDTO {
+func ToProjectBuildDTO(build *buildconfig.BuildConfig) *ProjectBuildDTO {
 	if build == nil {
 		return nil
 	}
@@ -140,17 +149,17 @@ func ToProjectBuildDTO(build *workspace.ProjectBuild) *ProjectBuildDTO {
 
 	return &ProjectBuildDTO{
 		Devcontainer: &ProjectBuildDevcontainerDTO{
-			DevContainerFilePath: build.Devcontainer.DevContainerFilePath,
+			FilePath: build.Devcontainer.FilePath,
 		},
 	}
 }
 
-func ToProject(projectDTO ProjectDTO) *workspace.Project {
-	return &workspace.Project{
+func ToProject(projectDTO ProjectDTO) *project.Project {
+	return &project.Project{
 		Name:        projectDTO.Name,
 		Image:       projectDTO.Image,
 		User:        projectDTO.User,
-		Build:       ToProjectBuild(projectDTO.Build),
+		BuildConfig: ToProjectBuild(projectDTO.Build),
 		Repository:  ToRepository(projectDTO.Repository),
 		WorkspaceId: projectDTO.WorkspaceId,
 		Target:      projectDTO.Target,
@@ -159,26 +168,29 @@ func ToProject(projectDTO ProjectDTO) *workspace.Project {
 	}
 }
 
-func ToFileStatus(statusDTO *FileStatusDTO) *workspace.FileStatus {
+func ToFileStatus(statusDTO *FileStatusDTO) *project.FileStatus {
 	if statusDTO == nil {
 		return nil
 	}
 
-	return &workspace.FileStatus{
+	return &project.FileStatus{
 		Name:     statusDTO.Name,
 		Extra:    statusDTO.Extra,
-		Staging:  workspace.Status(statusDTO.Staging),
-		Worktree: workspace.Status(statusDTO.Worktree),
+		Staging:  project.Status(statusDTO.Staging),
+		Worktree: project.Status(statusDTO.Worktree),
 	}
 }
 
-func ToGitStatus(statusDTO *GitStatusDTO) *workspace.GitStatus {
+func ToGitStatus(statusDTO *GitStatusDTO) *project.GitStatus {
 	if statusDTO == nil {
 		return nil
 	}
 
-	status := &workspace.GitStatus{
-		CurrentBranch: statusDTO.CurrentBranch,
+	status := &project.GitStatus{
+		CurrentBranch:   statusDTO.CurrentBranch,
+		BranchPublished: statusDTO.BranchPublished,
+		Ahead:           int(statusDTO.Ahead),
+		Behind:          int(statusDTO.Behind),
 	}
 
 	for _, file := range statusDTO.Files {
@@ -188,12 +200,12 @@ func ToGitStatus(statusDTO *GitStatusDTO) *workspace.GitStatus {
 	return status
 }
 
-func ToProjectState(stateDTO *ProjectStateDTO) *workspace.ProjectState {
+func ToProjectState(stateDTO *ProjectStateDTO) *project.ProjectState {
 	if stateDTO == nil {
 		return nil
 	}
 
-	return &workspace.ProjectState{
+	return &project.ProjectState{
 		UpdatedAt: stateDTO.UpdatedAt,
 		Uptime:    stateDTO.Uptime,
 		GitStatus: ToGitStatus(stateDTO.GitStatus),
@@ -211,23 +223,24 @@ func ToRepository(repoDTO RepositoryDTO) *gitprovider.GitRepository {
 		PrNumber: repoDTO.PrNumber,
 		Source:   repoDTO.Source,
 		Path:     repoDTO.Path,
+		Target:   gitprovider.CloneTarget(repoDTO.Target),
 	}
 
 	return &repo
 }
 
-func ToProjectBuild(buildDTO *ProjectBuildDTO) *workspace.ProjectBuild {
+func ToProjectBuild(buildDTO *ProjectBuildDTO) *buildconfig.BuildConfig {
 	if buildDTO == nil {
 		return nil
 	}
 
 	if buildDTO.Devcontainer == nil {
-		return &workspace.ProjectBuild{}
+		return &buildconfig.BuildConfig{}
 	}
 
-	return &workspace.ProjectBuild{
-		Devcontainer: &workspace.ProjectBuildDevcontainer{
-			DevContainerFilePath: buildDTO.Devcontainer.DevContainerFilePath,
+	return &buildconfig.BuildConfig{
+		Devcontainer: &buildconfig.DevcontainerConfig{
+			FilePath: buildDTO.Devcontainer.FilePath,
 		},
 	}
 }

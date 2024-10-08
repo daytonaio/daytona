@@ -4,6 +4,7 @@
 package frpc
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/fatedier/frp/client"
@@ -41,9 +42,9 @@ func GetService(params FrpcConnectParams) (HealthCheckFunc, *client.Service, err
 	}
 
 	return func() error {
-		proxyStatus, err := service.GetProxyStatus(params.Name)
-		if err != nil {
-			return err
+		proxyStatus, ok := service.StatusExporter().GetProxyStatus(params.Name)
+		if !ok || proxyStatus == nil {
+			return errors.New("failed to get proxy status")
 		}
 
 		if proxyStatus.Err != "" {

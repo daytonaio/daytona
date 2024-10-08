@@ -15,7 +15,7 @@ func ServerStoppedPrompt(serverStoppedCheck *bool) {
 		huh.NewGroup(
 			huh.NewConfirm().
 				Title("Please stop the Daytona Server before continuing").
-				Description("Removing the config directory requires the Daytona Server to be stopped.").
+				Description("Purging all data requires the Daytona Server to be stopped.").
 				Affirmative("Continue").
 				Negative("Abort").
 				Value(serverStoppedCheck),

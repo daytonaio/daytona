@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/google/uuid"
 
 	log "github.com/sirupsen/logrus"
@@ -18,6 +19,7 @@ import (
 
 const defaultRegistryUrl = "https://download.daytona.io/daytona"
 const defaultServerDownloadUrl = "https://download.daytona.io/daytona/install.sh"
+const defaultSamplesIndexUrl = "https://raw.githubusercontent.com/daytonaio/daytona/main/hack/samples/index.json"
 const defaultHeadscalePort = 3987
 const defaultApiPort = 3986
 const defaultBuilderImage = "daytonaio/workspace-project:latest"
@@ -117,6 +119,7 @@ func getDefaultConfig() (*Config, error) {
 		LocalBuilderRegistryImage: defaultLocalBuilderRegistryImage,
 		BuilderRegistryServer:     defaultBuilderRegistryServer,
 		BuildImageNamespace:       defaultBuildImageNamespace,
+		SamplesIndexUrl:           defaultSamplesIndexUrl,
 	}
 
 	if os.Getenv("DEFAULT_REGISTRY_URL") != "" {
@@ -164,12 +167,12 @@ func parsePort(port string) (uint32, error) {
 }
 
 func getDefaultProvidersDir() (string, error) {
-	userConfigDir, err := os.UserConfigDir()
+	configDir, err := config.GetConfigDir()
 	if err != nil {
 		return "", err
 	}
 
-	return filepath.Join(userConfigDir, "daytona", "providers"), nil
+	return filepath.Join(configDir, "providers"), nil
 }
 
 func getDefaultLogFilePath() (string, error) {

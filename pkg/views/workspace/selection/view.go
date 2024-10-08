@@ -21,6 +21,8 @@ import (
 
 var CustomRepoIdentifier = "<CUSTOM_REPO>"
 
+const CREATE_FROM_SAMPLE = "<CREATE_FROM_SAMPLE>"
+
 var selectedStyles = lipgloss.NewStyle().
 	Border(lipgloss.NormalBorder(), false, false, false, true).
 	BorderForeground(views.Green).
@@ -38,7 +40,8 @@ var statusMessageDangerStyle = lipgloss.NewStyle().Bold(true).
 type item[T any] struct {
 	id, title, desc, createdTime, uptime, target string
 	choiceProperty                               T
-	markForDeletion, isDisabled                  bool
+	markForDeletion                              bool
+	isMultipleSelect                             bool
 }
 
 func (i item[T]) Title() string       { return i.title }
@@ -72,63 +75,11 @@ func (m model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch keypress := msg.String(); keypress {
-		case "down", "j":
-			for {
-				isSubsequentItemsDisabled := true
-				curIndex := m.list.Index()
-				lastIndex := len(m.list.Items()) - 1
-				for i := curIndex + 1; i <= lastIndex; i++ {
-					if !m.list.Items()[i].(item[T]).isDisabled {
-						isSubsequentItemsDisabled = false
-						break
-					}
-				}
-				// no need of moving cursor down if all subsequent items after current index have
-				// disabled property true.
-				if isSubsequentItemsDisabled {
-					break
-				}
-
-				m.list.CursorDown()
-				item := m.list.SelectedItem().(item[T])
-				if !item.isDisabled {
-					break
-				}
-			}
-			return m, nil
-		case "up", "k":
-			for {
-				isPrecedingItemsDisabled := true
-				curIndex := m.list.Index()
-				for i := curIndex - 1; i >= 0; i-- {
-					if !m.list.Items()[i].(item[T]).isDisabled {
-						isPrecedingItemsDisabled = false
-						break
-					}
-				}
-
-				// no need of moving cursor up if all preceding items before current index have
-				// disabled property true.
-				if isPrecedingItemsDisabled {
-					break
-				}
-
-				m.list.CursorUp()
-				item := m.list.SelectedItem().(item[T])
-				if !item.isDisabled {
-					break
-				}
-			}
-			return m, nil
 		case "ctrl+c":
 			return m, tea.Quit
 
 		case "enter":
 			i, ok := m.list.SelectedItem().(item[T])
-			if i.isDisabled {
-				// avoid any action for 'enter' keypress on the disabled option
-				break
-			}
 			if ok {
 				m.choice = &i.choiceProperty
 			}
@@ -151,15 +102,6 @@ func (m model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		h, v := views.DocStyle.GetFrameSize()
 		m.list.SetSize(msg.Width-h, msg.Height-v)
-	}
-
-	// default case: Ensure the cursor starts from the first non-disabled item
-	for i := 0; i < len(m.list.Items()); i++ {
-		item := m.list.Items()[i].(item[T])
-		if !item.isDisabled {
-			m.list.Select(i)
-			break
-		}
 	}
 
 	var cmd tea.Cmd
@@ -205,10 +147,10 @@ func (d ItemDelegate[T]) Render(w io.Writer, m list.Model, index int, listItem l
 
 	baseStyles := lipgloss.NewStyle().Padding(0, 0, 0, 2)
 
-	title := baseStyles.Copy().Render(i.Title())
+	title := baseStyles.Render(i.Title())
 	idWithTargetString := fmt.Sprintf("%s (%s)", i.Id(), i.Target())
-	idWithTarget := baseStyles.Copy().Foreground(views.Gray).Render(idWithTargetString)
-	description := baseStyles.Copy().Render(i.Description())
+	idWithTarget := baseStyles.Foreground(views.Gray).Render(idWithTargetString)
+	description := baseStyles.Render(i.Description())
 
 	// Add the created/updated time if it's available
 	timeWidth := m.Width() - baseStyles.GetHorizontalFrameSize() - lipgloss.Width(title)
@@ -224,10 +166,10 @@ func (d ItemDelegate[T]) Render(w io.Writer, m list.Model, index int, listItem l
 
 	// Adjust styles as the user moves through the menu
 	if isSelected {
-		title = selectedStyles.Copy().Foreground(views.Green).Render(i.Title())
-		idWithTarget = selectedStyles.Copy().Foreground(views.Gray).Render(idWithTargetString)
-		description = selectedStyles.Copy().Foreground(views.DimmedGreen).Render(i.Description())
-		timeString = timeStyles.Copy().Foreground(views.DimmedGreen).Render(timeString)
+		title = selectedStyles.Foreground(views.Green).Render(i.Title())
+		idWithTarget = selectedStyles.Foreground(views.Gray).Render(idWithTargetString)
+		description = selectedStyles.Foreground(views.DimmedGreen).Render(i.Description())
+		timeString = timeStyles.Foreground(views.DimmedGreen).Render(timeString)
 	}
 
 	// Render to the terminal
@@ -263,6 +205,9 @@ func (d ItemDelegate[T]) Update(msg tea.Msg, m *list.Model) tea.Cmd {
 	case tea.KeyMsg:
 		switch keypress := msg.String(); keypress {
 		case "x":
+			if !i.isMultipleSelect {
+				return nil
+			}
 			if i.markForDeletion {
 				i.title = strings.TrimPrefix(i.title, statusMessageDangerStyle("Delete: "))
 				i.markForDeletion = false

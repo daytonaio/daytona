@@ -20,17 +20,10 @@ import (
 )
 
 func (s *HeadscaleServer) getHeadscaleConfig() (*hstypes.Config, error) {
-	headscaleConfigDir, err := s.getHeadscaleConfigDir()
-	if err != nil {
-		return nil, err
-	}
-
 	cfg := &hstypes.Config{
-		DBtype:                         "sqlite3",
 		ServerURL:                      fmt.Sprintf("https://%s.%s", s.serverId, s.frpsDomain),
 		Addr:                           fmt.Sprintf("0.0.0.0:%d", s.headscalePort),
 		EphemeralNodeInactivityTimeout: 5 * time.Minute,
-		NodeUpdateCheckInterval:        10 * time.Second,
 		BaseDomain:                     "daytona.local",
 		DERP: hstypes.DERPConfig{
 			ServerEnabled:                      true,
@@ -39,17 +32,13 @@ func (s *HeadscaleServer) getHeadscaleConfig() (*hstypes.Config, error) {
 			ServerRegionCode:                   "local",
 			ServerRegionName:                   "Daytona embedded DERP",
 			Paths:                              []string{},
-			ServerPrivateKeyPath:               filepath.Join(headscaleConfigDir, "derp_server_private.key"),
+			ServerPrivateKeyPath:               filepath.Join(s.configDir, "derp_server_private.key"),
 			UpdateFrequency:                    24 * time.Hour,
 			AutoUpdate:                         true,
 			STUNAddr:                           "0.0.0.0:3478",
 		},
 		Log: hstypes.LogConfig{
 			Format: "text",
-		},
-		IPPrefixes: []netip.Prefix{
-			netip.MustParsePrefix("fd7a:115c:a1e0::/48"),
-			netip.MustParsePrefix("100.64.0.0/10"),
 		},
 		DNSConfig: &tailcfg.DNSConfig{
 			Proxied: true,
@@ -66,17 +55,38 @@ func (s *HeadscaleServer) getHeadscaleConfig() (*hstypes.Config, error) {
 				},
 			},
 		},
-		DBpath:               filepath.Join(headscaleConfigDir, "headscale.db"),
-		UnixSocket:           filepath.Join(headscaleConfigDir, "headscale.sock"),
+
+		Database: hstypes.DatabaseConfig{
+			Sqlite: hstypes.SqliteConfig{
+				Path: filepath.Join(s.configDir, "headscale.db"),
+			},
+			Type: "sqlite3",
+		},
+		UnixSocket:           filepath.Join(s.configDir, "headscale.sock"),
 		UnixSocketPermission: fs.FileMode.Perm(0700),
-		NoisePrivateKeyPath:  filepath.Join(headscaleConfigDir, "noise_private.key"),
+		NoisePrivateKeyPath:  filepath.Join(s.configDir, "noise_private.key"),
 		CLI: hstypes.CLIConfig{
 			Timeout: 10 * time.Second,
 		},
+		Tuning: hstypes.Tuning{
+			BatchChangeDelay:               800 * time.Millisecond,
+			NotifierSendTimeout:            800 * time.Millisecond,
+			NodeMapSessionBufferedChanSize: 30,
+		},
+		IPAllocation: hstypes.IPAllocationStrategySequential,
+		Policy: hstypes.PolicyConfig{
+			Mode: hstypes.PolicyModeDB,
+		},
 	}
+
+	v4Prefix := netip.MustParsePrefix("100.64.0.0/10")
+	v6Prefix := netip.MustParsePrefix("fd7a:115c:a1e0::/48")
+	cfg.PrefixV4 = &v4Prefix
+	cfg.PrefixV6 = &v6Prefix
 
 	logLevelEnv, logLevelSet := os.LookupEnv("LOG_LEVEL")
 	if logLevelSet {
+		var err error
 		cfg.Log.Level, err = zerolog.ParseLevel(logLevelEnv)
 		if err != nil {
 			cfg.Log.Level = zerolog.ErrorLevel

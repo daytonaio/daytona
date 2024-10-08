@@ -4,18 +4,18 @@
 package apiclient
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
 	"regexp"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/gorilla/websocket"
 )
 
-func GetWebsocketConn(path string, profile *config.Profile, query *string) (*websocket.Conn, *http.Response, error) {
+func GetWebsocketConn(ctx context.Context, path string, profile *config.Profile, query *string) (*websocket.Conn, *http.Response, error) {
 	c, err := config.GetConfig()
 	if err != nil {
 		return nil, nil, err
@@ -24,24 +24,19 @@ func GetWebsocketConn(path string, profile *config.Profile, query *string) (*web
 	var serverUrl string
 	var apiKey string
 
-	if envApiUrl, ok := os.LookupEnv("DAYTONA_SERVER_API_URL"); ok {
-		serverUrl = envApiUrl
-		apiKey = os.Getenv("DAYTONA_SERVER_API_KEY")
-	} else {
-		var activeProfile config.Profile
-		if profile == nil {
-			var err error
-			activeProfile, err = c.GetActiveProfile()
-			if err != nil {
-				return nil, nil, err
-			}
-		} else {
-			activeProfile = *profile
+	var activeProfile config.Profile
+	if profile == nil {
+		var err error
+		activeProfile, err = c.GetActiveProfile()
+		if err != nil {
+			return nil, nil, err
 		}
-
-		serverUrl = activeProfile.Api.Url
-		apiKey = activeProfile.Api.Key
+	} else {
+		activeProfile = *profile
 	}
+
+	serverUrl = activeProfile.Api.Url
+	apiKey = activeProfile.Api.Key
 
 	url, err := url.JoinPath(serverUrl, path)
 	if err != nil {
@@ -57,7 +52,7 @@ func GetWebsocketConn(path string, profile *config.Profile, query *string) (*web
 		wsUrl = fmt.Sprintf("%s?%s", wsUrl, *query)
 	}
 
-	return websocket.DefaultDialer.Dial(wsUrl, http.Header{
+	return websocket.DefaultDialer.DialContext(ctx, wsUrl, http.Header{
 		"Authorization": []string{fmt.Sprintf("Bearer %s", apiKey)},
 	})
 }

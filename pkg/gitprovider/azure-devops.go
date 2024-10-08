@@ -5,18 +5,23 @@ package gitprovider
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
 
+	"github.com/daytonaio/daytona/internal/util"
+	azureWebhook "github.com/go-playground/webhooks/v6/azuredevops"
 	"github.com/google/uuid"
 	"github.com/microsoft/azure-devops-go-api/azuredevops"
 	"github.com/microsoft/azure-devops-go-api/azuredevops/core"
 	"github.com/microsoft/azure-devops-go-api/azuredevops/git"
 	"github.com/microsoft/azure-devops-go-api/azuredevops/location"
+	"github.com/microsoft/azure-devops-go-api/azuredevops/servicehooks"
 )
 
 type AzureDevOpsGitProvider struct {
@@ -37,8 +42,17 @@ func NewAzureDevOpsGitProvider(token string, baseApiUrl string) *AzureDevOpsGitP
 	return provider
 }
 
+func (g *AzureDevOpsGitProvider) CanHandle(repoUrl string) (bool, error) {
+	staticContext, err := g.ParseStaticGitContext(repoUrl)
+	if err != nil {
+		return false, err
+	}
+
+	return strings.Contains(g.baseApiUrl, staticContext.Source), nil
+}
+
 func (g *AzureDevOpsGitProvider) GetNamespaces() ([]*GitNamespace, error) {
-	client, err := g.getApiClient()
+	client, _, err := g.getApiClient()
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +74,7 @@ func (g *AzureDevOpsGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 			ContinuationToken: &pages.ContinuationToken,
 		}
 	}
-	return nil, err
+	return nil, g.FormatError(err)
 }
 
 func (g *AzureDevOpsGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
@@ -73,7 +87,7 @@ func (g *AzureDevOpsGitProvider) GetRepositories(namespace string) ([]*GitReposi
 		Project: &namespace,
 	})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	repositories := []*GitRepository{}
@@ -90,7 +104,7 @@ func (g *AzureDevOpsGitProvider) GetRepositories(namespace string) ([]*GitReposi
 		gitRepo := &GitRepository{
 			Id:     repo.Id.String(),
 			Name:   *repo.Name,
-			Branch: &defaultBranch,
+			Branch: defaultBranch,
 			Url:    *repo.WebUrl,
 			Source: u.Host,
 		}
@@ -110,7 +124,7 @@ func (g *AzureDevOpsGitProvider) GetUser() (*GitUser, error) {
 	ctx := context.Background()
 	connectionData, err := client.GetConnectionData(ctx, location.GetConnectionDataArgs{})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	user := &GitUser{}
@@ -141,7 +155,7 @@ func (g *AzureDevOpsGitProvider) GetRepoBranches(repositoryId string, namespaceI
 		RepositoryId: &repositoryId,
 	})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	var response []*GitBranch
@@ -178,7 +192,7 @@ func (g *AzureDevOpsGitProvider) GetRepoPRs(repositoryId string, namespaceId str
 		},
 	})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	response := []*GitPullRequest{}
@@ -199,7 +213,7 @@ func (g *AzureDevOpsGitProvider) GetRepoPRs(repositoryId string, namespaceId str
 			RepositoryId: &repositoryId,
 		})
 		if err != nil {
-			return nil, err
+			return nil, g.FormatError(err)
 		}
 
 		pullrequest.SourceRepoUrl = *repo.WebUrl
@@ -245,7 +259,7 @@ func (g *AzureDevOpsGitProvider) GetLastCommitSha(staticContext *StaticGitContex
 		Top: &[]int{1}[0],
 	})
 	if err != nil {
-		return "", err
+		return "", g.FormatError(err)
 	}
 
 	if len(*commits) == 0 {
@@ -254,7 +268,103 @@ func (g *AzureDevOpsGitProvider) GetLastCommitSha(staticContext *StaticGitContex
 	return *(*commits)[0].CommitId, nil
 }
 
-func (g *AzureDevOpsGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
+func (g *AzureDevOpsGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
+	client, err := g.getGitClient()
+	if err != nil {
+		return "", err
+	}
+
+	branches, err := client.GetBranches(context.Background(), git.GetBranchesArgs{
+		RepositoryId: &staticContext.Id,
+	})
+	if err != nil {
+		return "", g.FormatError(err)
+	}
+
+	var branchName string
+	for _, branch := range *branches {
+		if *branch.Commit.CommitId == *staticContext.Sha {
+			branchName = *branch.Name
+			break
+		}
+
+		searchCriteria := &git.GitQueryCommitsCriteria{
+			ItemVersion: &git.GitVersionDescriptor{
+				Version:     &branchName,
+				VersionType: &git.GitVersionTypeValues.Branch,
+			},
+			FromCommitId: staticContext.Sha,
+			ToCommitId:   staticContext.Sha,
+		}
+
+		commits, err := client.GetCommitsBatch(context.Background(), git.GetCommitsBatchArgs{
+			SearchCriteria: searchCriteria,
+			RepositoryId:   &staticContext.Id,
+		})
+		if err != nil {
+			continue
+		}
+
+		if len(*commits) == 0 {
+			continue
+		}
+
+		for _, commit := range *commits {
+			if *commit.CommitId == *staticContext.Sha {
+				branchName = *branch.Name
+				break
+			}
+
+		}
+		if branchName != "" {
+			break
+		}
+
+	}
+
+	if branchName == "" {
+		return "", fmt.Errorf("status code: %d branch not found for SHA: %s", http.StatusNotFound, *staticContext.Sha)
+	}
+
+	return branchName, nil
+}
+
+func (g *AzureDevOpsGitProvider) GetUrlFromContext(repoContext *GetRepositoryContext) string {
+	url := strings.TrimSuffix(repoContext.Url, ".git")
+	if repoContext.Name != nil {
+		url = strings.TrimSuffix(url, *repoContext.Name)
+		url += "_git/" + *repoContext.Name
+	}
+	query := ""
+
+	if repoContext.Branch != nil && *repoContext.Branch != "" {
+		if repoContext.Sha != nil && *repoContext.Sha == *repoContext.Branch {
+			query += "version=GC" + *repoContext.Branch
+		} else {
+			query += "version=GB" + *repoContext.Branch
+		}
+
+		if repoContext.Path != nil && *repoContext.Path != "" {
+			if query != "" {
+				query += "&"
+			}
+
+			query += "path=" + *repoContext.Path
+		}
+	} else if repoContext.Path != nil {
+		query = "version=GBmain&path=" + *repoContext.Path
+	} else {
+		url = strings.Replace(url, "/_git", "", 1)
+	}
+
+	if query != "" {
+		url += "?" + query
+	}
+
+	return url
+}
+
+func (g *AzureDevOpsGitProvider) GetPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
 	var pullRequestId int
 	if staticContext.PrNumber == nil {
 		return staticContext, nil
@@ -273,7 +383,7 @@ func (g *AzureDevOpsGitProvider) getPrContext(staticContext *StaticGitContext) (
 		PullRequestId: &pullRequestId,
 	})
 	if err != nil {
-		return nil, err
+		return nil, g.FormatError(err)
 	}
 
 	repo := *staticContext
@@ -292,7 +402,7 @@ func (g *AzureDevOpsGitProvider) getPrContext(staticContext *StaticGitContext) (
 	return &repo, nil
 }
 
-func (g *AzureDevOpsGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
+func (g *AzureDevOpsGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
 	repoUrl = strings.TrimSpace(repoUrl)
 	if strings.HasPrefix(repoUrl, "git@") {
 		return g.parseAzureDevopsSshGitUrl(repoUrl)
@@ -303,6 +413,25 @@ func (g *AzureDevOpsGitProvider) parseStaticGitContext(repoUrl string) (*StaticG
 	}
 
 	return nil, errors.New("can not parse git URL: " + repoUrl)
+}
+
+func (g *AzureDevOpsGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*string, error) {
+	client, err := g.getGitClient()
+	if err != nil {
+		return nil, err
+	}
+
+	ctx := context.Background()
+	repo, err := client.GetRepository(ctx, git.GetRepositoryArgs{
+		RepositoryId: &staticContext.Id,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	defaultBranch := *repo.DefaultBranch
+	defaultBranch = strings.TrimPrefix(defaultBranch, "refs/heads/")
+	return &defaultBranch, nil
 }
 
 func (g *AzureDevOpsGitProvider) parseAzureDevopsSshGitUrl(gitURL string) (*StaticGitContext, error) {
@@ -464,15 +593,15 @@ func (g *AzureDevOpsGitProvider) getGitClient() (git.Client, error) {
 	return client, nil
 }
 
-func (g *AzureDevOpsGitProvider) getApiClient() (core.Client, error) {
+func (g *AzureDevOpsGitProvider) getApiClient() (core.Client, *azuredevops.Connection, error) {
 	ctx := context.Background()
 	connection := azuredevops.NewPatConnection(g.baseApiUrl, g.token)
 
 	client, err := core.NewClient(ctx, connection)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return client, nil
+	return client, connection, nil
 }
 
 func (g *AzureDevOpsGitProvider) getLocationClient() location.Client {
@@ -481,4 +610,181 @@ func (g *AzureDevOpsGitProvider) getLocationClient() location.Client {
 
 	client := location.NewClient(ctx, connection)
 	return client
+}
+
+func (g *AzureDevOpsGitProvider) RegisterPrebuildWebhook(repo *GitRepository, endpointUrl string) (string, error) {
+	coreClient, conn, err := g.getApiClient()
+	if err != nil {
+		return "", err
+	}
+
+	serviceHooksClient := servicehooks.NewClient(context.Background(), conn)
+
+	project, err := coreClient.GetProject(context.Background(), core.GetProjectArgs{
+		ProjectId: &repo.Name,
+	})
+	if err != nil {
+		return "", fmt.Errorf("failed to get project: %w", err)
+	}
+	projectID := project.Id.String()
+
+	subscription := servicehooks.Subscription{
+		PublisherId:      util.Pointer("tfs"),
+		EventType:        util.Pointer("git.push"),
+		ResourceVersion:  util.Pointer("1.0"),
+		ConsumerActionId: util.Pointer("httpRequest"),
+		ConsumerId:       util.Pointer("webHooks"),
+		ConsumerInputs: &map[string]string{
+			"url":         endpointUrl,
+			"httpHeaders": "X-AzureDevops-Event:git.push\nX-Owner:" + repo.Owner,
+		},
+		PublisherInputs: &map[string]string{
+			"projectId":  projectID,
+			"repository": repo.Id,
+		},
+		Status: &servicehooks.SubscriptionStatusValues.Enabled,
+	}
+
+	var hook *servicehooks.Subscription
+	hook, err = serviceHooksClient.CreateSubscription(context.Background(), servicehooks.CreateSubscriptionArgs{
+		Subscription: &subscription,
+	})
+	if err != nil {
+		return "", fmt.Errorf("failed to create subscription: %w", err)
+	}
+
+	return hook.Id.String(), nil
+}
+
+func (g *AzureDevOpsGitProvider) GetPrebuildWebhook(repo *GitRepository, endpointUrl string) (*string, error) {
+	_, conn, err := g.getApiClient()
+	if err != nil {
+		return nil, err
+	}
+
+	serviceHooksClient := servicehooks.NewClient(context.Background(), conn)
+	hooks, err := serviceHooksClient.ListSubscriptions(context.Background(), servicehooks.ListSubscriptionsArgs{
+		PublisherId:      util.Pointer("tfs"),
+		ConsumerActionId: util.Pointer("httpRequest"),
+		ConsumerId:       util.Pointer("webHooks"),
+		EventType:        util.Pointer("git.push"),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to list subscriptions: %w", err)
+	}
+
+	for _, hook := range *hooks {
+		if (*hook.ConsumerInputs)["url"] == endpointUrl {
+			return util.Pointer(hook.Id.String()), nil
+		}
+	}
+
+	return nil, nil
+}
+
+func (g *AzureDevOpsGitProvider) UnregisterPrebuildWebhook(repo *GitRepository, id string) error {
+	_, conn, err := g.getApiClient()
+	if err != nil {
+		return err
+	}
+
+	uuid, err := uuid.Parse(id)
+	if err != nil {
+		return err
+	}
+
+	serviceHooksClient := servicehooks.NewClient(context.Background(), conn)
+
+	if err := serviceHooksClient.DeleteSubscription(context.Background(), servicehooks.DeleteSubscriptionArgs{
+		SubscriptionId: &uuid,
+	}); err != nil {
+		return fmt.Errorf("failed to delete subscription: %w", err)
+	}
+
+	return nil
+}
+
+func (g *AzureDevOpsGitProvider) GetCommitsRange(repo *GitRepository, initialSha string, currentSha string) (int, error) {
+	gitClient, err := g.getGitClient()
+	if err != nil {
+		return 0, err
+	}
+
+	commits, err := gitClient.GetCommitDiffs(context.Background(), git.GetCommitDiffsArgs{
+		RepositoryId: &repo.Id,
+		Project:      &repo.Name,
+		BaseVersionDescriptor: &git.GitBaseVersionDescriptor{
+			BaseVersion:     &initialSha,
+			BaseVersionType: &git.GitVersionTypeValues.Commit,
+		},
+		TargetVersionDescriptor: &git.GitTargetVersionDescriptor{
+			TargetVersion:     &currentSha,
+			TargetVersionType: &git.GitVersionTypeValues.Commit,
+		},
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	return *commits.AheadCount, nil
+}
+
+func (g *AzureDevOpsGitProvider) ParseEventData(request *http.Request) (*GitEventData, error) {
+	if request.Header.Get("X-AzureDevops-Event") != "git.push" {
+		return nil, fmt.Errorf("invalid event key: %s", request.Header.Get("X-AzureDevops-Event"))
+	}
+
+	hook, err := azureWebhook.New()
+	if err != nil {
+		return nil, err
+	}
+	event, err := hook.Parse(request, azureWebhook.GitPushEventType)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse event: %w", err)
+	}
+	pushEvent, ok := event.(azureWebhook.GitPushEvent)
+	if !ok {
+		return nil, fmt.Errorf("failed to parse push event: %w", err)
+	}
+
+	owner := request.Header.Get("X-Owner")
+
+	gitEventData := &GitEventData{
+		Owner:  owner,
+		Url:    util.CleanUpRepositoryUrl(pushEvent.Resource.Repository.RemoteURL),
+		Branch: strings.TrimPrefix(pushEvent.Resource.Repository.DefaultBranch, "refs/heads/"),
+		Sha:    pushEvent.Resource.Commits[0].CommitID,
+	}
+
+	for _, commit := range pushEvent.Resource.Commits {
+		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.CommitID)
+	}
+
+	return gitEventData, nil
+}
+
+func (g *AzureDevOpsGitProvider) FormatError(err error) error {
+	data, marshalErr := json.Marshal(err)
+	if marshalErr != nil {
+		return fmt.Errorf("status code: %d err: failed to format the error message: Request failed with %s", http.StatusInternalServerError, marshalErr.Error())
+	}
+
+	jsonData := azuredevops.WrappedError{}
+	unmarshalErr := json.Unmarshal(data, &jsonData)
+	if unmarshalErr != nil {
+		return fmt.Errorf("status code: %d err: failed to format the error message: Request failed with %s", http.StatusInternalServerError, unmarshalErr.Error())
+	}
+
+	statusCode := http.StatusInternalServerError
+	message := "unknown error"
+
+	if jsonData.StatusCode != nil {
+		statusCode = *jsonData.StatusCode
+	}
+
+	if jsonData.Message != nil {
+		message = *jsonData.Message
+	}
+
+	return fmt.Errorf("status code: %d err: Request failed with %s", statusCode, message)
 }

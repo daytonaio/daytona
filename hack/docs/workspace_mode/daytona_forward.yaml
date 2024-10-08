@@ -1,16 +1,9 @@
 name: daytona forward
-synopsis: Forward a port from the project to your local machine
+synopsis: Forward a port publicly via an URL
 usage: daytona forward [PORT] [flags]
-options:
-    - name: public
-      default_value: "false"
-      usage: Should be port be available publicly via an URL
 inherited_options:
     - name: help
       default_value: "false"
       usage: help for daytona
-    - name: output
-      shorthand: o
-      usage: Output format. Must be one of (yaml, json)
 see_also:
     - daytona - Use the Daytona CLI to manage your workspace

@@ -18,22 +18,25 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-var DoneConfiguring = apiclient.CreateWorkspaceRequestProject{Name: "DoneConfiguringName"}
+var doneConfiguringName = "DoneConfiguringName"
+var DoneConfiguring = apiclient.CreateProjectDTO{
+	Name: doneConfiguringName,
+}
 
 type projectRequestItem struct {
-	item[apiclient.CreateWorkspaceRequestProject]
+	item[apiclient.CreateProjectDTO]
 	name, image, user, devcontainerConfig string
-	project                               apiclient.CreateWorkspaceRequestProject
+	project                               apiclient.CreateProjectDTO
 }
 
 type projectRequestItemDelegate struct {
-	ItemDelegate[apiclient.CreateWorkspaceRequestProject]
+	ItemDelegate[apiclient.CreateProjectDTO]
 }
 type projectRequestModel struct {
-	model[apiclient.CreateWorkspaceRequestProject]
+	model[apiclient.CreateProjectDTO]
 }
 
-func selectProjectRequestPrompt(projects *[]apiclient.CreateWorkspaceRequestProject, choiceChan chan<- *apiclient.CreateWorkspaceRequestProject) {
+func selectProjectRequestPrompt(projects *[]apiclient.CreateProjectDTO, choiceChan chan<- *apiclient.CreateProjectDTO) {
 	items := []list.Item{}
 
 	for _, project := range *projects {
@@ -42,17 +45,15 @@ func selectProjectRequestPrompt(projects *[]apiclient.CreateWorkspaceRequestProj
 		var user string
 		var devcontainerConfig string
 
-		if project.Name != "" {
-			name = fmt.Sprintf("%s %s", "Project:", project.Name)
-		}
+		name = fmt.Sprintf("%s %s", "Project:", project.Name)
 		if project.Image != nil {
 			image = fmt.Sprintf("%s %s", "Image:", *project.Image)
 		}
 		if project.User != nil {
 			user = fmt.Sprintf("%s %s", "User:", *project.User)
 		}
-		if project.Build != nil && project.Build.Devcontainer != nil && project.Build.Devcontainer.DevContainerFilePath != nil {
-			devcontainerConfig = fmt.Sprintf("%s %s", "Devcontainer Config:", *project.Build.Devcontainer.DevContainerFilePath)
+		if project.BuildConfig != nil && project.BuildConfig.Devcontainer != nil {
+			devcontainerConfig = fmt.Sprintf("%s %s", "Devcontainer Config:", project.BuildConfig.Devcontainer.FilePath)
 		}
 
 		newItem := projectRequestItem{name: name, image: image, user: user, project: project, devcontainerConfig: devcontainerConfig}
@@ -95,8 +96,8 @@ func selectProjectRequestPrompt(projects *[]apiclient.CreateWorkspaceRequestProj
 	}
 }
 
-func GetProjectRequestFromPrompt(projects *[]apiclient.CreateWorkspaceRequestProject) *apiclient.CreateWorkspaceRequestProject {
-	choiceChan := make(chan *apiclient.CreateWorkspaceRequestProject)
+func GetProjectRequestFromPrompt(projects *[]apiclient.CreateProjectDTO) *apiclient.CreateProjectDTO {
+	choiceChan := make(chan *apiclient.CreateProjectDTO)
 
 	go selectProjectRequestPrompt(projects, choiceChan)
 
@@ -138,17 +139,17 @@ func (d projectRequestItemDelegate) Render(w io.Writer, m list.Model, index int,
 
 	baseStyles := lipgloss.NewStyle().Padding(0, 0, 0, 2)
 
-	name := baseStyles.Copy().Render(i.Name())
-	imageLine := baseStyles.Copy().Render(i.Image())
-	devcontainerConfigLine := baseStyles.Copy().Render(i.DevcontainerConfig())
-	userLine := baseStyles.Copy().Foreground(views.Gray).Render(i.User())
+	name := baseStyles.Render(i.Name())
+	imageLine := baseStyles.Render(i.Image())
+	devcontainerConfigLine := baseStyles.Render(i.DevcontainerConfig())
+	userLine := baseStyles.Foreground(views.Gray).Render(i.User())
 
 	// Adjust styles as the user moves through the menu
 	if isSelected {
-		name = selectedStyles.Copy().Foreground(views.Green).Render(i.Name())
-		devcontainerConfigLine = selectedStyles.Copy().Foreground(views.DimmedGreen).Render(i.DevcontainerConfig())
-		imageLine = selectedStyles.Copy().Foreground(views.DimmedGreen).Render(i.Image())
-		userLine = selectedStyles.Copy().Foreground(views.Gray).Render(i.User())
+		name = selectedStyles.Foreground(views.Green).Render(i.Name())
+		devcontainerConfigLine = selectedStyles.Foreground(views.DimmedGreen).Render(i.DevcontainerConfig())
+		imageLine = selectedStyles.Foreground(views.DimmedGreen).Render(i.Image())
+		userLine = selectedStyles.Foreground(views.Gray).Render(i.User())
 	}
 
 	// Render to the terminal

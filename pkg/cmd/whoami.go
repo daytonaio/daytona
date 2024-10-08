@@ -7,9 +7,8 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 
-	"github.com/daytonaio/daytona/pkg/cmd/output"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
 	view "github.com/daytonaio/daytona/pkg/views/whoami"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -19,22 +18,28 @@ var whoamiCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Aliases: []string{"who", "user"},
 	GroupID: util.PROFILE_GROUP,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		profile, err := c.GetActiveProfile()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
-		if output.FormatFlag != "" {
-			output.Output = profile
-			return
+		if format.FormatFlag != "" {
+			formattedData := format.NewFormatter(profile)
+			formattedData.Print()
+			return nil
 		}
 
 		view.Render(profile)
+		return nil
 	},
+}
+
+func init() {
+	format.RegisterFormatFlag(whoamiCmd)
 }

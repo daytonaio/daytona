@@ -6,15 +6,20 @@ options:
       shorthand: a
       default_value: "false"
       usage: Start all workspaces
+    - name: code
+      shorthand: c
+      default_value: "false"
+      usage: Open the workspace in the IDE after workspace start
     - name: project
       shorthand: p
       usage: Start a single project in the workspace (project name)
+    - name: "yes"
+      shorthand: "y"
+      default_value: "false"
+      usage: Automatically confirm any prompts
 inherited_options:
     - name: help
       default_value: "false"
       usage: help for daytona
-    - name: output
-      shorthand: o
-      usage: Output format. Must be one of (yaml, json)
 see_also:
     - daytona - Daytona is a Dev Environment Manager

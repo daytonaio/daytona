@@ -4,15 +4,15 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Password** | Pointer to **string** |  | [optional] 
-**Server** | Pointer to **string** |  | [optional] 
-**Username** | Pointer to **string** |  | [optional] 
+**Password** | **string** |  | 
+**Server** | **string** |  | 
+**Username** | **string** |  | 
 
 ## Methods
 
 ### NewContainerRegistry
 
-`func NewContainerRegistry() *ContainerRegistry`
+`func NewContainerRegistry(password string, server string, username string, ) *ContainerRegistry`
 
 NewContainerRegistry instantiates a new ContainerRegistry object
 This constructor will assign default values to properties that have it defined,
@@ -46,11 +46,6 @@ and a boolean to check if the value has been set.
 
 SetPassword sets Password field to given value.
 
-### HasPassword
-
-`func (o *ContainerRegistry) HasPassword() bool`
-
-HasPassword returns a boolean if a field has been set.
 
 ### GetServer
 
@@ -71,11 +66,6 @@ and a boolean to check if the value has been set.
 
 SetServer sets Server field to given value.
 
-### HasServer
-
-`func (o *ContainerRegistry) HasServer() bool`
-
-HasServer returns a boolean if a field has been set.
 
 ### GetUsername
 
@@ -96,11 +86,6 @@ and a boolean to check if the value has been set.
 
 SetUsername sets Username field to given value.
 
-### HasUsername
-
-`func (o *ContainerRegistry) HasUsername() bool`
-
-HasUsername returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

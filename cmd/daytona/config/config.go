@@ -188,6 +188,11 @@ func getConfigPath() (string, error) {
 }
 
 func GetConfigDir() (string, error) {
+	daytonaConfigDir := os.Getenv("DAYTONA_CONFIG_DIR")
+	if daytonaConfigDir != "" {
+		return daytonaConfigDir, nil
+	}
+
 	userConfigDir, err := os.UserConfigDir()
 	if err != nil {
 		return "", err
@@ -236,4 +241,19 @@ func GetClientId() string {
 	}
 
 	return c.Id
+}
+
+func GetErrorLogsDir() (string, error) {
+	configDir, err := GetConfigDir()
+	if err != nil {
+		return "", err
+	}
+
+	errorLogsDir := filepath.Join(configDir, "error_logs")
+	err = os.MkdirAll(errorLogsDir, 0755)
+	if err != nil {
+		return "", err
+	}
+
+	return errorLogsDir, nil
 }

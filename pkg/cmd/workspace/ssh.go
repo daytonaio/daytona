@@ -8,77 +8,88 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/internal/util/apiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
+	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/ide"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 var SshCmd = &cobra.Command{
-	Use:     "ssh [WORKSPACE] [PROJECT]",
+	Use:     "ssh [WORKSPACE] [PROJECT] [CMD...]",
 	Short:   "SSH into a project using the terminal",
-	Args:    cobra.RangeArgs(0, 2),
+	Args:    cobra.ArbitraryArgs,
 	GroupID: util.WORKSPACE_GROUP,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		activeProfile, err := c.GetActiveProfile()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		ctx := context.Background()
-		var workspaceId string
+		var workspace *apiclient.WorkspaceDTO
 		var projectName string
 
-		apiClient, err := apiclient.GetApiClient(&activeProfile)
+		apiClient, err := apiclient_util.GetApiClient(&activeProfile)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if len(args) == 0 {
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
-				log.Fatal(apiclient.HandleErrorResponse(res, err))
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
-			workspace := selection.GetWorkspaceFromPrompt(workspaceList, "SSH Into")
+			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "SSH Into")
 			if workspace == nil {
-				return
+				return nil
 			}
-			workspaceId = *workspace.Id
 		} else {
-			workspace, err := apiclient.GetWorkspace(args[0])
+			workspace, err = apiclient_util.GetWorkspace(args[0], true)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
-			workspaceId = *workspace.Id
 		}
 
 		if len(args) == 0 || len(args) == 1 {
-			selectedProject, err := selectWorkspaceProject(workspaceId, &activeProfile)
+			selectedProject, err := selectWorkspaceProject(workspace.Id, &activeProfile)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 			if selectedProject == nil {
-				return
+				return nil
 			}
-			projectName = *selectedProject.Name
+			projectName = selectedProject.Name
 		}
 
-		if len(args) == 2 {
+		if len(args) >= 2 {
 			projectName = args[1]
 		}
 
-		err = ide.OpenTerminalSsh(activeProfile, workspaceId, projectName)
-		if err != nil {
-			log.Fatal(err)
+		if !workspace_util.IsProjectRunning(workspace, projectName) {
+			wsRunningStatus, err := AutoStartWorkspace(workspace.Name, projectName)
+			if err != nil {
+				return err
+			}
+			if !wsRunningStatus {
+				return nil
+			}
 		}
+
+		sshArgs := []string{}
+		if len(args) > 2 {
+			sshArgs = append(sshArgs, args[2:]...)
+		}
+
+		return ide.OpenTerminalSsh(activeProfile, workspace.Id, projectName, sshArgs...)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) >= 2 {
@@ -90,4 +101,8 @@ var SshCmd = &cobra.Command{
 
 		return getWorkspaceNameCompletions()
 	},
+}
+
+func init() {
+	SshCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Automatically confirm any prompts")
 }

@@ -4,19 +4,19 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Branch** | Pointer to **string** |  | [optional] 
-**Name** | Pointer to **string** |  | [optional] 
-**Sha** | Pointer to **string** |  | [optional] 
-**SourceRepoId** | Pointer to **string** |  | [optional] 
-**SourceRepoName** | Pointer to **string** |  | [optional] 
-**SourceRepoOwner** | Pointer to **string** |  | [optional] 
-**SourceRepoUrl** | Pointer to **string** |  | [optional] 
+**Branch** | **string** |  | 
+**Name** | **string** |  | 
+**Sha** | **string** |  | 
+**SourceRepoId** | **string** |  | 
+**SourceRepoName** | **string** |  | 
+**SourceRepoOwner** | **string** |  | 
+**SourceRepoUrl** | **string** |  | 
 
 ## Methods
 
 ### NewGitPullRequest
 
-`func NewGitPullRequest() *GitPullRequest`
+`func NewGitPullRequest(branch string, name string, sha string, sourceRepoId string, sourceRepoName string, sourceRepoOwner string, sourceRepoUrl string, ) *GitPullRequest`
 
 NewGitPullRequest instantiates a new GitPullRequest object
 This constructor will assign default values to properties that have it defined,
@@ -50,11 +50,6 @@ and a boolean to check if the value has been set.
 
 SetBranch sets Branch field to given value.
 
-### HasBranch
-
-`func (o *GitPullRequest) HasBranch() bool`
-
-HasBranch returns a boolean if a field has been set.
 
 ### GetName
 
@@ -75,11 +70,6 @@ and a boolean to check if the value has been set.
 
 SetName sets Name field to given value.
 
-### HasName
-
-`func (o *GitPullRequest) HasName() bool`
-
-HasName returns a boolean if a field has been set.
 
 ### GetSha
 
@@ -100,11 +90,6 @@ and a boolean to check if the value has been set.
 
 SetSha sets Sha field to given value.
 
-### HasSha
-
-`func (o *GitPullRequest) HasSha() bool`
-
-HasSha returns a boolean if a field has been set.
 
 ### GetSourceRepoId
 
@@ -125,11 +110,6 @@ and a boolean to check if the value has been set.
 
 SetSourceRepoId sets SourceRepoId field to given value.
 
-### HasSourceRepoId
-
-`func (o *GitPullRequest) HasSourceRepoId() bool`
-
-HasSourceRepoId returns a boolean if a field has been set.
 
 ### GetSourceRepoName
 
@@ -150,11 +130,6 @@ and a boolean to check if the value has been set.
 
 SetSourceRepoName sets SourceRepoName field to given value.
 
-### HasSourceRepoName
-
-`func (o *GitPullRequest) HasSourceRepoName() bool`
-
-HasSourceRepoName returns a boolean if a field has been set.
 
 ### GetSourceRepoOwner
 
@@ -175,11 +150,6 @@ and a boolean to check if the value has been set.
 
 SetSourceRepoOwner sets SourceRepoOwner field to given value.
 
-### HasSourceRepoOwner
-
-`func (o *GitPullRequest) HasSourceRepoOwner() bool`
-
-HasSourceRepoOwner returns a boolean if a field has been set.
 
 ### GetSourceRepoUrl
 
@@ -200,11 +170,6 @@ and a boolean to check if the value has been set.
 
 SetSourceRepoUrl sets SourceRepoUrl field to given value.
 
-### HasSourceRepoUrl
-
-`func (o *GitPullRequest) HasSourceRepoUrl() bool`
-
-HasSourceRepoUrl returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

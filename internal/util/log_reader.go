@@ -5,12 +5,14 @@ package util
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"encoding/json"
 	"io"
+	"strings"
 
 	"github.com/daytonaio/daytona/pkg/logs"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func ReadLog(ctx context.Context, logReader io.Reader, follow bool, c chan []byte, errChan chan error) {
@@ -37,59 +39,34 @@ func ReadLog(ctx context.Context, logReader io.Reader, follow bool, c chan []byt
 	}
 }
 
-func ReadJSONLog(ctx context.Context, logReader io.Reader, follow bool, retry bool, c chan interface{}, errChan chan error) {
-	var buffer bytes.Buffer
-	var err error
+func ReadJSONLog(ctx context.Context, logReader io.Reader, follow bool, c chan interface{}, errChan chan error) {
 	reader := bufio.NewReader(logReader)
-	delimiter := []byte(logs.LogDelimiter)
-
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		default:
-			byteChunk := make([]byte, 1024)
-
-			if retry {
-				for {
-					n, err := reader.Read(byteChunk)
-					if err == nil {
-						buffer.Write(byteChunk[:n])
-						break
-					} else if !follow && err == io.EOF {
-						errChan <- io.EOF
-						return
-					}
-				}
-			} else {
-				n, err := reader.Read(byteChunk)
-				if err != nil {
-					if err != io.EOF {
-						errChan <- err
-					} else if !follow {
-						errChan <- io.EOF
-						return
-					}
-				}
-				buffer.Write(byteChunk[:n])
-			}
-
-			data := buffer.Bytes()
-
-			index := bytes.Index(data, delimiter)
-
-			if index != -1 { // if the delimiter is found, process the log entry
-
+			line, readErr := reader.ReadString('\n')
+			if line != "" {
+				stripped := strings.TrimSuffix(line, logs.LogDelimiter)
 				var logEntry logs.LogEntry
 
-				err = json.Unmarshal(data[:index], &logEntry)
+				err := json.Unmarshal([]byte(stripped), &logEntry)
 				if err != nil {
-					return
+					log.Trace("Failed to parse log entry: ", err, string(stripped))
 				}
 
 				c <- logEntry
-				buffer.Reset()
-				buffer.Write(data[index+len(delimiter):]) // write remaining data to buffer
+			}
+			if readErr != nil {
+				if readErr != io.EOF {
+					c <- logs.LogEntry{}
+					errChan <- readErr
+				} else if !follow {
+					c <- logs.LogEntry{}
+					errChan <- io.EOF
+					return
+				}
 			}
 		}
 	}

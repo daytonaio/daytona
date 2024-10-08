@@ -37,7 +37,7 @@ import (
 )
 
 func main() {
-	workspace := *openapiclient.NewCreateWorkspaceRequest([]openapiclient.CreateWorkspaceRequestProject{*openapiclient.NewCreateWorkspaceRequestProject("Name_example")}) // CreateWorkspaceRequest | Create workspace
+	workspace := *openapiclient.NewCreateWorkspaceDTO("Id_example", "Name_example", []openapiclient.CreateProjectDTO{*openapiclient.NewCreateProjectDTO(map[string]string{"key": "Inner_example"}, "Name_example", *openapiclient.NewCreateProjectSourceDTO(*openapiclient.NewGitRepository("Branch_example", "Id_example", "Name_example", "Owner_example", "Sha_example", "Source_example", "Url_example")))}, "Target_example") // CreateWorkspaceDTO | Create workspace
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -62,7 +62,7 @@ Other parameters are passed through a pointer to a apiCreateWorkspaceRequest str
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **workspace** | [**CreateWorkspaceRequest**](CreateWorkspaceRequest.md) | Create workspace | 
+ **workspace** | [**CreateWorkspaceDTO**](CreateWorkspaceDTO.md) | Create workspace | 
 
 ### Return type
 
@@ -84,7 +84,7 @@ Name | Type | Description  | Notes
 
 ## GetWorkspace
 
-> WorkspaceDTO GetWorkspace(ctx, workspaceId).Execute()
+> WorkspaceDTO GetWorkspace(ctx, workspaceId).Verbose(verbose).Execute()
 
 Get workspace info
 
@@ -104,10 +104,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
+	verbose := true // bool | Verbose (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceAPI.GetWorkspace(context.Background(), workspaceId).Execute()
+	resp, r, err := apiClient.WorkspaceAPI.GetWorkspace(context.Background(), workspaceId).Verbose(verbose).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.GetWorkspace``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -133,6 +134,7 @@ Other parameters are passed through a pointer to a apiGetWorkspaceRequest struct
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
+ **verbose** | **bool** | Verbose | 
 
 ### Return type
 
@@ -311,7 +313,7 @@ import (
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
 	projectId := "projectId_example" // string | Project ID
-	setState := *openapiclient.NewSetProjectState() // SetProjectState | Set State
+	setState := *openapiclient.NewSetProjectState(int32(123)) // SetProjectState | Set State
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

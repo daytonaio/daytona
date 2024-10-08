@@ -14,33 +14,25 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectRepositoryPrompt(repositories []apiclient.GitRepository, index int, choiceChan chan<- string, parentId string, selectedReposParentMap map[string]bool, selectedRepos map[string]bool) {
+func selectRepositoryPrompt(repositories []apiclient.GitRepository, projectOrder int, choiceChan chan<- string, selectedRepos map[string]int, parentIdentifier string) {
 	items := []list.Item{}
-	disabledReposCount := 0
 
 	// Populate items with titles and descriptions from workspaces.
 	for _, repository := range repositories {
-		url := *repository.Url
-		title := *repository.Name
-		isDisabled := false
-
-		// Index > 1 indicates use of 'multi-project' command
-		if index > 1 && len(selectedRepos) > 0 && selectedRepos[url] {
-			title += statusMessageDangerStyle(" (Already selected)")
-			// isDisabled property helps in skipping over this specific repo option, refer to
-			// handling of up/down key press under update method in ./view.go file
-			isDisabled = true
-			disabledReposCount++
+		newItem := item[string]{
+			id:             repository.Url,
+			title:          repository.Name,
+			choiceProperty: repository.Url,
+			desc:           repository.Url,
 		}
-		newItem := item[string]{id: url, title: title, choiceProperty: url, desc: url, isDisabled: isDisabled}
 		items = append(items, newItem)
 	}
 
-	l := views.GetStyledSelectList(items)
+	l := views.GetStyledSelectList(items, parentIdentifier)
 
 	title := "Choose a Repository"
-	if index > 1 {
-		title += fmt.Sprintf(" (Project #%d)", index)
+	if projectOrder > 1 {
+		title += fmt.Sprintf(" (Project #%d)", projectOrder)
 	}
 	l.Title = views.GetStyledMainTitle(title)
 	l.Styles.Title = titleStyle
@@ -55,27 +47,22 @@ func selectRepositoryPrompt(repositories []apiclient.GitRepository, index int, c
 	if m, ok := p.(model[string]); ok && m.choice != nil {
 		choice := *m.choice
 
-		selectedRepos[choice] = true
-		disabledReposCount++
-		if disabledReposCount == len(repositories) {
-			selectedReposParentMap[parentId] = true
-		}
-
+		selectedRepos[choice]++
 		choiceChan <- choice
 	} else {
 		choiceChan <- ""
 	}
 }
 
-func GetRepositoryFromPrompt(repositories []apiclient.GitRepository, index int, parentId string, selectedReposParentMap map[string]bool, selectedRepos map[string]bool) *apiclient.GitRepository {
+func GetRepositoryFromPrompt(repositories []apiclient.GitRepository, projectOrder int, selectedRepos map[string]int, parentIdentifier string) *apiclient.GitRepository {
 	choiceChan := make(chan string)
 
-	go selectRepositoryPrompt(repositories, index, choiceChan, parentId, selectedReposParentMap, selectedRepos)
+	go selectRepositoryPrompt(repositories, projectOrder, choiceChan, selectedRepos, parentIdentifier)
 
 	choice := <-choiceChan
 
 	for _, repository := range repositories {
-		if *repository.Url == choice {
+		if repository.Url == choice {
 			return &repository
 		}
 	}

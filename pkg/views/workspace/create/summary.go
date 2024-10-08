@@ -15,6 +15,7 @@ import (
 	util "github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 )
 
 type ProjectDetail string
@@ -29,32 +30,35 @@ const (
 	DEFAULT_PADDING                  = 21
 )
 
-type ProjectDefaults struct {
-	BuildChoice          BuildChoice
-	Image                *string
-	ImageUser            *string
-	DevcontainerFilePath string
+type SummaryModel struct {
+	lg          *lipgloss.Renderer
+	styles      *Styles
+	form        *huh.Form
+	width       int
+	quitting    bool
+	name        string
+	projectList []apiclient.CreateProjectDTO
+	defaults    *views_util.ProjectConfigDefaults
+	nameLabel   string
 }
 
-type SummaryModel struct {
-	lg            *lipgloss.Renderer
-	styles        *Styles
-	form          *huh.Form
-	width         int
-	quitting      bool
-	workspaceName string
-	projectList   []apiclient.CreateWorkspaceRequestProject
-	defaults      *ProjectDefaults
+type SubmissionFormConfig struct {
+	ChosenName    *string
+	SuggestedName string
+	ExistingNames []string
+	ProjectList   *[]apiclient.CreateProjectDTO
+	NameLabel     string
+	Defaults      *views_util.ProjectConfigDefaults
 }
 
 var configureCheck bool
 var userCancelled bool
-var projectsConfigurationChanged bool
+var ProjectsConfigurationChanged bool
 
-func RunSubmissionForm(workspaceName *string, suggestedName string, workspaceNames []string, projectList *[]apiclient.CreateWorkspaceRequestProject, defaults *ProjectDefaults) error {
+func RunSubmissionForm(config SubmissionFormConfig) error {
 	configureCheck = false
 
-	m := NewSummaryModel(workspaceName, suggestedName, workspaceNames, *projectList, defaults)
+	m := NewSummaryModel(config)
 
 	if _, err := tea.NewProgram(m).Run(); err != nil {
 		return err
@@ -68,43 +72,37 @@ func RunSubmissionForm(workspaceName *string, suggestedName string, workspaceNam
 		return nil
 	}
 
-	if defaults.Image == nil || defaults.ImageUser == nil {
-		return fmt.Errorf("default project entries are not set")
+	if config.Defaults.Image == nil || config.Defaults.ImageUser == nil {
+		return errors.New("default project entries are not set")
 	}
 
 	var err error
-	projectsConfigurationChanged, err = ConfigureProjects(projectList, *defaults)
+	ProjectsConfigurationChanged, err = RunProjectConfiguration(config.ProjectList, *config.Defaults)
 	if err != nil {
 		return err
 	}
 
-	return RunSubmissionForm(workspaceName, suggestedName, workspaceNames, projectList, defaults)
+	return RunSubmissionForm(config)
 }
 
-func RenderSummary(workspaceName string, projectList []apiclient.CreateWorkspaceRequestProject, defaults *ProjectDefaults) (string, error) {
+func RenderSummary(name string, projectList []apiclient.CreateProjectDTO, defaults *views_util.ProjectConfigDefaults, nameLabel string) (string, error) {
 	var output string
-	if workspaceName == "" {
+	if name == "" {
 		output = views.GetStyledMainTitle("SUMMARY")
 	} else {
-		output = views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - Workspace %s", workspaceName))
-	}
-
-	for _, project := range projectList {
-		if project.Source == nil || project.Source.Repository == nil || project.Source.Repository.Url == nil {
-			return "", fmt.Errorf("repository is required")
-		}
+		output = views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - %s %s", nameLabel, name))
 	}
 
 	output += "\n\n"
 
 	for i := range projectList {
 		if len(projectList) == 1 {
-			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render("Project"), (*projectList[i].Source.Repository.Url))
+			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render("Project"), (projectList[i].Source.Repository.Url))
 		} else {
-			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("%s #%d", "Project", i+1)), (*projectList[i].Source.Repository.Url))
+			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("%s #%d", "Project", i+1)), (projectList[i].Source.Repository.Url))
 		}
 
-		projectBuildChoice, choiceName := getProjectBuildChoice(projectList[i], defaults)
+		projectBuildChoice, choiceName := views_util.GetProjectBuildChoice(projectList[i], defaults)
 		output += renderProjectDetails(projectList[i], projectBuildChoice, choiceName)
 		if i < len(projectList)-1 {
 			output += "\n\n"
@@ -114,16 +112,14 @@ func RenderSummary(workspaceName string, projectList []apiclient.CreateWorkspace
 	return output, nil
 }
 
-func renderProjectDetails(project apiclient.CreateWorkspaceRequestProject, buildChoice BuildChoice, choiceName string) string {
+func renderProjectDetails(project apiclient.CreateProjectDTO, buildChoice views_util.BuildChoice, choiceName string) string {
 	output := projectDetailOutput(Build, choiceName)
 
-	if buildChoice == DEVCONTAINER {
-		if project.Build != nil {
-			if project.Build.Devcontainer != nil {
-				if project.Build.Devcontainer.DevContainerFilePath != nil {
-					output += "\n"
-					output += projectDetailOutput(DevcontainerConfig, *project.Build.Devcontainer.DevContainerFilePath)
-				}
+	if buildChoice == views_util.DEVCONTAINER {
+		if project.BuildConfig != nil {
+			if project.BuildConfig.Devcontainer != nil {
+				output += "\n"
+				output += projectDetailOutput(DevcontainerConfig, project.BuildConfig.Devcontainer.FilePath)
 			}
 		}
 	} else {
@@ -142,13 +138,13 @@ func renderProjectDetails(project apiclient.CreateWorkspaceRequestProject, build
 		}
 	}
 
-	if project.EnvVars != nil && len(*project.EnvVars) > 0 {
+	if len(project.EnvVars) > 0 {
 		if output != "" {
 			output += "\n"
 		}
 
 		var envVars string
-		for key, val := range *project.EnvVars {
+		for key, val := range project.EnvVars {
 			envVars += fmt.Sprintf("%s=%s; ", key, val)
 		}
 		output += projectDetailOutput(EnvVars, strings.TrimSuffix(envVars, "; "))
@@ -161,51 +157,36 @@ func projectDetailOutput(projectDetailKey ProjectDetail, projectDetailValue stri
 	return fmt.Sprintf("\t%s%-*s%s", lipgloss.NewStyle().Foreground(views.Green).Render(string(projectDetailKey)), DEFAULT_PADDING-len(string(projectDetailKey)), EMPTY_STRING, projectDetailValue)
 }
 
-func getProjectBuildChoice(project apiclient.CreateWorkspaceRequestProject, defaults *ProjectDefaults) (BuildChoice, string) {
-	if project.Build == nil {
-		if *project.Image == *defaults.Image && *project.User == *defaults.ImageUser {
-			return NONE, "None"
-		} else {
-			return CUSTOMIMAGE, "Custom Image"
-		}
-	} else {
-		if project.Build.Devcontainer != nil {
-			return DEVCONTAINER, "Devcontainer"
-		} else {
-			return AUTOMATIC, "Automatic"
-		}
-	}
-}
-
-func NewSummaryModel(workspaceName *string, suggestedName string, workspaceNames []string, projectList []apiclient.CreateWorkspaceRequestProject, defaults *ProjectDefaults) SummaryModel {
+func NewSummaryModel(config SubmissionFormConfig) SummaryModel {
 	m := SummaryModel{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
-	m.workspaceName = *workspaceName
-	m.projectList = projectList
-	m.defaults = defaults
+	m.name = *config.ChosenName
+	m.projectList = *config.ProjectList
+	m.defaults = config.Defaults
+	m.nameLabel = config.NameLabel
 
-	if *workspaceName == "" {
-		*workspaceName = suggestedName
+	if *config.ChosenName == "" {
+		*config.ChosenName = config.SuggestedName
 	}
 
 	m.form = huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().
-				Title("Workspace name").
-				Value(workspaceName).
-				Key("workspaceName").
+				Title(fmt.Sprintf("%s name", config.NameLabel)).
+				Value(config.ChosenName).
+				Key("name").
 				Validate(func(str string) error {
-					result, err := util.GetValidatedWorkspaceName(str)
+					result, err := util.GetValidatedName(str)
 					if err != nil {
 						return err
 					}
-					for _, name := range workspaceNames {
+					for _, name := range config.ExistingNames {
 						if name == result {
-							return errors.New("workspace name already exists")
+							return errors.New("name already exists")
 						}
 					}
-					*workspaceName = result
+					*config.ChosenName = result
 					return nil
 				}),
 		),
@@ -257,10 +238,10 @@ func (m SummaryModel) View() string {
 		return ""
 	}
 
-	view := m.form.View() + configurationHelpLine
+	view := m.form.WithHeight(5).View() + "\n" + configurationHelpLine
 
-	if len(m.projectList) > 1 || len(m.projectList) == 1 && projectsConfigurationChanged {
-		summary, err := RenderSummary(m.workspaceName, m.projectList, m.defaults)
+	if len(m.projectList) > 1 || len(m.projectList) == 1 && ProjectsConfigurationChanged {
+		summary, err := RenderSummary(m.name, m.projectList, m.defaults, m.nameLabel)
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -6,6 +6,7 @@ package gitnessclient
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -38,22 +39,51 @@ func (g *GitnessClient) performRequest(method, requestURL string) ([]byte, error
 	req.Header.Set("Authorization", "Bearer "+g.token)
 
 	client := &http.Client{}
-	resp, err := client.Do(req)
+	res, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer res.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
 		return nil, err
 	}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("status code: %d err: %s", res.StatusCode, string(body))
 	}
 
 	return body, nil
+}
+
+func (g *GitnessClient) GetCommits(owner string, repositoryName string, branch *string) (*[]Commit, error) {
+	api, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/commits", url.PathEscape(fmt.Sprintf("%s/%s", owner, repositoryName))))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse url : %w", err)
+	}
+
+	apiURL := ""
+	if branch != nil {
+		v := url.Values{}
+		v.Add("git_ref", *branch)
+		apiURL = api.String() + "?" + v.Encode()
+	} else {
+		apiURL = api.String()
+	}
+
+	body, err := g.performRequest("GET", apiURL)
+	if err != nil {
+		return nil, fmt.Errorf("error while making request: %s", err.Error())
+	}
+
+	var commitsResponse CommitsResponse
+	err = json.Unmarshal(body, &commitsResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return &commitsResponse.Commits, nil
 }
 
 func (g *GitnessClient) GetSpaceAdmin(spaceName string) (*SpaceMemberResponse, error) {
@@ -159,6 +189,30 @@ func (g *GitnessClient) GetRepositories(namespace string) ([]Repository, error) 
 	return apiRepos, nil
 }
 
+func (g *GitnessClient) GetRepository(url string) (*Repository, error) {
+	repoRef, err := g.GetRepoRef(url)
+	if err != nil {
+		return nil, err
+	}
+
+	repoURL, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s", *repoRef))
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := g.performRequest("GET", repoURL.String())
+	if err != nil {
+		return nil, err
+	}
+
+	var repo Repository
+	if err := json.Unmarshal(body, &repo); err != nil {
+		return nil, err
+	}
+
+	return &repo, nil
+}
+
 func (g *GitnessClient) GetRepoBranches(repositoryId string, namespaceId string) ([]*RepoBranch, error) {
 	branchesURL, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/branches", url.PathEscape(namespaceId+"/"+repositoryId)))
 	if err != nil {
@@ -221,12 +275,12 @@ func (g *GitnessClient) GetLastCommitSha(repoURL string, branch *string) (string
 
 	body, err := g.performRequest("GET", apiURL)
 	if err != nil {
-		return "", fmt.Errorf("error while making request: %s", err.Error())
+		return "", fmt.Errorf("error while making request: %w", err)
 	}
 
 	lastCommit, err := getLastCommit(body)
 	if err != nil {
-		return "", fmt.Errorf("error while fetching last commit from list: %s", err.Error())
+		return "", fmt.Errorf("error while fetching last commit from list: %w", err)
 	}
 
 	return lastCommit.Sha, nil
@@ -236,7 +290,7 @@ func (g *GitnessClient) GetRepoRef(url string) (*string, error) {
 	repoUrl := strings.TrimSuffix(url, ".git")
 	parts := strings.Split(repoUrl, "/")
 	if len(parts) < 5 {
-		return nil, fmt.Errorf("failed to parse repository reference: invalid url passed")
+		return nil, errors.New("failed to parse repository reference: invalid url passed")
 	}
 	var path string
 	if parts[3] == "git" && len(parts) >= 6 {
@@ -259,7 +313,7 @@ func getLastCommit(jsonData []byte) (Commit, error) {
 	})
 
 	if len(commitsResponse.Commits) == 0 {
-		return Commit{}, fmt.Errorf("no commits found")
+		return Commit{}, errors.New("no commits found")
 	}
 
 	return commitsResponse.Commits[len(commitsResponse.Commits)-1], nil
@@ -288,6 +342,15 @@ func (g *GitnessClient) GetPr(repoURL string, prNumber uint32) (*PullRequest, er
 	refPart := strings.Split(*repoRef, "/")
 	pr.GitUrl = GetCloneUrl(g.BaseURL.Scheme, g.BaseURL.Host, refPart[0], refPart[1])
 	return &pr, nil
+}
+
+func (g *GitnessClient) GetDefaultBranch(url string) (*string, error) {
+	repo, err := g.GetRepository(url)
+	if err != nil {
+		return nil, err
+	}
+
+	return &repo.DefaultBranch, nil
 }
 
 func GetCloneUrl(protocol, host, owner, repo string) string {

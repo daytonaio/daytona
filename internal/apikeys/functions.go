@@ -4,16 +4,16 @@
 package apikeys
 
 import (
-	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/google/uuid"
 )
 
+// returns the SHA-256 hash of a given key as a hexadecimal string.
 func HashKey(key string) string {
-	keyHash := sha256.Sum256([]byte(key))
-	return string(keyHash[:])
+	return util.Hash(key)
 }
 
 func GenerateRandomKey() string {

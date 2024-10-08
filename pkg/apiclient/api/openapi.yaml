@@ -3,7 +3,7 @@ info:
   contact: {}
   description: Daytona Server API
   title: Daytona Server API
-  version: 0.1.0
+  version: v0.0.0-dev
 servers:
 - url: http://localhost:3986/
 security:
@@ -63,6 +63,125 @@ paths:
       summary: Generate an API key
       tags:
       - apiKey
+  /build:
+    delete:
+      description: Delete ALL builds
+      operationId: DeleteAllBuilds
+      parameters:
+      - description: Force
+        in: query
+        name: force
+        schema:
+          type: boolean
+      responses:
+        "204":
+          content: {}
+          description: No Content
+      summary: Delete ALL builds
+      tags:
+      - build
+    get:
+      description: List builds
+      operationId: ListBuilds
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Build'
+                type: array
+          description: OK
+      summary: List builds
+      tags:
+      - build
+    post:
+      description: Create a build
+      operationId: CreateBuild
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBuildDTO'
+        description: Create Build DTO
+        required: true
+      responses:
+        "201":
+          content:
+            '*/*':
+              schema:
+                type: string
+          description: Created
+      summary: Create a build
+      tags:
+      - build
+      x-codegen-request-body-name: createBuildDto
+  /build/prebuild/{prebuildId}:
+    delete:
+      description: Delete builds
+      operationId: DeleteBuildsFromPrebuild
+      parameters:
+      - description: Prebuild ID
+        in: path
+        name: prebuildId
+        required: true
+        schema:
+          type: string
+      - description: Force
+        in: query
+        name: force
+        schema:
+          type: boolean
+      responses:
+        "204":
+          content: {}
+          description: No Content
+      summary: Delete builds
+      tags:
+      - build
+  /build/{buildId}:
+    delete:
+      description: Delete build
+      operationId: DeleteBuild
+      parameters:
+      - description: Build ID
+        in: path
+        name: buildId
+        required: true
+        schema:
+          type: string
+      - description: Force
+        in: query
+        name: force
+        schema:
+          type: boolean
+      responses:
+        "204":
+          content: {}
+          description: No Content
+      summary: Delete build
+      tags:
+      - build
+    get:
+      description: Get build data
+      operationId: GetBuild
+      parameters:
+      - description: Build ID
+        in: path
+        name: buildId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Build'
+          description: OK
+      summary: Get build data
+      tags:
+      - build
   /container-registry:
     get:
       description: List container registries
@@ -165,7 +284,7 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/GitProvider'
+              $ref: '#/components/schemas/SetGitProviderConfig'
         description: Git provider
         required: true
       responses:
@@ -176,17 +295,17 @@ paths:
       tags:
       - gitProvider
       x-codegen-request-body-name: gitProviderConfig
-  /gitprovider/context/{gitUrl}:
-    get:
+  /gitprovider/context:
+    post:
       description: Get Git context
       operationId: GetGitContext
-      parameters:
-      - description: Git URL
-        in: path
-        name: gitUrl
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/GetRepositoryContext'
+        description: Get repository context
         required: true
-        schema:
-          type: string
       responses:
         "200":
           content:
@@ -197,6 +316,29 @@ paths:
       summary: Get Git context
       tags:
       - gitProvider
+      x-codegen-request-body-name: repository
+  /gitprovider/context/url:
+    post:
+      description: Get URL from Git repository
+      operationId: GetUrlFromRepository
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/GitRepository'
+        description: Git repository
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepositoryUrl'
+          description: OK
+      summary: Get URL from Git repository
+      tags:
+      - gitProvider
+      x-codegen-request-body-name: repository
   /gitprovider/for-url/{url}:
     get:
       description: Get Git provider
@@ -216,6 +358,27 @@ paths:
                 $ref: '#/components/schemas/GitProvider'
           description: OK
       summary: Get Git provider
+      tags:
+      - gitProvider
+  /gitprovider/id-for-url/{url}:
+    get:
+      description: Get Git provider ID
+      operationId: GetGitProviderIdForUrl
+      parameters:
+      - description: Url
+        in: path
+        name: url
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema:
+                type: string
+          description: OK
+      summary: Get Git provider ID
       tags:
       - gitProvider
   /gitprovider/{gitProviderId}:
@@ -379,6 +542,20 @@ paths:
       summary: Get Git repository PRs
       tags:
       - gitProvider
+  /health:
+    get:
+      description: Health check
+      operationId: HealthCheck
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: OK
+      summary: Health check
   /profile:
     delete:
       description: Delete profile data
@@ -421,6 +598,263 @@ paths:
       tags:
       - profile
       x-codegen-request-body-name: profileData
+  /project-config:
+    get:
+      description: List project configs
+      operationId: ListProjectConfigs
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ProjectConfig'
+                type: array
+          description: OK
+      summary: List project configs
+      tags:
+      - project-config
+    put:
+      description: Set project config data
+      operationId: SetProjectConfig
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectConfigDTO'
+        description: Project config
+        required: true
+      responses:
+        "201":
+          content: {}
+          description: Created
+      summary: Set project config data
+      tags:
+      - project-config
+      x-codegen-request-body-name: projectConfig
+  /project-config/default/{gitUrl}:
+    get:
+      description: Get project configs by git url
+      operationId: GetDefaultProjectConfig
+      parameters:
+      - description: Git URL
+        in: path
+        name: gitUrl
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectConfig'
+          description: OK
+      summary: Get project configs by git url
+      tags:
+      - project-config
+  /project-config/prebuild:
+    get:
+      description: List prebuilds
+      operationId: ListPrebuilds
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                items:
+                  $ref: '#/components/schemas/PrebuildDTO'
+                type: array
+          description: OK
+      summary: List prebuilds
+      tags:
+      - prebuild
+  /project-config/prebuild/process-git-event:
+    post:
+      description: ProcessGitEvent
+      operationId: ProcessGitEvent
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: object
+        description: Webhook event
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: ProcessGitEvent
+      tags:
+      - prebuild
+      x-codegen-request-body-name: workspace
+  /project-config/{configName}:
+    delete:
+      description: Delete project config data
+      operationId: DeleteProjectConfig
+      parameters:
+      - description: Config name
+        in: path
+        name: configName
+        required: true
+        schema:
+          type: string
+      - description: Force
+        in: query
+        name: force
+        schema:
+          type: boolean
+      responses:
+        "204":
+          content: {}
+          description: No Content
+      summary: Delete project config data
+      tags:
+      - project-config
+    get:
+      description: Get project config data
+      operationId: GetProjectConfig
+      parameters:
+      - description: Config name
+        in: path
+        name: configName
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProjectConfig'
+          description: OK
+      summary: Get project config data
+      tags:
+      - project-config
+  /project-config/{configName}/prebuild:
+    get:
+      description: List prebuilds for project config
+      operationId: ListPrebuildsForProjectConfig
+      parameters:
+      - description: Config name
+        in: path
+        name: configName
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                items:
+                  $ref: '#/components/schemas/PrebuildDTO'
+                type: array
+          description: OK
+      summary: List prebuilds for project config
+      tags:
+      - prebuild
+    put:
+      description: Set prebuild
+      operationId: SetPrebuild
+      parameters:
+      - description: Config name
+        in: path
+        name: configName
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePrebuildDTO'
+        description: Prebuild
+        required: true
+      responses:
+        "201":
+          content:
+            '*/*':
+              schema:
+                type: string
+          description: Created
+      summary: Set prebuild
+      tags:
+      - prebuild
+      x-codegen-request-body-name: prebuild
+  /project-config/{configName}/prebuild/{prebuildId}:
+    delete:
+      description: Delete prebuild
+      operationId: DeletePrebuild
+      parameters:
+      - description: Project config name
+        in: path
+        name: configName
+        required: true
+        schema:
+          type: string
+      - description: Prebuild ID
+        in: path
+        name: prebuildId
+        required: true
+        schema:
+          type: string
+      - description: Force
+        in: query
+        name: force
+        schema:
+          type: boolean
+      responses:
+        "204":
+          content: {}
+          description: No Content
+      summary: Delete prebuild
+      tags:
+      - prebuild
+    get:
+      description: Get prebuild
+      operationId: GetPrebuild
+      parameters:
+      - description: Project config name
+        in: path
+        name: configName
+        required: true
+        schema:
+          type: string
+      - description: Prebuild ID
+        in: path
+        name: prebuildId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PrebuildDTO'
+          description: OK
+      summary: Get prebuild
+      tags:
+      - prebuild
+  /project-config/{configName}/set-default:
+    patch:
+      description: Set project config to default
+      operationId: SetDefaultProjectConfig
+      parameters:
+      - description: Config name
+        in: path
+        name: configName
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Set project config to default
+      tags:
+      - project-config
   /provider:
     get:
       description: List providers
@@ -495,6 +929,22 @@ paths:
       summary: Uninstall a provider
       tags:
       - provider
+  /sample:
+    get:
+      description: List samples
+      operationId: ListSamples
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Sample'
+                type: array
+          description: OK
+      summary: List samples
+      tags:
+      - sample
   /server/config:
     get:
       description: Get the server configuration
@@ -625,7 +1075,7 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/CreateWorkspaceRequest'
+              $ref: '#/components/schemas/CreateWorkspaceDTO'
         description: Create workspace
         required: true
       responses:
@@ -672,6 +1122,11 @@ paths:
         required: true
         schema:
           type: string
+      - description: Verbose
+        in: query
+        name: verbose
+        schema:
+          type: boolean
       responses:
         "200":
           content:
@@ -813,6 +1268,123 @@ components:
           type: string
         type:
           $ref: '#/components/schemas/apikey.ApiKeyType'
+      required:
+      - keyHash
+      - name
+      - type
+      type: object
+    Build:
+      example:
+        buildConfig:
+          cachedBuild:
+            image: image
+            user: user
+          devcontainer:
+            filePath: filePath
+        createdAt: createdAt
+        image: image
+        containerConfig:
+          image: image
+          user: user
+        prebuildId: prebuildId
+        envVars:
+          key: envVars
+        id: id
+        state: null
+        repository:
+          owner: owner
+          path: path
+          name: name
+          id: id
+          source: source
+          prNumber: 0
+          branch: branch
+          cloneTarget: null
+          sha: sha
+          url: url
+        user: user
+        updatedAt: updatedAt
+      properties:
+        buildConfig:
+          $ref: '#/components/schemas/BuildConfig'
+        containerConfig:
+          $ref: '#/components/schemas/ContainerConfig'
+        createdAt:
+          type: string
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
+        id:
+          type: string
+        image:
+          type: string
+        prebuildId:
+          type: string
+        repository:
+          $ref: '#/components/schemas/GitRepository'
+        state:
+          $ref: '#/components/schemas/build.BuildState'
+        updatedAt:
+          type: string
+        user:
+          type: string
+      required:
+      - containerConfig
+      - createdAt
+      - envVars
+      - id
+      - prebuildId
+      - repository
+      - state
+      - updatedAt
+      type: object
+    BuildConfig:
+      example:
+        cachedBuild:
+          image: image
+          user: user
+        devcontainer:
+          filePath: filePath
+      properties:
+        cachedBuild:
+          $ref: '#/components/schemas/CachedBuild'
+        devcontainer:
+          $ref: '#/components/schemas/DevcontainerConfig'
+      type: object
+    CachedBuild:
+      example:
+        image: image
+        user: user
+      properties:
+        image:
+          type: string
+        user:
+          type: string
+      required:
+      - image
+      - user
+      type: object
+    CloneTarget:
+      enum:
+      - branch
+      - commit
+      type: string
+      x-enum-varnames:
+      - CloneTargetBranch
+      - CloneTargetCommit
+    ContainerConfig:
+      example:
+        image: image
+        user: user
+      properties:
+        image:
+          type: string
+        user:
+          type: string
+      required:
+      - image
+      - user
       type: object
     ContainerRegistry:
       example:
@@ -826,14 +1398,167 @@ components:
           type: string
         username:
           type: string
+      required:
+      - password
+      - server
+      - username
       type: object
-    CreateWorkspaceRequest:
+    CreateBuildDTO:
+      example:
+        prebuildId: prebuildId
+        projectConfigName: projectConfigName
+        envVars:
+          key: envVars
+        branch: branch
+      properties:
+        branch:
+          type: string
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
+        prebuildId:
+          type: string
+        projectConfigName:
+          type: string
+      required:
+      - branch
+      - envVars
+      - projectConfigName
+      type: object
+    CreatePrebuildDTO:
+      example:
+        commitInterval: 0
+        id: id
+        branch: branch
+        retention: 6
+        triggerFiles:
+        - triggerFiles
+        - triggerFiles
+      properties:
+        branch:
+          type: string
+        commitInterval:
+          type: integer
+        id:
+          type: string
+        retention:
+          type: integer
+        triggerFiles:
+          items:
+            type: string
+          type: array
+      required:
+      - retention
+      type: object
+    CreateProjectConfigDTO:
+      example:
+        buildConfig:
+          cachedBuild:
+            image: image
+            user: user
+          devcontainer:
+            filePath: filePath
+        image: image
+        envVars:
+          key: envVars
+        name: name
+        user: user
+        repositoryUrl: repositoryUrl
+      properties:
+        buildConfig:
+          $ref: '#/components/schemas/BuildConfig'
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
+        image:
+          type: string
+        name:
+          type: string
+        repositoryUrl:
+          type: string
+        user:
+          type: string
+      required:
+      - envVars
+      - name
+      - repositoryUrl
+      type: object
+    CreateProjectDTO:
+      example:
+        buildConfig:
+          cachedBuild:
+            image: image
+            user: user
+          devcontainer:
+            filePath: filePath
+        image: image
+        envVars:
+          key: envVars
+        name: name
+        source:
+          repository:
+            owner: owner
+            path: path
+            name: name
+            id: id
+            source: source
+            prNumber: 0
+            branch: branch
+            cloneTarget: null
+            sha: sha
+            url: url
+        user: user
+      properties:
+        buildConfig:
+          $ref: '#/components/schemas/BuildConfig'
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
+        image:
+          type: string
+        name:
+          type: string
+        source:
+          $ref: '#/components/schemas/CreateProjectSourceDTO'
+        user:
+          type: string
+      required:
+      - envVars
+      - name
+      - source
+      type: object
+    CreateProjectSourceDTO:
+      example:
+        repository:
+          owner: owner
+          path: path
+          name: name
+          id: id
+          source: source
+          prNumber: 0
+          branch: branch
+          cloneTarget: null
+          sha: sha
+          url: url
+      properties:
+        repository:
+          $ref: '#/components/schemas/GitRepository'
+      required:
+      - repository
+      type: object
+    CreateWorkspaceDTO:
       example:
         projects:
-        - image: image
-          build:
+        - buildConfig:
+            cachedBuild:
+              image: image
+              user: user
             devcontainer:
-              devContainerFilePath: devContainerFilePath
+              filePath: filePath
+          image: image
           envVars:
             key: envVars
           name: name
@@ -846,13 +1571,17 @@ components:
               source: source
               prNumber: 0
               branch: branch
+              cloneTarget: null
               sha: sha
               url: url
           user: user
-        - image: image
-          build:
+        - buildConfig:
+            cachedBuild:
+              image: image
+              user: user
             devcontainer:
-              devContainerFilePath: devContainerFilePath
+              filePath: filePath
+          image: image
           envVars:
             key: envVars
           name: name
@@ -865,6 +1594,7 @@ components:
               source: source
               prNumber: 0
               branch: branch
+              cloneTarget: null
               sha: sha
               url: url
           user: user
@@ -878,67 +1608,24 @@ components:
           type: string
         projects:
           items:
-            $ref: '#/components/schemas/CreateWorkspaceRequestProject'
+            $ref: '#/components/schemas/CreateProjectDTO'
           type: array
         target:
           type: string
       required:
+      - id
+      - name
       - projects
+      - target
       type: object
-    CreateWorkspaceRequestProject:
+    DevcontainerConfig:
       example:
-        image: image
-        build:
-          devcontainer:
-            devContainerFilePath: devContainerFilePath
-        envVars:
-          key: envVars
-        name: name
-        source:
-          repository:
-            owner: owner
-            path: path
-            name: name
-            id: id
-            source: source
-            prNumber: 0
-            branch: branch
-            sha: sha
-            url: url
-        user: user
+        filePath: filePath
       properties:
-        build:
-          $ref: '#/components/schemas/ProjectBuild'
-        envVars:
-          additionalProperties:
-            type: string
-          type: object
-        image:
-          type: string
-        name:
-          type: string
-        source:
-          $ref: '#/components/schemas/CreateWorkspaceRequestProjectSource'
-        user:
+        filePath:
           type: string
       required:
-      - name
-      type: object
-    CreateWorkspaceRequestProjectSource:
-      example:
-        repository:
-          owner: owner
-          path: path
-          name: name
-          id: id
-          source: source
-          prNumber: 0
-          branch: branch
-          sha: sha
-          url: url
-      properties:
-        repository:
-          $ref: '#/components/schemas/GitRepository'
+      - filePath
       type: object
     FRPSConfig:
       example:
@@ -952,6 +1639,10 @@ components:
           type: integer
         protocol:
           type: string
+      required:
+      - domain
+      - port
+      - protocol
       type: object
     FileStatus:
       example:
@@ -968,69 +1659,13 @@ components:
           $ref: '#/components/schemas/Status'
         worktree:
           $ref: '#/components/schemas/Status'
+      required:
+      - extra
+      - name
+      - staging
+      - worktree
       type: object
-    GitBranch:
-      example:
-        name: name
-        sha: sha
-      properties:
-        name:
-          type: string
-        sha:
-          type: string
-      type: object
-    GitNamespace:
-      example:
-        name: name
-        id: id
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-      type: object
-    GitProvider:
-      example:
-        baseApiUrl: baseApiUrl
-        id: id
-        token: token
-        username: username
-      properties:
-        baseApiUrl:
-          type: string
-        id:
-          type: string
-        token:
-          type: string
-        username:
-          type: string
-      type: object
-    GitPullRequest:
-      example:
-        sourceRepoUrl: sourceRepoUrl
-        sourceRepoId: sourceRepoId
-        name: name
-        sourceRepoOwner: sourceRepoOwner
-        branch: branch
-        sha: sha
-        sourceRepoName: sourceRepoName
-      properties:
-        branch:
-          type: string
-        name:
-          type: string
-        sha:
-          type: string
-        sourceRepoId:
-          type: string
-        sourceRepoName:
-          type: string
-        sourceRepoOwner:
-          type: string
-        sourceRepoUrl:
-          type: string
-      type: object
-    GitRepository:
+    GetRepositoryContext:
       example:
         owner: owner
         path: path
@@ -1060,9 +1695,133 @@ components:
           type: string
         url:
           type: string
+      required:
+      - url
+      type: object
+    GitBranch:
+      example:
+        name: name
+        sha: sha
+      properties:
+        name:
+          type: string
+        sha:
+          type: string
+      required:
+      - name
+      - sha
+      type: object
+    GitNamespace:
+      example:
+        name: name
+        id: id
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+      - id
+      - name
+      type: object
+    GitProvider:
+      example:
+        baseApiUrl: baseApiUrl
+        id: id
+        token: token
+        username: username
+      properties:
+        baseApiUrl:
+          type: string
+        id:
+          type: string
+        token:
+          type: string
+        username:
+          type: string
+      required:
+      - id
+      - token
+      - username
+      type: object
+    GitPullRequest:
+      example:
+        sourceRepoUrl: sourceRepoUrl
+        sourceRepoId: sourceRepoId
+        name: name
+        sourceRepoOwner: sourceRepoOwner
+        branch: branch
+        sha: sha
+        sourceRepoName: sourceRepoName
+      properties:
+        branch:
+          type: string
+        name:
+          type: string
+        sha:
+          type: string
+        sourceRepoId:
+          type: string
+        sourceRepoName:
+          type: string
+        sourceRepoOwner:
+          type: string
+        sourceRepoUrl:
+          type: string
+      required:
+      - branch
+      - name
+      - sha
+      - sourceRepoId
+      - sourceRepoName
+      - sourceRepoOwner
+      - sourceRepoUrl
+      type: object
+    GitRepository:
+      example:
+        owner: owner
+        path: path
+        name: name
+        id: id
+        source: source
+        prNumber: 0
+        branch: branch
+        cloneTarget: null
+        sha: sha
+        url: url
+      properties:
+        branch:
+          type: string
+        cloneTarget:
+          $ref: '#/components/schemas/CloneTarget'
+        id:
+          type: string
+        name:
+          type: string
+        owner:
+          type: string
+        path:
+          type: string
+        prNumber:
+          type: integer
+        sha:
+          type: string
+        source:
+          type: string
+        url:
+          type: string
+      required:
+      - branch
+      - id
+      - name
+      - owner
+      - sha
+      - source
+      - url
       type: object
     GitStatus:
       example:
+        behind: 6
         fileStatus:
         - extra: extra
           name: name
@@ -1072,14 +1831,25 @@ components:
           name: name
           staging: null
           worktree: null
+        ahead: 0
+        branchPublished: true
         currentBranch: currentBranch
       properties:
+        ahead:
+          type: integer
+        behind:
+          type: integer
+        branchPublished:
+          type: boolean
         currentBranch:
           type: string
         fileStatus:
           items:
             $ref: '#/components/schemas/FileStatus'
           type: array
+      required:
+      - currentBranch
+      - fileStatus
       type: object
     GitUser:
       example:
@@ -1096,6 +1866,11 @@ components:
           type: string
         username:
           type: string
+      required:
+      - email
+      - id
+      - name
+      - username
       type: object
     InstallProviderRequest:
       example:
@@ -1109,6 +1884,9 @@ components:
           type: object
         name:
           type: string
+      required:
+      - downloadUrls
+      - name
       type: object
     NetworkKey:
       example:
@@ -1116,6 +1894,68 @@ components:
       properties:
         key:
           type: string
+      required:
+      - key
+      type: object
+    PrebuildConfig:
+      example:
+        commitInterval: 0
+        id: id
+        branch: branch
+        retention: 6
+        triggerFiles:
+        - triggerFiles
+        - triggerFiles
+      properties:
+        branch:
+          type: string
+        commitInterval:
+          type: integer
+        id:
+          type: string
+        retention:
+          type: integer
+        triggerFiles:
+          items:
+            type: string
+          type: array
+      required:
+      - branch
+      - commitInterval
+      - id
+      - retention
+      - triggerFiles
+      type: object
+    PrebuildDTO:
+      example:
+        projectConfigName: projectConfigName
+        commitInterval: 0
+        id: id
+        branch: branch
+        retention: 6
+        triggerFiles:
+        - triggerFiles
+        - triggerFiles
+      properties:
+        branch:
+          type: string
+        commitInterval:
+          type: integer
+        id:
+          type: string
+        projectConfigName:
+          type: string
+        retention:
+          type: integer
+        triggerFiles:
+          items:
+            type: string
+          type: array
+      required:
+      - branch
+      - id
+      - projectConfigName
+      - retention
       type: object
     ProfileData:
       example:
@@ -1126,16 +1966,24 @@ components:
           additionalProperties:
             type: string
           type: object
+      required:
+      - envVars
       type: object
     Project:
       example:
-        image: image
-        build:
+        buildConfig:
+          cachedBuild:
+            image: image
+            user: user
           devcontainer:
-            devContainerFilePath: devContainerFilePath
+            filePath: filePath
+        image: image
+        envVars:
+          key: envVars
         name: name
         state:
           gitStatus:
+            behind: 6
             fileStatus:
             - extra: extra
               name: name
@@ -1145,9 +1993,11 @@ components:
               name: name
               staging: null
               worktree: null
+            ahead: 0
+            branchPublished: true
             currentBranch: currentBranch
           updatedAt: updatedAt
-          uptime: 0
+          uptime: 1
         repository:
           owner: owner
           path: path
@@ -1156,14 +2006,19 @@ components:
           source: source
           prNumber: 0
           branch: branch
+          cloneTarget: null
           sha: sha
           url: url
         user: user
         target: target
         workspaceId: workspaceId
       properties:
-        build:
-          $ref: '#/components/schemas/ProjectBuild'
+        buildConfig:
+          $ref: '#/components/schemas/BuildConfig'
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
         image:
           type: string
         name:
@@ -1178,21 +2033,73 @@ components:
           type: string
         workspaceId:
           type: string
+      required:
+      - envVars
+      - image
+      - name
+      - repository
+      - target
+      - user
+      - workspaceId
       type: object
-    ProjectBuild:
+    ProjectConfig:
       example:
-        devcontainer:
-          devContainerFilePath: devContainerFilePath
+        prebuilds:
+        - commitInterval: 0
+          id: id
+          branch: branch
+          retention: 6
+          triggerFiles:
+          - triggerFiles
+          - triggerFiles
+        - commitInterval: 0
+          id: id
+          branch: branch
+          retention: 6
+          triggerFiles:
+          - triggerFiles
+          - triggerFiles
+        buildConfig:
+          cachedBuild:
+            image: image
+            user: user
+          devcontainer:
+            filePath: filePath
+        image: image
+        default: true
+        envVars:
+          key: envVars
+        name: name
+        user: user
+        repositoryUrl: repositoryUrl
       properties:
-        devcontainer:
-          $ref: '#/components/schemas/ProjectBuildDevcontainer'
-      type: object
-    ProjectBuildDevcontainer:
-      example:
-        devContainerFilePath: devContainerFilePath
-      properties:
-        devContainerFilePath:
+        buildConfig:
+          $ref: '#/components/schemas/BuildConfig'
+        default:
+          type: boolean
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
+        image:
           type: string
+        name:
+          type: string
+        prebuilds:
+          items:
+            $ref: '#/components/schemas/PrebuildConfig'
+          type: array
+        repositoryUrl:
+          type: string
+        user:
+          type: string
+      required:
+      - default
+      - envVars
+      - image
+      - name
+      - repositoryUrl
+      - user
       type: object
     ProjectInfo:
       example:
@@ -1212,10 +2119,16 @@ components:
           type: string
         workspaceId:
           type: string
+      required:
+      - created
+      - isRunning
+      - name
+      - workspaceId
       type: object
     ProjectState:
       example:
         gitStatus:
+          behind: 6
           fileStatus:
           - extra: extra
             name: name
@@ -1225,9 +2138,11 @@ components:
             name: name
             staging: null
             worktree: null
+          ahead: 0
+          branchPublished: true
           currentBranch: currentBranch
         updatedAt: updatedAt
-        uptime: 0
+        uptime: 1
       properties:
         gitStatus:
           $ref: '#/components/schemas/GitStatus'
@@ -1235,6 +2150,10 @@ components:
           type: string
         uptime:
           type: integer
+      required:
+      - gitStatus
+      - updatedAt
+      - uptime
       type: object
     Provider:
       example:
@@ -1245,6 +2164,9 @@ components:
           type: string
         version:
           type: string
+      required:
+      - name
+      - version
       type: object
     ProviderTarget:
       example:
@@ -1261,10 +2183,40 @@ components:
           type: string
         providerInfo:
           $ref: '#/components/schemas/provider.ProviderInfo'
+      required:
+      - name
+      - options
+      - providerInfo
       type: object
     ProviderTargetManifest:
       additionalProperties:
         $ref: '#/components/schemas/provider.ProviderTargetProperty'
+      type: object
+    RepositoryUrl:
+      example:
+        url: url
+      properties:
+        url:
+          type: string
+      required:
+      - url
+      type: object
+    Sample:
+      example:
+        name: name
+        description: description
+        gitUrl: gitUrl
+      properties:
+        description:
+          type: string
+        gitUrl:
+          type: string
+        name:
+          type: string
+      required:
+      - description
+      - gitUrl
+      - name
       type: object
     ServerConfig:
       example:
@@ -1280,6 +2232,7 @@ components:
         serverDownloadUrl: serverDownloadUrl
         binariesPath: binariesPath
         logFilePath: logFilePath
+        samplesIndexUrl: samplesIndexUrl
         defaultProjectImage: defaultProjectImage
         providersDir: providersDir
         id: id
@@ -1318,12 +2271,49 @@ components:
           type: string
         registryUrl:
           type: string
+        samplesIndexUrl:
+          type: string
         serverDownloadUrl:
           type: string
+      required:
+      - apiPort
+      - binariesPath
+      - builderImage
+      - builderRegistryServer
+      - defaultProjectImage
+      - defaultProjectUser
+      - headscalePort
+      - id
+      - localBuilderRegistryImage
+      - localBuilderRegistryPort
+      - logFilePath
+      - providersDir
+      - registryUrl
+      - serverDownloadUrl
+      type: object
+    SetGitProviderConfig:
+      example:
+        baseApiUrl: baseApiUrl
+        id: id
+        token: token
+        username: username
+      properties:
+        baseApiUrl:
+          type: string
+        id:
+          type: string
+        token:
+          type: string
+        username:
+          type: string
+      required:
+      - id
+      - token
       type: object
     SetProjectState:
       example:
         gitStatus:
+          behind: 6
           fileStatus:
           - extra: extra
             name: name
@@ -1333,6 +2323,8 @@ components:
             name: name
             staging: null
             worktree: null
+          ahead: 0
+          branchPublished: true
           currentBranch: currentBranch
         uptime: 0
       properties:
@@ -1340,6 +2332,8 @@ components:
           $ref: '#/components/schemas/GitStatus'
         uptime:
           type: integer
+      required:
+      - uptime
       type: object
     Status:
       enum:
@@ -1364,13 +2358,19 @@ components:
     Workspace:
       example:
         projects:
-        - image: image
-          build:
+        - buildConfig:
+            cachedBuild:
+              image: image
+              user: user
             devcontainer:
-              devContainerFilePath: devContainerFilePath
+              filePath: filePath
+          image: image
+          envVars:
+            key: envVars
           name: name
           state:
             gitStatus:
+              behind: 6
               fileStatus:
               - extra: extra
                 name: name
@@ -1380,9 +2380,11 @@ components:
                 name: name
                 staging: null
                 worktree: null
+              ahead: 0
+              branchPublished: true
               currentBranch: currentBranch
             updatedAt: updatedAt
-            uptime: 0
+            uptime: 1
           repository:
             owner: owner
             path: path
@@ -1391,18 +2393,25 @@ components:
             source: source
             prNumber: 0
             branch: branch
+            cloneTarget: null
             sha: sha
             url: url
           user: user
           target: target
           workspaceId: workspaceId
-        - image: image
-          build:
+        - buildConfig:
+            cachedBuild:
+              image: image
+              user: user
             devcontainer:
-              devContainerFilePath: devContainerFilePath
+              filePath: filePath
+          image: image
+          envVars:
+            key: envVars
           name: name
           state:
             gitStatus:
+              behind: 6
               fileStatus:
               - extra: extra
                 name: name
@@ -1412,9 +2421,11 @@ components:
                 name: name
                 staging: null
                 worktree: null
+              ahead: 0
+              branchPublished: true
               currentBranch: currentBranch
             updatedAt: updatedAt
-            uptime: 0
+            uptime: 1
           repository:
             owner: owner
             path: path
@@ -1423,6 +2434,7 @@ components:
             source: source
             prNumber: 0
             branch: branch
+            cloneTarget: null
             sha: sha
             url: url
           user: user
@@ -1442,17 +2454,28 @@ components:
           type: array
         target:
           type: string
+      required:
+      - id
+      - name
+      - projects
+      - target
       type: object
     WorkspaceDTO:
       example:
         projects:
-        - image: image
-          build:
+        - buildConfig:
+            cachedBuild:
+              image: image
+              user: user
             devcontainer:
-              devContainerFilePath: devContainerFilePath
+              filePath: filePath
+          image: image
+          envVars:
+            key: envVars
           name: name
           state:
             gitStatus:
+              behind: 6
               fileStatus:
               - extra: extra
                 name: name
@@ -1462,9 +2485,11 @@ components:
                 name: name
                 staging: null
                 worktree: null
+              ahead: 0
+              branchPublished: true
               currentBranch: currentBranch
             updatedAt: updatedAt
-            uptime: 0
+            uptime: 1
           repository:
             owner: owner
             path: path
@@ -1473,18 +2498,25 @@ components:
             source: source
             prNumber: 0
             branch: branch
+            cloneTarget: null
             sha: sha
             url: url
           user: user
           target: target
           workspaceId: workspaceId
-        - image: image
-          build:
+        - buildConfig:
+            cachedBuild:
+              image: image
+              user: user
             devcontainer:
-              devContainerFilePath: devContainerFilePath
+              filePath: filePath
+          image: image
+          envVars:
+            key: envVars
           name: name
           state:
             gitStatus:
+              behind: 6
               fileStatus:
               - extra: extra
                 name: name
@@ -1494,9 +2526,11 @@ components:
                 name: name
                 staging: null
                 worktree: null
+              ahead: 0
+              branchPublished: true
               currentBranch: currentBranch
             updatedAt: updatedAt
-            uptime: 0
+            uptime: 1
           repository:
             owner: owner
             path: path
@@ -1505,6 +2539,7 @@ components:
             source: source
             prNumber: 0
             branch: branch
+            cloneTarget: null
             sha: sha
             url: url
           user: user
@@ -1540,6 +2575,11 @@ components:
           type: array
         target:
           type: string
+      required:
+      - id
+      - name
+      - projects
+      - target
       type: object
     WorkspaceInfo:
       example:
@@ -1565,6 +2605,9 @@ components:
           type: array
         providerMetadata:
           type: string
+      required:
+      - name
+      - projects
       type: object
     apikey.ApiKeyType:
       enum:
@@ -1576,6 +2619,26 @@ components:
       - ApiKeyTypeClient
       - ApiKeyTypeProject
       - ApiKeyTypeWorkspace
+    build.BuildState:
+      enum:
+      - pending-run
+      - running
+      - error
+      - success
+      - published
+      - pending-delete
+      - pending-forced-delete
+      - deleting
+      type: string
+      x-enum-varnames:
+      - BuildStatePendingRun
+      - BuildStateRunning
+      - BuildStateError
+      - BuildStateSuccess
+      - BuildStatePublished
+      - BuildStatePendingDelete
+      - BuildStatePendingForcedDelete
+      - BuildStateDeleting
     provider.ProviderInfo:
       example:
         name: name
@@ -1585,6 +2648,9 @@ components:
           type: string
         version:
           type: string
+      required:
+      - name
+      - version
       type: object
     provider.ProviderTargetProperty:
       properties:
@@ -1606,6 +2672,12 @@ components:
           type: boolean
         options:
           description: Options is only used if the Type is ProviderTargetPropertyTypeOption
+          items:
+            type: string
+          type: array
+        suggestions:
+          description: Suggestions is an optional list of auto-complete values to
+            assist the user while filling the field
           items:
             type: string
           type: array

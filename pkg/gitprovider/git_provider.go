@@ -6,6 +6,7 @@ package gitprovider
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
@@ -14,16 +15,28 @@ import (
 const personalNamespaceId = "<PERSONAL>"
 
 type StaticGitContext struct {
-	Id       string  `json:"id"`
-	Url      string  `json:"url"`
-	Name     string  `json:"name"`
-	Branch   *string `json:"branch,omitempty"`
-	Sha      *string `json:"sha,omitempty"`
-	Owner    string  `json:"owner"`
-	PrNumber *uint32 `json:"prNumber,omitempty"`
-	Source   string  `json:"source"`
-	Path     *string `json:"path,omitempty"`
+	Id       string  `json:"id" validate:"required"`
+	Url      string  `json:"url" validate:"required"`
+	Name     string  `json:"name" validate:"required"`
+	Branch   *string `json:"branch,omitempty" validate:"optional"`
+	Sha      *string `json:"sha,omitempty" validate:"optional"`
+	Owner    string  `json:"owner" validate:"required"`
+	PrNumber *uint32 `json:"prNumber,omitempty" validate:"optional"`
+	Source   string  `json:"source" validate:"required"`
+	Path     *string `json:"path,omitempty" validate:"optional"`
 } // @name StaticGitContext
+
+type GetRepositoryContext struct {
+	Id       *string `json:"id" validate:"optional"`
+	Url      string  `json:"url" validate:"required"`
+	Name     *string `json:"name" validate:"optional"`
+	Branch   *string `json:"branch,omitempty" validate:"optional"`
+	Sha      *string `json:"sha" validate:"optional"`
+	Owner    *string `json:"owner" validate:"optional"`
+	PrNumber *uint32 `json:"prNumber,omitempty" validate:"optional"`
+	Source   *string `json:"source" validate:"optional"`
+	Path     *string `json:"path,omitempty" validate:"optional"`
+} // @name GetRepositoryContext
 
 type GitProvider interface {
 	GetNamespaces() ([]*GitNamespace, error)
@@ -32,48 +45,89 @@ type GitProvider interface {
 	GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error)
 	GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error)
 
-	GetRepositoryFromUrl(repositoryUrl string) (*GitRepository, error)
+	CanHandle(repoUrl string) (bool, error)
+	GetRepositoryContext(repoContext GetRepositoryContext) (*GitRepository, error)
+	GetUrlFromContext(repoContext *GetRepositoryContext) string
 	GetLastCommitSha(staticContext *StaticGitContext) (string, error)
-	getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error)
-	parseStaticGitContext(repoUrl string) (*StaticGitContext, error)
+	GetBranchByCommit(staticContext *StaticGitContext) (string, error)
+	GetPrContext(staticContext *StaticGitContext) (*StaticGitContext, error)
+	ParseStaticGitContext(repoUrl string) (*StaticGitContext, error)
+	GetDefaultBranch(staticContext *StaticGitContext) (*string, error)
+
+	RegisterPrebuildWebhook(repo *GitRepository, endpointUrl string) (string, error)
+	GetPrebuildWebhook(repo *GitRepository, endpointUrl string) (*string, error)
+	UnregisterPrebuildWebhook(repo *GitRepository, id string) error
+	GetCommitsRange(repo *GitRepository, initialSha string, currentSha string) (int, error)
+	ParseEventData(request *http.Request) (*GitEventData, error)
 }
 
 type AbstractGitProvider struct {
 	GitProvider
 }
 
-func (a *AbstractGitProvider) GetRepositoryFromUrl(repositoryUrl string) (*GitRepository, error) {
-	staticContext, err := a.GitProvider.parseStaticGitContext(repositoryUrl)
+func (a *AbstractGitProvider) GetRepositoryContext(repoContext GetRepositoryContext) (*GitRepository, error) {
+	staticContext, err := a.GitProvider.ParseStaticGitContext(repoContext.Url)
 	if err != nil {
 		return nil, err
 	}
 
-	if staticContext.PrNumber != nil {
-		staticContext, err = a.getPrContext(staticContext)
+	if repoContext.PrNumber != nil {
+		staticContext.PrNumber = repoContext.PrNumber
+		staticContext, err = a.GetPrContext(staticContext)
 		if err != nil {
 			return nil, err
 		}
+	} else {
+		if staticContext.PrNumber != nil {
+			staticContext, err = a.GetPrContext(staticContext)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
 
-	lastCommitSha, err := a.GetLastCommitSha(staticContext)
-	if err != nil {
-		return nil, err
+	if repoContext.Branch != nil {
+		staticContext.Branch = repoContext.Branch
+	}
+
+	var target CloneTarget = CloneTargetBranch
+	if staticContext.Sha != nil && staticContext.Branch == staticContext.Sha {
+		target = CloneTargetCommit
+		branch, err := a.GetBranchByCommit(staticContext)
+		if err != nil {
+			return nil, err
+		}
+		staticContext.Branch = &branch
+	} else {
+		if staticContext.Branch == nil {
+			branch, err := a.GitProvider.GetDefaultBranch(staticContext)
+			if err != nil {
+				return nil, err
+			}
+			staticContext.Branch = branch
+		}
+		lastCommitSha, err := a.GetLastCommitSha(staticContext)
+		if err != nil {
+			return nil, err
+		}
+		staticContext.Sha = &lastCommitSha
 	}
 
 	return &GitRepository{
 		Id:       staticContext.Id,
 		Name:     staticContext.Name,
 		Url:      staticContext.Url,
-		Branch:   staticContext.Branch,
-		Sha:      lastCommitSha,
+		Branch:   *staticContext.Branch,
+		Sha:      *staticContext.Sha,
 		Owner:    staticContext.Owner,
 		PrNumber: staticContext.PrNumber,
 		Source:   staticContext.Source,
 		Path:     staticContext.Path,
+		Target:   target,
 	}, nil
 }
 
-func (a *AbstractGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
+func (a *AbstractGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
 	isHttps := true
 	if strings.HasPrefix(repoUrl, "http://") {
 		isHttps = false
@@ -95,6 +149,10 @@ func (a *AbstractGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitC
 	path := strings.TrimPrefix(u.Path, "/")
 	parts := strings.Split(path, "/")
 
+	if len(parts) < 2 {
+		return nil, errors.New("cannot parse git URL: " + repoUrl)
+	}
+
 	repo.Source = u.Host
 	repo.Owner = parts[0]
 	repo.Name = parts[1]
@@ -108,6 +166,26 @@ func (a *AbstractGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitC
 	repo.Url = getCloneUrl(repo.Source, repo.Owner, repo.Name, isHttps)
 
 	return repo, nil
+}
+
+func (g *AbstractGitProvider) GetPrebuildWebhook(repo *GitRepository, endpointUrl string) (*string, error) {
+	return nil, errors.New("prebuilds not yet implemented for this git provider")
+}
+
+func (g *AbstractGitProvider) RegisterPrebuildWebhook(repo *GitRepository, endpointUrl string) (string, error) {
+	return "", errors.New("prebuilds not yet implemented for this git provider")
+}
+
+func (g *AbstractGitProvider) UnregisterPrebuildWebhook(repo *GitRepository, id string) error {
+	return errors.New("prebuilds not yet implemented for this git provider")
+}
+
+func (g *AbstractGitProvider) GetCommitsRange(repo *GitRepository, initialSha string, currentSha string) (int, error) {
+	return 0, errors.New("prebuilds not yet implemented for this git provider")
+}
+
+func (g *AbstractGitProvider) ParseEventData(request *http.Request) (*GitEventData, error) {
+	return nil, errors.New("prebuilds not yet implemented for this git provider")
 }
 
 func (a *AbstractGitProvider) parseSshGitUrl(gitURL string) (*StaticGitContext, error) {

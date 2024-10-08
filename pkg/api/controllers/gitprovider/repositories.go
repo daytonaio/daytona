@@ -4,9 +4,9 @@
 package gitprovider
 
 import (
-	"fmt"
-	"net/http"
+	"errors"
 
+	"github.com/daytonaio/daytona/pkg/api/controllers"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
@@ -31,7 +31,11 @@ func GetRepositories(ctx *gin.Context) {
 
 	response, err := server.GitProviderService.GetRepositories(gitProviderId, namespaceId)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get repositories for url: %s", err.Error()))
+		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
+		if codeErr != nil {
+			ctx.AbortWithError(statusCode, codeErr)
+		}
+		ctx.AbortWithError(statusCode, errors.New(message))
 		return
 	}
 

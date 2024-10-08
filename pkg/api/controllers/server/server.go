@@ -24,7 +24,7 @@ import (
 func GetConfig(ctx *gin.Context) {
 	config, err := server.GetConfig()
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get config: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get config: %w", err))
 		return
 	}
 
@@ -47,13 +47,13 @@ func SetConfig(ctx *gin.Context) {
 	var c server.Config
 	err := ctx.BindJSON(&c)
 	if err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %s", err.Error()))
+		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
 		return
 	}
 
 	err = server.Save(c)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to save config: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to save config: %w", err))
 		return
 	}
 
@@ -75,7 +75,7 @@ func GenerateNetworkKey(ctx *gin.Context) {
 
 	authKey, err := s.TailscaleServer.CreateAuthKey()
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to generate network key: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to generate network key: %w", err))
 		return
 	}
 

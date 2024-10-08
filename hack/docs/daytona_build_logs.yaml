@@ -1,0 +1,14 @@
+name: daytona build logs
+synopsis: View logs for build
+usage: daytona build logs [flags]
+options:
+    - name: follow
+      shorthand: f
+      default_value: "false"
+      usage: Follow logs
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona build - Manage builds

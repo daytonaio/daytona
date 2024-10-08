@@ -12,7 +12,9 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
 
@@ -30,7 +32,7 @@ type ProjectConfigurationData struct {
 	EnvVars              map[string]string
 }
 
-func NewProjectConfigurationData(buildChoice BuildChoice, devContainerFilePath string, currentProject *apiclient.CreateWorkspaceRequestProject, defaults *ProjectDefaults) *ProjectConfigurationData {
+func NewConfigurationData(buildChoice views_util.BuildChoice, devContainerFilePath string, currentProject *apiclient.CreateProjectDTO, defaults *views_util.ProjectConfigDefaults) *ProjectConfigurationData {
 	projectConfigurationData := &ProjectConfigurationData{
 		BuildChoice:          string(buildChoice),
 		DevcontainerFilePath: defaults.DevcontainerFilePath,
@@ -48,19 +50,19 @@ func NewProjectConfigurationData(buildChoice BuildChoice, devContainerFilePath s
 	}
 
 	if currentProject.EnvVars != nil {
-		projectConfigurationData.EnvVars = *currentProject.EnvVars
+		projectConfigurationData.EnvVars = currentProject.EnvVars
 	}
 
 	return projectConfigurationData
 }
 
-func ConfigureProjects(projectList *[]apiclient.CreateWorkspaceRequestProject, defaults ProjectDefaults) (bool, error) {
-	var currentProject *apiclient.CreateWorkspaceRequestProject
+func RunProjectConfiguration(projectList *[]apiclient.CreateProjectDTO, defaults views_util.ProjectConfigDefaults) (bool, error) {
+	var currentProject *apiclient.CreateProjectDTO
 
 	if len(*projectList) > 1 {
 		currentProject = selection.GetProjectRequestFromPrompt(projectList)
 		if currentProject == nil {
-			return false, errors.New("project is required")
+			return false, common.ErrCtrlCAbort
 		}
 	} else {
 		currentProject = &((*projectList)[0])
@@ -71,22 +73,23 @@ func ConfigureProjects(projectList *[]apiclient.CreateWorkspaceRequestProject, d
 	}
 
 	devContainerFilePath := defaults.DevcontainerFilePath
-	builderChoice := AUTOMATIC
+	builderChoice := views_util.AUTOMATIC
 
-	if currentProject.Build != nil {
-		if currentProject.Build.Devcontainer != nil {
-			builderChoice = DEVCONTAINER
-			devContainerFilePath = *currentProject.Build.Devcontainer.DevContainerFilePath
+	if currentProject.BuildConfig != nil {
+		if currentProject.BuildConfig.Devcontainer != nil {
+			builderChoice = views_util.DEVCONTAINER
+			devContainerFilePath = currentProject.BuildConfig.Devcontainer.FilePath
 		}
 	} else {
-		if *currentProject.Image == *defaults.Image && *currentProject.User == *defaults.ImageUser {
-			builderChoice = NONE
+		if currentProject.Image == nil && currentProject.User == nil ||
+			*currentProject.Image == *defaults.Image && *currentProject.User == *defaults.ImageUser {
+			builderChoice = views_util.NONE
 		} else {
-			builderChoice = CUSTOMIMAGE
+			builderChoice = views_util.CUSTOMIMAGE
 		}
 	}
 
-	projectConfigurationData := NewProjectConfigurationData(builderChoice, devContainerFilePath, currentProject, &defaults)
+	projectConfigurationData := NewConfigurationData(builderChoice, devContainerFilePath, currentProject, &defaults)
 
 	form := GetProjectConfigurationForm(projectConfigurationData)
 	err := form.Run()
@@ -96,35 +99,35 @@ func ConfigureProjects(projectList *[]apiclient.CreateWorkspaceRequestProject, d
 
 	for i := range *projectList {
 		if (*projectList)[i].Name == currentProject.Name {
-			if projectConfigurationData.BuildChoice == string(NONE) {
-				(*projectList)[i].Build = nil
+			if projectConfigurationData.BuildChoice == string(views_util.NONE) {
+				(*projectList)[i].BuildConfig = nil
 				(*projectList)[i].Image = defaults.Image
 				(*projectList)[i].User = defaults.ImageUser
 			}
 
-			if projectConfigurationData.BuildChoice == string(CUSTOMIMAGE) {
-				(*projectList)[i].Build = nil
+			if projectConfigurationData.BuildChoice == string(views_util.CUSTOMIMAGE) {
+				(*projectList)[i].BuildConfig = nil
 				(*projectList)[i].Image = &projectConfigurationData.Image
 				(*projectList)[i].User = &projectConfigurationData.User
 			}
 
-			if projectConfigurationData.BuildChoice == string(AUTOMATIC) {
-				(*projectList)[i].Build = &apiclient.ProjectBuild{}
+			if projectConfigurationData.BuildChoice == string(views_util.AUTOMATIC) {
+				(*projectList)[i].BuildConfig = &apiclient.BuildConfig{}
 				(*projectList)[i].Image = defaults.Image
 				(*projectList)[i].User = defaults.ImageUser
 			}
 
-			if projectConfigurationData.BuildChoice == string(DEVCONTAINER) {
-				(*projectList)[i].Build = &apiclient.ProjectBuild{
-					Devcontainer: &apiclient.ProjectBuildDevcontainer{
-						DevContainerFilePath: &projectConfigurationData.DevcontainerFilePath,
+			if projectConfigurationData.BuildChoice == string(views_util.DEVCONTAINER) {
+				(*projectList)[i].BuildConfig = &apiclient.BuildConfig{
+					Devcontainer: &apiclient.DevcontainerConfig{
+						FilePath: projectConfigurationData.DevcontainerFilePath,
 					},
 				}
 				(*projectList)[i].Image = nil
 				(*projectList)[i].User = nil
 			}
 
-			(*projectList)[i].EnvVars = &projectConfigurationData.EnvVars
+			(*projectList)[i].EnvVars = projectConfigurationData.EnvVars
 		}
 	}
 
@@ -132,7 +135,7 @@ func ConfigureProjects(projectList *[]apiclient.CreateWorkspaceRequestProject, d
 		return true, nil
 	}
 
-	return ConfigureProjects(projectList, defaults)
+	return RunProjectConfiguration(projectList, defaults)
 }
 
 func validateDevcontainerFilename(filename string) error {
@@ -145,10 +148,10 @@ func validateDevcontainerFilename(filename string) error {
 
 func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData) *huh.Form {
 	buildOptions := []huh.Option[string]{
-		{Key: "Automatic", Value: string(AUTOMATIC)},
-		{Key: "Devcontainer", Value: string(DEVCONTAINER)},
-		{Key: "Custom image", Value: string(CUSTOMIMAGE)},
-		{Key: "None", Value: string(NONE)},
+		{Key: "Automatic", Value: string(views_util.AUTOMATIC)},
+		{Key: "Devcontainer", Value: string(views_util.DEVCONTAINER)},
+		{Key: "Custom image", Value: string(views_util.CUSTOMIMAGE)},
+		{Key: "None", Value: string(views_util.NONE)},
 	}
 
 	form := huh.NewForm(
@@ -159,7 +162,7 @@ func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData)
 					buildOptions...,
 				).
 				Value(&projectConfiguration.BuildChoice),
-		),
+		).WithHeight(8),
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Custom container image").
@@ -167,19 +170,19 @@ func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData)
 			huh.NewInput().
 				Title("Container user").
 				Value(&projectConfiguration.User),
-		).WithHideFunc(func() bool {
-			return projectConfiguration.BuildChoice != string(CUSTOMIMAGE)
+		).WithHeight(5).WithHideFunc(func() bool {
+			return projectConfiguration.BuildChoice != string(views_util.CUSTOMIMAGE)
 		}),
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Devcontainer file path").
 				Value(&projectConfiguration.DevcontainerFilePath).Validate(validateDevcontainerFilename),
-		).WithHideFunc(func() bool {
-			return projectConfiguration.BuildChoice != string(DEVCONTAINER)
+		).WithHeight(5).WithHideFunc(func() bool {
+			return projectConfiguration.BuildChoice != string(views_util.DEVCONTAINER)
 		}),
 		huh.NewGroup(
 			views.GetEnvVarsInput(&projectConfiguration.EnvVars),
-		),
+		).WithHeight(12),
 	).WithTheme(views.GetCustomTheme())
 
 	keyMap := huh.NewDefaultKeyMap()
@@ -187,6 +190,7 @@ func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData)
 		NewLine: key.NewBinding(key.WithKeys("alt+enter"), key.WithHelp("alt+enter", "new line")),
 		Next:    key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "next")),
 		Prev:    key.NewBinding(key.WithKeys("shift+tab"), key.WithHelp("shift+tab", "prev")),
+		Submit:  key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "submit")),
 	}
 
 	form = form.WithKeyMap(keyMap)

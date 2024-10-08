@@ -12,7 +12,7 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal"
-	"github.com/daytonaio/daytona/pkg/api"
+	"github.com/daytonaio/daytona/internal/constants"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 )
@@ -25,6 +25,8 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 	if apiClient != nil {
 		return apiClient, nil
 	}
+
+	var newApiClient *apiclient.APIClient
 
 	c, err := config.GetConfig()
 	if err != nil {
@@ -45,16 +47,6 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 	serverUrl := activeProfile.Api.Url
 	apiKey := activeProfile.Api.Key
 
-	healthUrl, err := url.JoinPath(serverUrl, api.HEALTH_CHECK_ROUTE)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = http.Head(healthUrl)
-	if err != nil {
-		return nil, ErrHealthCheckFailed(healthUrl)
-	}
-
 	clientConfig := apiclient.NewConfiguration()
 	clientConfig.Servers = apiclient.ServerConfigurations{
 		{
@@ -68,7 +60,7 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 	if c.TelemetryEnabled {
 		clientConfig.AddDefaultHeader(telemetry.ENABLED_HEADER, "true")
 		clientConfig.AddDefaultHeader(telemetry.SESSION_ID_HEADER, internal.SESSION_ID)
-		clientConfig.AddDefaultHeader(telemetry.CLIENT_ID_HEADER, c.Id)
+		clientConfig.AddDefaultHeader(telemetry.CLIENT_ID_HEADER, config.GetClientId())
 		if internal.WorkspaceMode() {
 			clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, string(telemetry.CLI_PROJECT_SOURCE))
 		} else {
@@ -76,12 +68,23 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 		}
 	}
 
-	apiClient = apiclient.NewAPIClient(clientConfig)
+	newApiClient = apiclient.NewAPIClient(clientConfig)
 
-	apiClient.GetConfig().HTTPClient = &http.Client{
+	newApiClient.GetConfig().HTTPClient = &http.Client{
 		Transport: http.DefaultTransport,
 	}
 
+	healthUrl, err := url.JoinPath(serverUrl, constants.HEALTH_CHECK_ROUTE)
+	if err != nil {
+		return nil, err
+	}
+
+	_, _, err = newApiClient.DefaultAPI.HealthCheck(context.Background()).Execute()
+	if err != nil {
+		return nil, ErrHealthCheckFailed(healthUrl)
+	}
+
+	apiClient = newApiClient
 	return apiClient, nil
 }
 
@@ -112,37 +115,7 @@ func GetAgentApiClient(apiUrl, apiKey, clientId string, telemetryEnabled bool) (
 	return apiClient, nil
 }
 
-func GetProviderList() ([]apiclient.Provider, error) {
-	apiClient, err := GetApiClient(nil)
-	if err != nil {
-		return nil, err
-	}
-
-	ctx := context.Background()
-
-	providersList, res, err := apiClient.ProviderAPI.ListProviders(ctx).Execute()
-	if err != nil {
-		return nil, HandleErrorResponse(res, err)
-	}
-
-	return providersList, nil
-}
-
-func GetTargetList() ([]apiclient.ProviderTarget, error) {
-	apiClient, err := GetApiClient(nil)
-	if err != nil {
-		return nil, err
-	}
-
-	targets, resp, err := apiClient.TargetAPI.ListTargets(context.Background()).Execute()
-	if err != nil {
-		return nil, HandleErrorResponse(resp, err)
-	}
-
-	return targets, nil
-}
-
-func GetWorkspace(workspaceNameOrId string) (*apiclient.WorkspaceDTO, error) {
+func GetWorkspace(workspaceNameOrId string, verbose bool) (*apiclient.WorkspaceDTO, error) {
 	ctx := context.Background()
 
 	apiClient, err := GetApiClient(nil)
@@ -150,7 +123,7 @@ func GetWorkspace(workspaceNameOrId string) (*apiclient.WorkspaceDTO, error) {
 		return nil, err
 	}
 
-	workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceNameOrId).Execute()
+	workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceNameOrId).Verbose(verbose).Execute()
 	if err != nil {
 		return nil, HandleErrorResponse(res, err)
 	}
@@ -176,12 +149,12 @@ func GetFirstWorkspaceProjectName(workspaceId string, projectName string, profil
 			return "", errors.New("no projects found in workspace")
 		}
 
-		return *wsInfo.Projects[0].Name, nil
+		return wsInfo.Projects[0].Name, nil
 	}
 
 	for _, project := range wsInfo.Projects {
-		if *project.Name == projectName {
-			return *project.Name, nil
+		if project.Name == projectName {
+			return project.Name, nil
 		}
 	}
 

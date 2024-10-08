@@ -5,6 +5,7 @@ package gitprovider
 
 import (
 	"fmt"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
@@ -15,10 +16,10 @@ import (
 type GitnessGitProvider struct {
 	*AbstractGitProvider
 	token      string
-	baseApiUrl *string
+	baseApiUrl string
 }
 
-func NewGitnessGitProvider(token string, baseApiUrl *string) *GitnessGitProvider {
+func NewGitnessGitProvider(token string, baseApiUrl string) *GitnessGitProvider {
 	gitProvider := &GitnessGitProvider{
 		token:               token,
 		baseApiUrl:          baseApiUrl,
@@ -27,6 +28,15 @@ func NewGitnessGitProvider(token string, baseApiUrl *string) *GitnessGitProvider
 	gitProvider.AbstractGitProvider.GitProvider = gitProvider
 
 	return gitProvider
+}
+
+func (g *GitnessGitProvider) CanHandle(repoUrl string) (bool, error) {
+	staticContext, err := g.ParseStaticGitContext(repoUrl)
+	if err != nil {
+		return false, err
+	}
+
+	return strings.Contains(g.baseApiUrl, staticContext.Source), nil
 }
 
 func (g *GitnessGitProvider) GetNamespaces() ([]*GitNamespace, error) {
@@ -47,7 +57,7 @@ func (g *GitnessGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 }
 
 func (g *GitnessGitProvider) getApiClient() *gitnessclient.GitnessClient {
-	url, _ := url.Parse(*g.baseApiUrl)
+	url, _ := url.Parse(g.baseApiUrl)
 	return gitnessclient.NewGitnessClient(g.token, url)
 }
 
@@ -71,7 +81,7 @@ func (g *GitnessGitProvider) GetRepositories(namespace string) ([]*GitRepository
 			Id:     repo.Identifier,
 			Name:   repo.Identifier,
 			Url:    repo.GitUrl,
-			Branch: &repo.DefaultBranch,
+			Branch: repo.DefaultBranch,
 			Source: u.Host,
 			Owner:  admin.Principal.DisplayName,
 		}
@@ -134,12 +144,70 @@ func (g *GitnessGitProvider) GetUser() (*GitUser, error) {
 	return user, nil
 }
 
+func (g *GitnessGitProvider) GetUrlFromContext(repoContext *GetRepositoryContext) string {
+	url := strings.TrimSuffix(repoContext.Url, ".git")
+
+	if repoContext.Branch != nil && *repoContext.Branch != "" {
+		url += "/files/" + *repoContext.Branch
+
+		if repoContext.Path != nil && *repoContext.Path != "" {
+			url += "/~/" + *repoContext.Path
+		}
+	} else if repoContext.Path != nil {
+		url += "/files/main/~/" + *repoContext.Path
+	}
+
+	return url
+}
+
+func (g *GitnessGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
+	client := g.getApiClient()
+
+	response, err := client.GetRepoBranches(staticContext.Name, staticContext.Owner)
+	if err != nil {
+		return "", fmt.Errorf("failed to fetch Branches: %w", err)
+	}
+
+	var branchName string
+	for _, branch := range response {
+		if *staticContext.Sha == branch.Sha {
+			branchName = branch.Name
+			break
+		}
+
+		commits, err := client.GetCommits(staticContext.Owner, staticContext.Name, &branch.Name)
+		if err != nil {
+			return "", err
+		}
+
+		if len(*commits) == 0 {
+			continue
+		}
+
+		for _, commit := range *commits {
+			if commit.Sha == *staticContext.Sha {
+				branchName = branch.Name
+				break
+			}
+		}
+		if branchName != "" {
+			break
+		}
+	}
+
+	if branchName == "" {
+		return "", fmt.Errorf("status code: %d branch not found for SHA: %s", http.StatusNotFound, *staticContext.Sha)
+	}
+
+	return branchName, nil
+}
+
 func (g *GitnessGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (string, error) {
 	client := g.getApiClient()
 	return client.GetLastCommitSha(staticContext.Url, staticContext.Branch)
 }
 
-func (g *GitnessGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
+func (g *GitnessGitProvider) GetPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
 	if staticContext.PrNumber == nil {
 		return staticContext, nil
 	}
@@ -164,8 +232,8 @@ func (g *GitnessGitProvider) getPrContext(staticContext *StaticGitContext) (*Sta
 	return &repo, nil
 }
 
-func (g *GitnessGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
-	staticContext, err := g.AbstractGitProvider.parseStaticGitContext(repoUrl)
+func (g *GitnessGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
+	staticContext, err := g.AbstractGitProvider.ParseStaticGitContext(repoUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -207,4 +275,9 @@ func (g *GitnessGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitCo
 	}
 
 	return staticContext, nil
+}
+
+func (g *GitnessGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*string, error) {
+	client := g.getApiClient()
+	return client.GetDefaultBranch(staticContext.Url)
 }

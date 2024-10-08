@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -17,7 +18,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/daytonaio/daytona/pkg/ssh"
 	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
@@ -36,28 +36,34 @@ func (d *DockerClient) CreateWorkspace(workspace *workspace.Workspace, workspace
 }
 
 func (d *DockerClient) CreateProject(opts *CreateProjectOptions) error {
+	// pulledImages map keeps track of pulled images for project creation in order to avoid pulling the same image multiple times
+	// This is only an optimisation for images with tag 'latest'
+	pulledImages := map[string]bool{}
+
 	// TODO: The image should be configurable
 	err := d.PullImage("daytonaio/workspace-project", nil, opts.LogWriter)
 	if err != nil {
 		return err
 	}
+	pulledImages["daytonaio/workspace-project"] = true
+	pulledImages["daytonaio/workspace-project:latest"] = true
 
 	err = d.cloneProjectRepository(opts)
 	if err != nil {
 		return err
 	}
 
-	builderType, err := detect.DetectProjectBuilderType(opts.Project, opts.ProjectDir, opts.SshClient)
+	builderType, err := detect.DetectProjectBuilderType(opts.Project.BuildConfig, opts.ProjectDir, opts.SshClient)
 	if err != nil {
 		return err
 	}
 
 	switch builderType {
 	case detect.BuilderTypeDevcontainer:
-		_, err := d.createProjectFromDevcontainer(opts, true)
+		_, _, err := d.CreateFromDevcontainer(d.toCreateDevcontainerOptions(opts, true))
 		return err
 	case detect.BuilderTypeImage:
-		return d.createProjectFromImage(opts)
+		return d.createProjectFromImage(opts, pulledImages)
 	default:
 		return fmt.Errorf("unknown builder type: %s", builderType)
 	}
@@ -90,7 +96,7 @@ func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions) error 
 		ProjectDir: fmt.Sprintf("/workdir/%s-%s", opts.Project.WorkspaceId, opts.Project.Name),
 	}
 
-	cloneCmd := gitService.CloneRepositoryCmd(opts.Project, auth)
+	cloneCmd := gitService.CloneRepositoryCmd(opts.Project.Repository, auth)
 
 	c, err := d.apiClient.ContainerCreate(ctx, &container.Config{
 		Image:      "daytonaio/workspace-project",
@@ -112,7 +118,7 @@ func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions) error 
 		return err
 	}
 
-	defer d.removeContainer(c.ID) // nolint:errcheck
+	defer d.RemoveContainer(c.ID) // nolint:errcheck
 
 	err = d.apiClient.ContainerStart(ctx, c.ID, container.StartOptions{})
 	if err != nil {
@@ -130,9 +136,13 @@ func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions) error 
 		}
 	}()
 
-	containerUser, err := d.updateContainerUserUidGid(c.ID, opts)
+	containerUser := "daytona"
 
-	res, err := d.ExecSync(c.ID, types.ExecConfig{
+	if runtime.GOOS != "windows" {
+		containerUser, err = d.updateContainerUserUidGid(c.ID, opts)
+	}
+
+	res, err := d.ExecSync(c.ID, container.ExecOptions{
 		User: containerUser,
 		Cmd:  append([]string{"sh", "-c"}, strings.Join(cloneCmd, " ")),
 	}, opts.LogWriter)
@@ -171,7 +181,7 @@ func (d *DockerClient) updateContainerUserUidGid(containerId string, opts *Creat
 		Patch UID and GID of the user cloning the repository
 	*/
 	if containerUser != "root" {
-		_, err = d.ExecSync(containerId, types.ExecConfig{
+		_, err = d.ExecSync(containerId, container.ExecOptions{
 			User: "root",
 			Cmd:  []string{"sh", "-c", UPDATE_UID_GID_SCRIPT},
 			Env: []string{
@@ -186,6 +196,23 @@ func (d *DockerClient) updateContainerUserUidGid(containerId string, opts *Creat
 	}
 
 	return containerUser, nil
+}
+
+func (d *DockerClient) toCreateDevcontainerOptions(opts *CreateProjectOptions, prebuild bool) CreateDevcontainerOptions {
+	return CreateDevcontainerOptions{
+		ProjectDir:        opts.ProjectDir,
+		ProjectName:       opts.Project.Name,
+		BuildConfig:       opts.Project.BuildConfig,
+		LogWriter:         opts.LogWriter,
+		SshClient:         opts.SshClient,
+		ContainerRegistry: opts.Cr,
+		EnvVars:           opts.Project.EnvVars,
+		IdLabels: map[string]string{
+			"daytona.workspace.id": opts.Project.WorkspaceId,
+			"daytona.project.name": opts.Project.Name,
+		},
+		Prebuild: true,
+	}
 }
 
 const UPDATE_UID_GID_SCRIPT = `eval $(sed -n "s/${REMOTE_USER}:[^:]*:\([^:]*\):\([^:]*\):[^:]*:\([^:]*\).*/OLD_UID=\1;OLD_GID=\2;HOME_FOLDER=\3/p" /etc/passwd); \

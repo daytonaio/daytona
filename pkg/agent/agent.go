@@ -19,7 +19,7 @@ import (
 	agent_config "github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	log "github.com/sirupsen/logrus"
 )
@@ -65,15 +65,11 @@ func (a *Agent) startProjectMode() error {
 	var auth *http.BasicAuth
 	if gitProvider != nil {
 		auth = &http.BasicAuth{}
-		if gitProvider.Username != nil {
-			auth.Username = *gitProvider.Username
-		}
-		if gitProvider.Token != nil {
-			auth.Password = *gitProvider.Token
-		}
+		auth.Username = gitProvider.Username
+		auth.Password = gitProvider.Token
 	}
 
-	exists, err := a.Git.RepositoryExists(project)
+	exists, err := a.Git.RepositoryExists()
 	if err != nil {
 		log.Error(fmt.Sprintf("failed to clone repository: %s", err))
 	} else {
@@ -92,7 +88,7 @@ func (a *Agent) startProjectMode() error {
 			}
 
 			log.Info("Cloning repository...")
-			err = a.Git.CloneRepository(project, auth)
+			err = a.Git.CloneRepository(project.Repository, auth)
 			if err != nil {
 				log.Error(fmt.Sprintf("failed to clone repository: %s", err))
 			} else {
@@ -103,15 +99,16 @@ func (a *Agent) startProjectMode() error {
 
 	var gitUser *gitprovider.GitUser
 	if gitProvider != nil {
-		user, err := a.getGitUser(*gitProvider.Id)
+		user, err := a.getGitUser(gitProvider.Id)
 		if err != nil {
 			log.Error(fmt.Sprintf("failed to get git user data: %s", err))
-		}
-		gitUser = &gitprovider.GitUser{
-			Email:    *user.Email,
-			Name:     *user.Name,
-			Id:       *user.Id,
-			Username: *user.Username,
+		} else {
+			gitUser = &gitprovider.GitUser{
+				Email:    user.Email,
+				Name:     user.Name,
+				Id:       user.Id,
+				Username: user.Username,
+			}
 		}
 	}
 
@@ -134,7 +131,7 @@ func (a *Agent) startProjectMode() error {
 	return nil
 }
 
-func (a *Agent) getProject() (*workspace.Project, error) {
+func (a *Agent) getProject() (*project.Project, error) {
 	ctx := context.Background()
 
 	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey, a.Config.ClientId, a.TelemetryEnabled)
@@ -148,7 +145,7 @@ func (a *Agent) getProject() (*workspace.Project, error) {
 	}
 
 	for _, project := range workspace.Projects {
-		if *project.Name == a.Config.ProjectName {
+		if project.Name == a.Config.ProjectName {
 			return conversion.ToProject(&project), nil
 		}
 	}
@@ -227,7 +224,7 @@ func (a *Agent) setDefaultConfig() error {
 
 // Agent uptime in seconds
 func (a *Agent) uptime() int32 {
-	return int32(time.Since(a.startTime).Seconds())
+	return max(int32(time.Since(a.startTime).Seconds()), 1)
 }
 
 func (a *Agent) updateProjectState() error {
@@ -243,7 +240,7 @@ func (a *Agent) updateProjectState() error {
 
 	uptime := a.uptime()
 	res, err := apiClient.WorkspaceAPI.SetProjectState(context.Background(), a.Config.WorkspaceId, a.Config.ProjectName).SetState(apiclient.SetProjectState{
-		Uptime:    &uptime,
+		Uptime:    uptime,
 		GitStatus: conversion.ToGitStatusDTO(gitStatus),
 	}).Execute()
 	if err != nil {

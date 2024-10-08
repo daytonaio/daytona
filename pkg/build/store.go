@@ -3,13 +3,17 @@
 
 package build
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
+)
 
 type Store interface {
-	Find(hash string) (*BuildResult, error)
-	List() ([]*BuildResult, error)
-	Save(buildResult *BuildResult) error
-	Delete(hash string) error
+	Find(filter *Filter) (*Build, error)
+	List(filter *Filter) ([]*Build, error)
+	Save(build *Build) error
+	Delete(id string) error
 }
 
 var (
@@ -18,4 +22,31 @@ var (
 
 func IsBuildNotFound(err error) bool {
 	return err.Error() == ErrBuildNotFound.Error()
+}
+
+type Filter struct {
+	Id            *string
+	States        *[]BuildState
+	PrebuildIds   *[]string
+	GetNewest     *bool
+	BuildConfig   *buildconfig.BuildConfig
+	RepositoryUrl *string
+	Branch        *string
+	EnvVars       *map[string]string
+}
+
+func (f *Filter) StatesToInterface() []interface{} {
+	args := make([]interface{}, len(*f.States))
+	for i, v := range *f.States {
+		args[i] = v
+	}
+	return args
+}
+
+func (f *Filter) PrebuildIdsToInterface() []interface{} {
+	args := make([]interface{}, len(*f.PrebuildIds))
+	for i, v := range *f.PrebuildIds {
+		args[i] = v
+	}
+	return args
 }

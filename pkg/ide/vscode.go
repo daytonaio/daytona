@@ -20,7 +20,11 @@ import (
 )
 
 func OpenVSCode(activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string) error {
-	checkAndAlertVSCodeInstalled()
+	CheckAndAlertVSCodeInstalled()
+	err := installRemoteSSHExtension()
+	if err != nil {
+		return err
+	}
 
 	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
 
@@ -31,19 +35,23 @@ func OpenVSCode(activeProfile config.Profile, workspaceId string, projectName st
 
 	commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", projectHostname, projectDir)
 
-	vscCommand := exec.Command("code", "--folder-uri", commandArgument, "--disable-extension", "ms-vscode-remote.remote-containers")
+	vscCommand := exec.Command("code", "--disable-extension", "ms-vscode-remote.remote-containers", "--folder-uri", commandArgument)
 
 	err = vscCommand.Run()
 	if err != nil {
 		return err
 	}
 
-	return setupIdeCustomizations(projectHostname, projectProviderMetadata, devcontainer.Vscode, "*/.vscode-server/*/bin/code-server", "$HOME/.vscode-server/data/Machine/settings.json")
+	if projectProviderMetadata == "" {
+		return nil
+	}
+
+	return setupVSCodeCustomizations(projectHostname, projectProviderMetadata, devcontainer.Vscode, "*/.vscode-server/*/bin/code-server", "$HOME/.vscode-server/data/Machine/settings.json", ".daytona-customizations-lock-vscode")
 }
 
-func setupIdeCustomizations(projectHostname string, projectProviderMetadata string, tool devcontainer.Tool, codeServerPath string, settingsPath string) error {
+func setupVSCodeCustomizations(projectHostname string, projectProviderMetadata string, tool devcontainer.Tool, codeServerPath string, settingsPath string, lockFileName string) error {
 	// Check if customizations are already set up
-	err := exec.Command("ssh", projectHostname, "test", "-f", fmt.Sprintf("$HOME/.daytona-customizations-lock-%s", string(tool))).Run()
+	err := exec.Command("ssh", projectHostname, "test", "-f", fmt.Sprintf("$HOME/%s-%s", lockFileName, string(tool))).Run()
 	if err == nil {
 		return nil
 	}
@@ -81,12 +89,12 @@ func setupIdeCustomizations(projectHostname string, projectProviderMetadata stri
 			time.Sleep(2 * time.Second)
 			// Wait for code to be installed
 			var err error
-			if vscodePath, err = exec.Command("ssh", projectHostname, "find", "/home", "-path", fmt.Sprintf(`"%s"`, codeServerPath)).Output(); err == nil && len(vscodePath) > 0 {
+			if vscodePath, err = exec.Command("ssh", projectHostname, "find", "$HOME", "-path", fmt.Sprintf(`"%s"`, codeServerPath)).Output(); err == nil && len(vscodePath) > 0 {
 				break
 			}
 		}
 
-		if len(mergedCustomizations.Extensions) > 0 {
+		if mergedCustomizations != nil && len(mergedCustomizations.Extensions) > 0 {
 			extensionArgs := []string{}
 			for _, extension := range mergedCustomizations.Extensions {
 				extensionArgs = append(extensionArgs, "--install-extension", extension)
@@ -109,14 +117,14 @@ func setupIdeCustomizations(projectHostname string, projectProviderMetadata stri
 			}
 		}
 
-		err := setIdeSettings(projectHostname, mergedCustomizations, settingsPath)
+		err := setupVSCodeSettings(projectHostname, mergedCustomizations, settingsPath)
 		if err != nil {
 			log.Errorf("Failed to set IDE settings: %s", err)
 		}
 	}
 
 	// Create lock file to indicate that customizations are set up
-	err = exec.Command("ssh", projectHostname, "touch", fmt.Sprintf("$HOME/.daytona-customizations-lock-%s", string(tool))).Run()
+	err = exec.Command("ssh", projectHostname, "touch", fmt.Sprintf("$HOME/%s-%s", lockFileName, string(tool))).Run()
 	if err != nil {
 		return err
 	}
@@ -125,7 +133,7 @@ func setupIdeCustomizations(projectHostname string, projectProviderMetadata stri
 	return nil
 }
 
-func setIdeSettings(projectHostname string, customizations *devcontainer.Customizations, settingsPath string) error {
+func setupVSCodeSettings(projectHostname string, customizations *devcontainer.Customizations, settingsPath string) error {
 	if customizations == nil {
 		return nil
 	}
@@ -166,7 +174,7 @@ func setIdeSettings(projectHostname string, customizations *devcontainer.Customi
 	return nil
 }
 
-func checkAndAlertVSCodeInstalled() {
+func CheckAndAlertVSCodeInstalled() {
 	if err := isVSCodeInstalled(); err != nil {
 		redBold := "\033[1;31m" // ANSI escape code for red and bold
 		reset := "\033[0m"      // ANSI escape code to reset text formatting
@@ -186,4 +194,21 @@ func checkAndAlertVSCodeInstalled() {
 func isVSCodeInstalled() error {
 	_, err := exec.LookPath("code")
 	return err
+}
+
+func installRemoteSSHExtension() error {
+	output, err := exec.Command("code", "--list-extensions").Output()
+	if err != nil {
+		return err
+	}
+
+	if !strings.Contains(string(output), "ms-vscode-remote.remote-ssh") {
+		fmt.Println("Installing Remote SSH extension...")
+		err = exec.Command("code", "--install-extension", "ms-vscode-remote.remote-ssh").Run()
+		if err != nil {
+			return err
+		}
+		fmt.Println("Remote SSH extension successfully installed")
+	}
+	return nil
 }

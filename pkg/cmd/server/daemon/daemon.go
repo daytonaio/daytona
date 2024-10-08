@@ -5,14 +5,18 @@ package daemon
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"runtime"
 	"strings"
 	"time"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/kardianos/service"
 )
+
+const serviceName = "DaytonaServerDaemon"
 
 type program struct {
 	service.Interface
@@ -23,13 +27,23 @@ func Start(logFilePath string) error {
 	if err != nil {
 		return err
 	}
+
 	s, err := service.New(program{}, cfg)
 	if err != nil {
 		return err
 	}
-	err = s.Install()
+
+	serviceFilePath, err := getServiceFilePath(cfg)
 	if err != nil {
 		return err
+	}
+
+	_, err = os.Stat(serviceFilePath)
+	if os.IsNotExist(err) {
+		err = s.Install()
+		if err != nil {
+			return err
+		}
 	}
 
 	logFile, err := os.OpenFile(logFilePath, os.O_TRUNC|os.O_CREATE|os.O_RDONLY, 0644)
@@ -69,9 +83,9 @@ func Start(logFilePath string) error {
 	}
 
 	if status == service.StatusStopped {
-		return fmt.Errorf("daemon stopped unexpectedly")
+		return errors.New("daemon stopped unexpectedly")
 	} else {
-		return fmt.Errorf("daemon status unknown")
+		return errors.New("daemon status unknown")
 	}
 }
 
@@ -96,26 +110,26 @@ func Stop() error {
 func getServiceConfig() (*service.Config, error) {
 	user, ok := os.LookupEnv("USER")
 	if !ok {
-		return nil, fmt.Errorf("could not determine user")
+		return nil, errors.New("could not determine user")
 	}
 
 	svcConfig := &service.Config{
-		Name:        "DaytonaServerDaemon",
+		Name:        serviceName,
 		DisplayName: "Daytona Server",
-		Description: "This is the Daytona Server daemon.",
+		Description: "Daytona Server daemon.",
 		Arguments:   []string{"serve"},
 	}
 
 	switch runtime.GOOS {
 	case "windows":
-		return nil, fmt.Errorf("daemon mode not supported on Windows")
+		return nil, errors.New("daemon mode not supported on Windows")
 	case "linux":
 		// Fix for running as root on Linux
 		if user == "root" {
 			svcConfig.UserName = user
 		}
 		if !strings.HasSuffix(service.Platform(), "systemd") {
-			return nil, fmt.Errorf("on Linux, `server -d` is only supported with systemd. %s detected", service.Platform())
+			return nil, fmt.Errorf("on Linux, `server` is only supported with systemd. %s detected", service.Platform())
 		}
 		fallthrough
 	case "darwin":
@@ -123,6 +137,29 @@ func getServiceConfig() (*service.Config, error) {
 			svcConfig.Option = service.KeyValue{"UserService": true}
 		}
 	}
+	svcConfig.EnvVars = util.GetEnvVarsFromShell()
 
 	return svcConfig, nil
+}
+
+func getServiceFilePath(cfg *service.Config) (string, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	switch runtime.GOOS {
+	case "linux":
+		if cfg.UserName == "root" {
+			return fmt.Sprintf("/etc/systemd/system/%s.service", cfg.Name), nil
+		}
+		return fmt.Sprintf("%s/.config/systemd/user/%s.service", homeDir, cfg.Name), nil
+	case "darwin":
+		if cfg.UserName == "root" {
+			return fmt.Sprintf("/Library/LaunchDaemons/%s.plist", cfg.Name), nil
+		}
+		return fmt.Sprintf("%s/Library/LaunchAgents/%s.plist", homeDir, cfg.Name), nil
+	}
+
+	return "", errors.New("daemon mode not supported on current OS")
 }

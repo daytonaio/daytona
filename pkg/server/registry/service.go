@@ -5,19 +5,32 @@ package registry
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
+	"net"
 	"os"
+	"time"
 
 	"github.com/daytonaio/daytona/pkg/docker"
+	"github.com/daytonaio/daytona/pkg/frpc"
+	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
+
+	log "github.com/sirupsen/logrus"
 )
+
+const registryContainerName = "daytona-registry"
 
 type LocalContainerRegistryConfig struct {
 	DataPath string
 	Port     uint32
 	Image    string
+	Logger   io.Writer
+	Frps     *server.FRPSConfig
+	ServerId string
 }
 
 func NewLocalContainerRegistry(config *LocalContainerRegistryConfig) *LocalContainerRegistry {
@@ -25,6 +38,9 @@ func NewLocalContainerRegistry(config *LocalContainerRegistryConfig) *LocalConta
 		dataPath: config.DataPath,
 		port:     config.Port,
 		image:    config.Image,
+		logger:   config.Logger,
+		frps:     config.Frps,
+		serverId: config.ServerId,
 	}
 }
 
@@ -32,6 +48,9 @@ type LocalContainerRegistry struct {
 	dataPath string
 	port     uint32
 	image    string
+	logger   io.Writer
+	frps     *server.FRPSConfig
+	serverId string
 }
 
 func (s *LocalContainerRegistry) Start() error {
@@ -52,6 +71,10 @@ func (s *LocalContainerRegistry) Start() error {
 		return err
 	}
 
+	if _, err := cli.Info(ctx); err != nil {
+		return errors.New("cannot connect to the Docker daemon. Is the Docker daemon running?\nIf Docker is not installed, please install it by following https://docs.docker.com/engine/install/ and try again")
+	}
+
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
 		ApiClient: cli,
 	})
@@ -62,8 +85,13 @@ func (s *LocalContainerRegistry) Start() error {
 		return err
 	}
 
+	_, err = net.Dial("tcp", fmt.Sprintf(":%d", s.port))
+	if err == nil {
+		return fmt.Errorf("cannot start registry, port %d is already in use", s.port)
+	}
+
 	// Pull the image
-	err = dockerClient.PullImage(s.image, nil, os.Stdout)
+	err = dockerClient.PullImage(s.image, nil, s.logger)
 	if err != nil {
 		return err
 	}
@@ -90,16 +118,64 @@ func (s *LocalContainerRegistry) Start() error {
 				},
 			},
 		},
-	}, nil, nil, "daytona-registry")
+	}, nil, nil, registryContainerName)
 	if err != nil {
 		return err
 	}
 
-	if err := cli.ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
+	errChan := make(chan error)
+	go func() {
+		errChan <- cli.ContainerStart(ctx, resp.ID, container.StartOptions{})
+	}()
+
+	if s.frps == nil {
+		return <-errChan
+	}
+
+	healthCheck, frpcService, err := frpc.GetService(frpc.FrpcConnectParams{
+		ServerDomain: s.frps.Domain,
+		ServerPort:   int(s.frps.Port),
+		Name:         fmt.Sprintf("daytona-server-registry-%s", s.serverId),
+		Port:         int(s.port),
+		SubDomain:    fmt.Sprintf("registry-%s", s.serverId),
+	})
+	if err != nil {
 		return err
 	}
 
-	return nil
+	go func() {
+		err := frpcService.Run(context.Background())
+		if err != nil {
+			errChan <- err
+		}
+	}()
+
+	for i := 0; i < 5; i++ {
+		if err = healthCheck(); err != nil {
+			log.Debugf("Failed to connect to registry frpc: %s", err)
+			time.Sleep(2 * time.Second)
+		} else {
+			break
+		}
+	}
+	if err != nil {
+		return err
+	}
+
+	return <-errChan
+}
+
+func (s *LocalContainerRegistry) Stop() error {
+	return RemoveRegistryContainer()
+}
+
+func (s *LocalContainerRegistry) Purge() error {
+	err := s.Stop()
+	if err != nil {
+		return err
+	}
+
+	return os.RemoveAll(s.dataPath)
 }
 
 func RemoveRegistryContainer() error {
@@ -117,13 +193,13 @@ func RemoveRegistryContainer() error {
 
 	for _, c := range containers {
 		for _, name := range c.Names {
-			if name == "/daytona-registry" {
+			if name == fmt.Sprintf("/%s", registryContainerName) {
 				removeOptions := container.RemoveOptions{
 					Force: true,
 				}
 
 				if err := cli.ContainerRemove(ctx, c.ID, removeOptions); err != nil {
-					return err
+					return fmt.Errorf("failed to remove local container registry: %w", err)
 				}
 				return nil
 			}
