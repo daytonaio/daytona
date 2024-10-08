@@ -75,7 +75,6 @@ func (g *GitnessClient) GetCommits(owner string, repositoryName string, branch *
 	} else {
 		apiURL = api.String()
 	}
-	fmt.Println(apiURL) // TODO: remove
 
 	body, err := g.performRequest("GET", apiURL)
 	if err != nil {
