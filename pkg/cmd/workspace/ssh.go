@@ -13,6 +13,7 @@ import (
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/ide"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"
 )
@@ -36,6 +37,7 @@ var SshCmd = &cobra.Command{
 		ctx := context.Background()
 		var workspace *apiclient.WorkspaceDTO
 		var projectName string
+		var repoUrl string
 
 		apiClient, err := apiclient_util.GetApiClient(&activeProfile)
 		if err != nil {
@@ -68,10 +70,17 @@ var SshCmd = &cobra.Command{
 				return nil
 			}
 			projectName = selectedProject.Name
+			repoUrl = selectedProject.Repository.Url
 		}
 
 		if len(args) >= 2 {
 			projectName = args[1]
+			for _, project := range workspace.Projects {
+				if project.Name == projectName {
+					repoUrl = project.Repository.Url
+					break
+				}
+			}
 		}
 
 		if !workspace_util.IsProjectRunning(workspace, projectName) {
@@ -89,9 +98,10 @@ var SshCmd = &cobra.Command{
 			sshArgs = append(sshArgs, args[2:]...)
 		}
 
-		projectHostname := config.GetProjectHostname(activeProfile.Id, workspace.Id, workspace.Projects[0].Name)
-		gpgKey := ""
-		gpgKey, _ = GetGitProviderGpgKey(apiClient, ctx, activeProfile, workspace.Id, projectHostname)
+		gpgKey, err := GetGitProviderGpgKey(apiClient, ctx, repoUrl)
+		if err != nil {
+			log.Warn(err)
+		}
 
 		return ide.OpenTerminalSsh(activeProfile, workspace.Id, projectName, gpgKey, sshArgs...)
 	},

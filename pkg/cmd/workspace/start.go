@@ -41,6 +41,7 @@ var StartCmd = &cobra.Command{
 		var activeProfile config.Profile
 		var ideId string
 		var workspaceId string
+		var repoUrl string
 		var ideList []config.Ide
 		projectProviderMetadata := ""
 
@@ -94,6 +95,14 @@ var StartCmd = &cobra.Command{
 			workspaceId = wsInfo.Id
 			if startProjectFlag == "" {
 				startProjectFlag = wsInfo.Projects[0].Name
+				repoUrl = wsInfo.Projects[0].Repository.Url
+			} else {
+				for _, project := range wsInfo.Projects {
+					if project.Name == startProjectFlag {
+						repoUrl = project.Repository.Url
+						break
+					}
+				}
 			}
 			if ideId != "ssh" {
 				projectProviderMetadata, err = workspace_util.GetProjectProviderMetadata(wsInfo, wsInfo.Projects[0].Name)
@@ -108,14 +117,10 @@ var StartCmd = &cobra.Command{
 			return err
 		}
 
-		wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceIdOrName).Execute()
+		gpgKey, err := GetGitProviderGpgKey(apiClient, ctx, repoUrl)
 		if err != nil {
-			return apiclient_util.HandleErrorResponse(res, err)
+			log.Warn(err)
 		}
-
-		projectHostname := config.GetProjectHostname(activeProfile.Id, wsInfo.Id, wsInfo.Projects[0].Name)
-		gpgKey := ""
-		gpgKey, _ = GetGitProviderGpgKey(apiClient, ctx, activeProfile, wsInfo.Id, projectHostname)
 
 		if startProjectFlag == "" {
 			views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' started successfully", workspaceIdOrName))

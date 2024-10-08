@@ -30,6 +30,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/docker/docker/pkg/stringid"
+	log "github.com/sirupsen/logrus"
 	"tailscale.com/tsnet"
 
 	"github.com/spf13/cobra"
@@ -171,9 +172,7 @@ var CreateCmd = &cobra.Command{
 			stopLogs()
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
-		projectHostname := config.GetProjectHostname(activeProfile.Id, createdWorkspace.Id, createdWorkspace.Projects[0].Name)
-		gpgKey := ""
-		gpgKey, _ = GetGitProviderGpgKey(apiClient, ctx, activeProfile, createdWorkspace.Id, projectHostname)
+		var gpgKey string
 
 		err = waitForDial(createdWorkspace, &activeProfile, tsConn, gpgKey)
 		if err != nil {
@@ -220,7 +219,10 @@ var CreateCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-
+		gpgKey, err = GetGitProviderGpgKey(apiClient, ctx, wsInfo.Projects[0].Name)
+		if err != nil {
+			log.Warn(err)
+		}
 		return openIDE(chosenIdeId, activeProfile, createdWorkspace.Id, wsInfo.Projects[0].Name, providerMetadata, yesFlag, gpgKey)
 	},
 }
@@ -511,23 +513,12 @@ func dedupProjectNames(projects *[]apiclient.CreateProjectDTO) {
 	}
 }
 
-func GetGitProviderGpgKey(apiClient *apiclient.APIClient, ctx context.Context, activeProfile config.Profile, workspaceId string, projectHostname string) (string, error) {
+func GetGitProviderGpgKey(apiClient *apiclient.APIClient, ctx context.Context, repoUrl string) (string, error) {
 	var providerConfig *gitprovider.GitProviderConfig
 	var gpgKey string
 
-	// Fetch the workspace using the provided workspace ID
-	workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceId).Execute()
-	if err != nil {
-		return "", apiclient_util.HandleErrorResponse(res, err)
-	}
-	// Ensure SSH config entry is added
-	err = config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, workspace.Projects[0].Name, "")
-	if err != nil {
-		return "", err
-	}
-
 	// Get Git provider for repository URL
-	encodedUrl := url.QueryEscape(workspace.Projects[0].Repository.Url)
+	encodedUrl := url.QueryEscape(repoUrl)
 	gitProvider, res, err := apiClient.GitProviderAPI.GetGitProviderForUrl(ctx, encodedUrl).Execute()
 	if err != nil {
 		return "", apiclient_util.HandleErrorResponse(res, err)

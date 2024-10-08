@@ -41,6 +41,7 @@ var CodeCmd = &cobra.Command{
 		ctx := context.Background()
 		var workspaceId string
 		var projectName string
+		var repoUrl string
 		var ideId string
 		var workspace *apiclient.WorkspaceDTO
 
@@ -88,10 +89,17 @@ var CodeCmd = &cobra.Command{
 				return nil
 			}
 			projectName = selectedProject.Name
+			repoUrl = selectedProject.Repository.Url
 		}
 
 		if len(args) == 2 {
 			projectName = args[1]
+			for _, project := range workspace.Projects {
+				if project.Name == projectName {
+					repoUrl = project.Repository.Url
+					break
+				}
+			}
 		}
 
 		if ideFlag != "" {
@@ -115,9 +123,11 @@ var CodeCmd = &cobra.Command{
 				return err
 			}
 		}
-		projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, workspace.Projects[0].Name)
-		gpgKey := ""
-		gpgKey, _ = GetGitProviderGpgKey(apiClient, ctx, activeProfile, workspace.Id, projectHostname)
+
+		gpgKey, err := GetGitProviderGpgKey(apiClient, ctx, repoUrl)
+		if err != nil {
+			log.Warn(err)
+		}
 
 		yesFlag, _ := cmd.Flags().GetBool("yes")
 		ideList := config.GetIdeList()

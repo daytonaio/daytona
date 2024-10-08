@@ -12,6 +12,8 @@ import (
 	"regexp"
 	"runtime"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var sshHomeDir string
@@ -121,9 +123,20 @@ func generateSshConfigEntry(profileId, workspaceId, projectName, knownHostsPath 
 		tab+"UserKnownHostsFile %s\n"+
 		tab+"ProxyCommand \"%s\" ssh-proxy %s %s %s\n"+
 		tab+"ForwardAgent yes\n", projectHostname, knownHostsPath, daytonaPath, profileId, workspaceId, projectName)
+
 	if gpgForward {
-		localSocket, _ := getLocalGPGSocket()
-		remoteSocket, _ := getRemoteGPGSocket(projectHostname)
+		localSocket, err := getLocalGPGSocket()
+		if err != nil {
+			log.Warn(err)
+			return config, nil
+		}
+
+		remoteSocket, err := getRemoteGPGSocket(projectHostname)
+		if err != nil {
+			log.Warn(err)
+			return config, nil
+		}
+
 		config += fmt.Sprintf(
 			tab+"StreamLocalBindUnlink yes\n"+
 				tab+"RemoteForward %s:%s\n\n", remoteSocket, localSocket)
@@ -185,11 +198,10 @@ func appendSshConfigEntry(configPath, profileId, workspaceName, projectName, kno
 	if err != nil {
 		return err
 	}
+	projectHostname := GetProjectHostname(profileId, workspaceName, projectName)
 
-	// Check if the entry already exists
-	if strings.Contains(string(existingContent), data) {
-		return nil
-	}
+	// Remove previous entries for the project hostname if they exist
+	removePreviousSshEntry(configPath, projectHostname)
 
 	// Combine the new data with existing content
 	newData := data + string(existingContent)
@@ -206,6 +218,12 @@ func appendSshConfigEntry(configPath, profileId, workspaceName, projectName, kno
 }
 
 func getLocalGPGSocket() (string, error) {
+	// Check if gpg is installed
+	if _, err := exec.LookPath("gpg"); err != nil {
+		return "", fmt.Errorf("gpg is not installed: %v", err)
+	}
+
+	// Attempt to get the local GPG socket
 	cmd := exec.Command("gpgconf", "--list-dir", "agent-extra-socket")
 	output, err := cmd.Output()
 	if err != nil {
@@ -270,6 +288,27 @@ func RemoveWorkspaceSshEntries(profileId, workspaceId string) error {
 
 func GetProjectHostname(profileId, workspaceId, projectName string) string {
 	return fmt.Sprintf("%s-%s-%s", profileId, workspaceId, projectName)
+}
+
+// Remove previous SSH entries for the given project hostname
+func removePreviousSshEntry(configPath, projectHostname string) {
+	entryPattern := fmt.Sprintf(`(?s)Host\s+%s.*?(?=^Host\s+\w+|$)`, regexp.QuoteMeta(projectHostname))
+
+	existingContent, err := os.ReadFile(configPath)
+	if err != nil {
+		log.Warnf("Failed to read config file: %v", err)
+		return
+	}
+
+	// Remove existing entries for the project hostname
+	re := regexp.MustCompile(entryPattern)
+	newContent := re.ReplaceAll(existingContent, []byte{})
+
+	// Write the updated content back to the config file
+	err = os.WriteFile(configPath, newContent, 0600)
+	if err != nil {
+		log.Warnf("Failed to write updated config file: %v", err)
+	}
 }
 
 func init() {
