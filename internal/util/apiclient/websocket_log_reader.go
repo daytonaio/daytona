@@ -76,6 +76,56 @@ func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, worksp
 	wg.Wait()
 }
 
+func ReadWorkspaceLog(ctx context.Context, activeProfile config.Profile, workspaceId string, projectName string, follow, showWorkspaceLogs bool) {
+	var wg sync.WaitGroup
+
+	query := ""
+	if follow {
+		query = "follow=true"
+	}
+	if !showWorkspaceLogs {
+		workspaceLogsStarted = true
+	}
+	for index := range projectName {
+		wg.Add(1)
+		go func(projectName string) {
+			defer wg.Done()
+			for {
+				if !workspaceLogsStarted {
+					time.Sleep(250 * time.Millisecond)
+					continue
+				}
+				ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/workspace/%s/%s", workspaceId, projectName), &activeProfile, &query)
+				if err != nil {
+					log.Trace(HandleErrorResponse(res, err))
+					time.Sleep(500 * time.Millisecond)
+					continue
+				}
+
+				readJSONLog(ctx, ws, index)
+				ws.Close()
+				break
+			}
+		}(projectName)
+	}
+	if showWorkspaceLogs {
+		for {
+			ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/workspace/%s", workspaceId), &activeProfile, &query)
+			if err != nil {
+				log.Trace(HandleErrorResponse(res, err))
+				time.Sleep(250 * time.Millisecond)
+				continue
+			}
+
+			readJSONLog(ctx, ws, logs_view.STATIC_INDEX)
+			ws.Close()
+			break
+		}
+	}
+
+	wg.Wait()
+}
+
 func ReadBuildLogs(ctx context.Context, activeProfile config.Profile, buildId string, query string) {
 	logs_view.CalculateLongestPrefixLength([]string{buildId})
 

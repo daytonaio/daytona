@@ -12,8 +12,10 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/views"
 	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
+	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
@@ -30,6 +32,7 @@ const (
 
 var startProjectFlag string
 var allFlag bool
+var activeProfile config.Profile
 
 var StartCmd = &cobra.Command{
 	Use:     "start [WORKSPACE]",
@@ -38,7 +41,7 @@ var StartCmd = &cobra.Command{
 	GroupID: util.WORKSPACE_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var workspaceIdOrName string
-		var activeProfile config.Profile
+
 		var ideId string
 		var workspaceId string
 		var ideList []config.Ide
@@ -241,9 +244,12 @@ func StartWorkspace(apiClient *apiclient.APIClient, workspaceId, projectName str
 	ctx := context.Background()
 	var message string
 	var startFunc func() error
+	logs_view.DisplayLogEntry(logs.LogEntry{
+		Msg: fmt.Sprintf("Starting Workspace %s..... \n", workspaceId),
+	}, logs_view.STATIC_INDEX)
+	message = fmt.Sprintf("Workspace '%s' is starting", workspaceId)
 
 	if projectName == "" {
-		message = fmt.Sprintf("Workspace '%s' is starting", workspaceId)
 		startFunc = func() error {
 			res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspaceId).Execute()
 			if err != nil {
@@ -254,6 +260,7 @@ func StartWorkspace(apiClient *apiclient.APIClient, workspaceId, projectName str
 	} else {
 		message = fmt.Sprintf("Project '%s' from workspace '%s' is starting", projectName, workspaceId)
 		startFunc = func() error {
+			go apiclient_util.ReadWorkspaceLog(ctx, activeProfile, workspaceId, projectName, true, true)
 			res, err := apiClient.WorkspaceAPI.StartProject(ctx, workspaceId, projectName).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
