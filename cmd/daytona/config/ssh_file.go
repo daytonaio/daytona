@@ -193,15 +193,14 @@ func getKnownHostsFile() string {
 	return "/dev/null"
 }
 
-func appendSshConfigEntry(configPath, profileId, workspaceName, projectName, knownHostsFile string, gpgForward bool, existingContent []byte) error {
-	data, err := generateSshConfigEntry(profileId, workspaceName, projectName, knownHostsFile, gpgForward)
+func appendSshConfigEntry(configPath, profileId, workspaceId, projectName, knownHostsFile string, gpgForward bool, existingContent []byte) error {
+	data, err := generateSshConfigEntry(profileId, workspaceId, projectName, knownHostsFile, gpgForward)
 	if err != nil {
 		return err
 	}
-	projectHostname := GetProjectHostname(profileId, workspaceName, projectName)
 
 	// Remove previous entries for the project hostname if they exist
-	removePreviousSshEntry(configPath, projectHostname)
+	RemoveWorkspaceSshEntries(profileId, workspaceId, projectName)
 
 	// Combine the new data with existing content
 	newData := data + string(existingContent)
@@ -256,7 +255,7 @@ func ExportGPGKey(keyID, projectHostname string) error {
 	return importCmd.Run()
 }
 
-func RemoveWorkspaceSshEntries(profileId, workspaceId string) error {
+func RemoveWorkspaceSshEntries(profileId, workspaceId, projectName string) error {
 	sshDir := filepath.Join(sshHomeDir, ".ssh")
 	configPath := filepath.Join(sshDir, "daytona_config")
 
@@ -265,8 +264,15 @@ func RemoveWorkspaceSshEntries(profileId, workspaceId string) error {
 	if err != nil && !os.IsNotExist(err) {
 		return nil
 	}
+	// Regex to match the SSH configuration entries
+	var regex *regexp.Regexp
+	// Update the regex to make projectName optional
+	if projectName != "" {
+		regex = regexp.MustCompile(fmt.Sprintf(`Host %s-%s-%s\n(?:\t.*\n?)*`, profileId, workspaceId, projectName))
+	} else {
+		regex = regexp.MustCompile(fmt.Sprintf(`Host %s-%s-\w+\n(?:\t.*\n?)*`, profileId, workspaceId))
+	}
 
-	regex := regexp.MustCompile(fmt.Sprintf(`Host %s-%s-\w+\n(?:\t.*\n?)*`, profileId, workspaceId))
 	newContent := regex.ReplaceAllString(string(existingContent), "")
 
 	newContent = strings.Trim(newContent, "\n")
@@ -288,27 +294,6 @@ func RemoveWorkspaceSshEntries(profileId, workspaceId string) error {
 
 func GetProjectHostname(profileId, workspaceId, projectName string) string {
 	return fmt.Sprintf("%s-%s-%s", profileId, workspaceId, projectName)
-}
-
-// Remove previous SSH entries for the given project hostname
-func removePreviousSshEntry(configPath, projectHostname string) {
-	entryPattern := fmt.Sprintf(`(?s)Host\s+%s.*?(?=^Host\s+\w+|$)`, regexp.QuoteMeta(projectHostname))
-
-	existingContent, err := os.ReadFile(configPath)
-	if err != nil {
-		log.Warnf("Failed to read config file: %v", err)
-		return
-	}
-
-	// Remove existing entries for the project hostname
-	re := regexp.MustCompile(entryPattern)
-	newContent := re.ReplaceAll(existingContent, []byte{})
-
-	// Write the updated content back to the config file
-	err = os.WriteFile(configPath, newContent, 0600)
-	if err != nil {
-		log.Warnf("Failed to write updated config file: %v", err)
-	}
 }
 
 func init() {
