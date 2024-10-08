@@ -124,6 +124,10 @@ var StartCmd = &cobra.Command{
 
 		if startProjectFlag != "" {
 			projectNames = append(projectNames, startProjectFlag)
+		} else {
+			projectNames = util.ArrayMap(workspace.Projects, func(p apiclient.Project) string {
+				return p.Name
+			})
 		}
 
 		apiclient_util.ReadWorkspaceLogs(ctx, activeProfile, workspace.Id, projectNames, false, true, timeNow)
@@ -183,7 +187,11 @@ func startAllWorkspaces(activeProfile config.Profile, timeNow time.Time) error {
 			continue
 		}
 
-		apiclient_util.ReadWorkspaceLogs(ctx, activeProfile, workspace.Id, []string{}, false, true, timeNow)
+		projectNames := util.ArrayMap(workspace.Projects, func(p apiclient.Project) string {
+			return p.Name
+		})
+
+		apiclient_util.ReadWorkspaceLogs(ctx, activeProfile, workspace.Id, projectNames, false, true, timeNow)
 
 		views.RenderInfoMessage(fmt.Sprintf("- Workspace '%s' started successfully", workspace.Name))
 	}

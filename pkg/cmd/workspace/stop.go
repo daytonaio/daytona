@@ -87,6 +87,10 @@ var StopCmd = &cobra.Command{
 
 		if startProjectFlag != "" {
 			projectNames = append(projectNames, stopProjectFlag)
+		} else {
+			projectNames = util.ArrayMap(workspace.Projects, func(p apiclient.Project) string {
+				return p.Name
+			})
 		}
 
 		apiclient_util.ReadWorkspaceLogs(ctx, activeProfile, workspace.Id, projectNames, false, true, timeNow)
@@ -131,7 +135,11 @@ func stopAllWorkspaces(activeProfile config.Profile, timeNow time.Time) error {
 			continue
 		}
 
-		apiclient_util.ReadWorkspaceLogs(ctx, activeProfile, workspace.Id, []string{}, false, true, timeNow)
+		projectNames := util.ArrayMap(workspace.Projects, func(p apiclient.Project) string {
+			return p.Name
+		})
+
+		apiclient_util.ReadWorkspaceLogs(ctx, activeProfile, workspace.Id, projectNames, false, true, timeNow)
 		views.RenderInfoMessage(fmt.Sprintf("- Workspace '%s' successfully stopped", workspace.Name))
 	}
 	return nil
