@@ -251,6 +251,7 @@ func StartWorkspace(apiClient *apiclient.APIClient, workspaceId, projectName str
 
 	if projectName == "" {
 		startFunc = func() error {
+			go apiclient_util.ReadWorkspaceLog(ctx, activeProfile, workspaceId, projectName, true, true)
 			res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspaceId).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
