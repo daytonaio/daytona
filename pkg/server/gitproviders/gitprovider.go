@@ -23,7 +23,7 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 	for _, p := range gitProviders {
 		gitProvider, err := s.GetGitProvider(p.Id)
 		if err != nil {
-			return nil, "", err
+			continue
 		}
 
 		canHandle, _ := gitProvider.CanHandle(repoUrl)
@@ -36,23 +36,38 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 			}
 		}
 	}
-
-	u, err := url.Parse(repoUrl)
-	if err != nil {
-		return nil, "", nil
+	supportedGitProviders := []string{
+		"github",
+		"github-enterprise-server",
+		"gitlab",
+		"gitlab-self-managed",
+		"bitbucket",
+		"bitbucket-server",
+		"codeberg",
+		"gitea",
+		"gitness",
+		"azure-devops",
+		"aws-codecommit",
 	}
 
-	hostname := strings.TrimPrefix(u.Hostname(), "www.")
-	providerId := strings.Split(hostname, ".")[0]
+	for _, p := range supportedGitProviders {
+		gitProvider, err := s.newGitProvider(&gitprovider.GitProviderConfig{
+			ProviderId: p,
+			Id:         p,
+			Username:   "",
+			Token:      "",
+			BaseApiUrl: nil,
+		})
+		if err != nil {
+			continue
+		}
+		canHandle, _ := gitProvider.CanHandle(repoUrl)
+		if canHandle {
+			return gitProvider, p, nil
+		}
+	}
 
-	gitProvider, err := s.newGitProvider(&gitprovider.GitProviderConfig{
-		Id:         providerId,
-		Username:   "",
-		Token:      "",
-		BaseApiUrl: nil,
-	})
-
-	return gitProvider, providerId, err
+	return nil, "", errors.New("can not get public client for the URL " + repoUrl)
 }
 
 func (s *GitProviderService) GetConfigForUrl(repoUrl string) (*gitprovider.GitProviderConfig, error) {
