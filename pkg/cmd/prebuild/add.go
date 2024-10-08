@@ -21,11 +21,30 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	runOnAddFlag bool
+)
+
 var prebuildAddCmd = &cobra.Command{
-	Use:     "add",
+	Use:     "add [flags]",
 	Short:   "Add a prebuild configuration",
 	Args:    cobra.NoArgs,
 	Aliases: []string{"new", "create"},
+	Long: `
+Add a prebuild configuration for your project.
+
+Flags:
+  --run                  Run the prebuild once after adding it.
+  --branch               Specify the Git branch for the prebuild.
+  --retention            Set the retention period for the prebuild (in days).
+  --commit-interval      Set the interval for commits (in seconds).
+  --trigger-files        Specify files that will trigger the prebuild.
+  --project-config       Specify the project configuration name.
+
+Examples:
+  daytona prebuild add --branch main --retention 30 --commit-interval 10 --trigger-files file1.go,file2.go --project-config myProject
+  daytona prebuild add --run --project-config myProject
+  `,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var prebuildAddView add.PrebuildAddView
 		var projectConfig *apiclient.ProjectConfig
@@ -98,7 +117,6 @@ var prebuildAddCmd = &cobra.Command{
 		retention, err := strconv.Atoi(prebuildAddView.Retention)
 		if err != nil {
 			return errors.New("retention must be a number")
-
 		}
 
 		newPrebuild := apiclient.CreatePrebuildDTO{
@@ -134,8 +152,11 @@ var prebuildAddCmd = &cobra.Command{
 	},
 }
 
-var runOnAddFlag bool
-
 func init() {
 	prebuildAddCmd.Flags().BoolVar(&runOnAddFlag, "run", false, "Run the prebuild once after adding it")
+	prebuildAddCmd.Flags().StringVar(&branchFlag, "branch", "", "Git branch for the prebuild")
+	prebuildAddCmd.Flags().IntVar(&retentionFlag, "retention", 0, "Retention period for the prebuild (in days)")
+	prebuildAddCmd.Flags().IntVar(&commitIntervalFlag, "commit-interval", 0, "Commit interval for the prebuild (in seconds)")
+	prebuildAddCmd.Flags().StringSliceVar(&triggerFilesFlag, "trigger-files", nil, "Files that trigger the prebuild")
+	prebuildAddCmd.Flags().StringVar(&projectConfigFlag, "project-config", "", "Project configuration name")
 }
