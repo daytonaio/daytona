@@ -299,7 +299,13 @@ func (g *GitnessGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (
 
 func (g *GitnessGitProvider) RegisterPrebuildWebhook(repo *GitRepository, endpointUrl string) (string, error) {
 	client := g.getApiClient()
-	webhook, err := client.CreateWebhook(repo.Id, repo.Owner, endpointUrl)
+	webhook, err := client.CreateWebhook(repo.Id, repo.Owner, gitnessclient.Webhook{
+		Triggers:    []string{"branch_updated"},
+		Url:         endpointUrl,
+		Identifier:  "daytona-webhook_" + repo.Id,
+		DisplayName: "Daytona Webhook",
+		Enabled:     true,
+	})
 	if err != nil {
 		return "", err
 	}
@@ -310,7 +316,6 @@ func (g *GitnessGitProvider) GetPrebuildWebhook(repo *GitRepository, endpointUrl
 	client := g.getApiClient()
 	webhooks, err := client.GetAllWebhooks(repo.Id, repo.Owner)
 	if err != nil {
-		fmt.Println("err get webhook", err)
 		return nil, err
 	}
 	for _, webhook := range webhooks {
