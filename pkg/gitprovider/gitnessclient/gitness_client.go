@@ -347,13 +347,13 @@ func (g *GitnessClient) GetDefaultBranch(url string) (*string, error) {
 	return &repo.DefaultBranch, nil
 }
 
-func (g *GitnessClient) CreateWebhook(repoId string, namespaceId string, webHookData Webhook) (*Webhook, error) {
+func (g *GitnessClient) CreateWebhook(repoId string, namespaceId string, webhook Webhook) (*Webhook, error) {
 	webhookEndpoint, parseErr := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/webhooks", url.PathEscape(namespaceId+"/"+repoId)))
 	if parseErr != nil {
 		return nil, parseErr
 	}
 
-	jsonData, err := json.Marshal(webHookData)
+	jsonData, err := json.Marshal(webhook)
 	if err != nil {
 		return nil, err
 	}
