@@ -177,7 +177,7 @@ func (g *GitnessGitProvider) GetBranchByCommit(staticContext *StaticGitContext) 
 			break
 		}
 
-		commits, err := client.GetCommits(staticContext.Owner, staticContext.Name, &branch.Name)
+		commits, err := client.GetCommits(staticContext.Owner, staticContext.Name, &branch.Name, nil)
 		if err != nil {
 			return "", err
 		}
@@ -298,6 +298,7 @@ func (g *GitnessGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (
 }
 
 func (g *GitnessGitProvider) RegisterPrebuildWebhook(repo *GitRepository, endpointUrl string) (string, error) {
+	fmt.Println("RegisterPrebuildWebhook ")
 	client := g.getApiClient()
 	webhook, err := client.CreateWebhook(repo.Id, repo.Owner, gitnessclient.Webhook{
 		Triggers:    []string{"branch_updated"},
@@ -313,6 +314,7 @@ func (g *GitnessGitProvider) RegisterPrebuildWebhook(repo *GitRepository, endpoi
 }
 
 func (g *GitnessGitProvider) GetPrebuildWebhook(repo *GitRepository, endpointUrl string) (*string, error) {
+	fmt.Println("GetPrebuildWebhook ")
 	client := g.getApiClient()
 	webhooks, err := client.GetAllWebhooks(repo.Id, repo.Owner)
 	if err != nil {
@@ -328,19 +330,23 @@ func (g *GitnessGitProvider) GetPrebuildWebhook(repo *GitRepository, endpointUrl
 
 func (g *GitnessGitProvider) UnregisterPrebuildWebhook(repo *GitRepository, id string) error {
 	client := g.getApiClient()
+	fmt.Println("UnregisterPrebuildWebhook ")
 	return client.DeleteWebhook(repo.Id, repo.Owner, id)
 }
 
 func (g *GitnessGitProvider) GetCommitsRange(repo *GitRepository, initialSha string, currentSha string) (int, error) {
 	client := g.getApiClient()
-	commits, err := client.GetCommits(repo.Owner, repo.Name, &repo.Branch)
+	fmt.Println("GetCommitsRange ")
+	commits, err := client.GetCommits(repo.Owner, repo.Name, &repo.Branch, &initialSha)
 	if err != nil {
 		return 0, err
 	}
+	fmt.Println("GetCommitsRange ", len(*commits))
 	return len(*commits), nil
 }
 
 func (g *GitnessGitProvider) ParseEventData(request *http.Request) (*GitEventData, error) {
+	fmt.Println("ParseEventData ")
 	payload, err := io.ReadAll(request.Body)
 	if err != nil {
 		return nil, err
@@ -367,5 +373,6 @@ func (g *GitnessGitProvider) ParseEventData(request *http.Request) (*GitEventDat
 		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Added...)
 		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Removed...)
 	}
+	fmt.Printf("ParseEventData %v \n", gitEventData)
 	return gitEventData, nil
 }
