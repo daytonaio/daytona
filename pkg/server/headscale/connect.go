@@ -6,9 +6,11 @@ package headscale
 import (
 	"fmt"
 	"net/http"
+	"path/filepath"
 
 	"tailscale.com/tsnet"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -29,6 +31,12 @@ func (s *HeadscaleServer) Connect() error {
 
 	tsNetServer.ControlURL = fmt.Sprintf("http://localhost:%d", s.headscalePort)
 	tsNetServer.AuthKey = authKey
+
+	configDir, err := config.GetConfigDir()
+	if err != nil {
+		return err
+	}
+	tsNetServer.Dir = filepath.Join(configDir, "tsnet")
 
 	defer tsNetServer.Close()
 	ln, err := tsNetServer.Listen("tcp", ":80")
