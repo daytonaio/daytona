@@ -239,14 +239,18 @@ func (g *GitnessGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitCo
 	if err != nil {
 		return nil, err
 	}
-	ref, err := g.getApiClient().GetRepoRef(repoUrl)
-	if err != nil {
-		return nil, err
+	if strings.Contains(repoUrl, "/git/") {
+		ref, err := g.getApiClient().GetRepoRef(repoUrl)
+		if err != nil {
+			return nil, err
+		}
+		refParts := strings.Split(*ref, "/")
+		staticContext.Owner = refParts[0]
+		staticContext.Name = refParts[1]
+		staticContext.Id = refParts[1]
+		staticContext.Path = nil
 	}
-	refParts := strings.Split(*ref, "/")
-	staticContext.Owner = refParts[0]
-	staticContext.Name = refParts[1]
-	staticContext.Id = refParts[1]
+
 	parsedUrl, err := url.Parse(repoUrl)
 	if err != nil {
 		return nil, err

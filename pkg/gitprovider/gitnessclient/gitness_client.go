@@ -289,8 +289,9 @@ func (g *GitnessClient) GetRepoRef(gitUrl string) (*string, error) {
 	if err != nil {
 		return nil, err
 	}
+	parsedRepoUrl.Path = strings.TrimPrefix(parsedRepoUrl.Path, "/git/")
 	parts := strings.Split(parsedRepoUrl.Path, "/")
-	path := fmt.Sprintf("%s/%s", parts[2], parts[3])
+	path := fmt.Sprintf("%s/%s", parts[0], parts[1])
 	return &path, nil
 }
 
