@@ -4,6 +4,7 @@
 package tailscale
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net"
@@ -16,7 +17,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"tailscale.com/tsnet"
 
-	"github.com/daytonaio/daytona/internal/constants"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -36,27 +36,43 @@ func (s *Server) Start() error {
 	}
 
 	go func(tsnetServer *tsnet.Server) {
+		reconnect := func() {
+			// Close the tsnet server and reconnect
+			err = tsnetServer.Close()
+			if err != nil {
+				log.Errorf("Failed to close tsnet server: %v", err)
+			}
+
+			tsnetServer, err = s.connect()
+			if err != nil {
+				log.Errorf("Failed to reconnect: %v", err)
+			} else {
+				log.Info("Reconnected to server")
+			}
+		}
+
 		for {
 			time.Sleep(5 * time.Second)
-			httpClient := tsnetServer.HTTPClient()
-			httpClient.Timeout = 5 * time.Second
-			_, err := httpClient.Get(fmt.Sprintf("http://server%s", constants.HEALTH_CHECK_ROUTE))
-			if err != nil {
-				log.Errorf("Failed to connect to server: %v. Reconnecting...", err)
-				// Close the tsnet server and reconnect
-				err = tsnetServer.Close()
-				if err != nil {
-					log.Errorf("Failed to close tsnet server: %v", err)
-				}
 
-				tsnetServer, err = s.connect()
-				if err != nil {
-					log.Errorf("Failed to reconnect: %v", err)
-				} else {
-					log.Info("Reconnected to server")
-				}
+			localClient, err := tsnetServer.LocalClient()
+			if err != nil {
+				log.Errorf("Failed to get local client: %v", err)
+				reconnect()
+				continue
+			}
+
+			status, err := localClient.Status(context.Background())
+			if err != nil {
+				log.Errorf("Failed to get local client status: %v", err)
+				reconnect()
+				continue
+			}
+
+			if status.CurrentTailnet == nil {
+				log.Error("Tailscale not connected. Reconnecting...")
+				reconnect()
 			} else {
-				log.Trace("Connected to server")
+				log.Tracef("Connected to server. Status: %v", status)
 			}
 		}
 	}(tsnetServer)
