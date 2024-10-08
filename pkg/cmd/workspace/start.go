@@ -6,6 +6,7 @@ package workspace
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
@@ -37,22 +38,38 @@ var StartCmd = &cobra.Command{
 	Args:    cobra.RangeArgs(0, 1),
 	GroupID: util.WORKSPACE_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		timeFormat := time.Now().Format("2006-01-02 15:04:05")
+		timeNow, err := time.Parse("2006-01-02 15:04:05", timeFormat)
+		if err != nil {
+			return err
+		}
 		var workspaceIdOrName string
 		var activeProfile config.Profile
 		var ideId string
 		var workspaceId string
 		var ideList []config.Ide
+		var projectNames []string
 		projectProviderMetadata := ""
-
-		if allFlag {
-			return startAllWorkspaces()
-		}
 
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			return err
+		}
+
+		c, err := config.GetConfig()
+		if err != nil {
+			return err
+		}
+
+		activeProfile, err = c.GetActiveProfile()
+		if err != nil {
+			return err
+		}
+
+		if allFlag {
+			return startAllWorkspaces(activeProfile, timeNow)
 		}
 
 		if len(args) == 0 {
@@ -74,17 +91,9 @@ var StartCmd = &cobra.Command{
 		}
 
 		if codeFlag {
-			c, err := config.GetConfig()
-			if err != nil {
-				return err
-			}
 
 			ideList = config.GetIdeList()
 
-			activeProfile, err = c.GetActiveProfile()
-			if err != nil {
-				return err
-			}
 			ideId = c.DefaultIdeId
 
 			wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceIdOrName).Execute()
@@ -107,6 +116,17 @@ var StartCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
+		workspace, err := apiclient_util.GetWorkspace(workspaceIdOrName, false)
+		if err != nil {
+			return err
+		}
+
+		if startProjectFlag != "" {
+			projectNames = append(projectNames, startProjectFlag)
+		}
+
+		apiclient_util.ReadWorkspaceLogs(ctx, activeProfile, workspace.Id, projectNames, false, true, timeNow)
 
 		if startProjectFlag == "" {
 			views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' started successfully", workspaceIdOrName))
@@ -144,7 +164,7 @@ func init() {
 	}
 }
 
-func startAllWorkspaces() error {
+func startAllWorkspaces(activeProfile config.Profile, timeNow time.Time) error {
 	ctx := context.Background()
 	apiClient, err := apiclient_util.GetApiClient(nil)
 	if err != nil {
@@ -162,6 +182,8 @@ func startAllWorkspaces() error {
 			log.Errorf("Failed to start workspace %s: %v\n\n", workspace.Name, err)
 			continue
 		}
+
+		apiclient_util.ReadWorkspaceLogs(ctx, activeProfile, workspace.Id, []string{}, false, true, timeNow)
 
 		views.RenderInfoMessage(fmt.Sprintf("- Workspace '%s' started successfully", workspace.Name))
 	}
