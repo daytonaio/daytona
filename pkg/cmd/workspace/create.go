@@ -464,8 +464,8 @@ func waitForDial(workspace *apiclient.Workspace, activeProfile *config.Profile, 
 	}
 
 	connectChan := make(chan error)
-	spinner := time.After(3 * time.Second)
-	timeout := time.After(60 * time.Second)
+	spinner := time.After(15 * time.Second)
+	timeout := time.After(2 * time.Minute)
 
 	go func() {
 		for {
