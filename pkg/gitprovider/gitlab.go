@@ -76,7 +76,10 @@ func (g *GitLabGitProvider) GetNamespaces(options ListOptions) ([]*GitNamespace,
 		})
 	}
 
-	namespaces = append([]*GitNamespace{{Id: personalNamespaceId, Name: user.Username}}, namespaces...)
+	// Append 'personal' namespace on first page
+	if options.Page == 1 {
+		namespaces = append([]*GitNamespace{{Id: personalNamespaceId, Name: user.Username}}, namespaces...)
+	}
 
 	return namespaces, nil
 }

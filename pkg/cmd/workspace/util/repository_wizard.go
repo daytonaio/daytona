@@ -29,6 +29,15 @@ func isGitProviderWithUnsupportedPagination(providerId string) bool {
 	}
 }
 
+func gitProviderAppendsPersonalNamespace(providerId string) bool {
+	switch providerId {
+	case "github", "gitlab", "gitea":
+		return true
+	default:
+		return false
+	}
+}
+
 type RepositoryWizardConfig struct {
 	ApiClient           *apiclient.APIClient
 	UserGitProviders    []apiclient.GitProvider
@@ -145,7 +154,12 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 			disablePagination = true
 		} else {
 			// Check if we have reached the end of the list
-			disablePagination = int32(curPageItemsNum) < perPage
+			// For few providers, we manually append "personal" namespace info on the first page
+			if page == 1 && gitProviderAppendsPersonalNamespace(providerId) {
+				disablePagination = int32(curPageItemsNum)-1 < perPage
+			} else {
+				disablePagination = int32(curPageItemsNum) < perPage
+			}
 		}
 
 		selectionListCursorIdx = (int)(page-1) * int(perPage)
@@ -172,11 +186,6 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		} else {
 			// If user aborts or there's no selection
 			return nil, common.ErrCtrlCAbort
-		}
-		for _, namespaceItem := range namespaceList {
-			if namespaceItem.Id == namespaceId {
-				namespace = namespaceItem.Name
-			}
 		}
 	}
 

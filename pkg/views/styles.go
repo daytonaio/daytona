@@ -82,24 +82,30 @@ func GetStyledSelectList(items []list.Item, listOptions ...SelectionListOptions)
 		l.Filter = func(term string, targets []string) []list.Rank {
 			ranks := list.DefaultFilter(term, targets)
 
-			lastIdx := len(targets) - 1
-			if targets[lastIdx] != ListNavigationRenderText {
+			loadMoreIdx := -1
+			// Ideally 'Load More' option if present should be found at the last index
+			for i := len(targets) - 1; i >= 0; i-- {
+				if targets[i] == ListNavigationRenderText {
+					loadMoreIdx = i
+					break
+				}
+			}
+
+			if loadMoreIdx == -1 {
 				return ranks
 			}
 
-			isLoadMoreOptionPresent := false
+			// Return if already present
 			for i := range ranks {
-				if ranks[i].Index == len(targets)-1 {
+				if ranks[i].Index == loadMoreIdx {
 					return ranks
 				}
 			}
 
-			if !isLoadMoreOptionPresent {
-				lastIdx := list.Rank{
-					Index: len(targets) - 1,
-				}
-				ranks = append(ranks, lastIdx)
-			}
+			// Append 'Load More' option in search filter results
+			ranks = append(ranks, list.Rank{
+				Index: loadMoreIdx,
+			})
 
 			return ranks
 		}
@@ -117,7 +123,7 @@ func GetStyledSelectList(items []list.Item, listOptions ...SelectionListOptions)
 	var pluralItemName string
 	if listOptions == nil {
 		pluralItemName = fmt.Sprintf("items\n\n%s", SeparatorString)
-	} else if listOptions != nil && len(listOptions[0].ParentIdentifier) > 0 {
+	} else if len(listOptions[0].ParentIdentifier) > 0 {
 		pluralItemName = fmt.Sprintf("items (%s)\n\n%s", listOptions[0].ParentIdentifier, SeparatorString)
 	}
 
