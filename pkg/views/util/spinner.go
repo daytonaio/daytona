@@ -4,6 +4,7 @@
 package util
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -13,6 +14,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 	log "github.com/sirupsen/logrus"
 )
+
+var userCancelled bool
 
 type model struct {
 	spinner  spinner.Model
@@ -39,12 +42,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case Msg:
 		m.quitting = true
 		return m, tea.Quit
-
-	default:
-		var cmd tea.Cmd
-		m.spinner, cmd = m.spinner.Update(msg)
-		return m, cmd
+	case tea.KeyMsg:
+		if msg.String() == "ctrl+c" {
+			userCancelled = true
+			m.quitting = true
+			return m, tea.Quit
+		}
 	}
+
+	var cmd tea.Cmd
+	m.spinner, cmd = m.spinner.Update(msg)
+	return m, cmd
 }
 
 func WithSpinner(message string, fn func() error) error {
@@ -71,9 +79,12 @@ func start(message string, inline bool) *tea.Program {
 			fmt.Println(err)
 			os.Exit(1)
 		}
+		if userCancelled {
+			fmt.Println(errors.New("user cancelled"))
+			os.Exit(1)
+		}
 	}()
 	return p
-
 }
 
 func stop(p *tea.Program) {
