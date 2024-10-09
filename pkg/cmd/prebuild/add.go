@@ -26,25 +26,10 @@ var (
 )
 
 var prebuildAddCmd = &cobra.Command{
-	Use:     "add [flags]",
+	Use:     "add [project-config]",
 	Short:   "Add a prebuild configuration",
-	Args:    cobra.NoArgs,
+	Args:    cobra.MaximumNArgs(1), // Maximum one argument allowed
 	Aliases: []string{"new", "create"},
-	Long: `
-Add a prebuild configuration for your project.
-
-Flags:
-  --run                  Run the prebuild once after adding it.
-  --branch               Specify the Git branch for the prebuild.
-  --retention            Set the retention period for the prebuild (in days).
-  --commit-interval      Set the interval for commits (in seconds).
-  --trigger-files        Specify files that will trigger the prebuild.
-  --project-config       Specify the project configuration name.
-
-Examples:
-  daytona prebuild add --branch main --retention 30 --commit-interval 10 --trigger-files file1.go,file2.go --project-config myProject
-  daytona prebuild add --run --project-config myProject
-  `,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var prebuildAddView add.PrebuildAddView
 		var projectConfig *apiclient.ProjectConfig
@@ -55,57 +40,99 @@ Examples:
 			return err
 		}
 
-		gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
-		if err != nil {
-			return apiclient_util.HandleErrorResponse(res, err)
-		}
+		// If no arguments and no flags are provided, run the interactive CLI
+		if len(args) == 0 && !cmd.Flags().Changed("branch") && !cmd.Flags().Changed("retention") &&
+			!cmd.Flags().Changed("commit-interval") && !cmd.Flags().Changed("trigger-files") {
+			// Interactive CLI logic
+			gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
+			if err != nil {
+				return apiclient_util.HandleErrorResponse(res, err)
+			}
 
-		if len(gitProviders) == 0 {
-			views.RenderInfoMessage("No registered Git providers have been found - please register a Git provider using 'daytona git-provider add' in order to start using prebuilds.")
-			return nil
-		}
+			if len(gitProviders) == 0 {
+				views.RenderInfoMessage("No registered Git providers have been found - please register a Git provider using 'daytona git-provider add' in order to start using prebuilds.")
+				return nil
+			}
 
-		projectConfigList, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(ctx).Execute()
-		if err != nil {
-			return apiclient_util.HandleErrorResponse(res, err)
-		}
+			projectConfigList, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(ctx).Execute()
+			if err != nil {
+				return apiclient_util.HandleErrorResponse(res, err)
+			}
 
-		projectConfig = selection.GetProjectConfigFromPrompt(projectConfigList, 0, false, true, "Prebuild")
-		if projectConfig == nil {
-			return errors.New("No project config selected")
-		}
+			projectConfig = selection.GetProjectConfigFromPrompt(projectConfigList, 0, false, true, "Prebuild")
+			if projectConfig == nil {
+				return errors.New("No project config selected")
+			}
 
-		if projectConfig.Name == selection.NewProjectConfigIdentifier {
-			projectConfig, err = projectconfig.RunProjectConfigAddFlow(apiClient, gitProviders, ctx)
+			if projectConfig.Name == selection.NewProjectConfigIdentifier {
+				projectConfig, err = projectconfig.RunProjectConfigAddFlow(apiClient, gitProviders, ctx)
+				if err != nil {
+					return err
+				}
+				if projectConfig == nil {
+					return nil
+				}
+			}
+
+			prebuildAddView.ProjectConfigName = projectConfig.Name
+
+			if projectConfig.BuildConfig == nil {
+				return errors.New("The chosen project config does not have a build configuration")
+			}
+
+			chosenBranch, err := workspace_util.GetBranchFromProjectConfig(projectConfig, apiClient, 0)
 			if err != nil {
 				return err
 			}
-			if projectConfig == nil {
+
+			if chosenBranch == nil {
+				fmt.Println("Operation canceled")
 				return nil
 			}
+
+			prebuildAddView.RunBuildOnAdd = runOnAddFlag
+			prebuildAddView.Branch = chosenBranch.Name
+		} else {
+			// Non-interactive mode: use provided arguments and flags
+			if len(args) > 0 {
+				prebuildAddView.ProjectConfigName = args[0]
+
+				// Fetch the project configuration based on the provided argument
+				projectConfigTemp, res, err := apiClient.ProjectConfigAPI.GetProjectConfig(ctx, prebuildAddView.ProjectConfigName).Execute()
+				if err != nil {
+					return apiclient_util.HandleErrorResponse(res, err)
+				}
+
+				prebuildAddView.ProjectConfigName = projectConfigTemp.Name
+				projectConfig = projectConfigTemp
+
+				if projectConfig == nil {
+					return errors.New("Invalid project config specified")
+				}
+			} else {
+				return errors.New("Project config must be specified when using flags")
+			}
+
+			// Validate and handle required flags
+			if branchFlag == "" {
+				return errors.New("Branch flag is required when using flags")
+			}
+			prebuildAddView.Branch = branchFlag
+
+			if retentionFlag <= 0 {
+				return errors.New("Retention must be a positive integer")
+			}
+			prebuildAddView.Retention = strconv.Itoa(retentionFlag)
+
+			if commitIntervalFlag > 0 {
+				prebuildAddView.CommitInterval = strconv.Itoa(commitIntervalFlag)
+			}
+
+			prebuildAddView.TriggerFiles = triggerFilesFlag
+			prebuildAddView.RunBuildOnAdd = runOnAddFlag
 		}
 
-		prebuildAddView.ProjectConfigName = projectConfig.Name
-
-		if projectConfig.BuildConfig == nil {
-			return errors.New("The chosen project config does not have a build configuration")
-		}
-
-		chosenBranch, err := workspace_util.GetBranchFromProjectConfig(projectConfig, apiClient, 0)
-		if err != nil {
-			return err
-		}
-
-		if chosenBranch == nil {
-			fmt.Println("Operation canceled")
-			return nil
-		}
-
-		prebuildAddView.RunBuildOnAdd = runOnAddFlag
-		prebuildAddView.Branch = chosenBranch.Name
-
-		add.PrebuildCreationView(&prebuildAddView, false)
-
+		// Shared logic to create the prebuild configuration
 		var commitInterval int
 		if prebuildAddView.CommitInterval != "" {
 			commitInterval, err = strconv.Atoi(prebuildAddView.CommitInterval)
@@ -140,10 +167,11 @@ Examples:
 		views.RenderInfoMessage("Prebuild added successfully")
 
 		if prebuildAddView.RunBuildOnAdd {
-			buildId, err := build.CreateBuild(apiClient, projectConfig, chosenBranch.Name, &prebuildId)
+			buildId, err := build.CreateBuild(apiClient, projectConfig, prebuildAddView.Branch, &prebuildId)
 			if err != nil {
 				return err
 			}
+			fmt.Printf(buildId)
 
 			views.RenderViewBuildLogsMessage(buildId)
 		}
@@ -158,5 +186,4 @@ func init() {
 	prebuildAddCmd.Flags().IntVar(&retentionFlag, "retention", 0, "Retention period for the prebuild (in days)")
 	prebuildAddCmd.Flags().IntVar(&commitIntervalFlag, "commit-interval", 0, "Commit interval for the prebuild (in seconds)")
 	prebuildAddCmd.Flags().StringSliceVar(&triggerFilesFlag, "trigger-files", nil, "Files that trigger the prebuild")
-	prebuildAddCmd.Flags().StringVar(&projectConfigFlag, "project-config", "", "Project configuration name")
 }
