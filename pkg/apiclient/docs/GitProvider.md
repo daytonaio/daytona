@@ -4,8 +4,10 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**Alias** | **string** |  | 
 **BaseApiUrl** | Pointer to **string** |  | [optional] 
 **Id** | **string** |  | 
+**ProviderId** | **string** |  | 
 **Token** | **string** |  | 
 **Username** | **string** |  | 
 
@@ -13,7 +15,7 @@ Name | Type | Description | Notes
 
 ### NewGitProvider
 
-`func NewGitProvider(id string, token string, username string, ) *GitProvider`
+`func NewGitProvider(alias string, id string, providerId string, token string, username string, ) *GitProvider`
 
 NewGitProvider instantiates a new GitProvider object
 This constructor will assign default values to properties that have it defined,
@@ -27,6 +29,26 @@ will change when the set of required properties is changed
 NewGitProviderWithDefaults instantiates a new GitProvider object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetAlias
+
+`func (o *GitProvider) GetAlias() string`
+
+GetAlias returns the Alias field if non-nil, zero value otherwise.
+
+### GetAliasOk
+
+`func (o *GitProvider) GetAliasOk() (*string, bool)`
+
+GetAliasOk returns a tuple with the Alias field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAlias
+
+`func (o *GitProvider) SetAlias(v string)`
+
+SetAlias sets Alias field to given value.
+
 
 ### GetBaseApiUrl
 
@@ -71,6 +93,26 @@ and a boolean to check if the value has been set.
 `func (o *GitProvider) SetId(v string)`
 
 SetId sets Id field to given value.
+
+
+### GetProviderId
+
+`func (o *GitProvider) GetProviderId() string`
+
+GetProviderId returns the ProviderId field if non-nil, zero value otherwise.
+
+### GetProviderIdOk
+
+`func (o *GitProvider) GetProviderIdOk() (*string, bool)`
+
+GetProviderIdOk returns a tuple with the ProviderId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetProviderId
+
+`func (o *GitProvider) SetProviderId(v string)`
+
+SetProviderId sets ProviderId field to given value.
 
 
 ### GetToken

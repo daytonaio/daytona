@@ -17,12 +17,13 @@ import (
 )
 
 type BranchWizardConfig struct {
-	ApiClient    *apiclient.APIClient
-	ProviderId   string
-	NamespaceId  string
-	Namespace    string
-	ChosenRepo   *apiclient.GitRepository
-	ProjectOrder int
+	ApiClient           *apiclient.APIClient
+	GitProviderConfigId string
+	NamespaceId         string
+	Namespace           string
+	ChosenRepo          *apiclient.GitRepository
+	ProjectOrder        int
+	ProviderId          string
 }
 
 func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, error) {
@@ -32,7 +33,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	ctx := context.Background()
 
 	err = views_util.WithSpinner("Loading", func() error {
-		branchList, _, err = config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.ProviderId, url.QueryEscape(config.NamespaceId), url.QueryEscape(config.ChosenRepo.Id)).Execute()
+		branchList, _, err = config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.GitProviderConfigId, url.QueryEscape(config.NamespaceId), url.QueryEscape(config.ChosenRepo.Id)).Execute()
 		return err
 	})
 
@@ -52,7 +53,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 
 	var prList []apiclient.GitPullRequest
 	err = views_util.WithSpinner("Loading", func() error {
-		prList, _, err = config.ApiClient.GitProviderAPI.GetRepoPRs(ctx, config.ProviderId, url.QueryEscape(config.NamespaceId), url.QueryEscape(config.ChosenRepo.Id)).Execute()
+		prList, _, err = config.ApiClient.GitProviderAPI.GetRepoPRs(ctx, config.GitProviderConfigId, url.QueryEscape(config.NamespaceId), url.QueryEscape(config.ChosenRepo.Id)).Execute()
 		return err
 	})
 

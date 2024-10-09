@@ -55,6 +55,7 @@ func (s *GitProviderService) GetGitProvider(id string) (gitprovider.GitProvider,
 		if gitprovider.IsGitProviderNotFound(err) {
 			providerConfig = &gitprovider.GitProviderConfig{
 				Id:         id,
+				ProviderId: id,
 				Username:   "",
 				Token:      "",
 				BaseApiUrl: nil,
@@ -88,8 +89,8 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 	for _, p := range gitProviders {
 
 		isAwsUrl := strings.Contains(repo.Url, ".amazonaws.com/") || strings.Contains(repo.Url, ".console.aws.amazon.com/")
-		if p.Id == "aws-codecommit" && isAwsUrl {
-			provider, err = s.GetGitProvider(p.Id)
+		if p.ProviderId == "aws-codecommit" && isAwsUrl {
+			provider, err = s.GetGitProvider(p.ProviderId)
 			if err == nil {
 				return "", err
 			}
@@ -97,8 +98,8 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 			break
 		}
 
-		if strings.Contains(repo.Url, fmt.Sprintf("%s.", p.Id)) {
-			provider, err = s.GetGitProvider(p.Id)
+		if strings.Contains(repo.Url, fmt.Sprintf("%s.", p.ProviderId)) {
+			provider, err = s.GetGitProvider(p.ProviderId)
 			if err == nil {
 				return "", err
 			}
@@ -112,7 +113,7 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 		}
 
 		if p.BaseApiUrl != nil && strings.Contains(repo.Url, hostname) {
-			provider, err = s.GetGitProvider(p.Id)
+			provider, err = s.GetGitProvider(p.ProviderId)
 			if err == nil {
 				return "", err
 			}
@@ -127,7 +128,8 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 		providerId := strings.Split(hostname, ".")[0]
 
 		provider, err = s.newGitProvider(&gitprovider.GitProviderConfig{
-			Id:         providerId,
+			Id:         "",
+			ProviderId: providerId,
 			Username:   "",
 			Token:      "",
 			BaseApiUrl: nil,
@@ -151,7 +153,7 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 }
 
 func (s *GitProviderService) newGitProvider(config *gitprovider.GitProviderConfig) (gitprovider.GitProvider, error) {
-	switch config.Id {
+	switch config.ProviderId {
 	case "github":
 		return gitprovider.NewGitHubGitProvider(config.Token, nil), nil
 	case "github-enterprise-server":

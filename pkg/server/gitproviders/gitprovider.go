@@ -11,6 +11,7 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/docker/docker/pkg/stringid"
 )
 
 func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.GitProvider, string, error) {
@@ -22,31 +23,38 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 	for _, p := range gitProviders {
 		gitProvider, err := s.GetGitProvider(p.Id)
 		if err != nil {
-			return nil, "", err
+			continue
 		}
 
+		canHandle, _ := gitProvider.CanHandle(repoUrl)
+		if canHandle {
+			_, err = gitProvider.GetRepositoryContext(gitprovider.GetRepositoryContext{
+				Url: repoUrl,
+			})
+			if err == nil {
+				return gitProvider, p.Id, nil
+			}
+		}
+	}
+
+	for _, p := range config.GetSupportedGitProviders() {
+		gitProvider, err := s.newGitProvider(&gitprovider.GitProviderConfig{
+			ProviderId: p.Id,
+			Id:         p.Id,
+			Username:   "",
+			Token:      "",
+			BaseApiUrl: nil,
+		})
+		if err != nil {
+			continue
+		}
 		canHandle, _ := gitProvider.CanHandle(repoUrl)
 		if canHandle {
 			return gitProvider, p.Id, nil
 		}
 	}
 
-	u, err := url.Parse(repoUrl)
-	if err != nil {
-		return nil, "", nil
-	}
-
-	hostname := strings.TrimPrefix(u.Hostname(), "www.")
-	providerId := strings.Split(hostname, ".")[0]
-
-	gitProvider, err := s.newGitProvider(&gitprovider.GitProviderConfig{
-		Id:         providerId,
-		Username:   "",
-		Token:      "",
-		BaseApiUrl: nil,
-	})
-
-	return gitProvider, providerId, err
+	return nil, "", errors.New("can not get public client for the URL " + repoUrl)
 }
 
 func (s *GitProviderService) GetConfigForUrl(repoUrl string) (*gitprovider.GitProviderConfig, error) {
@@ -66,8 +74,14 @@ func (s *GitProviderService) GetConfigForUrl(repoUrl string) (*gitprovider.GitPr
 
 		canHandle, _ := gitProvider.CanHandle(repoUrl)
 		if canHandle {
-			return p, nil
+			_, err = gitProvider.GetRepositoryContext(gitprovider.GetRepositoryContext{
+				Url: repoUrl,
+			})
+			if err == nil {
+				return p, nil
+			}
 		}
+
 	}
 
 	supportedGitProviders := config.GetSupportedGitProviders()
@@ -118,6 +132,15 @@ func (s *GitProviderService) SetGitProviderConfig(providerConfig *gitprovider.Gi
 		return err
 	}
 	providerConfig.Username = userData.Username
+	if providerConfig.Id == "" {
+		id := stringid.GenerateRandomID()
+		id = stringid.TruncateID(id)
+		providerConfig.Id = id
+	}
+
+	if providerConfig.Alias == "" {
+		providerConfig.Alias = userData.Username
+	}
 
 	return s.configStore.Save(providerConfig)
 }

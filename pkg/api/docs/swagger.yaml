@@ -140,6 +140,8 @@ definitions:
         additionalProperties:
           type: string
         type: object
+      gitProviderConfigId:
+        type: string
       image:
         type: string
       name:
@@ -161,6 +163,8 @@ definitions:
         additionalProperties:
           type: string
         type: object
+      gitProviderConfigId:
+        type: string
       image:
         type: string
       name:
@@ -280,16 +284,22 @@ definitions:
     type: object
   GitProvider:
     properties:
+      alias:
+        type: string
       baseApiUrl:
         type: string
       id:
+        type: string
+      providerId:
         type: string
       token:
         type: string
       username:
         type: string
     required:
+    - alias
     - id
+    - providerId
     - token
     - username
     type: object
@@ -462,6 +472,8 @@ definitions:
         additionalProperties:
           type: string
         type: object
+      gitProviderConfigId:
+        type: string
       image:
         type: string
       name:
@@ -495,6 +507,8 @@ definitions:
         additionalProperties:
           type: string
         type: object
+      gitProviderConfigId:
+        type: string
       image:
         type: string
       name:
@@ -648,16 +662,20 @@ definitions:
     type: object
   SetGitProviderConfig:
     properties:
+      alias:
+        type: string
       baseApiUrl:
         type: string
       id:
+        type: string
+      providerId:
         type: string
       token:
         type: string
       username:
         type: string
     required:
-    - id
+    - providerId
     - token
     type: object
   SetProjectState:

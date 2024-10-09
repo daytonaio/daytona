@@ -8,14 +8,15 @@ import (
 )
 
 type ProjectConfigDTO struct {
-	Name          string            `gorm:"primaryKey"`
-	Image         string            `json:"image"`
-	User          string            `json:"user"`
-	Build         *ProjectBuildDTO  `json:"build,omitempty" gorm:"serializer:json"`
-	RepositoryUrl string            `json:"repositoryUrl"`
-	EnvVars       map[string]string `json:"envVars" gorm:"serializer:json"`
-	Prebuilds     []PrebuildDTO     `gorm:"serializer:json"`
-	IsDefault     bool              `json:"isDefault"`
+	Name                string            `gorm:"primaryKey"`
+	Image               string            `json:"image"`
+	User                string            `json:"user"`
+	Build               *ProjectBuildDTO  `json:"build,omitempty" gorm:"serializer:json"`
+	RepositoryUrl       string            `json:"repositoryUrl"`
+	EnvVars             map[string]string `json:"envVars" gorm:"serializer:json"`
+	Prebuilds           []PrebuildDTO     `gorm:"serializer:json"`
+	IsDefault           bool              `json:"isDefault"`
+	GitProviderConfigId *string           `json:"gitProviderConfigId" validate:"optional"`
 }
 
 type PrebuildDTO struct {
@@ -33,14 +34,15 @@ func ToProjectConfigDTO(projectConfig *config.ProjectConfig) ProjectConfigDTO {
 	}
 
 	return ProjectConfigDTO{
-		Name:          projectConfig.Name,
-		Image:         projectConfig.Image,
-		User:          projectConfig.User,
-		Build:         ToProjectBuildDTO(projectConfig.BuildConfig),
-		RepositoryUrl: projectConfig.RepositoryUrl,
-		EnvVars:       projectConfig.EnvVars,
-		Prebuilds:     prebuilds,
-		IsDefault:     projectConfig.IsDefault,
+		Name:                projectConfig.Name,
+		Image:               projectConfig.Image,
+		User:                projectConfig.User,
+		Build:               ToProjectBuildDTO(projectConfig.BuildConfig),
+		RepositoryUrl:       projectConfig.RepositoryUrl,
+		EnvVars:             projectConfig.EnvVars,
+		Prebuilds:           prebuilds,
+		IsDefault:           projectConfig.IsDefault,
+		GitProviderConfigId: projectConfig.GitProviderConfigId,
 	}
 }
 
@@ -51,14 +53,15 @@ func ToProjectConfig(projectConfigDTO ProjectConfigDTO) *config.ProjectConfig {
 	}
 
 	return &config.ProjectConfig{
-		Name:          projectConfigDTO.Name,
-		Image:         projectConfigDTO.Image,
-		User:          projectConfigDTO.User,
-		BuildConfig:   ToProjectBuild(projectConfigDTO.Build),
-		RepositoryUrl: projectConfigDTO.RepositoryUrl,
-		EnvVars:       projectConfigDTO.EnvVars,
-		Prebuilds:     prebuilds,
-		IsDefault:     projectConfigDTO.IsDefault,
+		Name:                projectConfigDTO.Name,
+		Image:               projectConfigDTO.Image,
+		User:                projectConfigDTO.User,
+		BuildConfig:         ToProjectBuild(projectConfigDTO.Build),
+		RepositoryUrl:       projectConfigDTO.RepositoryUrl,
+		EnvVars:             projectConfigDTO.EnvVars,
+		Prebuilds:           prebuilds,
+		IsDefault:           projectConfigDTO.IsDefault,
+		GitProviderConfigId: projectConfigDTO.GitProviderConfigId,
 	}
 }
 
