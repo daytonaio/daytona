@@ -1485,7 +1485,6 @@ components:
           type: string
       required:
       - envVars
-      - gitProviderConfigId
       - name
       - repositoryUrl
       type: object

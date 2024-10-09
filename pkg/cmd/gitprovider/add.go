@@ -30,7 +30,7 @@ var GitProviderAddCmd = &cobra.Command{
 		setGitProviderConfig.Username = new(string)
 		setGitProviderConfig.Alias = new(string)
 
-		gitprovider_view.GitProviderSelectionView(&setGitProviderConfig, apiClient, ctx)
+		gitprovider_view.GitProviderSelectionView(ctx, &setGitProviderConfig, apiClient)
 
 		if setGitProviderConfig.ProviderId == "" {
 			return nil

@@ -152,7 +152,6 @@ definitions:
         type: string
     required:
     - envVars
-    - gitProviderConfigId
     - name
     - repositoryUrl
     type: object

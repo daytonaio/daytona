@@ -143,7 +143,7 @@ func RunProjectConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []apic
 		User:                createDtos[0].User,
 		RepositoryUrl:       createDtos[0].Source.Repository.Url,
 		EnvVars:             createDtos[0].EnvVars,
-		GitProviderConfigId: *createDtos[0].GitProviderConfigId,
+		GitProviderConfigId: createDtos[0].GitProviderConfigId,
 	}
 
 	res, err = apiClient.ProjectConfigAPI.SetProjectConfig(ctx).ProjectConfig(createProjectConfig).Execute()
@@ -158,7 +158,7 @@ func RunProjectConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []apic
 		Name:                createProjectConfig.Name,
 		Prebuilds:           nil,
 		RepositoryUrl:       createProjectConfig.RepositoryUrl,
-		GitProviderConfigId: &createProjectConfig.GitProviderConfigId,
+		GitProviderConfigId: createProjectConfig.GitProviderConfigId,
 	}
 
 	if createProjectConfig.Image != nil {
@@ -169,7 +169,7 @@ func RunProjectConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []apic
 		projectConfig.User = *createProjectConfig.User
 	}
 
-	if createProjectConfig.GitProviderConfigId == "" {
+	if createProjectConfig.GitProviderConfigId == nil && *createProjectConfig.GitProviderConfigId == "" {
 		gitProviderConfigId, res, err := apiClient.GitProviderAPI.GetGitProviderIdForUrl(ctx, url.QueryEscape(createProjectConfig.RepositoryUrl)).Execute()
 		if err != nil {
 			return nil, apiclient_util.HandleErrorResponse(res, err)
@@ -235,7 +235,7 @@ func processCmdArgument(argument string, apiClient *apiclient.APIClient, ctx con
 		User:                project.User,
 		RepositoryUrl:       repoUrl,
 		EnvVars:             project.EnvVars,
-		GitProviderConfigId: *project.GitProviderConfigId,
+		GitProviderConfigId: project.GitProviderConfigId,
 	}
 
 	if newProjectConfig.Image == nil {

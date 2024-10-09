@@ -1953,7 +1953,6 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "envVars",
-                "gitProviderConfigId",
                 "name",
                 "repositoryUrl"
             ],

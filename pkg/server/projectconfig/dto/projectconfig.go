@@ -14,7 +14,7 @@ type CreateProjectConfigDTO struct {
 	BuildConfig         *buildconfig.BuildConfig `json:"buildConfig,omitempty" validate:"optional"`
 	RepositoryUrl       string                   `json:"repositoryUrl" validate:"required"`
 	EnvVars             map[string]string        `json:"envVars" validate:"required"`
-	GitProviderConfigId *string                  `json:"gitProviderConfigId" validate:"required"`
+	GitProviderConfigId *string                  `json:"gitProviderConfigId" validate:"optional"`
 } // @name CreateProjectConfigDTO
 
 type PrebuildDTO struct {

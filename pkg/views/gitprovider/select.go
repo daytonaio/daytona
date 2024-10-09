@@ -19,7 +19,7 @@ import (
 
 var commonGitProviderIds = []string{"github", "gitlab", "bitbucket"}
 
-func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig, apiClient *apiclient.APIClient, ctx context.Context) {
+func GitProviderSelectionView(ctx context.Context, gitProviderAddView *apiclient.SetGitProviderConfig, apiClient *apiclient.APIClient) {
 	supportedProviders := config.GetSupportedGitProviders()
 
 	var gitProviderOptions []huh.Option[string]

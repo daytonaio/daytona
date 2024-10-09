@@ -36,24 +36,11 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 			}
 		}
 	}
-	supportedGitProviders := []string{
-		"github",
-		"github-enterprise-server",
-		"gitlab",
-		"gitlab-self-managed",
-		"bitbucket",
-		"bitbucket-server",
-		"codeberg",
-		"gitea",
-		"gitness",
-		"azure-devops",
-		"aws-codecommit",
-	}
 
-	for _, p := range supportedGitProviders {
+	for _, p := range config.GetSupportedGitProviders() {
 		gitProvider, err := s.newGitProvider(&gitprovider.GitProviderConfig{
-			ProviderId: p,
-			Id:         p,
+			ProviderId: p.Id,
+			Id:         p.Id,
 			Username:   "",
 			Token:      "",
 			BaseApiUrl: nil,
@@ -63,7 +50,7 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 		}
 		canHandle, _ := gitProvider.CanHandle(repoUrl)
 		if canHandle {
-			return gitProvider, p, nil
+			return gitProvider, p.Id, nil
 		}
 	}
 
