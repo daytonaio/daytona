@@ -1459,6 +1459,7 @@ components:
             user: user
           devcontainer:
             filePath: filePath
+        gitProviderConfigId: gitProviderConfigId
         image: image
         envVars:
           key: envVars
@@ -1472,6 +1473,8 @@ components:
           additionalProperties:
             type: string
           type: object
+        gitProviderConfigId:
+          type: string
         image:
           type: string
         name:
@@ -1493,6 +1496,7 @@ components:
             user: user
           devcontainer:
             filePath: filePath
+        gitProviderConfigId: gitProviderConfigId
         image: image
         envVars:
           key: envVars
@@ -1517,6 +1521,8 @@ components:
           additionalProperties:
             type: string
           type: object
+        gitProviderConfigId:
+          type: string
         image:
           type: string
         name:
@@ -1558,6 +1564,7 @@ components:
               user: user
             devcontainer:
               filePath: filePath
+          gitProviderConfigId: gitProviderConfigId
           image: image
           envVars:
             key: envVars
@@ -1581,6 +1588,7 @@ components:
               user: user
             devcontainer:
               filePath: filePath
+          gitProviderConfigId: gitProviderConfigId
           image: image
           envVars:
             key: envVars
@@ -1726,21 +1734,29 @@ components:
       type: object
     GitProvider:
       example:
+        providerId: providerId
         baseApiUrl: baseApiUrl
+        alias: alias
         id: id
         token: token
         username: username
       properties:
+        alias:
+          type: string
         baseApiUrl:
           type: string
         id:
+          type: string
+        providerId:
           type: string
         token:
           type: string
         username:
           type: string
       required:
+      - alias
       - id
+      - providerId
       - token
       - username
       type: object
@@ -1977,6 +1993,7 @@ components:
             user: user
           devcontainer:
             filePath: filePath
+        gitProviderConfigId: gitProviderConfigId
         image: image
         envVars:
           key: envVars
@@ -2019,6 +2036,8 @@ components:
           additionalProperties:
             type: string
           type: object
+        gitProviderConfigId:
+          type: string
         image:
           type: string
         name:
@@ -2065,6 +2084,7 @@ components:
             user: user
           devcontainer:
             filePath: filePath
+        gitProviderConfigId: gitProviderConfigId
         image: image
         default: true
         envVars:
@@ -2081,6 +2101,8 @@ components:
           additionalProperties:
             type: string
           type: object
+        gitProviderConfigId:
+          type: string
         image:
           type: string
         name:
@@ -2293,21 +2315,27 @@ components:
       type: object
     SetGitProviderConfig:
       example:
+        providerId: providerId
         baseApiUrl: baseApiUrl
+        alias: alias
         id: id
         token: token
         username: username
       properties:
+        alias:
+          type: string
         baseApiUrl:
           type: string
         id:
+          type: string
+        providerId:
           type: string
         token:
           type: string
         username:
           type: string
       required:
-      - id
+      - providerId
       - token
       type: object
     SetProjectState:
@@ -2364,6 +2392,7 @@ components:
               user: user
             devcontainer:
               filePath: filePath
+          gitProviderConfigId: gitProviderConfigId
           image: image
           envVars:
             key: envVars
@@ -2405,6 +2434,7 @@ components:
               user: user
             devcontainer:
               filePath: filePath
+          gitProviderConfigId: gitProviderConfigId
           image: image
           envVars:
             key: envVars
@@ -2469,6 +2499,7 @@ components:
               user: user
             devcontainer:
               filePath: filePath
+          gitProviderConfigId: gitProviderConfigId
           image: image
           envVars:
             key: envVars
@@ -2510,6 +2541,7 @@ components:
               user: user
             devcontainer:
               filePath: filePath
+          gitProviderConfigId: gitProviderConfigId
           image: image
           envVars:
             key: envVars

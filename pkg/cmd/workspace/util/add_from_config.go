@@ -38,7 +38,8 @@ func AddProjectFromConfig(projectConfig *apiclient.ProjectConfig, apiClient *api
 	}
 
 	project := &apiclient.CreateProjectDTO{
-		Name: projectConfig.Name,
+		Name:                projectConfig.Name,
+		GitProviderConfigId: projectConfig.GitProviderConfigId,
 		Source: apiclient.CreateProjectSourceDTO{
 			Repository: *configRepo,
 		},

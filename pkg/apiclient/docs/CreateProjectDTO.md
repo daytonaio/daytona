@@ -6,6 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **BuildConfig** | Pointer to [**BuildConfig**](BuildConfig.md) |  | [optional] 
 **EnvVars** | **map[string]string** |  | 
+**GitProviderConfigId** | Pointer to **string** |  | [optional] 
 **Image** | Pointer to **string** |  | [optional] 
 **Name** | **string** |  | 
 **Source** | [**CreateProjectSourceDTO**](CreateProjectSourceDTO.md) |  | 
@@ -74,6 +75,31 @@ and a boolean to check if the value has been set.
 
 SetEnvVars sets EnvVars field to given value.
 
+
+### GetGitProviderConfigId
+
+`func (o *CreateProjectDTO) GetGitProviderConfigId() string`
+
+GetGitProviderConfigId returns the GitProviderConfigId field if non-nil, zero value otherwise.
+
+### GetGitProviderConfigIdOk
+
+`func (o *CreateProjectDTO) GetGitProviderConfigIdOk() (*string, bool)`
+
+GetGitProviderConfigIdOk returns a tuple with the GitProviderConfigId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGitProviderConfigId
+
+`func (o *CreateProjectDTO) SetGitProviderConfigId(v string)`
+
+SetGitProviderConfigId sets GitProviderConfigId field to given value.
+
+### HasGitProviderConfigId
+
+`func (o *CreateProjectDTO) HasGitProviderConfigId() bool`
+
+HasGitProviderConfigId returns a boolean if a field has been set.
 
 ### GetImage
 
