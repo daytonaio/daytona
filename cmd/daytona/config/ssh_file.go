@@ -261,46 +261,17 @@ func ExportGPGKey(keyID, projectHostname string) error {
 	return importCmd.Run()
 }
 
-func RemoveSshEntry(profileId, workspaceId, projectName string) error {
-	// Construct the Host entry based on provided arguments
-	hostEntry := fmt.Sprintf("Host %s-%s-%s", profileId, workspaceId, projectName)
-
-	// Path to the SSH config file (e.g., ~/.ssh/daytona_config)
-	sshDir := filepath.Join(os.Getenv("HOME"), ".ssh")
-	configPath := filepath.Join(sshDir, "daytona_config")
-
-	// Construct the sed command:
-	// sed -i '/^Host profileId-workspaceId-projectName\s*$/,/^\s*$/d' ~/.ssh/daytona_config
-	sedCommand := fmt.Sprintf(`/^%s\\s*$/,/^\\s*$/d`, hostEntry)
-
-	// Execute the sed command using exec.Command
-	cmd := exec.Command("sed", "-i", sedCommand, configPath)
-
-	// Run the command and capture any error
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("failed to execute sed command: %v", err)
+func readSshConfig(configPath string) (string, error) {
+	content, err := os.ReadFile(configPath)
+	if err != nil && !os.IsNotExist(err) {
+		return "", err
 	}
-
-	return nil
+	return string(content), nil
 }
 
-func RemoveWorkspaceSshEntries(profileId, workspaceId string) error {
-	sshDir := filepath.Join(sshHomeDir, ".ssh")
-	configPath := filepath.Join(sshDir, "daytona_config")
-
-	// Read existing content from the file
-	existingContent, err := os.ReadFile(configPath)
-	if err != nil && !os.IsNotExist(err) {
-		return nil
-	}
-
-	regex := regexp.MustCompile(fmt.Sprintf(`Host %s-%s-\w+\n(?:\t.*\n?)*`, profileId, workspaceId))
-	newContent := regex.ReplaceAllString(string(existingContent), "")
-
+func writeSshConfig(configPath, newContent string) error {
 	newContent = strings.Trim(newContent, "\n")
 
-	// Open the file for writing
 	file, err := os.Create(configPath)
 	if err != nil {
 		return err
@@ -308,6 +279,57 @@ func RemoveWorkspaceSshEntries(profileId, workspaceId string) error {
 	defer file.Close()
 
 	_, err = file.WriteString(newContent)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func RemoveSshEntry(profileId, workspaceId, projectName string) error {
+	hostEntry := fmt.Sprintf("Host %s-%s-%s", profileId, workspaceId, projectName)
+
+	sshDir := filepath.Join(os.Getenv("HOME"), ".ssh")
+	configPath := filepath.Join(sshDir, "daytona_config")
+
+	existingContent, err := readSshConfig(configPath)
+	if err != nil {
+		return err
+	}
+
+	// Define the regex pattern to match the specific Host entry
+	regex := regexp.MustCompile(fmt.Sprintf(`%s\s*\n(?:\t.*\n?)*`, regexp.QuoteMeta(hostEntry)))
+
+	// Replace the matched entry with an empty string
+	newContent := regex.ReplaceAllString(existingContent, "")
+
+	// Write the updated content back to the config file
+	err = writeSshConfig(configPath, newContent)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// RemoveWorkspaceSshEntries removes all SSH entries for a given profileId and workspaceId
+func RemoveWorkspaceSshEntries(profileId, workspaceId string) error {
+	sshDir := filepath.Join(os.Getenv("HOME"), ".ssh")
+	configPath := filepath.Join(sshDir, "daytona_config")
+
+	// Read existing content from the SSH config file
+	existingContent, err := readSshConfig(configPath)
+	if err != nil {
+		return err
+	}
+
+	// Define the regex pattern to match Host entries for the given profileId and workspaceId
+	regex := regexp.MustCompile(fmt.Sprintf(`Host %s-%s-\w+\s*\n(?:\t.*\n?)*`, profileId, workspaceId))
+
+	// Replace matched entries with an empty string
+	newContent := regex.ReplaceAllString(existingContent, "")
+
+	// Write the updated content back to the config file
+	err = writeSshConfig(configPath, newContent)
 	if err != nil {
 		return err
 	}
