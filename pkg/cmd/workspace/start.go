@@ -30,6 +30,7 @@ const (
 
 var startProjectFlag string
 var allFlag bool
+var codeFlag bool
 
 var StartCmd = &cobra.Command{
 	Use:     "start [WORKSPACE]",

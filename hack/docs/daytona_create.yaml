@@ -10,10 +10,6 @@ options:
       usage: Specify the Git branches to use in the projects
     - name: builder
       usage: Specify the builder (currently auto/devcontainer/none)
-    - name: code
-      shorthand: c
-      default_value: "false"
-      usage: Open the workspace in the IDE after workspace creation
     - name: custom-image
       usage: |
         Create the project with the custom image passed as the flag value; Requires setting --custom-image-user flag as well
@@ -39,6 +35,11 @@ options:
       usage: Workspace with multiple projects/repos
     - name: name
       usage: Specify the workspace name
+    - name: no-ide
+      shorthand: "n"
+      default_value: "false"
+      usage: |
+        Do not open the workspace in the IDE after workspace creation
     - name: target
       shorthand: t
       usage: Specify the target (e.g. 'local')

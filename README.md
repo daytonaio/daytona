@@ -85,7 +85,7 @@ daytona serve;
 ### Create your first dev environment by opening a new terminal, and running:
 
 ```bash
-daytona create --code
+daytona create
 ```
 
 **Start coding.**
@@ -101,7 +101,7 @@ Setting up development environments has become increasingly challenging over tim
 
 This complexity is unnecessary.
 
-With Daytona, you need only to execute a single command: `daytona create --code`.
+With Daytona, you need only to execute a single command: `daytona create`.
 
 Daytona automates the entire process; provisioning the instance, interpreting and applying the configuration, setting up prebuilds, establishing a secure VPN connection, securely connecting your local or a Web IDE, and assigning a fully qualified domain name to the development environment for easy sharing and collaboration.
 
@@ -193,10 +193,10 @@ Now that you have installed and initialized Daytona, you can proceed to setting 
 ### Creating Dev Environments
 Creating development environments with Daytona is a straightforward process, accomplished with just one command:
 ```bash
-daytona create --code
+daytona create
 ```
 
-You can skip the `--code` flag if you don't wish to open the IDE immediately after creating the environment.
+You can add the `--no-ide` flag if you don't wish to open the IDE immediately after creating the environment.
 
 Upon executing this command, you will be prompted with two questions:
 1. Choose the provider to decide where to create a dev environment.
@@ -227,7 +227,7 @@ Daytona offers flexibility for extension through the creation of plugins and pro
 ### Providers
 Daytona is designed to be infrastructure-agnostic, capable of creating and managing development environments across various platforms. Providers are the components that encapsulate the logic for provisioning compute resources on a specific target platform. They allow for the configuration of different targets within a single provider, enabling, for instance, multiple AWS profiles within an AWS provider.
 
-How does it work? When executing the `daytona create --code` command, Daytona communicates the environment details to the selected provider, which then provisions the necessary compute resources. Once provisioned, Daytona sets up the environment on these resources, allowing the user to interact with the environment seamlessly.
+How does it work? When executing the `daytona create` command, Daytona communicates the environment details to the selected provider, which then provisions the necessary compute resources. Once provisioned, Daytona sets up the environment on these resources, allowing the user to interact with the environment seamlessly.
 
 Providers are independent projects that adhere to the Daytona Provider interface. They can be developed in nearly any major programming language. More details coming soon.
 

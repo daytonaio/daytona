@@ -12,7 +12,6 @@ daytona create [REPOSITORY_URL | PROJECT_CONFIG_NAME]... [flags]
       --blank                      Create a blank project without using existing configurations
       --branch strings             Specify the Git branches to use in the projects
       --builder BuildChoice        Specify the builder (currently auto/devcontainer/none)
-  -c, --code                       Open the workspace in the IDE after workspace creation
       --custom-image string        Create the project with the custom image passed as the flag value; Requires setting --custom-image-user flag as well
       --custom-image-user string   Create the project with the custom image user passed as the flag value; Requires setting --custom-image flag as well
       --devcontainer-path string   Automatically assign the devcontainer builder with the path passed as the flag value
@@ -21,6 +20,7 @@ daytona create [REPOSITORY_URL | PROJECT_CONFIG_NAME]... [flags]
       --manual                     Manually enter the Git repository
       --multi-project              Workspace with multiple projects/repos
       --name string                Specify the workspace name
+  -n, --no-ide                     Do not open the workspace in the IDE after workspace creation
   -t, --target string              Specify the target (e.g. 'local')
   -y, --yes                        Automatically confirm any prompts
 ```
