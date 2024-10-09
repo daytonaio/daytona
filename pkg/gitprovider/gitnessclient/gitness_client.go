@@ -58,23 +58,21 @@ func (g *GitnessClient) performRequest(method, requestURL string) ([]byte, error
 	return body, nil
 }
 
-func (g *GitnessClient) GetCommits(owner string, repositoryName string, branch *string, fromSha *string) (*[]Commit, error) {
+func (g *GitnessClient) GetCommits(owner string, repositoryName string, branch *string, afterSha *string) (*[]Commit, error) {
 	api, err := g.BaseURL.Parse(fmt.Sprintf("/api/v1/repos/%s/commits", url.PathEscape(fmt.Sprintf("%s/%s", owner, repositoryName))))
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse url : %w", err)
 	}
 
-	apiURL := ""
+	apiURL := api.String() + "?"
 	v := url.Values{}
 	if branch != nil {
 		v.Add("git_ref", *branch)
-		apiURL = api.String() + "?" + v.Encode()
-	} else if fromSha != nil {
-		v.Add("sha", *fromSha)
-		apiURL = api.String() + "?" + v.Encode()
-	} else {
-		apiURL = api.String()
 	}
+	if afterSha != nil {
+		v.Add("after", *afterSha)
+	}
+	apiURL = apiURL + v.Encode()
 
 	body, err := g.performRequest("GET", apiURL)
 	if err != nil {
