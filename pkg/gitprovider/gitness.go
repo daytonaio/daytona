@@ -177,7 +177,7 @@ func (g *GitnessGitProvider) GetBranchByCommit(staticContext *StaticGitContext) 
 			break
 		}
 
-		commits, err := client.GetCommits(staticContext.Owner, staticContext.Name, &branch.Name, nil)
+		commits, err := client.GetCommits(staticContext.Owner, staticContext.Name, &branch.Name)
 		if err != nil {
 			return "", err
 		}
@@ -333,11 +333,36 @@ func (g *GitnessGitProvider) UnregisterPrebuildWebhook(repo *GitRepository, id s
 
 func (g *GitnessGitProvider) GetCommitsRange(repo *GitRepository, initialSha string, currentSha string) (int, error) {
 	client := g.getApiClient()
-	commits, err := client.GetCommits(repo.Owner, repo.Name, &repo.Branch, &initialSha)
+	commits, err := client.GetCommits(repo.Owner, repo.Name, &repo.Branch)
 	if err != nil {
 		return 0, err
 	}
-	return len(*commits), nil
+	initialShaIndex := -1
+	currentShaIndex := -1
+	for i := 0; i < len(*commits); i++ {
+		if currentSha == (*commits)[i].Sha {
+			currentShaIndex = i
+		}
+		if initialSha == (*commits)[i].Sha {
+			initialShaIndex = i
+		}
+		if initialShaIndex != -1 && currentShaIndex != -1 {
+			break
+		}
+	}
+
+	if initialShaIndex == -1 || currentShaIndex == -1 {
+		return 0, fmt.Errorf("Sha Not found in commits")
+	}
+
+	commitLength := 0
+	if initialShaIndex > currentShaIndex {
+		commitLength = initialShaIndex - currentShaIndex
+	} else {
+		commitLength = currentShaIndex - initialShaIndex
+	}
+
+	return commitLength, nil
 }
 
 func (g *GitnessGitProvider) ParseEventData(request *http.Request) (*GitEventData, error) {
