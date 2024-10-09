@@ -74,7 +74,12 @@ func (s *GitProviderService) GetConfigForUrl(repoUrl string) (*gitprovider.GitPr
 
 		canHandle, _ := gitProvider.CanHandle(repoUrl)
 		if canHandle {
-			return p, nil
+			_, err = gitProvider.GetRepositoryContext(gitprovider.GetRepositoryContext{
+				Url: repoUrl,
+			})
+			if err == nil {
+				return p, nil
+			}
 		}
 
 	}
