@@ -140,11 +140,6 @@ func generateSshConfigEntry(profileId, workspaceId, projectName, knownHostsPath 
 		config += fmt.Sprintf(
 			tab+"StreamLocalBindUnlink yes\n"+
 				tab+"RemoteForward %s:%s\n\n", remoteSocket, localSocket)
-		err = RemoveSshEntry(profileId, workspaceId, projectName)
-		if err != nil {
-			log.Warn(err)
-			return config, nil
-		}
 	} else {
 		config += "\n"
 	}
@@ -207,10 +202,18 @@ func appendSshConfigEntry(configPath, profileId, workspaceId, projectName, known
 	if strings.Contains(string(existingContent), data) {
 		return nil
 	}
-
-	// Combine the new data with existing content
-	newData := data + string(existingContent)
-
+	var newData string
+	if gpgForward {
+		configWithoutGpg, err := generateSshConfigEntry(profileId, workspaceId, projectName, knownHostsFile, false)
+		if err != nil {
+			return err
+		}
+		updatedContent := strings.Replace(string(existingContent), configWithoutGpg, "", -1)
+		newData = data + string(updatedContent)
+	} else {
+		// Combine the new data with existing content
+		newData = data + string(existingContent)
+	}
 	// Open the file for writing
 	file, err := os.Create(configPath)
 	if err != nil {
@@ -282,32 +285,6 @@ func writeSshConfig(configPath, newContent string) error {
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-func RemoveSshEntry(profileId, workspaceId, projectName string) error {
-	hostEntry := fmt.Sprintf("Host %s-%s-%s", profileId, workspaceId, projectName)
-
-	sshDir := filepath.Join(os.Getenv("HOME"), ".ssh")
-	configPath := filepath.Join(sshDir, "daytona_config")
-
-	existingContent, err := readSshConfig(configPath)
-	if err != nil {
-		return err
-	}
-
-	// Define the regex pattern to match the specific Host entry
-	regex := regexp.MustCompile(fmt.Sprintf(`%s\s*\n(?:\t.*\n?)*`, regexp.QuoteMeta(hostEntry)))
-
-	// Replace the matched entry with an empty string
-	newContent := regex.ReplaceAllString(existingContent, "")
-
-	// Write the updated content back to the config file
-	err = writeSshConfig(configPath, newContent)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
