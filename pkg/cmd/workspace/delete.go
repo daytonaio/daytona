@@ -182,7 +182,7 @@ func RemoveWorkspace(ctx context.Context, apiClient *apiclient.APIClient, worksp
 			return err
 		}
 
-		err = config.RemoveWorkspaceSshEntries(activeProfile.Id, workspace.Id, "")
+		err = config.RemoveWorkspaceSshEntries(activeProfile.Id, workspace.Id)
 		if err != nil {
 			return err
 		}

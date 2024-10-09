@@ -140,7 +140,7 @@ func generateSshConfigEntry(profileId, workspaceId, projectName, knownHostsPath 
 		config += fmt.Sprintf(
 			tab+"StreamLocalBindUnlink yes\n"+
 				tab+"RemoteForward %s:%s\n\n", remoteSocket, localSocket)
-		err = RemoveWorkspaceSshEntries(profileId, workspaceId, projectName)
+		err = RemoveSshEntry(profileId, workspaceId, projectName)
 		if err != nil {
 			log.Warn(err)
 			return config, nil
@@ -261,7 +261,31 @@ func ExportGPGKey(keyID, projectHostname string) error {
 	return importCmd.Run()
 }
 
-func RemoveWorkspaceSshEntries(profileId, workspaceId, projectName string) error {
+func RemoveSshEntry(profileId, workspaceId, projectName string) error {
+	// Construct the Host entry based on provided arguments
+	hostEntry := fmt.Sprintf("Host %s-%s-%s", profileId, workspaceId, projectName)
+
+	// Path to the SSH config file (e.g., ~/.ssh/daytona_config)
+	sshDir := filepath.Join(os.Getenv("HOME"), ".ssh")
+	configPath := filepath.Join(sshDir, "daytona_config")
+
+	// Construct the sed command:
+	// sed -i '/^Host profileId-workspaceId-projectName\s*$/,/^\s*$/d' ~/.ssh/daytona_config
+	sedCommand := fmt.Sprintf(`/^%s\\s*$/,/^\\s*$/d`, hostEntry)
+
+	// Execute the sed command using exec.Command
+	cmd := exec.Command("sed", "-i", sedCommand, configPath)
+
+	// Run the command and capture any error
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("failed to execute sed command: %v", err)
+	}
+
+	return nil
+}
+
+func RemoveWorkspaceSshEntries(profileId, workspaceId string) error {
 	sshDir := filepath.Join(sshHomeDir, ".ssh")
 	configPath := filepath.Join(sshDir, "daytona_config")
 
@@ -270,17 +294,9 @@ func RemoveWorkspaceSshEntries(profileId, workspaceId, projectName string) error
 	if err != nil && !os.IsNotExist(err) {
 		return nil
 	}
-	// Regex to match the SSH configuration entries
-	var regex *regexp.Regexp
-	var newContent string
-	// Update the regex to make projectName optional
-	if projectName != "" {
-		regex = regexp.MustCompile(fmt.Sprintf(`Host %s-%s-%s-\n(?:\t.*\n?)*`, profileId, workspaceId, projectName))
-		newContent = regex.ReplaceAllString(string(existingContent), "")
-	} else {
-		regex = regexp.MustCompile(fmt.Sprintf(`Host %s-%s-\w+\n(?:\t.*\n?)*`, profileId, workspaceId))
-		newContent = regex.ReplaceAllString(string(existingContent), "")
-	}
+
+	regex := regexp.MustCompile(fmt.Sprintf(`Host %s-%s-\w+\n(?:\t.*\n?)*`, profileId, workspaceId))
+	newContent := regex.ReplaceAllString(string(existingContent), "")
 
 	newContent = strings.Trim(newContent, "\n")
 
