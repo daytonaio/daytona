@@ -40,8 +40,9 @@ var statusMessageDangerStyle = lipgloss.NewStyle().Bold(true).
 type item[T any] struct {
 	id, title, desc, createdTime, uptime, target string
 	choiceProperty                               T
-	markForDeletion                              bool
+	isMarked                                     bool
 	isMultipleSelect                             bool
+	action                                       string
 }
 
 func (i item[T]) Title() string       { return i.title }
@@ -86,7 +87,7 @@ func (m model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			workspaceList := m.list.Items()
 			var choices []*T
 			for _, workspace := range workspaceList {
-				if workspace.(item[T]).markForDeletion {
+				if workspace.(item[T]).isMarked {
 					workspaceItem, ok := workspace.(item[T])
 					if !ok {
 						continue
@@ -208,18 +209,18 @@ func (d ItemDelegate[T]) Update(msg tea.Msg, m *list.Model) tea.Cmd {
 			if !i.isMultipleSelect {
 				return nil
 			}
-			if i.markForDeletion {
-				i.title = strings.TrimPrefix(i.title, statusMessageDangerStyle("Delete: "))
-				i.markForDeletion = false
+			if i.isMarked {
+				i.title = strings.TrimPrefix(i.title, statusMessageDangerStyle(fmt.Sprintf("%s: ", i.action)))
+				i.isMarked = false
 				m.SetItem(m.Index(), i)
-				return m.NewStatusMessage(statusMessageGreenStyle("Removed workspace from deletion list: ") + statusMessageGreenStyle(i.title))
+				return m.NewStatusMessage(statusMessageGreenStyle("Removed workspace from list: ") + statusMessageGreenStyle(i.title))
 			}
 
 			title = i.title
-			i.title = statusMessageDangerStyle("Delete: ") + statusMessageGreenStyle(i.title)
-			i.markForDeletion = true
+			i.title = statusMessageDangerStyle(fmt.Sprintf("%s: ", i.action)) + statusMessageGreenStyle(i.title)
+			i.isMarked = true
 			m.SetItem(m.Index(), i)
-			return m.NewStatusMessage(statusMessageDangerStyle("Added workspace to deletion list: ") + statusMessageGreenStyle(title))
+			return m.NewStatusMessage(statusMessageDangerStyle("Added workspace to list: ") + statusMessageGreenStyle(title))
 		}
 	}
 	return nil

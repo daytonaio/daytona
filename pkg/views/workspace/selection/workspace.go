@@ -17,7 +17,7 @@ import (
 	list_view "github.com/daytonaio/daytona/pkg/views/workspace/list"
 )
 
-func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO, isMultipleSelect bool) []list.Item {
+func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO, isMultipleSelect bool, action string) []list.Item {
 
 	// Initialize an empty list of items.
 	items := []list.Item{}
@@ -64,6 +64,7 @@ func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO, isMultipleSelect
 
 		if isMultipleSelect {
 			newItem.isMultipleSelect = true
+			newItem.action = action
 		}
 
 		items = append(items, newItem)
@@ -74,7 +75,7 @@ func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO, isMultipleSelect
 
 func getWorkspaceProgramEssentials(modelTitle string, actionVerb string, workspaces []apiclient.WorkspaceDTO, footerText string, isMultipleSelect bool) tea.Model {
 
-	items := generateWorkspaceList(workspaces, isMultipleSelect)
+	items := generateWorkspaceList(workspaces, isMultipleSelect, actionVerb)
 
 	d := ItemDelegate[apiclient.WorkspaceDTO]{}
 
@@ -124,7 +125,7 @@ func GetWorkspaceFromPrompt(workspaces []apiclient.WorkspaceDTO, actionVerb stri
 func selectWorkspacesFromPrompt(workspaces []apiclient.WorkspaceDTO, actionVerb string, choiceChan chan<- []*apiclient.WorkspaceDTO) {
 	list_view.SortWorkspaces(&workspaces, true)
 
-	footerText := lipgloss.NewStyle().Bold(true).PaddingLeft(2).Render("\n\nPress 'x' to mark workspace for deletion.\nPress 'enter' to delete the current/marked workspaces.")
+	footerText := lipgloss.NewStyle().Bold(true).PaddingLeft(2).Render(fmt.Sprintf("\n\nPress 'x' to mark workspace.\nPress 'enter' to %s the current/marked workspaces.", actionVerb))
 	p := getWorkspaceProgramEssentials("Select Workspaces To ", actionVerb, workspaces, footerText, true)
 
 	m, ok := p.(model[apiclient.WorkspaceDTO])
