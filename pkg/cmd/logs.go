@@ -6,7 +6,6 @@ package cmd
 import (
 	"context"
 	"errors"
-	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
@@ -98,7 +97,7 @@ var logsCmd = &cobra.Command{
 			})
 		}
 
-		apiclient_util.ReadWorkspaceLogs(ctx, activeProfile, workspace.Id, projectNames, followFlag, showWorkspaceLogs, time.Time{})
+		apiclient_util.ReadWorkspaceLogs(ctx, activeProfile, workspace.Id, projectNames, followFlag, showWorkspaceLogs, nil)
 
 		return nil
 	},

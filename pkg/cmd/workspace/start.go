@@ -270,7 +270,7 @@ func StartWorkspace(apiClient *apiclient.APIClient, workspaceId, projectName str
 	}
 
 	logsContext, stopLogs := context.WithCancel(context.Background())
-	go apiclient_util.ReadWorkspaceLogs(logsContext, activeProfile, workspace.Id, projectNames, true, true, timeNow)
+	go apiclient_util.ReadWorkspaceLogs(logsContext, activeProfile, workspace.Id, projectNames, true, true, &timeNow)
 
 	if projectName == "" {
 		res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspaceId).Execute()
