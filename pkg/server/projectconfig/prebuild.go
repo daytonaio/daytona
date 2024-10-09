@@ -238,7 +238,6 @@ func (s *ProjectConfigService) ProcessGitEvent(data gitprovider.GitEventData) er
 	if err != nil {
 		return err
 	}
-
 	gitProvider, _, err := s.gitProviderService.GetGitProviderForUrl(data.Url)
 	if err != nil {
 		return fmt.Errorf("failed to get git provider for URL: %s", err)
