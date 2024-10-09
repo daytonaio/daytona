@@ -204,7 +204,7 @@ var CreateCmd = &cobra.Command{
 		fmt.Println()
 		info.Render(wsInfo, chosenIde.Name, false)
 
-		if !codeFlag {
+		if noIdeFlag {
 			views.RenderCreationInfoMessage("Run 'daytona code' when you're ready to start developing")
 			return nil
 		}
@@ -223,18 +223,19 @@ var CreateCmd = &cobra.Command{
 
 var nameFlag string
 var targetNameFlag string
-var codeFlag bool
+var noIdeFlag bool
 var blankFlag bool
 var multiProjectFlag bool
 
 var projectConfigurationFlags = workspace_util.ProjectConfigurationFlags{
-	Builder:          new(views_util.BuildChoice),
-	CustomImage:      new(string),
-	CustomImageUser:  new(string),
-	Branches:         new([]string),
-	DevcontainerPath: new(string),
-	EnvVars:          new([]string),
-	Manual:           new(bool),
+	Builder:             new(views_util.BuildChoice),
+	CustomImage:         new(string),
+	CustomImageUser:     new(string),
+	Branches:            new([]string),
+	DevcontainerPath:    new(string),
+	EnvVars:             new([]string),
+	Manual:              new(bool),
+	GitProviderConfigId: new(string),
 }
 
 func init() {
@@ -249,7 +250,7 @@ func init() {
 	CreateCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", fmt.Sprintf("Specify the IDE (%s)", ideListStr))
 	CreateCmd.Flags().StringVarP(&targetNameFlag, "target", "t", "", "Specify the target (e.g. 'local')")
 	CreateCmd.Flags().BoolVar(&blankFlag, "blank", false, "Create a blank project without using existing configurations")
-	CreateCmd.Flags().BoolVarP(&codeFlag, "code", "c", false, "Open the workspace in the IDE after workspace creation")
+	CreateCmd.Flags().BoolVarP(&noIdeFlag, "no-ide", "n", false, "Do not open the workspace in the IDE after workspace creation")
 	CreateCmd.Flags().BoolVar(&multiProjectFlag, "multi-project", false, "Workspace with multiple projects/repos")
 	CreateCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Automatically confirm any prompts")
 	CreateCmd.Flags().StringSliceVar(projectConfigurationFlags.Branches, "branch", []string{}, "Specify the Git branches to use in the projects")
@@ -403,6 +404,7 @@ func processGitURL(ctx context.Context, repoUrl string, apiClient *apiclient.API
 	if !blankFlag {
 		projectConfig, res, err := apiClient.ProjectConfigAPI.GetDefaultProjectConfig(ctx, encodedURLParam).Execute()
 		if err == nil {
+			projectConfig.GitProviderConfigId = projectConfigurationFlags.GitProviderConfigId
 			return workspace_util.AddProjectFromConfig(projectConfig, apiClient, projects, branch)
 		}
 

@@ -39,6 +39,18 @@ var target = provider.ProviderTarget{
 	},
 	Options: "test-options",
 }
+var gitProviderConfigId = "github"
+
+var baseApiUrl = "https://api.github.com"
+
+var gitProviderConfig = gitprovider.GitProviderConfig{
+	Id:         "github",
+	ProviderId: gitProviderConfigId,
+	Alias:      "test-alias",
+	Username:   "test-username",
+	Token:      "test-token",
+	BaseApiUrl: &baseApiUrl,
+}
 
 var createWorkspaceDto = dto.CreateWorkspaceDTO{
 	Name:   "test",
@@ -46,12 +58,15 @@ var createWorkspaceDto = dto.CreateWorkspaceDTO{
 	Target: target.Name,
 	Projects: []dto.CreateProjectDTO{
 		{
-			Name: "project1",
+			Name:                "project1",
+			GitProviderConfigId: &gitProviderConfig.Id,
 			Source: dto.CreateProjectSourceDTO{
 				Repository: &gitprovider.GitRepository{
-					Id:   "123",
-					Url:  "https://github.com/daytonaio/daytona",
-					Name: "daytona",
+					Id:     "123",
+					Url:    "https://github.com/daytonaio/daytona",
+					Name:   "daytona",
+					Branch: "main",
+					Sha:    "sha1",
 				},
 			},
 			Image: util.Pointer(defaultProjectImage),
@@ -117,14 +132,6 @@ func TestWorkspaceService(t *testing.T) {
 
 		apiKeyService.On("Generate", apikey.ApiKeyTypeWorkspace, createWorkspaceDto.Id).Return(createWorkspaceDto.Id, nil)
 		gitProviderService.On("GetLastCommitSha", createWorkspaceDto.Projects[0].Source.Repository).Return("123", nil)
-
-		baseApiUrl := "https://api.github.com"
-		gitProviderConfig := gitprovider.GitProviderConfig{
-			Id:         "github",
-			Username:   "test-username",
-			Token:      "test-token",
-			BaseApiUrl: &baseApiUrl,
-		}
 
 		for _, project := range createWorkspaceDto.Projects {
 			apiKeyService.On("Generate", apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", createWorkspaceDto.Id, project.Name)).Return(project.Name, nil)
@@ -260,13 +267,6 @@ func TestWorkspaceService(t *testing.T) {
 		apiKeyService.On("Generate", apikey.ApiKeyTypeWorkspace, createWorkspaceDto.Id).Return(createWorkspaceDto.Id, nil)
 		gitProviderService.On("GetLastCommitSha", createWorkspaceDto.Projects[0].Source.Repository).Return("123", nil)
 
-		baseApiUrl := "https://api.github.com"
-		gitProviderConfig := gitprovider.GitProviderConfig{
-			Id:         "github",
-			Username:   "test-username",
-			Token:      "test-token",
-			BaseApiUrl: &baseApiUrl,
-		}
 		gitProviderService.On("GetConfigForUrl", "https://github.com/daytonaio/daytona").Return(&gitProviderConfig, nil)
 
 		for _, project := range createWorkspaceDto.Projects {

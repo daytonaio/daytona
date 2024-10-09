@@ -30,7 +30,7 @@ type RepositoryWizardConfig struct {
 }
 
 func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepository, error) {
-	var providerId string
+	var gitProviderConfigId string
 	var namespaceId string
 	var err error
 
@@ -42,7 +42,8 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 	}
 
 	if (len(config.UserGitProviders) == 0 && len(samples) == 0) || config.Manual {
-		return create.GetRepositoryFromUrlInput(config.MultiProject, config.ProjectOrder, config.ApiClient, config.SelectedRepos)
+		repo, err := create.GetRepositoryFromUrlInput(config.MultiProject, config.ProjectOrder, config.ApiClient, config.SelectedRepos)
+		return repo, err
 	}
 
 	supportedProviders := config_const.GetSupportedGitProviders()
@@ -50,28 +51,31 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 
 	for _, gitProvider := range config.UserGitProviders {
 		for _, supportedProvider := range supportedProviders {
-			if gitProvider.Id == supportedProvider.Id {
+			if gitProvider.ProviderId == supportedProvider.Id {
 				gitProviderViewList = append(gitProviderViewList,
 					gitprovider_view.GitProviderView{
-						Id:       gitProvider.Id,
-						Name:     supportedProvider.Name,
-						Username: gitProvider.Username,
+						Id:         gitProvider.Id,
+						ProviderId: gitProvider.ProviderId,
+						Name:       supportedProvider.Name,
+						Username:   gitProvider.Username,
+						Alias:      gitProvider.Alias,
 					},
 				)
 			}
 		}
 	}
 
-	providerId = selection.GetProviderIdFromPrompt(gitProviderViewList, config.ProjectOrder, len(samples) > 0)
-	if providerId == "" {
+	gitProviderConfigId = selection.GetProviderIdFromPrompt(gitProviderViewList, config.ProjectOrder, len(samples) > 0)
+	if gitProviderConfigId == "" {
 		return nil, common.ErrCtrlCAbort
 	}
 
-	if providerId == selection.CustomRepoIdentifier {
-		return create.GetRepositoryFromUrlInput(config.MultiProject, config.ProjectOrder, config.ApiClient, config.SelectedRepos)
+	if gitProviderConfigId == selection.CustomRepoIdentifier {
+		repo, err := create.GetRepositoryFromUrlInput(config.MultiProject, config.ProjectOrder, config.ApiClient, config.SelectedRepos)
+		return repo, err
 	}
 
-	if providerId == selection.CREATE_FROM_SAMPLE {
+	if gitProviderConfigId == selection.CREATE_FROM_SAMPLE {
 		sample := selection.GetSampleFromPrompt(samples)
 		if sample == nil {
 			return nil, common.ErrCtrlCAbort
@@ -87,10 +91,17 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		return repo, nil
 	}
 
+	var providerId string
+	for _, gp := range gitProviderViewList {
+		if gp.Id == gitProviderConfigId {
+			providerId = gp.ProviderId
+		}
+	}
+
 	var namespaceList []apiclient.GitNamespace
 
 	err = views_util.WithSpinner("Loading", func() error {
-		namespaceList, _, err = config.ApiClient.GitProviderAPI.GetNamespaces(ctx, providerId).Execute()
+		namespaceList, _, err = config.ApiClient.GitProviderAPI.GetNamespaces(ctx, gitProviderConfigId).Execute()
 		return err
 	})
 	if err != nil {
@@ -115,7 +126,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 
 	var providerRepos []apiclient.GitRepository
 	err = views_util.WithSpinner("Loading", func() error {
-		providerRepos, _, err = config.ApiClient.GitProviderAPI.GetRepositories(ctx, providerId, namespaceId).Execute()
+		providerRepos, _, err = config.ApiClient.GitProviderAPI.GetRepositories(ctx, gitProviderConfigId, namespaceId).Execute()
 		return err
 	})
 
@@ -134,11 +145,12 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 	}
 
 	return SetBranchFromWizard(BranchWizardConfig{
-		ApiClient:    config.ApiClient,
-		ProviderId:   providerId,
-		NamespaceId:  namespaceId,
-		Namespace:    namespace,
-		ChosenRepo:   chosenRepo,
-		ProjectOrder: config.ProjectOrder,
+		ApiClient:           config.ApiClient,
+		GitProviderConfigId: gitProviderConfigId,
+		NamespaceId:         namespaceId,
+		Namespace:           namespace,
+		ChosenRepo:          chosenRepo,
+		ProjectOrder:        config.ProjectOrder,
+		ProviderId:          providerId,
 	})
 }
