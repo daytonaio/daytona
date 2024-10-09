@@ -242,7 +242,7 @@ func StartWorkspace(apiClient *apiclient.APIClient, workspaceId, projectName str
 	ctx := context.Background()
 	var projectNames []string
 	timeFormat := time.Now().Format("2006-01-02 15:04:05")
-	timeNow, err := time.Parse("2006-01-02 15:04:05", timeFormat)
+	from, err := time.Parse("2006-01-02 15:04:05", timeFormat)
 	if err != nil {
 		return err
 	}
@@ -270,7 +270,7 @@ func StartWorkspace(apiClient *apiclient.APIClient, workspaceId, projectName str
 	}
 
 	logsContext, stopLogs := context.WithCancel(context.Background())
-	go apiclient_util.ReadWorkspaceLogs(logsContext, activeProfile, workspace.Id, projectNames, true, true, &timeNow)
+	go apiclient_util.ReadWorkspaceLogs(logsContext, activeProfile, workspace.Id, projectNames, true, true, &from)
 
 	if projectName == "" {
 		res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspaceId).Execute()

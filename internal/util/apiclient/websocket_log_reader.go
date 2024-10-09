@@ -18,7 +18,7 @@ import (
 
 var workspaceLogsStarted bool
 
-func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, workspaceId string, projectNames []string, follow, showWorkspaceLogs bool, timeNow *time.Time) {
+func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, workspaceId string, projectNames []string, follow, showWorkspaceLogs bool, from *time.Time) {
 	var wg sync.WaitGroup
 	query := ""
 	if follow {
@@ -32,7 +32,7 @@ func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, worksp
 
 	for index, projectName := range projectNames {
 		wg.Add(1)
-		go func(projectName string, timeNow *time.Time) {
+		go func(projectName string, from *time.Time) {
 			defer wg.Done()
 
 			for {
@@ -50,11 +50,11 @@ func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, worksp
 					continue
 				}
 
-				readJSONLog(ctx, ws, index, timeNow)
+				readJSONLog(ctx, ws, index, from)
 				ws.Close()
 				break
 			}
-		}(projectName, timeNow)
+		}(projectName, from)
 	}
 
 	if showWorkspaceLogs {
@@ -67,7 +67,7 @@ func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, worksp
 				continue
 			}
 
-			readJSONLog(ctx, ws, logs_view.STATIC_INDEX, timeNow)
+			readJSONLog(ctx, ws, logs_view.STATIC_INDEX, from)
 			ws.Close()
 			break
 		}
@@ -94,7 +94,7 @@ func ReadBuildLogs(ctx context.Context, activeProfile config.Profile, buildId st
 	}
 }
 
-func readJSONLog(ctx context.Context, ws *websocket.Conn, index int, timeNow *time.Time) {
+func readJSONLog(ctx context.Context, ws *websocket.Conn, index int, from *time.Time) {
 	logEntriesChan := make(chan logs.LogEntry)
 	readErr := make(chan error)
 	go func() {
@@ -124,13 +124,13 @@ func readJSONLog(ctx context.Context, ws *websocket.Conn, index int, timeNow *ti
 		case <-ctx.Done():
 			return
 		case logEntry := <-logEntriesChan:
-			if timeNow != nil {
+			if from != nil {
 				parsedTime, err := time.Parse(time.RFC3339Nano, logEntry.Time)
 				if err != nil {
 					log.Trace(err)
 				}
 
-				if parsedTime.After(*timeNow) || parsedTime.Equal(*timeNow) {
+				if parsedTime.After(*from) || parsedTime.Equal(*from) {
 					logs_view.DisplayLogEntry(logEntry, index)
 				}
 			} else {
