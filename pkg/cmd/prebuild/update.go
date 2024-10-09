@@ -6,7 +6,6 @@ package prebuild
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strconv"
 
 	"github.com/daytonaio/daytona/internal/util"
@@ -62,10 +61,6 @@ var prebuildUpdateCmd = &cobra.Command{
 
 			projectConfigFlag = args[0]
 			prebuildID := args[1]
-			prebuilds, res, err := apiClient.PrebuildAPI.ListPrebuildsForProjectConfig(ctx, projectConfigFlag).Execute()
-			if err != nil {
-				return apiclient_util.HandleErrorResponse(res, err)
-			}
 
 			prebuild, res, err = apiClient.PrebuildAPI.GetPrebuild(ctx, projectConfigFlag, prebuildID).Execute()
 			if err != nil {
