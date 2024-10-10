@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -139,7 +140,25 @@ func (s *GitProviderService) SetGitProviderConfig(providerConfig *gitprovider.Gi
 	}
 
 	if providerConfig.Alias == "" {
-		providerConfig.Alias = userData.Username
+		gitProviderConfigs, err := s.ListConfigs()
+		if err != nil {
+			return err
+		}
+
+		uniqueAlias := userData.Username
+		aliases := make(map[string]bool)
+
+		for _, c := range gitProviderConfigs {
+			aliases[c.Alias] = true
+		}
+		counter := 2
+
+		for aliases[uniqueAlias] {
+			uniqueAlias = userData.Username + strconv.Itoa(counter)
+			counter++
+		}
+
+		providerConfig.Alias = uniqueAlias
 	}
 
 	return s.configStore.Save(providerConfig)

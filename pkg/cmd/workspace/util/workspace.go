@@ -13,14 +13,14 @@ import (
 )
 
 type ProjectConfigurationFlags struct {
-	Builder             *views_util.BuildChoice
-	CustomImage         *string
-	CustomImageUser     *string
-	Branches            *[]string
-	DevcontainerPath    *string
-	EnvVars             *[]string
-	Manual              *bool
-	GitProviderConfigId *string
+	Builder           *views_util.BuildChoice
+	CustomImage       *string
+	CustomImageUser   *string
+	Branches          *[]string
+	DevcontainerPath  *string
+	EnvVars           *[]string
+	Manual            *bool
+	GitProviderConfig *string
 }
 
 func AddProjectConfigurationFlags(cmd *cobra.Command, flags ProjectConfigurationFlags, multiProjectFlagException bool) {
@@ -30,7 +30,7 @@ func AddProjectConfigurationFlags(cmd *cobra.Command, flags ProjectConfiguration
 	cmd.Flags().Var(flags.Builder, "builder", fmt.Sprintf("Specify the builder (currently %s/%s/%s)", views_util.AUTOMATIC, views_util.DEVCONTAINER, views_util.NONE))
 	cmd.Flags().StringArrayVar(flags.EnvVars, "env", []string{}, "Specify environment variables (e.g. --env 'KEY1=VALUE1' --env 'KEY2=VALUE2' ...')")
 	cmd.Flags().BoolVar(flags.Manual, "manual", false, "Manually enter the Git repository")
-	cmd.Flags().StringVar(flags.GitProviderConfigId, "git-provider-config-id", "", "Specify the Git Provider Configuration Id")
+	cmd.Flags().StringVar(flags.GitProviderConfig, "git-provider-config", "", "Specify the Git provider configuration ID or alias")
 
 	cmd.MarkFlagsMutuallyExclusive("builder", "custom-image")
 	cmd.MarkFlagsMutuallyExclusive("builder", "custom-image-user")
@@ -48,7 +48,7 @@ func AddProjectConfigurationFlags(cmd *cobra.Command, flags ProjectConfiguration
 }
 
 func CheckAnyProjectConfigurationFlagSet(flags ProjectConfigurationFlags) bool {
-	return *flags.GitProviderConfigId != "" || *flags.CustomImage != "" || *flags.CustomImageUser != "" || *flags.DevcontainerPath != "" || *flags.Builder != "" || len(*flags.EnvVars) > 0
+	return *flags.GitProviderConfig != "" || *flags.CustomImage != "" || *flags.CustomImageUser != "" || *flags.DevcontainerPath != "" || *flags.Builder != "" || len(*flags.EnvVars) > 0
 }
 
 func IsProjectRunning(workspace *apiclient.WorkspaceDTO, projectName string) bool {
