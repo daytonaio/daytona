@@ -13,6 +13,11 @@ import (
 )
 
 var (
+	ListNavigationText       = "load more"
+	ListNavigationRenderText = "+ Load more.."
+)
+
+var (
 	Green       = lipgloss.AdaptiveColor{Light: "#23cc71", Dark: "#23cc71"}
 	Blue        = lipgloss.AdaptiveColor{Light: "#017ffe", Dark: "#017ffe"}
 	Yellow      = lipgloss.AdaptiveColor{Light: "#d4ed2d", Dark: "#d4ed2d"}
@@ -46,7 +51,13 @@ var LogPrefixColors = []lipgloss.AdaptiveColor{
 	Blue, Orange, Cyan, Yellow,
 }
 
-func GetStyledSelectList(items []list.Item, parentIdentifier ...string) list.Model {
+type SelectionListOptions struct {
+	ParentIdentifier     string
+	IsPaginationDisabled bool
+	CursorIndex          int
+}
+
+func GetStyledSelectList(items []list.Item, listOptions ...SelectionListOptions) list.Model {
 
 	d := list.NewDefaultDelegate()
 
@@ -61,6 +72,47 @@ func GetStyledSelectList(items []list.Item, parentIdentifier ...string) list.Mod
 
 	l := list.New(items, d, 0, 0)
 
+	if listOptions != nil {
+		// Sets the mouse cursor to point to the first index of newly loaded items
+		if listOptions[0].CursorIndex > 0 {
+			l.Select(listOptions[0].CursorIndex)
+		}
+
+		if !listOptions[0].IsPaginationDisabled {
+			// Add the 'Load More' option in search filter results
+			l.Filter = func(term string, targets []string) []list.Rank {
+				ranks := list.DefaultFilter(term, targets)
+
+				loadMoreIdx := -1
+				// Ideally 'Load More' option if present should be found at the last index
+				for i := len(targets) - 1; i >= 0; i-- {
+					if targets[i] == ListNavigationRenderText {
+						loadMoreIdx = i
+						break
+					}
+				}
+
+				if loadMoreIdx == -1 {
+					return ranks
+				}
+
+				// Return if already present
+				for i := range ranks {
+					if ranks[i].Index == loadMoreIdx {
+						return ranks
+					}
+				}
+
+				// Append 'Load More' option in search filter results
+				ranks = append(ranks, list.Rank{
+					Index: loadMoreIdx,
+				})
+
+				return ranks
+			}
+		}
+	}
+
 	l.Styles.FilterPrompt = lipgloss.NewStyle().Foreground(Green)
 	l.Styles.FilterCursor = lipgloss.NewStyle().Foreground(Green).Background(Green)
 	l.Styles.Title = lipgloss.NewStyle().Foreground(Dark).Bold(true).
@@ -71,10 +123,10 @@ func GetStyledSelectList(items []list.Item, parentIdentifier ...string) list.Mod
 
 	singularItemName := "item " + SeparatorString
 	var pluralItemName string
-	if len(parentIdentifier) == 0 {
+	if listOptions == nil {
 		pluralItemName = fmt.Sprintf("items\n\n%s", SeparatorString)
-	} else {
-		pluralItemName = fmt.Sprintf("items (%s)\n\n%s", parentIdentifier[0], SeparatorString)
+	} else if len(listOptions[0].ParentIdentifier) > 0 {
+		pluralItemName = fmt.Sprintf("items (%s)\n\n%s", listOptions[0].ParentIdentifier, SeparatorString)
 	}
 
 	l.SetStatusBarItemName(singularItemName, pluralItemName)

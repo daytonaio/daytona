@@ -49,22 +49,22 @@ func (g *GitHubGitProvider) CanHandle(repoUrl string) (bool, error) {
 	return strings.Contains(*g.baseApiUrl, staticContext.Source), nil
 }
 
-func (g *GitHubGitProvider) GetNamespaces() ([]*GitNamespace, error) {
+func (g *GitHubGitProvider) GetNamespaces(options ListOptions) ([]*GitNamespace, error) {
 	client := g.getApiClient()
 	user, err := g.GetUser()
 	if err != nil {
 		return nil, err
 	}
 
+	namespaces := []*GitNamespace{}
+
 	orgList, _, err := client.Organizations.List(context.Background(), "", &github.ListOptions{
-		PerPage: 100,
-		Page:    1,
+		PerPage: options.PerPage,
+		Page:    options.Page,
 	})
 	if err != nil {
 		return nil, g.FormatError(err)
 	}
-
-	namespaces := []*GitNamespace{}
 
 	for _, org := range orgList {
 		namespace := &GitNamespace{}
@@ -77,14 +77,17 @@ func (g *GitHubGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 		namespaces = append(namespaces, namespace)
 	}
 
-	namespaces = append([]*GitNamespace{{Id: personalNamespaceId, Name: user.Username}}, namespaces...)
+	// Append 'personal' namespace on first page
+	if options.Page == 1 {
+		namespaces = append([]*GitNamespace{{Id: personalNamespaceId, Name: user.Username}}, namespaces...)
+	}
 
 	return namespaces, nil
 }
 
-func (g *GitHubGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
+func (g *GitHubGitProvider) GetRepositories(namespace string, options ListOptions) ([]*GitRepository, error) {
 	client := g.getApiClient()
-	var response []*GitRepository
+	var repos []*GitRepository
 	query := "fork:true "
 
 	if namespace == personalNamespaceId {
@@ -97,13 +100,16 @@ func (g *GitHubGitProvider) GetRepositories(namespace string) ([]*GitRepository,
 		query += "org:" + namespace
 	}
 
-	repoList, _, err := client.Search.Repositories(context.Background(), query, &github.SearchOptions{
-		ListOptions: github.ListOptions{
-			PerPage: 100,
-			Page:    1,
-		},
-	})
+	ctx := context.Background()
 
+	opts := &github.SearchOptions{
+		ListOptions: github.ListOptions{
+			PerPage: options.PerPage,
+			Page:    options.Page,
+		},
+	}
+
+	repoList, _, err := client.Search.Repositories(ctx, query, opts)
 	if err != nil {
 		return nil, g.FormatError(err)
 	}
@@ -113,7 +119,8 @@ func (g *GitHubGitProvider) GetRepositories(namespace string) ([]*GitRepository,
 		if err != nil {
 			return nil, err
 		}
-		response = append(response, &GitRepository{
+
+		repos = append(repos, &GitRepository{
 			Id:     *repo.Name,
 			Name:   *repo.Name,
 			Url:    *repo.HTMLURL,
@@ -123,10 +130,10 @@ func (g *GitHubGitProvider) GetRepositories(namespace string) ([]*GitRepository,
 		})
 	}
 
-	return response, err
+	return repos, err
 }
 
-func (g *GitHubGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {
+func (g *GitHubGitProvider) GetRepoBranches(repositoryId string, namespaceId string, options ListOptions) ([]*GitBranch, error) {
 	client := g.getApiClient()
 
 	if namespaceId == personalNamespaceId {
@@ -139,7 +146,10 @@ func (g *GitHubGitProvider) GetRepoBranches(repositoryId string, namespaceId str
 
 	var response []*GitBranch
 
-	repoBranches, _, err := client.Repositories.ListBranches(context.Background(), namespaceId, repositoryId, &github.ListOptions{})
+	repoBranches, _, err := client.Repositories.ListBranches(context.Background(), namespaceId, repositoryId, &github.ListOptions{
+		PerPage: options.PerPage,
+		Page:    options.Page,
+	})
 	if err != nil {
 		return nil, g.FormatError(err)
 	}
@@ -157,7 +167,7 @@ func (g *GitHubGitProvider) GetRepoBranches(repositoryId string, namespaceId str
 	return response, nil
 }
 
-func (g *GitHubGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error) {
+func (g *GitHubGitProvider) GetRepoPRs(repositoryId string, namespaceId string, options ListOptions) ([]*GitPullRequest, error) {
 	client := g.getApiClient()
 
 	if namespaceId == personalNamespaceId {
@@ -172,6 +182,10 @@ func (g *GitHubGitProvider) GetRepoPRs(repositoryId string, namespaceId string) 
 
 	prList, _, err := client.PullRequests.List(context.Background(), namespaceId, repositoryId, &github.PullRequestListOptions{
 		State: "open",
+		ListOptions: github.ListOptions{
+			PerPage: options.PerPage,
+			Page:    options.Page,
+		},
 	})
 	if err != nil {
 		return nil, g.FormatError(err)

@@ -50,14 +50,19 @@ func (g *GitLabGitProvider) CanHandle(repoUrl string) (bool, error) {
 	return strings.Contains(*g.baseApiUrl, staticContext.Source), nil
 }
 
-func (g *GitLabGitProvider) GetNamespaces() ([]*GitNamespace, error) {
+func (g *GitLabGitProvider) GetNamespaces(options ListOptions) ([]*GitNamespace, error) {
 	client := g.getApiClient()
 	user, err := g.GetUser()
 	if err != nil {
 		return nil, err
 	}
 
-	groupList, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{})
+	groupList, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
+		ListOptions: gitlab.ListOptions{
+			Page:    options.Page,
+			PerPage: options.PerPage,
+		},
+	})
 	if err != nil {
 		return nil, g.FormatError(err)
 	}
@@ -71,15 +76,19 @@ func (g *GitLabGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 		})
 	}
 
-	namespaces = append([]*GitNamespace{{Id: personalNamespaceId, Name: user.Username}}, namespaces...)
+	// Append 'personal' namespace on first page
+	if options.Page == 1 {
+		namespaces = append([]*GitNamespace{{Id: personalNamespaceId, Name: user.Username}}, namespaces...)
+	}
 
 	return namespaces, nil
 }
 
-func (g *GitLabGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
+func (g *GitLabGitProvider) GetRepositories(namespace string, options ListOptions) ([]*GitRepository, error) {
 	client := g.getApiClient()
 	var response []*GitRepository
 	var repoList []*gitlab.Project
+	var err error
 
 	if namespace == personalNamespaceId {
 		user, err := g.GetUser()
@@ -87,27 +96,25 @@ func (g *GitLabGitProvider) GetRepositories(namespace string) ([]*GitRepository,
 			return nil, err
 		}
 
-		repos, _, err := client.Projects.ListUserProjects(user.Id, &gitlab.ListProjectsOptions{
+		repoList, _, err = client.Projects.ListUserProjects(user.Id, &gitlab.ListProjectsOptions{
 			ListOptions: gitlab.ListOptions{
-				PerPage: 100,
-				Page:    1,
+				PerPage: options.PerPage,
+				Page:    options.Page,
 			},
 		})
 		if err != nil {
 			return nil, g.FormatError(err)
 		}
-		repoList = repos
 	} else {
-		repos, _, err := client.Groups.ListGroupProjects(namespace, &gitlab.ListGroupProjectsOptions{
+		repoList, _, err = client.Groups.ListGroupProjects(namespace, &gitlab.ListGroupProjectsOptions{
 			ListOptions: gitlab.ListOptions{
-				PerPage: 100,
-				Page:    1,
+				PerPage: options.PerPage,
+				Page:    options.Page,
 			},
 		})
 		if err != nil {
 			return nil, g.FormatError(err)
 		}
-		repoList = repos
 	}
 
 	for _, repo := range repoList {
@@ -129,11 +136,16 @@ func (g *GitLabGitProvider) GetRepositories(namespace string) ([]*GitRepository,
 	return response, nil
 }
 
-func (g *GitLabGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {
+func (g *GitLabGitProvider) GetRepoBranches(repositoryId string, namespaceId string, options ListOptions) ([]*GitBranch, error) {
 	client := g.getApiClient()
 	var response []*GitBranch
 
-	branches, _, err := client.Branches.ListBranches(repositoryId, &gitlab.ListBranchesOptions{})
+	branches, _, err := client.Branches.ListBranches(repositoryId, &gitlab.ListBranchesOptions{
+		ListOptions: gitlab.ListOptions{
+			Page:    options.Page,
+			PerPage: options.PerPage,
+		},
+	})
 	if err != nil {
 		return nil, g.FormatError(err)
 	}
@@ -151,11 +163,16 @@ func (g *GitLabGitProvider) GetRepoBranches(repositoryId string, namespaceId str
 	return response, nil
 }
 
-func (g *GitLabGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error) {
+func (g *GitLabGitProvider) GetRepoPRs(repositoryId string, namespaceId string, options ListOptions) ([]*GitPullRequest, error) {
 	client := g.getApiClient()
 	var response []*GitPullRequest
 
-	mergeRequests, _, err := client.MergeRequests.ListProjectMergeRequests(repositoryId, &gitlab.ListProjectMergeRequestsOptions{})
+	mergeRequests, _, err := client.MergeRequests.ListProjectMergeRequests(repositoryId, &gitlab.ListProjectMergeRequestsOptions{
+		ListOptions: gitlab.ListOptions{
+			Page:    options.Page,
+			PerPage: options.PerPage,
+		},
+	})
 	if err != nil {
 		return nil, g.FormatError(err)
 	}

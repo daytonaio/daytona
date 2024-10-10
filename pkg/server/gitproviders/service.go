@@ -19,10 +19,10 @@ type IGitProviderService interface {
 	GetGitProviderForUrl(url string) (gitprovider.GitProvider, string, error)
 	GetGitProviderForHttpRequest(req *http.Request) (gitprovider.GitProvider, error)
 	GetGitUser(gitProviderId string) (*gitprovider.GitUser, error)
-	GetNamespaces(gitProviderId string) ([]*gitprovider.GitNamespace, error)
-	GetRepoBranches(gitProviderId string, namespaceId string, repositoryId string) ([]*gitprovider.GitBranch, error)
-	GetRepoPRs(gitProviderId string, namespaceId string, repositoryId string) ([]*gitprovider.GitPullRequest, error)
-	GetRepositories(gitProviderId string, namespaceId string) ([]*gitprovider.GitRepository, error)
+	GetNamespaces(gitProviderId string, options gitprovider.ListOptions) ([]*gitprovider.GitNamespace, error)
+	GetRepoBranches(gitProviderId string, namespaceId string, repositoryId string, options gitprovider.ListOptions) ([]*gitprovider.GitBranch, error)
+	GetRepoPRs(gitProviderId string, namespaceId string, repositoryId string, options gitprovider.ListOptions) ([]*gitprovider.GitPullRequest, error)
+	GetRepositories(gitProviderId string, namespaceId string, options gitprovider.ListOptions) ([]*gitprovider.GitRepository, error)
 	ListConfigs() ([]*gitprovider.GitProviderConfig, error)
 	RemoveGitProvider(gitProviderId string) error
 	SetGitProviderConfig(providerConfig *gitprovider.GitProviderConfig) error

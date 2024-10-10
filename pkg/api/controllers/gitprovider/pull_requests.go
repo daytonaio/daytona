@@ -22,6 +22,8 @@ import (
 //	@Param			gitProviderId	path	string	true	"Git provider"
 //	@Param			namespaceId		path	string	true	"Namespace"
 //	@Param			repositoryId	path	string	true	"Repository"
+//	@Param			page			query	int		false	"Page number"
+//	@Param			per_page		query	int		false	"Number of items per page"
 //	@Produce		json
 //	@Success		200	{array}	GitPullRequest
 //	@Router			/gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/pull-requests [get]
@@ -31,6 +33,11 @@ func GetRepoPRs(ctx *gin.Context) {
 	gitProviderId := ctx.Param("gitProviderId")
 	namespaceArg := ctx.Param("namespaceId")
 	repositoryArg := ctx.Param("repositoryId")
+	options, err := getListOptions(ctx)
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
 
 	namespaceId, err := url.QueryUnescape(namespaceArg)
 	if err != nil {
@@ -46,7 +53,7 @@ func GetRepoPRs(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	response, err := server.GitProviderService.GetRepoPRs(gitProviderId, namespaceId, repositoryId)
+	response, err := server.GitProviderService.GetRepoPRs(gitProviderId, namespaceId, repositoryId, options)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {

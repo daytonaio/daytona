@@ -51,7 +51,7 @@ func (g *AzureDevOpsGitProvider) CanHandle(repoUrl string) (bool, error) {
 	return strings.Contains(g.baseApiUrl, staticContext.Source), nil
 }
 
-func (g *AzureDevOpsGitProvider) GetNamespaces() ([]*GitNamespace, error) {
+func (g *AzureDevOpsGitProvider) GetNamespaces(options ListOptions) ([]*GitNamespace, error) {
 	client, _, err := g.getApiClient()
 	if err != nil {
 		return nil, err
@@ -77,7 +77,7 @@ func (g *AzureDevOpsGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	return nil, g.FormatError(err)
 }
 
-func (g *AzureDevOpsGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
+func (g *AzureDevOpsGitProvider) GetRepositories(namespace string, options ListOptions) ([]*GitRepository, error) {
 	client, err := g.getGitClient()
 	if err != nil {
 		return nil, err
@@ -143,7 +143,7 @@ func (g *AzureDevOpsGitProvider) GetUser() (*GitUser, error) {
 	return user, nil
 }
 
-func (g *AzureDevOpsGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {
+func (g *AzureDevOpsGitProvider) GetRepoBranches(repositoryId string, namespaceId string, options ListOptions) ([]*GitBranch, error) {
 	client, err := g.getGitClient()
 	if err != nil {
 		return nil, err
@@ -173,7 +173,7 @@ func (g *AzureDevOpsGitProvider) GetRepoBranches(repositoryId string, namespaceI
 	return response, nil
 }
 
-func (g *AzureDevOpsGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error) {
+func (g *AzureDevOpsGitProvider) GetRepoPRs(repositoryId string, namespaceId string, options ListOptions) ([]*GitPullRequest, error) {
 	client, err := g.getGitClient()
 	if err != nil {
 		return nil, err

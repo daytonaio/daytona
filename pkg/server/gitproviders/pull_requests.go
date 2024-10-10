@@ -9,13 +9,13 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 )
 
-func (s *GitProviderService) GetRepoPRs(gitProviderId, namespaceId, repositoryId string) ([]*gitprovider.GitPullRequest, error) {
+func (s *GitProviderService) GetRepoPRs(gitProviderId, namespaceId, repositoryId string, options gitprovider.ListOptions) ([]*gitprovider.GitPullRequest, error) {
 	gitProvider, err := s.GetGitProvider(gitProviderId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get git provider: %w", err)
 	}
 
-	response, err := gitProvider.GetRepoPRs(repositoryId, namespaceId)
+	response, err := gitProvider.GetRepoPRs(repositoryId, namespaceId, options)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get pull requests: %w", err)
 	}

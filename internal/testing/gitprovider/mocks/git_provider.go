@@ -21,13 +21,13 @@ func (m *MockGitProvider) CanHandle(repoUrl string) (bool, error) {
 	return args.Bool(0), args.Error(1)
 }
 
-func (m *MockGitProvider) GetNamespaces() ([]*gitprovider.GitNamespace, error) {
-	args := m.Called()
+func (m *MockGitProvider) GetNamespaces(options gitprovider.ListOptions) ([]*gitprovider.GitNamespace, error) {
+	args := m.Called(options)
 	return args.Get(0).([]*gitprovider.GitNamespace), args.Error(1)
 }
 
-func (m *MockGitProvider) GetRepositories(namespace string) ([]*gitprovider.GitRepository, error) {
-	args := m.Called(namespace)
+func (m *MockGitProvider) GetRepositories(namespace string, options gitprovider.ListOptions) ([]*gitprovider.GitRepository, error) {
+	args := m.Called(namespace, options)
 	return args.Get(0).([]*gitprovider.GitRepository), args.Error(1)
 }
 
@@ -41,13 +41,13 @@ func (m *MockGitProvider) GetBranchByCommit(staticContext *gitprovider.StaticGit
 	return args.String(0), args.Error(1)
 }
 
-func (m *MockGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*gitprovider.GitBranch, error) {
-	args := m.Called(repositoryId, namespaceId)
+func (m *MockGitProvider) GetRepoBranches(repositoryId string, namespaceId string, options gitprovider.ListOptions) ([]*gitprovider.GitBranch, error) {
+	args := m.Called(repositoryId, namespaceId, options)
 	return args.Get(0).([]*gitprovider.GitBranch), args.Error(1)
 }
 
-func (m *MockGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]*gitprovider.GitPullRequest, error) {
-	args := m.Called(repositoryId, namespaceId)
+func (m *MockGitProvider) GetRepoPRs(repositoryId string, namespaceId string, options gitprovider.ListOptions) ([]*gitprovider.GitPullRequest, error) {
+	args := m.Called(repositoryId, namespaceId, options)
 	return args.Get(0).([]*gitprovider.GitPullRequest), args.Error(1)
 }
 

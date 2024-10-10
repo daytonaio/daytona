@@ -48,7 +48,7 @@ func (g *AwsCodeCommitGitProvider) CanHandle(repoUrl string) (bool, error) {
 	return staticContext.Source == fmt.Sprintf("git-codecommit.%s.amazonaws.com", g.region) || fmt.Sprintf("%s.console.aws.amazon.com", g.region) == staticContext.Source, nil
 }
 
-func (g *AwsCodeCommitGitProvider) GetNamespaces() ([]*GitNamespace, error) {
+func (g *AwsCodeCommitGitProvider) GetNamespaces(options ListOptions) ([]*GitNamespace, error) {
 	// AWS CodeCommit does not have a project and repository structure similar to other git providers.
 	// Therefore, returning repositories as an array of type GitNamespace.
 	client, err := g.getApiClient()
@@ -119,7 +119,7 @@ func (g *AwsCodeCommitGitProvider) getApiClient() (*codecommit.Client, error) {
 	return client, nil
 }
 
-func (g *AwsCodeCommitGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
+func (g *AwsCodeCommitGitProvider) GetRepositories(namespace string, options ListOptions) ([]*GitRepository, error) {
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get client: %w", err)
@@ -150,7 +150,7 @@ func (g *AwsCodeCommitGitProvider) GetRepositories(namespace string) ([]*GitRepo
 	return repos, nil
 }
 
-func (g *AwsCodeCommitGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {
+func (g *AwsCodeCommitGitProvider) GetRepoBranches(repositoryId string, namespaceId string, options ListOptions) ([]*GitBranch, error) {
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get client: %w", err)
@@ -210,7 +210,7 @@ func (g *AwsCodeCommitGitProvider) GetUser() (*GitUser, error) {
 
 }
 
-func (g *AwsCodeCommitGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error) {
+func (g *AwsCodeCommitGitProvider) GetRepoPRs(repositoryId string, namespaceId string, options ListOptions) ([]*GitPullRequest, error) {
 	client, err := g.getApiClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get client: %w", err)
