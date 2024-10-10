@@ -2194,6 +2194,12 @@ const docTemplate = `{
                 "providerId": {
                     "type": "string"
                 },
+                "signingKey": {
+                    "type": "string"
+                },
+                "signingMethod": {
+                    "$ref": "#/definitions/SigningMethod"
+                },
                 "token": {
                     "type": "string"
                 },
@@ -2736,6 +2742,12 @@ const docTemplate = `{
                 "providerId": {
                     "type": "string"
                 },
+                "signingKey": {
+                    "type": "string"
+                },
+                "signingMethod": {
+                    "$ref": "#/definitions/SigningMethod"
+                },
                 "token": {
                     "type": "string"
                 },
@@ -2757,6 +2769,17 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
+        },
+        "SigningMethod": {
+            "type": "string",
+            "enum": [
+                "ssh",
+                "gpg"
+            ],
+            "x-enum-varnames": [
+                "SigningMethodSSH",
+                "SigningMethodGPG"
+            ]
         },
         "Status": {
             "type": "string",

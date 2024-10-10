@@ -4,11 +4,13 @@
 package gitprovider
 
 type GitProviderView struct {
-	Id         string
-	ProviderId string
-	Name       string
-	Username   string
-	BaseApiUrl string
-	Token      string
-	Alias      string
+	Id            string
+	ProviderId    string
+	Name          string
+	Username      string
+	BaseApiUrl    string
+	Token         string
+	Alias         string
+	SigningMethod string
+	SigningKey    string
 }

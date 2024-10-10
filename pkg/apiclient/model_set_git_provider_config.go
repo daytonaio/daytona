@@ -21,12 +21,14 @@ var _ MappedNullable = &SetGitProviderConfig{}
 
 // SetGitProviderConfig struct for SetGitProviderConfig
 type SetGitProviderConfig struct {
-	Alias      *string `json:"alias,omitempty"`
-	BaseApiUrl *string `json:"baseApiUrl,omitempty"`
-	Id         *string `json:"id,omitempty"`
-	ProviderId string  `json:"providerId"`
-	Token      string  `json:"token"`
-	Username   *string `json:"username,omitempty"`
+	Alias         *string        `json:"alias,omitempty"`
+	BaseApiUrl    *string        `json:"baseApiUrl,omitempty"`
+	Id            *string        `json:"id,omitempty"`
+	ProviderId    string         `json:"providerId"`
+	SigningKey    *string        `json:"signingKey,omitempty"`
+	SigningMethod *SigningMethod `json:"signingMethod,omitempty"`
+	Token         string         `json:"token"`
+	Username      *string        `json:"username,omitempty"`
 }
 
 type _SetGitProviderConfig SetGitProviderConfig
@@ -170,6 +172,70 @@ func (o *SetGitProviderConfig) SetProviderId(v string) {
 	o.ProviderId = v
 }
 
+// GetSigningKey returns the SigningKey field value if set, zero value otherwise.
+func (o *SetGitProviderConfig) GetSigningKey() string {
+	if o == nil || IsNil(o.SigningKey) {
+		var ret string
+		return ret
+	}
+	return *o.SigningKey
+}
+
+// GetSigningKeyOk returns a tuple with the SigningKey field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SetGitProviderConfig) GetSigningKeyOk() (*string, bool) {
+	if o == nil || IsNil(o.SigningKey) {
+		return nil, false
+	}
+	return o.SigningKey, true
+}
+
+// HasSigningKey returns a boolean if a field has been set.
+func (o *SetGitProviderConfig) HasSigningKey() bool {
+	if o != nil && !IsNil(o.SigningKey) {
+		return true
+	}
+
+	return false
+}
+
+// SetSigningKey gets a reference to the given string and assigns it to the SigningKey field.
+func (o *SetGitProviderConfig) SetSigningKey(v string) {
+	o.SigningKey = &v
+}
+
+// GetSigningMethod returns the SigningMethod field value if set, zero value otherwise.
+func (o *SetGitProviderConfig) GetSigningMethod() SigningMethod {
+	if o == nil || IsNil(o.SigningMethod) {
+		var ret SigningMethod
+		return ret
+	}
+	return *o.SigningMethod
+}
+
+// GetSigningMethodOk returns a tuple with the SigningMethod field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SetGitProviderConfig) GetSigningMethodOk() (*SigningMethod, bool) {
+	if o == nil || IsNil(o.SigningMethod) {
+		return nil, false
+	}
+	return o.SigningMethod, true
+}
+
+// HasSigningMethod returns a boolean if a field has been set.
+func (o *SetGitProviderConfig) HasSigningMethod() bool {
+	if o != nil && !IsNil(o.SigningMethod) {
+		return true
+	}
+
+	return false
+}
+
+// SetSigningMethod gets a reference to the given SigningMethod and assigns it to the SigningMethod field.
+func (o *SetGitProviderConfig) SetSigningMethod(v SigningMethod) {
+	o.SigningMethod = &v
+}
+
 // GetToken returns the Token field value
 func (o *SetGitProviderConfig) GetToken() string {
 	if o == nil {
@@ -246,6 +312,12 @@ func (o SetGitProviderConfig) ToMap() (map[string]interface{}, error) {
 		toSerialize["id"] = o.Id
 	}
 	toSerialize["providerId"] = o.ProviderId
+	if !IsNil(o.SigningKey) {
+		toSerialize["signingKey"] = o.SigningKey
+	}
+	if !IsNil(o.SigningMethod) {
+		toSerialize["signingMethod"] = o.SigningMethod
+	}
 	toSerialize["token"] = o.Token
 	if !IsNil(o.Username) {
 		toSerialize["username"] = o.Username

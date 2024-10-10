@@ -12,6 +12,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/api/controllers"
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider/dto"
+	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
@@ -40,6 +41,7 @@ func ListGitProviders(ctx *gin.Context) {
 
 	for _, provider := range response {
 		provider.Token = ""
+		provider.SigningKey = nil
 	}
 
 	ctx.JSON(200, response)
@@ -71,6 +73,11 @@ func GetGitProviderForUrl(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %w", err))
 		return
+	}
+
+	apiKeyType, ok := ctx.Get("apiKeyType")
+	if !ok || apiKeyType == apikey.ApiKeyTypeClient {
+		gitProvider.Token = ""
 	}
 
 	ctx.JSON(200, gitProvider)
@@ -132,10 +139,12 @@ func SetGitProvider(ctx *gin.Context) {
 	}
 
 	gitProviderConfig := gitprovider.GitProviderConfig{
-		Id:         setConfigDto.Id,
-		ProviderId: setConfigDto.ProviderId,
-		Token:      setConfigDto.Token,
-		BaseApiUrl: setConfigDto.BaseApiUrl,
+		Id:            setConfigDto.Id,
+		ProviderId:    setConfigDto.ProviderId,
+		Token:         setConfigDto.Token,
+		BaseApiUrl:    setConfigDto.BaseApiUrl,
+		SigningKey:    setConfigDto.SigningKey,
+		SigningMethod: setConfigDto.SigningMethod,
 	}
 
 	if setConfigDto.Username != nil {

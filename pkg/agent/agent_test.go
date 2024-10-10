@@ -75,7 +75,7 @@ func TestAgent(t *testing.T) {
 
 	mockGitService := mock_git.NewMockGitService()
 	mockGitService.On("RepositoryExists").Return(true, nil)
-	mockGitService.On("SetGitConfig", mock.Anything).Return(nil)
+	mockGitService.On("SetGitConfig", mock.Anything, mock.Anything).Return(nil)
 	mockGitService.On("GetGitStatus").Return(gitStatus1, nil)
 
 	mockSshServer := mocks.NewMockSshServer()

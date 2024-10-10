@@ -20,6 +20,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/common"
+	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/views"
 	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
@@ -29,6 +30,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/docker/docker/pkg/stringid"
+	log "github.com/sirupsen/logrus"
 	"tailscale.com/tsnet"
 
 	"github.com/spf13/cobra"
@@ -170,8 +172,9 @@ var CreateCmd = &cobra.Command{
 			stopLogs()
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
+		var gpgKey string
 
-		err = waitForDial(createdWorkspace, &activeProfile, tsConn)
+		err = waitForDial(createdWorkspace, &activeProfile, tsConn, gpgKey)
 		if err != nil {
 			stopLogs()
 			return err
@@ -216,8 +219,11 @@ var CreateCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-
-		return openIDE(chosenIdeId, activeProfile, createdWorkspace.Id, wsInfo.Projects[0].Name, providerMetadata, yesFlag)
+		gpgKey, err = GetGitProviderGpgKey(apiClient, ctx, wsInfo.Projects[0].Repository.Url)
+		if err != nil {
+			log.Warn(err)
+		}
+		return openIDE(chosenIdeId, activeProfile, createdWorkspace.Id, wsInfo.Projects[0].Name, providerMetadata, yesFlag, gpgKey)
 	},
 }
 
@@ -441,9 +447,9 @@ func processGitURL(ctx context.Context, repoUrl string, apiClient *apiclient.API
 	return nil, nil
 }
 
-func waitForDial(workspace *apiclient.Workspace, activeProfile *config.Profile, tsConn *tsnet.Server) error {
+func waitForDial(workspace *apiclient.Workspace, activeProfile *config.Profile, tsConn *tsnet.Server, gpgKey string) error {
 	if workspace.Target == "local" && (activeProfile != nil && activeProfile.Id == "default") {
-		err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspace.Id, workspace.Projects[0].Name)
+		err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspace.Id, workspace.Projects[0].Name, gpgKey)
 		if err != nil {
 			return err
 		}
@@ -507,4 +513,32 @@ func dedupProjectNames(projects *[]apiclient.CreateProjectDTO) {
 			projectNames[project.Name] = 2
 		}
 	}
+}
+
+func GetGitProviderGpgKey(apiClient *apiclient.APIClient, ctx context.Context, repoUrl string) (string, error) {
+	var providerConfig *gitprovider.GitProviderConfig
+	var gpgKey string
+
+	// Get Git provider for repository URL
+	encodedUrl := url.QueryEscape(repoUrl)
+	gitProvider, res, err := apiClient.GitProviderAPI.GetGitProviderForUrl(ctx, encodedUrl).Execute()
+	if err != nil {
+		return "", apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	// Extract GPG key if present
+	if gitProvider != nil {
+		providerConfig = &gitprovider.GitProviderConfig{
+			SigningMethod: (*gitprovider.SigningMethod)(gitProvider.SigningMethod),
+			SigningKey:    gitProvider.SigningKey,
+		}
+
+		if providerConfig.SigningMethod != nil && providerConfig.SigningKey != nil {
+			if *providerConfig.SigningMethod == gitprovider.SigningMethodGPG {
+				gpgKey = *providerConfig.SigningKey
+			}
+		}
+	}
+
+	return gpgKey, nil
 }

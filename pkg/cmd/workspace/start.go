@@ -42,6 +42,7 @@ var StartCmd = &cobra.Command{
 		var activeProfile config.Profile
 		var ideId string
 		var workspaceId string
+		var repoUrl string
 		var ideList []config.Ide
 		projectProviderMetadata := ""
 
@@ -96,6 +97,14 @@ var StartCmd = &cobra.Command{
 			workspaceId = wsInfo.Id
 			if startProjectFlag == "" {
 				startProjectFlag = wsInfo.Projects[0].Name
+				repoUrl = wsInfo.Projects[0].Repository.Url
+			} else {
+				for _, project := range wsInfo.Projects {
+					if project.Name == startProjectFlag {
+						repoUrl = project.Repository.Url
+						break
+					}
+				}
 			}
 			if ideId != "ssh" {
 				projectProviderMetadata, err = workspace_util.GetProjectProviderMetadata(wsInfo, wsInfo.Projects[0].Name)
@@ -110,6 +119,11 @@ var StartCmd = &cobra.Command{
 			return err
 		}
 
+		gpgKey, err := GetGitProviderGpgKey(apiClient, ctx, repoUrl)
+		if err != nil {
+			log.Warn(err)
+		}
+
 		if startProjectFlag == "" {
 			views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' started successfully", workspaceIdOrName))
 		} else {
@@ -117,7 +131,7 @@ var StartCmd = &cobra.Command{
 
 			if codeFlag {
 				ide_views.RenderIdeOpeningMessage(workspaceIdOrName, startProjectFlag, ideId, ideList)
-				err = openIDE(ideId, activeProfile, workspaceId, startProjectFlag, projectProviderMetadata, yesFlag)
+				err = openIDE(ideId, activeProfile, workspaceId, startProjectFlag, projectProviderMetadata, yesFlag, gpgKey)
 				if err != nil {
 					return err
 				}

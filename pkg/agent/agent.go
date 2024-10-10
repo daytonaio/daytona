@@ -112,7 +112,14 @@ func (a *Agent) startProjectMode() error {
 		}
 	}
 
-	err = a.Git.SetGitConfig(gitUser)
+	var providerConfig *gitprovider.GitProviderConfig
+	if gitProvider != nil {
+		providerConfig = &gitprovider.GitProviderConfig{
+			SigningMethod: (*gitprovider.SigningMethod)(gitProvider.SigningMethod),
+			SigningKey:    gitProvider.SigningKey,
+		}
+	}
+	err = a.Git.SetGitConfig(gitUser, providerConfig)
 	if err != nil {
 		log.Error(fmt.Sprintf("failed to set git config: %s", err))
 	}
