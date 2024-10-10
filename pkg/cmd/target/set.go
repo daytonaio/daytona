@@ -18,6 +18,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 	provider_view "github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/daytonaio/daytona/pkg/views/target"
+	target_view "github.com/daytonaio/daytona/pkg/views/target"
 	"github.com/spf13/cobra"
 
 	log "github.com/sirupsen/logrus"
@@ -30,6 +31,7 @@ var TargetSetCmd = &cobra.Command{
 	Aliases: []string{"s", "add", "update", "register", "edit"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
+		var isNewProvider bool
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
@@ -96,6 +98,7 @@ var TargetSetCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
+			isNewProvider = true
 		}
 
 		targets, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
@@ -110,18 +113,22 @@ var TargetSetCmd = &cobra.Command{
 			}
 		}
 
-		selectedTarget, err := target.GetTargetFromPrompt(filteredTargets, activeProfile.Name, nil, true)
-		if err != nil {
-			if common.IsCtrlCAbort(err) {
-				return nil
-			} else {
-				return err
-			}
-		}
+		var selectedTarget *target_view.TargetView
 
-		targetManifest, res, err := apiClient.ProviderAPI.GetTargetManifest(context.Background(), selectedProvider.Name).Execute()
-		if err != nil {
-			return apiclient_util.HandleErrorResponse(res, err)
+		if !isNewProvider || len(filteredTargets) > 0 {
+			selectedTarget, err = target.GetTargetFromPrompt(filteredTargets, activeProfile.Name, nil, true)
+			if err != nil {
+				if common.IsCtrlCAbort(err) {
+					return nil
+				} else {
+					return err
+				}
+			}
+		} else {
+			selectedTarget = &target_view.TargetView{
+				Name:    target.NewTargetName,
+				Options: "{}",
+			}
 		}
 
 		if selectedTarget.Name == target.NewTargetName {
@@ -132,6 +139,11 @@ var TargetSetCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
+		}
+
+		targetManifest, res, err := apiClient.ProviderAPI.GetTargetManifest(context.Background(), selectedProvider.Name).Execute()
+		if err != nil {
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		err = target.SetTargetForm(selectedTarget, *targetManifest)
