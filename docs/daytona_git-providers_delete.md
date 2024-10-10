@@ -1,6 +1,6 @@
 ## daytona git-providers delete
 
-Unregister a Git providers
+Unregister a Git provider
 
 ```
 daytona git-providers delete [flags]

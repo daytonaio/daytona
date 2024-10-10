@@ -6,6 +6,7 @@ inherited_options:
       usage: help for daytona
 see_also:
     - daytona - Daytona is a Dev Environment Manager
-    - daytona git-providers add - Register a Git providers
-    - daytona git-providers delete - Unregister a Git providers
+    - daytona git-providers add - Register a Git provider
+    - daytona git-providers delete - Unregister a Git provider
     - daytona git-providers list - Lists your registered Git providers
+    - daytona git-providers update - Update a Git provider

@@ -1,6 +1,6 @@
-name: daytona git-providers add
-synopsis: Register a Git provider
-usage: daytona git-providers add [flags]
+name: daytona git-providers update
+synopsis: Update a Git provider
+usage: daytona git-providers update [flags]
 inherited_options:
     - name: help
       default_value: "false"

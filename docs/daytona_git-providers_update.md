@@ -1,9 +1,9 @@
-## daytona git-providers add
+## daytona git-providers update
 
-Register a Git provider
+Update a Git provider
 
 ```
-daytona git-providers add [flags]
+daytona git-providers update [flags]
 ```
 
 ### Options inherited from parent commands
