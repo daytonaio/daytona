@@ -115,12 +115,6 @@ var CreateCmd = &cobra.Command{
 			projectNames = append(projectNames, projects[i].Name)
 		}
 
-		logs_view.CalculateLongestPrefixLength(projectNames)
-
-		logs_view.DisplayLogEntry(logs.LogEntry{
-			Msg: "Request submitted\n",
-		}, logs_view.STATIC_INDEX)
-
 		for i, projectConfigName := range existingProjectConfigNames {
 			if projectConfigName == "" {
 				continue
@@ -140,6 +134,12 @@ var CreateCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
+		logs_view.CalculateLongestPrefixLength(projectNames)
+
+		logs_view.DisplayLogEntry(logs.LogEntry{
+			Msg: "Request submitted\n",
+		}, logs_view.STATIC_INDEX)
 
 		activeProfile, err = c.GetActiveProfile()
 		if err != nil {
