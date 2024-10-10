@@ -30,6 +30,7 @@ var TargetSetCmd = &cobra.Command{
 	Aliases: []string{"s", "add", "update", "register", "edit"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
+		var skipTargetSelection bool
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
@@ -96,6 +97,7 @@ var TargetSetCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
+			skipTargetSelection = true
 		}
 
 		targets, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
@@ -110,18 +112,22 @@ var TargetSetCmd = &cobra.Command{
 			}
 		}
 
-		selectedTarget, err := target.GetTargetFromPrompt(filteredTargets, activeProfile.Name, true)
-		if err != nil {
-			if common.IsCtrlCAbort(err) {
-				return nil
-			} else {
-				return err
-			}
-		}
+		var selectedTarget *apiclient.ProviderTarget
 
-		targetManifest, res, err := apiClient.ProviderAPI.GetTargetManifest(context.Background(), selectedProvider.Name).Execute()
-		if err != nil {
-			return apiclient_util.HandleErrorResponse(res, err)
+		if !skipTargetSelection {
+			selectedTarget, err = target.GetTargetFromPrompt(filteredTargets, activeProfile.Name, true)
+			if err != nil {
+				if common.IsCtrlCAbort(err) {
+					return nil
+				} else {
+					return err
+				}
+			}
+		} else {
+			selectedTarget = &apiclient.ProviderTarget{
+				Name:    target.NewTargetName,
+				Options: "{}",
+			}
 		}
 
 		if selectedTarget.Name == target.NewTargetName {
@@ -132,6 +138,11 @@ var TargetSetCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
+		}
+
+		targetManifest, res, err := apiClient.ProviderAPI.GetTargetManifest(context.Background(), selectedProvider.Name).Execute()
+		if err != nil {
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		err = target.SetTargetForm(selectedTarget, *targetManifest)
