@@ -37,7 +37,7 @@ func runGetBranchFromPromptWithPagination(ctx context.Context, config BranchWiza
 
 	for {
 		err = views_util.WithSpinner("Loading Branches", func() error {
-			branches, _, err := config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.ProviderId, config.NamespaceId, url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
+			branches, _, err := config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.GitProviderConfigId, url.QueryEscape(config.NamespaceId), url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
 			if err != nil {
 				return err
 			}
@@ -52,7 +52,7 @@ func runGetBranchFromPromptWithPagination(ctx context.Context, config BranchWiza
 		}
 
 		// Check first if the git provider supports pagination
-		if isGitProviderWithUnsupportedPagination(config.ProviderId) {
+		if isGitProviderWithUnsupportedPagination(config.GitProviderConfigId) {
 			disablePagination = true
 		} else {
 			// Check if we have reached the end of the list
@@ -95,7 +95,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	ctx := context.Background()
 
 	err = views_util.WithSpinner("Loading", func() error {
-		branches, _, err := config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.ProviderId, config.NamespaceId, url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
+		branches, _, err := config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.GitProviderConfigId, url.QueryEscape(config.NamespaceId), url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
 		if err != nil {
 			return err
 		}
@@ -124,7 +124,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	perPage = 1
 
 	err = views_util.WithSpinner("Loading", func() error {
-		prs, _, err := config.ApiClient.GitProviderAPI.GetRepoPRs(ctx, config.ProviderId, config.NamespaceId, url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
+		prs, _, err := config.ApiClient.GitProviderAPI.GetRepoPRs(ctx, config.GitProviderConfigId, url.QueryEscape(config.NamespaceId), url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
 		if err != nil {
 			return err
 		}
@@ -182,7 +182,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 
 		for {
 			err = views_util.WithSpinner("Loading Pull Requests", func() error {
-				branches, _, err := config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.ProviderId, config.NamespaceId, url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
+				branches, _, err := config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.GitProviderConfigId, url.QueryEscape(config.NamespaceId), url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
 				if err != nil {
 					return err
 				}

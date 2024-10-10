@@ -130,7 +130,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 
 	for {
 		err = views_util.WithSpinner("Loading Namespaces", func() error {
-			namespaces, _, err := config.ApiClient.GitProviderAPI.GetNamespaces(ctx, providerId).Page(page).PerPage(perPage).Execute()
+			namespaces, _, err := config.ApiClient.GitProviderAPI.GetNamespaces(ctx, gitProviderConfigId).Page(page).PerPage(perPage).Execute()
 			if err != nil {
 				return err
 			}
@@ -199,7 +199,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		// Fetch repos for the current page
 		err = views_util.WithSpinner("Loading Repositories", func() error {
 
-			repos, _, err := config.ApiClient.GitProviderAPI.GetRepositories(ctx, providerId, namespaceId).Page(page).PerPage(perPage).Execute()
+			repos, _, err := config.ApiClient.GitProviderAPI.GetRepositories(ctx, gitProviderConfigId, namespaceId).Page(page).PerPage(perPage).Execute()
 			if err != nil {
 				return err
 			}
