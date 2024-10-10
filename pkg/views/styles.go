@@ -72,42 +72,44 @@ func GetStyledSelectList(items []list.Item, listOptions ...SelectionListOptions)
 
 	l := list.New(items, d, 0, 0)
 
-	if listOptions != nil && !listOptions[0].IsPaginationDisabled {
+	if listOptions != nil {
 		// Sets the mouse cursor to point to the first index of newly loaded items
 		if listOptions[0].CursorIndex > 0 {
 			l.Select(listOptions[0].CursorIndex)
 		}
 
-		// Add the 'Load More' option in search filter results
-		l.Filter = func(term string, targets []string) []list.Rank {
-			ranks := list.DefaultFilter(term, targets)
+		if !listOptions[0].IsPaginationDisabled {
+			// Add the 'Load More' option in search filter results
+			l.Filter = func(term string, targets []string) []list.Rank {
+				ranks := list.DefaultFilter(term, targets)
 
-			loadMoreIdx := -1
-			// Ideally 'Load More' option if present should be found at the last index
-			for i := len(targets) - 1; i >= 0; i-- {
-				if targets[i] == ListNavigationRenderText {
-					loadMoreIdx = i
-					break
+				loadMoreIdx := -1
+				// Ideally 'Load More' option if present should be found at the last index
+				for i := len(targets) - 1; i >= 0; i-- {
+					if targets[i] == ListNavigationRenderText {
+						loadMoreIdx = i
+						break
+					}
 				}
-			}
 
-			if loadMoreIdx == -1 {
-				return ranks
-			}
-
-			// Return if already present
-			for i := range ranks {
-				if ranks[i].Index == loadMoreIdx {
+				if loadMoreIdx == -1 {
 					return ranks
 				}
+
+				// Return if already present
+				for i := range ranks {
+					if ranks[i].Index == loadMoreIdx {
+						return ranks
+					}
+				}
+
+				// Append 'Load More' option in search filter results
+				ranks = append(ranks, list.Rank{
+					Index: loadMoreIdx,
+				})
+
+				return ranks
 			}
-
-			// Append 'Load More' option in search filter results
-			ranks = append(ranks, list.Rank{
-				Index: loadMoreIdx,
-			})
-
-			return ranks
 		}
 	}
 
