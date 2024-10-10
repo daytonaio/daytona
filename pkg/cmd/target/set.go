@@ -110,7 +110,7 @@ var TargetSetCmd = &cobra.Command{
 			}
 		}
 
-		selectedTarget, err := target.GetTargetFromPrompt(filteredTargets, activeProfile.Name, true)
+		selectedTarget, err := target.GetTargetFromPrompt(filteredTargets, activeProfile.Name, nil, true)
 		if err != nil {
 			if common.IsCtrlCAbort(err) {
 				return nil
@@ -139,12 +139,16 @@ var TargetSetCmd = &cobra.Command{
 			return err
 		}
 
-		selectedTarget.ProviderInfo = apiclient.ProviderProviderInfo{
-			Name:    selectedProvider.Name,
-			Version: selectedProvider.Version,
+		targetData := apiclient.ProviderTarget{
+			Name:    selectedTarget.Name,
+			Options: selectedTarget.Options,
+			ProviderInfo: apiclient.ProviderProviderInfo{
+				Name:    selectedProvider.Name,
+				Version: selectedProvider.Version,
+			},
 		}
 
-		res, err = apiClient.TargetAPI.SetTarget(context.Background()).Target(*selectedTarget).Execute()
+		res, err = apiClient.TargetAPI.SetTarget(context.Background()).Target(targetData).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}

@@ -8,24 +8,30 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"golang.org/x/term"
 )
 
 type item struct {
-	target apiclient.ProviderTarget
+	target TargetView
 }
 
 func (i item) Title() string { return i.target.Name }
 func (i item) Description() string {
-	return i.target.ProviderInfo.Name
+	desc := i.target.ProviderInfo.Name
+	if i.target.ProviderInfo.Installed != nil {
+		if !*i.target.ProviderInfo.Installed {
+			desc += " (needs installing)"
+		}
+	}
+
+	return desc
 }
 func (i item) FilterValue() string { return i.target.Name }
 
 type model struct {
 	list   list.Model
-	choice *apiclient.ProviderTarget
+	choice *TargetView
 	footer string
 }
 

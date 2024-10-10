@@ -21,8 +21,9 @@ var _ MappedNullable = &Provider{}
 
 // Provider struct for Provider
 type Provider struct {
-	Name    string `json:"name"`
-	Version string `json:"version"`
+	Label   *string `json:"label,omitempty"`
+	Name    string  `json:"name"`
+	Version string  `json:"version"`
 }
 
 type _Provider Provider
@@ -44,6 +45,38 @@ func NewProvider(name string, version string) *Provider {
 func NewProviderWithDefaults() *Provider {
 	this := Provider{}
 	return &this
+}
+
+// GetLabel returns the Label field value if set, zero value otherwise.
+func (o *Provider) GetLabel() string {
+	if o == nil || IsNil(o.Label) {
+		var ret string
+		return ret
+	}
+	return *o.Label
+}
+
+// GetLabelOk returns a tuple with the Label field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Provider) GetLabelOk() (*string, bool) {
+	if o == nil || IsNil(o.Label) {
+		return nil, false
+	}
+	return o.Label, true
+}
+
+// HasLabel returns a boolean if a field has been set.
+func (o *Provider) HasLabel() bool {
+	if o != nil && !IsNil(o.Label) {
+		return true
+	}
+
+	return false
+}
+
+// SetLabel gets a reference to the given string and assigns it to the Label field.
+func (o *Provider) SetLabel(v string) {
+	o.Label = &v
 }
 
 // GetName returns the Name field value
@@ -104,6 +137,9 @@ func (o Provider) MarshalJSON() ([]byte, error) {
 
 func (o Provider) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.Label) {
+		toSerialize["label"] = o.Label
+	}
 	toSerialize["name"] = o.Name
 	toSerialize["version"] = o.Version
 	return toSerialize, nil

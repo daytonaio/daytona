@@ -16,13 +16,15 @@ import (
 )
 
 type RowData struct {
+	Label   string
 	Name    string
 	Version string
 }
 
 func getRowFromRowData(rowData RowData) []string {
 	row := []string{
-		views.NameStyle.Render(rowData.Name),
+		views.NameStyle.Render(rowData.Label),
+		views.DefaultRowDataStyle.Render(rowData.Name),
 		views.DefaultRowDataStyle.Render(rowData.Version),
 	}
 
@@ -30,8 +32,13 @@ func getRowFromRowData(rowData RowData) []string {
 }
 
 func getRowData(provider *apiclient.Provider) *RowData {
-	rowData := RowData{"", ""}
+	rowData := RowData{"", "", ""}
 
+	if provider.Label != nil {
+		rowData.Label = *provider.Label
+	} else {
+		rowData.Label = provider.Name
+	}
 	rowData.Name = provider.Name
 	rowData.Version = provider.Version
 
@@ -42,7 +49,7 @@ func List(providerList []apiclient.Provider) {
 
 	re := lipgloss.NewRenderer(os.Stdout)
 
-	headers := []string{"Name", "Version"}
+	headers := []string{"Provider", "Name", "Version"}
 
 	data := [][]string{}
 
@@ -90,9 +97,11 @@ func renderUnstyledList(providerList []apiclient.Provider) {
 	output := "\n"
 
 	for _, provider := range providerList {
-		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Provider Name: "), provider.Name) + "\n\n"
-
-		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Provider Version: "), provider.Version) + "\n"
+		if provider.Label != nil {
+			output += fmt.Sprintf("%s %s", views.GetPropertyKey("Provider: "), *provider.Label) + "\n\n"
+		}
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Name: "), provider.Name) + "\n\n"
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Version: "), provider.Version) + "\n"
 
 		if provider.Name != providerList[len(providerList)-1].Name {
 			output += views.SeparatorString + "\n\n"

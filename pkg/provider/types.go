@@ -11,8 +11,9 @@ import (
 )
 
 type ProviderInfo struct {
-	Name    string `json:"name" validate:"required"`
-	Version string `json:"version" validate:"required"`
+	Name    string  `json:"name" validate:"required"`
+	Label   *string `json:"label" validate:"optional"`
+	Version string  `json:"version" validate:"required"`
 }
 
 type InitializeProviderRequest struct {

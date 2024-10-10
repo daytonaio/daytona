@@ -36,6 +36,7 @@ func ListProviders(ctx *gin.Context) {
 
 		result = append(result, dto.Provider{
 			Name:    info.Name,
+			Label:   info.Label,
 			Version: info.Version,
 		})
 	}
