@@ -548,6 +548,8 @@ definitions:
     type: object
   Provider:
     properties:
+      label:
+        type: string
       name:
         type: string
       version:
@@ -773,6 +775,8 @@ definitions:
     - BuildStateDeleting
   provider.ProviderInfo:
     properties:
+      label:
+        type: string
       name:
         type: string
       version:

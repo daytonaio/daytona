@@ -2158,8 +2158,11 @@ components:
     Provider:
       example:
         name: name
+        label: label
         version: version
       properties:
+        label:
+          type: string
         name:
           type: string
         version:
@@ -2174,6 +2177,7 @@ components:
         options: options
         providerInfo:
           name: name
+          label: label
           version: version
       properties:
         name:
@@ -2642,8 +2646,11 @@ components:
     provider.ProviderInfo:
       example:
         name: name
+        label: label
         version: version
       properties:
+        label:
+          type: string
         name:
           type: string
         version:

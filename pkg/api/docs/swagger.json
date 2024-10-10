@@ -2558,6 +2558,9 @@
                 "version"
             ],
             "properties": {
+                "label": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -2871,6 +2874,9 @@
                 "version"
             ],
             "properties": {
+                "label": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },

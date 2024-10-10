@@ -2561,6 +2561,9 @@ const docTemplate = `{
                 "version"
             ],
             "properties": {
+                "label": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -2874,6 +2877,9 @@ const docTemplate = `{
                 "version"
             ],
             "properties": {
+                "label": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
