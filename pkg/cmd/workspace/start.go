@@ -6,6 +6,7 @@ package workspace
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
@@ -14,7 +15,6 @@ import (
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/views"
 	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
-	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
 	log "github.com/sirupsen/logrus"
@@ -45,15 +45,15 @@ var StartCmd = &cobra.Command{
 		var ideList []config.Ide
 		projectProviderMetadata := ""
 
-		if allFlag {
-			return startAllWorkspaces()
-		}
-
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			return err
+		}
+
+		if allFlag {
+			return startAllWorkspaces()
 		}
 
 		if len(args) == 0 {
@@ -80,12 +80,13 @@ var StartCmd = &cobra.Command{
 				return err
 			}
 
-			ideList = config.GetIdeList()
-
 			activeProfile, err = c.GetActiveProfile()
 			if err != nil {
 				return err
 			}
+
+			ideList = config.GetIdeList()
+
 			ideId = c.DefaultIdeId
 
 			wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceIdOrName).Execute()
@@ -240,33 +241,55 @@ func getAllWorkspacesByState(state WorkspaceState) ([]string, cobra.ShellCompDir
 
 func StartWorkspace(apiClient *apiclient.APIClient, workspaceId, projectName string) error {
 	ctx := context.Background()
-	var message string
-	var startFunc func() error
-
-	if projectName == "" {
-		message = fmt.Sprintf("Workspace '%s' is starting", workspaceId)
-		startFunc = func() error {
-			res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspaceId).Execute()
-			if err != nil {
-				return apiclient_util.HandleErrorResponse(res, err)
-			}
-			return nil
-		}
-	} else {
-		message = fmt.Sprintf("Project '%s' from workspace '%s' is starting", projectName, workspaceId)
-		startFunc = func() error {
-			res, err := apiClient.WorkspaceAPI.StartProject(ctx, workspaceId, projectName).Execute()
-			if err != nil {
-				return apiclient_util.HandleErrorResponse(res, err)
-			}
-			return nil
-		}
-	}
-
-	err := views_util.WithInlineSpinner(message, startFunc)
+	var projectNames []string
+	timeFormat := time.Now().Format("2006-01-02 15:04:05")
+	from, err := time.Parse("2006-01-02 15:04:05", timeFormat)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	c, err := config.GetConfig()
+	if err != nil {
+		return err
+	}
+
+	activeProfile, err := c.GetActiveProfile()
+	if err != nil {
+		return err
+	}
+
+	workspace, err := apiclient_util.GetWorkspace(workspaceId, false)
+	if err != nil {
+		return err
+	}
+	if projectName != "" {
+		projectNames = append(projectNames, projectName)
+	} else {
+		projectNames = util.ArrayMap(workspace.Projects, func(p apiclient.Project) string {
+			return p.Name
+		})
+	}
+
+	logsContext, stopLogs := context.WithCancel(context.Background())
+	go apiclient_util.ReadWorkspaceLogs(logsContext, activeProfile, workspace.Id, projectNames, true, true, &from)
+
+	if projectName == "" {
+		res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspaceId).Execute()
+		if err != nil {
+			stopLogs()
+			return apiclient_util.HandleErrorResponse(res, err)
+		}
+		time.Sleep(100 * time.Millisecond)
+		stopLogs()
+		return nil
+	} else {
+		res, err := apiClient.WorkspaceAPI.StartProject(ctx, workspaceId, projectName).Execute()
+		if err != nil {
+			stopLogs()
+			return apiclient_util.HandleErrorResponse(res, err)
+		}
+		time.Sleep(100 * time.Millisecond)
+		stopLogs()
+		return nil
+	}
 }
