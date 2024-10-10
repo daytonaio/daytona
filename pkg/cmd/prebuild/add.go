@@ -109,7 +109,6 @@ var prebuildAddCmd = &cobra.Command{
 				prebuildAddView.ProjectConfigName = projectConfigTemp.Name
 				projectConfig = projectConfigTemp
 
-				
 			} else {
 				return errors.New("Project config must be specified when using flags")
 			}
