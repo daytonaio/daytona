@@ -115,7 +115,7 @@ func GitProviderSelectionView(ctx context.Context, gitProviderAddView *apiclient
 		huh.NewGroup(huh.NewSelect[string]().
 			Title("Commit Signing Method").
 			DescriptionFunc(func() string {
-				return getGitProviderSigningHelpMessage(*gitProviderAddView.Id)
+				return getGitProviderSigningHelpMessage(gitProviderAddView.ProviderId)
 			}, nil).
 			Options(
 				huh.Option[string]{Key: "None", Value: "none"},
@@ -124,7 +124,7 @@ func GitProviderSelectionView(ctx context.Context, gitProviderAddView *apiclient
 			).
 			Value(&selectedSigningMethod).WithHeight(6),
 		).WithHeight(8).WithHideFunc(func() bool {
-			return commitSigningNotSupported(*gitProviderAddView.Id)
+			return commitSigningNotSupported(gitProviderAddView.ProviderId)
 		}),
 		huh.NewGroup(
 			huh.NewInput().
