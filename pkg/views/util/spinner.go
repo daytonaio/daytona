@@ -14,6 +14,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var isAborted bool
+
 type model struct {
 	spinner  spinner.Model
 	quitting bool
@@ -43,6 +45,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch keypress := msg.String(); keypress {
 		case "ctrl+c":
+			isAborted = true
 			m.quitting = true
 			return m, tea.Quit
 		}
@@ -75,6 +78,10 @@ func start(message string, inline bool) *tea.Program {
 	go func() {
 		if _, err := p.Run(); err != nil {
 			fmt.Println(err)
+			os.Exit(1)
+		}
+		if isAborted {
+			fmt.Println("Operation cancelled")
 			os.Exit(1)
 		}
 	}()
