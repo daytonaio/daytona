@@ -207,6 +207,11 @@ func processCmdArgument(argument string, apiClient *apiclient.APIClient, ctx con
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
+	projectConfigurationFlags.GitProviderConfig, err = workspace_util.GetGitProviderConfigIdFromFlag(ctx, apiClient, projectConfigurationFlags.GitProviderConfig)
+	if err != nil {
+		return nil, err
+	}
+
 	project, err := workspace_util.GetCreateProjectDtoFromFlags(projectConfigurationFlags)
 	if err != nil {
 		return nil, err
@@ -272,14 +277,14 @@ func getExistingProjectConfigNames(apiClient *apiclient.APIClient) ([]string, er
 var nameFlag string
 
 var projectConfigurationFlags = workspace_util.ProjectConfigurationFlags{
-	Builder:             new(views_util.BuildChoice),
-	CustomImage:         new(string),
-	CustomImageUser:     new(string),
-	Branches:            new([]string),
-	DevcontainerPath:    new(string),
-	EnvVars:             new([]string),
-	Manual:              new(bool),
-	GitProviderConfigId: new(string),
+	Builder:           new(views_util.BuildChoice),
+	CustomImage:       new(string),
+	CustomImageUser:   new(string),
+	Branches:          new([]string),
+	DevcontainerPath:  new(string),
+	EnvVars:           new([]string),
+	Manual:            new(bool),
+	GitProviderConfig: new(string),
 }
 
 func init() {
