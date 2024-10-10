@@ -4,6 +4,7 @@
 package gitprovider
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -17,36 +18,18 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
-type GitProviderView struct {
-	Id            string
-	Name          string
-	Username      string
-	BaseApiUrl    string
-	Token         string
-	SigningMethod string
-	SigningKey    string
-}
-
 var commonGitProviderIds = []string{"github", "gitlab", "bitbucket"}
 
-func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig, userGitProviders []apiclient.GitProvider, isDeleting bool) {
+func GitProviderSelectionView(ctx context.Context, gitProviderAddView *apiclient.SetGitProviderConfig, apiClient *apiclient.APIClient) {
 	supportedProviders := config.GetSupportedGitProviders()
 
 	var gitProviderOptions []huh.Option[string]
 	var otherGitProviderOptions []huh.Option[string]
 	for _, supportedProvider := range supportedProviders {
-		if isDeleting {
-			for _, userProvider := range userGitProviders {
-				if userProvider.Id == supportedProvider.Id {
-					gitProviderOptions = append(gitProviderOptions, huh.Option[string]{Key: supportedProvider.Name, Value: supportedProvider.Id})
-				}
-			}
+		if slices.Contains(commonGitProviderIds, supportedProvider.Id) {
+			gitProviderOptions = append(gitProviderOptions, huh.Option[string]{Key: supportedProvider.Name, Value: supportedProvider.Id})
 		} else {
-			if slices.Contains(commonGitProviderIds, supportedProvider.Id) {
-				gitProviderOptions = append(gitProviderOptions, huh.Option[string]{Key: supportedProvider.Name, Value: supportedProvider.Id})
-			} else {
-				otherGitProviderOptions = append(otherGitProviderOptions, huh.Option[string]{Key: supportedProvider.Name, Value: supportedProvider.Id})
-			}
+			otherGitProviderOptions = append(otherGitProviderOptions, huh.Option[string]{Key: supportedProvider.Name, Value: supportedProvider.Id})
 		}
 	}
 
@@ -61,15 +44,15 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig
 				Options(
 					gitProviderOptions...,
 				).
-				Value(&gitProviderAddView.Id)).WithHeight(8),
+				Value(&gitProviderAddView.ProviderId)).WithHeight(8),
 		huh.NewGroup(
 			huh.NewSelect[string]().
 				Title("Choose a Git provider").
 				Options(
 					otherGitProviderOptions...,
 				).
-				Value(&gitProviderAddView.Id)).WithHeight(12).WithHideFunc(func() bool {
-			return gitProviderAddView.Id != "other"
+				Value(&gitProviderAddView.ProviderId)).WithHeight(12).WithHideFunc(func() bool {
+			return gitProviderAddView.ProviderId != "other"
 		}),
 	).WithTheme(views.GetCustomTheme())
 
@@ -93,13 +76,13 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig
 					return nil
 				}),
 		).WithHeight(5).WithHideFunc(func() bool {
-			return isDeleting || !providerRequiresUsername(gitProviderAddView.Id)
+			return !providerRequiresUsername(gitProviderAddView.ProviderId)
 		}),
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Self-managed API URL").
 				Value(gitProviderAddView.BaseApiUrl).
-				Description(getApiUrlDescription(gitProviderAddView.Id)).
+				Description(getApiUrlDescription(gitProviderAddView.ProviderId)).
 				Validate(func(str string) error {
 					if str == "" {
 						return errors.New("URL can not be blank")
@@ -107,7 +90,7 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig
 					return nil
 				}),
 		).WithHeight(6).WithHideFunc(func() bool {
-			return isDeleting || !providerRequiresApiUrl(gitProviderAddView.Id)
+			return !providerRequiresApiUrl(gitProviderAddView.ProviderId)
 		}),
 
 		huh.NewGroup(
@@ -121,11 +104,18 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig
 					}
 					return nil
 				}),
-		).WithHeight(5).WithHide(isDeleting),
+		).WithHeight(5),
+		huh.NewGroup(
+			huh.NewInput().
+				Title("Alias").
+				Description("Will default to username if left empty").
+				Value(gitProviderAddView.Alias),
+		).WithHeight(6),
+
 		huh.NewGroup(huh.NewSelect[string]().
 			Title("Commit Signing Method").
 			DescriptionFunc(func() string {
-				return getGitProviderSigningHelpMessage(gitProviderAddView.Id)
+				return getGitProviderSigningHelpMessage(*gitProviderAddView.Id)
 			}, nil).
 			Options(
 				huh.Option[string]{Key: "None", Value: "none"},
@@ -134,7 +124,7 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig
 			).
 			Value(&selectedSigningMethod).WithHeight(6),
 		).WithHeight(8).WithHideFunc(func() bool {
-			return isDeleting || commitSigningNotSupported(gitProviderAddView.Id)
+			return commitSigningNotSupported(*gitProviderAddView.Id)
 		}),
 		huh.NewGroup(
 			huh.NewInput().
@@ -156,14 +146,11 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig
 					return nil
 				}),
 		).WithHeight(5).WithHideFunc(func() bool {
-			return selectedSigningMethod == "none" || isDeleting
+			return selectedSigningMethod == "none"
 		}),
 	).WithTheme(views.GetCustomTheme())
 
-	if !isDeleting {
-		views.RenderInfoMessage(getGitProviderHelpMessage(gitProviderAddView.Id))
-	}
-
+	views.RenderInfoMessage(getGitProviderHelpMessage(gitProviderAddView.ProviderId))
 	err = userDataForm.Run()
 	if err != nil {
 		log.Fatal(err)
@@ -174,13 +161,33 @@ func GitProviderSelectionView(gitProviderAddView *apiclient.SetGitProviderConfig
 		gitProviderAddView.SigningKey = &signingKey
 	}
 }
-
 func isValidSSHKey(key string) error {
 	sshKeyPattern := regexp.MustCompile(`^(ssh-(rsa|ed25519|dss|ecdsa-sha2-nistp(256|384|521)))\s+[A-Za-z0-9+/=]+(\s+.+)?$`)
 	if !sshKeyPattern.MatchString(key) {
 		return errors.New("invalid SSH key: must start with valid SSH key type (e.g., ssh-rsa, ssh-ed25519)")
 	}
 	return nil
+}
+
+func GitProviderDeleteView(gitProviderAddView *apiclient.SetGitProviderConfig, userGitProviders []apiclient.GitProvider, apiClient *apiclient.APIClient, ctx context.Context) {
+	var gitProviderOptions []huh.Option[string]
+	for _, userProvider := range userGitProviders {
+		gitProviderOptions = append(gitProviderOptions, huh.Option[string]{Key: fmt.Sprintf("%s   %s", userProvider.ProviderId, userProvider.Alias), Value: userProvider.Id})
+	}
+	gitProviderForm := huh.NewForm(
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title("Choose a Git provider").
+				Options(
+					gitProviderOptions...,
+				).
+				Value(gitProviderAddView.Id)).WithHeight(8),
+	).WithTheme(views.GetCustomTheme())
+	err := gitProviderForm.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }
 
 func providerRequiresUsername(gitProviderId string) bool {

@@ -50,14 +50,15 @@ func ToProject(projectDTO *apiclient.Project) *project.Project {
 	}
 
 	project := &project.Project{
-		Name:        projectDTO.Name,
-		Image:       projectDTO.Image,
-		User:        projectDTO.User,
-		BuildConfig: projectBuild,
-		Repository:  repository,
-		Target:      projectDTO.Target,
-		WorkspaceId: projectDTO.WorkspaceId,
-		State:       projectState,
+		Name:                projectDTO.Name,
+		Image:               projectDTO.Image,
+		User:                projectDTO.User,
+		BuildConfig:         projectBuild,
+		Repository:          repository,
+		Target:              projectDTO.Target,
+		WorkspaceId:         projectDTO.WorkspaceId,
+		State:               projectState,
+		GitProviderConfigId: projectDTO.GitProviderConfigId,
 	}
 
 	if projectDTO.Repository.PrNumber != nil {
@@ -148,9 +149,10 @@ func ToGitStatusDTO(gitStatus *project.GitStatus) *apiclient.GitStatus {
 
 func ToProjectConfig(createProjectConfigDto pc_dto.CreateProjectConfigDTO) *config.ProjectConfig {
 	result := &config.ProjectConfig{
-		Name:        createProjectConfigDto.Name,
-		BuildConfig: createProjectConfigDto.BuildConfig,
-		EnvVars:     createProjectConfigDto.EnvVars,
+		Name:                createProjectConfigDto.Name,
+		BuildConfig:         createProjectConfigDto.BuildConfig,
+		EnvVars:             createProjectConfigDto.EnvVars,
+		GitProviderConfigId: createProjectConfigDto.GitProviderConfigId,
 	}
 
 	result.RepositoryUrl = createProjectConfigDto.RepositoryUrl
@@ -168,10 +170,11 @@ func ToProjectConfig(createProjectConfigDto pc_dto.CreateProjectConfigDTO) *conf
 
 func CreateDtoToProject(createProjectDto project_dto.CreateProjectDTO) *project.Project {
 	p := &project.Project{
-		Name:        createProjectDto.Name,
-		BuildConfig: createProjectDto.BuildConfig,
-		Repository:  createProjectDto.Source.Repository,
-		EnvVars:     createProjectDto.EnvVars,
+		Name:                createProjectDto.Name,
+		BuildConfig:         createProjectDto.BuildConfig,
+		Repository:          createProjectDto.Source.Repository,
+		EnvVars:             createProjectDto.EnvVars,
+		GitProviderConfigId: createProjectDto.GitProviderConfigId,
 	}
 
 	if createProjectDto.Image != nil {
@@ -187,10 +190,11 @@ func CreateDtoToProject(createProjectDto project_dto.CreateProjectDTO) *project.
 
 func CreateConfigDtoToProject(createProjectConfigDto pc_dto.CreateProjectConfigDTO) *project.Project {
 	return &project.Project{
-		Name:        createProjectConfigDto.Name,
-		Image:       *createProjectConfigDto.Image,
-		User:        *createProjectConfigDto.User,
-		BuildConfig: createProjectConfigDto.BuildConfig,
+		Name:                createProjectConfigDto.Name,
+		Image:               *createProjectConfigDto.Image,
+		User:                *createProjectConfigDto.User,
+		BuildConfig:         createProjectConfigDto.BuildConfig,
+		GitProviderConfigId: createProjectConfigDto.GitProviderConfigId,
 		Repository: &gitprovider.GitRepository{
 			Url: createProjectConfigDto.RepositoryUrl,
 		},

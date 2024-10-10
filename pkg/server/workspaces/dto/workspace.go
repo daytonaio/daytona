@@ -28,12 +28,13 @@ type CreateWorkspaceDTO struct {
 } //	@name	CreateWorkspaceDTO
 
 type CreateProjectDTO struct {
-	Name        string                   `json:"name" validate:"required"`
-	Image       *string                  `json:"image,omitempty" validate:"optional"`
-	User        *string                  `json:"user,omitempty" validate:"optional"`
-	BuildConfig *buildconfig.BuildConfig `json:"buildConfig,omitempty" validate:"optional"`
-	Source      CreateProjectSourceDTO   `json:"source" validate:"required"`
-	EnvVars     map[string]string        `json:"envVars" validate:"required"`
+	Name                string                   `json:"name" validate:"required"`
+	Image               *string                  `json:"image,omitempty" validate:"optional"`
+	User                *string                  `json:"user,omitempty" validate:"optional"`
+	BuildConfig         *buildconfig.BuildConfig `json:"buildConfig,omitempty" validate:"optional"`
+	Source              CreateProjectSourceDTO   `json:"source" validate:"required"`
+	EnvVars             map[string]string        `json:"envVars" validate:"required"`
+	GitProviderConfigId *string                  `json:"gitProviderConfigId" validate:"optional"`
 } //	@name	CreateProjectDTO
 
 type CreateProjectSourceDTO struct {

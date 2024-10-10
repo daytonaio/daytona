@@ -21,8 +21,10 @@ var _ MappedNullable = &GitProvider{}
 
 // GitProvider struct for GitProvider
 type GitProvider struct {
+	Alias         string         `json:"alias"`
 	BaseApiUrl    *string        `json:"baseApiUrl,omitempty"`
 	Id            string         `json:"id"`
+	ProviderId    string         `json:"providerId"`
 	SigningKey    *string        `json:"signingKey,omitempty"`
 	SigningMethod *SigningMethod `json:"signingMethod,omitempty"`
 	Token         string         `json:"token"`
@@ -35,9 +37,11 @@ type _GitProvider GitProvider
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGitProvider(id string, token string, username string) *GitProvider {
+func NewGitProvider(alias string, id string, providerId string, token string, username string) *GitProvider {
 	this := GitProvider{}
+	this.Alias = alias
 	this.Id = id
+	this.ProviderId = providerId
 	this.Token = token
 	this.Username = username
 	return &this
@@ -49,6 +53,30 @@ func NewGitProvider(id string, token string, username string) *GitProvider {
 func NewGitProviderWithDefaults() *GitProvider {
 	this := GitProvider{}
 	return &this
+}
+
+// GetAlias returns the Alias field value
+func (o *GitProvider) GetAlias() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Alias
+}
+
+// GetAliasOk returns a tuple with the Alias field value
+// and a boolean to check if the value has been set.
+func (o *GitProvider) GetAliasOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Alias, true
+}
+
+// SetAlias sets field value
+func (o *GitProvider) SetAlias(v string) {
+	o.Alias = v
 }
 
 // GetBaseApiUrl returns the BaseApiUrl field value if set, zero value otherwise.
@@ -105,6 +133,30 @@ func (o *GitProvider) GetIdOk() (*string, bool) {
 // SetId sets field value
 func (o *GitProvider) SetId(v string) {
 	o.Id = v
+}
+
+// GetProviderId returns the ProviderId field value
+func (o *GitProvider) GetProviderId() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.ProviderId
+}
+
+// GetProviderIdOk returns a tuple with the ProviderId field value
+// and a boolean to check if the value has been set.
+func (o *GitProvider) GetProviderIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.ProviderId, true
+}
+
+// SetProviderId sets field value
+func (o *GitProvider) SetProviderId(v string) {
+	o.ProviderId = v
 }
 
 // GetSigningKey returns the SigningKey field value if set, zero value otherwise.
@@ -229,10 +281,12 @@ func (o GitProvider) MarshalJSON() ([]byte, error) {
 
 func (o GitProvider) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	toSerialize["alias"] = o.Alias
 	if !IsNil(o.BaseApiUrl) {
 		toSerialize["baseApiUrl"] = o.BaseApiUrl
 	}
 	toSerialize["id"] = o.Id
+	toSerialize["providerId"] = o.ProviderId
 	if !IsNil(o.SigningKey) {
 		toSerialize["signingKey"] = o.SigningKey
 	}
@@ -249,7 +303,9 @@ func (o *GitProvider) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"alias",
 		"id",
+		"providerId",
 		"token",
 		"username",
 	}

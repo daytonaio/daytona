@@ -1963,6 +1963,9 @@
                         "type": "string"
                     }
                 },
+                "gitProviderConfigId": {
+                    "type": "string"
+                },
                 "image": {
                     "type": "string"
                 },
@@ -1993,6 +1996,9 @@
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "gitProviderConfigId": {
+                    "type": "string"
                 },
                 "image": {
                     "type": "string"
@@ -2166,15 +2172,23 @@
         "GitProvider": {
             "type": "object",
             "required": [
+                "alias",
                 "id",
+                "providerId",
                 "token",
                 "username"
             ],
             "properties": {
+                "alias": {
+                    "type": "string"
+                },
                 "baseApiUrl": {
                     "type": "string"
                 },
                 "id": {
+                    "type": "string"
+                },
+                "providerId": {
                     "type": "string"
                 },
                 "signingKey": {
@@ -2446,6 +2460,9 @@
                         "type": "string"
                     }
                 },
+                "gitProviderConfigId": {
+                    "type": "string"
+                },
                 "image": {
                     "type": "string"
                 },
@@ -2491,6 +2508,9 @@
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "gitProviderConfigId": {
+                    "type": "string"
                 },
                 "image": {
                     "type": "string"
@@ -2703,14 +2723,20 @@
         "SetGitProviderConfig": {
             "type": "object",
             "required": [
-                "id",
+                "providerId",
                 "token"
             ],
             "properties": {
+                "alias": {
+                    "type": "string"
+                },
                 "baseApiUrl": {
                     "type": "string"
                 },
                 "id": {
+                    "type": "string"
+                },
+                "providerId": {
                     "type": "string"
                 },
                 "signingKey": {
