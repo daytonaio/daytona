@@ -10,6 +10,7 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
+	"github.com/daytonaio/daytona/pkg/cmd/provider"
 	"github.com/daytonaio/daytona/pkg/cmd/server/daemon"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -34,6 +35,18 @@ var ServerCmd = &cobra.Command{
 			if !confirmCheck {
 				views.RenderInfoMessage("Operation cancelled.")
 				return nil
+			}
+		}
+		logRequirements := provider.LogProvider{}
+		requirements, err := logRequirements.CheckRequirements()
+		if err != nil {
+			return err
+		}
+		for _, req := range requirements {
+			if req.Met {
+				log.Printf("[INFO] Requirement met: %s - %s\n", req.Name, req.Reason)
+			} else {
+				log.Printf("[WARNING] Requirement not met: %s - %s\n", req.Name, req.Reason)
 			}
 		}
 
