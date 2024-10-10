@@ -219,7 +219,7 @@ var CreateCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		gpgKey, err = GetGitProviderGpgKey(apiClient, ctx, wsInfo.Projects[0].Name)
+		gpgKey, err = GetGitProviderGpgKey(apiClient, ctx, wsInfo.Projects[0].Repository.Url)
 		if err != nil {
 			log.Warn(err)
 		}
