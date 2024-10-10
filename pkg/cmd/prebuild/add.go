@@ -102,13 +102,14 @@ var prebuildAddCmd = &cobra.Command{
 				if err != nil {
 					return apiclient_util.HandleErrorResponse(res, err)
 				}
+				if projectConfigTemp == nil {
+					return errors.New("Invalid project config specified")
+				}
 
 				prebuildAddView.ProjectConfigName = projectConfigTemp.Name
 				projectConfig = projectConfigTemp
 
-				if projectConfig == nil {
-					return errors.New("Invalid project config specified")
-				}
+				
 			} else {
 				return errors.New("Project config must be specified when using flags")
 			}
@@ -171,7 +172,6 @@ var prebuildAddCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			fmt.Printf(buildId)
 
 			views.RenderViewBuildLogsMessage(buildId)
 		}
