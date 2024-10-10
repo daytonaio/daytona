@@ -192,7 +192,7 @@ func ConvertOSToStringMap(downloadUrls map[os.OperatingSystem]string) map[string
 
 func InstallProvider(apiClient *apiclient.APIClient, providerToInstall provider_view.ProviderView, providersManifest *manager.ProvidersManifest) error {
 	downloadUrls := ConvertOSToStringMap((*providersManifest)[providerToInstall.Name].Versions[providerToInstall.Version].DownloadUrls)
-	err := views_util.WithSpinner("Installing", func() error {
+	err := views_util.WithInlineSpinner("Installing", func() error {
 		res, err := apiClient.ProviderAPI.InstallProviderExecute(apiclient.ApiInstallProviderRequest{}.Provider(apiclient.InstallProviderRequest{
 			Name:         providerToInstall.Name,
 			DownloadUrls: downloadUrls,
