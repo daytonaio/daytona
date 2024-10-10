@@ -148,37 +148,37 @@ func (a *GitProviderAPIService) GetGitContextExecute(r ApiGetGitContextRequest) 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiGetGitProviderForUrlRequest struct {
+type ApiGetGitProviderRequest struct {
 	ctx        context.Context
 	ApiService *GitProviderAPIService
-	url        string
+	idOrUrl    string
 }
 
-func (r ApiGetGitProviderForUrlRequest) Execute() (*GitProvider, *http.Response, error) {
-	return r.ApiService.GetGitProviderForUrlExecute(r)
+func (r ApiGetGitProviderRequest) Execute() (*GitProvider, *http.Response, error) {
+	return r.ApiService.GetGitProviderExecute(r)
 }
 
 /*
-GetGitProviderForUrl Get Git provider
+GetGitProvider Get Git provider
 
 Get Git provider
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param url Url
-	@return ApiGetGitProviderForUrlRequest
+	@param idOrUrl ID or URL
+	@return ApiGetGitProviderRequest
 */
-func (a *GitProviderAPIService) GetGitProviderForUrl(ctx context.Context, url string) ApiGetGitProviderForUrlRequest {
-	return ApiGetGitProviderForUrlRequest{
+func (a *GitProviderAPIService) GetGitProvider(ctx context.Context, idOrUrl string) ApiGetGitProviderRequest {
+	return ApiGetGitProviderRequest{
 		ApiService: a,
 		ctx:        ctx,
-		url:        url,
+		idOrUrl:    idOrUrl,
 	}
 }
 
 // Execute executes the request
 //
 //	@return GitProvider
-func (a *GitProviderAPIService) GetGitProviderForUrlExecute(r ApiGetGitProviderForUrlRequest) (*GitProvider, *http.Response, error) {
+func (a *GitProviderAPIService) GetGitProviderExecute(r ApiGetGitProviderRequest) (*GitProvider, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
@@ -186,13 +186,13 @@ func (a *GitProviderAPIService) GetGitProviderForUrlExecute(r ApiGetGitProviderF
 		localVarReturnValue *GitProvider
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitProviderAPIService.GetGitProviderForUrl")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitProviderAPIService.GetGitProvider")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/gitprovider/for-url/{url}"
-	localVarPath = strings.Replace(localVarPath, "{"+"url"+"}", url.PathEscape(parameterValueToString(r.url, "url")), -1)
+	localVarPath := localBasePath + "/gitprovider/{idOrUrl}"
+	localVarPath = strings.Replace(localVarPath, "{"+"idOrUrl"+"}", url.PathEscape(parameterValueToString(r.idOrUrl, "idOrUrl")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}

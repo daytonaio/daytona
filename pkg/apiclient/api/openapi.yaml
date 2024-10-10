@@ -339,27 +339,6 @@ paths:
       tags:
       - gitProvider
       x-codegen-request-body-name: repository
-  /gitprovider/for-url/{url}:
-    get:
-      description: Get Git provider
-      operationId: GetGitProviderForUrl
-      parameters:
-      - description: Url
-        in: path
-        name: url
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GitProvider'
-          description: OK
-      summary: Get Git provider
-      tags:
-      - gitProvider
   /gitprovider/id-for-url/{url}:
     get:
       description: Get Git provider ID
@@ -540,6 +519,27 @@ paths:
                 type: array
           description: OK
       summary: Get Git repository PRs
+      tags:
+      - gitProvider
+  /gitprovider/{idOrUrl}:
+    get:
+      description: Get Git provider
+      operationId: GetGitProvider
+      parameters:
+      - description: ID or URL
+        in: path
+        name: idOrUrl
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GitProvider'
+          description: OK
+      summary: Get Git provider
       tags:
       - gitProvider
   /health:

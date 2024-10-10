@@ -5,7 +5,7 @@ All URIs are relative to *http://localhost:3986*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**GetGitContext**](GitProviderAPI.md#GetGitContext) | **Post** /gitprovider/context | Get Git context
-[**GetGitProviderForUrl**](GitProviderAPI.md#GetGitProviderForUrl) | **Get** /gitprovider/for-url/{url} | Get Git provider
+[**GetGitProvider**](GitProviderAPI.md#GetGitProvider) | **Get** /gitprovider/{idOrUrl} | Get Git provider
 [**GetGitProviderIdForUrl**](GitProviderAPI.md#GetGitProviderIdForUrl) | **Get** /gitprovider/id-for-url/{url} | Get Git provider ID
 [**GetGitUser**](GitProviderAPI.md#GetGitUser) | **Get** /gitprovider/{gitProviderId}/user | Get Git context
 [**GetNamespaces**](GitProviderAPI.md#GetNamespaces) | **Get** /gitprovider/{gitProviderId}/namespaces | Get Git namespaces
@@ -85,9 +85,9 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
-## GetGitProviderForUrl
+## GetGitProvider
 
-> GitProvider GetGitProviderForUrl(ctx, url).Execute()
+> GitProvider GetGitProvider(ctx, idOrUrl).Execute()
 
 Get Git provider
 
@@ -106,17 +106,17 @@ import (
 )
 
 func main() {
-	url := "url_example" // string | Url
+	idOrUrl := "idOrUrl_example" // string | ID or URL
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.GitProviderAPI.GetGitProviderForUrl(context.Background(), url).Execute()
+	resp, r, err := apiClient.GitProviderAPI.GetGitProvider(context.Background(), idOrUrl).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `GitProviderAPI.GetGitProviderForUrl``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `GitProviderAPI.GetGitProvider``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `GetGitProviderForUrl`: GitProvider
-	fmt.Fprintf(os.Stdout, "Response from `GitProviderAPI.GetGitProviderForUrl`: %v\n", resp)
+	// response from `GetGitProvider`: GitProvider
+	fmt.Fprintf(os.Stdout, "Response from `GitProviderAPI.GetGitProvider`: %v\n", resp)
 }
 ```
 
@@ -126,11 +126,11 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**url** | **string** | Url | 
+**idOrUrl** | **string** | ID or URL | 
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiGetGitProviderForUrlRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiGetGitProviderRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes

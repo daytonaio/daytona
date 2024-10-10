@@ -257,7 +257,7 @@ func (a *ApiServer) Start() error {
 	projectGroup.Use(middlewares.ProjectAuthMiddleware())
 	{
 		projectGroup.POST(workspaceController.BasePath()+"/:workspaceId/:projectId/state", workspace.SetProjectState)
-		projectGroup.GET(gitProviderController.BasePath()+"/for-url/:url", gitprovider.GetGitProviderForUrl)
+		projectGroup.GET(gitProviderController.BasePath()+"/:idOrUrl", gitprovider.GetGitProvider)
 	}
 
 	a.httpServer = &http.Server{

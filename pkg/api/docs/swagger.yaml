@@ -1271,6 +1271,26 @@ paths:
       summary: Get Git context
       tags:
       - gitProvider
+  /gitprovider/{idOrUrl}:
+    get:
+      description: Get Git provider
+      operationId: GetGitProvider
+      parameters:
+      - description: ID or URL
+        in: path
+        name: idOrUrl
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/GitProvider'
+      summary: Get Git provider
+      tags:
+      - gitProvider
   /gitprovider/context:
     post:
       description: Get Git context
@@ -1311,26 +1331,6 @@ paths:
           schema:
             $ref: '#/definitions/RepositoryUrl'
       summary: Get URL from Git repository
-      tags:
-      - gitProvider
-  /gitprovider/for-url/{url}:
-    get:
-      description: Get Git provider
-      operationId: GetGitProviderForUrl
-      parameters:
-      - description: Url
-        in: path
-        name: url
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/GitProvider'
-      summary: Get Git provider
       tags:
       - gitProvider
   /gitprovider/id-for-url/{url}:

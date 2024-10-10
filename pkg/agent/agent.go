@@ -162,7 +162,7 @@ func (a *Agent) getGitProvider(repoUrl string) (*apiclient.GitProvider, error) {
 	}
 
 	encodedUrl := url.QueryEscape(repoUrl)
-	gitProvider, res, err := apiClient.GitProviderAPI.GetGitProviderForUrl(ctx, encodedUrl).Execute()
+	gitProvider, res, err := apiClient.GitProviderAPI.GetGitProvider(ctx, encodedUrl).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}

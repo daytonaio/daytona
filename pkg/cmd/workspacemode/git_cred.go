@@ -38,7 +38,7 @@ var gitCredCmd = &cobra.Command{
 		}
 
 		encodedUrl := url.QueryEscape(host)
-		gitProvider, _, _ := apiClient.GitProviderAPI.GetGitProviderForUrl(ctx, encodedUrl).Execute()
+		gitProvider, _, _ := apiClient.GitProviderAPI.GetGitProvider(ctx, encodedUrl).Execute()
 		if gitProvider == nil {
 			fmt.Println("error: git provider not found")
 			os.Exit(1)

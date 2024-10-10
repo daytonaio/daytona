@@ -1,0 +1,86 @@
+// Copyright 2024 Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
+package gitproviders
+
+import (
+	"errors"
+	"net/url"
+	"strings"
+
+	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/docker/docker/pkg/stringid"
+)
+
+func (s *GitProviderService) ListConfigs() ([]*gitprovider.GitProviderConfig, error) {
+	return s.configStore.List()
+}
+
+func (s *GitProviderService) GetConfig(idOrUrl string) (*gitprovider.GitProviderConfig, error) {
+	gitProviders, err := s.configStore.List()
+	if err != nil {
+		return nil, err
+	}
+
+	u, err := url.ParseRequestURI(idOrUrl)
+	if err != nil || u.Scheme == "" || u.Host == "" {
+		return s.configStore.Find(idOrUrl)
+	}
+
+	for _, p := range gitProviders {
+		p.Token = url.QueryEscape(p.Token)
+		p.Username = url.QueryEscape(p.Username)
+
+		gitProvider, err := s.GetGitProvider(p.Id)
+		if err != nil {
+			return nil, err
+		}
+
+		canHandle, _ := gitProvider.CanHandle(idOrUrl)
+		if canHandle {
+			_, err = gitProvider.GetRepositoryContext(gitprovider.GetRepositoryContext{
+				Url: idOrUrl,
+			})
+			if err == nil {
+				return p, nil
+			}
+		}
+
+	}
+
+	supportedGitProviders := config.GetSupportedGitProviders()
+	for _, provider := range supportedGitProviders {
+		if strings.Contains(idOrUrl, provider.Id) {
+			return &gitprovider.GitProviderConfig{
+				Id: provider.Id,
+			}, nil
+		}
+	}
+
+	return nil, errors.New("git provider not found")
+}
+
+func (s *GitProviderService) SetGitProviderConfig(providerConfig *gitprovider.GitProviderConfig) error {
+	gitProvider, err := s.newGitProvider(providerConfig)
+	if err != nil {
+		return err
+	}
+
+	userData, err := gitProvider.GetUser()
+	if err != nil {
+		return err
+	}
+	providerConfig.Username = userData.Username
+	if providerConfig.Id == "" {
+		id := stringid.GenerateRandomID()
+		id = stringid.TruncateID(id)
+		providerConfig.Id = id
+	}
+
+	if providerConfig.Alias == "" {
+		providerConfig.Alias = userData.Username
+	}
+
+	return s.configStore.Save(providerConfig)
+}

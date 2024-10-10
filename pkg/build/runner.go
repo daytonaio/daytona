@@ -60,7 +60,7 @@ type BuildProcessConfig struct {
 }
 
 type GitProviderStore interface {
-	GetConfigForUrl(url string) (*gitprovider.GitProviderConfig, error)
+	GetConfig(idOrUrl string) (*gitprovider.GitProviderConfig, error)
 }
 
 func NewBuildRunner(config BuildRunnerInstanceConfig) *BuildRunner {
@@ -240,7 +240,7 @@ func (r *BuildRunner) RunBuildProcess(config BuildProcessConfig) {
 		return
 	}
 
-	gitProvider, err := r.gitProviderStore.GetConfigForUrl(config.Build.Repository.Url)
+	gitProvider, err := r.gitProviderStore.GetConfig(config.Build.Repository.Url)
 	if err != nil && !gitprovider.IsGitProviderNotFound(err) {
 		r.handleBuildError(*config.Build, config.Builder, err, config.BuildLogger)
 		return

@@ -476,36 +476,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/gitprovider/for-url/{url}": {
-            "get": {
-                "description": "Get Git provider",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "gitProvider"
-                ],
-                "summary": "Get Git provider",
-                "operationId": "GetGitProviderForUrl",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Url",
-                        "name": "url",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/GitProvider"
-                        }
-                    }
-                }
-            }
-        },
         "/gitprovider/id-for-url/{url}": {
             "get": {
                 "description": "Get Git provider ID",
@@ -755,6 +725,36 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/GitPullRequest"
                             }
+                        }
+                    }
+                }
+            }
+        },
+        "/gitprovider/{idOrUrl}": {
+            "get": {
+                "description": "Get Git provider",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gitProvider"
+                ],
+                "summary": "Get Git provider",
+                "operationId": "GetGitProvider",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID or URL",
+                        "name": "idOrUrl",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GitProvider"
                         }
                     }
                 }
