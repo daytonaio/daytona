@@ -15,8 +15,8 @@ import (
 
 var GitProviderAddCmd = &cobra.Command{
 	Use:     "add",
-	Aliases: []string{"new", "register", "update"},
-	Short:   "Register a Git providers",
+	Aliases: []string{"new", "register"},
+	Short:   "Register a Git provider",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
@@ -30,7 +30,10 @@ var GitProviderAddCmd = &cobra.Command{
 		setGitProviderConfig.Username = new(string)
 		setGitProviderConfig.Alias = new(string)
 
-		gitprovider_view.GitProviderSelectionView(ctx, &setGitProviderConfig, apiClient)
+		err = gitprovider_view.GitProviderCreationView(ctx, &setGitProviderConfig, apiClient)
+		if err != nil {
+			return err
+		}
 
 		if setGitProviderConfig.ProviderId == "" {
 			return nil

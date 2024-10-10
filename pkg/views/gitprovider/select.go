@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"slices"
 
 	"github.com/charmbracelet/huh"
@@ -19,7 +18,7 @@ import (
 
 var commonGitProviderIds = []string{"github", "gitlab", "bitbucket"}
 
-func GitProviderSelectionView(ctx context.Context, gitProviderAddView *apiclient.SetGitProviderConfig, apiClient *apiclient.APIClient) {
+func GitProviderCreationView(ctx context.Context, gitProviderAddView *apiclient.SetGitProviderConfig, apiClient *apiclient.APIClient) error {
 	supportedProviders := config.GetSupportedGitProviders()
 
 	var gitProviderOptions []huh.Option[string]
@@ -36,28 +35,31 @@ func GitProviderSelectionView(ctx context.Context, gitProviderAddView *apiclient
 		gitProviderOptions = append(gitProviderOptions, huh.Option[string]{Key: "Other", Value: "other"})
 	}
 
-	gitProviderForm := huh.NewForm(
-		huh.NewGroup(
-			huh.NewSelect[string]().
-				Title("Choose a Git provider").
-				Options(
-					gitProviderOptions...,
-				).
-				Value(&gitProviderAddView.ProviderId)).WithHeight(8),
-		huh.NewGroup(
-			huh.NewSelect[string]().
-				Title("Choose a Git provider").
-				Options(
-					otherGitProviderOptions...,
-				).
-				Value(&gitProviderAddView.ProviderId)).WithHeight(12).WithHideFunc(func() bool {
-			return gitProviderAddView.ProviderId != "other"
-		}),
-	).WithTheme(views.GetCustomTheme())
+	if gitProviderAddView.ProviderId == "" {
+		gitProviderForm := huh.NewForm(
+			huh.NewGroup(
+				huh.NewSelect[string]().
+					Title("Choose a Git provider").
+					Description("Note: for updating an existing Git provider use 'daytona git-provider update'").
+					Options(
+						gitProviderOptions...,
+					).
+					Value(&gitProviderAddView.ProviderId)).WithHeight(8),
+			huh.NewGroup(
+				huh.NewSelect[string]().
+					Title("Choose a Git provider").
+					Options(
+						otherGitProviderOptions...,
+					).
+					Value(&gitProviderAddView.ProviderId)).WithHeight(12).WithHideFunc(func() bool {
+				return gitProviderAddView.ProviderId != "other"
+			}),
+		).WithTheme(views.GetCustomTheme())
 
-	err := gitProviderForm.Run()
-	if err != nil {
-		log.Fatal(err)
+		err := gitProviderForm.Run()
+		if err != nil {
+			return err
+		}
 	}
 
 	userDataForm := huh.NewForm(
@@ -109,18 +111,24 @@ func GitProviderSelectionView(ctx context.Context, gitProviderAddView *apiclient
 	).WithTheme(views.GetCustomTheme())
 
 	views.RenderInfoMessage(getGitProviderHelpMessage(gitProviderAddView.ProviderId))
-	err = userDataForm.Run()
+	err := userDataForm.Run()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
+	return nil
 }
 
-func GitProviderDeleteView(gitProviderAddView *apiclient.SetGitProviderConfig, userGitProviders []apiclient.GitProvider, apiClient *apiclient.APIClient, ctx context.Context) {
+func GetGitProviderFromPrompt(ctx context.Context, gitProviders []apiclient.GitProvider, apiClient *apiclient.APIClient) (*apiclient.GitProvider, error) {
 	var gitProviderOptions []huh.Option[string]
-	for _, userProvider := range userGitProviders {
-		gitProviderOptions = append(gitProviderOptions, huh.Option[string]{Key: fmt.Sprintf("%s   %s", userProvider.ProviderId, userProvider.Alias), Value: userProvider.Id})
+	for _, userProvider := range gitProviders {
+		gitProviderOptions = append(gitProviderOptions, huh.Option[string]{
+			Key:   fmt.Sprintf("%s   %s", userProvider.ProviderId, userProvider.Alias),
+			Value: userProvider.Id,
+		})
 	}
+
+	var selectedId string
 	gitProviderForm := huh.NewForm(
 		huh.NewGroup(
 			huh.NewSelect[string]().
@@ -128,13 +136,21 @@ func GitProviderDeleteView(gitProviderAddView *apiclient.SetGitProviderConfig, u
 				Options(
 					gitProviderOptions...,
 				).
-				Value(gitProviderAddView.Id)).WithHeight(8),
+				Value(&selectedId)).WithHeight(8),
 	).WithTheme(views.GetCustomTheme())
+
 	err := gitProviderForm.Run()
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
+	for _, userProvider := range gitProviders {
+		if userProvider.Id == selectedId {
+			return &userProvider, nil
+		}
+	}
+
+	return nil, fmt.Errorf("selected Git provider not found")
 }
 
 func providerRequiresUsername(gitProviderId string) bool {
