@@ -12,16 +12,17 @@ import (
 )
 
 type Project struct {
-	Name        string                     `json:"name" validate:"required"`
-	Image       string                     `json:"image" validate:"required"`
-	User        string                     `json:"user" validate:"required"`
-	BuildConfig *buildconfig.BuildConfig   `json:"buildConfig,omitempty" validate:"optional"`
-	Repository  *gitprovider.GitRepository `json:"repository" validate:"required"`
-	EnvVars     map[string]string          `json:"envVars" validate:"required"`
-	WorkspaceId string                     `json:"workspaceId" validate:"required"`
-	ApiKey      string                     `json:"-"`
-	Target      string                     `json:"target" validate:"required"`
-	State       *ProjectState              `json:"state,omitempty" validate:"optional"`
+	Name                string                     `json:"name" validate:"required"`
+	Image               string                     `json:"image" validate:"required"`
+	User                string                     `json:"user" validate:"required"`
+	BuildConfig         *buildconfig.BuildConfig   `json:"buildConfig,omitempty" validate:"optional"`
+	Repository          *gitprovider.GitRepository `json:"repository" validate:"required"`
+	EnvVars             map[string]string          `json:"envVars" validate:"required"`
+	WorkspaceId         string                     `json:"workspaceId" validate:"required"`
+	ApiKey              string                     `json:"-"`
+	Target              string                     `json:"target" validate:"required"`
+	State               *ProjectState              `json:"state,omitempty" validate:"optional"`
+	GitProviderConfigId *string                    `json:"gitProviderConfigId,omitempty" validate:"optional"`
 } // @name Project
 
 type ProjectInfo struct {

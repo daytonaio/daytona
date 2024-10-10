@@ -7,6 +7,7 @@ Name | Type | Description | Notes
 **BuildConfig** | Pointer to [**BuildConfig**](BuildConfig.md) |  | [optional] 
 **Default** | **bool** |  | 
 **EnvVars** | **map[string]string** |  | 
+**GitProviderConfigId** | Pointer to **string** |  | [optional] 
 **Image** | **string** |  | 
 **Name** | **string** |  | 
 **Prebuilds** | Pointer to [**[]PrebuildConfig**](PrebuildConfig.md) |  | [optional] 
@@ -96,6 +97,31 @@ and a boolean to check if the value has been set.
 
 SetEnvVars sets EnvVars field to given value.
 
+
+### GetGitProviderConfigId
+
+`func (o *ProjectConfig) GetGitProviderConfigId() string`
+
+GetGitProviderConfigId returns the GitProviderConfigId field if non-nil, zero value otherwise.
+
+### GetGitProviderConfigIdOk
+
+`func (o *ProjectConfig) GetGitProviderConfigIdOk() (*string, bool)`
+
+GetGitProviderConfigIdOk returns a tuple with the GitProviderConfigId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGitProviderConfigId
+
+`func (o *ProjectConfig) SetGitProviderConfigId(v string)`
+
+SetGitProviderConfigId sets GitProviderConfigId field to given value.
+
+### HasGitProviderConfigId
+
+`func (o *ProjectConfig) HasGitProviderConfigId() bool`
+
+HasGitProviderConfigId returns a boolean if a field has been set.
 
 ### GetImage
 

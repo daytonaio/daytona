@@ -806,7 +806,7 @@ import (
 )
 
 func main() {
-	gitProviderConfig := *openapiclient.NewSetGitProviderConfig("Id_example", "Token_example") // SetGitProviderConfig | Git provider
+	gitProviderConfig := *openapiclient.NewSetGitProviderConfig("ProviderId_example", "Token_example") // SetGitProviderConfig | Git provider
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

@@ -22,7 +22,7 @@ func selectGitProviderPrompt(gitProviders []gitprovider_view.GitProviderView, pr
 
 	// Populate items with titles and descriptions from workspaces.
 	for _, provider := range gitProviders {
-		newItem := item[string]{id: provider.Id, title: provider.Name, choiceProperty: provider.Id}
+		newItem := item[string]{id: provider.Id, title: fmt.Sprintf("%s (%s)", provider.Name, provider.Alias), choiceProperty: provider.Id}
 		items = append(items, newItem)
 	}
 
@@ -61,6 +61,5 @@ func GetProviderIdFromPrompt(gitProviders []gitprovider_view.GitProviderView, pr
 	choiceChan := make(chan string)
 
 	go selectGitProviderPrompt(gitProviders, projectOrder, choiceChan, samplesEnabled)
-
 	return <-choiceChan
 }

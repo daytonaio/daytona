@@ -52,28 +52,30 @@ type ProjectBuildDTO struct {
 }
 
 type ProjectDTO struct {
-	Name        string           `json:"name"`
-	Image       string           `json:"image"`
-	User        string           `json:"user"`
-	Build       *ProjectBuildDTO `json:"build,omitempty" gorm:"serializer:json"`
-	Repository  RepositoryDTO    `json:"repository" gorm:"serializer:json"`
-	WorkspaceId string           `json:"workspaceId"`
-	Target      string           `json:"target"`
-	ApiKey      string           `json:"apiKey"`
-	State       *ProjectStateDTO `json:"state,omitempty" gorm:"serializer:json"`
+	Name                string           `json:"name"`
+	Image               string           `json:"image"`
+	User                string           `json:"user"`
+	Build               *ProjectBuildDTO `json:"build,omitempty" gorm:"serializer:json"`
+	Repository          RepositoryDTO    `json:"repository" gorm:"serializer:json"`
+	WorkspaceId         string           `json:"workspaceId"`
+	Target              string           `json:"target"`
+	ApiKey              string           `json:"apiKey"`
+	State               *ProjectStateDTO `json:"state,omitempty" gorm:"serializer:json"`
+	GitProviderConfigId *string          `json:"gitProviderConfigId,omitempty"`
 }
 
 func ToProjectDTO(project *project.Project) ProjectDTO {
 	return ProjectDTO{
-		Name:        project.Name,
-		Image:       project.Image,
-		User:        project.User,
-		Build:       ToProjectBuildDTO(project.BuildConfig),
-		Repository:  ToRepositoryDTO(project.Repository),
-		WorkspaceId: project.WorkspaceId,
-		Target:      project.Target,
-		State:       ToProjectStateDTO(project.State),
-		ApiKey:      project.ApiKey,
+		Name:                project.Name,
+		Image:               project.Image,
+		User:                project.User,
+		Build:               ToProjectBuildDTO(project.BuildConfig),
+		Repository:          ToRepositoryDTO(project.Repository),
+		WorkspaceId:         project.WorkspaceId,
+		Target:              project.Target,
+		State:               ToProjectStateDTO(project.State),
+		ApiKey:              project.ApiKey,
+		GitProviderConfigId: project.GitProviderConfigId,
 	}
 }
 
@@ -156,15 +158,16 @@ func ToProjectBuildDTO(build *buildconfig.BuildConfig) *ProjectBuildDTO {
 
 func ToProject(projectDTO ProjectDTO) *project.Project {
 	return &project.Project{
-		Name:        projectDTO.Name,
-		Image:       projectDTO.Image,
-		User:        projectDTO.User,
-		BuildConfig: ToProjectBuild(projectDTO.Build),
-		Repository:  ToRepository(projectDTO.Repository),
-		WorkspaceId: projectDTO.WorkspaceId,
-		Target:      projectDTO.Target,
-		State:       ToProjectState(projectDTO.State),
-		ApiKey:      projectDTO.ApiKey,
+		Name:                projectDTO.Name,
+		Image:               projectDTO.Image,
+		User:                projectDTO.User,
+		BuildConfig:         ToProjectBuild(projectDTO.Build),
+		Repository:          ToRepository(projectDTO.Repository),
+		WorkspaceId:         projectDTO.WorkspaceId,
+		Target:              projectDTO.Target,
+		State:               ToProjectState(projectDTO.State),
+		ApiKey:              projectDTO.ApiKey,
+		GitProviderConfigId: projectDTO.GitProviderConfigId,
 	}
 }
 
