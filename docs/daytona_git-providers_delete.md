@@ -6,6 +6,12 @@ Unregister a Git providers
 daytona git-providers delete [flags]
 ```
 
+### Options
+
+```
+  -a, --all   Remove all Git providers
+```
+
 ### Options inherited from parent commands
 
 ```

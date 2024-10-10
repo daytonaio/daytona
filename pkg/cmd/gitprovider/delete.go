@@ -31,6 +31,18 @@ var gitProviderDeleteCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
+		if allFlag {
+			for _, gitProvider := range gitProviders {
+				_, err := apiClient.GitProviderAPI.RemoveGitProvider(ctx, gitProvider.Id).Execute()
+				if err != nil {
+					return err
+				}
+			}
+
+			views.RenderInfoMessage("All Git providers have been removed")
+			return nil
+		}
+
 		if len(gitProviders) == 0 {
 			views.RenderInfoMessage("No git providers registered")
 			return nil
@@ -56,4 +68,10 @@ var gitProviderDeleteCmd = &cobra.Command{
 		views.RenderInfoMessage("Git provider has been removed")
 		return nil
 	},
+}
+
+var allFlag bool
+
+func init() {
+	gitProviderDeleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Remove all Git providers")
 }
