@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -355,12 +356,7 @@ func (g *GitnessGitProvider) GetCommitsRange(repo *GitRepository, initialSha str
 		return 0, fmt.Errorf("Sha Not found in commits")
 	}
 
-	commitLength := 0
-	if initialShaIndex > currentShaIndex {
-		commitLength = initialShaIndex - currentShaIndex
-	} else {
-		commitLength = currentShaIndex - initialShaIndex
-	}
+	commitLength := int(math.Abs(float64(initialShaIndex - currentShaIndex)))
 
 	return commitLength, nil
 }
