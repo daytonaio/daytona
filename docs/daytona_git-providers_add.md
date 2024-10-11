@@ -1,6 +1,6 @@
 ## daytona git-providers add
 
-Register a Git providers
+Register a Git provider
 
 ```
 daytona git-providers add [flags]

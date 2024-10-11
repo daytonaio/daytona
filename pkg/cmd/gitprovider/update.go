@@ -7,15 +7,15 @@ import (
 	"context"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
 	"github.com/spf13/cobra"
 )
 
-var gitProviderDeleteCmd = &cobra.Command{
-	Use:     "delete",
-	Aliases: []string{"remove", "rm"},
-	Short:   "Unregister a Git provider",
+var gitProviderUpdateCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Update a Git provider",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
@@ -27,18 +27,6 @@ var gitProviderDeleteCmd = &cobra.Command{
 		gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
-		}
-
-		if allFlag {
-			for _, gitProvider := range gitProviders {
-				_, err := apiClient.GitProviderAPI.RemoveGitProvider(ctx, gitProvider.Id).Execute()
-				if err != nil {
-					return err
-				}
-			}
-
-			views.RenderInfoMessage("All Git providers have been removed")
-			return nil
 		}
 
 		if len(gitProviders) == 0 {
@@ -55,18 +43,26 @@ var gitProviderDeleteCmd = &cobra.Command{
 			return nil
 		}
 
-		_, err = apiClient.GitProviderAPI.RemoveGitProvider(ctx, selectedGitProvider.Id).Execute()
+		setGitProviderConfig := apiclient.SetGitProviderConfig{
+			Id:         &selectedGitProvider.Id,
+			ProviderId: selectedGitProvider.ProviderId,
+			Token:      selectedGitProvider.Token,
+			BaseApiUrl: selectedGitProvider.BaseApiUrl,
+			Username:   &selectedGitProvider.Username,
+			Alias:      &selectedGitProvider.Alias,
+		}
+
+		err = gitprovider_view.GitProviderCreationView(ctx, &setGitProviderConfig, apiClient)
 		if err != nil {
 			return err
 		}
 
-		views.RenderInfoMessage("Git provider has been removed")
+		res, err = apiClient.GitProviderAPI.SetGitProvider(ctx).GitProviderConfig(setGitProviderConfig).Execute()
+		if err != nil {
+			return apiclient_util.HandleErrorResponse(res, err)
+		}
+
+		views.RenderInfoMessage("Git provider has been updated")
 		return nil
 	},
-}
-
-var allFlag bool
-
-func init() {
-	gitProviderDeleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Remove all Git providers")
 }
