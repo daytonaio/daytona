@@ -6,6 +6,7 @@ package gitprovider
 import (
 	"context"
 
+	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -43,6 +44,10 @@ var gitProviderUpdateCmd = &cobra.Command{
 			return nil
 		}
 
+		existingAliases := util.ArrayMap(gitProviders, func(gp apiclient.GitProvider) string {
+			return gp.Alias
+		})
+
 		setGitProviderConfig := apiclient.SetGitProviderConfig{
 			Id:         &selectedGitProvider.Id,
 			ProviderId: selectedGitProvider.ProviderId,
@@ -52,7 +57,7 @@ var gitProviderUpdateCmd = &cobra.Command{
 			Alias:      &selectedGitProvider.Alias,
 		}
 
-		err = gitprovider_view.GitProviderCreationView(ctx, &setGitProviderConfig, apiClient)
+		err = gitprovider_view.GitProviderCreationView(ctx, apiClient, &setGitProviderConfig, existingAliases)
 		if err != nil {
 			return err
 		}

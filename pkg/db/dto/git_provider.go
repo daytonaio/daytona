@@ -13,7 +13,7 @@ type GitProviderConfigDTO struct {
 	Username   string  `json:"username"`
 	Token      string  `json:"token"`
 	BaseApiUrl *string `json:"baseApiUrl,omitempty"`
-	Alias      string  `json:"alias"`
+	Alias      string  `gorm:"uniqueIndex" json:"alias"`
 }
 
 func ToGitProviderConfigDTO(gitProvider gitprovider.GitProviderConfig) GitProviderConfigDTO {
