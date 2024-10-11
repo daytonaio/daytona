@@ -182,7 +182,7 @@ func GetProviderListFromManifest(manifest *manager.ProvidersManifest) []apiclien
 		for version := range providerManifest.Versions {
 			providerList = append(providerList, apiclient.Provider{
 				Name:    providerName,
-				Label:   &providerManifest.Label,
+				Label:   providerManifest.Label,
 				Version: version,
 			})
 		}

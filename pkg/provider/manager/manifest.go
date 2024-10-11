@@ -16,7 +16,7 @@ type ProvidersManifest map[string]ProviderManifest
 
 type ProviderManifest struct {
 	Default  bool               `json:"default"`
-	Label    string             `json:"label"`
+	Label    *string            `json:"label"`
 	Versions map[string]Version `json:"versions"`
 }
 
