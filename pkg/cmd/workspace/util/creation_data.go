@@ -17,6 +17,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/common"
+	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -124,7 +125,7 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 			}
 		}
 
-		providerRepo, err := getRepositoryFromWizard(RepositoryWizardConfig{
+		providerRepo, gitProviderConfigId, err := getRepositoryFromWizard(RepositoryWizardConfig{
 			ApiClient:           config.ApiClient,
 			UserGitProviders:    config.UserGitProviders,
 			Manual:              config.Manual,
@@ -135,6 +136,23 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 		})
 		if err != nil {
 			return nil, err
+		}
+
+		if gitProviderConfigId == selection.CustomRepoIdentifier || gitProviderConfigId == selection.CREATE_FROM_SAMPLE {
+			gitProviderConfigs, res, err := config.ApiClient.GitProviderAPI.ListGitProvidersForUrl(context.Background(), url.QueryEscape(providerRepo.Url)).Execute()
+			if err != nil {
+				return nil, apiclient_util.HandleErrorResponse(res, err)
+			}
+
+			if len(gitProviderConfigs) == 1 {
+				gitProviderConfigId = gitProviderConfigs[0].Id
+			} else if len(gitProviderConfigs) > 1 {
+				gp, err := gitprovider_view.GetGitProviderFromPrompt(context.Background(), gitProviderConfigs, config.ApiClient)
+				if err != nil {
+					return nil, err
+				}
+				gitProviderConfigId = gp.Id
+			}
 		}
 
 		getRepoContext := createGetRepoContextFromRepository(providerRepo)
@@ -148,11 +166,6 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 		providerRepoName, err := GetSanitizedProjectName(providerRepo.Name)
 		if err != nil {
 			return nil, err
-		}
-
-		gitProviderConfigId, res, err := config.ApiClient.GitProviderAPI.GetGitProviderIdForUrl(context.Background(), url.QueryEscape(providerRepo.Url)).Execute()
-		if err != nil {
-			return nil, apiclient_util.HandleErrorResponse(res, err)
 		}
 
 		projectList = append(projectList, newCreateProjectConfigDTO(config, providerRepo, providerRepoName, gitProviderConfigId))

@@ -13,6 +13,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/api/controllers"
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider/dto"
+	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
@@ -72,6 +73,13 @@ func ListGitProvidersForUrl(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %w", err))
 		return
+	}
+
+	apiKeyType, ok := ctx.Get("apiKeyType")
+	if !ok || apiKeyType == apikey.ApiKeyTypeClient {
+		for _, gitProvider := range gitProviders {
+			gitProvider.Token = ""
+		}
 	}
 
 	ctx.JSON(200, gitProviders)

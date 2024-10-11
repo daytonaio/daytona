@@ -48,7 +48,7 @@ type RepositoryWizardConfig struct {
 	SelectedRepos       map[string]int
 }
 
-func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepository, error) {
+func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepository, string, error) {
 	var gitProviderConfigId string
 	var namespaceId string
 	var err error
@@ -62,7 +62,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 
 	if (len(config.UserGitProviders) == 0 && len(samples) == 0) || config.Manual {
 		repo, err := create.GetRepositoryFromUrlInput(config.MultiProject, config.ProjectOrder, config.ApiClient, config.SelectedRepos)
-		return repo, err
+		return repo, selection.CustomRepoIdentifier, err
 	}
 
 	supportedProviders := config_const.GetSupportedGitProviders()
@@ -86,28 +86,28 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 
 	gitProviderConfigId = selection.GetProviderIdFromPrompt(gitProviderViewList, config.ProjectOrder, len(samples) > 0)
 	if gitProviderConfigId == "" {
-		return nil, common.ErrCtrlCAbort
+		return nil, "", common.ErrCtrlCAbort
 	}
 
 	if gitProviderConfigId == selection.CustomRepoIdentifier {
 		repo, err := create.GetRepositoryFromUrlInput(config.MultiProject, config.ProjectOrder, config.ApiClient, config.SelectedRepos)
-		return repo, err
+		return repo, selection.CustomRepoIdentifier, err
 	}
 
 	if gitProviderConfigId == selection.CREATE_FROM_SAMPLE {
 		sample := selection.GetSampleFromPrompt(samples)
 		if sample == nil {
-			return nil, common.ErrCtrlCAbort
+			return nil, "", common.ErrCtrlCAbort
 		}
 
 		repo, res, err := config.ApiClient.GitProviderAPI.GetGitContext(ctx).Repository(apiclient.GetRepositoryContext{
 			Url: sample.GitUrl,
 		}).Execute()
 		if err != nil {
-			return nil, apiclient_util.HandleErrorResponse(res, err)
+			return nil, "", apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		return repo, nil
+		return repo, selection.CREATE_FROM_SAMPLE, nil
 	}
 
 	var providerId string
@@ -140,7 +140,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		})
 
 		if err != nil {
-			return nil, err
+			return nil, "", err
 		}
 
 		if len(namespaceList) == 1 {
@@ -185,7 +185,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 			break
 		} else {
 			// If user aborts or there's no selection
-			return nil, common.ErrCtrlCAbort
+			return nil, "", common.ErrCtrlCAbort
 		}
 	}
 
@@ -209,7 +209,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		})
 
 		if err != nil {
-			return nil, err
+			return nil, "", err
 		}
 
 		// Check first if the git provider supports pagination
@@ -239,15 +239,15 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 			break
 		} else {
 			// If user aborts or there's no selection
-			return nil, common.ErrCtrlCAbort
+			return nil, "", common.ErrCtrlCAbort
 		}
 	}
 
 	if config.SkipBranchSelection {
-		return chosenRepo, nil
+		return chosenRepo, gitProviderConfigId, nil
 	}
 
-	return SetBranchFromWizard(BranchWizardConfig{
+	repoWithBranch, err := SetBranchFromWizard(BranchWizardConfig{
 		ApiClient:           config.ApiClient,
 		GitProviderConfigId: gitProviderConfigId,
 		NamespaceId:         namespaceId,
@@ -256,4 +256,6 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		ProjectOrder:        config.ProjectOrder,
 		ProviderId:          providerId,
 	})
+
+	return repoWithBranch, gitProviderConfigId, err
 }

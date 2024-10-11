@@ -139,7 +139,7 @@ func TestWorkspaceService(t *testing.T) {
 		provisioner.On("CreateProject", mock.Anything, &target, containerRegistry, &gitProviderConfig).Return(nil)
 		provisioner.On("StartProject", mock.Anything, &target).Return(nil)
 
-		gitProviderService.On("ListConfigsForUrl", "https://github.com/daytonaio/daytona").Return([]*gitprovider.GitProviderConfig{&gitProviderConfig}, nil)
+		gitProviderService.On("GetConfig", "github").Return(&gitProviderConfig, nil)
 
 		workspace, err := service.CreateWorkspace(context.TODO(), createWorkspaceDto)
 

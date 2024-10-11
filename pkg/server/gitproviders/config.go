@@ -45,24 +45,7 @@ func (s *GitProviderService) ListConfigsForUrl(repoUrl string) ([]*gitprovider.G
 				gpcs = append(gpcs, p)
 			}
 		}
-
 	}
-
-	// if len(gpcs) > 0 {
-	// 	return gpcs, nil
-	// }
-
-	// supportedGitProviders := config.GetSupportedGitProviders()
-	// for _, provider := range supportedGitProviders {
-	// 	if strings.Contains(repoUrl, provider.Id) {
-	// 		return []*gitprovider.GitProviderConfig{{
-	// 			Id: provider.Id,
-	// 		},
-	// 		}, nil
-	// 	}
-	// }
-
-	// return nil, errors.New("git provider not found")
 
 	return gpcs, nil
 }
