@@ -8,13 +8,13 @@ import (
 )
 
 type GitProviderConfigDTO struct {
-	Id            string                     `gorm:"primaryKey"`
-	ProviderId    string                     `json:"providerId"`
-	Username      string                     `json:"username"`
-	Token         string                     `json:"token"`
-	BaseApiUrl    *string                    `json:"baseApiUrl,omitempty"`
-	Alias         string                     `json:"alias"`
-	SigningKey    *string                    `json:"siginingKey,omitempty"`
+	Id         string  `gorm:"primaryKey"`
+	ProviderId string  `json:"providerId"`
+	Username   string  `json:"username"`
+	Token      string  `json:"token"`
+	BaseApiUrl *string `json:"baseApiUrl,omitempty"`
+	Alias      string  `gorm:"uniqueIndex" json:"alias"`
+  SigningKey    *string                    `json:"siginingKey,omitempty"`
 	SigningMethod *gitprovider.SigningMethod `json:"siginingMethod,omitempty"`
 }
 

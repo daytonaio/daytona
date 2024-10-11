@@ -235,7 +235,7 @@ func GetBranchFromProjectConfig(projectConfig *apiclient.ProjectConfig, apiClien
 
 func GetCreateProjectDtoFromFlags(projectConfigurationFlags ProjectConfigurationFlags) (*apiclient.CreateProjectDTO, error) {
 	project := &apiclient.CreateProjectDTO{
-		GitProviderConfigId: projectConfigurationFlags.GitProviderConfigId,
+		GitProviderConfigId: projectConfigurationFlags.GitProviderConfig,
 		BuildConfig:         &apiclient.BuildConfig{},
 	}
 
@@ -272,6 +272,28 @@ func GetCreateProjectDtoFromFlags(projectConfigurationFlags ProjectConfiguration
 	project.EnvVars = envVars
 
 	return project, nil
+}
+
+func GetGitProviderConfigIdFromFlag(ctx context.Context, apiClient *apiclient.APIClient, gitProviderConfigFlag *string) (*string, error) {
+	if gitProviderConfigFlag == nil || *gitProviderConfigFlag == "" {
+		return gitProviderConfigFlag, nil
+	}
+
+	gitProviderConfigs, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
+	if err != nil {
+		return nil, apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	for _, gitProviderConfig := range gitProviderConfigs {
+		if gitProviderConfig.Id == *gitProviderConfigFlag {
+			return &gitProviderConfig.Id, nil
+		}
+		if gitProviderConfig.Alias == *gitProviderConfigFlag {
+			return &gitProviderConfig.Id, nil
+		}
+	}
+
+	return nil, fmt.Errorf("git provider config '%s' not found", *gitProviderConfigFlag)
 }
 
 func newCreateProjectConfigDTO(config ProjectsDataPromptConfig, providerRepo *apiclient.GitRepository, providerRepoName string, gitProviderConfigId string) apiclient.CreateProjectDTO {
