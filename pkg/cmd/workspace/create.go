@@ -171,7 +171,10 @@ var CreateCmd = &cobra.Command{
 			stopLogs()
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
-		var gpgKey string
+		gpgKey, err := GetGitProviderGpgKey(apiClient, ctx, projects[0].Source.Repository.Url)
+		if err != nil {
+			log.Warn(err)
+		}
 
 		err = waitForDial(createdWorkspace, &activeProfile, tsConn, gpgKey)
 		if err != nil {
@@ -218,10 +221,7 @@ var CreateCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		gpgKey, err = GetGitProviderGpgKey(apiClient, ctx, wsInfo.Projects[0].Repository.Url)
-		if err != nil {
-			log.Warn(err)
-		}
+
 		return openIDE(chosenIdeId, activeProfile, createdWorkspace.Id, wsInfo.Projects[0].Name, providerMetadata, yesFlag, gpgKey)
 	},
 }

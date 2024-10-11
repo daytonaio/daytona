@@ -165,14 +165,14 @@ func EnsureSshConfigEntryAdded(profileId, workspaceName, projectName string, gpg
 	}
 
 	// Generate SSH config entry without GPG forwarding
-	err = appendSshConfigEntry(configPath, profileId, workspaceName, projectName, knownHostsFile, false, existingContent)
+	newContent, err := appendSshConfigEntry(configPath, profileId, workspaceName, projectName, knownHostsFile, false, string(existingContent))
 	if err != nil {
 		return err
 	}
 
 	if gpgKey != "" {
 		// Generate SSH config entry with GPG forwarding and override previous config
-		err = appendSshConfigEntry(configPath, profileId, workspaceName, projectName, knownHostsFile, true, existingContent)
+		_, err := appendSshConfigEntry(configPath, profileId, workspaceName, projectName, knownHostsFile, true, newContent)
 		if err != nil {
 			return err
 		}
@@ -193,36 +193,34 @@ func getKnownHostsFile() string {
 	return "/dev/null"
 }
 
-func appendSshConfigEntry(configPath, profileId, workspaceId, projectName, knownHostsFile string, gpgForward bool, existingContent []byte) error {
+func appendSshConfigEntry(configPath, profileId, workspaceId, projectName, knownHostsFile string, gpgForward bool, existingContent string) (string, error) {
 	data, err := generateSshConfigEntry(profileId, workspaceId, projectName, knownHostsFile, gpgForward)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	if strings.Contains(string(existingContent), data) {
-		return nil
+	if strings.Contains(existingContent, data) {
+		// Entry already exists in the file
+		return existingContent, nil
 	}
-	var newData string
-	if gpgForward {
-		configWithoutGpg, err := generateSshConfigEntry(profileId, workspaceId, projectName, knownHostsFile, false)
-		if err != nil {
-			return err
-		}
-		updatedContent := strings.Replace(string(existingContent), configWithoutGpg, "", -1)
-		newData = data + string(updatedContent)
-	} else {
-		// Combine the new data with existing content
-		newData = data + string(existingContent)
+
+	// We want to remove the config entry gpg counterpart
+	configCounterpart, err := generateSshConfigEntry(profileId, workspaceId, projectName, knownHostsFile, !gpgForward)
+	if err != nil {
+		return "", err
 	}
+	updatedContent := strings.ReplaceAll(existingContent, configCounterpart, "")
+	updatedContent = data + updatedContent
+
 	// Open the file for writing
 	file, err := os.Create(configPath)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer file.Close()
 
-	_, err = file.WriteString(newData)
-	return err
+	_, err = file.WriteString(updatedContent)
+	return updatedContent, err
 }
 
 func getLocalGPGSocket() (string, error) {
