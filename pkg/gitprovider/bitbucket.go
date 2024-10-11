@@ -45,7 +45,7 @@ func (g *BitbucketGitProvider) CanHandle(repoUrl string) (bool, error) {
 	return staticContext.Source == "bitbucket.org", nil
 }
 
-func (g *BitbucketGitProvider) GetNamespaces() ([]*GitNamespace, error) {
+func (g *BitbucketGitProvider) GetNamespaces(options ListOptions) ([]*GitNamespace, error) {
 	client := g.getApiClient()
 	wsList, err := client.Workspaces.List()
 	if err != nil {
@@ -64,8 +64,10 @@ func (g *BitbucketGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	return namespaces, nil
 }
 
-func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
+func (g *BitbucketGitProvider) GetRepositories(namespace string, options ListOptions) ([]*GitRepository, error) {
 	client := g.getApiClient()
+	// Bitbucket has 'page' param but doesnt supports 'perPage' param in fetch repos api
+	client.Pagelen = options.PerPage
 	var response []*GitRepository
 
 	if namespace == personalNamespaceId {
@@ -78,6 +80,7 @@ func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]*GitReposito
 
 	repoList, err := client.Repositories.ListForAccount(&bitbucket.RepositoriesOptions{
 		Owner:   namespace,
+		Page:    &options.Page,
 		Keyword: nil,
 	})
 	if err != nil {
@@ -117,7 +120,7 @@ func (g *BitbucketGitProvider) GetRepositories(namespace string) ([]*GitReposito
 	return response, err
 }
 
-func (g *BitbucketGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {
+func (g *BitbucketGitProvider) GetRepoBranches(repositoryId string, namespaceId string, options ListOptions) ([]*GitBranch, error) {
 	client := g.getApiClient()
 	var response []*GitBranch
 
@@ -154,7 +157,7 @@ func (g *BitbucketGitProvider) GetRepoBranches(repositoryId string, namespaceId 
 	return response, nil
 }
 
-func (g *BitbucketGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error) {
+func (g *BitbucketGitProvider) GetRepoPRs(repositoryId string, namespaceId string, options ListOptions) ([]*GitPullRequest, error) {
 	client := g.getApiClient()
 	var response []*GitPullRequest
 
@@ -214,6 +217,10 @@ func (g *BitbucketGitProvider) GetRepoPRs(repositoryId string, namespaceId strin
 
 func (g *BitbucketGitProvider) GetUser() (*GitUser, error) {
 	client := g.getApiClient()
+	// set pagelen to a big number since all fetch apis (except fetch repos api)
+	// doesnt support pagination args like page, perPage..
+	// Refer to https://github.com/ktrysmt/go-bitbucket/blob/master/client.go#L259
+	client.Pagelen = 1000
 
 	user, err := client.User.Profile()
 	if err != nil {
