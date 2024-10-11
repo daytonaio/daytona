@@ -24,7 +24,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/views"
 	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
-	"github.com/daytonaio/daytona/pkg/views/target"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
@@ -117,12 +116,6 @@ var CreateCmd = &cobra.Command{
 			projectNames = append(projectNames, projects[i].Name)
 		}
 
-		logs_view.CalculateLongestPrefixLength(projectNames)
-
-		logs_view.DisplayLogEntry(logs.LogEntry{
-			Msg: "Request submitted\n",
-		}, logs_view.STATIC_INDEX)
-
 		for i, projectConfigName := range existingProjectConfigNames {
 			if projectConfigName == "" {
 				continue
@@ -138,10 +131,16 @@ var CreateCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		target, err := getTarget(targetList, activeProfile.Name)
+		target, err := workspace_util.GetTarget(ctx, apiClient, targetList, activeProfile.Name, targetNameFlag)
 		if err != nil {
 			return err
 		}
+
+		logs_view.CalculateLongestPrefixLength(projectNames)
+
+		logs_view.DisplayLogEntry(logs.LogEntry{
+			Msg: "Request submitted\n",
+		}, logs_view.STATIC_INDEX)
 
 		activeProfile, err = c.GetActiveProfile()
 		if err != nil {
@@ -160,7 +159,7 @@ var CreateCmd = &cobra.Command{
 		id = stringid.TruncateID(id)
 
 		logsContext, stopLogs := context.WithCancel(context.Background())
-		go apiclient_util.ReadWorkspaceLogs(logsContext, activeProfile, id, projectNames, true, true)
+		go apiclient_util.ReadWorkspaceLogs(logsContext, activeProfile, id, projectNames, true, true, nil)
 
 		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(apiclient.CreateWorkspaceDTO{
 			Id:       id,
@@ -262,23 +261,6 @@ func init() {
 	CreateCmd.Flags().StringSliceVar(projectConfigurationFlags.Branches, "branch", []string{}, "Specify the Git branches to use in the projects")
 
 	workspace_util.AddProjectConfigurationFlags(CreateCmd, projectConfigurationFlags, true)
-}
-
-func getTarget(targetList []apiclient.ProviderTarget, activeProfileName string) (*apiclient.ProviderTarget, error) {
-	if targetNameFlag != "" {
-		for _, t := range targetList {
-			if t.Name == targetNameFlag {
-				return &t, nil
-			}
-		}
-		return nil, fmt.Errorf("target '%s' not found", targetNameFlag)
-	}
-
-	if len(targetList) == 1 {
-		return &targetList[0], nil
-	}
-
-	return target.GetTargetFromPrompt(targetList, activeProfileName, false)
 }
 
 func processPrompting(ctx context.Context, apiClient *apiclient.APIClient, workspaceName *string, projects *[]apiclient.CreateProjectDTO, workspaceNames []string) error {

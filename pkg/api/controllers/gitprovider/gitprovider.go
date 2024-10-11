@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"net/url"
 
@@ -197,4 +198,33 @@ func RemoveGitProvider(ctx *gin.Context) {
 	}
 
 	ctx.JSON(200, nil)
+}
+
+// extract pagination related query params
+func getListOptions(ctx *gin.Context) (gitprovider.ListOptions, error) {
+	pageQuery := ctx.Query("page")
+	perPageQuery := ctx.Query("per_page")
+
+	page := 1
+	perPage := 100
+	var err error
+
+	if pageQuery != "" {
+		page, err = strconv.Atoi(pageQuery)
+		if err != nil {
+			return gitprovider.ListOptions{}, errors.New("invalid value for 'page' query param")
+		}
+	}
+
+	if perPageQuery != "" {
+		perPage, err = strconv.Atoi(perPageQuery)
+		if err != nil {
+			return gitprovider.ListOptions{}, errors.New("invalid value for 'per_page' query param")
+		}
+	}
+
+	return gitprovider.ListOptions{
+		Page:    page,
+		PerPage: perPage,
+	}, nil
 }

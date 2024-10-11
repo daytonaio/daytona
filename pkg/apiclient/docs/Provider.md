@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**Label** | Pointer to **string** |  | [optional] 
 **Name** | **string** |  | 
 **Version** | **string** |  | 
 
@@ -25,6 +26,31 @@ will change when the set of required properties is changed
 NewProviderWithDefaults instantiates a new Provider object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetLabel
+
+`func (o *Provider) GetLabel() string`
+
+GetLabel returns the Label field if non-nil, zero value otherwise.
+
+### GetLabelOk
+
+`func (o *Provider) GetLabelOk() (*string, bool)`
+
+GetLabelOk returns a tuple with the Label field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLabel
+
+`func (o *Provider) SetLabel(v string)`
+
+SetLabel sets Label field to given value.
+
+### HasLabel
+
+`func (o *Provider) HasLabel() bool`
+
+HasLabel returns a boolean if a field has been set.
 
 ### GetName
 

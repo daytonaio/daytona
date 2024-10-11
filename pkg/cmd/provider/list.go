@@ -57,6 +57,7 @@ func GetProviderViewOptions(apiClient *apiclient.APIClient, latestProviders []ap
 	for _, installedProvider := range installedProviders {
 		providerMap[installedProvider.Name] = provider_view.ProviderView{
 			Name:      installedProvider.Name,
+			Label:     installedProvider.Label,
 			Version:   installedProvider.Version,
 			Installed: util.Pointer(true),
 		}
@@ -66,6 +67,7 @@ func GetProviderViewOptions(apiClient *apiclient.APIClient, latestProviders []ap
 		if _, exists := providerMap[latestProvider.Name]; !exists {
 			providerMap[latestProvider.Name] = provider_view.ProviderView{
 				Name:      latestProvider.Name,
+				Label:     latestProvider.Label,
 				Version:   latestProvider.Version,
 				Installed: util.Pointer(false),
 			}
