@@ -46,18 +46,18 @@ func ListGitProviders(ctx *gin.Context) {
 	ctx.JSON(200, response)
 }
 
-// GetGitProviderForUrl 			godoc
+// ListGitProvidersForUrl 			godoc
 //
 //	@Tags			gitProvider
-//	@Summary		Get Git provider
-//	@Description	Get Git provider
+//	@Summary		List Git providers for url
+//	@Description	List Git providers for url
 //	@Produce		json
-//	@Param			url	path		string	true	"Url"
-//	@Success		200	{object}	gitprovider.GitProviderConfig
+//	@Param			url	path	string	true	"Url"
+//	@Success		200	{array}	gitprovider.GitProviderConfig
 //	@Router			/gitprovider/for-url/{url} [get]
 //
-//	@id				GetGitProviderForUrl
-func GetGitProviderForUrl(ctx *gin.Context) {
+//	@id				ListGitProvidersForUrl
+func ListGitProvidersForUrl(ctx *gin.Context) {
 	urlParam := ctx.Param("url")
 
 	decodedUrl, err := url.QueryUnescape(urlParam)
@@ -68,9 +68,38 @@ func GetGitProviderForUrl(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	gitProvider, err := server.GitProviderService.GetConfigForUrl(decodedUrl)
+	gitProviders, err := server.GitProviderService.ListConfigsForUrl(decodedUrl)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %w", err))
+		return
+	}
+
+	ctx.JSON(200, gitProviders)
+}
+
+// GetGitProvider 			godoc
+//
+//	@Tags			gitProvider
+//	@Summary		Get Git provider
+//	@Description	Get Git provider
+//	@Produce		plain
+//	@Param			gitProviderId	path		string	true	"ID"
+//	@Success		200				{object}	gitprovider.GitProviderConfig
+//	@Router			/gitprovider/{gitProviderId} [get]
+//
+//	@id				GetGitProvider
+func GetGitProvider(ctx *gin.Context) {
+	id := ctx.Param("gitProviderId")
+
+	server := server.GetInstance(nil)
+
+	gitProvider, err := server.GitProviderService.GetConfig(id)
+	if err != nil {
+		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
+		if codeErr != nil {
+			ctx.AbortWithError(statusCode, codeErr)
+		}
+		ctx.AbortWithError(statusCode, errors.New(message))
 		return
 	}
 

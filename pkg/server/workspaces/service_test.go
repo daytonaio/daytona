@@ -139,7 +139,7 @@ func TestWorkspaceService(t *testing.T) {
 		provisioner.On("CreateProject", mock.Anything, &target, containerRegistry, &gitProviderConfig).Return(nil)
 		provisioner.On("StartProject", mock.Anything, &target).Return(nil)
 
-		gitProviderService.On("GetConfigForUrl", "https://github.com/daytonaio/daytona").Return(&gitProviderConfig, nil)
+		gitProviderService.On("ListConfigsForUrl", "https://github.com/daytonaio/daytona").Return([]*gitprovider.GitProviderConfig{&gitProviderConfig}, nil)
 
 		workspace, err := service.CreateWorkspace(context.TODO(), createWorkspaceDto)
 
@@ -267,7 +267,7 @@ func TestWorkspaceService(t *testing.T) {
 		apiKeyService.On("Generate", apikey.ApiKeyTypeWorkspace, createWorkspaceDto.Id).Return(createWorkspaceDto.Id, nil)
 		gitProviderService.On("GetLastCommitSha", createWorkspaceDto.Projects[0].Source.Repository).Return("123", nil)
 
-		gitProviderService.On("GetConfigForUrl", "https://github.com/daytonaio/daytona").Return(&gitProviderConfig, nil)
+		gitProviderService.On("ListConfigsForUrl", "https://github.com/daytonaio/daytona").Return([]*gitprovider.GitProviderConfig{&gitProviderConfig}, nil)
 
 		for _, project := range createWorkspaceDto.Projects {
 			apiKeyService.On("Generate", apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", createWorkspaceDto.Id, project.Name)).Return(project.Name, nil)
