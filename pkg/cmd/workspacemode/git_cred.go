@@ -37,15 +37,39 @@ var gitCredCmd = &cobra.Command{
 			return err
 		}
 
+		workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceId).Execute()
+		if err != nil {
+			return apiclient.HandleErrorResponse(res, err)
+		}
+
+		var gitProviderConfigId *string
+
+		for _, project := range workspace.Projects {
+			if project.Name == projectName {
+				gitProviderConfigId = project.GitProviderConfigId
+				break
+			}
+		}
+
+		if gitProviderConfigId != nil {
+			gitProvider, _, _ := apiClient.GitProviderAPI.GetGitProvider(ctx, *gitProviderConfigId).Execute()
+			if gitProvider != nil {
+				fmt.Println("username=" + gitProvider.Username)
+				fmt.Println("password=" + gitProvider.Token)
+				return nil
+			}
+
+		}
+
 		encodedUrl := url.QueryEscape(host)
-		gitProvider, _, _ := apiClient.GitProviderAPI.GetGitProviderForUrl(ctx, encodedUrl).Execute()
-		if gitProvider == nil {
+		gitProviders, _, _ := apiClient.GitProviderAPI.ListGitProvidersForUrl(ctx, encodedUrl).Execute()
+		if len(gitProviders) == 0 {
 			fmt.Println("error: git provider not found")
 			os.Exit(1)
 		}
 
-		fmt.Println("username=" + gitProvider.Username)
-		fmt.Println("password=" + gitProvider.Token)
+		fmt.Println("username=" + gitProviders[0].Username)
+		fmt.Println("password=" + gitProviders[0].Token)
 		return nil
 	},
 }

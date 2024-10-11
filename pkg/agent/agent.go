@@ -169,13 +169,13 @@ func (a *Agent) getGitProvider(repoUrl string) (*apiclient.GitProvider, error) {
 	}
 
 	encodedUrl := url.QueryEscape(repoUrl)
-	gitProvider, res, err := apiClient.GitProviderAPI.GetGitProviderForUrl(ctx, encodedUrl).Execute()
+	gitProviders, res, err := apiClient.GitProviderAPI.ListGitProvidersForUrl(ctx, encodedUrl).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	if gitProvider != nil {
-		return gitProvider, nil
+	if len(gitProviders) > 0 {
+		return &gitProviders[0], nil
 	}
 
 	return nil, nil

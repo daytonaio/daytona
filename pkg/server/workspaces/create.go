@@ -79,12 +79,18 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 
 		p.Repository.Url = util.CleanUpRepositoryUrl(p.Repository.Url)
 		if p.GitProviderConfigId == nil || *p.GitProviderConfigId == "" {
-			_, id, err := s.gitProviderService.GetGitProviderForUrl(p.Repository.Url)
+			configs, err := s.gitProviderService.ListConfigsForUrl(p.Repository.Url)
 			if err != nil {
 				return nil, err
 			}
-			p.GitProviderConfigId = &id
 
+			if len(configs) > 1 {
+				return nil, errors.New("multiple git provider configs found for the repository url")
+			}
+
+			if len(configs) == 1 {
+				p.GitProviderConfigId = &configs[0].Id
+			}
 		}
 
 		if p.Repository.Sha == "" {
@@ -161,9 +167,13 @@ func (s *WorkspaceService) createProject(p *project.Project, target *provider.Pr
 		return err
 	}
 
-	gc, err := s.gitProviderService.GetConfigForUrl(p.Repository.Url)
-	if err != nil && !gitprovider.IsGitProviderNotFound(err) {
-		return err
+	var gc *gitprovider.GitProviderConfig
+
+	if p.GitProviderConfigId != nil {
+		gc, err = s.gitProviderService.GetConfig(*p.GitProviderConfigId)
+		if err != nil && !gitprovider.IsGitProviderNotFound(err) {
+			return err
+		}
 	}
 
 	err = s.provisioner.CreateProject(p, target, cr, gc)

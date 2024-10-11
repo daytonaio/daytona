@@ -478,15 +478,15 @@ const docTemplate = `{
         },
         "/gitprovider/for-url/{url}": {
             "get": {
-                "description": "Get Git provider",
+                "description": "List Git providers for url",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "gitProvider"
                 ],
-                "summary": "Get Git provider",
-                "operationId": "GetGitProviderForUrl",
+                "summary": "List Git providers for url",
+                "operationId": "ListGitProvidersForUrl",
                 "parameters": [
                     {
                         "type": "string",
@@ -500,7 +500,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/GitProvider"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/GitProvider"
+                            }
                         }
                     }
                 }
@@ -537,6 +540,34 @@ const docTemplate = `{
             }
         },
         "/gitprovider/{gitProviderId}": {
+            "get": {
+                "description": "Get Git provider",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "gitProvider"
+                ],
+                "summary": "Get Git provider",
+                "operationId": "GetGitProvider",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID",
+                        "name": "gitProviderId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GitProvider"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "description": "Remove Git provider",
                 "produces": [

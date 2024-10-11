@@ -92,7 +92,7 @@ Class | Method | HTTP request | Description
 *ContainerRegistryAPI* | [**SetContainerRegistry**](docs/ContainerRegistryAPI.md#setcontainerregistry) | **Put** /container-registry/{server} | Set container registry credentials
 *DefaultAPI* | [**HealthCheck**](docs/DefaultAPI.md#healthcheck) | **Get** /health | Health check
 *GitProviderAPI* | [**GetGitContext**](docs/GitProviderAPI.md#getgitcontext) | **Post** /gitprovider/context | Get Git context
-*GitProviderAPI* | [**GetGitProviderForUrl**](docs/GitProviderAPI.md#getgitproviderforurl) | **Get** /gitprovider/for-url/{url} | Get Git provider
+*GitProviderAPI* | [**GetGitProvider**](docs/GitProviderAPI.md#getgitprovider) | **Get** /gitprovider/{gitProviderId} | Get Git provider
 *GitProviderAPI* | [**GetGitProviderIdForUrl**](docs/GitProviderAPI.md#getgitprovideridforurl) | **Get** /gitprovider/id-for-url/{url} | Get Git provider ID
 *GitProviderAPI* | [**GetGitUser**](docs/GitProviderAPI.md#getgituser) | **Get** /gitprovider/{gitProviderId}/user | Get Git context
 *GitProviderAPI* | [**GetNamespaces**](docs/GitProviderAPI.md#getnamespaces) | **Get** /gitprovider/{gitProviderId}/namespaces | Get Git namespaces
@@ -101,6 +101,7 @@ Class | Method | HTTP request | Description
 *GitProviderAPI* | [**GetRepositories**](docs/GitProviderAPI.md#getrepositories) | **Get** /gitprovider/{gitProviderId}/{namespaceId}/repositories | Get Git repositories
 *GitProviderAPI* | [**GetUrlFromRepository**](docs/GitProviderAPI.md#geturlfromrepository) | **Post** /gitprovider/context/url | Get URL from Git repository
 *GitProviderAPI* | [**ListGitProviders**](docs/GitProviderAPI.md#listgitproviders) | **Get** /gitprovider | List Git providers
+*GitProviderAPI* | [**ListGitProvidersForUrl**](docs/GitProviderAPI.md#listgitprovidersforurl) | **Get** /gitprovider/for-url/{url} | List Git providers for url
 *GitProviderAPI* | [**RemoveGitProvider**](docs/GitProviderAPI.md#removegitprovider) | **Delete** /gitprovider/{gitProviderId} | Remove Git provider
 *GitProviderAPI* | [**SetGitProvider**](docs/GitProviderAPI.md#setgitprovider) | **Put** /gitprovider | Set Git provider
 *PrebuildAPI* | [**DeletePrebuild**](docs/PrebuildAPI.md#deleteprebuild) | **Delete** /project-config/{configName}/prebuild/{prebuildId} | Delete prebuild

@@ -231,8 +231,9 @@ func (a *ApiServer) Start() error {
 		gitProviderController.GET("/:gitProviderId/:namespaceId/:repositoryId/pull-requests", gitprovider.GetRepoPRs)
 		gitProviderController.POST("/context", gitprovider.GetGitContext)
 		gitProviderController.POST("/context/url", gitprovider.GetUrlFromRepository)
+		gitProviderController.GET("/for-url/:url", gitprovider.ListGitProvidersForUrl)
 		gitProviderController.GET("/id-for-url/:url", gitprovider.GetGitProviderIdForUrl)
-		gitProviderController.GET("/for-url/:url", gitprovider.GetGitProviderForUrl)
+		gitProviderController.GET("/provider-for-url/:url", gitprovider.GetGitProvider)
 	}
 
 	apiKeyController := protected.Group("/apikey")

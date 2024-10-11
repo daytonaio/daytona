@@ -23,6 +23,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/views"
+	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
 	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
@@ -419,6 +420,21 @@ func processGitURL(ctx context.Context, repoUrl string, apiClient *apiclient.API
 		return nil, err
 	}
 
+	gitProviderConfigs, res, err := apiClient.GitProviderAPI.ListGitProvidersForUrl(context.Background(), url.QueryEscape(repoUrl)).Execute()
+	if err != nil {
+		return nil, apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	if len(gitProviderConfigs) == 1 {
+		projectConfigurationFlags.GitProviderConfig = &gitProviderConfigs[0].Id
+	} else if len(gitProviderConfigs) > 1 {
+		gp, err := gitprovider_view.GetGitProviderFromPrompt(context.Background(), gitProviderConfigs, apiClient)
+		if err != nil {
+			return nil, err
+		}
+		projectConfigurationFlags.GitProviderConfig = &gp.Id
+	}
+
 	project, err := workspace_util.GetCreateProjectDtoFromFlags(projectConfigurationFlags)
 	if err != nil {
 		return nil, err
@@ -508,7 +524,7 @@ func GetGitProviderGpgKey(apiClient *apiclient.APIClient, ctx context.Context, r
 
 	// Get Git provider for repository URL
 	encodedUrl := url.QueryEscape(repoUrl)
-	gitProvider, res, err := apiClient.GitProviderAPI.GetGitProviderForUrl(ctx, encodedUrl).Execute()
+	gitProvider, res, err := apiClient.GitProviderAPI.GetGitProvider(ctx, encodedUrl).Execute()
 	if err != nil {
 		return "", apiclient_util.HandleErrorResponse(res, err)
 	}
