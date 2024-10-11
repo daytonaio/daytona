@@ -106,7 +106,7 @@ func (s *GitProviderService) GetGitProviderForHttpRequest(req *http.Request) (gi
 	}
 
 	for _, p := range gitProviders {
-		header := req.Header.Get(config.GetWebhookEventHeaderKeyFromGitProvider(p.Id))
+		header := req.Header.Get(config.GetWebhookEventHeaderKeyFromGitProvider(p.ProviderId))
 		if header == "" {
 			continue
 		} else {
