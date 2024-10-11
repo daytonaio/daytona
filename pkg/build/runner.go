@@ -60,7 +60,7 @@ type BuildProcessConfig struct {
 }
 
 type GitProviderStore interface {
-	GetConfigForUrl(url string) (*gitprovider.GitProviderConfig, error)
+	ListConfigsForUrl(url string) ([]*gitprovider.GitProviderConfig, error)
 }
 
 func NewBuildRunner(config BuildRunnerInstanceConfig) *BuildRunner {
@@ -240,17 +240,17 @@ func (r *BuildRunner) RunBuildProcess(config BuildProcessConfig) {
 		return
 	}
 
-	gitProvider, err := r.gitProviderStore.GetConfigForUrl(config.Build.Repository.Url)
-	if err != nil && !gitprovider.IsGitProviderNotFound(err) {
+	gitProviders, err := r.gitProviderStore.ListConfigsForUrl(config.Build.Repository.Url)
+	if err != nil {
 		r.handleBuildError(*config.Build, config.Builder, err, config.BuildLogger)
 		return
 	}
 
 	var auth *http.BasicAuth
-	if gitProvider != nil {
+	if len(gitProviders) > 0 {
 		auth = &http.BasicAuth{}
-		auth.Username = gitProvider.Username
-		auth.Password = gitProvider.Token
+		auth.Username = gitProviders[0].Username
+		auth.Password = gitProviders[0].Token
 	}
 
 	err = config.GitService.CloneRepository(config.Build.Repository, auth)

@@ -341,8 +341,8 @@ paths:
       x-codegen-request-body-name: repository
   /gitprovider/for-url/{url}:
     get:
-      description: Get Git provider
-      operationId: GetGitProviderForUrl
+      description: List Git providers for url
+      operationId: ListGitProvidersForUrl
       parameters:
       - description: Url
         in: path
@@ -355,9 +355,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GitProvider'
+                items:
+                  $ref: '#/components/schemas/GitProvider'
+                type: array
           description: OK
-      summary: Get Git provider
+      summary: List Git providers for url
       tags:
       - gitProvider
   /gitprovider/id-for-url/{url}:
@@ -397,6 +399,26 @@ paths:
           content: {}
           description: OK
       summary: Remove Git provider
+      tags:
+      - gitProvider
+    get:
+      description: Get Git provider
+      operationId: GetGitProvider
+      parameters:
+      - description: ID
+        in: path
+        name: gitProviderId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/GitProvider'
+          description: OK
+      summary: Get Git provider
       tags:
       - gitProvider
   /gitprovider/{gitProviderId}/namespaces:
