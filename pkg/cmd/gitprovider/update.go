@@ -6,6 +6,7 @@ package gitprovider
 import (
 	"context"
 
+	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -17,7 +18,6 @@ var gitProviderUpdateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Update a Git provider",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var existingAliases []string
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -44,9 +44,9 @@ var gitProviderUpdateCmd = &cobra.Command{
 			return nil
 		}
 
-		for _, gp := range gitProviders {
-			existingAliases = append(existingAliases, gp.Alias)
-		}
+		existingAliases := util.ArrayMap(gitProviders, func(gp apiclient.GitProvider) string {
+			return gp.Alias
+		})
 
 		setGitProviderConfig := apiclient.SetGitProviderConfig{
 			Id:         &selectedGitProvider.Id,
