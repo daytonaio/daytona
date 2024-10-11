@@ -18,6 +18,7 @@ var GitProviderAddCmd = &cobra.Command{
 	Aliases: []string{"new", "register"},
 	Short:   "Register a Git provider",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		var existingAliases []string
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -25,12 +26,21 @@ var GitProviderAddCmd = &cobra.Command{
 			return err
 		}
 
+		gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
+		if err != nil {
+			return apiclient_util.HandleErrorResponse(res, err)
+		}
+
+		for _, gp := range gitProviders {
+			existingAliases = append(existingAliases, gp.Alias)
+		}
+
 		setGitProviderConfig := apiclient.SetGitProviderConfig{}
 		setGitProviderConfig.BaseApiUrl = new(string)
 		setGitProviderConfig.Username = new(string)
 		setGitProviderConfig.Alias = new(string)
 
-		err = gitprovider_view.GitProviderCreationView(ctx, &setGitProviderConfig, apiClient)
+		err = gitprovider_view.GitProviderCreationView(ctx, apiClient, &setGitProviderConfig, existingAliases)
 		if err != nil {
 			return err
 		}
@@ -39,7 +49,7 @@ var GitProviderAddCmd = &cobra.Command{
 			return nil
 		}
 
-		res, err := apiClient.GitProviderAPI.SetGitProvider(ctx).GitProviderConfig(setGitProviderConfig).Execute()
+		res, err = apiClient.GitProviderAPI.SetGitProvider(ctx).GitProviderConfig(setGitProviderConfig).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}

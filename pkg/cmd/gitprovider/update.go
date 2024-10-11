@@ -17,6 +17,7 @@ var gitProviderUpdateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Update a Git provider",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		var existingAliases []string
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -43,6 +44,10 @@ var gitProviderUpdateCmd = &cobra.Command{
 			return nil
 		}
 
+		for _, gp := range gitProviders {
+			existingAliases = append(existingAliases, gp.Alias)
+		}
+
 		setGitProviderConfig := apiclient.SetGitProviderConfig{
 			Id:         &selectedGitProvider.Id,
 			ProviderId: selectedGitProvider.ProviderId,
@@ -52,7 +57,7 @@ var gitProviderUpdateCmd = &cobra.Command{
 			Alias:      &selectedGitProvider.Alias,
 		}
 
-		err = gitprovider_view.GitProviderCreationView(ctx, &setGitProviderConfig, apiClient)
+		err = gitprovider_view.GitProviderCreationView(ctx, apiClient, &setGitProviderConfig, existingAliases)
 		if err != nil {
 			return err
 		}
