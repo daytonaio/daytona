@@ -170,7 +170,9 @@ func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient
 		gitProviderAddView.SigningMethod = (*apiclient.SigningMethod)(&selectedSigningMethod)
 		gitProviderAddView.SigningKey = &signingKey
 	}
+
 	return nil
+
 }
 func isValidSSHKey(key string) error {
 	sshKeyPattern := regexp.MustCompile(`^(ssh-(rsa|ed25519|dss|ecdsa-sha2-nistp(256|384|521)))\s+[A-Za-z0-9+/=]+(\s+.+)?$`)
