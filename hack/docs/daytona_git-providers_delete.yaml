@@ -1,5 +1,5 @@
 name: daytona git-providers delete
-synopsis: Unregister a Git providers
+synopsis: Unregister a Git provider
 usage: daytona git-providers delete [flags]
 options:
     - name: all
