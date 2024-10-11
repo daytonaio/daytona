@@ -34,6 +34,26 @@ func (g *GitnessGitProviderTestSuite) TestCanHandle_False() {
 	require.False(canHandle)
 }
 
+func (g *GitnessGitProviderTestSuite) TestParseStaticGitContext_GIT_URL() {
+	gitUrl := "https://localhost:3000/git/test/test.git"
+	gitContext := &StaticGitContext{
+		Id:       "test",
+		Name:     "test",
+		Owner:    "test",
+		Url:      "https://localhost:3000/git/test/test.git",
+		Branch:   nil,
+		Sha:      nil,
+		Source:   "localhost:3000",
+		Path:     nil,
+		PrNumber: nil,
+	}
+
+	require := g.Require()
+	httpContext, err := g.gitProvider.ParseStaticGitContext(gitUrl)
+	require.Nil(err)
+	require.Equal(gitContext, httpContext)
+}
+
 func (g *GitnessGitProviderTestSuite) TestParseStaticGitContext_PR() {
 	prUrl := "https://localhost:3000/test/test/pulls/1"
 	prContext := &StaticGitContext{
