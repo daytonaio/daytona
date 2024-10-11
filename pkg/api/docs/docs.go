@@ -581,6 +581,18 @@ const docTemplate = `{
                         "name": "gitProviderId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items per page",
+                        "name": "per_page",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -651,6 +663,18 @@ const docTemplate = `{
                         "name": "namespaceId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items per page",
+                        "name": "per_page",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -698,6 +722,18 @@ const docTemplate = `{
                         "name": "repositoryId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items per page",
+                        "name": "per_page",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -745,6 +781,18 @@ const docTemplate = `{
                         "name": "repositoryId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items per page",
+                        "name": "per_page",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -2581,6 +2629,9 @@ const docTemplate = `{
                 "version"
             ],
             "properties": {
+                "label": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -2900,6 +2951,9 @@ const docTemplate = `{
                 "version"
             ],
             "properties": {
+                "label": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },

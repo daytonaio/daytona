@@ -14,10 +14,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var GitProviderAddCmd = &cobra.Command{
-	Use:     "add",
-	Aliases: []string{"new", "register"},
-	Short:   "Register a Git provider",
+var gitProviderUpdateCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Update a Git provider",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
@@ -31,26 +30,36 @@ var GitProviderAddCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		existingAliases := util.ArrayMap(gitProviders, func(gp apiclient.GitProvider) string {
-			return gp.Alias
-		})
-
-		for _, gp := range gitProviders {
-			existingAliases = append(existingAliases, gp.Alias)
+		if len(gitProviders) == 0 {
+			views.RenderInfoMessage("No git providers registered")
+			return nil
 		}
 
-		setGitProviderConfig := apiclient.SetGitProviderConfig{}
-		setGitProviderConfig.BaseApiUrl = new(string)
-		setGitProviderConfig.Username = new(string)
-		setGitProviderConfig.Alias = new(string)
-
-		err = gitprovider_view.GitProviderCreationView(ctx, apiClient, &setGitProviderConfig, existingAliases)
+		selectedGitProvider, err := gitprovider_view.GetGitProviderFromPrompt(ctx, gitProviders, apiClient)
 		if err != nil {
 			return err
 		}
 
-		if setGitProviderConfig.ProviderId == "" {
+		if selectedGitProvider == nil {
 			return nil
+		}
+
+		existingAliases := util.ArrayMap(gitProviders, func(gp apiclient.GitProvider) string {
+			return gp.Alias
+		})
+
+		setGitProviderConfig := apiclient.SetGitProviderConfig{
+			Id:         &selectedGitProvider.Id,
+			ProviderId: selectedGitProvider.ProviderId,
+			Token:      selectedGitProvider.Token,
+			BaseApiUrl: selectedGitProvider.BaseApiUrl,
+			Username:   &selectedGitProvider.Username,
+			Alias:      &selectedGitProvider.Alias,
+		}
+
+		err = gitprovider_view.GitProviderCreationView(ctx, apiClient, &setGitProviderConfig, existingAliases)
+		if err != nil {
+			return err
 		}
 
 		res, err = apiClient.GitProviderAPI.SetGitProvider(ctx).GitProviderConfig(setGitProviderConfig).Execute()
@@ -58,7 +67,7 @@ var GitProviderAddCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		views.RenderInfoMessage("Git provider has been registered")
+		views.RenderInfoMessage("Git provider has been updated")
 		return nil
 	},
 }

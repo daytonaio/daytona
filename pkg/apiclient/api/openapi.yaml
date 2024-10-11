@@ -410,6 +410,16 @@ paths:
         required: true
         schema:
           type: string
+      - description: Page number
+        in: query
+        name: page
+        schema:
+          type: integer
+      - description: Number of items per page
+        in: query
+        name: per_page
+        schema:
+          type: integer
       responses:
         "200":
           content:
@@ -460,6 +470,16 @@ paths:
         required: true
         schema:
           type: string
+      - description: Page number
+        in: query
+        name: page
+        schema:
+          type: integer
+      - description: Number of items per page
+        in: query
+        name: per_page
+        schema:
+          type: integer
       responses:
         "200":
           content:
@@ -495,6 +515,16 @@ paths:
         required: true
         schema:
           type: string
+      - description: Page number
+        in: query
+        name: page
+        schema:
+          type: integer
+      - description: Number of items per page
+        in: query
+        name: per_page
+        schema:
+          type: integer
       responses:
         "200":
           content:
@@ -530,6 +560,16 @@ paths:
         required: true
         schema:
           type: string
+      - description: Page number
+        in: query
+        name: page
+        schema:
+          type: integer
+      - description: Number of items per page
+        in: query
+        name: per_page
+        schema:
+          type: integer
       responses:
         "200":
           content:
@@ -2180,8 +2220,11 @@ components:
     Provider:
       example:
         name: name
+        label: label
         version: version
       properties:
+        label:
+          type: string
         name:
           type: string
         version:
@@ -2196,6 +2239,7 @@ components:
         options: options
         providerInfo:
           name: name
+          label: label
           version: version
       properties:
         name:
@@ -2674,8 +2718,11 @@ components:
     provider.ProviderInfo:
       example:
         name: name
+        label: label
         version: version
       properties:
+        label:
+          type: string
         name:
           type: string
         version:

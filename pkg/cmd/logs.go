@@ -97,7 +97,7 @@ var logsCmd = &cobra.Command{
 			})
 		}
 
-		apiclient_util.ReadWorkspaceLogs(ctx, activeProfile, workspace.Id, projectNames, followFlag, showWorkspaceLogs)
+		apiclient_util.ReadWorkspaceLogs(ctx, activeProfile, workspace.Id, projectNames, followFlag, showWorkspaceLogs, nil)
 
 		return nil
 	},

@@ -1,15 +1,9 @@
-## daytona git-providers delete
+## daytona git-providers update
 
-Unregister a Git provider
-
-```
-daytona git-providers delete [flags]
-```
-
-### Options
+Update a Git provider
 
 ```
-  -a, --all   Remove all Git providers
+daytona git-providers update [flags]
 ```
 
 ### Options inherited from parent commands
