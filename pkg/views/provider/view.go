@@ -16,7 +16,13 @@ type item struct {
 	provider ProviderView
 }
 
-func (i item) Title() string { return i.provider.Name }
+func (i item) Title() string {
+	if i.provider.Label != nil {
+		return *i.provider.Label
+	} else {
+		return i.provider.Name
+	}
+}
 func (i item) Description() string {
 	desc := i.provider.Version
 	if i.provider.Installed != nil {
@@ -27,7 +33,13 @@ func (i item) Description() string {
 
 	return desc
 }
-func (i item) FilterValue() string { return i.provider.Name }
+func (i item) FilterValue() string {
+	if i.provider.Label != nil {
+		return *i.provider.Label
+	} else {
+		return i.provider.Name
+	}
+}
 
 type model struct {
 	list   list.Model
