@@ -6,6 +6,7 @@ package gitprovider
 import (
 	"context"
 
+	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -25,12 +26,25 @@ var GitProviderAddCmd = &cobra.Command{
 			return err
 		}
 
+		gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
+		if err != nil {
+			return apiclient_util.HandleErrorResponse(res, err)
+		}
+
+		existingAliases := util.ArrayMap(gitProviders, func(gp apiclient.GitProvider) string {
+			return gp.Alias
+		})
+
+		for _, gp := range gitProviders {
+			existingAliases = append(existingAliases, gp.Alias)
+		}
+
 		setGitProviderConfig := apiclient.SetGitProviderConfig{}
 		setGitProviderConfig.BaseApiUrl = new(string)
 		setGitProviderConfig.Username = new(string)
 		setGitProviderConfig.Alias = new(string)
 
-		err = gitprovider_view.GitProviderCreationView(ctx, &setGitProviderConfig, apiClient)
+		err = gitprovider_view.GitProviderCreationView(ctx, apiClient, &setGitProviderConfig, existingAliases)
 		if err != nil {
 			return err
 		}
@@ -39,7 +53,7 @@ var GitProviderAddCmd = &cobra.Command{
 			return nil
 		}
 
-		res, err := apiClient.GitProviderAPI.SetGitProvider(ctx).GitProviderConfig(setGitProviderConfig).Execute()
+		res, err = apiClient.GitProviderAPI.SetGitProvider(ctx).GitProviderConfig(setGitProviderConfig).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}

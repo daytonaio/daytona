@@ -18,7 +18,7 @@ import (
 
 var commonGitProviderIds = []string{"github", "gitlab", "bitbucket"}
 
-func GitProviderCreationView(ctx context.Context, gitProviderAddView *apiclient.SetGitProviderConfig, apiClient *apiclient.APIClient) error {
+func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient, gitProviderAddView *apiclient.SetGitProviderConfig, existingAliases []string) error {
 	supportedProviders := config.GetSupportedGitProviders()
 
 	var gitProviderOptions []huh.Option[string]
@@ -106,7 +106,15 @@ func GitProviderCreationView(ctx context.Context, gitProviderAddView *apiclient.
 			huh.NewInput().
 				Title("Alias").
 				Description("Will default to username if left empty").
-				Value(gitProviderAddView.Alias),
+				Value(gitProviderAddView.Alias).
+				Validate(func(str string) error {
+					for _, alias := range existingAliases {
+						if alias == str {
+							return errors.New("alias is already in use")
+						}
+					}
+					return nil
+				}),
 		).WithHeight(6),
 	).WithTheme(views.GetCustomTheme())
 

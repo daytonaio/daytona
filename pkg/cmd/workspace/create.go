@@ -227,14 +227,14 @@ var blankFlag bool
 var multiProjectFlag bool
 
 var projectConfigurationFlags = workspace_util.ProjectConfigurationFlags{
-	Builder:             new(views_util.BuildChoice),
-	CustomImage:         new(string),
-	CustomImageUser:     new(string),
-	Branches:            new([]string),
-	DevcontainerPath:    new(string),
-	EnvVars:             new([]string),
-	Manual:              new(bool),
-	GitProviderConfigId: new(string),
+	Builder:           new(views_util.BuildChoice),
+	CustomImage:       new(string),
+	CustomImageUser:   new(string),
+	Branches:          new([]string),
+	DevcontainerPath:  new(string),
+	EnvVars:           new([]string),
+	Manual:            new(bool),
+	GitProviderConfig: new(string),
 }
 
 func init() {
@@ -386,7 +386,7 @@ func processGitURL(ctx context.Context, repoUrl string, apiClient *apiclient.API
 	if !blankFlag {
 		projectConfig, res, err := apiClient.ProjectConfigAPI.GetDefaultProjectConfig(ctx, encodedURLParam).Execute()
 		if err == nil {
-			projectConfig.GitProviderConfigId = projectConfigurationFlags.GitProviderConfigId
+			projectConfig.GitProviderConfigId = projectConfigurationFlags.GitProviderConfig
 			return workspace_util.AddProjectFromConfig(projectConfig, apiClient, projects, branch)
 		}
 
@@ -404,6 +404,11 @@ func processGitURL(ctx context.Context, repoUrl string, apiClient *apiclient.API
 	}
 
 	projectName, err := workspace_util.GetSanitizedProjectName(repo.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	projectConfigurationFlags.GitProviderConfig, err = workspace_util.GetGitProviderConfigIdFromFlag(ctx, apiClient, projectConfigurationFlags.GitProviderConfig)
 	if err != nil {
 		return nil, err
 	}
