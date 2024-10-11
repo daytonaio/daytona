@@ -3,7 +3,7 @@
 Add a prebuild configuration
 
 ```
-daytona prebuild add [project-config] [flags]
+daytona prebuild add [PROJECT_CONFIG] [flags]
 ```
 
 ### Options

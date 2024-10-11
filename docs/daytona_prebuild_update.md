@@ -3,7 +3,7 @@
 Update a prebuild configuration
 
 ```
-daytona prebuild update [project-config] [prebuild-id] [flags]
+daytona prebuild update [PROJECT_CONFIG] [PREBUILD_ID] [flags]
 ```
 
 ### Options
@@ -11,7 +11,6 @@ daytona prebuild update [project-config] [prebuild-id] [flags]
 ```
       --branch string           Git branch for the prebuild
       --commit-interval int     Commit interval for the prebuild
-      --project-config string   Project configuration name
       --retention int           Retention period for the prebuild
       --run                     Run the prebuild once after updating it
       --trigger-files strings   Files that trigger the prebuild

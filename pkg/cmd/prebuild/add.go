@@ -26,7 +26,7 @@ var (
 )
 
 var prebuildAddCmd = &cobra.Command{
-	Use:     "add [project-config]",
+	Use:     "add [PROJECT_CONFIG]",
 	Short:   "Add a prebuild configuration",
 	Args:    cobra.MaximumNArgs(1), // Maximum one argument allowed
 	Aliases: []string{"new", "create"},
@@ -41,8 +41,8 @@ var prebuildAddCmd = &cobra.Command{
 		}
 
 		// If no arguments and no flags are provided, run the interactive CLI
-		if len(args) == 0 && !cmd.Flags().Changed("branch") && !cmd.Flags().Changed("retention") &&
-			!cmd.Flags().Changed("commit-interval") && !cmd.Flags().Changed("trigger-files") {
+		if len(args) == 0 && branchFlag == "" && retentionFlag == 0 &&
+			commitIntervalFlag == 0 && triggerFilesFlag == nil {
 			// Interactive CLI logic
 			gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
 			if err != nil {

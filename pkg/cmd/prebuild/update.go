@@ -28,7 +28,7 @@ var (
 )
 
 var prebuildUpdateCmd = &cobra.Command{
-	Use:   "update [project-config] [prebuild-id]",
+	Use:   "update [PROJECT_CONFIG] [PREBUILD_ID]",
 	Short: "Update a prebuild configuration",
 	Args:  cobra.MaximumNArgs(2), // Allow up to 2 arguments
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -193,6 +193,5 @@ func init() {
 	prebuildUpdateCmd.Flags().IntVar(&retentionFlag, "retention", 0, "Retention period for the prebuild")
 	prebuildUpdateCmd.Flags().IntVar(&commitIntervalFlag, "commit-interval", 0, "Commit interval for the prebuild")
 	prebuildUpdateCmd.Flags().StringSliceVar(&triggerFilesFlag, "trigger-files", nil, "Files that trigger the prebuild")
-	prebuildUpdateCmd.Flags().StringVar(&projectConfigFlag, "project-config", "", "Project configuration name") // New flag
 	prebuildUpdateCmd.Flags().BoolVar(&runOnUpdateFlag, "run", false, "Run the prebuild once after updating it")
 }

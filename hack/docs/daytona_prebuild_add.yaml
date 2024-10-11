@@ -1,6 +1,6 @@
 name: daytona prebuild add
 synopsis: Add a prebuild configuration
-usage: daytona prebuild add [project-config] [flags]
+usage: daytona prebuild add [PROJECT_CONFIG] [flags]
 options:
     - name: branch
       usage: Git branch for the prebuild
