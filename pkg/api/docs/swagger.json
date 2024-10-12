@@ -536,7 +536,7 @@
                 }
             }
         },
-        "/gitprovider/{gitProviderId}": {
+        "/gitprovider/provider-for-id/{gitProviderId}": {
             "get": {
                 "description": "Get Git provider",
                 "produces": [
@@ -564,7 +564,9 @@
                         }
                     }
                 }
-            },
+            }
+        },
+        "/gitprovider/{gitProviderId}": {
             "delete": {
                 "description": "Remove Git provider",
                 "produces": [

@@ -539,7 +539,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/gitprovider/{gitProviderId}": {
+        "/gitprovider/provider-for-id/{gitProviderId}": {
             "get": {
                 "description": "Get Git provider",
                 "produces": [
@@ -567,7 +567,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/gitprovider/{gitProviderId}": {
             "delete": {
                 "description": "Remove Git provider",
                 "produces": [

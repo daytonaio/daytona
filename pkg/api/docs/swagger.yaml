@@ -1158,25 +1158,6 @@ paths:
       summary: Remove Git provider
       tags:
       - gitProvider
-    get:
-      description: Get Git provider
-      operationId: GetGitProvider
-      parameters:
-      - description: ID
-        in: path
-        name: gitProviderId
-        required: true
-        type: string
-      produces:
-      - text/plain
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/GitProvider'
-      summary: Get Git provider
-      tags:
-      - gitProvider
   /gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/branches:
     get:
       description: Get Git repository branches
@@ -1424,6 +1405,26 @@ paths:
           schema:
             type: string
       summary: Get Git provider ID
+      tags:
+      - gitProvider
+  /gitprovider/provider-for-id/{gitProviderId}:
+    get:
+      description: Get Git provider
+      operationId: GetGitProvider
+      parameters:
+      - description: ID
+        in: path
+        name: gitProviderId
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/GitProvider'
+      summary: Get Git provider
       tags:
       - gitProvider
   /health:

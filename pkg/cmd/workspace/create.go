@@ -172,7 +172,7 @@ var CreateCmd = &cobra.Command{
 			stopLogs()
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
-		gpgKey, err := GetGitProviderGpgKey(apiClient, ctx, projects[0].Source.Repository.Url)
+		gpgKey, err := GetGitProviderGpgKey(apiClient, ctx, *projects[0].GitProviderConfigId)
 		if err != nil {
 			log.Warn(err)
 		}
@@ -518,30 +518,30 @@ func dedupProjectNames(projects *[]apiclient.CreateProjectDTO) {
 	}
 }
 
-func GetGitProviderGpgKey(apiClient *apiclient.APIClient, ctx context.Context, repoUrl string) (string, error) {
+func GetGitProviderGpgKey(apiClient *apiclient.APIClient, ctx context.Context, providerConfigId string) (string, error) {
 	var providerConfig *gitprovider.GitProviderConfig
 	var gpgKey string
 
-	// Get Git provider for repository URL
-	encodedUrl := url.QueryEscape(repoUrl)
-	gitProvider, res, err := apiClient.GitProviderAPI.GetGitProvider(ctx, encodedUrl).Execute()
-	if err != nil {
-		return "", apiclient_util.HandleErrorResponse(res, err)
-	}
+	if providerConfigId != "" {
 
-	// Extract GPG key if present
-	if gitProvider != nil {
-		providerConfig = &gitprovider.GitProviderConfig{
-			SigningMethod: (*gitprovider.SigningMethod)(gitProvider.SigningMethod),
-			SigningKey:    gitProvider.SigningKey,
+		gitProvider, res, err := apiClient.GitProviderAPI.GetGitProvider(ctx, providerConfigId).Execute()
+		if err != nil {
+			return "", apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		if providerConfig.SigningMethod != nil && providerConfig.SigningKey != nil {
-			if *providerConfig.SigningMethod == gitprovider.SigningMethodGPG {
-				gpgKey = *providerConfig.SigningKey
+		// Extract GPG key if present
+		if gitProvider != nil {
+			providerConfig = &gitprovider.GitProviderConfig{
+				SigningMethod: (*gitprovider.SigningMethod)(gitProvider.SigningMethod),
+				SigningKey:    gitProvider.SigningKey,
+			}
+
+			if providerConfig.SigningMethod != nil && providerConfig.SigningKey != nil {
+				if *providerConfig.SigningMethod == gitprovider.SigningMethodGPG {
+					gpgKey = *providerConfig.SigningKey
+				}
 			}
 		}
 	}
-
 	return gpgKey, nil
 }

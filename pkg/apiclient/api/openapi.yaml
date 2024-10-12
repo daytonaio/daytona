@@ -383,24 +383,7 @@ paths:
       summary: Get Git provider ID
       tags:
       - gitProvider
-  /gitprovider/{gitProviderId}:
-    delete:
-      description: Remove Git provider
-      operationId: RemoveGitProvider
-      parameters:
-      - description: Git provider
-        in: path
-        name: gitProviderId
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content: {}
-          description: OK
-      summary: Remove Git provider
-      tags:
-      - gitProvider
+  /gitprovider/provider-for-id/{gitProviderId}:
     get:
       description: Get Git provider
       operationId: GetGitProvider
@@ -419,6 +402,24 @@ paths:
                 $ref: '#/components/schemas/GitProvider'
           description: OK
       summary: Get Git provider
+      tags:
+      - gitProvider
+  /gitprovider/{gitProviderId}:
+    delete:
+      description: Remove Git provider
+      operationId: RemoveGitProvider
+      parameters:
+      - description: Git provider
+        in: path
+        name: gitProviderId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Remove Git provider
       tags:
       - gitProvider
   /gitprovider/{gitProviderId}/namespaces:

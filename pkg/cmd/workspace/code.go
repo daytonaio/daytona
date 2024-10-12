@@ -41,7 +41,7 @@ var CodeCmd = &cobra.Command{
 		ctx := context.Background()
 		var workspaceId string
 		var projectName string
-		var repoUrl string
+		var providerConfigId string
 		var ideId string
 		var workspace *apiclient.WorkspaceDTO
 
@@ -89,14 +89,14 @@ var CodeCmd = &cobra.Command{
 				return nil
 			}
 			projectName = selectedProject.Name
-			repoUrl = selectedProject.Repository.Url
+			providerConfigId = *selectedProject.GitProviderConfigId
 		}
 
 		if len(args) == 2 {
 			projectName = args[1]
 			for _, project := range workspace.Projects {
 				if project.Name == projectName {
-					repoUrl = project.Repository.Url
+					providerConfigId = *project.GitProviderConfigId
 					break
 				}
 			}
@@ -124,7 +124,7 @@ var CodeCmd = &cobra.Command{
 			}
 		}
 
-		gpgKey, err := GetGitProviderGpgKey(apiClient, ctx, repoUrl)
+		gpgKey, err := GetGitProviderGpgKey(apiClient, ctx, providerConfigId)
 		if err != nil {
 			log.Warn(err)
 		}

@@ -42,7 +42,7 @@ var StartCmd = &cobra.Command{
 		var activeProfile config.Profile
 		var ideId string
 		var ideList []config.Ide
-		var repoUrl string
+		var providerConfigId string
 		projectProviderMetadata := ""
 
 		ctx := context.Background()
@@ -97,11 +97,11 @@ var StartCmd = &cobra.Command{
 				workspaceId = wsInfo.Id
 				if startProjectFlag == "" {
 					startProjectFlag = wsInfo.Projects[0].Name
-					repoUrl = wsInfo.Projects[0].Repository.Url
+					providerConfigId = *wsInfo.Projects[0].GitProviderConfigId
 				} else {
 					for _, project := range wsInfo.Projects {
 						if project.Name == startProjectFlag {
-							repoUrl = project.Repository.Url
+							providerConfigId = *project.GitProviderConfigId
 							break
 						}
 					}
@@ -119,7 +119,7 @@ var StartCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			gpgKey, err := GetGitProviderGpgKey(apiClient, ctx, repoUrl)
+			gpgKey, err := GetGitProviderGpgKey(apiClient, ctx, providerConfigId)
 			if err != nil {
 				log.Warn(err)
 			}

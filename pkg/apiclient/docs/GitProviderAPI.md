@@ -5,7 +5,7 @@ All URIs are relative to *http://localhost:3986*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**GetGitContext**](GitProviderAPI.md#GetGitContext) | **Post** /gitprovider/context | Get Git context
-[**GetGitProvider**](GitProviderAPI.md#GetGitProvider) | **Get** /gitprovider/{gitProviderId} | Get Git provider
+[**GetGitProvider**](GitProviderAPI.md#GetGitProvider) | **Get** /gitprovider/provider-for-id/{gitProviderId} | Get Git provider
 [**GetGitProviderIdForUrl**](GitProviderAPI.md#GetGitProviderIdForUrl) | **Get** /gitprovider/id-for-url/{url} | Get Git provider ID
 [**GetGitUser**](GitProviderAPI.md#GetGitUser) | **Get** /gitprovider/{gitProviderId}/user | Get Git context
 [**GetNamespaces**](GitProviderAPI.md#GetNamespaces) | **Get** /gitprovider/{gitProviderId}/namespaces | Get Git namespaces
