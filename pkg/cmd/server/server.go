@@ -15,12 +15,14 @@ import (
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/views"
 	view "github.com/daytonaio/daytona/pkg/views/server"
+	"github.com/fatih/color"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 var yesFlag bool
+var allRequirementsMet bool
 
 var ServerCmd = &cobra.Command{
 	Use:     "server",
@@ -37,17 +39,30 @@ var ServerCmd = &cobra.Command{
 				return nil
 			}
 		}
+		infoColor := color.New(color.FgHiBlue).SprintFunc()
+		warningColor := color.New(color.FgRed).SprintFunc()
 		logRequirements := provider.LogProvider{}
-		requirements, err := logRequirements.CheckRequirements()
-		if err != nil {
-			return err
-		}
-		for _, req := range requirements {
-			if req.Met {
-				log.Printf("[INFO] Requirement met: %s - %s\n", req.Name, req.Reason)
-			} else {
-				log.Printf("[WARNING] Requirement not met: %s - %s\n", req.Name, req.Reason)
+
+		switch provider.ProviderDocker {
+		case "docker":
+			requirements, err := logRequirements.CheckDockerRequirements()
+			if err != nil {
+				return err
 			}
+
+			for _, req := range requirements {
+				if req.Met {
+					allRequirementsMet = true
+					fmt.Printf("%s[0000]     Requirement met: %s\n", infoColor("INFO"), req.Reason)
+				} else {
+					allRequirementsMet = false
+					fmt.Printf("%s[0000]  Requirement not met: %s\n", warningColor("WARNING"), req.Reason)
+				}
+				if !allRequirementsMet {
+					return fmt.Errorf("    Daytona server startup aborted, one or more requirement not met")
+				}
+			}
+
 		}
 
 		if log.GetLevel() < log.InfoLevel {

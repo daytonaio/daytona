@@ -3,11 +3,19 @@
 
 package provider
 
-import "os/exec"
+import (
+	"os/exec"
+)
 
 type ProviderRequirementLogs interface {
-	CheckRequirements() ([]RequirementStatus, error)
+	CheckDockerRequirements() ([]RequirementStatus, error)
 }
+
+const (
+	ProviderDocker       string = "docker"
+	ProviderAWS          string = "aws"
+	ProviderDigitalOcean string = "digitalocean"
+)
 
 type RequirementStatus struct {
 	Name   string
@@ -17,7 +25,7 @@ type RequirementStatus struct {
 
 type LogProvider struct{}
 
-func (l *LogProvider) CheckRequirements() ([]RequirementStatus, error) {
+func (l *LogProvider) CheckDockerRequirements() ([]RequirementStatus, error) {
 	var results []RequirementStatus
 
 	//check if docker is installed
