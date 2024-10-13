@@ -233,7 +233,7 @@ func (a *ApiServer) Start() error {
 		gitProviderController.POST("/context/url", gitprovider.GetUrlFromRepository)
 		gitProviderController.GET("/for-url/:url", gitprovider.ListGitProvidersForUrl)
 		gitProviderController.GET("/id-for-url/:url", gitprovider.GetGitProviderIdForUrl)
-		gitProviderController.GET("/provider-for-id/:gitProviderId", gitprovider.GetGitProvider)
+		gitProviderController.GET("/:gitProviderId", gitprovider.GetGitProvider)
 	}
 
 	apiKeyController := protected.Group("/apikey")

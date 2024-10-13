@@ -94,7 +94,7 @@ func ListGitProvidersForUrl(ctx *gin.Context) {
 //	@Produce		plain
 //	@Param			gitProviderId	path		string	true	"ID"
 //	@Success		200				{object}	gitprovider.GitProviderConfig
-//	@Router			/gitprovider/provider-for-id/{gitProviderId} [get]
+//	@Router			/gitprovider/{gitProviderId} [get]
 //
 //	@id				GetGitProvider
 func GetGitProvider(ctx *gin.Context) {
