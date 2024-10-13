@@ -42,7 +42,7 @@ var StartCmd = &cobra.Command{
 		var activeProfile config.Profile
 		var ideId string
 		var ideList []config.Ide
-		var providerConfigId string
+		var providerConfigId *string
 		projectProviderMetadata := ""
 
 		ctx := context.Background()
@@ -97,12 +97,17 @@ var StartCmd = &cobra.Command{
 				workspaceId = wsInfo.Id
 				if startProjectFlag == "" {
 					startProjectFlag = wsInfo.Projects[0].Name
-					providerConfigId = *wsInfo.Projects[0].GitProviderConfigId
+
+					if wsInfo.Projects[0].GitProviderConfigId != nil {
+						providerConfigId = wsInfo.Projects[0].GitProviderConfigId
+					}
 				} else {
 					for _, project := range wsInfo.Projects {
 						if project.Name == startProjectFlag {
-							providerConfigId = *project.GitProviderConfigId
-							break
+							if project.GitProviderConfigId != nil {
+								providerConfigId = project.GitProviderConfigId
+								break
+							}
 						}
 					}
 				}

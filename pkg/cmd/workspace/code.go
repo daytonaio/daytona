@@ -41,7 +41,7 @@ var CodeCmd = &cobra.Command{
 		ctx := context.Background()
 		var workspaceId string
 		var projectName string
-		var providerConfigId string
+		var providerConfigId *string
 		var ideId string
 		var workspace *apiclient.WorkspaceDTO
 
@@ -88,16 +88,22 @@ var CodeCmd = &cobra.Command{
 			if selectedProject == nil {
 				return nil
 			}
+
 			projectName = selectedProject.Name
-			providerConfigId = *selectedProject.GitProviderConfigId
+
+			if selectedProject.GitProviderConfigId != nil {
+				providerConfigId = selectedProject.GitProviderConfigId
+			}
 		}
 
 		if len(args) == 2 {
 			projectName = args[1]
 			for _, project := range workspace.Projects {
 				if project.Name == projectName {
-					providerConfigId = *project.GitProviderConfigId
-					break
+					if project.GitProviderConfigId != nil {
+						providerConfigId = project.GitProviderConfigId
+						break
+					}
 				}
 			}
 		}

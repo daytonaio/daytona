@@ -172,9 +172,12 @@ var CreateCmd = &cobra.Command{
 			stopLogs()
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
-		gpgKey, err := GetGitProviderGpgKey(apiClient, ctx, *projects[0].GitProviderConfigId)
-		if err != nil {
-			log.Warn(err)
+		var gpgKey string
+		if projects[0].GitProviderConfigId != nil {
+			gpgKey, err = GetGitProviderGpgKey(apiClient, ctx, projects[0].GitProviderConfigId)
+			if err != nil {
+				log.Warn(err)
+			}
 		}
 
 		err = waitForDial(createdWorkspace, &activeProfile, tsConn, gpgKey)
@@ -518,13 +521,13 @@ func dedupProjectNames(projects *[]apiclient.CreateProjectDTO) {
 	}
 }
 
-func GetGitProviderGpgKey(apiClient *apiclient.APIClient, ctx context.Context, providerConfigId string) (string, error) {
+func GetGitProviderGpgKey(apiClient *apiclient.APIClient, ctx context.Context, providerConfigId *string) (string, error) {
 	var providerConfig *gitprovider.GitProviderConfig
 	var gpgKey string
 
-	if providerConfigId != "" {
+	if providerConfigId != nil {
 
-		gitProvider, res, err := apiClient.GitProviderAPI.GetGitProvider(ctx, providerConfigId).Execute()
+		gitProvider, res, err := apiClient.GitProviderAPI.GetGitProvider(ctx, *providerConfigId).Execute()
 		if err != nil {
 			return "", apiclient_util.HandleErrorResponse(res, err)
 		}

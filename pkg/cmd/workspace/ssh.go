@@ -37,7 +37,7 @@ var SshCmd = &cobra.Command{
 		ctx := context.Background()
 		var workspace *apiclient.WorkspaceDTO
 		var projectName string
-		var providerConfigId string
+		var providerConfigId *string
 
 		apiClient, err := apiclient_util.GetApiClient(&activeProfile)
 		if err != nil {
@@ -70,15 +70,20 @@ var SshCmd = &cobra.Command{
 				return nil
 			}
 			projectName = selectedProject.Name
-			providerConfigId = *selectedProject.GitProviderConfigId
+
+			if selectedProject.GitProviderConfigId != nil {
+				providerConfigId = selectedProject.GitProviderConfigId
+			}
 		}
 
 		if len(args) >= 2 {
 			projectName = args[1]
 			for _, project := range workspace.Projects {
 				if project.Name == projectName {
-					providerConfigId = *project.GitProviderConfigId
-					break
+					if project.GitProviderConfigId != nil {
+						providerConfigId = project.GitProviderConfigId
+						break
+					}
 				}
 			}
 		}
