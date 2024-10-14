@@ -75,7 +75,6 @@ var prebuildAddCmd = &cobra.Command{
 			}
 
 			prebuildAddView.ProjectConfigName = projectConfig.Name
-
 			if projectConfig.BuildConfig == nil {
 				return errors.New("The chosen project config does not have a build configuration")
 			}
@@ -89,9 +88,9 @@ var prebuildAddCmd = &cobra.Command{
 				fmt.Println("Operation canceled")
 				return nil
 			}
-
 			prebuildAddView.RunBuildOnAdd = runOnAddFlag
 			prebuildAddView.Branch = chosenBranch.Name
+			add.PrebuildCreationView(&prebuildAddView, false)
 		} else {
 			// Non-interactive mode: use provided arguments and flags
 			if len(args) > 0 {
@@ -140,10 +139,13 @@ var prebuildAddCmd = &cobra.Command{
 				return errors.New("commit interval must be a number")
 			}
 		}
+		var retention int
 
-		retention, err := strconv.Atoi(prebuildAddView.Retention)
-		if err != nil {
-			return errors.New("retention must be a number")
+		if prebuildAddView.Retention != "" {
+			retention, err = strconv.Atoi(prebuildAddView.Retention)
+			if err != nil {
+				return errors.New("retention must be a number")
+			}
 		}
 
 		newPrebuild := apiclient.CreatePrebuildDTO{
@@ -181,8 +183,8 @@ var prebuildAddCmd = &cobra.Command{
 
 func init() {
 	prebuildAddCmd.Flags().BoolVar(&runOnAddFlag, "run", false, "Run the prebuild once after adding it")
-	prebuildAddCmd.Flags().StringVar(&branchFlag, "branch", "", "Git branch for the prebuild")
-	prebuildAddCmd.Flags().IntVar(&retentionFlag, "retention", 0, "Retention period for the prebuild (in days)")
-	prebuildAddCmd.Flags().IntVar(&commitIntervalFlag, "commit-interval", 0, "Commit interval for the prebuild (in seconds)")
-	prebuildAddCmd.Flags().StringSliceVar(&triggerFilesFlag, "trigger-files", nil, "Files that trigger the prebuild")
+	prebuildAddCmd.Flags().StringVarP(&branchFlag, "branch", "b", "", "Git branch for the prebuild")
+	prebuildAddCmd.Flags().IntVarP(&retentionFlag, "retention", "r", 0, "Retention period for the prebuild (in days)")
+	prebuildAddCmd.Flags().IntVarP(&commitIntervalFlag, "commit-interval", "c", 0, "Commit interval for the prebuild (in seconds)")
+	prebuildAddCmd.Flags().StringSliceVarP(&triggerFilesFlag, "trigger-files", "t", nil, "Files that trigger the prebuild")
 }
