@@ -17,7 +17,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
-	"github.com/daytonaio/daytona/pkg/views/server/apikey"
+	"github.com/daytonaio/daytona/pkg/views/apikey"
 )
 
 var yesFlag bool

@@ -12,8 +12,8 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	"github.com/daytonaio/daytona/pkg/views/server/apikey"
-	view "github.com/daytonaio/daytona/pkg/views/server/apikey"
+	"github.com/daytonaio/daytona/pkg/views/apikey"
+	view "github.com/daytonaio/daytona/pkg/views/apikey"
 )
 
 var GenerateCmd = &cobra.Command{
