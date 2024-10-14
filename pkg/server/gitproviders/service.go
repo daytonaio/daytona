@@ -14,7 +14,7 @@ import (
 
 type IGitProviderService interface {
 	GetConfig(id string) (*gitprovider.GitProviderConfig, error)
-	GetConfigForUrl(url string) (*gitprovider.GitProviderConfig, error)
+	ListConfigsForUrl(url string) ([]*gitprovider.GitProviderConfig, error)
 	GetGitProvider(id string) (gitprovider.GitProvider, error)
 	GetGitProviderForUrl(url string) (gitprovider.GitProvider, string, error)
 	GetGitProviderForHttpRequest(req *http.Request) (gitprovider.GitProvider, error)
@@ -66,14 +66,6 @@ func (s *GitProviderService) GetGitProvider(id string) (gitprovider.GitProvider,
 	}
 
 	return s.newGitProvider(providerConfig)
-}
-
-func (s *GitProviderService) ListConfigs() ([]*gitprovider.GitProviderConfig, error) {
-	return s.configStore.List()
-}
-
-func (s *GitProviderService) GetConfig(id string) (*gitprovider.GitProviderConfig, error) {
-	return s.configStore.Find(id)
 }
 
 func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (string, error) {
