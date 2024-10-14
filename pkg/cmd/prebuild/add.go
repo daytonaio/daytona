@@ -28,7 +28,7 @@ var (
 var prebuildAddCmd = &cobra.Command{
 	Use:     "add [PROJECT_CONFIG]",
 	Short:   "Add a prebuild configuration",
-	Args:    cobra.MaximumNArgs(1), // Maximum one argument allowed
+	Args:    cobra.MaximumNArgs(1), 
 	Aliases: []string{"new", "create"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var prebuildAddView add.PrebuildAddView
