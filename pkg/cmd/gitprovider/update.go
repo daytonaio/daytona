@@ -49,12 +49,14 @@ var gitProviderUpdateCmd = &cobra.Command{
 		})
 
 		setGitProviderConfig := apiclient.SetGitProviderConfig{
-			Id:         &selectedGitProvider.Id,
-			ProviderId: selectedGitProvider.ProviderId,
-			Token:      selectedGitProvider.Token,
-			BaseApiUrl: selectedGitProvider.BaseApiUrl,
-			Username:   &selectedGitProvider.Username,
-			Alias:      &selectedGitProvider.Alias,
+			Id:            &selectedGitProvider.Id,
+			ProviderId:    selectedGitProvider.ProviderId,
+			Token:         selectedGitProvider.Token,
+			BaseApiUrl:    selectedGitProvider.BaseApiUrl,
+			Username:      &selectedGitProvider.Username,
+			Alias:         &selectedGitProvider.Alias,
+			SigningMethod: selectedGitProvider.SigningMethod,
+			SigningKey:    selectedGitProvider.SigningKey,
 		}
 
 		err = gitprovider_view.GitProviderCreationView(ctx, apiClient, &setGitProviderConfig, existingAliases)
