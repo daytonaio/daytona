@@ -35,6 +35,8 @@ func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient
 		gitProviderOptions = append(gitProviderOptions, huh.Option[string]{Key: "Other", Value: "other"})
 	}
 
+	initialAlias := gitProviderAddView.Alias
+
 	if gitProviderAddView.ProviderId == "" {
 		gitProviderForm := huh.NewForm(
 			huh.NewGroup(
@@ -110,7 +112,9 @@ func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient
 				Validate(func(str string) error {
 					for _, alias := range existingAliases {
 						if alias == str {
-							return errors.New("alias is already in use")
+							if initialAlias == nil || *initialAlias != str {
+								return errors.New("alias is already in use")
+							}
 						}
 					}
 					return nil
