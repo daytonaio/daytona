@@ -32,7 +32,7 @@ func (pc *ProjectConfig) SetPrebuild(p *PrebuildConfig) error {
 
 	for _, pb := range pc.Prebuilds {
 		if pb.Id == p.Id {
-			pb = &newPrebuild
+			*pb = newPrebuild
 			return nil
 		}
 	}
