@@ -13,6 +13,7 @@ import (
 	"runtime"
 
 	"github.com/daytonaio/daytona/pkg/os"
+	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -40,7 +41,7 @@ func (m *ProviderManager) GetProvidersManifest() (*ProvidersManifest, error) {
 	return &manifest, nil
 }
 
-func (m *ProviderManager) DownloadProvider(downloadUrls map[os.OperatingSystem]string, providerName string, throwIfPresent bool) (string, error) {
+func (m *ProviderManager) DownloadProvider(c *gin.Context, downloadUrls map[os.OperatingSystem]string, providerName string, throwIfPresent bool) (string, error) {
 	downloadPath := filepath.Join(m.baseDir, providerName, providerName)
 	if runtime.GOOS == "windows" {
 		downloadPath += ".exe"
@@ -60,7 +61,7 @@ func (m *ProviderManager) DownloadProvider(downloadUrls map[os.OperatingSystem]s
 		return "", err
 	}
 
-	err = os.DownloadFile(downloadUrls[*operatingSystem], downloadPath)
+	err = os.DownloadFile(c, downloadUrls[*operatingSystem], downloadPath)
 	if err != nil {
 		return "", err
 	}

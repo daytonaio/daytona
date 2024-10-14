@@ -40,7 +40,7 @@ func InstallProvider(ctx *gin.Context) {
 		}
 	}
 
-	downloadPath, err := server.ProviderManager.DownloadProvider(req.DownloadUrls, req.Name, true)
+	downloadPath, err := server.ProviderManager.DownloadProvider(ctx, req.DownloadUrls, req.Name, true)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to download provider: %w", err))
 		return
