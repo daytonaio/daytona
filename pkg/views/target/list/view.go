@@ -5,21 +5,46 @@ package target
 
 import (
 	"fmt"
-	"os"
 	"sort"
 
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
-
-	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/lipgloss/table"
-	"golang.org/x/term"
+	"github.com/daytonaio/daytona/pkg/views/util"
 )
 
 type RowData struct {
 	Target   string
 	Provider string
 	Options  string
+}
+
+func ListTargets(targetList []apiclient.ProviderTarget) {
+	sortTargets(&targetList)
+
+	data := [][]string{}
+
+	for _, target := range targetList {
+		var rowData *RowData
+		var row []string
+
+		rowData = getRowData(&target)
+		if rowData == nil {
+			continue
+		}
+		row = getRowFromRowData(*rowData)
+		data = append(data, row)
+	}
+
+	table, success := util.GetTableView(data, []string{
+		"Target", "Provider", "Options",
+	}, nil)
+
+	if !success {
+		renderUnstyledList(targetList)
+		return
+	}
+
+	fmt.Println(table)
 }
 
 func getRowFromRowData(rowData RowData) []string {
@@ -40,56 +65,6 @@ func getRowData(target *apiclient.ProviderTarget) *RowData {
 	rowData.Options = target.Options
 
 	return &rowData
-}
-
-func ListTargets(targetList []apiclient.ProviderTarget) {
-
-	sortTargets(&targetList)
-
-	re := lipgloss.NewRenderer(os.Stdout)
-
-	headers := []string{"Target", "Provider", "Options"}
-
-	data := [][]string{}
-
-	for _, target := range targetList {
-		var rowData *RowData
-		var row []string
-
-		rowData = getRowData(&target)
-		if rowData == nil {
-			continue
-		}
-		row = getRowFromRowData(*rowData)
-		data = append(data, row)
-	}
-
-	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
-	if err != nil {
-		fmt.Println(data)
-		return
-	}
-
-	breakpointWidth := views.GetContainerBreakpointWidth(terminalWidth)
-
-	if breakpointWidth == 0 || terminalWidth < views.TUITableMinimumWidth {
-		renderUnstyledList(targetList)
-		return
-	}
-
-	t := table.New().
-		Headers(headers...).
-		Rows(data...).
-		BorderStyle(re.NewStyle().Foreground(views.LightGray)).
-		BorderRow(false).BorderColumn(false).BorderLeft(false).BorderRight(false).BorderTop(false).BorderBottom(false).
-		StyleFunc(func(row, col int) lipgloss.Style {
-			if row == 0 {
-				return views.TableHeaderStyle
-			}
-			return views.BaseCellStyle
-		}).Width(breakpointWidth - 2*views.BaseTableStyleHorizontalPadding)
-
-	fmt.Println(views.BaseTableStyle.Render(t.String()))
 }
 
 func sortTargets(targets *[]apiclient.ProviderTarget) {

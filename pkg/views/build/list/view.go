@@ -5,17 +5,13 @@ package list
 
 import (
 	"fmt"
-	"os"
 	"sort"
 
-	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/lipgloss/table"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/build/info"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
-	"golang.org/x/term"
 )
 
 type RowData struct {
@@ -29,10 +25,6 @@ type RowData struct {
 func ListBuilds(buildList []apiclient.Build, apiServerConfig *apiclient.ServerConfig) {
 	SortBuilds(&buildList)
 
-	re := lipgloss.NewRenderer(os.Stdout)
-
-	headers := []string{"ID", "State", "Prebuild ID", "Created", "Updated"}
-
 	data := [][]string{}
 
 	for _, pc := range buildList {
@@ -44,34 +36,16 @@ func ListBuilds(buildList []apiclient.Build, apiServerConfig *apiclient.ServerCo
 		data = append(data, row)
 	}
 
-	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
-	if err != nil {
-		fmt.Println(data)
-		return
-	}
+	table, success := views_util.GetTableView(data, []string{
+		"ID", "State", "Prebuild ID", "Created", "Updated",
+	}, nil)
 
-	breakpointWidth := views.GetContainerBreakpointWidth(terminalWidth)
-
-	minWidth := views_util.GetTableMinimumWidth(data)
-
-	if breakpointWidth == 0 || minWidth > breakpointWidth {
+	if !success {
 		renderUnstyledList(buildList, apiServerConfig)
 		return
 	}
 
-	t := table.New().
-		Headers(headers...).
-		Rows(data...).
-		BorderStyle(re.NewStyle().Foreground(views.LightGray)).
-		BorderRow(false).BorderColumn(false).BorderLeft(false).BorderRight(false).BorderTop(false).BorderBottom(false).
-		StyleFunc(func(row, col int) lipgloss.Style {
-			if row == 0 {
-				return views.TableHeaderStyle
-			}
-			return views.BaseCellStyle
-		}).Width(breakpointWidth - 2*views.BaseTableStyleHorizontalPadding - 1)
-
-	fmt.Println(views.BaseTableStyle.Render(t.String()))
+	fmt.Println(table)
 }
 
 func SortBuilds(buildList *[]apiclient.Build) {

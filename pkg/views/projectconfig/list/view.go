@@ -5,16 +5,12 @@ package list
 
 import (
 	"fmt"
-	"os"
 
-	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/lipgloss/table"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/projectconfig/info"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
-	"golang.org/x/term"
 )
 
 type RowData struct {
@@ -26,10 +22,6 @@ type RowData struct {
 }
 
 func ListProjectConfigs(projectConfigList []apiclient.ProjectConfig, apiServerConfig *apiclient.ServerConfig, specifyGitProviders bool) {
-	re := lipgloss.NewRenderer(os.Stdout)
-
-	headers := []string{"Name", "Repository", "Build", "Prebuild rules", "Default"}
-
 	data := [][]string{}
 
 	for _, pc := range projectConfigList {
@@ -41,34 +33,16 @@ func ListProjectConfigs(projectConfigList []apiclient.ProjectConfig, apiServerCo
 		data = append(data, row)
 	}
 
-	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
-	if err != nil {
-		fmt.Println(data)
-		return
-	}
+	table, success := views_util.GetTableView(data, []string{
+		"Name", "Repository", "Build", "Prebuild rules", "Default",
+	}, nil)
 
-	breakpointWidth := views.GetContainerBreakpointWidth(terminalWidth)
-
-	minWidth := views_util.GetTableMinimumWidth(data)
-
-	if breakpointWidth == 0 || minWidth > breakpointWidth {
+	if !success {
 		renderUnstyledList(projectConfigList, apiServerConfig)
 		return
 	}
 
-	t := table.New().
-		Headers(headers...).
-		Rows(data...).
-		BorderStyle(re.NewStyle().Foreground(views.LightGray)).
-		BorderRow(false).BorderColumn(false).BorderLeft(false).BorderRight(false).BorderTop(false).BorderBottom(false).
-		StyleFunc(func(row, col int) lipgloss.Style {
-			if row == 0 {
-				return views.TableHeaderStyle
-			}
-			return views.BaseCellStyle
-		}).Width(breakpointWidth - 2*views.BaseTableStyleHorizontalPadding - 1)
-
-	fmt.Println(views.BaseTableStyle.Render(t.String()))
+	fmt.Println(table)
 }
 
 func renderUnstyledList(projectConfigList []apiclient.ProjectConfig, apiServerConfig *apiclient.ServerConfig) {

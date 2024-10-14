@@ -5,14 +5,10 @@ package provider
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
-
-	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/lipgloss/table"
-	"golang.org/x/term"
+	"github.com/daytonaio/daytona/pkg/views/util"
 )
 
 type RowData struct {
@@ -46,11 +42,6 @@ func getRowData(provider *apiclient.Provider) *RowData {
 }
 
 func List(providerList []apiclient.Provider) {
-
-	re := lipgloss.NewRenderer(os.Stdout)
-
-	headers := []string{"Provider", "Name", "Version"}
-
 	data := [][]string{}
 
 	for _, provider := range providerList {
@@ -65,32 +56,16 @@ func List(providerList []apiclient.Provider) {
 		data = append(data, row)
 	}
 
-	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
-	if err != nil {
-		fmt.Println(data)
-		return
-	}
+	table, success := util.GetTableView(data, []string{
+		"Provider", "Name", "Version",
+	}, nil)
 
-	breakpointWidth := views.GetContainerBreakpointWidth(terminalWidth)
-
-	if breakpointWidth == 0 || terminalWidth < views.TUITableMinimumWidth {
+	if !success {
 		renderUnstyledList(providerList)
 		return
 	}
 
-	t := table.New().
-		Headers(headers...).
-		Rows(data...).
-		BorderStyle(re.NewStyle().Foreground(views.LightGray)).
-		BorderRow(false).BorderColumn(false).BorderLeft(false).BorderRight(false).BorderTop(false).BorderBottom(false).
-		StyleFunc(func(row, col int) lipgloss.Style {
-			if row == 0 {
-				return views.TableHeaderStyle
-			}
-			return views.BaseCellStyle
-		}).Width(breakpointWidth - 2*views.BaseTableStyleHorizontalPadding)
-
-	fmt.Println(views.BaseTableStyle.Render(t.String()))
+	fmt.Println(table)
 }
 
 func renderUnstyledList(providerList []apiclient.Provider) {
