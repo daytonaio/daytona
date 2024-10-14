@@ -68,6 +68,7 @@ func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient
 
 	if gitProviderAddView.SigningMethod != nil {
 		selectedSigningMethod = string(*gitProviderAddView.SigningMethod)
+		gitProviderAddView.SigningKey = nil
 	}
 
 	userDataForm := huh.NewForm(
@@ -173,6 +174,9 @@ func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient
 	if selectedSigningMethod != "none" {
 		gitProviderAddView.SigningMethod = (*apiclient.SigningMethod)(&selectedSigningMethod)
 		gitProviderAddView.SigningKey = &signingKey
+	} else {
+		gitProviderAddView.SigningKey = nil
+		gitProviderAddView.SigningMethod = nil
 	}
 
 	return nil
