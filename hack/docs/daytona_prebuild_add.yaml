@@ -8,18 +8,20 @@ options:
     - name: commit-interval
       shorthand: c
       default_value: "0"
-      usage: Commit interval for the prebuild (in seconds)
+      usage: |
+        Commit interval for running a prebuild - leave blank to ignore push events
     - name: retention
       shorthand: r
       default_value: "0"
-      usage: Retention period for the prebuild (in days)
+      usage: Maximum number of resulting builds stored at a time
     - name: run
       default_value: "false"
       usage: Run the prebuild once after adding it
     - name: trigger-files
       shorthand: t
       default_value: '[]'
-      usage: Files that trigger the prebuild
+      usage: |
+        Full paths of files whose changes should explicitly trigger a  prebuild
 inherited_options:
     - name: help
       default_value: "false"

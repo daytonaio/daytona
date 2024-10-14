@@ -10,10 +10,10 @@ daytona prebuild update [PROJECT_CONFIG] [PREBUILD_ID] [flags]
 
 ```
   -b, --branch string           Git branch for the prebuild
-  -c, --commit-interval int     Commit interval for the prebuild
-  -r, --retention int           Retention period for the prebuild
+  -c, --commit-interval int     Commit interval for running a prebuild - leave blank to ignore push events
+  -r, --retention int           Maximum number of resulting builds stored at a time
       --run                     Run the prebuild once after updating it
-  -t, --trigger-files strings   Files that trigger the prebuild
+  -t, --trigger-files strings   Full paths of files whose changes should explicitly trigger a  prebuild
 ```
 
 ### Options inherited from parent commands

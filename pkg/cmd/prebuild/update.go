@@ -18,18 +18,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	branchFlag         string
-	retentionFlag      int
-	commitIntervalFlag int
-	triggerFilesFlag   []string
-	runOnUpdateFlag    bool
-)
-
 var prebuildUpdateCmd = &cobra.Command{
 	Use:   "update [PROJECT_CONFIG] [PREBUILD_ID]",
 	Short: "Update a prebuild configuration",
-	Args:  cobra.MaximumNArgs(2), // Allow up to 2 arguments
+	Args:  cobra.MaximumNArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var prebuildAddView add.PrebuildAddView
 		var prebuild *apiclient.PrebuildDTO
@@ -84,14 +76,11 @@ var prebuildUpdateCmd = &cobra.Command{
 			if len(triggerFilesFlag) > 0 {
 				prebuild.TriggerFiles = triggerFilesFlag
 			}
-
-			prebuildAddView = add.PrebuildAddView{
-				Branch:            prebuild.Branch,
-				Retention:         strconv.Itoa(int(prebuild.Retention)),
-				ProjectConfigName: projectConfigRecieved,
-				TriggerFiles:      triggerFilesFlag,
-				CommitInterval:    strconv.Itoa(int(commitIntervalFlag)),
-			}
+			prebuildAddView.Branch = prebuild.Branch
+			prebuildAddView.Retention = strconv.Itoa(int(prebuild.Retention))
+			prebuildAddView.ProjectConfigName = projectConfigRecieved
+			prebuildAddView.TriggerFiles = triggerFilesFlag
+			prebuildAddView.CommitInterval = strconv.Itoa(int(commitIntervalFlag))
 			retention = int(prebuild.Retention)
 		} else {
 			// Interactive mode: Prompt for details
@@ -116,7 +105,6 @@ var prebuildUpdateCmd = &cobra.Command{
 				return nil
 			}
 
-			// Select prebuild from the prompt
 			prebuild = selection.GetPrebuildFromPrompt(prebuilds, "Update")
 			if prebuild == nil {
 				return nil
@@ -191,10 +179,18 @@ var prebuildUpdateCmd = &cobra.Command{
 	},
 }
 
+var (
+	branchFlag         string
+	retentionFlag      int
+	commitIntervalFlag int
+	triggerFilesFlag   []string
+	runOnUpdateFlag    bool
+)
+
 func init() {
 	prebuildUpdateCmd.Flags().StringVarP(&branchFlag, "branch", "b", "", "Git branch for the prebuild")
-	prebuildUpdateCmd.Flags().IntVarP(&retentionFlag, "retention", "r", 0, "Retention period for the prebuild")
-	prebuildUpdateCmd.Flags().IntVarP(&commitIntervalFlag, "commit-interval", "c", 0, "Commit interval for the prebuild")
-	prebuildUpdateCmd.Flags().StringSliceVarP(&triggerFilesFlag, "trigger-files", "t", nil, "Files that trigger the prebuild")
+	prebuildUpdateCmd.Flags().IntVarP(&retentionFlag, "retention", "r", 0, "Maximum number of resulting builds stored at a time")
+	prebuildUpdateCmd.Flags().IntVarP(&commitIntervalFlag, "commit-interval", "c", 0, "Commit interval for running a prebuild - leave blank to ignore push events")
+	prebuildUpdateCmd.Flags().StringSliceVarP(&triggerFilesFlag, "trigger-files", "t", nil, "Full paths of files whose changes should explicitly trigger a  prebuild")
 	prebuildUpdateCmd.Flags().BoolVar(&runOnUpdateFlag, "run", false, "Run the prebuild once after updating it")
 }
