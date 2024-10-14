@@ -90,20 +90,15 @@ var CodeCmd = &cobra.Command{
 			}
 
 			projectName = selectedProject.Name
-
-			if selectedProject.GitProviderConfigId != nil {
-				providerConfigId = selectedProject.GitProviderConfigId
-			}
+			providerConfigId = selectedProject.GitProviderConfigId
 		}
 
 		if len(args) == 2 {
 			projectName = args[1]
 			for _, project := range workspace.Projects {
 				if project.Name == projectName {
-					if project.GitProviderConfigId != nil {
-						providerConfigId = project.GitProviderConfigId
-						break
-					}
+					providerConfigId = project.GitProviderConfigId
+					break
 				}
 			}
 		}

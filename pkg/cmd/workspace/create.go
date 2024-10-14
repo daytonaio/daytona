@@ -172,12 +172,9 @@ var CreateCmd = &cobra.Command{
 			stopLogs()
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
-		var gpgKey string
-		if projects[0].GitProviderConfigId != nil {
-			gpgKey, err = GetGitProviderGpgKey(apiClient, ctx, projects[0].GitProviderConfigId)
-			if err != nil {
-				log.Warn(err)
-			}
+		gpgKey, err := GetGitProviderGpgKey(apiClient, ctx, projects[0].GitProviderConfigId)
+		if err != nil {
+			log.Warn(err)
 		}
 
 		err = waitForDial(createdWorkspace, &activeProfile, tsConn, gpgKey)
@@ -522,29 +519,31 @@ func dedupProjectNames(projects *[]apiclient.CreateProjectDTO) {
 }
 
 func GetGitProviderGpgKey(apiClient *apiclient.APIClient, ctx context.Context, providerConfigId *string) (string, error) {
+	if providerConfigId == nil {
+		return "", nil
+	}
+
 	var providerConfig *gitprovider.GitProviderConfig
 	var gpgKey string
 
-	if providerConfigId != nil {
+	gitProvider, res, err := apiClient.GitProviderAPI.GetGitProvider(ctx, *providerConfigId).Execute()
+	if err != nil {
+		return "", apiclient_util.HandleErrorResponse(res, err)
+	}
 
-		gitProvider, res, err := apiClient.GitProviderAPI.GetGitProvider(ctx, *providerConfigId).Execute()
-		if err != nil {
-			return "", apiclient_util.HandleErrorResponse(res, err)
+	// Extract GPG key if present
+	if gitProvider != nil {
+		providerConfig = &gitprovider.GitProviderConfig{
+			SigningMethod: (*gitprovider.SigningMethod)(gitProvider.SigningMethod),
+			SigningKey:    gitProvider.SigningKey,
 		}
 
-		// Extract GPG key if present
-		if gitProvider != nil {
-			providerConfig = &gitprovider.GitProviderConfig{
-				SigningMethod: (*gitprovider.SigningMethod)(gitProvider.SigningMethod),
-				SigningKey:    gitProvider.SigningKey,
-			}
-
-			if providerConfig.SigningMethod != nil && providerConfig.SigningKey != nil {
-				if *providerConfig.SigningMethod == gitprovider.SigningMethodGPG {
-					gpgKey = *providerConfig.SigningKey
-				}
+		if providerConfig.SigningMethod != nil && providerConfig.SigningKey != nil {
+			if *providerConfig.SigningMethod == gitprovider.SigningMethodGPG {
+				gpgKey = *providerConfig.SigningKey
 			}
 		}
 	}
+
 	return gpgKey, nil
 }

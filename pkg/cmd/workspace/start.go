@@ -97,17 +97,12 @@ var StartCmd = &cobra.Command{
 				workspaceId = wsInfo.Id
 				if startProjectFlag == "" {
 					startProjectFlag = wsInfo.Projects[0].Name
-
-					if wsInfo.Projects[0].GitProviderConfigId != nil {
-						providerConfigId = wsInfo.Projects[0].GitProviderConfigId
-					}
+					providerConfigId = wsInfo.Projects[0].GitProviderConfigId
 				} else {
 					for _, project := range wsInfo.Projects {
 						if project.Name == startProjectFlag {
-							if project.GitProviderConfigId != nil {
-								providerConfigId = project.GitProviderConfigId
-								break
-							}
+							providerConfigId = project.GitProviderConfigId
+							break
 						}
 					}
 				}
