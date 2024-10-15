@@ -4,6 +4,7 @@
 package server
 
 import (
+	"context"
 	"errors"
 	"os"
 	"path/filepath"
@@ -21,7 +22,7 @@ func (s *Server) downloadDefaultProviders() error {
 
 	log.Info("Downloading default providers")
 	for providerName, provider := range defaultProviders {
-		_, err = s.ProviderManager.DownloadProvider(provider.DownloadUrls, providerName, false)
+		_, err = s.ProviderManager.DownloadProvider(context.Background(), provider.DownloadUrls, providerName, false)
 		if err != nil {
 			log.Error(err)
 		}
