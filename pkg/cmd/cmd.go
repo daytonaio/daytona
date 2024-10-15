@@ -150,6 +150,8 @@ func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command
 
 func ensureProfiles(cmd *cobra.Command) error {
 	exemptions := []string{
+		"daytona",
+		"daytona docs",
 		"daytona version",
 		"daytona profile add",
 		"daytona serve",
