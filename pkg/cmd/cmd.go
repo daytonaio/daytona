@@ -4,9 +4,11 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
+	"slices"
 	"strings"
 	"time"
 
@@ -92,6 +94,11 @@ func Execute() error {
 		return cmd.Help()
 	}
 
+	err = ensureProfiles(cmd)
+	if err != nil {
+		return err
+	}
+
 	err = rootCmd.Execute()
 
 	endTime := time.Now()
@@ -139,6 +146,36 @@ func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command
 	}
 
 	return currentCmd, flags, nil
+}
+
+func ensureProfiles(cmd *cobra.Command) error {
+	exemptions := []string{
+		"daytona",
+		"daytona help",
+		"daytona docs",
+		"daytona version",
+		"daytona profile add",
+		"daytona serve",
+		"daytona server",
+		"daytona ide",
+		"daytona telemetry enable",
+		"daytona telemetry disable",
+	}
+
+	if slices.Contains(exemptions, cmd.CommandPath()) {
+		return nil
+	}
+
+	c, err := config.GetConfig()
+	if err != nil {
+		return err
+	}
+
+	if len(c.Profiles) == 0 {
+		return errors.New("no profiles found. Run `daytona serve` to create a default profile or `daytona profile add` to connect to a remote server.")
+	}
+
+	return nil
 }
 
 func SetupRootCommand(cmd *cobra.Command) {
@@ -240,7 +277,7 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 			props["called_as"] = os.Args[1]
 			err := telemetryService.TrackCliEvent(telemetry.CliEventInvalidCmd, clientId, props)
 			if err != nil {
-				log.Error(err)
+				log.Trace(err)
 			}
 			telemetryService.Close()
 		}
@@ -251,7 +288,7 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 	if telemetryEnabled {
 		err := telemetryService.TrackCliEvent(telemetry.CliEventCmdStart, clientId, GetCmdTelemetryData(cmd, flags))
 		if err != nil {
-			log.Error(err)
+			log.Trace(err)
 		}
 
 		go func() {
@@ -267,7 +304,7 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 
 				err := telemetryService.TrackCliEvent(telemetry.CliEventCmdEnd, clientId, props)
 				if err != nil {
-					log.Error(err)
+					log.Trace(err)
 				}
 				telemetryService.Close()
 				os.Exit(0)
@@ -289,7 +326,7 @@ func PostRun(cmd *cobra.Command, cmdErr error, telemetryService telemetry.Teleme
 
 		err := telemetryService.TrackCliEvent(telemetry.CliEventCmdEnd, clientId, props)
 		if err != nil {
-			log.Error(err)
+			log.Trace(err)
 		}
 		telemetryService.Close()
 	}

@@ -5,91 +5,51 @@ package target
 
 import (
 	"fmt"
-	"os"
 	"sort"
 
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
-
-	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/lipgloss/table"
-	"golang.org/x/term"
+	"github.com/daytonaio/daytona/pkg/views/util"
 )
 
-type RowData struct {
+type rowData struct {
 	Target   string
 	Provider string
 	Options  string
 }
 
-func getRowFromRowData(rowData RowData) []string {
-	row := []string{
-		views.NameStyle.Render(rowData.Target),
-		views.DefaultRowDataStyle.Render(rowData.Provider),
-		views.DefaultRowDataStyle.Render(rowData.Options),
-	}
-
-	return row
-}
-
-func getRowData(target *apiclient.ProviderTarget) *RowData {
-	rowData := RowData{"", "", ""}
-
-	rowData.Target = target.Name
-	rowData.Provider = target.ProviderInfo.Name
-	rowData.Options = target.Options
-
-	return &rowData
-}
-
 func ListTargets(targetList []apiclient.ProviderTarget) {
-
 	sortTargets(&targetList)
-
-	re := lipgloss.NewRenderer(os.Stdout)
-
-	headers := []string{"Target", "Provider", "Options"}
 
 	data := [][]string{}
 
 	for _, target := range targetList {
-		var rowData *RowData
-		var row []string
-
-		rowData = getRowData(&target)
-		if rowData == nil {
-			continue
-		}
-		row = getRowFromRowData(*rowData)
-		data = append(data, row)
+		data = append(data, getRowFromRowData(&target))
 	}
 
-	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
-	if err != nil {
-		fmt.Println(data)
-		return
-	}
-
-	breakpointWidth := views.GetContainerBreakpointWidth(terminalWidth)
-
-	if breakpointWidth == 0 || terminalWidth < views.TUITableMinimumWidth {
+	table := util.GetTableView(data, []string{
+		"Target", "Provider", "Options",
+	}, nil, func() {
 		renderUnstyledList(targetList)
-		return
+	})
+
+	fmt.Println(table)
+}
+
+func getRowFromRowData(target *apiclient.ProviderTarget) []string {
+	var data rowData
+
+	data.Target = target.Name
+	data.Provider = target.ProviderInfo.Name
+	data.Options = target.Options
+
+	row := []string{
+		views.NameStyle.Render(data.Target),
+		views.DefaultRowDataStyle.Render(data.Provider),
+		views.DefaultRowDataStyle.Render(data.Options),
 	}
 
-	t := table.New().
-		Headers(headers...).
-		Rows(data...).
-		BorderStyle(re.NewStyle().Foreground(views.LightGray)).
-		BorderRow(false).BorderColumn(false).BorderLeft(false).BorderRight(false).BorderTop(false).BorderBottom(false).
-		StyleFunc(func(row, col int) lipgloss.Style {
-			if row == 0 {
-				return views.TableHeaderStyle
-			}
-			return views.BaseCellStyle
-		}).Width(breakpointWidth - 2*views.BaseTableStyleHorizontalPadding)
-
-	fmt.Println(views.BaseTableStyle.Render(t.String()))
+	return row
 }
 
 func sortTargets(targets *[]apiclient.ProviderTarget) {

@@ -36,6 +36,8 @@ func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient
 		gitProviderOptions = append(gitProviderOptions, huh.Option[string]{Key: "Other", Value: "other"})
 	}
 
+	initialAlias := gitProviderAddView.Alias
+
 	if gitProviderAddView.ProviderId == "" {
 		gitProviderForm := huh.NewForm(
 			huh.NewGroup(
@@ -120,7 +122,9 @@ func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient
 				Validate(func(str string) error {
 					for _, alias := range existingAliases {
 						if alias == str {
-							return errors.New("alias is already in use")
+							if initialAlias == nil || *initialAlias != str {
+								return errors.New("alias is already in use")
+							}
 						}
 					}
 					return nil
@@ -189,35 +193,6 @@ func isValidSSHKey(key string) error {
 	}
 
 	return nil
-}
-
-func GetGitProviderFromPrompt(ctx context.Context, gitProviders []apiclient.GitProvider, apiClient *apiclient.APIClient) (*apiclient.GitProvider, error) {
-	var gitProviderOptions []huh.Option[apiclient.GitProvider]
-	for _, userProvider := range gitProviders {
-		gitProviderOptions = append(gitProviderOptions, huh.Option[apiclient.GitProvider]{
-			Key:   fmt.Sprintf("%-*s (%s)", 10, userProvider.ProviderId, userProvider.Alias),
-			Value: userProvider,
-		})
-	}
-
-	var result apiclient.GitProvider
-
-	gitProviderForm := huh.NewForm(
-		huh.NewGroup(
-			huh.NewSelect[apiclient.GitProvider]().
-				Title("Choose a Git provider").
-				Options(
-					gitProviderOptions...,
-				).
-				Value(&result)).WithHeight(8),
-	).WithTheme(views.GetCustomTheme())
-
-	err := gitProviderForm.Run()
-	if err != nil {
-		return nil, err
-	}
-
-	return &result, nil
 }
 
 func providerRequiresUsername(gitProviderId string) bool {

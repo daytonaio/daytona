@@ -45,6 +45,12 @@ func (s *HeadscaleServer) Connect() error {
 	}
 	defer ln.Close()
 
+	go func() {
+		<-s.disconnectChan
+		tsNetServer.Close()
+		ln.Close()
+	}()
+
 	return http.Serve(ln, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Ok\n")
 	}))

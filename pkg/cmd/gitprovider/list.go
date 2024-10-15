@@ -5,13 +5,13 @@ package gitprovider
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
+	"github.com/daytonaio/daytona/pkg/views/gitprovider/list"
 	"github.com/spf13/cobra"
 )
 
@@ -35,29 +35,31 @@ var gitProviderListCmd = &cobra.Command{
 			return nil
 		}
 
-		views.RenderMainTitle("Registered Git Providers:")
-
 		supportedProviders := config.GetSupportedGitProviders()
 		var gitProviderViewList []gitprovider_view.GitProviderView
 
 		for _, gitProvider := range gitProviders {
 			for _, supportedProvider := range supportedProviders {
 				if gitProvider.ProviderId == supportedProvider.Id {
+					gitProviderView := gitprovider_view.GitProviderView{
+						Id:         gitProvider.Id,
+						ProviderId: gitProvider.ProviderId,
+						Name:       supportedProvider.Name,
+						Username:   gitProvider.Username,
+						Alias:      gitProvider.Alias,
+					}
+
+					if gitProvider.BaseApiUrl != nil {
+						gitProviderView.BaseApiUrl = *gitProvider.BaseApiUrl
+					}
+
 					signingMethod := ""
 					if gitProvider.SigningMethod != nil {
 						signingMethod = string(*gitProvider.SigningMethod)
 					}
+					gitProviderView.SigningMethod = signingMethod
 
-					gitProviderViewList = append(gitProviderViewList,
-						gitprovider_view.GitProviderView{
-							Id:            gitProvider.Id,
-							ProviderId:    gitProvider.ProviderId,
-							Name:          supportedProvider.Name,
-							Username:      gitProvider.Username,
-							Alias:         gitProvider.Alias,
-							SigningMethod: signingMethod,
-						},
-					)
+					gitProviderViewList = append(gitProviderViewList, gitProviderView)
 				}
 			}
 		}
@@ -68,9 +70,7 @@ var gitProviderListCmd = &cobra.Command{
 			return nil
 		}
 
-		for _, gitProviderView := range gitProviderViewList {
-			views.RenderListLine(fmt.Sprintf("%s (%s)", gitProviderView.Name, gitProviderView.Alias))
-		}
+		list.ListGitProviders(gitProviderViewList)
 		return nil
 	},
 }

@@ -8,7 +8,7 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
-	"github.com/daytonaio/daytona/pkg/views/server/apikey"
+	"github.com/daytonaio/daytona/pkg/views/apikey"
 	"github.com/spf13/cobra"
 )
 

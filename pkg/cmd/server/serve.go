@@ -4,6 +4,7 @@
 package server
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -161,7 +162,7 @@ var ServeCmd = &cobra.Command{
 
 		printServerStartedMessage(c, false)
 
-		err = setDefaultConfig(server, c.ApiPort)
+		err = ensureDefaultProfile(server, c.ApiPort)
 		if err != nil {
 			return err
 		}
@@ -176,8 +177,8 @@ var ServeCmd = &cobra.Command{
 			return err
 		case <-interruptChannel:
 			log.Info("Shutting down")
-			// Exit will be handled by command PreRun
-			select {}
+
+			return server.TailscaleServer.Stop()
 		}
 	},
 }
@@ -489,17 +490,19 @@ func getDbPath() (string, error) {
 	return filepath.Join(configDir, "db"), nil
 }
 
-func setDefaultConfig(server *server.Server, apiPort uint32) error {
+func ensureDefaultProfile(server *server.Server, apiPort uint32) error {
 	existingConfig, err := config.GetConfig()
-	if err != nil && !config.IsNotExist(err) {
+	if err != nil {
 		return err
 	}
 
-	if existingConfig != nil {
-		for _, profile := range existingConfig.Profiles {
-			if profile.Id == "default" {
-				return nil
-			}
+	if existingConfig == nil {
+		return errors.New("config does not exist")
+	}
+
+	for _, profile := range existingConfig.Profiles {
+		if profile.Id == "default" {
+			return nil
 		}
 	}
 
@@ -508,37 +511,12 @@ func setDefaultConfig(server *server.Server, apiPort uint32) error {
 		return err
 	}
 
-	if existingConfig != nil {
-		err := existingConfig.AddProfile(config.Profile{
-			Id:   "default",
-			Name: "default",
-			Api: config.ServerApi{
-				Url: fmt.Sprintf("http://localhost:%d", apiPort),
-				Key: apiKey,
-			},
-		})
-		if err != nil {
-			return err
-		}
-
-		return existingConfig.Save()
-	}
-
-	config := &config.Config{
-		ActiveProfileId: "default",
-		DefaultIdeId:    config.DefaultIdeId,
-		Profiles: []config.Profile{
-			{
-				Id:   "default",
-				Name: "default",
-				Api: config.ServerApi{
-					Url: fmt.Sprintf("http://localhost:%d", apiPort),
-					Key: apiKey,
-				},
-			},
+	return existingConfig.AddProfile(config.Profile{
+		Id:   "default",
+		Name: "default",
+		Api: config.ServerApi{
+			Url: fmt.Sprintf("http://localhost:%d", apiPort),
+			Key: apiKey,
 		},
-		TelemetryEnabled: true,
-	}
-
-	return config.Save()
+	})
 }

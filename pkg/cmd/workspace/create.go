@@ -23,11 +23,11 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/views"
-	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
 	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
+	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/docker/docker/pkg/stringid"
 	log "github.com/sirupsen/logrus"
@@ -428,10 +428,7 @@ func processGitURL(ctx context.Context, repoUrl string, apiClient *apiclient.API
 	if len(gitProviderConfigs) == 1 {
 		projectConfigurationFlags.GitProviderConfig = &gitProviderConfigs[0].Id
 	} else if len(gitProviderConfigs) > 1 {
-		gp, err := gitprovider_view.GetGitProviderFromPrompt(context.Background(), gitProviderConfigs, apiClient)
-		if err != nil {
-			return nil, err
-		}
+		gp := selection.GetGitProviderConfigFromPrompt(gitProviderConfigs, false, "Use")
 		projectConfigurationFlags.GitProviderConfig = &gp.Id
 	}
 

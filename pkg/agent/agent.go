@@ -49,7 +49,7 @@ func (a *Agent) Start() error {
 }
 
 func (a *Agent) startProjectMode() error {
-	err := a.setDefaultConfig()
+	err := a.ensureDefaultProfile()
 	if err != nil {
 		return err
 	}
@@ -195,38 +195,33 @@ func (a *Agent) getGitUser(gitProviderId string) (*apiclient.GitUser, error) {
 	return userData, nil
 }
 
-func (a *Agent) setDefaultConfig() error {
+func (a *Agent) ensureDefaultProfile() error {
 	existingConfig, err := config.GetConfig()
-	if err != nil && !config.IsNotExist(err) {
+	if err != nil {
 		return err
 	}
 
-	if existingConfig != nil {
-		for _, profile := range existingConfig.Profiles {
-			if profile.Id == "default" {
-				return nil
-			}
+	if existingConfig == nil {
+		return errors.New("config does not exist")
+	}
+
+	for _, profile := range existingConfig.Profiles {
+		if profile.Id == "default" {
+			return nil
 		}
 	}
 
-	config := &config.Config{
-		Id:              a.Config.ClientId,
-		ActiveProfileId: "default",
-		DefaultIdeId:    "vscode",
-		Profiles: []config.Profile{
-			{
-				Id:   "default",
-				Name: "default",
-				Api: config.ServerApi{
-					Url: a.Config.Server.ApiUrl,
-					Key: a.Config.Server.ApiKey,
-				},
-			},
-		},
-		TelemetryEnabled: a.TelemetryEnabled,
-	}
+	existingConfig.Id = a.Config.ClientId
+	existingConfig.TelemetryEnabled = a.TelemetryEnabled
 
-	return config.Save()
+	return existingConfig.AddProfile(config.Profile{
+		Id:   "default",
+		Name: "default",
+		Api: config.ServerApi{
+			Url: a.Config.Server.ApiUrl,
+			Key: a.Config.Server.ApiKey,
+		},
+	})
 }
 
 // Agent uptime in seconds
