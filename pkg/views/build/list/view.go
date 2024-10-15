@@ -5,20 +5,16 @@ package list
 
 import (
 	"fmt"
-	"os"
 	"sort"
 
-	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/lipgloss/table"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/build/info"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
-	"golang.org/x/term"
 )
 
-type RowData struct {
+type rowData struct {
 	Id         string
 	State      string
 	PrebuildId string
@@ -29,49 +25,19 @@ type RowData struct {
 func ListBuilds(buildList []apiclient.Build, apiServerConfig *apiclient.ServerConfig) {
 	SortBuilds(&buildList)
 
-	re := lipgloss.NewRenderer(os.Stdout)
-
-	headers := []string{"ID", "State", "Prebuild ID", "Created", "Updated"}
-
 	data := [][]string{}
 
-	for _, pc := range buildList {
-		var rowData *RowData
-		var row []string
-
-		rowData = getTableRowData(pc)
-		row = getRowFromRowData(*rowData)
-		data = append(data, row)
+	for _, b := range buildList {
+		data = append(data, getRowFromRowData(b))
 	}
 
-	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
-	if err != nil {
-		fmt.Println(data)
-		return
-	}
-
-	breakpointWidth := views.GetContainerBreakpointWidth(terminalWidth)
-
-	minWidth := views_util.GetTableMinimumWidth(data)
-
-	if breakpointWidth == 0 || minWidth > breakpointWidth {
+	table := views_util.GetTableView(data, []string{
+		"ID", "State", "Prebuild ID", "Created", "Updated",
+	}, nil, func() {
 		renderUnstyledList(buildList, apiServerConfig)
-		return
-	}
+	})
 
-	t := table.New().
-		Headers(headers...).
-		Rows(data...).
-		BorderStyle(re.NewStyle().Foreground(views.LightGray)).
-		BorderRow(false).BorderColumn(false).BorderLeft(false).BorderRight(false).BorderTop(false).BorderBottom(false).
-		StyleFunc(func(row, col int) lipgloss.Style {
-			if row == 0 {
-				return views.TableHeaderStyle
-			}
-			return views.BaseCellStyle
-		}).Width(breakpointWidth - 2*views.BaseTableStyleHorizontalPadding - 1)
-
-	fmt.Println(views.BaseTableStyle.Render(t.String()))
+	fmt.Println(table)
 }
 
 func SortBuilds(buildList *[]apiclient.Build) {
@@ -92,29 +58,23 @@ func renderUnstyledList(buildList []apiclient.Build, apiServerConfig *apiclient.
 	}
 }
 
-func getRowFromRowData(rowData RowData) []string {
-	row := []string{
-		views.NameStyle.Render(rowData.Id),
-		views.DefaultRowDataStyle.Render(rowData.State),
-		views.DefaultRowDataStyle.Render(rowData.PrebuildId),
-		views.DefaultRowDataStyle.Render(rowData.CreatedAt),
-		views.DefaultRowDataStyle.Render(rowData.UpdatedAt),
+func getRowFromRowData(build apiclient.Build) []string {
+	var data rowData
+
+	data.Id = build.Id + views_util.AdditionalPropertyPadding
+	data.State = string(build.State)
+	data.PrebuildId = build.PrebuildId
+	if data.PrebuildId == "" {
+		data.PrebuildId = "/"
 	}
+	data.CreatedAt = util.FormatTimestamp(build.CreatedAt)
+	data.UpdatedAt = util.FormatTimestamp(build.UpdatedAt)
 
-	return row
-}
-
-func getTableRowData(build apiclient.Build) *RowData {
-	rowData := RowData{"", "", "", "", ""}
-
-	rowData.Id = build.Id + views_util.AdditionalPropertyPadding
-	rowData.State = string(build.State)
-	rowData.PrebuildId = build.PrebuildId
-	if rowData.PrebuildId == "" {
-		rowData.PrebuildId = "/"
+	return []string{
+		views.NameStyle.Render(data.Id),
+		views.DefaultRowDataStyle.Render(data.State),
+		views.DefaultRowDataStyle.Render(data.PrebuildId),
+		views.DefaultRowDataStyle.Render(data.CreatedAt),
+		views.DefaultRowDataStyle.Render(data.UpdatedAt),
 	}
-	rowData.CreatedAt = util.FormatTimestamp(build.CreatedAt)
-	rowData.UpdatedAt = util.FormatTimestamp(build.UpdatedAt)
-
-	return &rowData
 }
