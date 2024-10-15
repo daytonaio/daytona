@@ -45,7 +45,8 @@ type HeadscaleServer struct {
 	configDir     string
 	frps          *server.FRPSConfig
 
-	stopChan chan struct{}
+	stopChan       chan struct{}
+	disconnectChan chan struct{}
 }
 
 func (s *HeadscaleServer) Init() error {
@@ -74,6 +75,7 @@ func (s *HeadscaleServer) Start(errChan chan error) error {
 	go func() {
 		select {
 		case <-s.stopChan:
+			s.disconnectChan <- struct{}{}
 			errChan <- nil
 			return
 		case errChan <- app.Serve():
