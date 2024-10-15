@@ -8,7 +8,7 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
-	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
+	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
 )
 
@@ -46,10 +46,7 @@ var gitProviderDeleteCmd = &cobra.Command{
 			return nil
 		}
 
-		selectedGitProvider, err := gitprovider_view.GetGitProviderFromPrompt(ctx, gitProviders, apiClient)
-		if err != nil {
-			return err
-		}
+		selectedGitProvider := selection.GetGitProviderConfigFromPrompt(gitProviders, false, "Remove")
 
 		if selectedGitProvider == nil {
 			return nil

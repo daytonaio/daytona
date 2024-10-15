@@ -131,35 +131,6 @@ func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient
 	return nil
 }
 
-func GetGitProviderFromPrompt(ctx context.Context, gitProviders []apiclient.GitProvider, apiClient *apiclient.APIClient) (*apiclient.GitProvider, error) {
-	var gitProviderOptions []huh.Option[apiclient.GitProvider]
-	for _, userProvider := range gitProviders {
-		gitProviderOptions = append(gitProviderOptions, huh.Option[apiclient.GitProvider]{
-			Key:   fmt.Sprintf("%-*s (%s)", 10, userProvider.ProviderId, userProvider.Alias),
-			Value: userProvider,
-		})
-	}
-
-	var result apiclient.GitProvider
-
-	gitProviderForm := huh.NewForm(
-		huh.NewGroup(
-			huh.NewSelect[apiclient.GitProvider]().
-				Title("Choose a Git provider").
-				Options(
-					gitProviderOptions...,
-				).
-				Value(&result)).WithHeight(8),
-	).WithTheme(views.GetCustomTheme())
-
-	err := gitProviderForm.Run()
-	if err != nil {
-		return nil, err
-	}
-
-	return &result, nil
-}
-
 func providerRequiresUsername(gitProviderId string) bool {
 	return gitProviderId == "bitbucket" || gitProviderId == "bitbucket-server" || gitProviderId == "aws-codecommit"
 }

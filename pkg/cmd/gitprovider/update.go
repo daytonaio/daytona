@@ -11,6 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
+	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
 )
 
@@ -35,10 +36,7 @@ var gitProviderUpdateCmd = &cobra.Command{
 			return nil
 		}
 
-		selectedGitProvider, err := gitprovider_view.GetGitProviderFromPrompt(ctx, gitProviders, apiClient)
-		if err != nil {
-			return err
-		}
+		selectedGitProvider := selection.GetGitProviderConfigFromPrompt(gitProviders, false, "Update")
 
 		if selectedGitProvider == nil {
 			return nil
