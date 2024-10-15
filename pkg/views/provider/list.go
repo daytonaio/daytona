@@ -11,49 +11,17 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/util"
 )
 
-type RowData struct {
+type rowData struct {
 	Label   string
 	Name    string
 	Version string
-}
-
-func getRowFromRowData(rowData RowData) []string {
-	row := []string{
-		views.NameStyle.Render(rowData.Label),
-		views.DefaultRowDataStyle.Render(rowData.Name),
-		views.DefaultRowDataStyle.Render(rowData.Version),
-	}
-
-	return row
-}
-
-func getRowData(provider *apiclient.Provider) *RowData {
-	rowData := RowData{"", "", ""}
-
-	if provider.Label != nil {
-		rowData.Label = *provider.Label
-	} else {
-		rowData.Label = provider.Name
-	}
-	rowData.Name = provider.Name
-	rowData.Version = provider.Version
-
-	return &rowData
 }
 
 func List(providerList []apiclient.Provider) {
 	data := [][]string{}
 
 	for _, provider := range providerList {
-		var rowData *RowData
-		var row []string
-
-		rowData = getRowData(&provider)
-		if rowData == nil {
-			continue
-		}
-		row = getRowFromRowData(*rowData)
-		data = append(data, row)
+		data = append(data, getRowFromData(&provider))
 	}
 
 	table, success := util.GetTableView(data, []string{
@@ -66,6 +34,24 @@ func List(providerList []apiclient.Provider) {
 	}
 
 	fmt.Println(table)
+}
+
+func getRowFromData(provider *apiclient.Provider) []string {
+	var data rowData
+
+	if provider.Label != nil {
+		data.Label = *provider.Label
+	} else {
+		data.Label = provider.Name
+	}
+	data.Name = provider.Name
+	data.Version = provider.Version
+
+	return []string{
+		views.NameStyle.Render(data.Label),
+		views.DefaultRowDataStyle.Render(data.Name),
+		views.DefaultRowDataStyle.Render(data.Version),
+	}
 }
 
 func renderUnstyledList(providerList []apiclient.Provider) {

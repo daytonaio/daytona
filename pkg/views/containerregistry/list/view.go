@@ -22,15 +22,7 @@ func ListRegistries(registryList []apiclient.ContainerRegistry) {
 	data := [][]string{}
 
 	for _, registry := range registryList {
-		var rowData *rowData
-		var row []string
-
-		rowData = getRowData(&registry)
-		if rowData == nil {
-			continue
-		}
-		row = getRowFromRowData(*rowData)
-		data = append(data, row)
+		data = append(data, getRowFromData(registry))
 	}
 
 	table, success := views_util.GetTableView(data, []string{
@@ -45,20 +37,15 @@ func ListRegistries(registryList []apiclient.ContainerRegistry) {
 	fmt.Println(table)
 }
 
-func getRowData(registry *apiclient.ContainerRegistry) *rowData {
-	rowData := rowData{"", "", ""}
+func getRowFromData(registry apiclient.ContainerRegistry) []string {
+	var data rowData
 
-	rowData.Server = registry.Server
-	rowData.Username = registry.Username
-	rowData.Password = registry.Password
+	data.Server = registry.Server
+	data.Username = registry.Username
 
-	return &rowData
-}
-
-func getRowFromRowData(rowData rowData) []string {
 	row := []string{
-		views.NameStyle.Render(rowData.Server),
-		views.DefaultRowDataStyle.Render(rowData.Username),
+		views.NameStyle.Render(data.Server),
+		views.DefaultRowDataStyle.Render(data.Username),
 		views.DefaultRowDataStyle.Render(strings.Repeat("*", 10)),
 	}
 

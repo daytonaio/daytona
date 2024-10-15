@@ -11,7 +11,7 @@ import (
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 )
 
-type RowData struct {
+type rowData struct {
 	ID     string
 	Name   string
 	Status string
@@ -28,15 +28,7 @@ func ListProfiles(profileList []config.Profile, activeProfileId string, showApiK
 	data := [][]string{}
 
 	for _, profile := range profileList {
-		var rowData *RowData
-		var row []string
-
-		rowData = getRowData(&profile, activeProfileId, showApiKeysFlag)
-		if rowData == nil {
-			continue
-		}
-		row = getRowFromRowData(*rowData, showApiKeysFlag)
-		data = append(data, row)
+		data = append(data, getRowFromData(&profile, activeProfileId, showApiKeysFlag))
 	}
 
 	table, success := views_util.GetTableView(data, headers, nil)
@@ -48,41 +40,37 @@ func ListProfiles(profileList []config.Profile, activeProfileId string, showApiK
 	return table + "\n", nil
 }
 
-func getRowFromRowData(rowData RowData, showApiKeysFlag bool) []string {
+func getRowFromData(profile *config.Profile, activeProfileId string, showApiKeysFlag bool) []string {
+	var data rowData
+
+	data.ID = profile.Id
+	data.Name = profile.Name
+	data.ApiUrl = profile.Api.Url
+	if profile.Id == activeProfileId {
+		data.Status = "1"
+	}
+	if showApiKeysFlag {
+		data.ApiKey = profile.Api.Key
+	}
+
 	var state string
-	if rowData.Status == "" {
+	if data.Status == "" {
 		state = views.InactiveStyle.Render("Inactive")
 	} else {
 		state = views.ActiveStyle.Render("Active")
 	}
 
 	row := []string{
-		views.NameStyle.Render(rowData.ID),
-		views.DefaultRowDataStyle.Render(rowData.Name),
+		views.NameStyle.Render(data.ID),
+		views.DefaultRowDataStyle.Render(data.Name),
 		state,
-		views.DefaultRowDataStyle.Render(rowData.ApiUrl),
+		views.DefaultRowDataStyle.Render(data.ApiUrl),
 	}
 	if showApiKeysFlag {
-		row = append(row, views.DefaultRowDataStyle.Render(rowData.ApiKey))
+		row = append(row, views.DefaultRowDataStyle.Render(data.ApiKey))
 	}
 
 	return row
-}
-
-func getRowData(profile *config.Profile, activeProfileId string, showApiKeysFlag bool) *RowData {
-	rowData := RowData{"", "", "", "", ""}
-
-	rowData.ID = profile.Id
-	rowData.Name = profile.Name
-	rowData.ApiUrl = profile.Api.Url
-	if profile.Id == activeProfileId {
-		rowData.Status = "1"
-	}
-	if showApiKeysFlag {
-		rowData.ApiKey = profile.Api.Key
-	}
-
-	return &rowData
 }
 
 func renderUnstyledList(profileList []config.Profile, activeProfileId string, showApiKeysFlag bool) string {

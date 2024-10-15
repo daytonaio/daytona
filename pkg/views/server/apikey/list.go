@@ -20,15 +20,7 @@ func ListApiKeys(apiKeyList []apiclient.ApiKey) {
 	data := [][]string{}
 
 	for _, apiKey := range apiKeyList {
-		var rowData *RowData
-		var row []string
-
-		rowData = getRowData(&apiKey)
-		if rowData == nil {
-			continue
-		}
-		row = getRowFromRowData(*rowData)
-		data = append(data, row)
+		data = append(data, getRowFromRowData(apiKey))
 	}
 
 	table, success := util.GetTableView(data, []string{
@@ -43,22 +35,18 @@ func ListApiKeys(apiKeyList []apiclient.ApiKey) {
 	fmt.Println(table)
 }
 
-func getRowFromRowData(rowData RowData) []string {
+func getRowFromRowData(apiKey apiclient.ApiKey) []string {
+	rowData := RowData{"", ""}
+
+	rowData.Name = apiKey.Name
+	rowData.Type = string(apiKey.Type)
+
 	row := []string{
 		views.NameStyle.Render(rowData.Name),
 		views.DefaultRowDataStyle.Render(rowData.Type),
 	}
 
 	return row
-}
-
-func getRowData(apiKey *apiclient.ApiKey) *RowData {
-	rowData := RowData{"", ""}
-
-	rowData.Name = apiKey.Name
-	rowData.Type = string(apiKey.Type)
-
-	return &rowData
 }
 
 func renderUnstyledList(apiKeyList []apiclient.ApiKey) {

@@ -12,7 +12,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/util"
 )
 
-type RowData struct {
+type rowData struct {
 	Target   string
 	Provider string
 	Options  string
@@ -24,15 +24,7 @@ func ListTargets(targetList []apiclient.ProviderTarget) {
 	data := [][]string{}
 
 	for _, target := range targetList {
-		var rowData *RowData
-		var row []string
-
-		rowData = getRowData(&target)
-		if rowData == nil {
-			continue
-		}
-		row = getRowFromRowData(*rowData)
-		data = append(data, row)
+		data = append(data, getRowFromRowData(&target))
 	}
 
 	table, success := util.GetTableView(data, []string{
@@ -47,24 +39,20 @@ func ListTargets(targetList []apiclient.ProviderTarget) {
 	fmt.Println(table)
 }
 
-func getRowFromRowData(rowData RowData) []string {
+func getRowFromRowData(target *apiclient.ProviderTarget) []string {
+	var data rowData
+
+	data.Target = target.Name
+	data.Provider = target.ProviderInfo.Name
+	data.Options = target.Options
+
 	row := []string{
-		views.NameStyle.Render(rowData.Target),
-		views.DefaultRowDataStyle.Render(rowData.Provider),
-		views.DefaultRowDataStyle.Render(rowData.Options),
+		views.NameStyle.Render(data.Target),
+		views.DefaultRowDataStyle.Render(data.Provider),
+		views.DefaultRowDataStyle.Render(data.Options),
 	}
 
 	return row
-}
-
-func getRowData(target *apiclient.ProviderTarget) *RowData {
-	rowData := RowData{"", "", ""}
-
-	rowData.Target = target.Name
-	rowData.Provider = target.ProviderInfo.Name
-	rowData.Options = target.Options
-
-	return &rowData
 }
 
 func sortTargets(targets *[]apiclient.ProviderTarget) {

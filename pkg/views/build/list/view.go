@@ -14,7 +14,7 @@ import (
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 )
 
-type RowData struct {
+type rowData struct {
 	Id         string
 	State      string
 	PrebuildId string
@@ -27,13 +27,8 @@ func ListBuilds(buildList []apiclient.Build, apiServerConfig *apiclient.ServerCo
 
 	data := [][]string{}
 
-	for _, pc := range buildList {
-		var rowData *RowData
-		var row []string
-
-		rowData = getTableRowData(pc)
-		row = getRowFromRowData(*rowData)
-		data = append(data, row)
+	for _, b := range buildList {
+		data = append(data, getRowFromRowData(b))
 	}
 
 	table, success := views_util.GetTableView(data, []string{
@@ -66,29 +61,23 @@ func renderUnstyledList(buildList []apiclient.Build, apiServerConfig *apiclient.
 	}
 }
 
-func getRowFromRowData(rowData RowData) []string {
-	row := []string{
-		views.NameStyle.Render(rowData.Id),
-		views.DefaultRowDataStyle.Render(rowData.State),
-		views.DefaultRowDataStyle.Render(rowData.PrebuildId),
-		views.DefaultRowDataStyle.Render(rowData.CreatedAt),
-		views.DefaultRowDataStyle.Render(rowData.UpdatedAt),
+func getRowFromRowData(build apiclient.Build) []string {
+	var data rowData
+
+	data.Id = build.Id + views_util.AdditionalPropertyPadding
+	data.State = string(build.State)
+	data.PrebuildId = build.PrebuildId
+	if data.PrebuildId == "" {
+		data.PrebuildId = "/"
 	}
+	data.CreatedAt = util.FormatTimestamp(build.CreatedAt)
+	data.UpdatedAt = util.FormatTimestamp(build.UpdatedAt)
 
-	return row
-}
-
-func getTableRowData(build apiclient.Build) *RowData {
-	rowData := RowData{"", "", "", "", ""}
-
-	rowData.Id = build.Id + views_util.AdditionalPropertyPadding
-	rowData.State = string(build.State)
-	rowData.PrebuildId = build.PrebuildId
-	if rowData.PrebuildId == "" {
-		rowData.PrebuildId = "/"
+	return []string{
+		views.NameStyle.Render(data.Id),
+		views.DefaultRowDataStyle.Render(data.State),
+		views.DefaultRowDataStyle.Render(data.PrebuildId),
+		views.DefaultRowDataStyle.Render(data.CreatedAt),
+		views.DefaultRowDataStyle.Render(data.UpdatedAt),
 	}
-	rowData.CreatedAt = util.FormatTimestamp(build.CreatedAt)
-	rowData.UpdatedAt = util.FormatTimestamp(build.UpdatedAt)
-
-	return &rowData
 }

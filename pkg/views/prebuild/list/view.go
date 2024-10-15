@@ -16,7 +16,7 @@ import (
 
 var maxTriggerFilesStringLength = 24
 
-type RowData struct {
+type rowData struct {
 	ProjectConfigName string
 	Branch            string
 	CommitInterval    string
@@ -27,13 +27,8 @@ type RowData struct {
 func ListPrebuilds(prebuildList []apiclient.PrebuildDTO) {
 	data := [][]string{}
 
-	for _, pc := range prebuildList {
-		var rowData *RowData
-		var row []string
-
-		rowData = getTableRowData(pc)
-		row = getRowFromRowData(*rowData)
-		data = append(data, row)
+	for _, p := range prebuildList {
+		data = append(data, getRowFromData(p))
 	}
 
 	table, success := util.GetTableView(data, []string{
@@ -58,32 +53,26 @@ func renderUnstyledList(prebuildList []apiclient.PrebuildDTO) {
 	}
 }
 
-func getRowFromRowData(rowData RowData) []string {
-	row := []string{
-		views.NameStyle.Render(rowData.ProjectConfigName),
-		views.DefaultRowDataStyle.Render(views.GetBranchNameLabel(rowData.Branch)),
-		views.ActiveStyle.Render(rowData.CommitInterval),
-		views.DefaultRowDataStyle.Render(rowData.TriggerFiles),
-		views.DefaultRowDataStyle.Render(rowData.Retention),
-	}
+func getRowFromData(prebuildConfig apiclient.PrebuildDTO) []string {
+	var data rowData
 
-	return row
-}
-
-func getTableRowData(prebuildConfig apiclient.PrebuildDTO) *RowData {
-	rowData := RowData{"", "", "", "", ""}
-
-	rowData.ProjectConfigName = prebuildConfig.ProjectConfigName + views_util.AdditionalPropertyPadding
-	rowData.Branch = prebuildConfig.Branch
+	data.ProjectConfigName = prebuildConfig.ProjectConfigName + views_util.AdditionalPropertyPadding
+	data.Branch = prebuildConfig.Branch
 	if prebuildConfig.CommitInterval != nil {
-		rowData.CommitInterval = strconv.Itoa(int(*prebuildConfig.CommitInterval))
+		data.CommitInterval = strconv.Itoa(int(*prebuildConfig.CommitInterval))
 	} else {
-		rowData.CommitInterval = views.InactiveStyle.Render("None")
+		data.CommitInterval = views.InactiveStyle.Render("None")
 	}
-	rowData.TriggerFiles = getTriggerFilesString(prebuildConfig.TriggerFiles)
-	rowData.Retention = strconv.Itoa(int(prebuildConfig.Retention))
+	data.TriggerFiles = getTriggerFilesString(prebuildConfig.TriggerFiles)
+	data.Retention = strconv.Itoa(int(prebuildConfig.Retention))
 
-	return &rowData
+	return []string{
+		views.NameStyle.Render(data.ProjectConfigName),
+		views.DefaultRowDataStyle.Render(views.GetBranchNameLabel(data.Branch)),
+		views.ActiveStyle.Render(data.CommitInterval),
+		views.DefaultRowDataStyle.Render(data.TriggerFiles),
+		views.DefaultRowDataStyle.Render(data.Retention),
+	}
 }
 
 func getTriggerFilesString(triggerFiles []string) string {

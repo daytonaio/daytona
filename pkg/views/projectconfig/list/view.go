@@ -13,7 +13,7 @@ import (
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 )
 
-type RowData struct {
+type rowData struct {
 	Name       string
 	Repository string
 	Build      string
@@ -25,12 +25,7 @@ func ListProjectConfigs(projectConfigList []apiclient.ProjectConfig, apiServerCo
 	data := [][]string{}
 
 	for _, pc := range projectConfigList {
-		var rowData *RowData
-		var row []string
-
-		rowData = getTableRowData(pc, apiServerConfig, specifyGitProviders)
-		row = getRowFromRowData(*rowData)
-		data = append(data, row)
+		data = append(data, getRowFromData(pc, apiServerConfig, specifyGitProviders))
 	}
 
 	table, success := views_util.GetTableView(data, []string{
@@ -55,33 +50,14 @@ func renderUnstyledList(projectConfigList []apiclient.ProjectConfig, apiServerCo
 	}
 }
 
-func getRowFromRowData(rowData RowData) []string {
+func getRowFromData(projectConfig apiclient.ProjectConfig, apiServerConfig *apiclient.ServerConfig, specifyGitProviders bool) []string {
 	var isDefault string
+	var data rowData
 
-	if rowData.IsDefault == "" {
-		isDefault = views.InactiveStyle.Render("/")
-	} else {
-		isDefault = views.ActiveStyle.Render("Yes")
-	}
-
-	row := []string{
-		views.NameStyle.Render(rowData.Name),
-		views.DefaultRowDataStyle.Render(rowData.Repository),
-		views.DefaultRowDataStyle.Render(rowData.Build),
-		views.DefaultRowDataStyle.Render(rowData.Prebuilds),
-		isDefault,
-	}
-
-	return row
-}
-
-func getTableRowData(projectConfig apiclient.ProjectConfig, apiServerConfig *apiclient.ServerConfig, specifyGitProviders bool) *RowData {
-	rowData := RowData{"", "", "", "", ""}
-
-	rowData.Name = projectConfig.Name + views_util.AdditionalPropertyPadding
-	rowData.Repository = util.GetRepositorySlugFromUrl(projectConfig.RepositoryUrl, specifyGitProviders)
-	rowData.Prebuilds = "None"
-	rowData.IsDefault = ""
+	data.Name = projectConfig.Name + views_util.AdditionalPropertyPadding
+	data.Repository = util.GetRepositorySlugFromUrl(projectConfig.RepositoryUrl, specifyGitProviders)
+	data.Prebuilds = "None"
+	data.IsDefault = ""
 
 	projectDefaults := &views_util.ProjectConfigDefaults{
 		Image:     &apiServerConfig.DefaultProjectImage,
@@ -92,15 +68,27 @@ func getTableRowData(projectConfig apiclient.ProjectConfig, apiServerConfig *api
 		BuildConfig: projectConfig.BuildConfig,
 	}
 
-	_, rowData.Build = views_util.GetProjectBuildChoice(createProjectDto, projectDefaults)
+	_, data.Build = views_util.GetProjectBuildChoice(createProjectDto, projectDefaults)
 
 	if projectConfig.Default {
-		rowData.IsDefault = "1"
+		data.IsDefault = "1"
 	}
 
 	if len(projectConfig.Prebuilds) > 0 {
-		rowData.Prebuilds = fmt.Sprintf("%d", len(projectConfig.Prebuilds))
+		data.Prebuilds = fmt.Sprintf("%d", len(projectConfig.Prebuilds))
 	}
 
-	return &rowData
+	if data.IsDefault == "" {
+		isDefault = views.InactiveStyle.Render("/")
+	} else {
+		isDefault = views.ActiveStyle.Render("Yes")
+	}
+
+	return []string{
+		views.NameStyle.Render(data.Name),
+		views.DefaultRowDataStyle.Render(data.Repository),
+		views.DefaultRowDataStyle.Render(data.Build),
+		views.DefaultRowDataStyle.Render(data.Prebuilds),
+		isDefault,
+	}
 }
