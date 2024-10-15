@@ -32,7 +32,7 @@ func ListProfiles(profileList []config.Profile, activeProfileId string, showApiK
 	}
 
 	table := views_util.GetTableView(data, headers, nil, func() {
-		fmt.Println(renderUnstyledList(profileList, activeProfileId, showApiKeysFlag))
+		renderUnstyledList(profileList, activeProfileId, showApiKeysFlag)
 	})
 
 	return table + "\n", nil
@@ -71,7 +71,7 @@ func getRowFromData(profile *config.Profile, activeProfileId string, showApiKeys
 	return row
 }
 
-func renderUnstyledList(profileList []config.Profile, activeProfileId string, showApiKeysFlag bool) string {
+func renderUnstyledList(profileList []config.Profile, activeProfileId string, showApiKeysFlag bool) {
 	var status string
 	var isActive bool
 
@@ -106,5 +106,5 @@ func renderUnstyledList(profileList []config.Profile, activeProfileId string, sh
 		isActive = false
 	}
 
-	return output
+	fmt.Print(output)
 }

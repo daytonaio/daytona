@@ -20,6 +20,7 @@ var AdditionalPropertyPadding = "  "
 var RowWhiteSpace = 1 + 4 + len(AdditionalPropertyPadding)*2 + 4 + 4 + 1
 var ArbitrarySpace = 10
 
+// Gets the table view string or falls back to an unstyled view for lower terminal widths
 func GetTableView(data [][]string, headers []string, footer *string, fallbackRender func()) string {
 	re := lipgloss.NewRenderer(os.Stdout)
 
@@ -34,7 +35,6 @@ func GetTableView(data [][]string, headers []string, footer *string, fallbackRen
 	minWidth := getMinimumWidth(data)
 
 	if breakpointWidth == 0 || minWidth > breakpointWidth {
-		// Fallback to unstyled view for lower terminal widths
 		fallbackRender()
 		return ""
 	}
