@@ -7,10 +7,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"golang.org/x/term"
 	"os"
 	"strings"
 	"unicode/utf8"
+
+	"golang.org/x/term"
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
@@ -183,7 +184,7 @@ func validateRepoUrl(repoUrl string, apiClient *apiclient.APIClient) (*apiclient
 		Url: result,
 	}).Execute()
 	if err != nil {
-		wrappedErr := fmt.Sprintf("Failed to fetch repository information. Please check the URL and try again.")
+		wrappedErr := "Failed to fetch repository information. Please check the URL and try again."
 		return nil, errors.New(WrapText(wrappedErr, GetTerminalWidth()))
 	}
 
