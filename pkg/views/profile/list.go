@@ -31,7 +31,9 @@ func ListProfiles(profileList []config.Profile, activeProfileId string, showApiK
 		data = append(data, getRowFromData(&profile, activeProfileId, showApiKeysFlag))
 	}
 
-	table := views_util.GetTableView(data, headers, nil, renderUnstyledList, profileList, activeProfileId, showApiKeysFlag)
+	table := views_util.GetTableView(data, headers, nil, func() {
+		fmt.Println(renderUnstyledList(profileList, activeProfileId, showApiKeysFlag))
+	})
 
 	return table + "\n", nil
 }

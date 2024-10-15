@@ -33,7 +33,9 @@ func ListBuilds(buildList []apiclient.Build, apiServerConfig *apiclient.ServerCo
 
 	table := views_util.GetTableView(data, []string{
 		"ID", "State", "Prebuild ID", "Created", "Updated",
-	}, nil, renderUnstyledList, buildList, apiServerConfig)
+	}, nil, func() {
+		renderUnstyledList(buildList, apiServerConfig)
+	})
 
 	fmt.Println(table)
 }

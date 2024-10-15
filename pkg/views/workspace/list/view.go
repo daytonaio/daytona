@@ -68,7 +68,9 @@ func ListWorkspaces(workspaceList []apiclient.WorkspaceDTO, specifyGitProviders 
 
 	footer := lipgloss.NewStyle().Foreground(views.LightGray).Render(views.GetListFooter(activeProfileName, &views.Padding{}))
 
-	table := views_util.GetTableView(data, headers, &footer, renderUnstyledList, workspaceList)
+	table := views_util.GetTableView(data, headers, &footer, func() {
+		renderUnstyledList(workspaceList)
+	})
 
 	fmt.Println(table)
 }

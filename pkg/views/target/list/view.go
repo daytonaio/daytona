@@ -29,7 +29,9 @@ func ListTargets(targetList []apiclient.ProviderTarget) {
 
 	table := util.GetTableView(data, []string{
 		"Target", "Provider", "Options",
-	}, nil, renderUnstyledList, targetList)
+	}, nil, func() {
+		renderUnstyledList(targetList)
+	})
 
 	fmt.Println(table)
 }

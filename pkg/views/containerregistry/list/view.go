@@ -27,7 +27,9 @@ func ListRegistries(registryList []apiclient.ContainerRegistry) {
 
 	table := views_util.GetTableView(data, []string{
 		"Server", "Username", "Password",
-	}, nil, renderUnstyledList, registryList)
+	}, nil, func() {
+		renderUnstyledList(registryList)
+	})
 
 	fmt.Println(table)
 }

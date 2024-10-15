@@ -26,7 +26,9 @@ func List(providerList []apiclient.Provider) {
 
 	table := util.GetTableView(data, []string{
 		"Provider", "Name", "Version",
-	}, nil, renderUnstyledList, providerList)
+	}, nil, func() {
+		renderUnstyledList(providerList)
+	})
 
 	fmt.Println(table)
 }

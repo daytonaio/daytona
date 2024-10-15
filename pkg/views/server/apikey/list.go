@@ -25,7 +25,9 @@ func ListApiKeys(apiKeyList []apiclient.ApiKey) {
 
 	table := util.GetTableView(data, []string{
 		"Name", "Type",
-	}, nil, renderUnstyledList, apiKeyList)
+	}, nil, func() {
+		renderUnstyledList(apiKeyList)
+	})
 
 	fmt.Println(table)
 }

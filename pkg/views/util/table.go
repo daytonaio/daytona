@@ -6,7 +6,6 @@ package util
 import (
 	"fmt"
 	"os"
-	"reflect"
 	"regexp"
 
 	"github.com/charmbracelet/lipgloss"
@@ -21,7 +20,7 @@ var AdditionalPropertyPadding = "  "
 var RowWhiteSpace = 1 + 4 + len(AdditionalPropertyPadding)*2 + 4 + 4 + 1
 var ArbitrarySpace = 10
 
-func GetTableView(data [][]string, headers []string, footer *string, fn interface{}, args ...interface{}) string {
+func GetTableView(data [][]string, headers []string, footer *string, fallbackRender func()) string {
 	re := lipgloss.NewRenderer(os.Stdout)
 
 	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
@@ -35,14 +34,8 @@ func GetTableView(data [][]string, headers []string, footer *string, fn interfac
 	minWidth := getMinimumWidth(data)
 
 	if breakpointWidth == 0 || minWidth > breakpointWidth {
-		// Fallback to unstyled view
-		function := reflect.ValueOf(fn)
-		var in []reflect.Value
-		for _, arg := range args {
-			in = append(in, reflect.ValueOf(arg))
-		}
-
-		function.Call(in)
+		// Fallback to unstyled view for lower terminal widths
+		fallbackRender()
 		return ""
 	}
 

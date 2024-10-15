@@ -30,7 +30,9 @@ func ListProjectConfigs(projectConfigList []apiclient.ProjectConfig, apiServerCo
 
 	table := views_util.GetTableView(data, []string{
 		"Name", "Repository", "Build", "Prebuild rules", "Default",
-	}, nil, renderUnstyledList, projectConfigList, apiServerConfig)
+	}, nil, func() {
+		renderUnstyledList(projectConfigList, apiServerConfig)
+	})
 
 	fmt.Println(table)
 }
