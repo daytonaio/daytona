@@ -152,6 +152,8 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 					return nil, err
 				}
 				gitProviderConfigId = gp.Id
+			} else {
+				gitProviderConfigId = ""
 			}
 		}
 
