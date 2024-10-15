@@ -5,92 +5,50 @@ package provider
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
-
-	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/lipgloss/table"
-	"golang.org/x/term"
+	"github.com/daytonaio/daytona/pkg/views/util"
 )
 
-type RowData struct {
+type rowData struct {
 	Label   string
 	Name    string
 	Version string
 }
 
-func getRowFromRowData(rowData RowData) []string {
-	row := []string{
-		views.NameStyle.Render(rowData.Label),
-		views.DefaultRowDataStyle.Render(rowData.Name),
-		views.DefaultRowDataStyle.Render(rowData.Version),
-	}
-
-	return row
-}
-
-func getRowData(provider *apiclient.Provider) *RowData {
-	rowData := RowData{"", "", ""}
-
-	if provider.Label != nil {
-		rowData.Label = *provider.Label
-	} else {
-		rowData.Label = provider.Name
-	}
-	rowData.Name = provider.Name
-	rowData.Version = provider.Version
-
-	return &rowData
-}
-
 func List(providerList []apiclient.Provider) {
-
-	re := lipgloss.NewRenderer(os.Stdout)
-
-	headers := []string{"Provider", "Name", "Version"}
-
 	data := [][]string{}
 
 	for _, provider := range providerList {
-		var rowData *RowData
-		var row []string
-
-		rowData = getRowData(&provider)
-		if rowData == nil {
-			continue
-		}
-		row = getRowFromRowData(*rowData)
-		data = append(data, row)
+		data = append(data, getRowFromData(&provider))
 	}
 
-	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
-	if err != nil {
-		fmt.Println(data)
-		return
-	}
-
-	breakpointWidth := views.GetContainerBreakpointWidth(terminalWidth)
-
-	if breakpointWidth == 0 || terminalWidth < views.TUITableMinimumWidth {
+	table := util.GetTableView(data, []string{
+		"Provider", "Name", "Version",
+	}, nil, func() {
 		renderUnstyledList(providerList)
-		return
+	})
+
+	fmt.Println(table)
+}
+
+func getRowFromData(provider *apiclient.Provider) []string {
+	var data rowData
+
+	if provider.Label != nil {
+		data.Label = *provider.Label
+	} else {
+		data.Label = provider.Name
 	}
+	data.Name = provider.Name
+	data.Version = provider.Version
 
-	t := table.New().
-		Headers(headers...).
-		Rows(data...).
-		BorderStyle(re.NewStyle().Foreground(views.LightGray)).
-		BorderRow(false).BorderColumn(false).BorderLeft(false).BorderRight(false).BorderTop(false).BorderBottom(false).
-		StyleFunc(func(row, col int) lipgloss.Style {
-			if row == 0 {
-				return views.TableHeaderStyle
-			}
-			return views.BaseCellStyle
-		}).Width(breakpointWidth - 2*views.BaseTableStyleHorizontalPadding)
-
-	fmt.Println(views.BaseTableStyle.Render(t.String()))
+	return []string{
+		views.NameStyle.Render(data.Label),
+		views.DefaultRowDataStyle.Render(data.Name),
+		views.DefaultRowDataStyle.Render(data.Version),
+	}
 }
 
 func renderUnstyledList(providerList []apiclient.Provider) {
