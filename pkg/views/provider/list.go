@@ -24,14 +24,9 @@ func List(providerList []apiclient.Provider) {
 		data = append(data, getRowFromData(&provider))
 	}
 
-	table, success := util.GetTableView(data, []string{
+	table := util.GetTableView(data, []string{
 		"Provider", "Name", "Version",
-	}, nil)
-
-	if !success {
-		renderUnstyledList(providerList)
-		return
-	}
+	}, nil, renderUnstyledList, providerList)
 
 	fmt.Println(table)
 }

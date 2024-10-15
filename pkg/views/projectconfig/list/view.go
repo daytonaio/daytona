@@ -28,14 +28,9 @@ func ListProjectConfigs(projectConfigList []apiclient.ProjectConfig, apiServerCo
 		data = append(data, getRowFromData(pc, apiServerConfig, specifyGitProviders))
 	}
 
-	table, success := views_util.GetTableView(data, []string{
+	table := views_util.GetTableView(data, []string{
 		"Name", "Repository", "Build", "Prebuild rules", "Default",
-	}, nil)
-
-	if !success {
-		renderUnstyledList(projectConfigList, apiServerConfig)
-		return
-	}
+	}, nil, renderUnstyledList, projectConfigList, apiServerConfig)
 
 	fmt.Println(table)
 }

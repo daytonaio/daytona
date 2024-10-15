@@ -23,14 +23,9 @@ func ListApiKeys(apiKeyList []apiclient.ApiKey) {
 		data = append(data, getRowFromRowData(apiKey))
 	}
 
-	table, success := util.GetTableView(data, []string{
+	table := util.GetTableView(data, []string{
 		"Name", "Type",
-	}, nil)
-
-	if !success {
-		renderUnstyledList(apiKeyList)
-		return
-	}
+	}, nil, renderUnstyledList, apiKeyList)
 
 	fmt.Println(table)
 }

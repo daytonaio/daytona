@@ -27,14 +27,9 @@ func ListTargets(targetList []apiclient.ProviderTarget) {
 		data = append(data, getRowFromRowData(&target))
 	}
 
-	table, success := util.GetTableView(data, []string{
+	table := util.GetTableView(data, []string{
 		"Target", "Provider", "Options",
-	}, nil)
-
-	if !success {
-		renderUnstyledList(targetList)
-		return
-	}
+	}, nil, renderUnstyledList, targetList)
 
 	fmt.Println(table)
 }

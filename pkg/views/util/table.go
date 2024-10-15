@@ -6,6 +6,7 @@ package util
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"regexp"
 
 	"github.com/charmbracelet/lipgloss"
@@ -20,13 +21,13 @@ var AdditionalPropertyPadding = "  "
 var RowWhiteSpace = 1 + 4 + len(AdditionalPropertyPadding)*2 + 4 + 4 + 1
 var ArbitrarySpace = 10
 
-func GetTableView(data [][]string, headers []string, footer *string) (string, bool) {
+func GetTableView(data [][]string, headers []string, footer *string, fn interface{}, args ...interface{}) string {
 	re := lipgloss.NewRenderer(os.Stdout)
 
 	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
 		fmt.Println(data)
-		return "", true
+		return ""
 	}
 
 	breakpointWidth := views.GetContainerBreakpointWidth(terminalWidth)
@@ -34,7 +35,15 @@ func GetTableView(data [][]string, headers []string, footer *string) (string, bo
 	minWidth := getMinimumWidth(data)
 
 	if breakpointWidth == 0 || minWidth > breakpointWidth {
-		return "", false
+		// Fallback to unstyled view
+		function := reflect.ValueOf(fn)
+		var in []reflect.Value
+		for _, arg := range args {
+			in = append(in, reflect.ValueOf(arg))
+		}
+
+		function.Call(in)
+		return ""
 	}
 
 	t := table.New().
@@ -55,7 +64,7 @@ func GetTableView(data [][]string, headers []string, footer *string) (string, bo
 		table += "\n" + *footer
 	}
 
-	return views.BaseTableStyle.Render(table), true
+	return views.BaseTableStyle.Render(table)
 }
 
 func getMinimumWidth(data [][]string) int {

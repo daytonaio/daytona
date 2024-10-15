@@ -31,14 +31,9 @@ func ListPrebuilds(prebuildList []apiclient.PrebuildDTO) {
 		data = append(data, getRowFromData(p))
 	}
 
-	table, success := util.GetTableView(data, []string{
+	table := util.GetTableView(data, []string{
 		"Project Config", "Branch", "Commit Interval", "Trigger files", "Build Retention",
-	}, nil)
-
-	if !success {
-		renderUnstyledList(prebuildList)
-		return
-	}
+	}, nil, renderUnstyledList, prebuildList)
 
 	fmt.Println(table)
 }

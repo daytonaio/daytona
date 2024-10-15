@@ -31,14 +31,9 @@ func ListBuilds(buildList []apiclient.Build, apiServerConfig *apiclient.ServerCo
 		data = append(data, getRowFromRowData(b))
 	}
 
-	table, success := views_util.GetTableView(data, []string{
+	table := views_util.GetTableView(data, []string{
 		"ID", "State", "Prebuild ID", "Created", "Updated",
-	}, nil)
-
-	if !success {
-		renderUnstyledList(buildList, apiServerConfig)
-		return
-	}
+	}, nil, renderUnstyledList, buildList, apiServerConfig)
 
 	fmt.Println(table)
 }
