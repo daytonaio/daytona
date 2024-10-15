@@ -29,6 +29,7 @@ func (s *ProjectConfigService) SetPrebuild(projectConfigName string, createPrebu
 	existingPrebuild, err := projectConfig.FindPrebuild(&config.PrebuildFilter{
 		Branch: &createPrebuildDto.Branch,
 	})
+
 	if err == nil && createPrebuildDto.Id != nil && *createPrebuildDto.Id != existingPrebuild.Id {
 		return nil, errors.New("prebuild for the specified project config and branch already exists")
 	}
