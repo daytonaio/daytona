@@ -4,6 +4,7 @@
 package manager
 
 import (
+	"context"
 	"errors"
 	"os"
 	"os/exec"
@@ -34,7 +35,7 @@ var ProviderHandshakeConfig = plugin.HandshakeConfig{
 }
 
 type IProviderManager interface {
-	DownloadProvider(downloadUrls map[os_util.OperatingSystem]string, providerName string, throwIfPresent bool) (string, error)
+	DownloadProvider(ctx context.Context, downloadUrls map[os_util.OperatingSystem]string, providerName string, throwIfPresent bool) (string, error)
 	GetProvider(name string) (*Provider, error)
 	GetProviders() map[string]Provider
 	GetProvidersManifest() (*ProvidersManifest, error)
