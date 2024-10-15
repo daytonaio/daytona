@@ -53,11 +53,9 @@ var gitProviderListCmd = &cobra.Command{
 						gitProviderView.BaseApiUrl = *gitProvider.BaseApiUrl
 					}
 
-					signingMethod := ""
 					if gitProvider.SigningMethod != nil {
-						signingMethod = string(*gitProvider.SigningMethod)
+						gitProviderView.SigningMethod = string(*gitProvider.SigningMethod)
 					}
-					gitProviderView.SigningMethod = signingMethod
 
 					gitProviderViewList = append(gitProviderViewList, gitProviderView)
 				}
