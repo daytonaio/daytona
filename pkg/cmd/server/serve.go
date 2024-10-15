@@ -176,8 +176,8 @@ var ServeCmd = &cobra.Command{
 			return err
 		case <-interruptChannel:
 			log.Info("Shutting down")
-			// Exit will be handled by command PreRun
-			select {}
+
+			return server.TailscaleServer.Stop()
 		}
 	},
 }

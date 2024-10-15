@@ -240,7 +240,7 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 			props["called_as"] = os.Args[1]
 			err := telemetryService.TrackCliEvent(telemetry.CliEventInvalidCmd, clientId, props)
 			if err != nil {
-				log.Error(err)
+				log.Trace(err)
 			}
 			telemetryService.Close()
 		}
@@ -251,7 +251,7 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 	if telemetryEnabled {
 		err := telemetryService.TrackCliEvent(telemetry.CliEventCmdStart, clientId, GetCmdTelemetryData(cmd, flags))
 		if err != nil {
-			log.Error(err)
+			log.Trace(err)
 		}
 
 		go func() {
@@ -267,7 +267,7 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 
 				err := telemetryService.TrackCliEvent(telemetry.CliEventCmdEnd, clientId, props)
 				if err != nil {
-					log.Error(err)
+					log.Trace(err)
 				}
 				telemetryService.Close()
 				os.Exit(0)
@@ -289,7 +289,7 @@ func PostRun(cmd *cobra.Command, cmdErr error, telemetryService telemetry.Teleme
 
 		err := telemetryService.TrackCliEvent(telemetry.CliEventCmdEnd, clientId, props)
 		if err != nil {
-			log.Error(err)
+			log.Trace(err)
 		}
 		telemetryService.Close()
 	}
