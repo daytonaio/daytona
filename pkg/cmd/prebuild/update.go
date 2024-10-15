@@ -79,8 +79,8 @@ var prebuildUpdateCmd = &cobra.Command{
 			prebuildAddView.Branch = prebuild.Branch
 			prebuildAddView.Retention = strconv.Itoa(int(prebuild.Retention))
 			prebuildAddView.ProjectConfigName = projectConfigRecieved
-			prebuildAddView.TriggerFiles = triggerFilesFlag
-			prebuildAddView.CommitInterval = strconv.Itoa(int(commitIntervalFlag))
+			prebuildAddView.TriggerFiles = prebuild.TriggerFiles
+			prebuildAddView.CommitInterval = strconv.Itoa(int(*prebuild.CommitInterval))
 			retention = int(prebuild.Retention)
 		} else {
 			// Interactive mode: Prompt for details
@@ -130,7 +130,7 @@ var prebuildUpdateCmd = &cobra.Command{
 			add.PrebuildCreationView(&prebuildAddView, false)
 		}
 
-		prebuildAddView.RunBuildOnAdd = runOnUpdateFlag
+		prebuildAddView.RunBuildOnAdd = runFlag
 
 		var commitInterval int
 		if prebuildAddView.CommitInterval != "" {
@@ -184,7 +184,7 @@ var (
 	retentionFlag      int
 	commitIntervalFlag int
 	triggerFilesFlag   []string
-	runOnUpdateFlag    bool
+	runFlag            bool
 )
 
 func init() {
@@ -192,5 +192,5 @@ func init() {
 	prebuildUpdateCmd.Flags().IntVarP(&retentionFlag, "retention", "r", 0, "Maximum number of resulting builds stored at a time")
 	prebuildUpdateCmd.Flags().IntVarP(&commitIntervalFlag, "commit-interval", "c", 0, "Commit interval for running a prebuild - leave blank to ignore push events")
 	prebuildUpdateCmd.Flags().StringSliceVarP(&triggerFilesFlag, "trigger-files", "t", nil, "Full paths of files whose changes should explicitly trigger a  prebuild")
-	prebuildUpdateCmd.Flags().BoolVar(&runOnUpdateFlag, "run", false, "Run the prebuild once after updating it")
+	prebuildUpdateCmd.Flags().BoolVar(&runFlag, "run", false, "Run the prebuild once after updating it")
 }

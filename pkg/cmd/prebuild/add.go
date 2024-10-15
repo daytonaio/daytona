@@ -21,14 +21,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	runOnAddFlag bool
-)
-
 var prebuildAddCmd = &cobra.Command{
 	Use:     "add [PROJECT_CONFIG]",
 	Short:   "Add a prebuild configuration",
-	Args:    cobra.MaximumNArgs(1), 
+	Args:    cobra.MaximumNArgs(1),
 	Aliases: []string{"new", "create"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var prebuildAddView add.PrebuildAddView
@@ -39,20 +35,20 @@ var prebuildAddCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
+		if err != nil {
+			return apiclient_util.HandleErrorResponse(res, err)
+		}
+
+		if len(gitProviders) == 0 {
+			views.RenderInfoMessage("No registered Git providers have been found - please register a Git provider using 'daytona git-provider add' in order to start using prebuilds.")
+			return nil
+		}
 
 		// If no arguments and no flags are provided, run the interactive CLI
 		if len(args) == 0 && branchFlag == "" && retentionFlag == 0 &&
 			commitIntervalFlag == 0 && triggerFilesFlag == nil {
 			// Interactive CLI logic
-			gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
-			if err != nil {
-				return apiclient_util.HandleErrorResponse(res, err)
-			}
-
-			if len(gitProviders) == 0 {
-				views.RenderInfoMessage("No registered Git providers have been found - please register a Git provider using 'daytona git-provider add' in order to start using prebuilds.")
-				return nil
-			}
 
 			projectConfigList, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(ctx).Execute()
 			if err != nil {
@@ -88,7 +84,7 @@ var prebuildAddCmd = &cobra.Command{
 				fmt.Println("Operation canceled")
 				return nil
 			}
-			prebuildAddView.RunBuildOnAdd = runOnAddFlag
+			prebuildAddView.RunBuildOnAdd = runFlag
 			prebuildAddView.Branch = chosenBranch.Name
 			add.PrebuildCreationView(&prebuildAddView, false)
 		} else {
@@ -128,7 +124,7 @@ var prebuildAddCmd = &cobra.Command{
 			}
 
 			prebuildAddView.TriggerFiles = triggerFilesFlag
-			prebuildAddView.RunBuildOnAdd = runOnAddFlag
+			prebuildAddView.RunBuildOnAdd = runFlag
 		}
 
 		// Shared logic to create the prebuild configuration
@@ -182,7 +178,7 @@ var prebuildAddCmd = &cobra.Command{
 }
 
 func init() {
-	prebuildAddCmd.Flags().BoolVar(&runOnAddFlag, "run", false, "Run the prebuild once after adding it")
+	prebuildAddCmd.Flags().BoolVar(&runFlag, "run", false, "Run the prebuild once after adding it")
 	prebuildAddCmd.Flags().StringVarP(&branchFlag, "branch", "b", "", "Git branch for the prebuild")
 	prebuildAddCmd.Flags().IntVarP(&retentionFlag, "retention", "r", 0, "Maximum number of resulting builds stored at a time")
 	prebuildAddCmd.Flags().IntVarP(&commitIntervalFlag, "commit-interval", "c", 0, "Commit interval for running a prebuild - leave blank to ignore push events")
