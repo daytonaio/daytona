@@ -50,6 +50,7 @@ var gitProviderListCmd = &cobra.Command{
 							Name:       supportedProvider.Name,
 							Username:   gitProvider.Username,
 							Alias:      gitProvider.Alias,
+							BaseApiUrl: *gitProvider.BaseApiUrl,
 						},
 					)
 				}
