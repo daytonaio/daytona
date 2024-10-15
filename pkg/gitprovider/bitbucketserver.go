@@ -68,7 +68,6 @@ func (g *BitbucketServerGitProvider) GetNamespaces(options ListOptions) ([]*GitN
 	var namespaces []*GitNamespace
 
 	projectsRaw, err := client.DefaultApi.GetProjects(map[string]any{
-		"start": options.Page,
 		"limit": options.PerPage,
 	})
 	if err != nil {
@@ -100,57 +99,66 @@ func (g *BitbucketServerGitProvider) GetRepositories(namespace string, options L
 	}
 
 	var response []*GitRepository
-	var repoList *bitbucketv1.APIResponse
-
-	opts := map[string]interface{}{
-		"start": options.Page,
-		"limit": options.PerPage,
-	}
-	if namespace == personalNamespaceId {
-		repoList, err = client.DefaultApi.GetRepositories_19(opts)
-	} else {
-		repoList, err = client.DefaultApi.GetRepositoriesWithOptions(namespace, opts)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	pageRepos, err := bitbucketv1.GetRepositoriesResponse(repoList)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, repo := range pageRepos {
-		var repoUrl string
-		for _, link := range repo.Links.Clone {
-			if link.Name == "https" || link.Name == "http" {
-				repoUrl = link.Href
-				break
-			}
+	start := 0
+	for {
+		var repoList *bitbucketv1.APIResponse
+		opts := map[string]interface{}{
+			"start": start,
+			"limit": options.PerPage,
+		}
+		if namespace == personalNamespaceId {
+			repoList, err = client.DefaultApi.GetRepositories_19(opts)
+		} else {
+			repoList, err = client.DefaultApi.GetRepositoriesWithOptions(namespace, opts)
 		}
 
-		if len(repoUrl) == 0 && repo.Links != nil {
-			repoUrl = repo.Links.Self[0].Href
-		}
-
-		var ownerName string
-		if repo.Owner != nil {
-			ownerName = repo.Owner.Name
-		}
-
-		baseURL, err := url.Parse(g.baseApiUrl)
 		if err != nil {
-			return nil, g.FormatError(repoList.StatusCode, repoList.Message)
+			return nil, err
 		}
 
-		response = append(response, &GitRepository{
-			Id:     repo.Slug,
-			Name:   repo.Name,
-			Url:    repoUrl,
-			Source: baseURL.Host,
-			Owner:  ownerName,
-		})
+		pageRepos, err := bitbucketv1.GetRepositoriesResponse(repoList)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, repo := range pageRepos {
+			var repoUrl string
+			for _, link := range repo.Links.Clone {
+				if link.Name == "https" || link.Name == "http" {
+					repoUrl = link.Href
+					break
+				}
+			}
+
+			if len(repoUrl) == 0 && repo.Links != nil {
+				repoUrl = repo.Links.Self[0].Href
+			}
+
+			var ownerName string
+			if repo.Owner != nil {
+				ownerName = repo.Owner.Name
+			}
+
+			baseURL, err := url.Parse(g.baseApiUrl)
+			if err != nil {
+				return nil, g.FormatError(repoList.StatusCode, repoList.Message)
+			}
+
+			response = append(response, &GitRepository{
+				Id:     repo.Slug,
+				Name:   repo.Name,
+				Url:    repoUrl,
+				Source: baseURL.Host,
+				Owner:  ownerName,
+			})
+		}
+
+		hasNextPage, nextPageStart := bitbucketv1.HasNextPage(repoList)
+		if !hasNextPage {
+			break
+		}
+
+		start = nextPageStart
 	}
 
 	return response, nil
@@ -164,10 +172,7 @@ func (g *BitbucketServerGitProvider) GetRepoBranches(repositoryId string, namesp
 
 	var response []*GitBranch
 
-	branches, err := client.DefaultApi.GetBranches(repositoryId, namespaceId, map[string]interface{}{
-		"start": options.Page,
-		"limit": options.PerPage,
-	})
+	branches, err := client.DefaultApi.GetBranches(repositoryId, namespaceId, nil)
 	if err != nil {
 		return nil, g.FormatError(branches.StatusCode, branches.Message)
 	}
