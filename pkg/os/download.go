@@ -9,18 +9,9 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-
-	"github.com/gin-gonic/gin"
 )
 
-func DownloadFile(c *gin.Context, url string, filename string) error {
-	var ctx context.Context
-	if c != nil {
-		ctx = c.Request.Context()
-	} else {
-		ctx = context.Background()
-	}
-
+func DownloadFile(ctx context.Context, url string, filename string) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return err

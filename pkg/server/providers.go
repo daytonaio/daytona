@@ -4,15 +4,15 @@
 package server
 
 import (
+	"context"
 	"errors"
 	"os"
 	"path/filepath"
 
-	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *Server) downloadDefaultProviders(c *gin.Context) error {
+func (s *Server) downloadDefaultProviders() error {
 	manifest, err := s.ProviderManager.GetProvidersManifest()
 	if err != nil {
 		return err
@@ -22,7 +22,7 @@ func (s *Server) downloadDefaultProviders(c *gin.Context) error {
 
 	log.Info("Downloading default providers")
 	for providerName, provider := range defaultProviders {
-		_, err = s.ProviderManager.DownloadProvider(c, provider.DownloadUrls, providerName, false)
+		_, err = s.ProviderManager.DownloadProvider(context.Background(), provider.DownloadUrls, providerName, false)
 		if err != nil {
 			log.Error(err)
 		}

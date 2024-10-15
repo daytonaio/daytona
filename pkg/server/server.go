@@ -112,7 +112,7 @@ func (s *Server) Start() error {
 		log.Errorf("Failed to terminate orphaned provider processes: %s", err)
 	}
 
-	err = s.downloadDefaultProviders(nil)
+	err = s.downloadDefaultProviders()
 	if err != nil {
 		return err
 	}
