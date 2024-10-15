@@ -145,6 +145,11 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 }
 
 func (s *GitProviderService) newGitProvider(config *gitprovider.GitProviderConfig) (gitprovider.GitProvider, error) {
+	baseApiUrl := ""
+	if config.BaseApiUrl != nil {
+		baseApiUrl = *config.BaseApiUrl
+	}
+
 	switch config.ProviderId {
 	case "github":
 		return gitprovider.NewGitHubGitProvider(config.Token, nil), nil
@@ -155,19 +160,19 @@ func (s *GitProviderService) newGitProvider(config *gitprovider.GitProviderConfi
 	case "bitbucket":
 		return gitprovider.NewBitbucketGitProvider(config.Username, config.Token), nil
 	case "bitbucket-server":
-		return gitprovider.NewBitbucketServerGitProvider(config.Username, config.Token, *config.BaseApiUrl), nil
+		return gitprovider.NewBitbucketServerGitProvider(config.Username, config.Token, baseApiUrl), nil
 	case "gitlab-self-managed":
 		return gitprovider.NewGitLabGitProvider(config.Token, config.BaseApiUrl), nil
 	case "codeberg":
 		return gitprovider.NewGiteaGitProvider(config.Token, codebergUrl), nil
 	case "gitea":
-		return gitprovider.NewGiteaGitProvider(config.Token, *config.BaseApiUrl), nil
+		return gitprovider.NewGiteaGitProvider(config.Token, baseApiUrl), nil
 	case "gitness":
-		return gitprovider.NewGitnessGitProvider(config.Token, *config.BaseApiUrl), nil
+		return gitprovider.NewGitnessGitProvider(config.Token, baseApiUrl), nil
 	case "azure-devops":
-		return gitprovider.NewAzureDevOpsGitProvider(config.Token, *config.BaseApiUrl), nil
+		return gitprovider.NewAzureDevOpsGitProvider(config.Token, baseApiUrl), nil
 	case "aws-codecommit":
-		return gitprovider.NewAwsCodeCommitGitProvider(*config.BaseApiUrl), nil
+		return gitprovider.NewAwsCodeCommitGitProvider(baseApiUrl), nil
 	default:
 		return nil, errors.New("git provider not found")
 	}
