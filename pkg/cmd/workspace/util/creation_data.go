@@ -17,7 +17,6 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/common"
-	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -147,10 +146,7 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 			if len(gitProviderConfigs) == 1 {
 				gitProviderConfigId = gitProviderConfigs[0].Id
 			} else if len(gitProviderConfigs) > 1 {
-				gp, err := gitprovider_view.GetGitProviderFromPrompt(context.Background(), gitProviderConfigs, config.ApiClient)
-				if err != nil {
-					return nil, err
-				}
+				gp := selection.GetGitProviderConfigFromPrompt(gitProviderConfigs, false, "Use")
 				gitProviderConfigId = gp.Id
 			} else {
 				gitProviderConfigId = ""
