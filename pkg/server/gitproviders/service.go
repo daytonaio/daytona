@@ -173,6 +173,8 @@ func (s *GitProviderService) newGitProvider(config *gitprovider.GitProviderConfi
 		return gitprovider.NewAzureDevOpsGitProvider(config.Token, baseApiUrl), nil
 	case "aws-codecommit":
 		return gitprovider.NewAwsCodeCommitGitProvider(baseApiUrl), nil
+	case "gogs":
+		return gitprovider.NewGogsGitProvider(config.Token, baseApiUrl), nil
 	default:
 		return nil, errors.New("git provider not found")
 	}

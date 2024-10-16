@@ -33,6 +33,7 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 			if err == nil {
 				return gitProvider, p.Id, nil
 			}
+			return nil, "", err
 		}
 	}
 

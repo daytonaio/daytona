@@ -22,7 +22,7 @@ import (
 
 func isGitProviderWithUnsupportedPagination(providerId string) bool {
 	switch providerId {
-	case "azure-devops", "bitbucket", "gitness", "aws-codecommit":
+	case "azure-devops", "bitbucket", "gitness", "aws-codecommit", "gogs":
 		return true
 	default:
 		return false
