@@ -7,11 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
-	"strings"
-	"unicode/utf8"
-
-	"golang.org/x/term"
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
@@ -185,45 +180,8 @@ func validateRepoUrl(repoUrl string, apiClient *apiclient.APIClient) (*apiclient
 	}).Execute()
 	if err != nil {
 		wrappedErr := "Failed to fetch repository information. Please check the URL and try again."
-		return nil, errors.New(WrapText(wrappedErr, GetTerminalWidth()))
+		return nil, errors.New(views_util.WrapText(wrappedErr, views_util.GetTerminalWidth()))
 	}
 
 	return repo, nil
-}
-
-func WrapText(text string, width int) string {
-	if width <= 0 {
-		return text
-	}
-
-	var wrappedText strings.Builder
-	var line strings.Builder
-
-	words := strings.Fields(text)
-
-	for _, word := range words {
-		if utf8.RuneCountInString(line.String())+utf8.RuneCountInString(word)+1 > width {
-			wrappedText.WriteString(line.String() + "\n")
-			line.Reset()
-		}
-
-		if line.Len() > 0 {
-			line.WriteString(" ")
-		}
-		line.WriteString(word)
-	}
-
-	if line.Len() > 0 {
-		wrappedText.WriteString(line.String())
-	}
-
-	return wrappedText.String()
-}
-
-func GetTerminalWidth() int {
-	width, _, err := term.GetSize(int(os.Stdout.Fd()))
-	if err != nil {
-		return maxWidth
-	}
-	return width
 }
