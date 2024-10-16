@@ -127,13 +127,13 @@ func generateSshConfigEntry(profileId, workspaceId, projectName, knownHostsPath 
 	if gpgForward {
 		localSocket, err := getLocalGPGSocket()
 		if err != nil {
-			log.Warn(err)
+			log.Trace(err)
 			return config, nil
 		}
 
 		remoteSocket, err := getRemoteGPGSocket(projectHostname)
 		if err != nil {
-			log.Warn(err)
+			log.Trace(err)
 			return config, nil
 		}
 
