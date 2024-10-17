@@ -75,16 +75,32 @@ func GetRepositoryFromUrlInput(multiProject bool, projectOrder int, apiClient *a
 	var initialRepoUrl string
 	var repo *apiclient.GitRepository
 
+	var previousRepoUrl string
+	var previousError error
+
 	initialRepoInput := huh.NewInput().
 		Title(title).
 		Value(&initialRepoUrl).
 		Key("initialProjectRepo").
 		Validate(func(str string) error {
-			return views_util.WithInlineSpinner("Validating", func() error {
+			if str == previousRepoUrl && previousError != nil {
+				return previousError
+			}
+
+			previousRepoUrl = str
+			previousError = nil
+
+			err := views_util.WithInlineSpinner("Validating", func() error {
 				var err error
 				repo, err = validateRepoUrl(str, apiClient)
 				return err
 			})
+
+			if err != nil {
+				previousError = err
+			}
+
+			return err
 		})
 
 	dTheme := views.GetCustomTheme()
