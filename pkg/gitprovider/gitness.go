@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/daytonaio/daytona/internal/util"
 	gitnessclient "github.com/daytonaio/daytona/pkg/gitprovider/gitnessclient"
 )
 
@@ -377,7 +378,7 @@ func (g *GitnessGitProvider) ParseEventData(request *http.Request) (*GitEventDat
 	}
 
 	gitEventData := &GitEventData{
-		Url:    webhookEvent.Repo.GitURL,
+		Url:    util.CleanUpRepositoryUrl(webhookEvent.Repo.GitURL) + ".git",
 		Branch: strings.TrimPrefix(webhookEvent.Ref.Name, "refs/heads/"),
 		Sha:    webhookEvent.Sha,
 		Owner:  webhookEvent.Principal.DisplayName,
