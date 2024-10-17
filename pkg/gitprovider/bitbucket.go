@@ -265,6 +265,7 @@ func (g *BitbucketGitProvider) GetLastCommitSha(staticContext *StaticGitContext)
 		RepoSlug:    staticContext.Id,
 		Branchortag: branch,
 		Include:     include,
+		Page:        util.Pointer(1),
 	})
 
 	if err != nil {
