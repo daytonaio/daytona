@@ -99,6 +99,14 @@ func Stop() error {
 		return err
 	}
 
+	serviceFilePath, err := getServiceFilePath(cfg)
+	if err != nil {
+		return err
+	}
+	if _, err := os.Stat(serviceFilePath); os.IsNotExist(err) {
+		return errors.New("daemon not installed. Run `daytona server` to start the server")
+	}
+
 	err = s.Stop()
 	if err != nil {
 		return err
