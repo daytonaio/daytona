@@ -233,6 +233,7 @@ func (a *ApiServer) Start() error {
 		gitProviderController.POST("/context/url", gitprovider.GetUrlFromRepository)
 		gitProviderController.GET("/for-url/:url", gitprovider.ListGitProvidersForUrl)
 		gitProviderController.GET("/id-for-url/:url", gitprovider.GetGitProviderIdForUrl)
+		gitProviderController.GET("/:gitProviderId", gitprovider.GetGitProvider)
 	}
 
 	apiKeyController := protected.Group("/apikey")
@@ -258,7 +259,6 @@ func (a *ApiServer) Start() error {
 	projectGroup.Use(middlewares.ProjectAuthMiddleware())
 	{
 		projectGroup.POST(workspaceController.BasePath()+"/:workspaceId/:projectId/state", workspace.SetProjectState)
-		projectGroup.GET(gitProviderController.BasePath()+"/:gitProviderId", gitprovider.GetGitProvider)
 	}
 
 	a.httpServer = &http.Server{

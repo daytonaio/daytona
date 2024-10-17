@@ -42,6 +42,7 @@ func ListGitProviders(ctx *gin.Context) {
 
 	for _, provider := range response {
 		provider.Token = ""
+		provider.SigningKey = nil
 	}
 
 	ctx.JSON(200, response)
@@ -111,6 +112,11 @@ func GetGitProvider(ctx *gin.Context) {
 		return
 	}
 
+	apiKeyType, ok := ctx.Get("apiKeyType")
+	if !ok || apiKeyType == apikey.ApiKeyTypeClient {
+		gitProvider.Token = ""
+	}
+
 	ctx.JSON(200, gitProvider)
 }
 
@@ -170,10 +176,12 @@ func SetGitProvider(ctx *gin.Context) {
 	}
 
 	gitProviderConfig := gitprovider.GitProviderConfig{
-		Id:         setConfigDto.Id,
-		ProviderId: setConfigDto.ProviderId,
-		Token:      setConfigDto.Token,
-		BaseApiUrl: setConfigDto.BaseApiUrl,
+		Id:            setConfigDto.Id,
+		ProviderId:    setConfigDto.ProviderId,
+		Token:         setConfigDto.Token,
+		BaseApiUrl:    setConfigDto.BaseApiUrl,
+		SigningKey:    setConfigDto.SigningKey,
+		SigningMethod: setConfigDto.SigningMethod,
 	}
 
 	if setConfigDto.Username != nil {

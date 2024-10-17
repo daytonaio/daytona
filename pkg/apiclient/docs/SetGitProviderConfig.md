@@ -8,6 +8,8 @@ Name | Type | Description | Notes
 **BaseApiUrl** | Pointer to **string** |  | [optional] 
 **Id** | Pointer to **string** |  | [optional] 
 **ProviderId** | **string** |  | 
+**SigningKey** | Pointer to **string** |  | [optional] 
+**SigningMethod** | Pointer to [**SigningMethod**](SigningMethod.md) |  | [optional] 
 **Token** | **string** |  | 
 **Username** | Pointer to **string** |  | [optional] 
 
@@ -124,6 +126,56 @@ and a boolean to check if the value has been set.
 
 SetProviderId sets ProviderId field to given value.
 
+
+### GetSigningKey
+
+`func (o *SetGitProviderConfig) GetSigningKey() string`
+
+GetSigningKey returns the SigningKey field if non-nil, zero value otherwise.
+
+### GetSigningKeyOk
+
+`func (o *SetGitProviderConfig) GetSigningKeyOk() (*string, bool)`
+
+GetSigningKeyOk returns a tuple with the SigningKey field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetSigningKey
+
+`func (o *SetGitProviderConfig) SetSigningKey(v string)`
+
+SetSigningKey sets SigningKey field to given value.
+
+### HasSigningKey
+
+`func (o *SetGitProviderConfig) HasSigningKey() bool`
+
+HasSigningKey returns a boolean if a field has been set.
+
+### GetSigningMethod
+
+`func (o *SetGitProviderConfig) GetSigningMethod() SigningMethod`
+
+GetSigningMethod returns the SigningMethod field if non-nil, zero value otherwise.
+
+### GetSigningMethodOk
+
+`func (o *SetGitProviderConfig) GetSigningMethodOk() (*SigningMethod, bool)`
+
+GetSigningMethodOk returns a tuple with the SigningMethod field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetSigningMethod
+
+`func (o *SetGitProviderConfig) SetSigningMethod(v SigningMethod)`
+
+SetSigningMethod sets SigningMethod field to given value.
+
+### HasSigningMethod
+
+`func (o *SetGitProviderConfig) HasSigningMethod() bool`
+
+HasSigningMethod returns a boolean if a field has been set.
 
 ### GetToken
 
