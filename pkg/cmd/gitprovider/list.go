@@ -5,13 +5,14 @@ package gitprovider
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
+	"github.com/daytonaio/daytona/pkg/views/gitprovider/list"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 )
 
@@ -31,11 +32,10 @@ var gitProviderListCmd = &cobra.Command{
 		}
 
 		if len(gitProviders) == 0 {
-			views.RenderInfoMessage("No git providers registered. Add a new git provider by\npreparing a Personal Access Token and running 'daytona git-providers add'")
+			message := "No git providers registered. Add a new git provider by preparing a Personal Access Token and running 'daytona git-providers add'"
+			views.RenderInfoMessage(views_util.WrapText(message, views_util.GetTerminalWidth()))
 			return nil
 		}
-
-		views.RenderMainTitle("Registered Git Providers:")
 
 		supportedProviders := config.GetSupportedGitProviders()
 		var gitProviderViewList []gitprovider_view.GitProviderView
@@ -43,16 +43,23 @@ var gitProviderListCmd = &cobra.Command{
 		for _, gitProvider := range gitProviders {
 			for _, supportedProvider := range supportedProviders {
 				if gitProvider.ProviderId == supportedProvider.Id {
-					gitProviderViewList = append(gitProviderViewList,
-						gitprovider_view.GitProviderView{
-							Id:         gitProvider.Id,
-							ProviderId: gitProvider.ProviderId,
-							Name:       supportedProvider.Name,
-							Username:   gitProvider.Username,
-							Alias:      gitProvider.Alias,
-							BaseApiUrl: *gitProvider.BaseApiUrl,
-						},
-					)
+					gitProviderView := gitprovider_view.GitProviderView{
+						Id:         gitProvider.Id,
+						ProviderId: gitProvider.ProviderId,
+						Name:       supportedProvider.Name,
+						Username:   gitProvider.Username,
+						Alias:      gitProvider.Alias,
+					}
+
+					if gitProvider.BaseApiUrl != nil {
+						gitProviderView.BaseApiUrl = *gitProvider.BaseApiUrl
+					}
+
+					if gitProvider.SigningMethod != nil {
+						gitProviderView.SigningMethod = string(*gitProvider.SigningMethod)
+					}
+
+					gitProviderViewList = append(gitProviderViewList, gitProviderView)
 				}
 			}
 		}
@@ -63,9 +70,7 @@ var gitProviderListCmd = &cobra.Command{
 			return nil
 		}
 
-		for _, gitProviderView := range gitProviderViewList {
-			views.RenderListLine(fmt.Sprintf("%s (%s)", gitProviderView.Name, gitProviderView.Alias))
-		}
+		list.ListGitProviders(gitProviderViewList)
 		return nil
 	},
 }

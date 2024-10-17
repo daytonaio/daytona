@@ -4,6 +4,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 	"os"
@@ -50,7 +51,7 @@ func (s *Server) GetBinaryPath(binaryName, binaryVersion string) (string, error)
 		return "", err
 	}
 
-	err = daytona_os.DownloadFile(downloadUrl, binaryPath)
+	err = daytona_os.DownloadFile(context.Background(), downloadUrl, binaryPath)
 	if err != nil {
 		return "", err
 	}

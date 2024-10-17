@@ -188,6 +188,7 @@ Class | Method | HTTP request | Description
  - [ServerConfig](docs/ServerConfig.md)
  - [SetGitProviderConfig](docs/SetGitProviderConfig.md)
  - [SetProjectState](docs/SetProjectState.md)
+ - [SigningMethod](docs/SigningMethod.md)
  - [Status](docs/Status.md)
  - [Workspace](docs/Workspace.md)
  - [WorkspaceDTO](docs/WorkspaceDTO.md)

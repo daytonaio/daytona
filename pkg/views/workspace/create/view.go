@@ -179,7 +179,8 @@ func validateRepoUrl(repoUrl string, apiClient *apiclient.APIClient) (*apiclient
 		Url: result,
 	}).Execute()
 	if err != nil {
-		return nil, errors.New("Failed to fetch repository information. Please check the URL and try again.")
+		wrappedErr := "Failed to fetch repository information. Please check the URL and try again."
+		return nil, errors.New(views_util.WrapText(wrappedErr, views_util.GetTerminalWidth()))
 	}
 
 	return repo, nil
