@@ -127,14 +127,14 @@ func (g *BitbucketGitProvider) GetRepoBranches(repositoryId string, namespaceId 
 	opts := &bitbucket.RepositoryBranchOptions{
 		RepoSlug: repositoryId,
 		Owner:    namespaceId,
+		PageNum:  options.Page,
+		Pagelen:  options.PerPage,
 	}
 
 	owner, repo, err := g.getOwnerAndRepoFromFullName(repositoryId)
 	if err == nil {
-		opts = &bitbucket.RepositoryBranchOptions{
-			RepoSlug: repo,
-			Owner:    owner,
-		}
+		opts.RepoSlug = repo
+		opts.Owner = owner
 	}
 
 	branches, err := client.Repositories.Repository.ListBranches(opts)
