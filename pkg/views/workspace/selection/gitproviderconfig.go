@@ -17,25 +17,40 @@ import (
 )
 
 var NewGitProviderConfigIdentifier = "<NEW_GIT_PROVIDER_CONFIG>"
+var NoneGitProviderConfigIdentifier = "<NONE>"
 
-func GetGitProviderConfigFromPrompt(gitProviderConfigs []apiclient.GitProvider, withNewGitProviderConfig bool, actionVerb string) *apiclient.GitProvider {
+type GetGitProviderConfigParams struct {
+	GitProviderConfigs       []apiclient.GitProvider
+	WithNewGitProviderConfig bool
+	WithNoneOption           bool
+	ActionVerb               string
+	PreselectedGitProviderId *string
+}
+
+func GetGitProviderConfigFromPrompt(params GetGitProviderConfigParams) *apiclient.GitProvider {
 	choiceChan := make(chan *apiclient.GitProvider)
-	go selectGitProviderConfigPrompt(gitProviderConfigs, withNewGitProviderConfig, actionVerb, choiceChan)
+	go selectGitProviderConfigPrompt(params, choiceChan)
 	return <-choiceChan
 }
 
-func selectGitProviderConfigPrompt(gitProviderConfigs []apiclient.GitProvider, withNewGitProviderConfig bool, actionVerb string, choiceChan chan<- *apiclient.GitProvider) {
+func selectGitProviderConfigPrompt(params GetGitProviderConfigParams, choiceChan chan<- *apiclient.GitProvider) {
 	items := []list.Item{}
+	selectedProviderIndex := -1
 
 	supportedGitProviders := config.GetSupportedGitProviders()
 
-	for _, gp := range gitProviderConfigs {
+	for i, gp := range params.GitProviderConfigs {
 		title := fmt.Sprintf("%s (%s)", gp.ProviderId, gp.Alias)
 
 		for _, provider := range supportedGitProviders {
 			if provider.Id == gp.ProviderId {
 				title = fmt.Sprintf("%s (%s)", provider.Name, gp.Alias)
 			}
+		}
+
+		if params.PreselectedGitProviderId != nil && *params.PreselectedGitProviderId == gp.Id {
+			title = fmt.Sprintf("%s (currently used)", title)
+			selectedProviderIndex = i
 		}
 
 		desc := gp.Id
@@ -48,9 +63,16 @@ func selectGitProviderConfigPrompt(gitProviderConfigs []apiclient.GitProvider, w
 		items = append(items, newItem)
 	}
 
-	if withNewGitProviderConfig {
+	if params.WithNewGitProviderConfig {
 		newItem := item[apiclient.GitProvider]{title: "+ Add a new Git provider", desc: "", choiceProperty: apiclient.GitProvider{
 			Id: NewGitProviderConfigIdentifier,
+		}}
+		items = append(items, newItem)
+	}
+
+	if params.WithNoneOption {
+		newItem := item[apiclient.GitProvider]{title: "- None", desc: "", choiceProperty: apiclient.GitProvider{
+			Id: NoneGitProviderConfigIdentifier,
 		}}
 		items = append(items, newItem)
 	}
@@ -68,13 +90,17 @@ func selectGitProviderConfigPrompt(gitProviderConfigs []apiclient.GitProvider, w
 
 	l := list.New(items, d, 0, 0)
 
+	if selectedProviderIndex != -1 {
+		l.Select(selectedProviderIndex)
+	}
+
 	l.Styles.FilterPrompt = lipgloss.NewStyle().Foreground(views.Green)
 	l.Styles.FilterCursor = lipgloss.NewStyle().Foreground(views.Green)
 
 	l.FilterInput.PromptStyle = lipgloss.NewStyle().Foreground(views.Green)
 	l.FilterInput.TextStyle = lipgloss.NewStyle().Foreground(views.Green)
 
-	title := "Select a Git Provider Config To " + actionVerb
+	title := "Select a Git Provider Config To " + params.ActionVerb
 
 	l.Title = views.GetStyledMainTitle(title)
 	l.Styles.Title = titleStyle
