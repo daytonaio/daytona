@@ -40,6 +40,10 @@ func Render(gp *gitprovider.GitProviderView, forceUnstyled bool) {
 		output += getInfoLine("Base API URL", gp.BaseApiUrl) + "\n"
 	}
 
+	if gp.SigningMethod != "" {
+		output += getInfoLine("Signing Method", gp.SigningMethod) + "\n"
+	}
+
 	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
 		fmt.Println(output)

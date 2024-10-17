@@ -10,8 +10,8 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 )
 
-func OpenTerminalSsh(activeProfile config.Profile, workspaceId string, projectName string, args ...string) error {
-	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName)
+func OpenTerminalSsh(activeProfile config.Profile, workspaceId string, projectName string, gpgKey string, args ...string) error {
+	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName, gpgKey)
 	if err != nil {
 		return err
 	}

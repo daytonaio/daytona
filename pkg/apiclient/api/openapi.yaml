@@ -1799,7 +1799,9 @@ components:
         providerId: providerId
         baseApiUrl: baseApiUrl
         alias: alias
+        signingKey: signingKey
         id: id
+        signingMethod: null
         token: token
         username: username
       properties:
@@ -1811,6 +1813,10 @@ components:
           type: string
         providerId:
           type: string
+        signingKey:
+          type: string
+        signingMethod:
+          $ref: '#/components/schemas/SigningMethod'
         token:
           type: string
         username:
@@ -2384,7 +2390,9 @@ components:
         providerId: providerId
         baseApiUrl: baseApiUrl
         alias: alias
+        signingKey: signingKey
         id: id
+        signingMethod: null
         token: token
         username: username
       properties:
@@ -2396,6 +2404,10 @@ components:
           type: string
         providerId:
           type: string
+        signingKey:
+          type: string
+        signingMethod:
+          $ref: '#/components/schemas/SigningMethod'
         token:
           type: string
         username:
@@ -2429,6 +2441,14 @@ components:
       required:
       - uptime
       type: object
+    SigningMethod:
+      enum:
+      - ssh
+      - gpg
+      type: string
+      x-enum-varnames:
+      - SigningMethodSSH
+      - SigningMethodGPG
     Status:
       enum:
       - Unmodified
