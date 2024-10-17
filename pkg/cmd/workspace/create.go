@@ -422,7 +422,10 @@ func processGitURL(ctx context.Context, repoUrl string, apiClient *apiclient.API
 	if len(gitProviderConfigs) == 1 {
 		projectConfigurationFlags.GitProviderConfig = &gitProviderConfigs[0].Id
 	} else if len(gitProviderConfigs) > 1 {
-		gp := selection.GetGitProviderConfigFromPrompt(gitProviderConfigs, false, "Use")
+		gp := selection.GetGitProviderConfigFromPrompt(selection.GetGitProviderConfigParams{
+			GitProviderConfigs: gitProviderConfigs,
+			ActionVerb:         "Use",
+		})
 		projectConfigurationFlags.GitProviderConfig = &gp.Id
 	}
 

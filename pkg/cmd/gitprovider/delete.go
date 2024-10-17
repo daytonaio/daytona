@@ -46,7 +46,10 @@ var gitProviderDeleteCmd = &cobra.Command{
 			return nil
 		}
 
-		selectedGitProvider := selection.GetGitProviderConfigFromPrompt(gitProviders, false, "Remove")
+		selectedGitProvider := selection.GetGitProviderConfigFromPrompt(selection.GetGitProviderConfigParams{
+			GitProviderConfigs: gitProviders,
+			ActionVerb:         "Remove",
+		})
 
 		if selectedGitProvider == nil {
 			return nil

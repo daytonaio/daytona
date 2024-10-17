@@ -36,7 +36,10 @@ var gitProviderUpdateCmd = &cobra.Command{
 			return nil
 		}
 
-		selectedGitProvider := selection.GetGitProviderConfigFromPrompt(gitProviders, false, "Update")
+		selectedGitProvider := selection.GetGitProviderConfigFromPrompt(selection.GetGitProviderConfigParams{
+			GitProviderConfigs: gitProviders,
+			ActionVerb:         "Update",
+		})
 
 		if selectedGitProvider == nil {
 			return nil
