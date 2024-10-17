@@ -200,7 +200,17 @@ func providerRequiresUsername(gitProviderId string) bool {
 }
 
 func providerRequiresApiUrl(gitProviderId string) bool {
-	return gitProviderId == "gitness" || gitProviderId == "github-enterprise-server" || gitProviderId == "gitlab-self-managed" || gitProviderId == "gitea" || gitProviderId == "bitbucket-server" || gitProviderId == "azure-devops" || gitProviderId == "aws-codecommit"
+	providersRequiringApiUrl := []string{
+		"gitness",
+		"github-enterprise-server",
+		"gitlab-self-managed",
+		"gitea",
+		"bitbucket-server",
+		"azure-devops",
+		"aws-codecommit",
+		"gogs",
+	}
+	return slices.Contains(providersRequiringApiUrl, gitProviderId)
 }
 
 func commitSigningNotSupported(gitProviderId string) bool {
@@ -222,6 +232,8 @@ func getApiUrlDescription(gitProviderId string) string {
 		return "For example: https://bitbucket.host.com/rest"
 	} else if gitProviderId == "aws-codecommit" {
 		return "For example: https://ap-south-1.console.aws.amazon.com"
+	} else if gitProviderId == "gogs" {
+		return "For example: https://gogs-host.com"
 	}
 	return ""
 }
@@ -238,12 +250,17 @@ func getSigningKeyDescription(signingMethod string) string {
 }
 
 func getGitProviderHelpMessage(gitProviderId string) string {
-	message := fmt.Sprintf("%s\n%s\n\n%s%s",
+	message := fmt.Sprintf("%s\n%s",
 		lipgloss.NewStyle().Foreground(views.Green).Bold(true).Render("More information on:"),
-		config.GetDocsLinkFromGitProvider(gitProviderId),
-		lipgloss.NewStyle().Foreground(views.Green).Bold(true).Render("Required scopes: "),
-		config.GetRequiredScopesFromGitProviderId(gitProviderId))
+		config.GetDocsLinkFromGitProvider(gitProviderId))
 
+	requiredScopes := config.GetRequiredScopesFromGitProviderId(gitProviderId)
+	if requiredScopes != "" {
+		message = fmt.Sprintf("%s\n\n%s%s",
+			message,
+			lipgloss.NewStyle().Foreground(views.Green).Bold(true).Render("Required scopes: "),
+			requiredScopes)
+	}
 	prebuildScopes := config.GetPrebuildScopesFromGitProviderId(gitProviderId)
 	if prebuildScopes != "" {
 		message = fmt.Sprintf("%s\n%s%s",
