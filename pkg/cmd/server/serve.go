@@ -257,7 +257,8 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	})
 
 	gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
-		ConfigStore: gitProviderConfigStore,
+		ConfigStore:        gitProviderConfigStore,
+		ProjectConfigStore: projectConfigStore,
 	})
 
 	prebuildWebhookEndpoint := fmt.Sprintf("%s%s", util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain), constants.WEBHOOK_EVENT_ROUTE)
