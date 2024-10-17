@@ -88,9 +88,10 @@ var projectConfigUpdateCmd = &cobra.Command{
 
 		if len(eligibleGitProviders) > 0 {
 			selectedGitProvider := selection.GetGitProviderConfigFromPrompt(selection.GetGitProviderConfigParams{
-				GitProviderConfigs: eligibleGitProviders,
-				ActionVerb:         "Use",
-				WithNoneOption:     true,
+				GitProviderConfigs:       eligibleGitProviders,
+				ActionVerb:               "Use",
+				WithNoneOption:           true,
+				PreselectedGitProviderId: projectConfig.GitProviderConfigId,
 			})
 
 			if selectedGitProvider == nil {

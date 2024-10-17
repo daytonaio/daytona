@@ -24,6 +24,7 @@ type GetGitProviderConfigParams struct {
 	WithNewGitProviderConfig bool
 	WithNoneOption           bool
 	ActionVerb               string
+	PreselectedGitProviderId *string
 }
 
 func GetGitProviderConfigFromPrompt(params GetGitProviderConfigParams) *apiclient.GitProvider {
@@ -34,16 +35,22 @@ func GetGitProviderConfigFromPrompt(params GetGitProviderConfigParams) *apiclien
 
 func selectGitProviderConfigPrompt(params GetGitProviderConfigParams, choiceChan chan<- *apiclient.GitProvider) {
 	items := []list.Item{}
+	selectedProviderIndex := -1
 
 	supportedGitProviders := config.GetSupportedGitProviders()
 
-	for _, gp := range params.GitProviderConfigs {
+	for i, gp := range params.GitProviderConfigs {
 		title := fmt.Sprintf("%s (%s)", gp.ProviderId, gp.Alias)
 
 		for _, provider := range supportedGitProviders {
 			if provider.Id == gp.ProviderId {
 				title = fmt.Sprintf("%s (%s)", provider.Name, gp.Alias)
 			}
+		}
+
+		if params.PreselectedGitProviderId != nil && *params.PreselectedGitProviderId == gp.Id {
+			title = fmt.Sprintf("%s (currently used)", title)
+			selectedProviderIndex = i
 		}
 
 		desc := gp.Id
@@ -82,6 +89,10 @@ func selectGitProviderConfigPrompt(params GetGitProviderConfigParams, choiceChan
 	d.Styles.SelectedDesc = d.Styles.SelectedTitle.Foreground(views.DimmedGreen)
 
 	l := list.New(items, d, 0, 0)
+
+	if selectedProviderIndex != -1 {
+		l.Select(selectedProviderIndex)
+	}
 
 	l.Styles.FilterPrompt = lipgloss.NewStyle().Foreground(views.Green)
 	l.Styles.FilterCursor = lipgloss.NewStyle().Foreground(views.Green)

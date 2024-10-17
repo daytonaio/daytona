@@ -150,6 +150,9 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 					GitProviderConfigs: gitProviderConfigs,
 					ActionVerb:         "Use",
 				})
+				if gp == nil {
+					return nil, common.ErrCtrlCAbort
+				}
 				gitProviderConfigId = gp.Id
 			} else {
 				gitProviderConfigId = ""
