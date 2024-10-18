@@ -2,6 +2,10 @@ name: daytona ssh
 synopsis: SSH into a project using the terminal
 usage: daytona ssh [WORKSPACE] [PROJECT] [CMD...] [flags]
 options:
+    - name: option
+      shorthand: o
+      default_value: '[]'
+      usage: Specify SSH options in KEY=VALUE format.
     - name: "yes"
       shorthand: "y"
       default_value: "false"
