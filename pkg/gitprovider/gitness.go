@@ -378,7 +378,7 @@ func (g *GitnessGitProvider) ParseEventData(request *http.Request) (*GitEventDat
 	}
 
 	gitEventData := &GitEventData{
-		Url:    util.CleanUpRepositoryUrl(webhookEvent.Repo.GitURL) + ".git",
+		Url:    util.CleanUpRepositoryUrl(webhookEvent.Repo.GitURL),
 		Branch: strings.TrimPrefix(webhookEvent.Ref.Name, "refs/heads/"),
 		Sha:    webhookEvent.Sha,
 		Owner:  webhookEvent.Principal.DisplayName,
