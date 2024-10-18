@@ -6,6 +6,7 @@ package projectconfig
 import (
 	"context"
 	"net/http"
+	"net/url"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
@@ -59,8 +60,9 @@ var projectConfigUpdateCmd = &cobra.Command{
 						Url: projectConfig.RepositoryUrl,
 					},
 				},
-				BuildConfig: projectConfig.BuildConfig,
-				EnvVars:     projectConfig.EnvVars,
+				BuildConfig:         projectConfig.BuildConfig,
+				EnvVars:             projectConfig.EnvVars,
+				GitProviderConfigId: projectConfig.GitProviderConfigId,
 			},
 		}
 
@@ -74,18 +76,43 @@ var projectConfigUpdateCmd = &cobra.Command{
 			projectDefaults.DevcontainerFilePath = projectConfig.BuildConfig.Devcontainer.FilePath
 		}
 
-		create.ProjectsConfigurationChanged, err = create.RunProjectConfiguration(&createDto, *projectDefaults)
+		_, err = create.RunProjectConfiguration(&createDto, *projectDefaults)
 		if err != nil {
 			return err
 		}
 
+		eligibleGitProviders, res, err := apiClient.GitProviderAPI.ListGitProvidersForUrl(ctx, url.QueryEscape(projectConfig.RepositoryUrl)).Execute()
+		if err != nil {
+			return apiclient_util.HandleErrorResponse(res, err)
+		}
+
+		if len(eligibleGitProviders) > 0 {
+			selectedGitProvider := selection.GetGitProviderConfigFromPrompt(selection.GetGitProviderConfigParams{
+				GitProviderConfigs:       eligibleGitProviders,
+				ActionVerb:               "Use",
+				WithNoneOption:           true,
+				PreselectedGitProviderId: projectConfig.GitProviderConfigId,
+			})
+
+			if selectedGitProvider == nil {
+				return nil
+			}
+
+			if selectedGitProvider.Id == selection.NoneGitProviderConfigIdentifier {
+				createDto[0].GitProviderConfigId = nil
+			} else {
+				createDto[0].GitProviderConfigId = &selectedGitProvider.Id
+			}
+		}
+
 		newProjectConfig := apiclient.CreateProjectConfigDTO{
-			Name:          projectConfig.Name,
-			BuildConfig:   createDto[0].BuildConfig,
-			Image:         createDto[0].Image,
-			User:          createDto[0].User,
-			RepositoryUrl: createDto[0].Source.Repository.Url,
-			EnvVars:       createDto[0].EnvVars,
+			Name:                projectConfig.Name,
+			BuildConfig:         createDto[0].BuildConfig,
+			Image:               createDto[0].Image,
+			User:                createDto[0].User,
+			RepositoryUrl:       createDto[0].Source.Repository.Url,
+			EnvVars:             createDto[0].EnvVars,
+			GitProviderConfigId: createDto[0].GitProviderConfigId,
 		}
 
 		res, err = apiClient.ProjectConfigAPI.SetProjectConfig(ctx).ProjectConfig(newProjectConfig).Execute()
