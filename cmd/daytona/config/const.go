@@ -164,6 +164,8 @@ func GetWebhookEventHeaderKeyFromGitProvider(providerId string) string {
 		return "X-Gitea-Event"
 	case "azure-devops":
 		return "X-AzureDevops-Event"
+	case "gitness":
+		return "X-Gitness-Trigger"
 	default:
 		return ""
 	}
