@@ -7,7 +7,6 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
-	"slices"
 	"strings"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -20,7 +19,7 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 		return nil, "", err
 	}
 
-	baseApiUrls := make(map[string][]string)
+	var handleableProviders []string
 
 	for _, p := range gitProviders {
 		gitProvider, err := s.GetGitProvider(p.Id)
@@ -36,43 +35,38 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 			if err == nil {
 				return gitProvider, p.Id, nil
 			}
+			handleableProviders = append(handleableProviders, p.ProviderId)
+		}
+	}
 
-			if p.BaseApiUrl != nil {
-				if _, exists := baseApiUrls[p.ProviderId]; !exists {
-					baseApiUrls[p.ProviderId] = []string{""}
-				}
-				if !slices.Contains(baseApiUrls[p.ProviderId], *p.BaseApiUrl) {
-					baseApiUrls[p.ProviderId] = append(baseApiUrls[p.ProviderId], *p.BaseApiUrl)
-				}
-			}
+	if len(handleableProviders) > 0 {
+		providerId := handleableProviders[0]
+		gitProvider, err := s.newGitProvider(&gitprovider.GitProviderConfig{
+			ProviderId: providerId,
+			Id:         providerId,
+			Username:   "",
+			Token:      "",
+			BaseApiUrl: nil,
+		})
+		if err == nil {
+			return gitProvider, providerId, nil
 		}
 	}
 
 	for _, p := range config.GetSupportedGitProviders() {
-		urls := baseApiUrls[p.Id]
-		if len(urls) == 0 {
-			urls = []string{""}
+		gitProvider, err := s.newGitProvider(&gitprovider.GitProviderConfig{
+			ProviderId: p.Id,
+			Id:         p.Id,
+			Username:   "",
+			Token:      "",
+			BaseApiUrl: nil,
+		})
+		if err != nil {
+			continue
 		}
-		for _, url := range urls {
-			gitProvider, err := s.newGitProvider(&gitprovider.GitProviderConfig{
-				ProviderId: p.Id,
-				Id:         p.Id,
-				Username:   "",
-				Token:      "",
-				BaseApiUrl: func() *string {
-					if url == "" {
-						return nil
-					}
-					return &url
-				}(),
-			})
-			if err != nil {
-				continue
-			}
-			canHandle, _ := gitProvider.CanHandle(repoUrl)
-			if canHandle {
-				return gitProvider, p.Id, nil
-			}
+		canHandle, _ := gitProvider.CanHandle(repoUrl)
+		if canHandle {
+			return gitProvider, p.Id, nil
 		}
 	}
 
