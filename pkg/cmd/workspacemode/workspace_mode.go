@@ -46,7 +46,7 @@ func Execute() error {
 	telemetryEnabled := config.TelemetryEnabled()
 	startTime := time.Now()
 
-	telemetryService, command, flags, err := cmd.PreRun(workspaceModeRootCmd, os.Args[1:], telemetryEnabled, clientId, startTime)
+	telemetryService, command, flags, isComplete, err := cmd.PreRun(workspaceModeRootCmd, os.Args[1:], telemetryEnabled, clientId, startTime)
 	if err != nil {
 		return err
 	}
@@ -54,7 +54,9 @@ func Execute() error {
 	err = workspaceModeRootCmd.Execute()
 
 	endTime := time.Now()
-	cmd.PostRun(command, err, telemetryService, clientId, startTime, endTime, flags)
+	if !isComplete {
+		cmd.PostRun(command, err, telemetryService, clientId, startTime, endTime, flags)
+	}
 
 	return err
 }
