@@ -53,6 +53,19 @@ type CreateDevcontainerOptions struct {
 }
 
 func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (string, RemoteUser, error) {
+	// Ensure that the devcontainer config exists
+	if opts.SshClient != nil {
+		_, err := opts.SshClient.ReadFile(path.Join(opts.ProjectDir, opts.BuildConfig.Devcontainer.FilePath))
+		if err != nil {
+			return "", "", err
+		}
+	} else {
+		_, err := os.Stat(filepath.Join(opts.ProjectDir, opts.BuildConfig.Devcontainer.FilePath))
+		if err != nil {
+			return "", "", err
+		}
+	}
+
 	socketForwardId, err := d.ensureDockerSockForward(opts.LogWriter)
 	if err != nil {
 		return "", "", err
