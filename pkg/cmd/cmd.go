@@ -88,27 +88,35 @@ func Execute() error {
 	clientId := config.GetClientId()
 	telemetryEnabled := config.TelemetryEnabled()
 
-	telemetryService, cmd, flags, err := PreRun(rootCmd, os.Args[1:], telemetryEnabled, clientId, startTime)
+	telemetryService, cmd, flags, isCompletion, err := PreRun(rootCmd, os.Args[1:], telemetryEnabled, clientId, startTime)
 	if err != nil {
 		fmt.Printf("Error: %v\n\n", err)
 		return cmd.Help()
 	}
 
-	err = ensureProfiles(cmd)
-	if err != nil {
-		return err
+	if !isCompletion {
+		err = ensureProfiles(cmd)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = rootCmd.Execute()
 
 	endTime := time.Now()
 
-	PostRun(cmd, err, telemetryService, clientId, startTime, endTime, flags)
+	if !isCompletion {
+		PostRun(cmd, err, telemetryService, clientId, startTime, endTime, flags)
+	}
 
 	return err
 }
 
-func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command, flags []string, err error) {
+func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command, flags []string, isCompletion bool, err error) {
+	if len(args) > 0 && args[0] == "__complete" {
+		return rootCmd, flags, true, nil
+	}
+
 	rootCmd.InitDefaultHelpCmd()
 	currentCmd := rootCmd
 
@@ -128,7 +136,7 @@ func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command
 	for len(sanitzedArgs) > 0 {
 		subCmd, subArgs, err := currentCmd.Find(sanitzedArgs)
 		if err != nil {
-			return currentCmd, flags, err
+			return currentCmd, flags, false, err
 		}
 
 		if subCmd == currentCmd {
@@ -141,16 +149,17 @@ func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command
 
 	if len(sanitzedArgs) > 0 {
 		if err := currentCmd.ValidateArgs(sanitzedArgs); err != nil {
-			return currentCmd, flags, err
+			return currentCmd, flags, false, err
 		}
 	}
 
-	return currentCmd, flags, nil
+	return currentCmd, flags, false, nil
 }
 
 func ensureProfiles(cmd *cobra.Command) error {
 	exemptions := []string{
 		"daytona",
+		"daytona autocomplete",
 		"daytona help",
 		"daytona docs",
 		"daytona generate-docs",
@@ -259,7 +268,7 @@ func GetCmdTelemetryData(cmd *cobra.Command, flags []string) map[string]interfac
 	return data
 }
 
-func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, clientId string, startTime time.Time) (telemetry.TelemetryService, *cobra.Command, []string, error) {
+func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, clientId string, startTime time.Time) (telemetry.TelemetryService, *cobra.Command, []string, bool, error) {
 	var telemetryService telemetry.TelemetryService
 
 	if telemetryEnabled {
@@ -270,8 +279,8 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 		})
 	}
 
-	cmd, flags, err := validateCommands(rootCmd, os.Args[1:])
-	if err != nil {
+	cmd, flags, isCompletion, err := validateCommands(rootCmd, os.Args[1:])
+	if err != nil && !isCompletion {
 		if telemetryEnabled {
 			props := GetCmdTelemetryData(cmd, flags)
 			props["command"] = os.Args[1]
@@ -283,10 +292,10 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 			telemetryService.Close()
 		}
 
-		return telemetryService, cmd, flags, err
+		return telemetryService, cmd, flags, isCompletion, err
 	}
 
-	if telemetryEnabled {
+	if telemetryEnabled && !isCompletion {
 		err := telemetryService.TrackCliEvent(telemetry.CliEventCmdStart, clientId, GetCmdTelemetryData(cmd, flags))
 		if err != nil {
 			log.Trace(err)
@@ -313,7 +322,7 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 		}()
 	}
 
-	return telemetryService, cmd, flags, nil
+	return telemetryService, cmd, flags, isCompletion, nil
 }
 
 func PostRun(cmd *cobra.Command, cmdErr error, telemetryService telemetry.TelemetryService, clientId string, startTime time.Time, endTime time.Time, flags []string) {
