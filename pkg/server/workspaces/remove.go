@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	log "github.com/sirupsen/logrus"
 )
@@ -20,7 +21,7 @@ func (s *WorkspaceService) RemoveWorkspace(ctx context.Context, workspaceId stri
 
 	log.Infof("Destroying workspace %s", workspace.Id)
 
-	target, err := s.targetStore.Find(workspace.Target)
+	target, err := s.targetStore.Find(&provider.TargetFilter{Name: &workspace.Target})
 	if err != nil {
 		return err
 	}
@@ -96,7 +97,7 @@ func (s *WorkspaceService) ForceRemoveWorkspace(ctx context.Context, workspaceId
 
 	log.Infof("Destroying workspace %s", workspace.Id)
 
-	target, _ := s.targetStore.Find(workspace.Target)
+	target, _ := s.targetStore.Find(&provider.TargetFilter{Name: &workspace.Target})
 
 	for _, project := range workspace.Projects {
 		//	todo: go routines

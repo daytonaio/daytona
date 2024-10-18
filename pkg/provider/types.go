@@ -47,7 +47,8 @@ type ProviderTarget struct {
 	Name         string       `json:"name" validate:"required"`
 	ProviderInfo ProviderInfo `json:"providerInfo" validate:"required"`
 	// JSON encoded map of options
-	Options string `json:"options" validate:"required"`
+	Options   string `json:"options" validate:"required"`
+	IsDefault bool   `json:"isDefault" validate:"required"`
 } // @name ProviderTarget
 
 type ProviderTargetManifest map[string]ProviderTargetProperty // @name ProviderTargetManifest

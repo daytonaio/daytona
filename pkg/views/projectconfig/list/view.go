@@ -54,7 +54,6 @@ func getRowFromData(projectConfig apiclient.ProjectConfig, apiServerConfig *apic
 	data.Name = projectConfig.Name + views_util.AdditionalPropertyPadding
 	data.Repository = util.GetRepositorySlugFromUrl(projectConfig.RepositoryUrl, specifyGitProviders)
 	data.Prebuilds = "None"
-	data.IsDefault = ""
 
 	projectDefaults := &views_util.ProjectConfigDefaults{
 		Image:     &apiServerConfig.DefaultProjectImage,
@@ -68,17 +67,13 @@ func getRowFromData(projectConfig apiclient.ProjectConfig, apiServerConfig *apic
 	_, data.Build = views_util.GetProjectBuildChoice(createProjectDto, projectDefaults)
 
 	if projectConfig.Default {
-		data.IsDefault = "1"
+		isDefault = views.ActiveStyle.Render("Yes")
+	} else {
+		isDefault = views.InactiveStyle.Render("/")
 	}
 
 	if len(projectConfig.Prebuilds) > 0 {
 		data.Prebuilds = fmt.Sprintf("%d", len(projectConfig.Prebuilds))
-	}
-
-	if data.IsDefault == "" {
-		isDefault = views.InactiveStyle.Render("/")
-	} else {
-		isDefault = views.ActiveStyle.Render("Yes")
 	}
 
 	return []string{

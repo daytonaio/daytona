@@ -17,17 +17,34 @@ import (
 	target_view "github.com/daytonaio/daytona/pkg/views/target"
 )
 
-func GetTarget(ctx context.Context, apiClient *apiclient.APIClient, targetList []apiclient.ProviderTarget, activeProfileName string, targetNameFlag string) (*target_view.TargetView, error) {
-	if targetNameFlag != "" {
-		for _, t := range targetList {
-			if t.Name == targetNameFlag {
+type GetTargetConfig struct {
+	Ctx               context.Context
+	ApiClient         *apiclient.APIClient
+	TargetList        []apiclient.ProviderTarget
+	ActiveProfileName string
+	TargetNameFlag    string
+	PromptUsingTUI    bool
+}
+
+func GetTarget(config GetTargetConfig) (*target_view.TargetView, error) {
+	if config.TargetNameFlag != "" {
+		for _, t := range config.TargetList {
+			if t.Name == config.TargetNameFlag {
 				return util.Pointer(target_view.GetTargetViewFromTarget(t)), nil
 			}
 		}
-		return nil, fmt.Errorf("target '%s' not found", targetNameFlag)
+		return nil, fmt.Errorf("target '%s' not found", config.TargetNameFlag)
 	}
 
-	serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(apiclient.ApiGetConfigRequest{})
+	if !config.PromptUsingTUI {
+		for _, t := range config.TargetList {
+			if t.IsDefault {
+				return util.Pointer(target_view.GetTargetViewFromTarget(t)), nil
+			}
+		}
+	}
+
+	serverConfig, res, err := config.ApiClient.ServerAPI.GetConfigExecute(apiclient.ApiGetConfigRequest{})
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
@@ -48,13 +65,13 @@ func GetTarget(ctx context.Context, apiClient *apiclient.APIClient, targetList [
 
 		latestProviders := provider.GetProviderListFromManifest(providersManifestLatest)
 
-		providerViewList, err = provider.GetProviderViewOptions(apiClient, latestProviders, ctx)
+		providerViewList, err = provider.GetProviderViewOptions(config.ApiClient, latestProviders, config.Ctx)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	selectedTarget, err := target_view.GetTargetFromPrompt(targetList, activeProfileName, &providerViewList, false)
+	selectedTarget, err := target_view.GetTargetFromPrompt(config.TargetList, config.ActiveProfileName, &providerViewList, false, "Use")
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +80,7 @@ func GetTarget(ctx context.Context, apiClient *apiclient.APIClient, targetList [
 		return selectedTarget, nil
 	}
 
-	err = provider.InstallProvider(apiClient, provider_view.ProviderView{
+	err = provider.InstallProvider(config.ApiClient, provider_view.ProviderView{
 		Name:    selectedTarget.ProviderInfo.Name,
 		Version: selectedTarget.ProviderInfo.Version,
 	}, providersManifest)
@@ -71,13 +88,13 @@ func GetTarget(ctx context.Context, apiClient *apiclient.APIClient, targetList [
 		return nil, err
 	}
 
-	targetManifest, res, err := apiClient.ProviderAPI.GetTargetManifest(context.Background(), selectedTarget.ProviderInfo.Name).Execute()
+	targetManifest, res, err := config.ApiClient.ProviderAPI.GetTargetManifest(context.Background(), selectedTarget.ProviderInfo.Name).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	selectedTarget.Name = ""
-	err = target_view.NewTargetNameInput(&selectedTarget.Name, util.ArrayMap(targetList, func(t apiclient.ProviderTarget) string {
+	err = target_view.NewTargetNameInput(&selectedTarget.Name, util.ArrayMap(config.TargetList, func(t apiclient.ProviderTarget) string {
 		return t.Name
 	}))
 	if err != nil {
@@ -89,7 +106,7 @@ func GetTarget(ctx context.Context, apiClient *apiclient.APIClient, targetList [
 		return nil, err
 	}
 
-	res, err = apiClient.TargetAPI.SetTarget(context.Background()).Target(apiclient.ProviderTarget{
+	res, err = config.ApiClient.TargetAPI.SetTarget(context.Background()).Target(apiclient.CreateProviderTargetDTO{
 		Name:    selectedTarget.Name,
 		Options: selectedTarget.Options,
 		ProviderInfo: apiclient.ProviderProviderInfo{

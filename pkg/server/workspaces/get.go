@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	log "github.com/sirupsen/logrus"
@@ -28,7 +29,7 @@ func (s *WorkspaceService) GetWorkspace(ctx context.Context, workspaceId string,
 		return &response, nil
 	}
 
-	target, err := s.targetStore.Find(ws.Target)
+	target, err := s.targetStore.Find(&provider.TargetFilter{Name: &ws.Target})
 	if err != nil {
 		return nil, err
 	}
