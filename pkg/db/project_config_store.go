@@ -85,6 +85,9 @@ func processProjectConfigFilters(tx *gorm.DB, filter *config.ProjectConfigFilter
 		if filter.Default != nil {
 			tx = tx.Where("is_default = ?", *filter.Default)
 		}
+		if filter.GitProviderConfigId != nil {
+			tx = tx.Where("git_provider_config_id = ?", *filter.GitProviderConfigId)
+		}
 	}
 
 	return tx
