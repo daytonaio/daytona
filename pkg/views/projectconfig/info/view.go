@@ -37,6 +37,13 @@ func Render(projectConfig *apiclient.ProjectConfig, apiServerConfig *apiclient.S
 
 	output += getInfoLine("Repository", projectConfig.RepositoryUrl) + "\n"
 
+	gitProviderConfig := "/"
+	if projectConfig.GitProviderConfigId != nil {
+		gitProviderConfig = *projectConfig.GitProviderConfigId
+	}
+
+	output += getInfoLine("Git Provider ID", gitProviderConfig) + "\n"
+
 	if projectConfig.Default {
 		output += getInfoLine("Default", "Yes") + "\n"
 	}
