@@ -146,7 +146,13 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 			if len(gitProviderConfigs) == 1 {
 				gitProviderConfigId = gitProviderConfigs[0].Id
 			} else if len(gitProviderConfigs) > 1 {
-				gp := selection.GetGitProviderConfigFromPrompt(gitProviderConfigs, false, "Use")
+				gp := selection.GetGitProviderConfigFromPrompt(selection.GetGitProviderConfigParams{
+					GitProviderConfigs: gitProviderConfigs,
+					ActionVerb:         "Use",
+				})
+				if gp == nil {
+					return nil, common.ErrCtrlCAbort
+				}
 				gitProviderConfigId = gp.Id
 			} else {
 				gitProviderConfigId = ""
