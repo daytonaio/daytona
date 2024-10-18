@@ -77,6 +77,13 @@ func (s *InMemoryProjectConfigStore) processFilters(filter *config.ProjectConfig
 				}
 			}
 		}
+		if filter.GitProviderConfigId != nil {
+			for _, projectConfig := range filteredProjectConfigs {
+				if projectConfig.GitProviderConfigId != nil && *projectConfig.GitProviderConfigId != *filter.GitProviderConfigId {
+					delete(filteredProjectConfigs, projectConfig.Name)
+				}
+			}
+		}
 	}
 
 	for _, projectConfig := range filteredProjectConfigs {
