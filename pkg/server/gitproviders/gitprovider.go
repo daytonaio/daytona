@@ -19,8 +19,8 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 		return nil, "", err
 	}
 
-	var handleableProviders []string
-
+	var eligibleProvider gitprovider.GitProvider
+	
 	for _, p := range gitProviders {
 		gitProvider, err := s.GetGitProvider(p.Id)
 		if err != nil {
@@ -35,22 +35,12 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 			if err == nil {
 				return gitProvider, p.Id, nil
 			}
-			handleableProviders = append(handleableProviders, p.ProviderId)
+			eligibleProvider = gitProvider
 		}
 	}
 
-	if len(handleableProviders) > 0 {
-		providerId := handleableProviders[0]
-		gitProvider, err := s.newGitProvider(&gitprovider.GitProviderConfig{
-			ProviderId: providerId,
-			Id:         providerId,
-			Username:   "",
-			Token:      "",
-			BaseApiUrl: nil,
-		})
-		if err == nil {
-			return gitProvider, providerId, nil
-		}
+	if eligibleProvider != nil {
+		return eligibleProvider, "", nil
 	}
 
 	for _, p := range config.GetSupportedGitProviders() {
