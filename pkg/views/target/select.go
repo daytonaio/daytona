@@ -20,6 +20,7 @@ const NewTargetName = "+ New Target"
 type TargetView struct {
 	Name         string
 	Options      string
+	IsDefault    bool
 	ProviderInfo ProviderInfo
 }
 
@@ -29,7 +30,7 @@ type ProviderInfo struct {
 	Installed *bool
 }
 
-func GetTargetFromPrompt(targets []apiclient.ProviderTarget, activeProfileName string, providerViewList *[]provider.ProviderView, withNewTarget bool) (*TargetView, error) {
+func GetTargetFromPrompt(targets []apiclient.ProviderTarget, activeProfileName string, providerViewList *[]provider.ProviderView, withNewTarget bool, actionVerb string) (*TargetView, error) {
 	items := util.ArrayMap(targets, func(t apiclient.ProviderTarget) list.Item {
 		return item{
 			target: GetTargetViewFromTarget(t),
@@ -76,7 +77,7 @@ func GetTargetFromPrompt(targets []apiclient.ProviderTarget, activeProfileName s
 
 	l := views.GetStyledSelectList(items)
 	m := model{list: l}
-	m.list.Title = views.GetStyledMainTitle("Choose a Target")
+	m.list.Title = views.GetStyledMainTitle("Choose a Target To " + actionVerb)
 	m.footer = views.GetListFooter(activeProfileName, views.DefaultListFooterPadding)
 
 	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
@@ -93,8 +94,9 @@ func GetTargetFromPrompt(targets []apiclient.ProviderTarget, activeProfileName s
 
 func GetTargetViewFromTarget(target apiclient.ProviderTarget) TargetView {
 	return TargetView{
-		Name:    target.Name,
-		Options: target.Options,
+		Name:      target.Name,
+		Options:   target.Options,
+		IsDefault: target.IsDefault,
 		ProviderInfo: ProviderInfo{
 			Name:    target.ProviderInfo.Name,
 			Version: target.ProviderInfo.Version,

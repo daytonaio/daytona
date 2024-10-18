@@ -1522,7 +1522,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ProviderTarget"
+                            "$ref": "#/definitions/CreateProviderTargetDTO"
                         }
                     }
                 ],
@@ -1553,6 +1553,30 @@ const docTemplate = `{
                 "responses": {
                     "204": {
                         "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/target/{target}/set-default": {
+            "patch": {
+                "description": "Set target to default",
+                "tags": [
+                    "target"
+                ],
+                "summary": "Set target to default",
+                "operationId": "SetDefaultTarget",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target name",
+                        "name": "target",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
                     }
                 }
             }
@@ -2104,6 +2128,25 @@ const docTemplate = `{
             "properties": {
                 "repository": {
                     "$ref": "#/definitions/GitRepository"
+                }
+            }
+        },
+        "CreateProviderTargetDTO": {
+            "type": "object",
+            "required": [
+                "name",
+                "options",
+                "providerInfo"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "options": {
+                    "type": "string"
+                },
+                "providerInfo": {
+                    "$ref": "#/definitions/provider.ProviderInfo"
                 }
             }
         },
@@ -2680,11 +2723,15 @@ const docTemplate = `{
         "ProviderTarget": {
             "type": "object",
             "required": [
+                "isDefault",
                 "name",
                 "options",
                 "providerInfo"
             ],
             "properties": {
+                "isDefault": {
+                    "type": "boolean"
+                },
                 "name": {
                     "type": "string"
                 },

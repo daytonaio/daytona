@@ -6,6 +6,10 @@ options:
       shorthand: a
       default_value: "false"
       usage: Remove all Git providers
+    - name: "yes"
+      shorthand: "y"
+      default_value: "false"
+      usage: Confirm deletion without prompt
 inherited_options:
     - name: help
       default_value: "false"

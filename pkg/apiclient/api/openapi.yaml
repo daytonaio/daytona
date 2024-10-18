@@ -1079,7 +1079,7 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/ProviderTarget'
+              $ref: '#/components/schemas/CreateProviderTargetDTO'
         description: Target to set
         required: true
       responses:
@@ -1106,6 +1106,24 @@ paths:
           content: {}
           description: No Content
       summary: Remove a target
+      tags:
+      - target
+  /target/{target}/set-default:
+    patch:
+      description: Set target to default
+      operationId: SetDefaultTarget
+      parameters:
+      - description: Target name
+        in: path
+        name: target
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Set target to default
       tags:
       - target
   /workspace:
@@ -1616,6 +1634,26 @@ components:
           $ref: '#/components/schemas/GitRepository'
       required:
       - repository
+      type: object
+    CreateProviderTargetDTO:
+      example:
+        name: name
+        options: options
+        providerInfo:
+          name: name
+          label: label
+          version: version
+      properties:
+        name:
+          type: string
+        options:
+          type: string
+        providerInfo:
+          $ref: '#/components/schemas/provider.ProviderInfo'
+      required:
+      - name
+      - options
+      - providerInfo
       type: object
     CreateWorkspaceDTO:
       example:
@@ -2263,6 +2301,7 @@ components:
       type: object
     ProviderTarget:
       example:
+        isDefault: true
         name: name
         options: options
         providerInfo:
@@ -2270,6 +2309,8 @@ components:
           label: label
           version: version
       properties:
+        isDefault:
+          type: boolean
         name:
           type: string
         options:
@@ -2278,6 +2319,7 @@ components:
         providerInfo:
           $ref: '#/components/schemas/provider.ProviderInfo'
       required:
+      - isDefault
       - name
       - options
       - providerInfo

@@ -48,6 +48,7 @@ var CreateCmd = &cobra.Command{
 		var workspaceName string
 		var existingWorkspaceNames []string
 		var existingProjectConfigNames []string
+		promptUsingTUI := len(args) == 0
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
@@ -81,7 +82,7 @@ var CreateCmd = &cobra.Command{
 			existingWorkspaceNames = append(existingWorkspaceNames, workspaceInfo.Name)
 		}
 
-		if len(args) == 0 {
+		if promptUsingTUI {
 			err = processPrompting(ctx, apiClient, &workspaceName, &projects, existingWorkspaceNames)
 			if err != nil {
 				if common.IsCtrlCAbort(err) {
@@ -132,7 +133,14 @@ var CreateCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		target, err := workspace_util.GetTarget(ctx, apiClient, targetList, activeProfile.Name, targetNameFlag)
+		target, err := workspace_util.GetTarget(workspace_util.GetTargetConfig{
+			Ctx:               ctx,
+			ApiClient:         apiClient,
+			TargetList:        targetList,
+			ActiveProfileName: activeProfile.Name,
+			TargetNameFlag:    targetNameFlag,
+			PromptUsingTUI:    promptUsingTUI,
+		})
 		if err != nil {
 			return err
 		}
