@@ -5,6 +5,7 @@ package workspace
 
 import (
 	"context"
+	"strings"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
@@ -17,6 +18,8 @@ import (
 
 	"github.com/spf13/cobra"
 )
+
+var sshOptionsMap []string
 
 var SshCmd = &cobra.Command{
 	Use:     "ssh [WORKSPACE] [PROJECT] [CMD...]",
@@ -98,12 +101,24 @@ var SshCmd = &cobra.Command{
 			sshArgs = append(sshArgs, args[2:]...)
 		}
 
+		sshOptions := make(map[string]string)
+		for _, option := range sshOptionsMap {
+			parts := strings.SplitN(option, "=", 2)
+			if len(parts) == 2 {
+				key := strings.TrimSpace(parts[0])
+				value := strings.TrimSpace(parts[1])
+				sshOptions[key] = value
+			} else {
+				log.Warnf("Invalid SSH option format: %s", option)
+			}
+		}
+
 		gpgKey, err := GetGitProviderGpgKey(apiClient, ctx, providerConfigId)
 		if err != nil {
 			log.Warn(err)
 		}
 
-		return ide.OpenTerminalSsh(activeProfile, workspace.Id, projectName, gpgKey, sshArgs...)
+		return ide.OpenTerminalSsh(activeProfile, workspace.Id, projectName, gpgKey, sshOptions, sshArgs...)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) >= 2 {
@@ -119,4 +134,5 @@ var SshCmd = &cobra.Command{
 
 func init() {
 	SshCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Automatically confirm any prompts")
+	SshCmd.Flags().StringArrayVarP(&sshOptionsMap, "option", "o", []string{}, "Specify SSH options in KEY=VALUE format.")
 }
