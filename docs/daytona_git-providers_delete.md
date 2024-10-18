@@ -10,6 +10,7 @@ daytona git-providers delete [flags]
 
 ```
   -a, --all   Remove all Git providers
+  -y, --yes   Confirm deletion without prompt
 ```
 
 ### Options inherited from parent commands

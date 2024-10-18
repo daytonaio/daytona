@@ -38,7 +38,7 @@ type IWorkspaceService interface {
 }
 
 type targetStore interface {
-	Find(targetName string) (*provider.ProviderTarget, error)
+	Find(filter *provider.TargetFilter) (*provider.ProviderTarget, error)
 }
 
 type WorkspaceServiceConfig struct {

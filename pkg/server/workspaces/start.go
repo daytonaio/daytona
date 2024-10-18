@@ -24,7 +24,7 @@ func (s *WorkspaceService) StartWorkspace(ctx context.Context, workspaceId strin
 		return ErrWorkspaceNotFound
 	}
 
-	target, err := s.targetStore.Find(w.Target)
+	target, err := s.targetStore.Find(&provider.TargetFilter{Name: &w.Target})
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func (s *WorkspaceService) StartProject(ctx context.Context, workspaceId, projec
 		return ErrProjectNotFound
 	}
 
-	target, err := s.targetStore.Find(project.Target)
+	target, err := s.targetStore.Find(&provider.TargetFilter{Name: &w.Target})
 	if err != nil {
 		return err
 	}

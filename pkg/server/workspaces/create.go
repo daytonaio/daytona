@@ -132,7 +132,7 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 		return nil, err
 	}
 
-	target, err := s.targetStore.Find(w.Target)
+	target, err := s.targetStore.Find(&provider.TargetFilter{Name: &w.Target})
 	if err != nil {
 		return w, err
 	}

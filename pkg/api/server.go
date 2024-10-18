@@ -208,6 +208,7 @@ func (a *ApiServer) Start() error {
 	{
 		targetController.GET("/", target.ListTargets)
 		targetController.PUT("/", target.SetTarget)
+		targetController.PATCH("/:target/set-default", target.SetDefaultTarget)
 		targetController.DELETE("/:target", target.RemoveTarget)
 	}
 

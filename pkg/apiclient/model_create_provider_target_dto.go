@@ -16,67 +16,40 @@ import (
 	"fmt"
 )
 
-// checks if the ProviderTarget type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &ProviderTarget{}
+// checks if the CreateProviderTargetDTO type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &CreateProviderTargetDTO{}
 
-// ProviderTarget struct for ProviderTarget
-type ProviderTarget struct {
-	IsDefault bool   `json:"isDefault"`
-	Name      string `json:"name"`
-	// JSON encoded map of options
+// CreateProviderTargetDTO struct for CreateProviderTargetDTO
+type CreateProviderTargetDTO struct {
+	Name         string               `json:"name"`
 	Options      string               `json:"options"`
 	ProviderInfo ProviderProviderInfo `json:"providerInfo"`
 }
 
-type _ProviderTarget ProviderTarget
+type _CreateProviderTargetDTO CreateProviderTargetDTO
 
-// NewProviderTarget instantiates a new ProviderTarget object
+// NewCreateProviderTargetDTO instantiates a new CreateProviderTargetDTO object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProviderTarget(isDefault bool, name string, options string, providerInfo ProviderProviderInfo) *ProviderTarget {
-	this := ProviderTarget{}
-	this.IsDefault = isDefault
+func NewCreateProviderTargetDTO(name string, options string, providerInfo ProviderProviderInfo) *CreateProviderTargetDTO {
+	this := CreateProviderTargetDTO{}
 	this.Name = name
 	this.Options = options
 	this.ProviderInfo = providerInfo
 	return &this
 }
 
-// NewProviderTargetWithDefaults instantiates a new ProviderTarget object
+// NewCreateProviderTargetDTOWithDefaults instantiates a new CreateProviderTargetDTO object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewProviderTargetWithDefaults() *ProviderTarget {
-	this := ProviderTarget{}
+func NewCreateProviderTargetDTOWithDefaults() *CreateProviderTargetDTO {
+	this := CreateProviderTargetDTO{}
 	return &this
 }
 
-// GetIsDefault returns the IsDefault field value
-func (o *ProviderTarget) GetIsDefault() bool {
-	if o == nil {
-		var ret bool
-		return ret
-	}
-
-	return o.IsDefault
-}
-
-// GetIsDefaultOk returns a tuple with the IsDefault field value
-// and a boolean to check if the value has been set.
-func (o *ProviderTarget) GetIsDefaultOk() (*bool, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.IsDefault, true
-}
-
-// SetIsDefault sets field value
-func (o *ProviderTarget) SetIsDefault(v bool) {
-	o.IsDefault = v
-}
-
 // GetName returns the Name field value
-func (o *ProviderTarget) GetName() string {
+func (o *CreateProviderTargetDTO) GetName() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -87,7 +60,7 @@ func (o *ProviderTarget) GetName() string {
 
 // GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
-func (o *ProviderTarget) GetNameOk() (*string, bool) {
+func (o *CreateProviderTargetDTO) GetNameOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -95,12 +68,12 @@ func (o *ProviderTarget) GetNameOk() (*string, bool) {
 }
 
 // SetName sets field value
-func (o *ProviderTarget) SetName(v string) {
+func (o *CreateProviderTargetDTO) SetName(v string) {
 	o.Name = v
 }
 
 // GetOptions returns the Options field value
-func (o *ProviderTarget) GetOptions() string {
+func (o *CreateProviderTargetDTO) GetOptions() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -111,7 +84,7 @@ func (o *ProviderTarget) GetOptions() string {
 
 // GetOptionsOk returns a tuple with the Options field value
 // and a boolean to check if the value has been set.
-func (o *ProviderTarget) GetOptionsOk() (*string, bool) {
+func (o *CreateProviderTargetDTO) GetOptionsOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -119,12 +92,12 @@ func (o *ProviderTarget) GetOptionsOk() (*string, bool) {
 }
 
 // SetOptions sets field value
-func (o *ProviderTarget) SetOptions(v string) {
+func (o *CreateProviderTargetDTO) SetOptions(v string) {
 	o.Options = v
 }
 
 // GetProviderInfo returns the ProviderInfo field value
-func (o *ProviderTarget) GetProviderInfo() ProviderProviderInfo {
+func (o *CreateProviderTargetDTO) GetProviderInfo() ProviderProviderInfo {
 	if o == nil {
 		var ret ProviderProviderInfo
 		return ret
@@ -135,7 +108,7 @@ func (o *ProviderTarget) GetProviderInfo() ProviderProviderInfo {
 
 // GetProviderInfoOk returns a tuple with the ProviderInfo field value
 // and a boolean to check if the value has been set.
-func (o *ProviderTarget) GetProviderInfoOk() (*ProviderProviderInfo, bool) {
+func (o *CreateProviderTargetDTO) GetProviderInfoOk() (*ProviderProviderInfo, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -143,11 +116,11 @@ func (o *ProviderTarget) GetProviderInfoOk() (*ProviderProviderInfo, bool) {
 }
 
 // SetProviderInfo sets field value
-func (o *ProviderTarget) SetProviderInfo(v ProviderProviderInfo) {
+func (o *CreateProviderTargetDTO) SetProviderInfo(v ProviderProviderInfo) {
 	o.ProviderInfo = v
 }
 
-func (o ProviderTarget) MarshalJSON() ([]byte, error) {
+func (o CreateProviderTargetDTO) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -155,21 +128,19 @@ func (o ProviderTarget) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o ProviderTarget) ToMap() (map[string]interface{}, error) {
+func (o CreateProviderTargetDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["isDefault"] = o.IsDefault
 	toSerialize["name"] = o.Name
 	toSerialize["options"] = o.Options
 	toSerialize["providerInfo"] = o.ProviderInfo
 	return toSerialize, nil
 }
 
-func (o *ProviderTarget) UnmarshalJSON(data []byte) (err error) {
+func (o *CreateProviderTargetDTO) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"isDefault",
 		"name",
 		"options",
 		"providerInfo",
@@ -189,53 +160,53 @@ func (o *ProviderTarget) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varProviderTarget := _ProviderTarget{}
+	varCreateProviderTargetDTO := _CreateProviderTargetDTO{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varProviderTarget)
+	err = decoder.Decode(&varCreateProviderTargetDTO)
 
 	if err != nil {
 		return err
 	}
 
-	*o = ProviderTarget(varProviderTarget)
+	*o = CreateProviderTargetDTO(varCreateProviderTargetDTO)
 
 	return err
 }
 
-type NullableProviderTarget struct {
-	value *ProviderTarget
+type NullableCreateProviderTargetDTO struct {
+	value *CreateProviderTargetDTO
 	isSet bool
 }
 
-func (v NullableProviderTarget) Get() *ProviderTarget {
+func (v NullableCreateProviderTargetDTO) Get() *CreateProviderTargetDTO {
 	return v.value
 }
 
-func (v *NullableProviderTarget) Set(val *ProviderTarget) {
+func (v *NullableCreateProviderTargetDTO) Set(val *CreateProviderTargetDTO) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableProviderTarget) IsSet() bool {
+func (v NullableCreateProviderTargetDTO) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableProviderTarget) Unset() {
+func (v *NullableCreateProviderTargetDTO) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableProviderTarget(val *ProviderTarget) *NullableProviderTarget {
-	return &NullableProviderTarget{value: val, isSet: true}
+func NewNullableCreateProviderTargetDTO(val *CreateProviderTargetDTO) *NullableCreateProviderTargetDTO {
+	return &NullableCreateProviderTargetDTO{value: val, isSet: true}
 }
 
-func (v NullableProviderTarget) MarshalJSON() ([]byte, error) {
+func (v NullableCreateProviderTargetDTO) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableProviderTarget) UnmarshalJSON(src []byte) error {
+func (v *NullableCreateProviderTargetDTO) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

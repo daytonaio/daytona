@@ -129,6 +129,7 @@ Class | Method | HTTP request | Description
 *ServerAPI* | [**SetConfig**](docs/ServerAPI.md#setconfig) | **Post** /server/config | Set the server configuration
 *TargetAPI* | [**ListTargets**](docs/TargetAPI.md#listtargets) | **Get** /target | List targets
 *TargetAPI* | [**RemoveTarget**](docs/TargetAPI.md#removetarget) | **Delete** /target/{target} | Remove a target
+*TargetAPI* | [**SetDefaultTarget**](docs/TargetAPI.md#setdefaulttarget) | **Patch** /target/{target}/set-default | Set target to default
 *TargetAPI* | [**SetTarget**](docs/TargetAPI.md#settarget) | **Put** /target | Set a target
 *WorkspaceAPI* | [**CreateWorkspace**](docs/WorkspaceAPI.md#createworkspace) | **Post** /workspace | Create a workspace
 *WorkspaceAPI* | [**GetWorkspace**](docs/WorkspaceAPI.md#getworkspace) | **Get** /workspace/{workspaceId} | Get workspace info
@@ -157,6 +158,7 @@ Class | Method | HTTP request | Description
  - [CreateProjectConfigDTO](docs/CreateProjectConfigDTO.md)
  - [CreateProjectDTO](docs/CreateProjectDTO.md)
  - [CreateProjectSourceDTO](docs/CreateProjectSourceDTO.md)
+ - [CreateProviderTargetDTO](docs/CreateProviderTargetDTO.md)
  - [CreateWorkspaceDTO](docs/CreateWorkspaceDTO.md)
  - [DevcontainerConfig](docs/DevcontainerConfig.md)
  - [FRPSConfig](docs/FRPSConfig.md)

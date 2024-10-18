@@ -5,18 +5,20 @@ package provider
 
 import "errors"
 
-type Store interface {
+type TargetFilter struct {
+	Name    *string
+	Default *bool
 }
 
 type TargetStore interface {
-	List() ([]*ProviderTarget, error)
-	Find(targetName string) (*ProviderTarget, error)
+	List(filter *TargetFilter) ([]*ProviderTarget, error)
+	Find(filter *TargetFilter) (*ProviderTarget, error)
 	Save(target *ProviderTarget) error
 	Delete(target *ProviderTarget) error
 }
 
 var (
-	ErrTargetNotFound = errors.New("provider not found")
+	ErrTargetNotFound = errors.New("target not found")
 )
 
 func IsTargetNotFound(err error) bool {

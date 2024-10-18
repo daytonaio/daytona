@@ -52,7 +52,7 @@ var targetRemoveCmd = &cobra.Command{
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
-			selectedTarget, err := target.GetTargetFromPrompt(targetList, activeProfile.Name, nil, false)
+			selectedTarget, err := target.GetTargetFromPrompt(targetList, activeProfile.Name, nil, false, "Remove")
 			if err != nil {
 				if common.IsCtrlCAbort(err) {
 					return nil

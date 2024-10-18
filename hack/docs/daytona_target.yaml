@@ -9,3 +9,4 @@ see_also:
     - daytona target list - List targets
     - daytona target remove - Remove target
     - daytona target set - Set provider target
+    - daytona target set-default - Set target to be used by default

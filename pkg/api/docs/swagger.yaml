@@ -185,6 +185,19 @@ definitions:
     required:
     - repository
     type: object
+  CreateProviderTargetDTO:
+    properties:
+      name:
+        type: string
+      options:
+        type: string
+      providerInfo:
+        $ref: '#/definitions/provider.ProviderInfo'
+    required:
+    - name
+    - options
+    - providerInfo
+    type: object
   CreateWorkspaceDTO:
     properties:
       id:
@@ -578,6 +591,8 @@ definitions:
     type: object
   ProviderTarget:
     properties:
+      isDefault:
+        type: boolean
       name:
         type: string
       options:
@@ -586,6 +601,7 @@ definitions:
       providerInfo:
         $ref: '#/definitions/provider.ProviderInfo'
     required:
+    - isDefault
     - name
     - options
     - providerInfo
@@ -1883,7 +1899,7 @@ paths:
         name: target
         required: true
         schema:
-          $ref: '#/definitions/ProviderTarget'
+          $ref: '#/definitions/CreateProviderTargetDTO'
       responses:
         "201":
           description: Created
@@ -1904,6 +1920,22 @@ paths:
         "204":
           description: No Content
       summary: Remove a target
+      tags:
+      - target
+  /target/{target}/set-default:
+    patch:
+      description: Set target to default
+      operationId: SetDefaultTarget
+      parameters:
+      - description: Target name
+        in: path
+        name: target
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Set target to default
       tags:
       - target
   /workspace:
