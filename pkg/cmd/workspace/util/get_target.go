@@ -12,7 +12,6 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/provider"
-	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	provider_view "github.com/daytonaio/daytona/pkg/views/provider"
 	target_view "github.com/daytonaio/daytona/pkg/views/target"
@@ -74,11 +73,7 @@ func GetTarget(config GetTargetConfig) (*target_view.TargetView, error) {
 
 	selectedTarget, err := target_view.GetTargetFromPrompt(config.TargetList, config.ActiveProfileName, &providerViewList, false, "Use")
 	if err != nil {
-		if common.IsCtrlCAbort(err) {
-			return nil, nil
-		} else {
-			return nil, err
-		}
+		return nil, err
 	}
 
 	if selectedTarget.ProviderInfo.Installed == nil || *selectedTarget.ProviderInfo.Installed || selectedTarget == nil {

@@ -43,17 +43,12 @@ func getRowFromRowData(target *apiclient.ProviderTarget) []string {
 
 	data.Target = target.Name
 	data.Provider = target.ProviderInfo.Name
-	data.IsDefault = ""
 	data.Options = target.Options
 
 	if target.IsDefault {
-		data.IsDefault = "1"
-	}
-
-	if data.IsDefault == "" {
-		isDefault = views.InactiveStyle.Render("/")
-	} else {
 		isDefault = views.ActiveStyle.Render("Yes")
+	} else {
+		isDefault = views.InactiveStyle.Render("/")
 	}
 
 	row := []string{

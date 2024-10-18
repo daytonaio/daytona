@@ -165,7 +165,7 @@ var TargetSetCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		views.RenderInfoMessage("Target set successfully")
+		views.RenderInfoMessage("Target set successfully and will be used by default")
 		return nil
 	},
 }

@@ -142,6 +142,9 @@ var CreateCmd = &cobra.Command{
 			PromptUsingTUI:    promptUsingTUI,
 		})
 		if err != nil {
+			if common.IsCtrlCAbort(err) {
+				return nil
+			}
 			return err
 		}
 
