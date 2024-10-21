@@ -21,8 +21,11 @@ func OpenTerminalSsh(activeProfile config.Profile, workspaceId string, projectNa
 	parsedOptions := make(map[string]string)
 	for _, option := range sshOptions {
 		parts := strings.SplitN(option, "=", 2)
-		if len(parts) != 2 {
-			return fmt.Errorf("bad configuration option: %s, must be KEY=VALUE", option)
+		if len(parts) == 1 {
+			return fmt.Errorf("no argument after keyword %q", parts[0])
+		}
+		if len(parts) != 2 || strings.Count(option, "=") > 1 {
+			return fmt.Errorf("bad configuration option: %s", option)
 		}
 		parsedOptions[strings.TrimSpace(parts[0])] = strings.TrimSpace(parts[1])
 	}
