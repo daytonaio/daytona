@@ -113,7 +113,8 @@ func Execute() error {
 }
 
 func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command, flags []string, isCompletion bool, err error) {
-	if len(args) > 0 && args[0] == "__complete" {
+	completionCommands := []string{"__complete", "__completeNoDesc", "__completeNoDescCmd", "__completeCmd"}
+	if len(args) > 0 && slices.Contains(completionCommands, args[0]) {
 		return rootCmd, flags, true, nil
 	}
 
