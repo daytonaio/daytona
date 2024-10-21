@@ -17,7 +17,7 @@ type Provider interface {
 	GetInfo() (ProviderInfo, error)
 
 	GetTargetManifest() (*ProviderTargetManifest, error)
-	GetDefaultTargets() (*[]ProviderTarget, error)
+	GetPresetTargets() (*[]ProviderTarget, error)
 
 	CreateWorkspace(*WorkspaceRequest) (*util.Empty, error)
 	StartWorkspace(*WorkspaceRequest) (*util.Empty, error)

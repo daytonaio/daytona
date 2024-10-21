@@ -24,7 +24,7 @@ import (
 func ListTargets(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
-	targets, err := server.ProviderTargetService.List()
+	targets, err := server.ProviderTargetService.List(nil)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list targets: %w", err))
 		return

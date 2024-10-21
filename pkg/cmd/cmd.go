@@ -153,6 +153,7 @@ func ensureProfiles(cmd *cobra.Command) error {
 		"daytona",
 		"daytona help",
 		"daytona docs",
+		"daytona generate-docs",
 		"daytona version",
 		"daytona profile add",
 		"daytona serve",

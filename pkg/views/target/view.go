@@ -16,7 +16,15 @@ type item struct {
 	target TargetView
 }
 
-func (i item) Title() string { return i.target.Name }
+func (i item) Title() string {
+	title := i.target.Name
+
+	if i.target.IsDefault {
+		title += " (default)"
+	}
+
+	return title
+}
 func (i item) Description() string {
 	desc := i.target.ProviderInfo.Name
 	if i.target.ProviderInfo.Installed != nil {

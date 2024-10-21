@@ -18,4 +18,5 @@ func init() {
 	TargetCmd.AddCommand(targetListCmd)
 	TargetCmd.AddCommand(TargetSetCmd)
 	TargetCmd.AddCommand(targetRemoveCmd)
+	TargetCmd.AddCommand(targetSetDefaultCmd)
 }

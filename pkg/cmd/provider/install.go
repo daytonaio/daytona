@@ -149,7 +149,7 @@ var providerInstallCmd = &cobra.Command{
 				return err
 			}
 
-			targetData := apiclient.ProviderTarget{
+			targetData := apiclient.CreateProviderTargetDTO{
 				Name:    targetToSet.Name,
 				Options: targetToSet.Options,
 				ProviderInfo: apiclient.ProviderProviderInfo{

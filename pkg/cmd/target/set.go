@@ -116,7 +116,7 @@ var TargetSetCmd = &cobra.Command{
 		var selectedTarget *target_view.TargetView
 
 		if !isNewProvider || len(filteredTargets) > 0 {
-			selectedTarget, err = target.GetTargetFromPrompt(filteredTargets, activeProfile.Name, nil, true)
+			selectedTarget, err = target.GetTargetFromPrompt(filteredTargets, activeProfile.Name, nil, true, "Set")
 			if err != nil {
 				if common.IsCtrlCAbort(err) {
 					return nil
@@ -151,7 +151,7 @@ var TargetSetCmd = &cobra.Command{
 			return err
 		}
 
-		targetData := apiclient.ProviderTarget{
+		targetData := apiclient.CreateProviderTargetDTO{
 			Name:    selectedTarget.Name,
 			Options: selectedTarget.Options,
 			ProviderInfo: apiclient.ProviderProviderInfo{
@@ -165,7 +165,7 @@ var TargetSetCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		views.RenderInfoMessage("Target set successfully")
+		views.RenderInfoMessage("Target set successfully and will be used by default")
 		return nil
 	},
 }

@@ -7,6 +7,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	log "github.com/sirupsen/logrus"
 )
@@ -17,7 +18,7 @@ func (s *WorkspaceService) StopWorkspace(ctx context.Context, workspaceId string
 		return ErrWorkspaceNotFound
 	}
 
-	target, err := s.targetStore.Find(workspace.Target)
+	target, err := s.targetStore.Find(&provider.TargetFilter{Name: &workspace.Target})
 	if err != nil {
 		return err
 	}
@@ -70,7 +71,7 @@ func (s *WorkspaceService) StopProject(ctx context.Context, workspaceId, project
 		return ErrProjectNotFound
 	}
 
-	target, err := s.targetStore.Find(w.Target)
+	target, err := s.targetStore.Find(&provider.TargetFilter{Name: &w.Target})
 	if err != nil {
 		return err
 	}

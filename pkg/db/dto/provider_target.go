@@ -11,6 +11,7 @@ type ProviderTargetDTO struct {
 	ProviderLabel   *string `json:"providerLabel,omitempty"`
 	ProviderVersion string  `json:"providerVersion"`
 	Options         string  `json:"options"`
+	IsDefault       bool    `json:"isDefault"`
 }
 
 func ToProviderTargetDTO(providerTarget *provider.ProviderTarget) ProviderTargetDTO {
@@ -20,6 +21,7 @@ func ToProviderTargetDTO(providerTarget *provider.ProviderTarget) ProviderTarget
 		ProviderLabel:   providerTarget.ProviderInfo.Label,
 		ProviderVersion: providerTarget.ProviderInfo.Version,
 		Options:         providerTarget.Options,
+		IsDefault:       providerTarget.IsDefault,
 	}
 }
 
@@ -31,6 +33,7 @@ func ToProviderTarget(providerTargetDTO ProviderTargetDTO) *provider.ProviderTar
 			Label:   providerTargetDTO.ProviderLabel,
 			Version: providerTargetDTO.ProviderVersion,
 		},
-		Options: providerTargetDTO.Options,
+		Options:   providerTargetDTO.Options,
+		IsDefault: providerTargetDTO.IsDefault,
 	}
 }
