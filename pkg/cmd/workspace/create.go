@@ -530,7 +530,7 @@ func dedupProjectNames(projects *[]apiclient.CreateProjectDTO) {
 }
 
 func GetGitProviderGpgKey(apiClient *apiclient.APIClient, ctx context.Context, providerConfigId *string) (string, error) {
-	if providerConfigId == nil {
+	if providerConfigId == nil || *providerConfigId == "" {
 		return "", nil
 	}
 
