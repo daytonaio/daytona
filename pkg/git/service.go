@@ -100,18 +100,19 @@ func (s *Service) CloneRepository(repo *gitprovider.GitRepository, auth *http.Ba
 }
 
 func (s *Service) CloneRepositoryCmd(repo *gitprovider.GitRepository, auth *http.BasicAuth) []string {
-	branch := fmt.Sprintf("\"%s\"", repo.Branch)
-	cloneCmd := []string{"git", "clone", "--single-branch", "--branch", branch}
+	cloneCmd := []string{"git", "clone", "--single-branch", "--branch", fmt.Sprintf("\"%s\"", repo.Branch)}
+	cloneUrl := repo.Url
 
-	if auth != nil {
-		repoUrl := strings.TrimPrefix(repo.Url, "https://")
-		repoUrl = strings.TrimPrefix(repoUrl, "http://")
-		cloneCmd = append(cloneCmd, fmt.Sprintf("https://%s:%s@%s", auth.Username, auth.Password, repoUrl))
-	} else {
-		cloneCmd = append(cloneCmd, repo.Url)
+	// Default to https protocol if not specified
+	if !strings.Contains(cloneUrl, "://") {
+		cloneUrl = fmt.Sprintf("https://%s", cloneUrl)
 	}
 
-	cloneCmd = append(cloneCmd, s.ProjectDir)
+	if auth != nil {
+		cloneUrl = fmt.Sprintf("%s://%s:%s@%s", strings.Split(cloneUrl, "://")[0], auth.Username, auth.Password, strings.SplitN(cloneUrl, "://", 2)[1])
+	}
+
+	cloneCmd = append(cloneCmd, cloneUrl, s.ProjectDir)
 
 	if repo.Target == gitprovider.CloneTargetCommit {
 		cloneCmd = append(cloneCmd, "&&", "cd", s.ProjectDir)
