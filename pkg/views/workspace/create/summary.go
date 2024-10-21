@@ -60,7 +60,7 @@ func RunSubmissionForm(config SubmissionFormConfig) error {
 
 	m := NewSummaryModel(config)
 
-	if _, err := tea.NewProgram(m).Run(); err != nil {
+	if _, err := tea.NewProgram(m, tea.WithAltScreen()).Run(); err != nil {
 		return err
 	}
 

@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -114,7 +115,7 @@ func GetRepositoryFromUrlInput(multiProject bool, projectOrder int, apiClient *a
 		WithShowHelp(false).
 		WithShowErrors(true)
 
-	err := m.form.Run()
+	err := m.form.WithProgramOptions(tea.WithAltScreen()).Run()
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +145,7 @@ func RunAddMoreProjectsForm() (bool, error) {
 		WithShowErrors(true).
 		WithTheme(views.GetCustomTheme())
 
-	err := m.form.Run()
+	err := m.form.WithProgramOptions(tea.WithAltScreen()).Run()
 	if err != nil {
 		return false, err
 	}
