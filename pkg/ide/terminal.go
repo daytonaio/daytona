@@ -13,7 +13,6 @@ import (
 )
 
 func OpenTerminalSsh(activeProfile config.Profile, workspaceId string, projectName string, gpgKey string, sshOptions []string, args ...string) error {
-
 	if err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName, gpgKey); err != nil {
 		return err
 	}
