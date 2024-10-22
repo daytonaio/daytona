@@ -23,7 +23,7 @@ const (
 	DEVCONTAINER_FILEPATH = ".devcontainer/devcontainer.json"
 )
 
-var configurationHelpLine = lipgloss.NewStyle().Foreground(views.Gray).Render("enter: next  f10: advanced configuration")
+var HelpStyle = lipgloss.NewStyle().Foreground(views.Gray)
 
 type ProjectConfigurationData struct {
 	BuildChoice          string

@@ -9,6 +9,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
@@ -40,6 +41,7 @@ type SummaryModel struct {
 	projectList []apiclient.CreateProjectDTO
 	defaults    *views_util.ProjectConfigDefaults
 	nameLabel   string
+	viewport    viewport.Model
 }
 
 type SubmissionFormConfig struct {
@@ -87,14 +89,6 @@ func RunSubmissionForm(config SubmissionFormConfig) error {
 
 func RenderSummary(name string, projectList []apiclient.CreateProjectDTO, defaults *views_util.ProjectConfigDefaults, nameLabel string) (string, error) {
 	var output string
-	if name == "" {
-		output = views.GetStyledMainTitle("SUMMARY")
-	} else {
-		output = views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - %s %s", nameLabel, name))
-	}
-
-	output += "\n\n"
-
 	for i := range projectList {
 		if len(projectList) == 1 {
 			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render("Project"), (projectList[i].Source.Repository.Url))
@@ -192,6 +186,11 @@ func NewSummaryModel(config SubmissionFormConfig) SummaryModel {
 		),
 	).WithShowHelp(false).WithTheme(views.GetCustomTheme())
 
+	content, _ := RenderSummary(m.name, m.projectList, m.defaults, m.nameLabel)
+
+	m.viewport = viewport.New(80, 13)
+	m.viewport.SetContent(content)
+
 	return m
 }
 
@@ -212,6 +211,10 @@ func (m SummaryModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.form.State = huh.StateCompleted
 			configureCheck = true
 			return m, tea.Quit
+		case "up":
+			m.viewport.LineUp(1) // Scroll up
+		case "down":
+			m.viewport.LineDown(1) // Scroll down
 		}
 	}
 
@@ -238,15 +241,23 @@ func (m SummaryModel) View() string {
 		return ""
 	}
 
-	view := m.form.WithHeight(5).View() + "\n" + configurationHelpLine
+	helpLine := "enter: next • f10: advanced configuration"
 
-	if len(m.projectList) > 1 || len(m.projectList) == 1 && ProjectsConfigurationChanged {
+	if len(m.projectList) > 1 || (len(m.projectList) == 1 && ProjectsConfigurationChanged) {
+		helpLine += "\n" + "↑ up • ↓ down"
 		summary, err := RenderSummary(m.name, m.projectList, m.defaults, m.nameLabel)
 		if err != nil {
 			log.Fatal(err)
 		}
-		view = views.GetBorderedMessage(summary) + "\n" + view
+		var title string
+		if m.name == "" {
+			title = views.GetStyledMainTitle("SUMMARY")
+		} else {
+			title = views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - %s %s", m.nameLabel, m.name))
+		}
+		m.viewport.SetContent(summary)
+		return title + views.GetBorderedMessage(m.viewport.View()) + "\n" + m.form.WithHeight(5).View() + "\n" + HelpStyle.Render(helpLine)
 	}
 
-	return view
+	return m.form.WithHeight(5).View() + "\n" + HelpStyle.Render(helpLine)
 }
