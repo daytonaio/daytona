@@ -18,6 +18,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var sshOptions []string
+
 var SshCmd = &cobra.Command{
 	Use:     "ssh [WORKSPACE] [PROJECT] [CMD...]",
 	Short:   "SSH into a project using the terminal",
@@ -103,7 +105,7 @@ var SshCmd = &cobra.Command{
 			log.Warn(err)
 		}
 
-		return ide.OpenTerminalSsh(activeProfile, workspace.Id, projectName, gpgKey, sshArgs...)
+		return ide.OpenTerminalSsh(activeProfile, workspace.Id, projectName, gpgKey, sshOptions, sshArgs...)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) >= 2 {
@@ -119,4 +121,5 @@ var SshCmd = &cobra.Command{
 
 func init() {
 	SshCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Automatically confirm any prompts")
+	SshCmd.Flags().StringArrayVarP(&sshOptions, "option", "o", []string{}, "Specify SSH options in KEY=VALUE format.")
 }
