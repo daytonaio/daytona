@@ -15,6 +15,7 @@ import (
 type Provider interface {
 	Initialize(InitializeProviderRequest) (*util.Empty, error)
 	GetInfo() (ProviderInfo, error)
+	CheckRequirements() ([]RequirementStatus, error)
 
 	GetTargetManifest() (*ProviderTargetManifest, error)
 	GetDefaultTargets() (*[]ProviderTarget, error)
