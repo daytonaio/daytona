@@ -4,7 +4,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -94,13 +93,6 @@ func Execute() error {
 		return cmd.Help()
 	}
 
-	if !isCompletion {
-		err = ensureProfiles(cmd)
-		if err != nil {
-			return err
-		}
-	}
-
 	err = rootCmd.Execute()
 
 	endTime := time.Now()
@@ -155,38 +147,6 @@ func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command
 	}
 
 	return currentCmd, flags, false, nil
-}
-
-func ensureProfiles(cmd *cobra.Command) error {
-	exemptions := []string{
-		"daytona",
-		"daytona autocomplete",
-		"daytona help",
-		"daytona docs",
-		"daytona generate-docs",
-		"daytona version",
-		"daytona profile add",
-		"daytona serve",
-		"daytona server",
-		"daytona ide",
-		"daytona telemetry enable",
-		"daytona telemetry disable",
-	}
-
-	if slices.Contains(exemptions, cmd.CommandPath()) {
-		return nil
-	}
-
-	c, err := config.GetConfig()
-	if err != nil {
-		return err
-	}
-
-	if len(c.Profiles) == 0 {
-		return errors.New("no profiles found. Run `daytona serve` to create a default profile or `daytona profile add` to connect to a remote server.")
-	}
-
-	return nil
 }
 
 func SetupRootCommand(cmd *cobra.Command) {

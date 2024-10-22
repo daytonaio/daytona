@@ -23,6 +23,10 @@ var profileListCmd = &cobra.Command{
 			return err
 		}
 
+		if len(c.Profiles) == 0 {
+			return config.ErrNoProfilesFound
+		}
+
 		if format.FormatFlag != "" {
 			formattedData := format.NewFormatter(c.Profiles)
 			formattedData.Print()
