@@ -136,9 +136,6 @@ var CodeCmd = &cobra.Command{
 		return openIDE(ideId, activeProfile, workspaceId, projectName, providerMetadata, yesFlag, gpgKey)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		if len(args) >= 2 {
-			return nil, cobra.ShellCompDirectiveNoFileComp
-		}
 		if len(args) == 1 {
 			return getProjectNameCompletions(cmd, args, toComplete)
 		}

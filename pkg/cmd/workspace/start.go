@@ -150,10 +150,6 @@ var StartCmd = &cobra.Command{
 		return nil
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		if len(args) != 0 {
-			return nil, cobra.ShellCompDirectiveNoFileComp
-		}
-
 		return getAllWorkspacesByState(WORKSPACE_STATUS_STOPPED)
 	},
 }
@@ -248,12 +244,15 @@ func getAllWorkspacesByState(state WorkspaceState) ([]string, cobra.ShellCompDir
 
 	var choices []string
 	for _, workspace := range workspaceList {
-		for _, project := range workspace.Info.Projects {
-			if state == WORKSPACE_STATUS_RUNNING && project.IsRunning {
+		for _, project := range workspace.Projects {
+			if project.State == nil {
+				continue
+			}
+			if state == WORKSPACE_STATUS_RUNNING && project.State.Uptime != 0 {
 				choices = append(choices, workspace.Name)
 				break
 			}
-			if state == WORKSPACE_STATUS_STOPPED && !project.IsRunning {
+			if state == WORKSPACE_STATUS_STOPPED && project.State.Uptime == 0 {
 				choices = append(choices, workspace.Name)
 				break
 			}
