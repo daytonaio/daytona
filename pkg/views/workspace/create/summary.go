@@ -259,14 +259,13 @@ func (m SummaryModel) View() string {
 	helpLine := "enter: next • f10: advanced configuration"
 
 	if len(m.projectList) > 1 || ProjectsConfigurationChanged {
-		helpLine += "\n↑ up • ↓ down"
-		return renderSummaryView(m, helpLine)
+		return renderSummaryView(m) + "\n" + HelpStyle.Render(helpLine)
 	}
 
 	return m.form.WithHeight(5).View() + "\n" + HelpStyle.Render(helpLine)
 }
 
-func renderSummaryView(m SummaryModel, helpLine string) string {
+func renderSummaryView(m SummaryModel) string {
 	title := views.GetStyledMainTitle("SUMMARY")
 	if m.name != "" {
 		title = views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - %s %s", m.nameLabel, m.name))
@@ -280,7 +279,6 @@ func renderSummaryView(m SummaryModel, helpLine string) string {
 	m.viewport.SetContent(summary)
 
 	return title +
-		views.GetBorderedMessage(m.viewport.View()) + "\n" +
-		m.form.WithHeight(5).View() + "\n" +
-		HelpStyle.Render(helpLine)
+		views.GetBorderedMessage(m.viewport.View()) + HelpStyle.Render("  ↑ up • ↓ down") + "\n" +
+		m.form.WithHeight(5).View()
 }
