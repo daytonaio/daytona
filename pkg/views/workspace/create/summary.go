@@ -36,6 +36,7 @@ type SummaryModel struct {
 	styles      *Styles
 	form        *huh.Form
 	width       int
+	height      int
 	quitting    bool
 	name        string
 	projectList []apiclient.CreateProjectDTO
@@ -151,8 +152,20 @@ func projectDetailOutput(projectDetailKey ProjectDetail, projectDetailValue stri
 	return fmt.Sprintf("\t%s%-*s%s", lipgloss.NewStyle().Foreground(views.Green).Render(string(projectDetailKey)), DEFAULT_PADDING-len(string(projectDetailKey)), EMPTY_STRING, projectDetailValue)
 }
 
+func calculateViewportSize(content string) (width, height int) {
+	lines := strings.Split(content, "\n")
+	maxWidth := 0
+
+	for _, line := range lines {
+		if len(line) > maxWidth {
+			maxWidth = len(line)
+		}
+	}
+	return maxWidth, len(lines)
+}
+
 func NewSummaryModel(config SubmissionFormConfig) SummaryModel {
-	m := SummaryModel{width: maxWidth}
+	m := SummaryModel{}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
 	m.name = *config.ChosenName
@@ -188,7 +201,9 @@ func NewSummaryModel(config SubmissionFormConfig) SummaryModel {
 
 	content, _ := RenderSummary(m.name, m.projectList, m.defaults, m.nameLabel)
 
-	m.viewport = viewport.New(80, 13)
+	// Dynamically calculate viewport size
+	m.width, m.height = calculateViewportSize(content)
+	m.viewport = viewport.New(m.width, m.height)
 	m.viewport.SetContent(content)
 
 	return m
