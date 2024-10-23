@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
+	"slices"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/viewport"
@@ -152,22 +154,17 @@ func projectDetailOutput(projectDetailKey ProjectDetail, projectDetailValue stri
 	return fmt.Sprintf("\t%s%-*s%s", lipgloss.NewStyle().Foreground(views.Green).Render(string(projectDetailKey)), DEFAULT_PADDING-len(string(projectDetailKey)), EMPTY_STRING, projectDetailValue)
 }
 
-func calculateViewportSize(content string) (width, height int) {
+func calculateViewportSize(content string, terminalHeight int) (width, height int) {
 	lines := strings.Split(content, "\n")
-	maxWidth := 0
+	maxWidth := slices.MaxFunc(lines, func(a, b string) int {
+		return len(a) - len(b)
+	})
 
-	for _, line := range lines {
-		if len(line) > maxWidth {
-			maxWidth = len(line)
-		}
-	}
+	maxHeight := terminalHeight
 
-	height = len(lines)
-	if height > 25 {
-		height = 25
-	}
+	height = int(math.Min(float64(len(lines)), float64(maxHeight)))
 
-	return maxWidth, height
+	return len(maxWidth), height
 }
 
 func NewSummaryModel(config SubmissionFormConfig) SummaryModel {
@@ -208,7 +205,7 @@ func NewSummaryModel(config SubmissionFormConfig) SummaryModel {
 	content, _ := RenderSummary(m.name, m.projectList, m.defaults, m.nameLabel)
 
 	// Dynamically calculate viewport size
-	m.width, m.height = calculateViewportSize(content)
+	m.width, m.height = calculateViewportSize(content, views_util.GetTerminalHeight())
 	m.viewport = viewport.New(m.width, m.height)
 	m.viewport.SetContent(content)
 
@@ -237,6 +234,10 @@ func (m SummaryModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "down":
 			m.viewport.LineDown(1) // Scroll down
 		}
+	case tea.WindowSizeMsg:
+		m.viewport.Height = max(1, min(m.height, msg.Height-15))
+		m.viewport.Width = max(20, min(m.width, msg.Width-50))
+
 	}
 
 	var cmds []tea.Cmd
@@ -282,12 +283,7 @@ func renderSummaryView(m SummaryModel) string {
 		log.Fatal(err)
 	}
 	m.viewport.SetContent(summary)
-	if m.viewport.Height == 25 {
-		return title +
-			views.GetBorderedMessage(m.viewport.View()) + HelpStyle.Render("  ↑ up • ↓ down") + "\n" +
-			m.form.WithHeight(5).View()
-	}
 	return title +
-		views.GetBorderedMessage(m.viewport.View()) + "\n" +
+		views.GetBorderedMessage(m.viewport.View()) + HelpStyle.Render("↑ up • ↓ down") +
 		m.form.WithHeight(5).View()
 }
