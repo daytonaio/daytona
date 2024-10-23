@@ -114,7 +114,7 @@ func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command
 	currentCmd := rootCmd
 
 	// Filter flags from args
-	sanitzedArgs := []string{}
+	sanitizedArgs := []string{}
 	for i := 0; i < len(args); i++ {
 		if strings.HasPrefix(args[i], "-") {
 			flags = append(flags, args[i])
@@ -123,11 +123,11 @@ func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command
 			}
 			continue
 		}
-		sanitzedArgs = append(sanitzedArgs, args[i])
+		sanitizedArgs = append(sanitizedArgs, args[i])
 	}
 
-	for len(sanitzedArgs) > 0 {
-		subCmd, subArgs, err := currentCmd.Find(sanitzedArgs)
+	for len(sanitizedArgs) > 0 {
+		subCmd, subArgs, err := currentCmd.Find(sanitizedArgs)
 		if err != nil {
 			return currentCmd, flags, false, err
 		}
@@ -137,16 +137,10 @@ func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command
 		}
 
 		currentCmd = subCmd
-		sanitzedArgs = subArgs
+		sanitizedArgs = subArgs
 	}
 
-	if len(sanitzedArgs) > 0 {
-		if err := currentCmd.ValidateArgs(sanitzedArgs); err != nil {
-			return currentCmd, flags, false, err
-		}
-	}
-
-	return currentCmd, flags, false, nil
+	return currentCmd, flags, false, currentCmd.ValidateArgs(sanitizedArgs)
 }
 
 func SetupRootCommand(cmd *cobra.Command) {
