@@ -161,7 +161,13 @@ func calculateViewportSize(content string) (width, height int) {
 			maxWidth = len(line)
 		}
 	}
-	return maxWidth, len(lines)
+
+	height = len(lines)
+	if height > 25 {
+		height = 25
+	}
+
+	return maxWidth, height
 }
 
 func NewSummaryModel(config SubmissionFormConfig) SummaryModel {
@@ -275,10 +281,13 @@ func renderSummaryView(m SummaryModel) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	m.viewport.SetContent(summary)
-
+	if m.viewport.Height == 25 {
+		return title +
+			views.GetBorderedMessage(m.viewport.View()) + HelpStyle.Render("  ↑ up • ↓ down") + "\n" +
+			m.form.WithHeight(5).View()
+	}
 	return title +
-		views.GetBorderedMessage(m.viewport.View()) + HelpStyle.Render("  ↑ up • ↓ down") + "\n" +
+		views.GetBorderedMessage(m.viewport.View()) + "\n" +
 		m.form.WithHeight(5).View()
 }
