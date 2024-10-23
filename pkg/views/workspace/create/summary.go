@@ -241,25 +241,14 @@ func (m SummaryModel) View() string {
 		return ""
 	}
 
-	helpLine := buildHelpLine(m)
+	helpLine := "enter: next • f10: advanced configuration"
 
-	if shouldDisplaySummary(m) {
+	if len(m.projectList) > 1 || ProjectsConfigurationChanged {
+		helpLine += "\n↑ up • ↓ down"
 		return renderSummaryView(m, helpLine)
 	}
 
-	return renderSimpleView(m, helpLine)
-}
-
-func buildHelpLine(m SummaryModel) string {
-	helpLine := "enter: next • f10: advanced configuration"
-	if len(m.projectList) > 1 || ProjectsConfigurationChanged {
-		helpLine += "\n↑ up • ↓ down"
-	}
-	return helpLine
-}
-
-func shouldDisplaySummary(m SummaryModel) bool {
-	return len(m.projectList) > 1 || ProjectsConfigurationChanged
+	return m.form.WithHeight(5).View() + "\n" + HelpStyle.Render(helpLine)
 }
 
 func renderSummaryView(m SummaryModel, helpLine string) string {
@@ -279,8 +268,4 @@ func renderSummaryView(m SummaryModel, helpLine string) string {
 		views.GetBorderedMessage(m.viewport.View()) + "\n" +
 		m.form.WithHeight(5).View() + "\n" +
 		HelpStyle.Render(helpLine)
-}
-
-func renderSimpleView(m SummaryModel, helpLine string) string {
-	return m.form.WithHeight(5).View() + "\n" + HelpStyle.Render(helpLine)
 }
