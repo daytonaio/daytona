@@ -241,23 +241,46 @@ func (m SummaryModel) View() string {
 		return ""
 	}
 
-	helpLine := "enter: next • f10: advanced configuration"
+	helpLine := buildHelpLine(m)
 
-	if len(m.projectList) > 1 || (len(m.projectList) == 1 && ProjectsConfigurationChanged) {
-		helpLine += "\n" + "↑ up • ↓ down"
-		summary, err := RenderSummary(m.name, m.projectList, m.defaults, m.nameLabel)
-		if err != nil {
-			log.Fatal(err)
-		}
-		var title string
-		if m.name == "" {
-			title = views.GetStyledMainTitle("SUMMARY")
-		} else {
-			title = views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - %s %s", m.nameLabel, m.name))
-		}
-		m.viewport.SetContent(summary)
-		return title + views.GetBorderedMessage(m.viewport.View()) + "\n" + m.form.WithHeight(5).View() + "\n" + HelpStyle.Render(helpLine)
+	if shouldDisplaySummary(m) {
+		return renderSummaryView(m, helpLine)
 	}
 
+	return renderSimpleView(m, helpLine)
+}
+
+func buildHelpLine(m SummaryModel) string {
+	helpLine := "enter: next • f10: advanced configuration"
+	if len(m.projectList) > 1 || ProjectsConfigurationChanged {
+		helpLine += "\n↑ up • ↓ down"
+	}
+	return helpLine
+}
+
+func shouldDisplaySummary(m SummaryModel) bool {
+	return len(m.projectList) > 1 || ProjectsConfigurationChanged
+}
+
+func renderSummaryView(m SummaryModel, helpLine string) string {
+	title := views.GetStyledMainTitle("SUMMARY")
+	if m.name != "" {
+		title = views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - %s %s", m.nameLabel, m.name))
+	}
+
+	summary, err := RenderSummary(m.name, m.projectList, m.defaults, m.nameLabel)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	m.viewport.SetContent(summary)
+
+	return title +
+		views.GetBorderedMessage(m.viewport.View()) + "\n" +
+		m.form.WithHeight(5).View() + "\n" +
+		HelpStyle.Render(helpLine)
+}
+
+func renderSimpleView(m SummaryModel, helpLine string) string {
 	return m.form.WithHeight(5).View() + "\n" + HelpStyle.Render(helpLine)
 }
