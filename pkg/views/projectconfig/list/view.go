@@ -5,19 +5,15 @@ package list
 
 import (
 	"fmt"
-	"os"
 
-	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/lipgloss/table"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/projectconfig/info"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
-	"golang.org/x/term"
 )
 
-type RowData struct {
+type rowData struct {
 	Name       string
 	Repository string
 	Build      string
@@ -26,49 +22,19 @@ type RowData struct {
 }
 
 func ListProjectConfigs(projectConfigList []apiclient.ProjectConfig, apiServerConfig *apiclient.ServerConfig, specifyGitProviders bool) {
-	re := lipgloss.NewRenderer(os.Stdout)
-
-	headers := []string{"Name", "Repository", "Build", "Prebuild rules", "Default"}
-
 	data := [][]string{}
 
 	for _, pc := range projectConfigList {
-		var rowData *RowData
-		var row []string
-
-		rowData = getTableRowData(pc, apiServerConfig, specifyGitProviders)
-		row = getRowFromRowData(*rowData)
-		data = append(data, row)
+		data = append(data, getRowFromData(pc, apiServerConfig, specifyGitProviders))
 	}
 
-	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
-	if err != nil {
-		fmt.Println(data)
-		return
-	}
-
-	breakpointWidth := views.GetContainerBreakpointWidth(terminalWidth)
-
-	minWidth := views_util.GetTableMinimumWidth(data)
-
-	if breakpointWidth == 0 || minWidth > breakpointWidth {
+	table := views_util.GetTableView(data, []string{
+		"Name", "Repository", "Build", "Prebuild rules", "Default",
+	}, nil, func() {
 		renderUnstyledList(projectConfigList, apiServerConfig)
-		return
-	}
+	})
 
-	t := table.New().
-		Headers(headers...).
-		Rows(data...).
-		BorderStyle(re.NewStyle().Foreground(views.LightGray)).
-		BorderRow(false).BorderColumn(false).BorderLeft(false).BorderRight(false).BorderTop(false).BorderBottom(false).
-		StyleFunc(func(row, col int) lipgloss.Style {
-			if row == 0 {
-				return views.TableHeaderStyle
-			}
-			return views.BaseCellStyle
-		}).Width(breakpointWidth - 2*views.BaseTableStyleHorizontalPadding - 1)
-
-	fmt.Println(views.BaseTableStyle.Render(t.String()))
+	fmt.Println(table)
 }
 
 func renderUnstyledList(projectConfigList []apiclient.ProjectConfig, apiServerConfig *apiclient.ServerConfig) {
@@ -81,33 +47,13 @@ func renderUnstyledList(projectConfigList []apiclient.ProjectConfig, apiServerCo
 	}
 }
 
-func getRowFromRowData(rowData RowData) []string {
+func getRowFromData(projectConfig apiclient.ProjectConfig, apiServerConfig *apiclient.ServerConfig, specifyGitProviders bool) []string {
 	var isDefault string
+	var data rowData
 
-	if rowData.IsDefault == "" {
-		isDefault = views.InactiveStyle.Render("/")
-	} else {
-		isDefault = views.ActiveStyle.Render("Yes")
-	}
-
-	row := []string{
-		views.NameStyle.Render(rowData.Name),
-		views.DefaultRowDataStyle.Render(rowData.Repository),
-		views.DefaultRowDataStyle.Render(rowData.Build),
-		views.DefaultRowDataStyle.Render(rowData.Prebuilds),
-		isDefault,
-	}
-
-	return row
-}
-
-func getTableRowData(projectConfig apiclient.ProjectConfig, apiServerConfig *apiclient.ServerConfig, specifyGitProviders bool) *RowData {
-	rowData := RowData{"", "", "", "", ""}
-
-	rowData.Name = projectConfig.Name + views_util.AdditionalPropertyPadding
-	rowData.Repository = util.GetRepositorySlugFromUrl(projectConfig.RepositoryUrl, specifyGitProviders)
-	rowData.Prebuilds = "None"
-	rowData.IsDefault = ""
+	data.Name = projectConfig.Name + views_util.AdditionalPropertyPadding
+	data.Repository = util.GetRepositorySlugFromUrl(projectConfig.RepositoryUrl, specifyGitProviders)
+	data.Prebuilds = "None"
 
 	projectDefaults := &views_util.ProjectConfigDefaults{
 		Image:     &apiServerConfig.DefaultProjectImage,
@@ -118,15 +64,23 @@ func getTableRowData(projectConfig apiclient.ProjectConfig, apiServerConfig *api
 		BuildConfig: projectConfig.BuildConfig,
 	}
 
-	_, rowData.Build = views_util.GetProjectBuildChoice(createProjectDto, projectDefaults)
+	_, data.Build = views_util.GetProjectBuildChoice(createProjectDto, projectDefaults)
 
 	if projectConfig.Default {
-		rowData.IsDefault = "1"
+		isDefault = views.ActiveStyle.Render("Yes")
+	} else {
+		isDefault = views.InactiveStyle.Render("/")
 	}
 
 	if len(projectConfig.Prebuilds) > 0 {
-		rowData.Prebuilds = fmt.Sprintf("%d", len(projectConfig.Prebuilds))
+		data.Prebuilds = fmt.Sprintf("%d", len(projectConfig.Prebuilds))
 	}
 
-	return &rowData
+	return []string{
+		views.NameStyle.Render(data.Name),
+		views.DefaultRowDataStyle.Render(data.Repository),
+		views.DefaultRowDataStyle.Render(data.Build),
+		views.DefaultRowDataStyle.Render(data.Prebuilds),
+		isDefault,
+	}
 }

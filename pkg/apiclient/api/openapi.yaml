@@ -341,8 +341,8 @@ paths:
       x-codegen-request-body-name: repository
   /gitprovider/for-url/{url}:
     get:
-      description: Get Git provider
-      operationId: GetGitProviderForUrl
+      description: List Git providers for url
+      operationId: ListGitProvidersForUrl
       parameters:
       - description: Url
         in: path
@@ -355,9 +355,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GitProvider'
+                items:
+                  $ref: '#/components/schemas/GitProvider'
+                type: array
           description: OK
-      summary: Get Git provider
+      summary: List Git providers for url
       tags:
       - gitProvider
   /gitprovider/id-for-url/{url}:
@@ -399,6 +401,26 @@ paths:
       summary: Remove Git provider
       tags:
       - gitProvider
+    get:
+      description: Get Git provider
+      operationId: GetGitProvider
+      parameters:
+      - description: ID
+        in: path
+        name: gitProviderId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/GitProvider'
+          description: OK
+      summary: Get Git provider
+      tags:
+      - gitProvider
   /gitprovider/{gitProviderId}/namespaces:
     get:
       description: Get Git namespaces
@@ -410,6 +432,16 @@ paths:
         required: true
         schema:
           type: string
+      - description: Page number
+        in: query
+        name: page
+        schema:
+          type: integer
+      - description: Number of items per page
+        in: query
+        name: per_page
+        schema:
+          type: integer
       responses:
         "200":
           content:
@@ -460,6 +492,16 @@ paths:
         required: true
         schema:
           type: string
+      - description: Page number
+        in: query
+        name: page
+        schema:
+          type: integer
+      - description: Number of items per page
+        in: query
+        name: per_page
+        schema:
+          type: integer
       responses:
         "200":
           content:
@@ -495,6 +537,16 @@ paths:
         required: true
         schema:
           type: string
+      - description: Page number
+        in: query
+        name: page
+        schema:
+          type: integer
+      - description: Number of items per page
+        in: query
+        name: per_page
+        schema:
+          type: integer
       responses:
         "200":
           content:
@@ -530,6 +582,16 @@ paths:
         required: true
         schema:
           type: string
+      - description: Page number
+        in: query
+        name: page
+        schema:
+          type: integer
+      - description: Number of items per page
+        in: query
+        name: per_page
+        schema:
+          type: integer
       responses:
         "200":
           content:
@@ -1017,7 +1079,7 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/ProviderTarget'
+              $ref: '#/components/schemas/CreateProviderTargetDTO'
         description: Target to set
         required: true
       responses:
@@ -1044,6 +1106,24 @@ paths:
           content: {}
           description: No Content
       summary: Remove a target
+      tags:
+      - target
+  /target/{target}/set-default:
+    patch:
+      description: Set target to default
+      operationId: SetDefaultTarget
+      parameters:
+      - description: Target name
+        in: path
+        name: target
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Set target to default
       tags:
       - target
   /workspace:
@@ -1555,6 +1635,26 @@ components:
       required:
       - repository
       type: object
+    CreateProviderTargetDTO:
+      example:
+        name: name
+        options: options
+        providerInfo:
+          name: name
+          label: label
+          version: version
+      properties:
+        name:
+          type: string
+        options:
+          type: string
+        providerInfo:
+          $ref: '#/components/schemas/provider.ProviderInfo'
+      required:
+      - name
+      - options
+      - providerInfo
+      type: object
     CreateWorkspaceDTO:
       example:
         projects:
@@ -1737,7 +1837,9 @@ components:
         providerId: providerId
         baseApiUrl: baseApiUrl
         alias: alias
+        signingKey: signingKey
         id: id
+        signingMethod: null
         token: token
         username: username
       properties:
@@ -1749,6 +1851,10 @@ components:
           type: string
         providerId:
           type: string
+        signingKey:
+          type: string
+        signingMethod:
+          $ref: '#/components/schemas/SigningMethod'
         token:
           type: string
         username:
@@ -2180,8 +2286,11 @@ components:
     Provider:
       example:
         name: name
+        label: label
         version: version
       properties:
+        label:
+          type: string
         name:
           type: string
         version:
@@ -2192,12 +2301,16 @@ components:
       type: object
     ProviderTarget:
       example:
+        isDefault: true
         name: name
         options: options
         providerInfo:
           name: name
+          label: label
           version: version
       properties:
+        isDefault:
+          type: boolean
         name:
           type: string
         options:
@@ -2206,6 +2319,7 @@ components:
         providerInfo:
           $ref: '#/components/schemas/provider.ProviderInfo'
       required:
+      - isDefault
       - name
       - options
       - providerInfo
@@ -2318,7 +2432,9 @@ components:
         providerId: providerId
         baseApiUrl: baseApiUrl
         alias: alias
+        signingKey: signingKey
         id: id
+        signingMethod: null
         token: token
         username: username
       properties:
@@ -2330,6 +2446,10 @@ components:
           type: string
         providerId:
           type: string
+        signingKey:
+          type: string
+        signingMethod:
+          $ref: '#/components/schemas/SigningMethod'
         token:
           type: string
         username:
@@ -2363,6 +2483,14 @@ components:
       required:
       - uptime
       type: object
+    SigningMethod:
+      enum:
+      - ssh
+      - gpg
+      type: string
+      x-enum-varnames:
+      - SigningMethodSSH
+      - SigningMethodGPG
     Status:
       enum:
       - Unmodified
@@ -2674,8 +2802,11 @@ components:
     provider.ProviderInfo:
       example:
         name: name
+        label: label
         version: version
       properties:
+        label:
+          type: string
         name:
           type: string
         version:

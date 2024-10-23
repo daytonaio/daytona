@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	log "github.com/sirupsen/logrus"
@@ -34,7 +35,7 @@ func (s *WorkspaceService) ListWorkspaces(ctx context.Context, verbose bool) ([]
 		go func(i int) {
 			defer wg.Done()
 
-			target, err := s.targetStore.Find(w.Target)
+			target, err := s.targetStore.Find(&provider.TargetFilter{Name: &w.Target})
 			if err != nil {
 				log.Error(fmt.Errorf("failed to get target for %s", w.Target))
 				return

@@ -6,10 +6,11 @@ package config
 import "errors"
 
 type ProjectConfigFilter struct {
-	Name       *string
-	Url        *string
-	Default    *bool
-	PrebuildId *string
+	Name                *string
+	Url                 *string
+	Default             *bool
+	PrebuildId          *string
+	GitProviderConfigId *string
 }
 
 type PrebuildFilter struct {

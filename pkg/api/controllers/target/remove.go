@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
@@ -26,7 +27,9 @@ func RemoveTarget(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	target, err := server.ProviderTargetService.Find(targetName)
+	target, err := server.ProviderTargetService.Find(&provider.TargetFilter{
+		Name: &targetName,
+	})
 	if err != nil {
 		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to find target: %w", err))
 		return

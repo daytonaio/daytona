@@ -46,8 +46,8 @@ func (m *ProviderRPCServer) GetTargetManifest(arg interface{}, resp *ProviderTar
 	return nil
 }
 
-func (m *ProviderRPCServer) GetDefaultTargets(arg interface{}, resp *[]ProviderTarget) error {
-	targets, err := m.Impl.GetDefaultTargets()
+func (m *ProviderRPCServer) GetPresetTargets(arg interface{}, resp *[]ProviderTarget) error {
+	targets, err := m.Impl.GetPresetTargets()
 	if err != nil {
 		return err
 	}

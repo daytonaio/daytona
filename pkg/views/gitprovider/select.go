@@ -7,7 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
+	"regexp"
 	"slices"
 
 	"github.com/charmbracelet/huh"
@@ -19,7 +19,7 @@ import (
 
 var commonGitProviderIds = []string{"github", "gitlab", "bitbucket"}
 
-func GitProviderSelectionView(ctx context.Context, gitProviderAddView *apiclient.SetGitProviderConfig, apiClient *apiclient.APIClient) {
+func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient, gitProviderAddView *apiclient.SetGitProviderConfig, existingAliases []string) error {
 	supportedProviders := config.GetSupportedGitProviders()
 
 	var gitProviderOptions []huh.Option[string]
@@ -36,28 +36,41 @@ func GitProviderSelectionView(ctx context.Context, gitProviderAddView *apiclient
 		gitProviderOptions = append(gitProviderOptions, huh.Option[string]{Key: "Other", Value: "other"})
 	}
 
-	gitProviderForm := huh.NewForm(
-		huh.NewGroup(
-			huh.NewSelect[string]().
-				Title("Choose a Git provider").
-				Options(
-					gitProviderOptions...,
-				).
-				Value(&gitProviderAddView.ProviderId)).WithHeight(8),
-		huh.NewGroup(
-			huh.NewSelect[string]().
-				Title("Choose a Git provider").
-				Options(
-					otherGitProviderOptions...,
-				).
-				Value(&gitProviderAddView.ProviderId)).WithHeight(12).WithHideFunc(func() bool {
-			return gitProviderAddView.ProviderId != "other"
-		}),
-	).WithTheme(views.GetCustomTheme())
+	initialAlias := gitProviderAddView.Alias
 
-	err := gitProviderForm.Run()
-	if err != nil {
-		log.Fatal(err)
+	if gitProviderAddView.ProviderId == "" {
+		gitProviderForm := huh.NewForm(
+			huh.NewGroup(
+				huh.NewSelect[string]().
+					Title("Choose a Git provider").
+					Description("Note: for updating an existing Git provider use 'daytona git-provider update'").
+					Options(
+						gitProviderOptions...,
+					).
+					Value(&gitProviderAddView.ProviderId)).WithHeight(8),
+			huh.NewGroup(
+				huh.NewSelect[string]().
+					Title("Choose a Git provider").
+					Options(
+						otherGitProviderOptions...,
+					).
+					Value(&gitProviderAddView.ProviderId)).WithHeight(12).WithHideFunc(func() bool {
+				return gitProviderAddView.ProviderId != "other"
+			}),
+		).WithTheme(views.GetCustomTheme())
+
+		err := gitProviderForm.Run()
+		if err != nil {
+			return err
+		}
+	}
+
+	var selectedSigningMethod string
+	var signingKey string
+
+	if gitProviderAddView.SigningMethod != nil {
+		selectedSigningMethod = string(*gitProviderAddView.SigningMethod)
+		gitProviderAddView.SigningKey = nil
 	}
 
 	userDataForm := huh.NewForm(
@@ -88,6 +101,7 @@ func GitProviderSelectionView(ctx context.Context, gitProviderAddView *apiclient
 		).WithHeight(6).WithHideFunc(func() bool {
 			return !providerRequiresApiUrl(gitProviderAddView.ProviderId)
 		}),
+
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Personal access token").
@@ -104,37 +118,81 @@ func GitProviderSelectionView(ctx context.Context, gitProviderAddView *apiclient
 			huh.NewInput().
 				Title("Alias").
 				Description("Will default to username if left empty").
-				Value(gitProviderAddView.Alias),
+				Value(gitProviderAddView.Alias).
+				Validate(func(str string) error {
+					for _, alias := range existingAliases {
+						if alias == str {
+							if initialAlias == nil || *initialAlias != str {
+								return errors.New("alias is already in use")
+							}
+						}
+					}
+					return nil
+				}),
 		).WithHeight(6),
+
+		huh.NewGroup(huh.NewSelect[string]().
+			Title("Commit Signing Method").
+			DescriptionFunc(func() string {
+				return getGitProviderSigningHelpMessage(gitProviderAddView.ProviderId)
+			}, nil).
+			Options(
+				huh.Option[string]{Key: "None", Value: "none"},
+				huh.Option[string]{Key: "SSH", Value: "ssh"},
+				huh.Option[string]{Key: "GPG", Value: "gpg"},
+			).
+			Value(&selectedSigningMethod).WithHeight(6),
+		).WithHeight(8).WithHideFunc(func() bool {
+			return commitSigningNotSupported(gitProviderAddView.ProviderId)
+		}),
+		huh.NewGroup(
+			huh.NewInput().
+				Title("Signing Key").
+				Value(&signingKey).
+				DescriptionFunc(func() string {
+					return getSigningKeyDescription(selectedSigningMethod)
+				}, nil).
+				Validate(func(str string) error {
+					if selectedSigningMethod != "none" && str == "" {
+						return errors.New("signing key cannot be blank when a signing method is selected")
+					}
+
+					if selectedSigningMethod == "ssh" {
+						if err := isValidSSHKey(str); err != nil {
+							return err
+						}
+					}
+					return nil
+				}),
+		).WithHeight(5).WithHideFunc(func() bool {
+			return selectedSigningMethod == "none"
+		}),
 	).WithTheme(views.GetCustomTheme())
 
 	views.RenderInfoMessage(getGitProviderHelpMessage(gitProviderAddView.ProviderId))
-	err = userDataForm.Run()
+	err := userDataForm.Run()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+
+	if selectedSigningMethod != "none" {
+		gitProviderAddView.SigningMethod = (*apiclient.SigningMethod)(&selectedSigningMethod)
+		gitProviderAddView.SigningKey = &signingKey
+	} else {
+		gitProviderAddView.SigningKey = nil
+		gitProviderAddView.SigningMethod = nil
+	}
+
+	return nil
 
 }
-
-func GitProviderDeleteView(gitProviderAddView *apiclient.SetGitProviderConfig, userGitProviders []apiclient.GitProvider, apiClient *apiclient.APIClient, ctx context.Context) {
-	var gitProviderOptions []huh.Option[string]
-	for _, userProvider := range userGitProviders {
-		gitProviderOptions = append(gitProviderOptions, huh.Option[string]{Key: fmt.Sprintf("%s   %s", userProvider.ProviderId, userProvider.Alias), Value: userProvider.Id})
-	}
-	gitProviderForm := huh.NewForm(
-		huh.NewGroup(
-			huh.NewSelect[string]().
-				Title("Choose a Git provider").
-				Options(
-					gitProviderOptions...,
-				).
-				Value(gitProviderAddView.Id)).WithHeight(8),
-	).WithTheme(views.GetCustomTheme())
-	err := gitProviderForm.Run()
-	if err != nil {
-		log.Fatal(err)
+func isValidSSHKey(key string) error {
+	sshKeyPattern := regexp.MustCompile(`^(ssh-(rsa|ed25519|dss|ecdsa-sha2-nistp(256|384|521)))\s+[A-Za-z0-9+/=]+(\s+.+)?$`)
+	if !sshKeyPattern.MatchString(key) {
+		return errors.New("invalid SSH key: must start with valid SSH key type (e.g., ssh-rsa, ssh-ed25519)")
 	}
 
+	return nil
 }
 
 func providerRequiresUsername(gitProviderId string) bool {
@@ -142,7 +200,21 @@ func providerRequiresUsername(gitProviderId string) bool {
 }
 
 func providerRequiresApiUrl(gitProviderId string) bool {
-	return gitProviderId == "gitness" || gitProviderId == "github-enterprise-server" || gitProviderId == "gitlab-self-managed" || gitProviderId == "gitea" || gitProviderId == "bitbucket-server" || gitProviderId == "azure-devops" || gitProviderId == "aws-codecommit"
+	providersRequiringApiUrl := []string{
+		"gitness",
+		"github-enterprise-server",
+		"gitlab-self-managed",
+		"gitea",
+		"bitbucket-server",
+		"azure-devops",
+		"aws-codecommit",
+		"gogs",
+	}
+	return slices.Contains(providersRequiringApiUrl, gitProviderId)
+}
+
+func commitSigningNotSupported(gitProviderId string) bool {
+	return gitProviderId == "gitness" || gitProviderId == "bitbucket" || gitProviderId == "bitbucket-server"
 }
 
 func getApiUrlDescription(gitProviderId string) string {
@@ -160,17 +232,35 @@ func getApiUrlDescription(gitProviderId string) string {
 		return "For example: https://bitbucket.host.com/rest"
 	} else if gitProviderId == "aws-codecommit" {
 		return "For example: https://ap-south-1.console.aws.amazon.com"
+	} else if gitProviderId == "gogs" {
+		return "For example: https://gogs-host.com"
 	}
 	return ""
 }
 
-func getGitProviderHelpMessage(gitProviderId string) string {
-	message := fmt.Sprintf("%s\n%s\n\n%s%s",
-		lipgloss.NewStyle().Foreground(views.Green).Bold(true).Render("More information on:"),
-		config.GetDocsLinkFromGitProvider(gitProviderId),
-		lipgloss.NewStyle().Foreground(views.Green).Bold(true).Render("Required scopes: "),
-		config.GetRequiredScopesFromGitProviderId(gitProviderId))
+func getSigningKeyDescription(signingMethod string) string {
+	switch signingMethod {
+	case "gpg":
+		return "Provide your GPG key ID (e.g., 30F2B65B9246B6CA) for signing commits."
+	case "ssh":
+		return "Provide your public SSH key (e.g., ssh-ed25519 AAAAC3...<rest of key>) for secure signing."
+	default:
+		return ""
+	}
+}
 
+func getGitProviderHelpMessage(gitProviderId string) string {
+	message := fmt.Sprintf("%s\n%s",
+		lipgloss.NewStyle().Foreground(views.Green).Bold(true).Render("More information on:"),
+		config.GetDocsLinkFromGitProvider(gitProviderId))
+
+	requiredScopes := config.GetRequiredScopesFromGitProviderId(gitProviderId)
+	if requiredScopes != "" {
+		message = fmt.Sprintf("%s\n\n%s%s",
+			message,
+			lipgloss.NewStyle().Foreground(views.Green).Bold(true).Render("Required scopes: "),
+			requiredScopes)
+	}
 	prebuildScopes := config.GetPrebuildScopesFromGitProviderId(gitProviderId)
 	if prebuildScopes != "" {
 		message = fmt.Sprintf("%s\n%s%s",
@@ -180,4 +270,13 @@ func getGitProviderHelpMessage(gitProviderId string) string {
 	}
 
 	return message
+}
+
+func getGitProviderSigningHelpMessage(gitProviderId string) string {
+	signingDocsLink := config.GetDocsLinkForCommitSigning(gitProviderId)
+
+	if signingDocsLink != "" {
+		return signingDocsLink
+	}
+	return ""
 }

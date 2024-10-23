@@ -11,8 +11,9 @@ import (
 )
 
 type ProviderInfo struct {
-	Name    string `json:"name" validate:"required"`
-	Version string `json:"version" validate:"required"`
+	Name    string  `json:"name" validate:"required"`
+	Label   *string `json:"label" validate:"optional"`
+	Version string  `json:"version" validate:"required"`
 }
 
 type InitializeProviderRequest struct {
@@ -46,7 +47,8 @@ type ProviderTarget struct {
 	Name         string       `json:"name" validate:"required"`
 	ProviderInfo ProviderInfo `json:"providerInfo" validate:"required"`
 	// JSON encoded map of options
-	Options string `json:"options" validate:"required"`
+	Options   string `json:"options" validate:"required"`
+	IsDefault bool   `json:"isDefault" validate:"required"`
 } // @name ProviderTarget
 
 type ProviderTargetManifest map[string]ProviderTargetProperty // @name ProviderTargetManifest

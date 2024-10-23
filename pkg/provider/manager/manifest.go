@@ -16,6 +16,7 @@ type ProvidersManifest map[string]ProviderManifest
 
 type ProviderManifest struct {
 	Default  bool               `json:"default"`
+	Label    *string            `json:"label"`
 	Versions map[string]Version `json:"versions"`
 }
 
@@ -80,7 +81,7 @@ func (p *ProvidersManifest) HasUpdateAvailable(providerName string, currentVersi
 func (m *ProvidersManifest) GetLatestVersions() *ProvidersManifest {
 	var latestManifest ProvidersManifest = make(map[string]ProviderManifest, 0)
 	for provider, manifest := range *m {
-		latestManifest[provider] = ProviderManifest{Default: manifest.Default, Versions: make(map[string]Version)}
+		latestManifest[provider] = ProviderManifest{Default: manifest.Default, Label: manifest.Label, Versions: make(map[string]Version)}
 		versionName, version := manifest.FindLatestVersion()
 		latestManifest[provider].Versions[versionName] = *version
 	}

@@ -44,12 +44,6 @@ type GitProvider struct {
 	Name string
 }
 
-const configDoesntExistError = "config does not exist. Run `daytona serve` to create a default profile or `daytona profile add` to connect to a remote server."
-
-func IsNotExist(err error) bool {
-	return err.Error() == configDoesntExistError
-}
-
 func GetConfig() (*Config, error) {
 	configFilePath, err := getConfigPath()
 	if err != nil {
@@ -58,7 +52,12 @@ func GetConfig() (*Config, error) {
 
 	_, err = os.Stat(configFilePath)
 	if os.IsNotExist(err) {
-		return nil, errors.New(configDoesntExistError)
+		config := &Config{
+			Id:               uuid.NewString(),
+			DefaultIdeId:     DefaultIdeId,
+			TelemetryEnabled: true,
+		}
+		return config, config.Save()
 	}
 
 	if err != nil {
@@ -87,14 +86,20 @@ func GetConfig() (*Config, error) {
 	return &c, nil
 }
 
+var ErrNoProfilesFound = errors.New("no profiles found. Run `daytona serve` to create a default profile or `daytona profile add` to connect to a remote server")
+
 func (c *Config) GetActiveProfile() (Profile, error) {
+	if len(c.Profiles) == 0 {
+		return Profile{}, ErrNoProfilesFound
+	}
+
 	for _, profile := range c.Profiles {
 		if profile.Id == c.ActiveProfileId {
 			return profile, nil
 		}
 	}
 
-	return Profile{}, errors.New("active profile not found")
+	return Profile{}, errors.New("active profile not found. Set an active profile with `daytona profile use`")
 }
 
 func (c *Config) Save() error {

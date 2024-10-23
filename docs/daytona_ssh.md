@@ -9,7 +9,8 @@ daytona ssh [WORKSPACE] [PROJECT] [CMD...] [flags]
 ### Options
 
 ```
-  -y, --yes   Automatically confirm any prompts
+  -o, --option stringArray   Specify SSH options in KEY=VALUE format.
+  -y, --yes                  Automatically confirm any prompts
 ```
 
 ### Options inherited from parent commands

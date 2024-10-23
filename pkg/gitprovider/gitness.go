@@ -4,12 +4,16 @@
 package gitprovider
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"math"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 
+	"github.com/daytonaio/daytona/internal/util"
 	gitnessclient "github.com/daytonaio/daytona/pkg/gitprovider/gitnessclient"
 )
 
@@ -39,7 +43,7 @@ func (g *GitnessGitProvider) CanHandle(repoUrl string) (bool, error) {
 	return strings.Contains(g.baseApiUrl, staticContext.Source), nil
 }
 
-func (g *GitnessGitProvider) GetNamespaces() ([]*GitNamespace, error) {
+func (g *GitnessGitProvider) GetNamespaces(options ListOptions) ([]*GitNamespace, error) {
 	client := g.getApiClient()
 	response, err := client.GetSpaces()
 	if err != nil {
@@ -48,7 +52,7 @@ func (g *GitnessGitProvider) GetNamespaces() ([]*GitNamespace, error) {
 	var namespaces []*GitNamespace
 	for _, membership := range response {
 		namespace := &GitNamespace{
-			Id:   membership.Space.UID,
+			Id:   membership.Space.Identifier,
 			Name: membership.Space.Identifier,
 		}
 		namespaces = append(namespaces, namespace)
@@ -61,7 +65,7 @@ func (g *GitnessGitProvider) getApiClient() *gitnessclient.GitnessClient {
 	return gitnessclient.NewGitnessClient(g.token, url)
 }
 
-func (g *GitnessGitProvider) GetRepositories(namespace string) ([]*GitRepository, error) {
+func (g *GitnessGitProvider) GetRepositories(namespace string, options ListOptions) ([]*GitRepository, error) {
 	client := g.getApiClient()
 	response, err := client.GetRepositories(namespace)
 	if err != nil {
@@ -77,6 +81,7 @@ func (g *GitnessGitProvider) GetRepositories(namespace string) ([]*GitRepository
 		if err != nil {
 			return nil, err
 		}
+
 		repo := &GitRepository{
 			Id:     repo.Identifier,
 			Name:   repo.Identifier,
@@ -90,7 +95,7 @@ func (g *GitnessGitProvider) GetRepositories(namespace string) ([]*GitRepository
 	return repos, nil
 }
 
-func (g *GitnessGitProvider) GetRepoBranches(repositoryId string, namespaceId string) ([]*GitBranch, error) {
+func (g *GitnessGitProvider) GetRepoBranches(repositoryId string, namespaceId string, options ListOptions) ([]*GitBranch, error) {
 	client := g.getApiClient()
 	response, err := client.GetRepoBranches(repositoryId, namespaceId)
 	if err != nil {
@@ -107,7 +112,7 @@ func (g *GitnessGitProvider) GetRepoBranches(repositoryId string, namespaceId st
 	return branches, nil
 }
 
-func (g *GitnessGitProvider) GetRepoPRs(repositoryId string, namespaceId string) ([]*GitPullRequest, error) {
+func (g *GitnessGitProvider) GetRepoPRs(repositoryId string, namespaceId string, options ListOptions) ([]*GitPullRequest, error) {
 	client := g.getApiClient()
 	response, err := client.GetRepoPRs(repositoryId, namespaceId)
 	if err != nil {
@@ -162,7 +167,6 @@ func (g *GitnessGitProvider) GetUrlFromContext(repoContext *GetRepositoryContext
 
 func (g *GitnessGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
 	client := g.getApiClient()
-
 	response, err := client.GetRepoBranches(staticContext.Name, staticContext.Owner)
 	if err != nil {
 		return "", fmt.Errorf("failed to fetch Branches: %w", err)
@@ -204,7 +208,7 @@ func (g *GitnessGitProvider) GetBranchByCommit(staticContext *StaticGitContext) 
 
 func (g *GitnessGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (string, error) {
 	client := g.getApiClient()
-	return client.GetLastCommitSha(staticContext.Url, staticContext.Branch)
+	return client.GetLastCommitSha(staticContext.Owner, staticContext.Name, staticContext.Branch)
 }
 
 func (g *GitnessGitProvider) GetPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
@@ -237,6 +241,18 @@ func (g *GitnessGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitCo
 	if err != nil {
 		return nil, err
 	}
+	if strings.Contains(repoUrl, "/git/") {
+		ref, err := g.getApiClient().GetRepoRef(repoUrl)
+		if err != nil {
+			return nil, err
+		}
+		refParts := strings.Split(*ref, "/")
+		staticContext.Owner = refParts[0]
+		staticContext.Name = refParts[1]
+		staticContext.Id = refParts[1]
+		staticContext.Path = nil
+	}
+
 	parsedUrl, err := url.Parse(repoUrl)
 	if err != nil {
 		return nil, err
@@ -245,6 +261,7 @@ func (g *GitnessGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitCo
 	if staticContext.Path == nil {
 		return staticContext, nil
 	}
+
 	parts := strings.Split(*staticContext.Path, "/")
 
 	switch {
@@ -280,4 +297,97 @@ func (g *GitnessGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitCo
 func (g *GitnessGitProvider) GetDefaultBranch(staticContext *StaticGitContext) (*string, error) {
 	client := g.getApiClient()
 	return client.GetDefaultBranch(staticContext.Url)
+}
+
+func (g *GitnessGitProvider) RegisterPrebuildWebhook(repo *GitRepository, endpointUrl string) (string, error) {
+	client := g.getApiClient()
+	webhook, err := client.CreateWebhook(repo.Id, repo.Owner, gitnessclient.Webhook{
+		Triggers:    []string{"branch_updated"},
+		Url:         endpointUrl,
+		Identifier:  "daytona-webhook_" + repo.Id,
+		DisplayName: "Daytona Webhook",
+		Enabled:     true,
+	})
+	if err != nil {
+		return "", err
+	}
+	return webhook.Uid, nil
+}
+
+func (g *GitnessGitProvider) GetPrebuildWebhook(repo *GitRepository, endpointUrl string) (*string, error) {
+	client := g.getApiClient()
+	webhooks, err := client.GetAllWebhooks(repo.Id, repo.Owner)
+	if err != nil {
+		return nil, err
+	}
+	for _, webhook := range webhooks {
+		if webhook.Url == endpointUrl {
+			return &webhook.Uid, nil
+		}
+	}
+	return nil, nil
+}
+
+func (g *GitnessGitProvider) UnregisterPrebuildWebhook(repo *GitRepository, id string) error {
+	client := g.getApiClient()
+	return client.DeleteWebhook(repo.Id, repo.Owner, id)
+}
+
+func (g *GitnessGitProvider) GetCommitsRange(repo *GitRepository, initialSha string, currentSha string) (int, error) {
+	client := g.getApiClient()
+	commits, err := client.GetCommits(repo.Owner, repo.Name, &repo.Branch)
+	if err != nil {
+		return 0, err
+	}
+	initialShaIndex := -1
+	currentShaIndex := -1
+	for i := 0; i < len(*commits); i++ {
+		if currentSha == (*commits)[i].Sha {
+			currentShaIndex = i
+		}
+		if initialSha == (*commits)[i].Sha {
+			initialShaIndex = i
+		}
+		if initialShaIndex != -1 && currentShaIndex != -1 {
+			break
+		}
+	}
+
+	if initialShaIndex == -1 || currentShaIndex == -1 {
+		return 0, fmt.Errorf("Sha Not found in commits")
+	}
+
+	commitLength := int(math.Abs(float64(initialShaIndex - currentShaIndex)))
+
+	return commitLength, nil
+}
+
+func (g *GitnessGitProvider) ParseEventData(request *http.Request) (*GitEventData, error) {
+	payload, err := io.ReadAll(request.Body)
+	if err != nil {
+		return nil, err
+	}
+	var webhookEvent gitnessclient.WebhookEventData
+	err = json.Unmarshal(payload, &webhookEvent)
+	if err != nil {
+		return nil, err
+	}
+
+	if webhookEvent.Trigger != "branch_updated" {
+		return nil, nil
+	}
+
+	gitEventData := &GitEventData{
+		Url:    util.CleanUpRepositoryUrl(webhookEvent.Repo.GitURL),
+		Branch: strings.TrimPrefix(webhookEvent.Ref.Name, "refs/heads/"),
+		Sha:    webhookEvent.Sha,
+		Owner:  webhookEvent.Principal.DisplayName,
+	}
+
+	for _, commit := range webhookEvent.Commits {
+		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Modified...)
+		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Added...)
+		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Removed...)
+	}
+	return gitEventData, nil
 }

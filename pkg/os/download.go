@@ -4,14 +4,20 @@
 package os
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
 )
 
-func DownloadFile(url string, filename string) error {
-	resp, err := http.Get(url)
+func DownloadFile(ctx context.Context, url string, filename string) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -26,8 +32,29 @@ func DownloadFile(url string, filename string) error {
 	if err != nil {
 		return err
 	}
-	defer out.Close()
+	defer func() {
+		out.Close()
+		if ctx.Err() != nil {
+			os.Remove(filename)
+		}
+	}()
 
-	_, err = io.Copy(out, resp.Body)
-	return err
+	done := make(chan error, 1)
+
+	go func() {
+		_, err := io.Copy(out, resp.Body)
+		done <- err
+	}()
+
+	select {
+	case err := <-done:
+		if err != nil {
+			os.Remove(filename)
+			return err
+		}
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+
+	return nil
 }

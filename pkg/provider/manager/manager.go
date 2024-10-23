@@ -4,6 +4,7 @@
 package manager
 
 import (
+	"context"
 	"errors"
 	"os"
 	"os/exec"
@@ -34,7 +35,7 @@ var ProviderHandshakeConfig = plugin.HandshakeConfig{
 }
 
 type IProviderManager interface {
-	DownloadProvider(downloadUrls map[os_util.OperatingSystem]string, providerName string, throwIfPresent bool) (string, error)
+	DownloadProvider(ctx context.Context, downloadUrls map[os_util.OperatingSystem]string, providerName string, throwIfPresent bool) (string, error)
 	GetProvider(name string) (*Provider, error)
 	GetProviders() map[string]Provider
 	GetProvidersManifest() (*ProvidersManifest, error)
@@ -146,13 +147,13 @@ func (m *ProviderManager) RegisterProvider(pluginPath string) error {
 		return errors.New("failed to get targets: " + err.Error())
 	}
 
-	defaultTargets, err := (*p).GetDefaultTargets()
+	presetTargets, err := (*p).GetPresetTargets()
 	if err != nil {
-		return errors.New("failed to get default targets: " + err.Error())
+		return errors.New("failed to get preset targets: " + err.Error())
 	}
 
-	log.Info("Setting default targets")
-	for _, target := range *defaultTargets {
+	log.Info("Setting preset targets")
+	for _, target := range *presetTargets {
 		if _, ok := existingTargets[target.Name]; ok {
 			log.Infof("Target %s already exists. Skipping...", target.Name)
 			continue
@@ -165,7 +166,7 @@ func (m *ProviderManager) RegisterProvider(pluginPath string) error {
 			log.Infof("Target %s set", target.Name)
 		}
 	}
-	log.Info("Default targets set")
+	log.Info("Preset targets set")
 
 	log.Infof("Provider %s initialized", pluginRef.name)
 

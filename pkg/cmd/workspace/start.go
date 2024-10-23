@@ -38,11 +38,11 @@ var StartCmd = &cobra.Command{
 	Args:    cobra.RangeArgs(0, 1),
 	GroupID: util.WORKSPACE_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var workspaceIdOrName string
+		var selectedWorkspacesNames []string
 		var activeProfile config.Profile
 		var ideId string
-		var workspaceId string
 		var ideList []config.Ide
+		var providerConfigId *string
 		projectProviderMetadata := ""
 
 		ctx := context.Background()
@@ -65,71 +65,91 @@ var StartCmd = &cobra.Command{
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
-			workspace := selection.GetWorkspaceFromPrompt(workspaceList, "Start")
-			if workspace == nil {
-				return nil
+			selectedWorkspaces := selection.GetWorkspacesFromPrompt(workspaceList, "Start")
+			for _, workspaces := range selectedWorkspaces {
+				selectedWorkspacesNames = append(selectedWorkspacesNames, workspaces.Name)
 			}
-			workspaceIdOrName = workspace.Name
 		} else {
-			workspaceIdOrName = args[0]
+			selectedWorkspacesNames = append(selectedWorkspacesNames, args[0])
 		}
 
-		if codeFlag {
-			c, err := config.GetConfig()
-			if err != nil {
-				return err
-			}
-
-			activeProfile, err = c.GetActiveProfile()
-			if err != nil {
-				return err
-			}
-
-			ideList = config.GetIdeList()
-
-			ideId = c.DefaultIdeId
-
-			wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceIdOrName).Execute()
-			if err != nil {
-				return apiclient_util.HandleErrorResponse(res, err)
-			}
-			workspaceId = wsInfo.Id
-			if startProjectFlag == "" {
-				startProjectFlag = wsInfo.Projects[0].Name
-			}
-			if ideId != "ssh" {
-				projectProviderMetadata, err = workspace_util.GetProjectProviderMetadata(wsInfo, wsInfo.Projects[0].Name)
-				if err != nil {
-					return err
-				}
-			}
-		}
-
-		err = StartWorkspace(apiClient, workspaceIdOrName, startProjectFlag)
-		if err != nil {
-			return err
-		}
-
-		if startProjectFlag == "" {
-			views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' started successfully", workspaceIdOrName))
-		} else {
-			views.RenderInfoMessage(fmt.Sprintf("Project '%s' from workspace '%s' started successfully", startProjectFlag, workspaceIdOrName))
-
+		if len(selectedWorkspacesNames) == 1 {
+			workspaceName := selectedWorkspacesNames[0]
+			var workspaceId string
 			if codeFlag {
-				ide_views.RenderIdeOpeningMessage(workspaceIdOrName, startProjectFlag, ideId, ideList)
-				err = openIDE(ideId, activeProfile, workspaceId, startProjectFlag, projectProviderMetadata, yesFlag)
+				c, err := config.GetConfig()
 				if err != nil {
 					return err
 				}
+
+				activeProfile, err = c.GetActiveProfile()
+				if err != nil {
+					return err
+				}
+
+				ideList = config.GetIdeList()
+				ideId = c.DefaultIdeId
+
+				wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceName).Execute()
+				if err != nil {
+					return apiclient_util.HandleErrorResponse(res, err)
+				}
+				workspaceId = wsInfo.Id
+				if startProjectFlag == "" {
+					startProjectFlag = wsInfo.Projects[0].Name
+					providerConfigId = wsInfo.Projects[0].GitProviderConfigId
+				} else {
+					for _, project := range wsInfo.Projects {
+						if project.Name == startProjectFlag {
+							providerConfigId = project.GitProviderConfigId
+							break
+						}
+					}
+				}
+
+				if ideId != "ssh" {
+					projectProviderMetadata, err = workspace_util.GetProjectProviderMetadata(wsInfo, wsInfo.Projects[0].Name)
+					if err != nil {
+						return err
+					}
+				}
+			}
+
+			err = StartWorkspace(apiClient, workspaceName, startProjectFlag)
+			if err != nil {
+				return err
+			}
+			gpgKey, err := GetGitProviderGpgKey(apiClient, ctx, providerConfigId)
+			if err != nil {
+				log.Warn(err)
+			}
+
+			if startProjectFlag == "" {
+				views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' started successfully", workspaceName))
+			} else {
+				views.RenderInfoMessage(fmt.Sprintf("Project '%s' from workspace '%s' started successfully", startProjectFlag, workspaceName))
+
+				if codeFlag {
+					ide_views.RenderIdeOpeningMessage(workspaceName, startProjectFlag, ideId, ideList)
+					err = openIDE(ideId, activeProfile, workspaceId, startProjectFlag, projectProviderMetadata, yesFlag, gpgKey)
+					if err != nil {
+						return err
+					}
+				}
+			}
+		} else {
+			for _, workspace := range selectedWorkspacesNames {
+				err := StartWorkspace(apiClient, workspace, "")
+				if err != nil {
+					log.Errorf("Failed to start workspace %s: %v\n\n", workspace, err)
+					continue
+				}
+				views.RenderInfoMessage(fmt.Sprintf("- Workspace '%s' started successfully", workspace))
 			}
 		}
 		return nil
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		if len(args) != 0 {
-			return nil, cobra.ShellCompDirectiveNoFileComp
-		}
-
 		return getAllWorkspacesByState(WORKSPACE_STATUS_STOPPED)
 	},
 }
@@ -224,12 +244,15 @@ func getAllWorkspacesByState(state WorkspaceState) ([]string, cobra.ShellCompDir
 
 	var choices []string
 	for _, workspace := range workspaceList {
-		for _, project := range workspace.Info.Projects {
-			if state == WORKSPACE_STATUS_RUNNING && project.IsRunning {
+		for _, project := range workspace.Projects {
+			if project.State == nil {
+				continue
+			}
+			if state == WORKSPACE_STATUS_RUNNING && project.State.Uptime != 0 {
 				choices = append(choices, workspace.Name)
 				break
 			}
-			if state == WORKSPACE_STATUS_STOPPED && !project.IsRunning {
+			if state == WORKSPACE_STATUS_STOPPED && project.State.Uptime == 0 {
 				choices = append(choices, workspace.Name)
 				break
 			}

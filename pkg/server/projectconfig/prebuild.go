@@ -26,11 +26,11 @@ func (s *ProjectConfigService) SetPrebuild(projectConfigName string, createPrebu
 		return nil, err
 	}
 
-	existingPrebuild, err := projectConfig.FindPrebuild(&config.PrebuildFilter{
+	existingPrebuild, _ := projectConfig.FindPrebuild(&config.PrebuildFilter{
 		Branch: &createPrebuildDto.Branch,
 	})
 
-	if err == nil && createPrebuildDto.Id != nil && *createPrebuildDto.Id != existingPrebuild.Id {
+	if existingPrebuild != nil && createPrebuildDto.Id == nil {
 		return nil, errors.New("prebuild for the specified project config and branch already exists")
 	}
 
@@ -238,7 +238,6 @@ func (s *ProjectConfigService) ProcessGitEvent(data gitprovider.GitEventData) er
 	if err != nil {
 		return err
 	}
-
 	gitProvider, _, err := s.gitProviderService.GetGitProviderForUrl(data.Url)
 	if err != nil {
 		return fmt.Errorf("failed to get git provider for URL: %s", err)

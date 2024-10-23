@@ -6,6 +6,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**ListTargets**](TargetAPI.md#ListTargets) | **Get** /target | List targets
 [**RemoveTarget**](TargetAPI.md#RemoveTarget) | **Delete** /target/{target} | Remove a target
+[**SetDefaultTarget**](TargetAPI.md#SetDefaultTarget) | **Patch** /target/{target}/set-default | Set target to default
 [**SetTarget**](TargetAPI.md#SetTarget) | **Put** /target | Set a target
 
 
@@ -139,6 +140,74 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
+## SetDefaultTarget
+
+> SetDefaultTarget(ctx, target).Execute()
+
+Set target to default
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	target := "target_example" // string | Target name
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	r, err := apiClient.TargetAPI.SetDefaultTarget(context.Background(), target).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `TargetAPI.SetDefaultTarget``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**target** | **string** | Target name | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiSetDefaultTargetRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## SetTarget
 
 > SetTarget(ctx).Target(target).Execute()
@@ -160,7 +229,7 @@ import (
 )
 
 func main() {
-	target := *openapiclient.NewProviderTarget("Name_example", "Options_example", *openapiclient.NewProviderProviderInfo("Name_example", "Version_example")) // ProviderTarget | Target to set
+	target := *openapiclient.NewCreateProviderTargetDTO("Name_example", "Options_example", *openapiclient.NewProviderProviderInfo("Name_example", "Version_example")) // CreateProviderTargetDTO | Target to set
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -183,7 +252,7 @@ Other parameters are passed through a pointer to a apiSetTargetRequest struct vi
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **target** | [**ProviderTarget**](ProviderTarget.md) | Target to set | 
+ **target** | [**CreateProviderTargetDTO**](CreateProviderTargetDTO.md) | Target to set | 
 
 ### Return type
 

@@ -185,6 +185,19 @@ definitions:
     required:
     - repository
     type: object
+  CreateProviderTargetDTO:
+    properties:
+      name:
+        type: string
+      options:
+        type: string
+      providerInfo:
+        $ref: '#/definitions/provider.ProviderInfo'
+    required:
+    - name
+    - options
+    - providerInfo
+    type: object
   CreateWorkspaceDTO:
     properties:
       id:
@@ -292,6 +305,10 @@ definitions:
         type: string
       providerId:
         type: string
+      signingKey:
+        type: string
+      signingMethod:
+        $ref: '#/definitions/SigningMethod'
       token:
         type: string
       username:
@@ -562,6 +579,8 @@ definitions:
     type: object
   Provider:
     properties:
+      label:
+        type: string
       name:
         type: string
       version:
@@ -572,6 +591,8 @@ definitions:
     type: object
   ProviderTarget:
     properties:
+      isDefault:
+        type: boolean
       name:
         type: string
       options:
@@ -580,6 +601,7 @@ definitions:
       providerInfo:
         $ref: '#/definitions/provider.ProviderInfo'
     required:
+    - isDefault
     - name
     - options
     - providerInfo
@@ -670,6 +692,10 @@ definitions:
         type: string
       providerId:
         type: string
+      signingKey:
+        type: string
+      signingMethod:
+        $ref: '#/definitions/SigningMethod'
       token:
         type: string
       username:
@@ -687,6 +713,14 @@ definitions:
     required:
     - uptime
     type: object
+  SigningMethod:
+    enum:
+    - ssh
+    - gpg
+    type: string
+    x-enum-varnames:
+    - SigningMethodSSH
+    - SigningMethodGPG
   Status:
     enum:
     - Unmodified
@@ -791,6 +825,8 @@ definitions:
     - BuildStateDeleting
   provider.ProviderInfo:
     properties:
+      label:
+        type: string
       name:
         type: string
       version:
@@ -1138,6 +1174,25 @@ paths:
       summary: Remove Git provider
       tags:
       - gitProvider
+    get:
+      description: Get Git provider
+      operationId: GetGitProvider
+      parameters:
+      - description: ID
+        in: path
+        name: gitProviderId
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/GitProvider'
+      summary: Get Git provider
+      tags:
+      - gitProvider
   /gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/branches:
     get:
       description: Get Git repository branches
@@ -1158,6 +1213,14 @@ paths:
         name: repositoryId
         required: true
         type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Number of items per page
+        in: query
+        name: per_page
+        type: integer
       produces:
       - application/json
       responses:
@@ -1190,6 +1253,14 @@ paths:
         name: repositoryId
         required: true
         type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Number of items per page
+        in: query
+        name: per_page
+        type: integer
       produces:
       - application/json
       responses:
@@ -1217,6 +1288,14 @@ paths:
         name: namespaceId
         required: true
         type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Number of items per page
+        in: query
+        name: per_page
+        type: integer
       produces:
       - application/json
       responses:
@@ -1239,6 +1318,14 @@ paths:
         name: gitProviderId
         required: true
         type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Number of items per page
+        in: query
+        name: per_page
+        type: integer
       produces:
       - application/json
       responses:
@@ -1315,8 +1402,8 @@ paths:
       - gitProvider
   /gitprovider/for-url/{url}:
     get:
-      description: Get Git provider
-      operationId: GetGitProviderForUrl
+      description: List Git providers for url
+      operationId: ListGitProvidersForUrl
       parameters:
       - description: Url
         in: path
@@ -1329,8 +1416,10 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/GitProvider'
-      summary: Get Git provider
+            items:
+              $ref: '#/definitions/GitProvider'
+            type: array
+      summary: List Git providers for url
       tags:
       - gitProvider
   /gitprovider/id-for-url/{url}:
@@ -1810,7 +1899,7 @@ paths:
         name: target
         required: true
         schema:
-          $ref: '#/definitions/ProviderTarget'
+          $ref: '#/definitions/CreateProviderTargetDTO'
       responses:
         "201":
           description: Created
@@ -1831,6 +1920,22 @@ paths:
         "204":
           description: No Content
       summary: Remove a target
+      tags:
+      - target
+  /target/{target}/set-default:
+    patch:
+      description: Set target to default
+      operationId: SetDefaultTarget
+      parameters:
+      - description: Target name
+        in: path
+        name: target
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Set target to default
       tags:
       - target
   /workspace:

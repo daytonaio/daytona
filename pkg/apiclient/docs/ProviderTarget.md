@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**IsDefault** | **bool** |  | 
 **Name** | **string** |  | 
 **Options** | **string** | JSON encoded map of options | 
 **ProviderInfo** | [**ProviderProviderInfo**](ProviderProviderInfo.md) |  | 
@@ -12,7 +13,7 @@ Name | Type | Description | Notes
 
 ### NewProviderTarget
 
-`func NewProviderTarget(name string, options string, providerInfo ProviderProviderInfo, ) *ProviderTarget`
+`func NewProviderTarget(isDefault bool, name string, options string, providerInfo ProviderProviderInfo, ) *ProviderTarget`
 
 NewProviderTarget instantiates a new ProviderTarget object
 This constructor will assign default values to properties that have it defined,
@@ -26,6 +27,26 @@ will change when the set of required properties is changed
 NewProviderTargetWithDefaults instantiates a new ProviderTarget object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetIsDefault
+
+`func (o *ProviderTarget) GetIsDefault() bool`
+
+GetIsDefault returns the IsDefault field if non-nil, zero value otherwise.
+
+### GetIsDefaultOk
+
+`func (o *ProviderTarget) GetIsDefaultOk() (*bool, bool)`
+
+GetIsDefaultOk returns a tuple with the IsDefault field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetIsDefault
+
+`func (o *ProviderTarget) SetIsDefault(v bool)`
+
+SetIsDefault sets IsDefault field to given value.
+
 
 ### GetName
 
