@@ -12,7 +12,7 @@ options:
       usage: Display the version of Daytona
 see_also:
     - daytona agent - Start the agent process
-    - daytona autocomplete - Adds completion script for your shell enviornment
+    - daytona autocomplete - Adds a completion script for your shell environment
     - daytona docs - Opens the Daytona documentation in your default browser.
     - daytona expose - Expose a local port over stdout - Used by the Daytona CLI to make direct connections to the project
     - daytona forward - Forward a port publicly via an URL

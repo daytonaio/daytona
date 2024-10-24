@@ -20,7 +20,7 @@ daytona [flags]
 ### SEE ALSO
 
 * [daytona agent](daytona_agent.md)	 - Start the agent process
-* [daytona autocomplete](daytona_autocomplete.md)	 - Adds completion script for your shell enviornment
+* [daytona autocomplete](daytona_autocomplete.md)	 - Adds a completion script for your shell environment
 * [daytona docs](daytona_docs.md)	 - Opens the Daytona documentation in your default browser.
 * [daytona expose](daytona_expose.md)	 - Expose a local port over stdout - Used by the Daytona CLI to make direct connections to the project
 * [daytona forward](daytona_forward.md)	 - Forward a port publicly via an URL

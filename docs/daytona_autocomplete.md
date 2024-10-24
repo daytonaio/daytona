@@ -1,6 +1,6 @@
 ## daytona autocomplete
 
-Adds completion script for your shell enviornment
+Adds a completion script for your shell environment
 
 ```
 daytona autocomplete [bash|zsh|fish|powershell] [flags]
