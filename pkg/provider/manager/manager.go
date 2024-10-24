@@ -6,6 +6,7 @@ package manager
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -22,6 +23,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const DEFAULT_INSTALL_LOCK_FILE_NAME = "default-install.lock"
+
 type pluginRef struct {
 	client *plugin.Client
 	path   string
@@ -35,11 +38,12 @@ var ProviderHandshakeConfig = plugin.HandshakeConfig{
 }
 
 type IProviderManager interface {
-	DownloadProvider(ctx context.Context, downloadUrls map[os_util.OperatingSystem]string, providerName string, throwIfPresent bool) (string, error)
+	DownloadProvider(ctx context.Context, downloadUrls map[os_util.OperatingSystem]string, providerName string) (string, error)
 	GetProvider(name string) (*Provider, error)
 	GetProviders() map[string]Provider
 	GetProvidersManifest() (*ProvidersManifest, error)
 	RegisterProvider(pluginPath string) error
+	SetPresetTargets(providerName string) error
 	TerminateProviderProcesses(providersBasePath string) error
 	UninstallProvider(name string) error
 	Purge() error
@@ -137,9 +141,15 @@ func (m *ProviderManager) RegisterProvider(pluginPath string) error {
 
 	m.pluginRefs[pluginRef.name] = pluginRef
 
-	p, err := m.dispenseProvider(pluginRef.client, pluginRef.name)
+	log.Infof("Provider %s initialized", pluginRef.name)
+
+	return nil
+}
+
+func (m *ProviderManager) SetPresetTargets(providerName string) error {
+	p, err := m.GetProvider(providerName)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get provider: %w", err)
 	}
 
 	existingTargets, err := m.providerTargetService.Map()
@@ -152,7 +162,7 @@ func (m *ProviderManager) RegisterProvider(pluginPath string) error {
 		return errors.New("failed to get preset targets: " + err.Error())
 	}
 
-	log.Info("Setting preset targets")
+	log.Infof("Setting preset targets for %s", providerName)
 	for _, target := range *presetTargets {
 		if _, ok := existingTargets[target.Name]; ok {
 			log.Infof("Target %s already exists. Skipping...", target.Name)
@@ -166,9 +176,7 @@ func (m *ProviderManager) RegisterProvider(pluginPath string) error {
 			log.Infof("Target %s set", target.Name)
 		}
 	}
-	log.Info("Preset targets set")
-
-	log.Infof("Provider %s initialized", pluginRef.name)
+	log.Infof("Preset targets set for %s", providerName)
 
 	return nil
 }
@@ -184,6 +192,21 @@ func (m *ProviderManager) UninstallProvider(name string) error {
 	if err != nil {
 		return errors.New("failed to remove provider: " + err.Error())
 	}
+
+	// After clearing up the contents, remake the directory and add a lock file that
+	// will be used to ensure that the provider is not reinstalled automatically
+	err = os.MkdirAll(pluginRef.path, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	lockFilePath := filepath.Join(pluginRef.path, DEFAULT_INSTALL_LOCK_FILE_NAME)
+
+	file, err := os.Create(lockFilePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
 
 	delete(m.pluginRefs, name)
 
