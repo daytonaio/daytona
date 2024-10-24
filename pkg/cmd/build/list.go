@@ -8,8 +8,8 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
-	"github.com/daytonaio/daytona/pkg/views"
 	view "github.com/daytonaio/daytona/pkg/views/build/list"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 )
 
@@ -36,14 +36,14 @@ var buildListCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		if len(buildList) == 0 {
-			views.RenderInfoMessage("No builds found.")
-			return nil
-		}
-
 		if format.FormatFlag != "" {
 			formattedData := format.NewFormatter(buildList)
 			formattedData.Print()
+			return nil
+		}
+
+		if len(buildList) == 0 {
+			views_util.NotifyEmptyBuildList(true)
 			return nil
 		}
 

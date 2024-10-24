@@ -13,6 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	containerregistry_view "github.com/daytonaio/daytona/pkg/views/containerregistry"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 )
 
@@ -47,7 +48,7 @@ var containerRegistryDeleteCmd = &cobra.Command{
 			}
 
 			if len(containerRegistries) == 0 {
-				views.RenderInfoMessage("No container registries found")
+				views_util.NotifyEmptyContainerRegistryList(false)
 				return nil
 			}
 

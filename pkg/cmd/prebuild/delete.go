@@ -10,6 +10,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
 )
@@ -49,7 +50,7 @@ var prebuildDeleteCmd = &cobra.Command{
 			}
 
 			if len(prebuilds) == 0 {
-				views.RenderInfoMessage("No prebuilds found")
+				views_util.NotifyEmptyPrebuildList(false)
 				return nil
 			}
 

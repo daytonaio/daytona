@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/provider"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 )
 
@@ -31,6 +32,11 @@ var providerUninstallCmd = &cobra.Command{
 		providerList, res, err := apiClient.ProviderAPI.ListProviders(ctx).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
+		}
+
+		if len(providerList) == 0 {
+			views_util.NotifyEmptyProviderList(false)
+			return nil
 		}
 
 		providerToUninstall, err := provider.GetProviderFromPrompt(provider.ProviderListToView(providerList), "Choose a Provider to Uninstall", false)

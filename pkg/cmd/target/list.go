@@ -8,8 +8,8 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
-	"github.com/daytonaio/daytona/pkg/views"
 	list_view "github.com/daytonaio/daytona/pkg/views/target/list"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 )
 
@@ -31,15 +31,14 @@ var targetListCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		if len(targetList) == 0 {
-			views.RenderInfoMessageBold("No targets found")
-			views.RenderInfoMessage("Use 'daytona target set' to add a target")
-			return nil
-		}
-
 		if format.FormatFlag != "" {
 			formattedData := format.NewFormatter(targetList)
 			formattedData.Print()
+			return nil
+		}
+
+		if len(targetList) == 0 {
+			views_util.NotifyEmptyTargetList(true)
 			return nil
 		}
 
