@@ -263,27 +263,44 @@ func (m SummaryModel) View() string {
 		return ""
 	}
 
-	helpLine := "enter: next • f10: advanced configuration"
+	helpLine := HelpStyle.Render("enter: next • f10: advanced configuration")
+	var content string
 
 	if len(m.projectList) > 1 || ProjectsConfigurationChanged {
-		return renderSummaryView(m) + "\n" + HelpStyle.Render(helpLine)
+		content = renderSummaryView(m)
+	} else {
+		content = m.form.WithHeight(5).View()
 	}
 
-	return m.form.WithHeight(5).View() + "\n" + HelpStyle.Render(helpLine)
+	return content + "\n" + helpLine
 }
 
 func renderSummaryView(m SummaryModel) string {
-	title := views.GetStyledMainTitle("SUMMARY")
-	if m.name != "" {
-		title = views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - %s %s", m.nameLabel, m.name))
-	}
-
 	summary, err := RenderSummary(m.name, m.projectList, m.defaults, m.nameLabel)
 	if err != nil {
 		log.Fatal(err)
 	}
 	m.viewport.SetContent(summary)
-	return title +
-		views.GetBorderedMessage(m.viewport.View()) + HelpStyle.Render("↑ up • ↓ down") +
-		m.form.WithHeight(5).View()
+
+	return renderTitle(m) + lipgloss.JoinVertical(lipgloss.Top, renderBody(m), renderFooter(m)) + m.form.WithHeight(5).View()
+}
+
+func renderTitle(m SummaryModel) string {
+	if m.name != "" {
+		return views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - %s %s", m.nameLabel, m.name))
+	}
+	return views.GetStyledMainTitle("SUMMARY")
+}
+
+func renderBody(m SummaryModel) string {
+	return m.viewport.Style.
+		Margin(1, 0, 0).
+		Padding(1, 2).
+		BorderForeground(views.LightGray).
+		Border(lipgloss.RoundedBorder()).
+		Render(m.viewport.View())
+}
+
+func renderFooter(m SummaryModel) string {
+	return HelpStyle.Align(lipgloss.Right).Width(m.viewport.Width + 4).Render("↑ up • ↓ down")
 }
