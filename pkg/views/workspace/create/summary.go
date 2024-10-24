@@ -168,7 +168,7 @@ func calculateViewportSize(content string, terminalHeight int) (width, height in
 }
 
 func NewSummaryModel(config SubmissionFormConfig) SummaryModel {
-	m := SummaryModel{}
+	m := SummaryModel{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
 	m.name = *config.ChosenName
