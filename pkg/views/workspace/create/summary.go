@@ -264,7 +264,7 @@ func (m SummaryModel) View() string {
 		return ""
 	}
 
-	helpLine := HelpStyle.Render("enter: next • f10: advanced configuration")
+	helpLine := helpStyle.Render("enter: next • f10: advanced configuration")
 	var content string
 
 	if len(m.projectList) > 1 || ProjectsConfigurationChanged {
@@ -303,5 +303,5 @@ func renderBody(m SummaryModel) string {
 }
 
 func renderFooter(m SummaryModel) string {
-	return HelpStyle.Align(lipgloss.Right).Width(m.viewport.Width + 4).Render("↑ up • ↓ down")
+	return helpStyle.Align(lipgloss.Right).Width(m.viewport.Width + 4).Render("↑ up • ↓ down")
 }
