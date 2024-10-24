@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/daytonaio/daytona/pkg/cmd/autocomplete"
 	"github.com/google/uuid"
 )
 
@@ -52,6 +53,9 @@ func GetConfig() (*Config, error) {
 
 	_, err = os.Stat(configFilePath)
 	if os.IsNotExist(err) {
+		// Setup autocompletion when adding initial config
+		_ = autocomplete.DetectShellAndSetupAutocompletion()
+
 		config := &Config{
 			Id:               uuid.NewString(),
 			DefaultIdeId:     DefaultIdeId,
