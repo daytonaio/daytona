@@ -8,8 +8,8 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
-	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/env"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 )
 
@@ -39,7 +39,7 @@ var listCmd = &cobra.Command{
 		}
 
 		if len(profileData.EnvVars) == 0 {
-			views.RenderInfoMessageBold("No environment variables set")
+			views_util.NotifyEmptyEnvVarList(true)
 			return nil
 		}
 

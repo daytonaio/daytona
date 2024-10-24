@@ -11,7 +11,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
-	"github.com/daytonaio/daytona/pkg/views"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	list_view "github.com/daytonaio/daytona/pkg/views/workspace/list"
 	"github.com/spf13/cobra"
 )
@@ -55,7 +55,7 @@ var ListCmd = &cobra.Command{
 		}
 
 		if len(workspaceList) == 0 {
-			views.RenderInfoMessage("The workspace list is empty. Start off by running 'daytona create'.")
+			views_util.NotifyEmptyWorkspaceList(true)
 			return nil
 		}
 

@@ -8,8 +8,8 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
-	"github.com/daytonaio/daytona/pkg/views"
 	projectconfig_view "github.com/daytonaio/daytona/pkg/views/projectconfig/list"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 )
 
@@ -46,14 +46,14 @@ var projectConfigListCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		if len(projectConfigs) == 0 {
-			views.RenderInfoMessage("No project configs found. Add a new project config by running 'daytona project-config add'")
-			return nil
-		}
-
 		if format.FormatFlag != "" {
 			formattedData := format.NewFormatter(projectConfigs)
 			formattedData.Print()
+			return nil
+		}
+
+		if len(projectConfigs) == 0 {
+			views_util.NotifyEmptyProjectConfigList(true)
 			return nil
 		}
 

@@ -11,6 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/build/info"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
 )
@@ -38,6 +39,11 @@ var buildInfoCmd = &cobra.Command{
 			buildList, res, err := apiClient.BuildAPI.ListBuilds(ctx).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
+			}
+
+			if len(buildList) == 0 {
+				views_util.NotifyEmptyBuildList(true)
+				return nil
 			}
 
 			if format.FormatFlag != "" {

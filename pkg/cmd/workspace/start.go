@@ -15,8 +15,8 @@ import (
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/views"
 	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -63,6 +63,11 @@ var StartCmd = &cobra.Command{
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
+			}
+
+			if len(workspaceList) == 0 {
+				views_util.NotifyEmptyWorkspaceList(true)
+				return nil
 			}
 
 			selectedWorkspaces := selection.GetWorkspacesFromPrompt(workspaceList, "Start")

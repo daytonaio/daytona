@@ -16,7 +16,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -78,6 +77,12 @@ var DeleteCmd = &cobra.Command{
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
+
+			if len(workspaceList) == 0 {
+				views_util.NotifyEmptyWorkspaceList(false)
+				return nil
+			}
+
 			workspaceDeleteList = selection.GetWorkspacesFromPrompt(workspaceList, "Delete")
 			for _, workspace := range workspaceDeleteList {
 				workspaceDeleteListNames = append(workspaceDeleteListNames, workspace.Name)

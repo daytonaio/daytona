@@ -14,6 +14,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/cmd/build"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/prebuild/add"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
 )
@@ -101,7 +102,7 @@ var prebuildUpdateCmd = &cobra.Command{
 			}
 
 			if len(prebuilds) == 0 {
-				views.RenderInfoMessage("No prebuilds found")
+				views_util.NotifyEmptyPrebuildList(true)
 				return nil
 			}
 
