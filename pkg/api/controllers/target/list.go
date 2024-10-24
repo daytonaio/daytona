@@ -34,21 +34,21 @@ func ListTargets(ctx *gin.Context) {
 	for _, target := range targets {
 		p, err := server.ProviderManager.GetProvider(target.ProviderInfo.Name)
 		if err != nil {
-			ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("provider not found: %w", err))
-			return
+			target.Options = err.Error()
+			continue
 		}
 
 		manifest, err := (*p).GetTargetManifest()
 		if err != nil {
-			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get provider manifest: %w", err))
-			return
+			target.Options = err.Error()
+			continue
 		}
 
 		var opts map[string]interface{}
 		err = json.Unmarshal([]byte(target.Options), &opts)
 		if err != nil {
-			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to unmarshal options: %w", err))
-			return
+			target.Options = err.Error()
+			continue
 		}
 
 		for name, property := range *manifest {
@@ -59,8 +59,8 @@ func ListTargets(ctx *gin.Context) {
 
 		updatedOptions, err := json.MarshalIndent(opts, "", "  ")
 		if err != nil {
-			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to marshal updated options: %w", err))
-			return
+			target.Options = err.Error()
+			continue
 		}
 
 		target.Options = string(updatedOptions)
