@@ -46,9 +46,9 @@ func (s *DockerClientTestSuite) TestGetProjectInfo() {
 
 func (s *DockerClientTestSuite) TestGetWorkspaceInfo() {
 	workspaceWithoutProjects := &workspace.Workspace{
-		Id:     "123",
-		Name:   "test",
-		Target: "local",
+		Id:           "123",
+		Name:         "test",
+		TargetConfig: "local",
 	}
 
 	wsInfo, err := s.dockerClient.GetWorkspaceInfo(workspaceWithoutProjects)

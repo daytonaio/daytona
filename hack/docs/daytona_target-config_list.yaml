@@ -1,0 +1,13 @@
+name: daytona target-config list
+synopsis: List target configs
+usage: daytona target-config list [flags]
+options:
+    - name: format
+      shorthand: f
+      usage: Output format. Must be one of (yaml, json)
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona target-config - Manage targets configs

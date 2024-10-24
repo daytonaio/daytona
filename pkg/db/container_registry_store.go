@@ -30,12 +30,12 @@ func (s *ContainerRegistryStore) List() ([]*containerregistry.ContainerRegistry,
 		return nil, tx.Error
 	}
 
-	containerregistryTargets := []*containerregistry.ContainerRegistry{}
+	containerRegistries := []*containerregistry.ContainerRegistry{}
 	for _, containerRegistryDTO := range containerRegistryDTOs {
-		containerregistryTargets = append(containerregistryTargets, ToContainerRegistry(containerRegistryDTO))
+		containerRegistries = append(containerRegistries, ToContainerRegistry(containerRegistryDTO))
 	}
 
-	return containerregistryTargets, nil
+	return containerRegistries, nil
 }
 
 func (s *ContainerRegistryStore) Find(server string) (*containerregistry.ContainerRegistry, error) {

@@ -38,7 +38,7 @@ see_also:
     - daytona ssh - SSH into a project using the terminal
     - daytona start - Start a workspace
     - daytona stop - Stop a workspace
-    - daytona target - Manage provider targets
+    - daytona target-config - Manage targets configs
     - daytona telemetry - Manage telemetry collection
     - daytona use - Use profile [PROFILE_NAME]
     - daytona version - Print the version number
