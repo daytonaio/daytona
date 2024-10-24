@@ -23,7 +23,7 @@ const (
 	DEVCONTAINER_FILEPATH = ".devcontainer/devcontainer.json"
 )
 
-var HelpStyle = lipgloss.NewStyle().Foreground(views.Gray)
+var helpStyle = lipgloss.NewStyle().Foreground(views.Gray)
 
 type ProjectConfigurationData struct {
 	BuildChoice          string
