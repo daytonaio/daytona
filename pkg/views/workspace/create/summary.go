@@ -236,7 +236,7 @@ func (m SummaryModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.viewport.LineDown(1) // Scroll down
 		}
 	case tea.WindowSizeMsg:
-		m.viewport.Height = max(1, min(25, min(m.height, msg.Height-15)))
+		m.viewport.Height = max(1, min(msg.Height-19, m.height))
 		m.viewport.Width = max(20, min(maxWidth, min(m.width, msg.Width-15)))
 
 	}
