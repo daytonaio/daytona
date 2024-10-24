@@ -236,7 +236,7 @@ func (m SummaryModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case tea.WindowSizeMsg:
 		m.viewport.Height = max(1, min(m.height, msg.Height-15))
-		m.viewport.Width = max(20, min(m.width, msg.Width-50))
+		m.viewport.Width = max(20, min(maxWidth, min(m.width, msg.Width-15)))
 
 	}
 
