@@ -156,15 +156,16 @@ func projectDetailOutput(projectDetailKey ProjectDetail, projectDetailValue stri
 
 func calculateViewportSize(content string, terminalHeight int) (width, height int) {
 	lines := strings.Split(content, "\n")
-	maxWidth := slices.MaxFunc(lines, func(a, b string) int {
+	longestLine := slices.MaxFunc(lines, func(a, b string) int {
 		return len(a) - len(b)
 	})
+	width = len(longestLine)
 
 	maxHeight := terminalHeight
 
 	height = int(math.Min(float64(len(lines)), float64(maxHeight)))
 
-	return len(maxWidth), height
+	return width, height
 }
 
 func NewSummaryModel(config SubmissionFormConfig) SummaryModel {
