@@ -29,7 +29,7 @@ func (s *WorkspaceService) GetWorkspace(ctx context.Context, workspaceId string,
 		return &response, nil
 	}
 
-	target, err := s.targetStore.Find(&provider.TargetFilter{Name: &ws.Target})
+	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &ws.TargetConfig})
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (s *WorkspaceService) GetWorkspace(ctx context.Context, workspaceId string,
 	resultCh := make(chan provisioner.InfoResult, 1)
 
 	go func() {
-		workspaceInfo, err := s.provisioner.GetWorkspaceInfo(ctx, ws, target)
+		workspaceInfo, err := s.provisioner.GetWorkspaceInfo(ctx, ws, targetConfig)
 		resultCh <- provisioner.InfoResult{Info: workspaceInfo, Err: err}
 	}()
 

@@ -35,9 +35,9 @@ func (s *WorkspaceService) ListWorkspaces(ctx context.Context, verbose bool) ([]
 		go func(i int) {
 			defer wg.Done()
 
-			target, err := s.targetStore.Find(&provider.TargetFilter{Name: &w.Target})
+			target, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &w.TargetConfig})
 			if err != nil {
-				log.Error(fmt.Errorf("failed to get target for %s", w.Target))
+				log.Error(fmt.Errorf("failed to get target for %s", w.TargetConfig))
 				return
 			}
 

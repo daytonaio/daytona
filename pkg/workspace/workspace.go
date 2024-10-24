@@ -10,12 +10,12 @@ import (
 )
 
 type Workspace struct {
-	Id       string             `json:"id" validate:"required"`
-	Name     string             `json:"name" validate:"required"`
-	Projects []*project.Project `json:"projects" validate:"required"`
-	Target   string             `json:"target" validate:"required"`
-	ApiKey   string             `json:"-"`
-	EnvVars  map[string]string  `json:"-"`
+	Id           string             `json:"id" validate:"required"`
+	Name         string             `json:"name" validate:"required"`
+	Projects     []*project.Project `json:"projects" validate:"required"`
+	TargetConfig string             `json:"targetConfig" validate:"required"`
+	ApiKey       string             `json:"-"`
+	EnvVars      map[string]string  `json:"-"`
 } // @name Workspace
 
 type WorkspaceInfo struct {

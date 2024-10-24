@@ -14,7 +14,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/profiledata"
 	"github.com/daytonaio/daytona/pkg/server/projectconfig"
-	"github.com/daytonaio/daytona/pkg/server/providertargets"
+	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/hashicorp/go-plugin"
@@ -26,7 +26,7 @@ type ServerInstanceConfig struct {
 	Config                   Config
 	Version                  string
 	TailscaleServer          TailscaleServer
-	ProviderTargetService    providertargets.IProviderTargetService
+	TargetConfigService      targetconfigs.ITargetConfigService
 	ContainerRegistryService containerregistries.IContainerRegistryService
 	BuildService             builds.IBuildService
 	ProjectConfigService     projectconfig.IProjectConfigService
@@ -55,7 +55,7 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 			config:                   serverConfig.Config,
 			Version:                  serverConfig.Version,
 			TailscaleServer:          serverConfig.TailscaleServer,
-			ProviderTargetService:    serverConfig.ProviderTargetService,
+			TargetConfigService:      serverConfig.TargetConfigService,
 			ContainerRegistryService: serverConfig.ContainerRegistryService,
 			BuildService:             serverConfig.BuildService,
 			ProjectConfigService:     serverConfig.ProjectConfigService,
@@ -77,7 +77,7 @@ type Server struct {
 	config                   Config
 	Version                  string
 	TailscaleServer          TailscaleServer
-	ProviderTargetService    providertargets.IProviderTargetService
+	TargetConfigService      targetconfigs.ITargetConfigService
 	ContainerRegistryService containerregistries.IContainerRegistryService
 	BuildService             builds.IBuildService
 	ProjectConfigService     projectconfig.IProjectConfigService

@@ -102,7 +102,7 @@ func getSingleProjectOutput(project *apiclient.Project, isCreationView bool) str
 	output += getInfoLinePrNumber(project.Repository.PrNumber, project.Repository, project.State)
 
 	if !isCreationView {
-		output += getInfoLine("Target", project.Target) + "\n"
+		output += getInfoLine("Target Config", project.TargetConfig) + "\n"
 	}
 	output += getInfoLine("Repository", repositoryUrl)
 
@@ -125,7 +125,7 @@ func getProjectsOutputs(projects []apiclient.Project, isCreationView bool) strin
 		output += getInfoLinePrNumber(project.Repository.PrNumber, project.Repository, project.State)
 
 		if !isCreationView {
-			output += getInfoLine("Target", project.Target)
+			output += getInfoLine("Target Config", project.TargetConfig)
 		}
 		output += getInfoLine("Repository", project.Repository.Url)
 		if project.Name != projects[len(projects)-1].Name {
