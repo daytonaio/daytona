@@ -34,20 +34,20 @@ func ListTargets(ctx *gin.Context) {
 	for _, target := range targets {
 		p, err := server.ProviderManager.GetProvider(target.ProviderInfo.Name)
 		if err != nil {
-			target.Options = err.Error()
+			target.Options = fmt.Sprintf("Error: %s", err.Error())
 			continue
 		}
 
 		manifest, err := (*p).GetTargetManifest()
 		if err != nil {
-			target.Options = err.Error()
+			target.Options = fmt.Sprintf("Error: %s", err.Error())
 			continue
 		}
 
 		var opts map[string]interface{}
 		err = json.Unmarshal([]byte(target.Options), &opts)
 		if err != nil {
-			target.Options = err.Error()
+			target.Options = fmt.Sprintf("Error: %s", err.Error())
 			continue
 		}
 
@@ -59,7 +59,7 @@ func ListTargets(ctx *gin.Context) {
 
 		updatedOptions, err := json.MarshalIndent(opts, "", "  ")
 		if err != nil {
-			target.Options = err.Error()
+			target.Options = fmt.Sprintf("Error: %s", err.Error())
 			continue
 		}
 
