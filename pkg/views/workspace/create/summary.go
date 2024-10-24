@@ -7,8 +7,11 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
+	"slices"
 	"strings"
 
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
@@ -35,11 +38,13 @@ type SummaryModel struct {
 	styles      *Styles
 	form        *huh.Form
 	width       int
+	height      int
 	quitting    bool
 	name        string
 	projectList []apiclient.CreateProjectDTO
 	defaults    *views_util.ProjectConfigDefaults
 	nameLabel   string
+	viewport    viewport.Model
 }
 
 type SubmissionFormConfig struct {
@@ -87,14 +92,6 @@ func RunSubmissionForm(config SubmissionFormConfig) error {
 
 func RenderSummary(name string, projectList []apiclient.CreateProjectDTO, defaults *views_util.ProjectConfigDefaults, nameLabel string) (string, error) {
 	var output string
-	if name == "" {
-		output = views.GetStyledMainTitle("SUMMARY")
-	} else {
-		output = views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - %s %s", nameLabel, name))
-	}
-
-	output += "\n\n"
-
 	for i := range projectList {
 		if len(projectList) == 1 {
 			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render("Project"), (projectList[i].Source.Repository.Url))
@@ -157,6 +154,20 @@ func projectDetailOutput(projectDetailKey ProjectDetail, projectDetailValue stri
 	return fmt.Sprintf("\t%s%-*s%s", lipgloss.NewStyle().Foreground(views.Green).Render(string(projectDetailKey)), DEFAULT_PADDING-len(string(projectDetailKey)), EMPTY_STRING, projectDetailValue)
 }
 
+func calculateViewportSize(content string, terminalHeight int) (width, height int) {
+	lines := strings.Split(content, "\n")
+	longestLine := slices.MaxFunc(lines, func(a, b string) int {
+		return len(a) - len(b)
+	})
+	width = len(longestLine)
+
+	maxHeight := terminalHeight
+
+	height = int(math.Min(float64(len(lines)), float64(maxHeight)))
+
+	return width, height
+}
+
 func NewSummaryModel(config SubmissionFormConfig) SummaryModel {
 	m := SummaryModel{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
@@ -192,6 +203,13 @@ func NewSummaryModel(config SubmissionFormConfig) SummaryModel {
 		),
 	).WithShowHelp(false).WithTheme(views.GetCustomTheme())
 
+	content, _ := RenderSummary(m.name, m.projectList, m.defaults, m.nameLabel)
+
+	// Dynamically calculate viewport size
+	m.width, m.height = calculateViewportSize(content, views_util.GetTerminalHeight())
+	m.viewport = viewport.New(m.width, m.height)
+	m.viewport.SetContent(content)
+
 	return m
 }
 
@@ -212,7 +230,15 @@ func (m SummaryModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.form.State = huh.StateCompleted
 			configureCheck = true
 			return m, tea.Quit
+		case "up":
+			m.viewport.LineUp(1) // Scroll up
+		case "down":
+			m.viewport.LineDown(1) // Scroll down
 		}
+	case tea.WindowSizeMsg:
+		m.viewport.Height = max(1, min(m.height, msg.Height-15))
+		m.viewport.Width = max(20, min(maxWidth, min(m.width, msg.Width-15)))
+
 	}
 
 	var cmds []tea.Cmd
@@ -238,15 +264,44 @@ func (m SummaryModel) View() string {
 		return ""
 	}
 
-	view := m.form.WithHeight(5).View() + "\n" + configurationHelpLine
+	helpLine := helpStyle.Render("enter: next • f10: advanced configuration")
+	var content string
 
-	if len(m.projectList) > 1 || len(m.projectList) == 1 && ProjectsConfigurationChanged {
-		summary, err := RenderSummary(m.name, m.projectList, m.defaults, m.nameLabel)
-		if err != nil {
-			log.Fatal(err)
-		}
-		view = views.GetBorderedMessage(summary) + "\n" + view
+	if len(m.projectList) > 1 || ProjectsConfigurationChanged {
+		content = renderSummaryView(m)
+	} else {
+		content = m.form.WithHeight(5).View()
 	}
 
-	return view
+	return content + "\n" + helpLine
+}
+
+func renderSummaryView(m SummaryModel) string {
+	summary, err := RenderSummary(m.name, m.projectList, m.defaults, m.nameLabel)
+	if err != nil {
+		log.Fatal(err)
+	}
+	m.viewport.SetContent(summary)
+
+	return renderTitle(m) + lipgloss.JoinVertical(lipgloss.Top, renderBody(m), renderFooter(m)) + m.form.WithHeight(5).View()
+}
+
+func renderTitle(m SummaryModel) string {
+	if m.name != "" {
+		return views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - %s %s", m.nameLabel, m.name))
+	}
+	return views.GetStyledMainTitle("SUMMARY")
+}
+
+func renderBody(m SummaryModel) string {
+	return m.viewport.Style.
+		Margin(1, 0, 0).
+		Padding(1, 2).
+		BorderForeground(views.LightGray).
+		Border(lipgloss.RoundedBorder()).
+		Render(m.viewport.View())
+}
+
+func renderFooter(m SummaryModel) string {
+	return helpStyle.Align(lipgloss.Right).Width(m.viewport.Width + 4).Render("↑ up • ↓ down")
 }

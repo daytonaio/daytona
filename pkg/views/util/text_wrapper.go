@@ -48,3 +48,11 @@ func GetTerminalWidth() int {
 	}
 	return width
 }
+func GetTerminalHeight() int {
+	_, height, err := term.GetSize(int(os.Stdout.Fd()))
+	const maxHeight = 50
+	if err != nil {
+		return maxHeight
+	}
+	return height
+}
