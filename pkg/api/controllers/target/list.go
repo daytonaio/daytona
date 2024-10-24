@@ -4,6 +4,7 @@
 package target
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -28,6 +29,41 @@ func ListTargets(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list targets: %w", err))
 		return
+	}
+
+	for _, target := range targets {
+		p, err := server.ProviderManager.GetProvider(target.ProviderInfo.Name)
+		if err != nil {
+			ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("provider not found: %w", err))
+			return
+		}
+
+		manifest, err := (*p).GetTargetManifest()
+		if err != nil {
+			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get provider manifest: %w", err))
+			return
+		}
+
+		var opts map[string]interface{}
+		err = json.Unmarshal([]byte(target.Options), &opts)
+		if err != nil {
+			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to unmarshal options: %w", err))
+			return
+		}
+
+		for name, property := range *manifest {
+			if property.InputMasked {
+				delete(opts, name)
+			}
+		}
+
+		updatedOptions, err := json.MarshalIndent(opts, "", "  ")
+		if err != nil {
+			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to marshal updated options: %w", err))
+			return
+		}
+
+		target.Options = string(updatedOptions)
 	}
 
 	ctx.JSON(200, targets)
