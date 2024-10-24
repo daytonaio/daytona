@@ -15,7 +15,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	os_util "github.com/daytonaio/daytona/pkg/os"
 	. "github.com/daytonaio/daytona/pkg/provider"
-	"github.com/daytonaio/daytona/pkg/server/providertargets"
+	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 	"github.com/shirou/gopsutil/process"
@@ -51,7 +51,7 @@ type ProviderManagerConfig struct {
 	ServerVersion            string
 	ApiUrl                   string
 	LogsDir                  string
-	ProviderTargetService    providertargets.IProviderTargetService
+	TargetConfigService      targetconfigs.ITargetConfigService
 	RegistryUrl              string
 	BaseDir                  string
 	CreateProviderNetworkKey func(providerName string) (string, error)
@@ -67,7 +67,7 @@ func NewProviderManager(config ProviderManagerConfig) *ProviderManager {
 		serverVersion:            config.ServerVersion,
 		apiUrl:                   config.ApiUrl,
 		logsDir:                  config.LogsDir,
-		providerTargetService:    config.ProviderTargetService,
+		targetConfigService:      config.TargetConfigService,
 		registryUrl:              config.RegistryUrl,
 		baseDir:                  config.BaseDir,
 		createProviderNetworkKey: config.CreateProviderNetworkKey,
@@ -85,7 +85,7 @@ type ProviderManager struct {
 	serverPort               uint32
 	apiPort                  uint32
 	logsDir                  string
-	providerTargetService    providertargets.IProviderTargetService
+	targetConfigService      targetconfigs.ITargetConfigService
 	registryUrl              string
 	baseDir                  string
 	createProviderNetworkKey func(providerName string) (string, error)
@@ -142,12 +142,12 @@ func (m *ProviderManager) RegisterProvider(pluginPath string) error {
 		return err
 	}
 
-	existingTargets, err := m.providerTargetService.Map()
+	existingTargets, err := m.targetConfigService.Map()
 	if err != nil {
 		return errors.New("failed to get targets: " + err.Error())
 	}
 
-	presetTargets, err := (*p).GetPresetTargets()
+	presetTargets, err := (*p).GetPresetTargetConfigs()
 	if err != nil {
 		return errors.New("failed to get preset targets: " + err.Error())
 	}
@@ -159,7 +159,7 @@ func (m *ProviderManager) RegisterProvider(pluginPath string) error {
 			continue
 		}
 
-		err := m.providerTargetService.Save(&target)
+		err := m.targetConfigService.Save(&target)
 		if err != nil {
 			log.Errorf("Failed to set target %s: %s", target.Name, err)
 		} else {

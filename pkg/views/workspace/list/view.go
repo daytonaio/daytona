@@ -27,7 +27,7 @@ type RowData struct {
 func ListWorkspaces(workspaceList []apiclient.WorkspaceDTO, specifyGitProviders bool, verbose bool, activeProfileName string) {
 	SortWorkspaces(&workspaceList, verbose)
 
-	headers := []string{"Workspace", "Repository", "Target", "Status", "Created", "Branch"}
+	headers := []string{"Workspace", "Repository", "Target Config", "Status", "Created", "Branch"}
 
 	data := [][]string{}
 
@@ -149,7 +149,7 @@ func getWorkspaceTableRowData(workspace apiclient.WorkspaceDTO, specifyGitProvid
 		rowData.Branch = workspace.Projects[0].Repository.Branch
 	}
 
-	rowData.Target = workspace.Target + views_util.AdditionalPropertyPadding
+	rowData.Target = workspace.TargetConfig + views_util.AdditionalPropertyPadding
 
 	if workspace.Info != nil && workspace.Info.Projects != nil && len(workspace.Info.Projects) > 0 {
 		rowData.Created = util.FormatTimestamp(workspace.Info.Projects[0].Created)
@@ -167,7 +167,7 @@ func getProjectTableRowData(workspaceDTO apiclient.WorkspaceDTO, project apiclie
 	rowData.Repository = util.GetRepositorySlugFromUrl(project.Repository.Url, specifyGitProviders)
 	rowData.Branch = project.Repository.Branch
 
-	rowData.Target = project.Target + views_util.AdditionalPropertyPadding
+	rowData.Target = project.TargetConfig + views_util.AdditionalPropertyPadding
 
 	if project.State != nil && project.State.Uptime > 0 {
 		rowData.Status = util.FormatUptime(project.State.Uptime)

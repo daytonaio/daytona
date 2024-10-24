@@ -21,7 +21,7 @@ func (s *WorkspaceService) RemoveWorkspace(ctx context.Context, workspaceId stri
 
 	log.Infof("Destroying workspace %s", workspace.Id)
 
-	target, err := s.targetStore.Find(&provider.TargetFilter{Name: &workspace.Target})
+	target, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &workspace.TargetConfig})
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (s *WorkspaceService) ForceRemoveWorkspace(ctx context.Context, workspaceId
 
 	log.Infof("Destroying workspace %s", workspace.Id)
 
-	target, _ := s.targetStore.Find(&provider.TargetFilter{Name: &workspace.Target})
+	target, _ := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &workspace.TargetConfig})
 
 	for _, project := range workspace.Projects {
 		//	todo: go routines

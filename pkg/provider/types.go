@@ -32,40 +32,40 @@ type InitializeProviderRequest struct {
 }
 
 type WorkspaceRequest struct {
-	TargetOptions string
-	Workspace     *workspace.Workspace
+	TargetConfigOptions string
+	Workspace           *workspace.Workspace
 }
 
 type ProjectRequest struct {
-	TargetOptions     string
-	ContainerRegistry *containerregistry.ContainerRegistry
-	Project           *project.Project
-	GitProviderConfig *gitprovider.GitProviderConfig
+	TargetConfigOptions string
+	ContainerRegistry   *containerregistry.ContainerRegistry
+	Project             *project.Project
+	GitProviderConfig   *gitprovider.GitProviderConfig
 }
 
-type ProviderTarget struct {
+type TargetConfig struct {
 	Name         string       `json:"name" validate:"required"`
 	ProviderInfo ProviderInfo `json:"providerInfo" validate:"required"`
 	// JSON encoded map of options
 	Options   string `json:"options" validate:"required"`
 	IsDefault bool   `json:"isDefault" validate:"required"`
-} // @name ProviderTarget
+} // @name TargetConfig
 
-type ProviderTargetManifest map[string]ProviderTargetProperty // @name ProviderTargetManifest
+type TargetConfigManifest map[string]TargetConfigProperty // @name TargetConfigManifest
 
-type ProviderTargetPropertyType string
+type TargetConfigPropertyType string
 
 const (
-	ProviderTargetPropertyTypeString   ProviderTargetPropertyType = "string"
-	ProviderTargetPropertyTypeOption   ProviderTargetPropertyType = "option"
-	ProviderTargetPropertyTypeBoolean  ProviderTargetPropertyType = "boolean"
-	ProviderTargetPropertyTypeInt      ProviderTargetPropertyType = "int"
-	ProviderTargetPropertyTypeFloat    ProviderTargetPropertyType = "float"
-	ProviderTargetPropertyTypeFilePath ProviderTargetPropertyType = "file-path"
+	TargetConfigPropertyTypeString   TargetConfigPropertyType = "string"
+	TargetConfigPropertyTypeOption   TargetConfigPropertyType = "option"
+	TargetConfigPropertyTypeBoolean  TargetConfigPropertyType = "boolean"
+	TargetConfigPropertyTypeInt      TargetConfigPropertyType = "int"
+	TargetConfigPropertyTypeFloat    TargetConfigPropertyType = "float"
+	TargetConfigPropertyTypeFilePath TargetConfigPropertyType = "file-path"
 )
 
-type ProviderTargetProperty struct {
-	Type        ProviderTargetPropertyType
+type TargetConfigProperty struct {
+	Type        TargetConfigPropertyType
 	InputMasked bool
 	// A regex string matched with the name of the target to determine if the property should be disabled
 	// If the regex matches the target name, the property will be disabled
@@ -80,4 +80,4 @@ type ProviderTargetProperty struct {
 	Options []string
 	// Suggestions is an optional list of auto-complete values to assist the user while filling the field
 	Suggestions []string
-}
+} // @name TargetConfigProperty

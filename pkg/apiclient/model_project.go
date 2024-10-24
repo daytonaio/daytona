@@ -28,7 +28,7 @@ type Project struct {
 	Name                string            `json:"name"`
 	Repository          GitRepository     `json:"repository"`
 	State               *ProjectState     `json:"state,omitempty"`
-	Target              string            `json:"target"`
+	TargetConfig        string            `json:"targetConfig"`
 	User                string            `json:"user"`
 	WorkspaceId         string            `json:"workspaceId"`
 }
@@ -39,13 +39,13 @@ type _Project Project
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProject(envVars map[string]string, image string, name string, repository GitRepository, target string, user string, workspaceId string) *Project {
+func NewProject(envVars map[string]string, image string, name string, repository GitRepository, targetConfig string, user string, workspaceId string) *Project {
 	this := Project{}
 	this.EnvVars = envVars
 	this.Image = image
 	this.Name = name
 	this.Repository = repository
-	this.Target = target
+	this.TargetConfig = targetConfig
 	this.User = user
 	this.WorkspaceId = workspaceId
 	return &this
@@ -251,28 +251,28 @@ func (o *Project) SetState(v ProjectState) {
 	o.State = &v
 }
 
-// GetTarget returns the Target field value
-func (o *Project) GetTarget() string {
+// GetTargetConfig returns the TargetConfig field value
+func (o *Project) GetTargetConfig() string {
 	if o == nil {
 		var ret string
 		return ret
 	}
 
-	return o.Target
+	return o.TargetConfig
 }
 
-// GetTargetOk returns a tuple with the Target field value
+// GetTargetConfigOk returns a tuple with the TargetConfig field value
 // and a boolean to check if the value has been set.
-func (o *Project) GetTargetOk() (*string, bool) {
+func (o *Project) GetTargetConfigOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Target, true
+	return &o.TargetConfig, true
 }
 
-// SetTarget sets field value
-func (o *Project) SetTarget(v string) {
-	o.Target = v
+// SetTargetConfig sets field value
+func (o *Project) SetTargetConfig(v string) {
+	o.TargetConfig = v
 }
 
 // GetUser returns the User field value
@@ -346,7 +346,7 @@ func (o Project) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.State) {
 		toSerialize["state"] = o.State
 	}
-	toSerialize["target"] = o.Target
+	toSerialize["targetConfig"] = o.TargetConfig
 	toSerialize["user"] = o.User
 	toSerialize["workspaceId"] = o.WorkspaceId
 	return toSerialize, nil
@@ -361,7 +361,7 @@ func (o *Project) UnmarshalJSON(data []byte) (err error) {
 		"image",
 		"name",
 		"repository",
-		"target",
+		"targetConfig",
 		"user",
 		"workspaceId",
 	}

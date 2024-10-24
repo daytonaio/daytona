@@ -27,8 +27,8 @@ var project1 = &project.Project{
 		Url:  "https://github.com/daytonaio/daytona",
 		Name: "daytona",
 	},
-	WorkspaceId: "123",
-	Target:      "local",
+	WorkspaceId:  "123",
+	TargetConfig: "local",
 	State: &project.ProjectState{
 		UpdatedAt: "123",
 		Uptime:    148,
@@ -37,9 +37,9 @@ var project1 = &project.Project{
 }
 
 var workspace1 = &workspace.Workspace{
-	Id:     "123",
-	Name:   "test",
-	Target: "local",
+	Id:           "123",
+	Name:         "test",
+	TargetConfig: "local",
 	Projects: []*project.Project{
 		project1,
 	},

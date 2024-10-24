@@ -21,10 +21,10 @@ type ProjectDTO struct {
 } //	@name	ProjectDTO
 
 type CreateWorkspaceDTO struct {
-	Id       string             `json:"id" validate:"required"`
-	Name     string             `json:"name" validate:"required"`
-	Target   string             `json:"target" validate:"required"`
-	Projects []CreateProjectDTO `json:"projects" validate:"required,gt=0,dive"`
+	Id           string             `json:"id" validate:"required"`
+	Name         string             `json:"name" validate:"required"`
+	TargetConfig string             `json:"targetConfig" validate:"required"`
+	Projects     []CreateProjectDTO `json:"projects" validate:"required,gt=0,dive"`
 } //	@name	CreateWorkspaceDTO
 
 type CreateProjectDTO struct {

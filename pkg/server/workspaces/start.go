@@ -24,7 +24,7 @@ func (s *WorkspaceService) StartWorkspace(ctx context.Context, workspaceId strin
 		return ErrWorkspaceNotFound
 	}
 
-	target, err := s.targetStore.Find(&provider.TargetFilter{Name: &w.Target})
+	target, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &w.TargetConfig})
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func (s *WorkspaceService) StartProject(ctx context.Context, workspaceId, projec
 		return ErrProjectNotFound
 	}
 
-	target, err := s.targetStore.Find(&provider.TargetFilter{Name: &w.Target})
+	target, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &w.TargetConfig})
 	if err != nil {
 		return err
 	}
@@ -78,7 +78,7 @@ func (s *WorkspaceService) StartProject(ctx context.Context, workspaceId, projec
 	return s.startProject(ctx, project, target, projectLogger)
 }
 
-func (s *WorkspaceService) startWorkspace(ctx context.Context, ws *workspace.Workspace, target *provider.ProviderTarget, wsLogWriter io.Writer) error {
+func (s *WorkspaceService) startWorkspace(ctx context.Context, ws *workspace.Workspace, target *provider.TargetConfig, wsLogWriter io.Writer) error {
 	wsLogWriter.Write([]byte("Starting workspace\n"))
 
 	ws.EnvVars = workspace.GetWorkspaceEnvVars(ws, workspace.WorkspaceEnvVarParams{
@@ -108,7 +108,7 @@ func (s *WorkspaceService) startWorkspace(ctx context.Context, ws *workspace.Wor
 	return nil
 }
 
-func (s *WorkspaceService) startProject(ctx context.Context, p *project.Project, target *provider.ProviderTarget, logWriter io.Writer) error {
+func (s *WorkspaceService) startProject(ctx context.Context, p *project.Project, target *provider.TargetConfig, logWriter io.Writer) error {
 	logWriter.Write([]byte(fmt.Sprintf("Starting project %s\n", p.Name)))
 
 	projectToStart := *p

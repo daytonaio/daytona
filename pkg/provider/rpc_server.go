@@ -28,8 +28,8 @@ func (m *ProviderRPCServer) GetInfo(arg interface{}, resp *ProviderInfo) error {
 	return nil
 }
 
-func (m *ProviderRPCServer) GetTargetManifest(arg interface{}, resp *ProviderTargetManifest) error {
-	targetManifest, err := m.Impl.GetTargetManifest()
+func (m *ProviderRPCServer) GetTargetConfigManifest(arg interface{}, resp *TargetConfigManifest) error {
+	targetManifest, err := m.Impl.GetTargetConfigManifest()
 	if err != nil {
 		return err
 	}
@@ -38,8 +38,8 @@ func (m *ProviderRPCServer) GetTargetManifest(arg interface{}, resp *ProviderTar
 	return nil
 }
 
-func (m *ProviderRPCServer) GetPresetTargets(arg interface{}, resp *[]ProviderTarget) error {
-	targets, err := m.Impl.GetPresetTargets()
+func (m *ProviderRPCServer) GetPresetTargetConfigs(arg interface{}, resp *[]TargetConfig) error {
+	targets, err := m.Impl.GetPresetTargetConfigs()
 	if err != nil {
 		return err
 	}

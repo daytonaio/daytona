@@ -58,7 +58,7 @@ var SshProxyCmd = &cobra.Command{
 			return err
 		}
 
-		if workspace.Target == "local" && profile.Id == "default" {
+		if workspace.TargetConfig == "local" && profile.Id == "default" {
 			// If the workspace is local, we directly access the ssh port through the container
 			project := workspace.Projects[0]
 
