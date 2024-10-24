@@ -8,11 +8,13 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 
+	"github.com/daytonaio/daytona/pkg/provider/manager"
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *Server) downloadDefaultProviders() error {
+func (s *Server) installDefaultProviders() error {
 	manifest, err := s.ProviderManager.GetProvidersManifest()
 	if err != nil {
 		return err
@@ -20,15 +22,43 @@ func (s *Server) downloadDefaultProviders() error {
 
 	defaultProviders := manifest.GetDefaultProviders()
 
-	log.Info("Downloading default providers")
+	log.Info("Installing default providers")
 	for providerName, provider := range defaultProviders {
-		_, err = s.ProviderManager.DownloadProvider(context.Background(), provider.DownloadUrls, providerName, false)
+		// Skip if default install lock file is present
+		lockFilePath := filepath.Join(s.config.ProvidersDir, providerName, manager.DEFAULT_INSTALL_LOCK_FILE_NAME)
+		_, err := os.Stat(lockFilePath)
+		if err == nil {
+			log.Infof("Skipping install for %s because it was manually removed", providerName)
+			continue
+		}
+
+		_, err = s.ProviderManager.DownloadProvider(context.Background(), provider.DownloadUrls, providerName)
+		if err != nil {
+			if !manager.IsProviderAlreadyDownloaded(err, providerName) {
+				log.Error(err)
+			}
+			continue
+		}
+
+		pluginPath, err := s.getPluginPath(filepath.Join(s.config.ProvidersDir, providerName))
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+
+		err = s.ProviderManager.RegisterProvider(pluginPath)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+
+		err = s.ProviderManager.SetPresetTargets(providerName)
 		if err != nil {
 			log.Error(err)
 		}
 	}
 
-	log.Info("Default providers downloaded")
+	log.Info("Default providers installed")
 
 	return nil
 }
@@ -55,6 +85,10 @@ func (s *Server) registerProviders() error {
 			pluginPath, err := s.getPluginPath(filepath.Join(s.config.ProvidersDir, file.Name()))
 			if err != nil {
 				log.Error(err)
+				continue
+			}
+
+			if strings.HasSuffix(pluginPath, manager.DEFAULT_INSTALL_LOCK_FILE_NAME) {
 				continue
 			}
 

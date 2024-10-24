@@ -41,17 +41,14 @@ func (m *ProviderManager) GetProvidersManifest() (*ProvidersManifest, error) {
 	return &manifest, nil
 }
 
-func (m *ProviderManager) DownloadProvider(ctx context.Context, downloadUrls map[os.OperatingSystem]string, providerName string, throwIfPresent bool) (string, error) {
+func (m *ProviderManager) DownloadProvider(ctx context.Context, downloadUrls map[os.OperatingSystem]string, providerName string) (string, error) {
 	downloadPath := filepath.Join(m.baseDir, providerName, providerName)
 	if runtime.GOOS == "windows" {
 		downloadPath += ".exe"
 	}
 
 	if _, err := goos.Stat(downloadPath); err == nil {
-		if throwIfPresent {
-			return "", fmt.Errorf("provider %s already downloaded", providerName)
-		}
-		return "", nil
+		return "", providerAlreadyDownloadedError(providerName)
 	}
 
 	log.Info("Downloading " + providerName)
