@@ -17,6 +17,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"tailscale.com/tsnet"
 
 	log "github.com/sirupsen/logrus"
@@ -58,20 +59,20 @@ func (s *Server) Start() error {
 
 			localClient, err := tsnetServer.LocalClient()
 			if err != nil {
-				log.Errorf("Failed to get local client: %v", err)
+				log.Errorf("Failed to get local client: %v, %v", err, common.ErrConnection)
 				reconnect()
 				continue
 			}
 
 			status, err := localClient.Status(context.Background())
 			if err != nil {
-				log.Errorf("Failed to get local client status: %v", err)
+				log.Errorf("Failed to get local client status: %v, %v", err, common.ErrConnection)
 				reconnect()
 				continue
 			}
 
 			if status.CurrentTailnet == nil {
-				log.Error("Tailscale not connected. Reconnecting...")
+				log.Errorf("Tailscale not connected. %v. Reconnecting...", common.ErrConnection)
 				reconnect()
 			} else {
 				log.Tracef("Connected to server. Status: %v", status)

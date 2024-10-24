@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/fatedier/frp/client"
 	v1 "github.com/fatedier/frp/pkg/config/v1"
 )
@@ -44,15 +45,15 @@ func GetService(params FrpcConnectParams) (HealthCheckFunc, *client.Service, err
 	return func() error {
 		proxyStatus, ok := service.StatusExporter().GetProxyStatus(params.Name)
 		if !ok || proxyStatus == nil {
-			return errors.New("failed to get proxy status")
+			return fmt.Errorf("%w %w", errors.New("failed to get proxy status"), common.ErrConnection)
 		}
 
 		if proxyStatus.Err != "" {
-			return fmt.Errorf("proxy error: %s", proxyStatus.Err)
+			return fmt.Errorf("proxy error: %s %w", proxyStatus.Err, common.ErrConnection)
 		}
 
 		if proxyStatus.Phase != "running" {
-			return fmt.Errorf("proxy state is not running. State is %s", proxyStatus.Phase)
+			return fmt.Errorf("proxy state is not running. State is %s. %w", proxyStatus.Phase, common.ErrConnection)
 		}
 
 		return nil
