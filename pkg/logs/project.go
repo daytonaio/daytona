@@ -15,7 +15,7 @@ import (
 
 type projectLogger struct {
 	logsDir     string
-	workspaceId string
+	targetId    string
 	projectName string
 	logFile     *os.File
 	logger      *logrus.Logger
@@ -24,7 +24,7 @@ type projectLogger struct {
 
 func (pl *projectLogger) Write(p []byte) (n int, err error) {
 	if pl.logFile == nil {
-		filePath := filepath.Join(pl.logsDir, pl.workspaceId, pl.projectName, "log")
+		filePath := filepath.Join(pl.logsDir, pl.targetId, pl.projectName, "log")
 		err = os.MkdirAll(filepath.Dir(filePath), 0755)
 		if err != nil {
 			return len(p), err
@@ -41,7 +41,7 @@ func (pl *projectLogger) Write(p []byte) (n int, err error) {
 	var entry LogEntry
 	entry.Msg = string(p)
 	entry.Source = string(pl.source)
-	entry.WorkspaceId = &pl.workspaceId
+	entry.TargetId = &pl.targetId
 	entry.ProjectName = &pl.projectName
 	entry.Time = time.Now().Format(time.RFC3339)
 
@@ -70,7 +70,7 @@ func (pl *projectLogger) Close() error {
 }
 
 func (pl *projectLogger) Cleanup() error {
-	projectLogsDir := filepath.Join(pl.logsDir, pl.workspaceId, pl.projectName)
+	projectLogsDir := filepath.Join(pl.logsDir, pl.targetId, pl.projectName)
 
 	_, err := os.Stat(projectLogsDir)
 	if os.IsNotExist(err) {
@@ -82,19 +82,19 @@ func (pl *projectLogger) Cleanup() error {
 	return os.RemoveAll(projectLogsDir)
 }
 
-func (l *loggerFactoryImpl) CreateProjectLogger(workspaceId, projectName string, source LogSource) Logger {
+func (l *loggerFactoryImpl) CreateProjectLogger(targetId, projectName string, source LogSource) Logger {
 	logger := logrus.New()
 
 	return &projectLogger{
-		workspaceId: workspaceId,
-		logsDir:     l.wsLogsDir,
+		targetId:    targetId,
+		logsDir:     l.targetLogsDir,
 		projectName: projectName,
 		logger:      logger,
 		source:      source,
 	}
 }
 
-func (l *loggerFactoryImpl) CreateProjectLogReader(workspaceId, projectName string) (io.Reader, error) {
-	filePath := filepath.Join(l.wsLogsDir, workspaceId, projectName, "log")
+func (l *loggerFactoryImpl) CreateProjectLogReader(targetId, projectName string) (io.Reader, error) {
+	filePath := filepath.Join(l.targetLogsDir, targetId, projectName, "log")
 	return os.Open(filePath)
 }

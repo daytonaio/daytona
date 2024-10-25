@@ -14,10 +14,10 @@ import (
 
 var FIRST_PROJECT_INDEX = 0
 var STATIC_INDEX = -1
-var WORKSPACE_PREFIX = "WORKSPACE"
+var TARGET_PREFIX = "TARGET"
 var PROVIDER_PREFIX = "PROVIDER"
 
-var longestPrefixLength = len(WORKSPACE_PREFIX)
+var longestPrefixLength = len(TARGET_PREFIX)
 var maxPrefixLength = 20
 var prefixDelimiter = " | "
 var prefixPadding = " "
@@ -46,7 +46,7 @@ func DisplayLogEntry(logEntry logs.LogEntry, index int) {
 		if logEntry.Source == string(logs.LogSourceProvider) {
 			prefixText = PROVIDER_PREFIX
 		} else {
-			prefixText = WORKSPACE_PREFIX
+			prefixText = TARGET_PREFIX
 		}
 	}
 

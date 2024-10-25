@@ -7,16 +7,16 @@ import (
 	"context"
 
 	"github.com/daytonaio/daytona/pkg/provider"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/target"
 )
 
 type InfoResult struct {
-	Info *workspace.WorkspaceInfo
+	Info *target.TargetInfo
 	Err  error
 }
 
-// Gets the workspace info from the provider - the context is used to cancel the request if it takes too long
-func (p *Provisioner) GetWorkspaceInfo(ctx context.Context, ws *workspace.Workspace, targetConfig *provider.TargetConfig) (*workspace.WorkspaceInfo, error) {
+// Gets the target info from the provider - the context is used to cancel the request if it takes too long
+func (p *Provisioner) GetTargetInfo(ctx context.Context, target *target.Target, targetConfig *provider.TargetConfig) (*target.TargetInfo, error) {
 	ch := make(chan InfoResult, 1)
 
 	go func() {
@@ -26,9 +26,9 @@ func (p *Provisioner) GetWorkspaceInfo(ctx context.Context, ws *workspace.Worksp
 			return
 		}
 
-		info, err := (*targetProvider).GetWorkspaceInfo(&provider.WorkspaceRequest{
+		info, err := (*targetProvider).GetTargetInfo(&provider.TargetRequest{
 			TargetConfigOptions: targetConfig.Options,
-			Workspace:           ws,
+			Target:              target,
 		})
 
 		ch <- InfoResult{info, err}

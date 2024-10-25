@@ -3,7 +3,7 @@
 Forward a port from a project to your local machine
 
 ```
-daytona forward [PORT] [WORKSPACE] [PROJECT] [flags]
+daytona forward [PORT] [TARGET] [PROJECT] [flags]
 ```
 
 ### Options

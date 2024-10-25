@@ -7,7 +7,7 @@ package mocks
 
 import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/target/project"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/stretchr/testify/mock"
 )

@@ -1,15 +1,15 @@
 ## daytona restart
 
-Restart a workspace
+Restart a target
 
 ```
-daytona restart [WORKSPACE] [flags]
+daytona restart [TARGET] [flags]
 ```
 
 ### Options
 
 ```
-  -p, --project string   Restart a single project in the workspace (project name)
+  -p, --project string   Restart a single project in the target (project name)
 ```
 
 ### Options inherited from parent commands

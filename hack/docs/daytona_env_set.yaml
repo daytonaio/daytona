@@ -6,4 +6,4 @@ inherited_options:
       default_value: "false"
       usage: help for daytona
 see_also:
-    - daytona env - Manage profile environment variables that are added to all workspaces
+    - daytona env - Manage profile environment variables that are added to all targets and projects

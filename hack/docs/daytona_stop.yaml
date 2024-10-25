@@ -1,14 +1,14 @@
 name: daytona stop
-synopsis: Stop a workspace
-usage: daytona stop [WORKSPACE] [flags]
+synopsis: Stop a target
+usage: daytona stop [TARGET] [flags]
 options:
     - name: all
       shorthand: a
       default_value: "false"
-      usage: Stop all workspaces
+      usage: Stop all targets
     - name: project
       shorthand: p
-      usage: Stop a single project in the workspace (project name)
+      usage: Stop a single project in the target (project name)
 inherited_options:
     - name: help
       default_value: "false"

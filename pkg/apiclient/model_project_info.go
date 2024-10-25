@@ -25,7 +25,7 @@ type ProjectInfo struct {
 	IsRunning        bool    `json:"isRunning"`
 	Name             string  `json:"name"`
 	ProviderMetadata *string `json:"providerMetadata,omitempty"`
-	WorkspaceId      string  `json:"workspaceId"`
+	TargetId         string  `json:"targetId"`
 }
 
 type _ProjectInfo ProjectInfo
@@ -34,12 +34,12 @@ type _ProjectInfo ProjectInfo
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProjectInfo(created string, isRunning bool, name string, workspaceId string) *ProjectInfo {
+func NewProjectInfo(created string, isRunning bool, name string, targetId string) *ProjectInfo {
 	this := ProjectInfo{}
 	this.Created = created
 	this.IsRunning = isRunning
 	this.Name = name
-	this.WorkspaceId = workspaceId
+	this.TargetId = targetId
 	return &this
 }
 
@@ -155,28 +155,28 @@ func (o *ProjectInfo) SetProviderMetadata(v string) {
 	o.ProviderMetadata = &v
 }
 
-// GetWorkspaceId returns the WorkspaceId field value
-func (o *ProjectInfo) GetWorkspaceId() string {
+// GetTargetId returns the TargetId field value
+func (o *ProjectInfo) GetTargetId() string {
 	if o == nil {
 		var ret string
 		return ret
 	}
 
-	return o.WorkspaceId
+	return o.TargetId
 }
 
-// GetWorkspaceIdOk returns a tuple with the WorkspaceId field value
+// GetTargetIdOk returns a tuple with the TargetId field value
 // and a boolean to check if the value has been set.
-func (o *ProjectInfo) GetWorkspaceIdOk() (*string, bool) {
+func (o *ProjectInfo) GetTargetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.WorkspaceId, true
+	return &o.TargetId, true
 }
 
-// SetWorkspaceId sets field value
-func (o *ProjectInfo) SetWorkspaceId(v string) {
-	o.WorkspaceId = v
+// SetTargetId sets field value
+func (o *ProjectInfo) SetTargetId(v string) {
+	o.TargetId = v
 }
 
 func (o ProjectInfo) MarshalJSON() ([]byte, error) {
@@ -195,7 +195,7 @@ func (o ProjectInfo) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.ProviderMetadata) {
 		toSerialize["providerMetadata"] = o.ProviderMetadata
 	}
-	toSerialize["workspaceId"] = o.WorkspaceId
+	toSerialize["targetId"] = o.TargetId
 	return toSerialize, nil
 }
 
@@ -207,7 +207,7 @@ func (o *ProjectInfo) UnmarshalJSON(data []byte) (err error) {
 		"created",
 		"isRunning",
 		"name",
-		"workspaceId",
+		"targetId",
 	}
 
 	allProperties := make(map[string]interface{})

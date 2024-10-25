@@ -1,0 +1,75 @@
+// Copyright 2024 Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
+package target
+
+import (
+	"context"
+
+	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/internal/util/apiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
+	list_view "github.com/daytonaio/daytona/pkg/views/target/list"
+	"github.com/spf13/cobra"
+)
+
+var verbose bool
+
+var ListCmd = &cobra.Command{
+	Use:     "list",
+	Short:   "List targets",
+	Args:    cobra.ExactArgs(0),
+	Aliases: []string{"ls"},
+	GroupID: util.TARGET_GROUP,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+		var specifyGitProviders bool
+
+		apiClient, err := apiclient_util.GetApiClient(nil)
+		if err != nil {
+			return err
+		}
+
+		targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Verbose(verbose).Execute()
+
+		if err != nil {
+			return apiclient.HandleErrorResponse(res, err)
+		}
+
+		gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
+		if err != nil {
+			return apiclient.HandleErrorResponse(res, err)
+		}
+
+		if len(gitProviders) > 1 {
+			specifyGitProviders = true
+		}
+
+		if format.FormatFlag != "" {
+			formattedData := format.NewFormatter(targetList)
+			formattedData.Print()
+			return nil
+		}
+
+		c, err := config.GetConfig()
+		if err != nil {
+			return err
+		}
+
+		activeProfile, err := c.GetActiveProfile()
+		if err != nil {
+			return err
+		}
+
+		list_view.ListTargets(targetList, specifyGitProviders, verbose, activeProfile.Name)
+
+		return nil
+	},
+}
+
+func init() {
+	ListCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose output")
+	format.RegisterFormatFlag(ListCmd)
+}

@@ -1,13 +1,13 @@
 name: daytona purge
 synopsis: Purges all Daytona data from the current device
 description: |
-    Purges all Daytona data from the current device - including all workspaces, configuration files, and SSH files. This command is irreversible.
+    Purges all Daytona data from the current device - including all targets, configuration files, and SSH files. This command is irreversible.
 usage: daytona purge [flags]
 options:
     - name: force
       shorthand: f
       default_value: "false"
-      usage: Delete all workspaces by force
+      usage: Delete all targets by force
     - name: "yes"
       shorthand: "y"
       default_value: "false"

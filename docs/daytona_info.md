@@ -1,9 +1,9 @@
 ## daytona info
 
-Show workspace info
+Show target info
 
 ```
-daytona info [WORKSPACE] [flags]
+daytona info [TARGET] [flags]
 ```
 
 ### Options
