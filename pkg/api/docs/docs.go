@@ -1332,14 +1332,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/provider/{provider}/target-manifest": {
+        "/provider/{provider}/target-config-manifest": {
             "get": {
-                "description": "Get provider target manifest",
+                "description": "Get provider target config manifest",
                 "tags": [
                     "provider"
                 ],
-                "summary": "Get provider target manifest",
-                "operationId": "GetTargetManifest",
+                "summary": "Get provider target config manifest",
+                "operationId": "GetTargetConfigManifest",
                 "parameters": [
                     {
                         "type": "string",
@@ -1353,7 +1353,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ProviderTargetManifest"
+                            "$ref": "#/definitions/TargetConfigManifest"
                         }
                     }
                 }
@@ -1509,44 +1509,44 @@ const docTemplate = `{
                 }
             }
         },
-        "/target": {
+        "/target-config": {
             "get": {
-                "description": "List targets",
+                "description": "List target configs",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "target"
+                    "target-config"
                 ],
-                "summary": "List targets",
-                "operationId": "ListTargets",
+                "summary": "List target configs",
+                "operationId": "ListTargetConfigs",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/ProviderTarget"
+                                "$ref": "#/definitions/TargetConfig"
                             }
                         }
                     }
                 }
             },
             "put": {
-                "description": "Set a target",
+                "description": "Set a target config",
                 "tags": [
-                    "target"
+                    "target-config"
                 ],
-                "summary": "Set a target",
-                "operationId": "SetTarget",
+                "summary": "Set a target config",
+                "operationId": "SetTargetConfig",
                 "parameters": [
                     {
-                        "description": "Target to set",
-                        "name": "target",
+                        "description": "Target config to set",
+                        "name": "targetConfig",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/CreateProviderTargetDTO"
+                            "$ref": "#/definitions/CreateTargetConfigDTO"
                         }
                     }
                 ],
@@ -1557,19 +1557,19 @@ const docTemplate = `{
                 }
             }
         },
-        "/target/{target}": {
+        "/target-config/{configName}": {
             "delete": {
-                "description": "Remove a target",
+                "description": "Remove a target config",
                 "tags": [
-                    "target"
+                    "target-config"
                 ],
-                "summary": "Remove a target",
-                "operationId": "RemoveTarget",
+                "summary": "Remove a target config",
+                "operationId": "RemoveTargetConfig",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Target name",
-                        "name": "target",
+                        "description": "Target Config name",
+                        "name": "configName",
                         "in": "path",
                         "required": true
                     }
@@ -1581,19 +1581,19 @@ const docTemplate = `{
                 }
             }
         },
-        "/target/{target}/set-default": {
+        "/target-config/{configName}/set-default": {
             "patch": {
-                "description": "Set target to default",
+                "description": "Set target config to default",
                 "tags": [
-                    "target"
+                    "target-config"
                 ],
-                "summary": "Set target to default",
-                "operationId": "SetDefaultTarget",
+                "summary": "Set target config to default",
+                "operationId": "SetDefaultTargetConfig",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Target name",
-                        "name": "target",
+                        "description": "Target config name",
+                        "name": "configName",
                         "in": "path",
                         "required": true
                     }
@@ -2155,7 +2155,7 @@ const docTemplate = `{
                 }
             }
         },
-        "CreateProviderTargetDTO": {
+        "CreateTargetConfigDTO": {
             "type": "object",
             "required": [
                 "name",
@@ -2180,7 +2180,7 @@ const docTemplate = `{
                 "id",
                 "name",
                 "projects",
-                "target"
+                "targetConfig"
             ],
             "properties": {
                 "id": {
@@ -2195,7 +2195,7 @@ const docTemplate = `{
                         "$ref": "#/definitions/CreateProjectDTO"
                     }
                 },
-                "target": {
+                "targetConfig": {
                     "type": "string"
                 }
             }
@@ -2624,7 +2624,7 @@ const docTemplate = `{
                 "image",
                 "name",
                 "repository",
-                "target",
+                "targetConfig",
                 "user",
                 "workspaceId"
             ],
@@ -2653,7 +2653,7 @@ const docTemplate = `{
                 "state": {
                     "$ref": "#/definitions/ProjectState"
                 },
-                "target": {
+                "targetConfig": {
                     "type": "string"
                 },
                 "user": {
@@ -2771,36 +2771,6 @@ const docTemplate = `{
                 "version": {
                     "type": "string"
                 }
-            }
-        },
-        "ProviderTarget": {
-            "type": "object",
-            "required": [
-                "isDefault",
-                "name",
-                "options",
-                "providerInfo"
-            ],
-            "properties": {
-                "isDefault": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "options": {
-                    "description": "JSON encoded map of options",
-                    "type": "string"
-                },
-                "providerInfo": {
-                    "$ref": "#/definitions/provider.ProviderInfo"
-                }
-            }
-        },
-        "ProviderTargetManifest": {
-            "type": "object",
-            "additionalProperties": {
-                "$ref": "#/definitions/provider.ProviderTargetProperty"
             }
         },
         "RepositoryUrl": {
@@ -2986,13 +2956,80 @@ const docTemplate = `{
                 "UpdatedButUnmerged"
             ]
         },
+        "TargetConfig": {
+            "type": "object",
+            "required": [
+                "isDefault",
+                "name",
+                "options",
+                "providerInfo"
+            ],
+            "properties": {
+                "isDefault": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "options": {
+                    "description": "JSON encoded map of options",
+                    "type": "string"
+                },
+                "providerInfo": {
+                    "$ref": "#/definitions/provider.ProviderInfo"
+                }
+            }
+        },
+        "TargetConfigManifest": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/TargetConfigProperty"
+            }
+        },
+        "TargetConfigProperty": {
+            "type": "object",
+            "properties": {
+                "defaultValue": {
+                    "description": "DefaultValue is converted into the appropriate type based on the Type\nIf the property is a FilePath, the DefaultValue is a path to a directory",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "Brief description of the property",
+                    "type": "string"
+                },
+                "disabledPredicate": {
+                    "description": "A regex string matched with the name of the target config to determine if the property should be disabled\nIf the regex matches the target config name, the property will be disabled\nE.g. \"^local$\" will disable the property for the local target",
+                    "type": "string"
+                },
+                "inputMasked": {
+                    "type": "boolean"
+                },
+                "options": {
+                    "description": "Options is only used if the Type is TargetConfigPropertyTypeOption",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "suggestions": {
+                    "description": "Suggestions is an optional list of auto-complete values to assist the user while filling the field",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "type": {
+                    "$ref": "#/definitions/provider.TargetConfigPropertyType"
+                }
+            }
+        },
         "Workspace": {
             "type": "object",
             "required": [
                 "id",
                 "name",
                 "projects",
-                "target"
+                "targetConfig"
             ],
             "properties": {
                 "id": {
@@ -3007,7 +3044,7 @@ const docTemplate = `{
                         "$ref": "#/definitions/Project"
                     }
                 },
-                "target": {
+                "targetConfig": {
                     "type": "string"
                 }
             }
@@ -3018,7 +3055,7 @@ const docTemplate = `{
                 "id",
                 "name",
                 "projects",
-                "target"
+                "targetConfig"
             ],
             "properties": {
                 "id": {
@@ -3036,7 +3073,7 @@ const docTemplate = `{
                         "$ref": "#/definitions/Project"
                     }
                 },
-                "target": {
+                "targetConfig": {
                     "type": "string"
                 }
             }
@@ -3116,44 +3153,7 @@ const docTemplate = `{
                 }
             }
         },
-        "provider.ProviderTargetProperty": {
-            "type": "object",
-            "properties": {
-                "defaultValue": {
-                    "description": "DefaultValue is converted into the appropriate type based on the Type\nIf the property is a FilePath, the DefaultValue is a path to a directory",
-                    "type": "string"
-                },
-                "description": {
-                    "description": "Brief description of the property",
-                    "type": "string"
-                },
-                "disabledPredicate": {
-                    "description": "A regex string matched with the name of the target to determine if the property should be disabled\nIf the regex matches the target name, the property will be disabled\nE.g. \"^local$\" will disable the property for the local target",
-                    "type": "string"
-                },
-                "inputMasked": {
-                    "type": "boolean"
-                },
-                "options": {
-                    "description": "Options is only used if the Type is ProviderTargetPropertyTypeOption",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "suggestions": {
-                    "description": "Suggestions is an optional list of auto-complete values to assist the user while filling the field",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "type": {
-                    "$ref": "#/definitions/provider.ProviderTargetPropertyType"
-                }
-            }
-        },
-        "provider.ProviderTargetPropertyType": {
+        "provider.TargetConfigPropertyType": {
             "type": "string",
             "enum": [
                 "string",
@@ -3164,12 +3164,12 @@ const docTemplate = `{
                 "file-path"
             ],
             "x-enum-varnames": [
-                "ProviderTargetPropertyTypeString",
-                "ProviderTargetPropertyTypeOption",
-                "ProviderTargetPropertyTypeBoolean",
-                "ProviderTargetPropertyTypeInt",
-                "ProviderTargetPropertyTypeFloat",
-                "ProviderTargetPropertyTypeFilePath"
+                "TargetConfigPropertyTypeString",
+                "TargetConfigPropertyTypeOption",
+                "TargetConfigPropertyTypeBoolean",
+                "TargetConfigPropertyTypeInt",
+                "TargetConfigPropertyTypeFloat",
+                "TargetConfigPropertyTypeFilePath"
             ]
         }
     },

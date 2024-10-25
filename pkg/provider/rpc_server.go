@@ -37,23 +37,23 @@ func (m *ProviderRPCServer) CheckRequirements(arg interface{}, resp *[]Requireme
 	return nil
 }
 
-func (m *ProviderRPCServer) GetTargetManifest(arg interface{}, resp *ProviderTargetManifest) error {
-	targetManifest, err := m.Impl.GetTargetManifest()
+func (m *ProviderRPCServer) GetTargetConfigManifest(arg interface{}, resp *TargetConfigManifest) error {
+	targetConfigManifest, err := m.Impl.GetTargetConfigManifest()
 	if err != nil {
 		return err
 	}
 
-	*resp = *targetManifest
+	*resp = *targetConfigManifest
 	return nil
 }
 
-func (m *ProviderRPCServer) GetPresetTargets(arg interface{}, resp *[]ProviderTarget) error {
-	targets, err := m.Impl.GetPresetTargets()
+func (m *ProviderRPCServer) GetPresetTargetConfigs(arg interface{}, resp *[]TargetConfig) error {
+	targetConfigs, err := m.Impl.GetPresetTargetConfigs()
 	if err != nil {
 		return err
 	}
 
-	*resp = *targets
+	*resp = *targetConfigs
 	return nil
 }
 

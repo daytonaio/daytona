@@ -16,7 +16,7 @@ import (
 
 type ProjectParams struct {
 	Project                       *project.Project
-	Target                        *provider.ProviderTarget
+	TargetConfig                  *provider.TargetConfig
 	ContainerRegistry             *containerregistry.ContainerRegistry
 	GitProviderConfig             *gitprovider.GitProviderConfig
 	BuilderImage                  string
@@ -25,14 +25,14 @@ type ProjectParams struct {
 
 type IProvisioner interface {
 	CreateProject(params ProjectParams) error
-	CreateWorkspace(workspace *workspace.Workspace, target *provider.ProviderTarget) error
-	DestroyProject(project *project.Project, target *provider.ProviderTarget) error
-	DestroyWorkspace(workspace *workspace.Workspace, target *provider.ProviderTarget) error
-	GetWorkspaceInfo(ctx context.Context, workspace *workspace.Workspace, target *provider.ProviderTarget) (*workspace.WorkspaceInfo, error)
+	CreateWorkspace(workspace *workspace.Workspace, targetConfig *provider.TargetConfig) error
+	DestroyProject(project *project.Project, targetConfig *provider.TargetConfig) error
+	DestroyWorkspace(workspace *workspace.Workspace, targetConfig *provider.TargetConfig) error
+	GetWorkspaceInfo(ctx context.Context, workspace *workspace.Workspace, targetConfig *provider.TargetConfig) (*workspace.WorkspaceInfo, error)
 	StartProject(params ProjectParams) error
-	StartWorkspace(workspace *workspace.Workspace, target *provider.ProviderTarget) error
-	StopProject(project *project.Project, target *provider.ProviderTarget) error
-	StopWorkspace(workspace *workspace.Workspace, target *provider.ProviderTarget) error
+	StartWorkspace(workspace *workspace.Workspace, targetConfig *provider.TargetConfig) error
+	StopProject(project *project.Project, targetConfig *provider.TargetConfig) error
+	StopWorkspace(workspace *workspace.Workspace, targetConfig *provider.TargetConfig) error
 }
 
 type ProvisionerConfig struct {

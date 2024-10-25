@@ -34,8 +34,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/daytonaio/daytona/pkg/server/profiledata"
 	"github.com/daytonaio/daytona/pkg/server/projectconfig"
-	"github.com/daytonaio/daytona/pkg/server/providertargets"
 	"github.com/daytonaio/daytona/pkg/server/registry"
+	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -229,7 +229,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	if err != nil {
 		return nil, err
 	}
-	providerTargetStore, err := db.NewProviderTargetStore(dbConnection)
+	targetConfigStore, err := db.NewTargetConfigStore(dbConnection)
 	if err != nil {
 		return nil, err
 	}
@@ -312,8 +312,8 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		c.BuilderRegistryServer = util.GetFrpcRegistryDomain(c.Id, c.Frps.Domain)
 	}
 
-	providerTargetService := providertargets.NewProviderTargetService(providertargets.ProviderTargetServiceConfig{
-		TargetStore: providerTargetStore,
+	targetConfigService := targetconfigs.NewTargetConfigService(targetconfigs.TargetConfigServiceConfig{
+		TargetConfigStore: targetConfigStore,
 	})
 
 	apiKeyService := apikeys.NewApiKeyService(apikeys.ApiKeyServiceConfig{
@@ -323,19 +323,19 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	headscaleUrl := util.GetFrpcHeadscaleUrl(c.Frps.Protocol, c.Id, c.Frps.Domain)
 
 	providerManager := manager.NewProviderManager(manager.ProviderManagerConfig{
-		LogsDir:               wsLogsDir,
-		ProviderTargetService: providerTargetService,
-		ApiUrl:                util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
-		DaytonaDownloadUrl:    getDaytonaScriptUrl(c),
-		ServerUrl:             headscaleUrl,
-		ServerVersion:         version,
-		RegistryUrl:           c.RegistryUrl,
-		BaseDir:               c.ProvidersDir,
+		LogsDir:            wsLogsDir,
+		ApiUrl:             util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+		DaytonaDownloadUrl: getDaytonaScriptUrl(c),
+		ServerUrl:          headscaleUrl,
+		ServerVersion:      version,
+		RegistryUrl:        c.RegistryUrl,
+		BaseDir:            c.ProvidersDir,
 		CreateProviderNetworkKey: func(providerName string) (string, error) {
 			return headscaleServer.CreateAuthKey()
 		},
-		ServerPort: c.HeadscalePort,
-		ApiPort:    c.ApiPort,
+		ServerPort:          c.HeadscalePort,
+		ApiPort:             c.ApiPort,
+		TargetConfigService: targetConfigService,
 	})
 
 	provisioner := provisioner.NewProvisioner(provisioner.ProvisionerConfig{
@@ -344,7 +344,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 
 	workspaceService := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
 		WorkspaceStore:           workspaceStore,
-		TargetStore:              providerTargetStore,
+		TargetConfigStore:        targetConfigStore,
 		ApiKeyService:            apiKeyService,
 		GitProviderService:       gitProviderService,
 		ContainerRegistryService: containerRegistryService,
@@ -369,7 +369,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		Config:                   *c,
 		Version:                  version,
 		TailscaleServer:          headscaleServer,
-		ProviderTargetService:    providerTargetService,
+		TargetConfigService:      targetConfigService,
 		ContainerRegistryService: containerRegistryService,
 		BuildService:             buildService,
 		ProjectConfigService:     projectConfigService,

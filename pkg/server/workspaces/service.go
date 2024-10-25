@@ -37,13 +37,13 @@ type IWorkspaceService interface {
 	StopWorkspace(ctx context.Context, workspaceId string) error
 }
 
-type targetStore interface {
-	Find(filter *provider.TargetFilter) (*provider.ProviderTarget, error)
+type targetConfigStore interface {
+	Find(filter *provider.TargetConfigFilter) (*provider.TargetConfig, error)
 }
 
 type WorkspaceServiceConfig struct {
 	WorkspaceStore           workspace.Store
-	TargetStore              targetStore
+	TargetConfigStore        targetConfigStore
 	ContainerRegistryService containerregistries.IContainerRegistryService
 	BuildService             builds.IBuildService
 	ProjectConfigService     projectconfig.IProjectConfigService
@@ -63,7 +63,7 @@ type WorkspaceServiceConfig struct {
 func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 	return &WorkspaceService{
 		workspaceStore:           config.WorkspaceStore,
-		targetStore:              config.TargetStore,
+		targetConfigStore:        config.TargetConfigStore,
 		containerRegistryService: config.ContainerRegistryService,
 		buildService:             config.BuildService,
 		projectConfigService:     config.ProjectConfigService,
@@ -83,7 +83,7 @@ func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 
 type WorkspaceService struct {
 	workspaceStore           workspace.Store
-	targetStore              targetStore
+	targetConfigStore        targetConfigStore
 	containerRegistryService containerregistries.IContainerRegistryService
 	buildService             builds.IBuildService
 	projectConfigService     projectconfig.IProjectConfigService
