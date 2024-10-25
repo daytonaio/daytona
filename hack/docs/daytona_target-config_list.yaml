@@ -10,4 +10,4 @@ inherited_options:
       default_value: "false"
       usage: help for daytona
 see_also:
-    - daytona target-config - Manage targets configs
+    - daytona target-config - Manage target configs

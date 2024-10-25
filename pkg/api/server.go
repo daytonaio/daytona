@@ -183,7 +183,7 @@ func (a *ApiServer) Start() error {
 		providerController.POST("/install", provider.InstallProvider)
 		providerController.GET("/", provider.ListProviders)
 		providerController.POST("/:provider/uninstall", provider.UninstallProvider)
-		providerController.GET("/:provider/target-manifest", provider.GetTargetConfigManifest)
+		providerController.GET("/:provider/target-config-manifest", provider.GetTargetConfigManifest)
 	}
 
 	containerRegistryController := protected.Group("/container-registry")

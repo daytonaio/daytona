@@ -20,5 +20,5 @@ daytona target-config remove [CONFIG_NAME] [flags]
 
 ### SEE ALSO
 
-* [daytona target-config](daytona_target-config.md)	 - Manage targets configs
+* [daytona target-config](daytona_target-config.md)	 - Manage target configs
 

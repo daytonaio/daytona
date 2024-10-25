@@ -952,7 +952,7 @@ paths:
       tags:
       - provider
       x-codegen-request-body-name: provider
-  /provider/{provider}/target-manifest:
+  /provider/{provider}/target-config-manifest:
     get:
       description: Get provider target config manifest
       operationId: GetTargetConfigManifest
@@ -1080,7 +1080,7 @@ paths:
           '*/*':
             schema:
               $ref: '#/components/schemas/CreateTargetConfigDTO'
-        description: Target Config to set
+        description: Target config to set
         required: true
       responses:
         "201":
@@ -1113,7 +1113,7 @@ paths:
       description: Set target config to default
       operationId: SetDefaultTargetConfig
       parameters:
-      - description: Target name
+      - description: Target config name
         in: path
         name: configName
         required: true
@@ -2523,14 +2523,14 @@ components:
           type: string
         disabledPredicate:
           description: |-
-            A regex string matched with the name of the target to determine if the property should be disabled
-            If the regex matches the target name, the property will be disabled
+            A regex string matched with the name of the target config to determine if the property should be disabled
+            If the regex matches the target config name, the property will be disabled
             E.g. "^local$" will disable the property for the local target
           type: string
         inputMasked:
           type: boolean
         options:
-          description: Options is only used if the Type is ProviderTargetPropertyTypeOption
+          description: Options is only used if the Type is TargetConfigPropertyTypeOption
           items:
             type: string
           type: array

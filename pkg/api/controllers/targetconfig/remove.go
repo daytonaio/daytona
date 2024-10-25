@@ -27,7 +27,7 @@ func RemoveTargetConfig(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	target, err := server.TargetConfigService.Find(&provider.TargetConfigFilter{
+	targetConfig, err := server.TargetConfigService.Find(&provider.TargetConfigFilter{
 		Name: &configName,
 	})
 	if err != nil {
@@ -35,7 +35,7 @@ func RemoveTargetConfig(ctx *gin.Context) {
 		return
 	}
 
-	err = server.TargetConfigService.Delete(target)
+	err = server.TargetConfigService.Delete(targetConfig)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to remove target config: %w", err))
 		return

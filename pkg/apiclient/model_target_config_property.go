@@ -23,10 +23,10 @@ type TargetConfigProperty struct {
 	DefaultValue *string `json:"defaultValue,omitempty"`
 	// Brief description of the property
 	Description *string `json:"description,omitempty"`
-	// A regex string matched with the name of the target to determine if the property should be disabled If the regex matches the target name, the property will be disabled E.g. \"^local$\" will disable the property for the local target
+	// A regex string matched with the name of the target config to determine if the property should be disabled If the regex matches the target config name, the property will be disabled E.g. \"^local$\" will disable the property for the local target
 	DisabledPredicate *string `json:"disabledPredicate,omitempty"`
 	InputMasked       *bool   `json:"inputMasked,omitempty"`
-	// Options is only used if the Type is ProviderTargetPropertyTypeOption
+	// Options is only used if the Type is TargetConfigPropertyTypeOption
 	Options []string `json:"options,omitempty"`
 	// Suggestions is an optional list of auto-complete values to assist the user while filling the field
 	Suggestions []string                          `json:"suggestions,omitempty"`

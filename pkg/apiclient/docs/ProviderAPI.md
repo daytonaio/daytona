@@ -4,7 +4,7 @@ All URIs are relative to *http://localhost:3986*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**GetTargetConfigManifest**](ProviderAPI.md#GetTargetConfigManifest) | **Get** /provider/{provider}/target-manifest | Get provider target config manifest
+[**GetTargetConfigManifest**](ProviderAPI.md#GetTargetConfigManifest) | **Get** /provider/{provider}/target-config-manifest | Get provider target config manifest
 [**InstallProvider**](ProviderAPI.md#InstallProvider) | **Post** /provider/install | Install a provider
 [**ListProviders**](ProviderAPI.md#ListProviders) | **Get** /provider | List providers
 [**UninstallProvider**](ProviderAPI.md#UninstallProvider) | **Post** /provider/{provider}/uninstall | Uninstall a provider

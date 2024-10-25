@@ -161,7 +161,7 @@ import (
 )
 
 func main() {
-	configName := "configName_example" // string | Target name
+	configName := "configName_example" // string | Target config name
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -179,7 +179,7 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**configName** | **string** | Target name | 
+**configName** | **string** | Target config name | 
 
 ### Other Parameters
 
@@ -229,7 +229,7 @@ import (
 )
 
 func main() {
-	targetConfig := *openapiclient.NewCreateTargetConfigDTO("Name_example", "Options_example", *openapiclient.NewProviderProviderInfo("Name_example", "Version_example")) // CreateTargetConfigDTO | Target Config to set
+	targetConfig := *openapiclient.NewCreateTargetConfigDTO("Name_example", "Options_example", *openapiclient.NewProviderProviderInfo("Name_example", "Version_example")) // CreateTargetConfigDTO | Target config to set
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -252,7 +252,7 @@ Other parameters are passed through a pointer to a apiSetTargetConfigRequest str
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **targetConfig** | [**CreateTargetConfigDTO**](CreateTargetConfigDTO.md) | Target Config to set | 
+ **targetConfig** | [**CreateTargetConfigDTO**](CreateTargetConfigDTO.md) | Target config to set | 
 
 ### Return type
 

@@ -258,7 +258,7 @@ SetDefaultTargetConfig Set target config to default
 Set target config to default
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param configName Target name
+	@param configName Target config name
 	@return ApiSetDefaultTargetConfigRequest
 */
 func (a *TargetConfigAPIService) SetDefaultTargetConfig(ctx context.Context, configName string) ApiSetDefaultTargetConfigRequest {
@@ -354,7 +354,7 @@ type ApiSetTargetConfigRequest struct {
 	targetConfig *CreateTargetConfigDTO
 }
 
-// Target Config to set
+// Target config to set
 func (r ApiSetTargetConfigRequest) TargetConfig(targetConfig CreateTargetConfigDTO) ApiSetTargetConfigRequest {
 	r.targetConfig = &targetConfig
 	return r

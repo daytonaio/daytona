@@ -1,5 +1,5 @@
 name: daytona target-config
-synopsis: Manage targets configs
+synopsis: Manage target configs
 inherited_options:
     - name: help
       default_value: "false"

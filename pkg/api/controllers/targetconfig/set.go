@@ -19,7 +19,7 @@ import (
 //	@Tags			target-config
 //	@Summary		Set a target config
 //	@Description	Set a target config
-//	@Param			targetConfig	body	CreateTargetConfigDTO	true	"Target Config to set"
+//	@Param			targetConfig	body	CreateTargetConfigDTO	true	"Target config to set"
 //	@Success		201
 //	@Router			/target-config [put]
 //
@@ -34,9 +34,9 @@ func SetTargetConfig(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	target := conversion.ToTargetConfig(req)
+	targetConfig := conversion.ToTargetConfig(req)
 
-	err = server.TargetConfigService.Save(target)
+	err = server.TargetConfigService.Save(targetConfig)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to set target config: %w", err))
 		return
@@ -50,7 +50,7 @@ func SetTargetConfig(ctx *gin.Context) {
 //	@Tags			target-config
 //	@Summary		Set target config to default
 //	@Description	Set target config to default
-//	@Param			configName	path	string	true	"Target name"
+//	@Param			configName	path	string	true	"Target config name"
 //	@Success		200
 //	@Router			/target-config/{configName}/set-default [patch]
 //
@@ -60,7 +60,7 @@ func SetDefaultTargetConfig(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	target, err := server.TargetConfigService.Find(&provider.TargetConfigFilter{
+	targetConfig, err := server.TargetConfigService.Find(&provider.TargetConfigFilter{
 		Name: &configName,
 	})
 	if err != nil {
@@ -68,7 +68,7 @@ func SetDefaultTargetConfig(ctx *gin.Context) {
 		return
 	}
 
-	err = server.TargetConfigService.SetDefault(target)
+	err = server.TargetConfigService.SetDefault(targetConfig)
 	if err != nil {
 		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to set target config to default: %s", err.Error()))
 		return

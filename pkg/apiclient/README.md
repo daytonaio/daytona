@@ -119,7 +119,7 @@ Class | Method | HTTP request | Description
 *ProjectConfigAPI* | [**ListProjectConfigs**](docs/ProjectConfigAPI.md#listprojectconfigs) | **Get** /project-config | List project configs
 *ProjectConfigAPI* | [**SetDefaultProjectConfig**](docs/ProjectConfigAPI.md#setdefaultprojectconfig) | **Patch** /project-config/{configName}/set-default | Set project config to default
 *ProjectConfigAPI* | [**SetProjectConfig**](docs/ProjectConfigAPI.md#setprojectconfig) | **Put** /project-config | Set project config data
-*ProviderAPI* | [**GetTargetConfigManifest**](docs/ProviderAPI.md#gettargetconfigmanifest) | **Get** /provider/{provider}/target-manifest | Get provider target config manifest
+*ProviderAPI* | [**GetTargetConfigManifest**](docs/ProviderAPI.md#gettargetconfigmanifest) | **Get** /provider/{provider}/target-config-manifest | Get provider target config manifest
 *ProviderAPI* | [**InstallProvider**](docs/ProviderAPI.md#installprovider) | **Post** /provider/install | Install a provider
 *ProviderAPI* | [**ListProviders**](docs/ProviderAPI.md#listproviders) | **Get** /provider | List providers
 *ProviderAPI* | [**UninstallProvider**](docs/ProviderAPI.md#uninstallprovider) | **Post** /provider/{provider}/uninstall | Uninstall a provider

@@ -1332,7 +1332,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/provider/{provider}/target-manifest": {
+        "/provider/{provider}/target-config-manifest": {
             "get": {
                 "description": "Get provider target config manifest",
                 "tags": [
@@ -1517,7 +1517,7 @@ const docTemplate = `{
                 "operationId": "SetTargetConfig",
                 "parameters": [
                     {
-                        "description": "Target Config to set",
+                        "description": "Target config to set",
                         "name": "targetConfig",
                         "in": "body",
                         "required": true,
@@ -1568,7 +1568,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Target name",
+                        "description": "Target config name",
                         "name": "configName",
                         "in": "path",
                         "required": true
@@ -2945,14 +2945,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "disabledPredicate": {
-                    "description": "A regex string matched with the name of the target to determine if the property should be disabled\nIf the regex matches the target name, the property will be disabled\nE.g. \"^local$\" will disable the property for the local target",
+                    "description": "A regex string matched with the name of the target config to determine if the property should be disabled\nIf the regex matches the target config name, the property will be disabled\nE.g. \"^local$\" will disable the property for the local target",
                     "type": "string"
                 },
                 "inputMasked": {
                     "type": "boolean"
                 },
                 "options": {
-                    "description": "Options is only used if the Type is ProviderTargetPropertyTypeOption",
+                    "description": "Options is only used if the Type is TargetConfigPropertyTypeOption",
                     "type": "array",
                     "items": {
                         "type": "string"

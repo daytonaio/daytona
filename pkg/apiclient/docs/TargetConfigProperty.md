@@ -6,9 +6,9 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **DefaultValue** | Pointer to **string** | DefaultValue is converted into the appropriate type based on the Type If the property is a FilePath, the DefaultValue is a path to a directory | [optional] 
 **Description** | Pointer to **string** | Brief description of the property | [optional] 
-**DisabledPredicate** | Pointer to **string** | A regex string matched with the name of the target to determine if the property should be disabled If the regex matches the target name, the property will be disabled E.g. \&quot;^local$\&quot; will disable the property for the local target | [optional] 
+**DisabledPredicate** | Pointer to **string** | A regex string matched with the name of the target config to determine if the property should be disabled If the regex matches the target config name, the property will be disabled E.g. \&quot;^local$\&quot; will disable the property for the local target | [optional] 
 **InputMasked** | Pointer to **bool** |  | [optional] 
-**Options** | Pointer to **[]string** | Options is only used if the Type is ProviderTargetPropertyTypeOption | [optional] 
+**Options** | Pointer to **[]string** | Options is only used if the Type is TargetConfigPropertyTypeOption | [optional] 
 **Suggestions** | Pointer to **[]string** | Suggestions is an optional list of auto-complete values to assist the user while filling the field | [optional] 
 **Type** | Pointer to [**ProviderTargetConfigPropertyType**](ProviderTargetConfigPropertyType.md) |  | [optional] 
 

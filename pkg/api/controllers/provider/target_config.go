@@ -19,7 +19,7 @@ import (
 //	@Param			provider	path	string	true	"Provider name"
 //	@Success		200
 //	@Success		200	{object}	TargetConfigManifest
-//	@Router			/provider/{provider}/target-manifest [get]
+//	@Router			/provider/{provider}/target-config-manifest [get]
 //
 //	@id				GetTargetConfigManifest
 func GetTargetConfigManifest(ctx *gin.Context) {

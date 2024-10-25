@@ -1,6 +1,6 @@
 ## daytona target-config
 
-Manage targets configs
+Manage target configs
 
 ### Options inherited from parent commands
 

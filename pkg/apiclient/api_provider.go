@@ -65,7 +65,7 @@ func (a *ProviderAPIService) GetTargetConfigManifestExecute(r ApiGetTargetConfig
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/provider/{provider}/target-manifest"
+	localVarPath := localBasePath + "/provider/{provider}/target-config-manifest"
 	localVarPath = strings.Replace(localVarPath, "{"+"provider"+"}", url.PathEscape(parameterValueToString(r.provider, "provider")), -1)
 
 	localVarHeaderParams := make(map[string]string)
