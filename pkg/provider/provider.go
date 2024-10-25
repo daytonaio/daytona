@@ -16,8 +16,8 @@ type Provider interface {
 	Initialize(InitializeProviderRequest) (*util.Empty, error)
 	GetInfo() (ProviderInfo, error)
 
-	GetTargetManifest() (*ProviderTargetManifest, error)
-	GetPresetTargets() (*[]ProviderTarget, error)
+	GetTargetConfigManifest() (*TargetConfigManifest, error)
+	GetPresetTargetConfigs() (*[]TargetConfig, error)
 
 	CreateWorkspace(*WorkspaceRequest) (*util.Empty, error)
 	StartWorkspace(*WorkspaceRequest) (*util.Empty, error)
