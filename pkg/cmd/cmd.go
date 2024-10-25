@@ -26,7 +26,7 @@ import (
 	. "github.com/daytonaio/daytona/pkg/cmd/projectconfig"
 	. "github.com/daytonaio/daytona/pkg/cmd/provider"
 	. "github.com/daytonaio/daytona/pkg/cmd/server"
-	. "github.com/daytonaio/daytona/pkg/cmd/target"
+	. "github.com/daytonaio/daytona/pkg/cmd/targetconfig"
 	. "github.com/daytonaio/daytona/pkg/cmd/telemetry"
 	. "github.com/daytonaio/daytona/pkg/cmd/workspace"
 	"github.com/daytonaio/daytona/pkg/common"
@@ -65,7 +65,7 @@ func Execute() error {
 	rootCmd.AddCommand(ApiKeyCmd)
 	rootCmd.AddCommand(ContainerRegistryCmd)
 	rootCmd.AddCommand(ProviderCmd)
-	rootCmd.AddCommand(TargetCmd)
+	rootCmd.AddCommand(TargetConfigCmd)
 	rootCmd.AddCommand(configCmd)
 	rootCmd.AddCommand(ideCmd)
 	rootCmd.AddCommand(ProfileCmd)
@@ -190,8 +190,8 @@ func RunInitialScreenFlow(cmd *cobra.Command, args []string) error {
 		return CodeCmd.RunE(cmd, []string{})
 	case "git-provider add":
 		return GitProviderAddCmd.RunE(cmd, []string{})
-	case "target set":
-		return TargetSetCmd.RunE(cmd, []string{})
+	case "target-config set":
+		return TargetConfigSetCmd.RunE(cmd, []string{})
 	case "docs":
 		return DocsCmd.RunE(cmd, []string{})
 	case "help":

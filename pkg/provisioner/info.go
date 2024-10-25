@@ -16,19 +16,19 @@ type InfoResult struct {
 }
 
 // Gets the workspace info from the provider - the context is used to cancel the request if it takes too long
-func (p *Provisioner) GetWorkspaceInfo(ctx context.Context, ws *workspace.Workspace, target *provider.ProviderTarget) (*workspace.WorkspaceInfo, error) {
+func (p *Provisioner) GetWorkspaceInfo(ctx context.Context, ws *workspace.Workspace, targetConfig *provider.TargetConfig) (*workspace.WorkspaceInfo, error) {
 	ch := make(chan InfoResult, 1)
 
 	go func() {
-		targetProvider, err := p.providerManager.GetProvider(target.ProviderInfo.Name)
+		targetProvider, err := p.providerManager.GetProvider(targetConfig.ProviderInfo.Name)
 		if err != nil {
 			ch <- InfoResult{nil, err}
 			return
 		}
 
 		info, err := (*targetProvider).GetWorkspaceInfo(&provider.WorkspaceRequest{
-			TargetOptions: target.Options,
-			Workspace:     ws,
+			TargetConfigOptions: targetConfig.Options,
+			Workspace:           ws,
 		})
 
 		ch <- InfoResult{info, err}

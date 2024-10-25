@@ -27,7 +27,7 @@ func (s *WorkspaceService) StartWorkspace(ctx context.Context, workspaceId strin
 		return ErrWorkspaceNotFound
 	}
 
-	target, err := s.targetStore.Find(&provider.TargetFilter{Name: &w.Target})
+	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &w.TargetConfig})
 	if err != nil {
 		return err
 	}
@@ -37,7 +37,7 @@ func (s *WorkspaceService) StartWorkspace(ctx context.Context, workspaceId strin
 
 	wsLogWriter := io.MultiWriter(&util.InfoLogWriter{}, workspaceLogger)
 
-	err = s.startWorkspace(ctx, w, target, wsLogWriter)
+	err = s.startWorkspace(ctx, w, targetConfig, wsLogWriter)
 
 	if !telemetry.TelemetryEnabled(ctx) {
 		return err
@@ -45,7 +45,7 @@ func (s *WorkspaceService) StartWorkspace(ctx context.Context, workspaceId strin
 
 	clientId := telemetry.ClientId(ctx)
 
-	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, w, target)
+	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, w, targetConfig)
 	event := telemetry.ServerEventWorkspaceStarted
 	if err != nil {
 		telemetryProps["error"] = err.Error()
@@ -70,7 +70,7 @@ func (s *WorkspaceService) StartProject(ctx context.Context, workspaceId, projec
 		return ErrProjectNotFound
 	}
 
-	target, err := s.targetStore.Find(&provider.TargetFilter{Name: &w.Target})
+	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &w.TargetConfig})
 	if err != nil {
 		return err
 	}
@@ -78,10 +78,10 @@ func (s *WorkspaceService) StartProject(ctx context.Context, workspaceId, projec
 	projectLogger := s.loggerFactory.CreateProjectLogger(w.Id, project.Name, logs.LogSourceServer)
 	defer projectLogger.Close()
 
-	return s.startProject(ctx, project, target, projectLogger)
+	return s.startProject(ctx, project, targetConfig, projectLogger)
 }
 
-func (s *WorkspaceService) startWorkspace(ctx context.Context, ws *workspace.Workspace, target *provider.ProviderTarget, wsLogWriter io.Writer) error {
+func (s *WorkspaceService) startWorkspace(ctx context.Context, ws *workspace.Workspace, targetConfig *provider.TargetConfig, wsLogWriter io.Writer) error {
 	wsLogWriter.Write([]byte("Starting workspace\n"))
 
 	ws.EnvVars = workspace.GetWorkspaceEnvVars(ws, workspace.WorkspaceEnvVarParams{
@@ -91,7 +91,7 @@ func (s *WorkspaceService) startWorkspace(ctx context.Context, ws *workspace.Wor
 		ClientId:      telemetry.ClientId(ctx),
 	}, telemetry.TelemetryEnabled(ctx))
 
-	err := s.provisioner.StartWorkspace(ws, target)
+	err := s.provisioner.StartWorkspace(ws, targetConfig)
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func (s *WorkspaceService) startWorkspace(ctx context.Context, ws *workspace.Wor
 		projectLogger := s.loggerFactory.CreateProjectLogger(ws.Id, project.Name, logs.LogSourceServer)
 		defer projectLogger.Close()
 
-		err = s.startProject(ctx, project, target, projectLogger)
+		err = s.startProject(ctx, project, targetConfig, projectLogger)
 		if err != nil {
 			return err
 		}
@@ -111,7 +111,7 @@ func (s *WorkspaceService) startWorkspace(ctx context.Context, ws *workspace.Wor
 	return nil
 }
 
-func (s *WorkspaceService) startProject(ctx context.Context, p *project.Project, target *provider.ProviderTarget, logWriter io.Writer) error {
+func (s *WorkspaceService) startProject(ctx context.Context, p *project.Project, targetConfig *provider.TargetConfig, logWriter io.Writer) error {
 	logWriter.Write([]byte(fmt.Sprintf("Starting project %s\n", p.Name)))
 
 	projectToStart := *p
@@ -143,7 +143,7 @@ func (s *WorkspaceService) startProject(ctx context.Context, p *project.Project,
 
 	err = s.provisioner.StartProject(provisioner.ProjectParams{
 		Project:                       &projectToStart,
-		Target:                        target,
+		TargetConfig:                  targetConfig,
 		ContainerRegistry:             cr,
 		GitProviderConfig:             gc,
 		BuilderImage:                  s.builderImage,

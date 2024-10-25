@@ -19,10 +19,10 @@ func NotifyEmptyGitProviderList(tip bool) {
 	}
 }
 
-func NotifyEmptyTargetList(tip bool) {
-	views.RenderInfoMessageBold("No targets found")
+func NotifyEmptyTargetConfigList(tip bool) {
+	views.RenderInfoMessageBold("No target configs found")
 	if tip {
-		views.RenderTip("Use 'daytona target set' to add a target")
+		views.RenderTip("Use 'daytona target-config set' to add a target config")
 	}
 }
 

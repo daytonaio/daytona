@@ -22,17 +22,17 @@ var project1 = &project.Project{
 		Url:  "https://github.com/daytonaio/daytona",
 		Name: "daytona",
 	},
-	BuildConfig: &buildconfig.BuildConfig{},
-	Image:       "test-image:tag",
-	User:        "test-user",
-	WorkspaceId: "123",
-	Target:      "test",
+	Image:        "test-image:tag",
+	User:         "test-user",
+	WorkspaceId:  "123",
+	TargetConfig: "local",
+	BuildConfig:  &buildconfig.BuildConfig{},
 }
 
 var workspace1 = &workspace.Workspace{
-	Id:     "123",
-	Name:   "test",
-	Target: "test",
+	Id:           "123",
+	Name:         "test",
+	TargetConfig: "local",
 	Projects: []*project.Project{
 		project1,
 	},
