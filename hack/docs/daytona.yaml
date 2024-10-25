@@ -20,7 +20,7 @@ see_also:
     - daytona create - Create a target
     - daytona delete - Delete a target
     - daytona docs - Opens the Daytona documentation in your default browser.
-    - daytona env - Manage profile environment variables that are added to all workspaces
+    - daytona env - Manage profile environment variables that are added to all targets and projects
     - daytona forward - Forward a port from a project to your local machine
     - daytona git-providers - Manage Git providers
     - daytona ide - Choose the default IDE
