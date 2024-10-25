@@ -21,11 +21,11 @@ var _ MappedNullable = &WorkspaceDTO{}
 
 // WorkspaceDTO struct for WorkspaceDTO
 type WorkspaceDTO struct {
-	Id       string         `json:"id"`
-	Info     *WorkspaceInfo `json:"info,omitempty"`
-	Name     string         `json:"name"`
-	Projects []Project      `json:"projects"`
-	Target   string         `json:"target"`
+	Id           string         `json:"id"`
+	Info         *WorkspaceInfo `json:"info,omitempty"`
+	Name         string         `json:"name"`
+	Projects     []Project      `json:"projects"`
+	TargetConfig string         `json:"targetConfig"`
 }
 
 type _WorkspaceDTO WorkspaceDTO
@@ -34,12 +34,12 @@ type _WorkspaceDTO WorkspaceDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewWorkspaceDTO(id string, name string, projects []Project, target string) *WorkspaceDTO {
+func NewWorkspaceDTO(id string, name string, projects []Project, targetConfig string) *WorkspaceDTO {
 	this := WorkspaceDTO{}
 	this.Id = id
 	this.Name = name
 	this.Projects = projects
-	this.Target = target
+	this.TargetConfig = targetConfig
 	return &this
 }
 
@@ -155,28 +155,28 @@ func (o *WorkspaceDTO) SetProjects(v []Project) {
 	o.Projects = v
 }
 
-// GetTarget returns the Target field value
-func (o *WorkspaceDTO) GetTarget() string {
+// GetTargetConfig returns the TargetConfig field value
+func (o *WorkspaceDTO) GetTargetConfig() string {
 	if o == nil {
 		var ret string
 		return ret
 	}
 
-	return o.Target
+	return o.TargetConfig
 }
 
-// GetTargetOk returns a tuple with the Target field value
+// GetTargetConfigOk returns a tuple with the TargetConfig field value
 // and a boolean to check if the value has been set.
-func (o *WorkspaceDTO) GetTargetOk() (*string, bool) {
+func (o *WorkspaceDTO) GetTargetConfigOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Target, true
+	return &o.TargetConfig, true
 }
 
-// SetTarget sets field value
-func (o *WorkspaceDTO) SetTarget(v string) {
-	o.Target = v
+// SetTargetConfig sets field value
+func (o *WorkspaceDTO) SetTargetConfig(v string) {
+	o.TargetConfig = v
 }
 
 func (o WorkspaceDTO) MarshalJSON() ([]byte, error) {
@@ -195,7 +195,7 @@ func (o WorkspaceDTO) ToMap() (map[string]interface{}, error) {
 	}
 	toSerialize["name"] = o.Name
 	toSerialize["projects"] = o.Projects
-	toSerialize["target"] = o.Target
+	toSerialize["targetConfig"] = o.TargetConfig
 	return toSerialize, nil
 }
 
@@ -207,7 +207,7 @@ func (o *WorkspaceDTO) UnmarshalJSON(data []byte) (err error) {
 		"id",
 		"name",
 		"projects",
-		"target",
+		"targetConfig",
 	}
 
 	allProperties := make(map[string]interface{})

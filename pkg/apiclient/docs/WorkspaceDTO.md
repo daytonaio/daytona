@@ -8,13 +8,13 @@ Name | Type | Description | Notes
 **Info** | Pointer to [**WorkspaceInfo**](WorkspaceInfo.md) |  | [optional] 
 **Name** | **string** |  | 
 **Projects** | [**[]Project**](Project.md) |  | 
-**Target** | **string** |  | 
+**TargetConfig** | **string** |  | 
 
 ## Methods
 
 ### NewWorkspaceDTO
 
-`func NewWorkspaceDTO(id string, name string, projects []Project, target string, ) *WorkspaceDTO`
+`func NewWorkspaceDTO(id string, name string, projects []Project, targetConfig string, ) *WorkspaceDTO`
 
 NewWorkspaceDTO instantiates a new WorkspaceDTO object
 This constructor will assign default values to properties that have it defined,
@@ -114,24 +114,24 @@ and a boolean to check if the value has been set.
 SetProjects sets Projects field to given value.
 
 
-### GetTarget
+### GetTargetConfig
 
-`func (o *WorkspaceDTO) GetTarget() string`
+`func (o *WorkspaceDTO) GetTargetConfig() string`
 
-GetTarget returns the Target field if non-nil, zero value otherwise.
+GetTargetConfig returns the TargetConfig field if non-nil, zero value otherwise.
 
-### GetTargetOk
+### GetTargetConfigOk
 
-`func (o *WorkspaceDTO) GetTargetOk() (*string, bool)`
+`func (o *WorkspaceDTO) GetTargetConfigOk() (*string, bool)`
 
-GetTargetOk returns a tuple with the Target field if it's non-nil, zero value otherwise
+GetTargetConfigOk returns a tuple with the TargetConfig field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetTarget
+### SetTargetConfig
 
-`func (o *WorkspaceDTO) SetTarget(v string)`
+`func (o *WorkspaceDTO) SetTargetConfig(v string)`
 
-SetTarget sets Target field to given value.
+SetTargetConfig sets TargetConfig field to given value.
 
 
 

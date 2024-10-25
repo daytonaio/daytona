@@ -18,14 +18,14 @@ func (s *WorkspaceService) StopWorkspace(ctx context.Context, workspaceId string
 		return ErrWorkspaceNotFound
 	}
 
-	target, err := s.targetStore.Find(&provider.TargetFilter{Name: &workspace.Target})
+	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &workspace.TargetConfig})
 	if err != nil {
 		return err
 	}
 
 	for _, project := range workspace.Projects {
 		//	todo: go routines
-		err := s.provisioner.StopProject(project, target)
+		err := s.provisioner.StopProject(project, targetConfig)
 		if err != nil {
 			return err
 		}
@@ -35,7 +35,7 @@ func (s *WorkspaceService) StopWorkspace(ctx context.Context, workspaceId string
 		}
 	}
 
-	err = s.provisioner.StopWorkspace(workspace, target)
+	err = s.provisioner.StopWorkspace(workspace, targetConfig)
 	if err == nil {
 		err = s.workspaceStore.Save(workspace)
 	}
@@ -46,7 +46,7 @@ func (s *WorkspaceService) StopWorkspace(ctx context.Context, workspaceId string
 
 	clientId := telemetry.ClientId(ctx)
 
-	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, workspace, target)
+	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, workspace, targetConfig)
 	event := telemetry.ServerEventWorkspaceStopped
 	if err != nil {
 		telemetryProps["error"] = err.Error()
@@ -71,12 +71,12 @@ func (s *WorkspaceService) StopProject(ctx context.Context, workspaceId, project
 		return ErrProjectNotFound
 	}
 
-	target, err := s.targetStore.Find(&provider.TargetFilter{Name: &w.Target})
+	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &w.TargetConfig})
 	if err != nil {
 		return err
 	}
 
-	err = s.provisioner.StopProject(project, target)
+	err = s.provisioner.StopProject(project, targetConfig)
 	if err != nil {
 		return err
 	}

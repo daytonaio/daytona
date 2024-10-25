@@ -16,7 +16,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	os_util "github.com/daytonaio/daytona/pkg/os"
 	. "github.com/daytonaio/daytona/pkg/provider"
-	"github.com/daytonaio/daytona/pkg/server/providertargets"
+	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 	"github.com/shirou/gopsutil/process"
@@ -54,7 +54,7 @@ type ProviderManagerConfig struct {
 	ServerVersion            string
 	ApiUrl                   string
 	LogsDir                  string
-	ProviderTargetService    providertargets.IProviderTargetService
+	TargetConfigService      targetconfigs.ITargetConfigService
 	RegistryUrl              string
 	BaseDir                  string
 	CreateProviderNetworkKey func(providerName string) (string, error)
@@ -70,7 +70,7 @@ func NewProviderManager(config ProviderManagerConfig) *ProviderManager {
 		serverVersion:            config.ServerVersion,
 		apiUrl:                   config.ApiUrl,
 		logsDir:                  config.LogsDir,
-		providerTargetService:    config.ProviderTargetService,
+		targetConfigService:      config.TargetConfigService,
 		registryUrl:              config.RegistryUrl,
 		baseDir:                  config.BaseDir,
 		createProviderNetworkKey: config.CreateProviderNetworkKey,
@@ -88,7 +88,7 @@ type ProviderManager struct {
 	serverPort               uint32
 	apiPort                  uint32
 	logsDir                  string
-	providerTargetService    providertargets.IProviderTargetService
+	targetConfigService      targetconfigs.ITargetConfigService
 	registryUrl              string
 	baseDir                  string
 	createProviderNetworkKey func(providerName string) (string, error)
@@ -148,28 +148,28 @@ func (m *ProviderManager) RegisterProvider(pluginPath string, manualInstall bool
 			return fmt.Errorf("failed to get provider: %w", err)
 		}
 
-		existingTargets, err := m.providerTargetService.Map()
+		existingTargetConfigs, err := m.targetConfigService.Map()
 		if err != nil {
-			return errors.New("failed to get targets: " + err.Error())
+			return errors.New("failed to get target configs: " + err.Error())
 		}
 
-		presetTargets, err := (*p).GetPresetTargets()
+		presetTargetConfigs, err := (*p).GetPresetTargetConfigs()
 		if err != nil {
-			return errors.New("failed to get preset targets: " + err.Error())
+			return errors.New("failed to get preset target configs: " + err.Error())
 		}
 
-		log.Infof("Setting preset targets for %s", pluginRef.name)
-		for _, target := range *presetTargets {
-			if _, ok := existingTargets[target.Name]; ok {
-				log.Infof("Target %s already exists. Skipping...", target.Name)
+		log.Infof("Setting preset target configs for %s", pluginRef.name)
+		for _, targetConfig := range *presetTargetConfigs {
+			if _, ok := existingTargetConfigs[targetConfig.Name]; ok {
+				log.Infof("Target config %s already exists. Skipping...", targetConfig.Name)
 				continue
 			}
 
-			err := m.providerTargetService.Save(&target)
+			err := m.targetConfigService.Save(&targetConfig)
 			if err != nil {
-				log.Errorf("Failed to set target %s: %s", target.Name, err)
+				log.Errorf("Failed to set target %s: %s", targetConfig.Name, err)
 			} else {
-				log.Infof("Target %s set", target.Name)
+				log.Infof("Target %s set", targetConfig.Name)
 			}
 		}
 		log.Infof("Preset targets set for %s", pluginRef.name)

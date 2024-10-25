@@ -5,22 +5,22 @@ package provider
 
 import "errors"
 
-type TargetFilter struct {
+type TargetConfigFilter struct {
 	Name    *string
 	Default *bool
 }
 
-type TargetStore interface {
-	List(filter *TargetFilter) ([]*ProviderTarget, error)
-	Find(filter *TargetFilter) (*ProviderTarget, error)
-	Save(target *ProviderTarget) error
-	Delete(target *ProviderTarget) error
+type TargetConfigStore interface {
+	List(filter *TargetConfigFilter) ([]*TargetConfig, error)
+	Find(filter *TargetConfigFilter) (*TargetConfig, error)
+	Save(targetConfig *TargetConfig) error
+	Delete(targetConfig *TargetConfig) error
 }
 
 var (
-	ErrTargetNotFound = errors.New("target not found")
+	ErrTargetConfigNotFound = errors.New("target config not found")
 )
 
-func IsTargetNotFound(err error) bool {
-	return err.Error() == ErrTargetNotFound.Error()
+func IsTargetConfigNotFound(err error) bool {
+	return err.Error() == ErrTargetConfigNotFound.Error()
 }
