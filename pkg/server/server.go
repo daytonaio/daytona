@@ -15,7 +15,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/profiledata"
 	"github.com/daytonaio/daytona/pkg/server/projectconfig"
 	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
-	"github.com/daytonaio/daytona/pkg/server/workspaces"
+	"github.com/daytonaio/daytona/pkg/server/targets"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/hashicorp/go-plugin"
 
@@ -31,7 +31,7 @@ type ServerInstanceConfig struct {
 	BuildService             builds.IBuildService
 	ProjectConfigService     projectconfig.IProjectConfigService
 	LocalContainerRegistry   ILocalContainerRegistry
-	WorkspaceService         workspaces.IWorkspaceService
+	TargetService            targets.ITargetService
 	ApiKeyService            apikeys.IApiKeyService
 	GitProviderService       gitproviders.IGitProviderService
 	ProviderManager          manager.IProviderManager
@@ -60,7 +60,7 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 			BuildService:             serverConfig.BuildService,
 			ProjectConfigService:     serverConfig.ProjectConfigService,
 			LocalContainerRegistry:   serverConfig.LocalContainerRegistry,
-			WorkspaceService:         serverConfig.WorkspaceService,
+			TargetService:            serverConfig.TargetService,
 			ApiKeyService:            serverConfig.ApiKeyService,
 			GitProviderService:       serverConfig.GitProviderService,
 			ProviderManager:          serverConfig.ProviderManager,
@@ -82,7 +82,7 @@ type Server struct {
 	BuildService             builds.IBuildService
 	ProjectConfigService     projectconfig.IProjectConfigService
 	LocalContainerRegistry   ILocalContainerRegistry
-	WorkspaceService         workspaces.IWorkspaceService
+	TargetService            targets.ITargetService
 	ApiKeyService            apikeys.IApiKeyService
 	GitProviderService       gitproviders.IGitProviderService
 	ProviderManager          manager.IProviderManager

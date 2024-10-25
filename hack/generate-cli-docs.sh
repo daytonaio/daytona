@@ -7,5 +7,5 @@ rm -rf docs hack/docs
 # Generate default CLI documentation files in folder "docs"
 go run cmd/daytona/main.go generate-docs
 
-# Generate workspace mode documentation files in folder "docs/workspace_mode"
-DAYTONA_WS_ID=foo go run cmd/daytona/main.go generate-docs --directory docs/workspace_mode
+# Generate agent mode documentation files in folder "docs/agent_mode"
+DAYTONA_TARGET_ID=foo go run cmd/daytona/main.go generate-docs --directory docs/agent_mode

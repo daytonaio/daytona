@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/target/project"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	log "github.com/sirupsen/logrus"
@@ -90,9 +90,9 @@ func GetContainerCreateConfig(project *project.Project) *container.Config {
 		Hostname: project.Name,
 		Image:    project.Image,
 		Labels: map[string]string{
-			"daytona.workspace.id":                     project.WorkspaceId,
-			"daytona.workspace.project.name":           project.Name,
-			"daytona.workspace.project.repository.url": project.Repository.Url,
+			"daytona.target.id":              project.TargetId,
+			"daytona.project.name":           project.Name,
+			"daytona.project.repository.url": project.Repository.Url,
 		},
 		User:         project.User,
 		Env:          envVars,

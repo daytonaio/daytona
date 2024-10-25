@@ -27,13 +27,11 @@
 
 </div>
 
-
 <h1 align="center">The Open Source Development Environment Manager</h1>
 <div align="center">
 Set up a development environment on any infrastructure, with a single command.
 </div>
 </br>
-
 
 <p align="center">
     <a href="https://www.daytona.io/docs">Documentation</a>
@@ -50,24 +48,30 @@ Set up a development environment on any infrastructure, with a single command.
 <div align="center"><img src="https://github.com/daytonaio/daytona/raw/main/assets/images/daytona_demo.gif" width="50%" ></div>
 
 ## Features
-* __Single Command__: Activate a fully configured development environment with a single command.
-* __Runs everywhere__: spin up your development environment on any machine — whether it's local, remote, cloud-based, physical server, or a VM & any architecture x86 or ARM.
-* __Configuration File Support__: Initially support for [dev container](https://containers.dev/), ability to expand to DevFile, Nix & Flox (Contributions welcome here!).
-* __Prebuilds System__: Drastically improve environment setup times (Contributions welcome here!).
-* __IDE Support__ : Seamlessly supports [VS Code](https://github.com/microsoft/vscode) & [JetBrains](https://www.jetbrains.com/remote-development/gateway/) locally, ready to use without configuration. Includes a built-in Web IDE for added convenience.
-* __Git Provider Integration__: GitHub, GitLab, Bitbucket, Bitbucket Server, Gitea, Gitness, Azure DevOps, AWS CodeCommit & Gogs can be connected, allowing easy repo branch or PR pull and commit back from the workspaces.
-* __Multiple Project Workspace__: Support for multiple project repositories in the same workspace, making it easy to develop using a micro-service architecture.
-* __Reverse Proxy Integration__: Enable collaboration and streamline feedback loops by leveraging reverse proxy functionality. Access preview ports and the Web IDE seamlessly, even behind firewalls.
-* __Extensibility__: Enable extensibility with plugin or provider development. Moreover, in any dynamic language, not just Go(Contributions welcome here!).
-* __Security__: Automatically creates a VPN connection between the client machine and the development environment, ensuring a fully secure connection.
-* __All Ports__: The VPN connection enables access to all ports on the development environments, removing the need to setup port forwards over SSH connection.
-* __Works on my Machine__: Never experience it again.
+
+- **Single Command**: Activate a fully configured development environment with a single command.
+- **Runs everywhere**: spin up your development environment on any machine — whether it's local, remote, cloud-based, physical server, or a VM & any architecture x86 or ARM.
+- **Configuration File Support**: Initially support for [dev container](https://containers.dev/), ability to expand to DevFile, Nix & Flox (Contributions welcome here!).
+- **Prebuilds System**: Drastically improve environment setup times (Contributions welcome here!).
+- **IDE Support** : Seamlessly supports [VS Code](https://github.com/microsoft/vscode) & [JetBrains](https://www.jetbrains.com/remote-development/gateway/) locally, ready to use without configuration. Includes a built-in Web IDE for added convenience.
+- **Git Provider Integration**: GitHub, GitLab, Bitbucket, Bitbucket Server, Gitea, Gitness, Azure DevOps, AWS CodeCommit & Gogs can be connected, allowing easy repo branch or PR pull and commit back from the targets.
+- **Multiple Project Targets**: Support for multiple project repositories in the same target, making it easy to develop using a micro-service architecture.
+- **Reverse Proxy Integration**: Enable collaboration and streamline feedback loops by leveraging reverse proxy functionality. Access preview ports and the Web IDE seamlessly, even behind firewalls.
+- **Extensibility**: Enable extensibility with plugin or provider development. Moreover, in any dynamic language, not just Go(Contributions welcome here!).
+- **Security**: Automatically creates a VPN connection between the client machine and the development environment, ensuring a fully secure connection.
+- **All Ports**: The VPN connection enables access to all ports on the development environments, removing the need to setup port forwards over SSH connection.
+- **Works on my Machine**: Never experience it again.
+
 ## Quick Start
+
 ### Mac / Linux
+
 ```bash
 curl -sfL https://download.daytona.io/daytona/install.sh | sudo bash && daytona server -y && daytona
 ```
+
 ### Windows
+
 <details>
 <summary>Windows PowerShell</summary>
 This command downloads and installs Daytona and runs the Daytona Server:
@@ -90,14 +94,15 @@ daytona create
 
 **Start coding.**
 
-----
+---
 
 </br>
 
 ## Why Daytona?
+
 Daytona is a radically simple open source development environment manager.
 
-Setting up development environments has become increasingly challenging over time, especially when aiming to set up remotely, where the complexity increases by an order of magnitude. The process is so complex that we've compiled a [comprehensive guide](https://www.daytona.io/dotfiles/diy-guide-to-transform-any-machine-into-a-codespace) detailing all the necessary steps to set one up—spanning __5,000 words__, __7 steps__, and requiring anywhere from 15 to __45 minutes__.
+Setting up development environments has become increasingly challenging over time, especially when aiming to set up remotely, where the complexity increases by an order of magnitude. The process is so complex that we've compiled a [comprehensive guide](https://www.daytona.io/dotfiles/diy-guide-to-transform-any-machine-into-a-codespace) detailing all the necessary steps to set one up—spanning **5,000 words**, **7 steps**, and requiring anywhere from 15 to **45 minutes**.
 
 This complexity is unnecessary.
 
@@ -107,29 +112,25 @@ Daytona automates the entire process; provisioning the instance, interpreting an
 
 As a developer, you can immediately start focusing on what matters most—your code.
 
-
-
 ## Backstory
+
 We spent most of our careers building cloud development environments. In 2009, we launched what was likely the first commercial [Cloud IDE](https://codeanywhere.com) project. At that time, technology was lacking, forcing us to develop everything from scratch—the IDE, the environment orchestrator, and almost everything else. A lot of people were interested, and over 2.5 million developers signed up! But we were too early, and we asked too much from our users to change how they worked.
 
 Now, 15 years since its inception, we have noticed quite a few things. First, the technology we wished for back then exists now. Second, approximately 50% of developers work in remote dev environments, and third, and most importantly, setting up development environments has become more complex than ever, both locally and to a greater magnitude for remote.
 
 So, we took everything we learned and decided to solve these issues once and for all as a fully open-source project. Our goal was to create a single binary that allows you to set up a development environment anywhere you wish, completely free, and finally fulfill the promise that many have attempted to make.
 
-
-
-
-
-
 ## Getting Started
+
 ### Requirements
+
 Before starting the installation script, please go over all the necessary requirements:
-- __Hardware Resources__: Depending on the project requirements, ensure your machine has sufficient resources. Minimum hardware specification is 1cpu, 2GB of RAM and 10GB of disk space.
-- __Docker__: Ensure [Docker](https://www.docker.com/products/docker-desktop/) is installed and running.
 
-
+- **Hardware Resources**: Depending on the project requirements, ensure your machine has sufficient resources. Minimum hardware specification is 1cpu, 2GB of RAM and 10GB of disk space.
+- **Docker**: Ensure [Docker](https://www.docker.com/products/docker-desktop/) is installed and running.
 
 ### Installing Daytona
+
 Daytona allows you to manage your Development Environments using the Daytona CLI. To install it, please execute the following command:
 
 ```bash
@@ -139,59 +140,67 @@ curl -sf -L https://download.daytona.io/daytona/install.sh | sudo bash
 # OR if you want to install Daytona to some other path where you don`t need sudo
 # curl -sf -L https://download.daytona.io/daytona/install.sh | DAYTONA_PATH=/home/user/bin bash
 ```
+
 <details open>
   <summary> Manual installation </summary>
   If you don't want to use the provided script, download the binary directly from the URL for your specific OS:
 
-  ```bash
-  curl -sf -L https://download.daytona.io/daytona/latest/daytona-darwin-amd64 -o daytona
-  curl -sf -L https://download.daytona.io/daytona/latest/daytona-darwin-arm64 -o daytona
-  curl -sf -L https://download.daytona.io/daytona/latest/daytona-linux-amd64 -o daytona
-  curl -sf -L https://download.daytona.io/daytona/latest/daytona-linux-arm64 -o daytona
-  curl -sf -L https://download.daytona.io/daytona/latest/daytona-windows-amd64.exe -o daytona
-  curl -sf -L https://download.daytona.io/daytona/latest/daytona-windows-arm64.exe -o daytona
-  ```
-  Make sure that path where `daytona` binary is downloaded is in your system PATH.
+```bash
+curl -sf -L https://download.daytona.io/daytona/latest/daytona-darwin-amd64 -o daytona
+curl -sf -L https://download.daytona.io/daytona/latest/daytona-darwin-arm64 -o daytona
+curl -sf -L https://download.daytona.io/daytona/latest/daytona-linux-amd64 -o daytona
+curl -sf -L https://download.daytona.io/daytona/latest/daytona-linux-arm64 -o daytona
+curl -sf -L https://download.daytona.io/daytona/latest/daytona-windows-amd64.exe -o daytona
+curl -sf -L https://download.daytona.io/daytona/latest/daytona-windows-arm64.exe -o daytona
+```
+
+Make sure that path where `daytona` binary is downloaded is in your system PATH.
+
 </details>
 
-
-
 ### Initializing Daytona
+
 To initialize Daytona, follow these steps:
 
-__1. Start the Daytona Server:__
+**1. Start the Daytona Server:**
 This initiates the Daytona Server in daemon mode. Use the command:
+
 ```bash
 daytona server
 ```
-__2. Add Your Git Provider of Choice:__
+
+**2. Add Your Git Provider of Choice:**
 Daytona supports GitHub, GitLab, Bitbucket, Bitbucket Server, Gitea, Gitness, AWS CodeCommit, Azure DevOps and Gogs. To add them to your profile, use the command:
+
 ```bash
 daytona git-providers add
 
 ```
+
 Follow the steps provided.
 
-__3. Add Your Provider Target:__
+**3. Add Your Provider Target:**
 This step is for choosing where to deploy Development Environments. By default, Daytona includes a Docker provider to spin up environments on your local machine. For remote development environments, use the command:
+
 ```bash
 daytona target set
 ```
+
 Following the steps this command adds SSH machines to your targets.
 
-__4. Choose Your Default IDE:__
+**4. Choose Your Default IDE:**
 The default setting for Daytona is VS Code locally. If you prefer, you can switch to VS Code - Browser or any IDE from the JetBrains portfolio using the command:
+
 ```bash
 daytona ide
 ```
+
 Now that you have installed and initialized Daytona, you can proceed to setting up your development environments and start coding instantly.
 
-
-
-
-
 ### Creating Dev Environments
+
 Creating development environments with Daytona is a straightforward process, accomplished with just one command:
+
 ```bash
 daytona create
 ```
@@ -199,10 +208,12 @@ daytona create
 You can add the `--no-ide` flag if you don't wish to open the IDE immediately after creating the environment.
 
 Upon executing this command, you will be prompted with two questions:
+
 1. Choose the provider to decide where to create a dev environment.
 2. Select or type the Git repository you wish to use to create a dev environment.
 
 After making your selections, press enter, and Daytona will handle the rest. All that remains for you to do is to execute the following command to open your default IDE:
+
 ```bash
 daytona code
 ```
@@ -210,11 +221,13 @@ daytona code
 This command opens your development environment in your preferred IDE, allowing you to start coding instantly.
 
 ### Stopping the Daytona Server:
+
 ```bash
 daytona server stop
 ```
 
 ### Restarting the Daytona Server:
+
 ```bash
 daytona server restart
 ```
@@ -223,25 +236,21 @@ daytona server restart
 
 Daytona offers flexibility for extension through the creation of plugins and providers.
 
-
 ### Providers
+
 Daytona is designed to be infrastructure-agnostic, capable of creating and managing development environments across various platforms. Providers are the components that encapsulate the logic for provisioning compute resources on a specific target platform. They allow for the configuration of different targets within a single provider, enabling, for instance, multiple AWS profiles within an AWS provider.
 
 How does it work? When executing the `daytona create` command, Daytona communicates the environment details to the selected provider, which then provisions the necessary compute resources. Once provisioned, Daytona sets up the environment on these resources, allowing the user to interact with the environment seamlessly.
 
 Providers are independent projects that adhere to the Daytona Provider interface. They can be developed in nearly any major programming language. More details coming soon.
 
-
 ### Plugins
+
 Plugins enhance Daytona's core functionalities by adding new CLI commands, API methods, or services within the development environments. They offer configurable settings to tailor the plugin's behavior to the user's needs.
 
 Similar to providers, plugins are independent projects that conform to the Daytona Plugin interface and can be developed in a wide range of programming languages. More details coming soon.
 
-
-
-
 ## Contributing
-
 
 Daytona is Open Source under the [Apache License 2.0](LICENSE), and is the [copyright of its contributors](NOTICE). If you would like to contribute to the software, you must:
 
@@ -253,8 +262,6 @@ This ensures that users, distributors, and other contributors can rely on all th
 Afterwards, navigate to the [contributing guide](CONTRIBUTING.md) to get started.
 
 ## License
-
-
 
 This repository contains Daytona, covered under the [Apache License 2.0](LICENSE), except where noted (any Daytona logos or trademarks are not covered under the Apache License, and should be explicitly noted by a LICENSE file.)
 
@@ -268,11 +275,9 @@ You can read more in our [packinging guidelines](PACKAGING.md).
 
 ## Code of Conduct
 
-
 This project has adapted the Code of Conduct from the [Contributor Covenant](https://www.contributor-covenant.org/). For more information see the [Code of Conduct](CODE_OF_CONDUCT.md) or contact [codeofconduct@daytona.io.](mailto:codeofconduct@daytona.io) with any additional questions or comments.
 
 ## Questions
-
 
 For more information on how to use and develop Daytona, talk to us on
 [Slack](https://go.daytona.io/slack).

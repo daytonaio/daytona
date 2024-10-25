@@ -33,10 +33,10 @@ func NotifyEmptyProjectConfigList(tip bool) {
 	}
 }
 
-func NotifyEmptyWorkspaceList(tip bool) {
-	views.RenderInfoMessageBold("No workspaces found")
+func NotifyEmptyTargetList(tip bool) {
+	views.RenderInfoMessageBold("No targets found")
 	if tip {
-		views.RenderTip("Use 'daytona create' to create a workspace")
+		views.RenderTip("Use 'daytona create' to create a target")
 	}
 }
 

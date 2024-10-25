@@ -23,25 +23,25 @@ import (
 	"github.com/pkg/browser"
 )
 
-func OpenJetbrainsIDE(activeProfile config.Profile, ide, workspaceId, projectName string, gpgKey string) error {
+func OpenJetbrainsIDE(activeProfile config.Profile, ide, targetId, projectName string, gpgKey string) error {
 	err := IsJetBrainsGatewayInstalled()
 	if err != nil {
 		return err
 	}
 
-	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName, gpgKey)
+	projectDir, err := util.GetProjectDir(activeProfile, targetId, projectName, gpgKey)
 	if err != nil {
 		return err
 	}
 
-	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
+	projectHostname := config.GetProjectHostname(activeProfile.Id, targetId, projectName)
 
 	jbIde, ok := jetbrains.GetIdes()[jetbrains.Id(ide)]
 	if !ok {
 		return errors.New("IDE not found")
 	}
 
-	home, err := util.GetHomeDir(activeProfile, workspaceId, projectName, gpgKey)
+	home, err := util.GetHomeDir(activeProfile, targetId, projectName, gpgKey)
 	if err != nil {
 		return err
 	}
