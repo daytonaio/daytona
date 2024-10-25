@@ -9,17 +9,17 @@ import (
 	"os"
 
 	"github.com/daytonaio/daytona/pkg/ssh"
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/target/project"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 )
 
-func (d *DockerClient) DestroyWorkspace(workspace *workspace.Workspace, workspaceDir string, sshClient *ssh.Client) error {
+func (d *DockerClient) DestroyTarget(target *target.Target, targetDir string, sshClient *ssh.Client) error {
 	if sshClient == nil {
-		return os.RemoveAll(workspaceDir)
+		return os.RemoveAll(targetDir)
 	} else {
-		return sshClient.Exec(fmt.Sprintf("rm -rf %s", workspaceDir), nil)
+		return sshClient.Exec(fmt.Sprintf("rm -rf %s", targetDir), nil)
 	}
 }
 

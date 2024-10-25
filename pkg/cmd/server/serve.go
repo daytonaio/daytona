@@ -36,7 +36,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/projectconfig"
 	"github.com/daytonaio/daytona/pkg/server/registry"
 	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
-	"github.com/daytonaio/daytona/pkg/server/workspaces"
+	"github.com/daytonaio/daytona/pkg/server/targets"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/views"
 	started_view "github.com/daytonaio/daytona/pkg/views/server/started"
@@ -192,7 +192,7 @@ var ServeCmd = &cobra.Command{
 }
 
 func GetInstance(c *server.Config, configDir string, version string, telemetryService telemetry.TelemetryService) (*server.Server, error) {
-	wsLogsDir, err := server.GetWorkspaceLogsDir(configDir)
+	targetLogsDir, err := server.GetTargetLogsDir(configDir)
 	if err != nil {
 		return nil, err
 	}
@@ -200,7 +200,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	if err != nil {
 		return nil, err
 	}
-	loggerFactory := logs.NewLoggerFactory(&wsLogsDir, &buildLogsDir)
+	loggerFactory := logs.NewLoggerFactory(&targetLogsDir, &buildLogsDir)
 
 	dbPath, err := getDbPath()
 	if err != nil {
@@ -233,7 +233,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	if err != nil {
 		return nil, err
 	}
-	workspaceStore, err := db.NewWorkspaceStore(dbConnection)
+	targetStore, err := db.NewTargetStore(dbConnection)
 	if err != nil {
 		return nil, err
 	}
@@ -323,7 +323,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	headscaleUrl := util.GetFrpcHeadscaleUrl(c.Frps.Protocol, c.Id, c.Frps.Domain)
 
 	providerManager := manager.NewProviderManager(manager.ProviderManagerConfig{
-		LogsDir:            wsLogsDir,
+		LogsDir:            targetLogsDir,
 		ApiUrl:             util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 		DaytonaDownloadUrl: getDaytonaScriptUrl(c),
 		ServerUrl:          headscaleUrl,
@@ -342,8 +342,8 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		ProviderManager: providerManager,
 	})
 
-	workspaceService := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
-		WorkspaceStore:           workspaceStore,
+	targetService := targets.NewTargetService(targets.TargetServiceConfig{
+		TargetStore:              targetStore,
 		TargetConfigStore:        targetConfigStore,
 		ApiKeyService:            apiKeyService,
 		GitProviderService:       gitProviderService,
@@ -375,7 +375,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		ProjectConfigService:     projectConfigService,
 		LocalContainerRegistry:   localContainerRegistry,
 		ApiKeyService:            apiKeyService,
-		WorkspaceService:         workspaceService,
+		TargetService:            targetService,
 		GitProviderService:       gitProviderService,
 		ProviderManager:          providerManager,
 		ProfileDataService:       profileDataService,

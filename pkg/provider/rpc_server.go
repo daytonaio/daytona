@@ -5,8 +5,8 @@ package provider
 
 import (
 	"github.com/daytonaio/daytona/pkg/provider/util"
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/target/project"
 )
 
 type ProviderRPCServer struct {
@@ -57,28 +57,28 @@ func (m *ProviderRPCServer) GetPresetTargetConfigs(arg interface{}, resp *[]Targ
 	return nil
 }
 
-func (m *ProviderRPCServer) CreateWorkspace(arg *WorkspaceRequest, resp *util.Empty) error {
-	_, err := m.Impl.CreateWorkspace(arg)
+func (m *ProviderRPCServer) CreateTarget(arg *TargetRequest, resp *util.Empty) error {
+	_, err := m.Impl.CreateTarget(arg)
 	return err
 }
 
-func (m *ProviderRPCServer) StartWorkspace(arg *WorkspaceRequest, resp *util.Empty) error {
-	_, err := m.Impl.StartWorkspace(arg)
+func (m *ProviderRPCServer) StartTarget(arg *TargetRequest, resp *util.Empty) error {
+	_, err := m.Impl.StartTarget(arg)
 	return err
 }
 
-func (m *ProviderRPCServer) StopWorkspace(arg *WorkspaceRequest, resp *util.Empty) error {
-	_, err := m.Impl.StopWorkspace(arg)
+func (m *ProviderRPCServer) StopTarget(arg *TargetRequest, resp *util.Empty) error {
+	_, err := m.Impl.StopTarget(arg)
 	return err
 }
 
-func (m *ProviderRPCServer) DestroyWorkspace(arg *WorkspaceRequest, resp *util.Empty) error {
-	_, err := m.Impl.DestroyWorkspace(arg)
+func (m *ProviderRPCServer) DestroyTarget(arg *TargetRequest, resp *util.Empty) error {
+	_, err := m.Impl.DestroyTarget(arg)
 	return err
 }
 
-func (m *ProviderRPCServer) GetWorkspaceInfo(arg *WorkspaceRequest, resp *workspace.WorkspaceInfo) error {
-	info, err := m.Impl.GetWorkspaceInfo(arg)
+func (m *ProviderRPCServer) GetTargetInfo(arg *TargetRequest, resp *target.TargetInfo) error {
+	info, err := m.Impl.GetTargetInfo(arg)
 	if err != nil {
 		return err
 	}

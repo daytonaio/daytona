@@ -11,13 +11,13 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 )
 
-func GetHomeDir(activeProfile config.Profile, workspaceId string, projectName string, gpgKey string) (string, error) {
-	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName, gpgKey)
+func GetHomeDir(activeProfile config.Profile, targetId string, projectName string, gpgKey string) (string, error) {
+	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, targetId, projectName, gpgKey)
 	if err != nil {
 		return "", err
 	}
 
-	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
+	projectHostname := config.GetProjectHostname(activeProfile.Id, targetId, projectName)
 
 	homeDir, err := exec.Command("ssh", projectHostname, "echo", "$HOME").Output()
 	if err != nil {
@@ -27,13 +27,13 @@ func GetHomeDir(activeProfile config.Profile, workspaceId string, projectName st
 	return strings.TrimRight(string(homeDir), "\n"), nil
 }
 
-func GetProjectDir(activeProfile config.Profile, workspaceId string, projectName string, gpgKey string) (string, error) {
-	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName, gpgKey)
+func GetProjectDir(activeProfile config.Profile, targetId string, projectName string, gpgKey string) (string, error) {
+	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, targetId, projectName, gpgKey)
 	if err != nil {
 		return "", err
 	}
 
-	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
+	projectHostname := config.GetProjectHostname(activeProfile.Id, targetId, projectName)
 
 	daytonaProjectDir, err := exec.Command("ssh", projectHostname, "echo", "$DAYTONA_PROJECT_DIR").Output()
 	if err != nil {
@@ -44,7 +44,7 @@ func GetProjectDir(activeProfile config.Profile, workspaceId string, projectName
 		return strings.TrimRight(string(daytonaProjectDir), "\n"), nil
 	}
 
-	homeDir, err := GetHomeDir(activeProfile, workspaceId, projectName, gpgKey)
+	homeDir, err := GetHomeDir(activeProfile, targetId, projectName, gpgKey)
 	if err != nil {
 		return "", err
 	}

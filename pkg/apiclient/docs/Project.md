@@ -12,14 +12,14 @@ Name | Type | Description | Notes
 **Repository** | [**GitRepository**](GitRepository.md) |  | 
 **State** | Pointer to [**ProjectState**](ProjectState.md) |  | [optional] 
 **TargetConfig** | **string** |  | 
+**TargetId** | **string** |  | 
 **User** | **string** |  | 
-**WorkspaceId** | **string** |  | 
 
 ## Methods
 
 ### NewProject
 
-`func NewProject(envVars map[string]string, image string, name string, repository GitRepository, targetConfig string, user string, workspaceId string, ) *Project`
+`func NewProject(envVars map[string]string, image string, name string, repository GitRepository, targetConfig string, targetId string, user string, ) *Project`
 
 NewProject instantiates a new Project object
 This constructor will assign default values to properties that have it defined,
@@ -209,6 +209,26 @@ and a boolean to check if the value has been set.
 SetTargetConfig sets TargetConfig field to given value.
 
 
+### GetTargetId
+
+`func (o *Project) GetTargetId() string`
+
+GetTargetId returns the TargetId field if non-nil, zero value otherwise.
+
+### GetTargetIdOk
+
+`func (o *Project) GetTargetIdOk() (*string, bool)`
+
+GetTargetIdOk returns a tuple with the TargetId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTargetId
+
+`func (o *Project) SetTargetId(v string)`
+
+SetTargetId sets TargetId field to given value.
+
+
 ### GetUser
 
 `func (o *Project) GetUser() string`
@@ -227,26 +247,6 @@ and a boolean to check if the value has been set.
 `func (o *Project) SetUser(v string)`
 
 SetUser sets User field to given value.
-
-
-### GetWorkspaceId
-
-`func (o *Project) GetWorkspaceId() string`
-
-GetWorkspaceId returns the WorkspaceId field if non-nil, zero value otherwise.
-
-### GetWorkspaceIdOk
-
-`func (o *Project) GetWorkspaceIdOk() (*string, bool)`
-
-GetWorkspaceIdOk returns a tuple with the WorkspaceId field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetWorkspaceId
-
-`func (o *Project) SetWorkspaceId(v string)`
-
-SetWorkspaceId sets WorkspaceId field to given value.
 
 
 

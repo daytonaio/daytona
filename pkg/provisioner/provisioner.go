@@ -10,8 +10,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/target/project"
 )
 
 type ProjectParams struct {
@@ -24,15 +24,16 @@ type ProjectParams struct {
 }
 
 type IProvisioner interface {
+	CreateTarget(target *target.Target, targetConfig *provider.TargetConfig) error
+	StartTarget(target *target.Target, targetConfig *provider.TargetConfig) error
+	StopTarget(target *target.Target, targetConfig *provider.TargetConfig) error
+	GetTargetInfo(ctx context.Context, target *target.Target, targetConfig *provider.TargetConfig) (*target.TargetInfo, error)
+	DestroyTarget(target *target.Target, targetConfig *provider.TargetConfig) error
+
 	CreateProject(params ProjectParams) error
-	CreateWorkspace(workspace *workspace.Workspace, targetConfig *provider.TargetConfig) error
 	DestroyProject(project *project.Project, targetConfig *provider.TargetConfig) error
-	DestroyWorkspace(workspace *workspace.Workspace, targetConfig *provider.TargetConfig) error
-	GetWorkspaceInfo(ctx context.Context, workspace *workspace.Workspace, targetConfig *provider.TargetConfig) (*workspace.WorkspaceInfo, error)
 	StartProject(params ProjectParams) error
-	StartWorkspace(workspace *workspace.Workspace, targetConfig *provider.TargetConfig) error
 	StopProject(project *project.Project, targetConfig *provider.TargetConfig) error
-	StopWorkspace(workspace *workspace.Workspace, targetConfig *provider.TargetConfig) error
 }
 
 type ProvisionerConfig struct {

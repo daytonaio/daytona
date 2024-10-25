@@ -8,13 +8,13 @@ Name | Type | Description | Notes
 **IsRunning** | **bool** |  | 
 **Name** | **string** |  | 
 **ProviderMetadata** | Pointer to **string** |  | [optional] 
-**WorkspaceId** | **string** |  | 
+**TargetId** | **string** |  | 
 
 ## Methods
 
 ### NewProjectInfo
 
-`func NewProjectInfo(created string, isRunning bool, name string, workspaceId string, ) *ProjectInfo`
+`func NewProjectInfo(created string, isRunning bool, name string, targetId string, ) *ProjectInfo`
 
 NewProjectInfo instantiates a new ProjectInfo object
 This constructor will assign default values to properties that have it defined,
@@ -114,24 +114,24 @@ SetProviderMetadata sets ProviderMetadata field to given value.
 
 HasProviderMetadata returns a boolean if a field has been set.
 
-### GetWorkspaceId
+### GetTargetId
 
-`func (o *ProjectInfo) GetWorkspaceId() string`
+`func (o *ProjectInfo) GetTargetId() string`
 
-GetWorkspaceId returns the WorkspaceId field if non-nil, zero value otherwise.
+GetTargetId returns the TargetId field if non-nil, zero value otherwise.
 
-### GetWorkspaceIdOk
+### GetTargetIdOk
 
-`func (o *ProjectInfo) GetWorkspaceIdOk() (*string, bool)`
+`func (o *ProjectInfo) GetTargetIdOk() (*string, bool)`
 
-GetWorkspaceIdOk returns a tuple with the WorkspaceId field if it's non-nil, zero value otherwise
+GetTargetIdOk returns a tuple with the TargetId field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetWorkspaceId
+### SetTargetId
 
-`func (o *ProjectInfo) SetWorkspaceId(v string)`
+`func (o *ProjectInfo) SetTargetId(v string)`
 
-SetWorkspaceId sets WorkspaceId field to given value.
+SetTargetId sets TargetId field to given value.
 
 
 

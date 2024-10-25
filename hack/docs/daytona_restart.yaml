@@ -1,10 +1,10 @@
 name: daytona restart
-synopsis: Restart a workspace
-usage: daytona restart [WORKSPACE] [flags]
+synopsis: Restart a target
+usage: daytona restart [TARGET] [flags]
 options:
     - name: project
       shorthand: p
-      usage: Restart a single project in the workspace (project name)
+      usage: Restart a single project in the target (project name)
 inherited_options:
     - name: help
       default_value: "false"

@@ -9,8 +9,8 @@ import (
 	"github.com/daytonaio/daytona/internal/testing/docker/mocks"
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/target/project"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -23,11 +23,11 @@ var project1 = &project.Project{
 	},
 	Image:        "test-image:tag",
 	User:         "test-user",
-	WorkspaceId:  "123",
+	TargetId:     "123",
 	TargetConfig: "local",
 }
 
-var workspace1 = &workspace.Workspace{
+var target1 = &target.Target{
 	Id:           "123",
 	Name:         "test",
 	TargetConfig: "local",

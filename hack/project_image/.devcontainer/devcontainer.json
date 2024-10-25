@@ -1,5 +1,5 @@
 {
-  "name": "Daytona Workspace Project",
+  "name": "Daytona",
   "build": {
     "context": "..",
     "dockerfile": "../Dockerfile"

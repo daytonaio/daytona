@@ -15,7 +15,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/agent/ssh"
 	"github.com/daytonaio/daytona/pkg/agent/tailscale"
 	"github.com/daytonaio/daytona/pkg/git"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/target/project"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -68,9 +68,9 @@ var AgentCmd = &cobra.Command{
 			DefaultProjectDir: os.Getenv("HOME"),
 		}
 
-		tailscaleHostname := project.GetProjectHostname(c.WorkspaceId, c.ProjectName)
+		tailscaleHostname := project.GetProjectHostname(c.TargetId, c.ProjectName)
 		if hostModeFlag {
-			tailscaleHostname = c.WorkspaceId
+			tailscaleHostname = c.TargetId
 		}
 
 		telemetryEnabled := os.Getenv("DAYTONA_TELEMETRY_ENABLED") == "true"
