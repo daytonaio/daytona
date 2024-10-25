@@ -12,6 +12,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/table"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"golang.org/x/term"
 )
 
@@ -34,6 +35,11 @@ func getRowData(key, value string) *RowData {
 }
 
 func List(envVars map[string]string) {
+	if len(envVars) == 0 {
+		views_util.NotifyEmptyEnvVarList(true)
+		return
+	}
+
 	re := lipgloss.NewRenderer(os.Stdout)
 
 	headers := []string{"Key", "Value"}

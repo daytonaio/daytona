@@ -9,7 +9,6 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/env"
-	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 )
 
@@ -35,11 +34,6 @@ var listCmd = &cobra.Command{
 			}
 			formattedData := format.NewFormatter(profileData.EnvVars)
 			formattedData.Print()
-			return nil
-		}
-
-		if len(profileData.EnvVars) == 0 {
-			views_util.NotifyEmptyEnvVarList(true)
 			return nil
 		}
 

@@ -12,7 +12,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/provider"
 	provider_view "github.com/daytonaio/daytona/pkg/views/provider"
-	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 )
 
@@ -37,11 +36,6 @@ var providerListCmd = &cobra.Command{
 		if format.FormatFlag != "" {
 			formattedData := format.NewFormatter(providerList)
 			formattedData.Print()
-			return nil
-		}
-
-		if len(providerList) == 0 {
-			views_util.NotifyEmptyProviderList(true)
 			return nil
 		}
 

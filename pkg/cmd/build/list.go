@@ -9,7 +9,6 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	view "github.com/daytonaio/daytona/pkg/views/build/list"
-	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 )
 
@@ -39,11 +38,6 @@ var buildListCmd = &cobra.Command{
 		if format.FormatFlag != "" {
 			formattedData := format.NewFormatter(buildList)
 			formattedData.Print()
-			return nil
-		}
-
-		if len(buildList) == 0 {
-			views_util.NotifyEmptyBuildList(true)
 			return nil
 		}
 

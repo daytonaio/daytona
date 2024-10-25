@@ -11,7 +11,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
 	"github.com/daytonaio/daytona/pkg/views/gitprovider/list"
-	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 )
 
@@ -60,11 +59,6 @@ var gitProviderListCmd = &cobra.Command{
 		if format.FormatFlag != "" {
 			formattedData := format.NewFormatter(gitProviderViewList)
 			formattedData.Print()
-			return nil
-		}
-
-		if len(gitProviderViewList) == 0 {
-			views_util.NotifyEmptyGitProviderList(true)
 			return nil
 		}
 

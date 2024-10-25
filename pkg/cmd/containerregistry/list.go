@@ -10,7 +10,6 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	containerregistry_view "github.com/daytonaio/daytona/pkg/views/containerregistry/list"
-	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 )
 
@@ -33,11 +32,6 @@ var containerRegistryListCmd = &cobra.Command{
 		if format.FormatFlag != "" {
 			formattedData := format.NewFormatter(containerRegistries)
 			formattedData.Print()
-			return nil
-		}
-
-		if len(containerRegistries) == 0 {
-			views_util.NotifyEmptyContainerRegistryList(true)
 			return nil
 		}
 

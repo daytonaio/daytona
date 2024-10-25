@@ -11,7 +11,6 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
-	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	list_view "github.com/daytonaio/daytona/pkg/views/workspace/list"
 	"github.com/spf13/cobra"
 )
@@ -51,11 +50,6 @@ var ListCmd = &cobra.Command{
 		if format.FormatFlag != "" {
 			formattedData := format.NewFormatter(workspaceList)
 			formattedData.Print()
-			return nil
-		}
-
-		if len(workspaceList) == 0 {
-			views_util.NotifyEmptyWorkspaceList(true)
 			return nil
 		}
 

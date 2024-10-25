@@ -9,7 +9,6 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	list_view "github.com/daytonaio/daytona/pkg/views/target/list"
-	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 )
 
@@ -34,11 +33,6 @@ var targetListCmd = &cobra.Command{
 		if format.FormatFlag != "" {
 			formattedData := format.NewFormatter(targetList)
 			formattedData.Print()
-			return nil
-		}
-
-		if len(targetList) == 0 {
-			views_util.NotifyEmptyTargetList(true)
 			return nil
 		}
 

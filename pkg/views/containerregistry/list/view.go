@@ -19,6 +19,11 @@ type rowData struct {
 }
 
 func ListRegistries(registryList []apiclient.ContainerRegistry) {
+	if len(registryList) == 0 {
+		views_util.NotifyEmptyContainerRegistryList(true)
+		return
+	}
+
 	data := [][]string{}
 
 	for _, registry := range registryList {
