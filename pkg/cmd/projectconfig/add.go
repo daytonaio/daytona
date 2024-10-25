@@ -12,11 +12,11 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
+	target_util "github.com/daytonaio/daytona/pkg/cmd/target/util"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
+	"github.com/daytonaio/daytona/pkg/views/target/create"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
-	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/spf13/cobra"
 )
 
@@ -66,7 +66,7 @@ var projectConfigAddCmd = &cobra.Command{
 }
 
 func RunProjectConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []apiclient.GitProvider, ctx context.Context) (*apiclient.ProjectConfig, error) {
-	if workspace_util.CheckAnyProjectConfigurationFlagSet(projectConfigurationFlags) {
+	if target_util.CheckAnyProjectConfigurationFlagSet(projectConfigurationFlags) {
 		return nil, errors.New("please provide the repository URL in order to set up custom project config details through the CLI")
 	}
 
@@ -88,7 +88,7 @@ func RunProjectConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []apic
 		DevcontainerFilePath: create.DEVCONTAINER_FILEPATH,
 	}
 
-	createDtos, err = workspace_util.GetProjectsCreationDataFromPrompt(workspace_util.ProjectsDataPromptConfig{
+	createDtos, err = target_util.GetProjectsCreationDataFromPrompt(target_util.ProjectsDataPromptConfig{
 		UserGitProviders:    gitProviders,
 		Manual:              *projectConfigurationFlags.Manual,
 		MultiProject:        false,
@@ -120,7 +120,7 @@ func RunProjectConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []apic
 
 	initialSuggestion := createDtos[0].Name
 
-	chosenName := workspace_util.GetSuggestedName(initialSuggestion, existingProjectConfigNames)
+	chosenName := target_util.GetSuggestedName(initialSuggestion, existingProjectConfigNames)
 
 	submissionFormConfig := create.SubmissionFormConfig{
 		ChosenName:    &chosenName,
@@ -207,12 +207,12 @@ func processCmdArgument(argument string, apiClient *apiclient.APIClient, ctx con
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	projectConfigurationFlags.GitProviderConfig, err = workspace_util.GetGitProviderConfigIdFromFlag(ctx, apiClient, projectConfigurationFlags.GitProviderConfig)
+	projectConfigurationFlags.GitProviderConfig, err = target_util.GetGitProviderConfigIdFromFlag(ctx, apiClient, projectConfigurationFlags.GitProviderConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	project, err := workspace_util.GetCreateProjectDtoFromFlags(projectConfigurationFlags)
+	project, err := target_util.GetCreateProjectDtoFromFlags(projectConfigurationFlags)
 	if err != nil {
 		return nil, err
 	}
@@ -221,8 +221,8 @@ func processCmdArgument(argument string, apiClient *apiclient.APIClient, ctx con
 	if nameFlag != "" {
 		name = nameFlag
 	} else {
-		projectName := workspace_util.GetProjectNameFromRepo(repoUrl)
-		name = workspace_util.GetSuggestedName(projectName, existingProjectConfigNames)
+		projectName := target_util.GetProjectNameFromRepo(repoUrl)
+		name = target_util.GetSuggestedName(projectName, existingProjectConfigNames)
 	}
 
 	if project.GitProviderConfigId == nil || *project.GitProviderConfigId == "" {
@@ -276,7 +276,7 @@ func getExistingProjectConfigNames(apiClient *apiclient.APIClient) ([]string, er
 
 var nameFlag string
 
-var projectConfigurationFlags = workspace_util.ProjectConfigurationFlags{
+var projectConfigurationFlags = target_util.ProjectConfigurationFlags{
 	Builder:           new(views_util.BuildChoice),
 	CustomImage:       new(string),
 	CustomImageUser:   new(string),
@@ -289,5 +289,5 @@ var projectConfigurationFlags = workspace_util.ProjectConfigurationFlags{
 
 func init() {
 	projectConfigAddCmd.Flags().StringVar(&nameFlag, "name", "", "Specify the project config name")
-	workspace_util.AddProjectConfigurationFlags(projectConfigAddCmd, projectConfigurationFlags, false)
+	target_util.AddProjectConfigurationFlags(projectConfigAddCmd, projectConfigurationFlags, false)
 }

@@ -12,7 +12,7 @@ var BuildCmd = &cobra.Command{
 	Use:     "build",
 	Aliases: []string{"builds"},
 	Short:   "Manage builds",
-	GroupID: util.WORKSPACE_GROUP,
+	GroupID: util.TARGET_GROUP,
 }
 
 func init() {

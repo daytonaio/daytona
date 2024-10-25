@@ -5,8 +5,8 @@ package dto
 
 import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
-	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
+	"github.com/daytonaio/daytona/pkg/target/project"
+	"github.com/daytonaio/daytona/pkg/target/project/buildconfig"
 )
 
 type RepositoryDTO struct {
@@ -57,7 +57,7 @@ type ProjectDTO struct {
 	User                string           `json:"user"`
 	Build               *ProjectBuildDTO `json:"build,omitempty" gorm:"serializer:json"`
 	Repository          RepositoryDTO    `json:"repository" gorm:"serializer:json"`
-	WorkspaceId         string           `json:"workspaceId"`
+	TargetId            string           `json:"targetId"`
 	TargetConfig        string           `json:"targetConfig"`
 	ApiKey              string           `json:"apiKey"`
 	State               *ProjectStateDTO `json:"state,omitempty" gorm:"serializer:json"`
@@ -71,7 +71,7 @@ func ToProjectDTO(project *project.Project) ProjectDTO {
 		User:                project.User,
 		Build:               ToProjectBuildDTO(project.BuildConfig),
 		Repository:          ToRepositoryDTO(project.Repository),
-		WorkspaceId:         project.WorkspaceId,
+		TargetId:            project.TargetId,
 		TargetConfig:        project.TargetConfig,
 		State:               ToProjectStateDTO(project.State),
 		ApiKey:              project.ApiKey,
@@ -163,7 +163,7 @@ func ToProject(projectDTO ProjectDTO) *project.Project {
 		User:                projectDTO.User,
 		BuildConfig:         ToProjectBuild(projectDTO.Build),
 		Repository:          ToRepository(projectDTO.Repository),
-		WorkspaceId:         projectDTO.WorkspaceId,
+		TargetId:            projectDTO.TargetId,
 		TargetConfig:        projectDTO.TargetConfig,
 		State:               ToProjectState(projectDTO.State),
 		ApiKey:              projectDTO.ApiKey,

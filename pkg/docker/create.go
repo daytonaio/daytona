@@ -17,19 +17,19 @@ import (
 	"github.com/daytonaio/daytona/pkg/build/detect"
 	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/daytonaio/daytona/pkg/ssh"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	log "github.com/sirupsen/logrus"
 )
 
-func (d *DockerClient) CreateWorkspace(workspace *workspace.Workspace, workspaceDir string, logWriter io.Writer, sshClient *ssh.Client) error {
+func (d *DockerClient) CreateTarget(target *target.Target, targetDir string, logWriter io.Writer, sshClient *ssh.Client) error {
 	var err error
 	if sshClient == nil {
-		err = os.MkdirAll(workspaceDir, 0755)
+		err = os.MkdirAll(targetDir, 0755)
 	} else {
-		err = sshClient.Exec(fmt.Sprintf("mkdir -p %s", workspaceDir), nil)
+		err = sshClient.Exec(fmt.Sprintf("mkdir -p %s", targetDir), nil)
 	}
 
 	return err
@@ -93,7 +93,7 @@ func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions) error 
 	}
 
 	gitService := git.Service{
-		ProjectDir: fmt.Sprintf("/workdir/%s-%s", opts.Project.WorkspaceId, opts.Project.Name),
+		ProjectDir: fmt.Sprintf("/workdir/%s-%s", opts.Project.TargetId, opts.Project.Name),
 	}
 
 	cloneCmd := gitService.CloneRepositoryCmd(opts.Project.Repository, auth)
@@ -113,7 +113,7 @@ func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions) error 
 				Target: "/workdir",
 			},
 		},
-	}, nil, nil, fmt.Sprintf("git-clone-%s-%s", opts.Project.WorkspaceId, opts.Project.Name))
+	}, nil, nil, fmt.Sprintf("git-clone-%s-%s", opts.Project.TargetId, opts.Project.Name))
 	if err != nil {
 		return err
 	}
@@ -208,7 +208,7 @@ func (d *DockerClient) toCreateDevcontainerOptions(opts *CreateProjectOptions, p
 		ContainerRegistry: opts.Cr,
 		EnvVars:           opts.Project.EnvVars,
 		IdLabels: map[string]string{
-			"daytona.workspace.id": opts.Project.WorkspaceId,
+			"daytona.target.id":    opts.Project.TargetId,
 			"daytona.project.name": opts.Project.Name,
 		},
 		Prebuild: true,

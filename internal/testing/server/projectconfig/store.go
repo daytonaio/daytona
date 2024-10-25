@@ -8,7 +8,7 @@ package projectconfig
 import (
 	"fmt"
 
-	"github.com/daytonaio/daytona/pkg/workspace/project/config"
+	"github.com/daytonaio/daytona/pkg/target/project/config"
 )
 
 type InMemoryProjectConfigStore struct {
