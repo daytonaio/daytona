@@ -199,7 +199,7 @@ var CreateCmd = &cobra.Command{
 		// Make sure terminal cursor is reset
 		fmt.Print("\033[?25h")
 
-		wsInfo, res, err := apiClient.TargetAPI.GetTarget(ctx, targetName).Verbose(true).Execute()
+		targetInfo, res, err := apiClient.TargetAPI.GetTarget(ctx, targetName).Verbose(true).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
@@ -219,7 +219,7 @@ var CreateCmd = &cobra.Command{
 		}
 
 		fmt.Println()
-		info.Render(wsInfo, chosenIde.Name, false)
+		info.Render(targetInfo, chosenIde.Name, false)
 
 		if noIdeFlag {
 			views.RenderCreationInfoMessage("Run 'daytona code' when you're ready to start developing")
@@ -228,13 +228,13 @@ var CreateCmd = &cobra.Command{
 
 		views.RenderCreationInfoMessage(fmt.Sprintf("Opening the target in %s ...", chosenIde.Name))
 
-		projectName := wsInfo.Projects[0].Name
-		providerMetadata, err := target_util.GetProjectProviderMetadata(wsInfo, projectName)
+		projectName := targetInfo.Projects[0].Name
+		providerMetadata, err := target_util.GetProjectProviderMetadata(targetInfo, projectName)
 		if err != nil {
 			return err
 		}
 
-		return openIDE(chosenIdeId, activeProfile, createdTarget.Id, wsInfo.Projects[0].Name, providerMetadata, yesFlag, gpgKey)
+		return openIDE(chosenIdeId, activeProfile, createdTarget.Id, targetInfo.Projects[0].Name, providerMetadata, yesFlag, gpgKey)
 	},
 }
 

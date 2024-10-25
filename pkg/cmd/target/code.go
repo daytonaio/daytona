@@ -152,19 +152,19 @@ func selectTargetProject(targetId string, profile *config.Profile) (*apiclient.P
 		return nil, err
 	}
 
-	wsInfo, res, err := apiClient.TargetAPI.GetTarget(ctx, targetId).Execute()
+	targetInfo, res, err := apiClient.TargetAPI.GetTarget(ctx, targetId).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	if len(wsInfo.Projects) > 1 {
-		selectedProject := selection.GetProjectFromPrompt(wsInfo.Projects, "Open")
+	if len(targetInfo.Projects) > 1 {
+		selectedProject := selection.GetProjectFromPrompt(targetInfo.Projects, "Open")
 		if selectedProject == nil {
 			return nil, nil
 		}
 		return selectedProject, nil
-	} else if len(wsInfo.Projects) == 1 {
-		return &wsInfo.Projects[0], nil
+	} else if len(targetInfo.Projects) == 1 {
+		return &targetInfo.Projects[0], nil
 	}
 
 	return nil, errors.New("no projects found in target")

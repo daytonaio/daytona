@@ -51,8 +51,8 @@ func (s *DockerClientTestSuite) TestGetTargetInfo() {
 		TargetConfig: "local",
 	}
 
-	wsInfo, err := s.dockerClient.GetTargetInfo(targetWithoutProjects)
+	targetInfo, err := s.dockerClient.GetTargetInfo(targetWithoutProjects)
 	require.Nil(s.T(), err)
-	require.Equal(s.T(), wsInfo.Name, targetWithoutProjects.Name)
-	require.Equal(s.T(), wsInfo.ProviderMetadata, fmt.Sprintf(docker.TargetMetadataFormat, targetWithoutProjects.Id))
+	require.Equal(s.T(), targetInfo.Name, targetWithoutProjects.Name)
+	require.Equal(s.T(), targetInfo.ProviderMetadata, fmt.Sprintf(docker.TargetMetadataFormat, targetWithoutProjects.Id))
 }

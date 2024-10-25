@@ -139,20 +139,20 @@ func GetFirstProjectName(targetId string, projectName string, profile *config.Pr
 		return "", err
 	}
 
-	wsInfo, res, err := apiClient.TargetAPI.GetTarget(ctx, targetId).Execute()
+	targetInfo, res, err := apiClient.TargetAPI.GetTarget(ctx, targetId).Execute()
 	if err != nil {
 		return "", HandleErrorResponse(res, err)
 	}
 
 	if projectName == "" {
-		if len(wsInfo.Projects) == 0 {
+		if len(targetInfo.Projects) == 0 {
 			return "", errors.New("no projects found in target")
 		}
 
-		return wsInfo.Projects[0].Name, nil
+		return targetInfo.Projects[0].Name, nil
 	}
 
-	for _, project := range wsInfo.Projects {
+	for _, project := range targetInfo.Projects {
 		if project.Name == projectName {
 			return project.Name, nil
 		}

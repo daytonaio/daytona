@@ -90,16 +90,16 @@ var StartCmd = &cobra.Command{
 				ideList = config.GetIdeList()
 				ideId = c.DefaultIdeId
 
-				wsInfo, res, err := apiClient.TargetAPI.GetTarget(ctx, targetName).Execute()
+				targetInfo, res, err := apiClient.TargetAPI.GetTarget(ctx, targetName).Execute()
 				if err != nil {
 					return apiclient_util.HandleErrorResponse(res, err)
 				}
-				targetId = wsInfo.Id
+				targetId = targetInfo.Id
 				if startProjectFlag == "" {
-					startProjectFlag = wsInfo.Projects[0].Name
-					providerConfigId = wsInfo.Projects[0].GitProviderConfigId
+					startProjectFlag = targetInfo.Projects[0].Name
+					providerConfigId = targetInfo.Projects[0].GitProviderConfigId
 				} else {
-					for _, project := range wsInfo.Projects {
+					for _, project := range targetInfo.Projects {
 						if project.Name == startProjectFlag {
 							providerConfigId = project.GitProviderConfigId
 							break
@@ -108,7 +108,7 @@ var StartCmd = &cobra.Command{
 				}
 
 				if ideId != "ssh" {
-					projectProviderMetadata, err = target_util.GetProjectProviderMetadata(wsInfo, wsInfo.Projects[0].Name)
+					projectProviderMetadata, err = target_util.GetProjectProviderMetadata(targetInfo, targetInfo.Projects[0].Name)
 					if err != nil {
 						return err
 					}
