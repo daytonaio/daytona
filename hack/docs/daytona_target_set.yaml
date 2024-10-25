@@ -1,9 +1,0 @@
-name: daytona target set
-synopsis: Set provider target
-usage: daytona target set [flags]
-inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-see_also:
-    - daytona target - Manage provider targets

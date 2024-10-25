@@ -9,29 +9,29 @@ import (
 	"github.com/daytonaio/daytona/pkg/workspace/project"
 )
 
-func (p *Provisioner) StartWorkspace(workspace *workspace.Workspace, target *provider.ProviderTarget) error {
-	targetProvider, err := p.providerManager.GetProvider(target.ProviderInfo.Name)
+func (p *Provisioner) StartWorkspace(workspace *workspace.Workspace, targetConfig *provider.TargetConfig) error {
+	targetProvider, err := p.providerManager.GetProvider(targetConfig.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
 	_, err = (*targetProvider).StartWorkspace(&provider.WorkspaceRequest{
-		TargetOptions: target.Options,
-		Workspace:     workspace,
+		TargetConfigOptions: targetConfig.Options,
+		Workspace:           workspace,
 	})
 
 	return err
 }
 
-func (p *Provisioner) StartProject(proj *project.Project, target *provider.ProviderTarget) error {
-	targetProvider, err := p.providerManager.GetProvider(target.ProviderInfo.Name)
+func (p *Provisioner) StartProject(proj *project.Project, targetConfig *provider.TargetConfig) error {
+	targetProvider, err := p.providerManager.GetProvider(targetConfig.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
 	_, err = (*targetProvider).StartProject(&provider.ProjectRequest{
-		TargetOptions: target.Options,
-		Project:       proj,
+		TargetConfigOptions: targetConfig.Options,
+		Project:             proj,
 	})
 
 	return err

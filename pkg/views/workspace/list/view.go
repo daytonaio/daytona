@@ -16,12 +16,12 @@ import (
 )
 
 type RowData struct {
-	Name       string
-	Repository string
-	Target     string
-	Status     string
-	Created    string
-	Branch     string
+	Name         string
+	Repository   string
+	TargetConfig string
+	Status       string
+	Created      string
+	Branch       string
 }
 
 func ListWorkspaces(workspaceList []apiclient.WorkspaceDTO, specifyGitProviders bool, verbose bool, activeProfileName string) {
@@ -32,7 +32,7 @@ func ListWorkspaces(workspaceList []apiclient.WorkspaceDTO, specifyGitProviders 
 
 	SortWorkspaces(&workspaceList, verbose)
 
-	headers := []string{"Workspace", "Repository", "Target", "Status", "Created", "Branch"}
+	headers := []string{"Workspace", "Repository", "Target Config", "Status", "Created", "Branch"}
 
 	data := [][]string{}
 
@@ -106,7 +106,7 @@ func getRowFromRowData(rowData RowData, isMultiProjectAccordion bool) []string {
 	row := []string{
 		views.NameStyle.Render(rowData.Name),
 		views.DefaultRowDataStyle.Render(rowData.Repository),
-		views.DefaultRowDataStyle.Render(rowData.Target),
+		views.DefaultRowDataStyle.Render(rowData.TargetConfig),
 		state,
 		views.DefaultRowDataStyle.Render(rowData.Created),
 		views.DefaultRowDataStyle.Render(views.GetBranchNameLabel(rowData.Branch)),
@@ -154,7 +154,7 @@ func getWorkspaceTableRowData(workspace apiclient.WorkspaceDTO, specifyGitProvid
 		rowData.Branch = workspace.Projects[0].Repository.Branch
 	}
 
-	rowData.Target = workspace.Target + views_util.AdditionalPropertyPadding
+	rowData.TargetConfig = workspace.TargetConfig + views_util.AdditionalPropertyPadding
 
 	if workspace.Info != nil && workspace.Info.Projects != nil && len(workspace.Info.Projects) > 0 {
 		rowData.Created = util.FormatTimestamp(workspace.Info.Projects[0].Created)
@@ -172,7 +172,7 @@ func getProjectTableRowData(workspaceDTO apiclient.WorkspaceDTO, project apiclie
 	rowData.Repository = util.GetRepositorySlugFromUrl(project.Repository.Url, specifyGitProviders)
 	rowData.Branch = project.Repository.Branch
 
-	rowData.Target = project.Target + views_util.AdditionalPropertyPadding
+	rowData.TargetConfig = project.TargetConfig + views_util.AdditionalPropertyPadding
 
 	if project.State != nil && project.State.Uptime > 0 {
 		rowData.Status = util.FormatUptime(project.State.Uptime)

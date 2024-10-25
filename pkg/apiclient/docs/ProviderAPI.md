@@ -4,18 +4,18 @@ All URIs are relative to *http://localhost:3986*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**GetTargetManifest**](ProviderAPI.md#GetTargetManifest) | **Get** /provider/{provider}/target-manifest | Get provider target manifest
+[**GetTargetConfigManifest**](ProviderAPI.md#GetTargetConfigManifest) | **Get** /provider/{provider}/target-config-manifest | Get provider target config manifest
 [**InstallProvider**](ProviderAPI.md#InstallProvider) | **Post** /provider/install | Install a provider
 [**ListProviders**](ProviderAPI.md#ListProviders) | **Get** /provider | List providers
 [**UninstallProvider**](ProviderAPI.md#UninstallProvider) | **Post** /provider/{provider}/uninstall | Uninstall a provider
 
 
 
-## GetTargetManifest
+## GetTargetConfigManifest
 
-> map[string]ProviderProviderTargetProperty GetTargetManifest(ctx, provider).Execute()
+> map[string]TargetConfigProperty GetTargetConfigManifest(ctx, provider).Execute()
 
-Get provider target manifest
+Get provider target config manifest
 
 
 
@@ -36,13 +36,13 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.ProviderAPI.GetTargetManifest(context.Background(), provider).Execute()
+	resp, r, err := apiClient.ProviderAPI.GetTargetConfigManifest(context.Background(), provider).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `ProviderAPI.GetTargetManifest``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `ProviderAPI.GetTargetConfigManifest``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `GetTargetManifest`: map[string]ProviderProviderTargetProperty
-	fmt.Fprintf(os.Stdout, "Response from `ProviderAPI.GetTargetManifest`: %v\n", resp)
+	// response from `GetTargetConfigManifest`: map[string]TargetConfigProperty
+	fmt.Fprintf(os.Stdout, "Response from `ProviderAPI.GetTargetConfigManifest`: %v\n", resp)
 }
 ```
 
@@ -56,7 +56,7 @@ Name | Type | Description  | Notes
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiGetTargetManifestRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiGetTargetConfigManifestRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
@@ -65,7 +65,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**map[string]ProviderProviderTargetProperty**](ProviderProviderTargetProperty.md)
+[**map[string]TargetConfigProperty**](TargetConfigProperty.md)
 
 ### Authorization
 

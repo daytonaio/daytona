@@ -11,7 +11,7 @@ Name | Type | Description | Notes
 **Name** | **string** |  | 
 **Repository** | [**GitRepository**](GitRepository.md) |  | 
 **State** | Pointer to [**ProjectState**](ProjectState.md) |  | [optional] 
-**Target** | **string** |  | 
+**TargetConfig** | **string** |  | 
 **User** | **string** |  | 
 **WorkspaceId** | **string** |  | 
 
@@ -19,7 +19,7 @@ Name | Type | Description | Notes
 
 ### NewProject
 
-`func NewProject(envVars map[string]string, image string, name string, repository GitRepository, target string, user string, workspaceId string, ) *Project`
+`func NewProject(envVars map[string]string, image string, name string, repository GitRepository, targetConfig string, user string, workspaceId string, ) *Project`
 
 NewProject instantiates a new Project object
 This constructor will assign default values to properties that have it defined,
@@ -189,24 +189,24 @@ SetState sets State field to given value.
 
 HasState returns a boolean if a field has been set.
 
-### GetTarget
+### GetTargetConfig
 
-`func (o *Project) GetTarget() string`
+`func (o *Project) GetTargetConfig() string`
 
-GetTarget returns the Target field if non-nil, zero value otherwise.
+GetTargetConfig returns the TargetConfig field if non-nil, zero value otherwise.
 
-### GetTargetOk
+### GetTargetConfigOk
 
-`func (o *Project) GetTargetOk() (*string, bool)`
+`func (o *Project) GetTargetConfigOk() (*string, bool)`
 
-GetTargetOk returns a tuple with the Target field if it's non-nil, zero value otherwise
+GetTargetConfigOk returns a tuple with the TargetConfig field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetTarget
+### SetTargetConfig
 
-`func (o *Project) SetTarget(v string)`
+`func (o *Project) SetTargetConfig(v string)`
 
-SetTarget sets Target field to given value.
+SetTargetConfig sets TargetConfig field to given value.
 
 
 ### GetUser

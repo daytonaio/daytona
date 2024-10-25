@@ -56,9 +56,9 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 	}
 
 	w := &workspace.Workspace{
-		Id:     req.Id,
-		Name:   req.Name,
-		Target: req.Target,
+		Id:           req.Id,
+		Name:         req.Name,
+		TargetConfig: req.TargetConfig,
 	}
 
 	apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeWorkspace, w.Id)
@@ -123,7 +123,7 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 
 		p.WorkspaceId = w.Id
 		p.ApiKey = apiKey
-		p.Target = w.Target
+		p.TargetConfig = w.TargetConfig
 		w.Projects = append(w.Projects, p)
 	}
 
@@ -132,12 +132,12 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 		return nil, err
 	}
 
-	target, err := s.targetStore.Find(&provider.TargetFilter{Name: &w.Target})
+	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &w.TargetConfig})
 	if err != nil {
 		return w, err
 	}
 
-	w, err = s.createWorkspace(ctx, w, target)
+	w, err = s.createWorkspace(ctx, w, targetConfig)
 
 	if !telemetry.TelemetryEnabled(ctx) {
 		return w, err
@@ -145,7 +145,7 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 
 	clientId := telemetry.ClientId(ctx)
 
-	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, w, target)
+	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, w, targetConfig)
 	event := telemetry.ServerEventWorkspaceCreated
 	if err != nil {
 		telemetryProps["error"] = err.Error()
@@ -159,7 +159,7 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 	return w, err
 }
 
-func (s *WorkspaceService) createProject(p *project.Project, target *provider.ProviderTarget, logWriter io.Writer) error {
+func (s *WorkspaceService) createProject(p *project.Project, targetConfig *provider.TargetConfig, logWriter io.Writer) error {
 	logWriter.Write([]byte(fmt.Sprintf("Creating project %s\n", p.Name)))
 
 	cr, err := s.containerRegistryService.FindByImageName(p.Image)
@@ -176,7 +176,7 @@ func (s *WorkspaceService) createProject(p *project.Project, target *provider.Pr
 		}
 	}
 
-	err = s.provisioner.CreateProject(p, target, cr, gc)
+	err = s.provisioner.CreateProject(p, targetConfig, cr, gc)
 	if err != nil {
 		return err
 	}
@@ -186,7 +186,7 @@ func (s *WorkspaceService) createProject(p *project.Project, target *provider.Pr
 	return nil
 }
 
-func (s *WorkspaceService) createWorkspace(ctx context.Context, ws *workspace.Workspace, target *provider.ProviderTarget) (*workspace.Workspace, error) {
+func (s *WorkspaceService) createWorkspace(ctx context.Context, ws *workspace.Workspace, targetConfig *provider.TargetConfig) (*workspace.Workspace, error) {
 	wsLogger := s.loggerFactory.CreateWorkspaceLogger(ws.Id, logs.LogSourceServer)
 	defer wsLogger.Close()
 
@@ -199,7 +199,7 @@ func (s *WorkspaceService) createWorkspace(ctx context.Context, ws *workspace.Wo
 		ClientId:      telemetry.ClientId(ctx),
 	}, telemetry.TelemetryEnabled(ctx))
 
-	err := s.provisioner.CreateWorkspace(ws, target)
+	err := s.provisioner.CreateWorkspace(ws, targetConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -230,7 +230,7 @@ func (s *WorkspaceService) createWorkspace(ctx context.Context, ws *workspace.Wo
 			return nil, err
 		}
 
-		err = s.createProject(p, target, projectLogger)
+		err = s.createProject(p, targetConfig, projectLogger)
 		if err != nil {
 			return nil, err
 		}
@@ -238,7 +238,7 @@ func (s *WorkspaceService) createWorkspace(ctx context.Context, ws *workspace.Wo
 
 	wsLogger.Write([]byte("Workspace creation complete. Pending start...\n"))
 
-	err = s.startWorkspace(ctx, ws, target, wsLogger)
+	err = s.startWorkspace(ctx, ws, targetConfig, wsLogger)
 	if err != nil {
 		return nil, err
 	}
