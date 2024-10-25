@@ -92,6 +92,14 @@ func RunSubmissionForm(config SubmissionFormConfig) error {
 
 func RenderSummary(name string, projectList []apiclient.CreateProjectDTO, defaults *views_util.ProjectConfigDefaults, nameLabel string) (string, error) {
 	var output string
+	if name == "" {
+		output = views.GetStyledMainTitle("SUMMARY")
+	} else {
+		output = views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - %s %s", nameLabel, name))
+	}
+
+	output += "\n\n"
+
 	for i := range projectList {
 		if len(projectList) == 1 {
 			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render("Project"), (projectList[i].Source.Repository.Url))
@@ -283,14 +291,7 @@ func renderSummaryView(m SummaryModel) string {
 	}
 	m.viewport.SetContent(summary)
 
-	return renderTitle(m) + lipgloss.JoinVertical(lipgloss.Top, renderBody(m), renderFooter(m)) + m.form.WithHeight(5).View()
-}
-
-func renderTitle(m SummaryModel) string {
-	if m.name != "" {
-		return views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - %s %s", m.nameLabel, m.name))
-	}
-	return views.GetStyledMainTitle("SUMMARY")
+	return lipgloss.JoinVertical(lipgloss.Top, renderBody(m), renderFooter(m)) + m.form.WithHeight(5).View()
 }
 
 func renderBody(m SummaryModel) string {
