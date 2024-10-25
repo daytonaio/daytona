@@ -236,7 +236,14 @@ definitions:
     required:
     - repository
     type: object
-  CreateProviderTargetDTO:
+  CreateSessionRequest:
+    properties:
+      sessionId:
+        type: string
+    required:
+    - sessionId
+    type: object
+  CreateTargetConfigDTO:
     properties:
       name:
         type: string
@@ -249,13 +256,6 @@ definitions:
     - options
     - providerInfo
     type: object
-  CreateSessionRequest:
-    properties:
-      sessionId:
-        type: string
-    required:
-    - sessionId
-    type: object
   CreateWorkspaceDTO:
     properties:
       id:
@@ -266,13 +266,13 @@ definitions:
         items:
           $ref: '#/definitions/CreateProjectDTO'
         type: array
-      target:
+      targetConfig:
         type: string
     required:
     - id
     - name
     - projects
-    - target
+    - targetConfig
     type: object
   DevcontainerConfig:
     properties:
@@ -835,7 +835,7 @@ definitions:
         $ref: '#/definitions/GitRepository'
       state:
         $ref: '#/definitions/ProjectState'
-      target:
+      targetConfig:
         type: string
       user:
         type: string
@@ -846,7 +846,7 @@ definitions:
     - image
     - name
     - repository
-    - target
+    - targetConfig
     - user
     - workspaceId
     type: object
@@ -928,27 +928,6 @@ definitions:
     required:
     - name
     - version
-    type: object
-  ProviderTarget:
-    properties:
-      isDefault:
-        type: boolean
-      name:
-        type: string
-      options:
-        description: JSON encoded map of options
-        type: string
-      providerInfo:
-        $ref: '#/definitions/provider.ProviderInfo'
-    required:
-    - isDefault
-    - name
-    - options
-    - providerInfo
-    type: object
-  ProviderTargetManifest:
-    additionalProperties:
-      $ref: '#/definitions/provider.ProviderTargetProperty'
     type: object
   ReplaceRequest:
     properties:
@@ -1144,6 +1123,59 @@ definitions:
     - Renamed
     - Copied
     - UpdatedButUnmerged
+  TargetConfig:
+    properties:
+      isDefault:
+        type: boolean
+      name:
+        type: string
+      options:
+        description: JSON encoded map of options
+        type: string
+      providerInfo:
+        $ref: '#/definitions/provider.ProviderInfo'
+    required:
+    - isDefault
+    - name
+    - options
+    - providerInfo
+    type: object
+  TargetConfigManifest:
+    additionalProperties:
+      $ref: '#/definitions/TargetConfigProperty'
+    type: object
+  TargetConfigProperty:
+    properties:
+      defaultValue:
+        description: |-
+          DefaultValue is converted into the appropriate type based on the Type
+          If the property is a FilePath, the DefaultValue is a path to a directory
+        type: string
+      description:
+        description: Brief description of the property
+        type: string
+      disabledPredicate:
+        description: |-
+          A regex string matched with the name of the target config to determine if the property should be disabled
+          If the regex matches the target config name, the property will be disabled
+          E.g. "^local$" will disable the property for the local target
+        type: string
+      inputMasked:
+        type: boolean
+      options:
+        description: Options is only used if the Type is TargetConfigPropertyTypeOption
+        items:
+          type: string
+        type: array
+      suggestions:
+        description: Suggestions is an optional list of auto-complete values to assist
+          the user while filling the field
+        items:
+          type: string
+        type: array
+      type:
+        $ref: '#/definitions/provider.TargetConfigPropertyType'
+    type: object
   Workspace:
     properties:
       id:
@@ -1154,13 +1186,13 @@ definitions:
         items:
           $ref: '#/definitions/Project'
         type: array
-      target:
+      targetConfig:
         type: string
     required:
     - id
     - name
     - projects
-    - target
+    - targetConfig
     type: object
   WorkspaceDTO:
     properties:
@@ -1174,13 +1206,13 @@ definitions:
         items:
           $ref: '#/definitions/Project'
         type: array
-      target:
+      targetConfig:
         type: string
     required:
     - id
     - name
     - projects
-    - target
+    - targetConfig
     type: object
   WorkspaceInfo:
     properties:
@@ -1238,39 +1270,7 @@ definitions:
     - name
     - version
     type: object
-  provider.ProviderTargetProperty:
-    properties:
-      defaultValue:
-        description: |-
-          DefaultValue is converted into the appropriate type based on the Type
-          If the property is a FilePath, the DefaultValue is a path to a directory
-        type: string
-      description:
-        description: Brief description of the property
-        type: string
-      disabledPredicate:
-        description: |-
-          A regex string matched with the name of the target to determine if the property should be disabled
-          If the regex matches the target name, the property will be disabled
-          E.g. "^local$" will disable the property for the local target
-        type: string
-      inputMasked:
-        type: boolean
-      options:
-        description: Options is only used if the Type is ProviderTargetPropertyTypeOption
-        items:
-          type: string
-        type: array
-      suggestions:
-        description: Suggestions is an optional list of auto-complete values to assist
-          the user while filling the field
-        items:
-          type: string
-        type: array
-      type:
-        $ref: '#/definitions/provider.ProviderTargetPropertyType'
-    type: object
-  provider.ProviderTargetPropertyType:
+  provider.TargetConfigPropertyType:
     enum:
     - string
     - option
@@ -1280,12 +1280,12 @@ definitions:
     - file-path
     type: string
     x-enum-varnames:
-    - ProviderTargetPropertyTypeString
-    - ProviderTargetPropertyTypeOption
-    - ProviderTargetPropertyTypeBoolean
-    - ProviderTargetPropertyTypeInt
-    - ProviderTargetPropertyTypeFloat
-    - ProviderTargetPropertyTypeFilePath
+    - TargetConfigPropertyTypeString
+    - TargetConfigPropertyTypeOption
+    - TargetConfigPropertyTypeBoolean
+    - TargetConfigPropertyTypeInt
+    - TargetConfigPropertyTypeFloat
+    - TargetConfigPropertyTypeFilePath
 host: localhost:3986
 info:
   contact: {}
@@ -2156,10 +2156,10 @@ paths:
       summary: List providers
       tags:
       - provider
-  /provider/{provider}/target-manifest:
+  /provider/{provider}/target-config-manifest:
     get:
-      description: Get provider target manifest
-      operationId: GetTargetManifest
+      description: Get provider target config manifest
+      operationId: GetTargetConfigManifest
       parameters:
       - description: Provider name
         in: path
@@ -2170,8 +2170,8 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/ProviderTargetManifest'
-      summary: Get provider target manifest
+            $ref: '#/definitions/TargetConfigManifest'
+      summary: Get provider target config manifest
       tags:
       - provider
   /provider/{provider}/uninstall:
@@ -2293,10 +2293,10 @@ paths:
       summary: Generate a new authentication key
       tags:
       - server
-  /target:
+  /target-config:
     get:
-      description: List targets
-      operationId: ListTargets
+      description: List target configs
+      operationId: ListTargetConfigs
       produces:
       - application/json
       responses:
@@ -2304,59 +2304,59 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/ProviderTarget'
+              $ref: '#/definitions/TargetConfig'
             type: array
-      summary: List targets
+      summary: List target configs
       tags:
-      - target
+      - target-config
     put:
-      description: Set a target
-      operationId: SetTarget
+      description: Set a target config
+      operationId: SetTargetConfig
       parameters:
-      - description: Target to set
+      - description: Target config to set
         in: body
-        name: target
+        name: targetConfig
         required: true
         schema:
-          $ref: '#/definitions/CreateProviderTargetDTO'
+          $ref: '#/definitions/CreateTargetConfigDTO'
       responses:
         "201":
           description: Created
-      summary: Set a target
+      summary: Set a target config
       tags:
-      - target
-  /target/{target}:
+      - target-config
+  /target-config/{configName}:
     delete:
-      description: Remove a target
-      operationId: RemoveTarget
+      description: Remove a target config
+      operationId: RemoveTargetConfig
       parameters:
-      - description: Target name
+      - description: Target Config name
         in: path
-        name: target
+        name: configName
         required: true
         type: string
       responses:
         "204":
           description: No Content
-      summary: Remove a target
+      summary: Remove a target config
       tags:
-      - target
-  /target/{target}/set-default:
+      - target-config
+  /target-config/{configName}/set-default:
     patch:
-      description: Set target to default
-      operationId: SetDefaultTarget
+      description: Set target config to default
+      operationId: SetDefaultTargetConfig
       parameters:
-      - description: Target name
+      - description: Target config name
         in: path
-        name: target
+        name: configName
         required: true
         type: string
       responses:
         "200":
           description: OK
-      summary: Set target to default
+      summary: Set target config to default
       tags:
-      - target
+      - target-config
   /workspace:
     get:
       description: List workspaces

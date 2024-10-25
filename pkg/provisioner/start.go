@@ -8,28 +8,28 @@ import (
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
-func (p *Provisioner) StartWorkspace(workspace *workspace.Workspace, target *provider.ProviderTarget) error {
-	targetProvider, err := p.providerManager.GetProvider(target.ProviderInfo.Name)
+func (p *Provisioner) StartWorkspace(workspace *workspace.Workspace, targetConfig *provider.TargetConfig) error {
+	targetProvider, err := p.providerManager.GetProvider(targetConfig.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
 	_, err = (*targetProvider).StartWorkspace(&provider.WorkspaceRequest{
-		TargetOptions: target.Options,
-		Workspace:     workspace,
+		TargetConfigOptions: targetConfig.Options,
+		Workspace:           workspace,
 	})
 
 	return err
 }
 
 func (p *Provisioner) StartProject(params ProjectParams) error {
-	targetProvider, err := p.providerManager.GetProvider(params.Target.ProviderInfo.Name)
+	targetProvider, err := p.providerManager.GetProvider(params.TargetConfig.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
 	_, err = (*targetProvider).StartProject(&provider.ProjectRequest{
-		TargetOptions:            params.Target.Options,
+		TargetConfigOptions:      params.TargetConfig.Options,
 		Project:                  params.Project,
 		ContainerRegistry:        params.ContainerRegistry,
 		GitProviderConfig:        params.GitProviderConfig,

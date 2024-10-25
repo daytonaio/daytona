@@ -22,27 +22,27 @@ import (
 // ProviderAPIService ProviderAPI service
 type ProviderAPIService service
 
-type ApiGetTargetManifestRequest struct {
+type ApiGetTargetConfigManifestRequest struct {
 	ctx        context.Context
 	ApiService *ProviderAPIService
 	provider   string
 }
 
-func (r ApiGetTargetManifestRequest) Execute() (*map[string]ProviderProviderTargetProperty, *http.Response, error) {
-	return r.ApiService.GetTargetManifestExecute(r)
+func (r ApiGetTargetConfigManifestRequest) Execute() (*map[string]TargetConfigProperty, *http.Response, error) {
+	return r.ApiService.GetTargetConfigManifestExecute(r)
 }
 
 /*
-GetTargetManifest Get provider target manifest
+GetTargetConfigManifest Get provider target config manifest
 
-Get provider target manifest
+Get provider target config manifest
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param provider Provider name
-	@return ApiGetTargetManifestRequest
+	@return ApiGetTargetConfigManifestRequest
 */
-func (a *ProviderAPIService) GetTargetManifest(ctx context.Context, provider string) ApiGetTargetManifestRequest {
-	return ApiGetTargetManifestRequest{
+func (a *ProviderAPIService) GetTargetConfigManifest(ctx context.Context, provider string) ApiGetTargetConfigManifestRequest {
+	return ApiGetTargetConfigManifestRequest{
 		ApiService: a,
 		ctx:        ctx,
 		provider:   provider,
@@ -51,21 +51,21 @@ func (a *ProviderAPIService) GetTargetManifest(ctx context.Context, provider str
 
 // Execute executes the request
 //
-//	@return map[string]ProviderProviderTargetProperty
-func (a *ProviderAPIService) GetTargetManifestExecute(r ApiGetTargetManifestRequest) (*map[string]ProviderProviderTargetProperty, *http.Response, error) {
+//	@return map[string]TargetConfigProperty
+func (a *ProviderAPIService) GetTargetConfigManifestExecute(r ApiGetTargetConfigManifestRequest) (*map[string]TargetConfigProperty, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *map[string]ProviderProviderTargetProperty
+		localVarReturnValue *map[string]TargetConfigProperty
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProviderAPIService.GetTargetManifest")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProviderAPIService.GetTargetConfigManifest")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/provider/{provider}/target-manifest"
+	localVarPath := localBasePath + "/provider/{provider}/target-config-manifest"
 	localVarPath = strings.Replace(localVarPath, "{"+"provider"+"}", url.PathEscape(parameterValueToString(r.provider, "provider")), -1)
 
 	localVarHeaderParams := make(map[string]string)

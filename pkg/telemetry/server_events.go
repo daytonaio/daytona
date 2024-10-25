@@ -33,7 +33,7 @@ const (
 	ServerEventWorkspaceStopError    ServerEvent = "server_workspace_stopped_error"
 )
 
-func NewWorkspaceEventProps(ctx context.Context, workspace *workspace.Workspace, target *provider.ProviderTarget) map[string]interface{} {
+func NewWorkspaceEventProps(ctx context.Context, workspace *workspace.Workspace, targetConfig *provider.TargetConfig) map[string]interface{} {
 	props := map[string]interface{}{}
 
 	sessionId := SessionId(ctx)
@@ -70,10 +70,10 @@ func NewWorkspaceEventProps(ctx context.Context, workspace *workspace.Workspace,
 		props["workspace_builders"] = builders
 	}
 
-	if target != nil {
-		props["target_name"] = target.Name
-		props["target_provider"] = target.ProviderInfo.Name
-		props["target_provider_version"] = target.ProviderInfo.Version
+	if targetConfig != nil {
+		props["target_name"] = targetConfig.Name
+		props["target_provider"] = targetConfig.ProviderInfo.Name
+		props["target_provider_version"] = targetConfig.ProviderInfo.Version
 	}
 
 	return props
