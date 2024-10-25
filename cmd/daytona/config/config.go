@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/google/uuid"
@@ -37,8 +38,6 @@ type Ide struct {
 	Name string
 }
 
-const DefaultIdeId = "vscode"
-
 type GitProvider struct {
 	Id   string
 	Name string
@@ -54,7 +53,7 @@ func GetConfig() (*Config, error) {
 	if os.IsNotExist(err) {
 		config := &Config{
 			Id:               uuid.NewString(),
-			DefaultIdeId:     DefaultIdeId,
+			DefaultIdeId:     getInitialDefaultIde(),
 			TelemetryEnabled: true,
 		}
 		return config, config.Save()
@@ -261,4 +260,12 @@ func GetErrorLogsDir() (string, error) {
 	}
 
 	return errorLogsDir, nil
+}
+
+func getInitialDefaultIde() string {
+	_, err := exec.LookPath("code")
+	if err == nil {
+		return "vscode"
+	}
+	return "browser"
 }
