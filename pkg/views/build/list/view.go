@@ -23,6 +23,11 @@ type rowData struct {
 }
 
 func ListBuilds(buildList []apiclient.Build, apiServerConfig *apiclient.ServerConfig) {
+	if len(buildList) == 0 {
+		views_util.NotifyEmptyBuildList(true)
+		return
+	}
+
 	SortBuilds(&buildList)
 
 	data := [][]string{}

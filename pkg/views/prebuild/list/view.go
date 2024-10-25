@@ -25,6 +25,11 @@ type rowData struct {
 }
 
 func ListPrebuilds(prebuildList []apiclient.PrebuildDTO) {
+	if len(prebuildList) == 0 {
+		views_util.NotifyEmptyPrebuildList(true)
+		return
+	}
+
 	data := [][]string{}
 
 	for _, p := range prebuildList {

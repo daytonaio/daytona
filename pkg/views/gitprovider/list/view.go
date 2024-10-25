@@ -21,6 +21,11 @@ type rowData struct {
 }
 
 func ListGitProviders(gitProviderViewList []gitprovider.GitProviderView) {
+	if len(gitProviderViewList) == 0 {
+		views_util.NotifyEmptyGitProviderList(true)
+		return
+	}
+
 	var showBaseApiUrlColumn bool
 	var showSigningMethodColumn bool
 	headers := []string{"Name", "Alias", "Username", "Base API URL", "Signing Method"}

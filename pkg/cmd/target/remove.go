@@ -15,9 +15,9 @@ import (
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/target"
-	"github.com/spf13/cobra"
-
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 )
 
 var yesFlag bool
@@ -50,6 +50,11 @@ var targetRemoveCmd = &cobra.Command{
 			targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
+			}
+
+			if len(targetList) == 0 {
+				views_util.NotifyEmptyTargetList(false)
+				return nil
 			}
 
 			selectedTarget, err := target.GetTargetFromPrompt(targetList, activeProfile.Name, nil, false, "Remove")

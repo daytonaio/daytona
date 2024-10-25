@@ -8,7 +8,6 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
-	"github.com/daytonaio/daytona/pkg/views"
 	view "github.com/daytonaio/daytona/pkg/views/prebuild/list"
 	"github.com/spf13/cobra"
 )
@@ -29,11 +28,6 @@ var prebuildListCmd = &cobra.Command{
 		prebuildList, res, err := apiClient.PrebuildAPI.ListPrebuilds(ctx).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
-		}
-
-		if len(prebuildList) == 0 {
-			views.RenderInfoMessage("No prebuilds found. Add a new prebuild by running 'daytona prebuild add'")
-			return nil
 		}
 
 		if format.FormatFlag != "" {

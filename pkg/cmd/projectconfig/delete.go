@@ -11,6 +11,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -62,7 +63,7 @@ var projectConfigDeleteCmd = &cobra.Command{
 			}
 
 			if len(projectConfigs) == 0 {
-				views.RenderInfoMessage("No project configs found")
+				views_util.NotifyEmptyProjectConfigList(false)
 				return nil
 			}
 
