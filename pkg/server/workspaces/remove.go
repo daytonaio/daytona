@@ -21,20 +21,20 @@ func (s *WorkspaceService) RemoveWorkspace(ctx context.Context, workspaceId stri
 
 	log.Infof("Destroying workspace %s", workspace.Id)
 
-	target, err := s.targetStore.Find(&provider.TargetFilter{Name: &workspace.Target})
+	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &workspace.TargetConfig})
 	if err != nil {
 		return err
 	}
 
 	for _, project := range workspace.Projects {
 		//	todo: go routines
-		err := s.provisioner.DestroyProject(project, target)
+		err := s.provisioner.DestroyProject(project, targetConfig)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = s.provisioner.DestroyWorkspace(workspace, target)
+	err = s.provisioner.DestroyWorkspace(workspace, targetConfig)
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func (s *WorkspaceService) RemoveWorkspace(ctx context.Context, workspaceId stri
 
 	clientId := telemetry.ClientId(ctx)
 
-	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, workspace, target)
+	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, workspace, targetConfig)
 	event := telemetry.ServerEventWorkspaceDestroyed
 	if err != nil {
 		telemetryProps["error"] = err.Error()
@@ -97,17 +97,17 @@ func (s *WorkspaceService) ForceRemoveWorkspace(ctx context.Context, workspaceId
 
 	log.Infof("Destroying workspace %s", workspace.Id)
 
-	target, _ := s.targetStore.Find(&provider.TargetFilter{Name: &workspace.Target})
+	targetConfig, _ := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &workspace.TargetConfig})
 
 	for _, project := range workspace.Projects {
 		//	todo: go routines
-		err := s.provisioner.DestroyProject(project, target)
+		err := s.provisioner.DestroyProject(project, targetConfig)
 		if err != nil {
 			log.Error(err)
 		}
 	}
 
-	err = s.provisioner.DestroyWorkspace(workspace, target)
+	err = s.provisioner.DestroyWorkspace(workspace, targetConfig)
 	if err != nil {
 		log.Error(err)
 	}
@@ -138,7 +138,7 @@ func (s *WorkspaceService) ForceRemoveWorkspace(ctx context.Context, workspaceId
 
 	clientId := telemetry.ClientId(ctx)
 
-	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, workspace, target)
+	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, workspace, targetConfig)
 	event := telemetry.ServerEventWorkspaceDestroyed
 	if err != nil {
 		telemetryProps["error"] = err.Error()

@@ -1,0 +1,14 @@
+name: daytona target-config remove
+synopsis: Remove target config
+usage: daytona target-config remove [CONFIG_NAME] [flags]
+options:
+    - name: "yes"
+      shorthand: "y"
+      default_value: "false"
+      usage: Confirm deletion of all workspaces without prompt
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona target-config - Manage target configs

@@ -58,7 +58,7 @@ func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO, isMultipleSelect
 			desc:           strings.Join(projectsInfo, ", "),
 			createdTime:    createdTime,
 			uptime:         uptime,
-			target:         workspace.Target,
+			targetConfig:   workspace.TargetConfig,
 			choiceProperty: workspace,
 		}
 

@@ -35,9 +35,9 @@ func (s *WorkspaceService) ListWorkspaces(ctx context.Context, verbose bool) ([]
 		go func(i int) {
 			defer wg.Done()
 
-			target, err := s.targetStore.Find(&provider.TargetFilter{Name: &w.Target})
+			targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &w.TargetConfig})
 			if err != nil {
-				log.Error(fmt.Errorf("failed to get target for %s", w.Target))
+				log.Error(fmt.Errorf("failed to get target config for %s", w.TargetConfig))
 				return
 			}
 
@@ -47,7 +47,7 @@ func (s *WorkspaceService) ListWorkspaces(ctx context.Context, verbose bool) ([]
 			resultCh := make(chan provisioner.InfoResult, 1)
 
 			go func() {
-				workspaceInfo, err := s.provisioner.GetWorkspaceInfo(ctx, w, target)
+				workspaceInfo, err := s.provisioner.GetWorkspaceInfo(ctx, w, targetConfig)
 				resultCh <- provisioner.InfoResult{Info: workspaceInfo, Err: err}
 			}()
 

@@ -128,18 +128,18 @@ var CreateCmd = &cobra.Command{
 			}, i)
 		}
 
-		targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
+		targetConfigs, res, err := apiClient.TargetConfigAPI.ListTargetConfigs(ctx).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		target, err := workspace_util.GetTarget(workspace_util.GetTargetConfig{
-			Ctx:               ctx,
-			ApiClient:         apiClient,
-			TargetList:        targetList,
-			ActiveProfileName: activeProfile.Name,
-			TargetNameFlag:    targetNameFlag,
-			PromptUsingTUI:    promptUsingTUI,
+		targetConfig, err := workspace_util.GetTargetConfig(workspace_util.GetTargetConfigParams{
+			Ctx:                  ctx,
+			ApiClient:            apiClient,
+			TargetConfigs:        targetConfigs,
+			ActiveProfileName:    activeProfile.Name,
+			TargetConfigNameFlag: targetConfigNameFlag,
+			PromptUsingTUI:       promptUsingTUI,
 		})
 		if err != nil {
 			if common.IsCtrlCAbort(err) {
@@ -160,7 +160,7 @@ var CreateCmd = &cobra.Command{
 		}
 
 		var tsConn *tsnet.Server
-		if target.Name != "local" || activeProfile.Id != "default" {
+		if targetConfig.Name != "local" || activeProfile.Id != "default" {
 			tsConn, err = tailscale.GetConnection(&activeProfile)
 			if err != nil {
 				return err
@@ -174,10 +174,10 @@ var CreateCmd = &cobra.Command{
 		go apiclient_util.ReadWorkspaceLogs(logsContext, activeProfile, id, projectNames, true, true, nil)
 
 		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(apiclient.CreateWorkspaceDTO{
-			Id:       id,
-			Name:     workspaceName,
-			Target:   target.Name,
-			Projects: projects,
+			Id:           id,
+			Name:         workspaceName,
+			TargetConfig: targetConfig.Name,
+			Projects:     projects,
 		}).Execute()
 		if err != nil {
 			stopLogs()
@@ -239,7 +239,7 @@ var CreateCmd = &cobra.Command{
 }
 
 var nameFlag string
-var targetNameFlag string
+var targetConfigNameFlag string
 var noIdeFlag bool
 var blankFlag bool
 var multiProjectFlag bool
@@ -265,7 +265,7 @@ func init() {
 
 	CreateCmd.Flags().StringVar(&nameFlag, "name", "", "Specify the workspace name")
 	CreateCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", fmt.Sprintf("Specify the IDE (%s)", ideListStr))
-	CreateCmd.Flags().StringVarP(&targetNameFlag, "target", "t", "", "Specify the target (e.g. 'local')")
+	CreateCmd.Flags().StringVarP(&targetConfigNameFlag, "target", "t", "", "Specify the target (e.g. 'local')")
 	CreateCmd.Flags().BoolVar(&blankFlag, "blank", false, "Create a blank project without using existing configurations")
 	CreateCmd.Flags().BoolVarP(&noIdeFlag, "no-ide", "n", false, "Do not open the workspace in the IDE after workspace creation")
 	CreateCmd.Flags().BoolVar(&multiProjectFlag, "multi-project", false, "Workspace with multiple projects/repos")
@@ -464,7 +464,7 @@ func processGitURL(ctx context.Context, repoUrl string, apiClient *apiclient.API
 }
 
 func waitForDial(workspace *apiclient.Workspace, activeProfile *config.Profile, tsConn *tsnet.Server, gpgKey string) error {
-	if workspace.Target == "local" && (activeProfile != nil && activeProfile.Id == "default") {
+	if workspace.TargetConfig == "local" && (activeProfile != nil && activeProfile.Id == "default") {
 		err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspace.Id, workspace.Projects[0].Name, gpgKey)
 		if err != nil {
 			return err

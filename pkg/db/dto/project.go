@@ -58,7 +58,7 @@ type ProjectDTO struct {
 	Build               *ProjectBuildDTO `json:"build,omitempty" gorm:"serializer:json"`
 	Repository          RepositoryDTO    `json:"repository" gorm:"serializer:json"`
 	WorkspaceId         string           `json:"workspaceId"`
-	Target              string           `json:"target"`
+	TargetConfig        string           `json:"targetConfig"`
 	ApiKey              string           `json:"apiKey"`
 	State               *ProjectStateDTO `json:"state,omitempty" gorm:"serializer:json"`
 	GitProviderConfigId *string          `json:"gitProviderConfigId,omitempty"`
@@ -72,7 +72,7 @@ func ToProjectDTO(project *project.Project) ProjectDTO {
 		Build:               ToProjectBuildDTO(project.BuildConfig),
 		Repository:          ToRepositoryDTO(project.Repository),
 		WorkspaceId:         project.WorkspaceId,
-		Target:              project.Target,
+		TargetConfig:        project.TargetConfig,
 		State:               ToProjectStateDTO(project.State),
 		ApiKey:              project.ApiKey,
 		GitProviderConfigId: project.GitProviderConfigId,
@@ -164,7 +164,7 @@ func ToProject(projectDTO ProjectDTO) *project.Project {
 		BuildConfig:         ToProjectBuild(projectDTO.Build),
 		Repository:          ToRepository(projectDTO.Repository),
 		WorkspaceId:         projectDTO.WorkspaceId,
-		Target:              projectDTO.Target,
+		TargetConfig:        projectDTO.TargetConfig,
 		State:               ToProjectState(projectDTO.State),
 		ApiKey:              projectDTO.ApiKey,
 		GitProviderConfigId: projectDTO.GitProviderConfigId,

@@ -18,7 +18,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/provider"
 	provider_view "github.com/daytonaio/daytona/pkg/views/provider"
-	"github.com/daytonaio/daytona/pkg/views/target"
+	"github.com/daytonaio/daytona/pkg/views/targetconfig"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 )
@@ -99,12 +99,12 @@ var providerInstallCmd = &cobra.Command{
 
 		views.RenderInfoMessageBold(fmt.Sprintf("Provider %s has been successfully installed", providerToInstall.Name))
 
-		targets, res, err := apiClient.TargetAPI.ListTargets(context.Background()).Execute()
+		targetConfigs, res, err := apiClient.TargetConfigAPI.ListTargetConfigs(context.Background()).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		if slices.ContainsFunc(targets, func(t apiclient.ProviderTarget) bool {
+		if slices.ContainsFunc(targetConfigs, func(t apiclient.TargetConfig) bool {
 			return t.ProviderInfo.Name == providerToInstall.Name
 		}) {
 			return nil
@@ -114,7 +114,7 @@ var providerInstallCmd = &cobra.Command{
 			form := huh.NewForm(
 				huh.NewGroup(
 					huh.NewConfirm().
-						Title("Add a Target?").
+						Title("Add a Target Config?").
 						Value(&yesFlag),
 				),
 			).WithTheme(views.GetCustomTheme())
@@ -126,39 +126,39 @@ var providerInstallCmd = &cobra.Command{
 		}
 
 		if yesFlag {
-			targetManifest, res, err := apiClient.ProviderAPI.GetTargetManifest(context.Background(), providerToInstall.Name).Execute()
+			targetConfigManifest, res, err := apiClient.ProviderAPI.GetTargetConfigManifest(context.Background(), providerToInstall.Name).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
-			targetToSet := &target.TargetView{
+			targetConfigToSet := &targetconfig.TargetConfigView{
 				Options: "{}",
-				ProviderInfo: target.ProviderInfo{
+				ProviderInfo: targetconfig.ProviderInfo{
 					Name:    providerToInstall.Name,
 					Version: providerToInstall.Version,
 				},
 			}
 
-			err = target.NewTargetNameInput(&targetToSet.Name, []string{})
+			err = targetconfig.NewTargetConfigNameInput(&targetConfigToSet.Name, []string{})
 			if err != nil {
 				return err
 			}
 
-			err = target.SetTargetForm(targetToSet, *targetManifest)
+			err = targetconfig.SetTargetConfigForm(targetConfigToSet, *targetConfigManifest)
 			if err != nil {
 				return err
 			}
 
-			targetData := apiclient.CreateProviderTargetDTO{
-				Name:    targetToSet.Name,
-				Options: targetToSet.Options,
+			targetConfigData := apiclient.CreateTargetConfigDTO{
+				Name:    targetConfigToSet.Name,
+				Options: targetConfigToSet.Options,
 				ProviderInfo: apiclient.ProviderProviderInfo{
-					Name:    targetToSet.ProviderInfo.Name,
-					Version: targetToSet.ProviderInfo.Version,
+					Name:    targetConfigToSet.ProviderInfo.Name,
+					Version: targetConfigToSet.ProviderInfo.Version,
 				},
 			}
 
-			res, err = apiClient.TargetAPI.SetTarget(context.Background()).Target(targetData).Execute()
+			res, err = apiClient.TargetConfigAPI.SetTargetConfig(context.Background()).TargetConfig(targetConfigData).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
@@ -166,7 +166,7 @@ var providerInstallCmd = &cobra.Command{
 				return err
 			}
 
-			views.RenderInfoMessage("Target set successfully")
+			views.RenderInfoMessage("Target Config set successfully")
 		}
 		return nil
 	},

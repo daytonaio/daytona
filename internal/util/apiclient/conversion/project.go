@@ -55,7 +55,7 @@ func ToProject(projectDTO *apiclient.Project) *project.Project {
 		User:                projectDTO.User,
 		BuildConfig:         projectBuild,
 		Repository:          repository,
-		Target:              projectDTO.Target,
+		TargetConfig:        projectDTO.TargetConfig,
 		WorkspaceId:         projectDTO.WorkspaceId,
 		State:               projectState,
 		GitProviderConfigId: projectDTO.GitProviderConfigId,
