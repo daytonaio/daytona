@@ -952,10 +952,10 @@ paths:
       tags:
       - provider
       x-codegen-request-body-name: provider
-  /provider/{provider}/target-manifest:
+  /provider/{provider}/target-config-manifest:
     get:
-      description: Get provider target manifest
-      operationId: GetTargetManifest
+      description: Get provider target config manifest
+      operationId: GetTargetConfigManifest
       parameters:
       - description: Provider name
         in: path
@@ -968,9 +968,9 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/ProviderTargetManifest'
+                $ref: '#/components/schemas/TargetConfigManifest'
           description: OK
-      summary: Get provider target manifest
+      summary: Get provider target config manifest
       tags:
       - provider
   /provider/{provider}/uninstall:
@@ -1072,48 +1072,48 @@ paths:
       summary: Generate a new authentication key
       tags:
       - server
-  /target:
+  /target-config:
     get:
-      description: List targets
-      operationId: ListTargets
+      description: List target configs
+      operationId: ListTargetConfigs
       responses:
         "200":
           content:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/ProviderTarget'
+                  $ref: '#/components/schemas/TargetConfig'
                 type: array
           description: OK
-      summary: List targets
+      summary: List target configs
       tags:
-      - target
+      - target-config
     put:
-      description: Set a target
-      operationId: SetTarget
+      description: Set a target config
+      operationId: SetTargetConfig
       requestBody:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/CreateProviderTargetDTO'
-        description: Target to set
+              $ref: '#/components/schemas/CreateTargetConfigDTO'
+        description: Target config to set
         required: true
       responses:
         "201":
           content: {}
           description: Created
-      summary: Set a target
+      summary: Set a target config
       tags:
-      - target
-      x-codegen-request-body-name: target
-  /target/{target}:
+      - target-config
+      x-codegen-request-body-name: targetConfig
+  /target-config/{configName}:
     delete:
-      description: Remove a target
-      operationId: RemoveTarget
+      description: Remove a target config
+      operationId: RemoveTargetConfig
       parameters:
-      - description: Target name
+      - description: Target Config name
         in: path
-        name: target
+        name: configName
         required: true
         schema:
           type: string
@@ -1121,17 +1121,17 @@ paths:
         "204":
           content: {}
           description: No Content
-      summary: Remove a target
+      summary: Remove a target config
       tags:
-      - target
-  /target/{target}/set-default:
+      - target-config
+  /target-config/{configName}/set-default:
     patch:
-      description: Set target to default
-      operationId: SetDefaultTarget
+      description: Set target config to default
+      operationId: SetDefaultTargetConfig
       parameters:
-      - description: Target name
+      - description: Target config name
         in: path
-        name: target
+        name: configName
         required: true
         schema:
           type: string
@@ -1139,9 +1139,9 @@ paths:
         "200":
           content: {}
           description: OK
-      summary: Set target to default
+      summary: Set target config to default
       tags:
-      - target
+      - target-config
   /workspace:
     get:
       description: List workspaces
@@ -2925,7 +2925,16 @@ components:
       required:
       - repository
       type: object
-    CreateProviderTargetDTO:
+    CreateSessionRequest:
+      example:
+        sessionId: sessionId
+      properties:
+        sessionId:
+          type: string
+      required:
+      - sessionId
+      type: object
+    CreateTargetConfigDTO:
       example:
         name: name
         options: options
@@ -2945,17 +2954,9 @@ components:
       - options
       - providerInfo
       type: object
-    CreateSessionRequest:
-      example:
-        sessionId: sessionId
-      properties:
-        sessionId:
-          type: string
-      required:
-      - sessionId
-      type: object
     CreateWorkspaceDTO:
       example:
+        targetConfig: targetConfig
         projects:
         - buildConfig:
             cachedBuild:
@@ -3007,7 +3008,6 @@ components:
           user: user
         name: name
         id: id
-        target: target
       properties:
         id:
           type: string
@@ -3017,13 +3017,13 @@ components:
           items:
             $ref: '#/components/schemas/CreateProjectDTO'
           type: array
-        target:
+        targetConfig:
           type: string
       required:
       - id
       - name
       - projects
-      - target
+      - targetConfig
       type: object
     DevcontainerConfig:
       example:
@@ -3791,6 +3791,7 @@ components:
             filePath: filePath
         gitProviderConfigId: gitProviderConfigId
         image: image
+        targetConfig: targetConfig
         envVars:
           key: envVars
         name: name
@@ -3823,7 +3824,6 @@ components:
           sha: sha
           url: url
         user: user
-        target: target
         workspaceId: workspaceId
       properties:
         buildConfig:
@@ -3842,7 +3842,7 @@ components:
           $ref: '#/components/schemas/GitRepository'
         state:
           $ref: '#/components/schemas/ProjectState'
-        target:
+        targetConfig:
           type: string
         user:
           type: string
@@ -3853,7 +3853,7 @@ components:
       - image
       - name
       - repository
-      - target
+      - targetConfig
       - user
       - workspaceId
       type: object
@@ -3994,35 +3994,6 @@ components:
       required:
       - name
       - version
-      type: object
-    ProviderTarget:
-      example:
-        isDefault: true
-        name: name
-        options: options
-        providerInfo:
-          name: name
-          label: label
-          version: version
-      properties:
-        isDefault:
-          type: boolean
-        name:
-          type: string
-        options:
-          description: JSON encoded map of options
-          type: string
-        providerInfo:
-          $ref: '#/components/schemas/provider.ProviderInfo'
-      required:
-      - isDefault
-      - name
-      - options
-      - providerInfo
-      type: object
-    ProviderTargetManifest:
-      additionalProperties:
-        $ref: '#/components/schemas/provider.ProviderTargetProperty'
       type: object
     ReplaceRequest:
       example:
@@ -4306,8 +4277,70 @@ components:
       - Renamed
       - Copied
       - UpdatedButUnmerged
+    TargetConfig:
+      example:
+        isDefault: true
+        name: name
+        options: options
+        providerInfo:
+          name: name
+          label: label
+          version: version
+      properties:
+        isDefault:
+          type: boolean
+        name:
+          type: string
+        options:
+          description: JSON encoded map of options
+          type: string
+        providerInfo:
+          $ref: '#/components/schemas/provider.ProviderInfo'
+      required:
+      - isDefault
+      - name
+      - options
+      - providerInfo
+      type: object
+    TargetConfigManifest:
+      additionalProperties:
+        $ref: '#/components/schemas/TargetConfigProperty'
+      type: object
+    TargetConfigProperty:
+      properties:
+        defaultValue:
+          description: |-
+            DefaultValue is converted into the appropriate type based on the Type
+            If the property is a FilePath, the DefaultValue is a path to a directory
+          type: string
+        description:
+          description: Brief description of the property
+          type: string
+        disabledPredicate:
+          description: |-
+            A regex string matched with the name of the target config to determine if the property should be disabled
+            If the regex matches the target config name, the property will be disabled
+            E.g. "^local$" will disable the property for the local target
+          type: string
+        inputMasked:
+          type: boolean
+        options:
+          description: Options is only used if the Type is TargetConfigPropertyTypeOption
+          items:
+            type: string
+          type: array
+        suggestions:
+          description: Suggestions is an optional list of auto-complete values to
+            assist the user while filling the field
+          items:
+            type: string
+          type: array
+        type:
+          $ref: '#/components/schemas/provider.TargetConfigPropertyType'
+      type: object
     Workspace:
       example:
+        targetConfig: targetConfig
         projects:
         - buildConfig:
             cachedBuild:
@@ -4317,6 +4350,7 @@ components:
               filePath: filePath
           gitProviderConfigId: gitProviderConfigId
           image: image
+          targetConfig: targetConfig
           envVars:
             key: envVars
           name: name
@@ -4349,7 +4383,6 @@ components:
             sha: sha
             url: url
           user: user
-          target: target
           workspaceId: workspaceId
         - buildConfig:
             cachedBuild:
@@ -4359,6 +4392,7 @@ components:
               filePath: filePath
           gitProviderConfigId: gitProviderConfigId
           image: image
+          targetConfig: targetConfig
           envVars:
             key: envVars
           name: name
@@ -4391,11 +4425,9 @@ components:
             sha: sha
             url: url
           user: user
-          target: target
           workspaceId: workspaceId
         name: name
         id: id
-        target: target
       properties:
         id:
           type: string
@@ -4405,16 +4437,17 @@ components:
           items:
             $ref: '#/components/schemas/Project'
           type: array
-        target:
+        targetConfig:
           type: string
       required:
       - id
       - name
       - projects
-      - target
+      - targetConfig
       type: object
     WorkspaceDTO:
       example:
+        targetConfig: targetConfig
         projects:
         - buildConfig:
             cachedBuild:
@@ -4424,6 +4457,7 @@ components:
               filePath: filePath
           gitProviderConfigId: gitProviderConfigId
           image: image
+          targetConfig: targetConfig
           envVars:
             key: envVars
           name: name
@@ -4456,7 +4490,6 @@ components:
             sha: sha
             url: url
           user: user
-          target: target
           workspaceId: workspaceId
         - buildConfig:
             cachedBuild:
@@ -4466,6 +4499,7 @@ components:
               filePath: filePath
           gitProviderConfigId: gitProviderConfigId
           image: image
+          targetConfig: targetConfig
           envVars:
             key: envVars
           name: name
@@ -4498,7 +4532,6 @@ components:
             sha: sha
             url: url
           user: user
-          target: target
           workspaceId: workspaceId
         name: name
         id: id
@@ -4516,7 +4549,6 @@ components:
             workspaceId: workspaceId
           providerMetadata: providerMetadata
           name: name
-        target: target
       properties:
         id:
           type: string
@@ -4528,13 +4560,13 @@ components:
           items:
             $ref: '#/components/schemas/Project'
           type: array
-        target:
+        targetConfig:
           type: string
       required:
       - id
       - name
       - projects
-      - target
+      - targetConfig
       type: object
     WorkspaceInfo:
       example:
@@ -4610,39 +4642,7 @@ components:
       - name
       - version
       type: object
-    provider.ProviderTargetProperty:
-      properties:
-        defaultValue:
-          description: |-
-            DefaultValue is converted into the appropriate type based on the Type
-            If the property is a FilePath, the DefaultValue is a path to a directory
-          type: string
-        description:
-          description: Brief description of the property
-          type: string
-        disabledPredicate:
-          description: |-
-            A regex string matched with the name of the target to determine if the property should be disabled
-            If the regex matches the target name, the property will be disabled
-            E.g. "^local$" will disable the property for the local target
-          type: string
-        inputMasked:
-          type: boolean
-        options:
-          description: Options is only used if the Type is ProviderTargetPropertyTypeOption
-          items:
-            type: string
-          type: array
-        suggestions:
-          description: Suggestions is an optional list of auto-complete values to
-            assist the user while filling the field
-          items:
-            type: string
-          type: array
-        type:
-          $ref: '#/components/schemas/provider.ProviderTargetPropertyType'
-      type: object
-    provider.ProviderTargetPropertyType:
+    provider.TargetConfigPropertyType:
       enum:
       - string
       - option
@@ -4652,12 +4652,12 @@ components:
       - file-path
       type: string
       x-enum-varnames:
-      - ProviderTargetPropertyTypeString
-      - ProviderTargetPropertyTypeOption
-      - ProviderTargetPropertyTypeBoolean
-      - ProviderTargetPropertyTypeInt
-      - ProviderTargetPropertyTypeFloat
-      - ProviderTargetPropertyTypeFilePath
+      - TargetConfigPropertyTypeString
+      - TargetConfigPropertyTypeOption
+      - TargetConfigPropertyTypeBoolean
+      - TargetConfigPropertyTypeInt
+      - TargetConfigPropertyTypeFloat
+      - TargetConfigPropertyTypeFilePath
     FsUploadFile_request:
       properties:
         file:

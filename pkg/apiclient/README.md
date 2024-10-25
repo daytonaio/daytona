@@ -119,7 +119,7 @@ Class | Method | HTTP request | Description
 *ProjectConfigAPI* | [**ListProjectConfigs**](docs/ProjectConfigAPI.md#listprojectconfigs) | **Get** /project-config | List project configs
 *ProjectConfigAPI* | [**SetDefaultProjectConfig**](docs/ProjectConfigAPI.md#setdefaultprojectconfig) | **Patch** /project-config/{configName}/set-default | Set project config to default
 *ProjectConfigAPI* | [**SetProjectConfig**](docs/ProjectConfigAPI.md#setprojectconfig) | **Put** /project-config | Set project config data
-*ProviderAPI* | [**GetTargetManifest**](docs/ProviderAPI.md#gettargetmanifest) | **Get** /provider/{provider}/target-manifest | Get provider target manifest
+*ProviderAPI* | [**GetTargetConfigManifest**](docs/ProviderAPI.md#gettargetconfigmanifest) | **Get** /provider/{provider}/target-config-manifest | Get provider target config manifest
 *ProviderAPI* | [**InstallProvider**](docs/ProviderAPI.md#installprovider) | **Post** /provider/install | Install a provider
 *ProviderAPI* | [**ListProviders**](docs/ProviderAPI.md#listproviders) | **Get** /provider | List providers
 *ProviderAPI* | [**UninstallProvider**](docs/ProviderAPI.md#uninstallprovider) | **Post** /provider/{provider}/uninstall | Uninstall a provider
@@ -128,10 +128,10 @@ Class | Method | HTTP request | Description
 *ServerAPI* | [**GetConfig**](docs/ServerAPI.md#getconfig) | **Get** /server/config | Get the server configuration
 *ServerAPI* | [**GetServerLogFiles**](docs/ServerAPI.md#getserverlogfiles) | **Get** /server/logs | List server log files
 *ServerAPI* | [**SetConfig**](docs/ServerAPI.md#setconfig) | **Post** /server/config | Set the server configuration
-*TargetAPI* | [**ListTargets**](docs/TargetAPI.md#listtargets) | **Get** /target | List targets
-*TargetAPI* | [**RemoveTarget**](docs/TargetAPI.md#removetarget) | **Delete** /target/{target} | Remove a target
-*TargetAPI* | [**SetDefaultTarget**](docs/TargetAPI.md#setdefaulttarget) | **Patch** /target/{target}/set-default | Set target to default
-*TargetAPI* | [**SetTarget**](docs/TargetAPI.md#settarget) | **Put** /target | Set a target
+*TargetConfigAPI* | [**ListTargetConfigs**](docs/TargetConfigAPI.md#listtargetconfigs) | **Get** /target-config | List target configs
+*TargetConfigAPI* | [**RemoveTargetConfig**](docs/TargetConfigAPI.md#removetargetconfig) | **Delete** /target-config/{configName} | Remove a target config
+*TargetConfigAPI* | [**SetDefaultTargetConfig**](docs/TargetConfigAPI.md#setdefaulttargetconfig) | **Patch** /target-config/{configName}/set-default | Set target config to default
+*TargetConfigAPI* | [**SetTargetConfig**](docs/TargetConfigAPI.md#settargetconfig) | **Put** /target-config | Set a target config
 *WorkspaceAPI* | [**CreateWorkspace**](docs/WorkspaceAPI.md#createworkspace) | **Post** /workspace | Create a workspace
 *WorkspaceAPI* | [**GetWorkspace**](docs/WorkspaceAPI.md#getworkspace) | **Get** /workspace/{workspaceId} | Get workspace info
 *WorkspaceAPI* | [**ListWorkspaces**](docs/WorkspaceAPI.md#listworkspaces) | **Get** /workspace | List workspaces
@@ -197,8 +197,8 @@ Class | Method | HTTP request | Description
  - [CreateProjectConfigDTO](docs/CreateProjectConfigDTO.md)
  - [CreateProjectDTO](docs/CreateProjectDTO.md)
  - [CreateProjectSourceDTO](docs/CreateProjectSourceDTO.md)
- - [CreateProviderTargetDTO](docs/CreateProviderTargetDTO.md)
  - [CreateSessionRequest](docs/CreateSessionRequest.md)
+ - [CreateTargetConfigDTO](docs/CreateTargetConfigDTO.md)
  - [CreateWorkspaceDTO](docs/CreateWorkspaceDTO.md)
  - [DevcontainerConfig](docs/DevcontainerConfig.md)
  - [ExecuteRequest](docs/ExecuteRequest.md)
@@ -244,9 +244,7 @@ Class | Method | HTTP request | Description
  - [ProjectState](docs/ProjectState.md)
  - [Provider](docs/Provider.md)
  - [ProviderProviderInfo](docs/ProviderProviderInfo.md)
- - [ProviderProviderTargetProperty](docs/ProviderProviderTargetProperty.md)
- - [ProviderProviderTargetPropertyType](docs/ProviderProviderTargetPropertyType.md)
- - [ProviderTarget](docs/ProviderTarget.md)
+ - [ProviderTargetConfigPropertyType](docs/ProviderTargetConfigPropertyType.md)
  - [ReplaceRequest](docs/ReplaceRequest.md)
  - [ReplaceResult](docs/ReplaceResult.md)
  - [RepositoryUrl](docs/RepositoryUrl.md)
@@ -260,6 +258,8 @@ Class | Method | HTTP request | Description
  - [SetProjectState](docs/SetProjectState.md)
  - [SigningMethod](docs/SigningMethod.md)
  - [Status](docs/Status.md)
+ - [TargetConfig](docs/TargetConfig.md)
+ - [TargetConfigProperty](docs/TargetConfigProperty.md)
  - [Workspace](docs/Workspace.md)
  - [WorkspaceDTO](docs/WorkspaceDTO.md)
  - [WorkspaceInfo](docs/WorkspaceInfo.md)

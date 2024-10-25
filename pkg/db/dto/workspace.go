@@ -10,11 +10,11 @@ import (
 )
 
 type WorkspaceDTO struct {
-	Id       string       `gorm:"primaryKey"`
-	Name     string       `json:"name" gorm:"unique"`
-	Target   string       `json:"target"`
-	ApiKey   string       `json:"apiKey"`
-	Projects []ProjectDTO `gorm:"serializer:json"`
+	Id           string       `gorm:"primaryKey"`
+	Name         string       `json:"name" gorm:"unique"`
+	TargetConfig string       `json:"config"`
+	ApiKey       string       `json:"apiKey"`
+	Projects     []ProjectDTO `gorm:"serializer:json"`
 }
 
 func (w WorkspaceDTO) GetProject(name string) (*ProjectDTO, error) {
@@ -29,10 +29,10 @@ func (w WorkspaceDTO) GetProject(name string) (*ProjectDTO, error) {
 
 func ToWorkspaceDTO(workspace *workspace.Workspace) WorkspaceDTO {
 	workspaceDTO := WorkspaceDTO{
-		Id:     workspace.Id,
-		Name:   workspace.Name,
-		Target: workspace.Target,
-		ApiKey: workspace.ApiKey,
+		Id:           workspace.Id,
+		Name:         workspace.Name,
+		TargetConfig: workspace.TargetConfig,
+		ApiKey:       workspace.ApiKey,
 	}
 
 	for _, project := range workspace.Projects {
@@ -44,10 +44,10 @@ func ToWorkspaceDTO(workspace *workspace.Workspace) WorkspaceDTO {
 
 func ToWorkspace(workspaceDTO WorkspaceDTO) *workspace.Workspace {
 	workspace := workspace.Workspace{
-		Id:     workspaceDTO.Id,
-		Name:   workspaceDTO.Name,
-		Target: workspaceDTO.Target,
-		ApiKey: workspaceDTO.ApiKey,
+		Id:           workspaceDTO.Id,
+		Name:         workspaceDTO.Name,
+		TargetConfig: workspaceDTO.TargetConfig,
+		ApiKey:       workspaceDTO.ApiKey,
 	}
 
 	for _, projectDTO := range workspaceDTO.Projects {
