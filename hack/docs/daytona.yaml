@@ -12,7 +12,7 @@ options:
       usage: Display the version of Daytona
 see_also:
     - daytona api-key - Api Key commands
-    - daytona autocomplete - Adds completion script for your shell enviornment
+    - daytona autocomplete - Adds a completion script for your shell environment
     - daytona build - Manage builds
     - daytona code - Open a workspace in your preferred IDE
     - daytona config - Output Daytona configuration
