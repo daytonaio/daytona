@@ -7,8 +7,8 @@ import (
 	"net/rpc"
 
 	"github.com/daytonaio/daytona/pkg/provider/util"
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/target/project"
 	"github.com/hashicorp/go-plugin"
 )
 
@@ -19,11 +19,11 @@ type Provider interface {
 	GetTargetConfigManifest() (*TargetConfigManifest, error)
 	GetPresetTargetConfigs() (*[]TargetConfig, error)
 
-	CreateWorkspace(*WorkspaceRequest) (*util.Empty, error)
-	StartWorkspace(*WorkspaceRequest) (*util.Empty, error)
-	StopWorkspace(*WorkspaceRequest) (*util.Empty, error)
-	DestroyWorkspace(*WorkspaceRequest) (*util.Empty, error)
-	GetWorkspaceInfo(*WorkspaceRequest) (*workspace.WorkspaceInfo, error)
+	CreateTarget(*TargetRequest) (*util.Empty, error)
+	StartTarget(*TargetRequest) (*util.Empty, error)
+	StopTarget(*TargetRequest) (*util.Empty, error)
+	DestroyTarget(*TargetRequest) (*util.Empty, error)
+	GetTargetInfo(*TargetRequest) (*target.TargetInfo, error)
 
 	CreateProject(*ProjectRequest) (*util.Empty, error)
 	StartProject(*ProjectRequest) (*util.Empty, error)

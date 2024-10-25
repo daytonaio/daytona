@@ -14,7 +14,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/cmd/build"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/prebuild/add"
-	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
+	"github.com/daytonaio/daytona/pkg/views/target/selection"
 	"github.com/spf13/cobra"
 )
 

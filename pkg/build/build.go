@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
-	"github.com/daytonaio/daytona/pkg/workspace/project/containerconfig"
+	"github.com/daytonaio/daytona/pkg/target/project/buildconfig"
+	"github.com/daytonaio/daytona/pkg/target/project/containerconfig"
 )
 
 type BuildState string

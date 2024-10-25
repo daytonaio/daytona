@@ -127,19 +127,19 @@ Class | Method | HTTP request | Description
 *ServerAPI* | [**GenerateNetworkKey**](docs/ServerAPI.md#generatenetworkkey) | **Post** /server/network-key | Generate a new authentication key
 *ServerAPI* | [**GetConfig**](docs/ServerAPI.md#getconfig) | **Get** /server/config | Get the server configuration
 *ServerAPI* | [**SetConfig**](docs/ServerAPI.md#setconfig) | **Post** /server/config | Set the server configuration
+*TargetAPI* | [**CreateTarget**](docs/TargetAPI.md#createtarget) | **Post** /target | Create a target
+*TargetAPI* | [**GetTarget**](docs/TargetAPI.md#gettarget) | **Get** /target/{targetId} | Get target info
+*TargetAPI* | [**ListTargets**](docs/TargetAPI.md#listtargets) | **Get** /target | List targets
+*TargetAPI* | [**RemoveTarget**](docs/TargetAPI.md#removetarget) | **Delete** /target/{targetId} | Remove target
+*TargetAPI* | [**SetProjectState**](docs/TargetAPI.md#setprojectstate) | **Post** /target/{targetId}/{projectId}/state | Set project state
+*TargetAPI* | [**StartProject**](docs/TargetAPI.md#startproject) | **Post** /target/{targetId}/{projectId}/start | Start project
+*TargetAPI* | [**StartTarget**](docs/TargetAPI.md#starttarget) | **Post** /target/{targetId}/start | Start target
+*TargetAPI* | [**StopProject**](docs/TargetAPI.md#stopproject) | **Post** /target/{targetId}/{projectId}/stop | Stop project
+*TargetAPI* | [**StopTarget**](docs/TargetAPI.md#stoptarget) | **Post** /target/{targetId}/stop | Stop target
 *TargetConfigAPI* | [**ListTargetConfigs**](docs/TargetConfigAPI.md#listtargetconfigs) | **Get** /target-config | List target configs
 *TargetConfigAPI* | [**RemoveTargetConfig**](docs/TargetConfigAPI.md#removetargetconfig) | **Delete** /target-config/{configName} | Remove a target config
 *TargetConfigAPI* | [**SetDefaultTargetConfig**](docs/TargetConfigAPI.md#setdefaulttargetconfig) | **Patch** /target-config/{configName}/set-default | Set target config to default
 *TargetConfigAPI* | [**SetTargetConfig**](docs/TargetConfigAPI.md#settargetconfig) | **Put** /target-config | Set a target config
-*WorkspaceAPI* | [**CreateWorkspace**](docs/WorkspaceAPI.md#createworkspace) | **Post** /workspace | Create a workspace
-*WorkspaceAPI* | [**GetWorkspace**](docs/WorkspaceAPI.md#getworkspace) | **Get** /workspace/{workspaceId} | Get workspace info
-*WorkspaceAPI* | [**ListWorkspaces**](docs/WorkspaceAPI.md#listworkspaces) | **Get** /workspace | List workspaces
-*WorkspaceAPI* | [**RemoveWorkspace**](docs/WorkspaceAPI.md#removeworkspace) | **Delete** /workspace/{workspaceId} | Remove workspace
-*WorkspaceAPI* | [**SetProjectState**](docs/WorkspaceAPI.md#setprojectstate) | **Post** /workspace/{workspaceId}/{projectId}/state | Set project state
-*WorkspaceAPI* | [**StartProject**](docs/WorkspaceAPI.md#startproject) | **Post** /workspace/{workspaceId}/{projectId}/start | Start project
-*WorkspaceAPI* | [**StartWorkspace**](docs/WorkspaceAPI.md#startworkspace) | **Post** /workspace/{workspaceId}/start | Start workspace
-*WorkspaceAPI* | [**StopProject**](docs/WorkspaceAPI.md#stopproject) | **Post** /workspace/{workspaceId}/{projectId}/stop | Stop project
-*WorkspaceAPI* | [**StopWorkspace**](docs/WorkspaceAPI.md#stopworkspace) | **Post** /workspace/{workspaceId}/stop | Stop workspace
 
 
 ## Documentation For Models
@@ -159,7 +159,7 @@ Class | Method | HTTP request | Description
  - [CreateProjectDTO](docs/CreateProjectDTO.md)
  - [CreateProjectSourceDTO](docs/CreateProjectSourceDTO.md)
  - [CreateTargetConfigDTO](docs/CreateTargetConfigDTO.md)
- - [CreateWorkspaceDTO](docs/CreateWorkspaceDTO.md)
+ - [CreateTargetDTO](docs/CreateTargetDTO.md)
  - [DevcontainerConfig](docs/DevcontainerConfig.md)
  - [FRPSConfig](docs/FRPSConfig.md)
  - [FileStatus](docs/FileStatus.md)
@@ -190,11 +190,11 @@ Class | Method | HTTP request | Description
  - [SetProjectState](docs/SetProjectState.md)
  - [SigningMethod](docs/SigningMethod.md)
  - [Status](docs/Status.md)
+ - [Target](docs/Target.md)
  - [TargetConfig](docs/TargetConfig.md)
  - [TargetConfigProperty](docs/TargetConfigProperty.md)
- - [Workspace](docs/Workspace.md)
- - [WorkspaceDTO](docs/WorkspaceDTO.md)
- - [WorkspaceInfo](docs/WorkspaceInfo.md)
+ - [TargetDTO](docs/TargetDTO.md)
+ - [TargetInfo](docs/TargetInfo.md)
 
 
 ## Documentation For Authorization

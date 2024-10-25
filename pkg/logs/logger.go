@@ -24,7 +24,7 @@ const (
 
 type LogEntry struct {
 	Source      string  `json:"source"`
-	WorkspaceId *string `json:"workspaceId,omitempty"`
+	TargetId    *string `json:"targetId,omitempty"`
 	ProjectName *string `json:"projectName,omitempty"`
 	BuildId     *string `json:"buildId,omitempty"`
 	Msg         string  `json:"msg"`
@@ -33,24 +33,24 @@ type LogEntry struct {
 }
 
 type LoggerFactory interface {
-	CreateWorkspaceLogger(workspaceId string, source LogSource) Logger
-	CreateProjectLogger(workspaceId, projectName string, source LogSource) Logger
+	CreateTargetLogger(targetId string, source LogSource) Logger
+	CreateProjectLogger(targetId, projectName string, source LogSource) Logger
 	CreateBuildLogger(buildId string, source LogSource) Logger
-	CreateWorkspaceLogReader(workspaceId string) (io.Reader, error)
-	CreateProjectLogReader(workspaceId, projectName string) (io.Reader, error)
+	CreateTargetLogReader(targetId string) (io.Reader, error)
+	CreateProjectLogReader(targetId, projectName string) (io.Reader, error)
 	CreateBuildLogReader(buildId string) (io.Reader, error)
 }
 
 type loggerFactoryImpl struct {
-	wsLogsDir    string
-	buildLogsDir string
+	targetLogsDir string
+	buildLogsDir  string
 }
 
-func NewLoggerFactory(wsLogsDir *string, buildLogsDir *string) LoggerFactory {
+func NewLoggerFactory(targetLogsDir *string, buildLogsDir *string) LoggerFactory {
 	loggerFactoryImpl := &loggerFactoryImpl{}
 
-	if wsLogsDir != nil {
-		loggerFactoryImpl.wsLogsDir = *wsLogsDir
+	if targetLogsDir != nil {
+		loggerFactoryImpl.targetLogsDir = *targetLogsDir
 	}
 
 	if buildLogsDir != nil {

@@ -24,13 +24,13 @@ import (
 )
 
 var publicPreview bool
-var workspaceId string
+var targetId string
 var projectName string
 
 var PortForwardCmd = &cobra.Command{
-	Use:     "forward [PORT] [WORKSPACE] [PROJECT]",
+	Use:     "forward [PORT] [TARGET] [PROJECT]",
 	Short:   "Forward a port from a project to your local machine",
-	GroupID: util.WORKSPACE_GROUP,
+	GroupID: util.TARGET_GROUP,
 	Args:    cobra.RangeArgs(2, 3),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
@@ -46,22 +46,22 @@ var PortForwardCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		workspace, err := apiclient.GetWorkspace(args[1], true)
+		target, err := apiclient.GetTarget(args[1], true)
 		if err != nil {
 			return err
 		}
-		workspaceId = workspace.Id
+		targetId = target.Id
 
 		if len(args) == 3 {
 			projectName = args[2]
 		} else {
-			projectName, err = apiclient.GetFirstWorkspaceProjectName(workspaceId, projectName, nil)
+			projectName, err = apiclient.GetFirstProjectName(targetId, projectName, nil)
 			if err != nil {
 				return err
 			}
 		}
 
-		hostPort, errChan := tailscale.ForwardPort(workspaceId, projectName, uint16(port), activeProfile)
+		hostPort, errChan := tailscale.ForwardPort(targetId, projectName, uint16(port), activeProfile)
 
 		if hostPort == nil {
 			if err = <-errChan; err != nil {
@@ -76,7 +76,7 @@ var PortForwardCmd = &cobra.Command{
 
 		if publicPreview {
 			go func() {
-				errChan <- ForwardPublicPort(workspaceId, projectName, *hostPort, uint16(port))
+				errChan <- ForwardPublicPort(targetId, projectName, *hostPort, uint16(port))
 			}()
 		}
 
@@ -93,7 +93,7 @@ func init() {
 	PortForwardCmd.Flags().BoolVar(&publicPreview, "public", false, "Should be port be available publicly via an URL")
 }
 
-func ForwardPublicPort(workspaceId, projectName string, hostPort, targetPort uint16) error {
+func ForwardPublicPort(targetId, projectName string, hostPort, targetPort uint16) error {
 	views.RenderInfoMessage("Forwarding port to a public URL...")
 
 	apiClient, err := apiclient.GetApiClient(nil)
@@ -107,7 +107,7 @@ func ForwardPublicPort(workspaceId, projectName string, hostPort, targetPort uin
 	}
 
 	h := fnv.New64()
-	h.Write([]byte(fmt.Sprintf("%s-%s-%s", workspaceId, projectName, serverConfig.Id)))
+	h.Write([]byte(fmt.Sprintf("%s-%s-%s", targetId, projectName, serverConfig.Id)))
 
 	subDomain := fmt.Sprintf("%d-%s", targetPort, base64.RawURLEncoding.EncodeToString([]byte(fmt.Sprint(h.Sum64()))))
 

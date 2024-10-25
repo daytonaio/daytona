@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/pkg/provider"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/target"
 )
 
 type ServerEvent string
@@ -22,18 +22,18 @@ const (
 	ServerEventPurgeCompleted    ServerEvent = "server_purge_completed"
 	ServerEventPurgeError        ServerEvent = "server_purge_error"
 
-	// Workspace events
-	ServerEventWorkspaceCreated      ServerEvent = "server_workspace_created"
-	ServerEventWorkspaceDestroyed    ServerEvent = "server_workspace_destroyed"
-	ServerEventWorkspaceStarted      ServerEvent = "server_workspace_started"
-	ServerEventWorkspaceStopped      ServerEvent = "server_workspace_stopped"
-	ServerEventWorkspaceCreateError  ServerEvent = "server_workspace_created_error"
-	ServerEventWorkspaceDestroyError ServerEvent = "server_workspace_destroyed_error"
-	ServerEventWorkspaceStartError   ServerEvent = "server_workspace_started_error"
-	ServerEventWorkspaceStopError    ServerEvent = "server_workspace_stopped_error"
+	// Target events
+	ServerEventTargetCreated      ServerEvent = "server_target_created"
+	ServerEventTargetDestroyed    ServerEvent = "server_target_destroyed"
+	ServerEventTargetStarted      ServerEvent = "server_target_started"
+	ServerEventTargetStopped      ServerEvent = "server_target_stopped"
+	ServerEventTargetCreateError  ServerEvent = "server_target_created_error"
+	ServerEventTargetDestroyError ServerEvent = "server_target_destroyed_error"
+	ServerEventTargetStartError   ServerEvent = "server_target_started_error"
+	ServerEventTargetStopError    ServerEvent = "server_target_stopped_error"
 )
 
-func NewWorkspaceEventProps(ctx context.Context, workspace *workspace.Workspace, targetConfig *provider.TargetConfig) map[string]interface{} {
+func NewTargetEventProps(ctx context.Context, target *target.Target, targetConfig *provider.TargetConfig) map[string]interface{} {
 	props := map[string]interface{}{}
 
 	sessionId := SessionId(ctx)
@@ -42,14 +42,14 @@ func NewWorkspaceEventProps(ctx context.Context, workspace *workspace.Workspace,
 	props["session_id"] = sessionId
 	props["server_id"] = serverId
 
-	if workspace != nil {
-		props["workspace_id"] = workspace.Id
-		props["workspace_n_projects"] = len(workspace.Projects)
+	if target != nil {
+		props["target_id"] = target.Id
+		props["target_n_projects"] = len(target.Projects)
 		publicRepos := []string{}
 		publicImages := []string{}
 		builders := map[string]int{}
 
-		for _, project := range workspace.Projects {
+		for _, project := range target.Projects {
 			if isImagePublic(project.Image) {
 				publicImages = append(publicImages, project.Image)
 			}
@@ -65,9 +65,9 @@ func NewWorkspaceEventProps(ctx context.Context, workspace *workspace.Workspace,
 			}
 		}
 
-		props["workspace_public_repos"] = publicRepos
-		props["workspace_public_images"] = publicImages
-		props["workspace_builders"] = builders
+		props["target_public_repos"] = publicRepos
+		props["target_public_images"] = publicImages
+		props["target_builders"] = builders
 	}
 
 	if targetConfig != nil {

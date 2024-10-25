@@ -10,8 +10,8 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/docker"
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/target/project"
 	"github.com/docker/docker/api/types/container"
 	"github.com/stretchr/testify/mock"
 )
@@ -30,8 +30,8 @@ func (c *MockClient) CreateProject(p *project.Project, serverDownloadUrl string,
 	return args.Error(0)
 }
 
-func (c *MockClient) CreateWorkspace(workspace *workspace.Workspace, logWriter io.Writer) error {
-	args := c.Called(workspace, logWriter)
+func (c *MockClient) CreateTarget(target *target.Target, logWriter io.Writer) error {
+	args := c.Called(target, logWriter)
 	return args.Error(0)
 }
 
@@ -40,8 +40,8 @@ func (c *MockClient) DestroyProject(p *project.Project) error {
 	return args.Error(0)
 }
 
-func (c *MockClient) DestroyWorkspace(workspace *workspace.Workspace) error {
-	args := c.Called(workspace)
+func (c *MockClient) DestroyTarget(target *target.Target) error {
+	args := c.Called(target)
 	return args.Error(0)
 }
 
@@ -60,9 +60,9 @@ func (c *MockClient) GetProjectInfo(p *project.Project) (*project.ProjectInfo, e
 	return args.Get(0).(*project.ProjectInfo), args.Error(1)
 }
 
-func (c *MockClient) GetWorkspaceInfo(ws *workspace.Workspace) (*workspace.WorkspaceInfo, error) {
+func (c *MockClient) GetTargetInfo(ws *target.Target) (*target.TargetInfo, error) {
 	args := c.Called(ws)
-	return args.Get(0).(*workspace.WorkspaceInfo), args.Error(1)
+	return args.Get(0).(*target.TargetInfo), args.Error(1)
 }
 
 func (c *MockClient) GetProjectContainerName(p *project.Project) string {
