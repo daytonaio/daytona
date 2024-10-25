@@ -45,7 +45,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/provider"
 	"github.com/daytonaio/daytona/pkg/api/controllers/sample"
 	"github.com/daytonaio/daytona/pkg/api/controllers/server"
-	"github.com/daytonaio/daytona/pkg/api/controllers/target"
+	"github.com/daytonaio/daytona/pkg/api/controllers/targetconfig"
 	"github.com/daytonaio/daytona/pkg/api/controllers/workspace"
 	"github.com/daytonaio/daytona/pkg/api/controllers/workspace/toolbox"
 
@@ -235,7 +235,7 @@ func (a *ApiServer) Start() error {
 		providerController.POST("/install", provider.InstallProvider)
 		providerController.GET("", provider.ListProviders)
 		providerController.POST("/:provider/uninstall", provider.UninstallProvider)
-		providerController.GET("/:provider/target-manifest", provider.GetTargetManifest)
+		providerController.GET("/:provider/target-config-manifest", provider.GetTargetConfigManifest)
 	}
 
 	containerRegistryController := protected.Group("/container-registry")
@@ -256,12 +256,12 @@ func (a *ApiServer) Start() error {
 		buildController.DELETE("/prebuild/:prebuildId", build.DeleteBuildsFromPrebuild)
 	}
 
-	targetController := protected.Group("/target")
+	targetConfigController := protected.Group("/target-config")
 	{
-		targetController.GET("", target.ListTargets)
-		targetController.PUT("", target.SetTarget)
-		targetController.PATCH("/:target/set-default", target.SetDefaultTarget)
-		targetController.DELETE("/:target", target.RemoveTarget)
+		targetConfigController.GET("", targetconfig.ListTargetConfigs)
+		targetConfigController.PUT("", targetconfig.SetTargetConfig)
+		targetConfigController.PATCH("/:configName/set-default", targetconfig.SetDefaultTargetConfig)
+		targetConfigController.DELETE("/:configName", targetconfig.RemoveTargetConfig)
 	}
 
 	logController := protected.Group("/log")

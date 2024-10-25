@@ -7,13 +7,13 @@ Name | Type | Description | Notes
 **Id** | **string** |  | 
 **Name** | **string** |  | 
 **Projects** | [**[]Project**](Project.md) |  | 
-**Target** | **string** |  | 
+**TargetConfig** | **string** |  | 
 
 ## Methods
 
 ### NewWorkspace
 
-`func NewWorkspace(id string, name string, projects []Project, target string, ) *Workspace`
+`func NewWorkspace(id string, name string, projects []Project, targetConfig string, ) *Workspace`
 
 NewWorkspace instantiates a new Workspace object
 This constructor will assign default values to properties that have it defined,
@@ -88,24 +88,24 @@ and a boolean to check if the value has been set.
 SetProjects sets Projects field to given value.
 
 
-### GetTarget
+### GetTargetConfig
 
-`func (o *Workspace) GetTarget() string`
+`func (o *Workspace) GetTargetConfig() string`
 
-GetTarget returns the Target field if non-nil, zero value otherwise.
+GetTargetConfig returns the TargetConfig field if non-nil, zero value otherwise.
 
-### GetTargetOk
+### GetTargetConfigOk
 
-`func (o *Workspace) GetTargetOk() (*string, bool)`
+`func (o *Workspace) GetTargetConfigOk() (*string, bool)`
 
-GetTargetOk returns a tuple with the Target field if it's non-nil, zero value otherwise
+GetTargetConfigOk returns a tuple with the TargetConfig field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetTarget
+### SetTargetConfig
 
-`func (o *Workspace) SetTarget(v string)`
+`func (o *Workspace) SetTargetConfig(v string)`
 
-SetTarget sets Target field to given value.
+SetTargetConfig sets TargetConfig field to given value.
 
 
 
