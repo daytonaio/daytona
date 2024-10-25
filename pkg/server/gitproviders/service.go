@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace/project/config"
+	"github.com/daytonaio/daytona/pkg/target/project/config"
 )
 
 type IGitProviderService interface {

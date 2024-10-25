@@ -14,7 +14,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
-	"github.com/daytonaio/daytona/pkg/workspace/project/config"
+	"github.com/daytonaio/daytona/pkg/target/project/config"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )

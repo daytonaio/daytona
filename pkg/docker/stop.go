@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/target/project"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 )

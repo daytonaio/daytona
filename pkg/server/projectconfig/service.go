@@ -11,7 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/builds"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
-	"github.com/daytonaio/daytona/pkg/workspace/project/config"
+	"github.com/daytonaio/daytona/pkg/target/project/config"
 )
 
 type IProjectConfigService interface {
