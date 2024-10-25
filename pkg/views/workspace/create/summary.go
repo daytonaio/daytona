@@ -10,6 +10,7 @@ import (
 	"math"
 	"os"
 	"slices"
+	"sort"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/viewport"
@@ -150,11 +151,23 @@ func renderProjectDetails(project apiclient.CreateProjectDTO, buildChoice views_
 			output += "\n"
 		}
 
-		var envVars string
-		for key, val := range project.EnvVars {
-			envVars += fmt.Sprintf("%s=%s; ", key, val)
+		keys := make([]string, 0, len(project.EnvVars))
+		for key := range project.EnvVars {
+			keys = append(keys, key)
 		}
-		output += projectDetailOutput(EnvVars, strings.TrimSuffix(envVars, "; "))
+		sort.Strings(keys)
+
+		var envVarsBuilder strings.Builder
+		for _, key := range keys {
+			envVarsBuilder.WriteString(key + "=" + project.EnvVars[key] + "; ")
+		}
+
+		envVars := envVarsBuilder.String()
+		if len(envVars) > 2 {
+			envVars = envVars[:len(envVars)-2]
+		}
+
+		output += projectDetailOutput("EnvVars", envVars)
 	}
 
 	return output
