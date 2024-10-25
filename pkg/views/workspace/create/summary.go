@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"os"
 	"slices"
 	"strings"
 
@@ -19,6 +20,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
+	"golang.org/x/term"
 )
 
 type ProjectDetail string
@@ -162,14 +164,17 @@ func projectDetailOutput(projectDetailKey ProjectDetail, projectDetailValue stri
 	return fmt.Sprintf("\t%s%-*s%s", lipgloss.NewStyle().Foreground(views.Green).Render(string(projectDetailKey)), DEFAULT_PADDING-len(string(projectDetailKey)), EMPTY_STRING, projectDetailValue)
 }
 
-func calculateViewportSize(content string, terminalHeight int) (width, height int) {
+func calculateViewportSize(content string) (width, height int) {
 	lines := strings.Split(content, "\n")
 	longestLine := slices.MaxFunc(lines, func(a, b string) int {
 		return len(a) - len(b)
 	})
 	width = len(longestLine)
 
-	maxHeight := terminalHeight
+	_, maxHeight, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		maxHeight = 25
+	}
 
 	height = int(math.Min(float64(len(lines)), float64(maxHeight)))
 
@@ -214,7 +219,7 @@ func NewSummaryModel(config SubmissionFormConfig) SummaryModel {
 	content, _ := RenderSummary(m.name, m.projectList, m.defaults, m.nameLabel)
 
 	// Dynamically calculate viewport size
-	m.width, m.height = calculateViewportSize(content, views_util.GetTerminalHeight())
+	m.width, m.height = calculateViewportSize(content)
 	m.viewport = viewport.New(m.width, m.height)
 	m.viewport.SetContent(content)
 
