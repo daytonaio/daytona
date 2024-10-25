@@ -8,7 +8,7 @@ import (
 
 	t_build "github.com/daytonaio/daytona/internal/testing/build"
 	git_mocks "github.com/daytonaio/daytona/internal/testing/git/mocks"
-	builder_mocks "github.com/daytonaio/daytona/internal/testing/server/workspaces/mocks"
+	builder_mocks "github.com/daytonaio/daytona/internal/testing/server/targets/mocks"
 	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/stretchr/testify/suite"
 )

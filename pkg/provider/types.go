@@ -6,8 +6,8 @@ package provider
 import (
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/target/project"
 )
 
 type ProviderInfo struct {
@@ -31,9 +31,9 @@ type InitializeProviderRequest struct {
 	ApiPort uint32
 }
 
-type WorkspaceRequest struct {
+type TargetRequest struct {
 	TargetConfigOptions string
-	Workspace           *workspace.Workspace
+	Target              *target.Target
 }
 
 type ProjectRequest struct {

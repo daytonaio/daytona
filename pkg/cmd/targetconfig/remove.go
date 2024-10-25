@@ -11,7 +11,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	workspace_cmd "github.com/daytonaio/daytona/pkg/cmd/workspace"
+	target_cmd "github.com/daytonaio/daytona/pkg/cmd/target"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/targetconfig"
@@ -73,33 +73,33 @@ var removeCmd = &cobra.Command{
 		}
 
 		if yesFlag {
-			fmt.Println("Deleting all workspaces.")
-			err := RemoveTargetConfigWorkspaces(ctx, apiClient, selectedConfigName)
+			fmt.Println("Deleting all targets.")
+			err := RemoveTargetConfigTargets(ctx, apiClient, selectedConfigName)
 
 			if err != nil {
 				return err
 			}
 		} else {
-			var configWorkspaceCount int
+			var configTargetCount int
 
-			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+			targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
-			for _, workspace := range workspaceList {
-				if workspace.TargetConfig == selectedConfigName {
-					configWorkspaceCount++
+			for _, target := range targetList {
+				if target.TargetConfig == selectedConfigName {
+					configTargetCount++
 				}
 			}
 
-			if configWorkspaceCount > 0 {
-				title := fmt.Sprintf("Delete %d workspaces within %s?", configWorkspaceCount, selectedConfigName)
-				description := "You might not be able to easily remove these workspaces later."
+			if configTargetCount > 0 {
+				title := fmt.Sprintf("Delete %d targets within %s?", configTargetCount, selectedConfigName)
+				description := "You might not be able to easily remove these targets later."
 
-				if configWorkspaceCount == 1 {
-					title = fmt.Sprintf("Delete %d workspace within %s?", configWorkspaceCount, selectedConfigName)
-					description = "You might not be able to easily remove this workspace later."
+				if configTargetCount == 1 {
+					title = fmt.Sprintf("Delete 1 target within %s?", selectedConfigName)
+					description = "You might not be able to easily remove this target later."
 				}
 
 				form := huh.NewForm(
@@ -117,12 +117,12 @@ var removeCmd = &cobra.Command{
 				}
 
 				if yesFlag {
-					err := RemoveTargetConfigWorkspaces(ctx, apiClient, selectedConfigName)
+					err := RemoveTargetConfigTargets(ctx, apiClient, selectedConfigName)
 					if err != nil {
 						return err
 					}
 				} else {
-					fmt.Println("Proceeding with target config removal without deleting workspaces.")
+					fmt.Println("Proceeding with target config removal without deleting targets.")
 				}
 			}
 		}
@@ -138,26 +138,26 @@ var removeCmd = &cobra.Command{
 }
 
 func init() {
-	removeCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Confirm deletion of all workspaces without prompt")
+	removeCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Confirm deletion of all targets without prompt")
 }
 
-func RemoveTargetConfigWorkspaces(ctx context.Context, client *apiclient.APIClient, targetConfig string) error {
-	workspaceList, res, err := client.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+func RemoveTargetConfigTargets(ctx context.Context, client *apiclient.APIClient, targetConfig string) error {
+	targetList, res, err := client.TargetAPI.ListTargets(ctx).Execute()
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	for _, workspace := range workspaceList {
-		if workspace.TargetConfig != targetConfig {
+	for _, target := range targetList {
+		if target.TargetConfig != targetConfig {
 			continue
 		}
-		err := workspace_cmd.RemoveWorkspace(ctx, client, &workspace, false)
+		err := target_cmd.RemoveTarget(ctx, client, &target, false)
 		if err != nil {
-			log.Errorf("Failed to delete workspace %s: %v", workspace.Name, err)
+			log.Errorf("Failed to delete target %s: %v", target.Name, err)
 			continue
 		}
 
-		views.RenderInfoMessage(fmt.Sprintf("- Workspace '%s' successfully deleted", workspace.Name))
+		views.RenderInfoMessage(fmt.Sprintf("- Target '%s' successfully deleted", target.Name))
 	}
 
 	return nil
