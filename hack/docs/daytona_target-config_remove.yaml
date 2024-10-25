@@ -5,7 +5,7 @@ options:
     - name: "yes"
       shorthand: "y"
       default_value: "false"
-      usage: Confirm deletion of all workspaces without prompt
+      usage: Confirm deletion of all targets without prompt
 inherited_options:
     - name: help
       default_value: "false"

@@ -29,7 +29,7 @@ var forceFlag bool
 var purgeCmd = &cobra.Command{
 	Use:   "purge",
 	Short: "Purges all Daytona data from the current device",
-	Long:  "Purges all Daytona data from the current device - including all workspaces, configuration files, and SSH files. This command is irreversible.",
+	Long:  "Purges all Daytona data from the current device - including all targets, configuration files, and SSH files. This command is irreversible.",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var confirmCheck bool
@@ -241,5 +241,5 @@ var purgeCmd = &cobra.Command{
 
 func init() {
 	purgeCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Execute purge without prompt")
-	purgeCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Delete all workspaces by force")
+	purgeCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Delete all targets by force")
 }

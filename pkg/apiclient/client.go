@@ -70,9 +70,9 @@ type APIClient struct {
 
 	ServerAPI *ServerAPIService
 
-	TargetConfigAPI *TargetConfigAPIService
+	TargetAPI *TargetAPIService
 
-	WorkspaceAPI *WorkspaceAPIService
+	TargetConfigAPI *TargetConfigAPIService
 
 	WorkspaceToolboxAPI *WorkspaceToolboxAPIService
 }
@@ -104,8 +104,8 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.ProviderAPI = (*ProviderAPIService)(&c.common)
 	c.SampleAPI = (*SampleAPIService)(&c.common)
 	c.ServerAPI = (*ServerAPIService)(&c.common)
+	c.TargetAPI = (*TargetAPIService)(&c.common)
 	c.TargetConfigAPI = (*TargetConfigAPIService)(&c.common)
-	c.WorkspaceAPI = (*WorkspaceAPIService)(&c.common)
 	c.WorkspaceToolboxAPI = (*WorkspaceToolboxAPIService)(&c.common)
 
 	return c

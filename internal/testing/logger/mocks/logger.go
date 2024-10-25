@@ -20,11 +20,11 @@ type MockLoggerFactory struct {
 	mock.Mock
 }
 
-func (f *MockLoggerFactory) CreateWorkspaceLogger(workspaceId string, source logs.LogSource) logs.Logger {
+func (f *MockLoggerFactory) CreateTargetLogger(targetId string, source logs.LogSource) logs.Logger {
 	return &mockLogger{}
 }
 
-func (f *MockLoggerFactory) CreateProjectLogger(workspaceId, projectName string, source logs.LogSource) logs.Logger {
+func (f *MockLoggerFactory) CreateProjectLogger(targetId, projectName string, source logs.LogSource) logs.Logger {
 	return &mockLogger{}
 }
 
@@ -32,11 +32,11 @@ func (f *MockLoggerFactory) CreateBuildLogger(projectName, hash string, source l
 	return &mockLogger{}
 }
 
-func (f *MockLoggerFactory) CreateWorkspaceLogReader(workspaceId string) (io.Reader, error) {
+func (f *MockLoggerFactory) CreateTargetLogReader(targetId string) (io.Reader, error) {
 	return nil, nil
 }
 
-func (f *MockLoggerFactory) CreateProjectLogReader(workspaceId, projectName string) (io.Reader, error) {
+func (f *MockLoggerFactory) CreateProjectLogReader(targetId, projectName string) (io.Reader, error) {
 	return nil, nil
 }
 

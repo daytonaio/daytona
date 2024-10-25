@@ -16,7 +16,7 @@ import (
 
 const requiredExtension = "jeanp413.open-remote-ssh"
 
-func OpenVScodium(activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string, gpgkey string) error {
+func OpenVScodium(activeProfile config.Profile, targetId string, projectName string, projectProviderMetadata string, gpgkey string) error {
 	path, err := GetCodiumBinaryPath()
 	if err != nil {
 		return err
@@ -26,9 +26,9 @@ func OpenVScodium(activeProfile config.Profile, workspaceId string, projectName 
 	if err != nil {
 		return err
 	}
-	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
+	projectHostname := config.GetProjectHostname(activeProfile.Id, targetId, projectName)
 
-	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName, gpgkey)
+	projectDir, err := util.GetProjectDir(activeProfile, targetId, projectName, gpgkey)
 	if err != nil {
 		return err
 	}

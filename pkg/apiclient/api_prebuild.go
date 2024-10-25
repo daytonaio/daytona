@@ -499,12 +499,12 @@ func (a *PrebuildAPIService) ListPrebuildsForProjectConfigExecute(r ApiListPrebu
 type ApiProcessGitEventRequest struct {
 	ctx        context.Context
 	ApiService *PrebuildAPIService
-	workspace  *map[string]interface{}
+	body       *map[string]interface{}
 }
 
 // Webhook event
-func (r ApiProcessGitEventRequest) Workspace(workspace map[string]interface{}) ApiProcessGitEventRequest {
-	r.workspace = &workspace
+func (r ApiProcessGitEventRequest) Body(body map[string]interface{}) ApiProcessGitEventRequest {
+	r.body = &body
 	return r
 }
 
@@ -545,8 +545,8 @@ func (a *PrebuildAPIService) ProcessGitEventExecute(r ApiProcessGitEventRequest)
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.workspace == nil {
-		return nil, reportError("workspace is required and must be specified")
+	if r.body == nil {
+		return nil, reportError("body is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -567,7 +567,7 @@ func (a *PrebuildAPIService) ProcessGitEventExecute(r ApiProcessGitEventRequest)
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = r.workspace
+	localVarPostBody = r.body
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {

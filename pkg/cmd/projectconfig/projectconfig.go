@@ -12,7 +12,7 @@ var ProjectConfigCmd = &cobra.Command{
 	Use:     "project-config",
 	Short:   "Manage project configs",
 	Aliases: []string{"pc"},
-	GroupID: util.WORKSPACE_GROUP,
+	GroupID: util.TARGET_GROUP,
 }
 
 func init() {

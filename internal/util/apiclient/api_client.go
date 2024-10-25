@@ -61,7 +61,7 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 		clientConfig.AddDefaultHeader(telemetry.ENABLED_HEADER, "true")
 		clientConfig.AddDefaultHeader(telemetry.SESSION_ID_HEADER, internal.SESSION_ID)
 		clientConfig.AddDefaultHeader(telemetry.CLIENT_ID_HEADER, config.GetClientId())
-		if internal.WorkspaceMode() {
+		if internal.AgentMode() {
 			clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, string(telemetry.CLI_PROJECT_SOURCE))
 		} else {
 			clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, string(telemetry.CLI_SOURCE))
@@ -115,7 +115,7 @@ func GetAgentApiClient(apiUrl, apiKey, clientId string, telemetryEnabled bool) (
 	return apiClient, nil
 }
 
-func GetWorkspace(workspaceNameOrId string, verbose bool) (*apiclient.WorkspaceDTO, error) {
+func GetTarget(targetNameOrId string, verbose bool) (*apiclient.TargetDTO, error) {
 	ctx := context.Background()
 
 	apiClient, err := GetApiClient(nil)
@@ -123,15 +123,15 @@ func GetWorkspace(workspaceNameOrId string, verbose bool) (*apiclient.WorkspaceD
 		return nil, err
 	}
 
-	workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceNameOrId).Verbose(verbose).Execute()
+	target, res, err := apiClient.TargetAPI.GetTarget(ctx, targetNameOrId).Verbose(verbose).Execute()
 	if err != nil {
 		return nil, HandleErrorResponse(res, err)
 	}
 
-	return workspace, nil
+	return target, nil
 }
 
-func GetFirstWorkspaceProjectName(workspaceId string, projectName string, profile *config.Profile) (string, error) {
+func GetFirstProjectName(targetId string, projectName string, profile *config.Profile) (string, error) {
 	ctx := context.Background()
 
 	apiClient, err := GetApiClient(profile)
@@ -139,24 +139,24 @@ func GetFirstWorkspaceProjectName(workspaceId string, projectName string, profil
 		return "", err
 	}
 
-	wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceId).Execute()
+	targetInfo, res, err := apiClient.TargetAPI.GetTarget(ctx, targetId).Execute()
 	if err != nil {
 		return "", HandleErrorResponse(res, err)
 	}
 
 	if projectName == "" {
-		if len(wsInfo.Projects) == 0 {
-			return "", errors.New("no projects found in workspace")
+		if len(targetInfo.Projects) == 0 {
+			return "", errors.New("no projects found in target")
 		}
 
-		return wsInfo.Projects[0].Name, nil
+		return targetInfo.Projects[0].Name, nil
 	}
 
-	for _, project := range wsInfo.Projects {
+	for _, project := range targetInfo.Projects {
 		if project.Name == projectName {
 			return project.Name, nil
 		}
 	}
 
-	return "", errors.New("project not found in workspace")
+	return "", errors.New("project not found in target")
 }

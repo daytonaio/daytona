@@ -12,7 +12,7 @@ var PrebuildCmd = &cobra.Command{
 	Use:     "prebuild",
 	Aliases: []string{"pb", "prebuilds"},
 	Short:   "Manage prebuilds",
-	GroupID: util.WORKSPACE_GROUP,
+	GroupID: util.TARGET_GROUP,
 }
 
 func init() {

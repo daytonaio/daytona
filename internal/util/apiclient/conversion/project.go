@@ -7,10 +7,10 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	pc_dto "github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
-	project_dto "github.com/daytonaio/daytona/pkg/server/workspaces/dto"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
-	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
-	"github.com/daytonaio/daytona/pkg/workspace/project/config"
+	project_dto "github.com/daytonaio/daytona/pkg/server/targets/dto"
+	"github.com/daytonaio/daytona/pkg/target/project"
+	"github.com/daytonaio/daytona/pkg/target/project/buildconfig"
+	"github.com/daytonaio/daytona/pkg/target/project/config"
 )
 
 func ToProject(projectDTO *apiclient.Project) *project.Project {
@@ -56,7 +56,7 @@ func ToProject(projectDTO *apiclient.Project) *project.Project {
 		BuildConfig:         projectBuild,
 		Repository:          repository,
 		TargetConfig:        projectDTO.TargetConfig,
-		WorkspaceId:         projectDTO.WorkspaceId,
+		TargetId:            projectDTO.TargetId,
 		State:               projectState,
 		GitProviderConfigId: projectDTO.GitProviderConfigId,
 	}
