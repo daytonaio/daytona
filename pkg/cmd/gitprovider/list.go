@@ -9,10 +9,8 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
-	"github.com/daytonaio/daytona/pkg/views"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
 	"github.com/daytonaio/daytona/pkg/views/gitprovider/list"
-	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 )
 
@@ -31,14 +29,8 @@ var gitProviderListCmd = &cobra.Command{
 			return apiclient.HandleErrorResponse(res, err)
 		}
 
-		if len(gitProviders) == 0 {
-			message := "No git providers registered. Add a new git provider by preparing a Personal Access Token and running 'daytona git-providers add'"
-			views.RenderInfoMessage(views_util.WrapText(message, views_util.GetTerminalWidth()))
-			return nil
-		}
-
 		supportedProviders := config.GetSupportedGitProviders()
-		var gitProviderViewList []gitprovider_view.GitProviderView
+		gitProviderViewList := []gitprovider_view.GitProviderView{}
 
 		for _, gitProvider := range gitProviders {
 			for _, supportedProvider := range supportedProviders {

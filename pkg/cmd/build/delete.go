@@ -9,6 +9,7 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
 )
@@ -51,6 +52,11 @@ var buildDeleteCmd = &cobra.Command{
 			buildList, res, err := apiClient.BuildAPI.ListBuilds(ctx).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
+			}
+
+			if len(buildList) == 0 {
+				views_util.NotifyEmptyBuildList(false)
+				return nil
 			}
 
 			build := selection.GetBuildFromPrompt(buildList, "Delete")

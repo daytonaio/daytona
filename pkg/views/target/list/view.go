@@ -10,6 +10,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/util"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 )
 
 type rowData struct {
@@ -20,6 +21,11 @@ type rowData struct {
 }
 
 func ListTargets(targetList []apiclient.ProviderTarget) {
+	if len(targetList) == 0 {
+		views_util.NotifyEmptyTargetList(true)
+		return
+	}
+
 	sortTargets(&targetList)
 
 	data := [][]string{}

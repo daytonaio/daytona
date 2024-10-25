@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	target_view "github.com/daytonaio/daytona/pkg/views/target"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 )
 
@@ -32,6 +33,11 @@ var targetSetDefaultCmd = &cobra.Command{
 			targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
+			}
+
+			if len(targetList) == 0 {
+				views_util.NotifyEmptyTargetList(true)
+				return nil
 			}
 
 			c, err := config.GetConfig()

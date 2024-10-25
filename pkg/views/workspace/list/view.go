@@ -25,6 +25,11 @@ type RowData struct {
 }
 
 func ListWorkspaces(workspaceList []apiclient.WorkspaceDTO, specifyGitProviders bool, verbose bool, activeProfileName string) {
+	if len(workspaceList) == 0 {
+		views_util.NotifyEmptyWorkspaceList(true)
+		return
+	}
+
 	SortWorkspaces(&workspaceList, verbose)
 
 	headers := []string{"Workspace", "Repository", "Target", "Status", "Created", "Branch"}

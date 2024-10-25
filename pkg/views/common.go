@@ -52,8 +52,8 @@ func RenderMainTitle(title string) {
 	fmt.Println(lipgloss.NewStyle().Foreground(Green).Bold(true).Padding(1, 0, 1, 0).Render(title))
 }
 
-func RenderLine(message string) {
-	fmt.Println(lipgloss.NewStyle().PaddingLeft(1).Render(message))
+func RenderTip(message string) {
+	fmt.Println(lipgloss.NewStyle().Padding(0, 0, 1, 1).Render(message))
 }
 
 func RenderInfoMessage(message string) {
