@@ -8,10 +8,10 @@ import (
 
 	git_provider_mock "github.com/daytonaio/daytona/internal/testing/gitprovider/mocks"
 	projectconfig_internal "github.com/daytonaio/daytona/internal/testing/server/projectconfig"
-	"github.com/daytonaio/daytona/internal/testing/server/workspaces/mocks"
+	"github.com/daytonaio/daytona/internal/testing/server/targets/mocks"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/server/projectconfig"
-	"github.com/daytonaio/daytona/pkg/workspace/project/config"
+	"github.com/daytonaio/daytona/pkg/target/project/config"
 	"github.com/stretchr/testify/suite"
 )
 

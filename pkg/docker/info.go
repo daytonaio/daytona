@@ -8,32 +8,32 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/target/project"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 )
 
 const ContainerNotFoundMetadata = "{\"state\": \"container not found\"}"
-const WorkspaceMetadataFormat = "{\"networkId\": \"%s\"}"
+const TargetMetadataFormat = "{\"networkId\": \"%s\"}"
 
-func (d *DockerClient) GetWorkspaceInfo(ws *workspace.Workspace) (*workspace.WorkspaceInfo, error) {
-	workspaceInfo := &workspace.WorkspaceInfo{
-		Name:             ws.Name,
-		ProviderMetadata: fmt.Sprintf(WorkspaceMetadataFormat, ws.Id),
+func (d *DockerClient) GetTargetInfo(t *target.Target) (*target.TargetInfo, error) {
+	targetInfo := &target.TargetInfo{
+		Name:             t.Name,
+		ProviderMetadata: fmt.Sprintf(TargetMetadataFormat, t.Id),
 	}
 
 	projectInfos := []*project.ProjectInfo{}
-	for _, project := range ws.Projects {
+	for _, project := range t.Projects {
 		projectInfo, err := d.GetProjectInfo(project)
 		if err != nil {
 			return nil, err
 		}
 		projectInfos = append(projectInfos, projectInfo)
 	}
-	workspaceInfo.Projects = projectInfos
+	targetInfo.Projects = projectInfos
 
-	return workspaceInfo, nil
+	return targetInfo, nil
 }
 
 func (d *DockerClient) GetProjectInfo(p *project.Project) (*project.ProjectInfo, error) {

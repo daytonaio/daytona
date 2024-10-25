@@ -16,17 +16,17 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var workspaceLogsStarted bool
+var targetLogsStarted bool
 
-func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, workspaceId string, projectNames []string, follow, showWorkspaceLogs bool, from *time.Time) {
+func ReadTargetLogs(ctx context.Context, activeProfile config.Profile, targetId string, projectNames []string, follow, showTargetLogs bool, from *time.Time) {
 	var wg sync.WaitGroup
 	query := ""
 	if follow {
 		query = "follow=true"
 	}
 
-	if !showWorkspaceLogs {
-		workspaceLogsStarted = true
+	if !showTargetLogs {
+		targetLogsStarted = true
 	}
 	logs_view.CalculateLongestPrefixLength(projectNames)
 
@@ -36,13 +36,13 @@ func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, worksp
 			defer wg.Done()
 
 			for {
-				// Make sure workspace logs started before showing any project logs
-				if !workspaceLogsStarted {
+				// Make sure target logs started before showing any project logs
+				if !targetLogsStarted {
 					time.Sleep(250 * time.Millisecond)
 					continue
 				}
 
-				ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/workspace/%s/%s", workspaceId, projectName), &activeProfile, &query)
+				ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/target/%s/%s", targetId, projectName), &activeProfile, &query)
 				// We want to retry getting the logs if it fails
 				if err != nil {
 					log.Trace(HandleErrorResponse(res, err))
@@ -57,9 +57,9 @@ func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, worksp
 		}(projectName, from)
 	}
 
-	if showWorkspaceLogs {
+	if showTargetLogs {
 		for {
-			ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/workspace/%s", workspaceId), &activeProfile, &query)
+			ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/target/%s", targetId), &activeProfile, &query)
 			// We want to retry getting the logs if it fails
 			if err != nil {
 				log.Trace(HandleErrorResponse(res, err))
@@ -148,8 +148,8 @@ func readJSONLog(ctx context.Context, ws *websocket.Conn, index int, from *time.
 			}
 		}
 
-		if !workspaceLogsStarted && index == logs_view.STATIC_INDEX {
-			workspaceLogsStarted = true
+		if !targetLogsStarted && index == logs_view.STATIC_INDEX {
+			targetLogsStarted = true
 		}
 	}
 }

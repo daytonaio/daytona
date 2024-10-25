@@ -133,8 +133,8 @@ func ReadServerLog(ginCtx *gin.Context) {
 	readLog(ginCtx, reader, util.ReadLog, writeToWs)
 }
 
-func ReadWorkspaceLog(ginCtx *gin.Context) {
-	workspaceId := ginCtx.Param("workspaceId")
+func ReadTargetLog(ginCtx *gin.Context) {
+	targetId := ginCtx.Param("targetId")
 	retryQuery := ginCtx.DefaultQuery("retry", "true")
 	retry := retryQuery == "true"
 
@@ -142,7 +142,7 @@ func ReadWorkspaceLog(ginCtx *gin.Context) {
 
 	if retry {
 		for {
-			wsLogReader, err := server.WorkspaceService.GetWorkspaceLogReader(workspaceId)
+			wsLogReader, err := server.TargetService.GetTargetLogReader(targetId)
 			if err == nil {
 				readLog(ginCtx, wsLogReader, util.ReadJSONLog, writeJSONToWs)
 				return
@@ -151,7 +151,7 @@ func ReadWorkspaceLog(ginCtx *gin.Context) {
 		}
 	}
 
-	wsLogReader, err := server.WorkspaceService.GetWorkspaceLogReader(workspaceId)
+	wsLogReader, err := server.TargetService.GetTargetLogReader(targetId)
 	if err != nil {
 		ginCtx.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -161,7 +161,7 @@ func ReadWorkspaceLog(ginCtx *gin.Context) {
 }
 
 func ReadProjectLog(ginCtx *gin.Context) {
-	workspaceId := ginCtx.Param("workspaceId")
+	targetId := ginCtx.Param("targetId")
 	projectName := ginCtx.Param("projectName")
 	retryQuery := ginCtx.DefaultQuery("retry", "true")
 	retry := retryQuery == "true"
@@ -170,7 +170,7 @@ func ReadProjectLog(ginCtx *gin.Context) {
 
 	if retry {
 		for {
-			projectLogReader, err := server.WorkspaceService.GetProjectLogReader(workspaceId, projectName)
+			projectLogReader, err := server.TargetService.GetProjectLogReader(targetId, projectName)
 			if err == nil {
 				readLog(ginCtx, projectLogReader, util.ReadJSONLog, writeJSONToWs)
 				return
@@ -179,7 +179,7 @@ func ReadProjectLog(ginCtx *gin.Context) {
 		}
 	}
 
-	projectLogReader, err := server.WorkspaceService.GetProjectLogReader(workspaceId, projectName)
+	projectLogReader, err := server.TargetService.GetProjectLogReader(targetId, projectName)
 	if err != nil {
 		ginCtx.AbortWithError(http.StatusInternalServerError, err)
 		return

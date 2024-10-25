@@ -5,19 +5,19 @@ package provisioner
 
 import (
 	"github.com/daytonaio/daytona/pkg/provider"
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/target/project"
 )
 
-func (p *Provisioner) DestroyWorkspace(workspace *workspace.Workspace, targetConfig *provider.TargetConfig) error {
+func (p *Provisioner) DestroyTarget(target *target.Target, targetConfig *provider.TargetConfig) error {
 	targetProvider, err := p.providerManager.GetProvider(targetConfig.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
-	_, err = (*targetProvider).DestroyWorkspace(&provider.WorkspaceRequest{
+	_, err = (*targetProvider).DestroyTarget(&provider.TargetRequest{
 		TargetConfigOptions: targetConfig.Options,
-		Workspace:           workspace,
+		Target:              target,
 	})
 
 	return err

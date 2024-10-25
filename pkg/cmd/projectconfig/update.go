@@ -11,9 +11,9 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	"github.com/daytonaio/daytona/pkg/views/target/create"
+	"github.com/daytonaio/daytona/pkg/views/target/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
-	"github.com/daytonaio/daytona/pkg/views/workspace/create"
-	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
 )
 

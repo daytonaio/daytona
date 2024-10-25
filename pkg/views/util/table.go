@@ -16,7 +16,7 @@ import (
 
 var AdditionalPropertyPadding = "  "
 
-// Left border, BaseTableStyle padding left, additional padding for workspace name and target config, BaseTableStyle padding right, BaseCellStyle padding right, right border
+// Left border, BaseTableStyle padding left, additional padding for target name and target config, BaseTableStyle padding right, BaseCellStyle padding right, right border
 var RowWhiteSpace = 1 + 4 + len(AdditionalPropertyPadding)*2 + 4 + 4 + 1
 var ArbitrarySpace = 10
 

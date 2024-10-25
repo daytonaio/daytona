@@ -9,7 +9,7 @@ daytona target-config remove [CONFIG_NAME] [flags]
 ### Options
 
 ```
-  -y, --yes   Confirm deletion of all workspaces without prompt
+  -y, --yes   Confirm deletion of all targets without prompt
 ```
 
 ### Options inherited from parent commands
