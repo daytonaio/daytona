@@ -4,7 +4,7 @@
 package util
 
 const (
-	WORKSPACE_GROUP = "workspace"
-	SERVER_GROUP    = "server"
-	PROFILE_GROUP   = "profile"
+	TARGET_GROUP  = "target"
+	SERVER_GROUP  = "server"
+	PROFILE_GROUP = "profile"
 )

@@ -3,7 +3,7 @@
 SSH into a project using the terminal
 
 ```
-daytona ssh [WORKSPACE] [PROJECT] [CMD...] [flags]
+daytona ssh [TARGET] [PROJECT] [CMD...] [flags]
 ```
 
 ### Options

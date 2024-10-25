@@ -1,5 +1,5 @@
 name: daytona create
-synopsis: Create a workspace
+synopsis: Create a target
 usage: daytona create [REPOSITORY_URL | PROJECT_CONFIG_NAME]... [flags]
 options:
     - name: blank
@@ -34,14 +34,13 @@ options:
       usage: Manually enter the Git repository
     - name: multi-project
       default_value: "false"
-      usage: Workspace with multiple projects/repos
+      usage: Target with multiple projects/repos
     - name: name
-      usage: Specify the workspace name
+      usage: Specify the target name
     - name: no-ide
       shorthand: "n"
       default_value: "false"
-      usage: |
-        Do not open the workspace in the IDE after workspace creation
+      usage: Do not open the target in the IDE after target creation
     - name: target
       shorthand: t
       usage: Specify the target (e.g. 'local')

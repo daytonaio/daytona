@@ -9,7 +9,7 @@ import (
 	t_build "github.com/daytonaio/daytona/internal/testing/build"
 	git_mocks "github.com/daytonaio/daytona/internal/testing/git/mocks"
 	logger_mocks "github.com/daytonaio/daytona/internal/testing/logger/mocks"
-	"github.com/daytonaio/daytona/internal/testing/server/workspaces/mocks"
+	"github.com/daytonaio/daytona/internal/testing/server/targets/mocks"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/build"
 	t_gitprovider "github.com/daytonaio/daytona/pkg/build/mocks"

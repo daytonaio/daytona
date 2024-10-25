@@ -292,7 +292,7 @@ Name | Type | Description  | Notes
 
 ## ProcessGitEvent
 
-> ProcessGitEvent(ctx).Workspace(workspace).Execute()
+> ProcessGitEvent(ctx).Body(body).Execute()
 
 ProcessGitEvent
 
@@ -311,11 +311,11 @@ import (
 )
 
 func main() {
-	workspace := map[string]interface{}{ ... } // map[string]interface{} | Webhook event
+	body := map[string]interface{}{ ... } // map[string]interface{} | Webhook event
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.PrebuildAPI.ProcessGitEvent(context.Background()).Workspace(workspace).Execute()
+	r, err := apiClient.PrebuildAPI.ProcessGitEvent(context.Background()).Body(body).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `PrebuildAPI.ProcessGitEvent``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -334,7 +334,7 @@ Other parameters are passed through a pointer to a apiProcessGitEventRequest str
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **workspace** | **map[string]interface{}** | Webhook event | 
+ **body** | **map[string]interface{}** | Webhook event | 
 
 ### Return type
 

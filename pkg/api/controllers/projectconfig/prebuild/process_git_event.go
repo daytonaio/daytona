@@ -17,7 +17,7 @@ import (
 //	@Tags			prebuild
 //	@Summary		ProcessGitEvent
 //	@Description	ProcessGitEvent
-//	@Param			workspace	body	interface{}	true	"Webhook event"
+//	@Param			body	body	interface{}	true	"Webhook event"
 //	@Success		200
 //	@Router			/project-config/prebuild/process-git-event [post]
 //

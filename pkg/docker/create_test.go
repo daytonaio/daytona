@@ -23,13 +23,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func (s *DockerClientTestSuite) TestCreateWorkspace() {
-	workspaceDir := s.T().TempDir()
+func (s *DockerClientTestSuite) TestCreateTarget() {
+	targetDir := s.T().TempDir()
 
-	err := s.dockerClient.CreateWorkspace(workspace1, workspaceDir, nil, nil)
+	err := s.dockerClient.CreateTarget(target1, targetDir, nil, nil)
 	require.Nil(s.T(), err)
 
-	_, err = os.Stat(workspaceDir)
+	_, err = os.Stat(targetDir)
 	require.Nil(s.T(), err)
 }
 
@@ -80,7 +80,7 @@ func (s *DockerClientTestSuite) TestCreateProject() {
 				Target: "/workdir",
 			},
 		},
-	}, networkingConfig, platform, fmt.Sprintf("git-clone-%s-%s", project1.WorkspaceId, project1.Name),
+	}, networkingConfig, platform, fmt.Sprintf("git-clone-%s-%s", project1.TargetId, project1.Name),
 	).Return(container.CreateResponse{ID: "123"}, nil)
 	s.mockClient.On("ContainerCreate", mock.Anything, docker.GetContainerCreateConfig(project1, nil),
 		&container.HostConfig{

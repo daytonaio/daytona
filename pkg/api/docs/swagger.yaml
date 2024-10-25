@@ -256,7 +256,7 @@ definitions:
     - options
     - providerInfo
     type: object
-  CreateWorkspaceDTO:
+  CreateTargetDTO:
     properties:
       id:
         type: string
@@ -837,9 +837,9 @@ definitions:
         $ref: '#/definitions/ProjectState'
       targetConfig:
         type: string
-      user:
+      targetId:
         type: string
-      workspaceId:
+      user:
         type: string
     required:
     - envVars
@@ -847,8 +847,8 @@ definitions:
     - name
     - repository
     - targetConfig
+    - targetId
     - user
-    - workspaceId
     type: object
   ProjectConfig:
     properties:
@@ -897,13 +897,13 @@ definitions:
         type: string
       providerMetadata:
         type: string
-      workspaceId:
+      targetId:
         type: string
     required:
     - created
     - isRunning
     - name
-    - workspaceId
+    - targetId
     type: object
   ProjectState:
     properties:
@@ -1123,6 +1123,24 @@ definitions:
     - Renamed
     - Copied
     - UpdatedButUnmerged
+  Target:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      projects:
+        items:
+          $ref: '#/definitions/Project'
+        type: array
+      targetConfig:
+        type: string
+    required:
+    - id
+    - name
+    - projects
+    - targetConfig
+    type: object
   TargetConfig:
     properties:
       isDefault:
@@ -1176,30 +1194,12 @@ definitions:
       type:
         $ref: '#/definitions/provider.TargetConfigPropertyType'
     type: object
-  Workspace:
-    properties:
-      id:
-        type: string
-      name:
-        type: string
-      projects:
-        items:
-          $ref: '#/definitions/Project'
-        type: array
-      targetConfig:
-        type: string
-    required:
-    - id
-    - name
-    - projects
-    - targetConfig
-    type: object
-  WorkspaceDTO:
+  TargetDTO:
     properties:
       id:
         type: string
       info:
-        $ref: '#/definitions/WorkspaceInfo'
+        $ref: '#/definitions/TargetInfo'
       name:
         type: string
       projects:
@@ -1214,7 +1214,7 @@ definitions:
     - projects
     - targetConfig
     type: object
-  WorkspaceInfo:
+  TargetInfo:
     properties:
       name:
         type: string
@@ -1232,12 +1232,12 @@ definitions:
     enum:
     - client
     - project
-    - workspace
+    - target
     type: string
     x-enum-varnames:
     - ApiKeyTypeClient
     - ApiKeyTypeProject
-    - ApiKeyTypeWorkspace
+    - ApiKeyTypeTarget
   build.BuildState:
     enum:
     - pending-run
@@ -2130,7 +2130,7 @@ paths:
       parameters:
       - description: Webhook event
         in: body
-        name: workspace
+        name: body
         required: true
         schema:
           type: object
@@ -2293,6 +2293,47 @@ paths:
       summary: Generate a new authentication key
       tags:
       - server
+  /target:
+    get:
+      description: List targets
+      operationId: ListTargets
+      parameters:
+      - description: Verbose
+        in: query
+        name: verbose
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/TargetDTO'
+            type: array
+      summary: List targets
+      tags:
+      - target
+    post:
+      description: Create a target
+      operationId: CreateTarget
+      parameters:
+      - description: Create target
+        in: body
+        name: target
+        required: true
+        schema:
+          $ref: '#/definitions/CreateTargetDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Target'
+      summary: Create a target
+      tags:
+      - target
   /target-config:
     get:
       description: List target configs
@@ -2357,55 +2398,14 @@ paths:
       summary: Set target config to default
       tags:
       - target-config
-  /workspace:
-    get:
-      description: List workspaces
-      operationId: ListWorkspaces
-      parameters:
-      - description: Verbose
-        in: query
-        name: verbose
-        type: boolean
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/WorkspaceDTO'
-            type: array
-      summary: List workspaces
-      tags:
-      - workspace
-    post:
-      description: Create a workspace
-      operationId: CreateWorkspace
-      parameters:
-      - description: Create workspace
-        in: body
-        name: workspace
-        required: true
-        schema:
-          $ref: '#/definitions/CreateWorkspaceDTO'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/Workspace'
-      summary: Create a workspace
-      tags:
-      - workspace
-  /workspace/{workspaceId}:
+  /target/{targetId}:
     delete:
-      description: Remove workspace
-      operationId: RemoveWorkspace
+      description: Remove target
+      operationId: RemoveTarget
       parameters:
-      - description: Workspace ID
+      - description: Target ID
         in: path
-        name: workspaceId
+        name: targetId
         required: true
         type: string
       - description: Force
@@ -2415,16 +2415,16 @@ paths:
       responses:
         "200":
           description: OK
-      summary: Remove workspace
+      summary: Remove target
       tags:
-      - workspace
+      - target
     get:
-      description: Get workspace info
-      operationId: GetWorkspace
+      description: Get target info
+      operationId: GetTarget
       parameters:
-      - description: Workspace ID or Name
+      - description: Target ID or Name
         in: path
-        name: workspaceId
+        name: targetId
         required: true
         type: string
       - description: Verbose
@@ -2437,18 +2437,18 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/WorkspaceDTO'
-      summary: Get workspace info
+            $ref: '#/definitions/TargetDTO'
+      summary: Get target info
       tags:
-      - workspace
-  /workspace/{workspaceId}/{projectId}/start:
+      - target
+  /target/{targetId}/{projectId}/start:
     post:
       description: Start project
       operationId: StartProject
       parameters:
-      - description: Workspace ID or Name
+      - description: Target ID or Name
         in: path
-        name: workspaceId
+        name: targetId
         required: true
         type: string
       - description: Project ID
@@ -2461,15 +2461,15 @@ paths:
           description: OK
       summary: Start project
       tags:
-      - workspace
-  /workspace/{workspaceId}/{projectId}/state:
+      - target
+  /target/{targetId}/{projectId}/state:
     post:
       description: Set project state
       operationId: SetProjectState
       parameters:
-      - description: Workspace ID or Name
+      - description: Target ID or Name
         in: path
-        name: workspaceId
+        name: targetId
         required: true
         type: string
       - description: Project ID
@@ -2488,15 +2488,15 @@ paths:
           description: OK
       summary: Set project state
       tags:
-      - workspace
-  /workspace/{workspaceId}/{projectId}/stop:
+      - target
+  /target/{targetId}/{projectId}/stop:
     post:
       description: Stop project
       operationId: StopProject
       parameters:
-      - description: Workspace ID or Name
+      - description: Target ID or Name
         in: path
-        name: workspaceId
+        name: targetId
         required: true
         type: string
       - description: Project ID
@@ -2509,7 +2509,39 @@ paths:
           description: OK
       summary: Stop project
       tags:
-      - workspace
+      - target
+  /target/{targetId}/start:
+    post:
+      description: Start target
+      operationId: StartTarget
+      parameters:
+      - description: Target ID or Name
+        in: path
+        name: targetId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Start target
+      tags:
+      - target
+  /target/{targetId}/stop:
+    post:
+      description: Stop target
+      operationId: StopTarget
+      parameters:
+      - description: Target ID or Name
+        in: path
+        name: targetId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Stop target
+      tags:
+      - target
   /workspace/{workspaceId}/{projectId}/toolbox/files:
     delete:
       description: Delete file inside workspace project
@@ -3584,38 +3616,6 @@ paths:
       summary: Get project dir
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/start:
-    post:
-      description: Start workspace
-      operationId: StartWorkspace
-      parameters:
-      - description: Workspace ID or Name
-        in: path
-        name: workspaceId
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-      summary: Start workspace
-      tags:
-      - workspace
-  /workspace/{workspaceId}/stop:
-    post:
-      description: Stop workspace
-      operationId: StopWorkspace
-      parameters:
-      - description: Workspace ID or Name
-        in: path
-        name: workspaceId
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-      summary: Stop workspace
-      tags:
-      - workspace
 schemes:
 - http
 security:

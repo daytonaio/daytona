@@ -1,16 +1,16 @@
 ## daytona delete
 
-Delete a workspace
+Delete a target
 
 ```
-daytona delete [WORKSPACE] [flags]
+daytona delete [TARGET] [flags]
 ```
 
 ### Options
 
 ```
-  -a, --all     Delete all workspaces
-  -f, --force   Delete a workspace by force
+  -a, --all     Delete all targets
+  -f, --force   Delete a target by force
   -y, --yes     Confirm deletion without prompt
 ```
 

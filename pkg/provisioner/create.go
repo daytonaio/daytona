@@ -5,18 +5,18 @@ package provisioner
 
 import (
 	"github.com/daytonaio/daytona/pkg/provider"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/target"
 )
 
-func (p *Provisioner) CreateWorkspace(workspace *workspace.Workspace, targetConfig *provider.TargetConfig) error {
+func (p *Provisioner) CreateTarget(target *target.Target, targetConfig *provider.TargetConfig) error {
 	targetProvider, err := p.providerManager.GetProvider(targetConfig.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
-	_, err = (*targetProvider).CreateWorkspace(&provider.WorkspaceRequest{
+	_, err = (*targetProvider).CreateTarget(&provider.TargetRequest{
 		TargetConfigOptions: targetConfig.Options,
-		Workspace:           workspace,
+		Target:              target,
 	})
 
 	return err

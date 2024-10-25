@@ -12,13 +12,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func (s *DockerClientTestSuite) TestDestroyWorkspace() {
-	workspaceDir := s.T().TempDir()
+func (s *DockerClientTestSuite) TestDestroyTarget() {
+	targetDir := s.T().TempDir()
 
-	err := s.dockerClient.DestroyWorkspace(workspace1, workspaceDir, nil)
+	err := s.dockerClient.DestroyTarget(target1, targetDir, nil)
 	require.Nil(s.T(), err)
 
-	_, err = os.Stat(workspaceDir)
+	_, err = os.Stat(targetDir)
 	require.True(s.T(), os.IsNotExist(err))
 }
 
