@@ -19,7 +19,7 @@ import (
 	agent_config "github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/target/project"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	log "github.com/sirupsen/logrus"
 )
@@ -165,12 +165,12 @@ func (a *Agent) getProject() (*project.Project, error) {
 		return nil, err
 	}
 
-	workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, a.Config.WorkspaceId).Execute()
+	target, res, err := apiClient.TargetAPI.GetTarget(ctx, a.Config.TargetId).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	for _, project := range workspace.Projects {
+	for _, project := range target.Projects {
 		if project.Name == a.Config.ProjectName {
 			return conversion.ToProject(&project), nil
 		}
@@ -264,7 +264,7 @@ func (a *Agent) updateProjectState() error {
 	}
 
 	uptime := a.uptime()
-	res, err := apiClient.WorkspaceAPI.SetProjectState(context.Background(), a.Config.WorkspaceId, a.Config.ProjectName).SetState(apiclient.SetProjectState{
+	res, err := apiClient.TargetAPI.SetProjectState(context.Background(), a.Config.TargetId, a.Config.ProjectName).SetState(apiclient.SetProjectState{
 		Uptime:    uptime,
 		GitStatus: conversion.ToGitStatusDTO(gitStatus),
 	}).Execute()

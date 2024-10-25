@@ -45,8 +45,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/provider"
 	"github.com/daytonaio/daytona/pkg/api/controllers/sample"
 	"github.com/daytonaio/daytona/pkg/api/controllers/server"
+	"github.com/daytonaio/daytona/pkg/api/controllers/target"
 	"github.com/daytonaio/daytona/pkg/api/controllers/targetconfig"
-	"github.com/daytonaio/daytona/pkg/api/controllers/workspace"
 	"github.com/daytonaio/daytona/pkg/api/controllers/workspace/toolbox"
 
 	"github.com/gin-gonic/gin"
@@ -140,18 +140,9 @@ func (a *ApiServer) Start() error {
 		binaryController.GET("/:version/:binaryName", binary.GetBinary)
 	}
 
-	workspaceController := protected.Group("/workspace")
+	targetController := protected.Group("/target")
 	{
-		workspaceController.GET("/:workspaceId", workspace.GetWorkspace)
-		workspaceController.GET("", workspace.ListWorkspaces)
-		workspaceController.POST("", workspace.CreateWorkspace)
-		workspaceController.POST("/:workspaceId/start", workspace.StartWorkspace)
-		workspaceController.POST("/:workspaceId/stop", workspace.StopWorkspace)
-		workspaceController.DELETE("/:workspaceId", workspace.RemoveWorkspace)
-		workspaceController.POST("/:workspaceId/:projectId/start", workspace.StartProject)
-		workspaceController.POST("/:workspaceId/:projectId/stop", workspace.StopProject)
-
-		toolboxController := workspaceController.Group("/:workspaceId/:projectId/toolbox")
+		toolboxController := targetController.Group("/:targetId/:projectId/toolbox")
 		{
 			toolboxController.GET("/project-dir", toolbox.GetProjectDir)
 
@@ -212,6 +203,15 @@ func (a *ApiServer) Start() error {
 				lspController.POST("/stop", toolbox.LspStop)
 			}
 		}
+
+		targetController.GET("/:targetId", target.GetTarget)
+		targetController.GET("", target.ListTargets)
+		targetController.POST("", target.CreateTarget)
+		targetController.POST("/:targetId/start", target.StartTarget)
+		targetController.POST("/:targetId/stop", target.StopTarget)
+		targetController.DELETE("/:targetId", target.RemoveTarget)
+		targetController.POST("/:targetId/:projectId/start", target.StartProject)
+		targetController.POST("/:targetId/:projectId/stop", target.StopProject)
 	}
 
 	projectConfigController := protected.Group("/project-config")
@@ -279,8 +279,8 @@ func (a *ApiServer) Start() error {
 	logController := protected.Group("/log")
 	{
 		logController.GET("/server", log_controller.ReadServerLog)
-		logController.GET("/workspace/:workspaceId", log_controller.ReadWorkspaceLog)
-		logController.GET("/workspace/:workspaceId/:projectName", log_controller.ReadProjectLog)
+		logController.GET("/target/:targetId", log_controller.ReadTargetLog)
+		logController.GET("/target/:targetId/:projectName", log_controller.ReadProjectLog)
 		logController.GET("/build/:buildId", log_controller.ReadBuildLog)
 	}
 
@@ -323,7 +323,7 @@ func (a *ApiServer) Start() error {
 	projectGroup := protected.Group("/")
 	projectGroup.Use(middlewares.ProjectAuthMiddleware())
 	{
-		projectGroup.POST(workspaceController.BasePath()+"/:workspaceId/:projectId/state", workspace.SetProjectState)
+		projectGroup.POST(targetController.BasePath()+"/:targetId/:projectId/state", target.SetProjectState)
 	}
 
 	a.httpServer = &http.Server{

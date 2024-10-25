@@ -28,7 +28,7 @@ func (s *Server) Purge(ctx context.Context, force bool) []error {
 		}
 	}
 
-	fmt.Println("Deleting all workspaces...")
+	fmt.Println("Deleting all targets...")
 
 	err := server.Start()
 	if err != nil {
@@ -36,7 +36,7 @@ func (s *Server) Purge(ctx context.Context, force bool) []error {
 		return []error{err}
 	}
 
-	workspaces, err := s.WorkspaceService.ListWorkspaces(ctx, false)
+	targets, err := s.TargetService.ListTargets(ctx, false)
 	if err != nil {
 		s.trackPurgeError(ctx, force, err)
 		if !force {
@@ -45,21 +45,21 @@ func (s *Server) Purge(ctx context.Context, force bool) []error {
 	}
 
 	if err == nil {
-		for _, workspace := range workspaces {
-			err := s.WorkspaceService.RemoveWorkspace(ctx, workspace.Id)
+		for _, target := range targets {
+			err := s.TargetService.RemoveTarget(ctx, target.Id)
 			if err != nil {
 				s.trackPurgeError(ctx, force, err)
 				if !force {
 					return []error{err}
 				} else {
-					fmt.Printf("Failed to delete %s: %v\n", workspace.Name, err)
+					fmt.Printf("Failed to delete %s: %v\n", target.Name, err)
 				}
 			} else {
-				fmt.Printf("Workspace %s deleted\n", workspace.Name)
+				fmt.Printf("Target %s deleted\n", target.Name)
 			}
 		}
 	} else {
-		fmt.Printf("Failed to list workspaces: %v\n", err)
+		fmt.Printf("Failed to list targets: %v\n", err)
 	}
 
 	fmt.Println("Purging providers...")

@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/pkg/docker"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/stretchr/testify/mock"
@@ -44,15 +44,15 @@ func (s *DockerClientTestSuite) TestGetProjectInfo() {
 	require.Equal(s.T(), projectInfo.ProviderMetadata, metadata)
 }
 
-func (s *DockerClientTestSuite) TestGetWorkspaceInfo() {
-	workspaceWithoutProjects := &workspace.Workspace{
+func (s *DockerClientTestSuite) TestGetTargetInfo() {
+	targetWithoutProjects := &target.Target{
 		Id:           "123",
 		Name:         "test",
 		TargetConfig: "local",
 	}
 
-	wsInfo, err := s.dockerClient.GetWorkspaceInfo(workspaceWithoutProjects)
+	targetInfo, err := s.dockerClient.GetTargetInfo(targetWithoutProjects)
 	require.Nil(s.T(), err)
-	require.Equal(s.T(), wsInfo.Name, workspaceWithoutProjects.Name)
-	require.Equal(s.T(), wsInfo.ProviderMetadata, fmt.Sprintf(docker.WorkspaceMetadataFormat, workspaceWithoutProjects.Id))
+	require.Equal(s.T(), targetInfo.Name, targetWithoutProjects.Name)
+	require.Equal(s.T(), targetInfo.ProviderMetadata, fmt.Sprintf(docker.TargetMetadataFormat, targetWithoutProjects.Id))
 }

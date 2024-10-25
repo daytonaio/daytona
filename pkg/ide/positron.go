@@ -15,15 +15,15 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
-func OpenPositron(activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string, gpgkey string) error {
+func OpenPositron(activeProfile config.Profile, targetId string, projectName string, projectProviderMetadata string, gpgkey string) error {
 	path, err := GetPositronBinaryPath()
 	if err != nil {
 		return err
 	}
 
-	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
+	projectHostname := config.GetProjectHostname(activeProfile.Id, targetId, projectName)
 
-	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName, gpgkey)
+	projectDir, err := util.GetProjectDir(activeProfile, targetId, projectName, gpgkey)
 	if err != nil {
 		return err
 	}

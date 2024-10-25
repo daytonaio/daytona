@@ -1037,7 +1037,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "Webhook event",
-                        "name": "workspace",
+                        "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -1509,6 +1509,68 @@ const docTemplate = `{
                 }
             }
         },
+        "/target": {
+            "get": {
+                "description": "List targets",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "target"
+                ],
+                "summary": "List targets",
+                "operationId": "ListTargets",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Verbose",
+                        "name": "verbose",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/TargetDTO"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a target",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "target"
+                ],
+                "summary": "Create a target",
+                "operationId": "CreateTarget",
+                "parameters": [
+                    {
+                        "description": "Create target",
+                        "name": "target",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateTargetDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Target"
+                        }
+                    }
+                }
+            }
+        },
         "/target-config": {
             "get": {
                 "description": "List target configs",
@@ -1605,84 +1667,22 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace": {
+        "/target/{targetId}": {
             "get": {
-                "description": "List workspaces",
+                "description": "Get target info",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "workspace"
+                    "target"
                 ],
-                "summary": "List workspaces",
-                "operationId": "ListWorkspaces",
-                "parameters": [
-                    {
-                        "type": "boolean",
-                        "description": "Verbose",
-                        "name": "verbose",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/WorkspaceDTO"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a workspace",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "workspace"
-                ],
-                "summary": "Create a workspace",
-                "operationId": "CreateWorkspace",
-                "parameters": [
-                    {
-                        "description": "Create workspace",
-                        "name": "workspace",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/CreateWorkspaceDTO"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/Workspace"
-                        }
-                    }
-                }
-            }
-        },
-        "/workspace/{workspaceId}": {
-            "get": {
-                "description": "Get workspace info",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "workspace"
-                ],
-                "summary": "Get workspace info",
-                "operationId": "GetWorkspace",
+                "summary": "Get target info",
+                "operationId": "GetTarget",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workspace ID or Name",
-                        "name": "workspaceId",
+                        "description": "Target ID or Name",
+                        "name": "targetId",
                         "in": "path",
                         "required": true
                     },
@@ -1697,23 +1697,23 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/WorkspaceDTO"
+                            "$ref": "#/definitions/TargetDTO"
                         }
                     }
                 }
             },
             "delete": {
-                "description": "Remove workspace",
+                "description": "Remove target",
                 "tags": [
-                    "workspace"
+                    "target"
                 ],
-                "summary": "Remove workspace",
-                "operationId": "RemoveWorkspace",
+                "summary": "Remove target",
+                "operationId": "RemoveTarget",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workspace ID",
-                        "name": "workspaceId",
+                        "description": "Target ID",
+                        "name": "targetId",
                         "in": "path",
                         "required": true
                     },
@@ -1731,19 +1731,19 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/start": {
+        "/target/{targetId}/start": {
             "post": {
-                "description": "Start workspace",
+                "description": "Start target",
                 "tags": [
-                    "workspace"
+                    "target"
                 ],
-                "summary": "Start workspace",
-                "operationId": "StartWorkspace",
+                "summary": "Start target",
+                "operationId": "StartTarget",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workspace ID or Name",
-                        "name": "workspaceId",
+                        "description": "Target ID or Name",
+                        "name": "targetId",
                         "in": "path",
                         "required": true
                     }
@@ -1755,19 +1755,19 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/stop": {
+        "/target/{targetId}/stop": {
             "post": {
-                "description": "Stop workspace",
+                "description": "Stop target",
                 "tags": [
-                    "workspace"
+                    "target"
                 ],
-                "summary": "Stop workspace",
-                "operationId": "StopWorkspace",
+                "summary": "Stop target",
+                "operationId": "StopTarget",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workspace ID or Name",
-                        "name": "workspaceId",
+                        "description": "Target ID or Name",
+                        "name": "targetId",
                         "in": "path",
                         "required": true
                     }
@@ -1779,19 +1779,19 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/start": {
+        "/target/{targetId}/{projectId}/start": {
             "post": {
                 "description": "Start project",
                 "tags": [
-                    "workspace"
+                    "target"
                 ],
                 "summary": "Start project",
                 "operationId": "StartProject",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workspace ID or Name",
-                        "name": "workspaceId",
+                        "description": "Target ID or Name",
+                        "name": "targetId",
                         "in": "path",
                         "required": true
                     },
@@ -1810,19 +1810,19 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/state": {
+        "/target/{targetId}/{projectId}/state": {
             "post": {
                 "description": "Set project state",
                 "tags": [
-                    "workspace"
+                    "target"
                 ],
                 "summary": "Set project state",
                 "operationId": "SetProjectState",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workspace ID or Name",
-                        "name": "workspaceId",
+                        "description": "Target ID or Name",
+                        "name": "targetId",
                         "in": "path",
                         "required": true
                     },
@@ -1850,19 +1850,19 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/stop": {
+        "/target/{targetId}/{projectId}/stop": {
             "post": {
                 "description": "Stop project",
                 "tags": [
-                    "workspace"
+                    "target"
                 ],
                 "summary": "Stop project",
                 "operationId": "StopProject",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workspace ID or Name",
-                        "name": "workspaceId",
+                        "description": "Target ID or Name",
+                        "name": "targetId",
                         "in": "path",
                         "required": true
                     },
@@ -3832,7 +3832,7 @@ const docTemplate = `{
                 }
             }
         },
-        "CreateWorkspaceDTO": {
+        "CreateTargetDTO": {
             "type": "object",
             "required": [
                 "id",
@@ -4663,8 +4663,8 @@ const docTemplate = `{
                 "name",
                 "repository",
                 "targetConfig",
-                "user",
-                "workspaceId"
+                "targetId",
+                "user"
             ],
             "properties": {
                 "buildConfig": {
@@ -4694,10 +4694,10 @@ const docTemplate = `{
                 "targetConfig": {
                     "type": "string"
                 },
-                "user": {
+                "targetId": {
                     "type": "string"
                 },
-                "workspaceId": {
+                "user": {
                     "type": "string"
                 }
             }
@@ -4762,7 +4762,7 @@ const docTemplate = `{
                 "created",
                 "isRunning",
                 "name",
-                "workspaceId"
+                "targetId"
             ],
             "properties": {
                 "created": {
@@ -4777,7 +4777,7 @@ const docTemplate = `{
                 "providerMetadata": {
                     "type": "string"
                 },
-                "workspaceId": {
+                "targetId": {
                     "type": "string"
                 }
             }
@@ -5097,6 +5097,32 @@ const docTemplate = `{
                 "UpdatedButUnmerged"
             ]
         },
+        "Target": {
+            "type": "object",
+            "required": [
+                "id",
+                "name",
+                "projects",
+                "targetConfig"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Project"
+                    }
+                },
+                "targetConfig": {
+                    "type": "string"
+                }
+            }
+        },
         "TargetConfig": {
             "type": "object",
             "required": [
@@ -5164,33 +5190,7 @@ const docTemplate = `{
                 }
             }
         },
-        "Workspace": {
-            "type": "object",
-            "required": [
-                "id",
-                "name",
-                "projects",
-                "targetConfig"
-            ],
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "projects": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Project"
-                    }
-                },
-                "targetConfig": {
-                    "type": "string"
-                }
-            }
-        },
-        "WorkspaceDTO": {
+        "TargetDTO": {
             "type": "object",
             "required": [
                 "id",
@@ -5203,7 +5203,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "info": {
-                    "$ref": "#/definitions/WorkspaceInfo"
+                    "$ref": "#/definitions/TargetInfo"
                 },
                 "name": {
                     "type": "string"
@@ -5219,7 +5219,7 @@ const docTemplate = `{
                 }
             }
         },
-        "WorkspaceInfo": {
+        "TargetInfo": {
             "type": "object",
             "required": [
                 "name",
@@ -5245,12 +5245,12 @@ const docTemplate = `{
             "enum": [
                 "client",
                 "project",
-                "workspace"
+                "target"
             ],
             "x-enum-varnames": [
                 "ApiKeyTypeClient",
                 "ApiKeyTypeProject",
-                "ApiKeyTypeWorkspace"
+                "ApiKeyTypeTarget"
             ]
         },
         "build.BuildState": {

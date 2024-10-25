@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/pkg/ports"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/target/project"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/go-connections/nat"
@@ -48,7 +48,7 @@ func (d *DockerClient) initProjectContainer(opts *CreateProjectOptions, mountPro
 	var availablePort *uint16
 	var portBindings map[nat.Port][]nat.PortBinding
 
-	if opts.Project.Target == "local" {
+	if opts.Project.TargetConfig == "local" {
 		p, err := ports.GetAvailableEphemeralPort()
 		if err != nil {
 			log.Error(err)
@@ -114,9 +114,9 @@ func GetContainerCreateConfig(project *project.Project, toolboxApiHostPort *uint
 	}
 
 	labels := map[string]string{
-		"daytona.workspace.id":                     project.WorkspaceId,
-		"daytona.workspace.project.name":           project.Name,
-		"daytona.workspace.project.repository.url": project.Repository.Url,
+		"daytona.target.id":              project.TargetId,
+		"daytona.project.name":           project.Name,
+		"daytona.project.repository.url": project.Repository.Url,
 	}
 
 	if toolboxApiHostPort != nil {

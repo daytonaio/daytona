@@ -11,8 +11,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/ssh"
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/target/project"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
@@ -32,16 +32,16 @@ type CreateProjectOptions struct {
 
 type IDockerClient interface {
 	CreateProject(opts *CreateProjectOptions) error
-	CreateWorkspace(workspace *workspace.Workspace, workspaceDir string, logWriter io.Writer, sshClient *ssh.Client) error
+	CreateTarget(target *target.Target, targetDir string, logWriter io.Writer, sshClient *ssh.Client) error
 
 	DestroyProject(project *project.Project, projectDir string, sshClient *ssh.Client) error
-	DestroyWorkspace(workspace *workspace.Workspace, workspaceDir string, sshClient *ssh.Client) error
+	DestroyTarget(target *target.Target, targetDir string, sshClient *ssh.Client) error
 
 	StartProject(opts *CreateProjectOptions, daytonaDownloadUrl string) error
 	StopProject(project *project.Project, logWriter io.Writer) error
 
 	GetProjectInfo(project *project.Project) (*project.ProjectInfo, error)
-	GetWorkspaceInfo(ws *workspace.Workspace) (*workspace.WorkspaceInfo, error)
+	GetTargetInfo(ws *target.Target) (*target.TargetInfo, error)
 
 	GetProjectContainerName(project *project.Project) string
 	GetProjectVolumeName(project *project.Project) string
@@ -71,18 +71,18 @@ type DockerClient struct {
 
 func (d *DockerClient) GetProjectContainerName(project *project.Project) string {
 	containers, err := d.apiClient.ContainerList(context.Background(), container.ListOptions{
-		Filters: filters.NewArgs(filters.Arg("label", fmt.Sprintf("daytona.workspace.id=%s", project.WorkspaceId)), filters.Arg("label", fmt.Sprintf("daytona.project.name=%s", project.Name))),
+		Filters: filters.NewArgs(filters.Arg("label", fmt.Sprintf("daytona.target.id=%s", project.TargetId)), filters.Arg("label", fmt.Sprintf("daytona.project.name=%s", project.Name))),
 		All:     true,
 	})
 	if err != nil || len(containers) == 0 {
-		return project.WorkspaceId + "-" + project.Name
+		return project.TargetId + "-" + project.Name
 	}
 
 	return containers[0].ID
 }
 
 func (d *DockerClient) GetProjectVolumeName(project *project.Project) string {
-	return project.WorkspaceId + "-" + project.Name
+	return project.TargetId + "-" + project.Name
 }
 
 func (d *DockerClient) getComposeContainers(c types.ContainerJSON) (string, []types.Container, error) {

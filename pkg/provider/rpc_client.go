@@ -7,8 +7,8 @@ import (
 	"net/rpc"
 
 	"github.com/daytonaio/daytona/pkg/provider/util"
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/target/project"
 )
 
 type ProviderRPCClient struct {
@@ -45,29 +45,29 @@ func (m *ProviderRPCClient) GetPresetTargetConfigs() (*[]TargetConfig, error) {
 	return &resp, err
 }
 
-func (m *ProviderRPCClient) CreateWorkspace(workspaceReq *WorkspaceRequest) (*util.Empty, error) {
-	err := m.client.Call("Plugin.CreateWorkspace", workspaceReq, new(util.Empty))
+func (m *ProviderRPCClient) CreateTarget(targetReq *TargetRequest) (*util.Empty, error) {
+	err := m.client.Call("Plugin.CreateTarget", targetReq, new(util.Empty))
 	return new(util.Empty), err
 }
 
-func (m *ProviderRPCClient) StartWorkspace(workspaceReq *WorkspaceRequest) (*util.Empty, error) {
-	err := m.client.Call("Plugin.StartWorkspace", workspaceReq, new(util.Empty))
+func (m *ProviderRPCClient) StartTarget(targetReq *TargetRequest) (*util.Empty, error) {
+	err := m.client.Call("Plugin.StartTarget", targetReq, new(util.Empty))
 	return new(util.Empty), err
 }
 
-func (m *ProviderRPCClient) StopWorkspace(workspaceReq *WorkspaceRequest) (*util.Empty, error) {
-	err := m.client.Call("Plugin.StopWorkspace", workspaceReq, new(util.Empty))
+func (m *ProviderRPCClient) StopTarget(targetReq *TargetRequest) (*util.Empty, error) {
+	err := m.client.Call("Plugin.StopTarget", targetReq, new(util.Empty))
 	return new(util.Empty), err
 }
 
-func (m *ProviderRPCClient) DestroyWorkspace(workspaceReq *WorkspaceRequest) (*util.Empty, error) {
-	err := m.client.Call("Plugin.DestroyWorkspace", workspaceReq, new(util.Empty))
+func (m *ProviderRPCClient) DestroyTarget(targetReq *TargetRequest) (*util.Empty, error) {
+	err := m.client.Call("Plugin.DestroyTarget", targetReq, new(util.Empty))
 	return new(util.Empty), err
 }
 
-func (m *ProviderRPCClient) GetWorkspaceInfo(workspaceReq *WorkspaceRequest) (*workspace.WorkspaceInfo, error) {
-	var response workspace.WorkspaceInfo
-	err := m.client.Call("Plugin.GetWorkspaceInfo", workspaceReq, &response)
+func (m *ProviderRPCClient) GetTargetInfo(targetReq *TargetRequest) (*target.TargetInfo, error) {
+	var response target.TargetInfo
+	err := m.client.Call("Plugin.GetTargetInfo", targetReq, &response)
 	return &response, err
 }
 

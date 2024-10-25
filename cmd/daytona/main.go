@@ -12,15 +12,15 @@ import (
 	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/cmd"
-	"github.com/daytonaio/daytona/pkg/cmd/workspacemode"
+	"github.com/daytonaio/daytona/pkg/cmd/agentmode"
 	"github.com/rs/zerolog"
 	zlog "github.com/rs/zerolog/log"
 	log "github.com/sirupsen/logrus"
 )
 
 func main() {
-	if internal.WorkspaceMode() {
-		err := workspacemode.Execute()
+	if internal.AgentMode() {
+		err := agentmode.Execute()
 		if err != nil {
 			log.Fatal(err)
 		}

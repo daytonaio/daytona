@@ -11,7 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/server/builds/dto"
-	"github.com/daytonaio/daytona/pkg/workspace/project/containerconfig"
+	"github.com/daytonaio/daytona/pkg/target/project/containerconfig"
 	"github.com/docker/docker/pkg/stringid"
 )
 
