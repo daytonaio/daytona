@@ -54,7 +54,7 @@ func GetConfig() (*Config, error) {
 	_, err = os.Stat(configFilePath)
 	if os.IsNotExist(err) {
 		// Setup autocompletion when adding initial config
-		_ = autocomplete.DetectShellAndSetupAutocompletion()
+		_ = autocomplete.DetectShellAndSetupAutocompletion(autocomplete.AutoCompleteCmd.Root())
 
 		config := &Config{
 			Id:               uuid.NewString(),

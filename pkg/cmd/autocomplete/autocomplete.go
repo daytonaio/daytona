@@ -19,13 +19,10 @@ var AutoCompleteCmd = &cobra.Command{
 	Use:   fmt.Sprintf("autocomplete [%s]", strings.Join(supportedShells, "|")),
 	Short: "Adds a completion script for your shell environment",
 	Args:  cobra.ExactArgs(1),
-}
-
-func init() {
-	AutoCompleteCmd.RunE = func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		shell := args[0]
 
-		profilePath, err := SetupAutocompletionForShell(shell)
+		profilePath, err := SetupAutocompletionForShell(cmd.Root(), shell)
 		if err != nil {
 			return err
 		}
@@ -39,10 +36,10 @@ func init() {
 		}
 
 		return nil
-	}
+	},
 }
 
-func DetectShellAndSetupAutocompletion() error {
+func DetectShellAndSetupAutocompletion(rootCmd *cobra.Command) error {
 	shell := os.Getenv("SHELL")
 	if shell == "" {
 		return fmt.Errorf("unable to detect the shell, please use a supported one: %s", strings.Join(supportedShells, ", "))
@@ -55,7 +52,7 @@ func DetectShellAndSetupAutocompletion() error {
 		}
 	}
 
-	_, err := SetupAutocompletionForShell(shell)
+	_, err := SetupAutocompletionForShell(rootCmd, shell)
 	if err != nil {
 		return err
 	}
@@ -63,7 +60,7 @@ func DetectShellAndSetupAutocompletion() error {
 	return nil
 }
 
-func SetupAutocompletionForShell(shell string) (string, error) {
+func SetupAutocompletionForShell(rootCmd *cobra.Command, shell string) (string, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", fmt.Errorf("error finding user home directory: %s", err)
@@ -95,13 +92,13 @@ func SetupAutocompletionForShell(shell string) (string, error) {
 
 	switch shell {
 	case "bash":
-		err = AutoCompleteCmd.Root().GenBashCompletion(file)
+		err = rootCmd.GenBashCompletion(file)
 	case "zsh":
-		err = AutoCompleteCmd.Root().GenZshCompletion(file)
+		err = rootCmd.GenZshCompletion(file)
 	case "fish":
-		err = AutoCompleteCmd.Root().GenFishCompletion(file, true)
+		err = rootCmd.GenFishCompletion(file, true)
 	case "powershell":
-		err = AutoCompleteCmd.Root().GenPowerShellCompletionWithDesc(file)
+		err = rootCmd.GenPowerShellCompletionWithDesc(file)
 	}
 
 	if err != nil {
