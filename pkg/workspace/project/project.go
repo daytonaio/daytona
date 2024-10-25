@@ -20,7 +20,7 @@ type Project struct {
 	EnvVars             map[string]string          `json:"envVars" validate:"required"`
 	WorkspaceId         string                     `json:"workspaceId" validate:"required"`
 	ApiKey              string                     `json:"-"`
-	Target              string                     `json:"target" validate:"required"`
+	TargetConfig        string                     `json:"targetConfig" validate:"required"`
 	State               *ProjectState              `json:"state,omitempty" validate:"optional"`
 	GitProviderConfigId *string                    `json:"gitProviderConfigId,omitempty" validate:"optional"`
 } // @name Project
