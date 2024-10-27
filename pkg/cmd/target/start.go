@@ -28,7 +28,7 @@ const (
 	TARGET_STATE_STOPPED TargetState = "Unavailable"
 )
 
-var startProjectFlag string
+var startWorkspaceFlag string
 var allFlag bool
 var codeFlag bool
 
@@ -43,7 +43,7 @@ var StartCmd = &cobra.Command{
 		var ideId string
 		var ideList []config.Ide
 		var providerConfigId *string
-		projectProviderMetadata := ""
+		workspaceProviderMetadata := ""
 
 		ctx := context.Background()
 
@@ -57,7 +57,7 @@ var StartCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 {
-			if startProjectFlag != "" {
+			if startWorkspaceFlag != "" {
 				return cmd.Help()
 			}
 			targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
@@ -95,27 +95,27 @@ var StartCmd = &cobra.Command{
 					return apiclient_util.HandleErrorResponse(res, err)
 				}
 				targetId = targetInfo.Id
-				if startProjectFlag == "" {
-					startProjectFlag = targetInfo.Projects[0].Name
-					providerConfigId = targetInfo.Projects[0].GitProviderConfigId
+				if startWorkspaceFlag == "" {
+					startWorkspaceFlag = targetInfo.Workspaces[0].Name
+					providerConfigId = targetInfo.Workspaces[0].GitProviderConfigId
 				} else {
-					for _, project := range targetInfo.Projects {
-						if project.Name == startProjectFlag {
-							providerConfigId = project.GitProviderConfigId
+					for _, workspace := range targetInfo.Workspaces {
+						if workspace.Name == startWorkspaceFlag {
+							providerConfigId = workspace.GitProviderConfigId
 							break
 						}
 					}
 				}
 
 				if ideId != "ssh" {
-					projectProviderMetadata, err = target_util.GetProjectProviderMetadata(targetInfo, targetInfo.Projects[0].Name)
+					workspaceProviderMetadata, err = target_util.GetWorkspaceProviderMetadata(targetInfo, targetInfo.Workspaces[0].Name)
 					if err != nil {
 						return err
 					}
 				}
 			}
 
-			err = StartTarget(apiClient, targetName, startProjectFlag)
+			err = StartTarget(apiClient, targetName, startWorkspaceFlag)
 			if err != nil {
 				return err
 			}
@@ -124,14 +124,14 @@ var StartCmd = &cobra.Command{
 				log.Warn(err)
 			}
 
-			if startProjectFlag == "" {
+			if startWorkspaceFlag == "" {
 				views.RenderInfoMessage(fmt.Sprintf("Target '%s' started successfully", targetName))
 			} else {
-				views.RenderInfoMessage(fmt.Sprintf("Project '%s' from target '%s' started successfully", startProjectFlag, targetName))
+				views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' from target '%s' started successfully", startWorkspaceFlag, targetName))
 
 				if codeFlag {
-					ide_views.RenderIdeOpeningMessage(targetName, startProjectFlag, ideId, ideList)
-					err = openIDE(ideId, activeProfile, targetId, startProjectFlag, projectProviderMetadata, yesFlag, gpgKey)
+					ide_views.RenderIdeOpeningMessage(targetName, startWorkspaceFlag, ideId, ideList)
+					err = openIDE(ideId, activeProfile, targetId, startWorkspaceFlag, workspaceProviderMetadata, yesFlag, gpgKey)
 					if err != nil {
 						return err
 					}
@@ -155,12 +155,12 @@ var StartCmd = &cobra.Command{
 }
 
 func init() {
-	StartCmd.PersistentFlags().StringVarP(&startProjectFlag, "project", "p", "", "Start a single project in the target (project name)")
+	StartCmd.PersistentFlags().StringVarP(&startWorkspaceFlag, "workspace", "w", "", "Start a single workspace in the target (workspace name)")
 	StartCmd.PersistentFlags().BoolVarP(&allFlag, "all", "a", false, "Start all targets")
 	StartCmd.PersistentFlags().BoolVarP(&codeFlag, "code", "c", false, "Open the target in the IDE after target start")
 	StartCmd.PersistentFlags().BoolVarP(&yesFlag, "yes", "y", false, "Automatically confirm any prompts")
 
-	err := StartCmd.RegisterFlagCompletionFunc("project", getProjectNameCompletions)
+	err := StartCmd.RegisterFlagCompletionFunc("workspace", getWorkspaceNameCompletions)
 	if err != nil {
 		log.Error("failed to register completion function: ", err)
 	}
@@ -190,7 +190,7 @@ func startAllTargets() error {
 	return nil
 }
 
-func getProjectNameCompletions(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+func getWorkspaceNameCompletions(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	ctx := context.Background()
 	apiClient, err := apiclient_util.GetApiClient(nil)
 	if err != nil {
@@ -204,8 +204,8 @@ func getProjectNameCompletions(cmd *cobra.Command, args []string, toComplete str
 	}
 
 	var choices []string
-	for _, project := range target.Projects {
-		choices = append(choices, project.Name)
+	for _, workspace := range target.Workspaces {
+		choices = append(choices, workspace.Name)
 	}
 	return choices, cobra.ShellCompDirectiveDefault
 }
@@ -244,15 +244,15 @@ func getAllTargetsByState(state TargetState) ([]string, cobra.ShellCompDirective
 
 	var choices []string
 	for _, target := range targetList {
-		for _, project := range target.Projects {
-			if project.State == nil {
+		for _, workspace := range target.Workspaces {
+			if workspace.State == nil {
 				continue
 			}
-			if state == TARGET_STATE_RUNNING && project.State.Uptime != 0 {
+			if state == TARGET_STATE_RUNNING && workspace.State.Uptime != 0 {
 				choices = append(choices, target.Name)
 				break
 			}
-			if state == TARGET_STATE_STOPPED && project.State.Uptime == 0 {
+			if state == TARGET_STATE_STOPPED && workspace.State.Uptime == 0 {
 				choices = append(choices, target.Name)
 				break
 			}
@@ -262,9 +262,9 @@ func getAllTargetsByState(state TargetState) ([]string, cobra.ShellCompDirective
 	return choices, cobra.ShellCompDirectiveNoFileComp
 }
 
-func StartTarget(apiClient *apiclient.APIClient, targetId, projectName string) error {
+func StartTarget(apiClient *apiclient.APIClient, targetId, workspaceName string) error {
 	ctx := context.Background()
-	var projectNames []string
+	var workspaceNames []string
 	timeFormat := time.Now().Format("2006-01-02 15:04:05")
 	from, err := time.Parse("2006-01-02 15:04:05", timeFormat)
 	if err != nil {
@@ -285,18 +285,18 @@ func StartTarget(apiClient *apiclient.APIClient, targetId, projectName string) e
 	if err != nil {
 		return err
 	}
-	if projectName != "" {
-		projectNames = append(projectNames, projectName)
+	if workspaceName != "" {
+		workspaceNames = append(workspaceNames, workspaceName)
 	} else {
-		projectNames = util.ArrayMap(target.Projects, func(p apiclient.Project) string {
-			return p.Name
+		workspaceNames = util.ArrayMap(target.Workspaces, func(w apiclient.Workspace) string {
+			return w.Name
 		})
 	}
 
 	logsContext, stopLogs := context.WithCancel(context.Background())
-	go apiclient_util.ReadTargetLogs(logsContext, activeProfile, target.Id, projectNames, true, true, &from)
+	go apiclient_util.ReadTargetLogs(logsContext, activeProfile, target.Id, workspaceNames, true, true, &from)
 
-	if projectName == "" {
+	if workspaceName == "" {
 		res, err := apiClient.TargetAPI.StartTarget(ctx, targetId).Execute()
 		if err != nil {
 			stopLogs()
@@ -306,7 +306,7 @@ func StartTarget(apiClient *apiclient.APIClient, targetId, projectName string) e
 		stopLogs()
 		return nil
 	} else {
-		res, err := apiClient.TargetAPI.StartProject(ctx, targetId, projectName).Execute()
+		res, err := apiClient.TargetAPI.StartWorkspace(ctx, targetId, workspaceName).Execute()
 		if err != nil {
 			stopLogs()
 			return apiclient_util.HandleErrorResponse(res, err)

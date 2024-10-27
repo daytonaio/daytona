@@ -20,5 +20,5 @@ daytona env list [flags]
 
 ### SEE ALSO
 
-* [daytona env](daytona_env.md)	 - Manage profile environment variables that are added to all targets and projects
+* [daytona env](daytona_env.md)	 - Manage profile environment variables that are added to all targets and workspaces
 

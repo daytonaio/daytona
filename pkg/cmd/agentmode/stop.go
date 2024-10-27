@@ -15,7 +15,7 @@ import (
 
 var stopCmd = &cobra.Command{
 	Use:     "stop",
-	Short:   "Stop the project",
+	Short:   "Stop the workspace",
 	Args:    cobra.NoArgs,
 	GroupID: util.TARGET_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -24,13 +24,13 @@ var stopCmd = &cobra.Command{
 			return err
 		}
 
-		err = target_cmd.StopTarget(apiClient, targetId, projectName)
+		err = target_cmd.StopTarget(apiClient, targetId, workspaceName)
 		if err != nil {
 			return err
 		}
 
-		if projectName != "" {
-			views.RenderInfoMessage(fmt.Sprintf("Project '%s' from target '%s' successfully stopped", projectName, targetId))
+		if workspaceName != "" {
+			views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' from target '%s' successfully stopped", workspaceName, targetId))
 		} else {
 			views.RenderInfoMessage(fmt.Sprintf("Target '%s' successfully stopped", targetId))
 		}

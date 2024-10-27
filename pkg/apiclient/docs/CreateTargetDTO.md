@@ -6,14 +6,14 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** |  | 
 **Name** | **string** |  | 
-**Projects** | [**[]CreateProjectDTO**](CreateProjectDTO.md) |  | 
 **TargetConfig** | **string** |  | 
+**Workspaces** | [**[]CreateWorkspaceDTO**](CreateWorkspaceDTO.md) |  | 
 
 ## Methods
 
 ### NewCreateTargetDTO
 
-`func NewCreateTargetDTO(id string, name string, projects []CreateProjectDTO, targetConfig string, ) *CreateTargetDTO`
+`func NewCreateTargetDTO(id string, name string, targetConfig string, workspaces []CreateWorkspaceDTO, ) *CreateTargetDTO`
 
 NewCreateTargetDTO instantiates a new CreateTargetDTO object
 This constructor will assign default values to properties that have it defined,
@@ -68,26 +68,6 @@ and a boolean to check if the value has been set.
 SetName sets Name field to given value.
 
 
-### GetProjects
-
-`func (o *CreateTargetDTO) GetProjects() []CreateProjectDTO`
-
-GetProjects returns the Projects field if non-nil, zero value otherwise.
-
-### GetProjectsOk
-
-`func (o *CreateTargetDTO) GetProjectsOk() (*[]CreateProjectDTO, bool)`
-
-GetProjectsOk returns a tuple with the Projects field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetProjects
-
-`func (o *CreateTargetDTO) SetProjects(v []CreateProjectDTO)`
-
-SetProjects sets Projects field to given value.
-
-
 ### GetTargetConfig
 
 `func (o *CreateTargetDTO) GetTargetConfig() string`
@@ -106,6 +86,26 @@ and a boolean to check if the value has been set.
 `func (o *CreateTargetDTO) SetTargetConfig(v string)`
 
 SetTargetConfig sets TargetConfig field to given value.
+
+
+### GetWorkspaces
+
+`func (o *CreateTargetDTO) GetWorkspaces() []CreateWorkspaceDTO`
+
+GetWorkspaces returns the Workspaces field if non-nil, zero value otherwise.
+
+### GetWorkspacesOk
+
+`func (o *CreateTargetDTO) GetWorkspacesOk() (*[]CreateWorkspaceDTO, bool)`
+
+GetWorkspacesOk returns a tuple with the Workspaces field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetWorkspaces
+
+`func (o *CreateTargetDTO) SetWorkspaces(v []CreateWorkspaceDTO)`
+
+SetWorkspaces sets Workspaces field to given value.
 
 
 

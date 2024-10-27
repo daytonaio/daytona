@@ -1,9 +1,9 @@
 ## daytona ssh
 
-SSH into a project using the terminal
+SSH into a workspace using the terminal
 
 ```
-daytona ssh [TARGET] [PROJECT] [CMD...] [flags]
+daytona ssh [TARGET] [WORKSPACE] [CMD...] [flags]
 ```
 
 ### Options

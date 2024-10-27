@@ -11,8 +11,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/server/builds"
 	"github.com/daytonaio/daytona/pkg/server/builds/dto"
-	"github.com/daytonaio/daytona/pkg/target/project/buildconfig"
-	"github.com/daytonaio/daytona/pkg/target/project/containerconfig"
+	"github.com/daytonaio/daytona/pkg/target/workspace/buildconfig"
+	"github.com/daytonaio/daytona/pkg/target/workspace/containerconfig"
 	"github.com/stretchr/testify/suite"
 )
 

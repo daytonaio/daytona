@@ -35,15 +35,15 @@ func ListTargets(targetList []apiclient.TargetDTO, specifyGitProviders bool, ver
 		var rowData *RowData
 		var row []string
 
-		if len(target.Projects) == 1 {
+		if len(target.Workspaces) == 1 {
 			rowData = getTargetTableRowData(target, specifyGitProviders)
 			row = getRowFromRowData(*rowData, false)
 			data = append(data, row)
 		} else {
 			row = getRowFromRowData(RowData{Name: target.Name}, true)
 			data = append(data, row)
-			for _, project := range target.Projects {
-				rowData = getProjectTableRowData(target, project, specifyGitProviders)
+			for _, workspace := range target.Workspaces {
+				rowData = getWorkspaceTableRowData(target, workspace, specifyGitProviders)
 				if rowData == nil {
 					continue
 				}
@@ -86,7 +86,7 @@ func renderUnstyledList(targetList []apiclient.TargetDTO) {
 	}
 }
 
-func getRowFromRowData(rowData RowData, isMultiProjectAccordion bool) []string {
+func getRowFromRowData(rowData RowData, isMultiWorkspaceAccordion bool) []string {
 	var state string
 	if rowData.Status == "" {
 		state = views.InactiveStyle.Render("STOPPED")
@@ -94,7 +94,7 @@ func getRowFromRowData(rowData RowData, isMultiProjectAccordion bool) []string {
 		state = views.ActiveStyle.Render("RUNNING")
 	}
 
-	if isMultiProjectAccordion {
+	if isMultiWorkspaceAccordion {
 		return []string{rowData.Name, "", "", "", "", ""}
 	}
 
@@ -119,13 +119,13 @@ func SortTargets(targetList *[]apiclient.TargetDTO, verbose bool) {
 		sort.Slice(*targetList, func(i, j int) bool {
 			t1 := (*targetList)[i]
 			t2 := (*targetList)[j]
-			if t1.Info == nil || t2.Info == nil || t1.Info.Projects == nil || t2.Info.Projects == nil {
+			if t1.Info == nil || t2.Info == nil || t1.Info.Workspaces == nil || t2.Info.Workspaces == nil {
 				return true
 			}
-			if len(t1.Info.Projects) == 0 || len(t2.Info.Projects) == 0 {
+			if len(t1.Info.Workspaces) == 0 || len(t2.Info.Workspaces) == 0 {
 				return true
 			}
-			return t1.Info.Projects[0].Created > t2.Info.Projects[0].Created
+			return t1.Info.Workspaces[0].Created > t2.Info.Workspaces[0].Created
 		})
 		return
 	}
@@ -133,10 +133,10 @@ func SortTargets(targetList *[]apiclient.TargetDTO, verbose bool) {
 	sort.Slice(*targetList, func(i, j int) bool {
 		t1 := (*targetList)[i]
 		t2 := (*targetList)[j]
-		if len(t1.Projects) == 0 || len(t2.Projects) == 0 || t1.Projects[0].State == nil || t2.Projects[0].State == nil {
+		if len(t1.Workspaces) == 0 || len(t2.Workspaces) == 0 || t1.Workspaces[0].State == nil || t2.Workspaces[0].State == nil {
 			return true
 		}
-		return t1.Projects[0].State.Uptime < t2.Projects[0].State.Uptime
+		return t1.Workspaces[0].State.Uptime < t2.Workspaces[0].State.Uptime
 	})
 
 }
@@ -144,42 +144,42 @@ func SortTargets(targetList *[]apiclient.TargetDTO, verbose bool) {
 func getTargetTableRowData(target apiclient.TargetDTO, specifyGitProviders bool) *RowData {
 	rowData := RowData{"", "", "", "", "", ""}
 	rowData.Name = target.Name + views_util.AdditionalPropertyPadding
-	if len(target.Projects) > 0 {
-		rowData.Repository = util.GetRepositorySlugFromUrl(target.Projects[0].Repository.Url, specifyGitProviders)
-		rowData.Branch = target.Projects[0].Repository.Branch
+	if len(target.Workspaces) > 0 {
+		rowData.Repository = util.GetRepositorySlugFromUrl(target.Workspaces[0].Repository.Url, specifyGitProviders)
+		rowData.Branch = target.Workspaces[0].Repository.Branch
 	}
 
 	rowData.TargetConfig = target.TargetConfig + views_util.AdditionalPropertyPadding
 
-	if target.Info != nil && target.Info.Projects != nil && len(target.Info.Projects) > 0 {
-		rowData.Created = util.FormatTimestamp(target.Info.Projects[0].Created)
+	if target.Info != nil && target.Info.Workspaces != nil && len(target.Info.Workspaces) > 0 {
+		rowData.Created = util.FormatTimestamp(target.Info.Workspaces[0].Created)
 	}
-	if len(target.Projects) > 0 && target.Projects[0].State != nil && target.Projects[0].State.Uptime > 0 {
-		rowData.Status = util.FormatUptime(target.Projects[0].State.Uptime)
+	if len(target.Workspaces) > 0 && target.Workspaces[0].State != nil && target.Workspaces[0].State.Uptime > 0 {
+		rowData.Status = util.FormatUptime(target.Workspaces[0].State.Uptime)
 	}
 	return &rowData
 }
 
-func getProjectTableRowData(targetDTO apiclient.TargetDTO, project apiclient.Project, specifyGitProviders bool) *RowData {
+func getWorkspaceTableRowData(targetDTO apiclient.TargetDTO, workspace apiclient.Workspace, specifyGitProviders bool) *RowData {
 	rowData := RowData{"", "", "", "", "", ""}
-	rowData.Name = " └ " + project.Name
+	rowData.Name = " └ " + workspace.Name
 
-	rowData.Repository = util.GetRepositorySlugFromUrl(project.Repository.Url, specifyGitProviders)
-	rowData.Branch = project.Repository.Branch
+	rowData.Repository = util.GetRepositorySlugFromUrl(workspace.Repository.Url, specifyGitProviders)
+	rowData.Branch = workspace.Repository.Branch
 
-	rowData.TargetConfig = project.TargetConfig + views_util.AdditionalPropertyPadding
+	rowData.TargetConfig = workspace.TargetConfig + views_util.AdditionalPropertyPadding
 
-	if project.State != nil && project.State.Uptime > 0 {
-		rowData.Status = util.FormatUptime(project.State.Uptime)
+	if workspace.State != nil && workspace.State.Uptime > 0 {
+		rowData.Status = util.FormatUptime(workspace.State.Uptime)
 	}
 
-	if targetDTO.Info == nil || targetDTO.Info.Projects == nil {
+	if targetDTO.Info == nil || targetDTO.Info.Workspaces == nil {
 		return &rowData
 	}
 
-	for _, projectInfo := range targetDTO.Info.Projects {
-		if projectInfo.Name == project.Name {
-			rowData.Created = util.FormatTimestamp(projectInfo.Created)
+	for _, workspaceInfo := range targetDTO.Info.Workspaces {
+		if workspaceInfo.Name == workspace.Name {
+			rowData.Created = util.FormatTimestamp(workspaceInfo.Created)
 			break
 		}
 	}

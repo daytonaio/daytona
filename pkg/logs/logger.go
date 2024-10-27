@@ -23,21 +23,21 @@ const (
 )
 
 type LogEntry struct {
-	Source      string  `json:"source"`
-	TargetId    *string `json:"targetId,omitempty"`
-	ProjectName *string `json:"projectName,omitempty"`
-	BuildId     *string `json:"buildId,omitempty"`
-	Msg         string  `json:"msg"`
-	Level       string  `json:"level"`
-	Time        string  `json:"time"`
+	Source        string  `json:"source"`
+	TargetId      *string `json:"targetId,omitempty"`
+	WorkspaceName *string `json:"workspaceName,omitempty"`
+	BuildId       *string `json:"buildId,omitempty"`
+	Msg           string  `json:"msg"`
+	Level         string  `json:"level"`
+	Time          string  `json:"time"`
 }
 
 type LoggerFactory interface {
 	CreateTargetLogger(targetId string, source LogSource) Logger
-	CreateProjectLogger(targetId, projectName string, source LogSource) Logger
+	CreateWorkspaceLogger(targetId, workspaceName string, source LogSource) Logger
 	CreateBuildLogger(buildId string, source LogSource) Logger
 	CreateTargetLogReader(targetId string) (io.Reader, error)
-	CreateProjectLogReader(targetId, projectName string) (io.Reader, error)
+	CreateWorkspaceLogReader(targetId, workspaceName string) (io.Reader, error)
 	CreateBuildLogReader(buildId string) (io.Reader, error)
 }
 

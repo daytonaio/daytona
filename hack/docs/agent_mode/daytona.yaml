@@ -14,12 +14,12 @@ see_also:
     - daytona agent - Start the agent process
     - daytona autocomplete - Adds completion script for your shell enviornment
     - daytona docs - Opens the Daytona documentation in your default browser.
-    - daytona expose - Expose a local port over stdout - Used by the Daytona CLI to make direct connections to the project
+    - daytona expose - Expose a local port over stdout - Used by the Daytona CLI to make direct connections to the workspace
     - daytona forward - Forward a port publicly via an URL
-    - daytona info - Show project info
+    - daytona info - Show workspace info
     - daytona list - List targets
-    - daytona logs - View logs for a target/project
-    - daytona restart - Restart the project
-    - daytona start - Start the project
-    - daytona stop - Stop the project
+    - daytona logs - View logs for a target/workspace
+    - daytona restart - Restart the workspace
+    - daytona start - Start the workspace
+    - daytona stop - Stop the workspace
     - daytona version - Print the version number

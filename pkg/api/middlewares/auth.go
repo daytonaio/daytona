@@ -37,8 +37,8 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		if server.ApiKeyService.IsTargetApiKey(token) {
 			apiKeyType = apikey.ApiKeyTypeTarget
-		} else if server.ApiKeyService.IsProjectApiKey(token) {
-			apiKeyType = apikey.ApiKeyTypeProject
+		} else if server.ApiKeyService.IsWorkspaceApiKey(token) {
+			apiKeyType = apikey.ApiKeyTypeWorkspace
 		}
 
 		ctx.Set("apiKeyType", apiKeyType)

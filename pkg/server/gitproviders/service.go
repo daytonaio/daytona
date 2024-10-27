@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/target/project/config"
+	"github.com/daytonaio/daytona/pkg/target/workspace/config"
 )
 
 type IGitProviderService interface {
@@ -33,25 +33,25 @@ type IGitProviderService interface {
 	UnregisterPrebuildWebhook(gitProviderId string, repo *gitprovider.GitRepository, id string) error
 }
 
-type ProjectConfigStore interface {
-	Save(projectConfig *config.ProjectConfig) error
-	List(filter *config.ProjectConfigFilter) ([]*config.ProjectConfig, error)
+type WorkspaceConfigStore interface {
+	Save(workspaceConfig *config.WorkspaceConfig) error
+	List(filter *config.WorkspaceConfigFilter) ([]*config.WorkspaceConfig, error)
 }
 
 type GitProviderServiceConfig struct {
-	ConfigStore        gitprovider.ConfigStore
-	ProjectConfigStore ProjectConfigStore
+	ConfigStore          gitprovider.ConfigStore
+	WorkspaceConfigStore WorkspaceConfigStore
 }
 
 type GitProviderService struct {
-	configStore        gitprovider.ConfigStore
-	projectConfigStore ProjectConfigStore
+	configStore          gitprovider.ConfigStore
+	workspaceConfigStore WorkspaceConfigStore
 }
 
 func NewGitProviderService(config GitProviderServiceConfig) IGitProviderService {
 	return &GitProviderService{
-		configStore:        config.ConfigStore,
-		projectConfigStore: config.ProjectConfigStore,
+		configStore:          config.ConfigStore,
+		workspaceConfigStore: config.WorkspaceConfigStore,
 	}
 }
 

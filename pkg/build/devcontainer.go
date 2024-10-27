@@ -28,7 +28,7 @@ type DevcontainerBuilder struct {
 }
 
 func (b *DevcontainerBuilder) Build(build Build) (string, string, error) {
-	builderType, err := detect.DetectProjectBuilderType(build.BuildConfig, b.projectDir, nil)
+	builderType, err := detect.DetectWorkspaceBuilderType(build.BuildConfig, b.workspaceDir, nil)
 	if err != nil {
 		return "", "", err
 	}
@@ -41,7 +41,7 @@ func (b *DevcontainerBuilder) Build(build Build) (string, string, error) {
 }
 
 func (b *DevcontainerBuilder) CleanUp() error {
-	return os.RemoveAll(b.projectDir)
+	return os.RemoveAll(b.workspaceDir)
 }
 
 func (b *DevcontainerBuilder) Publish(build Build) error {
@@ -70,7 +70,7 @@ func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, er
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
-		return b.defaultProjectImage, b.defaultProjectUser, err
+		return b.defaultWorkspaceImage, b.defaultWorkspaceUser, err
 	}
 
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
@@ -80,7 +80,7 @@ func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, er
 	// TODO: The image should be configurable
 	err = dockerClient.PullImage("daytonaio/workspace-project", nil, buildLogger)
 	if err != nil {
-		return b.defaultProjectImage, b.defaultProjectUser, err
+		return b.defaultWorkspaceImage, b.defaultWorkspaceUser, err
 	}
 
 	containerId, remoteUser, err := dockerClient.CreateFromDevcontainer(docker.CreateDevcontainerOptions{
@@ -91,26 +91,26 @@ func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, er
 		IdLabels: map[string]string{
 			"daytona.build.id": build.Id,
 		},
-		ProjectDir: b.projectDir,
-		LogWriter:  buildLogger,
-		EnvVars:    build.EnvVars,
+		WorkspaceDir: b.workspaceDir,
+		LogWriter:    buildLogger,
+		EnvVars:      build.EnvVars,
 	})
 	if err != nil {
-		return b.defaultProjectImage, b.defaultProjectUser, err
+		return b.defaultWorkspaceImage, b.defaultWorkspaceUser, err
 	}
 
 	defer dockerClient.RemoveContainer(containerId) // nolint: errcheck
 
 	imageName, err := b.GetImageName(build)
 	if err != nil {
-		return b.defaultProjectImage, b.defaultProjectUser, err
+		return b.defaultWorkspaceImage, b.defaultWorkspaceUser, err
 	}
 
 	_, err = cli.ContainerCommit(context.Background(), containerId, container.CommitOptions{
 		Reference: imageName,
 	})
 	if err != nil {
-		return b.defaultProjectImage, b.defaultProjectUser, err
+		return b.defaultWorkspaceImage, b.defaultWorkspaceUser, err
 	}
 
 	return imageName, string(remoteUser), err

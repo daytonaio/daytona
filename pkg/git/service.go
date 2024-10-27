@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/target/project"
+	"github.com/daytonaio/daytona/pkg/target/workspace"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/protocol/packp/capability"
@@ -23,15 +23,15 @@ import (
 	"gopkg.in/ini.v1"
 )
 
-var MapStatus map[git.StatusCode]project.Status = map[git.StatusCode]project.Status{
-	git.Unmodified:         project.Unmodified,
-	git.Untracked:          project.Untracked,
-	git.Modified:           project.Modified,
-	git.Added:              project.Added,
-	git.Deleted:            project.Deleted,
-	git.Renamed:            project.Renamed,
-	git.Copied:             project.Copied,
-	git.UpdatedButUnmerged: project.UpdatedButUnmerged,
+var MapStatus map[git.StatusCode]workspace.Status = map[git.StatusCode]workspace.Status{
+	git.Unmodified:         workspace.Unmodified,
+	git.Untracked:          workspace.Untracked,
+	git.Modified:           workspace.Modified,
+	git.Added:              workspace.Added,
+	git.Deleted:            workspace.Deleted,
+	git.Renamed:            workspace.Renamed,
+	git.Copied:             workspace.Copied,
+	git.UpdatedButUnmerged: workspace.UpdatedButUnmerged,
 }
 
 type IGitService interface {
@@ -39,11 +39,11 @@ type IGitService interface {
 	CloneRepositoryCmd(repo *gitprovider.GitRepository, auth *http.BasicAuth) []string
 	RepositoryExists() (bool, error)
 	SetGitConfig(userData *gitprovider.GitUser, providerConfig *gitprovider.GitProviderConfig) error
-	GetGitStatus() (*project.GitStatus, error)
+	GetGitStatus() (*workspace.GitStatus, error)
 }
 
 type Service struct {
-	ProjectDir        string
+	WorkspaceDir      string
 	GitConfigFileName string
 	LogWriter         io.Writer
 	OpenRepository    *git.Repository
@@ -72,13 +72,13 @@ func (s *Service) CloneRepository(repo *gitprovider.GitRepository, auth *http.Ba
 
 	cloneOptions.ReferenceName = plumbing.ReferenceName("refs/heads/" + repo.Branch)
 
-	_, err := git.PlainClone(s.ProjectDir, false, cloneOptions)
+	_, err := git.PlainClone(s.WorkspaceDir, false, cloneOptions)
 	if err != nil {
 		return err
 	}
 
 	if repo.Target == gitprovider.CloneTargetCommit {
-		r, err := git.PlainOpen(s.ProjectDir)
+		r, err := git.PlainOpen(s.WorkspaceDir)
 		if err != nil {
 			return err
 		}
@@ -112,10 +112,10 @@ func (s *Service) CloneRepositoryCmd(repo *gitprovider.GitRepository, auth *http
 		cloneUrl = fmt.Sprintf("%s://%s:%s@%s", strings.Split(cloneUrl, "://")[0], auth.Username, auth.Password, strings.SplitN(cloneUrl, "://", 2)[1])
 	}
 
-	cloneCmd = append(cloneCmd, cloneUrl, s.ProjectDir)
+	cloneCmd = append(cloneCmd, cloneUrl, s.WorkspaceDir)
 
 	if repo.Target == gitprovider.CloneTargetCommit {
-		cloneCmd = append(cloneCmd, "&&", "cd", s.ProjectDir)
+		cloneCmd = append(cloneCmd, "&&", "cd", s.WorkspaceDir)
 		cloneCmd = append(cloneCmd, "&&", "git", "checkout", repo.Sha)
 	}
 
@@ -123,7 +123,7 @@ func (s *Service) CloneRepositoryCmd(repo *gitprovider.GitRepository, auth *http
 }
 
 func (s *Service) RepositoryExists() (bool, error) {
-	_, err := os.Stat(filepath.Join(s.ProjectDir, ".git"))
+	_, err := os.Stat(filepath.Join(s.WorkspaceDir, ".git"))
 	if os.IsNotExist(err) {
 		return false, nil
 	}
@@ -165,7 +165,7 @@ func (s *Service) SetGitConfig(userData *gitprovider.GitUser, providerConfig *gi
 			return err
 		}
 	}
-	_, err = cfg.Section("safe").NewKey("directory", s.ProjectDir)
+	_, err = cfg.Section("safe").NewKey("directory", s.WorkspaceDir)
 	if err != nil {
 		return err
 	}
@@ -301,7 +301,7 @@ func (s *Service) isBranchPublished() (bool, error) {
 }
 
 func (s *Service) getUpstreamBranch() (string, error) {
-	cmd := exec.Command("git", "-C", s.ProjectDir, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}")
+	cmd := exec.Command("git", "-C", s.WorkspaceDir, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", nil
@@ -319,7 +319,7 @@ func (s *Service) getAheadBehindInfo() (int, int, error) {
 		return 0, 0, nil
 	}
 
-	cmd := exec.Command("git", "-C", s.ProjectDir, "rev-list", "--left-right", "--count", fmt.Sprintf("%s...HEAD", upstream))
+	cmd := exec.Command("git", "-C", s.WorkspaceDir, "rev-list", "--left-right", "--count", fmt.Sprintf("%s...HEAD", upstream))
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return 0, 0, nil
@@ -347,8 +347,8 @@ func parseAheadBehind(output []byte) (int, int, error) {
 	return ahead, behind, nil
 }
 
-func (s *Service) GetGitStatus() (*project.GitStatus, error) {
-	repo, err := git.PlainOpen(s.ProjectDir)
+func (s *Service) GetGitStatus() (*workspace.GitStatus, error) {
+	repo, err := git.PlainOpen(s.WorkspaceDir)
 	if err != nil {
 		return nil, err
 	}
@@ -368,9 +368,9 @@ func (s *Service) GetGitStatus() (*project.GitStatus, error) {
 		return nil, err
 	}
 
-	files := []*project.FileStatus{}
+	files := []*workspace.FileStatus{}
 	for path, file := range status {
-		files = append(files, &project.FileStatus{
+		files = append(files, &workspace.FileStatus{
 			Name:     path,
 			Extra:    file.Extra,
 			Staging:  MapStatus[file.Staging],
@@ -388,7 +388,7 @@ func (s *Service) GetGitStatus() (*project.GitStatus, error) {
 		return nil, err
 	}
 
-	return &project.GitStatus{
+	return &workspace.GitStatus{
 		CurrentBranch:   ref.Name().Short(),
 		Files:           files,
 		BranchPublished: branchPublished,

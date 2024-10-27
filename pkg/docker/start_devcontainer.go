@@ -11,7 +11,7 @@ import (
 	"github.com/docker/docker/api/types/mount"
 )
 
-func (d *DockerClient) startDevcontainerProject(opts *CreateProjectOptions) (RemoteUser, error) {
+func (d *DockerClient) startDevcontainerWorkspace(opts *CreateWorkspaceOptions) (RemoteUser, error) {
 	go func() {
 		err := d.runDevcontainerUserCommands(opts)
 		if err != nil {
@@ -23,7 +23,7 @@ func (d *DockerClient) startDevcontainerProject(opts *CreateProjectOptions) (Rem
 	return remoteUser, err
 }
 
-func (d *DockerClient) runDevcontainerUserCommands(opts *CreateProjectOptions) error {
+func (d *DockerClient) runDevcontainerUserCommands(opts *CreateWorkspaceOptions) error {
 	socketForwardId, err := d.ensureDockerSockForward(opts.LogWriter)
 	if err != nil {
 		return err
@@ -31,7 +31,7 @@ func (d *DockerClient) runDevcontainerUserCommands(opts *CreateProjectOptions) e
 
 	opts.LogWriter.Write([]byte("Running devcontainer user commands...\n"))
 
-	paths := d.getDevcontainerPaths(opts.ProjectDir, opts.Project.BuildConfig.Devcontainer.FilePath)
+	paths := d.getDevcontainerPaths(opts.WorkspaceDir, opts.Workspace.BuildConfig.Devcontainer.FilePath)
 
 	devcontainerCmd := []string{
 		"devcontainer",
@@ -39,8 +39,8 @@ func (d *DockerClient) runDevcontainerUserCommands(opts *CreateProjectOptions) e
 		"--workspace-folder=" + paths.ProjectTarget,
 		"--config=" + paths.TargetConfigFilePath,
 		"--override-config=" + path.Join(paths.OverridesTarget, "devcontainer.json"),
-		"--id-label=daytona.target.id=" + opts.Project.TargetId,
-		"--id-label=daytona.project.name=" + opts.Project.Name,
+		"--id-label=daytona.target.id=" + opts.Workspace.TargetId,
+		"--id-label=daytona.workspace.name=" + opts.Workspace.Name,
 	}
 
 	cmd := strings.Join(devcontainerCmd, " ")

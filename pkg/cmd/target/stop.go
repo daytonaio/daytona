@@ -19,7 +19,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var stopProjectFlag string
+var stopWorkspaceFlag string
 
 var StopCmd = &cobra.Command{
 	Use:     "stop [TARGET]",
@@ -55,7 +55,7 @@ var StopCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 {
-			if stopProjectFlag != "" {
+			if stopWorkspaceFlag != "" {
 				return cmd.Help()
 			}
 			targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
@@ -72,17 +72,17 @@ var StopCmd = &cobra.Command{
 					continue
 				}
 
-				projectNames := util.ArrayMap(target.Projects, func(p apiclient.Project) string {
-					return p.Name
+				workspaceNames := util.ArrayMap(target.Workspaces, func(w apiclient.Workspace) string {
+					return w.Name
 				})
-				apiclient_util.ReadTargetLogs(ctx, activeProfile, target.Id, projectNames, false, true, &from)
+				apiclient_util.ReadTargetLogs(ctx, activeProfile, target.Id, workspaceNames, false, true, &from)
 				views.RenderInfoMessage(fmt.Sprintf("- Target '%s' successfully stopped", target.Name))
 			}
 		} else {
 			targetId := args[0]
-			var projectNames []string
+			var workspaceNames []string
 
-			err = StopTarget(apiClient, targetId, stopProjectFlag)
+			err = StopTarget(apiClient, targetId, stopWorkspaceFlag)
 			if err != nil {
 				return err
 			}
@@ -92,18 +92,18 @@ var StopCmd = &cobra.Command{
 				return err
 			}
 
-			if startProjectFlag != "" {
-				projectNames = append(projectNames, stopProjectFlag)
+			if startWorkspaceFlag != "" {
+				workspaceNames = append(workspaceNames, stopWorkspaceFlag)
 			} else {
-				projectNames = util.ArrayMap(target.Projects, func(p apiclient.Project) string {
-					return p.Name
+				workspaceNames = util.ArrayMap(target.Workspaces, func(w apiclient.Workspace) string {
+					return w.Name
 				})
 			}
 
-			apiclient_util.ReadTargetLogs(ctx, activeProfile, target.Id, projectNames, false, true, &from)
+			apiclient_util.ReadTargetLogs(ctx, activeProfile, target.Id, workspaceNames, false, true, &from)
 
-			if stopProjectFlag != "" {
-				views.RenderInfoMessage(fmt.Sprintf("Project '%s' from target '%s' successfully stopped", stopProjectFlag, targetId))
+			if stopWorkspaceFlag != "" {
+				views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' from target '%s' successfully stopped", stopWorkspaceFlag, targetId))
 			} else {
 				views.RenderInfoMessage(fmt.Sprintf("Target '%s' successfully stopped", targetId))
 			}
@@ -116,7 +116,7 @@ var StopCmd = &cobra.Command{
 }
 
 func init() {
-	StopCmd.Flags().StringVarP(&stopProjectFlag, "project", "p", "", "Stop a single project in the target (project name)")
+	StopCmd.Flags().StringVarP(&stopWorkspaceFlag, "workspace", "w", "", "Stop a single workspace in the target (workspace name)")
 	StopCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Stop all targets")
 }
 
@@ -139,22 +139,22 @@ func stopAllTargets(activeProfile config.Profile, from time.Time) error {
 			continue
 		}
 
-		projectNames := util.ArrayMap(target.Projects, func(p apiclient.Project) string {
-			return p.Name
+		workspaceNames := util.ArrayMap(target.Workspaces, func(w apiclient.Workspace) string {
+			return w.Name
 		})
 
-		apiclient_util.ReadTargetLogs(ctx, activeProfile, target.Id, projectNames, false, true, &from)
+		apiclient_util.ReadTargetLogs(ctx, activeProfile, target.Id, workspaceNames, false, true, &from)
 		views.RenderInfoMessage(fmt.Sprintf("- Target '%s' successfully stopped", target.Name))
 	}
 	return nil
 }
 
-func StopTarget(apiClient *apiclient.APIClient, targetId, projectName string) error {
+func StopTarget(apiClient *apiclient.APIClient, targetId, workspaceName string) error {
 	ctx := context.Background()
 	var message string
 	var stopFunc func() error
 
-	if projectName == "" {
+	if workspaceName == "" {
 		message = fmt.Sprintf("Target '%s' is stopping", targetId)
 		stopFunc = func() error {
 			res, err := apiClient.TargetAPI.StopTarget(ctx, targetId).Execute()
@@ -164,9 +164,9 @@ func StopTarget(apiClient *apiclient.APIClient, targetId, projectName string) er
 			return nil
 		}
 	} else {
-		message = fmt.Sprintf("Project '%s' from target '%s' is stopping", projectName, targetId)
+		message = fmt.Sprintf("Workspace '%s' from target '%s' is stopping", workspaceName, targetId)
 		stopFunc = func() error {
-			res, err := apiClient.TargetAPI.StopProject(ctx, targetId, projectName).Execute()
+			res, err := apiClient.TargetAPI.StopWorkspace(ctx, targetId, workspaceName).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}

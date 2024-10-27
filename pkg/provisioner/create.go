@@ -8,7 +8,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/project"
+	"github.com/daytonaio/daytona/pkg/target/workspace"
 )
 
 func (p *Provisioner) CreateTarget(target *target.Target, targetConfig *provider.TargetConfig) error {
@@ -25,15 +25,15 @@ func (p *Provisioner) CreateTarget(target *target.Target, targetConfig *provider
 	return err
 }
 
-func (p *Provisioner) CreateProject(proj *project.Project, targetConfig *provider.TargetConfig, cr *containerregistry.ContainerRegistry, gc *gitprovider.GitProviderConfig) error {
+func (p *Provisioner) CreateWorkspace(ws *workspace.Workspace, targetConfig *provider.TargetConfig, cr *containerregistry.ContainerRegistry, gc *gitprovider.GitProviderConfig) error {
 	targetProvider, err := p.providerManager.GetProvider(targetConfig.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
-	_, err = (*targetProvider).CreateProject(&provider.ProjectRequest{
+	_, err = (*targetProvider).CreateWorkspace(&provider.WorkspaceRequest{
 		TargetConfigOptions: targetConfig.Options,
-		Project:             proj,
+		Workspace:           ws,
 		ContainerRegistry:   cr,
 		GitProviderConfig:   gc,
 	})

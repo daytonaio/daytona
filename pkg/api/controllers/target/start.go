@@ -35,26 +35,26 @@ func StartTarget(ctx *gin.Context) {
 	ctx.Status(200)
 }
 
-// StartProject 			godoc
+// StartWorkspace 			godoc
 //
 //	@Tags			target
-//	@Summary		Start project
-//	@Description	Start project
+//	@Summary		Start workspace
+//	@Description	Start workspace
 //	@Param			targetId	path	string	true	"Target ID or Name"
-//	@Param			projectId	path	string	true	"Project ID"
+//	@Param			workspaceId	path	string	true	"Workspace ID"
 //	@Success		200
-//	@Router			/target/{targetId}/{projectId}/start [post]
+//	@Router			/target/{targetId}/{workspaceId}/start [post]
 //
-//	@id				StartProject
-func StartProject(ctx *gin.Context) {
+//	@id				StartWorkspace
+func StartWorkspace(ctx *gin.Context) {
 	targetId := ctx.Param("targetId")
-	projectId := ctx.Param("projectId")
+	workspaceId := ctx.Param("workspaceId")
 
 	server := server.GetInstance(nil)
 
-	err := server.TargetService.StartProject(ctx.Request.Context(), targetId, projectId)
+	err := server.TargetService.StartWorkspace(ctx.Request.Context(), targetId, workspaceId)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to start project %s: %w", projectId, err))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to start workspace %s: %w", workspaceId, err))
 		return
 	}
 

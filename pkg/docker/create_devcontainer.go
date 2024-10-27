@@ -21,7 +21,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/build/devcontainer"
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/ssh"
-	"github.com/daytonaio/daytona/pkg/target/project/buildconfig"
+	"github.com/daytonaio/daytona/pkg/target/workspace/buildconfig"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/mount"
@@ -40,7 +40,7 @@ type DevcontainerPaths struct {
 }
 
 type CreateDevcontainerOptions struct {
-	ProjectDir string
+	WorkspaceDir string
 	// Name of the project inside the devcontainer
 	ProjectName       string
 	BuildConfig       *buildconfig.BuildConfig
@@ -55,12 +55,12 @@ type CreateDevcontainerOptions struct {
 func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (string, RemoteUser, error) {
 	// Ensure that the devcontainer config exists
 	if opts.SshClient != nil {
-		_, err := opts.SshClient.ReadFile(path.Join(opts.ProjectDir, opts.BuildConfig.Devcontainer.FilePath))
+		_, err := opts.SshClient.ReadFile(path.Join(opts.WorkspaceDir, opts.BuildConfig.Devcontainer.FilePath))
 		if err != nil {
 			return "", "", err
 		}
 	} else {
-		_, err := os.Stat(filepath.Join(opts.ProjectDir, opts.BuildConfig.Devcontainer.FilePath))
+		_, err := os.Stat(filepath.Join(opts.WorkspaceDir, opts.BuildConfig.Devcontainer.FilePath))
 		if err != nil {
 			return "", "", err
 		}
@@ -73,7 +73,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 
 	ctx := context.Background()
 
-	paths := d.getDevcontainerPaths(opts.ProjectDir, opts.BuildConfig.Devcontainer.FilePath)
+	paths := d.getDevcontainerPaths(opts.WorkspaceDir, opts.BuildConfig.Devcontainer.FilePath)
 
 	if opts.SshClient != nil {
 		err = opts.SshClient.Exec(fmt.Sprintf("mkdir -p %s", paths.OverridesDir), opts.LogWriter)
@@ -130,7 +130,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 		workspaceFolder = fmt.Sprintf("/workspaces/%s", opts.ProjectName)
 		devcontainerConfig["workspaceFolder"] = workspaceFolder
 	}
-	devcontainerConfig["workspaceMount"] = fmt.Sprintf("source=%s,target=%s,type=bind", opts.ProjectDir, workspaceFolder)
+	devcontainerConfig["workspaceMount"] = fmt.Sprintf("source=%s,target=%s,type=bind", opts.WorkspaceDir, workspaceFolder)
 
 	delete(devcontainerConfig, "initializeCommand")
 
@@ -138,7 +138,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 		composeFilePath := devcontainerConfig["dockerComposeFile"].(string)
 
 		if opts.SshClient != nil {
-			composeFilePath = path.Join(opts.ProjectDir, filepath.Dir(opts.BuildConfig.Devcontainer.FilePath), composeFilePath)
+			composeFilePath = path.Join(opts.WorkspaceDir, filepath.Dir(opts.BuildConfig.Devcontainer.FilePath), composeFilePath)
 
 			composeFileContent, err := d.getRemoteComposeContent(&opts, paths, socketForwardId, composeFilePath)
 			if err != nil {
@@ -151,7 +151,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 				return "", "", err
 			}
 		} else {
-			composeFilePath = filepath.Join(opts.ProjectDir, filepath.Dir(opts.BuildConfig.Devcontainer.FilePath), composeFilePath)
+			composeFilePath = filepath.Join(opts.WorkspaceDir, filepath.Dir(opts.BuildConfig.Devcontainer.FilePath), composeFilePath)
 		}
 
 		options, err := cli.NewProjectOptions([]string{composeFilePath}, cli.WithOsEnv, cli.WithDotEnv)
@@ -159,22 +159,22 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 			return "", "", err
 		}
 
-		project, err := cli.ProjectFromOptions(ctx, options)
+		workspace, err := cli.ProjectFromOptions(ctx, options)
 		if err != nil {
 			return "", "", err
 		}
 
-		project.Name = fmt.Sprintf("%s-%s", opts.ProjectName, util.Hash(opts.ProjectDir))
+		workspace.Name = fmt.Sprintf("%s-%s", opts.ProjectName, util.Hash(opts.WorkspaceDir))
 
-		for _, service := range project.Services {
+		for _, service := range workspace.Services {
 			if service.Build != nil {
-				if strings.HasPrefix(service.Build.Context, opts.ProjectDir) {
-					service.Build.Context = strings.Replace(service.Build.Context, opts.ProjectDir, paths.ProjectTarget, 1)
+				if strings.HasPrefix(service.Build.Context, opts.WorkspaceDir) {
+					service.Build.Context = strings.Replace(service.Build.Context, opts.WorkspaceDir, paths.ProjectTarget, 1)
 				}
 			}
 		}
 
-		overrideComposeContent, err := project.MarshalYAML()
+		overrideComposeContent, err := workspace.MarshalYAML()
 		if err != nil {
 			return "", "", err
 		}
@@ -200,7 +200,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 		devcontainerConfig["dockerComposeFile"] = path.Join(paths.OverridesTarget, "daytona-compose-override.yml")
 	}
 
-	envVars["DAYTONA_PROJECT_DIR"] = workspaceFolder
+	envVars["DAYTONA_WORKSPACE_DIR"] = workspaceFolder
 
 	devcontainerConfig["containerEnv"] = envVars
 
@@ -471,7 +471,7 @@ func (d *DockerClient) execDevcontainerCommand(cmd string, opts *CreateDevcontai
 	mounts := []mount.Mount{
 		{
 			Type:   mount.TypeBind,
-			Source: opts.ProjectDir,
+			Source: opts.WorkspaceDir,
 			Target: paths.ProjectTarget,
 		},
 	}
@@ -563,11 +563,11 @@ func (d *DockerClient) getRemoteComposeContent(opts *CreateDevcontainerOptions, 
 	return output[nameIndex:], nil
 }
 
-func (d *DockerClient) getDevcontainerPaths(projectDir string, devcontainerFilePath string) DevcontainerPaths {
-	projectTarget := path.Join("/project", filepath.Base(projectDir))
+func (d *DockerClient) getDevcontainerPaths(workspaceDir string, devcontainerFilePath string) DevcontainerPaths {
+	projectTarget := path.Join("/project", filepath.Base(workspaceDir))
 	targetConfigFilePath := path.Join(projectTarget, devcontainerFilePath)
 
-	overridesDir := filepath.Join(filepath.Dir(projectDir), fmt.Sprintf("%s-data", filepath.Base(projectDir)))
+	overridesDir := filepath.Join(filepath.Dir(workspaceDir), fmt.Sprintf("%s-data", filepath.Base(workspaceDir)))
 	overridesTarget := "/tmp/overrides"
 
 	return DevcontainerPaths{

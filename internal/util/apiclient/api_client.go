@@ -62,7 +62,7 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 		clientConfig.AddDefaultHeader(telemetry.SESSION_ID_HEADER, internal.SESSION_ID)
 		clientConfig.AddDefaultHeader(telemetry.CLIENT_ID_HEADER, config.GetClientId())
 		if internal.AgentMode() {
-			clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, string(telemetry.CLI_PROJECT_SOURCE))
+			clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, string(telemetry.CLI_WORKSPACE_SOURCE))
 		} else {
 			clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, string(telemetry.CLI_SOURCE))
 		}
@@ -131,7 +131,7 @@ func GetTarget(targetNameOrId string, verbose bool) (*apiclient.TargetDTO, error
 	return target, nil
 }
 
-func GetFirstProjectName(targetId string, projectName string, profile *config.Profile) (string, error) {
+func GetFirstWorkspaceName(targetId string, workspaceName string, profile *config.Profile) (string, error) {
 	ctx := context.Background()
 
 	apiClient, err := GetApiClient(profile)
@@ -144,19 +144,19 @@ func GetFirstProjectName(targetId string, projectName string, profile *config.Pr
 		return "", HandleErrorResponse(res, err)
 	}
 
-	if projectName == "" {
-		if len(targetInfo.Projects) == 0 {
-			return "", errors.New("no projects found in target")
+	if workspaceName == "" {
+		if len(targetInfo.Workspaces) == 0 {
+			return "", errors.New("no workspaces found in target")
 		}
 
-		return targetInfo.Projects[0].Name, nil
+		return targetInfo.Workspaces[0].Name, nil
 	}
 
-	for _, project := range targetInfo.Projects {
-		if project.Name == projectName {
-			return project.Name, nil
+	for _, workspace := range targetInfo.Workspaces {
+		if workspace.Name == workspaceName {
+			return workspace.Name, nil
 		}
 	}
 
-	return "", errors.New("project not found in target")
+	return "", errors.New("workspace not found in target")
 }

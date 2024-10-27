@@ -1,6 +1,6 @@
 name: daytona expose
 synopsis: |
-    Expose a local port over stdout - Used by the Daytona CLI to make direct connections to the project
+    Expose a local port over stdout - Used by the Daytona CLI to make direct connections to the workspace
 usage: daytona expose [PORT] [flags]
 inherited_options:
     - name: help
