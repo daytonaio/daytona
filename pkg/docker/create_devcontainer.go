@@ -125,7 +125,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 		envVars[k] = v
 	}
 
-	// If the workspaceFolder is not set in the devcontainer.json, we set it to /workspaces/<project-name>
+	// If the workspaceFolder is not set in the devcontainer.json, we set it to /workspaces/<workspace-name>
 	if _, ok := devcontainerConfig["workspaceFolder"].(string); !ok {
 		workspaceFolder = fmt.Sprintf("/workspaces/%s", opts.WorkspaceName)
 		devcontainerConfig["workspaceFolder"] = workspaceFolder
