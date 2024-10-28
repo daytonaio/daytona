@@ -6,7 +6,7 @@ package git
 import "github.com/go-git/go-git/v5"
 
 func (s *Service) Add(files []string) error {
-	repo, err := git.PlainOpen(s.ProjectDir)
+	repo, err := git.PlainOpen(s.WorkspaceDir)
 	if err != nil {
 		return err
 	}

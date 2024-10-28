@@ -7,7 +7,7 @@ import "github.com/daytonaio/daytona/pkg/apikey"
 
 type IApiKeyService interface {
 	Generate(keyType apikey.ApiKeyType, name string) (string, error)
-	IsProjectApiKey(apiKey string) bool
+	IsWorkspaceApiKey(apiKey string) bool
 	IsTargetApiKey(apiKey string) bool
 	IsValidApiKey(apiKey string) bool
 	ListClientKeys() ([]*apikey.ApiKey, error)

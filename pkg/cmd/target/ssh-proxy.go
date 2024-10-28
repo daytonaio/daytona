@@ -16,7 +16,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	ssh_config "github.com/daytonaio/daytona/pkg/agent/ssh/config"
 	"github.com/daytonaio/daytona/pkg/docker"
-	"github.com/daytonaio/daytona/pkg/target/project"
+	"github.com/daytonaio/daytona/pkg/target/workspace"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
@@ -26,7 +26,7 @@ import (
 )
 
 var SshProxyCmd = &cobra.Command{
-	Use:    "ssh-proxy [PROFILE_ID] [TARGET_ID] [PROJECT]",
+	Use:    "ssh-proxy [PROFILE_ID] [TARGET_ID] [WORKSPACE]",
 	Args:   cobra.RangeArgs(2, 3),
 	Hidden: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -37,7 +37,7 @@ var SshProxyCmd = &cobra.Command{
 
 		profileId := args[0]
 		targetId := args[1]
-		projectName := ""
+		workspaceName := ""
 
 		profile, err := c.GetProfile(profileId)
 		if err != nil {
@@ -45,9 +45,9 @@ var SshProxyCmd = &cobra.Command{
 		}
 
 		if len(args) == 3 {
-			projectName = args[2]
+			workspaceName = args[2]
 		} else {
-			projectName, err = apiclient.GetFirstProjectName(targetId, projectName, &profile)
+			workspaceName, err = apiclient.GetFirstWorkspaceName(targetId, workspaceName, &profile)
 			if err != nil {
 				return err
 			}
@@ -60,12 +60,12 @@ var SshProxyCmd = &cobra.Command{
 
 		if target.TargetConfig == "local" && profile.Id == "default" {
 			// If the target is local, we directly access the ssh port through the container
-			project := target.Projects[0]
+			workspace := target.Workspaces[0]
 
-			if project.Name != projectName {
-				for _, p := range target.Projects {
-					if p.Name == projectName {
-						project = p
+			if workspace.Name != workspaceName {
+				for _, w := range target.Workspaces {
+					if w.Name == workspaceName {
+						workspace = w
 						break
 					}
 				}
@@ -80,7 +80,7 @@ var SshProxyCmd = &cobra.Command{
 				ApiClient: cli,
 			})
 
-			containerName := dockerClient.GetProjectContainerName(conversion.ToProject(&project))
+			containerName := dockerClient.GetWorkspaceContainerName(conversion.ToWorkspace(&workspace))
 
 			ctx := context.Background()
 
@@ -139,7 +139,7 @@ var SshProxyCmd = &cobra.Command{
 
 		errChan := make(chan error)
 
-		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", project.GetProjectHostname(targetId, projectName), ssh_config.SSH_PORT))
+		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", workspace.GetWorkspaceHostname(targetId, workspaceName), ssh_config.SSH_PORT))
 		if err != nil {
 			return err
 		}

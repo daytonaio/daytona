@@ -17,8 +17,8 @@ Method | HTTP request | Description
 [**FsSearchFiles**](WorkspaceToolboxAPI.md#FsSearchFiles) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/files/search | Search for files
 [**FsSetFilePermissions**](WorkspaceToolboxAPI.md#FsSetFilePermissions) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/files/permissions | Set file owner/group/permissions
 [**FsUploadFile**](WorkspaceToolboxAPI.md#FsUploadFile) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/files/upload | Upload file
-[**GetProjectDir**](WorkspaceToolboxAPI.md#GetProjectDir) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/project-dir | Get project dir
 [**GetSessionCommandLogs**](WorkspaceToolboxAPI.md#GetSessionCommandLogs) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/command/{commandId}/logs | Get session command logs
+[**GetWorkspaceDir**](WorkspaceToolboxAPI.md#GetWorkspaceDir) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/workspace-dir | Get workspace dir
 [**GitAddFiles**](WorkspaceToolboxAPI.md#GitAddFiles) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/add | Add files
 [**GitBranchList**](WorkspaceToolboxAPI.md#GitBranchList) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/git/branches | Get branch list
 [**GitCloneRepository**](WorkspaceToolboxAPI.md#GitCloneRepository) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/clone | Clone git repository
@@ -1019,79 +1019,6 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
-## GetProjectDir
-
-> ProjectDirResponse GetProjectDir(ctx, workspaceId, projectId).Execute()
-
-Get project dir
-
-
-
-### Example
-
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"os"
-	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
-)
-
-func main() {
-	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
-
-	configuration := openapiclient.NewConfiguration()
-	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceToolboxAPI.GetProjectDir(context.Background(), workspaceId, projectId).Execute()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.GetProjectDir``: %v\n", err)
-		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
-	}
-	// response from `GetProjectDir`: ProjectDirResponse
-	fmt.Fprintf(os.Stdout, "Response from `WorkspaceToolboxAPI.GetProjectDir`: %v\n", resp)
-}
-```
-
-### Path Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**workspaceId** | **string** | Workspace ID or Name | 
-**projectId** | **string** | Project ID | 
-
-### Other Parameters
-
-Other parameters are passed through a pointer to a apiGetProjectDirRequest struct via the builder pattern
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-
-
-
-### Return type
-
-[**ProjectDirResponse**](ProjectDirResponse.md)
-
-### Authorization
-
-[Bearer](../README.md#Bearer)
-
-### HTTP request headers
-
-- **Content-Type**: Not defined
-- **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
 ## GetSessionCommandLogs
 
 > string GetSessionCommandLogs(ctx, workspaceId, projectId, sessionId, commandId).Execute()
@@ -1165,6 +1092,79 @@ Name | Type | Description  | Notes
 
 - **Content-Type**: Not defined
 - **Accept**: */*
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetWorkspaceDir
+
+> WorkspaceDirResponse GetWorkspaceDir(ctx, workspaceId, projectId).Execute()
+
+Get workspace dir
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	workspaceId := "workspaceId_example" // string | Workspace ID or Name
+	projectId := "projectId_example" // string | Project ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.WorkspaceToolboxAPI.GetWorkspaceDir(context.Background(), workspaceId, projectId).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.GetWorkspaceDir``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetWorkspaceDir`: WorkspaceDirResponse
+	fmt.Fprintf(os.Stdout, "Response from `WorkspaceToolboxAPI.GetWorkspaceDir`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
+**projectId** | **string** | Project ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetWorkspaceDirRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
+### Return type
+
+[**WorkspaceDirResponse**](WorkspaceDirResponse.md)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

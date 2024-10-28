@@ -20,13 +20,13 @@ import (
 )
 
 var prebuildUpdateCmd = &cobra.Command{
-	Use:   "update [PROJECT_CONFIG] [PREBUILD_ID]",
+	Use:   "update [WORKSPACE_CONFIG] [PREBUILD_ID]",
 	Short: "Update a prebuild configuration",
 	Args:  cobra.MaximumNArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var prebuildAddView add.PrebuildAddView
 		var prebuild *apiclient.PrebuildDTO
-		var projectConfigRecieved string
+		var workspaceConfigRecieved string
 		var retention int
 		ctx := context.Background()
 
@@ -50,13 +50,13 @@ var prebuildUpdateCmd = &cobra.Command{
 		if len(args) == 2 || (branchFlag != "" || retentionFlag != 0 || commitIntervalFlag != 0 || len(triggerFilesFlag) > 0) {
 			// Non-interactive mode: use provided arguments and flags
 			if len(args) < 2 {
-				return errors.New("Both project config name and prebuild ID must be specified when using flags")
+				return errors.New("Both workspace config name and prebuild ID must be specified when using flags")
 			}
 
-			projectConfigRecieved = args[0]
+			workspaceConfigRecieved = args[0]
 			prebuildID := args[1]
 
-			prebuild, res, err = apiClient.PrebuildAPI.GetPrebuild(ctx, projectConfigRecieved, prebuildID).Execute()
+			prebuild, res, err = apiClient.PrebuildAPI.GetPrebuild(ctx, workspaceConfigRecieved, prebuildID).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
@@ -79,18 +79,18 @@ var prebuildUpdateCmd = &cobra.Command{
 			}
 			prebuildAddView.Branch = prebuild.Branch
 			prebuildAddView.Retention = strconv.Itoa(int(prebuild.Retention))
-			prebuildAddView.ProjectConfigName = projectConfigRecieved
+			prebuildAddView.WorkspaceConfigName = workspaceConfigRecieved
 			prebuildAddView.TriggerFiles = prebuild.TriggerFiles
 			prebuildAddView.CommitInterval = strconv.Itoa(int(*prebuild.CommitInterval))
 			retention = int(prebuild.Retention)
 		} else {
 			// Interactive mode: Prompt for details
 			var prebuilds []apiclient.PrebuildDTO
-			var selectedProjectConfigName string
+			var selectedWorkspaceConfigName string
 
 			if len(args) == 1 {
-				selectedProjectConfigName = args[0]
-				prebuilds, res, err = apiClient.PrebuildAPI.ListPrebuildsForProjectConfig(ctx, selectedProjectConfigName).Execute()
+				selectedWorkspaceConfigName = args[0]
+				prebuilds, res, err = apiClient.PrebuildAPI.ListPrebuildsForWorkspaceConfig(ctx, selectedWorkspaceConfigName).Execute()
 				if err != nil {
 					return apiclient_util.HandleErrorResponse(res, err)
 				}
@@ -111,11 +111,11 @@ var prebuildUpdateCmd = &cobra.Command{
 				return nil
 			}
 
-			projectConfigRecieved = prebuild.ProjectConfigName
+			workspaceConfigRecieved = prebuild.WorkspaceConfigName
 			prebuildAddView = add.PrebuildAddView{
-				Branch:            prebuild.Branch,
-				Retention:         strconv.Itoa(int(prebuild.Retention)),
-				ProjectConfigName: projectConfigRecieved,
+				Branch:              prebuild.Branch,
+				Retention:           strconv.Itoa(int(prebuild.Retention)),
+				WorkspaceConfigName: workspaceConfigRecieved,
 			}
 			retention, err = strconv.Atoi(prebuildAddView.Retention)
 			if err != nil {
@@ -155,7 +155,7 @@ var prebuildUpdateCmd = &cobra.Command{
 			newPrebuild.TriggerFiles = prebuildAddView.TriggerFiles
 		}
 
-		prebuildId, res, err := apiClient.PrebuildAPI.SetPrebuild(ctx, prebuildAddView.ProjectConfigName).Prebuild(newPrebuild).Execute()
+		prebuildId, res, err := apiClient.PrebuildAPI.SetPrebuild(ctx, prebuildAddView.WorkspaceConfigName).Prebuild(newPrebuild).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
@@ -163,12 +163,12 @@ var prebuildUpdateCmd = &cobra.Command{
 		views.RenderInfoMessage("Prebuild updated successfully")
 
 		if prebuildAddView.RunBuildOnAdd {
-			projectConfig, res, err := apiClient.ProjectConfigAPI.GetProjectConfig(ctx, prebuildAddView.ProjectConfigName).Execute()
+			workspaceConfig, res, err := apiClient.WorkspaceConfigAPI.GetWorkspaceConfig(ctx, prebuildAddView.WorkspaceConfigName).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
-			buildId, err := build.CreateBuild(apiClient, projectConfig, *newPrebuild.Branch, &prebuildId)
+			buildId, err := build.CreateBuild(apiClient, workspaceConfig, *newPrebuild.Branch, &prebuildId)
 			if err != nil {
 				return err
 			}

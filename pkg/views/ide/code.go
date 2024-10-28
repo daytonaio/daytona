@@ -10,7 +10,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
-func RenderIdeOpeningMessage(target, projectName, ideId string, ideList []config.Ide) {
+func RenderIdeOpeningMessage(target, workspaceName, ideId string, ideList []config.Ide) {
 	ideName := ""
 	for _, ide := range ideList {
 		if ide.Id == ideId {
@@ -18,5 +18,5 @@ func RenderIdeOpeningMessage(target, projectName, ideId string, ideList []config
 			break
 		}
 	}
-	views.RenderInfoMessage(fmt.Sprintf("Opening the project '%s' from target '%s' in %s", projectName, target, ideName))
+	views.RenderInfoMessage(fmt.Sprintf("Opening workspace '%s' from target '%s' in %s", workspaceName, target, ideName))
 }

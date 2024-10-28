@@ -1,9 +1,0 @@
-name: daytona profile delete
-synopsis: Delete profile [PROFILE_NAME]
-usage: daytona profile delete [flags]
-inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-see_also:
-    - daytona profile - Manage profiles

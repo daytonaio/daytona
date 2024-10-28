@@ -23,7 +23,7 @@ func (s *mockApiKeyService) Generate(keyType apikey.ApiKeyType, name string) (st
 	return args.String(0), args.Error(1)
 }
 
-func (s *mockApiKeyService) IsProjectApiKey(apiKey string) bool {
+func (s *mockApiKeyService) IsWorkspaceApiKey(apiKey string) bool {
 	args := s.Called(apiKey)
 	return args.Bool(0)
 }

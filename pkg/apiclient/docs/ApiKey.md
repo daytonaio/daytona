@@ -5,7 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **KeyHash** | **string** |  | 
-**Name** | **string** | Project or client name | 
+**Name** | **string** | Workspace or client name | 
 **Type** | [**ApikeyApiKeyType**](ApikeyApiKeyType.md) |  | 
 
 ## Methods

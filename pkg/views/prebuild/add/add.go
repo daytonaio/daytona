@@ -19,12 +19,12 @@ var DEFAULT_COMMIT_INTERVAL = "10"
 var DEFAULT_RETENTION = "3"
 
 type PrebuildAddView struct {
-	ProjectConfigName string
-	Branch            string
-	CommitInterval    string
-	TriggerFiles      []string
-	Retention         string
-	RunBuildOnAdd     bool
+	WorkspaceConfigName string
+	Branch              string
+	CommitInterval      string
+	TriggerFiles        []string
+	Retention           string
+	RunBuildOnAdd       bool
 }
 
 func PrebuildCreationView(prebuildAddView *PrebuildAddView, editing bool) {

@@ -10,45 +10,45 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/pkg/ports"
-	"github.com/daytonaio/daytona/pkg/target/project"
+	"github.com/daytonaio/daytona/pkg/target/workspace"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/go-connections/nat"
 	log "github.com/sirupsen/logrus"
 )
 
-// pulledImages map keeps track of pulled images for project creation in order to avoid pulling the same image multiple times
+// pulledImages map keeps track of pulled images for workspace creation in order to avoid pulling the same image multiple times
 // This is only an optimisation for images with tag 'latest'
-func (d *DockerClient) createProjectFromImage(opts *CreateProjectOptions, pulledImages map[string]bool, mountProjectDir bool) error {
-	if pulledImages[opts.Project.Image] {
-		return d.initProjectContainer(opts, mountProjectDir)
+func (d *DockerClient) createWorkspaceFromImage(opts *CreateWorkspaceOptions, pulledImages map[string]bool, mountWorkspaceDir bool) error {
+	if pulledImages[opts.Workspace.Image] {
+		return d.initWorkspaceContainer(opts, mountWorkspaceDir)
 	}
 
-	err := d.PullImage(opts.Project.Image, opts.ContainerRegistry, opts.LogWriter)
+	err := d.PullImage(opts.Workspace.Image, opts.ContainerRegistry, opts.LogWriter)
 	if err != nil {
 		return err
 	}
-	pulledImages[opts.Project.Image] = true
+	pulledImages[opts.Workspace.Image] = true
 
-	return d.initProjectContainer(opts, mountProjectDir)
+	return d.initWorkspaceContainer(opts, mountWorkspaceDir)
 }
 
-func (d *DockerClient) initProjectContainer(opts *CreateProjectOptions, mountProjectDir bool) error {
+func (d *DockerClient) initWorkspaceContainer(opts *CreateWorkspaceOptions, mountWorkspaceDir bool) error {
 	ctx := context.Background()
 
 	mounts := []mount.Mount{}
-	if mountProjectDir {
+	if mountWorkspaceDir {
 		mounts = append(mounts, mount.Mount{
 			Type:   mount.TypeBind,
-			Source: opts.ProjectDir,
-			Target: fmt.Sprintf("/home/%s/%s", opts.Project.User, opts.Project.Name),
+			Source: opts.WorkspaceDir,
+			Target: fmt.Sprintf("/home/%s/%s", opts.Workspace.User, opts.Workspace.Name),
 		})
 	}
 
 	var availablePort *uint16
 	var portBindings map[nat.Port][]nat.PortBinding
 
-	if opts.Project.TargetConfig == "local" {
+	if opts.Workspace.TargetConfig == "local" {
 		p, err := ports.GetAvailableEphemeralPort()
 		if err != nil {
 			log.Error(err)
@@ -64,14 +64,14 @@ func (d *DockerClient) initProjectContainer(opts *CreateProjectOptions, mountPro
 		}
 	}
 
-	c, err := d.apiClient.ContainerCreate(ctx, GetContainerCreateConfig(opts.Project, availablePort), &container.HostConfig{
+	c, err := d.apiClient.ContainerCreate(ctx, GetContainerCreateConfig(opts.Workspace, availablePort), &container.HostConfig{
 		Privileged: true,
 		Mounts:     mounts,
 		ExtraHosts: []string{
 			"host.docker.internal:host-gateway",
 		},
 		PortBindings: portBindings,
-	}, nil, nil, d.GetProjectContainerName(opts.Project))
+	}, nil, nil, d.GetWorkspaceContainerName(opts.Workspace))
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func (d *DockerClient) initProjectContainer(opts *CreateProjectOptions, mountPro
 		}
 	}()
 
-	if runtime.GOOS != "windows" && mountProjectDir {
+	if runtime.GOOS != "windows" && mountWorkspaceDir {
 		_, err = d.updateContainerUserUidGid(c.ID, opts)
 	}
 
@@ -106,17 +106,17 @@ func (d *DockerClient) initProjectContainer(opts *CreateProjectOptions, mountPro
 	return nil
 }
 
-func GetContainerCreateConfig(project *project.Project, toolboxApiHostPort *uint16) *container.Config {
+func GetContainerCreateConfig(workspace *workspace.Workspace, toolboxApiHostPort *uint16) *container.Config {
 	envVars := []string{}
 
-	for key, value := range project.EnvVars {
+	for key, value := range workspace.EnvVars {
 		envVars = append(envVars, fmt.Sprintf("%s=%s", key, value))
 	}
 
 	labels := map[string]string{
-		"daytona.target.id":              project.TargetId,
-		"daytona.project.name":           project.Name,
-		"daytona.project.repository.url": project.Repository.Url,
+		"daytona.target.id":                workspace.TargetId,
+		"daytona.workspace.name":           workspace.Name,
+		"daytona.workspace.repository.url": workspace.Repository.Url,
 	}
 
 	if toolboxApiHostPort != nil {
@@ -129,10 +129,10 @@ func GetContainerCreateConfig(project *project.Project, toolboxApiHostPort *uint
 	}
 
 	return &container.Config{
-		Hostname:     project.Name,
-		Image:        project.Image,
+		Hostname:     workspace.Name,
+		Image:        workspace.Image,
 		Labels:       labels,
-		User:         project.User,
+		User:         workspace.User,
 		Env:          envVars,
 		Entrypoint:   []string{"sleep", "infinity"},
 		AttachStdout: true,

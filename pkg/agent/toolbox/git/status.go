@@ -18,7 +18,7 @@ func GetStatus(c *gin.Context) {
 	}
 
 	gitService := git.Service{
-		ProjectDir: path,
+		WorkspaceDir: path,
 	}
 
 	status, err := gitService.GetGitStatus()

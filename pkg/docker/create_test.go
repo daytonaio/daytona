@@ -33,23 +33,23 @@ func (s *DockerClientTestSuite) TestCreateTarget() {
 	require.Nil(s.T(), err)
 }
 
-func (s *DockerClientTestSuite) TestCreateProject() {
+func (s *DockerClientTestSuite) TestCreateWorkspace() {
 	s.mockClient.On("ContainerList", mock.Anything, mock.Anything).Return([]types.Container{}, nil)
 
 	var networkingConfig *network.NetworkingConfig
 	var platform *v1.Platform
 
-	projectDir := os.TempDir()
+	workspaceDir := os.TempDir()
 
-	containerName := s.dockerClient.GetProjectContainerName(project1)
+	containerName := s.dockerClient.GetWorkspaceContainerName(workspace1)
 
 	s.mockClient.On("ImageList", mock.Anything,
 		image.ListOptions{
-			Filters: filters.NewArgs(filters.Arg("reference", project1.Image)),
+			Filters: filters.NewArgs(filters.Arg("reference", workspace1.Image)),
 		},
 	).Return([]image.Summary{}, nil)
 
-	s.mockClient.On("ImagePull", mock.Anything, project1.Image, mock.Anything).Return(t_docker.NewPipeReader(""), nil)
+	s.mockClient.On("ImagePull", mock.Anything, workspace1.Image, mock.Anything).Return(t_docker.NewPipeReader(""), nil)
 	s.mockClient.On("ImagePull", mock.Anything, "daytonaio/workspace-project", mock.Anything).Return(t_docker.NewPipeReader(""), nil)
 
 	s.mockClient.On("ContainerRemove", mock.Anything, mock.Anything, container.RemoveOptions{RemoveVolumes: true, Force: true}).Return(nil)
@@ -76,13 +76,13 @@ func (s *DockerClientTestSuite) TestCreateProject() {
 		Mounts: []mount.Mount{
 			{
 				Type:   mount.TypeBind,
-				Source: filepath.Dir(projectDir),
+				Source: filepath.Dir(workspaceDir),
 				Target: "/workdir",
 			},
 		},
-	}, networkingConfig, platform, fmt.Sprintf("git-clone-%s-%s", project1.TargetId, project1.Name),
+	}, networkingConfig, platform, fmt.Sprintf("git-clone-%s-%s", workspace1.TargetId, workspace1.Name),
 	).Return(container.CreateResponse{ID: "123"}, nil)
-	s.mockClient.On("ContainerCreate", mock.Anything, docker.GetContainerCreateConfig(project1, nil),
+	s.mockClient.On("ContainerCreate", mock.Anything, docker.GetContainerCreateConfig(workspace1, nil),
 		&container.HostConfig{
 			Privileged: true,
 			ExtraHosts: []string{
@@ -91,8 +91,8 @@ func (s *DockerClientTestSuite) TestCreateProject() {
 			Mounts: []mount.Mount{
 				{
 					Type:   mount.TypeBind,
-					Source: projectDir,
-					Target: fmt.Sprintf("/home/%s/%s", project1.User, project1.Name),
+					Source: workspaceDir,
+					Target: fmt.Sprintf("/home/%s/%s", workspace1.User, workspace1.Name),
 				},
 			},
 		},
@@ -101,9 +101,9 @@ func (s *DockerClientTestSuite) TestCreateProject() {
 		containerName,
 	).Return(container.CreateResponse{ID: "123"}, nil)
 
-	err := s.dockerClient.CreateProject(&docker.CreateProjectOptions{
-		Project:           project1,
-		ProjectDir:        projectDir,
+	err := s.dockerClient.CreateWorkspace(&docker.CreateWorkspaceOptions{
+		Workspace:         workspace1,
+		WorkspaceDir:      workspaceDir,
 		ContainerRegistry: nil,
 		LogWriter:         nil,
 		Gpc:               nil,

@@ -10,10 +10,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func (s *DockerClientTestSuite) TestStopProject() {
+func (s *DockerClientTestSuite) TestStopWorkspace() {
 	s.mockClient.On("ContainerList", mock.Anything, mock.Anything).Return([]types.Container{}, nil)
 
-	containerName := s.dockerClient.GetProjectContainerName(project1)
+	containerName := s.dockerClient.GetWorkspaceContainerName(workspace1)
 
 	s.mockClient.On("ContainerStop", mock.Anything, containerName, container.StopOptions{}).Return(nil)
 	s.mockClient.On("ContainerInspect", mock.Anything, containerName).Return(types.ContainerJSON{
@@ -27,6 +27,6 @@ func (s *DockerClientTestSuite) TestStopProject() {
 		},
 	}, nil)
 
-	err := s.dockerClient.StopProject(project1, nil)
+	err := s.dockerClient.StopWorkspace(workspace1, nil)
 	require.Nil(s.T(), err)
 }

@@ -14,20 +14,20 @@ import (
 	"github.com/daytonaio/daytona/pkg/build/devcontainer"
 )
 
-func OpenCursor(activeProfile config.Profile, targetId string, projectName string, projectProviderMetadata string, gpgkey string) error {
+func OpenCursor(activeProfile config.Profile, targetId string, workspaceName string, workspaceProviderMetadata string, gpgkey string) error {
 	path, err := GetCursorBinaryPath()
 	if err != nil {
 		return err
 	}
 
-	projectHostname := config.GetProjectHostname(activeProfile.Id, targetId, projectName)
+	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, targetId, workspaceName)
 
-	projectDir, err := util.GetProjectDir(activeProfile, targetId, projectName, gpgkey)
+	workspaceDir, err := util.GetWorkspaceDir(activeProfile, targetId, workspaceName, gpgkey)
 	if err != nil {
 		return err
 	}
 
-	commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", projectHostname, projectDir)
+	commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", workspaceHostname, workspaceDir)
 
 	cursorCommand := exec.Command(path, "--disable-extension", "ms-vscode-remote.remote-containers", "--folder-uri", commandArgument)
 
@@ -36,11 +36,11 @@ func OpenCursor(activeProfile config.Profile, targetId string, projectName strin
 		return err
 	}
 
-	if projectProviderMetadata == "" {
+	if workspaceProviderMetadata == "" {
 		return nil
 	}
 
-	return setupVSCodeCustomizations(projectHostname, projectProviderMetadata, devcontainer.Vscode, "*/.cursor-server/*/bin/cursor-server", "$HOME/.cursor-server/data/Machine/settings.json", ".daytona-customizations-lock-cursor")
+	return setupVSCodeCustomizations(workspaceHostname, workspaceProviderMetadata, devcontainer.Vscode, "*/.cursor-server/*/bin/cursor-server", "$HOME/.cursor-server/data/Machine/settings.json", ".daytona-customizations-lock-cursor")
 }
 
 func GetCursorBinaryPath() (string, error) {

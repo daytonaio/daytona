@@ -25,11 +25,11 @@ import (
 
 var publicPreview bool
 var targetId string
-var projectName string
+var workspaceName string
 
 var PortForwardCmd = &cobra.Command{
-	Use:     "forward [PORT] [TARGET] [PROJECT]",
-	Short:   "Forward a port from a project to your local machine",
+	Use:     "forward [PORT] [TARGET] [WORKSPACE]",
+	Short:   "Forward a port from a workspace to your local machine",
 	GroupID: util.TARGET_GROUP,
 	Args:    cobra.RangeArgs(2, 3),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -53,15 +53,15 @@ var PortForwardCmd = &cobra.Command{
 		targetId = target.Id
 
 		if len(args) == 3 {
-			projectName = args[2]
+			workspaceName = args[2]
 		} else {
-			projectName, err = apiclient.GetFirstProjectName(targetId, projectName, nil)
+			workspaceName, err = apiclient.GetFirstWorkspaceName(targetId, workspaceName, nil)
 			if err != nil {
 				return err
 			}
 		}
 
-		hostPort, errChan := tailscale.ForwardPort(targetId, projectName, uint16(port), activeProfile)
+		hostPort, errChan := tailscale.ForwardPort(targetId, workspaceName, uint16(port), activeProfile)
 
 		if hostPort == nil {
 			if err = <-errChan; err != nil {
@@ -76,7 +76,7 @@ var PortForwardCmd = &cobra.Command{
 
 		if publicPreview {
 			go func() {
-				errChan <- ForwardPublicPort(targetId, projectName, *hostPort, uint16(port))
+				errChan <- ForwardPublicPort(targetId, workspaceName, *hostPort, uint16(port))
 			}()
 		}
 
@@ -93,7 +93,7 @@ func init() {
 	PortForwardCmd.Flags().BoolVar(&publicPreview, "public", false, "Should be port be available publicly via an URL")
 }
 
-func ForwardPublicPort(targetId, projectName string, hostPort, targetPort uint16) error {
+func ForwardPublicPort(targetId, workspaceName string, hostPort, targetPort uint16) error {
 	views.RenderInfoMessage("Forwarding port to a public URL...")
 
 	apiClient, err := apiclient.GetApiClient(nil)
@@ -107,7 +107,7 @@ func ForwardPublicPort(targetId, projectName string, hostPort, targetPort uint16
 	}
 
 	h := fnv.New64()
-	h.Write([]byte(fmt.Sprintf("%s-%s-%s", targetId, projectName, serverConfig.Id)))
+	h.Write([]byte(fmt.Sprintf("%s-%s-%s", targetId, workspaceName, serverConfig.Id)))
 
 	subDomain := fmt.Sprintf("%d-%s", targetPort, base64.RawURLEncoding.EncodeToString([]byte(fmt.Sprint(h.Sum64()))))
 

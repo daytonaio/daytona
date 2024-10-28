@@ -1,5 +1,5 @@
 {
-	"name": "Daytona Project Image Builder",
+	"name": "Daytona Workspace Image Builder",
 	"image": "ubuntu:22.04",
 	"features": {
 		"ghcr.io/devcontainers/features/common-utils:1": {

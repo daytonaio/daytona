@@ -5,7 +5,7 @@ package dto
 
 import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/target/project/buildconfig"
+	"github.com/daytonaio/daytona/pkg/target/workspace/buildconfig"
 )
 
 type BuildCreationData struct {

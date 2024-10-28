@@ -51,12 +51,12 @@ type BuildRunner struct {
 }
 
 type BuildProcessConfig struct {
-	Builder     IBuilder
-	BuildLogger logs.Logger
-	Build       *Build
-	ProjectDir  string
-	GitService  git.IGitService
-	Wg          *sync.WaitGroup
+	Builder      IBuilder
+	BuildLogger  logs.Logger
+	Build        *Build
+	WorkspaceDir string
+	GitService   git.IGitService
+	Wg           *sync.WaitGroup
 }
 
 type GitProviderStore interface {
@@ -120,9 +120,9 @@ func (r *BuildRunner) RunBuilds() {
 			buildLogger := r.loggerFactory.CreateBuildLogger(b.Id, logs.LogSourceBuilder)
 			defer buildLogger.Close()
 
-			projectDir := filepath.Join(r.basePath, b.Id, "project")
+			workspaceDir := filepath.Join(r.basePath, b.Id, "workspace")
 
-			builder, err := r.builderFactory.Create(*b, projectDir)
+			builder, err := r.builderFactory.Create(*b, workspaceDir)
 			if err != nil {
 				r.handleBuildError(*b, builder, err, buildLogger)
 				return
@@ -154,13 +154,13 @@ func (r *BuildRunner) RunBuilds() {
 			b.BuildConfig.CachedBuild = GetCachedBuild(b, builds)
 
 			go r.RunBuildProcess(BuildProcessConfig{
-				Builder:     builder,
-				BuildLogger: buildLogger,
-				Build:       b,
-				ProjectDir:  projectDir,
+				Builder:      builder,
+				BuildLogger:  buildLogger,
+				Build:        b,
+				WorkspaceDir: workspaceDir,
 				GitService: &git.Service{
-					ProjectDir: projectDir,
-					LogWriter:  buildLogger,
+					WorkspaceDir: workspaceDir,
+					LogWriter:    buildLogger,
 				},
 				Wg: &wg,
 			})

@@ -16,7 +16,7 @@ import (
 
 const requiredExtension = "jeanp413.open-remote-ssh"
 
-func OpenVScodium(activeProfile config.Profile, targetId string, projectName string, projectProviderMetadata string, gpgkey string) error {
+func OpenVScodium(activeProfile config.Profile, targetId string, workspaceId string, workspaceProviderMetadata string, gpgkey string) error {
 	path, err := GetCodiumBinaryPath()
 	if err != nil {
 		return err
@@ -26,14 +26,15 @@ func OpenVScodium(activeProfile config.Profile, targetId string, projectName str
 	if err != nil {
 		return err
 	}
-	projectHostname := config.GetProjectHostname(activeProfile.Id, targetId, projectName)
 
-	projectDir, err := util.GetProjectDir(activeProfile, targetId, projectName, gpgkey)
+	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, targetId, workspaceId)
+
+	workspaceDir, err := util.GetWorkspaceDir(activeProfile, targetId, workspaceId, gpgkey)
 	if err != nil {
 		return err
 	}
 
-	commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", projectHostname, projectDir)
+	commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", workspaceHostname, workspaceDir)
 
 	codiumCommand := exec.Command(path, "--disable-extension", "ms-vscode-remote.remote-containers", "--folder-uri", commandArgument)
 
@@ -42,11 +43,11 @@ func OpenVScodium(activeProfile config.Profile, targetId string, projectName str
 		return err
 	}
 
-	if projectProviderMetadata == "" {
+	if workspaceProviderMetadata == "" {
 		return nil
 	}
 
-	return setupVSCodeCustomizations(projectHostname, projectProviderMetadata, devcontainer.Vscode, "*/.vscodium-server/*/bin/codium-server", "$HOME/.vscodium-server/data/Machine/settings.json", ".daytona-customizations-lock-codium")
+	return setupVSCodeCustomizations(workspaceHostname, workspaceProviderMetadata, devcontainer.Vscode, "*/.vscodium-server/*/bin/codium-server", "$HOME/.vscodium-server/data/Machine/settings.json", ".daytona-customizations-lock-codium")
 }
 
 func GetCodiumBinaryPath() (string, error) {

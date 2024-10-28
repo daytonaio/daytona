@@ -21,15 +21,15 @@ type IBuilder interface {
 
 type Builder struct {
 	id                          string
-	projectDir                  string
+	workspaceDir                string
 	image                       string
 	containerRegistry           *containerregistry.ContainerRegistry
 	buildImageContainerRegistry *containerregistry.ContainerRegistry
 	buildStore                  Store
 	buildImageNamespace         string
 	loggerFactory               logs.LoggerFactory
-	defaultProjectImage         string
-	defaultProjectUser          string
+	defaultWorkspaceImage       string
+	defaultWorkspaceUser        string
 }
 
 func (b *Builder) GetImageName(build Build) (string, error) {
@@ -44,7 +44,7 @@ func (b *Builder) GetImageName(build Build) (string, error) {
 	name := hex.EncodeToString(nameBytes[:])[:16]
 
 	namespace := b.buildImageNamespace
-	imageName := fmt.Sprintf("%s%s/p-%s:%s", b.buildImageContainerRegistry.Server, namespace, name, tag)
+	imageName := fmt.Sprintf("%s%s/w-%s:%s", b.buildImageContainerRegistry.Server, namespace, name, tag)
 
 	return imageName, nil
 }

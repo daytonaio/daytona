@@ -9,12 +9,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/target/workspace"
 	"github.com/go-git/go-git/v5"
 )
 
-func (s *Service) GetGitStatus() (*project.GitStatus, error) {
-	repo, err := git.PlainOpen(s.ProjectDir)
+func (s *Service) GetGitStatus() (*workspace.GitStatus, error) {
+	repo, err := git.PlainOpen(s.WorkspaceDir)
 	if err != nil {
 		return nil, err
 	}
@@ -34,9 +34,9 @@ func (s *Service) GetGitStatus() (*project.GitStatus, error) {
 		return nil, err
 	}
 
-	files := []*project.FileStatus{}
+	files := []*workspace.FileStatus{}
 	for path, file := range status {
-		files = append(files, &project.FileStatus{
+		files = append(files, &workspace.FileStatus{
 			Name:     path,
 			Extra:    file.Extra,
 			Staging:  MapStatus[file.Staging],
@@ -54,7 +54,7 @@ func (s *Service) GetGitStatus() (*project.GitStatus, error) {
 		return nil, err
 	}
 
-	return &project.GitStatus{
+	return &workspace.GitStatus{
 		CurrentBranch:   ref.Name().Short(),
 		Files:           files,
 		BranchPublished: branchPublished,
@@ -72,7 +72,7 @@ func (s *Service) isBranchPublished() (bool, error) {
 }
 
 func (s *Service) getUpstreamBranch() (string, error) {
-	cmd := exec.Command("git", "-C", s.ProjectDir, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}")
+	cmd := exec.Command("git", "-C", s.WorkspaceDir, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", nil
@@ -90,7 +90,7 @@ func (s *Service) getAheadBehindInfo() (int, int, error) {
 		return 0, 0, nil
 	}
 
-	cmd := exec.Command("git", "-C", s.ProjectDir, "rev-list", "--left-right", "--count", fmt.Sprintf("%s...HEAD", upstream))
+	cmd := exec.Command("git", "-C", s.WorkspaceDir, "rev-list", "--left-right", "--count", fmt.Sprintf("%s...HEAD", upstream))
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return 0, 0, nil

@@ -28,7 +28,7 @@ func (s *ApiKeyServiceTestSuite) TestRevoke() {
 	keyNames := []string{}
 
 	keyNames = append(keyNames, clientKeyNames[1:]...)
-	keyNames = append(keyNames, projectKeyNames...)
+	keyNames = append(keyNames, workspaceKeyNames...)
 	for _, keyName := range keyNames {
 		apiKey, _ := s.apiKeyStore.FindByName(keyName)
 		expectedKeys = append(expectedKeys, apiKey)
@@ -49,7 +49,7 @@ func (s *ApiKeyServiceTestSuite) TestGenerate() {
 	keyNames := []string{}
 
 	keyNames = append(keyNames, clientKeyNames...)
-	keyNames = append(keyNames, projectKeyNames...)
+	keyNames = append(keyNames, workspaceKeyNames...)
 	for _, keyName := range keyNames {
 		apiKey, _ := s.apiKeyStore.FindByName(keyName)
 		expectedKeys = append(expectedKeys, apiKey)
