@@ -3,7 +3,7 @@
 Open a target in your preferred IDE
 
 ```
-daytona code [TARGET] [PROJECT] [flags]
+daytona code [TARGET] [WORKSPACE] [flags]
 ```
 
 ### Options

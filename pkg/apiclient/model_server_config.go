@@ -26,8 +26,8 @@ type ServerConfig struct {
 	BuildImageNamespace       *string     `json:"buildImageNamespace,omitempty"`
 	BuilderImage              string      `json:"builderImage"`
 	BuilderRegistryServer     string      `json:"builderRegistryServer"`
-	DefaultProjectImage       string      `json:"defaultProjectImage"`
-	DefaultProjectUser        string      `json:"defaultProjectUser"`
+	DefaultWorkspaceImage     string      `json:"defaultWorkspaceImage"`
+	DefaultWorkspaceUser      string      `json:"defaultWorkspaceUser"`
 	Frps                      *FRPSConfig `json:"frps,omitempty"`
 	HeadscalePort             int32       `json:"headscalePort"`
 	Id                        string      `json:"id"`
@@ -46,14 +46,14 @@ type _ServerConfig ServerConfig
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewServerConfig(apiPort int32, binariesPath string, builderImage string, builderRegistryServer string, defaultProjectImage string, defaultProjectUser string, headscalePort int32, id string, localBuilderRegistryImage string, localBuilderRegistryPort int32, logFilePath string, providersDir string, registryUrl string, serverDownloadUrl string) *ServerConfig {
+func NewServerConfig(apiPort int32, binariesPath string, builderImage string, builderRegistryServer string, defaultWorkspaceImage string, defaultWorkspaceUser string, headscalePort int32, id string, localBuilderRegistryImage string, localBuilderRegistryPort int32, logFilePath string, providersDir string, registryUrl string, serverDownloadUrl string) *ServerConfig {
 	this := ServerConfig{}
 	this.ApiPort = apiPort
 	this.BinariesPath = binariesPath
 	this.BuilderImage = builderImage
 	this.BuilderRegistryServer = builderRegistryServer
-	this.DefaultProjectImage = defaultProjectImage
-	this.DefaultProjectUser = defaultProjectUser
+	this.DefaultWorkspaceImage = defaultWorkspaceImage
+	this.DefaultWorkspaceUser = defaultWorkspaceUser
 	this.HeadscalePort = headscalePort
 	this.Id = id
 	this.LocalBuilderRegistryImage = localBuilderRegistryImage
@@ -201,52 +201,52 @@ func (o *ServerConfig) SetBuilderRegistryServer(v string) {
 	o.BuilderRegistryServer = v
 }
 
-// GetDefaultProjectImage returns the DefaultProjectImage field value
-func (o *ServerConfig) GetDefaultProjectImage() string {
+// GetDefaultWorkspaceImage returns the DefaultWorkspaceImage field value
+func (o *ServerConfig) GetDefaultWorkspaceImage() string {
 	if o == nil {
 		var ret string
 		return ret
 	}
 
-	return o.DefaultProjectImage
+	return o.DefaultWorkspaceImage
 }
 
-// GetDefaultProjectImageOk returns a tuple with the DefaultProjectImage field value
+// GetDefaultWorkspaceImageOk returns a tuple with the DefaultWorkspaceImage field value
 // and a boolean to check if the value has been set.
-func (o *ServerConfig) GetDefaultProjectImageOk() (*string, bool) {
+func (o *ServerConfig) GetDefaultWorkspaceImageOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.DefaultProjectImage, true
+	return &o.DefaultWorkspaceImage, true
 }
 
-// SetDefaultProjectImage sets field value
-func (o *ServerConfig) SetDefaultProjectImage(v string) {
-	o.DefaultProjectImage = v
+// SetDefaultWorkspaceImage sets field value
+func (o *ServerConfig) SetDefaultWorkspaceImage(v string) {
+	o.DefaultWorkspaceImage = v
 }
 
-// GetDefaultProjectUser returns the DefaultProjectUser field value
-func (o *ServerConfig) GetDefaultProjectUser() string {
+// GetDefaultWorkspaceUser returns the DefaultWorkspaceUser field value
+func (o *ServerConfig) GetDefaultWorkspaceUser() string {
 	if o == nil {
 		var ret string
 		return ret
 	}
 
-	return o.DefaultProjectUser
+	return o.DefaultWorkspaceUser
 }
 
-// GetDefaultProjectUserOk returns a tuple with the DefaultProjectUser field value
+// GetDefaultWorkspaceUserOk returns a tuple with the DefaultWorkspaceUser field value
 // and a boolean to check if the value has been set.
-func (o *ServerConfig) GetDefaultProjectUserOk() (*string, bool) {
+func (o *ServerConfig) GetDefaultWorkspaceUserOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.DefaultProjectUser, true
+	return &o.DefaultWorkspaceUser, true
 }
 
-// SetDefaultProjectUser sets field value
-func (o *ServerConfig) SetDefaultProjectUser(v string) {
-	o.DefaultProjectUser = v
+// SetDefaultWorkspaceUser sets field value
+func (o *ServerConfig) SetDefaultWorkspaceUser(v string) {
+	o.DefaultWorkspaceUser = v
 }
 
 // GetFrps returns the Frps field value if set, zero value otherwise.
@@ -522,8 +522,8 @@ func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	}
 	toSerialize["builderImage"] = o.BuilderImage
 	toSerialize["builderRegistryServer"] = o.BuilderRegistryServer
-	toSerialize["defaultProjectImage"] = o.DefaultProjectImage
-	toSerialize["defaultProjectUser"] = o.DefaultProjectUser
+	toSerialize["defaultWorkspaceImage"] = o.DefaultWorkspaceImage
+	toSerialize["defaultWorkspaceUser"] = o.DefaultWorkspaceUser
 	if !IsNil(o.Frps) {
 		toSerialize["frps"] = o.Frps
 	}
@@ -550,8 +550,8 @@ func (o *ServerConfig) UnmarshalJSON(data []byte) (err error) {
 		"binariesPath",
 		"builderImage",
 		"builderRegistryServer",
-		"defaultProjectImage",
-		"defaultProjectUser",
+		"defaultWorkspaceImage",
+		"defaultWorkspaceUser",
 		"headscalePort",
 		"id",
 		"localBuilderRegistryImage",

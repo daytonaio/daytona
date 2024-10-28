@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/pkg/build"
-	"github.com/daytonaio/daytona/pkg/target/project/containerconfig"
+	"github.com/daytonaio/daytona/pkg/target/workspace/containerconfig"
 )
 
 type BuildDTO struct {
@@ -16,7 +16,7 @@ type BuildDTO struct {
 	Image           *string                         `json:"image,omitempty"`
 	User            *string                         `json:"user,omitempty"`
 	ContainerConfig containerconfig.ContainerConfig `gorm:"serializer:json"`
-	BuildConfig     *ProjectBuildDTO                `json:"build,omitempty" gorm:"serializer:json"`
+	BuildConfig     *WorkspaceBuildDTO              `json:"build,omitempty" gorm:"serializer:json"`
 	Repository      RepositoryDTO                   `gorm:"serializer:json"`
 	EnvVars         map[string]string               `json:"envVars" gorm:"serializer:json"`
 	PrebuildId      string                          `json:"prebuildId"`
@@ -31,7 +31,7 @@ func ToBuildDTO(build *build.Build) BuildDTO {
 		Image:           build.Image,
 		User:            build.User,
 		ContainerConfig: build.ContainerConfig,
-		BuildConfig:     ToProjectBuildDTO(build.BuildConfig),
+		BuildConfig:     ToWorkspaceBuildDTO(build.BuildConfig),
 		Repository:      ToRepositoryDTO(build.Repository),
 		EnvVars:         build.EnvVars,
 		PrebuildId:      build.PrebuildId,
@@ -47,7 +47,7 @@ func ToBuild(buildDTO BuildDTO) *build.Build {
 		Image:           buildDTO.Image,
 		User:            buildDTO.User,
 		ContainerConfig: buildDTO.ContainerConfig,
-		BuildConfig:     ToProjectBuild(buildDTO.BuildConfig),
+		BuildConfig:     ToWorkspaceBuild(buildDTO.BuildConfig),
 		Repository:      ToRepository(buildDTO.Repository),
 		EnvVars:         buildDTO.EnvVars,
 		PrebuildId:      buildDTO.PrebuildId,

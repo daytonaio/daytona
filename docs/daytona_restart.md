@@ -9,7 +9,7 @@ daytona restart [TARGET] [flags]
 ### Options
 
 ```
-  -p, --project string   Restart a single project in the target (project name)
+  -w, --workspace string   Restart a single workspace in the target (workspace name)
 ```
 
 ### Options inherited from parent commands

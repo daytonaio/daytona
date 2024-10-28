@@ -1,6 +1,6 @@
 ## daytona info
 
-Show project info
+Show workspace info
 
 ```
 daytona info [flags]

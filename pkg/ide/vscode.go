@@ -19,21 +19,21 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func OpenVSCode(activeProfile config.Profile, targetId string, projectName string, projectProviderMetadata string, gpgKey string) error {
+func OpenVSCode(activeProfile config.Profile, targetId string, workspaceName string, workspaceProviderMetadata string, gpgKey string) error {
 	CheckAndAlertVSCodeInstalled()
 	err := installRemoteSSHExtension()
 	if err != nil {
 		return err
 	}
 
-	projectHostname := config.GetProjectHostname(activeProfile.Id, targetId, projectName)
+	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, targetId, workspaceName)
 
-	projectDir, err := util.GetProjectDir(activeProfile, targetId, projectName, gpgKey)
+	workspaceDir, err := util.GetWorkspaceDir(activeProfile, targetId, workspaceName, gpgKey)
 	if err != nil {
 		return err
 	}
 
-	commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", projectHostname, projectDir)
+	commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", workspaceHostname, workspaceDir)
 
 	vscCommand := exec.Command("code", "--disable-extension", "ms-vscode-remote.remote-containers", "--folder-uri", commandArgument)
 
@@ -42,16 +42,16 @@ func OpenVSCode(activeProfile config.Profile, targetId string, projectName strin
 		return err
 	}
 
-	if projectProviderMetadata == "" {
+	if workspaceProviderMetadata == "" {
 		return nil
 	}
 
-	return setupVSCodeCustomizations(projectHostname, projectProviderMetadata, devcontainer.Vscode, "*/.vscode-server/*/bin/code-server", "$HOME/.vscode-server/data/Machine/settings.json", ".daytona-customizations-lock-vscode")
+	return setupVSCodeCustomizations(workspaceHostname, workspaceProviderMetadata, devcontainer.Vscode, "*/.vscode-server/*/bin/code-server", "$HOME/.vscode-server/data/Machine/settings.json", ".daytona-customizations-lock-vscode")
 }
 
-func setupVSCodeCustomizations(projectHostname string, projectProviderMetadata string, tool devcontainer.Tool, codeServerPath string, settingsPath string, lockFileName string) error {
+func setupVSCodeCustomizations(workspaceHostname string, workspaceProviderMetadata string, tool devcontainer.Tool, codeServerPath string, settingsPath string, lockFileName string) error {
 	// Check if customizations are already set up
-	err := exec.Command("ssh", projectHostname, "test", "-f", fmt.Sprintf("$HOME/%s-%s", lockFileName, string(tool))).Run()
+	err := exec.Command("ssh", workspaceHostname, "test", "-f", fmt.Sprintf("$HOME/%s-%s", lockFileName, string(tool))).Run()
 	if err == nil {
 		return nil
 	}
@@ -59,7 +59,7 @@ func setupVSCodeCustomizations(projectHostname string, projectProviderMetadata s
 	fmt.Println("Setting up IDE customizations...")
 
 	var metadata map[string]interface{}
-	if err := json.Unmarshal([]byte(projectProviderMetadata), &metadata); err != nil {
+	if err := json.Unmarshal([]byte(workspaceProviderMetadata), &metadata); err != nil {
 		return err
 	}
 
@@ -89,7 +89,7 @@ func setupVSCodeCustomizations(projectHostname string, projectProviderMetadata s
 			time.Sleep(2 * time.Second)
 			// Wait for code to be installed
 			var err error
-			if vscodePath, err = exec.Command("ssh", projectHostname, "find", "$HOME", "-path", fmt.Sprintf(`"%s"`, codeServerPath)).Output(); err == nil && len(vscodePath) > 0 {
+			if vscodePath, err = exec.Command("ssh", workspaceHostname, "find", "$HOME", "-path", fmt.Sprintf(`"%s"`, codeServerPath)).Output(); err == nil && len(vscodePath) > 0 {
 				break
 			}
 		}
@@ -101,7 +101,7 @@ func setupVSCodeCustomizations(projectHostname string, projectProviderMetadata s
 			}
 
 			args := []string{
-				projectHostname,
+				workspaceHostname,
 				strings.TrimRight(string(vscodePath), "\n"),
 				"--accept-server-license-terms",
 			}
@@ -117,14 +117,14 @@ func setupVSCodeCustomizations(projectHostname string, projectProviderMetadata s
 			}
 		}
 
-		err := setupVSCodeSettings(projectHostname, mergedCustomizations, settingsPath)
+		err := setupVSCodeSettings(workspaceHostname, mergedCustomizations, settingsPath)
 		if err != nil {
 			log.Errorf("Failed to set IDE settings: %s", err)
 		}
 	}
 
 	// Create lock file to indicate that customizations are set up
-	err = exec.Command("ssh", projectHostname, "touch", fmt.Sprintf("$HOME/%s-%s", lockFileName, string(tool))).Run()
+	err = exec.Command("ssh", workspaceHostname, "touch", fmt.Sprintf("$HOME/%s-%s", lockFileName, string(tool))).Run()
 	if err != nil {
 		return err
 	}
@@ -133,12 +133,12 @@ func setupVSCodeCustomizations(projectHostname string, projectProviderMetadata s
 	return nil
 }
 
-func setupVSCodeSettings(projectHostname string, customizations *devcontainer.Customizations, settingsPath string) error {
+func setupVSCodeSettings(workspaceHostname string, customizations *devcontainer.Customizations, settingsPath string) error {
 	if customizations == nil {
 		return nil
 	}
 
-	content, err := exec.Command("ssh", projectHostname, "cat", settingsPath).Output()
+	content, err := exec.Command("ssh", workspaceHostname, "cat", settingsPath).Output()
 	if err != nil {
 		content = []byte("{}")
 	}
@@ -165,7 +165,7 @@ func setupVSCodeSettings(projectHostname string, customizations *devcontainer.Cu
 		return err
 	}
 
-	err = exec.Command("ssh", projectHostname, "echo", fmt.Sprintf(`'%s'`, string(settingsJson)), ">", settingsPath).Run()
+	err = exec.Command("ssh", workspaceHostname, "echo", fmt.Sprintf(`'%s'`, string(settingsJson)), ">", settingsPath).Run()
 	if err != nil {
 		return err
 	}

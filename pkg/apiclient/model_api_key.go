@@ -22,7 +22,7 @@ var _ MappedNullable = &ApiKey{}
 // ApiKey struct for ApiKey
 type ApiKey struct {
 	KeyHash string `json:"keyHash"`
-	// Project or client name
+	// Workspace or client name
 	Name string           `json:"name"`
 	Type ApikeyApiKeyType `json:"type"`
 }

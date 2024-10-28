@@ -24,11 +24,11 @@ func (f *MockLoggerFactory) CreateTargetLogger(targetId string, source logs.LogS
 	return &mockLogger{}
 }
 
-func (f *MockLoggerFactory) CreateProjectLogger(targetId, projectName string, source logs.LogSource) logs.Logger {
+func (f *MockLoggerFactory) CreateWorkspaceLogger(targetId, workspaceName string, source logs.LogSource) logs.Logger {
 	return &mockLogger{}
 }
 
-func (f *MockLoggerFactory) CreateBuildLogger(projectName, hash string, source logs.LogSource) logs.Logger {
+func (f *MockLoggerFactory) CreateBuildLogger(workspaceName, hash string, source logs.LogSource) logs.Logger {
 	return &mockLogger{}
 }
 
@@ -36,11 +36,11 @@ func (f *MockLoggerFactory) CreateTargetLogReader(targetId string) (io.Reader, e
 	return nil, nil
 }
 
-func (f *MockLoggerFactory) CreateProjectLogReader(targetId, projectName string) (io.Reader, error) {
+func (f *MockLoggerFactory) CreateWorkspaceLogReader(targetId, workspaceName string) (io.Reader, error) {
 	return nil, nil
 }
 
-func (f *MockLoggerFactory) CreateBuildLogReader(projectName, hash string) (io.Reader, error) {
+func (f *MockLoggerFactory) CreateBuildLogReader(workspaceName, hash string) (io.Reader, error) {
 	return nil, nil
 }
 

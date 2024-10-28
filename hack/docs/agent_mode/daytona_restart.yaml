@@ -1,5 +1,5 @@
 name: daytona restart
-synopsis: Restart the project
+synopsis: Restart the workspace
 usage: daytona restart [flags]
 inherited_options:
     - name: help

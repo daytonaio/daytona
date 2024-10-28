@@ -14,19 +14,19 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
-func OpenZed(activeProfile config.Profile, targetId, projectName, gpgKey string) error {
+func OpenZed(activeProfile config.Profile, targetId, workspaceName, gpgKey string) error {
 	path, err := GetZedBinaryPath()
 	if err != nil {
 		return err
 	}
 
-	projectHostname := config.GetProjectHostname(activeProfile.Id, targetId, projectName)
-	projectDir, err := util.GetProjectDir(activeProfile, targetId, projectName, gpgKey)
+	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, targetId, workspaceName)
+	workspaceDir, err := util.GetWorkspaceDir(activeProfile, targetId, workspaceName, gpgKey)
 	if err != nil {
 		return err
 	}
 	printDisclaimer()
-	zedCmd := exec.Command(path, fmt.Sprintf("ssh://%s%s", projectHostname, projectDir))
+	zedCmd := exec.Command(path, fmt.Sprintf("ssh://%s%s", workspaceHostname, workspaceDir))
 
 	err = zedCmd.Run()
 	if err != nil {

@@ -1,6 +1,6 @@
 name: daytona logs
-synopsis: View logs for a target/project
-usage: daytona logs [TARGET] [PROJECT_NAME] [flags]
+synopsis: View logs for a target/workspace
+usage: daytona logs [TARGET] [WORKSPACE_NAME] [flags]
 options:
     - name: follow
       shorthand: f

@@ -1,5 +1,5 @@
 name: daytona start
-synopsis: Start the project
+synopsis: Start the workspace
 usage: daytona start [flags]
 inherited_options:
     - name: help

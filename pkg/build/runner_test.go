@@ -129,12 +129,12 @@ func (s *BuildRunnerTestSuite) TestRunBuildProcess() {
 	mockLogger.On("Write", mock.Anything).Return(0, nil)
 
 	s.Runner.RunBuildProcess(build.BuildProcessConfig{
-		Builder:     &s.mockBuilder,
-		BuildLogger: mockLogger,
-		Build:       mocks.MockBuild,
-		ProjectDir:  "",
-		GitService:  mockGitService,
-		Wg:          nil,
+		Builder:      &s.mockBuilder,
+		BuildLogger:  mockLogger,
+		Build:        mocks.MockBuild,
+		WorkspaceDir: "",
+		GitService:   mockGitService,
+		Wg:           nil,
 	})
 
 	mockLogger.AssertExpectations(s.T())

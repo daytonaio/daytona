@@ -6,14 +6,14 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** |  | 
 **Name** | **string** |  | 
-**Projects** | [**[]Project**](Project.md) |  | 
 **TargetConfig** | **string** |  | 
+**Workspaces** | [**[]Workspace**](Workspace.md) |  | 
 
 ## Methods
 
 ### NewTarget
 
-`func NewTarget(id string, name string, projects []Project, targetConfig string, ) *Target`
+`func NewTarget(id string, name string, targetConfig string, workspaces []Workspace, ) *Target`
 
 NewTarget instantiates a new Target object
 This constructor will assign default values to properties that have it defined,
@@ -68,26 +68,6 @@ and a boolean to check if the value has been set.
 SetName sets Name field to given value.
 
 
-### GetProjects
-
-`func (o *Target) GetProjects() []Project`
-
-GetProjects returns the Projects field if non-nil, zero value otherwise.
-
-### GetProjectsOk
-
-`func (o *Target) GetProjectsOk() (*[]Project, bool)`
-
-GetProjectsOk returns a tuple with the Projects field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetProjects
-
-`func (o *Target) SetProjects(v []Project)`
-
-SetProjects sets Projects field to given value.
-
-
 ### GetTargetConfig
 
 `func (o *Target) GetTargetConfig() string`
@@ -106,6 +86,26 @@ and a boolean to check if the value has been set.
 `func (o *Target) SetTargetConfig(v string)`
 
 SetTargetConfig sets TargetConfig field to given value.
+
+
+### GetWorkspaces
+
+`func (o *Target) GetWorkspaces() []Workspace`
+
+GetWorkspaces returns the Workspaces field if non-nil, zero value otherwise.
+
+### GetWorkspacesOk
+
+`func (o *Target) GetWorkspacesOk() (*[]Workspace, bool)`
+
+GetWorkspacesOk returns a tuple with the Workspaces field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetWorkspaces
+
+`func (o *Target) SetWorkspaces(v []Workspace)`
+
+SetWorkspaces sets Workspaces field to given value.
 
 
 

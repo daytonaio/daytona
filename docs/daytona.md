@@ -28,22 +28,21 @@ daytona [flags]
 * [daytona create](daytona_create.md)	 - Create a target
 * [daytona delete](daytona_delete.md)	 - Delete a target
 * [daytona docs](daytona_docs.md)	 - Opens the Daytona documentation in your default browser.
-* [daytona env](daytona_env.md)	 - Manage profile environment variables that are added to all targets and projects
-* [daytona forward](daytona_forward.md)	 - Forward a port from a project to your local machine
+* [daytona env](daytona_env.md)	 - Manage profile environment variables that are added to all targets and workspaces
+* [daytona forward](daytona_forward.md)	 - Forward a port from a workspace to your local machine
 * [daytona git-providers](daytona_git-providers.md)	 - Manage Git providers
 * [daytona ide](daytona_ide.md)	 - Choose the default IDE
 * [daytona info](daytona_info.md)	 - Show target info
 * [daytona list](daytona_list.md)	 - List targets
-* [daytona logs](daytona_logs.md)	 - View logs for a target/project
+* [daytona logs](daytona_logs.md)	 - View logs for a target/workspace
 * [daytona prebuild](daytona_prebuild.md)	 - Manage prebuilds
 * [daytona profile](daytona_profile.md)	 - Manage profiles
-* [daytona project-config](daytona_project-config.md)	 - Manage project configs
 * [daytona provider](daytona_provider.md)	 - Manage providers
 * [daytona purge](daytona_purge.md)	 - Purges all Daytona data from the current device
 * [daytona restart](daytona_restart.md)	 - Restart a target
 * [daytona serve](daytona_serve.md)	 - Run the server process in the current terminal session
 * [daytona server](daytona_server.md)	 - Start the server process in daemon mode
-* [daytona ssh](daytona_ssh.md)	 - SSH into a project using the terminal
+* [daytona ssh](daytona_ssh.md)	 - SSH into a workspace using the terminal
 * [daytona start](daytona_start.md)	 - Start a target
 * [daytona stop](daytona_stop.md)	 - Stop a target
 * [daytona target-config](daytona_target-config.md)	 - Manage target configs
@@ -51,4 +50,5 @@ daytona [flags]
 * [daytona use](daytona_use.md)	 - Use profile [PROFILE_NAME]
 * [daytona version](daytona_version.md)	 - Print the version number
 * [daytona whoami](daytona_whoami.md)	 - Display information about the active user
+* [daytona workspace-config](daytona_workspace-config.md)	 - Manage workspace configs
 

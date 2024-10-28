@@ -19,11 +19,11 @@ import (
 
 var buildRunCmd = &cobra.Command{
 	Use:     "run",
-	Short:   "Run a build from a project config",
+	Short:   "Run a build from a workspace config",
 	Aliases: []string{"create"},
 	Args:    cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var projectConfig *apiclient.ProjectConfig
+		var workspaceConfig *apiclient.WorkspaceConfig
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -31,21 +31,21 @@ var buildRunCmd = &cobra.Command{
 			return err
 		}
 
-		projectConfigList, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(ctx).Execute()
+		workspaceConfigList, res, err := apiClient.WorkspaceConfigAPI.ListWorkspaceConfigs(ctx).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		projectConfig = selection.GetProjectConfigFromPrompt(projectConfigList, 0, false, false, "Build")
-		if projectConfig == nil {
+		workspaceConfig = selection.GetWorkspaceConfigFromPrompt(workspaceConfigList, 0, false, false, "Build")
+		if workspaceConfig == nil {
 			return nil
 		}
 
-		if projectConfig.BuildConfig == nil {
-			return errors.New("The chosen project config does not have a build configuration")
+		if workspaceConfig.BuildConfig == nil {
+			return errors.New("The chosen workspace config does not have a build configuration")
 		}
 
-		chosenBranch, err := target_util.GetBranchFromProjectConfig(projectConfig, apiClient, 0)
+		chosenBranch, err := target_util.GetBranchFromWorkspaceConfig(workspaceConfig, apiClient, 0)
 		if err != nil {
 			return err
 		}
@@ -55,7 +55,7 @@ var buildRunCmd = &cobra.Command{
 			return nil
 		}
 
-		buildId, err := CreateBuild(apiClient, projectConfig, chosenBranch.Name, nil)
+		buildId, err := CreateBuild(apiClient, workspaceConfig, chosenBranch.Name, nil)
 		if err != nil {
 			return err
 		}
@@ -65,7 +65,7 @@ var buildRunCmd = &cobra.Command{
 	},
 }
 
-func CreateBuild(apiClient *apiclient.APIClient, projectConfig *apiclient.ProjectConfig, branch string, prebuildId *string) (string, error) {
+func CreateBuild(apiClient *apiclient.APIClient, workspaceConfig *apiclient.WorkspaceConfig, branch string, prebuildId *string) (string, error) {
 	ctx := context.Background()
 
 	profileData, res, err := apiClient.ProfileAPI.GetProfileData(ctx).Execute()
@@ -73,20 +73,20 @@ func CreateBuild(apiClient *apiclient.APIClient, projectConfig *apiclient.Projec
 		return "", apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	if projectConfig.BuildConfig == nil {
-		return "", errors.New("the chosen project config does not have a build configuration")
+	if workspaceConfig.BuildConfig == nil {
+		return "", errors.New("the chosen workspace config does not have a build configuration")
 	}
 
 	createBuildDto := apiclient.CreateBuildDTO{
-		ProjectConfigName: projectConfig.Name,
-		Branch:            branch,
-		PrebuildId:        prebuildId,
+		WorkspaceConfigName: workspaceConfig.Name,
+		Branch:              branch,
+		PrebuildId:          prebuildId,
 	}
 
 	if profileData != nil {
-		createBuildDto.EnvVars = util.MergeEnvVars(profileData.EnvVars, projectConfig.EnvVars)
+		createBuildDto.EnvVars = util.MergeEnvVars(profileData.EnvVars, workspaceConfig.EnvVars)
 	} else {
-		createBuildDto.EnvVars = util.MergeEnvVars(projectConfig.EnvVars)
+		createBuildDto.EnvVars = util.MergeEnvVars(workspaceConfig.EnvVars)
 	}
 
 	buildId, res, err := apiClient.BuildAPI.CreateBuild(ctx).CreateBuildDto(createBuildDto).Execute()

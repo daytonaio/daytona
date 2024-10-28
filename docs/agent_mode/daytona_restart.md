@@ -1,6 +1,6 @@
 ## daytona restart
 
-Restart the project
+Restart the workspace
 
 ```
 daytona restart [flags]
