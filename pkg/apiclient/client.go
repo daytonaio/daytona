@@ -62,8 +62,6 @@ type APIClient struct {
 
 	ProfileAPI *ProfileAPIService
 
-	ProjectConfigAPI *ProjectConfigAPIService
-
 	ProviderAPI *ProviderAPIService
 
 	SampleAPI *SampleAPIService
@@ -73,6 +71,8 @@ type APIClient struct {
 	TargetAPI *TargetAPIService
 
 	TargetConfigAPI *TargetConfigAPIService
+
+	WorkspaceConfigAPI *WorkspaceConfigAPIService
 
 	WorkspaceToolboxAPI *WorkspaceToolboxAPIService
 }
@@ -100,12 +100,12 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.GitProviderAPI = (*GitProviderAPIService)(&c.common)
 	c.PrebuildAPI = (*PrebuildAPIService)(&c.common)
 	c.ProfileAPI = (*ProfileAPIService)(&c.common)
-	c.ProjectConfigAPI = (*ProjectConfigAPIService)(&c.common)
 	c.ProviderAPI = (*ProviderAPIService)(&c.common)
 	c.SampleAPI = (*SampleAPIService)(&c.common)
 	c.ServerAPI = (*ServerAPIService)(&c.common)
 	c.TargetAPI = (*TargetAPIService)(&c.common)
 	c.TargetConfigAPI = (*TargetConfigAPIService)(&c.common)
+	c.WorkspaceConfigAPI = (*WorkspaceConfigAPIService)(&c.common)
 	c.WorkspaceToolboxAPI = (*WorkspaceToolboxAPIService)(&c.common)
 
 	return c

@@ -1,9 +1,0 @@
-name: daytona serve
-synopsis: Run the server process in the current terminal session
-usage: daytona serve [flags]
-inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-see_also:
-    - daytona - Daytona is a Dev Environment Manager

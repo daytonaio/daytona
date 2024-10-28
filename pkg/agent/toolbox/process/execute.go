@@ -14,7 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ExecuteCommand(projectDir string) func(c *gin.Context) {
+func ExecuteCommand(workspaceDir string) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		var request ExecuteRequest
 		if err := c.ShouldBindJSON(&request); err != nil {
@@ -29,7 +29,7 @@ func ExecuteCommand(projectDir string) func(c *gin.Context) {
 		}
 
 		cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
-		cmd.Dir = projectDir
+		cmd.Dir = workspaceDir
 
 		// set maximum execution time
 		timeout := 10 * time.Second

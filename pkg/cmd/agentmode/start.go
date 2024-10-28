@@ -13,7 +13,7 @@ import (
 
 var startCmd = &cobra.Command{
 	Use:     "start",
-	Short:   "Start the project",
+	Short:   "Start the workspace",
 	Args:    cobra.NoArgs,
 	GroupID: util.TARGET_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -22,12 +22,12 @@ var startCmd = &cobra.Command{
 			return err
 		}
 
-		err = target_cmd.StartTarget(apiClient, targetId, projectName)
+		err = target_cmd.StartTarget(apiClient, targetId, workspaceName)
 		if err != nil {
 			return err
 		}
 
-		views.RenderInfoMessage("Project successfully started")
+		views.RenderInfoMessage("Workspace successfully started")
 		return nil
 	},
 }

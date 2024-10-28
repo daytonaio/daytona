@@ -44,21 +44,21 @@ func NewTargetEventProps(ctx context.Context, target *target.Target, targetConfi
 
 	if target != nil {
 		props["target_id"] = target.Id
-		props["target_n_projects"] = len(target.Projects)
+		props["target_n_workspaces"] = len(target.Workspaces)
 		publicRepos := []string{}
 		publicImages := []string{}
 		builders := map[string]int{}
 
-		for _, project := range target.Projects {
-			if isImagePublic(project.Image) {
-				publicImages = append(publicImages, project.Image)
+		for _, workspace := range target.Workspaces {
+			if isImagePublic(workspace.Image) {
+				publicImages = append(publicImages, workspace.Image)
 			}
-			if project.Repository != nil && isPublic(project.Repository.Url) {
-				publicRepos = append(publicRepos, project.Repository.Url)
+			if workspace.Repository != nil && isPublic(workspace.Repository.Url) {
+				publicRepos = append(publicRepos, workspace.Repository.Url)
 			}
-			if project.BuildConfig == nil {
+			if workspace.BuildConfig == nil {
 				builders["none"]++
-			} else if project.BuildConfig.Devcontainer != nil {
+			} else if workspace.BuildConfig.Devcontainer != nil {
 				builders["devcontainer"]++
 			} else {
 				builders["automatic"]++

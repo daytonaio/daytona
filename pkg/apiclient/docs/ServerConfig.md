@@ -9,8 +9,8 @@ Name | Type | Description | Notes
 **BuildImageNamespace** | Pointer to **string** |  | [optional] 
 **BuilderImage** | **string** |  | 
 **BuilderRegistryServer** | **string** |  | 
-**DefaultProjectImage** | **string** |  | 
-**DefaultProjectUser** | **string** |  | 
+**DefaultWorkspaceImage** | **string** |  | 
+**DefaultWorkspaceUser** | **string** |  | 
 **Frps** | Pointer to [**FRPSConfig**](FRPSConfig.md) |  | [optional] 
 **HeadscalePort** | **int32** |  | 
 **Id** | **string** |  | 
@@ -26,7 +26,7 @@ Name | Type | Description | Notes
 
 ### NewServerConfig
 
-`func NewServerConfig(apiPort int32, binariesPath string, builderImage string, builderRegistryServer string, defaultProjectImage string, defaultProjectUser string, headscalePort int32, id string, localBuilderRegistryImage string, localBuilderRegistryPort int32, logFile LogFileConfig, providersDir string, registryUrl string, serverDownloadUrl string, ) *ServerConfig`
+`func NewServerConfig(apiPort int32, binariesPath string, builderImage string, builderRegistryServer string, defaultWorkspaceImage string, defaultWorkspaceUser string, headscalePort int32, id string, localBuilderRegistryImage string, localBuilderRegistryPort int32, logFile LogFileConfig, providersDir string, registryUrl string, serverDownloadUrl string, ) *ServerConfig`
 
 NewServerConfig instantiates a new ServerConfig object
 This constructor will assign default values to properties that have it defined,
@@ -146,44 +146,44 @@ and a boolean to check if the value has been set.
 SetBuilderRegistryServer sets BuilderRegistryServer field to given value.
 
 
-### GetDefaultProjectImage
+### GetDefaultWorkspaceImage
 
-`func (o *ServerConfig) GetDefaultProjectImage() string`
+`func (o *ServerConfig) GetDefaultWorkspaceImage() string`
 
-GetDefaultProjectImage returns the DefaultProjectImage field if non-nil, zero value otherwise.
+GetDefaultWorkspaceImage returns the DefaultWorkspaceImage field if non-nil, zero value otherwise.
 
-### GetDefaultProjectImageOk
+### GetDefaultWorkspaceImageOk
 
-`func (o *ServerConfig) GetDefaultProjectImageOk() (*string, bool)`
+`func (o *ServerConfig) GetDefaultWorkspaceImageOk() (*string, bool)`
 
-GetDefaultProjectImageOk returns a tuple with the DefaultProjectImage field if it's non-nil, zero value otherwise
+GetDefaultWorkspaceImageOk returns a tuple with the DefaultWorkspaceImage field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetDefaultProjectImage
+### SetDefaultWorkspaceImage
 
-`func (o *ServerConfig) SetDefaultProjectImage(v string)`
+`func (o *ServerConfig) SetDefaultWorkspaceImage(v string)`
 
-SetDefaultProjectImage sets DefaultProjectImage field to given value.
+SetDefaultWorkspaceImage sets DefaultWorkspaceImage field to given value.
 
 
-### GetDefaultProjectUser
+### GetDefaultWorkspaceUser
 
-`func (o *ServerConfig) GetDefaultProjectUser() string`
+`func (o *ServerConfig) GetDefaultWorkspaceUser() string`
 
-GetDefaultProjectUser returns the DefaultProjectUser field if non-nil, zero value otherwise.
+GetDefaultWorkspaceUser returns the DefaultWorkspaceUser field if non-nil, zero value otherwise.
 
-### GetDefaultProjectUserOk
+### GetDefaultWorkspaceUserOk
 
-`func (o *ServerConfig) GetDefaultProjectUserOk() (*string, bool)`
+`func (o *ServerConfig) GetDefaultWorkspaceUserOk() (*string, bool)`
 
-GetDefaultProjectUserOk returns a tuple with the DefaultProjectUser field if it's non-nil, zero value otherwise
+GetDefaultWorkspaceUserOk returns a tuple with the DefaultWorkspaceUser field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetDefaultProjectUser
+### SetDefaultWorkspaceUser
 
-`func (o *ServerConfig) SetDefaultProjectUser(v string)`
+`func (o *ServerConfig) SetDefaultWorkspaceUser(v string)`
 
-SetDefaultProjectUser sets DefaultProjectUser field to given value.
+SetDefaultWorkspaceUser sets DefaultWorkspaceUser field to given value.
 
 
 ### GetFrps

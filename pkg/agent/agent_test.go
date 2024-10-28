@@ -17,10 +17,10 @@ import (
 	"github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/project"
+	"github.com/daytonaio/daytona/pkg/target/workspace"
 )
 
-var project1 = &project.Project{
+var workspace1 = &workspace.Workspace{
 	Name: "test",
 	Repository: &gitprovider.GitRepository{
 		Id:   "123",
@@ -29,7 +29,7 @@ var project1 = &project.Project{
 	},
 	TargetId:     "123",
 	TargetConfig: "local",
-	State: &project.ProjectState{
+	State: &workspace.WorkspaceState{
 		UpdatedAt: "123",
 		Uptime:    148,
 		GitStatus: gitStatus1,
@@ -40,28 +40,28 @@ var target1 = &target.Target{
 	Id:           "123",
 	Name:         "test",
 	TargetConfig: "local",
-	Projects: []*project.Project{
-		project1,
+	Workspaces: []*workspace.Workspace{
+		workspace1,
 	},
 }
 
-var gitStatus1 = &project.GitStatus{
+var gitStatus1 = &workspace.GitStatus{
 	CurrentBranch: "main",
-	Files: []*project.FileStatus{{
+	Files: []*workspace.FileStatus{{
 		Name:     "File1",
 		Extra:    "",
-		Staging:  project.Modified,
-		Worktree: project.Modified,
+		Staging:  workspace.Modified,
+		Worktree: workspace.Modified,
 	}},
 }
 
 var mockConfig = &config.Config{
-	TargetId:    target1.Id,
-	ProjectName: project1.Name,
+	TargetId:      target1.Id,
+	WorkspaceName: workspace1.Name,
 	Server: config.DaytonaServerConfig{
 		ApiKey: "test-api-key",
 	},
-	Mode: config.ModeProject,
+	Mode: config.ModeWorkspace,
 }
 
 func TestAgent(t *testing.T) {
@@ -82,7 +82,7 @@ func TestAgent(t *testing.T) {
 	mockTailscaleServer := mocks.NewMockTailscaleServer()
 	mockToolboxServer := mocks.NewMockToolboxServer()
 
-	mockConfig.ProjectDir = t.TempDir()
+	mockConfig.WorkspaceDir = t.TempDir()
 
 	// Create a new Agent instance
 	a := &agent.Agent{

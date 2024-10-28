@@ -6,8 +6,8 @@ package dto
 import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/project"
-	"github.com/daytonaio/daytona/pkg/target/project/buildconfig"
+	"github.com/daytonaio/daytona/pkg/target/workspace"
+	"github.com/daytonaio/daytona/pkg/target/workspace/buildconfig"
 )
 
 type TargetDTO struct {
@@ -15,28 +15,28 @@ type TargetDTO struct {
 	Info *target.TargetInfo `json:"info" validate:"optional"`
 } //	@name	TargetDTO
 
-type ProjectDTO struct {
-	project.Project
-	Info *project.ProjectInfo `json:"info" validate:"optional"`
-} //	@name	ProjectDTO
+type WorkspaceDTO struct {
+	workspace.Workspace
+	Info *workspace.WorkspaceInfo `json:"info" validate:"optional"`
+} //	@name	WorkspaceDTO
 
 type CreateTargetDTO struct {
-	Id           string             `json:"id" validate:"required"`
-	Name         string             `json:"name" validate:"required"`
-	TargetConfig string             `json:"targetConfig" validate:"required"`
-	Projects     []CreateProjectDTO `json:"projects" validate:"required,gt=0,dive"`
+	Id           string               `json:"id" validate:"required"`
+	Name         string               `json:"name" validate:"required"`
+	TargetConfig string               `json:"targetConfig" validate:"required"`
+	Workspaces   []CreateWorkspaceDTO `json:"workspaces" validate:"required,gt=0,dive"`
 } //	@name	CreateTargetDTO
 
-type CreateProjectDTO struct {
+type CreateWorkspaceDTO struct {
 	Name                string                   `json:"name" validate:"required"`
 	Image               *string                  `json:"image,omitempty" validate:"optional"`
 	User                *string                  `json:"user,omitempty" validate:"optional"`
 	BuildConfig         *buildconfig.BuildConfig `json:"buildConfig,omitempty" validate:"optional"`
-	Source              CreateProjectSourceDTO   `json:"source" validate:"required"`
+	Source              CreateWorkspaceSourceDTO `json:"source" validate:"required"`
 	EnvVars             map[string]string        `json:"envVars" validate:"required"`
 	GitProviderConfigId *string                  `json:"gitProviderConfigId" validate:"optional"`
-} //	@name	CreateProjectDTO
+} //	@name	CreateWorkspaceDTO
 
-type CreateProjectSourceDTO struct {
+type CreateWorkspaceSourceDTO struct {
 	Repository *gitprovider.GitRepository `json:"repository" validate:"required"`
-} // @name CreateProjectSourceDTO
+} // @name CreateWorkspaceSourceDTO

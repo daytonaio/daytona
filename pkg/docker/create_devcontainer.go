@@ -21,7 +21,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/build/devcontainer"
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/ssh"
-	"github.com/daytonaio/daytona/pkg/target/project/buildconfig"
+	"github.com/daytonaio/daytona/pkg/target/workspace/buildconfig"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/mount"
@@ -35,14 +35,14 @@ type RemoteUser string
 type DevcontainerPaths struct {
 	OverridesDir         string
 	OverridesTarget      string
-	ProjectTarget        string
+	WorkspaceDirTarget   string
 	TargetConfigFilePath string
 }
 
 type CreateDevcontainerOptions struct {
-	ProjectDir string
+	WorkspaceDir string
 	// Name of the project inside the devcontainer
-	ProjectName              string
+	WorkspaceName            string
 	BuildConfig              *buildconfig.BuildConfig
 	LogWriter                io.Writer
 	SshClient                *ssh.Client
@@ -57,12 +57,12 @@ type CreateDevcontainerOptions struct {
 func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (string, RemoteUser, error) {
 	// Ensure that the devcontainer config exists
 	if opts.SshClient != nil {
-		_, err := opts.SshClient.ReadFile(path.Join(opts.ProjectDir, opts.BuildConfig.Devcontainer.FilePath))
+		_, err := opts.SshClient.ReadFile(path.Join(opts.WorkspaceDir, opts.BuildConfig.Devcontainer.FilePath))
 		if err != nil {
 			return "", "", err
 		}
 	} else {
-		_, err := os.Stat(filepath.Join(opts.ProjectDir, opts.BuildConfig.Devcontainer.FilePath))
+		_, err := os.Stat(filepath.Join(opts.WorkspaceDir, opts.BuildConfig.Devcontainer.FilePath))
 		if err != nil {
 			return "", "", err
 		}
@@ -75,7 +75,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 
 	ctx := context.Background()
 
-	paths := d.getDevcontainerPaths(opts.ProjectDir, opts.BuildConfig.Devcontainer.FilePath)
+	paths := d.getDevcontainerPaths(opts.WorkspaceDir, opts.BuildConfig.Devcontainer.FilePath)
 
 	if opts.SshClient != nil {
 		err = opts.SshClient.Exec(fmt.Sprintf("mkdir -p %s", paths.OverridesDir), opts.LogWriter)
@@ -95,7 +95,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 	}
 
 	if opts.Prebuild {
-		err = d.runInitializeCommand(opts.ProjectDir, config.MergedConfiguration.InitializeCommand, opts.LogWriter, opts.SshClient)
+		err = d.runInitializeCommand(opts.WorkspaceDir, config.MergedConfiguration.InitializeCommand, opts.LogWriter, opts.SshClient)
 		if err != nil {
 			return "", "", err
 		}
@@ -134,12 +134,12 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 		envVars[k] = v
 	}
 
-	// If the workspaceFolder is not set in the devcontainer.json, we set it to /workspaces/<project-name>
+	// If the workspaceFolder is not set in the devcontainer.json, we set it to /workspaces/<workspace-name>
 	if _, ok := devcontainerConfig["workspaceFolder"].(string); !ok {
-		workspaceFolder = fmt.Sprintf("/workspaces/%s", opts.ProjectName)
+		workspaceFolder = fmt.Sprintf("/workspaces/%s", opts.WorkspaceName)
 		devcontainerConfig["workspaceFolder"] = workspaceFolder
 	}
-	devcontainerConfig["workspaceMount"] = fmt.Sprintf("source=%s,target=%s,type=bind", opts.ProjectDir, workspaceFolder)
+	devcontainerConfig["workspaceMount"] = fmt.Sprintf("source=%s,target=%s,type=bind", opts.WorkspaceDir, workspaceFolder)
 
 	delete(devcontainerConfig, "initializeCommand")
 
@@ -148,7 +148,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 
 		getComposeFilePath := func(composeFilePath string) (string, error) {
 			if opts.SshClient != nil {
-				composeFilePath = path.Join(paths.ProjectTarget, filepath.Dir(opts.BuildConfig.Devcontainer.FilePath), composeFilePath)
+				composeFilePath = path.Join(opts.WorkspaceDir, filepath.Dir(opts.BuildConfig.Devcontainer.FilePath), composeFilePath)
 
 				composeFileContent, err := d.getRemoteComposeContent(&opts, paths, socketForwardId, composeFilePath)
 				if err != nil {
@@ -161,7 +161,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 					return "", err
 				}
 			} else {
-				composeFilePath = filepath.Join(opts.ProjectDir, filepath.Dir(opts.BuildConfig.Devcontainer.FilePath), composeFilePath)
+				composeFilePath = filepath.Join(opts.WorkspaceDir, filepath.Dir(opts.BuildConfig.Devcontainer.FilePath), composeFilePath)
 			}
 
 			return composeFilePath, nil
@@ -202,17 +202,17 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 			return "", "", err
 		}
 
-		project.Name = fmt.Sprintf("%s-%s", opts.ProjectName, util.Hash(opts.ProjectDir))
+		project.Name = fmt.Sprintf("%s-%s", opts.WorkspaceName, util.Hash(opts.WorkspaceDir))
 
 		for _, service := range project.Services {
 			if service.Build != nil {
-				if strings.HasPrefix(service.Build.Context, opts.ProjectDir) {
-					service.Build.Context = strings.Replace(service.Build.Context, opts.ProjectDir, paths.ProjectTarget, 1)
+				if strings.HasPrefix(service.Build.Context, opts.WorkspaceDir) {
+					service.Build.Context = strings.Replace(service.Build.Context, opts.WorkspaceDir, paths.WorkspaceDirTarget, 1)
 				}
 			}
 			for i, v := range service.Volumes {
-				if strings.HasPrefix(v.Source, paths.ProjectTarget) {
-					service.Volumes[i].Source = strings.Replace(v.Source, paths.ProjectTarget, opts.ProjectDir, 1)
+				if strings.HasPrefix(v.Source, paths.WorkspaceDirTarget) {
+					service.Volumes[i].Source = strings.Replace(v.Source, paths.WorkspaceDirTarget, opts.WorkspaceDir, 1)
 				}
 			}
 		}
@@ -243,7 +243,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 		devcontainerConfig["dockerComposeFile"] = path.Join(paths.OverridesTarget, "daytona-compose-override.yml")
 	}
 
-	envVars["DAYTONA_PROJECT_DIR"] = workspaceFolder
+	envVars["DAYTONA_WORKSPACE_DIR"] = workspaceFolder
 
 	devcontainerConfig["containerEnv"] = envVars
 
@@ -268,7 +268,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 	devcontainerCmd := []string{
 		"devcontainer",
 		"up",
-		"--workspace-folder=" + paths.ProjectTarget,
+		"--workspace-folder=" + paths.WorkspaceDirTarget,
 		"--config=" + paths.TargetConfigFilePath,
 		"--override-config=" + path.Join(paths.OverridesTarget, "devcontainer.json"),
 		"--skip-non-blocking-commands",
@@ -292,7 +292,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 		devcontainerCmd = append(devcontainerCmd, "--prebuild")
 	}
 
-	output, err := d.execDevcontainerCommand(strings.Join(devcontainerCmd, " "), &opts, paths, paths.ProjectTarget, socketForwardId, true, []mount.Mount{
+	output, err := d.execDevcontainerCommand(strings.Join(devcontainerCmd, " "), &opts, paths, paths.WorkspaceDirTarget, socketForwardId, true, []mount.Mount{
 		{
 			Type:   mount.TypeBind,
 			Source: paths.OverridesDir,
@@ -383,7 +383,7 @@ func (d *DockerClient) readDevcontainerConfig(opts *CreateDevcontainerOptions, p
 
 	// We need to override localEnvs to the host env variables
 	// FIXME: This will not work for features that require localEnv
-	configEnvOverride, err := d.execDevcontainerCommand(strings.Join(cmd, " "), opts, paths, paths.ProjectTarget, socketForwardId, false, nil)
+	configEnvOverride, err := d.execDevcontainerCommand(strings.Join(cmd, " "), opts, paths, paths.WorkspaceDirTarget, socketForwardId, false, nil)
 	if err != nil {
 		return "", nil, err
 	}
@@ -413,7 +413,7 @@ func (d *DockerClient) readDevcontainerConfig(opts *CreateDevcontainerOptions, p
 	devcontainerCmd := append([]string{}, []string{
 		"devcontainer",
 		"read-configuration",
-		"--workspace-folder=" + paths.ProjectTarget,
+		"--workspace-folder=" + paths.WorkspaceDirTarget,
 		"--config=" + paths.TargetConfigFilePath,
 		"--override-config=" + path.Join(paths.OverridesTarget, "devcontainer.json"),
 		"--include-merged-configuration",
@@ -422,7 +422,7 @@ func (d *DockerClient) readDevcontainerConfig(opts *CreateDevcontainerOptions, p
 		"1",
 	}...)
 
-	output, err := d.execDevcontainerCommand(strings.Join(devcontainerCmd, " "), opts, paths, paths.ProjectTarget, socketForwardId, false, []mount.Mount{
+	output, err := d.execDevcontainerCommand(strings.Join(devcontainerCmd, " "), opts, paths, paths.WorkspaceDirTarget, socketForwardId, false, []mount.Mount{
 		{
 			Type:   mount.TypeBind,
 			Source: paths.OverridesDir,
@@ -526,8 +526,8 @@ func (d *DockerClient) execDevcontainerCommand(cmd string, opts *CreateDevcontai
 	mounts := []mount.Mount{
 		{
 			Type:   mount.TypeBind,
-			Source: opts.ProjectDir,
-			Target: paths.ProjectTarget,
+			Source: opts.WorkspaceDir,
+			Target: paths.WorkspaceDirTarget,
 		},
 	}
 
@@ -618,17 +618,17 @@ func (d *DockerClient) getRemoteComposeContent(opts *CreateDevcontainerOptions, 
 	return output[nameIndex:], nil
 }
 
-func (d *DockerClient) getDevcontainerPaths(projectDir string, devcontainerFilePath string) DevcontainerPaths {
-	projectTarget := path.Join("/project", filepath.Base(projectDir))
-	targetConfigFilePath := path.Join(projectTarget, devcontainerFilePath)
+func (d *DockerClient) getDevcontainerPaths(workspaceDir string, devcontainerFilePath string) DevcontainerPaths {
+	workspaceDirTarget := path.Join("/project", filepath.Base(workspaceDir))
+	targetConfigFilePath := path.Join(workspaceDirTarget, devcontainerFilePath)
 
-	overridesDir := filepath.Join(filepath.Dir(projectDir), fmt.Sprintf("%s-data", filepath.Base(projectDir)))
+	overridesDir := filepath.Join(filepath.Dir(workspaceDir), fmt.Sprintf("%s-data", filepath.Base(workspaceDir)))
 	overridesTarget := "/tmp/overrides"
 
 	return DevcontainerPaths{
 		OverridesDir:         overridesDir,
 		OverridesTarget:      overridesTarget,
-		ProjectTarget:        projectTarget,
+		WorkspaceDirTarget:   workspaceDirTarget,
 		TargetConfigFilePath: targetConfigFilePath,
 	}
 }

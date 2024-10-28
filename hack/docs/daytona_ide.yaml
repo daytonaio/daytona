@@ -1,9 +1,0 @@
-name: daytona ide
-synopsis: Choose the default IDE
-usage: daytona ide [flags]
-inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-see_also:
-    - daytona - Daytona is a Dev Environment Manager

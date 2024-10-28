@@ -22,15 +22,15 @@ func (p *Provisioner) StartTarget(target *target.Target, targetConfig *provider.
 	return err
 }
 
-func (p *Provisioner) StartProject(params ProjectParams) error {
+func (p *Provisioner) StartWorkspace(params WorkspaceParams) error {
 	targetProvider, err := p.providerManager.GetProvider(params.TargetConfig.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
-	_, err = (*targetProvider).StartProject(&provider.ProjectRequest{
+	_, err = (*targetProvider).StartWorkspace(&provider.WorkspaceRequest{
 		TargetConfigOptions:      params.TargetConfig.Options,
-		Project:                  params.Project,
+		Workspace:                params.Workspace,
 		ContainerRegistry:        params.ContainerRegistry,
 		GitProviderConfig:        params.GitProviderConfig,
 		BuilderImage:             params.BuilderImage,

@@ -13,7 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/build/devcontainer"
 )
 
-func OpenVSCodeInsiders(activeProfile config.Profile, targetId string, projectName string, projectProviderMetadata string, gpgKey string) error {
+func OpenVSCodeInsiders(activeProfile config.Profile, targetId string, workspaceId string, workspaceProviderMetadata string, gpgKey string) error {
 	path, err := GetVSCodeInsidersBinaryPath()
 	if err != nil {
 		return err
@@ -23,14 +23,14 @@ func OpenVSCodeInsiders(activeProfile config.Profile, targetId string, projectNa
 		return err
 	}
 
-	projectHostname := config.GetProjectHostname(activeProfile.Id, targetId, projectName)
+	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, targetId, workspaceId)
 
-	projectDir, err := util.GetProjectDir(activeProfile, targetId, projectName, gpgKey)
+	workspaceDir, err := util.GetWorkspaceDir(activeProfile, targetId, workspaceId, gpgKey)
 	if err != nil {
 		return err
 	}
 
-	commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", projectHostname, projectDir)
+	commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", workspaceHostname, workspaceDir)
 
 	vscCommand := exec.Command(path, "--disable-extension", "ms-vscode-remote.remote-containers", "--folder-uri", commandArgument)
 
@@ -39,11 +39,11 @@ func OpenVSCodeInsiders(activeProfile config.Profile, targetId string, projectNa
 		return err
 	}
 
-	if projectProviderMetadata == "" {
+	if workspaceProviderMetadata == "" {
 		return nil
 	}
 
-	return setupVSCodeCustomizations(projectHostname, projectProviderMetadata, devcontainer.Vscode, "*/.vscode-server-insiders/*/bin/code-server-insiders", "$HOME/.vscode-server-insiders/data/Machine/settings.json", ".daytona-customizations-lock-vscode-insiders")
+	return setupVSCodeCustomizations(workspaceHostname, workspaceProviderMetadata, devcontainer.Vscode, "*/.vscode-server-insiders/*/bin/code-server-insiders", "$HOME/.vscode-server-insiders/data/Machine/settings.json", ".daytona-customizations-lock-vscode-insiders")
 }
 
 func GetVSCodeInsidersBinaryPath() (string, error) {

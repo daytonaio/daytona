@@ -18,13 +18,13 @@ import (
 func (s *DockerClientTestSuite) TestExecSync() {
 	s.mockClient.On("ContainerList", mock.Anything, mock.Anything).Return([]types.Container{}, nil)
 
-	containerName := s.dockerClient.GetProjectContainerName(project1)
+	containerName := s.dockerClient.GetWorkspaceContainerName(workspace1)
 
-	s.setupExecTest([]string{"test-cmd"}, containerName, project1.User, []string{}, "")
+	s.setupExecTest([]string{"test-cmd"}, containerName, workspace1.User, []string{}, "")
 
 	result, err := s.dockerClient.ExecSync(containerName, container.ExecOptions{
 		Cmd:  []string{"test-cmd"},
-		User: project1.User,
+		User: workspace1.User,
 	}, io.Discard)
 	require.Nil(s.T(), err)
 	require.Equal(s.T(), 0, result.ExitCode)

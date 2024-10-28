@@ -21,8 +21,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
 	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/project"
-	"github.com/daytonaio/daytona/pkg/target/project/buildconfig"
+	"github.com/daytonaio/daytona/pkg/target/workspace"
+	"github.com/daytonaio/daytona/pkg/target/workspace/buildconfig"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 
 	log "github.com/sirupsen/logrus"
@@ -68,19 +68,19 @@ func (s *TargetService) CreateTarget(ctx context.Context, req dto.CreateTargetDT
 	}
 	target.ApiKey = apiKey
 
-	target.Projects = []*project.Project{}
+	target.Workspaces = []*workspace.Workspace{}
 
-	for _, projectDto := range req.Projects {
-		p := conversion.CreateDtoToProject(projectDto)
+	for _, workspaceDto := range req.Workspaces {
+		w := conversion.CreateDtoToWorkspace(workspaceDto)
 
-		isValidProjectName := regexp.MustCompile(`^[a-zA-Z0-9-_.]+$`).MatchString
-		if !isValidProjectName(p.Name) {
-			return nil, ErrInvalidProjectName
+		isValidWorkspaceName := regexp.MustCompile(`^[a-zA-Z0-9-_.]+$`).MatchString
+		if !isValidWorkspaceName(w.Name) {
+			return nil, ErrInvalidWorkspaceName
 		}
 
-		p.Repository.Url = util.CleanUpRepositoryUrl(p.Repository.Url)
-		if p.GitProviderConfigId == nil || *p.GitProviderConfigId == "" {
-			configs, err := s.gitProviderService.ListConfigsForUrl(p.Repository.Url)
+		w.Repository.Url = util.CleanUpRepositoryUrl(w.Repository.Url)
+		if w.GitProviderConfigId == nil || *w.GitProviderConfigId == "" {
+			configs, err := s.gitProviderService.ListConfigsForUrl(w.Repository.Url)
 			if err != nil {
 				return nil, err
 			}
@@ -90,42 +90,42 @@ func (s *TargetService) CreateTarget(ctx context.Context, req dto.CreateTargetDT
 			}
 
 			if len(configs) == 1 {
-				p.GitProviderConfigId = &configs[0].Id
+				w.GitProviderConfigId = &configs[0].Id
 			}
 		}
 
-		if p.Repository.Sha == "" {
-			sha, err := s.gitProviderService.GetLastCommitSha(p.Repository)
+		if w.Repository.Sha == "" {
+			sha, err := s.gitProviderService.GetLastCommitSha(w.Repository)
 			if err != nil {
 				return nil, err
 			}
-			p.Repository.Sha = sha
+			w.Repository.Sha = sha
 		}
 
-		if p.BuildConfig != nil {
-			cachedBuild, err := s.getCachedBuildForProject(p)
+		if w.BuildConfig != nil {
+			cachedBuild, err := s.getCachedBuildForWorkspace(w)
 			if err == nil {
-				p.BuildConfig.CachedBuild = cachedBuild
+				w.BuildConfig.CachedBuild = cachedBuild
 			}
 		}
 
-		if p.Image == "" {
-			p.Image = s.defaultProjectImage
+		if w.Image == "" {
+			w.Image = s.defaultWorkspaceImage
 		}
 
-		if p.User == "" {
-			p.User = s.defaultProjectUser
+		if w.User == "" {
+			w.User = s.defaultWorkspaceUser
 		}
 
-		apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", target.Id, p.Name))
+		apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeWorkspace, fmt.Sprintf("%s/%s", target.Id, w.Name))
 		if err != nil {
 			return nil, err
 		}
 
-		p.TargetId = target.Id
-		p.ApiKey = apiKey
-		p.TargetConfig = target.TargetConfig
-		target.Projects = append(target.Projects, p)
+		w.TargetId = target.Id
+		w.ApiKey = apiKey
+		w.TargetConfig = target.TargetConfig
+		target.Workspaces = append(target.Workspaces, w)
 	}
 
 	err = s.targetStore.Save(target)
@@ -160,10 +160,10 @@ func (s *TargetService) CreateTarget(ctx context.Context, req dto.CreateTargetDT
 	return target, err
 }
 
-func (s *TargetService) createProject(p *project.Project, targetConfig *provider.TargetConfig, logWriter io.Writer) error {
-	logWriter.Write([]byte(fmt.Sprintf("Creating project %s\n", p.Name)))
+func (s *TargetService) createWorkspace(w *workspace.Workspace, targetConfig *provider.TargetConfig, logWriter io.Writer) error {
+	logWriter.Write([]byte(fmt.Sprintf("Creating workspace %s\n", w.Name)))
 
-	cr, err := s.containerRegistryService.FindByImageName(p.Image)
+	cr, err := s.containerRegistryService.FindByImageName(w.Image)
 	if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
 		return err
 	}
@@ -175,15 +175,15 @@ func (s *TargetService) createProject(p *project.Project, targetConfig *provider
 
 	var gc *gitprovider.GitProviderConfig
 
-	if p.GitProviderConfigId != nil {
-		gc, err = s.gitProviderService.GetConfig(*p.GitProviderConfigId)
+	if w.GitProviderConfigId != nil {
+		gc, err = s.gitProviderService.GetConfig(*w.GitProviderConfigId)
 		if err != nil && !gitprovider.IsGitProviderNotFound(err) {
 			return err
 		}
 	}
 
-	err = s.provisioner.CreateProject(provisioner.ProjectParams{
-		Project:                       p,
+	err = s.provisioner.CreateWorkspace(provisioner.WorkspaceParams{
+		Workspace:                     w,
 		TargetConfig:                  targetConfig,
 		ContainerRegistry:             cr,
 		GitProviderConfig:             gc,
@@ -194,7 +194,7 @@ func (s *TargetService) createProject(p *project.Project, targetConfig *provider
 		return err
 	}
 
-	logWriter.Write([]byte(fmt.Sprintf("Project %s created\n", p.Name)))
+	logWriter.Write([]byte(fmt.Sprintf("Workspace %s created\n", w.Name)))
 
 	return nil
 }
@@ -217,33 +217,33 @@ func (s *TargetService) createTarget(ctx context.Context, t *target.Target, targ
 		return nil, err
 	}
 
-	for i, p := range t.Projects {
-		projectLogger := s.loggerFactory.CreateProjectLogger(t.Id, p.Name, logs.LogSourceServer)
-		defer projectLogger.Close()
+	for i, w := range t.Workspaces {
+		workspaceLogger := s.loggerFactory.CreateWorkspaceLogger(t.Id, w.Name, logs.LogSourceServer)
+		defer workspaceLogger.Close()
 
-		projectWithEnv := *p
-		projectWithEnv.EnvVars = project.GetProjectEnvVars(p, project.ProjectEnvVarParams{
+		workspaceWithEnv := *w
+		workspaceWithEnv.EnvVars = workspace.GetWorkspaceEnvVars(w, workspace.WorkspaceEnvVarParams{
 			ApiUrl:        s.serverApiUrl,
 			ServerUrl:     s.serverUrl,
 			ServerVersion: s.serverVersion,
 			ClientId:      telemetry.ClientId(ctx),
 		}, telemetry.TelemetryEnabled(ctx))
 
-		for k, v := range p.EnvVars {
-			projectWithEnv.EnvVars[k] = v
+		for k, v := range w.EnvVars {
+			workspaceWithEnv.EnvVars[k] = v
 		}
 
 		var err error
 
-		p = &projectWithEnv
+		w = &workspaceWithEnv
 
-		t.Projects[i] = p
+		t.Workspaces[i] = w
 		err = s.targetStore.Save(t)
 		if err != nil {
 			return nil, err
 		}
 
-		err = s.createProject(p, targetConfig, projectLogger)
+		err = s.createWorkspace(w, targetConfig, workspaceLogger)
 		if err != nil {
 			return nil, err
 		}
@@ -259,17 +259,17 @@ func (s *TargetService) createTarget(ctx context.Context, t *target.Target, targ
 	return t, nil
 }
 
-func (s *TargetService) getCachedBuildForProject(p *project.Project) (*buildconfig.CachedBuild, error) {
+func (s *TargetService) getCachedBuildForWorkspace(w *workspace.Workspace) (*buildconfig.CachedBuild, error) {
 	validStates := &[]build.BuildState{
 		build.BuildState(build.BuildStatePublished),
 	}
 
 	build, err := s.buildService.Find(&build.Filter{
 		States:        validStates,
-		RepositoryUrl: &p.Repository.Url,
-		Branch:        &p.Repository.Branch,
-		EnvVars:       &p.EnvVars,
-		BuildConfig:   p.BuildConfig,
+		RepositoryUrl: &w.Repository.Url,
+		Branch:        &w.Repository.Branch,
+		EnvVars:       &w.EnvVars,
+		BuildConfig:   w.BuildConfig,
 		GetNewest:     util.Pointer(true),
 	})
 	if err != nil {
