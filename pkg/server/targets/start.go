@@ -11,7 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/project"
+	"github.com/daytonaio/daytona/pkg/target/workspace"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	log "github.com/sirupsen/logrus"
 
@@ -56,15 +56,15 @@ func (s *TargetService) StartTarget(ctx context.Context, targetId string) error 
 	return err
 }
 
-func (s *TargetService) StartProject(ctx context.Context, targetId, projectName string) error {
+func (s *TargetService) StartWorkspace(ctx context.Context, targetId, workspaceName string) error {
 	w, err := s.targetStore.Find(targetId)
 	if err != nil {
 		return ErrTargetNotFound
 	}
 
-	project, err := w.GetProject(projectName)
+	workspace, err := w.GetWorkspace(workspaceName)
 	if err != nil {
-		return ErrProjectNotFound
+		return ErrWorkspaceNotFound
 	}
 
 	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &w.TargetConfig})
@@ -72,10 +72,10 @@ func (s *TargetService) StartProject(ctx context.Context, targetId, projectName 
 		return err
 	}
 
-	projectLogger := s.loggerFactory.CreateProjectLogger(w.Id, project.Name, logs.LogSourceServer)
-	defer projectLogger.Close()
+	workspaceLogger := s.loggerFactory.CreateWorkspaceLogger(w.Id, workspace.Name, logs.LogSourceServer)
+	defer workspaceLogger.Close()
 
-	return s.startProject(ctx, project, targetConfig, projectLogger)
+	return s.startWorkspace(ctx, workspace, targetConfig, workspaceLogger)
 }
 
 func (s *TargetService) startTarget(ctx context.Context, t *target.Target, targetConfig *provider.TargetConfig, targetLogger io.Writer) error {
@@ -93,11 +93,11 @@ func (s *TargetService) startTarget(ctx context.Context, t *target.Target, targe
 		return err
 	}
 
-	for _, project := range t.Projects {
-		projectLogger := s.loggerFactory.CreateProjectLogger(t.Id, project.Name, logs.LogSourceServer)
-		defer projectLogger.Close()
+	for _, workspace := range t.Workspaces {
+		workspaceLogger := s.loggerFactory.CreateWorkspaceLogger(t.Id, workspace.Name, logs.LogSourceServer)
+		defer workspaceLogger.Close()
 
-		err = s.startProject(ctx, project, targetConfig, projectLogger)
+		err = s.startWorkspace(ctx, workspace, targetConfig, workspaceLogger)
 		if err != nil {
 			return err
 		}
@@ -108,23 +108,23 @@ func (s *TargetService) startTarget(ctx context.Context, t *target.Target, targe
 	return nil
 }
 
-func (s *TargetService) startProject(ctx context.Context, p *project.Project, targetConfig *provider.TargetConfig, logWriter io.Writer) error {
-	logWriter.Write([]byte(fmt.Sprintf("Starting project %s\n", p.Name)))
+func (s *TargetService) startWorkspace(ctx context.Context, w *workspace.Workspace, targetConfig *provider.TargetConfig, logWriter io.Writer) error {
+	logWriter.Write([]byte(fmt.Sprintf("Starting workspace %s\n", w.Name)))
 
-	projectToStart := *p
-	projectToStart.EnvVars = project.GetProjectEnvVars(p, project.ProjectEnvVarParams{
+	workspaceToStart := *w
+	workspaceToStart.EnvVars = workspace.GetWorkspaceEnvVars(w, workspace.WorkspaceEnvVarParams{
 		ApiUrl:        s.serverApiUrl,
 		ServerUrl:     s.serverUrl,
 		ServerVersion: s.serverVersion,
 		ClientId:      telemetry.ClientId(ctx),
 	}, telemetry.TelemetryEnabled(ctx))
 
-	err := s.provisioner.StartProject(&projectToStart, targetConfig)
+	err := s.provisioner.StartWorkspace(&workspaceToStart, targetConfig)
 	if err != nil {
 		return err
 	}
 
-	logWriter.Write([]byte(fmt.Sprintf("Project %s started\n", p.Name)))
+	logWriter.Write([]byte(fmt.Sprintf("Workspace %s started\n", w.Name)))
 
 	return nil
 }

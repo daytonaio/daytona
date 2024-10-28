@@ -42,9 +42,9 @@ type RepositoryWizardConfig struct {
 	ApiClient           *apiclient.APIClient
 	UserGitProviders    []apiclient.GitProvider
 	Manual              bool
-	MultiProject        bool
+	MultiWorkspace      bool
 	SkipBranchSelection bool
-	ProjectOrder        int
+	WorkspaceOrder      int
 	SelectedRepos       map[string]int
 }
 
@@ -61,7 +61,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 	}
 
 	if (len(config.UserGitProviders) == 0 && len(samples) == 0) || config.Manual {
-		repo, err := create.GetRepositoryFromUrlInput(config.MultiProject, config.ProjectOrder, config.ApiClient, config.SelectedRepos)
+		repo, err := create.GetRepositoryFromUrlInput(config.MultiWorkspace, config.WorkspaceOrder, config.ApiClient, config.SelectedRepos)
 		return repo, selection.CustomRepoIdentifier, err
 	}
 
@@ -84,13 +84,13 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		}
 	}
 
-	gitProviderConfigId = selection.GetProviderIdFromPrompt(gitProviderViewList, config.ProjectOrder, len(samples) > 0)
+	gitProviderConfigId = selection.GetProviderIdFromPrompt(gitProviderViewList, config.WorkspaceOrder, len(samples) > 0)
 	if gitProviderConfigId == "" {
 		return nil, "", common.ErrCtrlCAbort
 	}
 
 	if gitProviderConfigId == selection.CustomRepoIdentifier {
-		repo, err := create.GetRepositoryFromUrlInput(config.MultiProject, config.ProjectOrder, config.ApiClient, config.SelectedRepos)
+		repo, err := create.GetRepositoryFromUrlInput(config.MultiWorkspace, config.WorkspaceOrder, config.ApiClient, config.SelectedRepos)
 		return repo, selection.CustomRepoIdentifier, err
 	}
 
@@ -169,7 +169,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 			CursorIndex:          selectionListCursorIdx,
 		}
 
-		namespaceId, navigate = selection.GetNamespaceIdFromPrompt(namespaceList, config.ProjectOrder, selectionListOptions)
+		namespaceId, navigate = selection.GetNamespaceIdFromPrompt(namespaceList, config.WorkspaceOrder, selectionListOptions)
 
 		if !disablePagination && navigate != "" {
 			if navigate == views.ListNavigationText {
@@ -229,7 +229,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		}
 
 		// User will either choose a repo or navigate the pages
-		chosenRepo, navigate = selection.GetRepositoryFromPrompt(providerRepos, config.ProjectOrder, config.SelectedRepos, selectionListOptions)
+		chosenRepo, navigate = selection.GetRepositoryFromPrompt(providerRepos, config.WorkspaceOrder, config.SelectedRepos, selectionListOptions)
 		if !disablePagination && navigate != "" {
 			if navigate == views.ListNavigationText {
 				page++
@@ -253,7 +253,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		NamespaceId:         namespaceId,
 		Namespace:           namespace,
 		ChosenRepo:          chosenRepo,
-		ProjectOrder:        config.ProjectOrder,
+		WorkspaceOrder:      config.WorkspaceOrder,
 		ProviderId:          providerId,
 	})
 

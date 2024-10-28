@@ -14,7 +14,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/server"
 	builds_dto "github.com/daytonaio/daytona/pkg/server/builds/dto"
-	"github.com/daytonaio/daytona/pkg/target/project/config"
+	"github.com/daytonaio/daytona/pkg/target/workspace/config"
 	"github.com/gin-gonic/gin"
 )
 
@@ -39,22 +39,22 @@ func CreateBuild(ctx *gin.Context) {
 
 	s := server.GetInstance(nil)
 
-	projectConfig, err := s.ProjectConfigService.Find(&config.ProjectConfigFilter{
-		Name: &createBuildDto.ProjectConfigName,
+	workspaceConfig, err := s.WorkspaceConfigService.Find(&config.WorkspaceConfigFilter{
+		Name: &createBuildDto.WorkspaceConfigName,
 	})
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get project config: %s", err.Error()))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get workspace config: %s", err.Error()))
 		return
 	}
 
-	gitProvider, _, err := s.GitProviderService.GetGitProviderForUrl(projectConfig.RepositoryUrl)
+	gitProvider, _, err := s.GitProviderService.GetGitProviderForUrl(workspaceConfig.RepositoryUrl)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %s", err.Error()))
 		return
 	}
 
 	repo, err := gitProvider.GetRepositoryContext(gitprovider.GetRepositoryContext{
-		Url:    projectConfig.RepositoryUrl,
+		Url:    workspaceConfig.RepositoryUrl,
 		Branch: &createBuildDto.Branch,
 	})
 	if err != nil {
@@ -63,9 +63,9 @@ func CreateBuild(ctx *gin.Context) {
 	}
 
 	newBuildDto := builds_dto.BuildCreationData{
-		Image:       projectConfig.Image,
-		User:        projectConfig.User,
-		BuildConfig: projectConfig.BuildConfig,
+		Image:       workspaceConfig.Image,
+		User:        workspaceConfig.User,
+		BuildConfig: workspaceConfig.BuildConfig,
 		Repository:  repo,
 		EnvVars:     createBuildDto.EnvVars,
 	}
@@ -242,7 +242,7 @@ func DeleteBuildsFromPrebuild(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
 	// Fail if prebuild does not exist
-	_, err = server.ProjectConfigService.FindPrebuild(nil, &config.PrebuildFilter{
+	_, err = server.WorkspaceConfigService.FindPrebuild(nil, &config.PrebuildFilter{
 		Id: &prebuildId,
 	})
 	if err != nil {

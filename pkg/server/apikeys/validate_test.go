@@ -10,7 +10,7 @@ func (s *ApiKeyServiceTestSuite) TestIsValidKey_True() {
 
 	require := s.Require()
 
-	apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeProject, keyName)
+	apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeWorkspace, keyName)
 	require.Nil(err)
 
 	res := s.apiKeyService.IsValidApiKey(apiKey)
@@ -26,19 +26,19 @@ func (s *ApiKeyServiceTestSuite) TestIsValidKey_False() {
 	require.False(res)
 }
 
-func (s *ApiKeyServiceTestSuite) TestIsProjectApiKey_True() {
-	keyName := "projectKey"
+func (s *ApiKeyServiceTestSuite) TestIsWorkspaceApiKey_True() {
+	keyName := "workspaceKey"
 
 	require := s.Require()
 
-	apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeProject, keyName)
+	apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeWorkspace, keyName)
 	require.Nil(err)
 
-	res := s.apiKeyService.IsProjectApiKey(apiKey)
+	res := s.apiKeyService.IsWorkspaceApiKey(apiKey)
 	require.True(res)
 }
 
-func (s *ApiKeyServiceTestSuite) TestIsProjectApiKey_False() {
+func (s *ApiKeyServiceTestSuite) TestIsWorkspaceApiKey_False() {
 	keyName := "clientKey"
 
 	require := s.Require()
@@ -46,7 +46,7 @@ func (s *ApiKeyServiceTestSuite) TestIsProjectApiKey_False() {
 	apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeClient, keyName)
 	require.Nil(err)
 
-	res := s.apiKeyService.IsProjectApiKey(apiKey)
+	res := s.apiKeyService.IsWorkspaceApiKey(apiKey)
 	require.False(res)
 }
 

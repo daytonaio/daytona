@@ -21,9 +21,9 @@ var _ MappedNullable = &TargetInfo{}
 
 // TargetInfo struct for TargetInfo
 type TargetInfo struct {
-	Name             string        `json:"name"`
-	Projects         []ProjectInfo `json:"projects"`
-	ProviderMetadata *string       `json:"providerMetadata,omitempty"`
+	Name             string          `json:"name"`
+	ProviderMetadata *string         `json:"providerMetadata,omitempty"`
+	Workspaces       []WorkspaceInfo `json:"workspaces"`
 }
 
 type _TargetInfo TargetInfo
@@ -32,10 +32,10 @@ type _TargetInfo TargetInfo
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTargetInfo(name string, projects []ProjectInfo) *TargetInfo {
+func NewTargetInfo(name string, workspaces []WorkspaceInfo) *TargetInfo {
 	this := TargetInfo{}
 	this.Name = name
-	this.Projects = projects
+	this.Workspaces = workspaces
 	return &this
 }
 
@@ -71,30 +71,6 @@ func (o *TargetInfo) SetName(v string) {
 	o.Name = v
 }
 
-// GetProjects returns the Projects field value
-func (o *TargetInfo) GetProjects() []ProjectInfo {
-	if o == nil {
-		var ret []ProjectInfo
-		return ret
-	}
-
-	return o.Projects
-}
-
-// GetProjectsOk returns a tuple with the Projects field value
-// and a boolean to check if the value has been set.
-func (o *TargetInfo) GetProjectsOk() ([]ProjectInfo, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return o.Projects, true
-}
-
-// SetProjects sets field value
-func (o *TargetInfo) SetProjects(v []ProjectInfo) {
-	o.Projects = v
-}
-
 // GetProviderMetadata returns the ProviderMetadata field value if set, zero value otherwise.
 func (o *TargetInfo) GetProviderMetadata() string {
 	if o == nil || IsNil(o.ProviderMetadata) {
@@ -127,6 +103,30 @@ func (o *TargetInfo) SetProviderMetadata(v string) {
 	o.ProviderMetadata = &v
 }
 
+// GetWorkspaces returns the Workspaces field value
+func (o *TargetInfo) GetWorkspaces() []WorkspaceInfo {
+	if o == nil {
+		var ret []WorkspaceInfo
+		return ret
+	}
+
+	return o.Workspaces
+}
+
+// GetWorkspacesOk returns a tuple with the Workspaces field value
+// and a boolean to check if the value has been set.
+func (o *TargetInfo) GetWorkspacesOk() ([]WorkspaceInfo, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Workspaces, true
+}
+
+// SetWorkspaces sets field value
+func (o *TargetInfo) SetWorkspaces(v []WorkspaceInfo) {
+	o.Workspaces = v
+}
+
 func (o TargetInfo) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -138,10 +138,10 @@ func (o TargetInfo) MarshalJSON() ([]byte, error) {
 func (o TargetInfo) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["name"] = o.Name
-	toSerialize["projects"] = o.Projects
 	if !IsNil(o.ProviderMetadata) {
 		toSerialize["providerMetadata"] = o.ProviderMetadata
 	}
+	toSerialize["workspaces"] = o.Workspaces
 	return toSerialize, nil
 }
 
@@ -151,7 +151,7 @@ func (o *TargetInfo) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"name",
-		"projects",
+		"workspaces",
 	}
 
 	allProperties := make(map[string]interface{})

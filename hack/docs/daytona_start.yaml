@@ -10,9 +10,9 @@ options:
       shorthand: c
       default_value: "false"
       usage: Open the target in the IDE after target start
-    - name: project
-      shorthand: p
-      usage: Start a single project in the target (project name)
+    - name: workspace
+      shorthand: w
+      usage: Start a single workspace in the target (workspace name)
     - name: "yes"
       shorthand: "y"
       default_value: "false"

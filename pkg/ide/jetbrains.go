@@ -23,25 +23,25 @@ import (
 	"github.com/pkg/browser"
 )
 
-func OpenJetbrainsIDE(activeProfile config.Profile, ide, targetId, projectName string, gpgKey string) error {
+func OpenJetbrainsIDE(activeProfile config.Profile, ide, targetId, workspaceName string, gpgKey string) error {
 	err := IsJetBrainsGatewayInstalled()
 	if err != nil {
 		return err
 	}
 
-	projectDir, err := util.GetProjectDir(activeProfile, targetId, projectName, gpgKey)
+	workspaceDir, err := util.GetWorkspaceDir(activeProfile, targetId, workspaceName, gpgKey)
 	if err != nil {
 		return err
 	}
 
-	projectHostname := config.GetProjectHostname(activeProfile.Id, targetId, projectName)
+	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, targetId, workspaceName)
 
 	jbIde, ok := jetbrains.GetIdes()[jetbrains.Id(ide)]
 	if !ok {
 		return errors.New("IDE not found")
 	}
 
-	home, err := util.GetHomeDir(activeProfile, targetId, projectName, gpgKey)
+	home, err := util.GetHomeDir(activeProfile, targetId, workspaceName, gpgKey)
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func OpenJetbrainsIDE(activeProfile config.Profile, ide, targetId, projectName s
 
 	downloadUrl := ""
 
-	remoteOs, err := util.GetRemoteOS(projectHostname)
+	remoteOs, err := util.GetRemoteOS(workspaceHostname)
 	if err != nil {
 		return err
 	}
@@ -69,25 +69,25 @@ func OpenJetbrainsIDE(activeProfile config.Profile, ide, targetId, projectName s
 		return errors.New("JetBrains remote IDEs are only supported on Linux.")
 	}
 
-	err = downloadJetbrainsIDE(projectHostname, downloadUrl, downloadPath)
+	err = downloadJetbrainsIDE(workspaceHostname, downloadUrl, downloadPath)
 	if err != nil {
 		return err
 	}
 
-	gatewayUrl := fmt.Sprintf("jetbrains-gateway://connect#host=%s&type=ssh&deploy=false&projectPath=%s&user=daytona&port=%d&idePath=%s", projectHostname, projectDir, ssh_config.SSH_PORT, url.QueryEscape(downloadPath))
+	gatewayUrl := fmt.Sprintf("jetbrains-gateway://connect#host=%s&type=ssh&deploy=false&projectPath=%s&user=daytona&port=%d&idePath=%s", workspaceHostname, workspaceDir, ssh_config.SSH_PORT, url.QueryEscape(downloadPath))
 
 	return browser.OpenURL(gatewayUrl)
 }
 
-func downloadJetbrainsIDE(projectHostname, downloadUrl, downloadPath string) error {
-	if isAlreadyDownloaded(projectHostname, downloadPath) {
+func downloadJetbrainsIDE(workspaceHostname, downloadUrl, downloadPath string) error {
+	if isAlreadyDownloaded(workspaceHostname, downloadPath) {
 		views.RenderInfoMessage("JetBrains IDE already downloaded. Opening...")
 		return nil
 	}
 
-	views.RenderInfoMessage(fmt.Sprintf("Downloading the IDE into the project from %s...", downloadUrl))
+	views.RenderInfoMessage(fmt.Sprintf("Downloading the IDE into the workspace from %s...", downloadUrl))
 
-	downloadIdeCmd := exec.Command("ssh", projectHostname, fmt.Sprintf("mkdir -p %s && wget -q --show-progress --progress=bar:force -pO- %s | tar -xzC %s --strip-components=1", downloadPath, downloadUrl, downloadPath))
+	downloadIdeCmd := exec.Command("ssh", workspaceHostname, fmt.Sprintf("mkdir -p %s && wget -q --show-progress --progress=bar:force -pO- %s | tar -xzC %s --strip-components=1", downloadPath, downloadUrl, downloadPath))
 	downloadIdeCmd.Stdout = os.Stdout
 	downloadIdeCmd.Stderr = os.Stderr
 
@@ -101,8 +101,8 @@ func downloadJetbrainsIDE(projectHostname, downloadUrl, downloadPath string) err
 	return nil
 }
 
-func isAlreadyDownloaded(projectHostname, downloadPath string) bool {
-	statCmd := exec.Command("ssh", projectHostname, fmt.Sprintf("stat %s", downloadPath))
+func isAlreadyDownloaded(workspaceHostname, downloadPath string) bool {
+	statCmd := exec.Command("ssh", workspaceHostname, fmt.Sprintf("stat %s", downloadPath))
 	err := statCmd.Run()
 	return err == nil
 }

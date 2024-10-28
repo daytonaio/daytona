@@ -17,7 +17,7 @@ import (
 
 var exposeCmd = &cobra.Command{
 	Use:     "expose [PORT]",
-	Short:   "Expose a local port over stdout - Used by the Daytona CLI to make direct connections to the project",
+	Short:   "Expose a local port over stdout - Used by the Daytona CLI to make direct connections to the workspace",
 	Args:    cobra.ExactArgs(1),
 	GroupID: util.TARGET_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {

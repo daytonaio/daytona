@@ -1,6 +1,6 @@
 ## daytona expose
 
-Expose a local port over stdout - Used by the Daytona CLI to make direct connections to the project
+Expose a local port over stdout - Used by the Daytona CLI to make direct connections to the workspace
 
 ```
 daytona expose [PORT] [flags]

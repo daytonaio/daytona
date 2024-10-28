@@ -6,9 +6,9 @@ options:
       shorthand: a
       default_value: "false"
       usage: Stop all targets
-    - name: project
-      shorthand: p
-      usage: Stop a single project in the target (project name)
+    - name: workspace
+      shorthand: w
+      usage: Stop a single workspace in the target (workspace name)
 inherited_options:
     - name: help
       default_value: "false"

@@ -23,7 +23,7 @@ type BranchWizardConfig struct {
 	NamespaceId         string
 	Namespace           string
 	ChosenRepo          *apiclient.GitRepository
-	ProjectOrder        int
+	WorkspaceOrder      int
 	ProviderId          string
 }
 
@@ -67,7 +67,7 @@ func runGetBranchFromPromptWithPagination(ctx context.Context, config BranchWiza
 		}
 
 		// User will either choose a branch or navigate the pages
-		branch, navigate := selection.GetBranchFromPrompt(branchList, config.ProjectOrder, selectionListOptions)
+		branch, navigate := selection.GetBranchFromPrompt(branchList, config.WorkspaceOrder, selectionListOptions)
 		if !disablePagination && navigate != "" {
 			if navigate == views.ListNavigationText {
 				page++
@@ -150,7 +150,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	checkoutOptions = append(checkoutOptions, selection.CheckoutBranch)
 	checkoutOptions = append(checkoutOptions, selection.CheckoutPR)
 
-	chosenCheckoutOption := selection.GetCheckoutOptionFromPrompt(config.ProjectOrder, checkoutOptions, parentIdentifier)
+	chosenCheckoutOption := selection.GetCheckoutOptionFromPrompt(config.WorkspaceOrder, checkoutOptions, parentIdentifier)
 
 	if chosenCheckoutOption == (selection.CheckoutOption{}) {
 		return nil, common.ErrCtrlCAbort
@@ -212,7 +212,7 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 			}
 
 			// User will either choose a PR or navigate the pages
-			chosenPullRequest, navigate := selection.GetPullRequestFromPrompt(prList, config.ProjectOrder, selectionListOptions)
+			chosenPullRequest, navigate := selection.GetPullRequestFromPrompt(prList, config.WorkspaceOrder, selectionListOptions)
 			if !disablePagination && navigate != "" {
 				if navigate == views.ListNavigationText {
 					page++

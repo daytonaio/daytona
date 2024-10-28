@@ -21,8 +21,8 @@ import (
 var sshOptions []string
 
 var SshCmd = &cobra.Command{
-	Use:     "ssh [TARGET] [PROJECT] [CMD...]",
-	Short:   "SSH into a project using the terminal",
+	Use:     "ssh [TARGET] [WORKSPACE] [CMD...]",
+	Short:   "SSH into a workspace using the terminal",
 	Args:    cobra.ArbitraryArgs,
 	GroupID: util.TARGET_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -38,7 +38,7 @@ var SshCmd = &cobra.Command{
 
 		ctx := context.Background()
 		var target *apiclient.TargetDTO
-		var projectName string
+		var workspaceName string
 		var providerConfigId *string
 
 		apiClient, err := apiclient_util.GetApiClient(&activeProfile)
@@ -69,29 +69,29 @@ var SshCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 || len(args) == 1 {
-			selectedProject, err := selectTargetProject(target.Id, &activeProfile)
+			selectedWorkspace, err := selectTargetWorkspace(target.Id, &activeProfile)
 			if err != nil {
 				return err
 			}
-			if selectedProject == nil {
+			if selectedWorkspace == nil {
 				return nil
 			}
-			projectName = selectedProject.Name
-			providerConfigId = selectedProject.GitProviderConfigId
+			workspaceName = selectedWorkspace.Name
+			providerConfigId = selectedWorkspace.GitProviderConfigId
 		}
 
 		if len(args) >= 2 {
-			projectName = args[1]
-			for _, project := range target.Projects {
-				if project.Name == projectName {
-					providerConfigId = project.GitProviderConfigId
+			workspaceName = args[1]
+			for _, workspace := range target.Workspaces {
+				if workspace.Name == workspaceName {
+					providerConfigId = workspace.GitProviderConfigId
 					break
 				}
 			}
 		}
 
-		if !target_util.IsProjectRunning(target, projectName) {
-			wsRunningStatus, err := AutoStartTarget(target.Name, projectName)
+		if !target_util.IsWorkspaceRunning(target, workspaceName) {
+			wsRunningStatus, err := AutoStartTarget(target.Name, workspaceName)
 			if err != nil {
 				return err
 			}
@@ -110,14 +110,14 @@ var SshCmd = &cobra.Command{
 			log.Warn(err)
 		}
 
-		return ide.OpenTerminalSsh(activeProfile, target.Id, projectName, gpgKey, sshOptions, sshArgs...)
+		return ide.OpenTerminalSsh(activeProfile, target.Id, workspaceName, gpgKey, sshOptions, sshArgs...)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) >= 2 {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
 		if len(args) == 1 {
-			return getProjectNameCompletions(cmd, args, toComplete)
+			return getWorkspaceNameCompletions(cmd, args, toComplete)
 		}
 
 		return getTargetNameCompletions()

@@ -5,7 +5,7 @@
 
 * `ApiKeyTypeClient` (value: `"client"`)
 
-* `ApiKeyTypeProject` (value: `"project"`)
+* `ApiKeyTypeWorkspace` (value: `"workspace"`)
 
 * `ApiKeyTypeTarget` (value: `"target"`)
 

@@ -1,6 +1,6 @@
 name: daytona env
 synopsis: |
-    Manage profile environment variables that are added to all targets and projects
+    Manage profile environment variables that are added to all targets and workspaces
 inherited_options:
     - name: help
       default_value: "false"

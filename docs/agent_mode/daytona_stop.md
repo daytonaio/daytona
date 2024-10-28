@@ -1,6 +1,6 @@
 ## daytona stop
 
-Stop the project
+Stop the workspace
 
 ```
 daytona stop [flags]

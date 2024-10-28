@@ -1,6 +1,6 @@
 ## daytona build run
 
-Run a build from a project config
+Run a build from a workspace config
 
 ```
 daytona build run [flags]

@@ -10,7 +10,7 @@ import (
 
 var EnvCmd = &cobra.Command{
 	Use:     "env",
-	Short:   "Manage profile environment variables that are added to all targets and projects",
+	Short:   "Manage profile environment variables that are added to all targets and workspaces",
 	GroupID: util.PROFILE_GROUP,
 }
 

@@ -15,7 +15,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/agent/ssh"
 	"github.com/daytonaio/daytona/pkg/agent/tailscale"
 	"github.com/daytonaio/daytona/pkg/git"
-	"github.com/daytonaio/daytona/pkg/target/project"
+	"github.com/daytonaio/daytona/pkg/target/workspace"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -29,7 +29,7 @@ var AgentCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		setLogLevel()
 
-		agentMode := config.ModeProject
+		agentMode := config.ModeWorkspace
 
 		if hostModeFlag {
 			agentMode = config.ModeHost
@@ -39,10 +39,10 @@ var AgentCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		c.ProjectDir = filepath.Join(os.Getenv("HOME"), c.ProjectName)
+		c.WorkspaceDir = filepath.Join(os.Getenv("HOME"), c.WorkspaceName)
 
-		if projectDir := os.Getenv("DAYTONA_PROJECT_DIR"); projectDir != "" {
-			c.ProjectDir = projectDir
+		if workspaceDir := os.Getenv("DAYTONA_WORKSPACE_DIR"); workspaceDir != "" {
+			c.WorkspaceDir = workspaceDir
 		}
 
 		gitLogWriter := io.MultiWriter(os.Stdout)
@@ -58,17 +58,17 @@ var AgentCmd = &cobra.Command{
 		}
 
 		git := &git.Service{
-			ProjectDir:        c.ProjectDir,
+			WorkspaceDir:      c.WorkspaceDir,
 			GitConfigFileName: filepath.Join(os.Getenv("HOME"), ".gitconfig"),
 			LogWriter:         gitLogWriter,
 		}
 
 		sshServer := &ssh.Server{
-			ProjectDir:        c.ProjectDir,
-			DefaultProjectDir: os.Getenv("HOME"),
+			WorkspaceDir:        c.WorkspaceDir,
+			DefaultWorkspaceDir: os.Getenv("HOME"),
 		}
 
-		tailscaleHostname := project.GetProjectHostname(c.TargetId, c.ProjectName)
+		tailscaleHostname := workspace.GetWorkspaceHostname(c.TargetId, c.WorkspaceName)
 		if hostModeFlag {
 			tailscaleHostname = c.TargetId
 		}
