@@ -11,7 +11,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/workspace"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	log "github.com/sirupsen/logrus"
 
@@ -19,30 +18,57 @@ import (
 )
 
 func (s *TargetService) StartTarget(ctx context.Context, targetId string) error {
-	w, err := s.targetStore.Find(targetId)
+	t, err := s.targetStore.Find(targetId)
 	if err != nil {
-		return ErrTargetNotFound
+		return s.handleStartError(ctx, nil, ErrTargetNotFound)
 	}
 
-	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &w.TargetConfig})
+	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &t.TargetConfig})
+	if err != nil {
+		return s.handleStartError(ctx, t, err)
+	}
+
+	targetLogger := s.loggerFactory.CreateTargetLogger(t.Id, logs.LogSourceServer)
+	defer targetLogger.Close()
+
+	logger := io.MultiWriter(&util.InfoLogWriter{}, targetLogger)
+
+	t.EnvVars = target.GetTargetEnvVars(t, target.TargetEnvVarParams{
+		ApiUrl:        s.serverApiUrl,
+		ServerUrl:     s.serverUrl,
+		ServerVersion: s.serverVersion,
+		ClientId:      telemetry.ClientId(ctx),
+	}, telemetry.TelemetryEnabled(ctx))
+
+	err = s.startTarget(t, targetConfig, logger)
+	if err != nil {
+		return s.handleStartError(ctx, t, err)
+	}
+
+	return s.handleStartError(ctx, t, err)
+}
+
+func (s *TargetService) startTarget(target *target.Target, targetConfig *provider.TargetConfig, targetLogger io.Writer) error {
+	targetLogger.Write([]byte("Starting target\n"))
+
+	err := s.provisioner.StartTarget(target, targetConfig)
 	if err != nil {
 		return err
 	}
 
-	targetLogger := s.loggerFactory.CreateTargetLogger(w.Id, logs.LogSourceServer)
-	defer targetLogger.Close()
+	targetLogger.Write([]byte(fmt.Sprintf("Target %s started\n", target.Name)))
 
-	tgLogWriter := io.MultiWriter(&util.InfoLogWriter{}, targetLogger)
+	return err
+}
 
-	err = s.startTarget(ctx, w, targetConfig, tgLogWriter)
-
+func (s *TargetService) handleStartError(ctx context.Context, target *target.Target, err error) error {
 	if !telemetry.TelemetryEnabled(ctx) {
 		return err
 	}
 
 	clientId := telemetry.ClientId(ctx)
 
-	telemetryProps := telemetry.NewTargetEventProps(ctx, w, targetConfig)
+	telemetryProps := telemetry.NewTargetEventProps(ctx, target, nil)
 	event := telemetry.ServerEventTargetStarted
 	if err != nil {
 		telemetryProps["error"] = err.Error()
@@ -54,77 +80,4 @@ func (s *TargetService) StartTarget(ctx context.Context, targetId string) error 
 	}
 
 	return err
-}
-
-func (s *TargetService) StartWorkspace(ctx context.Context, targetId, workspaceName string) error {
-	w, err := s.targetStore.Find(targetId)
-	if err != nil {
-		return ErrTargetNotFound
-	}
-
-	workspace, err := w.GetWorkspace(workspaceName)
-	if err != nil {
-		return ErrWorkspaceNotFound
-	}
-
-	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &w.TargetConfig})
-	if err != nil {
-		return err
-	}
-
-	workspaceLogger := s.loggerFactory.CreateWorkspaceLogger(w.Id, workspace.Name, logs.LogSourceServer)
-	defer workspaceLogger.Close()
-
-	return s.startWorkspace(ctx, workspace, targetConfig, workspaceLogger)
-}
-
-func (s *TargetService) startTarget(ctx context.Context, t *target.Target, targetConfig *provider.TargetConfig, targetLogger io.Writer) error {
-	targetLogger.Write([]byte("Starting target\n"))
-
-	t.EnvVars = target.GetTargetEnvVars(t, target.TargetEnvVarParams{
-		ApiUrl:        s.serverApiUrl,
-		ServerUrl:     s.serverUrl,
-		ServerVersion: s.serverVersion,
-		ClientId:      telemetry.ClientId(ctx),
-	}, telemetry.TelemetryEnabled(ctx))
-
-	err := s.provisioner.StartTarget(t, targetConfig)
-	if err != nil {
-		return err
-	}
-
-	for _, workspace := range t.Workspaces {
-		workspaceLogger := s.loggerFactory.CreateWorkspaceLogger(t.Id, workspace.Name, logs.LogSourceServer)
-		defer workspaceLogger.Close()
-
-		err = s.startWorkspace(ctx, workspace, targetConfig, workspaceLogger)
-		if err != nil {
-			return err
-		}
-	}
-
-	targetLogger.Write([]byte(fmt.Sprintf("Target %s started\n", t.Name)))
-
-	return nil
-}
-
-func (s *TargetService) startWorkspace(ctx context.Context, w *workspace.Workspace, targetConfig *provider.TargetConfig, logWriter io.Writer) error {
-	logWriter.Write([]byte(fmt.Sprintf("Starting workspace %s\n", w.Name)))
-
-	workspaceToStart := *w
-	workspaceToStart.EnvVars = workspace.GetWorkspaceEnvVars(w, workspace.WorkspaceEnvVarParams{
-		ApiUrl:        s.serverApiUrl,
-		ServerUrl:     s.serverUrl,
-		ServerVersion: s.serverVersion,
-		ClientId:      telemetry.ClientId(ctx),
-	}, telemetry.TelemetryEnabled(ctx))
-
-	err := s.provisioner.StartWorkspace(&workspaceToStart, targetConfig)
-	if err != nil {
-		return err
-	}
-
-	logWriter.Write([]byte(fmt.Sprintf("Workspace %s started\n", w.Name)))
-
-	return nil
 }

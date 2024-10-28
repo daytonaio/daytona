@@ -21,13 +21,13 @@ type DaytonaServerConfig struct {
 }
 
 type Config struct {
-	WorkspaceDir  string
-	ClientId      string  `envconfig:"DAYTONA_CLIENT_ID" validate:"required"`
-	WorkspaceName string  `envconfig:"DAYTONA_WORKSPACE_NAME"`
-	TargetId      string  `envconfig:"DAYTONA_TARGET_ID" validate:"required"`
-	LogFilePath   *string `envconfig:"DAYTONA_AGENT_LOG_FILE_PATH"`
-	Server        DaytonaServerConfig
-	Mode          Mode
+	WorkspaceDir string
+	ClientId     string  `envconfig:"DAYTONA_CLIENT_ID" validate:"required"`
+	WorkspaceId  string  `envconfig:"DAYTONA_WORKSPACE_ID"`
+	TargetId     string  `envconfig:"DAYTONA_TARGET_ID" validate:"required"`
+	LogFilePath  *string `envconfig:"DAYTONA_AGENT_LOG_FILE_PATH"`
+	Server       DaytonaServerConfig
+	Mode         Mode
 }
 
 type Mode string
@@ -64,8 +64,8 @@ func GetConfig(mode Mode) (*Config, error) {
 	}
 
 	if config.Mode == ModeWorkspace {
-		if config.WorkspaceName == "" {
-			return nil, errors.New("DAYTONA_WORKSPACE_NAME is required in workspace mode")
+		if config.WorkspaceId == "" {
+			return nil, errors.New("DAYTONA_WORKSPACE_ID is required in workspace mode")
 		}
 	}
 

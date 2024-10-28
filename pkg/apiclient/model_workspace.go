@@ -24,11 +24,11 @@ type Workspace struct {
 	BuildConfig         *BuildConfig      `json:"buildConfig,omitempty"`
 	EnvVars             map[string]string `json:"envVars"`
 	GitProviderConfigId *string           `json:"gitProviderConfigId,omitempty"`
+	Id                  string            `json:"id"`
 	Image               string            `json:"image"`
 	Name                string            `json:"name"`
 	Repository          GitRepository     `json:"repository"`
 	State               *WorkspaceState   `json:"state,omitempty"`
-	TargetConfig        string            `json:"targetConfig"`
 	TargetId            string            `json:"targetId"`
 	User                string            `json:"user"`
 }
@@ -39,13 +39,13 @@ type _Workspace Workspace
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewWorkspace(envVars map[string]string, image string, name string, repository GitRepository, targetConfig string, targetId string, user string) *Workspace {
+func NewWorkspace(envVars map[string]string, id string, image string, name string, repository GitRepository, targetId string, user string) *Workspace {
 	this := Workspace{}
 	this.EnvVars = envVars
+	this.Id = id
 	this.Image = image
 	this.Name = name
 	this.Repository = repository
-	this.TargetConfig = targetConfig
 	this.TargetId = targetId
 	this.User = user
 	return &this
@@ -145,6 +145,30 @@ func (o *Workspace) HasGitProviderConfigId() bool {
 // SetGitProviderConfigId gets a reference to the given string and assigns it to the GitProviderConfigId field.
 func (o *Workspace) SetGitProviderConfigId(v string) {
 	o.GitProviderConfigId = &v
+}
+
+// GetId returns the Id field value
+func (o *Workspace) GetId() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Id
+}
+
+// GetIdOk returns a tuple with the Id field value
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Id, true
+}
+
+// SetId sets field value
+func (o *Workspace) SetId(v string) {
+	o.Id = v
 }
 
 // GetImage returns the Image field value
@@ -251,30 +275,6 @@ func (o *Workspace) SetState(v WorkspaceState) {
 	o.State = &v
 }
 
-// GetTargetConfig returns the TargetConfig field value
-func (o *Workspace) GetTargetConfig() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.TargetConfig
-}
-
-// GetTargetConfigOk returns a tuple with the TargetConfig field value
-// and a boolean to check if the value has been set.
-func (o *Workspace) GetTargetConfigOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.TargetConfig, true
-}
-
-// SetTargetConfig sets field value
-func (o *Workspace) SetTargetConfig(v string) {
-	o.TargetConfig = v
-}
-
 // GetTargetId returns the TargetId field value
 func (o *Workspace) GetTargetId() string {
 	if o == nil {
@@ -340,13 +340,13 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.GitProviderConfigId) {
 		toSerialize["gitProviderConfigId"] = o.GitProviderConfigId
 	}
+	toSerialize["id"] = o.Id
 	toSerialize["image"] = o.Image
 	toSerialize["name"] = o.Name
 	toSerialize["repository"] = o.Repository
 	if !IsNil(o.State) {
 		toSerialize["state"] = o.State
 	}
-	toSerialize["targetConfig"] = o.TargetConfig
 	toSerialize["targetId"] = o.TargetId
 	toSerialize["user"] = o.User
 	return toSerialize, nil
@@ -358,10 +358,10 @@ func (o *Workspace) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"envVars",
+		"id",
 		"image",
 		"name",
 		"repository",
-		"targetConfig",
 		"targetId",
 		"user",
 	}

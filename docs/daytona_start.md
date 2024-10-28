@@ -1,18 +1,17 @@
 ## daytona start
 
-Start a target
+Start a workspace
 
 ```
-daytona start [TARGET] [flags]
+daytona start [WORKSPACE] [flags]
 ```
 
 ### Options
 
 ```
-  -a, --all                Start all targets
-  -c, --code               Open the target in the IDE after target start
-  -w, --workspace string   Start a single workspace in the target (workspace name)
-  -y, --yes                Automatically confirm any prompts
+  -a, --all    Start all targets
+  -c, --code   Open the target in the IDE after target start
+  -y, --yes    Automatically confirm any prompts
 ```
 
 ### Options inherited from parent commands

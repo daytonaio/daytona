@@ -1,9 +1,9 @@
 ## daytona code
 
-Open a target in your preferred IDE
+Open a workspace in your preferred IDE
 
 ```
-daytona code [TARGET] [WORKSPACE] [flags]
+daytona code [WORKSPACE] [flags]
 ```
 
 ### Options

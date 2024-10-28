@@ -15,7 +15,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/agent/ssh"
 	"github.com/daytonaio/daytona/pkg/agent/tailscale"
 	"github.com/daytonaio/daytona/pkg/git"
-	"github.com/daytonaio/daytona/pkg/target/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -39,7 +39,7 @@ var AgentCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		c.WorkspaceDir = filepath.Join(os.Getenv("HOME"), c.WorkspaceName)
+		c.WorkspaceDir = filepath.Join(os.Getenv("HOME"), c.WorkspaceId)
 
 		if workspaceDir := os.Getenv("DAYTONA_WORKSPACE_DIR"); workspaceDir != "" {
 			c.WorkspaceDir = workspaceDir
@@ -68,7 +68,7 @@ var AgentCmd = &cobra.Command{
 			DefaultWorkspaceDir: os.Getenv("HOME"),
 		}
 
-		tailscaleHostname := workspace.GetWorkspaceHostname(c.TargetId, c.WorkspaceName)
+		tailscaleHostname := workspace.GetWorkspaceHostname(c.WorkspaceId)
 		if hostModeFlag {
 			tailscaleHostname = c.TargetId
 		}

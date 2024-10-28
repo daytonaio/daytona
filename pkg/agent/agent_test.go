@@ -17,18 +17,18 @@ import (
 	"github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
 var workspace1 = &workspace.Workspace{
+	Id:   "123",
 	Name: "test",
 	Repository: &gitprovider.GitRepository{
 		Id:   "123",
 		Url:  "https://github.com/daytonaio/daytona",
 		Name: "daytona",
 	},
-	TargetId:     "123",
-	TargetConfig: "local",
+	TargetId: "123",
 	State: &workspace.WorkspaceState{
 		UpdatedAt: "123",
 		Uptime:    148,
@@ -40,9 +40,6 @@ var target1 = &target.Target{
 	Id:           "123",
 	Name:         "test",
 	TargetConfig: "local",
-	Workspaces: []*workspace.Workspace{
-		workspace1,
-	},
 }
 
 var gitStatus1 = &workspace.GitStatus{
@@ -56,8 +53,8 @@ var gitStatus1 = &workspace.GitStatus{
 }
 
 var mockConfig = &config.Config{
-	TargetId:      target1.Id,
-	WorkspaceName: workspace1.Name,
+	TargetId:    target1.Id,
+	WorkspaceId: workspace1.Id,
 	Server: config.DaytonaServerConfig{
 		ApiKey: "test-api-key",
 	},
@@ -68,7 +65,7 @@ func TestAgent(t *testing.T) {
 	buf := bytes.Buffer{}
 	log.SetOutput(&buf)
 
-	apiServer := mocks.NewMockRestServer(t, target1)
+	apiServer := mocks.NewMockRestServer(t, workspace1)
 	defer apiServer.Close()
 
 	mockConfig.Server.ApiUrl = apiServer.URL

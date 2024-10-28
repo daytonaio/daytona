@@ -7,13 +7,12 @@ Name | Type | Description | Notes
 **Id** | **string** |  | 
 **Name** | **string** |  | 
 **TargetConfig** | **string** |  | 
-**Workspaces** | [**[]Workspace**](Workspace.md) |  | 
 
 ## Methods
 
 ### NewTarget
 
-`func NewTarget(id string, name string, targetConfig string, workspaces []Workspace, ) *Target`
+`func NewTarget(id string, name string, targetConfig string, ) *Target`
 
 NewTarget instantiates a new Target object
 This constructor will assign default values to properties that have it defined,
@@ -86,26 +85,6 @@ and a boolean to check if the value has been set.
 `func (o *Target) SetTargetConfig(v string)`
 
 SetTargetConfig sets TargetConfig field to given value.
-
-
-### GetWorkspaces
-
-`func (o *Target) GetWorkspaces() []Workspace`
-
-GetWorkspaces returns the Workspaces field if non-nil, zero value otherwise.
-
-### GetWorkspacesOk
-
-`func (o *Target) GetWorkspacesOk() (*[]Workspace, bool)`
-
-GetWorkspacesOk returns a tuple with the Workspaces field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetWorkspaces
-
-`func (o *Target) SetWorkspaces(v []Workspace)`
-
-SetWorkspaces sets Workspaces field to given value.
 
 
 

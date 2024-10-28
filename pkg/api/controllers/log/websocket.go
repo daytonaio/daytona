@@ -142,27 +142,26 @@ func ReadTargetLog(ginCtx *gin.Context) {
 
 	if retry {
 		for {
-			wsLogReader, err := server.TargetService.GetTargetLogReader(targetId)
+			targetLogReader, err := server.TargetService.GetTargetLogReader(targetId)
 			if err == nil {
-				readLog(ginCtx, wsLogReader, util.ReadJSONLog, writeJSONToWs)
+				readLog(ginCtx, targetLogReader, util.ReadJSONLog, writeJSONToWs)
 				return
 			}
 			time.Sleep(TIMEOUT)
 		}
 	}
 
-	wsLogReader, err := server.TargetService.GetTargetLogReader(targetId)
+	targetLogReader, err := server.TargetService.GetTargetLogReader(targetId)
 	if err != nil {
 		ginCtx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	readLog(ginCtx, wsLogReader, util.ReadJSONLog, writeJSONToWs)
+	readLog(ginCtx, targetLogReader, util.ReadJSONLog, writeJSONToWs)
 }
 
 func ReadWorkspaceLog(ginCtx *gin.Context) {
-	targetId := ginCtx.Param("targetId")
-	workspaceName := ginCtx.Param("workspaceName")
+	workspaceId := ginCtx.Param("workspaceId")
 	retryQuery := ginCtx.DefaultQuery("retry", "true")
 	retry := retryQuery == "true"
 
@@ -170,7 +169,7 @@ func ReadWorkspaceLog(ginCtx *gin.Context) {
 
 	if retry {
 		for {
-			workspaceLogReader, err := server.TargetService.GetWorkspaceLogReader(targetId, workspaceName)
+			workspaceLogReader, err := server.WorkspaceService.GetWorkspaceLogReader(workspaceId)
 			if err == nil {
 				readLog(ginCtx, workspaceLogReader, util.ReadJSONLog, writeJSONToWs)
 				return
@@ -179,7 +178,7 @@ func ReadWorkspaceLog(ginCtx *gin.Context) {
 		}
 	}
 
-	workspaceLogReader, err := server.TargetService.GetWorkspaceLogReader(targetId, workspaceName)
+	workspaceLogReader, err := server.WorkspaceService.GetWorkspaceLogReader(workspaceId)
 	if err != nil {
 		ginCtx.AbortWithError(http.StatusInternalServerError, err)
 		return

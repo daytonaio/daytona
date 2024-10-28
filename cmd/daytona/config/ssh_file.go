@@ -108,21 +108,21 @@ func UnlinkSshFiles() error {
 
 // Add ssh entry
 
-func generateSshConfigEntry(profileId, targetId, workspaceName, knownHostsPath string, gpgForward bool) (string, error) {
+func generateSshConfigEntry(profileId, workspaceName, knownHostsPath string, gpgForward bool) (string, error) {
 	daytonaPath, err := os.Executable()
 	if err != nil {
 		return "", err
 	}
 
 	tab := "\t"
-	workspaceHostname := GetWorkspaceHostname(profileId, targetId, workspaceName)
+	workspaceHostname := GetWorkspaceHostname(profileId, workspaceName)
 
 	config := fmt.Sprintf("Host %s\n"+
 		tab+"User daytona\n"+
 		tab+"StrictHostKeyChecking no\n"+
 		tab+"UserKnownHostsFile %s\n"+
-		tab+"ProxyCommand \"%s\" ssh-proxy %s %s %s\n"+
-		tab+"ForwardAgent yes\n", workspaceHostname, knownHostsPath, daytonaPath, profileId, targetId, workspaceName)
+		tab+"ProxyCommand \"%s\" ssh-proxy %s %s\n"+
+		tab+"ForwardAgent yes\n", workspaceHostname, knownHostsPath, daytonaPath, profileId, workspaceName)
 
 	if gpgForward {
 		localSocket, err := getLocalGPGSocket()
@@ -147,7 +147,7 @@ func generateSshConfigEntry(profileId, targetId, workspaceName, knownHostsPath s
 	return config, nil
 }
 
-func EnsureSshConfigEntryAdded(profileId, targetName, workspaceName string, gpgKey string) error {
+func EnsureSshConfigEntryAdded(profileId, workspaceId string, gpgKey string) error {
 	err := ensureSshFilesLinked()
 	if err != nil {
 		return err
@@ -165,18 +165,18 @@ func EnsureSshConfigEntryAdded(profileId, targetName, workspaceName string, gpgK
 	}
 
 	// Generate SSH config entry without GPG forwarding
-	newContent, err := appendSshConfigEntry(configPath, profileId, targetName, workspaceName, knownHostsFile, false, string(existingContent))
+	newContent, err := appendSshConfigEntry(configPath, profileId, workspaceId, knownHostsFile, false, string(existingContent))
 	if err != nil {
 		return err
 	}
 
 	if gpgKey != "" {
 		// Generate SSH config entry with GPG forwarding and override previous config
-		_, err := appendSshConfigEntry(configPath, profileId, targetName, workspaceName, knownHostsFile, true, newContent)
+		_, err := appendSshConfigEntry(configPath, profileId, workspaceId, knownHostsFile, true, newContent)
 		if err != nil {
 			return err
 		}
-		workspaceHostname := GetWorkspaceHostname(profileId, targetName, workspaceName)
+		workspaceHostname := GetWorkspaceHostname(profileId, workspaceId)
 		err = ExportGPGKey(gpgKey, workspaceHostname)
 		if err != nil {
 			return err
@@ -193,8 +193,8 @@ func getKnownHostsFile() string {
 	return "/dev/null"
 }
 
-func appendSshConfigEntry(configPath, profileId, targetId, workspaceName, knownHostsFile string, gpgForward bool, existingContent string) (string, error) {
-	data, err := generateSshConfigEntry(profileId, targetId, workspaceName, knownHostsFile, gpgForward)
+func appendSshConfigEntry(configPath, profileId, workspaceId, knownHostsFile string, gpgForward bool, existingContent string) (string, error) {
+	data, err := generateSshConfigEntry(profileId, workspaceId, knownHostsFile, gpgForward)
 	if err != nil {
 		return "", err
 	}
@@ -205,7 +205,7 @@ func appendSshConfigEntry(configPath, profileId, targetId, workspaceName, knownH
 	}
 
 	// We want to remove the config entry gpg counterpart
-	configCounterpart, err := generateSshConfigEntry(profileId, targetId, workspaceName, knownHostsFile, !gpgForward)
+	configCounterpart, err := generateSshConfigEntry(profileId, workspaceId, knownHostsFile, !gpgForward)
 	if err != nil {
 		return "", err
 	}
@@ -286,8 +286,8 @@ func writeSshConfig(configPath, newContent string) error {
 	return nil
 }
 
-// RemoveTargetSshEntries removes all SSH entries for a given profileId and targetId
-func RemoveTargetSshEntries(profileId, targetId string) error {
+// RemoveTargetSshEntries removes all SSH entries for a given profileId and workspaceId
+func RemoveWorkspaceSshEntries(profileId, workspaceId string) error {
 	sshDir := filepath.Join(os.Getenv("HOME"), ".ssh")
 	configPath := filepath.Join(sshDir, "daytona_config")
 
@@ -297,8 +297,8 @@ func RemoveTargetSshEntries(profileId, targetId string) error {
 		return err
 	}
 
-	// Define the regex pattern to match Host entries for the given profileId and targetId
-	regex := regexp.MustCompile(fmt.Sprintf(`Host %s-%s-\w+\s*\n(?:\t.*\n?)*`, profileId, targetId))
+	// Define the regex pattern to match Host entries for the given profileId and workspaceId
+	regex := regexp.MustCompile(fmt.Sprintf(`Host %s-%s\n(?:\t.*\n?)*`, profileId, workspaceId))
 
 	// Replace matched entries with an empty string
 	newContent := regex.ReplaceAllString(existingContent, "")
@@ -312,8 +312,8 @@ func RemoveTargetSshEntries(profileId, targetId string) error {
 	return nil
 }
 
-func GetWorkspaceHostname(profileId, targetId, workspaceName string) string {
-	return fmt.Sprintf("%s-%s-%s", profileId, targetId, workspaceName)
+func GetWorkspaceHostname(profileId, workspaceName string) string {
+	return fmt.Sprintf("%s-%s", profileId, workspaceName)
 }
 
 func init() {

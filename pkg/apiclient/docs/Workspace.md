@@ -7,11 +7,11 @@ Name | Type | Description | Notes
 **BuildConfig** | Pointer to [**BuildConfig**](BuildConfig.md) |  | [optional] 
 **EnvVars** | **map[string]string** |  | 
 **GitProviderConfigId** | Pointer to **string** |  | [optional] 
+**Id** | **string** |  | 
 **Image** | **string** |  | 
 **Name** | **string** |  | 
 **Repository** | [**GitRepository**](GitRepository.md) |  | 
 **State** | Pointer to [**WorkspaceState**](WorkspaceState.md) |  | [optional] 
-**TargetConfig** | **string** |  | 
 **TargetId** | **string** |  | 
 **User** | **string** |  | 
 
@@ -19,7 +19,7 @@ Name | Type | Description | Notes
 
 ### NewWorkspace
 
-`func NewWorkspace(envVars map[string]string, image string, name string, repository GitRepository, targetConfig string, targetId string, user string, ) *Workspace`
+`func NewWorkspace(envVars map[string]string, id string, image string, name string, repository GitRepository, targetId string, user string, ) *Workspace`
 
 NewWorkspace instantiates a new Workspace object
 This constructor will assign default values to properties that have it defined,
@@ -103,6 +103,26 @@ SetGitProviderConfigId sets GitProviderConfigId field to given value.
 `func (o *Workspace) HasGitProviderConfigId() bool`
 
 HasGitProviderConfigId returns a boolean if a field has been set.
+
+### GetId
+
+`func (o *Workspace) GetId() string`
+
+GetId returns the Id field if non-nil, zero value otherwise.
+
+### GetIdOk
+
+`func (o *Workspace) GetIdOk() (*string, bool)`
+
+GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetId
+
+`func (o *Workspace) SetId(v string)`
+
+SetId sets Id field to given value.
+
 
 ### GetImage
 
@@ -188,26 +208,6 @@ SetState sets State field to given value.
 `func (o *Workspace) HasState() bool`
 
 HasState returns a boolean if a field has been set.
-
-### GetTargetConfig
-
-`func (o *Workspace) GetTargetConfig() string`
-
-GetTargetConfig returns the TargetConfig field if non-nil, zero value otherwise.
-
-### GetTargetConfigOk
-
-`func (o *Workspace) GetTargetConfigOk() (*string, bool)`
-
-GetTargetConfigOk returns a tuple with the TargetConfig field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetTargetConfig
-
-`func (o *Workspace) SetTargetConfig(v string)`
-
-SetTargetConfig sets TargetConfig field to given value.
-
 
 ### GetTargetId
 

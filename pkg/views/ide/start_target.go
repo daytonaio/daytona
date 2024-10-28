@@ -11,13 +11,13 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
-func RunStartTargetForm(targetName string) bool {
+func RunStartWorkspaceForm(workspaceName string) bool {
 	confirmCheck := true
 
 	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewConfirm().
-				Title(fmt.Sprintf("The target %s is stopped, would you like to start it?", targetName)).
+				Title(fmt.Sprintf("The workspace %s is stopped, would you like to start it?", workspaceName)).
 				Value(&confirmCheck),
 		),
 	).WithTheme(views.GetCustomTheme())

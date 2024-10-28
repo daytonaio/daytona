@@ -19,7 +19,7 @@ import (
 	agent_config "github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/target/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	log "github.com/sirupsen/logrus"
 )
@@ -146,18 +146,12 @@ func (a *Agent) getWorkspace() (*workspace.Workspace, error) {
 		return nil, err
 	}
 
-	target, res, err := apiClient.TargetAPI.GetTarget(ctx, a.Config.TargetId).Execute()
+	workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, a.Config.WorkspaceId).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	for _, workspace := range target.Workspaces {
-		if workspace.Name == a.Config.WorkspaceName {
-			return conversion.ToWorkspace(&workspace), nil
-		}
-	}
-
-	return nil, errors.New("workspace not found")
+	return conversion.ToWorkspace(workspace), nil
 }
 
 func (a *Agent) getGitProvider(repoUrl string) (*apiclient.GitProvider, error) {
@@ -241,7 +235,7 @@ func (a *Agent) updateWorkspaceState() error {
 	}
 
 	uptime := a.uptime()
-	res, err := apiClient.TargetAPI.SetWorkspaceState(context.Background(), a.Config.TargetId, a.Config.WorkspaceName).SetState(apiclient.SetWorkspaceState{
+	res, err := apiClient.WorkspaceAPI.SetWorkspaceState(context.Background(), a.Config.WorkspaceId).SetState(apiclient.SetWorkspaceState{
 		Uptime:    uptime,
 		GitStatus: conversion.ToGitStatusDTO(gitStatus),
 	}).Execute()

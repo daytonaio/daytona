@@ -4,7 +4,7 @@
 package dto
 
 import (
-	"github.com/daytonaio/daytona/pkg/target/workspace/config"
+	"github.com/daytonaio/daytona/pkg/workspace/config"
 )
 
 type WorkspaceConfigDTO struct {
