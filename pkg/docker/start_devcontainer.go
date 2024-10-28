@@ -36,7 +36,7 @@ func (d *DockerClient) runDevcontainerUserCommands(opts *CreateWorkspaceOptions)
 	devcontainerCmd := []string{
 		"devcontainer",
 		"run-user-commands",
-		"--workspace-folder=" + paths.ProjectTarget,
+		"--workspace-folder=" + paths.WorkspaceDirTarget,
 		"--config=" + paths.TargetConfigFilePath,
 		"--override-config=" + path.Join(paths.OverridesTarget, "devcontainer.json"),
 		"--id-label=daytona.target.id=" + opts.Workspace.TargetId,
@@ -47,7 +47,7 @@ func (d *DockerClient) runDevcontainerUserCommands(opts *CreateWorkspaceOptions)
 
 	createDevcontainerOptions := d.toCreateDevcontainerOptions(opts, true)
 
-	_, err = d.execDevcontainerCommand(cmd, &createDevcontainerOptions, paths, paths.ProjectTarget, socketForwardId, true, []mount.Mount{
+	_, err = d.execDevcontainerCommand(cmd, &createDevcontainerOptions, paths, paths.WorkspaceDirTarget, socketForwardId, true, []mount.Mount{
 		{
 			Type:   mount.TypeBind,
 			Source: paths.OverridesDir,

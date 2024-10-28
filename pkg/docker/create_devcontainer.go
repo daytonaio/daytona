@@ -35,14 +35,14 @@ type RemoteUser string
 type DevcontainerPaths struct {
 	OverridesDir         string
 	OverridesTarget      string
-	ProjectTarget        string
+	WorkspaceDirTarget   string
 	TargetConfigFilePath string
 }
 
 type CreateDevcontainerOptions struct {
 	WorkspaceDir string
 	// Name of the project inside the devcontainer
-	ProjectName       string
+	WorkspaceName     string
 	BuildConfig       *buildconfig.BuildConfig
 	LogWriter         io.Writer
 	SshClient         *ssh.Client
@@ -127,7 +127,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 
 	// If the workspaceFolder is not set in the devcontainer.json, we set it to /workspaces/<project-name>
 	if _, ok := devcontainerConfig["workspaceFolder"].(string); !ok {
-		workspaceFolder = fmt.Sprintf("/workspaces/%s", opts.ProjectName)
+		workspaceFolder = fmt.Sprintf("/workspaces/%s", opts.WorkspaceName)
 		devcontainerConfig["workspaceFolder"] = workspaceFolder
 	}
 	devcontainerConfig["workspaceMount"] = fmt.Sprintf("source=%s,target=%s,type=bind", opts.WorkspaceDir, workspaceFolder)
@@ -159,22 +159,22 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 			return "", "", err
 		}
 
-		workspace, err := cli.ProjectFromOptions(ctx, options)
+		project, err := cli.ProjectFromOptions(ctx, options)
 		if err != nil {
 			return "", "", err
 		}
 
-		workspace.Name = fmt.Sprintf("%s-%s", opts.ProjectName, util.Hash(opts.WorkspaceDir))
+		project.Name = fmt.Sprintf("%s-%s", opts.WorkspaceName, util.Hash(opts.WorkspaceDir))
 
-		for _, service := range workspace.Services {
+		for _, service := range project.Services {
 			if service.Build != nil {
 				if strings.HasPrefix(service.Build.Context, opts.WorkspaceDir) {
-					service.Build.Context = strings.Replace(service.Build.Context, opts.WorkspaceDir, paths.ProjectTarget, 1)
+					service.Build.Context = strings.Replace(service.Build.Context, opts.WorkspaceDir, paths.WorkspaceDirTarget, 1)
 				}
 			}
 		}
 
-		overrideComposeContent, err := workspace.MarshalYAML()
+		overrideComposeContent, err := project.MarshalYAML()
 		if err != nil {
 			return "", "", err
 		}
@@ -225,7 +225,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 	devcontainerCmd := []string{
 		"devcontainer",
 		"up",
-		"--workspace-folder=" + paths.ProjectTarget,
+		"--workspace-folder=" + paths.WorkspaceDirTarget,
 		"--config=" + paths.TargetConfigFilePath,
 		"--override-config=" + path.Join(paths.OverridesTarget, "devcontainer.json"),
 		"--skip-non-blocking-commands",
@@ -254,7 +254,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 		return "", "", err
 	}
 
-	output, err := d.execDevcontainerCommand(strings.Join(devcontainerCmd, " "), &opts, paths, paths.ProjectTarget, socketForwardId, true, []mount.Mount{
+	output, err := d.execDevcontainerCommand(strings.Join(devcontainerCmd, " "), &opts, paths, paths.WorkspaceDirTarget, socketForwardId, true, []mount.Mount{
 		{
 			Type:   mount.TypeBind,
 			Source: paths.OverridesDir,
@@ -345,7 +345,7 @@ func (d *DockerClient) readDevcontainerConfig(opts *CreateDevcontainerOptions, p
 
 	// We need to override localEnvs to the host env variables
 	// FIXME: This will not work for features that require localEnv
-	configEnvOverride, err := d.execDevcontainerCommand(strings.Join(cmd, " "), opts, paths, paths.ProjectTarget, socketForwardId, false, nil)
+	configEnvOverride, err := d.execDevcontainerCommand(strings.Join(cmd, " "), opts, paths, paths.WorkspaceDirTarget, socketForwardId, false, nil)
 	if err != nil {
 		return "", nil, err
 	}
@@ -364,7 +364,7 @@ func (d *DockerClient) readDevcontainerConfig(opts *CreateDevcontainerOptions, p
 	devcontainerCmd := append(writeOverrideCmd, []string{
 		"devcontainer",
 		"read-configuration",
-		"--workspace-folder=" + paths.ProjectTarget,
+		"--workspace-folder=" + paths.WorkspaceDirTarget,
 		"--config=" + paths.TargetConfigFilePath,
 		"--override-config=/tmp/devcontainer.json",
 		"--include-merged-configuration",
@@ -373,7 +373,7 @@ func (d *DockerClient) readDevcontainerConfig(opts *CreateDevcontainerOptions, p
 		"1",
 	}...)
 
-	output, err := d.execDevcontainerCommand(strings.Join(devcontainerCmd, " "), opts, paths, paths.ProjectTarget, socketForwardId, false, nil)
+	output, err := d.execDevcontainerCommand(strings.Join(devcontainerCmd, " "), opts, paths, paths.WorkspaceDirTarget, socketForwardId, false, nil)
 	if err != nil {
 		return "", nil, err
 	}
@@ -472,7 +472,7 @@ func (d *DockerClient) execDevcontainerCommand(cmd string, opts *CreateDevcontai
 		{
 			Type:   mount.TypeBind,
 			Source: opts.WorkspaceDir,
-			Target: paths.ProjectTarget,
+			Target: paths.WorkspaceDirTarget,
 		},
 	}
 
@@ -564,8 +564,8 @@ func (d *DockerClient) getRemoteComposeContent(opts *CreateDevcontainerOptions, 
 }
 
 func (d *DockerClient) getDevcontainerPaths(workspaceDir string, devcontainerFilePath string) DevcontainerPaths {
-	projectTarget := path.Join("/project", filepath.Base(workspaceDir))
-	targetConfigFilePath := path.Join(projectTarget, devcontainerFilePath)
+	workspaceDirTarget := path.Join("/project", filepath.Base(workspaceDir))
+	targetConfigFilePath := path.Join(workspaceDirTarget, devcontainerFilePath)
 
 	overridesDir := filepath.Join(filepath.Dir(workspaceDir), fmt.Sprintf("%s-data", filepath.Base(workspaceDir)))
 	overridesTarget := "/tmp/overrides"
@@ -573,7 +573,7 @@ func (d *DockerClient) getDevcontainerPaths(workspaceDir string, devcontainerFil
 	return DevcontainerPaths{
 		OverridesDir:         overridesDir,
 		OverridesTarget:      overridesTarget,
-		ProjectTarget:        projectTarget,
+		WorkspaceDirTarget:   workspaceDirTarget,
 		TargetConfigFilePath: targetConfigFilePath,
 	}
 }

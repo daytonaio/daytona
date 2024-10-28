@@ -201,7 +201,7 @@ func (d *DockerClient) updateContainerUserUidGid(containerId string, opts *Creat
 func (d *DockerClient) toCreateDevcontainerOptions(opts *CreateWorkspaceOptions, prebuild bool) CreateDevcontainerOptions {
 	return CreateDevcontainerOptions{
 		WorkspaceDir:      opts.WorkspaceDir,
-		ProjectName:       opts.Workspace.Name,
+		WorkspaceName:     opts.Workspace.Name,
 		BuildConfig:       opts.Workspace.BuildConfig,
 		LogWriter:         opts.LogWriter,
 		SshClient:         opts.SshClient,

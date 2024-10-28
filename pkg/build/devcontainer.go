@@ -85,7 +85,7 @@ func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, er
 
 	containerId, remoteUser, err := dockerClient.CreateFromDevcontainer(docker.CreateDevcontainerOptions{
 		BuildConfig:       build.BuildConfig,
-		ProjectName:       build.Id,
+		WorkspaceName:     build.Id,
 		ContainerRegistry: b.containerRegistry,
 		Prebuild:          true,
 		IdLabels: map[string]string{

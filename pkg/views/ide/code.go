@@ -18,5 +18,5 @@ func RenderIdeOpeningMessage(target, workspaceName, ideId string, ideList []conf
 			break
 		}
 	}
-	views.RenderInfoMessage(fmt.Sprintf("Opening the workspace '%s' from target '%s' in %s", workspaceName, target, ideName))
+	views.RenderInfoMessage(fmt.Sprintf("Opening workspace '%s' from target '%s' in %s", workspaceName, target, ideName))
 }
