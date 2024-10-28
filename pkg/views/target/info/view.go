@@ -45,10 +45,10 @@ func Render(target *apiclient.TargetDTO, ide string, forceUnstyled bool) {
 		output += getInfoLine("Editor", ide) + "\n"
 	}
 
-	if len(target.Projects) == 1 {
-		output += getSingleProjectOutput(&target.Projects[0], isCreationView)
+	if len(target.Workspaces) == 1 {
+		output += getSingleWorkspaceOutput(&target.Workspaces[0], isCreationView)
 	} else {
-		output += getProjectsOutputs(target.Projects, isCreationView)
+		output += getWorkspacesOutputs(target.Workspaces, isCreationView)
 	}
 
 	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
@@ -86,49 +86,49 @@ func renderTUIView(output string, width int, isCreationView bool) {
 	fmt.Println(content)
 }
 
-func getSingleProjectOutput(project *apiclient.Project, isCreationView bool) string {
+func getSingleWorkspaceOutput(workspace *apiclient.Workspace, isCreationView bool) string {
 	var output string
 	var repositoryUrl string
 
-	repositoryUrl = project.Repository.Url
+	repositoryUrl = workspace.Repository.Url
 	repositoryUrl = strings.TrimPrefix(repositoryUrl, "https://")
 	repositoryUrl = strings.TrimPrefix(repositoryUrl, "http://")
 
-	if project.State != nil {
-		output += getInfoLineState("State", project.State) + "\n"
-		output += getInfoLineGitStatus("Branch", &project.State.GitStatus) + "\n"
+	if workspace.State != nil {
+		output += getInfoLineState("State", workspace.State) + "\n"
+		output += getInfoLineGitStatus("Branch", &workspace.State.GitStatus) + "\n"
 	}
 
-	output += getInfoLinePrNumber(project.Repository.PrNumber, project.Repository, project.State)
+	output += getInfoLinePrNumber(workspace.Repository.PrNumber, workspace.Repository, workspace.State)
 
 	if !isCreationView {
-		output += getInfoLine("Target Config", project.TargetConfig) + "\n"
+		output += getInfoLine("Target Config", workspace.TargetConfig) + "\n"
 	}
 	output += getInfoLine("Repository", repositoryUrl)
 
 	if !isCreationView {
 		output += "\n"
-		output += getInfoLine("Project", project.Name)
+		output += getInfoLine("Workspace", workspace.Name)
 	}
 
 	return output
 }
 
-func getProjectsOutputs(projects []apiclient.Project, isCreationView bool) string {
+func getWorkspacesOutputs(workspaces []apiclient.Workspace, isCreationView bool) string {
 	var output string
-	for i, project := range projects {
-		output += getInfoLine(fmt.Sprintf("Project #%d", i+1), project.Name)
-		output += getInfoLineState("State", project.State)
-		if project.State != nil {
-			output += getInfoLineGitStatus("Branch", &project.State.GitStatus)
+	for i, workspace := range workspaces {
+		output += getInfoLine(fmt.Sprintf("Workspace #%d", i+1), workspace.Name)
+		output += getInfoLineState("State", workspace.State)
+		if workspace.State != nil {
+			output += getInfoLineGitStatus("Branch", &workspace.State.GitStatus)
 		}
-		output += getInfoLinePrNumber(project.Repository.PrNumber, project.Repository, project.State)
+		output += getInfoLinePrNumber(workspace.Repository.PrNumber, workspace.Repository, workspace.State)
 
 		if !isCreationView {
-			output += getInfoLine("Target Config", project.TargetConfig)
+			output += getInfoLine("Target Config", workspace.TargetConfig)
 		}
-		output += getInfoLine("Repository", project.Repository.Url)
-		if project.Name != projects[len(projects)-1].Name {
+		output += getInfoLine("Repository", workspace.Repository.Url)
+		if workspace.Name != workspaces[len(workspaces)-1].Name {
 			output += "\n"
 		}
 	}
@@ -139,7 +139,7 @@ func getInfoLine(key, value string) string {
 	return propertyNameStyle.Render(fmt.Sprintf("%-*s", propertyNameWidth, key)) + propertyValueStyle.Render(value) + "\n"
 }
 
-func getInfoLineState(key string, state *apiclient.ProjectState) string {
+func getInfoLineState(key string, state *apiclient.WorkspaceState) string {
 	var uptime int
 	var stateProperty string
 
@@ -200,7 +200,7 @@ func getInfoLineGitStatus(key string, status *apiclient.GitStatus) string {
 	return output
 }
 
-func getInfoLinePrNumber(PrNumber *int32, repo apiclient.GitRepository, state *apiclient.ProjectState) string {
+func getInfoLinePrNumber(PrNumber *int32, repo apiclient.GitRepository, state *apiclient.WorkspaceState) string {
 	if PrNumber != nil && (state == nil || state.GitStatus.CurrentBranch == repo.Branch) {
 		return getInfoLine("PR Number", fmt.Sprintf("#%d", *PrNumber)) + "\n"
 	}

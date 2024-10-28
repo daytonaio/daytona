@@ -6,14 +6,14 @@ package apikey
 type ApiKeyType string
 
 const (
-	ApiKeyTypeClient  ApiKeyType = "client"
-	ApiKeyTypeProject ApiKeyType = "project"
-	ApiKeyTypeTarget  ApiKeyType = "target"
+	ApiKeyTypeClient    ApiKeyType = "client"
+	ApiKeyTypeWorkspace ApiKeyType = "workspace"
+	ApiKeyTypeTarget    ApiKeyType = "target"
 )
 
 type ApiKey struct {
 	KeyHash string     `json:"keyHash" validate:"required"`
 	Type    ApiKeyType `json:"type" validate:"required"`
-	// Project or client name
+	// Workspace or client name
 	Name string `json:"name" validate:"required"`
 } // @name ApiKey

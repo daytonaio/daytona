@@ -4,8 +4,8 @@
 package dto
 
 type CreateBuildDTO struct {
-	ProjectConfigName string            `json:"projectConfigName" validate:"required"`
-	Branch            string            `json:"branch" validate:"required"`
-	PrebuildId        *string           `json:"prebuildId" validate:"optional"`
-	EnvVars           map[string]string `json:"envVars" validate:"required"`
+	WorkspaceConfigName string            `json:"workspaceConfigName" validate:"required"`
+	Branch              string            `json:"branch" validate:"required"`
+	PrebuildId          *string           `json:"prebuildId" validate:"optional"`
+	EnvVars             map[string]string `json:"envVars" validate:"required"`
 } // @name CreateBuildDTO

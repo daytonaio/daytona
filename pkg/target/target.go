@@ -6,31 +6,31 @@ package target
 import (
 	"errors"
 
-	"github.com/daytonaio/daytona/pkg/target/project"
+	"github.com/daytonaio/daytona/pkg/target/workspace"
 )
 
 type Target struct {
-	Id           string             `json:"id" validate:"required"`
-	Name         string             `json:"name" validate:"required"`
-	Projects     []*project.Project `json:"projects" validate:"required"`
-	TargetConfig string             `json:"targetConfig" validate:"required"`
-	ApiKey       string             `json:"-"`
-	EnvVars      map[string]string  `json:"-"`
+	Id           string                 `json:"id" validate:"required"`
+	Name         string                 `json:"name" validate:"required"`
+	Workspaces   []*workspace.Workspace `json:"workspaces" validate:"required"`
+	TargetConfig string                 `json:"targetConfig" validate:"required"`
+	ApiKey       string                 `json:"-"`
+	EnvVars      map[string]string      `json:"-"`
 } // @name Target
 
 type TargetInfo struct {
-	Name             string                 `json:"name" validate:"required"`
-	Projects         []*project.ProjectInfo `json:"projects" validate:"required"`
-	ProviderMetadata string                 `json:"providerMetadata,omitempty" validate:"optional"`
+	Name             string                     `json:"name" validate:"required"`
+	Workspaces       []*workspace.WorkspaceInfo `json:"workspaces" validate:"required"`
+	ProviderMetadata string                     `json:"providerMetadata,omitempty" validate:"optional"`
 } // @name TargetInfo
 
-func (t *Target) GetProject(projectName string) (*project.Project, error) {
-	for _, project := range t.Projects {
-		if project.Name == projectName {
-			return project, nil
+func (t *Target) GetWorkspace(workspaceName string) (*workspace.Workspace, error) {
+	for _, workspace := range t.Workspaces {
+		if workspace.Name == workspaceName {
+			return workspace, nil
 		}
 	}
-	return nil, errors.New("project not found")
+	return nil, errors.New("workspace not found")
 }
 
 type TargetEnvVarParams struct {

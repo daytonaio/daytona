@@ -1,6 +1,6 @@
 ## daytona env
 
-Manage profile environment variables that are added to all targets and projects
+Manage profile environment variables that are added to all targets and workspaces
 
 ### Options inherited from parent commands
 

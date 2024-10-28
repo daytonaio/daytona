@@ -11,14 +11,14 @@ import (
 	"github.com/daytonaio/daytona/pkg/common"
 )
 
-func AddProjectFromConfig(projectConfig *apiclient.ProjectConfig, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectDTO, branchFlag *string) (*string, error) {
+func AddWorkspaceFromConfig(workspaceConfig *apiclient.WorkspaceConfig, apiClient *apiclient.APIClient, workspaces *[]apiclient.CreateWorkspaceDTO, branchFlag *string) (*string, error) {
 	chosenBranchName := ""
 	if branchFlag != nil {
 		chosenBranchName = *branchFlag
 	}
 
 	if chosenBranchName == "" {
-		chosenBranch, err := GetBranchFromProjectConfig(projectConfig, apiClient, 0)
+		chosenBranch, err := GetBranchFromWorkspaceConfig(workspaceConfig, apiClient, 0)
 		if err != nil {
 			return nil, err
 		}
@@ -30,25 +30,25 @@ func AddProjectFromConfig(projectConfig *apiclient.ProjectConfig, apiClient *api
 	}
 
 	configRepo, res, err := apiClient.GitProviderAPI.GetGitContext(context.Background()).Repository(apiclient.GetRepositoryContext{
-		Url:    projectConfig.RepositoryUrl,
+		Url:    workspaceConfig.RepositoryUrl,
 		Branch: &chosenBranchName,
 	}).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	project := &apiclient.CreateProjectDTO{
-		Name:                projectConfig.Name,
-		GitProviderConfigId: projectConfig.GitProviderConfigId,
-		Source: apiclient.CreateProjectSourceDTO{
+	workspace := &apiclient.CreateWorkspaceDTO{
+		Name:                workspaceConfig.Name,
+		GitProviderConfigId: workspaceConfig.GitProviderConfigId,
+		Source: apiclient.CreateWorkspaceSourceDTO{
 			Repository: *configRepo,
 		},
-		BuildConfig: projectConfig.BuildConfig,
-		Image:       &projectConfig.Image,
-		User:        &projectConfig.User,
-		EnvVars:     projectConfig.EnvVars,
+		BuildConfig: workspaceConfig.BuildConfig,
+		Image:       &workspaceConfig.Image,
+		User:        &workspaceConfig.User,
+		EnvVars:     workspaceConfig.EnvVars,
 	}
-	*projects = append(*projects, *project)
+	*workspaces = append(*workspaces, *workspace)
 
-	return &projectConfig.Name, nil
+	return &workspaceConfig.Name, nil
 }

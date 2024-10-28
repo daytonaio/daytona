@@ -1,6 +1,6 @@
 name: daytona forward
-synopsis: Forward a port from a project to your local machine
-usage: daytona forward [PORT] [TARGET] [PROJECT] [flags]
+synopsis: Forward a port from a workspace to your local machine
+usage: daytona forward [PORT] [TARGET] [WORKSPACE] [flags]
 options:
     - name: public
       default_value: "false"

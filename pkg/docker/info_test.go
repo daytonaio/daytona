@@ -14,10 +14,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func (s *DockerClientTestSuite) TestGetProjectInfo() {
+func (s *DockerClientTestSuite) TestGetWorkspaceInfo() {
 	s.mockClient.On("ContainerList", mock.Anything, mock.Anything).Return([]types.Container{}, nil)
 
-	containerName := s.dockerClient.GetProjectContainerName(project1)
+	containerName := s.dockerClient.GetWorkspaceContainerName(workspace1)
 
 	inspectResult := types.ContainerJSON{
 		ContainerJSONBase: &types.ContainerJSONBase{
@@ -36,23 +36,23 @@ func (s *DockerClientTestSuite) TestGetProjectInfo() {
 
 	s.mockClient.On("ContainerInspect", mock.Anything, containerName).Return(inspectResult, nil)
 
-	projectInfo, err := s.dockerClient.GetProjectInfo(project1)
+	workspaceInfo, err := s.dockerClient.GetWorkspaceInfo(workspace1)
 	require.Nil(s.T(), err)
-	require.Equal(s.T(), project1.Name, projectInfo.Name)
-	require.Equal(s.T(), projectInfo.IsRunning, inspectResult.State.Running)
-	require.Equal(s.T(), projectInfo.Created, inspectResult.Created)
-	require.Equal(s.T(), projectInfo.ProviderMetadata, metadata)
+	require.Equal(s.T(), workspace1.Name, workspaceInfo.Name)
+	require.Equal(s.T(), workspaceInfo.IsRunning, inspectResult.State.Running)
+	require.Equal(s.T(), workspaceInfo.Created, inspectResult.Created)
+	require.Equal(s.T(), workspaceInfo.ProviderMetadata, metadata)
 }
 
 func (s *DockerClientTestSuite) TestGetTargetInfo() {
-	targetWithoutProjects := &target.Target{
+	targetWithoutWorkspaces := &target.Target{
 		Id:           "123",
 		Name:         "test",
 		TargetConfig: "local",
 	}
 
-	targetInfo, err := s.dockerClient.GetTargetInfo(targetWithoutProjects)
+	targetInfo, err := s.dockerClient.GetTargetInfo(targetWithoutWorkspaces)
 	require.Nil(s.T(), err)
-	require.Equal(s.T(), targetInfo.Name, targetWithoutProjects.Name)
-	require.Equal(s.T(), targetInfo.ProviderMetadata, fmt.Sprintf(docker.TargetMetadataFormat, targetWithoutProjects.Id))
+	require.Equal(s.T(), targetInfo.Name, targetWithoutWorkspaces.Name)
+	require.Equal(s.T(), targetInfo.ProviderMetadata, fmt.Sprintf(docker.TargetMetadataFormat, targetWithoutWorkspaces.Id))
 }

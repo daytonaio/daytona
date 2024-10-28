@@ -20,8 +20,8 @@ var followFlag bool
 var targetFlag bool
 
 var logsCmd = &cobra.Command{
-	Use:     "logs [TARGET] [PROJECT_NAME]",
-	Short:   "View logs for a target/project",
+	Use:     "logs [TARGET] [WORKSPACE_NAME]",
+	Short:   "View logs for a target/workspace",
 	Args:    cobra.RangeArgs(0, 2),
 	GroupID: util.TARGET_GROUP,
 	Aliases: []string{"lg", "log"},
@@ -45,7 +45,7 @@ var logsCmd = &cobra.Command{
 
 		var (
 			showTargetLogs = true
-			projectNames   []string
+			workspaceNames []string
 		)
 
 		if len(args) == 0 {
@@ -67,37 +67,37 @@ var logsCmd = &cobra.Command{
 
 		if target == nil {
 			return errors.New("target not found")
-		} else if len(target.Projects) == 0 {
-			return errors.New("no projects found in target")
+		} else if len(target.Workspaces) == 0 {
+			return errors.New("no workspaces found in target")
 		}
 
 		if len(args) == 2 {
-			projects := util.ArrayMap(target.Projects, func(p apiclient.Project) string {
-				return p.Name
+			workspaces := util.ArrayMap(target.Workspaces, func(w apiclient.Workspace) string {
+				return w.Name
 			})
 			var found bool
-			for _, project := range projects {
-				if project == args[1] {
+			for _, workspace := range workspaces {
+				if workspace == args[1] {
 					found = true
 					break
 				}
 			}
 			if !found {
-				return errors.New("project not found in target")
+				return errors.New("workspace not found in target")
 			}
-			projectNames = append(projectNames, args[1])
+			workspaceNames = append(workspaceNames, args[1])
 			if targetFlag {
 				showTargetLogs = true
 			} else {
 				showTargetLogs = false
 			}
 		} else if !targetFlag {
-			projectNames = util.ArrayMap(target.Projects, func(p apiclient.Project) string {
-				return p.Name
+			workspaceNames = util.ArrayMap(target.Workspaces, func(w apiclient.Workspace) string {
+				return w.Name
 			})
 		}
 
-		apiclient_util.ReadTargetLogs(ctx, activeProfile, target.Id, projectNames, followFlag, showTargetLogs, nil)
+		apiclient_util.ReadTargetLogs(ctx, activeProfile, target.Id, workspaceNames, followFlag, showTargetLogs, nil)
 
 		return nil
 	},

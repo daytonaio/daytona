@@ -20,8 +20,8 @@ type FeatureItem struct {
 	// Add other fields as needed
 }
 
-func (d *DockerClient) startImageProject(opts *CreateProjectOptions) error {
-	containerName := d.GetProjectContainerName(opts.Project)
+func (d *DockerClient) startImageWorkspace(opts *CreateWorkspaceOptions) error {
+	containerName := d.GetWorkspaceContainerName(opts.Workspace)
 	ctx := context.Background()
 
 	c, err := d.apiClient.ContainerInspect(ctx, containerName)
@@ -109,7 +109,7 @@ func (d *DockerClient) startImageProject(opts *CreateProjectOptions) error {
 	return nil
 }
 
-func executeEntrypoints(ctx context.Context, cli client.APIClient, containerID string, features []FeatureItem, opts *CreateProjectOptions) error {
+func executeEntrypoints(ctx context.Context, cli client.APIClient, containerID string, features []FeatureItem, opts *CreateWorkspaceOptions) error {
 	for _, feature := range features {
 		if feature.Entrypoint != "" {
 			execConfig := container.ExecOptions{

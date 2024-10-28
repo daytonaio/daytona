@@ -73,11 +73,11 @@ func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *h
 		),
 		huh.NewGroup(
 			huh.NewInput().
-				Title("Default Project Image").
-				Value(&m.config.DefaultProjectImage),
+				Title("Default Workspace Image").
+				Value(&m.config.DefaultWorkspaceImage),
 			huh.NewInput().
-				Title("Default Project User").
-				Value(&m.config.DefaultProjectUser),
+				Title("Default Workspace User").
+				Value(&m.config.DefaultWorkspaceUser),
 		),
 		huh.NewGroup(
 			huh.NewInput().

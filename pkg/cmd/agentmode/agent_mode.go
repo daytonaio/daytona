@@ -16,7 +16,7 @@ import (
 )
 
 var targetId = ""
-var projectName = ""
+var workspaceName = ""
 
 var agentModeRootCmd = &cobra.Command{
 	Use:               "daytona",
@@ -32,7 +32,7 @@ var agentModeRootCmd = &cobra.Command{
 
 func Execute() error {
 	cmd.SetupRootCommand(agentModeRootCmd)
-	agentModeRootCmd.AddGroup(&cobra.Group{ID: util.TARGET_GROUP, Title: "Project & Target"})
+	agentModeRootCmd.AddGroup(&cobra.Group{ID: util.TARGET_GROUP, Title: "Workspace & Target"})
 	agentModeRootCmd.AddCommand(gitCredCmd)
 	agentModeRootCmd.AddCommand(AgentCmd)
 	agentModeRootCmd.AddCommand(startCmd)
@@ -65,7 +65,7 @@ func init() {
 	if targetIdEnv := os.Getenv("DAYTONA_TARGET_ID"); targetIdEnv != "" {
 		targetId = targetIdEnv
 	}
-	if projectNameEnv := os.Getenv("DAYTONA_PROJECT_NAME"); projectNameEnv != "" {
-		projectName = projectNameEnv
+	if workspaceNameEnv := os.Getenv("DAYTONA_WORKSPACE_NAME"); workspaceNameEnv != "" {
+		workspaceName = workspaceNameEnv
 	}
 }

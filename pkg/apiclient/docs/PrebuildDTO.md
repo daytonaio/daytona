@@ -7,15 +7,15 @@ Name | Type | Description | Notes
 **Branch** | **string** |  | 
 **CommitInterval** | Pointer to **int32** |  | [optional] 
 **Id** | **string** |  | 
-**ProjectConfigName** | **string** |  | 
 **Retention** | **int32** |  | 
 **TriggerFiles** | Pointer to **[]string** |  | [optional] 
+**WorkspaceConfigName** | **string** |  | 
 
 ## Methods
 
 ### NewPrebuildDTO
 
-`func NewPrebuildDTO(branch string, id string, projectConfigName string, retention int32, ) *PrebuildDTO`
+`func NewPrebuildDTO(branch string, id string, retention int32, workspaceConfigName string, ) *PrebuildDTO`
 
 NewPrebuildDTO instantiates a new PrebuildDTO object
 This constructor will assign default values to properties that have it defined,
@@ -95,26 +95,6 @@ and a boolean to check if the value has been set.
 SetId sets Id field to given value.
 
 
-### GetProjectConfigName
-
-`func (o *PrebuildDTO) GetProjectConfigName() string`
-
-GetProjectConfigName returns the ProjectConfigName field if non-nil, zero value otherwise.
-
-### GetProjectConfigNameOk
-
-`func (o *PrebuildDTO) GetProjectConfigNameOk() (*string, bool)`
-
-GetProjectConfigNameOk returns a tuple with the ProjectConfigName field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetProjectConfigName
-
-`func (o *PrebuildDTO) SetProjectConfigName(v string)`
-
-SetProjectConfigName sets ProjectConfigName field to given value.
-
-
 ### GetRetention
 
 `func (o *PrebuildDTO) GetRetention() int32`
@@ -159,6 +139,26 @@ SetTriggerFiles sets TriggerFiles field to given value.
 `func (o *PrebuildDTO) HasTriggerFiles() bool`
 
 HasTriggerFiles returns a boolean if a field has been set.
+
+### GetWorkspaceConfigName
+
+`func (o *PrebuildDTO) GetWorkspaceConfigName() string`
+
+GetWorkspaceConfigName returns the WorkspaceConfigName field if non-nil, zero value otherwise.
+
+### GetWorkspaceConfigNameOk
+
+`func (o *PrebuildDTO) GetWorkspaceConfigNameOk() (*string, bool)`
+
+GetWorkspaceConfigNameOk returns a tuple with the WorkspaceConfigName field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetWorkspaceConfigName
+
+`func (o *PrebuildDTO) SetWorkspaceConfigName(v string)`
+
+SetWorkspaceConfigName sets WorkspaceConfigName field to given value.
+
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

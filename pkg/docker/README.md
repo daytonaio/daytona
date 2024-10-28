@@ -1,7 +1,7 @@
 ## Package Purpose
 
-The purpose of the `docker` package is to provide a single library that providers can use to easily create targets and projects.
-Most providers will import the package and call commands from the `DockerClient` in order to create targets and projects on provided targets.
+The purpose of the `docker` package is to provide a single library that providers can use to easily create targets and workspaces.
+Most providers will import the package and call commands from the `DockerClient` in order to create targets and workspaces on provided targets.
 
 ## Usage
 

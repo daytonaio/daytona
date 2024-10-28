@@ -10,7 +10,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/ssh"
 	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/project"
+	"github.com/daytonaio/daytona/pkg/target/workspace"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 )
@@ -23,23 +23,23 @@ func (d *DockerClient) DestroyTarget(target *target.Target, targetDir string, ss
 	}
 }
 
-func (d *DockerClient) DestroyProject(project *project.Project, projectDir string, sshClient *ssh.Client) error {
-	err := d.removeProjectContainer(project)
+func (d *DockerClient) DestroyWorkspace(workspace *workspace.Workspace, workspaceDir string, sshClient *ssh.Client) error {
+	err := d.removeWorkspaceContainer(workspace)
 	if err != nil {
 		return err
 	}
 
 	if sshClient == nil {
-		return os.RemoveAll(projectDir)
+		return os.RemoveAll(workspaceDir)
 	} else {
-		return sshClient.Exec(fmt.Sprintf("rm -rf %s", projectDir), nil)
+		return sshClient.Exec(fmt.Sprintf("rm -rf %s", workspaceDir), nil)
 	}
 }
 
-func (d *DockerClient) removeProjectContainer(p *project.Project) error {
+func (d *DockerClient) removeWorkspaceContainer(w *workspace.Workspace) error {
 	ctx := context.Background()
 
-	containerName := d.GetProjectContainerName(p)
+	containerName := d.GetWorkspaceContainerName(w)
 
 	c, err := d.apiClient.ContainerInspect(ctx, containerName)
 	if err != nil {

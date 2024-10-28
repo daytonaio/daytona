@@ -24,38 +24,38 @@ func generateTargetList(targets []apiclient.TargetDTO, isMultipleSelect bool, ac
 
 	// Populate items with titles and descriptions from targets.
 	for _, target := range targets {
-		var projectsInfo []string
+		var workspacesInfo []string
 
-		if len(target.Projects) == 0 {
+		if len(target.Workspaces) == 0 {
 			continue
 		}
 
-		if len(target.Projects) == 1 {
-			projectsInfo = append(projectsInfo, util.GetRepositorySlugFromUrl(target.Projects[0].Repository.Url, true))
+		if len(target.Workspaces) == 1 {
+			workspacesInfo = append(workspacesInfo, util.GetRepositorySlugFromUrl(target.Workspaces[0].Repository.Url, true))
 		} else {
-			for _, project := range target.Projects {
-				projectsInfo = append(projectsInfo, project.Name)
+			for _, workspace := range target.Workspaces {
+				workspacesInfo = append(workspacesInfo, workspace.Name)
 			}
 		}
 
 		// Get the time if available
 		uptime := ""
 		createdTime := ""
-		if target.Info != nil && target.Info.Projects != nil && len(target.Info.Projects) > 0 {
-			createdTime = util.FormatTimestamp(target.Info.Projects[0].Created)
+		if target.Info != nil && target.Info.Workspaces != nil && len(target.Info.Workspaces) > 0 {
+			createdTime = util.FormatTimestamp(target.Info.Workspaces[0].Created)
 		}
-		if len(target.Projects) > 0 && target.Projects[0].State != nil {
-			if target.Projects[0].State.Uptime == 0 {
+		if len(target.Workspaces) > 0 && target.Workspaces[0].State != nil {
+			if target.Workspaces[0].State.Uptime == 0 {
 				uptime = "STOPPED"
 			} else {
-				uptime = fmt.Sprintf("up %s", util.FormatUptime(target.Projects[0].State.Uptime))
+				uptime = fmt.Sprintf("up %s", util.FormatUptime(target.Workspaces[0].State.Uptime))
 			}
 		}
 
 		newItem := item[apiclient.TargetDTO]{
 			title:          target.Name,
 			id:             target.Id,
-			desc:           strings.Join(projectsInfo, ", "),
+			desc:           strings.Join(workspacesInfo, ", "),
 			createdTime:    createdTime,
 			uptime:         uptime,
 			targetConfig:   target.TargetConfig,

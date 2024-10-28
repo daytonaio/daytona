@@ -108,21 +108,21 @@ func UnlinkSshFiles() error {
 
 // Add ssh entry
 
-func generateSshConfigEntry(profileId, targetId, projectName, knownHostsPath string, gpgForward bool) (string, error) {
+func generateSshConfigEntry(profileId, targetId, workspaceName, knownHostsPath string, gpgForward bool) (string, error) {
 	daytonaPath, err := os.Executable()
 	if err != nil {
 		return "", err
 	}
 
 	tab := "\t"
-	projectHostname := GetProjectHostname(profileId, targetId, projectName)
+	workspaceHostname := GetWorkspaceHostname(profileId, targetId, workspaceName)
 
 	config := fmt.Sprintf("Host %s\n"+
 		tab+"User daytona\n"+
 		tab+"StrictHostKeyChecking no\n"+
 		tab+"UserKnownHostsFile %s\n"+
 		tab+"ProxyCommand \"%s\" ssh-proxy %s %s %s\n"+
-		tab+"ForwardAgent yes\n", projectHostname, knownHostsPath, daytonaPath, profileId, targetId, projectName)
+		tab+"ForwardAgent yes\n", workspaceHostname, knownHostsPath, daytonaPath, profileId, targetId, workspaceName)
 
 	if gpgForward {
 		localSocket, err := getLocalGPGSocket()
@@ -131,7 +131,7 @@ func generateSshConfigEntry(profileId, targetId, projectName, knownHostsPath str
 			return config, nil
 		}
 
-		remoteSocket, err := getRemoteGPGSocket(projectHostname)
+		remoteSocket, err := getRemoteGPGSocket(workspaceHostname)
 		if err != nil {
 			log.Trace(err)
 			return config, nil
@@ -147,7 +147,7 @@ func generateSshConfigEntry(profileId, targetId, projectName, knownHostsPath str
 	return config, nil
 }
 
-func EnsureSshConfigEntryAdded(profileId, targetName, projectName string, gpgKey string) error {
+func EnsureSshConfigEntryAdded(profileId, targetName, workspaceName string, gpgKey string) error {
 	err := ensureSshFilesLinked()
 	if err != nil {
 		return err
@@ -165,19 +165,19 @@ func EnsureSshConfigEntryAdded(profileId, targetName, projectName string, gpgKey
 	}
 
 	// Generate SSH config entry without GPG forwarding
-	newContent, err := appendSshConfigEntry(configPath, profileId, targetName, projectName, knownHostsFile, false, string(existingContent))
+	newContent, err := appendSshConfigEntry(configPath, profileId, targetName, workspaceName, knownHostsFile, false, string(existingContent))
 	if err != nil {
 		return err
 	}
 
 	if gpgKey != "" {
 		// Generate SSH config entry with GPG forwarding and override previous config
-		_, err := appendSshConfigEntry(configPath, profileId, targetName, projectName, knownHostsFile, true, newContent)
+		_, err := appendSshConfigEntry(configPath, profileId, targetName, workspaceName, knownHostsFile, true, newContent)
 		if err != nil {
 			return err
 		}
-		projectHostname := GetProjectHostname(profileId, targetName, projectName)
-		err = ExportGPGKey(gpgKey, projectHostname)
+		workspaceHostname := GetWorkspaceHostname(profileId, targetName, workspaceName)
+		err = ExportGPGKey(gpgKey, workspaceHostname)
 		if err != nil {
 			return err
 		}
@@ -193,8 +193,8 @@ func getKnownHostsFile() string {
 	return "/dev/null"
 }
 
-func appendSshConfigEntry(configPath, profileId, targetId, projectName, knownHostsFile string, gpgForward bool, existingContent string) (string, error) {
-	data, err := generateSshConfigEntry(profileId, targetId, projectName, knownHostsFile, gpgForward)
+func appendSshConfigEntry(configPath, profileId, targetId, workspaceName, knownHostsFile string, gpgForward bool, existingContent string) (string, error) {
+	data, err := generateSshConfigEntry(profileId, targetId, workspaceName, knownHostsFile, gpgForward)
 	if err != nil {
 		return "", err
 	}
@@ -205,7 +205,7 @@ func appendSshConfigEntry(configPath, profileId, targetId, projectName, knownHos
 	}
 
 	// We want to remove the config entry gpg counterpart
-	configCounterpart, err := generateSshConfigEntry(profileId, targetId, projectName, knownHostsFile, !gpgForward)
+	configCounterpart, err := generateSshConfigEntry(profileId, targetId, workspaceName, knownHostsFile, !gpgForward)
 	if err != nil {
 		return "", err
 	}
@@ -238,8 +238,8 @@ func getLocalGPGSocket() (string, error) {
 	return strings.TrimSpace(string(output)), nil
 }
 
-func getRemoteGPGSocket(projectHostname string) (string, error) {
-	cmd := exec.Command("ssh", projectHostname, "gpgconf --list-dir agent-socket")
+func getRemoteGPGSocket(workspaceHostname string) (string, error) {
+	cmd := exec.Command("ssh", workspaceHostname, "gpgconf --list-dir agent-socket")
 	output, err := cmd.Output()
 	if err != nil {
 		return "", fmt.Errorf("failed to get remote GPG socket: %v", err)
@@ -247,7 +247,7 @@ func getRemoteGPGSocket(projectHostname string) (string, error) {
 	return strings.TrimSpace(string(output)), nil
 }
 
-func ExportGPGKey(keyID, projectHostname string) error {
+func ExportGPGKey(keyID, workspaceHostname string) error {
 	exportCmd := exec.Command("gpg", "--export", keyID)
 	var output bytes.Buffer
 	exportCmd.Stdout = &output
@@ -256,7 +256,7 @@ func ExportGPGKey(keyID, projectHostname string) error {
 		return err
 	}
 
-	importCmd := exec.Command("ssh", projectHostname, "gpg --import")
+	importCmd := exec.Command("ssh", workspaceHostname, "gpg --import")
 	importCmd.Stdin = &output
 
 	return importCmd.Run()
@@ -312,8 +312,8 @@ func RemoveTargetSshEntries(profileId, targetId string) error {
 	return nil
 }
 
-func GetProjectHostname(profileId, targetId, projectName string) string {
-	return fmt.Sprintf("%s-%s-%s", profileId, targetId, projectName)
+func GetWorkspaceHostname(profileId, targetId, workspaceName string) string {
+	return fmt.Sprintf("%s-%s-%s", profileId, targetId, workspaceName)
 }
 
 func init() {

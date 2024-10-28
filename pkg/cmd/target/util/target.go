@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type ProjectConfigurationFlags struct {
+type WorkspaceConfigurationFlags struct {
 	Builder           *views_util.BuildChoice
 	CustomImage       *string
 	CustomImageUser   *string
@@ -23,9 +23,9 @@ type ProjectConfigurationFlags struct {
 	GitProviderConfig *string
 }
 
-func AddProjectConfigurationFlags(cmd *cobra.Command, flags ProjectConfigurationFlags, multiProjectFlagException bool) {
-	cmd.Flags().StringVar(flags.CustomImage, "custom-image", "", "Create the project with the custom image passed as the flag value; Requires setting --custom-image-user flag as well")
-	cmd.Flags().StringVar(flags.CustomImageUser, "custom-image-user", "", "Create the project with the custom image user passed as the flag value; Requires setting --custom-image flag as well")
+func AddWorkspaceConfigurationFlags(cmd *cobra.Command, flags WorkspaceConfigurationFlags, multiWorkspaceFlagException bool) {
+	cmd.Flags().StringVar(flags.CustomImage, "custom-image", "", "Create the workspace with the custom image passed as the flag value; Requires setting --custom-image-user flag as well")
+	cmd.Flags().StringVar(flags.CustomImageUser, "custom-image-user", "", "Create the workspace with the custom image user passed as the flag value; Requires setting --custom-image flag as well")
 	cmd.Flags().StringVar(flags.DevcontainerPath, "devcontainer-path", "", "Automatically assign the devcontainer builder with the path passed as the flag value")
 	cmd.Flags().Var(flags.Builder, "builder", fmt.Sprintf("Specify the builder (currently %s/%s/%s)", views_util.AUTOMATIC, views_util.DEVCONTAINER, views_util.NONE))
 	cmd.Flags().StringArrayVar(flags.EnvVars, "env", []string{}, "Specify environment variables (e.g. --env 'KEY1=VALUE1' --env 'KEY2=VALUE2' ...')")
@@ -38,36 +38,36 @@ func AddProjectConfigurationFlags(cmd *cobra.Command, flags ProjectConfiguration
 	cmd.MarkFlagsMutuallyExclusive("devcontainer-path", "custom-image-user")
 	cmd.MarkFlagsRequiredTogether("custom-image", "custom-image-user")
 
-	if multiProjectFlagException {
-		cmd.MarkFlagsMutuallyExclusive("multi-project", "custom-image")
-		cmd.MarkFlagsMutuallyExclusive("multi-project", "custom-image-user")
-		cmd.MarkFlagsMutuallyExclusive("multi-project", "devcontainer-path")
-		cmd.MarkFlagsMutuallyExclusive("multi-project", "builder")
-		cmd.MarkFlagsMutuallyExclusive("multi-project", "env")
+	if multiWorkspaceFlagException {
+		cmd.MarkFlagsMutuallyExclusive("multi-workspace", "custom-image")
+		cmd.MarkFlagsMutuallyExclusive("multi-workspace", "custom-image-user")
+		cmd.MarkFlagsMutuallyExclusive("multi-workspace", "devcontainer-path")
+		cmd.MarkFlagsMutuallyExclusive("multi-workspace", "builder")
+		cmd.MarkFlagsMutuallyExclusive("multi-workspace", "env")
 	}
 }
 
-func CheckAnyProjectConfigurationFlagSet(flags ProjectConfigurationFlags) bool {
+func CheckAnyWorkspaceConfigurationFlagSet(flags WorkspaceConfigurationFlags) bool {
 	return *flags.GitProviderConfig != "" || *flags.CustomImage != "" || *flags.CustomImageUser != "" || *flags.DevcontainerPath != "" || *flags.Builder != "" || len(*flags.EnvVars) > 0
 }
 
-func IsProjectRunning(target *apiclient.TargetDTO, projectName string) bool {
-	for _, project := range target.GetProjects() {
-		if project.GetName() == projectName {
-			return project.GetState().Uptime != 0
+func IsWorkspaceRunning(target *apiclient.TargetDTO, workspaceName string) bool {
+	for _, workspace := range target.GetWorkspaces() {
+		if workspace.GetName() == workspaceName {
+			return workspace.GetState().Uptime != 0
 		}
 	}
 	return false
 }
 
-func GetProjectProviderMetadata(target *apiclient.TargetDTO, projectName string) (string, error) {
+func GetWorkspaceProviderMetadata(target *apiclient.TargetDTO, workspaceName string) (string, error) {
 	if target.Info != nil {
-		for _, project := range target.Info.Projects {
-			if project.Name == projectName {
-				if project.ProviderMetadata == nil {
-					return "", errors.New("project provider metadata is missing")
+		for _, workspace := range target.Info.Workspaces {
+			if workspace.Name == workspaceName {
+				if workspace.ProviderMetadata == nil {
+					return "", errors.New("workspace provider metadata is missing")
 				}
-				return *project.ProviderMetadata, nil
+				return *workspace.ProviderMetadata, nil
 			}
 		}
 	}
