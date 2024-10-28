@@ -10,21 +10,21 @@ import (
 )
 
 type TargetDTO struct {
-	Id           string       `gorm:"primaryKey"`
-	Name         string       `json:"name" gorm:"unique"`
-	TargetConfig string       `json:"config"`
-	ApiKey       string       `json:"apiKey"`
-	Projects     []ProjectDTO `gorm:"serializer:json"`
+	Id           string         `gorm:"primaryKey"`
+	Name         string         `json:"name" gorm:"unique"`
+	TargetConfig string         `json:"config"`
+	ApiKey       string         `json:"apiKey"`
+	Workspaces   []WorkspaceDTO `gorm:"serializer:json"`
 }
 
-func (w TargetDTO) GetProject(name string) (*ProjectDTO, error) {
-	for _, project := range w.Projects {
-		if project.Name == name {
-			return &project, nil
+func (w TargetDTO) GetWorkspace(name string) (*WorkspaceDTO, error) {
+	for _, workspace := range w.Workspaces {
+		if workspace.Name == name {
+			return &workspace, nil
 		}
 	}
 
-	return nil, errors.New("project not found")
+	return nil, errors.New("workspace not found")
 }
 
 func ToTargetDTO(target *target.Target) TargetDTO {
@@ -35,8 +35,8 @@ func ToTargetDTO(target *target.Target) TargetDTO {
 		ApiKey:       target.ApiKey,
 	}
 
-	for _, project := range target.Projects {
-		targetDTO.Projects = append(targetDTO.Projects, ToProjectDTO(project))
+	for _, workspace := range target.Workspaces {
+		targetDTO.Workspaces = append(targetDTO.Workspaces, ToWorkspaceDTO(workspace))
 	}
 
 	return targetDTO
@@ -50,8 +50,8 @@ func ToTarget(targetDTO TargetDTO) *target.Target {
 		ApiKey:       targetDTO.ApiKey,
 	}
 
-	for _, projectDTO := range targetDTO.Projects {
-		target.Projects = append(target.Projects, ToProject(projectDTO))
+	for _, workspaceDTO := range targetDTO.Workspaces {
+		target.Workspaces = append(target.Workspaces, ToWorkspace(workspaceDTO))
 	}
 
 	return &target

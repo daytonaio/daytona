@@ -33,10 +33,10 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/daytonaio/daytona/pkg/server/profiledata"
-	"github.com/daytonaio/daytona/pkg/server/projectconfig"
 	"github.com/daytonaio/daytona/pkg/server/registry"
 	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
 	"github.com/daytonaio/daytona/pkg/server/targets"
+	"github.com/daytonaio/daytona/pkg/server/workspaceconfig"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/views"
 	started_view "github.com/daytonaio/daytona/pkg/views/server/started"
@@ -60,7 +60,7 @@ var ServeCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if os.Getenv("USER") == "root" {
-			views.RenderInfoMessageBold("Running the server as root is not recommended because\nDaytona will not be able to remap project directory ownership.\nPlease run the server as a non-root user.")
+			views.RenderInfoMessageBold("Running the server as root is not recommended because\nDaytona will not be able to remap workspace directory ownership.\nPlease run the server as a non-root user.")
 		}
 
 		if log.GetLevel() < log.InfoLevel {
@@ -221,7 +221,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	if err != nil {
 		return nil, err
 	}
-	projectConfigStore, err := db.NewProjectConfigStore(dbConnection)
+	workspaceConfigStore, err := db.NewWorkspaceConfigStore(dbConnection)
 	if err != nil {
 		return nil, err
 	}
@@ -265,20 +265,20 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	})
 
 	gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
-		ConfigStore:        gitProviderConfigStore,
-		ProjectConfigStore: projectConfigStore,
+		ConfigStore:          gitProviderConfigStore,
+		WorkspaceConfigStore: workspaceConfigStore,
 	})
 
 	prebuildWebhookEndpoint := fmt.Sprintf("%s%s", util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain), constants.WEBHOOK_EVENT_ROUTE)
 
-	projectConfigService := projectconfig.NewProjectConfigService(projectconfig.ProjectConfigServiceConfig{
+	workspaceConfigService := workspaceconfig.NewWorkspaceConfigService(workspaceconfig.WorkspaceConfigServiceConfig{
 		PrebuildWebhookEndpoint: prebuildWebhookEndpoint,
-		ConfigStore:             projectConfigStore,
+		ConfigStore:             workspaceConfigStore,
 		BuildService:            buildService,
 		GitProviderService:      gitProviderService,
 	})
 
-	err = projectConfigService.StartRetentionPoller()
+	err = workspaceConfigService.StartRetentionPoller()
 	if err != nil {
 		return nil, err
 	}
@@ -350,12 +350,12 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		ContainerRegistryService: containerRegistryService,
 		BuilderImage:             c.BuilderImage,
 		BuildService:             buildService,
-		ProjectConfigService:     projectConfigService,
+		WorkspaceConfigService:   workspaceConfigService,
 		ServerApiUrl:             util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 		ServerVersion:            version,
 		ServerUrl:                headscaleUrl,
-		DefaultProjectImage:      c.DefaultProjectImage,
-		DefaultProjectUser:       c.DefaultProjectUser,
+		DefaultWorkspaceImage:    c.DefaultWorkspaceImage,
+		DefaultWorkspaceUser:     c.DefaultWorkspaceUser,
 		Provisioner:              provisioner,
 		LoggerFactory:            loggerFactory,
 		TelemetryService:         telemetryService,
@@ -372,7 +372,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		TargetConfigService:      targetConfigService,
 		ContainerRegistryService: containerRegistryService,
 		BuildService:             buildService,
-		ProjectConfigService:     projectConfigService,
+		WorkspaceConfigService:   workspaceConfigService,
 		LocalContainerRegistry:   localContainerRegistry,
 		ApiKeyService:            apiKeyService,
 		TargetService:            targetService,
@@ -456,8 +456,8 @@ func GetBuildRunner(c *server.Config, buildRunnerConfig *build.Config, telemetry
 		BuildStore:                  buildStore,
 		BuildImageNamespace:         buildImageNamespace,
 		LoggerFactory:               loggerFactory,
-		DefaultProjectImage:         c.DefaultProjectImage,
-		DefaultProjectUser:          c.DefaultProjectUser,
+		DefaultWorkspaceImage:       c.DefaultWorkspaceImage,
+		DefaultWorkspaceUser:        c.DefaultWorkspaceUser,
 	})
 
 	return build.NewBuildRunner(build.BuildRunnerInstanceConfig{

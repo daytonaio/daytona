@@ -16,7 +16,7 @@ func AddFiles(c *gin.Context) {
 	}
 
 	gitService := git.Service{
-		ProjectDir: req.Path,
+		WorkspaceDir: req.Path,
 	}
 
 	if err := gitService.Add(req.Files); err != nil {

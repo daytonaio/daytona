@@ -23,15 +23,15 @@ func (s *TargetService) StopTarget(ctx context.Context, targetId string) error {
 		return err
 	}
 
-	for _, project := range target.Projects {
+	for _, workspace := range target.Workspaces {
 		//	todo: go routines
-		err := s.provisioner.StopProject(project, targetConfig)
+		err := s.provisioner.StopWorkspace(workspace, targetConfig)
 		if err != nil {
 			return err
 		}
-		if project.State != nil {
-			project.State.Uptime = 0
-			project.State.UpdatedAt = time.Now().Format(time.RFC1123)
+		if workspace.State != nil {
+			workspace.State.Uptime = 0
+			workspace.State.UpdatedAt = time.Now().Format(time.RFC1123)
 		}
 	}
 
@@ -60,15 +60,15 @@ func (s *TargetService) StopTarget(ctx context.Context, targetId string) error {
 	return err
 }
 
-func (s *TargetService) StopProject(ctx context.Context, targetId, projectName string) error {
+func (s *TargetService) StopWorkspace(ctx context.Context, targetId, workspaceName string) error {
 	w, err := s.targetStore.Find(targetId)
 	if err != nil {
 		return ErrTargetNotFound
 	}
 
-	project, err := w.GetProject(projectName)
+	workspace, err := w.GetWorkspace(workspaceName)
 	if err != nil {
-		return ErrProjectNotFound
+		return ErrWorkspaceNotFound
 	}
 
 	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &w.TargetConfig})
@@ -76,14 +76,14 @@ func (s *TargetService) StopProject(ctx context.Context, targetId, projectName s
 		return err
 	}
 
-	err = s.provisioner.StopProject(project, targetConfig)
+	err = s.provisioner.StopWorkspace(workspace, targetConfig)
 	if err != nil {
 		return err
 	}
 
-	if project.State != nil {
-		project.State.Uptime = 0
-		project.State.UpdatedAt = time.Now().Format(time.RFC1123)
+	if workspace.State != nil {
+		workspace.State.Uptime = 0
+		workspace.State.UpdatedAt = time.Now().Format(time.RFC1123)
 	}
 
 	return s.targetStore.Save(w)

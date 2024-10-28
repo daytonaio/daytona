@@ -5,7 +5,7 @@ definitions:
       keyHash:
         type: string
       name:
-        description: Project or client name
+        description: Workspace or client name
         type: string
       type:
         $ref: '#/definitions/apikey.ApiKeyType'
@@ -147,12 +147,12 @@ definitions:
         type: object
       prebuildId:
         type: string
-      projectConfigName:
+      workspaceConfigName:
         type: string
     required:
     - branch
     - envVars
-    - projectConfigName
+    - workspaceConfigName
     type: object
   CreatePrebuildDTO:
     properties:
@@ -171,7 +171,38 @@ definitions:
     required:
     - retention
     type: object
-  CreateProjectConfigDTO:
+  CreateTargetConfigDTO:
+    properties:
+      name:
+        type: string
+      options:
+        type: string
+      providerInfo:
+        $ref: '#/definitions/provider.ProviderInfo'
+    required:
+    - name
+    - options
+    - providerInfo
+    type: object
+  CreateTargetDTO:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      targetConfig:
+        type: string
+      workspaces:
+        items:
+          $ref: '#/definitions/CreateWorkspaceDTO'
+        type: array
+    required:
+    - id
+    - name
+    - targetConfig
+    - workspaces
+    type: object
+  CreateWorkspaceConfigDTO:
     properties:
       buildConfig:
         $ref: '#/definitions/BuildConfig'
@@ -194,7 +225,7 @@ definitions:
     - name
     - repositoryUrl
     type: object
-  CreateProjectDTO:
+  CreateWorkspaceDTO:
     properties:
       buildConfig:
         $ref: '#/definitions/BuildConfig'
@@ -209,7 +240,7 @@ definitions:
       name:
         type: string
       source:
-        $ref: '#/definitions/CreateProjectSourceDTO'
+        $ref: '#/definitions/CreateWorkspaceSourceDTO'
       user:
         type: string
     required:
@@ -217,43 +248,12 @@ definitions:
     - name
     - source
     type: object
-  CreateProjectSourceDTO:
+  CreateWorkspaceSourceDTO:
     properties:
       repository:
         $ref: '#/definitions/GitRepository'
     required:
     - repository
-    type: object
-  CreateTargetConfigDTO:
-    properties:
-      name:
-        type: string
-      options:
-        type: string
-      providerInfo:
-        $ref: '#/definitions/provider.ProviderInfo'
-    required:
-    - name
-    - options
-    - providerInfo
-    type: object
-  CreateTargetDTO:
-    properties:
-      id:
-        type: string
-      name:
-        type: string
-      projects:
-        items:
-          $ref: '#/definitions/CreateProjectDTO'
-        type: array
-      targetConfig:
-        type: string
-    required:
-    - id
-    - name
-    - projects
-    - targetConfig
     type: object
   DevcontainerConfig:
     properties:
@@ -775,19 +775,19 @@ definitions:
         type: integer
       id:
         type: string
-      projectConfigName:
-        type: string
       retention:
         type: integer
       triggerFiles:
         items:
           type: string
         type: array
+      workspaceConfigName:
+        type: string
     required:
     - branch
     - id
-    - projectConfigName
     - retention
+    - workspaceConfigName
     type: object
   ProfileData:
     properties:
@@ -797,106 +797,6 @@ definitions:
         type: object
     required:
     - envVars
-    type: object
-  Project:
-    properties:
-      buildConfig:
-        $ref: '#/definitions/BuildConfig'
-      envVars:
-        additionalProperties:
-          type: string
-        type: object
-      gitProviderConfigId:
-        type: string
-      image:
-        type: string
-      name:
-        type: string
-      repository:
-        $ref: '#/definitions/GitRepository'
-      state:
-        $ref: '#/definitions/ProjectState'
-      targetConfig:
-        type: string
-      targetId:
-        type: string
-      user:
-        type: string
-    required:
-    - envVars
-    - image
-    - name
-    - repository
-    - targetConfig
-    - targetId
-    - user
-    type: object
-  ProjectConfig:
-    properties:
-      buildConfig:
-        $ref: '#/definitions/BuildConfig'
-      default:
-        type: boolean
-      envVars:
-        additionalProperties:
-          type: string
-        type: object
-      gitProviderConfigId:
-        type: string
-      image:
-        type: string
-      name:
-        type: string
-      prebuilds:
-        items:
-          $ref: '#/definitions/PrebuildConfig'
-        type: array
-      repositoryUrl:
-        type: string
-      user:
-        type: string
-    required:
-    - default
-    - envVars
-    - image
-    - name
-    - repositoryUrl
-    - user
-    type: object
-  ProjectDirResponse:
-    properties:
-      dir:
-        type: string
-    type: object
-  ProjectInfo:
-    properties:
-      created:
-        type: string
-      isRunning:
-        type: boolean
-      name:
-        type: string
-      providerMetadata:
-        type: string
-      targetId:
-        type: string
-    required:
-    - created
-    - isRunning
-    - name
-    - targetId
-    type: object
-  ProjectState:
-    properties:
-      gitStatus:
-        $ref: '#/definitions/GitStatus'
-      updatedAt:
-        type: string
-      uptime:
-        type: integer
-    required:
-    - updatedAt
-    - uptime
     type: object
   Provider:
     properties:
@@ -975,9 +875,9 @@ definitions:
         type: string
       builderRegistryServer:
         type: string
-      defaultProjectImage:
+      defaultWorkspaceImage:
         type: string
-      defaultProjectUser:
+      defaultWorkspaceUser:
         type: string
       frps:
         $ref: '#/definitions/FRPSConfig'
@@ -1004,8 +904,8 @@ definitions:
     - binariesPath
     - builderImage
     - builderRegistryServer
-    - defaultProjectImage
-    - defaultProjectUser
+    - defaultWorkspaceImage
+    - defaultWorkspaceUser
     - headscalePort
     - id
     - localBuilderRegistryImage
@@ -1037,7 +937,7 @@ definitions:
     - providerId
     - token
     type: object
-  SetProjectState:
+  SetWorkspaceState:
     properties:
       gitStatus:
         $ref: '#/definitions/GitStatus'
@@ -1080,17 +980,17 @@ definitions:
         type: string
       name:
         type: string
-      projects:
-        items:
-          $ref: '#/definitions/Project'
-        type: array
       targetConfig:
         type: string
+      workspaces:
+        items:
+          $ref: '#/definitions/Workspace'
+        type: array
     required:
     - id
     - name
-    - projects
     - targetConfig
+    - workspaces
     type: object
   TargetConfig:
     properties:
@@ -1153,41 +1053,141 @@ definitions:
         $ref: '#/definitions/TargetInfo'
       name:
         type: string
-      projects:
-        items:
-          $ref: '#/definitions/Project'
-        type: array
       targetConfig:
         type: string
+      workspaces:
+        items:
+          $ref: '#/definitions/Workspace'
+        type: array
     required:
     - id
     - name
-    - projects
     - targetConfig
+    - workspaces
     type: object
   TargetInfo:
     properties:
       name:
         type: string
-      projects:
-        items:
-          $ref: '#/definitions/ProjectInfo'
-        type: array
       providerMetadata:
         type: string
+      workspaces:
+        items:
+          $ref: '#/definitions/WorkspaceInfo'
+        type: array
     required:
     - name
-    - projects
+    - workspaces
+    type: object
+  Workspace:
+    properties:
+      buildConfig:
+        $ref: '#/definitions/BuildConfig'
+      envVars:
+        additionalProperties:
+          type: string
+        type: object
+      gitProviderConfigId:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      repository:
+        $ref: '#/definitions/GitRepository'
+      state:
+        $ref: '#/definitions/WorkspaceState'
+      targetConfig:
+        type: string
+      targetId:
+        type: string
+      user:
+        type: string
+    required:
+    - envVars
+    - image
+    - name
+    - repository
+    - targetConfig
+    - targetId
+    - user
+    type: object
+  WorkspaceConfig:
+    properties:
+      buildConfig:
+        $ref: '#/definitions/BuildConfig'
+      default:
+        type: boolean
+      envVars:
+        additionalProperties:
+          type: string
+        type: object
+      gitProviderConfigId:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      prebuilds:
+        items:
+          $ref: '#/definitions/PrebuildConfig'
+        type: array
+      repositoryUrl:
+        type: string
+      user:
+        type: string
+    required:
+    - default
+    - envVars
+    - image
+    - name
+    - repositoryUrl
+    - user
+    type: object
+  WorkspaceDirResponse:
+    properties:
+      dir:
+        type: string
+    type: object
+  WorkspaceInfo:
+    properties:
+      created:
+        type: string
+      isRunning:
+        type: boolean
+      name:
+        type: string
+      providerMetadata:
+        type: string
+      targetId:
+        type: string
+    required:
+    - created
+    - isRunning
+    - name
+    - targetId
+    type: object
+  WorkspaceState:
+    properties:
+      gitStatus:
+        $ref: '#/definitions/GitStatus'
+      updatedAt:
+        type: string
+      uptime:
+        type: integer
+    required:
+    - updatedAt
+    - uptime
     type: object
   apikey.ApiKeyType:
     enum:
     - client
-    - project
+    - workspace
     - target
     type: string
     x-enum-varnames:
     - ApiKeyTypeClient
-    - ApiKeyTypeProject
+    - ApiKeyTypeWorkspace
     - ApiKeyTypeTarget
   build.BuildState:
     enum:
@@ -1851,246 +1851,6 @@ paths:
       summary: Set profile data
       tags:
       - profile
-  /project-config:
-    get:
-      description: List project configs
-      operationId: ListProjectConfigs
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/ProjectConfig'
-            type: array
-      summary: List project configs
-      tags:
-      - project-config
-    put:
-      consumes:
-      - application/json
-      description: Set project config data
-      operationId: SetProjectConfig
-      parameters:
-      - description: Project config
-        in: body
-        name: projectConfig
-        required: true
-        schema:
-          $ref: '#/definitions/CreateProjectConfigDTO'
-      responses:
-        "201":
-          description: Created
-      summary: Set project config data
-      tags:
-      - project-config
-  /project-config/{configName}:
-    delete:
-      description: Delete project config data
-      operationId: DeleteProjectConfig
-      parameters:
-      - description: Config name
-        in: path
-        name: configName
-        required: true
-        type: string
-      - description: Force
-        in: query
-        name: force
-        type: boolean
-      responses:
-        "204":
-          description: No Content
-      summary: Delete project config data
-      tags:
-      - project-config
-    get:
-      consumes:
-      - application/json
-      description: Get project config data
-      operationId: GetProjectConfig
-      parameters:
-      - description: Config name
-        in: path
-        name: configName
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/ProjectConfig'
-      summary: Get project config data
-      tags:
-      - project-config
-  /project-config/{configName}/prebuild:
-    get:
-      consumes:
-      - application/json
-      description: List prebuilds for project config
-      operationId: ListPrebuildsForProjectConfig
-      parameters:
-      - description: Config name
-        in: path
-        name: configName
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/PrebuildDTO'
-            type: array
-      summary: List prebuilds for project config
-      tags:
-      - prebuild
-    put:
-      consumes:
-      - application/json
-      description: Set prebuild
-      operationId: SetPrebuild
-      parameters:
-      - description: Config name
-        in: path
-        name: configName
-        required: true
-        type: string
-      - description: Prebuild
-        in: body
-        name: prebuild
-        required: true
-        schema:
-          $ref: '#/definitions/CreatePrebuildDTO'
-      responses:
-        "201":
-          description: Created
-          schema:
-            type: string
-      summary: Set prebuild
-      tags:
-      - prebuild
-  /project-config/{configName}/prebuild/{prebuildId}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete prebuild
-      operationId: DeletePrebuild
-      parameters:
-      - description: Project config name
-        in: path
-        name: configName
-        required: true
-        type: string
-      - description: Prebuild ID
-        in: path
-        name: prebuildId
-        required: true
-        type: string
-      - description: Force
-        in: query
-        name: force
-        type: boolean
-      responses:
-        "204":
-          description: No Content
-      summary: Delete prebuild
-      tags:
-      - prebuild
-    get:
-      consumes:
-      - application/json
-      description: Get prebuild
-      operationId: GetPrebuild
-      parameters:
-      - description: Project config name
-        in: path
-        name: configName
-        required: true
-        type: string
-      - description: Prebuild ID
-        in: path
-        name: prebuildId
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/PrebuildDTO'
-      summary: Get prebuild
-      tags:
-      - prebuild
-  /project-config/{configName}/set-default:
-    patch:
-      description: Set project config to default
-      operationId: SetDefaultProjectConfig
-      parameters:
-      - description: Config name
-        in: path
-        name: configName
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-      summary: Set project config to default
-      tags:
-      - project-config
-  /project-config/default/{gitUrl}:
-    get:
-      description: Get project configs by git url
-      operationId: GetDefaultProjectConfig
-      parameters:
-      - description: Git URL
-        in: path
-        name: gitUrl
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/ProjectConfig'
-      summary: Get project configs by git url
-      tags:
-      - project-config
-  /project-config/prebuild:
-    get:
-      consumes:
-      - application/json
-      description: List prebuilds
-      operationId: ListPrebuilds
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/PrebuildDTO'
-            type: array
-      summary: List prebuilds
-      tags:
-      - prebuild
-  /project-config/prebuild/process-git-event:
-    post:
-      description: ProcessGitEvent
-      operationId: ProcessGitEvent
-      parameters:
-      - description: Webhook event
-        in: body
-        name: body
-        required: true
-        schema:
-          type: object
-      responses:
-        "200":
-          description: OK
-      summary: ProcessGitEvent
-      tags:
-      - prebuild
   /provider:
     get:
       description: List providers
@@ -2392,40 +2152,40 @@ paths:
       summary: Get target info
       tags:
       - target
-  /target/{targetId}/{projectId}/start:
+  /target/{targetId}/{workspaceId}/start:
     post:
-      description: Start project
-      operationId: StartProject
+      description: Start workspace
+      operationId: StartWorkspace
       parameters:
       - description: Target ID or Name
         in: path
         name: targetId
         required: true
         type: string
-      - description: Project ID
+      - description: Workspace ID
         in: path
-        name: projectId
+        name: workspaceId
         required: true
         type: string
       responses:
         "200":
           description: OK
-      summary: Start project
+      summary: Start workspace
       tags:
       - target
-  /target/{targetId}/{projectId}/state:
+  /target/{targetId}/{workspaceId}/state:
     post:
-      description: Set project state
-      operationId: SetProjectState
+      description: Set workspace state
+      operationId: SetWorkspaceState
       parameters:
       - description: Target ID or Name
         in: path
         name: targetId
         required: true
         type: string
-      - description: Project ID
+      - description: Workspace ID
         in: path
-        name: projectId
+        name: workspaceId
         required: true
         type: string
       - description: Set State
@@ -2433,32 +2193,32 @@ paths:
         name: setState
         required: true
         schema:
-          $ref: '#/definitions/SetProjectState'
+          $ref: '#/definitions/SetWorkspaceState'
       responses:
         "200":
           description: OK
-      summary: Set project state
+      summary: Set workspace state
       tags:
       - target
-  /target/{targetId}/{projectId}/stop:
+  /target/{targetId}/{workspaceId}/stop:
     post:
-      description: Stop project
-      operationId: StopProject
+      description: Stop workspace
+      operationId: StopWorkspace
       parameters:
       - description: Target ID or Name
         in: path
         name: targetId
         required: true
         type: string
-      - description: Project ID
+      - description: Workspace ID
         in: path
-        name: projectId
+        name: workspaceId
         required: true
         type: string
       responses:
         "200":
           description: OK
-      summary: Stop project
+      summary: Stop workspace
       tags:
       - target
   /target/{targetId}/start:
@@ -2493,6 +2253,246 @@ paths:
       summary: Stop target
       tags:
       - target
+  /workspace-config:
+    get:
+      description: List workspace configs
+      operationId: ListWorkspaceConfigs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/WorkspaceConfig'
+            type: array
+      summary: List workspace configs
+      tags:
+      - workspace-config
+    put:
+      consumes:
+      - application/json
+      description: Set workspace config data
+      operationId: SetWorkspaceConfig
+      parameters:
+      - description: Workspace config
+        in: body
+        name: workspaceConfig
+        required: true
+        schema:
+          $ref: '#/definitions/CreateWorkspaceConfigDTO'
+      responses:
+        "201":
+          description: Created
+      summary: Set workspace config data
+      tags:
+      - workspace-config
+  /workspace-config/{configName}:
+    delete:
+      description: Delete workspace config data
+      operationId: DeleteWorkspaceConfig
+      parameters:
+      - description: Config name
+        in: path
+        name: configName
+        required: true
+        type: string
+      - description: Force
+        in: query
+        name: force
+        type: boolean
+      responses:
+        "204":
+          description: No Content
+      summary: Delete workspace config data
+      tags:
+      - workspace-config
+    get:
+      consumes:
+      - application/json
+      description: Get workspace config data
+      operationId: GetWorkspaceConfig
+      parameters:
+      - description: Config name
+        in: path
+        name: configName
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/WorkspaceConfig'
+      summary: Get workspace config data
+      tags:
+      - workspace-config
+  /workspace-config/{configName}/prebuild:
+    get:
+      consumes:
+      - application/json
+      description: List prebuilds for workspace config
+      operationId: ListPrebuildsForWorkspaceConfig
+      parameters:
+      - description: Config name
+        in: path
+        name: configName
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/PrebuildDTO'
+            type: array
+      summary: List prebuilds for workspace config
+      tags:
+      - prebuild
+    put:
+      consumes:
+      - application/json
+      description: Set prebuild
+      operationId: SetPrebuild
+      parameters:
+      - description: Config name
+        in: path
+        name: configName
+        required: true
+        type: string
+      - description: Prebuild
+        in: body
+        name: prebuild
+        required: true
+        schema:
+          $ref: '#/definitions/CreatePrebuildDTO'
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: string
+      summary: Set prebuild
+      tags:
+      - prebuild
+  /workspace-config/{configName}/prebuild/{prebuildId}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete prebuild
+      operationId: DeletePrebuild
+      parameters:
+      - description: Workspace config name
+        in: path
+        name: configName
+        required: true
+        type: string
+      - description: Prebuild ID
+        in: path
+        name: prebuildId
+        required: true
+        type: string
+      - description: Force
+        in: query
+        name: force
+        type: boolean
+      responses:
+        "204":
+          description: No Content
+      summary: Delete prebuild
+      tags:
+      - prebuild
+    get:
+      consumes:
+      - application/json
+      description: Get prebuild
+      operationId: GetPrebuild
+      parameters:
+      - description: Workspace config name
+        in: path
+        name: configName
+        required: true
+        type: string
+      - description: Prebuild ID
+        in: path
+        name: prebuildId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/PrebuildDTO'
+      summary: Get prebuild
+      tags:
+      - prebuild
+  /workspace-config/{configName}/set-default:
+    patch:
+      description: Set workspace config to default
+      operationId: SetDefaultWorkspaceConfig
+      parameters:
+      - description: Config name
+        in: path
+        name: configName
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Set workspace config to default
+      tags:
+      - workspace-config
+  /workspace-config/default/{gitUrl}:
+    get:
+      description: Get workspace configs by git url
+      operationId: GetDefaultWorkspaceConfig
+      parameters:
+      - description: Git URL
+        in: path
+        name: gitUrl
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/WorkspaceConfig'
+      summary: Get workspace configs by git url
+      tags:
+      - workspace-config
+  /workspace-config/prebuild:
+    get:
+      consumes:
+      - application/json
+      description: List prebuilds
+      operationId: ListPrebuilds
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/PrebuildDTO'
+            type: array
+      summary: List prebuilds
+      tags:
+      - prebuild
+  /workspace-config/prebuild/process-git-event:
+    post:
+      description: ProcessGitEvent
+      operationId: ProcessGitEvent
+      parameters:
+      - description: Webhook event
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+      summary: ProcessGitEvent
+      tags:
+      - prebuild
   /workspace/{workspaceId}/{projectId}/toolbox/files:
     delete:
       description: Delete file inside workspace project
@@ -3388,10 +3388,10 @@ paths:
       summary: Execute command
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/project-dir:
+  /workspace/{workspaceId}/{projectId}/toolbox/workspace-dir:
     get:
-      description: Get project directory
-      operationId: GetProjectDir
+      description: Get workspace directory
+      operationId: GetWorkspaceDir
       parameters:
       - description: Workspace ID or Name
         in: path
@@ -3409,8 +3409,8 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/ProjectDirResponse'
-      summary: Get project dir
+            $ref: '#/definitions/WorkspaceDirResponse'
+      summary: Get workspace dir
       tags:
       - workspace toolbox
 schemes:

@@ -13,9 +13,9 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/profiledata"
-	"github.com/daytonaio/daytona/pkg/server/projectconfig"
 	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
 	"github.com/daytonaio/daytona/pkg/server/targets"
+	"github.com/daytonaio/daytona/pkg/server/workspaceconfig"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/hashicorp/go-plugin"
 
@@ -29,7 +29,7 @@ type ServerInstanceConfig struct {
 	TargetConfigService      targetconfigs.ITargetConfigService
 	ContainerRegistryService containerregistries.IContainerRegistryService
 	BuildService             builds.IBuildService
-	ProjectConfigService     projectconfig.IProjectConfigService
+	WorkspaceConfigService   workspaceconfig.IWorkspaceConfigService
 	LocalContainerRegistry   ILocalContainerRegistry
 	TargetService            targets.ITargetService
 	ApiKeyService            apikeys.IApiKeyService
@@ -58,7 +58,7 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 			TargetConfigService:      serverConfig.TargetConfigService,
 			ContainerRegistryService: serverConfig.ContainerRegistryService,
 			BuildService:             serverConfig.BuildService,
-			ProjectConfigService:     serverConfig.ProjectConfigService,
+			WorkspaceConfigService:   serverConfig.WorkspaceConfigService,
 			LocalContainerRegistry:   serverConfig.LocalContainerRegistry,
 			TargetService:            serverConfig.TargetService,
 			ApiKeyService:            serverConfig.ApiKeyService,
@@ -80,7 +80,7 @@ type Server struct {
 	TargetConfigService      targetconfigs.ITargetConfigService
 	ContainerRegistryService containerregistries.IContainerRegistryService
 	BuildService             builds.IBuildService
-	ProjectConfigService     projectconfig.IProjectConfigService
+	WorkspaceConfigService   workspaceconfig.IWorkspaceConfigService
 	LocalContainerRegistry   ILocalContainerRegistry
 	TargetService            targets.ITargetService
 	ApiKeyService            apikeys.IApiKeyService

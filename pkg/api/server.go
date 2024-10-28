@@ -40,14 +40,14 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/health"
 	log_controller "github.com/daytonaio/daytona/pkg/api/controllers/log"
 	"github.com/daytonaio/daytona/pkg/api/controllers/profiledata"
-	"github.com/daytonaio/daytona/pkg/api/controllers/projectconfig"
-	"github.com/daytonaio/daytona/pkg/api/controllers/projectconfig/prebuild"
 	"github.com/daytonaio/daytona/pkg/api/controllers/provider"
 	"github.com/daytonaio/daytona/pkg/api/controllers/sample"
 	"github.com/daytonaio/daytona/pkg/api/controllers/server"
 	"github.com/daytonaio/daytona/pkg/api/controllers/target"
 	"github.com/daytonaio/daytona/pkg/api/controllers/targetconfig"
 	"github.com/daytonaio/daytona/pkg/api/controllers/workspace/toolbox"
+	"github.com/daytonaio/daytona/pkg/api/controllers/workspaceconfig"
+	"github.com/daytonaio/daytona/pkg/api/controllers/workspaceconfig/prebuild"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -144,7 +144,7 @@ func (a *ApiServer) Start() error {
 	{
 		toolboxController := targetController.Group("/:targetId/:projectId/toolbox")
 		{
-			toolboxController.GET("/project-dir", toolbox.GetProjectDir)
+			toolboxController.GET("/workspace-dir", toolbox.GetWorkspaceDir)
 
 			toolboxController.POST("/process/execute", toolbox.ProcessExecuteCommand)
 
@@ -198,34 +198,34 @@ func (a *ApiServer) Start() error {
 		targetController.POST("/:targetId/start", target.StartTarget)
 		targetController.POST("/:targetId/stop", target.StopTarget)
 		targetController.DELETE("/:targetId", target.RemoveTarget)
-		targetController.POST("/:targetId/:projectId/start", target.StartProject)
-		targetController.POST("/:targetId/:projectId/stop", target.StopProject)
+		targetController.POST("/:targetId/:workspaceId/start", target.StartWorkspace)
+		targetController.POST("/:targetId/:workspaceId/stop", target.StopWorkspace)
 	}
 
-	projectConfigController := protected.Group("/project-config")
+	workspaceConfigController := protected.Group("/workspace-config")
 	{
-		// Defining the prebuild routes first to avoid conflicts with the project config routes
+		// Defining the prebuild routes first to avoid conflicts with the workspace config routes
 		prebuildRoutePath := "/prebuild"
-		projectConfigPrebuildsGroup := projectConfigController.Group(prebuildRoutePath)
+		workspaceConfigPrebuildsGroup := workspaceConfigController.Group(prebuildRoutePath)
 		{
-			projectConfigPrebuildsGroup.GET("", prebuild.ListPrebuilds)
+			workspaceConfigPrebuildsGroup.GET("", prebuild.ListPrebuilds)
 		}
 
-		projectConfigNameGroup := projectConfigController.Group(":configName")
+		workspaceConfigNameGroup := workspaceConfigController.Group(":configName")
 		{
-			projectConfigNameGroup.PUT(prebuildRoutePath, prebuild.SetPrebuild)
-			projectConfigNameGroup.GET(prebuildRoutePath, prebuild.ListPrebuildsForProjectConfig)
-			projectConfigNameGroup.GET(prebuildRoutePath+"/:prebuildId", prebuild.GetPrebuild)
-			projectConfigNameGroup.DELETE(prebuildRoutePath+"/:prebuildId", prebuild.DeletePrebuild)
+			workspaceConfigNameGroup.PUT(prebuildRoutePath, prebuild.SetPrebuild)
+			workspaceConfigNameGroup.GET(prebuildRoutePath, prebuild.ListPrebuildsForWorkspaceConfig)
+			workspaceConfigNameGroup.GET(prebuildRoutePath+"/:prebuildId", prebuild.GetPrebuild)
+			workspaceConfigNameGroup.DELETE(prebuildRoutePath+"/:prebuildId", prebuild.DeletePrebuild)
 
-			projectConfigNameGroup.GET("", projectconfig.GetProjectConfig)
-			projectConfigNameGroup.PATCH("/set-default", projectconfig.SetDefaultProjectConfig)
-			projectConfigNameGroup.DELETE("", projectconfig.DeleteProjectConfig)
+			workspaceConfigNameGroup.GET("", workspaceconfig.GetWorkspaceConfig)
+			workspaceConfigNameGroup.PATCH("/set-default", workspaceconfig.SetDefaultWorkspaceConfig)
+			workspaceConfigNameGroup.DELETE("", workspaceconfig.DeleteWorkspaceConfig)
 		}
 
-		projectConfigController.GET("", projectconfig.ListProjectConfigs)
-		projectConfigController.PUT("", projectconfig.SetProjectConfig)
-		projectConfigController.GET("/default/:gitUrl", projectconfig.GetDefaultProjectConfig)
+		workspaceConfigController.GET("", workspaceconfig.ListWorkspaceConfigs)
+		workspaceConfigController.PUT("", workspaceconfig.SetWorkspaceConfig)
+		workspaceConfigController.GET("/default/:gitUrl", workspaceconfig.GetDefaultWorkspaceConfig)
 	}
 
 	public.POST(constants.WEBHOOK_EVENT_ROUTE, prebuild.ProcessGitEvent)
@@ -268,7 +268,7 @@ func (a *ApiServer) Start() error {
 	{
 		logController.GET("/server", log_controller.ReadServerLog)
 		logController.GET("/target/:targetId", log_controller.ReadTargetLog)
-		logController.GET("/target/:targetId/:projectName", log_controller.ReadProjectLog)
+		logController.GET("/target/:targetId/:workspaceName", log_controller.ReadWorkspaceLog)
 		logController.GET("/build/:buildId", log_controller.ReadBuildLog)
 	}
 
@@ -308,10 +308,10 @@ func (a *ApiServer) Start() error {
 		samplesController.GET("", sample.ListSamples)
 	}
 
-	projectGroup := protected.Group("/")
-	projectGroup.Use(middlewares.ProjectAuthMiddleware())
+	workspaceGroup := protected.Group("/")
+	workspaceGroup.Use(middlewares.WorkspaceAuthMiddleware())
 	{
-		projectGroup.POST(targetController.BasePath()+"/:targetId/:projectId/state", target.SetProjectState)
+		workspaceGroup.POST(targetController.BasePath()+"/:targetId/:workspaceId/state", target.SetWorkspaceState)
 	}
 
 	a.httpServer = &http.Server{

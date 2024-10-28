@@ -28,7 +28,7 @@ import (
 )
 
 var CodeCmd = &cobra.Command{
-	Use:     "code [TARGET] [PROJECT]",
+	Use:     "code [TARGET] [WORKSPACE]",
 	Short:   "Open a target in your preferred IDE",
 	Args:    cobra.RangeArgs(0, 2),
 	Aliases: []string{"open"},
@@ -41,7 +41,7 @@ var CodeCmd = &cobra.Command{
 
 		ctx := context.Background()
 		var targetId string
-		var projectName string
+		var workspaceName string
 		var providerConfigId *string
 		var ideId string
 		var target *apiclient.TargetDTO
@@ -87,23 +87,23 @@ var CodeCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 || len(args) == 1 {
-			selectedProject, err := selectTargetProject(targetId, &activeProfile)
+			selectedWorkspace, err := selectTargetWorkspace(targetId, &activeProfile)
 			if err != nil {
 				return err
 			}
-			if selectedProject == nil {
+			if selectedWorkspace == nil {
 				return nil
 			}
 
-			projectName = selectedProject.Name
-			providerConfigId = selectedProject.GitProviderConfigId
+			workspaceName = selectedWorkspace.Name
+			providerConfigId = selectedWorkspace.GitProviderConfigId
 		}
 
 		if len(args) == 2 {
-			projectName = args[1]
-			for _, project := range target.Projects {
-				if project.Name == projectName {
-					providerConfigId = project.GitProviderConfigId
+			workspaceName = args[1]
+			for _, workspace := range target.Workspaces {
+				if workspace.Name == workspaceName {
+					providerConfigId = workspace.GitProviderConfigId
 					break
 				}
 			}
@@ -113,8 +113,8 @@ var CodeCmd = &cobra.Command{
 			ideId = ideFlag
 		}
 
-		if !target_util.IsProjectRunning(target, projectName) {
-			wsRunningStatus, err := AutoStartTarget(target.Name, projectName)
+		if !target_util.IsWorkspaceRunning(target, workspaceName) {
+			wsRunningStatus, err := AutoStartTarget(target.Name, workspaceName)
 			if err != nil {
 				return err
 			}
@@ -125,7 +125,7 @@ var CodeCmd = &cobra.Command{
 
 		providerMetadata := ""
 		if ideId != "ssh" {
-			providerMetadata, err = target_util.GetProjectProviderMetadata(target, projectName)
+			providerMetadata, err = target_util.GetWorkspaceProviderMetadata(target, workspaceName)
 			if err != nil {
 				return err
 			}
@@ -138,19 +138,19 @@ var CodeCmd = &cobra.Command{
 
 		yesFlag, _ := cmd.Flags().GetBool("yes")
 		ideList := config.GetIdeList()
-		ide_views.RenderIdeOpeningMessage(target.Name, projectName, ideId, ideList)
-		return openIDE(ideId, activeProfile, targetId, projectName, providerMetadata, yesFlag, gpgKey)
+		ide_views.RenderIdeOpeningMessage(target.Name, workspaceName, ideId, ideList)
+		return openIDE(ideId, activeProfile, targetId, workspaceName, providerMetadata, yesFlag, gpgKey)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) == 1 {
-			return getProjectNameCompletions(cmd, args, toComplete)
+			return getWorkspaceNameCompletions(cmd, args, toComplete)
 		}
 
 		return getTargetNameCompletions()
 	},
 }
 
-func selectTargetProject(targetId string, profile *config.Profile) (*apiclient.Project, error) {
+func selectTargetWorkspace(targetId string, profile *config.Profile) (*apiclient.Workspace, error) {
 	ctx := context.Background()
 
 	apiClient, err := apiclient_util.GetApiClient(profile)
@@ -163,51 +163,51 @@ func selectTargetProject(targetId string, profile *config.Profile) (*apiclient.P
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	if len(targetInfo.Projects) > 1 {
-		selectedProject := selection.GetProjectFromPrompt(targetInfo.Projects, "Open")
-		if selectedProject == nil {
+	if len(targetInfo.Workspaces) > 1 {
+		selectedWorkspace := selection.GetWorkspaceFromPrompt(targetInfo.Workspaces, "Open")
+		if selectedWorkspace == nil {
 			return nil, nil
 		}
-		return selectedProject, nil
-	} else if len(targetInfo.Projects) == 1 {
-		return &targetInfo.Projects[0], nil
+		return selectedWorkspace, nil
+	} else if len(targetInfo.Workspaces) == 1 {
+		return &targetInfo.Workspaces[0], nil
 	}
 
-	return nil, errors.New("no projects found in target")
+	return nil, errors.New("no workspaces found in target")
 }
 
-func openIDE(ideId string, activeProfile config.Profile, targetId string, projectName string, projectProviderMetadata string, yesFlag bool, gpgKey string) error {
+func openIDE(ideId string, activeProfile config.Profile, targetId string, workspaceName string, workspaceProviderMetadata string, yesFlag bool, gpgKey string) error {
 	telemetry.AdditionalData["ide"] = ideId
 
 	switch ideId {
 	case "vscode":
-		return ide.OpenVSCode(activeProfile, targetId, projectName, projectProviderMetadata, gpgKey)
+		return ide.OpenVSCode(activeProfile, targetId, workspaceName, workspaceProviderMetadata, gpgKey)
 	case "code-insiders":
-		return ide.OpenVSCodeInsiders(activeProfile, targetId, projectName, projectProviderMetadata, gpgKey)
+		return ide.OpenVSCodeInsiders(activeProfile, targetId, workspaceName, workspaceProviderMetadata, gpgKey)
 	case "ssh":
-		return ide.OpenTerminalSsh(activeProfile, targetId, projectName, gpgKey, nil)
+		return ide.OpenTerminalSsh(activeProfile, targetId, workspaceName, gpgKey, nil)
 	case "browser":
-		return ide.OpenBrowserIDE(activeProfile, targetId, projectName, projectProviderMetadata, gpgKey)
+		return ide.OpenBrowserIDE(activeProfile, targetId, workspaceName, workspaceProviderMetadata, gpgKey)
 	case "codium":
-		return ide.OpenVScodium(activeProfile, targetId, projectName, projectProviderMetadata, gpgKey)
+		return ide.OpenVScodium(activeProfile, targetId, workspaceName, workspaceProviderMetadata, gpgKey)
 	case "codium-insiders":
-		return ide.OpenVScodiumInsiders(activeProfile, targetId, projectName, projectProviderMetadata, gpgKey)
+		return ide.OpenVScodiumInsiders(activeProfile, targetId, workspaceName, workspaceProviderMetadata, gpgKey)
 	case "cursor":
-		return ide.OpenCursor(activeProfile, targetId, projectName, projectProviderMetadata, gpgKey)
+		return ide.OpenCursor(activeProfile, targetId, workspaceName, workspaceProviderMetadata, gpgKey)
 	case "jupyter":
-		return ide.OpenJupyterIDE(activeProfile, targetId, projectName, projectProviderMetadata, yesFlag, gpgKey)
+		return ide.OpenJupyterIDE(activeProfile, targetId, workspaceName, workspaceProviderMetadata, yesFlag, gpgKey)
 	case "fleet":
-		return ide.OpenFleet(activeProfile, targetId, projectName, gpgKey)
+		return ide.OpenFleet(activeProfile, targetId, workspaceName, gpgKey)
 	case "positron":
-		return ide.OpenPositron(activeProfile, targetId, projectName, projectProviderMetadata, gpgKey)
+		return ide.OpenPositron(activeProfile, targetId, workspaceName, workspaceProviderMetadata, gpgKey)
 	case "zed":
-		return ide.OpenZed(activeProfile, targetId, projectName, gpgKey)
+		return ide.OpenZed(activeProfile, targetId, workspaceName, gpgKey)
 	case "windsurf":
-		return ide.OpenWindsurf(activeProfile, targetId, projectName, projectProviderMetadata, gpgKey)
+		return ide.OpenWindsurf(activeProfile, targetId, workspaceName, workspaceProviderMetadata, gpgKey)
 	default:
 		_, ok := jetbrains.GetIdes()[jetbrains.Id(ideId)]
 		if ok {
-			return ide.OpenJetbrainsIDE(activeProfile, ideId, targetId, projectName, gpgKey)
+			return ide.OpenJetbrainsIDE(activeProfile, ideId, targetId, workspaceName, gpgKey)
 		}
 	}
 
@@ -229,7 +229,7 @@ func init() {
 
 }
 
-func AutoStartTarget(targetId string, projectName string) (bool, error) {
+func AutoStartTarget(targetId string, workspaceName string) (bool, error) {
 	if !yesFlag {
 		if !ide_views.RunStartTargetForm(targetId) {
 			return false, nil
@@ -241,7 +241,7 @@ func AutoStartTarget(targetId string, projectName string) (bool, error) {
 		return false, err
 	}
 
-	err = StartTarget(apiClient, targetId, projectName)
+	err = StartTarget(apiClient, targetId, workspaceName)
 	if err != nil {
 		return false, err
 	}

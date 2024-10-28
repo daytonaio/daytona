@@ -35,26 +35,26 @@ func StopTarget(ctx *gin.Context) {
 	ctx.Status(200)
 }
 
-// StopProject 			godoc
+// StopWorkspace 			godoc
 //
 //	@Tags			target
-//	@Summary		Stop project
-//	@Description	Stop project
+//	@Summary		Stop workspace
+//	@Description	Stop workspace
 //	@Param			targetId	path	string	true	"Target ID or Name"
-//	@Param			projectId	path	string	true	"Project ID"
+//	@Param			workspaceId	path	string	true	"Workspace ID"
 //	@Success		200
-//	@Router			/target/{targetId}/{projectId}/stop [post]
+//	@Router			/target/{targetId}/{workspaceId}/stop [post]
 //
-//	@id				StopProject
-func StopProject(ctx *gin.Context) {
+//	@id				StopWorkspace
+func StopWorkspace(ctx *gin.Context) {
 	targetId := ctx.Param("targetId")
-	projectId := ctx.Param("projectId")
+	workspaceId := ctx.Param("workspaceId")
 
 	server := server.GetInstance(nil)
 
-	err := server.TargetService.StopProject(ctx.Request.Context(), targetId, projectId)
+	err := server.TargetService.StopWorkspace(ctx.Request.Context(), targetId, workspaceId)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to stop project %s: %w", projectId, err))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to stop workspace %s: %w", workspaceId, err))
 		return
 	}
 

@@ -1,9 +1,0 @@
-name: daytona server stop
-synopsis: Stops the Daytona Server daemon
-usage: daytona server stop [flags]
-inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-see_also:
-    - daytona server - Start the server process in daemon mode

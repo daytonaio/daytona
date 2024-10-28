@@ -15,7 +15,7 @@ Method | HTTP request | Description
 [**FsSearchFiles**](WorkspaceToolboxAPI.md#FsSearchFiles) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/files/search | Search for files
 [**FsSetFilePermissions**](WorkspaceToolboxAPI.md#FsSetFilePermissions) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/files/permissions | Set file owner/group/permissions
 [**FsUploadFile**](WorkspaceToolboxAPI.md#FsUploadFile) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/files/upload | Upload file
-[**GetProjectDir**](WorkspaceToolboxAPI.md#GetProjectDir) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/project-dir | Get project dir
+[**GetWorkspaceDir**](WorkspaceToolboxAPI.md#GetWorkspaceDir) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/workspace-dir | Get workspace dir
 [**GitAddFiles**](WorkspaceToolboxAPI.md#GitAddFiles) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/add | Add files
 [**GitBranchList**](WorkspaceToolboxAPI.md#GitBranchList) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/git/branches | Get branch list
 [**GitCloneRepository**](WorkspaceToolboxAPI.md#GitCloneRepository) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/clone | Clone git repository
@@ -867,11 +867,11 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
-## GetProjectDir
+## GetWorkspaceDir
 
-> ProjectDirResponse GetProjectDir(ctx, workspaceId, projectId).Execute()
+> WorkspaceDirResponse GetWorkspaceDir(ctx, workspaceId, projectId).Execute()
 
-Get project dir
+Get workspace dir
 
 
 
@@ -893,13 +893,13 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceToolboxAPI.GetProjectDir(context.Background(), workspaceId, projectId).Execute()
+	resp, r, err := apiClient.WorkspaceToolboxAPI.GetWorkspaceDir(context.Background(), workspaceId, projectId).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.GetProjectDir``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.GetWorkspaceDir``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `GetProjectDir`: ProjectDirResponse
-	fmt.Fprintf(os.Stdout, "Response from `WorkspaceToolboxAPI.GetProjectDir`: %v\n", resp)
+	// response from `GetWorkspaceDir`: WorkspaceDirResponse
+	fmt.Fprintf(os.Stdout, "Response from `WorkspaceToolboxAPI.GetWorkspaceDir`: %v\n", resp)
 }
 ```
 
@@ -914,7 +914,7 @@ Name | Type | Description  | Notes
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiGetProjectDirRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiGetWorkspaceDirRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
@@ -924,7 +924,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**ProjectDirResponse**](ProjectDirResponse.md)
+[**WorkspaceDirResponse**](WorkspaceDirResponse.md)
 
 ### Authorization
 

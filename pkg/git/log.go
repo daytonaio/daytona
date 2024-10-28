@@ -10,7 +10,7 @@ import (
 )
 
 func (s *Service) Log() ([]GitCommitInfo, error) {
-	repo, err := git.PlainOpen(s.ProjectDir)
+	repo, err := git.PlainOpen(s.WorkspaceDir)
 	if err != nil {
 		return []GitCommitInfo{}, err
 	}

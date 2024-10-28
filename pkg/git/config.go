@@ -45,7 +45,7 @@ func (s *Service) SetGitConfig(userData *gitprovider.GitUser, providerConfig *gi
 			return err
 		}
 	}
-	_, err = cfg.Section("safe").NewKey("directory", s.ProjectDir)
+	_, err = cfg.Section("safe").NewKey("directory", s.WorkspaceDir)
 	if err != nil {
 		return err
 	}

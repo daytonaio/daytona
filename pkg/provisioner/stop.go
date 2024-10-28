@@ -6,7 +6,7 @@ package provisioner
 import (
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/project"
+	"github.com/daytonaio/daytona/pkg/target/workspace"
 )
 
 func (p *Provisioner) StopTarget(target *target.Target, targetConfig *provider.TargetConfig) error {
@@ -23,15 +23,15 @@ func (p *Provisioner) StopTarget(target *target.Target, targetConfig *provider.T
 	return err
 }
 
-func (p *Provisioner) StopProject(proj *project.Project, targetConfig *provider.TargetConfig) error {
+func (p *Provisioner) StopWorkspace(ws *workspace.Workspace, targetConfig *provider.TargetConfig) error {
 	targetProvider, err := p.providerManager.GetProvider(targetConfig.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
-	_, err = (*targetProvider).StopProject(&provider.ProjectRequest{
+	_, err = (*targetProvider).StopWorkspace(&provider.WorkspaceRequest{
 		TargetConfigOptions: targetConfig.Options,
-		Project:             proj,
+		Workspace:           ws,
 	})
 
 	return err

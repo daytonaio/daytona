@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Used in projects to download the Daytona binary
+// Used in workspaces to download the Daytona binary
 func GetDaytonaScript(ctx *gin.Context) {
 	scheme := "http"
 	if ctx.Request.TLS != nil || ctx.GetHeader("X-Forwarded-Proto") == "https" {

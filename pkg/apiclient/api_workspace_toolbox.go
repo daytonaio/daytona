@@ -1525,29 +1525,29 @@ func (a *WorkspaceToolboxAPIService) FsUploadFileExecute(r ApiFsUploadFileReques
 	return localVarHTTPResponse, nil
 }
 
-type ApiGetProjectDirRequest struct {
+type ApiGetWorkspaceDirRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
 	projectId   string
 }
 
-func (r ApiGetProjectDirRequest) Execute() (*ProjectDirResponse, *http.Response, error) {
-	return r.ApiService.GetProjectDirExecute(r)
+func (r ApiGetWorkspaceDirRequest) Execute() (*WorkspaceDirResponse, *http.Response, error) {
+	return r.ApiService.GetWorkspaceDirExecute(r)
 }
 
 /*
-GetProjectDir Get project dir
+GetWorkspaceDir Get workspace dir
 
-Get project directory
+Get workspace directory
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
 	@param projectId Project ID
-	@return ApiGetProjectDirRequest
+	@return ApiGetWorkspaceDirRequest
 */
-func (a *WorkspaceToolboxAPIService) GetProjectDir(ctx context.Context, workspaceId string, projectId string) ApiGetProjectDirRequest {
-	return ApiGetProjectDirRequest{
+func (a *WorkspaceToolboxAPIService) GetWorkspaceDir(ctx context.Context, workspaceId string, projectId string) ApiGetWorkspaceDirRequest {
+	return ApiGetWorkspaceDirRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
@@ -1557,21 +1557,21 @@ func (a *WorkspaceToolboxAPIService) GetProjectDir(ctx context.Context, workspac
 
 // Execute executes the request
 //
-//	@return ProjectDirResponse
-func (a *WorkspaceToolboxAPIService) GetProjectDirExecute(r ApiGetProjectDirRequest) (*ProjectDirResponse, *http.Response, error) {
+//	@return WorkspaceDirResponse
+func (a *WorkspaceToolboxAPIService) GetWorkspaceDirExecute(r ApiGetWorkspaceDirRequest) (*WorkspaceDirResponse, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *ProjectDirResponse
+		localVarReturnValue *WorkspaceDirResponse
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceToolboxAPIService.GetProjectDir")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceToolboxAPIService.GetWorkspaceDir")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/project-dir"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/workspace-dir"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
