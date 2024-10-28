@@ -11,22 +11,15 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/cmd/server/daemon"
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/views"
 	view "github.com/daytonaio/daytona/pkg/views/server"
-	"github.com/fatih/color"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 var yesFlag bool
-var allRequirementsMet bool
-
-type RequirementProvider struct {
-	provider.Provider
-}
 
 var ServerCmd = &cobra.Command{
 	Use:     "server",
@@ -41,27 +34,6 @@ var ServerCmd = &cobra.Command{
 			if !confirmCheck {
 				views.RenderInfoMessage("Operation cancelled.")
 				return nil
-			}
-		}
-		infoColor := color.New(color.FgHiBlue).SprintFunc()
-		warningColor := color.New(color.FgRed).SprintFunc()
-		p := RequirementProvider{}
-
-		requirements, err := p.CheckRequirements()
-		if err != nil {
-			return err
-		}
-
-		for _, req := range requirements {
-			if req.Met {
-				allRequirementsMet = true
-				fmt.Printf("%s[0000]     Requirement met: %s\n", infoColor("INFO"), req.Reason)
-			} else {
-				allRequirementsMet = false
-				fmt.Printf("%s[0000]  Requirement not met: %s\n", warningColor("WARNING"), req.Reason)
-			}
-			if !allRequirementsMet {
-				return fmt.Errorf("    Daytona server startup aborted, one or more requirement not met")
 			}
 		}
 

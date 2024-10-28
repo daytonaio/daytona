@@ -28,11 +28,12 @@ func (m *ProviderRPCServer) GetInfo(arg interface{}, resp *ProviderInfo) error {
 	return nil
 }
 
-func (m *ProviderRPCServer) CheckRequirements() ([]RequirementStatus, error) {
+func (m *ProviderRPCServer) CheckRequirements(arg interface{}, resp *[]RequirementStatus) (*[]RequirementStatus, error) {
 	result, err := m.Impl.CheckRequirements()
 	if err != nil {
 		return nil, err
 	}
+	*resp = *result
 	return result, nil
 }
 

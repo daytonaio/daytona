@@ -86,4 +86,4 @@ type RequirementStatus struct {
 	Name   string
 	Met    bool
 	Reason string
-}
+}// @name RequirementStatus
