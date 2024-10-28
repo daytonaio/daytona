@@ -1,6 +1,6 @@
 name: daytona ssh
 synopsis: SSH into a workspace using the terminal
-usage: daytona ssh [TARGET] [WORKSPACE] [CMD...] [flags]
+usage: daytona ssh [WORKSPACE] [CMD...] [flags]
 options:
     - name: option
       shorthand: o

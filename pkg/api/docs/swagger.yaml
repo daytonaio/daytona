@@ -153,15 +153,10 @@ definitions:
         type: string
       targetConfig:
         type: string
-      workspaces:
-        items:
-          $ref: '#/definitions/CreateWorkspaceDTO'
-        type: array
     required:
     - id
     - name
     - targetConfig
-    - workspaces
     type: object
   CreateWorkspaceConfigDTO:
     properties:
@@ -196,18 +191,24 @@ definitions:
         type: object
       gitProviderConfigId:
         type: string
+      id:
+        type: string
       image:
         type: string
       name:
         type: string
       source:
         $ref: '#/definitions/CreateWorkspaceSourceDTO'
+      targetId:
+        type: string
       user:
         type: string
     required:
     - envVars
+    - id
     - name
     - source
+    - targetId
     type: object
   CreateWorkspaceSourceDTO:
     properties:
@@ -632,15 +633,10 @@ definitions:
         type: string
       targetConfig:
         type: string
-      workspaces:
-        items:
-          $ref: '#/definitions/Workspace'
-        type: array
     required:
     - id
     - name
     - targetConfig
-    - workspaces
     type: object
   TargetConfig:
     properties:
@@ -705,15 +701,10 @@ definitions:
         type: string
       targetConfig:
         type: string
-      workspaces:
-        items:
-          $ref: '#/definitions/Workspace'
-        type: array
     required:
     - id
     - name
     - targetConfig
-    - workspaces
     type: object
   TargetInfo:
     properties:
@@ -721,13 +712,8 @@ definitions:
         type: string
       providerMetadata:
         type: string
-      workspaces:
-        items:
-          $ref: '#/definitions/WorkspaceInfo'
-        type: array
     required:
     - name
-    - workspaces
     type: object
   Workspace:
     properties:
@@ -739,6 +725,8 @@ definitions:
         type: object
       gitProviderConfigId:
         type: string
+      id:
+        type: string
       image:
         type: string
       name:
@@ -747,18 +735,16 @@ definitions:
         $ref: '#/definitions/GitRepository'
       state:
         $ref: '#/definitions/WorkspaceState'
-      targetConfig:
-        type: string
       targetId:
         type: string
       user:
         type: string
     required:
     - envVars
+    - id
     - image
     - name
     - repository
-    - targetConfig
     - targetId
     - user
     type: object
@@ -792,6 +778,41 @@ definitions:
     - image
     - name
     - repositoryUrl
+    - user
+    type: object
+  WorkspaceDTO:
+    properties:
+      buildConfig:
+        $ref: '#/definitions/BuildConfig'
+      envVars:
+        additionalProperties:
+          type: string
+        type: object
+      gitProviderConfigId:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      info:
+        $ref: '#/definitions/WorkspaceInfo'
+      name:
+        type: string
+      repository:
+        $ref: '#/definitions/GitRepository'
+      state:
+        $ref: '#/definitions/WorkspaceState'
+      targetId:
+        type: string
+      user:
+        type: string
+    required:
+    - envVars
+    - id
+    - image
+    - name
+    - repository
+    - targetId
     - user
     type: object
   WorkspaceInfo:
@@ -1782,75 +1803,6 @@ paths:
       summary: Get target info
       tags:
       - target
-  /target/{targetId}/{workspaceId}/start:
-    post:
-      description: Start workspace
-      operationId: StartWorkspace
-      parameters:
-      - description: Target ID or Name
-        in: path
-        name: targetId
-        required: true
-        type: string
-      - description: Workspace ID
-        in: path
-        name: workspaceId
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-      summary: Start workspace
-      tags:
-      - target
-  /target/{targetId}/{workspaceId}/state:
-    post:
-      description: Set workspace state
-      operationId: SetWorkspaceState
-      parameters:
-      - description: Target ID or Name
-        in: path
-        name: targetId
-        required: true
-        type: string
-      - description: Workspace ID
-        in: path
-        name: workspaceId
-        required: true
-        type: string
-      - description: Set State
-        in: body
-        name: setState
-        required: true
-        schema:
-          $ref: '#/definitions/SetWorkspaceState'
-      responses:
-        "200":
-          description: OK
-      summary: Set workspace state
-      tags:
-      - target
-  /target/{targetId}/{workspaceId}/stop:
-    post:
-      description: Stop workspace
-      operationId: StopWorkspace
-      parameters:
-      - description: Target ID or Name
-        in: path
-        name: targetId
-        required: true
-        type: string
-      - description: Workspace ID
-        in: path
-        name: workspaceId
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-      summary: Stop workspace
-      tags:
-      - target
   /target/{targetId}/start:
     post:
       description: Start target
@@ -1883,6 +1835,47 @@ paths:
       summary: Stop target
       tags:
       - target
+  /workspace:
+    get:
+      description: List workspaces
+      operationId: ListWorkspaces
+      parameters:
+      - description: Verbose
+        in: query
+        name: verbose
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/WorkspaceDTO'
+            type: array
+      summary: List workspaces
+      tags:
+      - workspace
+    post:
+      description: Create a workspace
+      operationId: CreateWorkspace
+      parameters:
+      - description: Create workspace
+        in: body
+        name: workspace
+        required: true
+        schema:
+          $ref: '#/definitions/CreateWorkspaceDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Workspace'
+      summary: Create a workspace
+      tags:
+      - workspace
   /workspace-config:
     get:
       description: List workspace configs
@@ -2123,6 +2116,103 @@ paths:
       summary: ProcessGitEvent
       tags:
       - prebuild
+  /workspace/{workspaceId}:
+    delete:
+      description: Remove workspace
+      operationId: RemoveWorkspace
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Force
+        in: query
+        name: force
+        type: boolean
+      responses:
+        "200":
+          description: OK
+      summary: Remove workspace
+      tags:
+      - workspace
+    get:
+      description: Get workspace info
+      operationId: GetWorkspace
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Verbose
+        in: query
+        name: verbose
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/WorkspaceDTO'
+      summary: Get workspace info
+      tags:
+      - workspace
+  /workspace/{workspaceId}/start:
+    post:
+      description: Start workspace
+      operationId: StartWorkspace
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Start workspace
+      tags:
+      - workspace
+  /workspace/{workspaceId}/state:
+    post:
+      description: Set workspace state
+      operationId: SetWorkspaceState
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Set State
+        in: body
+        name: setState
+        required: true
+        schema:
+          $ref: '#/definitions/SetWorkspaceState'
+      responses:
+        "200":
+          description: OK
+      summary: Set workspace state
+      tags:
+      - workspace
+  /workspace/{workspaceId}/stop:
+    post:
+      description: Stop workspace
+      operationId: StopWorkspace
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Stop workspace
+      tags:
+      - workspace
 schemes:
 - http
 security:

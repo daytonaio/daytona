@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/target/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	log "github.com/sirupsen/logrus"

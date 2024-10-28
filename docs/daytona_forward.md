@@ -3,7 +3,7 @@
 Forward a port from a workspace to your local machine
 
 ```
-daytona forward [PORT] [TARGET] [WORKSPACE] [flags]
+daytona forward [PORT] [WORKSPACE] [flags]
 ```
 
 ### Options

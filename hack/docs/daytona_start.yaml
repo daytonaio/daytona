@@ -1,6 +1,6 @@
 name: daytona start
-synopsis: Start a target
-usage: daytona start [TARGET] [flags]
+synopsis: Start a workspace
+usage: daytona start [WORKSPACE] [flags]
 options:
     - name: all
       shorthand: a
@@ -10,9 +10,6 @@ options:
       shorthand: c
       default_value: "false"
       usage: Open the target in the IDE after target start
-    - name: workspace
-      shorthand: w
-      usage: Start a single workspace in the target (workspace name)
     - name: "yes"
       shorthand: "y"
       default_value: "false"

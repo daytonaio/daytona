@@ -12,15 +12,16 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
-var FIRST_WORKSPACE_INDEX = 0
-var STATIC_INDEX = -1
-var TARGET_PREFIX = "TARGET"
-var PROVIDER_PREFIX = "PROVIDER"
+const FIRST_WORKSPACE_INDEX = 0
+const STATIC_INDEX = -1
+const TARGET_PREFIX = "TARGET"
+const PROVIDER_PREFIX = "PROVIDER"
 
 var longestPrefixLength = len(TARGET_PREFIX)
-var maxPrefixLength = 20
-var prefixDelimiter = " | "
-var prefixPadding = " "
+
+const maxPrefixLength = 20
+const prefixDelimiter = " | "
+const prefixPadding = " "
 
 func DisplayLogs(logEntriesChan <-chan logs.LogEntry, index int) {
 	for logEntry := range logEntriesChan {
@@ -36,13 +37,13 @@ func DisplayLogEntry(logEntry logs.LogEntry, index int) {
 
 	if logEntry.WorkspaceName != nil {
 		prefixText = *logEntry.WorkspaceName
-	}
-
-	if logEntry.BuildId != nil {
+	} else if logEntry.BuildId != nil {
 		prefixText = *logEntry.BuildId
+	} else if logEntry.TargetId != nil {
+		prefixText = *logEntry.TargetId
 	}
 
-	if index == STATIC_INDEX {
+	if index == STATIC_INDEX && prefixText == "" {
 		if logEntry.Source == string(logs.LogSourceProvider) {
 			prefixText = PROVIDER_PREFIX
 		} else {
@@ -53,7 +54,7 @@ func DisplayLogEntry(logEntry logs.LogEntry, index int) {
 	prefix := lipgloss.NewStyle().Foreground(prefixColor).Bold(true).Render(formatPrefixText(prefixText))
 
 	if index == STATIC_INDEX {
-		if logEntry.Source == string(logs.LogSourceProvider) {
+		if logEntry.Source == string(logs.LogSourceProvider) && prefixText == PROVIDER_PREFIX {
 			line = fmt.Sprintf("%s%s\033[1m%s\033[0m", prefixPadding, prefix, line)
 		} else {
 			line = fmt.Sprintf("%s%s%s \033[1m%s\033[0m", prefixPadding, prefix, views.CheckmarkSymbol, line)

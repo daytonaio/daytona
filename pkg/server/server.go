@@ -16,6 +16,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
 	"github.com/daytonaio/daytona/pkg/server/targets"
 	"github.com/daytonaio/daytona/pkg/server/workspaceconfig"
+	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/hashicorp/go-plugin"
 
@@ -30,6 +31,7 @@ type ServerInstanceConfig struct {
 	ContainerRegistryService containerregistries.IContainerRegistryService
 	BuildService             builds.IBuildService
 	WorkspaceConfigService   workspaceconfig.IWorkspaceConfigService
+	WorkspaceService         workspaces.IWorkspaceService
 	LocalContainerRegistry   ILocalContainerRegistry
 	TargetService            targets.ITargetService
 	ApiKeyService            apikeys.IApiKeyService
@@ -59,6 +61,7 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 			ContainerRegistryService: serverConfig.ContainerRegistryService,
 			BuildService:             serverConfig.BuildService,
 			WorkspaceConfigService:   serverConfig.WorkspaceConfigService,
+			WorkspaceService:         serverConfig.WorkspaceService,
 			LocalContainerRegistry:   serverConfig.LocalContainerRegistry,
 			TargetService:            serverConfig.TargetService,
 			ApiKeyService:            serverConfig.ApiKeyService,
@@ -81,6 +84,7 @@ type Server struct {
 	ContainerRegistryService containerregistries.IContainerRegistryService
 	BuildService             builds.IBuildService
 	WorkspaceConfigService   workspaceconfig.IWorkspaceConfigService
+	WorkspaceService         workspaces.IWorkspaceService
 	LocalContainerRegistry   ILocalContainerRegistry
 	TargetService            targets.ITargetService
 	ApiKeyService            apikeys.IApiKeyService

@@ -9,8 +9,6 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/huh"
-	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -23,10 +21,9 @@ import (
 var yesFlag bool
 var forceFlag bool
 
-var DeleteCmd = &cobra.Command{
+var deleteCmd = &cobra.Command{
 	Use:     "delete [TARGET]",
 	Short:   "Delete a target",
-	GroupID: util.TARGET_GROUP,
 	Aliases: []string{"remove", "rm"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if allFlag {
@@ -138,9 +135,9 @@ var DeleteCmd = &cobra.Command{
 }
 
 func init() {
-	DeleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Delete all targets")
-	DeleteCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Confirm deletion without prompt")
-	DeleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Delete a target by force")
+	deleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Delete all targets")
+	deleteCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Confirm deletion without prompt")
+	deleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Delete a target by force")
 }
 
 func DeleteAllTargets(force bool) error {
@@ -173,20 +170,7 @@ func RemoveTarget(ctx context.Context, apiClient *apiclient.APIClient, target *a
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
-		c, err := config.GetConfig()
-		if err != nil {
-			return err
-		}
 
-		activeProfile, err := c.GetActiveProfile()
-		if err != nil {
-			return err
-		}
-
-		err = config.RemoveTargetSshEntries(activeProfile.Id, target.Id)
-		if err != nil {
-			return err
-		}
 		return nil
 	})
 

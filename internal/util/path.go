@@ -11,13 +11,13 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 )
 
-func GetHomeDir(activeProfile config.Profile, targetId string, workspaceName string, gpgKey string) (string, error) {
-	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, targetId, workspaceName, gpgKey)
+func GetHomeDir(activeProfile config.Profile, workspaceId string, gpgKey string) (string, error) {
+	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, gpgKey)
 	if err != nil {
 		return "", err
 	}
 
-	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, targetId, workspaceName)
+	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, workspaceId)
 
 	homeDir, err := exec.Command("ssh", workspaceHostname, "echo", "$HOME").Output()
 	if err != nil {
@@ -27,13 +27,13 @@ func GetHomeDir(activeProfile config.Profile, targetId string, workspaceName str
 	return strings.TrimRight(string(homeDir), "\n"), nil
 }
 
-func GetWorkspaceDir(activeProfile config.Profile, targetId string, workspaceName string, gpgKey string) (string, error) {
-	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, targetId, workspaceName, gpgKey)
+func GetWorkspaceDir(activeProfile config.Profile, workspaceId string, gpgKey string) (string, error) {
+	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, gpgKey)
 	if err != nil {
 		return "", err
 	}
 
-	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, targetId, workspaceName)
+	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, workspaceId)
 
 	daytonaWorkspaceDir, err := exec.Command("ssh", workspaceHostname, "echo", "$DAYTONA_WORKSPACE_DIR").Output()
 	if err != nil {
@@ -44,10 +44,10 @@ func GetWorkspaceDir(activeProfile config.Profile, targetId string, workspaceNam
 		return strings.TrimRight(string(daytonaWorkspaceDir), "\n"), nil
 	}
 
-	homeDir, err := GetHomeDir(activeProfile, targetId, workspaceName, gpgKey)
+	homeDir, err := GetHomeDir(activeProfile, workspaceId, gpgKey)
 	if err != nil {
 		return "", err
 	}
 
-	return path.Join(homeDir, workspaceName), nil
+	return path.Join(homeDir, workspaceId), nil
 }

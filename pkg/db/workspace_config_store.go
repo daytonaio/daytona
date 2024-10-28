@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	. "github.com/daytonaio/daytona/pkg/db/dto"
-	"github.com/daytonaio/daytona/pkg/target/workspace/config"
+	"github.com/daytonaio/daytona/pkg/workspace/config"
 )
 
 type WorkspaceConfigStore struct {

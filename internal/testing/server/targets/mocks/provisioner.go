@@ -12,7 +12,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -67,4 +67,9 @@ func (p *mockProvisioner) StopWorkspace(ws *workspace.Workspace, targetConfig *p
 func (p *mockProvisioner) StopTarget(target *target.Target, targetConfig *provider.TargetConfig) error {
 	args := p.Called(target, targetConfig)
 	return args.Error(0)
+}
+
+func (p *mockProvisioner) GetWorkspaceInfo(ctx context.Context, w *workspace.Workspace, targetConfig *provider.TargetConfig) (*workspace.WorkspaceInfo, error) {
+	args := p.Called(ctx, w, targetConfig)
+	return args.Get(0).(*workspace.WorkspaceInfo), args.Error(1)
 }

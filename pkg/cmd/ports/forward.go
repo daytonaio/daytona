@@ -9,15 +9,18 @@ import (
 	"errors"
 	"fmt"
 	"hash/fnv"
+	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/cmd/tailscale"
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/internal/util/apiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/frpc"
 	"github.com/daytonaio/daytona/pkg/views"
+	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	log "github.com/sirupsen/logrus"
 	qrcode "github.com/skip2/go-qrcode"
 	"github.com/spf13/cobra"
@@ -25,13 +28,13 @@ import (
 
 var publicPreview bool
 var targetId string
-var workspaceName string
+var workspaceId string
 
 var PortForwardCmd = &cobra.Command{
-	Use:     "forward [PORT] [TARGET] [WORKSPACE]",
+	Use:     "forward [PORT] [WORKSPACE]",
 	Short:   "Forward a port from a workspace to your local machine",
 	GroupID: util.TARGET_GROUP,
-	Args:    cobra.RangeArgs(2, 3),
+	Args:    cobra.RangeArgs(1, 2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {
@@ -46,22 +49,34 @@ var PortForwardCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		target, err := apiclient.GetTarget(args[1], true)
+
+		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			return err
 		}
-		targetId = target.Id
+		ctx := context.Background()
 
-		if len(args) == 3 {
-			workspaceName = args[2]
-		} else {
-			workspaceName, err = apiclient.GetFirstWorkspaceName(targetId, workspaceName, nil)
+		var workspace *apiclient.WorkspaceDTO
+		var resp *http.Response
+
+		if len(args) == 2 {
+			workspace, resp, err = apiClient.WorkspaceAPI.GetWorkspace(ctx, args[1]).Execute()
 			if err != nil {
-				return err
+				return apiclient_util.HandleErrorResponse(resp, err)
+			}
+		} else {
+			workspaceList, resp, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+			if err != nil {
+				return apiclient_util.HandleErrorResponse(resp, err)
+			}
+
+			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "Forward")
+			if workspace == nil {
+				return nil
 			}
 		}
 
-		hostPort, errChan := tailscale.ForwardPort(targetId, workspaceName, uint16(port), activeProfile)
+		hostPort, errChan := tailscale.ForwardPort(workspace.Id, uint16(port), activeProfile)
 
 		if hostPort == nil {
 			if err = <-errChan; err != nil {
@@ -76,7 +91,7 @@ var PortForwardCmd = &cobra.Command{
 
 		if publicPreview {
 			go func() {
-				errChan <- ForwardPublicPort(targetId, workspaceName, *hostPort, uint16(port))
+				errChan <- ForwardPublicPort(targetId, workspaceId, *hostPort, uint16(port))
 			}()
 		}
 
@@ -93,21 +108,21 @@ func init() {
 	PortForwardCmd.Flags().BoolVar(&publicPreview, "public", false, "Should be port be available publicly via an URL")
 }
 
-func ForwardPublicPort(targetId, workspaceName string, hostPort, targetPort uint16) error {
+func ForwardPublicPort(targetId, workspaceId string, hostPort, targetPort uint16) error {
 	views.RenderInfoMessage("Forwarding port to a public URL...")
 
-	apiClient, err := apiclient.GetApiClient(nil)
+	apiClient, err := apiclient_util.GetApiClient(nil)
 	if err != nil {
 		return err
 	}
 
 	serverConfig, res, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
 	if err != nil {
-		return apiclient.HandleErrorResponse(res, err)
+		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	h := fnv.New64()
-	h.Write([]byte(fmt.Sprintf("%s-%s-%s", targetId, workspaceName, serverConfig.Id)))
+	h.Write([]byte(fmt.Sprintf("%s-%s-%s", targetId, workspaceId, serverConfig.Id)))
 
 	subDomain := fmt.Sprintf("%d-%s", targetPort, base64.RawURLEncoding.EncodeToString([]byte(fmt.Sprint(h.Sum64()))))
 

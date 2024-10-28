@@ -1,0 +1,14 @@
+name: daytona target
+synopsis: Manage targets
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona - Daytona is a Dev Environment Manager
+    - daytona target delete - Delete a target
+    - daytona target info - Show target info
+    - daytona target list - List targets
+    - daytona target restart - Restart a target
+    - daytona target start - Start a target
+    - daytona target stop - Stop a target

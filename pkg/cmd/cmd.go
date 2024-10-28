@@ -28,6 +28,7 @@ import (
 	. "github.com/daytonaio/daytona/pkg/cmd/target"
 	. "github.com/daytonaio/daytona/pkg/cmd/targetconfig"
 	. "github.com/daytonaio/daytona/pkg/cmd/telemetry"
+	. "github.com/daytonaio/daytona/pkg/cmd/workspace"
 	. "github.com/daytonaio/daytona/pkg/cmd/workspaceconfig"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
@@ -73,14 +74,15 @@ func Execute() error {
 	rootCmd.AddCommand(purgeCmd)
 	rootCmd.AddCommand(GitProviderCmd)
 	rootCmd.AddCommand(StartCmd)
-	rootCmd.AddCommand(StopCmd)
-	rootCmd.AddCommand(RestartCmd)
+	// rootCmd.AddCommand(StopCmd)
+	// rootCmd.AddCommand(RestartCmd)
 	rootCmd.AddCommand(InfoCmd)
 	rootCmd.AddCommand(PrebuildCmd)
 	rootCmd.AddCommand(BuildCmd)
 	rootCmd.AddCommand(PortForwardCmd)
 	rootCmd.AddCommand(EnvCmd)
 	rootCmd.AddCommand(TelemetryCmd)
+	rootCmd.AddCommand(TargetCmd)
 
 	SetupRootCommand(rootCmd)
 
