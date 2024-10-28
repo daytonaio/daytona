@@ -11,11 +11,11 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/ports"
-	"github.com/daytonaio/daytona/pkg/target/project"
+	"github.com/daytonaio/daytona/pkg/target/workspace"
 	"tailscale.com/tsnet"
 )
 
-func ForwardPort(targetId, projectName string, targetPort uint16, profile config.Profile) (*uint16, chan error) {
+func ForwardPort(targetId, workspaceName string, targetPort uint16, profile config.Profile) (*uint16, chan error) {
 	hostPort := targetPort
 	errChan := make(chan error)
 	var err error
@@ -47,7 +47,7 @@ func ForwardPort(targetId, projectName string, targetPort uint16, profile config
 				return
 			}
 
-			targetUrl := fmt.Sprintf("%s:%d", project.GetProjectHostname(targetId, projectName), targetPort)
+			targetUrl := fmt.Sprintf("%s:%d", workspace.GetWorkspaceHostname(targetId, workspaceName), targetPort)
 
 			go handlePortConnection(conn, tsConn, targetUrl, errChan)
 		}

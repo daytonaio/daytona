@@ -18,11 +18,11 @@ import (
 
 var sessions = map[string]*session{}
 
-func CreateSession(projectDir, configDir string) func(c *gin.Context) {
+func CreateSession(workspaceDir, configDir string) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		cmd := exec.Command(common.GetShell())
 		cmd.Env = os.Environ()
-		cmd.Dir = projectDir
+		cmd.Dir = workspaceDir
 
 		var request CreateSessionRequest
 		if err := c.ShouldBindJSON(&request); err != nil {

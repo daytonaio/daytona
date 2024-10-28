@@ -1,9 +1,0 @@
-name: daytona build run
-synopsis: Run a build from a project config
-usage: daytona build run [flags]
-inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-see_also:
-    - daytona build - Manage builds

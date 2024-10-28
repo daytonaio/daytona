@@ -46,7 +46,7 @@ DeletePrebuild Delete prebuild
 Delete prebuild
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param configName Project config name
+	@param configName Workspace config name
 	@param prebuildId Prebuild ID
 	@return ApiDeletePrebuildRequest
 */
@@ -72,7 +72,7 @@ func (a *PrebuildAPIService) DeletePrebuildExecute(r ApiDeletePrebuildRequest) (
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/project-config/{configName}/prebuild/{prebuildId}"
+	localVarPath := localBasePath + "/workspace-config/{configName}/prebuild/{prebuildId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"configName"+"}", url.PathEscape(parameterValueToString(r.configName, "configName")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"prebuildId"+"}", url.PathEscape(parameterValueToString(r.prebuildId, "prebuildId")), -1)
 
@@ -159,7 +159,7 @@ GetPrebuild Get prebuild
 Get prebuild
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param configName Project config name
+	@param configName Workspace config name
 	@param prebuildId Prebuild ID
 	@return ApiGetPrebuildRequest
 */
@@ -188,7 +188,7 @@ func (a *PrebuildAPIService) GetPrebuildExecute(r ApiGetPrebuildRequest) (*Prebu
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/project-config/{configName}/prebuild/{prebuildId}"
+	localVarPath := localBasePath + "/workspace-config/{configName}/prebuild/{prebuildId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"configName"+"}", url.PathEscape(parameterValueToString(r.configName, "configName")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"prebuildId"+"}", url.PathEscape(parameterValueToString(r.prebuildId, "prebuildId")), -1)
 
@@ -304,7 +304,7 @@ func (a *PrebuildAPIService) ListPrebuildsExecute(r ApiListPrebuildsRequest) ([]
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/project-config/prebuild"
+	localVarPath := localBasePath + "/workspace-config/prebuild"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -378,27 +378,27 @@ func (a *PrebuildAPIService) ListPrebuildsExecute(r ApiListPrebuildsRequest) ([]
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiListPrebuildsForProjectConfigRequest struct {
+type ApiListPrebuildsForWorkspaceConfigRequest struct {
 	ctx        context.Context
 	ApiService *PrebuildAPIService
 	configName string
 }
 
-func (r ApiListPrebuildsForProjectConfigRequest) Execute() ([]PrebuildDTO, *http.Response, error) {
-	return r.ApiService.ListPrebuildsForProjectConfigExecute(r)
+func (r ApiListPrebuildsForWorkspaceConfigRequest) Execute() ([]PrebuildDTO, *http.Response, error) {
+	return r.ApiService.ListPrebuildsForWorkspaceConfigExecute(r)
 }
 
 /*
-ListPrebuildsForProjectConfig List prebuilds for project config
+ListPrebuildsForWorkspaceConfig List prebuilds for workspace config
 
-List prebuilds for project config
+List prebuilds for workspace config
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param configName Config name
-	@return ApiListPrebuildsForProjectConfigRequest
+	@return ApiListPrebuildsForWorkspaceConfigRequest
 */
-func (a *PrebuildAPIService) ListPrebuildsForProjectConfig(ctx context.Context, configName string) ApiListPrebuildsForProjectConfigRequest {
-	return ApiListPrebuildsForProjectConfigRequest{
+func (a *PrebuildAPIService) ListPrebuildsForWorkspaceConfig(ctx context.Context, configName string) ApiListPrebuildsForWorkspaceConfigRequest {
+	return ApiListPrebuildsForWorkspaceConfigRequest{
 		ApiService: a,
 		ctx:        ctx,
 		configName: configName,
@@ -408,7 +408,7 @@ func (a *PrebuildAPIService) ListPrebuildsForProjectConfig(ctx context.Context, 
 // Execute executes the request
 //
 //	@return []PrebuildDTO
-func (a *PrebuildAPIService) ListPrebuildsForProjectConfigExecute(r ApiListPrebuildsForProjectConfigRequest) ([]PrebuildDTO, *http.Response, error) {
+func (a *PrebuildAPIService) ListPrebuildsForWorkspaceConfigExecute(r ApiListPrebuildsForWorkspaceConfigRequest) ([]PrebuildDTO, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
@@ -416,12 +416,12 @@ func (a *PrebuildAPIService) ListPrebuildsForProjectConfigExecute(r ApiListPrebu
 		localVarReturnValue []PrebuildDTO
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PrebuildAPIService.ListPrebuildsForProjectConfig")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PrebuildAPIService.ListPrebuildsForWorkspaceConfig")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/project-config/{configName}/prebuild"
+	localVarPath := localBasePath + "/workspace-config/{configName}/prebuild"
 	localVarPath = strings.Replace(localVarPath, "{"+"configName"+"}", url.PathEscape(parameterValueToString(r.configName, "configName")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -540,7 +540,7 @@ func (a *PrebuildAPIService) ProcessGitEventExecute(r ApiProcessGitEventRequest)
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/project-config/prebuild/process-git-event"
+	localVarPath := localBasePath + "/workspace-config/prebuild/process-git-event"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -660,7 +660,7 @@ func (a *PrebuildAPIService) SetPrebuildExecute(r ApiSetPrebuildRequest) (string
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/project-config/{configName}/prebuild"
+	localVarPath := localBasePath + "/workspace-config/{configName}/prebuild"
 	localVarPath = strings.Replace(localVarPath, "{"+"configName"+"}", url.PathEscape(parameterValueToString(r.configName, "configName")), -1)
 
 	localVarHeaderParams := make(map[string]string)

@@ -23,12 +23,12 @@ import (
 	. "github.com/daytonaio/daytona/pkg/cmd/prebuild"
 	. "github.com/daytonaio/daytona/pkg/cmd/profile"
 	. "github.com/daytonaio/daytona/pkg/cmd/profiledata/env"
-	. "github.com/daytonaio/daytona/pkg/cmd/projectconfig"
 	. "github.com/daytonaio/daytona/pkg/cmd/provider"
 	. "github.com/daytonaio/daytona/pkg/cmd/server"
 	. "github.com/daytonaio/daytona/pkg/cmd/target"
 	. "github.com/daytonaio/daytona/pkg/cmd/targetconfig"
 	. "github.com/daytonaio/daytona/pkg/cmd/telemetry"
+	. "github.com/daytonaio/daytona/pkg/cmd/workspaceconfig"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -49,7 +49,7 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() error {
-	rootCmd.AddGroup(&cobra.Group{ID: TARGET_GROUP, Title: "Targets & Projects"})
+	rootCmd.AddGroup(&cobra.Group{ID: TARGET_GROUP, Title: "Targets & Workspaces"})
 	rootCmd.AddGroup(&cobra.Group{ID: SERVER_GROUP, Title: "Server"})
 	rootCmd.AddGroup(&cobra.Group{ID: PROFILE_GROUP, Title: "Profile"})
 
@@ -58,7 +58,7 @@ func Execute() error {
 	rootCmd.AddCommand(SshProxyCmd)
 	rootCmd.AddCommand(CreateCmd)
 	rootCmd.AddCommand(DeleteCmd)
-	rootCmd.AddCommand(ProjectConfigCmd)
+	rootCmd.AddCommand(WorkspaceConfigCmd)
 	rootCmd.AddCommand(ServeCmd)
 	rootCmd.AddCommand(DaemonServeCmd)
 	rootCmd.AddCommand(ServerCmd)
@@ -212,7 +212,7 @@ func GetCmdTelemetryData(cmd *cobra.Command, flags []string) map[string]interfac
 
 	source := telemetry.CLI_SOURCE
 	if internal.AgentMode() {
-		source = telemetry.CLI_PROJECT_SOURCE
+		source = telemetry.CLI_WORKSPACE_SOURCE
 	}
 
 	calledAs := cmd.CalledAs()

@@ -26,9 +26,9 @@ func (s *TargetService) RemoveTarget(ctx context.Context, targetId string) error
 		return err
 	}
 
-	for _, project := range target.Projects {
+	for _, workspace := range target.Workspaces {
 		//	todo: go routines
-		err := s.provisioner.DestroyProject(project, targetConfig)
+		err := s.provisioner.DestroyWorkspace(workspace, targetConfig)
 		if err != nil {
 			return err
 		}
@@ -45,16 +45,16 @@ func (s *TargetService) RemoveTarget(ctx context.Context, targetId string) error
 		log.Error(err)
 	}
 
-	for _, project := range target.Projects {
-		err := s.apiKeyService.Revoke(fmt.Sprintf("%s/%s", target.Id, project.Name))
+	for _, workspace := range target.Workspaces {
+		err := s.apiKeyService.Revoke(fmt.Sprintf("%s/%s", target.Id, workspace.Name))
 		if err != nil {
 			// Should not fail the whole operation if the API key cannot be revoked
 			log.Error(err)
 		}
-		projectLogger := s.loggerFactory.CreateProjectLogger(target.Id, project.Name, logs.LogSourceServer)
-		err = projectLogger.Cleanup()
+		workspaceLogger := s.loggerFactory.CreateWorkspaceLogger(target.Id, workspace.Name, logs.LogSourceServer)
+		err = workspaceLogger.Cleanup()
 		if err != nil {
-			// Should not fail the whole operation if the project logger cannot be cleaned up
+			// Should not fail the whole operation if the workspace logger cannot be cleaned up
 			log.Error(err)
 		}
 	}
@@ -99,9 +99,9 @@ func (s *TargetService) ForceRemoveTarget(ctx context.Context, targetId string) 
 
 	targetConfig, _ := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &target.TargetConfig})
 
-	for _, project := range target.Projects {
+	for _, workspace := range target.Workspaces {
 		//	todo: go routines
-		err := s.provisioner.DestroyProject(project, targetConfig)
+		err := s.provisioner.DestroyWorkspace(workspace, targetConfig)
 		if err != nil {
 			log.Error(err)
 		}
@@ -117,14 +117,14 @@ func (s *TargetService) ForceRemoveTarget(ctx context.Context, targetId string) 
 		log.Error(err)
 	}
 
-	for _, project := range target.Projects {
-		err := s.apiKeyService.Revoke(fmt.Sprintf("%s/%s", target.Id, project.Name))
+	for _, workspace := range target.Workspaces {
+		err := s.apiKeyService.Revoke(fmt.Sprintf("%s/%s", target.Id, workspace.Name))
 		if err != nil {
 			log.Error(err)
 		}
 
-		projectLogger := s.loggerFactory.CreateProjectLogger(target.Id, project.Name, logs.LogSourceServer)
-		err = projectLogger.Cleanup()
+		workspaceLogger := s.loggerFactory.CreateWorkspaceLogger(target.Id, workspace.Name, logs.LogSourceServer)
+		err = workspaceLogger.Cleanup()
 		if err != nil {
 			log.Error(err)
 		}

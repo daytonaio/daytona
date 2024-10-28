@@ -26,10 +26,10 @@ func NotifyEmptyTargetConfigList(tip bool) {
 	}
 }
 
-func NotifyEmptyProjectConfigList(tip bool) {
-	views.RenderInfoMessageBold("No project configs found")
+func NotifyEmptyWorkspaceConfigList(tip bool) {
+	views.RenderInfoMessageBold("No workspace configs found")
 	if tip {
-		views.RenderTip("Use 'daytona project-config add' to add a project config")
+		views.RenderTip("Use 'daytona workspace-config add' to add a workspace config")
 	}
 }
 

@@ -16,25 +16,25 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/agent/toolbox/config"
 	"github.com/daytonaio/daytona/pkg/server"
-	"github.com/daytonaio/daytona/pkg/server/workspaces"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/server/targets"
+	"github.com/daytonaio/daytona/pkg/target/workspace"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
 
-// GetProjectDir 			godoc
+// GetWorkspaceDir 			godoc
 //
 //	@Tags			workspace toolbox
-//	@Summary		Get project dir
-//	@Description	Get project directory
+//	@Summary		Get workspace dir
+//	@Description	Get workspace directory
 //	@Produce		json
 //	@Param			workspaceId	path		string	true	"Workspace ID or Name"
 //	@Param			projectId	path		string	true	"Project ID"
-//	@Success		200			{object}	ProjectDirResponse
-//	@Router			/workspace/{workspaceId}/{projectId}/toolbox/project-dir [get]
+//	@Success		200			{object}	WorkspaceDirResponse
+//	@Router			/workspace/{workspaceId}/{projectId}/toolbox/workspace-dir [get]
 //
-//	@id				GetProjectDir
-func GetProjectDir(ctx *gin.Context) {
+//	@id				GetWorkspaceDir
+func GetWorkspaceDir(ctx *gin.Context) {
 	forwardRequestToToolbox(ctx)
 }
 
@@ -45,14 +45,14 @@ var upgrader = websocket.Upgrader{
 }
 
 func forwardRequestToToolbox(ctx *gin.Context) {
+	targetId := ctx.Param("targetId")
 	workspaceId := ctx.Param("workspaceId")
-	projectId := ctx.Param("projectId")
 
 	server := server.GetInstance(nil)
 
-	w, err := server.WorkspaceService.GetWorkspace(ctx.Request.Context(), workspaceId, true)
+	tg, err := server.TargetService.GetTarget(ctx.Request.Context(), targetId, true)
 	if err != nil {
-		if workspaces.IsWorkspaceNotFound(err) {
+		if errors.Is(err, targets.ErrTargetNotFound) {
 			ctx.AbortWithError(http.StatusNotFound, err)
 			return
 		}
@@ -60,26 +60,26 @@ func forwardRequestToToolbox(ctx *gin.Context) {
 		return
 	}
 
-	var projectInfo *project.ProjectInfo
+	var workspaceInfo *workspace.WorkspaceInfo
 	found := false
-	for _, p := range w.Info.Projects {
-		if p.Name == projectId {
-			projectInfo = p
+	for _, w := range tg.Info.Workspaces {
+		if w.Name == workspaceId {
+			workspaceInfo = w
 			found = true
 			break
 		}
 	}
 
 	if !found {
-		ctx.AbortWithError(http.StatusNotFound, errors.New("project not found"))
+		ctx.AbortWithError(http.StatusNotFound, errors.New("workspace not found"))
 		return
 	}
 
 	var client *http.Client
 	var websocketDialer *websocket.Dialer
 
-	projectHostname := project.GetProjectHostname(w.Id, projectId)
-	route := strings.Replace(ctx.Request.URL.Path, fmt.Sprintf("/workspace/%s/%s/toolbox/", workspaceId, projectId), "", 1)
+	projectHostname := workspace.GetWorkspaceHostname(tg.Id, workspaceId)
+	route := strings.Replace(ctx.Request.URL.Path, fmt.Sprintf("/workspace/%s/%s/toolbox/", targetId, workspaceId), "", 1)
 	query := ctx.Request.URL.Query().Encode()
 
 	scheme := "http"
@@ -95,9 +95,9 @@ func forwardRequestToToolbox(ctx *gin.Context) {
 		},
 	}
 
-	if w.Target == "local" {
+	if tg.TargetConfig == "local" {
 		var metadata map[string]interface{}
-		err := json.Unmarshal([]byte(projectInfo.ProviderMetadata), &metadata)
+		err := json.Unmarshal([]byte(workspaceInfo.ProviderMetadata), &metadata)
 		if err == nil {
 			if toolboxPortString, ok := metadata["daytona.toolbox.api.hostPort"]; ok {
 				toolboxPort, err := strconv.ParseUint(toolboxPortString.(string), 10, 16)

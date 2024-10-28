@@ -11,8 +11,8 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
-	projectconfig_info "github.com/daytonaio/daytona/pkg/views/projectconfig/info"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
+	workspaceconfig_info "github.com/daytonaio/daytona/pkg/views/workspaceconfig/info"
 	"golang.org/x/term"
 )
 
@@ -45,15 +45,15 @@ func Render(b *apiclient.Build, apiServerConfig *apiclient.ServerConfig, forceUn
 		output += getInfoLine("User", *b.User) + "\n"
 	}
 
-	if projectconfig_info.GetLabelFromBuild(b.BuildConfig) != "" {
-		projectDefaults := &views_util.ProjectConfigDefaults{
-			Image:     &apiServerConfig.DefaultProjectImage,
-			ImageUser: &apiServerConfig.DefaultProjectUser,
+	if workspaceconfig_info.GetLabelFromBuild(b.BuildConfig) != "" {
+		workspaceDefaults := &views_util.WorkspaceConfigDefaults{
+			Image:     &apiServerConfig.DefaultWorkspaceImage,
+			ImageUser: &apiServerConfig.DefaultWorkspaceUser,
 		}
 
-		_, buildChoice := views_util.GetProjectBuildChoice(apiclient.CreateProjectDTO{
+		_, buildChoice := views_util.GetWorkspaceBuildChoice(apiclient.CreateWorkspaceDTO{
 			BuildConfig: b.BuildConfig,
-		}, projectDefaults)
+		}, workspaceDefaults)
 		output += getInfoLine("Build", buildChoice) + "\n"
 	}
 

@@ -15,7 +15,7 @@ import (
 
 var restartCmd = &cobra.Command{
 	Use:     "restart",
-	Short:   "Restart the project",
+	Short:   "Restart the workspace",
 	Args:    cobra.NoArgs,
 	GroupID: util.TARGET_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -24,13 +24,13 @@ var restartCmd = &cobra.Command{
 			return err
 		}
 
-		err = target_cmd.RestartTarget(apiClient, targetId, projectName)
+		err = target_cmd.RestartTarget(apiClient, targetId, workspaceName)
 		if err != nil {
 			return err
 		}
 
-		if projectName != "" {
-			views.RenderInfoMessage(fmt.Sprintf("Project '%s' from target '%s' successfully restarted", projectName, targetId))
+		if workspaceName != "" {
+			views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' from target '%s' successfully restarted", workspaceName, targetId))
 		} else {
 			views.RenderInfoMessage(fmt.Sprintf("Target '%s' successfully restarted", targetId))
 		}

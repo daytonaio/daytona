@@ -21,10 +21,10 @@ var _ MappedNullable = &CreateBuildDTO{}
 
 // CreateBuildDTO struct for CreateBuildDTO
 type CreateBuildDTO struct {
-	Branch            string            `json:"branch"`
-	EnvVars           map[string]string `json:"envVars"`
-	PrebuildId        *string           `json:"prebuildId,omitempty"`
-	ProjectConfigName string            `json:"projectConfigName"`
+	Branch              string            `json:"branch"`
+	EnvVars             map[string]string `json:"envVars"`
+	PrebuildId          *string           `json:"prebuildId,omitempty"`
+	WorkspaceConfigName string            `json:"workspaceConfigName"`
 }
 
 type _CreateBuildDTO CreateBuildDTO
@@ -33,11 +33,11 @@ type _CreateBuildDTO CreateBuildDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateBuildDTO(branch string, envVars map[string]string, projectConfigName string) *CreateBuildDTO {
+func NewCreateBuildDTO(branch string, envVars map[string]string, workspaceConfigName string) *CreateBuildDTO {
 	this := CreateBuildDTO{}
 	this.Branch = branch
 	this.EnvVars = envVars
-	this.ProjectConfigName = projectConfigName
+	this.WorkspaceConfigName = workspaceConfigName
 	return &this
 }
 
@@ -129,28 +129,28 @@ func (o *CreateBuildDTO) SetPrebuildId(v string) {
 	o.PrebuildId = &v
 }
 
-// GetProjectConfigName returns the ProjectConfigName field value
-func (o *CreateBuildDTO) GetProjectConfigName() string {
+// GetWorkspaceConfigName returns the WorkspaceConfigName field value
+func (o *CreateBuildDTO) GetWorkspaceConfigName() string {
 	if o == nil {
 		var ret string
 		return ret
 	}
 
-	return o.ProjectConfigName
+	return o.WorkspaceConfigName
 }
 
-// GetProjectConfigNameOk returns a tuple with the ProjectConfigName field value
+// GetWorkspaceConfigNameOk returns a tuple with the WorkspaceConfigName field value
 // and a boolean to check if the value has been set.
-func (o *CreateBuildDTO) GetProjectConfigNameOk() (*string, bool) {
+func (o *CreateBuildDTO) GetWorkspaceConfigNameOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.ProjectConfigName, true
+	return &o.WorkspaceConfigName, true
 }
 
-// SetProjectConfigName sets field value
-func (o *CreateBuildDTO) SetProjectConfigName(v string) {
-	o.ProjectConfigName = v
+// SetWorkspaceConfigName sets field value
+func (o *CreateBuildDTO) SetWorkspaceConfigName(v string) {
+	o.WorkspaceConfigName = v
 }
 
 func (o CreateBuildDTO) MarshalJSON() ([]byte, error) {
@@ -168,7 +168,7 @@ func (o CreateBuildDTO) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.PrebuildId) {
 		toSerialize["prebuildId"] = o.PrebuildId
 	}
-	toSerialize["projectConfigName"] = o.ProjectConfigName
+	toSerialize["workspaceConfigName"] = o.WorkspaceConfigName
 	return toSerialize, nil
 }
 
@@ -179,7 +179,7 @@ func (o *CreateBuildDTO) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"branch",
 		"envVars",
-		"projectConfigName",
+		"workspaceConfigName",
 	}
 
 	allProperties := make(map[string]interface{})

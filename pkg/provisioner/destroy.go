@@ -6,7 +6,7 @@ package provisioner
 import (
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/project"
+	"github.com/daytonaio/daytona/pkg/target/workspace"
 )
 
 func (p *Provisioner) DestroyTarget(target *target.Target, targetConfig *provider.TargetConfig) error {
@@ -23,15 +23,15 @@ func (p *Provisioner) DestroyTarget(target *target.Target, targetConfig *provide
 	return err
 }
 
-func (p *Provisioner) DestroyProject(proj *project.Project, targetConfig *provider.TargetConfig) error {
+func (p *Provisioner) DestroyWorkspace(ws *workspace.Workspace, targetConfig *provider.TargetConfig) error {
 	targetProvider, err := p.providerManager.GetProvider(targetConfig.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
-	_, err = (*targetProvider).DestroyProject(&provider.ProjectRequest{
+	_, err = (*targetProvider).DestroyWorkspace(&provider.WorkspaceRequest{
 		TargetConfigOptions: targetConfig.Options,
-		Project:             proj,
+		Workspace:           ws,
 	})
 
 	return err

@@ -13,7 +13,7 @@ import (
 )
 
 var clientKeyNames []string = []string{"client1", "client2", "client3"}
-var projectKeyNames []string = []string{"project1", "project2"}
+var workspaceKeyNames []string = []string{"workspace1", "workspace2"}
 
 type ApiKeyServiceTestSuite struct {
 	suite.Suite
@@ -35,8 +35,8 @@ func (s *ApiKeyServiceTestSuite) SetupTest() {
 		_, _ = s.apiKeyService.Generate(apikey.ApiKeyTypeClient, keyName)
 	}
 
-	for _, keyName := range projectKeyNames {
-		_, _ = s.apiKeyService.Generate(apikey.ApiKeyTypeProject, keyName)
+	for _, keyName := range workspaceKeyNames {
+		_, _ = s.apiKeyService.Generate(apikey.ApiKeyTypeWorkspace, keyName)
 	}
 }
 

@@ -23,9 +23,9 @@ func RenderConfig(config *server.Config) {
 
 	output += fmt.Sprintf("%s %d", views.GetPropertyKey("API Port: "), config.ApiPort) + "\n\n"
 
-	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Default Project Image: "), config.DefaultProjectImage) + "\n\n"
+	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Default Workspace Image: "), config.DefaultWorkspaceImage) + "\n\n"
 
-	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Default Project User: "), config.DefaultProjectUser) + "\n\n"
+	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Default Workspace User: "), config.DefaultWorkspaceUser) + "\n\n"
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("FRPS Domain: "), config.Frps.Domain) + "\n\n"
 

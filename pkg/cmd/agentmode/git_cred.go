@@ -44,9 +44,9 @@ var gitCredCmd = &cobra.Command{
 
 		var gitProviderConfigId *string
 
-		for _, project := range target.Projects {
-			if project.Name == projectName {
-				gitProviderConfigId = project.GitProviderConfigId
+		for _, workspace := range target.Workspaces {
+			if workspace.Name == workspaceName {
+				gitProviderConfigId = workspace.GitProviderConfigId
 				break
 			}
 		}

@@ -22,8 +22,8 @@ import (
 )
 
 type Server struct {
-	ProjectDir        string
-	DefaultProjectDir string
+	WorkspaceDir        string
+	DefaultWorkspaceDir string
 }
 
 func (s *Server) Start() error {
@@ -84,10 +84,10 @@ func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh
 	shell := common.GetShell()
 	cmd := exec.Command(shell)
 
-	cmd.Dir = s.ProjectDir
+	cmd.Dir = s.WorkspaceDir
 
-	if _, err := os.Stat(s.ProjectDir); os.IsNotExist(err) {
-		cmd.Dir = s.DefaultProjectDir
+	if _, err := os.Stat(s.WorkspaceDir); os.IsNotExist(err) {
+		cmd.Dir = s.DefaultWorkspaceDir
 	}
 
 	if ssh.AgentRequested(session) {
@@ -143,9 +143,9 @@ func (s *Server) handleNonPty(session ssh.Session) {
 		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", "SSH_AUTH_SOCK", l.Addr().String()))
 	}
 
-	cmd.Dir = s.ProjectDir
-	if _, err := os.Stat(s.ProjectDir); os.IsNotExist(err) {
-		cmd.Dir = s.DefaultProjectDir
+	cmd.Dir = s.WorkspaceDir
+	if _, err := os.Stat(s.WorkspaceDir); os.IsNotExist(err) {
+		cmd.Dir = s.DefaultWorkspaceDir
 	}
 
 	cmd.Stdout = session

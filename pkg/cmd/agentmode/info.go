@@ -14,7 +14,7 @@ import (
 
 var infoCmd = &cobra.Command{
 	Use:     "info",
-	Short:   "Show project info",
+	Short:   "Show workspace info",
 	Aliases: []string{"view", "inspect"},
 	Args:    cobra.ExactArgs(0),
 	GroupID: util.TARGET_GROUP,
