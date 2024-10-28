@@ -12,8 +12,8 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 )
 
-func OpenTerminalSsh(activeProfile config.Profile, targetId string, projectName string, gpgKey string, sshOptions []string, args ...string) error {
-	if err := config.EnsureSshConfigEntryAdded(activeProfile.Id, targetId, projectName, gpgKey); err != nil {
+func OpenTerminalSsh(activeProfile config.Profile, targetId string, workspaceName string, gpgKey string, sshOptions []string, args ...string) error {
+	if err := config.EnsureSshConfigEntryAdded(activeProfile.Id, targetId, workspaceName, gpgKey); err != nil {
 		return err
 	}
 
@@ -23,8 +23,8 @@ func OpenTerminalSsh(activeProfile config.Profile, targetId string, projectName 
 		return err
 	}
 
-	projectHostname := config.GetProjectHostname(activeProfile.Id, targetId, projectName)
-	cmdArgs := buildCommandArgs(projectHostname, parsedOptions, args...)
+	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, targetId, workspaceName)
+	cmdArgs := buildCommandArgs(workspaceHostname, parsedOptions, args...)
 
 	sshCommand := exec.Command("ssh", cmdArgs...)
 	sshCommand.Stdin = os.Stdin
@@ -50,8 +50,8 @@ func parseSshOptions(sshOptions []string) (map[string]string, error) {
 	return parsedOptions, nil
 }
 
-func buildCommandArgs(projectHostname string, parsedOptions map[string]string, args ...string) []string {
-	cmdArgs := []string{projectHostname}
+func buildCommandArgs(workspaceHostname string, parsedOptions map[string]string, args ...string) []string {
+	cmdArgs := []string{workspaceHostname}
 	for key, value := range parsedOptions {
 		cmdArgs = append(cmdArgs, "-o", fmt.Sprintf("%s=%s", key, value))
 	}

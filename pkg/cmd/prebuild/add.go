@@ -13,8 +13,8 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/build"
-	"github.com/daytonaio/daytona/pkg/cmd/projectconfig"
 	target_util "github.com/daytonaio/daytona/pkg/cmd/target/util"
+	"github.com/daytonaio/daytona/pkg/cmd/workspaceconfig"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/prebuild/add"
 	"github.com/daytonaio/daytona/pkg/views/target/selection"
@@ -22,13 +22,13 @@ import (
 )
 
 var prebuildAddCmd = &cobra.Command{
-	Use:     "add [PROJECT_CONFIG]",
+	Use:     "add [WORKSPACE_CONFIG]",
 	Short:   "Add a prebuild configuration",
 	Args:    cobra.MaximumNArgs(1),
 	Aliases: []string{"new", "create"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var prebuildAddView add.PrebuildAddView
-		var projectConfig *apiclient.ProjectConfig
+		var workspaceConfig *apiclient.WorkspaceConfig
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -50,32 +50,32 @@ var prebuildAddCmd = &cobra.Command{
 			commitIntervalFlag == 0 && triggerFilesFlag == nil {
 			// Interactive CLI logic
 
-			projectConfigList, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(ctx).Execute()
+			workspaceConfigList, res, err := apiClient.WorkspaceConfigAPI.ListWorkspaceConfigs(ctx).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
-			projectConfig = selection.GetProjectConfigFromPrompt(projectConfigList, 0, false, true, "Prebuild")
-			if projectConfig == nil {
-				return errors.New("No project config selected")
+			workspaceConfig = selection.GetWorkspaceConfigFromPrompt(workspaceConfigList, 0, false, true, "Prebuild")
+			if workspaceConfig == nil {
+				return errors.New("No workspace config selected")
 			}
 
-			if projectConfig.Name == selection.NewProjectConfigIdentifier {
-				projectConfig, err = projectconfig.RunProjectConfigAddFlow(apiClient, gitProviders, ctx)
+			if workspaceConfig.Name == selection.NewWorkspaceConfigIdentifier {
+				workspaceConfig, err = workspaceconfig.RunWorkspaceConfigAddFlow(apiClient, gitProviders, ctx)
 				if err != nil {
 					return err
 				}
-				if projectConfig == nil {
+				if workspaceConfig == nil {
 					return nil
 				}
 			}
 
-			prebuildAddView.ProjectConfigName = projectConfig.Name
-			if projectConfig.BuildConfig == nil {
-				return errors.New("The chosen project config does not have a build configuration")
+			prebuildAddView.WorkspaceConfigName = workspaceConfig.Name
+			if workspaceConfig.BuildConfig == nil {
+				return errors.New("The chosen workspace config does not have a build configuration")
 			}
 
-			chosenBranch, err := target_util.GetBranchFromProjectConfig(projectConfig, apiClient, 0)
+			chosenBranch, err := target_util.GetBranchFromWorkspaceConfig(workspaceConfig, apiClient, 0)
 			if err != nil {
 				return err
 			}
@@ -90,22 +90,22 @@ var prebuildAddCmd = &cobra.Command{
 		} else {
 			// Non-interactive mode: use provided arguments and flags
 			if len(args) > 0 {
-				prebuildAddView.ProjectConfigName = args[0]
+				prebuildAddView.WorkspaceConfigName = args[0]
 
-				// Fetch the project configuration based on the provided argument
-				projectConfigTemp, res, err := apiClient.ProjectConfigAPI.GetProjectConfig(ctx, prebuildAddView.ProjectConfigName).Execute()
+				// Fetch the workspace configuration based on the provided argument
+				workspaceConfigTemp, res, err := apiClient.WorkspaceConfigAPI.GetWorkspaceConfig(ctx, prebuildAddView.WorkspaceConfigName).Execute()
 				if err != nil {
 					return apiclient_util.HandleErrorResponse(res, err)
 				}
-				if projectConfigTemp == nil {
-					return errors.New("Invalid project config specified")
+				if workspaceConfigTemp == nil {
+					return errors.New("Invalid workspace config specified")
 				}
 
-				prebuildAddView.ProjectConfigName = projectConfigTemp.Name
-				projectConfig = projectConfigTemp
+				prebuildAddView.WorkspaceConfigName = workspaceConfigTemp.Name
+				workspaceConfig = workspaceConfigTemp
 
 			} else {
-				return errors.New("Project config must be specified when using flags")
+				return errors.New("Workspace config must be specified when using flags")
 			}
 
 			// Validate and handle required flags
@@ -157,7 +157,7 @@ var prebuildAddCmd = &cobra.Command{
 			newPrebuild.TriggerFiles = prebuildAddView.TriggerFiles
 		}
 
-		prebuildId, res, err := apiClient.PrebuildAPI.SetPrebuild(ctx, prebuildAddView.ProjectConfigName).Prebuild(newPrebuild).Execute()
+		prebuildId, res, err := apiClient.PrebuildAPI.SetPrebuild(ctx, prebuildAddView.WorkspaceConfigName).Prebuild(newPrebuild).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
@@ -165,7 +165,7 @@ var prebuildAddCmd = &cobra.Command{
 		views.RenderInfoMessage("Prebuild added successfully")
 
 		if prebuildAddView.RunBuildOnAdd {
-			buildId, err := build.CreateBuild(apiClient, projectConfig, prebuildAddView.Branch, &prebuildId)
+			buildId, err := build.CreateBuild(apiClient, workspaceConfig, prebuildAddView.Branch, &prebuildId)
 			if err != nil {
 				return err
 			}

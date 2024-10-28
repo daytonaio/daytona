@@ -11,7 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/project"
+	"github.com/daytonaio/daytona/pkg/target/workspace"
 )
 
 type IProvisioner interface {
@@ -21,10 +21,10 @@ type IProvisioner interface {
 	GetTargetInfo(ctx context.Context, target *target.Target, targetConfig *provider.TargetConfig) (*target.TargetInfo, error)
 	DestroyTarget(target *target.Target, targetConfig *provider.TargetConfig) error
 
-	CreateProject(project *project.Project, targetConfig *provider.TargetConfig, cr *containerregistry.ContainerRegistry, gc *gitprovider.GitProviderConfig) error
-	DestroyProject(project *project.Project, targetConfig *provider.TargetConfig) error
-	StartProject(project *project.Project, targetConfig *provider.TargetConfig) error
-	StopProject(project *project.Project, targetConfig *provider.TargetConfig) error
+	CreateWorkspace(workspace *workspace.Workspace, targetConfig *provider.TargetConfig, cr *containerregistry.ContainerRegistry, gc *gitprovider.GitProviderConfig) error
+	DestroyWorkspace(workspace *workspace.Workspace, targetConfig *provider.TargetConfig) error
+	StartWorkspace(workspace *workspace.Workspace, targetConfig *provider.TargetConfig) error
+	StopWorkspace(workspace *workspace.Workspace, targetConfig *provider.TargetConfig) error
 }
 
 type ProvisionerConfig struct {

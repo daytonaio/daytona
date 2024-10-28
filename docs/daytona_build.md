@@ -15,5 +15,5 @@ Manage builds
 * [daytona build info](daytona_build_info.md)	 - Show build info
 * [daytona build list](daytona_build_list.md)	 - List all builds
 * [daytona build logs](daytona_build_logs.md)	 - View logs for build
-* [daytona build run](daytona_build_run.md)	 - Run a build from a project config
+* [daytona build run](daytona_build_run.md)	 - Run a build from a workspace config
 

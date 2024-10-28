@@ -1,0 +1,9 @@
+name: daytona workspace-config update
+synopsis: Update a workspace config
+usage: daytona workspace-config update [flags]
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona workspace-config - Manage workspace configs

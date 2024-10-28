@@ -16,7 +16,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var restartProjectFlag string
+var restartWorkspaceFlag string
 
 var RestartCmd = &cobra.Command{
 	Use:     "restart [TARGET]",
@@ -34,7 +34,7 @@ var RestartCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 {
-			if restartProjectFlag != "" {
+			if restartWorkspaceFlag != "" {
 				err := cmd.Help()
 				if err != nil {
 					return err
@@ -61,12 +61,12 @@ var RestartCmd = &cobra.Command{
 			targetId = args[0]
 		}
 
-		err = RestartTarget(apiClient, targetId, restartProjectFlag)
+		err = RestartTarget(apiClient, targetId, restartWorkspaceFlag)
 		if err != nil {
 			return err
 		}
-		if restartProjectFlag != "" {
-			views.RenderInfoMessage(fmt.Sprintf("Project '%s' from target '%s' successfully restarted", restartProjectFlag, targetId))
+		if restartWorkspaceFlag != "" {
+			views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' from target '%s' successfully restarted", restartWorkspaceFlag, targetId))
 		} else {
 			views.RenderInfoMessage(fmt.Sprintf("Target '%s' successfully restarted", targetId))
 		}
@@ -78,13 +78,13 @@ var RestartCmd = &cobra.Command{
 }
 
 func init() {
-	RestartCmd.Flags().StringVarP(&restartProjectFlag, "project", "p", "", "Restart a single project in the target (project name)")
+	RestartCmd.Flags().StringVarP(&restartWorkspaceFlag, "workspace", "w", "", "Restart a single workspace in the target (workspace name)")
 }
 
-func RestartTarget(apiClient *apiclient.APIClient, targetId, projectName string) error {
-	err := StopTarget(apiClient, targetId, projectName)
+func RestartTarget(apiClient *apiclient.APIClient, targetId, workspaceName string) error {
+	err := StopTarget(apiClient, targetId, workspaceName)
 	if err != nil {
 		return err
 	}
-	return StartTarget(apiClient, targetId, projectName)
+	return StartTarget(apiClient, targetId, workspaceName)
 }

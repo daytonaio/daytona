@@ -11,7 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/project"
+	"github.com/daytonaio/daytona/pkg/target/workspace"
 	"github.com/docker/docker/api/types/container"
 	"github.com/stretchr/testify/mock"
 )
@@ -25,8 +25,8 @@ func NewMockClient() *MockClient {
 	return &MockClient{}
 }
 
-func (c *MockClient) CreateProject(p *project.Project, serverDownloadUrl string, cr *containerregistry.ContainerRegistry, logWriter io.Writer) error {
-	args := c.Called(p, serverDownloadUrl, cr, logWriter)
+func (c *MockClient) CreateWorkspace(w *workspace.Workspace, serverDownloadUrl string, cr *containerregistry.ContainerRegistry, logWriter io.Writer) error {
+	args := c.Called(w, serverDownloadUrl, cr, logWriter)
 	return args.Error(0)
 }
 
@@ -35,8 +35,8 @@ func (c *MockClient) CreateTarget(target *target.Target, logWriter io.Writer) er
 	return args.Error(0)
 }
 
-func (c *MockClient) DestroyProject(p *project.Project) error {
-	args := c.Called(p)
+func (c *MockClient) DestroyWorkspace(w *workspace.Workspace) error {
+	args := c.Called(w)
 	return args.Error(0)
 }
 
@@ -45,28 +45,28 @@ func (c *MockClient) DestroyTarget(target *target.Target) error {
 	return args.Error(0)
 }
 
-func (c *MockClient) StartProject(p *project.Project) error {
-	args := c.Called(p)
+func (c *MockClient) StartWorkspace(w *workspace.Workspace) error {
+	args := c.Called(w)
 	return args.Error(0)
 }
 
-func (c *MockClient) StopProject(p *project.Project) error {
-	args := c.Called(p)
+func (c *MockClient) StopWorkspace(w *workspace.Workspace) error {
+	args := c.Called(w)
 	return args.Error(0)
 }
 
-func (c *MockClient) GetProjectInfo(p *project.Project) (*project.ProjectInfo, error) {
-	args := c.Called(p)
-	return args.Get(0).(*project.ProjectInfo), args.Error(1)
+func (c *MockClient) GetWorkspaceInfo(w *workspace.Workspace) (*workspace.WorkspaceInfo, error) {
+	args := c.Called(w)
+	return args.Get(0).(*workspace.WorkspaceInfo), args.Error(1)
 }
 
-func (c *MockClient) GetTargetInfo(ws *target.Target) (*target.TargetInfo, error) {
-	args := c.Called(ws)
+func (c *MockClient) GetTargetInfo(t *target.Target) (*target.TargetInfo, error) {
+	args := c.Called(t)
 	return args.Get(0).(*target.TargetInfo), args.Error(1)
 }
 
-func (c *MockClient) GetProjectContainerName(p *project.Project) string {
-	args := c.Called(p)
+func (c *MockClient) GetWorkspaceContainerName(w *workspace.Workspace) string {
+	args := c.Called(w)
 	return args.String(0)
 }
 

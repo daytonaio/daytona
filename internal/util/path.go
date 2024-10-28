@@ -11,15 +11,15 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 )
 
-func GetHomeDir(activeProfile config.Profile, targetId string, projectName string, gpgKey string) (string, error) {
-	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, targetId, projectName, gpgKey)
+func GetHomeDir(activeProfile config.Profile, targetId string, workspaceName string, gpgKey string) (string, error) {
+	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, targetId, workspaceName, gpgKey)
 	if err != nil {
 		return "", err
 	}
 
-	projectHostname := config.GetProjectHostname(activeProfile.Id, targetId, projectName)
+	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, targetId, workspaceName)
 
-	homeDir, err := exec.Command("ssh", projectHostname, "echo", "$HOME").Output()
+	homeDir, err := exec.Command("ssh", workspaceHostname, "echo", "$HOME").Output()
 	if err != nil {
 		return "", err
 	}
@@ -27,27 +27,27 @@ func GetHomeDir(activeProfile config.Profile, targetId string, projectName strin
 	return strings.TrimRight(string(homeDir), "\n"), nil
 }
 
-func GetProjectDir(activeProfile config.Profile, targetId string, projectName string, gpgKey string) (string, error) {
-	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, targetId, projectName, gpgKey)
+func GetWorkspaceDir(activeProfile config.Profile, targetId string, workspaceName string, gpgKey string) (string, error) {
+	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, targetId, workspaceName, gpgKey)
 	if err != nil {
 		return "", err
 	}
 
-	projectHostname := config.GetProjectHostname(activeProfile.Id, targetId, projectName)
+	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, targetId, workspaceName)
 
-	daytonaProjectDir, err := exec.Command("ssh", projectHostname, "echo", "$DAYTONA_PROJECT_DIR").Output()
+	daytonaWorkspaceDir, err := exec.Command("ssh", workspaceHostname, "echo", "$DAYTONA_WORKSPACE_DIR").Output()
 	if err != nil {
 		return "", err
 	}
 
-	if strings.TrimRight(string(daytonaProjectDir), "\n") != "" {
-		return strings.TrimRight(string(daytonaProjectDir), "\n"), nil
+	if strings.TrimRight(string(daytonaWorkspaceDir), "\n") != "" {
+		return strings.TrimRight(string(daytonaWorkspaceDir), "\n"), nil
 	}
 
-	homeDir, err := GetHomeDir(activeProfile, targetId, projectName, gpgKey)
+	homeDir, err := GetHomeDir(activeProfile, targetId, workspaceName, gpgKey)
 	if err != nil {
 		return "", err
 	}
 
-	return path.Join(homeDir, projectName), nil
+	return path.Join(homeDir, workspaceName), nil
 }

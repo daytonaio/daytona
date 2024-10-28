@@ -14,7 +14,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrder int, selectionListOptions views.SelectionListOptions, choiceChan chan<- string, navChan chan<- string) {
+func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, workspaceOrder int, selectionListOptions views.SelectionListOptions, choiceChan chan<- string, navChan chan<- string) {
 	items := []list.Item{}
 
 	for _, pr := range pullRequests {
@@ -34,8 +34,8 @@ func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrd
 	l := views.GetStyledSelectList(items, selectionListOptions)
 
 	title := "Choose a Pull/Merge Request"
-	if projectOrder > 1 {
-		title += fmt.Sprintf(" (Project #%d)", projectOrder)
+	if workspaceOrder > 1 {
+		title += fmt.Sprintf(" (Workspace #%d)", workspaceOrder)
 	}
 	l.Title = views.GetStyledMainTitle(title)
 	l.Styles.Title = titleStyle
@@ -59,11 +59,11 @@ func selectPullRequestPrompt(pullRequests []apiclient.GitPullRequest, projectOrd
 	}
 }
 
-func GetPullRequestFromPrompt(pullRequests []apiclient.GitPullRequest, projectOrder int, selectionListOptions views.SelectionListOptions) (*apiclient.GitPullRequest, string) {
+func GetPullRequestFromPrompt(pullRequests []apiclient.GitPullRequest, workspaceOrder int, selectionListOptions views.SelectionListOptions) (*apiclient.GitPullRequest, string) {
 	choiceChan := make(chan string)
 	navChan := make(chan string)
 
-	go selectPullRequestPrompt(pullRequests, projectOrder, selectionListOptions, choiceChan, navChan)
+	go selectPullRequestPrompt(pullRequests, workspaceOrder, selectionListOptions, choiceChan, navChan)
 
 	select {
 	case pullRequestName := <-choiceChan:

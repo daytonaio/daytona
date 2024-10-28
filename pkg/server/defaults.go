@@ -23,8 +23,8 @@ const defaultSamplesIndexUrl = "https://raw.githubusercontent.com/daytonaio/dayt
 const defaultHeadscalePort = 3987
 const defaultApiPort = 3986
 const defaultBuilderImage = "daytonaio/workspace-project:latest"
-const defaultProjectImage = "daytonaio/workspace-project:latest"
-const defaultProjectUser = "daytona"
+const defaultWorkspaceImage = "daytonaio/workspace-project:latest"
+const defaultWorkspaceUser = "daytona"
 
 const defaultLocalBuilderRegistryPort = 3988
 const defaultLocalBuilderRegistryImage = "registry:2.8.3"
@@ -112,8 +112,8 @@ func getDefaultConfig() (*Config, error) {
 		BinariesPath:              binariesPath,
 		Frps:                      getDefaultFRPSConfig(),
 		LogFilePath:               logFilePath,
-		DefaultProjectImage:       defaultProjectImage,
-		DefaultProjectUser:        defaultProjectUser,
+		DefaultWorkspaceImage:     defaultWorkspaceImage,
+		DefaultWorkspaceUser:      defaultWorkspaceUser,
 		BuilderImage:              defaultBuilderImage,
 		LocalBuilderRegistryPort:  defaultLocalBuilderRegistryPort,
 		LocalBuilderRegistryImage: defaultLocalBuilderRegistryImage,

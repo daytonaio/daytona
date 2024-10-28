@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/daytonaio/daytona/pkg/ssh"
-	"github.com/daytonaio/daytona/pkg/target/project/buildconfig"
+	"github.com/daytonaio/daytona/pkg/target/workspace/buildconfig"
 )
 
 type BuilderType string
@@ -19,26 +19,26 @@ var (
 	BuilderTypeImage        BuilderType = "image"
 )
 
-func DetectProjectBuilderType(buildConfig *buildconfig.BuildConfig, projectDir string, sshClient *ssh.Client) (BuilderType, error) {
+func DetectWorkspaceBuilderType(buildConfig *buildconfig.BuildConfig, workspaceDir string, sshClient *ssh.Client) (BuilderType, error) {
 	if buildConfig != nil && buildConfig.Devcontainer != nil {
 		return BuilderTypeDevcontainer, nil
 	}
 
 	if sshClient != nil {
-		if _, err := sshClient.ReadFile(path.Join(projectDir, ".devcontainer/devcontainer.json")); err == nil {
+		if _, err := sshClient.ReadFile(path.Join(workspaceDir, ".devcontainer/devcontainer.json")); err == nil {
 			buildConfig.Devcontainer = &buildconfig.DevcontainerConfig{
 				FilePath: ".devcontainer/devcontainer.json",
 			}
 			return BuilderTypeDevcontainer, nil
 		}
-		if _, err := sshClient.ReadFile(path.Join(projectDir, ".devcontainer.json")); err == nil {
+		if _, err := sshClient.ReadFile(path.Join(workspaceDir, ".devcontainer.json")); err == nil {
 			buildConfig.Devcontainer = &buildconfig.DevcontainerConfig{
 				FilePath: ".devcontainer.json",
 			}
 			return BuilderTypeDevcontainer, nil
 		}
 	} else {
-		if devcontainerFilePath, pathError := findDevcontainerConfigFilePath(projectDir); pathError == nil {
+		if devcontainerFilePath, pathError := findDevcontainerConfigFilePath(workspaceDir); pathError == nil {
 			buildConfig.Devcontainer = &buildconfig.DevcontainerConfig{
 				FilePath: devcontainerFilePath,
 			}
@@ -50,12 +50,12 @@ func DetectProjectBuilderType(buildConfig *buildconfig.BuildConfig, projectDir s
 	return BuilderTypeImage, nil
 }
 
-func findDevcontainerConfigFilePath(projectDir string) (string, error) {
+func findDevcontainerConfigFilePath(workspaceDir string) (string, error) {
 	devcontainerPath := ".devcontainer/devcontainer.json"
-	isDevcontainer, err := fileExists(filepath.Join(projectDir, devcontainerPath))
+	isDevcontainer, err := fileExists(filepath.Join(workspaceDir, devcontainerPath))
 	if !isDevcontainer || err != nil {
 		devcontainerPath = ".devcontainer.json"
-		isDevcontainer, err = fileExists(filepath.Join(projectDir, devcontainerPath))
+		isDevcontainer, err = fileExists(filepath.Join(workspaceDir, devcontainerPath))
 		if err != nil {
 			return devcontainerPath, nil
 		}

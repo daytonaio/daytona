@@ -9,7 +9,7 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/project"
+	"github.com/daytonaio/daytona/pkg/target/workspace"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 )
@@ -23,22 +23,22 @@ func (d *DockerClient) GetTargetInfo(t *target.Target) (*target.TargetInfo, erro
 		ProviderMetadata: fmt.Sprintf(TargetMetadataFormat, t.Id),
 	}
 
-	projectInfos := []*project.ProjectInfo{}
-	for _, project := range t.Projects {
-		projectInfo, err := d.GetProjectInfo(project)
+	workspaceInfos := []*workspace.WorkspaceInfo{}
+	for _, workspace := range t.Workspaces {
+		workspaceInfo, err := d.GetWorkspaceInfo(workspace)
 		if err != nil {
 			return nil, err
 		}
-		projectInfos = append(projectInfos, projectInfo)
+		workspaceInfos = append(workspaceInfos, workspaceInfo)
 	}
-	targetInfo.Projects = projectInfos
+	targetInfo.Workspaces = workspaceInfos
 
 	return targetInfo, nil
 }
 
-func (d *DockerClient) GetProjectInfo(p *project.Project) (*project.ProjectInfo, error) {
+func (d *DockerClient) GetWorkspaceInfo(w *workspace.Workspace) (*workspace.WorkspaceInfo, error) {
 	isRunning := true
-	info, err := d.getContainerInfo(p)
+	info, err := d.getContainerInfo(w)
 	if err != nil {
 		if client.IsErrNotFound(err) {
 			isRunning = false
@@ -48,16 +48,16 @@ func (d *DockerClient) GetProjectInfo(p *project.Project) (*project.ProjectInfo,
 	}
 
 	if info == nil || info.State == nil {
-		return &project.ProjectInfo{
-			Name:             p.Name,
+		return &workspace.WorkspaceInfo{
+			Name:             w.Name,
 			IsRunning:        isRunning,
 			Created:          "",
 			ProviderMetadata: ContainerNotFoundMetadata,
 		}, nil
 	}
 
-	projectInfo := &project.ProjectInfo{
-		Name:      p.Name,
+	workspaceInfo := &workspace.WorkspaceInfo{
+		Name:      w.Name,
 		IsRunning: isRunning,
 		Created:   info.Created,
 	}
@@ -67,16 +67,16 @@ func (d *DockerClient) GetProjectInfo(p *project.Project) (*project.ProjectInfo,
 		if err != nil {
 			return nil, err
 		}
-		projectInfo.ProviderMetadata = string(metadata)
+		workspaceInfo.ProviderMetadata = string(metadata)
 	}
 
-	return projectInfo, nil
+	return workspaceInfo, nil
 }
 
-func (d *DockerClient) getContainerInfo(p *project.Project) (*types.ContainerJSON, error) {
+func (d *DockerClient) getContainerInfo(w *workspace.Workspace) (*types.ContainerJSON, error) {
 	ctx := context.Background()
 
-	info, err := d.apiClient.ContainerInspect(ctx, d.GetProjectContainerName(p))
+	info, err := d.apiClient.ContainerInspect(ctx, d.GetWorkspaceContainerName(w))
 	if err != nil {
 		return nil, err
 	}

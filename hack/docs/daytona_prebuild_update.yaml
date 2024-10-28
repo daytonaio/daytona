@@ -1,6 +1,6 @@
 name: daytona prebuild update
 synopsis: Update a prebuild configuration
-usage: daytona prebuild update [PROJECT_CONFIG] [PREBUILD_ID] [flags]
+usage: daytona prebuild update [WORKSPACE_CONFIG] [PREBUILD_ID] [flags]
 options:
     - name: branch
       shorthand: b

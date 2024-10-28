@@ -15,10 +15,10 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/builds"
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
-	"github.com/daytonaio/daytona/pkg/server/projectconfig"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
+	"github.com/daytonaio/daytona/pkg/server/workspaceconfig"
 	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/project"
+	"github.com/daytonaio/daytona/pkg/target/workspace"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 )
 
@@ -32,10 +32,10 @@ type ITargetService interface {
 	RemoveTarget(ctx context.Context, targetId string) error
 	ForceRemoveTarget(ctx context.Context, targetId string) error
 
-	GetProjectLogReader(targetId, projectName string) (io.Reader, error)
-	SetProjectState(targetId string, projectName string, state *project.ProjectState) (*target.Target, error)
-	StartProject(ctx context.Context, targetId string, projectName string) error
-	StopProject(ctx context.Context, targetId string, projectName string) error
+	GetWorkspaceLogReader(targetId, workspaceName string) (io.Reader, error)
+	SetWorkspaceState(targetId string, workspaceName string, state *workspace.WorkspaceState) (*target.Target, error)
+	StartWorkspace(ctx context.Context, targetId string, workspaceName string) error
+	StopWorkspace(ctx context.Context, targetId string, workspaceName string) error
 }
 
 type targetConfigStore interface {
@@ -47,13 +47,13 @@ type TargetServiceConfig struct {
 	TargetConfigStore        targetConfigStore
 	ContainerRegistryService containerregistries.IContainerRegistryService
 	BuildService             builds.IBuildService
-	ProjectConfigService     projectconfig.IProjectConfigService
+	WorkspaceConfigService   workspaceconfig.IWorkspaceConfigService
 	ServerApiUrl             string
 	ServerUrl                string
 	ServerVersion            string
 	Provisioner              provisioner.IProvisioner
-	DefaultProjectImage      string
-	DefaultProjectUser       string
+	DefaultWorkspaceImage    string
+	DefaultWorkspaceUser     string
 	ApiKeyService            apikeys.IApiKeyService
 	LoggerFactory            logs.LoggerFactory
 	GitProviderService       gitproviders.IGitProviderService
@@ -66,12 +66,12 @@ func NewTargetService(config TargetServiceConfig) ITargetService {
 		targetConfigStore:        config.TargetConfigStore,
 		containerRegistryService: config.ContainerRegistryService,
 		buildService:             config.BuildService,
-		projectConfigService:     config.ProjectConfigService,
+		workspaceConfigService:   config.WorkspaceConfigService,
 		serverApiUrl:             config.ServerApiUrl,
 		serverUrl:                config.ServerUrl,
 		serverVersion:            config.ServerVersion,
-		defaultProjectImage:      config.DefaultProjectImage,
-		defaultProjectUser:       config.DefaultProjectUser,
+		defaultWorkspaceImage:    config.DefaultWorkspaceImage,
+		defaultWorkspaceUser:     config.DefaultWorkspaceUser,
 		provisioner:              config.Provisioner,
 		loggerFactory:            config.LoggerFactory,
 		apiKeyService:            config.ApiKeyService,
@@ -85,39 +85,39 @@ type TargetService struct {
 	targetConfigStore        targetConfigStore
 	containerRegistryService containerregistries.IContainerRegistryService
 	buildService             builds.IBuildService
-	projectConfigService     projectconfig.IProjectConfigService
+	workspaceConfigService   workspaceconfig.IWorkspaceConfigService
 	provisioner              provisioner.IProvisioner
 	apiKeyService            apikeys.IApiKeyService
 	serverApiUrl             string
 	serverUrl                string
 	serverVersion            string
-	defaultProjectImage      string
-	defaultProjectUser       string
+	defaultWorkspaceImage    string
+	defaultWorkspaceUser     string
 	loggerFactory            logs.LoggerFactory
 	gitProviderService       gitproviders.IGitProviderService
 	telemetryService         telemetry.TelemetryService
 }
 
-func (s *TargetService) SetProjectState(targetId, projectName string, state *project.ProjectState) (*target.Target, error) {
+func (s *TargetService) SetWorkspaceState(targetId, workspaceName string, state *workspace.WorkspaceState) (*target.Target, error) {
 	tg, err := s.targetStore.Find(targetId)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, project := range tg.Projects {
-		if project.Name == projectName {
-			project.State = state
+	for _, workspace := range tg.Workspaces {
+		if workspace.Name == workspaceName {
+			workspace.State = state
 			return tg, s.targetStore.Save(tg)
 		}
 	}
 
-	return nil, errors.New("project not found")
+	return nil, errors.New("workspace not found")
 }
 
 func (s *TargetService) GetTargetLogReader(targetId string) (io.Reader, error) {
 	return s.loggerFactory.CreateTargetLogReader(targetId)
 }
 
-func (s *TargetService) GetProjectLogReader(targetId, projectName string) (io.Reader, error) {
-	return s.loggerFactory.CreateProjectLogReader(targetId, projectName)
+func (s *TargetService) GetWorkspaceLogReader(targetId, workspaceName string) (io.Reader, error) {
+	return s.loggerFactory.CreateWorkspaceLogReader(targetId, workspaceName)
 }

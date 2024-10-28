@@ -25,7 +25,7 @@ var portForwardCmd = &cobra.Command{
 
 		errChan := make(chan error)
 		go func() {
-			errChan <- defaultPortForwardCmd.ForwardPublicPort(targetId, projectName, uint16(port), uint16(port))
+			errChan <- defaultPortForwardCmd.ForwardPublicPort(targetId, workspaceName, uint16(port), uint16(port))
 		}()
 
 		for {

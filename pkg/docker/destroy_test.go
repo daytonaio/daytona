@@ -22,10 +22,10 @@ func (s *DockerClientTestSuite) TestDestroyTarget() {
 	require.True(s.T(), os.IsNotExist(err))
 }
 
-func (s *DockerClientTestSuite) TestDestroyProject() {
+func (s *DockerClientTestSuite) TestDestroyWorkspace() {
 	s.mockClient.On("ContainerList", mock.Anything, mock.Anything).Return([]types.Container{}, nil)
 
-	containerName := s.dockerClient.GetProjectContainerName(project1)
+	containerName := s.dockerClient.GetWorkspaceContainerName(workspace1)
 
 	s.mockClient.On("ContainerInspect", mock.Anything, containerName).Return(types.ContainerJSON{
 		Config: &container.Config{},
@@ -38,13 +38,13 @@ func (s *DockerClientTestSuite) TestDestroyProject() {
 		},
 	).Return(nil)
 
-	s.mockClient.On("VolumeRemove", mock.Anything, s.dockerClient.GetProjectVolumeName(project1), true).Return(nil)
+	s.mockClient.On("VolumeRemove", mock.Anything, s.dockerClient.GetWorkspaceVolumeName(workspace1), true).Return(nil)
 
-	projectDir := s.T().TempDir()
+	workspaceDir := s.T().TempDir()
 
-	err := s.dockerClient.DestroyProject(project1, projectDir, nil)
+	err := s.dockerClient.DestroyWorkspace(workspace1, workspaceDir, nil)
 	require.Nil(s.T(), err)
 
-	_, err = os.Stat(projectDir)
+	_, err = os.Stat(workspaceDir)
 	require.True(s.T(), os.IsNotExist(err))
 }

@@ -1,9 +1,9 @@
 ## daytona logs
 
-View logs for a target/project
+View logs for a target/workspace
 
 ```
-daytona logs [TARGET] [PROJECT_NAME] [flags]
+daytona logs [TARGET] [WORKSPACE_NAME] [flags]
 ```
 
 ### Options

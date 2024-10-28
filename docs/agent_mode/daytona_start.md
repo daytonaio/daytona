@@ -1,6 +1,6 @@
 ## daytona start
 
-Start the project
+Start the workspace
 
 ```
 daytona start [flags]

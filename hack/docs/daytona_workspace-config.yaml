@@ -1,0 +1,14 @@
+name: daytona workspace-config
+synopsis: Manage workspace configs
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona - Daytona is a Dev Environment Manager
+    - daytona workspace-config add - Add a workspace config
+    - daytona workspace-config delete - Delete a workspace config
+    - daytona workspace-config info - Show workspace config info
+    - daytona workspace-config list - Lists workspace configs
+    - daytona workspace-config set-default - Set workspace config info
+    - daytona workspace-config update - Update a workspace config

@@ -6,7 +6,7 @@ package build
 import (
 	"errors"
 
-	"github.com/daytonaio/daytona/pkg/target/project/buildconfig"
+	"github.com/daytonaio/daytona/pkg/target/workspace/buildconfig"
 )
 
 type Store interface {
