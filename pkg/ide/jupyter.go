@@ -26,32 +26,32 @@ import (
 const startJupyterCommand = "notebook --no-browser --port=8888 --ip=0.0.0.0 --NotebookApp.token='' --NotebookApp.password=''"
 
 // OpenJupyterIDE manages the installation and startup of a Jupyter IDE on a remote target.
-func OpenJupyterIDE(activeProfile config.Profile, targetId, projectName, projectProviderMetadata string, yesFlag bool, gpgKey string) error {
+func OpenJupyterIDE(activeProfile config.Profile, targetId, workspaceName, workspaceProviderMetadata string, yesFlag bool, gpgKey string) error {
 	// Ensure SSH config entry is added
-	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, targetId, projectName, gpgKey)
+	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, targetId, workspaceName, gpgKey)
 	if err != nil {
 		return err
 	}
 
-	projectHostname := config.GetProjectHostname(activeProfile.Id, targetId, projectName)
+	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, targetId, workspaceName)
 
 	// Check and install Python if necessary
-	if err := ensurePythonInstalled(projectHostname, yesFlag); err != nil {
+	if err := ensurePythonInstalled(workspaceHostname, yesFlag); err != nil {
 		return err
 	}
 
 	// Check and install pip if necessary
-	if err := ensurePipInstalled(projectHostname, yesFlag); err != nil {
+	if err := ensurePipInstalled(workspaceHostname, yesFlag); err != nil {
 		return err
 	}
 
 	// Check and install Jupyter Notebook if necessary
-	if err := ensureJupyterInstalled(projectHostname); err != nil {
+	if err := ensureJupyterInstalled(workspaceHostname); err != nil {
 		return err
 	}
 
 	// Start Jupyter Notebook server
-	if err := startJupyterServer(projectHostname, activeProfile, targetId, projectName, gpgKey); err != nil {
+	if err := startJupyterServer(workspaceHostname, activeProfile, targetId, workspaceName, gpgKey); err != nil {
 		return err
 	}
 
@@ -216,8 +216,8 @@ func ensureJupyterInstalled(hostname string) error {
 }
 
 // startJupyterServer starts the Jupyter Notebook server on the remote target.
-func startJupyterServer(hostname string, activeProfile config.Profile, targetId, projectName string, gpgKey string) error {
-	projectDir, err := util.GetProjectDir(activeProfile, targetId, projectName, gpgKey)
+func startJupyterServer(hostname string, activeProfile config.Profile, targetId, workspaceName string, gpgKey string) error {
+	workspaceDir, err := util.GetWorkspaceDir(activeProfile, targetId, workspaceName, gpgKey)
 	if err != nil {
 		return err
 	}
@@ -226,7 +226,7 @@ func startJupyterServer(hostname string, activeProfile config.Profile, targetId,
 
 	// Start Jupyter Notebook server in the background
 	go func() {
-		cmd := exec.CommandContext(context.Background(), "ssh", hostname, fmt.Sprintf(". ~/.jupyter_venv/bin/activate && cd %s && jupyter %s", projectDir, startJupyterCommand))
+		cmd := exec.CommandContext(context.Background(), "ssh", hostname, fmt.Sprintf(". ~/.jupyter_venv/bin/activate && cd %s && jupyter %s", workspaceDir, startJupyterCommand))
 		cmd.Stdout = io.Writer(&util.DebugLogWriter{})
 		cmd.Stderr = io.Writer(&util.DebugLogWriter{})
 		if err := cmd.Run(); err != nil {
@@ -235,7 +235,7 @@ func startJupyterServer(hostname string, activeProfile config.Profile, targetId,
 	}()
 
 	// Forward the IDE port
-	browserPort, errChan := tailscale.ForwardPort(targetId, projectName, 8888, activeProfile)
+	browserPort, errChan := tailscale.ForwardPort(targetId, workspaceName, 8888, activeProfile)
 	if browserPort == nil {
 		if err := <-errChan; err != nil {
 			return err
@@ -246,7 +246,7 @@ func startJupyterServer(hostname string, activeProfile config.Profile, targetId,
 	ideURL := fmt.Sprintf("http://localhost:%d", *browserPort)
 	waitForPort(*browserPort)
 
-	views.RenderInfoMessageBold(fmt.Sprintf("Forwarded %s Jupyter Notebook port to %s.\nOpening browser...\n", projectName, ideURL))
+	views.RenderInfoMessageBold(fmt.Sprintf("Forwarded %s Jupyter Notebook port to %s.\nOpening browser...\n", workspaceName, ideURL))
 
 	if err := browser.OpenURL(ideURL); err != nil {
 		log.Error("Error opening URL: " + err.Error())

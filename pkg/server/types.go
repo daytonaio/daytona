@@ -43,9 +43,9 @@ type Config struct {
 	HeadscalePort             uint32         `json:"headscalePort" validate:"required"`
 	BinariesPath              string         `json:"binariesPath" validate:"required"`
 	LogFile                   *LogFileConfig `json:"logFile" validate:"required"`
-	DefaultProjectImage       string         `json:"defaultProjectImage" validate:"required"`
-	DefaultProjectUser        string         `json:"defaultProjectUser" validate:"required"`
 	BuilderImage              string         `json:"builderImage" validate:"required"`
+	DefaultWorkspaceImage     string         `json:"defaultWorkspaceImage" validate:"required"`
+	DefaultWorkspaceUser      string         `json:"defaultWorkspaceUser" validate:"required"`
 	LocalBuilderRegistryPort  uint32         `json:"localBuilderRegistryPort" validate:"required"`
 	LocalBuilderRegistryImage string         `json:"localBuilderRegistryImage" validate:"required"`
 	BuilderRegistryServer     string         `json:"builderRegistryServer" validate:"required"`

@@ -104,21 +104,15 @@ Class | Method | HTTP request | Description
 *GitProviderAPI* | [**ListGitProvidersForUrl**](docs/GitProviderAPI.md#listgitprovidersforurl) | **Get** /gitprovider/for-url/{url} | List Git providers for url
 *GitProviderAPI* | [**RemoveGitProvider**](docs/GitProviderAPI.md#removegitprovider) | **Delete** /gitprovider/{gitProviderId} | Remove Git provider
 *GitProviderAPI* | [**SetGitProvider**](docs/GitProviderAPI.md#setgitprovider) | **Put** /gitprovider | Set Git provider
-*PrebuildAPI* | [**DeletePrebuild**](docs/PrebuildAPI.md#deleteprebuild) | **Delete** /project-config/{configName}/prebuild/{prebuildId} | Delete prebuild
-*PrebuildAPI* | [**GetPrebuild**](docs/PrebuildAPI.md#getprebuild) | **Get** /project-config/{configName}/prebuild/{prebuildId} | Get prebuild
-*PrebuildAPI* | [**ListPrebuilds**](docs/PrebuildAPI.md#listprebuilds) | **Get** /project-config/prebuild | List prebuilds
-*PrebuildAPI* | [**ListPrebuildsForProjectConfig**](docs/PrebuildAPI.md#listprebuildsforprojectconfig) | **Get** /project-config/{configName}/prebuild | List prebuilds for project config
-*PrebuildAPI* | [**ProcessGitEvent**](docs/PrebuildAPI.md#processgitevent) | **Post** /project-config/prebuild/process-git-event | ProcessGitEvent
-*PrebuildAPI* | [**SetPrebuild**](docs/PrebuildAPI.md#setprebuild) | **Put** /project-config/{configName}/prebuild | Set prebuild
+*PrebuildAPI* | [**DeletePrebuild**](docs/PrebuildAPI.md#deleteprebuild) | **Delete** /workspace-config/{configName}/prebuild/{prebuildId} | Delete prebuild
+*PrebuildAPI* | [**GetPrebuild**](docs/PrebuildAPI.md#getprebuild) | **Get** /workspace-config/{configName}/prebuild/{prebuildId} | Get prebuild
+*PrebuildAPI* | [**ListPrebuilds**](docs/PrebuildAPI.md#listprebuilds) | **Get** /workspace-config/prebuild | List prebuilds
+*PrebuildAPI* | [**ListPrebuildsForWorkspaceConfig**](docs/PrebuildAPI.md#listprebuildsforworkspaceconfig) | **Get** /workspace-config/{configName}/prebuild | List prebuilds for workspace config
+*PrebuildAPI* | [**ProcessGitEvent**](docs/PrebuildAPI.md#processgitevent) | **Post** /workspace-config/prebuild/process-git-event | ProcessGitEvent
+*PrebuildAPI* | [**SetPrebuild**](docs/PrebuildAPI.md#setprebuild) | **Put** /workspace-config/{configName}/prebuild | Set prebuild
 *ProfileAPI* | [**DeleteProfileData**](docs/ProfileAPI.md#deleteprofiledata) | **Delete** /profile | Delete profile data
 *ProfileAPI* | [**GetProfileData**](docs/ProfileAPI.md#getprofiledata) | **Get** /profile | Get profile data
 *ProfileAPI* | [**SetProfileData**](docs/ProfileAPI.md#setprofiledata) | **Put** /profile | Set profile data
-*ProjectConfigAPI* | [**DeleteProjectConfig**](docs/ProjectConfigAPI.md#deleteprojectconfig) | **Delete** /project-config/{configName} | Delete project config data
-*ProjectConfigAPI* | [**GetDefaultProjectConfig**](docs/ProjectConfigAPI.md#getdefaultprojectconfig) | **Get** /project-config/default/{gitUrl} | Get project configs by git url
-*ProjectConfigAPI* | [**GetProjectConfig**](docs/ProjectConfigAPI.md#getprojectconfig) | **Get** /project-config/{configName} | Get project config data
-*ProjectConfigAPI* | [**ListProjectConfigs**](docs/ProjectConfigAPI.md#listprojectconfigs) | **Get** /project-config | List project configs
-*ProjectConfigAPI* | [**SetDefaultProjectConfig**](docs/ProjectConfigAPI.md#setdefaultprojectconfig) | **Patch** /project-config/{configName}/set-default | Set project config to default
-*ProjectConfigAPI* | [**SetProjectConfig**](docs/ProjectConfigAPI.md#setprojectconfig) | **Put** /project-config | Set project config data
 *ProviderAPI* | [**GetTargetConfigManifest**](docs/ProviderAPI.md#gettargetconfigmanifest) | **Get** /provider/{provider}/target-config-manifest | Get provider target config manifest
 *ProviderAPI* | [**InstallProvider**](docs/ProviderAPI.md#installprovider) | **Post** /provider/install | Install a provider
 *ProviderAPI* | [**ListProviders**](docs/ProviderAPI.md#listproviders) | **Get** /provider | List providers
@@ -132,15 +126,21 @@ Class | Method | HTTP request | Description
 *TargetAPI* | [**GetTarget**](docs/TargetAPI.md#gettarget) | **Get** /target/{targetId} | Get target info
 *TargetAPI* | [**ListTargets**](docs/TargetAPI.md#listtargets) | **Get** /target | List targets
 *TargetAPI* | [**RemoveTarget**](docs/TargetAPI.md#removetarget) | **Delete** /target/{targetId} | Remove target
-*TargetAPI* | [**SetProjectState**](docs/TargetAPI.md#setprojectstate) | **Post** /target/{targetId}/{projectId}/state | Set project state
-*TargetAPI* | [**StartProject**](docs/TargetAPI.md#startproject) | **Post** /target/{targetId}/{projectId}/start | Start project
+*TargetAPI* | [**SetWorkspaceState**](docs/TargetAPI.md#setworkspacestate) | **Post** /target/{targetId}/{workspaceId}/state | Set workspace state
 *TargetAPI* | [**StartTarget**](docs/TargetAPI.md#starttarget) | **Post** /target/{targetId}/start | Start target
-*TargetAPI* | [**StopProject**](docs/TargetAPI.md#stopproject) | **Post** /target/{targetId}/{projectId}/stop | Stop project
+*TargetAPI* | [**StartWorkspace**](docs/TargetAPI.md#startworkspace) | **Post** /target/{targetId}/{workspaceId}/start | Start workspace
 *TargetAPI* | [**StopTarget**](docs/TargetAPI.md#stoptarget) | **Post** /target/{targetId}/stop | Stop target
+*TargetAPI* | [**StopWorkspace**](docs/TargetAPI.md#stopworkspace) | **Post** /target/{targetId}/{workspaceId}/stop | Stop workspace
 *TargetConfigAPI* | [**ListTargetConfigs**](docs/TargetConfigAPI.md#listtargetconfigs) | **Get** /target-config | List target configs
 *TargetConfigAPI* | [**RemoveTargetConfig**](docs/TargetConfigAPI.md#removetargetconfig) | **Delete** /target-config/{configName} | Remove a target config
 *TargetConfigAPI* | [**SetDefaultTargetConfig**](docs/TargetConfigAPI.md#setdefaulttargetconfig) | **Patch** /target-config/{configName}/set-default | Set target config to default
 *TargetConfigAPI* | [**SetTargetConfig**](docs/TargetConfigAPI.md#settargetconfig) | **Put** /target-config | Set a target config
+*WorkspaceConfigAPI* | [**DeleteWorkspaceConfig**](docs/WorkspaceConfigAPI.md#deleteworkspaceconfig) | **Delete** /workspace-config/{configName} | Delete workspace config data
+*WorkspaceConfigAPI* | [**GetDefaultWorkspaceConfig**](docs/WorkspaceConfigAPI.md#getdefaultworkspaceconfig) | **Get** /workspace-config/default/{gitUrl} | Get workspace configs by git url
+*WorkspaceConfigAPI* | [**GetWorkspaceConfig**](docs/WorkspaceConfigAPI.md#getworkspaceconfig) | **Get** /workspace-config/{configName} | Get workspace config data
+*WorkspaceConfigAPI* | [**ListWorkspaceConfigs**](docs/WorkspaceConfigAPI.md#listworkspaceconfigs) | **Get** /workspace-config | List workspace configs
+*WorkspaceConfigAPI* | [**SetDefaultWorkspaceConfig**](docs/WorkspaceConfigAPI.md#setdefaultworkspaceconfig) | **Patch** /workspace-config/{configName}/set-default | Set workspace config to default
+*WorkspaceConfigAPI* | [**SetWorkspaceConfig**](docs/WorkspaceConfigAPI.md#setworkspaceconfig) | **Put** /workspace-config | Set workspace config data
 
 
 ## Documentation For Models
@@ -156,11 +156,11 @@ Class | Method | HTTP request | Description
  - [ContainerRegistry](docs/ContainerRegistry.md)
  - [CreateBuildDTO](docs/CreateBuildDTO.md)
  - [CreatePrebuildDTO](docs/CreatePrebuildDTO.md)
- - [CreateProjectConfigDTO](docs/CreateProjectConfigDTO.md)
- - [CreateProjectDTO](docs/CreateProjectDTO.md)
- - [CreateProjectSourceDTO](docs/CreateProjectSourceDTO.md)
  - [CreateTargetConfigDTO](docs/CreateTargetConfigDTO.md)
  - [CreateTargetDTO](docs/CreateTargetDTO.md)
+ - [CreateWorkspaceConfigDTO](docs/CreateWorkspaceConfigDTO.md)
+ - [CreateWorkspaceDTO](docs/CreateWorkspaceDTO.md)
+ - [CreateWorkspaceSourceDTO](docs/CreateWorkspaceSourceDTO.md)
  - [DevcontainerConfig](docs/DevcontainerConfig.md)
  - [FRPSConfig](docs/FRPSConfig.md)
  - [FileStatus](docs/FileStatus.md)
@@ -178,10 +178,6 @@ Class | Method | HTTP request | Description
  - [PrebuildConfig](docs/PrebuildConfig.md)
  - [PrebuildDTO](docs/PrebuildDTO.md)
  - [ProfileData](docs/ProfileData.md)
- - [Project](docs/Project.md)
- - [ProjectConfig](docs/ProjectConfig.md)
- - [ProjectInfo](docs/ProjectInfo.md)
- - [ProjectState](docs/ProjectState.md)
  - [Provider](docs/Provider.md)
  - [ProviderProviderInfo](docs/ProviderProviderInfo.md)
  - [ProviderTargetConfigPropertyType](docs/ProviderTargetConfigPropertyType.md)
@@ -189,7 +185,7 @@ Class | Method | HTTP request | Description
  - [Sample](docs/Sample.md)
  - [ServerConfig](docs/ServerConfig.md)
  - [SetGitProviderConfig](docs/SetGitProviderConfig.md)
- - [SetProjectState](docs/SetProjectState.md)
+ - [SetWorkspaceState](docs/SetWorkspaceState.md)
  - [SigningMethod](docs/SigningMethod.md)
  - [Status](docs/Status.md)
  - [Target](docs/Target.md)
@@ -197,6 +193,10 @@ Class | Method | HTTP request | Description
  - [TargetConfigProperty](docs/TargetConfigProperty.md)
  - [TargetDTO](docs/TargetDTO.md)
  - [TargetInfo](docs/TargetInfo.md)
+ - [Workspace](docs/Workspace.md)
+ - [WorkspaceConfig](docs/WorkspaceConfig.md)
+ - [WorkspaceInfo](docs/WorkspaceInfo.md)
+ - [WorkspaceState](docs/WorkspaceState.md)
 
 
 ## Documentation For Authorization

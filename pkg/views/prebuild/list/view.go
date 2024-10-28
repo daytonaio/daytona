@@ -17,11 +17,11 @@ import (
 var maxTriggerFilesStringLength = 24
 
 type rowData struct {
-	ProjectConfigName string
-	Branch            string
-	CommitInterval    string
-	TriggerFiles      string
-	Retention         string
+	WorkspaceConfigName string
+	Branch              string
+	CommitInterval      string
+	TriggerFiles        string
+	Retention           string
 }
 
 func ListPrebuilds(prebuildList []apiclient.PrebuildDTO) {
@@ -37,7 +37,7 @@ func ListPrebuilds(prebuildList []apiclient.PrebuildDTO) {
 	}
 
 	table := util.GetTableView(data, []string{
-		"Project Config", "Branch", "Commit Interval", "Trigger files", "Build Retention",
+		"Workspace Config", "Branch", "Commit Interval", "Trigger files", "Build Retention",
 	}, nil, func() {
 		renderUnstyledList(prebuildList)
 	})
@@ -46,10 +46,10 @@ func ListPrebuilds(prebuildList []apiclient.PrebuildDTO) {
 }
 
 func renderUnstyledList(prebuildList []apiclient.PrebuildDTO) {
-	for _, pc := range prebuildList {
-		info.Render(&pc, true)
+	for _, wc := range prebuildList {
+		info.Render(&wc, true)
 
-		if pc.Id != prebuildList[len(prebuildList)-1].Id {
+		if wc.Id != prebuildList[len(prebuildList)-1].Id {
 			fmt.Printf("\n%s\n\n", views.SeparatorString)
 		}
 	}
@@ -58,7 +58,7 @@ func renderUnstyledList(prebuildList []apiclient.PrebuildDTO) {
 func getRowFromData(prebuildConfig apiclient.PrebuildDTO) []string {
 	var data rowData
 
-	data.ProjectConfigName = prebuildConfig.ProjectConfigName + views_util.AdditionalPropertyPadding
+	data.WorkspaceConfigName = prebuildConfig.WorkspaceConfigName + views_util.AdditionalPropertyPadding
 	data.Branch = prebuildConfig.Branch
 	if prebuildConfig.CommitInterval != nil {
 		data.CommitInterval = strconv.Itoa(int(*prebuildConfig.CommitInterval))
@@ -69,7 +69,7 @@ func getRowFromData(prebuildConfig apiclient.PrebuildDTO) []string {
 	data.Retention = strconv.Itoa(int(prebuildConfig.Retention))
 
 	return []string{
-		views.NameStyle.Render(data.ProjectConfigName),
+		views.NameStyle.Render(data.WorkspaceConfigName),
 		views.DefaultRowDataStyle.Render(views.GetBranchNameLabel(data.Branch)),
 		views.ActiveStyle.Render(data.CommitInterval),
 		views.DefaultRowDataStyle.Render(data.TriggerFiles),

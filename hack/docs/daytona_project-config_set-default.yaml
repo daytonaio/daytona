@@ -1,9 +1,0 @@
-name: daytona project-config set-default
-synopsis: Set project config info
-usage: daytona project-config set-default [flags]
-inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-see_also:
-    - daytona project-config - Manage project configs

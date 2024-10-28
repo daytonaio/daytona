@@ -20,15 +20,15 @@ type ApikeyApiKeyType string
 
 // List of apikey.ApiKeyType
 const (
-	ApiKeyTypeClient  ApikeyApiKeyType = "client"
-	ApiKeyTypeProject ApikeyApiKeyType = "project"
-	ApiKeyTypeTarget  ApikeyApiKeyType = "target"
+	ApiKeyTypeClient    ApikeyApiKeyType = "client"
+	ApiKeyTypeWorkspace ApikeyApiKeyType = "workspace"
+	ApiKeyTypeTarget    ApikeyApiKeyType = "target"
 )
 
 // All allowed values of ApikeyApiKeyType enum
 var AllowedApikeyApiKeyTypeEnumValues = []ApikeyApiKeyType{
 	"client",
-	"project",
+	"workspace",
 	"target",
 }
 

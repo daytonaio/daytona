@@ -21,12 +21,12 @@ var _ MappedNullable = &PrebuildDTO{}
 
 // PrebuildDTO struct for PrebuildDTO
 type PrebuildDTO struct {
-	Branch            string   `json:"branch"`
-	CommitInterval    *int32   `json:"commitInterval,omitempty"`
-	Id                string   `json:"id"`
-	ProjectConfigName string   `json:"projectConfigName"`
-	Retention         int32    `json:"retention"`
-	TriggerFiles      []string `json:"triggerFiles,omitempty"`
+	Branch              string   `json:"branch"`
+	CommitInterval      *int32   `json:"commitInterval,omitempty"`
+	Id                  string   `json:"id"`
+	Retention           int32    `json:"retention"`
+	TriggerFiles        []string `json:"triggerFiles,omitempty"`
+	WorkspaceConfigName string   `json:"workspaceConfigName"`
 }
 
 type _PrebuildDTO PrebuildDTO
@@ -35,12 +35,12 @@ type _PrebuildDTO PrebuildDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPrebuildDTO(branch string, id string, projectConfigName string, retention int32) *PrebuildDTO {
+func NewPrebuildDTO(branch string, id string, retention int32, workspaceConfigName string) *PrebuildDTO {
 	this := PrebuildDTO{}
 	this.Branch = branch
 	this.Id = id
-	this.ProjectConfigName = projectConfigName
 	this.Retention = retention
+	this.WorkspaceConfigName = workspaceConfigName
 	return &this
 }
 
@@ -132,30 +132,6 @@ func (o *PrebuildDTO) SetId(v string) {
 	o.Id = v
 }
 
-// GetProjectConfigName returns the ProjectConfigName field value
-func (o *PrebuildDTO) GetProjectConfigName() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.ProjectConfigName
-}
-
-// GetProjectConfigNameOk returns a tuple with the ProjectConfigName field value
-// and a boolean to check if the value has been set.
-func (o *PrebuildDTO) GetProjectConfigNameOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.ProjectConfigName, true
-}
-
-// SetProjectConfigName sets field value
-func (o *PrebuildDTO) SetProjectConfigName(v string) {
-	o.ProjectConfigName = v
-}
-
 // GetRetention returns the Retention field value
 func (o *PrebuildDTO) GetRetention() int32 {
 	if o == nil {
@@ -212,6 +188,30 @@ func (o *PrebuildDTO) SetTriggerFiles(v []string) {
 	o.TriggerFiles = v
 }
 
+// GetWorkspaceConfigName returns the WorkspaceConfigName field value
+func (o *PrebuildDTO) GetWorkspaceConfigName() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.WorkspaceConfigName
+}
+
+// GetWorkspaceConfigNameOk returns a tuple with the WorkspaceConfigName field value
+// and a boolean to check if the value has been set.
+func (o *PrebuildDTO) GetWorkspaceConfigNameOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.WorkspaceConfigName, true
+}
+
+// SetWorkspaceConfigName sets field value
+func (o *PrebuildDTO) SetWorkspaceConfigName(v string) {
+	o.WorkspaceConfigName = v
+}
+
 func (o PrebuildDTO) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -227,11 +227,11 @@ func (o PrebuildDTO) ToMap() (map[string]interface{}, error) {
 		toSerialize["commitInterval"] = o.CommitInterval
 	}
 	toSerialize["id"] = o.Id
-	toSerialize["projectConfigName"] = o.ProjectConfigName
 	toSerialize["retention"] = o.Retention
 	if !IsNil(o.TriggerFiles) {
 		toSerialize["triggerFiles"] = o.TriggerFiles
 	}
+	toSerialize["workspaceConfigName"] = o.WorkspaceConfigName
 	return toSerialize, nil
 }
 
@@ -242,8 +242,8 @@ func (o *PrebuildDTO) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"branch",
 		"id",
-		"projectConfigName",
 		"retention",
+		"workspaceConfigName",
 	}
 
 	allProperties := make(map[string]interface{})

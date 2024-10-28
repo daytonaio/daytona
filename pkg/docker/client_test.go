@@ -10,11 +10,11 @@ import (
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/project"
+	"github.com/daytonaio/daytona/pkg/target/workspace"
 	"github.com/stretchr/testify/suite"
 )
 
-var project1 = &project.Project{
+var workspace1 = &workspace.Workspace{
 	Name: "test",
 	Repository: &gitprovider.GitRepository{
 		Id:   "123",
@@ -31,8 +31,8 @@ var target1 = &target.Target{
 	Id:           "123",
 	Name:         "test",
 	TargetConfig: "local",
-	Projects: []*project.Project{
-		project1,
+	Workspaces: []*workspace.Workspace{
+		workspace1,
 	},
 }
 

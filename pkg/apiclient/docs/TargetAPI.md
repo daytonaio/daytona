@@ -8,11 +8,11 @@ Method | HTTP request | Description
 [**GetTarget**](TargetAPI.md#GetTarget) | **Get** /target/{targetId} | Get target info
 [**ListTargets**](TargetAPI.md#ListTargets) | **Get** /target | List targets
 [**RemoveTarget**](TargetAPI.md#RemoveTarget) | **Delete** /target/{targetId} | Remove target
-[**SetProjectState**](TargetAPI.md#SetProjectState) | **Post** /target/{targetId}/{projectId}/state | Set project state
-[**StartProject**](TargetAPI.md#StartProject) | **Post** /target/{targetId}/{projectId}/start | Start project
+[**SetWorkspaceState**](TargetAPI.md#SetWorkspaceState) | **Post** /target/{targetId}/{workspaceId}/state | Set workspace state
 [**StartTarget**](TargetAPI.md#StartTarget) | **Post** /target/{targetId}/start | Start target
-[**StopProject**](TargetAPI.md#StopProject) | **Post** /target/{targetId}/{projectId}/stop | Stop project
+[**StartWorkspace**](TargetAPI.md#StartWorkspace) | **Post** /target/{targetId}/{workspaceId}/start | Start workspace
 [**StopTarget**](TargetAPI.md#StopTarget) | **Post** /target/{targetId}/stop | Stop target
+[**StopWorkspace**](TargetAPI.md#StopWorkspace) | **Post** /target/{targetId}/{workspaceId}/stop | Stop workspace
 
 
 
@@ -37,7 +37,7 @@ import (
 )
 
 func main() {
-	target := *openapiclient.NewCreateTargetDTO("Id_example", "Name_example", []openapiclient.CreateProjectDTO{*openapiclient.NewCreateProjectDTO(map[string]string{"key": "Inner_example"}, "Name_example", *openapiclient.NewCreateProjectSourceDTO(*openapiclient.NewGitRepository("Branch_example", "Id_example", "Name_example", "Owner_example", "Sha_example", "Source_example", "Url_example")))}, "TargetConfig_example") // CreateTargetDTO | Create target
+	target := *openapiclient.NewCreateTargetDTO("Id_example", "Name_example", "TargetConfig_example", []openapiclient.CreateWorkspaceDTO{*openapiclient.NewCreateWorkspaceDTO(map[string]string{"key": "Inner_example"}, "Name_example", *openapiclient.NewCreateWorkspaceSourceDTO(*openapiclient.NewGitRepository("Branch_example", "Id_example", "Name_example", "Owner_example", "Sha_example", "Source_example", "Url_example")))}) // CreateTargetDTO | Create target
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -290,84 +290,11 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
-## SetProjectState
+## SetWorkspaceState
 
-> SetProjectState(ctx, targetId, projectId).SetState(setState).Execute()
+> SetWorkspaceState(ctx, targetId, workspaceId).SetState(setState).Execute()
 
-Set project state
-
-
-
-### Example
-
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"os"
-	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
-)
-
-func main() {
-	targetId := "targetId_example" // string | Target ID or Name
-	projectId := "projectId_example" // string | Project ID
-	setState := *openapiclient.NewSetProjectState(int32(123)) // SetProjectState | Set State
-
-	configuration := openapiclient.NewConfiguration()
-	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.TargetAPI.SetProjectState(context.Background(), targetId, projectId).SetState(setState).Execute()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `TargetAPI.SetProjectState``: %v\n", err)
-		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
-	}
-}
-```
-
-### Path Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**targetId** | **string** | Target ID or Name | 
-**projectId** | **string** | Project ID | 
-
-### Other Parameters
-
-Other parameters are passed through a pointer to a apiSetProjectStateRequest struct via the builder pattern
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-
-
- **setState** | [**SetProjectState**](SetProjectState.md) | Set State | 
-
-### Return type
-
- (empty response body)
-
-### Authorization
-
-[Bearer](../README.md#Bearer)
-
-### HTTP request headers
-
-- **Content-Type**: Not defined
-- **Accept**: Not defined
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
-## StartProject
-
-> StartProject(ctx, targetId, projectId).Execute()
-
-Start project
+Set workspace state
 
 
 
@@ -385,13 +312,14 @@ import (
 
 func main() {
 	targetId := "targetId_example" // string | Target ID or Name
-	projectId := "projectId_example" // string | Project ID
+	workspaceId := "workspaceId_example" // string | Workspace ID
+	setState := *openapiclient.NewSetWorkspaceState(int32(123)) // SetWorkspaceState | Set State
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.TargetAPI.StartProject(context.Background(), targetId, projectId).Execute()
+	r, err := apiClient.TargetAPI.SetWorkspaceState(context.Background(), targetId, workspaceId).SetState(setState).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `TargetAPI.StartProject``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `TargetAPI.SetWorkspaceState``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
 }
@@ -404,17 +332,18 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
 **targetId** | **string** | Target ID or Name | 
-**projectId** | **string** | Project ID | 
+**workspaceId** | **string** | Workspace ID | 
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiStartProjectRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiSetWorkspaceStateRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
+ **setState** | [**SetWorkspaceState**](SetWorkspaceState.md) | Set State | 
 
 ### Return type
 
@@ -502,11 +431,11 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
-## StopProject
+## StartWorkspace
 
-> StopProject(ctx, targetId, projectId).Execute()
+> StartWorkspace(ctx, targetId, workspaceId).Execute()
 
-Stop project
+Start workspace
 
 
 
@@ -524,13 +453,13 @@ import (
 
 func main() {
 	targetId := "targetId_example" // string | Target ID or Name
-	projectId := "projectId_example" // string | Project ID
+	workspaceId := "workspaceId_example" // string | Workspace ID
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.TargetAPI.StopProject(context.Background(), targetId, projectId).Execute()
+	r, err := apiClient.TargetAPI.StartWorkspace(context.Background(), targetId, workspaceId).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `TargetAPI.StopProject``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `TargetAPI.StartWorkspace``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
 }
@@ -543,11 +472,11 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
 **targetId** | **string** | Target ID or Name | 
-**projectId** | **string** | Project ID | 
+**workspaceId** | **string** | Workspace ID | 
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiStopProjectRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiStartWorkspaceRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
@@ -621,6 +550,77 @@ Other parameters are passed through a pointer to a apiStopTargetRequest struct v
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## StopWorkspace
+
+> StopWorkspace(ctx, targetId, workspaceId).Execute()
+
+Stop workspace
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	targetId := "targetId_example" // string | Target ID or Name
+	workspaceId := "workspaceId_example" // string | Workspace ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	r, err := apiClient.TargetAPI.StopWorkspace(context.Background(), targetId, workspaceId).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `TargetAPI.StopWorkspace``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**targetId** | **string** | Target ID or Name | 
+**workspaceId** | **string** | Workspace ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiStopWorkspaceRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
 
 
 ### Return type

@@ -55,7 +55,7 @@ Set up a development environment on any infrastructure, with a single command.
 - **Prebuilds System**: Drastically improve environment setup times (Contributions welcome here!).
 - **IDE Support** : Seamlessly supports [VS Code](https://github.com/microsoft/vscode) & [JetBrains](https://www.jetbrains.com/remote-development/gateway/) locally, ready to use without configuration. Includes a built-in Web IDE for added convenience.
 - **Git Provider Integration**: GitHub, GitLab, Bitbucket, Bitbucket Server, Gitea, Gitness, Azure DevOps, AWS CodeCommit & Gogs can be connected, allowing easy repo branch or PR pull and commit back from the targets.
-- **Multiple Project Targets**: Support for multiple project repositories in the same target, making it easy to develop using a micro-service architecture.
+- **Multiple Workspace Targets**: Support for multiple workspace repositories in the same target, making it easy to develop using a micro-service architecture.
 - **Reverse Proxy Integration**: Enable collaboration and streamline feedback loops by leveraging reverse proxy functionality. Access preview ports and the Web IDE seamlessly, even behind firewalls.
 - **Extensibility**: Enable extensibility with plugin or provider development. Moreover, in any dynamic language, not just Go(Contributions welcome here!).
 - **Security**: Automatically creates a VPN connection between the client machine and the development environment, ensuring a fully secure connection.

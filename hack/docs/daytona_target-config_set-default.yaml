@@ -1,9 +1,0 @@
-name: daytona target-config set-default
-synopsis: Set default target config
-usage: daytona target-config set-default [CONFIG_NAME] [flags]
-inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-see_also:
-    - daytona target-config - Manage target configs

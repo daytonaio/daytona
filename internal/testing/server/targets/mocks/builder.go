@@ -9,8 +9,8 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/target/project/buildconfig"
-	"github.com/daytonaio/daytona/pkg/target/project/containerconfig"
+	"github.com/daytonaio/daytona/pkg/target/workspace/buildconfig"
+	"github.com/daytonaio/daytona/pkg/target/workspace/containerconfig"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -24,10 +24,10 @@ var MockBuild = &build.Build{
 		User:  "test",
 	},
 	BuildConfig: &buildconfig.BuildConfig{
-		Devcontainer: MockProjectConfig.BuildConfig.Devcontainer,
+		Devcontainer: MockWorkspaceConfig.BuildConfig.Devcontainer,
 	},
 	Repository: &gitprovider.GitRepository{
-		Url: MockProjectConfig.RepositoryUrl,
+		Url: MockWorkspaceConfig.RepositoryUrl,
 	},
 	EnvVars: map[string]string{},
 }
@@ -36,8 +36,8 @@ type MockBuilderFactory struct {
 	mock.Mock
 }
 
-func (f *MockBuilderFactory) Create(build build.Build, projectDir string) (build.IBuilder, error) {
-	args := f.Called(build, projectDir)
+func (f *MockBuilderFactory) Create(build build.Build, workspaceDir string) (build.IBuilder, error) {
+	args := f.Called(build, workspaceDir)
 	return args.Get(0).(*MockBuilder), args.Error(1)
 }
 

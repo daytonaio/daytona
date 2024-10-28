@@ -12,7 +12,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
-var FIRST_PROJECT_INDEX = 0
+var FIRST_WORKSPACE_INDEX = 0
 var STATIC_INDEX = -1
 var TARGET_PREFIX = "TARGET"
 var PROVIDER_PREFIX = "PROVIDER"
@@ -34,8 +34,8 @@ func DisplayLogEntry(logEntry logs.LogEntry, index int) {
 	prefixColor := getPrefixColor(index, logEntry.Source)
 	var prefixText string
 
-	if logEntry.ProjectName != nil {
-		prefixText = *logEntry.ProjectName
+	if logEntry.WorkspaceName != nil {
+		prefixText = *logEntry.WorkspaceName
 	}
 
 	if logEntry.BuildId != nil {
@@ -88,10 +88,10 @@ func DisplayLogEntry(logEntry logs.LogEntry, index int) {
 	fmt.Print(result)
 }
 
-func CalculateLongestPrefixLength(projectNames []string) {
-	for _, projectName := range projectNames {
-		if len(projectName) > longestPrefixLength {
-			longestPrefixLength = len(projectName)
+func CalculateLongestPrefixLength(workspaceNames []string) {
+	for _, workspaceName := range workspaceNames {
+		if len(workspaceName) > longestPrefixLength {
+			longestPrefixLength = len(workspaceName)
 		}
 	}
 }

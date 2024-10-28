@@ -11,7 +11,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/build"
 	. "github.com/daytonaio/daytona/pkg/db/dto"
-	"github.com/daytonaio/daytona/pkg/target/project/buildconfig"
+	"github.com/daytonaio/daytona/pkg/target/workspace/buildconfig"
 	"gorm.io/gorm"
 )
 
