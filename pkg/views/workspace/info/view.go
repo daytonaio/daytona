@@ -33,7 +33,7 @@ func Render(workspace *apiclient.WorkspaceDTO, ide string, forceUnstyled bool) {
 	}
 
 	if isCreationView {
-		nameLabel = "Worskpace"
+		nameLabel = "Workspace"
 	}
 
 	output += "\n"
@@ -55,7 +55,7 @@ func Render(workspace *apiclient.WorkspaceDTO, ide string, forceUnstyled bool) {
 		return
 	}
 
-	output = getSingleWorkspaceOutput(workspace, isCreationView)
+	output += getSingleWorkspaceOutput(workspace, isCreationView)
 
 	if !isCreationView {
 		output = views.GetStyledMainTitle("Workspace Info") + "\n" + output
@@ -100,6 +100,7 @@ func getSingleWorkspaceOutput(workspace *apiclient.WorkspaceDTO, isCreationView 
 	if !isCreationView {
 		output += getInfoLine("Target ID", workspace.TargetId) + "\n"
 	}
+
 	output += getInfoLine("Repository", repositoryUrl)
 
 	if !isCreationView {
