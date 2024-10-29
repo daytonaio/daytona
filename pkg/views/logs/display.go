@@ -39,8 +39,8 @@ func DisplayLogEntry(logEntry logs.LogEntry, index int) {
 		prefixText = *logEntry.WorkspaceName
 	} else if logEntry.BuildId != nil {
 		prefixText = *logEntry.BuildId
-	} else if logEntry.TargetId != nil {
-		prefixText = *logEntry.TargetId
+	} else if logEntry.TargetName != nil {
+		prefixText = *logEntry.TargetName
 	}
 
 	if index == STATIC_INDEX && prefixText == "" {
