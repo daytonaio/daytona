@@ -65,7 +65,7 @@ func TestAgent(t *testing.T) {
 	buf := bytes.Buffer{}
 	log.SetOutput(&buf)
 
-	apiServer := mocks.NewMockRestServer(t, workspace1)
+	apiServer := mocks.NewMockRestServer(t)
 	defer apiServer.Close()
 
 	mockConfig.Server.ApiUrl = apiServer.URL
@@ -86,6 +86,7 @@ func TestAgent(t *testing.T) {
 		Git:       mockGitService,
 		Ssh:       mockSshServer,
 		Tailscale: mockTailscaleServer,
+		Workspace: workspace1,
 	}
 
 	t.Run("Start agent", func(t *testing.T) {
