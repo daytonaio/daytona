@@ -12,11 +12,10 @@ import (
 	"testing"
 
 	"github.com/daytonaio/daytona/pkg/server"
-	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/gin-gonic/gin"
 )
 
-func NewMockRestServer(t *testing.T, workspace *workspace.Workspace) *httptest.Server {
+func NewMockRestServer(t *testing.T) *httptest.Server {
 	router := gin.Default()
 	serverController := router.Group("/server")
 	{
@@ -34,13 +33,6 @@ func NewMockRestServer(t *testing.T, workspace *workspace.Workspace) *httptest.S
 		})
 		serverController.POST("/network-key", func(ctx *gin.Context) {
 			ctx.JSON(200, &server.NetworkKey{Key: "test-key"})
-		})
-	}
-
-	workspaceController := router.Group("/workspace")
-	{
-		workspaceController.GET("/:workspaceId", func(ctx *gin.Context) {
-			ctx.JSON(http.StatusOK, workspace)
 		})
 	}
 
