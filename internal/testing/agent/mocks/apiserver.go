@@ -29,7 +29,7 @@ func NewMockRestServer(t *testing.T, workspace *workspace.Workspace) *httptest.S
 				ApiPort:           3000,
 				HeadscalePort:     4000,
 				BinariesPath:      "",
-				LogFilePath:       "",
+				LogFile:           nil,
 			})
 		})
 		serverController.POST("/network-key", func(ctx *gin.Context) {

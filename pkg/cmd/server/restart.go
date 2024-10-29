@@ -27,7 +27,7 @@ var restartCmd = &cobra.Command{
 		}
 
 		views.RenderInfoMessage("Starting the Daytona Server daemon...")
-		err = daemon.Start(c.LogFilePath)
+		err = daemon.Start(c.LogFile.Path)
 		if err != nil {
 			return err
 		}

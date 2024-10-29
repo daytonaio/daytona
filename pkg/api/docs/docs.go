@@ -2477,6 +2477,35 @@ const docTemplate = `{
                 }
             }
         },
+        "LogFileConfig": {
+            "type": "object",
+            "required": [
+                "maxAge",
+                "maxBackups",
+                "maxSize",
+                "path"
+            ],
+            "properties": {
+                "compress": {
+                    "type": "boolean"
+                },
+                "localTime": {
+                    "type": "boolean"
+                },
+                "maxAge": {
+                    "type": "integer"
+                },
+                "maxBackups": {
+                    "type": "integer"
+                },
+                "maxSize": {
+                    "type": "integer"
+                },
+                "path": {
+                    "type": "string"
+                }
+            }
+        },
         "NetworkKey": {
             "type": "object",
             "required": [
@@ -2793,7 +2822,7 @@ const docTemplate = `{
                 "id",
                 "localBuilderRegistryImage",
                 "localBuilderRegistryPort",
-                "logFilePath",
+                "logFile",
                 "providersDir",
                 "registryUrl",
                 "serverDownloadUrl"
@@ -2835,8 +2864,8 @@ const docTemplate = `{
                 "localBuilderRegistryPort": {
                     "type": "integer"
                 },
-                "logFilePath": {
-                    "type": "string"
+                "logFile": {
+                    "$ref": "#/definitions/LogFileConfig"
                 },
                 "providersDir": {
                     "type": "string"

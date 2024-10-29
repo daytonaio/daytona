@@ -2010,6 +2010,33 @@ components:
       - downloadUrls
       - name
       type: object
+    LogFileConfig:
+      example:
+        localTime: true
+        path: path
+        compress: true
+        maxAge: 5
+        maxBackups: 2
+        maxSize: 7
+      properties:
+        compress:
+          type: boolean
+        localTime:
+          type: boolean
+        maxAge:
+          type: integer
+        maxBackups:
+          type: integer
+        maxSize:
+          type: integer
+        path:
+          type: string
+      required:
+      - maxAge
+      - maxBackups
+      - maxSize
+      - path
+      type: object
     NetworkKey:
       example:
         key: key
@@ -2367,7 +2394,13 @@ components:
         buildImageNamespace: buildImageNamespace
         serverDownloadUrl: serverDownloadUrl
         binariesPath: binariesPath
-        logFilePath: logFilePath
+        logFile:
+          localTime: true
+          path: path
+          compress: true
+          maxAge: 5
+          maxBackups: 2
+          maxSize: 7
         samplesIndexUrl: samplesIndexUrl
         defaultProjectImage: defaultProjectImage
         providersDir: providersDir
@@ -2401,8 +2434,8 @@ components:
           type: string
         localBuilderRegistryPort:
           type: integer
-        logFilePath:
-          type: string
+        logFile:
+          $ref: '#/components/schemas/LogFileConfig'
         providersDir:
           type: string
         registryUrl:
@@ -2422,7 +2455,7 @@ components:
       - id
       - localBuilderRegistryImage
       - localBuilderRegistryPort
-      - logFilePath
+      - logFile
       - providersDir
       - registryUrl
       - serverDownloadUrl
