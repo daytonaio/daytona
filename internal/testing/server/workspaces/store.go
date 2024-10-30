@@ -19,8 +19,8 @@ func NewInMemoryWorkspaceStore() workspace.Store {
 
 func (s *InMemoryWorkspaceStore) List() ([]*workspace.WorkspaceViewDTO, error) {
 	workspaceViewDTOs := []*workspace.WorkspaceViewDTO{}
-	for _, t := range s.workspaces {
-		workspaceViewDTOs = append(workspaceViewDTOs, &workspace.WorkspaceViewDTO{Workspace: *t})
+	for _, w := range s.workspaces {
+		workspaceViewDTOs = append(workspaceViewDTOs, &workspace.WorkspaceViewDTO{Workspace: *w})
 	}
 
 	return workspaceViewDTOs, nil
