@@ -176,9 +176,6 @@ func renderProjectDetails(project apiclient.CreateProjectDTO, buildChoice views_
 func projectDetailOutput(projectDetailKey ProjectDetail, projectDetailValue string) string {
 	if projectDetailKey == EnvVars {
 		envVars := strings.Split(projectDetailValue, "; ")
-		if len(envVars) == 0 {
-			return ""
-		}
 		output := fmt.Sprintf("\t%s\n\t\t%s",
 			lipgloss.NewStyle().Foreground(views.Green).Render(string(projectDetailKey)),
 			strings.Join(envVars, "\n\t\t"))
