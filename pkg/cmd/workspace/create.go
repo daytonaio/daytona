@@ -320,6 +320,8 @@ func processPrompting(ctx context.Context, apiClient *apiclient.APIClient, works
 
 	suggestedName := workspace_util.GetSuggestedName(initialSuggestion, workspaceNames)
 
+	dedupProjectNames(projects)
+
 	submissionFormConfig := create.SubmissionFormConfig{
 		ChosenName:    workspaceName,
 		SuggestedName: suggestedName,
