@@ -174,7 +174,26 @@ func renderProjectDetails(project apiclient.CreateProjectDTO, buildChoice views_
 }
 
 func projectDetailOutput(projectDetailKey ProjectDetail, projectDetailValue string) string {
-	return fmt.Sprintf("\t%s%-*s%s", lipgloss.NewStyle().Foreground(views.Green).Render(string(projectDetailKey)), DEFAULT_PADDING-len(string(projectDetailKey)), EMPTY_STRING, projectDetailValue)
+	// Special handling for environment variables
+	if projectDetailKey == EnvVars {
+		envVars := strings.Split(projectDetailValue, "; ")
+		if len(envVars) == 0 {
+			return ""
+		}
+
+		output := fmt.Sprintf("\t%s\n", lipgloss.NewStyle().Foreground(views.Green).Render(string(projectDetailKey)))
+
+		for _, env := range envVars {
+			output += fmt.Sprintf("\t\t%s\n", env)
+		}
+
+		return strings.TrimSuffix(output, "\n")
+	}
+	return fmt.Sprintf("\t%s%-*s%s",
+		lipgloss.NewStyle().Foreground(views.Green).Render(string(projectDetailKey)),
+		DEFAULT_PADDING-len(string(projectDetailKey)),
+		EMPTY_STRING,
+		projectDetailValue)
 }
 
 func calculateViewportSize(content string) (width, height int) {
