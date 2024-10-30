@@ -174,15 +174,14 @@ func renderProjectDetails(project apiclient.CreateProjectDTO, buildChoice views_
 }
 
 func projectDetailOutput(projectDetailKey ProjectDetail, projectDetailValue string) string {
+	keyStyle := lipgloss.NewStyle().Foreground(views.Green).Render(string(projectDetailKey))
+
 	if projectDetailKey == EnvVars {
-		envVars := strings.Split(projectDetailValue, "; ")
-		output := fmt.Sprintf("\t%s\n\t\t%s",
-			lipgloss.NewStyle().Foreground(views.Green).Render(string(projectDetailKey)),
-			strings.Join(envVars, "\n\t\t"))
-		return output
+		projectDetailValue = strings.ReplaceAll(projectDetailValue, "; ", "\n\t\t")
+		return fmt.Sprintf("\t%s\n\t\t%s", keyStyle, projectDetailValue)
 	}
 	return fmt.Sprintf("\t%s%-*s%s",
-		lipgloss.NewStyle().Foreground(views.Green).Render(string(projectDetailKey)),
+		keyStyle,
 		DEFAULT_PADDING-len(string(projectDetailKey)),
 		EMPTY_STRING,
 		projectDetailValue)
