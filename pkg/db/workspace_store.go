@@ -5,6 +5,7 @@ package db
 
 import (
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	. "github.com/daytonaio/daytona/pkg/db/dto"
 	"github.com/daytonaio/daytona/pkg/workspace"
@@ -23,24 +24,24 @@ func NewWorkspaceStore(db *gorm.DB) (*WorkspaceStore, error) {
 	return &WorkspaceStore{db: db}, nil
 }
 
-func (store *WorkspaceStore) List() ([]*workspace.Workspace, error) {
+func (store *WorkspaceStore) List() ([]*workspace.WorkspaceViewDTO, error) {
 	workspaceDTOs := []WorkspaceDTO{}
-	tx := store.db.Find(&workspaceDTOs)
+	tx := store.db.Preload(clause.Associations).Find(&workspaceDTOs)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 
-	workspaces := []*workspace.Workspace{}
+	workspaceViewDTOs := []*workspace.WorkspaceViewDTO{}
 	for _, workspaceDTO := range workspaceDTOs {
-		workspaces = append(workspaces, ToWorkspace(workspaceDTO))
+		workspaceViewDTOs = append(workspaceViewDTOs, ToWorkspaceViewDTO(workspaceDTO))
 	}
 
-	return workspaces, nil
+	return workspaceViewDTOs, nil
 }
 
-func (w *WorkspaceStore) Find(idOrName string) (*workspace.Workspace, error) {
+func (w *WorkspaceStore) Find(idOrName string) (*workspace.WorkspaceViewDTO, error) {
 	workspaceDTO := WorkspaceDTO{}
-	tx := w.db.Where("id = ? OR name = ?", idOrName, idOrName).First(&workspaceDTO)
+	tx := w.db.Preload(clause.Associations).Where("id = ? OR name = ?", idOrName, idOrName).First(&workspaceDTO)
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
 			return nil, workspace.ErrWorkspaceNotFound
@@ -48,7 +49,7 @@ func (w *WorkspaceStore) Find(idOrName string) (*workspace.Workspace, error) {
 		return nil, tx.Error
 	}
 
-	return ToWorkspace(workspaceDTO), nil
+	return ToWorkspaceViewDTO(workspaceDTO), nil
 }
 
 func (w *WorkspaceStore) Save(workspace *workspace.Workspace) error {

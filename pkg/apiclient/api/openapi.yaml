@@ -1033,7 +1033,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Workspace'
+                $ref: '#/components/schemas/WorkspaceViewDTO'
           description: OK
       summary: Create a workspace
       tags:
@@ -2429,82 +2429,6 @@ components:
       required:
       - name
       type: object
-    Workspace:
-      example:
-        buildConfig:
-          cachedBuild:
-            image: image
-            user: user
-          devcontainer:
-            filePath: filePath
-        gitProviderConfigId: gitProviderConfigId
-        image: image
-        targetId: targetId
-        envVars:
-          key: envVars
-        name: name
-        id: id
-        state:
-          gitStatus:
-            behind: 6
-            fileStatus:
-            - extra: extra
-              name: name
-              staging: null
-              worktree: null
-            - extra: extra
-              name: name
-              staging: null
-              worktree: null
-            ahead: 0
-            branchPublished: true
-            currentBranch: currentBranch
-          updatedAt: updatedAt
-          uptime: 1
-        repository:
-          owner: owner
-          path: path
-          name: name
-          id: id
-          source: source
-          prNumber: 0
-          branch: branch
-          cloneTarget: null
-          sha: sha
-          url: url
-        user: user
-      properties:
-        buildConfig:
-          $ref: '#/components/schemas/BuildConfig'
-        envVars:
-          additionalProperties:
-            type: string
-          type: object
-        gitProviderConfigId:
-          type: string
-        id:
-          type: string
-        image:
-          type: string
-        name:
-          type: string
-        repository:
-          $ref: '#/components/schemas/GitRepository'
-        state:
-          $ref: '#/components/schemas/WorkspaceState'
-        targetId:
-          type: string
-        user:
-          type: string
-      required:
-      - envVars
-      - id
-      - image
-      - name
-      - repository
-      - targetId
-      - user
-      type: object
     WorkspaceConfig:
       example:
         prebuilds:
@@ -2577,6 +2501,7 @@ components:
             filePath: filePath
         gitProviderConfigId: gitProviderConfigId
         image: image
+        targetName: targetName
         targetId: targetId
         envVars:
           key: envVars
@@ -2640,6 +2565,8 @@ components:
           $ref: '#/components/schemas/WorkspaceState'
         targetId:
           type: string
+        targetName:
+          type: string
         user:
           type: string
       required:
@@ -2649,6 +2576,7 @@ components:
       - name
       - repository
       - targetId
+      - targetName
       - user
       type: object
     WorkspaceInfo:
@@ -2704,6 +2632,86 @@ components:
       - gitStatus
       - updatedAt
       - uptime
+      type: object
+    WorkspaceViewDTO:
+      example:
+        buildConfig:
+          cachedBuild:
+            image: image
+            user: user
+          devcontainer:
+            filePath: filePath
+        gitProviderConfigId: gitProviderConfigId
+        image: image
+        targetName: targetName
+        targetId: targetId
+        envVars:
+          key: envVars
+        name: name
+        id: id
+        state:
+          gitStatus:
+            behind: 6
+            fileStatus:
+            - extra: extra
+              name: name
+              staging: null
+              worktree: null
+            - extra: extra
+              name: name
+              staging: null
+              worktree: null
+            ahead: 0
+            branchPublished: true
+            currentBranch: currentBranch
+          updatedAt: updatedAt
+          uptime: 1
+        repository:
+          owner: owner
+          path: path
+          name: name
+          id: id
+          source: source
+          prNumber: 0
+          branch: branch
+          cloneTarget: null
+          sha: sha
+          url: url
+        user: user
+      properties:
+        buildConfig:
+          $ref: '#/components/schemas/BuildConfig'
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
+        gitProviderConfigId:
+          type: string
+        id:
+          type: string
+        image:
+          type: string
+        name:
+          type: string
+        repository:
+          $ref: '#/components/schemas/GitRepository'
+        state:
+          $ref: '#/components/schemas/WorkspaceState'
+        targetId:
+          type: string
+        targetName:
+          type: string
+        user:
+          type: string
+      required:
+      - envVars
+      - id
+      - image
+      - name
+      - repository
+      - targetId
+      - targetName
+      - user
       type: object
     apikey.ApiKeyType:
       enum:

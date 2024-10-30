@@ -1453,7 +1453,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Workspace"
+                            "$ref": "#/definitions/WorkspaceViewDTO"
                         }
                     }
                 }
@@ -2993,53 +2993,6 @@ const docTemplate = `{
                 }
             }
         },
-        "Workspace": {
-            "type": "object",
-            "required": [
-                "envVars",
-                "id",
-                "image",
-                "name",
-                "repository",
-                "targetId",
-                "user"
-            ],
-            "properties": {
-                "buildConfig": {
-                    "$ref": "#/definitions/BuildConfig"
-                },
-                "envVars": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "gitProviderConfigId": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "image": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "repository": {
-                    "$ref": "#/definitions/GitRepository"
-                },
-                "state": {
-                    "$ref": "#/definitions/WorkspaceState"
-                },
-                "targetId": {
-                    "type": "string"
-                },
-                "user": {
-                    "type": "string"
-                }
-            }
-        },
         "WorkspaceConfig": {
             "type": "object",
             "required": [
@@ -3095,6 +3048,7 @@ const docTemplate = `{
                 "name",
                 "repository",
                 "targetId",
+                "targetName",
                 "user"
             ],
             "properties": {
@@ -3129,6 +3083,9 @@ const docTemplate = `{
                     "$ref": "#/definitions/WorkspaceState"
                 },
                 "targetId": {
+                    "type": "string"
+                },
+                "targetName": {
                     "type": "string"
                 },
                 "user": {
@@ -3178,6 +3135,57 @@ const docTemplate = `{
                 },
                 "uptime": {
                     "type": "integer"
+                }
+            }
+        },
+        "WorkspaceViewDTO": {
+            "type": "object",
+            "required": [
+                "envVars",
+                "id",
+                "image",
+                "name",
+                "repository",
+                "targetId",
+                "targetName",
+                "user"
+            ],
+            "properties": {
+                "buildConfig": {
+                    "$ref": "#/definitions/BuildConfig"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "gitProviderConfigId": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "repository": {
+                    "$ref": "#/definitions/GitRepository"
+                },
+                "state": {
+                    "$ref": "#/definitions/WorkspaceState"
+                },
+                "targetId": {
+                    "type": "string"
+                },
+                "targetName": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
                 }
             }
         },

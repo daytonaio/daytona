@@ -6,11 +6,16 @@ package workspace
 import "errors"
 
 type Store interface {
-	List() ([]*Workspace, error)
-	Find(idOrName string) (*Workspace, error)
+	List() ([]*WorkspaceViewDTO, error)
+	Find(idOrName string) (*WorkspaceViewDTO, error)
 	Save(workspace *Workspace) error
 	Delete(workspace *Workspace) error
 }
+
+type WorkspaceViewDTO struct {
+	Workspace
+	TargetName string `json:"targetName" validate:"required"`
+} // @name WorkspaceViewDTO
 
 var (
 	ErrWorkspaceNotFound = errors.New("workspace not found")

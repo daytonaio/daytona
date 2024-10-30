@@ -16,32 +16,32 @@ import (
 func (s *WorkspaceService) StopWorkspace(ctx context.Context, workspaceId string) error {
 	ws, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
-		return s.handleStopError(ctx, ws, ErrWorkspaceNotFound)
+		return s.handleStopError(ctx, &ws.Workspace, ErrWorkspaceNotFound)
 	}
 
 	target, err := s.targetStore.Find(ws.TargetId)
 	if err != nil {
-		return s.handleStopError(ctx, ws, err)
+		return s.handleStopError(ctx, &ws.Workspace, err)
 	}
 
 	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &target.TargetConfig})
 	if err != nil {
-		return s.handleStopError(ctx, ws, err)
+		return s.handleStopError(ctx, &ws.Workspace, err)
 	}
 
 	//	todo: go routines
-	err = s.provisioner.StopWorkspace(ws, targetConfig)
+	err = s.provisioner.StopWorkspace(&ws.Workspace, targetConfig)
 	if err != nil {
-		return s.handleStopError(ctx, ws, err)
+		return s.handleStopError(ctx, &ws.Workspace, err)
 	}
 	if ws.State != nil {
 		ws.State.Uptime = 0
 		ws.State.UpdatedAt = time.Now().Format(time.RFC1123)
 	}
 
-	err = s.workspaceStore.Save(ws)
+	err = s.workspaceStore.Save(&ws.Workspace)
 
-	return s.handleStopError(ctx, ws, err)
+	return s.handleStopError(ctx, &ws.Workspace, err)
 }
 
 func (s *WorkspaceService) handleStopError(ctx context.Context, w *workspace.Workspace, err error) error {

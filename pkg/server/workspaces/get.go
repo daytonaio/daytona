@@ -22,7 +22,7 @@ func (s *WorkspaceService) GetWorkspace(ctx context.Context, workspaceId string,
 	}
 
 	response := &dto.WorkspaceDTO{
-		Workspace: *ws,
+		WorkspaceViewDTO: *ws,
 	}
 
 	if !verbose {
@@ -45,7 +45,7 @@ func (s *WorkspaceService) GetWorkspace(ctx context.Context, workspaceId string,
 	resultCh := make(chan provisioner.WorkspaceInfoResult, 1)
 
 	go func() {
-		workspaceInfo, err := s.provisioner.GetWorkspaceInfo(ctx, ws, targetConfig)
+		workspaceInfo, err := s.provisioner.GetWorkspaceInfo(ctx, &ws.Workspace, targetConfig)
 		resultCh <- provisioner.WorkspaceInfoResult{Info: workspaceInfo, Err: err}
 	}()
 

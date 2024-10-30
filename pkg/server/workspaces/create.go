@@ -42,7 +42,7 @@ func isValidWorkspaceName(name string) bool {
 	return true
 }
 
-func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWorkspaceDTO) (*workspace.Workspace, error) {
+func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWorkspaceDTO) (*workspace.WorkspaceViewDTO, error) {
 	_, err := s.workspaceStore.Find(req.Name)
 	if err == nil {
 		return s.handleCreateError(ctx, nil, ErrWorkspaceAlreadyExists)
@@ -160,9 +160,12 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 	return s.handleCreateError(ctx, w, err)
 }
 
-func (s *WorkspaceService) handleCreateError(ctx context.Context, w *workspace.Workspace, err error) (*workspace.Workspace, error) {
+func (s *WorkspaceService) handleCreateError(ctx context.Context, w *workspace.Workspace, err error) (*workspace.WorkspaceViewDTO, error) {
 	if !telemetry.TelemetryEnabled(ctx) {
-		return w, err
+		if w == nil {
+			return nil, err
+		}
+		return &workspace.WorkspaceViewDTO{Workspace: *w}, err
 	}
 
 	clientId := telemetry.ClientId(ctx)
@@ -178,7 +181,11 @@ func (s *WorkspaceService) handleCreateError(ctx context.Context, w *workspace.W
 		log.Trace(err)
 	}
 
-	return w, err
+	if w == nil {
+		return nil, err
+	}
+
+	return &workspace.WorkspaceViewDTO{Workspace: *w}, err
 }
 
 func (s *WorkspaceService) getCachedBuildForWorkspace(w *workspace.Workspace) (*buildconfig.CachedBuild, error) {

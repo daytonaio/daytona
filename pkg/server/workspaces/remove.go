@@ -17,24 +17,24 @@ import (
 func (s *WorkspaceService) RemoveWorkspace(ctx context.Context, workspaceId string) error {
 	ws, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
-		return s.handleRemoveError(ctx, ws, ErrWorkspaceNotFound)
+		return s.handleRemoveError(ctx, &ws.Workspace, ErrWorkspaceNotFound)
 	}
 
 	log.Infof("Destroying workspace %s", ws.Name)
 
 	target, err := s.targetStore.Find(ws.TargetId)
 	if err != nil {
-		return s.handleRemoveError(ctx, ws, err)
+		return s.handleRemoveError(ctx, &ws.Workspace, err)
 	}
 
 	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &target.TargetConfig})
 	if err != nil {
-		return s.handleRemoveError(ctx, ws, err)
+		return s.handleRemoveError(ctx, &ws.Workspace, err)
 	}
 
-	err = s.provisioner.DestroyWorkspace(ws, targetConfig)
+	err = s.provisioner.DestroyWorkspace(&ws.Workspace, targetConfig)
 	if err != nil {
-		return s.handleRemoveError(ctx, ws, err)
+		return s.handleRemoveError(ctx, &ws.Workspace, err)
 	}
 
 	err = s.apiKeyService.Revoke(fmt.Sprintf("ws-%s", ws.Id))
@@ -49,31 +49,31 @@ func (s *WorkspaceService) RemoveWorkspace(ctx context.Context, workspaceId stri
 		log.Error(err)
 	}
 
-	err = s.workspaceStore.Delete(ws)
+	err = s.workspaceStore.Delete(&ws.Workspace)
 
-	return s.handleRemoveError(ctx, ws, err)
+	return s.handleRemoveError(ctx, &ws.Workspace, err)
 }
 
 // ForceRemoveWorkspace ignores provider errors and makes sure the workspace is removed from storage.
 func (s *WorkspaceService) ForceRemoveWorkspace(ctx context.Context, workspaceId string) error {
 	ws, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
-		return s.handleRemoveError(ctx, ws, ErrWorkspaceNotFound)
+		return s.handleRemoveError(ctx, &ws.Workspace, ErrWorkspaceNotFound)
 	}
 
 	log.Infof("Destroying workspace %s", ws.Name)
 
 	target, err := s.targetStore.Find(ws.TargetId)
 	if err != nil {
-		return s.handleRemoveError(ctx, ws, err)
+		return s.handleRemoveError(ctx, &ws.Workspace, err)
 	}
 
 	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &target.TargetConfig})
 	if err != nil {
-		return s.handleRemoveError(ctx, ws, err)
+		return s.handleRemoveError(ctx, &ws.Workspace, err)
 	}
 
-	err = s.provisioner.DestroyWorkspace(ws, targetConfig)
+	err = s.provisioner.DestroyWorkspace(&ws.Workspace, targetConfig)
 	if err != nil {
 		log.Error(err)
 	}
@@ -90,9 +90,9 @@ func (s *WorkspaceService) ForceRemoveWorkspace(ctx context.Context, workspaceId
 		log.Error(err)
 	}
 
-	err = s.workspaceStore.Delete(ws)
+	err = s.workspaceStore.Delete(&ws.Workspace)
 
-	return s.handleRemoveError(ctx, ws, err)
+	return s.handleRemoveError(ctx, &ws.Workspace, err)
 }
 
 func (s *WorkspaceService) handleRemoveError(ctx context.Context, w *workspace.Workspace, err error) error {

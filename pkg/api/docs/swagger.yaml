@@ -715,39 +715,6 @@ definitions:
     required:
     - name
     type: object
-  Workspace:
-    properties:
-      buildConfig:
-        $ref: '#/definitions/BuildConfig'
-      envVars:
-        additionalProperties:
-          type: string
-        type: object
-      gitProviderConfigId:
-        type: string
-      id:
-        type: string
-      image:
-        type: string
-      name:
-        type: string
-      repository:
-        $ref: '#/definitions/GitRepository'
-      state:
-        $ref: '#/definitions/WorkspaceState'
-      targetId:
-        type: string
-      user:
-        type: string
-    required:
-    - envVars
-    - id
-    - image
-    - name
-    - repository
-    - targetId
-    - user
-    type: object
   WorkspaceConfig:
     properties:
       buildConfig:
@@ -804,6 +771,8 @@ definitions:
         $ref: '#/definitions/WorkspaceState'
       targetId:
         type: string
+      targetName:
+        type: string
       user:
         type: string
     required:
@@ -813,6 +782,7 @@ definitions:
     - name
     - repository
     - targetId
+    - targetName
     - user
     type: object
   WorkspaceInfo:
@@ -845,6 +815,42 @@ definitions:
     - gitStatus
     - updatedAt
     - uptime
+    type: object
+  WorkspaceViewDTO:
+    properties:
+      buildConfig:
+        $ref: '#/definitions/BuildConfig'
+      envVars:
+        additionalProperties:
+          type: string
+        type: object
+      gitProviderConfigId:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      repository:
+        $ref: '#/definitions/GitRepository'
+      state:
+        $ref: '#/definitions/WorkspaceState'
+      targetId:
+        type: string
+      targetName:
+        type: string
+      user:
+        type: string
+    required:
+    - envVars
+    - id
+    - image
+    - name
+    - repository
+    - targetId
+    - targetName
+    - user
     type: object
   apikey.ApiKeyType:
     enum:
@@ -1872,7 +1878,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Workspace'
+            $ref: '#/definitions/WorkspaceViewDTO'
       summary: Create a workspace
       tags:
       - workspace

@@ -22,7 +22,7 @@ import (
 )
 
 type IWorkspaceService interface {
-	CreateWorkspace(ctx context.Context, req dto.CreateWorkspaceDTO) (*workspace.Workspace, error)
+	CreateWorkspace(ctx context.Context, req dto.CreateWorkspaceDTO) (*workspace.WorkspaceViewDTO, error)
 	GetWorkspace(ctx context.Context, workspaceId string, verbose bool) (*dto.WorkspaceDTO, error)
 	ListWorkspaces(ctx context.Context, verbose bool) ([]dto.WorkspaceDTO, error)
 	StartWorkspace(ctx context.Context, workspaceId string) error
@@ -31,7 +31,7 @@ type IWorkspaceService interface {
 	ForceRemoveWorkspace(ctx context.Context, workspaceId string) error
 
 	GetWorkspaceLogReader(workspaceId string) (io.Reader, error)
-	SetWorkspaceState(workspaceId string, state *workspace.WorkspaceState) (*workspace.Workspace, error)
+	SetWorkspaceState(workspaceId string, state *workspace.WorkspaceState) (*workspace.WorkspaceViewDTO, error)
 }
 
 type targetStore interface {
@@ -101,14 +101,14 @@ type WorkspaceService struct {
 	telemetryService         telemetry.TelemetryService
 }
 
-func (s *WorkspaceService) SetWorkspaceState(workspaceId string, state *workspace.WorkspaceState) (*workspace.Workspace, error) {
+func (s *WorkspaceService) SetWorkspaceState(workspaceId string, state *workspace.WorkspaceState) (*workspace.WorkspaceViewDTO, error) {
 	ws, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
 		return nil, ErrWorkspaceNotFound
 	}
 
 	ws.State = state
-	return ws, s.workspaceStore.Save(ws)
+	return ws, s.workspaceStore.Save(&ws.Workspace)
 }
 
 func (s *WorkspaceService) GetWorkspaceLogReader(workspaceId string) (io.Reader, error) {

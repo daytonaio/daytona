@@ -16,11 +16,11 @@ import (
 	"fmt"
 )
 
-// checks if the Workspace type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &Workspace{}
+// checks if the WorkspaceViewDTO type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &WorkspaceViewDTO{}
 
-// Workspace struct for Workspace
-type Workspace struct {
+// WorkspaceViewDTO struct for WorkspaceViewDTO
+type WorkspaceViewDTO struct {
 	BuildConfig         *BuildConfig      `json:"buildConfig,omitempty"`
 	EnvVars             map[string]string `json:"envVars"`
 	GitProviderConfigId *string           `json:"gitProviderConfigId,omitempty"`
@@ -30,37 +30,39 @@ type Workspace struct {
 	Repository          GitRepository     `json:"repository"`
 	State               *WorkspaceState   `json:"state,omitempty"`
 	TargetId            string            `json:"targetId"`
+	TargetName          string            `json:"targetName"`
 	User                string            `json:"user"`
 }
 
-type _Workspace Workspace
+type _WorkspaceViewDTO WorkspaceViewDTO
 
-// NewWorkspace instantiates a new Workspace object
+// NewWorkspaceViewDTO instantiates a new WorkspaceViewDTO object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewWorkspace(envVars map[string]string, id string, image string, name string, repository GitRepository, targetId string, user string) *Workspace {
-	this := Workspace{}
+func NewWorkspaceViewDTO(envVars map[string]string, id string, image string, name string, repository GitRepository, targetId string, targetName string, user string) *WorkspaceViewDTO {
+	this := WorkspaceViewDTO{}
 	this.EnvVars = envVars
 	this.Id = id
 	this.Image = image
 	this.Name = name
 	this.Repository = repository
 	this.TargetId = targetId
+	this.TargetName = targetName
 	this.User = user
 	return &this
 }
 
-// NewWorkspaceWithDefaults instantiates a new Workspace object
+// NewWorkspaceViewDTOWithDefaults instantiates a new WorkspaceViewDTO object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewWorkspaceWithDefaults() *Workspace {
-	this := Workspace{}
+func NewWorkspaceViewDTOWithDefaults() *WorkspaceViewDTO {
+	this := WorkspaceViewDTO{}
 	return &this
 }
 
 // GetBuildConfig returns the BuildConfig field value if set, zero value otherwise.
-func (o *Workspace) GetBuildConfig() BuildConfig {
+func (o *WorkspaceViewDTO) GetBuildConfig() BuildConfig {
 	if o == nil || IsNil(o.BuildConfig) {
 		var ret BuildConfig
 		return ret
@@ -70,7 +72,7 @@ func (o *Workspace) GetBuildConfig() BuildConfig {
 
 // GetBuildConfigOk returns a tuple with the BuildConfig field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetBuildConfigOk() (*BuildConfig, bool) {
+func (o *WorkspaceViewDTO) GetBuildConfigOk() (*BuildConfig, bool) {
 	if o == nil || IsNil(o.BuildConfig) {
 		return nil, false
 	}
@@ -78,7 +80,7 @@ func (o *Workspace) GetBuildConfigOk() (*BuildConfig, bool) {
 }
 
 // HasBuildConfig returns a boolean if a field has been set.
-func (o *Workspace) HasBuildConfig() bool {
+func (o *WorkspaceViewDTO) HasBuildConfig() bool {
 	if o != nil && !IsNil(o.BuildConfig) {
 		return true
 	}
@@ -87,12 +89,12 @@ func (o *Workspace) HasBuildConfig() bool {
 }
 
 // SetBuildConfig gets a reference to the given BuildConfig and assigns it to the BuildConfig field.
-func (o *Workspace) SetBuildConfig(v BuildConfig) {
+func (o *WorkspaceViewDTO) SetBuildConfig(v BuildConfig) {
 	o.BuildConfig = &v
 }
 
 // GetEnvVars returns the EnvVars field value
-func (o *Workspace) GetEnvVars() map[string]string {
+func (o *WorkspaceViewDTO) GetEnvVars() map[string]string {
 	if o == nil {
 		var ret map[string]string
 		return ret
@@ -103,7 +105,7 @@ func (o *Workspace) GetEnvVars() map[string]string {
 
 // GetEnvVarsOk returns a tuple with the EnvVars field value
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetEnvVarsOk() (*map[string]string, bool) {
+func (o *WorkspaceViewDTO) GetEnvVarsOk() (*map[string]string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -111,12 +113,12 @@ func (o *Workspace) GetEnvVarsOk() (*map[string]string, bool) {
 }
 
 // SetEnvVars sets field value
-func (o *Workspace) SetEnvVars(v map[string]string) {
+func (o *WorkspaceViewDTO) SetEnvVars(v map[string]string) {
 	o.EnvVars = v
 }
 
 // GetGitProviderConfigId returns the GitProviderConfigId field value if set, zero value otherwise.
-func (o *Workspace) GetGitProviderConfigId() string {
+func (o *WorkspaceViewDTO) GetGitProviderConfigId() string {
 	if o == nil || IsNil(o.GitProviderConfigId) {
 		var ret string
 		return ret
@@ -126,7 +128,7 @@ func (o *Workspace) GetGitProviderConfigId() string {
 
 // GetGitProviderConfigIdOk returns a tuple with the GitProviderConfigId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetGitProviderConfigIdOk() (*string, bool) {
+func (o *WorkspaceViewDTO) GetGitProviderConfigIdOk() (*string, bool) {
 	if o == nil || IsNil(o.GitProviderConfigId) {
 		return nil, false
 	}
@@ -134,7 +136,7 @@ func (o *Workspace) GetGitProviderConfigIdOk() (*string, bool) {
 }
 
 // HasGitProviderConfigId returns a boolean if a field has been set.
-func (o *Workspace) HasGitProviderConfigId() bool {
+func (o *WorkspaceViewDTO) HasGitProviderConfigId() bool {
 	if o != nil && !IsNil(o.GitProviderConfigId) {
 		return true
 	}
@@ -143,12 +145,12 @@ func (o *Workspace) HasGitProviderConfigId() bool {
 }
 
 // SetGitProviderConfigId gets a reference to the given string and assigns it to the GitProviderConfigId field.
-func (o *Workspace) SetGitProviderConfigId(v string) {
+func (o *WorkspaceViewDTO) SetGitProviderConfigId(v string) {
 	o.GitProviderConfigId = &v
 }
 
 // GetId returns the Id field value
-func (o *Workspace) GetId() string {
+func (o *WorkspaceViewDTO) GetId() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -159,7 +161,7 @@ func (o *Workspace) GetId() string {
 
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetIdOk() (*string, bool) {
+func (o *WorkspaceViewDTO) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -167,12 +169,12 @@ func (o *Workspace) GetIdOk() (*string, bool) {
 }
 
 // SetId sets field value
-func (o *Workspace) SetId(v string) {
+func (o *WorkspaceViewDTO) SetId(v string) {
 	o.Id = v
 }
 
 // GetImage returns the Image field value
-func (o *Workspace) GetImage() string {
+func (o *WorkspaceViewDTO) GetImage() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -183,7 +185,7 @@ func (o *Workspace) GetImage() string {
 
 // GetImageOk returns a tuple with the Image field value
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetImageOk() (*string, bool) {
+func (o *WorkspaceViewDTO) GetImageOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -191,12 +193,12 @@ func (o *Workspace) GetImageOk() (*string, bool) {
 }
 
 // SetImage sets field value
-func (o *Workspace) SetImage(v string) {
+func (o *WorkspaceViewDTO) SetImage(v string) {
 	o.Image = v
 }
 
 // GetName returns the Name field value
-func (o *Workspace) GetName() string {
+func (o *WorkspaceViewDTO) GetName() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -207,7 +209,7 @@ func (o *Workspace) GetName() string {
 
 // GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetNameOk() (*string, bool) {
+func (o *WorkspaceViewDTO) GetNameOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -215,12 +217,12 @@ func (o *Workspace) GetNameOk() (*string, bool) {
 }
 
 // SetName sets field value
-func (o *Workspace) SetName(v string) {
+func (o *WorkspaceViewDTO) SetName(v string) {
 	o.Name = v
 }
 
 // GetRepository returns the Repository field value
-func (o *Workspace) GetRepository() GitRepository {
+func (o *WorkspaceViewDTO) GetRepository() GitRepository {
 	if o == nil {
 		var ret GitRepository
 		return ret
@@ -231,7 +233,7 @@ func (o *Workspace) GetRepository() GitRepository {
 
 // GetRepositoryOk returns a tuple with the Repository field value
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetRepositoryOk() (*GitRepository, bool) {
+func (o *WorkspaceViewDTO) GetRepositoryOk() (*GitRepository, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -239,12 +241,12 @@ func (o *Workspace) GetRepositoryOk() (*GitRepository, bool) {
 }
 
 // SetRepository sets field value
-func (o *Workspace) SetRepository(v GitRepository) {
+func (o *WorkspaceViewDTO) SetRepository(v GitRepository) {
 	o.Repository = v
 }
 
 // GetState returns the State field value if set, zero value otherwise.
-func (o *Workspace) GetState() WorkspaceState {
+func (o *WorkspaceViewDTO) GetState() WorkspaceState {
 	if o == nil || IsNil(o.State) {
 		var ret WorkspaceState
 		return ret
@@ -254,7 +256,7 @@ func (o *Workspace) GetState() WorkspaceState {
 
 // GetStateOk returns a tuple with the State field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetStateOk() (*WorkspaceState, bool) {
+func (o *WorkspaceViewDTO) GetStateOk() (*WorkspaceState, bool) {
 	if o == nil || IsNil(o.State) {
 		return nil, false
 	}
@@ -262,7 +264,7 @@ func (o *Workspace) GetStateOk() (*WorkspaceState, bool) {
 }
 
 // HasState returns a boolean if a field has been set.
-func (o *Workspace) HasState() bool {
+func (o *WorkspaceViewDTO) HasState() bool {
 	if o != nil && !IsNil(o.State) {
 		return true
 	}
@@ -271,12 +273,12 @@ func (o *Workspace) HasState() bool {
 }
 
 // SetState gets a reference to the given WorkspaceState and assigns it to the State field.
-func (o *Workspace) SetState(v WorkspaceState) {
+func (o *WorkspaceViewDTO) SetState(v WorkspaceState) {
 	o.State = &v
 }
 
 // GetTargetId returns the TargetId field value
-func (o *Workspace) GetTargetId() string {
+func (o *WorkspaceViewDTO) GetTargetId() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -287,7 +289,7 @@ func (o *Workspace) GetTargetId() string {
 
 // GetTargetIdOk returns a tuple with the TargetId field value
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetTargetIdOk() (*string, bool) {
+func (o *WorkspaceViewDTO) GetTargetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -295,12 +297,36 @@ func (o *Workspace) GetTargetIdOk() (*string, bool) {
 }
 
 // SetTargetId sets field value
-func (o *Workspace) SetTargetId(v string) {
+func (o *WorkspaceViewDTO) SetTargetId(v string) {
 	o.TargetId = v
 }
 
+// GetTargetName returns the TargetName field value
+func (o *WorkspaceViewDTO) GetTargetName() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.TargetName
+}
+
+// GetTargetNameOk returns a tuple with the TargetName field value
+// and a boolean to check if the value has been set.
+func (o *WorkspaceViewDTO) GetTargetNameOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.TargetName, true
+}
+
+// SetTargetName sets field value
+func (o *WorkspaceViewDTO) SetTargetName(v string) {
+	o.TargetName = v
+}
+
 // GetUser returns the User field value
-func (o *Workspace) GetUser() string {
+func (o *WorkspaceViewDTO) GetUser() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -311,7 +337,7 @@ func (o *Workspace) GetUser() string {
 
 // GetUserOk returns a tuple with the User field value
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetUserOk() (*string, bool) {
+func (o *WorkspaceViewDTO) GetUserOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -319,11 +345,11 @@ func (o *Workspace) GetUserOk() (*string, bool) {
 }
 
 // SetUser sets field value
-func (o *Workspace) SetUser(v string) {
+func (o *WorkspaceViewDTO) SetUser(v string) {
 	o.User = v
 }
 
-func (o Workspace) MarshalJSON() ([]byte, error) {
+func (o WorkspaceViewDTO) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -331,7 +357,7 @@ func (o Workspace) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o Workspace) ToMap() (map[string]interface{}, error) {
+func (o WorkspaceViewDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.BuildConfig) {
 		toSerialize["buildConfig"] = o.BuildConfig
@@ -348,11 +374,12 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 		toSerialize["state"] = o.State
 	}
 	toSerialize["targetId"] = o.TargetId
+	toSerialize["targetName"] = o.TargetName
 	toSerialize["user"] = o.User
 	return toSerialize, nil
 }
 
-func (o *Workspace) UnmarshalJSON(data []byte) (err error) {
+func (o *WorkspaceViewDTO) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -363,6 +390,7 @@ func (o *Workspace) UnmarshalJSON(data []byte) (err error) {
 		"name",
 		"repository",
 		"targetId",
+		"targetName",
 		"user",
 	}
 
@@ -380,53 +408,53 @@ func (o *Workspace) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varWorkspace := _Workspace{}
+	varWorkspaceViewDTO := _WorkspaceViewDTO{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varWorkspace)
+	err = decoder.Decode(&varWorkspaceViewDTO)
 
 	if err != nil {
 		return err
 	}
 
-	*o = Workspace(varWorkspace)
+	*o = WorkspaceViewDTO(varWorkspaceViewDTO)
 
 	return err
 }
 
-type NullableWorkspace struct {
-	value *Workspace
+type NullableWorkspaceViewDTO struct {
+	value *WorkspaceViewDTO
 	isSet bool
 }
 
-func (v NullableWorkspace) Get() *Workspace {
+func (v NullableWorkspaceViewDTO) Get() *WorkspaceViewDTO {
 	return v.value
 }
 
-func (v *NullableWorkspace) Set(val *Workspace) {
+func (v *NullableWorkspaceViewDTO) Set(val *WorkspaceViewDTO) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableWorkspace) IsSet() bool {
+func (v NullableWorkspaceViewDTO) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableWorkspace) Unset() {
+func (v *NullableWorkspaceViewDTO) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableWorkspace(val *Workspace) *NullableWorkspace {
-	return &NullableWorkspace{value: val, isSet: true}
+func NewNullableWorkspaceViewDTO(val *WorkspaceViewDTO) *NullableWorkspaceViewDTO {
+	return &NullableWorkspaceViewDTO{value: val, isSet: true}
 }
 
-func (v NullableWorkspace) MarshalJSON() ([]byte, error) {
+func (v NullableWorkspaceViewDTO) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableWorkspace) UnmarshalJSON(src []byte) error {
+func (v *NullableWorkspaceViewDTO) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
