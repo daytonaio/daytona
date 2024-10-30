@@ -174,20 +174,15 @@ func renderProjectDetails(project apiclient.CreateProjectDTO, buildChoice views_
 }
 
 func projectDetailOutput(projectDetailKey ProjectDetail, projectDetailValue string) string {
-	// Special handling for environment variables
 	if projectDetailKey == EnvVars {
 		envVars := strings.Split(projectDetailValue, "; ")
 		if len(envVars) == 0 {
 			return ""
 		}
-
-		output := fmt.Sprintf("\t%s\n", lipgloss.NewStyle().Foreground(views.Green).Render(string(projectDetailKey)))
-
-		for _, env := range envVars {
-			output += fmt.Sprintf("\t\t%s\n", env)
-		}
-
-		return strings.TrimSuffix(output, "\n")
+		output := fmt.Sprintf("\t%s\n\t\t%s",
+			lipgloss.NewStyle().Foreground(views.Green).Render(string(projectDetailKey)),
+			strings.Join(envVars, "\n\t\t"))
+		return output
 	}
 	return fmt.Sprintf("\t%s%-*s%s",
 		lipgloss.NewStyle().Foreground(views.Green).Render(string(projectDetailKey)),
