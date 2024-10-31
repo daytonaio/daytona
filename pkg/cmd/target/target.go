@@ -22,4 +22,6 @@ func init() {
 	TargetCmd.AddCommand(startCmd)
 	TargetCmd.AddCommand(stopCmd)
 	TargetCmd.AddCommand(listCmd)
+	TargetCmd.AddCommand(targetSetCmd)
+	TargetCmd.AddCommand(setDefaultCmd)
 }

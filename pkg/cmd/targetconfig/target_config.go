@@ -19,5 +19,4 @@ func init() {
 	TargetConfigCmd.AddCommand(listCmd)
 	TargetConfigCmd.AddCommand(TargetConfigSetCmd)
 	TargetConfigCmd.AddCommand(removeCmd)
-	TargetConfigCmd.AddCommand(setDefaultCmd)
 }

@@ -9,7 +9,7 @@ import (
 	"io"
 
 	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/provider"
+	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	log "github.com/sirupsen/logrus"
@@ -21,12 +21,7 @@ func (s *WorkspaceService) StartWorkspace(ctx context.Context, workspaceId strin
 		return s.handleStartError(ctx, ws, ErrWorkspaceNotFound)
 	}
 
-	target, err := s.targetStore.Find(ws.TargetId)
-	if err != nil {
-		return s.handleStartError(ctx, ws, err)
-	}
-
-	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &target.TargetConfig})
+	target, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &ws.TargetId})
 	if err != nil {
 		return s.handleStartError(ctx, ws, err)
 	}
@@ -42,7 +37,7 @@ func (s *WorkspaceService) StartWorkspace(ctx context.Context, workspaceId strin
 		ClientId:      telemetry.ClientId(ctx),
 	}, telemetry.TelemetryEnabled(ctx))
 
-	err = s.startWorkspace(&workspaceToStart, targetConfig, workspaceLogger)
+	err = s.startWorkspace(&workspaceToStart, target, workspaceLogger)
 	if err != nil {
 		return s.handleStartError(ctx, ws, err)
 	}
@@ -50,10 +45,10 @@ func (s *WorkspaceService) StartWorkspace(ctx context.Context, workspaceId strin
 	return s.handleStartError(ctx, ws, err)
 }
 
-func (s *WorkspaceService) startWorkspace(w *workspace.Workspace, targetConfig *provider.TargetConfig, logger io.Writer) error {
+func (s *WorkspaceService) startWorkspace(w *workspace.Workspace, target *target.Target, logger io.Writer) error {
 	logger.Write([]byte(fmt.Sprintf("Starting workspace %s\n", w.Name)))
 
-	err := s.provisioner.StartWorkspace(w, targetConfig)
+	err := s.provisioner.StartWorkspace(w, target)
 	if err != nil {
 		return err
 	}

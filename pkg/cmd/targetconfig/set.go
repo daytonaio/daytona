@@ -153,7 +153,7 @@ var TargetConfigSetCmd = &cobra.Command{
 		targetConfigData := apiclient.CreateTargetConfigDTO{
 			Name:    selectedTargetConfig.Name,
 			Options: selectedTargetConfig.Options,
-			ProviderInfo: apiclient.ProviderProviderInfo{
+			ProviderInfo: apiclient.TargetProviderInfo{
 				Name:    selectedProvider.Name,
 				Version: selectedProvider.Version,
 			},
@@ -164,7 +164,7 @@ var TargetConfigSetCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		views.RenderInfoMessage("Target config set successfully and will be used by default")
+		views.RenderInfoMessage("Target config set successfully")
 		return nil
 	},
 }

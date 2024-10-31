@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/provider"
+	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	log "github.com/sirupsen/logrus"
@@ -22,17 +22,12 @@ func (s *WorkspaceService) RemoveWorkspace(ctx context.Context, workspaceId stri
 
 	log.Infof("Destroying workspace %s", ws.Name)
 
-	target, err := s.targetStore.Find(ws.TargetId)
+	target, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &ws.TargetId})
 	if err != nil {
 		return s.handleRemoveError(ctx, ws, err)
 	}
 
-	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &target.TargetConfig})
-	if err != nil {
-		return s.handleRemoveError(ctx, ws, err)
-	}
-
-	err = s.provisioner.DestroyWorkspace(ws, targetConfig)
+	err = s.provisioner.DestroyWorkspace(ws, target)
 	if err != nil {
 		return s.handleRemoveError(ctx, ws, err)
 	}
@@ -63,17 +58,12 @@ func (s *WorkspaceService) ForceRemoveWorkspace(ctx context.Context, workspaceId
 
 	log.Infof("Destroying workspace %s", ws.Name)
 
-	target, err := s.targetStore.Find(ws.TargetId)
+	target, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &ws.TargetId})
 	if err != nil {
 		return s.handleRemoveError(ctx, ws, err)
 	}
 
-	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &target.TargetConfig})
-	if err != nil {
-		return s.handleRemoveError(ctx, ws, err)
-	}
-
-	err = s.provisioner.DestroyWorkspace(ws, targetConfig)
+	err = s.provisioner.DestroyWorkspace(ws, target)
 	if err != nil {
 		log.Error(err)
 	}

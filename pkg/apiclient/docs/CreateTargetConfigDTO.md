@@ -6,13 +6,13 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Name** | **string** |  | 
 **Options** | **string** |  | 
-**ProviderInfo** | [**ProviderProviderInfo**](ProviderProviderInfo.md) |  | 
+**ProviderInfo** | [**TargetProviderInfo**](TargetProviderInfo.md) |  | 
 
 ## Methods
 
 ### NewCreateTargetConfigDTO
 
-`func NewCreateTargetConfigDTO(name string, options string, providerInfo ProviderProviderInfo, ) *CreateTargetConfigDTO`
+`func NewCreateTargetConfigDTO(name string, options string, providerInfo TargetProviderInfo, ) *CreateTargetConfigDTO`
 
 NewCreateTargetConfigDTO instantiates a new CreateTargetConfigDTO object
 This constructor will assign default values to properties that have it defined,
@@ -69,20 +69,20 @@ SetOptions sets Options field to given value.
 
 ### GetProviderInfo
 
-`func (o *CreateTargetConfigDTO) GetProviderInfo() ProviderProviderInfo`
+`func (o *CreateTargetConfigDTO) GetProviderInfo() TargetProviderInfo`
 
 GetProviderInfo returns the ProviderInfo field if non-nil, zero value otherwise.
 
 ### GetProviderInfoOk
 
-`func (o *CreateTargetConfigDTO) GetProviderInfoOk() (*ProviderProviderInfo, bool)`
+`func (o *CreateTargetConfigDTO) GetProviderInfoOk() (*TargetProviderInfo, bool)`
 
 GetProviderInfoOk returns a tuple with the ProviderInfo field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetProviderInfo
 
-`func (o *CreateTargetConfigDTO) SetProviderInfo(v ProviderProviderInfo)`
+`func (o *CreateTargetConfigDTO) SetProviderInfo(v TargetProviderInfo)`
 
 SetProviderInfo sets ProviderInfo field to given value.
 

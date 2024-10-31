@@ -10,14 +10,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
+	"github.com/daytonaio/daytona/pkg/target"
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *TargetService) ListTargets(ctx context.Context, verbose bool) ([]dto.TargetDTO, error) {
-	targets, err := s.targetStore.List()
+func (s *TargetService) ListTargets(ctx context.Context, filter *target.TargetFilter, verbose bool) ([]dto.TargetDTO, error) {
+	targets, err := s.targetStore.List(filter)
 	if err != nil {
 		return nil, err
 	}
@@ -35,19 +35,13 @@ func (s *TargetService) ListTargets(ctx context.Context, verbose bool) ([]dto.Ta
 		go func(i int) {
 			defer wg.Done()
 
-			targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &t.TargetConfig})
-			if err != nil {
-				log.Error(fmt.Errorf("failed to get target config for %s", t.TargetConfig))
-				return
-			}
-
 			ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 			defer cancel()
 
 			resultCh := make(chan provisioner.TargetInfoResult, 1)
 
 			go func() {
-				targetInfo, err := s.provisioner.GetTargetInfo(ctx, t, targetConfig)
+				targetInfo, err := s.provisioner.GetTargetInfo(ctx, t)
 				resultCh <- provisioner.TargetInfoResult{Info: targetInfo, Err: err}
 			}()
 

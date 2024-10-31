@@ -19,7 +19,7 @@ var verbose bool
 
 var ListCmd = &cobra.Command{
 	Use:     "list",
-	Short:   "List targets",
+	Short:   "List workspaces",
 	Args:    cobra.ExactArgs(0),
 	Aliases: []string{"ls"},
 	GroupID: util.TARGET_GROUP,

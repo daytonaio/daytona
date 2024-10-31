@@ -16,6 +16,8 @@ import (
 	os_util "github.com/daytonaio/daytona/pkg/os"
 	. "github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
+	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/target/config"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 	"github.com/shirou/gopsutil/process"
@@ -142,6 +144,11 @@ func (m *ProviderManager) RegisterProvider(pluginPath string) error {
 		return err
 	}
 
+	providerInfo, err := (*p).GetInfo()
+	if err != nil {
+		return err
+	}
+
 	existingTargetConfigs, err := m.targetConfigService.Map()
 	if err != nil {
 		return errors.New("failed to get target configs: " + err.Error())
@@ -159,7 +166,15 @@ func (m *ProviderManager) RegisterProvider(pluginPath string) error {
 			continue
 		}
 
-		err := m.targetConfigService.Save(&targetConfig)
+		err := m.targetConfigService.Save(&config.TargetConfig{
+			Name: targetConfig.Name,
+			ProviderInfo: target.ProviderInfo{
+				Name:    providerInfo.Name,
+				Version: providerInfo.Version,
+				Label:   providerInfo.Label,
+			},
+			Options: targetConfig.Options,
+		})
 		if err != nil {
 			log.Errorf("Failed to set target config %s: %s", targetConfig.Name, err)
 		} else {

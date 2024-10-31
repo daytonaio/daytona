@@ -8,7 +8,6 @@ import (
 	"io"
 
 	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
 	"github.com/daytonaio/daytona/pkg/server/builds"
@@ -17,6 +16,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/workspaceconfig"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/target/config"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
@@ -35,11 +35,11 @@ type IWorkspaceService interface {
 }
 
 type targetStore interface {
-	Find(idOrName string) (*target.Target, error)
+	Find(filter *target.TargetFilter) (*target.Target, error)
 }
 
 type targetConfigStore interface {
-	Find(filter *provider.TargetConfigFilter) (*provider.TargetConfig, error)
+	Find(filter *config.TargetConfigFilter) (*config.TargetConfig, error)
 }
 
 type WorkspaceServiceConfig struct {

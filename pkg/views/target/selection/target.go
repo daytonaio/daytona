@@ -6,7 +6,6 @@ package selection
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -15,20 +14,27 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
-func generateTargetList(targets []apiclient.TargetDTO, isMultipleSelect bool, action string) []list.Item {
+var NewTargetIdentifier = "<NEW_TARGET>"
 
+func generateTargetList(targets []apiclient.TargetDTO, isMultipleSelect bool, action string) []list.Item {
 	// Initialize an empty list of items.
 	items := []list.Item{}
 
 	// Populate items with titles and descriptions from targets.
 	for _, target := range targets {
-		var workspacesInfo []string
+		var providerName string
+
+		if target.ProviderInfo.Label != nil {
+			providerName = *target.ProviderInfo.Label
+		} else {
+			providerName = target.ProviderInfo.Name
+		}
 
 		newItem := item[apiclient.TargetDTO]{
 			title:          target.Name,
 			id:             target.Id,
-			desc:           strings.Join(workspacesInfo, ", "),
-			targetConfig:   target.TargetConfig,
+			desc:           providerName,
+			target:         &target,
 			choiceProperty: target,
 		}
 
@@ -43,9 +49,16 @@ func generateTargetList(targets []apiclient.TargetDTO, isMultipleSelect bool, ac
 	return items
 }
 
-func getTargetProgramEssentials(modelTitle string, actionVerb string, targets []apiclient.TargetDTO, footerText string, isMultipleSelect bool) tea.Model {
+func getTargetProgramEssentials(modelTitle string, withNewTarget bool, actionVerb string, targets []apiclient.TargetDTO, footerText string, isMultipleSelect bool) tea.Model {
 
 	items := generateTargetList(targets, isMultipleSelect, actionVerb)
+
+	if withNewTarget {
+		newItem := item[apiclient.TargetDTO]{title: "+ Create a new target", desc: "", choiceProperty: apiclient.TargetDTO{
+			Name: NewTargetIdentifier,
+		}}
+		items = append(items, newItem)
+	}
 
 	d := ItemDelegate[apiclient.TargetDTO]{}
 
@@ -73,8 +86,8 @@ func getTargetProgramEssentials(modelTitle string, actionVerb string, targets []
 	return p
 }
 
-func selectTargetPrompt(targets []apiclient.TargetDTO, actionVerb string, choiceChan chan<- *apiclient.TargetDTO) {
-	p := getTargetProgramEssentials("Select a Target To ", actionVerb, targets, "", false)
+func selectTargetPrompt(targets []apiclient.TargetDTO, withNewTarget bool, actionVerb string, choiceChan chan<- *apiclient.TargetDTO) {
+	p := getTargetProgramEssentials("Select a Target To ", withNewTarget, actionVerb, targets, "", false)
 	if m, ok := p.(model[apiclient.TargetDTO]); ok && m.choice != nil {
 		choiceChan <- m.choice
 	} else {
@@ -82,17 +95,17 @@ func selectTargetPrompt(targets []apiclient.TargetDTO, actionVerb string, choice
 	}
 }
 
-func GetTargetFromPrompt(targets []apiclient.TargetDTO, actionVerb string) *apiclient.TargetDTO {
+func GetTargetFromPrompt(targets []apiclient.TargetDTO, withNewTarget bool, actionVerb string) *apiclient.TargetDTO {
 	choiceChan := make(chan *apiclient.TargetDTO)
 
-	go selectTargetPrompt(targets, actionVerb, choiceChan)
+	go selectTargetPrompt(targets, withNewTarget, actionVerb, choiceChan)
 
 	return <-choiceChan
 }
 
 func selectTargetsFromPrompt(targets []apiclient.TargetDTO, actionVerb string, choiceChan chan<- []*apiclient.TargetDTO) {
-	footerText := lipgloss.NewStyle().Bold(true).PaddingLeft(2).Render(fmt.Sprintf("\n\nPress 'x' to mark target.\nPress 'enter' to %s the current/marked targets.", actionVerb))
-	p := getTargetProgramEssentials("Select Targets To ", actionVerb, targets, footerText, true)
+	footerText := lipgloss.NewStyle().Bold(true).PaddingLeft(2).Render(fmt.Sprintf("\n\nPress 'x' to mark a target.\nPress 'enter' to %s the current/marked targets.", actionVerb))
+	p := getTargetProgramEssentials("Select Targets To ", false, actionVerb, targets, footerText, true)
 
 	m, ok := p.(model[apiclient.TargetDTO])
 	if ok && m.choices != nil {

@@ -7,18 +7,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/pkg/apiclient"
-	target_cmd "github.com/daytonaio/daytona/pkg/cmd/target"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/targetconfig"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
-
-	log "github.com/sirupsen/logrus"
 )
 
 var yesFlag bool
@@ -72,60 +67,62 @@ var removeCmd = &cobra.Command{
 			selectedConfigName = args[0]
 		}
 
-		if yesFlag {
-			fmt.Println("Deleting all targets.")
-			err := RemoveTargetConfigTargets(ctx, apiClient, selectedConfigName)
+		// TODO: consider removing
 
-			if err != nil {
-				return err
-			}
-		} else {
-			var configTargetCount int
+		// if yesFlag {
+		// 	fmt.Println("Deleting all targets.")
+		// 	err := RemoveTargetConfigTargets(ctx, apiClient, selectedConfigName)
 
-			targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
-			if err != nil {
-				return apiclient_util.HandleErrorResponse(res, err)
-			}
+		// 	if err != nil {
+		// 		return err
+		// 	}
+		// } else {
+		// 	var configTargetCount int
 
-			for _, target := range targetList {
-				if target.TargetConfig == selectedConfigName {
-					configTargetCount++
-				}
-			}
+		// 	targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
+		// 	if err != nil {
+		// 		return apiclient_util.HandleErrorResponse(res, err)
+		// 	}
 
-			if configTargetCount > 0 {
-				title := fmt.Sprintf("Delete %d targets within %s?", configTargetCount, selectedConfigName)
-				description := "You might not be able to easily remove these targets later."
+		// 	for _, target := range targetList {
+		// 		if target.TargetConfig == selectedConfigName {
+		// 			configTargetCount++
+		// 		}
+		// 	}
 
-				if configTargetCount == 1 {
-					title = fmt.Sprintf("Delete 1 target within %s?", selectedConfigName)
-					description = "You might not be able to easily remove this target later."
-				}
+		// 	if configTargetCount > 0 {
+		// 		title := fmt.Sprintf("Delete %d targets within %s?", configTargetCount, selectedConfigName)
+		// 		description := "You might not be able to easily remove these targets later."
 
-				form := huh.NewForm(
-					huh.NewGroup(
-						huh.NewConfirm().
-							Title(title).
-							Description(description).
-							Value(&yesFlag),
-					),
-				).WithTheme(views.GetCustomTheme())
+		// 		if configTargetCount == 1 {
+		// 			title = fmt.Sprintf("Delete 1 target within %s?", selectedConfigName)
+		// 			description = "You might not be able to easily remove this target later."
+		// 		}
 
-				err := form.Run()
-				if err != nil {
-					return err
-				}
+		// 		form := huh.NewForm(
+		// 			huh.NewGroup(
+		// 				huh.NewConfirm().
+		// 					Title(title).
+		// 					Description(description).
+		// 					Value(&yesFlag),
+		// 			),
+		// 		).WithTheme(views.GetCustomTheme())
 
-				if yesFlag {
-					err := RemoveTargetConfigTargets(ctx, apiClient, selectedConfigName)
-					if err != nil {
-						return err
-					}
-				} else {
-					fmt.Println("Proceeding with target config removal without deleting targets.")
-				}
-			}
-		}
+		// 		err := form.Run()
+		// 		if err != nil {
+		// 			return err
+		// 		}
+
+		// 		if yesFlag {
+		// 			err := RemoveTargetConfigTargets(ctx, apiClient, selectedConfigName)
+		// 			if err != nil {
+		// 				return err
+		// 			}
+		// 		} else {
+		// 			fmt.Println("Proceeding with target config removal without deleting targets.")
+		// 		}
+		// 	}
+		// }
 
 		res, err := apiClient.TargetConfigAPI.RemoveTargetConfig(ctx, selectedConfigName).Execute()
 		if err != nil {
@@ -141,24 +138,24 @@ func init() {
 	removeCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Confirm deletion of all targets without prompt")
 }
 
-func RemoveTargetConfigTargets(ctx context.Context, client *apiclient.APIClient, targetConfig string) error {
-	targetList, res, err := client.TargetAPI.ListTargets(ctx).Execute()
-	if err != nil {
-		return apiclient_util.HandleErrorResponse(res, err)
-	}
+// func RemoveTargetConfigTargets(ctx context.Context, client *apiclient.APIClient, targetConfig string) error {
+// 	targetList, res, err := client.TargetAPI.ListTargets(ctx).Execute()
+// 	if err != nil {
+// 		return apiclient_util.HandleErrorResponse(res, err)
+// 	}
 
-	for _, target := range targetList {
-		if target.TargetConfig != targetConfig {
-			continue
-		}
-		err := target_cmd.RemoveTarget(ctx, client, &target, false)
-		if err != nil {
-			log.Errorf("Failed to delete target %s: %v", target.Name, err)
-			continue
-		}
+// 	for _, target := range targetList {
+// 		if target.TargetConfig != targetConfig {
+// 			continue
+// 		}
+// 		err := target_cmd.RemoveTarget(ctx, client, &target, false)
+// 		if err != nil {
+// 			log.Errorf("Failed to delete target %s: %v", target.Name, err)
+// 			continue
+// 		}
 
-		views.RenderInfoMessage(fmt.Sprintf("- Target '%s' successfully deleted", target.Name))
-	}
+// 		views.RenderInfoMessage(fmt.Sprintf("- Target '%s' successfully deleted", target.Name))
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
