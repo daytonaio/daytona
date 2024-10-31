@@ -68,7 +68,7 @@ func (s *TargetService) CreateTarget(ctx context.Context, req dto.CreateTargetDT
 		return s.handleCreateError(ctx, nil, err)
 	}
 
-	targetLogger := s.loggerFactory.CreateTargetLogger(tg.Id, logs.LogSourceServer)
+	targetLogger := s.loggerFactory.CreateTargetLogger(tg.Id, tg.Name, logs.LogSourceServer)
 	defer targetLogger.Close()
 
 	targetLogger.Write([]byte(fmt.Sprintf("Creating target %s (%s)\n", tg.Name, tg.Id)))

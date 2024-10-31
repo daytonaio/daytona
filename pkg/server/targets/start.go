@@ -28,7 +28,7 @@ func (s *TargetService) StartTarget(ctx context.Context, targetId string) error 
 		return s.handleStartError(ctx, t, err)
 	}
 
-	targetLogger := s.loggerFactory.CreateTargetLogger(t.Id, logs.LogSourceServer)
+	targetLogger := s.loggerFactory.CreateTargetLogger(t.Id, t.Name, logs.LogSourceServer)
 	defer targetLogger.Close()
 
 	logger := io.MultiWriter(&util.InfoLogWriter{}, targetLogger)

@@ -148,7 +148,8 @@ var CreateCmd = &cobra.Command{
 			return err
 		}
 
-		logs_view.CalculateLongestPrefixLength(workspaceNames)
+		names := append(workspaceNames, targetName)
+		logs_view.CalculateLongestPrefixLength(names)
 
 		logs_view.DisplayLogEntry(logs.LogEntry{
 			Msg: "Request submitted\n",
@@ -173,7 +174,7 @@ var CreateCmd = &cobra.Command{
 		logsContext, stopLogs := context.WithCancel(context.Background())
 		defer stopLogs()
 
-		logs_view.CalculateLongestPrefixLength(workspaceNames)
+		logs_view.CalculateLongestPrefixLength(names)
 
 		go apiclient_util.ReadTargetLogs(logsContext, activeProfile, id, true, nil)
 

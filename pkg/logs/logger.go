@@ -24,7 +24,7 @@ const (
 
 type LogEntry struct {
 	Source        string  `json:"source"`
-	TargetId      *string `json:"targetId,omitempty"`
+	TargetName    *string `json:"targetName,omitempty"`
 	WorkspaceName *string `json:"workspaceName,omitempty"`
 	BuildId       *string `json:"buildId,omitempty"`
 	Msg           string  `json:"msg"`
@@ -36,7 +36,7 @@ type LoggerFactory interface {
 	CreateBuildLogger(buildId string, source LogSource) Logger
 	CreateBuildLogReader(buildId string) (io.Reader, error)
 
-	CreateTargetLogger(targetId string, source LogSource) Logger
+	CreateTargetLogger(targetId, targetName string, source LogSource) Logger
 	CreateTargetLogReader(targetId string) (io.Reader, error)
 
 	CreateWorkspaceLogger(workspaceId, workspaceName string, source LogSource) Logger

@@ -37,7 +37,7 @@ func (s *TargetService) RemoveTarget(ctx context.Context, targetId string) error
 		log.Error(err)
 	}
 
-	logger := s.loggerFactory.CreateTargetLogger(target.Id, logs.LogSourceServer)
+	logger := s.loggerFactory.CreateTargetLogger(target.Id, target.Name, logs.LogSourceServer)
 	err = logger.Cleanup()
 	if err != nil {
 		// Should not fail the whole operation if the target logger cannot be cleaned up
