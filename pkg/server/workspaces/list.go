@@ -26,7 +26,7 @@ func (s *WorkspaceService) ListWorkspaces(ctx context.Context, verbose bool) ([]
 	response := []dto.WorkspaceDTO{}
 
 	for i, ws := range workspaces {
-		response = append(response, dto.WorkspaceDTO{Workspace: *ws})
+		response = append(response, dto.WorkspaceDTO{WorkspaceViewDTO: *ws})
 		if !verbose {
 			continue
 		}
@@ -53,7 +53,7 @@ func (s *WorkspaceService) ListWorkspaces(ctx context.Context, verbose bool) ([]
 			resultCh := make(chan provisioner.WorkspaceInfoResult, 1)
 
 			go func() {
-				targetInfo, err := s.provisioner.GetWorkspaceInfo(ctx, ws, targetConfig)
+				targetInfo, err := s.provisioner.GetWorkspaceInfo(ctx, &ws.Workspace, targetConfig)
 				resultCh <- provisioner.WorkspaceInfoResult{Info: targetInfo, Err: err}
 			}()
 

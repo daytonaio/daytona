@@ -17,27 +17,27 @@ func NewInMemoryWorkspaceStore() workspace.Store {
 	}
 }
 
-func (s *InMemoryWorkspaceStore) List() ([]*workspace.Workspace, error) {
-	workspaces := []*workspace.Workspace{}
-	for _, t := range s.workspaces {
-		workspaces = append(workspaces, t)
+func (s *InMemoryWorkspaceStore) List() ([]*workspace.WorkspaceViewDTO, error) {
+	workspaceViewDTOs := []*workspace.WorkspaceViewDTO{}
+	for _, w := range s.workspaces {
+		workspaceViewDTOs = append(workspaceViewDTOs, &workspace.WorkspaceViewDTO{Workspace: *w})
 	}
 
-	return workspaces, nil
+	return workspaceViewDTOs, nil
 }
 
-func (s *InMemoryWorkspaceStore) Find(idOrName string) (*workspace.Workspace, error) {
+func (s *InMemoryWorkspaceStore) Find(idOrName string) (*workspace.WorkspaceViewDTO, error) {
 	t, ok := s.workspaces[idOrName]
 	if !ok {
 		for _, w := range s.workspaces {
 			if w.Name == idOrName {
-				return w, nil
+				return &workspace.WorkspaceViewDTO{Workspace: *w}, nil
 			}
 		}
 		return nil, workspace.ErrWorkspaceNotFound
 	}
 
-	return t, nil
+	return &workspace.WorkspaceViewDTO{Workspace: *t}, nil
 }
 
 func (s *InMemoryWorkspaceStore) Save(workspace *workspace.Workspace) error {

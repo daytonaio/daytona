@@ -1450,7 +1450,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Workspace"
+                            "$ref": "#/definitions/WorkspaceViewDTO"
                         }
                     }
                 }
@@ -2990,53 +2990,6 @@
                 }
             }
         },
-        "Workspace": {
-            "type": "object",
-            "required": [
-                "envVars",
-                "id",
-                "image",
-                "name",
-                "repository",
-                "targetId",
-                "user"
-            ],
-            "properties": {
-                "buildConfig": {
-                    "$ref": "#/definitions/BuildConfig"
-                },
-                "envVars": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "gitProviderConfigId": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "image": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "repository": {
-                    "$ref": "#/definitions/GitRepository"
-                },
-                "state": {
-                    "$ref": "#/definitions/WorkspaceState"
-                },
-                "targetId": {
-                    "type": "string"
-                },
-                "user": {
-                    "type": "string"
-                }
-            }
-        },
         "WorkspaceConfig": {
             "type": "object",
             "required": [
@@ -3092,6 +3045,7 @@
                 "name",
                 "repository",
                 "targetId",
+                "targetName",
                 "user"
             ],
             "properties": {
@@ -3126,6 +3080,9 @@
                     "$ref": "#/definitions/WorkspaceState"
                 },
                 "targetId": {
+                    "type": "string"
+                },
+                "targetName": {
                     "type": "string"
                 },
                 "user": {
@@ -3175,6 +3132,57 @@
                 },
                 "uptime": {
                     "type": "integer"
+                }
+            }
+        },
+        "WorkspaceViewDTO": {
+            "type": "object",
+            "required": [
+                "envVars",
+                "id",
+                "image",
+                "name",
+                "repository",
+                "targetId",
+                "targetName",
+                "user"
+            ],
+            "properties": {
+                "buildConfig": {
+                    "$ref": "#/definitions/BuildConfig"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "gitProviderConfigId": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "repository": {
+                    "$ref": "#/definitions/GitRepository"
+                },
+                "state": {
+                    "$ref": "#/definitions/WorkspaceState"
+                },
+                "targetId": {
+                    "type": "string"
+                },
+                "targetName": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
                 }
             }
         },

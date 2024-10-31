@@ -144,10 +144,10 @@ func TestTargetService(t *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, workspace)
 
-		ws = workspace
+		ws = &workspace.Workspace
 		ws.EnvVars = nil
 
-		workspaceEquals(t, createWorkspaceDTO, workspace, defaultWorkspaceImage)
+		workspaceEquals(t, createWorkspaceDTO, &workspace.Workspace, defaultWorkspaceImage)
 	})
 
 	t.Run("CreateWorkspace fails when workspace already exists", func(t *testing.T) {

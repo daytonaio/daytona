@@ -248,3 +248,10 @@ func ToWorkspaceBuild(buildDTO *WorkspaceBuildDTO) *buildconfig.BuildConfig {
 		},
 	}
 }
+
+func ToWorkspaceViewDTO(workspaceDTO WorkspaceDTO) *workspace.WorkspaceViewDTO {
+	return &workspace.WorkspaceViewDTO{
+		Workspace:  *ToWorkspace(workspaceDTO),
+		TargetName: workspaceDTO.Target.Name,
+	}
+}

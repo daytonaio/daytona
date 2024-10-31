@@ -14,13 +14,14 @@ Name | Type | Description | Notes
 **Repository** | [**GitRepository**](GitRepository.md) |  | 
 **State** | Pointer to [**WorkspaceState**](WorkspaceState.md) |  | [optional] 
 **TargetId** | **string** |  | 
+**TargetName** | **string** |  | 
 **User** | **string** |  | 
 
 ## Methods
 
 ### NewWorkspaceDTO
 
-`func NewWorkspaceDTO(envVars map[string]string, id string, image string, name string, repository GitRepository, targetId string, user string, ) *WorkspaceDTO`
+`func NewWorkspaceDTO(envVars map[string]string, id string, image string, name string, repository GitRepository, targetId string, targetName string, user string, ) *WorkspaceDTO`
 
 NewWorkspaceDTO instantiates a new WorkspaceDTO object
 This constructor will assign default values to properties that have it defined,
@@ -253,6 +254,26 @@ and a boolean to check if the value has been set.
 `func (o *WorkspaceDTO) SetTargetId(v string)`
 
 SetTargetId sets TargetId field to given value.
+
+
+### GetTargetName
+
+`func (o *WorkspaceDTO) GetTargetName() string`
+
+GetTargetName returns the TargetName field if non-nil, zero value otherwise.
+
+### GetTargetNameOk
+
+`func (o *WorkspaceDTO) GetTargetNameOk() (*string, bool)`
+
+GetTargetNameOk returns a tuple with the TargetName field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTargetName
+
+`func (o *WorkspaceDTO) SetTargetName(v string)`
+
+SetTargetName sets TargetName field to given value.
 
 
 ### GetUser

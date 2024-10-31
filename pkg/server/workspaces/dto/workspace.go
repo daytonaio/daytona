@@ -10,7 +10,7 @@ import (
 )
 
 type WorkspaceDTO struct {
-	workspace.Workspace
+	workspace.WorkspaceViewDTO
 	Info *workspace.WorkspaceInfo `json:"info" validate:"optional"`
 } //	@name	WorkspaceDTO
 

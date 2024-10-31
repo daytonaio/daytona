@@ -18,7 +18,7 @@ import (
 type RowData struct {
 	Name       string
 	Repository string
-	TargetId   string
+	TargetName string
 	Status     string
 	Created    string
 	Branch     string
@@ -32,7 +32,7 @@ func ListWorkspaces(workspaceList []apiclient.WorkspaceDTO, specifyGitProviders 
 
 	SortWorkspaces(&workspaceList, verbose)
 
-	headers := []string{"Target", "Repository", "Target Id", "Status", "Created", "Branch"}
+	headers := []string{"Workspace", "Repository", "Target", "Status", "Created", "Branch"}
 
 	data := [][]string{}
 
@@ -93,7 +93,7 @@ func getRowFromRowData(rowData RowData, isMultiWorkspaceAccordion bool) []string
 	row := []string{
 		views.NameStyle.Render(rowData.Name),
 		views.DefaultRowDataStyle.Render(rowData.Repository),
-		views.DefaultRowDataStyle.Render(rowData.TargetId),
+		views.DefaultRowDataStyle.Render(rowData.TargetName),
 		state,
 		views.DefaultRowDataStyle.Render(rowData.Created),
 		views.DefaultRowDataStyle.Render(views.GetBranchNameLabel(rowData.Branch)),
@@ -136,7 +136,7 @@ func getTableRowData(workspace apiclient.WorkspaceDTO, specifyGitProviders bool)
 	rowData.Repository = util.GetRepositorySlugFromUrl(workspace.Repository.Url, specifyGitProviders)
 	rowData.Branch = workspace.Repository.Branch
 
-	rowData.TargetId = workspace.TargetId + views_util.AdditionalPropertyPadding
+	rowData.TargetName = workspace.TargetName + views_util.AdditionalPropertyPadding
 
 	if workspace.Info != nil {
 		rowData.Created = util.FormatTimestamp(workspace.Info.Created)

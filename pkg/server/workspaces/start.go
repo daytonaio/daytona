@@ -18,24 +18,24 @@ import (
 func (s *WorkspaceService) StartWorkspace(ctx context.Context, workspaceId string) error {
 	ws, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
-		return s.handleStartError(ctx, ws, ErrWorkspaceNotFound)
+		return s.handleStartError(ctx, &ws.Workspace, ErrWorkspaceNotFound)
 	}
 
 	target, err := s.targetStore.Find(ws.TargetId)
 	if err != nil {
-		return s.handleStartError(ctx, ws, err)
+		return s.handleStartError(ctx, &ws.Workspace, err)
 	}
 
 	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &target.TargetConfig})
 	if err != nil {
-		return s.handleStartError(ctx, ws, err)
+		return s.handleStartError(ctx, &ws.Workspace, err)
 	}
 
 	workspaceLogger := s.loggerFactory.CreateWorkspaceLogger(ws.Id, ws.Name, logs.LogSourceServer)
 	defer workspaceLogger.Close()
 
-	workspaceToStart := *ws
-	workspaceToStart.EnvVars = workspace.GetWorkspaceEnvVars(ws, workspace.WorkspaceEnvVarParams{
+	workspaceToStart := ws.Workspace
+	workspaceToStart.EnvVars = workspace.GetWorkspaceEnvVars(&ws.Workspace, workspace.WorkspaceEnvVarParams{
 		ApiUrl:        s.serverApiUrl,
 		ServerUrl:     s.serverUrl,
 		ServerVersion: s.serverVersion,
@@ -44,10 +44,10 @@ func (s *WorkspaceService) StartWorkspace(ctx context.Context, workspaceId strin
 
 	err = s.startWorkspace(&workspaceToStart, targetConfig, workspaceLogger)
 	if err != nil {
-		return s.handleStartError(ctx, ws, err)
+		return s.handleStartError(ctx, &ws.Workspace, err)
 	}
 
-	return s.handleStartError(ctx, ws, err)
+	return s.handleStartError(ctx, &ws.Workspace, err)
 }
 
 func (s *WorkspaceService) startWorkspace(w *workspace.Workspace, targetConfig *provider.TargetConfig, logger io.Writer) error {

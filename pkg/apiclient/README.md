@@ -195,11 +195,11 @@ Class | Method | HTTP request | Description
  - [TargetConfigProperty](docs/TargetConfigProperty.md)
  - [TargetDTO](docs/TargetDTO.md)
  - [TargetInfo](docs/TargetInfo.md)
- - [Workspace](docs/Workspace.md)
  - [WorkspaceConfig](docs/WorkspaceConfig.md)
  - [WorkspaceDTO](docs/WorkspaceDTO.md)
  - [WorkspaceInfo](docs/WorkspaceInfo.md)
  - [WorkspaceState](docs/WorkspaceState.md)
+ - [WorkspaceViewDTO](docs/WorkspaceViewDTO.md)
 
 
 ## Documentation For Authorization
