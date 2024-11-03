@@ -191,6 +191,8 @@ func openIDE(ideId string, activeProfile config.Profile, workspaceId string, pro
 		return ide.OpenJupyterIDE(activeProfile, workspaceId, projectName, projectProviderMetadata, yesFlag, gpgKey)
 	case "fleet":
 		return ide.OpenFleet(activeProfile, workspaceId, projectName, gpgKey)
+	case "zed":
+		return ide.OpenZed(activeProfile, workspaceId, projectName, gpgKey)
 	default:
 		_, ok := jetbrains.GetIdes()[jetbrains.Id(ideId)]
 		if ok {
