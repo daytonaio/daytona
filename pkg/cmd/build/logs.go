@@ -9,8 +9,8 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/pkg/views/target/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
+	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
 )
 

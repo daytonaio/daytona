@@ -1,0 +1,25 @@
+name: daytona
+synopsis: Daytona is a Dev Environment Manager
+description: Daytona is a Dev Environment Manager
+usage: daytona [flags]
+options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+    - name: version
+      shorthand: v
+      default_value: "false"
+      usage: Display the version of Daytona
+see_also:
+    - daytona agent - Start the agent process
+    - daytona autocomplete - Adds a completion script for your shell environment
+    - daytona docs - Opens the Daytona documentation in your default browser.
+    - daytona expose - Expose a local port over stdout - Used by the Daytona CLI to make direct connections to the workspace
+    - daytona forward - Forward a port publicly via an URL
+    - daytona info - Show workspace info
+    - daytona list - List targets
+    - daytona logs - View logs for a target/workspace
+    - daytona restart - Restart the workspace
+    - daytona start - Start the workspace
+    - daytona stop - Stop the workspace
+    - daytona version - Print the version number

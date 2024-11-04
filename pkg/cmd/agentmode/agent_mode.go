@@ -16,7 +16,7 @@ import (
 )
 
 var targetId = ""
-var workspaceName = ""
+var workspaceId = ""
 
 var agentModeRootCmd = &cobra.Command{
 	Use:               "daytona",
@@ -65,7 +65,7 @@ func init() {
 	if targetIdEnv := os.Getenv("DAYTONA_TARGET_ID"); targetIdEnv != "" {
 		targetId = targetIdEnv
 	}
-	if workspaceNameEnv := os.Getenv("DAYTONA_WORKSPACE_NAME"); workspaceNameEnv != "" {
-		workspaceName = workspaceNameEnv
+	if workspaceIdEnv := os.Getenv("DAYTONA_WORKSPACE_ID"); workspaceIdEnv != "" {
+		workspaceId = workspaceIdEnv
 	}
 }

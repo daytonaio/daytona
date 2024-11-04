@@ -25,7 +25,6 @@ type TargetDTO struct {
 	Info         *TargetInfo `json:"info,omitempty"`
 	Name         string      `json:"name"`
 	TargetConfig string      `json:"targetConfig"`
-	Workspaces   []Workspace `json:"workspaces"`
 }
 
 type _TargetDTO TargetDTO
@@ -34,12 +33,11 @@ type _TargetDTO TargetDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTargetDTO(id string, name string, targetConfig string, workspaces []Workspace) *TargetDTO {
+func NewTargetDTO(id string, name string, targetConfig string) *TargetDTO {
 	this := TargetDTO{}
 	this.Id = id
 	this.Name = name
 	this.TargetConfig = targetConfig
-	this.Workspaces = workspaces
 	return &this
 }
 
@@ -155,30 +153,6 @@ func (o *TargetDTO) SetTargetConfig(v string) {
 	o.TargetConfig = v
 }
 
-// GetWorkspaces returns the Workspaces field value
-func (o *TargetDTO) GetWorkspaces() []Workspace {
-	if o == nil {
-		var ret []Workspace
-		return ret
-	}
-
-	return o.Workspaces
-}
-
-// GetWorkspacesOk returns a tuple with the Workspaces field value
-// and a boolean to check if the value has been set.
-func (o *TargetDTO) GetWorkspacesOk() ([]Workspace, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return o.Workspaces, true
-}
-
-// SetWorkspaces sets field value
-func (o *TargetDTO) SetWorkspaces(v []Workspace) {
-	o.Workspaces = v
-}
-
 func (o TargetDTO) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -195,7 +169,6 @@ func (o TargetDTO) ToMap() (map[string]interface{}, error) {
 	}
 	toSerialize["name"] = o.Name
 	toSerialize["targetConfig"] = o.TargetConfig
-	toSerialize["workspaces"] = o.Workspaces
 	return toSerialize, nil
 }
 
@@ -207,7 +180,6 @@ func (o *TargetDTO) UnmarshalJSON(data []byte) (err error) {
 		"id",
 		"name",
 		"targetConfig",
-		"workspaces",
 	}
 
 	allProperties := make(map[string]interface{})

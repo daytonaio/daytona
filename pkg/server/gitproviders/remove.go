@@ -3,7 +3,7 @@
 
 package gitproviders
 
-import "github.com/daytonaio/daytona/pkg/target/workspace/config"
+import "github.com/daytonaio/daytona/pkg/workspace/config"
 
 func (s *GitProviderService) RemoveGitProvider(gitProviderId string) error {
 	gitProvider, err := s.configStore.Find(gitProviderId)

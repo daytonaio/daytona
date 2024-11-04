@@ -19,7 +19,7 @@ import (
 	agent_config "github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/target/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	log "github.com/sirupsen/logrus"
 )
@@ -72,13 +72,8 @@ func (a *Agent) startWorkspaceMode() error {
 	}
 
 	if a.Config.SkipClone == "" {
-		workspace, err := a.getWorkspace()
-		if err != nil {
-			return err
-		}
-
 		// Ignoring error because we don't want to fail if the git provider is not found
-		gitProvider, _ := a.getGitProvider(workspace.Repository.Url)
+		gitProvider, _ := a.getGitProvider(a.Workspace.Repository.Url)
 
 		var auth *http.BasicAuth
 		if gitProvider != nil {
@@ -97,7 +92,7 @@ func (a *Agent) startWorkspaceMode() error {
 				if stat, err := os.Stat(a.Config.WorkspaceDir); err == nil {
 					ownerUid := stat.Sys().(*syscall.Stat_t).Uid
 					if ownerUid != uint32(os.Getuid()) {
-						chownCmd := exec.Command("sudo", "chown", "-R", fmt.Sprintf("%s:%s", workspace.User, workspace.User), a.Config.WorkspaceDir)
+						chownCmd := exec.Command("sudo", "chown", "-R", fmt.Sprintf("%s:%s", a.Workspace.User, a.Workspace.User), a.Config.WorkspaceDir)
 						err = chownCmd.Run()
 						if err != nil {
 							log.Error(err)
@@ -106,7 +101,7 @@ func (a *Agent) startWorkspaceMode() error {
 				}
 
 				log.Info("Cloning repository...")
-				err = a.Git.CloneRepository(workspace.Repository, auth)
+				err = a.Git.CloneRepository(a.Workspace.Repository, auth)
 				if err != nil {
 					log.Error(fmt.Sprintf("failed to clone repository: %s", err))
 				} else {
@@ -155,28 +150,6 @@ func (a *Agent) startWorkspaceMode() error {
 	}()
 
 	return nil
-}
-
-func (a *Agent) getWorkspace() (*workspace.Workspace, error) {
-	ctx := context.Background()
-
-	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey, a.Config.ClientId, a.TelemetryEnabled)
-	if err != nil {
-		return nil, err
-	}
-
-	target, res, err := apiClient.TargetAPI.GetTarget(ctx, a.Config.TargetId).Execute()
-	if err != nil {
-		return nil, apiclient_util.HandleErrorResponse(res, err)
-	}
-
-	for _, workspace := range target.Workspaces {
-		if workspace.Name == a.Config.WorkspaceName {
-			return conversion.ToWorkspace(&workspace), nil
-		}
-	}
-
-	return nil, errors.New("workspace not found")
 }
 
 func (a *Agent) getGitProvider(repoUrl string) (*apiclient.GitProvider, error) {
@@ -264,7 +237,7 @@ func (a *Agent) updateWorkspaceState() error {
 	}
 
 	uptime := a.uptime()
-	res, err := apiClient.TargetAPI.SetWorkspaceState(context.Background(), a.Config.TargetId, a.Config.WorkspaceName).SetState(apiclient.SetWorkspaceState{
+	res, err := apiClient.WorkspaceAPI.SetWorkspaceState(context.Background(), a.Config.WorkspaceId).SetState(apiclient.SetWorkspaceState{
 		Uptime:    uptime,
 		GitStatus: conversion.ToGitStatusDTO(gitStatus),
 	}).Execute()

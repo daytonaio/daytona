@@ -7,13 +7,12 @@ Name | Type | Description | Notes
 **Id** | **string** |  | 
 **Name** | **string** |  | 
 **TargetConfig** | **string** |  | 
-**Workspaces** | [**[]CreateWorkspaceDTO**](CreateWorkspaceDTO.md) |  | 
 
 ## Methods
 
 ### NewCreateTargetDTO
 
-`func NewCreateTargetDTO(id string, name string, targetConfig string, workspaces []CreateWorkspaceDTO, ) *CreateTargetDTO`
+`func NewCreateTargetDTO(id string, name string, targetConfig string, ) *CreateTargetDTO`
 
 NewCreateTargetDTO instantiates a new CreateTargetDTO object
 This constructor will assign default values to properties that have it defined,
@@ -86,26 +85,6 @@ and a boolean to check if the value has been set.
 `func (o *CreateTargetDTO) SetTargetConfig(v string)`
 
 SetTargetConfig sets TargetConfig field to given value.
-
-
-### GetWorkspaces
-
-`func (o *CreateTargetDTO) GetWorkspaces() []CreateWorkspaceDTO`
-
-GetWorkspaces returns the Workspaces field if non-nil, zero value otherwise.
-
-### GetWorkspacesOk
-
-`func (o *CreateTargetDTO) GetWorkspacesOk() (*[]CreateWorkspaceDTO, bool)`
-
-GetWorkspacesOk returns a tuple with the Workspaces field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetWorkspaces
-
-`func (o *CreateTargetDTO) SetWorkspaces(v []CreateWorkspaceDTO)`
-
-SetWorkspaces sets Workspaces field to given value.
 
 
 

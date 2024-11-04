@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/pkg/ports"
-	"github.com/daytonaio/daytona/pkg/target/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/go-connections/nat"
@@ -48,7 +48,7 @@ func (d *DockerClient) initWorkspaceContainer(opts *CreateWorkspaceOptions, moun
 	var availablePort *uint16
 	var portBindings map[nat.Port][]nat.PortBinding
 
-	if opts.Workspace.TargetConfig == "local" {
+	if opts.Workspace.TargetId == "local" {
 		p, err := ports.GetAvailableEphemeralPort()
 		if err != nil {
 			log.Error(err)

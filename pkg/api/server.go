@@ -45,6 +45,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/server"
 	"github.com/daytonaio/daytona/pkg/api/controllers/target"
 	"github.com/daytonaio/daytona/pkg/api/controllers/targetconfig"
+	"github.com/daytonaio/daytona/pkg/api/controllers/workspace"
 	"github.com/daytonaio/daytona/pkg/api/controllers/workspace/toolbox"
 	"github.com/daytonaio/daytona/pkg/api/controllers/workspaceconfig"
 	"github.com/daytonaio/daytona/pkg/api/controllers/workspaceconfig/prebuild"
@@ -142,7 +143,17 @@ func (a *ApiServer) Start() error {
 
 	targetController := protected.Group("/target")
 	{
-		toolboxController := targetController.Group("/:targetId/:projectId/toolbox")
+		targetController.GET("/:targetId", target.GetTarget)
+		targetController.GET("", target.ListTargets)
+		targetController.POST("", target.CreateTarget)
+		targetController.POST("/:targetId/start", target.StartTarget)
+		targetController.POST("/:targetId/stop", target.StopTarget)
+		targetController.DELETE("/:targetId", target.RemoveTarget)
+	}
+
+	workspaceController := protected.Group("/workspace")
+	{
+		toolboxController := workspaceController.Group("/:workspaceId/toolbox")
 		{
 			toolboxController.GET("/workspace-dir", toolbox.GetWorkspaceDir)
 
@@ -204,14 +215,12 @@ func (a *ApiServer) Start() error {
 			}
 		}
 
-		targetController.GET("/:targetId", target.GetTarget)
-		targetController.GET("", target.ListTargets)
-		targetController.POST("", target.CreateTarget)
-		targetController.POST("/:targetId/start", target.StartTarget)
-		targetController.POST("/:targetId/stop", target.StopTarget)
-		targetController.DELETE("/:targetId", target.RemoveTarget)
-		targetController.POST("/:targetId/:workspaceId/start", target.StartWorkspace)
-		targetController.POST("/:targetId/:workspaceId/stop", target.StopWorkspace)
+		workspaceController.GET("/:workspaceId", workspace.GetWorkspace)
+		workspaceController.GET("", workspace.ListWorkspaces)
+		workspaceController.POST("", workspace.CreateWorkspace)
+		workspaceController.DELETE("/:workspaceId", workspace.RemoveWorkspace)
+		workspaceController.POST("/:workspaceId/start", workspace.StartWorkspace)
+		workspaceController.POST("/:workspaceId/stop", workspace.StopWorkspace)
 	}
 
 	workspaceConfigController := protected.Group("/workspace-config")
@@ -280,7 +289,7 @@ func (a *ApiServer) Start() error {
 	{
 		logController.GET("/server", log_controller.ReadServerLog)
 		logController.GET("/target/:targetId", log_controller.ReadTargetLog)
-		logController.GET("/target/:targetId/:workspaceName", log_controller.ReadWorkspaceLog)
+		logController.GET("/workspace/:workspaceId", log_controller.ReadWorkspaceLog)
 		logController.GET("/build/:buildId", log_controller.ReadBuildLog)
 	}
 
@@ -323,7 +332,7 @@ func (a *ApiServer) Start() error {
 	workspaceGroup := protected.Group("/")
 	workspaceGroup.Use(middlewares.WorkspaceAuthMiddleware())
 	{
-		workspaceGroup.POST(targetController.BasePath()+"/:targetId/:workspaceId/state", target.SetWorkspaceState)
+		workspaceGroup.POST(workspaceController.BasePath()+"/:workspaceId/state", workspace.SetWorkspaceState)
 	}
 
 	a.httpServer = &http.Server{

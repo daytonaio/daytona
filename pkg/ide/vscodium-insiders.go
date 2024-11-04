@@ -13,7 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/build/devcontainer"
 )
 
-func OpenVScodiumInsiders(activeProfile config.Profile, targetId string, workspaceId string, workspaceProviderMetadata string, gpgkey string) error {
+func OpenVScodiumInsiders(activeProfile config.Profile, workspaceId string, workspaceProviderMetadata string, gpgkey string) error {
 	path, err := GetCodiumInsidersBinaryPath()
 	if err != nil {
 		return err
@@ -24,9 +24,9 @@ func OpenVScodiumInsiders(activeProfile config.Profile, targetId string, workspa
 		return err
 	}
 
-	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, targetId, workspaceId)
+	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, workspaceId)
 
-	workspaceDir, err := util.GetWorkspaceDir(activeProfile, targetId, workspaceId, gpgkey)
+	workspaceDir, err := util.GetWorkspaceDir(activeProfile, workspaceId, gpgkey)
 	if err != nil {
 		return err
 	}

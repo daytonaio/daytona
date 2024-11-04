@@ -12,7 +12,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/build/detect"
 	"github.com/daytonaio/daytona/pkg/provider/util"
-	"github.com/daytonaio/daytona/pkg/target/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/docker/docker/api/types/container"
 )
 

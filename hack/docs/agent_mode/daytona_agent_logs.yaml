@@ -1,0 +1,14 @@
+name: daytona agent logs
+synopsis: Output Daytona Agent logs
+usage: daytona agent logs [flags]
+options:
+    - name: follow
+      shorthand: f
+      default_value: "false"
+      usage: Follow logs
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona agent - Start the agent process

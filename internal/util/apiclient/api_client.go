@@ -5,7 +5,6 @@ package apiclient
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -131,32 +130,18 @@ func GetTarget(targetNameOrId string, verbose bool) (*apiclient.TargetDTO, error
 	return target, nil
 }
 
-func GetFirstWorkspaceName(targetId string, workspaceName string, profile *config.Profile) (string, error) {
+func GetWorkspace(workspaceNameOrId string, verbose bool) (*apiclient.WorkspaceDTO, error) {
 	ctx := context.Background()
 
-	apiClient, err := GetApiClient(profile)
+	apiClient, err := GetApiClient(nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	targetInfo, res, err := apiClient.TargetAPI.GetTarget(ctx, targetId).Execute()
+	workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceNameOrId).Verbose(verbose).Execute()
 	if err != nil {
-		return "", HandleErrorResponse(res, err)
+		return nil, HandleErrorResponse(res, err)
 	}
 
-	if workspaceName == "" {
-		if len(targetInfo.Workspaces) == 0 {
-			return "", errors.New("no workspaces found in target")
-		}
-
-		return targetInfo.Workspaces[0].Name, nil
-	}
-
-	for _, workspace := range targetInfo.Workspaces {
-		if workspace.Name == workspaceName {
-			return workspace.Name, nil
-		}
-	}
-
-	return "", errors.New("workspace not found in target")
+	return workspace, nil
 }

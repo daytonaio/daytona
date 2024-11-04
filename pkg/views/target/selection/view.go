@@ -19,10 +19,6 @@ import (
 	"golang.org/x/term"
 )
 
-var CustomRepoIdentifier = "<CUSTOM_REPO>"
-
-const CREATE_FROM_SAMPLE = "<CREATE_FROM_SAMPLE>"
-
 var selectedStyles = lipgloss.NewStyle().
 	Border(lipgloss.NormalBorder(), false, false, false, true).
 	BorderForeground(views.Green).
@@ -38,19 +34,17 @@ var statusMessageDangerStyle = lipgloss.NewStyle().Bold(true).
 	Render
 
 type item[T any] struct {
-	id, title, desc, createdTime, uptime, targetConfig string
-	choiceProperty                                     T
-	isMarked                                           bool
-	isMultipleSelect                                   bool
-	action                                             string
+	id, title, desc, targetConfig string
+	choiceProperty                T
+	isMarked                      bool
+	isMultipleSelect              bool
+	action                        string
 }
 
 func (i item[T]) Title() string        { return i.title }
 func (i item[T]) Id() string           { return i.id }
 func (i item[T]) Description() string  { return i.desc }
 func (i item[T]) FilterValue() string  { return i.title }
-func (i item[T]) CreatedTime() string  { return i.createdTime }
-func (i item[T]) Uptime() string       { return i.uptime }
 func (i item[T]) TargetConfig() string { return i.targetConfig }
 
 type model[T any] struct {
@@ -159,11 +153,6 @@ func (d ItemDelegate[T]) Render(w io.Writer, m list.Model, index int, listItem l
 		Align(lipgloss.Right).
 		Width(timeWidth)
 	timeString := timeStyles.Render("")
-	if i.Uptime() != "" {
-		timeString = timeStyles.Render(i.Uptime())
-	} else if i.CreatedTime() != "" {
-		timeString = timeStyles.Render(fmt.Sprintf("created %s", i.CreatedTime()))
-	}
 
 	// Adjust styles as the user moves through the menu
 	if isSelected {

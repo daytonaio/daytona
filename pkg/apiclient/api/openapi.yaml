@@ -1012,86 +1012,49 @@ paths:
       summary: Stop target
       tags:
       - target
-  /target/{targetId}/{workspaceId}/start:
-    post:
-      description: Start workspace
-      operationId: StartWorkspace
+  /workspace:
+    get:
+      description: List workspaces
+      operationId: ListWorkspaces
       parameters:
-      - description: Target ID or Name
-        in: path
-        name: targetId
-        required: true
+      - description: Verbose
+        in: query
+        name: verbose
         schema:
-          type: string
-      - description: Workspace ID
-        in: path
-        name: workspaceId
-        required: true
-        schema:
-          type: string
+          type: boolean
       responses:
         "200":
-          content: {}
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/WorkspaceDTO'
+                type: array
           description: OK
-      summary: Start workspace
+      summary: List workspaces
       tags:
-      - target
-  /target/{targetId}/{workspaceId}/state:
+      - workspace
     post:
-      description: Set workspace state
-      operationId: SetWorkspaceState
-      parameters:
-      - description: Target ID or Name
-        in: path
-        name: targetId
-        required: true
-        schema:
-          type: string
-      - description: Workspace ID
-        in: path
-        name: workspaceId
-        required: true
-        schema:
-          type: string
+      description: Create a workspace
+      operationId: CreateWorkspace
       requestBody:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/SetWorkspaceState'
-        description: Set State
+              $ref: '#/components/schemas/CreateWorkspaceDTO'
+        description: Create workspace
         required: true
       responses:
         "200":
-          content: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceViewDTO'
           description: OK
-      summary: Set workspace state
+      summary: Create a workspace
       tags:
-      - target
-      x-codegen-request-body-name: setState
-  /target/{targetId}/{workspaceId}/stop:
-    post:
-      description: Stop workspace
-      operationId: StopWorkspace
-      parameters:
-      - description: Target ID or Name
-        in: path
-        name: targetId
-        required: true
-        schema:
-          type: string
-      - description: Workspace ID
-        in: path
-        name: workspaceId
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content: {}
-          description: OK
-      summary: Stop workspace
-      tags:
-      - target
+      - workspace
+      x-codegen-request-body-name: workspace
   /workspace-config:
     get:
       description: List workspace configs
@@ -1349,10 +1312,32 @@ paths:
       summary: Set workspace config to default
       tags:
       - workspace-config
-  /workspace/{workspaceId}/{projectId}/toolbox/files:
+  /workspace/{workspaceId}:
     delete:
-      description: Delete file inside workspace project
-      operationId: FsDeleteFile
+      description: Remove workspace
+      operationId: RemoveWorkspace
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      - description: Force
+        in: query
+        name: force
+        schema:
+          type: boolean
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Remove workspace
+      tags:
+      - workspace
+    get:
+      description: Get workspace info
+      operationId: GetWorkspace
       parameters:
       - description: Workspace ID or Name
         in: path
@@ -1360,9 +1345,91 @@ paths:
         required: true
         schema:
           type: string
-      - description: Project ID
+      - description: Verbose
+        in: query
+        name: verbose
+        schema:
+          type: boolean
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceDTO'
+          description: OK
+      summary: Get workspace info
+      tags:
+      - workspace
+  /workspace/{workspaceId}/start:
+    post:
+      description: Start workspace
+      operationId: StartWorkspace
+      parameters:
+      - description: Workspace ID or Name
         in: path
-        name: projectId
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Start workspace
+      tags:
+      - workspace
+  /workspace/{workspaceId}/state:
+    post:
+      description: Set workspace state
+      operationId: SetWorkspaceState
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/SetWorkspaceState'
+        description: Set State
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Set workspace state
+      tags:
+      - workspace
+      x-codegen-request-body-name: setState
+  /workspace/{workspaceId}/stop:
+    post:
+      description: Stop workspace
+      operationId: StopWorkspace
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Stop workspace
+      tags:
+      - workspace
+  /workspace/{workspaceId}/toolbox/files:
+    delete:
+      description: Delete file inside a workspace
+      operationId: FsDeleteFile
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
         required: true
         schema:
           type: string
@@ -1380,18 +1447,12 @@ paths:
       tags:
       - workspace toolbox
     get:
-      description: List files inside workspace project
+      description: List files inside a workspace
       operationId: FsListFiles
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1412,20 +1473,14 @@ paths:
       summary: List files
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/files/download:
+  /workspace/{workspaceId}/toolbox/files/download:
     get:
-      description: Download file from workspace project
+      description: Download file from a workspace
       operationId: FsDownloadFile
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1446,20 +1501,14 @@ paths:
       summary: Download file
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/files/find:
+  /workspace/{workspaceId}/toolbox/files/find:
     get:
-      description: Search for text/pattern inside workspace project files
+      description: Search for text/pattern inside a workspace files
       operationId: FsFindInFiles
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1487,20 +1536,14 @@ paths:
       summary: Search for text/pattern in files
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/files/folder:
+  /workspace/{workspaceId}/toolbox/files/folder:
     post:
-      description: Create folder inside workspace project
+      description: Create folder inside a workspace
       operationId: FsCreateFolder
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1523,20 +1566,14 @@ paths:
       summary: Create folder
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/files/info:
+  /workspace/{workspaceId}/toolbox/files/info:
     get:
-      description: Get file info inside workspace project
+      description: Get file info inside a workspace
       operationId: FsGetFileDetails
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1556,20 +1593,14 @@ paths:
       summary: Get file info
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/files/move:
+  /workspace/{workspaceId}/toolbox/files/move:
     post:
-      description: Create folder inside workspace project
+      description: Create folder inside a workspace
       operationId: FsMoveFile
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1592,20 +1623,14 @@ paths:
       summary: Create folder
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/files/permissions:
+  /workspace/{workspaceId}/toolbox/files/permissions:
     post:
-      description: Set file owner/group/permissions inside workspace project
+      description: Set file owner/group/permissions inside a workspace
       operationId: FsSetFilePermissions
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1637,20 +1662,14 @@ paths:
       summary: Set file owner/group/permissions
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/files/replace:
+  /workspace/{workspaceId}/toolbox/files/replace:
     post:
-      description: Repleace text/pattern in mutilple files inside workspace project
+      description: Repleace text/pattern in mutilple files inside a workspace
       operationId: FsReplaceInFiles
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1674,20 +1693,14 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: replace
-  /workspace/{workspaceId}/{projectId}/toolbox/files/search:
+  /workspace/{workspaceId}/toolbox/files/search:
     get:
-      description: Search for files inside workspace project
+      description: Search for files inside a workspace
       operationId: FsSearchFiles
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1713,20 +1726,14 @@ paths:
       summary: Search for files
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/files/upload:
+  /workspace/{workspaceId}/toolbox/files/upload:
     post:
-      description: Upload file inside workspace project
+      description: Upload file inside a workspace
       operationId: FsUploadFile
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1749,7 +1756,7 @@ paths:
       summary: Upload file
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/git/add:
+  /workspace/{workspaceId}/toolbox/git/add:
     post:
       description: Add files to git commit
       operationId: GitAddFiles
@@ -1757,12 +1764,6 @@ paths:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1781,20 +1782,14 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/git/branches:
+  /workspace/{workspaceId}/toolbox/git/branches:
     get:
-      description: Get branch list from git repository inside workspace project
+      description: Get branch list from git repository inside a workspace
       operationId: GitBranchList
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1815,18 +1810,12 @@ paths:
       tags:
       - workspace toolbox
     post:
-      description: Create branch on git repository inside workspace project
+      description: Create branch on git repository inside a workspace
       operationId: GitCreateBranch
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1845,20 +1834,14 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/git/clone:
+  /workspace/{workspaceId}/toolbox/git/clone:
     post:
-      description: Clone git repository inside workspace project
+      description: Clone git repository inside a workspace
       operationId: GitCloneRepository
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1877,20 +1860,14 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/git/commit:
+  /workspace/{workspaceId}/toolbox/git/commit:
     post:
-      description: Commit changes to git repository inside workspace project
+      description: Commit changes to git repository inside a workspace
       operationId: GitCommitChanges
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1912,20 +1889,14 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/git/history:
+  /workspace/{workspaceId}/toolbox/git/history:
     get:
-      description: Get commit history from git repository inside workspace project
+      description: Get commit history from git repository inside a workspace
       operationId: GitCommitHistory
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1947,20 +1918,14 @@ paths:
       summary: Get commit history
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/git/pull:
+  /workspace/{workspaceId}/toolbox/git/pull:
     post:
-      description: Pull changes from remote to git repository inside workspace project
+      description: Pull changes from remote to git repository inside a workspace
       operationId: GitPullChanges
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1979,20 +1944,14 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/git/push:
+  /workspace/{workspaceId}/toolbox/git/push:
     post:
-      description: Push changes to remote from git repository inside workspace project
+      description: Push changes to remote from git repository inside a workspace
       operationId: GitPushChanges
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2011,20 +1970,14 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/git/status:
+  /workspace/{workspaceId}/toolbox/git/status:
     get:
-      description: Get status from git repository inside workspace project
+      description: Get status from git repository inside a workspace
       operationId: GitGitStatus
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2044,7 +1997,7 @@ paths:
       summary: Get git status
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/lsp/completions:
+  /workspace/{workspaceId}/toolbox/lsp/completions:
     post:
       description: The Completion request is sent from the client to the server to
         compute completion items at a given cursor position.
@@ -2053,12 +2006,6 @@ paths:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2080,7 +2027,7 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/lsp/did-close:
+  /workspace/{workspaceId}/toolbox/lsp/did-close:
     post:
       description: The document close notification is sent from the client to the
         server when the document got closed in the client.
@@ -2089,12 +2036,6 @@ paths:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2113,7 +2054,7 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/lsp/did-open:
+  /workspace/{workspaceId}/toolbox/lsp/did-open:
     post:
       description: The document open notification is sent from the client to the server
         to signal newly opened text documents.
@@ -2122,12 +2063,6 @@ paths:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2146,7 +2081,7 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/lsp/document-symbols:
+  /workspace/{workspaceId}/toolbox/lsp/document-symbols:
     get:
       description: The document symbol request is sent from the client to the server.
       operationId: LspDocumentSymbols
@@ -2154,12 +2089,6 @@ paths:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2193,20 +2122,14 @@ paths:
       summary: Call Lsp DocumentSymbols
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/lsp/start:
+  /workspace/{workspaceId}/toolbox/lsp/start:
     post:
-      description: Start Lsp server process inside workspace project
+      description: Start Lsp server process inside a workspace
       operationId: LspStart
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2225,20 +2148,14 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/lsp/stop:
+  /workspace/{workspaceId}/toolbox/lsp/stop:
     post:
-      description: Stop Lsp server process inside workspace project
+      description: Stop Lsp server process inside a workspace
       operationId: LspStop
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2257,7 +2174,7 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/lsp/workspace-symbols:
+  /workspace/{workspaceId}/toolbox/lsp/workspace-symbols:
     get:
       description: The workspace symbol request is sent from the client to the server
         to list project-wide symbols matching the query string.
@@ -2266,12 +2183,6 @@ paths:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2305,20 +2216,14 @@ paths:
       summary: Call Lsp WorkspaceSymbols
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/process/execute:
+  /workspace/{workspaceId}/toolbox/process/execute:
     post:
-      description: Execute command synchronously inside workspace project
+      description: Execute command synchronously inside a workspace
       operationId: ProcessExecuteCommand
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2340,7 +2245,7 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/process/session:
+  /workspace/{workspaceId}/toolbox/process/session:
     get:
       description: List sessions inside workspace project
       operationId: ListSessions
@@ -2348,12 +2253,6 @@ paths:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2379,12 +2278,6 @@ paths:
         required: true
         schema:
           type: string
-      - description: Project ID
-        in: path
-        name: projectId
-        required: true
-        schema:
-          type: string
       requestBody:
         content:
           '*/*':
@@ -2400,7 +2293,7 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}:
+  /workspace/{workspaceId}/toolbox/process/session/{sessionId}:
     delete:
       description: Delete a session inside workspace project
       operationId: DeleteSession
@@ -2408,12 +2301,6 @@ paths:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2430,7 +2317,7 @@ paths:
       summary: Delete session
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/command/{commandId}/logs:
+  /workspace/{workspaceId}/toolbox/process/session/{sessionId}/command/{commandId}/logs:
     get:
       description: |-
         Get logs of a command inside a session inside workspace project
@@ -2440,12 +2327,6 @@ paths:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2471,7 +2352,7 @@ paths:
       summary: Get session command logs
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/exec:
+  /workspace/{workspaceId}/toolbox/process/session/{sessionId}/exec:
     post:
       description: Execute command inside a session inside workspace project
       operationId: SessionExecuteCommand
@@ -2479,12 +2360,6 @@ paths:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2512,7 +2387,7 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/workspace-dir:
+  /workspace/{workspaceId}/toolbox/workspace-dir:
     get:
       description: Get workspace directory
       operationId: GetWorkspaceDir
@@ -2520,12 +2395,6 @@ paths:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2855,55 +2724,6 @@ components:
         targetConfig: targetConfig
         name: name
         id: id
-        workspaces:
-        - buildConfig:
-            cachedBuild:
-              image: image
-              user: user
-            devcontainer:
-              filePath: filePath
-          gitProviderConfigId: gitProviderConfigId
-          image: image
-          envVars:
-            key: envVars
-          name: name
-          source:
-            repository:
-              owner: owner
-              path: path
-              name: name
-              id: id
-              source: source
-              prNumber: 0
-              branch: branch
-              cloneTarget: null
-              sha: sha
-              url: url
-          user: user
-        - buildConfig:
-            cachedBuild:
-              image: image
-              user: user
-            devcontainer:
-              filePath: filePath
-          gitProviderConfigId: gitProviderConfigId
-          image: image
-          envVars:
-            key: envVars
-          name: name
-          source:
-            repository:
-              owner: owner
-              path: path
-              name: name
-              id: id
-              source: source
-              prNumber: 0
-              branch: branch
-              cloneTarget: null
-              sha: sha
-              url: url
-          user: user
       properties:
         id:
           type: string
@@ -2911,15 +2731,10 @@ components:
           type: string
         targetConfig:
           type: string
-        workspaces:
-          items:
-            $ref: '#/components/schemas/CreateWorkspaceDTO'
-          type: array
       required:
       - id
       - name
       - targetConfig
-      - workspaces
       type: object
     CreateWorkspaceConfigDTO:
       example:
@@ -2968,9 +2783,11 @@ components:
             filePath: filePath
         gitProviderConfigId: gitProviderConfigId
         image: image
+        targetId: targetId
         envVars:
           key: envVars
         name: name
+        id: id
         source:
           repository:
             owner: owner
@@ -2993,18 +2810,24 @@ components:
           type: object
         gitProviderConfigId:
           type: string
+        id:
+          type: string
         image:
           type: string
         name:
           type: string
         source:
           $ref: '#/components/schemas/CreateWorkspaceSourceDTO'
+        targetId:
+          type: string
         user:
           type: string
       required:
       - envVars
+      - id
       - name
       - source
+      - targetId
       type: object
     CreateWorkspaceSourceDTO:
       example:
@@ -4084,91 +3907,6 @@ components:
         targetConfig: targetConfig
         name: name
         id: id
-        workspaces:
-        - buildConfig:
-            cachedBuild:
-              image: image
-              user: user
-            devcontainer:
-              filePath: filePath
-          gitProviderConfigId: gitProviderConfigId
-          image: image
-          targetConfig: targetConfig
-          targetId: targetId
-          envVars:
-            key: envVars
-          name: name
-          state:
-            gitStatus:
-              behind: 6
-              fileStatus:
-              - extra: extra
-                name: name
-                staging: null
-                worktree: null
-              - extra: extra
-                name: name
-                staging: null
-                worktree: null
-              ahead: 0
-              branchPublished: true
-              currentBranch: currentBranch
-            updatedAt: updatedAt
-            uptime: 1
-          repository:
-            owner: owner
-            path: path
-            name: name
-            id: id
-            source: source
-            prNumber: 0
-            branch: branch
-            cloneTarget: null
-            sha: sha
-            url: url
-          user: user
-        - buildConfig:
-            cachedBuild:
-              image: image
-              user: user
-            devcontainer:
-              filePath: filePath
-          gitProviderConfigId: gitProviderConfigId
-          image: image
-          targetConfig: targetConfig
-          targetId: targetId
-          envVars:
-            key: envVars
-          name: name
-          state:
-            gitStatus:
-              behind: 6
-              fileStatus:
-              - extra: extra
-                name: name
-                staging: null
-                worktree: null
-              - extra: extra
-                name: name
-                staging: null
-                worktree: null
-              ahead: 0
-              branchPublished: true
-              currentBranch: currentBranch
-            updatedAt: updatedAt
-            uptime: 1
-          repository:
-            owner: owner
-            path: path
-            name: name
-            id: id
-            source: source
-            prNumber: 0
-            branch: branch
-            cloneTarget: null
-            sha: sha
-            url: url
-          user: user
       properties:
         id:
           type: string
@@ -4176,15 +3914,10 @@ components:
           type: string
         targetConfig:
           type: string
-        workspaces:
-          items:
-            $ref: '#/components/schemas/Workspace'
-          type: array
       required:
       - id
       - name
       - targetConfig
-      - workspaces
       type: object
     TargetConfig:
       example:
@@ -4252,105 +3985,9 @@ components:
         targetConfig: targetConfig
         name: name
         id: id
-        workspaces:
-        - buildConfig:
-            cachedBuild:
-              image: image
-              user: user
-            devcontainer:
-              filePath: filePath
-          gitProviderConfigId: gitProviderConfigId
-          image: image
-          targetConfig: targetConfig
-          targetId: targetId
-          envVars:
-            key: envVars
-          name: name
-          state:
-            gitStatus:
-              behind: 6
-              fileStatus:
-              - extra: extra
-                name: name
-                staging: null
-                worktree: null
-              - extra: extra
-                name: name
-                staging: null
-                worktree: null
-              ahead: 0
-              branchPublished: true
-              currentBranch: currentBranch
-            updatedAt: updatedAt
-            uptime: 1
-          repository:
-            owner: owner
-            path: path
-            name: name
-            id: id
-            source: source
-            prNumber: 0
-            branch: branch
-            cloneTarget: null
-            sha: sha
-            url: url
-          user: user
-        - buildConfig:
-            cachedBuild:
-              image: image
-              user: user
-            devcontainer:
-              filePath: filePath
-          gitProviderConfigId: gitProviderConfigId
-          image: image
-          targetConfig: targetConfig
-          targetId: targetId
-          envVars:
-            key: envVars
-          name: name
-          state:
-            gitStatus:
-              behind: 6
-              fileStatus:
-              - extra: extra
-                name: name
-                staging: null
-                worktree: null
-              - extra: extra
-                name: name
-                staging: null
-                worktree: null
-              ahead: 0
-              branchPublished: true
-              currentBranch: currentBranch
-            updatedAt: updatedAt
-            uptime: 1
-          repository:
-            owner: owner
-            path: path
-            name: name
-            id: id
-            source: source
-            prNumber: 0
-            branch: branch
-            cloneTarget: null
-            sha: sha
-            url: url
-          user: user
         info:
           providerMetadata: providerMetadata
           name: name
-          workspaces:
-          - providerMetadata: providerMetadata
-            targetId: targetId
-            isRunning: true
-            created: created
-            name: name
-          - providerMetadata: providerMetadata
-            targetId: targetId
-            isRunning: true
-            created: created
-            name: name
       properties:
         id:
           type: string
@@ -4360,119 +3997,22 @@ components:
           type: string
         targetConfig:
           type: string
-        workspaces:
-          items:
-            $ref: '#/components/schemas/Workspace'
-          type: array
       required:
       - id
       - name
       - targetConfig
-      - workspaces
       type: object
     TargetInfo:
       example:
         providerMetadata: providerMetadata
         name: name
-        workspaces:
-        - providerMetadata: providerMetadata
-          targetId: targetId
-          isRunning: true
-          created: created
-          name: name
-        - providerMetadata: providerMetadata
-          targetId: targetId
-          isRunning: true
-          created: created
-          name: name
       properties:
         name:
           type: string
         providerMetadata:
           type: string
-        workspaces:
-          items:
-            $ref: '#/components/schemas/WorkspaceInfo'
-          type: array
       required:
       - name
-      - workspaces
-      type: object
-    Workspace:
-      example:
-        buildConfig:
-          cachedBuild:
-            image: image
-            user: user
-          devcontainer:
-            filePath: filePath
-        gitProviderConfigId: gitProviderConfigId
-        image: image
-        targetConfig: targetConfig
-        targetId: targetId
-        envVars:
-          key: envVars
-        name: name
-        state:
-          gitStatus:
-            behind: 6
-            fileStatus:
-            - extra: extra
-              name: name
-              staging: null
-              worktree: null
-            - extra: extra
-              name: name
-              staging: null
-              worktree: null
-            ahead: 0
-            branchPublished: true
-            currentBranch: currentBranch
-          updatedAt: updatedAt
-          uptime: 1
-        repository:
-          owner: owner
-          path: path
-          name: name
-          id: id
-          source: source
-          prNumber: 0
-          branch: branch
-          cloneTarget: null
-          sha: sha
-          url: url
-        user: user
-      properties:
-        buildConfig:
-          $ref: '#/components/schemas/BuildConfig'
-        envVars:
-          additionalProperties:
-            type: string
-          type: object
-        gitProviderConfigId:
-          type: string
-        image:
-          type: string
-        name:
-          type: string
-        repository:
-          $ref: '#/components/schemas/GitRepository'
-        state:
-          $ref: '#/components/schemas/WorkspaceState'
-        targetConfig:
-          type: string
-        targetId:
-          type: string
-        user:
-          type: string
-      required:
-      - envVars
-      - image
-      - name
-      - repository
-      - targetConfig
-      - targetId
-      - user
       type: object
     WorkspaceConfig:
       example:
@@ -4536,6 +4076,94 @@ components:
       - repositoryUrl
       - user
       type: object
+    WorkspaceDTO:
+      example:
+        buildConfig:
+          cachedBuild:
+            image: image
+            user: user
+          devcontainer:
+            filePath: filePath
+        gitProviderConfigId: gitProviderConfigId
+        image: image
+        targetName: targetName
+        targetId: targetId
+        envVars:
+          key: envVars
+        name: name
+        id: id
+        state:
+          gitStatus:
+            behind: 6
+            fileStatus:
+            - extra: extra
+              name: name
+              staging: null
+              worktree: null
+            - extra: extra
+              name: name
+              staging: null
+              worktree: null
+            ahead: 0
+            branchPublished: true
+            currentBranch: currentBranch
+          updatedAt: updatedAt
+          uptime: 1
+        repository:
+          owner: owner
+          path: path
+          name: name
+          id: id
+          source: source
+          prNumber: 0
+          branch: branch
+          cloneTarget: null
+          sha: sha
+          url: url
+        user: user
+        info:
+          providerMetadata: providerMetadata
+          targetId: targetId
+          isRunning: true
+          created: created
+          name: name
+      properties:
+        buildConfig:
+          $ref: '#/components/schemas/BuildConfig'
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
+        gitProviderConfigId:
+          type: string
+        id:
+          type: string
+        image:
+          type: string
+        info:
+          $ref: '#/components/schemas/WorkspaceInfo'
+        name:
+          type: string
+        repository:
+          $ref: '#/components/schemas/GitRepository'
+        state:
+          $ref: '#/components/schemas/WorkspaceState'
+        targetId:
+          type: string
+        targetName:
+          type: string
+        user:
+          type: string
+      required:
+      - envVars
+      - id
+      - image
+      - name
+      - repository
+      - targetId
+      - targetName
+      - user
+      type: object
     WorkspaceDirResponse:
       example:
         dir: dir
@@ -4595,6 +4223,86 @@ components:
       required:
       - updatedAt
       - uptime
+      type: object
+    WorkspaceViewDTO:
+      example:
+        buildConfig:
+          cachedBuild:
+            image: image
+            user: user
+          devcontainer:
+            filePath: filePath
+        gitProviderConfigId: gitProviderConfigId
+        image: image
+        targetName: targetName
+        targetId: targetId
+        envVars:
+          key: envVars
+        name: name
+        id: id
+        state:
+          gitStatus:
+            behind: 6
+            fileStatus:
+            - extra: extra
+              name: name
+              staging: null
+              worktree: null
+            - extra: extra
+              name: name
+              staging: null
+              worktree: null
+            ahead: 0
+            branchPublished: true
+            currentBranch: currentBranch
+          updatedAt: updatedAt
+          uptime: 1
+        repository:
+          owner: owner
+          path: path
+          name: name
+          id: id
+          source: source
+          prNumber: 0
+          branch: branch
+          cloneTarget: null
+          sha: sha
+          url: url
+        user: user
+      properties:
+        buildConfig:
+          $ref: '#/components/schemas/BuildConfig'
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
+        gitProviderConfigId:
+          type: string
+        id:
+          type: string
+        image:
+          type: string
+        name:
+          type: string
+        repository:
+          $ref: '#/components/schemas/GitRepository'
+        state:
+          $ref: '#/components/schemas/WorkspaceState'
+        targetId:
+          type: string
+        targetName:
+          type: string
+        user:
+          type: string
+      required:
+      - envVars
+      - id
+      - image
+      - name
+      - repository
+      - targetId
+      - targetName
+      - user
       type: object
     apikey.ApiKeyType:
       enum:

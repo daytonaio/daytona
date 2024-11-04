@@ -37,11 +37,11 @@ func (s *TargetService) GetTarget(ctx context.Context, targetId string, verbose 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	resultCh := make(chan provisioner.InfoResult, 1)
+	resultCh := make(chan provisioner.TargetInfoResult, 1)
 
 	go func() {
 		targetInfo, err := s.provisioner.GetTargetInfo(ctx, tg, targetConfig)
-		resultCh <- provisioner.InfoResult{Info: targetInfo, Err: err}
+		resultCh <- provisioner.TargetInfoResult{Info: targetInfo, Err: err}
 	}()
 
 	select {

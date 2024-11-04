@@ -7,7 +7,6 @@ import (
 	"context"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
@@ -17,15 +16,13 @@ import (
 
 var verbose bool
 
-var ListCmd = &cobra.Command{
+var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List targets",
 	Args:    cobra.ExactArgs(0),
 	Aliases: []string{"ls"},
-	GroupID: util.TARGET_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
-		var specifyGitProviders bool
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
@@ -36,15 +33,6 @@ var ListCmd = &cobra.Command{
 
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
-		}
-
-		gitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
-		if err != nil {
-			return apiclient.HandleErrorResponse(res, err)
-		}
-
-		if len(gitProviders) > 1 {
-			specifyGitProviders = true
 		}
 
 		if format.FormatFlag != "" {
@@ -63,13 +51,13 @@ var ListCmd = &cobra.Command{
 			return err
 		}
 
-		list_view.ListTargets(targetList, specifyGitProviders, verbose, activeProfile.Name)
+		list_view.ListTargets(targetList, verbose, activeProfile.Name)
 
 		return nil
 	},
 }
 
 func init() {
-	ListCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose output")
-	format.RegisterFormatFlag(ListCmd)
+	listCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose output")
+	format.RegisterFormatFlag(listCmd)
 }

@@ -5,9 +5,9 @@ package targets
 
 import (
 	"context"
-	"time"
 
 	"github.com/daytonaio/daytona/pkg/provider"
+	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	log "github.com/sirupsen/logrus"
 )
@@ -15,38 +15,27 @@ import (
 func (s *TargetService) StopTarget(ctx context.Context, targetId string) error {
 	target, err := s.targetStore.Find(targetId)
 	if err != nil {
-		return ErrTargetNotFound
+		return s.handleStopError(ctx, nil, ErrTargetNotFound)
 	}
 
 	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &target.TargetConfig})
 	if err != nil {
-		return err
-	}
-
-	for _, workspace := range target.Workspaces {
-		//	todo: go routines
-		err := s.provisioner.StopWorkspace(workspace, targetConfig)
-		if err != nil {
-			return err
-		}
-		if workspace.State != nil {
-			workspace.State.Uptime = 0
-			workspace.State.UpdatedAt = time.Now().Format(time.RFC1123)
-		}
+		return s.handleStopError(ctx, target, err)
 	}
 
 	err = s.provisioner.StopTarget(target, targetConfig)
-	if err == nil {
-		err = s.targetStore.Save(target)
-	}
 
+	return s.handleStopError(ctx, target, err)
+}
+
+func (s *TargetService) handleStopError(ctx context.Context, target *target.Target, err error) error {
 	if !telemetry.TelemetryEnabled(ctx) {
 		return err
 	}
 
 	clientId := telemetry.ClientId(ctx)
 
-	telemetryProps := telemetry.NewTargetEventProps(ctx, target, targetConfig)
+	telemetryProps := telemetry.NewTargetEventProps(ctx, target, nil)
 	event := telemetry.ServerEventTargetStopped
 	if err != nil {
 		telemetryProps["error"] = err.Error()
@@ -58,33 +47,4 @@ func (s *TargetService) StopTarget(ctx context.Context, targetId string) error {
 	}
 
 	return err
-}
-
-func (s *TargetService) StopWorkspace(ctx context.Context, targetId, workspaceName string) error {
-	w, err := s.targetStore.Find(targetId)
-	if err != nil {
-		return ErrTargetNotFound
-	}
-
-	workspace, err := w.GetWorkspace(workspaceName)
-	if err != nil {
-		return ErrWorkspaceNotFound
-	}
-
-	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &w.TargetConfig})
-	if err != nil {
-		return err
-	}
-
-	err = s.provisioner.StopWorkspace(workspace, targetConfig)
-	if err != nil {
-		return err
-	}
-
-	if workspace.State != nil {
-		workspace.State.Uptime = 0
-		workspace.State.UpdatedAt = time.Now().Format(time.RFC1123)
-	}
-
-	return s.targetStore.Save(w)
 }

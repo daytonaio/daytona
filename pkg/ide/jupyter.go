@@ -26,14 +26,14 @@ import (
 const startJupyterCommand = "notebook --no-browser --port=8888 --ip=0.0.0.0 --NotebookApp.token='' --NotebookApp.password=''"
 
 // OpenJupyterIDE manages the installation and startup of a Jupyter IDE on a remote target.
-func OpenJupyterIDE(activeProfile config.Profile, targetId, workspaceName, workspaceProviderMetadata string, yesFlag bool, gpgKey string) error {
+func OpenJupyterIDE(activeProfile config.Profile, workspaceId, workspaceProviderMetadata string, yesFlag bool, gpgKey string) error {
 	// Ensure SSH config entry is added
-	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, targetId, workspaceName, gpgKey)
+	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, gpgKey)
 	if err != nil {
 		return err
 	}
 
-	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, targetId, workspaceName)
+	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, workspaceId)
 
 	// Check and install Python if necessary
 	if err := ensurePythonInstalled(workspaceHostname, yesFlag); err != nil {
@@ -51,7 +51,7 @@ func OpenJupyterIDE(activeProfile config.Profile, targetId, workspaceName, works
 	}
 
 	// Start Jupyter Notebook server
-	if err := startJupyterServer(workspaceHostname, activeProfile, targetId, workspaceName, gpgKey); err != nil {
+	if err := startJupyterServer(workspaceHostname, activeProfile, workspaceId, gpgKey); err != nil {
 		return err
 	}
 
@@ -216,8 +216,8 @@ func ensureJupyterInstalled(hostname string) error {
 }
 
 // startJupyterServer starts the Jupyter Notebook server on the remote target.
-func startJupyterServer(hostname string, activeProfile config.Profile, targetId, workspaceName string, gpgKey string) error {
-	workspaceDir, err := util.GetWorkspaceDir(activeProfile, targetId, workspaceName, gpgKey)
+func startJupyterServer(hostname string, activeProfile config.Profile, workspaceId string, gpgKey string) error {
+	workspaceDir, err := util.GetWorkspaceDir(activeProfile, workspaceId, gpgKey)
 	if err != nil {
 		return err
 	}
@@ -235,7 +235,7 @@ func startJupyterServer(hostname string, activeProfile config.Profile, targetId,
 	}()
 
 	// Forward the IDE port
-	browserPort, errChan := tailscale.ForwardPort(targetId, workspaceName, 8888, activeProfile)
+	browserPort, errChan := tailscale.ForwardPort(workspaceId, 8888, activeProfile)
 	if browserPort == nil {
 		if err := <-errChan; err != nil {
 			return err
@@ -246,7 +246,7 @@ func startJupyterServer(hostname string, activeProfile config.Profile, targetId,
 	ideURL := fmt.Sprintf("http://localhost:%d", *browserPort)
 	waitForPort(*browserPort)
 
-	views.RenderInfoMessageBold(fmt.Sprintf("Forwarded %s Jupyter Notebook port to %s.\nOpening browser...\n", workspaceName, ideURL))
+	views.RenderInfoMessageBold(fmt.Sprintf("Forwarded %s Jupyter Notebook port to %s.\nOpening browser...\n", workspaceId, ideURL))
 
 	if err := browser.OpenURL(ideURL); err != nil {
 		log.Error("Error opening URL: " + err.Error())
