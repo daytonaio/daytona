@@ -27,7 +27,6 @@ type ApiCreateSessionRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	params      *CreateSessionRequest
 }
 
@@ -48,15 +47,13 @@ Create exec session inside workspace project
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiCreateSessionRequest
 */
-func (a *WorkspaceToolboxAPIService) CreateSession(ctx context.Context, workspaceId string, projectId string) ApiCreateSessionRequest {
+func (a *WorkspaceToolboxAPIService) CreateSession(ctx context.Context, workspaceId string) ApiCreateSessionRequest {
 	return ApiCreateSessionRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -73,9 +70,8 @@ func (a *WorkspaceToolboxAPIService) CreateSessionExecute(r ApiCreateSessionRequ
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/process/session"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/process/session"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -149,7 +145,6 @@ type ApiDeleteSessionRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	sessionId   string
 }
 
@@ -164,16 +159,14 @@ Delete a session inside workspace project
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@param sessionId Session ID
 	@return ApiDeleteSessionRequest
 */
-func (a *WorkspaceToolboxAPIService) DeleteSession(ctx context.Context, workspaceId string, projectId string, sessionId string) ApiDeleteSessionRequest {
+func (a *WorkspaceToolboxAPIService) DeleteSession(ctx context.Context, workspaceId string, sessionId string) ApiDeleteSessionRequest {
 	return ApiDeleteSessionRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 		sessionId:   sessionId,
 	}
 }
@@ -191,9 +184,8 @@ func (a *WorkspaceToolboxAPIService) DeleteSessionExecute(r ApiDeleteSessionRequ
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/process/session/{sessionId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"sessionId"+"}", url.PathEscape(parameterValueToString(r.sessionId, "sessionId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -263,7 +255,6 @@ type ApiFsCreateFolderRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	path        *string
 	mode        *string
 }
@@ -287,19 +278,17 @@ func (r ApiFsCreateFolderRequest) Execute() (*http.Response, error) {
 /*
 FsCreateFolder Create folder
 
-Create folder inside workspace project
+Create folder inside a workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiFsCreateFolderRequest
 */
-func (a *WorkspaceToolboxAPIService) FsCreateFolder(ctx context.Context, workspaceId string, projectId string) ApiFsCreateFolderRequest {
+func (a *WorkspaceToolboxAPIService) FsCreateFolder(ctx context.Context, workspaceId string) ApiFsCreateFolderRequest {
 	return ApiFsCreateFolderRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -316,9 +305,8 @@ func (a *WorkspaceToolboxAPIService) FsCreateFolderExecute(r ApiFsCreateFolderRe
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/files/folder"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/files/folder"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -395,7 +383,6 @@ type ApiFsDeleteFileRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	path        *string
 }
 
@@ -412,19 +399,17 @@ func (r ApiFsDeleteFileRequest) Execute() (*http.Response, error) {
 /*
 FsDeleteFile Delete file
 
-Delete file inside workspace project
+Delete file inside a workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiFsDeleteFileRequest
 */
-func (a *WorkspaceToolboxAPIService) FsDeleteFile(ctx context.Context, workspaceId string, projectId string) ApiFsDeleteFileRequest {
+func (a *WorkspaceToolboxAPIService) FsDeleteFile(ctx context.Context, workspaceId string) ApiFsDeleteFileRequest {
 	return ApiFsDeleteFileRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -441,9 +426,8 @@ func (a *WorkspaceToolboxAPIService) FsDeleteFileExecute(r ApiFsDeleteFileReques
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/files"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/files"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -516,7 +500,6 @@ type ApiFsDownloadFileRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	path        *string
 }
 
@@ -533,19 +516,17 @@ func (r ApiFsDownloadFileRequest) Execute() (*os.File, *http.Response, error) {
 /*
 FsDownloadFile Download file
 
-Download file from workspace project
+Download file from a workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiFsDownloadFileRequest
 */
-func (a *WorkspaceToolboxAPIService) FsDownloadFile(ctx context.Context, workspaceId string, projectId string) ApiFsDownloadFileRequest {
+func (a *WorkspaceToolboxAPIService) FsDownloadFile(ctx context.Context, workspaceId string) ApiFsDownloadFileRequest {
 	return ApiFsDownloadFileRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -565,9 +546,8 @@ func (a *WorkspaceToolboxAPIService) FsDownloadFileExecute(r ApiFsDownloadFileRe
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/files/download"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/files/download"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -649,7 +629,6 @@ type ApiFsFindInFilesRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	path        *string
 	pattern     *string
 }
@@ -673,19 +652,17 @@ func (r ApiFsFindInFilesRequest) Execute() ([]Match, *http.Response, error) {
 /*
 FsFindInFiles Search for text/pattern in files
 
-Search for text/pattern inside workspace project files
+Search for text/pattern inside a workspace files
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiFsFindInFilesRequest
 */
-func (a *WorkspaceToolboxAPIService) FsFindInFiles(ctx context.Context, workspaceId string, projectId string) ApiFsFindInFilesRequest {
+func (a *WorkspaceToolboxAPIService) FsFindInFiles(ctx context.Context, workspaceId string) ApiFsFindInFilesRequest {
 	return ApiFsFindInFilesRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -705,9 +682,8 @@ func (a *WorkspaceToolboxAPIService) FsFindInFilesExecute(r ApiFsFindInFilesRequ
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/files/find"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/files/find"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -793,7 +769,6 @@ type ApiFsGetFileDetailsRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	path        *string
 }
 
@@ -810,19 +785,17 @@ func (r ApiFsGetFileDetailsRequest) Execute() (*FileInfo, *http.Response, error)
 /*
 FsGetFileDetails Get file info
 
-Get file info inside workspace project
+Get file info inside a workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiFsGetFileDetailsRequest
 */
-func (a *WorkspaceToolboxAPIService) FsGetFileDetails(ctx context.Context, workspaceId string, projectId string) ApiFsGetFileDetailsRequest {
+func (a *WorkspaceToolboxAPIService) FsGetFileDetails(ctx context.Context, workspaceId string) ApiFsGetFileDetailsRequest {
 	return ApiFsGetFileDetailsRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -842,9 +815,8 @@ func (a *WorkspaceToolboxAPIService) FsGetFileDetailsExecute(r ApiFsGetFileDetai
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/files/info"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/files/info"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -926,7 +898,6 @@ type ApiFsListFilesRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	path        *string
 }
 
@@ -943,19 +914,17 @@ func (r ApiFsListFilesRequest) Execute() ([]FileInfo, *http.Response, error) {
 /*
 FsListFiles List files
 
-List files inside workspace project
+List files inside a workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiFsListFilesRequest
 */
-func (a *WorkspaceToolboxAPIService) FsListFiles(ctx context.Context, workspaceId string, projectId string) ApiFsListFilesRequest {
+func (a *WorkspaceToolboxAPIService) FsListFiles(ctx context.Context, workspaceId string) ApiFsListFilesRequest {
 	return ApiFsListFilesRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -975,9 +944,8 @@ func (a *WorkspaceToolboxAPIService) FsListFilesExecute(r ApiFsListFilesRequest)
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/files"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/files"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -1058,7 +1026,6 @@ type ApiFsMoveFileRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	source      *string
 	destination *string
 }
@@ -1082,19 +1049,17 @@ func (r ApiFsMoveFileRequest) Execute() (*http.Response, error) {
 /*
 FsMoveFile Create folder
 
-Create folder inside workspace project
+Create folder inside a workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiFsMoveFileRequest
 */
-func (a *WorkspaceToolboxAPIService) FsMoveFile(ctx context.Context, workspaceId string, projectId string) ApiFsMoveFileRequest {
+func (a *WorkspaceToolboxAPIService) FsMoveFile(ctx context.Context, workspaceId string) ApiFsMoveFileRequest {
 	return ApiFsMoveFileRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -1111,9 +1076,8 @@ func (a *WorkspaceToolboxAPIService) FsMoveFileExecute(r ApiFsMoveFileRequest) (
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/files/move"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/files/move"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -1190,7 +1154,6 @@ type ApiFsReplaceInFilesRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	replace     *ReplaceRequest
 }
 
@@ -1207,19 +1170,17 @@ func (r ApiFsReplaceInFilesRequest) Execute() ([]ReplaceResult, *http.Response, 
 /*
 FsReplaceInFiles Repleace text/pattern in files
 
-Repleace text/pattern in mutilple files inside workspace project
+Repleace text/pattern in mutilple files inside a workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiFsReplaceInFilesRequest
 */
-func (a *WorkspaceToolboxAPIService) FsReplaceInFiles(ctx context.Context, workspaceId string, projectId string) ApiFsReplaceInFilesRequest {
+func (a *WorkspaceToolboxAPIService) FsReplaceInFiles(ctx context.Context, workspaceId string) ApiFsReplaceInFilesRequest {
 	return ApiFsReplaceInFilesRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -1239,9 +1200,8 @@ func (a *WorkspaceToolboxAPIService) FsReplaceInFilesExecute(r ApiFsReplaceInFil
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/files/replace"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/files/replace"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -1324,7 +1284,6 @@ type ApiFsSearchFilesRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	path        *string
 	pattern     *string
 }
@@ -1348,19 +1307,17 @@ func (r ApiFsSearchFilesRequest) Execute() (*SearchFilesResponse, *http.Response
 /*
 FsSearchFiles Search for files
 
-Search for files inside workspace project
+Search for files inside a workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiFsSearchFilesRequest
 */
-func (a *WorkspaceToolboxAPIService) FsSearchFiles(ctx context.Context, workspaceId string, projectId string) ApiFsSearchFilesRequest {
+func (a *WorkspaceToolboxAPIService) FsSearchFiles(ctx context.Context, workspaceId string) ApiFsSearchFilesRequest {
 	return ApiFsSearchFilesRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -1380,9 +1337,8 @@ func (a *WorkspaceToolboxAPIService) FsSearchFilesExecute(r ApiFsSearchFilesRequ
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/files/search"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/files/search"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -1468,7 +1424,6 @@ type ApiFsSetFilePermissionsRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	path        *string
 	owner       *string
 	group       *string
@@ -1506,19 +1461,17 @@ func (r ApiFsSetFilePermissionsRequest) Execute() (*http.Response, error) {
 /*
 FsSetFilePermissions Set file owner/group/permissions
 
-Set file owner/group/permissions inside workspace project
+Set file owner/group/permissions inside a workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiFsSetFilePermissionsRequest
 */
-func (a *WorkspaceToolboxAPIService) FsSetFilePermissions(ctx context.Context, workspaceId string, projectId string) ApiFsSetFilePermissionsRequest {
+func (a *WorkspaceToolboxAPIService) FsSetFilePermissions(ctx context.Context, workspaceId string) ApiFsSetFilePermissionsRequest {
 	return ApiFsSetFilePermissionsRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -1535,9 +1488,8 @@ func (a *WorkspaceToolboxAPIService) FsSetFilePermissionsExecute(r ApiFsSetFileP
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/files/permissions"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/files/permissions"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -1619,7 +1571,6 @@ type ApiFsUploadFileRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	path        *string
 	file        *os.File
 }
@@ -1643,19 +1594,17 @@ func (r ApiFsUploadFileRequest) Execute() (*http.Response, error) {
 /*
 FsUploadFile Upload file
 
-Upload file inside workspace project
+Upload file inside a workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiFsUploadFileRequest
 */
-func (a *WorkspaceToolboxAPIService) FsUploadFile(ctx context.Context, workspaceId string, projectId string) ApiFsUploadFileRequest {
+func (a *WorkspaceToolboxAPIService) FsUploadFile(ctx context.Context, workspaceId string) ApiFsUploadFileRequest {
 	return ApiFsUploadFileRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -1672,9 +1621,8 @@ func (a *WorkspaceToolboxAPIService) FsUploadFileExecute(r ApiFsUploadFileReques
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/files/upload"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/files/upload"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -1765,7 +1713,6 @@ type ApiGetSessionCommandLogsRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	sessionId   string
 	commandId   string
 }
@@ -1782,17 +1729,15 @@ Connect with websocket to get a stream of the logs
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@param sessionId Session ID
 	@param commandId Command ID
 	@return ApiGetSessionCommandLogsRequest
 */
-func (a *WorkspaceToolboxAPIService) GetSessionCommandLogs(ctx context.Context, workspaceId string, projectId string, sessionId string, commandId string) ApiGetSessionCommandLogsRequest {
+func (a *WorkspaceToolboxAPIService) GetSessionCommandLogs(ctx context.Context, workspaceId string, sessionId string, commandId string) ApiGetSessionCommandLogsRequest {
 	return ApiGetSessionCommandLogsRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 		sessionId:   sessionId,
 		commandId:   commandId,
 	}
@@ -1814,9 +1759,8 @@ func (a *WorkspaceToolboxAPIService) GetSessionCommandLogsExecute(r ApiGetSessio
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/command/{commandId}/logs"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/process/session/{sessionId}/command/{commandId}/logs"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"sessionId"+"}", url.PathEscape(parameterValueToString(r.sessionId, "sessionId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"commandId"+"}", url.PathEscape(parameterValueToString(r.commandId, "commandId")), -1)
 
@@ -1896,7 +1840,6 @@ type ApiGetWorkspaceDirRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 }
 
 func (r ApiGetWorkspaceDirRequest) Execute() (*WorkspaceDirResponse, *http.Response, error) {
@@ -1910,15 +1853,13 @@ Get workspace directory
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiGetWorkspaceDirRequest
 */
-func (a *WorkspaceToolboxAPIService) GetWorkspaceDir(ctx context.Context, workspaceId string, projectId string) ApiGetWorkspaceDirRequest {
+func (a *WorkspaceToolboxAPIService) GetWorkspaceDir(ctx context.Context, workspaceId string) ApiGetWorkspaceDirRequest {
 	return ApiGetWorkspaceDirRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -1938,9 +1879,8 @@ func (a *WorkspaceToolboxAPIService) GetWorkspaceDirExecute(r ApiGetWorkspaceDir
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/workspace-dir"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/workspace-dir"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -2018,7 +1958,6 @@ type ApiGitAddFilesRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	params      *GitAddRequest
 }
 
@@ -2039,15 +1978,13 @@ Add files to git commit
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiGitAddFilesRequest
 */
-func (a *WorkspaceToolboxAPIService) GitAddFiles(ctx context.Context, workspaceId string, projectId string) ApiGitAddFilesRequest {
+func (a *WorkspaceToolboxAPIService) GitAddFiles(ctx context.Context, workspaceId string) ApiGitAddFilesRequest {
 	return ApiGitAddFilesRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -2064,9 +2001,8 @@ func (a *WorkspaceToolboxAPIService) GitAddFilesExecute(r ApiGitAddFilesRequest)
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/git/add"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/git/add"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -2140,7 +2076,6 @@ type ApiGitBranchListRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	path        *string
 }
 
@@ -2157,19 +2092,17 @@ func (r ApiGitBranchListRequest) Execute() (*ListBranchResponse, *http.Response,
 /*
 GitBranchList Get branch list
 
-Get branch list from git repository inside workspace project
+Get branch list from git repository inside a workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiGitBranchListRequest
 */
-func (a *WorkspaceToolboxAPIService) GitBranchList(ctx context.Context, workspaceId string, projectId string) ApiGitBranchListRequest {
+func (a *WorkspaceToolboxAPIService) GitBranchList(ctx context.Context, workspaceId string) ApiGitBranchListRequest {
 	return ApiGitBranchListRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -2189,9 +2122,8 @@ func (a *WorkspaceToolboxAPIService) GitBranchListExecute(r ApiGitBranchListRequ
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/git/branches"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/git/branches"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -2273,7 +2205,6 @@ type ApiGitCloneRepositoryRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	params      *GitCloneRequest
 }
 
@@ -2290,19 +2221,17 @@ func (r ApiGitCloneRepositoryRequest) Execute() (*http.Response, error) {
 /*
 GitCloneRepository Clone git repository
 
-Clone git repository inside workspace project
+Clone git repository inside a workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiGitCloneRepositoryRequest
 */
-func (a *WorkspaceToolboxAPIService) GitCloneRepository(ctx context.Context, workspaceId string, projectId string) ApiGitCloneRepositoryRequest {
+func (a *WorkspaceToolboxAPIService) GitCloneRepository(ctx context.Context, workspaceId string) ApiGitCloneRepositoryRequest {
 	return ApiGitCloneRepositoryRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -2319,9 +2248,8 @@ func (a *WorkspaceToolboxAPIService) GitCloneRepositoryExecute(r ApiGitCloneRepo
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/git/clone"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/git/clone"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -2395,7 +2323,6 @@ type ApiGitCommitChangesRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	params      *GitCommitRequest
 }
 
@@ -2412,19 +2339,17 @@ func (r ApiGitCommitChangesRequest) Execute() (*GitCommitResponse, *http.Respons
 /*
 GitCommitChanges Commit changes
 
-Commit changes to git repository inside workspace project
+Commit changes to git repository inside a workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiGitCommitChangesRequest
 */
-func (a *WorkspaceToolboxAPIService) GitCommitChanges(ctx context.Context, workspaceId string, projectId string) ApiGitCommitChangesRequest {
+func (a *WorkspaceToolboxAPIService) GitCommitChanges(ctx context.Context, workspaceId string) ApiGitCommitChangesRequest {
 	return ApiGitCommitChangesRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -2444,9 +2369,8 @@ func (a *WorkspaceToolboxAPIService) GitCommitChangesExecute(r ApiGitCommitChang
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/git/commit"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/git/commit"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -2529,7 +2453,6 @@ type ApiGitCommitHistoryRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	path        *string
 }
 
@@ -2546,19 +2469,17 @@ func (r ApiGitCommitHistoryRequest) Execute() ([]GitCommitInfo, *http.Response, 
 /*
 GitCommitHistory Get commit history
 
-Get commit history from git repository inside workspace project
+Get commit history from git repository inside a workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiGitCommitHistoryRequest
 */
-func (a *WorkspaceToolboxAPIService) GitCommitHistory(ctx context.Context, workspaceId string, projectId string) ApiGitCommitHistoryRequest {
+func (a *WorkspaceToolboxAPIService) GitCommitHistory(ctx context.Context, workspaceId string) ApiGitCommitHistoryRequest {
 	return ApiGitCommitHistoryRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -2578,9 +2499,8 @@ func (a *WorkspaceToolboxAPIService) GitCommitHistoryExecute(r ApiGitCommitHisto
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/git/history"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/git/history"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -2662,7 +2582,6 @@ type ApiGitCreateBranchRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	params      *GitBranchRequest
 }
 
@@ -2679,19 +2598,17 @@ func (r ApiGitCreateBranchRequest) Execute() (*http.Response, error) {
 /*
 GitCreateBranch Create branch
 
-Create branch on git repository inside workspace project
+Create branch on git repository inside a workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiGitCreateBranchRequest
 */
-func (a *WorkspaceToolboxAPIService) GitCreateBranch(ctx context.Context, workspaceId string, projectId string) ApiGitCreateBranchRequest {
+func (a *WorkspaceToolboxAPIService) GitCreateBranch(ctx context.Context, workspaceId string) ApiGitCreateBranchRequest {
 	return ApiGitCreateBranchRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -2708,9 +2625,8 @@ func (a *WorkspaceToolboxAPIService) GitCreateBranchExecute(r ApiGitCreateBranch
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/git/branches"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/git/branches"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -2784,7 +2700,6 @@ type ApiGitGitStatusRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	path        *string
 }
 
@@ -2801,19 +2716,17 @@ func (r ApiGitGitStatusRequest) Execute() (*GitStatus, *http.Response, error) {
 /*
 GitGitStatus Get git status
 
-Get status from git repository inside workspace project
+Get status from git repository inside a workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiGitGitStatusRequest
 */
-func (a *WorkspaceToolboxAPIService) GitGitStatus(ctx context.Context, workspaceId string, projectId string) ApiGitGitStatusRequest {
+func (a *WorkspaceToolboxAPIService) GitGitStatus(ctx context.Context, workspaceId string) ApiGitGitStatusRequest {
 	return ApiGitGitStatusRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -2833,9 +2746,8 @@ func (a *WorkspaceToolboxAPIService) GitGitStatusExecute(r ApiGitGitStatusReques
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/git/status"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/git/status"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -2917,7 +2829,6 @@ type ApiGitPullChangesRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	params      *GitRepoRequest
 }
 
@@ -2934,19 +2845,17 @@ func (r ApiGitPullChangesRequest) Execute() (*http.Response, error) {
 /*
 GitPullChanges Pull changes
 
-Pull changes from remote to git repository inside workspace project
+Pull changes from remote to git repository inside a workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiGitPullChangesRequest
 */
-func (a *WorkspaceToolboxAPIService) GitPullChanges(ctx context.Context, workspaceId string, projectId string) ApiGitPullChangesRequest {
+func (a *WorkspaceToolboxAPIService) GitPullChanges(ctx context.Context, workspaceId string) ApiGitPullChangesRequest {
 	return ApiGitPullChangesRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -2963,9 +2872,8 @@ func (a *WorkspaceToolboxAPIService) GitPullChangesExecute(r ApiGitPullChangesRe
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/git/pull"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/git/pull"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -3039,7 +2947,6 @@ type ApiGitPushChangesRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	params      *GitRepoRequest
 }
 
@@ -3056,19 +2963,17 @@ func (r ApiGitPushChangesRequest) Execute() (*http.Response, error) {
 /*
 GitPushChanges Push changes
 
-Push changes to remote from git repository inside workspace project
+Push changes to remote from git repository inside a workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiGitPushChangesRequest
 */
-func (a *WorkspaceToolboxAPIService) GitPushChanges(ctx context.Context, workspaceId string, projectId string) ApiGitPushChangesRequest {
+func (a *WorkspaceToolboxAPIService) GitPushChanges(ctx context.Context, workspaceId string) ApiGitPushChangesRequest {
 	return ApiGitPushChangesRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -3085,9 +2990,8 @@ func (a *WorkspaceToolboxAPIService) GitPushChangesExecute(r ApiGitPushChangesRe
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/git/push"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/git/push"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -3161,7 +3065,6 @@ type ApiListSessionsRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 }
 
 func (r ApiListSessionsRequest) Execute() ([]Session, *http.Response, error) {
@@ -3175,15 +3078,13 @@ List sessions inside workspace project
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiListSessionsRequest
 */
-func (a *WorkspaceToolboxAPIService) ListSessions(ctx context.Context, workspaceId string, projectId string) ApiListSessionsRequest {
+func (a *WorkspaceToolboxAPIService) ListSessions(ctx context.Context, workspaceId string) ApiListSessionsRequest {
 	return ApiListSessionsRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -3203,9 +3104,8 @@ func (a *WorkspaceToolboxAPIService) ListSessionsExecute(r ApiListSessionsReques
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/process/session"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/process/session"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -3283,7 +3183,6 @@ type ApiLspCompletionsRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	params      *LspCompletionParams
 }
 
@@ -3304,15 +3203,13 @@ The Completion request is sent from the client to the server to compute completi
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiLspCompletionsRequest
 */
-func (a *WorkspaceToolboxAPIService) LspCompletions(ctx context.Context, workspaceId string, projectId string) ApiLspCompletionsRequest {
+func (a *WorkspaceToolboxAPIService) LspCompletions(ctx context.Context, workspaceId string) ApiLspCompletionsRequest {
 	return ApiLspCompletionsRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -3332,9 +3229,8 @@ func (a *WorkspaceToolboxAPIService) LspCompletionsExecute(r ApiLspCompletionsRe
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/lsp/completions"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/lsp/completions"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -3417,7 +3313,6 @@ type ApiLspDidCloseRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	params      *LspDocumentRequest
 }
 
@@ -3438,15 +3333,13 @@ The document close notification is sent from the client to the server when the d
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiLspDidCloseRequest
 */
-func (a *WorkspaceToolboxAPIService) LspDidClose(ctx context.Context, workspaceId string, projectId string) ApiLspDidCloseRequest {
+func (a *WorkspaceToolboxAPIService) LspDidClose(ctx context.Context, workspaceId string) ApiLspDidCloseRequest {
 	return ApiLspDidCloseRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -3463,9 +3356,8 @@ func (a *WorkspaceToolboxAPIService) LspDidCloseExecute(r ApiLspDidCloseRequest)
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/lsp/did-close"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/lsp/did-close"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -3539,7 +3431,6 @@ type ApiLspDidOpenRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	params      *LspDocumentRequest
 }
 
@@ -3560,15 +3451,13 @@ The document open notification is sent from the client to the server to signal n
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiLspDidOpenRequest
 */
-func (a *WorkspaceToolboxAPIService) LspDidOpen(ctx context.Context, workspaceId string, projectId string) ApiLspDidOpenRequest {
+func (a *WorkspaceToolboxAPIService) LspDidOpen(ctx context.Context, workspaceId string) ApiLspDidOpenRequest {
 	return ApiLspDidOpenRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -3585,9 +3474,8 @@ func (a *WorkspaceToolboxAPIService) LspDidOpenExecute(r ApiLspDidOpenRequest) (
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/lsp/did-open"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/lsp/did-open"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -3661,7 +3549,6 @@ type ApiLspDocumentSymbolsRequest struct {
 	ctx           context.Context
 	ApiService    *WorkspaceToolboxAPIService
 	workspaceId   string
-	projectId     string
 	languageId    *string
 	pathToProject *string
 	uri           *string
@@ -3696,15 +3583,13 @@ The document symbol request is sent from the client to the server.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiLspDocumentSymbolsRequest
 */
-func (a *WorkspaceToolboxAPIService) LspDocumentSymbols(ctx context.Context, workspaceId string, projectId string) ApiLspDocumentSymbolsRequest {
+func (a *WorkspaceToolboxAPIService) LspDocumentSymbols(ctx context.Context, workspaceId string) ApiLspDocumentSymbolsRequest {
 	return ApiLspDocumentSymbolsRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -3724,9 +3609,8 @@ func (a *WorkspaceToolboxAPIService) LspDocumentSymbolsExecute(r ApiLspDocumentS
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/lsp/document-symbols"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/lsp/document-symbols"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -3816,7 +3700,6 @@ type ApiLspStartRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	params      *LspServerRequest
 }
 
@@ -3833,19 +3716,17 @@ func (r ApiLspStartRequest) Execute() (*http.Response, error) {
 /*
 LspStart Start Lsp server
 
-Start Lsp server process inside workspace project
+Start Lsp server process inside a workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiLspStartRequest
 */
-func (a *WorkspaceToolboxAPIService) LspStart(ctx context.Context, workspaceId string, projectId string) ApiLspStartRequest {
+func (a *WorkspaceToolboxAPIService) LspStart(ctx context.Context, workspaceId string) ApiLspStartRequest {
 	return ApiLspStartRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -3862,9 +3743,8 @@ func (a *WorkspaceToolboxAPIService) LspStartExecute(r ApiLspStartRequest) (*htt
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/lsp/start"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/lsp/start"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -3938,7 +3818,6 @@ type ApiLspStopRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	params      *LspServerRequest
 }
 
@@ -3955,19 +3834,17 @@ func (r ApiLspStopRequest) Execute() (*http.Response, error) {
 /*
 LspStop Stop Lsp server
 
-Stop Lsp server process inside workspace project
+Stop Lsp server process inside a workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiLspStopRequest
 */
-func (a *WorkspaceToolboxAPIService) LspStop(ctx context.Context, workspaceId string, projectId string) ApiLspStopRequest {
+func (a *WorkspaceToolboxAPIService) LspStop(ctx context.Context, workspaceId string) ApiLspStopRequest {
 	return ApiLspStopRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -3984,9 +3861,8 @@ func (a *WorkspaceToolboxAPIService) LspStopExecute(r ApiLspStopRequest) (*http.
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/lsp/stop"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/lsp/stop"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -4060,7 +3936,6 @@ type ApiLspWorkspaceSymbolsRequest struct {
 	ctx           context.Context
 	ApiService    *WorkspaceToolboxAPIService
 	workspaceId   string
-	projectId     string
 	languageId    *string
 	pathToProject *string
 	query         *string
@@ -4095,15 +3970,13 @@ The workspace symbol request is sent from the client to the server to list proje
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiLspWorkspaceSymbolsRequest
 */
-func (a *WorkspaceToolboxAPIService) LspWorkspaceSymbols(ctx context.Context, workspaceId string, projectId string) ApiLspWorkspaceSymbolsRequest {
+func (a *WorkspaceToolboxAPIService) LspWorkspaceSymbols(ctx context.Context, workspaceId string) ApiLspWorkspaceSymbolsRequest {
 	return ApiLspWorkspaceSymbolsRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -4123,9 +3996,8 @@ func (a *WorkspaceToolboxAPIService) LspWorkspaceSymbolsExecute(r ApiLspWorkspac
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/lsp/workspace-symbols"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/lsp/workspace-symbols"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -4215,7 +4087,6 @@ type ApiProcessExecuteCommandRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	params      *ExecuteRequest
 }
 
@@ -4232,19 +4103,17 @@ func (r ApiProcessExecuteCommandRequest) Execute() (*ExecuteResponse, *http.Resp
 /*
 ProcessExecuteCommand Execute command
 
-Execute command synchronously inside workspace project
+Execute command synchronously inside a workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@return ApiProcessExecuteCommandRequest
 */
-func (a *WorkspaceToolboxAPIService) ProcessExecuteCommand(ctx context.Context, workspaceId string, projectId string) ApiProcessExecuteCommandRequest {
+func (a *WorkspaceToolboxAPIService) ProcessExecuteCommand(ctx context.Context, workspaceId string) ApiProcessExecuteCommandRequest {
 	return ApiProcessExecuteCommandRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
@@ -4264,9 +4133,8 @@ func (a *WorkspaceToolboxAPIService) ProcessExecuteCommandExecute(r ApiProcessEx
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/process/execute"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/process/execute"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -4349,7 +4217,6 @@ type ApiSessionExecuteCommandRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService
 	workspaceId string
-	projectId   string
 	sessionId   string
 	params      *SessionExecuteRequest
 }
@@ -4371,16 +4238,14 @@ Execute command inside a session inside workspace project
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
 	@param sessionId Session ID
 	@return ApiSessionExecuteCommandRequest
 */
-func (a *WorkspaceToolboxAPIService) SessionExecuteCommand(ctx context.Context, workspaceId string, projectId string, sessionId string) ApiSessionExecuteCommandRequest {
+func (a *WorkspaceToolboxAPIService) SessionExecuteCommand(ctx context.Context, workspaceId string, sessionId string) ApiSessionExecuteCommandRequest {
 	return ApiSessionExecuteCommandRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 		sessionId:   sessionId,
 	}
 }
@@ -4401,9 +4266,8 @@ func (a *WorkspaceToolboxAPIService) SessionExecuteCommandExecute(r ApiSessionEx
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/exec"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/process/session/{sessionId}/exec"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"sessionId"+"}", url.PathEscape(parameterValueToString(r.sessionId, "sessionId")), -1)
 
 	localVarHeaderParams := make(map[string]string)

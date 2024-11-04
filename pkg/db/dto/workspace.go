@@ -5,8 +5,8 @@ package dto
 
 import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/target/workspace"
-	"github.com/daytonaio/daytona/pkg/target/workspace/buildconfig"
+	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/buildconfig"
 )
 
 type RepositoryDTO struct {
@@ -52,13 +52,14 @@ type WorkspaceBuildDTO struct {
 }
 
 type WorkspaceDTO struct {
+	Id                  string             `gorm:"primaryKey"`
 	Name                string             `json:"name"`
 	Image               string             `json:"image"`
 	User                string             `json:"user"`
 	Build               *WorkspaceBuildDTO `json:"build,omitempty" gorm:"serializer:json"`
 	Repository          RepositoryDTO      `json:"repository" gorm:"serializer:json"`
-	TargetId            string             `json:"targetId"`
-	TargetConfig        string             `json:"targetConfig"`
+	TargetId            string             `json:"targetId" gorm:"foreignKey:TargetId;references:Id"`
+	Target              TargetDTO          `gorm:"foreignKey:TargetId"`
 	ApiKey              string             `json:"apiKey"`
 	State               *WorkspaceStateDTO `json:"state,omitempty" gorm:"serializer:json"`
 	GitProviderConfigId *string            `json:"gitProviderConfigId,omitempty"`
@@ -66,13 +67,13 @@ type WorkspaceDTO struct {
 
 func ToWorkspaceDTO(workspace *workspace.Workspace) WorkspaceDTO {
 	return WorkspaceDTO{
+		Id:                  workspace.Id,
 		Name:                workspace.Name,
 		Image:               workspace.Image,
 		User:                workspace.User,
 		Build:               ToWorkspaceBuildDTO(workspace.BuildConfig),
 		Repository:          ToRepositoryDTO(workspace.Repository),
 		TargetId:            workspace.TargetId,
-		TargetConfig:        workspace.TargetConfig,
 		State:               ToWorkspaceStateDTO(workspace.State),
 		ApiKey:              workspace.ApiKey,
 		GitProviderConfigId: workspace.GitProviderConfigId,
@@ -158,13 +159,13 @@ func ToWorkspaceBuildDTO(build *buildconfig.BuildConfig) *WorkspaceBuildDTO {
 
 func ToWorkspace(workspaceDTO WorkspaceDTO) *workspace.Workspace {
 	return &workspace.Workspace{
+		Id:                  workspaceDTO.Id,
 		Name:                workspaceDTO.Name,
 		Image:               workspaceDTO.Image,
 		User:                workspaceDTO.User,
 		BuildConfig:         ToWorkspaceBuild(workspaceDTO.Build),
 		Repository:          ToRepository(workspaceDTO.Repository),
 		TargetId:            workspaceDTO.TargetId,
-		TargetConfig:        workspaceDTO.TargetConfig,
 		State:               ToWorkspaceState(workspaceDTO.State),
 		ApiKey:              workspaceDTO.ApiKey,
 		GitProviderConfigId: workspaceDTO.GitProviderConfigId,
@@ -245,5 +246,12 @@ func ToWorkspaceBuild(buildDTO *WorkspaceBuildDTO) *buildconfig.BuildConfig {
 		Devcontainer: &buildconfig.DevcontainerConfig{
 			FilePath: buildDTO.Devcontainer.FilePath,
 		},
+	}
+}
+
+func ToWorkspaceViewDTO(workspaceDTO WorkspaceDTO) *workspace.WorkspaceViewDTO {
+	return &workspace.WorkspaceViewDTO{
+		Workspace:  *ToWorkspace(workspaceDTO),
+		TargetName: workspaceDTO.Target.Name,
 	}
 }

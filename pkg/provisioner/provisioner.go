@@ -11,7 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
 type WorkspaceParams struct {
@@ -34,6 +34,7 @@ type IProvisioner interface {
 	DestroyWorkspace(workspace *workspace.Workspace, targetConfig *provider.TargetConfig) error
 	StartWorkspace(params WorkspaceParams) error
 	StopWorkspace(workspace *workspace.Workspace, targetConfig *provider.TargetConfig) error
+	GetWorkspaceInfo(ctx context.Context, workspace *workspace.Workspace, targetConfig *provider.TargetConfig) (*workspace.WorkspaceInfo, error)
 }
 
 type ProvisionerConfig struct {

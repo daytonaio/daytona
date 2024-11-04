@@ -11,7 +11,7 @@ import (
 	workspaceconfig_internal "github.com/daytonaio/daytona/internal/testing/server/workspaceconfig"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/server/workspaceconfig"
-	"github.com/daytonaio/daytona/pkg/target/workspace/config"
+	"github.com/daytonaio/daytona/pkg/workspace/config"
 	"github.com/stretchr/testify/suite"
 )
 

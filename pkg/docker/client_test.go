@@ -10,8 +10,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/workspace"
-	"github.com/daytonaio/daytona/pkg/target/workspace/buildconfig"
+	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/buildconfig"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -22,20 +22,16 @@ var workspace1 = &workspace.Workspace{
 		Url:  "https://github.com/daytonaio/daytona",
 		Name: "daytona",
 	},
-	Image:        "test-image:tag",
-	User:         "test-user",
-	TargetId:     "123",
-	TargetConfig: "local",
-	BuildConfig:  &buildconfig.BuildConfig{},
+	Image:       "test-image:tag",
+	User:        "test-user",
+	TargetId:    "123",
+	BuildConfig: &buildconfig.BuildConfig{},
 }
 
 var target1 = &target.Target{
 	Id:           "123",
 	Name:         "test",
 	TargetConfig: "local",
-	Workspaces: []*workspace.Workspace{
-		workspace1,
-	},
 }
 
 type DockerClientTestSuiteConfig struct {

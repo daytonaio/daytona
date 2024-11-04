@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/daytonaio/daytona/pkg/target/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/go-git/go-git/v5"
 )
 
