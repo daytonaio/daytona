@@ -12,10 +12,9 @@ import "github.com/gin-gonic/gin"
 //	@Description	Create exec session inside workspace project
 //	@Produce		json
 //	@Param			workspaceId	path	string					true	"Workspace ID or Name"
-//	@Param			projectId	path	string					true	"Project ID"
 //	@Param			params		body	CreateSessionRequest	true	"Create session request"
 //	@Success		201
-//	@Router			/workspace/{workspaceId}/{projectId}/toolbox/process/session [post]
+//	@Router			/workspace/{workspaceId}/toolbox/process/session [post]
 //
 //	@id				CreateSession
 func CreateSession(ctx *gin.Context) {
@@ -29,11 +28,10 @@ func CreateSession(ctx *gin.Context) {
 //	@Description	Execute command inside a session inside workspace project
 //	@Produce		json
 //	@Param			workspaceId	path		string					true	"Workspace ID or Name"
-//	@Param			projectId	path		string					true	"Project ID"
 //	@Param			sessionId	path		string					true	"Session ID"
 //	@Param			params		body		SessionExecuteRequest	true	"Execute command request"
 //	@Success		200			{object}	SessionExecuteResponse
-//	@Router			/workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/exec [post]
+//	@Router			/workspace/{workspaceId}/toolbox/process/session/{sessionId}/exec [post]
 //
 //	@id				SessionExecuteCommand
 func SessionExecuteCommand(ctx *gin.Context) {
@@ -47,10 +45,9 @@ func SessionExecuteCommand(ctx *gin.Context) {
 //	@Description	Delete a session inside workspace project
 //	@Produce		json
 //	@Param			workspaceId	path	string	true	"Workspace ID or Name"
-//	@Param			projectId	path	string	true	"Project ID"
 //	@Param			sessionId	path	string	true	"Session ID"
 //	@Success		204
-//	@Router			/workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId} [delete]
+//	@Router			/workspace/{workspaceId}/toolbox/process/session/{sessionId} [delete]
 //
 //	@id				DeleteSession
 func DeleteSession(ctx *gin.Context) {
@@ -64,9 +61,8 @@ func DeleteSession(ctx *gin.Context) {
 //	@Description	List sessions inside workspace project
 //	@Produce		json
 //	@Param			workspaceId	path	string	true	"Workspace ID or Name"
-//	@Param			projectId	path	string	true	"Project ID"
 //	@Success		200			{array}	Session
-//	@Router			/workspace/{workspaceId}/{projectId}/toolbox/process/session [get]
+//	@Router			/workspace/{workspaceId}/toolbox/process/session [get]
 //
 //	@id				ListSessions
 func ListSessions(ctx *gin.Context) {
@@ -80,11 +76,10 @@ func ListSessions(ctx *gin.Context) {
 //	@Description	Get logs of a command inside a session inside workspace project
 //	@Description	Connect with websocket to get a stream of the logs
 //	@Param			workspaceId	path		string	true	"Workspace ID or Name"
-//	@Param			projectId	path		string	true	"Project ID"
 //	@Param			sessionId	path		string	true	"Session ID"
 //	@Param			commandId	path		string	true	"Command ID"
 //	@Success		200			{string}	string	"command logs"
-//	@Router			/workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/command/{commandId}/logs [get]
+//	@Router			/workspace/{workspaceId}/toolbox/process/session/{sessionId}/command/{commandId}/logs [get]
 //
 //	@id				GetSessionCommandLogs
 func GetSessionCommandLogs(ctx *gin.Context) {

@@ -6,8 +6,8 @@
 package mocks
 
 import (
-	"github.com/daytonaio/daytona/pkg/target/workspace/buildconfig"
-	"github.com/daytonaio/daytona/pkg/target/workspace/config"
+	"github.com/daytonaio/daytona/pkg/workspace/buildconfig"
+	"github.com/daytonaio/daytona/pkg/workspace/config"
 )
 
 var MockWorkspaceConfig = config.WorkspaceConfig{

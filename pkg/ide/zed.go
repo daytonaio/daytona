@@ -14,14 +14,14 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
-func OpenZed(activeProfile config.Profile, targetId, workspaceName, gpgKey string) error {
+func OpenZed(activeProfile config.Profile, workspaceId, gpgKey string) error {
 	path, err := GetZedBinaryPath()
 	if err != nil {
 		return err
 	}
 
-	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, targetId, workspaceName)
-	workspaceDir, err := util.GetWorkspaceDir(activeProfile, targetId, workspaceName, gpgKey)
+	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, workspaceId)
+	workspaceDir, err := util.GetWorkspaceDir(activeProfile, workspaceId, gpgKey)
 	if err != nil {
 		return err
 	}

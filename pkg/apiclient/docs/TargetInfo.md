@@ -6,13 +6,12 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Name** | **string** |  | 
 **ProviderMetadata** | Pointer to **string** |  | [optional] 
-**Workspaces** | [**[]WorkspaceInfo**](WorkspaceInfo.md) |  | 
 
 ## Methods
 
 ### NewTargetInfo
 
-`func NewTargetInfo(name string, workspaces []WorkspaceInfo, ) *TargetInfo`
+`func NewTargetInfo(name string, ) *TargetInfo`
 
 NewTargetInfo instantiates a new TargetInfo object
 This constructor will assign default values to properties that have it defined,
@@ -71,26 +70,6 @@ SetProviderMetadata sets ProviderMetadata field to given value.
 `func (o *TargetInfo) HasProviderMetadata() bool`
 
 HasProviderMetadata returns a boolean if a field has been set.
-
-### GetWorkspaces
-
-`func (o *TargetInfo) GetWorkspaces() []WorkspaceInfo`
-
-GetWorkspaces returns the Workspaces field if non-nil, zero value otherwise.
-
-### GetWorkspacesOk
-
-`func (o *TargetInfo) GetWorkspacesOk() (*[]WorkspaceInfo, bool)`
-
-GetWorkspacesOk returns a tuple with the Workspaces field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetWorkspaces
-
-`func (o *TargetInfo) SetWorkspaces(v []WorkspaceInfo)`
-
-SetWorkspaces sets Workspaces field to given value.
-
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

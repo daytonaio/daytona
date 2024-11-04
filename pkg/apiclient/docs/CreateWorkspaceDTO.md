@@ -7,16 +7,18 @@ Name | Type | Description | Notes
 **BuildConfig** | Pointer to [**BuildConfig**](BuildConfig.md) |  | [optional] 
 **EnvVars** | **map[string]string** |  | 
 **GitProviderConfigId** | Pointer to **string** |  | [optional] 
+**Id** | **string** |  | 
 **Image** | Pointer to **string** |  | [optional] 
 **Name** | **string** |  | 
 **Source** | [**CreateWorkspaceSourceDTO**](CreateWorkspaceSourceDTO.md) |  | 
+**TargetId** | **string** |  | 
 **User** | Pointer to **string** |  | [optional] 
 
 ## Methods
 
 ### NewCreateWorkspaceDTO
 
-`func NewCreateWorkspaceDTO(envVars map[string]string, name string, source CreateWorkspaceSourceDTO, ) *CreateWorkspaceDTO`
+`func NewCreateWorkspaceDTO(envVars map[string]string, id string, name string, source CreateWorkspaceSourceDTO, targetId string, ) *CreateWorkspaceDTO`
 
 NewCreateWorkspaceDTO instantiates a new CreateWorkspaceDTO object
 This constructor will assign default values to properties that have it defined,
@@ -101,6 +103,26 @@ SetGitProviderConfigId sets GitProviderConfigId field to given value.
 
 HasGitProviderConfigId returns a boolean if a field has been set.
 
+### GetId
+
+`func (o *CreateWorkspaceDTO) GetId() string`
+
+GetId returns the Id field if non-nil, zero value otherwise.
+
+### GetIdOk
+
+`func (o *CreateWorkspaceDTO) GetIdOk() (*string, bool)`
+
+GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetId
+
+`func (o *CreateWorkspaceDTO) SetId(v string)`
+
+SetId sets Id field to given value.
+
+
 ### GetImage
 
 `func (o *CreateWorkspaceDTO) GetImage() string`
@@ -164,6 +186,26 @@ and a boolean to check if the value has been set.
 `func (o *CreateWorkspaceDTO) SetSource(v CreateWorkspaceSourceDTO)`
 
 SetSource sets Source field to given value.
+
+
+### GetTargetId
+
+`func (o *CreateWorkspaceDTO) GetTargetId() string`
+
+GetTargetId returns the TargetId field if non-nil, zero value otherwise.
+
+### GetTargetIdOk
+
+`func (o *CreateWorkspaceDTO) GetTargetIdOk() (*string, bool)`
+
+GetTargetIdOk returns a tuple with the TargetId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTargetId
+
+`func (o *CreateWorkspaceDTO) SetTargetId(v string)`
+
+SetTargetId sets TargetId field to given value.
 
 
 ### GetUser

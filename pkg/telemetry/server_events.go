@@ -11,6 +11,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
 type ServerEvent string
@@ -31,6 +32,16 @@ const (
 	ServerEventTargetDestroyError ServerEvent = "server_target_destroyed_error"
 	ServerEventTargetStartError   ServerEvent = "server_target_started_error"
 	ServerEventTargetStopError    ServerEvent = "server_target_stopped_error"
+
+	// Workspace events
+	ServerEventWorkspaceCreated      ServerEvent = "server_workspace_created"
+	ServerEventWorkspaceDestroyed    ServerEvent = "server_workspace_destroyed"
+	ServerEventWorkspaceStarted      ServerEvent = "server_workspace_started"
+	ServerEventWorkspaceStopped      ServerEvent = "server_workspace_stopped"
+	ServerEventWorkspaceCreateError  ServerEvent = "server_workspace_created_error"
+	ServerEventWorkspaceDestroyError ServerEvent = "server_workspace_destroyed_error"
+	ServerEventWorkspaceStartError   ServerEvent = "server_workspace_started_error"
+	ServerEventWorkspaceStopError    ServerEvent = "server_workspace_stopped_error"
 )
 
 func NewTargetEventProps(ctx context.Context, target *target.Target, targetConfig *provider.TargetConfig) map[string]interface{} {
@@ -44,36 +55,37 @@ func NewTargetEventProps(ctx context.Context, target *target.Target, targetConfi
 
 	if target != nil {
 		props["target_id"] = target.Id
-		props["target_n_workspaces"] = len(target.Workspaces)
-		publicRepos := []string{}
-		publicImages := []string{}
-		builders := map[string]int{}
-
-		for _, workspace := range target.Workspaces {
-			if isImagePublic(workspace.Image) {
-				publicImages = append(publicImages, workspace.Image)
-			}
-			if workspace.Repository != nil && isPublic(workspace.Repository.Url) {
-				publicRepos = append(publicRepos, workspace.Repository.Url)
-			}
-			if workspace.BuildConfig == nil {
-				builders["none"]++
-			} else if workspace.BuildConfig.Devcontainer != nil {
-				builders["devcontainer"]++
-			} else {
-				builders["automatic"]++
-			}
-		}
-
-		props["target_public_repos"] = publicRepos
-		props["target_public_images"] = publicImages
-		props["target_builders"] = builders
 	}
 
 	if targetConfig != nil {
 		props["target_name"] = targetConfig.Name
 		props["target_provider"] = targetConfig.ProviderInfo.Name
 		props["target_provider_version"] = targetConfig.ProviderInfo.Version
+	}
+
+	return props
+}
+
+func NewWorkspaceEventProps(ctx context.Context, workspace *workspace.Workspace) map[string]interface{} {
+	props := map[string]interface{}{}
+
+	if workspace == nil {
+		return props
+	}
+
+	if isImagePublic(workspace.Image) {
+		props["workspace_image"] = workspace.Image
+	}
+	if workspace.Repository != nil && isPublic(workspace.Repository.Url) {
+		props["workspace_repository"] = workspace.Repository.Url
+	}
+
+	if workspace.BuildConfig == nil {
+		props["workspace_builder"] = "none"
+	} else if workspace.BuildConfig.Devcontainer != nil {
+		props["workspace_builder"] = "devcontainer"
+	} else {
+		props["workspace_builder"] = "automatic"
 	}
 
 	return props

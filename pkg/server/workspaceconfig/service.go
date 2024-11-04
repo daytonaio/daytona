@@ -11,7 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/builds"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/workspaceconfig/dto"
-	"github.com/daytonaio/daytona/pkg/target/workspace/config"
+	"github.com/daytonaio/daytona/pkg/workspace/config"
 )
 
 type IWorkspaceConfigService interface {

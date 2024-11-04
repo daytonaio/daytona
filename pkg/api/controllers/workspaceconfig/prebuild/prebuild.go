@@ -11,7 +11,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/workspaceconfig/dto"
-	"github.com/daytonaio/daytona/pkg/target/workspace/config"
+	"github.com/daytonaio/daytona/pkg/workspace/config"
 	"github.com/gin-gonic/gin"
 )
 
