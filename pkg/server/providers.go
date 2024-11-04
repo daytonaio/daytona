@@ -6,7 +6,6 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -77,6 +76,19 @@ func (s *Server) registerProviders() error {
 				log.Error(err)
 				continue
 			}
+			requirements, err := (*provider).CheckRequirements()
+			if err != nil {
+				return err
+			}
+			for _, req := range *requirements {
+
+				if req.Met {
+					log.Infof("Requirement met : %s ", req.Reason)
+				} else {
+					log.Warnf("Requirement not met.... : %s", req.Reason)
+
+				}
+			}
 
 			if manifest.HasUpdateAvailable(info.Name, info.Version) {
 				log.Infof("Update available for %s. Update with `daytona provider update`.", info.Name)
@@ -85,26 +97,6 @@ func (s *Server) registerProviders() error {
 	}
 
 	log.Info("Providers registered")
-
-	var allRequirementsMet bool
-
-	requirements, err := s.Provider.CheckRequirements()
-	if err != nil {
-		return err
-	}
-	for _, req := range *requirements {
-
-		if req.Met {
-			log.Infof("Requirement met : %s ", req.Reason)
-		} else {
-			allRequirementsMet = false
-			log.Warnf("Requirement not met.... : %s", req.Reason)
-
-		}
-	}
-	if !allRequirementsMet {
-		return fmt.Errorf("daytona server startup aborted, one or more requirements not met")
-	}
 
 	return nil
 }

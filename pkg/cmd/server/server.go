@@ -11,7 +11,6 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/cmd/server/daemon"
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/views"
 	view "github.com/daytonaio/daytona/pkg/views/server"
@@ -21,10 +20,6 @@ import (
 )
 
 var yesFlag bool
-
-type RequirementProvider struct {
-	provider.Provider
-}
 
 var ServerCmd = &cobra.Command{
 	Use:     "server",
