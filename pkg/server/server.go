@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
 	"github.com/daytonaio/daytona/pkg/server/builds"
@@ -88,7 +87,6 @@ type Server struct {
 	GitProviderService       gitproviders.IGitProviderService
 	ProviderManager          manager.IProviderManager
 	ProfileDataService       profiledata.IProfileDataService
-	Provider                 provider.Provider
 	TelemetryService         telemetry.TelemetryService
 }
 
