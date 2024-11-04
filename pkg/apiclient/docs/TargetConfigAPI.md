@@ -6,7 +6,6 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**ListTargetConfigs**](TargetConfigAPI.md#ListTargetConfigs) | **Get** /target-config | List target configs
 [**RemoveTargetConfig**](TargetConfigAPI.md#RemoveTargetConfig) | **Delete** /target-config/{configName} | Remove a target config
-[**SetDefaultTargetConfig**](TargetConfigAPI.md#SetDefaultTargetConfig) | **Patch** /target-config/{configName}/set-default | Set target config to default
 [**SetTargetConfig**](TargetConfigAPI.md#SetTargetConfig) | **Put** /target-config | Set a target config
 
 
@@ -140,74 +139,6 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
-## SetDefaultTargetConfig
-
-> SetDefaultTargetConfig(ctx, configName).Execute()
-
-Set target config to default
-
-
-
-### Example
-
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"os"
-	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
-)
-
-func main() {
-	configName := "configName_example" // string | Target config name
-
-	configuration := openapiclient.NewConfiguration()
-	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.TargetConfigAPI.SetDefaultTargetConfig(context.Background(), configName).Execute()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `TargetConfigAPI.SetDefaultTargetConfig``: %v\n", err)
-		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
-	}
-}
-```
-
-### Path Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**configName** | **string** | Target config name | 
-
-### Other Parameters
-
-Other parameters are passed through a pointer to a apiSetDefaultTargetConfigRequest struct via the builder pattern
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-
-
-### Return type
-
- (empty response body)
-
-### Authorization
-
-[Bearer](../README.md#Bearer)
-
-### HTTP request headers
-
-- **Content-Type**: Not defined
-- **Accept**: Not defined
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
 ## SetTargetConfig
 
 > SetTargetConfig(ctx).TargetConfig(targetConfig).Execute()
@@ -229,7 +160,7 @@ import (
 )
 
 func main() {
-	targetConfig := *openapiclient.NewCreateTargetConfigDTO("Name_example", "Options_example", *openapiclient.NewProviderProviderInfo("Name_example", "Version_example")) // CreateTargetConfigDTO | Target config to set
+	targetConfig := *openapiclient.NewCreateTargetConfigDTO("Name_example", "Options_example", *openapiclient.NewTargetProviderInfo("Name_example", "Version_example")) // CreateTargetConfigDTO | Target config to set
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

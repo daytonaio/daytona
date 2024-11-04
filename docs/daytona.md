@@ -25,15 +25,15 @@ daytona [flags]
 * [daytona code](daytona_code.md)	 - Open a workspace in your preferred IDE
 * [daytona config](daytona_config.md)	 - Output Daytona configuration
 * [daytona container-registry](daytona_container-registry.md)	 - Manage container registries
-* [daytona create](daytona_create.md)	 - Create a target
+* [daytona create](daytona_create.md)	 - Create a workspace
 * [daytona delete](daytona_delete.md)	 - Delete a workspace
 * [daytona docs](daytona_docs.md)	 - Opens the Daytona documentation in your default browser.
 * [daytona env](daytona_env.md)	 - Manage profile environment variables that are added to all targets and workspaces
 * [daytona forward](daytona_forward.md)	 - Forward a port from a workspace to your local machine
 * [daytona git-providers](daytona_git-providers.md)	 - Manage Git providers
 * [daytona ide](daytona_ide.md)	 - Choose the default IDE
-* [daytona info](daytona_info.md)	 - Show target info
-* [daytona list](daytona_list.md)	 - List targets
+* [daytona info](daytona_info.md)	 - Show workspace info
+* [daytona list](daytona_list.md)	 - List workspaces
 * [daytona logs](daytona_logs.md)	 - View logs for a target/workspace
 * [daytona prebuild](daytona_prebuild.md)	 - Manage prebuilds
 * [daytona profile](daytona_profile.md)	 - Manage profiles

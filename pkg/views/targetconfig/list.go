@@ -15,7 +15,6 @@ import (
 type rowData struct {
 	ConfigName string
 	Provider   string
-	IsDefault  string
 	Options    string
 }
 
@@ -29,7 +28,7 @@ func ListTargetConfigs(targetConfigs []apiclient.TargetConfig) {
 	}
 
 	table := util.GetTableView(data, []string{
-		"Name", "Provider", "Default", "Options",
+		"Name", "Provider", "Options",
 	}, nil, func() {
 		renderUnstyledList(targetConfigs)
 	})
@@ -38,23 +37,15 @@ func ListTargetConfigs(targetConfigs []apiclient.TargetConfig) {
 }
 
 func getRowFromRowData(targetConfig *apiclient.TargetConfig) []string {
-	var isDefault string
 	var data rowData
 
 	data.ConfigName = targetConfig.Name
 	data.Provider = targetConfig.ProviderInfo.Name
 	data.Options = targetConfig.Options
 
-	if targetConfig.IsDefault {
-		isDefault = views.ActiveStyle.Render("Yes")
-	} else {
-		isDefault = views.InactiveStyle.Render("/")
-	}
-
 	row := []string{
 		views.NameStyle.Render(data.ConfigName),
 		views.DefaultRowDataStyle.Render(data.Provider),
-		isDefault,
 		views.DefaultRowDataStyle.Render(data.Options),
 	}
 
@@ -76,10 +67,6 @@ func renderUnstyledList(targetConfigs []apiclient.TargetConfig) {
 		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Name: "), targetConfig.Name) + "\n\n"
 
 		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Provider: "), targetConfig.ProviderInfo.Name) + "\n\n"
-
-		if targetConfig.IsDefault {
-			output += fmt.Sprintf("%s %s", views.GetPropertyKey("Default: "), "Yes") + "\n\n"
-		}
 
 		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Options: "), targetConfig.Options) + "\n\n"
 

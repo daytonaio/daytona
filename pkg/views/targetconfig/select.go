@@ -20,7 +20,6 @@ const NewTargetConfigName = "+ New Target Config"
 type TargetConfigView struct {
 	Name         string
 	Options      string
-	IsDefault    bool
 	ProviderInfo ProviderInfo
 }
 
@@ -94,9 +93,8 @@ func GetTargetConfigFromPrompt(targetConfigs []apiclient.TargetConfig, activePro
 
 func ToTargetConfigView(targetConfig apiclient.TargetConfig) TargetConfigView {
 	return TargetConfigView{
-		Name:      targetConfig.Name,
-		Options:   targetConfig.Options,
-		IsDefault: targetConfig.IsDefault,
+		Name:    targetConfig.Name,
+		Options: targetConfig.Options,
 		ProviderInfo: ProviderInfo{
 			Name:    targetConfig.ProviderInfo.Name,
 			Version: targetConfig.ProviderInfo.Version,

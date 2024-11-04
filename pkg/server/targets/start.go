@@ -9,7 +9,6 @@ import (
 	"io"
 
 	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	log "github.com/sirupsen/logrus"
@@ -18,14 +17,9 @@ import (
 )
 
 func (s *TargetService) StartTarget(ctx context.Context, targetId string) error {
-	t, err := s.targetStore.Find(targetId)
+	t, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &targetId})
 	if err != nil {
 		return s.handleStartError(ctx, nil, ErrTargetNotFound)
-	}
-
-	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &t.TargetConfig})
-	if err != nil {
-		return s.handleStartError(ctx, t, err)
 	}
 
 	targetLogger := s.loggerFactory.CreateTargetLogger(t.Id, t.Name, logs.LogSourceServer)
@@ -40,7 +34,7 @@ func (s *TargetService) StartTarget(ctx context.Context, targetId string) error 
 		ClientId:      telemetry.ClientId(ctx),
 	}, telemetry.TelemetryEnabled(ctx))
 
-	err = s.startTarget(t, targetConfig, logger)
+	err = s.startTarget(t, logger)
 	if err != nil {
 		return s.handleStartError(ctx, t, err)
 	}
@@ -48,10 +42,10 @@ func (s *TargetService) StartTarget(ctx context.Context, targetId string) error 
 	return s.handleStartError(ctx, t, err)
 }
 
-func (s *TargetService) startTarget(target *target.Target, targetConfig *provider.TargetConfig, targetLogger io.Writer) error {
+func (s *TargetService) startTarget(target *target.Target, targetLogger io.Writer) error {
 	targetLogger.Write([]byte("Starting target\n"))
 
-	err := s.provisioner.StartTarget(target, targetConfig)
+	err := s.provisioner.StartTarget(target)
 	if err != nil {
 		return err
 	}
@@ -68,7 +62,7 @@ func (s *TargetService) handleStartError(ctx context.Context, target *target.Tar
 
 	clientId := telemetry.ClientId(ctx)
 
-	telemetryProps := telemetry.NewTargetEventProps(ctx, target, nil)
+	telemetryProps := telemetry.NewTargetEventProps(ctx, target)
 	event := telemetry.ServerEventTargetStarted
 	if err != nil {
 		telemetryProps["error"] = err.Error()

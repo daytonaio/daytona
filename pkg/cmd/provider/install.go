@@ -99,12 +99,12 @@ var providerInstallCmd = &cobra.Command{
 
 		views.RenderInfoMessageBold(fmt.Sprintf("Provider %s has been successfully installed", providerToInstall.Name))
 
-		targetConfigs, res, err := apiClient.TargetConfigAPI.ListTargetConfigs(context.Background()).Execute()
+		targets, res, err := apiClient.TargetAPI.ListTargets(context.Background()).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		if slices.ContainsFunc(targetConfigs, func(t apiclient.TargetConfig) bool {
+		if slices.ContainsFunc(targets, func(t apiclient.TargetDTO) bool {
 			return t.ProviderInfo.Name == providerToInstall.Name
 		}) {
 			return nil
@@ -114,7 +114,7 @@ var providerInstallCmd = &cobra.Command{
 			form := huh.NewForm(
 				huh.NewGroup(
 					huh.NewConfirm().
-						Title("Add a Target Config?").
+						Title("Add a Target?").
 						Value(&yesFlag),
 				),
 			).WithTheme(views.GetCustomTheme())
@@ -149,16 +149,16 @@ var providerInstallCmd = &cobra.Command{
 				return err
 			}
 
-			targetConfigData := apiclient.CreateTargetConfigDTO{
+			targetData := apiclient.CreateTargetDTO{
 				Name:    targetConfigToSet.Name,
 				Options: targetConfigToSet.Options,
-				ProviderInfo: apiclient.ProviderProviderInfo{
+				ProviderInfo: apiclient.TargetProviderInfo{
 					Name:    targetConfigToSet.ProviderInfo.Name,
 					Version: targetConfigToSet.ProviderInfo.Version,
 				},
 			}
 
-			res, err = apiClient.TargetConfigAPI.SetTargetConfig(context.Background()).TargetConfig(targetConfigData).Execute()
+			_, res, err = apiClient.TargetAPI.CreateTarget(context.Background()).Target(targetData).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
@@ -166,7 +166,7 @@ var providerInstallCmd = &cobra.Command{
 				return err
 			}
 
-			views.RenderInfoMessage("Target Config set successfully")
+			views.RenderInfoMessage("Target set successfully")
 		}
 		return nil
 	},

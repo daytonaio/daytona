@@ -10,12 +10,13 @@ import (
 	t_targetconfigs "github.com/daytonaio/daytona/internal/testing/provider/targetconfigs"
 	t_targets "github.com/daytonaio/daytona/internal/testing/server/targets"
 	"github.com/daytonaio/daytona/internal/testing/server/targets/mocks"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/server/targets"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
 	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/target/config"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -23,9 +24,9 @@ import (
 const serverApiUrl = "http://localhost:3986"
 const serverUrl = "http://localhost:3987"
 
-var targetConfig = provider.TargetConfig{
+var targetConfig = config.TargetConfig{
 	Name: "test-target-config",
-	ProviderInfo: provider.ProviderInfo{
+	ProviderInfo: target.ProviderInfo{
 		Name:    "test-provider",
 		Version: "test",
 	},
@@ -35,7 +36,8 @@ var targetConfig = provider.TargetConfig{
 var createTargetDTO = dto.CreateTargetDTO{
 	Name:         "test",
 	Id:           "test",
-	TargetConfig: targetConfig.Name,
+	ProviderInfo: targetConfig.ProviderInfo,
+	Options:      targetConfig.Options,
 }
 
 var targetInfo = target.TargetInfo{
@@ -98,7 +100,7 @@ func TestTargetService(t *testing.T) {
 	t.Run("GetTarget", func(t *testing.T) {
 		provisioner.On("GetTargetInfo", mock.Anything, mock.Anything, &targetConfig).Return(&targetInfo, nil)
 
-		target, err := service.GetTarget(context.TODO(), createTargetDTO.Id, true)
+		target, err := service.GetTarget(context.TODO(), &target.TargetFilter{IdOrName: &createTargetDTO.Id}, true)
 
 		require.Nil(t, err)
 		require.NotNil(t, target)
@@ -107,7 +109,7 @@ func TestTargetService(t *testing.T) {
 	})
 
 	t.Run("GetTarget fails when target not found", func(t *testing.T) {
-		_, err := service.GetTarget(context.TODO(), "invalid-id", true)
+		_, err := service.GetTarget(context.TODO(), &target.TargetFilter{IdOrName: util.Pointer("invalid-id")}, true)
 		require.NotNil(t, err)
 		require.Equal(t, targets.ErrTargetNotFound, err)
 	})
@@ -116,7 +118,7 @@ func TestTargetService(t *testing.T) {
 		verbose := false
 		provisioner.On("GetTargetInfo", mock.Anything, mock.Anything, &targetConfig).Return(&targetInfo, nil)
 
-		targets, err := service.ListTargets(context.TODO(), verbose)
+		targets, err := service.ListTargets(context.TODO(), nil, verbose)
 
 		require.Nil(t, err)
 		require.Len(t, targets, 1)
@@ -130,7 +132,7 @@ func TestTargetService(t *testing.T) {
 		verbose := true
 		provisioner.On("GetTargetInfo", mock.Anything, mock.Anything, &targetConfig).Return(&targetInfo, nil)
 
-		targets, err := service.ListTargets(context.TODO(), verbose)
+		targets, err := service.ListTargets(context.TODO(), nil, verbose)
 
 		require.Nil(t, err)
 		require.Len(t, targets, 1)
@@ -164,7 +166,7 @@ func TestTargetService(t *testing.T) {
 
 		require.Nil(t, err)
 
-		_, err = service.GetTarget(context.TODO(), createTargetDTO.Id, true)
+		_, err = service.GetTarget(context.TODO(), &target.TargetFilter{IdOrName: &createTargetDTO.Id}, true)
 		require.Equal(t, targets.ErrTargetNotFound, err)
 	})
 
@@ -183,7 +185,7 @@ func TestTargetService(t *testing.T) {
 
 		require.Nil(t, err)
 
-		_, err = service.GetTarget(context.TODO(), createTargetDTO.Id, true)
+		_, err = service.GetTarget(context.TODO(), &target.TargetFilter{IdOrName: &createTargetDTO.Id}, true)
 		require.Equal(t, targets.ErrTargetNotFound, err)
 	})
 
@@ -198,7 +200,8 @@ func targetEquals(t *testing.T, req dto.CreateTargetDTO, target *target.Target) 
 
 	require.Equal(t, req.Id, target.Id)
 	require.Equal(t, req.Name, target.Name)
-	require.Equal(t, req.TargetConfig, target.TargetConfig)
+	require.Equal(t, req.ProviderInfo, target.ProviderInfo)
+	require.Equal(t, req.Options, target.Options)
 }
 
 func targetDtoEquals(t *testing.T, req dto.CreateTargetDTO, target dto.TargetDTO, targetInfo target.TargetInfo, verbose bool) {
@@ -206,7 +209,8 @@ func targetDtoEquals(t *testing.T, req dto.CreateTargetDTO, target dto.TargetDTO
 
 	require.Equal(t, req.Id, target.Id)
 	require.Equal(t, req.Name, target.Name)
-	require.Equal(t, req.TargetConfig, target.TargetConfig)
+	require.Equal(t, req.ProviderInfo, target.ProviderInfo)
+	require.Equal(t, req.Options, target.Options)
 
 	if verbose {
 		require.Equal(t, target.Info.Name, targetInfo.Name)

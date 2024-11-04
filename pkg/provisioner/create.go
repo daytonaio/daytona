@@ -11,31 +11,30 @@ import (
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
-func (p *Provisioner) CreateTarget(target *target.Target, targetConfig *provider.TargetConfig) error {
-	targetProvider, err := p.providerManager.GetProvider(targetConfig.ProviderInfo.Name)
+func (p *Provisioner) CreateTarget(t *target.Target) error {
+	targetProvider, err := p.providerManager.GetProvider(t.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
 	_, err = (*targetProvider).CreateTarget(&provider.TargetRequest{
-		TargetConfigOptions: targetConfig.Options,
-		Target:              target,
+		Target: t,
 	})
 
 	return err
 }
 
-func (p *Provisioner) CreateWorkspace(ws *workspace.Workspace, targetConfig *provider.TargetConfig, cr *containerregistry.ContainerRegistry, gc *gitprovider.GitProviderConfig) error {
-	targetProvider, err := p.providerManager.GetProvider(targetConfig.ProviderInfo.Name)
+func (p *Provisioner) CreateWorkspace(ws *workspace.Workspace, t *target.Target, cr *containerregistry.ContainerRegistry, gc *gitprovider.GitProviderConfig) error {
+	targetProvider, err := p.providerManager.GetProvider(t.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
 	_, err = (*targetProvider).CreateWorkspace(&provider.WorkspaceRequest{
-		TargetConfigOptions: targetConfig.Options,
-		Workspace:           ws,
-		ContainerRegistry:   cr,
-		GitProviderConfig:   gc,
+		Target:            t,
+		Workspace:         ws,
+		ContainerRegistry: cr,
+		GitProviderConfig: gc,
 	})
 
 	return err

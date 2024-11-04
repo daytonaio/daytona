@@ -15,8 +15,11 @@ import (
 )
 
 type RowData struct {
-	Name         string
-	TargetConfig string
+	Name             string
+	Provider         string
+	Default          bool
+	ProviderMetadata string
+	Options          string
 }
 
 func ListTargets(targetList []apiclient.TargetDTO, verbose bool, activeProfileName string) {
@@ -25,10 +28,21 @@ func ListTargets(targetList []apiclient.TargetDTO, verbose bool, activeProfileNa
 		return
 	}
 
-	headers := []string{"Target", "Target Config"}
+	headers := []string{"Target", "Provider", "Default", "Metadata", "Options"}
 
 	data := util.ArrayMap(targetList, func(target apiclient.TargetDTO) []string {
-		return getRowFromRowData(RowData{Name: target.Name, TargetConfig: target.TargetConfig})
+		rowData := RowData{
+			Name:     target.Name,
+			Provider: target.ProviderInfo.Name,
+			Default:  target.Default,
+			Options:  target.Options,
+		}
+
+		if target.Info != nil {
+			rowData.ProviderMetadata = *target.Info.ProviderMetadata
+		}
+
+		return getRowFromRowData(rowData)
 	})
 
 	footer := lipgloss.NewStyle().Foreground(views.LightGray).Render(views.GetListFooter(activeProfileName, &views.Padding{}))
@@ -51,8 +65,19 @@ func renderUnstyledList(targetList []apiclient.TargetDTO) {
 }
 
 func getRowFromRowData(rowData RowData) []string {
+	var isDefault string
+
+	if rowData.Default {
+		isDefault = views.ActiveStyle.Render("Yes")
+	} else {
+		isDefault = views.InactiveStyle.Render("/")
+	}
+
 	return []string{
 		views.NameStyle.Render(rowData.Name),
-		views.DefaultRowDataStyle.Render(rowData.TargetConfig),
+		views.DefaultRowDataStyle.Render(rowData.Provider),
+		isDefault,
+		views.DefaultRowDataStyle.Render(rowData.ProviderMetadata),
+		views.DefaultRowDataStyle.Render(rowData.Options),
 	}
 }

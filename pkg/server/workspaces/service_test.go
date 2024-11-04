@@ -18,10 +18,10 @@ import (
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/target/config"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -32,9 +32,9 @@ const serverUrl = "http://localhost:3987"
 const defaultWorkspaceUser = "daytona"
 const defaultWorkspaceImage = "daytonaio/workspace-project:latest"
 
-var targetConfig = provider.TargetConfig{
+var targetConfig = config.TargetConfig{
 	Name: "test-target-config",
-	ProviderInfo: provider.ProviderInfo{
+	ProviderInfo: target.ProviderInfo{
 		Name:    "test-provider",
 		Version: "test",
 	},
@@ -54,9 +54,13 @@ var gitProviderConfig = gitprovider.GitProviderConfig{
 }
 
 var tg = &target.Target{
-	Id:           "123",
-	Name:         "test",
-	TargetConfig: targetConfig.Name,
+	Id:   "123",
+	Name: "test",
+	ProviderInfo: target.ProviderInfo{
+		Name:    "test-provider",
+		Version: "test",
+	},
+	Options: "test-options",
 }
 
 var createWorkspaceDTO = dto.CreateWorkspaceDTO{

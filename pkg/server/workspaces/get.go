@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
+	"github.com/daytonaio/daytona/pkg/target"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -29,12 +29,7 @@ func (s *WorkspaceService) GetWorkspace(ctx context.Context, workspaceId string,
 		return response, nil
 	}
 
-	target, err := s.targetStore.Find(ws.TargetId)
-	if err != nil {
-		return nil, err
-	}
-
-	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &target.TargetConfig})
+	target, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &ws.TargetId})
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +40,7 @@ func (s *WorkspaceService) GetWorkspace(ctx context.Context, workspaceId string,
 	resultCh := make(chan provisioner.WorkspaceInfoResult, 1)
 
 	go func() {
-		workspaceInfo, err := s.provisioner.GetWorkspaceInfo(ctx, &ws.Workspace, targetConfig)
+		workspaceInfo, err := s.provisioner.GetWorkspaceInfo(ctx, &ws.Workspace, target)
 		resultCh <- provisioner.WorkspaceInfoResult{Info: workspaceInfo, Err: err}
 	}()
 

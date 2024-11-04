@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
@@ -44,7 +43,7 @@ const (
 	ServerEventWorkspaceStopError    ServerEvent = "server_workspace_stopped_error"
 )
 
-func NewTargetEventProps(ctx context.Context, target *target.Target, targetConfig *provider.TargetConfig) map[string]interface{} {
+func NewTargetEventProps(ctx context.Context, target *target.Target) map[string]interface{} {
 	props := map[string]interface{}{}
 
 	sessionId := SessionId(ctx)
@@ -55,12 +54,9 @@ func NewTargetEventProps(ctx context.Context, target *target.Target, targetConfi
 
 	if target != nil {
 		props["target_id"] = target.Id
-	}
-
-	if targetConfig != nil {
-		props["target_name"] = targetConfig.Name
-		props["target_provider"] = targetConfig.ProviderInfo.Name
-		props["target_provider_version"] = targetConfig.ProviderInfo.Version
+		props["target_name"] = target.Name
+		props["target_provider"] = target.ProviderInfo.Name
+		props["target_provider_version"] = target.ProviderInfo.Version
 	}
 
 	return props

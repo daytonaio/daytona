@@ -53,7 +53,7 @@ var SshProxyCmd = &cobra.Command{
 			return err
 		}
 
-		if target.TargetConfig == "local" && profile.Id == "default" {
+		if target.Name == "local" && profile.Id == "default" {
 			// If the target is local, we directly access the ssh port through the container
 
 			cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())

@@ -40,14 +40,13 @@ import (
 
 var CreateCmd = &cobra.Command{
 	Use:     "create [REPOSITORY_URL | WORKSPACE_CONFIG_NAME]...",
-	Short:   "Create a target",
+	Short:   "Create a workspace",
 	GroupID: util.TARGET_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		var workspaces []apiclient.CreateWorkspaceDTO
-		var targetName string
-		var existingTargetNames []string
 		var existingWorkspaceConfigNames []string
+		var targetId string
 		promptUsingTUI := len(args) == 0
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -70,20 +69,22 @@ var CreateCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		if nameFlag != "" {
-			targetName = nameFlag
-		}
-
-		targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
+		target, targetExisted, err := workspace_util.GetTarget(workspace_util.GetTargetConfigParams{
+			Ctx:               ctx,
+			ApiClient:         apiClient,
+			ActiveProfileName: activeProfile.Name,
+			TargetNameFlag:    targetNameFlag,
+			PromptUsingTUI:    promptUsingTUI,
+		})
 		if err != nil {
-			return apiclient_util.HandleErrorResponse(res, err)
-		}
-		for _, targetInfo := range targetList {
-			existingTargetNames = append(existingTargetNames, targetInfo.Name)
+			if common.IsCtrlCAbort(err) {
+				return nil
+			}
+			return err
 		}
 
 		if promptUsingTUI {
-			err = processPrompting(ctx, apiClient, &targetName, &workspaces, existingTargetNames)
+			err = processPrompting(ctx, apiClient, &workspaces, target.Name)
 			if err != nil {
 				if common.IsCtrlCAbort(err) {
 					return nil
@@ -96,16 +97,6 @@ var CreateCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-
-			initialSuggestion := workspaces[0].Name
-
-			if targetName == "" {
-				targetName = workspace_util.GetSuggestedName(initialSuggestion, existingTargetNames)
-			}
-		}
-
-		if targetName == "" || len(workspaces) == 0 {
-			return errors.New("target name and repository urls are required")
 		}
 
 		workspaceNames := []string{}
@@ -118,6 +109,9 @@ var CreateCmd = &cobra.Command{
 			workspaceNames = append(workspaceNames, workspaces[i].Name)
 		}
 
+		names := append(workspaceNames, target.Name)
+		logs_view.CalculateLongestPrefixLength(names)
+
 		for i, workspaceConfigName := range existingWorkspaceConfigNames {
 			if workspaceConfigName == "" {
 				continue
@@ -128,32 +122,15 @@ var CreateCmd = &cobra.Command{
 			}, i)
 		}
 
-		targetConfigs, res, err := apiClient.TargetConfigAPI.ListTargetConfigs(ctx).Execute()
-		if err != nil {
-			return apiclient_util.HandleErrorResponse(res, err)
-		}
-
-		targetConfig, err := workspace_util.GetTargetConfig(workspace_util.GetTargetConfigParams{
-			Ctx:                  ctx,
-			ApiClient:            apiClient,
-			TargetConfigs:        targetConfigs,
-			ActiveProfileName:    activeProfile.Name,
-			TargetConfigNameFlag: targetConfigNameFlag,
-			PromptUsingTUI:       promptUsingTUI,
-		})
-		if err != nil {
-			if common.IsCtrlCAbort(err) {
-				return nil
-			}
-			return err
-		}
-
-		names := append(workspaceNames, targetName)
-		logs_view.CalculateLongestPrefixLength(names)
-
-		logs_view.DisplayLogEntry(logs.LogEntry{
+		requestLogEntry := logs.LogEntry{
 			Msg: "Request submitted\n",
-		}, logs_view.STATIC_INDEX)
+		}
+
+		if targetExisted {
+			requestLogEntry.TargetName = &target.Name
+		}
+
+		logs_view.DisplayLogEntry(requestLogEntry, logs_view.STATIC_INDEX)
 
 		activeProfile, err = c.GetActiveProfile()
 		if err != nil {
@@ -161,28 +138,41 @@ var CreateCmd = &cobra.Command{
 		}
 
 		var tsConn *tsnet.Server
-		if targetConfig.Name != "local" || activeProfile.Id != "default" {
+		if target.Name != "local" || activeProfile.Id != "default" {
 			tsConn, err = tailscale.GetConnection(&activeProfile)
 			if err != nil {
 				return err
 			}
 		}
 
-		id := stringid.GenerateRandomID()
-		id = stringid.TruncateID(id)
+		if targetExisted {
+			targetId = target.Id
+		} else {
+			targetId = stringid.GenerateRandomID()
+			targetId = stringid.TruncateID(targetId)
+		}
 
 		logsContext, stopLogs := context.WithCancel(context.Background())
 		defer stopLogs()
 
 		logs_view.CalculateLongestPrefixLength(names)
 
-		go apiclient_util.ReadTargetLogs(logsContext, activeProfile, id, true, nil)
+		go apiclient_util.ReadTargetLogs(logsContext, activeProfile, targetId, true, nil)
 
-		createdTarget, res, err := apiClient.TargetAPI.CreateTarget(ctx).Target(apiclient.CreateTargetDTO{
-			Id:           id,
-			Name:         targetName,
-			TargetConfig: targetConfig.Name,
-		}).Execute()
+		if !targetExisted {
+			_, res, err := apiClient.TargetAPI.CreateTarget(ctx).Target(apiclient.CreateTargetDTO{
+				Id:      targetId,
+				Name:    target.Name,
+				Options: target.Options,
+				ProviderInfo: apiclient.TargetProviderInfo{
+					Name:    target.ProviderInfo.Name,
+					Version: target.ProviderInfo.Version,
+				},
+			}).Execute()
+			if err != nil {
+				return apiclient_util.HandleErrorResponse(res, err)
+			}
+		}
 
 		dedupWorkspaceNames(&workspaces)
 
@@ -190,7 +180,7 @@ var CreateCmd = &cobra.Command{
 			wsId := stringid.GenerateRandomID()
 			wsId = stringid.TruncateID(wsId)
 			workspaces[i].Id = wsId
-			workspaces[i].TargetId = id
+			workspaces[i].TargetId = targetId
 			ws := workspaces[i]
 
 			go apiclient_util.ReadWorkspaceLogs(logsContext, i, activeProfile, wsId, true, nil)
@@ -209,7 +199,7 @@ var CreateCmd = &cobra.Command{
 			log.Warn(err)
 		}
 
-		err = waitForDial(createdTarget, workspaces[0].Id, &activeProfile, tsConn, gpgKey)
+		err = waitForDial(target.Name, workspaces[0].Id, &activeProfile, tsConn, gpgKey)
 		if err != nil {
 			return err
 		}
@@ -247,14 +237,13 @@ var CreateCmd = &cobra.Command{
 			return nil
 		}
 
-		views.RenderCreationInfoMessage(fmt.Sprintf("Opening the target in %s ...", chosenIde.Name))
+		views.RenderCreationInfoMessage(fmt.Sprintf("Opening the workspace in %s ...", chosenIde.Name))
 
 		return openIDE(chosenIdeId, activeProfile, workspaces[0].Name, *ws.Info.ProviderMetadata, yesFlag, gpgKey)
 	},
 }
 
-var nameFlag string
-var targetConfigNameFlag string
+var targetNameFlag string
 var noIdeFlag bool
 var blankFlag bool
 var multiWorkspaceFlag bool
@@ -278,9 +267,8 @@ func init() {
 	}
 	ideListStr := strings.Join(ids, ", ")
 
-	CreateCmd.Flags().StringVar(&nameFlag, "name", "", "Specify the target name")
 	CreateCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", fmt.Sprintf("Specify the IDE (%s)", ideListStr))
-	CreateCmd.Flags().StringVarP(&targetConfigNameFlag, "target", "t", "", "Specify the target (e.g. 'local')")
+	CreateCmd.Flags().StringVarP(&targetNameFlag, "target", "t", "", "Specify the target (e.g. 'local')")
 	CreateCmd.Flags().BoolVar(&blankFlag, "blank", false, "Create a blank workspace without using existing configurations")
 	CreateCmd.Flags().BoolVarP(&noIdeFlag, "no-ide", "n", false, "Do not open the target in the IDE after target creation")
 	CreateCmd.Flags().BoolVar(&multiWorkspaceFlag, "multi-workspace", false, "Target with multiple workspaces/repos")
@@ -290,7 +278,7 @@ func init() {
 	workspace_util.AddWorkspaceConfigurationFlags(CreateCmd, workspaceConfigurationFlags, true)
 }
 
-func processPrompting(ctx context.Context, apiClient *apiclient.APIClient, targetName *string, workspaces *[]apiclient.CreateWorkspaceDTO, targetNames []string) error {
+func processPrompting(ctx context.Context, apiClient *apiclient.APIClient, workspaces *[]apiclient.CreateWorkspaceDTO, targetName string) error {
 	if workspace_util.CheckAnyWorkspaceConfigurationFlagSet(workspaceConfigurationFlags) || (workspaceConfigurationFlags.Branches != nil && len(*workspaceConfigurationFlags.Branches) > 0) {
 		return errors.New("please provide the repository URL in order to set up custom workspace details through the CLI")
 	}
@@ -331,16 +319,12 @@ func processPrompting(ctx context.Context, apiClient *apiclient.APIClient, targe
 		return err
 	}
 
-	initialSuggestion := (*workspaces)[0].Name
-
-	suggestedName := workspace_util.GetSuggestedName(initialSuggestion, targetNames)
+	dedupWorkspaceNames(workspaces)
 
 	submissionFormConfig := create.SubmissionFormConfig{
-		ChosenName:    targetName,
-		SuggestedName: suggestedName,
-		ExistingNames: targetNames,
+		ChosenName:    &targetNameFlag,
 		WorkspaceList: workspaces,
-		NameLabel:     "Target",
+		NameLabel:     targetName,
 		Defaults:      workspaceDefaults,
 	}
 
@@ -476,8 +460,8 @@ func processGitURL(ctx context.Context, repoUrl string, apiClient *apiclient.API
 	return nil, nil
 }
 
-func waitForDial(target *apiclient.Target, workspaceId string, activeProfile *config.Profile, tsConn *tsnet.Server, gpgKey string) error {
-	if target.TargetConfig == "local" && (activeProfile != nil && activeProfile.Id == "default") {
+func waitForDial(targetName string, workspaceId string, activeProfile *config.Profile, tsConn *tsnet.Server, gpgKey string) error {
+	if targetName == "local" && (activeProfile != nil && activeProfile.Id == "default") {
 		err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, gpgKey)
 		if err != nil {
 			return err

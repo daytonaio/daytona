@@ -17,8 +17,8 @@ import (
 )
 
 var InfoCmd = &cobra.Command{
-	Use:     "info [TARGET]",
-	Short:   "Show target info",
+	Use:     "info [WORKSPACE]",
+	Short:   "Show workspace info",
 	Aliases: []string{"view", "inspect"},
 	Args:    cobra.RangeArgs(0, 1),
 	GroupID: util.TARGET_GROUP,

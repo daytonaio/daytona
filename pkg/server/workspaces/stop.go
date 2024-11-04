@@ -7,7 +7,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/provider"
+	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	log "github.com/sirupsen/logrus"
@@ -19,18 +19,13 @@ func (s *WorkspaceService) StopWorkspace(ctx context.Context, workspaceId string
 		return s.handleStopError(ctx, &ws.Workspace, ErrWorkspaceNotFound)
 	}
 
-	target, err := s.targetStore.Find(ws.TargetId)
-	if err != nil {
-		return s.handleStopError(ctx, &ws.Workspace, err)
-	}
-
-	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &target.TargetConfig})
+	target, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &ws.TargetId})
 	if err != nil {
 		return s.handleStopError(ctx, &ws.Workspace, err)
 	}
 
 	//	todo: go routines
-	err = s.provisioner.StopWorkspace(&ws.Workspace, targetConfig)
+	err = s.provisioner.StopWorkspace(&ws.Workspace, target)
 	if err != nil {
 		return s.handleStopError(ctx, &ws.Workspace, err)
 	}

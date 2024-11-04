@@ -5,9 +5,14 @@ package target
 
 import "errors"
 
+type TargetFilter struct {
+	IdOrName *string
+	Default  *bool
+}
+
 type Store interface {
-	List() ([]*Target, error)
-	Find(idOrName string) (*Target, error)
+	List(filter *TargetFilter) ([]*Target, error)
+	Find(filter *TargetFilter) (*Target, error)
 	Save(target *Target) error
 	Delete(target *Target) error
 }
