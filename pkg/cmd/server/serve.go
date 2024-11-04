@@ -37,6 +37,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
 	"github.com/daytonaio/daytona/pkg/server/targets"
 	"github.com/daytonaio/daytona/pkg/server/workspaceconfig"
+	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/views"
 	started_view "github.com/daytonaio/daytona/pkg/views/server/started"
@@ -233,6 +234,10 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	if err != nil {
 		return nil, err
 	}
+	workspaceStore, err := db.NewWorkspaceStore(dbConnection)
+	if err != nil {
+		return nil, err
+	}
 
 	headscaleServer := headscale.NewHeadscaleServer(&headscale.HeadscaleServerConfig{
 		ServerId:      c.Id,
@@ -329,6 +334,19 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	})
 
 	targetService := targets.NewTargetService(targets.TargetServiceConfig{
+		TargetStore:       targetStore,
+		TargetConfigStore: targetConfigStore,
+		ApiKeyService:     apiKeyService,
+		ServerApiUrl:      util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+		ServerVersion:     version,
+		ServerUrl:         headscaleUrl,
+		Provisioner:       provisioner,
+		LoggerFactory:     loggerFactory,
+		TelemetryService:  telemetryService,
+	})
+
+	workspaceService := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
+		WorkspaceStore:           workspaceStore,
 		TargetStore:              targetStore,
 		TargetConfigStore:        targetConfigStore,
 		ApiKeyService:            apiKeyService,
@@ -358,6 +376,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		ContainerRegistryService: containerRegistryService,
 		BuildService:             buildService,
 		WorkspaceConfigService:   workspaceConfigService,
+		WorkspaceService:         workspaceService,
 		LocalContainerRegistry:   localContainerRegistry,
 		ApiKeyService:            apiKeyService,
 		TargetService:            targetService,

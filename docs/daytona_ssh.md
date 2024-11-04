@@ -3,7 +3,7 @@
 SSH into a workspace using the terminal
 
 ```
-daytona ssh [TARGET] [WORKSPACE] [CMD...] [flags]
+daytona ssh [WORKSPACE] [CMD...] [flags]
 ```
 
 ### Options

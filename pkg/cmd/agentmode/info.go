@@ -36,7 +36,7 @@ var infoCmd = &cobra.Command{
 			return nil
 		}
 
-		info.Render(target, "", false)
+		info.Render(target, false)
 		return nil
 	},
 }

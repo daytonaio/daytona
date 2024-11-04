@@ -6,7 +6,6 @@ package apiclient
 import (
 	"context"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -18,62 +17,46 @@ import (
 
 var targetLogsStarted bool
 
-func ReadTargetLogs(ctx context.Context, activeProfile config.Profile, targetId string, workspaceNames []string, follow, showTargetLogs bool, from *time.Time) {
-	var wg sync.WaitGroup
+func ReadTargetLogs(ctx context.Context, activeProfile config.Profile, targetId string, follow bool, from *time.Time) {
 	query := ""
 	if follow {
 		query = "follow=true"
 	}
 
-	if !showTargetLogs {
-		targetLogsStarted = true
-	}
-	logs_view.CalculateLongestPrefixLength(workspaceNames)
-
-	for index, workspaceName := range workspaceNames {
-		wg.Add(1)
-		go func(workspaceName string, from *time.Time) {
-			defer wg.Done()
-
-			for {
-				// Make sure target logs started before showing any workspace logs
-				if !targetLogsStarted {
-					time.Sleep(250 * time.Millisecond)
-					continue
-				}
-
-				ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/target/%s/%s", targetId, workspaceName), &activeProfile, &query)
-				// We want to retry getting the logs if it fails
-				if err != nil {
-					log.Trace(HandleErrorResponse(res, err))
-					time.Sleep(500 * time.Millisecond)
-					continue
-				}
-
-				readJSONLog(ctx, ws, index, from)
-				ws.Close()
-				break
-			}
-		}(workspaceName, from)
-	}
-
-	if showTargetLogs {
-		for {
-			ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/target/%s", targetId), &activeProfile, &query)
-			// We want to retry getting the logs if it fails
-			if err != nil {
-				log.Trace(HandleErrorResponse(res, err))
-				time.Sleep(250 * time.Millisecond)
-				continue
-			}
-
-			readJSONLog(ctx, ws, logs_view.STATIC_INDEX, from)
-			ws.Close()
-			break
+	for {
+		ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/target/%s", targetId), &activeProfile, &query)
+		// We want to retry getting the logs if it fails
+		if err != nil {
+			log.Trace(HandleErrorResponse(res, err))
+			time.Sleep(250 * time.Millisecond)
+			continue
 		}
+
+		readJSONLog(ctx, ws, logs_view.STATIC_INDEX, from)
+		ws.Close()
+		break
+	}
+}
+
+func ReadWorkspaceLogs(ctx context.Context, index int, activeProfile config.Profile, workspaceId string, follow bool, from *time.Time) {
+	query := ""
+	if follow {
+		query = "follow=true"
 	}
 
-	wg.Wait()
+	for {
+		ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/workspace/%s", workspaceId), &activeProfile, &query)
+		// We want to retry getting the logs if it fails
+		if err != nil {
+			log.Trace(HandleErrorResponse(res, err))
+			time.Sleep(500 * time.Millisecond)
+			continue
+		}
+
+		readJSONLog(ctx, ws, index, from)
+		ws.Close()
+		break
+	}
 }
 
 func ReadBuildLogs(ctx context.Context, activeProfile config.Profile, buildId string, query string) {

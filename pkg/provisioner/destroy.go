@@ -6,7 +6,7 @@ package provisioner
 import (
 	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
 func (p *Provisioner) DestroyTarget(target *target.Target, targetConfig *provider.TargetConfig) error {

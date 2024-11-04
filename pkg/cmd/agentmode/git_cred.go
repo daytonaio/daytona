@@ -37,22 +37,13 @@ var gitCredCmd = &cobra.Command{
 			return err
 		}
 
-		target, res, err := apiClient.TargetAPI.GetTarget(ctx, targetId).Execute()
+		workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceId).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
 
-		var gitProviderConfigId *string
-
-		for _, workspace := range target.Workspaces {
-			if workspace.Name == workspaceName {
-				gitProviderConfigId = workspace.GitProviderConfigId
-				break
-			}
-		}
-
-		if gitProviderConfigId != nil {
-			gitProvider, _, _ := apiClient.GitProviderAPI.GetGitProvider(ctx, *gitProviderConfigId).Execute()
+		if workspace.GitProviderConfigId != nil {
+			gitProvider, _, _ := apiClient.GitProviderAPI.GetGitProvider(ctx, *workspace.GitProviderConfigId).Execute()
 			if gitProvider != nil {
 				fmt.Println("username=" + gitProvider.Username)
 				fmt.Println("password=" + gitProvider.Token)

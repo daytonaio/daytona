@@ -12,8 +12,8 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 )
 
-func OpenTerminalSsh(activeProfile config.Profile, targetId string, workspaceName string, gpgKey string, sshOptions []string, args ...string) error {
-	if err := config.EnsureSshConfigEntryAdded(activeProfile.Id, targetId, workspaceName, gpgKey); err != nil {
+func OpenTerminalSsh(activeProfile config.Profile, workspaceId string, gpgKey string, sshOptions []string, args ...string) error {
+	if err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, gpgKey); err != nil {
 		return err
 	}
 
@@ -23,7 +23,7 @@ func OpenTerminalSsh(activeProfile config.Profile, targetId string, workspaceNam
 		return err
 	}
 
-	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, targetId, workspaceName)
+	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, workspaceId)
 	cmdArgs := buildCommandArgs(workspaceHostname, parsedOptions, args...)
 
 	sshCommand := exec.Command("ssh", cmdArgs...)

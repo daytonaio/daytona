@@ -13,8 +13,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	build_dto "github.com/daytonaio/daytona/pkg/server/builds/dto"
 	"github.com/daytonaio/daytona/pkg/server/workspaceconfig/dto"
-	"github.com/daytonaio/daytona/pkg/target/workspace/config"
-	"github.com/daytonaio/daytona/pkg/target/workspace/containerconfig"
+	"github.com/daytonaio/daytona/pkg/workspace/config"
+	"github.com/daytonaio/daytona/pkg/workspace/containerconfig"
 	log "github.com/sirupsen/logrus"
 )
 
