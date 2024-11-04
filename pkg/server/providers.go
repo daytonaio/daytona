@@ -98,7 +98,7 @@ func (s *Server) registerProviders() error {
 			log.Infof("Requirement met : %s ", req.Reason)
 		} else {
 			allRequirementsMet = false
-			log.Warnf("Requirement not met : %s", req.Reason)
+			log.Warnf("Requirement not met.... : %s", req.Reason)
 
 		}
 	}
