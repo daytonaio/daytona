@@ -9,6 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/git"
+	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
 type SshServer interface {
@@ -27,4 +28,5 @@ type Agent struct {
 	LogWriter        io.Writer
 	TelemetryEnabled bool
 	startTime        time.Time
+	Workspace        *workspace.Workspace
 }

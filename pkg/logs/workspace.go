@@ -15,7 +15,7 @@ import (
 
 type workspaceLogger struct {
 	logsDir       string
-	targetId      string
+	workspaceId   string
 	workspaceName string
 	logFile       *os.File
 	logger        *logrus.Logger
@@ -24,7 +24,7 @@ type workspaceLogger struct {
 
 func (pl *workspaceLogger) Write(p []byte) (n int, err error) {
 	if pl.logFile == nil {
-		filePath := filepath.Join(pl.logsDir, pl.targetId, pl.workspaceName, "log")
+		filePath := filepath.Join(pl.logsDir, pl.workspaceId, "log")
 		err = os.MkdirAll(filepath.Dir(filePath), 0755)
 		if err != nil {
 			return len(p), err
@@ -41,7 +41,6 @@ func (pl *workspaceLogger) Write(p []byte) (n int, err error) {
 	var entry LogEntry
 	entry.Msg = string(p)
 	entry.Source = string(pl.source)
-	entry.TargetId = &pl.targetId
 	entry.WorkspaceName = &pl.workspaceName
 	entry.Time = time.Now().Format(time.RFC3339)
 
@@ -70,7 +69,7 @@ func (pl *workspaceLogger) Close() error {
 }
 
 func (pl *workspaceLogger) Cleanup() error {
-	workspaceLogsDir := filepath.Join(pl.logsDir, pl.targetId, pl.workspaceName)
+	workspaceLogsDir := filepath.Join(pl.logsDir, pl.workspaceId)
 
 	_, err := os.Stat(workspaceLogsDir)
 	if os.IsNotExist(err) {
@@ -82,11 +81,11 @@ func (pl *workspaceLogger) Cleanup() error {
 	return os.RemoveAll(workspaceLogsDir)
 }
 
-func (l *loggerFactoryImpl) CreateWorkspaceLogger(targetId, workspaceName string, source LogSource) Logger {
+func (l *loggerFactoryImpl) CreateWorkspaceLogger(workspaceId, workspaceName string, source LogSource) Logger {
 	logger := logrus.New()
 
 	return &workspaceLogger{
-		targetId:      targetId,
+		workspaceId:   workspaceId,
 		logsDir:       l.targetLogsDir,
 		workspaceName: workspaceName,
 		logger:        logger,
@@ -94,7 +93,7 @@ func (l *loggerFactoryImpl) CreateWorkspaceLogger(targetId, workspaceName string
 	}
 }
 
-func (l *loggerFactoryImpl) CreateWorkspaceLogReader(targetId, workspaceName string) (io.Reader, error) {
-	filePath := filepath.Join(l.targetLogsDir, targetId, workspaceName, "log")
+func (l *loggerFactoryImpl) CreateWorkspaceLogReader(workspaceId string) (io.Reader, error) {
+	filePath := filepath.Join(l.targetLogsDir, workspaceId, "log")
 	return os.Open(filePath)
 }

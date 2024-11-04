@@ -1,6 +1,6 @@
 name: daytona code
-synopsis: Open a target in your preferred IDE
-usage: daytona code [TARGET] [WORKSPACE] [flags]
+synopsis: Open a workspace in your preferred IDE
+usage: daytona code [WORKSPACE] [flags]
 options:
     - name: ide
       shorthand: i

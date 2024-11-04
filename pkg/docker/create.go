@@ -93,7 +93,7 @@ func (d *DockerClient) cloneWorkspaceRepository(opts *CreateWorkspaceOptions) er
 	}
 
 	gitService := git.Service{
-		WorkspaceDir: fmt.Sprintf("/workdir/%s-%s", opts.Workspace.TargetId, opts.Workspace.Name),
+		WorkspaceDir: fmt.Sprintf("/workdir/%s", opts.Workspace.Name),
 	}
 
 	cloneCmd := gitService.CloneRepositoryCmd(opts.Workspace.Repository, auth)

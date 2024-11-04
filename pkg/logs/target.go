@@ -14,11 +14,12 @@ import (
 )
 
 type targetLogger struct {
-	logsDir  string
-	targetId string
-	logFile  *os.File
-	logger   *logrus.Logger
-	source   LogSource
+	logsDir    string
+	targetId   string
+	targetName string
+	logFile    *os.File
+	logger     *logrus.Logger
+	source     LogSource
 }
 
 func (w *targetLogger) Write(p []byte) (n int, err error) {
@@ -39,7 +40,7 @@ func (w *targetLogger) Write(p []byte) (n int, err error) {
 	var entry LogEntry
 	entry.Msg = string(p)
 	entry.Source = string(w.source)
-	entry.TargetId = &w.targetId
+	entry.TargetName = &w.targetName
 	entry.Time = time.Now().Format(time.RFC3339)
 
 	b, err := json.Marshal(entry)
@@ -79,14 +80,15 @@ func (w *targetLogger) Cleanup() error {
 	return os.RemoveAll(targetLogsDir)
 }
 
-func (l *loggerFactoryImpl) CreateTargetLogger(targetId string, source LogSource) Logger {
+func (l *loggerFactoryImpl) CreateTargetLogger(targetId, targetName string, source LogSource) Logger {
 	logger := logrus.New()
 
 	return &targetLogger{
-		targetId: targetId,
-		logsDir:  l.targetLogsDir,
-		logger:   logger,
-		source:   source,
+		targetId:   targetId,
+		targetName: targetName,
+		logsDir:    l.targetLogsDir,
+		logger:     logger,
+		source:     source,
 	}
 }
 

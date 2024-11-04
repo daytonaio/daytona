@@ -6,7 +6,6 @@ package target
 import (
 	"context"
 
-	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
@@ -16,12 +15,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var InfoCmd = &cobra.Command{
+var infoCmd = &cobra.Command{
 	Use:     "info [TARGET]",
 	Short:   "Show target info",
 	Aliases: []string{"view", "inspect"},
 	Args:    cobra.RangeArgs(0, 1),
-	GroupID: util.TARGET_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
@@ -69,7 +67,7 @@ var InfoCmd = &cobra.Command{
 			return nil
 		}
 
-		info.Render(target, "", false)
+		info.Render(target, false)
 		return nil
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -78,5 +76,5 @@ var InfoCmd = &cobra.Command{
 }
 
 func init() {
-	format.RegisterFormatFlag(InfoCmd)
+	format.RegisterFormatFlag(infoCmd)
 }

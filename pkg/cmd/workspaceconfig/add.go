@@ -12,11 +12,11 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	target_util "github.com/daytonaio/daytona/pkg/cmd/target/util"
+	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
-	"github.com/daytonaio/daytona/pkg/views/target/create"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
+	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/spf13/cobra"
 )
 
@@ -66,7 +66,7 @@ var workspaceAddCmd = &cobra.Command{
 }
 
 func RunWorkspaceConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []apiclient.GitProvider, ctx context.Context) (*apiclient.WorkspaceConfig, error) {
-	if target_util.CheckAnyWorkspaceConfigurationFlagSet(workspaceConfigurationFlags) {
+	if workspace_util.CheckAnyWorkspaceConfigurationFlagSet(workspaceConfigurationFlags) {
 		return nil, errors.New("please provide the repository URL in order to set up custom workspace config details through the CLI")
 	}
 
@@ -88,7 +88,7 @@ func RunWorkspaceConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []ap
 		DevcontainerFilePath: create.DEVCONTAINER_FILEPATH,
 	}
 
-	createDtos, err = target_util.GetWorkspacesCreationDataFromPrompt(target_util.WorkspacesDataPromptConfig{
+	createDtos, err = workspace_util.GetWorkspacesCreationDataFromPrompt(workspace_util.WorkspacesDataPromptConfig{
 		UserGitProviders:    gitProviders,
 		Manual:              *workspaceConfigurationFlags.Manual,
 		MultiWorkspace:      false,
@@ -120,7 +120,7 @@ func RunWorkspaceConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []ap
 
 	initialSuggestion := createDtos[0].Name
 
-	chosenName := target_util.GetSuggestedName(initialSuggestion, existingWorkspaceConfigNames)
+	chosenName := workspace_util.GetSuggestedName(initialSuggestion, existingWorkspaceConfigNames)
 
 	submissionFormConfig := create.SubmissionFormConfig{
 		ChosenName:    &chosenName,
@@ -207,12 +207,12 @@ func processCmdArgument(argument string, apiClient *apiclient.APIClient, ctx con
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	workspaceConfigurationFlags.GitProviderConfig, err = target_util.GetGitProviderConfigIdFromFlag(ctx, apiClient, workspaceConfigurationFlags.GitProviderConfig)
+	workspaceConfigurationFlags.GitProviderConfig, err = workspace_util.GetGitProviderConfigIdFromFlag(ctx, apiClient, workspaceConfigurationFlags.GitProviderConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	workspace, err := target_util.GetCreateWorkspaceDtoFromFlags(workspaceConfigurationFlags)
+	workspace, err := workspace_util.GetCreateWorkspaceDtoFromFlags(workspaceConfigurationFlags)
 	if err != nil {
 		return nil, err
 	}
@@ -221,8 +221,8 @@ func processCmdArgument(argument string, apiClient *apiclient.APIClient, ctx con
 	if nameFlag != "" {
 		name = nameFlag
 	} else {
-		workspaceName := target_util.GetWorkspaceNameFromRepo(repoUrl)
-		name = target_util.GetSuggestedName(workspaceName, existingWorkspaceConfigNames)
+		workspaceName := workspace_util.GetWorkspaceNameFromRepo(repoUrl)
+		name = workspace_util.GetSuggestedName(workspaceName, existingWorkspaceConfigNames)
 	}
 
 	if workspace.GitProviderConfigId == nil || *workspace.GitProviderConfigId == "" {
@@ -276,7 +276,7 @@ func getExistingWorkspaceConfigNames(apiClient *apiclient.APIClient) ([]string, 
 
 var nameFlag string
 
-var workspaceConfigurationFlags = target_util.WorkspaceConfigurationFlags{
+var workspaceConfigurationFlags = workspace_util.WorkspaceConfigurationFlags{
 	Builder:           new(views_util.BuildChoice),
 	CustomImage:       new(string),
 	CustomImageUser:   new(string),
@@ -289,5 +289,5 @@ var workspaceConfigurationFlags = target_util.WorkspaceConfigurationFlags{
 
 func init() {
 	workspaceAddCmd.Flags().StringVar(&nameFlag, "name", "", "Specify the workspace config name")
-	target_util.AddWorkspaceConfigurationFlags(workspaceAddCmd, workspaceConfigurationFlags, false)
+	workspace_util.AddWorkspaceConfigurationFlags(workspaceAddCmd, workspaceConfigurationFlags, false)
 }

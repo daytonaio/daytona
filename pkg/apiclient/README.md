@@ -125,15 +125,19 @@ Class | Method | HTTP request | Description
 *TargetAPI* | [**GetTarget**](docs/TargetAPI.md#gettarget) | **Get** /target/{targetId} | Get target info
 *TargetAPI* | [**ListTargets**](docs/TargetAPI.md#listtargets) | **Get** /target | List targets
 *TargetAPI* | [**RemoveTarget**](docs/TargetAPI.md#removetarget) | **Delete** /target/{targetId} | Remove target
-*TargetAPI* | [**SetWorkspaceState**](docs/TargetAPI.md#setworkspacestate) | **Post** /target/{targetId}/{workspaceId}/state | Set workspace state
 *TargetAPI* | [**StartTarget**](docs/TargetAPI.md#starttarget) | **Post** /target/{targetId}/start | Start target
-*TargetAPI* | [**StartWorkspace**](docs/TargetAPI.md#startworkspace) | **Post** /target/{targetId}/{workspaceId}/start | Start workspace
 *TargetAPI* | [**StopTarget**](docs/TargetAPI.md#stoptarget) | **Post** /target/{targetId}/stop | Stop target
-*TargetAPI* | [**StopWorkspace**](docs/TargetAPI.md#stopworkspace) | **Post** /target/{targetId}/{workspaceId}/stop | Stop workspace
 *TargetConfigAPI* | [**ListTargetConfigs**](docs/TargetConfigAPI.md#listtargetconfigs) | **Get** /target-config | List target configs
 *TargetConfigAPI* | [**RemoveTargetConfig**](docs/TargetConfigAPI.md#removetargetconfig) | **Delete** /target-config/{configName} | Remove a target config
 *TargetConfigAPI* | [**SetDefaultTargetConfig**](docs/TargetConfigAPI.md#setdefaulttargetconfig) | **Patch** /target-config/{configName}/set-default | Set target config to default
 *TargetConfigAPI* | [**SetTargetConfig**](docs/TargetConfigAPI.md#settargetconfig) | **Put** /target-config | Set a target config
+*WorkspaceAPI* | [**CreateWorkspace**](docs/WorkspaceAPI.md#createworkspace) | **Post** /workspace | Create a workspace
+*WorkspaceAPI* | [**GetWorkspace**](docs/WorkspaceAPI.md#getworkspace) | **Get** /workspace/{workspaceId} | Get workspace info
+*WorkspaceAPI* | [**ListWorkspaces**](docs/WorkspaceAPI.md#listworkspaces) | **Get** /workspace | List workspaces
+*WorkspaceAPI* | [**RemoveWorkspace**](docs/WorkspaceAPI.md#removeworkspace) | **Delete** /workspace/{workspaceId} | Remove workspace
+*WorkspaceAPI* | [**SetWorkspaceState**](docs/WorkspaceAPI.md#setworkspacestate) | **Post** /workspace/{workspaceId}/state | Set workspace state
+*WorkspaceAPI* | [**StartWorkspace**](docs/WorkspaceAPI.md#startworkspace) | **Post** /workspace/{workspaceId}/start | Start workspace
+*WorkspaceAPI* | [**StopWorkspace**](docs/WorkspaceAPI.md#stopworkspace) | **Post** /workspace/{workspaceId}/stop | Stop workspace
 *WorkspaceConfigAPI* | [**DeleteWorkspaceConfig**](docs/WorkspaceConfigAPI.md#deleteworkspaceconfig) | **Delete** /workspace-config/{configName} | Delete workspace config data
 *WorkspaceConfigAPI* | [**GetDefaultWorkspaceConfig**](docs/WorkspaceConfigAPI.md#getdefaultworkspaceconfig) | **Get** /workspace-config/default/{gitUrl} | Get workspace configs by git url
 *WorkspaceConfigAPI* | [**GetWorkspaceConfig**](docs/WorkspaceConfigAPI.md#getworkspaceconfig) | **Get** /workspace-config/{configName} | Get workspace config data
@@ -191,10 +195,11 @@ Class | Method | HTTP request | Description
  - [TargetConfigProperty](docs/TargetConfigProperty.md)
  - [TargetDTO](docs/TargetDTO.md)
  - [TargetInfo](docs/TargetInfo.md)
- - [Workspace](docs/Workspace.md)
  - [WorkspaceConfig](docs/WorkspaceConfig.md)
+ - [WorkspaceDTO](docs/WorkspaceDTO.md)
  - [WorkspaceInfo](docs/WorkspaceInfo.md)
  - [WorkspaceState](docs/WorkspaceState.md)
+ - [WorkspaceViewDTO](docs/WorkspaceViewDTO.md)
 
 
 ## Documentation For Authorization

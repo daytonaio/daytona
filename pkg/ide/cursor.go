@@ -14,15 +14,15 @@ import (
 	"github.com/daytonaio/daytona/pkg/build/devcontainer"
 )
 
-func OpenCursor(activeProfile config.Profile, targetId string, workspaceName string, workspaceProviderMetadata string, gpgkey string) error {
+func OpenCursor(activeProfile config.Profile, workspaceId string, workspaceProviderMetadata string, gpgkey string) error {
 	path, err := GetCursorBinaryPath()
 	if err != nil {
 		return err
 	}
 
-	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, targetId, workspaceName)
+	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, workspaceId)
 
-	workspaceDir, err := util.GetWorkspaceDir(activeProfile, targetId, workspaceName, gpgkey)
+	workspaceDir, err := util.GetWorkspaceDir(activeProfile, workspaceId, gpgkey)
 	if err != nil {
 		return err
 	}

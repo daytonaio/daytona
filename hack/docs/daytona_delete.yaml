@@ -1,15 +1,15 @@
 name: daytona delete
-synopsis: Delete a target
-usage: daytona delete [TARGET] [flags]
+synopsis: Delete a workspace
+usage: daytona delete [WORKSPACE] [flags]
 options:
     - name: all
       shorthand: a
       default_value: "false"
-      usage: Delete all targets
+      usage: Delete all workspaces
     - name: force
       shorthand: f
       default_value: "false"
-      usage: Delete a target by force
+      usage: Delete a workspace by force
     - name: "yes"
       shorthand: "y"
       default_value: "false"
