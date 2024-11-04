@@ -9,7 +9,7 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 )
@@ -22,16 +22,6 @@ func (d *DockerClient) GetTargetInfo(t *target.Target) (*target.TargetInfo, erro
 		Name:             t.Name,
 		ProviderMetadata: fmt.Sprintf(TargetMetadataFormat, t.Id),
 	}
-
-	workspaceInfos := []*workspace.WorkspaceInfo{}
-	for _, workspace := range t.Workspaces {
-		workspaceInfo, err := d.GetWorkspaceInfo(workspace)
-		if err != nil {
-			return nil, err
-		}
-		workspaceInfos = append(workspaceInfos, workspaceInfo)
-	}
-	targetInfo.Workspaces = workspaceInfos
 
 	return targetInfo, nil
 }

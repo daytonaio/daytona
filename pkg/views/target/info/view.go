@@ -6,7 +6,6 @@ package info
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/pkg/apiclient"
@@ -23,33 +22,14 @@ var propertyValueStyle = lipgloss.NewStyle().
 	Foreground(views.Light).
 	Bold(true)
 
-func Render(target *apiclient.TargetDTO, ide string, forceUnstyled bool) {
-	var isCreationView bool
+func Render(target *apiclient.TargetDTO, forceUnstyled bool) {
 	var output string
 	nameLabel := "Name"
-
-	if ide != "" {
-		isCreationView = true
-	}
-
-	if isCreationView {
-		nameLabel = "Target"
-	}
 
 	output += "\n"
 	output += getInfoLine(nameLabel, target.Name) + "\n"
 
 	output += getInfoLine("ID", target.Id) + "\n"
-
-	if isCreationView {
-		output += getInfoLine("Editor", ide) + "\n"
-	}
-
-	if len(target.Workspaces) == 1 {
-		output += getSingleWorkspaceOutput(&target.Workspaces[0], isCreationView)
-	} else {
-		output += getWorkspacesOutputs(target.Workspaces, isCreationView)
-	}
 
 	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
@@ -61,148 +41,23 @@ func Render(target *apiclient.TargetDTO, ide string, forceUnstyled bool) {
 		return
 	}
 
-	if !isCreationView {
-		output = views.GetStyledMainTitle("Target Info") + "\n" + output
-	}
-
-	renderTUIView(output, views.GetContainerBreakpointWidth(terminalWidth), isCreationView)
+	renderTUIView(output, views.GetContainerBreakpointWidth(terminalWidth))
 }
 
 func renderUnstyledInfo(output string) {
 	fmt.Println(output)
 }
 
-func renderTUIView(output string, width int, isCreationView bool) {
+func renderTUIView(output string, width int) {
 	output = lipgloss.NewStyle().PaddingLeft(3).Render(output)
 
 	content := lipgloss.
 		NewStyle().Width(width).
 		Render(output)
 
-	if !isCreationView {
-		content = lipgloss.NewStyle().Margin(1, 0).Render(content)
-	}
-
 	fmt.Println(content)
-}
-
-func getSingleWorkspaceOutput(workspace *apiclient.Workspace, isCreationView bool) string {
-	var output string
-	var repositoryUrl string
-
-	repositoryUrl = workspace.Repository.Url
-	repositoryUrl = strings.TrimPrefix(repositoryUrl, "https://")
-	repositoryUrl = strings.TrimPrefix(repositoryUrl, "http://")
-
-	if workspace.State != nil {
-		output += getInfoLineState("State", workspace.State) + "\n"
-		output += getInfoLineGitStatus("Branch", &workspace.State.GitStatus) + "\n"
-	}
-
-	output += getInfoLinePrNumber(workspace.Repository.PrNumber, workspace.Repository, workspace.State)
-
-	if !isCreationView {
-		output += getInfoLine("Target Config", workspace.TargetConfig) + "\n"
-	}
-	output += getInfoLine("Repository", repositoryUrl)
-
-	if !isCreationView {
-		output += "\n"
-		output += getInfoLine("Workspace", workspace.Name)
-	}
-
-	return output
-}
-
-func getWorkspacesOutputs(workspaces []apiclient.Workspace, isCreationView bool) string {
-	var output string
-	for i, workspace := range workspaces {
-		output += getInfoLine(fmt.Sprintf("Workspace #%d", i+1), workspace.Name)
-		output += getInfoLineState("State", workspace.State)
-		if workspace.State != nil {
-			output += getInfoLineGitStatus("Branch", &workspace.State.GitStatus)
-		}
-		output += getInfoLinePrNumber(workspace.Repository.PrNumber, workspace.Repository, workspace.State)
-
-		if !isCreationView {
-			output += getInfoLine("Target Config", workspace.TargetConfig)
-		}
-		output += getInfoLine("Repository", workspace.Repository.Url)
-		if workspace.Name != workspaces[len(workspaces)-1].Name {
-			output += "\n"
-		}
-	}
-	return output
 }
 
 func getInfoLine(key, value string) string {
 	return propertyNameStyle.Render(fmt.Sprintf("%-*s", propertyNameWidth, key)) + propertyValueStyle.Render(value) + "\n"
-}
-
-func getInfoLineState(key string, state *apiclient.WorkspaceState) string {
-	var uptime int
-	var stateProperty string
-
-	if state == nil {
-		uptime = 0
-	} else {
-		uptime = int(state.Uptime)
-	}
-
-	if uptime == 0 {
-		stateProperty = propertyValueStyle.Foreground(views.Gray).Render("STOPPED")
-	} else {
-		stateProperty = propertyValueStyle.Foreground(views.Green).Render("RUNNING")
-	}
-
-	return propertyNameStyle.Render(fmt.Sprintf("%-*s", propertyNameWidth, key)) + stateProperty + propertyValueStyle.Foreground(views.Light).Render("\n")
-}
-
-func getInfoLineGitStatus(key string, status *apiclient.GitStatus) string {
-	output := propertyNameStyle.Render(fmt.Sprintf("%-*s", propertyNameWidth, key))
-	output += propertyNameStyle.Foreground(views.Gray).Render(fmt.Sprintf("%-*s", propertyNameWidth, status.CurrentBranch))
-
-	changesOutput := ""
-	if status.FileStatus != nil {
-		filesNum := len(status.FileStatus)
-		if filesNum == 1 {
-			changesOutput = " (1 uncommitted change)"
-		} else if filesNum > 1 {
-			changesOutput = fmt.Sprintf(" (%d uncommitted changes)", filesNum)
-		}
-	}
-
-	unpushedOutput := ""
-
-	if status.Ahead != nil && *status.Ahead > 0 {
-		if *status.Ahead == 1 {
-			unpushedOutput += " (1 commit ahead)"
-		} else {
-			unpushedOutput += fmt.Sprintf(" (%d commits ahead)", *status.Ahead)
-		}
-	}
-
-	if status.Behind != nil && *status.Behind > 0 {
-		if *status.Behind == 1 {
-			unpushedOutput += " (1 commit behind)"
-		} else {
-			unpushedOutput += fmt.Sprintf(" (%d commits behind)", *status.Behind)
-		}
-	}
-
-	branchPublishedOutput := ""
-	if !*status.BranchPublished {
-		branchPublishedOutput = " (branch not published)"
-	}
-
-	output += changesOutput + unpushedOutput + branchPublishedOutput + propertyValueStyle.Foreground(views.Light).Render("\n")
-
-	return output
-}
-
-func getInfoLinePrNumber(PrNumber *int32, repo apiclient.GitRepository, state *apiclient.WorkspaceState) string {
-	if PrNumber != nil && (state == nil || state.GitStatus.CurrentBranch == repo.Branch) {
-		return getInfoLine("PR Number", fmt.Sprintf("#%d", *PrNumber)) + "\n"
-	}
-	return ""
 }

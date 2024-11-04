@@ -21,10 +21,9 @@ var _ MappedNullable = &Target{}
 
 // Target struct for Target
 type Target struct {
-	Id           string      `json:"id"`
-	Name         string      `json:"name"`
-	TargetConfig string      `json:"targetConfig"`
-	Workspaces   []Workspace `json:"workspaces"`
+	Id           string `json:"id"`
+	Name         string `json:"name"`
+	TargetConfig string `json:"targetConfig"`
 }
 
 type _Target Target
@@ -33,12 +32,11 @@ type _Target Target
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTarget(id string, name string, targetConfig string, workspaces []Workspace) *Target {
+func NewTarget(id string, name string, targetConfig string) *Target {
 	this := Target{}
 	this.Id = id
 	this.Name = name
 	this.TargetConfig = targetConfig
-	this.Workspaces = workspaces
 	return &this
 }
 
@@ -122,30 +120,6 @@ func (o *Target) SetTargetConfig(v string) {
 	o.TargetConfig = v
 }
 
-// GetWorkspaces returns the Workspaces field value
-func (o *Target) GetWorkspaces() []Workspace {
-	if o == nil {
-		var ret []Workspace
-		return ret
-	}
-
-	return o.Workspaces
-}
-
-// GetWorkspacesOk returns a tuple with the Workspaces field value
-// and a boolean to check if the value has been set.
-func (o *Target) GetWorkspacesOk() ([]Workspace, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return o.Workspaces, true
-}
-
-// SetWorkspaces sets field value
-func (o *Target) SetWorkspaces(v []Workspace) {
-	o.Workspaces = v
-}
-
 func (o Target) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -159,7 +133,6 @@ func (o Target) ToMap() (map[string]interface{}, error) {
 	toSerialize["id"] = o.Id
 	toSerialize["name"] = o.Name
 	toSerialize["targetConfig"] = o.TargetConfig
-	toSerialize["workspaces"] = o.Workspaces
 	return toSerialize, nil
 }
 
@@ -171,7 +144,6 @@ func (o *Target) UnmarshalJSON(data []byte) (err error) {
 		"id",
 		"name",
 		"targetConfig",
-		"workspaces",
 	}
 
 	allProperties := make(map[string]interface{})

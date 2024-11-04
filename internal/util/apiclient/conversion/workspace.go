@@ -6,14 +6,14 @@ package conversion
 import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	workspace_dto "github.com/daytonaio/daytona/pkg/server/targets/dto"
 	wc_dto "github.com/daytonaio/daytona/pkg/server/workspaceconfig/dto"
-	"github.com/daytonaio/daytona/pkg/target/workspace"
-	"github.com/daytonaio/daytona/pkg/target/workspace/buildconfig"
-	"github.com/daytonaio/daytona/pkg/target/workspace/config"
+	workspace_dto "github.com/daytonaio/daytona/pkg/server/workspaces/dto"
+	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/buildconfig"
+	"github.com/daytonaio/daytona/pkg/workspace/config"
 )
 
-func ToWorkspace(workspaceDTO *apiclient.Workspace) *workspace.Workspace {
+func ToWorkspace(workspaceDTO *apiclient.WorkspaceDTO) *workspace.Workspace {
 	if workspaceDTO == nil {
 		return nil
 	}
@@ -50,12 +50,12 @@ func ToWorkspace(workspaceDTO *apiclient.Workspace) *workspace.Workspace {
 	}
 
 	workspace := &workspace.Workspace{
+		Id:                  workspaceDTO.Id,
 		Name:                workspaceDTO.Name,
 		Image:               workspaceDTO.Image,
 		User:                workspaceDTO.User,
 		BuildConfig:         workspaceBuild,
 		Repository:          repository,
-		TargetConfig:        workspaceDTO.TargetConfig,
 		TargetId:            workspaceDTO.TargetId,
 		State:               workspaceState,
 		GitProviderConfigId: workspaceDTO.GitProviderConfigId,
@@ -170,10 +170,12 @@ func ToWorkspaceConfig(createWorkspaceConfigDto wc_dto.CreateWorkspaceConfigDTO)
 
 func CreateDtoToWorkspace(createWorkspaceDto workspace_dto.CreateWorkspaceDTO) *workspace.Workspace {
 	w := &workspace.Workspace{
+		Id:                  createWorkspaceDto.Id,
 		Name:                createWorkspaceDto.Name,
 		BuildConfig:         createWorkspaceDto.BuildConfig,
 		Repository:          createWorkspaceDto.Source.Repository,
 		EnvVars:             createWorkspaceDto.EnvVars,
+		TargetId:            createWorkspaceDto.TargetId,
 		GitProviderConfigId: createWorkspaceDto.GitProviderConfigId,
 	}
 

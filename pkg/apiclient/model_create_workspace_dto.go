@@ -24,9 +24,11 @@ type CreateWorkspaceDTO struct {
 	BuildConfig         *BuildConfig             `json:"buildConfig,omitempty"`
 	EnvVars             map[string]string        `json:"envVars"`
 	GitProviderConfigId *string                  `json:"gitProviderConfigId,omitempty"`
+	Id                  string                   `json:"id"`
 	Image               *string                  `json:"image,omitempty"`
 	Name                string                   `json:"name"`
 	Source              CreateWorkspaceSourceDTO `json:"source"`
+	TargetId            string                   `json:"targetId"`
 	User                *string                  `json:"user,omitempty"`
 }
 
@@ -36,11 +38,13 @@ type _CreateWorkspaceDTO CreateWorkspaceDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateWorkspaceDTO(envVars map[string]string, name string, source CreateWorkspaceSourceDTO) *CreateWorkspaceDTO {
+func NewCreateWorkspaceDTO(envVars map[string]string, id string, name string, source CreateWorkspaceSourceDTO, targetId string) *CreateWorkspaceDTO {
 	this := CreateWorkspaceDTO{}
 	this.EnvVars = envVars
+	this.Id = id
 	this.Name = name
 	this.Source = source
+	this.TargetId = targetId
 	return &this
 }
 
@@ -140,6 +144,30 @@ func (o *CreateWorkspaceDTO) SetGitProviderConfigId(v string) {
 	o.GitProviderConfigId = &v
 }
 
+// GetId returns the Id field value
+func (o *CreateWorkspaceDTO) GetId() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Id
+}
+
+// GetIdOk returns a tuple with the Id field value
+// and a boolean to check if the value has been set.
+func (o *CreateWorkspaceDTO) GetIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Id, true
+}
+
+// SetId sets field value
+func (o *CreateWorkspaceDTO) SetId(v string) {
+	o.Id = v
+}
+
 // GetImage returns the Image field value if set, zero value otherwise.
 func (o *CreateWorkspaceDTO) GetImage() string {
 	if o == nil || IsNil(o.Image) {
@@ -220,6 +248,30 @@ func (o *CreateWorkspaceDTO) SetSource(v CreateWorkspaceSourceDTO) {
 	o.Source = v
 }
 
+// GetTargetId returns the TargetId field value
+func (o *CreateWorkspaceDTO) GetTargetId() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.TargetId
+}
+
+// GetTargetIdOk returns a tuple with the TargetId field value
+// and a boolean to check if the value has been set.
+func (o *CreateWorkspaceDTO) GetTargetIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.TargetId, true
+}
+
+// SetTargetId sets field value
+func (o *CreateWorkspaceDTO) SetTargetId(v string) {
+	o.TargetId = v
+}
+
 // GetUser returns the User field value if set, zero value otherwise.
 func (o *CreateWorkspaceDTO) GetUser() string {
 	if o == nil || IsNil(o.User) {
@@ -269,11 +321,13 @@ func (o CreateWorkspaceDTO) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.GitProviderConfigId) {
 		toSerialize["gitProviderConfigId"] = o.GitProviderConfigId
 	}
+	toSerialize["id"] = o.Id
 	if !IsNil(o.Image) {
 		toSerialize["image"] = o.Image
 	}
 	toSerialize["name"] = o.Name
 	toSerialize["source"] = o.Source
+	toSerialize["targetId"] = o.TargetId
 	if !IsNil(o.User) {
 		toSerialize["user"] = o.User
 	}
@@ -286,8 +340,10 @@ func (o *CreateWorkspaceDTO) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"envVars",
+		"id",
 		"name",
 		"source",
+		"targetId",
 	}
 
 	allProperties := make(map[string]interface{})
