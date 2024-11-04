@@ -81,12 +81,10 @@ func (s *Server) registerProviders() error {
 				return err
 			}
 			for _, req := range *requirements {
-
 				if req.Met {
-					log.Infof("Requirement met : %s ", req.Reason)
+					log.Infof("Provider requirement met: %s", req.Reason)
 				} else {
-					log.Warnf("Requirement not met.... : %s", req.Reason)
-
+					log.Warnf("Provider requirement not met: %s", req.Reason)
 				}
 			}
 
