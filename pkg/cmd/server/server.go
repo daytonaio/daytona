@@ -21,7 +21,6 @@ import (
 )
 
 var yesFlag bool
-var allRequirementsMet bool
 
 type RequirementProvider struct {
 	provider.Provider
@@ -41,25 +40,6 @@ var ServerCmd = &cobra.Command{
 				views.RenderInfoMessage("Operation cancelled.")
 				return nil
 			}
-		}
-		p := RequirementProvider{}
-
-		requirements, err := p.Provider.CheckRequirements()
-		if err != nil {
-			return err
-		}
-		for _, req := range *requirements {
-
-			if req.Met {
-				log.WithField("requirement", req.Reason).Info("Requirement met")
-			} else {
-				allRequirementsMet = false
-				log.WithField("requirement", req.Reason).Warn("Requirement not met")
-			}
-		}
-
-		if !allRequirementsMet {
-			return fmt.Errorf("daytona server startup aborted, one or more requirements not met")
 		}
 
 		if log.GetLevel() < log.InfoLevel {
