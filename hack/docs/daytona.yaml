@@ -1,0 +1,44 @@
+name: daytona
+synopsis: Daytona is a Dev Environment Manager
+description: Daytona is a Dev Environment Manager
+usage: daytona [flags]
+options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+    - name: version
+      shorthand: v
+      default_value: "false"
+      usage: Display the version of Daytona
+see_also:
+    - daytona api-key - Api Key commands
+    - daytona autocomplete - Adds a completion script for your shell environment
+    - daytona build - Manage builds
+    - daytona code - Open a workspace in your preferred IDE
+    - daytona config - Output Daytona configuration
+    - daytona container-registry - Manage container registries
+    - daytona create - Create a target
+    - daytona delete - Delete a workspace
+    - daytona docs - Opens the Daytona documentation in your default browser.
+    - daytona env - Manage profile environment variables that are added to all targets and workspaces
+    - daytona forward - Forward a port from a workspace to your local machine
+    - daytona git-providers - Manage Git providers
+    - daytona ide - Choose the default IDE
+    - daytona info - Show target info
+    - daytona list - List targets
+    - daytona logs - View logs for a target/workspace
+    - daytona prebuild - Manage prebuilds
+    - daytona profile - Manage profiles
+    - daytona provider - Manage providers
+    - daytona purge - Purges all Daytona data from the current device
+    - daytona serve - Run the server process in the current terminal session
+    - daytona server - Start the server process in daemon mode
+    - daytona ssh - SSH into a workspace using the terminal
+    - daytona start - Start a workspace
+    - daytona target - Manage targets
+    - daytona target-config - Manage target configs
+    - daytona telemetry - Manage telemetry collection
+    - daytona use - Use profile [PROFILE_NAME]
+    - daytona version - Print the version number
+    - daytona whoami - Display information about the active user
+    - daytona workspace-config - Manage workspace configs

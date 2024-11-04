@@ -11,10 +11,8 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
-	list_view "github.com/daytonaio/daytona/pkg/views/target/list"
 )
 
 func generateTargetList(targets []apiclient.TargetDTO, isMultipleSelect bool, action string) []list.Item {
@@ -26,38 +24,10 @@ func generateTargetList(targets []apiclient.TargetDTO, isMultipleSelect bool, ac
 	for _, target := range targets {
 		var workspacesInfo []string
 
-		if len(target.Workspaces) == 0 {
-			continue
-		}
-
-		if len(target.Workspaces) == 1 {
-			workspacesInfo = append(workspacesInfo, util.GetRepositorySlugFromUrl(target.Workspaces[0].Repository.Url, true))
-		} else {
-			for _, workspace := range target.Workspaces {
-				workspacesInfo = append(workspacesInfo, workspace.Name)
-			}
-		}
-
-		// Get the time if available
-		uptime := ""
-		createdTime := ""
-		if target.Info != nil && target.Info.Workspaces != nil && len(target.Info.Workspaces) > 0 {
-			createdTime = util.FormatTimestamp(target.Info.Workspaces[0].Created)
-		}
-		if len(target.Workspaces) > 0 && target.Workspaces[0].State != nil {
-			if target.Workspaces[0].State.Uptime == 0 {
-				uptime = "STOPPED"
-			} else {
-				uptime = fmt.Sprintf("up %s", util.FormatUptime(target.Workspaces[0].State.Uptime))
-			}
-		}
-
 		newItem := item[apiclient.TargetDTO]{
 			title:          target.Name,
 			id:             target.Id,
 			desc:           strings.Join(workspacesInfo, ", "),
-			createdTime:    createdTime,
-			uptime:         uptime,
 			targetConfig:   target.TargetConfig,
 			choiceProperty: target,
 		}
@@ -104,8 +74,6 @@ func getTargetProgramEssentials(modelTitle string, actionVerb string, targets []
 }
 
 func selectTargetPrompt(targets []apiclient.TargetDTO, actionVerb string, choiceChan chan<- *apiclient.TargetDTO) {
-	list_view.SortTargets(&targets, true)
-
 	p := getTargetProgramEssentials("Select a Target To ", actionVerb, targets, "", false)
 	if m, ok := p.(model[apiclient.TargetDTO]); ok && m.choice != nil {
 		choiceChan <- m.choice
@@ -123,8 +91,6 @@ func GetTargetFromPrompt(targets []apiclient.TargetDTO, actionVerb string) *apic
 }
 
 func selectTargetsFromPrompt(targets []apiclient.TargetDTO, actionVerb string, choiceChan chan<- []*apiclient.TargetDTO) {
-	list_view.SortTargets(&targets, true)
-
 	footerText := lipgloss.NewStyle().Bold(true).PaddingLeft(2).Render(fmt.Sprintf("\n\nPress 'x' to mark target.\nPress 'enter' to %s the current/marked targets.", actionVerb))
 	p := getTargetProgramEssentials("Select Targets To ", actionVerb, targets, footerText, true)
 

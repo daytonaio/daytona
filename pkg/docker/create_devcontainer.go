@@ -21,7 +21,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/build/devcontainer"
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/ssh"
-	"github.com/daytonaio/daytona/pkg/target/workspace/buildconfig"
+	"github.com/daytonaio/daytona/pkg/workspace/buildconfig"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/mount"

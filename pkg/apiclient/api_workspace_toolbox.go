@@ -80,7 +80,7 @@ func (a *WorkspaceToolboxAPIService) FsCreateFolderExecute(r ApiFsCreateFolderRe
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/files/folder"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/files/folder"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -205,7 +205,7 @@ func (a *WorkspaceToolboxAPIService) FsDeleteFileExecute(r ApiFsDeleteFileReques
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/files"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/files"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -329,7 +329,7 @@ func (a *WorkspaceToolboxAPIService) FsDownloadFileExecute(r ApiFsDownloadFileRe
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/files/download"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/files/download"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -469,7 +469,7 @@ func (a *WorkspaceToolboxAPIService) FsFindInFilesExecute(r ApiFsFindInFilesRequ
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/files/find"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/files/find"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -606,7 +606,7 @@ func (a *WorkspaceToolboxAPIService) FsGetFileDetailsExecute(r ApiFsGetFileDetai
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/files/info"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/files/info"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -739,7 +739,7 @@ func (a *WorkspaceToolboxAPIService) FsListFilesExecute(r ApiFsListFilesRequest)
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/files"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/files"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -875,7 +875,7 @@ func (a *WorkspaceToolboxAPIService) FsMoveFileExecute(r ApiFsMoveFileRequest) (
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/files/move"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/files/move"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -1003,7 +1003,7 @@ func (a *WorkspaceToolboxAPIService) FsReplaceInFilesExecute(r ApiFsReplaceInFil
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/files/replace"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/files/replace"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -1144,7 +1144,7 @@ func (a *WorkspaceToolboxAPIService) FsSearchFilesExecute(r ApiFsSearchFilesRequ
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/files/search"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/files/search"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -1299,7 +1299,7 @@ func (a *WorkspaceToolboxAPIService) FsSetFilePermissionsExecute(r ApiFsSetFileP
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/files/permissions"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/files/permissions"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -1436,7 +1436,7 @@ func (a *WorkspaceToolboxAPIService) FsUploadFileExecute(r ApiFsUploadFileReques
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/files/upload"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/files/upload"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -1571,7 +1571,7 @@ func (a *WorkspaceToolboxAPIService) GetWorkspaceDirExecute(r ApiGetWorkspaceDir
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/workspace-dir"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/workspace-dir"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -1697,7 +1697,7 @@ func (a *WorkspaceToolboxAPIService) GitAddFilesExecute(r ApiGitAddFilesRequest)
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/git/add"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/git/add"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -1822,7 +1822,7 @@ func (a *WorkspaceToolboxAPIService) GitBranchListExecute(r ApiGitBranchListRequ
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/git/branches"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/git/branches"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -1952,7 +1952,7 @@ func (a *WorkspaceToolboxAPIService) GitCloneRepositoryExecute(r ApiGitCloneRepo
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/git/clone"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/git/clone"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -2077,7 +2077,7 @@ func (a *WorkspaceToolboxAPIService) GitCommitChangesExecute(r ApiGitCommitChang
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/git/commit"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/git/commit"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -2211,7 +2211,7 @@ func (a *WorkspaceToolboxAPIService) GitCommitHistoryExecute(r ApiGitCommitHisto
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/git/history"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/git/history"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -2341,7 +2341,7 @@ func (a *WorkspaceToolboxAPIService) GitCreateBranchExecute(r ApiGitCreateBranch
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/git/branches"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/git/branches"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -2466,7 +2466,7 @@ func (a *WorkspaceToolboxAPIService) GitGitStatusExecute(r ApiGitGitStatusReques
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/git/status"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/git/status"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -2596,7 +2596,7 @@ func (a *WorkspaceToolboxAPIService) GitPullChangesExecute(r ApiGitPullChangesRe
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/git/pull"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/git/pull"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -2718,7 +2718,7 @@ func (a *WorkspaceToolboxAPIService) GitPushChangesExecute(r ApiGitPushChangesRe
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/git/push"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/git/push"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -2843,7 +2843,7 @@ func (a *WorkspaceToolboxAPIService) LspCompletionsExecute(r ApiLspCompletionsRe
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/lsp/completions"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/lsp/completions"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -2974,7 +2974,7 @@ func (a *WorkspaceToolboxAPIService) LspDidCloseExecute(r ApiLspDidCloseRequest)
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/lsp/did-close"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/lsp/did-close"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -3096,7 +3096,7 @@ func (a *WorkspaceToolboxAPIService) LspDidOpenExecute(r ApiLspDidOpenRequest) (
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/lsp/did-open"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/lsp/did-open"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -3235,7 +3235,7 @@ func (a *WorkspaceToolboxAPIService) LspDocumentSymbolsExecute(r ApiLspDocumentS
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/lsp/document-symbols"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/lsp/document-symbols"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -3373,7 +3373,7 @@ func (a *WorkspaceToolboxAPIService) LspStartExecute(r ApiLspStartRequest) (*htt
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/lsp/start"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/lsp/start"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -3495,7 +3495,7 @@ func (a *WorkspaceToolboxAPIService) LspStopExecute(r ApiLspStopRequest) (*http.
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/lsp/stop"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/lsp/stop"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -3634,7 +3634,7 @@ func (a *WorkspaceToolboxAPIService) LspWorkspaceSymbolsExecute(r ApiLspWorkspac
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/lsp/workspace-symbols"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/lsp/workspace-symbols"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
@@ -3775,7 +3775,7 @@ func (a *WorkspaceToolboxAPIService) ProcessExecuteCommandExecute(r ApiProcessEx
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/process/execute"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/toolbox/process/execute"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 

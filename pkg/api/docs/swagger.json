@@ -1418,104 +1418,64 @@
                 }
             }
         },
-        "/target/{targetId}/{workspaceId}/start": {
-            "post": {
-                "description": "Start workspace",
-                "tags": [
-                    "target"
+        "/workspace": {
+            "get": {
+                "description": "List workspaces",
+                "produces": [
+                    "application/json"
                 ],
-                "summary": "Start workspace",
-                "operationId": "StartWorkspace",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "List workspaces",
+                "operationId": "ListWorkspaces",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Target ID or Name",
-                        "name": "targetId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Workspace ID",
-                        "name": "workspaceId",
-                        "in": "path",
-                        "required": true
+                        "type": "boolean",
+                        "description": "Verbose",
+                        "name": "verbose",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/WorkspaceDTO"
+                            }
+                        }
                     }
                 }
-            }
-        },
-        "/target/{targetId}/{workspaceId}/state": {
+            },
             "post": {
-                "description": "Set workspace state",
-                "tags": [
-                    "target"
+                "description": "Create a workspace",
+                "produces": [
+                    "application/json"
                 ],
-                "summary": "Set workspace state",
-                "operationId": "SetWorkspaceState",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Create a workspace",
+                "operationId": "CreateWorkspace",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Target ID or Name",
-                        "name": "targetId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Workspace ID",
-                        "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Set State",
-                        "name": "setState",
+                        "description": "Create workspace",
+                        "name": "workspace",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SetWorkspaceState"
+                            "$ref": "#/definitions/CreateWorkspaceDTO"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/target/{targetId}/{workspaceId}/stop": {
-            "post": {
-                "description": "Stop workspace",
-                "tags": [
-                    "target"
-                ],
-                "summary": "Stop workspace",
-                "operationId": "StopWorkspace",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Target ID or Name",
-                        "name": "targetId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Workspace ID",
-                        "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/WorkspaceViewDTO"
+                        }
                     }
                 }
             }
@@ -1878,17 +1838,30 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/files": {
+<<<<<<< HEAD
+        "/workspace/{workspaceId}/toolbox/files": {
             "get": {
                 "description": "List files inside workspace project",
+=======
+        "/workspace/{workspaceId}": {
+            "get": {
+                "description": "Get workspace info",
+>>>>>>> 01c7ba1e (refactor: detach workspace from target)
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
+<<<<<<< HEAD
                     "workspace toolbox"
                 ],
                 "summary": "List files",
                 "operationId": "FsListFiles",
+=======
+                    "workspace"
+                ],
+                "summary": "Get workspace info",
+                "operationId": "GetWorkspace",
+>>>>>>> 01c7ba1e (refactor: detach workspace from target)
                 "parameters": [
                     {
                         "type": "string",
@@ -1898,6 +1871,7 @@
                         "required": true
                     },
                     {
+<<<<<<< HEAD
                         "type": "string",
                         "description": "Project ID",
                         "name": "projectId",
@@ -1908,6 +1882,11 @@
                         "type": "string",
                         "description": "Path",
                         "name": "path",
+=======
+                        "type": "boolean",
+                        "description": "Verbose",
+                        "name": "verbose",
+>>>>>>> 01c7ba1e (refactor: detach workspace from target)
                         "in": "query"
                     }
                 ],
@@ -1915,15 +1894,20 @@
                     "200": {
                         "description": "OK",
                         "schema": {
+<<<<<<< HEAD
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/FileInfo"
                             }
+=======
+                            "$ref": "#/definitions/WorkspaceDTO"
+>>>>>>> 01c7ba1e (refactor: detach workspace from target)
                         }
                     }
                 }
             },
             "delete": {
+<<<<<<< HEAD
                 "description": "Delete file inside workspace project",
                 "produces": [
                     "application/json"
@@ -1937,11 +1921,24 @@
                     {
                         "type": "string",
                         "description": "Workspace ID or Name",
+=======
+                "description": "Remove workspace",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Remove workspace",
+                "operationId": "RemoveWorkspace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID",
+>>>>>>> 01c7ba1e (refactor: detach workspace from target)
                         "name": "workspaceId",
                         "in": "path",
                         "required": true
                     },
                     {
+<<<<<<< HEAD
                         "type": "string",
                         "description": "Project ID",
                         "name": "projectId",
@@ -1963,7 +1960,7 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/files/download": {
+        "/workspace/{workspaceId}/toolbox/files/download": {
             "get": {
                 "description": "Download file from workspace project",
                 "produces": [
@@ -2007,7 +2004,7 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/files/find": {
+        "/workspace/{workspaceId}/toolbox/files/find": {
             "get": {
                 "description": "Search for text/pattern inside workspace project files",
                 "produces": [
@@ -2061,7 +2058,7 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/files/folder": {
+        "/workspace/{workspaceId}/toolbox/files/folder": {
             "post": {
                 "description": "Create folder inside workspace project",
                 "produces": [
@@ -2109,7 +2106,7 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/files/info": {
+        "/workspace/{workspaceId}/toolbox/files/info": {
             "get": {
                 "description": "Get file info inside workspace project",
                 "produces": [
@@ -2153,7 +2150,7 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/files/move": {
+        "/workspace/{workspaceId}/toolbox/files/move": {
             "post": {
                 "description": "Create folder inside workspace project",
                 "produces": [
@@ -2201,7 +2198,7 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/files/permissions": {
+        "/workspace/{workspaceId}/toolbox/files/permissions": {
             "post": {
                 "description": "Set file owner/group/permissions inside workspace project",
                 "produces": [
@@ -2250,6 +2247,11 @@
                         "type": "string",
                         "description": "Mode",
                         "name": "mode",
+=======
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+>>>>>>> 01c7ba1e (refactor: detach workspace from target)
                         "in": "query"
                     }
                 ],
@@ -2260,7 +2262,8 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/files/replace": {
+<<<<<<< HEAD
+        "/workspace/{workspaceId}/toolbox/files/replace": {
             "post": {
                 "description": "Repleace text/pattern in mutilple files inside workspace project",
                 "produces": [
@@ -2271,6 +2274,16 @@
                 ],
                 "summary": "Repleace text/pattern in files",
                 "operationId": "FsReplaceInFiles",
+=======
+        "/workspace/{workspaceId}/start": {
+            "post": {
+                "description": "Start workspace",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Start workspace",
+                "operationId": "StartWorkspace",
+>>>>>>> 01c7ba1e (refactor: detach workspace from target)
                 "parameters": [
                     {
                         "type": "string",
@@ -2278,6 +2291,7 @@
                         "name": "workspaceId",
                         "in": "path",
                         "required": true
+<<<<<<< HEAD
                     },
                     {
                         "type": "string",
@@ -2309,7 +2323,7 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/files/search": {
+        "/workspace/{workspaceId}/toolbox/files/search": {
             "get": {
                 "description": "Search for files inside workspace project",
                 "produces": [
@@ -2360,7 +2374,7 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/files/upload": {
+        "/workspace/{workspaceId}/toolbox/files/upload": {
             "post": {
                 "description": "Upload file inside workspace project",
                 "produces": [
@@ -2399,6 +2413,8 @@
                         "name": "file",
                         "in": "formData",
                         "required": true
+=======
+>>>>>>> 01c7ba1e (refactor: detach workspace from target)
                     }
                 ],
                 "responses": {
@@ -2408,7 +2424,8 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/git/add": {
+<<<<<<< HEAD
+        "/workspace/{workspaceId}/toolbox/git/add": {
             "post": {
                 "description": "Add files to git commit",
                 "produces": [
@@ -2423,11 +2440,26 @@
                     {
                         "type": "string",
                         "description": "Workspace ID or Name",
+=======
+        "/workspace/{workspaceId}/state": {
+            "post": {
+                "description": "Set workspace state",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Set workspace state",
+                "operationId": "SetWorkspaceState",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID",
+>>>>>>> 01c7ba1e (refactor: detach workspace from target)
                         "name": "workspaceId",
                         "in": "path",
                         "required": true
                     },
                     {
+<<<<<<< HEAD
                         "type": "string",
                         "description": "Project ID",
                         "name": "projectId",
@@ -2441,6 +2473,14 @@
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/GitAddRequest"
+=======
+                        "description": "Set State",
+                        "name": "setState",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SetWorkspaceState"
+>>>>>>> 01c7ba1e (refactor: detach workspace from target)
                         }
                     }
                 ],
@@ -2451,7 +2491,8 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/git/branches": {
+<<<<<<< HEAD
+        "/workspace/{workspaceId}/toolbox/git/branches": {
             "get": {
                 "description": "Get branch list from git repository inside workspace project",
                 "produces": [
@@ -2504,6 +2545,16 @@
                 ],
                 "summary": "Create branch",
                 "operationId": "GitCreateBranch",
+=======
+        "/workspace/{workspaceId}/stop": {
+            "post": {
+                "description": "Stop workspace",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Stop workspace",
+                "operationId": "StopWorkspace",
+>>>>>>> 01c7ba1e (refactor: detach workspace from target)
                 "parameters": [
                     {
                         "type": "string",
@@ -2511,6 +2562,7 @@
                         "name": "workspaceId",
                         "in": "path",
                         "required": true
+<<<<<<< HEAD
                     },
                     {
                         "type": "string",
@@ -2536,7 +2588,7 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/git/clone": {
+        "/workspace/{workspaceId}/toolbox/git/clone": {
             "post": {
                 "description": "Clone git repository inside workspace project",
                 "produces": [
@@ -2570,6 +2622,8 @@
                         "schema": {
                             "$ref": "#/definitions/GitCloneRequest"
                         }
+=======
+>>>>>>> 01c7ba1e (refactor: detach workspace from target)
                     }
                 ],
                 "responses": {
@@ -2578,8 +2632,9 @@
                     }
                 }
             }
+<<<<<<< HEAD
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/git/commit": {
+        "/workspace/{workspaceId}/toolbox/git/commit": {
             "post": {
                 "description": "Commit changes to git repository inside workspace project",
                 "produces": [
@@ -2625,7 +2680,7 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/git/history": {
+        "/workspace/{workspaceId}/toolbox/git/history": {
             "get": {
                 "description": "Get commit history from git repository inside workspace project",
                 "produces": [
@@ -2672,7 +2727,7 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/git/pull": {
+        "/workspace/{workspaceId}/toolbox/git/pull": {
             "post": {
                 "description": "Pull changes from remote to git repository inside workspace project",
                 "produces": [
@@ -2715,7 +2770,7 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/git/push": {
+        "/workspace/{workspaceId}/toolbox/git/push": {
             "post": {
                 "description": "Push changes to remote from git repository inside workspace project",
                 "produces": [
@@ -2758,7 +2813,7 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/git/status": {
+        "/workspace/{workspaceId}/toolbox/git/status": {
             "get": {
                 "description": "Get status from git repository inside workspace project",
                 "produces": [
@@ -2802,7 +2857,7 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/lsp/completions": {
+        "/workspace/{workspaceId}/toolbox/lsp/completions": {
             "post": {
                 "description": "The Completion request is sent from the client to the server to compute completion items at a given cursor position.",
                 "produces": [
@@ -2848,7 +2903,7 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/lsp/did-close": {
+        "/workspace/{workspaceId}/toolbox/lsp/did-close": {
             "post": {
                 "description": "The document close notification is sent from the client to the server when the document got closed in the client.",
                 "produces": [
@@ -2891,7 +2946,7 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/lsp/did-open": {
+        "/workspace/{workspaceId}/toolbox/lsp/did-open": {
             "post": {
                 "description": "The document open notification is sent from the client to the server to signal newly opened text documents.",
                 "produces": [
@@ -2934,7 +2989,7 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/lsp/document-symbols": {
+        "/workspace/{workspaceId}/toolbox/lsp/document-symbols": {
             "get": {
                 "description": "The document symbol request is sent from the client to the server.",
                 "produces": [
@@ -2995,7 +3050,7 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/lsp/start": {
+        "/workspace/{workspaceId}/toolbox/lsp/start": {
             "post": {
                 "description": "Start Lsp server process inside workspace project",
                 "produces": [
@@ -3038,7 +3093,7 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/lsp/stop": {
+        "/workspace/{workspaceId}/toolbox/lsp/stop": {
             "post": {
                 "description": "Stop Lsp server process inside workspace project",
                 "produces": [
@@ -3081,7 +3136,7 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/lsp/workspace-symbols": {
+        "/workspace/{workspaceId}/toolbox/lsp/workspace-symbols": {
             "get": {
                 "description": "The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.",
                 "produces": [
@@ -3142,7 +3197,7 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/process/execute": {
+        "/workspace/{workspaceId}/toolbox/process/execute": {
             "post": {
                 "description": "Execute command synchronously inside workspace project",
                 "produces": [
@@ -3188,7 +3243,7 @@
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/workspace-dir": {
+        "/workspace/{workspaceId}/toolbox/workspace-dir": {
             "get": {
                 "description": "Get workspace directory",
                 "produces": [
@@ -3224,6 +3279,8 @@
                     }
                 }
             }
+=======
+>>>>>>> 01c7ba1e (refactor: detach workspace from target)
         }
     },
     "definitions": {
@@ -3503,8 +3560,7 @@
             "required": [
                 "id",
                 "name",
-                "targetConfig",
-                "workspaces"
+                "targetConfig"
             ],
             "properties": {
                 "id": {
@@ -3515,12 +3571,6 @@
                 },
                 "targetConfig": {
                     "type": "string"
-                },
-                "workspaces": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/CreateWorkspaceDTO"
-                    }
                 }
             }
         },
@@ -3562,8 +3612,10 @@
             "type": "object",
             "required": [
                 "envVars",
+                "id",
                 "name",
-                "source"
+                "source",
+                "targetId"
             ],
             "properties": {
                 "buildConfig": {
@@ -3578,6 +3630,9 @@
                 "gitProviderConfigId": {
                     "type": "string"
                 },
+                "id": {
+                    "type": "string"
+                },
                 "image": {
                     "type": "string"
                 },
@@ -3586,6 +3641,9 @@
                 },
                 "source": {
                     "$ref": "#/definitions/CreateWorkspaceSourceDTO"
+                },
+                "targetId": {
+                    "type": "string"
                 },
                 "user": {
                     "type": "string"
@@ -4656,8 +4714,7 @@
             "required": [
                 "id",
                 "name",
-                "targetConfig",
-                "workspaces"
+                "targetConfig"
             ],
             "properties": {
                 "id": {
@@ -4668,12 +4725,6 @@
                 },
                 "targetConfig": {
                     "type": "string"
-                },
-                "workspaces": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Workspace"
-                    }
                 }
             }
         },
@@ -4749,8 +4800,7 @@
             "required": [
                 "id",
                 "name",
-                "targetConfig",
-                "workspaces"
+                "targetConfig"
             ],
             "properties": {
                 "id": {
@@ -4764,79 +4814,19 @@
                 },
                 "targetConfig": {
                     "type": "string"
-                },
-                "workspaces": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Workspace"
-                    }
                 }
             }
         },
         "TargetInfo": {
             "type": "object",
             "required": [
-                "name",
-                "workspaces"
+                "name"
             ],
             "properties": {
                 "name": {
                     "type": "string"
                 },
                 "providerMetadata": {
-                    "type": "string"
-                },
-                "workspaces": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/WorkspaceInfo"
-                    }
-                }
-            }
-        },
-        "Workspace": {
-            "type": "object",
-            "required": [
-                "envVars",
-                "image",
-                "name",
-                "repository",
-                "targetConfig",
-                "targetId",
-                "user"
-            ],
-            "properties": {
-                "buildConfig": {
-                    "$ref": "#/definitions/BuildConfig"
-                },
-                "envVars": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "gitProviderConfigId": {
-                    "type": "string"
-                },
-                "image": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "repository": {
-                    "$ref": "#/definitions/GitRepository"
-                },
-                "state": {
-                    "$ref": "#/definitions/WorkspaceState"
-                },
-                "targetConfig": {
-                    "type": "string"
-                },
-                "targetId": {
-                    "type": "string"
-                },
-                "user": {
                     "type": "string"
                 }
             }
@@ -4887,10 +4877,63 @@
                 }
             }
         },
+<<<<<<< HEAD
         "WorkspaceDirResponse": {
             "type": "object",
             "properties": {
                 "dir": {
+=======
+        "WorkspaceDTO": {
+            "type": "object",
+            "required": [
+                "envVars",
+                "id",
+                "image",
+                "name",
+                "repository",
+                "targetId",
+                "targetName",
+                "user"
+            ],
+            "properties": {
+                "buildConfig": {
+                    "$ref": "#/definitions/BuildConfig"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "gitProviderConfigId": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "info": {
+                    "$ref": "#/definitions/WorkspaceInfo"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "repository": {
+                    "$ref": "#/definitions/GitRepository"
+                },
+                "state": {
+                    "$ref": "#/definitions/WorkspaceState"
+                },
+                "targetId": {
+                    "type": "string"
+                },
+                "targetName": {
+                    "type": "string"
+                },
+                "user": {
+>>>>>>> 01c7ba1e (refactor: detach workspace from target)
                     "type": "string"
                 }
             }
@@ -4936,6 +4979,57 @@
                 },
                 "uptime": {
                     "type": "integer"
+                }
+            }
+        },
+        "WorkspaceViewDTO": {
+            "type": "object",
+            "required": [
+                "envVars",
+                "id",
+                "image",
+                "name",
+                "repository",
+                "targetId",
+                "targetName",
+                "user"
+            ],
+            "properties": {
+                "buildConfig": {
+                    "$ref": "#/definitions/BuildConfig"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "gitProviderConfigId": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "repository": {
+                    "$ref": "#/definitions/GitRepository"
+                },
+                "state": {
+                    "$ref": "#/definitions/WorkspaceState"
+                },
+                "targetId": {
+                    "type": "string"
+                },
+                "targetName": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
                 }
             }
         },

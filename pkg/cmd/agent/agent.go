@@ -6,19 +6,23 @@
 package agent
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	"github.com/daytonaio/daytona/pkg/agent"
 	"github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/agent/ssh"
 	"github.com/daytonaio/daytona/pkg/agent/tailscale"
 	"github.com/daytonaio/daytona/pkg/agent/toolbox"
 	"github.com/daytonaio/daytona/pkg/git"
-	"github.com/daytonaio/daytona/pkg/target/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace"
 	log "github.com/sirupsen/logrus"
+
 	"github.com/spf13/cobra"
 )
 
@@ -41,7 +45,19 @@ var AgentCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		c.WorkspaceDir = filepath.Join(os.Getenv("HOME"), c.WorkspaceName)
+
+		telemetryEnabled := os.Getenv("DAYTONA_TELEMETRY_ENABLED") == "true"
+
+		var ws *workspace.Workspace
+
+		if agentMode == config.ModeWorkspace {
+			ws, err = getWorkspace(c, telemetryEnabled)
+			if err != nil {
+				return err
+			}
+		}
+
+		c.WorkspaceDir = filepath.Join(os.Getenv("HOME"), ws.Name)
 
 		if workspaceDir := os.Getenv("DAYTONA_WORKSPACE_DIR"); workspaceDir != "" {
 			c.WorkspaceDir = workspaceDir
@@ -76,7 +92,7 @@ var AgentCmd = &cobra.Command{
 			DefaultWorkspaceDir: os.Getenv("HOME"),
 		}
 
-		tailscaleHostname := workspace.GetWorkspaceHostname(c.TargetId, c.WorkspaceName)
+		tailscaleHostname := workspace.GetWorkspaceHostname(c.WorkspaceId)
 		if hostModeFlag {
 			tailscaleHostname = c.TargetId
 		}
@@ -84,8 +100,6 @@ var AgentCmd = &cobra.Command{
 		toolBoxServer := &toolbox.Server{
 			WorkspaceDir: c.WorkspaceDir,
 		}
-
-		telemetryEnabled := os.Getenv("DAYTONA_TELEMETRY_ENABLED") == "true"
 
 		tailscaleServer := &tailscale.Server{
 			Hostname:         tailscaleHostname,
@@ -102,6 +116,7 @@ var AgentCmd = &cobra.Command{
 			Tailscale:        tailscaleServer,
 			LogWriter:        agentLogWriter,
 			TelemetryEnabled: telemetryEnabled,
+			Workspace:        ws,
 		}
 
 		return agent.Start()
@@ -125,4 +140,20 @@ func setLogLevel() {
 	} else {
 		log.SetLevel(log.InfoLevel)
 	}
+}
+
+func getWorkspace(c *config.Config, telemetryEnabled bool) (*workspace.Workspace, error) {
+	ctx := context.Background()
+
+	apiClient, err := apiclient_util.GetAgentApiClient(c.Server.ApiUrl, c.Server.ApiKey, c.ClientId, telemetryEnabled)
+	if err != nil {
+		return nil, err
+	}
+
+	workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, c.WorkspaceId).Execute()
+	if err != nil {
+		return nil, apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	return conversion.ToWorkspace(workspace), nil
 }

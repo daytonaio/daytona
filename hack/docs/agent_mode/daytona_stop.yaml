@@ -1,0 +1,9 @@
+name: daytona stop
+synopsis: Stop the workspace
+usage: daytona stop [flags]
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona - Daytona is a Dev Environment Manager

@@ -9,8 +9,8 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/target/workspace/buildconfig"
-	"github.com/daytonaio/daytona/pkg/target/workspace/containerconfig"
+	"github.com/daytonaio/daytona/pkg/workspace/buildconfig"
+	"github.com/daytonaio/daytona/pkg/workspace/containerconfig"
 	"github.com/stretchr/testify/mock"
 )
 

@@ -1,0 +1,22 @@
+name: daytona start
+synopsis: Start a workspace
+usage: daytona start [WORKSPACE] [flags]
+options:
+    - name: all
+      shorthand: a
+      default_value: "false"
+      usage: Start all targets
+    - name: code
+      shorthand: c
+      default_value: "false"
+      usage: Open the target in the IDE after target start
+    - name: "yes"
+      shorthand: "y"
+      default_value: "false"
+      usage: Automatically confirm any prompts
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona - Daytona is a Dev Environment Manager

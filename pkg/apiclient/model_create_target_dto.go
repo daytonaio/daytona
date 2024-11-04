@@ -21,10 +21,9 @@ var _ MappedNullable = &CreateTargetDTO{}
 
 // CreateTargetDTO struct for CreateTargetDTO
 type CreateTargetDTO struct {
-	Id           string               `json:"id"`
-	Name         string               `json:"name"`
-	TargetConfig string               `json:"targetConfig"`
-	Workspaces   []CreateWorkspaceDTO `json:"workspaces"`
+	Id           string `json:"id"`
+	Name         string `json:"name"`
+	TargetConfig string `json:"targetConfig"`
 }
 
 type _CreateTargetDTO CreateTargetDTO
@@ -33,12 +32,11 @@ type _CreateTargetDTO CreateTargetDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateTargetDTO(id string, name string, targetConfig string, workspaces []CreateWorkspaceDTO) *CreateTargetDTO {
+func NewCreateTargetDTO(id string, name string, targetConfig string) *CreateTargetDTO {
 	this := CreateTargetDTO{}
 	this.Id = id
 	this.Name = name
 	this.TargetConfig = targetConfig
-	this.Workspaces = workspaces
 	return &this
 }
 
@@ -122,30 +120,6 @@ func (o *CreateTargetDTO) SetTargetConfig(v string) {
 	o.TargetConfig = v
 }
 
-// GetWorkspaces returns the Workspaces field value
-func (o *CreateTargetDTO) GetWorkspaces() []CreateWorkspaceDTO {
-	if o == nil {
-		var ret []CreateWorkspaceDTO
-		return ret
-	}
-
-	return o.Workspaces
-}
-
-// GetWorkspacesOk returns a tuple with the Workspaces field value
-// and a boolean to check if the value has been set.
-func (o *CreateTargetDTO) GetWorkspacesOk() ([]CreateWorkspaceDTO, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return o.Workspaces, true
-}
-
-// SetWorkspaces sets field value
-func (o *CreateTargetDTO) SetWorkspaces(v []CreateWorkspaceDTO) {
-	o.Workspaces = v
-}
-
 func (o CreateTargetDTO) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -159,7 +133,6 @@ func (o CreateTargetDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize["id"] = o.Id
 	toSerialize["name"] = o.Name
 	toSerialize["targetConfig"] = o.TargetConfig
-	toSerialize["workspaces"] = o.Workspaces
 	return toSerialize, nil
 }
 
@@ -171,7 +144,6 @@ func (o *CreateTargetDTO) UnmarshalJSON(data []byte) (err error) {
 		"id",
 		"name",
 		"targetConfig",
-		"workspaces",
 	}
 
 	allProperties := make(map[string]interface{})

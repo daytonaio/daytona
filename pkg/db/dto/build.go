@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/pkg/build"
-	"github.com/daytonaio/daytona/pkg/target/workspace/containerconfig"
+	"github.com/daytonaio/daytona/pkg/workspace/containerconfig"
 )
 
 type BuildDTO struct {

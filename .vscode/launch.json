@@ -13,7 +13,7 @@
       "console": "integratedTerminal",
       "env": {
         "DAYTONA_TARGET_ID": "TARGET_ID",
-        "DAYTONA_WORKSPACE_NAME": "WORKSPACE_NAME",
+        "DAYTONA_WORKSPACE_ID": "WORKSPACE_ID",
         "DAYTONA_SERVER_URL": "http://localhost:3986",
         "DAYTONA_SERVER_API_KEY": "1234567890",
       },

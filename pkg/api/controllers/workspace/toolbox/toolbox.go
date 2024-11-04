@@ -14,8 +14,8 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/agent/toolbox/config"
 	"github.com/daytonaio/daytona/pkg/server"
-	"github.com/daytonaio/daytona/pkg/server/targets"
-	"github.com/daytonaio/daytona/pkg/target/workspace"
+	"github.com/daytonaio/daytona/pkg/server/workspaces"
+	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,9 +26,8 @@ import (
 //	@Description	Get workspace directory
 //	@Produce		json
 //	@Param			workspaceId	path		string	true	"Workspace ID or Name"
-//	@Param			projectId	path		string	true	"Project ID"
 //	@Success		200			{object}	WorkspaceDirResponse
-//	@Router			/workspace/{workspaceId}/{projectId}/toolbox/workspace-dir [get]
+//	@Router			/workspace/{workspaceId}/toolbox/workspace-dir [get]
 //
 //	@id				GetWorkspaceDir
 func GetWorkspaceDir(ctx *gin.Context) {
@@ -36,14 +35,13 @@ func GetWorkspaceDir(ctx *gin.Context) {
 }
 
 func forwardRequestToToolbox(ctx *gin.Context) {
-	targetId := ctx.Param("targetId")
 	workspaceId := ctx.Param("workspaceId")
 
 	server := server.GetInstance(nil)
 
-	tg, err := server.TargetService.GetTarget(ctx.Request.Context(), targetId, true)
+	w, err := server.WorkspaceService.GetWorkspace(ctx.Request.Context(), workspaceId, true)
 	if err != nil {
-		if errors.Is(err, targets.ErrTargetNotFound) {
+		if errors.Is(err, workspaces.ErrWorkspaceNotFound) {
 			ctx.AbortWithError(http.StatusNotFound, err)
 			return
 		}
@@ -51,33 +49,18 @@ func forwardRequestToToolbox(ctx *gin.Context) {
 		return
 	}
 
-	var workspaceInfo *workspace.WorkspaceInfo
-	found := false
-	for _, w := range tg.Info.Workspaces {
-		if w.Name == workspaceId {
-			workspaceInfo = w
-			found = true
-			break
-		}
-	}
-
-	if !found {
-		ctx.AbortWithError(http.StatusNotFound, errors.New("workspace not found"))
-		return
-	}
-
 	var client *http.Client
 
-	projectHostname := workspace.GetWorkspaceHostname(tg.Id, workspaceId)
-	route := strings.Replace(ctx.Request.URL.Path, fmt.Sprintf("/workspace/%s/%s/toolbox/", targetId, workspaceId), "", 1)
+	workspaceHostname := workspace.GetWorkspaceHostname(w.Id)
+	route := strings.Replace(ctx.Request.URL.Path, fmt.Sprintf("/workspace/%s/toolbox/", workspaceId), "", 1)
 	query := ctx.Request.URL.Query().Encode()
 
-	reqUrl := fmt.Sprintf("http://%s:%d/%s?%s", projectHostname, config.TOOLBOX_API_PORT, route, query)
+	reqUrl := fmt.Sprintf("http://%s:%d/%s?%s", workspaceHostname, config.TOOLBOX_API_PORT, route, query)
 	client = server.TailscaleServer.HTTPClient()
 
-	if tg.TargetConfig == "local" {
+	if w.TargetId == "local" && w.Info != nil && w.Info.ProviderMetadata != "" {
 		var metadata map[string]interface{}
-		err := json.Unmarshal([]byte(workspaceInfo.ProviderMetadata), &metadata)
+		err := json.Unmarshal([]byte(w.Info.ProviderMetadata), &metadata)
 		if err == nil {
 			if toolboxPortString, ok := metadata["daytona.toolbox.api.hostPort"]; ok {
 				toolboxPort, err := strconv.ParseUint(toolboxPortString.(string), 10, 16)
