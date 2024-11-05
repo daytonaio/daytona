@@ -2971,7 +2971,8 @@
                 "id",
                 "name",
                 "options",
-                "providerInfo"
+                "providerInfo",
+                "workspaceCount"
             ],
             "properties": {
                 "default": {
@@ -2992,6 +2993,9 @@
                 },
                 "providerInfo": {
                     "$ref": "#/definitions/TargetProviderInfo"
+                },
+                "workspaceCount": {
+                    "type": "integer"
                 }
             }
         },

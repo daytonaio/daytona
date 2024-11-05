@@ -15,11 +15,11 @@ import (
 )
 
 type RowData struct {
-	Name             string
-	Provider         string
-	Default          bool
-	ProviderMetadata string
-	Options          string
+	Name           string
+	Provider       string
+	Default        bool
+	WorkspaceCount string
+	Options        string
 }
 
 func ListTargets(targetList []apiclient.TargetDTO, verbose bool, activeProfileName string) {
@@ -28,18 +28,15 @@ func ListTargets(targetList []apiclient.TargetDTO, verbose bool, activeProfileNa
 		return
 	}
 
-	headers := []string{"Target", "Provider", "Default", "Metadata", "Options"}
+	headers := []string{"Target", "Provider", "Default", "# Workspaces", "Options"}
 
 	data := util.ArrayMap(targetList, func(target apiclient.TargetDTO) []string {
 		rowData := RowData{
-			Name:     target.Name,
-			Provider: target.ProviderInfo.Name,
-			Default:  target.Default,
-			Options:  target.Options,
-		}
-
-		if target.Info != nil {
-			rowData.ProviderMetadata = *target.Info.ProviderMetadata
+			Name:           target.Name,
+			Provider:       target.ProviderInfo.Name,
+			Default:        target.Default,
+			WorkspaceCount: fmt.Sprintf("%d", target.WorkspaceCount),
+			Options:        target.Options,
 		}
 
 		return getRowFromRowData(rowData)
@@ -77,7 +74,7 @@ func getRowFromRowData(rowData RowData) []string {
 		views.NameStyle.Render(rowData.Name),
 		views.DefaultRowDataStyle.Render(rowData.Provider),
 		isDefault,
-		views.DefaultRowDataStyle.Render(rowData.ProviderMetadata),
+		views.DefaultRowDataStyle.Render(rowData.WorkspaceCount),
 		views.DefaultRowDataStyle.Render(rowData.Options),
 	}
 }

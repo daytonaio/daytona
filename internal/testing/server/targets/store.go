@@ -21,11 +21,11 @@ func NewInMemoryTargetStore() target.Store {
 	}
 }
 
-func (s *InMemoryTargetStore) List(filter *target.TargetFilter) ([]*target.Target, error) {
+func (s *InMemoryTargetStore) List(filter *target.TargetFilter) ([]*target.TargetViewDTO, error) {
 	return s.processFilters(filter)
 }
 
-func (s *InMemoryTargetStore) Find(filter *target.TargetFilter) (*target.Target, error) {
+func (s *InMemoryTargetStore) Find(filter *target.TargetFilter) (*target.TargetViewDTO, error) {
 	targets, err := s.processFilters(filter)
 	if err != nil {
 		return nil, err
@@ -48,20 +48,22 @@ func (s *InMemoryTargetStore) Delete(target *target.Target) error {
 	return nil
 }
 
-func (s *InMemoryTargetStore) processFilters(filter *target.TargetFilter) ([]*target.Target, error) {
-	var result []*target.Target
-	filteredTargets := make(map[string]*target.Target)
+func (s *InMemoryTargetStore) processFilters(filter *target.TargetFilter) ([]*target.TargetViewDTO, error) {
+	var result []*target.TargetViewDTO
+	filteredTargets := make(map[string]*target.TargetViewDTO)
 	for k, v := range s.targets {
-		filteredTargets[k] = v
+		filteredTargets[k] = &target.TargetViewDTO{
+			Target: *v,
+		}
 	}
 
 	if filter != nil {
 		if filter.IdOrName != nil {
 			t, ok := s.targets[*filter.IdOrName]
 			if ok {
-				return []*target.Target{t}, nil
+				return []*target.TargetViewDTO{{Target: *t}}, nil
 			} else {
-				return []*target.Target{}, fmt.Errorf("target config with id or name %s not found", *filter.IdOrName)
+				return []*target.TargetViewDTO{}, fmt.Errorf("target config with id or name %s not found", *filter.IdOrName)
 			}
 		}
 		if filter.Default != nil {

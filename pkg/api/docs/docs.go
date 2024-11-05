@@ -2974,7 +2974,8 @@ const docTemplate = `{
                 "id",
                 "name",
                 "options",
-                "providerInfo"
+                "providerInfo",
+                "workspaceCount"
             ],
             "properties": {
                 "default": {
@@ -2995,6 +2996,9 @@ const docTemplate = `{
                 },
                 "providerInfo": {
                     "$ref": "#/definitions/TargetProviderInfo"
+                },
+                "workspaceCount": {
+                    "type": "integer"
                 }
             }
         },

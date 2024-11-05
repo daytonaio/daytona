@@ -16,7 +16,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/targets"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
 	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/config"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -24,8 +23,9 @@ import (
 const serverApiUrl = "http://localhost:3986"
 const serverUrl = "http://localhost:3987"
 
-var targetConfig = config.TargetConfig{
-	Name: "test-target-config",
+var tg = target.Target{
+	Id:   "test",
+	Name: "test",
 	ProviderInfo: target.ProviderInfo{
 		Name:    "test-provider",
 		Version: "test",
@@ -36,8 +36,8 @@ var targetConfig = config.TargetConfig{
 var createTargetDTO = dto.CreateTargetDTO{
 	Name:         "test",
 	Id:           "test",
-	ProviderInfo: targetConfig.ProviderInfo,
-	Options:      targetConfig.Options,
+	ProviderInfo: tg.ProviderInfo,
+	Options:      tg.Options,
 }
 
 var targetInfo = target.TargetInfo{
@@ -49,8 +49,6 @@ func TestTargetService(t *testing.T) {
 	targetStore := t_targets.NewInMemoryTargetStore()
 
 	targetConfigStore := t_targetconfigs.NewInMemoryTargetConfigStore()
-	err := targetConfigStore.Save(&targetConfig)
-	require.Nil(t, err)
 
 	apiKeyService := mocks.NewMockApiKeyService()
 	provisioner := mocks.NewMockProvisioner()
@@ -69,8 +67,8 @@ func TestTargetService(t *testing.T) {
 	})
 
 	t.Run("CreateTarget", func(t *testing.T) {
-		provisioner.On("CreateTarget", mock.Anything, &targetConfig).Return(nil)
-		provisioner.On("StartTarget", mock.Anything, &targetConfig).Return(nil)
+		provisioner.On("CreateTarget", &tg).Return(nil)
+		provisioner.On("StartTarget", &tg).Return(nil)
 
 		apiKeyService.On("Generate", apikey.ApiKeyTypeTarget, createTargetDTO.Id).Return(createTargetDTO.Id, nil)
 
@@ -98,7 +96,7 @@ func TestTargetService(t *testing.T) {
 	})
 
 	t.Run("GetTarget", func(t *testing.T) {
-		provisioner.On("GetTargetInfo", mock.Anything, mock.Anything, &targetConfig).Return(&targetInfo, nil)
+		provisioner.On("GetTargetInfo", context.TODO(), &tg).Return(&targetInfo, nil)
 
 		target, err := service.GetTarget(context.TODO(), &target.TargetFilter{IdOrName: &createTargetDTO.Id}, true)
 
@@ -116,7 +114,7 @@ func TestTargetService(t *testing.T) {
 
 	t.Run("ListTargets", func(t *testing.T) {
 		verbose := false
-		provisioner.On("GetTargetInfo", mock.Anything, mock.Anything, &targetConfig).Return(&targetInfo, nil)
+		provisioner.On("GetTargetInfo", context.TODO(), &tg).Return(&targetInfo, nil)
 
 		targets, err := service.ListTargets(context.TODO(), nil, verbose)
 
@@ -130,7 +128,7 @@ func TestTargetService(t *testing.T) {
 
 	t.Run("ListTargets - verbose", func(t *testing.T) {
 		verbose := true
-		provisioner.On("GetTargetInfo", mock.Anything, mock.Anything, &targetConfig).Return(&targetInfo, nil)
+		provisioner.On("GetTargetInfo", context.TODO(), &tg).Return(&targetInfo, nil)
 
 		targets, err := service.ListTargets(context.TODO(), nil, verbose)
 
@@ -143,7 +141,7 @@ func TestTargetService(t *testing.T) {
 	})
 
 	t.Run("StartTarget", func(t *testing.T) {
-		provisioner.On("StartTarget", mock.Anything, &targetConfig).Return(nil)
+		provisioner.On("StartTarget", &tg, &tg).Return(nil)
 
 		err := service.StartTarget(context.TODO(), createTargetDTO.Id)
 
@@ -151,7 +149,7 @@ func TestTargetService(t *testing.T) {
 	})
 
 	t.Run("StopTarget", func(t *testing.T) {
-		provisioner.On("StopTarget", mock.Anything, &targetConfig).Return(nil)
+		provisioner.On("StopTarget", &tg, &tg).Return(nil)
 
 		err := service.StopTarget(context.TODO(), createTargetDTO.Id)
 
@@ -159,7 +157,7 @@ func TestTargetService(t *testing.T) {
 	})
 
 	t.Run("RemoveTarget", func(t *testing.T) {
-		provisioner.On("DestroyTarget", mock.Anything, &targetConfig).Return(nil)
+		provisioner.On("DestroyTarget", &tg).Return(nil)
 		apiKeyService.On("Revoke", mock.Anything).Return(nil)
 
 		err := service.RemoveTarget(context.TODO(), createTargetDTO.Id)
@@ -171,17 +169,17 @@ func TestTargetService(t *testing.T) {
 	})
 
 	t.Run("ForceRemoveTarget", func(t *testing.T) {
-		provisioner.On("CreateTarget", mock.Anything, &targetConfig).Return(nil)
-		provisioner.On("StartTarget", mock.Anything, &targetConfig).Return(nil)
+		provisioner.On("CreateTarget", &tg).Return(nil)
+		provisioner.On("StartTarget", &tg).Return(nil)
 
 		apiKeyService.On("Generate", apikey.ApiKeyTypeTarget, createTargetDTO.Id).Return(createTargetDTO.Id, nil)
 
 		_, _ = service.CreateTarget(context.TODO(), createTargetDTO)
 
-		provisioner.On("DestroyTarget", mock.Anything, &targetConfig).Return(nil)
+		provisioner.On("DestroyTarget", &tg, &tg).Return(nil)
 		apiKeyService.On("Revoke", mock.Anything).Return(nil)
 
-		err = service.ForceRemoveTarget(context.TODO(), createTargetDTO.Id)
+		err := service.ForceRemoveTarget(context.TODO(), createTargetDTO.Id)
 
 		require.Nil(t, err)
 

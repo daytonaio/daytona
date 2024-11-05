@@ -35,7 +35,7 @@ type IWorkspaceService interface {
 }
 
 type targetStore interface {
-	Find(filter *target.TargetFilter) (*target.Target, error)
+	Find(filter *target.TargetFilter) (*target.TargetViewDTO, error)
 }
 
 type targetConfigStore interface {

@@ -14,6 +14,7 @@ type TargetDTO struct {
 	Options      string          `json:"options"`
 	ApiKey       string          `json:"apiKey"`
 	IsDefault    bool            `json:"isDefault"`
+	Workspaces   []WorkspaceDTO  `gorm:"foreignKey:TargetId;references:Id"`
 }
 
 type ProviderInfoDTO struct {
@@ -54,4 +55,23 @@ func ToTarget(targetDTO TargetDTO) *target.Target {
 	}
 
 	return &target
+}
+
+func ToTargetViewDTO(targetDto TargetDTO) *target.TargetViewDTO {
+	return &target.TargetViewDTO{
+		Target:         *ToTarget(targetDto),
+		WorkspaceCount: len(targetDto.Workspaces),
+	}
+}
+
+func ViewToTarget(targetViewDTO *target.TargetViewDTO) *target.Target {
+	return &target.Target{
+		Id:           targetViewDTO.Id,
+		Name:         targetViewDTO.Name,
+		ProviderInfo: targetViewDTO.ProviderInfo,
+		Options:      targetViewDTO.Options,
+		ApiKey:       targetViewDTO.ApiKey,
+		EnvVars:      targetViewDTO.EnvVars,
+		IsDefault:    targetViewDTO.IsDefault,
+	}
 }

@@ -13,14 +13,16 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/cmd/targetconfig"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/views"
+	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
 	target_view "github.com/daytonaio/daytona/pkg/views/target"
 	targetconfig_view "github.com/daytonaio/daytona/pkg/views/targetconfig"
 	"github.com/docker/docker/pkg/stringid"
 	"github.com/spf13/cobra"
 )
 
-var targetSetCmd = &cobra.Command{
+var targetCreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a target",
 	Args:  cobra.NoArgs,
@@ -50,6 +52,18 @@ var targetSetCmd = &cobra.Command{
 		if err != nil || createTargetDto == nil {
 			return err
 		}
+
+		logsContext, stopLogs := context.WithCancel(context.Background())
+		defer stopLogs()
+
+		logs_view.CalculateLongestPrefixLength([]string{createTargetDto.Name})
+
+		logs_view.DisplayLogEntry(logs.LogEntry{
+			TargetName: &createTargetDto.Name,
+			Msg:        "Request submitted\n",
+		}, logs_view.STATIC_INDEX)
+
+		go apiclient_util.ReadTargetLogs(logsContext, activeProfile, createTargetDto.Id, true, nil)
 
 		_, res, err := apiClient.TargetAPI.CreateTarget(ctx).Target(*createTargetDto).Execute()
 		if err != nil {

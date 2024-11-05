@@ -8,7 +8,7 @@ import (
 )
 
 type TargetDTO struct {
-	target.Target
+	target.TargetViewDTO
 	Info *target.TargetInfo `json:"info" validate:"optional"`
 } //	@name	TargetDTO
 

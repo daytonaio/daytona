@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	db_dto "github.com/daytonaio/daytona/pkg/db/dto"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -27,7 +28,7 @@ func (s *WorkspaceService) RemoveWorkspace(ctx context.Context, workspaceId stri
 		return s.handleRemoveError(ctx, &ws.Workspace, err)
 	}
 
-	err = s.provisioner.DestroyWorkspace(&ws.Workspace, target)
+	err = s.provisioner.DestroyWorkspace(&ws.Workspace, db_dto.ViewToTarget(target))
 	if err != nil {
 		return s.handleRemoveError(ctx, &ws.Workspace, err)
 	}
@@ -63,7 +64,7 @@ func (s *WorkspaceService) ForceRemoveWorkspace(ctx context.Context, workspaceId
 		return s.handleRemoveError(ctx, &ws.Workspace, err)
 	}
 
-	err = s.provisioner.DestroyWorkspace(&ws.Workspace, target)
+	err = s.provisioner.DestroyWorkspace(&ws.Workspace, db_dto.ViewToTarget(target))
 	if err != nil {
 		log.Error(err)
 	}

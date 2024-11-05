@@ -10,12 +10,13 @@ Name | Type | Description | Notes
 **Name** | **string** |  | 
 **Options** | **string** | JSON encoded map of options | 
 **ProviderInfo** | [**TargetProviderInfo**](TargetProviderInfo.md) |  | 
+**WorkspaceCount** | **int32** |  | 
 
 ## Methods
 
 ### NewTargetDTO
 
-`func NewTargetDTO(default_ bool, id string, name string, options string, providerInfo TargetProviderInfo, ) *TargetDTO`
+`func NewTargetDTO(default_ bool, id string, name string, options string, providerInfo TargetProviderInfo, workspaceCount int32, ) *TargetDTO`
 
 NewTargetDTO instantiates a new TargetDTO object
 This constructor will assign default values to properties that have it defined,
@@ -153,6 +154,26 @@ and a boolean to check if the value has been set.
 `func (o *TargetDTO) SetProviderInfo(v TargetProviderInfo)`
 
 SetProviderInfo sets ProviderInfo field to given value.
+
+
+### GetWorkspaceCount
+
+`func (o *TargetDTO) GetWorkspaceCount() int32`
+
+GetWorkspaceCount returns the WorkspaceCount field if non-nil, zero value otherwise.
+
+### GetWorkspaceCountOk
+
+`func (o *TargetDTO) GetWorkspaceCountOk() (*int32, bool)`
+
+GetWorkspaceCountOk returns a tuple with the WorkspaceCount field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetWorkspaceCount
+
+`func (o *TargetDTO) SetWorkspaceCount(v int32)`
+
+SetWorkspaceCount sets WorkspaceCount field to given value.
 
 
 

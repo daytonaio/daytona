@@ -7,6 +7,7 @@ import (
 	"context"
 	"time"
 
+	db_dto "github.com/daytonaio/daytona/pkg/db/dto"
 	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/workspace"
@@ -25,7 +26,7 @@ func (s *WorkspaceService) StopWorkspace(ctx context.Context, workspaceId string
 	}
 
 	//	todo: go routines
-	err = s.provisioner.StopWorkspace(&ws.Workspace, target)
+	err = s.provisioner.StopWorkspace(&ws.Workspace, db_dto.ViewToTarget(target))
 	if err != nil {
 		return s.handleStopError(ctx, &ws.Workspace, err)
 	}

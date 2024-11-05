@@ -6,7 +6,6 @@ package db
 import (
 	"gorm.io/gorm"
 
-	"github.com/daytonaio/daytona/internal/util"
 	. "github.com/daytonaio/daytona/pkg/db/dto"
 	"github.com/daytonaio/daytona/pkg/target"
 )
@@ -24,22 +23,40 @@ func NewTargetStore(db *gorm.DB) (*TargetStore, error) {
 	return &TargetStore{db: db}, nil
 }
 
-func (s *TargetStore) List(filter *target.TargetFilter) ([]*target.Target, error) {
+func (s *TargetStore) List(filter *target.TargetFilter) ([]*target.TargetViewDTO, error) {
 	targetDTOs := []TargetDTO{}
-	tx := processTargetFilters(s.db, filter).Find(&targetDTOs)
 
+	tx := processTargetFilters(s.db, filter).Find(&targetDTOs)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 
-	return util.ArrayMap(targetDTOs, func(targetDTOs TargetDTO) *target.Target {
-		return ToTarget(targetDTOs)
-	}), nil
+	tx = tx.Preload("Workspaces").Find(&targetDTOs)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	targetViewDTOs := []*target.TargetViewDTO{}
+	for _, targetDTO := range targetDTOs {
+		viewDTO := &target.TargetViewDTO{
+			Target:         *ToTarget(targetDTO),
+			WorkspaceCount: len(targetDTO.Workspaces),
+		}
+		targetViewDTOs = append(targetViewDTOs, viewDTO)
+	}
+
+	return targetViewDTOs, nil
 }
 
-func (s *TargetStore) Find(filter *target.TargetFilter) (*target.Target, error) {
+func (s *TargetStore) Find(filter *target.TargetFilter) (*target.TargetViewDTO, error) {
 	targetDTO := TargetDTO{}
+
 	tx := processTargetFilters(s.db, filter).First(&targetDTO)
+
+	tx = tx.Preload("Workspaces").First(&targetDTO)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
 
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
@@ -48,7 +65,12 @@ func (s *TargetStore) Find(filter *target.TargetFilter) (*target.Target, error) 
 		return nil, tx.Error
 	}
 
-	return ToTarget(targetDTO), nil
+	targetViewDTO := &target.TargetViewDTO{
+		Target:         *ToTarget(targetDTO),
+		WorkspaceCount: len(targetDTO.Workspaces),
+	}
+
+	return targetViewDTO, nil
 }
 
 func (s *TargetStore) Save(target *target.Target) error {

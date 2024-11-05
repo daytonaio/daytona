@@ -26,8 +26,9 @@ type TargetDTO struct {
 	Info    *TargetInfo `json:"info,omitempty"`
 	Name    string      `json:"name"`
 	// JSON encoded map of options
-	Options      string             `json:"options"`
-	ProviderInfo TargetProviderInfo `json:"providerInfo"`
+	Options        string             `json:"options"`
+	ProviderInfo   TargetProviderInfo `json:"providerInfo"`
+	WorkspaceCount int32              `json:"workspaceCount"`
 }
 
 type _TargetDTO TargetDTO
@@ -36,13 +37,14 @@ type _TargetDTO TargetDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTargetDTO(default_ bool, id string, name string, options string, providerInfo TargetProviderInfo) *TargetDTO {
+func NewTargetDTO(default_ bool, id string, name string, options string, providerInfo TargetProviderInfo, workspaceCount int32) *TargetDTO {
 	this := TargetDTO{}
 	this.Default = default_
 	this.Id = id
 	this.Name = name
 	this.Options = options
 	this.ProviderInfo = providerInfo
+	this.WorkspaceCount = workspaceCount
 	return &this
 }
 
@@ -206,6 +208,30 @@ func (o *TargetDTO) SetProviderInfo(v TargetProviderInfo) {
 	o.ProviderInfo = v
 }
 
+// GetWorkspaceCount returns the WorkspaceCount field value
+func (o *TargetDTO) GetWorkspaceCount() int32 {
+	if o == nil {
+		var ret int32
+		return ret
+	}
+
+	return o.WorkspaceCount
+}
+
+// GetWorkspaceCountOk returns a tuple with the WorkspaceCount field value
+// and a boolean to check if the value has been set.
+func (o *TargetDTO) GetWorkspaceCountOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.WorkspaceCount, true
+}
+
+// SetWorkspaceCount sets field value
+func (o *TargetDTO) SetWorkspaceCount(v int32) {
+	o.WorkspaceCount = v
+}
+
 func (o TargetDTO) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -224,6 +250,7 @@ func (o TargetDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize["name"] = o.Name
 	toSerialize["options"] = o.Options
 	toSerialize["providerInfo"] = o.ProviderInfo
+	toSerialize["workspaceCount"] = o.WorkspaceCount
 	return toSerialize, nil
 }
 
@@ -237,6 +264,7 @@ func (o *TargetDTO) UnmarshalJSON(data []byte) (err error) {
 		"name",
 		"options",
 		"providerInfo",
+		"workspaceCount",
 	}
 
 	allProperties := make(map[string]interface{})

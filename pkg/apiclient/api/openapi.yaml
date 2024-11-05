@@ -2416,6 +2416,7 @@ components:
         default: true
         name: name
         options: options
+        workspaceCount: 0
         id: id
         info:
           providerMetadata: providerMetadata
@@ -2438,12 +2439,15 @@ components:
           type: string
         providerInfo:
           $ref: '#/components/schemas/TargetProviderInfo'
+        workspaceCount:
+          type: integer
       required:
       - default
       - id
       - name
       - options
       - providerInfo
+      - workspaceCount
       type: object
     TargetInfo:
       example:

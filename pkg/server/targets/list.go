@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	db_dto "github.com/daytonaio/daytona/pkg/db/dto"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
 	"github.com/daytonaio/daytona/pkg/target"
@@ -26,7 +27,7 @@ func (s *TargetService) ListTargets(ctx context.Context, filter *target.TargetFi
 	response := []dto.TargetDTO{}
 
 	for i, t := range targets {
-		response = append(response, dto.TargetDTO{Target: *t})
+		response = append(response, dto.TargetDTO{TargetViewDTO: *t})
 		if !verbose {
 			continue
 		}
@@ -41,7 +42,7 @@ func (s *TargetService) ListTargets(ctx context.Context, filter *target.TargetFi
 			resultCh := make(chan provisioner.TargetInfoResult, 1)
 
 			go func() {
-				targetInfo, err := s.provisioner.GetTargetInfo(ctx, t)
+				targetInfo, err := s.provisioner.GetTargetInfo(ctx, db_dto.ViewToTarget(t))
 				resultCh <- provisioner.TargetInfoResult{Info: targetInfo, Err: err}
 			}()
 

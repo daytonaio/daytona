@@ -714,12 +714,15 @@ definitions:
         type: string
       providerInfo:
         $ref: '#/definitions/TargetProviderInfo'
+      workspaceCount:
+        type: integer
     required:
     - default
     - id
     - name
     - options
     - providerInfo
+    - workspaceCount
     type: object
   TargetInfo:
     properties:
