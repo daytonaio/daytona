@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	db_dto "github.com/daytonaio/daytona/pkg/db/dto"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	"github.com/daytonaio/daytona/pkg/target"
@@ -48,7 +47,7 @@ func (s *WorkspaceService) ListWorkspaces(ctx context.Context, verbose bool) ([]
 			resultCh := make(chan provisioner.WorkspaceInfoResult, 1)
 
 			go func() {
-				targetInfo, err := s.provisioner.GetWorkspaceInfo(ctx, &ws.Workspace, db_dto.ViewToTarget(target))
+				targetInfo, err := s.provisioner.GetWorkspaceInfo(ctx, &ws.Workspace, &target.Target)
 				resultCh <- provisioner.WorkspaceInfoResult{Info: targetInfo, Err: err}
 			}()
 

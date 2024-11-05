@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 
-	db_dto "github.com/daytonaio/daytona/pkg/db/dto"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -38,7 +37,7 @@ func (s *WorkspaceService) StartWorkspace(ctx context.Context, workspaceId strin
 		ClientId:      telemetry.ClientId(ctx),
 	}, telemetry.TelemetryEnabled(ctx))
 
-	err = s.startWorkspace(&workspaceToStart, db_dto.ViewToTarget(target), workspaceLogger)
+	err = s.startWorkspace(&workspaceToStart, &target.Target, workspaceLogger)
 	if err != nil {
 		return s.handleStartError(ctx, &ws.Workspace, err)
 	}

@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	db_dto "github.com/daytonaio/daytona/pkg/db/dto"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
 	"github.com/daytonaio/daytona/pkg/target"
@@ -42,7 +41,7 @@ func (s *TargetService) ListTargets(ctx context.Context, filter *target.TargetFi
 			resultCh := make(chan provisioner.TargetInfoResult, 1)
 
 			go func() {
-				targetInfo, err := s.provisioner.GetTargetInfo(ctx, db_dto.ViewToTarget(t))
+				targetInfo, err := s.provisioner.GetTargetInfo(ctx, &t.Target)
 				resultCh <- provisioner.TargetInfoResult{Info: targetInfo, Err: err}
 			}()
 

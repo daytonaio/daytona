@@ -6,7 +6,6 @@ package targets
 import (
 	"context"
 
-	db_dto "github.com/daytonaio/daytona/pkg/db/dto"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -16,14 +15,14 @@ import (
 func (s *TargetService) RemoveTarget(ctx context.Context, targetId string) error {
 	target, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &targetId})
 	if err != nil {
-		return s.handleRemoveError(ctx, db_dto.ViewToTarget(target), ErrTargetNotFound)
+		return s.handleRemoveError(ctx, &target.Target, ErrTargetNotFound)
 	}
 
 	log.Infof("Destroying target %s", target.Id)
 
-	err = s.provisioner.DestroyTarget(db_dto.ViewToTarget(target))
+	err = s.provisioner.DestroyTarget(&target.Target)
 	if err != nil {
-		return s.handleRemoveError(ctx, db_dto.ViewToTarget(target), err)
+		return s.handleRemoveError(ctx, &target.Target, err)
 	}
 
 	// Should not fail the whole operation if the API key cannot be revoked
@@ -39,9 +38,9 @@ func (s *TargetService) RemoveTarget(ctx context.Context, targetId string) error
 		log.Error(err)
 	}
 
-	err = s.targetStore.Delete(db_dto.ViewToTarget(target))
+	err = s.targetStore.Delete(&target.Target)
 
-	return s.handleRemoveError(ctx, db_dto.ViewToTarget(target), err)
+	return s.handleRemoveError(ctx, &target.Target, err)
 }
 
 // ForceRemoveTarget ignores provider errors and makes sure the target is removed from storage.
@@ -53,7 +52,7 @@ func (s *TargetService) ForceRemoveTarget(ctx context.Context, targetId string) 
 
 	log.Infof("Destroying target %s", target.Id)
 
-	err = s.provisioner.DestroyTarget(db_dto.ViewToTarget(target))
+	err = s.provisioner.DestroyTarget(&target.Target)
 	if err != nil {
 		log.Error(err)
 	}
@@ -63,9 +62,9 @@ func (s *TargetService) ForceRemoveTarget(ctx context.Context, targetId string) 
 		log.Error(err)
 	}
 
-	err = s.targetStore.Delete(db_dto.ViewToTarget(target))
+	err = s.targetStore.Delete(&target.Target)
 
-	return s.handleRemoveError(ctx, db_dto.ViewToTarget(target), err)
+	return s.handleRemoveError(ctx, &target.Target, err)
 }
 
 func (s *TargetService) handleRemoveError(ctx context.Context, target *target.Target, err error) error {

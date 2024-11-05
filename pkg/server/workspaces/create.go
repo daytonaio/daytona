@@ -14,7 +14,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/containerregistry"
-	db_dto "github.com/daytonaio/daytona/pkg/db/dto"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
@@ -144,14 +143,14 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 		}
 	}
 
-	err = s.provisioner.CreateWorkspace(w, db_dto.ViewToTarget(target), cr, gc)
+	err = s.provisioner.CreateWorkspace(w, &target.Target, cr, gc)
 	if err != nil {
 		return s.handleCreateError(ctx, w, err)
 	}
 
 	workspaceLogger.Write([]byte(fmt.Sprintf("Workspace %s created\n", w.Name)))
 
-	err = s.startWorkspace(w, db_dto.ViewToTarget(target), workspaceLogger)
+	err = s.startWorkspace(w, &target.Target, workspaceLogger)
 
 	return s.handleCreateError(ctx, w, err)
 }

@@ -63,15 +63,3 @@ func ToTargetViewDTO(targetDto TargetDTO) *target.TargetViewDTO {
 		WorkspaceCount: len(targetDto.Workspaces),
 	}
 }
-
-func ViewToTarget(targetViewDTO *target.TargetViewDTO) *target.Target {
-	return &target.Target{
-		Id:           targetViewDTO.Id,
-		Name:         targetViewDTO.Name,
-		ProviderInfo: targetViewDTO.ProviderInfo,
-		Options:      targetViewDTO.Options,
-		ApiKey:       targetViewDTO.ApiKey,
-		EnvVars:      targetViewDTO.EnvVars,
-		IsDefault:    targetViewDTO.IsDefault,
-	}
-}

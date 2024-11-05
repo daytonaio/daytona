@@ -6,7 +6,6 @@ package targets
 import (
 	"context"
 
-	db_dto "github.com/daytonaio/daytona/pkg/db/dto"
 	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	log "github.com/sirupsen/logrus"
@@ -18,9 +17,9 @@ func (s *TargetService) StopTarget(ctx context.Context, targetId string) error {
 		return s.handleStopError(ctx, nil, ErrTargetNotFound)
 	}
 
-	err = s.provisioner.StopTarget(db_dto.ViewToTarget(target))
+	err = s.provisioner.StopTarget(&target.Target)
 
-	return s.handleStopError(ctx, db_dto.ViewToTarget(target), err)
+	return s.handleStopError(ctx, &target.Target, err)
 }
 
 func (s *TargetService) handleStopError(ctx context.Context, target *target.Target, err error) error {

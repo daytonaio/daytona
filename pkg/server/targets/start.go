@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 
-	db_dto "github.com/daytonaio/daytona/pkg/db/dto"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -28,19 +27,19 @@ func (s *TargetService) StartTarget(ctx context.Context, targetId string) error 
 
 	logger := io.MultiWriter(&util.InfoLogWriter{}, targetLogger)
 
-	t.EnvVars = target.GetTargetEnvVars(db_dto.ViewToTarget(t), target.TargetEnvVarParams{
+	t.EnvVars = target.GetTargetEnvVars(&t.Target, target.TargetEnvVarParams{
 		ApiUrl:        s.serverApiUrl,
 		ServerUrl:     s.serverUrl,
 		ServerVersion: s.serverVersion,
 		ClientId:      telemetry.ClientId(ctx),
 	}, telemetry.TelemetryEnabled(ctx))
 
-	err = s.startTarget(db_dto.ViewToTarget(t), logger)
+	err = s.startTarget(&t.Target, logger)
 	if err != nil {
-		return s.handleStartError(ctx, db_dto.ViewToTarget(t), err)
+		return s.handleStartError(ctx, &t.Target, err)
 	}
 
-	return s.handleStartError(ctx, db_dto.ViewToTarget(t), err)
+	return s.handleStartError(ctx, &t.Target, err)
 }
 
 func (s *TargetService) startTarget(target *target.Target, targetLogger io.Writer) error {
