@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package target
+package workspace
 
 import (
 	"context"
@@ -157,8 +157,6 @@ var CreateCmd = &cobra.Command{
 
 		logs_view.CalculateLongestPrefixLength(names)
 
-		go apiclient_util.ReadTargetLogs(logsContext, activeProfile, targetId, true, nil)
-
 		if !targetExisted {
 			_, res, err := apiClient.TargetAPI.CreateTarget(ctx).Target(apiclient.CreateTargetDTO{
 				Id:      targetId,
@@ -172,6 +170,8 @@ var CreateCmd = &cobra.Command{
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
+
+			go apiclient_util.ReadTargetLogs(logsContext, activeProfile, targetId, true, nil)
 		}
 
 		dedupWorkspaceNames(&workspaces)

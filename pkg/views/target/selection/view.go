@@ -44,7 +44,7 @@ type item[T any] struct {
 }
 
 func (i item[T]) Title() string {
-	title := i.target.Name
+	title := i.title
 
 	if i.target.Default {
 		title += " (default)"
