@@ -5,7 +5,6 @@ package target
 
 import (
 	"errors"
-	"fmt"
 	"log"
 
 	"github.com/charmbracelet/huh"
@@ -13,12 +12,10 @@ import (
 )
 
 func SetTargetNameView(name *string, existingNames []string) {
-	fmt.Println(existingNames)
-
 	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().
-				Title("Name").
+				Title("Target Name").
 				Value(name).
 				Validate(func(str string) error {
 					if str == "" {

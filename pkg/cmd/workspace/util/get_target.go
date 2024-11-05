@@ -22,7 +22,7 @@ type GetTargetConfigParams struct {
 	PromptUsingTUI    bool
 }
 
-func GetTarget(params GetTargetConfigParams) (*apiclient.TargetDTO, bool, error) {
+func GetTarget(params GetTargetConfigParams) (t *apiclient.TargetDTO, targetExisted bool, err error) {
 	targetList, res, err := params.ApiClient.TargetAPI.ListTargets(params.Ctx).Execute()
 	if err != nil {
 		return nil, false, apiclient_util.HandleErrorResponse(res, err)
@@ -31,7 +31,7 @@ func GetTarget(params GetTargetConfigParams) (*apiclient.TargetDTO, bool, error)
 	if params.TargetNameFlag != "" {
 		for _, t := range targetList {
 			if t.Name == params.TargetNameFlag {
-				return &t, false, nil
+				return &t, true, nil
 			}
 		}
 		return nil, false, fmt.Errorf("target config '%s' not found", params.TargetNameFlag)
@@ -40,13 +40,17 @@ func GetTarget(params GetTargetConfigParams) (*apiclient.TargetDTO, bool, error)
 	if !params.PromptUsingTUI {
 		for _, t := range targetList {
 			if t.Default {
-				return &t, false, nil
+				return &t, true, nil
 			}
 		}
 	}
 
 	if len(targetList) == 0 {
-		return runCreateTargetDtoFlow(params)
+		t, err := runCreateTargetDtoFlow(params)
+		if err != nil {
+			return nil, false, err
+		}
+		return t, true, nil
 	}
 
 	selectedTarget := selection.GetTargetFromPrompt(targetList, true, "Use")
@@ -56,20 +60,24 @@ func GetTarget(params GetTargetConfigParams) (*apiclient.TargetDTO, bool, error)
 	}
 
 	if selectedTarget.Name == selection.NewTargetIdentifier {
-		return runCreateTargetDtoFlow(params)
+		t, err := runCreateTargetDtoFlow(params)
+		if err != nil {
+			return nil, false, err
+		}
+		return t, true, nil
 	}
 
 	return selectedTarget, true, nil
 }
 
-func runCreateTargetDtoFlow(params GetTargetConfigParams) (*apiclient.TargetDTO, bool, error) {
+func runCreateTargetDtoFlow(params GetTargetConfigParams) (*apiclient.TargetDTO, error) {
 	createTargetDto, err := target.CreateTargetDtoFlow(target.TargetCreationParams{
 		Ctx:               params.Ctx,
 		ApiClient:         params.ApiClient,
 		ActiveProfileName: params.ActiveProfileName,
 	})
 	if err != nil {
-		return nil, false, err
+		return nil, err
 	}
 
 	return &apiclient.TargetDTO{
@@ -79,5 +87,5 @@ func runCreateTargetDtoFlow(params GetTargetConfigParams) (*apiclient.TargetDTO,
 			Name:    createTargetDto.ProviderInfo.Name,
 			Version: createTargetDto.ProviderInfo.Version,
 		},
-	}, false, nil
+	}, nil
 }

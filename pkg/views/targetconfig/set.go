@@ -24,7 +24,7 @@ import (
 
 func NewTargetConfigNameInput(name *string, existingNames []string) error {
 	input := huh.NewInput().
-		Title("Name").
+		Title("Target Config Name").
 		Value(name).
 		Validate(func(s string) error {
 			if s == "" {

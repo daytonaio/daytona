@@ -19,16 +19,16 @@ func (s *TargetService) SetDefault(ctx context.Context, id string) error {
 		return err
 	}
 
-	defaultConfig, err := s.GetTarget(ctx, &target.TargetFilter{
+	defaultTarget, err := s.GetTarget(ctx, &target.TargetFilter{
 		Default: util.Pointer(true),
 	}, false)
 	if err != nil && !target.IsTargetNotFound(err) {
 		return err
 	}
 
-	if defaultConfig != nil {
-		defaultConfig.IsDefault = false
-		err := s.targetStore.Save(TargetDtoToTarget(*defaultConfig))
+	if defaultTarget != nil {
+		defaultTarget.IsDefault = false
+		err := s.targetStore.Save(TargetDtoToTarget(*defaultTarget))
 		if err != nil {
 			return err
 		}

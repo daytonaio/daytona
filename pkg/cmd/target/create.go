@@ -13,6 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/cmd/targetconfig"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/views"
 	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
@@ -49,8 +50,12 @@ var targetCreateCmd = &cobra.Command{
 			ApiClient:         apiClient,
 			ActiveProfileName: activeProfile.Name,
 		})
-		if err != nil || createTargetDto == nil {
-			return err
+		if err != nil {
+			if common.IsCtrlCAbort(err) {
+				return nil
+			} else {
+				return err
+			}
 		}
 
 		logsContext, stopLogs := context.WithCancel(context.Background())
@@ -94,10 +99,29 @@ func CreateTargetDtoFlow(params TargetCreationParams) (*apiclient.CreateTargetDT
 		if err != nil {
 			return nil, err
 		}
+
+		if targetConfigView == nil {
+			return nil, common.ErrCtrlCAbort
+		}
 	} else {
 		targetConfigView, err = targetconfig_view.GetTargetConfigFromPrompt(targetConfigList, params.ActiveProfileName, nil, true, "Use")
 		if err != nil {
 			return nil, err
+		}
+
+		if targetConfigView == nil {
+			return nil, common.ErrCtrlCAbort
+		}
+
+		if targetConfigView.Name == targetconfig_view.NewTargetConfigName {
+			targetConfigView, err = targetconfig.TargetConfigCreationFlow(params.Ctx, params.ApiClient, params.ActiveProfileName, false)
+			if err != nil {
+				return nil, err
+			}
+
+			if targetConfigView == nil {
+				return nil, common.ErrCtrlCAbort
+			}
 		}
 	}
 

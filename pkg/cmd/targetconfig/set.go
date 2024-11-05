@@ -51,6 +51,10 @@ var TargetConfigSetCmd = &cobra.Command{
 			return err
 		}
 
+		if targetConfig == nil {
+			return nil
+		}
+
 		views.RenderInfoMessage(fmt.Sprintf("Target config '%s' set successfully", targetConfig.Name))
 		return nil
 	},
@@ -112,53 +116,70 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 		isNewProvider = true
 	}
 
+	selectedTargetConfig := &targetconfig.TargetConfigView{
+		Name:    "",
+		Options: "{}",
+		ProviderInfo: targetconfig.ProviderInfo{
+			Name:    selectedProvider.Name,
+			Version: selectedProvider.Version,
+		},
+	}
+
 	targetConfigs, res, err := apiClient.TargetConfigAPI.ListTargetConfigs(ctx).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	filteredConfigs := []apiclient.TargetConfig{}
-	for _, t := range targetConfigs {
-		if t.ProviderInfo.Name == selectedProvider.Name {
-			filteredConfigs = append(filteredConfigs, t)
-		}
-	}
-
-	var selectedTargetConfig *targetconfig.TargetConfigView
-
-	if !isNewProvider || len(filteredConfigs) > 0 {
-		selectedTargetConfig, err = targetconfig.GetTargetConfigFromPrompt(filteredConfigs, activeProfileName, nil, true, "Set")
-		if err != nil {
-			if common.IsCtrlCAbort(err) {
-				return nil, nil
-			} else {
-				return nil, err
+	if allowUpdating {
+		filteredConfigs := []apiclient.TargetConfig{}
+		for _, t := range targetConfigs {
+			if t.ProviderInfo.Name == selectedProvider.Name {
+				filteredConfigs = append(filteredConfigs, t)
 			}
 		}
-	} else {
-		selectedTargetConfig = &targetconfig.TargetConfigView{
-			Name:    targetconfig.NewTargetConfigName,
-			Options: "{}",
-		}
-	}
 
-	if selectedTargetConfig.Name == targetconfig.NewTargetConfigName {
-		selectedTargetConfig.Name = ""
-		err = targetconfig.NewTargetConfigNameInput(&selectedTargetConfig.Name, internal_util.ArrayMap(targetConfigs, func(t apiclient.TargetConfig) string {
-			return t.Name
-		}))
-		if err != nil {
-			return nil, err
+		if !isNewProvider || len(filteredConfigs) > 0 {
+			selectedTargetConfig, err = targetconfig.GetTargetConfigFromPrompt(filteredConfigs, activeProfileName, nil, true, "Set")
+			if err != nil {
+				if common.IsCtrlCAbort(err) {
+					return nil, nil
+				} else {
+					return nil, err
+				}
+			}
+		} else {
+			selectedTargetConfig = &targetconfig.TargetConfigView{
+				Name:    targetconfig.NewTargetConfigName,
+				Options: "{}",
+			}
 		}
-	} else {
-		if !allowUpdating {
-			return selectedTargetConfig, nil
+
+		if selectedTargetConfig.Name == targetconfig.NewTargetConfigName {
+			selectedTargetConfig.Name = ""
+			err = targetconfig.NewTargetConfigNameInput(&selectedTargetConfig.Name, internal_util.ArrayMap(targetConfigs, func(t apiclient.TargetConfig) string {
+				return t.Name
+			}))
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			if !allowUpdating {
+				return selectedTargetConfig, nil
+			}
 		}
 	}
 
 	targetConfigManifest, res, err := apiClient.ProviderAPI.GetTargetConfigManifest(context.Background(), selectedProvider.Name).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	selectedTargetConfig.Name = ""
+	err = targetconfig.NewTargetConfigNameInput(&selectedTargetConfig.Name, internal_util.ArrayMap(targetConfigs, func(t apiclient.TargetConfig) string {
+		return t.Name
+	}))
+	if err != nil {
+		return nil, err
 	}
 
 	err = targetconfig.SetTargetConfigForm(selectedTargetConfig, *targetConfigManifest)
