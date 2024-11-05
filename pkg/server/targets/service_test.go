@@ -7,7 +7,6 @@ import (
 	"context"
 	"testing"
 
-	t_targetconfigs "github.com/daytonaio/daytona/internal/testing/provider/targetconfigs"
 	t_targets "github.com/daytonaio/daytona/internal/testing/server/targets"
 	"github.com/daytonaio/daytona/internal/testing/server/targets/mocks"
 	"github.com/daytonaio/daytona/internal/util"
@@ -48,8 +47,6 @@ var targetInfo = target.TargetInfo{
 func TestTargetService(t *testing.T) {
 	targetStore := t_targets.NewInMemoryTargetStore()
 
-	targetConfigStore := t_targetconfigs.NewInMemoryTargetConfigStore()
-
 	apiKeyService := mocks.NewMockApiKeyService()
 	provisioner := mocks.NewMockProvisioner()
 
@@ -57,13 +54,12 @@ func TestTargetService(t *testing.T) {
 	buildLogsDir := t.TempDir()
 
 	service := targets.NewTargetService(targets.TargetServiceConfig{
-		TargetStore:       targetStore,
-		TargetConfigStore: targetConfigStore,
-		ServerApiUrl:      serverApiUrl,
-		ServerUrl:         serverUrl,
-		ApiKeyService:     apiKeyService,
-		Provisioner:       provisioner,
-		LoggerFactory:     logs.NewLoggerFactory(&tgLogsDir, &buildLogsDir),
+		TargetStore:   targetStore,
+		ServerApiUrl:  serverApiUrl,
+		ServerUrl:     serverUrl,
+		ApiKeyService: apiKeyService,
+		Provisioner:   provisioner,
+		LoggerFactory: logs.NewLoggerFactory(&tgLogsDir, &buildLogsDir),
 	})
 
 	t.Run("CreateTarget", func(t *testing.T) {

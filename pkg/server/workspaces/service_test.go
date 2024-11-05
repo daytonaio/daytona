@@ -9,7 +9,6 @@ import (
 	"testing"
 	"time"
 
-	t_targetconfigs "github.com/daytonaio/daytona/internal/testing/provider/targetconfigs"
 	t_targets "github.com/daytonaio/daytona/internal/testing/server/targets"
 	"github.com/daytonaio/daytona/internal/testing/server/targets/mocks"
 	t_workspaces "github.com/daytonaio/daytona/internal/testing/server/workspaces"
@@ -91,10 +90,6 @@ func TestTargetService(t *testing.T) {
 
 	containerRegistryService := mocks.NewMockContainerRegistryService()
 
-	workspaceConfigService := mocks.NewMockWorkspaceConfigService()
-
-	targetConfigStore := t_targetconfigs.NewInMemoryTargetConfigStore()
-
 	apiKeyService := mocks.NewMockApiKeyService()
 	gitProviderService := mocks.NewMockGitProviderService()
 	provisioner := mocks.NewMockProvisioner()
@@ -105,11 +100,9 @@ func TestTargetService(t *testing.T) {
 	service := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
 		TargetStore:              targetStore,
 		WorkspaceStore:           workspaceStore,
-		TargetConfigStore:        targetConfigStore,
 		ServerApiUrl:             serverApiUrl,
 		ServerUrl:                serverUrl,
 		ContainerRegistryService: containerRegistryService,
-		WorkspaceConfigService:   workspaceConfigService,
 		DefaultWorkspaceImage:    defaultWorkspaceImage,
 		DefaultWorkspaceUser:     defaultWorkspaceUser,
 		ApiKeyService:            apiKeyService,

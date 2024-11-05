@@ -13,10 +13,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/builds"
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
-	"github.com/daytonaio/daytona/pkg/server/workspaceconfig"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/config"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
@@ -38,17 +36,11 @@ type targetStore interface {
 	Find(filter *target.TargetFilter) (*target.TargetViewDTO, error)
 }
 
-type targetConfigStore interface {
-	Find(filter *config.TargetConfigFilter) (*config.TargetConfig, error)
-}
-
 type WorkspaceServiceConfig struct {
 	WorkspaceStore           workspace.Store
 	TargetStore              targetStore
-	TargetConfigStore        targetConfigStore
 	ContainerRegistryService containerregistries.IContainerRegistryService
 	BuildService             builds.IBuildService
-	WorkspaceConfigService   workspaceconfig.IWorkspaceConfigService
 	ServerApiUrl             string
 	ServerUrl                string
 	ServerVersion            string
@@ -65,10 +57,8 @@ func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 	return &WorkspaceService{
 		workspaceStore:           config.WorkspaceStore,
 		targetStore:              config.TargetStore,
-		targetConfigStore:        config.TargetConfigStore,
 		containerRegistryService: config.ContainerRegistryService,
 		buildService:             config.BuildService,
-		workspaceConfigService:   config.WorkspaceConfigService,
 		serverApiUrl:             config.ServerApiUrl,
 		serverUrl:                config.ServerUrl,
 		serverVersion:            config.ServerVersion,
@@ -85,10 +75,8 @@ func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 type WorkspaceService struct {
 	workspaceStore           workspace.Store
 	targetStore              targetStore
-	targetConfigStore        targetConfigStore
 	containerRegistryService containerregistries.IContainerRegistryService
 	buildService             builds.IBuildService
-	workspaceConfigService   workspaceconfig.IWorkspaceConfigService
 	provisioner              provisioner.IProvisioner
 	apiKeyService            apikeys.IApiKeyService
 	serverApiUrl             string

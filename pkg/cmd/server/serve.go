@@ -334,26 +334,23 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	})
 
 	targetService := targets.NewTargetService(targets.TargetServiceConfig{
-		TargetStore:       targetStore,
-		TargetConfigStore: targetConfigStore,
-		ApiKeyService:     apiKeyService,
-		ServerApiUrl:      util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
-		ServerVersion:     version,
-		ServerUrl:         headscaleUrl,
-		Provisioner:       provisioner,
-		LoggerFactory:     loggerFactory,
-		TelemetryService:  telemetryService,
+		TargetStore:      targetStore,
+		ApiKeyService:    apiKeyService,
+		ServerApiUrl:     util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+		ServerVersion:    version,
+		ServerUrl:        headscaleUrl,
+		Provisioner:      provisioner,
+		LoggerFactory:    loggerFactory,
+		TelemetryService: telemetryService,
 	})
 
 	workspaceService := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
 		WorkspaceStore:           workspaceStore,
 		TargetStore:              targetStore,
-		TargetConfigStore:        targetConfigStore,
 		ApiKeyService:            apiKeyService,
 		GitProviderService:       gitProviderService,
 		ContainerRegistryService: containerRegistryService,
 		BuildService:             buildService,
-		WorkspaceConfigService:   workspaceConfigService,
 		ServerApiUrl:             util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 		ServerVersion:            version,
 		ServerUrl:                headscaleUrl,
