@@ -39,10 +39,12 @@ daytona [flags]
 * [daytona profile](daytona_profile.md)	 - Manage profiles
 * [daytona provider](daytona_provider.md)	 - Manage providers
 * [daytona purge](daytona_purge.md)	 - Purges all Daytona data from the current device
+* [daytona restart](daytona_restart.md)	 - Restart a workspace
 * [daytona serve](daytona_serve.md)	 - Run the server process in the current terminal session
 * [daytona server](daytona_server.md)	 - Start the server process in daemon mode
 * [daytona ssh](daytona_ssh.md)	 - SSH into a workspace using the terminal
 * [daytona start](daytona_start.md)	 - Start a workspace
+* [daytona stop](daytona_stop.md)	 - Stop a workspace
 * [daytona target](daytona_target.md)	 - Manage targets
 * [daytona target-config](daytona_target-config.md)	 - Manage target configs
 * [daytona telemetry](daytona_telemetry.md)	 - Manage telemetry collection
