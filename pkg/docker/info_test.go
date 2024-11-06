@@ -46,9 +46,13 @@ func (s *DockerClientTestSuite) TestGetWorkspaceInfo() {
 
 func (s *DockerClientTestSuite) TestGetTargetInfo() {
 	targetWithoutWorkspaces := &target.Target{
-		Id:           "123",
-		Name:         "test",
-		TargetConfig: "local",
+		Id:   "123",
+		Name: "test",
+		ProviderInfo: target.ProviderInfo{
+			Name:    "test-provider",
+			Version: "test",
+		},
+		Options: "",
 	}
 
 	targetInfo, err := s.dockerClient.GetTargetInfo(targetWithoutWorkspaces)

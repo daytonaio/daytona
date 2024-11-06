@@ -14,6 +14,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/build"
 	server_cmd "github.com/daytonaio/daytona/pkg/cmd/server"
+	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -23,7 +24,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var yesFlag bool
 var forceFlag bool
 
 var purgeCmd = &cobra.Command{
@@ -57,7 +57,7 @@ var purgeCmd = &cobra.Command{
 		}
 
 		if c.ActiveProfileId != "default" {
-			if !yesFlag {
+			if !create.YesFlag {
 				view.DefaultProfileNoticePrompt(&defaultProfileNoticeConfirm)
 				if !defaultProfileNoticeConfirm {
 					fmt.Println("Operation cancelled.")
@@ -90,7 +90,7 @@ var purgeCmd = &cobra.Command{
 			}
 		}
 
-		if !yesFlag {
+		if !create.YesFlag {
 			view.ConfirmPrompt(&confirmCheck)
 			if !confirmCheck {
 				fmt.Println("Operation cancelled.")
@@ -240,6 +240,6 @@ var purgeCmd = &cobra.Command{
 }
 
 func init() {
-	purgeCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Execute purge without prompt")
+	purgeCmd.Flags().BoolVarP(&create.YesFlag, "yes", "y", false, "Execute purge without prompt")
 	purgeCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Delete all targets by force")
 }

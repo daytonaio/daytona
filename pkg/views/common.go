@@ -38,8 +38,6 @@ var DefaultHorizontalMargin = 1
 
 var TUITableMinimumWidth = 80
 
-var CheckmarkSymbol = lipgloss.NewStyle().Foreground(lipgloss.Color("42")).SetString("✓")
-
 var SeparatorString = lipgloss.NewStyle().Foreground(LightGray).Render("===")
 
 var (
@@ -180,4 +178,9 @@ func GetEnvVarsInput(envVars *map[string]string) *huh.Text {
 
 			return nil
 		})
+}
+
+// Bolds the message and prepends a checkmark
+func GetPrettyLogLine(message string) string {
+	return fmt.Sprintf("%s \033[1m%s\033[0m\n", lipgloss.NewStyle().Foreground(lipgloss.Color("42")).SetString("✓").String(), message)
 }

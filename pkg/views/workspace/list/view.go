@@ -26,7 +26,7 @@ type RowData struct {
 
 func ListWorkspaces(workspaceList []apiclient.WorkspaceDTO, specifyGitProviders bool, verbose bool, activeProfileName string) {
 	if len(workspaceList) == 0 {
-		views_util.NotifyEmptyTargetList(true)
+		views_util.NotifyEmptyWorkspaceList(true)
 		return
 	}
 
@@ -127,7 +127,6 @@ func SortWorkspaces(workspaceList *[]apiclient.WorkspaceDTO, verbose bool) {
 		}
 		return w1.State.Uptime < w2.State.Uptime
 	})
-
 }
 
 func getTableRowData(workspace apiclient.WorkspaceDTO, specifyGitProviders bool) *RowData {

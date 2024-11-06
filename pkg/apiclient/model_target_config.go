@@ -21,11 +21,10 @@ var _ MappedNullable = &TargetConfig{}
 
 // TargetConfig struct for TargetConfig
 type TargetConfig struct {
-	IsDefault bool   `json:"isDefault"`
-	Name      string `json:"name"`
+	Name string `json:"name"`
 	// JSON encoded map of options
-	Options      string               `json:"options"`
-	ProviderInfo ProviderProviderInfo `json:"providerInfo"`
+	Options      string             `json:"options"`
+	ProviderInfo TargetProviderInfo `json:"providerInfo"`
 }
 
 type _TargetConfig TargetConfig
@@ -34,9 +33,8 @@ type _TargetConfig TargetConfig
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTargetConfig(isDefault bool, name string, options string, providerInfo ProviderProviderInfo) *TargetConfig {
+func NewTargetConfig(name string, options string, providerInfo TargetProviderInfo) *TargetConfig {
 	this := TargetConfig{}
-	this.IsDefault = isDefault
 	this.Name = name
 	this.Options = options
 	this.ProviderInfo = providerInfo
@@ -49,30 +47,6 @@ func NewTargetConfig(isDefault bool, name string, options string, providerInfo P
 func NewTargetConfigWithDefaults() *TargetConfig {
 	this := TargetConfig{}
 	return &this
-}
-
-// GetIsDefault returns the IsDefault field value
-func (o *TargetConfig) GetIsDefault() bool {
-	if o == nil {
-		var ret bool
-		return ret
-	}
-
-	return o.IsDefault
-}
-
-// GetIsDefaultOk returns a tuple with the IsDefault field value
-// and a boolean to check if the value has been set.
-func (o *TargetConfig) GetIsDefaultOk() (*bool, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.IsDefault, true
-}
-
-// SetIsDefault sets field value
-func (o *TargetConfig) SetIsDefault(v bool) {
-	o.IsDefault = v
 }
 
 // GetName returns the Name field value
@@ -124,9 +98,9 @@ func (o *TargetConfig) SetOptions(v string) {
 }
 
 // GetProviderInfo returns the ProviderInfo field value
-func (o *TargetConfig) GetProviderInfo() ProviderProviderInfo {
+func (o *TargetConfig) GetProviderInfo() TargetProviderInfo {
 	if o == nil {
-		var ret ProviderProviderInfo
+		var ret TargetProviderInfo
 		return ret
 	}
 
@@ -135,7 +109,7 @@ func (o *TargetConfig) GetProviderInfo() ProviderProviderInfo {
 
 // GetProviderInfoOk returns a tuple with the ProviderInfo field value
 // and a boolean to check if the value has been set.
-func (o *TargetConfig) GetProviderInfoOk() (*ProviderProviderInfo, bool) {
+func (o *TargetConfig) GetProviderInfoOk() (*TargetProviderInfo, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -143,7 +117,7 @@ func (o *TargetConfig) GetProviderInfoOk() (*ProviderProviderInfo, bool) {
 }
 
 // SetProviderInfo sets field value
-func (o *TargetConfig) SetProviderInfo(v ProviderProviderInfo) {
+func (o *TargetConfig) SetProviderInfo(v TargetProviderInfo) {
 	o.ProviderInfo = v
 }
 
@@ -157,7 +131,6 @@ func (o TargetConfig) MarshalJSON() ([]byte, error) {
 
 func (o TargetConfig) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["isDefault"] = o.IsDefault
 	toSerialize["name"] = o.Name
 	toSerialize["options"] = o.Options
 	toSerialize["providerInfo"] = o.ProviderInfo
@@ -169,7 +142,6 @@ func (o *TargetConfig) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"isDefault",
 		"name",
 		"options",
 		"providerInfo",

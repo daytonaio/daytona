@@ -33,6 +33,12 @@ type Provider interface {
 	GetWorkspaceInfo(*WorkspaceRequest) (*workspace.WorkspaceInfo, error)
 }
 
+type ProviderInfo struct {
+	Name    string  `json:"name" validate:"required"`
+	Label   *string `json:"label" validate:"optional"`
+	Version string  `json:"version" validate:"required"`
+}
+
 type ProviderPlugin struct {
 	Impl Provider
 }

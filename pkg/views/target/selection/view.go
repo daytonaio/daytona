@@ -15,6 +15,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"golang.org/x/term"
 )
@@ -34,18 +35,27 @@ var statusMessageDangerStyle = lipgloss.NewStyle().Bold(true).
 	Render
 
 type item[T any] struct {
-	id, title, desc, targetConfig string
-	choiceProperty                T
-	isMarked                      bool
-	isMultipleSelect              bool
-	action                        string
+	id, title, desc  string
+	target           *apiclient.TargetDTO
+	choiceProperty   T
+	isMarked         bool
+	isMultipleSelect bool
+	action           string
 }
 
-func (i item[T]) Title() string        { return i.title }
-func (i item[T]) Id() string           { return i.id }
-func (i item[T]) Description() string  { return i.desc }
-func (i item[T]) FilterValue() string  { return i.title }
-func (i item[T]) TargetConfig() string { return i.targetConfig }
+func (i item[T]) Title() string {
+	title := i.title
+
+	if i.target.Default {
+		title += " (default)"
+	}
+
+	return title
+}
+
+func (i item[T]) Id() string          { return i.id }
+func (i item[T]) Description() string { return i.desc }
+func (i item[T]) FilterValue() string { return i.title }
 
 type model[T any] struct {
 	list            list.Model
@@ -143,7 +153,10 @@ func (d ItemDelegate[T]) Render(w io.Writer, m list.Model, index int, listItem l
 	baseStyles := lipgloss.NewStyle().Padding(0, 0, 0, 2)
 
 	title := baseStyles.Render(i.Title())
-	idWithTargetConfigString := fmt.Sprintf("%s (%s)", i.Id(), i.TargetConfig())
+	idWithTargetConfigString := i.Id()
+	if i.Id() == NewTargetIdentifier {
+		idWithTargetConfigString = ""
+	}
 	idWithTargetConfig := baseStyles.Foreground(views.Gray).Render(idWithTargetConfigString)
 	description := baseStyles.Render(i.Description())
 

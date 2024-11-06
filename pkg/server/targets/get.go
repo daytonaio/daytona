@@ -9,29 +9,24 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
+	"github.com/daytonaio/daytona/pkg/target"
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *TargetService) GetTarget(ctx context.Context, targetId string, verbose bool) (*dto.TargetDTO, error) {
-	tg, err := s.targetStore.Find(targetId)
+func (s *TargetService) GetTarget(ctx context.Context, filter *target.TargetFilter, verbose bool) (*dto.TargetDTO, error) {
+	tg, err := s.targetStore.Find(filter)
 	if err != nil {
 		return nil, ErrTargetNotFound
 	}
 
 	response := dto.TargetDTO{
-		Target: *tg,
+		TargetViewDTO: *tg,
 	}
 
 	if !verbose {
 		return &response, nil
-	}
-
-	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &tg.TargetConfig})
-	if err != nil {
-		return nil, err
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
@@ -40,7 +35,7 @@ func (s *TargetService) GetTarget(ctx context.Context, targetId string, verbose 
 	resultCh := make(chan provisioner.TargetInfoResult, 1)
 
 	go func() {
-		targetInfo, err := s.provisioner.GetTargetInfo(ctx, tg, targetConfig)
+		targetInfo, err := s.provisioner.GetTargetInfo(ctx, &tg.Target)
 		resultCh <- provisioner.TargetInfoResult{Info: targetInfo, Err: err}
 	}()
 

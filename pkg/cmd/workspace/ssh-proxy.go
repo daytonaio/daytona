@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package target
+package workspace
 
 import (
 	"context"
@@ -15,6 +15,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	ssh_config "github.com/daytonaio/daytona/pkg/agent/ssh/config"
+	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/docker/docker/api/types/container"
@@ -53,7 +54,7 @@ var SshProxyCmd = &cobra.Command{
 			return err
 		}
 
-		if target.TargetConfig == "local" && profile.Id == "default" {
+		if create.IsLocalDockerTarget(target) && profile.Id == "default" {
 			// If the target is local, we directly access the ssh port through the container
 
 			cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())

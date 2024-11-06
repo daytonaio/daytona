@@ -10,9 +10,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
+	"github.com/daytonaio/daytona/pkg/target"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -35,15 +35,9 @@ func (s *WorkspaceService) ListWorkspaces(ctx context.Context, verbose bool) ([]
 		go func(i int) {
 			defer wg.Done()
 
-			target, err := s.targetStore.Find(ws.TargetId)
+			target, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &ws.TargetId})
 			if err != nil {
 				log.Error(fmt.Errorf("failed to get target for %s", ws.TargetId))
-				return
-			}
-
-			targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &target.TargetConfig})
-			if err != nil {
-				log.Error(fmt.Errorf("failed to get target config for %s", target.TargetConfig))
 				return
 			}
 
@@ -53,23 +47,23 @@ func (s *WorkspaceService) ListWorkspaces(ctx context.Context, verbose bool) ([]
 			resultCh := make(chan provisioner.WorkspaceInfoResult, 1)
 
 			go func() {
-				targetInfo, err := s.provisioner.GetWorkspaceInfo(ctx, &ws.Workspace, targetConfig)
-				resultCh <- provisioner.WorkspaceInfoResult{Info: targetInfo, Err: err}
+				workspaceInfo, err := s.provisioner.GetWorkspaceInfo(ctx, &ws.Workspace, &target.Target)
+				resultCh <- provisioner.WorkspaceInfoResult{Info: workspaceInfo, Err: err}
 			}()
 
 			select {
 			case res := <-resultCh:
 				if res.Err != nil {
-					log.Error(fmt.Errorf("failed to get target info for %s: %v", ws.Name, res.Err))
+					log.Error(fmt.Errorf("failed to get workspace info for %s: %v", ws.Name, res.Err))
 					return
 				}
 
 				response[i].Info = res.Info
 			case <-ctx.Done():
 				if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-					log.Warn(fmt.Sprintf("timeout getting target info for %s", ws.Name))
+					log.Warn(fmt.Sprintf("timeout getting workspace info for %s", ws.Name))
 				} else {
-					log.Warn(fmt.Sprintf("cancelled getting target info for %s", ws.Name))
+					log.Warn(fmt.Sprintf("cancelled getting workspace info for %s", ws.Name))
 				}
 			}
 		}(i)

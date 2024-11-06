@@ -13,7 +13,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/build"
-	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
+	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/cmd/workspaceconfig"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/prebuild/add"
@@ -75,7 +75,7 @@ var prebuildAddCmd = &cobra.Command{
 				return errors.New("The chosen workspace config does not have a build configuration")
 			}
 
-			chosenBranch, err := workspace_util.GetBranchFromWorkspaceConfig(workspaceConfig, apiClient, 0)
+			chosenBranch, err := create.GetBranchFromWorkspaceConfig(workspaceConfig, apiClient, 0)
 			if err != nil {
 				return err
 			}

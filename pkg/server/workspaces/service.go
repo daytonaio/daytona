@@ -8,13 +8,11 @@ import (
 	"io"
 
 	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
 	"github.com/daytonaio/daytona/pkg/server/builds"
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
-	"github.com/daytonaio/daytona/pkg/server/workspaceconfig"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -35,20 +33,14 @@ type IWorkspaceService interface {
 }
 
 type targetStore interface {
-	Find(idOrName string) (*target.Target, error)
-}
-
-type targetConfigStore interface {
-	Find(filter *provider.TargetConfigFilter) (*provider.TargetConfig, error)
+	Find(filter *target.TargetFilter) (*target.TargetViewDTO, error)
 }
 
 type WorkspaceServiceConfig struct {
 	WorkspaceStore           workspace.Store
 	TargetStore              targetStore
-	TargetConfigStore        targetConfigStore
 	ContainerRegistryService containerregistries.IContainerRegistryService
 	BuildService             builds.IBuildService
-	WorkspaceConfigService   workspaceconfig.IWorkspaceConfigService
 	ServerApiUrl             string
 	ServerUrl                string
 	ServerVersion            string
@@ -66,10 +58,8 @@ func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 	return &WorkspaceService{
 		workspaceStore:           config.WorkspaceStore,
 		targetStore:              config.TargetStore,
-		targetConfigStore:        config.TargetConfigStore,
 		containerRegistryService: config.ContainerRegistryService,
 		buildService:             config.BuildService,
-		workspaceConfigService:   config.WorkspaceConfigService,
 		serverApiUrl:             config.ServerApiUrl,
 		serverUrl:                config.ServerUrl,
 		serverVersion:            config.ServerVersion,
@@ -87,10 +77,8 @@ func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 type WorkspaceService struct {
 	workspaceStore           workspace.Store
 	targetStore              targetStore
-	targetConfigStore        targetConfigStore
 	containerRegistryService containerregistries.IContainerRegistryService
 	buildService             builds.IBuildService
-	workspaceConfigService   workspaceconfig.IWorkspaceConfigService
 	provisioner              provisioner.IProvisioner
 	apiKeyService            apikeys.IApiKeyService
 	serverApiUrl             string
