@@ -90,7 +90,7 @@ func (s *DockerClientTestSuite) TestCreateWorkspace() {
 				{
 					Type:   mount.TypeBind,
 					Source: workspaceDir,
-					Target: fmt.Sprintf("/home/%s/%s", workspace1.User, workspace1.Name),
+					Target: fmt.Sprintf("/home/%s/%s", workspace1.User, workspace1.Repository.Name),
 				},
 			},
 		},

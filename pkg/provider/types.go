@@ -10,12 +10,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
-type ProviderInfo struct {
-	Name    string  `json:"name" validate:"required"`
-	Label   *string `json:"label" validate:"optional"`
-	Version string  `json:"version" validate:"required"`
-}
-
 type InitializeProviderRequest struct {
 	BasePath           string
 	DaytonaDownloadUrl string
@@ -32,12 +26,11 @@ type InitializeProviderRequest struct {
 }
 
 type TargetRequest struct {
-	TargetConfigOptions string
-	Target              *target.Target
+	Target *target.Target
 }
 
 type WorkspaceRequest struct {
-	TargetConfigOptions      string
+	Target                   *target.Target
 	ContainerRegistry        *containerregistry.ContainerRegistry
 	Workspace                *workspace.Workspace
 	GitProviderConfig        *gitprovider.GitProviderConfig
@@ -46,12 +39,10 @@ type WorkspaceRequest struct {
 }
 
 type TargetConfig struct {
-	Name         string       `json:"name" validate:"required"`
-	ProviderInfo ProviderInfo `json:"providerInfo" validate:"required"`
+	Name string `json:"name" validate:"required"`
 	// JSON encoded map of options
-	Options   string `json:"options" validate:"required"`
-	IsDefault bool   `json:"isDefault" validate:"required"`
-} // @name TargetConfig
+	Options string `json:"options" validate:"required"`
+}
 
 type TargetConfigManifest map[string]TargetConfigProperty // @name TargetConfigManifest
 

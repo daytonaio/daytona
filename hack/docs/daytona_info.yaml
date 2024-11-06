@@ -1,6 +1,6 @@
 name: daytona info
-synopsis: Show target info
-usage: daytona info [TARGET] [flags]
+synopsis: Show workspace info
+usage: daytona info [WORKSPACE] [flags]
 options:
     - name: format
       shorthand: f

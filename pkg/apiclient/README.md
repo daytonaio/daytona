@@ -126,11 +126,11 @@ Class | Method | HTTP request | Description
 *TargetAPI* | [**GetTarget**](docs/TargetAPI.md#gettarget) | **Get** /target/{targetId} | Get target info
 *TargetAPI* | [**ListTargets**](docs/TargetAPI.md#listtargets) | **Get** /target | List targets
 *TargetAPI* | [**RemoveTarget**](docs/TargetAPI.md#removetarget) | **Delete** /target/{targetId} | Remove target
+*TargetAPI* | [**SetDefaultTarget**](docs/TargetAPI.md#setdefaulttarget) | **Patch** /target/{targetId}/set-default | Set target to be used by default
 *TargetAPI* | [**StartTarget**](docs/TargetAPI.md#starttarget) | **Post** /target/{targetId}/start | Start target
 *TargetAPI* | [**StopTarget**](docs/TargetAPI.md#stoptarget) | **Post** /target/{targetId}/stop | Stop target
 *TargetConfigAPI* | [**ListTargetConfigs**](docs/TargetConfigAPI.md#listtargetconfigs) | **Get** /target-config | List target configs
 *TargetConfigAPI* | [**RemoveTargetConfig**](docs/TargetConfigAPI.md#removetargetconfig) | **Delete** /target-config/{configName} | Remove a target config
-*TargetConfigAPI* | [**SetDefaultTargetConfig**](docs/TargetConfigAPI.md#setdefaulttargetconfig) | **Patch** /target-config/{configName}/set-default | Set target config to default
 *TargetConfigAPI* | [**SetTargetConfig**](docs/TargetConfigAPI.md#settargetconfig) | **Put** /target-config | Set a target config
 *WorkspaceAPI* | [**CreateWorkspace**](docs/WorkspaceAPI.md#createworkspace) | **Post** /workspace | Create a workspace
 *WorkspaceAPI* | [**GetWorkspace**](docs/WorkspaceAPI.md#getworkspace) | **Get** /workspace/{workspaceId} | Get workspace info
@@ -183,7 +183,6 @@ Class | Method | HTTP request | Description
  - [PrebuildDTO](docs/PrebuildDTO.md)
  - [ProfileData](docs/ProfileData.md)
  - [Provider](docs/Provider.md)
- - [ProviderProviderInfo](docs/ProviderProviderInfo.md)
  - [ProviderTargetConfigPropertyType](docs/ProviderTargetConfigPropertyType.md)
  - [RepositoryUrl](docs/RepositoryUrl.md)
  - [Sample](docs/Sample.md)
@@ -197,6 +196,7 @@ Class | Method | HTTP request | Description
  - [TargetConfigProperty](docs/TargetConfigProperty.md)
  - [TargetDTO](docs/TargetDTO.md)
  - [TargetInfo](docs/TargetInfo.md)
+ - [TargetProviderInfo](docs/TargetProviderInfo.md)
  - [WorkspaceConfig](docs/WorkspaceConfig.md)
  - [WorkspaceDTO](docs/WorkspaceDTO.md)
  - [WorkspaceInfo](docs/WorkspaceInfo.md)

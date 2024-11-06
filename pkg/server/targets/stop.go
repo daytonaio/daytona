@@ -6,26 +6,20 @@ package targets
 import (
 	"context"
 
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	log "github.com/sirupsen/logrus"
 )
 
 func (s *TargetService) StopTarget(ctx context.Context, targetId string) error {
-	target, err := s.targetStore.Find(targetId)
+	target, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &targetId})
 	if err != nil {
 		return s.handleStopError(ctx, nil, ErrTargetNotFound)
 	}
 
-	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &target.TargetConfig})
-	if err != nil {
-		return s.handleStopError(ctx, target, err)
-	}
+	err = s.provisioner.StopTarget(&target.Target)
 
-	err = s.provisioner.StopTarget(target, targetConfig)
-
-	return s.handleStopError(ctx, target, err)
+	return s.handleStopError(ctx, &target.Target, err)
 }
 
 func (s *TargetService) handleStopError(ctx context.Context, target *target.Target, err error) error {
@@ -35,7 +29,7 @@ func (s *TargetService) handleStopError(ctx context.Context, target *target.Targ
 
 	clientId := telemetry.ClientId(ctx)
 
-	telemetryProps := telemetry.NewTargetEventProps(ctx, target, nil)
+	telemetryProps := telemetry.NewTargetEventProps(ctx, target)
 	event := telemetry.ServerEventTargetStopped
 	if err != nil {
 		telemetryProps["error"] = err.Error()

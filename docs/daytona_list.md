@@ -1,6 +1,6 @@
 ## daytona list
 
-List targets
+List workspaces
 
 ```
 daytona list [flags]

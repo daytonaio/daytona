@@ -147,6 +147,7 @@ func (a *ApiServer) Start() error {
 		targetController.POST("/", target.CreateTarget)
 		targetController.POST("/:targetId/start", target.StartTarget)
 		targetController.POST("/:targetId/stop", target.StopTarget)
+		targetController.PATCH("/:targetId/set-default", target.SetDefaultTarget)
 		targetController.DELETE("/:targetId", target.RemoveTarget)
 	}
 
@@ -218,7 +219,6 @@ func (a *ApiServer) Start() error {
 	{
 		targetConfigController.GET("/", targetconfig.ListTargetConfigs)
 		targetConfigController.PUT("/", targetconfig.SetTargetConfig)
-		targetConfigController.PATCH("/:configName/set-default", targetconfig.SetDefaultTargetConfig)
 		targetConfigController.DELETE("/:configName", targetconfig.RemoveTargetConfig)
 	}
 

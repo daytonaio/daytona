@@ -40,7 +40,7 @@ var restartCmd = &cobra.Command{
 				return nil
 			}
 
-			target := selection.GetTargetFromPrompt(targetList, "Restart")
+			target := selection.GetTargetFromPrompt(targetList, false, "Restart")
 			if target == nil {
 				return nil
 			}

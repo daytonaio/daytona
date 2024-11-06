@@ -40,7 +40,7 @@ func (d *DockerClient) initWorkspaceContainer(opts *CreateWorkspaceOptions) erro
 			{
 				Type:   mount.TypeBind,
 				Source: opts.WorkspaceDir,
-				Target: fmt.Sprintf("/home/%s/%s", opts.Workspace.User, opts.Workspace.Name),
+				Target: fmt.Sprintf("/home/%s/%s", opts.Workspace.User, opts.Workspace.WorkspaceFolderName()),
 			},
 		},
 		ExtraHosts: []string{

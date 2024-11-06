@@ -27,9 +27,13 @@ var workspace1 = &workspace.Workspace{
 }
 
 var target1 = &target.Target{
-	Id:           "123",
-	Name:         "test",
-	TargetConfig: "local",
+	Id:   "123",
+	Name: "test",
+	ProviderInfo: target.ProviderInfo{
+		Name:    "test-provider",
+		Version: "test",
+	},
+	Options: "test-options",
 }
 
 type DockerClientTestSuiteConfig struct {

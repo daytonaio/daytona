@@ -26,10 +26,25 @@ var deleteCmd = &cobra.Command{
 	Short:   "Delete a target",
 	Aliases: []string{"remove", "rm"},
 	RunE: func(cmd *cobra.Command, args []string) error {
+
+		ctx := context.Background()
+
+		var targetDeleteList = []*apiclient.TargetDTO{}
+		var targetDeleteListNames = []string{}
+		apiClient, err := apiclient_util.GetApiClient(nil)
+		if err != nil {
+			return err
+		}
+
+		workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+		if err != nil {
+			return apiclient_util.HandleErrorResponse(res, err)
+		}
+
 		if allFlag {
 			if yesFlag {
 				fmt.Println("Deleting all targets.")
-				err := DeleteAllTargets(forceFlag)
+				err := DeleteAllTargets(workspaceList, forceFlag)
 				if err != nil {
 					return err
 				}
@@ -49,7 +64,7 @@ var deleteCmd = &cobra.Command{
 				}
 
 				if yesFlag {
-					err := DeleteAllTargets(forceFlag)
+					err := DeleteAllTargets(workspaceList, forceFlag)
 					if err != nil {
 						return err
 					}
@@ -58,15 +73,6 @@ var deleteCmd = &cobra.Command{
 				}
 			}
 			return nil
-		}
-
-		ctx := context.Background()
-
-		var targetDeleteList = []*apiclient.TargetDTO{}
-		var targetDeleteListNames = []string{}
-		apiClient, err := apiclient_util.GetApiClient(nil)
-		if err != nil {
-			return err
 		}
 
 		if len(args) == 0 {
@@ -120,11 +126,12 @@ var deleteCmd = &cobra.Command{
 			fmt.Println("Operation canceled.")
 		} else {
 			for _, target := range targetDeleteList {
-				err := RemoveTarget(ctx, apiClient, target, forceFlag)
+				err := RemoveTarget(ctx, apiClient, target, workspaceList, forceFlag)
 				if err != nil {
 					log.Error(fmt.Sprintf("[ %s ] : %v", target.Name, err))
+				} else {
+					views.RenderInfoMessage(fmt.Sprintf("Target '%s' successfully deleted", target.Name))
 				}
-				views.RenderInfoMessage(fmt.Sprintf("Target '%s' successfully deleted", target.Name))
 			}
 		}
 		return nil
@@ -140,7 +147,7 @@ func init() {
 	deleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Delete a target by force")
 }
 
-func DeleteAllTargets(force bool) error {
+func DeleteAllTargets(workspaceList []apiclient.WorkspaceDTO, force bool) error {
 	ctx := context.Background()
 	apiClient, err := apiclient_util.GetApiClient(nil)
 	if err != nil {
@@ -153,7 +160,7 @@ func DeleteAllTargets(force bool) error {
 	}
 
 	for _, target := range targetList {
-		err := RemoveTarget(ctx, apiClient, &target, force)
+		err := RemoveTarget(ctx, apiClient, &target, workspaceList, force)
 		if err != nil {
 			log.Errorf("Failed to delete target %s: %v", target.Name, err)
 			continue
@@ -163,7 +170,13 @@ func DeleteAllTargets(force bool) error {
 	return nil
 }
 
-func RemoveTarget(ctx context.Context, apiClient *apiclient.APIClient, target *apiclient.TargetDTO, force bool) error {
+func RemoveTarget(ctx context.Context, apiClient *apiclient.APIClient, target *apiclient.TargetDTO, workspaceList []apiclient.WorkspaceDTO, force bool) error {
+	for _, workspace := range workspaceList {
+		if workspace.TargetId == target.Id {
+			return fmt.Errorf("target '%s' is in use by workspace '%s', please remove workspaces before deleting their target", target.Name, workspace.Name)
+		}
+	}
+
 	message := fmt.Sprintf("Deleting target %s", target.Name)
 	err := views_util.WithInlineSpinner(message, func() error {
 		res, err := apiClient.TargetAPI.RemoveTarget(ctx, target.Id).Force(force).Execute()

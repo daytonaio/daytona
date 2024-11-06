@@ -15,16 +15,29 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type ReadLogParams struct {
+	Id                    string
+	Label                 *string
+	ActiveProfile         config.Profile
+	SkipPrefixLengthSetup bool
+	Index                 *int
+	Follow                *bool
+	Query                 *string
+	From                  *time.Time
+}
+
 var targetLogsStarted bool
 
-func ReadTargetLogs(ctx context.Context, activeProfile config.Profile, targetId string, follow bool, from *time.Time) {
+func ReadTargetLogs(ctx context.Context, params ReadLogParams) {
+	checkAndSetupLongestPrefixLength(params.SkipPrefixLengthSetup, params.Id, params.Label)
+
 	query := ""
-	if follow {
+	if params.Follow != nil && *params.Follow {
 		query = "follow=true"
 	}
 
 	for {
-		ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/target/%s", targetId), &activeProfile, &query)
+		ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/target/%s", params.Id), &params.ActiveProfile, &query)
 		// We want to retry getting the logs if it fails
 		if err != nil {
 			log.Trace(HandleErrorResponse(res, err))
@@ -32,20 +45,22 @@ func ReadTargetLogs(ctx context.Context, activeProfile config.Profile, targetId 
 			continue
 		}
 
-		readJSONLog(ctx, ws, logs_view.STATIC_INDEX, from)
+		readJSONLog(ctx, ws, logs_view.STATIC_INDEX, params.From)
 		ws.Close()
 		break
 	}
 }
 
-func ReadWorkspaceLogs(ctx context.Context, index int, activeProfile config.Profile, workspaceId string, follow bool, from *time.Time) {
+func ReadWorkspaceLogs(ctx context.Context, params ReadLogParams) {
+	checkAndSetupLongestPrefixLength(params.SkipPrefixLengthSetup, params.Id, params.Label)
+
 	query := ""
-	if follow {
+	if params.Follow != nil && *params.Follow {
 		query = "follow=true"
 	}
 
 	for {
-		ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/workspace/%s", workspaceId), &activeProfile, &query)
+		ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/workspace/%s", params.Id), &params.ActiveProfile, &query)
 		// We want to retry getting the logs if it fails
 		if err != nil {
 			log.Trace(HandleErrorResponse(res, err))
@@ -53,17 +68,27 @@ func ReadWorkspaceLogs(ctx context.Context, index int, activeProfile config.Prof
 			continue
 		}
 
-		readJSONLog(ctx, ws, index, from)
+		index := 0
+		if params.Index != nil {
+			index = *params.Index
+		}
+
+		readJSONLog(ctx, ws, index, params.From)
 		ws.Close()
 		break
 	}
 }
 
-func ReadBuildLogs(ctx context.Context, activeProfile config.Profile, buildId string, query string) {
-	logs_view.CalculateLongestPrefixLength([]string{buildId})
+func ReadBuildLogs(ctx context.Context, params ReadLogParams) {
+	checkAndSetupLongestPrefixLength(params.SkipPrefixLengthSetup, params.Id, params.Label)
 
 	for {
-		ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/build/%s", buildId), &activeProfile, &query)
+		var query string
+		if params.Query != nil {
+			query = *params.Query
+		}
+
+		ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/build/%s", params.Id), &params.ActiveProfile, &query)
 		// We want to retry getting the logs if it fails
 		if err != nil {
 			log.Trace(HandleErrorResponse(res, err))
@@ -135,4 +160,16 @@ func readJSONLog(ctx context.Context, ws *websocket.Conn, index int, from *time.
 			targetLogsStarted = true
 		}
 	}
+}
+
+func checkAndSetupLongestPrefixLength(skipSetup bool, id string, label *string) {
+	if skipSetup {
+		return
+	}
+
+	name := id
+	if label != nil {
+		name = *label
+	}
+	logs_view.SetupLongestPrefixLength([]string{name})
 }

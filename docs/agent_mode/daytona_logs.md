@@ -1,16 +1,9 @@
 ## daytona logs
 
-View logs for a target/workspace
+View logs for the workspace
 
 ```
-daytona logs [TARGET] [WORKSPACE_NAME] [flags]
-```
-
-### Options
-
-```
-  -f, --follow   Follow logs
-  -w, --target   View target logs
+daytona logs [flags]
 ```
 
 ### Options inherited from parent commands

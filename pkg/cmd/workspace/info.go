@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package target
+package workspace
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
+	"github.com/daytonaio/daytona/pkg/cmd/workspace/common"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -17,8 +18,8 @@ import (
 )
 
 var InfoCmd = &cobra.Command{
-	Use:     "info [TARGET]",
-	Short:   "Show target info",
+	Use:     "info [WORKSPACE]",
+	Short:   "Show workspace info",
 	Aliases: []string{"view", "inspect"},
 	Args:    cobra.RangeArgs(0, 1),
 	GroupID: util.TARGET_GROUP,
@@ -73,7 +74,7 @@ var InfoCmd = &cobra.Command{
 		return nil
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return getWorkspaceNameCompletions()
+		return common.GetWorkspaceNameCompletions()
 	},
 }
 
