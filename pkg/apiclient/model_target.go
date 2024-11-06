@@ -21,9 +21,12 @@ var _ MappedNullable = &Target{}
 
 // Target struct for Target
 type Target struct {
-	Id           string `json:"id"`
-	Name         string `json:"name"`
-	TargetConfig string `json:"targetConfig"`
+	Default bool   `json:"default"`
+	Id      string `json:"id"`
+	Name    string `json:"name"`
+	// JSON encoded map of options
+	Options      string             `json:"options"`
+	ProviderInfo TargetProviderInfo `json:"providerInfo"`
 }
 
 type _Target Target
@@ -32,11 +35,13 @@ type _Target Target
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTarget(id string, name string, targetConfig string) *Target {
+func NewTarget(default_ bool, id string, name string, options string, providerInfo TargetProviderInfo) *Target {
 	this := Target{}
+	this.Default = default_
 	this.Id = id
 	this.Name = name
-	this.TargetConfig = targetConfig
+	this.Options = options
+	this.ProviderInfo = providerInfo
 	return &this
 }
 
@@ -46,6 +51,30 @@ func NewTarget(id string, name string, targetConfig string) *Target {
 func NewTargetWithDefaults() *Target {
 	this := Target{}
 	return &this
+}
+
+// GetDefault returns the Default field value
+func (o *Target) GetDefault() bool {
+	if o == nil {
+		var ret bool
+		return ret
+	}
+
+	return o.Default
+}
+
+// GetDefaultOk returns a tuple with the Default field value
+// and a boolean to check if the value has been set.
+func (o *Target) GetDefaultOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Default, true
+}
+
+// SetDefault sets field value
+func (o *Target) SetDefault(v bool) {
+	o.Default = v
 }
 
 // GetId returns the Id field value
@@ -96,28 +125,52 @@ func (o *Target) SetName(v string) {
 	o.Name = v
 }
 
-// GetTargetConfig returns the TargetConfig field value
-func (o *Target) GetTargetConfig() string {
+// GetOptions returns the Options field value
+func (o *Target) GetOptions() string {
 	if o == nil {
 		var ret string
 		return ret
 	}
 
-	return o.TargetConfig
+	return o.Options
 }
 
-// GetTargetConfigOk returns a tuple with the TargetConfig field value
+// GetOptionsOk returns a tuple with the Options field value
 // and a boolean to check if the value has been set.
-func (o *Target) GetTargetConfigOk() (*string, bool) {
+func (o *Target) GetOptionsOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.TargetConfig, true
+	return &o.Options, true
 }
 
-// SetTargetConfig sets field value
-func (o *Target) SetTargetConfig(v string) {
-	o.TargetConfig = v
+// SetOptions sets field value
+func (o *Target) SetOptions(v string) {
+	o.Options = v
+}
+
+// GetProviderInfo returns the ProviderInfo field value
+func (o *Target) GetProviderInfo() TargetProviderInfo {
+	if o == nil {
+		var ret TargetProviderInfo
+		return ret
+	}
+
+	return o.ProviderInfo
+}
+
+// GetProviderInfoOk returns a tuple with the ProviderInfo field value
+// and a boolean to check if the value has been set.
+func (o *Target) GetProviderInfoOk() (*TargetProviderInfo, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.ProviderInfo, true
+}
+
+// SetProviderInfo sets field value
+func (o *Target) SetProviderInfo(v TargetProviderInfo) {
+	o.ProviderInfo = v
 }
 
 func (o Target) MarshalJSON() ([]byte, error) {
@@ -130,9 +183,11 @@ func (o Target) MarshalJSON() ([]byte, error) {
 
 func (o Target) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	toSerialize["default"] = o.Default
 	toSerialize["id"] = o.Id
 	toSerialize["name"] = o.Name
-	toSerialize["targetConfig"] = o.TargetConfig
+	toSerialize["options"] = o.Options
+	toSerialize["providerInfo"] = o.ProviderInfo
 	return toSerialize, nil
 }
 
@@ -141,9 +196,11 @@ func (o *Target) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"default",
 		"id",
 		"name",
-		"targetConfig",
+		"options",
+		"providerInfo",
 	}
 
 	allProperties := make(map[string]interface{})

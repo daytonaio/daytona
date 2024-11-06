@@ -21,9 +21,9 @@ var _ MappedNullable = &CreateTargetConfigDTO{}
 
 // CreateTargetConfigDTO struct for CreateTargetConfigDTO
 type CreateTargetConfigDTO struct {
-	Name         string               `json:"name"`
-	Options      string               `json:"options"`
-	ProviderInfo ProviderProviderInfo `json:"providerInfo"`
+	Name         string             `json:"name"`
+	Options      string             `json:"options"`
+	ProviderInfo TargetProviderInfo `json:"providerInfo"`
 }
 
 type _CreateTargetConfigDTO CreateTargetConfigDTO
@@ -32,7 +32,7 @@ type _CreateTargetConfigDTO CreateTargetConfigDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateTargetConfigDTO(name string, options string, providerInfo ProviderProviderInfo) *CreateTargetConfigDTO {
+func NewCreateTargetConfigDTO(name string, options string, providerInfo TargetProviderInfo) *CreateTargetConfigDTO {
 	this := CreateTargetConfigDTO{}
 	this.Name = name
 	this.Options = options
@@ -97,9 +97,9 @@ func (o *CreateTargetConfigDTO) SetOptions(v string) {
 }
 
 // GetProviderInfo returns the ProviderInfo field value
-func (o *CreateTargetConfigDTO) GetProviderInfo() ProviderProviderInfo {
+func (o *CreateTargetConfigDTO) GetProviderInfo() TargetProviderInfo {
 	if o == nil {
-		var ret ProviderProviderInfo
+		var ret TargetProviderInfo
 		return ret
 	}
 
@@ -108,7 +108,7 @@ func (o *CreateTargetConfigDTO) GetProviderInfo() ProviderProviderInfo {
 
 // GetProviderInfoOk returns a tuple with the ProviderInfo field value
 // and a boolean to check if the value has been set.
-func (o *CreateTargetConfigDTO) GetProviderInfoOk() (*ProviderProviderInfo, bool) {
+func (o *CreateTargetConfigDTO) GetProviderInfoOk() (*TargetProviderInfo, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -116,7 +116,7 @@ func (o *CreateTargetConfigDTO) GetProviderInfoOk() (*ProviderProviderInfo, bool
 }
 
 // SetProviderInfo sets field value
-func (o *CreateTargetConfigDTO) SetProviderInfo(v ProviderProviderInfo) {
+func (o *CreateTargetConfigDTO) SetProviderInfo(v TargetProviderInfo) {
 	o.ProviderInfo = v
 }
 

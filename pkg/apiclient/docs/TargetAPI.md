@@ -8,6 +8,7 @@ Method | HTTP request | Description
 [**GetTarget**](TargetAPI.md#GetTarget) | **Get** /target/{targetId} | Get target info
 [**ListTargets**](TargetAPI.md#ListTargets) | **Get** /target | List targets
 [**RemoveTarget**](TargetAPI.md#RemoveTarget) | **Delete** /target/{targetId} | Remove target
+[**SetDefaultTarget**](TargetAPI.md#SetDefaultTarget) | **Patch** /target/{targetId}/set-default | Set target to be used by default
 [**StartTarget**](TargetAPI.md#StartTarget) | **Post** /target/{targetId}/start | Start target
 [**StopTarget**](TargetAPI.md#StopTarget) | **Post** /target/{targetId}/stop | Stop target
 
@@ -34,7 +35,7 @@ import (
 )
 
 func main() {
-	target := *openapiclient.NewCreateTargetDTO("Id_example", "Name_example", "TargetConfig_example") // CreateTargetDTO | Create target
+	target := *openapiclient.NewCreateTargetDTO("Id_example", "Name_example", "TargetConfigName_example") // CreateTargetDTO | Create target
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -268,6 +269,74 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
  **force** | **bool** | Force | 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## SetDefaultTarget
+
+> SetDefaultTarget(ctx, targetId).Execute()
+
+Set target to be used by default
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	targetId := "targetId_example" // string | Target ID or name
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	r, err := apiClient.TargetAPI.SetDefaultTarget(context.Background(), targetId).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `TargetAPI.SetDefaultTarget``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**targetId** | **string** | Target ID or name | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiSetDefaultTargetRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
 
 ### Return type
 

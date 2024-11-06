@@ -11,9 +11,10 @@ import (
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provisioner"
+	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/telemetry"
+	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	log "github.com/sirupsen/logrus"
 )
@@ -24,12 +25,7 @@ func (s *WorkspaceService) StartWorkspace(ctx context.Context, workspaceId strin
 		return s.handleStartError(ctx, &ws.Workspace, ErrWorkspaceNotFound)
 	}
 
-	target, err := s.targetStore.Find(ws.TargetId)
-	if err != nil {
-		return s.handleStartError(ctx, &ws.Workspace, err)
-	}
-
-	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &target.TargetConfig})
+	target, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &ws.TargetId})
 	if err != nil {
 		return s.handleStartError(ctx, &ws.Workspace, err)
 	}
@@ -45,7 +41,7 @@ func (s *WorkspaceService) StartWorkspace(ctx context.Context, workspaceId strin
 		ClientId:      telemetry.ClientId(ctx),
 	}, telemetry.TelemetryEnabled(ctx))
 
-	err = s.startWorkspace(&workspaceToStart, targetConfig, workspaceLogger)
+	err = s.startWorkspace(&workspaceToStart, &target.Target, workspaceLogger)
 	if err != nil {
 		return s.handleStartError(ctx, &ws.Workspace, err)
 	}
@@ -53,7 +49,7 @@ func (s *WorkspaceService) StartWorkspace(ctx context.Context, workspaceId strin
 	return s.handleStartError(ctx, &ws.Workspace, err)
 }
 
-func (s *WorkspaceService) startWorkspace(w *workspace.Workspace, targetConfig *provider.TargetConfig, logger io.Writer) error {
+func (s *WorkspaceService) startWorkspace(w *workspace.Workspace, target *target.Target, logger io.Writer) error {
 	logger.Write([]byte(fmt.Sprintf("Starting workspace %s\n", w.Name)))
 
 	cr, err := s.containerRegistryService.FindByImageName(w.Image)
@@ -77,7 +73,7 @@ func (s *WorkspaceService) startWorkspace(w *workspace.Workspace, targetConfig *
 
 	err = s.provisioner.StartWorkspace(provisioner.WorkspaceParams{
 		Workspace:                     w,
-		TargetConfig:                  targetConfig,
+		Target:                        target,
 		ContainerRegistry:             cr,
 		GitProviderConfig:             gc,
 		BuilderImage:                  s.builderImage,
@@ -87,7 +83,7 @@ func (s *WorkspaceService) startWorkspace(w *workspace.Workspace, targetConfig *
 		return err
 	}
 
-	logger.Write([]byte(fmt.Sprintf("Workspace %s started\n", w.Name)))
+	logger.Write([]byte(views.GetPrettyLogLine(fmt.Sprintf("Workspace %s started", w.Name))))
 
 	return nil
 }

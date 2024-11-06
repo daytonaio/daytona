@@ -8,48 +8,48 @@ package targetconfigs
 import (
 	"fmt"
 
-	"github.com/daytonaio/daytona/pkg/provider"
+	"github.com/daytonaio/daytona/pkg/target/config"
 )
 
 type InMemoryTargetConfigStore struct {
-	targetConfigs map[string]*provider.TargetConfig
+	targetConfigs map[string]*config.TargetConfig
 }
 
-func NewInMemoryTargetConfigStore() provider.TargetConfigStore {
+func NewInMemoryTargetConfigStore() config.TargetConfigStore {
 	return &InMemoryTargetConfigStore{
-		targetConfigs: make(map[string]*provider.TargetConfig),
+		targetConfigs: make(map[string]*config.TargetConfig),
 	}
 }
 
-func (s *InMemoryTargetConfigStore) List(filter *provider.TargetConfigFilter) ([]*provider.TargetConfig, error) {
+func (s *InMemoryTargetConfigStore) List(filter *config.TargetConfigFilter) ([]*config.TargetConfig, error) {
 	return s.processFilters(filter)
 }
 
-func (s *InMemoryTargetConfigStore) Find(filter *provider.TargetConfigFilter) (*provider.TargetConfig, error) {
+func (s *InMemoryTargetConfigStore) Find(filter *config.TargetConfigFilter) (*config.TargetConfig, error) {
 	targetConfigs, err := s.processFilters(filter)
 	if err != nil {
 		return nil, err
 	}
 	if len(targetConfigs) == 0 {
-		return nil, provider.ErrTargetConfigNotFound
+		return nil, config.ErrTargetConfigNotFound
 	}
 
 	return targetConfigs[0], nil
 }
 
-func (s *InMemoryTargetConfigStore) Save(targetConfig *provider.TargetConfig) error {
+func (s *InMemoryTargetConfigStore) Save(targetConfig *config.TargetConfig) error {
 	s.targetConfigs[targetConfig.Name] = targetConfig
 	return nil
 }
 
-func (s *InMemoryTargetConfigStore) Delete(targetConfig *provider.TargetConfig) error {
+func (s *InMemoryTargetConfigStore) Delete(targetConfig *config.TargetConfig) error {
 	delete(s.targetConfigs, targetConfig.Name)
 	return nil
 }
 
-func (s *InMemoryTargetConfigStore) processFilters(filter *provider.TargetConfigFilter) ([]*provider.TargetConfig, error) {
-	var result []*provider.TargetConfig
-	targetConfigs := make(map[string]*provider.TargetConfig)
+func (s *InMemoryTargetConfigStore) processFilters(filter *config.TargetConfigFilter) ([]*config.TargetConfig, error) {
+	var result []*config.TargetConfig
+	targetConfigs := make(map[string]*config.TargetConfig)
 	for k, v := range s.targetConfigs {
 		targetConfigs[k] = v
 	}
@@ -58,16 +58,9 @@ func (s *InMemoryTargetConfigStore) processFilters(filter *provider.TargetConfig
 		if filter.Name != nil {
 			targetConfig, ok := s.targetConfigs[*filter.Name]
 			if ok {
-				return []*provider.TargetConfig{targetConfig}, nil
+				return []*config.TargetConfig{targetConfig}, nil
 			} else {
-				return []*provider.TargetConfig{}, fmt.Errorf("target config with name %s not found", *filter.Name)
-			}
-		}
-		if filter.Default != nil {
-			for _, targetConfig := range targetConfigs {
-				if targetConfig.IsDefault != *filter.Default {
-					delete(targetConfigs, targetConfig.Name)
-				}
+				return []*config.TargetConfig{}, fmt.Errorf("target config with name %s not found", *filter.Name)
 			}
 		}
 	}

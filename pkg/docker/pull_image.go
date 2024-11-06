@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/containerregistry"
+	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/registry"
@@ -68,7 +69,7 @@ func (d *DockerClient) PullImage(imageName string, cr *containerregistry.Contain
 		return err
 	}
 	if logWriter != nil {
-		logWriter.Write([]byte("Image pulled successfully\n"))
+		logWriter.Write([]byte(views.GetPrettyLogLine("Image pulled successfully")))
 	}
 
 	return nil

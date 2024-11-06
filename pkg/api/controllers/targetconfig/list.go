@@ -4,10 +4,10 @@
 package targetconfig
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
+	"github.com/daytonaio/daytona/pkg/api/util"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
@@ -32,38 +32,13 @@ func ListTargetConfigs(ctx *gin.Context) {
 	}
 
 	for _, targetConfig := range targetConfigs {
-		p, err := server.ProviderManager.GetProvider(targetConfig.ProviderInfo.Name)
+		maskedOptions, err := util.GetMaskedOptions(server, targetConfig.ProviderInfo.Name, targetConfig.Options)
 		if err != nil {
 			targetConfig.Options = fmt.Sprintf("Error: %s", err.Error())
 			continue
 		}
 
-		manifest, err := (*p).GetTargetConfigManifest()
-		if err != nil {
-			targetConfig.Options = fmt.Sprintf("Error: %s", err.Error())
-			continue
-		}
-
-		var opts map[string]interface{}
-		err = json.Unmarshal([]byte(targetConfig.Options), &opts)
-		if err != nil {
-			targetConfig.Options = fmt.Sprintf("Error: %s", err.Error())
-			continue
-		}
-
-		for name, property := range *manifest {
-			if property.InputMasked {
-				delete(opts, name)
-			}
-		}
-
-		updatedOptions, err := json.MarshalIndent(opts, "", "  ")
-		if err != nil {
-			targetConfig.Options = fmt.Sprintf("Error: %s", err.Error())
-			continue
-		}
-
-		targetConfig.Options = string(updatedOptions)
+		targetConfig.Options = maskedOptions
 	}
 
 	ctx.JSON(200, targetConfigs)

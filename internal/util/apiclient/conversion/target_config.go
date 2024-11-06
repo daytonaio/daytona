@@ -4,12 +4,12 @@
 package conversion
 
 import (
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/server/targetconfigs/dto"
+	"github.com/daytonaio/daytona/pkg/target/config"
 )
 
-func ToTargetConfig(createTargetConfigDto dto.CreateTargetConfigDTO) *provider.TargetConfig {
-	return &provider.TargetConfig{
+func ToTargetConfig(createTargetConfigDto dto.CreateTargetConfigDTO) *config.TargetConfig {
+	return &config.TargetConfig{
 		Name:         createTargetConfigDto.Name,
 		ProviderInfo: createTargetConfigDto.ProviderInfo,
 		Options:      createTargetConfigDto.Options,

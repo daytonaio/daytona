@@ -4,17 +4,26 @@
 package target
 
 type Target struct {
-	Id           string            `json:"id" validate:"required"`
-	Name         string            `json:"name" validate:"required"`
-	TargetConfig string            `json:"targetConfig" validate:"required"`
-	ApiKey       string            `json:"-"`
-	EnvVars      map[string]string `json:"-"`
+	Id           string       `json:"id" validate:"required"`
+	Name         string       `json:"name" validate:"required"`
+	ProviderInfo ProviderInfo `json:"providerInfo" validate:"required"`
+	// JSON encoded map of options
+	Options   string            `json:"options" validate:"required"`
+	ApiKey    string            `json:"-"`
+	EnvVars   map[string]string `json:"-"`
+	IsDefault bool              `json:"default" validate:"required"`
 } // @name Target
 
 type TargetInfo struct {
 	Name             string `json:"name" validate:"required"`
 	ProviderMetadata string `json:"providerMetadata,omitempty" validate:"optional"`
 } // @name TargetInfo
+
+type ProviderInfo struct {
+	Name    string  `json:"name" validate:"required"`
+	Version string  `json:"version" validate:"required"`
+	Label   *string `json:"label" validate:"optional"`
+} // @name TargetProviderInfo
 
 type TargetEnvVarParams struct {
 	ApiUrl        string

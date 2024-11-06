@@ -16,10 +16,13 @@ var TargetCmd = &cobra.Command{
 }
 
 func init() {
+	TargetCmd.AddCommand(targetCreateCmd)
 	TargetCmd.AddCommand(deleteCmd)
 	TargetCmd.AddCommand(infoCmd)
 	TargetCmd.AddCommand(restartCmd)
 	TargetCmd.AddCommand(startCmd)
 	TargetCmd.AddCommand(stopCmd)
+	TargetCmd.AddCommand(logsCmd)
 	TargetCmd.AddCommand(listCmd)
+	TargetCmd.AddCommand(setDefaultCmd)
 }

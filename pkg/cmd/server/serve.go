@@ -362,13 +362,11 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	workspaceService := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
 		WorkspaceStore:           workspaceStore,
 		TargetStore:              targetStore,
-		TargetConfigStore:        targetConfigStore,
 		ApiKeyService:            apiKeyService,
 		GitProviderService:       gitProviderService,
 		ContainerRegistryService: containerRegistryService,
 		BuilderImage:             c.BuilderImage,
 		BuildService:             buildService,
-		WorkspaceConfigService:   workspaceConfigService,
 		ServerApiUrl:             util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 		ServerVersion:            version,
 		ServerUrl:                headscaleUrl,

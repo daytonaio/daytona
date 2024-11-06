@@ -1,5 +1,5 @@
 name: daytona create
-synopsis: Create a target
+synopsis: Create a workspace
 usage: daytona create [REPOSITORY_URL | WORKSPACE_CONFIG_NAME]... [flags]
 options:
     - name: blank
@@ -36,8 +36,6 @@ options:
     - name: multi-workspace
       default_value: "false"
       usage: Target with multiple workspaces/repos
-    - name: name
-      usage: Specify the target name
     - name: no-ide
       shorthand: "n"
       default_value: "false"

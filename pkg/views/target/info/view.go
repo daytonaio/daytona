@@ -31,6 +31,23 @@ func Render(target *apiclient.TargetDTO, forceUnstyled bool) {
 
 	output += getInfoLine("ID", target.Id) + "\n"
 
+	providerLabel := target.ProviderInfo.Name
+	if target.ProviderInfo.Label != nil {
+		providerLabel = *target.ProviderInfo.Label
+	}
+
+	output += getInfoLine("Provider", providerLabel) + "\n"
+
+	if target.Default {
+		output += getInfoLine("Default", "Yes") + "\n"
+	}
+
+	output += getInfoLine("Options", target.Options) + "\n"
+
+	if target.Info != nil {
+		output += getInfoLine("Metadata", *target.Info.ProviderMetadata) + "\n"
+	}
+
 	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
 		fmt.Println(output)
