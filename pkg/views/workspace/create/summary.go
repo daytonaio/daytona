@@ -20,6 +20,8 @@ import (
 type WorkspaceDetail string
 
 const (
+	Repository         WorkspaceDetail = "Repository"
+	Branch             WorkspaceDetail = "Branch"
 	Build              WorkspaceDetail = "Build"
 	DevcontainerConfig WorkspaceDetail = "Devcontainer Config"
 	Image              WorkspaceDetail = "Image"
@@ -96,9 +98,9 @@ func RenderSummary(name string, workspaceList []apiclient.CreateWorkspaceDTO, de
 
 	for i := range workspaceList {
 		if len(workspaceList) == 1 {
-			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render("Workspace"), (workspaceList[i].Source.Repository.Url))
+			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render("Workspace"), (workspaceList[i].Name))
 		} else {
-			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("%s #%d", "Workspace", i+1)), (workspaceList[i].Source.Repository.Url))
+			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("%s #%d", "Workspace", i+1)), (workspaceList[i].Name))
 		}
 
 		workspaceBuildChoice, choiceName := views_util.GetWorkspaceBuildChoice(workspaceList[i], defaults)
@@ -112,7 +114,9 @@ func RenderSummary(name string, workspaceList []apiclient.CreateWorkspaceDTO, de
 }
 
 func renderWorkspaceDetails(workspace apiclient.CreateWorkspaceDTO, buildChoice views_util.BuildChoice, choiceName string) string {
-	output := workspaceDetailOutput(Build, choiceName)
+	output := workspaceDetailOutput(Repository, workspace.Source.Repository.Url) + "\n"
+	output += workspaceDetailOutput(Branch, workspace.Source.Repository.Branch) + "\n"
+	output += workspaceDetailOutput(Build, choiceName)
 
 	if buildChoice == views_util.DEVCONTAINER {
 		if workspace.BuildConfig != nil {

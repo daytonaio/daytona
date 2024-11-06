@@ -153,33 +153,21 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 				Options: "{}",
 			}
 		}
+	}
 
-		if selectedTargetConfig.Name == targetconfig.NewTargetConfigName {
-			selectedTargetConfig.Name = ""
-			err = targetconfig.NewTargetConfigNameInput(&selectedTargetConfig.Name, internal_util.ArrayMap(targetConfigs, func(t apiclient.TargetConfig) string {
-				return t.Name
-			}))
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			if !allowUpdating {
-				return selectedTargetConfig, nil
-			}
+	if !allowUpdating || selectedTargetConfig.Name == targetconfig.NewTargetConfigName {
+		selectedTargetConfig.Name = ""
+		err = targetconfig.NewTargetConfigNameInput(&selectedTargetConfig.Name, internal_util.ArrayMap(targetConfigs, func(t apiclient.TargetConfig) string {
+			return t.Name
+		}))
+		if err != nil {
+			return nil, err
 		}
 	}
 
 	targetConfigManifest, res, err := apiClient.ProviderAPI.GetTargetConfigManifest(context.Background(), selectedProvider.Name).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
-	}
-
-	selectedTargetConfig.Name = ""
-	err = targetconfig.NewTargetConfigNameInput(&selectedTargetConfig.Name, internal_util.ArrayMap(targetConfigs, func(t apiclient.TargetConfig) string {
-		return t.Name
-	}))
-	if err != nil {
-		return nil, err
 	}
 
 	err = targetconfig.SetTargetConfigForm(selectedTargetConfig, *targetConfigManifest)

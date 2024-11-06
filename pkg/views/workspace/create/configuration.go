@@ -163,7 +163,7 @@ func GetWorkspaceConfigurationForm(workspaceConfiguration *WorkspaceConfiguratio
 	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().
-				Title("Workspace name").
+				Title("Name").
 				Value(&workspaceConfiguration.Name),
 		),
 		huh.NewGroup(
