@@ -16,7 +16,6 @@ import (
 )
 
 type ProcessPromptingConfig struct {
-	Ctx                         context.Context
 	ApiClient                   *apiclient.APIClient
 	CreateWorkspaceDtos         *[]apiclient.CreateWorkspaceDTO
 	ExistingWorkspaces          *[]apiclient.WorkspaceDTO
@@ -26,17 +25,17 @@ type ProcessPromptingConfig struct {
 	TargetName                  string
 }
 
-func ProcessPrompting(config ProcessPromptingConfig) error {
+func ProcessPrompting(ctx context.Context, config ProcessPromptingConfig) error {
 	if workspace_common.CheckAnyWorkspaceConfigurationFlagSet(config.WorkspaceConfigurationFlags) || (config.WorkspaceConfigurationFlags.Branches != nil && len(*config.WorkspaceConfigurationFlags.Branches) > 0) {
 		return errors.New("please provide the repository URL in order to set up custom workspace details through the CLI")
 	}
 
-	gitProviders, res, err := config.ApiClient.GitProviderAPI.ListGitProviders(config.Ctx).Execute()
+	gitProviders, res, err := config.ApiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	workspaceConfigs, res, err := config.ApiClient.WorkspaceConfigAPI.ListWorkspaceConfigs(config.Ctx).Execute()
+	workspaceConfigs, res, err := config.ApiClient.WorkspaceConfigAPI.ListWorkspaceConfigs(ctx).Execute()
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)
 	}

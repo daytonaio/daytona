@@ -26,12 +26,7 @@ func NewTargetStore(db *gorm.DB) (*TargetStore, error) {
 func (s *TargetStore) List(filter *target.TargetFilter) ([]*target.TargetViewDTO, error) {
 	targetDTOs := []TargetDTO{}
 
-	tx := processTargetFilters(s.db, filter).Find(&targetDTOs)
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
-
-	tx = tx.Preload("Workspaces").Find(&targetDTOs)
+	tx := processTargetFilters(s.db, filter).Preload("Workspaces").Find(&targetDTOs)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -51,9 +46,7 @@ func (s *TargetStore) List(filter *target.TargetFilter) ([]*target.TargetViewDTO
 func (s *TargetStore) Find(filter *target.TargetFilter) (*target.TargetViewDTO, error) {
 	targetDTO := TargetDTO{}
 
-	tx := processTargetFilters(s.db, filter).First(&targetDTO)
-
-	tx = tx.Preload("Workspaces").First(&targetDTO)
+	tx := processTargetFilters(s.db, filter).Preload("Workspaces").First(&targetDTO)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}

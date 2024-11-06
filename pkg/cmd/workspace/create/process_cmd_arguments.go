@@ -18,7 +18,6 @@ import (
 )
 
 type ProcessCmdArgumentsConfig struct {
-	Ctx                         context.Context
 	ApiClient                   *apiclient.APIClient
 	RepoUrls                    []string
 	CreateWorkspaceDtos         *[]apiclient.CreateWorkspaceDTO
@@ -28,7 +27,6 @@ type ProcessCmdArgumentsConfig struct {
 }
 
 type ProcessGitUrlConfig struct {
-	Ctx                         context.Context
 	ApiClient                   *apiclient.APIClient
 	RepoUrl                     string
 	CreateWorkspaceDtos         *[]apiclient.CreateWorkspaceDTO
@@ -37,7 +35,7 @@ type ProcessGitUrlConfig struct {
 	BlankFlag                   bool
 }
 
-func ProcessCmdArguments(config ProcessCmdArgumentsConfig) ([]string, error) {
+func ProcessCmdArguments(ctx context.Context, config ProcessCmdArgumentsConfig) ([]string, error) {
 	if len(config.RepoUrls) == 0 {
 		return nil, fmt.Errorf("no repository URLs provided")
 	}
@@ -63,8 +61,7 @@ func ProcessCmdArguments(config ProcessCmdArgumentsConfig) ([]string, error) {
 		validatedUrl, err := util.GetValidatedUrl(repoUrl)
 		if err == nil {
 			// The argument is a Git URL
-			existingWorkspaceConfigName, err := processGitURL(ProcessGitUrlConfig{
-				Ctx:                         config.Ctx,
+			existingWorkspaceConfigName, err := processGitURL(ctx, ProcessGitUrlConfig{
 				ApiClient:                   config.ApiClient,
 				RepoUrl:                     validatedUrl,
 				CreateWorkspaceDtos:         config.CreateWorkspaceDtos,
@@ -85,7 +82,7 @@ func ProcessCmdArguments(config ProcessCmdArgumentsConfig) ([]string, error) {
 		}
 
 		// The argument is not a Git URL - try getting the workspace config
-		workspaceConfig, _, err = config.ApiClient.WorkspaceConfigAPI.GetWorkspaceConfig(config.Ctx, repoUrl).Execute()
+		workspaceConfig, _, err = config.ApiClient.WorkspaceConfigAPI.GetWorkspaceConfig(ctx, repoUrl).Execute()
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse the URL or fetch the workspace config for '%s'", repoUrl)
 		}
@@ -107,11 +104,11 @@ func ProcessCmdArguments(config ProcessCmdArgumentsConfig) ([]string, error) {
 	return existingWorkspaceConfigNames, nil
 }
 
-func processGitURL(config ProcessGitUrlConfig) (*string, error) {
+func processGitURL(ctx context.Context, config ProcessGitUrlConfig) (*string, error) {
 	encodedURLParam := url.QueryEscape(config.RepoUrl)
 
 	if !config.BlankFlag {
-		workspaceConfig, res, err := config.ApiClient.WorkspaceConfigAPI.GetDefaultWorkspaceConfig(config.Ctx, encodedURLParam).Execute()
+		workspaceConfig, res, err := config.ApiClient.WorkspaceConfigAPI.GetDefaultWorkspaceConfig(ctx, encodedURLParam).Execute()
 		if err == nil {
 			workspaceConfig.GitProviderConfigId = config.WorkspaceConfigurationFlags.GitProviderConfig
 			return AddWorkspaceFromConfig(workspaceConfig, config.ApiClient, config.CreateWorkspaceDtos, config.Branch)
@@ -122,7 +119,7 @@ func processGitURL(config ProcessGitUrlConfig) (*string, error) {
 		}
 	}
 
-	repo, res, err := config.ApiClient.GitProviderAPI.GetGitContext(config.Ctx).Repository(apiclient.GetRepositoryContext{
+	repo, res, err := config.ApiClient.GitProviderAPI.GetGitContext(ctx).Repository(apiclient.GetRepositoryContext{
 		Url:    config.RepoUrl,
 		Branch: config.Branch,
 	}).Execute()
@@ -135,7 +132,7 @@ func processGitURL(config ProcessGitUrlConfig) (*string, error) {
 		return nil, err
 	}
 
-	config.WorkspaceConfigurationFlags.GitProviderConfig, err = GetGitProviderConfigIdFromFlag(config.Ctx, config.ApiClient, config.WorkspaceConfigurationFlags.GitProviderConfig)
+	config.WorkspaceConfigurationFlags.GitProviderConfig, err = GetGitProviderConfigIdFromFlag(ctx, config.ApiClient, config.WorkspaceConfigurationFlags.GitProviderConfig)
 	if err != nil {
 		return nil, err
 	}

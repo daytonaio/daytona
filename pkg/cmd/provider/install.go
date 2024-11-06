@@ -136,6 +136,7 @@ var providerInstallCmd = &cobra.Command{
 				ProviderInfo: targetconfig.ProviderInfo{
 					Name:    providerToInstall.Name,
 					Version: providerToInstall.Version,
+					Label:   providerToInstall.Label,
 				},
 			}
 

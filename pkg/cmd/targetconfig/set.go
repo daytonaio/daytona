@@ -122,6 +122,7 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 		ProviderInfo: targetconfig.ProviderInfo{
 			Name:    selectedProvider.Name,
 			Version: selectedProvider.Version,
+			Label:   selectedProvider.Label,
 		},
 	}
 
@@ -181,6 +182,7 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 		ProviderInfo: apiclient.TargetProviderInfo{
 			Name:    selectedProvider.Name,
 			Version: selectedProvider.Version,
+			Label:   selectedProvider.Label,
 		},
 	}
 
@@ -195,6 +197,7 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 		ProviderInfo: targetconfig.ProviderInfo{
 			Name:    targetConfig.ProviderInfo.Name,
 			Version: targetConfig.ProviderInfo.Version,
+			Label:   targetConfig.ProviderInfo.Label,
 		},
 	}, nil
 }

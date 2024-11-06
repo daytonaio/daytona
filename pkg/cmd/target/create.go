@@ -45,8 +45,7 @@ var targetCreateCmd = &cobra.Command{
 			return err
 		}
 
-		createTargetDto, err := CreateTargetDtoFlow(TargetCreationParams{
-			Ctx:               ctx,
+		createTargetDto, err := CreateTargetDtoFlow(ctx, TargetCreationParams{
 			ApiClient:         apiClient,
 			ActiveProfileName: activeProfile.Name,
 		})
@@ -61,16 +60,19 @@ var targetCreateCmd = &cobra.Command{
 		logsContext, stopLogs := context.WithCancel(context.Background())
 		defer stopLogs()
 
+		logs_view.SetupLongestPrefixLength([]string{createTargetDto.Name})
+
 		logs_view.DisplayLogEntry(logs.LogEntry{
 			TargetName: &createTargetDto.Name,
 			Msg:        views.GetPrettyLogLine("Request submitted"),
 		}, logs_view.STATIC_INDEX)
 
 		go apiclient_util.ReadTargetLogs(logsContext, apiclient_util.ReadLogParams{
-			Id:            createTargetDto.Id,
-			Label:         &createTargetDto.Name,
-			ActiveProfile: activeProfile,
-			Follow:        util.Pointer(true),
+			Id:                    createTargetDto.Id,
+			Label:                 &createTargetDto.Name,
+			ActiveProfile:         activeProfile,
+			Follow:                util.Pointer(true),
+			SkipPrefixLengthSetup: true,
 		})
 
 		_, res, err := apiClient.TargetAPI.CreateTarget(ctx).Target(*createTargetDto).Execute()
@@ -84,21 +86,20 @@ var targetCreateCmd = &cobra.Command{
 }
 
 type TargetCreationParams struct {
-	Ctx               context.Context
 	ApiClient         *apiclient.APIClient
 	ActiveProfileName string
 }
 
-func CreateTargetDtoFlow(params TargetCreationParams) (*apiclient.CreateTargetDTO, error) {
+func CreateTargetDtoFlow(ctx context.Context, params TargetCreationParams) (*apiclient.CreateTargetDTO, error) {
 	var targetConfigView *targetconfig_view.TargetConfigView
 
-	targetConfigList, res, err := params.ApiClient.TargetConfigAPI.ListTargetConfigs(params.Ctx).Execute()
+	targetConfigList, res, err := params.ApiClient.TargetConfigAPI.ListTargetConfigs(ctx).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	if len(targetConfigList) == 0 {
-		targetConfigView, err = targetconfig.TargetConfigCreationFlow(params.Ctx, params.ApiClient, params.ActiveProfileName, false)
+		targetConfigView, err = targetconfig.TargetConfigCreationFlow(ctx, params.ApiClient, params.ActiveProfileName, false)
 		if err != nil {
 			return nil, err
 		}
@@ -117,7 +118,7 @@ func CreateTargetDtoFlow(params TargetCreationParams) (*apiclient.CreateTargetDT
 		}
 
 		if targetConfigView.Name == targetconfig_view.NewTargetConfigName {
-			targetConfigView, err = targetconfig.TargetConfigCreationFlow(params.Ctx, params.ApiClient, params.ActiveProfileName, false)
+			targetConfigView, err = targetconfig.TargetConfigCreationFlow(ctx, params.ApiClient, params.ActiveProfileName, false)
 			if err != nil {
 				return nil, err
 			}
@@ -132,7 +133,7 @@ func CreateTargetDtoFlow(params TargetCreationParams) (*apiclient.CreateTargetDT
 		format.UnblockStdOut()
 	}
 
-	targetList, res, err := params.ApiClient.TargetAPI.ListTargets(params.Ctx).Execute()
+	targetList, res, err := params.ApiClient.TargetAPI.ListTargets(ctx).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
@@ -156,6 +157,7 @@ func CreateTargetDtoFlow(params TargetCreationParams) (*apiclient.CreateTargetDT
 		ProviderInfo: apiclient.TargetProviderInfo{
 			Name:    targetConfigView.ProviderInfo.Name,
 			Version: targetConfigView.ProviderInfo.Version,
+			Label:   targetConfigView.ProviderInfo.Label,
 		},
 	}, nil
 }

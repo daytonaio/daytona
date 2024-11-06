@@ -41,6 +41,9 @@ func getRowFromRowData(targetConfig *apiclient.TargetConfig) []string {
 
 	data.ConfigName = targetConfig.Name
 	data.Provider = targetConfig.ProviderInfo.Name
+	if targetConfig.ProviderInfo.Label != nil {
+		data.Provider = *targetConfig.ProviderInfo.Label
+	}
 	data.Options = targetConfig.Options
 
 	row := []string{

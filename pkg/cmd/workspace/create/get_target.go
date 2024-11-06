@@ -15,15 +15,14 @@ import (
 )
 
 type GetTargetConfigParams struct {
-	Ctx               context.Context
 	ApiClient         *apiclient.APIClient
 	ActiveProfileName string
 	TargetNameFlag    string
 	PromptUsingTUI    bool
 }
 
-func GetTarget(params GetTargetConfigParams) (t *apiclient.TargetDTO, targetExisted bool, err error) {
-	targetList, res, err := params.ApiClient.TargetAPI.ListTargets(params.Ctx).Execute()
+func GetTarget(ctx context.Context, params GetTargetConfigParams) (t *apiclient.TargetDTO, targetExisted bool, err error) {
+	targetList, res, err := params.ApiClient.TargetAPI.ListTargets(ctx).Execute()
 	if err != nil {
 		return nil, false, apiclient_util.HandleErrorResponse(res, err)
 	}
@@ -46,7 +45,7 @@ func GetTarget(params GetTargetConfigParams) (t *apiclient.TargetDTO, targetExis
 	}
 
 	if len(targetList) == 0 {
-		t, err := runCreateTargetDtoFlow(params)
+		t, err := runCreateTargetDtoFlow(ctx, params)
 		if err != nil {
 			return nil, false, err
 		}
@@ -60,7 +59,7 @@ func GetTarget(params GetTargetConfigParams) (t *apiclient.TargetDTO, targetExis
 	}
 
 	if selectedTarget.Name == selection.NewTargetIdentifier {
-		t, err := runCreateTargetDtoFlow(params)
+		t, err := runCreateTargetDtoFlow(ctx, params)
 		if err != nil {
 			return nil, false, err
 		}
@@ -70,9 +69,8 @@ func GetTarget(params GetTargetConfigParams) (t *apiclient.TargetDTO, targetExis
 	return selectedTarget, true, nil
 }
 
-func runCreateTargetDtoFlow(params GetTargetConfigParams) (*apiclient.TargetDTO, error) {
-	createTargetDto, err := target.CreateTargetDtoFlow(target.TargetCreationParams{
-		Ctx:               params.Ctx,
+func runCreateTargetDtoFlow(ctx context.Context, params GetTargetConfigParams) (*apiclient.TargetDTO, error) {
+	createTargetDto, err := target.CreateTargetDtoFlow(ctx, target.TargetCreationParams{
 		ApiClient:         params.ApiClient,
 		ActiveProfileName: params.ActiveProfileName,
 	})

@@ -5,6 +5,7 @@ package logs
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
@@ -85,11 +86,9 @@ func DisplayLogEntry(logEntry logs.LogEntry, index int) {
 }
 
 func SetupLongestPrefixLength(workspaceNames []string) {
-	for _, workspaceName := range workspaceNames {
-		if len(workspaceName) > longestPrefixLength {
-			longestPrefixLength = len(workspaceName)
-		}
-	}
+	longestPrefixLength = len(slices.MaxFunc(workspaceNames, func(a, b string) int {
+		return len(a) - len(b)
+	}))
 }
 
 func formatPrefixText(input string) string {

@@ -26,6 +26,7 @@ type TargetConfigView struct {
 type ProviderInfo struct {
 	Name      string
 	Version   string
+	Label     *string
 	Installed *bool
 }
 
@@ -67,6 +68,7 @@ func GetTargetConfigFromPrompt(targetConfigs []apiclient.TargetConfig, activePro
 					ProviderInfo: ProviderInfo{
 						Name:      providerView.Name,
 						Version:   providerView.Version,
+						Label:     providerView.Label,
 						Installed: providerView.Installed,
 					},
 				},
@@ -98,6 +100,7 @@ func ToTargetConfigView(targetConfig apiclient.TargetConfig) TargetConfigView {
 		ProviderInfo: ProviderInfo{
 			Name:    targetConfig.ProviderInfo.Name,
 			Version: targetConfig.ProviderInfo.Version,
+			Label:   targetConfig.ProviderInfo.Label,
 		},
 	}
 }

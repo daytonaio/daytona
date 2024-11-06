@@ -20,6 +20,11 @@ func (i item) Title() string { return i.targetConfig.Name }
 
 func (i item) Description() string {
 	desc := i.targetConfig.ProviderInfo.Name
+
+	if i.targetConfig.ProviderInfo.Label != nil {
+		desc = *i.targetConfig.ProviderInfo.Label
+	}
+
 	if i.targetConfig.ProviderInfo.Installed != nil {
 		if !*i.targetConfig.ProviderInfo.Installed {
 			desc += " (needs installing)"

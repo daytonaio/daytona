@@ -64,8 +64,7 @@ var CreateCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		target, targetExisted, err := GetTarget(GetTargetConfigParams{
-			Ctx:               ctx,
+		target, targetExisted, err := GetTarget(ctx, GetTargetConfigParams{
 			ApiClient:         apiClient,
 			ActiveProfileName: activeProfile.Name,
 			TargetNameFlag:    targetNameFlag,
@@ -84,8 +83,7 @@ var CreateCmd = &cobra.Command{
 		}
 
 		if promptUsingTUI {
-			err = ProcessPrompting(ProcessPromptingConfig{
-				Ctx:                         ctx,
+			err = ProcessPrompting(ctx, ProcessPromptingConfig{
 				ApiClient:                   apiClient,
 				CreateWorkspaceDtos:         &createWorkspaceDtos,
 				ExistingWorkspaces:          &existingWorkspaces,
@@ -102,8 +100,7 @@ var CreateCmd = &cobra.Command{
 				}
 			}
 		} else {
-			existingWorkspaceConfigNames, err = ProcessCmdArguments(ProcessCmdArgumentsConfig{
-				Ctx:                         ctx,
+			existingWorkspaceConfigNames, err = ProcessCmdArguments(ctx, ProcessCmdArgumentsConfig{
 				ApiClient:                   apiClient,
 				RepoUrls:                    args,
 				CreateWorkspaceDtos:         &createWorkspaceDtos,
