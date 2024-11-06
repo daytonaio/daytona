@@ -9,29 +9,28 @@ import (
 	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
-func (p *Provisioner) StopTarget(target *target.Target, targetConfig *provider.TargetConfig) error {
-	targetProvider, err := p.providerManager.GetProvider(targetConfig.ProviderInfo.Name)
+func (p *Provisioner) StopTarget(t *target.Target) error {
+	targetProvider, err := p.providerManager.GetProvider(t.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
 	_, err = (*targetProvider).StopTarget(&provider.TargetRequest{
-		TargetConfigOptions: targetConfig.Options,
-		Target:              target,
+		Target: t,
 	})
 
 	return err
 }
 
-func (p *Provisioner) StopWorkspace(ws *workspace.Workspace, targetConfig *provider.TargetConfig) error {
-	targetProvider, err := p.providerManager.GetProvider(targetConfig.ProviderInfo.Name)
+func (p *Provisioner) StopWorkspace(ws *workspace.Workspace, t *target.Target) error {
+	targetProvider, err := p.providerManager.GetProvider(t.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
 	_, err = (*targetProvider).StopWorkspace(&provider.WorkspaceRequest{
-		TargetConfigOptions: targetConfig.Options,
-		Workspace:           ws,
+		Target:    t,
+		Workspace: ws,
 	})
 
 	return err

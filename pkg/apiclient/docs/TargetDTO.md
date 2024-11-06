@@ -4,16 +4,19 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**Default** | **bool** |  | 
 **Id** | **string** |  | 
 **Info** | Pointer to [**TargetInfo**](TargetInfo.md) |  | [optional] 
 **Name** | **string** |  | 
-**TargetConfig** | **string** |  | 
+**Options** | **string** | JSON encoded map of options | 
+**ProviderInfo** | [**TargetProviderInfo**](TargetProviderInfo.md) |  | 
+**WorkspaceCount** | **int32** |  | 
 
 ## Methods
 
 ### NewTargetDTO
 
-`func NewTargetDTO(id string, name string, targetConfig string, ) *TargetDTO`
+`func NewTargetDTO(default_ bool, id string, name string, options string, providerInfo TargetProviderInfo, workspaceCount int32, ) *TargetDTO`
 
 NewTargetDTO instantiates a new TargetDTO object
 This constructor will assign default values to properties that have it defined,
@@ -27,6 +30,26 @@ will change when the set of required properties is changed
 NewTargetDTOWithDefaults instantiates a new TargetDTO object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetDefault
+
+`func (o *TargetDTO) GetDefault() bool`
+
+GetDefault returns the Default field if non-nil, zero value otherwise.
+
+### GetDefaultOk
+
+`func (o *TargetDTO) GetDefaultOk() (*bool, bool)`
+
+GetDefaultOk returns a tuple with the Default field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetDefault
+
+`func (o *TargetDTO) SetDefault(v bool)`
+
+SetDefault sets Default field to given value.
+
 
 ### GetId
 
@@ -93,24 +116,64 @@ and a boolean to check if the value has been set.
 SetName sets Name field to given value.
 
 
-### GetTargetConfig
+### GetOptions
 
-`func (o *TargetDTO) GetTargetConfig() string`
+`func (o *TargetDTO) GetOptions() string`
 
-GetTargetConfig returns the TargetConfig field if non-nil, zero value otherwise.
+GetOptions returns the Options field if non-nil, zero value otherwise.
 
-### GetTargetConfigOk
+### GetOptionsOk
 
-`func (o *TargetDTO) GetTargetConfigOk() (*string, bool)`
+`func (o *TargetDTO) GetOptionsOk() (*string, bool)`
 
-GetTargetConfigOk returns a tuple with the TargetConfig field if it's non-nil, zero value otherwise
+GetOptionsOk returns a tuple with the Options field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetTargetConfig
+### SetOptions
 
-`func (o *TargetDTO) SetTargetConfig(v string)`
+`func (o *TargetDTO) SetOptions(v string)`
 
-SetTargetConfig sets TargetConfig field to given value.
+SetOptions sets Options field to given value.
+
+
+### GetProviderInfo
+
+`func (o *TargetDTO) GetProviderInfo() TargetProviderInfo`
+
+GetProviderInfo returns the ProviderInfo field if non-nil, zero value otherwise.
+
+### GetProviderInfoOk
+
+`func (o *TargetDTO) GetProviderInfoOk() (*TargetProviderInfo, bool)`
+
+GetProviderInfoOk returns a tuple with the ProviderInfo field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetProviderInfo
+
+`func (o *TargetDTO) SetProviderInfo(v TargetProviderInfo)`
+
+SetProviderInfo sets ProviderInfo field to given value.
+
+
+### GetWorkspaceCount
+
+`func (o *TargetDTO) GetWorkspaceCount() int32`
+
+GetWorkspaceCount returns the WorkspaceCount field if non-nil, zero value otherwise.
+
+### GetWorkspaceCountOk
+
+`func (o *TargetDTO) GetWorkspaceCountOk() (*int32, bool)`
+
+GetWorkspaceCountOk returns a tuple with the WorkspaceCount field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetWorkspaceCount
+
+`func (o *TargetDTO) SetWorkspaceCount(v int32)`
+
+SetWorkspaceCount sets WorkspaceCount field to given value.
 
 
 

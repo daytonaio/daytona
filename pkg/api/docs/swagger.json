@@ -1252,8 +1252,11 @@
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/TargetConfig"
+                        }
                     }
                 }
             }
@@ -1278,30 +1281,6 @@
                 "responses": {
                     "204": {
                         "description": "No Content"
-                    }
-                }
-            }
-        },
-        "/target-config/{configName}/set-default": {
-            "patch": {
-                "description": "Set target config to default",
-                "tags": [
-                    "target-config"
-                ],
-                "summary": "Set target config to default",
-                "operationId": "SetDefaultTargetConfig",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Target config name",
-                        "name": "configName",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
                     }
                 }
             }
@@ -1361,6 +1340,30 @@
                         "description": "Force",
                         "name": "force",
                         "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/target/{targetId}/set-default": {
+            "patch": {
+                "description": "Set target to be used by default",
+                "tags": [
+                    "target"
+                ],
+                "summary": "Set target to be used by default",
+                "operationId": "SetDefaultTarget",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target ID or name",
+                        "name": "targetId",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1838,30 +1841,17 @@
                 }
             }
         },
-<<<<<<< HEAD
-        "/workspace/{workspaceId}/toolbox/files": {
-            "get": {
-                "description": "List files inside workspace project",
-=======
         "/workspace/{workspaceId}": {
             "get": {
                 "description": "Get workspace info",
->>>>>>> 01c7ba1e (refactor: detach workspace from target)
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-<<<<<<< HEAD
-                    "workspace toolbox"
-                ],
-                "summary": "List files",
-                "operationId": "FsListFiles",
-=======
                     "workspace"
                 ],
                 "summary": "Get workspace info",
                 "operationId": "GetWorkspace",
->>>>>>> 01c7ba1e (refactor: detach workspace from target)
                 "parameters": [
                     {
                         "type": "string",
@@ -1871,22 +1861,9 @@
                         "required": true
                     },
                     {
-<<<<<<< HEAD
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Path",
-                        "name": "path",
-=======
                         "type": "boolean",
                         "description": "Verbose",
                         "name": "verbose",
->>>>>>> 01c7ba1e (refactor: detach workspace from target)
                         "in": "query"
                     }
                 ],
@@ -1894,21 +1871,161 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-<<<<<<< HEAD
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/FileInfo"
-                            }
-=======
                             "$ref": "#/definitions/WorkspaceDTO"
->>>>>>> 01c7ba1e (refactor: detach workspace from target)
                         }
                     }
                 }
             },
             "delete": {
-<<<<<<< HEAD
-                "description": "Delete file inside workspace project",
+                "description": "Remove workspace",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Remove workspace",
+                "operationId": "RemoveWorkspace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/start": {
+            "post": {
+                "description": "Start workspace",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Start workspace",
+                "operationId": "StartWorkspace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/state": {
+            "post": {
+                "description": "Set workspace state",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Set workspace state",
+                "operationId": "SetWorkspaceState",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Set State",
+                        "name": "setState",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SetWorkspaceState"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/stop": {
+            "post": {
+                "description": "Stop workspace",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Stop workspace",
+                "operationId": "StopWorkspace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/toolbox/files": {
+            "get": {
+                "description": "List files inside a workspace",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "List files",
+                "operationId": "FsListFiles",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Path",
+                        "name": "path",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/FileInfo"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete file inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -1921,27 +2038,7 @@
                     {
                         "type": "string",
                         "description": "Workspace ID or Name",
-=======
-                "description": "Remove workspace",
-                "tags": [
-                    "workspace"
-                ],
-                "summary": "Remove workspace",
-                "operationId": "RemoveWorkspace",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Workspace ID",
->>>>>>> 01c7ba1e (refactor: detach workspace from target)
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-<<<<<<< HEAD
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -1962,7 +2059,7 @@
         },
         "/workspace/{workspaceId}/toolbox/files/download": {
             "get": {
-                "description": "Download file from workspace project",
+                "description": "Download file from a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -1976,13 +2073,6 @@
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2006,7 +2096,7 @@
         },
         "/workspace/{workspaceId}/toolbox/files/find": {
             "get": {
-                "description": "Search for text/pattern inside workspace project files",
+                "description": "Search for text/pattern inside a workspace files",
                 "produces": [
                     "application/json"
                 ],
@@ -2020,13 +2110,6 @@
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2060,7 +2143,7 @@
         },
         "/workspace/{workspaceId}/toolbox/files/folder": {
             "post": {
-                "description": "Create folder inside workspace project",
+                "description": "Create folder inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2074,13 +2157,6 @@
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2108,7 +2184,7 @@
         },
         "/workspace/{workspaceId}/toolbox/files/info": {
             "get": {
-                "description": "Get file info inside workspace project",
+                "description": "Get file info inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2122,13 +2198,6 @@
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2152,7 +2221,7 @@
         },
         "/workspace/{workspaceId}/toolbox/files/move": {
             "post": {
-                "description": "Create folder inside workspace project",
+                "description": "Create folder inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2166,13 +2235,6 @@
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2200,7 +2262,7 @@
         },
         "/workspace/{workspaceId}/toolbox/files/permissions": {
             "post": {
-                "description": "Set file owner/group/permissions inside workspace project",
+                "description": "Set file owner/group/permissions inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2214,13 +2276,6 @@
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2247,11 +2302,6 @@
                         "type": "string",
                         "description": "Mode",
                         "name": "mode",
-=======
-                        "type": "boolean",
-                        "description": "Force",
-                        "name": "force",
->>>>>>> 01c7ba1e (refactor: detach workspace from target)
                         "in": "query"
                     }
                 ],
@@ -2262,10 +2312,9 @@
                 }
             }
         },
-<<<<<<< HEAD
         "/workspace/{workspaceId}/toolbox/files/replace": {
             "post": {
-                "description": "Repleace text/pattern in mutilple files inside workspace project",
+                "description": "Repleace text/pattern in mutilple files inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2274,29 +2323,11 @@
                 ],
                 "summary": "Repleace text/pattern in files",
                 "operationId": "FsReplaceInFiles",
-=======
-        "/workspace/{workspaceId}/start": {
-            "post": {
-                "description": "Start workspace",
-                "tags": [
-                    "workspace"
-                ],
-                "summary": "Start workspace",
-                "operationId": "StartWorkspace",
->>>>>>> 01c7ba1e (refactor: detach workspace from target)
                 "parameters": [
                     {
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-<<<<<<< HEAD
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2325,7 +2356,7 @@
         },
         "/workspace/{workspaceId}/toolbox/files/search": {
             "get": {
-                "description": "Search for files inside workspace project",
+                "description": "Search for files inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2339,13 +2370,6 @@
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2376,7 +2400,7 @@
         },
         "/workspace/{workspaceId}/toolbox/files/upload": {
             "post": {
-                "description": "Upload file inside workspace project",
+                "description": "Upload file inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2395,13 +2419,6 @@
                     },
                     {
                         "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "description": "Path",
                         "name": "path",
                         "in": "query",
@@ -2413,8 +2430,6 @@
                         "name": "file",
                         "in": "formData",
                         "required": true
-=======
->>>>>>> 01c7ba1e (refactor: detach workspace from target)
                     }
                 ],
                 "responses": {
@@ -2424,7 +2439,6 @@
                 }
             }
         },
-<<<<<<< HEAD
         "/workspace/{workspaceId}/toolbox/git/add": {
             "post": {
                 "description": "Add files to git commit",
@@ -2440,29 +2454,7 @@
                     {
                         "type": "string",
                         "description": "Workspace ID or Name",
-=======
-        "/workspace/{workspaceId}/state": {
-            "post": {
-                "description": "Set workspace state",
-                "tags": [
-                    "workspace"
-                ],
-                "summary": "Set workspace state",
-                "operationId": "SetWorkspaceState",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Workspace ID",
->>>>>>> 01c7ba1e (refactor: detach workspace from target)
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-<<<<<<< HEAD
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2473,14 +2465,6 @@
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/GitAddRequest"
-=======
-                        "description": "Set State",
-                        "name": "setState",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/SetWorkspaceState"
->>>>>>> 01c7ba1e (refactor: detach workspace from target)
                         }
                     }
                 ],
@@ -2491,10 +2475,9 @@
                 }
             }
         },
-<<<<<<< HEAD
         "/workspace/{workspaceId}/toolbox/git/branches": {
             "get": {
-                "description": "Get branch list from git repository inside workspace project",
+                "description": "Get branch list from git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2508,13 +2491,6 @@
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2536,7 +2512,7 @@
                 }
             },
             "post": {
-                "description": "Create branch on git repository inside workspace project",
+                "description": "Create branch on git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2545,29 +2521,11 @@
                 ],
                 "summary": "Create branch",
                 "operationId": "GitCreateBranch",
-=======
-        "/workspace/{workspaceId}/stop": {
-            "post": {
-                "description": "Stop workspace",
-                "tags": [
-                    "workspace"
-                ],
-                "summary": "Stop workspace",
-                "operationId": "StopWorkspace",
->>>>>>> 01c7ba1e (refactor: detach workspace from target)
                 "parameters": [
                     {
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-<<<<<<< HEAD
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2590,7 +2548,7 @@
         },
         "/workspace/{workspaceId}/toolbox/git/clone": {
             "post": {
-                "description": "Clone git repository inside workspace project",
+                "description": "Clone git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2608,13 +2566,6 @@
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "description": "GitCloneRequest",
                         "name": "params",
                         "in": "body",
@@ -2622,8 +2573,6 @@
                         "schema": {
                             "$ref": "#/definitions/GitCloneRequest"
                         }
-=======
->>>>>>> 01c7ba1e (refactor: detach workspace from target)
                     }
                 ],
                 "responses": {
@@ -2632,11 +2581,10 @@
                     }
                 }
             }
-<<<<<<< HEAD
         },
         "/workspace/{workspaceId}/toolbox/git/commit": {
             "post": {
-                "description": "Commit changes to git repository inside workspace project",
+                "description": "Commit changes to git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2650,13 +2598,6 @@
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2682,7 +2623,7 @@
         },
         "/workspace/{workspaceId}/toolbox/git/history": {
             "get": {
-                "description": "Get commit history from git repository inside workspace project",
+                "description": "Get commit history from git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2696,13 +2637,6 @@
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2729,7 +2663,7 @@
         },
         "/workspace/{workspaceId}/toolbox/git/pull": {
             "post": {
-                "description": "Pull changes from remote to git repository inside workspace project",
+                "description": "Pull changes from remote to git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2743,13 +2677,6 @@
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2772,7 +2699,7 @@
         },
         "/workspace/{workspaceId}/toolbox/git/push": {
             "post": {
-                "description": "Push changes to remote from git repository inside workspace project",
+                "description": "Push changes to remote from git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2786,13 +2713,6 @@
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2815,7 +2735,7 @@
         },
         "/workspace/{workspaceId}/toolbox/git/status": {
             "get": {
-                "description": "Get status from git repository inside workspace project",
+                "description": "Get status from git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2829,13 +2749,6 @@
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2873,13 +2786,6 @@
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2923,13 +2829,6 @@
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "description": "LspDocumentRequest",
                         "name": "params",
                         "in": "body",
@@ -2962,13 +2861,6 @@
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -3010,13 +2902,6 @@
                     },
                     {
                         "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "description": "Language ID",
                         "name": "languageId",
                         "in": "query",
@@ -3052,7 +2937,7 @@
         },
         "/workspace/{workspaceId}/toolbox/lsp/start": {
             "post": {
-                "description": "Start Lsp server process inside workspace project",
+                "description": "Start Lsp server process inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -3066,13 +2951,6 @@
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -3095,7 +2973,7 @@
         },
         "/workspace/{workspaceId}/toolbox/lsp/stop": {
             "post": {
-                "description": "Stop Lsp server process inside workspace project",
+                "description": "Stop Lsp server process inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -3109,13 +2987,6 @@
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -3157,13 +3028,6 @@
                     },
                     {
                         "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "description": "Language ID",
                         "name": "languageId",
                         "in": "query",
@@ -3199,7 +3063,7 @@
         },
         "/workspace/{workspaceId}/toolbox/process/execute": {
             "post": {
-                "description": "Execute command synchronously inside workspace project",
+                "description": "Execute command synchronously inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -3213,13 +3077,6 @@
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -3261,13 +3118,6 @@
                         "name": "workspaceId",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
-                        "in": "path",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -3279,8 +3129,6 @@
                     }
                 }
             }
-=======
->>>>>>> 01c7ba1e (refactor: detach workspace from target)
         }
     },
     "definitions": {
@@ -3551,7 +3399,7 @@
                     "type": "string"
                 },
                 "providerInfo": {
-                    "$ref": "#/definitions/provider.ProviderInfo"
+                    "$ref": "#/definitions/TargetProviderInfo"
                 }
             }
         },
@@ -3560,7 +3408,7 @@
             "required": [
                 "id",
                 "name",
-                "targetConfig"
+                "targetConfigName"
             ],
             "properties": {
                 "id": {
@@ -3569,7 +3417,7 @@
                 "name": {
                     "type": "string"
                 },
-                "targetConfig": {
+                "targetConfigName": {
                     "type": "string"
                 }
             }
@@ -4712,33 +4560,18 @@
         "Target": {
             "type": "object",
             "required": [
+                "default",
                 "id",
-                "name",
-                "targetConfig"
-            ],
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "targetConfig": {
-                    "type": "string"
-                }
-            }
-        },
-        "TargetConfig": {
-            "type": "object",
-            "required": [
-                "isDefault",
                 "name",
                 "options",
                 "providerInfo"
             ],
             "properties": {
-                "isDefault": {
+                "default": {
                     "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
@@ -4748,7 +4581,27 @@
                     "type": "string"
                 },
                 "providerInfo": {
-                    "$ref": "#/definitions/provider.ProviderInfo"
+                    "$ref": "#/definitions/TargetProviderInfo"
+                }
+            }
+        },
+        "TargetConfig": {
+            "type": "object",
+            "required": [
+                "name",
+                "options",
+                "providerInfo"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "options": {
+                    "description": "JSON encoded map of options",
+                    "type": "string"
+                },
+                "providerInfo": {
+                    "$ref": "#/definitions/TargetProviderInfo"
                 }
             }
         },
@@ -4798,11 +4651,17 @@
         "TargetDTO": {
             "type": "object",
             "required": [
+                "default",
                 "id",
                 "name",
-                "targetConfig"
+                "options",
+                "providerInfo",
+                "workspaceCount"
             ],
             "properties": {
+                "default": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -4812,8 +4671,15 @@
                 "name": {
                     "type": "string"
                 },
-                "targetConfig": {
+                "options": {
+                    "description": "JSON encoded map of options",
                     "type": "string"
+                },
+                "providerInfo": {
+                    "$ref": "#/definitions/TargetProviderInfo"
+                },
+                "workspaceCount": {
+                    "type": "integer"
                 }
             }
         },
@@ -4827,6 +4693,24 @@
                     "type": "string"
                 },
                 "providerMetadata": {
+                    "type": "string"
+                }
+            }
+        },
+        "TargetProviderInfo": {
+            "type": "object",
+            "required": [
+                "name",
+                "version"
+            ],
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "version": {
                     "type": "string"
                 }
             }
@@ -4877,12 +4761,6 @@
                 }
             }
         },
-<<<<<<< HEAD
-        "WorkspaceDirResponse": {
-            "type": "object",
-            "properties": {
-                "dir": {
-=======
         "WorkspaceDTO": {
             "type": "object",
             "required": [
@@ -4933,7 +4811,14 @@
                     "type": "string"
                 },
                 "user": {
->>>>>>> 01c7ba1e (refactor: detach workspace from target)
+                    "type": "string"
+                }
+            }
+        },
+        "WorkspaceDirResponse": {
+            "type": "object",
+            "properties": {
+                "dir": {
                     "type": "string"
                 }
             }
@@ -5068,24 +4953,6 @@
                 "BuildStatePendingForcedDelete",
                 "BuildStateDeleting"
             ]
-        },
-        "provider.ProviderInfo": {
-            "type": "object",
-            "required": [
-                "name",
-                "version"
-            ],
-            "properties": {
-                "label": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "string"
-                }
-            }
         },
         "provider.TargetConfigPropertyType": {
             "type": "string",

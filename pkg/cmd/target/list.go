@@ -52,7 +52,6 @@ var listCmd = &cobra.Command{
 		}
 
 		list_view.ListTargets(targetList, verbose, activeProfile.Name)
-
 		return nil
 	},
 }

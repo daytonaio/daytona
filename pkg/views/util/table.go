@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/table"
@@ -68,7 +69,7 @@ func getMinimumWidth(data [][]string) int {
 			// Remove ANSI escape codes
 			regex := regexp.MustCompile("\x1b\\[[0-9;]*[a-zA-Z]")
 			strippedCell := regex.ReplaceAllString(cell, "")
-			width += len(strippedCell)
+			width += longestLineLength(strippedCell)
 			if width > widestRow {
 				widestRow = width
 			}
@@ -76,4 +77,18 @@ func getMinimumWidth(data [][]string) int {
 		width = 0
 	}
 	return widestRow
+}
+
+// Returns the length of the longest line in a string
+func longestLineLength(input string) int {
+	lines := strings.Split(input, "\n")
+	maxLength := 0
+
+	for _, line := range lines {
+		if len(line) > maxLength {
+			maxLength = len(line)
+		}
+	}
+
+	return maxLength
 }

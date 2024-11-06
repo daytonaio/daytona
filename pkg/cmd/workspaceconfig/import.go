@@ -12,6 +12,7 @@ import (
 	"os"
 
 	"github.com/charmbracelet/huh"
+	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -212,21 +213,21 @@ func importWorkspaceConfig(ctx context.Context, apiClient *apiclient.APIClient, 
 	}
 
 	submissionFormConfig := create.SubmissionFormConfig{
-		ChosenName:    &config.Name,
-		SuggestedName: config.Name,
-		ExistingNames: existingWorkspaceConfigNames,
-		WorkspaceList: &createDto,
-		NameLabel:     "Workspace config",
-		Defaults:      workspaceDefaults,
+		ChosenName:             &config.Name,
+		SuggestedName:          config.Name,
+		ExistingWorkspaceNames: existingWorkspaceConfigNames,
+		WorkspaceList:          &createDto,
+		NameLabel:              "Workspace config",
+		Defaults:               workspaceDefaults,
+		ImportConfirmation:     util.Pointer(true),
 	}
 
-	confirmation := true
-	err = create.RunSubmissionForm(submissionFormConfig, &confirmation)
+	err = create.RunSubmissionForm(submissionFormConfig)
 	if err != nil {
 		return err
 	}
 
-	if confirmation {
+	if submissionFormConfig.ImportConfirmation != nil && *submissionFormConfig.ImportConfirmation {
 		res, err = apiClient.WorkspaceConfigAPI.SetWorkspaceConfig(ctx).WorkspaceConfig(newWorkspaceConfig).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)

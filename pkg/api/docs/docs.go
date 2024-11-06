@@ -1255,8 +1255,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/TargetConfig"
+                        }
                     }
                 }
             }
@@ -1281,30 +1284,6 @@ const docTemplate = `{
                 "responses": {
                     "204": {
                         "description": "No Content"
-                    }
-                }
-            }
-        },
-        "/target-config/{configName}/set-default": {
-            "patch": {
-                "description": "Set target config to default",
-                "tags": [
-                    "target-config"
-                ],
-                "summary": "Set target config to default",
-                "operationId": "SetDefaultTargetConfig",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Target config name",
-                        "name": "configName",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
                     }
                 }
             }
@@ -1364,6 +1343,30 @@ const docTemplate = `{
                         "description": "Force",
                         "name": "force",
                         "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/target/{targetId}/set-default": {
+            "patch": {
+                "description": "Set target to be used by default",
+                "tags": [
+                    "target"
+                ],
+                "summary": "Set target to be used by default",
+                "operationId": "SetDefaultTarget",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target ID or name",
+                        "name": "targetId",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1841,9 +1844,154 @@ const docTemplate = `{
                 }
             }
         },
+        "/workspace/{workspaceId}": {
+            "get": {
+                "description": "Get workspace info",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Get workspace info",
+                "operationId": "GetWorkspace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Verbose",
+                        "name": "verbose",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/WorkspaceDTO"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove workspace",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Remove workspace",
+                "operationId": "RemoveWorkspace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/start": {
+            "post": {
+                "description": "Start workspace",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Start workspace",
+                "operationId": "StartWorkspace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/state": {
+            "post": {
+                "description": "Set workspace state",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Set workspace state",
+                "operationId": "SetWorkspaceState",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Set State",
+                        "name": "setState",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SetWorkspaceState"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/stop": {
+            "post": {
+                "description": "Stop workspace",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Stop workspace",
+                "operationId": "StopWorkspace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/workspace/{workspaceId}/toolbox/files": {
             "get": {
-                "description": "List files inside workspace project",
+                "description": "List files inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -1857,13 +2005,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -1887,7 +2028,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Delete file inside workspace project",
+                "description": "Delete file inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -1901,13 +2042,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -1928,7 +2062,7 @@ const docTemplate = `{
         },
         "/workspace/{workspaceId}/toolbox/files/download": {
             "get": {
-                "description": "Download file from workspace project",
+                "description": "Download file from a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -1942,13 +2076,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -1972,7 +2099,7 @@ const docTemplate = `{
         },
         "/workspace/{workspaceId}/toolbox/files/find": {
             "get": {
-                "description": "Search for text/pattern inside workspace project files",
+                "description": "Search for text/pattern inside a workspace files",
                 "produces": [
                     "application/json"
                 ],
@@ -1986,13 +2113,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2026,7 +2146,7 @@ const docTemplate = `{
         },
         "/workspace/{workspaceId}/toolbox/files/folder": {
             "post": {
-                "description": "Create folder inside workspace project",
+                "description": "Create folder inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2040,13 +2160,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2074,7 +2187,7 @@ const docTemplate = `{
         },
         "/workspace/{workspaceId}/toolbox/files/info": {
             "get": {
-                "description": "Get file info inside workspace project",
+                "description": "Get file info inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2088,13 +2201,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2118,7 +2224,7 @@ const docTemplate = `{
         },
         "/workspace/{workspaceId}/toolbox/files/move": {
             "post": {
-                "description": "Create folder inside workspace project",
+                "description": "Create folder inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2132,13 +2238,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2166,7 +2265,7 @@ const docTemplate = `{
         },
         "/workspace/{workspaceId}/toolbox/files/permissions": {
             "post": {
-                "description": "Set file owner/group/permissions inside workspace project",
+                "description": "Set file owner/group/permissions inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2180,13 +2279,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2225,7 +2317,7 @@ const docTemplate = `{
         },
         "/workspace/{workspaceId}/toolbox/files/replace": {
             "post": {
-                "description": "Repleace text/pattern in mutilple files inside workspace project",
+                "description": "Repleace text/pattern in mutilple files inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2239,13 +2331,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2274,7 +2359,7 @@ const docTemplate = `{
         },
         "/workspace/{workspaceId}/toolbox/files/search": {
             "get": {
-                "description": "Search for files inside workspace project",
+                "description": "Search for files inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2288,13 +2373,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2325,7 +2403,7 @@ const docTemplate = `{
         },
         "/workspace/{workspaceId}/toolbox/files/upload": {
             "post": {
-                "description": "Upload file inside workspace project",
+                "description": "Upload file inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2339,13 +2417,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2391,13 +2462,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "description": "GitAddRequest",
                         "name": "params",
                         "in": "body",
@@ -2416,7 +2480,7 @@ const docTemplate = `{
         },
         "/workspace/{workspaceId}/toolbox/git/branches": {
             "get": {
-                "description": "Get branch list from git repository inside workspace project",
+                "description": "Get branch list from git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2430,13 +2494,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2458,7 +2515,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create branch on git repository inside workspace project",
+                "description": "Create branch on git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2472,13 +2529,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2501,7 +2551,7 @@ const docTemplate = `{
         },
         "/workspace/{workspaceId}/toolbox/git/clone": {
             "post": {
-                "description": "Clone git repository inside workspace project",
+                "description": "Clone git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2515,13 +2565,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2544,7 +2587,7 @@ const docTemplate = `{
         },
         "/workspace/{workspaceId}/toolbox/git/commit": {
             "post": {
-                "description": "Commit changes to git repository inside workspace project",
+                "description": "Commit changes to git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2558,13 +2601,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2590,7 +2626,7 @@ const docTemplate = `{
         },
         "/workspace/{workspaceId}/toolbox/git/history": {
             "get": {
-                "description": "Get commit history from git repository inside workspace project",
+                "description": "Get commit history from git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2604,13 +2640,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2637,7 +2666,7 @@ const docTemplate = `{
         },
         "/workspace/{workspaceId}/toolbox/git/pull": {
             "post": {
-                "description": "Pull changes from remote to git repository inside workspace project",
+                "description": "Pull changes from remote to git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2651,13 +2680,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2680,7 +2702,7 @@ const docTemplate = `{
         },
         "/workspace/{workspaceId}/toolbox/git/push": {
             "post": {
-                "description": "Push changes to remote from git repository inside workspace project",
+                "description": "Push changes to remote from git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2694,13 +2716,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2723,7 +2738,7 @@ const docTemplate = `{
         },
         "/workspace/{workspaceId}/toolbox/git/status": {
             "get": {
-                "description": "Get status from git repository inside workspace project",
+                "description": "Get status from git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2737,13 +2752,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2781,13 +2789,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2831,13 +2832,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "description": "LspDocumentRequest",
                         "name": "params",
                         "in": "body",
@@ -2870,13 +2864,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2918,13 +2905,6 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "description": "Language ID",
                         "name": "languageId",
                         "in": "query",
@@ -2960,7 +2940,7 @@ const docTemplate = `{
         },
         "/workspace/{workspaceId}/toolbox/lsp/start": {
             "post": {
-                "description": "Start Lsp server process inside workspace project",
+                "description": "Start Lsp server process inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2974,13 +2954,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -3003,7 +2976,7 @@ const docTemplate = `{
         },
         "/workspace/{workspaceId}/toolbox/lsp/stop": {
             "post": {
-                "description": "Stop Lsp server process inside workspace project",
+                "description": "Stop Lsp server process inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -3017,13 +2990,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -3065,13 +3031,6 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "description": "Language ID",
                         "name": "languageId",
                         "in": "query",
@@ -3107,7 +3066,7 @@ const docTemplate = `{
         },
         "/workspace/{workspaceId}/toolbox/process/execute": {
             "post": {
-                "description": "Execute command synchronously inside workspace project",
+                "description": "Execute command synchronously inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -3121,13 +3080,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -3167,13 +3119,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     }
@@ -3457,7 +3402,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "providerInfo": {
-                    "$ref": "#/definitions/provider.ProviderInfo"
+                    "$ref": "#/definitions/TargetProviderInfo"
                 }
             }
         },
@@ -3466,7 +3411,7 @@ const docTemplate = `{
             "required": [
                 "id",
                 "name",
-                "targetConfig"
+                "targetConfigName"
             ],
             "properties": {
                 "id": {
@@ -3475,7 +3420,7 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "targetConfig": {
+                "targetConfigName": {
                     "type": "string"
                 }
             }
@@ -4618,33 +4563,18 @@ const docTemplate = `{
         "Target": {
             "type": "object",
             "required": [
+                "default",
                 "id",
-                "name",
-                "targetConfig"
-            ],
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "targetConfig": {
-                    "type": "string"
-                }
-            }
-        },
-        "TargetConfig": {
-            "type": "object",
-            "required": [
-                "isDefault",
                 "name",
                 "options",
                 "providerInfo"
             ],
             "properties": {
-                "isDefault": {
+                "default": {
                     "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
@@ -4654,7 +4584,27 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "providerInfo": {
-                    "$ref": "#/definitions/provider.ProviderInfo"
+                    "$ref": "#/definitions/TargetProviderInfo"
+                }
+            }
+        },
+        "TargetConfig": {
+            "type": "object",
+            "required": [
+                "name",
+                "options",
+                "providerInfo"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "options": {
+                    "description": "JSON encoded map of options",
+                    "type": "string"
+                },
+                "providerInfo": {
+                    "$ref": "#/definitions/TargetProviderInfo"
                 }
             }
         },
@@ -4704,11 +4654,17 @@ const docTemplate = `{
         "TargetDTO": {
             "type": "object",
             "required": [
+                "default",
                 "id",
                 "name",
-                "targetConfig"
+                "options",
+                "providerInfo",
+                "workspaceCount"
             ],
             "properties": {
+                "default": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -4718,8 +4674,15 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "targetConfig": {
+                "options": {
+                    "description": "JSON encoded map of options",
                     "type": "string"
+                },
+                "providerInfo": {
+                    "$ref": "#/definitions/TargetProviderInfo"
+                },
+                "workspaceCount": {
+                    "type": "integer"
                 }
             }
         },
@@ -4733,6 +4696,24 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "providerMetadata": {
+                    "type": "string"
+                }
+            }
+        },
+        "TargetProviderInfo": {
+            "type": "object",
+            "required": [
+                "name",
+                "version"
+            ],
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "version": {
                     "type": "string"
                 }
             }
@@ -4776,6 +4757,60 @@ const docTemplate = `{
                     }
                 },
                 "repositoryUrl": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                }
+            }
+        },
+        "WorkspaceDTO": {
+            "type": "object",
+            "required": [
+                "envVars",
+                "id",
+                "image",
+                "name",
+                "repository",
+                "targetId",
+                "targetName",
+                "user"
+            ],
+            "properties": {
+                "buildConfig": {
+                    "$ref": "#/definitions/BuildConfig"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "gitProviderConfigId": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "info": {
+                    "$ref": "#/definitions/WorkspaceInfo"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "repository": {
+                    "$ref": "#/definitions/GitRepository"
+                },
+                "state": {
+                    "$ref": "#/definitions/WorkspaceState"
+                },
+                "targetId": {
+                    "type": "string"
+                },
+                "targetName": {
                     "type": "string"
                 },
                 "user": {
@@ -4921,24 +4956,6 @@ const docTemplate = `{
                 "BuildStatePendingForcedDelete",
                 "BuildStateDeleting"
             ]
-        },
-        "provider.ProviderInfo": {
-            "type": "object",
-            "required": [
-                "name",
-                "version"
-            ],
-            "properties": {
-                "label": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "string"
-                }
-            }
         },
         "provider.TargetConfigPropertyType": {
             "type": "string",

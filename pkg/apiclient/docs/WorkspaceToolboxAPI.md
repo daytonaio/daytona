@@ -1,44 +1,48 @@
 # \WorkspaceToolboxAPI
 
-All URIs are relative to _http://localhost:3986_
+All URIs are relative to *http://localhost:3986*
 
-| Method                                                                    | HTTP request                                                   | Description                      |
-| ------------------------------------------------------------------------- | -------------------------------------------------------------- | -------------------------------- |
-| [**FsCreateFolder**](WorkspaceToolboxAPI.md#FsCreateFolder)               | **Post** /workspace/{workspaceId}/toolbox/files/folder         | Create folder                    |
-| [**FsDeleteFile**](WorkspaceToolboxAPI.md#FsDeleteFile)                   | **Delete** /workspace/{workspaceId}/toolbox/files              | Delete file                      |
-| [**FsDownloadFile**](WorkspaceToolboxAPI.md#FsDownloadFile)               | **Get** /workspace/{workspaceId}/toolbox/files/download        | Download file                    |
-| [**FsFindInFiles**](WorkspaceToolboxAPI.md#FsFindInFiles)                 | **Get** /workspace/{workspaceId}/toolbox/files/find            | Search for text/pattern in files |
-| [**FsGetFileDetails**](WorkspaceToolboxAPI.md#FsGetFileDetails)           | **Get** /workspace/{workspaceId}/toolbox/files/info            | Get file info                    |
-| [**FsListFiles**](WorkspaceToolboxAPI.md#FsListFiles)                     | **Get** /workspace/{workspaceId}/toolbox/files                 | List files                       |
-| [**FsMoveFile**](WorkspaceToolboxAPI.md#FsMoveFile)                       | **Post** /workspace/{workspaceId}/toolbox/files/move           | Create folder                    |
-| [**FsReplaceInFiles**](WorkspaceToolboxAPI.md#FsReplaceInFiles)           | **Post** /workspace/{workspaceId}/toolbox/files/replace        | Repleace text/pattern in files   |
-| [**FsSearchFiles**](WorkspaceToolboxAPI.md#FsSearchFiles)                 | **Get** /workspace/{workspaceId}/toolbox/files/search          | Search for files                 |
-| [**FsSetFilePermissions**](WorkspaceToolboxAPI.md#FsSetFilePermissions)   | **Post** /workspace/{workspaceId}/toolbox/files/permissions    | Set file owner/group/permissions |
-| [**FsUploadFile**](WorkspaceToolboxAPI.md#FsUploadFile)                   | **Post** /workspace/{workspaceId}/toolbox/files/upload         | Upload file                      |
-| [**GetWorkspaceDir**](WorkspaceToolboxAPI.md#GetWorkspaceDir)             | **Get** /workspace/{workspaceId}/toolbox/workspace-dir         | Get workspace dir                |
-| [**GitAddFiles**](WorkspaceToolboxAPI.md#GitAddFiles)                     | **Post** /workspace/{workspaceId}/toolbox/git/add              | Add files                        |
-| [**GitBranchList**](WorkspaceToolboxAPI.md#GitBranchList)                 | **Get** /workspace/{workspaceId}/toolbox/git/branches          | Get branch list                  |
-| [**GitCloneRepository**](WorkspaceToolboxAPI.md#GitCloneRepository)       | **Post** /workspace/{workspaceId}/toolbox/git/clone            | Clone git repository             |
-| [**GitCommitChanges**](WorkspaceToolboxAPI.md#GitCommitChanges)           | **Post** /workspace/{workspaceId}/toolbox/git/commit           | Commit changes                   |
-| [**GitCommitHistory**](WorkspaceToolboxAPI.md#GitCommitHistory)           | **Get** /workspace/{workspaceId}/toolbox/git/history           | Get commit history               |
-| [**GitCreateBranch**](WorkspaceToolboxAPI.md#GitCreateBranch)             | **Post** /workspace/{workspaceId}/toolbox/git/branches         | Create branch                    |
-| [**GitGitStatus**](WorkspaceToolboxAPI.md#GitGitStatus)                   | **Get** /workspace/{workspaceId}/toolbox/git/status            | Get git status                   |
-| [**GitPullChanges**](WorkspaceToolboxAPI.md#GitPullChanges)               | **Post** /workspace/{workspaceId}/toolbox/git/pull             | Pull changes                     |
-| [**GitPushChanges**](WorkspaceToolboxAPI.md#GitPushChanges)               | **Post** /workspace/{workspaceId}/toolbox/git/push             | Push changes                     |
-| [**LspCompletions**](WorkspaceToolboxAPI.md#LspCompletions)               | **Post** /workspace/{workspaceId}/toolbox/lsp/completions      | Get Lsp Completions              |
-| [**LspDidClose**](WorkspaceToolboxAPI.md#LspDidClose)                     | **Post** /workspace/{workspaceId}/toolbox/lsp/did-close        | Call Lsp DidClose                |
-| [**LspDidOpen**](WorkspaceToolboxAPI.md#LspDidOpen)                       | **Post** /workspace/{workspaceId}/toolbox/lsp/did-open         | Call Lsp DidOpen                 |
-| [**LspDocumentSymbols**](WorkspaceToolboxAPI.md#LspDocumentSymbols)       | **Get** /workspace/{workspaceId}/toolbox/lsp/document-symbols  | Call Lsp DocumentSymbols         |
-| [**LspStart**](WorkspaceToolboxAPI.md#LspStart)                           | **Post** /workspace/{workspaceId}/toolbox/lsp/start            | Start Lsp server                 |
-| [**LspStop**](WorkspaceToolboxAPI.md#LspStop)                             | **Post** /workspace/{workspaceId}/toolbox/lsp/stop             | Stop Lsp server                  |
-| [**LspWorkspaceSymbols**](WorkspaceToolboxAPI.md#LspWorkspaceSymbols)     | **Get** /workspace/{workspaceId}/toolbox/lsp/workspace-symbols | Call Lsp WorkspaceSymbols        |
-| [**ProcessExecuteCommand**](WorkspaceToolboxAPI.md#ProcessExecuteCommand) | **Post** /workspace/{workspaceId}/toolbox/process/execute      | Execute command                  |
+Method | HTTP request | Description
+------------- | ------------- | -------------
+[**FsCreateFolder**](WorkspaceToolboxAPI.md#FsCreateFolder) | **Post** /workspace/{workspaceId}/toolbox/files/folder | Create folder
+[**FsDeleteFile**](WorkspaceToolboxAPI.md#FsDeleteFile) | **Delete** /workspace/{workspaceId}/toolbox/files | Delete file
+[**FsDownloadFile**](WorkspaceToolboxAPI.md#FsDownloadFile) | **Get** /workspace/{workspaceId}/toolbox/files/download | Download file
+[**FsFindInFiles**](WorkspaceToolboxAPI.md#FsFindInFiles) | **Get** /workspace/{workspaceId}/toolbox/files/find | Search for text/pattern in files
+[**FsGetFileDetails**](WorkspaceToolboxAPI.md#FsGetFileDetails) | **Get** /workspace/{workspaceId}/toolbox/files/info | Get file info
+[**FsListFiles**](WorkspaceToolboxAPI.md#FsListFiles) | **Get** /workspace/{workspaceId}/toolbox/files | List files
+[**FsMoveFile**](WorkspaceToolboxAPI.md#FsMoveFile) | **Post** /workspace/{workspaceId}/toolbox/files/move | Create folder
+[**FsReplaceInFiles**](WorkspaceToolboxAPI.md#FsReplaceInFiles) | **Post** /workspace/{workspaceId}/toolbox/files/replace | Repleace text/pattern in files
+[**FsSearchFiles**](WorkspaceToolboxAPI.md#FsSearchFiles) | **Get** /workspace/{workspaceId}/toolbox/files/search | Search for files
+[**FsSetFilePermissions**](WorkspaceToolboxAPI.md#FsSetFilePermissions) | **Post** /workspace/{workspaceId}/toolbox/files/permissions | Set file owner/group/permissions
+[**FsUploadFile**](WorkspaceToolboxAPI.md#FsUploadFile) | **Post** /workspace/{workspaceId}/toolbox/files/upload | Upload file
+[**GetWorkspaceDir**](WorkspaceToolboxAPI.md#GetWorkspaceDir) | **Get** /workspace/{workspaceId}/toolbox/workspace-dir | Get workspace dir
+[**GitAddFiles**](WorkspaceToolboxAPI.md#GitAddFiles) | **Post** /workspace/{workspaceId}/toolbox/git/add | Add files
+[**GitBranchList**](WorkspaceToolboxAPI.md#GitBranchList) | **Get** /workspace/{workspaceId}/toolbox/git/branches | Get branch list
+[**GitCloneRepository**](WorkspaceToolboxAPI.md#GitCloneRepository) | **Post** /workspace/{workspaceId}/toolbox/git/clone | Clone git repository
+[**GitCommitChanges**](WorkspaceToolboxAPI.md#GitCommitChanges) | **Post** /workspace/{workspaceId}/toolbox/git/commit | Commit changes
+[**GitCommitHistory**](WorkspaceToolboxAPI.md#GitCommitHistory) | **Get** /workspace/{workspaceId}/toolbox/git/history | Get commit history
+[**GitCreateBranch**](WorkspaceToolboxAPI.md#GitCreateBranch) | **Post** /workspace/{workspaceId}/toolbox/git/branches | Create branch
+[**GitGitStatus**](WorkspaceToolboxAPI.md#GitGitStatus) | **Get** /workspace/{workspaceId}/toolbox/git/status | Get git status
+[**GitPullChanges**](WorkspaceToolboxAPI.md#GitPullChanges) | **Post** /workspace/{workspaceId}/toolbox/git/pull | Pull changes
+[**GitPushChanges**](WorkspaceToolboxAPI.md#GitPushChanges) | **Post** /workspace/{workspaceId}/toolbox/git/push | Push changes
+[**LspCompletions**](WorkspaceToolboxAPI.md#LspCompletions) | **Post** /workspace/{workspaceId}/toolbox/lsp/completions | Get Lsp Completions
+[**LspDidClose**](WorkspaceToolboxAPI.md#LspDidClose) | **Post** /workspace/{workspaceId}/toolbox/lsp/did-close | Call Lsp DidClose
+[**LspDidOpen**](WorkspaceToolboxAPI.md#LspDidOpen) | **Post** /workspace/{workspaceId}/toolbox/lsp/did-open | Call Lsp DidOpen
+[**LspDocumentSymbols**](WorkspaceToolboxAPI.md#LspDocumentSymbols) | **Get** /workspace/{workspaceId}/toolbox/lsp/document-symbols | Call Lsp DocumentSymbols
+[**LspStart**](WorkspaceToolboxAPI.md#LspStart) | **Post** /workspace/{workspaceId}/toolbox/lsp/start | Start Lsp server
+[**LspStop**](WorkspaceToolboxAPI.md#LspStop) | **Post** /workspace/{workspaceId}/toolbox/lsp/stop | Stop Lsp server
+[**LspWorkspaceSymbols**](WorkspaceToolboxAPI.md#LspWorkspaceSymbols) | **Get** /workspace/{workspaceId}/toolbox/lsp/workspace-symbols | Call Lsp WorkspaceSymbols
+[**ProcessExecuteCommand**](WorkspaceToolboxAPI.md#ProcessExecuteCommand) | **Post** /workspace/{workspaceId}/toolbox/process/execute | Execute command
+
+
 
 ## FsCreateFolder
 
-> FsCreateFolder(ctx, workspaceId, projectId).Path(path).Mode(mode).Execute()
+> FsCreateFolder(ctx, workspaceId).Path(path).Mode(mode).Execute()
 
 Create folder
+
+
 
 ### Example
 
@@ -54,13 +58,12 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	path := "path_example" // string | Path
 	mode := "mode_example" // string | Mode
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.WorkspaceToolboxAPI.FsCreateFolder(context.Background(), workspaceId, projectId).Path(path).Mode(mode).Execute()
+	r, err := apiClient.WorkspaceToolboxAPI.FsCreateFolder(context.Background(), workspaceId).Path(path).Mode(mode).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.FsCreateFolder``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -70,25 +73,26 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiFsCreateFolderRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**path** | **string** | Path |
-**mode** | **string** | Mode |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **path** | **string** | Path | 
+ **mode** | **string** | Mode | 
 
 ### Return type
 
-(empty response body)
+ (empty response body)
 
 ### Authorization
 
@@ -103,11 +107,14 @@ Other parameters are passed through a pointer to a apiFsCreateFolderRequest stru
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## FsDeleteFile
 
-> FsDeleteFile(ctx, workspaceId, projectId).Path(path).Execute()
+> FsDeleteFile(ctx, workspaceId).Path(path).Execute()
 
 Delete file
+
+
 
 ### Example
 
@@ -123,12 +130,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	path := "path_example" // string | Path
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.WorkspaceToolboxAPI.FsDeleteFile(context.Background(), workspaceId, projectId).Path(path).Execute()
+	r, err := apiClient.WorkspaceToolboxAPI.FsDeleteFile(context.Background(), workspaceId).Path(path).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.FsDeleteFile``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -138,24 +144,25 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiFsDeleteFileRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**path** | **string** | Path |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **path** | **string** | Path | 
 
 ### Return type
 
-(empty response body)
+ (empty response body)
 
 ### Authorization
 
@@ -170,11 +177,14 @@ Other parameters are passed through a pointer to a apiFsDeleteFileRequest struct
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## FsDownloadFile
 
-> \*os.File FsDownloadFile(ctx, workspaceId, projectId).Path(path).Execute()
+> *os.File FsDownloadFile(ctx, workspaceId).Path(path).Execute()
 
 Download file
+
+
 
 ### Example
 
@@ -190,12 +200,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	path := "path_example" // string | Path
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceToolboxAPI.FsDownloadFile(context.Background(), workspaceId, projectId).Path(path).Execute()
+	resp, r, err := apiClient.WorkspaceToolboxAPI.FsDownloadFile(context.Background(), workspaceId).Path(path).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.FsDownloadFile``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -207,24 +216,25 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiFsDownloadFileRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**path** | **string** | Path |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **path** | **string** | Path | 
 
 ### Return type
 
-[**\*os.File**](*os.File.md)
+[***os.File**](*os.File.md)
 
 ### Authorization
 
@@ -239,11 +249,14 @@ Other parameters are passed through a pointer to a apiFsDownloadFileRequest stru
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## FsFindInFiles
 
-> []Match FsFindInFiles(ctx, workspaceId, projectId).Path(path).Pattern(pattern).Execute()
+> []Match FsFindInFiles(ctx, workspaceId).Path(path).Pattern(pattern).Execute()
 
 Search for text/pattern in files
+
+
 
 ### Example
 
@@ -259,13 +272,12 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	path := "path_example" // string | Path
 	pattern := "pattern_example" // string | Pattern
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceToolboxAPI.FsFindInFiles(context.Background(), workspaceId, projectId).Path(path).Pattern(pattern).Execute()
+	resp, r, err := apiClient.WorkspaceToolboxAPI.FsFindInFiles(context.Background(), workspaceId).Path(path).Pattern(pattern).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.FsFindInFiles``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -277,21 +289,22 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiFsFindInFilesRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**path** | **string** | Path |
-**pattern** | **string** | Pattern |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **path** | **string** | Path | 
+ **pattern** | **string** | Pattern | 
 
 ### Return type
 
@@ -310,11 +323,14 @@ Other parameters are passed through a pointer to a apiFsFindInFilesRequest struc
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## FsGetFileDetails
 
-> FileInfo FsGetFileDetails(ctx, workspaceId, projectId).Path(path).Execute()
+> FileInfo FsGetFileDetails(ctx, workspaceId).Path(path).Execute()
 
 Get file info
+
+
 
 ### Example
 
@@ -330,12 +346,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	path := "path_example" // string | Path
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceToolboxAPI.FsGetFileDetails(context.Background(), workspaceId, projectId).Path(path).Execute()
+	resp, r, err := apiClient.WorkspaceToolboxAPI.FsGetFileDetails(context.Background(), workspaceId).Path(path).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.FsGetFileDetails``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -347,20 +362,21 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiFsGetFileDetailsRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**path** | **string** | Path |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **path** | **string** | Path | 
 
 ### Return type
 
@@ -379,11 +395,14 @@ Other parameters are passed through a pointer to a apiFsGetFileDetailsRequest st
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## FsListFiles
 
-> []FileInfo FsListFiles(ctx, workspaceId, projectId).Path(path).Execute()
+> []FileInfo FsListFiles(ctx, workspaceId).Path(path).Execute()
 
 List files
+
+
 
 ### Example
 
@@ -399,12 +418,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	path := "path_example" // string | Path (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceToolboxAPI.FsListFiles(context.Background(), workspaceId, projectId).Path(path).Execute()
+	resp, r, err := apiClient.WorkspaceToolboxAPI.FsListFiles(context.Background(), workspaceId).Path(path).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.FsListFiles``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -416,20 +434,21 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiFsListFilesRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**path** | **string** | Path |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **path** | **string** | Path | 
 
 ### Return type
 
@@ -448,11 +467,14 @@ Other parameters are passed through a pointer to a apiFsListFilesRequest struct 
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## FsMoveFile
 
-> FsMoveFile(ctx, workspaceId, projectId).Source(source).Destination(destination).Execute()
+> FsMoveFile(ctx, workspaceId).Source(source).Destination(destination).Execute()
 
 Create folder
+
+
 
 ### Example
 
@@ -468,13 +490,12 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	source := "source_example" // string | Source path
 	destination := "destination_example" // string | Destination path
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.WorkspaceToolboxAPI.FsMoveFile(context.Background(), workspaceId, projectId).Source(source).Destination(destination).Execute()
+	r, err := apiClient.WorkspaceToolboxAPI.FsMoveFile(context.Background(), workspaceId).Source(source).Destination(destination).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.FsMoveFile``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -484,25 +505,26 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiFsMoveFileRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**source** | **string** | Source path |
-**destination** | **string** | Destination path |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **source** | **string** | Source path | 
+ **destination** | **string** | Destination path | 
 
 ### Return type
 
-(empty response body)
+ (empty response body)
 
 ### Authorization
 
@@ -517,11 +539,14 @@ Other parameters are passed through a pointer to a apiFsMoveFileRequest struct v
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## FsReplaceInFiles
 
-> []ReplaceResult FsReplaceInFiles(ctx, workspaceId, projectId).Replace(replace).Execute()
+> []ReplaceResult FsReplaceInFiles(ctx, workspaceId).Replace(replace).Execute()
 
 Repleace text/pattern in files
+
+
 
 ### Example
 
@@ -537,12 +562,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	replace := *openapiclient.NewReplaceRequest([]string{"Files_example"}, "NewValue_example", "Pattern_example") // ReplaceRequest | ReplaceParams
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceToolboxAPI.FsReplaceInFiles(context.Background(), workspaceId, projectId).Replace(replace).Execute()
+	resp, r, err := apiClient.WorkspaceToolboxAPI.FsReplaceInFiles(context.Background(), workspaceId).Replace(replace).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.FsReplaceInFiles``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -554,20 +578,21 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiFsReplaceInFilesRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**replace** | [**ReplaceRequest**](ReplaceRequest.md) | ReplaceParams |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **replace** | [**ReplaceRequest**](ReplaceRequest.md) | ReplaceParams | 
 
 ### Return type
 
@@ -586,11 +611,14 @@ Other parameters are passed through a pointer to a apiFsReplaceInFilesRequest st
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## FsSearchFiles
 
-> SearchFilesResponse FsSearchFiles(ctx, workspaceId, projectId).Path(path).Pattern(pattern).Execute()
+> SearchFilesResponse FsSearchFiles(ctx, workspaceId).Path(path).Pattern(pattern).Execute()
 
 Search for files
+
+
 
 ### Example
 
@@ -606,13 +634,12 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	path := "path_example" // string | Path
 	pattern := "pattern_example" // string | Pattern
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceToolboxAPI.FsSearchFiles(context.Background(), workspaceId, projectId).Path(path).Pattern(pattern).Execute()
+	resp, r, err := apiClient.WorkspaceToolboxAPI.FsSearchFiles(context.Background(), workspaceId).Path(path).Pattern(pattern).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.FsSearchFiles``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -624,21 +651,22 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiFsSearchFilesRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**path** | **string** | Path |
-**pattern** | **string** | Pattern |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **path** | **string** | Path | 
+ **pattern** | **string** | Pattern | 
 
 ### Return type
 
@@ -657,11 +685,14 @@ Other parameters are passed through a pointer to a apiFsSearchFilesRequest struc
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## FsSetFilePermissions
 
-> FsSetFilePermissions(ctx, workspaceId, projectId).Path(path).Owner(owner).Group(group).Mode(mode).Execute()
+> FsSetFilePermissions(ctx, workspaceId).Path(path).Owner(owner).Group(group).Mode(mode).Execute()
 
 Set file owner/group/permissions
+
+
 
 ### Example
 
@@ -677,7 +708,6 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	path := "path_example" // string | Path
 	owner := "owner_example" // string | Owner (optional)
 	group := "group_example" // string | Group (optional)
@@ -685,7 +715,7 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.WorkspaceToolboxAPI.FsSetFilePermissions(context.Background(), workspaceId, projectId).Path(path).Owner(owner).Group(group).Mode(mode).Execute()
+	r, err := apiClient.WorkspaceToolboxAPI.FsSetFilePermissions(context.Background(), workspaceId).Path(path).Owner(owner).Group(group).Mode(mode).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.FsSetFilePermissions``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -695,27 +725,28 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiFsSetFilePermissionsRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**path** | **string** | Path |
-**owner** | **string** | Owner |
-**group** | **string** | Group |
-**mode** | **string** | Mode |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **path** | **string** | Path | 
+ **owner** | **string** | Owner | 
+ **group** | **string** | Group | 
+ **mode** | **string** | Mode | 
 
 ### Return type
 
-(empty response body)
+ (empty response body)
 
 ### Authorization
 
@@ -730,11 +761,14 @@ Other parameters are passed through a pointer to a apiFsSetFilePermissionsReques
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## FsUploadFile
 
-> FsUploadFile(ctx, workspaceId, projectId).Path(path).File(file).Execute()
+> FsUploadFile(ctx, workspaceId).Path(path).File(file).Execute()
 
 Upload file
+
+
 
 ### Example
 
@@ -750,13 +784,12 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	path := "path_example" // string | Path
 	file := os.NewFile(1234, "some_file") // *os.File | File
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.WorkspaceToolboxAPI.FsUploadFile(context.Background(), workspaceId, projectId).Path(path).File(file).Execute()
+	r, err := apiClient.WorkspaceToolboxAPI.FsUploadFile(context.Background(), workspaceId).Path(path).File(file).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.FsUploadFile``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -766,25 +799,26 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiFsUploadFileRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**path** | **string** | Path |
-**file** | **\*os.File** | File |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **path** | **string** | Path | 
+ **file** | ***os.File** | File | 
 
 ### Return type
 
-(empty response body)
+ (empty response body)
 
 ### Authorization
 
@@ -799,11 +833,14 @@ Other parameters are passed through a pointer to a apiFsUploadFileRequest struct
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## GetWorkspaceDir
 
-> WorkspaceDirResponse GetWorkspaceDir(ctx, workspaceId, projectId).Execute()
+> WorkspaceDirResponse GetWorkspaceDir(ctx, workspaceId).Execute()
 
 Get workspace dir
+
+
 
 ### Example
 
@@ -819,11 +856,10 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceToolboxAPI.GetWorkspaceDir(context.Background(), workspaceId, projectId).Execute()
+	resp, r, err := apiClient.WorkspaceToolboxAPI.GetWorkspaceDir(context.Background(), workspaceId).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.GetWorkspaceDir``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -835,18 +871,20 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiGetWorkspaceDirRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
 
 ### Return type
 
@@ -865,11 +903,14 @@ Other parameters are passed through a pointer to a apiGetWorkspaceDirRequest str
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## GitAddFiles
 
-> GitAddFiles(ctx, workspaceId, projectId).Params(params).Execute()
+> GitAddFiles(ctx, workspaceId).Params(params).Execute()
 
 Add files
+
+
 
 ### Example
 
@@ -885,12 +926,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	params := *openapiclient.NewGitAddRequest([]string{"Files_example"}, "Path_example") // GitAddRequest | GitAddRequest
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.WorkspaceToolboxAPI.GitAddFiles(context.Background(), workspaceId, projectId).Params(params).Execute()
+	r, err := apiClient.WorkspaceToolboxAPI.GitAddFiles(context.Background(), workspaceId).Params(params).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.GitAddFiles``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -900,24 +940,25 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiGitAddFilesRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**params** | [**GitAddRequest**](GitAddRequest.md) | GitAddRequest |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **params** | [**GitAddRequest**](GitAddRequest.md) | GitAddRequest | 
 
 ### Return type
 
-(empty response body)
+ (empty response body)
 
 ### Authorization
 
@@ -932,11 +973,14 @@ Other parameters are passed through a pointer to a apiGitAddFilesRequest struct 
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## GitBranchList
 
-> ListBranchResponse GitBranchList(ctx, workspaceId, projectId).Path(path).Execute()
+> ListBranchResponse GitBranchList(ctx, workspaceId).Path(path).Execute()
 
 Get branch list
+
+
 
 ### Example
 
@@ -952,12 +996,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	path := "path_example" // string | Path to git repository
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceToolboxAPI.GitBranchList(context.Background(), workspaceId, projectId).Path(path).Execute()
+	resp, r, err := apiClient.WorkspaceToolboxAPI.GitBranchList(context.Background(), workspaceId).Path(path).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.GitBranchList``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -969,20 +1012,21 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiGitBranchListRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**path** | **string** | Path to git repository |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **path** | **string** | Path to git repository | 
 
 ### Return type
 
@@ -1001,11 +1045,14 @@ Other parameters are passed through a pointer to a apiGitBranchListRequest struc
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## GitCloneRepository
 
-> GitCloneRepository(ctx, workspaceId, projectId).Params(params).Execute()
+> GitCloneRepository(ctx, workspaceId).Params(params).Execute()
 
 Clone git repository
+
+
 
 ### Example
 
@@ -1021,12 +1068,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	params := *openapiclient.NewGitCloneRequest("Path_example", "Url_example") // GitCloneRequest | GitCloneRequest
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.WorkspaceToolboxAPI.GitCloneRepository(context.Background(), workspaceId, projectId).Params(params).Execute()
+	r, err := apiClient.WorkspaceToolboxAPI.GitCloneRepository(context.Background(), workspaceId).Params(params).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.GitCloneRepository``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -1036,24 +1082,25 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiGitCloneRepositoryRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**params** | [**GitCloneRequest**](GitCloneRequest.md) | GitCloneRequest |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **params** | [**GitCloneRequest**](GitCloneRequest.md) | GitCloneRequest | 
 
 ### Return type
 
-(empty response body)
+ (empty response body)
 
 ### Authorization
 
@@ -1068,11 +1115,14 @@ Other parameters are passed through a pointer to a apiGitCloneRepositoryRequest 
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## GitCommitChanges
 
-> GitCommitResponse GitCommitChanges(ctx, workspaceId, projectId).Params(params).Execute()
+> GitCommitResponse GitCommitChanges(ctx, workspaceId).Params(params).Execute()
 
 Commit changes
+
+
 
 ### Example
 
@@ -1088,12 +1138,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	params := *openapiclient.NewGitCommitRequest("Author_example", "Email_example", "Message_example", "Path_example") // GitCommitRequest | GitCommitRequest
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceToolboxAPI.GitCommitChanges(context.Background(), workspaceId, projectId).Params(params).Execute()
+	resp, r, err := apiClient.WorkspaceToolboxAPI.GitCommitChanges(context.Background(), workspaceId).Params(params).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.GitCommitChanges``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -1105,20 +1154,21 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiGitCommitChangesRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**params** | [**GitCommitRequest**](GitCommitRequest.md) | GitCommitRequest |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **params** | [**GitCommitRequest**](GitCommitRequest.md) | GitCommitRequest | 
 
 ### Return type
 
@@ -1137,11 +1187,14 @@ Other parameters are passed through a pointer to a apiGitCommitChangesRequest st
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## GitCommitHistory
 
-> []GitCommitInfo GitCommitHistory(ctx, workspaceId, projectId).Path(path).Execute()
+> []GitCommitInfo GitCommitHistory(ctx, workspaceId).Path(path).Execute()
 
 Get commit history
+
+
 
 ### Example
 
@@ -1157,12 +1210,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	path := "path_example" // string | Path to git repository
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceToolboxAPI.GitCommitHistory(context.Background(), workspaceId, projectId).Path(path).Execute()
+	resp, r, err := apiClient.WorkspaceToolboxAPI.GitCommitHistory(context.Background(), workspaceId).Path(path).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.GitCommitHistory``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -1174,20 +1226,21 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiGitCommitHistoryRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**path** | **string** | Path to git repository |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **path** | **string** | Path to git repository | 
 
 ### Return type
 
@@ -1206,11 +1259,14 @@ Other parameters are passed through a pointer to a apiGitCommitHistoryRequest st
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## GitCreateBranch
 
-> GitCreateBranch(ctx, workspaceId, projectId).Params(params).Execute()
+> GitCreateBranch(ctx, workspaceId).Params(params).Execute()
 
 Create branch
+
+
 
 ### Example
 
@@ -1226,12 +1282,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	params := *openapiclient.NewGitBranchRequest("Name_example", "Path_example") // GitBranchRequest | GitBranchRequest
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.WorkspaceToolboxAPI.GitCreateBranch(context.Background(), workspaceId, projectId).Params(params).Execute()
+	r, err := apiClient.WorkspaceToolboxAPI.GitCreateBranch(context.Background(), workspaceId).Params(params).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.GitCreateBranch``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -1241,24 +1296,25 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiGitCreateBranchRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**params** | [**GitBranchRequest**](GitBranchRequest.md) | GitBranchRequest |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **params** | [**GitBranchRequest**](GitBranchRequest.md) | GitBranchRequest | 
 
 ### Return type
 
-(empty response body)
+ (empty response body)
 
 ### Authorization
 
@@ -1273,11 +1329,14 @@ Other parameters are passed through a pointer to a apiGitCreateBranchRequest str
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## GitGitStatus
 
-> GitStatus GitGitStatus(ctx, workspaceId, projectId).Path(path).Execute()
+> GitStatus GitGitStatus(ctx, workspaceId).Path(path).Execute()
 
 Get git status
+
+
 
 ### Example
 
@@ -1293,12 +1352,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	path := "path_example" // string | Path to git repository
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceToolboxAPI.GitGitStatus(context.Background(), workspaceId, projectId).Path(path).Execute()
+	resp, r, err := apiClient.WorkspaceToolboxAPI.GitGitStatus(context.Background(), workspaceId).Path(path).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.GitGitStatus``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -1310,20 +1368,21 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiGitGitStatusRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**path** | **string** | Path to git repository |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **path** | **string** | Path to git repository | 
 
 ### Return type
 
@@ -1342,11 +1401,14 @@ Other parameters are passed through a pointer to a apiGitGitStatusRequest struct
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## GitPullChanges
 
-> GitPullChanges(ctx, workspaceId, projectId).Params(params).Execute()
+> GitPullChanges(ctx, workspaceId).Params(params).Execute()
 
 Pull changes
+
+
 
 ### Example
 
@@ -1362,12 +1424,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	params := *openapiclient.NewGitRepoRequest("Path_example") // GitRepoRequest | Git pull request
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.WorkspaceToolboxAPI.GitPullChanges(context.Background(), workspaceId, projectId).Params(params).Execute()
+	r, err := apiClient.WorkspaceToolboxAPI.GitPullChanges(context.Background(), workspaceId).Params(params).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.GitPullChanges``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -1377,24 +1438,25 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiGitPullChangesRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**params** | [**GitRepoRequest**](GitRepoRequest.md) | Git pull request |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **params** | [**GitRepoRequest**](GitRepoRequest.md) | Git pull request | 
 
 ### Return type
 
-(empty response body)
+ (empty response body)
 
 ### Authorization
 
@@ -1409,11 +1471,14 @@ Other parameters are passed through a pointer to a apiGitPullChangesRequest stru
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## GitPushChanges
 
-> GitPushChanges(ctx, workspaceId, projectId).Params(params).Execute()
+> GitPushChanges(ctx, workspaceId).Params(params).Execute()
 
 Push changes
+
+
 
 ### Example
 
@@ -1429,12 +1494,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	params := *openapiclient.NewGitRepoRequest("Path_example") // GitRepoRequest | Git push request
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.WorkspaceToolboxAPI.GitPushChanges(context.Background(), workspaceId, projectId).Params(params).Execute()
+	r, err := apiClient.WorkspaceToolboxAPI.GitPushChanges(context.Background(), workspaceId).Params(params).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.GitPushChanges``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -1444,24 +1508,25 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiGitPushChangesRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**params** | [**GitRepoRequest**](GitRepoRequest.md) | Git push request |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **params** | [**GitRepoRequest**](GitRepoRequest.md) | Git push request | 
 
 ### Return type
 
-(empty response body)
+ (empty response body)
 
 ### Authorization
 
@@ -1476,11 +1541,14 @@ Other parameters are passed through a pointer to a apiGitPushChangesRequest stru
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## LspCompletions
 
-> CompletionList LspCompletions(ctx, workspaceId, projectId).Params(params).Execute()
+> CompletionList LspCompletions(ctx, workspaceId).Params(params).Execute()
 
 Get Lsp Completions
+
+
 
 ### Example
 
@@ -1496,12 +1564,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	params := *openapiclient.NewLspCompletionParams("LanguageId_example", "PathToProject_example", *openapiclient.NewPosition(int32(123), int32(123)), "Uri_example") // LspCompletionParams | LspCompletionParams
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceToolboxAPI.LspCompletions(context.Background(), workspaceId, projectId).Params(params).Execute()
+	resp, r, err := apiClient.WorkspaceToolboxAPI.LspCompletions(context.Background(), workspaceId).Params(params).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.LspCompletions``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -1513,20 +1580,21 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiLspCompletionsRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**params** | [**LspCompletionParams**](LspCompletionParams.md) | LspCompletionParams |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **params** | [**LspCompletionParams**](LspCompletionParams.md) | LspCompletionParams | 
 
 ### Return type
 
@@ -1545,11 +1613,14 @@ Other parameters are passed through a pointer to a apiLspCompletionsRequest stru
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## LspDidClose
 
-> LspDidClose(ctx, workspaceId, projectId).Params(params).Execute()
+> LspDidClose(ctx, workspaceId).Params(params).Execute()
 
 Call Lsp DidClose
+
+
 
 ### Example
 
@@ -1565,12 +1636,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	params := *openapiclient.NewLspDocumentRequest("LanguageId_example", "PathToProject_example", "Uri_example") // LspDocumentRequest | LspDocumentRequest
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.WorkspaceToolboxAPI.LspDidClose(context.Background(), workspaceId, projectId).Params(params).Execute()
+	r, err := apiClient.WorkspaceToolboxAPI.LspDidClose(context.Background(), workspaceId).Params(params).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.LspDidClose``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -1580,24 +1650,25 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiLspDidCloseRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**params** | [**LspDocumentRequest**](LspDocumentRequest.md) | LspDocumentRequest |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **params** | [**LspDocumentRequest**](LspDocumentRequest.md) | LspDocumentRequest | 
 
 ### Return type
 
-(empty response body)
+ (empty response body)
 
 ### Authorization
 
@@ -1612,11 +1683,14 @@ Other parameters are passed through a pointer to a apiLspDidCloseRequest struct 
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## LspDidOpen
 
-> LspDidOpen(ctx, workspaceId, projectId).Params(params).Execute()
+> LspDidOpen(ctx, workspaceId).Params(params).Execute()
 
 Call Lsp DidOpen
+
+
 
 ### Example
 
@@ -1632,12 +1706,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	params := *openapiclient.NewLspDocumentRequest("LanguageId_example", "PathToProject_example", "Uri_example") // LspDocumentRequest | LspDocumentRequest
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.WorkspaceToolboxAPI.LspDidOpen(context.Background(), workspaceId, projectId).Params(params).Execute()
+	r, err := apiClient.WorkspaceToolboxAPI.LspDidOpen(context.Background(), workspaceId).Params(params).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.LspDidOpen``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -1647,24 +1720,25 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiLspDidOpenRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**params** | [**LspDocumentRequest**](LspDocumentRequest.md) | LspDocumentRequest |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **params** | [**LspDocumentRequest**](LspDocumentRequest.md) | LspDocumentRequest | 
 
 ### Return type
 
-(empty response body)
+ (empty response body)
 
 ### Authorization
 
@@ -1679,11 +1753,14 @@ Other parameters are passed through a pointer to a apiLspDidOpenRequest struct v
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## LspDocumentSymbols
 
-> []LspSymbol LspDocumentSymbols(ctx, workspaceId, projectId).LanguageId(languageId).PathToProject(pathToProject).Uri(uri).Execute()
+> []LspSymbol LspDocumentSymbols(ctx, workspaceId).LanguageId(languageId).PathToProject(pathToProject).Uri(uri).Execute()
 
 Call Lsp DocumentSymbols
+
+
 
 ### Example
 
@@ -1699,14 +1776,13 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	languageId := "languageId_example" // string | Language ID
 	pathToProject := "pathToProject_example" // string | Path to project
 	uri := "uri_example" // string | Document Uri
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceToolboxAPI.LspDocumentSymbols(context.Background(), workspaceId, projectId).LanguageId(languageId).PathToProject(pathToProject).Uri(uri).Execute()
+	resp, r, err := apiClient.WorkspaceToolboxAPI.LspDocumentSymbols(context.Background(), workspaceId).LanguageId(languageId).PathToProject(pathToProject).Uri(uri).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.LspDocumentSymbols``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -1718,22 +1794,23 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiLspDocumentSymbolsRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**languageId** | **string** | Language ID |
-**pathToProject** | **string** | Path to project |
-**uri** | **string** | Document Uri |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **languageId** | **string** | Language ID | 
+ **pathToProject** | **string** | Path to project | 
+ **uri** | **string** | Document Uri | 
 
 ### Return type
 
@@ -1752,11 +1829,14 @@ Other parameters are passed through a pointer to a apiLspDocumentSymbolsRequest 
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## LspStart
 
-> LspStart(ctx, workspaceId, projectId).Params(params).Execute()
+> LspStart(ctx, workspaceId).Params(params).Execute()
 
 Start Lsp server
+
+
 
 ### Example
 
@@ -1772,12 +1852,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	params := *openapiclient.NewLspServerRequest("LanguageId_example", "PathToProject_example") // LspServerRequest | LspServerRequest
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.WorkspaceToolboxAPI.LspStart(context.Background(), workspaceId, projectId).Params(params).Execute()
+	r, err := apiClient.WorkspaceToolboxAPI.LspStart(context.Background(), workspaceId).Params(params).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.LspStart``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -1787,24 +1866,25 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiLspStartRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**params** | [**LspServerRequest**](LspServerRequest.md) | LspServerRequest |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **params** | [**LspServerRequest**](LspServerRequest.md) | LspServerRequest | 
 
 ### Return type
 
-(empty response body)
+ (empty response body)
 
 ### Authorization
 
@@ -1819,11 +1899,14 @@ Other parameters are passed through a pointer to a apiLspStartRequest struct via
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## LspStop
 
-> LspStop(ctx, workspaceId, projectId).Params(params).Execute()
+> LspStop(ctx, workspaceId).Params(params).Execute()
 
 Stop Lsp server
+
+
 
 ### Example
 
@@ -1839,12 +1922,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	params := *openapiclient.NewLspServerRequest("LanguageId_example", "PathToProject_example") // LspServerRequest | LspServerRequest
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.WorkspaceToolboxAPI.LspStop(context.Background(), workspaceId, projectId).Params(params).Execute()
+	r, err := apiClient.WorkspaceToolboxAPI.LspStop(context.Background(), workspaceId).Params(params).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.LspStop``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -1854,24 +1936,25 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiLspStopRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**params** | [**LspServerRequest**](LspServerRequest.md) | LspServerRequest |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **params** | [**LspServerRequest**](LspServerRequest.md) | LspServerRequest | 
 
 ### Return type
 
-(empty response body)
+ (empty response body)
 
 ### Authorization
 
@@ -1886,11 +1969,14 @@ Other parameters are passed through a pointer to a apiLspStopRequest struct via 
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## LspWorkspaceSymbols
 
-> []LspSymbol LspWorkspaceSymbols(ctx, workspaceId, projectId).LanguageId(languageId).PathToProject(pathToProject).Query(query).Execute()
+> []LspSymbol LspWorkspaceSymbols(ctx, workspaceId).LanguageId(languageId).PathToProject(pathToProject).Query(query).Execute()
 
 Call Lsp WorkspaceSymbols
+
+
 
 ### Example
 
@@ -1906,14 +1992,13 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	languageId := "languageId_example" // string | Language ID
 	pathToProject := "pathToProject_example" // string | Path to project
 	query := "query_example" // string | Symbol Query
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceToolboxAPI.LspWorkspaceSymbols(context.Background(), workspaceId, projectId).LanguageId(languageId).PathToProject(pathToProject).Query(query).Execute()
+	resp, r, err := apiClient.WorkspaceToolboxAPI.LspWorkspaceSymbols(context.Background(), workspaceId).LanguageId(languageId).PathToProject(pathToProject).Query(query).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.LspWorkspaceSymbols``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -1925,22 +2010,23 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiLspWorkspaceSymbolsRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**languageId** | **string** | Language ID |
-**pathToProject** | **string** | Path to project |
-**query** | **string** | Symbol Query |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **languageId** | **string** | Language ID | 
+ **pathToProject** | **string** | Path to project | 
+ **query** | **string** | Symbol Query | 
 
 ### Return type
 
@@ -1959,11 +2045,14 @@ Other parameters are passed through a pointer to a apiLspWorkspaceSymbolsRequest
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
 
+
 ## ProcessExecuteCommand
 
-> ExecuteResponse ProcessExecuteCommand(ctx, workspaceId, projectId).Params(params).Execute()
+> ExecuteResponse ProcessExecuteCommand(ctx, workspaceId).Params(params).Execute()
 
 Execute command
+
+
 
 ### Example
 
@@ -1979,12 +2068,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project ID
 	params := *openapiclient.NewExecuteRequest("Command_example") // ExecuteRequest | Execute command request
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceToolboxAPI.ProcessExecuteCommand(context.Background(), workspaceId, projectId).Params(params).Execute()
+	resp, r, err := apiClient.WorkspaceToolboxAPI.ProcessExecuteCommand(context.Background(), workspaceId).Params(params).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.ProcessExecuteCommand``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -1996,20 +2084,21 @@ func main() {
 
 ### Path Parameters
 
-| Name            | Type                | Description                                                                 | Notes |
-| --------------- | ------------------- | --------------------------------------------------------------------------- | ----- |
-| **ctx**         | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc. |
-| **workspaceId** | **string**          | Workspace ID or Name                                                        |
-| **projectId**   | **string**          | Project ID                                                                  |
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiProcessExecuteCommandRequest struct via the builder pattern
 
-| Name | Type | Description | Notes |
-| ---- | ---- | ----------- | ----- |
 
-**params** | [**ExecuteRequest**](ExecuteRequest.md) | Execute command request |
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **params** | [**ExecuteRequest**](ExecuteRequest.md) | Execute command request | 
 
 ### Return type
 
@@ -2027,3 +2116,4 @@ Other parameters are passed through a pointer to a apiProcessExecuteCommandReque
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to README]](../README.md)
+

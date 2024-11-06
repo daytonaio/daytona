@@ -7,54 +7,55 @@ import (
 	"testing"
 
 	t_targetconfigs "github.com/daytonaio/daytona/internal/testing/provider/targetconfigs"
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
+	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/target/config"
 	"github.com/stretchr/testify/suite"
 )
 
-var targetConfig1 *provider.TargetConfig = &provider.TargetConfig{
+var targetConfig1 *config.TargetConfig = &config.TargetConfig{
 	Name: "targetConfig1",
-	ProviderInfo: provider.ProviderInfo{
+	ProviderInfo: target.ProviderInfo{
 		Name:    "provider1",
 		Version: "v1",
 	},
 	Options: "",
 }
 
-var targetConfig2 *provider.TargetConfig = &provider.TargetConfig{
+var targetConfig2 *config.TargetConfig = &config.TargetConfig{
 	Name: "targetConfig2",
-	ProviderInfo: provider.ProviderInfo{
+	ProviderInfo: target.ProviderInfo{
 		Name:    "provider2",
 		Version: "v1",
 	},
 	Options: "",
 }
 
-var targetConfig3 *provider.TargetConfig = &provider.TargetConfig{
+var targetConfig3 *config.TargetConfig = &config.TargetConfig{
 	Name: "targetConfig3",
-	ProviderInfo: provider.ProviderInfo{
-		Name:    "provider1",
+	ProviderInfo: target.ProviderInfo{
+		Name:    "provider3",
 		Version: "v1",
 	},
 	Options: "",
 }
 
-var targetConfig4 *provider.TargetConfig = &provider.TargetConfig{
+var targetConfig4 *config.TargetConfig = &config.TargetConfig{
 	Name: "newTargetConfig",
-	ProviderInfo: provider.ProviderInfo{
+	ProviderInfo: target.ProviderInfo{
 		Name:    "provider2",
 		Version: "v1",
 	},
 	Options: "",
 }
 
-var expectedConfigs []*provider.TargetConfig
-var expectedConfigMap map[string]*provider.TargetConfig
+var expectedConfigs []*config.TargetConfig
+var expectedConfigMap map[string]*config.TargetConfig
 
 type TargetConfigServiceTestSuite struct {
 	suite.Suite
 	targetConfigService targetconfigs.ITargetConfigService
-	targetConfigStore   provider.TargetConfigStore
+	targetConfigStore   config.TargetConfigStore
 }
 
 func NewTargetConfigServiceTestSuite() *TargetConfigServiceTestSuite {
@@ -62,11 +63,11 @@ func NewTargetConfigServiceTestSuite() *TargetConfigServiceTestSuite {
 }
 
 func (s *TargetConfigServiceTestSuite) SetupTest() {
-	expectedConfigs = []*provider.TargetConfig{
+	expectedConfigs = []*config.TargetConfig{
 		targetConfig1, targetConfig2, targetConfig3,
 	}
 
-	expectedConfigMap = map[string]*provider.TargetConfig{
+	expectedConfigMap = map[string]*config.TargetConfig{
 		targetConfig1.Name: targetConfig1,
 		targetConfig2.Name: targetConfig2,
 		targetConfig3.Name: targetConfig3,
@@ -105,25 +106,11 @@ func (s *TargetConfigServiceTestSuite) TestMap() {
 func (s *TargetConfigServiceTestSuite) TestFind() {
 	require := s.Require()
 
-	targetConfig, err := s.targetConfigService.Find(&provider.TargetConfigFilter{
+	targetConfig, err := s.targetConfigService.Find(&config.TargetConfigFilter{
 		Name: &targetConfig1.Name,
 	})
 	require.Nil(err)
 	require.Equal(targetConfig1, targetConfig)
-}
-
-func (s *TargetConfigServiceTestSuite) TestSetDefault() {
-	require := s.Require()
-
-	err := s.targetConfigService.SetDefault(targetConfig2)
-	require.Nil(err)
-
-	targetConfig, err := s.targetConfigService.Find(&provider.TargetConfigFilter{
-		Name: &targetConfig2.Name,
-	})
-	require.Nil(err)
-
-	require.Equal(targetConfig2, targetConfig)
 }
 
 func (s *TargetConfigServiceTestSuite) TestSave() {

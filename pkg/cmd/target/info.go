@@ -45,7 +45,7 @@ var infoCmd = &cobra.Command{
 				format.UnblockStdOut()
 			}
 
-			target = selection.GetTargetFromPrompt(targetList, "View")
+			target = selection.GetTargetFromPrompt(targetList, false, "View")
 			if format.FormatFlag != "" {
 				format.BlockStdOut()
 			}

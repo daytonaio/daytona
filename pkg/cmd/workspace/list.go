@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package target
+package workspace
 
 import (
 	"context"
@@ -19,7 +19,7 @@ var verbose bool
 
 var ListCmd = &cobra.Command{
 	Use:     "list",
-	Short:   "List targets",
+	Short:   "List workspaces",
 	Args:    cobra.ExactArgs(0),
 	Aliases: []string{"ls"},
 	GroupID: util.TARGET_GROUP,

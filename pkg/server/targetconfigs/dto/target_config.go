@@ -3,10 +3,10 @@
 
 package dto
 
-import "github.com/daytonaio/daytona/pkg/provider"
+import "github.com/daytonaio/daytona/pkg/target"
 
 type CreateTargetConfigDTO struct {
-	Name         string                `json:"name" validate:"required"`
-	ProviderInfo provider.ProviderInfo `json:"providerInfo" validate:"required"`
-	Options      string                `json:"options" validate:"required"`
+	Name         string              `json:"name" validate:"required"`
+	ProviderInfo target.ProviderInfo `json:"providerInfo" validate:"required"`
+	Options      string              `json:"options" validate:"required"`
 } // @name CreateTargetConfigDTO
