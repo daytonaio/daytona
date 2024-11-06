@@ -8,12 +8,14 @@ import (
 )
 
 type TargetDTO struct {
-	target.Target
+	target.TargetViewDTO
 	Info *target.TargetInfo `json:"info" validate:"optional"`
 } //	@name	TargetDTO
 
 type CreateTargetDTO struct {
-	Id           string `json:"id" validate:"required"`
-	Name         string `json:"name" validate:"required"`
-	TargetConfig string `json:"targetConfig" validate:"required"`
+	Id           string              `json:"id" validate:"required"`
+	Name         string              `json:"name" validate:"required"`
+	ProviderInfo target.ProviderInfo `json:"providerInfo" validate:"required"`
+	// JSON encoded map of options
+	Options string `json:"options" validate:"required"`
 } //	@name	CreateTargetDTO

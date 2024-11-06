@@ -7,28 +7,22 @@ import (
 	"context"
 
 	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	log "github.com/sirupsen/logrus"
 )
 
 func (s *TargetService) RemoveTarget(ctx context.Context, targetId string) error {
-	target, err := s.targetStore.Find(targetId)
+	target, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &targetId})
 	if err != nil {
-		return s.handleRemoveError(ctx, target, ErrTargetNotFound)
+		return s.handleRemoveError(ctx, &target.Target, ErrTargetNotFound)
 	}
 
 	log.Infof("Destroying target %s", target.Id)
 
-	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &target.TargetConfig})
+	err = s.provisioner.DestroyTarget(&target.Target)
 	if err != nil {
-		return s.handleRemoveError(ctx, target, err)
-	}
-
-	err = s.provisioner.DestroyTarget(target, targetConfig)
-	if err != nil {
-		return s.handleRemoveError(ctx, target, err)
+		return s.handleRemoveError(ctx, &target.Target, err)
 	}
 
 	// Should not fail the whole operation if the API key cannot be revoked
@@ -44,23 +38,21 @@ func (s *TargetService) RemoveTarget(ctx context.Context, targetId string) error
 		log.Error(err)
 	}
 
-	err = s.targetStore.Delete(target)
+	err = s.targetStore.Delete(&target.Target)
 
-	return s.handleRemoveError(ctx, target, err)
+	return s.handleRemoveError(ctx, &target.Target, err)
 }
 
 // ForceRemoveTarget ignores provider errors and makes sure the target is removed from storage.
 func (s *TargetService) ForceRemoveTarget(ctx context.Context, targetId string) error {
-	target, err := s.targetStore.Find(targetId)
+	target, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &targetId})
 	if err != nil {
 		return s.handleRemoveError(ctx, nil, ErrTargetNotFound)
 	}
 
 	log.Infof("Destroying target %s", target.Id)
 
-	targetConfig, _ := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &target.TargetConfig})
-
-	err = s.provisioner.DestroyTarget(target, targetConfig)
+	err = s.provisioner.DestroyTarget(&target.Target)
 	if err != nil {
 		log.Error(err)
 	}
@@ -70,9 +62,9 @@ func (s *TargetService) ForceRemoveTarget(ctx context.Context, targetId string) 
 		log.Error(err)
 	}
 
-	err = s.targetStore.Delete(target)
+	err = s.targetStore.Delete(&target.Target)
 
-	return s.handleRemoveError(ctx, target, err)
+	return s.handleRemoveError(ctx, &target.Target, err)
 }
 
 func (s *TargetService) handleRemoveError(ctx context.Context, target *target.Target, err error) error {
@@ -82,7 +74,7 @@ func (s *TargetService) handleRemoveError(ctx context.Context, target *target.Ta
 
 	clientId := telemetry.ClientId(ctx)
 
-	telemetryProps := telemetry.NewTargetEventProps(ctx, target, nil)
+	telemetryProps := telemetry.NewTargetEventProps(ctx, target)
 	event := telemetry.ServerEventTargetDestroyed
 	if err != nil {
 		telemetryProps["error"] = err.Error()

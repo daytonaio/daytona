@@ -70,7 +70,7 @@ func (s *WorkspaceConfigService) SetDefault(workspaceConfigName string) error {
 		Url:     &workspaceConfig.RepositoryUrl,
 		Default: util.Pointer(true),
 	})
-	if err != nil && err != config.ErrWorkspaceConfigNotFound {
+	if err != nil && !config.IsWorkspaceConfigNotFound(err) {
 		return err
 	}
 

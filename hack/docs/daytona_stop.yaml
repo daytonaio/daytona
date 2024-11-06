@@ -1,14 +1,15 @@
 name: daytona stop
-synopsis: Stop a target
-usage: daytona stop [TARGET] [flags]
+synopsis: Stop a workspace
+usage: daytona stop [WORKSPACE] [flags]
 options:
     - name: all
       shorthand: a
       default_value: "false"
       usage: Stop all targets
-    - name: workspace
-      shorthand: w
-      usage: Stop a single workspace in the target (workspace name)
+    - name: "yes"
+      shorthand: "y"
+      default_value: "false"
+      usage: Automatically confirm any prompts
 inherited_options:
     - name: help
       default_value: "false"

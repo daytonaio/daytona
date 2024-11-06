@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/targetconfigs/dto"
 	"github.com/gin-gonic/gin"
@@ -19,8 +18,8 @@ import (
 //	@Tags			target-config
 //	@Summary		Set a target config
 //	@Description	Set a target config
-//	@Param			targetConfig	body	CreateTargetConfigDTO	true	"Target config to set"
-//	@Success		201
+//	@Param			targetConfig	body		CreateTargetConfigDTO	true	"Target config to set"
+//	@Success		200				{object}	TargetConfig
 //	@Router			/target-config [put]
 //
 //	@id				SetTargetConfig
@@ -42,37 +41,5 @@ func SetTargetConfig(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Status(201)
-}
-
-// SetDefaultTargetConfig godoc
-//
-//	@Tags			target-config
-//	@Summary		Set target config to default
-//	@Description	Set target config to default
-//	@Param			configName	path	string	true	"Target config name"
-//	@Success		200
-//	@Router			/target-config/{configName}/set-default [patch]
-//
-//	@id				SetDefaultTargetConfig
-func SetDefaultTargetConfig(ctx *gin.Context) {
-	configName := ctx.Param("configName")
-
-	server := server.GetInstance(nil)
-
-	targetConfig, err := server.TargetConfigService.Find(&provider.TargetConfigFilter{
-		Name: &configName,
-	})
-	if err != nil {
-		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to find target config: %w", err))
-		return
-	}
-
-	err = server.TargetConfigService.SetDefault(targetConfig)
-	if err != nil {
-		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to set target config to default: %s", err.Error()))
-		return
-	}
-
-	ctx.Status(200)
+	ctx.JSON(200, targetConfig)
 }

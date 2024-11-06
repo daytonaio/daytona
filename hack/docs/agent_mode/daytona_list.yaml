@@ -1,5 +1,5 @@
 name: daytona list
-synopsis: List targets
+synopsis: List workspaces
 usage: daytona list [flags]
 options:
     - name: format

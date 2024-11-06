@@ -25,6 +25,13 @@ type Workspace struct {
 	GitProviderConfigId *string                    `json:"gitProviderConfigId,omitempty" validate:"optional"`
 } // @name Workspace
 
+func (w *Workspace) WorkspaceFolderName() string {
+	if w.Repository != nil {
+		return w.Repository.Name
+	}
+	return w.Name
+}
+
 type WorkspaceInfo struct {
 	Name             string `json:"name" validate:"required"`
 	Created          string `json:"created" validate:"required"`

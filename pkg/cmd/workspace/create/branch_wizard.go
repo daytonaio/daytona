@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package util
+package create
 
 import (
 	"context"
@@ -25,64 +25,6 @@ type BranchWizardConfig struct {
 	ChosenRepo          *apiclient.GitRepository
 	WorkspaceOrder      int
 	ProviderId          string
-}
-
-func runGetBranchFromPromptWithPagination(ctx context.Context, config BranchWizardConfig, parentIdentifier string, page, perPage int32) (*apiclient.GitRepository, error) {
-	var branchList []apiclient.GitBranch
-	disablePagination := false
-	curPageItemsNum := 0
-	selectionListCursorIdx := 0
-	var selectionListOptions views.SelectionListOptions
-	var err error
-
-	for {
-		err = views_util.WithSpinner("Loading Branches", func() error {
-			branches, _, err := config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.GitProviderConfigId, url.QueryEscape(config.NamespaceId), url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
-			if err != nil {
-				return err
-			}
-
-			curPageItemsNum = len(branches)
-			branchList = append(branchList, branches...)
-			return nil
-		})
-
-		if err != nil {
-			return nil, err
-		}
-
-		// Check first if the git provider supports pagination
-		if isGitProviderWithUnsupportedPagination(config.GitProviderConfigId) {
-			disablePagination = true
-		} else {
-			// Check if we have reached the end of the list
-			disablePagination = int32(curPageItemsNum) < perPage
-		}
-
-		selectionListCursorIdx = (int)(page-1) * int(perPage)
-		selectionListOptions = views.SelectionListOptions{
-			ParentIdentifier:     parentIdentifier,
-			IsPaginationDisabled: disablePagination,
-			CursorIndex:          selectionListCursorIdx,
-		}
-
-		// User will either choose a branch or navigate the pages
-		branch, navigate := selection.GetBranchFromPrompt(branchList, config.WorkspaceOrder, selectionListOptions)
-		if !disablePagination && navigate != "" {
-			if navigate == views.ListNavigationText {
-				page++
-				continue // Fetch the next page of branches
-			}
-		} else if branch != nil {
-			config.ChosenRepo.Branch = branch.Name
-			config.ChosenRepo.Sha = branch.Sha
-
-			return config.ChosenRepo, nil
-		} else {
-			// If user aborts or there's no selection
-			return nil, errors.New("must select a branch")
-		}
-	}
 }
 
 func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, error) {
@@ -235,4 +177,62 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 	}
 
 	return config.ChosenRepo, nil
+}
+
+func runGetBranchFromPromptWithPagination(ctx context.Context, config BranchWizardConfig, parentIdentifier string, page, perPage int32) (*apiclient.GitRepository, error) {
+	var branchList []apiclient.GitBranch
+	disablePagination := false
+	curPageItemsNum := 0
+	selectionListCursorIdx := 0
+	var selectionListOptions views.SelectionListOptions
+	var err error
+
+	for {
+		err = views_util.WithSpinner("Loading Branches", func() error {
+			branches, _, err := config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.GitProviderConfigId, url.QueryEscape(config.NamespaceId), url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
+			if err != nil {
+				return err
+			}
+
+			curPageItemsNum = len(branches)
+			branchList = append(branchList, branches...)
+			return nil
+		})
+
+		if err != nil {
+			return nil, err
+		}
+
+		// Check first if the git provider supports pagination
+		if isGitProviderWithUnsupportedPagination(config.GitProviderConfigId) {
+			disablePagination = true
+		} else {
+			// Check if we have reached the end of the list
+			disablePagination = int32(curPageItemsNum) < perPage
+		}
+
+		selectionListCursorIdx = (int)(page-1) * int(perPage)
+		selectionListOptions = views.SelectionListOptions{
+			ParentIdentifier:     parentIdentifier,
+			IsPaginationDisabled: disablePagination,
+			CursorIndex:          selectionListCursorIdx,
+		}
+
+		// User will either choose a branch or navigate the pages
+		branch, navigate := selection.GetBranchFromPrompt(branchList, config.WorkspaceOrder, selectionListOptions)
+		if !disablePagination && navigate != "" {
+			if navigate == views.ListNavigationText {
+				page++
+				continue // Fetch the next page of branches
+			}
+		} else if branch != nil {
+			config.ChosenRepo.Branch = branch.Name
+			config.ChosenRepo.Sha = branch.Sha
+
+			return config.ChosenRepo, nil
+		} else {
+			// If user aborts or there's no selection
+			return nil, errors.New("must select a branch")
+		}
+	}
 }

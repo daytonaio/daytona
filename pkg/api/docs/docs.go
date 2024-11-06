@@ -1231,8 +1231,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/TargetConfig"
+                        }
                     }
                 }
             }
@@ -1257,30 +1260,6 @@ const docTemplate = `{
                 "responses": {
                     "204": {
                         "description": "No Content"
-                    }
-                }
-            }
-        },
-        "/target-config/{configName}/set-default": {
-            "patch": {
-                "description": "Set target config to default",
-                "tags": [
-                    "target-config"
-                ],
-                "summary": "Set target config to default",
-                "operationId": "SetDefaultTargetConfig",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Target config name",
-                        "name": "configName",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
                     }
                 }
             }
@@ -1340,6 +1319,30 @@ const docTemplate = `{
                         "description": "Force",
                         "name": "force",
                         "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/target/{targetId}/set-default": {
+            "patch": {
+                "description": "Set target to be used by default",
+                "tags": [
+                    "target"
+                ],
+                "summary": "Set target to be used by default",
+                "operationId": "SetDefaultTarget",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target ID or name",
+                        "name": "targetId",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -2172,7 +2175,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "providerInfo": {
-                    "$ref": "#/definitions/provider.ProviderInfo"
+                    "$ref": "#/definitions/TargetProviderInfo"
                 }
             }
         },
@@ -2181,7 +2184,8 @@ const docTemplate = `{
             "required": [
                 "id",
                 "name",
-                "targetConfig"
+                "options",
+                "providerInfo"
             ],
             "properties": {
                 "id": {
@@ -2190,8 +2194,12 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "targetConfig": {
+                "options": {
+                    "description": "JSON encoded map of options",
                     "type": "string"
+                },
+                "providerInfo": {
+                    "$ref": "#/definitions/TargetProviderInfo"
                 }
             }
         },
@@ -2874,33 +2882,18 @@ const docTemplate = `{
         "Target": {
             "type": "object",
             "required": [
+                "default",
                 "id",
-                "name",
-                "targetConfig"
-            ],
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "targetConfig": {
-                    "type": "string"
-                }
-            }
-        },
-        "TargetConfig": {
-            "type": "object",
-            "required": [
-                "isDefault",
                 "name",
                 "options",
                 "providerInfo"
             ],
             "properties": {
-                "isDefault": {
+                "default": {
                     "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
@@ -2910,7 +2903,27 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "providerInfo": {
-                    "$ref": "#/definitions/provider.ProviderInfo"
+                    "$ref": "#/definitions/TargetProviderInfo"
+                }
+            }
+        },
+        "TargetConfig": {
+            "type": "object",
+            "required": [
+                "name",
+                "options",
+                "providerInfo"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "options": {
+                    "description": "JSON encoded map of options",
+                    "type": "string"
+                },
+                "providerInfo": {
+                    "$ref": "#/definitions/TargetProviderInfo"
                 }
             }
         },
@@ -2960,11 +2973,17 @@ const docTemplate = `{
         "TargetDTO": {
             "type": "object",
             "required": [
+                "default",
                 "id",
                 "name",
-                "targetConfig"
+                "options",
+                "providerInfo",
+                "workspaceCount"
             ],
             "properties": {
+                "default": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -2974,8 +2993,15 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "targetConfig": {
+                "options": {
+                    "description": "JSON encoded map of options",
                     "type": "string"
+                },
+                "providerInfo": {
+                    "$ref": "#/definitions/TargetProviderInfo"
+                },
+                "workspaceCount": {
+                    "type": "integer"
                 }
             }
         },
@@ -2989,6 +3015,24 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "providerMetadata": {
+                    "type": "string"
+                }
+            }
+        },
+        "TargetProviderInfo": {
+            "type": "object",
+            "required": [
+                "name",
+                "version"
+            ],
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "version": {
                     "type": "string"
                 }
             }
@@ -3224,24 +3268,6 @@ const docTemplate = `{
                 "BuildStatePendingForcedDelete",
                 "BuildStateDeleting"
             ]
-        },
-        "provider.ProviderInfo": {
-            "type": "object",
-            "required": [
-                "name",
-                "version"
-            ],
-            "properties": {
-                "label": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "string"
-                }
-            }
         },
         "provider.TargetConfigPropertyType": {
             "type": "string",

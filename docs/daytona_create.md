@@ -1,6 +1,6 @@
 ## daytona create
 
-Create a target
+Create a workspace
 
 ```
 daytona create [REPOSITORY_URL | WORKSPACE_CONFIG_NAME]... [flags]
@@ -20,7 +20,6 @@ daytona create [REPOSITORY_URL | WORKSPACE_CONFIG_NAME]... [flags]
   -i, --ide string                   Specify the IDE (vscode, browser, cursor, ssh, jupyter, fleet, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
       --manual                       Manually enter the Git repository
       --multi-workspace              Target with multiple workspaces/repos
-      --name string                  Specify the target name
   -n, --no-ide                       Do not open the target in the IDE after target creation
   -t, --target string                Specify the target (e.g. 'local')
   -y, --yes                          Automatically confirm any prompts
