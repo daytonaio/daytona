@@ -175,6 +175,8 @@ var CreateCmd = &cobra.Command{
 		logs_view.CalculateLongestPrefixLength(names)
 
 		if !targetExisted {
+			go apiclient_util.ReadTargetLogs(logsContext, activeProfile, targetId, true, nil)
+
 			_, res, err := apiClient.TargetAPI.CreateTarget(ctx).Target(apiclient.CreateTargetDTO{
 				Id:      targetId,
 				Name:    target.Name,
@@ -187,8 +189,6 @@ var CreateCmd = &cobra.Command{
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
-
-			go apiclient_util.ReadTargetLogs(logsContext, activeProfile, targetId, true, nil)
 		}
 
 		for i := range createWorkspaceDtos {
