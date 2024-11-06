@@ -193,11 +193,9 @@ var CreateCmd = &cobra.Command{
 
 		for i := range createWorkspaceDtos {
 			createWorkspaceDtos[i].TargetId = targetId
-			ws := createWorkspaceDtos[i]
-
 			go apiclient_util.ReadWorkspaceLogs(logsContext, i, activeProfile, createWorkspaceDtos[i].Id, true, nil)
 
-			_, res, err = apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(ws).Execute()
+			_, res, err = apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(createWorkspaceDtos[i]).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}

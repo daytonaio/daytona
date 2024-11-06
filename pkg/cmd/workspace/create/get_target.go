@@ -50,7 +50,7 @@ func GetTarget(params GetTargetConfigParams) (t *apiclient.TargetDTO, targetExis
 		if err != nil {
 			return nil, false, err
 		}
-		return t, true, nil
+		return t, false, nil
 	}
 
 	selectedTarget := selection.GetTargetFromPrompt(targetList, true, "Use")
@@ -64,7 +64,7 @@ func GetTarget(params GetTargetConfigParams) (t *apiclient.TargetDTO, targetExis
 		if err != nil {
 			return nil, false, err
 		}
-		return t, true, nil
+		return t, false, nil
 	}
 
 	return selectedTarget, true, nil

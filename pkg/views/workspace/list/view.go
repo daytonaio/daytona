@@ -26,7 +26,7 @@ type RowData struct {
 
 func ListWorkspaces(workspaceList []apiclient.WorkspaceDTO, specifyGitProviders bool, verbose bool, activeProfileName string) {
 	if len(workspaceList) == 0 {
-		views_util.NotifyEmptyTargetList(true)
+		views_util.NotifyEmptyWorkspaceList(true)
 		return
 	}
 
