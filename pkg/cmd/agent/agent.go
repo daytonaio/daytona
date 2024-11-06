@@ -53,9 +53,9 @@ var AgentCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-		}
 
-		c.WorkspaceDir = filepath.Join(os.Getenv("HOME"), ws.Name)
+			c.WorkspaceDir = filepath.Join(os.Getenv("HOME"), ws.Name)
+		}
 
 		if workspaceDir := os.Getenv("DAYTONA_WORKSPACE_DIR"); workspaceDir != "" {
 			c.WorkspaceDir = workspaceDir
@@ -84,9 +84,9 @@ var AgentCmd = &cobra.Command{
 			DefaultWorkspaceDir: os.Getenv("HOME"),
 		}
 
-		tailscaleHostname := workspace.GetWorkspaceHostname(c.WorkspaceId)
-		if hostModeFlag {
-			tailscaleHostname = c.TargetId
+		tailscaleHostname := c.TargetId
+		if agentMode == config.ModeWorkspace {
+			tailscaleHostname = workspace.GetWorkspaceHostname(c.WorkspaceId)
 		}
 
 		tailscaleServer := &tailscale.Server{
