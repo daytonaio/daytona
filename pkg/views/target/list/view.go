@@ -5,6 +5,7 @@ package list
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/internal/util"
@@ -27,6 +28,8 @@ func ListTargets(targetList []apiclient.TargetDTO, verbose bool, activeProfileNa
 		views_util.NotifyEmptyTargetList(true)
 		return
 	}
+
+	SortTargets(&targetList)
 
 	headers := []string{"Target", "Provider", "Default", "# Workspaces", "Options"}
 
@@ -77,4 +80,10 @@ func getRowFromRowData(rowData RowData) []string {
 		views.DefaultRowDataStyle.Render(rowData.WorkspaceCount),
 		views.DefaultRowDataStyle.Render(rowData.Options),
 	}
+}
+
+func SortTargets(targetList *[]apiclient.TargetDTO) {
+	sort.Slice(*targetList, func(i, j int) bool {
+		return (*targetList)[i].Default && !(*targetList)[j].Default
+	})
 }

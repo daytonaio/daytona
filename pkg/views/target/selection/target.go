@@ -12,6 +12,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	list_view "github.com/daytonaio/daytona/pkg/views/target/list"
 )
 
 var NewTargetIdentifier = "<NEW_TARGET>"
@@ -90,6 +91,8 @@ func getTargetProgramEssentials(modelTitle string, withNewTarget bool, actionVer
 }
 
 func selectTargetPrompt(targets []apiclient.TargetDTO, withNewTarget bool, actionVerb string, choiceChan chan<- *apiclient.TargetDTO) {
+	list_view.SortTargets(&targets)
+
 	p := getTargetProgramEssentials("Select a Target To ", withNewTarget, actionVerb, targets, "", false)
 	if m, ok := p.(model[apiclient.TargetDTO]); ok && m.choice != nil {
 		choiceChan <- m.choice
@@ -107,6 +110,8 @@ func GetTargetFromPrompt(targets []apiclient.TargetDTO, withNewTarget bool, acti
 }
 
 func selectTargetsFromPrompt(targets []apiclient.TargetDTO, actionVerb string, choiceChan chan<- []*apiclient.TargetDTO) {
+	list_view.SortTargets(&targets)
+
 	footerText := lipgloss.NewStyle().Bold(true).PaddingLeft(2).Render(fmt.Sprintf("\n\nPress 'x' to mark a target.\nPress 'enter' to %s the current/marked targets.", actionVerb))
 	p := getTargetProgramEssentials("Select Targets To ", false, actionVerb, targets, footerText, true)
 

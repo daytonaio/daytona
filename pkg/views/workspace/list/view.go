@@ -127,7 +127,6 @@ func SortWorkspaces(workspaceList *[]apiclient.WorkspaceDTO, verbose bool) {
 		}
 		return w1.State.Uptime < w2.State.Uptime
 	})
-
 }
 
 func getTableRowData(workspace apiclient.WorkspaceDTO, specifyGitProviders bool) *RowData {

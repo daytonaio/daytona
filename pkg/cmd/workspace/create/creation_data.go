@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package util
+package create
 
 import (
 	"context"
@@ -16,10 +16,12 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	workspace_common "github.com/daytonaio/daytona/pkg/cmd/workspace/common"
 	"github.com/daytonaio/daytona/pkg/common"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
+	"github.com/docker/docker/pkg/stringid"
 )
 
 type WorkspacesDataPromptConfig struct {
@@ -250,7 +252,7 @@ func GetBranchFromWorkspaceConfig(workspaceConfig *apiclient.WorkspaceConfig, ap
 	}, nil
 }
 
-func GetCreateWorkspaceDtoFromFlags(workspaceConfigurationFlags WorkspaceConfigurationFlags) (*apiclient.CreateWorkspaceDTO, error) {
+func GetCreateWorkspaceDtoFromFlags(workspaceConfigurationFlags workspace_common.WorkspaceConfigurationFlags) (*apiclient.CreateWorkspaceDTO, error) {
 	workspace := &apiclient.CreateWorkspaceDTO{
 		GitProviderConfigId: workspaceConfigurationFlags.GitProviderConfig,
 		BuildConfig:         &apiclient.BuildConfig{},
@@ -345,4 +347,35 @@ func createGetRepoContextFromRepository(providerRepo *apiclient.GitRepository) a
 	}
 
 	return result
+}
+
+func setInitialWorkspaceNames(createWorkspaceDtos *[]apiclient.CreateWorkspaceDTO, existingWorkspaces []apiclient.WorkspaceDTO) {
+	existingNames := make(map[string]bool)
+	for _, workspace := range existingWorkspaces {
+		existingNames[workspace.Name] = true
+	}
+
+	for i := range *createWorkspaceDtos {
+		originalName := (*createWorkspaceDtos)[i].Name
+		newName := originalName
+		counter := 2
+
+		for existingNames[newName] {
+			newName = fmt.Sprintf("%s%d", originalName, counter)
+			counter++
+		}
+
+		(*createWorkspaceDtos)[i].Name = newName
+		existingNames[newName] = true
+	}
+}
+
+func generateWorkspaceIds(createWorkspaceDtos *[]apiclient.CreateWorkspaceDTO) []string {
+	for i := range *createWorkspaceDtos {
+		wsId := stringid.GenerateRandomID()
+		wsId = stringid.TruncateID(wsId)
+		(*createWorkspaceDtos)[i].Id = wsId
+	}
+
+	return nil
 }

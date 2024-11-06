@@ -11,7 +11,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
+	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
@@ -45,7 +45,7 @@ var buildRunCmd = &cobra.Command{
 			return errors.New("The chosen workspace config does not have a build configuration")
 		}
 
-		chosenBranch, err := workspace_util.GetBranchFromWorkspaceConfig(workspaceConfig, apiClient, 0)
+		chosenBranch, err := create.GetBranchFromWorkspaceConfig(workspaceConfig, apiClient, 0)
 		if err != nil {
 			return err
 		}

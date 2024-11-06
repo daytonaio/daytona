@@ -13,6 +13,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	workspace_common "github.com/daytonaio/daytona/pkg/cmd/workspace/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -106,7 +107,7 @@ var StartCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			gpgKey, err := GetGitProviderGpgKey(apiClient, ctx, providerConfigId)
+			gpgKey, err := workspace_common.GetGitProviderGpgKey(apiClient, ctx, providerConfigId)
 			if err != nil {
 				log.Warn(err)
 			}
@@ -115,7 +116,7 @@ var StartCmd = &cobra.Command{
 
 			if codeFlag {
 				ide_views.RenderIdeOpeningMessage(ws.TargetId, ws.Name, ideId, ideList)
-				err = openIDE(ideId, activeProfile, ws.Id, workspaceProviderMetadata, yesFlag, gpgKey)
+				err = workspace_common.OpenIDE(ideId, activeProfile, ws.Id, workspaceProviderMetadata, yesFlag, gpgKey)
 				if err != nil {
 					return err
 				}

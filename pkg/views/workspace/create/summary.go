@@ -42,12 +42,12 @@ type SummaryModel struct {
 }
 
 type SubmissionFormConfig struct {
-	ChosenName    *string
-	SuggestedName string
-	ExistingNames []string
-	WorkspaceList *[]apiclient.CreateWorkspaceDTO
-	NameLabel     string
-	Defaults      *views_util.WorkspaceConfigDefaults
+	ChosenName             *string
+	SuggestedName          string
+	WorkspaceList          *[]apiclient.CreateWorkspaceDTO
+	NameLabel              string
+	Defaults               *views_util.WorkspaceConfigDefaults
+	ExistingWorkspaceNames []string
 }
 
 var doneCheck bool
