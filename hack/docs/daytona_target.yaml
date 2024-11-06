@@ -10,6 +10,7 @@ see_also:
     - daytona target delete - Delete a target
     - daytona target info - Show target info
     - daytona target list - List targets
+    - daytona target logs - View the logs of a target
     - daytona target restart - Restart a target
     - daytona target set-default - Set default target
     - daytona target start - Start a target

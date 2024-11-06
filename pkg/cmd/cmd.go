@@ -77,6 +77,7 @@ func Execute() error {
 	rootCmd.AddCommand(StartCmd)
 	rootCmd.AddCommand(StopCmd)
 	rootCmd.AddCommand(RestartCmd)
+	rootCmd.AddCommand(LogsCmd)
 	rootCmd.AddCommand(InfoCmd)
 	rootCmd.AddCommand(PrebuildCmd)
 	rootCmd.AddCommand(BuildCmd)

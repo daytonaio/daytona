@@ -14,6 +14,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/workspace/common"
 	workspace_common "github.com/daytonaio/daytona/pkg/cmd/workspace/common"
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
@@ -104,7 +105,7 @@ var CodeCmd = &cobra.Command{
 		return workspace_common.OpenIDE(ideId, activeProfile, ws.Id, providerMetadata, yesFlag, gpgKey)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return getWorkspaceNameCompletions()
+		return common.GetWorkspaceNameCompletions()
 	},
 }
 

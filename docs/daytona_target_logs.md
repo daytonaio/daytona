@@ -1,9 +1,9 @@
-## daytona logs
+## daytona target logs
 
-View the logs of a workspace
+View the logs of a target
 
 ```
-daytona logs [WORKSPACE] [flags]
+daytona target logs [TARGET] [flags]
 ```
 
 ### Options
@@ -20,5 +20,5 @@ daytona logs [WORKSPACE] [flags]
 
 ### SEE ALSO
 
-* [daytona](daytona.md)	 - Daytona is a Dev Environment Manager
+* [daytona target](daytona_target.md)	 - Manage targets
 

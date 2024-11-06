@@ -10,6 +10,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/workspace/common"
 	workspace_common "github.com/daytonaio/daytona/pkg/cmd/workspace/common"
 	"github.com/daytonaio/daytona/pkg/ide"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -90,7 +91,7 @@ var SshCmd = &cobra.Command{
 		return ide.OpenTerminalSsh(activeProfile, ws.Id, gpgKey, sshOptions, sshArgs...)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return getWorkspaceNameCompletions()
+		return common.GetWorkspaceNameCompletions()
 	},
 }
 

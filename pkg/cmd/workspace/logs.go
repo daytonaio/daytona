@@ -6,27 +6,40 @@ package workspace
 import (
 	"context"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/common"
+	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
-	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
 )
 
-var InfoCmd = &cobra.Command{
-	Use:     "info [WORKSPACE]",
-	Short:   "Show workspace info",
-	Aliases: []string{"view", "inspect"},
-	Args:    cobra.RangeArgs(0, 1),
+var followFlag bool
+
+var LogsCmd = &cobra.Command{
+	Use:     "logs [WORKSPACE]",
+	Short:   "View the logs of a workspace",
+	Args:    cobra.RangeArgs(0, 2),
 	GroupID: util.TARGET_GROUP,
+	Aliases: []string{"lg", "log"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
+		if err != nil {
+			return err
+		}
+
+		c, err := config.GetConfig()
+		if err != nil {
+			return err
+		}
+
+		activeProfile, err := c.GetActiveProfile()
 		if err != nil {
 			return err
 		}
@@ -48,7 +61,7 @@ var InfoCmd = &cobra.Command{
 				format.UnblockStdOut()
 			}
 
-			ws = selection.GetWorkspaceFromPrompt(workspaceList, "View")
+			ws = selection.GetWorkspaceFromPrompt(workspaceList, "View Logs For")
 			if format.FormatFlag != "" {
 				format.BlockStdOut()
 			}
@@ -64,13 +77,9 @@ var InfoCmd = &cobra.Command{
 			return nil
 		}
 
-		if format.FormatFlag != "" {
-			formattedData := format.NewFormatter(ws)
-			formattedData.Print()
-			return nil
-		}
+		logs_view.CalculateLongestPrefixLength([]string{ws.Name})
 
-		info.Render(ws, "", false)
+		apiclient_util.ReadWorkspaceLogs(ctx, 0, activeProfile, ws.Id, followFlag, nil)
 		return nil
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -79,5 +88,5 @@ var InfoCmd = &cobra.Command{
 }
 
 func init() {
-	format.RegisterFormatFlag(InfoCmd)
+	LogsCmd.Flags().BoolVarP(&followFlag, "follow", "f", false, "Follow logs")
 }

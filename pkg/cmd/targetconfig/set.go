@@ -27,7 +27,7 @@ var TargetConfigSetCmd = &cobra.Command{
 	Use:     "set",
 	Short:   "Set target config",
 	Args:    cobra.NoArgs,
-	Aliases: []string{"s", "add", "update", "register", "edit"},
+	Aliases: []string{"s", "add", "update", "register", "edit", "new", "create"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 

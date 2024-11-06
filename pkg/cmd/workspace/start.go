@@ -13,6 +13,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/workspace/common"
 	workspace_common "github.com/daytonaio/daytona/pkg/cmd/workspace/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
@@ -21,13 +22,6 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-)
-
-type WorkspaceState string
-
-const (
-	WORKSPACE_STATE_RUNNING WorkspaceState = "Running"
-	WORKSPACE_STATE_STOPPED WorkspaceState = "Unavailable"
 )
 
 var allFlag bool
@@ -134,7 +128,7 @@ var StartCmd = &cobra.Command{
 		return nil
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return getAllWorkspacesByState(WORKSPACE_STATE_STOPPED)
+		return common.GetAllWorkspacesByState(common.WORKSPACE_STATE_STOPPED)
 	},
 }
 
@@ -166,53 +160,6 @@ func startAllWorkspaces() error {
 		views.RenderInfoMessage(fmt.Sprintf("- Workspace '%s' started successfully", workspace.Name))
 	}
 	return nil
-}
-
-func getWorkspaceNameCompletions() ([]string, cobra.ShellCompDirective) {
-	ctx := context.Background()
-	apiClient, err := apiclient_util.GetApiClient(nil)
-	if err != nil {
-		return nil, cobra.ShellCompDirectiveNoFileComp
-	}
-
-	workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
-	if err != nil {
-		return nil, cobra.ShellCompDirectiveNoFileComp
-	}
-
-	var choices []string
-	for _, v := range workspaceList {
-		choices = append(choices, v.Name)
-	}
-
-	return choices, cobra.ShellCompDirectiveNoFileComp
-}
-
-func getAllWorkspacesByState(state WorkspaceState) ([]string, cobra.ShellCompDirective) {
-	ctx := context.Background()
-	apiClient, err := apiclient_util.GetApiClient(nil)
-	if err != nil {
-		return nil, cobra.ShellCompDirectiveNoFileComp
-	}
-
-	workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
-	if err != nil {
-		return nil, cobra.ShellCompDirectiveNoFileComp
-	}
-
-	var choices []string
-	for _, workspace := range workspaceList {
-		if state == WORKSPACE_STATE_RUNNING && workspace.State.Uptime != 0 {
-			choices = append(choices, workspace.Name)
-			break
-		}
-		if state == WORKSPACE_STATE_STOPPED && workspace.State.Uptime == 0 {
-			choices = append(choices, workspace.Name)
-			break
-		}
-	}
-
-	return choices, cobra.ShellCompDirectiveNoFileComp
 }
 
 func StartWorkspace(apiClient *apiclient.APIClient, workspaceId string) error {
