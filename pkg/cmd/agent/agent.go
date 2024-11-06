@@ -54,7 +54,7 @@ var AgentCmd = &cobra.Command{
 				return err
 			}
 
-			c.WorkspaceDir = filepath.Join(os.Getenv("HOME"), ws.Name)
+			c.WorkspaceDir = filepath.Join(os.Getenv("HOME"), ws.WorkspaceFolderName())
 		}
 
 		if workspaceDir := os.Getenv("DAYTONA_WORKSPACE_DIR"); workspaceDir != "" {
