@@ -10,10 +10,11 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
 	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/target/config"
 	"github.com/daytonaio/daytona/pkg/telemetry"
+	"github.com/daytonaio/daytona/pkg/views"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -36,9 +37,14 @@ func isValidTargetName(name string) bool {
 }
 
 func (s *TargetService) CreateTarget(ctx context.Context, req dto.CreateTargetDTO) (*target.Target, error) {
-	_, err := s.targetStore.Find(req.Name)
+	_, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &req.Id})
 	if err == nil {
 		return nil, ErrTargetAlreadyExists
+	}
+
+	tc, err := s.targetConfigStore.Find(&config.TargetConfigFilter{Name: &req.TargetConfigName})
+	if err != nil {
+		return s.handleCreateError(ctx, nil, err)
 	}
 
 	// Repo name is taken as the name for target by default
@@ -49,12 +55,8 @@ func (s *TargetService) CreateTarget(ctx context.Context, req dto.CreateTargetDT
 	tg := &target.Target{
 		Id:           req.Id,
 		Name:         req.Name,
-		TargetConfig: req.TargetConfig,
-	}
-
-	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &tg.TargetConfig})
-	if err != nil {
-		return s.handleCreateError(ctx, nil, err)
+		ProviderInfo: tc.ProviderInfo,
+		Options:      tc.Options,
 	}
 
 	apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeTarget, tg.Id)
@@ -80,17 +82,29 @@ func (s *TargetService) CreateTarget(ctx context.Context, req dto.CreateTargetDT
 		ClientId:      telemetry.ClientId(ctx),
 	}, telemetry.TelemetryEnabled(ctx))
 
-	err = s.provisioner.CreateTarget(tg, targetConfig)
+	err = s.provisioner.CreateTarget(tg)
+	if err != nil {
+		return s.handleCreateError(ctx, tg, err)
+	}
+
+	targetLogger.Write([]byte(views.GetPrettyLogLine("Target creation complete")))
+
+	err = s.startTarget(tg, targetLogger)
+	if err != nil {
+		return s.handleCreateError(ctx, tg, err)
+	}
+
+	tg, err = s.handleCreateError(ctx, tg, err)
 	if err != nil {
 		return nil, err
 	}
 
-	targetLogger.Write([]byte("Target creation complete. Pending start...\n"))
-
-	err = s.startTarget(tg, targetConfig, targetLogger)
+	err = s.SetDefault(ctx, tg.Id)
 	if err != nil {
-		return s.handleCreateError(ctx, tg, err)
+		return nil, err
 	}
+
+	tg.IsDefault = true
 
 	return s.handleCreateError(ctx, tg, err)
 }
@@ -102,7 +116,7 @@ func (s *TargetService) handleCreateError(ctx context.Context, target *target.Ta
 
 	clientId := telemetry.ClientId(ctx)
 
-	telemetryProps := telemetry.NewTargetEventProps(ctx, target, nil)
+	telemetryProps := telemetry.NewTargetEventProps(ctx, target)
 	event := telemetry.ServerEventTargetCreated
 	if err != nil {
 		telemetryProps["error"] = err.Error()

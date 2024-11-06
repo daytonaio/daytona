@@ -8,12 +8,12 @@ import (
 )
 
 type TargetDTO struct {
-	target.Target
+	target.TargetViewDTO
 	Info *target.TargetInfo `json:"info" validate:"optional"`
 } //	@name	TargetDTO
 
 type CreateTargetDTO struct {
-	Id           string `json:"id" validate:"required"`
-	Name         string `json:"name" validate:"required"`
-	TargetConfig string `json:"targetConfig" validate:"required"`
+	Id               string `json:"id" validate:"required"`
+	Name             string `json:"name" validate:"required"`
+	TargetConfigName string `json:"targetConfigName" validate:"required"`
 } //	@name	CreateTargetDTO

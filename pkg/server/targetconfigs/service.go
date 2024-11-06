@@ -4,25 +4,23 @@
 package targetconfigs
 
 import (
-	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/pkg/provider"
+	"github.com/daytonaio/daytona/pkg/target/config"
 )
 
 type ITargetConfigService interface {
-	Delete(targetConfig *provider.TargetConfig) error
-	Find(filter *provider.TargetConfigFilter) (*provider.TargetConfig, error)
-	List(filter *provider.TargetConfigFilter) ([]*provider.TargetConfig, error)
-	Map() (map[string]*provider.TargetConfig, error)
-	Save(targetConfig *provider.TargetConfig) error
-	SetDefault(targetConfig *provider.TargetConfig) error
+	Delete(targetConfig *config.TargetConfig) error
+	Find(filter *config.TargetConfigFilter) (*config.TargetConfig, error)
+	List(filter *config.TargetConfigFilter) ([]*config.TargetConfig, error)
+	Map() (map[string]*config.TargetConfig, error)
+	Save(targetConfig *config.TargetConfig) error
 }
 
 type TargetConfigServiceConfig struct {
-	TargetConfigStore provider.TargetConfigStore
+	TargetConfigStore config.TargetConfigStore
 }
 
 type TargetConfigService struct {
-	targetConfigStore provider.TargetConfigStore
+	targetConfigStore config.TargetConfigStore
 }
 
 func NewTargetConfigService(config TargetConfigServiceConfig) ITargetConfigService {
@@ -31,17 +29,17 @@ func NewTargetConfigService(config TargetConfigServiceConfig) ITargetConfigServi
 	}
 }
 
-func (s *TargetConfigService) List(filter *provider.TargetConfigFilter) ([]*provider.TargetConfig, error) {
+func (s *TargetConfigService) List(filter *config.TargetConfigFilter) ([]*config.TargetConfig, error) {
 	return s.targetConfigStore.List(filter)
 }
 
-func (s *TargetConfigService) Map() (map[string]*provider.TargetConfig, error) {
+func (s *TargetConfigService) Map() (map[string]*config.TargetConfig, error) {
 	list, err := s.targetConfigStore.List(nil)
 	if err != nil {
 		return nil, err
 	}
 
-	targetConfigs := make(map[string]*provider.TargetConfig)
+	targetConfigs := make(map[string]*config.TargetConfig)
 	for _, targetConfig := range list {
 		targetConfigs[targetConfig.Name] = targetConfig
 	}
@@ -49,46 +47,14 @@ func (s *TargetConfigService) Map() (map[string]*provider.TargetConfig, error) {
 	return targetConfigs, nil
 }
 
-func (s *TargetConfigService) Find(filter *provider.TargetConfigFilter) (*provider.TargetConfig, error) {
+func (s *TargetConfigService) Find(filter *config.TargetConfigFilter) (*config.TargetConfig, error) {
 	return s.targetConfigStore.Find(filter)
 }
 
-func (s *TargetConfigService) Save(targetConfig *provider.TargetConfig) error {
-	err := s.targetConfigStore.Save(targetConfig)
-	if err != nil {
-		return err
-	}
-
-	return s.SetDefault(targetConfig)
+func (s *TargetConfigService) Save(targetConfig *config.TargetConfig) error {
+	return s.targetConfigStore.Save(targetConfig)
 }
 
-func (s *TargetConfigService) Delete(targetConfig *provider.TargetConfig) error {
+func (s *TargetConfigService) Delete(targetConfig *config.TargetConfig) error {
 	return s.targetConfigStore.Delete(targetConfig)
-}
-
-func (s *TargetConfigService) SetDefault(targetConfig *provider.TargetConfig) error {
-	currentConfig, err := s.Find(&provider.TargetConfigFilter{
-		Name: &targetConfig.Name,
-	})
-	if err != nil {
-		return err
-	}
-
-	defaultConfig, err := s.Find(&provider.TargetConfigFilter{
-		Default: util.Pointer(true),
-	})
-	if err != nil && err != provider.ErrTargetConfigNotFound {
-		return err
-	}
-
-	if defaultConfig != nil {
-		defaultConfig.IsDefault = false
-		err := s.targetConfigStore.Save(defaultConfig)
-		if err != nil {
-			return err
-		}
-	}
-
-	currentConfig.IsDefault = true
-	return s.targetConfigStore.Save(currentConfig)
 }

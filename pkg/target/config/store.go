@@ -1,13 +1,12 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package provider
+package config
 
 import "errors"
 
 type TargetConfigFilter struct {
-	Name    *string
-	Default *bool
+	Name *string
 }
 
 type TargetConfigStore interface {

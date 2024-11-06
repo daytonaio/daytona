@@ -23,24 +23,34 @@ func NewTargetStore(db *gorm.DB) (*TargetStore, error) {
 	return &TargetStore{db: db}, nil
 }
 
-func (store *TargetStore) List() ([]*target.Target, error) {
+func (s *TargetStore) List(filter *target.TargetFilter) ([]*target.TargetViewDTO, error) {
 	targetDTOs := []TargetDTO{}
-	tx := store.db.Find(&targetDTOs)
+
+	tx := processTargetFilters(s.db, filter).Preload("Workspaces").Find(&targetDTOs)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 
-	targets := []*target.Target{}
+	targetViewDTOs := []*target.TargetViewDTO{}
 	for _, targetDTO := range targetDTOs {
-		targets = append(targets, ToTarget(targetDTO))
+		viewDTO := &target.TargetViewDTO{
+			Target:         *ToTarget(targetDTO),
+			WorkspaceCount: len(targetDTO.Workspaces),
+		}
+		targetViewDTOs = append(targetViewDTOs, viewDTO)
 	}
 
-	return targets, nil
+	return targetViewDTOs, nil
 }
 
-func (w *TargetStore) Find(idOrName string) (*target.Target, error) {
+func (s *TargetStore) Find(filter *target.TargetFilter) (*target.TargetViewDTO, error) {
 	targetDTO := TargetDTO{}
-	tx := w.db.Where("id = ? OR name = ?", idOrName, idOrName).First(&targetDTO)
+
+	tx := processTargetFilters(s.db, filter).Preload("Workspaces").First(&targetDTO)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
 			return nil, target.ErrTargetNotFound
@@ -48,11 +58,16 @@ func (w *TargetStore) Find(idOrName string) (*target.Target, error) {
 		return nil, tx.Error
 	}
 
-	return ToTarget(targetDTO), nil
+	targetViewDTO := &target.TargetViewDTO{
+		Target:         *ToTarget(targetDTO),
+		WorkspaceCount: len(targetDTO.Workspaces),
+	}
+
+	return targetViewDTO, nil
 }
 
-func (w *TargetStore) Save(target *target.Target) error {
-	tx := w.db.Save(ToTargetDTO(target))
+func (s *TargetStore) Save(target *target.Target) error {
+	tx := s.db.Save(ToTargetDTO(target))
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -60,8 +75,8 @@ func (w *TargetStore) Save(target *target.Target) error {
 	return nil
 }
 
-func (w *TargetStore) Delete(t *target.Target) error {
-	tx := w.db.Delete(ToTargetDTO(t))
+func (s *TargetStore) Delete(t *target.Target) error {
+	tx := s.db.Delete(ToTargetDTO(t))
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -70,4 +85,17 @@ func (w *TargetStore) Delete(t *target.Target) error {
 	}
 
 	return nil
+}
+
+func processTargetFilters(tx *gorm.DB, filter *target.TargetFilter) *gorm.DB {
+	if filter != nil {
+		if filter.IdOrName != nil {
+			tx = tx.Where("id = ? OR name = ?", *filter.IdOrName, *filter.IdOrName)
+		}
+		if filter.Default != nil {
+			tx = tx.Where("is_default = ?", *filter.Default)
+		}
+	}
+
+	return tx
 }

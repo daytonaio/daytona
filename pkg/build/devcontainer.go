@@ -84,10 +84,10 @@ func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, er
 	}
 
 	containerId, remoteUser, err := dockerClient.CreateFromDevcontainer(docker.CreateDevcontainerOptions{
-		BuildConfig:       build.BuildConfig,
-		WorkspaceName:     build.Id,
-		ContainerRegistry: b.containerRegistry,
-		Prebuild:          true,
+		BuildConfig:         build.BuildConfig,
+		WorkspaceFolderName: build.Id,
+		ContainerRegistry:   b.containerRegistry,
+		Prebuild:            true,
 		IdLabels: map[string]string{
 			"daytona.build.id": build.Id,
 		},

@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/server"
+	"github.com/daytonaio/daytona/pkg/target/config"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,7 +27,7 @@ func RemoveTargetConfig(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	targetConfig, err := server.TargetConfigService.Find(&provider.TargetConfigFilter{
+	targetConfig, err := server.TargetConfigService.Find(&config.TargetConfigFilter{
 		Name: &configName,
 	})
 	if err != nil {

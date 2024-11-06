@@ -1,10 +1,6 @@
 name: daytona restart
-synopsis: Restart a target
-usage: daytona restart [TARGET] [flags]
-options:
-    - name: workspace
-      shorthand: w
-      usage: Restart a single workspace in the target (workspace name)
+synopsis: Restart a workspace
+usage: daytona restart [WORKSPACE] [flags]
 inherited_options:
     - name: help
       default_value: "false"

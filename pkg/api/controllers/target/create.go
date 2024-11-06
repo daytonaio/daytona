@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/daytonaio/daytona/pkg/api/util"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
 	"github.com/gin-gonic/gin"
@@ -33,11 +34,18 @@ func CreateTarget(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	w, err := server.TargetService.CreateTarget(ctx.Request.Context(), createTargetReq)
+	t, err := server.TargetService.CreateTarget(ctx.Request.Context(), createTargetReq)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to create target: %w", err))
 		return
 	}
 
-	ctx.JSON(200, w)
+	maskedOptions, err := util.GetMaskedOptions(server, t.ProviderInfo.Name, t.Options)
+	if err != nil {
+		t.Options = fmt.Sprintf("Error: %s", err.Error())
+	} else {
+		t.Options = maskedOptions
+	}
+
+	ctx.JSON(200, t)
 }

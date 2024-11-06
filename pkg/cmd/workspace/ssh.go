@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package target
+package workspace
 
 import (
 	"context"
@@ -10,6 +10,8 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/workspace/common"
+	workspace_common "github.com/daytonaio/daytona/pkg/cmd/workspace/common"
 	"github.com/daytonaio/daytona/pkg/ide"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -67,7 +69,7 @@ var SshCmd = &cobra.Command{
 		}
 
 		if ws.State == nil || ws.State.Uptime < 1 {
-			wsRunningStatus, err := AutoStartWorkspace(ws.Id)
+			wsRunningStatus, err := AutoStartWorkspace(*ws)
 			if err != nil {
 				return err
 			}
@@ -81,7 +83,7 @@ var SshCmd = &cobra.Command{
 			sshArgs = append(sshArgs, args[1:]...)
 		}
 
-		gpgKey, err := GetGitProviderGpgKey(apiClient, ctx, providerConfigId)
+		gpgKey, err := workspace_common.GetGitProviderGpgKey(apiClient, ctx, providerConfigId)
 		if err != nil {
 			log.Warn(err)
 		}
@@ -89,7 +91,7 @@ var SshCmd = &cobra.Command{
 		return ide.OpenTerminalSsh(activeProfile, ws.Id, gpgKey, sshOptions, sshArgs...)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return getWorkspaceNameCompletions()
+		return common.GetWorkspaceNameCompletions()
 	},
 }
 

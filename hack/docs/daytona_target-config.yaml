@@ -9,4 +9,3 @@ see_also:
     - daytona target-config list - List target configs
     - daytona target-config remove - Remove target config
     - daytona target-config set - Set target config
-    - daytona target-config set-default - Set default target config
