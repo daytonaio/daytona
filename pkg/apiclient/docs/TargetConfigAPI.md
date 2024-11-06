@@ -141,7 +141,7 @@ Name | Type | Description  | Notes
 
 ## SetTargetConfig
 
-> SetTargetConfig(ctx).TargetConfig(targetConfig).Execute()
+> TargetConfig SetTargetConfig(ctx).TargetConfig(targetConfig).Execute()
 
 Set a target config
 
@@ -164,11 +164,13 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.TargetConfigAPI.SetTargetConfig(context.Background()).TargetConfig(targetConfig).Execute()
+	resp, r, err := apiClient.TargetConfigAPI.SetTargetConfig(context.Background()).TargetConfig(targetConfig).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `TargetConfigAPI.SetTargetConfig``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
+	// response from `SetTargetConfig`: TargetConfig
+	fmt.Fprintf(os.Stdout, "Response from `TargetConfigAPI.SetTargetConfig`: %v\n", resp)
 }
 ```
 
@@ -187,7 +189,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
- (empty response body)
+[**TargetConfig**](TargetConfig.md)
 
 ### Authorization
 
@@ -196,7 +198,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: Not defined
+- **Accept**: */*
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

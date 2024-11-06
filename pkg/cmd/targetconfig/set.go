@@ -184,18 +184,17 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 		},
 	}
 
-	// TODO: consider returning the DTO from the api
-	res, err = apiClient.TargetConfigAPI.SetTargetConfig(context.Background()).TargetConfig(targetConfigData).Execute()
+	targetConfig, res, err := apiClient.TargetConfigAPI.SetTargetConfig(context.Background()).TargetConfig(targetConfigData).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	return &targetconfig.TargetConfigView{
-		Name:    selectedTargetConfig.Name,
-		Options: selectedTargetConfig.Options,
+		Name:    targetConfig.Name,
+		Options: targetConfig.Options,
 		ProviderInfo: targetconfig.ProviderInfo{
-			Name:    selectedProvider.Name,
-			Version: selectedProvider.Version,
+			Name:    targetConfig.ProviderInfo.Name,
+			Version: targetConfig.ProviderInfo.Version,
 		},
 	}, nil
 }

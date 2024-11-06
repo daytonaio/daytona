@@ -1747,8 +1747,10 @@ paths:
         schema:
           $ref: '#/definitions/CreateTargetConfigDTO'
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/TargetConfig'
       summary: Set a target config
       tags:
       - target-config

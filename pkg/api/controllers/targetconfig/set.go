@@ -18,8 +18,8 @@ import (
 //	@Tags			target-config
 //	@Summary		Set a target config
 //	@Description	Set a target config
-//	@Param			targetConfig	body	CreateTargetConfigDTO	true	"Target config to set"
-//	@Success		201
+//	@Param			targetConfig	body		CreateTargetConfigDTO	true	"Target config to set"
+//	@Success		200				{object}	TargetConfig
 //	@Router			/target-config [put]
 //
 //	@id				SetTargetConfig
@@ -41,5 +41,5 @@ func SetTargetConfig(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Status(201)
+	ctx.JSON(200, targetConfig)
 }

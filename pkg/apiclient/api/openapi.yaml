@@ -869,9 +869,12 @@ paths:
         description: Target config to set
         required: true
       responses:
-        "201":
-          content: {}
-          description: Created
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/TargetConfig'
+          description: OK
       summary: Set a target config
       tags:
       - target-config

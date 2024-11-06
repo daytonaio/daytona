@@ -254,7 +254,7 @@ func (r ApiSetTargetConfigRequest) TargetConfig(targetConfig CreateTargetConfigD
 	return r
 }
 
-func (r ApiSetTargetConfigRequest) Execute() (*http.Response, error) {
+func (r ApiSetTargetConfigRequest) Execute() (*TargetConfig, *http.Response, error) {
 	return r.ApiService.SetTargetConfigExecute(r)
 }
 
@@ -274,16 +274,19 @@ func (a *TargetConfigAPIService) SetTargetConfig(ctx context.Context) ApiSetTarg
 }
 
 // Execute executes the request
-func (a *TargetConfigAPIService) SetTargetConfigExecute(r ApiSetTargetConfigRequest) (*http.Response, error) {
+//
+//	@return TargetConfig
+func (a *TargetConfigAPIService) SetTargetConfigExecute(r ApiSetTargetConfigRequest) (*TargetConfig, *http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPut
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *TargetConfig
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TargetConfigAPIService.SetTargetConfig")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/target-config"
@@ -292,7 +295,7 @@ func (a *TargetConfigAPIService) SetTargetConfigExecute(r ApiSetTargetConfigRequ
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 	if r.targetConfig == nil {
-		return nil, reportError("targetConfig is required and must be specified")
+		return localVarReturnValue, nil, reportError("targetConfig is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -305,7 +308,7 @@ func (a *TargetConfigAPIService) SetTargetConfigExecute(r ApiSetTargetConfigRequ
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{}
+	localVarHTTPHeaderAccepts := []string{"*/*"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -330,19 +333,19 @@ func (a *TargetConfigAPIService) SetTargetConfigExecute(r ApiSetTargetConfigRequ
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -350,8 +353,17 @@ func (a *TargetConfigAPIService) SetTargetConfigExecute(r ApiSetTargetConfigRequ
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarHTTPResponse, newErr
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
