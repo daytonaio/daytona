@@ -9,7 +9,6 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
 	"github.com/daytonaio/daytona/pkg/views/target/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
@@ -58,8 +57,10 @@ var logsCmd = &cobra.Command{
 			}
 		}
 
-		logs_view.CalculateLongestPrefixLength([]string{target.Name})
-		apiclient_util.ReadTargetLogs(ctx, activeProfile, target.Id, followFlag, nil)
+		apiclient_util.ReadTargetLogs(ctx, activeProfile, apiclient_util.ReadLogParams{
+			Id:    target.Id,
+			Label: &target.Name,
+		}, followFlag, nil)
 
 		return nil
 	},

@@ -84,7 +84,7 @@ func DisplayLogEntry(logEntry logs.LogEntry, index int) {
 	fmt.Print(result)
 }
 
-func CalculateLongestPrefixLength(workspaceNames []string) {
+func SetupLongestPrefixLength(workspaceNames []string) {
 	for _, workspaceName := range workspaceNames {
 		if len(workspaceName) > longestPrefixLength {
 			longestPrefixLength = len(workspaceName)

@@ -61,14 +61,15 @@ var targetCreateCmd = &cobra.Command{
 		logsContext, stopLogs := context.WithCancel(context.Background())
 		defer stopLogs()
 
-		logs_view.CalculateLongestPrefixLength([]string{createTargetDto.Name})
-
 		logs_view.DisplayLogEntry(logs.LogEntry{
 			TargetName: &createTargetDto.Name,
 			Msg:        views.GetPrettyLogLine("Request submitted"),
 		}, logs_view.STATIC_INDEX)
 
-		go apiclient_util.ReadTargetLogs(logsContext, activeProfile, createTargetDto.Id, true, nil)
+		go apiclient_util.ReadTargetLogs(logsContext, activeProfile, apiclient_util.ReadLogParams{
+			Id:    createTargetDto.Id,
+			Label: &createTargetDto.Name,
+		}, true, nil)
 
 		_, res, err := apiClient.TargetAPI.CreateTarget(ctx).Target(*createTargetDto).Execute()
 		if err != nil {

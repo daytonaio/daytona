@@ -12,7 +12,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/common"
-	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
@@ -77,9 +76,10 @@ var LogsCmd = &cobra.Command{
 			return nil
 		}
 
-		logs_view.CalculateLongestPrefixLength([]string{ws.Name})
-
-		apiclient_util.ReadWorkspaceLogs(ctx, 0, activeProfile, ws.Id, followFlag, nil)
+		apiclient_util.ReadWorkspaceLogs(ctx, 0, activeProfile, apiclient_util.ReadLogParams{
+			Id:    ws.Id,
+			Label: &ws.Name,
+		}, followFlag, nil)
 		return nil
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {

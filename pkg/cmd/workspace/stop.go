@@ -27,7 +27,7 @@ var StopCmd = &cobra.Command{
 	Args:    cobra.RangeArgs(0, 1),
 	GroupID: util.TARGET_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var selectedWorkspaceNames []string
+		var selectedWorkspaces []apiclient.WorkspaceDTO
 
 		ctx := context.Background()
 
@@ -54,28 +54,33 @@ var StopCmd = &cobra.Command{
 			if selectedWorkspace == nil {
 				return nil
 			}
-			selectedWorkspaceNames = append(selectedWorkspaceNames, selectedWorkspace.Name)
+			selectedWorkspaces = append(selectedWorkspaces, *selectedWorkspace)
 		} else {
-			selectedWorkspaceNames = append(selectedWorkspaceNames, args[0])
-		}
-
-		if len(selectedWorkspaceNames) == 1 {
-			workspaceName := selectedWorkspaceNames[0]
-
-			err = StopWorkspace(apiClient, workspaceName)
+			workspace, err := apiclient_util.GetWorkspace(args[0], true)
 			if err != nil {
 				return err
 			}
 
-			views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' stopped successfully", workspaceName))
+			selectedWorkspaces = append(selectedWorkspaces, *workspace)
+		}
+
+		if len(selectedWorkspaces) == 1 {
+			workspace := selectedWorkspaces[0]
+
+			err = StopWorkspace(apiClient, workspace)
+			if err != nil {
+				return err
+			}
+
+			views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' stopped successfully", workspace.Name))
 		} else {
-			for _, ws := range selectedWorkspaceNames {
+			for _, ws := range selectedWorkspaces {
 				err := StopWorkspace(apiClient, ws)
 				if err != nil {
-					log.Errorf("Failed to stop workspace %s: %v\n\n", ws, err)
+					log.Errorf("Failed to stop workspace %s: %v\n\n", ws.Name, err)
 					continue
 				}
-				views.RenderInfoMessage(fmt.Sprintf("- Workspace '%s' stopped successfully", ws))
+				views.RenderInfoMessage(fmt.Sprintf("- Workspace '%s' stopped successfully", ws.Name))
 			}
 		}
 		return nil
@@ -103,7 +108,7 @@ func stopAllWorkspaces() error {
 	}
 
 	for _, workspace := range workspaceList {
-		err := StopWorkspace(apiClient, workspace.Id)
+		err := StopWorkspace(apiClient, workspace)
 		if err != nil {
 			log.Errorf("Failed to stop workspace %s: %v\n\n", workspace.Name, err)
 			continue
@@ -114,7 +119,7 @@ func stopAllWorkspaces() error {
 	return nil
 }
 
-func StopWorkspace(apiClient *apiclient.APIClient, workspaceId string) error {
+func StopWorkspace(apiClient *apiclient.APIClient, workspace apiclient.WorkspaceDTO) error {
 	ctx := context.Background()
 	timeFormat := time.Now().Format("2006-01-02 15:04:05")
 	from, err := time.Parse("2006-01-02 15:04:05", timeFormat)
@@ -133,9 +138,12 @@ func StopWorkspace(apiClient *apiclient.APIClient, workspaceId string) error {
 	}
 
 	logsContext, stopLogs := context.WithCancel(context.Background())
-	go apiclient_util.ReadWorkspaceLogs(logsContext, 0, activeProfile, workspaceId, true, &from)
+	go apiclient_util.ReadWorkspaceLogs(logsContext, 0, activeProfile, apiclient_util.ReadLogParams{
+		Id:    workspace.Id,
+		Label: &workspace.Name,
+	}, true, &from)
 
-	res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, workspaceId).Execute()
+	res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, workspace.Id).Execute()
 	if err != nil {
 		stopLogs()
 		return apiclient_util.HandleErrorResponse(res, err)

@@ -70,7 +70,10 @@ var stopCmd = &cobra.Command{
 					continue
 				}
 
-				apiclient_util.ReadTargetLogs(ctx, activeProfile, target.Id, false, &from)
+				apiclient_util.ReadTargetLogs(ctx, activeProfile, apiclient_util.ReadLogParams{
+					Id:    target.Id,
+					Label: &target.Name,
+				}, false, &from)
 				views.RenderInfoMessage(fmt.Sprintf("- Target '%s' successfully stopped", target.Name))
 			}
 		} else {
@@ -86,7 +89,10 @@ var stopCmd = &cobra.Command{
 				return err
 			}
 
-			apiclient_util.ReadTargetLogs(ctx, activeProfile, target.Id, false, &from)
+			apiclient_util.ReadTargetLogs(ctx, activeProfile, apiclient_util.ReadLogParams{
+				Id:    target.Id,
+				Label: &target.Name,
+			}, false, &from)
 
 			views.RenderInfoMessage(fmt.Sprintf("Target '%s' successfully stopped", targetId))
 		}
@@ -121,7 +127,10 @@ func stopAllTargets(activeProfile config.Profile, from time.Time) error {
 			continue
 		}
 
-		apiclient_util.ReadTargetLogs(ctx, activeProfile, target.Id, false, &from)
+		apiclient_util.ReadTargetLogs(ctx, activeProfile, apiclient_util.ReadLogParams{
+			Id:    target.Id,
+			Label: &target.Name,
+		}, false, &from)
 		views.RenderInfoMessage(fmt.Sprintf("- Target '%s' successfully stopped", target.Name))
 	}
 	return nil

@@ -24,7 +24,7 @@ var RestartCmd = &cobra.Command{
 	Args:    cobra.RangeArgs(0, 1),
 	GroupID: util.TARGET_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var workspaceId string
+		var workspace *apiclient.WorkspaceDTO
 
 		ctx := context.Background()
 
@@ -33,32 +33,34 @@ var RestartCmd = &cobra.Command{
 			return err
 		}
 
+		workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+		if err != nil {
+			return apiclient_util.HandleErrorResponse(res, err)
+		}
+
+		if len(workspaceList) == 0 {
+			views_util.NotifyEmptyWorkspaceList(true)
+			return nil
+		}
+
 		if len(args) == 0 {
-			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
-			if err != nil {
-				return apiclient_util.HandleErrorResponse(res, err)
-			}
-
-			if len(workspaceList) == 0 {
-				views_util.NotifyEmptyWorkspaceList(true)
-				return nil
-			}
-
 			workspace := selection.GetWorkspaceFromPrompt(workspaceList, "Restart")
 			if workspace == nil {
 				return nil
 			}
-			workspaceId = workspace.Name
 		} else {
-			workspaceId = args[0]
+			workspace, err = apiclient_util.GetWorkspace(args[0], false)
+			if err != nil {
+				return err
+			}
 		}
 
-		err = RestartWorkspace(apiClient, workspaceId)
+		err = RestartWorkspace(apiClient, *workspace)
 		if err != nil {
 			return err
 		}
 
-		views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' restarted successfully", workspaceId))
+		views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' restarted successfully", workspace.Name))
 
 		return nil
 	},
@@ -67,10 +69,10 @@ var RestartCmd = &cobra.Command{
 	},
 }
 
-func RestartWorkspace(apiClient *apiclient.APIClient, workspaceId string) error {
-	err := StopWorkspace(apiClient, workspaceId)
+func RestartWorkspace(apiClient *apiclient.APIClient, workspace apiclient.WorkspaceDTO) error {
+	err := StopWorkspace(apiClient, workspace)
 	if err != nil {
 		return err
 	}
-	return StartWorkspace(apiClient, workspaceId)
+	return StartWorkspace(apiClient, workspace)
 }

@@ -83,7 +83,7 @@ var CodeCmd = &cobra.Command{
 		}
 
 		if ws.State != nil || ws.State.Uptime < 1 {
-			wsRunningStatus, err := AutoStartWorkspace(ws.Id)
+			wsRunningStatus, err := AutoStartWorkspace(*ws)
 			if err != nil {
 				return err
 			}
@@ -122,9 +122,9 @@ func init() {
 
 }
 
-func AutoStartWorkspace(workspaceId string) (bool, error) {
+func AutoStartWorkspace(workspace apiclient.WorkspaceDTO) (bool, error) {
 	if !yesFlag {
-		if !ide_views.RunStartWorkspaceForm(workspaceId) {
+		if !ide_views.RunStartWorkspaceForm(workspace.Id) {
 			return false, nil
 		}
 	}
@@ -134,7 +134,7 @@ func AutoStartWorkspace(workspaceId string) (bool, error) {
 		return false, err
 	}
 
-	err = StartWorkspace(apiClient, workspaceId)
+	err = StartWorkspace(apiClient, workspace)
 	if err != nil {
 		return false, err
 	}

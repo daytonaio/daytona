@@ -127,7 +127,7 @@ var CreateCmd = &cobra.Command{
 		}
 
 		names := append(workspaceNames, target.Name)
-		logs_view.CalculateLongestPrefixLength(names)
+		logs_view.SetupLongestPrefixLength(names)
 
 		for i, workspaceConfigName := range existingWorkspaceConfigNames {
 			if workspaceConfigName == "" {
@@ -172,10 +172,13 @@ var CreateCmd = &cobra.Command{
 		logsContext, stopLogs := context.WithCancel(context.Background())
 		defer stopLogs()
 
-		logs_view.CalculateLongestPrefixLength(names)
+		logs_view.SetupLongestPrefixLength(names)
 
 		if !targetExisted {
-			go apiclient_util.ReadTargetLogs(logsContext, activeProfile, targetId, true, nil)
+			go apiclient_util.ReadTargetLogs(logsContext, activeProfile, apiclient_util.ReadLogParams{
+				Id:    targetId,
+				Label: &target.Name,
+			}, true, nil)
 
 			_, res, err := apiClient.TargetAPI.CreateTarget(ctx).Target(apiclient.CreateTargetDTO{
 				Id:      targetId,
@@ -193,7 +196,10 @@ var CreateCmd = &cobra.Command{
 
 		for i := range createWorkspaceDtos {
 			createWorkspaceDtos[i].TargetId = targetId
-			go apiclient_util.ReadWorkspaceLogs(logsContext, i, activeProfile, createWorkspaceDtos[i].Id, true, nil)
+			go apiclient_util.ReadWorkspaceLogs(logsContext, i, activeProfile, apiclient_util.ReadLogParams{
+				Id:    createWorkspaceDtos[i].Id,
+				Label: &createWorkspaceDtos[i].Name,
+			}, true, nil)
 
 			_, res, err = apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(createWorkspaceDtos[i]).Execute()
 			if err != nil {

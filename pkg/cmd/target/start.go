@@ -218,7 +218,10 @@ func StartTarget(apiClient *apiclient.APIClient, targetId string) error {
 	}
 
 	logsContext, stopLogs := context.WithCancel(context.Background())
-	go apiclient_util.ReadTargetLogs(logsContext, activeProfile, target.Id, true, &from)
+	go apiclient_util.ReadTargetLogs(logsContext, activeProfile, apiclient_util.ReadLogParams{
+		Id:    target.Id,
+		Label: &target.Name,
+	}, true, &from)
 	res, err := apiClient.TargetAPI.StartTarget(ctx, targetId).Execute()
 	if err != nil {
 		stopLogs()
