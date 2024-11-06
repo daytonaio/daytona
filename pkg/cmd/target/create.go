@@ -66,10 +66,12 @@ var targetCreateCmd = &cobra.Command{
 			Msg:        views.GetPrettyLogLine("Request submitted"),
 		}, logs_view.STATIC_INDEX)
 
-		go apiclient_util.ReadTargetLogs(logsContext, activeProfile, apiclient_util.ReadLogParams{
-			Id:    createTargetDto.Id,
-			Label: &createTargetDto.Name,
-		}, true, nil)
+		go apiclient_util.ReadTargetLogs(logsContext, apiclient_util.ReadLogParams{
+			Id:            createTargetDto.Id,
+			Label:         &createTargetDto.Name,
+			ActiveProfile: activeProfile,
+			Follow:        util.Pointer(true),
+		})
 
 		_, res, err := apiClient.TargetAPI.CreateTarget(ctx).Target(*createTargetDto).Execute()
 		if err != nil {

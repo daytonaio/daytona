@@ -57,10 +57,12 @@ var logsCmd = &cobra.Command{
 			}
 		}
 
-		apiclient_util.ReadTargetLogs(ctx, activeProfile, apiclient_util.ReadLogParams{
-			Id:    target.Id,
-			Label: &target.Name,
-		}, followFlag, nil)
+		apiclient_util.ReadTargetLogs(ctx, apiclient_util.ReadLogParams{
+			Id:            target.Id,
+			Label:         &target.Name,
+			ActiveProfile: activeProfile,
+			Follow:        &followFlag,
+		})
 
 		return nil
 	},

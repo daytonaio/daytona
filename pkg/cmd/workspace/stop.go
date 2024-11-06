@@ -138,10 +138,14 @@ func StopWorkspace(apiClient *apiclient.APIClient, workspace apiclient.Workspace
 	}
 
 	logsContext, stopLogs := context.WithCancel(context.Background())
-	go apiclient_util.ReadWorkspaceLogs(logsContext, 0, activeProfile, apiclient_util.ReadLogParams{
-		Id:    workspace.Id,
-		Label: &workspace.Name,
-	}, true, &from)
+	go apiclient_util.ReadWorkspaceLogs(logsContext, apiclient_util.ReadLogParams{
+		Id:            workspace.Id,
+		Label:         &workspace.Name,
+		ActiveProfile: activeProfile,
+		Index:         util.Pointer(0),
+		Follow:        util.Pointer(true),
+		From:          &from,
+	})
 
 	res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, workspace.Id).Execute()
 	if err != nil {

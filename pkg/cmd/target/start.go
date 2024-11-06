@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -218,10 +219,13 @@ func StartTarget(apiClient *apiclient.APIClient, targetId string) error {
 	}
 
 	logsContext, stopLogs := context.WithCancel(context.Background())
-	go apiclient_util.ReadTargetLogs(logsContext, activeProfile, apiclient_util.ReadLogParams{
-		Id:    target.Id,
-		Label: &target.Name,
-	}, true, &from)
+	go apiclient_util.ReadTargetLogs(logsContext, apiclient_util.ReadLogParams{
+		Id:            target.Id,
+		Label:         &target.Name,
+		ActiveProfile: activeProfile,
+		Follow:        util.Pointer(true),
+		From:          &from,
+	})
 	res, err := apiClient.TargetAPI.StartTarget(ctx, targetId).Execute()
 	if err != nil {
 		stopLogs()

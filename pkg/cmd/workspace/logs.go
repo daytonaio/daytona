@@ -76,10 +76,13 @@ var LogsCmd = &cobra.Command{
 			return nil
 		}
 
-		apiclient_util.ReadWorkspaceLogs(ctx, 0, activeProfile, apiclient_util.ReadLogParams{
-			Id:    ws.Id,
-			Label: &ws.Name,
-		}, followFlag, nil)
+		apiclient_util.ReadWorkspaceLogs(ctx, apiclient_util.ReadLogParams{
+			Id:            ws.Id,
+			Label:         &ws.Name,
+			ActiveProfile: activeProfile,
+			Index:         util.Pointer(0),
+			Follow:        &followFlag,
+		})
 		return nil
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {

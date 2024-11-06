@@ -9,9 +9,11 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
 	"github.com/daytonaio/daytona/pkg/views/target/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	log "github.com/sirupsen/logrus"
@@ -70,10 +72,17 @@ var stopCmd = &cobra.Command{
 					continue
 				}
 
-				apiclient_util.ReadTargetLogs(ctx, activeProfile, apiclient_util.ReadLogParams{
-					Id:    target.Id,
-					Label: &target.Name,
-				}, false, &from)
+				logs_view.SetupLongestPrefixLength(util.ArrayMap(targetList, func(t apiclient.TargetDTO) string {
+					return t.Name
+				}))
+
+				apiclient_util.ReadTargetLogs(ctx, apiclient_util.ReadLogParams{
+					Id:                    target.Id,
+					Label:                 &target.Name,
+					ActiveProfile:         activeProfile,
+					From:                  &from,
+					SkipPrefixLengthSetup: true,
+				})
 				views.RenderInfoMessage(fmt.Sprintf("- Target '%s' successfully stopped", target.Name))
 			}
 		} else {
@@ -89,10 +98,12 @@ var stopCmd = &cobra.Command{
 				return err
 			}
 
-			apiclient_util.ReadTargetLogs(ctx, activeProfile, apiclient_util.ReadLogParams{
-				Id:    target.Id,
-				Label: &target.Name,
-			}, false, &from)
+			apiclient_util.ReadTargetLogs(ctx, apiclient_util.ReadLogParams{
+				Id:            target.Id,
+				Label:         &target.Name,
+				ActiveProfile: activeProfile,
+				From:          &from,
+			})
 
 			views.RenderInfoMessage(fmt.Sprintf("Target '%s' successfully stopped", targetId))
 		}
@@ -127,10 +138,17 @@ func stopAllTargets(activeProfile config.Profile, from time.Time) error {
 			continue
 		}
 
-		apiclient_util.ReadTargetLogs(ctx, activeProfile, apiclient_util.ReadLogParams{
-			Id:    target.Id,
-			Label: &target.Name,
-		}, false, &from)
+		logs_view.SetupLongestPrefixLength(util.ArrayMap(targetList, func(t apiclient.TargetDTO) string {
+			return t.Name
+		}))
+
+		apiclient_util.ReadTargetLogs(ctx, apiclient_util.ReadLogParams{
+			Id:                    target.Id,
+			Label:                 &target.Name,
+			ActiveProfile:         activeProfile,
+			From:                  &from,
+			SkipPrefixLengthSetup: true,
+		})
 		views.RenderInfoMessage(fmt.Sprintf("- Target '%s' successfully stopped", target.Name))
 	}
 	return nil
