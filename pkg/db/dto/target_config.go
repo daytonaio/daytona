@@ -3,37 +3,37 @@
 
 package dto
 
-import "github.com/daytonaio/daytona/pkg/provider"
+import (
+	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/target/config"
+)
 
 type TargetConfigDTO struct {
-	Name            string  `json:"name" gorm:"primaryKey"`
-	ProviderName    string  `json:"providerName"`
-	ProviderLabel   *string `json:"providerLabel,omitempty"`
-	ProviderVersion string  `json:"providerVersion"`
-	Options         string  `json:"options"`
-	IsDefault       bool    `json:"isDefault"`
+	Name         string          `json:"name" gorm:"primaryKey"`
+	ProviderInfo ProviderInfoDTO `json:"providerInfo" gorm:"serializer:json"`
+	Options      string          `json:"options"`
 }
 
-func ToTargetConfigDTO(targetConfig *provider.TargetConfig) TargetConfigDTO {
+func ToTargetConfigDTO(targetConfig *config.TargetConfig) TargetConfigDTO {
 	return TargetConfigDTO{
-		Name:            targetConfig.Name,
-		ProviderName:    targetConfig.ProviderInfo.Name,
-		ProviderLabel:   targetConfig.ProviderInfo.Label,
-		ProviderVersion: targetConfig.ProviderInfo.Version,
-		Options:         targetConfig.Options,
-		IsDefault:       targetConfig.IsDefault,
+		Name: targetConfig.Name,
+		ProviderInfo: ProviderInfoDTO{
+			Name:    targetConfig.ProviderInfo.Name,
+			Version: targetConfig.ProviderInfo.Version,
+			Label:   targetConfig.ProviderInfo.Label,
+		},
+		Options: targetConfig.Options,
 	}
 }
 
-func ToTargetConfig(targetConfigDTO TargetConfigDTO) *provider.TargetConfig {
-	return &provider.TargetConfig{
+func ToTargetConfig(targetConfigDTO TargetConfigDTO) *config.TargetConfig {
+	return &config.TargetConfig{
 		Name: targetConfigDTO.Name,
-		ProviderInfo: provider.ProviderInfo{
-			Name:    targetConfigDTO.ProviderName,
-			Label:   targetConfigDTO.ProviderLabel,
-			Version: targetConfigDTO.ProviderVersion,
+		ProviderInfo: target.ProviderInfo{
+			Name:    targetConfigDTO.ProviderInfo.Name,
+			Version: targetConfigDTO.ProviderInfo.Version,
+			Label:   targetConfigDTO.ProviderInfo.Label,
 		},
-		Options:   targetConfigDTO.Options,
-		IsDefault: targetConfigDTO.IsDefault,
+		Options: targetConfigDTO.Options,
 	}
 }

@@ -12,7 +12,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
-	util "github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -21,6 +21,8 @@ import (
 type WorkspaceDetail string
 
 const (
+	Repository         WorkspaceDetail = "Repository"
+	Branch             WorkspaceDetail = "Branch"
 	Build              WorkspaceDetail = "Build"
 	DevcontainerConfig WorkspaceDetail = "Devcontainer Config"
 	Image              WorkspaceDetail = "Image"
@@ -43,22 +45,23 @@ type SummaryModel struct {
 }
 
 type SubmissionFormConfig struct {
-	ChosenName    *string
-	SuggestedName string
-	ExistingNames []string
-	WorkspaceList *[]apiclient.CreateWorkspaceDTO
-	NameLabel     string
-	Defaults      *views_util.WorkspaceConfigDefaults
+	ChosenName             *string
+	SuggestedName          string
+	WorkspaceList          *[]apiclient.CreateWorkspaceDTO
+	NameLabel              string
+	Defaults               *views_util.WorkspaceConfigDefaults
+	ExistingWorkspaceNames []string
+	ImportConfirmation     *bool
 }
 
-var configureCheck bool
+var doneCheck bool
 var userCancelled bool
 var WorkspacesConfigurationChanged bool
 
-func RunSubmissionForm(config SubmissionFormConfig, wtImport *bool) error {
-	configureCheck = false
+func RunSubmissionForm(config SubmissionFormConfig) error {
+	doneCheck = true
 
-	m := NewSummaryModel(config, wtImport)
+	m := NewSummaryModel(config)
 
 	if _, err := tea.NewProgram(m, tea.WithAltScreen()).Run(); err != nil {
 		return err
@@ -68,7 +71,7 @@ func RunSubmissionForm(config SubmissionFormConfig, wtImport *bool) error {
 		return errors.New("user cancelled")
 	}
 
-	if !configureCheck {
+	if doneCheck {
 		return nil
 	}
 
@@ -77,29 +80,34 @@ func RunSubmissionForm(config SubmissionFormConfig, wtImport *bool) error {
 	}
 
 	var err error
-	WorkspacesConfigurationChanged, err = RunWorkspaceConfiguration(config.WorkspaceList, *config.Defaults, *wtImport)
+	isImporting := false
+	if config.ImportConfirmation != nil {
+		isImporting = *config.ImportConfirmation
+	}
+
+	WorkspacesConfigurationChanged, err = RunWorkspaceConfiguration(config.WorkspaceList, *config.Defaults, isImporting)
 	if err != nil {
 		return err
 	}
 
-	return RunSubmissionForm(config, wtImport)
+	return RunSubmissionForm(config)
 }
 
 func RenderSummary(name string, workspaceList []apiclient.CreateWorkspaceDTO, defaults *views_util.WorkspaceConfigDefaults, nameLabel string) (string, error) {
 	var output string
-	if name == "" {
+	if nameLabel == "" {
 		output = views.GetStyledMainTitle("SUMMARY")
 	} else {
-		output = views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - %s %s", nameLabel, name))
+		output = views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - Target %s", nameLabel))
 	}
 
 	output += "\n\n"
 
 	for i := range workspaceList {
 		if len(workspaceList) == 1 {
-			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render("Workspace"), (workspaceList[i].Source.Repository.Url))
+			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render("Workspace"), (workspaceList[i].Name))
 		} else {
-			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("%s #%d", "Workspace", i+1)), (workspaceList[i].Source.Repository.Url))
+			output += fmt.Sprintf("%s - %s\n", lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("%s #%d", "Workspace", i+1)), (workspaceList[i].Name))
 		}
 
 		workspaceBuildChoice, choiceName := views_util.GetWorkspaceBuildChoice(workspaceList[i], defaults)
@@ -113,7 +121,9 @@ func RenderSummary(name string, workspaceList []apiclient.CreateWorkspaceDTO, de
 }
 
 func renderWorkspaceDetails(workspace apiclient.CreateWorkspaceDTO, buildChoice views_util.BuildChoice, choiceName string) string {
-	output := workspaceDetailOutput(Build, choiceName)
+	output := workspaceDetailOutput(Repository, workspace.Source.Repository.Url) + "\n"
+	output += workspaceDetailOutput(Branch, workspace.Source.Repository.Branch) + "\n"
+	output += workspaceDetailOutput(Build, choiceName)
 
 	if buildChoice == views_util.DEVCONTAINER {
 		if workspace.BuildConfig != nil {
@@ -157,20 +167,19 @@ func workspaceDetailOutput(workspaceDetailKey WorkspaceDetail, workspaceDetailVa
 	return fmt.Sprintf("\t%s%-*s%s", lipgloss.NewStyle().Foreground(views.Green).Render(string(workspaceDetailKey)), DEFAULT_PADDING-len(string(workspaceDetailKey)), EMPTY_STRING, workspaceDetailValue)
 }
 
-func NewSummaryModel(config SubmissionFormConfig, wtImport *bool) SummaryModel {
+func NewSummaryModel(config SubmissionFormConfig) SummaryModel {
 	m := SummaryModel{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
-	m.name = *config.ChosenName
 	m.workspaceList = *config.WorkspaceList
 	m.defaults = config.Defaults
 	m.nameLabel = config.NameLabel
 
-	if *config.ChosenName == "" {
+	if config.ChosenName != nil && *config.ChosenName == "" {
 		*config.ChosenName = config.SuggestedName
 	}
 
-	if !*wtImport {
+	if config.ImportConfirmation == nil || !*config.ImportConfirmation {
 		m.form = huh.NewForm(
 			huh.NewGroup(
 				huh.NewInput().
@@ -182,7 +191,7 @@ func NewSummaryModel(config SubmissionFormConfig, wtImport *bool) SummaryModel {
 						if err != nil {
 							return err
 						}
-						for _, name := range config.ExistingNames {
+						for _, name := range config.ExistingWorkspaceNames {
 							if name == result {
 								return errors.New("name already exists")
 							}
@@ -197,10 +206,17 @@ func NewSummaryModel(config SubmissionFormConfig, wtImport *bool) SummaryModel {
 			huh.NewGroup(
 				huh.NewConfirm().
 					Title("Is the above information correct?").
-					Value(wtImport),
+					Value(config.ImportConfirmation),
 			),
 		).WithShowHelp(false).WithTheme(views.GetCustomTheme())
 	}
+	m.form = huh.NewForm(
+		huh.NewGroup(
+			huh.NewConfirm().
+				Title("Good to go?").Affirmative("Create").Negative("Configure").
+				Value(&doneCheck),
+		),
+	).WithShowHelp(false).WithTheme(views.GetCustomTheme())
 
 	return m
 }
@@ -220,7 +236,7 @@ func (m SummaryModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "f10":
 			m.quitting = true
 			m.form.State = huh.StateCompleted
-			configureCheck = true
+			doneCheck = false
 			return m, tea.Quit
 		}
 	}
@@ -250,13 +266,11 @@ func (m SummaryModel) View() string {
 
 	view := m.form.WithHeight(5).View() + "\n" + configurationHelpLine
 
-	if len(m.workspaceList) > 1 || len(m.workspaceList) == 1 && WorkspacesConfigurationChanged {
-		summary, err := RenderSummary(m.name, m.workspaceList, m.defaults, m.nameLabel)
-		if err != nil {
-			log.Fatal(err)
-		}
-		view = views.GetBorderedMessage(summary) + "\n" + view
+	summary, err := RenderSummary(m.name, m.workspaceList, m.defaults, m.nameLabel)
+	if err != nil {
+		log.Fatal(err)
 	}
+	view = views.GetBorderedMessage(summary) + "\n" + view
 
 	return view
 }

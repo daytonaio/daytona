@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/daytonaio/daytona/pkg/api/util"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/targets"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
@@ -35,7 +36,7 @@ func CreateTarget(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	w, err := server.TargetService.CreateTarget(ctx.Request.Context(), createTargetReq)
+	t, err := server.TargetService.CreateTarget(ctx.Request.Context(), createTargetReq)
 	if err != nil {
 		if errors.Is(err, targets.ErrTargetAlreadyExists) {
 			ctx.AbortWithError(http.StatusConflict, fmt.Errorf("target already exists: %w", err))
@@ -45,5 +46,12 @@ func CreateTarget(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(200, w)
+	maskedOptions, err := util.GetMaskedOptions(server, t.ProviderInfo.Name, t.Options)
+	if err != nil {
+		t.Options = fmt.Sprintf("Error: %s", err.Error())
+	} else {
+		t.Options = maskedOptions
+	}
+
+	ctx.JSON(200, t)
 }

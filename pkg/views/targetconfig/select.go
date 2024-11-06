@@ -20,13 +20,13 @@ const NewTargetConfigName = "+ New Target Config"
 type TargetConfigView struct {
 	Name         string
 	Options      string
-	IsDefault    bool
 	ProviderInfo ProviderInfo
 }
 
 type ProviderInfo struct {
 	Name      string
 	Version   string
+	Label     *string
 	Installed *bool
 }
 
@@ -68,6 +68,7 @@ func GetTargetConfigFromPrompt(targetConfigs []apiclient.TargetConfig, activePro
 					ProviderInfo: ProviderInfo{
 						Name:      providerView.Name,
 						Version:   providerView.Version,
+						Label:     providerView.Label,
 						Installed: providerView.Installed,
 					},
 				},
@@ -94,12 +95,12 @@ func GetTargetConfigFromPrompt(targetConfigs []apiclient.TargetConfig, activePro
 
 func ToTargetConfigView(targetConfig apiclient.TargetConfig) TargetConfigView {
 	return TargetConfigView{
-		Name:      targetConfig.Name,
-		Options:   targetConfig.Options,
-		IsDefault: targetConfig.IsDefault,
+		Name:    targetConfig.Name,
+		Options: targetConfig.Options,
 		ProviderInfo: ProviderInfo{
 			Name:    targetConfig.ProviderInfo.Name,
 			Version: targetConfig.ProviderInfo.Version,
+			Label:   targetConfig.ProviderInfo.Label,
 		},
 	}
 }

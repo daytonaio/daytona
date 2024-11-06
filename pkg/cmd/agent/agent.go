@@ -57,7 +57,7 @@ var AgentCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			c.WorkspaceDir = filepath.Join(os.Getenv("HOME"), ws.Name)
+			c.WorkspaceDir = filepath.Join(os.Getenv("HOME"), ws.WorkspaceFolderName())
 		}
 
 		configDir, err := config.GetConfigDir()
@@ -98,9 +98,9 @@ var AgentCmd = &cobra.Command{
 			DefaultWorkspaceDir: os.Getenv("HOME"),
 		}
 
-		tailscaleHostname := workspace.GetWorkspaceHostname(c.WorkspaceId)
-		if hostModeFlag {
-			tailscaleHostname = c.TargetId
+		tailscaleHostname := c.TargetId
+		if agentMode == agent_config.ModeWorkspace {
+			tailscaleHostname = workspace.GetWorkspaceHostname(c.WorkspaceId)
 		}
 
 		toolBoxServer := &toolbox.Server{

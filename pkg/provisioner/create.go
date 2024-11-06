@@ -8,28 +8,27 @@ import (
 	"github.com/daytonaio/daytona/pkg/target"
 )
 
-func (p *Provisioner) CreateTarget(target *target.Target, targetConfig *provider.TargetConfig) error {
-	targetProvider, err := p.providerManager.GetProvider(targetConfig.ProviderInfo.Name)
+func (p *Provisioner) CreateTarget(t *target.Target) error {
+	targetProvider, err := p.providerManager.GetProvider(t.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
 	_, err = (*targetProvider).CreateTarget(&provider.TargetRequest{
-		TargetConfigOptions: targetConfig.Options,
-		Target:              target,
+		Target: t,
 	})
 
 	return err
 }
 
 func (p *Provisioner) CreateWorkspace(params WorkspaceParams) error {
-	targetProvider, err := p.providerManager.GetProvider(params.TargetConfig.ProviderInfo.Name)
+	targetProvider, err := p.providerManager.GetProvider(params.Target.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
 	_, err = (*targetProvider).CreateWorkspace(&provider.WorkspaceRequest{
-		TargetConfigOptions:      params.TargetConfig.Options,
+		Target:                   params.Target,
 		Workspace:                params.Workspace,
 		ContainerRegistry:        params.ContainerRegistry,
 		GitProviderConfig:        params.GitProviderConfig,

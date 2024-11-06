@@ -36,7 +36,7 @@ func (s *Server) Purge(ctx context.Context, force bool) []error {
 		return []error{err}
 	}
 
-	targets, err := s.TargetService.ListTargets(ctx, false)
+	targets, err := s.TargetService.ListTargets(ctx, nil, false)
 	if err != nil {
 		s.trackPurgeError(ctx, force, err)
 		if !force {

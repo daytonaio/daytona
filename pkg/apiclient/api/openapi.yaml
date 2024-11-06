@@ -885,9 +885,12 @@ paths:
         description: Target config to set
         required: true
       responses:
-        "201":
-          content: {}
-          description: Created
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/TargetConfig'
+          description: OK
       summary: Set a target config
       tags:
       - target-config
@@ -908,24 +911,6 @@ paths:
           content: {}
           description: No Content
       summary: Remove a target config
-      tags:
-      - target-config
-  /target-config/{configName}/set-default:
-    patch:
-      description: Set target config to default
-      operationId: SetDefaultTargetConfig
-      parameters:
-      - description: Target config name
-        in: path
-        name: configName
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content: {}
-          description: OK
-      summary: Set target config to default
       tags:
       - target-config
   /target/{targetId}:
@@ -974,6 +959,24 @@ paths:
                 $ref: '#/components/schemas/TargetDTO'
           description: OK
       summary: Get target info
+      tags:
+      - target
+  /target/{targetId}/set-default:
+    patch:
+      description: Set target to be used by default
+      operationId: SetDefaultTarget
+      parameters:
+      - description: Target ID or name
+        in: path
+        name: targetId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Set target to be used by default
       tags:
       - target
   /target/{targetId}/start:
@@ -2713,7 +2716,7 @@ components:
         options:
           type: string
         providerInfo:
-          $ref: '#/components/schemas/provider.ProviderInfo'
+          $ref: '#/components/schemas/TargetProviderInfo'
       required:
       - name
       - options
@@ -2721,7 +2724,7 @@ components:
       type: object
     CreateTargetDTO:
       example:
-        targetConfig: targetConfig
+        targetConfigName: targetConfigName
         name: name
         id: id
       properties:
@@ -2729,12 +2732,12 @@ components:
           type: string
         name:
           type: string
-        targetConfig:
+        targetConfigName:
           type: string
       required:
       - id
       - name
-      - targetConfig
+      - targetConfigName
       type: object
     CreateWorkspaceConfigDTO:
       example:
@@ -3904,24 +3907,35 @@ components:
       - UpdatedButUnmerged
     Target:
       example:
-        targetConfig: targetConfig
+        default: true
         name: name
+        options: options
         id: id
+        providerInfo:
+          name: name
+          label: label
+          version: version
       properties:
+        default:
+          type: boolean
         id:
           type: string
         name:
           type: string
-        targetConfig:
+        options:
+          description: JSON encoded map of options
           type: string
+        providerInfo:
+          $ref: '#/components/schemas/TargetProviderInfo'
       required:
+      - default
       - id
       - name
-      - targetConfig
+      - options
+      - providerInfo
       type: object
     TargetConfig:
       example:
-        isDefault: true
         name: name
         options: options
         providerInfo:
@@ -3929,17 +3943,14 @@ components:
           label: label
           version: version
       properties:
-        isDefault:
-          type: boolean
         name:
           type: string
         options:
           description: JSON encoded map of options
           type: string
         providerInfo:
-          $ref: '#/components/schemas/provider.ProviderInfo'
+          $ref: '#/components/schemas/TargetProviderInfo'
       required:
-      - isDefault
       - name
       - options
       - providerInfo
@@ -3982,25 +3993,41 @@ components:
       type: object
     TargetDTO:
       example:
-        targetConfig: targetConfig
+        default: true
         name: name
+        options: options
+        workspaceCount: 0
         id: id
         info:
           providerMetadata: providerMetadata
           name: name
+        providerInfo:
+          name: name
+          label: label
+          version: version
       properties:
+        default:
+          type: boolean
         id:
           type: string
         info:
           $ref: '#/components/schemas/TargetInfo'
         name:
           type: string
-        targetConfig:
+        options:
+          description: JSON encoded map of options
           type: string
+        providerInfo:
+          $ref: '#/components/schemas/TargetProviderInfo'
+        workspaceCount:
+          type: integer
       required:
+      - default
       - id
       - name
-      - targetConfig
+      - options
+      - providerInfo
+      - workspaceCount
       type: object
     TargetInfo:
       example:
@@ -4013,6 +4040,22 @@ components:
           type: string
       required:
       - name
+      type: object
+    TargetProviderInfo:
+      example:
+        name: name
+        label: label
+        version: version
+      properties:
+        label:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+      required:
+      - name
+      - version
       type: object
     WorkspaceConfig:
       example:
@@ -4334,22 +4377,6 @@ components:
       - BuildStatePendingDelete
       - BuildStatePendingForcedDelete
       - BuildStateDeleting
-    provider.ProviderInfo:
-      example:
-        name: name
-        label: label
-        version: version
-      properties:
-        label:
-          type: string
-        name:
-          type: string
-        version:
-          type: string
-      required:
-      - name
-      - version
-      type: object
     provider.TargetConfigPropertyType:
       enum:
       - string

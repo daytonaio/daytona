@@ -9,7 +9,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/daytonaio/daytona/pkg/api/util"
 	"github.com/daytonaio/daytona/pkg/server"
+	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,13 +43,20 @@ func GetTarget(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	w, err := server.TargetService.GetTarget(ctx.Request.Context(), targetId, verbose)
+	t, err := server.TargetService.GetTarget(ctx.Request.Context(), &target.TargetFilter{IdOrName: &targetId}, verbose)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get target: %w", err))
 		return
 	}
 
-	ctx.JSON(200, w)
+	maskedOptions, err := util.GetMaskedOptions(server, t.ProviderInfo.Name, t.Options)
+	if err != nil {
+		t.Options = fmt.Sprintf("Error: %s", err.Error())
+	} else {
+		t.Options = maskedOptions
+	}
+
+	ctx.JSON(200, t)
 }
 
 // ListTargets 			godoc
@@ -76,52 +85,21 @@ func ListTargets(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	targetList, err := server.TargetService.ListTargets(ctx.Request.Context(), verbose)
+	targetList, err := server.TargetService.ListTargets(ctx.Request.Context(), nil, verbose)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list targets: %w", err))
 		return
 	}
 
-	ctx.JSON(200, targetList)
-}
-
-// RemoveTarget 			godoc
-//
-//	@Tags			target
-//	@Summary		Remove target
-//	@Description	Remove target
-//	@Param			targetId	path	string	true	"Target ID"
-//	@Param			force		query	bool	false	"Force"
-//	@Success		200
-//	@Router			/target/{targetId} [delete]
-//
-//	@id				RemoveTarget
-func RemoveTarget(ctx *gin.Context) {
-	targetId := ctx.Param("targetId")
-	forceQuery := ctx.Query("force")
-	var err error
-	force := false
-
-	if forceQuery != "" {
-		force, err = strconv.ParseBool(forceQuery)
+	for i, t := range targetList {
+		maskedOptions, err := util.GetMaskedOptions(server, t.ProviderInfo.Name, t.Options)
 		if err != nil {
-			ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for force flag"))
-			return
+			targetList[i].Options = fmt.Sprintf("Error: %s", err.Error())
+			continue
 		}
+
+		targetList[i].Options = maskedOptions
 	}
 
-	server := server.GetInstance(nil)
-
-	if force {
-		err = server.TargetService.ForceRemoveTarget(ctx.Request.Context(), targetId)
-	} else {
-		err = server.TargetService.RemoveTarget(ctx.Request.Context(), targetId)
-	}
-
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to remove target: %w", err))
-		return
-	}
-
-	ctx.Status(200)
+	ctx.JSON(200, targetList)
 }

@@ -41,7 +41,7 @@ func (d *DockerClient) initWorkspaceContainer(opts *CreateWorkspaceOptions, moun
 		mounts = append(mounts, mount.Mount{
 			Type:   mount.TypeBind,
 			Source: opts.WorkspaceDir,
-			Target: fmt.Sprintf("/home/%s/%s", opts.Workspace.User, opts.Workspace.Name),
+			Target: fmt.Sprintf("/home/%s/%s", opts.Workspace.User, opts.Workspace.WorkspaceFolderName()),
 		})
 	}
 

@@ -16,10 +16,11 @@ import (
 	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
+	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/telemetry"
+	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/daytonaio/daytona/pkg/workspace/buildconfig"
 
@@ -49,12 +50,7 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 		return s.handleCreateError(ctx, nil, ErrWorkspaceAlreadyExists)
 	}
 
-	target, err := s.targetStore.Find(req.TargetId)
-	if err != nil {
-		return s.handleCreateError(ctx, nil, err)
-	}
-
-	targetConfig, err := s.targetConfigStore.Find(&provider.TargetConfigFilter{Name: &target.TargetConfig})
+	target, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &req.TargetId})
 	if err != nil {
 		return s.handleCreateError(ctx, nil, err)
 	}
@@ -156,7 +152,7 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 
 	err = s.provisioner.CreateWorkspace(provisioner.WorkspaceParams{
 		Workspace:                     w,
-		TargetConfig:                  targetConfig,
+		Target:                        &target.Target,
 		ContainerRegistry:             cr,
 		GitProviderConfig:             gc,
 		BuilderImage:                  s.builderImage,
@@ -166,9 +162,9 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 		return s.handleCreateError(ctx, w, err)
 	}
 
-	workspaceLogger.Write([]byte(fmt.Sprintf("Workspace %s created\n", w.Name)))
+	workspaceLogger.Write([]byte(views.GetPrettyLogLine(fmt.Sprintf("Workspace %s created", w.Name))))
 
-	err = s.startWorkspace(w, targetConfig, workspaceLogger)
+	err = s.startWorkspace(w, &target.Target, workspaceLogger)
 
 	return s.handleCreateError(ctx, w, err)
 }
