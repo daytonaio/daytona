@@ -42,14 +42,14 @@ type DevcontainerPaths struct {
 type CreateDevcontainerOptions struct {
 	WorkspaceDir string
 	// Name of the project inside the devcontainer
-	WorkspaceName     string
-	BuildConfig       *buildconfig.BuildConfig
-	LogWriter         io.Writer
-	SshClient         *ssh.Client
-	ContainerRegistry *containerregistry.ContainerRegistry
-	Prebuild          bool
-	EnvVars           map[string]string
-	IdLabels          map[string]string
+	WorkspaceFolderName string
+	BuildConfig         *buildconfig.BuildConfig
+	LogWriter           io.Writer
+	SshClient           *ssh.Client
+	ContainerRegistry   *containerregistry.ContainerRegistry
+	Prebuild            bool
+	EnvVars             map[string]string
+	IdLabels            map[string]string
 }
 
 func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (string, RemoteUser, error) {
@@ -127,7 +127,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 
 	// If the workspaceFolder is not set in the devcontainer.json, we set it to /workspaces/<workspace-name>
 	if _, ok := devcontainerConfig["workspaceFolder"].(string); !ok {
-		workspaceFolder = fmt.Sprintf("/workspaces/%s", opts.WorkspaceName)
+		workspaceFolder = fmt.Sprintf("/workspaces/%s", opts.WorkspaceFolderName)
 		devcontainerConfig["workspaceFolder"] = workspaceFolder
 	}
 	devcontainerConfig["workspaceMount"] = fmt.Sprintf("source=%s,target=%s,type=bind", opts.WorkspaceDir, workspaceFolder)
@@ -164,7 +164,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 			return "", "", err
 		}
 
-		project.Name = fmt.Sprintf("%s-%s", opts.WorkspaceName, util.Hash(opts.WorkspaceDir))
+		project.Name = fmt.Sprintf("%s-%s", opts.WorkspaceFolderName, util.Hash(opts.WorkspaceDir))
 
 		for _, service := range project.Services {
 			if service.Build != nil {

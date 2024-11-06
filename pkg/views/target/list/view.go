@@ -5,6 +5,7 @@ package list
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/internal/util"
@@ -15,8 +16,11 @@ import (
 )
 
 type RowData struct {
-	Name         string
-	TargetConfig string
+	Name           string
+	Provider       string
+	Default        bool
+	WorkspaceCount string
+	Options        string
 }
 
 func ListTargets(targetList []apiclient.TargetDTO, verbose bool, activeProfileName string) {
@@ -25,10 +29,25 @@ func ListTargets(targetList []apiclient.TargetDTO, verbose bool, activeProfileNa
 		return
 	}
 
-	headers := []string{"Target", "Target Config"}
+	SortTargets(&targetList)
+
+	headers := []string{"Target", "Provider", "Default", "# Workspaces", "Options"}
 
 	data := util.ArrayMap(targetList, func(target apiclient.TargetDTO) []string {
-		return getRowFromRowData(RowData{Name: target.Name, TargetConfig: target.TargetConfig})
+		provider := target.ProviderInfo.Name
+		if target.ProviderInfo.Label != nil {
+			provider = *target.ProviderInfo.Label
+		}
+
+		rowData := RowData{
+			Name:           target.Name,
+			Provider:       provider,
+			Default:        target.Default,
+			WorkspaceCount: fmt.Sprintf("%d", target.WorkspaceCount),
+			Options:        target.Options,
+		}
+
+		return getRowFromRowData(rowData)
 	})
 
 	footer := lipgloss.NewStyle().Foreground(views.LightGray).Render(views.GetListFooter(activeProfileName, &views.Padding{}))
@@ -51,8 +70,25 @@ func renderUnstyledList(targetList []apiclient.TargetDTO) {
 }
 
 func getRowFromRowData(rowData RowData) []string {
+	var isDefault string
+
+	if rowData.Default {
+		isDefault = views.ActiveStyle.Render("Yes")
+	} else {
+		isDefault = views.InactiveStyle.Render("/")
+	}
+
 	return []string{
 		views.NameStyle.Render(rowData.Name),
-		views.DefaultRowDataStyle.Render(rowData.TargetConfig),
+		views.DefaultRowDataStyle.Render(rowData.Provider),
+		isDefault,
+		views.DefaultRowDataStyle.Render(rowData.WorkspaceCount),
+		views.DefaultRowDataStyle.Render(rowData.Options),
 	}
+}
+
+func SortTargets(targetList *[]apiclient.TargetDTO) {
+	sort.Slice(*targetList, func(i, j int) bool {
+		return (*targetList)[i].Default && !(*targetList)[j].Default
+	})
 }

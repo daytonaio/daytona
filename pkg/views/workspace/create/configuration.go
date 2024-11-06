@@ -23,9 +23,10 @@ const (
 	DEVCONTAINER_FILEPATH = ".devcontainer/devcontainer.json"
 )
 
-var configurationHelpLine = lipgloss.NewStyle().Foreground(views.Gray).Render("enter: next  f10: advanced configuration")
+var configurationHelpLine = lipgloss.NewStyle().Foreground(views.Gray).Render("enter: next  f10: configuration screen")
 
 type WorkspaceConfigurationData struct {
+	Name                 string
 	BuildChoice          string
 	DevcontainerFilePath string
 	Image                string
@@ -35,6 +36,7 @@ type WorkspaceConfigurationData struct {
 
 func NewConfigurationData(buildChoice views_util.BuildChoice, devContainerFilePath string, currentWorkspace *apiclient.CreateWorkspaceDTO, defaults *views_util.WorkspaceConfigDefaults) *WorkspaceConfigurationData {
 	workspaceConfigurationData := &WorkspaceConfigurationData{
+		Name:                 currentWorkspace.Name,
 		BuildChoice:          string(buildChoice),
 		DevcontainerFilePath: defaults.DevcontainerFilePath,
 		Image:                *defaults.Image,
@@ -99,37 +101,40 @@ func RunWorkspaceConfiguration(workspaceList *[]apiclient.CreateWorkspaceDTO, de
 	}
 
 	for i := range *workspaceList {
-		if (*workspaceList)[i].Name == currentWorkspace.Name {
-			if workspaceConfigurationData.BuildChoice == string(views_util.NONE) {
-				(*workspaceList)[i].BuildConfig = nil
-				(*workspaceList)[i].Image = defaults.Image
-				(*workspaceList)[i].User = defaults.ImageUser
-			}
-
-			if workspaceConfigurationData.BuildChoice == string(views_util.CUSTOMIMAGE) {
-				(*workspaceList)[i].BuildConfig = nil
-				(*workspaceList)[i].Image = &workspaceConfigurationData.Image
-				(*workspaceList)[i].User = &workspaceConfigurationData.User
-			}
-
-			if workspaceConfigurationData.BuildChoice == string(views_util.AUTOMATIC) {
-				(*workspaceList)[i].BuildConfig = &apiclient.BuildConfig{}
-				(*workspaceList)[i].Image = defaults.Image
-				(*workspaceList)[i].User = defaults.ImageUser
-			}
-
-			if workspaceConfigurationData.BuildChoice == string(views_util.DEVCONTAINER) {
-				(*workspaceList)[i].BuildConfig = &apiclient.BuildConfig{
-					Devcontainer: &apiclient.DevcontainerConfig{
-						FilePath: workspaceConfigurationData.DevcontainerFilePath,
-					},
-				}
-				(*workspaceList)[i].Image = nil
-				(*workspaceList)[i].User = nil
-			}
-
-			(*workspaceList)[i].EnvVars = workspaceConfigurationData.EnvVars
+		if (*workspaceList)[i].Id != currentWorkspace.Id {
+			continue
 		}
+
+		if workspaceConfigurationData.BuildChoice == string(views_util.NONE) {
+			(*workspaceList)[i].BuildConfig = nil
+			(*workspaceList)[i].Image = defaults.Image
+			(*workspaceList)[i].User = defaults.ImageUser
+		}
+
+		if workspaceConfigurationData.BuildChoice == string(views_util.CUSTOMIMAGE) {
+			(*workspaceList)[i].BuildConfig = nil
+			(*workspaceList)[i].Image = &workspaceConfigurationData.Image
+			(*workspaceList)[i].User = &workspaceConfigurationData.User
+		}
+
+		if workspaceConfigurationData.BuildChoice == string(views_util.AUTOMATIC) {
+			(*workspaceList)[i].BuildConfig = &apiclient.BuildConfig{}
+			(*workspaceList)[i].Image = defaults.Image
+			(*workspaceList)[i].User = defaults.ImageUser
+		}
+
+		if workspaceConfigurationData.BuildChoice == string(views_util.DEVCONTAINER) {
+			(*workspaceList)[i].BuildConfig = &apiclient.BuildConfig{
+				Devcontainer: &apiclient.DevcontainerConfig{
+					FilePath: workspaceConfigurationData.DevcontainerFilePath,
+				},
+			}
+			(*workspaceList)[i].Image = nil
+			(*workspaceList)[i].User = nil
+		}
+
+		(*workspaceList)[i].Name = workspaceConfigurationData.Name
+		(*workspaceList)[i].EnvVars = workspaceConfigurationData.EnvVars
 	}
 
 	if len(*workspaceList) == 1 {
@@ -156,6 +161,11 @@ func GetWorkspaceConfigurationForm(workspaceConfiguration *WorkspaceConfiguratio
 	}
 
 	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewInput().
+				Title("Name").
+				Value(&workspaceConfiguration.Name),
+		),
 		huh.NewGroup(
 			huh.NewSelect[string]().
 				Title("Choose a build configuration").

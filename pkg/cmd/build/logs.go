@@ -68,7 +68,11 @@ var buildLogsCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(nil, err)
 		}
 
-		apiclient_util.ReadBuildLogs(ctx, activeProfile, buildId, query)
+		apiclient_util.ReadBuildLogs(ctx, apiclient_util.ReadLogParams{
+			Id:            buildId,
+			ActiveProfile: activeProfile,
+			Query:         &query,
+		})
 
 		// Make sure the terminal cursor is reset
 		fmt.Print("\033[?25h")

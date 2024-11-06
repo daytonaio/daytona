@@ -8,27 +8,28 @@ import (
 	"io"
 
 	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
 	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/target/config"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 )
 
 type ITargetService interface {
 	CreateTarget(ctx context.Context, req dto.CreateTargetDTO) (*target.Target, error)
-	GetTarget(ctx context.Context, targetId string, verbose bool) (*dto.TargetDTO, error)
+	GetTarget(ctx context.Context, filter *target.TargetFilter, verbose bool) (*dto.TargetDTO, error)
 	GetTargetLogReader(targetId string) (io.Reader, error)
-	ListTargets(ctx context.Context, verbose bool) ([]dto.TargetDTO, error)
+	ListTargets(ctx context.Context, filter *target.TargetFilter, verbose bool) ([]dto.TargetDTO, error)
 	StartTarget(ctx context.Context, targetId string) error
 	StopTarget(ctx context.Context, targetId string) error
+	SetDefault(ctx context.Context, targetId string) error
 	RemoveTarget(ctx context.Context, targetId string) error
 	ForceRemoveTarget(ctx context.Context, targetId string) error
 }
 
 type targetConfigStore interface {
-	Find(filter *provider.TargetConfigFilter) (*provider.TargetConfig, error)
+	Find(filter *config.TargetConfigFilter) (*config.TargetConfig, error)
 }
 
 type TargetServiceConfig struct {

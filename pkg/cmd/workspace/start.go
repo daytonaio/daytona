@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package target
+package workspace
 
 import (
 	"context"
@@ -13,6 +13,8 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/workspace/common"
+	workspace_common "github.com/daytonaio/daytona/pkg/cmd/workspace/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -20,13 +22,6 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-)
-
-type WorkspaceState string
-
-const (
-	WORKSPACE_STATE_RUNNING WorkspaceState = "Running"
-	WORKSPACE_STATE_STOPPED WorkspaceState = "Unavailable"
 )
 
 var allFlag bool
@@ -38,7 +33,7 @@ var StartCmd = &cobra.Command{
 	Args:    cobra.RangeArgs(0, 1),
 	GroupID: util.TARGET_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var selectedWorkspaceNames []string
+		var selectedWorkspaces []apiclient.WorkspaceDTO
 		var activeProfile config.Profile
 		var ideId string
 		var ideList []config.Ide
@@ -66,19 +61,25 @@ var StartCmd = &cobra.Command{
 				views_util.NotifyEmptyWorkspaceList(true)
 				return nil
 			}
+
 			selectedWorkspace := selection.GetWorkspaceFromPrompt(workspaceList, "Start")
 			if selectedWorkspace == nil {
 				return nil
 			}
-			selectedWorkspaceNames = append(selectedWorkspaceNames, selectedWorkspace.Name)
+			selectedWorkspaces = append(selectedWorkspaces, *selectedWorkspace)
 		} else {
-			selectedWorkspaceNames = append(selectedWorkspaceNames, args[0])
+			workspace, err := apiclient_util.GetWorkspace(args[0], true)
+			if err != nil {
+				return err
+			}
+
+			selectedWorkspaces = append(selectedWorkspaces, *workspace)
 		}
 
-		if len(selectedWorkspaceNames) == 1 {
+		if len(selectedWorkspaces) == 1 {
 			var ws *apiclient.WorkspaceDTO
 			var res *http.Response
-			workspaceName := selectedWorkspaceNames[0]
+			workspace := selectedWorkspaces[0]
 			if codeFlag {
 				c, err := config.GetConfig()
 				if err != nil {
@@ -93,7 +94,7 @@ var StartCmd = &cobra.Command{
 				ideList = config.GetIdeList()
 				ideId = c.DefaultIdeId
 
-				ws, res, err = apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceName).Verbose(true).Execute()
+				ws, res, err = apiClient.WorkspaceAPI.GetWorkspace(ctx, workspace.Id).Verbose(true).Execute()
 				if err != nil {
 					return apiclient_util.HandleErrorResponse(res, err)
 				}
@@ -102,38 +103,38 @@ var StartCmd = &cobra.Command{
 				}
 			}
 
-			err = StartWorkspace(apiClient, workspaceName)
+			err = StartWorkspace(apiClient, workspace)
 			if err != nil {
 				return err
 			}
-			gpgKey, err := GetGitProviderGpgKey(apiClient, ctx, providerConfigId)
+			gpgKey, err := workspace_common.GetGitProviderGpgKey(apiClient, ctx, providerConfigId)
 			if err != nil {
 				log.Warn(err)
 			}
 
-			views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' started successfully", workspaceName))
+			views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' started successfully", workspace.Name))
 
 			if codeFlag {
 				ide_views.RenderIdeOpeningMessage(ws.TargetId, ws.Name, ideId, ideList)
-				err = openIDE(ideId, activeProfile, ws.Id, workspaceProviderMetadata, yesFlag, gpgKey)
+				err = workspace_common.OpenIDE(ideId, activeProfile, ws.Id, workspaceProviderMetadata, yesFlag, gpgKey)
 				if err != nil {
 					return err
 				}
 			}
 		} else {
-			for _, ws := range selectedWorkspaceNames {
+			for _, ws := range selectedWorkspaces {
 				err := StartWorkspace(apiClient, ws)
 				if err != nil {
-					log.Errorf("Failed to start workspace %s: %v\n\n", ws, err)
+					log.Errorf("Failed to start workspace %s: %v\n\n", ws.Name, err)
 					continue
 				}
-				views.RenderInfoMessage(fmt.Sprintf("- Workspace '%s' started successfully", ws))
+				views.RenderInfoMessage(fmt.Sprintf("- Workspace '%s' started successfully", ws.Name))
 			}
 		}
 		return nil
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return getAllWorkspacesByState(WORKSPACE_STATE_STOPPED)
+		return common.GetAllWorkspacesByState(common.WORKSPACE_STATE_STOPPED)
 	},
 }
 
@@ -156,7 +157,7 @@ func startAllWorkspaces() error {
 	}
 
 	for _, workspace := range workspaceList {
-		err := StartWorkspace(apiClient, workspace.Id)
+		err := StartWorkspace(apiClient, workspace)
 		if err != nil {
 			log.Errorf("Failed to start workspace %s: %v\n\n", workspace.Name, err)
 			continue
@@ -167,54 +168,7 @@ func startAllWorkspaces() error {
 	return nil
 }
 
-func getWorkspaceNameCompletions() ([]string, cobra.ShellCompDirective) {
-	ctx := context.Background()
-	apiClient, err := apiclient_util.GetApiClient(nil)
-	if err != nil {
-		return nil, cobra.ShellCompDirectiveNoFileComp
-	}
-
-	workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
-	if err != nil {
-		return nil, cobra.ShellCompDirectiveNoFileComp
-	}
-
-	var choices []string
-	for _, v := range workspaceList {
-		choices = append(choices, v.Name)
-	}
-
-	return choices, cobra.ShellCompDirectiveNoFileComp
-}
-
-func getAllWorkspacesByState(state WorkspaceState) ([]string, cobra.ShellCompDirective) {
-	ctx := context.Background()
-	apiClient, err := apiclient_util.GetApiClient(nil)
-	if err != nil {
-		return nil, cobra.ShellCompDirectiveNoFileComp
-	}
-
-	workspaceList, _, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
-	if err != nil {
-		return nil, cobra.ShellCompDirectiveNoFileComp
-	}
-
-	var choices []string
-	for _, workspace := range workspaceList {
-		if state == WORKSPACE_STATE_RUNNING && workspace.State.Uptime != 0 {
-			choices = append(choices, workspace.Name)
-			break
-		}
-		if state == WORKSPACE_STATE_STOPPED && workspace.State.Uptime == 0 {
-			choices = append(choices, workspace.Name)
-			break
-		}
-	}
-
-	return choices, cobra.ShellCompDirectiveNoFileComp
-}
-
-func StartWorkspace(apiClient *apiclient.APIClient, workspaceId string) error {
+func StartWorkspace(apiClient *apiclient.APIClient, workspace apiclient.WorkspaceDTO) error {
 	ctx := context.Background()
 	timeFormat := time.Now().Format("2006-01-02 15:04:05")
 	from, err := time.Parse("2006-01-02 15:04:05", timeFormat)
@@ -233,9 +187,16 @@ func StartWorkspace(apiClient *apiclient.APIClient, workspaceId string) error {
 	}
 
 	logsContext, stopLogs := context.WithCancel(context.Background())
-	go apiclient_util.ReadWorkspaceLogs(logsContext, 0, activeProfile, workspaceId, true, &from)
+	go apiclient_util.ReadWorkspaceLogs(logsContext, apiclient_util.ReadLogParams{
+		Id:            workspace.Id,
+		Label:         &workspace.Name,
+		ActiveProfile: activeProfile,
+		Index:         util.Pointer(0),
+		Follow:        util.Pointer(true),
+		From:          &from,
+	})
 
-	res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspaceId).Execute()
+	res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspace.Id).Execute()
 	if err != nil {
 		stopLogs()
 		return apiclient_util.HandleErrorResponse(res, err)

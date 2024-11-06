@@ -17,24 +17,26 @@ see_also:
     - daytona code - Open a workspace in your preferred IDE
     - daytona config - Output Daytona configuration
     - daytona container-registry - Manage container registries
-    - daytona create - Create a target
+    - daytona create - Create a workspace
     - daytona delete - Delete a workspace
     - daytona docs - Opens the Daytona documentation in your default browser.
     - daytona env - Manage profile environment variables that are added to all targets and workspaces
     - daytona forward - Forward a port from a workspace to your local machine
     - daytona git-providers - Manage Git providers
     - daytona ide - Choose the default IDE
-    - daytona info - Show target info
-    - daytona list - List targets
-    - daytona logs - View logs for a target/workspace
+    - daytona info - Show workspace info
+    - daytona list - List workspaces
+    - daytona logs - View the logs of a workspace
     - daytona prebuild - Manage prebuilds
     - daytona profile - Manage profiles
     - daytona provider - Manage providers
     - daytona purge - Purges all Daytona data from the current device
+    - daytona restart - Restart a workspace
     - daytona serve - Run the server process in the current terminal session
     - daytona server - Start the server process in daemon mode
     - daytona ssh - SSH into a workspace using the terminal
     - daytona start - Start a workspace
+    - daytona stop - Stop a workspace
     - daytona target - Manage targets
     - daytona target-config - Manage target configs
     - daytona telemetry - Manage telemetry collection

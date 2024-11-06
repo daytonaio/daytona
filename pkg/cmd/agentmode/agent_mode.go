@@ -41,6 +41,7 @@ func Execute() error {
 	agentModeRootCmd.AddCommand(infoCmd)
 	agentModeRootCmd.AddCommand(portForwardCmd)
 	agentModeRootCmd.AddCommand(exposeCmd)
+	agentModeRootCmd.AddCommand(logsCmd)
 
 	clientId := config.GetClientId()
 	telemetryEnabled := config.TelemetryEnabled()

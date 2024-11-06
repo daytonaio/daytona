@@ -16,17 +16,15 @@ type item struct {
 	targetConfig TargetConfigView
 }
 
-func (i item) Title() string {
-	title := i.targetConfig.Name
+func (i item) Title() string { return i.targetConfig.Name }
 
-	if i.targetConfig.IsDefault {
-		title += " (default)"
-	}
-
-	return title
-}
 func (i item) Description() string {
 	desc := i.targetConfig.ProviderInfo.Name
+
+	if i.targetConfig.ProviderInfo.Label != nil {
+		desc = *i.targetConfig.ProviderInfo.Label
+	}
+
 	if i.targetConfig.ProviderInfo.Installed != nil {
 		if !*i.targetConfig.ProviderInfo.Installed {
 			desc += " (needs installing)"

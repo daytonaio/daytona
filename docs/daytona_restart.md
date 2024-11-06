@@ -1,15 +1,9 @@
 ## daytona restart
 
-Restart a target
+Restart a workspace
 
 ```
-daytona restart [TARGET] [flags]
-```
-
-### Options
-
-```
-  -w, --workspace string   Restart a single workspace in the target (workspace name)
+daytona restart [WORKSPACE] [flags]
 ```
 
 ### Options inherited from parent commands

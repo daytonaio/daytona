@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package target
+package workspace
 
 import (
 	"context"
@@ -11,13 +11,13 @@ import (
 	"strings"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/internal/jetbrains"
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	"github.com/daytonaio/daytona/pkg/ide"
+	"github.com/daytonaio/daytona/pkg/cmd/workspace/common"
+	workspace_common "github.com/daytonaio/daytona/pkg/cmd/workspace/common"
+	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
-	"github.com/daytonaio/daytona/pkg/telemetry"
 	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
@@ -78,12 +78,12 @@ var CodeCmd = &cobra.Command{
 				return err
 			}
 		}
-		if ideFlag != "" {
-			ideId = ideFlag
+		if create.IdeFlag != "" {
+			ideId = create.IdeFlag
 		}
 
 		if ws.State != nil || ws.State.Uptime < 1 {
-			wsRunningStatus, err := AutoStartWorkspace(ws.Id)
+			wsRunningStatus, err := AutoStartWorkspace(*ws)
 			if err != nil {
 				return err
 			}
@@ -94,7 +94,7 @@ var CodeCmd = &cobra.Command{
 
 		providerMetadata := *ws.Info.ProviderMetadata
 
-		gpgKey, err := GetGitProviderGpgKey(apiClient, ctx, providerConfigId)
+		gpgKey, err := workspace_common.GetGitProviderGpgKey(apiClient, ctx, providerConfigId)
 		if err != nil {
 			log.Warn(err)
 		}
@@ -102,40 +102,12 @@ var CodeCmd = &cobra.Command{
 		yesFlag, _ := cmd.Flags().GetBool("yes")
 		ideList := config.GetIdeList()
 		ide_views.RenderIdeOpeningMessage(ws.TargetId, ws.Name, ideId, ideList)
-		return openIDE(ideId, activeProfile, ws.Id, providerMetadata, yesFlag, gpgKey)
+		return workspace_common.OpenIDE(ideId, activeProfile, ws.Id, providerMetadata, yesFlag, gpgKey)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return getWorkspaceNameCompletions()
+		return common.GetWorkspaceNameCompletions()
 	},
 }
-
-func openIDE(ideId string, activeProfile config.Profile, workspaceId string, workspaceProviderMetadata string, yesFlag bool, gpgKey string) error {
-	telemetry.AdditionalData["ide"] = ideId
-
-	switch ideId {
-	case "vscode":
-		return ide.OpenVSCode(activeProfile, workspaceId, workspaceProviderMetadata, gpgKey)
-	case "ssh":
-		return ide.OpenTerminalSsh(activeProfile, workspaceId, gpgKey, nil)
-	case "browser":
-		return ide.OpenBrowserIDE(activeProfile, workspaceId, workspaceProviderMetadata, gpgKey)
-	case "cursor":
-		return ide.OpenCursor(activeProfile, workspaceId, workspaceProviderMetadata, gpgKey)
-	case "jupyter":
-		return ide.OpenJupyterIDE(activeProfile, workspaceId, workspaceProviderMetadata, yesFlag, gpgKey)
-	case "fleet":
-		return ide.OpenFleet(activeProfile, workspaceId, gpgKey)
-	default:
-		_, ok := jetbrains.GetIdes()[jetbrains.Id(ideId)]
-		if ok {
-			return ide.OpenJetbrainsIDE(activeProfile, ideId, workspaceId, gpgKey)
-		}
-	}
-
-	return errors.New("invalid IDE. Please choose one by running `daytona ide`")
-}
-
-var ideFlag string
 
 func init() {
 	ideList := config.GetIdeList()
@@ -144,15 +116,15 @@ func init() {
 		ids[i] = ide.Id
 	}
 	ideListStr := strings.Join(ids, ", ")
-	CodeCmd.Flags().StringVarP(&ideFlag, "ide", "i", "", fmt.Sprintf("Specify the IDE (%s)", ideListStr))
+	CodeCmd.Flags().StringVarP(&create.IdeFlag, "ide", "i", "", fmt.Sprintf("Specify the IDE (%s)", ideListStr))
 
 	CodeCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Automatically confirm any prompts")
 
 }
 
-func AutoStartWorkspace(workspaceId string) (bool, error) {
+func AutoStartWorkspace(workspace apiclient.WorkspaceDTO) (bool, error) {
 	if !yesFlag {
-		if !ide_views.RunStartWorkspaceForm(workspaceId) {
+		if !ide_views.RunStartWorkspaceForm(workspace.Id) {
 			return false, nil
 		}
 	}
@@ -162,7 +134,7 @@ func AutoStartWorkspace(workspaceId string) (bool, error) {
 		return false, err
 	}
 
-	err = StartWorkspace(apiClient, workspaceId)
+	err = StartWorkspace(apiClient, workspace)
 	if err != nil {
 		return false, err
 	}

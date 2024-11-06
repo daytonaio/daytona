@@ -6,13 +6,13 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** |  | 
 **Name** | **string** |  | 
-**TargetConfig** | **string** |  | 
+**TargetConfigName** | **string** |  | 
 
 ## Methods
 
 ### NewCreateTargetDTO
 
-`func NewCreateTargetDTO(id string, name string, targetConfig string, ) *CreateTargetDTO`
+`func NewCreateTargetDTO(id string, name string, targetConfigName string, ) *CreateTargetDTO`
 
 NewCreateTargetDTO instantiates a new CreateTargetDTO object
 This constructor will assign default values to properties that have it defined,
@@ -67,24 +67,24 @@ and a boolean to check if the value has been set.
 SetName sets Name field to given value.
 
 
-### GetTargetConfig
+### GetTargetConfigName
 
-`func (o *CreateTargetDTO) GetTargetConfig() string`
+`func (o *CreateTargetDTO) GetTargetConfigName() string`
 
-GetTargetConfig returns the TargetConfig field if non-nil, zero value otherwise.
+GetTargetConfigName returns the TargetConfigName field if non-nil, zero value otherwise.
 
-### GetTargetConfigOk
+### GetTargetConfigNameOk
 
-`func (o *CreateTargetDTO) GetTargetConfigOk() (*string, bool)`
+`func (o *CreateTargetDTO) GetTargetConfigNameOk() (*string, bool)`
 
-GetTargetConfigOk returns a tuple with the TargetConfig field if it's non-nil, zero value otherwise
+GetTargetConfigNameOk returns a tuple with the TargetConfigName field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetTargetConfig
+### SetTargetConfigName
 
-`func (o *CreateTargetDTO) SetTargetConfig(v string)`
+`func (o *CreateTargetDTO) SetTargetConfigName(v string)`
 
-SetTargetConfig sets TargetConfig field to given value.
+SetTargetConfigName sets TargetConfigName field to given value.
 
 
 

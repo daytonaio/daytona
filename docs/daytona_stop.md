@@ -1,16 +1,16 @@
 ## daytona stop
 
-Stop a target
+Stop a workspace
 
 ```
-daytona stop [TARGET] [flags]
+daytona stop [WORKSPACE] [flags]
 ```
 
 ### Options
 
 ```
-  -a, --all                Stop all targets
-  -w, --workspace string   Stop a single workspace in the target (workspace name)
+  -a, --all   Stop all targets
+  -y, --yes   Automatically confirm any prompts
 ```
 
 ### Options inherited from parent commands
