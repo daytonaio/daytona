@@ -13,6 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
 	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/telemetry"
+	"github.com/daytonaio/daytona/pkg/views"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -80,7 +81,7 @@ func (s *TargetService) CreateTarget(ctx context.Context, req dto.CreateTargetDT
 		return s.handleCreateError(ctx, tg, err)
 	}
 
-	targetLogger.Write([]byte("Target creation complete. Pending start...\n"))
+	targetLogger.Write([]byte(views.GetPrettyLogLine("Target creation complete")))
 
 	err = s.startTarget(tg, targetLogger)
 	if err != nil {

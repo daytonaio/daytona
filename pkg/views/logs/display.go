@@ -54,12 +54,7 @@ func DisplayLogEntry(logEntry logs.LogEntry, index int) {
 	prefix := lipgloss.NewStyle().Foreground(prefixColor).Bold(true).Render(formatPrefixText(prefixText))
 
 	if index == STATIC_INDEX {
-		if logEntry.Source == string(logs.LogSourceProvider) && prefixText == PROVIDER_PREFIX {
-			line = fmt.Sprintf("%s%s\033[1m%s\033[0m", prefixPadding, prefix, line)
-		} else {
-			line = fmt.Sprintf("%s%s%s \033[1m%s\033[0m", prefixPadding, prefix, views.CheckmarkSymbol, line)
-		}
-		fmt.Print(line)
+		fmt.Printf("%s%s\033[1m%s\033[0m", prefixPadding, prefix, line)
 		return
 	}
 

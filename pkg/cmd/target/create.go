@@ -65,7 +65,7 @@ var targetCreateCmd = &cobra.Command{
 
 		logs_view.DisplayLogEntry(logs.LogEntry{
 			TargetName: &createTargetDto.Name,
-			Msg:        "Request submitted\n",
+			Msg:        views.GetPrettyLogLine("Request submitted"),
 		}, logs_view.STATIC_INDEX)
 
 		go apiclient_util.ReadTargetLogs(logsContext, activeProfile, createTargetDto.Id, true, nil)

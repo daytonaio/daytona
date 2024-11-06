@@ -11,6 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/telemetry"
+	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	log "github.com/sirupsen/logrus"
 )
@@ -53,7 +54,7 @@ func (s *WorkspaceService) startWorkspace(w *workspace.Workspace, target *target
 		return err
 	}
 
-	logger.Write([]byte(fmt.Sprintf("Workspace %s started\n", w.Name)))
+	logger.Write([]byte(views.GetPrettyLogLine(fmt.Sprintf("Workspace %s started", w.Name))))
 
 	return nil
 }

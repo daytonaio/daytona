@@ -140,7 +140,7 @@ var CreateCmd = &cobra.Command{
 		}
 
 		requestLogEntry := logs.LogEntry{
-			Msg: "Request submitted\n",
+			Msg: views.GetPrettyLogLine("Request submitted"),
 		}
 
 		if targetExisted {

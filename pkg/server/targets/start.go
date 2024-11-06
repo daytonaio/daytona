@@ -11,6 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/telemetry"
+	"github.com/daytonaio/daytona/pkg/views"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/daytonaio/daytona/internal/util"
@@ -50,7 +51,7 @@ func (s *TargetService) startTarget(target *target.Target, targetLogger io.Write
 		return err
 	}
 
-	targetLogger.Write([]byte(fmt.Sprintf("Target %s started\n", target.Name)))
+	targetLogger.Write([]byte(views.GetPrettyLogLine(fmt.Sprintf("Target %s started", target.Name))))
 
 	return err
 }

@@ -19,6 +19,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/telemetry"
+	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/daytonaio/daytona/pkg/workspace/buildconfig"
 
@@ -148,7 +149,7 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 		return s.handleCreateError(ctx, w, err)
 	}
 
-	workspaceLogger.Write([]byte(fmt.Sprintf("Workspace %s created\n", w.Name)))
+	workspaceLogger.Write([]byte(views.GetPrettyLogLine(fmt.Sprintf("Workspace %s created", w.Name))))
 
 	err = s.startWorkspace(w, &target.Target, workspaceLogger)
 
