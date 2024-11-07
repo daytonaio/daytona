@@ -13,9 +13,9 @@ import (
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
+	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
-	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
 	log "github.com/sirupsen/logrus"
 )

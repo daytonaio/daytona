@@ -15,10 +15,13 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"golang.org/x/term"
 )
+
+var CustomRepoIdentifier = "<CUSTOM_REPO>"
+
+const CREATE_FROM_SAMPLE = "<CREATE_FROM_SAMPLE>"
 
 var selectedStyles = lipgloss.NewStyle().
 	Border(lipgloss.NormalBorder(), false, false, false, true).
@@ -35,20 +38,20 @@ var statusMessageDangerStyle = lipgloss.NewStyle().Bold(true).
 	Render
 
 type item[T any] struct {
-	id, title, desc, targetName, repository string
-	workspace                               *apiclient.WorkspaceDTO
-	choiceProperty                          T
-	isMarked                                bool
-	isMultipleSelect                        bool
-	action                                  string
+	id, title, desc, createdTime, uptime, targetName string
+	choiceProperty                                   T
+	isMarked                                         bool
+	isMultipleSelect                                 bool
+	action                                           string
 }
 
 func (i item[T]) Title() string       { return i.title }
 func (i item[T]) Id() string          { return i.id }
 func (i item[T]) Description() string { return i.desc }
-func (i item[T]) TargetName() string  { return i.targetName }
-func (i item[T]) Repository() string  { return i.repository }
 func (i item[T]) FilterValue() string { return i.title }
+func (i item[T]) CreatedTime() string { return i.createdTime }
+func (i item[T]) Uptime() string      { return i.uptime }
+func (i item[T]) TargetName() string  { return i.targetName }
 
 type model[T any] struct {
 	list            list.Model
@@ -147,11 +150,7 @@ func (d ItemDelegate[T]) Render(w io.Writer, m list.Model, index int, listItem l
 
 	title := baseStyles.Render(i.Title())
 	idWithTargetConfigString := fmt.Sprintf("%s (%s)", i.Id(), i.TargetName())
-	if i.Id() == NewWorkspaceIdentifier {
-		idWithTargetConfigString = ""
-	}
 	idWithTargetConfig := baseStyles.Foreground(views.Gray).Render(idWithTargetConfigString)
-	repository := baseStyles.Foreground(views.Gray).Render(i.Repository())
 	description := baseStyles.Render(i.Description())
 
 	// Add the created/updated time if it's available
@@ -160,12 +159,16 @@ func (d ItemDelegate[T]) Render(w io.Writer, m list.Model, index int, listItem l
 		Align(lipgloss.Right).
 		Width(timeWidth)
 	timeString := timeStyles.Render("")
+	if i.Uptime() != "" {
+		timeString = timeStyles.Render(i.Uptime())
+	} else if i.CreatedTime() != "" {
+		timeString = timeStyles.Render(fmt.Sprintf("created %s", i.CreatedTime()))
+	}
 
 	// Adjust styles as the user moves through the menu
 	if isSelected {
 		title = selectedStyles.Foreground(views.Green).Render(i.Title())
 		idWithTargetConfig = selectedStyles.Foreground(views.Gray).Render(idWithTargetConfigString)
-		repository = selectedStyles.Foreground(views.Gray).Render(i.Repository())
 		description = selectedStyles.Foreground(views.DimmedGreen).Render(i.Description())
 		timeString = timeStyles.Foreground(views.DimmedGreen).Render(timeString)
 	}
@@ -175,12 +178,8 @@ func (d ItemDelegate[T]) Render(w io.Writer, m list.Model, index int, listItem l
 	s.WriteRune('\n')
 	s.WriteString(idWithTargetConfig)
 	s.WriteRune('\n')
-	s.WriteString(repository)
+	s.WriteString(description)
 	s.WriteRune('\n')
-	if i.Description() != "" {
-		s.WriteString(description)
-		s.WriteRune('\n')
-	}
 
 	fmt.Fprint(w, s.String())
 }

@@ -14,7 +14,6 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/common"
-	workspace_common "github.com/daytonaio/daytona/pkg/cmd/workspace/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -30,10 +29,9 @@ var codeFlag bool
 var StartCmd = &cobra.Command{
 	Use:     "start [WORKSPACE]",
 	Short:   "Start a workspace",
-	Args:    cobra.RangeArgs(0, 1),
 	GroupID: util.TARGET_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var selectedWorkspaces []apiclient.WorkspaceDTO
+		var selectedWorkspaces []*apiclient.WorkspaceDTO
 		var activeProfile config.Profile
 		var ideId string
 		var ideList []config.Ide
@@ -62,18 +60,16 @@ var StartCmd = &cobra.Command{
 				return nil
 			}
 
-			selectedWorkspace := selection.GetWorkspaceFromPrompt(workspaceList, "Start")
-			if selectedWorkspace == nil {
-				return nil
-			}
-			selectedWorkspaces = append(selectedWorkspaces, *selectedWorkspace)
+			selectedWorkspaces = selection.GetWorkspacesFromPrompt(workspaceList, "Start")
 		} else {
-			workspace, err := apiclient_util.GetWorkspace(args[0], true)
-			if err != nil {
-				return err
+			for _, arg := range args {
+				workspace, err := apiclient_util.GetWorkspace(arg, false)
+				if err != nil {
+					log.Error(fmt.Sprintf("[ %s ] : %v", arg, err))
+					continue
+				}
+				selectedWorkspaces = append(selectedWorkspaces, workspace)
 			}
-
-			selectedWorkspaces = append(selectedWorkspaces, *workspace)
 		}
 
 		if len(selectedWorkspaces) == 1 {
@@ -103,11 +99,11 @@ var StartCmd = &cobra.Command{
 				}
 			}
 
-			err = StartWorkspace(apiClient, workspace)
+			err = StartWorkspace(apiClient, *workspace)
 			if err != nil {
 				return err
 			}
-			gpgKey, err := workspace_common.GetGitProviderGpgKey(apiClient, ctx, providerConfigId)
+			gpgKey, err := common.GetGitProviderGpgKey(apiClient, ctx, providerConfigId)
 			if err != nil {
 				log.Warn(err)
 			}
@@ -116,14 +112,14 @@ var StartCmd = &cobra.Command{
 
 			if codeFlag {
 				ide_views.RenderIdeOpeningMessage(ws.TargetId, ws.Name, ideId, ideList)
-				err = workspace_common.OpenIDE(ideId, activeProfile, ws.Id, workspaceProviderMetadata, yesFlag, gpgKey)
+				err = common.OpenIDE(ideId, activeProfile, ws.Id, workspaceProviderMetadata, yesFlag, gpgKey)
 				if err != nil {
 					return err
 				}
 			}
 		} else {
 			for _, ws := range selectedWorkspaces {
-				err := StartWorkspace(apiClient, ws)
+				err := StartWorkspace(apiClient, *ws)
 				if err != nil {
 					log.Errorf("Failed to start workspace %s: %v\n\n", ws.Name, err)
 					continue

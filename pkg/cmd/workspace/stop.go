@@ -24,10 +24,9 @@ import (
 var StopCmd = &cobra.Command{
 	Use:     "stop [WORKSPACE]",
 	Short:   "Stop a workspace",
-	Args:    cobra.RangeArgs(0, 1),
 	GroupID: util.TARGET_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var selectedWorkspaces []apiclient.WorkspaceDTO
+		var selectedWorkspaces []*apiclient.WorkspaceDTO
 
 		ctx := context.Background()
 
@@ -50,24 +49,23 @@ var StopCmd = &cobra.Command{
 				views_util.NotifyEmptyWorkspaceList(true)
 				return nil
 			}
-			selectedWorkspace := selection.GetWorkspaceFromPrompt(workspaceList, "Stop")
-			if selectedWorkspace == nil {
-				return nil
-			}
-			selectedWorkspaces = append(selectedWorkspaces, *selectedWorkspace)
-		} else {
-			workspace, err := apiclient_util.GetWorkspace(args[0], true)
-			if err != nil {
-				return err
-			}
 
-			selectedWorkspaces = append(selectedWorkspaces, *workspace)
+			selectedWorkspaces = selection.GetWorkspacesFromPrompt(workspaceList, "Stop")
+		} else {
+			for _, arg := range args {
+				workspace, err := apiclient_util.GetWorkspace(arg, false)
+				if err != nil {
+					log.Error(fmt.Sprintf("[ %s ] : %v", arg, err))
+					continue
+				}
+				selectedWorkspaces = append(selectedWorkspaces, workspace)
+			}
 		}
 
 		if len(selectedWorkspaces) == 1 {
 			workspace := selectedWorkspaces[0]
 
-			err = StopWorkspace(apiClient, workspace)
+			err = StopWorkspace(apiClient, *workspace)
 			if err != nil {
 				return err
 			}
@@ -75,7 +73,7 @@ var StopCmd = &cobra.Command{
 			views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' stopped successfully", workspace.Name))
 		} else {
 			for _, ws := range selectedWorkspaces {
-				err := StopWorkspace(apiClient, ws)
+				err := StopWorkspace(apiClient, *ws)
 				if err != nil {
 					log.Errorf("Failed to stop workspace %s: %v\n\n", ws.Name, err)
 					continue
