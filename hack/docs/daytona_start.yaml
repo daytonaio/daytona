@@ -1,6 +1,6 @@
 name: daytona start
 synopsis: Start a workspace
-usage: daytona start [WORKSPACE] [flags]
+usage: daytona start [WORKSPACE]... [flags]
 options:
     - name: all
       shorthand: a
