@@ -18,13 +18,13 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	workspace_common "github.com/daytonaio/daytona/pkg/cmd/workspace/common"
 	"github.com/daytonaio/daytona/pkg/common"
+	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
-	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/docker/docker/pkg/stringid"
 )
 
-type WorkspacesDataPromptConfig struct {
+type WorkspacesDataPromptParams struct {
 	UserGitProviders    []apiclient.GitProvider
 	WorkspaceConfigs    []apiclient.WorkspaceConfig
 	Manual              bool
@@ -35,13 +35,13 @@ type WorkspacesDataPromptConfig struct {
 	Defaults            *views_util.WorkspaceConfigDefaults
 }
 
-func GetWorkspacesCreationDataFromPrompt(config WorkspacesDataPromptConfig) ([]apiclient.CreateWorkspaceDTO, error) {
+func GetWorkspacesCreationDataFromPrompt(ctx context.Context, params WorkspacesDataPromptParams) ([]apiclient.CreateWorkspaceDTO, error) {
 	var workspaceList []apiclient.CreateWorkspaceDTO
 	// keep track of visited repos, will help in keeping workspace names unique
 	// since these are later saved into the db under a unique constraint field.
 	selectedRepos := make(map[string]int)
 
-	for i := 1; config.MultiWorkspace || i == 1; i++ {
+	for i := 1; params.MultiWorkspace || i == 1; i++ {
 		var err error
 
 		if i > 2 {
@@ -54,8 +54,8 @@ func GetWorkspacesCreationDataFromPrompt(config WorkspacesDataPromptConfig) ([]a
 			}
 		}
 
-		if len(config.WorkspaceConfigs) > 0 && !config.BlankWorkspace {
-			workspaceConfig := selection.GetWorkspaceConfigFromPrompt(config.WorkspaceConfigs, i, true, false, "Use")
+		if len(params.WorkspaceConfigs) > 0 && !params.BlankWorkspace {
+			workspaceConfig := selection.GetWorkspaceConfigFromPrompt(params.WorkspaceConfigs, i, true, false, "Use")
 			if workspaceConfig == nil {
 				return nil, common.ErrCtrlCAbort
 			}
@@ -78,7 +78,7 @@ func GetWorkspacesCreationDataFromPrompt(config WorkspacesDataPromptConfig) ([]a
 					Url: workspaceConfig.RepositoryUrl,
 				}
 
-				branch, err := GetBranchFromWorkspaceConfig(workspaceConfig, config.ApiClient, i)
+				branch, err := GetBranchFromWorkspaceConfig(ctx, workspaceConfig, params.ApiClient, i)
 				if err != nil {
 					return nil, err
 				}
@@ -88,7 +88,7 @@ func GetWorkspacesCreationDataFromPrompt(config WorkspacesDataPromptConfig) ([]a
 					getRepoContext.Sha = &branch.Sha
 				}
 
-				configRepo, res, err := config.ApiClient.GitProviderAPI.GetGitContext(context.Background()).Repository(getRepoContext).Execute()
+				configRepo, res, err := params.ApiClient.GitProviderAPI.GetGitContext(ctx).Repository(getRepoContext).Execute()
 				if err != nil {
 					return nil, apiclient_util.HandleErrorResponse(res, err)
 				}
@@ -100,8 +100,8 @@ func GetWorkspacesCreationDataFromPrompt(config WorkspacesDataPromptConfig) ([]a
 						Repository: *configRepo,
 					},
 					BuildConfig: workspaceConfig.BuildConfig,
-					Image:       config.Defaults.Image,
-					User:        config.Defaults.ImageUser,
+					Image:       params.Defaults.Image,
+					User:        params.Defaults.ImageUser,
 					EnvVars:     workspaceConfig.EnvVars,
 				}
 
@@ -114,7 +114,7 @@ func GetWorkspacesCreationDataFromPrompt(config WorkspacesDataPromptConfig) ([]a
 				}
 
 				if workspaceConfig.GitProviderConfigId == nil || *workspaceConfig.GitProviderConfigId == "" {
-					gitProviderConfigId, res, err := config.ApiClient.GitProviderAPI.GetGitProviderIdForUrl(context.Background(), url.QueryEscape(workspaceConfig.RepositoryUrl)).Execute()
+					gitProviderConfigId, res, err := params.ApiClient.GitProviderAPI.GetGitProviderIdForUrl(ctx, url.QueryEscape(workspaceConfig.RepositoryUrl)).Execute()
 					if err != nil {
 						return nil, apiclient_util.HandleErrorResponse(res, err)
 					}
@@ -126,12 +126,12 @@ func GetWorkspacesCreationDataFromPrompt(config WorkspacesDataPromptConfig) ([]a
 			}
 		}
 
-		providerRepo, gitProviderConfigId, err := getRepositoryFromWizard(RepositoryWizardConfig{
-			ApiClient:           config.ApiClient,
-			UserGitProviders:    config.UserGitProviders,
-			Manual:              config.Manual,
-			MultiWorkspace:      config.MultiWorkspace,
-			SkipBranchSelection: config.SkipBranchSelection,
+		providerRepo, gitProviderConfigId, err := getRepositoryFromWizard(ctx, RepositoryWizardParams{
+			ApiClient:           params.ApiClient,
+			UserGitProviders:    params.UserGitProviders,
+			Manual:              params.Manual,
+			MultiWorkspace:      params.MultiWorkspace,
+			SkipBranchSelection: params.SkipBranchSelection,
 			WorkspaceOrder:      i,
 			SelectedRepos:       selectedRepos,
 		})
@@ -140,7 +140,7 @@ func GetWorkspacesCreationDataFromPrompt(config WorkspacesDataPromptConfig) ([]a
 		}
 
 		if gitProviderConfigId == selection.CustomRepoIdentifier || gitProviderConfigId == selection.CREATE_FROM_SAMPLE {
-			gitProviderConfigs, res, err := config.ApiClient.GitProviderAPI.ListGitProvidersForUrl(context.Background(), url.QueryEscape(providerRepo.Url)).Execute()
+			gitProviderConfigs, res, err := params.ApiClient.GitProviderAPI.ListGitProvidersForUrl(ctx, url.QueryEscape(providerRepo.Url)).Execute()
 			if err != nil {
 				return nil, apiclient_util.HandleErrorResponse(res, err)
 			}
@@ -164,7 +164,7 @@ func GetWorkspacesCreationDataFromPrompt(config WorkspacesDataPromptConfig) ([]a
 		getRepoContext := createGetRepoContextFromRepository(providerRepo)
 
 		var res *http.Response
-		providerRepo, res, err = config.ApiClient.GitProviderAPI.GetGitContext(context.Background()).Repository(getRepoContext).Execute()
+		providerRepo, res, err = params.ApiClient.GitProviderAPI.GetGitContext(ctx).Repository(getRepoContext).Execute()
 		if err != nil {
 			return nil, apiclient_util.HandleErrorResponse(res, err)
 		}
@@ -174,7 +174,7 @@ func GetWorkspacesCreationDataFromPrompt(config WorkspacesDataPromptConfig) ([]a
 			return nil, err
 		}
 
-		workspaceList = append(workspaceList, newCreateWorkspaceConfigDTO(config, providerRepo, providerRepoName, gitProviderConfigId))
+		workspaceList = append(workspaceList, newCreateWorkspaceConfigDTO(params, providerRepo, providerRepoName, gitProviderConfigId))
 	}
 
 	return workspaceList, nil
@@ -212,9 +212,7 @@ func GetSanitizedWorkspaceName(workspaceName string) (string, error) {
 	return workspaceName, nil
 }
 
-func GetBranchFromWorkspaceConfig(workspaceConfig *apiclient.WorkspaceConfig, apiClient *apiclient.APIClient, workspaceOrder int) (*apiclient.GitBranch, error) {
-	ctx := context.Background()
-
+func GetBranchFromWorkspaceConfig(ctx context.Context, workspaceConfig *apiclient.WorkspaceConfig, apiClient *apiclient.APIClient, workspaceOrder int) (*apiclient.GitBranch, error) {
 	encodedURLParam := url.QueryEscape(workspaceConfig.RepositoryUrl)
 
 	repoResponse, res, err := apiClient.GitProviderAPI.GetGitContext(ctx).Repository(apiclient.GetRepositoryContext{
@@ -229,7 +227,7 @@ func GetBranchFromWorkspaceConfig(workspaceConfig *apiclient.WorkspaceConfig, ap
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	branchWizardConfig := BranchWizardConfig{
+	branchWizardConfig := BranchWizardParams{
 		ApiClient:           apiClient,
 		GitProviderConfigId: gitProviderConfigId,
 		NamespaceId:         repoResponse.Owner,
@@ -315,7 +313,7 @@ func GetGitProviderConfigIdFromFlag(ctx context.Context, apiClient *apiclient.AP
 	return nil, fmt.Errorf("git provider config '%s' not found", *gitProviderConfigFlag)
 }
 
-func newCreateWorkspaceConfigDTO(config WorkspacesDataPromptConfig, providerRepo *apiclient.GitRepository, providerRepoName string, gitProviderConfigId string) apiclient.CreateWorkspaceDTO {
+func newCreateWorkspaceConfigDTO(params WorkspacesDataPromptParams, providerRepo *apiclient.GitRepository, providerRepoName string, gitProviderConfigId string) apiclient.CreateWorkspaceDTO {
 	workspace := apiclient.CreateWorkspaceDTO{
 		Name:                providerRepoName,
 		GitProviderConfigId: &gitProviderConfigId,
@@ -323,8 +321,8 @@ func newCreateWorkspaceConfigDTO(config WorkspacesDataPromptConfig, providerRepo
 			Repository: *providerRepo,
 		},
 		BuildConfig: &apiclient.BuildConfig{},
-		Image:       config.Defaults.Image,
-		User:        config.Defaults.ImageUser,
+		Image:       params.Defaults.Image,
+		User:        params.Defaults.ImageUser,
 		EnvVars:     map[string]string{},
 	}
 
