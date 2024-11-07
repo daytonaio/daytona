@@ -152,7 +152,7 @@ var CreateCmd = &cobra.Command{
 		}
 
 		var tsConn *tsnet.Server
-		if target.Name != "local" || activeProfile.Id != "default" {
+		if !IsLocalDockerTarget(target) || activeProfile.Id != "default" {
 			tsConn, err = tailscale.GetConnection(&activeProfile)
 			if err != nil {
 				return err
@@ -218,7 +218,7 @@ var CreateCmd = &cobra.Command{
 			log.Warn(err)
 		}
 
-		err = waitForDial(target.Name, createWorkspaceDtos[0].Id, &activeProfile, tsConn, gpgKey)
+		err = waitForDial(target, createWorkspaceDtos[0].Id, &activeProfile, tsConn, gpgKey)
 		if err != nil {
 			return err
 		}
@@ -299,8 +299,8 @@ func init() {
 	workspace_common.AddWorkspaceConfigurationFlags(CreateCmd, workspaceConfigurationFlags, true)
 }
 
-func waitForDial(targetName string, workspaceId string, activeProfile *config.Profile, tsConn *tsnet.Server, gpgKey string) error {
-	if targetName == "local" && (activeProfile != nil && activeProfile.Id == "default") {
+func waitForDial(target *apiclient.TargetDTO, workspaceId string, activeProfile *config.Profile, tsConn *tsnet.Server, gpgKey string) error {
+	if IsLocalDockerTarget(target) && (activeProfile != nil && activeProfile.Id == "default") {
 		err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, gpgKey)
 		if err != nil {
 			return err
@@ -352,4 +352,12 @@ func waitForDial(targetName string, workspaceId string, activeProfile *config.Pr
 		})
 		return err
 	}
+}
+
+func IsLocalDockerTarget(target *apiclient.TargetDTO) bool {
+	if target.ProviderInfo.Name != "docker-provider" {
+		return false
+	}
+
+	return !strings.Contains(target.Options, "Remote Hostname")
 }
