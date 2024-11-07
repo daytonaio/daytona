@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
+	"github.com/daytonaio/daytona/pkg/api/util"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/targetconfigs/dto"
 	"github.com/gin-gonic/gin"
@@ -39,6 +40,13 @@ func SetTargetConfig(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to set target config: %w", err))
 		return
+	}
+
+	maskedOptions, err := util.GetMaskedOptions(server, targetConfig.ProviderInfo.Name, targetConfig.Options)
+	if err != nil {
+		targetConfig.Options = fmt.Sprintf("Error: %s", err.Error())
+	} else {
+		targetConfig.Options = maskedOptions
 	}
 
 	ctx.JSON(200, targetConfig)

@@ -21,69 +21,56 @@ type GetTargetConfigParams struct {
 	PromptUsingTUI    bool
 }
 
-func GetTarget(ctx context.Context, params GetTargetConfigParams) (t *apiclient.TargetDTO, targetExisted bool, err error) {
+func GetTarget(ctx context.Context, params GetTargetConfigParams) (t *apiclient.TargetDTO, createTargetDto *apiclient.CreateTargetDTO, err error) {
 	targetList, res, err := params.ApiClient.TargetAPI.ListTargets(ctx).Execute()
 	if err != nil {
-		return nil, false, apiclient_util.HandleErrorResponse(res, err)
+		return nil, nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	if params.TargetNameFlag != "" {
 		for _, t := range targetList {
 			if t.Name == params.TargetNameFlag {
-				return &t, true, nil
+				return &t, nil, nil
 			}
 		}
-		return nil, false, fmt.Errorf("target config '%s' not found", params.TargetNameFlag)
+		return nil, nil, fmt.Errorf("target '%s' not found", params.TargetNameFlag)
 	}
 
 	if !params.PromptUsingTUI {
 		for _, t := range targetList {
 			if t.Default {
-				return &t, true, nil
+				return &t, nil, nil
 			}
 		}
 	}
 
 	if len(targetList) == 0 {
-		t, err := runCreateTargetDtoFlow(ctx, params)
+		createTargetDto, err := target.CreateTargetDtoFlow(ctx, target.TargetCreationParams{
+			ApiClient:         params.ApiClient,
+			ActiveProfileName: params.ActiveProfileName,
+		})
 		if err != nil {
-			return nil, false, err
+			return nil, createTargetDto, err
 		}
-		return t, false, nil
+		return nil, createTargetDto, nil
 	}
 
 	selectedTarget := selection.GetTargetFromPrompt(targetList, true, "Use")
 
 	if selectedTarget == nil {
-		return nil, false, common.ErrCtrlCAbort
+		return nil, nil, common.ErrCtrlCAbort
 	}
 
 	if selectedTarget.Name == selection.NewTargetIdentifier {
-		t, err := runCreateTargetDtoFlow(ctx, params)
+		createTargetDto, err := target.CreateTargetDtoFlow(ctx, target.TargetCreationParams{
+			ApiClient:         params.ApiClient,
+			ActiveProfileName: params.ActiveProfileName,
+		})
 		if err != nil {
-			return nil, false, err
+			return nil, createTargetDto, err
 		}
-		return t, false, nil
+		return nil, createTargetDto, nil
 	}
 
-	return selectedTarget, true, nil
-}
-
-func runCreateTargetDtoFlow(ctx context.Context, params GetTargetConfigParams) (*apiclient.TargetDTO, error) {
-	createTargetDto, err := target.CreateTargetDtoFlow(ctx, target.TargetCreationParams{
-		ApiClient:         params.ApiClient,
-		ActiveProfileName: params.ActiveProfileName,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return &apiclient.TargetDTO{
-		Name:    createTargetDto.Name,
-		Options: createTargetDto.Options,
-		ProviderInfo: apiclient.TargetProviderInfo{
-			Name:    createTargetDto.ProviderInfo.Name,
-			Version: createTargetDto.ProviderInfo.Version,
-		},
-	}, nil
+	return selectedTarget, nil, nil
 }

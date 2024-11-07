@@ -13,9 +13,7 @@ type TargetDTO struct {
 } //	@name	TargetDTO
 
 type CreateTargetDTO struct {
-	Id           string              `json:"id" validate:"required"`
-	Name         string              `json:"name" validate:"required"`
-	ProviderInfo target.ProviderInfo `json:"providerInfo" validate:"required"`
-	// JSON encoded map of options
-	Options string `json:"options" validate:"required"`
+	Id               string `json:"id" validate:"required"`
+	Name             string `json:"name" validate:"required"`
+	TargetConfigName string `json:"targetConfigName" validate:"required"`
 } //	@name	CreateTargetDTO

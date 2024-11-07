@@ -24,7 +24,6 @@ import (
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/docker/docker/pkg/stringid"
 	log "github.com/sirupsen/logrus"
 	"tailscale.com/tsnet"
 
@@ -64,7 +63,7 @@ var CreateCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		target, targetExisted, err := GetTarget(ctx, GetTargetConfigParams{
+		target, createTargetDto, err := GetTarget(ctx, GetTargetConfigParams{
 			ApiClient:         apiClient,
 			ActiveProfileName: activeProfile.Name,
 			TargetNameFlag:    targetNameFlag,
@@ -75,6 +74,13 @@ var CreateCmd = &cobra.Command{
 				return nil
 			}
 			return err
+		}
+
+		targetName := ""
+		if target != nil {
+			targetName = target.Name
+		} else if createTargetDto != nil {
+			targetName = createTargetDto.Name
 		}
 
 		existingWorkspaces, res, err := apiClient.WorkspaceAPI.ListWorkspaces(context.Background()).Execute()
@@ -90,7 +96,7 @@ var CreateCmd = &cobra.Command{
 				WorkspaceConfigurationFlags: workspaceConfigurationFlags,
 				MultiWorkspaceFlag:          multiWorkspaceFlag,
 				BlankFlag:                   blankFlag,
-				TargetName:                  target.Name,
+				TargetName:                  targetName,
 			})
 			if err != nil {
 				if common.IsCtrlCAbort(err) {
@@ -123,7 +129,8 @@ var CreateCmd = &cobra.Command{
 			workspaceNames = append(workspaceNames, createWorkspaceDtos[i].Name)
 		}
 
-		names := append(workspaceNames, target.Name)
+		names := append(workspaceNames, targetName)
+
 		logs_view.SetupLongestPrefixLength(names)
 
 		for i, workspaceConfigName := range existingWorkspaceConfigNames {
@@ -140,8 +147,10 @@ var CreateCmd = &cobra.Command{
 			Msg: views.GetPrettyLogLine("Request submitted"),
 		}
 
-		if targetExisted {
+		if target != nil {
 			requestLogEntry.TargetName = &target.Name
+		} else if createTargetDto != nil {
+			requestLogEntry.TargetName = &createTargetDto.Name
 		}
 
 		logs_view.DisplayLogEntry(requestLogEntry, logs_view.STATIC_INDEX)
@@ -151,44 +160,46 @@ var CreateCmd = &cobra.Command{
 			return err
 		}
 
-		var tsConn *tsnet.Server
-		if !IsLocalDockerTarget(target) || activeProfile.Id != "default" {
-			tsConn, err = tailscale.GetConnection(&activeProfile)
-			if err != nil {
-				return err
-			}
-		}
-
-		if targetExisted {
+		if target != nil {
 			targetId = target.Id
-		} else {
-			targetId = stringid.GenerateRandomID()
-			targetId = stringid.TruncateID(targetId)
+		} else if createTargetDto != nil {
+			targetId = createTargetDto.Id
 		}
 
 		logsContext, stopLogs := context.WithCancel(context.Background())
 		defer stopLogs()
 
-		if !targetExisted {
+		if createTargetDto != nil {
 			go apiclient_util.ReadTargetLogs(logsContext, apiclient_util.ReadLogParams{
 				Id:                    targetId,
-				Label:                 &target.Name,
+				Label:                 &createTargetDto.Name,
 				ActiveProfile:         activeProfile,
 				Follow:                util.Pointer(true),
 				SkipPrefixLengthSetup: true,
 			})
 
-			_, res, err := apiClient.TargetAPI.CreateTarget(ctx).Target(apiclient.CreateTargetDTO{
-				Id:      targetId,
-				Name:    target.Name,
-				Options: target.Options,
-				ProviderInfo: apiclient.TargetProviderInfo{
-					Name:    target.ProviderInfo.Name,
-					Version: target.ProviderInfo.Version,
-				},
+			t, res, err := apiClient.TargetAPI.CreateTarget(ctx).Target(apiclient.CreateTargetDTO{
+				Id:               createTargetDto.Id,
+				Name:             createTargetDto.Name,
+				TargetConfigName: createTargetDto.TargetConfigName,
 			}).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
+			}
+			target = &apiclient.TargetDTO{
+				Id:           t.Id,
+				Name:         t.Name,
+				Options:      t.Options,
+				ProviderInfo: t.ProviderInfo,
+				Default:      t.Default,
+			}
+		}
+
+		var tsConn *tsnet.Server
+		if !IsLocalDockerTarget(target) || activeProfile.Id != "default" {
+			tsConn, err = tailscale.GetConnection(&activeProfile)
+			if err != nil {
+				return err
 			}
 		}
 

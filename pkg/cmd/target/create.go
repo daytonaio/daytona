@@ -151,13 +151,8 @@ func CreateTargetDtoFlow(ctx context.Context, params TargetCreationParams) (*api
 	id = stringid.TruncateID(id)
 
 	return &apiclient.CreateTargetDTO{
-		Id:      id,
-		Name:    targetName,
-		Options: targetConfigView.Options,
-		ProviderInfo: apiclient.TargetProviderInfo{
-			Name:    targetConfigView.ProviderInfo.Name,
-			Version: targetConfigView.ProviderInfo.Version,
-			Label:   targetConfigView.ProviderInfo.Label,
-		},
+		Id:               id,
+		Name:             targetName,
+		TargetConfigName: targetConfigView.Name,
 	}, nil
 }

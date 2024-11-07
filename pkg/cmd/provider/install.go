@@ -20,6 +20,7 @@ import (
 	provider_view "github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/daytonaio/daytona/pkg/views/targetconfig"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
+	"github.com/docker/docker/pkg/stringid"
 	"github.com/spf13/cobra"
 )
 
@@ -150,13 +151,13 @@ var providerInstallCmd = &cobra.Command{
 				return err
 			}
 
+			id := stringid.GenerateRandomID()
+			id = stringid.TruncateID(id)
+
 			targetData := apiclient.CreateTargetDTO{
-				Name:    targetConfigToSet.Name,
-				Options: targetConfigToSet.Options,
-				ProviderInfo: apiclient.TargetProviderInfo{
-					Name:    targetConfigToSet.ProviderInfo.Name,
-					Version: targetConfigToSet.ProviderInfo.Version,
-				},
+				Id:               id,
+				Name:             targetConfigToSet.Name,
+				TargetConfigName: targetConfigToSet.Name,
 			}
 
 			_, res, err = apiClient.TargetAPI.CreateTarget(context.Background()).Target(targetData).Execute()

@@ -15,6 +15,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/targets"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
 	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/target/config"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -33,10 +34,18 @@ var tg = target.Target{
 }
 
 var createTargetDTO = dto.CreateTargetDTO{
-	Name:         "test",
-	Id:           "test",
-	ProviderInfo: tg.ProviderInfo,
-	Options:      tg.Options,
+	Name:             "test",
+	Id:               "test",
+	TargetConfigName: "test",
+}
+
+var tc = config.TargetConfig{
+	Name: "test",
+	ProviderInfo: target.ProviderInfo{
+		Name:    "test-provider",
+		Version: "test",
+	},
+	Options: "test-options",
 }
 
 var targetInfo = target.TargetInfo{
@@ -194,8 +203,8 @@ func targetEquals(t *testing.T, req dto.CreateTargetDTO, target *target.Target) 
 
 	require.Equal(t, req.Id, target.Id)
 	require.Equal(t, req.Name, target.Name)
-	require.Equal(t, req.ProviderInfo, target.ProviderInfo)
-	require.Equal(t, req.Options, target.Options)
+	require.Equal(t, tc.ProviderInfo, target.ProviderInfo)
+	require.Equal(t, tc.Options, target.Options)
 }
 
 func targetDtoEquals(t *testing.T, req dto.CreateTargetDTO, target dto.TargetDTO, targetInfo target.TargetInfo, verbose bool) {
@@ -203,8 +212,8 @@ func targetDtoEquals(t *testing.T, req dto.CreateTargetDTO, target dto.TargetDTO
 
 	require.Equal(t, req.Id, target.Id)
 	require.Equal(t, req.Name, target.Name)
-	require.Equal(t, req.ProviderInfo, target.ProviderInfo)
-	require.Equal(t, req.Options, target.Options)
+	require.Equal(t, tc.ProviderInfo, target.ProviderInfo)
+	require.Equal(t, tc.Options, target.Options)
 
 	if verbose {
 		require.Equal(t, target.Info.Name, targetInfo.Name)
