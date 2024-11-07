@@ -35,7 +35,6 @@ daytona [flags]
 * [daytona info](daytona_info.md)	 - Show workspace info
 * [daytona list](daytona_list.md)	 - List workspaces
 * [daytona logs](daytona_logs.md)	 - View the logs of a workspace
-* [daytona logs](daytona_logs.md)	 - View logs for a target/workspace
 * [daytona prebuild](daytona_prebuild.md)	 - Manage prebuilds
 * [daytona profile](daytona_profile.md)	 - Manage profiles
 * [daytona provider](daytona_provider.md)	 - Manage providers

@@ -26,7 +26,7 @@ daytona [flags]
 * [daytona forward](daytona_forward.md)	 - Forward a port publicly via an URL
 * [daytona info](daytona_info.md)	 - Show workspace info
 * [daytona list](daytona_list.md)	 - List workspaces
-* [daytona logs](daytona_logs.md)	 - View logs for a target/workspace
+* [daytona logs](daytona_logs.md)	 - View logs for the workspace
 * [daytona restart](daytona_restart.md)	 - Restart the workspace
 * [daytona start](daytona_start.md)	 - Start the workspace
 * [daytona stop](daytona_stop.md)	 - Stop the workspace

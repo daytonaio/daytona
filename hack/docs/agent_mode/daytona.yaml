@@ -18,7 +18,7 @@ see_also:
     - daytona forward - Forward a port publicly via an URL
     - daytona info - Show workspace info
     - daytona list - List workspaces
-    - daytona logs - View logs for a target/workspace
+    - daytona logs - View logs for the workspace
     - daytona restart - Restart the workspace
     - daytona start - Start the workspace
     - daytona stop - Stop the workspace
