@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
 	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/target/config"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 )
 
@@ -27,39 +28,46 @@ type ITargetService interface {
 	ForceRemoveTarget(ctx context.Context, targetId string) error
 }
 
+type targetConfigStore interface {
+	Find(filter *config.TargetConfigFilter) (*config.TargetConfig, error)
+}
+
 type TargetServiceConfig struct {
-	TargetStore      target.Store
-	ServerApiUrl     string
-	ServerUrl        string
-	ServerVersion    string
-	Provisioner      provisioner.IProvisioner
-	ApiKeyService    apikeys.IApiKeyService
-	LoggerFactory    logs.LoggerFactory
-	TelemetryService telemetry.TelemetryService
+	TargetStore       target.Store
+	TargetConfigStore targetConfigStore
+	ServerApiUrl      string
+	ServerUrl         string
+	ServerVersion     string
+	Provisioner       provisioner.IProvisioner
+	ApiKeyService     apikeys.IApiKeyService
+	LoggerFactory     logs.LoggerFactory
+	TelemetryService  telemetry.TelemetryService
 }
 
 func NewTargetService(config TargetServiceConfig) ITargetService {
 	return &TargetService{
-		targetStore:      config.TargetStore,
-		serverApiUrl:     config.ServerApiUrl,
-		serverUrl:        config.ServerUrl,
-		serverVersion:    config.ServerVersion,
-		provisioner:      config.Provisioner,
-		loggerFactory:    config.LoggerFactory,
-		apiKeyService:    config.ApiKeyService,
-		telemetryService: config.TelemetryService,
+		targetStore:       config.TargetStore,
+		targetConfigStore: config.TargetConfigStore,
+		serverApiUrl:      config.ServerApiUrl,
+		serverUrl:         config.ServerUrl,
+		serverVersion:     config.ServerVersion,
+		provisioner:       config.Provisioner,
+		loggerFactory:     config.LoggerFactory,
+		apiKeyService:     config.ApiKeyService,
+		telemetryService:  config.TelemetryService,
 	}
 }
 
 type TargetService struct {
-	targetStore      target.Store
-	provisioner      provisioner.IProvisioner
-	apiKeyService    apikeys.IApiKeyService
-	serverApiUrl     string
-	serverUrl        string
-	serverVersion    string
-	loggerFactory    logs.LoggerFactory
-	telemetryService telemetry.TelemetryService
+	targetStore       target.Store
+	targetConfigStore targetConfigStore
+	provisioner       provisioner.IProvisioner
+	apiKeyService     apikeys.IApiKeyService
+	serverApiUrl      string
+	serverUrl         string
+	serverVersion     string
+	loggerFactory     logs.LoggerFactory
+	telemetryService  telemetry.TelemetryService
 }
 
 func (s *TargetService) GetTargetLogReader(targetId string) (io.Reader, error) {

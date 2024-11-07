@@ -1629,28 +1629,20 @@ components:
       type: object
     CreateTargetDTO:
       example:
+        targetConfigName: targetConfigName
         name: name
-        options: options
         id: id
-        providerInfo:
-          name: name
-          label: label
-          version: version
       properties:
         id:
           type: string
         name:
           type: string
-        options:
-          description: JSON encoded map of options
+        targetConfigName:
           type: string
-        providerInfo:
-          $ref: '#/components/schemas/TargetProviderInfo'
       required:
       - id
       - name
-      - options
-      - providerInfo
+      - targetConfigName
       type: object
     CreateWorkspaceConfigDTO:
       example:

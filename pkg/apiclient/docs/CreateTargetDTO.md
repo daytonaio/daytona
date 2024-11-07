@@ -6,14 +6,13 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** |  | 
 **Name** | **string** |  | 
-**Options** | **string** | JSON encoded map of options | 
-**ProviderInfo** | [**TargetProviderInfo**](TargetProviderInfo.md) |  | 
+**TargetConfigName** | **string** |  | 
 
 ## Methods
 
 ### NewCreateTargetDTO
 
-`func NewCreateTargetDTO(id string, name string, options string, providerInfo TargetProviderInfo, ) *CreateTargetDTO`
+`func NewCreateTargetDTO(id string, name string, targetConfigName string, ) *CreateTargetDTO`
 
 NewCreateTargetDTO instantiates a new CreateTargetDTO object
 This constructor will assign default values to properties that have it defined,
@@ -68,44 +67,24 @@ and a boolean to check if the value has been set.
 SetName sets Name field to given value.
 
 
-### GetOptions
+### GetTargetConfigName
 
-`func (o *CreateTargetDTO) GetOptions() string`
+`func (o *CreateTargetDTO) GetTargetConfigName() string`
 
-GetOptions returns the Options field if non-nil, zero value otherwise.
+GetTargetConfigName returns the TargetConfigName field if non-nil, zero value otherwise.
 
-### GetOptionsOk
+### GetTargetConfigNameOk
 
-`func (o *CreateTargetDTO) GetOptionsOk() (*string, bool)`
+`func (o *CreateTargetDTO) GetTargetConfigNameOk() (*string, bool)`
 
-GetOptionsOk returns a tuple with the Options field if it's non-nil, zero value otherwise
+GetTargetConfigNameOk returns a tuple with the TargetConfigName field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetOptions
+### SetTargetConfigName
 
-`func (o *CreateTargetDTO) SetOptions(v string)`
+`func (o *CreateTargetDTO) SetTargetConfigName(v string)`
 
-SetOptions sets Options field to given value.
-
-
-### GetProviderInfo
-
-`func (o *CreateTargetDTO) GetProviderInfo() TargetProviderInfo`
-
-GetProviderInfo returns the ProviderInfo field if non-nil, zero value otherwise.
-
-### GetProviderInfoOk
-
-`func (o *CreateTargetDTO) GetProviderInfoOk() (*TargetProviderInfo, bool)`
-
-GetProviderInfoOk returns a tuple with the ProviderInfo field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetProviderInfo
-
-`func (o *CreateTargetDTO) SetProviderInfo(v TargetProviderInfo)`
-
-SetProviderInfo sets ProviderInfo field to given value.
+SetTargetConfigName sets TargetConfigName field to given value.
 
 
 

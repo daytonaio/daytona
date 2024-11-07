@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/daytonaio/daytona/pkg/api/util"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/gin-gonic/gin"
@@ -42,13 +43,20 @@ func GetTarget(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	w, err := server.TargetService.GetTarget(ctx.Request.Context(), &target.TargetFilter{IdOrName: &targetId}, verbose)
+	t, err := server.TargetService.GetTarget(ctx.Request.Context(), &target.TargetFilter{IdOrName: &targetId}, verbose)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get target: %w", err))
 		return
 	}
 
-	ctx.JSON(200, w)
+	maskedOptions, err := util.GetMaskedOptions(server, t.ProviderInfo.Name, t.Options)
+	if err != nil {
+		t.Options = fmt.Sprintf("Error: %s", err.Error())
+	} else {
+		t.Options = maskedOptions
+	}
+
+	ctx.JSON(200, t)
 }
 
 // ListTargets 			godoc
@@ -81,6 +89,16 @@ func ListTargets(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list targets: %w", err))
 		return
+	}
+
+	for i, t := range targetList {
+		maskedOptions, err := util.GetMaskedOptions(server, t.ProviderInfo.Name, t.Options)
+		if err != nil {
+			targetList[i].Options = fmt.Sprintf("Error: %s", err.Error())
+			continue
+		}
+
+		targetList[i].Options = maskedOptions
 	}
 
 	ctx.JSON(200, targetList)

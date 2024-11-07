@@ -2184,8 +2184,7 @@ const docTemplate = `{
             "required": [
                 "id",
                 "name",
-                "options",
-                "providerInfo"
+                "targetConfigName"
             ],
             "properties": {
                 "id": {
@@ -2194,12 +2193,8 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "options": {
-                    "description": "JSON encoded map of options",
+                "targetConfigName": {
                     "type": "string"
-                },
-                "providerInfo": {
-                    "$ref": "#/definitions/TargetProviderInfo"
                 }
             }
         },

@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
 	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/target/config"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/views"
 
@@ -41,6 +42,11 @@ func (s *TargetService) CreateTarget(ctx context.Context, req dto.CreateTargetDT
 		return nil, ErrTargetAlreadyExists
 	}
 
+	tc, err := s.targetConfigStore.Find(&config.TargetConfigFilter{Name: &req.TargetConfigName})
+	if err != nil {
+		return s.handleCreateError(ctx, nil, err)
+	}
+
 	// Repo name is taken as the name for target by default
 	if !isValidTargetName(req.Name) {
 		return nil, ErrInvalidTargetName
@@ -49,8 +55,8 @@ func (s *TargetService) CreateTarget(ctx context.Context, req dto.CreateTargetDT
 	tg := &target.Target{
 		Id:           req.Id,
 		Name:         req.Name,
-		ProviderInfo: req.ProviderInfo,
-		Options:      req.Options,
+		ProviderInfo: tc.ProviderInfo,
+		Options:      tc.Options,
 	}
 
 	apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeTarget, tg.Id)
