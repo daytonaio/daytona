@@ -1,6 +1,6 @@
 name: daytona stop
 synopsis: Stop a workspace
-usage: daytona stop [WORKSPACE] [flags]
+usage: daytona stop [WORKSPACE]... [flags]
 options:
     - name: all
       shorthand: a

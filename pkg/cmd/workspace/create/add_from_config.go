@@ -11,14 +11,21 @@ import (
 	"github.com/daytonaio/daytona/pkg/common"
 )
 
-func AddWorkspaceFromConfig(workspaceConfig *apiclient.WorkspaceConfig, apiClient *apiclient.APIClient, workspaces *[]apiclient.CreateWorkspaceDTO, branchFlag *string) (*string, error) {
+type AddWorkspaceFromConfigParams struct {
+	WorkspaceConfig *apiclient.WorkspaceConfig
+	ApiClient       *apiclient.APIClient
+	Workspaces      *[]apiclient.CreateWorkspaceDTO
+	BranchFlag      *string
+}
+
+func AddWorkspaceFromConfig(ctx context.Context, params AddWorkspaceFromConfigParams) (*string, error) {
 	chosenBranchName := ""
-	if branchFlag != nil {
-		chosenBranchName = *branchFlag
+	if params.BranchFlag != nil {
+		chosenBranchName = *params.BranchFlag
 	}
 
 	if chosenBranchName == "" {
-		chosenBranch, err := GetBranchFromWorkspaceConfig(workspaceConfig, apiClient, 0)
+		chosenBranch, err := GetBranchFromWorkspaceConfig(ctx, params.WorkspaceConfig, params.ApiClient, 0)
 		if err != nil {
 			return nil, err
 		}
@@ -29,8 +36,8 @@ func AddWorkspaceFromConfig(workspaceConfig *apiclient.WorkspaceConfig, apiClien
 		chosenBranchName = chosenBranch.Name
 	}
 
-	configRepo, res, err := apiClient.GitProviderAPI.GetGitContext(context.Background()).Repository(apiclient.GetRepositoryContext{
-		Url:    workspaceConfig.RepositoryUrl,
+	configRepo, res, err := params.ApiClient.GitProviderAPI.GetGitContext(ctx).Repository(apiclient.GetRepositoryContext{
+		Url:    params.WorkspaceConfig.RepositoryUrl,
 		Branch: &chosenBranchName,
 	}).Execute()
 	if err != nil {
@@ -38,17 +45,17 @@ func AddWorkspaceFromConfig(workspaceConfig *apiclient.WorkspaceConfig, apiClien
 	}
 
 	workspace := &apiclient.CreateWorkspaceDTO{
-		Name:                workspaceConfig.Name,
-		GitProviderConfigId: workspaceConfig.GitProviderConfigId,
+		Name:                params.WorkspaceConfig.Name,
+		GitProviderConfigId: params.WorkspaceConfig.GitProviderConfigId,
 		Source: apiclient.CreateWorkspaceSourceDTO{
 			Repository: *configRepo,
 		},
-		BuildConfig: workspaceConfig.BuildConfig,
-		Image:       &workspaceConfig.Image,
-		User:        &workspaceConfig.User,
-		EnvVars:     workspaceConfig.EnvVars,
+		BuildConfig: params.WorkspaceConfig.BuildConfig,
+		Image:       &params.WorkspaceConfig.Image,
+		User:        &params.WorkspaceConfig.User,
+		EnvVars:     params.WorkspaceConfig.EnvVars,
 	}
-	*workspaces = append(*workspaces, *workspace)
+	*params.Workspaces = append(*params.Workspaces, *workspace)
 
-	return &workspaceConfig.Name, nil
+	return &params.WorkspaceConfig.Name, nil
 }
