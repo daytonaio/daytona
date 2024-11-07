@@ -3,7 +3,7 @@
 Stop a workspace
 
 ```
-daytona stop [WORKSPACE] [flags]
+daytona stop [WORKSPACE]... [flags]
 ```
 
 ### Options

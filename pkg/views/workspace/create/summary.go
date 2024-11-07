@@ -44,7 +44,7 @@ type SummaryModel struct {
 	nameLabel     string
 }
 
-type SubmissionFormConfig struct {
+type SubmissionFormParams struct {
 	ChosenName             *string
 	SuggestedName          string
 	WorkspaceList          *[]apiclient.CreateWorkspaceDTO
@@ -58,10 +58,10 @@ var doneCheck bool
 var userCancelled bool
 var WorkspacesConfigurationChanged bool
 
-func RunSubmissionForm(config SubmissionFormConfig) error {
+func RunSubmissionForm(params SubmissionFormParams) error {
 	doneCheck = true
 
-	m := NewSummaryModel(config)
+	m := NewSummaryModel(params)
 
 	if _, err := tea.NewProgram(m, tea.WithAltScreen()).Run(); err != nil {
 		return err
@@ -75,22 +75,22 @@ func RunSubmissionForm(config SubmissionFormConfig) error {
 		return nil
 	}
 
-	if config.Defaults.Image == nil || config.Defaults.ImageUser == nil {
+	if params.Defaults.Image == nil || params.Defaults.ImageUser == nil {
 		return errors.New("default workspace entries are not set")
 	}
 
 	var err error
-	isImporting := false
-	if config.ImportConfirmation != nil {
-		isImporting = *config.ImportConfirmation
+	importConfirmation := false
+	if params.ImportConfirmation != nil {
+		importConfirmation = *params.ImportConfirmation
 	}
 
-	WorkspacesConfigurationChanged, err = RunWorkspaceConfiguration(config.WorkspaceList, *config.Defaults, isImporting)
+	WorkspacesConfigurationChanged, err = RunWorkspaceConfiguration(params.WorkspaceList, *params.Defaults, importConfirmation)
 	if err != nil {
 		return err
 	}
 
-	return RunSubmissionForm(config)
+	return RunSubmissionForm(params)
 }
 
 func RenderSummary(name string, workspaceList []apiclient.CreateWorkspaceDTO, defaults *views_util.WorkspaceConfigDefaults, nameLabel string) (string, error) {
@@ -167,36 +167,36 @@ func workspaceDetailOutput(workspaceDetailKey WorkspaceDetail, workspaceDetailVa
 	return fmt.Sprintf("\t%s%-*s%s", lipgloss.NewStyle().Foreground(views.Green).Render(string(workspaceDetailKey)), DEFAULT_PADDING-len(string(workspaceDetailKey)), EMPTY_STRING, workspaceDetailValue)
 }
 
-func NewSummaryModel(config SubmissionFormConfig) SummaryModel {
+func NewSummaryModel(params SubmissionFormParams) SummaryModel {
 	m := SummaryModel{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
-	m.workspaceList = *config.WorkspaceList
-	m.defaults = config.Defaults
-	m.nameLabel = config.NameLabel
+	m.workspaceList = *params.WorkspaceList
+	m.defaults = params.Defaults
+	m.nameLabel = params.NameLabel
 
-	if config.ChosenName != nil && *config.ChosenName == "" {
-		*config.ChosenName = config.SuggestedName
+	if params.ChosenName != nil && *params.ChosenName == "" {
+		*params.ChosenName = params.SuggestedName
 	}
 
-	if config.ImportConfirmation == nil || !*config.ImportConfirmation {
+	if params.ImportConfirmation == nil || !*params.ImportConfirmation {
 		m.form = huh.NewForm(
 			huh.NewGroup(
 				huh.NewInput().
-					Title(fmt.Sprintf("%s name", config.NameLabel)).
-					Value(config.ChosenName).
+					Title(fmt.Sprintf("%s name", params.NameLabel)).
+					Value(params.ChosenName).
 					Key("name").
 					Validate(func(str string) error {
 						result, err := util.GetValidatedName(str)
 						if err != nil {
 							return err
 						}
-						for _, name := range config.ExistingWorkspaceNames {
+						for _, name := range params.ExistingWorkspaceNames {
 							if name == result {
 								return errors.New("name already exists")
 							}
 						}
-						*config.ChosenName = result
+						*params.ChosenName = result
 						return nil
 					}),
 			),
@@ -206,7 +206,7 @@ func NewSummaryModel(config SubmissionFormConfig) SummaryModel {
 			huh.NewGroup(
 				huh.NewConfirm().
 					Title("Is the above information correct?").
-					Value(config.ImportConfirmation),
+					Value(params.ImportConfirmation),
 			),
 		).WithShowHelp(false).WithTheme(views.GetCustomTheme())
 	}

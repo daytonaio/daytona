@@ -1,6 +1,6 @@
 name: daytona delete
 synopsis: Delete a workspace
-usage: daytona delete [WORKSPACE] [flags]
+usage: daytona delete [WORKSPACE]... [flags]
 options:
     - name: all
       shorthand: a

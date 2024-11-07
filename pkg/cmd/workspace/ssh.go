@@ -17,7 +17,6 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/common"
-	workspace_common "github.com/daytonaio/daytona/pkg/cmd/workspace/common"
 	"github.com/daytonaio/daytona/pkg/ide"
 	"github.com/daytonaio/daytona/pkg/views"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -99,7 +98,7 @@ var SshCmd = &cobra.Command{
 			sshArgs = append(sshArgs, args[1:]...)
 		}
 
-		gpgKey, err := workspace_common.GetGitProviderGpgKey(apiClient, ctx, ws.GitProviderConfigId)
+		gpgKey, err := common.GetGitProviderGpgKey(apiClient, ctx, ws.GitProviderConfigId)
 		if err != nil {
 			log.Warn(err)
 		}
