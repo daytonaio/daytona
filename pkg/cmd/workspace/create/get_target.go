@@ -50,7 +50,7 @@ func GetTarget(ctx context.Context, params GetTargetConfigParams) (t *apiclient.
 			ActiveProfileName: params.ActiveProfileName,
 		})
 		if err != nil {
-			return nil, createTargetDto, err
+			return nil, nil, err
 		}
 		return nil, createTargetDto, nil
 	}
