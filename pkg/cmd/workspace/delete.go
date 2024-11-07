@@ -26,7 +26,7 @@ var forceFlag bool
 
 // FIXME: multi-select delete
 var DeleteCmd = &cobra.Command{
-	Use:     "delete [WORKSPACE]",
+	Use:     "delete [WORKSPACE]...",
 	Short:   "Delete a workspace",
 	GroupID: util.TARGET_GROUP,
 	Aliases: []string{"remove", "rm"},
@@ -84,11 +84,7 @@ var DeleteCmd = &cobra.Command{
 				return nil
 			}
 
-			workspaceToDelete := selection.GetWorkspaceFromPrompt(workspaceList, "Delete")
-			if workspaceToDelete == nil {
-				return nil
-			}
-			workspaceDeleteList = append(workspaceDeleteList, workspaceToDelete)
+			workspaceDeleteList = selection.GetWorkspacesFromPrompt(workspaceList, "Delete")
 		} else {
 			for _, arg := range args {
 				workspace, err := apiclient_util.GetWorkspace(arg, false)

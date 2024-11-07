@@ -18,9 +18,9 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	workspace_common "github.com/daytonaio/daytona/pkg/cmd/workspace/common"
 	"github.com/daytonaio/daytona/pkg/common"
+	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
-	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/docker/docker/pkg/stringid"
 )
 

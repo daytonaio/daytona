@@ -13,7 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views"
-	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
+	"github.com/daytonaio/daytona/pkg/views/selection"
 	"github.com/spf13/cobra"
 )
 
