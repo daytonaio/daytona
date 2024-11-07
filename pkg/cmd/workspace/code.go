@@ -15,7 +15,6 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/common"
-	workspace_common "github.com/daytonaio/daytona/pkg/cmd/workspace/common"
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
@@ -94,7 +93,7 @@ var CodeCmd = &cobra.Command{
 
 		providerMetadata := *ws.Info.ProviderMetadata
 
-		gpgKey, err := workspace_common.GetGitProviderGpgKey(apiClient, ctx, providerConfigId)
+		gpgKey, err := common.GetGitProviderGpgKey(apiClient, ctx, providerConfigId)
 		if err != nil {
 			log.Warn(err)
 		}
@@ -102,7 +101,7 @@ var CodeCmd = &cobra.Command{
 		yesFlag, _ := cmd.Flags().GetBool("yes")
 		ideList := config.GetIdeList()
 		ide_views.RenderIdeOpeningMessage(ws.TargetId, ws.Name, ideId, ideList)
-		return workspace_common.OpenIDE(ideId, activeProfile, ws.Id, providerMetadata, yesFlag, gpgKey)
+		return common.OpenIDE(ideId, activeProfile, ws.Id, providerMetadata, yesFlag, gpgKey)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return common.GetWorkspaceNameCompletions()

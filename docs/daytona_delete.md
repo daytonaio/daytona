@@ -3,7 +3,7 @@
 Delete a workspace
 
 ```
-daytona delete [WORKSPACE] [flags]
+daytona delete [WORKSPACE]... [flags]
 ```
 
 ### Options
