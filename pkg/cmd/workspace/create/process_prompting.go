@@ -15,7 +15,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 )
 
-type ProcessPromptingConfig struct {
+type ProcessPromptingParams struct {
 	ApiClient                   *apiclient.APIClient
 	CreateWorkspaceDtos         *[]apiclient.CreateWorkspaceDTO
 	ExistingWorkspaces          *[]apiclient.WorkspaceDTO
@@ -25,7 +25,7 @@ type ProcessPromptingConfig struct {
 	TargetName                  string
 }
 
-func ProcessPrompting(ctx context.Context, config ProcessPromptingConfig) error {
+func ProcessPrompting(ctx context.Context, config ProcessPromptingParams) error {
 	if workspace_common.CheckAnyWorkspaceConfigurationFlagSet(config.WorkspaceConfigurationFlags) || (config.WorkspaceConfigurationFlags.Branches != nil && len(*config.WorkspaceConfigurationFlags.Branches) > 0) {
 		return errors.New("please provide the repository URL in order to set up custom workspace details through the CLI")
 	}
@@ -40,7 +40,7 @@ func ProcessPrompting(ctx context.Context, config ProcessPromptingConfig) error 
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	apiServerConfig, res, err := config.ApiClient.ServerAPI.GetConfig(context.Background()).Execute()
+	apiServerConfig, res, err := config.ApiClient.ServerAPI.GetConfig(ctx).Execute()
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
@@ -52,7 +52,7 @@ func ProcessPrompting(ctx context.Context, config ProcessPromptingConfig) error 
 		DevcontainerFilePath: create.DEVCONTAINER_FILEPATH,
 	}
 
-	*config.CreateWorkspaceDtos, err = GetWorkspacesCreationDataFromPrompt(WorkspacesDataPromptConfig{
+	*config.CreateWorkspaceDtos, err = GetWorkspacesCreationDataFromPrompt(ctx, WorkspacesDataPromptParams{
 		UserGitProviders: gitProviders,
 		WorkspaceConfigs: workspaceConfigs,
 		Manual:           *config.WorkspaceConfigurationFlags.Manual,
@@ -69,7 +69,7 @@ func ProcessPrompting(ctx context.Context, config ProcessPromptingConfig) error 
 	generateWorkspaceIds(config.CreateWorkspaceDtos)
 	setInitialWorkspaceNames(config.CreateWorkspaceDtos, *config.ExistingWorkspaces)
 
-	submissionFormConfig := create.SubmissionFormConfig{
+	submissionFormConfig := create.SubmissionFormParams{
 		ChosenName:    &config.TargetName,
 		WorkspaceList: config.CreateWorkspaceDtos,
 		NameLabel:     config.TargetName,

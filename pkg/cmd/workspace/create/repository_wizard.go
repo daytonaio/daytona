@@ -38,7 +38,7 @@ func gitProviderAppendsPersonalNamespace(providerId string) bool {
 	}
 }
 
-type RepositoryWizardConfig struct {
+type RepositoryWizardParams struct {
 	ApiClient           *apiclient.APIClient
 	UserGitProviders    []apiclient.GitProvider
 	Manual              bool
@@ -48,27 +48,25 @@ type RepositoryWizardConfig struct {
 	SelectedRepos       map[string]int
 }
 
-func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepository, string, error) {
+func getRepositoryFromWizard(ctx context.Context, params RepositoryWizardParams) (*apiclient.GitRepository, string, error) {
 	var gitProviderConfigId string
 	var namespaceId string
 	var err error
 
-	ctx := context.Background()
-
-	samples, res, err := config.ApiClient.SampleAPI.ListSamples(ctx).Execute()
+	samples, res, err := params.ApiClient.SampleAPI.ListSamples(ctx).Execute()
 	if err != nil {
 		log.Debug("Error fetching samples: ", apiclient_util.HandleErrorResponse(res, err))
 	}
 
-	if (len(config.UserGitProviders) == 0 && len(samples) == 0) || config.Manual {
-		repo, err := create.GetRepositoryFromUrlInput(config.MultiWorkspace, config.WorkspaceOrder, config.ApiClient, config.SelectedRepos)
+	if (len(params.UserGitProviders) == 0 && len(samples) == 0) || params.Manual {
+		repo, err := create.GetRepositoryFromUrlInput(params.MultiWorkspace, params.WorkspaceOrder, params.ApiClient, params.SelectedRepos)
 		return repo, selection.CustomRepoIdentifier, err
 	}
 
 	supportedProviders := config_const.GetSupportedGitProviders()
 	var gitProviderViewList []gitprovider_view.GitProviderView
 
-	for _, gitProvider := range config.UserGitProviders {
+	for _, gitProvider := range params.UserGitProviders {
 		for _, supportedProvider := range supportedProviders {
 			if gitProvider.ProviderId == supportedProvider.Id {
 				gitProviderViewList = append(gitProviderViewList,
@@ -84,13 +82,13 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		}
 	}
 
-	gitProviderConfigId = selection.GetProviderIdFromPrompt(gitProviderViewList, config.WorkspaceOrder, len(samples) > 0)
+	gitProviderConfigId = selection.GetProviderIdFromPrompt(gitProviderViewList, params.WorkspaceOrder, len(samples) > 0)
 	if gitProviderConfigId == "" {
 		return nil, "", common.ErrCtrlCAbort
 	}
 
 	if gitProviderConfigId == selection.CustomRepoIdentifier {
-		repo, err := create.GetRepositoryFromUrlInput(config.MultiWorkspace, config.WorkspaceOrder, config.ApiClient, config.SelectedRepos)
+		repo, err := create.GetRepositoryFromUrlInput(params.MultiWorkspace, params.WorkspaceOrder, params.ApiClient, params.SelectedRepos)
 		return repo, selection.CustomRepoIdentifier, err
 	}
 
@@ -100,7 +98,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 			return nil, "", common.ErrCtrlCAbort
 		}
 
-		repo, res, err := config.ApiClient.GitProviderAPI.GetGitContext(ctx).Repository(apiclient.GetRepositoryContext{
+		repo, res, err := params.ApiClient.GitProviderAPI.GetGitContext(ctx).Repository(apiclient.GetRepositoryContext{
 			Url: sample.GitUrl,
 		}).Execute()
 		if err != nil {
@@ -130,7 +128,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 
 	for {
 		err = views_util.WithSpinner("Loading Namespaces", func() error {
-			namespaces, _, err := config.ApiClient.GitProviderAPI.GetNamespaces(ctx, gitProviderConfigId).Page(page).PerPage(perPage).Execute()
+			namespaces, _, err := params.ApiClient.GitProviderAPI.GetNamespaces(ctx, gitProviderConfigId).Page(page).PerPage(perPage).Execute()
 			if err != nil {
 				return err
 			}
@@ -169,7 +167,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 			CursorIndex:          selectionListCursorIdx,
 		}
 
-		namespaceId, navigate = selection.GetNamespaceIdFromPrompt(namespaceList, config.WorkspaceOrder, selectionListOptions)
+		namespaceId, navigate = selection.GetNamespaceIdFromPrompt(namespaceList, params.WorkspaceOrder, selectionListOptions)
 
 		if !disablePagination && navigate != "" {
 			if navigate == views.ListNavigationText {
@@ -199,7 +197,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		// Fetch repos for the current page
 		err = views_util.WithSpinner("Loading Repositories", func() error {
 
-			repos, _, err := config.ApiClient.GitProviderAPI.GetRepositories(ctx, gitProviderConfigId, namespaceId).Page(page).PerPage(perPage).Execute()
+			repos, _, err := params.ApiClient.GitProviderAPI.GetRepositories(ctx, gitProviderConfigId, namespaceId).Page(page).PerPage(perPage).Execute()
 			if err != nil {
 				return err
 			}
@@ -229,7 +227,7 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		}
 
 		// User will either choose a repo or navigate the pages
-		chosenRepo, navigate = selection.GetRepositoryFromPrompt(providerRepos, config.WorkspaceOrder, config.SelectedRepos, selectionListOptions)
+		chosenRepo, navigate = selection.GetRepositoryFromPrompt(providerRepos, params.WorkspaceOrder, params.SelectedRepos, selectionListOptions)
 		if !disablePagination && navigate != "" {
 			if navigate == views.ListNavigationText {
 				page++
@@ -243,17 +241,17 @@ func getRepositoryFromWizard(config RepositoryWizardConfig) (*apiclient.GitRepos
 		}
 	}
 
-	if config.SkipBranchSelection {
+	if params.SkipBranchSelection {
 		return chosenRepo, gitProviderConfigId, nil
 	}
 
-	repoWithBranch, err := SetBranchFromWizard(BranchWizardConfig{
-		ApiClient:           config.ApiClient,
+	repoWithBranch, err := SetBranchFromWizard(BranchWizardParams{
+		ApiClient:           params.ApiClient,
 		GitProviderConfigId: gitProviderConfigId,
 		NamespaceId:         namespaceId,
 		Namespace:           namespace,
 		ChosenRepo:          chosenRepo,
-		WorkspaceOrder:      config.WorkspaceOrder,
+		WorkspaceOrder:      params.WorkspaceOrder,
 		ProviderId:          providerId,
 	})
 

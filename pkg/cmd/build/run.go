@@ -45,7 +45,7 @@ var buildRunCmd = &cobra.Command{
 			return errors.New("The chosen workspace config does not have a build configuration")
 		}
 
-		chosenBranch, err := create.GetBranchFromWorkspaceConfig(workspaceConfig, apiClient, 0)
+		chosenBranch, err := create.GetBranchFromWorkspaceConfig(ctx, workspaceConfig, apiClient, 0)
 		if err != nil {
 			return err
 		}
