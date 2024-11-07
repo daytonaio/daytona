@@ -89,7 +89,7 @@ var CreateCmd = &cobra.Command{
 		}
 
 		if promptUsingTUI {
-			err = ProcessPrompting(ctx, ProcessPromptingConfig{
+			err = ProcessPrompting(ctx, ProcessPromptingParams{
 				ApiClient:                   apiClient,
 				CreateWorkspaceDtos:         &createWorkspaceDtos,
 				ExistingWorkspaces:          &existingWorkspaces,
@@ -106,7 +106,7 @@ var CreateCmd = &cobra.Command{
 				}
 			}
 		} else {
-			existingWorkspaceConfigNames, err = ProcessCmdArguments(ctx, ProcessCmdArgumentsConfig{
+			existingWorkspaceConfigNames, err = ProcessCmdArguments(ctx, ProcessCmdArgumentsParams{
 				ApiClient:                   apiClient,
 				RepoUrls:                    args,
 				CreateWorkspaceDtos:         &createWorkspaceDtos,
