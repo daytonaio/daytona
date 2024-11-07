@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	list_view "github.com/daytonaio/daytona/pkg/views/workspace/list"
@@ -28,12 +29,30 @@ func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO, isMultipleSelect
 			workspaceName = "Unnamed Workspace"
 		}
 
+		// Get the time if available
+		uptime := ""
+		createdTime := ""
+
+		if workspace.Info != nil {
+			createdTime = util.FormatTimestamp(workspace.Info.Created)
+		}
+
+		if workspace.State != nil {
+			if workspace.State.Uptime == 0 {
+				uptime = "STOPPED"
+			} else {
+				uptime = fmt.Sprintf("up %s", util.FormatUptime(workspace.State.Uptime))
+			}
+		}
+
 		newItem := item[apiclient.WorkspaceDTO]{
 			title:          workspaceName,
 			id:             workspace.Id,
 			desc:           "",
 			targetName:     workspace.TargetName,
 			repository:     workspace.Repository.Url,
+			createdTime:    createdTime,
+			uptime:         uptime,
 			workspace:      &workspace,
 			choiceProperty: workspace,
 		}

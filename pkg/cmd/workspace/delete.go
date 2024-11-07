@@ -26,7 +26,7 @@ var forceFlag bool
 
 // FIXME: multi-select delete
 var DeleteCmd = &cobra.Command{
-	Use:     "delete [WORKSPACE]",
+	Use:     "delete [WORKSPACE]...",
 	Short:   "Delete a workspace",
 	GroupID: util.TARGET_GROUP,
 	Aliases: []string{"remove", "rm"},

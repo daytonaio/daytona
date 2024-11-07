@@ -27,7 +27,7 @@ var allFlag bool
 var codeFlag bool
 
 var StartCmd = &cobra.Command{
-	Use:     "start [WORKSPACE]",
+	Use:     "start [WORKSPACE]...",
 	Short:   "Start a workspace",
 	GroupID: util.TARGET_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {

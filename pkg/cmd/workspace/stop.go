@@ -22,7 +22,7 @@ import (
 )
 
 var StopCmd = &cobra.Command{
-	Use:     "stop [WORKSPACE]",
+	Use:     "stop [WORKSPACE]...",
 	Short:   "Stop a workspace",
 	GroupID: util.TARGET_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {
