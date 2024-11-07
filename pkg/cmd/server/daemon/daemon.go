@@ -116,6 +116,10 @@ func Stop() error {
 }
 
 func getServiceConfig() (*service.Config, error) {
+	if runtime.GOOS == "windows" {
+		return nil, errors.New("daemon mode not supported on Windows")
+	}
+
 	user, ok := os.LookupEnv("USER")
 	if !ok {
 		return nil, errors.New("could not determine user")
@@ -129,8 +133,6 @@ func getServiceConfig() (*service.Config, error) {
 	}
 
 	switch runtime.GOOS {
-	case "windows":
-		return nil, errors.New("daemon mode not supported on Windows")
 	case "linux":
 		// Fix for running as root on Linux
 		if user == "root" {
