@@ -3,7 +3,7 @@
 Start a workspace
 
 ```
-daytona start [WORKSPACE] [flags]
+daytona start [WORKSPACE]... [flags]
 ```
 
 ### Options

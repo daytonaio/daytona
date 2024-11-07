@@ -89,7 +89,7 @@ func RunWorkspaceConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []ap
 		DevcontainerFilePath: create.DEVCONTAINER_FILEPATH,
 	}
 
-	createDtos, err = create_cmd.GetWorkspacesCreationDataFromPrompt(create_cmd.WorkspacesDataPromptConfig{
+	createDtos, err = create_cmd.GetWorkspacesCreationDataFromPrompt(ctx, create_cmd.WorkspacesDataPromptParams{
 		UserGitProviders:    gitProviders,
 		Manual:              *workspaceConfigurationFlags.Manual,
 		MultiWorkspace:      false,
@@ -123,7 +123,7 @@ func RunWorkspaceConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []ap
 
 	chosenName := create_cmd.GetSuggestedName(initialSuggestion, existingWorkspaceConfigNames)
 
-	submissionFormConfig := create.SubmissionFormConfig{
+	submissionFormConfig := create.SubmissionFormParams{
 		ChosenName:             &chosenName,
 		SuggestedName:          chosenName,
 		ExistingWorkspaceNames: existingWorkspaceConfigNames,

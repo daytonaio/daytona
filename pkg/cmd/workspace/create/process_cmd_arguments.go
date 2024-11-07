@@ -13,11 +13,11 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	workspace_common "github.com/daytonaio/daytona/pkg/cmd/workspace/common"
+	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
-	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
 
-type ProcessCmdArgumentsConfig struct {
+type ProcessCmdArgumentsParams struct {
 	ApiClient                   *apiclient.APIClient
 	RepoUrls                    []string
 	CreateWorkspaceDtos         *[]apiclient.CreateWorkspaceDTO
@@ -26,7 +26,7 @@ type ProcessCmdArgumentsConfig struct {
 	BlankFlag                   bool
 }
 
-type ProcessGitUrlConfig struct {
+type ProcessGitUrlParams struct {
 	ApiClient                   *apiclient.APIClient
 	RepoUrl                     string
 	CreateWorkspaceDtos         *[]apiclient.CreateWorkspaceDTO
@@ -35,16 +35,16 @@ type ProcessGitUrlConfig struct {
 	BlankFlag                   bool
 }
 
-func ProcessCmdArguments(ctx context.Context, config ProcessCmdArgumentsConfig) ([]string, error) {
-	if len(config.RepoUrls) == 0 {
+func ProcessCmdArguments(ctx context.Context, params ProcessCmdArgumentsParams) ([]string, error) {
+	if len(params.RepoUrls) == 0 {
 		return nil, fmt.Errorf("no repository URLs provided")
 	}
 
-	if len(config.RepoUrls) > 1 && workspace_common.CheckAnyWorkspaceConfigurationFlagSet(config.WorkspaceConfigurationFlags) {
+	if len(params.RepoUrls) > 1 && workspace_common.CheckAnyWorkspaceConfigurationFlagSet(params.WorkspaceConfigurationFlags) {
 		return nil, fmt.Errorf("can't set custom workspace configuration properties for multiple workspaces")
 	}
 
-	if *config.WorkspaceConfigurationFlags.Builder != "" && *config.WorkspaceConfigurationFlags.Builder != views_util.DEVCONTAINER && *config.WorkspaceConfigurationFlags.DevcontainerPath != "" {
+	if *params.WorkspaceConfigurationFlags.Builder != "" && *params.WorkspaceConfigurationFlags.Builder != views_util.DEVCONTAINER && *params.WorkspaceConfigurationFlags.DevcontainerPath != "" {
 		return nil, fmt.Errorf("can't set devcontainer file path if builder is not set to %s", views_util.DEVCONTAINER)
 	}
 
@@ -52,22 +52,22 @@ func ProcessCmdArguments(ctx context.Context, config ProcessCmdArgumentsConfig) 
 
 	existingWorkspaceConfigNames := []string{}
 
-	for i, repoUrl := range config.RepoUrls {
+	for i, repoUrl := range params.RepoUrls {
 		var branch *string
-		if len(*config.WorkspaceConfigurationFlags.Branches) > i {
-			branch = &(*config.WorkspaceConfigurationFlags.Branches)[i]
+		if len(*params.WorkspaceConfigurationFlags.Branches) > i {
+			branch = &(*params.WorkspaceConfigurationFlags.Branches)[i]
 		}
 
 		validatedUrl, err := util.GetValidatedUrl(repoUrl)
 		if err == nil {
 			// The argument is a Git URL
-			existingWorkspaceConfigName, err := processGitURL(ctx, ProcessGitUrlConfig{
-				ApiClient:                   config.ApiClient,
+			existingWorkspaceConfigName, err := processGitURL(ctx, ProcessGitUrlParams{
+				ApiClient:                   params.ApiClient,
 				RepoUrl:                     validatedUrl,
-				CreateWorkspaceDtos:         config.CreateWorkspaceDtos,
-				WorkspaceConfigurationFlags: config.WorkspaceConfigurationFlags,
+				CreateWorkspaceDtos:         params.CreateWorkspaceDtos,
+				WorkspaceConfigurationFlags: params.WorkspaceConfigurationFlags,
 				Branch:                      branch,
-				BlankFlag:                   config.BlankFlag,
+				BlankFlag:                   params.BlankFlag,
 			})
 			if err != nil {
 				return nil, err
@@ -82,12 +82,17 @@ func ProcessCmdArguments(ctx context.Context, config ProcessCmdArgumentsConfig) 
 		}
 
 		// The argument is not a Git URL - try getting the workspace config
-		workspaceConfig, _, err = config.ApiClient.WorkspaceConfigAPI.GetWorkspaceConfig(ctx, repoUrl).Execute()
+		workspaceConfig, _, err = params.ApiClient.WorkspaceConfigAPI.GetWorkspaceConfig(ctx, repoUrl).Execute()
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse the URL or fetch the workspace config for '%s'", repoUrl)
 		}
 
-		existingWorkspaceConfigName, err := AddWorkspaceFromConfig(workspaceConfig, config.ApiClient, config.CreateWorkspaceDtos, branch)
+		existingWorkspaceConfigName, err := AddWorkspaceFromConfig(ctx, AddWorkspaceFromConfigParams{
+			WorkspaceConfig: workspaceConfig,
+			ApiClient:       params.ApiClient,
+			Workspaces:      params.CreateWorkspaceDtos,
+			BranchFlag:      branch,
+		})
 		if err != nil {
 			return nil, err
 		}
@@ -98,20 +103,25 @@ func ProcessCmdArguments(ctx context.Context, config ProcessCmdArgumentsConfig) 
 		}
 	}
 
-	generateWorkspaceIds(config.CreateWorkspaceDtos)
-	setInitialWorkspaceNames(config.CreateWorkspaceDtos, *config.ExistingWorkspaces)
+	generateWorkspaceIds(params.CreateWorkspaceDtos)
+	setInitialWorkspaceNames(params.CreateWorkspaceDtos, *params.ExistingWorkspaces)
 
 	return existingWorkspaceConfigNames, nil
 }
 
-func processGitURL(ctx context.Context, config ProcessGitUrlConfig) (*string, error) {
-	encodedURLParam := url.QueryEscape(config.RepoUrl)
+func processGitURL(ctx context.Context, params ProcessGitUrlParams) (*string, error) {
+	encodedURLParam := url.QueryEscape(params.RepoUrl)
 
-	if !config.BlankFlag {
-		workspaceConfig, res, err := config.ApiClient.WorkspaceConfigAPI.GetDefaultWorkspaceConfig(ctx, encodedURLParam).Execute()
+	if !params.BlankFlag {
+		workspaceConfig, res, err := params.ApiClient.WorkspaceConfigAPI.GetDefaultWorkspaceConfig(ctx, encodedURLParam).Execute()
 		if err == nil {
-			workspaceConfig.GitProviderConfigId = config.WorkspaceConfigurationFlags.GitProviderConfig
-			return AddWorkspaceFromConfig(workspaceConfig, config.ApiClient, config.CreateWorkspaceDtos, config.Branch)
+			workspaceConfig.GitProviderConfigId = params.WorkspaceConfigurationFlags.GitProviderConfig
+			return AddWorkspaceFromConfig(ctx, AddWorkspaceFromConfigParams{
+				WorkspaceConfig: workspaceConfig,
+				ApiClient:       params.ApiClient,
+				Workspaces:      params.CreateWorkspaceDtos,
+				BranchFlag:      params.Branch,
+			})
 		}
 
 		if res.StatusCode != http.StatusNotFound {
@@ -119,9 +129,9 @@ func processGitURL(ctx context.Context, config ProcessGitUrlConfig) (*string, er
 		}
 	}
 
-	repo, res, err := config.ApiClient.GitProviderAPI.GetGitContext(ctx).Repository(apiclient.GetRepositoryContext{
-		Url:    config.RepoUrl,
-		Branch: config.Branch,
+	repo, res, err := params.ApiClient.GitProviderAPI.GetGitContext(ctx).Repository(apiclient.GetRepositoryContext{
+		Url:    params.RepoUrl,
+		Branch: params.Branch,
 	}).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
@@ -132,27 +142,27 @@ func processGitURL(ctx context.Context, config ProcessGitUrlConfig) (*string, er
 		return nil, err
 	}
 
-	config.WorkspaceConfigurationFlags.GitProviderConfig, err = GetGitProviderConfigIdFromFlag(ctx, config.ApiClient, config.WorkspaceConfigurationFlags.GitProviderConfig)
+	params.WorkspaceConfigurationFlags.GitProviderConfig, err = GetGitProviderConfigIdFromFlag(ctx, params.ApiClient, params.WorkspaceConfigurationFlags.GitProviderConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	gitProviderConfigs, res, err := config.ApiClient.GitProviderAPI.ListGitProvidersForUrl(context.Background(), url.QueryEscape(config.RepoUrl)).Execute()
+	gitProviderConfigs, res, err := params.ApiClient.GitProviderAPI.ListGitProvidersForUrl(ctx, url.QueryEscape(params.RepoUrl)).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	if len(gitProviderConfigs) == 1 {
-		config.WorkspaceConfigurationFlags.GitProviderConfig = &gitProviderConfigs[0].Id
+		params.WorkspaceConfigurationFlags.GitProviderConfig = &gitProviderConfigs[0].Id
 	} else if len(gitProviderConfigs) > 1 {
 		gp := selection.GetGitProviderConfigFromPrompt(selection.GetGitProviderConfigParams{
 			GitProviderConfigs: gitProviderConfigs,
 			ActionVerb:         "Use",
 		})
-		config.WorkspaceConfigurationFlags.GitProviderConfig = &gp.Id
+		params.WorkspaceConfigurationFlags.GitProviderConfig = &gp.Id
 	}
 
-	workspace, err := GetCreateWorkspaceDtoFromFlags(config.WorkspaceConfigurationFlags)
+	workspace, err := GetCreateWorkspaceDtoFromFlags(params.WorkspaceConfigurationFlags)
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +172,7 @@ func processGitURL(ctx context.Context, config ProcessGitUrlConfig) (*string, er
 		Repository: *repo,
 	}
 
-	*config.CreateWorkspaceDtos = append(*config.CreateWorkspaceDtos, *workspace)
+	*params.CreateWorkspaceDtos = append(*params.CreateWorkspaceDtos, *workspace)
 
 	return nil, nil
 }
