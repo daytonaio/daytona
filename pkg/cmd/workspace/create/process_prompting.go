@@ -25,22 +25,22 @@ type ProcessPromptingParams struct {
 	TargetName                  string
 }
 
-func ProcessPrompting(ctx context.Context, config ProcessPromptingParams) error {
-	if workspace_common.CheckAnyWorkspaceConfigurationFlagSet(config.WorkspaceConfigurationFlags) || (config.WorkspaceConfigurationFlags.Branches != nil && len(*config.WorkspaceConfigurationFlags.Branches) > 0) {
+func ProcessPrompting(ctx context.Context, params ProcessPromptingParams) error {
+	if workspace_common.CheckAnyWorkspaceConfigurationFlagSet(params.WorkspaceConfigurationFlags) || (params.WorkspaceConfigurationFlags.Branches != nil && len(*params.WorkspaceConfigurationFlags.Branches) > 0) {
 		return errors.New("please provide the repository URL in order to set up custom workspace details through the CLI")
 	}
 
-	gitProviders, res, err := config.ApiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
+	gitProviders, res, err := params.ApiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	workspaceConfigs, res, err := config.ApiClient.WorkspaceConfigAPI.ListWorkspaceConfigs(ctx).Execute()
+	workspaceConfigs, res, err := params.ApiClient.WorkspaceConfigAPI.ListWorkspaceConfigs(ctx).Execute()
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	apiServerConfig, res, err := config.ApiClient.ServerAPI.GetConfig(ctx).Execute()
+	apiServerConfig, res, err := params.ApiClient.ServerAPI.GetConfig(ctx).Execute()
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
@@ -52,13 +52,13 @@ func ProcessPrompting(ctx context.Context, config ProcessPromptingParams) error 
 		DevcontainerFilePath: create.DEVCONTAINER_FILEPATH,
 	}
 
-	*config.CreateWorkspaceDtos, err = GetWorkspacesCreationDataFromPrompt(ctx, WorkspacesDataPromptParams{
+	*params.CreateWorkspaceDtos, err = GetWorkspacesCreationDataFromPrompt(ctx, WorkspacesDataPromptParams{
 		UserGitProviders: gitProviders,
 		WorkspaceConfigs: workspaceConfigs,
-		Manual:           *config.WorkspaceConfigurationFlags.Manual,
-		MultiWorkspace:   config.MultiWorkspaceFlag,
-		BlankWorkspace:   config.BlankFlag,
-		ApiClient:        config.ApiClient,
+		Manual:           *params.WorkspaceConfigurationFlags.Manual,
+		MultiWorkspace:   params.MultiWorkspaceFlag,
+		BlankWorkspace:   params.BlankFlag,
+		ApiClient:        params.ApiClient,
 		Defaults:         workspaceDefaults,
 	})
 
@@ -66,15 +66,15 @@ func ProcessPrompting(ctx context.Context, config ProcessPromptingParams) error 
 		return err
 	}
 
-	generateWorkspaceIds(config.CreateWorkspaceDtos)
-	setInitialWorkspaceNames(config.CreateWorkspaceDtos, *config.ExistingWorkspaces)
+	generateWorkspaceIds(params.CreateWorkspaceDtos)
+	setInitialWorkspaceNames(params.CreateWorkspaceDtos, *params.ExistingWorkspaces)
 
 	submissionFormConfig := create.SubmissionFormParams{
-		ChosenName:    &config.TargetName,
-		WorkspaceList: config.CreateWorkspaceDtos,
-		NameLabel:     config.TargetName,
+		ChosenName:    &params.TargetName,
+		WorkspaceList: params.CreateWorkspaceDtos,
+		NameLabel:     params.TargetName,
 		Defaults:      workspaceDefaults,
-		ExistingWorkspaceNames: util.ArrayMap(*config.ExistingWorkspaces, func(w apiclient.WorkspaceDTO) string {
+		ExistingWorkspaceNames: util.ArrayMap(*params.ExistingWorkspaces, func(w apiclient.WorkspaceDTO) string {
 			return w.Name
 		}),
 	}

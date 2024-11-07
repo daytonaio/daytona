@@ -179,7 +179,7 @@ func SetBranchFromWizard(params BranchWizardParams) (*apiclient.GitRepository, e
 	return params.ChosenRepo, nil
 }
 
-func runGetBranchFromPromptWithPagination(ctx context.Context, config BranchWizardParams, parentIdentifier string, page, perPage int32) (*apiclient.GitRepository, error) {
+func runGetBranchFromPromptWithPagination(ctx context.Context, params BranchWizardParams, parentIdentifier string, page, perPage int32) (*apiclient.GitRepository, error) {
 	var branchList []apiclient.GitBranch
 	disablePagination := false
 	curPageItemsNum := 0
@@ -189,7 +189,7 @@ func runGetBranchFromPromptWithPagination(ctx context.Context, config BranchWiza
 
 	for {
 		err = views_util.WithSpinner("Loading Branches", func() error {
-			branches, _, err := config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.GitProviderConfigId, url.QueryEscape(config.NamespaceId), url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
+			branches, _, err := params.ApiClient.GitProviderAPI.GetRepoBranches(ctx, params.GitProviderConfigId, url.QueryEscape(params.NamespaceId), url.QueryEscape(params.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
 			if err != nil {
 				return err
 			}
@@ -204,7 +204,7 @@ func runGetBranchFromPromptWithPagination(ctx context.Context, config BranchWiza
 		}
 
 		// Check first if the git provider supports pagination
-		if isGitProviderWithUnsupportedPagination(config.GitProviderConfigId) {
+		if isGitProviderWithUnsupportedPagination(params.GitProviderConfigId) {
 			disablePagination = true
 		} else {
 			// Check if we have reached the end of the list
@@ -219,17 +219,17 @@ func runGetBranchFromPromptWithPagination(ctx context.Context, config BranchWiza
 		}
 
 		// User will either choose a branch or navigate the pages
-		branch, navigate := selection.GetBranchFromPrompt(branchList, config.WorkspaceOrder, selectionListOptions)
+		branch, navigate := selection.GetBranchFromPrompt(branchList, params.WorkspaceOrder, selectionListOptions)
 		if !disablePagination && navigate != "" {
 			if navigate == views.ListNavigationText {
 				page++
 				continue // Fetch the next page of branches
 			}
 		} else if branch != nil {
-			config.ChosenRepo.Branch = branch.Name
-			config.ChosenRepo.Sha = branch.Sha
+			params.ChosenRepo.Branch = branch.Name
+			params.ChosenRepo.Sha = branch.Sha
 
-			return config.ChosenRepo, nil
+			return params.ChosenRepo, nil
 		} else {
 			// If user aborts or there's no selection
 			return nil, errors.New("must select a branch")

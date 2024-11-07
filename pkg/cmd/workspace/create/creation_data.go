@@ -313,7 +313,7 @@ func GetGitProviderConfigIdFromFlag(ctx context.Context, apiClient *apiclient.AP
 	return nil, fmt.Errorf("git provider config '%s' not found", *gitProviderConfigFlag)
 }
 
-func newCreateWorkspaceConfigDTO(config WorkspacesDataPromptParams, providerRepo *apiclient.GitRepository, providerRepoName string, gitProviderConfigId string) apiclient.CreateWorkspaceDTO {
+func newCreateWorkspaceConfigDTO(params WorkspacesDataPromptParams, providerRepo *apiclient.GitRepository, providerRepoName string, gitProviderConfigId string) apiclient.CreateWorkspaceDTO {
 	workspace := apiclient.CreateWorkspaceDTO{
 		Name:                providerRepoName,
 		GitProviderConfigId: &gitProviderConfigId,
@@ -321,8 +321,8 @@ func newCreateWorkspaceConfigDTO(config WorkspacesDataPromptParams, providerRepo
 			Repository: *providerRepo,
 		},
 		BuildConfig: &apiclient.BuildConfig{},
-		Image:       config.Defaults.Image,
-		User:        config.Defaults.ImageUser,
+		Image:       params.Defaults.Image,
+		User:        params.Defaults.ImageUser,
 		EnvVars:     map[string]string{},
 	}
 
