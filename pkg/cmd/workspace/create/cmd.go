@@ -169,14 +169,13 @@ var CreateCmd = &cobra.Command{
 		logsContext, stopLogs := context.WithCancel(context.Background())
 		defer stopLogs()
 
-		logs_view.SetupLongestPrefixLength(names)
-
 		if !targetExisted {
 			go apiclient_util.ReadTargetLogs(logsContext, apiclient_util.ReadLogParams{
-				Id:            targetId,
-				Label:         &target.Name,
-				ActiveProfile: activeProfile,
-				Follow:        util.Pointer(true),
+				Id:                    targetId,
+				Label:                 &target.Name,
+				ActiveProfile:         activeProfile,
+				Follow:                util.Pointer(true),
+				SkipPrefixLengthSetup: true,
 			})
 
 			_, res, err := apiClient.TargetAPI.CreateTarget(ctx).Target(apiclient.CreateTargetDTO{
