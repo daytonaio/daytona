@@ -160,6 +160,7 @@ func GetEnvVarsInput(envVars *map[string]string) *huh.Text {
 	return huh.NewText().
 		Title("Environment Variables").
 		Description("Enter environment variables in the format KEY=VALUE\nTo pass machine env variables at runtime, use $VALUE").
+		CharLimit(-1).
 		Value(&inputText).
 		Validate(func(str string) error {
 			tempEnvVars := map[string]string{}
