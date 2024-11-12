@@ -14,17 +14,17 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"
 )
 
 var RestartCmd = &cobra.Command{
-	Use:     "restart [WORKSPACE]",
+	Use:     "restart [WORKSPACE]...",
 	Short:   "Restart a workspace",
-	Args:    cobra.RangeArgs(0, 1),
 	GroupID: util.TARGET_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var workspace *apiclient.WorkspaceDTO
+		var selectedWorkspaces []*apiclient.WorkspaceDTO
 
 		ctx := context.Background()
 
@@ -44,23 +44,40 @@ var RestartCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 {
-			workspace := selection.GetWorkspaceFromPrompt(workspaceList, "Restart")
-			if workspace == nil {
+			selectedWorkspaces = selection.GetWorkspacesFromPrompt(workspaceList, "Restart")
+			if selectedWorkspaces == nil {
 				return nil
 			}
 		} else {
-			workspace, err = apiclient_util.GetWorkspace(args[0], false)
-			if err != nil {
-				return err
+			for _, arg := range args {
+				workspace, err := apiclient_util.GetWorkspace(arg, false)
+				if err != nil {
+					log.Error(fmt.Sprintf("[ %s ] : %v", arg, err))
+					continue
+				}
+				selectedWorkspaces = append(selectedWorkspaces, workspace)
 			}
 		}
 
-		err = RestartWorkspace(apiClient, *workspace)
-		if err != nil {
-			return err
-		}
+		if len(selectedWorkspaces) == 1 {
+			workspace := selectedWorkspaces[0]
 
-		views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' restarted successfully", workspace.Name))
+			err = RestartWorkspace(apiClient, *workspace)
+			if err != nil {
+				return err
+			}
+
+			views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' restarted successfully", workspace.Name))
+		} else {
+			for _, ws := range selectedWorkspaces {
+				err := RestartWorkspace(apiClient, *ws)
+				if err != nil {
+					log.Errorf("Failed to restart workspace %s: %v\n\n", ws.Name, err)
+					continue
+				}
+				views.RenderInfoMessage(fmt.Sprintf("- Workspace '%s' restarted successfully", ws.Name))
+			}
+		}
 
 		return nil
 	},
