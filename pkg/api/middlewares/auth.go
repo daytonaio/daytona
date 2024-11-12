@@ -7,7 +7,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/daytonaio/daytona/pkg/apikey"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
@@ -33,12 +33,12 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		apiKeyType := apikey.ApiKeyTypeClient
+		apiKeyType := models.ApiKeyTypeClient
 
 		if server.ApiKeyService.IsTargetApiKey(token) {
-			apiKeyType = apikey.ApiKeyTypeTarget
+			apiKeyType = models.ApiKeyTypeTarget
 		} else if server.ApiKeyService.IsWorkspaceApiKey(token) {
-			apiKeyType = apikey.ApiKeyTypeWorkspace
+			apiKeyType = models.ApiKeyTypeWorkspace
 		}
 
 		ctx.Set("apiKeyType", apiKeyType)

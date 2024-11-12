@@ -6,13 +6,13 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **KeyHash** | **string** |  | 
 **Name** | **string** | Workspace or client name | 
-**Type** | [**ApikeyApiKeyType**](ApikeyApiKeyType.md) |  | 
+**Type** | [**ModelsApiKeyType**](ModelsApiKeyType.md) |  | 
 
 ## Methods
 
 ### NewApiKey
 
-`func NewApiKey(keyHash string, name string, type_ ApikeyApiKeyType, ) *ApiKey`
+`func NewApiKey(keyHash string, name string, type_ ModelsApiKeyType, ) *ApiKey`
 
 NewApiKey instantiates a new ApiKey object
 This constructor will assign default values to properties that have it defined,
@@ -69,20 +69,20 @@ SetName sets Name field to given value.
 
 ### GetType
 
-`func (o *ApiKey) GetType() ApikeyApiKeyType`
+`func (o *ApiKey) GetType() ModelsApiKeyType`
 
 GetType returns the Type field if non-nil, zero value otherwise.
 
 ### GetTypeOk
 
-`func (o *ApiKey) GetTypeOk() (*ApikeyApiKeyType, bool)`
+`func (o *ApiKey) GetTypeOk() (*ModelsApiKeyType, bool)`
 
 GetTypeOk returns a tuple with the Type field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetType
 
-`func (o *ApiKey) SetType(v ApikeyApiKeyType)`
+`func (o *ApiKey) SetType(v ModelsApiKeyType)`
 
 SetType sets Type field to given value.
 

@@ -6,56 +6,55 @@ package targetconfigs_test
 import (
 	"testing"
 
-	t_targetconfigs "github.com/daytonaio/daytona/internal/testing/provider/targetconfigs"
+	t_targetconfigs "github.com/daytonaio/daytona/internal/testing/server/targetconfigs"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
-	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/config"
 	"github.com/stretchr/testify/suite"
 )
 
-var targetConfig1 *config.TargetConfig = &config.TargetConfig{
+var targetConfig1 *models.TargetConfig = &models.TargetConfig{
 	Name: "targetConfig1",
-	ProviderInfo: target.ProviderInfo{
+	ProviderInfo: models.ProviderInfo{
 		Name:    "provider1",
 		Version: "v1",
 	},
 	Options: "",
 }
 
-var targetConfig2 *config.TargetConfig = &config.TargetConfig{
+var targetConfig2 *models.TargetConfig = &models.TargetConfig{
 	Name: "targetConfig2",
-	ProviderInfo: target.ProviderInfo{
+	ProviderInfo: models.ProviderInfo{
 		Name:    "provider2",
 		Version: "v1",
 	},
 	Options: "",
 }
 
-var targetConfig3 *config.TargetConfig = &config.TargetConfig{
+var targetConfig3 *models.TargetConfig = &models.TargetConfig{
 	Name: "targetConfig3",
-	ProviderInfo: target.ProviderInfo{
+	ProviderInfo: models.ProviderInfo{
 		Name:    "provider3",
 		Version: "v1",
 	},
 	Options: "",
 }
 
-var targetConfig4 *config.TargetConfig = &config.TargetConfig{
+var targetConfig4 *models.TargetConfig = &models.TargetConfig{
 	Name: "newTargetConfig",
-	ProviderInfo: target.ProviderInfo{
+	ProviderInfo: models.ProviderInfo{
 		Name:    "provider2",
 		Version: "v1",
 	},
 	Options: "",
 }
 
-var expectedConfigs []*config.TargetConfig
-var expectedConfigMap map[string]*config.TargetConfig
+var expectedConfigs []*models.TargetConfig
+var expectedConfigMap map[string]*models.TargetConfig
 
 type TargetConfigServiceTestSuite struct {
 	suite.Suite
 	targetConfigService targetconfigs.ITargetConfigService
-	targetConfigStore   config.TargetConfigStore
+	targetConfigStore   targetconfigs.TargetConfigStore
 }
 
 func NewTargetConfigServiceTestSuite() *TargetConfigServiceTestSuite {
@@ -63,11 +62,11 @@ func NewTargetConfigServiceTestSuite() *TargetConfigServiceTestSuite {
 }
 
 func (s *TargetConfigServiceTestSuite) SetupTest() {
-	expectedConfigs = []*config.TargetConfig{
+	expectedConfigs = []*models.TargetConfig{
 		targetConfig1, targetConfig2, targetConfig3,
 	}
 
-	expectedConfigMap = map[string]*config.TargetConfig{
+	expectedConfigMap = map[string]*models.TargetConfig{
 		targetConfig1.Name: targetConfig1,
 		targetConfig2.Name: targetConfig2,
 		targetConfig3.Name: targetConfig3,
@@ -106,7 +105,7 @@ func (s *TargetConfigServiceTestSuite) TestMap() {
 func (s *TargetConfigServiceTestSuite) TestFind() {
 	require := s.Require()
 
-	targetConfig, err := s.targetConfigService.Find(&config.TargetConfigFilter{
+	targetConfig, err := s.targetConfigService.Find(&targetconfigs.TargetConfigFilter{
 		Name: &targetConfig1.Name,
 	})
 	require.Nil(err)

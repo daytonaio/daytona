@@ -6,7 +6,7 @@
 package mocks
 
 import (
-	"github.com/daytonaio/daytona/pkg/containerregistry"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -23,27 +23,27 @@ func (m *mockContainerRegistryService) Delete(server string) error {
 	return args.Error(0)
 }
 
-func (m *mockContainerRegistryService) Find(server string) (*containerregistry.ContainerRegistry, error) {
+func (m *mockContainerRegistryService) Find(server string) (*models.ContainerRegistry, error) {
 	args := m.Called(server)
-	return args.Get(0).(*containerregistry.ContainerRegistry), args.Error(1)
+	return args.Get(0).(*models.ContainerRegistry), args.Error(1)
 }
 
-func (m *mockContainerRegistryService) FindByImageName(imageName string) (*containerregistry.ContainerRegistry, error) {
+func (m *mockContainerRegistryService) FindByImageName(imageName string) (*models.ContainerRegistry, error) {
 	args := m.Called(imageName)
-	return args.Get(0).(*containerregistry.ContainerRegistry), args.Error(1)
+	return args.Get(0).(*models.ContainerRegistry), args.Error(1)
 }
 
-func (m *mockContainerRegistryService) List() ([]*containerregistry.ContainerRegistry, error) {
+func (m *mockContainerRegistryService) List() ([]*models.ContainerRegistry, error) {
 	args := m.Called()
-	return args.Get(0).([]*containerregistry.ContainerRegistry), args.Error(1)
+	return args.Get(0).([]*models.ContainerRegistry), args.Error(1)
 }
 
-func (m *mockContainerRegistryService) Map() (map[string]*containerregistry.ContainerRegistry, error) {
+func (m *mockContainerRegistryService) Map() (map[string]*models.ContainerRegistry, error) {
 	args := m.Called()
-	return args.Get(0).(map[string]*containerregistry.ContainerRegistry), args.Error(1)
+	return args.Get(0).(map[string]*models.ContainerRegistry), args.Error(1)
 }
 
-func (m *mockContainerRegistryService) Save(cr *containerregistry.ContainerRegistry) error {
+func (m *mockContainerRegistryService) Save(cr *models.ContainerRegistry) error {
 	args := m.Called(cr)
 	return args.Error(0)
 }

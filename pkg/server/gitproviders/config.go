@@ -8,19 +8,20 @@ import (
 	"strconv"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/docker/docker/pkg/stringid"
 )
 
-func (s *GitProviderService) GetConfig(id string) (*gitprovider.GitProviderConfig, error) {
+func (s *GitProviderService) GetConfig(id string) (*models.GitProviderConfig, error) {
 	return s.configStore.Find(id)
 }
 
-func (s *GitProviderService) ListConfigs() ([]*gitprovider.GitProviderConfig, error) {
+func (s *GitProviderService) ListConfigs() ([]*models.GitProviderConfig, error) {
 	return s.configStore.List()
 }
 
-func (s *GitProviderService) ListConfigsForUrl(repoUrl string) ([]*gitprovider.GitProviderConfig, error) {
-	var gpcs []*gitprovider.GitProviderConfig
+func (s *GitProviderService) ListConfigsForUrl(repoUrl string) ([]*models.GitProviderConfig, error) {
+	var gpcs []*models.GitProviderConfig
 
 	gitProviders, err := s.configStore.List()
 	if err != nil {
@@ -50,7 +51,7 @@ func (s *GitProviderService) ListConfigsForUrl(repoUrl string) ([]*gitprovider.G
 	return gpcs, nil
 }
 
-func (s *GitProviderService) SetGitProviderConfig(providerConfig *gitprovider.GitProviderConfig) error {
+func (s *GitProviderService) SetGitProviderConfig(providerConfig *models.GitProviderConfig) error {
 	gitProvider, err := s.newGitProvider(providerConfig)
 	if err != nil {
 		return err

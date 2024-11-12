@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/pkg/docker"
-	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/stretchr/testify/mock"
@@ -45,10 +45,10 @@ func (s *DockerClientTestSuite) TestGetWorkspaceInfo() {
 }
 
 func (s *DockerClientTestSuite) TestGetTargetInfo() {
-	targetWithoutWorkspaces := &target.Target{
+	targetWithoutWorkspaces := &models.Target{
 		Id:   "123",
 		Name: "test",
-		ProviderInfo: target.ProviderInfo{
+		ProviderInfo: models.ProviderInfo{
 			Name:    "test-provider",
 			Version: "test",
 		},

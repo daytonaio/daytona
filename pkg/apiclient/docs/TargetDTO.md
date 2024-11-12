@@ -10,13 +10,13 @@ Name | Type | Description | Notes
 **Name** | **string** |  | 
 **Options** | **string** | JSON encoded map of options | 
 **ProviderInfo** | [**TargetProviderInfo**](TargetProviderInfo.md) |  | 
-**WorkspaceCount** | **int32** |  | 
+**Workspaces** | Pointer to [**[]Workspace**](Workspace.md) |  | [optional] 
 
 ## Methods
 
 ### NewTargetDTO
 
-`func NewTargetDTO(default_ bool, id string, name string, options string, providerInfo TargetProviderInfo, workspaceCount int32, ) *TargetDTO`
+`func NewTargetDTO(default_ bool, id string, name string, options string, providerInfo TargetProviderInfo, ) *TargetDTO`
 
 NewTargetDTO instantiates a new TargetDTO object
 This constructor will assign default values to properties that have it defined,
@@ -156,25 +156,30 @@ and a boolean to check if the value has been set.
 SetProviderInfo sets ProviderInfo field to given value.
 
 
-### GetWorkspaceCount
+### GetWorkspaces
 
-`func (o *TargetDTO) GetWorkspaceCount() int32`
+`func (o *TargetDTO) GetWorkspaces() []Workspace`
 
-GetWorkspaceCount returns the WorkspaceCount field if non-nil, zero value otherwise.
+GetWorkspaces returns the Workspaces field if non-nil, zero value otherwise.
 
-### GetWorkspaceCountOk
+### GetWorkspacesOk
 
-`func (o *TargetDTO) GetWorkspaceCountOk() (*int32, bool)`
+`func (o *TargetDTO) GetWorkspacesOk() (*[]Workspace, bool)`
 
-GetWorkspaceCountOk returns a tuple with the WorkspaceCount field if it's non-nil, zero value otherwise
+GetWorkspacesOk returns a tuple with the Workspaces field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetWorkspaceCount
+### SetWorkspaces
 
-`func (o *TargetDTO) SetWorkspaceCount(v int32)`
+`func (o *TargetDTO) SetWorkspaces(v []Workspace)`
 
-SetWorkspaceCount sets WorkspaceCount field to given value.
+SetWorkspaces sets Workspaces field to given value.
 
+### HasWorkspaces
+
+`func (o *TargetDTO) HasWorkspaces() bool`
+
+HasWorkspaces returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

@@ -4,12 +4,12 @@
 package dto
 
 import (
-	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/models"
 )
 
 type TargetDTO struct {
-	target.TargetViewDTO
-	Info *target.TargetInfo `json:"info" validate:"optional"`
+	models.Target
+	Info *models.TargetInfo `json:"info" validate:"optional"`
 } //	@name	TargetDTO
 
 type CreateTargetDTO struct {

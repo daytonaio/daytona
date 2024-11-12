@@ -9,7 +9,8 @@ import (
 	"io"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/build"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/server/builds"
 	"github.com/daytonaio/daytona/pkg/server/builds/dto"
 	"github.com/stretchr/testify/mock"
 )
@@ -27,17 +28,17 @@ func (m *MockBuildService) Create(createBuildDto dto.BuildCreationData) (string,
 	return args.String(0), args.Error(1)
 }
 
-func (m *MockBuildService) Find(filter *build.Filter) (*build.Build, error) {
+func (m *MockBuildService) Find(filter *builds.BuildFilter) (*models.Build, error) {
 	args := m.Called(filter)
-	return args.Get(0).(*build.Build), args.Error(1)
+	return args.Get(0).(*models.Build), args.Error(1)
 }
 
-func (m *MockBuildService) List(filter *build.Filter) ([]*build.Build, error) {
+func (m *MockBuildService) List(filter *builds.BuildFilter) ([]*models.Build, error) {
 	args := m.Called(filter)
-	return args.Get(0).([]*build.Build), args.Error(1)
+	return args.Get(0).([]*models.Build), args.Error(1)
 }
 
-func (m *MockBuildService) MarkForDeletion(filter *build.Filter, force bool) []error {
+func (m *MockBuildService) MarkForDeletion(filter *builds.BuildFilter, force bool) []error {
 	args := m.Called(filter, force)
 	return args.Get(0).([]error)
 }

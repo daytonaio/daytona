@@ -9,21 +9,20 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace/buildconfig"
-	"github.com/daytonaio/daytona/pkg/workspace/containerconfig"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/stretchr/testify/mock"
 )
 
-var MockBuild = &build.Build{
+var MockBuild = &models.Build{
 	Id:    "1",
-	State: build.BuildStatePendingRun,
+	State: models.BuildStatePendingRun,
 	Image: util.Pointer("image"),
 	User:  util.Pointer("user"),
-	ContainerConfig: containerconfig.ContainerConfig{
+	ContainerConfig: models.ContainerConfig{
 		Image: "test",
 		User:  "test",
 	},
-	BuildConfig: &buildconfig.BuildConfig{
+	BuildConfig: &models.BuildConfig{
 		Devcontainer: MockWorkspaceConfig.BuildConfig.Devcontainer,
 	},
 	Repository: &gitprovider.GitRepository{
@@ -36,21 +35,21 @@ type MockBuilderFactory struct {
 	mock.Mock
 }
 
-func (f *MockBuilderFactory) Create(build build.Build, workspaceDir string) (build.IBuilder, error) {
+func (f *MockBuilderFactory) Create(build models.Build, workspaceDir string) (build.IBuilder, error) {
 	args := f.Called(build, workspaceDir)
 	return args.Get(0).(*MockBuilder), args.Error(1)
 }
 
-func (f *MockBuilderFactory) CheckExistingBuild(b build.Build) (*build.Build, error) {
+func (f *MockBuilderFactory) CheckExistingBuild(b models.Build) (*models.Build, error) {
 	args := f.Called(b)
-	return args.Get(0).(*build.Build), args.Error(1)
+	return args.Get(0).(*models.Build), args.Error(1)
 }
 
 type MockBuilder struct {
 	mock.Mock
 }
 
-func (b *MockBuilder) Build(build build.Build) (string, string, error) {
+func (b *MockBuilder) Build(build models.Build) (string, string, error) {
 	args := b.Called(build)
 	return args.String(0), args.String(1), args.Error(2)
 }
@@ -60,17 +59,17 @@ func (b *MockBuilder) CleanUp() error {
 	return args.Error(0)
 }
 
-func (b *MockBuilder) Publish(build build.Build) error {
+func (b *MockBuilder) Publish(build models.Build) error {
 	args := b.Called(build)
 	return args.Error(0)
 }
 
-func (b *MockBuilder) SaveBuild(r build.Build) error {
+func (b *MockBuilder) SaveBuild(r models.Build) error {
 	args := b.Called(r)
 	return args.Error(0)
 }
 
-func (b *MockBuilder) GetImageName(build build.Build) (string, error) {
+func (b *MockBuilder) GetImageName(build models.Build) (string, error) {
 	args := b.Called(build)
 	return args.String(0), args.Error(1)
 }

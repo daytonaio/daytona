@@ -12,11 +12,10 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
-	"github.com/daytonaio/daytona/pkg/target"
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *TargetService) ListTargets(ctx context.Context, filter *target.TargetFilter, verbose bool) ([]dto.TargetDTO, error) {
+func (s *TargetService) ListTargets(ctx context.Context, filter *TargetFilter, verbose bool) ([]dto.TargetDTO, error) {
 	targets, err := s.targetStore.List(filter)
 	if err != nil {
 		return nil, err
@@ -26,7 +25,7 @@ func (s *TargetService) ListTargets(ctx context.Context, filter *target.TargetFi
 	response := []dto.TargetDTO{}
 
 	for i, t := range targets {
-		response = append(response, dto.TargetDTO{TargetViewDTO: *t})
+		response = append(response, dto.TargetDTO{Target: *t})
 		if !verbose {
 			continue
 		}
@@ -41,7 +40,7 @@ func (s *TargetService) ListTargets(ctx context.Context, filter *target.TargetFi
 			resultCh := make(chan provisioner.TargetInfoResult, 1)
 
 			go func() {
-				targetInfo, err := s.provisioner.GetTargetInfo(ctx, &t.Target)
+				targetInfo, err := s.provisioner.GetTargetInfo(ctx, t)
 				resultCh <- provisioner.TargetInfoResult{Info: targetInfo, Err: err}
 			}()
 

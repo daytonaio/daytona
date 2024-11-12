@@ -7,8 +7,9 @@ package mocks
 
 import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/server/workspaceconfig/dto"
-	"github.com/daytonaio/daytona/pkg/workspace/config"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/server/workspaceconfigs"
+	"github.com/daytonaio/daytona/pkg/server/workspaceconfigs/dto"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -25,14 +26,14 @@ func (m *mockWorkspaceConfigService) Delete(name string, force bool) []error {
 	return args.Get(0).([]error)
 }
 
-func (m *mockWorkspaceConfigService) Find(filter *config.WorkspaceConfigFilter) (*config.WorkspaceConfig, error) {
+func (m *mockWorkspaceConfigService) Find(filter *workspaceconfigs.WorkspaceConfigFilter) (*models.WorkspaceConfig, error) {
 	args := m.Called(filter)
-	return args.Get(0).(*config.WorkspaceConfig), args.Error(1)
+	return args.Get(0).(*models.WorkspaceConfig), args.Error(1)
 }
 
-func (m *mockWorkspaceConfigService) List(filter *config.WorkspaceConfigFilter) ([]*config.WorkspaceConfig, error) {
+func (m *mockWorkspaceConfigService) List(filter *workspaceconfigs.WorkspaceConfigFilter) ([]*models.WorkspaceConfig, error) {
 	args := m.Called(filter)
-	return args.Get(0).([]*config.WorkspaceConfig), args.Error(1)
+	return args.Get(0).([]*models.WorkspaceConfig), args.Error(1)
 }
 
 func (m *mockWorkspaceConfigService) SetDefault(name string) error {
@@ -40,7 +41,7 @@ func (m *mockWorkspaceConfigService) SetDefault(name string) error {
 	return args.Error(0)
 }
 
-func (m *mockWorkspaceConfigService) Save(wc *config.WorkspaceConfig) error {
+func (m *mockWorkspaceConfigService) Save(wc *models.WorkspaceConfig) error {
 	args := m.Called(wc)
 	return args.Error(0)
 }
@@ -50,12 +51,12 @@ func (m *mockWorkspaceConfigService) SetPrebuild(workspaceConfigName string, cre
 	return args.Get(0).(*dto.PrebuildDTO), args.Error(1)
 }
 
-func (m *mockWorkspaceConfigService) FindPrebuild(workspaceConfigFilter *config.WorkspaceConfigFilter, prebuildFilter *config.PrebuildFilter) (*dto.PrebuildDTO, error) {
+func (m *mockWorkspaceConfigService) FindPrebuild(workspaceConfigFilter *workspaceconfigs.WorkspaceConfigFilter, prebuildFilter *workspaceconfigs.PrebuildFilter) (*dto.PrebuildDTO, error) {
 	args := m.Called(workspaceConfigFilter, prebuildFilter)
 	return args.Get(0).(*dto.PrebuildDTO), args.Error(1)
 }
 
-func (m *mockWorkspaceConfigService) ListPrebuilds(workspaceConfigFilter *config.WorkspaceConfigFilter, prebuildFilter *config.PrebuildFilter) ([]*dto.PrebuildDTO, error) {
+func (m *mockWorkspaceConfigService) ListPrebuilds(workspaceConfigFilter *workspaceconfigs.WorkspaceConfigFilter, prebuildFilter *workspaceconfigs.PrebuildFilter) ([]*dto.PrebuildDTO, error) {
 	args := m.Called(workspaceConfigFilter, prebuildFilter)
 	return args.Get(0).([]*dto.PrebuildDTO), args.Error(1)
 }

@@ -3,10 +3,12 @@
 
 package apikeys_test
 
-import "github.com/daytonaio/daytona/pkg/apikey"
+import (
+	"github.com/daytonaio/daytona/pkg/models"
+)
 
 func (s *ApiKeyServiceTestSuite) TestListClientKeys() {
-	expectedKeys := []*apikey.ApiKey{}
+	expectedKeys := []*models.ApiKey{}
 	keyNames := []string{}
 
 	keyNames = append(keyNames, clientKeyNames...)
@@ -24,7 +26,7 @@ func (s *ApiKeyServiceTestSuite) TestListClientKeys() {
 }
 
 func (s *ApiKeyServiceTestSuite) TestRevoke() {
-	expectedKeys := []*apikey.ApiKey{}
+	expectedKeys := []*models.ApiKey{}
 	keyNames := []string{}
 
 	keyNames = append(keyNames, clientKeyNames[1:]...)
@@ -45,7 +47,7 @@ func (s *ApiKeyServiceTestSuite) TestRevoke() {
 }
 
 func (s *ApiKeyServiceTestSuite) TestGenerate() {
-	expectedKeys := []*apikey.ApiKey{}
+	expectedKeys := []*models.ApiKey{}
 	keyNames := []string{}
 
 	keyNames = append(keyNames, clientKeyNames...)
@@ -59,7 +61,7 @@ func (s *ApiKeyServiceTestSuite) TestGenerate() {
 
 	require := s.Require()
 
-	_, err := s.apiKeyService.Generate(apikey.ApiKeyTypeClient, keyName)
+	_, err := s.apiKeyService.Generate(models.ApiKeyTypeClient, keyName)
 	require.Nil(err)
 
 	apiKey, err := s.apiKeyStore.FindByName(keyName)

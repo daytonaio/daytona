@@ -8,7 +8,7 @@ definitions:
         description: Workspace or client name
         type: string
       type:
-        $ref: '#/definitions/apikey.ApiKeyType'
+        $ref: '#/definitions/models.ApiKeyType'
     required:
     - keyHash
     - name
@@ -35,7 +35,7 @@ definitions:
       repository:
         $ref: '#/definitions/GitRepository'
       state:
-        $ref: '#/definitions/build.BuildState'
+        $ref: '#/definitions/models.BuildState'
       updatedAt:
         type: string
       user:
@@ -499,8 +499,11 @@ definitions:
         additionalProperties:
           type: string
         type: object
+      id:
+        type: string
     required:
     - envVars
+    - id
     type: object
   Provider:
     properties:
@@ -658,6 +661,10 @@ definitions:
         type: string
       providerInfo:
         $ref: '#/definitions/TargetProviderInfo'
+      workspaces:
+        items:
+          $ref: '#/definitions/Workspace'
+        type: array
     required:
     - default
     - id
@@ -730,15 +737,16 @@ definitions:
         type: string
       providerInfo:
         $ref: '#/definitions/TargetProviderInfo'
-      workspaceCount:
-        type: integer
+      workspaces:
+        items:
+          $ref: '#/definitions/Workspace'
+        type: array
     required:
     - default
     - id
     - name
     - options
     - providerInfo
-    - workspaceCount
     type: object
   TargetInfo:
     properties:
@@ -760,6 +768,42 @@ definitions:
     required:
     - name
     - version
+    type: object
+  Workspace:
+    properties:
+      buildConfig:
+        $ref: '#/definitions/BuildConfig'
+      envVars:
+        additionalProperties:
+          type: string
+        type: object
+      gitProviderConfigId:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      repository:
+        $ref: '#/definitions/GitRepository'
+      state:
+        $ref: '#/definitions/WorkspaceState'
+      target:
+        $ref: '#/definitions/Target'
+      targetId:
+        type: string
+      user:
+        type: string
+    required:
+    - envVars
+    - id
+    - image
+    - name
+    - repository
+    - target
+    - targetId
+    - user
     type: object
   WorkspaceConfig:
     properties:
@@ -815,9 +859,9 @@ definitions:
         $ref: '#/definitions/GitRepository'
       state:
         $ref: '#/definitions/WorkspaceState'
+      target:
+        $ref: '#/definitions/Target'
       targetId:
-        type: string
-      targetName:
         type: string
       user:
         type: string
@@ -827,8 +871,8 @@ definitions:
     - image
     - name
     - repository
+    - target
     - targetId
-    - targetName
     - user
     type: object
   WorkspaceInfo:
@@ -862,43 +906,7 @@ definitions:
     - updatedAt
     - uptime
     type: object
-  WorkspaceViewDTO:
-    properties:
-      buildConfig:
-        $ref: '#/definitions/BuildConfig'
-      envVars:
-        additionalProperties:
-          type: string
-        type: object
-      gitProviderConfigId:
-        type: string
-      id:
-        type: string
-      image:
-        type: string
-      name:
-        type: string
-      repository:
-        $ref: '#/definitions/GitRepository'
-      state:
-        $ref: '#/definitions/WorkspaceState'
-      targetId:
-        type: string
-      targetName:
-        type: string
-      user:
-        type: string
-    required:
-    - envVars
-    - id
-    - image
-    - name
-    - repository
-    - targetId
-    - targetName
-    - user
-    type: object
-  apikey.ApiKeyType:
+  models.ApiKeyType:
     enum:
     - client
     - workspace
@@ -908,7 +916,7 @@ definitions:
     - ApiKeyTypeClient
     - ApiKeyTypeWorkspace
     - ApiKeyTypeTarget
-  build.BuildState:
+  models.BuildState:
     enum:
     - pending-run
     - running
@@ -1930,7 +1938,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/WorkspaceViewDTO'
+            $ref: '#/definitions/Workspace'
       summary: Create a workspace
       tags:
       - workspace

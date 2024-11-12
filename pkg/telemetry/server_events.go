@@ -9,8 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/models"
 )
 
 type ServerEvent string
@@ -43,7 +42,7 @@ const (
 	ServerEventWorkspaceStopError    ServerEvent = "server_workspace_stopped_error"
 )
 
-func NewTargetEventProps(ctx context.Context, target *target.Target) map[string]interface{} {
+func NewTargetEventProps(ctx context.Context, target *models.Target) map[string]interface{} {
 	props := map[string]interface{}{}
 
 	sessionId := SessionId(ctx)
@@ -62,12 +61,15 @@ func NewTargetEventProps(ctx context.Context, target *target.Target) map[string]
 	return props
 }
 
-func NewWorkspaceEventProps(ctx context.Context, workspace *workspace.Workspace) map[string]interface{} {
+func NewWorkspaceEventProps(ctx context.Context, workspace *models.Workspace) map[string]interface{} {
 	props := map[string]interface{}{}
 
 	if workspace == nil {
 		return props
 	}
+
+	props["workspace_provider"] = workspace.Target.ProviderInfo.Name
+	props["workspace_provider_version"] = workspace.Target.ProviderInfo.Version
 
 	if isImagePublic(workspace.Image) {
 		props["workspace_image"] = workspace.Image

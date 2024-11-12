@@ -43,7 +43,7 @@ func ListTargets(targetList []apiclient.TargetDTO, verbose bool, activeProfileNa
 			Name:           target.Name,
 			Provider:       provider,
 			Default:        target.Default,
-			WorkspaceCount: fmt.Sprintf("%d", target.WorkspaceCount),
+			WorkspaceCount: fmt.Sprintf("%d", len(target.Workspaces)),
 			Options:        target.Options,
 		}
 

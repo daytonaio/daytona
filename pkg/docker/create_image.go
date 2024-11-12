@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	log "github.com/sirupsen/logrus"
@@ -79,7 +79,7 @@ func (d *DockerClient) initWorkspaceContainer(opts *CreateWorkspaceOptions) erro
 	return nil
 }
 
-func GetContainerCreateConfig(workspace *workspace.Workspace) *container.Config {
+func GetContainerCreateConfig(workspace *models.Workspace) *container.Config {
 	envVars := []string{}
 
 	for key, value := range workspace.EnvVars {

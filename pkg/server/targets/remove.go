@@ -7,22 +7,22 @@ import (
 	"context"
 
 	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	log "github.com/sirupsen/logrus"
 )
 
 func (s *TargetService) RemoveTarget(ctx context.Context, targetId string) error {
-	target, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &targetId})
+	target, err := s.targetStore.Find(&TargetFilter{IdOrName: &targetId})
 	if err != nil {
-		return s.handleRemoveError(ctx, &target.Target, ErrTargetNotFound)
+		return s.handleRemoveError(ctx, target, ErrTargetNotFound)
 	}
 
 	log.Infof("Destroying target %s", target.Id)
 
-	err = s.provisioner.DestroyTarget(&target.Target)
+	err = s.provisioner.DestroyTarget(target)
 	if err != nil {
-		return s.handleRemoveError(ctx, &target.Target, err)
+		return s.handleRemoveError(ctx, target, err)
 	}
 
 	// Should not fail the whole operation if the API key cannot be revoked
@@ -38,21 +38,21 @@ func (s *TargetService) RemoveTarget(ctx context.Context, targetId string) error
 		log.Error(err)
 	}
 
-	err = s.targetStore.Delete(&target.Target)
+	err = s.targetStore.Delete(target)
 
-	return s.handleRemoveError(ctx, &target.Target, err)
+	return s.handleRemoveError(ctx, target, err)
 }
 
 // ForceRemoveTarget ignores provider errors and makes sure the target is removed from storage.
 func (s *TargetService) ForceRemoveTarget(ctx context.Context, targetId string) error {
-	target, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &targetId})
+	target, err := s.targetStore.Find(&TargetFilter{IdOrName: &targetId})
 	if err != nil {
 		return s.handleRemoveError(ctx, nil, ErrTargetNotFound)
 	}
 
 	log.Infof("Destroying target %s", target.Id)
 
-	err = s.provisioner.DestroyTarget(&target.Target)
+	err = s.provisioner.DestroyTarget(target)
 	if err != nil {
 		log.Error(err)
 	}
@@ -62,12 +62,12 @@ func (s *TargetService) ForceRemoveTarget(ctx context.Context, targetId string) 
 		log.Error(err)
 	}
 
-	err = s.targetStore.Delete(&target.Target)
+	err = s.targetStore.Delete(target)
 
-	return s.handleRemoveError(ctx, &target.Target, err)
+	return s.handleRemoveError(ctx, target, err)
 }
 
-func (s *TargetService) handleRemoveError(ctx context.Context, target *target.Target, err error) error {
+func (s *TargetService) handleRemoveError(ctx context.Context, target *models.Target, err error) error {
 	if !telemetry.TelemetryEnabled(ctx) {
 		return err
 	}

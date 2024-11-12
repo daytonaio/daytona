@@ -4,12 +4,11 @@
 package provisioner
 
 import (
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provider"
-	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
-func (p *Provisioner) DestroyTarget(t *target.Target) error {
+func (p *Provisioner) DestroyTarget(t *models.Target) error {
 	targetProvider, err := p.providerManager.GetProvider(t.ProviderInfo.Name)
 	if err != nil {
 		return err
@@ -22,14 +21,13 @@ func (p *Provisioner) DestroyTarget(t *target.Target) error {
 	return err
 }
 
-func (p *Provisioner) DestroyWorkspace(ws *workspace.Workspace, t *target.Target) error {
-	targetProvider, err := p.providerManager.GetProvider(t.ProviderInfo.Name)
+func (p *Provisioner) DestroyWorkspace(ws *models.Workspace) error {
+	targetProvider, err := p.providerManager.GetProvider(ws.Target.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
 	_, err = (*targetProvider).DestroyWorkspace(&provider.WorkspaceRequest{
-		Target:    t,
 		Workspace: ws,
 	})
 

@@ -24,7 +24,7 @@ type ApiKey struct {
 	KeyHash string `json:"keyHash"`
 	// Workspace or client name
 	Name string           `json:"name"`
-	Type ApikeyApiKeyType `json:"type"`
+	Type ModelsApiKeyType `json:"type"`
 }
 
 type _ApiKey ApiKey
@@ -33,7 +33,7 @@ type _ApiKey ApiKey
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewApiKey(keyHash string, name string, type_ ApikeyApiKeyType) *ApiKey {
+func NewApiKey(keyHash string, name string, type_ ModelsApiKeyType) *ApiKey {
 	this := ApiKey{}
 	this.KeyHash = keyHash
 	this.Name = name
@@ -98,9 +98,9 @@ func (o *ApiKey) SetName(v string) {
 }
 
 // GetType returns the Type field value
-func (o *ApiKey) GetType() ApikeyApiKeyType {
+func (o *ApiKey) GetType() ModelsApiKeyType {
 	if o == nil {
-		var ret ApikeyApiKeyType
+		var ret ModelsApiKeyType
 		return ret
 	}
 
@@ -109,7 +109,7 @@ func (o *ApiKey) GetType() ApikeyApiKeyType {
 
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
-func (o *ApiKey) GetTypeOk() (*ApikeyApiKeyType, bool) {
+func (o *ApiKey) GetTypeOk() (*ModelsApiKeyType, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -117,7 +117,7 @@ func (o *ApiKey) GetTypeOk() (*ApikeyApiKeyType, bool) {
 }
 
 // SetType sets field value
-func (o *ApiKey) SetType(v ApikeyApiKeyType) {
+func (o *ApiKey) SetType(v ModelsApiKeyType) {
 	o.Type = v
 }
 

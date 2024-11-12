@@ -4,10 +4,7 @@
 package provider
 
 import (
-	"github.com/daytonaio/daytona/pkg/containerregistry"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/models"
 )
 
 type InitializeProviderRequest struct {
@@ -26,16 +23,21 @@ type InitializeProviderRequest struct {
 }
 
 type TargetRequest struct {
-	Target *target.Target
+	Target *models.Target
 }
 
 type WorkspaceRequest struct {
-	Target                   *target.Target
-	ContainerRegistry        *containerregistry.ContainerRegistry
-	Workspace                *workspace.Workspace
-	GitProviderConfig        *gitprovider.GitProviderConfig
 	BuilderImage             string
-	BuilderContainerRegistry *containerregistry.ContainerRegistry
+	BuilderContainerRegistry *models.ContainerRegistry
+	ContainerRegistry        *models.ContainerRegistry
+	Workspace                *models.Workspace
+	GitProviderConfig        *models.GitProviderConfig
+}
+
+type ProviderInfo struct {
+	Name    string  `json:"name" validate:"required"`
+	Label   *string `json:"label" validate:"optional"`
+	Version string  `json:"version" validate:"required"`
 }
 
 type TargetConfig struct {
