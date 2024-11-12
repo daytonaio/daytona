@@ -6,21 +6,22 @@
 package containerregistries
 
 import (
-	"github.com/daytonaio/daytona/pkg/containerregistry"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 )
 
 type InMemoryContainerRegistryStore struct {
-	crs map[string]*containerregistry.ContainerRegistry
+	crs map[string]*models.ContainerRegistry
 }
 
-func NewInMemoryContainerRegistryStore() containerregistry.Store {
+func NewInMemoryContainerRegistryStore() containerregistries.ContainerRegistryStore {
 	return &InMemoryContainerRegistryStore{
-		crs: make(map[string]*containerregistry.ContainerRegistry),
+		crs: make(map[string]*models.ContainerRegistry),
 	}
 }
 
-func (s *InMemoryContainerRegistryStore) List() ([]*containerregistry.ContainerRegistry, error) {
-	crs := []*containerregistry.ContainerRegistry{}
+func (s *InMemoryContainerRegistryStore) List() ([]*models.ContainerRegistry, error) {
+	crs := []*models.ContainerRegistry{}
 	for _, cr := range s.crs {
 		crs = append(crs, cr)
 	}
@@ -28,24 +29,24 @@ func (s *InMemoryContainerRegistryStore) List() ([]*containerregistry.ContainerR
 	return crs, nil
 }
 
-func (s *InMemoryContainerRegistryStore) Find(server string) (*containerregistry.ContainerRegistry, error) {
+func (s *InMemoryContainerRegistryStore) Find(server string) (*models.ContainerRegistry, error) {
 	cr, ok := s.crs[server]
 	if !ok {
-		return nil, containerregistry.ErrContainerRegistryNotFound
+		return nil, containerregistries.ErrContainerRegistryNotFound
 	}
 
 	return cr, nil
 }
 
-func (s *InMemoryContainerRegistryStore) Save(cr *containerregistry.ContainerRegistry) error {
+func (s *InMemoryContainerRegistryStore) Save(cr *models.ContainerRegistry) error {
 	s.crs[cr.Server] = cr
 	return nil
 }
 
-func (s *InMemoryContainerRegistryStore) Delete(cr *containerregistry.ContainerRegistry) error {
+func (s *InMemoryContainerRegistryStore) Delete(cr *models.ContainerRegistry) error {
 	_, ok := s.crs[cr.Server]
 	if !ok {
-		return containerregistry.ErrContainerRegistryNotFound
+		return containerregistries.ErrContainerRegistryNotFound
 	}
 	delete(s.crs, cr.Server)
 	return nil

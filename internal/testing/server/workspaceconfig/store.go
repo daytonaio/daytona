@@ -8,48 +8,49 @@ package workspaceconfig
 import (
 	"fmt"
 
-	"github.com/daytonaio/daytona/pkg/workspace/config"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/server/workspaceconfigs"
 )
 
 type InMemoryWorkspaceConfigStore struct {
-	workspaceConfigs map[string]*config.WorkspaceConfig
+	workspaceConfigs map[string]*models.WorkspaceConfig
 }
 
-func NewInMemoryWorkspaceConfigStore() config.Store {
+func NewInMemoryWorkspaceConfigStore() workspaceconfigs.WorkspaceConfigStore {
 	return &InMemoryWorkspaceConfigStore{
-		workspaceConfigs: make(map[string]*config.WorkspaceConfig),
+		workspaceConfigs: make(map[string]*models.WorkspaceConfig),
 	}
 }
 
-func (s *InMemoryWorkspaceConfigStore) List(filter *config.WorkspaceConfigFilter) ([]*config.WorkspaceConfig, error) {
+func (s *InMemoryWorkspaceConfigStore) List(filter *workspaceconfigs.WorkspaceConfigFilter) ([]*models.WorkspaceConfig, error) {
 	return s.processFilters(filter)
 }
 
-func (s *InMemoryWorkspaceConfigStore) Find(filter *config.WorkspaceConfigFilter) (*config.WorkspaceConfig, error) {
+func (s *InMemoryWorkspaceConfigStore) Find(filter *workspaceconfigs.WorkspaceConfigFilter) (*models.WorkspaceConfig, error) {
 	workspaceConfigs, err := s.processFilters(filter)
 	if err != nil {
 		return nil, err
 	}
 	if len(workspaceConfigs) == 0 {
-		return nil, config.ErrWorkspaceConfigNotFound
+		return nil, workspaceconfigs.ErrWorkspaceConfigNotFound
 	}
 
 	return workspaceConfigs[0], nil
 }
 
-func (s *InMemoryWorkspaceConfigStore) Save(workspaceConfig *config.WorkspaceConfig) error {
+func (s *InMemoryWorkspaceConfigStore) Save(workspaceConfig *models.WorkspaceConfig) error {
 	s.workspaceConfigs[workspaceConfig.Name] = workspaceConfig
 	return nil
 }
 
-func (s *InMemoryWorkspaceConfigStore) Delete(workspaceConfig *config.WorkspaceConfig) error {
+func (s *InMemoryWorkspaceConfigStore) Delete(workspaceConfig *models.WorkspaceConfig) error {
 	delete(s.workspaceConfigs, workspaceConfig.Name)
 	return nil
 }
 
-func (s *InMemoryWorkspaceConfigStore) processFilters(filter *config.WorkspaceConfigFilter) ([]*config.WorkspaceConfig, error) {
-	var result []*config.WorkspaceConfig
-	filteredWorkspaceConfigs := make(map[string]*config.WorkspaceConfig)
+func (s *InMemoryWorkspaceConfigStore) processFilters(filter *workspaceconfigs.WorkspaceConfigFilter) ([]*models.WorkspaceConfig, error) {
+	var result []*models.WorkspaceConfig
+	filteredWorkspaceConfigs := make(map[string]*models.WorkspaceConfig)
 	for k, v := range s.workspaceConfigs {
 		filteredWorkspaceConfigs[k] = v
 	}
@@ -58,9 +59,9 @@ func (s *InMemoryWorkspaceConfigStore) processFilters(filter *config.WorkspaceCo
 		if filter.Name != nil {
 			workspaceConfig, ok := s.workspaceConfigs[*filter.Name]
 			if ok {
-				return []*config.WorkspaceConfig{workspaceConfig}, nil
+				return []*models.WorkspaceConfig{workspaceConfig}, nil
 			} else {
-				return []*config.WorkspaceConfig{}, fmt.Errorf("workspace config with name %s not found", *filter.Name)
+				return []*models.WorkspaceConfig{}, fmt.Errorf("workspace config with name %s not found", *filter.Name)
 			}
 		}
 		if filter.Url != nil {

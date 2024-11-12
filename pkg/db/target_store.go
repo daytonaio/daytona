@@ -6,8 +6,8 @@ package db
 import (
 	"gorm.io/gorm"
 
-	. "github.com/daytonaio/daytona/pkg/db/dto"
-	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/server/targets"
 )
 
 type TargetStore struct {
@@ -15,7 +15,7 @@ type TargetStore struct {
 }
 
 func NewTargetStore(db *gorm.DB) (*TargetStore, error) {
-	err := db.AutoMigrate(&TargetDTO{})
+	err := db.AutoMigrate(&models.Target{})
 	if err != nil {
 		return nil, err
 	}
@@ -23,51 +23,35 @@ func NewTargetStore(db *gorm.DB) (*TargetStore, error) {
 	return &TargetStore{db: db}, nil
 }
 
-func (s *TargetStore) List(filter *target.TargetFilter) ([]*target.TargetViewDTO, error) {
-	targetDTOs := []TargetDTO{}
+func (s *TargetStore) List(filter *targets.TargetFilter) ([]*models.Target, error) {
+	targets := []*models.Target{}
 
-	tx := processTargetFilters(s.db, filter).Preload("Workspaces").Find(&targetDTOs)
+	tx := processTargetFilters(s.db, filter).Preload("Workspaces").Find(&targets)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-
-	targetViewDTOs := []*target.TargetViewDTO{}
-	for _, targetDTO := range targetDTOs {
-		viewDTO := &target.TargetViewDTO{
-			Target:         *ToTarget(targetDTO),
-			WorkspaceCount: len(targetDTO.Workspaces),
-		}
-		targetViewDTOs = append(targetViewDTOs, viewDTO)
-	}
-
-	return targetViewDTOs, nil
+	return targets, nil
 }
 
-func (s *TargetStore) Find(filter *target.TargetFilter) (*target.TargetViewDTO, error) {
-	targetDTO := TargetDTO{}
+func (s *TargetStore) Find(filter *targets.TargetFilter) (*models.Target, error) {
+	tg := &models.Target{}
 
-	tx := processTargetFilters(s.db, filter).Preload("Workspaces").First(&targetDTO)
+	tx := processTargetFilters(s.db, filter).Preload("Workspaces").First(tg)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
-			return nil, target.ErrTargetNotFound
+			return nil, targets.ErrTargetNotFound
 		}
 		return nil, tx.Error
 	}
-
-	targetViewDTO := &target.TargetViewDTO{
-		Target:         *ToTarget(targetDTO),
-		WorkspaceCount: len(targetDTO.Workspaces),
-	}
-
-	return targetViewDTO, nil
+	return tg, nil
 }
 
-func (s *TargetStore) Save(target *target.Target) error {
-	tx := s.db.Save(ToTargetDTO(target))
+func (s *TargetStore) Save(target *models.Target) error {
+	tx := s.db.Save(target)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -75,19 +59,19 @@ func (s *TargetStore) Save(target *target.Target) error {
 	return nil
 }
 
-func (s *TargetStore) Delete(t *target.Target) error {
-	tx := s.db.Delete(ToTargetDTO(t))
+func (s *TargetStore) Delete(t *models.Target) error {
+	tx := s.db.Delete(t)
 	if tx.Error != nil {
 		return tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		return target.ErrTargetNotFound
+		return targets.ErrTargetNotFound
 	}
 
 	return nil
 }
 
-func processTargetFilters(tx *gorm.DB, filter *target.TargetFilter) *gorm.DB {
+func processTargetFilters(tx *gorm.DB, filter *targets.TargetFilter) *gorm.DB {
 	if filter != nil {
 		if filter.IdOrName != nil {
 			tx = tx.Where("id = ? OR name = ?", *filter.IdOrName, *filter.IdOrName)

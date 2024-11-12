@@ -10,11 +10,11 @@ import (
 	"strconv"
 
 	"github.com/daytonaio/daytona/pkg/api/controllers/build/dto"
-	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/server"
+	"github.com/daytonaio/daytona/pkg/server/builds"
 	builds_dto "github.com/daytonaio/daytona/pkg/server/builds/dto"
-	"github.com/daytonaio/daytona/pkg/workspace/config"
+	"github.com/daytonaio/daytona/pkg/server/workspaceconfigs"
 	"github.com/gin-gonic/gin"
 )
 
@@ -39,7 +39,7 @@ func CreateBuild(ctx *gin.Context) {
 
 	s := server.GetInstance(nil)
 
-	workspaceConfig, err := s.WorkspaceConfigService.Find(&config.WorkspaceConfigFilter{
+	workspaceConfig, err := s.WorkspaceConfigService.Find(&workspaceconfigs.WorkspaceConfigFilter{
 		Name: &createBuildDto.WorkspaceConfigName,
 	})
 	if err != nil {
@@ -99,12 +99,12 @@ func GetBuild(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	b, err := server.BuildService.Find(&build.Filter{
+	b, err := server.BuildService.Find(&builds.BuildFilter{
 		Id: &buildId,
 	})
 	if err != nil {
 		statusCode := http.StatusInternalServerError
-		if build.IsBuildNotFound(err) {
+		if builds.IsBuildNotFound(err) {
 			statusCode = http.StatusNotFound
 		}
 		ctx.AbortWithError(statusCode, fmt.Errorf("failed to find build: %w", err))
@@ -200,7 +200,7 @@ func DeleteBuild(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	errs := server.BuildService.MarkForDeletion(&build.Filter{
+	errs := server.BuildService.MarkForDeletion(&builds.BuildFilter{
 		Id: &buildId,
 	}, force)
 	if len(errs) > 0 {
@@ -242,7 +242,7 @@ func DeleteBuildsFromPrebuild(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
 	// Fail if prebuild does not exist
-	_, err = server.WorkspaceConfigService.FindPrebuild(nil, &config.PrebuildFilter{
+	_, err = server.WorkspaceConfigService.FindPrebuild(nil, &workspaceconfigs.PrebuildFilter{
 		Id: &prebuildId,
 	})
 	if err != nil {
@@ -250,7 +250,7 @@ func DeleteBuildsFromPrebuild(ctx *gin.Context) {
 		return
 	}
 
-	errs := server.BuildService.MarkForDeletion(&build.Filter{
+	errs := server.BuildService.MarkForDeletion(&builds.BuildFilter{
 		PrebuildIds: &[]string{prebuildId},
 	}, force)
 	if len(errs) > 0 {

@@ -11,6 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/build/detect"
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 )
@@ -27,7 +28,7 @@ type DevcontainerBuilder struct {
 	builderDockerPort uint16
 }
 
-func (b *DevcontainerBuilder) Build(build Build) (string, string, error) {
+func (b *DevcontainerBuilder) Build(build models.Build) (string, string, error) {
 	builderType, err := detect.DetectWorkspaceBuilderType(build.BuildConfig, b.workspaceDir, nil)
 	if err != nil {
 		return "", "", err
@@ -44,7 +45,7 @@ func (b *DevcontainerBuilder) CleanUp() error {
 	return os.RemoveAll(b.workspaceDir)
 }
 
-func (b *DevcontainerBuilder) Publish(build Build) error {
+func (b *DevcontainerBuilder) Publish(build models.Build) error {
 	buildLogger := b.loggerFactory.CreateBuildLogger(build.Id, logs.LogSourceBuilder)
 	defer buildLogger.Close()
 
@@ -64,7 +65,7 @@ func (b *DevcontainerBuilder) Publish(build Build) error {
 	return dockerClient.PushImage(*build.Image, b.containerRegistry, buildLogger)
 }
 
-func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, error) {
+func (b *DevcontainerBuilder) buildDevcontainer(build models.Build) (string, string, error) {
 	buildLogger := b.loggerFactory.CreateBuildLogger(build.Id, logs.LogSourceBuilder)
 	defer buildLogger.Close()
 

@@ -22,6 +22,7 @@ var _ MappedNullable = &ProfileData{}
 // ProfileData struct for ProfileData
 type ProfileData struct {
 	EnvVars map[string]string `json:"envVars"`
+	Id      string            `json:"id"`
 }
 
 type _ProfileData ProfileData
@@ -30,9 +31,10 @@ type _ProfileData ProfileData
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProfileData(envVars map[string]string) *ProfileData {
+func NewProfileData(envVars map[string]string, id string) *ProfileData {
 	this := ProfileData{}
 	this.EnvVars = envVars
+	this.Id = id
 	return &this
 }
 
@@ -68,6 +70,30 @@ func (o *ProfileData) SetEnvVars(v map[string]string) {
 	o.EnvVars = v
 }
 
+// GetId returns the Id field value
+func (o *ProfileData) GetId() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Id
+}
+
+// GetIdOk returns a tuple with the Id field value
+// and a boolean to check if the value has been set.
+func (o *ProfileData) GetIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Id, true
+}
+
+// SetId sets field value
+func (o *ProfileData) SetId(v string) {
+	o.Id = v
+}
+
 func (o ProfileData) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -79,6 +105,7 @@ func (o ProfileData) MarshalJSON() ([]byte, error) {
 func (o ProfileData) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["envVars"] = o.EnvVars
+	toSerialize["id"] = o.Id
 	return toSerialize, nil
 }
 
@@ -88,6 +115,7 @@ func (o *ProfileData) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"envVars",
+		"id",
 	}
 
 	allProperties := make(map[string]interface{})

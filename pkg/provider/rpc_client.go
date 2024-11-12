@@ -6,9 +6,8 @@ package provider
 import (
 	"net/rpc"
 
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provider/util"
-	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
 type ProviderRPCClient struct {
@@ -59,8 +58,8 @@ func (m *ProviderRPCClient) DestroyTarget(targetReq *TargetRequest) (*util.Empty
 	return new(util.Empty), err
 }
 
-func (m *ProviderRPCClient) GetTargetInfo(targetReq *TargetRequest) (*target.TargetInfo, error) {
-	var response target.TargetInfo
+func (m *ProviderRPCClient) GetTargetInfo(targetReq *TargetRequest) (*models.TargetInfo, error) {
+	var response models.TargetInfo
 	err := m.client.Call("Plugin.GetTargetInfo", targetReq, &response)
 	return &response, err
 }
@@ -85,8 +84,8 @@ func (m *ProviderRPCClient) DestroyWorkspace(workspaceReq *WorkspaceRequest) (*u
 	return new(util.Empty), err
 }
 
-func (m *ProviderRPCClient) GetWorkspaceInfo(workspaceReq *WorkspaceRequest) (*workspace.WorkspaceInfo, error) {
-	var resp workspace.WorkspaceInfo
+func (m *ProviderRPCClient) GetWorkspaceInfo(workspaceReq *WorkspaceRequest) (*models.WorkspaceInfo, error) {
+	var resp models.WorkspaceInfo
 	err := m.client.Call("Plugin.GetWorkspaceInfo", workspaceReq, &resp)
 	return &resp, err
 }

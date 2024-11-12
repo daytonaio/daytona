@@ -7,7 +7,7 @@ package mocks
 
 import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/stretchr/testify/mock"
 )
@@ -31,14 +31,14 @@ func (m *MockGitService) RepositoryExists() (bool, error) {
 	return args.Bool(0), args.Error(1)
 }
 
-func (m *MockGitService) SetGitConfig(userData *gitprovider.GitUser, providerConfig *gitprovider.GitProviderConfig) error {
+func (m *MockGitService) SetGitConfig(userData *gitprovider.GitUser, providerConfig *models.GitProviderConfig) error {
 	args := m.Called(userData, providerConfig)
 	return args.Error(0)
 }
 
-func (m *MockGitService) GetGitStatus() (*workspace.GitStatus, error) {
+func (m *MockGitService) GetGitStatus() (*models.GitStatus, error) {
 	args := m.Called()
-	return args.Get(0).(*workspace.GitStatus), args.Error(1)
+	return args.Get(0).(*models.GitStatus), args.Error(1)
 }
 
 func NewMockGitService() *MockGitService {

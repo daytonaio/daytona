@@ -10,15 +10,17 @@ import (
 	git_mocks "github.com/daytonaio/daytona/internal/testing/git/mocks"
 	builder_mocks "github.com/daytonaio/daytona/internal/testing/server/targets/mocks"
 	"github.com/daytonaio/daytona/pkg/build"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/server/builds"
 	"github.com/stretchr/testify/suite"
 )
 
-var expectedBuilds []*build.Build
+var expectedBuilds []*models.Build
 
 type BuilderTestSuite struct {
 	suite.Suite
 	mockGitService *git_mocks.MockGitService
-	mockBuildStore build.Store
+	mockBuildStore builds.BuildStore
 	builder        build.IBuilder
 }
 

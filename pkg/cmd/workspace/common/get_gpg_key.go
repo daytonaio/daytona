@@ -8,7 +8,7 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/models"
 )
 
 func GetGitProviderGpgKey(apiClient *apiclient.APIClient, ctx context.Context, providerConfigId *string) (string, error) {
@@ -16,7 +16,7 @@ func GetGitProviderGpgKey(apiClient *apiclient.APIClient, ctx context.Context, p
 		return "", nil
 	}
 
-	var providerConfig *gitprovider.GitProviderConfig
+	var providerConfig *models.GitProviderConfig
 	var gpgKey string
 
 	gitProvider, res, err := apiClient.GitProviderAPI.GetGitProvider(ctx, *providerConfigId).Execute()
@@ -26,13 +26,13 @@ func GetGitProviderGpgKey(apiClient *apiclient.APIClient, ctx context.Context, p
 
 	// Extract GPG key if present
 	if gitProvider != nil {
-		providerConfig = &gitprovider.GitProviderConfig{
-			SigningMethod: (*gitprovider.SigningMethod)(gitProvider.SigningMethod),
+		providerConfig = &models.GitProviderConfig{
+			SigningMethod: (*models.SigningMethod)(gitProvider.SigningMethod),
 			SigningKey:    gitProvider.SigningKey,
 		}
 
 		if providerConfig.SigningMethod != nil && providerConfig.SigningKey != nil {
-			if *providerConfig.SigningMethod == gitprovider.SigningMethodGPG {
+			if *providerConfig.SigningMethod == models.SigningMethodGPG {
 				gpgKey = *providerConfig.SigningKey
 			}
 		}

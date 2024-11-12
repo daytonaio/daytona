@@ -7,39 +7,33 @@ import (
 	"context"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/telemetry"
-	"github.com/daytonaio/daytona/pkg/workspace"
 	log "github.com/sirupsen/logrus"
 )
 
 func (s *WorkspaceService) StopWorkspace(ctx context.Context, workspaceId string) error {
 	ws, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
-		return s.handleStopError(ctx, &ws.Workspace, ErrWorkspaceNotFound)
-	}
-
-	target, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &ws.TargetId})
-	if err != nil {
-		return s.handleStopError(ctx, &ws.Workspace, err)
+		return s.handleStopError(ctx, ws, ErrWorkspaceNotFound)
 	}
 
 	//	todo: go routines
-	err = s.provisioner.StopWorkspace(&ws.Workspace, &target.Target)
+	err = s.provisioner.StopWorkspace(ws)
 	if err != nil {
-		return s.handleStopError(ctx, &ws.Workspace, err)
+		return s.handleStopError(ctx, ws, err)
 	}
 	if ws.State != nil {
 		ws.State.Uptime = 0
 		ws.State.UpdatedAt = time.Now().Format(time.RFC1123)
 	}
 
-	err = s.workspaceStore.Save(&ws.Workspace)
+	err = s.workspaceStore.Save(ws)
 
-	return s.handleStopError(ctx, &ws.Workspace, err)
+	return s.handleStopError(ctx, ws, err)
 }
 
-func (s *WorkspaceService) handleStopError(ctx context.Context, w *workspace.Workspace, err error) error {
+func (s *WorkspaceService) handleStopError(ctx context.Context, w *models.Workspace, err error) error {
 	if !telemetry.TelemetryEnabled(ctx) {
 		return err
 	}

@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 **Image** | Pointer to **string** |  | [optional] 
 **PrebuildId** | **string** |  | 
 **Repository** | [**GitRepository**](GitRepository.md) |  | 
-**State** | [**BuildBuildState**](BuildBuildState.md) |  | 
+**State** | [**ModelsBuildState**](ModelsBuildState.md) |  | 
 **UpdatedAt** | **string** |  | 
 **User** | Pointer to **string** |  | [optional] 
 
@@ -20,7 +20,7 @@ Name | Type | Description | Notes
 
 ### NewBuild
 
-`func NewBuild(containerConfig ContainerConfig, createdAt string, envVars map[string]string, id string, prebuildId string, repository GitRepository, state BuildBuildState, updatedAt string, ) *Build`
+`func NewBuild(containerConfig ContainerConfig, createdAt string, envVars map[string]string, id string, prebuildId string, repository GitRepository, state ModelsBuildState, updatedAt string, ) *Build`
 
 NewBuild instantiates a new Build object
 This constructor will assign default values to properties that have it defined,
@@ -207,20 +207,20 @@ SetRepository sets Repository field to given value.
 
 ### GetState
 
-`func (o *Build) GetState() BuildBuildState`
+`func (o *Build) GetState() ModelsBuildState`
 
 GetState returns the State field if non-nil, zero value otherwise.
 
 ### GetStateOk
 
-`func (o *Build) GetStateOk() (*BuildBuildState, bool)`
+`func (o *Build) GetStateOk() (*ModelsBuildState, bool)`
 
 GetStateOk returns a tuple with the State field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetState
 
-`func (o *Build) SetState(v BuildBuildState)`
+`func (o *Build) SetState(v ModelsBuildState)`
 
 SetState sets State field to given value.
 

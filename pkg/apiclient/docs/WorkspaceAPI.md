@@ -16,7 +16,7 @@ Method | HTTP request | Description
 
 ## CreateWorkspace
 
-> WorkspaceViewDTO CreateWorkspace(ctx).Workspace(workspace).Execute()
+> Workspace CreateWorkspace(ctx).Workspace(workspace).Execute()
 
 Create a workspace
 
@@ -44,7 +44,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.CreateWorkspace``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `CreateWorkspace`: WorkspaceViewDTO
+	// response from `CreateWorkspace`: Workspace
 	fmt.Fprintf(os.Stdout, "Response from `WorkspaceAPI.CreateWorkspace`: %v\n", resp)
 }
 ```
@@ -64,7 +64,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**WorkspaceViewDTO**](WorkspaceViewDTO.md)
+[**Workspace**](Workspace.md)
 
 ### Authorization
 

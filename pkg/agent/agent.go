@@ -19,6 +19,7 @@ import (
 	agent_config "github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	log "github.com/sirupsen/logrus"
 )
@@ -106,10 +107,10 @@ func (a *Agent) startWorkspaceMode() error {
 		}
 	}
 
-	var providerConfig *gitprovider.GitProviderConfig
+	var providerConfig *models.GitProviderConfig
 	if gitProvider != nil {
-		providerConfig = &gitprovider.GitProviderConfig{
-			SigningMethod: (*gitprovider.SigningMethod)(gitProvider.SigningMethod),
+		providerConfig = &models.GitProviderConfig{
+			SigningMethod: (*models.SigningMethod)(gitProvider.SigningMethod),
 			SigningKey:    gitProvider.SigningKey,
 		}
 	}
