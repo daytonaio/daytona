@@ -13,8 +13,8 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/api/controllers"
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider/dto"
-	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
@@ -25,12 +25,12 @@ import (
 //	@Summary		List Git providers
 //	@Description	List Git providers
 //	@Produce		json
-//	@Success		200	{array}	gitprovider.GitProviderConfig
+//	@Success		200	{array}	models.GitProviderConfig
 //	@Router			/gitprovider [get]
 //
 //	@id				ListGitProviders
 func ListGitProviders(ctx *gin.Context) {
-	var response []*gitprovider.GitProviderConfig
+	var response []*models.GitProviderConfig
 
 	server := server.GetInstance(nil)
 
@@ -55,7 +55,7 @@ func ListGitProviders(ctx *gin.Context) {
 //	@Description	List Git providers for url
 //	@Produce		json
 //	@Param			url	path	string	true	"Url"
-//	@Success		200	{array}	gitprovider.GitProviderConfig
+//	@Success		200	{array}	models.GitProviderConfig
 //	@Router			/gitprovider/for-url/{url} [get]
 //
 //	@id				ListGitProvidersForUrl
@@ -77,7 +77,7 @@ func ListGitProvidersForUrl(ctx *gin.Context) {
 	}
 
 	apiKeyType, ok := ctx.Get("apiKeyType")
-	if !ok || apiKeyType == apikey.ApiKeyTypeClient {
+	if !ok || apiKeyType == models.ApiKeyTypeClient {
 		for _, gitProvider := range gitProviders {
 			gitProvider.Token = ""
 		}
@@ -93,7 +93,7 @@ func ListGitProvidersForUrl(ctx *gin.Context) {
 //	@Description	Get Git provider
 //	@Produce		plain
 //	@Param			gitProviderId	path		string	true	"ID"
-//	@Success		200				{object}	gitprovider.GitProviderConfig
+//	@Success		200				{object}	models.GitProviderConfig
 //	@Router			/gitprovider/{gitProviderId} [get]
 //
 //	@id				GetGitProvider
@@ -113,7 +113,7 @@ func GetGitProvider(ctx *gin.Context) {
 	}
 
 	apiKeyType, ok := ctx.Get("apiKeyType")
-	if !ok || apiKeyType == apikey.ApiKeyTypeClient {
+	if !ok || apiKeyType == models.ApiKeyTypeClient {
 		gitProvider.Token = ""
 	}
 
@@ -175,7 +175,7 @@ func SetGitProvider(ctx *gin.Context) {
 		return
 	}
 
-	gitProviderConfig := gitprovider.GitProviderConfig{
+	gitProviderConfig := models.GitProviderConfig{
 		Id:            setConfigDto.Id,
 		ProviderId:    setConfigDto.ProviderId,
 		Token:         setConfigDto.Token,

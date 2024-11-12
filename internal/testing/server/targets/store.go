@@ -8,37 +8,38 @@ package targets
 import (
 	"fmt"
 
-	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/server/targets"
 )
 
 type InMemoryTargetStore struct {
-	targets map[string]*target.Target
+	targets map[string]*models.Target
 }
 
-func NewInMemoryTargetStore() target.Store {
+func NewInMemoryTargetStore() targets.TargetStore {
 	return &InMemoryTargetStore{
-		targets: make(map[string]*target.Target),
+		targets: make(map[string]*models.Target),
 	}
 }
 
-func (s *InMemoryTargetStore) List(filter *target.TargetFilter) ([]*target.TargetViewDTO, error) {
+func (s *InMemoryTargetStore) List(filter *targets.TargetFilter) ([]*models.Target, error) {
 	return s.processFilters(filter)
 }
 
-func (s *InMemoryTargetStore) Find(filter *target.TargetFilter) (*target.TargetViewDTO, error) {
-	targets, err := s.processFilters(filter)
+func (s *InMemoryTargetStore) Find(filter *targets.TargetFilter) (*models.Target, error) {
+	t, err := s.processFilters(filter)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(targets) == 0 {
-		return nil, target.ErrTargetNotFound
+	if len(t) == 0 {
+		return nil, targets.ErrTargetNotFound
 	}
 
-	return targets[0], nil
+	return t[0], nil
 }
 
-func (s *InMemoryTargetStore) Save(target *target.Target) error {
+func (s *InMemoryTargetStore) Save(target *models.Target) error {
 	tg := *target
 	tg.EnvVars = nil
 	tg.ApiKey = ""
@@ -47,27 +48,25 @@ func (s *InMemoryTargetStore) Save(target *target.Target) error {
 	return nil
 }
 
-func (s *InMemoryTargetStore) Delete(target *target.Target) error {
+func (s *InMemoryTargetStore) Delete(target *models.Target) error {
 	delete(s.targets, target.Id)
 	return nil
 }
 
-func (s *InMemoryTargetStore) processFilters(filter *target.TargetFilter) ([]*target.TargetViewDTO, error) {
-	var result []*target.TargetViewDTO
-	filteredTargets := make(map[string]*target.TargetViewDTO)
+func (s *InMemoryTargetStore) processFilters(filter *targets.TargetFilter) ([]*models.Target, error) {
+	var result []*models.Target
+	filteredTargets := make(map[string]*models.Target)
 	for k, v := range s.targets {
-		filteredTargets[k] = &target.TargetViewDTO{
-			Target: *v,
-		}
+		filteredTargets[k] = v
 	}
 
 	if filter != nil {
 		if filter.IdOrName != nil {
 			t, ok := s.targets[*filter.IdOrName]
 			if ok {
-				return []*target.TargetViewDTO{{Target: *t}}, nil
+				return []*models.Target{t}, nil
 			} else {
-				return []*target.TargetViewDTO{}, fmt.Errorf("target with id or name %s not found", *filter.IdOrName)
+				return []*models.Target{}, fmt.Errorf("target with id or name %s not found", *filter.IdOrName)
 			}
 		}
 		if filter.Default != nil {

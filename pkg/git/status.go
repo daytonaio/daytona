@@ -9,11 +9,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/go-git/go-git/v5"
 )
 
-func (s *Service) GetGitStatus() (*workspace.GitStatus, error) {
+func (s *Service) GetGitStatus() (*models.GitStatus, error) {
 	repo, err := git.PlainOpen(s.WorkspaceDir)
 	if err != nil {
 		return nil, err
@@ -34,9 +34,9 @@ func (s *Service) GetGitStatus() (*workspace.GitStatus, error) {
 		return nil, err
 	}
 
-	files := []*workspace.FileStatus{}
+	files := []*models.FileStatus{}
 	for path, file := range status {
-		files = append(files, &workspace.FileStatus{
+		files = append(files, &models.FileStatus{
 			Name:     path,
 			Extra:    file.Extra,
 			Staging:  MapStatus[file.Staging],
@@ -54,7 +54,7 @@ func (s *Service) GetGitStatus() (*workspace.GitStatus, error) {
 		return nil, err
 	}
 
-	return &workspace.GitStatus{
+	return &models.GitStatus{
 		CurrentBranch:   ref.Name().Short(),
 		Files:           files,
 		BranchPublished: branchPublished,

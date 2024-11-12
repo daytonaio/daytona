@@ -7,22 +7,22 @@ import (
 	"context"
 
 	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
-	"github.com/daytonaio/daytona/pkg/target"
 )
 
 func (s *TargetService) SetDefault(ctx context.Context, id string) error {
-	currentTarget, err := s.GetTarget(ctx, &target.TargetFilter{
+	currentTarget, err := s.GetTarget(ctx, &TargetFilter{
 		IdOrName: &id,
 	}, false)
 	if err != nil || currentTarget == nil {
 		return err
 	}
 
-	defaultTarget, err := s.GetTarget(ctx, &target.TargetFilter{
+	defaultTarget, err := s.GetTarget(ctx, &TargetFilter{
 		Default: util.Pointer(true),
 	}, false)
-	if err != nil && !target.IsTargetNotFound(err) {
+	if err != nil && !IsTargetNotFound(err) {
 		return err
 	}
 
@@ -38,8 +38,8 @@ func (s *TargetService) SetDefault(ctx context.Context, id string) error {
 	return s.targetStore.Save(TargetDtoToTarget(*currentTarget))
 }
 
-func TargetDtoToTarget(targetDto dto.TargetDTO) *target.Target {
-	return &target.Target{
+func TargetDtoToTarget(targetDto dto.TargetDTO) *models.Target {
+	return &models.Target{
 		Id:           targetDto.Id,
 		Name:         targetDto.Name,
 		ProviderInfo: targetDto.ProviderInfo,

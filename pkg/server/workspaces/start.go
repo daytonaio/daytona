@@ -8,72 +8,65 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/daytonaio/daytona/pkg/containerregistry"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provisioner"
-	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/server/containerregistries"
+	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/views"
-	"github.com/daytonaio/daytona/pkg/workspace"
 	log "github.com/sirupsen/logrus"
 )
 
 func (s *WorkspaceService) StartWorkspace(ctx context.Context, workspaceId string) error {
 	ws, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
-		return s.handleStartError(ctx, &ws.Workspace, ErrWorkspaceNotFound)
-	}
-
-	target, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &ws.TargetId})
-	if err != nil {
-		return s.handleStartError(ctx, &ws.Workspace, err)
+		return s.handleStartError(ctx, ws, ErrWorkspaceNotFound)
 	}
 
 	workspaceLogger := s.loggerFactory.CreateWorkspaceLogger(ws.Id, ws.Name, logs.LogSourceServer)
 	defer workspaceLogger.Close()
 
-	workspaceToStart := ws.Workspace
-	workspaceToStart.EnvVars = workspace.GetWorkspaceEnvVars(&ws.Workspace, workspace.WorkspaceEnvVarParams{
+	workspaceToStart := ws
+	workspaceToStart.EnvVars = GetWorkspaceEnvVars(ws, WorkspaceEnvVarParams{
 		ApiUrl:        s.serverApiUrl,
 		ServerUrl:     s.serverUrl,
 		ServerVersion: s.serverVersion,
 		ClientId:      telemetry.ClientId(ctx),
 	}, telemetry.TelemetryEnabled(ctx))
 
-	err = s.startWorkspace(&workspaceToStart, &target.Target, workspaceLogger)
+	err = s.startWorkspace(workspaceToStart, workspaceLogger)
 	if err != nil {
-		return s.handleStartError(ctx, &ws.Workspace, err)
+		return s.handleStartError(ctx, ws, err)
 	}
 
-	return s.handleStartError(ctx, &ws.Workspace, err)
+	return s.handleStartError(ctx, ws, err)
 }
 
-func (s *WorkspaceService) startWorkspace(w *workspace.Workspace, target *target.Target, logger io.Writer) error {
+func (s *WorkspaceService) startWorkspace(w *models.Workspace, logger io.Writer) error {
 	logger.Write([]byte(fmt.Sprintf("Starting workspace %s\n", w.Name)))
 
 	cr, err := s.containerRegistryService.FindByImageName(w.Image)
-	if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
+	if err != nil && !containerregistries.IsContainerRegistryNotFound(err) {
 		return err
 	}
 
 	builderCr, err := s.containerRegistryService.FindByImageName(s.builderImage)
-	if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
+	if err != nil && !containerregistries.IsContainerRegistryNotFound(err) {
 		return err
 	}
 
-	var gc *gitprovider.GitProviderConfig
+	var gc *models.GitProviderConfig
 
 	if w.GitProviderConfigId != nil {
 		gc, err = s.gitProviderService.GetConfig(*w.GitProviderConfigId)
-		if err != nil && !gitprovider.IsGitProviderNotFound(err) {
+		if err != nil && !gitproviders.IsGitProviderNotFound(err) {
 			return err
 		}
 	}
 
 	err = s.provisioner.StartWorkspace(provisioner.WorkspaceParams{
 		Workspace:                     w,
-		Target:                        target,
 		ContainerRegistry:             cr,
 		GitProviderConfig:             gc,
 		BuilderImage:                  s.builderImage,
@@ -88,7 +81,7 @@ func (s *WorkspaceService) startWorkspace(w *workspace.Workspace, target *target
 	return nil
 }
 
-func (s *WorkspaceService) handleStartError(ctx context.Context, w *workspace.Workspace, err error) error {
+func (s *WorkspaceService) handleStartError(ctx context.Context, w *models.Workspace, err error) error {
 	if !telemetry.TelemetryEnabled(ctx) {
 		return err
 	}

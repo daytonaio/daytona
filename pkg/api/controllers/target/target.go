@@ -11,7 +11,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/api/util"
 	"github.com/daytonaio/daytona/pkg/server"
-	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/server/targets"
 	"github.com/gin-gonic/gin"
 )
 
@@ -43,7 +43,7 @@ func GetTarget(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	t, err := server.TargetService.GetTarget(ctx.Request.Context(), &target.TargetFilter{IdOrName: &targetId}, verbose)
+	t, err := server.TargetService.GetTarget(ctx.Request.Context(), &targets.TargetFilter{IdOrName: &targetId}, verbose)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get target: %w", err))
 		return

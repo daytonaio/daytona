@@ -12,9 +12,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/frpc"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
@@ -29,7 +29,7 @@ type LocalContainerRegistryConfig struct {
 	DataPath          string
 	Port              uint32
 	Image             string
-	ContainerRegistry *containerregistry.ContainerRegistry
+	ContainerRegistry *models.ContainerRegistry
 	Logger            io.Writer
 	Frps              *server.FRPSConfig
 	ServerId          string
@@ -51,7 +51,7 @@ type LocalContainerRegistry struct {
 	dataPath          string
 	port              uint32
 	image             string
-	containerRegistry *containerregistry.ContainerRegistry
+	containerRegistry *models.ContainerRegistry
 	logger            io.Writer
 	frps              *server.FRPSConfig
 	serverId          string

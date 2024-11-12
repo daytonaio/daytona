@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/daytonaio/daytona/pkg/containerregistry"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
@@ -33,7 +33,7 @@ func SetContainerRegistry(ctx *gin.Context) {
 		return
 	}
 
-	var req containerregistry.ContainerRegistry
+	var req models.ContainerRegistry
 	err = ctx.BindJSON(&req)
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))

@@ -6,24 +6,24 @@ package containerregistries
 import (
 	"strings"
 
-	"github.com/daytonaio/daytona/pkg/containerregistry"
+	"github.com/daytonaio/daytona/pkg/models"
 )
 
 type IContainerRegistryService interface {
 	Delete(server string) error
-	Find(server string) (*containerregistry.ContainerRegistry, error)
-	FindByImageName(imageName string) (*containerregistry.ContainerRegistry, error)
-	List() ([]*containerregistry.ContainerRegistry, error)
-	Map() (map[string]*containerregistry.ContainerRegistry, error)
-	Save(cr *containerregistry.ContainerRegistry) error
+	Find(server string) (*models.ContainerRegistry, error)
+	FindByImageName(imageName string) (*models.ContainerRegistry, error)
+	List() ([]*models.ContainerRegistry, error)
+	Map() (map[string]*models.ContainerRegistry, error)
+	Save(cr *models.ContainerRegistry) error
 }
 
 type ContainerRegistryServiceConfig struct {
-	Store containerregistry.Store
+	Store ContainerRegistryStore
 }
 
 type ContainerRegistryService struct {
-	store containerregistry.Store
+	store ContainerRegistryStore
 }
 
 func NewContainerRegistryService(config ContainerRegistryServiceConfig) IContainerRegistryService {
@@ -32,17 +32,17 @@ func NewContainerRegistryService(config ContainerRegistryServiceConfig) IContain
 	}
 }
 
-func (s *ContainerRegistryService) List() ([]*containerregistry.ContainerRegistry, error) {
+func (s *ContainerRegistryService) List() ([]*models.ContainerRegistry, error) {
 	return s.store.List()
 }
 
-func (s *ContainerRegistryService) Map() (map[string]*containerregistry.ContainerRegistry, error) {
+func (s *ContainerRegistryService) Map() (map[string]*models.ContainerRegistry, error) {
 	list, err := s.store.List()
 	if err != nil {
 		return nil, err
 	}
 
-	crs := make(map[string]*containerregistry.ContainerRegistry)
+	crs := make(map[string]*models.ContainerRegistry)
 	for _, cr := range list {
 		crs[cr.Server] = cr
 	}
@@ -50,17 +50,17 @@ func (s *ContainerRegistryService) Map() (map[string]*containerregistry.Containe
 	return crs, nil
 }
 
-func (s *ContainerRegistryService) Find(server string) (*containerregistry.ContainerRegistry, error) {
+func (s *ContainerRegistryService) Find(server string) (*models.ContainerRegistry, error) {
 	return s.store.Find(server)
 }
 
-func (s *ContainerRegistryService) FindByImageName(imageName string) (*containerregistry.ContainerRegistry, error) {
+func (s *ContainerRegistryService) FindByImageName(imageName string) (*models.ContainerRegistry, error) {
 	server := getImageServer(imageName)
 
 	return s.Find(server)
 }
 
-func (s *ContainerRegistryService) Save(cr *containerregistry.ContainerRegistry) error {
+func (s *ContainerRegistryService) Save(cr *models.ContainerRegistry) error {
 	return s.store.Save(cr)
 }
 

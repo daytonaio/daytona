@@ -5,12 +5,13 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **EnvVars** | **map[string]string** |  | 
+**Id** | **string** |  | 
 
 ## Methods
 
 ### NewProfileData
 
-`func NewProfileData(envVars map[string]string, ) *ProfileData`
+`func NewProfileData(envVars map[string]string, id string, ) *ProfileData`
 
 NewProfileData instantiates a new ProfileData object
 This constructor will assign default values to properties that have it defined,
@@ -43,6 +44,26 @@ and a boolean to check if the value has been set.
 `func (o *ProfileData) SetEnvVars(v map[string]string)`
 
 SetEnvVars sets EnvVars field to given value.
+
+
+### GetId
+
+`func (o *ProfileData) GetId() string`
+
+GetId returns the Id field if non-nil, zero value otherwise.
+
+### GetIdOk
+
+`func (o *ProfileData) GetIdOk() (*string, bool)`
+
+GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetId
+
+`func (o *ProfileData) SetId(v string)`
+
+SetId sets Id field to given value.
 
 
 

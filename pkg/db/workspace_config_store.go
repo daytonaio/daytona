@@ -6,8 +6,8 @@ package db
 import (
 	"gorm.io/gorm"
 
-	. "github.com/daytonaio/daytona/pkg/db/dto"
-	"github.com/daytonaio/daytona/pkg/workspace/config"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/server/workspaceconfigs"
 )
 
 type WorkspaceConfigStore struct {
@@ -15,7 +15,7 @@ type WorkspaceConfigStore struct {
 }
 
 func NewWorkspaceConfigStore(db *gorm.DB) (*WorkspaceConfigStore, error) {
-	err := db.AutoMigrate(&WorkspaceConfigDTO{})
+	err := db.AutoMigrate(&models.WorkspaceConfig{})
 	if err != nil {
 		return nil, err
 	}
@@ -23,38 +23,33 @@ func NewWorkspaceConfigStore(db *gorm.DB) (*WorkspaceConfigStore, error) {
 	return &WorkspaceConfigStore{db: db}, nil
 }
 
-func (s *WorkspaceConfigStore) List(filter *config.WorkspaceConfigFilter) ([]*config.WorkspaceConfig, error) {
-	workspaceConfigDTOs := []WorkspaceConfigDTO{}
-	tx := processWorkspaceConfigFilters(s.db, filter).Find(&workspaceConfigDTOs)
+func (s *WorkspaceConfigStore) List(filter *workspaceconfigs.WorkspaceConfigFilter) ([]*models.WorkspaceConfig, error) {
+	workspaceConfigs := []*models.WorkspaceConfig{}
+	tx := processWorkspaceConfigFilters(s.db, filter).Find(&workspaceConfigs)
 
 	if tx.Error != nil {
 		return nil, tx.Error
-	}
-
-	workspaceConfigs := []*config.WorkspaceConfig{}
-	for _, workspaceConfigDTO := range workspaceConfigDTOs {
-		workspaceConfigs = append(workspaceConfigs, ToWorkspaceConfig(workspaceConfigDTO))
 	}
 
 	return workspaceConfigs, nil
 }
 
-func (s *WorkspaceConfigStore) Find(filter *config.WorkspaceConfigFilter) (*config.WorkspaceConfig, error) {
-	workspaceConfigDTO := WorkspaceConfigDTO{}
-	tx := processWorkspaceConfigFilters(s.db, filter).First(&workspaceConfigDTO)
+func (s *WorkspaceConfigStore) Find(filter *workspaceconfigs.WorkspaceConfigFilter) (*models.WorkspaceConfig, error) {
+	workspaceConfig := &models.WorkspaceConfig{}
+	tx := processWorkspaceConfigFilters(s.db, filter).First(workspaceConfig)
 
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
-			return nil, config.ErrWorkspaceConfigNotFound
+			return nil, workspaceconfigs.ErrWorkspaceConfigNotFound
 		}
 		return nil, tx.Error
 	}
 
-	return ToWorkspaceConfig(workspaceConfigDTO), nil
+	return workspaceConfig, nil
 }
 
-func (s *WorkspaceConfigStore) Save(workspaceConfig *config.WorkspaceConfig) error {
-	tx := s.db.Save(ToWorkspaceConfigDTO(workspaceConfig))
+func (s *WorkspaceConfigStore) Save(workspaceConfig *models.WorkspaceConfig) error {
+	tx := s.db.Save(workspaceConfig)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -62,19 +57,19 @@ func (s *WorkspaceConfigStore) Save(workspaceConfig *config.WorkspaceConfig) err
 	return nil
 }
 
-func (s *WorkspaceConfigStore) Delete(workspaceConfig *config.WorkspaceConfig) error {
-	tx := s.db.Delete(ToWorkspaceConfigDTO(workspaceConfig))
+func (s *WorkspaceConfigStore) Delete(workspaceConfig *models.WorkspaceConfig) error {
+	tx := s.db.Delete(workspaceConfig)
 	if tx.Error != nil {
 		return tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		return config.ErrWorkspaceConfigNotFound
+		return workspaceconfigs.ErrWorkspaceConfigNotFound
 	}
 
 	return nil
 }
 
-func processWorkspaceConfigFilters(tx *gorm.DB, filter *config.WorkspaceConfigFilter) *gorm.DB {
+func processWorkspaceConfigFilters(tx *gorm.DB, filter *workspaceconfigs.WorkspaceConfigFilter) *gorm.DB {
 	if filter != nil {
 		if filter.Name != nil {
 			tx = tx.Where("name = ?", *filter.Name)

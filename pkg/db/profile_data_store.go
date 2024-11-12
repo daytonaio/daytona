@@ -4,8 +4,8 @@
 package db
 
 import (
-	. "github.com/daytonaio/daytona/pkg/db/dto"
-	"github.com/daytonaio/daytona/pkg/profiledata"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/server/profiledata"
 	"gorm.io/gorm"
 )
 
@@ -14,7 +14,7 @@ type ProfileDataStore struct {
 }
 
 func NewProfileDataStore(db *gorm.DB) (*ProfileDataStore, error) {
-	err := db.AutoMigrate(&ProfileDataDTO{})
+	err := db.AutoMigrate(&models.ProfileData{})
 	if err != nil {
 		return nil, err
 	}
@@ -22,9 +22,9 @@ func NewProfileDataStore(db *gorm.DB) (*ProfileDataStore, error) {
 	return &ProfileDataStore{db: db}, nil
 }
 
-func (p *ProfileDataStore) Get() (*profiledata.ProfileData, error) {
-	profileDataDTO := ProfileDataDTO{}
-	tx := p.db.Where("id = ?", ProfileDataId).First(&profileDataDTO)
+func (p *ProfileDataStore) Get(id string) (*models.ProfileData, error) {
+	profileData := &models.ProfileData{}
+	tx := p.db.Where("id = ?", id).First(profileData)
 	if tx.Error != nil {
 		if tx.Error == gorm.ErrRecordNotFound {
 			return nil, profiledata.ErrProfileDataNotFound
@@ -32,14 +32,11 @@ func (p *ProfileDataStore) Get() (*profiledata.ProfileData, error) {
 		return nil, tx.Error
 	}
 
-	profileData := ToProfileData(profileDataDTO)
-
 	return profileData, nil
 }
 
-func (p *ProfileDataStore) Save(profileData *profiledata.ProfileData) error {
-	profileDataDTO := ToProfileDataDTO(profileData)
-	tx := p.db.Save(&profileDataDTO)
+func (p *ProfileDataStore) Save(profileData *models.ProfileData) error {
+	tx := p.db.Save(profileData)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -47,8 +44,8 @@ func (p *ProfileDataStore) Save(profileData *profiledata.ProfileData) error {
 	return nil
 }
 
-func (p *ProfileDataStore) Delete() error {
-	tx := p.db.Where("id = ?", ProfileDataId).Delete(&ProfileDataDTO{})
+func (p *ProfileDataStore) Delete(id string) error {
+	tx := p.db.Where("id = ?", id).Delete(&models.ProfileData{})
 	if tx.Error != nil {
 		return tx.Error
 	}

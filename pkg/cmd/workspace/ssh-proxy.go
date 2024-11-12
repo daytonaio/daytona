@@ -17,7 +17,7 @@ import (
 	ssh_config "github.com/daytonaio/daytona/pkg/agent/ssh/config"
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/docker"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
@@ -125,7 +125,7 @@ var SshProxyCmd = &cobra.Command{
 
 		errChan := make(chan error)
 
-		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", workspace.GetWorkspaceHostname(ws.Id), ssh_config.SSH_PORT))
+		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", models.Workspace{Id: ws.Id}.Hostname(), ssh_config.SSH_PORT))
 		if err != nil {
 			return err
 		}

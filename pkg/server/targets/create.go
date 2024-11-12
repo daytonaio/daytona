@@ -8,11 +8,10 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
-	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/config"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/views"
 
@@ -36,13 +35,13 @@ func isValidTargetName(name string) bool {
 	return true
 }
 
-func (s *TargetService) CreateTarget(ctx context.Context, req dto.CreateTargetDTO) (*target.Target, error) {
-	_, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &req.Id})
+func (s *TargetService) CreateTarget(ctx context.Context, req dto.CreateTargetDTO) (*models.Target, error) {
+	_, err := s.targetStore.Find(&TargetFilter{IdOrName: &req.Id})
 	if err == nil {
 		return nil, ErrTargetAlreadyExists
 	}
 
-	tc, err := s.targetConfigStore.Find(&config.TargetConfigFilter{Name: &req.TargetConfigName})
+	tc, err := s.targetConfigStore.Find(&targetconfigs.TargetConfigFilter{Name: &req.TargetConfigName})
 	if err != nil {
 		return s.handleCreateError(ctx, nil, err)
 	}
@@ -52,14 +51,14 @@ func (s *TargetService) CreateTarget(ctx context.Context, req dto.CreateTargetDT
 		return nil, ErrInvalidTargetName
 	}
 
-	tg := &target.Target{
+	tg := &models.Target{
 		Id:           req.Id,
 		Name:         req.Name,
 		ProviderInfo: tc.ProviderInfo,
 		Options:      tc.Options,
 	}
 
-	apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeTarget, tg.Id)
+	apiKey, err := s.apiKeyService.Generate(models.ApiKeyTypeTarget, tg.Id)
 	if err != nil {
 		return s.handleCreateError(ctx, nil, err)
 	}
@@ -75,7 +74,7 @@ func (s *TargetService) CreateTarget(ctx context.Context, req dto.CreateTargetDT
 
 	targetLogger.Write([]byte(fmt.Sprintf("Creating target %s (%s)\n", tg.Name, tg.Id)))
 
-	tg.EnvVars = target.GetTargetEnvVars(tg, target.TargetEnvVarParams{
+	tg.EnvVars = GetTargetEnvVars(tg, TargetEnvVarParams{
 		ApiUrl:        s.serverApiUrl,
 		ServerUrl:     s.serverUrl,
 		ServerVersion: s.serverVersion,
@@ -109,7 +108,7 @@ func (s *TargetService) CreateTarget(ctx context.Context, req dto.CreateTargetDT
 	return s.handleCreateError(ctx, tg, err)
 }
 
-func (s *TargetService) handleCreateError(ctx context.Context, target *target.Target, err error) (*target.Target, error) {
+func (s *TargetService) handleCreateError(ctx context.Context, target *models.Target, err error) (*models.Target, error) {
 	if !telemetry.TelemetryEnabled(ctx) {
 		return target, err
 	}

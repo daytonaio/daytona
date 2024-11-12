@@ -6,14 +6,12 @@ package conversion
 import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	wc_dto "github.com/daytonaio/daytona/pkg/server/workspaceconfig/dto"
+	"github.com/daytonaio/daytona/pkg/models"
+	wc_dto "github.com/daytonaio/daytona/pkg/server/workspaceconfigs/dto"
 	workspace_dto "github.com/daytonaio/daytona/pkg/server/workspaces/dto"
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/daytonaio/daytona/pkg/workspace/buildconfig"
-	"github.com/daytonaio/daytona/pkg/workspace/config"
 )
 
-func ToWorkspace(workspaceDTO *apiclient.WorkspaceDTO) *workspace.Workspace {
+func ToWorkspace(workspaceDTO *apiclient.WorkspaceDTO) *models.Workspace {
 	if workspaceDTO == nil {
 		return nil
 	}
@@ -29,27 +27,27 @@ func ToWorkspace(workspaceDTO *apiclient.WorkspaceDTO) *workspace.Workspace {
 		Url:    workspaceDTO.Repository.Url,
 	}
 
-	var workspaceState *workspace.WorkspaceState
+	var workspaceState *models.WorkspaceState
 	if workspaceDTO.State != nil {
 		uptime := workspaceDTO.State.Uptime
-		workspaceState = &workspace.WorkspaceState{
+		workspaceState = &models.WorkspaceState{
 			UpdatedAt: workspaceDTO.State.UpdatedAt,
 			Uptime:    uint64(uptime),
 			GitStatus: ToGitStatus(workspaceDTO.State.GitStatus),
 		}
 	}
 
-	var workspaceBuild *buildconfig.BuildConfig
+	var workspaceBuild *models.BuildConfig
 	if workspaceDTO.BuildConfig != nil {
-		workspaceBuild = &buildconfig.BuildConfig{}
+		workspaceBuild = &models.BuildConfig{}
 		if workspaceDTO.BuildConfig.Devcontainer != nil {
-			workspaceBuild.Devcontainer = &buildconfig.DevcontainerConfig{
+			workspaceBuild.Devcontainer = &models.DevcontainerConfig{
 				FilePath: workspaceDTO.BuildConfig.Devcontainer.FilePath,
 			}
 		}
 	}
 
-	workspace := &workspace.Workspace{
+	workspace := &models.Workspace{
 		Id:                  workspaceDTO.Id,
 		Name:                workspaceDTO.Name,
 		Image:               workspaceDTO.Image,
@@ -69,16 +67,16 @@ func ToWorkspace(workspaceDTO *apiclient.WorkspaceDTO) *workspace.Workspace {
 	return workspace
 }
 
-func ToGitStatus(gitStatusDTO *apiclient.GitStatus) *workspace.GitStatus {
+func ToGitStatus(gitStatusDTO *apiclient.GitStatus) *models.GitStatus {
 	if gitStatusDTO == nil {
 		return nil
 	}
 
-	files := []*workspace.FileStatus{}
+	files := []*models.FileStatus{}
 	for _, fileDTO := range gitStatusDTO.FileStatus {
-		staging := workspace.Status(string(fileDTO.Staging))
-		worktree := workspace.Status(string(fileDTO.Worktree))
-		file := &workspace.FileStatus{
+		staging := models.Status(string(fileDTO.Staging))
+		worktree := models.Status(string(fileDTO.Worktree))
+		file := &models.FileStatus{
 			Name:     fileDTO.Name,
 			Extra:    fileDTO.Extra,
 			Staging:  staging,
@@ -100,7 +98,7 @@ func ToGitStatus(gitStatusDTO *apiclient.GitStatus) *workspace.GitStatus {
 		branchPublished = *gitStatusDTO.BranchPublished
 	}
 
-	return &workspace.GitStatus{
+	return &models.GitStatus{
 		CurrentBranch:   gitStatusDTO.CurrentBranch,
 		Files:           files,
 		BranchPublished: branchPublished,
@@ -109,7 +107,7 @@ func ToGitStatus(gitStatusDTO *apiclient.GitStatus) *workspace.GitStatus {
 	}
 }
 
-func ToGitStatusDTO(gitStatus *workspace.GitStatus) *apiclient.GitStatus {
+func ToGitStatusDTO(gitStatus *models.GitStatus) *apiclient.GitStatus {
 	if gitStatus == nil {
 		return nil
 	}
@@ -151,8 +149,8 @@ func ToGitStatusDTO(gitStatus *workspace.GitStatus) *apiclient.GitStatus {
 	}
 }
 
-func ToWorkspaceConfig(createWorkspaceConfigDto wc_dto.CreateWorkspaceConfigDTO) *config.WorkspaceConfig {
-	result := &config.WorkspaceConfig{
+func ToWorkspaceConfig(createWorkspaceConfigDto wc_dto.CreateWorkspaceConfigDTO) *models.WorkspaceConfig {
+	result := &models.WorkspaceConfig{
 		Name:                createWorkspaceConfigDto.Name,
 		BuildConfig:         createWorkspaceConfigDto.BuildConfig,
 		EnvVars:             createWorkspaceConfigDto.EnvVars,
@@ -172,8 +170,8 @@ func ToWorkspaceConfig(createWorkspaceConfigDto wc_dto.CreateWorkspaceConfigDTO)
 	return result
 }
 
-func CreateDtoToWorkspace(createWorkspaceDto workspace_dto.CreateWorkspaceDTO) *workspace.Workspace {
-	w := &workspace.Workspace{
+func CreateDtoToWorkspace(createWorkspaceDto workspace_dto.CreateWorkspaceDTO) *models.Workspace {
+	w := &models.Workspace{
 		Id:                  createWorkspaceDto.Id,
 		Name:                createWorkspaceDto.Name,
 		BuildConfig:         createWorkspaceDto.BuildConfig,
@@ -192,18 +190,4 @@ func CreateDtoToWorkspace(createWorkspaceDto workspace_dto.CreateWorkspaceDTO) *
 	}
 
 	return w
-}
-
-func CreateConfigDtoToWorkspace(createWorkspaceConfigDto wc_dto.CreateWorkspaceConfigDTO) *workspace.Workspace {
-	return &workspace.Workspace{
-		Name:                createWorkspaceConfigDto.Name,
-		Image:               *createWorkspaceConfigDto.Image,
-		User:                *createWorkspaceConfigDto.User,
-		BuildConfig:         createWorkspaceConfigDto.BuildConfig,
-		GitProviderConfigId: createWorkspaceConfigDto.GitProviderConfigId,
-		Repository: &gitprovider.GitRepository{
-			Url: createWorkspaceConfigDto.RepositoryUrl,
-		},
-		EnvVars: createWorkspaceConfigDto.EnvVars,
-	}
 }
