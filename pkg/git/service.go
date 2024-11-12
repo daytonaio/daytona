@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/protocol/packp/capability"
@@ -23,23 +23,23 @@ import (
 	"gopkg.in/ini.v1"
 )
 
-var MapStatus map[git.StatusCode]workspace.Status = map[git.StatusCode]workspace.Status{
-	git.Unmodified:         workspace.Unmodified,
-	git.Untracked:          workspace.Untracked,
-	git.Modified:           workspace.Modified,
-	git.Added:              workspace.Added,
-	git.Deleted:            workspace.Deleted,
-	git.Renamed:            workspace.Renamed,
-	git.Copied:             workspace.Copied,
-	git.UpdatedButUnmerged: workspace.UpdatedButUnmerged,
+var MapStatus map[git.StatusCode]models.Status = map[git.StatusCode]models.Status{
+	git.Unmodified:         models.Unmodified,
+	git.Untracked:          models.Untracked,
+	git.Modified:           models.Modified,
+	git.Added:              models.Added,
+	git.Deleted:            models.Deleted,
+	git.Renamed:            models.Renamed,
+	git.Copied:             models.Copied,
+	git.UpdatedButUnmerged: models.UpdatedButUnmerged,
 }
 
 type IGitService interface {
 	CloneRepository(repo *gitprovider.GitRepository, auth *http.BasicAuth) error
 	CloneRepositoryCmd(repo *gitprovider.GitRepository, auth *http.BasicAuth) []string
 	RepositoryExists() (bool, error)
-	SetGitConfig(userData *gitprovider.GitUser, providerConfig *gitprovider.GitProviderConfig) error
-	GetGitStatus() (*workspace.GitStatus, error)
+	SetGitConfig(userData *gitprovider.GitUser, providerConfig *models.GitProviderConfig) error
+	GetGitStatus() (*models.GitStatus, error)
 }
 
 type Service struct {
@@ -133,7 +133,7 @@ func (s *Service) RepositoryExists() (bool, error) {
 	return true, nil
 }
 
-func (s *Service) SetGitConfig(userData *gitprovider.GitUser, providerConfig *gitprovider.GitProviderConfig) error {
+func (s *Service) SetGitConfig(userData *gitprovider.GitUser, providerConfig *models.GitProviderConfig) error {
 	gitConfigFileName := s.GitConfigFileName
 
 	var gitConfigContent []byte
@@ -202,7 +202,7 @@ func (s *Service) SetGitConfig(userData *gitprovider.GitUser, providerConfig *gi
 	return os.WriteFile(gitConfigFileName, buf.Bytes(), 0644)
 }
 
-func (s *Service) setSigningConfig(cfg *ini.File, providerConfig *gitprovider.GitProviderConfig, userData *gitprovider.GitUser) error {
+func (s *Service) setSigningConfig(cfg *ini.File, providerConfig *models.GitProviderConfig, userData *gitprovider.GitUser) error {
 	if providerConfig == nil || providerConfig.SigningMethod == nil || providerConfig.SigningKey == nil {
 		return nil
 	}
@@ -227,12 +227,12 @@ func (s *Service) setSigningConfig(cfg *ini.File, providerConfig *gitprovider.Gi
 	}
 
 	switch *providerConfig.SigningMethod {
-	case gitprovider.SigningMethodGPG:
+	case models.SigningMethodGPG:
 		_, err := cfg.Section("commit").NewKey("gpgSign", "true")
 		if err != nil {
 			return err
 		}
-	case gitprovider.SigningMethodSSH:
+	case models.SigningMethodSSH:
 		err := s.configureAllowedSigners(userData.Email, *providerConfig.SigningKey)
 		if err != nil {
 			return err
@@ -347,7 +347,7 @@ func parseAheadBehind(output []byte) (int, int, error) {
 	return ahead, behind, nil
 }
 
-func (s *Service) GetGitStatus() (*workspace.GitStatus, error) {
+func (s *Service) GetGitStatus() (*models.GitStatus, error) {
 	repo, err := git.PlainOpen(s.WorkspaceDir)
 	if err != nil {
 		return nil, err
@@ -368,9 +368,9 @@ func (s *Service) GetGitStatus() (*workspace.GitStatus, error) {
 		return nil, err
 	}
 
-	files := []*workspace.FileStatus{}
+	files := []*models.FileStatus{}
 	for path, file := range status {
-		files = append(files, &workspace.FileStatus{
+		files = append(files, &models.FileStatus{
 			Name:     path,
 			Extra:    file.Extra,
 			Staging:  MapStatus[file.Staging],
@@ -388,7 +388,7 @@ func (s *Service) GetGitStatus() (*workspace.GitStatus, error) {
 		return nil, err
 	}
 
-	return &workspace.GitStatus{
+	return &models.GitStatus{
 		CurrentBranch:   ref.Name().Short(),
 		Files:           files,
 		BranchPublished: branchPublished,

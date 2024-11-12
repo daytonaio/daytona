@@ -19,9 +19,8 @@ import (
 	"github.com/compose-spec/compose-go/v2/cli"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/build/devcontainer"
-	"github.com/daytonaio/daytona/pkg/containerregistry"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/ssh"
-	"github.com/daytonaio/daytona/pkg/workspace/buildconfig"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/mount"
@@ -43,10 +42,10 @@ type CreateDevcontainerOptions struct {
 	WorkspaceDir string
 	// Name of the project inside the devcontainer
 	WorkspaceFolderName string
-	BuildConfig         *buildconfig.BuildConfig
+	BuildConfig         *models.BuildConfig
 	LogWriter           io.Writer
 	SshClient           *ssh.Client
-	ContainerRegistry   *containerregistry.ContainerRegistry
+	ContainerRegistry   *models.ContainerRegistry
 	Prebuild            bool
 	EnvVars             map[string]string
 	IdLabels            map[string]string

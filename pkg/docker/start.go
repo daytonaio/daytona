@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/pkg/build/detect"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provider/util"
-	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/docker/docker/api/types/container"
 )
 
@@ -42,7 +42,7 @@ func (d *DockerClient) StartWorkspace(opts *CreateWorkspaceOptions, daytonaDownl
 	return d.startDaytonaAgent(opts.Workspace, containerUser, daytonaDownloadUrl, opts.LogWriter)
 }
 
-func (d *DockerClient) startDaytonaAgent(w *workspace.Workspace, containerUser, daytonaDownloadUrl string, logWriter io.Writer) error {
+func (d *DockerClient) startDaytonaAgent(w *models.Workspace, containerUser, daytonaDownloadUrl string, logWriter io.Writer) error {
 	errChan := make(chan error)
 
 	go func() {

@@ -7,21 +7,22 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/ports"
+	"github.com/daytonaio/daytona/pkg/server/builds"
 	"github.com/docker/docker/pkg/stringid"
 )
 
 type IBuilderFactory interface {
-	Create(build Build, workspaceDir string) (IBuilder, error)
-	CheckExistingBuild(build Build) (*Build, error)
+	Create(build models.Build, workspaceDir string) (IBuilder, error)
+	CheckExistingBuild(build models.Build) (*models.Build, error)
 }
 
 type BuilderFactory struct {
-	containerRegistry     *containerregistry.ContainerRegistry
+	containerRegistry     *models.ContainerRegistry
 	buildImageNamespace   string
-	buildStore            Store
+	buildStore            builds.BuildStore
 	loggerFactory         logs.LoggerFactory
 	image                 string
 	defaultWorkspaceImage string
@@ -30,8 +31,8 @@ type BuilderFactory struct {
 
 type BuilderFactoryConfig struct {
 	Image                 string
-	ContainerRegistry     *containerregistry.ContainerRegistry
-	BuildStore            Store
+	ContainerRegistry     *models.ContainerRegistry
+	BuildStore            builds.BuildStore
 	BuildImageNamespace   string // Namespace to be used when tagging and pushing the build image
 	LoggerFactory         logs.LoggerFactory
 	DefaultWorkspaceImage string
@@ -50,17 +51,17 @@ func NewBuilderFactory(config BuilderFactoryConfig) IBuilderFactory {
 	}
 }
 
-func (f *BuilderFactory) Create(build Build, workspaceDir string) (IBuilder, error) {
+func (f *BuilderFactory) Create(build models.Build, workspaceDir string) (IBuilder, error) {
 	// TODO: Implement factory logic after adding prebuilds and other builder types
 	return f.newDevcontainerBuilder(workspaceDir)
 }
 
-func (f *BuilderFactory) CheckExistingBuild(b Build) (*Build, error) {
+func (f *BuilderFactory) CheckExistingBuild(b models.Build) (*models.Build, error) {
 	if b.Repository == nil {
 		return nil, errors.New("repository must be set")
 	}
 
-	build, err := f.buildStore.Find(&Filter{
+	build, err := f.buildStore.Find(&builds.BuildFilter{
 		Branch:        &b.Repository.Branch,
 		RepositoryUrl: &b.Repository.Url,
 		BuildConfig:   b.BuildConfig,

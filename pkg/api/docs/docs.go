@@ -1456,7 +1456,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/WorkspaceViewDTO"
+                            "$ref": "#/definitions/Workspace"
                         }
                     }
                 }
@@ -1983,7 +1983,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
-                    "$ref": "#/definitions/apikey.ApiKeyType"
+                    "$ref": "#/definitions/models.ApiKeyType"
                 }
             }
         },
@@ -2028,7 +2028,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/GitRepository"
                 },
                 "state": {
-                    "$ref": "#/definitions/build.BuildState"
+                    "$ref": "#/definitions/models.BuildState"
                 },
                 "updatedAt": {
                     "type": "string"
@@ -2662,7 +2662,8 @@ const docTemplate = `{
         "ProfileData": {
             "type": "object",
             "required": [
-                "envVars"
+                "envVars",
+                "id"
             ],
             "properties": {
                 "envVars": {
@@ -2670,6 +2671,9 @@ const docTemplate = `{
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "id": {
+                    "type": "string"
                 }
             }
         },
@@ -2899,6 +2903,12 @@ const docTemplate = `{
                 },
                 "providerInfo": {
                     "$ref": "#/definitions/TargetProviderInfo"
+                },
+                "workspaces": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Workspace"
+                    }
                 }
             }
         },
@@ -2972,8 +2982,7 @@ const docTemplate = `{
                 "id",
                 "name",
                 "options",
-                "providerInfo",
-                "workspaceCount"
+                "providerInfo"
             ],
             "properties": {
                 "default": {
@@ -2995,8 +3004,11 @@ const docTemplate = `{
                 "providerInfo": {
                     "$ref": "#/definitions/TargetProviderInfo"
                 },
-                "workspaceCount": {
-                    "type": "integer"
+                "workspaces": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Workspace"
+                    }
                 }
             }
         },
@@ -3028,6 +3040,57 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "Workspace": {
+            "type": "object",
+            "required": [
+                "envVars",
+                "id",
+                "image",
+                "name",
+                "repository",
+                "target",
+                "targetId",
+                "user"
+            ],
+            "properties": {
+                "buildConfig": {
+                    "$ref": "#/definitions/BuildConfig"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "gitProviderConfigId": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "repository": {
+                    "$ref": "#/definitions/GitRepository"
+                },
+                "state": {
+                    "$ref": "#/definitions/WorkspaceState"
+                },
+                "target": {
+                    "$ref": "#/definitions/Target"
+                },
+                "targetId": {
+                    "type": "string"
+                },
+                "user": {
                     "type": "string"
                 }
             }
@@ -3086,8 +3149,8 @@ const docTemplate = `{
                 "image",
                 "name",
                 "repository",
+                "target",
                 "targetId",
-                "targetName",
                 "user"
             ],
             "properties": {
@@ -3121,10 +3184,10 @@ const docTemplate = `{
                 "state": {
                     "$ref": "#/definitions/WorkspaceState"
                 },
-                "targetId": {
-                    "type": "string"
+                "target": {
+                    "$ref": "#/definitions/Target"
                 },
-                "targetName": {
+                "targetId": {
                     "type": "string"
                 },
                 "user": {
@@ -3177,58 +3240,7 @@ const docTemplate = `{
                 }
             }
         },
-        "WorkspaceViewDTO": {
-            "type": "object",
-            "required": [
-                "envVars",
-                "id",
-                "image",
-                "name",
-                "repository",
-                "targetId",
-                "targetName",
-                "user"
-            ],
-            "properties": {
-                "buildConfig": {
-                    "$ref": "#/definitions/BuildConfig"
-                },
-                "envVars": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "gitProviderConfigId": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "image": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "repository": {
-                    "$ref": "#/definitions/GitRepository"
-                },
-                "state": {
-                    "$ref": "#/definitions/WorkspaceState"
-                },
-                "targetId": {
-                    "type": "string"
-                },
-                "targetName": {
-                    "type": "string"
-                },
-                "user": {
-                    "type": "string"
-                }
-            }
-        },
-        "apikey.ApiKeyType": {
+        "models.ApiKeyType": {
             "type": "string",
             "enum": [
                 "client",
@@ -3241,7 +3253,7 @@ const docTemplate = `{
                 "ApiKeyTypeTarget"
             ]
         },
-        "build.BuildState": {
+        "models.BuildState": {
             "type": "string",
             "enum": [
                 "pending-run",

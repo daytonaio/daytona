@@ -27,6 +27,7 @@ type Target struct {
 	// JSON encoded map of options
 	Options      string             `json:"options"`
 	ProviderInfo TargetProviderInfo `json:"providerInfo"`
+	Workspaces   []Workspace        `json:"workspaces,omitempty"`
 }
 
 type _Target Target
@@ -173,6 +174,38 @@ func (o *Target) SetProviderInfo(v TargetProviderInfo) {
 	o.ProviderInfo = v
 }
 
+// GetWorkspaces returns the Workspaces field value if set, zero value otherwise.
+func (o *Target) GetWorkspaces() []Workspace {
+	if o == nil || IsNil(o.Workspaces) {
+		var ret []Workspace
+		return ret
+	}
+	return o.Workspaces
+}
+
+// GetWorkspacesOk returns a tuple with the Workspaces field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Target) GetWorkspacesOk() ([]Workspace, bool) {
+	if o == nil || IsNil(o.Workspaces) {
+		return nil, false
+	}
+	return o.Workspaces, true
+}
+
+// HasWorkspaces returns a boolean if a field has been set.
+func (o *Target) HasWorkspaces() bool {
+	if o != nil && !IsNil(o.Workspaces) {
+		return true
+	}
+
+	return false
+}
+
+// SetWorkspaces gets a reference to the given []Workspace and assigns it to the Workspaces field.
+func (o *Target) SetWorkspaces(v []Workspace) {
+	o.Workspaces = v
+}
+
 func (o Target) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -188,6 +221,9 @@ func (o Target) ToMap() (map[string]interface{}, error) {
 	toSerialize["name"] = o.Name
 	toSerialize["options"] = o.Options
 	toSerialize["providerInfo"] = o.ProviderInfo
+	if !IsNil(o.Workspaces) {
+		toSerialize["workspaces"] = o.Workspaces
+	}
 	return toSerialize, nil
 }
 

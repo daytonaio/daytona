@@ -5,47 +5,50 @@
 
 package workspaces
 
-import "github.com/daytonaio/daytona/pkg/workspace"
+import (
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/server/workspaces"
+)
 
 type InMemoryWorkspaceStore struct {
-	workspaces map[string]*workspace.Workspace
+	workspaces map[string]*models.Workspace
 }
 
-func NewInMemoryWorkspaceStore() workspace.Store {
+func NewInMemoryWorkspaceStore() workspaces.WorkspaceStore {
 	return &InMemoryWorkspaceStore{
-		workspaces: make(map[string]*workspace.Workspace),
+		workspaces: make(map[string]*models.Workspace),
 	}
 }
 
-func (s *InMemoryWorkspaceStore) List() ([]*workspace.WorkspaceViewDTO, error) {
-	workspaceViewDTOs := []*workspace.WorkspaceViewDTO{}
+func (s *InMemoryWorkspaceStore) List() ([]*models.Workspace, error) {
+	workspaces := []*models.Workspace{}
 	for _, w := range s.workspaces {
-		workspaceViewDTOs = append(workspaceViewDTOs, &workspace.WorkspaceViewDTO{Workspace: *w})
+		workspaces = append(workspaces, w)
 	}
 
-	return workspaceViewDTOs, nil
+	return workspaces, nil
 }
 
-func (s *InMemoryWorkspaceStore) Find(idOrName string) (*workspace.WorkspaceViewDTO, error) {
-	t, ok := s.workspaces[idOrName]
+func (s *InMemoryWorkspaceStore) Find(idOrName string) (*models.Workspace, error) {
+	w, ok := s.workspaces[idOrName]
 	if !ok {
 		for _, w := range s.workspaces {
 			if w.Name == idOrName {
-				return &workspace.WorkspaceViewDTO{Workspace: *w}, nil
+				return w, nil
 			}
 		}
-		return nil, workspace.ErrWorkspaceNotFound
+		return nil, workspaces.ErrWorkspaceNotFound
 	}
 
-	return &workspace.WorkspaceViewDTO{Workspace: *t}, nil
+	return w, nil
 }
 
-func (s *InMemoryWorkspaceStore) Save(workspace *workspace.Workspace) error {
+func (s *InMemoryWorkspaceStore) Save(workspace *models.Workspace) error {
 	s.workspaces[workspace.Id] = workspace
 	return nil
 }
 
-func (s *InMemoryWorkspaceStore) Delete(workspace *workspace.Workspace) error {
+func (s *InMemoryWorkspaceStore) Delete(workspace *models.Workspace) error {
 	delete(s.workspaces, workspace.Id)
 	return nil
 }

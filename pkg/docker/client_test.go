@@ -9,12 +9,11 @@ import (
 	"github.com/daytonaio/daytona/internal/testing/docker/mocks"
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/stretchr/testify/suite"
 )
 
-var workspace1 = &workspace.Workspace{
+var workspace1 = &models.Workspace{
 	Name: "test",
 	Repository: &gitprovider.GitRepository{
 		Id:   "123",
@@ -26,10 +25,10 @@ var workspace1 = &workspace.Workspace{
 	TargetId: "123",
 }
 
-var target1 = &target.Target{
+var target1 = &models.Target{
 	Id:   "123",
 	Name: "test",
-	ProviderInfo: target.ProviderInfo{
+	ProviderInfo: models.ProviderInfo{
 		Name:    "test-provider",
 		Version: "test",
 	},

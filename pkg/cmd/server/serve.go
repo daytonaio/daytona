@@ -18,11 +18,10 @@ import (
 	"github.com/daytonaio/daytona/internal/constants"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
-	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/build"
-	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/db"
 	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/provisioner"
@@ -31,12 +30,13 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/builds"
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
+	gp_util "github.com/daytonaio/daytona/pkg/server/gitproviders/util"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/daytonaio/daytona/pkg/server/profiledata"
 	"github.com/daytonaio/daytona/pkg/server/registry"
 	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
 	"github.com/daytonaio/daytona/pkg/server/targets"
-	"github.com/daytonaio/daytona/pkg/server/workspaceconfig"
+	"github.com/daytonaio/daytona/pkg/server/workspaceconfigs"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -263,12 +263,12 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 
 	gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
 		ConfigStore:          gitProviderConfigStore,
-		WorkspaceConfigStore: workspaceConfigStore,
+		WorkspaceConfigStore: gp_util.FromWorkspaceConfigStore(workspaceConfigStore),
 	})
 
 	prebuildWebhookEndpoint := fmt.Sprintf("%s%s", util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain), constants.WEBHOOK_EVENT_ROUTE)
 
-	workspaceConfigService := workspaceconfig.NewWorkspaceConfigService(workspaceconfig.WorkspaceConfigServiceConfig{
+	workspaceConfigService := workspaceconfigs.NewWorkspaceConfigService(workspaceconfigs.WorkspaceConfigServiceConfig{
 		PrebuildWebhookEndpoint: prebuildWebhookEndpoint,
 		ConfigStore:             workspaceConfigStore,
 		BuildService:            buildService,
@@ -430,12 +430,12 @@ func GetBuildRunner(c *server.Config, buildRunnerConfig *build.Config, telemetry
 		Store: containerRegistryStore,
 	})
 
-	var builderRegistry *containerregistry.ContainerRegistry
+	var builderRegistry *models.ContainerRegistry
 
 	if c.BuilderRegistryServer != "local" {
 		builderRegistry, err = containerRegistryService.Find(c.BuilderRegistryServer)
 		if err != nil {
-			builderRegistry = &containerregistry.ContainerRegistry{
+			builderRegistry = &models.ContainerRegistry{
 				Server: c.BuilderRegistryServer,
 			}
 		}
@@ -524,7 +524,7 @@ func ensureDefaultProfile(server *server.Server, apiPort uint32) error {
 		}
 	}
 
-	apiKey, err := server.ApiKeyService.Generate(apikey.ApiKeyTypeClient, "default")
+	apiKey, err := server.ApiKeyService.Generate(models.ApiKeyTypeClient, "default")
 	if err != nil {
 		return err
 	}

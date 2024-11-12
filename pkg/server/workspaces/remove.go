@@ -8,28 +8,22 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/telemetry"
-	"github.com/daytonaio/daytona/pkg/workspace"
 	log "github.com/sirupsen/logrus"
 )
 
 func (s *WorkspaceService) RemoveWorkspace(ctx context.Context, workspaceId string) error {
 	ws, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
-		return s.handleRemoveError(ctx, &ws.Workspace, ErrWorkspaceNotFound)
+		return s.handleRemoveError(ctx, ws, ErrWorkspaceNotFound)
 	}
 
 	log.Infof("Destroying workspace %s", ws.Name)
 
-	target, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &ws.TargetId})
+	err = s.provisioner.DestroyWorkspace(ws)
 	if err != nil {
-		return s.handleRemoveError(ctx, &ws.Workspace, err)
-	}
-
-	err = s.provisioner.DestroyWorkspace(&ws.Workspace, &target.Target)
-	if err != nil {
-		return s.handleRemoveError(ctx, &ws.Workspace, err)
+		return s.handleRemoveError(ctx, ws, err)
 	}
 
 	err = s.apiKeyService.Revoke(fmt.Sprintf("ws-%s", ws.Id))
@@ -44,26 +38,21 @@ func (s *WorkspaceService) RemoveWorkspace(ctx context.Context, workspaceId stri
 		log.Error(err)
 	}
 
-	err = s.workspaceStore.Delete(&ws.Workspace)
+	err = s.workspaceStore.Delete(ws)
 
-	return s.handleRemoveError(ctx, &ws.Workspace, err)
+	return s.handleRemoveError(ctx, ws, err)
 }
 
 // ForceRemoveWorkspace ignores provider errors and makes sure the workspace is removed from storage.
 func (s *WorkspaceService) ForceRemoveWorkspace(ctx context.Context, workspaceId string) error {
 	ws, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
-		return s.handleRemoveError(ctx, &ws.Workspace, ErrWorkspaceNotFound)
+		return s.handleRemoveError(ctx, ws, ErrWorkspaceNotFound)
 	}
 
 	log.Infof("Destroying workspace %s", ws.Name)
 
-	target, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &ws.TargetId})
-	if err != nil {
-		return s.handleRemoveError(ctx, &ws.Workspace, err)
-	}
-
-	err = s.provisioner.DestroyWorkspace(&ws.Workspace, &target.Target)
+	err = s.provisioner.DestroyWorkspace(ws)
 	if err != nil {
 		log.Error(err)
 	}
@@ -80,12 +69,12 @@ func (s *WorkspaceService) ForceRemoveWorkspace(ctx context.Context, workspaceId
 		log.Error(err)
 	}
 
-	err = s.workspaceStore.Delete(&ws.Workspace)
+	err = s.workspaceStore.Delete(ws)
 
-	return s.handleRemoveError(ctx, &ws.Workspace, err)
+	return s.handleRemoveError(ctx, ws, err)
 }
 
-func (s *WorkspaceService) handleRemoveError(ctx context.Context, w *workspace.Workspace, err error) error {
+func (s *WorkspaceService) handleRemoveError(ctx context.Context, w *models.Workspace, err error) error {
 	if !telemetry.TelemetryEnabled(ctx) {
 		return err
 	}

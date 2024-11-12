@@ -6,13 +6,12 @@
 package mocks
 
 import (
-	"github.com/daytonaio/daytona/pkg/workspace/buildconfig"
-	"github.com/daytonaio/daytona/pkg/workspace/config"
+	"github.com/daytonaio/daytona/pkg/models"
 )
 
-var MockWorkspaceConfig = config.WorkspaceConfig{
-	BuildConfig: &buildconfig.BuildConfig{
-		Devcontainer: &buildconfig.DevcontainerConfig{
+var MockWorkspaceConfig = models.WorkspaceConfig{
+	BuildConfig: &models.BuildConfig{
+		Devcontainer: &models.DevcontainerConfig{
 			FilePath: ".devcontainer/devcontainer.json",
 		},
 	},

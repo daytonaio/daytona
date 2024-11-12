@@ -29,7 +29,7 @@ type Build struct {
 	Image           *string           `json:"image,omitempty"`
 	PrebuildId      string            `json:"prebuildId"`
 	Repository      GitRepository     `json:"repository"`
-	State           BuildBuildState   `json:"state"`
+	State           ModelsBuildState  `json:"state"`
 	UpdatedAt       string            `json:"updatedAt"`
 	User            *string           `json:"user,omitempty"`
 }
@@ -40,7 +40,7 @@ type _Build Build
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewBuild(containerConfig ContainerConfig, createdAt string, envVars map[string]string, id string, prebuildId string, repository GitRepository, state BuildBuildState, updatedAt string) *Build {
+func NewBuild(containerConfig ContainerConfig, createdAt string, envVars map[string]string, id string, prebuildId string, repository GitRepository, state ModelsBuildState, updatedAt string) *Build {
 	this := Build{}
 	this.ContainerConfig = containerConfig
 	this.CreatedAt = createdAt
@@ -270,9 +270,9 @@ func (o *Build) SetRepository(v GitRepository) {
 }
 
 // GetState returns the State field value
-func (o *Build) GetState() BuildBuildState {
+func (o *Build) GetState() ModelsBuildState {
 	if o == nil {
-		var ret BuildBuildState
+		var ret ModelsBuildState
 		return ret
 	}
 
@@ -281,7 +281,7 @@ func (o *Build) GetState() BuildBuildState {
 
 // GetStateOk returns a tuple with the State field value
 // and a boolean to check if the value has been set.
-func (o *Build) GetStateOk() (*BuildBuildState, bool) {
+func (o *Build) GetStateOk() (*ModelsBuildState, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -289,7 +289,7 @@ func (o *Build) GetStateOk() (*BuildBuildState, bool) {
 }
 
 // SetState sets field value
-func (o *Build) SetState(v BuildBuildState) {
+func (o *Build) SetState(v ModelsBuildState) {
 	o.State = v
 }
 

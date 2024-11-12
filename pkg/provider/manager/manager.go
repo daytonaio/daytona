@@ -14,11 +14,10 @@ import (
 	"strings"
 
 	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/models"
 	os_util "github.com/daytonaio/daytona/pkg/os"
 	. "github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
-	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/config"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 	"github.com/shirou/gopsutil/process"
@@ -172,9 +171,9 @@ func (m *ProviderManager) RegisterProvider(pluginPath string, manualInstall bool
 				continue
 			}
 
-			err = m.targetConfigService.Save(&config.TargetConfig{
+			err = m.targetConfigService.Save(&models.TargetConfig{
 				Name: targetConfig.Name,
-				ProviderInfo: target.ProviderInfo{
+				ProviderInfo: models.ProviderInfo{
 					Name:    providerInfo.Name,
 					Version: providerInfo.Version,
 					Label:   providerInfo.Label,
@@ -182,12 +181,12 @@ func (m *ProviderManager) RegisterProvider(pluginPath string, manualInstall bool
 				Options: targetConfig.Options,
 			})
 			if err != nil {
-				log.Errorf("Failed to set target %s: %s", targetConfig.Name, err)
+				log.Errorf("Failed to set target config %s: %s", targetConfig.Name, err)
 			} else {
-				log.Infof("Target %s set", targetConfig.Name)
+				log.Infof("Target config %s set", targetConfig.Name)
 			}
 		}
-		log.Infof("Preset targets set for %s", pluginRef.name)
+		log.Infof("Preset target configs set for %s", pluginRef.name)
 	}
 
 	log.Infof("Provider %s initialized", pluginRef.name)

@@ -10,16 +10,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 )
 
-func (d *DockerClient) StopWorkspace(w *workspace.Workspace, logWriter io.Writer) error {
+func (d *DockerClient) StopWorkspace(w *models.Workspace, logWriter io.Writer) error {
 	return d.stopWorkspaceContainer(w, logWriter)
 }
 
-func (d *DockerClient) stopWorkspaceContainer(w *workspace.Workspace, logWriter io.Writer) error {
+func (d *DockerClient) stopWorkspaceContainer(w *models.Workspace, logWriter io.Writer) error {
 	containerName := d.GetWorkspaceContainerName(w)
 	ctx := context.Background()
 

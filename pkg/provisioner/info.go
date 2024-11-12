@@ -6,18 +6,17 @@ package provisioner
 import (
 	"context"
 
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provider"
-	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
 type TargetInfoResult struct {
-	Info *target.TargetInfo
+	Info *models.TargetInfo
 	Err  error
 }
 
 // Gets the target info from the provider - the context is used to cancel the request if it takes too long
-func (p *Provisioner) GetTargetInfo(ctx context.Context, t *target.Target) (*target.TargetInfo, error) {
+func (p *Provisioner) GetTargetInfo(ctx context.Context, t *models.Target) (*models.TargetInfo, error) {
 	ch := make(chan TargetInfoResult, 1)
 
 	go func() {
@@ -43,23 +42,22 @@ func (p *Provisioner) GetTargetInfo(ctx context.Context, t *target.Target) (*tar
 }
 
 type WorkspaceInfoResult struct {
-	Info *workspace.WorkspaceInfo
+	Info *models.WorkspaceInfo
 	Err  error
 }
 
 // Gets the workspace info from the provider - the context is used to cancel the request if it takes too long
-func (p *Provisioner) GetWorkspaceInfo(ctx context.Context, workspace *workspace.Workspace, t *target.Target) (*workspace.WorkspaceInfo, error) {
+func (p *Provisioner) GetWorkspaceInfo(ctx context.Context, workspace *models.Workspace) (*models.WorkspaceInfo, error) {
 	ch := make(chan WorkspaceInfoResult, 1)
 
 	go func() {
-		targetProvider, err := p.providerManager.GetProvider(t.ProviderInfo.Name)
+		targetProvider, err := p.providerManager.GetProvider(workspace.Target.ProviderInfo.Name)
 		if err != nil {
 			ch <- WorkspaceInfoResult{nil, err}
 			return
 		}
 
 		info, err := (*targetProvider).GetWorkspaceInfo(&provider.WorkspaceRequest{
-			Target:    t,
 			Workspace: workspace,
 		})
 

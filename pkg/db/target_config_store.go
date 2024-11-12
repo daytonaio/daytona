@@ -6,9 +6,8 @@ package db
 import (
 	"gorm.io/gorm"
 
-	"github.com/daytonaio/daytona/internal/util"
-	. "github.com/daytonaio/daytona/pkg/db/dto"
-	"github.com/daytonaio/daytona/pkg/target/config"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
 )
 
 type TargetConfigStore struct {
@@ -16,7 +15,7 @@ type TargetConfigStore struct {
 }
 
 func NewTargetConfigStore(db *gorm.DB) (*TargetConfigStore, error) {
-	err := db.AutoMigrate(&TargetConfigDTO{})
+	err := db.AutoMigrate(&models.TargetConfig{})
 	if err != nil {
 		return nil, err
 	}
@@ -24,35 +23,33 @@ func NewTargetConfigStore(db *gorm.DB) (*TargetConfigStore, error) {
 	return &TargetConfigStore{db: db}, nil
 }
 
-func (s *TargetConfigStore) List(filter *config.TargetConfigFilter) ([]*config.TargetConfig, error) {
-	targetConfigDTOs := []TargetConfigDTO{}
-	tx := processTargetConfigFilters(s.db, filter).Find(&targetConfigDTOs)
+func (s *TargetConfigStore) List(filter *targetconfigs.TargetConfigFilter) ([]*models.TargetConfig, error) {
+	targetConfigs := []*models.TargetConfig{}
+	tx := processTargetConfigFilters(s.db, filter).Find(&targetConfigs)
 
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 
-	return util.ArrayMap(targetConfigDTOs, func(targetConfigDTO TargetConfigDTO) *config.TargetConfig {
-		return ToTargetConfig(targetConfigDTO)
-	}), nil
+	return targetConfigs, nil
 }
 
-func (s *TargetConfigStore) Find(filter *config.TargetConfigFilter) (*config.TargetConfig, error) {
-	targetConfigDTO := TargetConfigDTO{}
-	tx := processTargetConfigFilters(s.db, filter).First(&targetConfigDTO)
+func (s *TargetConfigStore) Find(filter *targetconfigs.TargetConfigFilter) (*models.TargetConfig, error) {
+	targetConfig := &models.TargetConfig{}
+	tx := processTargetConfigFilters(s.db, filter).First(targetConfig)
 
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
-			return nil, config.ErrTargetConfigNotFound
+			return nil, targetconfigs.ErrTargetConfigNotFound
 		}
 		return nil, tx.Error
 	}
 
-	return ToTargetConfig(targetConfigDTO), nil
+	return targetConfig, nil
 }
 
-func (s *TargetConfigStore) Save(targetConfig *config.TargetConfig) error {
-	tx := s.db.Save(ToTargetConfigDTO(targetConfig))
+func (s *TargetConfigStore) Save(targetConfig *models.TargetConfig) error {
+	tx := s.db.Save(targetConfig)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -60,19 +57,19 @@ func (s *TargetConfigStore) Save(targetConfig *config.TargetConfig) error {
 	return nil
 }
 
-func (s *TargetConfigStore) Delete(targetConfig *config.TargetConfig) error {
-	tx := s.db.Delete(ToTargetConfigDTO(targetConfig))
+func (s *TargetConfigStore) Delete(targetConfig *models.TargetConfig) error {
+	tx := s.db.Delete(targetConfig)
 	if tx.Error != nil {
 		return tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		return config.ErrTargetConfigNotFound
+		return targetconfigs.ErrTargetConfigNotFound
 	}
 
 	return nil
 }
 
-func processTargetConfigFilters(tx *gorm.DB, filter *config.TargetConfigFilter) *gorm.DB {
+func processTargetConfigFilters(tx *gorm.DB, filter *targetconfigs.TargetConfigFilter) *gorm.DB {
 	if filter != nil {
 		if filter.Name != nil {
 			tx = tx.Where("name = ?", *filter.Name)

@@ -12,3 +12,7 @@ var (
 	ErrInvalidTargetName   = errors.New("name is not a valid alphanumeric string")
 	ErrTargetNotFound      = errors.New("target not found")
 )
+
+func IsTargetNotFound(err error) bool {
+	return err.Error() == ErrTargetNotFound.Error()
+}

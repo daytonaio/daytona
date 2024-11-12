@@ -16,11 +16,10 @@ import (
 	"github.com/daytonaio/daytona/pkg/agent"
 	"github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/models"
 )
 
-var workspace1 = &workspace.Workspace{
+var workspace1 = &models.Workspace{
 	Id:   "123",
 	Name: "test",
 	Repository: &gitprovider.GitRepository{
@@ -29,30 +28,30 @@ var workspace1 = &workspace.Workspace{
 		Name: "daytona",
 	},
 	TargetId: "123",
-	State: &workspace.WorkspaceState{
+	State: &models.WorkspaceState{
 		UpdatedAt: "123",
 		Uptime:    148,
 		GitStatus: gitStatus1,
 	},
 }
 
-var target1 = &target.Target{
+var target1 = &models.Target{
 	Id:   "123",
 	Name: "test",
-	ProviderInfo: target.ProviderInfo{
+	ProviderInfo: models.ProviderInfo{
 		Name:    "test-provider",
 		Version: "test",
 	},
 	Options: "test-options",
 }
 
-var gitStatus1 = &workspace.GitStatus{
+var gitStatus1 = &models.GitStatus{
 	CurrentBranch: "main",
-	Files: []*workspace.FileStatus{{
+	Files: []*models.FileStatus{{
 		Name:     "File1",
 		Extra:    "",
-		Staging:  workspace.Modified,
-		Worktree: workspace.Modified,
+		Staging:  models.Modified,
+		Worktree: models.Modified,
 	}},
 }
 

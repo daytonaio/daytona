@@ -3,14 +3,14 @@
 
 package apikeys_test
 
-import "github.com/daytonaio/daytona/pkg/apikey"
+import "github.com/daytonaio/daytona/pkg/models"
 
 func (s *ApiKeyServiceTestSuite) TestIsValidKey_True() {
 	keyName := "api-key"
 
 	require := s.Require()
 
-	apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeWorkspace, keyName)
+	apiKey, err := s.apiKeyService.Generate(models.ApiKeyTypeWorkspace, keyName)
 	require.Nil(err)
 
 	res := s.apiKeyService.IsValidApiKey(apiKey)
@@ -31,7 +31,7 @@ func (s *ApiKeyServiceTestSuite) TestIsWorkspaceApiKey_True() {
 
 	require := s.Require()
 
-	apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeWorkspace, keyName)
+	apiKey, err := s.apiKeyService.Generate(models.ApiKeyTypeWorkspace, keyName)
 	require.Nil(err)
 
 	res := s.apiKeyService.IsWorkspaceApiKey(apiKey)
@@ -43,7 +43,7 @@ func (s *ApiKeyServiceTestSuite) TestIsWorkspaceApiKey_False() {
 
 	require := s.Require()
 
-	apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeClient, keyName)
+	apiKey, err := s.apiKeyService.Generate(models.ApiKeyTypeClient, keyName)
 	require.Nil(err)
 
 	res := s.apiKeyService.IsWorkspaceApiKey(apiKey)
@@ -55,7 +55,7 @@ func (s *ApiKeyServiceTestSuite) TestIsIsTargetApiKey_True() {
 
 	require := s.Require()
 
-	apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeTarget, keyName)
+	apiKey, err := s.apiKeyService.Generate(models.ApiKeyTypeTarget, keyName)
 	require.Nil(err)
 
 	res := s.apiKeyService.IsTargetApiKey(apiKey)
@@ -67,7 +67,7 @@ func (s *ApiKeyServiceTestSuite) TestIsTargetApiKey_False() {
 
 	require := s.Require()
 
-	apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeClient, keyName)
+	apiKey, err := s.apiKeyService.Generate(models.ApiKeyTypeClient, keyName)
 	require.Nil(err)
 
 	res := s.apiKeyService.IsTargetApiKey(apiKey)

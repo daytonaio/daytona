@@ -3,8 +3,6 @@
 
 package gitproviders
 
-import "github.com/daytonaio/daytona/pkg/workspace/config"
-
 func (s *GitProviderService) RemoveGitProvider(gitProviderId string) error {
 	gitProvider, err := s.configStore.Find(gitProviderId)
 	if err != nil {
@@ -12,9 +10,7 @@ func (s *GitProviderService) RemoveGitProvider(gitProviderId string) error {
 	}
 
 	// Check if workspace configs need to be updated
-	workspaceConfigs, err := s.workspaceConfigStore.List(&config.WorkspaceConfigFilter{
-		GitProviderConfigId: &gitProviderId,
-	})
+	workspaceConfigs, err := s.workspaceConfigStore.List(gitProviderId)
 
 	if err != nil {
 		return err
