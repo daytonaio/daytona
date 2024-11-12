@@ -8,14 +8,13 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/ssh"
-	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 )
 
-func (d *DockerClient) DestroyTarget(target *target.Target, targetDir string, sshClient *ssh.Client) error {
+func (d *DockerClient) DestroyTarget(target *models.Target, targetDir string, sshClient *ssh.Client) error {
 	if sshClient == nil {
 		return os.RemoveAll(targetDir)
 	} else {
@@ -23,7 +22,7 @@ func (d *DockerClient) DestroyTarget(target *target.Target, targetDir string, ss
 	}
 }
 
-func (d *DockerClient) DestroyWorkspace(workspace *workspace.Workspace, workspaceDir string, sshClient *ssh.Client) error {
+func (d *DockerClient) DestroyWorkspace(workspace *models.Workspace, workspaceDir string, sshClient *ssh.Client) error {
 	err := d.removeWorkspaceContainer(workspace)
 	if err != nil {
 		return err
@@ -36,7 +35,7 @@ func (d *DockerClient) DestroyWorkspace(workspace *workspace.Workspace, workspac
 	}
 }
 
-func (d *DockerClient) removeWorkspaceContainer(w *workspace.Workspace) error {
+func (d *DockerClient) removeWorkspaceContainer(w *models.Workspace) error {
 	ctx := context.Background()
 
 	containerName := d.GetWorkspaceContainerName(w)

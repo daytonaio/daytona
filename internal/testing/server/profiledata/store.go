@@ -6,20 +6,21 @@
 package profiledata
 
 import (
-	"github.com/daytonaio/daytona/pkg/profiledata"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/server/profiledata"
 )
 
 type InMemoryProfileDataStore struct {
-	profileData *profiledata.ProfileData
+	profileData *models.ProfileData
 }
 
-func NewInMemoryProfileDataStore() profiledata.Store {
+func NewInMemoryProfileDataStore() profiledata.ProfileDataStore {
 	return &InMemoryProfileDataStore{
 		profileData: nil,
 	}
 }
 
-func (s *InMemoryProfileDataStore) Get() (*profiledata.ProfileData, error) {
+func (s *InMemoryProfileDataStore) Get(id string) (*models.ProfileData, error) {
 	if s.profileData == nil {
 		return nil, profiledata.ErrProfileDataNotFound
 	}
@@ -27,12 +28,12 @@ func (s *InMemoryProfileDataStore) Get() (*profiledata.ProfileData, error) {
 	return s.profileData, nil
 }
 
-func (s *InMemoryProfileDataStore) Save(profileData *profiledata.ProfileData) error {
+func (s *InMemoryProfileDataStore) Save(profileData *models.ProfileData) error {
 	s.profileData = profileData
 	return nil
 }
 
-func (s *InMemoryProfileDataStore) Delete() error {
+func (s *InMemoryProfileDataStore) Delete(id string) error {
 	s.profileData = nil
 	return nil
 }

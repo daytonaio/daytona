@@ -10,12 +10,12 @@ import (
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace/config"
+	"github.com/daytonaio/daytona/pkg/models"
 )
 
 type IGitProviderService interface {
-	GetConfig(id string) (*gitprovider.GitProviderConfig, error)
-	ListConfigsForUrl(url string) ([]*gitprovider.GitProviderConfig, error)
+	GetConfig(id string) (*models.GitProviderConfig, error)
+	ListConfigsForUrl(url string) ([]*models.GitProviderConfig, error)
 	GetGitProvider(id string) (gitprovider.GitProvider, error)
 	GetGitProviderForUrl(url string) (gitprovider.GitProvider, string, error)
 	GetGitProviderForHttpRequest(req *http.Request) (gitprovider.GitProvider, error)
@@ -24,27 +24,22 @@ type IGitProviderService interface {
 	GetRepoBranches(gitProviderId string, namespaceId string, repositoryId string, options gitprovider.ListOptions) ([]*gitprovider.GitBranch, error)
 	GetRepoPRs(gitProviderId string, namespaceId string, repositoryId string, options gitprovider.ListOptions) ([]*gitprovider.GitPullRequest, error)
 	GetRepositories(gitProviderId string, namespaceId string, options gitprovider.ListOptions) ([]*gitprovider.GitRepository, error)
-	ListConfigs() ([]*gitprovider.GitProviderConfig, error)
+	ListConfigs() ([]*models.GitProviderConfig, error)
 	RemoveGitProvider(gitProviderId string) error
-	SetGitProviderConfig(providerConfig *gitprovider.GitProviderConfig) error
+	SetGitProviderConfig(providerConfig *models.GitProviderConfig) error
 	GetLastCommitSha(repo *gitprovider.GitRepository) (string, error)
 	RegisterPrebuildWebhook(gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (string, error)
 	GetPrebuildWebhook(gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (*string, error)
 	UnregisterPrebuildWebhook(gitProviderId string, repo *gitprovider.GitRepository, id string) error
 }
 
-type WorkspaceConfigStore interface {
-	Save(workspaceConfig *config.WorkspaceConfig) error
-	List(filter *config.WorkspaceConfigFilter) ([]*config.WorkspaceConfig, error)
-}
-
 type GitProviderServiceConfig struct {
-	ConfigStore          gitprovider.ConfigStore
+	ConfigStore          GitProviderConfigStore
 	WorkspaceConfigStore WorkspaceConfigStore
 }
 
 type GitProviderService struct {
-	configStore          gitprovider.ConfigStore
+	configStore          GitProviderConfigStore
 	workspaceConfigStore WorkspaceConfigStore
 }
 
@@ -61,8 +56,8 @@ func (s *GitProviderService) GetGitProvider(id string) (gitprovider.GitProvider,
 	providerConfig, err := s.configStore.Find(id)
 	if err != nil {
 		// If config is not defined, use the default (public) client without token
-		if gitprovider.IsGitProviderNotFound(err) {
-			providerConfig = &gitprovider.GitProviderConfig{
+		if IsGitProviderNotFound(err) {
+			providerConfig = &models.GitProviderConfig{
 				Id:         id,
 				ProviderId: id,
 				Username:   "",
@@ -128,7 +123,7 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 		hostname := strings.TrimPrefix(repo.Source, "www.")
 		providerId := strings.Split(hostname, ".")[0]
 
-		provider, err = s.newGitProvider(&gitprovider.GitProviderConfig{
+		provider, err = s.newGitProvider(&models.GitProviderConfig{
 			Id:         "",
 			ProviderId: providerId,
 			Username:   "",
@@ -153,7 +148,7 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 	})
 }
 
-func (s *GitProviderService) newGitProvider(config *gitprovider.GitProviderConfig) (gitprovider.GitProvider, error) {
+func (s *GitProviderService) newGitProvider(config *models.GitProviderConfig) (gitprovider.GitProvider, error) {
 	baseApiUrl := ""
 	if config.BaseApiUrl != nil {
 		baseApiUrl = *config.BaseApiUrl

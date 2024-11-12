@@ -8,11 +8,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/daytonaio/daytona/pkg/containerregistry"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/ssh"
-	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
@@ -20,35 +17,35 @@ import (
 )
 
 type CreateWorkspaceOptions struct {
-	Workspace                *workspace.Workspace
+	Workspace                *models.Workspace
 	WorkspaceDir             string
-	ContainerRegistry        *containerregistry.ContainerRegistry
+	ContainerRegistry        *models.ContainerRegistry
 	LogWriter                io.Writer
-	Gpc                      *gitprovider.GitProviderConfig
+	Gpc                      *models.GitProviderConfig
 	SshClient                *ssh.Client
 	BuilderImage             string
-	BuilderContainerRegistry *containerregistry.ContainerRegistry
+	BuilderContainerRegistry *models.ContainerRegistry
 }
 
 type IDockerClient interface {
 	CreateWorkspace(opts *CreateWorkspaceOptions) error
-	CreateTarget(target *target.Target, targetDir string, logWriter io.Writer, sshClient *ssh.Client) error
+	CreateTarget(target *models.Target, targetDir string, logWriter io.Writer, sshClient *ssh.Client) error
 
-	DestroyWorkspace(workspace *workspace.Workspace, workspaceDir string, sshClient *ssh.Client) error
-	DestroyTarget(target *target.Target, targetDir string, sshClient *ssh.Client) error
+	DestroyWorkspace(workspace *models.Workspace, workspaceDir string, sshClient *ssh.Client) error
+	DestroyTarget(target *models.Target, targetDir string, sshClient *ssh.Client) error
 
 	StartWorkspace(opts *CreateWorkspaceOptions, daytonaDownloadUrl string) error
-	StopWorkspace(workspace *workspace.Workspace, logWriter io.Writer) error
+	StopWorkspace(workspace *models.Workspace, logWriter io.Writer) error
 
-	GetWorkspaceInfo(workspace *workspace.Workspace) (*workspace.WorkspaceInfo, error)
-	GetTargetInfo(t *target.Target) (*target.TargetInfo, error)
+	GetWorkspaceInfo(workspace *models.Workspace) (*models.WorkspaceInfo, error)
+	GetTargetInfo(t *models.Target) (*models.TargetInfo, error)
 
-	GetWorkspaceContainerName(workspace *workspace.Workspace) string
-	GetWorkspaceVolumeName(workspace *workspace.Workspace) string
+	GetWorkspaceContainerName(workspace *models.Workspace) string
+	GetWorkspaceVolumeName(workspace *models.Workspace) string
 	ExecSync(containerID string, config container.ExecOptions, outputWriter io.Writer) (*ExecResult, error)
 	GetContainerLogs(containerName string, logWriter io.Writer) error
-	PullImage(imageName string, cr *containerregistry.ContainerRegistry, logWriter io.Writer) error
-	PushImage(imageName string, cr *containerregistry.ContainerRegistry, logWriter io.Writer) error
+	PullImage(imageName string, cr *models.ContainerRegistry, logWriter io.Writer) error
+	PushImage(imageName string, cr *models.ContainerRegistry, logWriter io.Writer) error
 	DeleteImage(imageName string, force bool, logWriter io.Writer) error
 
 	CreateFromDevcontainer(opts CreateDevcontainerOptions) (string, RemoteUser, error)
@@ -69,7 +66,7 @@ type DockerClient struct {
 	apiClient client.APIClient
 }
 
-func (d *DockerClient) GetWorkspaceContainerName(workspace *workspace.Workspace) string {
+func (d *DockerClient) GetWorkspaceContainerName(workspace *models.Workspace) string {
 	containers, err := d.apiClient.ContainerList(context.Background(), container.ListOptions{
 		Filters: filters.NewArgs(filters.Arg("label", fmt.Sprintf("daytona.target.id=%s", workspace.TargetId)), filters.Arg("label", fmt.Sprintf("daytona.workspace.name=%s", workspace.Name))),
 		All:     true,
@@ -81,7 +78,7 @@ func (d *DockerClient) GetWorkspaceContainerName(workspace *workspace.Workspace)
 	return containers[0].ID
 }
 
-func (d *DockerClient) GetWorkspaceVolumeName(workspace *workspace.Workspace) string {
+func (d *DockerClient) GetWorkspaceVolumeName(workspace *models.Workspace) string {
 	return workspace.TargetId + "-" + workspace.Name
 }
 

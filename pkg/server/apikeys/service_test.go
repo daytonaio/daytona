@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	t_apikeys "github.com/daytonaio/daytona/internal/testing/server/apikeys"
-	"github.com/daytonaio/daytona/pkg/apikey"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
 	"github.com/stretchr/testify/suite"
 )
@@ -18,7 +18,7 @@ var workspaceKeyNames []string = []string{"workspace1", "workspace2"}
 type ApiKeyServiceTestSuite struct {
 	suite.Suite
 	apiKeyService apikeys.IApiKeyService
-	apiKeyStore   apikey.Store
+	apiKeyStore   apikeys.ApiKeyStore
 }
 
 func NewApiKeyServiceTestSuite() *ApiKeyServiceTestSuite {
@@ -32,11 +32,11 @@ func (s *ApiKeyServiceTestSuite) SetupTest() {
 	})
 
 	for _, keyName := range clientKeyNames {
-		_, _ = s.apiKeyService.Generate(apikey.ApiKeyTypeClient, keyName)
+		_, _ = s.apiKeyService.Generate(models.ApiKeyTypeClient, keyName)
 	}
 
 	for _, keyName := range workspaceKeyNames {
-		_, _ = s.apiKeyService.Generate(apikey.ApiKeyTypeWorkspace, keyName)
+		_, _ = s.apiKeyService.Generate(models.ApiKeyTypeWorkspace, keyName)
 	}
 }
 

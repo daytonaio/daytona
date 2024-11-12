@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/pkg/api/controllers/target/dto"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server"
-	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/gin-gonic/gin"
 )
 
@@ -37,7 +37,7 @@ func SetWorkspaceState(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	_, err = server.WorkspaceService.SetWorkspaceState(workspaceId, &workspace.WorkspaceState{
+	_, err = server.WorkspaceService.SetWorkspaceState(workspaceId, &models.WorkspaceState{
 		Uptime:    setWorkspaceStateDTO.Uptime,
 		UpdatedAt: time.Now().Format(time.RFC1123),
 		GitStatus: setWorkspaceStateDTO.GitStatus,

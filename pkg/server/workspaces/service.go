@@ -8,19 +8,18 @@ import (
 	"io"
 
 	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
 	"github.com/daytonaio/daytona/pkg/server/builds"
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
-	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/telemetry"
-	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
 type IWorkspaceService interface {
-	CreateWorkspace(ctx context.Context, req dto.CreateWorkspaceDTO) (*workspace.WorkspaceViewDTO, error)
+	CreateWorkspace(ctx context.Context, req dto.CreateWorkspaceDTO) (*models.Workspace, error)
 	GetWorkspace(ctx context.Context, workspaceId string, verbose bool) (*dto.WorkspaceDTO, error)
 	ListWorkspaces(ctx context.Context, verbose bool) ([]dto.WorkspaceDTO, error)
 	StartWorkspace(ctx context.Context, workspaceId string) error
@@ -29,15 +28,11 @@ type IWorkspaceService interface {
 	ForceRemoveWorkspace(ctx context.Context, workspaceId string) error
 
 	GetWorkspaceLogReader(workspaceId string) (io.Reader, error)
-	SetWorkspaceState(workspaceId string, state *workspace.WorkspaceState) (*workspace.WorkspaceViewDTO, error)
-}
-
-type targetStore interface {
-	Find(filter *target.TargetFilter) (*target.TargetViewDTO, error)
+	SetWorkspaceState(workspaceId string, state *models.WorkspaceState) (*models.Workspace, error)
 }
 
 type WorkspaceServiceConfig struct {
-	WorkspaceStore           workspace.Store
+	WorkspaceStore           WorkspaceStore
 	TargetStore              targetStore
 	ContainerRegistryService containerregistries.IContainerRegistryService
 	BuildService             builds.IBuildService
@@ -75,7 +70,7 @@ func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 }
 
 type WorkspaceService struct {
-	workspaceStore           workspace.Store
+	workspaceStore           WorkspaceStore
 	targetStore              targetStore
 	containerRegistryService containerregistries.IContainerRegistryService
 	buildService             builds.IBuildService
@@ -92,14 +87,14 @@ type WorkspaceService struct {
 	telemetryService         telemetry.TelemetryService
 }
 
-func (s *WorkspaceService) SetWorkspaceState(workspaceId string, state *workspace.WorkspaceState) (*workspace.WorkspaceViewDTO, error) {
+func (s *WorkspaceService) SetWorkspaceState(workspaceId string, state *models.WorkspaceState) (*models.Workspace, error) {
 	ws, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
 		return nil, ErrWorkspaceNotFound
 	}
 
 	ws.State = state
-	return ws, s.workspaceStore.Save(&ws.Workspace)
+	return ws, s.workspaceStore.Save(ws)
 }
 
 func (s *WorkspaceService) GetWorkspaceLogReader(workspaceId string) (io.Reader, error) {

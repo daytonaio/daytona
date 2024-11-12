@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -20,14 +21,14 @@ func NewMockGitProviderService() *MockGitProviderService {
 	return &MockGitProviderService{}
 }
 
-func (m *MockGitProviderService) GetConfig(id string) (*gitprovider.GitProviderConfig, error) {
+func (m *MockGitProviderService) GetConfig(id string) (*models.GitProviderConfig, error) {
 	args := m.Called(id)
-	return args.Get(0).(*gitprovider.GitProviderConfig), args.Error(1)
+	return args.Get(0).(*models.GitProviderConfig), args.Error(1)
 }
 
-func (m *MockGitProviderService) ListConfigsForUrl(url string) ([]*gitprovider.GitProviderConfig, error) {
+func (m *MockGitProviderService) ListConfigsForUrl(url string) ([]*models.GitProviderConfig, error) {
 	args := m.Called(url)
-	return args.Get(0).([]*gitprovider.GitProviderConfig), args.Error(1)
+	return args.Get(0).([]*models.GitProviderConfig), args.Error(1)
 }
 
 func (m *MockGitProviderService) GetGitProviderForHttpRequest(req *http.Request) (gitprovider.GitProvider, error) {
@@ -70,9 +71,9 @@ func (m *MockGitProviderService) GetRepositories(gitProviderId string, namespace
 	return args.Get(0).([]*gitprovider.GitRepository), args.Error(1)
 }
 
-func (m *MockGitProviderService) ListConfigs() ([]*gitprovider.GitProviderConfig, error) {
+func (m *MockGitProviderService) ListConfigs() ([]*models.GitProviderConfig, error) {
 	args := m.Called()
-	return args.Get(0).([]*gitprovider.GitProviderConfig), args.Error(1)
+	return args.Get(0).([]*models.GitProviderConfig), args.Error(1)
 }
 
 func (m *MockGitProviderService) RemoveGitProvider(gitProviderId string) error {
@@ -80,7 +81,7 @@ func (m *MockGitProviderService) RemoveGitProvider(gitProviderId string) error {
 	return args.Error(0)
 }
 
-func (m *MockGitProviderService) SetGitProviderConfig(providerConfig *gitprovider.GitProviderConfig) error {
+func (m *MockGitProviderService) SetGitProviderConfig(providerConfig *models.GitProviderConfig) error {
 	args := m.Called(providerConfig)
 	return args.Error(0)
 }

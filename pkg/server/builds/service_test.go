@@ -7,34 +7,32 @@ import (
 	"testing"
 
 	build_internal "github.com/daytonaio/daytona/internal/testing/build"
-	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server/builds"
 	"github.com/daytonaio/daytona/pkg/server/builds/dto"
-	"github.com/daytonaio/daytona/pkg/workspace/buildconfig"
-	"github.com/daytonaio/daytona/pkg/workspace/containerconfig"
 	"github.com/stretchr/testify/suite"
 )
 
 var build1Image = "image1"
 var build1User = "user1"
 
-var build1 *build.Build = &build.Build{
+var build1 *models.Build = &models.Build{
 	Id: "id1",
-	ContainerConfig: containerconfig.ContainerConfig{
+	ContainerConfig: models.ContainerConfig{
 		Image: build1Image,
 		User:  build1User,
 	},
-	BuildConfig: &buildconfig.BuildConfig{},
+	BuildConfig: &models.BuildConfig{},
 	Repository: &gitprovider.GitRepository{
 		Sha: "sha1",
 	},
-	State: build.BuildStatePublished,
+	State: models.BuildStatePublished,
 }
 
-var build2 *build.Build = &build.Build{
+var build2 *models.Build = &models.Build{
 	Id: "id2",
-	ContainerConfig: containerconfig.ContainerConfig{
+	ContainerConfig: models.ContainerConfig{
 		Image: "image2",
 		User:  "user2",
 	},
@@ -42,12 +40,12 @@ var build2 *build.Build = &build.Build{
 	Repository: &gitprovider.GitRepository{
 		Sha: "sha2",
 	},
-	State: build.BuildStatePublished,
+	State: models.BuildStatePublished,
 }
 
-var build3 *build.Build = &build.Build{
+var build3 *models.Build = &models.Build{
 	Id: "id3",
-	ContainerConfig: containerconfig.ContainerConfig{
+	ContainerConfig: models.ContainerConfig{
 		Image: "image3",
 		User:  "user3",
 	},
@@ -55,12 +53,12 @@ var build3 *build.Build = &build.Build{
 	Repository: &gitprovider.GitRepository{
 		Sha: "sha3",
 	},
-	State: build.BuildStatePendingRun,
+	State: models.BuildStatePendingRun,
 }
 
-var build4 *build.Build = &build.Build{
+var build4 *models.Build = &models.Build{
 	Id: "id4",
-	ContainerConfig: containerconfig.ContainerConfig{
+	ContainerConfig: models.ContainerConfig{
 		Image: "image4",
 		User:  "user4",
 	},
@@ -68,19 +66,19 @@ var build4 *build.Build = &build.Build{
 	Repository: &gitprovider.GitRepository{
 		Sha: "sha4",
 	},
-	State: build.BuildStatePendingRun,
+	State: models.BuildStatePendingRun,
 }
 
-var expectedBuilds []*build.Build
-var expectedFilteredBuilds []*build.Build
+var expectedBuilds []*models.Build
+var expectedFilteredBuilds []*models.Build
 
-var expectedBuildsMap map[string]*build.Build
-var expectedFilteredBuildsMap map[string]*build.Build
+var expectedBuildsMap map[string]*models.Build
+var expectedFilteredBuildsMap map[string]*models.Build
 
 type BuildServiceTestSuite struct {
 	suite.Suite
 	buildService builds.IBuildService
-	buildStore   build.Store
+	buildStore   builds.BuildStore
 }
 
 func NewBuildServiceTestSuite() *BuildServiceTestSuite {
@@ -88,21 +86,21 @@ func NewBuildServiceTestSuite() *BuildServiceTestSuite {
 }
 
 func (s *BuildServiceTestSuite) SetupTest() {
-	expectedBuilds = []*build.Build{
+	expectedBuilds = []*models.Build{
 		build1, build2, build3,
 	}
 
-	expectedBuildsMap = map[string]*build.Build{
+	expectedBuildsMap = map[string]*models.Build{
 		build1.Id: build1,
 		build2.Id: build2,
 		build3.Id: build3,
 	}
 
-	expectedFilteredBuilds = []*build.Build{
+	expectedFilteredBuilds = []*models.Build{
 		build1, build2,
 	}
 
-	expectedFilteredBuildsMap = map[string]*build.Build{
+	expectedFilteredBuildsMap = map[string]*models.Build{
 		build1.Id: build1,
 		build2.Id: build2,
 	}
@@ -132,7 +130,7 @@ func (s *BuildServiceTestSuite) TestList() {
 func (s *BuildServiceTestSuite) TestFind() {
 	require := s.Require()
 
-	build, err := s.buildService.Find(&build.Filter{
+	build, err := s.buildService.Find(&builds.BuildFilter{
 		Id: &build1.Id,
 	})
 	require.Nil(err)
@@ -166,16 +164,16 @@ func (s *BuildServiceTestSuite) TestMarkForDeletion() {
 
 	require := s.Require()
 
-	err := s.buildService.MarkForDeletion(&build.Filter{
+	err := s.buildService.MarkForDeletion(&builds.BuildFilter{
 		Id: &build3.Id,
 	}, false)
 	require.Nil(err)
 
-	b, errs := s.buildService.Find(&build.Filter{
+	b, errs := s.buildService.Find(&builds.BuildFilter{
 		Id: &build3.Id,
 	})
 	require.Nil(errs)
-	require.Equal(b.State, build.BuildStatePendingDelete)
+	require.Equal(b.State, models.BuildStatePendingDelete)
 }
 
 func (s *BuildServiceTestSuite) TestDelete() {

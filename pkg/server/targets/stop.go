@@ -6,23 +6,23 @@ package targets
 import (
 	"context"
 
-	"github.com/daytonaio/daytona/pkg/target"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	log "github.com/sirupsen/logrus"
 )
 
 func (s *TargetService) StopTarget(ctx context.Context, targetId string) error {
-	target, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &targetId})
+	target, err := s.targetStore.Find(&TargetFilter{IdOrName: &targetId})
 	if err != nil {
 		return s.handleStopError(ctx, nil, ErrTargetNotFound)
 	}
 
-	err = s.provisioner.StopTarget(&target.Target)
+	err = s.provisioner.StopTarget(target)
 
-	return s.handleStopError(ctx, &target.Target, err)
+	return s.handleStopError(ctx, target, err)
 }
 
-func (s *TargetService) handleStopError(ctx context.Context, target *target.Target, err error) error {
+func (s *TargetService) handleStopError(ctx context.Context, target *models.Target, err error) error {
 	if !telemetry.TelemetryEnabled(ctx) {
 		return err
 	}

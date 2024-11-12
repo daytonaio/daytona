@@ -98,7 +98,7 @@ func getSingleWorkspaceOutput(workspace *apiclient.WorkspaceDTO, isCreationView 
 	output += getInfoLinePrNumber(workspace.Repository.PrNumber, workspace.Repository, workspace.State)
 
 	if !isCreationView {
-		output += getInfoLine("Target", fmt.Sprintf("%s (%s)", workspace.TargetName, workspace.TargetId)) + "\n"
+		output += getInfoLine("Target", fmt.Sprintf("%s (%s)", workspace.Target.Name, workspace.TargetId)) + "\n"
 	}
 
 	output += getInfoLine("Repository", repositoryUrl)

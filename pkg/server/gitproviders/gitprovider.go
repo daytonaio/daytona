@@ -11,6 +11,7 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/models"
 )
 
 func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.GitProvider, string, error) {
@@ -46,7 +47,7 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 	}
 
 	for _, p := range config.GetSupportedGitProviders() {
-		gitProvider, err := s.newGitProvider(&gitprovider.GitProviderConfig{
+		gitProvider, err := s.newGitProvider(&models.GitProviderConfig{
 			ProviderId: p.Id,
 			Id:         p.Id,
 			Username:   "",
@@ -66,7 +67,7 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 }
 
 func (s *GitProviderService) GetGitProviderForHttpRequest(req *http.Request) (gitprovider.GitProvider, error) {
-	var provider *gitprovider.GitProviderConfig
+	var provider *models.GitProviderConfig
 
 	gitProviders, err := s.configStore.List()
 	if err != nil {

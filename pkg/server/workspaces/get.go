@@ -11,7 +11,6 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
-	"github.com/daytonaio/daytona/pkg/target"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -22,16 +21,11 @@ func (s *WorkspaceService) GetWorkspace(ctx context.Context, workspaceId string,
 	}
 
 	response := &dto.WorkspaceDTO{
-		WorkspaceViewDTO: *ws,
+		Workspace: *ws,
 	}
 
 	if !verbose {
 		return response, nil
-	}
-
-	target, err := s.targetStore.Find(&target.TargetFilter{IdOrName: &ws.TargetId})
-	if err != nil {
-		return nil, err
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
@@ -40,7 +34,7 @@ func (s *WorkspaceService) GetWorkspace(ctx context.Context, workspaceId string,
 	resultCh := make(chan provisioner.WorkspaceInfoResult, 1)
 
 	go func() {
-		workspaceInfo, err := s.provisioner.GetWorkspaceInfo(ctx, &ws.Workspace, &target.Target)
+		workspaceInfo, err := s.provisioner.GetWorkspaceInfo(ctx, ws)
 		resultCh <- provisioner.WorkspaceInfoResult{Info: workspaceInfo, Err: err}
 	}()
 

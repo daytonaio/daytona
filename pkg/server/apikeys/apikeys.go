@@ -5,19 +5,19 @@ package apikeys
 
 import (
 	"github.com/daytonaio/daytona/internal/apikeys"
-	"github.com/daytonaio/daytona/pkg/apikey"
+	"github.com/daytonaio/daytona/pkg/models"
 )
 
-func (s *ApiKeyService) ListClientKeys() ([]*apikey.ApiKey, error) {
+func (s *ApiKeyService) ListClientKeys() ([]*models.ApiKey, error) {
 	keys, err := s.apiKeyStore.List()
 	if err != nil {
 		return nil, err
 	}
 
-	clientKeys := []*apikey.ApiKey{}
+	clientKeys := []*models.ApiKey{}
 
 	for _, key := range keys {
-		if key.Type == apikey.ApiKeyTypeClient {
+		if key.Type == models.ApiKeyTypeClient {
 			clientKeys = append(clientKeys, key)
 		}
 	}
@@ -34,10 +34,10 @@ func (s *ApiKeyService) Revoke(name string) error {
 	return s.apiKeyStore.Delete(apiKey)
 }
 
-func (s *ApiKeyService) Generate(keyType apikey.ApiKeyType, name string) (string, error) {
+func (s *ApiKeyService) Generate(keyType models.ApiKeyType, name string) (string, error) {
 	key := apikeys.GenerateRandomKey()
 
-	apiKey := &apikey.ApiKey{
+	apiKey := &models.ApiKey{
 		KeyHash: apikeys.HashKey(key),
 		Type:    keyType,
 		Name:    name,

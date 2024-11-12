@@ -4,9 +4,8 @@
 package provider
 
 import (
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provider/util"
-	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
 type ProviderRPCServer struct {
@@ -77,7 +76,7 @@ func (m *ProviderRPCServer) DestroyTarget(arg *TargetRequest, resp *util.Empty) 
 	return err
 }
 
-func (m *ProviderRPCServer) GetTargetInfo(arg *TargetRequest, resp *target.TargetInfo) error {
+func (m *ProviderRPCServer) GetTargetInfo(arg *TargetRequest, resp *models.TargetInfo) error {
 	info, err := m.Impl.GetTargetInfo(arg)
 	if err != nil {
 		return err
@@ -107,7 +106,7 @@ func (m *ProviderRPCServer) DestroyWorkspace(arg *WorkspaceRequest, resp *util.E
 	return err
 }
 
-func (m *ProviderRPCServer) GetWorkspaceInfo(arg *WorkspaceRequest, resp *workspace.WorkspaceInfo) error {
+func (m *ProviderRPCServer) GetWorkspaceInfo(arg *WorkspaceRequest, resp *models.WorkspaceInfo) error {
 	info, err := m.Impl.GetWorkspaceInfo(arg)
 	if err != nil {
 		return err

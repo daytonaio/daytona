@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/daytonaio/daytona/pkg/apikey"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
@@ -28,7 +28,7 @@ func GenerateApiKey(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	response, err := server.ApiKeyService.Generate(apikey.ApiKeyTypeClient, apiKeyName)
+	response, err := server.ApiKeyService.Generate(models.ApiKeyTypeClient, apiKeyName)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get API keys: %w", err))
 		return

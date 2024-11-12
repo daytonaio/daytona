@@ -21,7 +21,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/agent/tailscale"
 	"github.com/daytonaio/daytona/pkg/agent/toolbox"
 	"github.com/daytonaio/daytona/pkg/git"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/models"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"
@@ -49,7 +49,7 @@ var AgentCmd = &cobra.Command{
 
 		telemetryEnabled := os.Getenv("DAYTONA_TELEMETRY_ENABLED") == "true"
 
-		var ws *workspace.Workspace
+		var ws *models.Workspace
 		c.WorkspaceDir = os.Getenv("HOME")
 
 		if agentMode == agent_config.ModeWorkspace {
@@ -100,7 +100,7 @@ var AgentCmd = &cobra.Command{
 
 		tailscaleHostname := c.TargetId
 		if agentMode == agent_config.ModeWorkspace {
-			tailscaleHostname = workspace.GetWorkspaceHostname(c.WorkspaceId)
+			tailscaleHostname = ws.Hostname()
 		}
 
 		toolBoxServer := &toolbox.Server{
@@ -149,7 +149,7 @@ func setLogLevel() {
 	}
 }
 
-func getWorkspace(c *agent_config.Config, telemetryEnabled bool) (*workspace.Workspace, error) {
+func getWorkspace(c *agent_config.Config, telemetryEnabled bool) (*models.Workspace, error) {
 	ctx := context.Background()
 
 	apiClient, err := apiclient_util.GetAgentApiClient(c.Server.ApiUrl, c.Server.ApiKey, c.ClientId, telemetryEnabled)

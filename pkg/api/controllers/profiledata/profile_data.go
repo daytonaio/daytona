@@ -7,8 +7,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/daytonaio/daytona/pkg/profiledata"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server"
+	"github.com/daytonaio/daytona/pkg/server/profiledata"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,16 +19,16 @@ import (
 //	@Summary		Get profile data
 //	@Description	Get profile data
 //	@Accept			json
-//	@Success		200 {object} profiledata.ProfileData
+//	@Success		200 {object} models.ProfileData
 //	@Router			/profile [get]
 //
 //	@id				GetProfileData
 func GetProfileData(ctx *gin.Context) {
 	server := server.GetInstance(nil)
-	profileData, err := server.ProfileDataService.Get()
+	profileData, err := server.ProfileDataService.Get("")
 	if err != nil {
 		if profiledata.IsProfileDataNotFound(err) {
-			ctx.JSON(200, &profiledata.ProfileData{})
+			ctx.JSON(200, &models.ProfileData{})
 			return
 		}
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get profile data: %w", err))
@@ -43,13 +44,13 @@ func GetProfileData(ctx *gin.Context) {
 //	@Summary		Set profile data
 //	@Description	Set profile data
 //	@Accept			json
-//	@Param			profileData	body	profiledata.ProfileData	true	"Profile data"
+//	@Param			profileData	body	models.ProfileData	true	"Profile data"
 //	@Success		201
 //	@Router			/profile [put]
 //
 //	@id				SetProfileData
 func SetProfileData(ctx *gin.Context) {
-	var req profiledata.ProfileData
+	var req models.ProfileData
 	err := ctx.BindJSON(&req)
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
@@ -77,7 +78,7 @@ func SetProfileData(ctx *gin.Context) {
 //	@id				DeleteProfileData
 func DeleteProfileData(ctx *gin.Context) {
 	server := server.GetInstance(nil)
-	err := server.ProfileDataService.Delete()
+	err := server.ProfileDataService.Delete("")
 	if err != nil {
 		if profiledata.IsProfileDataNotFound(err) {
 			ctx.Status(204)

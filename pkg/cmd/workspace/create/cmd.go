@@ -19,11 +19,11 @@ import (
 	workspace_common "github.com/daytonaio/daytona/pkg/cmd/workspace/common"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/views"
 	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
-	"github.com/daytonaio/daytona/pkg/workspace"
 	log "github.com/sirupsen/logrus"
 	"tailscale.com/tsnet"
 
@@ -339,7 +339,7 @@ func waitForDial(target *apiclient.TargetDTO, workspaceId string, activeProfile 
 
 	go func() {
 		for {
-			dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", workspace.GetWorkspaceHostname(workspaceId), ssh_config.SSH_PORT))
+			dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", models.Workspace{Id: workspaceId}.Hostname(), ssh_config.SSH_PORT))
 			if err == nil {
 				connectChan <- dialConn.Close()
 				return

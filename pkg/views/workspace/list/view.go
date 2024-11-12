@@ -135,7 +135,7 @@ func getTableRowData(workspace apiclient.WorkspaceDTO, specifyGitProviders bool)
 	rowData.Repository = util.GetRepositorySlugFromUrl(workspace.Repository.Url, specifyGitProviders)
 	rowData.Branch = workspace.Repository.Branch
 
-	rowData.TargetName = workspace.TargetName + views_util.AdditionalPropertyPadding
+	rowData.TargetName = workspace.Target.Name + views_util.AdditionalPropertyPadding
 
 	if workspace.Info != nil {
 		rowData.Created = util.FormatTimestamp(workspace.Info.Created)

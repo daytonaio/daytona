@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	t_containerregistries "github.com/daytonaio/daytona/internal/testing/server/containerregistries"
-	"github.com/daytonaio/daytona/pkg/containerregistry"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/stretchr/testify/require"
 )
@@ -20,7 +20,7 @@ func TestContainerRegistryService(t *testing.T) {
 	})
 
 	t.Run("CreateContainerRegistry", func(t *testing.T) {
-		var crOrg = &containerregistry.ContainerRegistry{
+		var crOrg = &models.ContainerRegistry{
 			Server:   "example.com",
 			Username: "user",
 			Password: "password",
@@ -37,7 +37,7 @@ func TestContainerRegistryService(t *testing.T) {
 	})
 
 	t.Run("FindByImageName", func(t *testing.T) {
-		var crOrg = &containerregistry.ContainerRegistry{
+		var crOrg = &models.ContainerRegistry{
 			Server:   "example.com",
 			Username: "user",
 			Password: "password",
