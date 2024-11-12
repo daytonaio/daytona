@@ -221,14 +221,14 @@ func (d ItemDelegate[T]) Update(msg tea.Msg, m *list.Model) tea.Cmd {
 				i.title = strings.TrimPrefix(i.title, statusMessageDangerStyle(fmt.Sprintf("%s: ", i.action)))
 				i.isMarked = false
 				m.SetItem(m.Index(), i)
-				return m.NewStatusMessage(statusMessageGreenStyle("Removed target from list: ") + statusMessageGreenStyle(i.title))
+				return m.NewStatusMessage(statusMessageGreenStyle("Removed workspace from list: ") + statusMessageGreenStyle(i.title))
 			}
 
 			title = i.title
 			i.title = statusMessageDangerStyle(fmt.Sprintf("%s: ", i.action)) + statusMessageGreenStyle(i.title)
 			i.isMarked = true
 			m.SetItem(m.Index(), i)
-			return m.NewStatusMessage(statusMessageDangerStyle("Added target to list: ") + statusMessageGreenStyle(title))
+			return m.NewStatusMessage(statusMessageDangerStyle("Added workspace to list: ") + statusMessageGreenStyle(title))
 		}
 	}
 	return nil
