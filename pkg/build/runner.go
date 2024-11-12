@@ -10,12 +10,12 @@ import (
 	"sync"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/git"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/scheduler"
+	"github.com/daytonaio/daytona/pkg/server/builds"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/docker/docker/client"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
@@ -26,9 +26,9 @@ type BuildRunnerInstanceConfig struct {
 	Interval          string
 	Scheduler         scheduler.IScheduler
 	BuildRunnerId     string
-	ContainerRegistry *containerregistry.ContainerRegistry
+	ContainerRegistry *models.ContainerRegistry
 	GitProviderStore  GitProviderStore
-	BuildStore        Store
+	BuildStore        builds.BuildStore
 	BuilderFactory    IBuilderFactory
 	LoggerFactory     logs.LoggerFactory
 	BasePath          string
@@ -40,9 +40,9 @@ type BuildRunner struct {
 	Id                string
 	scheduler         scheduler.IScheduler
 	runInterval       string
-	containerRegistry *containerregistry.ContainerRegistry
+	containerRegistry *models.ContainerRegistry
 	gitProviderStore  GitProviderStore
-	buildStore        Store
+	buildStore        builds.BuildStore
 	builderFactory    IBuilderFactory
 	loggerFactory     logs.LoggerFactory
 	basePath          string
@@ -53,14 +53,14 @@ type BuildRunner struct {
 type BuildProcessConfig struct {
 	Builder      IBuilder
 	BuildLogger  logs.Logger
-	Build        *Build
+	Build        *models.Build
 	WorkspaceDir string
 	GitService   git.IGitService
 	Wg           *sync.WaitGroup
 }
 
 type GitProviderStore interface {
-	ListConfigsForUrl(url string) ([]*gitprovider.GitProviderConfig, error)
+	ListConfigsForUrl(url string) ([]*models.GitProviderConfig, error)
 }
 
 func NewBuildRunner(config BuildRunnerInstanceConfig) *BuildRunner {
@@ -100,8 +100,8 @@ func (r *BuildRunner) Stop() {
 }
 
 func (r *BuildRunner) RunBuilds() {
-	builds, err := r.buildStore.List(&Filter{
-		States: &[]BuildState{BuildStatePendingRun, BuildStatePublished},
+	builds, err := r.buildStore.List(&builds.BuildFilter{
+		States: &[]models.BuildState{models.BuildStatePendingRun, models.BuildStatePublished},
 	})
 	if err != nil {
 		log.Error(err)
@@ -110,7 +110,7 @@ func (r *BuildRunner) RunBuilds() {
 
 	var wg sync.WaitGroup
 	for _, b := range builds {
-		if b.State == BuildStatePendingRun {
+		if b.State == models.BuildStatePendingRun {
 			wg.Add(1)
 
 			if b.BuildConfig == nil {
@@ -142,7 +142,7 @@ func (r *BuildRunner) RunBuilds() {
 
 			_, _, err = cli.ImageInspectWithRaw(context.Background(), imageName)
 			if err == nil {
-				b.State = BuildStatePublished
+				b.State = models.BuildStatePublished
 				err = r.buildStore.Save(b)
 				if err != nil {
 					r.handleBuildError(*b, builder, err, buildLogger)
@@ -151,7 +151,7 @@ func (r *BuildRunner) RunBuilds() {
 				return
 			}
 
-			b.BuildConfig.CachedBuild = GetCachedBuild(b, builds)
+			b.BuildConfig.CachedBuild = models.GetCachedBuild(b, builds)
 
 			go r.RunBuildProcess(BuildProcessConfig{
 				Builder:      builder,
@@ -171,8 +171,8 @@ func (r *BuildRunner) RunBuilds() {
 }
 
 func (r *BuildRunner) DeleteBuilds() {
-	markedForDeletionBuilds, err := r.buildStore.List(&Filter{
-		States: &[]BuildState{BuildStatePendingDelete, BuildStatePendingForcedDelete},
+	markedForDeletionBuilds, err := r.buildStore.List(&builds.BuildFilter{
+		States: &[]models.BuildState{models.BuildStatePendingDelete, models.BuildStatePendingForcedDelete},
 	})
 	if err != nil {
 		log.Error(err)
@@ -193,13 +193,13 @@ func (r *BuildRunner) DeleteBuilds() {
 	for _, b := range markedForDeletionBuilds {
 		wg.Add(1)
 
-		go func(b *Build) {
+		go func(b *models.Build) {
 			buildLogger := r.loggerFactory.CreateBuildLogger(b.Id, logs.LogSourceBuilder)
 			defer buildLogger.Close()
 
-			force := b.State == BuildStatePendingForcedDelete
+			force := b.State == models.BuildStatePendingForcedDelete
 
-			b.State = BuildStateDeleting
+			b.State = models.BuildStateDeleting
 			err = r.buildStore.Save(b)
 			if err != nil {
 				r.handleBuildError(*b, nil, err, buildLogger)
@@ -233,7 +233,7 @@ func (r *BuildRunner) RunBuildProcess(config BuildProcessConfig) {
 		defer config.Wg.Done()
 	}
 
-	config.Build.State = BuildStateRunning
+	config.Build.State = models.BuildStateRunning
 	err := r.buildStore.Save(config.Build)
 	if err != nil {
 		r.handleBuildError(*config.Build, config.Builder, err, config.BuildLogger)
@@ -267,7 +267,7 @@ func (r *BuildRunner) RunBuildProcess(config BuildProcessConfig) {
 
 	config.Build.Image = &image
 	config.Build.User = &user
-	config.Build.State = BuildStateSuccess
+	config.Build.State = models.BuildStateSuccess
 	err = r.buildStore.Save(config.Build)
 	if err != nil {
 		r.handleBuildError(*config.Build, config.Builder, err, config.BuildLogger)
@@ -280,7 +280,7 @@ func (r *BuildRunner) RunBuildProcess(config BuildProcessConfig) {
 		return
 	}
 
-	config.Build.State = BuildStatePublished
+	config.Build.State = models.BuildStatePublished
 	err = r.buildStore.Save(config.Build)
 	if err != nil {
 		r.handleBuildError(*config.Build, config.Builder, err, config.BuildLogger)
@@ -300,13 +300,13 @@ func (r *BuildRunner) RunBuildProcess(config BuildProcessConfig) {
 	}
 }
 
-func (r *BuildRunner) handleBuildError(b Build, builder IBuilder, err error, buildLogger logs.Logger) {
+func (r *BuildRunner) handleBuildError(b models.Build, builder IBuilder, err error, buildLogger logs.Logger) {
 	var errMsg string
 	errMsg += "################################################\n"
 	errMsg += fmt.Sprintf("#### BUILD FAILED FOR %s: %s\n", b.Id, err.Error())
 	errMsg += "################################################\n"
 
-	b.State = BuildStateError
+	b.State = models.BuildStateError
 	err = r.buildStore.Save(&b)
 	if err != nil {
 		errMsg += fmt.Sprintf("Error saving build: %s\n", err.Error())
@@ -326,7 +326,7 @@ func (r *BuildRunner) handleBuildError(b Build, builder IBuilder, err error, bui
 	}
 }
 
-func (r *BuildRunner) logTelemetry(ctx context.Context, b Build, err error) {
+func (r *BuildRunner) logTelemetry(ctx context.Context, b models.Build, err error) {
 	telemetryProps := telemetry.NewBuildRunnerEventProps(ctx, b.Id, string(b.State))
 	event := telemetry.BuildRunnerEventRunBuild
 	if err != nil {

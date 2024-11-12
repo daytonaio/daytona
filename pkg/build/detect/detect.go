@@ -8,8 +8,8 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/ssh"
-	"github.com/daytonaio/daytona/pkg/workspace/buildconfig"
 )
 
 type BuilderType string
@@ -19,7 +19,7 @@ var (
 	BuilderTypeImage        BuilderType = "image"
 )
 
-func DetectWorkspaceBuilderType(buildConfig *buildconfig.BuildConfig, workspaceDir string, sshClient *ssh.Client) (BuilderType, error) {
+func DetectWorkspaceBuilderType(buildConfig *models.BuildConfig, workspaceDir string, sshClient *ssh.Client) (BuilderType, error) {
 	if buildConfig == nil {
 		return BuilderTypeImage, nil
 	}
@@ -30,20 +30,20 @@ func DetectWorkspaceBuilderType(buildConfig *buildconfig.BuildConfig, workspaceD
 
 	if sshClient != nil {
 		if _, err := sshClient.ReadFile(path.Join(workspaceDir, ".devcontainer/devcontainer.json")); err == nil {
-			buildConfig.Devcontainer = &buildconfig.DevcontainerConfig{
+			buildConfig.Devcontainer = &models.DevcontainerConfig{
 				FilePath: ".devcontainer/devcontainer.json",
 			}
 			return BuilderTypeDevcontainer, nil
 		}
 		if _, err := sshClient.ReadFile(path.Join(workspaceDir, ".devcontainer.json")); err == nil {
-			buildConfig.Devcontainer = &buildconfig.DevcontainerConfig{
+			buildConfig.Devcontainer = &models.DevcontainerConfig{
 				FilePath: ".devcontainer.json",
 			}
 			return BuilderTypeDevcontainer, nil
 		}
 	} else {
 		if devcontainerFilePath, pathError := findDevcontainerConfigFilePath(workspaceDir); pathError == nil {
-			buildConfig.Devcontainer = &buildconfig.DevcontainerConfig{
+			buildConfig.Devcontainer = &models.DevcontainerConfig{
 				FilePath: devcontainerFilePath,
 			}
 

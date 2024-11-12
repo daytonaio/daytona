@@ -8,31 +8,32 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/server/builds"
 )
 
 type IBuilder interface {
-	Build(build Build) (string, string, error)
+	Build(build models.Build) (string, string, error)
 	CleanUp() error
-	Publish(build Build) error
-	GetImageName(build Build) (string, error)
+	Publish(build models.Build) error
+	GetImageName(build models.Build) (string, error)
 }
 
 type Builder struct {
 	id                          string
 	workspaceDir                string
 	image                       string
-	containerRegistry           *containerregistry.ContainerRegistry
-	buildImageContainerRegistry *containerregistry.ContainerRegistry
-	buildStore                  Store
+	containerRegistry           *models.ContainerRegistry
+	buildImageContainerRegistry *models.ContainerRegistry
+	buildStore                  builds.BuildStore
 	buildImageNamespace         string
 	loggerFactory               logs.LoggerFactory
 	defaultWorkspaceImage       string
 	defaultWorkspaceUser        string
 }
 
-func (b *Builder) GetImageName(build Build) (string, error) {
+func (b *Builder) GetImageName(build models.Build) (string, error) {
 	hash, err := build.GetBuildHash()
 	if err != nil {
 		return "", err

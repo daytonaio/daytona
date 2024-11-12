@@ -13,14 +13,15 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/build"
 	t_gitprovider "github.com/daytonaio/daytona/pkg/build/mocks"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/server/builds"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
-var gitProviderConfig = gitprovider.GitProviderConfig{
+var gitProviderConfig = models.GitProviderConfig{
 	Id:         "github",
 	Username:   "daytonaio",
 	Token:      "",
@@ -34,7 +35,7 @@ type BuildRunnerTestSuite struct {
 	mockScheduler              mocks.MockScheduler
 	mockGitService             git_mocks.MockGitService
 	loggerFactory              logs.LoggerFactory
-	mockBuildStore             build.Store
+	mockBuildStore             builds.BuildStore
 	mockGitProviderConfigStore t_gitprovider.MockGitProviderConfigStore
 	Runner                     build.BuildRunner
 }
@@ -103,7 +104,7 @@ func (s *BuildRunnerTestSuite) TestRun() {
 
 func (s *BuildRunnerTestSuite) TestRunBuildProcess() {
 	pendingBuild := *mocks.MockBuild
-	s.mockGitProviderConfigStore.On("ListConfigsForUrl", pendingBuild.Repository.Url).Return([]*gitprovider.GitProviderConfig{&gitProviderConfig}, nil)
+	s.mockGitProviderConfigStore.On("ListConfigsForUrl", pendingBuild.Repository.Url).Return([]*models.GitProviderConfig{&gitProviderConfig}, nil)
 	s.mockGitService.On("CloneRepository", pendingBuild.Repository, &http.BasicAuth{
 		Username: gitProviderConfig.Username,
 	}).Return(nil)
@@ -114,11 +115,11 @@ func (s *BuildRunnerTestSuite) TestRunBuildProcess() {
 	}).Return(nil)
 
 	runningBuild := *mocks.MockBuild
-	runningBuild.State = build.BuildStateRunning
+	runningBuild.State = models.BuildStateRunning
 	s.mockBuilder.On("Build", runningBuild).Return("image", "user", nil)
 
 	successBuild := *mocks.MockBuild
-	successBuild.State = build.BuildStateSuccess
+	successBuild.State = models.BuildStateSuccess
 	successBuild.Image = util.Pointer("image")
 	successBuild.User = util.Pointer("user")
 	s.mockBuilder.On("Publish", successBuild).Return(nil)
@@ -143,5 +144,5 @@ func (s *BuildRunnerTestSuite) TestRunBuildProcess() {
 
 	s.Require().Equal(mocks.MockBuild.Image, util.Pointer("image"))
 	s.Require().Equal(mocks.MockBuild.User, util.Pointer("user"))
-	s.Require().Equal(mocks.MockBuild.State, build.BuildStatePublished)
+	s.Require().Equal(mocks.MockBuild.State, models.BuildStatePublished)
 }

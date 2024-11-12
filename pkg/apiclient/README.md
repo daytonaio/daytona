@@ -179,9 +179,7 @@ Class | Method | HTTP request | Description
 ## Documentation For Models
 
  - [ApiKey](docs/ApiKey.md)
- - [ApikeyApiKeyType](docs/ApikeyApiKeyType.md)
  - [Build](docs/Build.md)
- - [BuildBuildState](docs/BuildBuildState.md)
  - [BuildConfig](docs/BuildConfig.md)
  - [CachedBuild](docs/CachedBuild.md)
  - [CloneTarget](docs/CloneTarget.md)
@@ -229,6 +227,8 @@ Class | Method | HTTP request | Description
  - [LspServerRequest](docs/LspServerRequest.md)
  - [LspSymbol](docs/LspSymbol.md)
  - [Match](docs/Match.md)
+ - [ModelsApiKeyType](docs/ModelsApiKeyType.md)
+ - [ModelsBuildState](docs/ModelsBuildState.md)
  - [NetworkKey](docs/NetworkKey.md)
  - [Position](docs/Position.md)
  - [PrebuildConfig](docs/PrebuildConfig.md)
@@ -252,12 +252,12 @@ Class | Method | HTTP request | Description
  - [TargetDTO](docs/TargetDTO.md)
  - [TargetInfo](docs/TargetInfo.md)
  - [TargetProviderInfo](docs/TargetProviderInfo.md)
+ - [Workspace](docs/Workspace.md)
  - [WorkspaceConfig](docs/WorkspaceConfig.md)
  - [WorkspaceDTO](docs/WorkspaceDTO.md)
  - [WorkspaceDirResponse](docs/WorkspaceDirResponse.md)
  - [WorkspaceInfo](docs/WorkspaceInfo.md)
  - [WorkspaceState](docs/WorkspaceState.md)
- - [WorkspaceViewDTO](docs/WorkspaceViewDTO.md)
 
 
 ## Documentation For Authorization

@@ -15,7 +15,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/agent/toolbox/config"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
-	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/gin-gonic/gin"
 )
 
@@ -51,7 +50,7 @@ func forwardRequestToToolbox(ctx *gin.Context) {
 
 	var client *http.Client
 
-	workspaceHostname := workspace.GetWorkspaceHostname(w.Id)
+	workspaceHostname := w.Hostname()
 	route := strings.Replace(ctx.Request.URL.Path, fmt.Sprintf("/workspace/%s/toolbox/", workspaceId), "", 1)
 	query := ctx.Request.URL.Query().Encode()
 

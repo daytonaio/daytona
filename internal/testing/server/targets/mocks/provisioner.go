@@ -8,9 +8,8 @@ package mocks
 import (
 	"context"
 
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provisioner"
-	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -27,24 +26,24 @@ func (p *mockProvisioner) CreateWorkspace(params provisioner.WorkspaceParams) er
 	return args.Error(0)
 }
 
-func (p *mockProvisioner) CreateTarget(t *target.Target) error {
+func (p *mockProvisioner) CreateTarget(t *models.Target) error {
 	args := p.Called(t)
 	return args.Error(0)
 }
 
-func (p *mockProvisioner) DestroyWorkspace(ws *workspace.Workspace, t *target.Target) error {
-	args := p.Called(ws, t)
+func (p *mockProvisioner) DestroyWorkspace(ws *models.Workspace) error {
+	args := p.Called(ws)
 	return args.Error(0)
 }
 
-func (p *mockProvisioner) DestroyTarget(t *target.Target) error {
+func (p *mockProvisioner) DestroyTarget(t *models.Target) error {
 	args := p.Called(t)
 	return args.Error(0)
 }
 
-func (p *mockProvisioner) GetTargetInfo(ctx context.Context, t *target.Target) (*target.TargetInfo, error) {
+func (p *mockProvisioner) GetTargetInfo(ctx context.Context, t *models.Target) (*models.TargetInfo, error) {
 	args := p.Called(ctx, t)
-	return args.Get(0).(*target.TargetInfo), args.Error(1)
+	return args.Get(0).(*models.TargetInfo), args.Error(1)
 }
 
 func (p *mockProvisioner) StartWorkspace(params provisioner.WorkspaceParams) error {
@@ -52,22 +51,22 @@ func (p *mockProvisioner) StartWorkspace(params provisioner.WorkspaceParams) err
 	return args.Error(0)
 }
 
-func (p *mockProvisioner) StartTarget(t *target.Target) error {
+func (p *mockProvisioner) StartTarget(t *models.Target) error {
 	args := p.Called(t)
 	return args.Error(0)
 }
 
-func (p *mockProvisioner) StopWorkspace(ws *workspace.Workspace, t *target.Target) error {
-	args := p.Called(ws, t)
+func (p *mockProvisioner) StopWorkspace(ws *models.Workspace) error {
+	args := p.Called(ws)
 	return args.Error(0)
 }
 
-func (p *mockProvisioner) StopTarget(t *target.Target) error {
+func (p *mockProvisioner) StopTarget(t *models.Target) error {
 	args := p.Called(t)
 	return args.Error(0)
 }
 
-func (p *mockProvisioner) GetWorkspaceInfo(ctx context.Context, w *workspace.Workspace, t *target.Target) (*workspace.WorkspaceInfo, error) {
-	args := p.Called(ctx, w, t)
-	return args.Get(0).(*workspace.WorkspaceInfo), args.Error(1)
+func (p *mockProvisioner) GetWorkspaceInfo(ctx context.Context, w *models.Workspace) (*models.WorkspaceInfo, error) {
+	args := p.Called(ctx, w)
+	return args.Get(0).(*models.WorkspaceInfo), args.Error(1)
 }

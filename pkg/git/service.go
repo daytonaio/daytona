@@ -9,28 +9,28 @@ import (
 	"path/filepath"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
-var MapStatus map[git.StatusCode]workspace.Status = map[git.StatusCode]workspace.Status{
-	git.Unmodified:         workspace.Unmodified,
-	git.Untracked:          workspace.Untracked,
-	git.Modified:           workspace.Modified,
-	git.Added:              workspace.Added,
-	git.Deleted:            workspace.Deleted,
-	git.Renamed:            workspace.Renamed,
-	git.Copied:             workspace.Copied,
-	git.UpdatedButUnmerged: workspace.UpdatedButUnmerged,
+var MapStatus map[git.StatusCode]models.Status = map[git.StatusCode]models.Status{
+	git.Unmodified:         models.Unmodified,
+	git.Untracked:          models.Untracked,
+	git.Modified:           models.Modified,
+	git.Added:              models.Added,
+	git.Deleted:            models.Deleted,
+	git.Renamed:            models.Renamed,
+	git.Copied:             models.Copied,
+	git.UpdatedButUnmerged: models.UpdatedButUnmerged,
 }
 
 type IGitService interface {
 	CloneRepository(repo *gitprovider.GitRepository, auth *http.BasicAuth) error
 	CloneRepositoryCmd(repo *gitprovider.GitRepository, auth *http.BasicAuth) []string
 	RepositoryExists() (bool, error)
-	SetGitConfig(userData *gitprovider.GitUser, providerConfig *gitprovider.GitProviderConfig) error
-	GetGitStatus() (*workspace.GitStatus, error)
+	SetGitConfig(userData *gitprovider.GitUser, providerConfig *models.GitProviderConfig) error
+	GetGitStatus() (*models.GitStatus, error)
 }
 
 type Service struct {

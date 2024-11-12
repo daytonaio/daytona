@@ -1477,7 +1477,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/WorkspaceViewDTO"
+                            "$ref": "#/definitions/Workspace"
                         }
                     }
                 }
@@ -3148,7 +3148,7 @@
                     "type": "string"
                 },
                 "type": {
-                    "$ref": "#/definitions/apikey.ApiKeyType"
+                    "$ref": "#/definitions/models.ApiKeyType"
                 }
             }
         },
@@ -3193,7 +3193,7 @@
                     "$ref": "#/definitions/GitRepository"
                 },
                 "state": {
-                    "$ref": "#/definitions/build.BuildState"
+                    "$ref": "#/definitions/models.BuildState"
                 },
                 "updatedAt": {
                     "type": "string"
@@ -4295,7 +4295,8 @@
         "ProfileData": {
             "type": "object",
             "required": [
-                "envVars"
+                "envVars",
+                "id"
             ],
             "properties": {
                 "envVars": {
@@ -4303,6 +4304,9 @@
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "id": {
+                    "type": "string"
                 }
             }
         },
@@ -4582,6 +4586,12 @@
                 },
                 "providerInfo": {
                     "$ref": "#/definitions/TargetProviderInfo"
+                },
+                "workspaces": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Workspace"
+                    }
                 }
             }
         },
@@ -4655,8 +4665,7 @@
                 "id",
                 "name",
                 "options",
-                "providerInfo",
-                "workspaceCount"
+                "providerInfo"
             ],
             "properties": {
                 "default": {
@@ -4678,8 +4687,11 @@
                 "providerInfo": {
                     "$ref": "#/definitions/TargetProviderInfo"
                 },
-                "workspaceCount": {
-                    "type": "integer"
+                "workspaces": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Workspace"
+                    }
                 }
             }
         },
@@ -4711,6 +4723,57 @@
                     "type": "string"
                 },
                 "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "Workspace": {
+            "type": "object",
+            "required": [
+                "envVars",
+                "id",
+                "image",
+                "name",
+                "repository",
+                "target",
+                "targetId",
+                "user"
+            ],
+            "properties": {
+                "buildConfig": {
+                    "$ref": "#/definitions/BuildConfig"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "gitProviderConfigId": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "repository": {
+                    "$ref": "#/definitions/GitRepository"
+                },
+                "state": {
+                    "$ref": "#/definitions/WorkspaceState"
+                },
+                "target": {
+                    "$ref": "#/definitions/Target"
+                },
+                "targetId": {
+                    "type": "string"
+                },
+                "user": {
                     "type": "string"
                 }
             }
@@ -4769,8 +4832,8 @@
                 "image",
                 "name",
                 "repository",
+                "target",
                 "targetId",
-                "targetName",
                 "user"
             ],
             "properties": {
@@ -4804,10 +4867,10 @@
                 "state": {
                     "$ref": "#/definitions/WorkspaceState"
                 },
-                "targetId": {
-                    "type": "string"
+                "target": {
+                    "$ref": "#/definitions/Target"
                 },
-                "targetName": {
+                "targetId": {
                     "type": "string"
                 },
                 "user": {
@@ -4867,58 +4930,7 @@
                 }
             }
         },
-        "WorkspaceViewDTO": {
-            "type": "object",
-            "required": [
-                "envVars",
-                "id",
-                "image",
-                "name",
-                "repository",
-                "targetId",
-                "targetName",
-                "user"
-            ],
-            "properties": {
-                "buildConfig": {
-                    "$ref": "#/definitions/BuildConfig"
-                },
-                "envVars": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "gitProviderConfigId": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "image": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "repository": {
-                    "$ref": "#/definitions/GitRepository"
-                },
-                "state": {
-                    "$ref": "#/definitions/WorkspaceState"
-                },
-                "targetId": {
-                    "type": "string"
-                },
-                "targetName": {
-                    "type": "string"
-                },
-                "user": {
-                    "type": "string"
-                }
-            }
-        },
-        "apikey.ApiKeyType": {
+        "models.ApiKeyType": {
             "type": "string",
             "enum": [
                 "client",
@@ -4931,7 +4943,7 @@
                 "ApiKeyTypeTarget"
             ]
         },
-        "build.BuildState": {
+        "models.BuildState": {
             "type": "string",
             "enum": [
                 "pending-run",

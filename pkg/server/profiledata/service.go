@@ -4,17 +4,17 @@
 package profiledata
 
 import (
-	. "github.com/daytonaio/daytona/pkg/profiledata"
+	"github.com/daytonaio/daytona/pkg/models"
 )
 
 type IProfileDataService interface {
-	Get() (*ProfileData, error)
-	Save(profileData *ProfileData) error
-	Delete() error
+	Get(id string) (*models.ProfileData, error)
+	Save(profileData *models.ProfileData) error
+	Delete(id string) error
 }
 
 type ProfileDataServiceConfig struct {
-	ProfileDataStore Store
+	ProfileDataStore ProfileDataStore
 }
 
 func NewProfileDataService(config ProfileDataServiceConfig) IProfileDataService {
@@ -24,17 +24,29 @@ func NewProfileDataService(config ProfileDataServiceConfig) IProfileDataService 
 }
 
 type ProfileDataService struct {
-	profileDataStore Store
+	profileDataStore ProfileDataStore
 }
 
-func (s *ProfileDataService) Get() (*ProfileData, error) {
-	return s.profileDataStore.Get()
+func (s *ProfileDataService) Get(id string) (*models.ProfileData, error) {
+	if id == "" {
+		id = ProfileDataId
+	}
+
+	return s.profileDataStore.Get(id)
 }
 
-func (s *ProfileDataService) Save(profileData *ProfileData) error {
+func (s *ProfileDataService) Save(profileData *models.ProfileData) error {
+	if profileData.Id == "" {
+		profileData.Id = ProfileDataId
+	}
+
 	return s.profileDataStore.Save(profileData)
 }
 
-func (s *ProfileDataService) Delete() error {
-	return s.profileDataStore.Delete()
+func (s *ProfileDataService) Delete(id string) error {
+	if id == "" {
+		id = ProfileDataId
+	}
+
+	return s.profileDataStore.Delete(id)
 }

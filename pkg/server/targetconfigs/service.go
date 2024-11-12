@@ -4,23 +4,23 @@
 package targetconfigs
 
 import (
-	"github.com/daytonaio/daytona/pkg/target/config"
+	"github.com/daytonaio/daytona/pkg/models"
 )
 
 type ITargetConfigService interface {
-	Delete(targetConfig *config.TargetConfig) error
-	Find(filter *config.TargetConfigFilter) (*config.TargetConfig, error)
-	List(filter *config.TargetConfigFilter) ([]*config.TargetConfig, error)
-	Map() (map[string]*config.TargetConfig, error)
-	Save(targetConfig *config.TargetConfig) error
+	Delete(targetConfig *models.TargetConfig) error
+	Find(filter *TargetConfigFilter) (*models.TargetConfig, error)
+	List(filter *TargetConfigFilter) ([]*models.TargetConfig, error)
+	Map() (map[string]*models.TargetConfig, error)
+	Save(targetConfig *models.TargetConfig) error
 }
 
 type TargetConfigServiceConfig struct {
-	TargetConfigStore config.TargetConfigStore
+	TargetConfigStore TargetConfigStore
 }
 
 type TargetConfigService struct {
-	targetConfigStore config.TargetConfigStore
+	targetConfigStore TargetConfigStore
 }
 
 func NewTargetConfigService(config TargetConfigServiceConfig) ITargetConfigService {
@@ -29,17 +29,17 @@ func NewTargetConfigService(config TargetConfigServiceConfig) ITargetConfigServi
 	}
 }
 
-func (s *TargetConfigService) List(filter *config.TargetConfigFilter) ([]*config.TargetConfig, error) {
+func (s *TargetConfigService) List(filter *TargetConfigFilter) ([]*models.TargetConfig, error) {
 	return s.targetConfigStore.List(filter)
 }
 
-func (s *TargetConfigService) Map() (map[string]*config.TargetConfig, error) {
+func (s *TargetConfigService) Map() (map[string]*models.TargetConfig, error) {
 	list, err := s.targetConfigStore.List(nil)
 	if err != nil {
 		return nil, err
 	}
 
-	targetConfigs := make(map[string]*config.TargetConfig)
+	targetConfigs := make(map[string]*models.TargetConfig)
 	for _, targetConfig := range list {
 		targetConfigs[targetConfig.Name] = targetConfig
 	}
@@ -47,14 +47,14 @@ func (s *TargetConfigService) Map() (map[string]*config.TargetConfig, error) {
 	return targetConfigs, nil
 }
 
-func (s *TargetConfigService) Find(filter *config.TargetConfigFilter) (*config.TargetConfig, error) {
+func (s *TargetConfigService) Find(filter *TargetConfigFilter) (*models.TargetConfig, error) {
 	return s.targetConfigStore.Find(filter)
 }
 
-func (s *TargetConfigService) Save(targetConfig *config.TargetConfig) error {
+func (s *TargetConfigService) Save(targetConfig *models.TargetConfig) error {
 	return s.targetConfigStore.Save(targetConfig)
 }
 
-func (s *TargetConfigService) Delete(targetConfig *config.TargetConfig) error {
+func (s *TargetConfigService) Delete(targetConfig *models.TargetConfig) error {
 	return s.targetConfigStore.Delete(targetConfig)
 }

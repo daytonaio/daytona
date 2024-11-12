@@ -6,8 +6,8 @@ package db
 import (
 	"gorm.io/gorm"
 
-	"github.com/daytonaio/daytona/pkg/containerregistry"
-	. "github.com/daytonaio/daytona/pkg/db/dto"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 )
 
 type ContainerRegistryStore struct {
@@ -15,7 +15,7 @@ type ContainerRegistryStore struct {
 }
 
 func NewContainerRegistryStore(db *gorm.DB) (*ContainerRegistryStore, error) {
-	err := db.AutoMigrate(&ContainerRegistryDTO{})
+	err := db.AutoMigrate(&models.ContainerRegistry{})
 	if err != nil {
 		return nil, err
 	}
@@ -23,36 +23,31 @@ func NewContainerRegistryStore(db *gorm.DB) (*ContainerRegistryStore, error) {
 	return &ContainerRegistryStore{db: db}, nil
 }
 
-func (s *ContainerRegistryStore) List() ([]*containerregistry.ContainerRegistry, error) {
-	containerRegistryDTOs := []ContainerRegistryDTO{}
-	tx := s.db.Find(&containerRegistryDTOs)
+func (s *ContainerRegistryStore) List() ([]*models.ContainerRegistry, error) {
+	containerRegistries := []*models.ContainerRegistry{}
+	tx := s.db.Find(&containerRegistries)
 	if tx.Error != nil {
 		return nil, tx.Error
-	}
-
-	containerRegistries := []*containerregistry.ContainerRegistry{}
-	for _, containerRegistryDTO := range containerRegistryDTOs {
-		containerRegistries = append(containerRegistries, ToContainerRegistry(containerRegistryDTO))
 	}
 
 	return containerRegistries, nil
 }
 
-func (s *ContainerRegistryStore) Find(server string) (*containerregistry.ContainerRegistry, error) {
-	containerRegistryDTO := ContainerRegistryDTO{}
-	tx := s.db.Where("server = ?", server).First(&containerRegistryDTO)
+func (s *ContainerRegistryStore) Find(server string) (*models.ContainerRegistry, error) {
+	containerRegistry := &models.ContainerRegistry{}
+	tx := s.db.Where("server = ?", server).First(containerRegistry)
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
-			return nil, containerregistry.ErrContainerRegistryNotFound
+			return nil, containerregistries.ErrContainerRegistryNotFound
 		}
 		return nil, tx.Error
 	}
 
-	return ToContainerRegistry(containerRegistryDTO), nil
+	return containerRegistry, nil
 }
 
-func (s *ContainerRegistryStore) Save(cr *containerregistry.ContainerRegistry) error {
-	tx := s.db.Save(ToContainerRegistryDTO(cr))
+func (s *ContainerRegistryStore) Save(cr *models.ContainerRegistry) error {
+	tx := s.db.Save(cr)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -60,13 +55,13 @@ func (s *ContainerRegistryStore) Save(cr *containerregistry.ContainerRegistry) e
 	return nil
 }
 
-func (s *ContainerRegistryStore) Delete(cr *containerregistry.ContainerRegistry) error {
-	tx := s.db.Delete(ToContainerRegistryDTO(cr))
+func (s *ContainerRegistryStore) Delete(cr *models.ContainerRegistry) error {
+	tx := s.db.Delete(cr)
 	if tx.Error != nil {
 		return tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		return containerregistry.ErrContainerRegistryNotFound
+		return containerregistries.ErrContainerRegistryNotFound
 	}
 
 	return nil

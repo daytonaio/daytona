@@ -4,11 +4,11 @@
 package provisioner
 
 import (
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provider"
-	"github.com/daytonaio/daytona/pkg/target"
 )
 
-func (p *Provisioner) CreateTarget(t *target.Target) error {
+func (p *Provisioner) CreateTarget(t *models.Target) error {
 	targetProvider, err := p.providerManager.GetProvider(t.ProviderInfo.Name)
 	if err != nil {
 		return err
@@ -22,13 +22,12 @@ func (p *Provisioner) CreateTarget(t *target.Target) error {
 }
 
 func (p *Provisioner) CreateWorkspace(params WorkspaceParams) error {
-	targetProvider, err := p.providerManager.GetProvider(params.Target.ProviderInfo.Name)
+	targetProvider, err := p.providerManager.GetProvider(params.Workspace.Target.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
 	_, err = (*targetProvider).CreateWorkspace(&provider.WorkspaceRequest{
-		Target:                   params.Target,
 		Workspace:                params.Workspace,
 		ContainerRegistry:        params.ContainerRegistry,
 		GitProviderConfig:        params.GitProviderConfig,

@@ -5,13 +5,13 @@ package dto
 
 import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace/buildconfig"
+	"github.com/daytonaio/daytona/pkg/models"
 )
 
 type BuildCreationData struct {
 	Image       string                     `json:"image" validate:"required"`
 	User        string                     `json:"user" validate:"required"`
-	BuildConfig *buildconfig.BuildConfig   `json:"buildConfig" validate:"optional"`
+	BuildConfig *models.BuildConfig        `json:"buildConfig" validate:"optional"`
 	Repository  *gitprovider.GitRepository `json:"repository" validate:"optional"`
 	EnvVars     map[string]string          `json:"envVars" validate:"required"`
 	PrebuildId  string                     `json:"prebuildId" validate:"required"`
