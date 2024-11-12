@@ -5,7 +5,7 @@ package apikeys
 
 import (
 	"github.com/daytonaio/daytona/internal/apikeys"
-	"github.com/daytonaio/daytona/pkg/apikey"
+	"github.com/daytonaio/daytona/pkg/models"
 )
 
 func (s *ApiKeyService) IsValidApiKey(apiKey string) bool {
@@ -23,7 +23,7 @@ func (s *ApiKeyService) IsWorkspaceApiKey(apiKey string) bool {
 		return false
 	}
 
-	if key.Type != apikey.ApiKeyTypeWorkspace {
+	if key.Type != models.ApiKeyTypeWorkspace {
 		return false
 	}
 
@@ -38,7 +38,7 @@ func (s *ApiKeyService) IsTargetApiKey(apiKey string) bool {
 		return false
 	}
 
-	if key.Type != apikey.ApiKeyTypeTarget {
+	if key.Type != models.ApiKeyTypeTarget {
 		return false
 	}
 

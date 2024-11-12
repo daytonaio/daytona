@@ -26,9 +26,9 @@ type TargetDTO struct {
 	Info    *TargetInfo `json:"info,omitempty"`
 	Name    string      `json:"name"`
 	// JSON encoded map of options
-	Options        string             `json:"options"`
-	ProviderInfo   TargetProviderInfo `json:"providerInfo"`
-	WorkspaceCount int32              `json:"workspaceCount"`
+	Options      string             `json:"options"`
+	ProviderInfo TargetProviderInfo `json:"providerInfo"`
+	Workspaces   []Workspace        `json:"workspaces,omitempty"`
 }
 
 type _TargetDTO TargetDTO
@@ -37,14 +37,13 @@ type _TargetDTO TargetDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTargetDTO(default_ bool, id string, name string, options string, providerInfo TargetProviderInfo, workspaceCount int32) *TargetDTO {
+func NewTargetDTO(default_ bool, id string, name string, options string, providerInfo TargetProviderInfo) *TargetDTO {
 	this := TargetDTO{}
 	this.Default = default_
 	this.Id = id
 	this.Name = name
 	this.Options = options
 	this.ProviderInfo = providerInfo
-	this.WorkspaceCount = workspaceCount
 	return &this
 }
 
@@ -208,28 +207,36 @@ func (o *TargetDTO) SetProviderInfo(v TargetProviderInfo) {
 	o.ProviderInfo = v
 }
 
-// GetWorkspaceCount returns the WorkspaceCount field value
-func (o *TargetDTO) GetWorkspaceCount() int32 {
-	if o == nil {
-		var ret int32
+// GetWorkspaces returns the Workspaces field value if set, zero value otherwise.
+func (o *TargetDTO) GetWorkspaces() []Workspace {
+	if o == nil || IsNil(o.Workspaces) {
+		var ret []Workspace
 		return ret
 	}
-
-	return o.WorkspaceCount
+	return o.Workspaces
 }
 
-// GetWorkspaceCountOk returns a tuple with the WorkspaceCount field value
+// GetWorkspacesOk returns a tuple with the Workspaces field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TargetDTO) GetWorkspaceCountOk() (*int32, bool) {
-	if o == nil {
+func (o *TargetDTO) GetWorkspacesOk() ([]Workspace, bool) {
+	if o == nil || IsNil(o.Workspaces) {
 		return nil, false
 	}
-	return &o.WorkspaceCount, true
+	return o.Workspaces, true
 }
 
-// SetWorkspaceCount sets field value
-func (o *TargetDTO) SetWorkspaceCount(v int32) {
-	o.WorkspaceCount = v
+// HasWorkspaces returns a boolean if a field has been set.
+func (o *TargetDTO) HasWorkspaces() bool {
+	if o != nil && !IsNil(o.Workspaces) {
+		return true
+	}
+
+	return false
+}
+
+// SetWorkspaces gets a reference to the given []Workspace and assigns it to the Workspaces field.
+func (o *TargetDTO) SetWorkspaces(v []Workspace) {
+	o.Workspaces = v
 }
 
 func (o TargetDTO) MarshalJSON() ([]byte, error) {
@@ -250,7 +257,9 @@ func (o TargetDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize["name"] = o.Name
 	toSerialize["options"] = o.Options
 	toSerialize["providerInfo"] = o.ProviderInfo
-	toSerialize["workspaceCount"] = o.WorkspaceCount
+	if !IsNil(o.Workspaces) {
+		toSerialize["workspaces"] = o.Workspaces
+	}
 	return toSerialize, nil
 }
 
@@ -264,7 +273,6 @@ func (o *TargetDTO) UnmarshalJSON(data []byte) (err error) {
 		"name",
 		"options",
 		"providerInfo",
-		"workspaceCount",
 	}
 
 	allProperties := make(map[string]interface{})

@@ -10,8 +10,8 @@ import (
 	"net"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/ports"
-	"github.com/daytonaio/daytona/pkg/workspace"
 	"tailscale.com/tsnet"
 )
 
@@ -47,7 +47,7 @@ func ForwardPort(workspaceId string, targetPort uint16, profile config.Profile) 
 				return
 			}
 
-			targetUrl := fmt.Sprintf("%s:%d", workspace.GetWorkspaceHostname(workspaceId), targetPort)
+			targetUrl := fmt.Sprintf("%s:%d", (models.Workspace{Id: workspaceId}).Hostname(), targetPort)
 
 			go handlePortConnection(conn, tsConn, targetUrl, errChan)
 		}

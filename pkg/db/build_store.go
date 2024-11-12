@@ -9,9 +9,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/daytonaio/daytona/pkg/build"
-	. "github.com/daytonaio/daytona/pkg/db/dto"
-	"github.com/daytonaio/daytona/pkg/workspace/buildconfig"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/server/builds"
 	"gorm.io/gorm"
 )
 
@@ -21,7 +20,7 @@ type BuildStore struct {
 }
 
 func NewBuildStore(db *gorm.DB) (*BuildStore, error) {
-	err := db.AutoMigrate(&BuildDTO{})
+	err := db.AutoMigrate(&models.Build{})
 	if err != nil {
 		return nil, err
 	}
@@ -29,50 +28,42 @@ func NewBuildStore(db *gorm.DB) (*BuildStore, error) {
 	return &BuildStore{db: db}, nil
 }
 
-func (b *BuildStore) Find(filter *build.Filter) (*build.Build, error) {
+func (b *BuildStore) Find(filter *builds.BuildFilter) (*models.Build, error) {
 	b.Lock.Lock()
 	defer b.Lock.Unlock()
 
-	buildDTO := BuildDTO{}
-	tx := processBuildFilters(b.db, filter).First(&buildDTO)
+	build := &models.Build{}
+	tx := processBuildFilters(b.db, filter).First(build)
 
 	if tx.Error != nil {
 		if tx.Error == gorm.ErrRecordNotFound {
-			return nil, build.ErrBuildNotFound
+			return nil, builds.ErrBuildNotFound
 		}
 		return nil, tx.Error
 	}
 
-	build := ToBuild(buildDTO)
-
 	return build, nil
 }
 
-func (b *BuildStore) List(filter *build.Filter) ([]*build.Build, error) {
+func (b *BuildStore) List(filter *builds.BuildFilter) ([]*models.Build, error) {
 	b.Lock.Lock()
 	defer b.Lock.Unlock()
 
-	buildDTOs := []BuildDTO{}
-	tx := processBuildFilters(b.db, filter).Find(&buildDTOs)
+	builds := []*models.Build{}
+	tx := processBuildFilters(b.db, filter).Find(&builds)
 
 	if tx.Error != nil {
 		return nil, tx.Error
-	}
-
-	builds := []*build.Build{}
-	for _, buildDTO := range buildDTOs {
-		builds = append(builds, ToBuild(buildDTO))
 	}
 
 	return builds, nil
 }
 
-func (b *BuildStore) Save(build *build.Build) error {
+func (b *BuildStore) Save(build *models.Build) error {
 	b.Lock.Lock()
 	defer b.Lock.Unlock()
 
-	buildDTO := ToBuildDTO(build)
-	tx := b.db.Save(&buildDTO)
+	tx := b.db.Save(build)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -84,18 +75,18 @@ func (b *BuildStore) Delete(id string) error {
 	b.Lock.Lock()
 	defer b.Lock.Unlock()
 
-	tx := b.db.Where("id = ?", id).Delete(&BuildDTO{})
+	tx := b.db.Where("id = ?", id).Delete(&models.Build{})
 	if tx.Error != nil {
 		return tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		return build.ErrBuildNotFound
+		return builds.ErrBuildNotFound
 	}
 
 	return nil
 }
 
-func processBuildFilters(tx *gorm.DB, filter *build.Filter) *gorm.DB {
+func processBuildFilters(tx *gorm.DB, filter *builds.BuildFilter) *gorm.DB {
 	if filter != nil {
 		if filter.Id != nil {
 			tx = tx.Where("id = ?", *filter.Id)
@@ -116,7 +107,7 @@ func processBuildFilters(tx *gorm.DB, filter *build.Filter) *gorm.DB {
 			tx = tx.Order("created_at desc").Limit(1)
 		}
 		// Skip filtering when an automatic build config is provided
-		if filter.BuildConfig != nil && *filter.BuildConfig != (buildconfig.BuildConfig{}) {
+		if filter.BuildConfig != nil && *filter.BuildConfig != (models.BuildConfig{}) {
 			buildConfigJSON, err := json.Marshal(filter.BuildConfig)
 			if err == nil {
 				tx = tx.Where("build_config = ?", string(buildConfigJSON))

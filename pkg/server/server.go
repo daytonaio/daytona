@@ -15,7 +15,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/profiledata"
 	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
 	"github.com/daytonaio/daytona/pkg/server/targets"
-	"github.com/daytonaio/daytona/pkg/server/workspaceconfig"
+	"github.com/daytonaio/daytona/pkg/server/workspaceconfigs"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/hashicorp/go-plugin"
@@ -30,7 +30,7 @@ type ServerInstanceConfig struct {
 	TargetConfigService      targetconfigs.ITargetConfigService
 	ContainerRegistryService containerregistries.IContainerRegistryService
 	BuildService             builds.IBuildService
-	WorkspaceConfigService   workspaceconfig.IWorkspaceConfigService
+	WorkspaceConfigService   workspaceconfigs.IWorkspaceConfigService
 	WorkspaceService         workspaces.IWorkspaceService
 	LocalContainerRegistry   ILocalContainerRegistry
 	TargetService            targets.ITargetService
@@ -83,7 +83,7 @@ type Server struct {
 	TargetConfigService      targetconfigs.ITargetConfigService
 	ContainerRegistryService containerregistries.IContainerRegistryService
 	BuildService             builds.IBuildService
-	WorkspaceConfigService   workspaceconfig.IWorkspaceConfigService
+	WorkspaceConfigService   workspaceconfigs.IWorkspaceConfigService
 	WorkspaceService         workspaces.IWorkspaceService
 	LocalContainerRegistry   ILocalContainerRegistry
 	TargetService            targets.ITargetService

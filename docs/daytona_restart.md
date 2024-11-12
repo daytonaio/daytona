@@ -3,7 +3,7 @@
 Restart a workspace
 
 ```
-daytona restart [WORKSPACE] [flags]
+daytona restart [WORKSPACE]... [flags]
 ```
 
 ### Options inherited from parent commands

@@ -6,34 +6,31 @@ package provisioner
 import (
 	"context"
 
-	"github.com/daytonaio/daytona/pkg/containerregistry"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
-	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/workspace"
 )
 
 type WorkspaceParams struct {
-	Workspace                     *workspace.Workspace
-	Target                        *target.Target
-	ContainerRegistry             *containerregistry.ContainerRegistry
-	GitProviderConfig             *gitprovider.GitProviderConfig
+	Workspace                     *models.Workspace
+	Target                        *models.Target
+	ContainerRegistry             *models.ContainerRegistry
+	GitProviderConfig             *models.GitProviderConfig
 	BuilderImage                  string
-	BuilderImageContainerRegistry *containerregistry.ContainerRegistry
+	BuilderImageContainerRegistry *models.ContainerRegistry
 }
 
 type IProvisioner interface {
-	CreateTarget(target *target.Target) error
-	StartTarget(target *target.Target) error
-	StopTarget(target *target.Target) error
-	GetTargetInfo(ctx context.Context, target *target.Target) (*target.TargetInfo, error)
-	DestroyTarget(target *target.Target) error
+	CreateTarget(target *models.Target) error
+	StartTarget(target *models.Target) error
+	StopTarget(target *models.Target) error
+	GetTargetInfo(ctx context.Context, target *models.Target) (*models.TargetInfo, error)
+	DestroyTarget(target *models.Target) error
 
 	CreateWorkspace(params WorkspaceParams) error
-	DestroyWorkspace(workspace *workspace.Workspace, target *target.Target) error
+	DestroyWorkspace(workspace *models.Workspace) error
 	StartWorkspace(params WorkspaceParams) error
-	StopWorkspace(workspace *workspace.Workspace, target *target.Target) error
-	GetWorkspaceInfo(ctx context.Context, workspace *workspace.Workspace, target *target.Target) (*workspace.WorkspaceInfo, error)
+	StopWorkspace(workspace *models.Workspace) error
+	GetWorkspaceInfo(ctx context.Context, workspace *models.Workspace) (*models.WorkspaceInfo, error)
 }
 
 type ProvisionerConfig struct {

@@ -49,7 +49,7 @@ func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO, isMultipleSelect
 			title:          workspaceName,
 			id:             workspace.Id,
 			desc:           "",
-			targetName:     workspace.TargetName,
+			targetName:     workspace.Target.Name,
 			repository:     workspace.Repository.Url,
 			createdTime:    createdTime,
 			uptime:         uptime,

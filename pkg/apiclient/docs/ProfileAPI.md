@@ -151,7 +151,7 @@ import (
 )
 
 func main() {
-	profileData := *openapiclient.NewProfileData(map[string]string{"key": "Inner_example"}) // ProfileData | Profile data
+	profileData := *openapiclient.NewProfileData(map[string]string{"key": "Inner_example"}, "Id_example") // ProfileData | Profile data
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

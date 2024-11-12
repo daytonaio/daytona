@@ -13,16 +13,14 @@ import (
 	"github.com/daytonaio/daytona/internal/testing/server/targets/mocks"
 	t_workspaces "github.com/daytonaio/daytona/internal/testing/server/workspaces"
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/pkg/apikey"
-	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provisioner"
+	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
-	"github.com/daytonaio/daytona/pkg/target"
 	"github.com/daytonaio/daytona/pkg/telemetry"
-	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -37,7 +35,7 @@ var gitProviderConfigId = "github"
 
 var baseApiUrl = "https://api.github.com"
 
-var gitProviderConfig = gitprovider.GitProviderConfig{
+var gitProviderConfig = models.GitProviderConfig{
 	Id:         "github",
 	ProviderId: gitProviderConfigId,
 	Alias:      "test-alias",
@@ -46,10 +44,10 @@ var gitProviderConfig = gitprovider.GitProviderConfig{
 	BaseApiUrl: &baseApiUrl,
 }
 
-var tg = &target.Target{
+var tg = &models.Target{
 	Id:   "123",
 	Name: "test",
-	ProviderInfo: target.ProviderInfo{
+	ProviderInfo: models.ProviderInfo{
 		Name:    "test-provider",
 		Version: "test",
 	},
@@ -74,7 +72,7 @@ var createWorkspaceDTO = dto.CreateWorkspaceDTO{
 	TargetId: tg.Id,
 }
 
-var workspaceInfo = workspace.WorkspaceInfo{
+var workspaceInfo = models.WorkspaceInfo{
 	Name:             createWorkspaceDTO.Name,
 	Created:          "1 min ago",
 	IsRunning:        true,
@@ -82,7 +80,7 @@ var workspaceInfo = workspace.WorkspaceInfo{
 	TargetId:         "123",
 }
 
-var ws = &workspace.Workspace{
+var ws = &models.Workspace{
 	Id:                  "123",
 	Name:                "workspace1",
 	ApiKey:              createWorkspaceDTO.Name,
@@ -100,7 +98,7 @@ var ws = &workspace.Workspace{
 }
 
 func TestTargetService(t *testing.T) {
-	ws.EnvVars = workspace.GetWorkspaceEnvVars(ws, workspace.WorkspaceEnvVarParams{
+	ws.EnvVars = workspaces.GetWorkspaceEnvVars(ws, workspaces.WorkspaceEnvVarParams{
 		ApiUrl:    serverApiUrl,
 		ServerUrl: serverUrl,
 		ClientId:  "test-client-id",
@@ -139,15 +137,15 @@ func TestTargetService(t *testing.T) {
 	})
 
 	t.Run("CreateWorkspace", func(t *testing.T) {
-		var containerRegistry *containerregistry.ContainerRegistry
+		var containerRegistry *models.ContainerRegistry
 
-		containerRegistryService.On("FindByImageName", defaultWorkspaceImage).Return(containerRegistry, containerregistry.ErrContainerRegistryNotFound)
+		containerRegistryService.On("FindByImageName", defaultWorkspaceImage).Return(containerRegistry, containerregistries.ErrContainerRegistryNotFound)
 
 		gitProviderService.On("GetLastCommitSha", createWorkspaceDTO.Source.Repository).Return("123", nil)
 
-		apiKeyService.On("Generate", apikey.ApiKeyTypeWorkspace, fmt.Sprintf("ws-%s", createWorkspaceDTO.Id)).Return(createWorkspaceDTO.Name, nil)
+		apiKeyService.On("Generate", models.ApiKeyTypeWorkspace, fmt.Sprintf("ws-%s", createWorkspaceDTO.Id)).Return(createWorkspaceDTO.Name, nil)
 
-		ws := &workspace.Workspace{
+		ws := &models.Workspace{
 			Name:                createWorkspaceDTO.Name,
 			Image:               *createWorkspaceDTO.Image,
 			User:                *createWorkspaceDTO.User,
@@ -158,7 +156,7 @@ func TestTargetService(t *testing.T) {
 			TargetId:            createWorkspaceDTO.Id,
 		}
 
-		ws.EnvVars = workspace.GetWorkspaceEnvVars(ws, workspace.WorkspaceEnvVarParams{
+		ws.EnvVars = workspaces.GetWorkspaceEnvVars(ws, workspaces.WorkspaceEnvVarParams{
 			ApiUrl:        serverApiUrl,
 			ServerUrl:     serverUrl,
 			ServerVersion: serverVersion,
@@ -189,7 +187,7 @@ func TestTargetService(t *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, workspace)
 
-		workspaceEquals(t, ws, &workspace.Workspace, defaultWorkspaceImage)
+		workspaceEquals(t, ws, workspace, defaultWorkspaceImage)
 
 		ws.EnvVars = nil
 	})
@@ -299,10 +297,10 @@ func TestTargetService(t *testing.T) {
 		require.Nil(t, err)
 
 		updatedAt := time.Now().Format(time.RFC1123)
-		res, err := service.SetWorkspaceState(createWorkspaceDTO.Id, &workspace.WorkspaceState{
+		res, err := service.SetWorkspaceState(createWorkspaceDTO.Id, &models.WorkspaceState{
 			UpdatedAt: updatedAt,
 			Uptime:    10,
-			GitStatus: &workspace.GitStatus{
+			GitStatus: &models.GitStatus{
 				CurrentBranch: "main",
 			},
 		})
@@ -318,7 +316,7 @@ func TestTargetService(t *testing.T) {
 	})
 }
 
-func workspaceEquals(t *testing.T, ws1, ws2 *workspace.Workspace, workspaceImage string) {
+func workspaceEquals(t *testing.T, ws1, ws2 *models.Workspace, workspaceImage string) {
 	t.Helper()
 
 	require.Equal(t, ws1.Id, ws2.Id)
@@ -332,7 +330,7 @@ func workspaceEquals(t *testing.T, ws1, ws2 *workspace.Workspace, workspaceImage
 	require.Equal(t, ws1.Repository.Name, ws2.Repository.Name)
 }
 
-func workspaceDtoEquals(t *testing.T, req dto.CreateWorkspaceDTO, workspace dto.WorkspaceDTO, workspaceInfo workspace.WorkspaceInfo, workspaceImage string, verbose bool) {
+func workspaceDtoEquals(t *testing.T, req dto.CreateWorkspaceDTO, workspace dto.WorkspaceDTO, workspaceInfo models.WorkspaceInfo, workspaceImage string, verbose bool) {
 	t.Helper()
 
 	require.Equal(t, req.Id, workspace.Id)

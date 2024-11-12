@@ -9,8 +9,8 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/ports"
-	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/go-connections/nat"
@@ -106,7 +106,7 @@ func (d *DockerClient) initWorkspaceContainer(opts *CreateWorkspaceOptions, moun
 	return nil
 }
 
-func GetContainerCreateConfig(workspace *workspace.Workspace, toolboxApiHostPort *uint16) *container.Config {
+func GetContainerCreateConfig(workspace *models.Workspace, toolboxApiHostPort *uint16) *container.Config {
 	envVars := []string{}
 
 	for key, value := range workspace.EnvVars {

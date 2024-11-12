@@ -5,13 +5,12 @@ package dto
 
 import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/daytonaio/daytona/pkg/workspace/buildconfig"
+	"github.com/daytonaio/daytona/pkg/models"
 )
 
 type WorkspaceDTO struct {
-	workspace.WorkspaceViewDTO
-	Info *workspace.WorkspaceInfo `json:"info" validate:"optional"`
+	models.Workspace
+	Info *models.WorkspaceInfo `json:"info" validate:"optional"`
 } //	@name	WorkspaceDTO
 
 type CreateWorkspaceDTO struct {
@@ -19,7 +18,7 @@ type CreateWorkspaceDTO struct {
 	Name                string                   `json:"name" validate:"required"`
 	Image               *string                  `json:"image,omitempty" validate:"optional"`
 	User                *string                  `json:"user,omitempty" validate:"optional"`
-	BuildConfig         *buildconfig.BuildConfig `json:"buildConfig,omitempty" validate:"optional"`
+	BuildConfig         *models.BuildConfig      `json:"buildConfig,omitempty" validate:"optional"`
 	Source              CreateWorkspaceSourceDTO `json:"source" validate:"required"`
 	EnvVars             map[string]string        `json:"envVars" validate:"required"`
 	TargetId            string                   `json:"targetId" validate:"required"`

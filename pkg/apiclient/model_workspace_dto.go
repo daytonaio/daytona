@@ -30,8 +30,8 @@ type WorkspaceDTO struct {
 	Name                string            `json:"name"`
 	Repository          GitRepository     `json:"repository"`
 	State               *WorkspaceState   `json:"state,omitempty"`
+	Target              Target            `json:"target"`
 	TargetId            string            `json:"targetId"`
-	TargetName          string            `json:"targetName"`
 	User                string            `json:"user"`
 }
 
@@ -41,15 +41,15 @@ type _WorkspaceDTO WorkspaceDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewWorkspaceDTO(envVars map[string]string, id string, image string, name string, repository GitRepository, targetId string, targetName string, user string) *WorkspaceDTO {
+func NewWorkspaceDTO(envVars map[string]string, id string, image string, name string, repository GitRepository, target Target, targetId string, user string) *WorkspaceDTO {
 	this := WorkspaceDTO{}
 	this.EnvVars = envVars
 	this.Id = id
 	this.Image = image
 	this.Name = name
 	this.Repository = repository
+	this.Target = target
 	this.TargetId = targetId
-	this.TargetName = targetName
 	this.User = user
 	return &this
 }
@@ -310,6 +310,30 @@ func (o *WorkspaceDTO) SetState(v WorkspaceState) {
 	o.State = &v
 }
 
+// GetTarget returns the Target field value
+func (o *WorkspaceDTO) GetTarget() Target {
+	if o == nil {
+		var ret Target
+		return ret
+	}
+
+	return o.Target
+}
+
+// GetTargetOk returns a tuple with the Target field value
+// and a boolean to check if the value has been set.
+func (o *WorkspaceDTO) GetTargetOk() (*Target, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Target, true
+}
+
+// SetTarget sets field value
+func (o *WorkspaceDTO) SetTarget(v Target) {
+	o.Target = v
+}
+
 // GetTargetId returns the TargetId field value
 func (o *WorkspaceDTO) GetTargetId() string {
 	if o == nil {
@@ -332,30 +356,6 @@ func (o *WorkspaceDTO) GetTargetIdOk() (*string, bool) {
 // SetTargetId sets field value
 func (o *WorkspaceDTO) SetTargetId(v string) {
 	o.TargetId = v
-}
-
-// GetTargetName returns the TargetName field value
-func (o *WorkspaceDTO) GetTargetName() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.TargetName
-}
-
-// GetTargetNameOk returns a tuple with the TargetName field value
-// and a boolean to check if the value has been set.
-func (o *WorkspaceDTO) GetTargetNameOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.TargetName, true
-}
-
-// SetTargetName sets field value
-func (o *WorkspaceDTO) SetTargetName(v string) {
-	o.TargetName = v
 }
 
 // GetUser returns the User field value
@@ -409,8 +409,8 @@ func (o WorkspaceDTO) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.State) {
 		toSerialize["state"] = o.State
 	}
+	toSerialize["target"] = o.Target
 	toSerialize["targetId"] = o.TargetId
-	toSerialize["targetName"] = o.TargetName
 	toSerialize["user"] = o.User
 	return toSerialize, nil
 }
@@ -425,8 +425,8 @@ func (o *WorkspaceDTO) UnmarshalJSON(data []byte) (err error) {
 		"image",
 		"name",
 		"repository",
+		"target",
 		"targetId",
-		"targetName",
 		"user",
 	}
 

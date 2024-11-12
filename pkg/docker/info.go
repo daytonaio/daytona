@@ -8,8 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 )
@@ -17,8 +16,8 @@ import (
 const ContainerNotFoundMetadata = "{\"state\": \"container not found\"}"
 const TargetMetadataFormat = "{\"networkId\": \"%s\"}"
 
-func (d *DockerClient) GetTargetInfo(t *target.Target) (*target.TargetInfo, error) {
-	targetInfo := &target.TargetInfo{
+func (d *DockerClient) GetTargetInfo(t *models.Target) (*models.TargetInfo, error) {
+	targetInfo := &models.TargetInfo{
 		Name:             t.Name,
 		ProviderMetadata: fmt.Sprintf(TargetMetadataFormat, t.Id),
 	}
@@ -26,7 +25,7 @@ func (d *DockerClient) GetTargetInfo(t *target.Target) (*target.TargetInfo, erro
 	return targetInfo, nil
 }
 
-func (d *DockerClient) GetWorkspaceInfo(w *workspace.Workspace) (*workspace.WorkspaceInfo, error) {
+func (d *DockerClient) GetWorkspaceInfo(w *models.Workspace) (*models.WorkspaceInfo, error) {
 	isRunning := true
 	info, err := d.getContainerInfo(w)
 	if err != nil {
@@ -38,7 +37,7 @@ func (d *DockerClient) GetWorkspaceInfo(w *workspace.Workspace) (*workspace.Work
 	}
 
 	if info == nil || info.State == nil {
-		return &workspace.WorkspaceInfo{
+		return &models.WorkspaceInfo{
 			Name:             w.Name,
 			IsRunning:        isRunning,
 			Created:          "",
@@ -46,7 +45,7 @@ func (d *DockerClient) GetWorkspaceInfo(w *workspace.Workspace) (*workspace.Work
 		}, nil
 	}
 
-	workspaceInfo := &workspace.WorkspaceInfo{
+	workspaceInfo := &models.WorkspaceInfo{
 		Name:      w.Name,
 		IsRunning: isRunning,
 		Created:   info.Created,
@@ -63,7 +62,7 @@ func (d *DockerClient) GetWorkspaceInfo(w *workspace.Workspace) (*workspace.Work
 	return workspaceInfo, nil
 }
 
-func (d *DockerClient) getContainerInfo(w *workspace.Workspace) (*types.ContainerJSON, error) {
+func (d *DockerClient) getContainerInfo(w *models.Workspace) (*types.ContainerJSON, error) {
 	ctx := context.Background()
 
 	info, err := d.apiClient.ContainerInspect(ctx, d.GetWorkspaceContainerName(w))

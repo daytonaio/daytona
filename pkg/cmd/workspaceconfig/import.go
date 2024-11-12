@@ -16,9 +16,9 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
-	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
 )
 
@@ -212,7 +212,7 @@ func importWorkspaceConfig(ctx context.Context, apiClient *apiclient.APIClient, 
 		return err
 	}
 
-	submissionFormConfig := create.SubmissionFormConfig{
+	submissionFormConfig := create.SubmissionFormParams{
 		ChosenName:             &config.Name,
 		SuggestedName:          config.Name,
 		ExistingWorkspaceNames: existingWorkspaceConfigNames,

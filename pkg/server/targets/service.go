@@ -8,19 +8,19 @@ import (
 	"io"
 
 	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
+	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
-	"github.com/daytonaio/daytona/pkg/target"
-	"github.com/daytonaio/daytona/pkg/target/config"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 )
 
 type ITargetService interface {
-	CreateTarget(ctx context.Context, req dto.CreateTargetDTO) (*target.Target, error)
-	GetTarget(ctx context.Context, filter *target.TargetFilter, verbose bool) (*dto.TargetDTO, error)
+	CreateTarget(ctx context.Context, req dto.CreateTargetDTO) (*models.Target, error)
+	GetTarget(ctx context.Context, filter *TargetFilter, verbose bool) (*dto.TargetDTO, error)
 	GetTargetLogReader(targetId string) (io.Reader, error)
-	ListTargets(ctx context.Context, filter *target.TargetFilter, verbose bool) ([]dto.TargetDTO, error)
+	ListTargets(ctx context.Context, filter *TargetFilter, verbose bool) ([]dto.TargetDTO, error)
 	StartTarget(ctx context.Context, targetId string) error
 	StopTarget(ctx context.Context, targetId string) error
 	SetDefault(ctx context.Context, targetId string) error
@@ -29,11 +29,11 @@ type ITargetService interface {
 }
 
 type targetConfigStore interface {
-	Find(filter *config.TargetConfigFilter) (*config.TargetConfig, error)
+	Find(filter *targetconfigs.TargetConfigFilter) (*models.TargetConfig, error)
 }
 
 type TargetServiceConfig struct {
-	TargetStore       target.Store
+	TargetStore       TargetStore
 	TargetConfigStore targetConfigStore
 	ServerApiUrl      string
 	ServerUrl         string
@@ -59,7 +59,7 @@ func NewTargetService(config TargetServiceConfig) ITargetService {
 }
 
 type TargetService struct {
-	targetStore       target.Store
+	targetStore       TargetStore
 	targetConfigStore targetConfigStore
 	provisioner       provisioner.IProvisioner
 	apiKeyService     apikeys.IApiKeyService

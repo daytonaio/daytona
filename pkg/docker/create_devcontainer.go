@@ -19,9 +19,8 @@ import (
 	"github.com/compose-spec/compose-go/v2/cli"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/build/devcontainer"
-	"github.com/daytonaio/daytona/pkg/containerregistry"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/ssh"
-	"github.com/daytonaio/daytona/pkg/workspace/buildconfig"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/mount"
@@ -43,15 +42,15 @@ type CreateDevcontainerOptions struct {
 	WorkspaceDir string
 	// Name of the project inside the devcontainer
 	WorkspaceFolderName      string
-	BuildConfig              *buildconfig.BuildConfig
+	BuildConfig              *models.BuildConfig
 	LogWriter                io.Writer
 	SshClient                *ssh.Client
-	ContainerRegistry        *containerregistry.ContainerRegistry
+	ContainerRegistry        *models.ContainerRegistry
 	Prebuild                 bool
 	EnvVars                  map[string]string
 	IdLabels                 map[string]string
 	BuilderImage             string
-	BuilderContainerRegistry *containerregistry.ContainerRegistry
+	BuilderContainerRegistry *models.ContainerRegistry
 }
 
 func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (string, RemoteUser, error) {
@@ -323,7 +322,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 	return result.ContainerId, RemoteUser(result.RemoteUser), nil
 }
 
-func (d *DockerClient) ensureDockerSockForward(builderImage string, builderContainerRegistry *containerregistry.ContainerRegistry, logWriter io.Writer) (string, error) {
+func (d *DockerClient) ensureDockerSockForward(builderImage string, builderContainerRegistry *models.ContainerRegistry, logWriter io.Writer) (string, error) {
 	ctx := context.Background()
 
 	containers, err := d.apiClient.ContainerList(ctx, container.ListOptions{
