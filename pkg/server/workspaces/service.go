@@ -7,84 +7,83 @@ import (
 	"context"
 	"io"
 
+	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provisioner"
-	"github.com/daytonaio/daytona/pkg/server/apikeys"
-	"github.com/daytonaio/daytona/pkg/server/builds"
-	"github.com/daytonaio/daytona/pkg/server/containerregistries"
-	"github.com/daytonaio/daytona/pkg/server/gitproviders"
-	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 )
 
-type IWorkspaceService interface {
-	CreateWorkspace(ctx context.Context, req dto.CreateWorkspaceDTO) (*models.Workspace, error)
-	GetWorkspace(ctx context.Context, workspaceId string, verbose bool) (*dto.WorkspaceDTO, error)
-	ListWorkspaces(ctx context.Context, verbose bool) ([]dto.WorkspaceDTO, error)
-	StartWorkspace(ctx context.Context, workspaceId string) error
-	StopWorkspace(ctx context.Context, workspaceId string) error
-	RemoveWorkspace(ctx context.Context, workspaceId string) error
-	ForceRemoveWorkspace(ctx context.Context, workspaceId string) error
-
-	GetWorkspaceLogReader(workspaceId string) (io.Reader, error)
-	SetWorkspaceState(workspaceId string, state *models.WorkspaceState) (*models.Workspace, error)
-}
-
 type WorkspaceServiceConfig struct {
-	WorkspaceStore           WorkspaceStore
-	TargetStore              targetStore
-	ContainerRegistryService containerregistries.IContainerRegistryService
-	BuildService             builds.IBuildService
-	ServerApiUrl             string
-	ServerUrl                string
-	ServerVersion            string
-	Provisioner              provisioner.IProvisioner
-	DefaultWorkspaceImage    string
-	DefaultWorkspaceUser     string
-	BuilderImage             string
-	ApiKeyService            apikeys.IApiKeyService
-	LoggerFactory            logs.LoggerFactory
-	GitProviderService       gitproviders.IGitProviderService
-	TelemetryService         telemetry.TelemetryService
+	WorkspaceStore stores.WorkspaceStore
+
+	FindTarget             func(ctx context.Context, targetId string) (*models.Target, error)
+	FindContainerRegistry  func(ctx context.Context, image string) (*models.ContainerRegistry, error)
+	FindCachedBuild        func(ctx context.Context, w *models.Workspace) (*models.CachedBuild, error)
+	GenerateApiKey         func(ctx context.Context, name string) (string, error)
+	RevokeApiKey           func(ctx context.Context, name string) error
+	ListGitProviderConfigs func(ctx context.Context, repoUrl string) ([]*models.GitProviderConfig, error)
+	FindGitProviderConfig  func(ctx context.Context, id string) (*models.GitProviderConfig, error)
+	GetLastCommitSha       func(ctx context.Context, repo *gitprovider.GitRepository) (string, error)
+	TrackTelemetryEvent    func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
+
+	LoggerFactory         logs.LoggerFactory
+	ServerApiUrl          string
+	ServerUrl             string
+	ServerVersion         string
+	Provisioner           provisioner.IProvisioner
+	DefaultWorkspaceImage string
+	DefaultWorkspaceUser  string
+	BuilderImage          string
 }
 
-func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
+func NewWorkspaceService(config WorkspaceServiceConfig) services.IWorkspaceService {
 	return &WorkspaceService{
-		workspaceStore:           config.WorkspaceStore,
-		targetStore:              config.TargetStore,
-		containerRegistryService: config.ContainerRegistryService,
-		buildService:             config.BuildService,
-		serverApiUrl:             config.ServerApiUrl,
-		serverUrl:                config.ServerUrl,
-		serverVersion:            config.ServerVersion,
-		defaultWorkspaceImage:    config.DefaultWorkspaceImage,
-		defaultWorkspaceUser:     config.DefaultWorkspaceUser,
-		builderImage:             config.BuilderImage,
-		provisioner:              config.Provisioner,
-		loggerFactory:            config.LoggerFactory,
-		apiKeyService:            config.ApiKeyService,
-		gitProviderService:       config.GitProviderService,
-		telemetryService:         config.TelemetryService,
+		workspaceStore:         config.WorkspaceStore,
+		findTarget:             config.FindTarget,
+		findContainerRegistry:  config.FindContainerRegistry,
+		findCachedBuild:        config.FindCachedBuild,
+		generateApiKey:         config.GenerateApiKey,
+		revokeApiKey:           config.RevokeApiKey,
+		listGitProviderConfigs: config.ListGitProviderConfigs,
+		findGitProviderConfig:  config.FindGitProviderConfig,
+		getLastCommitSha:       config.GetLastCommitSha,
+		trackTelemetryEvent:    config.TrackTelemetryEvent,
+
+		serverApiUrl:          config.ServerApiUrl,
+		serverUrl:             config.ServerUrl,
+		serverVersion:         config.ServerVersion,
+		defaultWorkspaceImage: config.DefaultWorkspaceImage,
+		defaultWorkspaceUser:  config.DefaultWorkspaceUser,
+		provisioner:           config.Provisioner,
+		loggerFactory:         config.LoggerFactory,
+		builderImage:          config.BuilderImage,
 	}
 }
 
 type WorkspaceService struct {
-	workspaceStore           WorkspaceStore
-	targetStore              targetStore
-	containerRegistryService containerregistries.IContainerRegistryService
-	buildService             builds.IBuildService
-	provisioner              provisioner.IProvisioner
-	apiKeyService            apikeys.IApiKeyService
-	serverApiUrl             string
-	serverUrl                string
-	serverVersion            string
-	defaultWorkspaceImage    string
-	defaultWorkspaceUser     string
-	builderImage             string
-	loggerFactory            logs.LoggerFactory
-	gitProviderService       gitproviders.IGitProviderService
-	telemetryService         telemetry.TelemetryService
+	workspaceStore stores.WorkspaceStore
+
+	findTarget             func(ctx context.Context, targetId string) (*models.Target, error)
+	findContainerRegistry  func(ctx context.Context, image string) (*models.ContainerRegistry, error)
+	findCachedBuild        func(ctx context.Context, w *models.Workspace) (*models.CachedBuild, error)
+	generateApiKey         func(ctx context.Context, name string) (string, error)
+	revokeApiKey           func(ctx context.Context, name string) error
+	listGitProviderConfigs func(ctx context.Context, repoUrl string) ([]*models.GitProviderConfig, error)
+	findGitProviderConfig  func(ctx context.Context, id string) (*models.GitProviderConfig, error)
+	getLastCommitSha       func(ctx context.Context, repo *gitprovider.GitRepository) (string, error)
+	trackTelemetryEvent    func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
+
+	provisioner           provisioner.IProvisioner
+	serverApiUrl          string
+	serverUrl             string
+	serverVersion         string
+	defaultWorkspaceImage string
+	defaultWorkspaceUser  string
+	loggerFactory         logs.LoggerFactory
+	builderImage          string
 }
 
 func (s *WorkspaceService) SetWorkspaceState(workspaceId string, state *models.WorkspaceState) (*models.Workspace, error) {

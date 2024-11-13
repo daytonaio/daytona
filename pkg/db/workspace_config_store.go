@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/workspaceconfigs"
+	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type WorkspaceConfigStore struct {
@@ -23,7 +23,7 @@ func NewWorkspaceConfigStore(db *gorm.DB) (*WorkspaceConfigStore, error) {
 	return &WorkspaceConfigStore{db: db}, nil
 }
 
-func (s *WorkspaceConfigStore) List(filter *workspaceconfigs.WorkspaceConfigFilter) ([]*models.WorkspaceConfig, error) {
+func (s *WorkspaceConfigStore) List(filter *stores.WorkspaceConfigFilter) ([]*models.WorkspaceConfig, error) {
 	workspaceConfigs := []*models.WorkspaceConfig{}
 	tx := processWorkspaceConfigFilters(s.db, filter).Find(&workspaceConfigs)
 
@@ -34,13 +34,13 @@ func (s *WorkspaceConfigStore) List(filter *workspaceconfigs.WorkspaceConfigFilt
 	return workspaceConfigs, nil
 }
 
-func (s *WorkspaceConfigStore) Find(filter *workspaceconfigs.WorkspaceConfigFilter) (*models.WorkspaceConfig, error) {
+func (s *WorkspaceConfigStore) Find(filter *stores.WorkspaceConfigFilter) (*models.WorkspaceConfig, error) {
 	workspaceConfig := &models.WorkspaceConfig{}
 	tx := processWorkspaceConfigFilters(s.db, filter).First(workspaceConfig)
 
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
-			return nil, workspaceconfigs.ErrWorkspaceConfigNotFound
+			return nil, stores.ErrWorkspaceConfigNotFound
 		}
 		return nil, tx.Error
 	}
@@ -63,13 +63,13 @@ func (s *WorkspaceConfigStore) Delete(workspaceConfig *models.WorkspaceConfig) e
 		return tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		return workspaceconfigs.ErrWorkspaceConfigNotFound
+		return stores.ErrWorkspaceConfigNotFound
 	}
 
 	return nil
 }
 
-func processWorkspaceConfigFilters(tx *gorm.DB, filter *workspaceconfigs.WorkspaceConfigFilter) *gorm.DB {
+func processWorkspaceConfigFilters(tx *gorm.DB, filter *stores.WorkspaceConfigFilter) *gorm.DB {
 	if filter != nil {
 		if filter.Name != nil {
 			tx = tx.Where("name = ?", *filter.Name)

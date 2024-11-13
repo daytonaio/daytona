@@ -5,31 +5,27 @@ package profiledata
 
 import (
 	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
 )
 
-type IProfileDataService interface {
-	Get(id string) (*models.ProfileData, error)
-	Save(profileData *models.ProfileData) error
-	Delete(id string) error
-}
-
 type ProfileDataServiceConfig struct {
-	ProfileDataStore ProfileDataStore
+	ProfileDataStore stores.ProfileDataStore
 }
 
-func NewProfileDataService(config ProfileDataServiceConfig) IProfileDataService {
+func NewProfileDataService(config ProfileDataServiceConfig) services.IProfileDataService {
 	return &ProfileDataService{
 		profileDataStore: config.ProfileDataStore,
 	}
 }
 
 type ProfileDataService struct {
-	profileDataStore ProfileDataStore
+	profileDataStore stores.ProfileDataStore
 }
 
 func (s *ProfileDataService) Get(id string) (*models.ProfileData, error) {
 	if id == "" {
-		id = ProfileDataId
+		id = stores.ProfileDataId
 	}
 
 	return s.profileDataStore.Get(id)
@@ -37,7 +33,7 @@ func (s *ProfileDataService) Get(id string) (*models.ProfileData, error) {
 
 func (s *ProfileDataService) Save(profileData *models.ProfileData) error {
 	if profileData.Id == "" {
-		profileData.Id = ProfileDataId
+		profileData.Id = stores.ProfileDataId
 	}
 
 	return s.profileDataStore.Save(profileData)
@@ -45,7 +41,7 @@ func (s *ProfileDataService) Save(profileData *models.ProfileData) error {
 
 func (s *ProfileDataService) Delete(id string) error {
 	if id == "" {
-		id = ProfileDataId
+		id = stores.ProfileDataId
 	}
 
 	return s.profileDataStore.Delete(id)

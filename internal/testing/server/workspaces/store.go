@@ -8,13 +8,14 @@ package workspaces
 import (
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
+	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type InMemoryWorkspaceStore struct {
 	workspaces map[string]*models.Workspace
 }
 
-func NewInMemoryWorkspaceStore() workspaces.WorkspaceStore {
+func NewInMemoryWorkspaceStore() stores.WorkspaceStore {
 	return &InMemoryWorkspaceStore{
 		workspaces: make(map[string]*models.Workspace),
 	}

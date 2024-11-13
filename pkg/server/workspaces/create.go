@@ -10,15 +10,11 @@ import (
 	"regexp"
 
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provisioner"
-	"github.com/daytonaio/daytona/pkg/server/builds"
-	"github.com/daytonaio/daytona/pkg/server/containerregistries"
-	"github.com/daytonaio/daytona/pkg/server/gitproviders"
-	"github.com/daytonaio/daytona/pkg/server/targets"
-	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/views"
 
@@ -42,18 +38,18 @@ func isValidWorkspaceName(name string) bool {
 	return true
 }
 
-func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWorkspaceDTO) (*models.Workspace, error) {
+func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req services.CreateWorkspaceDTO) (*models.Workspace, error) {
 	_, err := s.workspaceStore.Find(req.Name)
 	if err == nil {
 		return s.handleCreateError(ctx, nil, ErrWorkspaceAlreadyExists)
 	}
 
-	target, err := s.targetStore.Find(&targets.TargetFilter{IdOrName: &req.TargetId})
+	target, err := s.findTarget(ctx, req.TargetId)
 	if err != nil {
 		return s.handleCreateError(ctx, nil, err)
 	}
 
-	w := conversion.CreateDtoToWorkspace(req)
+	w := req.ToWorkspace()
 	w.Target = *target
 
 	if !isValidWorkspaceName(w.Name) {
@@ -62,7 +58,7 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 
 	w.Repository.Url = util.CleanUpRepositoryUrl(w.Repository.Url)
 	if w.GitProviderConfigId == nil || *w.GitProviderConfigId == "" {
-		configs, err := s.gitProviderService.ListConfigsForUrl(w.Repository.Url)
+		configs, err := s.listGitProviderConfigs(ctx, w.Repository.Url)
 		if err != nil {
 			return s.handleCreateError(ctx, w, err)
 		}
@@ -77,7 +73,7 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 	}
 
 	if w.Repository.Sha == "" {
-		sha, err := s.gitProviderService.GetLastCommitSha(w.Repository)
+		sha, err := s.getLastCommitSha(ctx, w.Repository)
 		if err != nil {
 			return s.handleCreateError(ctx, w, err)
 		}
@@ -85,7 +81,7 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 	}
 
 	if w.BuildConfig != nil {
-		cachedBuild, err := s.getCachedBuildForWorkspace(w)
+		cachedBuild, err := s.findCachedBuild(ctx, w)
 		if err == nil {
 			w.BuildConfig.CachedBuild = cachedBuild
 		}
@@ -99,7 +95,7 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 		w.User = s.defaultWorkspaceUser
 	}
 
-	apiKey, err := s.apiKeyService.Generate(models.ApiKeyTypeWorkspace, fmt.Sprintf("ws-%s", w.Id))
+	apiKey, err := s.generateApiKey(ctx, fmt.Sprintf("ws-%s", w.Id))
 	if err != nil {
 		return s.handleCreateError(ctx, w, err)
 	}
@@ -130,21 +126,21 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 
 	workspaceLogger.Write([]byte(fmt.Sprintf("Creating workspace %s\n", w.Name)))
 
-	cr, err := s.containerRegistryService.FindByImageName(w.Image)
-	if err != nil && !containerregistries.IsContainerRegistryNotFound(err) {
+	cr, err := s.findContainerRegistry(ctx, w.Image)
+	if err != nil && !stores.IsContainerRegistryNotFound(err) {
 		return s.handleCreateError(ctx, w, err)
 	}
 
-	builderCr, err := s.containerRegistryService.FindByImageName(s.builderImage)
-	if err != nil && !containerregistries.IsContainerRegistryNotFound(err) {
+	builderCr, err := s.findContainerRegistry(ctx, s.builderImage)
+	if err != nil && !stores.IsContainerRegistryNotFound(err) {
 		return s.handleCreateError(ctx, w, err)
 	}
 
 	var gc *models.GitProviderConfig
 
 	if w.GitProviderConfigId != nil {
-		gc, err = s.gitProviderService.GetConfig(*w.GitProviderConfigId)
-		if err != nil && !gitproviders.IsGitProviderNotFound(err) {
+		gc, err = s.findGitProviderConfig(ctx, *w.GitProviderConfigId)
+		if err != nil && !stores.IsGitProviderNotFound(err) {
 			return s.handleCreateError(ctx, w, err)
 		}
 	}
@@ -162,7 +158,7 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 
 	workspaceLogger.Write([]byte(views.GetPrettyLogLine(fmt.Sprintf("Workspace %s created", w.Name))))
 
-	err = s.startWorkspace(w, workspaceLogger)
+	err = s.startWorkspace(ctx, w, workspaceLogger)
 
 	return s.handleCreateError(ctx, w, err)
 }
@@ -183,7 +179,7 @@ func (s *WorkspaceService) handleCreateError(ctx context.Context, w *models.Work
 		telemetryProps["error"] = err.Error()
 		event = telemetry.ServerEventWorkspaceCreateError
 	}
-	telemetryError := s.telemetryService.TrackServerEvent(event, clientId, telemetryProps)
+	telemetryError := s.trackTelemetryEvent(event, clientId, telemetryProps)
 	if telemetryError != nil {
 		log.Trace(err)
 	}
@@ -193,31 +189,4 @@ func (s *WorkspaceService) handleCreateError(ctx context.Context, w *models.Work
 	}
 
 	return w, err
-}
-
-func (s *WorkspaceService) getCachedBuildForWorkspace(w *models.Workspace) (*models.CachedBuild, error) {
-	validStates := &[]models.BuildState{
-		models.BuildStatePublished,
-	}
-
-	build, err := s.buildService.Find(&builds.BuildFilter{
-		States:        validStates,
-		RepositoryUrl: &w.Repository.Url,
-		Branch:        &w.Repository.Branch,
-		EnvVars:       &w.EnvVars,
-		BuildConfig:   w.BuildConfig,
-		GetNewest:     util.Pointer(true),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if build.Image == nil || build.User == nil {
-		return nil, errors.New("cached build is missing image or user")
-	}
-
-	return &models.CachedBuild{
-		User:  *build.User,
-		Image: *build.Image,
-	}, nil
 }
